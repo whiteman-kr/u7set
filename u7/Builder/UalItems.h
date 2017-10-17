@@ -38,16 +38,16 @@ namespace Builder
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
 
-	class AppItem;
+	class UalItem;
 	class ModuleLogicCompiler;
 
-	class LogicAfb
+	class Afbl
 	{
 		// Functional Block Library element
 		//
 	public:
-		LogicAfb(std::shared_ptr<Afb::AfbElement> afb);
-		virtual ~LogicAfb();
+		Afbl(std::shared_ptr<Afb::AfbElement> afb);
+		virtual ~Afbl();
 
 		bool hasRam() const { return m_afb->hasRam(); }
 		int opCode() const	{ return m_afb->opCode(); }
@@ -59,27 +59,27 @@ namespace Builder
 		bool isBusProcessingAfb() const;
 
 	private:
-		bool LogicAfb::isBusProcessingAfbChecking() const;
+		bool isBusProcessingAfbChecking() const;
 
 	private:
 		std::shared_ptr<Afb::AfbElement> m_afb;
 
 		mutable int m_isBusProcessingAfb = -1;			// -1 - isBusProcessingAfb() is not previously called
-														// 0  - afb is not bus processing element
-														// 1  - afb is bus processing element
+														//  0 - afb is not bus processing element
+														//  1 - afb is bus processing element
 	};
 
 	typedef QHash<int, int> FblInstanceMap;				// Key is OpCode
 	typedef QHash<QString, int> NonRamFblInstanceMap;
 
-	class AppFb;
+	class UalAfb;
 
-	class AfbMap : public HashedVector<QString, LogicAfb*>
+	class AfblsMap : public HashedVector<QString, Afbl*>
 	{
 	public:
-		virtual ~AfbMap();
+		virtual ~AfblsMap();
 
-		bool addInstance(AppFb *appFb);
+		bool addInstance(UalAfb* ualAfb);
 		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
 		void clear();
 
@@ -102,11 +102,8 @@ namespace Builder
 		QHash<QString, LogicAfbParam*> m_afbParams;
 	};
 
-	class AppItem : public QObject
+	class UalItem : public QObject
 	{
-		// Base class for AppFb & AppSignal
-		// contains pointer to AppLogicItem
-		//
 		Q_OBJECT
 
 	public:
@@ -121,14 +118,14 @@ namespace Builder
 			Terminator,
 			BusComposer,
 			BusExtractor,
-			LoopbackSource,
-			LoopbackTarget
+			LoopbackOutput,
+			LoopbackInput
 		};
 
-		AppItem();
-		AppItem(const AppItem& appItem);
-		AppItem(const AppLogicItem& appLogicItem);
-		AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
+		UalItem();
+		UalItem(const UalItem& ualItem);
+		UalItem(const AppLogicItem& appLogicItem);
+		UalItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
 
 		bool init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg);
 
@@ -138,14 +135,16 @@ namespace Builder
 
 		QString strID() const;
 
-		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
-		bool isAfb() const { return m_appLogicItem.m_fblItem->isAfbElement(); }
-		bool isConst() const { return m_appLogicItem.m_fblItem->isConstElement(); }
-		bool isTransmitter() const { return m_appLogicItem.m_fblItem->isTransmitterElement(); }
-		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
-		bool isTerminator() const { return m_appLogicItem.m_fblItem->isTerminatorElement(); }
-		bool isBusComposer() const { return m_appLogicItem.m_fblItem->isBusComposerElement(); }
-		bool isBusExtractor() const { return m_appLogicItem.m_fblItem->isBusExtractorElement(); }
+		bool isSignal() const { return type() == UalItem::Type::Signal; }
+		bool isAfb() const { return type() == UalItem::Type::Afb; }
+		bool isConst() const { return type() == UalItem::Type::Const; }
+		bool isTransmitter() const { return type() == UalItem::Type::Transmitter; }
+		bool isReceiver() const { return type() == UalItem::Type::Receiver; }
+		bool isTerminator() const { return type() == UalItem::Type::Terminator; }
+		bool isBusComposer() const { return type() == UalItem::Type::BusComposer; }
+		bool isBusExtractor() const { return type() == UalItem::Type::BusExtractor; }
+		bool isLoopbackOutput() const { return type() == UalItem::Type::LoopbackOutput; }
+		bool isLoopbackInput() const { return type() == UalItem::Type::LoopbackInput; }
 
 		Type type() const;
 
@@ -174,13 +173,15 @@ namespace Builder
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 
 	protected:
-		AppLogicItem m_appLogicItem;
+		AppLogicItem m_appLogicItem;							// structure from parser
 
 	private:
+		mutable UalItem::Type m_type = UalItem::Type::Unknown;
+
 		QHash<QString, int> m_opNameToIndexMap;
 	};
 
-	typedef std::map<QUuid, AppItem*> ConnectedAppItems;		// connected pin Uuid => AppItem*
+	typedef std::map<QUuid, UalItem*> ConnectedAppItems;		// connected pin Uuid => AppItem*
 
 	class AppFbParamValue
 	{
@@ -239,7 +240,7 @@ namespace Builder
 
 	class ModuleLogicCompiler;
 
-	class AppFb : public AppItem
+	class UalAfb : public UalItem
 	{
 		// Application Functional Block
 		// represent all FB items in application logic schemas
@@ -248,7 +249,7 @@ namespace Builder
 		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of FB's parameters used by user only
 
 	public:
-		AppFb(const AppItem &appItem);
+		UalAfb(const UalItem &appItem);
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().opCode(); }		// return FB type
@@ -337,31 +338,31 @@ namespace Builder
 	};
 
 
-	class AppFbMap: public HashedVector<QUuid, AppFb*>
+	class UalAfbsMap: public HashedVector<QUuid, UalAfb*>
 	{
 	public:
-		virtual ~AppFbMap();
+		virtual ~UalAfbsMap();
 
-		AppFb* insert(AppFb *appFb);
+		UalAfb* insert(UalAfb *appFb);
 		void clear();
 
 	private:
 		int m_fbNumber = 1;
 	};
 
-	class AppSignal
+	class UalSignal
 	{
 		// Application Signal
 		// represent all signal in application logic schemas, and signals, which createad in compiling time
 		//
 	public:
-		AppSignal(Signal* signal, const AppItem* ualSignal);
-		AppSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
-		AppSignal(const QUuid& guid, const QString &signalID, const QString& busTypeID, int busSizeW);
+		UalSignal(Signal* s);
+		UalSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const UalItem* appItem, const QString& appSignalID);
+		UalSignal(const QUuid& guid, const QString &signalID, const QString& busTypeID, int busSizeW);
 
-		~AppSignal();
+		~UalSignal();
 
-		const AppItem &appItem() const;
+		bool appendSignalRef(Signal* s);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -371,77 +372,94 @@ namespace Builder
 
 		bool isAutoSignal() const { return m_isAutoSignal; }
 
-		QString appSignalID() const { return m_signal->appSignalID(); }
+		QString appSignalID() const { return m_signals[0]->appSignalID(); }
 
-		QUuid guid() const;
+		Address16 ualAddr() const { return m_ualAddr; }
+		Address16 regBufAddr() const { return m_regBufAddr; }
 
-		Address16 ualAddr() const { return m_signal->ualAddr(); }
-		Address16 regBufAddr() const { return m_signal->regBufAddr(); }
+		E::SignalType signalType() const { return m_signals[0]->signalType(); }
+		E::AnalogAppSignalFormat analogSignalFormat() const { return m_signals[0]->analogSignalFormat(); }
+		int dataSize() const { return m_signals[0]->dataSize(); }
 
-		E::SignalType signalType() const { return m_signal->signalType(); }
-		E::AnalogAppSignalFormat analogSignalFormat() const { return m_signal->analogSignalFormat(); }
-		int dataSize() const { return m_signal->dataSize(); }
+		bool isAnalog() const { return m_signals[0]->isAnalog(); }
+		bool isDiscrete() const { return m_signals[0]->isDiscrete(); }
+		bool isBus() const { return m_signals[0]->isBus(); }
 
-		bool isAnalog() const { return m_signal->isAnalog(); }
-		bool isDiscrete() const { return m_signal->isDiscrete(); }
-		bool isBus() const { return m_signal->isBus(); }
+		bool isAcquired() const { return m_signals[0]->isAcquired(); }
+		bool isInternal() const { return m_signals[0]->isInternal(); }
+		bool isInput() const { return m_signals[0]->isInput(); }
+		bool isOutput() const { return m_signals[0]->isOutput(); }
+		bool enableTuning() const { return m_signals[0]->enableTuning(); }
 
-		bool isAcquired() const { return m_signal->isAcquired(); }
-		bool isInternal() const { return m_signal->isInternal(); }
-		bool isInput() const { return m_signal->isInput(); }
-		bool isOutput() const { return m_signal->isOutput(); }
-		bool enableTuning() const { return m_signal->enableTuning(); }
-		int ID() const { return m_signal->ID(); }
-
-		QString busTypeID() const { return m_signal->busTypeID(); }
+		QString busTypeID() const { return m_signals[0]->busTypeID(); }
 
 		bool isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const;
 
-		const Signal& constSignal() { return *m_signal; }
+		const Signal& constSignal() { return *m_signals[0]; }
 
-		Signal* signal() { return m_signal; }
-		const Signal* signal() const { return m_signal; }
-
-		QString schemaID() const;
+		Signal* signal() { return m_signals[0]; }
+		const Signal* signal() const { return m_signals[0]; }
 
 	private:
-		Signal* m_signal = nullptr;							// pointer to signal in m_signalSet
-
-		const AppItem* m_appItem = nullptr;					// application signals pointer (for real signals)
-															// application functional block pointer (for auto signals)
-		QUuid m_guid;
+		QVector<Signal*> m_signals;							// vector of pointers to signal in m_signalSet
 
 		bool m_isAutoSignal = false;
 
 		bool m_computed = false;
 		bool m_resultSaved = false;
+
+		Address16 m_ualAddr;
+		Address16 m_regBufAddr;
 	};
 
-
-	class AppSignalMap: public QObject, public HashedVector<QUuid, AppSignal*>
+	class UalSignalsMap: public QObject, private QHash<UalSignal*, UalSignal*>
 	{
 		Q_OBJECT
 	public:
-		AppSignalMap(ModuleLogicCompiler& compiler, IssueLogger* log);
-		~AppSignalMap();
+		UalSignalsMap(ModuleLogicCompiler& compiler, IssueLogger* log);
+		~UalSignalsMap();
 
-		bool insertUalSignal(const AppItem* appItem);
-		bool insertNonBusAutoSignal(const AppFb* appFb, const LogicPin& outputPin);
-		bool insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, BusShared bus);
+		QHash<UalSignal*, UalSignal*>::iterator begin() { return QHash<UalSignal*, UalSignal*>::begin(); }
+		QHash<UalSignal*, UalSignal*>::const_iterator begin() const { return QHash<UalSignal*, UalSignal*>::begin(); }
+		QHash<UalSignal*, UalSignal*>::iterator end() { return QHash<UalSignal*, UalSignal*>::end(); }
+		QHash<UalSignal*, UalSignal*>::const_iterator end() const { return QHash<UalSignal*, UalSignal*>::end(); }
 
-		AppSignal* getSignal(const QString& appSignalID);
-		bool containsSignal(const QString& appSignalID) const;
+		UalSignal* createInputSignal(Signal* s, QUuid outPinUuid);
+
+		bool appendLink(QUuid pinUuid, UalSignal* ualSignal);
+		bool appendSignalRef(UalSignal* ualSignal, Signal* s);
+
+		UalSignal* get(const QString& appSignalID) const { return m_idToSignalMap.value(appSignalID, nullptr); }
+		bool contains(const QString& appSignalID) const { return m_idToSignalMap.contains(appSignalID); }
+
+		UalSignal* get(QUuid pinUuid) const { return m_pinToSignalMap.value(pinUuid, nullptr); }
+		bool contains(QUuid pinUuid) const { return m_pinToSignalMap.contains(pinUuid); }
+
+
+
+		bool insertUalSignal(const UalItem* appItem);
+		bool insertNonBusAutoSignal(const UalAfb* appFb, const LogicPin& outputPin);
+		bool insertBusAutoSignal(const UalItem* appItem, const LogicPin& outputPin, BusShared bus);
+
 
 		void clear();
 
 	private:
-		QString getAutoSignalID(const AppItem* appItem, const LogicPin& outputPin);
+		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);
+
+		QString getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin);
+
+		const UalSignal* value(const UalSignal* &key, const UalSignal* &defaultValue) const;
+
 
 	private:
 		ModuleLogicCompiler& m_compiler;
 		IssueLogger* m_log = nullptr;
 
-		QHash<QString, AppSignal*> m_signalStrIdMap;
+		//
+
+		QHash<QString, UalSignal*> m_idToSignalMap;
+		QHash<QUuid, UalSignal*> m_pinToSignalMap;
 	};
 
 }

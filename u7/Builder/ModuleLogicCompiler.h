@@ -11,7 +11,7 @@
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
 #include "ComparatorStorage.h"
-#include "AppItems.h"
+#include "UalItems.h"
 
 #include "../u7/Connection.h"
 
@@ -88,7 +88,7 @@ namespace Builder
 
 		IssueLogger* log() { return m_log; }
 
-		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
+		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbls.getAfbSignal(afbStrID, signalIndex); }
 
 		bool pass1();
 		bool pass2();
@@ -101,24 +101,32 @@ namespace Builder
 
 		bool createChassisSignalsMap();
 
-		bool createAppLogicItemsMaps();
-		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const;
+		bool createUalItemsMaps();
+		QString getUalItemStrID(const AppLogicItem& appLogicItem) const;
 
-		bool createAppFbsMap();
-		bool createAppSignalsMap();
+		bool createUalAfbsMap();
+		bool createUalSignals();
+
+		bool createUalSignalFromSignal(UalItem* ualItem);
+
+		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
+		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
+
+		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
+		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid& inPinUuid, UalSignal* ualSignal);
 
 		bool appendUalSignals();
 		bool appendSignalsFromAppItems();
 
-		bool appendAfbOutputsAutoSignals(AppItem* appItem);
-		bool appendAfbNonBusOutputsAutoSignals(AppItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems);
-		bool appendAfbBusOutputsAutoSignals(AppItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus);
+		bool appendAfbOutputsAutoSignals(UalItem* appItem);
+		bool appendAfbNonBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems);
+		bool appendAfbBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus);
 
-		bool appendBusComposerOutputAutoSignal(AppItem* busComposer);
+		bool appendBusComposerOutputAutoSignal(UalItem* busComposer);
 
-		bool checkBusAndAfbInputCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem, QUuid destPinUuid);
-		bool checkBusAndSignalCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem);
-		bool checkBusAndBusExtractorCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem);
+		bool checkBusAndAfbInputCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem, QUuid destPinUuid);
+		bool checkBusAndSignalCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
+		bool checkBusAndBusExtractorCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
 
 		bool buildTuningData();
 
@@ -176,22 +184,22 @@ namespace Builder
 
 		bool appendFbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createFbForAnalogInputSignalConversion(Signal& signal, AppItem& appItem);
-		bool createFbForAnalogOutputSignalConversion(Signal& signal, AppItem& appItem);
+		bool createFbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem);
+		bool createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
 
-		AppFb* createAppFb(const AppItem& appItem);
+		UalAfb* createUalAfb(const UalItem& appItem);
 		bool setOutputSignalsAsComputed();
 
 		bool processTxSignals();
 		bool processSerialRxSignals();
 
 		bool processTransmitters();
-		bool processTransmitter(const AppItem *item);
+		bool processTransmitter(const UalItem *item);
 		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
 
 		bool processSerialReceivers();
-		bool processSerialReceiver(const AppItem* item);
+		bool processSerialReceiver(const UalItem* item);
 
 		bool setOptoRawInSignalsAsComputed();
 
@@ -201,8 +209,8 @@ namespace Builder
 		bool generateAppStartCommand();
 
 		bool initAfbs();
-		bool initAppFbParams(AppFb* appFb, bool instantiatorsOnly);
-		bool displayAfbParams(const AppFb& appFb);
+		bool initAppFbParams(UalAfb* appFb, bool instantiatorsOnly);
+		bool displayAfbParams(const UalAfb& appFb);
 
 		bool startAppLogicCode();
 
@@ -215,39 +223,39 @@ namespace Builder
 
 		bool generateAppLogicCode();
 
-		bool generateAppSignalCode(const AppItem* appItem);
-		bool generateWriteConstToSignalCode(AppSignal& appSignal, const UalConst* constItem);
-		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
-		bool generateWriteBusExtractorToSignalCode(AppSignal& appSignal, const AppItem* appBusExtractor, QUuid extractorOutPinUuid);
-		bool generateWriteSignalToSignalCode(AppSignal& appSignal, QUuid srcSignalGuid);
+		bool generateAppSignalCode(const UalItem* appItem);
+		bool generateWriteConstToSignalCode(UalSignal& appSignal, const UalConst* constItem);
+		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, UalSignal& appSignal, const QUuid& pinGuid);
+		bool generateWriteBusExtractorToSignalCode(UalSignal& appSignal, const UalItem* appBusExtractor, QUuid extractorOutPinUuid);
+		bool generateWriteSignalToSignalCode(UalSignal& appSignal, QUuid srcSignalGuid);
 
-		bool generateFbCode(const AppItem* appItem);
-		bool writeFbInputSignals(const AppFb *appFb);
-		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const UalConst* constItem);
-		bool genearateWriteReceiverToFbCode(const AppFb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
-		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
-		bool startFb(const AppFb* appFb);
-		bool readFbOutputSignals(const AppFb *appFb);
-		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
+		bool generateFbCode(const UalItem* appItem);
+		bool writeFbInputSignals(const UalAfb *appFb);
+		bool generateWriteConstToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalConst* constItem);
+		bool genearateWriteReceiverToFbCode(const UalAfb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
+		bool generateWriteSignalToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalSignal& appSignal);
+		bool startFb(const UalAfb* appFb);
+		bool readFbOutputSignals(const UalAfb *appFb);
+		bool generateReadFuncBlockToSignalCode(const UalAfb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
-		bool generateBusComposerCode(const AppItem* composer);
-		bool generateBusComposerToSignalCode(const AppItem* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
-		bool fillAnalogBusSignals(const AppItem *composer, const Signal* destSignal);
-		bool generateAnalogSignalToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
-		bool generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem);
-		bool fillDiscreteBusSignals(const AppItem* composer, const Signal* busSignal);
-		bool generateDiscreteSignalToBusCode(const AppItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode);
-		bool generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem, Commands& fillingCode);
+		bool generateBusComposerCode(const UalItem* composer);
+		bool generateBusComposerToSignalCode(const UalItem* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
+		bool fillAnalogBusSignals(const UalItem *composer, const Signal* destSignal);
+		bool generateAnalogSignalToBusCode(const UalItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
+		bool generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const UalItem* constAppItem);
+		bool fillDiscreteBusSignals(const UalItem* composer, const Signal* busSignal);
+		bool generateDiscreteSignalToBusCode(const UalItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode);
+		bool generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const UalItem* constAppItem, Commands& fillingCode);
 
-		AppItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
-		AppItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
-		const AppSignal *getExtractorBusSignal(const AppItem* appBusExtractor);
+		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
+		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
+		const UalSignal *getExtractorBusSignal(const UalItem* appBusExtractor);
 		bool getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems);
-		bool getBusProcessingParams(const AppFb* appFb, bool& isBusProcessingAfb, QString& busTypeID);
-		AppSignal* getPinInputAppSignal(const LogicPin& inPin);
+		bool getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID);
+		UalSignal* getPinInputAppSignal(const LogicPin& inPin);
 
-		bool addToComparatorStorage(const AppFb *appFb);
-		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);
+		bool addToComparatorStorage(const UalAfb *appFb);
+		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
 
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
@@ -289,7 +297,7 @@ namespace Builder
 		void cleanup();
 
 		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
-		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const AppFb& fb, const LogicAfbSignal& afbSignal);
+		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal);
 
 		bool isUsedInUal(const Signal* s) const;
 		bool isUsedInUal(const QString& appSignalID) const;
@@ -355,15 +363,15 @@ namespace Builder
 		int m_idrPhaseClockCount = 0;		// input data receive phase clock count
 		int m_alpPhaseClockCount = 0;		// application logic processing clock count
 
-		AfbMap m_afbs;
+		AfblsMap m_afbls;
 
-		AppSignalMap m_appSignals;
-		AppFbMap m_appFbs;
+		UalSignalsMap m_ualSignals;
+		UalAfbsMap m_ualAfbs;
 
 		// service maps
 		//
-		HashedVector<QUuid, AppItem*> m_appItems;				// item GUID => item ptr
-		QHash<QUuid, AppItem*> m_pinParent;						// pin GUID => parent item ptr
+		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
+		QHash<QUuid, UalItem*> m_pinParent;						// pin GUID => parent item ptr
 
 		HashedVector<QString, Signal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => Signal*
 		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
@@ -418,8 +426,8 @@ namespace Builder
 		static const char* BUS_COMPOSER_CAPTION;
 		static const char* BUS_EXTRACTOR_CAPTION;
 
-		QVector<AppItem*> m_scalAppItems;
-		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
+		QVector<UalItem*> m_scalAppItems;
+		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;
 
 		Tuning::TuningData* m_tuningData = nullptr;
 	};

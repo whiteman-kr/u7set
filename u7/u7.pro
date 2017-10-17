@@ -188,7 +188,6 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
     ../lib/CsvFile.cpp \
-    Builder/AppItems.cpp \
     DialogBusEditor.cpp \
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
@@ -196,7 +195,7 @@ SOURCES +=\
     Builder/SignalSet.cpp \
     Builder/Busses.cpp \
     IdePropertyEditor.cpp \
-    Builder/Ual.cpp
+    Builder/UalItems.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -323,7 +322,6 @@ HEADERS  += \
     ../lib/AppSignal.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
-    Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
     BusStorage.h \
@@ -331,7 +329,7 @@ HEADERS  += \
     Builder/SignalSet.h \
     Builder/Busses.h \
     IdePropertyEditor.h \
-    Builder/Ual.h
+    Builder/UalItems.h
 
 FORMS    += \
     CreateProjectDialog.ui \

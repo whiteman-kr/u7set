@@ -1,4 +1,4 @@
-#include "AppItems.h"
+#include "UalItems.h"
 
 #include "ModuleLogicCompiler.h"
 
@@ -10,7 +10,7 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	LogicAfb::LogicAfb(std::shared_ptr<Afb::AfbElement> afb) :
+	Afbl::Afbl(std::shared_ptr<Afb::AfbElement> afb) :
 		m_afb(afb)
 	{
 		if (m_afb == nullptr)
@@ -20,11 +20,11 @@ namespace Builder
 		}
 	}
 
-	LogicAfb::~LogicAfb()
+	Afbl::~Afbl()
 	{
 	}
 
-	bool LogicAfb::isBusProcessingAfb() const
+	bool Afbl::isBusProcessingAfb() const
 	{
 		switch(m_isBusProcessingAfb)
 		{
@@ -51,7 +51,7 @@ namespace Builder
 		return false;
 	}
 
-	bool LogicAfb::isBusProcessingAfbChecking() const
+	bool Afbl::isBusProcessingAfbChecking() const
 	{
 		const std::vector<Afb::AfbSignal>& inputSignals = afb().inputSignals();
 
@@ -76,30 +76,30 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AfbMap::~AfbMap()
+	AfblsMap::~AfblsMap()
 	{
 		clear();
 	}
 
-	bool AfbMap::addInstance(AppFb* appFb)
+	bool AfblsMap::addInstance(UalAfb* ualAfb)
 	{
-		if (appFb == nullptr)
+		if (ualAfb == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		QString afbStrID = appFb->strID();
+		QString afbStrID = ualAfb->strID();
 
-		if (!contains(afbStrID))
+		if (contains(afbStrID) == false)
 		{
 			assert(false);			// unknown FBL strID
 			return false;
 		}
 
-		LogicAfb* fbl = (*this)[afbStrID];
+		Afbl* afbl = (*this)[afbStrID];
 
-		if (fbl == nullptr)
+		if (afbl == nullptr)
 		{
 			assert(false);
 			return 0;
@@ -107,11 +107,11 @@ namespace Builder
 
 		int instance = 0;
 
-		QString instantiatorID = appFb->instantiatorID();
+		QString instantiatorID = ualAfb->instantiatorID();
 
-		if (fbl->hasRam())
+		if (afbl->hasRam())
 		{
-			int opCode = fbl->opCode();
+			int opCode = afbl->opCode();
 
 			if (m_fblInstance.contains(opCode))
 			{
@@ -138,7 +138,7 @@ namespace Builder
 			}
 			else
 			{
-				int opCode = fbl->opCode();
+				int opCode = afbl->opCode();
 				if (m_fblInstance.contains(opCode))
 				{
 					instance = m_fblInstance[opCode];
@@ -168,12 +168,12 @@ namespace Builder
 			return false;
 		}
 
-		appFb->setInstance(instance);
+		ualAfb->setInstance(instance);
 
 		return true;
 	}
 
-	void AfbMap::insert(std::shared_ptr<Afb::AfbElement> logicAfb)
+	void AfblsMap::insert(std::shared_ptr<Afb::AfbElement> logicAfb)
 	{
 		if (logicAfb == nullptr)
 		{
@@ -187,9 +187,9 @@ namespace Builder
 			return;
 		}
 
-		LogicAfb* afb = new LogicAfb(logicAfb);
+		Afbl* afbl = new Afbl(logicAfb);
 
-		HashedVector<QString, LogicAfb*>::insert(afb->strID(), afb);
+		HashedVector<QString, Afbl*>::insert(afbl->strID(), afbl);
 
 		// initialize map Fbl opCode -> current instance
 		//
@@ -244,7 +244,7 @@ namespace Builder
 
 		for(LogicAfbParam param : params)
 		{
-			if (param.operandIndex() == AppFb::FOR_USER_ONLY_PARAM_INDEX)
+			if (param.operandIndex() == UalAfb::FOR_USER_ONLY_PARAM_INDEX)
 			{
 				continue;
 			}
@@ -264,17 +264,20 @@ namespace Builder
 		}
 	}
 
-	void AfbMap::clear()
+	void AfblsMap::clear()
 	{
-		for(LogicAfb* fbl : *this)
+		for(Afbl* afbl : *this)
 		{
-			delete fbl;
+			if (afbl != nullptr)
+			{
+				delete afbl;
+			}
 		}
 
-		HashedVector<QString, LogicAfb*>::clear();
+		HashedVector<QString, Afbl*>::clear();
 	}
 
-	const LogicAfbSignal AfbMap::getAfbSignal(const QString& afbStrID, int signalIndex)
+	const LogicAfbSignal AfblsMap::getAfbSignal(const QString& afbStrID, int signalIndex)
 	{
 		StrIDIndex si;
 
@@ -297,27 +300,28 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AppItem::AppItem()
+	UalItem::UalItem()
 	{
 	}
 
-	AppItem::AppItem(const AppItem& appItem) :
+	UalItem::UalItem(const UalItem& ualItem) :
 		QObject()
 	{
-		m_appLogicItem = appItem.m_appLogicItem;
+		m_appLogicItem = ualItem.m_appLogicItem;
+		m_type = ualItem.m_type;
 	}
 
-	AppItem::AppItem(const AppLogicItem& appLogicItem) :
+	UalItem::UalItem(const AppLogicItem& appLogicItem) :
 		m_appLogicItem(appLogicItem)
 	{
 	}
 
-	AppItem::AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg)
+	UalItem::UalItem(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg)
 	{
 		init(afbElement, errorMsg);
 	}
 
-	bool AppItem::init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg)
+	bool UalItem::init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg)
 	{
 		m_appLogicItem.m_afbElement = *afbElement.get();
 		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
@@ -333,7 +337,7 @@ namespace Builder
 		return true;
 	}
 
-	QString AppItem::strID() const
+	QString UalItem::strID() const
 	{
 		if (m_appLogicItem.m_fblItem->isSignalElement())
 		{
@@ -378,51 +382,66 @@ namespace Builder
 		return "";
 	}
 
-	AppItem::Type AppItem::type() const
+	UalItem::Type UalItem::type() const
 	{
-		if (isSignal() == true)
+		if (m_type != UalItem::Type::Unknown)
 		{
-			return Type::Signal;
+			return m_type;
 		}
 
-		if (isAfb() == true)
+		if (m_appLogicItem.m_fblItem->isSignalElement() == true)
 		{
-			return Type::Afb;
+			m_type = Type::Signal;
+			return m_type;
 		}
 
-		if (isConst() == true)
+		if (m_appLogicItem.m_fblItem->isAfbElement() == true)
 		{
-			return Type::Const;
+			m_type = Type::Afb;
+			return m_type;
 		}
 
-		if (isTransmitter() == true)
+		if (m_appLogicItem.m_fblItem->isConstElement() == true)
 		{
-			return Type::Transmitter;
+			m_type = Type::Const;
+			return m_type;
 		}
 
-		if (isReceiver() == true)
+		if (m_appLogicItem.m_fblItem->isTransmitterElement() == true)
 		{
-			return Type::Receiver;
+			m_type = Type::Transmitter;
+			return m_type;
 		}
 
-		if (isTerminator() == true)
+		if (m_appLogicItem.m_fblItem->isReceiverElement() == true)
 		{
-			return Type::Terminator;
+			m_type = Type::Receiver;
+			return m_type;
 		}
 
-		if (isBusComposer() == true)
+		if (m_appLogicItem.m_fblItem->isTerminatorElement() == true)
 		{
-			return Type::BusComposer;
+			m_type = Type::Terminator;
+			return m_type;
 		}
 
-		if (isBusExtractor() == true)
+		if (m_appLogicItem.m_fblItem->isBusComposerElement() == true)
 		{
-			return Type::BusExtractor;
+			m_type = Type::BusComposer;
+			return m_type;
+		}
+
+		if (m_appLogicItem.m_fblItem->isBusExtractorElement() == true)
+		{
+			m_type = Type::BusExtractor;
+			return m_type;
 		}
 
 		assert(false);
 
-		return Type::Unknown;
+		m_type = Type::Unknown;
+
+		return m_type;
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -557,8 +576,8 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AppFb::AppFb(const AppItem& appItem) :
-		AppItem(appItem)
+	UalAfb::UalAfb(const UalItem& appItem) :
+		UalItem(appItem)
 	{
 		// initialize m_paramValuesArray
 		//
@@ -570,24 +589,24 @@ namespace Builder
 		}
 	}
 
-	bool AppFb::isConstComaparator() const
+	bool UalAfb::isConstComaparator() const
 	{
 		return opcode() == CONST_COMPARATOR_OPCODE;
 	}
 
-	bool AppFb::isDynamicComaparator() const
+	bool UalAfb::isDynamicComaparator() const
 	{
 		return opcode() == DYNAMIC_COMPARATOR_OPCODE;
 	}
 
-	bool AppFb::isComparator() const
+	bool UalAfb::isComparator() const
 	{
 		quint16 oc = opcode();
 
 		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
 	}
 
-	QString AppFb::instantiatorID()
+	QString UalAfb::instantiatorID()
 	{
 		if (m_instantiatorID.isEmpty() == false)
 		{
@@ -627,7 +646,7 @@ namespace Builder
 		return m_instantiatorID;
 	}
 
-	bool AppFb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
+	bool UalAfb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
 	{
 		for(const LogicAfbParam& param : afb().params())
 		{
@@ -645,7 +664,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const
+	bool UalAfb::getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const
 	{
 		if (afbSignal == nullptr)
 		{
@@ -676,7 +695,7 @@ namespace Builder
 		return false;
 	}
 
-	bool AppFb::getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const
+	bool UalAfb::getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const
 	{
 		if (afbSignal == nullptr)
 		{
@@ -706,12 +725,12 @@ namespace Builder
 	}
 
 
-	bool AppFb::checkRequiredParameters(const QStringList& requiredParams)
+	bool UalAfb::checkRequiredParameters(const QStringList& requiredParams)
 	{
 		return checkRequiredParameters(requiredParams, true);
 	}
 
-	bool AppFb::checkRequiredParameters(const QStringList& requiredParams, bool displayError)
+	bool UalAfb::checkRequiredParameters(const QStringList& requiredParams, bool displayError)
 	{
 		bool result = true;
 
@@ -733,7 +752,7 @@ namespace Builder
 		return result;
 	}
 
-	bool AppFb::checkUnsignedInt(const AppFbParamValue& paramValue)
+	bool UalAfb::checkUnsignedInt(const AppFbParamValue& paramValue)
 	{
 		if (paramValue.isUnsignedInt())
 		{
@@ -747,7 +766,7 @@ namespace Builder
 		return false;
 	}
 
-	bool AppFb::checkUnsignedInt16(const AppFbParamValue& paramValue)
+	bool UalAfb::checkUnsignedInt16(const AppFbParamValue& paramValue)
 	{
 		if (paramValue.isUnsignedInt16())
 		{
@@ -761,7 +780,7 @@ namespace Builder
 		return false;
 	}
 
-	bool AppFb::checkUnsignedInt32(const AppFbParamValue& paramValue)
+	bool UalAfb::checkUnsignedInt32(const AppFbParamValue& paramValue)
 	{
 		if (paramValue.isUnsignedInt32())
 		{
@@ -775,7 +794,7 @@ namespace Builder
 		return false;
 	}
 
-	bool AppFb::checkSignedInt32(const AppFbParamValue& paramValue)
+	bool UalAfb::checkSignedInt32(const AppFbParamValue& paramValue)
 	{
 		if (paramValue.isSignedInt32())
 		{
@@ -789,7 +808,7 @@ namespace Builder
 		return false;
 	}
 
-	bool AppFb::checkFloat32(const AppFbParamValue& paramValue)
+	bool UalAfb::checkFloat32(const AppFbParamValue& paramValue)
 	{
 		if (paramValue.isFloat32())
 		{
@@ -810,12 +829,12 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AppFbMap::~AppFbMap()
+	UalAfbsMap::~UalAfbsMap()
 	{
 		clear();
 	}
 
-	AppFb* AppFbMap::insert(AppFb *appFb)
+	UalAfb* UalAfbsMap::insert(UalAfb *appFb)
 	{
 		if (appFb == nullptr)
 		{
@@ -827,20 +846,20 @@ namespace Builder
 
 		m_fbNumber++;
 
-		HashedVector<QUuid, AppFb*>::insert(appFb->guid(), appFb);
+		HashedVector<QUuid, UalAfb*>::insert(appFb->guid(), appFb);
 
 		return appFb;
 	}
 
 
-	void AppFbMap::clear()
+	void UalAfbsMap::clear()
 	{
-		for(AppFb* appFb : *this)
+		for(UalAfb* appFb : *this)
 		{
 			delete appFb;
 		}
 
-		HashedVector<QUuid, AppFb*>::clear();
+		HashedVector<QUuid, UalAfb*>::clear();
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -849,38 +868,34 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AppSignal::AppSignal(Signal *signal, const AppItem* ualSignal) :
-		m_signal(signal),
-		m_appItem(ualSignal)
+	UalSignal::UalSignal(Signal* s)
 	{
-		m_isAutoSignal = false;
-
-		// construct AppSignal based on real signal
-		//
-		if (m_signal == nullptr)
+		if (s == nullptr)
 		{
 			assert(false);
 			return;
 		}
 
+		m_isAutoSignal = false;
+
+		m_signals.append(s);
+
 		// believe that all input and tuning signals have already been computed
 		//
-		if ( m_signal->isInput() == true ||
-			(m_signal->isInternal() == true && m_signal->enableTuning() == true))
+		if ( s->isInput() == true ||
+			(s->isInternal() == true && s->enableTuning() == true))
 		{
 			setComputed();
 		}
 	}
 
-	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType,
+	UalSignal::UalSignal(const QUuid& guid, E::SignalType signalType,
 						 E::AnalogAppSignalFormat dataFormat,
 						 int dataSize,
-						 const AppItem *appItem,
-						 const QString& strID) :
-		m_appItem(appItem),
-		m_guid(guid)
+						 const UalItem *appItem,
+						 const QString& strID)
 	{
-		m_isAutoSignal = true;
+/*		m_isAutoSignal = true;
 
 		m_signal = new Signal;
 
@@ -897,12 +912,12 @@ namespace Builder
 		}
 
 		m_signal->setInOutType(E::SignalInOutType::Internal);
-		m_signal->setAcquire(false);								// non-registered signal !
+		m_signal->setAcquire(false);								// non-registered signal !*/
 	}
 
-	AppSignal::AppSignal(const QUuid& guid, const QString& signalID, const QString& busTypeID, int busSizeW)
+	UalSignal::UalSignal(const QUuid& guid, const QString& signalID, const QString& busTypeID, int busSizeW)
 	{
-		m_isAutoSignal = true;
+/*		m_isAutoSignal = true;
 
 		m_signal = new Signal;
 
@@ -913,51 +928,50 @@ namespace Builder
 		m_signal->setBusTypeID(busTypeID);
 		m_signal->setDataSize(busSizeW * SIZE_16BIT);
 		m_signal->setInOutType(E::SignalInOutType::Internal);
-		m_signal->setAcquire(false);								// non-registered signal !
+		m_signal->setAcquire(false);								// non-registered signal !*/
 	}
 
-	AppSignal::~AppSignal()
+	UalSignal::~UalSignal()
 	{
 		if (m_isAutoSignal == true)
 		{
-			delete m_signal;
+			if (m_signals.size() == 1)
+			{
+				delete m_signals[0];
+			}
+			else
+			{
+				assert(false);
+			}
 		}
 	}
 
-	const AppItem& AppSignal::appItem() const
+	bool UalSignal::appendSignalRef(Signal* s)
 	{
-		assert(m_appItem != nullptr);
-
-		return *m_appItem;
-	}
-
-	QUuid AppSignal::guid() const
-	{
-		if (m_appItem != nullptr)
+		for(Signal* pesentSignal : m_signals)
 		{
-			return m_appItem->guid();
+			if (pesentSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (pesentSignal == s)
+			{
+				assert(false);			// not duplicate ref, why?
+				return true;
+			}
 		}
 
-		assert(false);
+		m_signals.append(s);
 
-		return QUuid();
+		return true;
 	}
 
-	bool AppSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
+
+	bool UalSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
 	{
-		return m_signal->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
-	}
-
-	QString AppSignal::schemaID() const
-	{
-		if (m_appItem != nullptr)
-		{
-			return m_appItem->schemaID();
-		}
-
-		assert(false);
-
-		return "";
+		return m_signals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -966,21 +980,129 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AppSignalMap::AppSignalMap(ModuleLogicCompiler& compiler, IssueLogger* log) :
+	UalSignalsMap::UalSignalsMap(ModuleLogicCompiler& compiler, IssueLogger* log) :
 		m_compiler(compiler),
 		m_log(log)
 	{
 	}
 
 
-	AppSignalMap::~AppSignalMap()
+	UalSignalsMap::~UalSignalsMap()
 	{
 		clear();
 	}
 
-	bool AppSignalMap::insertUalSignal(const AppItem* ualSignal)
+	UalSignal* UalSignalsMap::createInputSignal(Signal* s, QUuid outPinUuid)
+	{
+		if (s == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return nullptr;
+		}
+
+		UalSignal* ualSignal = m_idToSignalMap.value(s->appSignalID(), nullptr);
+
+		if (ualSignal != nullptr)
+		{
+			// signal already in map
+			//
+			assert(ualSignal->signal() == s);
+			assert(m_pinToSignalMap.contains(outPinUuid) == false);
+
+			m_pinToSignalMap.insert(outPinUuid, ualSignal);
+
+			return ualSignal;
+		}
+
+		// create new signal
+		//
+		ualSignal = new UalSignal(s);
+
+		bool result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return false;
+		}
+
+		return ualSignal;
+	}
+
+	bool UalSignalsMap::appendLink(QUuid pinUuid, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (QHash<UalSignal*, UalSignal*>::contains(ualSignal) == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);			// ualSignal must exists!
+			return false;
+		}
+
+		UalSignal* existsSignal = m_pinToSignalMap.value(pinUuid, nullptr);
+
+		if (existsSignal != nullptr)
+		{
+			if (existsSignal == ualSignal)
+			{
+				assert(false);						// is not an error, but why?
+				return true;
+			}
+
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);				// link to this pin is already exists
+			return false;
+		}
+
+		m_pinToSignalMap.insert(pinUuid, ualSignal);
+
+		return true;
+	}
+
+	bool UalSignalsMap::appendSignalRef(UalSignal* ualSignal, Signal* s)
+	{
+		if (ualSignal == nullptr || s == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (QHash<UalSignal*, UalSignal*>::contains(ualSignal) == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);			// ualSignal must exists!
+			return false;
+		}
+
+		if (m_idToSignalMap.contains(s->appSignalID()) == true)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);			// duplicate ref!
+			return false;
+		}
+
+		bool result = ualSignal->appendSignalRef(s);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		m_idToSignalMap.insert(s->appSignalID(), ualSignal);
+
+		return true;
+	}
+
+
+
+	bool UalSignalsMap::insertUalSignal(const UalItem* ualSignal)
+	{
+/*		if (ualSignal == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
@@ -1009,7 +1131,7 @@ namespace Builder
 			return false;
 		}
 
-		AppSignal* appSignal = nullptr;
+		UalSignal* appSignal = nullptr;
 
 		if (m_signalStrIdMap.contains(appSignalID) == true)
 		{
@@ -1017,23 +1139,23 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(s, ualSignal);
+			appSignal = new UalSignal(s, ualSignal);
 
 			m_signalStrIdMap.insert(appSignalID, appSignal);
 		}
 
 		assert(appSignal != nullptr);
 
-		HashedVector<QUuid, AppSignal*>::insert(ualSignal->guid(), appSignal);
+		HashedVector<QUuid, UalSignal*>::insert(ualSignal->guid(), appSignal);
 
 		// qDebug() << "Insert signal" << ualSignal->guid().toString() << appSignalID;
-
+*/
 		return true;
 	}
 
-	bool AppSignalMap::insertNonBusAutoSignal(const AppFb* appFb, const LogicPin& outputPin)
+	bool UalSignalsMap::insertNonBusAutoSignal(const UalAfb* appFb, const LogicPin& outputPin)
 	{
-		if (appFb == nullptr )
+/*		if (appFb == nullptr )
 		{
 			LOG_NULLPTR_ERROR(m_log);
 		}
@@ -1090,7 +1212,7 @@ namespace Builder
 			assert(false);
 		}
 
-		AppSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
+		UalSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
 
 		if (appSignal != nullptr)
 		{
@@ -1098,7 +1220,7 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(outPinGuid, afbSignal.type(), analogSignalFormat, dataSize, appFb, autoSignalID);
+			appSignal = new UalSignal(outPinGuid, afbSignal.type(), analogSignalFormat, dataSize, appFb, autoSignalID);
 
 			// auto-signals always connected to output pin, therefore considered computed
 			//
@@ -1107,14 +1229,14 @@ namespace Builder
 			m_signalStrIdMap.insert(autoSignalID, appSignal);
 		}
 
-		HashedVector<QUuid, AppSignal*>::insert(outPinGuid, appSignal);
-
+		HashedVector<QUuid, UalSignal*>::insert(outPinGuid, appSignal);
+*/
 		return true;
 	}
 
-	bool AppSignalMap::insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, BusShared bus)
+	bool UalSignalsMap::insertBusAutoSignal(const UalItem* appItem, const LogicPin& outputPin, BusShared bus)
 	{
-		if (appItem == nullptr || bus == nullptr)
+/*		if (appItem == nullptr || bus == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
@@ -1124,11 +1246,11 @@ namespace Builder
 
 		QString autoSignalID = getAutoSignalID(appItem, outputPin);
 
-		AppSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
+		UalSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
 
 		if (appSignal == nullptr)
 		{
-			appSignal = new AppSignal(outPinGuid, autoSignalID, bus->busTypeID(), bus->sizeW());
+			appSignal = new UalSignal(outPinGuid, autoSignalID, bus->busTypeID(), bus->sizeW());
 
 			// auto-signals always connected to output pin, therefore considered computed
 			//
@@ -1141,34 +1263,65 @@ namespace Builder
 			assert(false);							// duplicate StrID??
 		}
 
-		HashedVector<QUuid, AppSignal*>::insert(outPinGuid, appSignal);
+		HashedVector<QUuid, UalSignal*>::insert(outPinGuid, appSignal);
+*/
+		return true;
+	}
+
+	void UalSignalsMap::clear()
+	{
+		for(UalSignal* ualSignal : (*this))
+		{
+			if (ualSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			delete ualSignal;
+		}
+
+		m_idToSignalMap.clear();
+		m_pinToSignalMap.clear();
+	}
+
+	bool UalSignalsMap::insertNew(QUuid pinUuid, UalSignal* newUalSignal)
+	{
+		if (newUalSignal == nullptr || newUalSignal->signal() == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (QHash<UalSignal*, UalSignal*>::contains(newUalSignal) == true)
+		{
+			assert(false);
+			return false;
+		}
+
+		QString signalID = newUalSignal->signal()->appSignalID();
+
+		if (m_idToSignalMap.contains(signalID) == true)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (m_pinToSignalMap.contains(pinUuid) == true)
+		{
+			assert(false);
+			return false;
+		}
+
+		insert(newUalSignal, newUalSignal);
+		m_idToSignalMap.insert(signalID, newUalSignal);
+		m_pinToSignalMap.insert(pinUuid, newUalSignal);
 
 		return true;
 	}
 
-	AppSignal* AppSignalMap::getSignal(const QString& appSignalID)
-	{
-		return m_signalStrIdMap.value(appSignalID, nullptr);
-	}
 
-	bool AppSignalMap::containsSignal(const QString& appSignalID) const
-	{
-		return m_signalStrIdMap.contains(appSignalID);
-	}
-
-	void AppSignalMap::clear()
-	{
-		for(AppSignal* appSignal : m_signalStrIdMap)
-		{
-			delete appSignal;
-		}
-
-		m_signalStrIdMap.clear();
-
-		HashedVector<QUuid, AppSignal*>::clear();
-	}
-
-	QString AppSignalMap::getAutoSignalID(const AppItem* appItem, const LogicPin& outputPin)
+	QString UalSignalsMap::getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin)
 	{
 		if (appItem == nullptr)
 		{
@@ -1182,5 +1335,4 @@ namespace Builder
 
 		return strID;
 	}
-
 }

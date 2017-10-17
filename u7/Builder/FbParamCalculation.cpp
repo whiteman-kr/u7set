@@ -11,7 +11,7 @@ namespace Builder
 #define CHECK_FLOAT32(param)					if (checkFloat32(param) == false) { return false; }
 
 
-	bool AppFb::calculateFbParamValues(ModuleLogicCompiler* compiler)
+	bool UalAfb::calculateFbParamValues(ModuleLogicCompiler* compiler)
 	{
 		if (compiler == nullptr)
 		{
@@ -153,7 +153,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_LOGIC_paramValues()
+	bool UalAfb::calculate_LOGIC_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -185,14 +185,14 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_NOT_paramValues()
+	bool UalAfb::calculate_NOT_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
 
 
-	bool AppFb::calculate_TCT_paramValues()
+	bool UalAfb::calculate_TCT_paramValues()
 	{
 		m_runTime = 4 + 34;
 
@@ -226,7 +226,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_FLIP_FLOP_paramValues()
+	bool UalAfb::calculate_FLIP_FLOP_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -261,7 +261,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_CTUD_paramValues()
+	bool UalAfb::calculate_CTUD_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -292,7 +292,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_MAJ_paramValues()
+	bool UalAfb::calculate_MAJ_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -315,28 +315,28 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_SRSST_paramValues()
+	bool UalAfb::calculate_SRSST_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
 
 
-	bool AppFb::calculate_BCOD_paramValues()
+	bool UalAfb::calculate_BCOD_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
 
 
-	bool AppFb::calculate_BDEC_paramValues()
+	bool UalAfb::calculate_BDEC_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
 
 
-	bool AppFb::calculate_BCOMP_paramValues()
+	bool UalAfb::calculate_BCOMP_paramValues()
 	{
 		m_runTime = 3 + 14;
 
@@ -474,7 +474,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_DAMPER_paramValues()
+	bool UalAfb::calculate_DAMPER_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -523,7 +523,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_MEM_paramValues()
+	bool UalAfb::calculate_MEM_paramValues()
 	{
 		m_runTime = 0;
 
@@ -579,7 +579,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_MATH_paramValues()
+	bool UalAfb::calculate_MATH_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -620,7 +620,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_SCALE_paramValues()
+	bool UalAfb::calculate_SCALE_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -879,7 +879,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_SCALE_P_paramValues()
+	bool UalAfb::calculate_SCALE_P_paramValues()
 	{
 		const int XY_POINT_COUNT = 6;
 		const int RANGE_COUNT = XY_POINT_COUNT - 1;				// 5
@@ -1156,7 +1156,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_FUNC_paramValues()
+	bool UalAfb::calculate_FUNC_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -1215,7 +1215,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_INT_paramValues()
+	bool UalAfb::calculate_INT_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -1274,7 +1274,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_DPCOMP_paramValues()
+	bool UalAfb::calculate_DPCOMP_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -1382,7 +1382,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_MUX_paramValues()
+	bool UalAfb::calculate_MUX_paramValues()
 	{
 		m_runTime = 3 + 4;
 
@@ -1390,7 +1390,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_LATCH_paramValues()
+	bool UalAfb::calculate_LATCH_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -1423,7 +1423,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_LIM_paramValues()
+	bool UalAfb::calculate_LIM_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -1489,7 +1489,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_DEAD_ZONE_paramValues()
+	bool UalAfb::calculate_DEAD_ZONE_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -1549,7 +1549,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_POL_paramValues()
+	bool UalAfb::calculate_POL_paramValues()
 	{
 		m_runTime = 24 + 4;
 
@@ -1598,7 +1598,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_DER_paramValues()
+	bool UalAfb::calculate_DER_paramValues()
 	{
 		m_runTime = 35 + 44;
 
@@ -1657,7 +1657,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_MISMATCH_paramValues()
+	bool UalAfb::calculate_MISMATCH_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -1808,7 +1808,7 @@ namespace Builder
 		return true;
 	}
 
-	bool AppFb::calculate_TCONV_paramValues()
+	bool UalAfb::calculate_TCONV_paramValues()
 	{
 		m_runTime = 0;
 

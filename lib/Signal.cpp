@@ -229,6 +229,11 @@ bool Signal::isCompatibleFormat(const SignalAddress16& sa16) const
 	return isCompatibleFormat(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder());
 }
 
+bool Signal::isCompatibleFormat(const Signal& s) const
+{
+	return isCompatibleFormat(s.signalType(), s.analogSignalFormat(), s.byteOrder());
+}
+
 void Signal::resetAddresses()
 {
 	m_ioBufAddr.reset();

@@ -1985,21 +1985,29 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is not found in Application Signals.
+	/// Title: Signal '%1' is not found in Application Signals (Logic schema '%2').
 	///
 	/// Parameters:
 	///		%1 Application signal ID
+	///		%2 Logic schema ID
 	///
 	/// Description:
 	///		Signal idendifier is not found in application signals.
 	///
-	void IssueLogger::errALC5000(QString appSignalID, QUuid itemUuid)
+	void IssueLogger::errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		if (schemaID.isEmpty() == true)
+		{
+			addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		}
+		else
+		{
+			addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		}
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5000,
-				  tr("Signal '%1' is not found in Application Signals.").arg(appSignalID));
+				  tr("Signal '%1' is not found in Application Signals (Logic schema '%2').").arg(appSignalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5001
@@ -4552,6 +4560,53 @@ namespace Builder
 				  QString(tr("Uncompatible bus data format of UAL elements (Logic schema '%1').")).
 						arg(schemaID));
 	}
+
+	/// IssueCode: ALC5116
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Disallowed connection of UAL elements (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Disallowed connection of UAL elements. Check connection.
+	///
+	void IssueLogger::errALC5116(QUuid uuid1, QUuid uuid2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5116,
+				  QString(tr("Disallowed connection of UAL elements (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5117
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Uncompatible signals connection (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Uncompatible signals connection. Check signals type and data format.
+	///
+	void IssueLogger::errALC5117(QUuid uuid1, QUuid uuid2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5117,
+				  QString(tr("Uncompatible signals connection (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
 
 	//
 

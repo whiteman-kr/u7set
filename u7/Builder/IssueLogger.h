@@ -190,7 +190,7 @@ namespace Builder
 		// ALC			Application logic compiler				5000-5999
 		//
 
-		void errALC5000(QString appSignalID, QUuid itemUuid);					// Signal identifier '%1' is not found.
+		void errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID);		// Signal identifier '%1' is not found (Logic schema '%2').
 		void wrnALC5001(QString logicModuleID);									// Application logic for module '%1' is not found.
 		void errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid);					// Value of signal '%1' is undefined (Logic schema '%2').
 		void errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Analog output '%1.%2' is connected to discrete signal '%3'.
@@ -306,6 +306,8 @@ namespace Builder
 		void errALC5113(QUuid item1, QUuid item2, QString schemaID);					// Bus output is connected to non-bus input.
 		void errALC5114(QString itemCaption, QString inputCaption, QUuid itemUuid, QString schemaID);	// Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
 		void errALC5115(QUuid uuid1, QUuid uuid2, QString schemaID);					// Uncompatible bus data format of UAL elements (Logic schema '%1').
+		void errALC5116(QUuid uuid1, QUuid uuid2, QString schemaID);					// Disallowed connection of UAL elements (Logic schema '%1').
+		void errALC5117(QUuid uuid1, QUuid uuid2, QString schemaID);					// Uncompatible signals connection (Logic schema '%1').
 
 		// Uncompatible bus data format of UAL elements (Logic schema '%1').
 

@@ -28,7 +28,7 @@ namespace Builder
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
 		m_memoryMap(appLogicCompiler.m_log),
-		m_appSignals(*this, appLogicCompiler.m_log)
+		m_ualSignals(*this, appLogicCompiler.m_log)
 	{
 		m_equipmentSet = appLogicCompiler.m_equipmentSet;
 		m_deviceRoot = m_equipmentSet->root();
@@ -103,11 +103,11 @@ namespace Builder
 
 			if (createChassisSignalsMap() == false) break;
 
-			if (createAppLogicItemsMaps() == false) break;
+			if (createUalItemsMaps() == false) break;
 
-			if (createAppFbsMap() == false) break;
+			if (createUalAfbsMap() == false) break;
 
-			if (createAppSignalsMap() == false) break;
+			if (createUalSignals() == false) break;
 
 			if (processTxSignals() == false) break;
 
@@ -503,16 +503,16 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createAppLogicItemsMaps()
+	bool ModuleLogicCompiler::createUalItemsMaps()
 	{
-		m_afbs.clear();
+		m_afbls.clear();
 
 		for(std::shared_ptr<Afb::AfbElement> afbl : m_lmDescription->afbs())
 		{
-			m_afbs.insert(afbl);
+			m_afbls.insert(afbl);
 		}
 
-		m_appItems.clear();
+		m_ualItems.clear();
 		m_pinParent.clear();
 
 		if (m_moduleLogic == nullptr)
@@ -527,12 +527,12 @@ namespace Builder
 			// build QHash<QUuid, AppItem*> m_appItems
 			// item GUID -> item ptr
 			//
-			if (m_appItems.contains(logicItem.m_fblItem->guid()) == true)
+			if (m_ualItems.contains(logicItem.m_fblItem->guid()) == true)
 			{
-				AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
+				UalItem* firstItem = m_ualItems[logicItem.m_fblItem->guid()];
 
 				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
-						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
+						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getUalItemStrID(logicItem));
 
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 
@@ -541,9 +541,9 @@ namespace Builder
 				continue;
 			}
 
-			AppItem* appItem = new AppItem(logicItem);
+			UalItem* appItem = new UalItem(logicItem);
 
-			m_appItems.insert(appItem->guid(), appItem);
+			m_ualItems.insert(appItem->guid(), appItem);
 
 			// build QHash<QUuid, LogicItem*> m_itemsPins;
 			// pin GUID -> parent item ptr
@@ -555,7 +555,7 @@ namespace Builder
 			{
 				if (m_pinParent.contains(input.guid()))
 				{
-					AppItem* firstItem = m_pinParent[input.guid()];
+					UalItem* firstItem = m_pinParent[input.guid()];
 
 					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
 							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
@@ -576,7 +576,7 @@ namespace Builder
 			{
 				if (m_pinParent.contains(output.guid()))
 				{
-					AppItem* firstItem = m_pinParent[output.guid()];
+					UalItem* firstItem = m_pinParent[output.guid()];
 
 					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
 							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
@@ -595,23 +595,23 @@ namespace Builder
 		return result;
 	}
 
-	QString ModuleLogicCompiler::getAppLogicItemStrID(const AppLogicItem& appLogicItem) const
+	QString ModuleLogicCompiler::getUalItemStrID(const AppLogicItem& appLogicItem) const
 	{
-		AppItem appItem(appLogicItem); return appItem.strID();
+		UalItem appItem(appLogicItem); return appItem.strID();
 	}
 
-	bool ModuleLogicCompiler::createAppFbsMap()
+	bool ModuleLogicCompiler::createUalAfbsMap()
 	{
-		for(AppItem* item : m_appItems)
+		for(UalItem* ualItem : m_ualItems)
 		{
-			if (item->isAfb() == false)
+			if (ualItem->isAfb() == false)
 			{
 				continue;
 			}
 
-			AppFb* appFb = createAppFb(*item);
+			UalAfb* ualAfb = createUalAfb(*ualItem);
 
-			if (appFb == nullptr)
+			if (ualAfb == nullptr)
 			{
 				return false;
 			}
@@ -620,12 +620,62 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createAppSignalsMap()
+	bool ModuleLogicCompiler::createUalSignals()
 	{
-		m_appSignals.clear();
+		m_ualSignals.clear();
 		m_outPinSignal.clear();
 
-		bool result = false;
+		bool result = true;
+
+		for(UalItem* ualItem : m_ualItems)
+		{
+			if (ualItem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			switch(ualItem->type())
+			{
+			// UAL items that can generate signals
+			//
+			case UalItem::Type::Signal:
+				result &= createUalSignalFromSignal(ualItem);
+				break;
+
+			case UalItem::Type::Const:
+				break;
+
+			case UalItem::Type::Afb:
+				break;
+
+			case UalItem::Type::Receiver:
+				break;
+
+			case UalItem::Type::BusComposer:
+				break;
+
+			// UAL items that doesn't generate signals
+			//
+			case UalItem::Type::Transmitter:
+			case UalItem::Type::Terminator:
+			case UalItem::Type::BusExtractor:
+			case UalItem::Type::LoopbackOutput:
+			case UalItem::Type::LoopbackInput:
+				break;
+
+			// unknown item's type
+			//
+			case UalItem::Type::Unknown:
+			default:
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+		}
+
+
+/*		bool result = false;
 
 		do
 		{
@@ -634,16 +684,280 @@ namespace Builder
 
 			result = true;
 		}
-		while(false);
+		while(false);*/
 
 		return result;
 	}
+
+	bool ModuleLogicCompiler::createUalSignalFromSignal(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (ualItem->isSignal() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString signalID = ualItem->strID();
+
+		Signal* s = m_signals->getSignal(signalID);
+
+		if (s == nullptr)
+		{
+			m_log->errALC5000(signalID, ualItem->guid(), ualItem->schemaID());
+			return false;
+		}
+
+		bool result = true;
+
+		if (s->isInput() == false)
+		{
+			result = checkInOutsConnectedToSignal(ualItem, true);
+
+			if (result == false)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);			// signal is not in pin->signals map, why?
+				return false;
+			}
+
+			return result;
+		}
+
+		// Only Input signal really can generate UalSignal
+
+		if (ualItem->inputs().size() != 0)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);				// input signal can't has input pins
+			return false;
+		}
+
+		const std::vector<LogicPin>& outputs = ualItem->outputs();
+
+		if (outputs.size() != 1)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);				// input signal must have only one output pin
+			return false;
+		}
+
+		const LogicPin& outPin = ualItem->outputs()[0];
+
+		UalSignal* ualSignal = m_ualSignals.createInputSignal(s, outPin.guid());
+
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		// link connected signals to newly created UalSignal
+		//
+		result = linkConnectedItems(ualItem, outPin, ualSignal);
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		UalSignal* sameSignal = nullptr;
+
+		bool result = checkPinsConnectedToSignal(ualItem->inputs(), shouldConnectToSameSignal, &sameSignal);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = checkPinsConnectedToSignal(ualItem->outputs(), shouldConnectToSameSignal, &sameSignal);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignalPtr)
+	{
+		if (sameSignalPtr == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		for(const LogicPin& pin : pins)
+		{
+			UalSignal* connectedSignal = m_ualSignals.get(pin.guid());
+
+			if (connectedSignal == nullptr)
+			{
+				return false;
+			}
+
+			if (shouldConnectToSameSignal == false)
+			{
+				continue;
+			}
+
+			if (*sameSignalPtr == nullptr)
+			{
+				*sameSignalPtr = connectedSignal;
+			}
+			else
+			{
+				if (*sameSignalPtr != connectedSignal)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
+	{
+		if (srcUalItem == nullptr || ualSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (outPin.IsOutput() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		bool result = true;
+
+		const std::vector<QUuid>& associatedInputs = outPin.associatedIOs();
+
+		for(QUuid inPinUuid : associatedInputs)
+		{
+			UalItem* destUalItem = m_pinParent.value(inPinUuid, nullptr);
+
+			if (destUalItem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);			// pin's parent is not found
+				return false;
+			}
+
+			switch(destUalItem->type())
+			{
+			case UalItem::Type::Signal:
+				result &= linkSignal(srcUalItem, destUalItem, inPinUuid, ualSignal);
+				break;
+
+			case UalItem::Type::Afb:
+			case UalItem::Type::Transmitter:
+			case UalItem::Type::BusComposer:
+			case UalItem::Type::BusExtractor:
+				break;
+
+			// link pins to signal only, any checks is not required
+			//
+			case UalItem::Type::Terminator:
+			case UalItem::Type::LoopbackOutput:
+				m_ualSignals.appendLink(inPinUuid, ualSignal);
+				break;
+
+			// output can't connect to:
+			//
+			case UalItem::Type::Const:
+			case UalItem::Type::Receiver:
+			case UalItem::Type::LoopbackInput:
+				m_log->errALC5116(srcUalItem->guid(), destUalItem->guid(), destUalItem->schemaID());
+				result = false;
+				break;
+
+			// unknown UalItem type
+			//
+			case UalItem::Type::Unknown:
+			default:
+				assert(false);
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid& inPinUuid, UalSignal* ualSignal)
+	{
+		if (srcItem == nullptr || signalItem == nullptr || ualSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (signalItem->isSignal() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString signalID = signalItem->strID();
+
+		Signal* s = m_signals->getSignal(signalID);
+
+		if (s == nullptr)
+		{
+			m_log->errALC5000(signalID, signalItem->guid(), signalItem->schemaID());
+			return false;
+		}
+
+		// check signals compatibility
+		//
+		bool result = ualSignal->signal()->isCompatibleFormat(s);
+
+		if (result == false)
+		{
+			m_log->errALC5117(srcItem->guid(), signalItem->guid(), signalItem->schemaID());
+			return false;
+		}
+
+		result = m_ualSignals.appendLink(inPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = m_ualSignals.addReference(ualSignal, s);
+
+		const std::vector<LogicPin>& outputs = signalItem->outputs();
+
+		if (outputs.size() > 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);				// signal connot have more then 1 output
+			return false;
+		}
+
+		if (outputs.size() == 1)
+		{
+			result = linkConnectedItems(signalItem, outputs[0], ualSignal);
+		}
+
+		return result;
+	}
+
 
 	bool ModuleLogicCompiler::appendUalSignals()
 	{
 		bool result = true;
 
-		for(AppItem* item : m_appItems)
+		for(UalItem* item : m_ualItems)
 		{
 			if (item == nullptr)
 			{
@@ -664,7 +978,7 @@ namespace Builder
 				return false;
 			}
 
-			result &= m_appSignals.insertUalSignal(item);
+			result &= m_ualSignals.insertUalSignal(item);
 		}
 
 		return result;
@@ -682,7 +996,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(AppItem* item : m_appItems)
+		for(UalItem* item : m_ualItems)
 		{
 			if (item == nullptr)
 			{
@@ -694,30 +1008,30 @@ namespace Builder
 			{
 			// items that generate signals
 			//
-			case AppItem::Type::Signal:
+			case UalItem::Type::Signal:
 				break;												// 1) already added in appendUalSignals()
 
-			case AppItem::Type::Afb:
+			case UalItem::Type::Afb:
 				result &= appendAfbOutputsAutoSignals(item);		// 2)
 				break;
 
-			case AppItem::Type::BusComposer:
+			case UalItem::Type::BusComposer:
 				result &= appendBusComposerOutputAutoSignal(item);	// 3)
 				break;
 
-			case AppItem::Type::Receiver:
+			case UalItem::Type::Receiver:
 				//assert(false);					// should be implemented
 				break;
 
-			case AppItem::Type::BusExtractor:
+			case UalItem::Type::BusExtractor:
 				//assert(false);					// should be implemented
 				break;
 
 			// items that is not generate signals
 			//
-			case AppItem::Type::Const:
-			case AppItem::Type::Transmitter:
-			case AppItem::Type::Terminator:
+			case UalItem::Type::Const:
+			case UalItem::Type::Transmitter:
+			case UalItem::Type::Terminator:
 				break;
 
 			// unknown item type
@@ -730,7 +1044,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::appendAfbOutputsAutoSignals(AppItem* appItem)
+	bool ModuleLogicCompiler::appendAfbOutputsAutoSignals(UalItem* appItem)
 	{
 		if (appItem == nullptr)
 		{
@@ -744,7 +1058,7 @@ namespace Builder
 			return false;
 		}
 
-		AppFb* appFb = m_appFbs.value(appItem->guid(), nullptr);
+		UalAfb* appFb = m_ualAfbs.value(appItem->guid(), nullptr);
 
 		if (appFb == nullptr)
 		{
@@ -837,7 +1151,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::appendAfbNonBusOutputsAutoSignals(AppItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems)
+	bool ModuleLogicCompiler::appendAfbNonBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems)
 	{
 		if (appItem == nullptr)
 		{
@@ -850,9 +1164,9 @@ namespace Builder
 
 		bool result = true;
 
-		for(const std::pair<QUuid, AppItem*>& pair : connectedAppItems)
+		for(const std::pair<QUuid, UalItem*>& pair : connectedAppItems)
 		{
-			AppItem* connectedAppItem = pair.second;
+			UalItem* connectedAppItem = pair.second;
 
 			if (connectedAppItem == nullptr)
 			{
@@ -861,36 +1175,36 @@ namespace Builder
 				continue;
 			}
 
-			AppItem::Type connectedItemType = connectedAppItem->type();
+			UalItem::Type connectedItemType = connectedAppItem->type();
 
 			switch(connectedItemType)
 			{
 			// allowed AFB's output connections
 			//
-			case AppItem::Type::Afb:
-			case AppItem::Type::BusComposer:
-			case AppItem::Type::LoopbackSource:
+			case UalItem::Type::Afb:
+			case UalItem::Type::BusComposer:
+			case UalItem::Type::LoopbackOutput:
 				needToCreateAutoSignal = true;
 				break;
 
-			case AppItem::Type::Terminator:		// not need to create signal
+			case UalItem::Type::Terminator:		// not need to create signal
 				break;
 
-			case AppItem::Type::Signal:
+			case UalItem::Type::Signal:
 				connectedToSignal = true;
 				m_outPinSignal.insertMulti(outPin.guid(), connectedAppItem->signal().guid());
 				break;
 
 			// disallowed connections or connection to unknown item type
 			//
-			case AppItem::Type::Transmitter:
+			case UalItem::Type::Transmitter:
 				// AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
 				//
 				m_log->errALC5107(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
 				result = false;
 				break;
 
-			case AppItem::Type::BusExtractor:
+			case UalItem::Type::BusExtractor:
 				// Non-bus output of AFB is connected to BusExtractor (Logic schema '%1').
 				//
 				m_log->errALC5110(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
@@ -911,7 +1225,7 @@ namespace Builder
 		{
 			// create auto signal with Uuid of this output pin
 			//
-			const AppFb* appFb = m_appFbs.value(appItem->guid(), nullptr);
+			const UalAfb* appFb = m_ualAfbs.value(appItem->guid(), nullptr);
 
 			if (appFb == nullptr)
 			{
@@ -919,7 +1233,7 @@ namespace Builder
 				return false;
 			}
 
-			result = m_appSignals.insertNonBusAutoSignal(appFb, outPin);
+			result = m_ualSignals.insertNonBusAutoSignal(appFb, outPin);
 
 			if (result == false)
 			{
@@ -934,7 +1248,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::appendAfbBusOutputsAutoSignals(AppItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus)
+	bool ModuleLogicCompiler::appendAfbBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus)
 	{
 		if (appItem == nullptr || bus == nullptr)
 		{
@@ -947,10 +1261,10 @@ namespace Builder
 
 		bool result = true;
 
-		for(const std::pair<QUuid, AppItem*>& pair : connectedAppItems)
+		for(const std::pair<QUuid, UalItem*>& pair : connectedAppItems)
 		{
 			QUuid connectedPinUuid = pair.first;
-			AppItem* connectedAppItem = pair.second;
+			UalItem* connectedAppItem = pair.second;
 
 			if (connectedAppItem == nullptr)
 			{
@@ -959,7 +1273,7 @@ namespace Builder
 				continue;
 			}
 
-			AppItem::Type connectedItemType = connectedAppItem->type();
+			UalItem::Type connectedItemType = connectedAppItem->type();
 
 			bool res = true;
 
@@ -967,7 +1281,7 @@ namespace Builder
 			{
 			// allowed AFB's output connections
 			//
-			case AppItem::Type::Afb:
+			case UalItem::Type::Afb:
 				{
 					res = checkBusAndAfbInputCompatibility(appItem, bus, connectedAppItem, connectedPinUuid);
 
@@ -981,7 +1295,7 @@ namespace Builder
 				}
 				break;
 
-			case AppItem::Type::BusExtractor:
+			case UalItem::Type::BusExtractor:
 				{
 					res = checkBusAndBusExtractorCompatibility(appItem, bus, connectedAppItem);
 
@@ -995,15 +1309,15 @@ namespace Builder
 				}
 				break;
 
-			case AppItem::Type::LoopbackSource:
+			case UalItem::Type::LoopbackOutput:
 				assert(false);						// should be implemented
 				needToCreateAutoSignal = true;
 				break;
 
-			case AppItem::Type::Terminator:			// not need to create signal
+			case UalItem::Type::Terminator:			// not need to create signal
 				break;
 
-			case AppItem::Type::Signal:
+			case UalItem::Type::Signal:
 				{
 					res = checkBusAndSignalCompatibility(appItem, bus, connectedAppItem);
 
@@ -1020,14 +1334,14 @@ namespace Builder
 
 			// disallowed connections or connection to unknown item type
 			//
-			case AppItem::Type::Transmitter:
+			case UalItem::Type::Transmitter:
 				// AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
 				//
 				m_log->errALC5107(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
 				result = false;
 				break;
 
-			case AppItem::Type::BusComposer:
+			case UalItem::Type::BusComposer:
 				// Non-bus output of AFB is connected to BusExtractor (Logic schema '%1').
 				//
 				m_log->errALC5110(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
@@ -1048,7 +1362,7 @@ namespace Builder
 		{
 			// create auto signal with Uuid of this output pin
 			//
-			const AppFb* appFb = m_appFbs.value(appItem->guid(), nullptr);
+			const UalAfb* appFb = m_ualAfbs.value(appItem->guid(), nullptr);
 
 			if (appFb == nullptr)
 			{
@@ -1056,7 +1370,7 @@ namespace Builder
 				return false;
 			}
 
-			result = m_appSignals.insertBusAutoSignal(appFb, outPin, bus);
+			result = m_ualSignals.insertBusAutoSignal(appFb, outPin, bus);
 
 			if (result == false)
 			{
@@ -1071,7 +1385,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::appendBusComposerOutputAutoSignal(AppItem* appItem)
+	bool ModuleLogicCompiler::appendBusComposerOutputAutoSignal(UalItem* appItem)
 	{
 		if (appItem == nullptr)
 		{
@@ -1125,10 +1439,10 @@ namespace Builder
 		bool needToCreateAutoSignal = false;
 		bool connectedToSignal = false;
 
-		for(const std::pair<QUuid, AppItem*>& pair : connectedAppItems)
+		for(const std::pair<QUuid, UalItem*>& pair : connectedAppItems)
 		{
 			QUuid connectedPinUuid = pair.first;
-			AppItem* connectedAppItem = pair.second;
+			UalItem* connectedAppItem = pair.second;
 
 			if (connectedAppItem == nullptr)
 			{
@@ -1143,7 +1457,7 @@ namespace Builder
 			{
 			// allowed BusComposer connections
 			//
-			case AppItem::Type::Afb:
+			case UalItem::Type::Afb:
 				{
 					res = checkBusAndAfbInputCompatibility(appItem, bus, connectedAppItem, connectedPinUuid);
 
@@ -1157,7 +1471,7 @@ namespace Builder
 				}
 				break;
 
-			case AppItem::Type::BusExtractor:
+			case UalItem::Type::BusExtractor:
 				{
 					res = checkBusAndBusExtractorCompatibility(appItem, bus, connectedAppItem);
 
@@ -1171,10 +1485,10 @@ namespace Builder
 				}
 				break;
 
-			case AppItem::Type::Terminator:		// not need to create signal
+			case UalItem::Type::Terminator:		// not need to create signal
 				break;
 
-			case AppItem::Type::Signal:
+			case UalItem::Type::Signal:
 				{
 					res = checkBusAndSignalCompatibility(appItem, bus, connectedAppItem);
 
@@ -1191,14 +1505,14 @@ namespace Builder
 
 			// disallowed connections or connection to unknown item type
 			//
-			case AppItem::Type::BusComposer:
+			case UalItem::Type::BusComposer:
 				// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
 				//
 				m_log->errALC5102(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
 				result = false;
 				break;
 
-			case AppItem::Type::Transmitter:
+			case UalItem::Type::Transmitter:
 				// Bus composer cannot be directly connected to transmitter (Logic schema %1).
 				//
 				m_log->errALC5101(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
@@ -1219,7 +1533,7 @@ namespace Builder
 		{
 			// create auto signal with Uuid of this output pin
 			//
-			result = m_appSignals.insertBusAutoSignal(appItem, outPin, bus);
+			result = m_ualSignals.insertBusAutoSignal(appItem, outPin, bus);
 
 			if (result == false)
 			{
@@ -1234,7 +1548,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::checkBusAndAfbInputCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem, QUuid destPinUuid)
+	bool ModuleLogicCompiler::checkBusAndAfbInputCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem, QUuid destPinUuid)
 	{
 		if (srcAppItem == nullptr || bus == nullptr || destAppItem == nullptr)
 		{
@@ -1247,7 +1561,7 @@ namespace Builder
 		// 2) maxBusSize > BusTypeID.sizeW
 		// 3) same E::BusDataFormat
 		//
-		AppFb* destAppFb = m_appFbs.value(destAppItem->guid(), nullptr);
+		UalAfb* destAppFb = m_ualAfbs.value(destAppItem->guid(), nullptr);
 
 		if (destAppFb == nullptr)
 		{
@@ -1290,7 +1604,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::checkBusAndSignalCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem)
+	bool ModuleLogicCompiler::checkBusAndSignalCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem)
 	{
 		if (srcAppItem == nullptr || bus == nullptr || destAppItem == nullptr)
 		{
@@ -1300,7 +1614,7 @@ namespace Builder
 
 		// check that connected signal has 'bus' type and apropriate 'busTypeID'
 		//
-		AppSignal* appSignal = m_appSignals.value(destAppItem->guid(), nullptr);
+		UalSignal* appSignal = m_ualSignals.get(destAppItem->guid());
 
 		if (appSignal == nullptr)
 		{
@@ -1331,7 +1645,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::checkBusAndBusExtractorCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem)
+	bool ModuleLogicCompiler::checkBusAndBusExtractorCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem)
 	{
 		if (srcAppItem == nullptr || bus == nullptr || destAppItem == nullptr)
 		{
@@ -1698,7 +2012,7 @@ namespace Builder
 
 		// append auto discrete internal signals (auto generated in m_appSignals)
 		//
-		for(AppSignal* appSignal : m_appSignals)
+		for(UalSignal* appSignal : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
@@ -1963,7 +2277,7 @@ namespace Builder
 
 		// append auto analog internal signals (auto generated in m_appSignals)
 		//
-		for(AppSignal* appSignal : m_appSignals)
+		for(UalSignal* appSignal : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
@@ -2067,7 +2381,7 @@ namespace Builder
 
 		// append auto bus signals (auto generated in m_appSignals)
 		//
-		for(AppSignal* appSignal : m_appSignals)
+		for(UalSignal* appSignal : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
@@ -2755,13 +3069,13 @@ namespace Builder
 			assert(s->isAnalog() == true);
 			assert(s->isInput() == true);
 
-			AppItem appItem;
+			UalItem appItem;
 
 			bool res = createFbForAnalogInputSignalConversion(*s, appItem);
 
 			if (res == true)
 			{
-				AppFb* appFb = createAppFb(appItem);
+				UalAfb* appFb = createUalAfb(appItem);
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
 			}
@@ -2783,13 +3097,13 @@ namespace Builder
 			assert(s->isAnalog() == true);
 			assert(s->isOutput() == true);
 
-			AppItem appItem;
+			UalItem appItem;
 
 			bool res = createFbForAnalogOutputSignalConversion(*s, appItem);
 
 			if (res == true)
 			{
-				AppFb* appFb = createAppFb(appItem);
+				UalAfb* appFb = createUalAfb(appItem);
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
 			}
@@ -2962,7 +3276,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogInputSignalConversion(Signal& signal, AppItem& appItem)
+	bool ModuleLogicCompiler::createFbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isInput());
@@ -3077,7 +3391,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(Signal& signal, AppItem& appItem)
+	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isOutput());
@@ -3225,14 +3539,14 @@ namespace Builder
 		return false;
 	}
 
-	AppFb* ModuleLogicCompiler::createAppFb(const AppItem& appItem)
+	UalAfb* ModuleLogicCompiler::createUalAfb(const UalItem& appItem)
 	{
 		if (appItem.isAfb() == false)
 		{
 			return nullptr;
 		}
 
-		AppFb* appFb = new AppFb(appItem);
+		UalAfb* appFb = new UalAfb(appItem);
 
 		if (appFb->calculateFbParamValues(this) == false)
 		{
@@ -3242,7 +3556,7 @@ namespace Builder
 
 		// get Functional Block instance
 		//
-		bool result = m_afbs.addInstance(appFb);
+		bool result = m_afbls.addInstance(appFb);
 
 		if (result == false)
 		{
@@ -3252,7 +3566,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		m_appFbs.insert(appFb);
+		m_ualAfbs.insert(appFb);
 
 		return appFb;
 	}
@@ -3287,7 +3601,7 @@ namespace Builder
 
 			const VFrame30::SchemaItemSignal* s = item.m_fblItem->toSignalElement();
 
-			AppSignal* appSignal = m_appSignals.getSignal(s->appSignalIds());
+			UalSignal* appSignal = m_ualSignals.get(s->appSignalIds());
 
 			if (appSignal == nullptr)
 			{
@@ -3395,7 +3709,7 @@ namespace Builder
 
 		// process transmitters and add tx signals to Optical and Serial ports txSignals lists
 		//
-		for(const AppItem* item : m_appItems)
+		for(const UalItem* item : m_ualItems)
 		{
 			if (item == nullptr)
 			{
@@ -3412,7 +3726,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::processTransmitter(const AppItem* item)
+	bool ModuleLogicCompiler::processTransmitter(const UalItem* item)
 	{
 		TEST_PTR_RETURN_FALSE(item);
 
@@ -3440,7 +3754,7 @@ namespace Builder
 
 			if (s == nullptr)
 			{
-				m_log->errALC5000(connectedSignalID, connectedSignalUuid);
+				m_log->errALC5000(connectedSignalID, connectedSignalUuid, item->schemaID());
 				ASSERT_RETURN_FALSE
 			}
 
@@ -3494,7 +3808,7 @@ namespace Builder
 
 			QUuid connectedPinGuid = associatedOutPins[0];
 
-			AppItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
+			UalItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
 
 			if (connectedPinParent == nullptr)
 			{
@@ -3537,7 +3851,7 @@ namespace Builder
 				}
 			}
 
-			AppSignal* appSignal = m_appSignals.value(connectedSignalUuid, nullptr);
+			UalSignal* appSignal = m_ualSignals.get(connectedSignalUuid);
 
 			if (appSignal == nullptr)
 			{
@@ -3559,7 +3873,7 @@ namespace Builder
 
 		// process receivers and add regular tx signals to Serial (only!) ports rxSignals lists
 		//
-		for(const AppItem* item : m_appItems)
+		for(const UalItem* item : m_ualItems)
 		{
 			if (item == nullptr)
 			{
@@ -3573,7 +3887,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::processSerialReceiver(const AppItem* item)
+	bool ModuleLogicCompiler::processSerialReceiver(const UalItem* item)
 	{
 		TEST_PTR_RETURN_FALSE(item);
 
@@ -3615,7 +3929,7 @@ namespace Builder
 
 		if (rxSignal == nullptr)
 		{
-			m_log->errALC5000(rxSignalID, item->guid());
+			m_log->errALC5000(rxSignalID, item->guid(), item->schemaID());
 			return false;
 		}
 
@@ -3672,7 +3986,7 @@ namespace Builder
 				{
 					if (item.type == Hardware::RawDataDescriptionItem::Type::RxSignal)
 					{
-						AppSignal* appSignal = m_appSignals.getSignal(item.appSignalID);
+						UalSignal* appSignal = m_ualSignals.get(item.appSignalID);
 
 						if (appSignal != nullptr)
 						{
@@ -3729,33 +4043,33 @@ namespace Builder
 
 		QHash<QString, int> instantiatorStrIDsMap;
 
-		for(LogicAfb* fbl : m_afbs)
+		for(Afbl* afbl : m_afbls)
 		{
-			for(AppFb* appFb : m_appFbs)
+			for(UalAfb* ualAfb : m_ualAfbs)
 			{
-				if (appFb->afbStrID() != fbl->strID())
+				if (ualAfb->afbStrID() != afbl->strID())
 				{
 					continue;
 				}
 
-				if (appFb->hasRam() == true)
+				if (ualAfb->hasRam() == true)
 				{
 					// initialize all params for each instance of FB with RAM
 					//
-					result &= initAppFbParams(appFb, false);
+					result &= initAppFbParams(ualAfb, false);
 				}
 				else
 				{
 					// FB without RAM initialize once for all instances
 					// initialize instantiator params only
 					//
-					QString instantiatorID = appFb->instantiatorID();
+					QString instantiatorID = ualAfb->instantiatorID();
 
 					if (instantiatorStrIDsMap.contains(instantiatorID) == false)
 					{
 						instantiatorStrIDsMap.insert(instantiatorID, 0);
 
-						result &= initAppFbParams(appFb, true);
+						result &= initAppFbParams(ualAfb, true);
 					}
 				}
 			}
@@ -3773,7 +4087,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool /* instantiatorsOnly */)
+	bool ModuleLogicCompiler::initAppFbParams(UalAfb* appFb, bool /* instantiatorsOnly */)
 	{
 		if (appFb == nullptr)
 		{
@@ -3904,7 +4218,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::displayAfbParams(const AppFb& appFb)
+	bool ModuleLogicCompiler::displayAfbParams(const UalAfb& appFb)
 	{
 		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
@@ -4010,7 +4324,7 @@ namespace Builder
 				continue;
 			}
 
-			AppFb* appFb = m_inOutSignalsToScalAppFbMap.value(s->appSignalID(), nullptr);
+			UalAfb* appFb = m_inOutSignalsToScalAppFbMap.value(s->appSignalID(), nullptr);
 
 			if (appFb == nullptr)
 			{
@@ -4215,7 +4529,7 @@ namespace Builder
 		m_code.comment("Application logic code");
 		m_code.newLine();
 
-		for(AppItem* appItem : m_appItems)
+		for(UalItem* appItem : m_ualItems)
 		{
 			TEST_PTR_RETURN_FALSE(appItem)
 
@@ -4297,11 +4611,11 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateAppSignalCode(const AppItem* appItem)
+	bool ModuleLogicCompiler::generateAppSignalCode(const UalItem* appItem)
 	{
 		assert(appItem->isSignal() == true);
 
-		AppSignal* appSignal = m_appSignals.value(appItem->guid(), nullptr);
+		UalSignal* appSignal = m_ualSignals.get(appItem->guid());
 
 		if (appSignal == nullptr)
 		{
@@ -4329,7 +4643,7 @@ namespace Builder
 			{
 				// Value of signal '%1' is undefined.
 				//
-				m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
+				m_log->errALC5002(appItem->schemaID(), appSignal->appSignalID(), appItem->guid());
 				return false;
 			}
 
@@ -4347,7 +4661,7 @@ namespace Builder
 
 		QUuid connectedOutPinUuid;
 
-		AppItem* connectedPinParent = getAssociatedOutputPinParent(inPin, &connectedOutPinUuid);
+		UalItem* connectedPinParent = getAssociatedOutputPinParent(inPin, &connectedOutPinUuid);
 
 		if (connectedPinParent == nullptr)
 		{
@@ -4359,25 +4673,25 @@ namespace Builder
 
 		switch(connectedPinParent->type())
 		{
-		case AppItem::Const:
+		case UalItem::Const:
 			result = generateWriteConstToSignalCode(*appSignal, connectedPinParent->ualConst());
 			break;
 
-		case AppItem::Receiver:
+		case UalItem::Receiver:
 			result = generateWriteReceiverToSignalCode(connectedPinParent->logicReceiver(), *appSignal, connectedOutPinUuid);
 			break;
 
-		case AppItem::BusComposer:
+		case UalItem::BusComposer:
 			// "writeBusComposerToSignal" code implemented in generateBusComposerCode()
 			//
 			break;
 
-		case AppItem::BusExtractor:
+		case UalItem::BusExtractor:
 			result = generateWriteBusExtractorToSignalCode(*appSignal, connectedPinParent, connectedOutPinUuid);
 			break;
 
-		case AppItem::Signal:
-		case AppItem::Afb:
+		case UalItem::Signal:
+		case UalItem::Afb:
 			{
 				QUuid srcSignalGuid;
 
@@ -4415,16 +4729,16 @@ namespace Builder
 		{
 			// Value of signal '%1' is undefined.
 			//
-			m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
+			m_log->errALC5002(appItem->schemaID(), appSignal->appSignalID(), appItem->guid());
 			return false;
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal& appSignal, const UalConst* constItem)
+	bool ModuleLogicCompiler::generateWriteConstToSignalCode(UalSignal& appSignal, const UalConst* constItem)
 	{
-		TEST_PTR_LOG_RETURN_FALSE(constItem, m_log)
+/*		TEST_PTR_LOG_RETURN_FALSE(constItem, m_log)
 
 		if (appSignal.enableTuning() == true)
 		{
@@ -4529,14 +4843,14 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		appSignal.setResultSaved();
+		appSignal.setResultSaved();*/
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid)
+	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(const LogicReceiver& receiver, UalSignal& appSignal, const QUuid& pinGuid)
 	{
-		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+/*		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
 
 		if (connection == nullptr)
 		{
@@ -4673,14 +4987,14 @@ namespace Builder
 
 		LOG_INTERNAL_ERROR(m_log);
 
-		assert(false);		// unknown pin type
+		assert(false);		// unknown pin type*/
 
 		return false;
 	}
 
-	bool ModuleLogicCompiler::generateWriteBusExtractorToSignalCode(AppSignal& appSignal, const AppItem* appBusExtractor, QUuid extractorOutPinUuid)
+	bool ModuleLogicCompiler::generateWriteBusExtractorToSignalCode(UalSignal& appSignal, const UalItem* appBusExtractor, QUuid extractorOutPinUuid)
 	{
-		const Signal* destSignal = appSignal.signal();
+/*		const Signal* destSignal = appSignal.signal();
 
 		if (destSignal == nullptr)
 		{
@@ -4714,7 +5028,7 @@ namespace Builder
 			return false;
 		}
 
-		const AppSignal* busSignal = getExtractorBusSignal(appBusExtractor);
+		const UalSignal* busSignal = getExtractorBusSignal(appBusExtractor);
 
 		if (busSignal == nullptr)
 		{
@@ -4795,13 +5109,13 @@ namespace Builder
 
 		cmd.setComment(QString("%1 <= %2.%3").arg(destSignal->appSignalID()).arg(srcSignal->appSignalID()).arg(busOut.signalID));
 		m_code.append(cmd);
-
+*/
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, QUuid srcSignalGuid)
+	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(UalSignal& appSignal, QUuid srcSignalGuid)
 	{
-		AppSignal* srcAppSignal = m_appSignals.value(srcSignalGuid, nullptr);
+/*		UalSignal* srcAppSignal = m_ualSignals.get(srcSignalGuid);
 
 		if (srcAppSignal == nullptr)
 		{
@@ -4976,18 +5290,18 @@ namespace Builder
 		m_code.newLine();
 
 		appSignal.setResultSaved();
-
+*/
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateFbCode(const AppItem* appItem)
+	bool ModuleLogicCompiler::generateFbCode(const UalItem* appItem)
 	{
-		if (!m_appFbs.contains(appItem->guid()))
+		if (!m_ualAfbs.contains(appItem->guid()))
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		const AppFb* appFb = m_appFbs[appItem->guid()];
+		const UalAfb* appFb = m_ualAfbs[appItem->guid()];
 
 		TEST_PTR_RETURN_FALSE(appFb)
 
@@ -5012,9 +5326,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::writeFbInputSignals(const AppFb* appFb)
+	bool ModuleLogicCompiler::writeFbInputSignals(const UalAfb* appFb)
 	{
-		bool result = true;
+/*		bool result = true;
 
 		for(LogicPin inPin : appFb->inputs())
 		{
@@ -5045,7 +5359,7 @@ namespace Builder
 					RESULT_FALSE_BREAK
 				}
 
-				AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
+				UalItem* connectedPinParent = m_pinParent[connectedPinGuid];
 
 				if (connectedPinParent == nullptr)
 				{
@@ -5088,14 +5402,14 @@ namespace Builder
 					signalGuid = m_outPinSignal[connectedPinGuid];
 				}
 
-				if (!m_appSignals.contains(signalGuid))
+				if (m_ualSignals.contains(signalGuid) == false)
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
 
 					RESULT_FALSE_BREAK
 				}
 
-				AppSignal* appSignal = m_appSignals[signalGuid];
+				UalSignal* appSignal = m_ualSignals.get(signalGuid);
 
 				if (appSignal == nullptr)
 				{
@@ -5119,10 +5433,12 @@ namespace Builder
 			}
 		}
 
-		return result;
+		return result;*/
+
+		return true;
 	}
 
-	bool ModuleLogicCompiler::generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const UalConst* constItem)
+	bool ModuleLogicCompiler::generateWriteConstToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalConst* constItem)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(constItem, m_log);
 
@@ -5257,7 +5573,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const AppFb& fb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid)
+	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const UalAfb& fb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid)
 	{
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
 
@@ -5302,7 +5618,7 @@ namespace Builder
 			{
 				// Signal identifier '%1' is not found.
 				//
-				m_log->errALC5000(receiver.appSignalId(), receiver.guid());
+				m_log->errALC5000(receiver.appSignalId(), receiver.guid(), fb.schemaID());
 				return false;
 			}
 
@@ -5398,9 +5714,9 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal)
+	bool ModuleLogicCompiler::generateWriteSignalToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalSignal& appSignal)
 	{
-		quint16 fbType = appFb.opcode();
+/*		quint16 fbType = appFb.opcode();
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = inPin.afbOperandIndex();
 
@@ -5487,11 +5803,11 @@ namespace Builder
 
 			m_code.append(cmd);
 		}
-
+*/
 		return true;
 	}
 
-	bool ModuleLogicCompiler::startFb(const AppFb* appFb)
+	bool ModuleLogicCompiler::startFb(const UalAfb* appFb)
 	{
 		int startCount = 1;
 
@@ -5521,7 +5837,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::readFbOutputSignals(const AppFb* appFb)
+	bool ModuleLogicCompiler::readFbOutputSignals(const UalAfb* appFb)
 	{
 		bool result = true;
 
@@ -5543,30 +5859,30 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
+				UalItem* connectedPinParent = m_pinParent[connectedPinGuid];
 
 				if (connectedPinParent == nullptr)
 				{
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				AppItem::Type t = connectedPinParent->type();
+				UalItem::Type t = connectedPinParent->type();
 
 				switch(t)
 				{
-				case AppItem::Type::Afb:
-				case AppItem::Type::BusComposer:
+				case UalItem::Type::Afb:
+				case UalItem::Type::BusComposer:
 					connectedToFb = true;
 					break;
 
-				case AppItem::Type::Transmitter:
+				case UalItem::Type::Transmitter:
 					break;
 
-				case AppItem::Type::Terminator:
+				case UalItem::Type::Terminator:
 					connectedToTerminator = true;
 					break;
 
-				case AppItem::Type::Signal:
+				case UalItem::Type::Signal:
 					{
 						QUuid signalGuid;
 
@@ -5625,16 +5941,16 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid)
+	bool ModuleLogicCompiler::generateReadFuncBlockToSignalCode(const UalAfb& appFb, const LogicPin& outPin, const QUuid& signalGuid)
 	{
-		if (!m_appSignals.contains(signalGuid))
+/*		if (!m_ualSignals.contains(signalGuid))
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
 			return false;
 		}
 
-		AppSignal* appSignal = m_appSignals[signalGuid];
+		UalSignal* appSignal = m_ualSignals.get(signalGuid);
 
 		if (appSignal == nullptr)
 		{
@@ -5742,12 +6058,12 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		appSignal->setResultSaved();
+		appSignal->setResultSaved();*/
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateBusComposerCode(const AppItem* composer)
+	bool ModuleLogicCompiler::generateBusComposerCode(const UalItem* composer)
 	{
 		if (composer == nullptr)
 		{
@@ -5780,7 +6096,7 @@ namespace Builder
 
 			for(QUuid connectedPinGuid : outPin.associatedIOs())
 			{
-				AppItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
+				UalItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
 
 				if (connectedPinParent == nullptr)
 				{
@@ -5799,13 +6115,13 @@ namespace Builder
 				// 1) transmitter
 				// 2) input of another BusComposer
 
-				AppItem::Type t = connectedPinParent->type();
+				UalItem::Type t = connectedPinParent->type();
 
 				switch(t)
 				{
 				// allowed connections
 				//
-				case AppItem::Type::Signal:
+				case UalItem::Type::Signal:
 
 					// save BusComposer result to real signal
 					// connectedPinParent->guid() is an app signal guid
@@ -5814,8 +6130,8 @@ namespace Builder
 
 					break;
 
-				case AppItem::Type::Afb:
-				case AppItem::Type::BusExtractor:
+				case UalItem::Type::Afb:
+				case UalItem::Type::BusExtractor:
 
 					// save BusComposer result to auto signal
 					// outPin->guid() is an auto signal guid
@@ -5823,20 +6139,20 @@ namespace Builder
 					result = generateBusComposerToSignalCode(composer, outPin.guid(), &composerInfo);
 					break;
 
-				case AppItem::Type::Terminator:
+				case UalItem::Type::Terminator:
 					// nothing to do
 					break;
 
 				// disallowed connections
 				//
-				case AppItem::Type::Transmitter:
+				case UalItem::Type::Transmitter:
 					// Bus composer can't be directly connected to transmitter (Logic schema %1).
 					//
 					m_log->errALC5101(composer->guid(), connectedPinParent->guid(), composer->schemaID());
 					result = false;
 					break;
 
-				case AppItem::Type::BusComposer:
+				case UalItem::Type::BusComposer:
 					// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
 					//
 					m_log->errALC5102(composer->guid(), connectedPinParent->guid(), composer->schemaID());
@@ -5868,16 +6184,16 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateBusComposerToSignalCode(const AppItem* composer, QUuid signalUuid, BusComposerInfo* composerInfo)
+	bool ModuleLogicCompiler::generateBusComposerToSignalCode(const UalItem* composer, QUuid signalUuid, BusComposerInfo* composerInfo)
 	{
-		if (composer == nullptr || composerInfo == nullptr)
+/*		if (composer == nullptr || composerInfo == nullptr)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		AppSignal* destAppSignal = m_appSignals.value(signalUuid, nullptr);
+		UalSignal* destAppSignal = m_ualSignals.get(signalUuid);
 
 		if (destAppSignal == nullptr)
 		{
@@ -5971,12 +6287,12 @@ namespace Builder
 		// setup composerInfo fields to indicate that bus filling code already generated and bus filled
 		//
 		composerInfo->busContentAddress = busSignal->ualAddr().offset();
-		composerInfo->busFillingCodeAlreadyGenerated = true;
+		composerInfo->busFillingCodeAlreadyGenerated = true;*/
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::fillAnalogBusSignals(const AppItem* composer, const Signal* busSignal)
+	bool ModuleLogicCompiler::fillAnalogBusSignals(const UalItem* composer, const Signal* busSignal)
 	{
 		if (composer == nullptr ||
 			busSignal == nullptr)
@@ -6026,29 +6342,29 @@ namespace Builder
 			assert(busInputSignal.signalType == E::SignalType::Analog);
 
 			QUuid connectedOutPinUuid;
-			AppItem* connectedItem = getInputPinAssociatedOutputPinParent(composer->guid(), busInputSignal.signalID, &connectedOutPinUuid);
+			UalItem* connectedItem = getInputPinAssociatedOutputPinParent(composer->guid(), busInputSignal.signalID, &connectedOutPinUuid);
 
 			switch(connectedItem->type())
 			{
 			// allowed connections
 			//
-			case AppItem::Type::Signal:
+			case UalItem::Type::Signal:
 				// composer is connected to signal schema item
 				//
 				generateAnalogSignalToBusCode(composer, busInputSignal, busSignal, connectedItem->guid() /* real app signal guid */);
 				break;
 
-			case AppItem::Type::Afb:
+			case UalItem::Type::Afb:
 				// composer is directly connected to FB via auto signal
 				//
 				generateAnalogSignalToBusCode(composer, busInputSignal, busSignal, connectedOutPinUuid /* auto app signal guid */);
 				break;
 
-			case AppItem::Type::Const:
+			case UalItem::Type::Const:
 				generateAnalogConstToBusCode(busInputSignal, busSignal, connectedItem);
 				break;
 
-			case AppItem::Type::Receiver:
+			case UalItem::Type::Receiver:
 				assert(false);				// must be implemented!
 				break;
 
@@ -6064,9 +6380,9 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateAnalogSignalToBusCode(const AppItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid)
+	bool ModuleLogicCompiler::generateAnalogSignalToBusCode(const UalItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid)
 	{
-		if (composer == nullptr ||
+/*		if (composer == nullptr ||
 			busSignal == nullptr)
 		{
 			assert(false);
@@ -6074,7 +6390,7 @@ namespace Builder
 			return false;
 		}
 
-		AppSignal* connectedAppSignal = m_appSignals.value(connectedSignalGuid, nullptr);
+		UalSignal* connectedAppSignal = m_ualSignals.get(connectedSignalGuid);
 
 		if (connectedAppSignal == nullptr)
 		{
@@ -6137,12 +6453,12 @@ namespace Builder
 		cmd.mov32(busSignal->ualAddr().offset() + busInputSignal.inbusAddr.offset(), connectedSignal->ualAddr().offset());
 		cmd.setComment(QString("%1.%2 <= %3").arg(busSignal->appSignalID()).arg(busInputSignal.signalID).arg(connectedSignal->appSignalID()));
 
-		m_code.append(cmd);
+		m_code.append(cmd);*/
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem)
+	bool ModuleLogicCompiler::generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const UalItem* constAppItem)
 	{
 		assert(constAppItem->isConst());
 		assert(busInputSignal.signalType == E::SignalType::Analog);
@@ -6218,7 +6534,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::fillDiscreteBusSignals(const AppItem* composer, const Signal* busSignal)
+	bool ModuleLogicCompiler::fillDiscreteBusSignals(const UalItem* composer, const Signal* busSignal)
 	{
 		if (composer == nullptr ||
 			busSignal == nullptr)
@@ -6285,7 +6601,7 @@ namespace Builder
 				assert(busInputSignal.inbusAddr.offset() == discretesOffset);
 
 				QUuid connectedOutPinUuid;
-				AppItem* connectedItem = getInputPinAssociatedOutputPinParent(composer->guid(), busInputSignal.signalID, &connectedOutPinUuid);
+				UalItem* connectedItem = getInputPinAssociatedOutputPinParent(composer->guid(), busInputSignal.signalID, &connectedOutPinUuid);
 
 				if (connectedItem == nullptr)
 				{
@@ -6297,23 +6613,23 @@ namespace Builder
 				{
 				// allowed connections
 				//
-				case AppItem::Type::Signal:
+				case UalItem::Type::Signal:
 					// composer is connected to signal schema item
 					//
 					generateDiscreteSignalToBusCode(composer, busInputSignal, busSignal, connectedItem->guid() /* real app signal guid */, fillingCode);
 					break;
 
-				case AppItem::Type::Afb:
+				case UalItem::Type::Afb:
 					// composer is directly connected to FB via auto signal
 					//
 					generateDiscreteSignalToBusCode(composer, busInputSignal, busSignal, connectedOutPinUuid /* auto app signal guid */, fillingCode);
 					break;
 
-				case AppItem::Type::Const:
+				case UalItem::Type::Const:
 					generateDiscreteConstToBusCode(busInputSignal, busSignal, connectedItem, fillingCode);
 					break;
 
-				case AppItem::Type::Receiver:
+				case UalItem::Type::Receiver:
 					assert(false);				// must be implemented!
 					break;
 
@@ -6332,9 +6648,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateDiscreteSignalToBusCode(const AppItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode)
+	bool ModuleLogicCompiler::generateDiscreteSignalToBusCode(const UalItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode)
 	{
-		if (composer == nullptr ||
+/*		if (composer == nullptr ||
 			busSignal == nullptr)
 		{
 			assert(false);
@@ -6342,7 +6658,7 @@ namespace Builder
 			return false;
 		}
 
-		AppSignal* connectedAppSignal = m_appSignals.value(connectedSignalGuid, nullptr);
+		UalSignal* connectedAppSignal = m_ualSignals.get(connectedSignalGuid);
 
 		if (connectedAppSignal == nullptr)
 		{
@@ -6395,12 +6711,12 @@ namespace Builder
 
 		cmd.setComment(QString("%1.%2 <= %3").arg(busSignal->appSignalID()).arg(busInputSignal.signalID).arg(connectedSignal->appSignalID()));
 
-		fillingCode.append(cmd);
+		fillingCode.append(cmd);*/
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem, Commands& fillingCode)
+	bool ModuleLogicCompiler::generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const UalItem* constAppItem, Commands& fillingCode)
 	{
 		assert(constAppItem->isConst());
 		assert(busInputSignal.signalType == E::SignalType::Discrete);
@@ -6446,7 +6762,7 @@ namespace Builder
 	}
 
 
-	AppItem* ModuleLogicCompiler::getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const
+	UalItem* ModuleLogicCompiler::getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const
 	{
 		if (connectedOutPinUuid == nullptr)
 		{
@@ -6457,7 +6773,7 @@ namespace Builder
 
 		*connectedOutPinUuid = QUuid();
 
-		AppItem* currentItem  = m_appItems.value(appItemUuid, nullptr);
+		UalItem* currentItem  = m_ualItems.value(appItemUuid, nullptr);
 
 		if (currentItem == nullptr)
 		{
@@ -6466,7 +6782,7 @@ namespace Builder
 			return false;
 		}
 
-		AppItem* connectedItem = nullptr;
+		UalItem* connectedItem = nullptr;
 
 		const std::vector<LogicPin>& inputs = currentItem->inputs();
 
@@ -6514,7 +6830,7 @@ namespace Builder
 		return connectedItem;
 	}
 
-	AppItem* ModuleLogicCompiler::getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid) const
+	UalItem* ModuleLogicCompiler::getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid) const
 	{
 		if (inputPin.IsInput() == false)
 		{
@@ -6537,7 +6853,7 @@ namespace Builder
 			*connectedOutPinUuid = associatedOuts[0];
 		}
 
-		AppItem* connectedOutPinParent = m_pinParent.value(associatedOuts[0], nullptr);
+		UalItem* connectedOutPinParent = m_pinParent.value(associatedOuts[0], nullptr);
 
 		if (connectedOutPinParent == nullptr)
 		{
@@ -6549,7 +6865,7 @@ namespace Builder
 		return connectedOutPinParent;
 	}
 
-	const AppSignal* ModuleLogicCompiler::getExtractorBusSignal(const AppItem* appBusExtractor)
+	const UalSignal* ModuleLogicCompiler::getExtractorBusSignal(const UalItem* appBusExtractor)
 	{
 		const UalBusExtractor* extractor = appBusExtractor->ualBusExtractor();
 
@@ -6571,7 +6887,7 @@ namespace Builder
 
 		QUuid connectedOutPinUuid;
 
-		AppItem* extractorSourceItem = getAssociatedOutputPinParent(inputs[0], &connectedOutPinUuid);
+		UalItem* extractorSourceItem = getAssociatedOutputPinParent(inputs[0], &connectedOutPinUuid);
 
 		QUuid srcSignalUuid;
 
@@ -6579,14 +6895,14 @@ namespace Builder
 		{
 		// allowed connections
 		//
-		case AppItem::Signal:
+		case UalItem::Signal:
 			// extractor connected to signal
 			//
 			srcSignalUuid = extractorSourceItem->guid();
 			break;
 
-		case AppItem::Afb:
-		case AppItem::BusComposer:
+		case UalItem::Afb:
+		case UalItem::BusComposer:
 			// extractor directly connected to 	Fb, BusComposer
 			//
 			srcSignalUuid = connectedOutPinUuid;
@@ -6600,7 +6916,7 @@ namespace Builder
 			return false;
 		}
 
-		const AppSignal* srcSignal = m_appSignals.value(srcSignalUuid);
+		const UalSignal* srcSignal = m_ualSignals.get(srcSignalUuid);
 
 		if (srcSignal == nullptr)
 		{
@@ -6627,7 +6943,7 @@ namespace Builder
 
 		for(QUuid connectedPinUuid : pin.associatedIOs())
 		{
-			AppItem* connectedPinParent = m_pinParent.value(connectedPinUuid, nullptr);
+			UalItem* connectedPinParent = m_pinParent.value(connectedPinUuid, nullptr);
 
 			if (connectedPinParent == nullptr)
 			{
@@ -6636,13 +6952,13 @@ namespace Builder
 				continue;
 			}
 
-			connectedAppItems->insert(std::pair<QUuid, AppItem*>(connectedPinUuid, connectedPinParent));
+			connectedAppItems->insert(std::pair<QUuid, UalItem*>(connectedPinUuid, connectedPinParent));
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getBusProcessingParams(const AppFb* appFb, bool& isBusProcessingAfb, QString& busTypeID)
+	bool ModuleLogicCompiler::getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID)
 	{
 		if (appFb == nullptr)
 		{
@@ -6653,16 +6969,16 @@ namespace Builder
 		isBusProcessingAfb = false;
 		busTypeID.clear();
 
-		const LogicAfb* afb = m_afbs.value(appFb->afbStrID(), nullptr);
+		const Afbl* afbl = m_afbls.value(appFb->afbStrID(), nullptr);
 
-		if (afb == nullptr)
+		if (afbl == nullptr)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		isBusProcessingAfb = afb->isBusProcessingAfb();
+		isBusProcessingAfb = afbl->isBusProcessingAfb();
 
 		if (isBusProcessingAfb == false)
 		{
@@ -6691,7 +7007,7 @@ namespace Builder
 				continue;
 			}
 
-			AppSignal* appSignal = getPinInputAppSignal(inPin);
+			UalSignal* appSignal = getPinInputAppSignal(inPin);
 
 			if (appSignal == nullptr)
 			{
@@ -6747,7 +7063,7 @@ namespace Builder
 		return true;
 	}
 
-	AppSignal* ModuleLogicCompiler::getPinInputAppSignal(const LogicPin& inPin)
+	UalSignal* ModuleLogicCompiler::getPinInputAppSignal(const LogicPin& inPin)
 	{
 		assert(inPin.IsInput());
 
@@ -6761,7 +7077,7 @@ namespace Builder
 
 		QUuid associatedOutUuid = associatedOuts[0];
 
-		const AppItem* connectedPinParent = m_pinParent.value(associatedOutUuid, nullptr);
+		const UalItem* connectedPinParent = m_pinParent.value(associatedOutUuid, nullptr);
 
 		if (connectedPinParent == nullptr)
 		{
@@ -6769,22 +7085,22 @@ namespace Builder
 			return false;
 		}
 
-		AppSignal* appSignal = nullptr;
+		UalSignal* appSignal = nullptr;
 
 		if (connectedPinParent->isSignal() == true)
 		{
-			appSignal = m_appSignals.value(connectedPinParent->guid(), nullptr);
+			appSignal = m_ualSignals.get(connectedPinParent->guid());
 		}
 		else
 		{
-			appSignal = m_appSignals.value(associatedOutUuid, nullptr);
+			appSignal = m_ualSignals.get(associatedOutUuid);
 		}
 
 		return appSignal;
 	}
 
 
-	bool ModuleLogicCompiler::addToComparatorStorage(const AppFb* appFb)
+	bool ModuleLogicCompiler::addToComparatorStorage(const UalAfb* appFb)
 	{
 		if (appFb == nullptr)
 		{
@@ -6810,7 +7126,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb)
+	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb)
 	{
 		Q_UNUSED(cmp);
 
@@ -7307,7 +7623,7 @@ namespace Builder
 				continue;
 			}
 
-			AppFb* appFb = m_inOutSignalsToScalAppFbMap.value(s->appSignalID(), nullptr);
+			UalAfb* appFb = m_inOutSignalsToScalAppFbMap.value(s->appSignalID(), nullptr);
 
 			TEST_PTR_CONTINUE(appFb);
 
@@ -7662,7 +7978,7 @@ namespace Builder
 			{
 				// Signal identifier '%1' is not found.
 				//
-				m_log->errALC5000(txSignal->appSignalID(), QUuid());
+				m_log->errALC5000(txSignal->appSignalID(), QUuid(), "");
 				result = false;
 				continue;
 			}
@@ -7742,7 +8058,7 @@ namespace Builder
 			{
 				// Signal identifier '%1' is not found.
 				//
-				m_log->errALC5000(txSignal->appSignalID(), QUuid());
+				m_log->errALC5000(txSignal->appSignalID(), QUuid(), "");
 				result = false;
 				continue;
 			}
@@ -8816,14 +9132,14 @@ namespace Builder
 
 	void ModuleLogicCompiler::cleanup()
 	{
-		for(AppItem* appItem : m_appItems)
+		for(UalItem* appItem : m_ualItems)
 		{
 			delete appItem;
 		}
 
-		m_appItems.clear();
+		m_ualItems.clear();
 
-		for(AppItem* scalAppItem : m_scalAppItems)
+		for(UalItem* scalAppItem : m_scalAppItems)
 		{
 			delete scalAppItem;
 		}
@@ -8884,7 +9200,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const AppFb& fb, const LogicAfbSignal& afbSignal)
+	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal)
 	{
 		if (srcSignal.isDiscrete())
 		{
@@ -8935,12 +9251,12 @@ namespace Builder
 
 	bool ModuleLogicCompiler::isUsedInUal(const QString& appSignalID) const
 	{
-		return m_appSignals.containsSignal(appSignalID);
+		return m_ualSignals.contains(appSignalID);
 	}
 
 	QString ModuleLogicCompiler::getSchemaID(QUuid itemUuid)
 	{
-		AppItem* appItem = m_appItems.value(itemUuid, nullptr);
+		UalItem* appItem = m_ualItems.value(itemUuid, nullptr);
 
 		if (appItem != nullptr)
 		{
