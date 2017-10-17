@@ -36,6 +36,8 @@ namespace EditEngine
 
 	void SetObjectCommand::executeCommand(EditSchemaView* schemaView)
 	{
+		assert(schemaView);
+
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
 
 		for (const Record& r : m_items)
@@ -52,6 +54,8 @@ namespace EditEngine
 
 	void SetObjectCommand::unExecuteCommand(EditSchemaView* schemaView)
 	{
+		assert(schemaView);
+
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
 
 		for (const Record& r : m_items)

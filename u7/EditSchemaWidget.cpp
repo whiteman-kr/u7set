@@ -5235,6 +5235,12 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 		busses.push_back(bus);
 	}
 
+	std::sort(busses.begin(), busses.end(),
+			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
+			{
+				return b1.busTypeId() < b2.busTypeId();
+			});
+
 	std::swap(busses, *out);
 	return true;
 }
@@ -5685,6 +5691,12 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
+	if (item->isType<VFrame30::SchemaItemBus>() == true)
+	{
+		f2KeyForBus(item);
+		return;
+	}
+
 	return;
 }
 
@@ -6057,6 +6069,108 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
 		editSchemaView()->update();
 	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemBus* busItem = dynamic_cast<VFrame30::SchemaItemBus*>(item.get());
+	if (busItem == nullptr)
+	{
+		assert(busItem);
+		return;
+	}
+
+	QString text = busItem->busTypeId();
+
+	// Get Bus list
+	//
+	std::vector<VFrame30::Bus> busses;
+
+	bool ok = loadBusses(&busses);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set BusType"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// Type Items
+	//
+	QLabel* busTypeLabel = new QLabel("Select BusType:");
+
+	QComboBox* busTypeCombo = new QComboBox();
+
+	for (int i = 0; i < static_cast<int>(busses.size()); i++)
+	{
+		busTypeCombo->addItem(busses[i].busTypeId(), QVariant(i));
+	}
+
+	int dataIndex = busTypeCombo->findText(text);
+	if (dataIndex != -1)
+	{
+		busTypeCombo->setCurrentIndex(dataIndex);
+	}
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(busTypeLabel);
+	layout->addWidget(busTypeCombo);
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted && text != busTypeCombo->currentText())
+	{
+		int selectedBusIndex = busTypeCombo->currentData().toInt();
+		const VFrame30::Bus& newBus = busses[selectedBusIndex];
+
+		QByteArray oldState;
+		busItem->Save(oldState);
+
+		busItem->setBusType(newBus);
+
+		QByteArray newState;
+		busItem->Save(newState);
+
+		// Return object to prev state, it is not neccessary indeed, as it will be loaded into the new state in edit engine
+		//
+		busItem->Load(oldState);
+
+		// Run command
+		//
+		m_editEngine->runSetObject(oldState, newState, item);
+
+		editSchemaView()->update();
+	}
+
 
 	return;
 }
@@ -7070,58 +7184,24 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 		return;
 	}
 
-	// Select BustType from existing
-	//
-	std::vector<DbFileInfo> fileInfos;
-
-	bool ok = db()->getFileList(&fileInfos, db()->busTypesFileId(), ::BusFileExtension, true, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	std::vector<std::shared_ptr<DbFile>> files;
-
-	ok = db()->getLatestVersion(fileInfos, &files, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	// Parse files
+	// Get Bus list
 	//
 	std::vector<VFrame30::Bus> busses;
-	busses.reserve(files.size());
 
+	bool ok = loadBusses(&busses);
 
-	for (std::shared_ptr<DbFile> f : files)
+	if (ok == false)
 	{
-		VFrame30::Bus bus;
-
-		ok = bus.Load(f->data());
-
-		if (ok == false)
-		{
-			QMessageBox::critical(this, qAppName(), QString("Load bus error, file: %1").arg(f->fileName()));
-			continue;
-		}
-
-		busses.push_back(bus);
+		return;
 	}
 
-	std::sort(busses.begin(), busses.end(),
-			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
-			{
-				return b1.busTypeId() < b2.busTypeId();
-			});
+	// Select BustType from existing
+	//
+
 	// Show menu
 	//
 	QObject actionParent;
 	QList<QAction*> menuActions;
-
-//	QAction* empty = new QAction(QString("BusTypeID"), &actionParent);
-//	empty->setData(empty->text());
-//	menuActions << empty;
 
 	for (const VFrame30::Bus& bus : busses)
 	{

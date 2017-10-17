@@ -1049,6 +1049,8 @@ public:
 
 		m_properties[hash] = property;
 
+		emit propertyListChanged();
+
 		return property.get();
 	}
 
@@ -1066,6 +1068,8 @@ public:
 		property->setVisible(visible);
 
 		m_properties[hash] = property;
+
+		emit propertyListChanged();
 
 		return property.get();
 	}
@@ -1104,6 +1108,8 @@ public:
 
 		m_properties[hash] = property;
 
+		emit propertyListChanged();
+
 		return property.get();
 	}
 
@@ -1132,30 +1138,51 @@ public:
 	void removeAllProperties()
 	{
 		m_properties.clear();
+
+		emit propertyListChanged();
 	}
 
 	bool removeProperty(const QString& caption)
 	{
 		uint hash = qHash(caption);
 		size_t removed = m_properties.erase(hash);
-		return removed > 0;
+
+		if (removed > 0)
+		{
+			emit propertyListChanged();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	// Delete all specific properties
 	//
 	void removeSpecificProperties()
 	{
+		bool someRemoved = false;
+
 		for(auto it = m_properties.begin(); it != m_properties.end();)
 		{
 			if(it->second->specific() == true)
 			{
 				it = m_properties.erase(it);
+				someRemoved = true;
 			}
 			else
 			{
 				++it;
 			}
 		}
+
+		if (someRemoved == true)
+		{
+			emit propertyListChanged();
+		}
+
+		return;
 	}
 
 
@@ -1172,12 +1199,23 @@ public:
 			uint hash = qHash(p->caption());
 			m_properties[hash] = p;
 		}
+
+		if (properties.empty() == false)
+		{
+			emit propertyListChanged();
+		}
+
+		return;
 	}
 
 	void addProperty(std::shared_ptr<Property> property)
 	{
 		uint hash = qHash(property->caption());
 		m_properties[hash] = property;
+
+		emit propertyListChanged();
+
+		return;
 	}
 
 
@@ -1334,6 +1372,9 @@ public:
 
 		return result;
 	}
+
+signals:
+	void propertyListChanged();		// One or more properties were added or deleted
 
 private:
 	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)
