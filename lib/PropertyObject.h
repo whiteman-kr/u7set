@@ -1056,7 +1056,8 @@ public:
 
 	PropertyValueNoGetterSetter* addProperty(const QString& caption,
 											 const QString& category,
-											 bool visible)
+											 bool visible,
+											 const QVariant& value)
 	{
 		//std::shared_ptr<PropertyValueNoGetterSetter> property = thePropertyObjectHeap.alloc<PropertyValueNoGetterSetter>();
 		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
@@ -1066,6 +1067,7 @@ public:
 		property->setCaption(caption);
 		property->setCategory(category);
 		property->setVisible(visible);
+		property->setValue(value);
 
 		m_properties[hash] = property;
 

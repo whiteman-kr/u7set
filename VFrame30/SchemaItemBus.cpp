@@ -586,9 +586,8 @@ namespace VFrame30
 
 			if (it == props.end())
 			{
-				auto p = this->addProperty(propName, PropertyNames::parametersCategory, true);
+				auto p = this->addProperty(propName, PropertyNames::parametersCategory, true, QVariant(true));
 				p->setSpecific(true);
-				p->setValue(true);
 			}
 			else
 			{

@@ -701,6 +701,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return;
 		}
 
+		// Block signals is required here, as removeProperty, addProperty emit propertyListChanged signal,
+		// but PropertyEditor tries to update values and we have assers
+		//
+		blockSignals(true);
+
 		// Delete all ColumnXX props
 		//
 		std::vector<std::shared_ptr<Property>> allProperties = properties();
@@ -735,6 +740,12 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 									  std::bind(&SchemaItemSignal::columnHorzAlign, this, static_cast<int>(i)),
 									  std::bind(&SchemaItemSignal::setColumnHorzAlign, this, std::placeholders::_1, static_cast<int>(i)));
 		}
+
+		// Allow signals and notify PropertyEditor that it can update property list now
+		//
+		blockSignals(false);
+
+		emit propertyListChanged();
 
 		return;
 	}
