@@ -1027,7 +1027,7 @@ void SignalsModel::addSignal()
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
 	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete") << tr("Bus"));
-	signalTypeCombo->setCurrentIndex(0);
+	signalTypeCombo->setCurrentIndex(1);
 
 	fl->addRow(tr("Signal type"), signalTypeCombo);
 
@@ -1570,18 +1570,18 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	QGroupBox *groupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
-	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
-	QVBoxLayout* groupBoxLayout = new QVBoxLayout;
-	groupBox->setLayout(groupBoxLayout);
-	vl->addWidget(groupBox);
+	QGroupBox *equipmentGroupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
+	equipmentGroupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QVBoxLayout* equipmentGroupBoxLayout = new QVBoxLayout;
+	equipmentGroupBox->setLayout(equipmentGroupBoxLayout);
+	vl->addWidget(equipmentGroupBox);
 
 	for (QString lmId : lmIdList)
 	{
 		QCheckBox* enableLmCheck = new QCheckBox(lmId, &signalCreationSettingsDialog);
 		enableLmCheck->setChecked(true);
 
-		groupBoxLayout->addWidget(enableLmCheck);
+		equipmentGroupBoxLayout->addWidget(enableLmCheck);
 		checkBoxList.append(enableLmCheck);
 
 		connect(enableLmCheck, &QCheckBox::toggled, [&checkBoxList, enableLmCheck](bool checked){
@@ -1605,11 +1605,49 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		});
 	}
 
-	QComboBox* signalTypeCombo = new QComboBox(&signalCreationSettingsDialog);
-	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
-	signalTypeCombo->setCurrentIndex(0);
+	QGroupBox *signalTypeGroupBox = new QGroupBox("Signal type", &signalCreationSettingsDialog);
+	signalTypeGroupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QVBoxLayout* signalTypeGroupBoxLayout = new QVBoxLayout;
+	signalTypeGroupBox->setLayout(signalTypeGroupBoxLayout);
 
-	fl->addRow(tr("Signal type"), signalTypeCombo);
+	QButtonGroup* signalTypeButtonGroup = new QButtonGroup(&signalCreationSettingsDialog);
+
+	signalTypeButtonGroup->setExclusive(true);
+
+	static const QString discreteCaption("Discrete");
+	static const QString analogFloat32Caption("Analog Float32");
+	static const QString analogSignedInt32Caption("Analog SignedInt32");
+	static const QString busCaption("Bus");
+
+	QVector<QRadioButton*> buttons;
+	QRadioButton* defaultButton;
+	QRadioButton* busButton;
+	buttons.push_back(defaultButton = new QRadioButton(discreteCaption, signalTypeGroupBox));
+	buttons.push_back(new QRadioButton(analogFloat32Caption, signalTypeGroupBox));
+	buttons.push_back(new QRadioButton(analogSignedInt32Caption, signalTypeGroupBox));
+	buttons.push_back(busButton = new QRadioButton(busCaption, signalTypeGroupBox));
+
+	QLineEdit* busTypeIdEdit = new QLineEdit(QString("BUSTYPEID_%1").arg(dbController->nextCounterValue(), 4, 10, QLatin1Char('0')), &signalCreationSettingsDialog);
+	busTypeIdEdit->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdEdit));
+	busTypeIdEdit->setVisible(false);
+
+	QLabel* busTypeIdLabel = new QLabel("BusTypeId", &signalCreationSettingsDialog);
+	busTypeIdLabel->setVisible(false);
+
+	fl->addRow(busTypeIdLabel, busTypeIdEdit);
+
+	connect(busButton, &QRadioButton::toggled, busTypeIdEdit, &QLineEdit::setVisible);
+	connect(busButton, &QRadioButton::toggled, busTypeIdLabel, &QLabel::setVisible);
+
+	defaultButton->setChecked(true);
+
+	for (auto b : buttons)
+	{
+		signalTypeButtonGroup->addButton(b);
+		signalTypeGroupBoxLayout->addWidget(b);
+	}
+
+	vl->addWidget(signalTypeGroupBox);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -1629,7 +1667,27 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		return QStringList();
 	}
 
-	E::SignalType type = static_cast<E::SignalType>(signalTypeCombo->currentIndex());
+	QRadioButton* checkedSignalTypeButton = dynamic_cast<QRadioButton*>(signalTypeButtonGroup->checkedButton());
+	if (checkedSignalTypeButton == nullptr)
+	{
+		return QStringList();
+	}
+
+	E::SignalType type;
+	switch (checkedSignalTypeButton->text()[0].unicode())
+	{
+		case 'A':
+			type = E::SignalType::Analog;
+			break;
+
+		case 'B':
+			type = E::SignalType::Bus;
+			break;
+
+		case 'D':
+			type = E::SignalType::Discrete;
+			break;
+	}
 
 	for (QCheckBox* check : checkBoxList)
 	{
@@ -1670,8 +1728,17 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		switch (type)
 		{
 			case E::SignalType::Analog:
-				newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-				newSignal.setDataSize(FLOAT32_SIZE);
+				if (checkedSignalTypeButton->text() == analogFloat32Caption)
+				{
+					newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+					newSignal.setDataSize(FLOAT32_SIZE);
+				}
+
+				if (checkedSignalTypeButton->text() == analogSignedInt32Caption)
+				{
+					newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
+					newSignal.setDataSize(SIGNED_INT32_SIZE);
+				}
 				break;
 
 			case E::SignalType::Discrete:
@@ -1679,6 +1746,9 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 				break;
 
 			case E::SignalType::Bus:
+				newSignal.setBusTypeID(busTypeIdEdit->text());
+				break;
+
 			default:
 				break;
 		}
