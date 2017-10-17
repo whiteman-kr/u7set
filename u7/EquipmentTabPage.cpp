@@ -4711,7 +4711,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 	//
 	if (m_propertyEditor != nullptr)
 	{
-		m_propertyEditor->updateProperty("EquipmentID");
+		m_propertyEditor->updatePropertyValues("EquipmentID");
 	}
 
 	// --

@@ -57,15 +57,15 @@ void SchemaPropertyEditor::valueChanged(QtProperty* property, QVariant value)
 		return;
 	}
 
-	QList<std::shared_ptr<PropertyObject>> objects = m_objects;
+	QList<std::shared_ptr<PropertyObject>> objectsList = objects();
 
-	if (objects.size() != 1)
+	if (objectsList.size() != 1)
 	{
-		assert(objects.size() == 1);
+		assert(objectsList.size() == 1);
 		return;
 	}
 
-	std::shared_ptr<VFrame30::Schema> schema = std::dynamic_pointer_cast<VFrame30::Schema>(objects.front());
+	std::shared_ptr<VFrame30::Schema> schema = std::dynamic_pointer_cast<VFrame30::Schema>(objectsList.front());
 	assert(schema.get() != nullptr);
 
 	if (schema->propertyValue(property->propertyName()) != value)

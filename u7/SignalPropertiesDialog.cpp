@@ -365,7 +365,7 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 		for (auto property : signalProperties->propertiesDependentOnPrecision())
 		{
 			property->setPrecision(precision);
-			m_propertyEditor->updateProperty(property->caption());
+			m_propertyEditor->updatePropertyValues(property->caption());
 		}
 	}
 }
