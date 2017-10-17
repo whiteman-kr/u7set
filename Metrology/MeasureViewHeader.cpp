@@ -23,16 +23,13 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Chassis"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Module"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Place"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "El. range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Ph. range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. El. range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "El. nominal value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Ph. nominal value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. El. nominal value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Physical range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Physical nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value to %"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "El. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Ph. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. El. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Physical measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "System error"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Standard deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
@@ -57,11 +54,14 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 18"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 19"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 20"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error of input"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error (in)"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error of output"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error (out)"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(),
+		MeasureViewColumn(),
+		MeasureViewColumn(),
+		MeasureViewColumn(),
+		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
@@ -149,7 +149,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(),
 	},
 };
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -314,41 +313,13 @@ void MeasureViewHeader::updateColumnState()
 	{
 		case MEASURE_TYPE_LINEARITY:
 			{
-
-				// input and output range
+				// show columns of physical value
 				//
-				bool visibleInput = theOptions.linearity().showInputRangeColumn();
-				bool visibleOutput = theOptions.linearity().showOutputRangeColumn();
+				bool visiblePhysical = theOptions.linearity().showPhyscalValueColumn();
 
-				setColumnVisible(MVC_CMN_L_IN_EL_NOMINAL, visibleInput);
-				setColumnVisible(MVC_CMN_L_IN_EL_MEASURE, visibleInput);
-				setColumnVisible(MVC_CMN_L_IN_ERROR, visibleInput);
-				setColumnVisible(MVC_CMN_L_IN_ERROR_LIMIT, visibleInput);
-
-				setColumnVisible(MVC_CMN_L_OUT_NOMINAL, visibleOutput);
-				setColumnVisible(MVC_CMN_L_OUT_MEASURE, visibleOutput);
-				setColumnVisible(MVC_CMN_L_OUT_ERROR, visibleOutput);
-				setColumnVisible(MVC_CMN_L_OUT_ERROR_LIMIT, visibleOutput);
-
-				if (theOptions.linearity().errorType() == MEASURE_ERROR_TYPE_ABSOLUTE)
-				{
-					setColumnTitle(MVC_CMN_L_IN_ERROR, visibleOutput == false ? "Error" : "Error of input");
-					setColumnTitle(MVC_CMN_L_IN_ERROR_LIMIT, visibleOutput == false ? "Limit of error" : "Limit of error (in)");
-					setColumnTitle(MVC_CMN_L_OUT_ERROR, visibleInput == false ? "Error" : "Error of output");
-					setColumnTitle(MVC_CMN_L_OUT_ERROR_LIMIT, visibleInput == false ? "Limit of error" : "Limit of error (out)");
-				}
-				else
-				{
-					setColumnTitle(MVC_CMN_L_IN_ERROR, visibleOutput == false ? "Error" : "Error of input");
-					setColumnTitle(MVC_CMN_L_IN_ERROR_LIMIT, "Limit of error");
-					setColumnTitle(MVC_CMN_L_OUT_ERROR, visibleInput == false ? "Error" : "Error of output");
-					setColumnTitle(MVC_CMN_L_OUT_ERROR_LIMIT, "Limit of error");
-
-					if (visibleOutput == true)
-					{
-						setColumnVisible(MVC_CMN_L_IN_ERROR_LIMIT, false);
-					}
-				}
+				//setColumnVisible(MVC_CMN_L_PH_RANGE, visiblePhysical);
+				setColumnVisible(MVC_CMN_L_PH_NOMINAL, visiblePhysical);
+				setColumnVisible(MVC_CMN_L_PH_MEASURE, visiblePhysical);
 
 				// list type
 				//
@@ -366,6 +337,10 @@ void MeasureViewHeader::updateColumnState()
 							setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
 						}
 
+
+						setColumnVisible(MVC_CMN_L_ERROR, true);
+						setColumnVisible(MVC_CMN_L_ERROR_LIMIT, true);
+
 						break;
 
 					case LO_VIEW_TYPE_EXTENDED:
@@ -379,6 +354,10 @@ void MeasureViewHeader::updateColumnState()
 						{
 							setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
 						}
+
+
+						setColumnVisible(MVC_CMN_L_ERROR, true);
+						setColumnVisible(MVC_CMN_L_ERROR_LIMIT, true);
 
 						break;
 
@@ -395,10 +374,8 @@ void MeasureViewHeader::updateColumnState()
 							setColumnVisible(m + MVC_CMN_L_VALUE_0, true);
 						}
 
-						setColumnVisible(MVC_CMN_L_IN_ERROR, false);
-						setColumnVisible(MVC_CMN_L_IN_ERROR_LIMIT, false);
-						setColumnVisible(MVC_CMN_L_OUT_ERROR, false);
-						setColumnVisible(MVC_CMN_L_OUT_ERROR_LIMIT, false);
+						setColumnVisible(MVC_CMN_L_ERROR, false);
+						setColumnVisible(MVC_CMN_L_ERROR_LIMIT, false);
 
 						break;
 

@@ -7,6 +7,7 @@
 #include "EditEngineMoveItem.h"
 #include "EditEngineSetOrder.h"
 #include "EditEngineSetProperty.h"
+#include "EditEngineSetObject.h"
 #include "EditEngineSetSchemaProperty.h"
 
 namespace EditEngine
@@ -264,6 +265,19 @@ namespace EditEngine
 		items.push_back(item);
 
 		return runSetProperty(propertyName, value, items);
+	}
+
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	{
+		addCommand(std::make_shared<SetObjectCommand>(m_schemaView, currentState, newState, items, m_hScrollBar, m_vScrollBar), true);
+	}
+
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::shared_ptr<VFrame30::SchemaItem>& item)
+	{
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		items.push_back(item);
+
+		return runSetObject(currentState, newState, items);
 	}
 
 	void EditEngine::runSetSchemaProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& schema)

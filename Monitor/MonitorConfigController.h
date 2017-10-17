@@ -36,11 +36,19 @@ struct ConfigSettings
 {
 	QString softwareEquipmentId;
 	QString project;
-	QString startSchemaId;				// Start Schema ID
+	QString startSchemaId;
+
 	ConfigConnection appDataService1;
 	ConfigConnection appDataService2;
+
 	ConfigConnection archiveService1;
 	ConfigConnection archiveService2;
+
+	bool tuningEnabled = false;
+	QStringList tuningSources;
+	ConfigConnection tuningService1;
+	ConfigConnection tuningService2;
+
 	QString globalScript;
 
 	QString errorMessage;				// Parsing error message, empty if no errors

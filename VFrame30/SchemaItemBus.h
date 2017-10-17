@@ -48,7 +48,7 @@ namespace VFrame30
 		QString busTypeId() const;
 
 		const VFrame30::Bus& busType() const;
-		void setBusType(const VFrame30::Bus&bus);
+		void setBusType(const VFrame30::Bus& bus);
 
 		Hash busTypeHash() const;
 

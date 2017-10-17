@@ -4,6 +4,7 @@
 
 #include <QTime>
 
+#include "MainWindow.h"
 #include "Options.h"
 #include "Conversion.h"
 #include "CalibratorBase.h"
@@ -29,8 +30,113 @@ void MeasureThread::init(QWidget* parent)
 
 	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
 
-	connect(this, &MeasureThread::showMsgBox, this, &MeasureThread::msgBox);
 	connect(this, &MeasureThread::finished, this, &MeasureThread::stopMeasure);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureThread::enableMesureIsSignal()
+{
+	if (theOptions.linearity().warningIfMeasured() == true)
+	{
+		QString measuredSignals;
+
+		if (signalIsMeasured(measuredSignals) == true)
+		{
+			int result = QMessageBox::NoButton;
+			emit msgBox(QMessageBox::Question, tr("Following signals were measured:\n\n%1\nDo you want to measure them again?").arg(measuredSignals), &result);
+			if (result == QMessageBox::No)
+			{
+				return false;
+			}
+		}
+	}
+
+	// set param of active signal for measure
+	//
+	if (setActiveSignalParam() == false)
+	{
+		return false;
+	}
+
+	// set unit and mode on calibrators
+	//
+	if (setCalibratorUnit() == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureThread::signalIsMeasured(QString& signalID)
+{
+	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_parent);
+	if (pMainWindow == nullptr)
+	{
+		return false;
+	}
+
+	MeasureSignal measureSignal = theSignalBase.activeSignal();
+	if (measureSignal.isEmpty() == true)
+	{
+		return false;
+	}
+
+	MetrologyMultiSignal signal;
+
+	switch (theOptions.toolBar().outputSignalType())
+	{
+		case OUTPUT_SIGNAL_TYPE_UNUSED:			signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+		default:								assert(0);
+	}
+
+	if (signal.isEmpty() == true)
+	{
+		return false;
+	}
+
+	// temporary solution
+	// metrologySignal.setStatistic(theMeasureBase.statisticItem(param.hash()));
+	//
+	MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
+	if (pMeasureView == nullptr)
+	{
+		return false;
+	}
+
+	bool isMeasured = false;
+
+	for(int c = 0; c < Metrology::ChannelCount; c++)
+	{
+		Metrology::Signal* pMetrologySignal = signal.metrologySignal(c);
+		if (pMetrologySignal == nullptr)
+		{
+			continue;
+		}
+
+		Metrology::SignalParam& param = pMetrologySignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
+
+		pMetrologySignal->setStatistic(pMeasureView->table().m_measureBase.statistic(param.hash()));
+		if (pMetrologySignal->statistic().measureCount() != 0)
+		{
+			signalID.append(param.customAppSignalID() + "\n");
+
+			isMeasured = true;
+		}
+	}
+	//
+	// temporary solution
+
+	return isMeasured;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -59,6 +165,16 @@ bool MeasureThread::setActiveSignalParam()
 
 			Metrology::SignalParam& param = pSignal->param();
 			if (param.isValid() == false)
+			{
+				continue;
+			}
+
+			if (param.isAnalog() == false)
+			{
+				continue;
+			}
+
+			if (param.physicalRangeIsValid() == false || param.electricRangeIsValid() == false)
 			{
 				continue;
 			}
@@ -147,7 +263,7 @@ bool MeasureThread::hasConnectedCalibrators()
 
 	if (connectedCalibratorCount == 0)
 	{
-		emit showMsgBox(tr("No connected calibrators for measure"));
+		emit msgBox(QMessageBox::Information, tr("No connected calibrators for measure"));
 		return false;
 	}
 
@@ -195,9 +311,9 @@ bool MeasureThread::setCalibratorUnit()
 									continue;
 								}
 
-								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_SOURCE, inParam.inputElectricUnitID(), inParam.inputElectricHighLimit()) == false)
+								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_SOURCE, inParam.electricUnitID(), inParam.electricHighLimit()) == false)
 								{
-									emit showMsgBox(QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->calibratorPort()));
+									emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->calibratorPort()));
 								}
 
 								Metrology::SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
@@ -211,9 +327,9 @@ bool MeasureThread::setCalibratorUnit()
 									continue;
 								}
 
-								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.outputElectricUnitID(), outParam.outputElectricHighLimit()) == false)
+								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
 								{
-									emit showMsgBox(QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
+									emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
 								}
 
 							}
@@ -233,9 +349,9 @@ bool MeasureThread::setCalibratorUnit()
 									continue;
 								}
 
-								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.outputElectricUnitID(), outParam.outputElectricHighLimit()) == false)
+								if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.electricUnitID(), outParam.electricHighLimit()) == false)
 								{
-									emit showMsgBox(QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
+									emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->calibratorPort()));
 								}
 							}
 
@@ -324,31 +440,77 @@ void MeasureThread::run()
 		return;
 	}
 
+	switch (m_measureType)
+	{
+		case MEASURE_TYPE_LINEARITY:				// test - have programm measure points
+
+			if (theOptions.linearity().points().count() == 0)
+			{
+				emit msgBox(QMessageBox::Information, tr("No points for measure"));
+				return;
+			}
+
+			break;
+
+		case MEASURE_TYPE_COMPARATOR:	break;		// test - have signal comporators
+		default:						return;
+	}
+
 	// set command for exit (stop measure) in state = FALSE
 	//
 	m_cmdStopMeasure = false;
 
-	// set param of active signal for measure
-	//
-	if (setActiveSignalParam() == false)
-	{
-		return;
-	}
+	bool signalIsSelected = true;
 
-	// set unit and mode on calibrators
+	// start of cycle for measuring all signals in selected module
 	//
-	if (setCalibratorUnit() == false)
+	while(signalIsSelected == true)
 	{
-		return;
-	}
+		if (theCalibratorBase.connectedCalibratorsCount() == 0)
+		{
+			emit msgBox(QMessageBox::Information, tr("No connected calibrators for measure"));
+			break;
+		}
 
-	// start measure function
-	//
-	switch (m_measureType)
-	{
-		case MEASURE_TYPE_LINEARITY:	measureLinearity();		break;
-		case MEASURE_TYPE_COMPARATOR:	measureComprators();	break;
-		default:						assert(0);
+		if (enableMesureIsSignal() == true)
+		{
+			// start measure function
+			//
+			switch (m_measureType)
+			{
+				case MEASURE_TYPE_LINEARITY:	measureLinearity();		break;
+				case MEASURE_TYPE_COMPARATOR:	measureComprators();	break;
+				default:
+					assert(0);
+					m_cmdStopMeasure = true;
+					break;
+			}
+
+			// if we decided to finish measuring, exit
+			//
+			if (m_cmdStopMeasure == true)
+			{
+				break;
+			}
+		}
+
+		if (theOptions.linearity().measureEntireModule() == true)
+		{
+			// if we want to measure all signals of module
+			// suspend MeasureThread
+			// select next active analog signal
+			//
+			emit setNextMeasureSignal(signalIsSelected); // call signal how - Qt::BlockingQueuedConnection
+			//
+			// resume MeasureThread
+		}
+		else
+		{
+			// if we want to measure only one selected analog signal of module
+			// exit from cycle
+			//
+			break;
+		}
 	}
 }
 
@@ -357,12 +519,6 @@ void MeasureThread::run()
 void MeasureThread::measureLinearity()
 {
 	int pointCount = theOptions.linearity().points().count();
-	if (pointCount == 0)
-	{
-		emit showMsgBox(tr("No points for measure"));
-		return;
-	}
-
 	for(int p = 0; p < pointCount; p++)
 	{
 		if (hasConnectedCalibrators() == false)
@@ -390,10 +546,12 @@ void MeasureThread::measureLinearity()
 				continue;
 			}
 
+			m_activeSignalParam[c].setPercent(point.percent());
+
 			// at the beginning we need get physical value because if range is not Linear (for instance Ohm or mV)
 			// then by physical value we may get electric value
 			//
-			double physicalVal = (point.percent() * (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) / 100) + param.inputPhysicalLowLimit();
+			double physicalVal = (point.percent() * (param.physicalHighLimit() - param.physicalLowLimit()) / 100) + param.physicalLowLimit();
 			double electricVal = conversion(physicalVal, CT_PHYSICAL_TO_ELECTRIC, param);
 
 			switch (m_activeSignalParam[c].outputSignalType())
@@ -455,6 +613,8 @@ void MeasureThread::measureLinearity()
 
 			emit measureComplite(pMeasurement);
 		}
+
+		emit measureInfo(tr(""));
 	}
 }
 

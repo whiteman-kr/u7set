@@ -82,7 +82,7 @@ void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 		return;
 	}
 
-	if (ui->trendSignals->topLevelItemCount() >= 12)
+	if (ui->trendSignals->topLevelItemCount() >= 16)
 	{
 		QMessageBox::critical(this, qAppName(), tr("The maximum number of signals reached."));
 		return;
