@@ -8200,6 +8200,7 @@ void EditSchemaWidget::findNext()
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
 		bool found = item->searchText(searchText);
+		//bool found = item->searchTextByAllTextProps(searchText, Qt::CaseInsensitive);
 
 		if (found == true)
 		{
@@ -8215,6 +8216,7 @@ void EditSchemaWidget::findNext()
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
 		bool found = item->searchText(searchText);
+		//bool found = item->searchTextByAllTextProps(searchText, Qt::CaseInsensitive);
 
 		if (found == true)
 		{

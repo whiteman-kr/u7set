@@ -115,6 +115,9 @@ namespace VFrame30
 		//
 	public:
 		virtual bool searchText(const QString& text) const;
+		std::pair<QString, QString> searchTextByAllTextProps(const QString& text, Qt::CaseSensitivity cs) const;	// Returns pair:
+																													//	first - property where text found
+																													//	second - property value
 
 		// Draw Functions
 		//

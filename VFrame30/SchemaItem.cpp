@@ -24,6 +24,10 @@ namespace VFrame30
 	{	
 		m_guid = QUuid::createUuid();
 
+		auto guidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::guid, true, SchemaItem::guid);
+		guidProp->setCategory(PropertyNames::functionalCategory);
+		guidProp->setExpert(true);
+
 		auto commentedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::commented, true, SchemaItem::commented, SchemaItem::setCommented);
 		commentedProp->setCategory(PropertyNames::functionalCategory);
 
@@ -355,6 +359,65 @@ namespace VFrame30
 		}
 
 		return false;
+	}
+
+	std::pair<QString, QString> SchemaItem::searchTextByAllTextProps(const QString& text, Qt::CaseSensitivity cs) const
+	{
+		// Returns pair:
+		//		first - property where text found
+		//		second - property value
+		// Returns {QString(), QString} if text was not found
+		//
+
+		if (text.isEmpty() == true)
+		{
+			return {QString(), QString()};
+		}
+
+		// Check Uuid for the text
+		//
+		QString uuidString = guid().toString();
+
+		if (uuidString.contains(text, cs) == true)
+		{
+			return {PropertyNames::guid, uuidString};
+		}
+
+		// Search all other text, visible, properties
+		//
+		std::vector<std::shared_ptr<Property>> props = properties();
+
+		for (auto p : props)
+		{
+			if (p->visible() == false)
+			{
+				continue;
+			}
+
+			QVariant value = p->value();
+
+			if (value.type() == QVariant::String)
+			{
+				QString valueText = value.toString();
+
+				if (valueText.contains(text, cs) == true)
+				{
+					return {p->caption(), valueText};
+				}
+			}
+
+			if (value.type() == QVariant::StringList)
+			{
+				QStringList valueText = value.toStringList();
+
+				if (valueText.contains(text, cs) == true)
+				{
+					return {p->caption(), valueText.join(QChar::LineFeed)};
+				}
+			}
+		}
+
+		return {QString(), QString()};
 	}
 
 	// Drawing Functions
