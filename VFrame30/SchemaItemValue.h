@@ -67,11 +67,6 @@ namespace VFrame30
 		QString parseText(QString text, const AppSignalParam& signal, const AppSignalState& signalState) const;
 		QString formatNumber(double value, const AppSignalParam& signal) const;
 
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& textAnalog) const override;
-
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;

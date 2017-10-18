@@ -89,11 +89,6 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
-
 		// Public Methods
 		//
 	public:
@@ -141,11 +136,6 @@ namespace VFrame30
 		//
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
-
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
 
 		// Public Methods
 		//

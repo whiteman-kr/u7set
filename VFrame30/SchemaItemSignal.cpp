@@ -776,14 +776,6 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_cachedGridSize * 10;
 	}
 
-	// Text search
-	//
-	bool SchemaItemSignal::searchText(const QString& text) const
-	{
-		return	FblItemRect::searchText(text) ||
-				appSignalIds().contains(text, Qt::CaseInsensitive);
-	}
-
 	QString SchemaItemSignal::toolTipText(int dpiX, int dpiY) const
 	{
 		Q_UNUSED(dpiX);

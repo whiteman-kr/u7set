@@ -220,12 +220,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemTransmitter::searchText(const QString& text) const
-	{
-		return	FblItemRect::searchText(text) ||
-				connectionId().contains(text, Qt::CaseInsensitive);
-	}
-
 	QString SchemaItemTransmitter::buildName() const
 	{
 		return QString("Transmitter %1").arg(connectionId());
@@ -464,15 +458,6 @@ namespace VFrame30
 		DrawHelper::drawText(p, m_font, itemUnit(), dataText, r, Qt::AlignHCenter | Qt::AlignBottom);
 
 		return;
-	}
-
-	bool SchemaItemReceiver::searchText(const QString& text) const
-	{
-		bool f0 = FblItemRect::searchText(text);
-		bool f1 = m_appSignalId.contains(text, Qt::CaseInsensitive);
-		bool f2 = connectionId().contains(text, Qt::CaseInsensitive);
-
-		return f0 || f1 || f2;
 	}
 
 	double SchemaItemReceiver::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const

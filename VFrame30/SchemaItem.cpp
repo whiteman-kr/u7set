@@ -337,30 +337,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItem::searchText(const QString& text) const
-	{
-		QUuid uuid(text);
-		if (uuid.isNull() == false)
-		{
-			if (uuid == guid())
-			{
-				return true;
-			}
-		}
-
-		// FblItem is not derived from SchemaItem, so serach for the text manualy, cant call virtual function
-		//
-		if (isFblItem() == true)
-		{
-			if (toFblItem()->searchText(text) == true)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	std::list<std::pair<QString, QString>> SchemaItem::searchTextByProps(const QString& text, Qt::CaseSensitivity cs) const
 	{
 		// Returns pair:

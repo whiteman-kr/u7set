@@ -33,11 +33,6 @@ namespace VFrame30
 
 		void runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget);
 
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
-
 		// Properties and Data
 		//
 	public:

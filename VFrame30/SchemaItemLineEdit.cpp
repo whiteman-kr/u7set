@@ -413,16 +413,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemLineEdit::searchText(const QString& text) const
-	{
-		return	SchemaItem::searchText(text) ||
-				m_text.contains(text, Qt::CaseInsensitive) ||
-				m_scriptAfterCreate.contains(text, Qt::CaseInsensitive) ||
-				m_scriptEditingFinished.contains(text, Qt::CaseInsensitive) ||
-				m_scriptReturnPressed.contains(text, Qt::CaseInsensitive) ||
-				m_scriptTextChanged.contains(text, Qt::CaseInsensitive);
-	}
-
 	// Properties and Data
 	//
 

@@ -269,12 +269,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemBusComposer::searchText(const QString& text) const
-	{
-		return	FblItemRect::searchText(text) ||
-				busTypeId().contains(text, Qt::CaseInsensitive);
-	}
-
 	double SchemaItemBusComposer::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
 	{
 		// Cache values
@@ -491,14 +485,6 @@ namespace VFrame30
 		}
 
 		return;
-	}
-
-	bool SchemaItemBusExtractor::searchText(const QString& text) const
-	{
-		bool f0 = FblItemRect::searchText(text);
-		bool f1 = busTypeId().contains(text, Qt::CaseInsensitive);
-
-		return f0 || f1;
 	}
 
 	double SchemaItemBusExtractor::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
