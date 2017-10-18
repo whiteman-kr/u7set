@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QVBoxLayout>
 #include <QTableView>
+#include <QLabel>
 #include <QDialogButtonBox>
 
 #include "TuningSignalBase.h"
@@ -185,6 +186,7 @@ private:
 	QMenu*					m_pViewShowMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
 
+	QAction*				m_pChangeStateAction = nullptr;
 	QAction*				m_pExportAction = nullptr;
 
 	QAction*				m_pFindAction = nullptr;
@@ -208,8 +210,6 @@ private:
 	static E::SignalType	m_typeAD;
 	static bool				m_showSource;
 
-	Hash					m_selectedSignalHash = 0;
-
 	void					createInterface();
 	void					createHeaderContexMenu();
 	void					createContextMenu();
@@ -222,8 +222,6 @@ private:
 	void					stopSignalStateTimer();
 
 public:
-
-	Hash					selectedSignalHash() const { return m_selectedSignalHash; }
 
 protected:
 
@@ -246,6 +244,7 @@ private slots:
 	//
 							// Signal
 							//
+	void					changeSignalState();
 	void					exportSignal();
 
 							// Edit
@@ -270,10 +269,48 @@ private slots:
 
 	// slots for list
 	//
-	void					onListDoubleClicked(const QModelIndex&) {}
+	void					onListDoubleClicked(const QModelIndex&);
 
 };
 
 // ==============================================================================================
+
+class TuningSignalStateDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+
+	explicit TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget *parent = 0);
+	virtual ~TuningSignalStateDialog();
+
+private:
+
+	QLineEdit*				m_stateEdit = nullptr;
+
+	Metrology::SignalParam	m_param;
+
+	void					createInterface();
+
+public:
+
+protected:
+
+signals:
+
+private slots:
+
+	// slots of buttons
+	//
+	void					onOk();		// for analog signal
+
+	void					onYes();	// for discrete signal
+	void					onNo();		// for discrete signal
+
+};
+
+// ==============================================================================================
+
+
 
 #endif // TUNINGSIGNALLISTDIALOG_H

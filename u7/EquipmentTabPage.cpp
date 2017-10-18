@@ -3669,7 +3669,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	m_splitter = new QSplitter(this);
 
-	m_propertyEditor = new IdePropertyEditor(m_splitter);
+	m_propertyEditor = new IdePropertyEditor(m_splitter, dbcontroller);
     m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
 
 
@@ -4711,7 +4711,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 	//
 	if (m_propertyEditor != nullptr)
 	{
-		m_propertyEditor->updateProperty("EquipmentID");
+		m_propertyEditor->updatePropertyValues("EquipmentID");
 	}
 
 	// --

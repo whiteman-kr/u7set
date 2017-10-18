@@ -627,6 +627,24 @@ namespace Builder
 
 		bool result = true;
 
+		// create Bus signals and Bus child signals from BusComposers
+		//
+
+		for(UalItem* ualItem : m_ualItems)
+		{
+			if (ualItem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualItem->isBusComposer() == true)
+			{
+//				createUalSignalsFromBusComposer
+			}
+		}
+
 		for(UalItem* ualItem : m_ualItems)
 		{
 			if (ualItem == nullptr)
@@ -649,12 +667,14 @@ namespace Builder
 				break;
 
 			case UalItem::Type::Afb:
+				result &= createUalSignalsFromAfbOuts(ualItem);
 				break;
 
 			case UalItem::Type::Receiver:
 				break;
 
 			case UalItem::Type::BusComposer:
+				// already processed in previous 'for'
 				break;
 
 			// UAL items that doesn't generate signals
@@ -756,7 +776,7 @@ namespace Builder
 
 		const LogicPin& outPin = ualItem->outputs()[0];
 
-		UalSignal* ualSignal = m_ualSignals.createInputSignal(s, outPin.guid());
+		UalSignal* ualSignal = m_ualSignals.createSignal(s, outPin.guid());
 
 		if (ualSignal == nullptr)
 		{
@@ -779,7 +799,7 @@ namespace Builder
 			return false;
 		}
 
-		UalConst* ualConst = ualItem->ualConst();
+		const UalConst* ualConst = ualItem->ualConst();
 
 		if (ualConst == nullptr)
 		{
@@ -805,11 +825,40 @@ namespace Builder
 
 		if (result == false)
 		{
+			m_log->addItemsIssues(OutputMessageLevel::Error, ualItem->guid(), ualItem->schemaID());
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("Cannot detect constant type %1")).
-							   arg(m_lm->equipmentIdTemplate()).
-							   arg(tuningFrameCount));
+							   QString(tr("Cannot detect constant type (Logic schema %1)")).arg(ualItem->schemaID()));
 			return false;
+		}
+
+		if (ualConst->isFloat() == true)
+		{
+			if ((constSignalType == E::SignalType::Analog && constAnalogFormat == E::AnalogAppSignalFormat::Float32) == false)
+			{
+				// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
+				//
+				m_log->errALC5119(ualItem->guid(), ualItem->schemaID());
+				return false;
+			}
+		}
+		else
+		{
+			if (ualConst->isIntegral() == true)
+			{
+				if ((constSignalType == E::SignalType::Analog && constAnalogFormat == E::AnalogAppSignalFormat::SignedInt32) == false &&
+					(constSignalType != E::SignalType::Discrete))
+				{
+					// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
+					//
+					m_log->errALC5119(ualItem->guid(), ualItem->schemaID());
+					return false;
+				}
+			}
+			else
+			{
+				LOG_INTERNAL_ERROR(m_log);			// unknown constant type
+				return false;
+			}
 		}
 
 		UalSignal* ualSignal = m_ualSignals.createConstSignal(constSignalType,
@@ -824,6 +873,70 @@ namespace Builder
 		// link connected signals to newly created UalSignal
 		//
 		result = linkConnectedItems(ualItem, outPin, ualSignal);
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::createUalSignalsFromAfbOuts(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
+
+		if (ualAfb == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		bool result = true;
+
+		const std::vector<LogicPin>& outputs = ualItem->outputs();
+
+		for(const LogicPin& outPin : outputs)
+		{
+			LogicAfbSignal outAfbSignal;
+
+			if (ualAfb->getAfbSignalByPin(outPin, &outAfbSignal) == false)
+			{
+				result = false;
+				continue;
+			}
+
+			bool connectedToTerminatorOnly = isConnectedToTerminatorOnly(outPin);
+
+			if (connectedToTerminatorOnly == true)
+			{
+				continue;				// not needed to create signal
+			}
+
+			UalSignal* ualSignal = nullptr;
+
+			Signal* s = getCompatibleConnectedSignal(outPin, outAfbSignal);
+
+			if (s == nullptr)
+			{
+				ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal);
+			}
+			else
+			{
+				ualSignal = m_ualSignals.createSignal(s, outPin.guid());
+			}
+
+			if (ualSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			result &= linkConnectedItems(ualItem, outPin, ualSignal);
+		}
 
 		return result;
 	}
@@ -873,9 +986,11 @@ namespace Builder
 			// link pins to signal only, any checks is not required
 			//
 			case UalItem::Type::Transmitter:
-			case UalItem::Type::Terminator:
 			case UalItem::Type::LoopbackOutput:
 				m_ualSignals.appendPinRef(inPinUuid, ualSignal);
+				break;
+
+			case UalItem::Type::Terminator:
 				break;
 
 			// output can't connect to:
@@ -1083,7 +1198,7 @@ namespace Builder
 
 			if (linkedItem->isAfb() == true)
 			{
-				UalAfb* ualAfb = m_afbls.value(linkedItem->guid(), nullptr);
+				UalAfb* ualAfb = m_ualAfbs.value(linkedItem->guid(), nullptr);
 
 				if (ualAfb == nullptr)
 				{
@@ -1102,7 +1217,7 @@ namespace Builder
 
 				*constSignalType = inSignal.type();
 
-				switch(inSignal.type() == )
+				switch(inSignal.type())
 				{
 				case E::SignalType::Discrete:
 					return true;
@@ -1130,9 +1245,86 @@ namespace Builder
 			}
 		}
 
-		return true;
+		return false;
 	}
 
+	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
+	{
+		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
+
+		for(QUuid inPinUuid : connectedPinsUuids)
+		{
+			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+
+			if (connectedItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (connectedItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			QString signalID = connectedItem->strID();
+
+			Signal* s = m_signals->getSignal(signalID);
+
+			if (s == nullptr)
+			{
+				continue;
+			}
+
+			switch(outAfbSignal.type())
+			{
+			case E::SignalType::Discrete:
+			case E::SignalType::Analog:
+
+				if (s->isCompatibleFormat(outAfbSignal.type(),
+										  outAfbSignal.dataFormat(),
+										  outAfbSignal.size(),
+										  outAfbSignal.byteOrder()) == true)
+				{
+					return s;
+				}
+
+				break;
+
+			case E::SignalType::Bus:
+				assert(false);			// should be implemented
+				continue;
+
+			default:
+				assert(false);
+			}
+		}
+
+		return nullptr;
+	}
+
+	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin)
+	{
+		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
+
+		for(QUuid inPinUuid : connectedPinsUuids)
+		{
+			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+
+			if (connectedItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (connectedItem->isTerminator() == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	bool ModuleLogicCompiler::checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal)
 	{

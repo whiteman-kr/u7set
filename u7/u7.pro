@@ -195,7 +195,8 @@ SOURCES +=\
     Builder/SignalSet.cpp \
     Builder/Busses.cpp \
     IdePropertyEditor.cpp \
-    Builder/UalItems.cpp
+    Builder/UalItems.cpp \
+    EditEngine/EditEngineSetObject.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -329,7 +330,8 @@ HEADERS  += \
     Builder/SignalSet.h \
     Builder/Busses.h \
     IdePropertyEditor.h \
-    Builder/UalItems.h
+    Builder/UalItems.h \
+    EditEngine/EditEngineSetObject.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -405,11 +407,12 @@ win32 {
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
+# c++14 support
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+win32:QMAKE_CXXFLAGS += -std:c++14
+unix:QMAKE_CXXFLAGS += -std=c++14
 
-#c++14 support for GCC
+#c++14 support for Windows
 #
 unix:QMAKE_CXXFLAGS += -std=c++14
 

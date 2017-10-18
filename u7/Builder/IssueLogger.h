@@ -309,9 +309,7 @@ namespace Builder
 		void errALC5116(QUuid uuid1, QUuid uuid2, QString schemaID);					// Disallowed connection of UAL elements (Logic schema '%1').
 		void errALC5117(QUuid uuid1, QUuid uuid2, QString schemaID);					// Uncompatible signals connection (Logic schema '%1').
 		void errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID);			// Signal '%1' is not connected to any signal source. (Logic schema '%2').
-
-		// Uncompatible bus data format of UAL elements (Logic schema '%1').
-
+		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
@@ -349,6 +347,8 @@ namespace Builder
 		void errEQP6105(QString appSignalID, int byteOrder);		// Signal %1 has wrong order of byte: %2.
 
 		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);	//Schema %1 specified in Tuning Client %2 does not exist.
+		void errEQP6107(QString property, QString softwareEquipmentId);							//Error parsing property %1 specified in software %2.
+		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 
 
 	public:

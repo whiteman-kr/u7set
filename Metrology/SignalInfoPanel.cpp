@@ -259,38 +259,27 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 
 	QString stateStr, formatStr;
 
-	formatStr.sprintf(("%%.%df"), param.inputPhysicalPrecision());
+	formatStr.sprintf(("%%.%df"), param.physicalPrecision());
 
 	stateStr.sprintf(formatStr.toAscii(), state.value());
 
-	if (param.inputPhysicalUnit().isEmpty() == false)
+	if (param.physicalUnit().isEmpty() == false)
 	{
-		stateStr.append(" " + param.inputPhysicalUnit());
+		stateStr.append(" " + param.physicalUnit());
 	}
 
 	// append electrical equivalent
 	//
 	if (theOptions.signalInfo().showElectricState() == true)
 	{
-		if (param.isInput() == true)
+		if (param.isInput() == true || param.isOutput() == true)
 		{
 			double electric = conversion(state.value(), CT_PHYSICAL_TO_ELECTRIC, param);
-			stateStr.append(" = " + QString::number(electric, 10, param.inputElectricPrecision()));
+			stateStr.append(" = " + QString::number(electric, 10, param.electricPrecision()));
 
-			if (param.inputElectricUnit().isEmpty() == false)
+			if (param.electricUnit().isEmpty() == false)
 			{
-				stateStr.append(" " + param.inputElectricUnit());
-			}
-		}
-
-		if (param.isOutput() == true)
-		{
-			double electric = (state.value() - param.inputPhysicalLowLimit()) * (param.outputElectricHighLimit() - param.outputElectricLowLimit()) / (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.outputElectricLowLimit();
-			stateStr.append(" = " + QString::number(electric, 10, param.outputElectricPrecision()));
-
-			if (param.outputElectricUnit().isEmpty() == false)
-			{
-				stateStr.append(" " + param.outputElectricUnit());
+				stateStr.append(" " + param.electricUnit());
 			}
 		}
 	}
@@ -299,7 +288,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	//
 	if (theOptions.signalInfo().showAdcState() == true)
 	{
-		int adc = (state.value() - param.inputPhysicalLowLimit())*(param.highADC() - param.lowADC())/(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
+		int adc = (state.value() - param.physicalLowLimit())*(param.highADC() - param.lowADC())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.lowADC();
 		stateStr.append(" = " + QString::number(adc, 10));
 	}
 
@@ -308,7 +297,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	if (theOptions.signalInfo().showAdcHexState() == true)
 	{
 		QString adcHexValue;
-		int adc = (state.value() - param.inputPhysicalLowLimit())* (param.highADC() - param.lowADC())/ (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
+		int adc = (state.value() - param.physicalLowLimit())* (param.highADC() - param.lowADC())/ (param.physicalHighLimit() - param.physicalLowLimit()) + param.lowADC();
 		adcHexValue.sprintf(" = 0x%04X", adc);
 		stateStr.append(adcHexValue);
 	}

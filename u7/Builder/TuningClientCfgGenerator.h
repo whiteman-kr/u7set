@@ -21,10 +21,10 @@ private:
 	Hardware::SubsystemStorage* m_subsystems = nullptr;
 
 	bool writeSettings();
-	bool writeObjectFilters();
+	bool writeTuningSignals(std::vector<Hash>* tuningSignalHashArray);	// Hashes of tuning signal will be placed to the vector
+	bool writeObjectFilters(const std::vector<Hash>& tuningSignalHashArray);
 	bool writeSchemas();
 	bool writeSchemasDetails();
-	bool writeTuningSignals();
 	bool writeGlobalScript();
 
 	void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);

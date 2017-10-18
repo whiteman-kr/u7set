@@ -16,6 +16,17 @@ class QXmlStreamAttributes;
 class XmlWriteHelper;
 class XmlReadHelper;
 
+const char* const ElectricUnitStr[] =
+{
+	"",
+	"mA",
+	"mV",
+	"Ohm",
+	"V",
+};
+
+const int ELECTRIC_UNIT_COUNT = sizeof(ElectricUnitStr) / sizeof(ElectricUnitStr[0]);
+
 const char* const OutputModeStr[] =
 {
 	"0 .. 5 V",
@@ -351,11 +362,11 @@ private:
 
 	// Analog input/output signals properties
 	//
-	double m_electricLowLimit = 0;										// low electric value for input range
-	double m_electricHighLimit = 0;										// high electric value for input range
+	double m_electricLowLimit = 0;									// low electric value for input range
+	double m_electricHighLimit = 0;									// high electric value for input range
 	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensorType;			// electric sensor type for input range (was created for m_inputUnitID)
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;			// output electric range (or mode ref. OutputModeStr[])
+	E::SensorType m_sensorType = E::SensorType::NoSensorType;		// electric sensor type for input range (was created for m_inputUnitID)
+	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
 
 	// Tuning signal properties
 	//

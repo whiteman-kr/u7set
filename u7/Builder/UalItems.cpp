@@ -889,6 +889,93 @@ namespace Builder
 		}
 	}
 
+	UalSignal::UalSignal(const QString& constSignalID,
+			  E::SignalType constSignalType,
+			  E::AnalogAppSignalFormat constAnalogFormat,
+			  int constIntValue,
+			  float constFloatValue)
+	{
+		// const signal creation
+
+		m_isAutoSignal = true;
+
+		Signal* s = new Signal;
+
+		s->setAppSignalID(constSignalID);
+		s->setCustomAppSignalID(QString(constSignalID).remove("#"));
+		s->setCaption(s->customAppSignalID());
+
+		s->setSignalType(constSignalType);
+		s->setInOutType(E::SignalInOutType::Internal);
+		s->setAnalogSignalFormat(constAnalogFormat);
+
+		switch(constSignalType)
+		{
+		case E::SignalType::Discrete:
+			s->setDataSize(SIZE_1BIT);
+			break;
+
+		case E::SignalType::Analog:
+			assert(constAnalogFormat == E::AnalogAppSignalFormat::Float32 || constAnalogFormat == E::AnalogAppSignalFormat::SignedInt32);
+			s->setDataSize(SIZE_32BIT);
+			break;
+
+		default:
+			assert(false);
+		}
+
+		s->setAcquire(false);
+
+		m_signals.append(s);
+
+		// set Const signal fields
+
+		m_isConst = true;
+		m_constIntValue = constIntValue;
+		m_constFloatValue = constFloatValue;
+
+		setComputed();
+	}
+
+	UalSignal::UalSignal(const QString& signalID,
+			  E::SignalType signalType,
+			  E::AnalogAppSignalFormat analogFormat)
+	{
+		// analog or discrete auto signal creation
+		// const signal creation
+
+		m_isAutoSignal = true;
+
+		Signal* s = new Signal;
+
+		s->setAppSignalID(signalID);
+		s->setCustomAppSignalID(QString(signalID).remove("#"));
+		s->setCaption(s->customAppSignalID());
+
+		s->setSignalType(signalType);
+		s->setInOutType(E::SignalInOutType::Internal);
+		s->setAnalogSignalFormat(analogFormat);
+
+		switch(signalType)
+		{
+		case E::SignalType::Discrete:
+			s->setDataSize(SIZE_1BIT);
+			break;
+
+		case E::SignalType::Analog:
+			assert(analogFormat == E::AnalogAppSignalFormat::Float32 || analogFormat == E::AnalogAppSignalFormat::SignedInt32);
+			s->setDataSize(SIZE_32BIT);
+			break;
+
+		default:
+			assert(false);
+		}
+
+		s->setAcquire(false);
+
+		m_signals.append(s);
+	}
+
 	UalSignal::UalSignal(const QUuid& guid, E::SignalType signalType,
 						 E::AnalogAppSignalFormat dataFormat,
 						 int dataSize,
@@ -935,14 +1022,15 @@ namespace Builder
 	{
 		if (m_isAutoSignal == true)
 		{
-			if (m_signals.size() == 1)
-			{
-				delete m_signals[0];
-			}
-			else
+			if (m_signals.size() < 1)
 			{
 				assert(false);
+				return;
 			}
+
+			// Pointer on Auto Signal objects, created inside UalSignal constructor, is ALWAYS stored in m_signals[0]
+			//
+			delete m_signals[0];
 		}
 	}
 
@@ -1018,6 +1106,45 @@ namespace Builder
 		return m_signals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
 
+	E::SignalType UalSignal::constType() const
+	{
+		assert(m_isConst == true);
+
+		return m_signals[0]->signalType();
+	}
+
+	E::AnalogAppSignalFormat UalSignal::constAnalogFormat() const
+	{
+		assert(m_isConst == true);
+		assert(constType() == E::SignalType::Analog);
+
+		return m_signals[0]->analogSignalFormat();
+	}
+
+	int UalSignal::constDiscreteValue() const
+	{
+		assert(m_isConst == true);
+		assert(constType() == E::SignalType::Discrete);
+
+		return m_constIntValue == 0 ? 0 : 1;
+	}
+
+	int UalSignal::constAnalogIntValue() const
+	{
+		assert(m_isConst == true);
+		assert(constAnalogFormat() == E::AnalogAppSignalFormat::SignedInt32);
+
+		return m_constIntValue;
+	}
+
+	float UalSignal::constAnalogFloatValue() const
+	{
+		assert(m_isConst == true);
+		assert(constAnalogFormat() == E::AnalogAppSignalFormat::Float32);
+
+		return m_constFloatValue;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppSignalsMap class implementation
@@ -1036,7 +1163,7 @@ namespace Builder
 		clear();
 	}
 
-	UalSignal* UalSignalsMap::createInputSignal(Signal* s, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createSignal(Signal* s, QUuid outPinUuid)
 	{
 		if (s == nullptr)
 		{
@@ -1063,6 +1190,89 @@ namespace Builder
 		ualSignal = new UalSignal(s);
 
 		bool result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return false;
+		}
+
+		return ualSignal;
+	}
+
+	UalSignal* UalSignalsMap::createConstSignal(E::SignalType constSignalType,
+												E::AnalogAppSignalFormat constAnalogFormat,
+												const UalConst* ualConst,
+												QUuid outPinUuid)
+	{
+		QString constSignalID = QString("#AUTO_CONST_%1").arg(ualConst->label());
+
+		UalSignal* ualSignal = m_idToSignalMap.value(constSignalID, nullptr);
+
+		if (ualSignal != nullptr)
+		{
+			// const already in map
+			//
+			assert(false);
+
+			assert(m_pinToSignalMap.contains(outPinUuid) == false);
+
+			appendPinToSignalRef(outPinUuid, ualSignal);
+
+			return ualSignal;
+		}
+
+		// create new const signal
+		//
+		ualSignal = new UalSignal(constSignalID, constSignalType, constAnalogFormat, ualConst->intValue(), ualConst->floatValue());
+
+		bool result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return false;
+		}
+
+		return ualSignal;
+	}
+
+	UalSignal* UalSignalsMap::createAutoSignal(const UalItem *ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal)
+	{
+		QString signalID = QString("#AUTO_SIGNAL_%1").arg(ualItem->label());
+
+		UalSignal* ualSignal = m_idToSignalMap.value(signalID, nullptr);
+
+		if (ualSignal != nullptr)
+		{
+			// signal already in map
+			//
+			assert(false);
+			assert(m_pinToSignalMap.contains(outPinUuid) == false);
+
+			appendPinToSignalRef(outPinUuid, ualSignal);
+
+			return ualSignal;
+		}
+
+		E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::SignedInt32;
+
+		bool result = getAnalogFormat(outAfbSignal, &analogFormat);
+
+		if (result == false)
+		{
+			m_log->addItemsIssues(OutputMessageLevel::Error, ualItem->guid(), ualItem->schemaID());
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+							   QString(tr("Invalid AFB's output format %1.%2 (Logic schema %3)")).
+							   arg(ualItem->caption()).arg(outAfbSignal.caption()).arg(ualItem->schemaID()));
+			return false;
+		}
+
+		// create new auto signal
+		//
+		ualSignal = new UalSignal(signalID, outAfbSignal.type(), analogFormat);
+
+		result = insertNew(outPinUuid, ualSignal);
 
 		if (result == false)
 		{
@@ -1453,4 +1663,37 @@ namespace Builder
 
 		return strID;
 	}
+
+	bool UalSignalsMap::getAnalogFormat(const LogicAfbSignal& afbSignal, E::AnalogAppSignalFormat* analogFormat)
+	{
+		if (analogFormat == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (afbSignal.isAnalog() == false)
+		{
+			return true;
+		}
+
+		if (afbSignal.dataFormat() == E::DataFormat::Float && afbSignal.size() == SIZE_32BIT)
+		{
+			*analogFormat = E::AnalogAppSignalFormat::Float32;
+		}
+		else
+		{
+			if (afbSignal.dataFormat() == E::DataFormat::SignedInt && afbSignal.size() == SIZE_32BIT)
+			{
+				*analogFormat = E::AnalogAppSignalFormat::SignedInt32;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 }

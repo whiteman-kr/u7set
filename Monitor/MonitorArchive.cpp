@@ -1,3 +1,4 @@
+#include <memory>
 #include "MonitorArchive.h"
 #include "Settings.h"
 #include <QMessageBox>
@@ -252,6 +253,11 @@ void MonitorArchiveWidget::ensureVisible()
 
 	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
 	QRect intersectRect = screenRect.intersected(frameGeometry());
+
+	if (isMinimized() == true)
+	{
+		showNormal();
+	}
 
 	if (isMaximized() == false &&
 		(intersectRect.width() < size().width() ||

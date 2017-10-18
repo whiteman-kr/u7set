@@ -82,8 +82,9 @@ public:
 
 
 public:
-	void setSignals(std::vector<TuningModelRecord>& signalsList);
+	void setItems(std::vector<TuningModelRecord>& signalsList);
 
+	TuningModelRecord* item(int index);
 	AppSignalParam* param(int index);
 	TuningSignalState* state(int index);
 

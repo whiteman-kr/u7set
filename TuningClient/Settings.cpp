@@ -176,10 +176,8 @@ void Settings::StoreUser()
     s.setValue("TuningFiltersEditor/pos", m_presetEditorPos);
     s.setValue("TuningFiltersEditor/geometry", m_presetEditorGeometry);
 
-    s.setValue("TuningFiltersEditor/SignalsTableColumnWidth", QVariant::fromValue(m_presetEditorSignalsTableColumnWidth));
-    s.setValue("TuningFiltersEditor/PresetsTreeColumnWidth", QVariant::fromValue(m_presetEditorPresetsTreeColumnWidth));
-    s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_presetEditorPropertyEditorSplitterPos);
-    s.setValue("TuningFiltersEditor/PropertyEditorGeometry", m_presetEditorPropertyEditorGeometry);
+	s.setValue("TuningFiltersEditor/DialogChooseSignalGeometry", m_tuningFiltersDialogChooseSignalGeometry);
+	s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
 
 	//
 
@@ -229,10 +227,8 @@ void Settings::RestoreUser()
     m_presetEditorPos = s.value("TuningFiltersEditor/pos", QPoint(-1, -1)).toPoint();
     m_presetEditorGeometry = s.value("TuningFiltersEditor/geometry").toByteArray();
 
-    m_presetEditorSignalsTableColumnWidth = s.value("TuningFiltersEditor/SignalsTableColumnWidth").value<QList<int>>();
-    m_presetEditorPresetsTreeColumnWidth = s.value("TuningFiltersEditor/PresetsTreeColumnWidth").value<QList<int> >();
-    m_presetEditorPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
-    m_presetEditorPropertyEditorGeometry = s.value("TuningFiltersEditor/PropertyEditorGeometry").toByteArray();
+	m_tuningFiltersDialogChooseSignalGeometry = s.value("TuningFiltersEditor/DialogChooseSignalGeometry").toByteArray();
+	m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
 
 	//
 

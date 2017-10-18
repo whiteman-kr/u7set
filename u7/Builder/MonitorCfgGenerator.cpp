@@ -146,6 +146,14 @@ namespace Builder
 				return false;
 			}
 
+			// TuningService
+			//
+			ok = writeTuningServiceSection(xmlWriter);
+			if (ok == false)
+			{
+				return false;
+			}
+
 		} // Settings
 
 
@@ -342,6 +350,137 @@ namespace Builder
 			xmlWriter.writeAttribute("ip2", archiveServiceSettings2.clientRequestIP.address().toString());
 			xmlWriter.writeAttribute("port2", QString::number(archiveServiceSettings2.clientRequestIP.port()));
 		}	// ArchiveService
+
+		return true;
+	}
+
+	bool MonitorCfgGenerator::writeTuningServiceSection(QXmlStreamWriter& xmlWriter)
+	{
+		bool ok = true;
+
+		// TuningEnable
+		//
+		bool tuningEnable = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "TuningEnable", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// TuningSourceEquipmentID, semicolon or return EquipmentID separated list
+		//
+		QString tuningSources = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		tuningSources = tuningSources.replace(QChar(QChar::LineFeed), QChar(';'));
+		tuningSources = tuningSources.replace(QChar(QChar::CarriageReturn), QChar(';'));
+		tuningSources = tuningSources.replace(QChar(QChar::Tabulation), QChar(';'));
+
+		QStringList tuningSourceList = tuningSources.split(QChar(';'), QString::SkipEmptyParts);
+
+		if (tuningEnable == true &&
+			tuningSourceList.isEmpty() == true)
+		{
+			// Warning, tuning is enabled but no equipment to tune set
+			//
+			// ADD CODE FROM RPCT-1801
+			//m_log->errALC5000();
+		}
+
+		// TuningServiceID1(2)
+		//
+		QString tuningServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID1", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (tuningServiceId1.isEmpty() == true)
+		{
+			QString errorStr = tr("Monitor configuration error %1, property TuningServiceID1 is invalid")
+							   .arg(m_software->equipmentIdTemplate());
+
+			m_log->writeError(errorStr);
+			writeErrorSection(xmlWriter, errorStr);
+			return false;
+		}
+
+		// TuningServiceID2
+		//
+		QString tuningServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID2", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (tuningServiceId2.isEmpty() == true)
+		{
+			QString errorStr = tr("Monitor configuration error %1, property TuningServiceID2 is invalid")
+							   .arg(m_software->equipmentIdTemplate());
+
+			m_log->writeError(errorStr);
+			writeErrorSection(xmlWriter, errorStr);
+			return false;
+		}
+
+		// TuningServiceID1(2)->ClientRequestIP, ClientRequestPort
+		//
+		Hardware::Software* tuningServiceObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId1));
+		Hardware::Software* tuningServiceObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
+
+		if (tuningServiceObject1 == nullptr)
+		{
+			QString errorStr = tr("Object %1 is not found").arg(tuningServiceId1);
+
+			m_log->writeError(errorStr);
+			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			return false;
+		}
+
+		if (tuningServiceObject2 == nullptr)
+		{
+			QString errorStr = tr("Object %1 is not found").arg(tuningServiceId2);
+
+			m_log->writeError(errorStr);
+			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			return false;
+		}
+
+		TuningServiceSettings tuningServiceSettings1;
+		tuningServiceSettings1.readFromDevice(tuningServiceObject1, m_log);
+
+		TuningServiceSettings tuningServiceSettings2;
+		tuningServiceSettings2.readFromDevice(tuningServiceObject2, m_log);
+
+		// TuningService -- Get ip addresses and ports, write them to configurations
+		//
+		{
+			xmlWriter.writeStartElement("TuningService");
+			std::shared_ptr<int*> writeEndElement(nullptr, [&xmlWriter](void*)
+			{
+				xmlWriter.writeEndElement();
+			});
+
+			// --
+			//
+			xmlWriter.writeAttribute("Enable", tuningEnable ? "true" : "false");
+
+			xmlWriter.writeAttribute("TuningServiceID1", tuningServiceId1);
+			xmlWriter.writeAttribute("TuningServiceID2", tuningServiceId2);
+
+			xmlWriter.writeAttribute("ip1", tuningServiceSettings1.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port1", QString::number(tuningServiceSettings1.clientRequestIP.port()));
+			xmlWriter.writeAttribute("ip2", tuningServiceSettings2.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port2", QString::number(tuningServiceSettings2.clientRequestIP.port()));
+		}	// TuningService
+
+		// TuningSources -- EqupmentIDs for LM's to tune
+		//
+		{
+			xmlWriter.writeTextElement(QLatin1String("TuningSources"), tuningSourceList.join(QLatin1String("; ")));
+		}
 
 		return true;
 	}

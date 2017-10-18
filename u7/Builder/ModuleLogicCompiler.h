@@ -105,10 +105,11 @@ namespace Builder
 		QString getUalItemStrID(const AppLogicItem& appLogicItem) const;
 
 		bool createUalAfbsMap();
-		bool createUalSignals();
 
+		bool createUalSignals();
 		bool createUalSignalFromSignal(UalItem* ualItem);
 		bool createUalSignalFromConst(UalItem* ualItem);
+		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
@@ -116,9 +117,11 @@ namespace Builder
 
 		bool detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat);
 
+		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
+		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
+
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
 		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
-
 
 		bool appendUalSignals();
 		bool appendSignalsFromAppItems();

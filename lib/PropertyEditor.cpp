@@ -1690,176 +1690,34 @@ namespace ExtWidgets
 	{
         setVisible(false);
 
-		clearProperties();
+		// Disconnect updatePropertiesList slot from previous objects
 
-        QMap<QString, std::shared_ptr<Property>> propertyItems;
-		QList<QString> propertyNames;
-
-		// Create a map with all properties
-		//
-        m_objects.clear();
-
-        for (auto pobject : objects)
+		for (std::shared_ptr<PropertyObject> po : m_objects)
 		{
-            m_objects.push_back(pobject);
-
-            PropertyObject* object = pobject.get();
-
-            for (std::shared_ptr<Property> p : object->properties())
+			bool ok = disconnect(po.get(), &PropertyObject::propertyListChanged, this, &PropertyEditor::updatePropertiesList);
+			if (ok == false)
 			{
-                if (p->visible() == false)
-                {
-                    continue;
-                }
-
-				if (p->expert() && m_expertMode == false)
-				{
-					continue;
-				}
-
-                propertyItems.insertMulti(p->caption(), p);
-
-                if (propertyNames.indexOf(p->caption()) == -1)
-				{
-                    propertyNames.append(p->caption());
-				}
+				assert(false);
 			}
 		}
 
-		// add only common properties with same type
-		//
-        for (auto name : propertyNames)
+		m_objects = objects;
+
+		fillProperties();
+
+		// Connect updatePropertiesList slot to new objects
+
+		for (std::shared_ptr<PropertyObject> po : m_objects)
 		{
-			// take all properties witn the same name
-			//
-            QList<std::shared_ptr<Property>> propsByName = propertyItems.values(name);
-            if (propsByName.size() != objects.size() || propsByName.size() == 0)
+			bool ok =connect(po.get(), &PropertyObject::propertyListChanged, this, &PropertyEditor::updatePropertiesList);
+			if (ok == false)
 			{
-				continue;   // this property is not in all objects
+				assert(false);
 			}
-
-			// now check if all properties have the same type and values
-			//
-            int type;
-            QVariant value;
-
-			bool sameType = true;
-			bool sameValue = true;
-
-            for (auto p = propsByName.begin(); p != propsByName.end(); p++)
-			{
-                if (p == propsByName.begin())
-				{
-                    Property* _p = p->get();
-
-					// remember the first item params
-					//
-                    type = _p->value().userType();
-                    value = _p->value();
-				}
-				else
-				{
-                    Property* _p = p->get();
-
-					// compare with next item params
-					//
-                    if (_p->value().userType() != type)
-					{
-						sameType = false;
-						break;
-					}
-
-                    if (_p->isEnum())
-					{
-                        if (value.toInt() != _p->value().toInt())
-						{
-							sameValue = false;
-						}
-					}
-					else
-					{
-                        if (value != _p->value())
-						{
-							sameValue = false;
-						}
-					}
-				}
-			}
-
-			if (sameType == false)
-			{
-				continue;   // properties are not the same type
-			}
-
-            // add the property to the editor
-            //
-            std::shared_ptr<Property> p = propsByName[0];
-            if (p == nullptr)
-            {
-                assert(p);
-                continue;
-            }
-
-            // set the description and limits
-            //
-            QString description = p->description().isEmpty() ? p->caption() : p->description();
-
-			if (p->readOnly() == true || m_readOnly == true)
-            {
-                description = QString("[ReadOnly] ") + description;
-            }
-
-			if (p->specific() && p->value().userType() == QVariant::Double)
-            {
-                bool ok1 = false;
-                bool ok2 = false;
-                double l = p->lowLimit().toDouble(&ok1);
-                double h = p->highLimit().toDouble(&ok2);
-
-                if (ok1 == true && ok2 == true && l < h)
-                {
-                    description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
-                }
-            }
-
-			if (p->specific() && p->value().userType() == QVariant::Int)
-            {
-                bool ok1 = false;
-                bool ok2 = false;
-                int l = p->lowLimit().toInt(&ok1);
-                int h = p->highLimit().toInt(&ok2);
-
-                if (ok1 == true && ok2 == true && l < h)
-                {
-                    description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
-                }
-            }
-
-			if (p->specific() && p->value().userType() == QVariant::UInt)
-            {
-                bool ok1 = false;
-                bool ok2 = false;
-                uint l = p->lowLimit().toUInt(&ok1);
-                uint h = p->highLimit().toUInt(&ok2);
-
-                if (ok1 == true && ok2 == true && l < h)
-                {
-                    description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
-                }
-            }
-
-            QString category = p->category();
-            if (category.isEmpty())
-            {
-                category = "Common";
-            }
-
-            createProperty(nullptr, p->caption(), category, description, p, sameValue);
 		}
 
-        sortItems(0, Qt::AscendingOrder);
+		setVisible(true);
 
-        setVisible(true);
 		return;
 	}
 
@@ -1910,7 +1768,6 @@ namespace ExtWidgets
 			//
 			QtProperty* subProperty = nullptr;
 
-
             subProperty = m_propertyVariantManager->addProperty(caption);
             subProperty->setToolTip(description);
 			subProperty->setEnabled(m_readOnly == false && value->readOnly() == false);
@@ -1930,7 +1787,7 @@ namespace ExtWidgets
 
 	}
 
-	void PropertyEditor::updateProperty(const QString& propertyName)
+	void PropertyEditor::updatePropertyValues(const QString& propertyName)
 	{
         QSet<QtProperty*> props;
         QMap<QtProperty*, std::pair<QVariant, bool>> vals;
@@ -1960,9 +1817,196 @@ namespace ExtWidgets
         }
 	}
 
-	void PropertyEditor::updateProperties()
+	void PropertyEditor::updatePropertiesList()
 	{
-		updateProperty(QString());
+		setVisible(false);
+
+		fillProperties();
+
+		setVisible(true);
+
+		return;
+	}
+
+	void PropertyEditor::updatePropertiesValues()
+	{
+		updatePropertyValues(QString());
+	}
+
+	void PropertyEditor::fillProperties()
+	{
+		clearProperties();
+
+		QMap<QString, std::shared_ptr<Property>> propertyItems;
+		QList<QString> propertyNames;
+
+		// Create a map with all properties
+		//
+
+		for (std::shared_ptr<PropertyObject> pobject : m_objects)
+		{
+			PropertyObject* object = pobject.get();
+
+			for (std::shared_ptr<Property> p : object->properties())
+			{
+				if (p->visible() == false)
+				{
+					continue;
+				}
+
+				if (p->expert() && m_expertMode == false)
+				{
+					continue;
+				}
+
+				propertyItems.insertMulti(p->caption(), p);
+
+				if (propertyNames.indexOf(p->caption()) == -1)
+				{
+					propertyNames.append(p->caption());
+				}
+			}
+		}
+
+		// add only common properties with same type
+		//
+		for (auto name : propertyNames)
+		{
+			// take all properties witn the same name
+			//
+			QList<std::shared_ptr<Property>> propsByName = propertyItems.values(name);
+			if (propsByName.size() != m_objects.size() || propsByName.size() == 0)
+			{
+				continue;   // this property is not in all objects
+			}
+
+			// now check if all properties have the same type and values
+			//
+			int type;
+			QVariant value;
+
+			bool sameType = true;
+			bool sameValue = true;
+
+			for (auto p = propsByName.begin(); p != propsByName.end(); p++)
+			{
+				if (p == propsByName.begin())
+				{
+					Property* _p = p->get();
+
+					// remember the first item params
+					//
+					type = _p->value().userType();
+					value = _p->value();
+				}
+				else
+				{
+					Property* _p = p->get();
+
+					// compare with next item params
+					//
+					if (_p->value().userType() != type)
+					{
+						sameType = false;
+						break;
+					}
+
+					if (_p->isEnum())
+					{
+						if (value.toInt() != _p->value().toInt())
+						{
+							sameValue = false;
+						}
+					}
+					else
+					{
+						if (value != _p->value())
+						{
+							sameValue = false;
+						}
+					}
+				}
+			}
+
+			if (sameType == false)
+			{
+				continue;   // properties are not the same type
+			}
+
+			// add the property to the editor
+			//
+			std::shared_ptr<Property> p = propsByName[0];
+			if (p == nullptr)
+			{
+				assert(p);
+				continue;
+			}
+
+			// set the description and limits
+			//
+			QString description = p->description().isEmpty() ? p->caption() : p->description();
+
+			if (p->readOnly() == true || m_readOnly == true)
+			{
+				description = QString("[ReadOnly] ") + description;
+			}
+
+			if (p->specific() && p->value().userType() == QVariant::Double)
+			{
+				bool ok1 = false;
+				bool ok2 = false;
+				double l = p->lowLimit().toDouble(&ok1);
+				double h = p->highLimit().toDouble(&ok2);
+
+				if (ok1 == true && ok2 == true && l < h)
+				{
+					description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
+				}
+			}
+
+			if (p->specific() && p->value().userType() == QVariant::Int)
+			{
+				bool ok1 = false;
+				bool ok2 = false;
+				int l = p->lowLimit().toInt(&ok1);
+				int h = p->highLimit().toInt(&ok2);
+
+				if (ok1 == true && ok2 == true && l < h)
+				{
+					description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
+				}
+			}
+
+			if (p->specific() && p->value().userType() == QVariant::UInt)
+			{
+				bool ok1 = false;
+				bool ok2 = false;
+				uint l = p->lowLimit().toUInt(&ok1);
+				uint h = p->highLimit().toUInt(&ok2);
+
+				if (ok1 == true && ok2 == true && l < h)
+				{
+					description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
+				}
+			}
+
+			QString category = p->category();
+			if (category.isEmpty())
+			{
+				category = "Common";
+			}
+
+			createProperty(nullptr, p->caption(), category, description, p, sameValue);
+		}
+
+		sortItems(0, Qt::AscendingOrder);
+	}
+
+	void PropertyEditor::clearProperties()
+	{
+		m_propertyVariantManager->clear();
+		m_propertyGroupManager->clear();
+		clear();
 	}
 
     void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool>>& values)
@@ -1998,14 +2042,6 @@ namespace ExtWidgets
 
             values.insert(property, std::make_pair(value, sameValue));
         }
-	}
-
-	void PropertyEditor::clearProperties()
-	{
-		m_propertyVariantManager->clear();
-		m_propertyGroupManager->clear();
-		clear();
-        m_objects.clear();
 	}
 
 	void PropertyEditor::setExpertMode(bool expertMode)

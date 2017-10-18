@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	QString errorCode;
 
-	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode, TuningFilter::FilterSource::User) == false)
+	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -288,7 +288,8 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 
 	// Update automatic filters
 
-	m_filterStorage.removeFilters(TuningFilter::FilterSource::Automatic);
+	m_filterStorage.removeFilters(TuningFilter::Source::Schema);
+	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
 
 	m_filterStorage.createAutomaticFilters(objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
 
@@ -296,7 +297,17 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 
 	bool removedNotFound = false;
 
-	m_filterStorage.checkSignals(objects, removedNotFound, this);
+	std::vector<Hash> tuningSignalHashArray;
+
+	int count = objects->signalsCount();
+	for (int i = 0; i < count; i++)
+	{
+		tuningSignalHashArray.push_back(objects->signalPtrByIndex(i)->hash());
+	}
+
+	std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
+
+	m_filterStorage.checkAndRemoveFilterSignals(tuningSignalHashArray, removedNotFound, notFoundSignalsAndFilters, this);
 
 	if (removedNotFound == true)
 	{
@@ -387,9 +398,9 @@ void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 	QString errorStr;
 
 
-	m_filterStorage.removeFilters(TuningFilter::FilterSource::Project);
+	m_filterStorage.removeFilters(TuningFilter::Source::Project);
 
-	if (m_filterStorage.load(data, &errorStr, TuningFilter::FilterSource::Project) == false)
+	if (m_filterStorage.load(data, &errorStr) == false)
 	{
 		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
 		theLogFile->writeError(completeErrorMessage);

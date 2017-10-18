@@ -357,6 +357,17 @@ namespace Builder
 		//
 	public:
 		UalSignal(Signal* s);
+
+		UalSignal(const QString& constSignalID,
+				  E::SignalType constSignalType,
+				  E::AnalogAppSignalFormat constAnalogFormat,
+				  int constIntValue,
+				  float constFloatValue);
+
+		UalSignal(const QString& signalID,
+				  E::SignalType signalType,
+				  E::AnalogAppSignalFormat analogFormat);
+
 		UalSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const UalItem* appItem, const QString& appSignalID);
 		UalSignal(const QUuid& guid, const QString &signalID, const QString& busTypeID, int busSizeW);
 
@@ -405,8 +416,26 @@ namespace Builder
 		bool isCompatible(const Signal* s) const;
 		bool isCompatible(const LogicAfbSignal& afbSignal) const;
 
+		//
+
+		bool isConst() const { return m_isConst; }
+		E::SignalType constType() const;
+		E::AnalogAppSignalFormat constAnalogFormat() const;
+		int constDiscreteValue() const;
+		int constAnalogIntValue() const;
+		float constAnalogFloatValue() const;
+
 	private:
 		QVector<Signal*> m_signals;							// vector of pointers to signal in m_signalSet
+
+		//
+
+		bool m_isConst = false;
+
+		int m_constIntValue = 0;
+		double m_constFloatValue = 0;
+
+		//
 
 		BusShared m_bus;
 
@@ -431,7 +460,14 @@ namespace Builder
 		QHash<UalSignal*, UalSignal*>::iterator end() { return QHash<UalSignal*, UalSignal*>::end(); }
 		QHash<UalSignal*, UalSignal*>::const_iterator end() const { return QHash<UalSignal*, UalSignal*>::end(); }
 
-		UalSignal* createInputSignal(Signal* s, QUuid outPinUuid);
+		UalSignal* createSignal(Signal* s, QUuid outPinUuid);
+
+		UalSignal* createConstSignal(E::SignalType constSignalType,
+									 E::AnalogAppSignalFormat constAnalogFormat,
+									 const UalConst* ualConst,
+									 QUuid outPinUuid);
+
+		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
 		bool appendPinRef(QUuid pinUuid, UalSignal* ualSignal);
 		bool appendSignalRef(Signal* s, UalSignal* ualSignal);
@@ -457,6 +493,8 @@ namespace Builder
 		QString getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin);
 
 		const UalSignal* value(const UalSignal* &key, const UalSignal* &defaultValue) const;
+
+		bool getAnalogFormat(const LogicAfbSignal& afbSignal, E::AnalogAppSignalFormat* analogFormat);
 
 
 	private:

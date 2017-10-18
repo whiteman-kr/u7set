@@ -341,6 +341,7 @@ protected slots:
 	void f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item);
 	void f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item);
 	void f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item);
 
 	void deleteKey();
 

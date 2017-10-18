@@ -62,6 +62,23 @@ bool TuningSignalStorage::loadSignals(const QByteArray& data, QString* errorCode
 	return true;
 }
 
+bool TuningSignalStorage::addSignal(const AppSignalParam& param)
+{
+	std::shared_ptr<AppSignalParam> asp = std::make_shared<AppSignalParam>(param);
+
+	if (m_signalsMap.find(asp->hash()) != m_signalsMap.end())
+	{
+		assert(false);
+		return false;
+	}
+
+	m_signals.push_back(asp);
+
+	m_signalsMap[asp->hash()] = static_cast<int>(m_signals.size()) - 1;
+
+	return true;
+}
+
 
 int TuningSignalStorage::signalsCount() const
 {

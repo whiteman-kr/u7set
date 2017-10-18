@@ -12,22 +12,21 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 	assert(objects);
 
     m_tuningFilterEditor = new TuningFilterEditor(filterStorage, objects,
-                                                  theSettings.m_presetEditorSignalsTableColumnWidth,
-                                                  theSettings.m_presetEditorPresetsTreeColumnWidth,
-                                                  theSettings.m_presetEditorPropertyEditorSplitterPos,
-                                                  theSettings.m_presetEditorPropertyEditorGeometry);
+												  false, true, TuningFilter::Source::User,
+												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
+												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 
-    connect(m_tuningFilterEditor, &TuningFilterEditor::getCurrentSignalValue, this, &DialogFilterEditor::onGetCurrentSignalValue, Qt::DirectConnection);
+	//connect(m_tuningFilterEditor, &TuningFilterEditor::getCurrentSignalValue, this, &DialogFilterEditor::onGetCurrentSignalValue, Qt::DirectConnection);
 
-    m_saveButton = new QPushButton(tr("Save"));
-    connect(m_saveButton, &QPushButton::clicked, this, &DialogFilterEditor::accept);
+	m_okButton = new QPushButton(tr("OK"));
+	connect(m_okButton, &QPushButton::clicked, this, &DialogFilterEditor::accept);
 
     m_cancelButton = new QPushButton(tr("Cancel"));
     connect(m_cancelButton, &QPushButton::clicked, this, &DialogFilterEditor::reject);
 
     QHBoxLayout* okCancelButtonsLayout = new QHBoxLayout();
     okCancelButtonsLayout->addStretch();
-    okCancelButtonsLayout->addWidget(m_saveButton);
+	okCancelButtonsLayout->addWidget(m_okButton);
     okCancelButtonsLayout->addWidget(m_cancelButton);
 
     QVBoxLayout* l = new QVBoxLayout(this);
@@ -50,10 +49,7 @@ DialogFilterEditor::~DialogFilterEditor()
     theSettings.m_presetEditorPos = pos();
     theSettings.m_presetEditorGeometry = saveGeometry();
 
-    theSettings.m_presetEditorSignalsTableColumnWidth = m_tuningFilterEditor->saveSignalsTableColumnWidth();
-    theSettings.m_presetEditorPresetsTreeColumnWidth = m_tuningFilterEditor->savePresetsTreeColumnWidth();
-    theSettings.m_presetEditorPropertyEditorSplitterPos = m_tuningFilterEditor->m_propertyEditorSplitterPos;
-    theSettings.m_presetEditorPropertyEditorGeometry = m_tuningFilterEditor->m_propertyEditorGeometry;
+	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 
 }
 

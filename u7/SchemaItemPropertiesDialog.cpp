@@ -84,7 +84,7 @@ SchemaItemPropertyEditor::SchemaItemPropertyEditor(EditEngine::EditEngine* editE
 {
 	assert(m_editEngine);
 
-	connect(m_editEngine, &EditEngine::EditEngine::propertiesChanged, this, &SchemaItemPropertyEditor::updateProperties);
+	connect(m_editEngine, &EditEngine::EditEngine::propertiesChanged, this, &SchemaItemPropertyEditor::updatePropertiesValues);
 }
 
 SchemaItemPropertyEditor::~SchemaItemPropertyEditor()
@@ -102,9 +102,11 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 	// Set the new property value in all objects
 	//
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
-	bool updateRequired = false;
+	//bool updateRequired = false;
 
-	for (auto i : m_objects)
+	QList<std::shared_ptr<PropertyObject>> objectsList = objects();
+
+	for (auto i : objectsList)
 	{
 		std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
 		assert(vi.get() != nullptr);
@@ -118,13 +120,13 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 
 		items.push_back(vi);
 
-		if (dynamic_cast<VFrame30::SchemaItemSignal*>(vi.get()) != nullptr &&
+		/*if (dynamic_cast<VFrame30::SchemaItemSignal*>(vi.get()) != nullptr &&
 			property->propertyName() == "ColumnCount")
 		{
 			// If SchemaItemSignal::ColumnCount changed, new properties are created
 			//
 			updateRequired = true;
-		}
+		}*/
 	}
 
 	if (items.empty() == true)
@@ -138,7 +140,7 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 																			// items changed to m_objects
 
 	items.clear();
-	for (auto i : m_objects)
+	for (auto i : objectsList)
 	{
 		std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
 		items.push_back(vi);
@@ -146,11 +148,10 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 
 	editEngine()->runSetProperty(property->propertyName(), value, items);
 
-	if (updateRequired == true)
+	/*if (updateRequired == true)
 	{
-		auto o = objects();		// Copy of m_objects, it's not a reference
-		setObjects(o);
-	}
+		setObjects(objectsList);	// Copy of m_objects, it's not a reference
+	}*/
 
 	return;
 }
