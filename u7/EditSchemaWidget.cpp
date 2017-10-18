@@ -5602,6 +5602,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 														  counterValue,
 														  schema()->schemaId(),
 														  schema()->caption(),
+														  "",
 														  this);
 
 	if (signalsIds.isEmpty() == false)

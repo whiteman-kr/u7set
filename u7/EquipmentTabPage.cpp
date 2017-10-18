@@ -2259,6 +2259,7 @@ void EquipmentView::addAppSignal()
 								 counter,
 								 module->equipmentId(),
 								 module->equipmentId(),
+								 "",
 								 this);
 	return;
 }

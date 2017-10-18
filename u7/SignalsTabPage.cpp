@@ -25,6 +25,7 @@
 #include "../lib/WidgetUtils.h"
 #include "SignalPropertiesDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
+#include "BusStorage.h"
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -1558,7 +1559,7 @@ SignalsTabPage::~SignalsTabPage()
 	}
 }
 
-QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
+QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, const QString& appSignalId, QWidget* parent)
 {
 	QVector<Signal> signalVector;
 
@@ -1620,30 +1621,72 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	static const QString busCaption("Bus");
 
 	QVector<QRadioButton*> buttons;
-	QRadioButton* defaultButton;
 	QRadioButton* busButton;
-	buttons.push_back(defaultButton = new QRadioButton(discreteCaption, signalTypeGroupBox));
+	buttons.push_back(new QRadioButton(discreteCaption, signalTypeGroupBox));
 	buttons.push_back(new QRadioButton(analogFloat32Caption, signalTypeGroupBox));
 	buttons.push_back(new QRadioButton(analogSignedInt32Caption, signalTypeGroupBox));
 	buttons.push_back(busButton = new QRadioButton(busCaption, signalTypeGroupBox));
 
-	QLineEdit* busTypeIdEdit = new QLineEdit(QString("BUSTYPEID_%1").arg(dbController->nextCounterValue(), 4, 10, QLatin1Char('0')), &signalCreationSettingsDialog);
-	busTypeIdEdit->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdEdit));
-	busTypeIdEdit->setVisible(false);
+	QComboBox* busTypeIdComboBox = new QComboBox(&signalCreationSettingsDialog);
+	busTypeIdComboBox->setEditable(true);
+	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdComboBox));
+	busTypeIdComboBox->setVisible(false);
+
+	BusStorage busStorage(dbController);
+	// Load buses
+	//
+	QString errorMessage;
+
+	if (busStorage.load(&errorMessage) == false)
+	{
+		QMessageBox::critical(parent, qAppName(), tr("Bus loading error: %1").arg(errorMessage));
+	}
+
+	int count = busStorage.count();
+
+	for (int i = 0; i < count; i++)
+	{
+		const std::shared_ptr<VFrame30::Bus> bus = busStorage.get(i);
+
+		busTypeIdComboBox->addItem(bus->busTypeId());
+	}
+
+	static const QString defaultBusTypeIdCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultBusTypeId");
+
+	QSettings settings;
+	QString defaultBusTypeId = settings.value(defaultBusTypeIdCaption,
+											  QString("BUSTYPEID_%1").arg(dbController->nextCounterValue(), 4, 10, QLatin1Char('0'))).toString();
+	busTypeIdComboBox->setEditText(defaultBusTypeId);
 
 	QLabel* busTypeIdLabel = new QLabel("BusTypeId", &signalCreationSettingsDialog);
 	busTypeIdLabel->setVisible(false);
 
-	fl->addRow(busTypeIdLabel, busTypeIdEdit);
+	fl->addRow(busTypeIdLabel, busTypeIdComboBox);
 
-	connect(busButton, &QRadioButton::toggled, busTypeIdEdit, &QLineEdit::setVisible);
 	connect(busButton, &QRadioButton::toggled, busTypeIdLabel, &QLabel::setVisible);
+	connect(busButton, &QRadioButton::toggled, busTypeIdComboBox, &QComboBox::setVisible);
 
-	defaultButton->setChecked(true);
+	static const QString defaultSignalTypeCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultSignalType");
+
+	int defaultSignalType = settings.value(defaultSignalTypeCaption, 0).toInt();
+
+	if (defaultSignalType < 0)
+	{
+		defaultSignalType = 0;
+	}
+
+	if (defaultSignalType >= buttons.count())
+	{
+		defaultSignalType = buttons.count() - 1;
+	}
+
+	buttons[defaultSignalType]->setChecked(true);
+
+	int index = 0;
 
 	for (auto b : buttons)
 	{
-		signalTypeButtonGroup->addButton(b);
+		signalTypeButtonGroup->addButton(b, index++);
 		signalTypeGroupBoxLayout->addWidget(b);
 	}
 
@@ -1666,6 +1709,8 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	{
 		return QStringList();
 	}
+
+	settings.setValue(defaultSignalTypeCaption, signalTypeButtonGroup->checkedId());
 
 	QRadioButton* checkedSignalTypeButton = dynamic_cast<QRadioButton*>(signalTypeButtonGroup->checkedButton());
 	if (checkedSignalTypeButton == nullptr)
@@ -1710,6 +1755,11 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		newSignalExtStrId.replace("#", "");
 		QString newSignalStrId = newSignalExtStrId;
 
+		if (appSignalId.isEmpty() == false)
+		{
+			newSignalStrId = QString("%1_%2").arg(appSignalId).arg(signalSuffix);
+		}
+
 		QString newSignalCaption = QString("App signal %1 at schema \"%2\"").arg(signalSuffix).arg(schemaCaption);
 
 		if (newSignalExtStrId[0] == QChar('#'))
@@ -1746,7 +1796,8 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 				break;
 
 			case E::SignalType::Bus:
-				newSignal.setBusTypeID(busTypeIdEdit->text());
+				newSignal.setBusTypeID(busTypeIdComboBox->currentText());
+				settings.setValue(defaultBusTypeIdCaption, newSignal.busTypeID());
 				break;
 
 			default:
