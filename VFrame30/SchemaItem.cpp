@@ -361,29 +361,21 @@ namespace VFrame30
 		return false;
 	}
 
-	std::pair<QString, QString> SchemaItem::searchTextByAllTextProps(const QString& text, Qt::CaseSensitivity cs) const
+	std::list<std::pair<QString, QString>> SchemaItem::searchTextByProps(const QString& text, Qt::CaseSensitivity cs) const
 	{
 		// Returns pair:
 		//		first - property where text found
 		//		second - property value
-		// Returns {QString(), QString} if text was not found
 		//
+		std::list<std::pair<QString, QString>> result;
 
 		if (text.isEmpty() == true)
 		{
-			return {QString(), QString()};
-		}
-
-		// Check Uuid for the text
-		//
-		QString uuidString = guid().toString();
-
-		if (uuidString.contains(text, cs) == true)
-		{
-			return {PropertyNames::guid, uuidString};
+			return result;
 		}
 
 		// Search all other text, visible, properties
+		// Keep search conditions in consistency with SchemaItem::replace
 		//
 		std::vector<std::shared_ptr<Property>> props = properties();
 
@@ -396,13 +388,25 @@ namespace VFrame30
 
 			QVariant value = p->value();
 
+			if (value.type() == QVariant::Uuid)
+			{
+				QString valueText = value.toString();
+
+				if (valueText.contains(text, cs) == true)
+				{
+					result.push_back({p->caption(), valueText});
+					continue;
+				}
+			}
+
 			if (value.type() == QVariant::String)
 			{
 				QString valueText = value.toString();
 
 				if (valueText.contains(text, cs) == true)
 				{
-					return {p->caption(), valueText};
+					result.push_back({p->caption(), valueText});
+					continue;
 				}
 			}
 
@@ -412,12 +416,78 @@ namespace VFrame30
 
 				if (valueText.contains(text, cs) == true)
 				{
-					return {p->caption(), valueText.join(QChar::LineFeed)};
+					result.push_back({p->caption(), valueText.join(QChar::LineFeed)});
+					continue;
 				}
 			}
 		}
 
-		return {QString(), QString()};
+		return result;
+	}
+
+	int SchemaItem::replace(QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+	{
+		if (findText.isEmpty() == true)
+		{
+			return 0;
+		}
+
+		int replaceCount = 0;
+
+		// Search all other text, visible, properties
+		// Keep search conditions in consistency with SchemaItem::searchTextByProps
+		//
+		std::vector<std::shared_ptr<Property>> props = properties();
+
+		for (auto p : props)
+		{
+			if (p->visible() == false ||
+				p->readOnly() == true)
+			{
+				continue;
+			}
+
+			QVariant value = p->value();
+
+			if (value.type() == QVariant::String)
+			{
+				QString oldValueText = value.toString();
+				QString replacedText = value.toString();
+
+				replaceCount += oldValueText.count(findText, cs);
+
+				replacedText.replace(findText, replaceWith, cs);
+
+				if (oldValueText != replacedText)
+				{
+					p->setValue(QVariant(replacedText));
+				}
+			}
+
+			if (value.type() == QVariant::StringList)
+			{
+				QStringList valueLiest = value.toStringList();
+				QStringList newValues;
+
+				int oldreplaceCount = replaceCount;
+
+				for (QString& valueText : valueLiest)
+				{
+					replaceCount += valueText.count(findText, cs);
+
+					valueText.replace(findText, replaceWith, cs);
+
+					newValues.push_back(valueText);
+				}
+
+				if (oldreplaceCount != replaceCount)
+				{
+					p->setValue(QVariant(newValues));
+				}
+			}
+		}
+
+		return replaceCount;
 	}
 
 	// Drawing Functions
