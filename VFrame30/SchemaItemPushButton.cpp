@@ -453,17 +453,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemPushButton::searchText(const QString& text) const
-	{
-		return	SchemaItem::searchText(text) ||
-				m_text.contains(text, Qt::CaseInsensitive) ||
-				m_scriptAfterCreate.contains(text, Qt::CaseInsensitive) ||
-				m_scriptClicked.contains(text, Qt::CaseInsensitive) ||
-				m_scriptPressed.contains(text, Qt::CaseInsensitive) ||
-				m_scriptReleased.contains(text, Qt::CaseInsensitive) ||
-				m_scriptToggled.contains(text, Qt::CaseInsensitive);
-	}
-
 	// Properties and Data
 	//
 

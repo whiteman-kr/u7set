@@ -64,6 +64,189 @@
 		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"/>
 	</AFBImplementation>
 	<AFBL>
+
+        <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0000">
+		    <Properties>
+			    <Description>Multiplexor Block selects one of two input bus signals and output result in accordance with control signal.</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>21</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>22</MinWidth>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_sel"		Caption="sel"  Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="1" BusDataFormat="Discrete" MaxBusSize="32"/>
+				<Pin OpName="i_x1_data" Caption="in_1" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="1" BusDataFormat="Discrete" MaxBusSize="32"/>
+				<Pin OpName="i_x2_data" Caption="in_2" Type="Bus" ByteOrder="BigEndian" OpIndex="3" Size="1" BusDataFormat="Discrete" MaxBusSize="32"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="6" Size="1" BusDataFormat="Discrete" MaxBusSize="32"/>
+			</Outputs>
+			<Params>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
+        <AFB id="#bus_voter_v1"           Caption="bus_voter"           Version="1.0000">
+		    <Properties>
+			    <Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>6</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>19</MinWidth>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_1_oprd" Caption="in_1"   Type="Bus" ByteOrder="BigEndian" OpIndex="2"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_2_oprd" Caption="in_2"   Type="Bus" ByteOrder="BigEndian" OpIndex="3"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_3_oprd" Caption="in_3"   Type="Bus" ByteOrder="BigEndian" OpIndex="4"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_4_oprd" Caption="in_4"   Type="Bus" ByteOrder="BigEndian" OpIndex="5"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_5_oprd" Caption="in_5"   Type="Bus" ByteOrder="BigEndian" OpIndex="6"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_6_oprd" Caption="in_6"   Type="Bus" ByteOrder="BigEndian" OpIndex="7"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_7_oprd" Caption="in_7"   Type="Bus" ByteOrder="BigEndian" OpIndex="8"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_8_oprd" Caption="in_8"   Type="Bus" ByteOrder="BigEndian" OpIndex="9"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_9_oprd" Caption="in_9"   Type="Bus" ByteOrder="BigEndian" OpIndex="10" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_10_oprd" Caption="in_10" Type="Bus" ByteOrder="BigEndian" OpIndex="11" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_11_oprd" Caption="in_11" Type="Bus" ByteOrder="BigEndian" OpIndex="12" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_12_oprd" Caption="in_12" Type="Bus" ByteOrder="BigEndian" OpIndex="13" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_13_oprd" Caption="in_13" Type="Bus" ByteOrder="BigEndian" OpIndex="14" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_14_oprd" Caption="in_14" Type="Bus" ByteOrder="BigEndian" OpIndex="15" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_15_oprd" Caption="in_15" Type="Bus" ByteOrder="BigEndian" OpIndex="16" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_16_oprd" Caption="in_16" Type="Bus" ByteOrder="BigEndian" OpIndex="17" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="19" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+			    <Param OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>2</LowLimit>
+					<HighLimit>15</HighLimit>
+					<Script>
+					    <Changed>
+						    function(videoItemFblElement, afbElement)
+							{
+							    var xCount = videoItemFblElement.getParamIntValue("XCount");
+								if (xCount == -1)
+								{
+								    return false;
+								}
+
+                                var yCount = videoItemFblElement.getParamIntValue("YCount");
+								if (yCount == -1)
+								{
+								    return false;
+								}
+
+                                if (xCount &gt;= yCount)
+								{
+								    videoItemFblElement.setAfbParamByOpName("i_conf_x", yCount - 1);
+									return false;
+								}
+								return true;
+							}
+							</Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_conf_y" Caption="YCount" Visible="true" OpIndex="1" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>3</Value>
+					<Default>3</Default>
+					<LowLimit>3</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+					    <Changed>
+						    function(videoItemFblElement, afbElement)
+							{
+							    var xCount = videoItemFblElement.getParamIntValue("XCount");
+								if (xCount == -1)
+								{
+								    return false;
+								}
+
+                                var yCount = videoItemFblElement.getParamIntValue("YCount");
+								if (yCount == -1)
+								{
+								    return false;
+								}
+
+                                if (yCount &lt;= xCount)
+								{
+								    videoItemFblElement.setAfbParamByOpName("i_conf_y", xCount + 1);
+								}
+
+                                return createInputSignals(videoItemFblElement, afbElement);
+							}
+							</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+			    <Library>
+				    function createInputSignals(videoItemFblElement, afbElement)
+					{
+					    videoItemFblElement.removeInputSignals();
+
+                        var yCount = videoItemFblElement.getParamIntValue("YCount");
+						if (yCount == -1)
+						{
+						    return false;
+						}
+
+                        var opIndex = 2;
+						for (var i = 0; i &lt; yCount; i++)
+						{
+						    var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+							if (afbInputSignal != null)
+							{
+							    var caption = afbInputSignal.jsCaption();
+								var type = afbInputSignal.jsType();
+								var operandIndex = afbInputSignal.operandIndex();
+								var size = afbInputSignal.size();
+								videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+							}
+							opIndex++;
+						}
+
+                        videoItemFblElement.adjustHeight();
+
+                        return true;
+					}
+					</Library>
+				<AfterCreation>
+				function(videoItemFblElement, afbElement)
+				{
+				    return createInputSignals(videoItemFblElement, afbElement);
+				}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+        <AFB id="#bus_not_v1"            Caption="bus_not"            Version="1.0000">
+		    <Properties>
+			    <Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>2</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>19</MinWidth>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_oprd" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="2" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
 			
 		<AFB id="#bus_or_v1"             Caption="bus_or"             Version="1.0000">
 			<Properties>				

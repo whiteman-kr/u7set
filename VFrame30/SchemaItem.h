@@ -111,10 +111,13 @@ namespace VFrame30
 		QString formatSqriptError(const QJSValue& scriptValue) const;
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 
-		// Text search
+		// Text search/replace
 		//
 	public:
-		virtual bool searchText(const QString& text) const;
+		//	first - property where text found
+		//	second - property value
+		std::list<std::pair<QString, QString>> searchTextByProps(const QString& text, Qt::CaseSensitivity cs) const;
+		virtual int replace(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 
 		// Draw Functions
 		//

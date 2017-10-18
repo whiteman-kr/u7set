@@ -353,6 +353,7 @@ protected slots:
 
 	void selectAll();
 	void selectItem(std::shared_ptr<VFrame30::SchemaItem> item);
+	void selectItems(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items);
 
 	void editCut();
 	void editCopy();
@@ -401,8 +402,12 @@ protected slots:
 	void toggleLock();
 
 	void find();
-	void findNext();
-	void findPrev();
+	void findNext(Qt::CaseSensitivity cs);
+	void findPrev(Qt::CaseSensitivity cs);
+
+	int replace(std::shared_ptr<VFrame30::SchemaItem> item, QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+	void replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+	void replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 
 	void hideWorkDialogs();
 
@@ -654,15 +659,35 @@ public:
 	void setFocusToEditLine();
 
 signals:
-	void findPrev();
-	void findNext();
+	void findPrev(Qt::CaseSensitivity cs);
+	void findNext(Qt::CaseSensitivity cs);
+
+	void replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+	void replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+
+protected slots:
+	void replaceAndFindPressed();
+	void replaceAllPressed();
 
 public slots:
 	void updateCompleter();
+	void updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
+								const std::list<std::pair<QString, QString>>& foundProps,
+								QString searchText,
+								Qt::CaseSensitivity cs);
 
 private:
-	QLineEdit* m_lineEdit = nullptr;
+	QLineEdit* m_findTextEdit = nullptr;
+	QLineEdit* m_replaceTextEdit = nullptr;
+
+	QCheckBox* m_caseSensitiveCheckBox = nullptr;
+	QTextEdit* m_findResult = nullptr;
+
 	QPushButton* m_prevButton = nullptr;
 	QPushButton* m_nextButton = nullptr;
+
+	QPushButton* m_replaceButton = nullptr;
+	QPushButton* m_replaceAllButton = nullptr;
+
 };
 

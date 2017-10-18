@@ -66,6 +66,15 @@ class PropertyObject;
 			(std::function<int(void)>)std::bind(&GETTER, &OWNER), \
 			std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
+
+enum class PropertySpecificEditor : qint16
+{
+	None = 0,
+	Password,
+	Script,
+	TuningFilter
+};
+
 //
 //
 //			Class Property
@@ -168,27 +177,33 @@ public:
 		m_expert = value;
 	}
 
+	PropertySpecificEditor specificEditor()
+	{
+		return m_specificEditor;
+	}
+
+	void setSpecificEditor(PropertySpecificEditor value)
+	{
+		m_specificEditor = value;
+	}
+
     bool password() const
     {
-        return m_password;
+		return m_specificEditor == PropertySpecificEditor::Password;
     }
     void setPassword(bool value)
     {
-        m_password = value;
-    }
+		m_specificEditor = value ? PropertySpecificEditor::Password : PropertySpecificEditor::None;
+	}
 
 	bool isScript() const
 	{
-		if (m_isScript == false && caption().contains("Script") == true)
-		{
-			return true;
-		}
-
-		return m_isScript;
+		return m_specificEditor == PropertySpecificEditor::Script ||
+				caption().contains("Script") == true;
 	}
 	void setIsScript(bool value)
 	{
-		m_isScript = value;
+		m_specificEditor = value ? PropertySpecificEditor::Script : PropertySpecificEditor::None;
 	}
 
     int precision() const
@@ -237,6 +252,7 @@ protected:
 		m_validator = source->m_validator;
 		m_flags = source->m_flags;
 		m_precision = source->m_precision;
+		m_specificEditor = source->m_specificEditor;
 
 		return;
 	}
@@ -258,11 +274,11 @@ private:
 			bool m_specific : 1;				// Specific property, used in DeviceObject
 			bool m_visible : 1;
 			bool m_expert : 1;
-            bool m_password : 1;
-			bool m_isScript : 1;
 		};
 		uint32_t m_flags;
 	};
+
+	PropertySpecificEditor m_specificEditor;
 
 	int m_precision = 2;
 };
@@ -1056,7 +1072,8 @@ public:
 
 	PropertyValueNoGetterSetter* addProperty(const QString& caption,
 											 const QString& category,
-											 bool visible)
+											 bool visible,
+											 const QVariant& value)
 	{
 		//std::shared_ptr<PropertyValueNoGetterSetter> property = thePropertyObjectHeap.alloc<PropertyValueNoGetterSetter>();
 		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
@@ -1066,6 +1083,7 @@ public:
 		property->setCaption(caption);
 		property->setCategory(category);
 		property->setVisible(visible);
+		property->setValue(value);
 
 		m_properties[hash] = property;
 
