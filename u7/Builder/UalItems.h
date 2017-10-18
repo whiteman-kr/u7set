@@ -374,6 +374,8 @@ namespace Builder
 
 		QString appSignalID() const { return m_signals[0]->appSignalID(); }
 
+		void appSignalIDs(QStringList& appSignalIDs);
+
 		Address16 ualAddr() const { return m_ualAddr; }
 		Address16 regBufAddr() const { return m_regBufAddr; }
 
@@ -393,15 +395,20 @@ namespace Builder
 
 		QString busTypeID() const { return m_signals[0]->busTypeID(); }
 
-		bool isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const;
-
 		const Signal& constSignal() { return *m_signals[0]; }
 
 		Signal* signal() { return m_signals[0]; }
 		const Signal* signal() const { return m_signals[0]; }
 
+		int signalRefCount() const { return m_signals.count(); }
+
+		bool isCompatible(const Signal* s) const;
+		bool isCompatible(const LogicAfbSignal& afbSignal) const;
+
 	private:
 		QVector<Signal*> m_signals;							// vector of pointers to signal in m_signalSet
+
+		BusShared m_bus;
 
 		bool m_isAutoSignal = false;
 
@@ -426,8 +433,8 @@ namespace Builder
 
 		UalSignal* createInputSignal(Signal* s, QUuid outPinUuid);
 
-		bool appendLink(QUuid pinUuid, UalSignal* ualSignal);
-		bool appendSignalRef(UalSignal* ualSignal, Signal* s);
+		bool appendPinRef(QUuid pinUuid, UalSignal* ualSignal);
+		bool appendSignalRef(Signal* s, UalSignal* ualSignal);
 
 		UalSignal* get(const QString& appSignalID) const { return m_idToSignalMap.value(appSignalID, nullptr); }
 		bool contains(const QString& appSignalID) const { return m_idToSignalMap.contains(appSignalID); }
@@ -435,17 +442,17 @@ namespace Builder
 		UalSignal* get(QUuid pinUuid) const { return m_pinToSignalMap.value(pinUuid, nullptr); }
 		bool contains(QUuid pinUuid) const { return m_pinToSignalMap.contains(pinUuid); }
 
-
-
 		bool insertUalSignal(const UalItem* appItem);
 		bool insertNonBusAutoSignal(const UalAfb* appFb, const LogicPin& outputPin);
 		bool insertBusAutoSignal(const UalItem* appItem, const LogicPin& outputPin, BusShared bus);
 
-
 		void clear();
+
+		bool getReport(QStringList& report);
 
 	private:
 		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);
+		void appendPinToSignalRef(QUuid pinUuid, UalSignal* ualSignal);
 
 		QString getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin);
 
@@ -460,6 +467,7 @@ namespace Builder
 
 		QHash<QString, UalSignal*> m_idToSignalMap;
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
+		QHash<UalSignal*, QUuid> m_signalToPinsMap;
 	};
 
 }

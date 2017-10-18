@@ -4607,6 +4607,28 @@ namespace Builder
 						arg(schemaID));
 	}
 
+	/// IssueCode: ALC5118
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal '%1' is not connected to any signal source. (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Signal is not connected to any signal source. Signal's value is undefined.
+	///
+	void IssueLogger::errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5118,
+				  QString(tr("Signal '%1' is not connected to any signal source. (Logic schema '%2').")).
+						arg(appSignalID).arg(schemaID));
+	}
 
 	//
 

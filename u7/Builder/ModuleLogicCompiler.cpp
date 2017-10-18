@@ -645,6 +645,7 @@ namespace Builder
 				break;
 
 			case UalItem::Type::Const:
+				result &= createUalSignalFromConst(ualItem);
 				break;
 
 			case UalItem::Type::Afb:
@@ -674,6 +675,11 @@ namespace Builder
 			}
 		}
 
+		QStringList report;
+
+		m_ualSignals.getReport(report);
+
+		m_resultWriter->addFile("TestData", m_lm->equipmentId() + ".signals", "", "", report, false);
 
 /*		bool result = false;
 
@@ -721,8 +727,9 @@ namespace Builder
 
 			if (result == false)
 			{
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);			// signal is not in pin->signals map, why?
+				// Signal '%1' is not connected to any signal source. (Logic schema '%2').
+				//
+				m_log->errALC5118(signalID, ualItem->guid(), ualItem->schemaID());
 				return false;
 			}
 
@@ -762,6 +769,368 @@ namespace Builder
 		result = linkConnectedItems(ualItem, outPin, ualSignal);
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::createUalSignalFromConst(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		UalConst* ualConst = ualItem->ualConst();
+
+		if (ualConst == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const std::vector<LogicPin>& outputs = ualItem->outputs();
+
+		if (outputs.size() != 1)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);				// Const must have only one output pin
+			return false;
+		}
+
+		const LogicPin& outPin = ualItem->outputs()[0];
+
+		E::SignalType constSignalType = E::SignalType::Discrete;
+		E::AnalogAppSignalFormat constAnalogFormat = E::AnalogAppSignalFormat::Float32;
+
+		bool result = detectConstSignalType(outPin, &constSignalType, &constAnalogFormat);
+
+		if (result == false)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("Cannot detect constant type %1")).
+							   arg(m_lm->equipmentIdTemplate()).
+							   arg(tuningFrameCount));
+			return false;
+		}
+
+		UalSignal* ualSignal = m_ualSignals.createConstSignal(constSignalType,
+															  constAnalogFormat,
+															  ualConst, outPin.guid());
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		// link connected signals to newly created UalSignal
+		//
+		result = linkConnectedItems(ualItem, outPin, ualSignal);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
+	{
+		if (srcUalItem == nullptr || ualSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (outPin.IsOutput() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		bool result = true;
+
+		const std::vector<QUuid>& associatedInputs = outPin.associatedIOs();
+
+		for(QUuid inPinUuid : associatedInputs)
+		{
+			UalItem* destUalItem = m_pinParent.value(inPinUuid, nullptr);
+
+			if (destUalItem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);			// pin's parent is not found
+				return false;
+			}
+
+			switch(destUalItem->type())
+			{
+			case UalItem::Type::Signal:
+				result &= linkSignal(srcUalItem, destUalItem, inPinUuid, ualSignal);
+				break;
+
+			case UalItem::Type::Afb:
+				result &= linkAfbInput(srcUalItem, destUalItem, inPinUuid, ualSignal);
+				break;
+
+			case UalItem::Type::BusComposer:
+			case UalItem::Type::BusExtractor:
+				break;
+
+			// link pins to signal only, any checks is not required
+			//
+			case UalItem::Type::Transmitter:
+			case UalItem::Type::Terminator:
+			case UalItem::Type::LoopbackOutput:
+				m_ualSignals.appendPinRef(inPinUuid, ualSignal);
+				break;
+
+			// output can't connect to:
+			//
+			case UalItem::Type::Const:
+			case UalItem::Type::Receiver:
+			case UalItem::Type::LoopbackInput:
+				m_log->errALC5116(srcUalItem->guid(), destUalItem->guid(), destUalItem->schemaID());
+				result = false;
+				break;
+
+			// unknown UalItem type
+			//
+			case UalItem::Type::Unknown:
+			default:
+				assert(false);
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		if (srcItem == nullptr || signalItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (signalItem->isSignal() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString signalID = signalItem->strID();
+
+		Signal* s = m_signals->getSignal(signalID);
+
+		if (s == nullptr)
+		{
+			m_log->errALC5000(signalID, signalItem->guid(), signalItem->schemaID());
+			return false;
+		}
+
+		// check signals compatibility
+		//
+		bool result = ualSignal->isCompatible(s);
+
+		if (result == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(srcItem->guid(), signalItem->guid(), signalItem->schemaID());
+			return false;
+		}
+
+		result = m_ualSignals.appendPinRef(inPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = m_ualSignals.appendSignalRef(s, ualSignal);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		const std::vector<LogicPin>& outputs = signalItem->outputs();
+
+		if (outputs.size() > 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);				// signal connot have more then 1 output
+			return false;
+		}
+
+		if (outputs.size() == 1)
+		{
+			const LogicPin& output = outputs[0];
+
+			m_ualSignals.appendPinRef(output.guid(), ualSignal);
+
+			// recursive linking of items
+			//
+			result = linkConnectedItems(signalItem, output, ualSignal);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		if (srcItem == nullptr || afbItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (afbItem->isAfb() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		UalAfb* ualAfb = m_ualAfbs.value(afbItem->guid(), nullptr);
+
+		if (ualAfb == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		LogicAfbSignal inSignal;
+
+		bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (ualSignal->isBus() == true)
+		{
+			if (inSignal.isBus() == false)
+			{
+				// Bus output is connected to non-bus input.
+				//
+				m_log->errALC5113(srcItem->guid(), afbItem->guid(), afbItem->schemaID());
+				return false;
+			}
+		}
+		else
+		{
+			if (inSignal.isBus() == true)
+			{
+				// Non-bus output is connected to bus input.
+				//
+				m_log->errALC5110(srcItem->guid(), afbItem->guid(), afbItem->schemaID());
+				return false;
+			}
+
+			result = ualSignal->isCompatible(inSignal);
+
+			if (result == false)
+			{
+				// Uncompatible signals connection (Logic schema '%1').
+				//
+				m_log->errALC5117(srcItem->guid(), afbItem->guid(), afbItem->schemaID());
+				return false;
+			}
+		}
+
+		return m_ualSignals.appendPinRef(inPinUuid, ualSignal);
+	}
+
+	bool ModuleLogicCompiler::detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat)
+	{
+		if (constSignalType == nullptr || constAnalogFormat == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		const std::vector<QUuid>& inputsUuids = outPin.associatedIOs();
+
+		if (inputsUuids.size() == 0)
+		{
+			LOG_INTERNAL_ERROR(m_log);			// Const out pin is unconnected?
+			return false;
+		}
+
+		for(QUuid inPinUuid : inputsUuids)
+		{
+			UalItem* linkedItem = m_pinParent.value(inPinUuid, nullptr);
+
+			if (linkedItem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			// detect const type by connected signal of Afb input
+
+			if (linkedItem->isSignal() == true)
+			{
+				QString signalID = linkedItem->strID();
+
+				Signal* s = m_signals->getSignal(signalID);
+
+				if (s == nullptr)
+				{
+					continue;
+				}
+
+				*constSignalType = s->signalType();
+				*constAnalogFormat = s->analogSignalFormat();
+
+				return true;
+			}
+
+			if (linkedItem->isAfb() == true)
+			{
+				UalAfb* ualAfb = m_afbls.value(linkedItem->guid(), nullptr);
+
+				if (ualAfb == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				LogicAfbSignal inSignal;
+
+				bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
+
+				if (result == false)
+				{
+					return false;
+				}
+
+				*constSignalType = inSignal.type();
+
+				switch(inSignal.type() == )
+				{
+				case E::SignalType::Discrete:
+					return true;
+
+				case E::SignalType::Analog:
+					if (inSignal.dataFormat() == E::DataFormat::Float &&
+						inSignal.size() == SIZE_32BIT)
+					{
+						*constAnalogFormat = E::AnalogAppSignalFormat::Float32;
+						return true;
+					}
+
+					if (inSignal.dataFormat() == E::DataFormat::SignedInt &&
+						inSignal.size() == SIZE_32BIT)
+					{
+						*constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
+						return true;
+					}
+
+					return false;
+
+				case E::SignalType::Bus:
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 
@@ -824,134 +1193,6 @@ namespace Builder
 
 		return true;
 	}
-
-	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
-	{
-		if (srcUalItem == nullptr || ualSignal == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		if (outPin.IsOutput() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		bool result = true;
-
-		const std::vector<QUuid>& associatedInputs = outPin.associatedIOs();
-
-		for(QUuid inPinUuid : associatedInputs)
-		{
-			UalItem* destUalItem = m_pinParent.value(inPinUuid, nullptr);
-
-			if (destUalItem == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);			// pin's parent is not found
-				return false;
-			}
-
-			switch(destUalItem->type())
-			{
-			case UalItem::Type::Signal:
-				result &= linkSignal(srcUalItem, destUalItem, inPinUuid, ualSignal);
-				break;
-
-			case UalItem::Type::Afb:
-			case UalItem::Type::Transmitter:
-			case UalItem::Type::BusComposer:
-			case UalItem::Type::BusExtractor:
-				break;
-
-			// link pins to signal only, any checks is not required
-			//
-			case UalItem::Type::Terminator:
-			case UalItem::Type::LoopbackOutput:
-				m_ualSignals.appendLink(inPinUuid, ualSignal);
-				break;
-
-			// output can't connect to:
-			//
-			case UalItem::Type::Const:
-			case UalItem::Type::Receiver:
-			case UalItem::Type::LoopbackInput:
-				m_log->errALC5116(srcUalItem->guid(), destUalItem->guid(), destUalItem->schemaID());
-				result = false;
-				break;
-
-			// unknown UalItem type
-			//
-			case UalItem::Type::Unknown:
-			default:
-				assert(false);
-				result = false;
-			}
-		}
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid& inPinUuid, UalSignal* ualSignal)
-	{
-		if (srcItem == nullptr || signalItem == nullptr || ualSignal == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		if (signalItem->isSignal() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		QString signalID = signalItem->strID();
-
-		Signal* s = m_signals->getSignal(signalID);
-
-		if (s == nullptr)
-		{
-			m_log->errALC5000(signalID, signalItem->guid(), signalItem->schemaID());
-			return false;
-		}
-
-		// check signals compatibility
-		//
-		bool result = ualSignal->signal()->isCompatibleFormat(s);
-
-		if (result == false)
-		{
-			m_log->errALC5117(srcItem->guid(), signalItem->guid(), signalItem->schemaID());
-			return false;
-		}
-
-		result = m_ualSignals.appendLink(inPinUuid, ualSignal);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result = m_ualSignals.addReference(ualSignal, s);
-
-		const std::vector<LogicPin>& outputs = signalItem->outputs();
-
-		if (outputs.size() > 1)
-		{
-			LOG_INTERNAL_ERROR(m_log);				// signal connot have more then 1 output
-			return false;
-		}
-
-		if (outputs.size() == 1)
-		{
-			result = linkConnectedItems(signalItem, outputs[0], ualSignal);
-		}
-
-		return result;
-	}
-
 
 	bool ModuleLogicCompiler::appendUalSignals()
 	{

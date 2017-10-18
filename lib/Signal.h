@@ -132,6 +132,7 @@ public:
 	bool isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
 	bool isCompatibleFormat(const Signal& s) const;
+	bool isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const;
 
 	// Analog signal properties
 
@@ -306,6 +307,7 @@ private:
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
 
+	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 	//
 
 private:

@@ -308,6 +308,7 @@ namespace Builder
 		void errALC5115(QUuid uuid1, QUuid uuid2, QString schemaID);					// Uncompatible bus data format of UAL elements (Logic schema '%1').
 		void errALC5116(QUuid uuid1, QUuid uuid2, QString schemaID);					// Disallowed connection of UAL elements (Logic schema '%1').
 		void errALC5117(QUuid uuid1, QUuid uuid2, QString schemaID);					// Uncompatible signals connection (Logic schema '%1').
+		void errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID);			// Signal '%1' is not connected to any signal source. (Logic schema '%2').
 
 		// Uncompatible bus data format of UAL elements (Logic schema '%1').
 

@@ -154,45 +154,13 @@ E::DataFormat Signal::dataFormat() const
 
 bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const
 {
-	if (m_signalType != signalType)
+	if (signalType == E::SignalType::Bus)
 	{
+		assert(false);			// use isCompatibleFormat(signalType, busTtypeID)
 		return false;
 	}
 
-	if (m_byteOrder != byteOrder)
-	{
-		return false;
-	}
-
-	if (m_signalType == E::SignalType::Analog)
-	{
-		switch(m_analogSignalFormat)
-		{
-		case E::AnalogAppSignalFormat::Float32:
-			return (dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE);
-
-		case E::AnalogAppSignalFormat::SignedInt32:
-			return (dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE);
-
-		default:
-			assert(false);
-		}
-
-		return false;
-	}
-
-	if (m_signalType == E::SignalType::Discrete)
-	{
-		if (size == DISCRETE_SIZE)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	assert(false);
-	return false;
+	return isCompatibleFormatPrivate(signalType, dataFormat, size, byteOrder, "");
 }
 
 bool Signal::isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const
@@ -204,10 +172,10 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalForm
 		switch(analogFormat)
 		{
 		case E::AnalogAppSignalFormat::Float32:
-			return isCompatibleFormat(signalType, E::DataFormat::Float, FLOAT32_SIZE, byteOrder);
+			return isCompatibleFormatPrivate(signalType, E::DataFormat::Float, FLOAT32_SIZE, byteOrder, "");
 
 		case E::AnalogAppSignalFormat::SignedInt32:
-			return isCompatibleFormat(signalType, E::DataFormat::SignedInt, SIGNED_INT32_SIZE, byteOrder);
+			return isCompatibleFormatPrivate(signalType, E::DataFormat::SignedInt, SIGNED_INT32_SIZE, byteOrder, "");
 
 		default:
 			assert(false);
@@ -215,7 +183,7 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalForm
 		break;
 
 	case E::SignalType::Discrete:
-		return isCompatibleFormat(signalType, E::DataFormat::UnsignedInt, DISCRETE_SIZE, byteOrder);
+		return isCompatibleFormatPrivate(signalType, E::DataFormat::UnsignedInt, DISCRETE_SIZE, byteOrder, "");
 
 	default:
 		assert(false);
@@ -226,13 +194,34 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalForm
 
 bool Signal::isCompatibleFormat(const SignalAddress16& sa16) const
 {
-	return isCompatibleFormat(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder());
+	return isCompatibleFormatPrivate(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder(), "");
 }
 
 bool Signal::isCompatibleFormat(const Signal& s) const
 {
+	if (s.signalType() == E::SignalType::Bus)
+	{
+		return isCompatibleFormat(E::SignalType::Bus, s.busTypeID());
+	}
+
 	return isCompatibleFormat(s.signalType(), s.analogSignalFormat(), s.byteOrder());
 }
+
+bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const
+{
+	if (signalType != E::SignalType::Bus)
+	{
+		assert(false);		// use other isCompatibelFormat functions
+		return false;
+	}
+
+	return isCompatibleFormatPrivate(signalType,
+									 E::DataFormat::UnsignedInt,		// param is not checked for Bus signals
+									 SIZE_1BIT,							// param is not checked for Bus signals
+									 E::BigEndian,						// param is not checked for Bus signals
+									 busTypeID);
+}
+
 
 void Signal::resetAddresses()
 {
@@ -1034,6 +1023,47 @@ void Signal::initCalculatedProperties()
 {
 	m_hash = calcHash(m_appSignalID);
 }
+
+bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
+{
+	if (m_signalType != signalType)
+	{
+		return false;
+	}
+
+	switch(m_signalType)
+	{
+	case E::SignalType::Analog:
+			if (m_byteOrder != byteOrder)
+			{
+				return false;
+			}
+
+			switch(m_analogSignalFormat)
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				return (dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE);
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				return (dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE);
+
+			default:
+				assert(false);
+			}
+
+			return false;
+
+	case E::SignalType::Discrete:
+		return size == DISCRETE_SIZE;
+
+	case E::SignalType::Bus:
+		return m_busTypeID == busTypeID;
+	}
+
+	assert(false);
+	return false;
+}
+
 
 // --------------------------------------------------------------------------------------------------------
 //

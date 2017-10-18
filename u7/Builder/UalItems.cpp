@@ -719,7 +719,7 @@ namespace Builder
 		}
 
 		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Not found signal with pin Uuidx = %1 in FB %2")).arg(pinUuid.toString()).arg(caption()));
+				  QString(tr("Not found signal with pin Uuid = %1 in FB %2")).arg(pinUuid.toString()).arg(caption()));
 
 		return false;
 	}
@@ -968,9 +968,53 @@ namespace Builder
 		return true;
 	}
 
-
-	bool UalSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
+	void UalSignal::appSignalIDs(QStringList& appSignalIDs)
 	{
+		appSignalIDs.clear();
+
+		for(Signal* s : m_signals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			appSignalIDs.append(s->appSignalID());
+		}
+	}
+
+	bool UalSignal::isCompatible(const Signal* s) const
+	{
+		if (s == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (m_signals.count() < 1 || m_signals[0] == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return m_signals[0]->isCompatibleFormat(*s);
+	}
+
+	bool UalSignal::isCompatible(const LogicAfbSignal& afbSignal) const
+	{
+		if (m_signals.count() < 1 || m_signals[0] == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (afbSignal.isBus() == true)
+		{
+			assert(false);			// should be impelmented
+			return false;
+//			m_signals[0]->isCompatibleFormat(E::SignalType::Bus);
+		}
 		return m_signals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
 
@@ -1009,7 +1053,7 @@ namespace Builder
 			assert(ualSignal->signal() == s);
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
 
-			m_pinToSignalMap.insert(outPinUuid, ualSignal);
+			appendPinToSignalRef(outPinUuid, ualSignal);
 
 			return ualSignal;
 		}
@@ -1029,7 +1073,7 @@ namespace Builder
 		return ualSignal;
 	}
 
-	bool UalSignalsMap::appendLink(QUuid pinUuid, UalSignal* ualSignal)
+	bool UalSignalsMap::appendPinRef(QUuid pinUuid, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr)
 		{
@@ -1059,12 +1103,12 @@ namespace Builder
 			return false;
 		}
 
-		m_pinToSignalMap.insert(pinUuid, ualSignal);
+		appendPinToSignalRef(pinUuid, ualSignal);
 
 		return true;
 	}
 
-	bool UalSignalsMap::appendSignalRef(UalSignal* ualSignal, Signal* s)
+	bool UalSignalsMap::appendSignalRef(Signal* s, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr || s == nullptr)
 		{
@@ -1079,10 +1123,17 @@ namespace Builder
 			return false;
 		}
 
-		if (m_idToSignalMap.contains(s->appSignalID()) == true)
+		UalSignal* existsSignal = m_idToSignalMap.value(s->appSignalID(), nullptr);
+
+		if (existsSignal != nullptr)
 		{
+			if (existsSignal == ualSignal)
+			{
+				return true;					// ref to same signal, its Ok
+			}
+
 			assert(false);
-			LOG_INTERNAL_ERROR(m_log);			// duplicate ref!
+			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
 			return false;
 		}
 
@@ -1283,6 +1334,60 @@ namespace Builder
 
 		m_idToSignalMap.clear();
 		m_pinToSignalMap.clear();
+		m_signalToPinsMap.clear();
+	}
+
+	bool UalSignalsMap::getReport(QStringList& report)
+	{
+		QStringList signalIDs;
+
+		for(UalSignal* ualSignal : (*this))
+		{
+			if (ualSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			signalIDs.append(ualSignal->appSignalID());
+		}
+
+		signalIDs.sort();
+
+		for(const QString& signalID : signalIDs)
+		{
+			UalSignal* ualSignal = m_idToSignalMap.value(signalID, nullptr);
+
+			if (ualSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			QStringList refSignalsIDs;
+
+			ualSignal->appSignalIDs(refSignalsIDs);
+
+			QString str;
+
+			for(const QString& refSignalID : refSignalsIDs)
+			{
+				str += refSignalID + ";";
+			}
+
+			QList<QUuid> pinsRef = m_signalToPinsMap.values(ualSignal);
+
+			if (pinsRef.count() == 0)
+			{
+				assert(false);
+			}
+
+			str += QString::number(pinsRef.count());
+
+			report.append(str);
+		}
+
+		return true;
 	}
 
 	bool UalSignalsMap::insertNew(QUuid pinUuid, UalSignal* newUalSignal)
@@ -1314,12 +1419,25 @@ namespace Builder
 		}
 
 		insert(newUalSignal, newUalSignal);
+
 		m_idToSignalMap.insert(signalID, newUalSignal);
-		m_pinToSignalMap.insert(pinUuid, newUalSignal);
+
+		appendPinToSignalRef(pinUuid, newUalSignal);
 
 		return true;
 	}
 
+	void UalSignalsMap::appendPinToSignalRef(QUuid pinUuid, UalSignal* ualSignal)
+	{
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		m_pinToSignalMap.insert(pinUuid, ualSignal);
+		m_signalToPinsMap.insertMulti(ualSignal, pinUuid);
+	}
 
 	QString UalSignalsMap::getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin)
 	{

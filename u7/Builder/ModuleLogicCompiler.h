@@ -108,12 +108,17 @@ namespace Builder
 		bool createUalSignals();
 
 		bool createUalSignalFromSignal(UalItem* ualItem);
+		bool createUalSignalFromConst(UalItem* ualItem);
+
+		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
+		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal);
+
+		bool detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
 		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
 
-		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
-		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid& inPinUuid, UalSignal* ualSignal);
 
 		bool appendUalSignals();
 		bool appendSignalsFromAppItems();
