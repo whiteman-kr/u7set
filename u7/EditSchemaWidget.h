@@ -409,8 +409,6 @@ protected slots:
 	void replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 	void replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 
-
-
 	void hideWorkDialogs();
 
 	// Properties
