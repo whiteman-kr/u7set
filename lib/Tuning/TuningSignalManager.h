@@ -46,9 +46,15 @@ public:
 	void setState(Hash signalHash, const TuningSignalState& state);
 	void setState(const std::vector<TuningSignalState>& states);
 
+	// Signals
+	//
+signals:
+	void signalsLoaded();			// Emited when new signals loaded
+
 	// Data
 	//
 private:
+
 	// Objects storage
 	//
 	mutable QMutex m_signalsMutex;						// For access to m_signals

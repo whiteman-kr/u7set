@@ -66,6 +66,8 @@ bool TuningSignalManager::load(const ::Proto::AppSignalSet& message)
 		std::swap(loadedSignals, m_signals);
 	}
 
+	emit signalsLoaded();
+
 	return ok;
 }
 

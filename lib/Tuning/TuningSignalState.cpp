@@ -108,6 +108,11 @@ bool operator != (const TuningValue& l, const TuningValue& r)
 //
 // TuningSignalState
 //
+TuningSignalState::TuningSignalState(const ::Network::TuningSignalState& message)
+{
+	setState(message);
+}
+
 Hash TuningSignalState::hash() const
 {
 	return m_hash;
@@ -177,7 +182,7 @@ void TuningSignalState::clearUserModified()
 	m_flags.userModified = false;
 }
 
-void TuningSignalState::setState(const ::Network::TuningSignalState& message)
+bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 {
 	m_hash = message.signalhash();
 	m_flags.valid = message.valid();
@@ -191,7 +196,7 @@ void TuningSignalState::setState(const ::Network::TuningSignalState& message)
 	m_flags.writeInProgress = message.writeinprogress();
 	m_writeErrorCode = message.writeerrorcode();
 
-	return;
+	return true;
 }
 
 void TuningSignalState::invalidate()

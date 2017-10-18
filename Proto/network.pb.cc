@@ -669,7 +669,6 @@ void protobuf_AssignDesc_network_2eproto() {
       sizeof(ConfigurationServiceSettings));
   GetTuningSourcesInfo_descriptor_ = file->message_type(27);
   static const int GetTuningSourcesInfo_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesInfo, clientequipmentid_),
   };
   GetTuningSourcesInfo_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -700,7 +699,6 @@ void protobuf_AssignDesc_network_2eproto() {
       sizeof(GetTuningSourcesInfoReply));
   GetTuningSourcesStates_descriptor_ = file->message_type(29);
   static const int GetTuningSourcesStates_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStates, clientequipmentid_),
   };
   GetTuningSourcesStates_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -784,8 +782,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesStatesReply));
   TuningSignalsRead_descriptor_ = file->message_type(32);
-  static const int TuningSignalsRead_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsRead, clientequipmentid_),
+  static const int TuningSignalsRead_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsRead, signalhash_),
   };
   TuningSignalsRead_reflection_ =
@@ -1392,98 +1389,96 @@ void protobuf_AddDesc_network_2eproto() {
     " \002(\005:\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workstation\030\007 \002"
     "(\t\"e\n\034ConfigurationServiceSettings\022\023\n\013eq"
     "uipmentID\030\001 \002(\t\022\031\n\021autoloadBuildPath\030\002 \002"
-    "(\t\022\025\n\rworkDirectory\030\003 \002(\t\"1\n\024GetTuningSo"
-    "urcesInfo\022\031\n\021clientEquipmentID\030\001 \001(\t\"`\n\031"
-    "GetTuningSourcesInfoReply\022\020\n\005error\030\001 \001(\005"
-    ":\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Network."
-    "DataSourceInfo\"3\n\026GetTuningSourcesStates"
-    "\022\031\n\021clientEquipmentID\030\001 \001(\t\"\345\t\n\021TuningSo"
-    "urceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007isRepl"
-    "y\030\002 \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003:\0010\022"
-    "\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020commandQueueSi"
-    "ze\030\005 \001(\005:\0010\022\034\n\021errUntimelyReplay\030\006 \001(\003:\001"
-    "0\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016errPartialSent\030"
-    "\010 \001(\003:\0010\022\027\n\014errReplySize\030\t \001(\003:\0010\022\025\n\nerr"
-    "NoReply\030\n \001(\003:\0010\022 \n\025errRupProtocolVersio"
-    "n\030\013 \001(\003:\0010\022\032\n\017errRupFrameSize\030\014 \001(\003:\0010\022\036"
-    "\n\023errRupNonTuningData\030\r \001(\003:\0010\022\033\n\020errRup"
-    "ModuleType\030\016 \001(\003:\0010\022\037\n\024errRupFramesQuant"
-    "ity\030\017 \001(\003:\0010\022\034\n\021errRupFrameNumber\030\020 \001(\003:"
-    "\0010\022\"\n\027errFotipProtocolVersion\030\021 \001(\003:\0010\022\033"
-    "\n\020errFotipUniqueID\030\022 \001(\003:\0010\022\033\n\020errFotipL"
-    "mNumber\030\023 \001(\003:\0010\022 \n\025errFotipSubsystemCod"
-    "e\030\024 \001(\003:\0010\022 \n\025errFotipOperationCode\030\025 \001("
-    "\003:\0010\022\034\n\021errFotipFrameSize\030\026 \001(\003:\0010\022\032\n\017er"
-    "rFotipRomSize\030\027 \001(\003:\0010\022\037\n\024errFotipRomFra"
-    "meSize\030\030 \001(\003:\0010\022&\n\033fotipFlagBoundsCheckS"
-    "uccess\030\031 \001(\003:\0010\022 \n\025fotipFlagWriteSuccess"
-    "\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030\033 \001(\003:"
-    "\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001(\003:\0010\022 \n\025fot"
-    "ipFlagStartAddrErr\030\035 \001(\003:\0010\022\036\n\023fotipFlag"
-    "RomSizeErr\030\036 \001(\003:\0010\022#\n\030fotipFlagRomFrame"
-    "SizeErr\030\037 \001(\003:\0010\022 \n\025fotipFlagFrameSizeEr"
-    "r\030  \001(\003:\0010\022&\n\033fotipFlagProtocolVersionEr"
-    "r\030! \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyErr\030\""
-    " \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003:\0010\022"
-    "\035\n\022fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025fotipF"
-    "lagApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFlagSet"
-    "SOR\030& \001(\003:\0010\022!\n\026errAnalogLowBoundCheck\030\'"
-    " \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030( \001(\003"
-    ":\0010\"g\n\033GetTuningSourcesStatesReply\022\020\n\005er"
-    "ror\030\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002 \003(\013"
-    "2\032.Network.TuningSourceState\"B\n\021TuningSi"
-    "gnalsRead\022\031\n\021clientEquipmentID\030\001 \001(\t\022\022\n\n"
-    "signalHash\030\002 \003(\004\"_\n\013TuningValue\022\014\n\004type\030"
-    "\001 \001(\005\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue"
-    "\030\003 \001(\002:\0010\022\026\n\013doubleValue\030\004 \001(\002:\0010\"\243\002\n\021Tu"
-    "ningSignalState\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020"
-    "\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022#"
-    "\n\005value\030\004 \001(\0132\024.Network.TuningValue\022*\n\014r"
-    "eadLowBound\030\005 \001(\0132\024.Network.TuningValue\022"
-    "+\n\rreadHighBound\030\006 \001(\0132\024.Network.TuningV"
-    "alue\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031\n\016"
-    "writeErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t"
-    " \001(\006:\0010\"a\n\026TuningSignalsReadReply\022\020\n\005err"
-    "or\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003(\0132\032"
-    ".Network.TuningSignalState\"<\n\021TuningSign"
-    "alWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005value\030"
-    "\002 \001(\002:\0010\"\200\001\n\022TuningSignalsWrite\022\031\n\021clien"
-    "tEquipmentID\030\001 \001(\t\022\030\n\tautoApply\030\002 \001(\010:\005f"
-    "alse\0225\n\021tuningSignalWrite\030\003 \003(\0132\032.Networ"
-    "k.TuningSignalWrite\"B\n\027TuningSignalWrite"
-    "Result\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002"
-    " \001(\005:\0010\"b\n\027TuningSignalsWriteReply\022\020\n\005er"
-    "ror\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132 .Netw"
-    "ork.TuningSignalWriteResult\"/\n\022TuningSig"
-    "nalsApply\022\031\n\021clientEquipmentID\030\001 \001(\t\"+\n\027"
-    "TuningSignalsApplyReply\022\020\n\005error\030\001 \001(\005:\001"
-    "0\"q\n$SaveAppSignalsStatesToArchiveReques"
-    "t\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n\017appSigna"
-    "lStates\030\002 \003(\0132\025.Proto.AppSignalState\"N\n\""
-    "SaveAppSignalsStatesToArchiveReply\022\020\n\005er"
-    "ror\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n"
-    ")GetAppSignalStatesFromArchiveStartReque"
-    "st\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010timeTyp"
-    "e\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endT"
-    "ime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016re"
-    "movePeriodic\030\006 \001(\010:\004true\"~\n\'GetAppSignal"
-    "StatesFromArchiveStartReply\022\020\n\005error\030\001 \001"
-    "(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorSt"
-    "ring\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(GetA"
-    "ppSignalStatesFromArchiveNextRequest\022\024\n\t"
-    "requestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalState"
-    "sFromArchiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022"
-    "\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001"
-    "(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdataReady\030"
-    "\004 \001(\010:\005false\022\033\n\020totalStatesCount\030\005 \001(\005:\001"
-    "0\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021statesI"
-    "nPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:"
-    "\005false\022.\n\017appSignalStates\030\t \003(\0132\025.Proto."
-    "AppSignalState\"B\n*GetAppSignalStatesFrom"
-    "ArchiveCancelRequest\022\024\n\trequestID\030\001 \001(\r:"
-    "\0010\"i\n(GetAppSignalStatesFromArchiveCance"
-    "lReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 "
-    "\001(\005:\003100\022\023\n\013errorString\030\003 \001(\t", 6589);
+    "(\t\022\025\n\rworkDirectory\030\003 \002(\t\"\026\n\024GetTuningSo"
+    "urcesInfo\"`\n\031GetTuningSourcesInfoReply\022\020"
+    "\n\005error\030\001 \001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003"
+    "(\0132\027.Network.DataSourceInfo\"\030\n\026GetTuning"
+    "SourcesStates\"\345\t\n\021TuningSourceState\022\023\n\010s"
+    "ourceID\030\001 \001(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005false"
+    "\022\027\n\014requestCount\030\003 \001(\003:\0010\022\025\n\nreplyCount\030"
+    "\004 \001(\003:\0010\022\033\n\020commandQueueSize\030\005 \001(\005:\0010\022\034\n"
+    "\021errUntimelyReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030\007"
+    " \001(\003:\0010\022\031\n\016errPartialSent\030\010 \001(\003:\0010\022\027\n\014er"
+    "rReplySize\030\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:"
+    "\0010\022 \n\025errRupProtocolVersion\030\013 \001(\003:\0010\022\032\n\017"
+    "errRupFrameSize\030\014 \001(\003:\0010\022\036\n\023errRupNonTun"
+    "ingData\030\r \001(\003:\0010\022\033\n\020errRupModuleType\030\016 \001"
+    "(\003:\0010\022\037\n\024errRupFramesQuantity\030\017 \001(\003:\0010\022\034"
+    "\n\021errRupFrameNumber\030\020 \001(\003:\0010\022\"\n\027errFotip"
+    "ProtocolVersion\030\021 \001(\003:\0010\022\033\n\020errFotipUniq"
+    "ueID\030\022 \001(\003:\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003:"
+    "\0010\022 \n\025errFotipSubsystemCode\030\024 \001(\003:\0010\022 \n\025"
+    "errFotipOperationCode\030\025 \001(\003:\0010\022\034\n\021errFot"
+    "ipFrameSize\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize\030"
+    "\027 \001(\003:\0010\022\037\n\024errFotipRomFrameSize\030\030 \001(\003:\001"
+    "0\022&\n\033fotipFlagBoundsCheckSuccess\030\031 \001(\003:\001"
+    "0\022 \n\025fotipFlagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024f"
+    "otipFlagDataTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFla"
+    "gOpCodeErr\030\034 \001(\003:\0010\022 \n\025fotipFlagStartAdd"
+    "rErr\030\035 \001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030\036 \001"
+    "(\003:\0010\022#\n\030fotipFlagRomFrameSizeErr\030\037 \001(\003:"
+    "\0010\022 \n\025fotipFlagFrameSizeErr\030  \001(\003:\0010\022&\n\033"
+    "fotipFlagProtocolVersionErr\030! \001(\003:\0010\022#\n\030"
+    "fotipFlagSubsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fot"
+    "ipFlagUniueIDErr\030# \001(\003:\0010\022\035\n\022fotipFlagOf"
+    "fsetErr\030$ \001(\003:\0010\022 \n\025fotipFlagApplySucces"
+    "s\030% \001(\003:\0010\022\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022!"
+    "\n\026errAnalogLowBoundCheck\030\' \001(\003:\0010\022\"\n\027err"
+    "AnalogHighBoundCheck\030( \001(\003:\0010\"g\n\033GetTuni"
+    "ngSourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0226"
+    "\n\022tuningSourcesState\030\002 \003(\0132\032.Network.Tun"
+    "ingSourceState\"\'\n\021TuningSignalsRead\022\022\n\ns"
+    "ignalHash\030\002 \003(\004\"_\n\013TuningValue\022\014\n\004type\030\001"
+    " \001(\005\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030"
+    "\003 \001(\002:\0010\022\026\n\013doubleValue\030\004 \001(\002:\0010\"\243\002\n\021Tun"
+    "ingSignalState\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n"
+    "\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022#\n"
+    "\005value\030\004 \001(\0132\024.Network.TuningValue\022*\n\014re"
+    "adLowBound\030\005 \001(\0132\024.Network.TuningValue\022+"
+    "\n\rreadHighBound\030\006 \001(\0132\024.Network.TuningVa"
+    "lue\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031\n\016w"
+    "riteErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t "
+    "\001(\006:\0010\"a\n\026TuningSignalsReadReply\022\020\n\005erro"
+    "r\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003(\0132\032."
+    "Network.TuningSignalState\"<\n\021TuningSigna"
+    "lWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005value\030\002"
+    " \001(\002:\0010\"\200\001\n\022TuningSignalsWrite\022\031\n\021client"
+    "EquipmentID\030\001 \001(\t\022\030\n\tautoApply\030\002 \001(\010:\005fa"
+    "lse\0225\n\021tuningSignalWrite\030\003 \003(\0132\032.Network"
+    ".TuningSignalWrite\"B\n\027TuningSignalWriteR"
+    "esult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 "
+    "\001(\005:\0010\"b\n\027TuningSignalsWriteReply\022\020\n\005err"
+    "or\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132 .Netwo"
+    "rk.TuningSignalWriteResult\"/\n\022TuningSign"
+    "alsApply\022\031\n\021clientEquipmentID\030\001 \001(\t\"+\n\027T"
+    "uningSignalsApplyReply\022\020\n\005error\030\001 \001(\005:\0010"
+    "\"q\n$SaveAppSignalsStatesToArchiveRequest"
+    "\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n\017appSignal"
+    "States\030\002 \003(\0132\025.Proto.AppSignalState\"N\n\"S"
+    "aveAppSignalsStatesToArchiveReply\022\020\n\005err"
+    "or\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n)"
+    "GetAppSignalStatesFromArchiveStartReques"
+    "t\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010timeType"
+    "\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTi"
+    "me\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016rem"
+    "ovePeriodic\030\006 \001(\010:\004true\"~\n\'GetAppSignalS"
+    "tatesFromArchiveStartReply\022\020\n\005error\030\001 \001("
+    "\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorStr"
+    "ing\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(GetAp"
+    "pSignalStatesFromArchiveNextRequest\022\024\n\tr"
+    "equestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalStates"
+    "FromArchiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\026"
+    "\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001("
+    "\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdataReady\030\004"
+    " \001(\010:\005false\022\033\n\020totalStatesCount\030\005 \001(\005:\0010"
+    "\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021statesIn"
+    "PartCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:\005"
+    "false\022.\n\017appSignalStates\030\t \003(\0132\025.Proto.A"
+    "ppSignalState\"B\n*GetAppSignalStatesFromA"
+    "rchiveCancelRequest\022\024\n\trequestID\030\001 \001(\r:\001"
+    "0\"i\n(GetAppSignalStatesFromArchiveCancel"
+    "Reply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001"
+    "(\005:\003100\022\023\n\013errorString\030\003 \001(\t", 6508);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -10344,7 +10339,6 @@ void ConfigurationServiceSettings::Swap(ConfigurationServiceSettings* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int GetTuningSourcesInfo::kClientEquipmentIDFieldNumber;
 #endif  // !_MSC_VER
 
 GetTuningSourcesInfo::GetTuningSourcesInfo()
@@ -10363,7 +10357,6 @@ GetTuningSourcesInfo::GetTuningSourcesInfo(const GetTuningSourcesInfo& from)
 
 void GetTuningSourcesInfo::SharedCtor() {
   _cached_size_ = 0;
-  clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -10372,9 +10365,6 @@ GetTuningSourcesInfo::~GetTuningSourcesInfo() {
 }
 
 void GetTuningSourcesInfo::SharedDtor() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
   if (this != default_instance_) {
   }
 }
@@ -10401,13 +10391,6 @@ GetTuningSourcesInfo* GetTuningSourcesInfo::New() const {
 }
 
 void GetTuningSourcesInfo::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_clientequipmentid()) {
-      if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-        clientequipmentid_->clear();
-      }
-    }
-  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -10417,34 +10400,12 @@ bool GetTuningSourcesInfo::MergePartialFromCodedStream(
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
-    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string clientEquipmentID = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_clientequipmentid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->clientequipmentid().data(), this->clientequipmentid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectAtEnd()) return true;
-        break;
-      }
-
-      default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
-        }
-        DO_(::google::protobuf::internal::WireFormat::SkipField(
-              input, tag, mutable_unknown_fields()));
-        break;
-      }
+    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+      return true;
     }
+    DO_(::google::protobuf::internal::WireFormat::SkipField(
+          input, tag, mutable_unknown_fields()));
   }
   return true;
 #undef DO_
@@ -10452,15 +10413,6 @@ bool GetTuningSourcesInfo::MergePartialFromCodedStream(
 
 void GetTuningSourcesInfo::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      1, this->clientequipmentid(), output);
-  }
-
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -10469,16 +10421,6 @@ void GetTuningSourcesInfo::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* GetTuningSourcesInfo::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->clientequipmentid(), target);
-  }
-
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -10489,15 +10431,6 @@ void GetTuningSourcesInfo::SerializeWithCachedSizes(
 int GetTuningSourcesInfo::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional string clientEquipmentID = 1;
-    if (has_clientequipmentid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->clientequipmentid());
-    }
-
-  }
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -10523,11 +10456,6 @@ void GetTuningSourcesInfo::MergeFrom(const ::google::protobuf::Message& from) {
 
 void GetTuningSourcesInfo::MergeFrom(const GetTuningSourcesInfo& from) {
   GOOGLE_CHECK_NE(&from, this);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_clientequipmentid()) {
-      set_clientequipmentid(from.clientequipmentid());
-    }
-  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -10550,8 +10478,6 @@ bool GetTuningSourcesInfo::IsInitialized() const {
 
 void GetTuningSourcesInfo::Swap(GetTuningSourcesInfo* other) {
   if (other != this) {
-    std::swap(clientequipmentid_, other->clientequipmentid_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
@@ -10817,7 +10743,6 @@ void GetTuningSourcesInfoReply::Swap(GetTuningSourcesInfoReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int GetTuningSourcesStates::kClientEquipmentIDFieldNumber;
 #endif  // !_MSC_VER
 
 GetTuningSourcesStates::GetTuningSourcesStates()
@@ -10836,7 +10761,6 @@ GetTuningSourcesStates::GetTuningSourcesStates(const GetTuningSourcesStates& fro
 
 void GetTuningSourcesStates::SharedCtor() {
   _cached_size_ = 0;
-  clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -10845,9 +10769,6 @@ GetTuningSourcesStates::~GetTuningSourcesStates() {
 }
 
 void GetTuningSourcesStates::SharedDtor() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
   if (this != default_instance_) {
   }
 }
@@ -10874,13 +10795,6 @@ GetTuningSourcesStates* GetTuningSourcesStates::New() const {
 }
 
 void GetTuningSourcesStates::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_clientequipmentid()) {
-      if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-        clientequipmentid_->clear();
-      }
-    }
-  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -10890,34 +10804,12 @@ bool GetTuningSourcesStates::MergePartialFromCodedStream(
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
-    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string clientEquipmentID = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_clientequipmentid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->clientequipmentid().data(), this->clientequipmentid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectAtEnd()) return true;
-        break;
-      }
-
-      default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
-        }
-        DO_(::google::protobuf::internal::WireFormat::SkipField(
-              input, tag, mutable_unknown_fields()));
-        break;
-      }
+    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+      return true;
     }
+    DO_(::google::protobuf::internal::WireFormat::SkipField(
+          input, tag, mutable_unknown_fields()));
   }
   return true;
 #undef DO_
@@ -10925,15 +10817,6 @@ bool GetTuningSourcesStates::MergePartialFromCodedStream(
 
 void GetTuningSourcesStates::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      1, this->clientequipmentid(), output);
-  }
-
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -10942,16 +10825,6 @@ void GetTuningSourcesStates::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* GetTuningSourcesStates::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->clientequipmentid(), target);
-  }
-
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -10962,15 +10835,6 @@ void GetTuningSourcesStates::SerializeWithCachedSizes(
 int GetTuningSourcesStates::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional string clientEquipmentID = 1;
-    if (has_clientequipmentid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->clientequipmentid());
-    }
-
-  }
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -10996,11 +10860,6 @@ void GetTuningSourcesStates::MergeFrom(const ::google::protobuf::Message& from) 
 
 void GetTuningSourcesStates::MergeFrom(const GetTuningSourcesStates& from) {
   GOOGLE_CHECK_NE(&from, this);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_clientequipmentid()) {
-      set_clientequipmentid(from.clientequipmentid());
-    }
-  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -11023,8 +10882,6 @@ bool GetTuningSourcesStates::IsInitialized() const {
 
 void GetTuningSourcesStates::Swap(GetTuningSourcesStates* other) {
   if (other != this) {
-    std::swap(clientequipmentid_, other->clientequipmentid_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
@@ -13081,7 +12938,6 @@ void GetTuningSourcesStatesReply::Swap(GetTuningSourcesStatesReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TuningSignalsRead::kClientEquipmentIDFieldNumber;
 const int TuningSignalsRead::kSignalHashFieldNumber;
 #endif  // !_MSC_VER
 
@@ -13101,7 +12957,6 @@ TuningSignalsRead::TuningSignalsRead(const TuningSignalsRead& from)
 
 void TuningSignalsRead::SharedCtor() {
   _cached_size_ = 0;
-  clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -13110,9 +12965,6 @@ TuningSignalsRead::~TuningSignalsRead() {
 }
 
 void TuningSignalsRead::SharedDtor() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
   if (this != default_instance_) {
   }
 }
@@ -13139,13 +12991,6 @@ TuningSignalsRead* TuningSignalsRead::New() const {
 }
 
 void TuningSignalsRead::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_clientequipmentid()) {
-      if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-        clientequipmentid_->clear();
-      }
-    }
-  }
   signalhash_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -13157,22 +13002,6 @@ bool TuningSignalsRead::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string clientEquipmentID = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_clientequipmentid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->clientequipmentid().data(), this->clientequipmentid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(16)) goto parse_signalHash;
-        break;
-      }
-
       // repeated uint64 signalHash = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
@@ -13213,15 +13042,6 @@ bool TuningSignalsRead::MergePartialFromCodedStream(
 
 void TuningSignalsRead::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      1, this->clientequipmentid(), output);
-  }
-
   // repeated uint64 signalHash = 2;
   for (int i = 0; i < this->signalhash_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(
@@ -13236,16 +13056,6 @@ void TuningSignalsRead::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* TuningSignalsRead::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->clientequipmentid(), target);
-  }
-
   // repeated uint64 signalHash = 2;
   for (int i = 0; i < this->signalhash_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -13262,15 +13072,6 @@ void TuningSignalsRead::SerializeWithCachedSizes(
 int TuningSignalsRead::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional string clientEquipmentID = 1;
-    if (has_clientequipmentid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->clientequipmentid());
-    }
-
-  }
   // repeated uint64 signalHash = 2;
   {
     int data_size = 0;
@@ -13307,11 +13108,6 @@ void TuningSignalsRead::MergeFrom(const ::google::protobuf::Message& from) {
 void TuningSignalsRead::MergeFrom(const TuningSignalsRead& from) {
   GOOGLE_CHECK_NE(&from, this);
   signalhash_.MergeFrom(from.signalhash_);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_clientequipmentid()) {
-      set_clientequipmentid(from.clientequipmentid());
-    }
-  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -13334,7 +13130,6 @@ bool TuningSignalsRead::IsInitialized() const {
 
 void TuningSignalsRead::Swap(TuningSignalsRead* other) {
   if (other != this) {
-    std::swap(clientequipmentid_, other->clientequipmentid_);
     signalhash_.Swap(&other->signalhash_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);

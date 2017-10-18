@@ -75,7 +75,7 @@ message GetAppSignalStateReply
 
 message DataSourceInfo
 {
-    optional uint64 id = 1;		    // unique id
+    optional uint64 id = 1;				// unique id
     optional string equipmentID = 2;
     optional string caption = 3;
     optional int32 dataType = 4;
@@ -248,7 +248,6 @@ message ConfigurationServiceSettings
 
 message GetTuningSourcesInfo
 {
-    optional string clientEquipmentID = 1;
 }
 
 message GetTuningSourcesInfoReply
@@ -261,7 +260,6 @@ message GetTuningSourcesInfoReply
 
 message GetTuningSourcesStates
 {
-    optional string clientEquipmentID = 1;
 }
 
 message TuningSourceState
@@ -332,7 +330,6 @@ message GetTuningSourcesStatesReply
 
 message TuningSignalsRead
 {
-    optional string clientEquipmentID = 1;
     repeated uint64 signalHash = 2;
 }
 

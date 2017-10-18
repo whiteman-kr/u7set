@@ -3189,29 +3189,14 @@ class GetTuningSourcesInfo : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfo)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[1];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -3371,29 +3356,14 @@ class GetTuningSourcesStates : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStates)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[1];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -4025,18 +3995,6 @@ class TuningSignalsRead : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // repeated uint64 signalHash = 2;
   inline int signalhash_size() const;
   inline void clear_signalhash();
@@ -4051,16 +4009,13 @@ class TuningSignalsRead : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Network.TuningSignalsRead)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
   ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhash_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -9057,76 +9012,6 @@ inline void ConfigurationServiceSettings::set_allocated_workdirectory(::std::str
 
 // GetTuningSourcesInfo
 
-// optional string clientEquipmentID = 1;
-inline bool GetTuningSourcesInfo::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void GetTuningSourcesInfo::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void GetTuningSourcesInfo::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void GetTuningSourcesInfo::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
-  }
-  clear_has_clientequipmentid();
-}
-inline const ::std::string& GetTuningSourcesInfo::clientequipmentid() const {
-  return *clientequipmentid_;
-}
-inline void GetTuningSourcesInfo::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void GetTuningSourcesInfo::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void GetTuningSourcesInfo::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* GetTuningSourcesInfo::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  return clientequipmentid_;
-}
-inline ::std::string* GetTuningSourcesInfo::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void GetTuningSourcesInfo::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
-  } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
 // -------------------------------------------------------------------
 
 // GetTuningSourcesInfoReply
@@ -9181,76 +9066,6 @@ GetTuningSourcesInfoReply::mutable_tuningsourceinfo() {
 // -------------------------------------------------------------------
 
 // GetTuningSourcesStates
-
-// optional string clientEquipmentID = 1;
-inline bool GetTuningSourcesStates::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void GetTuningSourcesStates::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void GetTuningSourcesStates::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void GetTuningSourcesStates::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
-  }
-  clear_has_clientequipmentid();
-}
-inline const ::std::string& GetTuningSourcesStates::clientequipmentid() const {
-  return *clientequipmentid_;
-}
-inline void GetTuningSourcesStates::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void GetTuningSourcesStates::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void GetTuningSourcesStates::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* GetTuningSourcesStates::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  return clientequipmentid_;
-}
-inline ::std::string* GetTuningSourcesStates::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void GetTuningSourcesStates::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
-  } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
 
 // -------------------------------------------------------------------
 
@@ -10190,76 +10005,6 @@ GetTuningSourcesStatesReply::mutable_tuningsourcesstate() {
 // -------------------------------------------------------------------
 
 // TuningSignalsRead
-
-// optional string clientEquipmentID = 1;
-inline bool TuningSignalsRead::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void TuningSignalsRead::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void TuningSignalsRead::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void TuningSignalsRead::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
-  }
-  clear_has_clientequipmentid();
-}
-inline const ::std::string& TuningSignalsRead::clientequipmentid() const {
-  return *clientequipmentid_;
-}
-inline void TuningSignalsRead::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsRead::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsRead::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TuningSignalsRead::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  return clientequipmentid_;
-}
-inline ::std::string* TuningSignalsRead::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TuningSignalsRead::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
-  } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
 
 // repeated uint64 signalHash = 2;
 inline int TuningSignalsRead::signalhash_size() const {

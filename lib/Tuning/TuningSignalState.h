@@ -68,6 +68,7 @@ class TuningSignalState
 
 public:
 	TuningSignalState() = default;
+	TuningSignalState(const ::Network::TuningSignalState& message);
 
 	Q_INVOKABLE Hash hash() const;
 
@@ -88,7 +89,7 @@ public:
 	bool userModified() const;
 	void clearUserModified();
 
-	void setState(const ::Network::TuningSignalState& message);
+	bool setState(const ::Network::TuningSignalState& message);
 
 	void invalidate();
 

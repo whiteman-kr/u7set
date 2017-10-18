@@ -347,6 +347,8 @@ const quint32 TDS_TUNING_SIGNALS_READ = 0x1503;
 const quint32 TDS_TUNING_SIGNALS_WRITE = 0x1504;
 const quint32 TDS_TUNING_SIGNALS_APPLY = 0x1505;
 
+const int TDS_TUNING_MAX_STATES = 1000;
+
 // ArchivingService and AppData Service communications, Port PORT_ARCHIVING_SERVICE_APP_DATA
 //
 const quint32 ARCHS_CONNECTION_ALIVE = 0x1601;

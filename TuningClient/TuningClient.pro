@@ -149,7 +149,6 @@ SOURCES +=\
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/Tuning/TuningSignalStorage.cpp \
     TuningClientSignalManager.cpp \
     DialogFilterEditor.cpp
 
@@ -202,7 +201,6 @@ HEADERS  += MainWindow.h \
     ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../lib/Tuning/TuningSignalStorage.h \
     TuningClientSignalManager.h \
     DialogFilterEditor.h
 
