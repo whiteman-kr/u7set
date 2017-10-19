@@ -1246,25 +1246,6 @@ namespace ExtWidgets
 
 	}
 
-
-    std::shared_ptr<Property> QtMultiVariantPropertyManager::value(const QtProperty* property) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-            return nullptr;
-		}
-
-		const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-            return nullptr;
-		}
-
-        return it->p;
-	}
-
 	QVariant QtMultiVariantPropertyManager::attribute(const QtProperty* property, const QString& attribute) const
 	{
 		if (property == nullptr)
@@ -1307,6 +1288,24 @@ namespace ExtWidgets
 
 		const QMap<QString, QVariant>::const_iterator attrit = it.value().attributes.constFind(attribute);
 		return attrit != it.value().attributes.end();
+	}
+
+	std::shared_ptr<Property> QtMultiVariantPropertyManager::value(const QtProperty* property) const
+	{
+		if (property == nullptr)
+		{
+			Q_ASSERT(property);
+			return nullptr;
+		}
+
+		const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
+		if (it == values.end())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
+		return it->p;
 	}
 
 	int QtMultiVariantPropertyManager::valueType(const QtProperty* property) const
@@ -1371,7 +1370,7 @@ namespace ExtWidgets
 		return result;
 	}
 
-    void QtMultiVariantPropertyManager::setValue(QtProperty* property, const QVariant& value)
+	void QtMultiVariantPropertyManager::updateProperty(QtProperty* property)
 	{
 		if (property == nullptr)
 		{
@@ -1379,17 +1378,23 @@ namespace ExtWidgets
 			return;
 		}
 
-		const QMap<const QtProperty*, Data>::iterator it = values.find(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-			return;
-        }
-
-        it->p->setValue(value);
-
-        emit propertyChanged(property);
+		emit propertyChanged(property);
 	}
+
+	void QtMultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVariant& value)
+	{
+		if (property == nullptr)
+		{
+			Q_ASSERT(property);
+			return;
+		}
+
+		emit valueChanged(property, value);
+
+		emit propertyChanged(property);
+	}
+
+
 
 	void QtMultiVariantPropertyManager::setAttribute (QtProperty* property, const QString& attribute, const QVariant& value)
 	{
@@ -1409,18 +1414,6 @@ namespace ExtWidgets
 		it.value().attributes[attribute] = value;
 	}
 
-	void QtMultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVariant& value)
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return;
-		}
-
-		emit valueChanged(property, value);
-
-        emit propertyChanged(property);
-	}
 
 	void QtMultiVariantPropertyManager::initializeProperty(QtProperty* property)
 	{
@@ -1805,15 +1798,11 @@ namespace ExtWidgets
 
 		for (auto p : props)
 		{
-            QVariant value = vals.value(p).first;
             bool sameValue = vals.value(p).second;
 
             m_propertyVariantManager->setAttribute(p, "@propertyEditor@sameValue", sameValue);
 
-            if (sameValue == true)
-            {
-                m_propertyVariantManager->setValue(p, value);
-            }
+			m_propertyVariantManager->updateProperty(p);
         }
 	}
 

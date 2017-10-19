@@ -148,11 +148,11 @@ namespace Builder
 
 			// TuningService
 			//
-			ok = writeTuningServiceSection(xmlWriter);
-			if (ok == false)
-			{
-				return false;
-			}
+//			ok = writeTuningServiceSection(xmlWriter);
+//			if (ok == false)
+//			{
+//				return false;
+//			}
 
 		} // Settings
 

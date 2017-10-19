@@ -64,6 +64,7 @@ namespace EditEngine
 		if (runCommand == true)
 		{
 			command->execute(m_schemaView, m_hScrollBar, m_vScrollBar);
+			emit propertiesChanged();
 		}
 
 		if (m_commands.size() > MaxCommandCount)
@@ -316,6 +317,8 @@ namespace EditEngine
 		restoreViewPos(schemaView, hScrollBar, vScrollBar);
 
 		executeCommand(schemaView);
+
+		return;
 	}
 
 	void EditCommand::unExecute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)

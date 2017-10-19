@@ -296,6 +296,8 @@ namespace ExtWidgets
 
 		QSet<QtProperty*> propertyByName(const QString& propertyName);
 
+		void updateProperty(QtProperty* property);
+
 		void emitSetValue(QtProperty* property, const QVariant& value);
 
 	private:
@@ -311,7 +313,6 @@ namespace ExtWidgets
         QMap<const QtProperty*, Data> values;
 
 	public slots:
-        void setValue(QtProperty* property, const QVariant& value);
 		void setAttribute (QtProperty* property, const QString& attribute, const QVariant& value);
 
 	signals:
