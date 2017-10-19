@@ -83,7 +83,7 @@ namespace Builder
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
 
-		const SignalSet& signalSet() { return *m_signals; }
+		SignalSet& signalSet() { return *m_signals; }
 		Signal* getSignal(const QString& appSignalID);
 
 		IssueLogger* log() { return m_log; }
@@ -92,6 +92,8 @@ namespace Builder
 
 		bool pass1();
 		bool pass2();
+
+		QString lmEquipmentID();
 
 	private:
 		// pass #1 compilation functions
@@ -141,7 +143,7 @@ namespace Builder
 		bool createSignalLists();
 
 		bool createAcquiredDiscreteInputSignalsList();
-		bool createAcquiredDiscreteOutputSignalsList();
+		bool createAcquiredDiscreteStrictOutputSignalsList();
 		bool createAcquiredDiscreteInternalSignalsList();
 		bool createAcquiredDiscreteTuningSignalsList();
 
@@ -167,7 +169,7 @@ namespace Builder
 
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;
-		void sortSignalList(QVector<Signal *> &signalList);
+		void sortSignalList(QVector<UalSignal*> &signalList);
 
 		bool disposeSignalsInMemory();
 
@@ -319,6 +321,8 @@ namespace Builder
 
 		void dumpApplicationLogicItems();
 
+		const HashedVector<QString, Signal*>& chassisSignals() const { return m_chassisSignals; }
+
 	private:
 		static const int ERR_VALUE = -1;
 
@@ -388,15 +392,16 @@ namespace Builder
 		QHash<QString, QString> m_linkedValidtySignalsID;		// device signals with linked validity signals
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
 
-		QVector<Signal*> m_acquiredDiscreteInputSignals;		// acquired discrete input signals, no matter used in UAL or not
-		QVector<Signal*> m_acquiredDiscreteOutputSignals;		// acquired discrete output signals, used in UAL
-		QVector<Signal*> m_acquiredDiscreteInternalSignals;		// acquired discrete internal non tuningable signals, used in UAL
-		QVector<Signal*> m_acquiredDiscreteTuningSignals;		// acquired discrete internal tuningable signals, no matter used in UAL or not
+		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
+		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL
+		QVector<UalSignal*> m_acquiredDiscreteInternalSignals;			// acquired discrete internal non tuningable signals, used in UAL
+		QVector<UalSignal*> m_acquiredDiscreteTuningSignals;			// acquired discrete internal tuningable signals, no matter used in UAL or not
 
-		QVector<Signal*> m_nonAcquiredDiscreteInputSignals;		// non acquired discrete input signals, used in UAL
-		QVector<Signal*> m_nonAcquiredDiscreteOutputSignals;	// non acquired discrete output signals, used in UAL
-		QVector<Signal*> m_nonAcquiredDiscreteInternalSignals;	// non acquired discrete internal non tuningbale signals, used in UAL
-		QVector<Signal*> m_nonAcquiredDiscreteTuningSignals;	// non acquired discrete internal tuningable signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteInternalSignals;		// non acquired discrete internal non tuningbale signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteTuningSignals;			// non acquired discrete internal tuningable signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL
 
 		QVector<Signal*> m_acquiredAnalogInputSignals;			// acquired analog input signals, no matter used in UAL or not
 		QVector<Signal*> m_acquiredAnalogOutputSignals;			// acquired analog output signals, used in UAL
@@ -411,7 +416,7 @@ namespace Builder
 		QVector<Signal*> m_acquiredBuses;						// acquired bus signals, used in UAL
 		QVector<Signal*> m_nonAcquiredBuses;					// non acquired bus signals, used in UAL
 
-		QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
+		//QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
 																		// for grant unique records
 
 		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID

@@ -225,6 +225,18 @@ namespace Builder
 		return result;
 	}
 
+	QString ModuleLogicCompiler::lmEquipmentID()
+	{
+		if (m_lm == nullptr)
+		{
+			assert(false);
+			LOG_NULLPTR_ERROR(m_log);
+			return QString();
+		}
+
+		return m_lm->equipmentIdTemplate();
+	}
+
 	bool ModuleLogicCompiler::loadLMSettings()
 	{
 		bool result = true;
@@ -695,6 +707,11 @@ namespace Builder
 			}
 		}
 
+		for(UalSignal* ualSignal : m_ualSignals)
+		{
+			ualSignal->sortRefSignals();
+		}
+
 		QStringList report;
 
 		m_ualSignals.getReport(report);
@@ -739,9 +756,19 @@ namespace Builder
 			return false;
 		}
 
+		if (m_chassisSignals.contains(signalID) == false)
+		{
+			// The signal '%1' is not associated with LM '%2'.
+			//
+			m_log->errALC5030(signalID, m_lm->equipmentId(), ualItem->guid());
+			return false;
+		}
+
 		bool result = true;
 
-		if (s->isInput() == false)
+		// Only Input and Tuningable signals really can generate UalSignal
+
+		if (s->isInput() == false && s->enableTuning() == false)
 		{
 			result = checkInOutsConnectedToSignal(ualItem, true);
 
@@ -755,8 +782,6 @@ namespace Builder
 
 			return result;
 		}
-
-		// Only Input signal really can generate UalSignal
 
 		if (ualItem->inputs().size() != 0)
 		{
@@ -987,7 +1012,7 @@ namespace Builder
 			//
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::LoopbackOutput:
-				m_ualSignals.appendPinRef(inPinUuid, ualSignal);
+				m_ualSignals.appendRefPin(inPinUuid, ualSignal);
 				break;
 
 			case UalItem::Type::Terminator:
@@ -1050,14 +1075,14 @@ namespace Builder
 			return false;
 		}
 
-		result = m_ualSignals.appendPinRef(inPinUuid, ualSignal);
+		result = m_ualSignals.appendRefPin(inPinUuid, ualSignal);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		result = m_ualSignals.appendSignalRef(s, ualSignal);
+		result = m_ualSignals.appendRefSignal(s, ualSignal);
 
 		if (result == false)
 		{
@@ -1076,7 +1101,7 @@ namespace Builder
 		{
 			const LogicPin& output = outputs[0];
 
-			m_ualSignals.appendPinRef(output.guid(), ualSignal);
+			m_ualSignals.appendRefPin(output.guid(), ualSignal);
 
 			// recursive linking of items
 			//
@@ -1148,7 +1173,7 @@ namespace Builder
 			}
 		}
 
-		return m_ualSignals.appendPinRef(inPinUuid, ualSignal);
+		return m_ualSignals.appendRefPin(inPinUuid, ualSignal);
 	}
 
 	bool ModuleLogicCompiler::detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat)
@@ -2167,7 +2192,7 @@ namespace Builder
 		bool result = true;
 
 		result &= createAcquiredDiscreteInputSignalsList();
-		result &= createAcquiredDiscreteOutputSignalsList();
+		result &= createAcquiredDiscreteStrictOutputSignalsList();
 		result &= createAcquiredDiscreteInternalSignalsList();
 		result &= createAcquiredDiscreteTuningSignalsList();
 
@@ -2204,16 +2229,16 @@ namespace Builder
 		}
 
 		sortSignalList(m_acquiredDiscreteInputSignals);
-		sortSignalList(m_acquiredDiscreteOutputSignals);
+		sortSignalList(m_acquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_acquiredDiscreteInternalSignals);
 		// sortSignalList(m_acquiredDiscreteTuningSignals);			// Not need to sort!
 
 		sortSignalList(m_nonAcquiredDiscreteInputSignals);
-		sortSignalList(m_nonAcquiredDiscreteOutputSignals);
+		sortSignalList(m_nonAcquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
 		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
 
-		sortSignalList(m_acquiredAnalogInputSignals);
+		/*sortSignalList(m_acquiredAnalogInputSignals);
 		sortSignalList(m_acquiredAnalogOutputSignals);
 		sortSignalList(m_acquiredAnalogInternalSignals);
 		// sortSignalList(m_acquiredAnalogTuningSignals);			// Not need to sort!
@@ -2224,7 +2249,7 @@ namespace Builder
 		sortSignalList(m_nonAcquiredAnalogTuningSignals);
 
 		sortSignalList(m_acquiredBuses);
-		sortSignalList(m_nonAcquiredBuses);
+		sortSignalList(m_nonAcquiredBuses);*/
 
 		return result;
 	}
@@ -2232,7 +2257,7 @@ namespace Builder
 	bool ModuleLogicCompiler::createAcquiredDiscreteInputSignalsList()
 	{
 		m_acquiredDiscreteInputSignals.clear();
-		m_acquiredDiscreteInputSignalsMap.clear();
+//		m_acquiredDiscreteInputSignalsMap.clear();
 
 		//	list include signals that:
 		//
@@ -2241,7 +2266,24 @@ namespace Builder
 		//	+ input
 		//	+ no matter used in UAL or not
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isAcquired() == true &&
+				s->isDiscrete() == true &&
+				s->isInput() == true)
+			{
+				m_acquiredDiscreteInputSignals.append(s);
+
+				// if input signal is acquired, then validity signal (if exists) also always acquired
+				//
+
+				//appendLinkedValiditySignal(s);
+			}
+		}
+
+/*		for(Signal* s : m_chassisSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -2259,14 +2301,14 @@ namespace Builder
 				//
 				appendLinkedValiditySignal(s);
 			}
-		}
+		}*/
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createAcquiredDiscreteOutputSignalsList()
+	bool ModuleLogicCompiler::createAcquiredDiscreteStrictOutputSignalsList()
 	{
-		m_acquiredDiscreteOutputSignals.clear();
+		m_acquiredDiscreteStrictOutputSignals.clear();
 
 		//	list include signals that:
 		//
@@ -2284,9 +2326,22 @@ namespace Builder
 				s->isOutput() == true &&
 				isUsedInUal(s) == true)
 			{
-				m_acquiredDiscreteOutputSignals.append(s);
+				m_acquiredDiscreteStrictOutputSignals.append(s);
 			}
 		}
+
+/*		for(Signal* s : m_chassisSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isAcquired() == true &&
+				s->isDiscrete() == true &&
+				s->isOutput() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_acquiredDiscreteStrictOutputSignals.append(s);
+			}
+		}*/
 
 		return true;
 	}
@@ -2888,7 +2943,7 @@ namespace Builder
 		signalsMap.reserve(m_chassisSignals.count());
 
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInputSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteOutputSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteStrictOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInternalSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteTuningSignals);
 
@@ -2932,7 +2987,7 @@ namespace Builder
 		return result;
 	}
 
-	void ModuleLogicCompiler::sortSignalList(QVector<Signal*>& signalList)
+	void ModuleLogicCompiler::sortSignalList(QVector<UalSignal*>& signalList)
 	{
 		int count = signalList.count();
 
@@ -2940,8 +2995,8 @@ namespace Builder
 		{
 			for(int k = i + 1; k < count; k++)
 			{
-				Signal* s1 = signalList[i];
-				Signal* s2 = signalList[k];
+				UalSignal* s1 = signalList[i];
+				UalSignal* s2 = signalList[k];
 
 				if (s1->appSignalID() > s2->appSignalID())
 				{
@@ -3078,7 +3133,7 @@ namespace Builder
 					break;
 
 				case E::SignalInOutType::Output:
-					assert(false);							// output diagnostics signals do not exist
+					assert(false);							// output diagnostics signals is not exist
 					break;
 
 				case E::SignalInOutType::Internal:
@@ -3102,7 +3157,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(Signal* s : m_acquiredDiscreteOutputSignals)
+		for(Signal* s : m_acquiredDiscreteStrictOutputSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -3322,7 +3377,7 @@ namespace Builder
 			return false;
 		}
 
-		for(Signal* s : m_acquiredDiscreteOutputSignals)
+		for(Signal* s : m_acquiredDiscreteStrictOutputSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -7889,7 +7944,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf()
 	{
-		if (m_acquiredDiscreteOutputSignals.isEmpty() == false)
+		if (m_acquiredDiscreteStrictOutputSignals.isEmpty() == false)
 		{
 			assert(m_memoryMap.acquiredDiscreteOutputSignalsSizeW() ==
 				   m_memoryMap.acquiredDiscreteOutputSignalsInRegBufSizeW());
@@ -8102,7 +8157,7 @@ namespace Builder
 	{
 		QVector<Signal*> outDiscreteSignals;
 
-		outDiscreteSignals.append(m_acquiredDiscreteOutputSignals);
+		outDiscreteSignals.append(m_acquiredDiscreteStrictOutputSignals);
 		outDiscreteSignals.append(m_nonAcquiredDiscreteOutputSignals);
 
 //		if (outDiscreteSignals.isEmpty() == true)
@@ -9040,7 +9095,7 @@ namespace Builder
 		QVector<Signal*> acquiredSignals;
 
 		acquiredSignals.append(m_acquiredDiscreteInputSignals);
-		acquiredSignals.append(m_acquiredDiscreteOutputSignals);
+		acquiredSignals.append(m_acquiredDiscreteStrictOutputSignals);
 		acquiredSignals.append(m_acquiredDiscreteInternalSignals);
 		acquiredSignals.append(m_acquiredDiscreteTuningSignals);
 

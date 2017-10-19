@@ -168,6 +168,12 @@ namespace Builder
 				continue;
 			}
 
+			if (s.isInternal() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);				// only Internals can be tuningable
+				return false;
+			}
+
 			if (s.isAnalog() == true)
 			{
 				if (s.lowEngeneeringUnits() >= s.highEngeneeringUnits())

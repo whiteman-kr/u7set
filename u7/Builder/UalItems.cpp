@@ -870,20 +870,21 @@ namespace Builder
 
 	UalSignal::UalSignal(Signal* s)
 	{
+		// regular UalSignal creation
+
 		if (s == nullptr)
 		{
 			assert(false);
 			return;
 		}
 
-		m_isAutoSignal = false;
+		m_autoSignalPtr = nullptr;
 
-		m_signals.append(s);
+		appendRefSignal(s, false);
 
-		// believe that all input and tuning signals have already been computed
+		// input and tuning signals have already been computed
 		//
-		if ( s->isInput() == true ||
-			(s->isInternal() == true && s->enableTuning() == true))
+		if (isSource() == true)
 		{
 			setComputed();
 		}
@@ -895,38 +896,36 @@ namespace Builder
 			  int constIntValue,
 			  float constFloatValue)
 	{
-		// const signal creation
+		// const UalSignal creation
 
-		m_isAutoSignal = true;
+		m_autoSignalPtr = new Signal;
 
-		Signal* s = new Signal;
+		m_autoSignalPtr->setAppSignalID(constSignalID);
+		m_autoSignalPtr->setCustomAppSignalID(QString(constSignalID).remove("#"));
+		m_autoSignalPtr->setCaption(m_autoSignalPtr->customAppSignalID());
 
-		s->setAppSignalID(constSignalID);
-		s->setCustomAppSignalID(QString(constSignalID).remove("#"));
-		s->setCaption(s->customAppSignalID());
-
-		s->setSignalType(constSignalType);
-		s->setInOutType(E::SignalInOutType::Internal);
-		s->setAnalogSignalFormat(constAnalogFormat);
+		m_autoSignalPtr->setSignalType(constSignalType);
+		m_autoSignalPtr->setInOutType(E::SignalInOutType::Input);
+		m_autoSignalPtr->setAnalogSignalFormat(constAnalogFormat);
 
 		switch(constSignalType)
 		{
 		case E::SignalType::Discrete:
-			s->setDataSize(SIZE_1BIT);
+			m_autoSignalPtr->setDataSize(SIZE_1BIT);
 			break;
 
 		case E::SignalType::Analog:
 			assert(constAnalogFormat == E::AnalogAppSignalFormat::Float32 || constAnalogFormat == E::AnalogAppSignalFormat::SignedInt32);
-			s->setDataSize(SIZE_32BIT);
+			m_autoSignalPtr->setDataSize(SIZE_32BIT);
 			break;
 
 		default:
 			assert(false);
 		}
 
-		s->setAcquire(false);
+		m_autoSignalPtr->setAcquire(false);
 
-		m_signals.append(s);
+		appendRefSignal(m_autoSignalPtr, false);
 
 		// set Const signal fields
 
@@ -941,40 +940,62 @@ namespace Builder
 			  E::SignalType signalType,
 			  E::AnalogAppSignalFormat analogFormat)
 	{
-		// analog or discrete auto signal creation
-		// const signal creation
+		// analog or discrete auto UalSignal creation
 
-		m_isAutoSignal = true;
+		m_autoSignalPtr = new Signal;
 
-		Signal* s = new Signal;
+		m_autoSignalPtr->setAppSignalID(signalID);
+		m_autoSignalPtr->setCustomAppSignalID(QString(signalID).remove("#"));
+		m_autoSignalPtr->setCaption(m_autoSignalPtr->customAppSignalID());
 
-		s->setAppSignalID(signalID);
-		s->setCustomAppSignalID(QString(signalID).remove("#"));
-		s->setCaption(s->customAppSignalID());
-
-		s->setSignalType(signalType);
-		s->setInOutType(E::SignalInOutType::Internal);
-		s->setAnalogSignalFormat(analogFormat);
+		m_autoSignalPtr->setSignalType(signalType);
+		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);
+		m_autoSignalPtr->setAnalogSignalFormat(analogFormat);
 
 		switch(signalType)
 		{
 		case E::SignalType::Discrete:
-			s->setDataSize(SIZE_1BIT);
+			m_autoSignalPtr->setDataSize(SIZE_1BIT);
 			break;
 
 		case E::SignalType::Analog:
 			assert(analogFormat == E::AnalogAppSignalFormat::Float32 || analogFormat == E::AnalogAppSignalFormat::SignedInt32);
-			s->setDataSize(SIZE_32BIT);
+			m_autoSignalPtr->setDataSize(SIZE_32BIT);
 			break;
 
 		default:
 			assert(false);
 		}
 
-		s->setAcquire(false);
+		m_autoSignalPtr->setAcquire(false);
 
-		m_signals.append(s);
+		appendRefSignal(m_autoSignalPtr, false);
 	}
+
+	UalSignal::UalSignal(Signal* s, const QString& lmEquipmentID)
+	{
+		// Opto UalSignal creation
+
+		if (s == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		assert(s->equipmentID() != lmEquipmentID);				// s - is a signal from another LM received by Opto connection
+
+		// create new instance of Signal
+
+		m_autoSignalPtr = new Signal(*s);
+
+		m_autoSignalPtr->setEquipmentID(lmEquipmentID);			// associate new signal with current lm
+		m_autoSignalPtr->setAcquire(false);
+
+		appendRefSignal(m_autoSignalPtr, true);
+
+		setComputed();
+	}
+
 
 	UalSignal::UalSignal(const QUuid& guid, E::SignalType signalType,
 						 E::AnalogAppSignalFormat dataFormat,
@@ -1020,23 +1041,23 @@ namespace Builder
 
 	UalSignal::~UalSignal()
 	{
-		if (m_isAutoSignal == true)
+		if (m_autoSignalPtr != nullptr)
 		{
-			if (m_signals.size() < 1)
-			{
-				assert(false);
-				return;
-			}
-
-			// Pointer on Auto Signal objects, created inside UalSignal constructor, is ALWAYS stored in m_signals[0]
-			//
-			delete m_signals[0];
+			delete m_autoSignalPtr;
 		}
+
+		m_refSignals.clear();
 	}
 
-	bool UalSignal::appendSignalRef(Signal* s)
+	bool UalSignal::appendRefSignal(Signal* s, bool isOptoSignal)
 	{
-		for(Signal* pesentSignal : m_signals)
+		if (s == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		for(Signal* pesentSignal : m_refSignals)
 		{
 			if (pesentSignal == nullptr)
 			{
@@ -1051,7 +1072,74 @@ namespace Builder
 			}
 		}
 
-		m_signals.append(s);
+		if (m_refSignals.count() > 0)
+		{
+			// check signals compatibility
+			//
+			Signal* first = m_refSignals[0];
+
+			if (first->signalType() != s->signalType())
+			{
+				assert(false);
+				return false;
+			}
+
+			if (first->dataSize() != s->dataSize())
+			{
+				assert(false);
+				return false;
+			}
+
+			if (first->isAnalog() == true)
+			{
+				if (first->analogSignalFormat() != s->analogSignalFormat())
+				{
+					assert(false);
+					return false;
+				}
+
+				if (first->byteOrder() != s->byteOrder())
+				{
+					assert(false);
+					return false;
+				}
+			}
+
+			if (first->isBus() == true)
+			{
+				if (first->busTypeID() != s->busTypeID())
+				{
+					assert(false);
+					return false;
+				}
+			}
+
+			if (isSource() == true &&
+				(s->isInput() == true || s->enableTuning() == true || isOptoSignal == true))
+			{
+				// only one Source signal in m_signals[] can be exists
+				//
+				assert(false);
+				return false;
+			}
+		}
+
+		m_refSignals.append(s);
+
+		// In UalSignal, Input, Tuningable and Opto signals treat as Source
+
+		m_isInput |= s->isInput();
+		m_isTuningable |= s->enableTuning();
+		m_isOptoSignal |= isOptoSignal;
+
+		// UalSignal can be Input and Output simultaneously (also as Tuningable and Output, OptoSignal and Output)
+		// for example, if Input Signal directly connected to Output Signal (or Tuningable => Output, OptoSignal => Output)
+		// in this case m_ualAddress set to Sourcet signal ioBufAddr and memory for that signal is not allocate (used ioBuf memory)
+		// value of Source signal can't be changed by UAL
+
+		m_isOutput |= s->isOutput();
+
+		m_isAcquired |= s->isAcquired();
 
 		return true;
 	}
@@ -1060,7 +1148,7 @@ namespace Builder
 	{
 		appSignalIDs.clear();
 
-		for(Signal* s : m_signals)
+		for(Signal* s : m_refSignals)
 		{
 			if (s == nullptr)
 			{
@@ -1072,6 +1160,17 @@ namespace Builder
 		}
 	}
 
+	Signal* UalSignal::firstSignal() const
+	{
+		if (m_refSignals.count() < 1)
+		{
+			assert(false);
+			return nullptr;
+		}
+
+		return m_refSignals[0];
+	}
+
 	bool UalSignal::isCompatible(const Signal* s) const
 	{
 		if (s == nullptr)
@@ -1080,18 +1179,18 @@ namespace Builder
 			return false;
 		}
 
-		if (m_signals.count() < 1 || m_signals[0] == nullptr)
+		if (m_refSignals.count() < 1 || m_refSignals[0] == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		return m_signals[0]->isCompatibleFormat(*s);
+		return m_refSignals[0]->isCompatibleFormat(*s);
 	}
 
 	bool UalSignal::isCompatible(const LogicAfbSignal& afbSignal) const
 	{
-		if (m_signals.count() < 1 || m_signals[0] == nullptr)
+		if (m_refSignals.count() < 1 || m_refSignals[0] == nullptr)
 		{
 			assert(false);
 			return false;
@@ -1103,14 +1202,14 @@ namespace Builder
 			return false;
 //			m_signals[0]->isCompatibleFormat(E::SignalType::Bus);
 		}
-		return m_signals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
+		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
 
 	E::SignalType UalSignal::constType() const
 	{
 		assert(m_isConst == true);
 
-		return m_signals[0]->signalType();
+		return m_refSignals[0]->signalType();
 	}
 
 	E::AnalogAppSignalFormat UalSignal::constAnalogFormat() const
@@ -1118,7 +1217,7 @@ namespace Builder
 		assert(m_isConst == true);
 		assert(constType() == E::SignalType::Analog);
 
-		return m_signals[0]->analogSignalFormat();
+		return m_refSignals[0]->analogSignalFormat();
 	}
 
 	int UalSignal::constDiscreteValue() const
@@ -1143,6 +1242,51 @@ namespace Builder
 		assert(constAnalogFormat() == E::AnalogAppSignalFormat::Float32);
 
 		return m_constFloatValue;
+	}
+
+	bool UalSignal::setUalAddr(Address16 ualAddr)
+	{
+		assert(ualAddr.isValid() == true);
+
+		if (m_ualAddr.isValid() == true)
+		{
+			assert(false);				// m_ualAddr is already set
+			return false;
+		}
+
+		m_ualAddr = ualAddr;
+
+		// set same ual address for all associated signals
+
+		for(Signal* s : m_refSignals)
+		{
+			assert(s->ualAddr().isValid() == false);
+
+			s->setUalAddr(ualAddr);
+		}
+
+		return true;
+	}
+
+	void UalSignal::sortRefSignals()
+	{
+		// sorting m_refSignals by m_refSignals[i]->appSignalID ascending
+		//
+
+		int count = m_refSignals.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				if (m_refSignals[i]->appSignalID() > m_refSignals[k]->appSignalID())
+				{
+					Signal* tmp = m_refSignals[i];
+					m_refSignals[i] = m_refSignals[k];
+					m_refSignals[k] = tmp;
+				}
+			}
+		}
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -1180,7 +1324,7 @@ namespace Builder
 			assert(ualSignal->signal() == s);
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
 
-			appendPinToSignalRef(outPinUuid, ualSignal);
+			appendPinRefToSignal(outPinUuid, ualSignal);
 
 			return ualSignal;
 		}
@@ -1217,7 +1361,7 @@ namespace Builder
 
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
 
-			appendPinToSignalRef(outPinUuid, ualSignal);
+			appendPinRefToSignal(outPinUuid, ualSignal);
 
 			return ualSignal;
 		}
@@ -1239,7 +1383,9 @@ namespace Builder
 
 	UalSignal* UalSignalsMap::createAutoSignal(const UalItem *ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal)
 	{
-		QString signalID = QString("#AUTO_SIGNAL_%1").arg(ualItem->label());
+		QString signalID = QString("#AUTO_SIGNAL_%1_%2").arg(ualItem->label().arg(outAfbSignal.caption()));
+
+		signalID = signalID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
 
 		UalSignal* ualSignal = m_idToSignalMap.value(signalID, nullptr);
 
@@ -1250,7 +1396,7 @@ namespace Builder
 			assert(false);
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
 
-			appendPinToSignalRef(outPinUuid, ualSignal);
+			appendPinRefToSignal(outPinUuid, ualSignal);
 
 			return ualSignal;
 		}
@@ -1283,7 +1429,55 @@ namespace Builder
 		return ualSignal;
 	}
 
-	bool UalSignalsMap::appendPinRef(QUuid pinUuid, UalSignal* ualSignal)
+	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, QUuid outPinUuid)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return nullptr;
+		}
+
+		const UalReceiver* receiver = ualItem->ualReceiver();
+
+		QString signalID = receiver->appSignalId();
+
+		UalSignal* ualSignal = m_idToSignalMap.value(signalID, nullptr);
+
+		if (ualSignal != nullptr)
+		{
+			// signal already in map
+			//
+			assert(m_pinToSignalMap.contains(outPinUuid) == false);
+
+			appendPinRefToSignal(outPinUuid, ualSignal);
+
+			return ualSignal;
+		}
+
+		Signal* s = m_compiler.signalSet().getSignal(signalID);
+
+		if (s == nullptr)
+		{
+			m_log->errALC5000(signalID, ualItem->guid(), ualItem->schemaID());
+			return nullptr;
+		}
+
+		// create opto signal
+		//
+		ualSignal = new UalSignal(s, m_compiler.lmEquipmentID());
+
+		bool result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return false;
+		}
+
+		return ualSignal;
+	}
+
+	bool UalSignalsMap::appendRefPin(QUuid pinUuid, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr)
 		{
@@ -1313,12 +1507,12 @@ namespace Builder
 			return false;
 		}
 
-		appendPinToSignalRef(pinUuid, ualSignal);
+		appendPinRefToSignal(pinUuid, ualSignal);
 
 		return true;
 	}
 
-	bool UalSignalsMap::appendSignalRef(Signal* s, UalSignal* ualSignal)
+	bool UalSignalsMap::appendRefSignal(Signal* s, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr || s == nullptr)
 		{
@@ -1333,13 +1527,16 @@ namespace Builder
 			return false;
 		}
 
-		UalSignal* existsSignal = m_idToSignalMap.value(s->appSignalID(), nullptr);
+		UalSignal* existsSignal = m_ptrToSignalMap.value(s, nullptr);
 
 		if (existsSignal != nullptr)
 		{
 			if (existsSignal == ualSignal)
 			{
-				return true;					// ref to same signal, its Ok
+				// ref to same signal, its Ok
+				//
+				assert(false);					// for debug
+				return true;
 			}
 
 			assert(false);
@@ -1347,7 +1544,24 @@ namespace Builder
 			return false;
 		}
 
-		bool result = ualSignal->appendSignalRef(s);
+		existsSignal = m_idToSignalMap.value(s->appSignalID(), nullptr);
+
+		if (existsSignal != nullptr)
+		{
+			if (existsSignal == ualSignal)
+			{
+				// ref to same signal, its Ok
+				//
+				assert(false);					// for debug
+				return true;
+			}
+
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
+			return false;
+		}
+
+		bool result = ualSignal->appendRefSignal(s, false);
 
 		if (result == false)
 		{
@@ -1358,8 +1572,6 @@ namespace Builder
 
 		return true;
 	}
-
-
 
 	bool UalSignalsMap::insertUalSignal(const UalItem* ualSignal)
 	{
@@ -1628,17 +1840,41 @@ namespace Builder
 			return false;
 		}
 
+		Signal* firstSignal = newUalSignal->firstSignal();
+
+		if (firstSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (m_ptrToSignalMap.contains(firstSignal) == true)
+		{
+			assert(false);
+			return false;
+		}
+
+		// all right - insert signal in maps
+
 		insert(newUalSignal, newUalSignal);
 
 		m_idToSignalMap.insert(signalID, newUalSignal);
 
-		appendPinToSignalRef(pinUuid, newUalSignal);
+		m_ptrToSignalMap.insert(firstSignal, newUalSignal);
+
+		appendPinRefToSignal(pinUuid, newUalSignal);
 
 		return true;
 	}
 
-	void UalSignalsMap::appendPinToSignalRef(QUuid pinUuid, UalSignal* ualSignal)
+	void UalSignalsMap::appendPinRefToSignal(QUuid pinUuid, UalSignal* ualSignal)
 	{
+		if (pinUuid.isNull() == true)
+		{
+			assert(false);
+			return;
+		}
+
 		if (ualSignal == nullptr)
 		{
 			assert(false);

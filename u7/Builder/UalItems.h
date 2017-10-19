@@ -31,6 +31,7 @@ namespace Builder
 
 	typedef VFrame30::SchemaItemTransmitter LogicTransmitter;
 	typedef VFrame30::SchemaItemReceiver LogicReceiver;
+	typedef VFrame30::SchemaItemReceiver UalReceiver;
 
 	typedef VFrame30::SchemaItemBusComposer UalBusComposer;
 	typedef VFrame30::SchemaItemBusExtractor UalBusExtractor;
@@ -158,6 +159,7 @@ namespace Builder
 		const UalConst* ualConst() const { return m_appLogicItem.m_fblItem->toSchemaItemConst(); }
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
+		const UalReceiver* ualReceiver() const { return m_appLogicItem.m_fblItem->toReceiverElement(); }
 
 		const UalBusComposer* ualBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
 		const UalBusExtractor* ualBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
@@ -355,7 +357,10 @@ namespace Builder
 		// Application Signal
 		// represent all signal in application logic schemas, and signals, which createad in compiling time
 		//
-	public:
+	private:
+
+		// private constructors can be used by UalSignalsMap only
+		//
 		UalSignal(Signal* s);
 
 		UalSignal(const QString& constSignalID,
@@ -368,12 +373,19 @@ namespace Builder
 				  E::SignalType signalType,
 				  E::AnalogAppSignalFormat analogFormat);
 
+		UalSignal(Signal* s, const QString &lmEquipmentID);
+
+		friend class UalSignalsMap;
+
+		UalSignal(const UalSignal&) = delete;
+
+	public:
 		UalSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const UalItem* appItem, const QString& appSignalID);
 		UalSignal(const QUuid& guid, const QString &signalID, const QString& busTypeID, int busSizeW);
 
 		~UalSignal();
 
-		bool appendSignalRef(Signal* s);
+		bool appendRefSignal(Signal* s, bool isOptoSignal);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -381,40 +393,49 @@ namespace Builder
 		void setResultSaved() { m_resultSaved = true; }
 		bool isResultSaved() const { return m_resultSaved; }
 
-		bool isAutoSignal() const { return m_isAutoSignal; }
-
-		QString appSignalID() const { return m_signals[0]->appSignalID(); }
+		QString appSignalID() const { return m_refSignals[0]->appSignalID(); }
 
 		void appSignalIDs(QStringList& appSignalIDs);
 
 		Address16 ualAddr() const { return m_ualAddr; }
 		Address16 regBufAddr() const { return m_regBufAddr; }
 
-		E::SignalType signalType() const { return m_signals[0]->signalType(); }
-		E::AnalogAppSignalFormat analogSignalFormat() const { return m_signals[0]->analogSignalFormat(); }
-		int dataSize() const { return m_signals[0]->dataSize(); }
+		Signal* firstSignal() const;
 
-		bool isAnalog() const { return m_signals[0]->isAnalog(); }
-		bool isDiscrete() const { return m_signals[0]->isDiscrete(); }
-		bool isBus() const { return m_signals[0]->isBus(); }
+		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
+		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
+		int dataSize() const { return m_refSignals[0]->dataSize(); }
 
-		bool isAcquired() const { return m_signals[0]->isAcquired(); }
-		bool isInternal() const { return m_signals[0]->isInternal(); }
-		bool isInput() const { return m_signals[0]->isInput(); }
-		bool isOutput() const { return m_signals[0]->isOutput(); }
-		bool enableTuning() const { return m_signals[0]->enableTuning(); }
+		bool isAnalog() const { return m_refSignals[0]->isAnalog(); }
+		bool isDiscrete() const { return m_refSignals[0]->isDiscrete(); }
+		bool isBus() const { return m_refSignals[0]->isBus(); }
 
-		QString busTypeID() const { return m_signals[0]->busTypeID(); }
+		QString busTypeID() const { return m_refSignals[0]->busTypeID(); }
 
-		const Signal& constSignal() { return *m_signals[0]; }
+		const Signal& constSignal() { return *m_refSignals[0]; }
 
-		Signal* signal() { return m_signals[0]; }
-		const Signal* signal() const { return m_signals[0]; }
+		Signal* signal() { return m_refSignals[0]; }
+		const Signal* signal() const { return m_refSignals[0]; }
 
-		int signalRefCount() const { return m_signals.count(); }
+		int refSignalsCount() const { return m_refSignals.count(); }
 
 		bool isCompatible(const Signal* s) const;
 		bool isCompatible(const LogicAfbSignal& afbSignal) const;
+
+		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
+
+		bool isInput() const { return m_isInput; }
+		bool isTuningable() const { return m_isTuningable; }
+		bool isOptoSignal() const { return m_isOptoSignal; }
+
+		bool isSource() const { return m_isInput || m_isTuningable || m_isOptoSignal; }
+
+		bool isOutput() const { return m_isOutput; }
+		bool isStrictOutput() const { return m_isOutput && isSource() == false; }
+
+		bool isInternal() const { return m_isInput == false && m_isOutput == false; }
+
+		bool isAcquired() const { return m_isAcquired; }
 
 		//
 
@@ -425,8 +446,14 @@ namespace Builder
 		int constAnalogIntValue() const;
 		float constAnalogFloatValue() const;
 
+		bool setUalAddr(Address16 ualAddr);
+
+		void sortRefSignals();
+
 	private:
-		QVector<Signal*> m_signals;							// vector of pointers to signal in m_signalSet
+		Signal* m_autoSignalPtr = nullptr;
+
+		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
 
 		//
 
@@ -439,7 +466,12 @@ namespace Builder
 
 		BusShared m_bus;
 
-		bool m_isAutoSignal = false;
+		bool m_isInput = false;							// signal sources
+		bool m_isTuningable = false;
+		bool m_isOptoSignal = false;
+
+		bool m_isOutput = false;
+		bool m_isAcquired = false;
 
 		bool m_computed = false;
 		bool m_resultSaved = false;
@@ -469,8 +501,10 @@ namespace Builder
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
-		bool appendPinRef(QUuid pinUuid, UalSignal* ualSignal);
-		bool appendSignalRef(Signal* s, UalSignal* ualSignal);
+		UalSignal* createOptoSignal(const UalItem* ualItem, QUuid outPinUuid);
+
+		bool appendRefPin(QUuid pinUuid, UalSignal* ualSignal);
+		bool appendRefSignal(Signal* s, UalSignal* ualSignal);
 
 		UalSignal* get(const QString& appSignalID) const { return m_idToSignalMap.value(appSignalID, nullptr); }
 		bool contains(const QString& appSignalID) const { return m_idToSignalMap.contains(appSignalID); }
@@ -488,7 +522,7 @@ namespace Builder
 
 	private:
 		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);
-		void appendPinToSignalRef(QUuid pinUuid, UalSignal* ualSignal);
+		void appendPinRefToSignal(QUuid pinUuid, UalSignal* ualSignal);
 
 		QString getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin);
 
@@ -506,6 +540,7 @@ namespace Builder
 		QHash<QString, UalSignal*> m_idToSignalMap;
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
 		QHash<UalSignal*, QUuid> m_signalToPinsMap;
+		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
 	};
 
 }

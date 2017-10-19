@@ -1127,7 +1127,7 @@ bool SignalSet::ID2IndexMapIsEmpty()
 	return m_strID2IndexMap.isEmpty();
 }
 
-bool SignalSet::contains(const QString& appSignalID)
+bool SignalSet::contains(const QString& appSignalID) const
 {
 	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
 	{
