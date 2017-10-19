@@ -433,7 +433,7 @@ namespace Builder
 		bool isOutput() const { return m_isOutput; }
 		bool isStrictOutput() const { return m_isOutput && isSource() == false; }
 
-		bool isInternal() const { return m_isInput == false && m_isOutput == false; }
+		bool isInternal() const { return isSource() == false && m_isOutput == false; }
 
 		bool isAcquired() const { return m_isAcquired; }
 
@@ -491,6 +491,8 @@ namespace Builder
 		QHash<UalSignal*, UalSignal*>::const_iterator begin() const { return QHash<UalSignal*, UalSignal*>::begin(); }
 		QHash<UalSignal*, UalSignal*>::iterator end() { return QHash<UalSignal*, UalSignal*>::end(); }
 		QHash<UalSignal*, UalSignal*>::const_iterator end() const { return QHash<UalSignal*, UalSignal*>::end(); }
+
+		UalSignal* createSignal(Signal* s);
 
 		UalSignal* createSignal(Signal* s, QUuid outPinUuid);
 

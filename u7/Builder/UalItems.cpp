@@ -1307,6 +1307,11 @@ namespace Builder
 		clear();
 	}
 
+	UalSignal* UalSignalsMap::createSignal(Signal* s)
+	{
+		return createSignal(s, QUuid());
+	}
+
 	UalSignal* UalSignalsMap::createSignal(Signal* s, QUuid outPinUuid)
 	{
 		if (s == nullptr)
@@ -1871,8 +1876,7 @@ namespace Builder
 	{
 		if (pinUuid.isNull() == true)
 		{
-			assert(false);
-			return;
+			return;							// is not an error
 		}
 
 		if (ualSignal == nullptr)

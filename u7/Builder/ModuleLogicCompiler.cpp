@@ -160,6 +160,12 @@ namespace Builder
 		{
 			if (finalizeOptoConnectionsProcessing() == false) break;
 
+			//
+			// set addresses of Opto UalSignals here !!!!!!!!!!
+			//
+			// generate signals TestData or report here
+			//
+
 			// LM program code generation
 			//
 			if (generateAppStartCommand() == false) break;
@@ -638,6 +644,35 @@ namespace Builder
 		m_outPinSignal.clear();
 
 		bool result = true;
+
+		// fill m_ualSignals by Input and Tuning Acquired signals
+		//
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				continue;
+			}
+
+			if (s->isAcquired() == false)
+			{
+				continue;
+			}
+
+			if (s->isInput() == true)
+			{
+				m_ualSignals.createSignal(s);
+				continue;
+			}
+
+			if (s->enableTuning() == true)
+			{
+				assert(s->isInternal());
+				m_ualSignals.createSignal(s);
+				continue;
+			}
+		}
 
 		// create Bus signals and Bus child signals from BusComposers
 		//
@@ -2317,14 +2352,13 @@ namespace Builder
 		//	+ output
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isDiscrete() == true &&
-				s->isOutput() == true &&
-				isUsedInUal(s) == true)
+				s->isStrictOutput() == true)
 			{
 				m_acquiredDiscreteStrictOutputSignals.append(s);
 			}
@@ -2358,7 +2392,19 @@ namespace Builder
 		//  - enableTuning
 		//	+ used in UAL || is a SerialRx signal
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isAcquired() == true &&
+				s->isDiscrete() == true &&
+				s->isInternal() == true)
+			{
+				m_acquiredDiscreteInternalSignals.append(s);
+			}
+		}
+
+/*		for(Signal* s : m_chassisSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -2371,7 +2417,7 @@ namespace Builder
 			{
 				m_acquiredDiscreteInternalSignals.append(s);
 			}
-		}
+		}*/
 
 		return true;
 	}
