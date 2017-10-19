@@ -1840,11 +1840,18 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		return QStringList();
 	}
 
+	SignalsModel* model = SignalsModel::instance();
+	model->loadSignals();
+
+	QList<int> selectIdList;
 	QStringList result;
 	for (Signal& signal : signalVector)
 	{
 		result << signal.appSignalID();
+		selectIdList << signal.ID();
 	}
+
+	model->parentWindow()->setSelection(selectIdList);
 
 	return result;
 }
@@ -2207,6 +2214,26 @@ void SignalsTabPage::changeSignalActionsVisibility()
 		}
 		emit setSignalActionsVisibility(false);
 	}
+}
+
+void SignalsTabPage::setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID)
+{
+	if (selectedRowsSignalID.isEmpty())
+	{
+		return;
+	}
+	if (focusedCellSignalID == -1)
+	{
+		focusedCellSignalID = selectedRowsSignalID.last();
+	}
+	m_selectedRowsSignalID = selectedRowsSignalID;
+
+	int focusedRow = m_signalsModel->keyIndex(focusedCellSignalID);
+
+	m_lastVerticalScrollPosition = m_signalsView->rowViewportPosition(focusedRow);
+	m_lastHorizontalScrollPosition = 0;
+
+	restoreSelection(focusedCellSignalID);
 }
 
 void SignalsTabPage::saveSelection()
