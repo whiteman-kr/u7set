@@ -114,6 +114,7 @@ public:
 	int bitAddress() const { return m_offset * 16 + m_bit; }
 };
 
+bool operator == (const Address16& addr1, const Address16& addr2);
 
 class SignalAddress16 : public Address16
 {

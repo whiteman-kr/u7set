@@ -310,6 +310,8 @@ namespace Builder
 		void errALC5117(QUuid uuid1, QUuid uuid2, QString schemaID);					// Uncompatible signals connection (Logic schema '%1').
 		void errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID);			// Signal '%1' is not connected to any signal source. (Logic schema '%2').
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
+		void errALC5120(QUuid ualItemUuid, QUuid pinUuid, QString schemaID);			// UalSignal is not found for pin '%1' (Logic schema '%2').
+		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input or tuningable signal '%1' (Logic schema '%2').
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
@@ -320,7 +322,6 @@ namespace Builder
 		void errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connect to transmitter (Connection '%3').
 		void errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
 		void wrnALC5194(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
-
 
 		// EQP			Equipment issues						6000-6999
 		//

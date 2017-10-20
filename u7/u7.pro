@@ -196,7 +196,8 @@ SOURCES +=\
     Builder/Busses.cpp \
     IdePropertyEditor.cpp \
     Builder/UalItems.cpp \
-    EditEngine/EditEngineSetObject.cpp
+    EditEngine/EditEngineSetObject.cpp \
+    ../lib/address16.cpp
 
 HEADERS  += \
     CentralWidget.h \

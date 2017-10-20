@@ -168,7 +168,7 @@ namespace Builder
 		bool appendLinkedValiditySignal(const Signal* s);
 
 		bool listsUniquenessCheck() const;
-		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;
+		bool listUniquenessCheck(QHash<UalSignal*, UalSignal*>& signalsMap, const QVector<UalSignal*>& signalList) const;
 		void sortSignalList(QVector<UalSignal*> &signalList);
 
 		bool disposeSignalsInMemory();
@@ -438,6 +438,8 @@ namespace Builder
 
 		static const char* BUS_COMPOSER_CAPTION;
 		static const char* BUS_EXTRACTOR_CAPTION;
+
+		static const char* TEST_DATA_DIR;
 
 		QVector<UalItem*> m_scalAppItems;
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;

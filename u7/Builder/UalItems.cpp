@@ -1289,6 +1289,23 @@ namespace Builder
 		}
 	}
 
+	Signal* UalSignal::getInputSignal()
+	{
+		Signal* inputSignal = nullptr;
+
+		for(Signal* s : m_refSignals)
+		{
+			if (s->isInput() == true)
+			{
+				inputSignal = s;
+				break;
+			}
+		}
+
+		return inputSignal;
+	}
+
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppSignalsMap class implementation
@@ -1540,7 +1557,6 @@ namespace Builder
 			{
 				// ref to same signal, its Ok
 				//
-				assert(false);					// for debug
 				return true;
 			}
 
@@ -1791,11 +1807,16 @@ namespace Builder
 				continue;
 			}
 
+			QString str;
+
+			str.append(QString::number(ualSignal->ualAddr().offset()));
+			str += ";";
+			str.append(QString::number(ualSignal->ualAddr().bit()));
+			str += ";";
+
 			QStringList refSignalsIDs;
 
 			ualSignal->appSignalIDs(refSignalsIDs);
-
-			QString str;
 
 			for(const QString& refSignalID : refSignalsIDs)
 			{
@@ -1804,10 +1825,8 @@ namespace Builder
 
 			QList<QUuid> pinsRef = m_signalToPinsMap.values(ualSignal);
 
-			if (pinsRef.count() == 0)
-			{
-				assert(false);
-			}
+			// if pinsRef.count() == 0 - is not an error
+			// for example, all acquired input discretes appends to ualSignals even if don't used in UAL
 
 			str += QString::number(pinsRef.count());
 

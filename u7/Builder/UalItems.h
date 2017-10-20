@@ -405,6 +405,7 @@ namespace Builder
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
 		int dataSize() const { return m_refSignals[0]->dataSize(); }
+		int sizeW() const { return m_refSignals[0]->sizeW(); }
 
 		bool isAnalog() const { return m_refSignals[0]->isAnalog(); }
 		bool isDiscrete() const { return m_refSignals[0]->isDiscrete(); }
@@ -417,6 +418,7 @@ namespace Builder
 		Signal* signal() { return m_refSignals[0]; }
 		const Signal* signal() const { return m_refSignals[0]; }
 
+		const QVector<Signal*>& refSignals() const { return m_refSignals; }
 		int refSignalsCount() const { return m_refSignals.count(); }
 
 		bool isCompatible(const Signal* s) const;
@@ -449,6 +451,8 @@ namespace Builder
 		bool setUalAddr(Address16 ualAddr);
 
 		void sortRefSignals();
+
+		Signal* getInputSignal();
 
 	private:
 		Signal* m_autoSignalPtr = nullptr;

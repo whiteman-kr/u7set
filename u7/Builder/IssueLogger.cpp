@@ -4651,6 +4651,51 @@ namespace Builder
 				  QString(tr("Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').")).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5120
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		UalSignal is not found for pin with specified Uuid. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5120(QUuid ualItemUuid, QUuid pinUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5120,
+				  QString(tr("UalSignal is not found for pin '%1' (Logic schema '%2').")).
+							arg(pinUuid.toString()).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5121
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Can't assign value to input or tuningable signal '%1' (Logic schema '%2')
+	///
+	/// Parameters:
+	///		%1 App signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Value of input or tuningable signals cannot be modified by UAL.
+	///
+	void IssueLogger::errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5121,
+				  QString(tr("Can't assign value to input or tuningable signal '%1' (Logic schema '%2').")).
+							arg(appSignalID).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

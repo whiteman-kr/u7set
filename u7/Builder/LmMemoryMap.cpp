@@ -1,6 +1,9 @@
 #include "../Builder/LmMemoryMap.h"
 #include "../lib/WUtils.h"
 
+#include "UalItems.h"
+
+
 namespace Builder
 {
 
@@ -29,11 +32,17 @@ namespace Builder
 	}
 
 
-	Address16 MemoryArea::appendSignal(const Signal& signal)
+	Address16 MemoryArea::appendSignal(const UalSignal* ualSignal)
 	{
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return Address16();
+		}
+
 		Address16 signalAddress;
 
-		if (signal.isAnalog())
+		if (ualSignal->isAnalog())
 		{
 			// do word-align
 			//
@@ -42,10 +51,10 @@ namespace Builder
 
 		signalAddress = m_nextSignalAddress;
 
-		switch(signal.signalType())
+		switch(ualSignal->signalType())
 		{
 		case E::SignalType::Analog:
-			m_nextSignalAddress.addWord(signal.sizeW());
+			m_nextSignalAddress.addWord(ualSignal->sizeW());
 			break;
 
 		case E::SignalType::Discrete:
@@ -53,14 +62,14 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			m_nextSignalAddress.addWord(signal.sizeW());
+			m_nextSignalAddress.addWord(ualSignal->sizeW());
 			break;
 
 		default:
 			assert(false);
 		}
 
-		m_signals.append(SignalAddress16(signal.appSignalID(), signalAddress, signal.sizeW(), signal.isDiscrete()));
+		appendUalRefSignals(signalAddress, ualSignal);
 
 		m_sizeW = m_nextSignalAddress.offset() - m_startAddress;
 
@@ -72,6 +81,27 @@ namespace Builder
 		return signalAddress;
 	}
 
+	void MemoryArea::appendUalRefSignals(const Address16& addr16, const UalSignal* ualSignal)
+	{
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		const QVector<Signal*>& refSignals = ualSignal->refSignals();
+
+		for(const Signal* s : refSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			m_signals.append(SignalAddress16(s->appSignalID(), addr16, s->sizeW(), s->isDiscrete()));
+		}
+	}
 
 	// ---------------------------------------------------------------------------------
 	//
@@ -468,40 +498,95 @@ namespace Builder
 		memFile.append("");
 	}
 
-	Address16 LmMemoryMap::appendAcquiredDiscreteOutputSignal(const Signal& signal)
+	bool LmMemoryMap::appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals)
 	{
-		assert(signal.isAcquired() == true &&
-			   signal.isDiscrete() == true &&
-			   signal.isOutput() == true);
+		bool result = true;
 
-		return m_appBitAdressed.acquiredDiscreteOutputSignals.appendSignal(signal);
+		for(UalSignal* ualSignal : ualSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			Address16 addr = memArea.appendSignal(ualSignal);
+
+			ualSignal->setUalAddr(addr);
+		}
+
+		return result;
 	}
 
-	Address16 LmMemoryMap::appendAcquiredDiscreteInternalSignal(const Signal& signal)
+	bool LmMemoryMap::appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals)
 	{
-		assert(signal.isAcquired() == true &&
-			   signal.isDiscrete() == true &&
-			   signal.isInternal() == true);
+		bool result = true;
 
-		return m_appBitAdressed.acquiredDiscreteInternalSignals.appendSignal(signal);
+		for(UalSignal* ualSignal : ualSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			Address16 addr = memArea.appendSignal(ualSignal);
+
+			ualSignal->setRegAddr(addr);
+		}
+
+		return result;
 	}
 
-	Address16 LmMemoryMap::appendNonAcquiredDiscreteOutputSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == false &&
-			   signal.isDiscrete() == true &&
-			   signal.isOutput() == true);
 
-		return m_appBitAdressed.nonAcquiredDiscreteOutputSignals.appendSignal(signal);
+	bool LmMemoryMap::appendAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		appendUalSignals(m_appBitAdressed.acquiredDiscreteOutputSignals, ualSignals);
+		m_memoryMap.recalculateAddresses();
 	}
 
-	Address16 LmMemoryMap::appendNonAcquiredDiscreteInternalSignal(const Signal& signal)
+	bool LmMemoryMap::appendAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals)
 	{
-		assert(signal.isAcquired() == false &&
-			   signal.isDiscrete() == true &&
-			   signal.isInternal() == true);
+		bool result = true;
 
-		return m_appBitAdressed.nonAcquiredDiscreteInternalSignals.appendSignal(signal);
+		result &= appendUalSignals(m_appBitAdressed.acquiredDiscreteInternalSignals, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendNonAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendUalSignals(m_appBitAdressed.nonAcquiredDiscreteOutputSignals, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendNonAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendUalSignals(m_appBitAdressed.nonAcquiredDiscreteInternalSignals, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredDiscreteInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInputSignals, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
 	}
 
 	Address16 LmMemoryMap::setAcquiredRawDataSize(int sizeW)
@@ -511,7 +596,7 @@ namespace Builder
 		return Address16(m_appWordAdressed.acquiredRawData.startAddress(), 0);
 	}
 
-	Address16 LmMemoryMap::appendAcquiredAnalogInputSignal(const Signal& signal)
+/*	Address16 LmMemoryMap::appendAcquiredAnalogInputSignal(const Signal& signal)
 	{
 		assert(signal.isAcquired() == true &&
 			   signal.isAnalog() == true &&
@@ -627,7 +712,7 @@ namespace Builder
 			   signal.isBus() == true);
 
 		return m_appWordAdressed.nonAcquiredBuses.appendSignal(signal);
-	}
+	}*/
 
 	double LmMemoryMap::bitAddressedMemoryUsed()
 	{
