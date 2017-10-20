@@ -777,6 +777,12 @@ namespace ExtWidgets
 			m_lineEdit->setText(QString::number(m_oldValue.toUInt()));
 		}
 			break;
+		case QMetaType::Float:
+		{
+			m_oldValue = property->value().toFloat();
+			m_lineEdit->setText(QString::number(m_oldValue.toFloat(), 'f', property->precision()));
+		}
+			break;
 		case QVariant::Double:
 		{
 			m_oldValue = property->value().toDouble();
@@ -844,6 +850,17 @@ namespace ExtWidgets
 				bool ok = false;
 				uint value = m_lineEdit->text().toUInt(&ok);
 				if (ok == true && value != m_oldValue.toUInt())
+				{
+					m_oldValue = value;
+					emit valueChanged(value);
+				}
+			}
+			break;
+		case QMetaType::Float:
+			{
+				bool ok = false;
+				float value = m_lineEdit->text().toFloat(&ok);
+				if (ok == true && value != m_oldValue.toFloat())
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -1142,6 +1159,7 @@ namespace ExtWidgets
 					case QVariant::String:
 					case QVariant::Int:
 					case QVariant::UInt:
+					case QMetaType::Float:
 					case QVariant::Double:
 						{
 							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
@@ -1552,15 +1570,16 @@ namespace ExtWidgets
 					}
 					break;
 
+				case QMetaType::Float:
+					{
+						float val = value.toFloat();
+						return QString::number(val, 'f', p->precision());
+					}
+					break;
 				case QVariant::Double:
 					{
                         double val = value.toDouble();
-                        int precision = p->precision();
-                        if (precision == 0)
-                        {
-                            precision = 1;
-                        }
-                        return QString::number(val, 'f', precision);
+						return QString::number(val, 'f', p->precision());
 					}
 					break;
 				case QVariant::Bool:
@@ -1938,6 +1957,19 @@ namespace ExtWidgets
 			if (p->readOnly() == true || m_readOnly == true)
 			{
 				description = QString("[ReadOnly] ") + description;
+			}
+
+			if (p->specific() && p->value().userType() == QMetaType::Float)
+			{
+				bool ok1 = false;
+				bool ok2 = false;
+				float l = p->lowLimit().toFloat(&ok1);
+				float h = p->highLimit().toFloat(&ok2);
+
+				if (ok1 == true && ok2 == true && l < h)
+				{
+					description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
+				}
 			}
 
 			if (p->specific() && p->value().userType() == QVariant::Double)
