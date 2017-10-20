@@ -144,7 +144,7 @@ private:
 	// Logo
 	//
 	QLabel* m_logoLabel = nullptr;
-	QWidget* m_logoSpacer = nullptr;
+	QWidget* m_spacer = nullptr;
 
 	// Controls
 	//
@@ -179,7 +179,6 @@ private:
 	MonitorConfigController* m_configController = nullptr;
 	MonitorCentralWidget* m_centraWidget = nullptr;
 
-	QLabel* m_label = nullptr;
 	QComboBox* m_comboBox = nullptr;
 };
 
@@ -188,8 +187,7 @@ class MonitorToolBar : public QToolBar
 	Q_OBJECT
 
 public:
-	explicit MonitorToolBar(const QString &tittle, QWidget *parent = Q_NULLPTR);
-	explicit MonitorToolBar(QWidget *parent = Q_NULLPTR);
+	explicit MonitorToolBar(const QString &tittle, QWidget* parent = Q_NULLPTR);
 
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent *event) override;
