@@ -398,7 +398,13 @@ namespace Builder
 		void appSignalIDs(QStringList& appSignalIDs);
 
 		Address16 ualAddr() const { return m_ualAddr; }
+		bool setUalAddr(Address16 ualAddr);
+
 		Address16 regBufAddr() const { return m_regBufAddr; }
+		bool setRegBufAddr(Address16 regBufAddr);
+
+		Address16 regValueAddr() const { return m_regValueAddr; }
+		bool setRegValueAddr(Address16 regValueAddr);
 
 		Signal* firstSignal() const;
 
@@ -430,10 +436,10 @@ namespace Builder
 		bool isTuningable() const { return m_isTuningable; }
 		bool isOptoSignal() const { return m_isOptoSignal; }
 
-		bool isSource() const { return m_isInput || m_isTuningable || m_isOptoSignal; }
+		bool isSource() const { return m_isInput || m_isTuningable || m_isOptoSignal || m_isConst; }
 
 		bool isOutput() const { return m_isOutput; }
-		bool isStrictOutput() const { return m_isOutput && isSource() == false; }
+		bool isStrictOutput() const { return m_isOutput == true && isSource() == false; }
 
 		bool isInternal() const { return isSource() == false && m_isOutput == false; }
 
@@ -448,11 +454,13 @@ namespace Builder
 		int constAnalogIntValue() const;
 		float constAnalogFloatValue() const;
 
-		bool setUalAddr(Address16 ualAddr);
-
 		void sortRefSignals();
 
 		Signal* getInputSignal();
+		Signal* getTuningableSignal();
+
+		QStringList refSignalsIDs();
+		QStringList acquiredRefSignalsIDs();
 
 	private:
 		Signal* m_autoSignalPtr = nullptr;
@@ -482,6 +490,7 @@ namespace Builder
 
 		Address16 m_ualAddr;
 		Address16 m_regBufAddr;
+		Address16 m_regValueAddr;
 	};
 
 	class UalSignalsMap: public QObject, private QHash<UalSignal*, UalSignal*>

@@ -905,7 +905,7 @@ namespace Builder
 		m_autoSignalPtr->setCaption(m_autoSignalPtr->customAppSignalID());
 
 		m_autoSignalPtr->setSignalType(constSignalType);
-		m_autoSignalPtr->setInOutType(E::SignalInOutType::Input);
+		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);
 		m_autoSignalPtr->setAnalogSignalFormat(constAnalogFormat);
 
 		switch(constSignalType)
@@ -1246,6 +1246,12 @@ namespace Builder
 
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
+		if (m_isConst == true)
+		{
+			assert(false);					// for Const signals ualAddr isn't assigned
+			return false;
+		}
+
 		assert(ualAddr.isValid() == true);
 
 		if (m_ualAddr.isValid() == true)
@@ -1267,6 +1273,65 @@ namespace Builder
 
 		return true;
 	}
+
+	bool UalSignal::setRegBufAddr(Address16 regBufAddr)
+	{
+		assert(regBufAddr.isValid() == true);
+
+		if (m_regBufAddr.isValid() == true)
+		{
+			assert(false);				// m_regBufAddr is already set
+			return false;
+		}
+
+		m_regBufAddr = regBufAddr;
+
+		// set same regBufAddr for all associated acquired signals
+
+		for(Signal* s : m_refSignals)
+		{
+			if (s->isAcquired() == false)
+			{
+				continue;
+			}
+
+			assert(s->regBufAddr().isValid() == false);
+
+			s->setRegBufAddr(regBufAddr);
+		}
+
+		return true;
+	}
+
+	bool UalSignal::setRegValueAddr(Address16 regValueAddr)
+	{
+		assert(regValueAddr.isValid() == true);
+
+		if (m_regValueAddr.isValid() == true)
+		{
+			assert(false);				// m_regValueAddr is already set
+			return false;
+		}
+
+		m_regValueAddr = regValueAddr;
+
+		// set same regBufAddr for all associated acquired signals
+
+		for(Signal* s : m_refSignals)
+		{
+			if (s->isAcquired() == false)
+			{
+				continue;
+			}
+
+			assert(s->regValueAddr().isValid() == false);
+
+			s->setRegValueAddr(regValueAddr);
+		}
+
+		return true;
+	}
+
 
 	void UalSignal::sortRefSignals()
 	{
@@ -1304,6 +1369,53 @@ namespace Builder
 
 		return inputSignal;
 	}
+
+	Signal* UalSignal::getTuningableSignal()
+	{
+		Signal* tuningableSignal = nullptr;
+
+		for(Signal* s : m_refSignals)
+		{
+			if (s->enableTuning() == true)
+			{
+				tuningableSignal = s;
+				break;
+			}
+		}
+
+		return tuningableSignal;
+	}
+
+
+	QStringList UalSignal::refSignalsIDs()
+	{
+		QStringList list;
+
+		for(Signal* s : m_refSignals)
+		{
+			list.append(s->appSignalID());
+		}
+
+		return list;
+	}
+
+	QStringList UalSignal::acquiredRefSignalsIDs()
+	{
+		QStringList list;
+
+		for(Signal* s : m_refSignals)
+		{
+			if (s->isAcquired() == false)
+			{
+				continue;
+			}
+
+			list.append(s->appSignalID());
+		}
+
+		return list;
+	}
+
 
 
 	// ---------------------------------------------------------------------------------------
@@ -1577,7 +1689,6 @@ namespace Builder
 				return true;
 			}
 
-			assert(false);
 			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
 			return false;
 		}
