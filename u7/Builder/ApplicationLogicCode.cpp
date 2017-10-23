@@ -717,6 +717,10 @@ namespace Builder
 		read16(addrFrom);
 	}
 
+	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(), fbCaption);
+	}
 
 	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
@@ -743,6 +747,11 @@ namespace Builder
 		}
 
 		m_memoryMap->write16(addrTo);
+	}
+
+	void Command::readFuncBlockBit(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		readFuncBlockBit(addrTo.offset(), addrTo.bitNo(), fbType, fbInstance, fbParamNo, fbCaption);
 	}
 
 	void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
@@ -940,6 +949,12 @@ namespace Builder
 		read32(addrFrom);
 	}
 
+	void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		assert(addrFrom.bit() == 0);
+
+		writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
+	}
 
 	void Command::readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{

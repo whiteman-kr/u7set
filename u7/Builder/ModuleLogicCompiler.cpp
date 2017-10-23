@@ -5888,9 +5888,9 @@ namespace Builder
 
 		do
 		{
-			if (generateLoadAfbInputsCode(ualAfb) == false) break;
+			if (generateSignalsToAfbInputsCode(ualAfb) == false) break;
 
-			if (startFb(ualAfb) == false) break;
+			if (startAfb(ualAfb) == false) break;
 
 			if (readFbOutputSignals(ualAfb) == false) break;
 
@@ -5905,7 +5905,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateLoadAfbInputsCode(const UalAfb* ualAfb)
+	bool ModuleLogicCompiler::generateSignalsToAfbInputsCode(const UalAfb* ualAfb)
 	{
 		bool result = true;
 
@@ -6044,11 +6044,89 @@ namespace Builder
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
+
+		if (inUalSignal->isCompatible(inAfbSignal) == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
+			return false;
+		}
+
+		// inUalSignal and inAfbSignal are compatible
+
+		bool result = true;
+
+		int afbOpcode = ualAfb->opcode();
+		int afbInstance = ualAfb->instance();
+		int afbSignalIndex = inAfbSignal.operandIndex();
+
+		QString afbCaption = ualAfb->caption();
+		QString signalCaption = inAfbSignal.caption();
+
+		Command cmd;
+
+		switch(inUalSignal->signalType())
+		{
+		case E::SignalType::Discrete:
+			if (inUalSignal->isConst() == true)
+			{
+				cmd.writeFuncBlockConst(afbOpcode, afbInstance, afbSignalIndex, inUalSignal->constDiscreteValue(), afbCaption);
+				cmd.setComment(QString("%1.%2 <= #%3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->constDiscreteValue()));
+			}
+			else
+			{
+				cmd.writeFuncBlockBit(afbOpcode, afbInstance, afbSignalIndex, inUalSignal->ualAddr(), afbCaption);
+				cmd.setComment(QString("%1.%2 <= %3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->appSignalID()));
+			}
+
+			m_code.append(cmd);
+
+			break;
+
+		case E::SignalType::Analog:
+			if (inUalSignal->isConst() == true)
+			{
+				switch(inUalSignal->constAnalogFormat())
+				{
+				case  E::AnalogAppSignalFormat::Float32:
+					cmd.writeFuncBlockConstFloat(afbOpcode, afbInstance, afbSignalIndex, inUalSignal->constAnalogFloatValue(), afbCaption);
+					cmd.setComment(QString("%1.%2 <= #%3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->constAnalogFloatValue()));
+					break;
+
+				case  E::AnalogAppSignalFormat::SignedInt32:
+					cmd.writeFuncBlockConst(afbOpcode, afbInstance, afbSignalIndex, inUalSignal->constAnalogIntValue(), afbCaption);
+					cmd.setComment(QString("%1.%2 <= #%3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->constAnalogIntValue()));
+					break;
+
+				default:
+					assert(false);
+				}
+			}
+			else
+			{
+				cmd.writeFuncBlock32(afbOpcode, afbInstance, afbSignalIndex, inUalSignal->ualAddr(), afbCaption);
+				cmd.setComment(QString("%1.%2 <= %3").arg(afbCaption).arg(signalCaption).arg(inUalSignal->appSignalID()));
+			}
+
+			m_code.append(cmd);
+
+			break;
+
+		case E::SignalType::Bus:
+			assert(false);
+			break;
+
+		default:
+			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
+			return false;
+		}
+
+		return result;
 	}
 
-	bool ModuleLogicCompiler::generateWriteConstToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalConst* constItem)
+	bool ModuleLogicCompiler::generateWriteConstToFbCode(const UalAfb& appFb, const LogicAfbSignal& inAfbSignal, const UalConst* constItem)
 	{
-		TEST_PTR_LOG_RETURN_FALSE(constItem, m_log);
+/*		TEST_PTR_LOG_RETURN_FALSE(constItem, m_log);
 
 		quint16 fbType = appFb.opcode();
 		quint16 fbInstance = appFb.instance();
@@ -6178,7 +6256,9 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		return result;
+		return result;*/
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const UalAfb& fb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid)
@@ -6415,11 +6495,11 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::startFb(const UalAfb* appFb)
+	bool ModuleLogicCompiler::startAfb(const UalAfb* ualAfb)
 	{
 		int startCount = 1;
 
-		for(LogicAfbParam param : appFb->afb().params())
+		for(LogicAfbParam param : ualAfb->afb().params())
 		{
 			if (param.opName() == "test_start_count")
 			{
@@ -6427,22 +6507,141 @@ namespace Builder
 				break;
 			}
 		}
+
+		int afbOpcode = ualAfb->opcode();
+		int afbInstance = ualAfb->instance();
+		int afbRunTime = ualAfb->runTime();
+
+		QString afbCaption = ualAfb->caption();
+		QString afbLabel = ualAfb->label();
+
 		Command cmd;
 
 		if (startCount == 1)
 		{
-			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
-			cmd.setComment(QString(tr("compute %1 @%2")).arg(appFb->caption()).arg(appFb->label()));
+			cmd.start(afbOpcode, afbInstance, afbCaption, afbRunTime);
+			cmd.setComment(QString(tr("compute %1 @%2")).arg(afbCaption).arg(afbLabel));
 		}
 		else
 		{
-			cmd.nstart(appFb->opcode(), appFb->instance(), startCount, appFb->caption(), appFb->runTime());
-			cmd.setComment(QString(tr("compute %1 @%2 %3 times")).arg(appFb->afbStrID()).arg(appFb->label()).arg(startCount));
+			cmd.nstart(afbOpcode, afbInstance, startCount, afbCaption, afbRunTime);
+			cmd.setComment(QString(tr("compute %1 @%2 %3 times")).arg(afbCaption).arg(afbLabel).arg(startCount));
 		}
 
 		m_code.append(cmd);
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbOutputsToSignalsCode(const UalAfb* ualAfb)
+	{
+		if (ualAfb == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		bool result = true;
+
+		for(const LogicPin& outPin : ualAfb->outputs())
+		{
+			if (outPin.IsOutput() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			UalSignal* outUalSignal = m_ualSignals.get(outPin.guid());
+
+			if (outUalSignal == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			LogicAfbSignal outAfbSignal;
+
+			bool res = ualAfb->getAfbSignalByPin(outPin, &outAfbSignal);
+
+			if (res == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = res;
+				continue;
+			}
+
+			result &= generateAfbOutputToSignalCode(ualAfb, outAfbSignal, outUalSignal);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal)
+	{
+		if (ualAfb == nullptr || outUalSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (outUalSignal->isConst() == true)
+		{
+			assert(false);							// can't assign value to const ual signal
+			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
+			return false;
+		}
+
+		if (outUalSignal->isCompatible(outAfbSignal) == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
+			return false;
+		}
+
+		// inUalSignal and inAfbSignal are compatible
+
+		bool result = true;
+
+		int afbOpcode = ualAfb->opcode();
+		int afbInstance = ualAfb->instance();
+		int afbSignalIndex = outAfbSignal.operandIndex();
+
+		QString afbCaption = ualAfb->caption();
+		QString signalCaption = outAfbSignal.caption();
+
+		Command cmd;
+
+		switch(outUalSignal->signalType())
+		{
+		case E::SignalType::Discrete:
+
+			cmd.readFuncBlockBit(outUalSignal->ualAddr(), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
+			cmd.setComment(QString("%1 <= %2.%3").arg(outAfbSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+
+			m_code.append(cmd);
+
+			break;
+
+		case E::SignalType::Analog:
+
+			cmd.readFuncBlock32(outUalSignal->ualAddr(), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
+			cmd.setComment(QString("%1 <= %2.%3").arg(outAfbSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+
+			m_code.append(cmd);
+
+			break;
+
+		case E::SignalType::Bus:
+			assert(false);
+			break;
+
+		default:
+			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
+			return false;
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::readFbOutputSignals(const UalAfb* appFb)
