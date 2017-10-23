@@ -1,5 +1,6 @@
 #pragma once
 #include <QHostInfo>
+#include "../VFrame30/PosConnectionImpl.h"
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaView.h"
@@ -298,6 +299,8 @@ protected:
 	void setMouseCursor(QPoint mousePos);
 
 	QPointF magnetPointToPin(QPointF docPoint);
+
+	void movePosConnectionEndPoint(VFrame30::IPosConnection* item, QPointF toPoint);
 
 	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
 	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;

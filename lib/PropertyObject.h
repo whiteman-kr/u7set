@@ -278,7 +278,7 @@ private:
 		uint32_t m_flags;
 	};
 
-	PropertySpecificEditor m_specificEditor;
+	PropertySpecificEditor m_specificEditor = PropertySpecificEditor::None;
 
 	int m_precision = 2;
 };
