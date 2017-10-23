@@ -4243,52 +4243,133 @@ void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* ev
 
 	VFrame30::SchemaPoint ptBase = points.back();
 
-	// Add extra points
+	// Two cases:
+	//	1. If docPoint ouside of horzline, add to main part 3 pointx
+	//	------------+(1)
+	//              |
+	//           (2)+--------+(3)
 	//
-	double horzDistance = std::abs(ptBase.X - docPoint.x()) * (ptBase.X - docPoint.x() > 0.0 ? -1.0 : 1.0);
-	double midPoint = 0.0;
-
-	if (std::abs(ptBase.X - docPoint.x()) < gridSize * 1.0)
-	{
-		midPoint = ptBase.X;
-	}
-	else
-	{
-		midPoint = ptBase.X + horzDistance / 2;
-	}
-
-	QPointF onePoint(midPoint, ptBase.Y);
-	onePoint = snapToGrid(onePoint);
-
-	itemPos->DeleteAllExtensionPoints();
-
-	// if onePoint on previous line, then move it to base
+	//	2. If docPoint on horz line, add to main part two points
+	//	------------+(1)
+	//              |
+	//       =======+=======
+	//             (2)
 	//
-	if (points.size() > 1)
-	{
-		VFrame30::SchemaPoint lastLinkPt1 = *std::prev(points.end(), 2);
-		VFrame30::SchemaPoint lastLinkPt2 = points.back();
+	bool docPointIsOnHorzLine = false;
 
-		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
-			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
-			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
-			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
-			))
+	// Try to to detect situation 2
+	//
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderDocPoint = activeLayer()->getItemListUnderPoint(docPoint, editSchemaView()->m_newItem->metaObject()->className());
+
+	if (linksUnderDocPoint.empty() == false)
+	{
+		for (std::shared_ptr<VFrame30::SchemaItem> connItem : linksUnderDocPoint)
 		{
-			onePoint.setX(ptBase.X);
-			onePoint.setY(ptBase.Y);
+			VFrame30::IPosConnection* connectionUndertDocPoint = dynamic_cast<VFrame30::IPosConnection*>(connItem.get());
+
+			// Get all horizontal lines for item connectionUndertDocPoint
+			//
+			std::list<VFrame30::SchemaPoint> underItemPointsList = connectionUndertDocPoint->GetPointList();
+			std::vector<VFrame30::SchemaPoint> underItemPoints = {underItemPointsList.begin(), underItemPointsList.end()};		// In the next loop more conv
+
+			for (size_t i = 0; i < underItemPoints.size(); i++)
+			{
+				if (i == 0)
+				{
+					continue;
+				}
+
+				VFrame30::SchemaPoint curPos = underItemPoints[i];
+				VFrame30::SchemaPoint prevPos = underItemPoints[i - 1];
+
+				if (std::abs(curPos.Y - prevPos.Y) < 0.000001 &&			// it's horiznotal
+					std::abs(curPos.Y - docPoint.y()) < 0.000001 &&		// docPoint.y is on this link
+					std::min(curPos.X, prevPos.X) <= docPoint.x() &&		// docPoint.x is on this link
+					std::max(curPos.X, prevPos.X) >= docPoint.x())			// docPoint.x is on this link
+				{
+					// This is horz line, docPoint lies on it
+					//
+					docPointIsOnHorzLine = true;
+					break;
+				}
+			}
+
+			if (docPointIsOnHorzLine == true)
+			{
+				break;
+			}
 		}
 	}
 
-	QPointF twoPoint(onePoint.x(), docPoint.y());
-
-	if (onePoint != ptBase)
+	if (docPointIsOnHorzLine == true)
 	{
-		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
-	}
-	itemPos->AddExtensionPoint(twoPoint.x(), twoPoint.y());
-	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
+		//	2. If docPoint on horz line, add to main part two points
+		//	------------+(1) - cornerPoint
+		//              |
+		//       =======+=======
+		//             (2) docCpoint
+		//
+		QPointF cornerPoint(docPoint.x(), ptBase.Y);		// (1)
+		cornerPoint = snapToGrid(cornerPoint);
 
+		itemPos->DeleteAllExtensionPoints();
+		itemPos->AddExtensionPoint(cornerPoint.x(), cornerPoint.y());
+		itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
+	}
+	else
+	{
+		//	1. If docPoint ouside of horzline, add to main part 3 pointx
+		//	------------+(1)
+		//              |
+		//           (2)+--------+(3)
+		//
+
+		// Add extra points
+		//
+		double horzDistance = std::abs(ptBase.X - docPoint.x()) * (ptBase.X - docPoint.x() > 0.0 ? -1.0 : 1.0);
+		double midPoint = 0.0;
+
+		if (std::abs(ptBase.X - docPoint.x()) < gridSize * 1.0)
+		{
+			midPoint = ptBase.X;
+		}
+		else
+		{
+			midPoint = ptBase.X + horzDistance / 2;
+		}
+
+		QPointF onePoint(midPoint, ptBase.Y);
+		onePoint = snapToGrid(onePoint);
+
+		itemPos->DeleteAllExtensionPoints();
+
+		// if onePoint on previous line, then move it to base
+		//
+		if (points.size() > 1)
+		{
+			VFrame30::SchemaPoint lastLinkPt1 = *std::prev(points.end(), 2);
+			VFrame30::SchemaPoint lastLinkPt2 = points.back();
+
+			if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
+				std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
+				((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
+				 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
+				))
+			{
+				onePoint.setX(ptBase.X);
+				onePoint.setY(ptBase.Y);
+			}
+		}
+
+		QPointF twoPoint(onePoint.x(), docPoint.y());
+
+		if (onePoint != ptBase)
+		{
+			itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
+		}
+		itemPos->AddExtensionPoint(twoPoint.x(), twoPoint.y());
+		itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
+	}
 
 	editSchemaView()->update();
 
