@@ -16,6 +16,7 @@ namespace VFrame30
 		static const QString commented;
 		static const QString objectName;
 		static const QString name;
+		static const QString guid;
 
 		static const QString fontName;
 		static const QString fontSize;
@@ -159,6 +160,7 @@ namespace VFrame30
 		static const QString controlCategory;
 		static const QString scriptsCategory;
 		static const QString apertureCategory;
+		static const QString constCategory;
 
 		static const QString widgetPropStyleSheet;
 		static const QString widgetPropToolTip;

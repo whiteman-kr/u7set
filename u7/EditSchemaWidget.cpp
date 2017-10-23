@@ -2489,13 +2489,22 @@ void EditSchemaWidget::createActions()
 	m_findNextAction = new QAction(tr("Find Next"), this);
 	m_findNextAction->setEnabled(true);
 	m_findNextAction->setShortcut(QKeySequence::FindNext);
-	connect(m_findNextAction, &QAction::triggered, this, &EditSchemaWidget::findNext);
+	connect(m_findNextAction, &QAction::triggered, this,
+			[this]()
+			{
+				findNext(theSettings.m_findSchemaItemCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+			});
 	addAction(m_findNextAction);
 
 	m_findPrevAction = new QAction(tr("Find Previous"), this);
 	m_findPrevAction->setEnabled(true);
 	m_findPrevAction->setShortcut(QKeySequence::FindPrevious);
-	connect(m_findPrevAction, &QAction::triggered, this, &EditSchemaWidget::findPrev);
+	connect(m_findPrevAction, &QAction::triggered, this,
+			[this]()
+			{
+				findPrev(theSettings.m_findSchemaItemCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+			});
+
 	addAction(m_findPrevAction);
 
 	//
@@ -5602,6 +5611,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 														  counterValue,
 														  schema()->schemaId(),
 														  schema()->caption(),
+														  "",
 														  this);
 
 	if (signalsIds.isEmpty() == false)
@@ -6248,6 +6258,14 @@ void EditSchemaWidget::selectItem(std::shared_ptr<VFrame30::SchemaItem> item)
 	items.push_back(item);
 	editSchemaView()->setSelectedItems(items);
 
+	editSchemaView()->update();
+	return;
+}
+
+void EditSchemaWidget::selectItems(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items)
+{
+	editSchemaView()->clearSelection();
+	editSchemaView()->setSelectedItems(items);
 	editSchemaView()->update();
 	return;
 }
@@ -8122,6 +8140,9 @@ void EditSchemaWidget::find()
 
 		connect(m_findDialog, &SchemaFindDialog::findPrev, this, &EditSchemaWidget::findPrev);
 		connect(m_findDialog, &SchemaFindDialog::findNext, this, &EditSchemaWidget::findNext);
+
+		connect(m_findDialog, &SchemaFindDialog::replaceAndFind, this, &EditSchemaWidget::replaceAndFind);
+		connect(m_findDialog, &SchemaFindDialog::replaceAll, this, &EditSchemaWidget::replaceAll);
 	}
 
 	m_findDialog->show();
@@ -8131,7 +8152,7 @@ void EditSchemaWidget::find()
 	return;
 }
 
-void EditSchemaWidget::findNext()
+void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 {
 	if (m_findDialog == nullptr)
 	{
@@ -8199,11 +8220,12 @@ void EditSchemaWidget::findNext()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8214,11 +8236,12 @@ void EditSchemaWidget::findNext()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8237,7 +8260,7 @@ void EditSchemaWidget::findNext()
 	return;
 }
 
-void EditSchemaWidget::findPrev()
+void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 {
 	if (m_findDialog == nullptr)
 	{
@@ -8305,11 +8328,12 @@ void EditSchemaWidget::findPrev()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8320,11 +8344,12 @@ void EditSchemaWidget::findPrev()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8339,6 +8364,187 @@ void EditSchemaWidget::findPrev()
 	m_findDialog->raise();
 	m_findDialog->activateWindow();
 	m_findDialog->setFocusToEditLine();
+
+	return;
+}
+
+int EditSchemaWidget::replace(std::shared_ptr<VFrame30::SchemaItem> item, QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return 0;
+	}
+
+	QByteArray oldState;
+	item->Save(oldState);
+
+	int replaceCount = item->replace(findText, replaceWith, cs);
+
+	QByteArray newState;
+	item->Save(newState);
+
+	item->Load(oldState);
+
+	if (replaceCount != 0)
+	{
+		m_editEngine->runSetObject(oldState, newState, item);
+	}
+
+	return replaceCount;
+}
+
+void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	auto& selected = selectedItems();		// Keep reference!!!!
+
+	// Get start iterator
+	//
+	auto searchStartIterator = layer->Items.begin();
+
+	if (selected.empty() == true)
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+	else
+	{
+		searchStartIterator = std::find(layer->Items.begin(), layer->Items.end(), selected.front());
+
+		if (searchStartIterator == layer->Items.end())
+		{
+			searchStartIterator = layer->Items.begin();
+		}
+		else
+		{
+			// Replace text in selected item
+			//
+			replace(*searchStartIterator, findText, replaceWith, cs);
+			searchStartIterator ++;
+		}
+	}
+
+	// Text in current selected item replaced, find and select next item
+	//
+	if (searchStartIterator == layer->Items.end())
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+
+	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		auto result = item->searchTextByProps(findText, cs);
+
+		if (result.empty() == false)
+		{
+			selectItem(item);
+
+			if (m_findDialog != nullptr)
+			{
+				m_findDialog->updateFoundInformation(item, result, findText, cs);
+			}
+			return;
+		}
+	}
+
+	// Serach text from the beginning
+	//
+	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		auto result = item->searchTextByProps(findText, cs);
+
+		if (result.empty() == false)
+		{
+			selectItem(item);
+
+			if (m_findDialog != nullptr)
+			{
+				m_findDialog->updateFoundInformation(item, result, findText, cs);
+			}
+			return;
+		}
+	}
+
+	// Text not found
+	//
+	clearSelection();
+
+	QMessageBox::information(this, qApp->applicationName(), tr("Text <b>%1</b> not found.").arg(findText));
+
+	if (m_findDialog != nullptr)
+	{
+		m_findDialog->show();
+		m_findDialog->raise();
+		m_findDialog->activateWindow();
+		m_findDialog->setFocusToEditLine();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	// If there are selected items, then replace only in selected
+	// else relace in all layer's items
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items = selectedItems();
+	if (items.empty() == true)
+	{
+		items.assign(layer->Items.begin(), layer->Items.end());
+	}
+
+	// Replace
+	//
+	int count = 0;
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> replacedInItems;
+	replacedInItems.reserve(items.size());
+
+	for(std::shared_ptr<VFrame30::SchemaItem> item : items)
+	{
+		int itemReplaces = replace(item, findText, replaceWith, cs);
+
+		if (itemReplaces != 0)
+		{
+			count += itemReplaces;
+			replacedInItems.push_back(item);
+		}
+	}
+
+	if (count == 0)
+	{
+		QMessageBox::information(this, tr("Replace All Result"), tr("Text <b>%1</b> not found.").arg(findText));
+	}
+	else
+	{
+		selectItems(replacedInItems);
+		QMessageBox::information(this, tr("Replace All Result"), tr("%1 replaced to %2 in %3 item(s).").arg(findText).arg(replaceWith).arg(replacedInItems.size()));
+	}
 
 	return;
 }
@@ -8465,23 +8671,80 @@ void EditSchemaWidget::setCompareItemActions(const std::map<QUuid, CompareAction
 SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	QDialog(parent)
 {
-	m_lineEdit = new QLineEdit();
+	setWindowTitle(tr("Find and Replace"));
+
+	setWindowFlags((windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// FindText/Replace - text for search
+	//
+	m_findTextEdit = new QLineEdit();
+	m_replaceTextEdit = new QLineEdit();
 
 	QCompleter* searchCompleter = new QCompleter(theSettings.buildSearchCompleter(), this);
 	searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-	m_lineEdit->setCompleter(searchCompleter);
 
+	m_findTextEdit->setCompleter(searchCompleter);
+	m_replaceTextEdit->setCompleter(searchCompleter);
+
+	// CaseSensivity check box
+	//
+	m_caseSensitiveCheckBox = new QCheckBox(tr("Case Sensitive"));
+	m_caseSensitiveCheckBox->setChecked(theSettings.m_findSchemaItemCaseSensitive);
+
+	// Find Result
+	//
+	m_findResult = new QTextEdit;
+	m_findResult->setReadOnly(true);
+
+	auto p = qApp->palette("QListView");
+
+	QColor highlight = p.highlight().color();
+	QColor highlightText = p.highlightedText().color();
+
+	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
+							 .arg(highlight.name())
+							 .arg(highlightText.name());
+
+	m_findResult->setStyleSheet(selectionColor);
+
+	// Find buttons
+	//
 	m_prevButton = new QPushButton(tr("Find Previous"));
+	m_nextButton = new QPushButton(tr("Find Next"));
+
+	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
 	//m_prevButton->setShortcut(QKeySequence::FindPrevious);	// Done via Actions, works much faster
 
-	m_nextButton = new QPushButton(tr("Find Next"));
-	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
+	// Replace buttons
+	//
+	m_replaceAllButton = new QPushButton(tr("Replace All"));
+	m_replaceButton = new QPushButton(tr("Replace && Find"));
 
+	connect(m_replaceButton, &QPushButton::clicked, this, &SchemaFindDialog::replaceAndFindPressed);
+	connect(m_replaceAllButton, &QPushButton::clicked, this, &SchemaFindDialog::replaceAllPressed);
+
+	// --
+	//
 	QGridLayout* layout = new QGridLayout();
 
-	layout->addWidget(m_lineEdit, 0, 0, 1, 2);
-	layout->addWidget(m_prevButton, 1, 0);
-	layout->addWidget(m_nextButton, 1, 1);
+	layout->addWidget(new QLabel("Find:"), 0, 0, 1, 1);
+	layout->addWidget(m_findTextEdit, 0, 1, 1, 3);
+
+	layout->addWidget(new QLabel("Replace with:"), 1, 0, 1, 1);
+	layout->addWidget(m_replaceTextEdit, 1, 1, 1, 3);
+
+	layout->addWidget(m_caseSensitiveCheckBox, 2, 0, 1, 4);
+
+	layout->addWidget(m_findResult, 3, 0, 1, 4);
+
+	layout->addWidget(m_replaceAllButton, 4, 0);
+	layout->addWidget(m_replaceButton, 4, 1);
+
+	layout->addWidget(m_prevButton, 4, 2);
+	layout->addWidget(m_nextButton, 4, 3);
 
 	setLayout(layout);
 
@@ -8495,32 +8758,52 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	prevAction->setShortcut(QKeySequence::FindPrevious);
 	addAction(prevAction);
 
-	connect(nextAction, &QAction::triggered, this, &SchemaFindDialog::findNext);
-	connect(prevAction, &QAction::triggered, this, &SchemaFindDialog::findPrev);
+	// Find buttons
+	//
+	connect(m_caseSensitiveCheckBox, &QCheckBox::toggled, this,
+			[](bool checked)
+			{
+				theSettings.m_findSchemaItemCaseSensitive = checked;
+			});
+
+	auto findNextFunc = [this]()
+		{
+			emit findNext(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		};
+
+	auto findPrevFunc = [this]()
+		{
+			emit findPrev(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		};
+
+	connect(nextAction, &QAction::triggered, this, findNextFunc);
+	connect(prevAction, &QAction::triggered, this, findPrevFunc);
 
 	// --
 	//
-	connect(m_prevButton, &QPushButton::clicked, this, &SchemaFindDialog::findPrev);
-	connect(m_nextButton, &QPushButton::clicked, this, &SchemaFindDialog::findNext);
+	connect(m_nextButton, &QPushButton::clicked, this, findNextFunc);
+	connect(m_prevButton, &QPushButton::clicked, this, findPrevFunc);
 
 	m_nextButton->setDefault(true);
+
+	return;
 }
 
 QString SchemaFindDialog::findText() const
 {
-	assert(m_lineEdit);
+	assert(m_findTextEdit);
 
-	QString text = m_lineEdit->text().trimmed();
+	QString text = m_findTextEdit->text().trimmed();
 
 	return text;
 }
 
 void SchemaFindDialog::setFocusToEditLine()
 {
-	assert(m_lineEdit);
+	assert(m_findTextEdit);
 
-	m_lineEdit->setFocus();
-	m_lineEdit->selectAll();
+	m_findTextEdit->setFocus();
+	m_findTextEdit->selectAll();
 
 	return;
 }
@@ -8535,7 +8818,7 @@ void SchemaFindDialog::updateCompleter()
 	{
 		theSettings.buildSearchCompleter() << searchText;
 
-		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_lineEdit->completer()->model());
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findTextEdit->completer()->model());
 		assert(completerModel);
 
 		if (completerModel != nullptr)
@@ -8543,5 +8826,65 @@ void SchemaFindDialog::updateCompleter()
 			completerModel->setStringList(theSettings.buildSearchCompleter());
 		}
 	}
+}
+
+void SchemaFindDialog::updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
+											  const std::list<std::pair<QString, QString>>& foundProps,
+											  QString searchText,
+											  Qt::CaseSensitivity /*cs*/)
+{
+
+	QString itemCaption = QString(item->metaObject()->className());
+
+	if (itemCaption.startsWith("VFrame30::SchemaItem") == true)
+	{
+		itemCaption.remove(0, 20);		// 20 is length of VFrame30::SchemaItem
+	}
+
+	QString infoText = itemCaption + "\n";
+
+	for (auto p : foundProps)
+	{
+		infoText.append(QString("%1 : %2\n").arg(p.first).arg(p.second));
+	}
+
+	m_findResult->setText(infoText);
+
+	// To do: highlight all searchText with CaseSensitivity
+	//
+
+	return;
+}
+
+void SchemaFindDialog::replaceAndFindPressed()
+{
+	QString findText = m_findTextEdit->text();
+	QString replaceWith = m_replaceTextEdit->text();
+	Qt::CaseSensitivity cs = m_caseSensitiveCheckBox->isChecked() == true ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+	if (findText.trimmed().isEmpty() == true)
+	{
+		return;
+	}
+
+	emit replaceAndFind(findText, replaceWith, cs);
+
+	return;
+}
+
+void SchemaFindDialog::replaceAllPressed()
+{
+	QString findText = m_findTextEdit->text();
+	QString replaceWith = m_replaceTextEdit->text();
+	Qt::CaseSensitivity cs = m_caseSensitiveCheckBox->isChecked() == true ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+	if (findText.trimmed().isEmpty() == true)
+	{
+		return;
+	}
+
+	emit replaceAll(findText, replaceWith, cs);
+
+	return;
 }
 

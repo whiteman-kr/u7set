@@ -112,7 +112,8 @@ SOURCES += main.cpp \
     ArchiveTcpClient.cpp \
     ArchiveModelView.cpp \
     ArchiveData.cpp \
-    TcpSignalRecents.cpp
+    TcpSignalRecents.cpp \
+    SelectSchemaWidget.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -159,7 +160,8 @@ HEADERS  += \
     ArchiveTcpClient.h \
     ArchiveModelView.h \
     ArchiveData.h \
-    TcpSignalRecents.h
+    TcpSignalRecents.h \
+    SelectSchemaWidget.h
 
 FORMS    += \
     DialogSettings.ui \

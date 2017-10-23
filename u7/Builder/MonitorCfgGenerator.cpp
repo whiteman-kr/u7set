@@ -148,11 +148,11 @@ namespace Builder
 
 			// TuningService
 			//
-			ok = writeTuningServiceSection(xmlWriter);
-			if (ok == false)
-			{
-				return false;
-			}
+//			ok = writeTuningServiceSection(xmlWriter);
+//			if (ok == false)
+//			{
+//				return false;
+//			}
 
 		} // Settings
 
@@ -385,8 +385,7 @@ namespace Builder
 		{
 			// Warning, tuning is enabled but no equipment to tune set
 			//
-			// ADD CODE FROM RPCT-1801
-			//m_log->errALC5000();
+			m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
 		}
 
 		// TuningServiceID1(2)

@@ -15,15 +15,10 @@ namespace VFrame30
 	SchemaItemConst::SchemaItemConst(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(ConstType, PropertyNames::type, true, SchemaItemConst::type, SchemaItemConst::setType);
-		auto valIntProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueInteger, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
-		auto valFloatProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::valueFloat, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
-		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
-
-		typeProp->setCategory(PropertyNames::functionalCategory);
-		valIntProp->setCategory(PropertyNames::functionalCategory);
-		valFloatProp->setCategory(PropertyNames::functionalCategory);
-		precisionProp->setCategory(PropertyNames::functionalCategory);
+		ADD_PROPERTY_GET_SET_CAT(ConstType, PropertyNames::type, PropertyNames::constCategory, true, SchemaItemConst::type, SchemaItemConst::setType);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueInteger, PropertyNames::constCategory, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::valueFloat, PropertyNames::constCategory, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::constCategory, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
 
 		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemConst::horzAlign, SchemaItemConst::setHorzAlign);
 		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemConst::vertAlign, SchemaItemConst::setVertAlign);
@@ -83,7 +78,8 @@ namespace VFrame30
 
 		const Proto::SchemaItemConst& constitem = message.schemaitem().constitem();
 
-		m_type = static_cast<ConstType>(constitem.type());
+		setType(static_cast<ConstType>(constitem.type()));		// Value properties created here
+
 		m_intValue = constitem.intvalue();
 		m_floatValue = constitem.floatvalue();
 		m_precision = constitem.precision();
@@ -215,6 +211,27 @@ namespace VFrame30
 	void SchemaItemConst::setType(SchemaItemConst::ConstType value)
 	{
 		m_type = value;
+
+		switch (m_type)
+		{
+			case ConstType::IntegerType:
+				propertyByCaption(PropertyNames::valueInteger)->setVisible(true);
+				propertyByCaption(PropertyNames::valueFloat)->setVisible(false);
+				propertyByCaption(PropertyNames::precision)->setVisible(false);
+				emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
+				break;
+			case ConstType::FloatType:
+				propertyByCaption(PropertyNames::valueInteger)->setVisible(false);
+				propertyByCaption(PropertyNames::valueFloat)->setVisible(true);
+				propertyByCaption(PropertyNames::precision)->setVisible(true);
+				emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
+				break;
+			default:
+				assert(false);
+				break;
+		}
+
+		return;
 	}
 
 	bool SchemaItemConst::isIntegral() const

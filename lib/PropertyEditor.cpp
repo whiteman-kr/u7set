@@ -777,6 +777,12 @@ namespace ExtWidgets
 			m_lineEdit->setText(QString::number(m_oldValue.toUInt()));
 		}
 			break;
+		case QMetaType::Float:
+		{
+			m_oldValue = property->value().toFloat();
+			m_lineEdit->setText(QString::number(m_oldValue.toFloat(), 'f', property->precision()));
+		}
+			break;
 		case QVariant::Double:
 		{
 			m_oldValue = property->value().toDouble();
@@ -844,6 +850,17 @@ namespace ExtWidgets
 				bool ok = false;
 				uint value = m_lineEdit->text().toUInt(&ok);
 				if (ok == true && value != m_oldValue.toUInt())
+				{
+					m_oldValue = value;
+					emit valueChanged(value);
+				}
+			}
+			break;
+		case QMetaType::Float:
+			{
+				bool ok = false;
+				float value = m_lineEdit->text().toFloat(&ok);
+				if (ok == true && value != m_oldValue.toFloat())
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -1142,6 +1159,7 @@ namespace ExtWidgets
 					case QVariant::String:
 					case QVariant::Int:
 					case QVariant::UInt:
+					case QMetaType::Float:
 					case QVariant::Double:
 						{
 							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
@@ -1246,25 +1264,6 @@ namespace ExtWidgets
 
 	}
 
-
-    std::shared_ptr<Property> QtMultiVariantPropertyManager::value(const QtProperty* property) const
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-            return nullptr;
-		}
-
-		const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-            return nullptr;
-		}
-
-        return it->p;
-	}
-
 	QVariant QtMultiVariantPropertyManager::attribute(const QtProperty* property, const QString& attribute) const
 	{
 		if (property == nullptr)
@@ -1307,6 +1306,24 @@ namespace ExtWidgets
 
 		const QMap<QString, QVariant>::const_iterator attrit = it.value().attributes.constFind(attribute);
 		return attrit != it.value().attributes.end();
+	}
+
+	std::shared_ptr<Property> QtMultiVariantPropertyManager::value(const QtProperty* property) const
+	{
+		if (property == nullptr)
+		{
+			Q_ASSERT(property);
+			return nullptr;
+		}
+
+		const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
+		if (it == values.end())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
+		return it->p;
 	}
 
 	int QtMultiVariantPropertyManager::valueType(const QtProperty* property) const
@@ -1371,7 +1388,7 @@ namespace ExtWidgets
 		return result;
 	}
 
-    void QtMultiVariantPropertyManager::setValue(QtProperty* property, const QVariant& value)
+	void QtMultiVariantPropertyManager::updateProperty(QtProperty* property)
 	{
 		if (property == nullptr)
 		{
@@ -1379,17 +1396,23 @@ namespace ExtWidgets
 			return;
 		}
 
-		const QMap<const QtProperty*, Data>::iterator it = values.find(property);
-		if (it == values.end())
-		{
-			Q_ASSERT(false);
-			return;
-        }
-
-        it->p->setValue(value);
-
-        emit propertyChanged(property);
+		emit propertyChanged(property);
 	}
+
+	void QtMultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVariant& value)
+	{
+		if (property == nullptr)
+		{
+			Q_ASSERT(property);
+			return;
+		}
+
+		emit valueChanged(property, value);
+
+		emit propertyChanged(property);
+	}
+
+
 
 	void QtMultiVariantPropertyManager::setAttribute (QtProperty* property, const QString& attribute, const QVariant& value)
 	{
@@ -1409,18 +1432,6 @@ namespace ExtWidgets
 		it.value().attributes[attribute] = value;
 	}
 
-	void QtMultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVariant& value)
-	{
-		if (property == nullptr)
-		{
-			Q_ASSERT(property);
-			return;
-		}
-
-		emit valueChanged(property, value);
-
-        emit propertyChanged(property);
-	}
 
 	void QtMultiVariantPropertyManager::initializeProperty(QtProperty* property)
 	{
@@ -1559,15 +1570,16 @@ namespace ExtWidgets
 					}
 					break;
 
+				case QMetaType::Float:
+					{
+						float val = value.toFloat();
+						return QString::number(val, 'f', p->precision());
+					}
+					break;
 				case QVariant::Double:
 					{
                         double val = value.toDouble();
-                        int precision = p->precision();
-                        if (precision == 0)
-                        {
-                            precision = 1;
-                        }
-                        return QString::number(val, 'f', precision);
+						return QString::number(val, 'f', p->precision());
 					}
 					break;
 				case QVariant::Bool:
@@ -1805,15 +1817,11 @@ namespace ExtWidgets
 
 		for (auto p : props)
 		{
-            QVariant value = vals.value(p).first;
             bool sameValue = vals.value(p).second;
 
             m_propertyVariantManager->setAttribute(p, "@propertyEditor@sameValue", sameValue);
 
-            if (sameValue == true)
-            {
-                m_propertyVariantManager->setValue(p, value);
-            }
+			m_propertyVariantManager->updateProperty(p);
         }
 	}
 
@@ -1949,6 +1957,19 @@ namespace ExtWidgets
 			if (p->readOnly() == true || m_readOnly == true)
 			{
 				description = QString("[ReadOnly] ") + description;
+			}
+
+			if (p->specific() && p->value().userType() == QMetaType::Float)
+			{
+				bool ok1 = false;
+				bool ok2 = false;
+				float l = p->lowLimit().toFloat(&ok1);
+				float h = p->highLimit().toFloat(&ok2);
+
+				if (ok1 == true && ok2 == true && l < h)
+				{
+					description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
+				}
 			}
 
 			if (p->specific() && p->value().userType() == QVariant::Double)
