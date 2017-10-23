@@ -42,7 +42,7 @@
 		<AFBComponent Caption="TCT"			OpCode="3"	ImpVersion="207"	VersionOpIndex="14"/>
 		<AFBComponent Caption="FLIP_FLOP" 	OpCode="4"  ImpVersion="106"    VersionOpIndex="9"/>
 		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"/>
-		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="105"	VersionOpIndex="21"/>
+		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="106"	VersionOpIndex="23"/>
 		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"/>
 		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="37"/>
 		<AFBComponent Caption="BDEC"		OpCode="9"	ImpVersion="103"	VersionOpIndex="37"/>
@@ -118,7 +118,7 @@
 				<Pin OpName="i_16_oprd" Caption="in_16" Type="Bus" ByteOrder="BigEndian" OpIndex="17" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
 			</Inputs>
 			<Outputs>
-			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="19" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="19" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>				
 			</Outputs>
 			<Params>
 			    <Param OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -3112,7 +3112,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0010">
+		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0011">
 			<Properties>				
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
@@ -3122,8 +3122,7 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>24</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
-				<Pin OpName="i_track" Caption="track" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>				
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="13" Size="32"/>
@@ -3150,6 +3149,13 @@ function(videoItemFblElement, afbElement)
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
 					<HighLimit>2</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_track" Caption="track" Visible="false" OpIndex="8" Size="1" Instantiator="false" User="false" Type="Discrete" ByteOrder="BigEndian">
+					<Value>0</Value>
+					<Default>0</Default>					
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -3267,7 +3273,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0011">
+		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0012">
 			<Properties>				
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
@@ -3277,8 +3283,7 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>24</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>
-				<Pin OpName="i_track" Caption="track" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>				
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="13" Size="32"/>						
@@ -3305,6 +3310,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>           
+				<Param OpName="i_track" Caption="track" Visible="false" OpIndex="8" Size="1" Instantiator="false" User="false" Type="Discrete" ByteOrder="BigEndian">
+					<Value>0</Value>
+					<Default>0</Default>					
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
 				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
@@ -5414,7 +5426,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0007">
+		<AFB id="#lim_fplim_fp_v1"         Caption="lim_fp"         Version="1.0007">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -10530,7 +10542,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#voter_v1"           Caption="voter"           Version="1.0005">
+		<AFB id="#voter_v1"           Caption="voter"           Version="1.0006">
 			<Properties>				
 				<Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
 				<Category>Logic</Category>
@@ -10559,6 +10571,8 @@ function(videoItemFblElement, afbElement)
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
+				<Pin OpName="o_maj_1err" Caption="err_ms" Type="Discrete" ByteOrder="BigEndian" OpIndex="22" Size="1"/>
+				<Pin OpName="o_maj_2err" Caption="err_st" Type="Discrete" ByteOrder="BigEndian" OpIndex="23" Size="1"/>				
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -10623,6 +10637,30 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="OutErrMismatch" Caption="OutErrMismatch" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutErrStrict" Caption="OutErrStrict" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -10655,11 +10693,43 @@ function createInputSignals(videoItemFblElement, afbElement)
 
 	return true;
 }
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutErrMismatch", "err_ms");	
+	createOutput(videoItemFblElement, afbElement, "OutErrStrict", "err_st");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
 				</Library>
 				<AfterCreation>
 function(videoItemFblElement, afbElement)
 {
+	createOutputSignals(videoItemFblElement, afbElement);
 	return createInputSignals(videoItemFblElement, afbElement);
+	
 }
 				</AfterCreation>
 			</CommonScript>
