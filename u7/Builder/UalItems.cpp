@@ -1685,7 +1685,6 @@ namespace Builder
 			{
 				// ref to same signal, its Ok
 				//
-				assert(false);					// for debug
 				return true;
 			}
 

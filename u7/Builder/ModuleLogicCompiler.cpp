@@ -5081,13 +5081,39 @@ namespace Builder
 		m_code.comment("Application logic code");
 		m_code.newLine();
 
-		for(UalItem* appItem : m_ualItems)
+		for(UalItem* ualItem : m_ualItems)
 		{
-			TEST_PTR_RETURN_FALSE(appItem)
+			TEST_PTR_RETURN_FALSE(ualItem)
 
-			if (appItem->isSignal() == true)
+			switch(ualItem->type())
 			{
-				result &= generateAppSignalCode(appItem);
+			case UalItem::Type::Afb:
+				result &= generateAfbCode(ualItem);
+				break;
+
+			// UalItems that is not required code generation
+			//
+			case UalItem::Type::Signal:
+			case UalItem::Type::Const:
+			case UalItem::Type::Transmitter:
+			case UalItem::Type::Receiver:
+			case UalItem::Type::Terminator:
+			case UalItem::Type::BusComposer:
+			case UalItem::Type::BusExtractor:
+			case UalItem::Type::LoopbackOutput:
+			case UalItem::Type::LoopbackInput:
+				break;
+
+			case UalItem::Type::Unknown:
+			default:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+/*
+			if (ualItem->isSignal() == true)
+			{
+				result &= generateAppSignalCode(ualItem);
 
 				if (result == false)
 				{
@@ -5097,9 +5123,9 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isAfb() == true)
+			if (ualItem->isAfb() == true)
 			{
-				result &= generateFbCode(appItem);
+				result &= generateFbCode(ualItem);
 
 				if (result == false)
 				{
@@ -5109,12 +5135,12 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isConst() == true)
+			if (ualItem->isConst() == true)
 			{
 				continue;
 			}
 
-			if (appItem->isTransmitter() == true)
+			if (ualItem->isTransmitter() == true)
 			{
 				// no special code generation for transmitter here
 				// code for transmitters is generate in copyOptoConnectionsTxData()
@@ -5122,7 +5148,7 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isReceiver() == true)
+			if (ualItem->isReceiver() == true)
 			{
 				// no special code generation for receiver here
 				// code for receivers is generate in:
@@ -5132,15 +5158,15 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isTerminator() == true)
+			if (ualItem->isTerminator() == true)
 			{
 				// no needed special code generation for terminator
 				continue;
 			}
 
-			if (appItem->isBusComposer() == true)
+			if (ualItem->isBusComposer() == true)
 			{
-				result &= generateBusComposerCode(appItem);
+				result &= generateBusComposerCode(ualItem);
 
 				if (result == false)
 				{
@@ -5150,14 +5176,14 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isBusExtractor() == true)
+			if (ualItem->isBusExtractor() == true)
 			{
 				continue;
 			}
 
-			m_log->errALC5011(appItem->label(), appItem->schemaID(), appItem->guid());		// Application item '%1' has unknown type, SchemaID '%2'. Contact to the RPCT developers.
+			m_log->errALC5011(ualItem->label(), ualItem->schemaID(), ualItem->guid());		// Application item '%1' has unknown type, SchemaID '%2'. Contact to the RPCT developers.
 			result = false;
-			break;
+			break;*/
 		}
 
 		return result;
@@ -5847,28 +5873,28 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateFbCode(const UalItem* appItem)
+	bool ModuleLogicCompiler::generateAfbCode(const UalItem* appItem)
 	{
-		if (!m_ualAfbs.contains(appItem->guid()))
+		if (m_ualAfbs.contains(appItem->guid()) == false)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		const UalAfb* appFb = m_ualAfbs[appItem->guid()];
+		const UalAfb* ualAfb = m_ualAfbs[appItem->guid()];
 
-		TEST_PTR_RETURN_FALSE(appFb)
+		TEST_PTR_RETURN_FALSE(ualAfb)
 
 		bool result = false;
 
 		do
 		{
-			if (writeFbInputSignals(appFb) == false) break;
+			if (generateLoadAfbInputsCode(ualAfb) == false) break;
 
-			if (startFb(appFb) == false) break;
+			if (startFb(ualAfb) == false) break;
 
-			if (readFbOutputSignals(appFb) == false) break;
+			if (readFbOutputSignals(ualAfb) == false) break;
 
-			if (addToComparatorStorage(appFb) == false) break;
+			if (addToComparatorStorage(ualAfb) == false) break;
 
 			result = true;
 		}
@@ -5879,20 +5905,42 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::writeFbInputSignals(const UalAfb* appFb)
+	bool ModuleLogicCompiler::generateLoadAfbInputsCode(const UalAfb* ualAfb)
 	{
-/*		bool result = true;
+		bool result = true;
 
-		for(LogicPin inPin : appFb->inputs())
+		for(const LogicPin& inPin : ualAfb->inputs())
 		{
-			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
+			if (inPin.IsInput() == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(appFb->strID()));
-				RESULT_FALSE_BREAK
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 
-			int connectedPinsCount = 1;
+			UalSignal* inUalSignal = m_ualSignals.get(inPin.guid());
+
+			if (inUalSignal == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			LogicAfbSignal inAfbSignal;
+
+			bool res = ualAfb->getAfbSignalByPin(inPin, &inAfbSignal);
+
+			if (res == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = res;
+				continue;
+			}
+
+			result &= generateSignalToAfbInputCode(ualAfb, inAfbSignal, inUalSignal);
+
+
+/*			int connectedPinsCount = 1;
 
 			for(QUuid connectedPinGuid : inPin.associatedIOs())
 			{
@@ -5983,12 +6031,19 @@ namespace Builder
 			if (result == false)
 			{
 				break;
-			}
+			}*/
 		}
 
-		return result;*/
+		return result;
+	}
 
-		return true;
+	bool ModuleLogicCompiler::generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal)
+	{
+		if (ualAfb == nullptr || inUalSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
 	}
 
 	bool ModuleLogicCompiler::generateWriteConstToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalConst* constItem)
@@ -8084,10 +8139,39 @@ namespace Builder
 		}
 
 		assert(m_memoryMap.acquiredDiscreteConstSignalsInRegBufSizeW() == 1);			// always 1 word!
-		Command cmd;
 
-		cmd.movConst(m_memoryMap.acquiredDiscreteConstSignalsAddressInRegBuf(), 2);		// bit 0 == 0, bit 1 == 1
-		cmd.setComment("acquired discrete const signals values, bit 0 == 0, bit 1 == 1");
+		m_code.append(Comment("Copy acquired discrete const signals values:"));
+
+		QStringList const0Signals;
+		QStringList const1Signals;
+
+		for(UalSignal* ualSignal : m_acquiredDiscreteConstSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				return false;
+			}
+
+			if (ualSignal->constDiscreteValue() == 0)
+			{
+				const0Signals.append(ualSignal->acquiredRefSignalsIDs());
+			}
+			else
+			{
+				const1Signals.append(ualSignal->acquiredRefSignalsIDs());
+			}
+		}
+
+		m_code.append(Comment(QString("const 0: %1").arg(const0Signals.join(", "))));
+		m_code.append(Comment(QString("const 1: %1").arg(const1Signals.join(", "))));
+
+		m_code.newLine();
+
+		Command cmd;
+		cmd.movConst(m_memoryMap.acquiredDiscreteConstSignalsAddressInRegBuf(), 2);
+		cmd.setComment("bit 0 == 0, bit 1 == 1");
+
 		m_code.append(cmd);
 		m_code.newLine();
 
@@ -8266,10 +8350,34 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOutputDiscreteSignals()
 	{
-/*		QVector<UalSignal*> outDiscreteSignals;
+		QVector<Signal*> outDiscreteSignals;
 
-		outDiscreteSignals.append(m_acquiredDiscreteStrictOutputSignals);
-		outDiscreteSignals.append(m_nonAcquiredDiscreteStrictOutputSignals);
+//		outDiscreteSignals.append(m_acquiredDiscreteStrictOutputSignals);
+//		outDiscreteSignals.append(m_nonAcquiredDiscreteStrictOutputSignals);
+
+		bool result = true;
+
+		for(Signal* s : m_ioSignals)
+		{
+			if (s == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (s->isDiscrete() == false || s->isOutput() == false)
+			{
+				continue;
+			}
+
+			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
+
+			if (ualSignal != nullptr)
+			{
+				outDiscreteSignals.append(s);
+			}
+		}
 
 //		if (outDiscreteSignals.isEmpty() == true)
 //		{
@@ -8312,8 +8420,27 @@ namespace Builder
 			{
 				TEST_PTR_CONTINUE(s);
 
-				cmd.movBit(wordAccAddr, s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
+				UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
+
+				if (ualSignal == nullptr)
+				{
+					assert(false);
+					LOG_NULLPTR_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				if (ualSignal->isConst() == true)
+				{
+					cmd.movBitConst(wordAccAddr, s->ioBufAddr().bit(), ualSignal->constDiscreteValue());
+				}
+				else
+				{
+					cmd.movBit(wordAccAddr, s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
+				}
+
 				cmd.setComment(s->appSignalID());
+
 				m_code.append(cmd);
 			}
 
@@ -8336,9 +8463,9 @@ namespace Builder
 			cmd.setComment("write #0 to LM's outputs area");
 			m_code.append(cmd);
 			m_code.newLine();
-		}*/
+		}
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyOptoConnectionsTxData()

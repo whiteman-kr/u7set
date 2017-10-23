@@ -644,6 +644,8 @@ namespace Builder
 
 		m_appWordAdressed.acquiredDiscreteConstSignals.setSizeW(1);			// always 1 word!
 
+		result &= recalculateAddresses();
+
 		return result;
 	}
 

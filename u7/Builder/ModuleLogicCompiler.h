@@ -239,8 +239,9 @@ namespace Builder
 		bool generateWriteBusExtractorToSignalCode(UalSignal& appSignal, const UalItem* appBusExtractor, QUuid extractorOutPinUuid);
 		bool generateWriteSignalToSignalCode(UalSignal& appSignal, QUuid srcSignalGuid);
 
-		bool generateFbCode(const UalItem* appItem);
-		bool writeFbInputSignals(const UalAfb *appFb);
+		bool generateAfbCode(const UalItem* appItem);
+		bool generateLoadAfbInputsCode(const UalAfb* ualAfb);
+		bool generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicPin& inPin, const UalSignal* inUalSignal);
 		bool generateWriteConstToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalConst* constItem);
 		bool genearateWriteReceiverToFbCode(const UalAfb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
 		bool generateWriteSignalToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalSignal& appSignal);
