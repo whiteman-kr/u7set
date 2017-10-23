@@ -240,13 +240,20 @@ namespace Builder
 		bool generateWriteSignalToSignalCode(UalSignal& appSignal, QUuid srcSignalGuid);
 
 		bool generateAfbCode(const UalItem* appItem);
-		bool generateLoadAfbInputsCode(const UalAfb* ualAfb);
-		bool generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicPin& inPin, const UalSignal* inUalSignal);
-		bool generateWriteConstToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalConst* constItem);
+		bool generateSignalsToAfbInputsCode(const UalAfb* ualAfb);
+		bool generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal);
+		bool startAfb(const UalAfb* appFb);
+		bool generateAfbOutputsToSignalsCode(const UalAfb* ualAfb);
+		bool generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal);
+
+		bool readFbOutputSignals(const UalAfb *appFb);
+
+		//
+		bool generateWriteConstToFbCode(const UalAfb& appFb, const LogicAfbSignal &inAfbSignal, const UalConst* constItem);
 		bool genearateWriteReceiverToFbCode(const UalAfb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
 		bool generateWriteSignalToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalSignal& appSignal);
-		bool startFb(const UalAfb* appFb);
-		bool readFbOutputSignals(const UalAfb *appFb);
+		//
+
 		bool generateReadFuncBlockToSignalCode(const UalAfb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
 		bool generateBusComposerCode(const UalItem* composer);
