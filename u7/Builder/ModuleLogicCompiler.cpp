@@ -6621,7 +6621,7 @@ namespace Builder
 
 			m_code.append(cmd);
 
-			break;w
+			break;
 
 		case E::SignalType::Analog:
 
