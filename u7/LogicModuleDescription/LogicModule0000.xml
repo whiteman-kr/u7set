@@ -5426,7 +5426,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_fplim_fp_v1"         Caption="lim_fp"         Version="1.0007">
+        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0007">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
