@@ -8,8 +8,11 @@
 #include "Parser.h"
 #include "Builder.h"
 
+#define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalsIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
+
 namespace Builder
 {
+
 
 	// ---------------------------------------------------------------------------------
 	//
@@ -120,7 +123,7 @@ namespace Builder
 
 			if (disposeSignalsInMemory() == false) break;
 
-			if (appendFbsForAnalogInOutSignalsConversion() == false) break;
+			if (appendAfbsForAnalogInOutSignalsConversion() == false) break;
 
 			if (setOutputSignalsAsComputed() == false) break;
 
@@ -2236,20 +2239,22 @@ namespace Builder
 		result &= createAcquiredDiscreteConstSignalsList();
 
 		result &= createNonAcquiredDiscreteInputSignalsList();
-		result &= createNonAcquiredDiscreteOutputSignalsList();
+		result &= createNonAcquiredDiscreteStrictOutputSignalsList();
 		result &= createNonAcquiredDiscreteInternalSignalsList();
 		result &= createNonAcquiredDiscreteTuningSignalsList();
 
 		result &= createAcquiredAnalogInputSignalsList();
-		result &= createAcquiredAnalogOutputSignalsList();
+		result &= createAcquiredAnalogStrictOutputSignalsList();
 		result &= createAcquiredAnalogInternalSignalsList();
 		result &= createAcquiredAnalogTuninglSignalsList();
 //		result &= createAcquiredAnalogConstSignalsList();
 
 		result &= createNonAcquiredAnalogInputSignalsList();
-		result &= createNonAcquiredAnalogOutputSignalsList();
+		result &= createNonAcquiredAnalogStrictOutputSignalsList();
 		result &= createNonAcquiredAnalogInternalSignalsList();
 		result &= createNonAcquiredAnalogTuningSignalsList();
+
+		result &= createAnalogOutputSignalsList();
 
 		result &= createAcquiredBusSignalsList();
 		result &= createNonAcquiredBusSignalsList();
@@ -2277,20 +2282,21 @@ namespace Builder
 		sortSignalList(m_nonAcquiredDiscreteInputSignals);
 		sortSignalList(m_nonAcquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
-		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
 
-		/*sortSignalList(m_acquiredAnalogInputSignals);
-		sortSignalList(m_acquiredAnalogOutputSignals);
+		sortSignalList(m_acquiredAnalogInputSignals);
+		sortSignalList(m_acquiredAnalogStrictOutputSignals);
 		sortSignalList(m_acquiredAnalogInternalSignals);
 		// sortSignalList(m_acquiredAnalogTuningSignals);			// Not need to sort!
 
 		sortSignalList(m_nonAcquiredAnalogInputSignals);
-		sortSignalList(m_nonAcquiredAnalogOutputSignals);
+		sortSignalList(m_nonAcquiredAnalogStrictOutputSignals);
 		sortSignalList(m_nonAcquiredAnalogInternalSignals);
 		sortSignalList(m_nonAcquiredAnalogTuningSignals);
 
+		sortSignalList(m_analogOutputSignals);
+
 		sortSignalList(m_acquiredBuses);
-		sortSignalList(m_nonAcquiredBuses);*/
+		sortSignalList(m_nonAcquiredBuses);
 
 		return result;
 	}
@@ -2302,6 +2308,7 @@ namespace Builder
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ acquired
 		//	+ discrete
 		//	+ input
@@ -2325,26 +2332,6 @@ namespace Builder
 			}
 		}
 
-/*		for(Signal* s : m_chassisSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			if (s->isAcquired() == true &&
-				s->isDiscrete() == true &&
-				s->isInput() == true)
-			{
-				if (m_acquiredDiscreteInputSignalsMap.contains(s) == false)
-				{
-					m_acquiredDiscreteInputSignals.append(s);
-					m_acquiredDiscreteInputSignalsMap.insert(s, s);
-				}
-
-				// if input signal is acquired, then validity signal (if exists) also always acquired
-				//
-				appendLinkedValiditySignal(s);
-			}
-		}*/
-
 		return true;
 	}
 
@@ -2356,7 +2343,7 @@ namespace Builder
 		//
 		//	+ acquired
 		//	+ discrete
-		//	+ output
+		//	+ strict output
 		//	+ used in UAL
 
 		for(UalSignal* s : m_ualSignals)
@@ -2371,19 +2358,6 @@ namespace Builder
 			}
 		}
 
-/*		for(Signal* s : m_chassisSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			if (s->isAcquired() == true &&
-				s->isDiscrete() == true &&
-				s->isOutput() == true &&
-				isUsedInUal(s) == true)
-			{
-				m_acquiredDiscreteStrictOutputSignals.append(s);
-			}
-		}*/
-
 		return true;
 	}
 
@@ -2393,10 +2367,11 @@ namespace Builder
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ acquired
 		//	+ discrete
 		//	+ internal
-		//  - enableTuning
+		//  - tuningable
 		//	+ used in UAL || is a SerialRx signal
 
 		for(UalSignal* s : m_ualSignals)
@@ -2406,26 +2381,12 @@ namespace Builder
 			if (s->isConst() == false &&
 				s->isAcquired() == true &&
 				s->isDiscrete() == true &&
-				s->isInternal() == true)
+				s->isInternal() == true &&
+				s->isTuningable() == false)
 			{
 				m_acquiredDiscreteInternalSignals.append(s);
 			}
 		}
-
-/*		for(Signal* s : m_chassisSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			if (s->isAcquired() == true &&
-				s->isDiscrete() == true &&
-				s->isInternal() == true &&
-				s->enableTuning() == false &&
-				(isUsedInUal(s->appSignalID()) == true ||
-				m_optoModuleStorage->isSerialRxSignalExists(m_lm->equipmentIdTemplate(), s->appSignalID())))
-			{
-				m_acquiredDiscreteInternalSignals.append(s);
-			}
-		}*/
 
 		return true;
 	}
@@ -2505,108 +2466,85 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createNonAcquiredDiscreteInputSignalsList()
 	{
-/*		m_nonAcquiredDiscreteInputSignals.clear();
+		m_nonAcquiredDiscreteInputSignals.clear();
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ non acquired
 		//	+ discrete
 		//	+ input
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isDiscrete() == true &&
-				s->isInput() == true &&
-				isUsedInUal(s) == true)
+				s->isInput() == true)
 			{
 				m_nonAcquiredDiscreteInputSignals.append(s);
 			}
-		}*/
+		}
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createNonAcquiredDiscreteOutputSignalsList()
+	bool ModuleLogicCompiler::createNonAcquiredDiscreteStrictOutputSignalsList()
 	{
-/*		m_nonAcquiredDiscreteOutputSignals.clear();
+		m_nonAcquiredDiscreteStrictOutputSignals.clear();
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ non acquired
 		//	+ discrete
-		//	+ output
+		//	+ strict output
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == false &&
+			if (s->isConst() == false &&
+				s->isAcquired() == false &&
 				s->isDiscrete() == true &&
-				s->isOutput() == true &&
-				isUsedInUal(s) == true)
+				s->isStrictOutput() == true)
 			{
-				m_nonAcquiredDiscreteOutputSignals.append(s);
+				m_nonAcquiredDiscreteStrictOutputSignals.append(s);
 			}
-		}*/
+		}
 
 		return true;
 	}
 
 	bool ModuleLogicCompiler::createNonAcquiredDiscreteInternalSignalsList()
 	{
-/*		m_nonAcquiredDiscreteInternalSignals.clear();
+		m_nonAcquiredDiscreteInternalSignals.clear();
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ non acquired
 		//	+ discrete
 		//	+ internal
 		//  - enableTuning
 		//	+ used in UAL
-		//	+ auto discrete internal signals (auto generated in m_appSignals)
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == false &&
+			if (s->isConst() == false &&
+				s->isAcquired() == false &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
-				s->enableTuning() == false &&
-				isUsedInUal(s) == true)
+				s->isTuningable() == false)
 			{
 				m_nonAcquiredDiscreteInternalSignals.append(s);
 			}
 		}
-
-		// append auto discrete internal signals (auto generated in m_appSignals)
-		//
-		for(UalSignal* appSignal : m_ualSignals)
-		{
-			TEST_PTR_CONTINUE(appSignal);
-
-			if (appSignal->isAutoSignal() == true &&
-				appSignal->isDiscrete() == true)
-			{
-				Signal* s = appSignal->signal();
-
-				if (s == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				assert(s->isAcquired() == false);
-				assert(s->isInternal() == true);
-
-				m_nonAcquiredDiscreteInternalSignals.append(s);
-			}
-		}*/
 
 		return true;
 	}
@@ -2642,20 +2580,22 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createAcquiredAnalogInputSignalsList()
 	{
-/*		m_acquiredAnalogInputSignals.clear();
+		m_acquiredAnalogInputSignals.clear();
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ acquired
 		//	+ analog
 		//	+ input
 		//	+ no matter used in UAL or not
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == true &&
+			if (s->isConst() == false &&
+				s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isInput() == true)
 			{
@@ -2663,66 +2603,67 @@ namespace Builder
 
 				// if input signal is acquired, then validity signal (if exists) also always acquired
 				//
-				appendLinkedValiditySignal(s);
+//				appendLinkedValiditySignal(s);
 			}
-		} */
+		}
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createAcquiredAnalogOutputSignalsList()
+	bool ModuleLogicCompiler::createAcquiredAnalogStrictOutputSignalsList()
 	{
-/*		m_acquiredAnalogOutputSignals.clear();
+		m_acquiredAnalogStrictOutputSignals.clear();
 
 		//	list include signals that:
 		//
+		//	- const
 		//	+ acquired
 		//	+ analog
-		//	+ output
+		//	+ strict output
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == true &&
+			if (s->isConst() == false &&
+				s->isAcquired() == true &&
 				s->isAnalog() == true &&
-				s->isOutput() == true &&
-				isUsedInUal(s) == true)
+				s->isStrictOutput() == true)
 			{
-				m_acquiredAnalogOutputSignals.append(s);
+				m_acquiredAnalogStrictOutputSignals.append(s);
 			}
-		}*/
+		}
 
 		return true;
 	}
 
 	bool ModuleLogicCompiler::createAcquiredAnalogInternalSignalsList()
 	{
-/*		m_acquiredAnalogInternalSignals.clear();
+		m_acquiredAnalogInternalSignals.clear();
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ acquired
 		//	+ analog
 		//	+ internal
 		//  - enableTuning
-		//	+ used in UAL || is a SerialRx signal
+		//	+ used in UAL || is a SerialRx signal (condition: m_optoModuleStorage->isSerialRxSignalExists(m_lm->equipmentIdTemplate(), s->appSignalID()) == true))
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == true &&
+			if (s->isConst() == false &&
+				s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isInternal() == true &&
-				s->enableTuning() == false &&
-				(isUsedInUal(s->appSignalID()) == true ||
-				 m_optoModuleStorage->isSerialRxSignalExists(m_lm->equipmentIdTemplate(), s->appSignalID()) == true))
+				s->isTuningable() == false)
 			{
 				m_acquiredAnalogInternalSignals.append(s);
 			}
-		}*/
+		}
 
 		return true;
 	}
@@ -2768,66 +2709,95 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createNonAcquiredAnalogInputSignalsList()
+	bool ModuleLogicCompiler::createAnalogOutputSignalsList()
 	{
-/*		m_nonAcquiredAnalogInputSignals.clear();
+		m_acquiredAnalogStrictOutputSignals.clear();
 
 		//	list include signals that:
 		//
+		//	- const
+		//	+ analog
+		//	+ output
+
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isConst() == false &&
+				s->isAnalog() == true &&
+				s->isOutput() == true)
+			{
+				m_analogOutputSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::createNonAcquiredAnalogInputSignalsList()
+	{
+		m_nonAcquiredAnalogInputSignals.clear();
+
+		//	list include signals that:
+		//
+		//	- const
 		//	+ non acquired
 		//	+ analog
 		//	+ input
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == false &&
+			if (s->isConst() == false &&
+				s->isAcquired() == false &&
 				s->isAnalog() == true &&
-				s->isInput() == true &&
-				isUsedInUal(s) == true)
+				s->isInput() == true)
 			{
 				m_nonAcquiredAnalogInputSignals.append(s);
 			}
-		}*/
+		}
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createNonAcquiredAnalogOutputSignalsList()
+	bool ModuleLogicCompiler::createNonAcquiredAnalogStrictOutputSignalsList()
 	{
-/*		m_nonAcquiredAnalogOutputSignals.clear();
+		m_nonAcquiredAnalogStrictOutputSignals.clear();
 
 		//	list include signals that:
 		//
+		//	- const
 		//	+ non acquired
 		//	+ analog
 		//	+ output
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == false &&
+			if (s->isConst() == false &&
+				s->isAcquired() == false &&
 				s->isAnalog() == true &&
-				s->isOutput() == true &&
-				isUsedInUal(s) == true)
+				s->isStrictOutput() == true)
 			{
-				m_nonAcquiredAnalogOutputSignals.append(s);
+				m_nonAcquiredAnalogStrictOutputSignals.append(s);
 			}
-		}*/
+		}
 
 		return true;
 	}
 
 	bool ModuleLogicCompiler::createNonAcquiredAnalogInternalSignalsList()
 	{
-/*		m_nonAcquiredAnalogInternalSignals.clear();
+		m_nonAcquiredAnalogInternalSignals.clear();
 
 		//	list include signals that:
 		//
+		//  - const
 		//	+ non acquired
 		//	+ analog
 		//	+ internal
@@ -2835,44 +2805,18 @@ namespace Builder
 		//	+ used in UAL
 		//	+ auto analog internal signals (auto generated in m_appSignals)
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* s : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isAcquired() == false &&
+			if (s->isConst() == false &&
+				s->isAcquired() == false &&
 				s->isAnalog() == true &&
-				s->isInternal() == true &&
-				s->enableTuning() == false &&
-				isUsedInUal(s) == true)
+				s->isInternal() == true)
 			{
 				m_nonAcquiredAnalogInternalSignals.append(s);
 			}
 		}
-
-		// append auto analog internal signals (auto generated in m_appSignals)
-		//
-		for(UalSignal* appSignal : m_ualSignals)
-		{
-			TEST_PTR_CONTINUE(appSignal);
-
-			if (appSignal->isAutoSignal() == true &&
-				appSignal->isAnalog() == true)
-			{
-				Signal* s = appSignal->signal();
-
-				if (s == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				assert(s->isAcquired() == false);
-				assert(s->isInternal() == true);
-				assert(s->dataSize() == SIZE_32BIT);
-
-				m_nonAcquiredAnalogInternalSignals.append(s);
-			}
-		}*/
 
 		return true;
 	}
@@ -3101,19 +3045,21 @@ namespace Builder
 		{
 			if (calculateIoSignalsAddresses() == false) break;
 
+			if (setDiscreteInputSignalsUalAddresses() == false) break;
+
 			if (disposeDiscreteSignalsInBitMemory() == false) break;
 
-/*			if (disposeAcquiredRawDataInRegBuf() == false) break;
+			if (disposeAcquiredRawDataInRegBuf() == false) break;
 
 			if (disposeAcquiredAnalogSignalsInRegBuf() == false) break;
 
-			if (disposeAcquiredBusesInRegBuf() == false) break; */
+			if (disposeAcquiredBusesInRegBuf() == false) break;
 
 			if (disposeAcquiredDiscreteSignalsInRegBuf() == false) break;
 
-/*			if (disposeNonAcquiredAnalogSignals() == false) break;
+			if (disposeNonAcquiredAnalogSignals() == false) break;
 
-			if (disposeNonAcquiredBuses() == false) break;*/
+			if (disposeNonAcquiredBuses() == false) break;
 
 			result = true;
 		}
@@ -3242,11 +3188,26 @@ namespace Builder
 			}
 		}
 
-		// set ualAddress of input UalSignals reffered by m_ioSignals equal to ioBufAddr of input signal
+		return result;
+	}
 
+	bool ModuleLogicCompiler::setDiscreteInputSignalsUalAddresses()
+	{
+		bool result = true;
+
+		// set ualAddress of discrete input UalSignals reffered by m_ioSignals equal to ioBufAddr of input signal
+		//
 		for(Signal* ioSignal : m_ioSignals)
 		{
-			if (ioSignal->isInput() == false)
+			if (ioSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ioSignal->isInput() == false ||
+				ioSignal->isDiscrete() == false)
 			{
 				continue;
 			}
@@ -3258,10 +3219,12 @@ namespace Builder
 				continue;			// is not an error
 			}
 
-			if (ualSignal->isInput() == false)
+			if (ualSignal->isInput() == false ||
+				ualSignal->isDiscrete() == false)
 			{
-				assert(false);					// ualSignal must be Input if reffered by ioSignal
+				assert(false);					// ualSignal must be Discrete Input if reffered by ioSignal
 				LOG_INTERNAL_ERROR(m_log);
+				result = false;
 				continue;
 			}
 
@@ -3303,87 +3266,11 @@ namespace Builder
 	{
 		bool result = true;
 
-/*		int regBufOffset = -m_memoryMap.regBufStartAddr();	// minus is OK!
+		result &= m_memoryMap.appendAcquiredAnalogInputSignalsInRegBuf(m_acquiredAnalogInputSignals);
+		result &= m_memoryMap.appendAcquiredAnalogStrictOutputSignalsInRegBuf(m_acquiredAnalogStrictOutputSignals);
+		result &= m_memoryMap.appendAcquiredAnalogInternalSignalsInRegBuf(m_acquiredAnalogInternalSignals);
 
-		for(Signal* s : m_acquiredAnalogInputSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendAcquiredAnalogInputSignal(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_acquiredAnalogOutputSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendAcquiredAnalogOutputSignal(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_acquiredAnalogInternalSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendAcquiredAnalogInternalSignal(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_acquiredAnalogTuningSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			assert(s->tuningAddr().isValid() == true);
-
-			// ualAddr of acquired analog tuning signals is assigned in TuningData::buildTuningData() !
-			//
-			// s->setUalAddr(s->tuningAddr());
-
-			Address16 addr = m_memoryMap.appendAcquiredAnalogTuningSignal(*s);
-
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}*/
-
-		result = m_memoryMap.recalculateAddresses();
+		// ++ acquired analog tuning signals
 
 		return result;
 	}
@@ -3422,96 +3309,20 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredDiscreteTuningSignalsInRegBuf(m_acquiredDiscreteTuningSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteConstSignalsInRegBuf(m_acquiredDiscreteConstSignals);
 
-
-		return result;
-
-/*		int regBufOffset = -m_memoryMap.regBufStartAddr();	// minus is OK!
-
-		for(UalSignal* s : m_acquiredDiscreteInputSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-		}
-
-		result = m_memoryMap.recalculateAddresses(); */
-
-/*		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_acquiredDiscreteStrictOutputSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			assert(s->ualAddr().isValid() == true);
-
-			Address16 addr = m_memoryMap.appendAcquiredDiscreteOutputSignalInRegBuf(*s);
-
-			s->setRegBufAddr(addr);
-
-			assert(s->ualAddr().bit() == s->regBufAddr().bit());
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_acquiredDiscreteInternalSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			assert(s->ualAddr().isValid() == true);
-
-			Address16 addr = m_memoryMap.appendAcquiredDiscreteInternalSignalInRegBuf(*s);
-
-			s->setRegBufAddr(addr);
-
-			assert(s->ualAddr().bit() == s->regBufAddr().bit());
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_acquiredDiscreteTuningSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			assert(s->tuningAddr().isValid() == true);
-
-			// ualAddr of acquired discrete tuning signals is assigned in TuningData::buildTuningData() !
-			//
-			// s->setUalAddr(s->tuningAddr());
-
-			Address16 addr = m_memoryMap.appendAcquiredDiscreteTuningSignal(*s);
-
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();*/
-
 		return result;
 	}
 
 	bool ModuleLogicCompiler::disposeNonAcquiredAnalogSignals()
 	{
 		bool result = true;
+
+		result &= m_memoryMap.appendNonAcquiredAnalogInputSignals(m_nonAcquiredAnalogInputSignals);
+		result &= m_memoryMap.appendNonAcquiredAnalogStrictOutputSignals(m_nonAcquiredAnalogStrictOutputSignals);
+		result &= m_memoryMap.appendNonAcquiredAnalogInternalSignals(m_nonAcquiredAnalogInternalSignals);
+
+
+		//result &= m_memoryMap.appendNonAnalogInputSignals(m_nonAcquiredAnalogInputSignals);
+
 
 /*		int regBufOffset = -m_memoryMap.regBufStartAddr();	// minus is OK!
 
@@ -3597,7 +3408,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::appendFbsForAnalogInOutSignalsConversion()
+	bool ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion()
 	{
 		if (findFbsForAnalogInOutSignalsConversion() == false)
 		{
@@ -3608,21 +3419,30 @@ namespace Builder
 
 		// append FBs  for analog input signals conversion
 		//
-		QVector<Signal*> analogInputSignals;
+		QVector<UalSignal*> analogInputSignals;
 
 		analogInputSignals.append(m_acquiredAnalogInputSignals);
 		analogInputSignals.append(m_nonAcquiredAnalogInputSignals);
 
-		for(Signal* s : analogInputSignals)
+		for(UalSignal* ualSignal : analogInputSignals)
 		{
-			TEST_PTR_CONTINUE(s);
+			TEST_PTR_CONTINUE(ualSignal);
 
-			assert(s->isAnalog() == true);
-			assert(s->isInput() == true);
+			assert(ualSignal->isAnalog() == true);
+			assert(ualSignal->isInput() == true);
+
+			Signal* s = ualSignal->getInputSignal();
+
+			if (s == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
 
 			UalItem appItem;
 
-			bool res = createFbForAnalogInputSignalConversion(*s, appItem);
+			bool res = createAfbForAnalogInputSignalConversion(*s, appItem);
 
 			if (res == true)
 			{
@@ -3636,7 +3456,7 @@ namespace Builder
 
 		// append FBs  for analog output signals conversion
 		//
-		QVector<Signal*> analogOutputSignals;
+		QVector<UalSignal*> analogOutputSignals;
 
 		analogOutputSignals.append(m_acquiredAnalogOutputSignals);
 		analogOutputSignals.append(m_nonAcquiredAnalogOutputSignals);
@@ -3827,7 +3647,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem)
+	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isInput());
@@ -4835,7 +4655,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		QVector<Signal*> analogInputSignals;
+		QVector<UalSignal*> analogInputSignals;
 
 		analogInputSignals.append(m_acquiredAnalogInputSignals);
 		analogInputSignals.append(m_nonAcquiredAnalogInputSignals);
@@ -4845,16 +4665,26 @@ namespace Builder
 			return true;
 		}
 
-		m_code.comment("Convertion of input analog signals");
+		m_code.comment("Convertion of analog input signals");
 		m_code.newLine();
 
 		Command cmd;
 
-		for(Signal* s : analogInputSignals)
+		for(UalSignal* ualSignal : analogInputSignals)
 		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			Signal* s = ualSignal->getInputSignal();
+
 			if (s == nullptr)
 			{
-				assert(false);
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
 				continue;
 			}
 
@@ -5892,9 +5722,9 @@ namespace Builder
 
 			if (startAfb(ualAfb) == false) break;
 
-			if (readFbOutputSignals(ualAfb) == false) break;
+			if (generateAfbOutputsToSignalsCode(ualAfb) == false) break;
 
-			if (addToComparatorStorage(ualAfb) == false) break;
+			//if (addToComparatorStorage(ualAfb) == false) break;
 
 			result = true;
 		}
@@ -6053,6 +5883,12 @@ namespace Builder
 		}
 
 		// inUalSignal and inAfbSignal are compatible
+
+		if (inUalSignal->isConst() == false && inUalSignal->ualAddr().isValid() == false)
+		{
+			LOG_UNDEFINED_UAL_ADDRESS(m_log, inUalSignal);
+			return false;
+		}
 
 		bool result = true;
 
@@ -6551,6 +6387,11 @@ namespace Builder
 				return false;
 			}
 
+			if (isConnectedToTerminator(outPin) == true)
+			{
+				continue;
+			}
+
 			UalSignal* outUalSignal = m_ualSignals.get(outPin.guid());
 
 			if (outUalSignal == nullptr)
@@ -6599,6 +6440,12 @@ namespace Builder
 			return false;
 		}
 
+		if (outUalSignal->ualAddr().isValid() == false)
+		{
+			LOG_UNDEFINED_UAL_ADDRESS(m_log, outUalSignal);
+			return false;
+		}
+
 		// inUalSignal and inAfbSignal are compatible
 
 		bool result = true;
@@ -6617,7 +6464,7 @@ namespace Builder
 		case E::SignalType::Discrete:
 
 			cmd.readFuncBlockBit(outUalSignal->ualAddr(), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
-			cmd.setComment(QString("%1 <= %2.%3").arg(outAfbSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+			cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
 
 			m_code.append(cmd);
 
@@ -6626,7 +6473,7 @@ namespace Builder
 		case E::SignalType::Analog:
 
 			cmd.readFuncBlock32(outUalSignal->ualAddr(), afbOpcode, afbInstance, afbSignalIndex, afbCaption);
-			cmd.setComment(QString("%1 <= %2.%3").arg(outAfbSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
+			cmd.setComment(QString("%1 <= %2.%3").arg(outUalSignal->appSignalID()).arg(afbCaption).arg(signalCaption));
 
 			m_code.append(cmd);
 
@@ -7906,6 +7753,36 @@ namespace Builder
 		return appSignal;
 	}
 
+	bool ModuleLogicCompiler::isConnectedToTerminator(const LogicPin& outPin)
+	{
+		ConnectedAppItems connectedItems;
+
+		bool result = getConnectedAppItems(outPin, &connectedItems);
+
+		if (result == false)
+		{
+			assert(false);
+			return false;
+		}
+
+		for(const std::pair<QUuid, UalItem*>& pair : connectedItems)
+		{
+			if (pair.second == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				continue;
+			}
+
+			if (pair.second->isTerminator() == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
 
 	bool ModuleLogicCompiler::addToComparatorStorage(const UalAfb* appFb)
 	{
@@ -7974,9 +7851,21 @@ namespace Builder
 
 		QString commentStr;
 
-		for(Signal* s : m_acquiredAnalogTuningSignals)
+		for(UalSignal* ualSignal : m_acquiredAnalogTuningSignals)
 		{
-			TEST_PTR_CONTINUE(s);
+			if(ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				return false;
+			}
+
+			Signal* s = ualSignal->getTuningableSignal();
+
+			if (s == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				return false;
+			}
 
 			// check signal!
 			//
@@ -8239,6 +8128,15 @@ namespace Builder
 
 			assert(ualSignal->isConst() == false);
 
+			if (ualSignal->ualAddr().isValid() == false ||
+				ualSignal->regBufAddr().isValid() == false ||
+				ualSignal->regValueAddr().isValid() == false)
+			{
+				assert(false);				// signal's ualAddr ot regBufAddr is not initialized!
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
 			Signal* inputSignal = ualSignal->getInputSignal();
 
 			if (inputSignal == nullptr)
@@ -8247,21 +8145,16 @@ namespace Builder
 				return false;
 			}
 
-			if (inputSignal->ualAddr().isValid() == false ||
-				inputSignal->regBufAddr().isValid() == false ||
-				inputSignal->regValueAddr().isValid() == false)
+			if (ualSignal->ualAddr() != inputSignal->ualAddr() ||
+				ualSignal->ualAddr() != inputSignal->ioBufAddr())
 			{
-				assert(false);				// signal's ualAddr ot regBufAddr is not initialized!
 				LOG_INTERNAL_ERROR(m_log);
 				return false;
 			}
 
-			assert(ualSignal->ualAddr() == inputSignal->ualAddr());
-			assert(ualSignal->ualAddr() == inputSignal->ioBufAddr());
-
 			countReminder16 = count % SIZE_16BIT;
 
-			assert(inputSignal->regBufAddr().bit() == countReminder16);
+			assert(ualSignal->regBufAddr().bit() == countReminder16);
 
 			if (countReminder16 == 0 && (signalsCount - count) < SIZE_16BIT && zeroLastWord == true)
 			{
@@ -8271,7 +8164,7 @@ namespace Builder
 				zeroLastWord = false;
 			}
 
-			cmd.movBit(bitAccAddr, inputSignal->regBufAddr().bit(), inputSignal->ioBufAddr().offset(), inputSignal->ioBufAddr().bit());
+			cmd.movBit(bitAccAddr, ualSignal->regBufAddr().bit(), inputSignal->ioBufAddr().offset(), inputSignal->ioBufAddr().bit());
 			cmd.setComment(QString("copy %1").arg(ualSignal->acquiredRefSignalsIDs().join(", ")));
 			m_code.append(cmd);
 
@@ -8470,8 +8363,15 @@ namespace Builder
 	{
 		QVector<Signal*> outAnalogSignals;
 
-		outAnalogSignals.append(m_acquiredAnalogOutputSignals);
-		outAnalogSignals.append(m_nonAcquiredAnalogOutputSignals);
+		for(UalSignal* ualSignal : m_acquiredAnalogStrictOutputSignals)
+		{
+			outAnalogSignals.append(ualSignal->getAnalogOutputSignals());
+		}
+
+		for(UalSignal* ualSignal : m_nonAcquiredAnalogStrictOutputSignals)
+		{
+			outAnalogSignals.append(ualSignal->getAnalogOutputSignals());
+		}
 
 		if (outAnalogSignals.isEmpty() == true)
 		{
@@ -8549,12 +8449,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOutputDiscreteSignals()
 	{
-		QVector<Signal*> outDiscreteSignals;
-
-//		outDiscreteSignals.append(m_acquiredDiscreteStrictOutputSignals);
-//		outDiscreteSignals.append(m_nonAcquiredDiscreteStrictOutputSignals);
-
 		bool result = true;
+
+		QHash<int, Signal*> writeAddressesMap;
 
 		for(Signal* s : m_ioSignals)
 		{
@@ -8574,29 +8471,15 @@ namespace Builder
 
 			if (ualSignal != nullptr)
 			{
-				outDiscreteSignals.append(s);
+				writeAddressesMap.insertMulti(s->ioBufAddr().offset(), s);
 			}
 		}
-
-//		if (outDiscreteSignals.isEmpty() == true)
-//		{
-//			return true;
-//		}
 
 		int lmOutputsAddress = m_lmDescription->memory().m_appDataOffset;
 		bool lmOutputsIsWritten = false;
 
-		m_code.comment("Copy output discrete signals to output modules memory");
+		m_code.comment("Copy discrete output signals to output modules memory");
 		m_code.newLine();
-
-		QHash<int, Signal*> writeAddressesMap;
-
-		for(Signal* s : outDiscreteSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			writeAddressesMap.insertMulti(s->ioBufAddr().offset(), s);
-		}
 
 		QList<int> writeAddreses = writeAddressesMap.uniqueKeys();
 
@@ -8610,14 +8493,33 @@ namespace Builder
 		{
 			QList<Signal*> writeSignals = writeAddressesMap.values(writeAddr);
 
+			// signals sorting by ioBufAddr  via std::map
+			//
+			std::map<int, Signal*> sortedWriteSignals;
+
+			for(Signal* s : writeSignals)
+			{
+				sortedWriteSignals.insert(std::make_pair(s->ioBufAddr().bitAddress(), s));
+			}
+
 			Command cmd;
 
 			cmd.movConst(wordAccAddr, 0);
 			m_code.append(cmd);
 
-			for(Signal* s : writeSignals)
+			for(const std::pair<int, Signal*>& pair: sortedWriteSignals)
 			{
+				Signal* s = pair.second;
+
 				TEST_PTR_CONTINUE(s);
+
+				if (s->ioBufAddr().isValid() == false)
+				{
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
 
 				UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
@@ -8635,6 +8537,14 @@ namespace Builder
 				}
 				else
 				{
+					if (s->ualAddr().isValid() == false)
+					{
+						assert(false);
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
+						continue;
+					}
+
 					cmd.movBit(wordAccAddr, s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
 				}
 

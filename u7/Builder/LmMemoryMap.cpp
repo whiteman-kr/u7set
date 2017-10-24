@@ -500,7 +500,7 @@ namespace Builder
 		return result;
 	}
 
-	bool LmMemoryMap::appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals)
+	bool LmMemoryMap::appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals, bool setUalAddrEqualToRegBufAddr)
 	{
 		bool result = true;
 
@@ -514,6 +514,12 @@ namespace Builder
 			}
 
 			Address16 addr = memArea.appendSignal(ualSignal, true);
+
+			if (setUalAddrEqualToRegBufAddr == true)
+			{
+				assert(ualSignal->ualAddr().isValid() == false);			//	checking that ualAddr is not set early
+				ualSignal->setUalAddr(addr);
+			}
 
 			ualSignal->setRegBufAddr(addr);
 
@@ -570,7 +576,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInputSignals, ualSignals);
+		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInputSignals, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;
@@ -580,7 +586,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteOutputSignals, ualSignals);
+		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteOutputSignals, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;
@@ -590,7 +596,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInternalSignals, ualSignals);
+		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInternalSignals, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;
@@ -600,7 +606,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteTuningSignals, ualSignals);
+		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteTuningSignals, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;
@@ -644,6 +650,66 @@ namespace Builder
 
 		m_appWordAdressed.acquiredDiscreteConstSignals.setSizeW(1);			// always 1 word!
 
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredAnalogInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogInputSignals, ualSignals, true);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredAnalogStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogOutputSignals, ualSignals, true);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogInternalSignals, ualSignals, true);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendUalSignals(m_appWordAdressed.nonAcquiredAnalogInputSignals, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendNonAcquiredAnalogStrictOutputSignals(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendUalSignals(m_appWordAdressed.nonAcquiredAnalogOutputSignals, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendNonAcquiredAnalogInternalSignals(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendUalSignals(m_appWordAdressed.nonAcquiredAnalogInternalSignals, ualSignals);
 		result &= recalculateAddresses();
 
 		return result;

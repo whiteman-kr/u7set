@@ -149,17 +149,19 @@ namespace Builder
 		bool createAcquiredDiscreteConstSignalsList();
 
 		bool createNonAcquiredDiscreteInputSignalsList();
-		bool createNonAcquiredDiscreteOutputSignalsList();
+		bool createNonAcquiredDiscreteStrictOutputSignalsList();
 		bool createNonAcquiredDiscreteInternalSignalsList();
 		bool createNonAcquiredDiscreteTuningSignalsList();
 
 		bool createAcquiredAnalogInputSignalsList();
-		bool createAcquiredAnalogOutputSignalsList();
+		bool createAcquiredAnalogStrictOutputSignalsList();
 		bool createAcquiredAnalogInternalSignalsList();
 		bool createAcquiredAnalogTuninglSignalsList();
 
+		bool createAnalogOutputSignalsList();
+
 		bool createNonAcquiredAnalogInputSignalsList();
-		bool createNonAcquiredAnalogOutputSignalsList();
+		bool createNonAcquiredAnalogStrictOutputSignalsList();
 		bool createNonAcquiredAnalogInternalSignalsList();
 		bool createNonAcquiredAnalogTuningSignalsList();
 
@@ -176,8 +178,9 @@ namespace Builder
 
 		bool calculateIoSignalsAddresses();
 
-		// disposing discrete signals in bit-addressed memory
+		// disposing discrete signals in memory
 		//
+		bool setDiscreteInputSignalsUalAddresses();
 		bool disposeDiscreteSignalsInBitMemory();
 
 		// disposing acquired analog, discrete and bus signals in registration buffer (word-addressed memory)
@@ -192,9 +195,9 @@ namespace Builder
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
 
-		bool appendFbsForAnalogInOutSignalsConversion();
+		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createFbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem);
+		bool createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem);
 		bool createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
 
@@ -271,6 +274,8 @@ namespace Builder
 		bool getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems);
 		bool getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID);
 		UalSignal* getPinInputAppSignal(const LogicPin& inPin);
+
+		bool isConnectedToTerminator(const LogicPin& outPin);
 
 		bool addToComparatorStorage(const UalAfb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
@@ -407,24 +412,26 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredDiscreteTuningSignals;			// acquired discrete internal tuningable signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteConstSignals;
 
-		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// *** list is no required - delete it! *** non acquired discrete input signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteInternalSignals;		// non acquired discrete internal non tuningbale signals, used in UAL
-		QVector<UalSignal*> m_nonAcquiredDiscreteTuningSignals;			// non acquired discrete internal tuningable signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteTuningSignals;			// *** list is no required - delete it! *** non acquired discrete internal tuningable signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL
 
-		QVector<Signal*> m_acquiredAnalogInputSignals;			// acquired analog input signals, no matter used in UAL or not
-		QVector<Signal*> m_acquiredAnalogOutputSignals;			// acquired analog output signals, used in UAL
-		QVector<Signal*> m_acquiredAnalogInternalSignals;		// acquired analog internal signals, used in UAL
-		QVector<Signal*> m_acquiredAnalogTuningSignals;			// acquired analog internal tuningable signals, no matter used in UAL or not
+		QVector<UalSignal*> m_acquiredAnalogInputSignals;				// acquired analog input signals, no matter used in UAL or not
+		QVector<UalSignal*> m_acquiredAnalogStrictOutputSignals;		// acquired analog strict output signals, used in UAL
+		QVector<UalSignal*> m_acquiredAnalogInternalSignals;			// acquired analog internal signals, used in UAL
+		QVector<UalSignal*> m_acquiredAnalogTuningSignals;				// acquired analog internal tuningable signals, no matter used in UAL or not
 
-		QVector<Signal*> m_nonAcquiredAnalogInputSignals;		// non acquired analog input signals, used in UAL
-		QVector<Signal*> m_nonAcquiredAnalogOutputSignals;		// non acquired analog output signals, used in UAL
-		QVector<Signal*> m_nonAcquiredAnalogInternalSignals;	// non acquired analog internal non tunigable signals, used in UAL
-		QVector<Signal*> m_nonAcquiredAnalogTuningSignals;		// non acquired analog internal tuningable signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredAnalogInputSignals;			// non acquired analog input signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredAnalogStrictOutputSignals;		// non acquired analog strict output signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredAnalogInternalSignals;			// non acquired analog internal non tunigable signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredAnalogTuningSignals;			// non acquired analog internal tuningable signals, used in UAL
 
-		QVector<Signal*> m_acquiredBuses;						// acquired bus signals, used in UAL
-		QVector<Signal*> m_nonAcquiredBuses;					// non acquired bus signals, used in UAL
+		QVector<UalSignal*> m_analogOutputSignals;						// all analog output signals requires conversion
+
+		QVector<UalSignal*> m_acquiredBuses;							// acquired bus signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredBuses;							// non acquired bus signals, used in UAL
 
 		//QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
 																		// for grant unique records

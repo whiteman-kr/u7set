@@ -236,7 +236,7 @@ namespace Builder
 		void getFile(QStringList& memFile);
 
 		bool appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
-		bool appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
+		bool appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals, bool setUalAddrEqualToRegBufAddr);
 
 		bool appendAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals);
@@ -248,6 +248,14 @@ namespace Builder
 		bool appendAcquiredDiscreteInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteConstSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+
+		bool appendAcquiredAnalogInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+
+		bool appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredAnalogStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredAnalogInternalSignals(const QVector<UalSignal*>& ualSignals);
 
 		Address16 setAcquiredRawDataSize(int sizeW);
 

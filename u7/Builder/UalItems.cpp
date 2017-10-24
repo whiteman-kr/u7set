@@ -724,7 +724,6 @@ namespace Builder
 		return false;
 	}
 
-
 	bool UalAfb::checkRequiredParameters(const QStringList& requiredParams)
 	{
 		return checkRequiredParameters(requiredParams, true);
@@ -1386,8 +1385,30 @@ namespace Builder
 		return tuningableSignal;
 	}
 
+	QVector<Signal*> UalSignal::getAnalogOutputSignals()
+	{
+		QVector<Signal*> analogOutputs;
 
-	QStringList UalSignal::refSignalsIDs()
+		if (isAnalog() == false)
+		{
+			assert(false);
+			return analogOutputs;
+		}
+
+		for(Signal* s : m_refSignals)
+		{
+			assert(s->isAnalog() == true);
+
+			if (s->isOutput() == true)
+			{
+				analogOutputs.append(s);
+			}
+		}
+
+		return analogOutputs;
+	}
+
+	QStringList UalSignal::refSignalsIDs() const
 	{
 		QStringList list;
 
@@ -1399,7 +1420,7 @@ namespace Builder
 		return list;
 	}
 
-	QStringList UalSignal::acquiredRefSignalsIDs()
+	QStringList UalSignal::acquiredRefSignalsIDs() const
 	{
 		QStringList list;
 
