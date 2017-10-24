@@ -500,34 +500,6 @@ namespace VFrame30
 			points.pop_back();
 		}
 	}
-
-	const std::list<SchemaPoint>& PosConnectionImpl::GetExtensionPoints() const
-	{
-		return extPoints;
-	}
-	
-	void PosConnectionImpl::SetExtensionPoints(const std::list<SchemaPoint>& extPoints)
-	{
-		this->extPoints = extPoints;
-	}
-
-	void PosConnectionImpl::AddExtensionPoint(double x, double y)
-	{
-		extPoints.push_back(SchemaPoint(x, y));
-	}
-
-	void PosConnectionImpl::DeleteAllExtensionPoints()
-	{
-		extPoints.clear();
-	}
-
-	void PosConnectionImpl::DeleteLastExtensionPoint()
-	{
-		if (extPoints.empty() == false)
-		{
-			extPoints.pop_back();
-		}
-	}
 		
 	// ISchemaItemPropertiesPos Implementation
 	//

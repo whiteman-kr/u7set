@@ -16,6 +16,52 @@
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
 
+class ConnLineEditPoints
+{
+public:
+	enum EditDirrection
+	{
+		AddToEnd,
+		AddToBegin
+	};
+
+	ConnLineEditPoints() = delete;
+	ConnLineEditPoints(const ConnLineEditPoints& that) = default;
+	ConnLineEditPoints(std::shared_ptr<VFrame30::PosConnectionImpl> item, ConnLineEditPoints::EditDirrection dirrection);
+
+	// Methods
+	//
+public:
+	void clear();
+	void clearExtensionPoints();
+
+	void addBasePoint(const QPointF& pt);
+	void addExtensionPoint(const QPointF& pt);
+
+	int moveExtensionPointsToBasePoints();
+
+	const std::list<QPointF>& basePoints() const;
+	const std::list<QPointF>& extensionPoints() const;
+	std::vector<QPointF> points() const;				// Get all points depending on m_editDirrection
+
+	QPointF lastBasePoint() const;
+	QPointF lastExtensionPoint() const;
+
+	void setPointToItsItem() const;
+
+	void drawOutline(VFrame30::CDrawParam* drawParam) const;
+
+	// Data
+	//
+private:
+	std::shared_ptr<VFrame30::PosConnectionImpl> m_schemaItem;
+
+	std::list<QPointF> m_basePoints;
+	std::list<QPointF> m_extensionPoints;
+
+	EditDirrection m_editDirrection = AddToEnd;
+};
+
 
 enum class MouseState
 {
@@ -116,6 +162,7 @@ protected:
 	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawSelection(QPainter* p);
+	void drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam);
 	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
 	void drawSelectionArea(QPainter* p);
 	void drawMovingItems(VFrame30::CDrawParam* drawParam);
@@ -167,6 +214,8 @@ private:
 	int m_activeLayer;
 	MouseState m_mouseState;
 
+	// Temporary data can be changed in EditSchemaWidget
+	//
 protected:
 	std::shared_ptr<VFrame30::SchemaItem> m_newItem;
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
@@ -190,6 +239,8 @@ protected:
 
 	// Variables for changing ConnectionLine
 	//
+	std::list<ConnLineEditPoints> m_editConnectionLines;	// Add new connection_line struct
+
 	double m_editStartMovingEdge;				// Start pos fro moving edge
 	double m_editEndMovingEdge;					// End pos for moving edge
 	double m_editStartMovingEdgeX;				// Начальная координата для перемещения вершины
@@ -203,11 +254,7 @@ protected:
 												// используются при завершении (MouseUp) редактирования.
 	std::list<VFrame30::SchemaPoint> m_movingVertexPoints;
 
-	//QRubberBand* m_rubberBand;				// Not don yet, on linux same CPU ussage for repainting everything and using QRubberBand
-												// TO DO, test CPU Usage on Windows, if it has any advatages, move to using QRubberBand!!!!
-
-
-	// Temporary data, can be changed in EditSchemaWidget
+	// Temporary data can be changed in EditSchemaWidget
 	//
 	friend EditSchemaWidget;
 };
@@ -300,7 +347,7 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
-	void movePosConnectionEndPoint(VFrame30::IPosConnection* item, QPointF toPoint);
+	void movePosConnectionEndPoint(ConnLineEditPoints* ecl, QPointF toPoint);
 
 	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
 	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;
