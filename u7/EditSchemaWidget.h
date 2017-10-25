@@ -16,18 +16,26 @@
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
 
-class ConnLineEditPoints
+class EditConnectionLine
 {
 public:
-	enum EditDirrection
+	enum EditMode
 	{
 		AddToEnd,
-		AddToBegin
+		AddToBegin,
+		EditPoint,
+		EditEdge
 	};
 
-	ConnLineEditPoints() = delete;
-	ConnLineEditPoints(const ConnLineEditPoints& that) = default;
-	ConnLineEditPoints(std::shared_ptr<VFrame30::PosConnectionImpl> item, ConnLineEditPoints::EditDirrection dirrection);
+	enum  Dirrection
+	{
+		Horz,
+		Vert
+	};
+
+	EditConnectionLine() = delete;
+	EditConnectionLine(const EditConnectionLine& that) = default;
+	EditConnectionLine(std::shared_ptr<VFrame30::PosConnectionImpl> item, EditConnectionLine::EditMode mode);
 
 	// Methods
 	//
@@ -47,19 +55,51 @@ public:
 	QPointF lastBasePoint() const;
 	QPointF lastExtensionPoint() const;
 
-	void setPointToItsItem() const;
+	void setPointToItem(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem) const;
 
 	void drawOutline(VFrame30::CDrawParam* drawParam) const;
+
+	EditConnectionLine::EditMode mode() const;
+	void setMode(EditConnectionLine::EditMode value);
+
+	// EditDirrection::EditPoint only
+	//
+	void modifyPoint(const QPointF& point);
+	QPointF editPointCurrState() const;
+	int editPointIndex() const;
+	void setEditPointIndex(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem, int pointIndex);
+
+	// EditDirrection::EditEdge only
+	//
+	void modifyEdge(double value);
+	double editEdgetCurrState() const;
+	int editEdgeIndex() const;
+	void setEditEdgeIndex(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem, int edgeIndex);
+
+protected:
+	static Dirrection getDirrection(const QPointF& pt1, const QPointF& pt2);
 
 	// Data
 	//
 private:
-	std::shared_ptr<VFrame30::PosConnectionImpl> m_schemaItem;
-
+	EditMode m_mode = AddToEnd;
 	std::list<QPointF> m_basePoints;
+
+	// EditDirrection::AddToEnd/AddToBegin only
+	//
 	std::list<QPointF> m_extensionPoints;
 
-	EditDirrection m_editDirrection = AddToEnd;
+	// EditDirrection::EditPoint only
+	//
+	int m_editPointIndex = 0;							// EditDirrection::EditPoint
+	std::vector<QPointF> m_editPointInitialState;		// Initial state for EditDirrection::EditPoint mode
+	QPointF m_editPointCurrState;
+
+	// EditDirrection::EditEdge only
+	//
+	int m_editEdgeIndex = 0;							// Edge consist of two points m_basePoints[m_editEdgePointIndex]  and m_basePoints[m_editEdgePointIndex + 1]
+	std::vector<QPointF> m_editEdgeInitialState;		// Initial state for EditDirrection::EditEdge mode
+	double m_editEdgeCurrState = 0;
 };
 
 
@@ -239,20 +279,7 @@ protected:
 
 	// Variables for changing ConnectionLine
 	//
-	std::list<ConnLineEditPoints> m_editConnectionLines;	// Add new connection_line struct
-
-	double m_editStartMovingEdge;				// Start pos fro moving edge
-	double m_editEndMovingEdge;					// End pos for moving edge
-	double m_editStartMovingEdgeX;				// Ќачальна€ координата дл€ перемещени€ вершины
-	double m_editStartMovingEdgeY;				// Ќачальна€ координата дл€ перемещени€ вершины
-	double m_editEndMovingEdgeX;				//  онечна€ координата дл€ перемещени€ грани
-	double m_editEndMovingEdgeY;				//  онечна€ координата дл€ перемещени€ грани
-	int m_movingEdgePointIndex;					// »ндекс точки при перемещении вершины или грани
-
-												// ѕри перемещении вершины соединительно линии здесь
-												// соххран€ютс€ точки (в отрисовке), и потом они
-												// используютс€ при завершении (MouseUp) редактировани€.
-	std::list<VFrame30::SchemaPoint> m_movingVertexPoints;
+	std::list<EditConnectionLine> m_editConnectionLines;	// Add new or edit PosConnectionImpl items
 
 	// Temporary data can be changed in EditSchemaWidget
 	//
@@ -347,7 +374,7 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
-	void movePosConnectionEndPoint(ConnLineEditPoints* ecl, QPointF toPoint);
+	void movePosConnectionEndPoint(EditConnectionLine* ecl, QPointF toPoint);
 
 	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
 	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;

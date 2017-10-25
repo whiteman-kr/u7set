@@ -35,44 +35,43 @@
 #include "Forms/ComparePropertyObjectDialog.h"
 
 
-ConnLineEditPoints::ConnLineEditPoints(std::shared_ptr<VFrame30::PosConnectionImpl> item, ConnLineEditPoints::EditDirrection dirrection)
+EditConnectionLine::EditConnectionLine(std::shared_ptr<VFrame30::PosConnectionImpl> item, EditConnectionLine::EditMode mode)
 {
-	clear();
-	assert(item);
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
 
-	m_schemaItem = item;
-	m_editDirrection = dirrection;
+	m_mode = mode;
 
-	const std::list<VFrame30::SchemaPoint>& itemPoints = m_schemaItem->GetPointList();
+	const std::list<VFrame30::SchemaPoint>& itemPoints = item->GetPointList();
 	m_basePoints.insert(m_basePoints.begin(), itemPoints.begin(), itemPoints.end());
 
 	return;
 }
 
-void ConnLineEditPoints::clear()
+void EditConnectionLine::clear()
 {
 	m_basePoints.clear();
 	m_extensionPoints.clear();
-
-	m_schemaItem.reset();
-
 	return;
 }
 
-void ConnLineEditPoints::clearExtensionPoints()
+void EditConnectionLine::clearExtensionPoints()
 {
 	m_extensionPoints.clear();
 }
 
-void ConnLineEditPoints::addBasePoint(const QPointF& pt)
+void EditConnectionLine::addBasePoint(const QPointF& pt)
 {
-	if (m_editDirrection == AddToEnd)
+	if (m_mode == AddToEnd)
 	{
 		m_basePoints.push_back(pt);
 		return;
 	}
 
-	if (m_editDirrection == AddToBegin)
+	if (m_mode == AddToBegin)
 	{
 		m_basePoints.push_front(pt);
 		return;
@@ -82,15 +81,15 @@ void ConnLineEditPoints::addBasePoint(const QPointF& pt)
 	return;
 }
 
-void ConnLineEditPoints::addExtensionPoint(const QPointF& pt)
+void EditConnectionLine::addExtensionPoint(const QPointF& pt)
 {
-	if (m_editDirrection == AddToEnd)
+	if (m_mode == AddToEnd)
 	{
 		m_extensionPoints.push_back(pt);
 		return;
 	}
 
-	if (m_editDirrection == AddToBegin)
+	if (m_mode == AddToBegin)
 	{
 		m_extensionPoints.push_front(pt);
 		return;
@@ -100,18 +99,18 @@ void ConnLineEditPoints::addExtensionPoint(const QPointF& pt)
 	return;
 }
 
-int ConnLineEditPoints::moveExtensionPointsToBasePoints()
+int EditConnectionLine::moveExtensionPointsToBasePoints()
 {
 	int addedPoints = static_cast<int>(m_extensionPoints.size());
 
-	if (m_editDirrection == AddToEnd)
+	if (m_mode == AddToEnd)
 	{
 		m_basePoints.insert(m_basePoints.end(), m_extensionPoints.begin(), m_extensionPoints.end());
 		m_extensionPoints.clear();
 		return addedPoints;
 	}
 
-	if (m_editDirrection == AddToBegin)
+	if (m_mode == AddToBegin)
 	{
 		m_basePoints.insert(m_basePoints.begin(), m_extensionPoints.begin(), m_extensionPoints.end());
 		m_extensionPoints.clear();
@@ -122,22 +121,22 @@ int ConnLineEditPoints::moveExtensionPointsToBasePoints()
 	return 0;
 }
 
-const std::list<QPointF>& ConnLineEditPoints::basePoints() const
+const std::list<QPointF>& EditConnectionLine::basePoints() const
 {
 	return m_basePoints;
 }
 
-const std::list<QPointF>& ConnLineEditPoints::extensionPoints() const
+const std::list<QPointF>& EditConnectionLine::extensionPoints() const
 {
 	return m_extensionPoints;
 }
 
-std::vector<QPointF> ConnLineEditPoints::points() const
+std::vector<QPointF> EditConnectionLine::points() const
 {
 	std::vector<QPointF> result;
 	result.reserve(m_basePoints.size() + m_extensionPoints.size());
 
-	if (m_editDirrection == AddToEnd)
+	if (m_mode == AddToEnd)
 	{
 		result.insert(result.begin(), m_basePoints.begin(), m_basePoints.end());
 		result.insert(result.end(), m_extensionPoints.begin(), m_extensionPoints.end());
@@ -145,19 +144,25 @@ std::vector<QPointF> ConnLineEditPoints::points() const
 		return result;
 	}
 
-	if (m_editDirrection == AddToBegin)
+	if (m_mode == AddToBegin)
 	{
 		result.insert(result.end(), m_extensionPoints.begin(), m_extensionPoints.end());
 		result.insert(result.begin(), m_basePoints.begin(), m_basePoints.end());
 
 		return result;
+	}
+
+	if (m_mode == EditPoint ||
+		m_mode == EditEdge)
+	{
+		result.insert(result.begin(), m_basePoints.begin(), m_basePoints.end());
 	}
 
 	assert(false);
 	return result;
 }
 
-QPointF ConnLineEditPoints::lastBasePoint() const
+QPointF EditConnectionLine::lastBasePoint() const
 {
 	QPointF result;
 
@@ -167,13 +172,13 @@ QPointF ConnLineEditPoints::lastBasePoint() const
 		return result;
 	}
 
-	if (m_editDirrection == AddToEnd)
+	if (m_mode == AddToEnd)
 	{
 		result = m_basePoints.back();
 		return result;
 	}
 
-	if (m_editDirrection == AddToBegin)
+	if (m_mode == AddToBegin)
 	{
 		result = m_basePoints.front();
 		return result;
@@ -183,7 +188,7 @@ QPointF ConnLineEditPoints::lastBasePoint() const
 	return result;
 }
 
-QPointF ConnLineEditPoints::lastExtensionPoint() const
+QPointF EditConnectionLine::lastExtensionPoint() const
 {
 	QPointF result;
 
@@ -193,13 +198,13 @@ QPointF ConnLineEditPoints::lastExtensionPoint() const
 		return result;
 	}
 
-	if (m_editDirrection == AddToEnd)
+	if (m_mode == AddToEnd)
 	{
 		result = m_extensionPoints.back();
 		return result;
 	}
 
-	if (m_editDirrection == AddToBegin)
+	if (m_mode == AddToBegin)
 	{
 		result = m_extensionPoints.front();
 		return result;
@@ -209,24 +214,24 @@ QPointF ConnLineEditPoints::lastExtensionPoint() const
 	return result;
 }
 
-void ConnLineEditPoints::setPointToItsItem() const
+void EditConnectionLine::setPointToItem(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem) const
 {
-	if (m_schemaItem == nullptr)
+	if (schemaItem == nullptr)
 	{
-		assert(m_schemaItem);
+		assert(schemaItem);
 		return;
 	}
 
 	std::list<VFrame30::SchemaPoint> itemPoints(m_basePoints.begin(), m_basePoints.end());
 	itemPoints.unique();
 
-	m_schemaItem->DeleteAllPoints();
-	m_schemaItem->SetPointList(itemPoints);
+	schemaItem->DeleteAllPoints();
+	schemaItem->SetPointList(itemPoints);
 
 	return;
 }
 
-void ConnLineEditPoints::drawOutline(VFrame30::CDrawParam* drawParam) const
+void EditConnectionLine::drawOutline(VFrame30::CDrawParam* drawParam) const
 {
 	if (drawParam == nullptr)
 	{
@@ -263,7 +268,7 @@ void ConnLineEditPoints::drawOutline(VFrame30::CDrawParam* drawParam) const
 	QPolygonF extPolyline;
 	extPolyline.reserve(static_cast<int>(m_extensionPoints.size()) + 1);
 
-	if (m_editDirrection == AddToEnd)
+	if (m_mode == AddToEnd)
 	{
 		extPolyline.push_back(m_basePoints.back());
 	}
@@ -273,7 +278,7 @@ void ConnLineEditPoints::drawOutline(VFrame30::CDrawParam* drawParam) const
 		extPolyline.push_back(pt);
 	}
 
-	if (m_editDirrection == AddToBegin)
+	if (m_mode == AddToBegin)
 	{
 		extPolyline.push_back(m_basePoints.front());
 	}
@@ -285,6 +290,323 @@ void ConnLineEditPoints::drawOutline(VFrame30::CDrawParam* drawParam) const
 	p->drawPolyline(extPolyline);
 
 	return;
+}
+
+EditConnectionLine::EditMode EditConnectionLine::mode() const
+{
+	return m_mode;
+}
+
+void EditConnectionLine::setMode(EditConnectionLine::EditMode value)
+{
+	m_mode = value;
+}
+
+void EditConnectionLine::modifyPoint(const QPointF& point)
+{
+	assert(m_mode == EditMode::EditPoint);		// Use these functions only in EditPoint mode
+
+	if (m_editPointIndex >= m_editPointInitialState.size())
+	{
+		assert(m_editPointIndex < m_editPointInitialState.size());
+		return;
+	}
+
+	std::vector<QPointF> points = m_editPointInitialState;
+
+	// Shift the previouse point
+	//
+	if (m_editPointIndex - 1 >= 0)
+	{
+		int index = static_cast<int>(m_editPointIndex);
+		bool sameDirrection = true;
+		bool wasVert = true;
+		bool wasHorz = true;
+		QPointF curPoint = points[index];
+
+		while (index > 0 && sameDirrection == true)
+		{
+			QPointF prevPoint = points[index - 1];
+
+			if (std::abs(prevPoint.x() - curPoint.x()) < std::abs(prevPoint.y() - curPoint.y()))
+			{
+				if (wasVert == true)
+				{
+					// The line is vertical
+					//
+					prevPoint.rx() = point.x();
+					wasHorz = false;
+					wasVert = true;
+				}
+				else
+				{
+					sameDirrection = false;
+				}
+			}
+			else
+			{
+				if (wasHorz == true)
+				{
+					// The line is horizontal
+					//
+					prevPoint.ry() = point.y();
+					wasHorz = true;
+					wasVert = false;
+				}
+				else
+				{
+					sameDirrection = false;
+				}
+			}
+
+			if (sameDirrection == true)
+			{
+				curPoint = points[index - 1];
+				points[index - 1] = prevPoint;
+			}
+
+			index--;
+		}
+	}
+
+	// Shift the next point
+	//
+	if (m_editPointIndex + 1 < static_cast<int>(points.size()))
+	{
+		int index = static_cast<int>(m_editPointIndex);
+		bool sameDirrection = true;
+		bool wasVert = true;
+		bool wasHorz = true;
+		QPointF curPoint = points[index];
+
+		while (index + 1 < static_cast<int>(points.size()) && sameDirrection == true)
+		{
+			QPointF nextPoint = points[index + 1];
+
+			if (std::abs(nextPoint.x() - curPoint.x()) < std::abs(nextPoint.y() - curPoint.y()))
+			{
+				if (wasVert == true)
+				{
+					// The line is vertical
+					//
+					nextPoint.rx() = point.x();
+					wasHorz = false;
+					wasVert = true;
+				}
+				else
+				{
+					sameDirrection = false;
+				}
+			}
+			else
+			{
+				if (wasHorz == true)
+				{
+					// The line is horizontal
+					//
+					nextPoint.ry() = point.y();
+					wasHorz = true;
+					wasVert = false;
+				}
+				else
+				{
+					sameDirrection = false;
+				}
+			}
+
+			if (sameDirrection == true)
+			{
+				curPoint = points[index + 1];
+				points[index + 1] = nextPoint;
+			}
+
+			index++;
+		}
+	}
+
+	// Shift the moving point
+	//
+	points[m_editPointIndex] = point;
+	m_editPointCurrState = point;
+
+	// Set result
+	//
+	m_basePoints.assign(points.begin(), points.end());
+
+	return;
+}
+
+QPointF EditConnectionLine::editPointCurrState() const
+{
+	assert(m_mode == EditMode::EditPoint);		// Use these functions only in EditPoint mode
+	return m_editPointCurrState;
+}
+
+int EditConnectionLine::editPointIndex() const
+{
+	assert(m_mode == EditMode::EditPoint);		// Use these functions only in EditPoint mode
+	return m_editPointIndex;
+}
+
+void EditConnectionLine::setEditPointIndex(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem, int pointIndex)
+{
+	assert(m_mode == EditMode::EditPoint);		// Use these functions only in EditPoint mode
+
+	if (schemaItem == nullptr)
+	{
+		assert(schemaItem);
+		return;
+	}
+
+	const std::list<VFrame30::SchemaPoint>& itemPoints = schemaItem->GetPointList();
+
+	if (pointIndex >= itemPoints.size())
+	{
+		assert(pointIndex < itemPoints.size());
+		return;
+	}
+
+	m_editPointIndex = pointIndex;
+
+	// Save item's initial state
+	//
+	m_editPointInitialState.reserve(itemPoints.size());
+	m_editPointInitialState.assign(itemPoints.begin(), itemPoints.end());
+
+	m_editPointCurrState = m_editPointInitialState[m_editPointIndex];
+
+	return;
+}
+
+void EditConnectionLine::modifyEdge(double value)
+{
+	assert(m_mode == EditMode::EditEdge);		// Use these functions only in EditEdge mode
+
+	if (m_editEdgeIndex >= m_editEdgeInitialState.size() - 1)
+	{
+		assert(m_editEdgeIndex < m_editEdgeInitialState.size() - 1);
+		return;
+	}
+
+	m_editEdgeCurrState = value;
+
+	std::vector<QPointF> points = m_editEdgeInitialState;
+
+	QPointF oldEdgeStart = points[m_editEdgeIndex];
+	QPointF oldEdgeEnd = points[m_editEdgeIndex + 1];
+
+	if (getDirrection(oldEdgeStart, oldEdgeEnd) == Dirrection::Horz)
+	{
+		points[m_editEdgeIndex].ry() = value;
+		points[m_editEdgeIndex + 1].ry() = value;
+
+		// Если по сторонам есть еще ГОРИЗОНАТЛЬНЫЕ линии то добавить точку,
+		// что бы ребро не тянуло по диагонали соседние отрезки
+		//
+		if (m_editEdgeIndex + 2 < static_cast<int>(points.size()) &&
+			getDirrection(points[m_editEdgeIndex + 2], oldEdgeEnd) == Dirrection::Horz)
+		{
+			points.insert(points.begin() + m_editEdgeIndex + 2, oldEdgeEnd);
+		}
+
+		if (m_editEdgeIndex - 1 >= 0 &&
+			getDirrection(points[m_editEdgeIndex - 1], oldEdgeStart) == Dirrection::Horz)
+		{
+			points.insert(points.begin() + m_editEdgeIndex, oldEdgeStart);
+		}
+	}
+	else
+	{
+		points[m_editEdgeIndex].rx() = value;
+		points[m_editEdgeIndex + 1].rx() = value;
+
+		// Если по сторонам есть еще ВЕРТИКАЛЬНЫЕ линии то добавить точку,
+		// что бы ребро не тянуло по диагонали соседние отрезки
+		//
+		if (m_editEdgeIndex + 2 < static_cast<int>(points.size()) &&
+			getDirrection(points[m_editEdgeIndex + 2], oldEdgeEnd) == Dirrection::Vert)
+		{
+			points.insert(points.begin() + m_editEdgeIndex + 2, oldEdgeEnd);
+		}
+
+		if (m_editEdgeIndex - 1 >= 0 &&
+			getDirrection(points[m_editEdgeIndex - 1], oldEdgeStart) == Dirrection::Vert)
+		{
+			points.insert(points.begin() + m_editEdgeIndex, oldEdgeStart);
+		}
+	}
+
+	// Set result
+	//
+	m_basePoints.assign(points.begin(), points.end());
+	m_basePoints.unique();
+
+	return;
+}
+
+double EditConnectionLine::editEdgetCurrState() const
+{
+	assert(m_mode == EditMode::EditEdge);
+	return m_editEdgeCurrState;
+}
+
+int EditConnectionLine::editEdgeIndex() const
+{
+	assert(m_mode == EditMode::EditEdge);
+	return m_editEdgeIndex;
+}
+
+void EditConnectionLine::setEditEdgeIndex(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem, int edgeIndex)
+{
+	assert(m_mode == EditMode::EditEdge);
+
+	if (schemaItem == nullptr)
+	{
+		assert(schemaItem);
+		return;
+	}
+
+	const std::list<VFrame30::SchemaPoint>& itemPoints = schemaItem->GetPointList();
+
+	if (edgeIndex > m_basePoints.size() - 1)
+	{
+		assert(edgeIndex < m_basePoints.size() - 1);
+		return;
+	}
+
+	m_editEdgeIndex = edgeIndex;
+
+	// Save item's initial state
+	//
+	m_editEdgeInitialState.reserve(itemPoints.size());
+	m_editEdgeInitialState.assign(itemPoints.begin(), itemPoints.end());
+
+	if (getDirrection(m_editEdgeInitialState[m_editEdgeIndex], m_editEdgeInitialState[m_editEdgeIndex + 1]) == Dirrection::Horz)
+	{
+		m_editEdgeCurrState = m_editEdgeInitialState[m_editEdgeIndex].y();
+	}
+	else
+	{
+		m_editEdgeCurrState = m_editEdgeInitialState[m_editEdgeIndex].x();
+	}
+
+	return;
+}
+
+EditConnectionLine::Dirrection EditConnectionLine::getDirrection(const QPointF& pt1, const QPointF& pt2)
+{
+	if (std::abs(pt1.y() - pt2.y()) < 0.000001)
+	{
+		return Dirrection::Horz;
+	}
+
+	if (std::abs(pt1.x() - pt2.x()) < 0.000001)
+	{
+		return Dirrection::Vert;
+	}
+
+	assert(false);
+	return Dirrection::Horz;
 }
 
 
@@ -337,30 +659,14 @@ const char* SchemaItemClipboardData::mimeType = "application/x-radiyschemaset";
 EditSchemaView::EditSchemaView(QWidget* parent) :
 	VFrame30::SchemaView(parent),
 	m_activeLayer(0),
-	m_mouseState(MouseState::None),
-	m_editStartMovingEdge(0),
-	m_editEndMovingEdge(0),
-	m_editStartMovingEdgeX(0),
-	m_editStartMovingEdgeY(0),
-	m_editEndMovingEdgeX(0),
-	m_editEndMovingEdgeY(0),
-	m_movingEdgePointIndex(0)
-	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
+	m_mouseState(MouseState::None)
 {
 }
 
 EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent)
 	: VFrame30::SchemaView(schema, parent),
 	m_activeLayer(0),
-	m_mouseState(MouseState::None),
-	m_editStartMovingEdge(0),
-	m_editEndMovingEdge(0),
-	m_editStartMovingEdgeX(0),
-	m_editStartMovingEdgeY(0),
-	m_editEndMovingEdgeX(0),
-	m_editEndMovingEdgeY(0),
-	m_movingEdgePointIndex(0)
-	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
+	m_mouseState(MouseState::None)
 {
 }
 
@@ -643,7 +949,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 void EditSchemaView::drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam)
 {
-	for (const ConnLineEditPoints& ecl : m_editConnectionLines)
+	for (const EditConnectionLine& ecl : m_editConnectionLines)
 	{
 		ecl.drawOutline(drawParam);
 	}
@@ -725,7 +1031,7 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		}
 
 		posInterfaceFound = true;
-		const ConnLineEditPoints& ecl = m_editConnectionLines.front();
+		const EditConnectionLine& ecl = m_editConnectionLines.front();
 
 		if (ecl.extensionPoints().empty() == false)
 		{
@@ -1206,264 +1512,13 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		return;
 	}
 
-	if (m_movingEdgePointIndex == -1)
+	if (m_editConnectionLines.size() != 1)
 	{
-		assert(m_movingEdgePointIndex != -1);
+		assert(m_editConnectionLines.size() == 1);
 		return;
 	}
 
-	if (selectedItems().size() != 1)
-	{
-		assert(selectedItems().size() == 1);
-		return;
-	}
-
-	auto si = selectedItems().front();
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(si.get());
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
-		return;
-	}
-
-	std::list<VFrame30::SchemaPoint> pointsList = itemPos->GetPointList();
-	std::vector<VFrame30::SchemaPoint> points(pointsList.begin(), pointsList.end());
-
-	// Save position
-	//
-	auto oldPos = si->getPointList();
-
-	if (m_movingEdgePointIndex < 0 || m_movingEdgePointIndex >= static_cast<int>(points.size()))
-	{
-		assert(m_movingEdgePointIndex >= 0);
-		assert(m_movingEdgePointIndex < static_cast<int>(points.size()));
-		return;
-	}
-
-	QPointF rullerPoint;
-
-	// Calculate new position
-	//
-	switch (mouseState())
-	{
-	case MouseState::MovingHorizontalEdge:
-		{
-			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
-
-			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
-
-			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
-			op.Y += diff;
-
-			points[m_movingEdgePointIndex] = op;
-
-			//
-			op = points[m_movingEdgePointIndex + 1];
-			op.Y += diff;
-
-			points[m_movingEdgePointIndex + 1] = op;
-
-			rullerPoint.setY(op.Y);
-
-			// Если по сторонам есть еще ГОРИЗОНАТЛЬНЫЕ линии то добавить точку,
-			// что бы ребро не тянуло по диагонали соседние отрезки
-			//
-			if (m_movingEdgePointIndex + 2 < static_cast<int>(points.size()) &&
-				std::abs(points[m_movingEdgePointIndex + 2].Y - oldEdgeEnd.Y) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex + 2, oldEdgeEnd);
-			}
-
-			if (m_movingEdgePointIndex - 1 >= 0 &&
-				std::abs(points[m_movingEdgePointIndex - 1].Y - oldEdgeStart.Y) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex, oldEdgeStart);
-			}
-		}
-		break;
-	case MouseState::MovingVerticalEdge:
-		{
-			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
-
-			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
-
-			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
-			op.X += diff;
-
-			points[m_movingEdgePointIndex] = op;
-			//
-			op = points[m_movingEdgePointIndex + 1];
-			op.X += diff;
-
-			points[m_movingEdgePointIndex + 1] = op;
-
-			rullerPoint.setX(op.X);
-
-			// Если по сторонам есть еще ВЕРТИКАЛЬНЫЕ линии то добавить точку,
-			// что бы ребро не тянуло по диагонали соседние отрезки
-			//
-			if (m_movingEdgePointIndex + 2 < static_cast<int>(points.size()) &&
-				std::abs(points[m_movingEdgePointIndex + 2].X - oldEdgeEnd.X) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex + 2, oldEdgeEnd);
-			}
-
-			if (m_movingEdgePointIndex - 1 >= 0 &&
-				std::abs(points[m_movingEdgePointIndex - 1].X - oldEdgeStart.X) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex, oldEdgeStart);
-			}
-		}
-		break;
-	case MouseState::MovingConnectionLinePoint:
-		{
-			double diffX = m_editEndMovingEdgeX - points[m_movingEdgePointIndex].X;
-			double diffY = m_editEndMovingEdgeY - points[m_movingEdgePointIndex].Y;
-
-			// Shift the previouse point
-			//
-			if (m_movingEdgePointIndex - 1 >= 0)
-			{
-				int index = m_movingEdgePointIndex;
-				bool sameDirrection = true;
-				bool wasVert = true;
-				bool wasHorz = true;
-				VFrame30::SchemaPoint curPoint = points[index];
-
-				while (index > 0 && sameDirrection == true)
-				{
-					VFrame30::SchemaPoint prevPoint = points[index - 1];
-
-					if (std::abs(prevPoint.X - curPoint.X) < std::abs(prevPoint.Y - curPoint.Y))
-					{
-						if (wasVert == true)
-						{
-							// The line is vertical
-							//
-							prevPoint.X += diffX;
-							wasHorz = false;
-							wasVert = true;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-					else
-					{
-						if (wasHorz == true)
-						{
-							// The line is horizontal
-							//
-							prevPoint.Y += diffY;
-							wasHorz = true;
-							wasVert = false;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-
-					if (sameDirrection == true)
-					{
-						curPoint = points[index - 1];
-						points[index - 1] = prevPoint;
-					}
-
-					index--;
-				}
-			}
-
-			// Shift the next point
-			//
-			if (m_movingEdgePointIndex + 1 < static_cast<int>(points.size()))
-			{
-				int index = m_movingEdgePointIndex;
-				bool sameDirrection = true;
-				bool wasVert = true;
-				bool wasHorz = true;
-				VFrame30::SchemaPoint curPoint = points[index];
-
-				while (index + 1 < static_cast<int>(points.size()) && sameDirrection == true)
-				{
-					VFrame30::SchemaPoint nextPoint = points[index + 1];
-
-					if (std::abs(nextPoint.X - curPoint.X) < std::abs(nextPoint.Y - curPoint.Y))
-					{
-						if (wasVert == true)
-						{
-							// The line is vertical
-							//
-							nextPoint.X += diffX;
-							wasHorz = false;
-							wasVert = true;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-					else
-					{
-						if (wasHorz == true)
-						{
-							// The line is horizontal
-							//
-							nextPoint.Y += diffY;
-							wasHorz = true;
-							wasVert = false;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-
-					if (sameDirrection == true)
-					{
-						curPoint = points[index + 1];
-						points[index + 1] = nextPoint;
-					}
-
-					index++;
-				}
-			}
-
-			// Shift the moving point
-			//
-			VFrame30::SchemaPoint pt = points[m_movingEdgePointIndex];
-
-			pt.X += diffX;
-			pt.Y += diffY;
-
-			points[m_movingEdgePointIndex] = pt;
-
-			rullerPoint.setX(pt.X);
-			rullerPoint.setY(pt.Y);
-		}
-		break;
-
-		default:
-			void();
-	}
-
-	// Set calculated pos to SchemaItem
-	//
-	pointsList.assign(points.begin(), points.end());
-	itemPos->SetPointList(pointsList);
-	itemPos->RemoveSamePoints();
-
-	// SavePoints to View, so later they will be used in MouseUp action to set new position
-	//
-	m_movingVertexPoints = itemPos->GetPointList();
-
-	// Draw item outline
-	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	const EditConnectionLine& ecl = m_editConnectionLines.front();
 
 	// Draw rullers
 	//
@@ -1484,25 +1539,30 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		{
+			double rullerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(0.0, rullerPoint), QPointF(schema()->docWidth(), rullerPoint));
+		}
 		break;
 	case MouseState::MovingVerticalEdge:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
+		{
+			double rullerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(rullerPoint, 0.0), QPointF(rullerPoint, schema()->docHeight()));
+		}
 		break;
 	case MouseState::MovingConnectionLinePoint:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		{
+			QPointF rullerPoint = ecl.editPointCurrState();
+			p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		}
 		break;
 	default:
 		assert(false);
 		break;
 	}
+
 	p->setRenderHints(oldrenderhints);
-
-
-	// Restore ald position
-	//
-	si->setPointList(oldPos);
 
 	return;
 }
@@ -3211,18 +3271,26 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditEdge);
 
-					editSchemaView()->m_editStartMovingEdge = docPoint.y();
-					editSchemaView()->m_editEndMovingEdge = docPoint.y();
+					ecl.setEditEdgeIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
+
+//					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
+//					//
+//					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+
+//					editSchemaView()->m_editStartMovingEdge = docPoint.y();
+//					editSchemaView()->m_editEndMovingEdge = docPoint.y();
+
+//					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
 
 					setMouseState(MouseState::MovingHorizontalEdge);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -3232,18 +3300,26 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditEdge);
+
+					ecl.setEditEdgeIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
+
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
+
 					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
 					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+//					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
-					editSchemaView()->m_editStartMovingEdge = docPoint.x();
-					editSchemaView()->m_editEndMovingEdge = docPoint.x();
+//					editSchemaView()->m_editStartMovingEdge = docPoint.x();
+//					editSchemaView()->m_editEndMovingEdge = docPoint.x();
 
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+//					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
 
 					setMouseState(MouseState::MovingVerticalEdge);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -3253,23 +3329,29 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					//if (movingEdgePointIndex == )
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditPoint);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					ecl.setEditPointIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_editStartMovingEdgeX = docPoint.x();
-					editSchemaView()->m_editStartMovingEdgeY = docPoint.y();
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
 
-					editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
-					editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
+//					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
+//					//
+//					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+//					editSchemaView()->m_editStartMovingEdgeX = docPoint.x();
+//					editSchemaView()->m_editStartMovingEdgeY = docPoint.y();
+
+//					editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
+//					editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
+
+//					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
 
 					setMouseState(MouseState::MovingConnectionLinePoint);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -3396,9 +3478,6 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 	// Selection item or area
 	//
-//	editSchemaView()->m_rubberBand->show();
-//	editSchemaView()->m_rubberBand->setGeometry(QRect(me->pos(), QSize()));
-
 	editSchemaView()->m_mouseSelectionStartPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->m_mouseSelectionEndPoint = editSchemaView()->m_mouseSelectionStartPoint;
 
@@ -3509,8 +3588,8 @@ void EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint(QMouseEven
 	//
 	docPoint = magnetPointToPin(docPoint);
 
-	ConnLineEditPoints ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(editSchemaView()->m_newItem),
-						   ConnLineEditPoints::AddToEnd);
+	EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(editSchemaView()->m_newItem),
+						   EditConnectionLine::AddToEnd);
 
 	ecl.addBasePoint(docPoint);
 	ecl.addExtensionPoint(docPoint);
@@ -4037,8 +4116,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 	//
 	mouseRightDown_AddSchemaPosConnectionNextPoint(e);
 
-	const ConnLineEditPoints& ecl = editSchemaView()->m_editConnectionLines.front();
-	ecl.setPointToItsItem();
+	const EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+	ecl.setPointToItem(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(editSchemaView()->m_newItem));
 
 	if (itemPos->GetPointList().size() >= 2)
 	{
@@ -4257,9 +4336,12 @@ void EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	if (selectedItems().size() != 1)
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(selectedItems().size() == 1);
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
+
 		resetAction();
 		return;
 	}
@@ -4275,26 +4357,22 @@ void EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	if ((mouseState() == MouseState::MovingHorizontalEdge || mouseState() == MouseState::MovingVerticalEdge) &&
-		std::abs(editSchemaView()->m_editEndMovingEdge - editSchemaView()->m_editStartMovingEdge) < 0.000001)
+	// Check if the real change vertex or edge has been done
+	//
+	const EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+
+	std::list<VFrame30::SchemaPoint> newPoints = {ecl.basePoints().begin(), ecl.basePoints().end()};
+	const std::list<VFrame30::SchemaPoint>& itemPoints = itemPos->GetPointList();
+
+	if (newPoints == itemPoints)
 	{
-		// изменения координат небыло, значит и не надо выполнять команду
+		// Nothing has changed, do not exec a command
 		//
 		resetAction();
 		return;
 	}
 
-	if (mouseState() == MouseState::MovingConnectionLinePoint &&
-		std::abs(editSchemaView()->m_editEndMovingEdgeX - editSchemaView()->m_editStartMovingEdgeX) < 0.000001 &&
-		std::abs(editSchemaView()->m_editEndMovingEdgeY - editSchemaView()->m_editStartMovingEdgeY) < 0.000001)
-	{
-		// изменения координат небыло, значит и не надо выполнять команду
-		//
-		resetAction();
-		return;
-	}
-
-	std::vector<VFrame30::SchemaPoint> setPoints(editSchemaView()->m_movingVertexPoints.begin(), editSchemaView()->m_movingVertexPoints.end());
+	std::vector<VFrame30::SchemaPoint> setPoints(newPoints.begin(), newPoints.end());
 	m_editEngine->runSetPoints(setPoints, si);
 
 	resetAction();
@@ -4488,7 +4566,7 @@ void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* ev
 	//
 	docPoint = magnetPointToPin(docPoint);
 
-	for (ConnLineEditPoints& ecl : editSchemaView()->m_editConnectionLines)
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
 	{
 		movePosConnectionEndPoint(&ecl, docPoint);
 	}
@@ -4509,43 +4587,50 @@ void EditSchemaWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 		return;
 	}
 
-	if (selectedItems().size() != 1)
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(selectedItems().size() == 1);
+		assert(editSchemaView()->m_editConnectionLines.size() != 1);
 		resetAction();
 		return;
 	}
 
-	auto si = selectedItems().front();
-	assert(si != nullptr);
+//	auto si = selectedItems().front();
+//	assert(si != nullptr);
 
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(si.get());
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
-		resetAction();
-		return;
-	}
+//	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(si.get());
+//	if (itemPos == nullptr)
+//	{
+//		assert(itemPos != nullptr);
+//		resetAction();
+//		return;
+//	}
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
+
+	EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
 
 	// --
 	//
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
-		editSchemaView()->m_editEndMovingEdge = docPoint.y();
+		ecl.modifyEdge(docPoint.y());
+		//editSchemaView()->m_editEndMovingEdge = docPoint.y();
 		break;
 	case MouseState::MovingVerticalEdge:
-		editSchemaView()->m_editEndMovingEdge = docPoint.x();
+		ecl.modifyEdge(docPoint.x());
+		//editSchemaView()->m_editEndMovingEdge = docPoint.x();
 		break;
 	case MouseState::MovingConnectionLinePoint:
 		// magnet point to pin
 		//
 		docPoint = magnetPointToPin(docPoint);
+		ecl.modifyPoint(docPoint);
 
-		editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
-		editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
+//		editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
+//		editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
 		break;
 	default:
 		assert(false);
@@ -4577,7 +4662,7 @@ void EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEven
 		return;
 	}
 
-	for (ConnLineEditPoints& ecl : editSchemaView()->m_editConnectionLines)
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
 	{
 		assert(ecl.extensionPoints().empty() == false);
 
@@ -5072,7 +5157,7 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
-void EditSchemaWidget::movePosConnectionEndPoint(ConnLineEditPoints* ecl, QPointF toPoint)
+void EditSchemaWidget::movePosConnectionEndPoint(EditConnectionLine* ecl, QPointF toPoint)
 {
 	assert(ecl);
 
@@ -5604,8 +5689,6 @@ void EditSchemaWidget::resetAction()
 	editSchemaView()->m_mouseSelectionEndPoint = QPoint();
 	editSchemaView()->m_editStartDocPt = QPointF();
 	editSchemaView()->m_editEndDocPt = QPointF();
-
-	editSchemaView()->m_movingVertexPoints.clear();
 
 	setMouseCursor(mapFromGlobal(QCursor::pos()));
 
@@ -6253,7 +6336,7 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	// IntItems
 	//
 	QLabel* intValueLabel = new QLabel("IntegerValue:");
-	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue));
+	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue, 'g', constItem->precision()));
 	intValueEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), intValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::IntegerType)
@@ -6264,9 +6347,11 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	// FloatItems
 	//
+	QLocale locale;
+
 	QLabel* floatValueLabel = new QLabel("FloatValue:");
-	QLineEdit* floatValueEdit = new QLineEdit(QString::number(floatValue));
-	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::min(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
+	QLineEdit* floatValueEdit = new QLineEdit(locale.toString(floatValue));
+	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::FloatType)
 	{
@@ -6325,8 +6410,11 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	if (result == QDialog::Accepted)
 	{
 		VFrame30::SchemaItemConst::ConstType newType = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+
 		int newIntValue = intValueEdit->text().toInt();
-		double newFloatValue = floatValueEdit->text().toFloat();
+
+		QLocale locale;
+		double newFloatValue = locale.toFloat(floatValueEdit->text());
 
 		if (newType != type)
 		{
