@@ -157,8 +157,9 @@ namespace Builder
 		bool createAcquiredAnalogStrictOutputSignalsList();
 		bool createAcquiredAnalogInternalSignalsList();
 		bool createAcquiredAnalogTuninglSignalsList();
+		bool createAcquiredAnalogConstSignalsList();
 
-		bool createAnalogOutputSignalsList();
+		bool createAnalogOutputSignalsToConversionList();
 
 		bool createNonAcquiredAnalogInputSignalsList();
 		bool createNonAcquiredAnalogStrictOutputSignalsList();
@@ -282,6 +283,8 @@ namespace Builder
 
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
+
+		bool copyAcquiredConstAnalogSignalsToRegBuf();
 
 		bool copyAcquiredDiscreteInputSignalsToRegBuf();
 		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf();
@@ -423,12 +426,15 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredAnalogInternalSignals;			// acquired analog internal signals, used in UAL
 		QVector<UalSignal*> m_acquiredAnalogTuningSignals;				// acquired analog internal tuningable signals, no matter used in UAL or not
 
+		QHash<int, UalSignal*> m_acquiredAnalogConstIntSignals;
+		QHash<float, UalSignal*> m_acquiredAnalogConstFloatSignals;
+
 		QVector<UalSignal*> m_nonAcquiredAnalogInputSignals;			// non acquired analog input signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredAnalogStrictOutputSignals;		// non acquired analog strict output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredAnalogInternalSignals;			// non acquired analog internal non tunigable signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredAnalogTuningSignals;			// non acquired analog internal tuningable signals, used in UAL
 
-		QVector<UalSignal*> m_analogOutputSignals;						// all analog output signals requires conversion
+		QVector<Signal*> m_analogOutputSignalsToConversion;				// all analog output signals requires conversion
 
 		QVector<UalSignal*> m_acquiredBuses;							// acquired bus signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredBuses;							// non acquired bus signals, used in UAL

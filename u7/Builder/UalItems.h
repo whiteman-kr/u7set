@@ -438,7 +438,7 @@ namespace Builder
 
 		bool isSource() const { return m_isInput || m_isTuningable || m_isOptoSignal || m_isConst; }
 
-//		bool isOutput() const { return m_isOutput; }
+		bool isOutput() const { return m_isOutput; }
 		bool isStrictOutput() const { return m_isOutput == true && isSource() == false; }
 
 		bool isInternal() const { return isSource() == false && m_isOutput == false; }

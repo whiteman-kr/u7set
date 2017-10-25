@@ -531,6 +531,44 @@ namespace Builder
 		return result;
 	}
 
+	bool LmMemoryMap::appendRegAnalogConstSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		bool first = true;
+
+		Address16 addrOfConst;
+
+		for(UalSignal* ualSignal : ualSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			if (first == true)
+			{
+				addrOfConst = memArea.appendSignal(ualSignal, true);			// allocate memory for const value
+				first = false;
+			}
+			else
+			{
+				memArea.appendUalRefSignals(addrOfConst, ualSignal, true);		// append ref only
+			}
+
+			Address16 addr = addrOfConst;
+
+			ualSignal->setRegBufAddr(addr);
+
+			addr.addWord(-m_appWordAdressed.memory.startAddress());			// minus is OK!
+
+			ualSignal->setRegValueAddr(addr);
+		}
+
+		return result;
+	}
 
 	bool LmMemoryMap::appendAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals)
 	{
@@ -680,6 +718,36 @@ namespace Builder
 		bool result = true;
 
 		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogInternalSignals, ualSignals, true);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal*>& acquiredAnalogConstIntSignals,
+															   const QHash<float, UalSignal*>& acquiredAnalogConstFloatSignals)
+	{
+		bool result = true;
+
+		QVector<int> sortedIntConsts = QVector<int>::fromList(acquiredAnalogConstIntSignals.uniqueKeys());
+
+		qSort(sortedIntConsts);
+
+		for(int intConst : sortedIntConsts)
+		{
+			result &= appendRegAnalogConstSignals(m_appWordAdressed.acquiredAnalogConstSignals,
+									   QVector<UalSignal*>::fromList(acquiredAnalogConstIntSignals.values(intConst)));
+		}
+
+		QVector<float> sortedFloatConsts = QVector<float>::fromList(acquiredAnalogConstFloatSignals.uniqueKeys());
+
+		qSort(sortedFloatConsts);
+
+		for(float floatConst : sortedFloatConsts)
+		{
+			result &= appendRegAnalogConstSignals(m_appWordAdressed.acquiredAnalogConstSignals,
+									   QVector<UalSignal*>::fromList(acquiredAnalogConstFloatSignals.values(floatConst)));
+		}
+
 		result &= recalculateAddresses();
 
 		return result;

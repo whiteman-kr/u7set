@@ -190,6 +190,8 @@ namespace Builder
 
 			if (copyAcquiredTuningAnalogSignalsToRegBuf() == false) break;
 
+			if (copyAcquiredConstAnalogSignalsToRegBuf() == false) break;
+
 			if (copyAcquiredDiscreteInputSignalsToRegBuf() == false) break;
 
 			if (copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf() == false) break;
@@ -2247,14 +2249,14 @@ namespace Builder
 		result &= createAcquiredAnalogStrictOutputSignalsList();
 		result &= createAcquiredAnalogInternalSignalsList();
 		result &= createAcquiredAnalogTuninglSignalsList();
-//		result &= createAcquiredAnalogConstSignalsList();
+		result &= createAcquiredAnalogConstSignalsList();
 
 		result &= createNonAcquiredAnalogInputSignalsList();
 		result &= createNonAcquiredAnalogStrictOutputSignalsList();
 		result &= createNonAcquiredAnalogInternalSignalsList();
 		result &= createNonAcquiredAnalogTuningSignalsList();
 
-		result &= createAnalogOutputSignalsList();
+		result &= createAnalogOutputSignalsToConversionList();
 
 		result &= createAcquiredBusSignalsList();
 		result &= createNonAcquiredBusSignalsList();
@@ -2293,7 +2295,7 @@ namespace Builder
 		sortSignalList(m_nonAcquiredAnalogInternalSignals);
 		sortSignalList(m_nonAcquiredAnalogTuningSignals);
 
-		sortSignalList(m_analogOutputSignals);
+//		sortSignalList(m_analogOutputSignals);
 
 		sortSignalList(m_acquiredBuses);
 		sortSignalList(m_nonAcquiredBuses);
@@ -2709,13 +2711,48 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createAnalogOutputSignalsList()
+	bool ModuleLogicCompiler::createAcquiredAnalogConstSignalsList()
 	{
-		m_acquiredAnalogStrictOutputSignals.clear();
+		m_acquiredAnalogConstIntSignals.clear();
+		m_acquiredAnalogConstFloatSignals.clear();
+
+		bool result = true;
+
+		for(UalSignal* ualSignal : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(ualSignal);
+
+			if (ualSignal->isConst() == false || ualSignal->isAnalog() == false)
+			{
+				continue;
+			}
+
+			switch(ualSignal->analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::SignedInt32:
+				m_acquiredAnalogConstIntSignals.insertMulti(ualSignal->constAnalogIntValue(), ualSignal);
+				continue;
+
+			case E::AnalogAppSignalFormat::Float32:
+				m_acquiredAnalogConstFloatSignals.insertMulti(ualSignal->constAnalogFloatValue(), ualSignal);
+				continue;
+
+			default:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::createAnalogOutputSignalsToConversionList()
+	{
+		m_analogOutputSignalsToConversion.clear();
 
 		//	list include signals that:
 		//
-		//	- const
 		//	+ analog
 		//	+ output
 
@@ -2723,11 +2760,10 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isConst() == false &&
-				s->isAnalog() == true &&
+			if (s->isAnalog() == true &&
 				s->isOutput() == true)
 			{
-				m_analogOutputSignals.append(s);
+				m_analogOutputSignalsToConversion.append(s->getAnalogOutputSignals());
 			}
 		}
 
@@ -3271,6 +3307,9 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredAnalogInternalSignalsInRegBuf(m_acquiredAnalogInternalSignals);
 
 		// ++ acquired analog tuning signals
+		result &= m_memoryMap.appendAcquiredAnalogConstSignalsInRegBuf(m_acquiredAnalogConstIntSignals,
+																	   m_acquiredAnalogConstFloatSignals);
+
 
 		return result;
 	}
@@ -3319,6 +3358,7 @@ namespace Builder
 		result &= m_memoryMap.appendNonAcquiredAnalogInputSignals(m_nonAcquiredAnalogInputSignals);
 		result &= m_memoryMap.appendNonAcquiredAnalogStrictOutputSignals(m_nonAcquiredAnalogStrictOutputSignals);
 		result &= m_memoryMap.appendNonAcquiredAnalogInternalSignals(m_nonAcquiredAnalogInternalSignals);
+
 
 
 		//result &= m_memoryMap.appendNonAnalogInputSignals(m_nonAcquiredAnalogInputSignals);
@@ -3456,12 +3496,7 @@ namespace Builder
 
 		// append FBs  for analog output signals conversion
 		//
-		QVector<UalSignal*> analogOutputSignals;
-
-		analogOutputSignals.append(m_acquiredAnalogOutputSignals);
-		analogOutputSignals.append(m_nonAcquiredAnalogOutputSignals);
-
-		for(Signal* s : analogOutputSignals)
+		for(Signal* s : m_analogOutputSignalsToConversion)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -8093,6 +8128,110 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::copyAcquiredConstAnalogSignalsToRegBuf()
+	{
+		if (m_acquiredAnalogConstIntSignals.isEmpty() == true &&
+			m_acquiredAnalogConstFloatSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		m_code.comment("Writing of acquired analog const signals values in reg buf");
+		m_code.newLine();
+
+		QVector<int> sortedIntConsts = QVector<int>::fromList(m_acquiredAnalogConstIntSignals.uniqueKeys());
+
+		if (sortedIntConsts.isEmpty() == false)
+		{
+			qSort(sortedIntConsts);
+
+			for(int intConst : sortedIntConsts)
+			{
+				QList<UalSignal*> constIntSignals = m_acquiredAnalogConstIntSignals.values(intConst);
+				QStringList constIntSignalsIDs;
+
+				Address16 regBufAddr;
+
+				for(UalSignal* constIntSignal : constIntSignals)
+				{
+					if (regBufAddr.isValid() == false)
+					{
+						// first iteration
+						regBufAddr = constIntSignal->regBufAddr();
+					}
+
+					if (regBufAddr.isValid() == false ||
+						regBufAddr != constIntSignal->regBufAddr())				// all const signals with same value mast have same reg buf address
+					{
+						assert(false);
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					constIntSignalsIDs.append(constIntSignal->acquiredRefSignalsIDs());
+				}
+
+				Command cmd;
+
+				cmd.movConstInt32(regBufAddr.offset(), intConst);
+				cmd.setComment(QString("int const %1: %2").arg(intConst).arg(constIntSignalsIDs.join(", ")));
+
+				m_code.append(cmd);
+			}
+
+			m_code.newLine();
+		}
+
+		//
+
+		QVector<float> sortedFloatConsts = QVector<float>::fromList(m_acquiredAnalogConstFloatSignals.uniqueKeys());
+
+		if (sortedFloatConsts.isEmpty() == false)
+		{
+			qSort(sortedFloatConsts);
+
+			for(float floatConst : sortedFloatConsts)
+			{
+				QList<UalSignal*> constFloatSignals = m_acquiredAnalogConstFloatSignals.values(floatConst);
+				QStringList constFloatSignalsIDs;
+
+				Address16 regBufAddr;
+
+				for(UalSignal* constFloatSignal : constFloatSignals)
+				{
+					if (regBufAddr.isValid() == false)
+					{
+						// first iteration
+						regBufAddr = constFloatSignal->regBufAddr();
+					}
+
+					if (regBufAddr.isValid() == false ||
+						regBufAddr != constFloatSignal->regBufAddr())				// all const signals with same value mast have same reg buf address
+					{
+						assert(false);
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					constFloatSignalsIDs.append(constFloatSignal->acquiredRefSignalsIDs());
+				}
+
+				Command cmd;
+
+				cmd.movConstFloat(regBufAddr.offset(), floatConst);
+				cmd.setComment(QString("float const %1: %2").arg(floatConst).arg(constFloatSignalsIDs.join(", ")));
+
+				m_code.append(cmd);
+			}
+
+			m_code.newLine();
+		}
+
+		return result;
+	}
+
 	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf()
 	{
 		if (m_acquiredDiscreteInputSignals.isEmpty() == true)
@@ -8361,19 +8500,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::conevrtOutputAnalogSignals()
 	{
-		QVector<Signal*> outAnalogSignals;
-
-		for(UalSignal* ualSignal : m_acquiredAnalogStrictOutputSignals)
-		{
-			outAnalogSignals.append(ualSignal->getAnalogOutputSignals());
-		}
-
-		for(UalSignal* ualSignal : m_nonAcquiredAnalogStrictOutputSignals)
-		{
-			outAnalogSignals.append(ualSignal->getAnalogOutputSignals());
-		}
-
-		if (outAnalogSignals.isEmpty() == true)
+		if (m_analogOutputSignalsToConversion.isEmpty() == true)
 		{
 			return true;
 		}
@@ -8383,24 +8510,78 @@ namespace Builder
 
 		Command cmd;
 
-		for(Signal* s : outAnalogSignals)
+		for(Signal* s : m_analogOutputSignalsToConversion)
 		{
 			TEST_PTR_CONTINUE(s);
+
+			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
+
+			if (ualSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
 
 			assert(s->isAnalog() == true);
 			assert(s->isOutput() == true);
 			assert(s->dataSize() == SIZE_32BIT);
-			assert(s->ualAddr().isValid() == true);
 			assert(s->ioBufAddr().isValid() == true);
+
+			int constIntValue = 0;
+			float constFloatValue = 0;
+			bool constIsFloat = false;
+
+			if (ualSignal->isConst() == true)
+			{
+				switch(ualSignal->analogSignalFormat())
+				{
+				case E::AnalogAppSignalFormat::Float32:
+					constFloatValue = ualSignal->constAnalogFloatValue();
+					constIsFloat = true;
+					break;
+
+				case E::AnalogAppSignalFormat::SignedInt32:
+					constIntValue = ualSignal->constAnalogIntValue();
+					constIsFloat = false;
+					break;
+
+				default:
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+			}
+			else
+			{
+				assert(s->ualAddr().isValid() == true);
+			}
 
 			if (s->needConversion() == false)
 			{
 				// signal isn't need conversion
 				// copy signal only
 				//
-				cmd.mov32(s->ioBufAddr().offset(), s->ualAddr().offset());
-				cmd.setComment(QString("copy analog output %1").arg(s->appSignalID()));
+				if (ualSignal->isConst() == true)
+				{
+					if (constIsFloat == true)
+					{
+						cmd.movConstFloat(s->ioBufAddr().offset(), constFloatValue);
+						cmd.setComment(QString("analog output %1 set to const %2").arg(s->appSignalID()).arg(constFloatValue));
+					}
+					else
+					{
+						cmd.movConstInt32(s->ioBufAddr().offset(), constIntValue);
+						cmd.setComment(QString("analog output %1 set to const %2").arg(s->appSignalID()).arg(constIntValue));
+					}
+				}
+				else
+				{
+					cmd.mov32(s->ioBufAddr().offset(), s->ualAddr().offset());
+					cmd.setComment(QString("copy analog output %1").arg(s->appSignalID()));
+				}
+
 				m_code.append(cmd);
+				m_code.newLine();
 
 				continue;
 			}
@@ -8427,10 +8608,32 @@ namespace Builder
 				assert(false);
 			}
 
-			cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-							   s->ualAddr().offset(), appFb->caption());
-			cmd.setComment(QString(tr("conversion of analog output %1")).arg(s->appSignalID()));
-			m_code.append(cmd);
+			if (ualSignal->isConst() == true)
+			{
+				if(constIsFloat == true)
+				{
+					cmd.writeFuncBlockConstFloat(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+													constFloatValue, appFb->caption());
+					cmd.setComment(QString(tr("float const %1 to analog output %2 conversion")).
+										arg(constFloatValue).arg(s->appSignalID()));
+				}
+				else
+				{
+					cmd.writeFuncBlockConstInt32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+													constIntValue, appFb->caption());
+					cmd.setComment(QString(tr("int const %1 to analog output %2 conversion")).
+										arg(constIntValue).arg(s->appSignalID()));
+				}
+
+				m_code.append(cmd);
+			}
+			else
+			{
+				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+								   s->ualAddr().offset(), appFb->caption());
+				cmd.setComment(QString(tr("analog output %1 conversion")).arg(s->appSignalID()));
+				m_code.append(cmd);
+			}
 
 			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 			cmd.clearComment();
@@ -8440,7 +8643,6 @@ namespace Builder
 							  appFb->opcode(), appFb->instance(),
 							  fbScal.outputSignalIndex, appFb->caption());
 			m_code.append(cmd);
-
 			m_code.newLine();
 		}
 

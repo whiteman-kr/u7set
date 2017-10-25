@@ -1476,7 +1476,7 @@ namespace Builder
 		{
 			// signal already in map
 			//
-			assert(ualSignal->signal() == s);
+//			assert(ualSignal->signal() == s);
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
 
 			appendPinRefToSignal(outPinUuid, ualSignal);

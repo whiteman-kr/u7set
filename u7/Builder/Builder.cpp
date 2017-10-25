@@ -1059,6 +1059,8 @@ namespace Builder
 
 		bool result = alPareser.parse();
 
+		result = m_log->errorCount() == 0;
+
 		if (result == false)
 		{
 		}

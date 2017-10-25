@@ -237,6 +237,7 @@ namespace Builder
 
 		bool appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
 		bool appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals, bool setUalAddrEqualToRegBufAddr);
+		bool appendRegAnalogConstSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
 
 		bool appendAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals);
@@ -252,6 +253,8 @@ namespace Builder
 		bool appendAcquiredAnalogInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
+													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
 
 		bool appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendNonAcquiredAnalogStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
