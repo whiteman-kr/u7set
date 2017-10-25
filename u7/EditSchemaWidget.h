@@ -65,6 +65,8 @@ public:
 	// EditDirrection::EditPoint only
 	//
 	void modifyPoint(const QPointF& point);
+	bool addPointAndSwitchMode(const QPointF& point);		// Add point to front or back depending on currentIndex, if point in the middle the return false and do nothing
+
 	QPointF editPointCurrState() const;
 	int editPointIndex() const;
 	void setEditPointIndex(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem, int pointIndex);
@@ -349,9 +351,11 @@ protected:
 	void mouseMove_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Down
+	// WARNING, if you add another function in MouseRightUp, add in EditSchemaWidget::contextMenu(const QPoint& pos) exception for this MouseMode
 	//
 	void mouseRightDown_None(QMouseEvent* event);
 	void mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* event);
+	void mouseRightDown_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Up
 	//
@@ -374,7 +378,7 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
-	void movePosConnectionEndPoint(EditConnectionLine* ecl, QPointF toPoint);
+	void movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem, EditConnectionLine* ecl, QPointF toPoint);
 
 	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
 	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;
