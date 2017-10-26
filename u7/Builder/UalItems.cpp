@@ -1428,7 +1428,7 @@ namespace Builder
 		return analogOutputs;
 	}
 
-	QStringList UalSignal::refSignalsIDs() const
+	QStringList UalSignal::refSignalIDs() const
 	{
 		QStringList list;
 
@@ -1440,7 +1440,7 @@ namespace Builder
 		return list;
 	}
 
-	void UalSignal::refSignalIDs(QStringList* appSignalIDs)
+	void UalSignal::refSignalIDs(QStringList* appSignalIDs) const
 	{
 		if (appSignalIDs == nullptr)
 		{
@@ -2019,14 +2019,14 @@ namespace Builder
 			str.append(QString::number(ualSignal->regBufAddr().bit()));
 			str += ";";
 
-			QStringList refSignalsIDs;
+			QStringList refSignalIDs;
 
-			ualSignal->appSignalIDs(refSignalsIDs);
+			ualSignal->refSignalIDs(&refSignalIDs);
 
-			str.append(QString::number(refSignalsIDs.count()));
+			str.append(QString::number(refSignalIDs.count()));
 			str += ";";
 
-			str.append(refSignalsIDs.join(";"));
+			str.append(refSignalIDs.join(";"));
 			str += ";";
 
 			QList<QUuid> pinsRef = m_signalToPinsMap.values(ualSignal);

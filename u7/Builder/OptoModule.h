@@ -121,7 +121,7 @@ namespace Hardware
 		bool calculateTxSignalsAddresses();
 		bool calculateTxDataID();
 
-		bool appendSerialRxSignal(const Signal* rxSignal);
+		bool appendSerialRxSignal(const Builder::UalSignal* rxSignal);
 		bool initSerialRawRxSignals();
 		bool sortSerialRxSignals();
 		bool calculateSerialRxSignalsAddresses();
@@ -267,17 +267,7 @@ namespace Hardware
 		void writeInfo(QStringList& list) const;
 
 	private:
-		bool appendTxSignal(const QStringList& appSignalIDs,
-							E::SignalType signalType,
-							E::DataFormat dataFormat,
-							int dataSize,
-							E::ByteOrder byteOrder);
-
-		bool appendRxSignal(const QStringList& appSignalIDs,
-							E::SignalType signalType,
-							E::DataFormat dataFormat,
-							int dataSize,
-							E::ByteOrder byteOrder);
+		bool appendRxSignal(const Builder::UalSignal* ualSignal);
 
 		void sortByOffsetBitNoAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
 		void sortByAppSignalIdAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
@@ -344,6 +334,7 @@ namespace Hardware
 		bool m_txRawDataSizeWCalculationStarted = false;
 
 		HashedVector<QString, TxRxSignalShared> m_txSignals;			// signals transmitted via port
+		QHash<QString, TxRxSignalShared> m_txSignalIDs;
 
 		//
 
@@ -356,6 +347,7 @@ namespace Hardware
 		int m_rxDiscreteSignalsSizeW = 0;				//
 
 		HashedVector<QString, TxRxSignalShared> m_rxSignals;			// signals received via port
+		QHash<QString, TxRxSignalShared> m_rxSignalIDs;
 	};
 
 	typedef std::shared_ptr<OptoPort> OptoPortShared;
@@ -499,7 +491,7 @@ namespace Hardware
 									  const QString& connectionID,
 									  QUuid receiverUuid,
 									  const QString& lmID,
-									  const Signal* appSignal);
+									  const Builder::UalSignal* ualSignal);
 
 		bool getRxSignalAbsAddress(const QString& schemaID,
 								   const QString& connectionID,

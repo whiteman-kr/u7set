@@ -8,7 +8,7 @@
 #include "Parser.h"
 #include "Builder.h"
 
-#define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalsIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
+#define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
 namespace Builder
 {
@@ -4161,7 +4161,7 @@ namespace Builder
 			{
 				// The signal '%1' is repeatedly connected to the transmitter '%2'
 				//
-				m_log->errALC5029(connectedSignal->refSignalsIDs().join(","), transmitter.connectionId(), QUuid(), transmitter.guid());
+				m_log->errALC5029(connectedSignal->refSignalIDs().join(","), transmitter.connectionId(), QUuid(), transmitter.guid());
 				result = false;
 				break;
 			}
@@ -4272,12 +4272,18 @@ namespace Builder
 			return false;
 		}
 
-		bool result = m_optoModuleStorage->appendSerialRxSignal(item->schemaID(),
+		assert(false);
+		LOG_INTERNAL_ERROR(m_log);
+		return false;
+
+		/* reimplement this call with UalSignal parameter WhiteMan 27.10.2017
+		 *
+		 * bool result = m_optoModuleStorage->appendSerialRxSignal(item->schemaID(),
 																	connectionID,
 																	item->guid(),
 																	m_lm->equipmentIdTemplate(),
 																	rxSignal);
-		return result;
+		return result;*/
 	}
 
 	bool ModuleLogicCompiler::setOptoRawInSignalsAsComputed()
@@ -9538,7 +9544,8 @@ namespace Builder
 
 		m_code.getAsmCode(asmCode);
 
-		BuildFile* buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.asm").arg(m_lm->caption()).arg(m_lmNumber), asmCode);
+		BuildFile* buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.asm").
+													   arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
 
 		if (buildFile == nullptr)
 		{
@@ -9549,7 +9556,8 @@ namespace Builder
 
 		m_memoryMap.getFile(memFile);
 
-		buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.mem").arg(m_lm->caption()).arg(m_lmNumber), memFile);
+		buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.mem").
+											arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
 
 		if (buildFile == nullptr)
 		{
@@ -9812,7 +9820,7 @@ namespace Builder
 		}
 */
 		bool result = m_resultWriter->addFile(subsystemID, QString("%1-%2.tun").
-										 arg(lmCaption).arg(lmNumber), file);
+										 arg(subsystemID.toLower()).arg(lmNumber), file);
 		return result;
 	}
 

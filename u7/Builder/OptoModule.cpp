@@ -305,21 +305,6 @@ namespace Hardware
 		return res;
 	}
 
-	bool OptoPort::appendTxSignal(const Builder::UalSignal* txSignal)
-	{
-		if (txSignal == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		return appendTxSignal(txSignal->refSignalsIDs(),
-							  txSignal->signalType(),
-							  txSignal->dataFormat(),
-							  txSignal->dataSize(),
-							  txSignal->byteOrder());
-	}
-
 	bool OptoPort::initRawTxSignals()
 	{
 		bool result = true;
@@ -505,7 +490,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::appendSerialRxSignal(const Signal* rxSignal)
+	bool OptoPort::appendSerialRxSignal(const Builder::UalSignal* rxSignal)
 	{
 		TEST_PTR_RETURN_FALSE(rxSignal);
 
@@ -520,11 +505,7 @@ namespace Hardware
 			return true;				// signal already in list, nothing to do
 		}
 
-		bool result = appendRxSignal(QStringList(rxSignal->appSignalID()),
-									 rxSignal->signalType(),
-									 rxSignal->dataFormat(),
-									 rxSignal->dataSize(),
-									 rxSignal->byteOrder());
+		bool result = appendRxSignal(rxSignal);
 
 		return result;
 	}
@@ -948,7 +929,7 @@ namespace Hardware
 
 	bool OptoPort::isTxSignalExists(const QString& appSignalID)
 	{
-		return m_txSignals.contains(appSignalID);
+		return m_txSignalIDs.contains(appSignalID);
 	}
 
 	bool OptoPort::isTxSignalExists(const Builder::UalSignal* ualSignal)
@@ -959,13 +940,47 @@ namespace Hardware
 			return false;
 		}
 
-		return m_txSignals.contains(appSignalID);
-	}
+		QStringList refSignalIDs;
 
+		ualSignal->refSignalIDs(&refSignalIDs);
+
+		for(const QString& appSignalID : refSignalIDs)
+		{
+			if (m_txSignalIDs.contains(appSignalID) == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	bool OptoPort::isRxSignalExists(const QString& appSignalID)
 	{
-		return m_rxSignals.contains(appSignalID);
+		return m_rxSignalIDs.contains(appSignalID);
+	}
+
+	bool OptoPort::isRxSignalExists(const Builder::UalSignal* ualSignal)
+	{
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QStringList refSignalIDs;
+
+		ualSignal->refSignalIDs(&refSignalIDs);
+
+		for(const QString& appSignalID : refSignalIDs)
+		{
+			if (m_rxSignalIDs.contains(appSignalID) == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	bool OptoPort::isSerialRxSignalExists(const QString& appSignalID)
@@ -1414,7 +1429,7 @@ namespace Hardware
 				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
 							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalID()));
+							C_STR(tx->appSignalIDs().join(", ")));
 				list.append(str);
 
 				hasSignals = true;
@@ -1437,7 +1452,7 @@ namespace Hardware
 				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
 							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalID()));
+							C_STR(tx->appSignalIDs().join(", ")));
 				list.append(str);
 
 				hasSignals = true;
@@ -1460,7 +1475,7 @@ namespace Hardware
 				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
 							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalID()));
+							C_STR(tx->appSignalIDs().join(", ")));
 				list.append(str);
 
 				hasSignals = true;
@@ -1512,7 +1527,7 @@ namespace Hardware
 				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
 							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
 							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalID()));
+							C_STR(rx->appSignalIDs().join(", ")));
 				list.append(str);
 
 				hasSignals = true;
@@ -1535,7 +1550,7 @@ namespace Hardware
 				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
 							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
 							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalID()));
+							C_STR(rx->appSignalIDs().join(", ")));
 				list.append(str);
 
 				hasSignals = true;
@@ -1558,7 +1573,7 @@ namespace Hardware
 				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
 							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
 							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalID()));
+							C_STR(rx->appSignalIDs().join(", ")));
 				list.append(str);
 
 				hasSignals = true;
@@ -1571,68 +1586,86 @@ namespace Hardware
 		}
 	}
 
-
-	bool OptoPort::appendTxSignal(const QStringList& appSignalIDs,
-								  E::SignalType signalType,
-								  E::DataFormat dataFormat,
-								  int dataSize,
-								  E::ByteOrder byteOrder)
+	bool OptoPort::appendTxSignal(const Builder::UalSignal* ualSignal)
 	{
-		for(const QString& appSignalID : appSignalIDs)
+		if (ualSignal == nullptr)
 		{
-			if (m_txSignals.contains(appSignalID) == true)
-			{
-				return false;
-			}
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
 		}
+
+		QString ualSignalID = ualSignal->appSignalID();
+
+		if (m_txSignals.contains(ualSignalID) == true)
+		{
+			// Signal ID '%1' is duplicate in opto port '%2'.
+			//
+			m_log->errALC5188(ualSignalID, m_equipmentID);
+			return false;
+		}
+
+		QStringList appSignalIDs;
+
+		ualSignal->refSignalIDs(&appSignalIDs);
 
 		TxRxSignalShared txSignal = std::make_shared<TxRxSignal>();
 
-		bool res = txSignal->init(appSignalIDs, signalType, dataFormat, dataSize, byteOrder);
+		bool res = txSignal->init(appSignalIDs, ualSignal->signalType(),
+								  ualSignal->dataFormat(), ualSignal->dataSize(), ualSignal->byteOrder());
 
 		if (res == false)
 		{
 			return false;
 		}
 
+		m_txSignals.insert(ualSignalID, txSignal);
+
 		for(const QString& appSignalID : appSignalIDs)
 		{
-			m_txSignals.insert(appSignalID, txSignal);
+			m_txSignalIDs.insert(appSignalID, txSignal);
 		}
 
 		return true;
 	}
 
-	bool OptoPort::appendRxSignal(const QStringList& appSignalIDs,
-								  E::SignalType signalType,
-								  E::DataFormat dataFormat,
-								  int dataSize,
-								  E::ByteOrder byteOrder)
-	{
-		for(const QString& appSignalID : appSignalIDs)
-		{
-			if (m_rxSignals.contains(appSignalID) == true)
-			{
-				// Signal ID '%1' is duplicate in opto port '%2'.
-				//
-				m_log->errALC5188(appSignalID, m_equipmentID);
 
-				return false;
-			}
+	bool OptoPort::appendRxSignal(const Builder::UalSignal* ualSignal)
+	{
+		if (ualSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
 		}
+
+		QString ualSignalID = ualSignal->appSignalID();
+
+		if (m_rxSignals.contains(ualSignalID) == true)
+		{
+			// Signal ID '%1' is duplicate in opto port '%2'.
+			//
+			m_log->errALC5188(ualSignalID, m_equipmentID);
+			return false;
+		}
+
+		QStringList appSignalIDs;
+
+		ualSignal->refSignalIDs(&appSignalIDs);
 
 		TxRxSignalShared rxSignal = std::make_shared<TxRxSignal>();
 
-		bool res = rxSignal->init(appSignalIDs, signalType, dataFormat, dataSize, byteOrder);
+		bool res = rxSignal->init(appSignalIDs, ualSignal->signalType(),
+								  ualSignal->dataFormat(), ualSignal->dataSize(), ualSignal->byteOrder());
 
 		if (res == false)
 		{
 			return false;
 		}
 
+		m_rxSignals.insert(ualSignalID, rxSignal);
+
 		for(const QString& appSignalID : appSignalIDs)
 		{
-			m_rxSignals.insert(appSignalID, rxSignal);
+			m_rxSignalIDs.insert(appSignalID, rxSignal);
 		}
 
 		return true;
@@ -2861,7 +2894,7 @@ namespace Hardware
 			{
 				bool result = true;
 
-				if (p1->isTxSignalExists(appSignalID))
+				if (p1->isTxSignalExists(ualSignal))
 				{
 					*signalAlreadyInList = true;
 				}
@@ -2905,7 +2938,7 @@ namespace Hardware
 
 		if (m1->lmID() == lmID)
 		{
-			if (p1->isTxSignalExists(appSignalID))
+			if (p1->isTxSignalExists(ualSignal))
 			{
 				*signalAlreadyInList = true;
 			}
@@ -2919,7 +2952,7 @@ namespace Hardware
 
 		if (m2->lmID() == lmID)
 		{
-			if (p2->isTxSignalExists(appSignalID))
+			if (p2->isTxSignalExists(ualSignal))
 			{
 				*signalAlreadyInList = true;
 			}
@@ -2942,9 +2975,9 @@ namespace Hardware
 													 const QString& connectionID,
 													 QUuid receiverUuid,
 													 const QString& lmID,
-													 const Signal *appSignal)
+													 const Builder::UalSignal* ualSignal)
 	{
-		if (appSignal == nullptr)
+		if (ualSignal == nullptr)
 		{
 			ASSERT_RETURN_FALSE;
 		}
@@ -2980,7 +3013,7 @@ namespace Hardware
 			return false;
 		}
 
-		bool result = p1->appendSerialRxSignal(appSignal);
+		bool result = p1->appendSerialRxSignal(ualSignal);
 
 		return result;
 	}

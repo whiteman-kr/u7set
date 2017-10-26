@@ -462,8 +462,8 @@ namespace Builder
 		Signal* getTuningableSignal();
 		QVector<Signal*> getAnalogOutputSignals();
 
-		QStringList refSignalsIDs() const;
-		void refSignalIDs(QStringList* appSignalIDs);
+		QStringList refSignalIDs() const;
+		void refSignalIDs(QStringList* appSignalIDs) const;
 
 		QStringList acquiredRefSignalsIDs() const;
 
