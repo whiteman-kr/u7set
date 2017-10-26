@@ -8,6 +8,7 @@
 #include "../lib/Signal.h"
 
 #include "RawDataDescription.h"
+#include "UalItems.h"
 #include "../Connection.h"
 
 class LogicModule;
@@ -49,7 +50,7 @@ namespace Hardware
 	public:
 		TxRxSignal();
 
-		bool init(const QString& appSignalID,
+		bool init(const QStringList& appSignalIDs,
 				  E::SignalType signalType,
 				  E::DataFormat dataFormat,
 				  int dataSize,
@@ -57,7 +58,10 @@ namespace Hardware
 
 		bool initRawSignal(const RawDataDescriptionItem& item, int offsetFromBeginningOfBuffer);
 
-		QString appSignalID() const { return m_appSignalID; }
+		QString appSignalID() const { return m_appSignalIDs.first(); }
+		const QStringList appSignalIDs() const { return m_appSignalIDs; }
+
+		bool hasSignalID(const QString& signalID);
 
 		bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
@@ -78,7 +82,7 @@ namespace Hardware
 	private:
 		Type m_type = Type::Regular;
 
-		QString m_appSignalID;
+		QStringList m_appSignalIDs;
 		E::SignalType m_signalType = E::SignalType::Analog;
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
@@ -111,7 +115,7 @@ namespace Hardware
 
 		bool initSettings(ConnectionShared cn);
 
-		bool appendTxSignal(const Signal* txSignal);
+		bool appendTxSignal(const Builder::UalSignal* txSignal);
 		bool initRawTxSignals();
 		bool sortTxSignals();
 		bool calculateTxSignalsAddresses();
@@ -139,7 +143,10 @@ namespace Hardware
 		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
 
 		bool isTxSignalExists(const QString& appSignalID);
+		bool isTxSignalExists(const Builder::UalSignal* ualSignal);
+
 		bool isRxSignalExists(const QString& appSignalID);
+		bool isRxSignalExists(const Builder::UalSignal* ualSignal);
 
 		bool isSerialRxSignalExists(const QString& appSignalID);
 
@@ -260,13 +267,13 @@ namespace Hardware
 		void writeInfo(QStringList& list) const;
 
 	private:
-		bool appendTxSignal(const QString& appSignalID,
+		bool appendTxSignal(const QStringList& appSignalIDs,
 							E::SignalType signalType,
 							E::DataFormat dataFormat,
 							int dataSize,
 							E::ByteOrder byteOrder);
 
-		bool appendRxSignal(const QString& appSignalID,
+		bool appendRxSignal(const QStringList& appSignalIDs,
 							E::SignalType signalType,
 							E::DataFormat dataFormat,
 							int dataSize,
@@ -485,7 +492,7 @@ namespace Hardware
 						 const QString& connectionID,
 						 QUuid transmitterUuid,
 						 const QString& lmID,
-						 const Signal* appSignalID,
+						 const Builder::UalSignal* ualSignal,
 						 bool* signalAlreadyInList);
 
 		bool appendSerialRxSignal(const QString& schemaID,

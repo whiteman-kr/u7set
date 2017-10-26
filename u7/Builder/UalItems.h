@@ -395,8 +395,6 @@ namespace Builder
 
 		QString appSignalID() const { return m_refSignals[0]->appSignalID(); }
 
-		void appSignalIDs(QStringList& appSignalIDs);
-
 		Address16 ualAddr() const { return m_ualAddr; }
 		bool setUalAddr(Address16 ualAddr);
 
@@ -406,12 +404,16 @@ namespace Builder
 		Address16 regValueAddr() const { return m_regValueAddr; }
 		bool setRegValueAddr(Address16 regValueAddr);
 
+		Address16 ioBufAddr();
+
 		Signal* firstSignal() const;
 
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
 		int dataSize() const { return m_refSignals[0]->dataSize(); }
 		int sizeW() const { return m_refSignals[0]->sizeW(); }
+		E::DataFormat dataFormat() const { return m_refSignals[0]->dataFormat(); }
+		E::ByteOrder byteOrder() const { return m_refSignals[0]->byteOrder(); }
 
 		bool isAnalog() const { return m_refSignals[0]->isAnalog(); }
 		bool isDiscrete() const { return m_refSignals[0]->isDiscrete(); }
@@ -458,9 +460,11 @@ namespace Builder
 
 		Signal* getInputSignal();
 		Signal* getTuningableSignal();
-		QVector<Signal *> getAnalogOutputSignals();
+		QVector<Signal*> getAnalogOutputSignals();
 
 		QStringList refSignalsIDs() const;
+		void refSignalIDs(QStringList* appSignalIDs);
+
 		QStringList acquiredRefSignalsIDs() const;
 
 	private:
@@ -545,7 +549,6 @@ namespace Builder
 		const UalSignal* value(const UalSignal* &key, const UalSignal* &defaultValue) const;
 
 		bool getAnalogFormat(const LogicAfbSignal& afbSignal, E::AnalogAppSignalFormat* analogFormat);
-
 
 	private:
 		ModuleLogicCompiler& m_compiler;

@@ -210,7 +210,7 @@ namespace Builder
 
 		bool processTransmitters();
 		bool processTransmitter(const UalItem *item);
-		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
+		bool getConnectedSignals(const LogicTransmitter &transmitter, QVector<UalSignal *>* connectedSignals);
 
 		bool processSerialReceivers();
 		bool processSerialReceiver(const UalItem* item);

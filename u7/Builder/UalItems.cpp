@@ -1143,20 +1143,40 @@ namespace Builder
 		return true;
 	}
 
-	void UalSignal::appSignalIDs(QStringList& appSignalIDs)
+	Address16 UalSignal::ioBufAddr()
 	{
-		appSignalIDs.clear();
-
-		for(Signal* s : m_refSignals)
+		if (m_isInput == true)
 		{
-			if (s == nullptr)
+			Signal* inSignal = getInputSignal();
+
+			if (inSignal == nullptr)
 			{
 				assert(false);
-				continue;
+				return Address16();
 			}
 
-			appSignalIDs.append(s->appSignalID());
+			return inSignal->ioBufAddr();
 		}
+
+		if (m_isTuningable == true)
+		{
+			Signal* tunSignal = getTuningableSignal();
+
+			if (tunSignal == nullptr)
+			{
+				assert(false);
+				return Address16();
+			}
+
+			return tunSignal->ioBufAddr();
+		}
+
+		if (m_isOptoSignal == true)
+		{
+			return m_autoSignalPtr->ioBufAddr();
+		}
+
+		return Address16();
 	}
 
 	Signal* UalSignal::firstSignal() const
@@ -1419,6 +1439,29 @@ namespace Builder
 
 		return list;
 	}
+
+	void UalSignal::refSignalIDs(QStringList* appSignalIDs)
+	{
+		if (appSignalIDs == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		appSignalIDs->clear();
+
+		for(Signal* s : m_refSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			appSignalIDs->append(s->appSignalID());
+		}
+	}
+
 
 	QStringList UalSignal::acquiredRefSignalsIDs() const
 	{
@@ -1940,19 +1983,51 @@ namespace Builder
 
 			QString str;
 
+			if (ualSignal->isConst())
+			{
+				str.append("const;");
+			}
+			else
+			{
+				str.append("var;");
+			}
+
+			str.append(E::valueToString<E::SignalType>(ualSignal->signalType()));
+			str += ";";
+
+			str.append(E::valueToString<E::AnalogAppSignalFormat>(ualSignal->analogSignalFormat()));
+			str += ";";
+
+			str.append(ualSignal->busTypeID());
+			str += ";";
+
+			str.append(ualSignal->isAcquired() == true ? "true" : "false");
+			str += ";";
+
 			str.append(QString::number(ualSignal->ualAddr().offset()));
 			str += ";";
 			str.append(QString::number(ualSignal->ualAddr().bit()));
+			str += ";";
+
+			str.append(QString::number(ualSignal->ioBufAddr().offset()));
+			str += ";";
+			str.append(QString::number(ualSignal->ioBufAddr().bit()));
+			str += ";";
+
+			str.append(QString::number(ualSignal->regBufAddr().offset()));
+			str += ";";
+			str.append(QString::number(ualSignal->regBufAddr().bit()));
 			str += ";";
 
 			QStringList refSignalsIDs;
 
 			ualSignal->appSignalIDs(refSignalsIDs);
 
-			for(const QString& refSignalID : refSignalsIDs)
-			{
-				str += refSignalID + ";";
-			}
+			str.append(QString::number(refSignalsIDs.count()));
+			str += ";";
+
+			str.append(refSignalsIDs.join(";"));
+			str += ";";
 
 			QList<QUuid> pinsRef = m_signalToPinsMap.values(ualSignal);
 
