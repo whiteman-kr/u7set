@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QComboBox>
+#include <QToolButton>
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
@@ -70,7 +71,7 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
 
-	connect(m_schemaListWidget, &SchemaListWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	// --
 	//
@@ -83,7 +84,6 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	// Try attach memory segment, that keep information
 	// about instance status
 	//
-
 	m_instanceTimer = new QTimer(this);
 	m_instanceTimer->start(100);
 
@@ -210,7 +210,7 @@ void MonitorMainWindow::showLogo()
 
 	if (m_toolBar->frameSize().height() < logo.height())
 	{
-		logo = logo.scaledToHeight(m_toolBar->frameSize().height(), Qt::FastTransformation);
+		logo = logo.scaledToHeight(m_toolBar->frameSize().height(), Qt::SmoothTransformation);
 	}
 
 	// Show logo if it was enabled in settings
@@ -402,27 +402,10 @@ void MonitorMainWindow::createMenus()
 
 void MonitorMainWindow::createToolBars()
 {
-	m_toolBar = new MonitorToolBar(this);
+	m_toolBar = new MonitorToolBar("ToolBar", this);
 	m_toolBar->setObjectName("MonitorMainToolBar");
 
-	m_toolBar->setMovable(false);
-	m_toolBar->setIconSize(QSize(28, 28));
-	m_toolBar->setStyleSheet("QToolBar{spacing:2px;padding:2px;}");
-
 	m_toolBar->addAction(m_newTabAction);
-	m_toolBar->addSeparator();
-
-	m_toolBar->addAction(m_zoomInAction);
-	m_toolBar->addAction(m_zoomOutAction);
-	m_toolBar->addSeparator();
-
-	m_schemaListWidget = new SchemaListWidget(&m_configController, monitorCentralWidget());
-	m_schemaListWidget->setMinimumWidth(300);
-	m_toolBar->addWidget(m_schemaListWidget);
-	m_toolBar->addSeparator();
-
-	m_toolBar->addAction(m_historyBack);
-	m_toolBar->addAction(m_historyForward);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_archiveAction);
@@ -432,19 +415,34 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_signalSnapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
 
-	// Create logo for toolbar
-	//
-	m_logoLabel = new QLabel(this);
+	m_toolBar->addSeparator();
+	m_selectSchemaWidget = new SelectSchemaWidget(&m_configController, monitorCentralWidget());
+	m_selectSchemaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_selectSchemaWidget->setMaximumWidth(1280);
+	m_toolBar->addWidget(m_selectSchemaWidget);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_historyBack);
+	m_toolBar->addAction(m_historyForward);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_zoomInAction);
+	m_toolBar->addAction(m_zoomOutAction);
 
 	// Spacer between actions and logo
 	//
-	m_logoSpacer = new QWidget(this);
-	m_logoSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	m_spacer = new QWidget(this);
+	m_spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+	m_toolBar->addWidget(m_spacer);
 
-	m_toolBar->addWidget(m_logoSpacer);
+	// Create logo for toolbar
+	//
+	m_logoLabel = new QLabel(this);
 	m_toolBar->addWidget(m_logoLabel);
-
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
+
+	int space = m_toolBar->sizeHint().height() / 6;
+	m_toolBar->setStyleSheet(QString("QToolBar{spacing:%1;padding:%1;}").arg(space));
 
 	return;
 }
@@ -817,159 +815,23 @@ const MonitorConfigController* MonitorMainWindow::configController() const
 	return &m_configController;
 }
 
-SchemaListWidget::SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
-	m_configController(configController),
-	m_centraWidget(centralWidget)
-{
-	assert(m_configController);
-	assert(m_centraWidget);
-
-	m_label = new QLabel;
-	m_label->setText(tr("Schema:"));
-
-	m_comboBox = new QComboBox;
-
-	QLayout* layout = new QVBoxLayout(this);
-
-	layout->addWidget(m_label);
-	layout->addWidget(m_comboBox);
-
-	setLayout(layout);
-
-	connect(m_configController, &MonitorConfigController::configurationArrived, this, &SchemaListWidget::slot_configurationArrived);
-	connect(m_centraWidget, &MonitorCentralWidget::signal_schemaChanged, this, &SchemaListWidget::slot_schemaChanged);
-	connect(m_comboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SchemaListWidget::slot_indexChanged);
-}
-
-SchemaListWidget::~SchemaListWidget()
-{
-
-}
-
-void SchemaListWidget::slot_configurationArrived(ConfigSettings /*configuration*/)
-{
-	assert(m_comboBox);
-	assert(m_configController);
-	assert(m_centraWidget);
-
-	m_comboBox->blockSignals(true);		// don;'t want to emit slot_indexChanged
-
-	// Save state
-	//
-	QVariant selected;
-
-	MonitorSchemaWidget* tab = m_centraWidget->currentTab();
-	if (tab != nullptr)
-	{
-		selected = tab->schemaId();
-	}
-
-	// Clear all and fill with new data;
-	//
-	m_comboBox->clear();
-
-	std::vector<VFrame30::SchemaDetails> schemas = m_configController->schemasDetails();
-
-	std::sort(schemas.begin(), schemas.end(),
-		[](const VFrame30::SchemaDetails& s1, const VFrame30::SchemaDetails& s2) -> bool
-		{
-			return s1.m_schemaId < s2.m_schemaId;
-		});
-
-	for (const VFrame30::SchemaDetails& s : schemas)
-	{
-		QVariant data = QVariant::fromValue(s.m_schemaId);
-		m_comboBox->addItem(s.m_schemaId + "  " + s.m_caption, data);
-	}
-
-	// Restore selected
-	//
-	if (selected.isValid() == true)
-	{
-		int index = m_comboBox->findData(selected);
-
-		if (index != -1)
-		{
-			m_comboBox->setCurrentIndex(index);
-		}
-		else
-		{
-			m_comboBox->setCurrentIndex(-1);
-		}
-	}
-	else
-	{
-		m_comboBox->setCurrentIndex(-1);
-	}
-
-	// Allow signals
-	//
-	m_comboBox->blockSignals(false);	// Allow to emit signals
-
-	return;
-}
-
-void SchemaListWidget::slot_schemaChanged(QString strId)
-{
-	if (m_comboBox == nullptr ||
-		m_configController == nullptr)
-	{
-		assert(m_comboBox);
-		assert(m_configController);
-		return;
-	}
-
-	m_comboBox->blockSignals(true);		// don;'t want to emit slot_indexChanged
-
-	// Restore selected
-	//
-	QVariant data = QVariant::fromValue(strId);
-
-	int index = m_comboBox->findData(data);
-
-	if (index != -1)
-	{
-		m_comboBox->setCurrentIndex(index);
-	}
-	else
-	{
-		m_comboBox->setCurrentIndex(-1);
-	}
-
-	// Allow signals
-	//
-	m_comboBox->blockSignals(false);	// Allo wto emit signals
-
-	return;
-}
-
-void SchemaListWidget::slot_indexChanged(int /*index*/)
-{
-	QVariant data = m_comboBox->currentData();
-
-	if (data.isValid() == false ||
-		data.type() != QVariant::String)
-	{
-		return;
-	}
-
-	QString strId = data.toString();
-
-	emit selectionChanged(strId);
-
-	return;
-}
-
 MonitorToolBar::MonitorToolBar(const QString& tittle, QWidget* parent) :
 	QToolBar(tittle, parent)
 {
 	setAcceptDrops(true);
+	setMovable(false);
+
+	return;
 }
 
-MonitorToolBar::MonitorToolBar(QWidget* parent) :
-	QToolBar(parent)
+void MonitorToolBar::addAction(QAction* action)
 {
-	setAcceptDrops(true);
+	assert(action);
+
+	QWidget::addAction(action);
+	widgetForAction(action)->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
+
+	return;
 }
 
 void MonitorToolBar::dragEnterEvent(QDragEnterEvent* event)
@@ -1151,7 +1013,6 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 			MonitorArchive::startNewWidget(mainWindow->configController(), appSignals, mainWindow);
 		}
 	}
-
 
 	return;
 }

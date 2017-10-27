@@ -188,6 +188,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0170.sql", "Upgrade to version 170, AFBL library was updated"},
 	{":/DatabaseUpgrade/Upgrade0171.sql", "Upgrade to version 171, AFBL library was updated"},
 	{":/DatabaseUpgrade/Upgrade0172.sql", "Upgrade to version 172, AFBL library was updated"},
+	{":/DatabaseUpgrade/Upgrade0173.sql", "Upgrade to version 173, Fixed lim_fp update error"},
 };
 
 
