@@ -10,6 +10,7 @@
 #include <QTableView>
 #include <QLabel>
 #include <QDialogButtonBox>
+#include <QHeaderView>
 
 #include "TuningSignalBase.h"
 
@@ -269,7 +270,7 @@ private slots:
 
 	// slots for list
 	//
-	void					onListDoubleClicked(const QModelIndex&);
+	void					onSignalListDoubleClicked(const QModelIndex&);
 
 };
 

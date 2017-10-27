@@ -172,6 +172,8 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubSystem:" << dsi.subsystem().c_str() << ", EquipmentID:" << dsi.equipmentid().c_str() << ", IP:" << dsi.ip().c_str();
 	}
 
+	theSignalBase.tuning().Sources().sortByID();
+
 	emit sourcesLoaded();
 
 	requestTuningSourcesState();
