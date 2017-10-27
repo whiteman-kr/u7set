@@ -55,7 +55,6 @@ namespace VFrame30
 		// Other
 		//
 	public:
-		virtual bool searchText(const QString& text) const override;
 		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties

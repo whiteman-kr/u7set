@@ -246,7 +246,7 @@ public:
 	SignalsTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~SignalsTabPage();
 
-	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent);
+	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, const QString& appSignalId, QWidget* parent);
 
 protected:
 	void CreateActions(QToolBar* toolBar);
@@ -275,6 +275,7 @@ public slots:
 	void editColumnsVisibilityAndOrder();
 	void changeSignalActionsVisibility();
 
+	void setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
 

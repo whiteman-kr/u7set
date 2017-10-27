@@ -171,6 +171,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		signalProperties->propertyByCaption(typeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(inOutTypeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(dataSizeCaption)->setReadOnly(true);
+		signalProperties->propertyByCaption(byteOrderCaption)->setReadOnly(true);
 
 		auto& s = signalProperties->signal();
 		if (s.signalType() == E::SignalType::Bus)
@@ -365,7 +366,7 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 		for (auto property : signalProperties->propertiesDependentOnPrecision())
 		{
 			property->setPrecision(precision);
-			m_propertyEditor->updateProperty(property->caption());
+			m_propertyEditor->updatePropertyValues(property->caption());
 		}
 	}
 }

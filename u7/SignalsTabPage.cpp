@@ -25,6 +25,7 @@
 #include "../lib/WidgetUtils.h"
 #include "SignalPropertiesDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
+#include "BusStorage.h"
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -170,6 +171,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_DATA_SIZE:
 		{
+			return nullptr;	//Read only
 			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].signalType() == E::SignalType::Discrete)
 			{
 				return nullptr;
@@ -222,6 +224,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_IN_OUT_TYPE:
 		{
+			return nullptr;	//Read only
 			QComboBox* cb = new QComboBox(parent);
 
 			cb->addItems(E::enumKeyStrings<E::SignalInOutType>());
@@ -230,6 +233,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_BYTE_ORDER:
 		{
+			return nullptr;	//Read only
 			QComboBox* cb = new QComboBox(parent);
 
 			auto byteOrderList = E::enumValues<E::ByteOrder>();
@@ -1027,7 +1031,7 @@ void SignalsModel::addSignal()
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
 	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete") << tr("Bus"));
-	signalTypeCombo->setCurrentIndex(0);
+	signalTypeCombo->setCurrentIndex(1);
 
 	fl->addRow(tr("Signal type"), signalTypeCombo);
 
@@ -1558,7 +1562,7 @@ SignalsTabPage::~SignalsTabPage()
 	}
 }
 
-QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
+QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, const QString& appSignalId, QWidget* parent)
 {
 	QVector<Signal> signalVector;
 
@@ -1570,18 +1574,18 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	QGroupBox *groupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
-	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
-	QVBoxLayout* groupBoxLayout = new QVBoxLayout;
-	groupBox->setLayout(groupBoxLayout);
-	vl->addWidget(groupBox);
+	QGroupBox *equipmentGroupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
+	equipmentGroupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QVBoxLayout* equipmentGroupBoxLayout = new QVBoxLayout;
+	equipmentGroupBox->setLayout(equipmentGroupBoxLayout);
+	vl->addWidget(equipmentGroupBox);
 
 	for (QString lmId : lmIdList)
 	{
 		QCheckBox* enableLmCheck = new QCheckBox(lmId, &signalCreationSettingsDialog);
 		enableLmCheck->setChecked(true);
 
-		groupBoxLayout->addWidget(enableLmCheck);
+		equipmentGroupBoxLayout->addWidget(enableLmCheck);
 		checkBoxList.append(enableLmCheck);
 
 		connect(enableLmCheck, &QCheckBox::toggled, [&checkBoxList, enableLmCheck](bool checked){
@@ -1605,11 +1609,91 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		});
 	}
 
-	QComboBox* signalTypeCombo = new QComboBox(&signalCreationSettingsDialog);
-	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
-	signalTypeCombo->setCurrentIndex(0);
+	QGroupBox *signalTypeGroupBox = new QGroupBox("Signal type", &signalCreationSettingsDialog);
+	signalTypeGroupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QVBoxLayout* signalTypeGroupBoxLayout = new QVBoxLayout;
+	signalTypeGroupBox->setLayout(signalTypeGroupBoxLayout);
 
-	fl->addRow(tr("Signal type"), signalTypeCombo);
+	QButtonGroup* signalTypeButtonGroup = new QButtonGroup(&signalCreationSettingsDialog);
+
+	signalTypeButtonGroup->setExclusive(true);
+
+	static const QString discreteCaption("Discrete");
+	static const QString analogFloat32Caption("Analog Float32");
+	static const QString analogSignedInt32Caption("Analog SignedInt32");
+	static const QString busCaption("Bus");
+
+	QVector<QRadioButton*> buttons;
+	QRadioButton* busButton;
+	buttons.push_back(new QRadioButton(discreteCaption, signalTypeGroupBox));
+	buttons.push_back(new QRadioButton(analogFloat32Caption, signalTypeGroupBox));
+	buttons.push_back(new QRadioButton(analogSignedInt32Caption, signalTypeGroupBox));
+	buttons.push_back(busButton = new QRadioButton(busCaption, signalTypeGroupBox));
+
+	QComboBox* busTypeIdComboBox = new QComboBox(&signalCreationSettingsDialog);
+	busTypeIdComboBox->setEditable(true);
+	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdComboBox));
+	busTypeIdComboBox->setVisible(false);
+
+	BusStorage busStorage(dbController);
+	// Load buses
+	//
+	QString errorMessage;
+
+	if (busStorage.load(&errorMessage) == false)
+	{
+		QMessageBox::critical(parent, qAppName(), tr("Bus loading error: %1").arg(errorMessage));
+	}
+
+	int count = busStorage.count();
+
+	for (int i = 0; i < count; i++)
+	{
+		const std::shared_ptr<VFrame30::Bus> bus = busStorage.get(i);
+
+		busTypeIdComboBox->addItem(bus->busTypeId());
+	}
+
+	static const QString defaultBusTypeIdCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultBusTypeId");
+
+	QSettings settings;
+	QString defaultBusTypeId = settings.value(defaultBusTypeIdCaption,
+											  QString("BUSTYPEID_%1").arg(dbController->nextCounterValue(), 4, 10, QLatin1Char('0'))).toString();
+	busTypeIdComboBox->setEditText(defaultBusTypeId);
+
+	QLabel* busTypeIdLabel = new QLabel("BusTypeId", &signalCreationSettingsDialog);
+	busTypeIdLabel->setVisible(false);
+
+	fl->addRow(busTypeIdLabel, busTypeIdComboBox);
+
+	connect(busButton, &QRadioButton::toggled, busTypeIdLabel, &QLabel::setVisible);
+	connect(busButton, &QRadioButton::toggled, busTypeIdComboBox, &QComboBox::setVisible);
+
+	static const QString defaultSignalTypeCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultSignalType");
+
+	int defaultSignalType = settings.value(defaultSignalTypeCaption, 0).toInt();
+
+	if (defaultSignalType < 0)
+	{
+		defaultSignalType = 0;
+	}
+
+	if (defaultSignalType >= buttons.count())
+	{
+		defaultSignalType = buttons.count() - 1;
+	}
+
+	buttons[defaultSignalType]->setChecked(true);
+
+	int index = 0;
+
+	for (auto b : buttons)
+	{
+		signalTypeButtonGroup->addButton(b, index++);
+		signalTypeGroupBoxLayout->addWidget(b);
+	}
+
+	vl->addWidget(signalTypeGroupBox);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -1629,7 +1713,29 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		return QStringList();
 	}
 
-	E::SignalType type = static_cast<E::SignalType>(signalTypeCombo->currentIndex());
+	settings.setValue(defaultSignalTypeCaption, signalTypeButtonGroup->checkedId());
+
+	QRadioButton* checkedSignalTypeButton = dynamic_cast<QRadioButton*>(signalTypeButtonGroup->checkedButton());
+	if (checkedSignalTypeButton == nullptr)
+	{
+		return QStringList();
+	}
+
+	E::SignalType type;
+	switch (checkedSignalTypeButton->text()[0].unicode())
+	{
+		case 'A':
+			type = E::SignalType::Analog;
+			break;
+
+		case 'B':
+			type = E::SignalType::Bus;
+			break;
+
+		case 'D':
+			type = E::SignalType::Discrete;
+			break;
+	}
 
 	for (QCheckBox* check : checkBoxList)
 	{
@@ -1652,6 +1758,11 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		newSignalExtStrId.replace("#", "");
 		QString newSignalStrId = newSignalExtStrId;
 
+		if (appSignalId.isEmpty() == false)
+		{
+			newSignalStrId = QString("%1_%2").arg(appSignalId).arg(signalSuffix);
+		}
+
 		QString newSignalCaption = QString("App signal %1 at schema \"%2\"").arg(signalSuffix).arg(schemaCaption);
 
 		if (newSignalExtStrId[0] == QChar('#'))
@@ -1670,8 +1781,17 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		switch (type)
 		{
 			case E::SignalType::Analog:
-				newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-				newSignal.setDataSize(FLOAT32_SIZE);
+				if (checkedSignalTypeButton->text() == analogFloat32Caption)
+				{
+					newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+					newSignal.setDataSize(FLOAT32_SIZE);
+				}
+
+				if (checkedSignalTypeButton->text() == analogSignedInt32Caption)
+				{
+					newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
+					newSignal.setDataSize(SIGNED_INT32_SIZE);
+				}
 				break;
 
 			case E::SignalType::Discrete:
@@ -1679,6 +1799,10 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 				break;
 
 			case E::SignalType::Bus:
+				newSignal.setBusTypeID(busTypeIdComboBox->currentText());
+				settings.setValue(defaultBusTypeIdCaption, newSignal.busTypeID());
+				break;
+
 			default:
 				break;
 		}
@@ -1719,11 +1843,18 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		return QStringList();
 	}
 
+	SignalsModel* model = SignalsModel::instance();
+	model->loadSignals();
+
+	QList<int> selectIdList;
 	QStringList result;
 	for (Signal& signal : signalVector)
 	{
 		result << signal.appSignalID();
+		selectIdList << signal.ID();
 	}
+
+	model->parentWindow()->setSelection(selectIdList);
 
 	return result;
 }
@@ -2086,6 +2217,26 @@ void SignalsTabPage::changeSignalActionsVisibility()
 		}
 		emit setSignalActionsVisibility(false);
 	}
+}
+
+void SignalsTabPage::setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID)
+{
+	if (selectedRowsSignalID.isEmpty())
+	{
+		return;
+	}
+	if (focusedCellSignalID == -1)
+	{
+		focusedCellSignalID = selectedRowsSignalID.last();
+	}
+	m_selectedRowsSignalID = selectedRowsSignalID;
+
+	int focusedRow = m_signalsModel->keyIndex(focusedCellSignalID);
+
+	m_lastVerticalScrollPosition = m_signalsView->rowViewportPosition(focusedRow);
+	m_lastHorizontalScrollPosition = 0;
+
+	restoreSelection(focusedCellSignalID);
 }
 
 void SignalsTabPage::saveSelection()

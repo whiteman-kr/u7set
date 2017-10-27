@@ -24,7 +24,7 @@ namespace TrendLib
 {
 
 	TrendMainWindow::TrendMainWindow(QWidget* parent) :
-		QMainWindow(parent),
+		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 		ui(new Ui::TrendsMainWindow)
 	{
 		ui->setupUi(this);
@@ -204,6 +204,11 @@ namespace TrendLib
 	{
 		setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
+		if (isMinimized() == true)
+		{
+			showNormal();
+		}
+
 		QRect screenRect  = QApplication::desktop()->availableGeometry(this);
 		QRect intersectRect = screenRect.intersected(frameGeometry());
 
@@ -243,7 +248,7 @@ namespace TrendLib
 		std::vector<TrendLib::TrendSignalParam> discreteSignals = signalSet().discreteSignals();
 		std::vector<TrendLib::TrendSignalParam> analogSignals = signalSet().analogSignals();
 
-		if (discreteSignals.size() + analogSignals.size() > 12)
+		if (discreteSignals.size() + analogSignals.size() > 16)
 		{
 			return false;
 		}

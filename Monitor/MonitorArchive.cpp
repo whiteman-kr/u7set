@@ -254,6 +254,11 @@ void MonitorArchiveWidget::ensureVisible()
 	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
+	if (isMinimized() == true)
+	{
+		showNormal();
+	}
+
 	if (isMaximized() == false &&
 		(intersectRect.width() < size().width() ||
 		 intersectRect.height() < size().height()))

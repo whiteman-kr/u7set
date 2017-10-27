@@ -2489,13 +2489,22 @@ void EditSchemaWidget::createActions()
 	m_findNextAction = new QAction(tr("Find Next"), this);
 	m_findNextAction->setEnabled(true);
 	m_findNextAction->setShortcut(QKeySequence::FindNext);
-	connect(m_findNextAction, &QAction::triggered, this, &EditSchemaWidget::findNext);
+	connect(m_findNextAction, &QAction::triggered, this,
+			[this]()
+			{
+				findNext(theSettings.m_findSchemaItemCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+			});
 	addAction(m_findNextAction);
 
 	m_findPrevAction = new QAction(tr("Find Previous"), this);
 	m_findPrevAction->setEnabled(true);
 	m_findPrevAction->setShortcut(QKeySequence::FindPrevious);
-	connect(m_findPrevAction, &QAction::triggered, this, &EditSchemaWidget::findPrev);
+	connect(m_findPrevAction, &QAction::triggered, this,
+			[this]()
+			{
+				findPrev(theSettings.m_findSchemaItemCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+			});
+
 	addAction(m_findPrevAction);
 
 	//
@@ -4186,8 +4195,6 @@ void EditSchemaWidget::mouseMove_AddSchemaPosRectEndPoint(QMouseEvent* event)
 
 void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* event)
 {
-	double gridSize = schema()->gridSize();
-
 	if (editSchemaView()->m_newItem == nullptr)
 	{
 		assert(editSchemaView()->m_newItem != nullptr);
@@ -4214,72 +4221,7 @@ void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* ev
 	//
 	docPoint = magnetPointToPin(docPoint);
 
-	// --
-	//
-	auto points = itemPos->GetPointList();
-	auto extPoints = itemPos->GetExtensionPoints();
-
-	if (points.empty() == true || extPoints.empty() == true)
-	{
-		assert(points.size() > 0);
-		assert(extPoints.size() > 0);
-		return;
-	}
-
-	if (points.size() + extPoints.size() < 2)
-	{
-		assert(points.size() + extPoints.size() >= 2);
-		return;
-	}
-
-	VFrame30::SchemaPoint ptBase = points.back();
-
-	// Add extra points
-	//
-	double horzDistance = std::abs(ptBase.X - docPoint.x()) * (ptBase.X - docPoint.x() > 0.0 ? -1.0 : 1.0);
-	double midPoint = 0.0;
-
-	if (std::abs(ptBase.X - docPoint.x()) < gridSize * 1.0)
-	{
-		midPoint = ptBase.X;
-	}
-	else
-	{
-		midPoint = ptBase.X + horzDistance / 2;
-	}
-
-	QPointF onePoint(midPoint, ptBase.Y);
-	onePoint = snapToGrid(onePoint);
-
-	itemPos->DeleteAllExtensionPoints();
-
-	// if onePoint on previous line, then move it to base
-	//
-	if (points.size() > 1)
-	{
-		VFrame30::SchemaPoint lastLinkPt1 = *std::prev(points.end(), 2);
-		VFrame30::SchemaPoint lastLinkPt2 = points.back();
-
-		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
-			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
-			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
-			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
-			))
-		{
-			onePoint.setX(ptBase.X);
-			onePoint.setY(ptBase.Y);
-		}
-	}
-
-	QPointF twoPoint(onePoint.x(), docPoint.y());
-
-	if (onePoint != ptBase)
-	{
-		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
-	}
-	itemPos->AddExtensionPoint(twoPoint.x(), twoPoint.y());
-	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
-
+	movePosConnectionEndPoint(itemPos, docPoint);
 
 	editSchemaView()->update();
 
@@ -4878,6 +4820,159 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
+void EditSchemaWidget::movePosConnectionEndPoint(VFrame30::IPosConnection* item, QPointF toPoint)
+{
+	double gridSize = schema()->gridSize();
+
+	auto points = item->GetPointList();
+	auto extPoints = item->GetExtensionPoints();
+
+	if (points.empty() == true || extPoints.empty() == true)
+	{
+		assert(points.size() > 0);
+		assert(extPoints.size() > 0);
+		return;
+	}
+
+	if (points.size() + extPoints.size() < 2)
+	{
+		assert(points.size() + extPoints.size() >= 2);
+		return;
+	}
+
+	VFrame30::SchemaPoint ptBase = points.back();
+
+	// Two cases:
+	//	1. If docPoint ouside of horzline, add to main part 3 pointx
+	//	------------+(1)
+	//              |
+	//           (2)+--------+(3)
+	//
+	//	2. If docPoint on horz line, add to main part two points
+	//	------------+(1)
+	//              |
+	//       =======+=======
+	//             (2)
+	//
+	bool docPointIsOnHorzLine = false;
+
+	// Try to to detect situation 2
+	//
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderDocPoint = activeLayer()->getItemListUnderPoint(toPoint, editSchemaView()->m_newItem->metaObject()->className());
+
+	if (linksUnderDocPoint.empty() == false)
+	{
+		for (std::shared_ptr<VFrame30::SchemaItem> connItem : linksUnderDocPoint)
+		{
+			VFrame30::IPosConnection* connectionUndertDocPoint = dynamic_cast<VFrame30::IPosConnection*>(connItem.get());
+
+			// Get all horizontal lines for item connectionUndertDocPoint
+			//
+			std::list<VFrame30::SchemaPoint> underItemPointsList = connectionUndertDocPoint->GetPointList();
+			std::vector<VFrame30::SchemaPoint> underItemPoints = {underItemPointsList.begin(), underItemPointsList.end()};		// In the next loop more conv
+
+			for (size_t i = 0; i < underItemPoints.size(); i++)
+			{
+				if (i == 0)
+				{
+					continue;
+				}
+
+				VFrame30::SchemaPoint curPos = underItemPoints[i];
+				VFrame30::SchemaPoint prevPos = underItemPoints[i - 1];
+
+				if (std::abs(curPos.Y - prevPos.Y) < 0.000001 &&			// it's horiznotal
+					std::abs(curPos.Y - toPoint.y()) < 0.000001 &&		// docPoint.y is on this link
+					std::min(curPos.X, prevPos.X) <= toPoint.x() &&		// docPoint.x is on this link
+					std::max(curPos.X, prevPos.X) >= toPoint.x())			// docPoint.x is on this link
+				{
+					// This is horz line, docPoint lies on it
+					//
+					docPointIsOnHorzLine = true;
+					break;
+				}
+			}
+
+			if (docPointIsOnHorzLine == true)
+			{
+				break;
+			}
+		}
+	}
+
+	if (docPointIsOnHorzLine == true)
+	{
+		//	2. If docPoint on horz line, add to main part two points
+		//	------------+(1) - cornerPoint
+		//              |
+		//       =======+=======
+		//             (2) docCpoint
+		//
+		QPointF cornerPoint(toPoint.x(), ptBase.Y);		// (1)
+		cornerPoint = snapToGrid(cornerPoint);
+
+		item->DeleteAllExtensionPoints();
+		item->AddExtensionPoint(cornerPoint.x(), cornerPoint.y());
+		item->AddExtensionPoint(toPoint.x(), toPoint.y());
+	}
+	else
+	{
+		//	1. If docPoint ouside of horzline, add to main part 3 pointx
+		//	------------+(1)
+		//              |
+		//           (2)+--------+(3)
+		//
+
+		// Add extra points
+		//
+		double horzDistance = std::abs(ptBase.X - toPoint.x()) * (ptBase.X - toPoint.x() > 0.0 ? -1.0 : 1.0);
+		double midPoint = 0.0;
+
+		if (std::abs(ptBase.X - toPoint.x()) < gridSize * 1.0)
+		{
+			midPoint = ptBase.X;
+		}
+		else
+		{
+			midPoint = ptBase.X + horzDistance / 2;
+		}
+
+		QPointF onePoint(midPoint, ptBase.Y);
+		onePoint = snapToGrid(onePoint);
+
+		item->DeleteAllExtensionPoints();
+
+		// if onePoint on previous line, then move it to base
+		//
+		if (points.size() > 1)
+		{
+			VFrame30::SchemaPoint lastLinkPt1 = *std::prev(points.end(), 2);
+			VFrame30::SchemaPoint lastLinkPt2 = points.back();
+
+			if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
+				std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
+				((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
+				 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
+				))
+			{
+				onePoint.setX(ptBase.X);
+				onePoint.setY(ptBase.Y);
+			}
+		}
+
+		QPointF twoPoint(onePoint.x(), toPoint.y());
+
+		if (onePoint != ptBase)
+		{
+			item->AddExtensionPoint(onePoint.x(), onePoint.y());
+		}
+		item->AddExtensionPoint(twoPoint.x(), twoPoint.y());
+		item->AddExtensionPoint(toPoint.x(), toPoint.y());
+	}
+
+	return;
+}
+
 std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const
 {
 	std::vector<VFrame30::SchemaPoint> result = source;
@@ -5234,6 +5329,12 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 
 		busses.push_back(bus);
 	}
+
+	std::sort(busses.begin(), busses.end(),
+			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
+			{
+				return b1.busTypeId() < b2.busTypeId();
+			});
 
 	std::swap(busses, *out);
 	return true;
@@ -5596,6 +5697,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 														  counterValue,
 														  schema()->schemaId(),
 														  schema()->caption(),
+														  "",
 														  this);
 
 	if (signalsIds.isEmpty() == false)
@@ -5682,6 +5784,12 @@ void EditSchemaWidget::f2Key()
 	if (item->isType<VFrame30::SchemaItemValue>() == true)
 	{
 		f2KeyForValue(item);
+		return;
+	}
+
+	if (item->isType<VFrame30::SchemaItemBus>() == true)
+	{
+		f2KeyForBus(item);
 		return;
 	}
 
@@ -6061,6 +6169,108 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 	return;
 }
 
+void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemBus* busItem = dynamic_cast<VFrame30::SchemaItemBus*>(item.get());
+	if (busItem == nullptr)
+	{
+		assert(busItem);
+		return;
+	}
+
+	QString text = busItem->busTypeId();
+
+	// Get Bus list
+	//
+	std::vector<VFrame30::Bus> busses;
+
+	bool ok = loadBusses(&busses);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set BusType"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// Type Items
+	//
+	QLabel* busTypeLabel = new QLabel("Select BusType:");
+
+	QComboBox* busTypeCombo = new QComboBox();
+
+	for (int i = 0; i < static_cast<int>(busses.size()); i++)
+	{
+		busTypeCombo->addItem(busses[i].busTypeId(), QVariant(i));
+	}
+
+	int dataIndex = busTypeCombo->findText(text);
+	if (dataIndex != -1)
+	{
+		busTypeCombo->setCurrentIndex(dataIndex);
+	}
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(busTypeLabel);
+	layout->addWidget(busTypeCombo);
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted && text != busTypeCombo->currentText())
+	{
+		int selectedBusIndex = busTypeCombo->currentData().toInt();
+		const VFrame30::Bus& newBus = busses[selectedBusIndex];
+
+		QByteArray oldState;
+		busItem->Save(oldState);
+
+		busItem->setBusType(newBus);
+
+		QByteArray newState;
+		busItem->Save(newState);
+
+		// Return object to prev state, it is not neccessary indeed, as it will be loaded into the new state in edit engine
+		//
+		busItem->Load(oldState);
+
+		// Run command
+		//
+		m_editEngine->runSetObject(oldState, newState, item);
+
+		editSchemaView()->update();
+	}
+
+
+	return;
+}
+
 void EditSchemaWidget::deleteKey()
 {
 	auto items = editSchemaView()->selectedNonLockedItems();
@@ -6134,6 +6344,14 @@ void EditSchemaWidget::selectItem(std::shared_ptr<VFrame30::SchemaItem> item)
 	items.push_back(item);
 	editSchemaView()->setSelectedItems(items);
 
+	editSchemaView()->update();
+	return;
+}
+
+void EditSchemaWidget::selectItems(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items)
+{
+	editSchemaView()->clearSelection();
+	editSchemaView()->setSelectedItems(items);
 	editSchemaView()->update();
 	return;
 }
@@ -7070,58 +7288,24 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 		return;
 	}
 
-	// Select BustType from existing
-	//
-	std::vector<DbFileInfo> fileInfos;
-
-	bool ok = db()->getFileList(&fileInfos, db()->busTypesFileId(), ::BusFileExtension, true, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	std::vector<std::shared_ptr<DbFile>> files;
-
-	ok = db()->getLatestVersion(fileInfos, &files, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	// Parse files
+	// Get Bus list
 	//
 	std::vector<VFrame30::Bus> busses;
-	busses.reserve(files.size());
 
+	bool ok = loadBusses(&busses);
 
-	for (std::shared_ptr<DbFile> f : files)
+	if (ok == false)
 	{
-		VFrame30::Bus bus;
-
-		ok = bus.Load(f->data());
-
-		if (ok == false)
-		{
-			QMessageBox::critical(this, qAppName(), QString("Load bus error, file: %1").arg(f->fileName()));
-			continue;
-		}
-
-		busses.push_back(bus);
+		return;
 	}
 
-	std::sort(busses.begin(), busses.end(),
-			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
-			{
-				return b1.busTypeId() < b2.busTypeId();
-			});
+	// Select BustType from existing
+	//
+
 	// Show menu
 	//
 	QObject actionParent;
 	QList<QAction*> menuActions;
-
-//	QAction* empty = new QAction(QString("BusTypeID"), &actionParent);
-//	empty->setData(empty->text());
-//	menuActions << empty;
 
 	for (const VFrame30::Bus& bus : busses)
 	{
@@ -8042,6 +8226,9 @@ void EditSchemaWidget::find()
 
 		connect(m_findDialog, &SchemaFindDialog::findPrev, this, &EditSchemaWidget::findPrev);
 		connect(m_findDialog, &SchemaFindDialog::findNext, this, &EditSchemaWidget::findNext);
+
+		connect(m_findDialog, &SchemaFindDialog::replaceAndFind, this, &EditSchemaWidget::replaceAndFind);
+		connect(m_findDialog, &SchemaFindDialog::replaceAll, this, &EditSchemaWidget::replaceAll);
 	}
 
 	m_findDialog->show();
@@ -8051,7 +8238,7 @@ void EditSchemaWidget::find()
 	return;
 }
 
-void EditSchemaWidget::findNext()
+void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 {
 	if (m_findDialog == nullptr)
 	{
@@ -8119,11 +8306,12 @@ void EditSchemaWidget::findNext()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8134,11 +8322,12 @@ void EditSchemaWidget::findNext()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8157,7 +8346,7 @@ void EditSchemaWidget::findNext()
 	return;
 }
 
-void EditSchemaWidget::findPrev()
+void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 {
 	if (m_findDialog == nullptr)
 	{
@@ -8225,11 +8414,12 @@ void EditSchemaWidget::findPrev()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8240,11 +8430,12 @@ void EditSchemaWidget::findPrev()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -8259,6 +8450,187 @@ void EditSchemaWidget::findPrev()
 	m_findDialog->raise();
 	m_findDialog->activateWindow();
 	m_findDialog->setFocusToEditLine();
+
+	return;
+}
+
+int EditSchemaWidget::replace(std::shared_ptr<VFrame30::SchemaItem> item, QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return 0;
+	}
+
+	QByteArray oldState;
+	item->Save(oldState);
+
+	int replaceCount = item->replace(findText, replaceWith, cs);
+
+	QByteArray newState;
+	item->Save(newState);
+
+	item->Load(oldState);
+
+	if (replaceCount != 0)
+	{
+		m_editEngine->runSetObject(oldState, newState, item);
+	}
+
+	return replaceCount;
+}
+
+void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	auto& selected = selectedItems();		// Keep reference!!!!
+
+	// Get start iterator
+	//
+	auto searchStartIterator = layer->Items.begin();
+
+	if (selected.empty() == true)
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+	else
+	{
+		searchStartIterator = std::find(layer->Items.begin(), layer->Items.end(), selected.front());
+
+		if (searchStartIterator == layer->Items.end())
+		{
+			searchStartIterator = layer->Items.begin();
+		}
+		else
+		{
+			// Replace text in selected item
+			//
+			replace(*searchStartIterator, findText, replaceWith, cs);
+			searchStartIterator ++;
+		}
+	}
+
+	// Text in current selected item replaced, find and select next item
+	//
+	if (searchStartIterator == layer->Items.end())
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+
+	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		auto result = item->searchTextByProps(findText, cs);
+
+		if (result.empty() == false)
+		{
+			selectItem(item);
+
+			if (m_findDialog != nullptr)
+			{
+				m_findDialog->updateFoundInformation(item, result, findText, cs);
+			}
+			return;
+		}
+	}
+
+	// Serach text from the beginning
+	//
+	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		auto result = item->searchTextByProps(findText, cs);
+
+		if (result.empty() == false)
+		{
+			selectItem(item);
+
+			if (m_findDialog != nullptr)
+			{
+				m_findDialog->updateFoundInformation(item, result, findText, cs);
+			}
+			return;
+		}
+	}
+
+	// Text not found
+	//
+	clearSelection();
+
+	QMessageBox::information(this, qApp->applicationName(), tr("Text <b>%1</b> not found.").arg(findText));
+
+	if (m_findDialog != nullptr)
+	{
+		m_findDialog->show();
+		m_findDialog->raise();
+		m_findDialog->activateWindow();
+		m_findDialog->setFocusToEditLine();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	// If there are selected items, then replace only in selected
+	// else relace in all layer's items
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items = selectedItems();
+	if (items.empty() == true)
+	{
+		items.assign(layer->Items.begin(), layer->Items.end());
+	}
+
+	// Replace
+	//
+	int count = 0;
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> replacedInItems;
+	replacedInItems.reserve(items.size());
+
+	for(std::shared_ptr<VFrame30::SchemaItem> item : items)
+	{
+		int itemReplaces = replace(item, findText, replaceWith, cs);
+
+		if (itemReplaces != 0)
+		{
+			count += itemReplaces;
+			replacedInItems.push_back(item);
+		}
+	}
+
+	if (count == 0)
+	{
+		QMessageBox::information(this, tr("Replace All Result"), tr("Text <b>%1</b> not found.").arg(findText));
+	}
+	else
+	{
+		selectItems(replacedInItems);
+		QMessageBox::information(this, tr("Replace All Result"), tr("%1 replaced to %2 in %3 item(s).").arg(findText).arg(replaceWith).arg(replacedInItems.size()));
+	}
 
 	return;
 }
@@ -8385,23 +8757,80 @@ void EditSchemaWidget::setCompareItemActions(const std::map<QUuid, CompareAction
 SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	QDialog(parent)
 {
-	m_lineEdit = new QLineEdit();
+	setWindowTitle(tr("Find and Replace"));
+
+	setWindowFlags((windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// FindText/Replace - text for search
+	//
+	m_findTextEdit = new QLineEdit();
+	m_replaceTextEdit = new QLineEdit();
 
 	QCompleter* searchCompleter = new QCompleter(theSettings.buildSearchCompleter(), this);
 	searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-	m_lineEdit->setCompleter(searchCompleter);
 
+	m_findTextEdit->setCompleter(searchCompleter);
+	m_replaceTextEdit->setCompleter(searchCompleter);
+
+	// CaseSensivity check box
+	//
+	m_caseSensitiveCheckBox = new QCheckBox(tr("Case Sensitive"));
+	m_caseSensitiveCheckBox->setChecked(theSettings.m_findSchemaItemCaseSensitive);
+
+	// Find Result
+	//
+	m_findResult = new QTextEdit;
+	m_findResult->setReadOnly(true);
+
+	auto p = qApp->palette("QListView");
+
+	QColor highlight = p.highlight().color();
+	QColor highlightText = p.highlightedText().color();
+
+	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
+							 .arg(highlight.name())
+							 .arg(highlightText.name());
+
+	m_findResult->setStyleSheet(selectionColor);
+
+	// Find buttons
+	//
 	m_prevButton = new QPushButton(tr("Find Previous"));
+	m_nextButton = new QPushButton(tr("Find Next"));
+
+	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
 	//m_prevButton->setShortcut(QKeySequence::FindPrevious);	// Done via Actions, works much faster
 
-	m_nextButton = new QPushButton(tr("Find Next"));
-	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
+	// Replace buttons
+	//
+	m_replaceAllButton = new QPushButton(tr("Replace All"));
+	m_replaceButton = new QPushButton(tr("Replace && Find"));
 
+	connect(m_replaceButton, &QPushButton::clicked, this, &SchemaFindDialog::replaceAndFindPressed);
+	connect(m_replaceAllButton, &QPushButton::clicked, this, &SchemaFindDialog::replaceAllPressed);
+
+	// --
+	//
 	QGridLayout* layout = new QGridLayout();
 
-	layout->addWidget(m_lineEdit, 0, 0, 1, 2);
-	layout->addWidget(m_prevButton, 1, 0);
-	layout->addWidget(m_nextButton, 1, 1);
+	layout->addWidget(new QLabel("Find:"), 0, 0, 1, 1);
+	layout->addWidget(m_findTextEdit, 0, 1, 1, 3);
+
+	layout->addWidget(new QLabel("Replace with:"), 1, 0, 1, 1);
+	layout->addWidget(m_replaceTextEdit, 1, 1, 1, 3);
+
+	layout->addWidget(m_caseSensitiveCheckBox, 2, 0, 1, 4);
+
+	layout->addWidget(m_findResult, 3, 0, 1, 4);
+
+	layout->addWidget(m_replaceAllButton, 4, 0);
+	layout->addWidget(m_replaceButton, 4, 1);
+
+	layout->addWidget(m_prevButton, 4, 2);
+	layout->addWidget(m_nextButton, 4, 3);
 
 	setLayout(layout);
 
@@ -8415,32 +8844,52 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	prevAction->setShortcut(QKeySequence::FindPrevious);
 	addAction(prevAction);
 
-	connect(nextAction, &QAction::triggered, this, &SchemaFindDialog::findNext);
-	connect(prevAction, &QAction::triggered, this, &SchemaFindDialog::findPrev);
+	// Find buttons
+	//
+	connect(m_caseSensitiveCheckBox, &QCheckBox::toggled, this,
+			[](bool checked)
+			{
+				theSettings.m_findSchemaItemCaseSensitive = checked;
+			});
+
+	auto findNextFunc = [this]()
+		{
+			emit findNext(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		};
+
+	auto findPrevFunc = [this]()
+		{
+			emit findPrev(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		};
+
+	connect(nextAction, &QAction::triggered, this, findNextFunc);
+	connect(prevAction, &QAction::triggered, this, findPrevFunc);
 
 	// --
 	//
-	connect(m_prevButton, &QPushButton::clicked, this, &SchemaFindDialog::findPrev);
-	connect(m_nextButton, &QPushButton::clicked, this, &SchemaFindDialog::findNext);
+	connect(m_nextButton, &QPushButton::clicked, this, findNextFunc);
+	connect(m_prevButton, &QPushButton::clicked, this, findPrevFunc);
 
 	m_nextButton->setDefault(true);
+
+	return;
 }
 
 QString SchemaFindDialog::findText() const
 {
-	assert(m_lineEdit);
+	assert(m_findTextEdit);
 
-	QString text = m_lineEdit->text().trimmed();
+	QString text = m_findTextEdit->text().trimmed();
 
 	return text;
 }
 
 void SchemaFindDialog::setFocusToEditLine()
 {
-	assert(m_lineEdit);
+	assert(m_findTextEdit);
 
-	m_lineEdit->setFocus();
-	m_lineEdit->selectAll();
+	m_findTextEdit->setFocus();
+	m_findTextEdit->selectAll();
 
 	return;
 }
@@ -8455,7 +8904,7 @@ void SchemaFindDialog::updateCompleter()
 	{
 		theSettings.buildSearchCompleter() << searchText;
 
-		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_lineEdit->completer()->model());
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findTextEdit->completer()->model());
 		assert(completerModel);
 
 		if (completerModel != nullptr)
@@ -8463,5 +8912,65 @@ void SchemaFindDialog::updateCompleter()
 			completerModel->setStringList(theSettings.buildSearchCompleter());
 		}
 	}
+}
+
+void SchemaFindDialog::updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
+											  const std::list<std::pair<QString, QString>>& foundProps,
+											  QString searchText,
+											  Qt::CaseSensitivity /*cs*/)
+{
+
+	QString itemCaption = QString(item->metaObject()->className());
+
+	if (itemCaption.startsWith("VFrame30::SchemaItem") == true)
+	{
+		itemCaption.remove(0, 20);		// 20 is length of VFrame30::SchemaItem
+	}
+
+	QString infoText = itemCaption + "\n";
+
+	for (auto p : foundProps)
+	{
+		infoText.append(QString("%1 : %2\n").arg(p.first).arg(p.second));
+	}
+
+	m_findResult->setText(infoText);
+
+	// To do: highlight all searchText with CaseSensitivity
+	//
+
+	return;
+}
+
+void SchemaFindDialog::replaceAndFindPressed()
+{
+	QString findText = m_findTextEdit->text();
+	QString replaceWith = m_replaceTextEdit->text();
+	Qt::CaseSensitivity cs = m_caseSensitiveCheckBox->isChecked() == true ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+	if (findText.trimmed().isEmpty() == true)
+	{
+		return;
+	}
+
+	emit replaceAndFind(findText, replaceWith, cs);
+
+	return;
+}
+
+void SchemaFindDialog::replaceAllPressed()
+{
+	QString findText = m_findTextEdit->text();
+	QString replaceWith = m_replaceTextEdit->text();
+	Qt::CaseSensitivity cs = m_caseSensitiveCheckBox->isChecked() == true ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+	if (findText.trimmed().isEmpty() == true)
+	{
+		return;
+	}
+
+	emit replaceAll(findText, replaceWith, cs);
+
+	return;
 }
 

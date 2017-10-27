@@ -7,6 +7,7 @@
 #include "EditEngineMoveItem.h"
 #include "EditEngineSetOrder.h"
 #include "EditEngineSetProperty.h"
+#include "EditEngineSetObject.h"
 #include "EditEngineSetSchemaProperty.h"
 
 namespace EditEngine
@@ -63,6 +64,7 @@ namespace EditEngine
 		if (runCommand == true)
 		{
 			command->execute(m_schemaView, m_hScrollBar, m_vScrollBar);
+			emit propertiesChanged();
 		}
 
 		if (m_commands.size() > MaxCommandCount)
@@ -266,6 +268,19 @@ namespace EditEngine
 		return runSetProperty(propertyName, value, items);
 	}
 
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	{
+		addCommand(std::make_shared<SetObjectCommand>(m_schemaView, currentState, newState, items, m_hScrollBar, m_vScrollBar), true);
+	}
+
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::shared_ptr<VFrame30::SchemaItem>& item)
+	{
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		items.push_back(item);
+
+		return runSetObject(currentState, newState, items);
+	}
+
 	void EditEngine::runSetSchemaProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& schema)
 	{
 		addCommand(std::make_shared<SetSchemaPropertyCommand>(m_schemaView, propertyName, value, schema, m_hScrollBar, m_vScrollBar), true);
@@ -302,6 +317,8 @@ namespace EditEngine
 		restoreViewPos(schemaView, hScrollBar, vScrollBar);
 
 		executeCommand(schemaView);
+
+		return;
 	}
 
 	void EditCommand::unExecute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)

@@ -736,11 +736,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultInt));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
-			newProperty->setValue(QVariant(defaultInt));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -773,11 +772,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultUInt));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
-			newProperty->setValue(QVariant(defaultUInt));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -810,11 +808,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultDouble));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
-			newProperty->setValue(QVariant(defaultDouble));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -830,10 +827,9 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultBool));
 
 			newProperty->setSpecific(true);
-			newProperty->setValue(QVariant(defaultBool));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -849,8 +845,7 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
-			newProperty->setValue(QVariant::fromValue(E::Channel::A));
+			auto newProperty = addProperty(name, category, true, QVariant::fromValue(E::Channel::A));
 
 			newProperty->setSpecific(true);
 			newProperty->setValue(defaultString.toStdString().c_str());
@@ -865,10 +860,9 @@ namespace Hardware
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultValue.toString()));
 
 			newProperty->setSpecific(true);
-			newProperty->setValue(QVariant(defaultValue.toString()));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -953,11 +947,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultInt));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
-			newProperty->setValue(QVariant(defaultInt));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -992,11 +985,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultUInt));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
-			newProperty->setValue(QVariant(defaultUInt));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1031,11 +1023,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultDouble));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
-			newProperty->setValue(QVariant(defaultDouble));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1053,10 +1044,9 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultBool));
 
 			newProperty->setSpecific(true);
-			newProperty->setValue(QVariant(defaultBool));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1074,8 +1064,7 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
-			newProperty->setValue(QVariant::fromValue(E::Channel::A));
+			auto newProperty = addProperty(name, category, true, QVariant::fromValue(E::Channel::A));
 
 			newProperty->setSpecific(true);
 			newProperty->setValue(defaultString.toStdString().c_str());
@@ -1092,10 +1081,9 @@ namespace Hardware
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultValue.toString()));
 
 			newProperty->setSpecific(true);
-			newProperty->setValue(QVariant(defaultValue.toString()));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1189,11 +1177,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultInt));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
-			newProperty->setValue(QVariant(defaultInt));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1229,11 +1216,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultUInt));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
-			newProperty->setValue(QVariant(defaultUInt));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1269,11 +1255,10 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultDouble));
 
 			newProperty->setSpecific(true);
 			newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
-			newProperty->setValue(QVariant(defaultDouble));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1292,10 +1277,9 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultBool));
 
 			newProperty->setSpecific(true);
-			newProperty->setValue(QVariant(defaultBool));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);
@@ -1314,8 +1298,7 @@ namespace Hardware
 
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
-			newProperty->setValue(QVariant::fromValue(E::Channel::A));
+			auto newProperty = addProperty(name, category, true, QVariant::fromValue(E::Channel::A));
 
 			newProperty->setSpecific(true);
 			newProperty->setValue(defaultString.toStdString().c_str());
@@ -1333,10 +1316,9 @@ namespace Hardware
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
-			auto newProperty = addProperty(name, category, true);
+			auto newProperty = addProperty(name, category, true, QVariant(defaultValue.toString()));
 
 			newProperty->setSpecific(true);
-			newProperty->setValue(QVariant(defaultValue.toString()));
 			newProperty->setReadOnly(false);
 			newProperty->setPrecision(precision);
 			newProperty->setUpdateFromPreset(updateFromPreset);

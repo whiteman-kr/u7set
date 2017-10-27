@@ -478,7 +478,7 @@ namespace TrendLib
 	{
 		QMutexLocker locker(&m_paramMutex);
 
-		if (m_signalParams.size() >= 12)
+		if (m_signalParams.size() >= 16)
 		{
 			return false;
 		}
