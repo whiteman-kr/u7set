@@ -26,6 +26,7 @@ namespace VFrame30
 		static const QString type;
 		static const QString valueInteger;
 		static const QString valueFloat;
+		static const QString valueDiscrete;
 		static const QString precision;
 		static const QString precisionPropText;
 		static const QString analogFormat;

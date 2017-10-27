@@ -5971,6 +5971,7 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	VFrame30::SchemaItemConst::ConstType type = constItem->type();
 	int intValue = constItem->intValue();
 	double floatValue = constItem->floatValue();
+	int discreteValue = constItem->discreteValue();
 
 	// Show input dialog
 	//
@@ -5989,6 +5990,7 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	QComboBox* typeCombo = new QComboBox();
 	typeCombo->addItem("IntegerType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::IntegerType));
 	typeCombo->addItem("FloatType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::FloatType));
+	typeCombo->addItem("Discrete", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::Discrete));
 
 	int dataIndex = typeCombo->findData(QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(type));
 	assert(dataIndex != -1);
@@ -6021,6 +6023,18 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 		floatValueEdit->setEnabled(false);
 	}
 
+	// DiscreteItems
+	//
+	QLabel* discreteValueLabel = new QLabel("DiscreteValue (0 or 1):");
+	QLineEdit* discreteValueEdit = new QLineEdit(QString::number(discreteValue));
+	discreteValueEdit->setValidator(new QIntValidator(0, 1, discreteValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::Discrete)
+	{
+		discreteValueLabel->setEnabled(false);
+		discreteValueEdit->setEnabled(false);
+	}
+
 	// --
 	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -6036,6 +6050,9 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	layout->addWidget(floatValueLabel);
 	layout->addWidget(floatValueEdit);
 
+	layout->addWidget(discreteValueLabel);
+	layout->addWidget(discreteValueEdit);
+
 	layout->addWidget(buttonBox);
 
 	d.setLayout(layout);
@@ -6044,7 +6061,7 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
 	connect(typeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-			[typeCombo, intValueLabel, intValueEdit, floatValueLabel, floatValueEdit](int)
+			[typeCombo, intValueLabel, intValueEdit, floatValueLabel, floatValueEdit, discreteValueLabel, discreteValueEdit](int)
 			{
 				VFrame30::SchemaItemConst::ConstType type = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
 
@@ -6052,16 +6069,36 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 				{
 					intValueLabel->setEnabled(true);
 					intValueEdit->setEnabled(true);
+
 					floatValueLabel->setEnabled(false);
 					floatValueEdit->setEnabled(false);
+
+					discreteValueLabel->setEnabled(false);
+					discreteValueEdit->setEnabled(false);
 				}
 
 				if (type == VFrame30::SchemaItemConst::ConstType::FloatType)
 				{
 					intValueLabel->setEnabled(false);
 					intValueEdit->setEnabled(false);
+
 					floatValueLabel->setEnabled(true);
 					floatValueEdit->setEnabled(true);
+
+					discreteValueLabel->setEnabled(false);
+					discreteValueEdit->setEnabled(false);
+				}
+
+				if (type == VFrame30::SchemaItemConst::ConstType::Discrete)
+				{
+					intValueLabel->setEnabled(false);
+					intValueEdit->setEnabled(false);
+
+					floatValueLabel->setEnabled(false);
+					floatValueEdit->setEnabled(false);
+
+					discreteValueLabel->setEnabled(true);
+					discreteValueEdit->setEnabled(true);
 				}
 			});
 
@@ -6074,6 +6111,7 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 		VFrame30::SchemaItemConst::ConstType newType = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
 		int newIntValue = intValueEdit->text().toInt();
 		double newFloatValue = floatValueEdit->text().toFloat();
+		int newDiscreteValue = discreteValueEdit->text().toInt();
 
 		if (newType != type)
 		{
@@ -6088,6 +6126,11 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 		if (newFloatValue != floatValue)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(newFloatValue), item);
+		}
+
+		if (newDiscreteValue != discreteValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant(newDiscreteValue), item);
 		}
 
 		editSchemaView()->update();
@@ -6577,15 +6620,20 @@ void EditSchemaWidget::editPaste()
 
 		bool okInteger = false;
 		bool okFloat = false;
+		bool okDiscrete = false;
 
 		int constInt = mimeData->text().toInt(&okInteger);
 		double constFloat = mimeData->text().toDouble(&okFloat);
+		int constDiscrete = mimeData->text().toInt(&okDiscrete);
 
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constIntItems;
 		constIntItems.reserve(selected.size());
 
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
 		constFloatItems.reserve(selected.size());
+
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constDiscreteItems;
+		constDiscreteItems.reserve(selected.size());
 
 		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 		{
@@ -6613,6 +6661,13 @@ void EditSchemaWidget::editPaste()
 				}
 				break;
 
+			case VFrame30::SchemaItemConst::ConstType::Discrete:
+				if (okDiscrete == true)
+				{
+					constDiscreteItems.push_back(item);
+				}
+				break;
+
 			default:
 				assert(false);
 				allItemsAreConsts = false;
@@ -6629,6 +6684,11 @@ void EditSchemaWidget::editPaste()
 			if (okFloat == true && constFloatItems.empty() == false)
 			{
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(constFloat), constFloatItems);
+			}
+
+			if (okDiscrete == true && constDiscreteItems.empty() == false)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant(constDiscrete), constDiscreteItems);
 			}
 		}
 	}
@@ -6946,6 +7006,9 @@ void EditSchemaWidget::clipboardDataChanged()
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
 	constFloatItems.reserve(selected.size());
 
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constDiscreteItems;
+	constDiscreteItems.reserve(selected.size());
+
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
 		VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
@@ -6971,6 +7034,12 @@ void EditSchemaWidget::clipboardDataChanged()
 				constFloatItems.push_back(item);
 			}
 			break;
+		case VFrame30::SchemaItemConst::ConstType::Discrete:
+			if (okInteger == true)
+			{
+				constDiscreteItems.push_back(item);
+			}
+			break;
 
 		default:
 			assert(false);
@@ -6980,13 +7049,9 @@ void EditSchemaWidget::clipboardDataChanged()
 
 	if (allItemsAreConsts == true)
 	{
-		if (okInteger == true && constIntItems.empty() == false)
-		{
-			m_editPasteAction->setEnabled(true);
-			return;
-		}
-
-		if (okFloat == true && constFloatItems.empty() == false)
+		if ((okInteger == true && constIntItems.empty() == false) ||
+			(okFloat  == true && constFloatItems.empty() == false) ||
+			(okInteger  == true && constDiscreteItems.empty() == false))
 		{
 			m_editPasteAction->setEnabled(true);
 			return;

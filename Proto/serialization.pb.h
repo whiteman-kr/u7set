@@ -4969,6 +4969,13 @@ class SchemaItemConst : public ::google::protobuf::Message {
   inline double floatvalue() const;
   inline void set_floatvalue(double value);
 
+  // optional int32 discreteValue = 7 [default = 0];
+  inline bool has_discretevalue() const;
+  inline void clear_discretevalue();
+  static const int kDiscreteValueFieldNumber = 7;
+  inline ::google::protobuf::int32 discretevalue() const;
+  inline void set_discretevalue(::google::protobuf::int32 value);
+
   // optional int32 precision = 4 [default = 2];
   inline bool has_precision() const;
   inline void clear_precision();
@@ -4998,6 +5005,8 @@ class SchemaItemConst : public ::google::protobuf::Message {
   inline void clear_has_intvalue();
   inline void set_has_floatvalue();
   inline void clear_has_floatvalue();
+  inline void set_has_discretevalue();
+  inline void clear_has_discretevalue();
   inline void set_has_precision();
   inline void clear_has_precision();
   inline void set_has_horzalign();
@@ -5010,12 +5019,13 @@ class SchemaItemConst : public ::google::protobuf::Message {
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 intvalue_;
   double floatvalue_;
+  ::google::protobuf::int32 discretevalue_;
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 horzalign_;
   ::google::protobuf::int32 vertalign_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -16811,15 +16821,37 @@ inline void SchemaItemConst::set_floatvalue(double value) {
   floatvalue_ = value;
 }
 
-// optional int32 precision = 4 [default = 2];
-inline bool SchemaItemConst::has_precision() const {
+// optional int32 discreteValue = 7 [default = 0];
+inline bool SchemaItemConst::has_discretevalue() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void SchemaItemConst::set_has_precision() {
+inline void SchemaItemConst::set_has_discretevalue() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void SchemaItemConst::clear_has_precision() {
+inline void SchemaItemConst::clear_has_discretevalue() {
   _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemConst::clear_discretevalue() {
+  discretevalue_ = 0;
+  clear_has_discretevalue();
+}
+inline ::google::protobuf::int32 SchemaItemConst::discretevalue() const {
+  return discretevalue_;
+}
+inline void SchemaItemConst::set_discretevalue(::google::protobuf::int32 value) {
+  set_has_discretevalue();
+  discretevalue_ = value;
+}
+
+// optional int32 precision = 4 [default = 2];
+inline bool SchemaItemConst::has_precision() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemConst::set_has_precision() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemConst::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void SchemaItemConst::clear_precision() {
   precision_ = 2;
@@ -16835,13 +16867,13 @@ inline void SchemaItemConst::set_precision(::google::protobuf::int32 value) {
 
 // optional int32 horzAlign = 5 [default = 4];
 inline bool SchemaItemConst::has_horzalign() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void SchemaItemConst::set_has_horzalign() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void SchemaItemConst::clear_has_horzalign() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void SchemaItemConst::clear_horzalign() {
   horzalign_ = 4;
@@ -16857,13 +16889,13 @@ inline void SchemaItemConst::set_horzalign(::google::protobuf::int32 value) {
 
 // optional int32 vertAlign = 6 [default = 128];
 inline bool SchemaItemConst::has_vertalign() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void SchemaItemConst::set_has_vertalign() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void SchemaItemConst::clear_has_vertalign() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void SchemaItemConst::clear_vertalign() {
   vertalign_ = 128;
