@@ -11,98 +11,12 @@
 #include "../VFrame30/SchemaItemBus.h"
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
+#include "EditConnectionLine.h"
 
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
 
-class EditConnectionLine
-{
-public:
-	enum EditMode
-	{
-		AddToEnd,
-		AddToBegin,
-		EditPoint,
-		EditEdge
-	};
-
-	enum  Dirrection
-	{
-		Horz,
-		Vert
-	};
-
-	EditConnectionLine() = delete;
-	EditConnectionLine(const EditConnectionLine& that) = default;
-	EditConnectionLine(std::shared_ptr<VFrame30::PosConnectionImpl> item, EditConnectionLine::EditMode mode);
-
-	// Methods
-	//
-public:
-	void clear();
-	void clearExtensionPoints();
-
-	void addBasePoint(const QPointF& pt);
-	void addExtensionPoint(const QPointF& pt);
-
-	int moveExtensionPointsToBasePoints();
-
-	const std::list<QPointF>& basePoints() const;
-	const std::list<QPointF>& extensionPoints() const;
-	std::vector<QPointF> points() const;				// Get all points depending on m_editDirrection
-
-	QPointF lastBasePoint() const;
-	QPointF lastExtensionPoint() const;
-
-	void setPointToItem(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem) const;
-
-	void drawOutline(VFrame30::CDrawParam* drawParam) const;
-
-	EditConnectionLine::EditMode mode() const;
-	void setMode(EditConnectionLine::EditMode value);
-
-	// EditDirrection::EditPoint only
-	//
-	void modifyPoint(const QPointF& point);
-	bool addPointAndSwitchMode(const QPointF& point);		// Add point to front or back depending on currentIndex, if point in the middle the return false and do nothing
-
-	QPointF editPointCurrState() const;
-	int editPointIndex() const;
-	void setEditPointIndex(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem, int pointIndex);
-
-	// EditDirrection::EditEdge only
-	//
-	void modifyEdge(double value);
-	double editEdgetCurrState() const;
-	int editEdgeIndex() const;
-	void setEditEdgeIndex(std::shared_ptr<VFrame30::PosConnectionImpl> schemaItem, int edgeIndex);
-
-protected:
-	static Dirrection getDirrection(const QPointF& pt1, const QPointF& pt2);
-
-	// Data
-	//
-private:
-	EditMode m_mode = AddToEnd;
-	std::list<QPointF> m_basePoints;
-
-	// EditDirrection::AddToEnd/AddToBegin only
-	//
-	std::list<QPointF> m_extensionPoints;
-
-	// EditDirrection::EditPoint only
-	//
-	int m_editPointIndex = 0;							// EditDirrection::EditPoint
-	std::vector<QPointF> m_editPointInitialState;		// Initial state for EditDirrection::EditPoint mode
-	QPointF m_editPointCurrState;
-
-	// EditDirrection::EditEdge only
-	//
-	int m_editEdgeIndex = 0;							// Edge consist of two points m_basePoints[m_editEdgePointIndex]  and m_basePoints[m_editEdgePointIndex + 1]
-	std::vector<QPointF> m_editEdgeInitialState;		// Initial state for EditDirrection::EditEdge mode
-	double m_editEdgeCurrState = 0;
-};
 
 
 enum class MouseState
@@ -380,8 +294,8 @@ protected:
 
 	void movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem, EditConnectionLine* ecl, QPointF toPoint);
 
-	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
-	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;
+	void initMoveAfbsConnectionLinks();
+	void finishMoveAfbsConnectionLinks();
 
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
