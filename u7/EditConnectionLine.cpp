@@ -310,14 +310,16 @@ int EditConnectionLine::moveExtensionPointsToBasePoints()
 {
 	int addedPoints = static_cast<int>(m_extensionPoints.size());
 
-	if (m_mode == AddToEnd)
+	if (m_mode == AddToEnd ||
+		(m_mode == MoveToPin && m_moveToPin.moveLinkBack == true))
 	{
 		m_basePoints.insert(m_basePoints.end(), m_extensionPoints.begin(), m_extensionPoints.end());
 		m_extensionPoints.clear();
 		return addedPoints;
 	}
 
-	if (m_mode == AddToBegin)
+	if (m_mode == AddToBegin ||
+		(m_mode == MoveToPin && m_moveToPin.moveLinkBack == false))
 	{
 		m_basePoints.insert(m_basePoints.begin(), m_extensionPoints.begin(), m_extensionPoints.end());
 		m_extensionPoints.clear();
@@ -359,7 +361,8 @@ std::vector<QPointF> EditConnectionLine::points() const
 	std::vector<QPointF> result;
 	result.reserve(m_basePoints.size() + m_extensionPoints.size());
 
-	if (m_mode == AddToEnd)
+	if (m_mode == AddToEnd ||
+		(m_mode == MoveToPin && m_moveToPin.moveLinkBack == true))
 	{
 		result.insert(result.begin(), m_basePoints.begin(), m_basePoints.end());
 		result.insert(result.end(), m_extensionPoints.begin(), m_extensionPoints.end());
@@ -367,7 +370,8 @@ std::vector<QPointF> EditConnectionLine::points() const
 		return result;
 	}
 
-	if (m_mode == AddToBegin)
+	if (m_mode == AddToBegin ||
+		(m_mode == MoveToPin && m_moveToPin.moveLinkBack == false))
 	{
 		result.insert(result.end(), m_extensionPoints.begin(), m_extensionPoints.end());
 		result.insert(result.begin(), m_basePoints.begin(), m_basePoints.end());
@@ -504,7 +508,19 @@ void EditConnectionLine::drawOutline(VFrame30::CDrawParam* drawParam) const
 		polyline.push_back(pt);
 	}
 
-	QPen pen(Qt::darkRed);
+	QColor basePartColor = Qt::darkRed;
+	QColor extPartColor = Qt::red;
+
+	if (m_mode == MoveToPin)
+	{
+		basePartColor = Qt::darkBlue;
+		basePartColor.setAlpha(128);
+
+		extPartColor = Qt::blue;
+		extPartColor.setAlpha(128);
+	}
+
+	QPen pen(basePartColor);
 	pen.setWidthF(0);
 	p->setPen(pen);
 
@@ -532,7 +548,7 @@ void EditConnectionLine::drawOutline(VFrame30::CDrawParam* drawParam) const
 		extPolyline.push_back(m_basePoints.front());
 	}
 
-	QPen extPen(Qt::red);
+	QPen extPen(extPartColor);
 	extPen.setWidth(0);
 	p->setPen(extPen);
 

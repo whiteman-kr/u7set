@@ -294,9 +294,14 @@ protected:
 
 	void movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem, EditConnectionLine* ecl, QPointF toPoint);
 
+	// Move ConnectionLinks withFblItemPects' pins
+	//
 	void initMoveAfbsConnectionLinks();
+	void moveAfbsConnectionLinks(QPointF offset);
 	void finishMoveAfbsConnectionLinks();
 
+	// --
+	//
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 	bool loadBusses(std::vector<VFrame30::Bus>* out);

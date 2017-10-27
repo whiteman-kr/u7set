@@ -3137,9 +3137,9 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 		if (itemsForMove.empty() == false)
 		{
-			finishMoveAfbsConnectionLinks();
-
 			m_editEngine->runMoveItem(xdif, ydif, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
 		}
 	}
 	else
@@ -3838,10 +3838,7 @@ void EditSchemaWidget::mouseMove_Moving(QMouseEvent* me)
 	//
 	QPointF offset = editSchemaView()->m_editEndDocPt - editSchemaView()->m_editStartDocPt;
 
-	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
-	{
-		ecl.moveToPin_offset(activeLayer(), offset, schema()->gridSize());
-	}
+	moveAfbsConnectionLinks(offset);
 
 	// --
 	//
@@ -4741,10 +4738,6 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks()
 	//
 	// [SIGNAL1]-+---------------+-[SIGNAL2]
 	//
-
-	qDebug() << "---";
-	qDebug() << editSchemaView()->m_editConnectionLines.size();
-
 	for (std::shared_ptr<VFrame30::SchemaItemLink> cl: commonLinks)
 	{
 		size_t useCount = commonLinks.count(cl);
@@ -4775,15 +4768,48 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks()
 		}
 	}
 
-	qDebug() << editSchemaView()->m_editConnectionLines.size();
+	return;
+}
+
+void EditSchemaWidget::moveAfbsConnectionLinks(QPointF offset)
+{
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
+	{
+		ecl.moveToPin_offset(activeLayer(), offset, schema()->gridSize());
+	}
 
 	return;
 }
 
 void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 {
-//	for (EditConnectionLine)
-//	editSchemaView()->m_editConnectionLines
+	std::vector<std::vector<VFrame30::SchemaPoint>> commandPoints;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> commandItems;
+
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
+	{
+		ecl.moveExtensionPointsToBasePoints();
+		std::vector<QPointF> points = ecl.points();
+
+		std::list<VFrame30::SchemaPoint> uniquePoints(points.begin(), points.end());
+		uniquePoints.unique();
+
+		uniquePoints = EditConnectionLine::removeUnwantedPoints(uniquePoints);
+
+		std::vector<VFrame30::SchemaPoint> resultPoinst(uniquePoints.begin(), uniquePoints.end());
+
+		commandPoints.push_back(resultPoinst);
+		commandItems.push_back(ecl.moveToPin_schemaItem());
+	}
+
+	if (commandPoints.empty() == false)
+	{
+		assert(commandPoints.size() == commandItems.size());
+
+		m_editEngine->runSetPoints(commandPoints, commandItems);
+
+		editSchemaView()->m_editConnectionLines.clear();
+	}
 
 	return;
 }
