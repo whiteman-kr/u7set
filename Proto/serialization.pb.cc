@@ -959,10 +959,11 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemAfb));
   SchemaItemConst_descriptor_ = file->message_type(36);
-  static const int SchemaItemConst_offsets_[6] = {
+  static const int SchemaItemConst_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, intvalue_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, floatvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, discretevalue_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, precision_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, horzalign_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, vertalign_),
@@ -2242,193 +2243,194 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\024\n\tprecision\030\004 \001(\005:\0012\0223\n\025deprecated_afbe"
     "lement\030\005 \001(\0132\024.Proto.AfbElementXml\022\030\n\020de"
     "precated_label\030\006 \001(\t\022(\n\nafbelement\030\007 \001(\013"
-    "2\024.Proto.AfbElementXml\"\222\001\n\017SchemaItemCon"
+    "2\024.Proto.AfbElementXml\"\254\001\n\017SchemaItemCon"
     "st\022\017\n\004type\030\001 \001(\005:\0010\022\023\n\010intValue\030\002 \001(\005:\0010"
-    "\022\025\n\nfloatValue\030\003 \001(\001:\0010\022\024\n\tprecision\030\004 \001"
-    "(\005:\0012\022\024\n\thorzAlign\030\005 \001(\005:\0014\022\026\n\tvertAlign"
-    "\030\006 \001(\005:\003128\",\n\024SchemaItemConnection\022\024\n\014c"
-    "onnectionid\030\001 \001(\t\",\n\025SchemaItemTransmitt"
-    "er\022\023\n\010pinCount\030\001 \001(\005:\0011\"\213\001\n\022SchemaItemRe"
-    "ceiver\022\032\n\014showValidity\030\001 \001(\010:\004true\022\023\n\013ap"
-    "pSignalId\030\002 \001(\t\022\023\n\010dataType\030\003 \001(\005:\0010\022\024\n\t"
-    "precision\030\004 \001(\005:\0012\022\031\n\014analogFormat\030\005 \001(\005"
-    ":\003102\"P\n\rSchemaItemUfb\022\023\n\013ufbSchemaId\030\001 "
-    "\001(\t\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nufbVersion\030\003 "
-    "\001(\005:\002-1\"\026\n\024SchemaItemTerminator\"\234\006\n\017Sche"
-    "maItemValue\022\016\n\006weight\030\001 \001(\001\022\021\n\tlineColor"
-    "\030\002 \001(\r\022\021\n\tfillColor\030\003 \001(\r\022\022\n\ntextAnalog\030"
-    "\004 \001(\t\022\021\n\ttextColor\030\005 \001(\r\022\036\n\004font\030\006 \001(\0132\020"
-    ".Proto.FontParam\022\014\n\004fill\030\007 \001(\010\022\026\n\010drawre"
-    "ct\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t \001(\005:\0014\022\026\n\t"
-    "vertAlign\030\n \001(\005:\003128\022\020\n\010signalId\030\013 \001(\t\022\027"
-    "\n\014signalSource\030\014 \001(\005:\0010\022\025\n\tprecision\030\r \001"
-    "(\005:\002-1\022\025\n\rtextDiscrete0\030\016 \001(\t\022\025\n\rtextDis"
-    "crete1\030\017 \001(\t\022\024\n\014textNonValid\030\020 \001(\t\022\032\n\022fi"
-    "llColorNonValid0\030\036 \001(\r\022\032\n\022fillColorNonVa"
-    "lid1\030\037 \001(\r\022\032\n\022textColorNonValid0\030  \001(\r\022\032"
-    "\n\022textColorNonValid1\030! \001(\r\022\030\n\020fillColorA"
-    "nalog0\030* \001(\r\022\030\n\020fillColorAnalog1\030+ \001(\r\022\030"
-    "\n\020textColorAnalog0\030, \001(\r\022\030\n\020textColorAna"
-    "log1\030- \001(\r\022\032\n\022fillColorDiscrYes0\030. \001(\r\022\032"
-    "\n\022fillColorDiscrYes1\030/ \001(\r\022\032\n\022textColorD"
-    "iscrYes0\0300 \001(\r\022\032\n\022textColorDiscrYes1\0301 \001"
-    "(\r\022\031\n\021fillColorDiscrNo0\0302 \001(\r\022\031\n\021fillCol"
-    "orDiscrNo1\0303 \001(\r\022\031\n\021textColorDiscrNo0\0304 "
-    "\001(\r\022\031\n\021textColorDiscrNo1\0305 \001(\r\"P\n\rSchema"
-    "ItemBus\022\021\n\tbusTypeId\030\002 \001(\t\022\023\n\013busTypeHas"
-    "h\030\003 \001(\006\022\027\n\003bus\030\005 \001(\0132\n.Proto.Bus\"\027\n\025Sche"
-    "maItemBusComposer\"=\n\026SchemaItemBusExtrac"
-    "tor\022#\n\nproperties\030\002 \003(\0132\017.Proto.Property"
-    "\"8\n\021SchemaItemControl\022\022\n\nstyleSheet\030\001 \001("
-    "\t\022\017\n\007toolTip\030\002 \001(\t\"\220\002\n\024SchemaItemPushBut"
-    "ton\022\014\n\004text\030\001 \001(\t\022\021\n\tcheckable\030\002 \001(\010\022\026\n\016"
-    "checkedDefault\030\003 \001(\010\022\022\n\nautoRepeat\030\004 \001(\010"
-    "\022\027\n\017autoRepeatDelay\030\005 \001(\005\022\032\n\022autoRepeatI"
-    "nterval\030\006 \001(\005\022\031\n\021scriptAfterCreate\030\025 \001(\t"
-    "\022\025\n\rscriptClicked\030\026 \001(\t\022\025\n\rscriptPressed"
-    "\030\027 \001(\t\022\026\n\016scriptReleased\030\030 \001(\t\022\025\n\rscript"
-    "Toggled\030\031 \001(\t\"\370\001\n\022SchemaItemLineEdit\022\014\n\004"
-    "text\030\001 \001(\t\022\021\n\thorzAlign\030\002 \001(\005\022\021\n\tvertAli"
-    "gn\030\003 \001(\005\022\021\n\tmaxLength\030\004 \001(\005\022\027\n\017placehold"
-    "erText\030\005 \001(\t\022\020\n\010readOnly\030\006 \001(\010\022\031\n\021script"
-    "AfterCreate\030\025 \001(\t\022\035\n\025scriptEditingFinish"
-    "ed\030\026 \001(\t\022\033\n\023scriptReturnPressed\030\027 \001(\t\022\031\n"
-    "\021scriptTextChanged\030\030 \001(\t\"\201\006\n\014DeviceObjec"
-    "t\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n\013equipmen"
-    "tId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002"
-    "(\0132\016.Proto.wstring\022(\n\020childRestriction\030\004"
-    " \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001(\005:\0010\022\""
-    "\n\032specific_properties_struct\030\006 \001(\t\022#\n\npr"
-    "operties\030\007 \003(\0132\017.Proto.Property\022\025\n\006prese"
-    "t\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005fals"
-    "e\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstring\022%\n"
-    "\020presetObjectUuid\030# \001(\0132\013.Proto.Uuid\022\031\n\016"
-    "childCountHint\030$ \001(\005:\0010\022\037\n\004Root\030d \001(\0132\021."
-    "Proto.DeviceRoot\022#\n\006System\030e \001(\0132\023.Proto"
-    ".DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.Devi"
-    "ceRack\022%\n\007Chassis\030g \001(\0132\024.Proto.DeviceCh"
-    "assis\022#\n\006Module\030h \001(\0132\023.Proto.DeviceModu"
-    "le\022+\n\nController\030i \001(\0132\027.Proto.DeviceCon"
-    "troller\022#\n\006Signal\030j \001(\0132\023.Proto.DeviceSi"
-    "gnal\022\'\n\013Workstation\030k \001(\0132\022.Proto.Workst"
-    "ation\022!\n\010Software\030l \001(\0132\017.Proto.Software"
-    "\022\"\n\010children\030\310\001 \003(\0132\017.Proto.Envelope\"\014\n\n"
-    "DeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRack"
-    "\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"\223\001\n\014D"
-    "eviceModule\022\027\n\014typeObsolete\030\001 \001(\005:\0010\022\033\n\023"
-    "configurationScript\030\002 \001(\t\022\022\n\nmoduleType\030"
-    "\003 \001(\005\022\032\n\022rawDataDescription\030\004 \001(\t\022\035\n\022cus"
-    "tomModuleFamily\030\005 \001(\005:\0010\"\022\n\020DeviceContro"
-    "ller\"\207\003\n\014DeviceSignal\022\027\n\014obsoletetype\030\001 "
-    "\001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006format\030\003"
-    " \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\026\n\013valueOffset\030"
-    "\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t "
-    "\001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\022\025\n\nmemoryAre"
-    "a\030\013 \001(\005:\0010\022\032\n\017appSignalLowAdc\030\014 \001(\005:\0010\022\037"
-    "\n\020appSignalHighAdc\030\r \001(\005:\00565535\022\037\n\024appSi"
-    "gnalLowEngUnits\030\016 \001(\001:\0010\022\"\n\025appSignalHig"
-    "hEngUnits\030\017 \001(\001:\003100\022\036\n\023appSignalDataFor"
-    "mat\030\020 \001(\005:\0012\022\030\n\020validitySignalId\030\024 \001(\t\"\036"
-    "\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Softwa"
-    "re\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfigurati"
-    "on\022\032\n\022struct_description\030\001 \001(\t\022/\n\006values"
-    "\030\002 \003(\0132\037.Proto.ModuleConfigurationValue\022"
-    "\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigurationVa"
-    "lue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Prop"
-    "erty\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0\n\tAdd"
-    "ress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:"
-    "\002-1\"&\n\004Unit\022\r\n\002id\030\001 \002(\005:\0010\022\017\n\007caption\030\002 "
-    "\002(\t\"$\n\007UnitSet\022\031\n\004unit\030\001 \003(\0132\013.Proto.Uni"
-    "t\"\312\n\n\tAppSignal\022\023\n\013appSignalID\030\001 \001(\t\022\031\n\021"
-    "customAppSignalID\030\002 \001(\t\022\017\n\007caption\030\003 \001(\t"
-    "\022\023\n\013equipmentID\030\004 \001(\t\022\021\n\tbusTypeID\030\005 \001(\t"
-    "\022\022\n\007channel\030\006 \001(\005:\0010\022\025\n\nsignalType\030\020 \001(\005"
-    ":\0011\022\024\n\tinOutType\030\021 \001(\005:\0012\022\023\n\010dataSize\030\025 "
-    "\001(\005:\0010\022\024\n\tbyteOrder\030\026 \001(\005:\0011\022\035\n\022analogSi"
-    "gnalFormat\030\032 \001(\005:\0011\022\014\n\004unit\030\033 \001(\t\022\021\n\006low"
-    "ADC\030\034 \001(\005:\0010\022\022\n\007highADC\030\035 \001(\005:\0010\022\036\n\023lowE"
-    "ngeneeringUnits\030\036 \001(\001:\0010\022\037\n\024highEngeneer"
-    "ingUnits\030\037 \001(\001:\0010\022\030\n\rlowValidRange\030  \001(\001"
-    ":\0010\022\031\n\016highValidRange\030! \001(\001:\0010\022\030\n\rfilter"
-    "ingTime\030\" \001(\001:\0010\022\032\n\017spreadTolerance\030# \001("
-    "\001:\0010\022\033\n\020electricLowLimit\0303 \001(\001:\0010\022\034\n\021ele"
-    "ctricHighLimit\0304 \001(\001:\0010\022\027\n\014electricUnit\030"
-    "5 \001(\005:\0011\022\025\n\nsensorType\0306 \001(\005:\0010\022\025\n\noutpu"
-    "tMode\0307 \001(\005:\0010\022\033\n\014enableTuning\030G \001(\010:\005fa"
-    "lse\022\035\n\022tuningDefaultValue\030H \001(\002:\0010\022\031\n\016tu"
-    "ningLowBound\030I \001(\002:\0010\022\032\n\017tuningHighBound"
-    "\030J \001(\002:\0010\022\026\n\007acquire\030Q \001(\010:\005false\022\030\n\rdec"
-    "imalPlaces\030R \001(\005:\0012\022\031\n\016coarseAperture\030S "
-    "\001(\001:\0011\022\031\n\014fineAperture\030T \001(\001:\0030.5\022\037\n\020ada"
-    "ptiveAperture\030U \001(\010:\005false\022\016\n\002ID\030e \001(\005:\002"
-    "-1\022\031\n\rsignalGroupID\030f \001(\005:\002-1\022\034\n\020signalI"
-    "nstanceID\030g \001(\005:\002-1\022\027\n\013changesetID\030h \001(\005"
-    ":\002-1\022\031\n\ncheckedOut\030i \001(\010:\005false\022\022\n\006userI"
-    "D\030j \001(\005:\002-1\022\022\n\007created\030k \001(\003:\0010\022\026\n\007delet"
-    "ed\030l \001(\010:\005false\022\032\n\017instanceCreated\030m \001(\003"
-    ":\0010\022\031\n\016instanceAction\030n \001(\005:\0010\022\017\n\004hash\030t"
-    " \001(\004:\0010\022#\n\tioBufAddr\030u \001(\0132\020.Proto.Addre"
-    "ss16\022$\n\ntuningAddr\030v \001(\0132\020.Proto.Address"
-    "16\022!\n\007ualAddr\030w \001(\0132\020.Proto.Address16\022$\n"
-    "\nregBufAddr\030x \001(\0132\020.Proto.Address16\022&\n\014r"
-    "egValueAddr\030y \001(\0132\020.Proto.Address16\022)\n\017r"
-    "egValidityAddr\030z \001(\0132\020.Proto.Address16\"3"
-    "\n\014AppSignalSet\022#\n\tappSignal\030\001 \003(\0132\020.Prot"
-    "o.AppSignal\"\237\001\n\016AppSignalState\022\017\n\004hash\030\001"
-    " \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r"
-    ":\0010\022\025\n\nsystemTime\030\004 \001(\020:\0010\022\024\n\tlocalTime\030"
-    "\005 \001(\020:\0010\022\024\n\tplantTime\030\006 \001(\020:\0010\022\025\n\tarchiv"
-    "eId\030\007 \001(\020:\002-1\"\224\006\n\nConnection\022\026\n\014Connecti"
-    "onID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001(\t:\000"
-    "\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port1Raw"
-    "DataDescription\030\005 \001(\t:\000\022!\n\027Port2RawDataD"
-    "escription\030\006 \001(\t:\000\022\035\n\016ManualSettings\030\013 \001"
-    "(\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005false\022"
-    "\036\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036\n\023Port1"
-    "TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQ"
-    "uantity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQuanti"
-    "ty\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddress\030\021 \001"
-    "(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003479"
-    "\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:\003479\022\031\n\004u"
-    "uid\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1EnableSer"
-    "ial\030\025 \001(\010:\005false\022\032\n\017Port1SerialMode\030\026 \001("
-    "\005:\0010\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005false\022 "
-    "\n\021Port2EnableSerial\030\030 \001(\010:\005false\022\032\n\017Port"
-    "2SerialMode\030\031 \001(\005:\0010\022 \n\021Port2EnableDuple"
-    "x\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014Obsol"
-    "eteMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerialMode\030\007"
-    " \001(\005:\0010\022#\n\024ObsoleteEnableDuplex\030\n \001(\010:\005f"
-    "alse\"@\n\020SchemaDetailsSet\022,\n\016schemasDetai"
-    "ls\030\002 \003(\0132\024.Proto.SchemaDetails\"\342\001\n\rSchem"
-    "aDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schemaId\030\004 "
-    "\001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfromBuil"
-    "d\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDescri"
-    "ptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006la"
-    "bels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005guids"
-    "\030\027 \003(\0132\013.Proto.Uuid\"A\n\nArchSignal\022\014\n\004has"
-    "h\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalID"
-    "\030\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSignals\030\001 \003"
-    "(\0132\021.Proto.ArchSignal\"\303\003\n\tBusSignal\022\020\n\010s"
-    "ignalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003"
-    " \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001("
-    "\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseApertur"
-    "e\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037\n"
-    "\020adaptiveAperture\030\016 \001(\010:\005false\022\023\n\013inbusO"
-    "ffset\030  \001(\005\022\032\n\022inbusDiscreteBitNo\030( \001(\005\022"
-    "\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021inbusAnalogF"
-    "ormat\0303 \001(\005\022\034\n\024inbusAnalogByteOrder\0304 \001("
-    "\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022\032\n\022busAnalo"
-    "gHighLimit\0306 \001(\001\022\033\n\023inbusAnalogLowLimit\030"
-    "7 \001(\001\022\034\n\024inbusAnalogHighLimit\0308 \001(\001\"\226\001\n\003"
-    "Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tbusTyp"
-    "eId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Proto.Bu"
-    "sSignal\022!\n\023autoSignalPlacement\030\n \001(\010:\004tr"
-    "ue\022\030\n\rmanualBusSize\030\013 \001(\005:\0010*3\n\nSchemaUn"
-    "it\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020"
-    "\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006"
-    "Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n"
-    "\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsigned"
-    "Int\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 13551);
+    "\022\025\n\nfloatValue\030\003 \001(\001:\0010\022\030\n\rdiscreteValue"
+    "\030\007 \001(\005:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\022\024\n\thorzA"
+    "lign\030\005 \001(\005:\0014\022\026\n\tvertAlign\030\006 \001(\005:\003128\",\n"
+    "\024SchemaItemConnection\022\024\n\014connectionid\030\001 "
+    "\001(\t\",\n\025SchemaItemTransmitter\022\023\n\010pinCount"
+    "\030\001 \001(\005:\0011\"\213\001\n\022SchemaItemReceiver\022\032\n\014show"
+    "Validity\030\001 \001(\010:\004true\022\023\n\013appSignalId\030\002 \001("
+    "\t\022\023\n\010dataType\030\003 \001(\005:\0010\022\024\n\tprecision\030\004 \001("
+    "\005:\0012\022\031\n\014analogFormat\030\005 \001(\005:\003102\"P\n\rSchem"
+    "aItemUfb\022\023\n\013ufbSchemaId\030\001 \001(\t\022\022\n\nufbCapt"
+    "ion\030\002 \001(\t\022\026\n\nufbVersion\030\003 \001(\005:\002-1\"\026\n\024Sch"
+    "emaItemTerminator\"\234\006\n\017SchemaItemValue\022\016\n"
+    "\006weight\030\001 \001(\001\022\021\n\tlineColor\030\002 \001(\r\022\021\n\tfill"
+    "Color\030\003 \001(\r\022\022\n\ntextAnalog\030\004 \001(\t\022\021\n\ttextC"
+    "olor\030\005 \001(\r\022\036\n\004font\030\006 \001(\0132\020.Proto.FontPar"
+    "am\022\014\n\004fill\030\007 \001(\010\022\026\n\010drawrect\030\010 \001(\010:\004true"
+    "\022\024\n\thorzAlign\030\t \001(\005:\0014\022\026\n\tvertAlign\030\n \001("
+    "\005:\003128\022\020\n\010signalId\030\013 \001(\t\022\027\n\014signalSource"
+    "\030\014 \001(\005:\0010\022\025\n\tprecision\030\r \001(\005:\002-1\022\025\n\rtext"
+    "Discrete0\030\016 \001(\t\022\025\n\rtextDiscrete1\030\017 \001(\t\022\024"
+    "\n\014textNonValid\030\020 \001(\t\022\032\n\022fillColorNonVali"
+    "d0\030\036 \001(\r\022\032\n\022fillColorNonValid1\030\037 \001(\r\022\032\n\022"
+    "textColorNonValid0\030  \001(\r\022\032\n\022textColorNon"
+    "Valid1\030! \001(\r\022\030\n\020fillColorAnalog0\030* \001(\r\022\030"
+    "\n\020fillColorAnalog1\030+ \001(\r\022\030\n\020textColorAna"
+    "log0\030, \001(\r\022\030\n\020textColorAnalog1\030- \001(\r\022\032\n\022"
+    "fillColorDiscrYes0\030. \001(\r\022\032\n\022fillColorDis"
+    "crYes1\030/ \001(\r\022\032\n\022textColorDiscrYes0\0300 \001(\r"
+    "\022\032\n\022textColorDiscrYes1\0301 \001(\r\022\031\n\021fillColo"
+    "rDiscrNo0\0302 \001(\r\022\031\n\021fillColorDiscrNo1\0303 \001"
+    "(\r\022\031\n\021textColorDiscrNo0\0304 \001(\r\022\031\n\021textCol"
+    "orDiscrNo1\0305 \001(\r\"P\n\rSchemaItemBus\022\021\n\tbus"
+    "TypeId\030\002 \001(\t\022\023\n\013busTypeHash\030\003 \001(\006\022\027\n\003bus"
+    "\030\005 \001(\0132\n.Proto.Bus\"\027\n\025SchemaItemBusCompo"
+    "ser\"=\n\026SchemaItemBusExtractor\022#\n\npropert"
+    "ies\030\002 \003(\0132\017.Proto.Property\"8\n\021SchemaItem"
+    "Control\022\022\n\nstyleSheet\030\001 \001(\t\022\017\n\007toolTip\030\002"
+    " \001(\t\"\220\002\n\024SchemaItemPushButton\022\014\n\004text\030\001 "
+    "\001(\t\022\021\n\tcheckable\030\002 \001(\010\022\026\n\016checkedDefault"
+    "\030\003 \001(\010\022\022\n\nautoRepeat\030\004 \001(\010\022\027\n\017autoRepeat"
+    "Delay\030\005 \001(\005\022\032\n\022autoRepeatInterval\030\006 \001(\005\022"
+    "\031\n\021scriptAfterCreate\030\025 \001(\t\022\025\n\rscriptClic"
+    "ked\030\026 \001(\t\022\025\n\rscriptPressed\030\027 \001(\t\022\026\n\016scri"
+    "ptReleased\030\030 \001(\t\022\025\n\rscriptToggled\030\031 \001(\t\""
+    "\370\001\n\022SchemaItemLineEdit\022\014\n\004text\030\001 \001(\t\022\021\n\t"
+    "horzAlign\030\002 \001(\005\022\021\n\tvertAlign\030\003 \001(\005\022\021\n\tma"
+    "xLength\030\004 \001(\005\022\027\n\017placeholderText\030\005 \001(\t\022\020"
+    "\n\010readOnly\030\006 \001(\010\022\031\n\021scriptAfterCreate\030\025 "
+    "\001(\t\022\035\n\025scriptEditingFinished\030\026 \001(\t\022\033\n\023sc"
+    "riptReturnPressed\030\027 \001(\t\022\031\n\021scriptTextCha"
+    "nged\030\030 \001(\t\"\201\006\n\014DeviceObject\022\031\n\004uuid\030\001 \002("
+    "\0132\013.Proto.Uuid\022#\n\013equipmentId\030\002 \002(\0132\016.Pr"
+    "oto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wst"
+    "ring\022(\n\020childRestriction\030\004 \001(\0132\016.Proto.w"
+    "string\022\020\n\005place\030\005 \001(\005:\0010\022\"\n\032specific_pro"
+    "perties_struct\030\006 \001(\t\022#\n\nproperties\030\007 \003(\013"
+    "2\017.Proto.Property\022\025\n\006preset\030  \001(\010:\005false"
+    "\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n\npresetNam"
+    "e\030\" \001(\0132\016.Proto.wstring\022%\n\020presetObjectU"
+    "uid\030# \001(\0132\013.Proto.Uuid\022\031\n\016childCountHint"
+    "\030$ \001(\005:\0010\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRo"
+    "ot\022#\n\006System\030e \001(\0132\023.Proto.DeviceSystem\022"
+    "\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chas"
+    "sis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006Modul"
+    "e\030h \001(\0132\023.Proto.DeviceModule\022+\n\nControll"
+    "er\030i \001(\0132\027.Proto.DeviceController\022#\n\006Sig"
+    "nal\030j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Workst"
+    "ation\030k \001(\0132\022.Proto.Workstation\022!\n\010Softw"
+    "are\030l \001(\0132\017.Proto.Software\022\"\n\010children\030\310"
+    "\001 \003(\0132\017.Proto.Envelope\"\014\n\nDeviceRoot\"\016\n\014"
+    "DeviceSystem\"\014\n\nDeviceRack\" \n\rDeviceChas"
+    "sis\022\017\n\004type\030\001 \001(\005:\0010\"\223\001\n\014DeviceModule\022\027\n"
+    "\014typeObsolete\030\001 \001(\005:\0010\022\033\n\023configurationS"
+    "cript\030\002 \001(\t\022\022\n\nmoduleType\030\003 \001(\005\022\032\n\022rawDa"
+    "taDescription\030\004 \001(\t\022\035\n\022customModuleFamil"
+    "y\030\005 \001(\005:\0010\"\022\n\020DeviceController\"\207\003\n\014Devic"
+    "eSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyte"
+    "Order\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004siz"
+    "e\030\004 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010va"
+    "lueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010func"
+    "tion\030\n \001(\005:\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017"
+    "appSignalLowAdc\030\014 \001(\005:\0010\022\037\n\020appSignalHig"
+    "hAdc\030\r \001(\005:\00565535\022\037\n\024appSignalLowEngUnit"
+    "s\030\016 \001(\001:\0010\022\"\n\025appSignalHighEngUnits\030\017 \001("
+    "\001:\003100\022\036\n\023appSignalDataFormat\030\020 \001(\005:\0012\022\030"
+    "\n\020validitySignalId\030\024 \001(\t\"\036\n\013Workstation\022"
+    "\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001"
+    "(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struct_d"
+    "escription\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto"
+    ".ModuleConfigurationValue\022\016\n\004name\030\003 \001(\t:"
+    "\000\"7\n\030ModuleConfigurationValue\022\014\n\004name\030\001 "
+    "\002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001"
+    " \002(\t\022\r\n\005value\030\002 \002(\t\"0\n\tAddress16\022\022\n\006offs"
+    "et\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"&\n\004Unit\022\r\n"
+    "\002id\030\001 \002(\005:\0010\022\017\n\007caption\030\002 \002(\t\"$\n\007UnitSet"
+    "\022\031\n\004unit\030\001 \003(\0132\013.Proto.Unit\"\312\n\n\tAppSigna"
+    "l\022\023\n\013appSignalID\030\001 \001(\t\022\031\n\021customAppSigna"
+    "lID\030\002 \001(\t\022\017\n\007caption\030\003 \001(\t\022\023\n\013equipmentI"
+    "D\030\004 \001(\t\022\021\n\tbusTypeID\030\005 \001(\t\022\022\n\007channel\030\006 "
+    "\001(\005:\0010\022\025\n\nsignalType\030\020 \001(\005:\0011\022\024\n\tinOutTy"
+    "pe\030\021 \001(\005:\0012\022\023\n\010dataSize\030\025 \001(\005:\0010\022\024\n\tbyte"
+    "Order\030\026 \001(\005:\0011\022\035\n\022analogSignalFormat\030\032 \001"
+    "(\005:\0011\022\014\n\004unit\030\033 \001(\t\022\021\n\006lowADC\030\034 \001(\005:\0010\022\022"
+    "\n\007highADC\030\035 \001(\005:\0010\022\036\n\023lowEngeneeringUnit"
+    "s\030\036 \001(\001:\0010\022\037\n\024highEngeneeringUnits\030\037 \001(\001"
+    ":\0010\022\030\n\rlowValidRange\030  \001(\001:\0010\022\031\n\016highVal"
+    "idRange\030! \001(\001:\0010\022\030\n\rfilteringTime\030\" \001(\001:"
+    "\0010\022\032\n\017spreadTolerance\030# \001(\001:\0010\022\033\n\020electr"
+    "icLowLimit\0303 \001(\001:\0010\022\034\n\021electricHighLimit"
+    "\0304 \001(\001:\0010\022\027\n\014electricUnit\0305 \001(\005:\0011\022\025\n\nse"
+    "nsorType\0306 \001(\005:\0010\022\025\n\noutputMode\0307 \001(\005:\0010"
+    "\022\033\n\014enableTuning\030G \001(\010:\005false\022\035\n\022tuningD"
+    "efaultValue\030H \001(\002:\0010\022\031\n\016tuningLowBound\030I"
+    " \001(\002:\0010\022\032\n\017tuningHighBound\030J \001(\002:\0010\022\026\n\007a"
+    "cquire\030Q \001(\010:\005false\022\030\n\rdecimalPlaces\030R \001"
+    "(\005:\0012\022\031\n\016coarseAperture\030S \001(\001:\0011\022\031\n\014fine"
+    "Aperture\030T \001(\001:\0030.5\022\037\n\020adaptiveAperture\030"
+    "U \001(\010:\005false\022\016\n\002ID\030e \001(\005:\002-1\022\031\n\rsignalGr"
+    "oupID\030f \001(\005:\002-1\022\034\n\020signalInstanceID\030g \001("
+    "\005:\002-1\022\027\n\013changesetID\030h \001(\005:\002-1\022\031\n\nchecke"
+    "dOut\030i \001(\010:\005false\022\022\n\006userID\030j \001(\005:\002-1\022\022\n"
+    "\007created\030k \001(\003:\0010\022\026\n\007deleted\030l \001(\010:\005fals"
+    "e\022\032\n\017instanceCreated\030m \001(\003:\0010\022\031\n\016instanc"
+    "eAction\030n \001(\005:\0010\022\017\n\004hash\030t \001(\004:\0010\022#\n\tioB"
+    "ufAddr\030u \001(\0132\020.Proto.Address16\022$\n\ntuning"
+    "Addr\030v \001(\0132\020.Proto.Address16\022!\n\007ualAddr\030"
+    "w \001(\0132\020.Proto.Address16\022$\n\nregBufAddr\030x "
+    "\001(\0132\020.Proto.Address16\022&\n\014regValueAddr\030y "
+    "\001(\0132\020.Proto.Address16\022)\n\017regValidityAddr"
+    "\030z \001(\0132\020.Proto.Address16\"3\n\014AppSignalSet"
+    "\022#\n\tappSignal\030\001 \003(\0132\020.Proto.AppSignal\"\237\001"
+    "\n\016AppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005val"
+    "ue\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystemT"
+    "ime\030\004 \001(\020:\0010\022\024\n\tlocalTime\030\005 \001(\020:\0010\022\024\n\tpl"
+    "antTime\030\006 \001(\020:\0010\022\025\n\tarchiveId\030\007 \001(\020:\002-1\""
+    "\224\006\n\nConnection\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032"
+    "\n\020Port1EquipmentID\030\003 \001(\t:\000\022\032\n\020Port2Equip"
+    "mentID\030\004 \001(\t:\000\022!\n\027Port1RawDataDescriptio"
+    "n\030\005 \001(\t:\000\022!\n\027Port2RawDataDescription\030\006 \001"
+    "(\t:\000\022\035\n\016ManualSettings\030\013 \001(\010:\005false\022\034\n\rD"
+    "isableDataID\030\014 \001(\010:\005false\022\036\n\017GenerateVHD"
+    "File\030\r \001(\010:\005false\022\036\n\023Port1TxStartAddress"
+    "\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuantity\030\017 \001(\005:"
+    "\003479\022!\n\024Port1RxWordsQuantity\030\020 \001(\005:\003479\022"
+    "\036\n\023Port2TxStartAddress\030\021 \001(\005:\0010\022!\n\024Port2"
+    "TxWordsQuantity\030\022 \001(\005:\003479\022!\n\024Port2RxWor"
+    "dsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Pr"
+    "oto.Uuid\022 \n\021Port1EnableSerial\030\025 \001(\010:\005fal"
+    "se\022\032\n\017Port1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1E"
+    "nableDuplex\030\027 \001(\010:\005false\022 \n\021Port2EnableS"
+    "erial\030\030 \001(\010:\005false\022\032\n\017Port2SerialMode\030\031 "
+    "\001(\005:\0010\022 \n\021Port2EnableDuplex\030\032 \001(\010:\005false"
+    "\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005:"
+    "\0010\022\035\n\022ObsoleteSerialMode\030\007 \001(\005:\0010\022#\n\024Obs"
+    "oleteEnableDuplex\030\n \001(\010:\005false\"@\n\020Schema"
+    "DetailsSet\022,\n\016schemasDetails\030\002 \003(\0132\024.Pro"
+    "to.SchemaDetails\"\342\001\n\rSchemaDetails\022\017\n\007ve"
+    "rsion\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007caption"
+    "\030\005 \001(\t\022\031\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013equ"
+    "ipmentId\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 \001("
+    "\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013"
+    "connections\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto"
+    ".Uuid\"A\n\nArchSignal\022\014\n\004hash\030\001 \002(\004\022\020\n\010isA"
+    "nalog\030\002 \002(\010\022\023\n\013appSignalID\030\003 \002(\t\"5\n\013Arch"
+    "Signals\022&\n\013archSignals\030\001 \003(\0132\021.Proto.Arc"
+    "hSignal\"\303\003\n\tBusSignal\022\020\n\010signalId\030\001 \001(\t\022"
+    "\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005units\030"
+    "\004 \001(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tprecision"
+    "\030\013 \001(\005:\0012\022\031\n\016coarseAperture\030\014 \001(\001:\0011\022\031\n\014"
+    "fineAperture\030\r \001(\001:\0030.5\022\037\n\020adaptiveApert"
+    "ure\030\016 \001(\010:\005false\022\023\n\013inbusOffset\030  \001(\005\022\032\n"
+    "\022inbusDiscreteBitNo\030( \001(\005\022\027\n\017inbusAnalog"
+    "Size\0302 \001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n"
+    "\024inbusAnalogByteOrder\0304 \001(\005\022\031\n\021busAnalog"
+    "LowLimit\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001"
+    "(\001\022\033\n\023inbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbus"
+    "AnalogHighLimit\0308 \001(\001\"\226\001\n\003Bus\022\031\n\004uuid\030\001 "
+    "\001(\0132\013.Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nb"
+    "usSignals\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023aut"
+    "oSignalPlacement\030\n \001(\010:\004true\022\030\n\rmanualBu"
+    "sSize\030\013 \001(\005:\0010*3\n\nSchemaUnit\022\013\n\007Display\020"
+    "\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connectio"
+    "nDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFb"
+    "lSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n"
+    "\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSigne"
+    "dInt\020\001\022\t\n\005Float\020\002", 13577);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -16843,6 +16845,7 @@ void SchemaItemAfb::Swap(SchemaItemAfb* other) {
 const int SchemaItemConst::kTypeFieldNumber;
 const int SchemaItemConst::kIntValueFieldNumber;
 const int SchemaItemConst::kFloatValueFieldNumber;
+const int SchemaItemConst::kDiscreteValueFieldNumber;
 const int SchemaItemConst::kPrecisionFieldNumber;
 const int SchemaItemConst::kHorzAlignFieldNumber;
 const int SchemaItemConst::kVertAlignFieldNumber;
@@ -16867,6 +16870,7 @@ void SchemaItemConst::SharedCtor() {
   type_ = 0;
   intvalue_ = 0;
   floatvalue_ = 0;
+  discretevalue_ = 0;
   precision_ = 2;
   horzalign_ = 4;
   vertalign_ = 128;
@@ -16908,6 +16912,7 @@ void SchemaItemConst::Clear() {
     type_ = 0;
     intvalue_ = 0;
     floatvalue_ = 0;
+    discretevalue_ = 0;
     precision_ = 2;
     horzalign_ = 4;
     vertalign_ = 128;
@@ -17013,6 +17018,22 @@ bool SchemaItemConst::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(56)) goto parse_discreteValue;
+        break;
+      }
+
+      // optional int32 discreteValue = 7 [default = 0];
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_discreteValue:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &discretevalue_)));
+          set_has_discretevalue();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -17065,6 +17086,11 @@ void SchemaItemConst::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->vertalign(), output);
   }
 
+  // optional int32 discreteValue = 7 [default = 0];
+  if (has_discretevalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->discretevalue(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -17103,6 +17129,11 @@ void SchemaItemConst::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->vertalign(), target);
   }
 
+  // optional int32 discreteValue = 7 [default = 0];
+  if (has_discretevalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->discretevalue(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -17131,6 +17162,13 @@ int SchemaItemConst::ByteSize() const {
     // optional double floatValue = 3 [default = 0];
     if (has_floatvalue()) {
       total_size += 1 + 8;
+    }
+
+    // optional int32 discreteValue = 7 [default = 0];
+    if (has_discretevalue()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->discretevalue());
     }
 
     // optional int32 precision = 4 [default = 2];
@@ -17190,6 +17228,9 @@ void SchemaItemConst::MergeFrom(const SchemaItemConst& from) {
     if (from.has_floatvalue()) {
       set_floatvalue(from.floatvalue());
     }
+    if (from.has_discretevalue()) {
+      set_discretevalue(from.discretevalue());
+    }
     if (from.has_precision()) {
       set_precision(from.precision());
     }
@@ -17225,6 +17266,7 @@ void SchemaItemConst::Swap(SchemaItemConst* other) {
     std::swap(type_, other->type_);
     std::swap(intvalue_, other->intvalue_);
     std::swap(floatvalue_, other->floatvalue_);
+    std::swap(discretevalue_, other->discretevalue_);
     std::swap(precision_, other->precision_);
     std::swap(horzalign_, other->horzalign_);
     std::swap(vertalign_, other->vertalign_);

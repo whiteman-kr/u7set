@@ -19,6 +19,7 @@ namespace VFrame30
 	const QString PropertyNames::type("Type");
 	const QString PropertyNames::valueInteger("ValueInteger");
 	const QString PropertyNames::valueFloat("ValueFloat");
+	const QString PropertyNames::valueDiscrete("ValueDiscrete");
 	const QString PropertyNames::precision("Precision");
 	const QString PropertyNames::precisionPropText("Number of decimals after period, -1: take value from the signal description");
 	const QString PropertyNames::analogFormat("AnalogFormat");
