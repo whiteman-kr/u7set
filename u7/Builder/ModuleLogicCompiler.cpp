@@ -1020,19 +1020,17 @@ namespace Builder
 			return false;
 		}
 
-		//
+		QString connectionID = ualReceiver->connectionId();
 
-		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 
-				if (connection == nullptr)
-				{
-					// Receiver is linked to unknown opto connection '%1'.
-					//
-					m_log->errALC5025(receiver.connectionId(), receiver.guid(), appSignal.schemaID());
-					return false;
-				}
-
-		//
+		if (connection == nullptr)
+		{
+			// Receiver is linked to unknown opto connection '%1'.
+			//
+			m_log->errALC5025(connectionID, ualReceiver->guid(), ualItem->schemaID());
+			return false;
+		}
 
 		const std::vector<LogicPin>& outputs = ualItem->outputs();
 
@@ -1094,7 +1092,7 @@ namespace Builder
 				return nullptr;
 			}
 
-			ualSignal = m_ualSignals.createOptoSignal(ualReceiver->connectionId(), s, m_lm->equipmentIdTemplate(), signalPin.guid());
+			ualSignal = m_ualSignals.createOptoSignal(connectionID, s, m_lm->equipmentIdTemplate(), signalPin.guid());
 
 			if (ualSignal == nullptr)
 			{
@@ -4486,8 +4484,7 @@ namespace Builder
 
 			QString connectionID = ualSignal->optoConnectionID();
 
-			std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
-
+			std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 		}
 
 		/*
