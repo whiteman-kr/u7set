@@ -2254,12 +2254,14 @@ void EquipmentView::addAppSignal()
 		return;
 	}
 
+	CreatingSignalOptions options;
 	SignalsTabPage::createSignal(db(),
 								 equipmentIdList,
 								 counter,
 								 module->equipmentId(),
 								 module->equipmentId(),
 								 "",
+								 options,
 								 this);
 	return;
 }

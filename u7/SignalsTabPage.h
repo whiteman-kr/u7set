@@ -37,6 +37,16 @@ const int	FI_ANY = 0,
 			FI_CAPTION = 4;
 
 
+struct CreatingSignalOptions
+{
+	QStringList SelectedEquipmentIdList;
+	QStringList AppSignalIdList;
+	QStringList CustomSignlIdList;
+	int DefaultSignalTypeIndex = -1;
+	QString DefaultBusTypeId;
+};
+
+
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -246,7 +256,7 @@ public:
 	SignalsTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~SignalsTabPage();
 
-	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, const QString& appSignalId, QWidget* parent);
+	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, const QString& appSignalId, CreatingSignalOptions& options, QWidget* parent);
 
 protected:
 	void CreateActions(QToolBar* toolBar);
