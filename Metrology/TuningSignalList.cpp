@@ -783,7 +783,7 @@ void TuningSignalListDialog::createInterface()
 
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-	connect(m_pSignalView, &QTableView::doubleClicked , this, &TuningSignalListDialog::onListDoubleClicked);
+	connect(m_pSignalView, &QTableView::doubleClicked , this, &TuningSignalListDialog::onSignalListDoubleClicked);
 
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -1170,7 +1170,7 @@ void TuningSignalListDialog::onColumnAction(QAction* action)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::onListDoubleClicked(const QModelIndex&)
+void TuningSignalListDialog::onSignalListDoubleClicked(const QModelIndex&)
 {
 	changeSignalState();
 }

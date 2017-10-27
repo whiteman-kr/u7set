@@ -171,6 +171,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		signalProperties->propertyByCaption(typeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(inOutTypeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(dataSizeCaption)->setReadOnly(true);
+		signalProperties->propertyByCaption(byteOrderCaption)->setReadOnly(true);
 
 		auto& s = signalProperties->signal();
 		if (s.signalType() == E::SignalType::Bus)

@@ -171,6 +171,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_DATA_SIZE:
 		{
+			return nullptr;	//Read only
 			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].signalType() == E::SignalType::Discrete)
 			{
 				return nullptr;
@@ -223,6 +224,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_IN_OUT_TYPE:
 		{
+			return nullptr;	//Read only
 			QComboBox* cb = new QComboBox(parent);
 
 			cb->addItems(E::enumKeyStrings<E::SignalInOutType>());
@@ -231,6 +233,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_BYTE_ORDER:
 		{
+			return nullptr;	//Read only
 			QComboBox* cb = new QComboBox(parent);
 
 			auto byteOrderList = E::enumValues<E::ByteOrder>();
