@@ -30,7 +30,6 @@ namespace Builder
 	typedef VFrame30::SchemaItemConst UalConst;
 
 	typedef VFrame30::SchemaItemTransmitter LogicTransmitter;
-	typedef VFrame30::SchemaItemReceiver LogicReceiver;
 	typedef VFrame30::SchemaItemReceiver UalReceiver;
 
 	typedef VFrame30::SchemaItemBusComposer UalBusComposer;
@@ -158,7 +157,7 @@ namespace Builder
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
 		const UalConst* ualConst() const { return m_appLogicItem.m_fblItem->toSchemaItemConst(); }
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
-		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
+		const UalReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const UalReceiver* ualReceiver() const { return m_appLogicItem.m_fblItem->toReceiverElement(); }
 
 		const UalBusComposer* ualBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
@@ -373,7 +372,7 @@ namespace Builder
 				  E::SignalType signalType,
 				  E::AnalogAppSignalFormat analogFormat);
 
-		UalSignal(Signal* s, const QString &lmEquipmentID);
+		UalSignal(const QString& connectionID, const Signal* s, const QString &lmEquipmentID);
 
 		friend class UalSignalsMap;
 
@@ -467,6 +466,8 @@ namespace Builder
 
 		QStringList acquiredRefSignalsIDs() const;
 
+		QString optoConnectionID() const;
+
 	private:
 		Signal* m_autoSignalPtr = nullptr;
 
@@ -482,6 +483,8 @@ namespace Builder
 		//
 
 		BusShared m_bus;
+
+		QString m_optoConnectionID;							// for opto signals
 
 		bool m_isInput = false;							// signal sources
 		bool m_isTuningable = false;
@@ -521,7 +524,7 @@ namespace Builder
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
-		UalSignal* createOptoSignal(const UalItem* ualItem, QUuid outPinUuid);
+		UalSignal* createOptoSignal(const QString& connectionID, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
 
 		bool appendRefPin(QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);

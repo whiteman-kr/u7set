@@ -971,7 +971,7 @@ namespace Builder
 		appendRefSignal(m_autoSignalPtr, false);
 	}
 
-	UalSignal::UalSignal(Signal* s, const QString& lmEquipmentID)
+	UalSignal::UalSignal(const QString& connectionID, const Signal *s, const QString& lmEquipmentID)
 	{
 		// Opto UalSignal creation
 
@@ -985,10 +985,14 @@ namespace Builder
 
 		// create new instance of Signal
 
+		m_isOptoSignal = true;
+
 		m_autoSignalPtr = new Signal(*s);
 
 		m_autoSignalPtr->setEquipmentID(lmEquipmentID);			// associate new signal with current lm
 		m_autoSignalPtr->setAcquire(false);
+
+		m_optoConnectionID = connectionID;
 
 		appendRefSignal(m_autoSignalPtr, true);
 
@@ -1462,7 +1466,6 @@ namespace Builder
 		}
 	}
 
-
 	QStringList UalSignal::acquiredRefSignalsIDs() const
 	{
 		QStringList list;
@@ -1480,7 +1483,16 @@ namespace Builder
 		return list;
 	}
 
+	QString UalSignal::optoConnectionID() const
+	{
+		if (m_isOptoSignal == false)
+		{
+			assert(false);
+			return QString();
+		}
 
+		return m_optoConnectionID;
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -1627,42 +1639,11 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createOptoSignal(const QString& connectionID, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return nullptr;
-		}
-
-		const UalReceiver* receiver = ualItem->ualReceiver();
-
-		QString signalID = receiver->appSignalId();
-
-		UalSignal* ualSignal = m_idToSignalMap.value(signalID, nullptr);
-
-		if (ualSignal != nullptr)
-		{
-			// signal already in map
-			//
-			assert(m_pinToSignalMap.contains(outPinUuid) == false);
-
-			appendPinRefToSignal(outPinUuid, ualSignal);
-
-			return ualSignal;
-		}
-
-		Signal* s = m_compiler.signalSet().getSignal(signalID);
-
-		if (s == nullptr)
-		{
-			m_log->errALC5000(signalID, ualItem->guid(), ualItem->schemaID());
-			return nullptr;
-		}
-
 		// create opto signal
 		//
-		ualSignal = new UalSignal(s, m_compiler.lmEquipmentID());
+		UalSignal* ualSignal = new UalSignal(connectionID, s, lmEquipmentID);
 
 		bool result = insertNew(outPinUuid, ualSignal);
 

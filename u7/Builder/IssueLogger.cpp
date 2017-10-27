@@ -2635,7 +2635,7 @@ namespace Builder
 
 	/// IssueCode: ALC5029
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: The signal '%1' is repeatedly connected to the transmitter '%2'.
 	///
@@ -2646,14 +2646,14 @@ namespace Builder
 	///		%4 Transmitter Uuid
 	///
 	/// Description:
-	///		The same signal can be connected only once to the transmitter. Check transmitter input links.
+	///		The same signal should be connected only once to the transmitter. Check transmitter input links.
 	///
-	void IssueLogger::errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid)
+	void IssueLogger::wrnALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
 
-		LOG_ERROR(IssueType::AlCompiler,
+		LOG_WARNING0(IssueType::AlCompiler,
 				  5029,
 				  QString(tr("The signal '%1' is repeatedly connected to the transmitter '%2'.").
 						  arg(appSignalID).arg(connection)));

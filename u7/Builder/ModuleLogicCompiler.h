@@ -112,6 +112,7 @@ namespace Builder
 		bool createUalSignalFromSignal(UalItem* ualItem);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
+		bool createUalSignalFromReceiver(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
@@ -220,6 +221,8 @@ namespace Builder
 		// pass #2 compilation functions
 		//
 		bool finalizeOptoConnectionsProcessing();
+		bool setOptoUalSignalsAddresses();
+
 		bool generateAppStartCommand();
 
 		bool initAfbs();
@@ -239,7 +242,7 @@ namespace Builder
 
 		bool generateAppSignalCode(const UalItem* appItem);
 		bool generateWriteConstToSignalCode(UalSignal& appSignal, const UalConst* constItem);
-		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, UalSignal& appSignal, const QUuid& pinGuid);
+		bool generateWriteReceiverToSignalCode(const UalReceiver& receiver, UalSignal& appSignal, const QUuid& pinGuid);
 		bool generateWriteBusExtractorToSignalCode(UalSignal& appSignal, const UalItem* appBusExtractor, QUuid extractorOutPinUuid);
 		bool generateWriteSignalToSignalCode(UalSignal& appSignal, QUuid srcSignalGuid);
 
@@ -254,7 +257,7 @@ namespace Builder
 
 		//
 		bool generateWriteConstToFbCode(const UalAfb& appFb, const LogicAfbSignal &inAfbSignal, const UalConst* constItem);
-		bool genearateWriteReceiverToFbCode(const UalAfb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
+		bool genearateWriteReceiverToFbCode(const UalAfb &appFb, const LogicPin& inPin, const UalReceiver& receiver, const QUuid& receiverPinGuid);
 		bool generateWriteSignalToFbCode(const UalAfb& appFb, const LogicPin& inPin, const UalSignal& appSignal);
 		//
 

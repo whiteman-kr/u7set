@@ -164,9 +164,8 @@ namespace Builder
 		{
 			if (finalizeOptoConnectionsProcessing() == false) break;
 
-			//
-			// set addresses of Opto UalSignals here !!!!!!!!!!
-			//
+			if (setOptoUalSignalsAddresses() == false) break;
+
 			// generate signals TestData or report here
 			//
 
@@ -726,6 +725,7 @@ namespace Builder
 				break;
 
 			case UalItem::Type::Receiver:
+				result &= createUalSignalFromReceiver(ualItem);
 				break;
 
 			case UalItem::Type::BusComposer:
@@ -1003,6 +1003,112 @@ namespace Builder
 
 		return result;
 	}
+
+	bool ModuleLogicCompiler::createUalSignalFromReceiver(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		const UalReceiver* ualReceiver = ualItem->ualReceiver();
+
+		if (ualReceiver == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		//
+
+		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+
+				if (connection == nullptr)
+				{
+					// Receiver is linked to unknown opto connection '%1'.
+					//
+					m_log->errALC5025(receiver.connectionId(), receiver.guid(), appSignal.schemaID());
+					return false;
+				}
+
+		//
+
+		const std::vector<LogicPin>& outputs = ualItem->outputs();
+
+		int signalPinIndex = -1;
+		int validityPinIndex = -1;
+
+		for(int i = 0; i < outputs.size(); i++)
+		{
+			if (ualReceiver->isValidityPin(outputs[i].guid()) == true)
+			{
+				if (validityPinIndex != -1)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				validityPinIndex = i;
+			}
+
+			if (ualReceiver->isOutputPin(outputs[i].guid()) == true)
+			{
+				if (signalPinIndex != -1)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				signalPinIndex = i;
+			}
+		}
+
+		if (signalPinIndex == -1)
+		{
+			LOG_INTERNAL_ERROR(m_log);			// signal out pin is not found, why?
+			return false;
+		}
+
+		const LogicPin& signalPin = outputs[signalPinIndex];
+
+		QString signalID = ualReceiver->appSignalId();
+
+		UalSignal* ualSignal = m_ualSignals.get(signalID);
+
+		if (ualSignal != nullptr)
+		{
+			// signal already in map
+			//
+			m_ualSignals.appendRefPin(signalPin.guid(), ualSignal);
+		}
+		else
+		{
+			// create opto signal
+			//
+			Signal* s = m_signals->getSignal(signalID);
+
+			if (s == nullptr)
+			{
+				m_log->errALC5000(signalID, ualItem->guid(), ualItem->schemaID());
+				return nullptr;
+			}
+
+			ualSignal = m_ualSignals.createOptoSignal(ualReceiver->connectionId(), s, m_lm->equipmentIdTemplate(), signalPin.guid());
+
+			if (ualSignal == nullptr)
+			{
+				return false;
+			}
+		}
+
+		// link connected signals to newly created UalSignal
+		//
+		bool result = linkConnectedItems(ualItem, signalPin, ualSignal);
+
+		return result;
+	}
+
 
 	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
 	{
@@ -4161,9 +4267,7 @@ namespace Builder
 			{
 				// The signal '%1' is repeatedly connected to the transmitter '%2'
 				//
-				m_log->errALC5029(connectedSignal->refSignalIDs().join(","), transmitter.connectionId(), QUuid(), transmitter.guid());
-				result = false;
-				break;
+				m_log->wrnALC5029(connectedSignal->refSignalIDs().join(","), transmitter.connectionId(), QUuid(), transmitter.guid());
 			}
 		}
 
@@ -4235,7 +4339,7 @@ namespace Builder
 			return true;				// item is not receiver, nothing to processing
 		}
 
-		const LogicReceiver& receiver = item->logicReceiver();
+		const UalReceiver& receiver = item->logicReceiver();
 
 		QString connectionID = receiver.connectionId();
 
@@ -4359,6 +4463,123 @@ namespace Builder
 		//
 		result &= m_optoModuleStorage->calculateRxBufAddresses(lmID);
 
+		return result;
+	}
+
+	bool ModuleLogicCompiler::setOptoUalSignalsAddresses()
+	{
+		bool result = true;
+
+		for(UalSignal* ualSignal : m_ualSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->isOptoSignal() == false)
+			{
+				continue;
+			}
+
+			QString connectionID = ualSignal->optoConnectionID();
+
+			std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+
+		}
+
+		/*
+		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+
+				if (connection == nullptr)
+				{
+					// Receiver is linked to unknown opto connection '%1'.
+					//
+					m_log->errALC5025(receiver.connectionId(), receiver.guid(), appSignal.schemaID());
+					return false;
+				}
+
+				if (appSignal.enableTuning() == true)
+				{
+					// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+					//
+					m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+					return false;
+				}
+
+				if (appSignal.isInput() == true)
+				{
+					// Can't assign value to input signal '%1' (Logic schema '%2').
+					//
+					m_log->errALC5087(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+					return false;
+				}
+
+				Signal* destSignal = m_signals->getSignal(appSignal.appSignalID());
+
+				if (destSignal == nullptr)
+				{
+					// Signal identifier '%1' is not found.
+					//
+					m_log->errALC5000(appSignal.appSignalID(), appSignal.guid());
+					return false;
+				}
+
+				Command cmd;
+
+				if (receiver.isOutputPin(pinGuid) == true)
+				{
+					SignalAddress16 rxAddress;
+
+					if (m_optoModuleStorage->getRxSignalAbsAddress(appSignal.schemaID(),
+																   receiver.connectionId(),
+																   receiver.appSignalId(),
+																   m_lm->equipmentIdTemplate(),
+																   receiver.guid(),
+																   rxAddress) == false)
+					{
+						return false;
+					}
+
+					Signal* srcSignal = m_signals->getSignal(receiver.appSignalId());
+
+					if (srcSignal == nullptr)
+					{
+						// Signal identifier '%1' is not found.
+						//
+						m_log->errALC5000(receiver.appSignalId(), receiver.guid());
+						return false;
+					}
+
+					if (checkSignalsCompatibility(*srcSignal, receiver.guid(), *destSignal, appSignal.guid()) == false)
+					{
+						return false;
+					}
+
+					QString str;
+
+					str = QString(tr("%1 >> %2 => %3")).arg(receiver.connectionId()).arg(receiver.appSignalId()).arg(destSignal->appSignalID());
+
+					if (destSignal->isAnalog())
+					{
+						cmd.mov32(destSignal->ualAddr().offset(), rxAddress.offset());
+					}
+					else
+					{
+						if (destSignal->isDiscrete())
+						{
+							cmd.movBit(destSignal->ualAddr().offset(), destSignal->ualAddr().bit(),
+									   rxAddress.offset(), rxAddress.bit());
+						}
+						else
+						{
+							assert(false);		// unknown type of signal
+							return false;
+						}
+					}
+*/
 		return result;
 	}
 
@@ -5230,7 +5451,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(const LogicReceiver& receiver, UalSignal& appSignal, const QUuid& pinGuid)
+	bool ModuleLogicCompiler::generateWriteReceiverToSignalCode(const UalReceiver& receiver, UalSignal& appSignal, const QUuid& pinGuid)
 	{
 /*		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
 
@@ -6070,7 +6291,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const UalAfb& fb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid)
+	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const UalAfb& fb, const LogicPin& inPin, const UalReceiver& receiver, const QUuid& receiverPinGuid)
 	{
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
 
