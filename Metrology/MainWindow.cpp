@@ -700,15 +700,15 @@ void MainWindow::createStatusBar()
 
 	m_statusEmpty->setText(QString());
 
-	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: offline "));
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 
-	m_statusConnectToAppDataServer->setText(tr(" AppDataService: offline "));
+	m_statusConnectToAppDataServer->setText(tr(" AppDataService: off "));
 	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToAppDataServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 
-	m_statusConnectToTuningServer->setText(tr(" TuningService: offline "));
+	m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToTuningServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 }
@@ -1823,9 +1823,22 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	connectedState.append(tr("\nLoaded signals: %1").arg(theSignalBase.signalCount()));
 
+	if (CFG_FILE_VER_METROLOGY_SIGNALS != theOptions.projectInfo().cfgFileVersion())
+	{
+		connectedState.append(tr("\n\nFailed version of %1. Current version: %2. Received version: %3 ")
+								.arg(CFG_FILE_NAME_METROLOGY_SIGNALS)
+								.arg(CFG_FILE_VER_METROLOGY_SIGNALS)
+								.arg(theOptions.projectInfo().cfgFileVersion()));
+	}
+
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToConfigServer->setToolTip(connectedState);
+
+	if (theSignalBase.signalCount() == 0)
+	{
+		m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 255, 160);");
+	}
 
 	updateRacksOnToolBar();
 	updateSignalsOnToolBar();
@@ -1850,7 +1863,7 @@ void MainWindow::signalSocketConnected()
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: on "));
 	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: 0").arg(signalSocketAddress.addressStr()).arg(signalSocketAddress.port()));
+	m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\n").arg(signalSocketAddress.addressStr()).arg(signalSocketAddress.port()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1884,9 +1897,19 @@ void MainWindow::tuningSocketConnected()
 
 	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
 
+	QString connectedState = tr("Connected: %1 : %2").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
+
+	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
+	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
+
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToTuningServer->setToolTip(tr("Connected: %1 : %2\nTuning signals: 0").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port()));
+	m_statusConnectToTuningServer->setToolTip(connectedState);
+
+	if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+	{
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1931,8 +1954,22 @@ void MainWindow::tuningSignalsCreated()
 	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
 	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
 
-	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
-	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	if (m_pTuningSocket->isConnected() == true)
+	{
+		m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+
+		if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+		{
+			m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
+		}
+	}
+	else
+	{
+		m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
+	}
+
 	m_statusConnectToTuningServer->setToolTip(connectedState);
 }
 
