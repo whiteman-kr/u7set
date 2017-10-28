@@ -374,6 +374,12 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 void EditSchemaView::drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam)
 {
+	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
+	if (ctrlIsPressed == true)
+	{
+		return;
+	}
+
 	for (const EditConnectionLine& ecl : m_editConnectionLines)
 	{
 		ecl.drawOutline(drawParam);
@@ -2457,8 +2463,34 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 		properties();
 	}
 
+	// This will update if Moving item in progress and we try to move connection links
+	//
+	if (editSchemaView()->m_editConnectionLines.empty() == false &&
+		e->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier)  != m_ctrlWasPressed)
+	{
+		m_ctrlWasPressed = e->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier);
+		editSchemaView()->update();
+	}
+
 	return;
 }
+
+void EditSchemaWidget::keyReleaseEvent(QKeyEvent* event)
+{
+	BaseSchemaWidget::keyReleaseEvent(event);
+
+	// This will update if Moving item in progress and we try to move connection links
+	//
+	if (editSchemaView()->m_editConnectionLines.empty() == false &&
+		event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier)  != m_ctrlWasPressed)
+	{
+		m_ctrlWasPressed = event->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier);
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
 
 // Set corresponding to the current situation and user actions context menu
 //

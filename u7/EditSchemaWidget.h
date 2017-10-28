@@ -224,6 +224,7 @@ protected:
 
 	virtual bool event(QEvent* e) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
+	virtual void keyReleaseEvent(QKeyEvent* event) override;
 
 	// Set corresponding to the current situation and user actions context menu
 	//
@@ -505,6 +506,10 @@ private:
 	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initializend in constructor
 
 	SchemaFindDialog* m_findDialog = nullptr;
+
+	// --
+	//
+	bool m_ctrlWasPressed = false;
 
 	// Actions
 	//
