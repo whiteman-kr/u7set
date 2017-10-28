@@ -7,6 +7,7 @@ namespace EditEngine
 	SetPointsCommand::SetPointsCommand(EditSchemaView* schemaView,
 			const std::vector<std::vector<VFrame30::SchemaPoint>>& points,
 			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+			bool selectChangedItems,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
 		EditCommand(schemaView, hScrollBar, vScrollBar)
@@ -17,6 +18,7 @@ namespace EditEngine
 
 		m_items = items;
 		m_newPoints = points;
+		m_selectChangedItems = selectChangedItems;
 
 		for (auto it = items.begin(); it != items.end(); ++it)
 		{
@@ -26,7 +28,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::executeCommand(EditSchemaView* schemaView)
+	void SetPointsCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{
@@ -34,7 +36,10 @@ namespace EditEngine
 			return;
 		}
 
-		schemaView->setSelectedItems(m_items);
+		if (m_selectChangedItems == true)
+		{
+			*itemsToSelect = m_items;
+		}
 
 		for (unsigned int i = 0; i < m_items.size(); i++)
 		{
@@ -44,7 +49,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::unExecuteCommand(EditSchemaView* schemaView)
+	void SetPointsCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{
@@ -52,7 +57,10 @@ namespace EditEngine
 			return;
 		}
 
-		schemaView->setSelectedItems(m_items);
+		if (m_selectChangedItems == true)
+		{
+			*itemsToSelect = m_items;
+		}
 
 		for (unsigned int i = 0; i < m_items.size(); i++)
 		{

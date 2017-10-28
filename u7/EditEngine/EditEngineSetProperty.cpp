@@ -41,9 +41,10 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPropertyCommand::executeCommand(EditSchemaView* schemaView)
+	void SetPropertyCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		selection.reserve(m_items.size());
 
 		for (Record& r : m_items)
 		{
@@ -71,7 +72,7 @@ namespace EditEngine
 
 					if (ok == false)
 					{
-						QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
+						QMessageBox::critical(m_schemaView, QObject::tr("Error"), errorMsg);
 					}
 
 					// setAfbParam executes script that can correct the value. If it was corrected, update the value
@@ -102,13 +103,14 @@ namespace EditEngine
 			}
 		}
 
-		schemaView->setSelectedItems(selection);
+		*itemsToSelect = selection;
 		return;
 	}
 
-	void SetPropertyCommand::unExecuteCommand(EditSchemaView* schemaView)
+	void SetPropertyCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> sel;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> sel;
+		sel.reserve(m_items.size());
 
 		for (Record& r : m_items)
 		{
@@ -132,7 +134,7 @@ namespace EditEngine
 
 					if (ok == false)
 					{
-						QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
+						QMessageBox::critical(m_schemaView, QObject::tr("Error"), errorMsg);
 					}
 
 					continue;
@@ -154,7 +156,7 @@ namespace EditEngine
 			}
 		}
 
-		schemaView->setSelectedItems(sel);
+		*itemsToSelect = sel;
 		return;
 	}
 

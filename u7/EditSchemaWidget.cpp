@@ -1496,6 +1496,8 @@ void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30
 	m_selectedItems = items;
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items)
@@ -1528,6 +1530,8 @@ void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item)
@@ -1541,6 +1545,8 @@ void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>
 	m_selectedItems.push_back(item);
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
@@ -1569,6 +1575,8 @@ void EditSchemaView::clearSelection()
 
 	m_selectedItems.clear();
 	emit selectionChanged();
+
+	return;
 }
 
 bool EditSchemaView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
@@ -3137,9 +3145,13 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 		if (itemsForMove.empty() == false)
 		{
+			m_editEngine->startBatch();
+
 			m_editEngine->runMoveItem(xdif, ydif, itemsForMove, snapToGrid());
 
 			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
 		}
 	}
 	else
@@ -3346,7 +3358,7 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2), std::min(y1, y2)));
 	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2) + std::abs(x2 - x1), std::min(y1, y2) + std::abs(y2 - y1)));
 
-	m_editEngine->runSetPoints(itemPoints, si);
+	m_editEngine->runSetPoints(itemPoints, si, true);
 
 	resetAction();
 	return;
@@ -3403,7 +3415,7 @@ void EditSchemaWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 		points[1] = static_cast<VFrame30::SchemaPoint>(QPointF(itemPos->endXDocPt() + xdif, itemPos->endYDocPt() + ydif));
 	}
 
-	m_editEngine->runSetPoints(points, si);
+	m_editEngine->runSetPoints(points, si, true);
 
 	//--
 	//
@@ -3591,7 +3603,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 				newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
+				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint, true);
 			}
 			else
 			{
@@ -3613,7 +3625,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint, true);
 				}
 			}
 		}
@@ -3655,7 +3667,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 				}
 				else
 				{
@@ -3668,7 +3680,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 				}
 			}
 			else
@@ -3693,7 +3705,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 						newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 					}
 					else
 					{
@@ -3706,7 +3718,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 						newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 					}
 				}
 			}
@@ -3800,7 +3812,7 @@ void EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 	}
 
 	std::vector<VFrame30::SchemaPoint> setPoints(newPoints.begin(), newPoints.end());
-	m_editEngine->runSetPoints(setPoints, si);
+	m_editEngine->runSetPoints(setPoints, si, true);
 
 	resetAction();
 	return;
@@ -4806,7 +4818,7 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 	{
 		assert(commandPoints.size() == commandItems.size());
 
-		m_editEngine->runSetPoints(commandPoints, commandItems);
+		m_editEngine->runSetPoints(commandPoints, commandItems, false);
 
 		editSchemaView()->m_editConnectionLines.clear();
 	}
@@ -6005,7 +6017,7 @@ void EditSchemaWidget::deleteKey()
 
 void EditSchemaWidget::undo()
 {
-	m_editEngine->undo(1);
+	m_editEngine->undo();
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
@@ -6015,7 +6027,7 @@ void EditSchemaWidget::undo()
 
 void EditSchemaWidget::redo()
 {
-	m_editEngine->redo(1);
+	m_editEngine->redo();
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
@@ -7283,7 +7295,7 @@ void EditSchemaWidget::sameWidth()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7381,7 +7393,7 @@ void EditSchemaWidget::sameHeight()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7509,7 +7521,7 @@ void EditSchemaWidget::sameSize()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7574,7 +7586,7 @@ void EditSchemaWidget::alignLeft()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7639,7 +7651,7 @@ void EditSchemaWidget::alignRight()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7704,7 +7716,7 @@ void EditSchemaWidget::alignTop()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7769,7 +7781,7 @@ void EditSchemaWidget::alignBottom()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }

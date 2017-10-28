@@ -195,7 +195,8 @@ SOURCES +=\
     Forms/ChooseAfbDialog.cpp \
     IdePropertyEditor.cpp \
     EditEngine/EditEngineSetObject.cpp \
-    EditConnectionLine.cpp
+    EditConnectionLine.cpp \
+    EditEngine/EditEngineBatch.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -329,7 +330,8 @@ HEADERS  += \
     Forms/DialogUpdateFromPreset.h \
     IdePropertyEditor.h \
     EditEngine/EditEngineSetObject.h \
-    EditConnectionLine.h
+    EditConnectionLine.h \
+    EditEngine/EditEngineBatch.h
 
 FORMS    += \
     CreateProjectDialog.ui \
