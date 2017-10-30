@@ -11,10 +11,12 @@
 #include "../VFrame30/SchemaItemBus.h"
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
+#include "EditConnectionLine.h"
 
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
+
 
 
 enum class MouseState
@@ -116,6 +118,7 @@ protected:
 	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawSelection(QPainter* p);
+	void drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam);
 	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
 	void drawSelectionArea(QPainter* p);
 	void drawMovingItems(VFrame30::CDrawParam* drawParam);
@@ -130,6 +133,8 @@ protected:
 	//
 protected:
 	SchemaItemAction getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex);
+
+	QRectF sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos);
 
 	// Signals
 signals:
@@ -167,6 +172,8 @@ private:
 	int m_activeLayer;
 	MouseState m_mouseState;
 
+	// Temporary data can be changed in EditSchemaWidget
+	//
 protected:
 	std::shared_ptr<VFrame30::SchemaItem> m_newItem;
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
@@ -190,24 +197,9 @@ protected:
 
 	// Variables for changing ConnectionLine
 	//
-	double m_editStartMovingEdge;				// Start pos fro moving edge
-	double m_editEndMovingEdge;					// End pos for moving edge
-	double m_editStartMovingEdgeX;				// Ќачальна€ координата дл€ перемещени€ вершины
-	double m_editStartMovingEdgeY;				// Ќачальна€ координата дл€ перемещени€ вершины
-	double m_editEndMovingEdgeX;				//  онечна€ координата дл€ перемещени€ грани
-	double m_editEndMovingEdgeY;				//  онечна€ координата дл€ перемещени€ грани
-	int m_movingEdgePointIndex;					// »ндекс точки при перемещении вершины или грани
+	std::list<EditConnectionLine> m_editConnectionLines;	// Add new or edit PosConnectionImpl items
 
-												// ѕри перемещении вершины соединительно линии здесь
-												// соххран€ютс€ точки (в отрисовке), и потом они
-												// используютс€ при завершении (MouseUp) редактировани€.
-	std::list<VFrame30::SchemaPoint> m_movingVertexPoints;
-
-	//QRubberBand* m_rubberBand;				// Not don yet, on linux same CPU ussage for repainting everything and using QRubberBand
-												// TO DO, test CPU Usage on Windows, if it has any advatages, move to using QRubberBand!!!!
-
-
-	// Temporary data, can be changed in EditSchemaWidget
+	// Temporary data can be changed in EditSchemaWidget
 	//
 	friend EditSchemaWidget;
 };
@@ -232,8 +224,9 @@ public:
 protected:
 	void createActions();
 
-	virtual bool event(QEvent* e) override;
+	virtual bool event(QEvent* event) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
+	virtual void keyReleaseEvent(QKeyEvent* event) override;
 
 	// Set corresponding to the current situation and user actions context menu
 	//
@@ -275,9 +268,11 @@ protected:
 	void mouseMove_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Down
+	// WARNING, if you add another function in MouseRightUp, add in EditSchemaWidget::contextMenu(const QPoint& pos) exception for this MouseMode
 	//
 	void mouseRightDown_None(QMouseEvent* event);
 	void mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* event);
+	void mouseRightDown_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Up
 	//
@@ -300,11 +295,16 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
-	void movePosConnectionEndPoint(VFrame30::IPosConnection* item, QPointF toPoint);
+	void movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem, EditConnectionLine* ecl, QPointF toPoint);
 
-	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
-	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;
+	// Move ConnectionLinks withFblItemPects' pins
+	//
+	void initMoveAfbsConnectionLinks(MouseState mouseState);
+	void moveAfbsConnectionLinks(QPointF offset, MouseState mouseState);
+	void finishMoveAfbsConnectionLinks();
 
+	// --
+	//
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 	bool loadBusses(std::vector<VFrame30::Bus>* out);
@@ -508,6 +508,11 @@ private:
 	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initializend in constructor
 
 	SchemaFindDialog* m_findDialog = nullptr;
+
+	// --
+	//
+	bool m_ctrlWasPressed = false;
+	bool m_altWasPressed = false;
 
 	// Actions
 	//

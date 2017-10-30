@@ -139,6 +139,9 @@ namespace VFrame30
 
 		bool GetConnectionPoint(const QUuid& guid, VFrame30::AfbPin* pResult) const;
 
+		bool hasInputs() const;
+		bool hasOutputs() const;
+
 		int inputsCount() const;
 		int outputsCount() const;
 

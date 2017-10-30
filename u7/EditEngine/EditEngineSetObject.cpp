@@ -27,18 +27,16 @@ namespace EditEngine
 			assert(item);
 
 			Record r = {oldState, newState, item};
-
 			m_items.push_back(r);
 		}
 
 		return;
 	}
 
-	void SetObjectCommand::executeCommand(EditSchemaView* schemaView)
+	void SetObjectCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		assert(schemaView);
-
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		selection.reserve(m_items.size());
 
 		for (const Record& r : m_items)
 		{
@@ -48,15 +46,14 @@ namespace EditEngine
 			assert(ok);
 		}
 
-		schemaView->setSelectedItems(selection);
+		*itemsToSelect = selection;
 		return;
 	}
 
-	void SetObjectCommand::unExecuteCommand(EditSchemaView* schemaView)
+	void SetObjectCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		assert(schemaView);
-
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		selection.reserve(m_items.size());
 
 		for (const Record& r : m_items)
 		{
@@ -66,7 +63,7 @@ namespace EditEngine
 			assert(ok);
 		}
 
-		schemaView->setSelectedItems(selection);
+		*itemsToSelect = selection;
 		return;
 	}
 
