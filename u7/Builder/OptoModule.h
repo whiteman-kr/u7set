@@ -59,7 +59,7 @@ namespace Hardware
 		bool initRawSignal(const RawDataDescriptionItem& item, int offsetFromBeginningOfBuffer);
 
 		QString appSignalID() const { return m_appSignalIDs.first(); }
-		const QStringList appSignalIDs() const { return m_appSignalIDs; }
+		const QStringList& appSignalIDs() const { return m_appSignalIDs; }
 
 		bool hasSignalID(const QString& signalID);
 

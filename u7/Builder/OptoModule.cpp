@@ -730,6 +730,8 @@ namespace Hardware
 
 		OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(m_linkedPortID);
 
+		qDebug() << "This port " << m_equipmentID;
+
 		if (linkedPort == nullptr)
 		{
 			ASSERT_RETURN_FALSE;
@@ -747,6 +749,11 @@ namespace Hardware
 			}
 
 			m_rxSignals.insert(txSignal->appSignalID(), txSignal);
+
+			for(const QString& appSignalID : txSignal->appSignalIDs())
+			{
+				m_rxSignalIDs.insert(appSignalID, txSignal);
+			}
 		}
 
 		// copying Tx to Rx parameters

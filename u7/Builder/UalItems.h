@@ -360,19 +360,24 @@ namespace Builder
 
 		// private constructors can be used by UalSignalsMap only
 		//
-		UalSignal(Signal* s);
+		UalSignal(const UalItem* ualItem, Signal* s);
 
-		UalSignal(const QString& constSignalID,
+		UalSignal(const UalItem* ualItem,
+				  const QString& constSignalID,
 				  E::SignalType constSignalType,
 				  E::AnalogAppSignalFormat constAnalogFormat,
+				  int constDiscreteValue,
 				  int constIntValue,
 				  float constFloatValue);
 
-		UalSignal(const QString& signalID,
+		UalSignal(const UalItem* ualItem,
+				  const QString& signalID,
 				  E::SignalType signalType,
 				  E::AnalogAppSignalFormat analogFormat);
 
-		UalSignal(const QString& connectionID, const Signal* s, const QString &lmEquipmentID);
+		UalSignal(const UalItem* ualItem,
+				  const Signal* s,
+				  const QString &lmEquipmentID);
 
 		friend class UalSignalsMap;
 
@@ -468,7 +473,12 @@ namespace Builder
 
 		QString optoConnectionID() const;
 
+		const UalItem* ualItem() const { return m_ualItem; }
+
+		void setUalItem(const UalItem* ualItem);
+
 	private:
+		const UalItem* m_ualItem = nullptr;
 		Signal* m_autoSignalPtr = nullptr;
 
 		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
@@ -477,14 +487,13 @@ namespace Builder
 
 		bool m_isConst = false;
 
+		int m_constDiscreteValue = 0;
 		int m_constIntValue = 0;
 		double m_constFloatValue = 0;
 
 		//
 
 		BusShared m_bus;
-
-		QString m_optoConnectionID;							// for opto signals
 
 		bool m_isInput = false;							// signal sources
 		bool m_isTuningable = false;
@@ -515,18 +524,18 @@ namespace Builder
 
 		UalSignal* createSignal(Signal* s);
 
-		UalSignal* createSignal(Signal* s, QUuid outPinUuid);
+		UalSignal* createSignal(const UalItem* ualItem, Signal* s, QUuid outPinUuid);
 
-		UalSignal* createConstSignal(E::SignalType constSignalType,
+		UalSignal* createConstSignal(const UalItem* ualItem,
+									 E::SignalType constSignalType,
 									 E::AnalogAppSignalFormat constAnalogFormat,
-									 const UalConst* ualConst,
 									 QUuid outPinUuid);
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
-		UalSignal* createOptoSignal(const QString& connectionID, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
+		UalSignal* createOptoSignal(const UalItem* ualItem, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
 
-		bool appendRefPin(QUuid pinUuid, UalSignal* ualSignal);
+		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);
 
 		UalSignal* get(const QString& appSignalID) const { return m_idToSignalMap.value(appSignalID, nullptr); }
@@ -563,6 +572,11 @@ namespace Builder
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
 		QHash<UalSignal*, QUuid> m_signalToPinsMap;
 		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
+
+		//
+
+		static const QString AUTO_CONST_SIGNAL_ID_PREFIX;
+		static const QString AUTO_SIGNAL_ID_PREFIX;
 	};
 
 }

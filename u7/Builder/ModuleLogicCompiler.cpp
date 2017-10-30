@@ -839,7 +839,7 @@ namespace Builder
 
 		const LogicPin& outPin = ualItem->outputs()[0];
 
-		UalSignal* ualSignal = m_ualSignals.createSignal(s, outPin.guid());
+		UalSignal* ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
 
 		if (ualSignal == nullptr)
 		{
@@ -882,51 +882,45 @@ namespace Builder
 		const LogicPin& outPin = ualItem->outputs()[0];
 
 		E::SignalType constSignalType = E::SignalType::Discrete;
-		E::AnalogAppSignalFormat constAnalogFormat = E::AnalogAppSignalFormat::Float32;
+		E::AnalogAppSignalFormat constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
 
-		bool result = detectConstSignalType(outPin, &constSignalType, &constAnalogFormat);
-
-		if (result == false)
+		switch(ualConst->type())
 		{
-			m_log->addItemsIssues(OutputMessageLevel::Error, ualItem->guid(), ualItem->schemaID());
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("Cannot detect constant type (Logic schema %1)")).arg(ualItem->schemaID()));
+		case VFrame30::SchemaItemConst::ConstType::Discrete:
+
+			constSignalType = E::SignalType::Discrete;
+
+			if (ualConst->discreteValue() != 0 && ualConst->discreteValue() != 1)
+			{
+				// Discrete constant must have value 0 or 1.
+				//
+				m_log->errALC5086(ualItem->guid(), ualItem->schemaID());
+				return false;
+			}
+			break;
+
+		case VFrame30::SchemaItemConst::ConstType::IntegerType:
+
+			constSignalType = E::SignalType::Analog;
+			constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
+			break;
+
+		case VFrame30::SchemaItemConst::ConstType::FloatType:
+
+			constSignalType = E::SignalType::Analog;
+			constAnalogFormat = E::AnalogAppSignalFormat::Float32;
+			break;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		if (ualConst->isFloat() == true)
-		{
-			if ((constSignalType == E::SignalType::Analog && constAnalogFormat == E::AnalogAppSignalFormat::Float32) == false)
-			{
-				// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
-				//
-				m_log->errALC5119(ualItem->guid(), ualItem->schemaID());
-				return false;
-			}
-		}
-		else
-		{
-			if (ualConst->isIntegral() == true)
-			{
-				if ((constSignalType == E::SignalType::Analog && constAnalogFormat == E::AnalogAppSignalFormat::SignedInt32) == false &&
-					(constSignalType != E::SignalType::Discrete))
-				{
-					// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
-					//
-					m_log->errALC5119(ualItem->guid(), ualItem->schemaID());
-					return false;
-				}
-			}
-			else
-			{
-				LOG_INTERNAL_ERROR(m_log);			// unknown constant type
-				return false;
-			}
-		}
-
-		UalSignal* ualSignal = m_ualSignals.createConstSignal(constSignalType,
+		UalSignal* ualSignal = m_ualSignals.createConstSignal(ualItem,
+															  constSignalType,
 															  constAnalogFormat,
-															  ualConst, outPin.guid());
+															  outPin.guid());
 		if (ualSignal == nullptr)
 		{
 			assert(false);
@@ -935,7 +929,7 @@ namespace Builder
 
 		// link connected signals to newly created UalSignal
 		//
-		result = linkConnectedItems(ualItem, outPin, ualSignal);
+		bool result = linkConnectedItems(ualItem, outPin, ualSignal);
 
 		return result;
 	}
@@ -988,7 +982,7 @@ namespace Builder
 			}
 			else
 			{
-				ualSignal = m_ualSignals.createSignal(s, outPin.guid());
+				ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
 			}
 
 			if (ualSignal == nullptr)
@@ -1078,7 +1072,7 @@ namespace Builder
 		{
 			// signal already in map
 			//
-			m_ualSignals.appendRefPin(signalPin.guid(), ualSignal);
+			m_ualSignals.appendRefPin(ualItem, signalPin.guid(), ualSignal);
 		}
 		else
 		{
@@ -1092,7 +1086,7 @@ namespace Builder
 				return nullptr;
 			}
 
-			ualSignal = m_ualSignals.createOptoSignal(connectionID, s, m_lm->equipmentIdTemplate(), signalPin.guid());
+			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, m_lm->equipmentIdTemplate(), signalPin.guid());
 
 			if (ualSignal == nullptr)
 			{
@@ -1100,7 +1094,7 @@ namespace Builder
 			}
 		}
 
-		// link connected signals to newly created UalSignal
+		// link connected signals to UalSignal
 		//
 		bool result = linkConnectedItems(ualItem, signalPin, ualSignal);
 
@@ -1154,7 +1148,7 @@ namespace Builder
 			//
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::LoopbackOutput:
-				m_ualSignals.appendRefPin(inPinUuid, ualSignal);
+				m_ualSignals.appendRefPin(destUalItem, inPinUuid, ualSignal);
 				break;
 
 			case UalItem::Type::Terminator:
@@ -1217,7 +1211,7 @@ namespace Builder
 			return false;
 		}
 
-		result = m_ualSignals.appendRefPin(inPinUuid, ualSignal);
+		result = m_ualSignals.appendRefPin(signalItem, inPinUuid, ualSignal);
 
 		if (result == false)
 		{
@@ -1243,7 +1237,7 @@ namespace Builder
 		{
 			const LogicPin& output = outputs[0];
 
-			m_ualSignals.appendRefPin(output.guid(), ualSignal);
+			m_ualSignals.appendRefPin(signalItem, output.guid(), ualSignal);
 
 			// recursive linking of items
 			//
@@ -1315,12 +1309,12 @@ namespace Builder
 			}
 		}
 
-		return m_ualSignals.appendRefPin(inPinUuid, ualSignal);
+		return m_ualSignals.appendRefPin(srcItem, inPinUuid, ualSignal);
 	}
 
 	bool ModuleLogicCompiler::detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat)
 	{
-		if (constSignalType == nullptr || constAnalogFormat == nullptr)
+/*		if (constSignalType == nullptr || constAnalogFormat == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
@@ -1416,7 +1410,7 @@ namespace Builder
 				}
 			}
 		}
-
+*/
 		return false;
 	}
 
@@ -4482,9 +4476,40 @@ namespace Builder
 				continue;
 			}
 
-			QString connectionID = ualSignal->optoConnectionID();
+			const UalItem* ualItem = ualSignal->ualItem();
 
-			std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
+			if (ualItem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			const UalReceiver* ualReceiver = ualItem->ualReceiver();
+
+			if (ualReceiver == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			SignalAddress16 rxAddress;
+
+			bool res = m_optoModuleStorage->getRxSignalAbsAddress(ualItem->schemaID(),
+													   ualReceiver->connectionId(),
+													   ualReceiver->appSignalId(),
+													   m_lm->equipmentIdTemplate(),
+													   ualReceiver->guid(),
+													   rxAddress);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			ualSignal->setUalAddr(rxAddress);
 		}
 
 		/*
@@ -6290,7 +6315,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const UalAfb& fb, const LogicPin& inPin, const UalReceiver& receiver, const QUuid& receiverPinGuid)
 	{
-		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
+/*		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
 
 		if (connection == nullptr)
 		{
@@ -6424,7 +6449,7 @@ namespace Builder
 
 		LOG_INTERNAL_ERROR(m_log);
 
-		assert(false);		// unknown pin type
+		assert(false);		// unknown pin type*/
 
 		return false;
 	}

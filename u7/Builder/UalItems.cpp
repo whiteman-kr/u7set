@@ -863,15 +863,18 @@ namespace Builder
 
 	// ---------------------------------------------------------------------------------------
 	//
-	// AppSignal class implementation
+	// UalSignal class implementation
 	//
 	// ---------------------------------------------------------------------------------------
 
-	UalSignal::UalSignal(Signal* s)
+	UalSignal::UalSignal(const UalItem* ualItem, Signal* s) :
+		m_ualItem(ualItem)
 	{
+		// ualItem can be == nullptr!!!
+
 		// regular UalSignal creation
 
-		if (s == nullptr)
+		if (s == nullptr )
 		{
 			assert(false);
 			return;
@@ -889,12 +892,17 @@ namespace Builder
 		}
 	}
 
-	UalSignal::UalSignal(const QString& constSignalID,
-			  E::SignalType constSignalType,
-			  E::AnalogAppSignalFormat constAnalogFormat,
-			  int constIntValue,
-			  float constFloatValue)
+	UalSignal::UalSignal(const UalItem* ualItem,
+						 const QString& constSignalID,
+						 E::SignalType constSignalType,
+						 E::AnalogAppSignalFormat constAnalogFormat,
+						 int constDiscreteValue,
+						 int constIntValue,
+						 float constFloatValue) :
+		m_ualItem(ualItem)
 	{
+		assert(ualItem != nullptr);
+
 		// const UalSignal creation
 
 		m_autoSignalPtr = new Signal;
@@ -929,16 +937,21 @@ namespace Builder
 		// set Const signal fields
 
 		m_isConst = true;
+		m_constDiscreteValue = constDiscreteValue;
 		m_constIntValue = constIntValue;
 		m_constFloatValue = constFloatValue;
 
 		setComputed();
 	}
 
-	UalSignal::UalSignal(const QString& signalID,
-			  E::SignalType signalType,
-			  E::AnalogAppSignalFormat analogFormat)
+	UalSignal::UalSignal(const UalItem* ualItem,
+						 const QString& signalID,
+						 E::SignalType signalType,
+						E::AnalogAppSignalFormat analogFormat) :
+		m_ualItem(ualItem)
 	{
+		assert(ualItem != nullptr);
+
 		// analog or discrete auto UalSignal creation
 
 		m_autoSignalPtr = new Signal;
@@ -971,9 +984,14 @@ namespace Builder
 		appendRefSignal(m_autoSignalPtr, false);
 	}
 
-	UalSignal::UalSignal(const QString& connectionID, const Signal *s, const QString& lmEquipmentID)
+	UalSignal::UalSignal(const UalItem* ualItem,
+						 const Signal *s,
+						 const QString& lmEquipmentID) :
+		m_ualItem(ualItem)
 	{
-		// Opto UalSignal creation
+		assert(ualItem != nullptr);
+
+		// Opto UalSignal creation from receiver
 
 		if (s == nullptr)
 		{
@@ -989,10 +1007,13 @@ namespace Builder
 
 		m_autoSignalPtr = new Signal(*s);
 
+		// reset signal addresses to invalid state
+		// ualAddr of opto signal should be set later in setOptoUalSignalsAddresses()
+		//
+		m_autoSignalPtr->resetAddresses();
+
 		m_autoSignalPtr->setEquipmentID(lmEquipmentID);			// associate new signal with current lm
 		m_autoSignalPtr->setAcquire(false);
-
-		m_optoConnectionID = connectionID;
 
 		appendRefSignal(m_autoSignalPtr, true);
 
@@ -1248,7 +1269,7 @@ namespace Builder
 		assert(m_isConst == true);
 		assert(constType() == E::SignalType::Discrete);
 
-		return m_constIntValue == 0 ? 0 : 1;
+		return m_constDiscreteValue == 0 ? 0 : 1;
 	}
 
 	int UalSignal::constAnalogIntValue() const
@@ -1491,7 +1512,29 @@ namespace Builder
 			return QString();
 		}
 
-		return m_optoConnectionID;
+		if (m_ualItem == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		const UalReceiver* ualReceiver = m_ualItem->ualReceiver();
+
+		if (ualReceiver == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return ualReceiver->connectionId();
+	}
+
+	void UalSignal::setUalItem(const UalItem* ualItem)
+	{
+		if (m_ualItem == nullptr)
+		{
+			m_ualItem = ualItem;
+		}
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -1499,6 +1542,9 @@ namespace Builder
 	// AppSignalsMap class implementation
 	//
 	// ---------------------------------------------------------------------------------------
+
+	const QString UalSignalsMap::AUTO_CONST_SIGNAL_ID_PREFIX("#AUTO_CONST");
+	const QString UalSignalsMap::AUTO_SIGNAL_ID_PREFIX("#AUTO_SIGNAL");
 
 	UalSignalsMap::UalSignalsMap(ModuleLogicCompiler& compiler, IssueLogger* log) :
 		m_compiler(compiler),
@@ -1514,11 +1560,13 @@ namespace Builder
 
 	UalSignal* UalSignalsMap::createSignal(Signal* s)
 	{
-		return createSignal(s, QUuid());
+		return createSignal(nullptr, s, QUuid());
 	}
 
-	UalSignal* UalSignalsMap::createSignal(Signal* s, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createSignal(const UalItem* ualItem, Signal* s, QUuid outPinUuid)
 	{
+		// ualItem can be nullptr!!!
+
 		if (s == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
@@ -1531,7 +1579,6 @@ namespace Builder
 		{
 			// signal already in map
 			//
-//			assert(ualSignal->signal() == s);
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
 
 			appendPinRefToSignal(outPinUuid, ualSignal);
@@ -1541,7 +1588,7 @@ namespace Builder
 
 		// create new signal
 		//
-		ualSignal = new UalSignal(s);
+		ualSignal = new UalSignal(ualItem, s);
 
 		bool result = insertNew(outPinUuid, ualSignal);
 
@@ -1554,12 +1601,19 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createConstSignal(E::SignalType constSignalType,
+	UalSignal* UalSignalsMap::createConstSignal(const UalItem* ualItem,
+												E::SignalType constSignalType,
 												E::AnalogAppSignalFormat constAnalogFormat,
-												const UalConst* ualConst,
 												QUuid outPinUuid)
 	{
-		QString constSignalID = QString("#AUTO_CONST_%1").arg(ualConst->label());
+		if (ualItem == nullptr)
+		{
+			assert(false);
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		QString constSignalID = QString("%1_%2").arg(AUTO_CONST_SIGNAL_ID_PREFIX).arg(ualItem->label());
 
 		UalSignal* ualSignal = m_idToSignalMap.value(constSignalID, nullptr);
 
@@ -1576,9 +1630,23 @@ namespace Builder
 			return ualSignal;
 		}
 
+		const UalConst* ualConst = ualItem->ualConst();
+
+		if (ualConst == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
 		// create new const signal
 		//
-		ualSignal = new UalSignal(constSignalID, constSignalType, constAnalogFormat, ualConst->intValue(), ualConst->floatValue());
+		ualSignal = new UalSignal(ualItem,
+								  constSignalID,
+								  constSignalType,
+								  constAnalogFormat,
+								  ualConst->discreteValue(),
+								  ualConst->intValue(),
+								  ualConst->floatValue());
 
 		bool result = insertNew(outPinUuid, ualSignal);
 
@@ -1593,7 +1661,7 @@ namespace Builder
 
 	UalSignal* UalSignalsMap::createAutoSignal(const UalItem *ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal)
 	{
-		QString signalID = QString("#AUTO_SIGNAL_%1_%2").arg(ualItem->label().arg(outAfbSignal.caption()));
+		QString signalID = QString("%1_%2_%3").arg(AUTO_SIGNAL_ID_PREFIX).arg(ualItem->label().arg(outAfbSignal.caption()));
 
 		signalID = signalID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
 
@@ -1626,7 +1694,7 @@ namespace Builder
 
 		// create new auto signal
 		//
-		ualSignal = new UalSignal(signalID, outAfbSignal.type(), analogFormat);
+		ualSignal = new UalSignal(ualItem, signalID, outAfbSignal.type(), analogFormat);
 
 		result = insertNew(outPinUuid, ualSignal);
 
@@ -1639,11 +1707,11 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createOptoSignal(const QString& connectionID, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid)
 	{
 		// create opto signal
 		//
-		UalSignal* ualSignal = new UalSignal(connectionID, s, lmEquipmentID);
+		UalSignal* ualSignal = new UalSignal(ualItem, s, lmEquipmentID);
 
 		bool result = insertNew(outPinUuid, ualSignal);
 
@@ -1656,13 +1724,15 @@ namespace Builder
 		return ualSignal;
 	}
 
-	bool UalSignalsMap::appendRefPin(QUuid pinUuid, UalSignal* ualSignal)
+	bool UalSignalsMap::appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
+
+		ualSignal->setUalItem(ualItem);
 
 		if (QHash<UalSignal*, UalSignal*>::contains(ualSignal) == false)
 		{
