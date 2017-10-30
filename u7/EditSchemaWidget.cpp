@@ -5595,7 +5595,19 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
-	qDebug() << equipmentIdList;
+	const VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get());
+	QStringList itemsAppSignals = signalItem->appSignalIdList();
+
+	if (itemsAppSignals.size() == 1 &&
+		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||
+		(itemsAppSignals[0] == QLatin1String("#IN_STRID")) ||
+		(itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
+	{
+	}
+	else
+	{
+		m_createSignalOptions.AppSignalIdList = itemsAppSignals;
+	}
 
 	int counterValue = 0;
 	bool nextValRes = db()->nextCounterValue(&counterValue);
@@ -5604,14 +5616,13 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
-	CreatingSignalOptions options;
+	m_createSignalOptions.LmEquipmentIdList = equipmentIdList;
+
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
-														  equipmentIdList,
 														  counterValue,
 														  schema()->schemaId(),
 														  schema()->caption(),
-														  "",
-														  options,
+														  &m_createSignalOptions,
 														  this);
 
 	if (signalsIds.isEmpty() == false)

@@ -11,6 +11,7 @@
 #include "../VFrame30/SchemaItemBus.h"
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
+#include "SignalsTabPage.h"
 #include "EditConnectionLine.h"
 
 #define ControlBarSizeDisplay		10
@@ -508,6 +509,8 @@ private:
 	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initializend in constructor
 
 	SchemaFindDialog* m_findDialog = nullptr;
+
+	CreatingSignalOptions m_createSignalOptions;
 
 	// --
 	//
