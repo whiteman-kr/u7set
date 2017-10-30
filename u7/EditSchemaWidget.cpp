@@ -2666,9 +2666,19 @@ void EditSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void EditSchemaWidget::mouseDoubleClickEvent(QMouseEvent* event)
 {
+	if (mouseState() == MouseState::MovingConnectionLinePoint ||
+		mouseState() == MouseState::AddSchemaPosConnectionNextPoint)
+	{
+		// It accidental double clicking, ignore it
+		//
+		event->ignore();
+		return;
+	}
+
 	setMouseState(MouseState::None);
 
-	if (selectedItems().empty() == false)
+	if (event->button() == Qt::LeftButton &&
+		selectedItems().empty() == false)
 	{
 		properties();
 	}

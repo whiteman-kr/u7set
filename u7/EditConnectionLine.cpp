@@ -155,10 +155,12 @@ void EditConnectionLine::moveEndPointPos(std::shared_ptr<VFrame30::SchemaLayer> 
 	//       =======+=======
 	//             (2)
 	//
-	//	PreferedMovePointWay::HorzCorner -- move (1), (2) in horz way
-	//	                +------------------
-	//         (1)      |
-	//   [ITEM]-+-------+(2
+	//	PreferedMovePointWay::HorzCorner -- move (1) and (2) in vert way
+	//                 (3)
+	//	   =============+------------------
+	//                  |
+	//   [ITEM]-+-------+
+	//         (1)     (2)
 	//
 
 	// Try to to detect situation for PreferedMovePointWay::VertCorner
@@ -210,18 +212,19 @@ void EditConnectionLine::moveEndPointPos(std::shared_ptr<VFrame30::SchemaLayer> 
 	if ((preferedWay == PreferedMovePointWay::Auto && docPointIsOnHorzLine == true) ||
 		(preferedWay == PreferedMovePointWay::VertCorner))
 	{
-		//	PreferedMovePointWay::VertCorner -- If docPoint on horz line, add to main part two points
-		//	------------+(1) - cornerPoint
-		//              |
-		//       =======+=======
-		//             (2) docCpoint
+		//	PreferedMovePointWay::HorzCorner -- move (1) and (2) in vert way
+		//                 (3)
+		//	   =============+------------------
+		//                  |
+		//   [ITEM]-+-------+
+		//         (1)     (2)
 		//
-		QPointF cornerPoint(toPoint.x(), ptBase.y());		// (1)
+		QPointF cornerPoint(toPoint.x(), ptBase.y());				// (2)
 		cornerPoint = CUtils::snapToGrid(cornerPoint, gridSize);
 
 		clearExtensionPoints();
-		addExtensionPoint(cornerPoint);
-		addExtensionPoint(toPoint);
+		addExtensionPoint(cornerPoint);								// (2)
+		addExtensionPoint(toPoint);									// (1)
 
 		return;
 	}
@@ -1069,93 +1072,57 @@ std::vector<VFrame30::SchemaPoint> EditConnectionLine::removeUnwantedPoints(cons
 {
 	std::vector<VFrame30::SchemaPoint> result = source;
 
-	int sameXPosCount = 0;			// Pairs of points amount by X coordinate
-	int sameYPosCount = 0;			// Pairs of points amount by Y coordinate
+	int horzCount = 0;
+	int vertCount = 0;
 
-	size_t currentPointIndex = 0;	// Index of current point to process
-
-	// In cycle we are processing current point with previous point
-	//
+	size_t currentPointIndex = 0;
 
 	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
 	{
-		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
-		const VFrame30::SchemaPoint& prevPoint = result.at(currentPointIndex - 1);
+		const VFrame30::SchemaPoint& curPoint = result[currentPointIndex];
+		const VFrame30::SchemaPoint& prevPoint = result[currentPointIndex - 1];
 
-		if (std::abs(curPoint.X - prevPoint.X) < 0.0000001)
+		if (curPoint == prevPoint)
 		{
-			sameXPosCount ++;
+			result.erase(result.begin() + (currentPointIndex - 1));
+
+			// Keep horzCount and vertCount as prev point does matter
+			//
+
+			currentPointIndex  --;		// Process same point index one more time
+			continue;
+		}
+
+		if (isHorz(curPoint, prevPoint) == true)
+		{
+			assert(isVert(curPoint, prevPoint) == false);
+
+			horzCount ++;
+			vertCount = 0;
+
+			if (horzCount == 2)
+			{
+				result.erase(result.begin() + (currentPointIndex - 1));
+				horzCount = 1;
+
+				currentPointIndex --;
+			}
 		}
 		else
 		{
-			// Remove points only if we have more than one pair with same
-			// X coordinates
-			//
-			if (sameXPosCount > 1)
+			assert(isVert(curPoint, prevPoint) == true);
+
+			horzCount = 0;
+			vertCount ++;
+
+			if (vertCount == 2)
 			{
-				assert(currentPointIndex > 0);
-				assert(currentPointIndex <= result.size());
+				result.erase(result.begin() + (currentPointIndex - 1));
+				vertCount = 1;
 
-				size_t startIndex = currentPointIndex - sameXPosCount;
-				size_t lastIndex = currentPointIndex - 1;
-
-				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
-
-				currentPointIndex = currentPointIndex - sameXPosCount-1;
-				sameYPosCount = 0;
+				currentPointIndex --;
 			}
-
-			sameXPosCount = 0;
 		}
-
-		if (std::abs(curPoint.Y - prevPoint.Y) < 0.0000001)
-		{
-			sameYPosCount++;
-		}
-		else
-		{
-			// Remove points only if we have more than one pair with same
-			// X coordinates
-			//
-			if (sameYPosCount > 1)
-			{
-				assert(currentPointIndex > 0);
-				assert(currentPointIndex <= result.size());
-
-				size_t startIndex = currentPointIndex - sameYPosCount;
-				size_t lastIndex = currentPointIndex - 1;
-
-				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
-
-				currentPointIndex = currentPointIndex - sameYPosCount-1;
-				sameXPosCount = 0;
-			}
-
-			sameYPosCount = 0;
-		}
-	}
-
-	// If some pairs with same coordinate values are placed at the end of
-	// the line, we must remove them!
-	//
-	if (sameYPosCount > 1)
-	{
-		assert(currentPointIndex == result.size());
-
-		size_t beginIndex = currentPointIndex - sameYPosCount;
-		size_t lastIndex = currentPointIndex - 1;
-
-		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
-	}
-
-	if (sameXPosCount > 1)
-	{
-		assert(currentPointIndex == result.size());
-
-		size_t beginIndex = currentPointIndex - sameXPosCount;
-		size_t lastIndex = currentPointIndex - 1;
-
-		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
 	}
 
 	// Check points before return
@@ -1168,7 +1135,6 @@ std::vector<VFrame30::SchemaPoint> EditConnectionLine::removeUnwantedPoints(cons
 
 		// Points must be connected by X or Y axis. In other way - exception must be rised
 		//
-
 		assert((std::abs(curPoint.X - prevPoint.X) < 0.0000001) ||
 				(std::abs(curPoint.Y - prevPoint.Y) < 0.0000001));
 	}
