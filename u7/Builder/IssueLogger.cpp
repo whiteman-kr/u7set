@@ -2633,32 +2633,6 @@ namespace Builder
 				  QString(tr("Floating point constant is connected to discrete signal '%1'.").arg(appSignalID)));
 	}
 
-	/// IssueCode: ALC5029
-	///
-	/// IssueType: Warning
-	///
-	/// Title: The signal '%1' is repeatedly connected to the transmitter '%2'.
-	///
-	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Connection ID
-	///		%3 Signal Uuid
-	///		%4 Transmitter Uuid
-	///
-	/// Description:
-	///		The same signal should be connected only once to the transmitter. Check transmitter input links.
-	///
-	void IssueLogger::wrnALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
-
-		LOG_WARNING0(IssueType::AlCompiler,
-				  5029,
-				  QString(tr("The signal '%1' is repeatedly connected to the transmitter '%2'.").
-						  arg(appSignalID).arg(connection)));
-	}
-
 	/// IssueCode: ALC5030
 	///
 	/// IssueType: Error

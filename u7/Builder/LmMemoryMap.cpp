@@ -753,6 +753,16 @@ namespace Builder
 		return result;
 	}
 
+	bool LmMemoryMap::appendAcquiredBussesInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredBuses, ualSignals, true);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
 	bool LmMemoryMap::appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals)
 	{
 		bool result = true;
@@ -783,6 +793,15 @@ namespace Builder
 		return result;
 	}
 
+	bool LmMemoryMap::appendNonAcquiredBusses(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendUalSignals(m_appWordAdressed.nonAcquiredBuses, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
+	}
 
 	Address16 LmMemoryMap::setAcquiredRawDataSize(int sizeW)
 	{

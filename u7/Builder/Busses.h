@@ -63,6 +63,8 @@ namespace Builder
 		const std::vector<int>& analogSignalIndexes() const { return m_analogSignalIndexes; }
 		const std::map<int, std::vector<int>>& discreteSignalIndexes() const { return m_discreteSignalIndexes; }
 
+		const QVector<BusSignal>& busSignals() const { return m_signals; }
+
 	private:
 		bool buildInBusSignalsMap();
 		bool placeSignals();

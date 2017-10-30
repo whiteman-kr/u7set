@@ -356,39 +356,41 @@ namespace Builder
 		// Application Signal
 		// represent all signal in application logic schemas, and signals, which createad in compiling time
 		//
-	private:
-
-		// private constructors can be used by UalSignalsMap only
-		//
-		UalSignal(const UalItem* ualItem, Signal* s);
-
-		UalSignal(const UalItem* ualItem,
-				  const QString& constSignalID,
-				  E::SignalType constSignalType,
-				  E::AnalogAppSignalFormat constAnalogFormat,
-				  int constDiscreteValue,
-				  int constIntValue,
-				  float constFloatValue);
-
-		UalSignal(const UalItem* ualItem,
-				  const QString& signalID,
-				  E::SignalType signalType,
-				  E::AnalogAppSignalFormat analogFormat);
-
-		UalSignal(const UalItem* ualItem,
-				  const Signal* s,
-				  const QString &lmEquipmentID);
-
-		friend class UalSignalsMap;
-
-		UalSignal(const UalSignal&) = delete;
-
 	public:
-		UalSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const UalItem* appItem, const QString& appSignalID);
-		UalSignal(const QUuid& guid, const QString &signalID, const QString& busTypeID, int busSizeW);
+		UalSignal();
+		UalSignal(const UalSignal&) = delete;
 
 		~UalSignal();
 
+	private:
+		// private intializers can be used by UalSignalsMap only
+		//
+		bool createRegularSignal(const UalItem* ualItem, Signal* s);
+
+		bool createConstSignal(const UalItem* ualItem,
+								const QString& constSignalID,
+								E::SignalType constSignalType,
+								E::AnalogAppSignalFormat constAnalogFormat);
+
+		bool createAutoSignal(const UalItem* ualItem,
+								const QString& signalID,
+								E::SignalType signalType,
+								E::AnalogAppSignalFormat analogFormat);
+
+		bool createOptoSignal(const UalItem* ualItem,
+								const Signal* s,
+								const QString &lmEquipmentID);
+
+		bool createBusParentSignal(const UalItem* ualItem,
+									Signal* busSignal,
+									Builder::BusShared bus);
+
+		bool createBusChildSignal(const UalItem* ualItem,
+									Signal* busChildSignal);
+
+		friend class UalSignalsMap;
+
+	public:
 		bool appendRefSignal(Signal* s, bool isOptoSignal);
 
 		void setComputed() { m_computed = true; }
@@ -435,6 +437,7 @@ namespace Builder
 
 		bool isCompatible(const Signal* s) const;
 		bool isCompatible(const LogicAfbSignal& afbSignal) const;
+		bool isCompatible(const Builder::BusSignal& busSignal) const;
 
 		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
 
@@ -450,6 +453,9 @@ namespace Builder
 		bool isInternal() const { return isSource() == false && m_isOutput == false; }
 
 		bool isAcquired() const { return m_isAcquired; }
+
+		bool isBusChild() const { return m_isBusChild; }
+		void setBusChild(bool busChild) { m_isBusChild = busChild; }
 
 		//
 
@@ -473,15 +479,21 @@ namespace Builder
 
 		QString optoConnectionID() const;
 
-		const UalItem* ualItem() const { return m_ualItem; }
-
 		void setUalItem(const UalItem* ualItem);
+
+		const UalItem* ualItem() const { return m_ualItem; }
+		QUuid ualItemGuid() const;
+
+		bool appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal);
+
 
 	private:
 		const UalItem* m_ualItem = nullptr;
 		Signal* m_autoSignalPtr = nullptr;
 
 		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
+
+		QHash<QString, UalSignal*> m_busChildSignals;
 
 		//
 
@@ -501,6 +513,8 @@ namespace Builder
 
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
+
+		bool m_isBusChild = false;
 
 		bool m_computed = false;
 		bool m_resultSaved = false;
@@ -534,6 +548,8 @@ namespace Builder
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
 		UalSignal* createOptoSignal(const UalItem* ualItem, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
+
+		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* busSignal, BusShared bus, QUuid outPinUuid);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);

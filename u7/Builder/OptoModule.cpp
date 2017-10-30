@@ -311,16 +311,19 @@ namespace Hardware
 
 		for(const RawDataDescriptionItem& rawTxSignal : m_rawTxSignals)
 		{
-			if (m_txSignals.contains(rawTxSignal.appSignalID) == false)
+			TxRxSignalShared txSignal = m_txSignalIDs.value(rawTxSignal.appSignalID, nullptr);
+
+			if (txSignal == nullptr)
 			{
+				// Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
+				//
 				m_log->errALC5192(rawTxSignal.appSignalID, m_equipmentID, m_connectionID);
 				result = false;
-				continue;
 			}
-
-			TxRxSignalShared& txSignal = m_txSignals[rawTxSignal.appSignalID];
-
-			txSignal->initRawSignal(rawTxSignal, TX_DATA_ID_SIZE_W);
+			else
+			{
+				txSignal->initRawSignal(rawTxSignal, TX_DATA_ID_SIZE_W);
+			}
 		}
 
 		return result;
@@ -500,7 +503,7 @@ namespace Hardware
 			return false;
 		}
 
-		if (m_rxSignals.contains(rxSignal->appSignalID()) == true)
+		if (m_rxSignalIDs.contains(rxSignal->appSignalID()) == true)
 		{
 			return true;				// signal already in list, nothing to do
 		}
@@ -521,14 +524,16 @@ namespace Hardware
 
 		for(const RawDataDescriptionItem& rawRxSignal : m_rawRxSignals)
 		{
-			if (m_rxSignals.contains(rawRxSignal.appSignalID) == false)
+			TxRxSignalShared rxSignal = m_rxSignalIDs.value(rawRxSignal.appSignalID, nullptr);
+
+			if (rxSignal == nullptr)
 			{
+				// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+				//
 				m_log->errALC5193(rawRxSignal.appSignalID, m_equipmentID, m_connectionID);
 				result = false;
 				continue;
 			}
-
-			TxRxSignalShared& rxSignal = m_rxSignals[rawRxSignal.appSignalID];
 
 			rxSignal->initRawSignal(rawRxSignal, TX_DATA_ID_SIZE_W);
 		}
@@ -739,16 +744,16 @@ namespace Hardware
 
 		// copying txSignals of linked port to rxSignals of current port
 		//
-		const HashedVector<QString, TxRxSignalShared>& txSignals = linkedPort->txSignals();
+		const QVector<TxRxSignalShared>& txSignals = linkedPort->txSignals();
 
-		for(const TxRxSignalShared& txSignal : txSignals)
+		for(const TxRxSignalShared txSignal : txSignals)
 		{
 			if (txSignal == nullptr)
 			{
 				ASSERT_RETURN_FALSE;
 			}
 
-			m_rxSignals.insert(txSignal->appSignalID(), txSignal);
+			m_rxSignals.append(txSignal);
 
 			for(const QString& appSignalID : txSignal->appSignalIDs())
 			{
@@ -997,7 +1002,7 @@ namespace Hardware
 			return false;
 		}
 
-		return m_rxSignals.contains(appSignalID);
+		return m_rxSignalIDs.contains(appSignalID);
 	}
 
 	bool OptoPort::isUsedInConnection() const
@@ -1021,7 +1026,7 @@ namespace Hardware
 
 	bool OptoPort::getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16& addr) const
 	{
-		TxRxSignalShared txSignal = m_txSignals.value(appSignalID);
+		TxRxSignalShared txSignal = m_txSignalIDs.value(appSignalID, nullptr);
 
 		if (txSignal == nullptr)
 		{
@@ -1051,7 +1056,7 @@ namespace Hardware
 
 	bool OptoPort::getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const
 	{
-		TxRxSignalShared rxSignal = m_rxSignals.value(appSignalID);
+		TxRxSignalShared rxSignal = m_rxSignalIDs.value(appSignalID);
 
 		if (rxSignal == nullptr)
 		{
@@ -1603,12 +1608,9 @@ namespace Hardware
 
 		QString ualSignalID = ualSignal->appSignalID();
 
-		if (m_txSignals.contains(ualSignalID) == true)
+		if (m_txSignalIDs.contains(ualSignalID) == true)
 		{
-			// Signal ID '%1' is duplicate in opto port '%2'.
-			//
-			m_log->errALC5188(ualSignalID, m_equipmentID);
-			return false;
+			return true;			// signal already in tx list
 		}
 
 		QStringList appSignalIDs;
@@ -1625,7 +1627,7 @@ namespace Hardware
 			return false;
 		}
 
-		m_txSignals.insert(ualSignalID, txSignal);
+		m_txSignals.append(txSignal);
 
 		for(const QString& appSignalID : appSignalIDs)
 		{
@@ -1646,12 +1648,10 @@ namespace Hardware
 
 		QString ualSignalID = ualSignal->appSignalID();
 
-		if (m_rxSignals.contains(ualSignalID) == true)
+		if (m_rxSignalIDs.contains(ualSignalID) == true)
 		{
-			// Signal ID '%1' is duplicate in opto port '%2'.
-			//
-			m_log->errALC5188(ualSignalID, m_equipmentID);
-			return false;
+			assert(false);					// for debug
+			return true;					// signal already in rs list
 		}
 
 		QStringList appSignalIDs;
@@ -1668,7 +1668,7 @@ namespace Hardware
 			return false;
 		}
 
-		m_rxSignals.insert(ualSignalID, rxSignal);
+		m_rxSignals.append(rxSignal);
 
 		for(const QString& appSignalID : appSignalIDs)
 		{
@@ -1678,43 +1678,43 @@ namespace Hardware
 		return true;
 	}
 
-	void OptoPort::sortByOffsetBitNoAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs)
+	void OptoPort::sortByOffsetBitNoAscending(QVector<TxRxSignalShared>& list)
 	{
-		int count = pairs.count();
+		int count = list.count();
 
 		for(int i = 0; i < count - 1; i++)
 		{
 			for(int k = i + 1; k < count; k++)
 			{
-				if (pairs[i].second->addrInBuf().bitAddress() > pairs[k].second->addrInBuf().bitAddress())
+				if (list[i]->addrInBuf().bitAddress() > list[k]->addrInBuf().bitAddress())
 				{
-					QPair<QString, TxRxSignalShared> temp = pairs[i];
-					pairs[i] = pairs[k];
-					pairs[k] = temp;
+					TxRxSignalShared temp = list[i];
+					list[i] = list[k];
+					list[k] = temp;
 				}
 			}
 		}
 	}
 
-	void OptoPort::sortByAppSignalIdAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs)
+	void OptoPort::sortByAppSignalIdAscending(QVector<TxRxSignalShared>& list)
 	{
-		int count = pairs.count();
+		int count = list.count();
 
 		for(int i = 0; i < count - 1; i++)
 		{
 			for(int k = i + 1; k < count; k++)
 			{
-				if (pairs[i].second->appSignalID() > pairs[k].second->appSignalID())
+				if (list[i]->appSignalID() > list[k]->appSignalID())
 				{
-					QPair<QString, TxRxSignalShared> temp = pairs[i];
-					pairs[i] =  pairs[k];
-					pairs[k] = temp;
+					TxRxSignalShared temp = list[i];
+					list[i] =  list[k];
+					list[k] = temp;
 				}
 			}
 		}
 	}
 
-	bool OptoPort::checkSignalsOffsets(const HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count)
+	bool OptoPort::checkSignalsOffsets(const QVector<TxRxSignalShared>& signalList, int startIndex, int count)
 	{
 		bool result = true;
 
@@ -1741,7 +1741,7 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoPort::sortTxRxSignalList(HashedVector<QString, TxRxSignalShared>& signalList)
+	bool OptoPort::sortTxRxSignalList(QVector<TxRxSignalShared>& signalList)
 	{
 		// Tx/Rx signals sorting order:
 		//
@@ -1749,8 +1749,8 @@ namespace Hardware
 		// 2. All Regular Analog signals (on appSignalID ascending)
 		// 3. All Regular Discrete signals (on appSignalID ascending)
 
-		QVector<QPair<QString, TxRxSignalShared>> pairs;
-		HashedVector<QString, TxRxSignalShared> tempSignalList = signalList;
+		QVector<TxRxSignalShared> tempList;
+		QVector<TxRxSignalShared> tempSignalList = signalList;
 
 		int count = tempSignalList.count();
 
@@ -1764,13 +1764,13 @@ namespace Hardware
 
 			if (s->isRaw() == true)
 			{
-				pairs.append(QPair<QString, TxRxSignalShared>(s->appSignalID(), s));
+				tempList.append(s);
 			}
 		}
 
-		sortByOffsetBitNoAscending(pairs);
+		sortByOffsetBitNoAscending(tempList);
 
-		copyPairVectorToHashedVector(pairs, signalList);
+		signalList.append(tempList);
 
 		if (checkSignalsOffsets(signalList, 0, signalList.count()) == false)
 		{
@@ -1779,7 +1779,7 @@ namespace Hardware
 
 		// 2. Fetch and sort all regular analog Tx signals
 		//
-		pairs.clear();
+		tempList.clear();
 
 		for(int i = 0; i < count; i++)
 		{
@@ -1787,17 +1787,17 @@ namespace Hardware
 
 			if (s->isRegular() == true && s->isAnalog() == true)
 			{
-				pairs.append(QPair<QString, TxRxSignalShared>(s->appSignalID(), s));
+				tempList.append(s);
 			}
 		}
 
-		sortByAppSignalIdAscending(pairs);
+		sortByAppSignalIdAscending(tempList);
 
-		copyPairVectorToHashedVector(pairs, signalList);
+		signalList.append(tempList);
 
 		// 3. Fetch and sort all regular discrete Tx signals
 		//
-		pairs.clear();
+		tempList.clear();
 
 		for(int i = 0; i < count; i++)
 		{
@@ -1805,33 +1805,15 @@ namespace Hardware
 
 			if (s->isRegular() == true && s->isDiscrete() == true)
 			{
-				pairs.append(QPair<QString, TxRxSignalShared>(s->appSignalID(), s));
+				tempList.append(s);
 			}
 		}
 
-		sortByAppSignalIdAscending(pairs);
+		sortByAppSignalIdAscending(tempList);
 
-		copyPairVectorToHashedVector(pairs, signalList);
+		signalList.append(tempList);
 
 		return true;
-	}
-
-	void OptoPort::copyHashedVectorToPairVector(const HashedVector<QString, TxRxSignalShared>& hVector,
-												QVector<QPair<QString, TxRxSignalShared>>& pVector)
-	{
-		for(const TxRxSignalShared& txRxSignal : hVector)
-		{
-			pVector.append(QPair<QString, TxRxSignalShared>(txRxSignal->appSignalID(), txRxSignal));
-		}
-	}
-
-	void OptoPort::copyPairVectorToHashedVector(const QVector<QPair<QString, TxRxSignalShared>>& pVector,
-												HashedVector<QString, TxRxSignalShared>& hVector)
-	{
-		for(const QPair<QString, TxRxSignalShared>& pair : pVector)
-		{
-			hVector.insert(pair.first, pair.second);
-		}
 	}
 
 	// --------------------------------------------------------------------------------------

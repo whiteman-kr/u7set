@@ -219,7 +219,6 @@ namespace Builder
 		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
 		void errALC5027(QUuid transmitterUuid);									// All transmitter inputs must be directly linked to a signals.
 		void errALC5028(QString appSignalID, QUuid constUuid, QUuid signalUuid);	// Floating point constant is connected to discrete signal '%1'.
-		void wrnALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid);		// The signal '%1' is repeatedly connected to the transmitter '%2'.
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal '%1' is not associated with LM '%2'.
 		void errALC5031(QString appSignalID);												// The signal '%1' can be bind to Logic Module or Equipment Signal.
 		void errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);		// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).

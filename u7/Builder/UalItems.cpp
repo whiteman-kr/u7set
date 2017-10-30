@@ -867,17 +867,31 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	UalSignal::UalSignal(const UalItem* ualItem, Signal* s) :
-		m_ualItem(ualItem)
+
+	UalSignal::UalSignal()
+	{
+	}
+
+	UalSignal::~UalSignal()
+	{
+		if (m_autoSignalPtr != nullptr)
+		{
+			delete m_autoSignalPtr;
+		}
+
+		m_refSignals.clear();
+	}
+
+	bool UalSignal::createRegularSignal(const UalItem* ualItem, Signal* s)
 	{
 		// ualItem can be == nullptr!!!
-
-		// regular UalSignal creation
+		//
+		m_ualItem = ualItem;
 
 		if (s == nullptr )
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		m_autoSignalPtr = nullptr;
@@ -890,18 +904,30 @@ namespace Builder
 		{
 			setComputed();
 		}
+
+		return true;
 	}
 
-	UalSignal::UalSignal(const UalItem* ualItem,
-						 const QString& constSignalID,
-						 E::SignalType constSignalType,
-						 E::AnalogAppSignalFormat constAnalogFormat,
-						 int constDiscreteValue,
-						 int constIntValue,
-						 float constFloatValue) :
-		m_ualItem(ualItem)
+	bool UalSignal::createConstSignal(const UalItem* ualItem,
+										const QString& constSignalID,
+										E::SignalType constSignalType,
+										E::AnalogAppSignalFormat constAnalogFormat)
 	{
-		assert(ualItem != nullptr);
+		if (ualItem == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_ualItem = ualItem;
+
+		const UalConst* ualConst = ualItem->ualConst();
+
+		if (ualConst == nullptr)
+		{
+			assert(false);
+			return false;
+		}
 
 		// const UalSignal creation
 
@@ -937,20 +963,27 @@ namespace Builder
 		// set Const signal fields
 
 		m_isConst = true;
-		m_constDiscreteValue = constDiscreteValue;
-		m_constIntValue = constIntValue;
-		m_constFloatValue = constFloatValue;
+		m_constDiscreteValue = ualConst->discreteValue();
+		m_constIntValue = ualConst->intValue();
+		m_constFloatValue = ualConst->floatValue();
 
 		setComputed();
+
+		return true;
 	}
 
-	UalSignal::UalSignal(const UalItem* ualItem,
-						 const QString& signalID,
-						 E::SignalType signalType,
-						E::AnalogAppSignalFormat analogFormat) :
-		m_ualItem(ualItem)
+	bool UalSignal::createAutoSignal(const UalItem* ualItem,
+									const QString& signalID,
+									E::SignalType signalType,
+									E::AnalogAppSignalFormat analogFormat)
 	{
-		assert(ualItem != nullptr);
+		if (ualItem == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_ualItem = ualItem;
 
 		// analog or discrete auto UalSignal creation
 
@@ -975,6 +1008,7 @@ namespace Builder
 			m_autoSignalPtr->setDataSize(SIZE_32BIT);
 			break;
 
+		case E::SignalType::Bus:
 		default:
 			assert(false);
 		}
@@ -984,19 +1018,24 @@ namespace Builder
 		appendRefSignal(m_autoSignalPtr, false);
 	}
 
-	UalSignal::UalSignal(const UalItem* ualItem,
-						 const Signal *s,
-						 const QString& lmEquipmentID) :
-		m_ualItem(ualItem)
+	bool UalSignal::createOptoSignal(const UalItem* ualItem,
+									const Signal* s,
+									const QString& lmEquipmentID)
 	{
-		assert(ualItem != nullptr);
+		if (ualItem == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_ualItem = ualItem;
 
 		// Opto UalSignal creation from receiver
 
 		if (s == nullptr)
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		assert(s->equipmentID() != lmEquipmentID);				// s - is a signal from another LM received by Opto connection
@@ -1018,59 +1057,76 @@ namespace Builder
 		appendRefSignal(m_autoSignalPtr, true);
 
 		setComputed();
+
+		return true;
 	}
 
-
-	UalSignal::UalSignal(const QUuid& guid, E::SignalType signalType,
-						 E::AnalogAppSignalFormat dataFormat,
-						 int dataSize,
-						 const UalItem *appItem,
-						 const QString& strID)
+	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
+											Signal* busSignal,
+											Builder::BusShared bus)
 	{
-/*		m_isAutoSignal = true;
-
-		m_signal = new Signal;
-
-		// construct auto AppSignal based on OutputPin
+		// create parent Bus signal
 		//
-		m_signal->setAppSignalID(strID);
-		m_signal->setSignalType(signalType);
-		m_signal->setAnalogSignalFormat(dataFormat);
-		m_signal->setDataSize(dataSize);
-
-		if (signalType == E::SignalType::Analog && dataSize != SIZE_32BIT)
+		if (ualItem == nullptr || bus == nullptr)
 		{
 			assert(false);
+			return false;
 		}
 
-		m_signal->setInOutType(E::SignalInOutType::Internal);
-		m_signal->setAcquire(false);								// non-registered signal !*/
-	}
+		m_ualItem = ualItem;
+		m_bus = bus;
 
-	UalSignal::UalSignal(const QUuid& guid, const QString& signalID, const QString& busTypeID, int busSizeW)
-	{
-/*		m_isAutoSignal = true;
-
-		m_signal = new Signal;
-
-		// construct auto AppSignal based on OutputPin
-		//
-		m_signal->setAppSignalID(signalID);
-		m_signal->setSignalType(E::SignalType::Bus);
-		m_signal->setBusTypeID(busTypeID);
-		m_signal->setDataSize(busSizeW * SIZE_16BIT);
-		m_signal->setInOutType(E::SignalInOutType::Internal);
-		m_signal->setAcquire(false);								// non-registered signal !*/
-	}
-
-	UalSignal::~UalSignal()
-	{
-		if (m_autoSignalPtr != nullptr)
+		if (busSignal == nullptr)
 		{
-			delete m_autoSignalPtr;
+			// create auto bus signal
+			//
+			QString appSignalID = QString("#AUTO_BUS_%1").arg(ualItem->label());
+
+			m_autoSignalPtr = new Signal;
+
+			m_autoSignalPtr->setAppSignalID(appSignalID);
+			m_autoSignalPtr->setCustomAppSignalID(appSignalID.remove("#"));
+			m_autoSignalPtr->setCaption(m_autoSignalPtr->customAppSignalID());
+
+			m_autoSignalPtr->setSignalType(E::SignalType::Bus);
+			m_autoSignalPtr->setBusTypeID(bus->busTypeID());
+
+			m_autoSignalPtr->setDataSizeW(bus->sizeW());
+
+			m_autoSignalPtr->setAcquire(false);
+
+			busSignal = m_autoSignalPtr;
+		}
+		else
+		{
+			assert(busSignal->isBus());
+			assert(busSignal->busTypeID() == bus->busTypeID());
 		}
 
-		m_refSignals.clear();
+		appendRefSignal(busSignal, false);
+
+		return true;
+	}
+
+
+	bool UalSignal::createBusChildSignal(const UalItem* ualItem,
+										Signal* busChildSignal)
+	{
+		if (ualItem == nullptr || busChildSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		// Bus child signal is not AUTO signal!!!
+		//
+		// instance of busChildSignal is creates by UalSignalMap and added to project's m_signalSet
+		// and destroyed when in m_signalSet is deleted
+		//
+
+		appendRefSignal(busChildSignal, false);
+
+		return true;
 	}
 
 	bool UalSignal::appendRefSignal(Signal* s, bool isOptoSignal)
@@ -1246,7 +1302,19 @@ namespace Builder
 			return false;
 //			m_signals[0]->isCompatibleFormat(E::SignalType::Bus);
 		}
+
 		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
+	}
+
+	bool UalSignal::isCompatible(const Builder::BusSignal& busSignal) const
+	{
+		if (m_refSignals.count() < 1 || m_refSignals[0] == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
 	}
 
 	E::SignalType UalSignal::constType() const
@@ -1537,6 +1605,38 @@ namespace Builder
 		}
 	}
 
+	QUuid UalSignal::ualItemGuid() const
+	{
+		if (m_ualItem != nullptr)
+		{
+			return m_ualItem->guid();
+		}
+
+		return QUuid();
+	}
+
+	bool UalSignal::appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal)
+	{
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (m_busChildSignals.contains(busSignalID) == true)
+		{
+			assert(false);
+			return false;
+		}
+
+		ualSignal->setBusChild(true);
+
+		m_busChildSignals.insert(busSignalID, ualSignal);
+
+		return true;
+	}
+
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppSignalsMap class implementation
@@ -1588,14 +1688,22 @@ namespace Builder
 
 		// create new signal
 		//
-		ualSignal = new UalSignal(ualItem, s);
+		ualSignal = new UalSignal;
 
-		bool result = insertNew(outPinUuid, ualSignal);
+		bool result = ualSignal->createRegularSignal(ualItem, s);
 
 		if (result == false)
 		{
 			delete ualSignal;
-			return false;
+			return nullptr;
+		}
+
+		result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return nullptr;
 		}
 
 		return ualSignal;
@@ -1610,7 +1718,7 @@ namespace Builder
 		{
 			assert(false);
 			LOG_NULLPTR_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		QString constSignalID = QString("%1_%2").arg(AUTO_CONST_SIGNAL_ID_PREFIX).arg(ualItem->label());
@@ -1635,25 +1743,29 @@ namespace Builder
 		if (ualConst == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		// create new const signal
 		//
-		ualSignal = new UalSignal(ualItem,
-								  constSignalID,
-								  constSignalType,
-								  constAnalogFormat,
-								  ualConst->discreteValue(),
-								  ualConst->intValue(),
-								  ualConst->floatValue());
+		ualSignal = new UalSignal;
 
-		bool result = insertNew(outPinUuid, ualSignal);
+		bool result = ualSignal->createConstSignal(ualItem,
+									  constSignalID,
+									  constSignalType,
+									  constAnalogFormat);
+		if (result == false)
+		{
+			delete ualSignal;
+			return nullptr;
+		}
+
+		result = insertNew(outPinUuid, ualSignal);
 
 		if (result == false)
 		{
 			delete ualSignal;
-			return false;
+			return nullptr;
 		}
 
 		return ualSignal;
@@ -1689,19 +1801,27 @@ namespace Builder
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
 							   QString(tr("Invalid AFB's output format %1.%2 (Logic schema %3)")).
 							   arg(ualItem->caption()).arg(outAfbSignal.caption()).arg(ualItem->schemaID()));
-			return false;
+			return nullptr;
 		}
 
 		// create new auto signal
 		//
-		ualSignal = new UalSignal(ualItem, signalID, outAfbSignal.type(), analogFormat);
+		ualSignal = new UalSignal;
+
+		result = ualSignal->createAutoSignal(ualItem, signalID, outAfbSignal.type(), analogFormat);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return nullptr;
+		}
 
 		result = insertNew(outPinUuid, ualSignal);
 
 		if (result == false)
 		{
 			delete ualSignal;
-			return false;
+			return nullptr;
 		}
 
 		return ualSignal;
@@ -1711,15 +1831,75 @@ namespace Builder
 	{
 		// create opto signal
 		//
-		UalSignal* ualSignal = new UalSignal(ualItem, s, lmEquipmentID);
+		UalSignal* ualSignal = new UalSignal;
 
-		bool result = insertNew(outPinUuid, ualSignal);
+		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID);
 
 		if (result == false)
 		{
 			delete ualSignal;
-			return false;
+			return nullptr;
 		}
+
+		result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return nullptr;
+		}
+
+		return ualSignal;
+	}
+
+	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem, Signal* busSignal, BusShared bus, QUuid outPinUuid)
+	{
+		// busSignal can bee nullptr
+		//
+
+		UalSignal* ualSignal = new UalSignal;
+
+		bool result = ualSignal->createBusParentSignal(ualItem, busSignal, bus);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return nullptr;
+		}
+
+		result = insertNew(outPinUuid, ualSignal);
+
+		if (result == false)
+		{
+			delete ualSignal;
+			return nullptr;
+		}
+
+
+		const QVector<BusSignal>& busSignals = bus->busSignals();
+
+		for(const BusSignal& busSignal : busSignals)
+		{
+			Signal* s = new Signal;
+
+			s->setSignalType(busSignal.signalType);
+			s->setDataSize(busSignal.signalType, busSignal.analogFormat);
+			s->setInOutType(E::SignalInOutType::Internal);
+
+			QString appSignalID = QString("%1.%2").arg(ualSignal->appSignalID()).arg(busSignal.signalID);
+
+			s->setAppSignalID(appSignalID);
+			s->setCustomAppSignalID(appSignalID.remove("#"));
+
+
+			buildBusSignalCaption(const QString& busParentSignalCaption,
+														 const QString& busTypeID,
+														 const QString& busParentSignalCustomID,
+														 const QString& busChildSignalID,
+														 const QString& busChildSignalCaption)
+		}
+
+
 
 		return ualSignal;
 	}

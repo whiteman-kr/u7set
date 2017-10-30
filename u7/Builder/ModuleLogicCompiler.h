@@ -109,6 +109,7 @@ namespace Builder
 		bool createUalAfbsMap();
 
 		bool createUalSignals();
+		bool createUalSignalsFromBusComposer(UalItem* ualItem);
 		bool createUalSignalFromSignal(UalItem* ualItem);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
@@ -117,10 +118,12 @@ namespace Builder
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 
 		bool detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat);
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
+		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
@@ -399,6 +402,8 @@ namespace Builder
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
+
+		QHash<UalItem*, UalSignal*> m_busComposers;
 
 		// service maps
 		//

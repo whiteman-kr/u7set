@@ -255,10 +255,13 @@ namespace Builder
 		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
 													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
+		bool appendAcquiredBussesInRegBuf(const QVector<UalSignal*>& ualSignals);
 
 		bool appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendNonAcquiredAnalogStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
 		bool appendNonAcquiredAnalogInternalSignals(const QVector<UalSignal*>& ualSignals);
+
+		bool appendNonAcquiredBusses(const QVector<UalSignal*>& ualSignals);
 
 		Address16 setAcquiredRawDataSize(int sizeW);
 

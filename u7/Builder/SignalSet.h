@@ -26,6 +26,12 @@ namespace Builder
 
 		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
 
+		static QString buildBusSignalCaption(const QString& busParentSignalCaption,
+												 const QString& busTypeID,
+												 const QString& busParentSignalCustomID,
+												 const QString& busChildSignalID,
+												 const QString& busChildSignalCaption) const;
+
 	private:
 		bool appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
 		QString buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);

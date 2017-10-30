@@ -429,4 +429,21 @@ namespace Builder
 
 		return caption;
 	}
+
+	QString SignalSet::buildBusSignalCaption(const QString& busParentSignalCaption,
+											 const QString& busTypeID,
+											 const QString& busParentSignalCustomID,
+											 const QString& busChildSignalID,
+											 const QString& busChildSignalCaption) const
+	{
+		QString caption = busParentSignalCaption;
+
+		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSTYPEID, busTypeID);
+		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSID, busParentSignalCustomID);
+		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALID, busChildSignalID);
+		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION, busChildSignalCaption);
+
+		return caption;
+	}
+
 }

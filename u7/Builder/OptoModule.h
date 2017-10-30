@@ -134,8 +134,8 @@ namespace Hardware
 		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getRxSignals(QVector<TxRxSignalShared>& rxSignals) const;
 
-		const HashedVector<QString, TxRxSignalShared>& txSignals() const { return m_txSignals; }
-		const HashedVector<QString, TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
+		const QVector<TxRxSignalShared>& txSignals() const { return m_txSignals; }
+		const QVector<TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
 
 		int rxSignalsCount() const { return m_rxSignals.count(); }
 
@@ -269,18 +269,12 @@ namespace Hardware
 	private:
 		bool appendRxSignal(const Builder::UalSignal* ualSignal);
 
-		void sortByOffsetBitNoAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
-		void sortByAppSignalIdAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
+		void sortByOffsetBitNoAscending(QVector<TxRxSignalShared>& list);
+		void sortByAppSignalIdAscending(QVector<TxRxSignalShared>& list);
 
-		bool checkSignalsOffsets(const HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
+		bool checkSignalsOffsets(const QVector<TxRxSignalShared>& signalList, int startIndex, int count);
 
-		bool sortTxRxSignalList(HashedVector<QString, TxRxSignalShared>& signalList);
-
-		void copyHashedVectorToPairVector(const HashedVector<QString, TxRxSignalShared>& hVector,
-										  QVector<QPair<QString, TxRxSignalShared>>& pVector);
-
-		void copyPairVectorToHashedVector(const QVector<QPair<QString, TxRxSignalShared>>& pVector,
-										  HashedVector<QString, TxRxSignalShared>& hVector);
+		bool sortTxRxSignalList(QVector<TxRxSignalShared> &signalList);
 
 	private:
 		QString m_equipmentID;
@@ -333,7 +327,7 @@ namespace Hardware
 		bool m_txRawDataSizeWIsCalculated = false;
 		bool m_txRawDataSizeWCalculationStarted = false;
 
-		HashedVector<QString, TxRxSignalShared> m_txSignals;			// signals transmitted via port
+		QVector<TxRxSignalShared> m_txSignals;			// signals transmitted via port
 		QHash<QString, TxRxSignalShared> m_txSignalIDs;
 
 		//
@@ -346,7 +340,7 @@ namespace Hardware
 		int m_rxAnalogSignalsSizeW = 0;					//
 		int m_rxDiscreteSignalsSizeW = 0;				//
 
-		HashedVector<QString, TxRxSignalShared> m_rxSignals;			// signals received via port
+		QVector<TxRxSignalShared> m_rxSignals;			// signals received via port
 		QHash<QString, TxRxSignalShared> m_rxSignalIDs;
 	};
 

@@ -121,6 +121,11 @@ void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat data
 	}
 }
 
+void Signal::setDataSizeW(int sizeW)
+{
+	m_dataSize = sizeW * SIZE_16BIT;
+}
+
 E::DataFormat Signal::dataFormat() const
 {
 	switch(m_signalType)

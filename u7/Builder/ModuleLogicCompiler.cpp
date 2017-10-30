@@ -681,9 +681,8 @@ namespace Builder
 			}
 		}
 
-		// create Bus signals and Bus child signals from BusComposers
+		// create Bus parent and Bus child signals from BusComposers
 		//
-
 		for(UalItem* ualItem : m_ualItems)
 		{
 			if (ualItem == nullptr)
@@ -695,7 +694,7 @@ namespace Builder
 
 			if (ualItem->isBusComposer() == true)
 			{
-//				createUalSignalsFromBusComposer
+				result &= createUalSignalsFromBusComposer(ualItem);
 			}
 		}
 
@@ -755,16 +754,65 @@ namespace Builder
 			ualSignal->sortRefSignals();
 		}
 
-/*		bool result = false;
+		return result;
+	}
 
-		do
+	bool ModuleLogicCompiler::createUalSignalsFromBusComposer(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
 		{
-			if (appendUalSignals() == false) break;
-			if (appendSignalsFromAppItems() == false) break;
-
-			result = true;
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
 		}
-		while(false);*/
+
+		const UalBusComposer* busComposer = ualItem->ualBusComposer();
+
+		if (busComposer == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const std::vector<LogicPin>& outputs = busComposer->outputs();
+
+		if (outputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const LogicPin& outPin = outputs[0];
+
+		if (isConnectedToTerminatorOnly(outPin) == true)
+		{
+			// not need to create bus signal
+			return true;
+		}
+
+		QString busTypeID = busComposer->busTypeId();
+
+		BusShared bus = m_signals->getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			// Bus type ID '%1' is undefined (Logic schema '%2').
+			//
+			m_log->errALC5100(busTypeID, ualItem->guid(), ualItem->schemaID());
+			return false;
+		}
+
+		Signal* connectedBusSignal = getCompatibleConnectedBusSignal(outPin, busTypeID);
+
+		UalSignal* parentBusSignal = m_ualSignals.createBusParentSignal(ualItem, connectedBusSignal, bus, outPin.guid());
+
+		if (parentBusSignal == nullptr)
+		{
+			return false;
+		}
+
+		m_busComposers.insert(ualItem, parentBusSignal);
+
+		bool result = linkConnectedItems(ualItem, outPin, parentBusSignal);
 
 		return result;
 	}
@@ -1141,6 +1189,9 @@ namespace Builder
 				break;
 
 			case UalItem::Type::BusComposer:
+				result &= linkBusComposerInput(srcUalItem, destUalItem, inPinUuid, ualSignal);
+				break;
+
 			case UalItem::Type::BusExtractor:
 				break;
 
@@ -1312,6 +1363,59 @@ namespace Builder
 		return m_ualSignals.appendRefPin(srcItem, inPinUuid, ualSignal);
 	}
 
+	bool ModuleLogicCompiler::linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		if (srcItem == nullptr || busComposerItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		const UalBusComposer* busComposer = busComposerItem->ualBusComposer();
+
+		if (busComposer == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString busTypeID = busComposer->busTypeId();
+
+		BusShared bus = m_signals->getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			// Bus type ID '%1' is undefined (Logic schema '%2').
+			//
+			m_log->errALC5100(busTypeID, busComposerItem->guid(), busComposerItem->schemaID());
+			return false;
+		}
+
+		const LogicPin& inPin = busComposer->input(inPinUuid);
+
+		QString busSignalID = inPin.caption();
+
+		const BusSignal& busSignal = bus->signalByID(busSignalID);
+
+		if (busSignal.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);				// bus signal with busSignalID is not found,
+			return false;
+		}
+
+		if (ualSignal->isCompatible(busSignal) == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualSignal->ualItemGuid(), busComposerItem->guid(), busComposerItem->schemaID());
+			return false;
+		}
+
+		bool result = m_ualSignals.appendRefPin(busComposerItem, inPin.guid(), ualSignal);
+
+		return result;
+	}
+
 	bool ModuleLogicCompiler::detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat)
 	{
 /*		if (constSignalType == nullptr || constAnalogFormat == nullptr)
@@ -1468,6 +1572,56 @@ namespace Builder
 
 		return nullptr;
 	}
+
+	Signal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID)
+	{
+		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
+
+		for(QUuid inPinUuid : connectedPinsUuids)
+		{
+			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+
+			if (connectedItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (connectedItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			QString signalID = connectedItem->strID();
+
+			Signal* s = m_signals->getSignal(signalID);
+
+			if (s == nullptr)
+			{
+				continue;
+			}
+
+			switch(s->signalType())
+			{
+			case E::SignalType::Discrete:
+			case E::SignalType::Analog:
+				break;
+
+			case E::SignalType::Bus:
+				if (s->busTypeID() == busTypeID)
+				{
+					return s;				// yes!!!
+				}
+				continue;
+
+			default:
+				assert(false);
+			}
+		}
+
+		return nullptr;
+	}
+
 
 	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin)
 	{
@@ -2986,7 +3140,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createAcquiredBusSignalsList()
 	{
-/*		m_acquiredBuses.clear();
+		m_acquiredBuses.clear();
 
 		//	list include signals that:
 		//
@@ -2994,24 +3148,23 @@ namespace Builder
 		//	+ bus
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* ualSignal : m_ualSignals)
 		{
-			TEST_PTR_CONTINUE(s);
+			TEST_PTR_CONTINUE(ualSignal);
 
-			if (s->isAcquired() == true &&
-				s->isBus() == true &&
-				isUsedInUal(s) == true)
+			if (ualSignal->isAcquired() == true &&
+				ualSignal->isBus() == true)
 			{
-				m_acquiredBuses.append(s);
+				m_acquiredBuses.append(ualSignal);
 			}
-		}*/
+		}
 
 		return true;
 	}
 
 	bool ModuleLogicCompiler::createNonAcquiredBusSignalsList()
 	{
-/*		m_nonAcquiredBuses.clear();
+		m_nonAcquiredBuses.clear();
 
 		//	list include signals that:
 		//
@@ -3019,42 +3172,16 @@ namespace Builder
 		//	+ bus
 		//	+ used in UAL
 
-		for(Signal* s : m_chassisSignals)
+		for(UalSignal* ualSignal : m_ualSignals)
 		{
-			TEST_PTR_CONTINUE(s);
+			TEST_PTR_CONTINUE(ualSignal);
 
-			if (s->isAcquired() == false &&
-				s->isBus() == true &&
-				isUsedInUal(s) == true)
+			if (ualSignal->isAcquired() == false &&
+				ualSignal->isBus() == true)
 			{
-				m_nonAcquiredBuses.append(s);
+				m_nonAcquiredBuses.append(ualSignal);
 			}
 		}
-
-		// append auto bus signals (auto generated in m_appSignals)
-		//
-		for(UalSignal* appSignal : m_ualSignals)
-		{
-			TEST_PTR_CONTINUE(appSignal);
-
-			if (appSignal->isAutoSignal() == true &&
-				appSignal->isBus() == true)
-			{
-				Signal* s = appSignal->signal();
-
-				if (s == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				assert(s->isAcquired() == false);
-				assert(s->isInternal() == true);
-				assert(s->isBus() == true);
-
-				m_nonAcquiredBuses.append(s);
-			}
-		}*/
 
 		return true;
 	}
@@ -3416,22 +3543,7 @@ namespace Builder
 	{
 		bool result = true;
 
-/*		int regBufOffset = -m_memoryMap.regBufStartAddr();	// minus is OK!
-
-		for(Signal* s : m_acquiredBuses)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendAcquiredBus(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses(); */
+		result &= m_memoryMap.appendAcquiredBussesInRegBuf(m_acquiredBuses);
 
 		return result;
 	}
@@ -3526,22 +3638,7 @@ namespace Builder
 	{
 		bool result = true;
 
-/*		int regBufOffset = -m_memoryMap.regBufStartAddr();	// minus is OK!
-
-		for(Signal* s : m_nonAcquiredBuses)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendNonAcquiredBus(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();  */
+		result &= m_memoryMap.appendNonAcquiredBusses(m_nonAcquiredBuses);
 
 		return result;
 	}
@@ -4255,12 +4352,6 @@ namespace Builder
 													   m_lm->equipmentIdTemplate(),
 													   connectedSignal,
 													   &signalAlreadyInTxList);
-			if (signalAlreadyInTxList == true)
-			{
-				// The signal '%1' is repeatedly connected to the transmitter '%2'
-				//
-				m_log->wrnALC5029(connectedSignal->refSignalIDs().join(","), transmitter.connectionId(), QUuid(), transmitter.guid());
-			}
 		}
 
 		return result;
@@ -4502,7 +4593,6 @@ namespace Builder
 													   m_lm->equipmentIdTemplate(),
 													   ualReceiver->guid(),
 													   rxAddress);
-
 			if (res == false)
 			{
 				result = false;
@@ -5010,7 +5100,7 @@ namespace Builder
 			m_code.append(comment);
 			m_code.newLine();
 
-			const HashedVector<QString, Hardware::TxRxSignalShared>& rxSignals = port->rxSignals();
+			const QVector<Hardware::TxRxSignalShared>& rxSignals = port->rxSignals();
 
 			for(const Hardware::TxRxSignalShared& rxSignal : rxSignals)
 			{
@@ -9175,7 +9265,7 @@ namespace Builder
 			return false;
 		}
 
-		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+		const QVector<Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
 		bool result = true;
 
@@ -9190,13 +9280,20 @@ namespace Builder
 				continue;
 			}
 
-			Signal* s = m_signals->getSignal(txSignal->appSignalID());
+			UalSignal* ualSignal = m_ualSignals.get(txSignal->appSignalID());
 
-			if (s == nullptr)
+			if (ualSignal == nullptr)
 			{
 				// Signal identifier '%1' is not found.
 				//
 				m_log->errALC5000(txSignal->appSignalID(), QUuid(), "");
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->ualAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
 				result = false;
 				continue;
 			}
@@ -9215,10 +9312,18 @@ namespace Builder
 
 			Command cmd;
 
-			int txSignalAddress = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
+			SignalAddress16 txSignalAddress;
 
-			cmd.mov32(txSignalAddress, s->ualAddr().offset());
-			cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
+			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), txSignalAddress);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			cmd.mov32(txSignalAddress.offset(), ualSignal->ualAddr().offset());
+			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalIDs().join(", ")).arg(port->connectionID()));
 
 			m_code.append(cmd);
 		}
@@ -9270,13 +9375,20 @@ namespace Builder
 				continue;					// raw signals copying in raw data section code generation
 			}
 
-			Signal* s = m_signals->getSignal(txSignal->appSignalID());
+			UalSignal* ualSignal = m_ualSignals.get(txSignal->appSignalID());
 
-			if (s == nullptr)
+			if (ualSignal == nullptr)
 			{
 				// Signal identifier '%1' is not found.
 				//
 				m_log->errALC5000(txSignal->appSignalID(), QUuid(), "");
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->ualAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
 				result = false;
 				continue;
 			}
@@ -9315,8 +9427,8 @@ namespace Builder
 
 			// copy discrete signal value to bit accumulator
 			//
-			cmd.movBit(bitAccumulatorAddress, bit, s->ualAddr().offset(), s->ualAddr().bit());
-			cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
+			cmd.movBit(bitAccumulatorAddress, bit, ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
+			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalIDs().join(", ")).arg(port->connectionID()));
 
 			m_code.append(cmd);
 
@@ -9619,7 +9731,7 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+		const QVector<Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
 		bool result = true;
 
@@ -9678,7 +9790,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port)
 	{
-		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+		const QVector<Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
 		int count = 0;
 
