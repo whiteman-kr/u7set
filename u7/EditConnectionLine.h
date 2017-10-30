@@ -103,6 +103,9 @@ public:
 	std::shared_ptr<VFrame30::SchemaItem> moveToPin_schemaItem() const;
 	void moveToPin_setMoveWholeLink();
 
+	bool moveToPin_isInput() const;
+	bool moveToPin_isOutput() const;
+
 public:
 	static Dirrection getDirrection(const QPointF& pt1, const QPointF& pt2);
 	static bool isHorz(const QPointF& pt1, const QPointF& pt2);

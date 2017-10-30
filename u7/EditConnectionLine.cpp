@@ -1020,6 +1020,24 @@ void EditConnectionLine::moveToPin_setMoveWholeLink()
 	return;
 }
 
+bool EditConnectionLine::moveToPin_isInput() const
+{
+	assert(m_mode == MoveToPin);
+	assert(m_moveToPin.pinDirrection == VFrame30::Input ||
+		   m_moveToPin.pinDirrection == VFrame30::Output);
+
+	return m_moveToPin.pinDirrection == VFrame30::Input;
+}
+
+bool EditConnectionLine::moveToPin_isOutput() const
+{
+	assert(m_mode == MoveToPin);
+	assert(m_moveToPin.pinDirrection == VFrame30::Input ||
+		   m_moveToPin.pinDirrection == VFrame30::Output);
+
+	return m_moveToPin.pinDirrection == VFrame30::Output;
+}
+
 
 EditConnectionLine::Dirrection EditConnectionLine::getDirrection(const QPointF& pt1, const QPointF& pt2)
 {

@@ -134,6 +134,8 @@ protected:
 protected:
 	SchemaItemAction getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex);
 
+	QRectF sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos);
+
 	// Signals
 signals:
 	void selectionChanged();
@@ -222,7 +224,7 @@ public:
 protected:
 	void createActions();
 
-	virtual bool event(QEvent* e) override;
+	virtual bool event(QEvent* event) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
 	virtual void keyReleaseEvent(QKeyEvent* event) override;
 
@@ -297,8 +299,8 @@ protected:
 
 	// Move ConnectionLinks withFblItemPects' pins
 	//
-	void initMoveAfbsConnectionLinks();
-	void moveAfbsConnectionLinks(QPointF offset);
+	void initMoveAfbsConnectionLinks(MouseState mouseState);
+	void moveAfbsConnectionLinks(QPointF offset, MouseState mouseState);
 	void finishMoveAfbsConnectionLinks();
 
 	// --
@@ -510,6 +512,7 @@ private:
 	// --
 	//
 	bool m_ctrlWasPressed = false;
+	bool m_altWasPressed = false;
 
 	// Actions
 	//
