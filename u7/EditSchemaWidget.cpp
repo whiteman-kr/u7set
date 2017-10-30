@@ -5604,12 +5604,14 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
+	CreatingSignalOptions options;
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
 														  equipmentIdList,
 														  counterValue,
 														  schema()->schemaId(),
 														  schema()->caption(),
 														  "",
+														  options,
 														  this);
 
 	if (signalsIds.isEmpty() == false)
