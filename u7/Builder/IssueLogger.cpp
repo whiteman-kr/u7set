@@ -4632,7 +4632,8 @@ namespace Builder
 	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
 	///
 	/// Parameters:
-	///		%1 Logic schema ID
+	///		%1 Schema item pin Guid
+	///		%2 Logic schema ID
 	///
 	/// Description:
 	///		UalSignal is not found for pin with specified Uuid. Contact to RPCT developers.
@@ -4668,6 +4669,29 @@ namespace Builder
 				  5121,
 				  QString(tr("Can't assign value to input or tuningable signal '%1' (Logic schema '%2').")).
 							arg(appSignalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5122
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Schema item pin caption
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		UalSignal is not found for pin with specified caption. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5122,
+				  QString(tr("UalSignal is not found for pin '%1' (Logic schema '%2').")).
+							arg(pinCaption).arg(schemaID));
 	}
 
 	//

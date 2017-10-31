@@ -311,6 +311,8 @@ namespace Builder
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
 		void errALC5120(QUuid ualItemUuid, QUuid pinUuid, QString schemaID);			// UalSignal is not found for pin '%1' (Logic schema '%2').
 		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input or tuningable signal '%1' (Logic schema '%2').
+		void errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID);		// UalSignal is not found for pin '%1' (Logic schema '%2').
+
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

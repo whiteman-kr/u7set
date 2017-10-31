@@ -228,7 +228,7 @@ namespace Builder
 
 			for(const VFrame30::BusSignal& busSignal : busSignals)
 			{
-				Signal* newSignal = appendBusSignal(*s, bus, busSignal);
+				Signal* newSignal = appendBusChildSignal(*s, bus, busSignal);
 
 				if (newSignal == nullptr)
 				{
@@ -338,7 +338,18 @@ namespace Builder
 		}
 	}
 
-	Signal* SignalSet::appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
+	Signal* SignalSet::appendBusChildSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
+	{
+		m_maxSignalID++;
+
+		Signal* newSignal = createBusChildSignal(s, bus, busSignal);
+
+		append(m_maxSignalID, newSignal);
+
+		return newSignal;
+	}
+
+	Signal* SignalSet::createBusChildSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
 	{
 		Signal* newSignal = new Signal();
 
@@ -391,10 +402,6 @@ namespace Builder
 		newSignal->setCoarseAperture(1);
 		newSignal->setFineAperture(0.5);
 		newSignal->setAdaptiveAperture(false);
-
-		m_maxSignalID++;
-
-		append(m_maxSignalID, newSignal);
 
 		return newSignal;
 	}

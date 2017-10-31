@@ -379,7 +379,8 @@ namespace Builder
 
 		bool createOptoSignal(const UalItem* ualItem,
 								const Signal* s,
-								const QString &lmEquipmentID);
+								const QString &lmEquipmentID,
+								BusShared bus);
 
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
@@ -436,6 +437,8 @@ namespace Builder
 		bool isCompatible(const Signal* s) const;
 		bool isCompatible(const LogicAfbSignal& afbSignal) const;
 		bool isCompatible(const Builder::BusSignal& busSignal) const;
+		bool isCompatible(const UalSignal* ualSignal) const;
+
 
 		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
 
@@ -473,6 +476,9 @@ namespace Builder
 		QStringList refSignalIDs() const;
 		void refSignalIDs(QStringList* appSignalIDs) const;
 
+		QString refSignalIDsJoined() const;
+
+
 		QStringList acquiredRefSignalsIDs() const;
 
 		QString optoConnectionID() const;
@@ -481,6 +487,8 @@ namespace Builder
 
 		const UalItem* ualItem() const { return m_ualItem; }
 		QUuid ualItemGuid() const;
+		QString ualItemSchemaID() const;
+
 
 		bool appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal);
 

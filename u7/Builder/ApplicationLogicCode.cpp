@@ -571,6 +571,13 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::mov(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov(addrTo.offset(), addrFrom.offset());
+	}
 
 	void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
 	{
@@ -600,6 +607,13 @@ namespace Builder
 		writeArea(addrTo, sizeW);
 	}
 
+	void Command::movMem(Address16 addrTo, Address16 addrFrom, quint16 sizeW)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		movMem(addrTo.offset(), addrFrom.offset(), sizeW);
+	}
 
 	void Command::movConst(quint16 addrTo, quint16 constVal)
 	{
@@ -644,6 +658,12 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::movBitConst(Address16 addr16, quint16 constBit)
+	{
+		assert(addr16.isValid() == true);
+
+		movBitConst(addr16.offset(), addr16.bit(), constBit);
+	}
 
 	void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
 	{
@@ -826,6 +846,9 @@ namespace Builder
 
 	void Command::movBit(Address16 addrTo, Address16 addrFrom)
 	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+
 		movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit());
 	}
 
@@ -879,6 +902,13 @@ namespace Builder
 		write32(addrTo);
 	}
 
+	void Command::mov32(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov32(addrTo.offset(), addrFrom.offset());
+	}
 
 	void Command::movConstInt32(quint16 addrTo, qint32 constInt32)
 	{

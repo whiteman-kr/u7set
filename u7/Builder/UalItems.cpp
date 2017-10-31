@@ -1022,7 +1022,8 @@ namespace Builder
 
 	bool UalSignal::createOptoSignal(const UalItem* ualItem,
 									const Signal* s,
-									const QString& lmEquipmentID)
+									const QString& lmEquipmentID,
+									 BusShared bus)
 	{
 		if (ualItem == nullptr)
 		{
@@ -1031,6 +1032,7 @@ namespace Builder
 		}
 
 		m_ualItem = ualItem;
+		m_bus = bus;
 
 		// Opto UalSignal creation from receiver
 
@@ -1311,6 +1313,11 @@ namespace Builder
 		return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
 	}
 
+	bool UalSignal::isCompatible(const UalSignal* ualSignal) const
+	{
+		return isCompatible(ualSignal->signal());
+	}
+
 	E::SignalType UalSignal::constType() const
 	{
 		assert(m_isConst == true);
@@ -1362,6 +1369,8 @@ namespace Builder
 
 		if (m_ualAddr.isValid() == true)
 		{
+			Signal* s = signal();
+
 			assert(false);				// m_ualAddr is already set
 			return false;
 		}
@@ -1585,6 +1594,15 @@ namespace Builder
 		}
 	}
 
+	QString UalSignal::refSignalIDsJoined() const
+	{
+		QStringList ids;
+
+		refSignalIDs(&ids);
+
+		return ids.join(", ");
+	}
+
 	QStringList UalSignal::acquiredRefSignalsIDs() const
 	{
 		QStringList list;
@@ -1643,6 +1661,16 @@ namespace Builder
 		}
 
 		return QUuid();
+	}
+
+	QString UalSignal::ualItemSchemaID() const
+	{
+		if (m_ualItem != nullptr)
+		{
+			return m_ualItem->schemaID();
+		}
+
+		return QString();
 	}
 
 	bool UalSignal::appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal)
@@ -1875,7 +1903,31 @@ namespace Builder
 		//
 		UalSignal* ualSignal = new UalSignal;
 
-		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID);
+		if (s == nullptr)
+		{
+			assert(false);
+			LOG_NULLPTR_ERROR(m_log);
+			return nullptr;
+		}
+
+		// opto signal can be Bus
+
+		BusShared bus;
+
+		if (s->isBus() == true)
+		{
+			bus = m_compiler.signalSet().getBus(s->busTypeID());
+
+			if (bus == nullptr)
+			{
+				// Bus type ID '%1' of signal '%2' is undefined.
+				//
+				m_log->errALC5092(s->busTypeID(), s->appSignalID());
+				return nullptr;
+			}
+		}
+
+		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus);
 
 		if (result == false)
 		{
@@ -1889,6 +1941,29 @@ namespace Builder
 		{
 			delete ualSignal;
 			return nullptr;
+		}
+
+		if (ualSignal->isBus() == true)
+		{
+			const QVector<BusSignal>& busSignals = bus->busSignals();
+
+			for(const BusSignal& busSignal : busSignals)
+			{
+				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(),
+																   bus->srcBus(),
+																   bus->getBusSignal(busSignal.signalID));
+
+				templateSignal->setEquipmentID(s->equipmentID());
+
+				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, QUuid());
+
+				if (busChildSignal != nullptr)
+				{
+					ualSignal->appendBusChildSignal(busSignal.signalID, busChildSignal);
+				}
+
+				delete templateSignal;			// no longer nedded
+			}
 		}
 
 		return ualSignal;
@@ -1920,7 +1995,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : busSignals)
 		{
-			Signal* s = m_compiler.signalSet().appendBusSignal(*busParentSignal->signal(),
+			Signal* s = m_compiler.signalSet().appendBusChildSignal(*busParentSignal->signal(),
 															   bus->srcBus(),
 															   bus->getBusSignal(busSignal.signalID));
 
@@ -2042,7 +2117,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
-			Signal* newSignal = m_compiler.signalSet().appendBusSignal(*s, bus->srcBus(), bus->getBusSignal(busSignal.signalID));
+			Signal* newSignal = m_compiler.signalSet().appendBusChildSignal(*s, bus->srcBus(), bus->getBusSignal(busSignal.signalID));
 
 			result &= ualSignal->appendBusChildRefSignals(busSignal.signalID, newSignal);
 		}

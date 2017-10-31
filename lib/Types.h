@@ -513,3 +513,6 @@ const int	SIZE_8BIT = 8;
 const int	SIZE_16BIT = 16;
 const int	SIZE_32BIT = 32;
 
+const int	SIZE_1WORD = 1;
+const int	SIZE_2WORD = 2;
+

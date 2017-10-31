@@ -19,39 +19,46 @@ namespace Hardware
 	{
 	}
 
-	bool TxRxSignal::init(const QStringList& appSignalIDs,
-						  E::SignalType signalType,
-						  E::DataFormat dataFormat,
-						  int dataSize,
-						  E::ByteOrder byteOrder)
+	bool TxRxSignal::init(const Builder::UalSignal* ualSignal)
 	{
-		if (appSignalIDs.isEmpty() == true)
+		if (ualSignal == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		m_appSignalIDs = appSignalIDs;
-		m_signalType = signalType;
+		m_appSignalIDs = ualSignal->refSignalIDs();
+		m_signalType = ualSignal->signalType();
+		m_byteOrder = ualSignal->byteOrder();
 
-		if (m_signalType != E::SignalType::Analog && m_signalType != E::SignalType::Discrete)
+		switch(m_signalType)
 		{
+		case E::SignalType::Analog:
+		case E::SignalType::Discrete:
+
+			m_dataFormat = ualSignal->dataFormat();
+			m_dataSize = ualSignal->dataSize();
+			break;
+
+		case E::SignalType::Bus:
+
+			if (ualSignal->bus() == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			m_dataFormat = E::DataFormat::UnsignedInt;
+			m_dataSize = ualSignal->bus()->sizeBit();
+			break;
+
+		default:
 			assert(false);		// wtf?
 			return false;
 		}
 
-		m_dataFormat = dataFormat;
-		m_byteOrder = byteOrder;
-		m_dataSize = dataSize;
-
 		m_type = TxRxSignal::Type::Regular;
 
-#ifdef QT_DEBUG
-		if (isDiscrete() == true)
-		{
-			assert(m_dataSize == SIZE_1BIT);
-		}
-#endif
 		return true;
 	}
 
@@ -341,6 +348,7 @@ namespace Hardware
 		//
 		m_txDataSizeW = 0;
 		m_txAnalogSignalsSizeW = 0;
+		m_txBusSignalsSizeW = 0;
 		m_txDiscreteSignalsSizeW = 0;
 
 		if (isUsedInConnection() == false)
@@ -394,14 +402,9 @@ namespace Hardware
 		//
 		for(TxRxSignalShared& txAnalogSignal : m_txSignals)
 		{
-			if (txAnalogSignal->isRaw() == true)
+			if (txAnalogSignal->isRaw() == true || txAnalogSignal->isAnalog() == false)
 			{
-				continue;					// exclude raw signals
-			}
-
-			if (txAnalogSignal->isDiscrete() == true)
-			{
-				break;						// no more analog signals, exit
+				continue;
 			}
 
 			txAnalogSignal->setAddrInBuf(address);
@@ -414,18 +417,35 @@ namespace Hardware
 
 		startAddr = address.offset();
 
+		// then place bus signals
+		//
+		for(TxRxSignalShared& txBusSignal : m_txSignals)
+		{
+			if (txBusSignal->isRaw() == true || txBusSignal->isBus() == false)
+			{
+				continue;
+			}
+
+			txBusSignal->setAddrInBuf(address);
+
+			address.addBit(txBusSignal->dataSize());
+
+			assert(address.bit() == 0);
+
+			address.wordAlign();
+		}
+
+		m_txBusSignalsSizeW = address.offset() - startAddr ;
+
+		startAddr = address.offset();
+
 		// then place discrete signals
 		//
 		for(TxRxSignalShared& txDiscreteSignal : m_txSignals)
 		{
-			if (txDiscreteSignal->isRaw() == true)
+			if (txDiscreteSignal->isRaw() == true || txDiscreteSignal->isDiscrete() == false)
 			{
-				continue;					// exclude raw signals
-			}
-
-			if (txDiscreteSignal->isAnalog() == true)
-			{
-				continue;					// skip analog signals
+				continue;
 			}
 
 			txDiscreteSignal->setAddrInBuf(address);
@@ -439,14 +459,15 @@ namespace Hardware
 
 		m_txDiscreteSignalsSizeW = address.offset() - startAddr;
 
-		m_txUsedDataSizeW = TX_DATA_ID_SIZE_W + m_txRawDataSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
+		m_txUsedDataSizeW = TX_DATA_ID_SIZE_W + m_txRawDataSizeW + m_txAnalogSignalsSizeW +
+										m_txBusSignalsSizeW + m_txDiscreteSignalsSizeW;
 
 		if (manualSettings() == true)
 		{
 			if (m_txUsedDataSizeW > m_manualTxSizeW)
 			{
-				LOG_MESSAGE(m_log, QString(tr("Port %1: txIdSizeW = %2, txRawDataSizeW = %3, txAnalogSignalsSizeW = %4, txDiscreteSignalsSizeW = %5")).
-									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
+				LOG_MESSAGE(m_log, QString(tr("Port %1: txIdSizeW = %2, txRawDataSizeW = %3, txAnalogSignalsSizeW = %4, txBusSignalsSizeW = %5, txDiscreteSignalsSizeW = %6")).
+									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txBusSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
 								   arg(m_manualTxSizeW).arg(m_txUsedDataSizeW).
@@ -568,6 +589,7 @@ namespace Hardware
 
 		m_rxDataSizeW = 0;
 		m_rxAnalogSignalsSizeW = 0;
+		m_rxBusSignalsSizeW = 0;
 		m_rxDiscreteSignalsSizeW = 0;
 
 		if (m_rxRawDataSizeW == 0 && m_rxSignals.count() == 0)
@@ -613,14 +635,9 @@ namespace Hardware
 		//
 		for(TxRxSignalShared& rxAnalogSignal : m_rxSignals)
 		{
-			if (rxAnalogSignal->isRaw() == true)
+			if (rxAnalogSignal->isRaw() == true || rxAnalogSignal->isAnalog() == false)
 			{
 				continue;					// exclude raw signals
-			}
-
-			if (rxAnalogSignal->isDiscrete() == true)
-			{
-				break;						// no more analog signals, exit
 			}
 
 			rxAnalogSignal->setAddrInBuf(address);
@@ -633,18 +650,32 @@ namespace Hardware
 
 		startAddr = address.offset();
 
-		// then place discrete signals
+		// then place bus rx signals
 		//
-		for(TxRxSignalShared& rxDiscreteSignal : m_rxSignals)
+		for(TxRxSignalShared& rxBusSignal : m_rxSignals)
 		{
-			if (rxDiscreteSignal->isRaw() == true)
+			if (rxBusSignal->isRaw() == true || rxBusSignal->isBus() == false)
 			{
 				continue;					// exclude raw signals
 			}
 
-			if (rxDiscreteSignal->isAnalog() == true)
+			rxBusSignal->setAddrInBuf(address);
+
+			address.addBit(rxBusSignal->dataSize());
+			address.wordAlign();
+		}
+
+		m_rxAnalogSignalsSizeW = address.offset() - startAddr ;
+
+		startAddr = address.offset();
+
+		// then place discrete signals
+		//
+		for(TxRxSignalShared& rxDiscreteSignal : m_rxSignals)
+		{
+			if (rxDiscreteSignal->isRaw() == true || rxDiscreteSignal->isDiscrete() == false)
 			{
-				continue;					// skip analog signals
+				continue;					// exclude raw signals
 			}
 
 			rxDiscreteSignal->setAddrInBuf(address);
@@ -768,6 +799,7 @@ namespace Hardware
 		m_rxUsedDataSizeW = linkedPort->txUsedDataSizeW();
 		m_rxRawDataSizeW = linkedPort->txRawDataSizeW();
 		m_rxAnalogSignalsSizeW = linkedPort->txAnalogSignalsSizeW();
+		m_rxBusSignalsSizeW = linkedPort->txBusSignalsSizeW();
 		m_rxDiscreteSignalsSizeW = linkedPort->txDiscreteSignalsSizeW();
 
 		return true;
@@ -1476,6 +1508,29 @@ namespace Hardware
 			list.append("");
 		}
 
+		list.append("Tx bus signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& tx : m_txSignals)
+		{
+			if (tx->isRegular() == true && tx->isBus() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							C_STR(tx->appSignalIDs().join(", ")));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
 		list.append("Tx discrete signals:\n");
 
 		hasSignals = false;
@@ -1574,6 +1629,29 @@ namespace Hardware
 			list.append("");
 		}
 
+		list.append("Rx bus signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& rx : m_rxSignals)
+		{
+			if (rx->isRegular() == true && rx->isBus() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							C_STR(rx->appSignalIDs().join(", ")));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
 		list.append("Rx discrete signals:\n");
 
 		hasSignals = false;
@@ -1613,19 +1691,18 @@ namespace Hardware
 			return true;			// signal already in tx list
 		}
 
-		QStringList appSignalIDs;
-
-		ualSignal->refSignalIDs(&appSignalIDs);
-
 		TxRxSignalShared txSignal = std::make_shared<TxRxSignal>();
 
-		bool res = txSignal->init(appSignalIDs, ualSignal->signalType(),
-								  ualSignal->dataFormat(), ualSignal->dataSize(), ualSignal->byteOrder());
+		bool res = txSignal->init(ualSignal);
 
 		if (res == false)
 		{
 			return false;
 		}
+
+		QStringList appSignalIDs;
+
+		ualSignal->refSignalIDs(&appSignalIDs);
 
 		m_txSignals.append(txSignal);
 
@@ -1654,14 +1731,9 @@ namespace Hardware
 			return true;					// signal already in rs list
 		}
 
-		QStringList appSignalIDs;
-
-		ualSignal->refSignalIDs(&appSignalIDs);
-
 		TxRxSignalShared rxSignal = std::make_shared<TxRxSignal>();
 
-		bool res = rxSignal->init(appSignalIDs, ualSignal->signalType(),
-								  ualSignal->dataFormat(), ualSignal->dataSize(), ualSignal->byteOrder());
+		bool res = rxSignal->init(ualSignal);
 
 		if (res == false)
 		{
@@ -1669,6 +1741,10 @@ namespace Hardware
 		}
 
 		m_rxSignals.append(rxSignal);
+
+		QStringList appSignalIDs;
+
+		ualSignal->refSignalIDs(&appSignalIDs);
 
 		for(const QString& appSignalID : appSignalIDs)
 		{
@@ -1747,7 +1823,8 @@ namespace Hardware
 		//
 		// 1. All Raw signals (on addrInBuf ascending)
 		// 2. All Regular Analog signals (on appSignalID ascending)
-		// 3. All Regular Discrete signals (on appSignalID ascending)
+		// 3. All Regular BusSignals (on appSignalID ascending)
+		// 4. All Regular Discrete signals (on appSignalID ascending)
 
 		QVector<TxRxSignalShared> tempList;
 		QVector<TxRxSignalShared> tempSignalList = signalList;
@@ -1795,7 +1872,25 @@ namespace Hardware
 
 		signalList.append(tempList);
 
-		// 3. Fetch and sort all regular discrete Tx signals
+		// 3. Fetch and sort all regular bus Tx signals
+		//
+		tempList.clear();
+
+		for(int i = 0; i < count; i++)
+		{
+			TxRxSignalShared& s = tempSignalList[i];
+
+			if (s->isRegular() == true && s->isBus() == true)
+			{
+				tempList.append(s);
+			}
+		}
+
+		sortByAppSignalIdAscending(tempList);
+
+		signalList.append(tempList);
+
+		// 4. Fetch and sort all regular discrete Tx signals
 		//
 		tempList.clear();
 

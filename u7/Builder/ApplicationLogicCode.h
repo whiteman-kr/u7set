@@ -281,9 +281,12 @@ namespace Builder
 		void start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime);
 		void stop();
 		void mov(quint16 addrTo, quint16 addrFrom);
+		void mov(Address16 addrTo, Address16 addrFrom);
 		void movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW);
+		void movMem(Address16 addrTo, Address16 addrFrom, quint16 sizeW);
 		void movConst(quint16 addrTo, quint16 constVal);
 		void movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit);
+		void movBitConst(Address16 addr16, quint16 constBit);
 		void writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption);
 		void readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
 		void writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal, const QString& fbCaption);
@@ -299,6 +302,7 @@ namespace Builder
 		void appStart(quint16 appStartAddr);
 
 		void mov32(quint16 addrTo, quint16 addrFrom);
+		void mov32(Address16 addrTo, Address16 addrFrom);
 		void movConstInt32(quint16 addrTo, qint32 constInt32);
 		void movConstUInt32(quint16 addrTo, quint32 constUInt32);
 		void movConstFloat(quint16 addrTo, float constFloat);

@@ -50,11 +50,7 @@ namespace Hardware
 	public:
 		TxRxSignal();
 
-		bool init(const QStringList& appSignalIDs,
-				  E::SignalType signalType,
-				  E::DataFormat dataFormat,
-				  int dataSize,
-				  E::ByteOrder byteOrder);
+		bool init(const Builder::UalSignal* ualSignal);
 
 		bool initRawSignal(const RawDataDescriptionItem& item, int offsetFromBeginningOfBuffer);
 
@@ -65,6 +61,7 @@ namespace Hardware
 
 		bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
+		bool isBus() const { return m_signalType == E::SignalType::Bus; }
 
 		bool isRaw() const { return m_type == Type::Raw; }
 		bool isRegular() const { return m_type == Type::Regular; }
@@ -230,6 +227,7 @@ namespace Hardware
 		bool hasTxRawData() const { return m_rawDataDescriptionStr.isEmpty() == false; }
 
 		int txAnalogSignalsSizeW() const { return m_txAnalogSignalsSizeW; }
+		int txBusSignalsSizeW() const { return m_txBusSignalsSizeW; }
 		int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
 
 		int txSignalsCount() const { return m_txSignals.count();}
@@ -322,6 +320,7 @@ namespace Hardware
 		int m_txUsedDataSizeW = 0;						// for ports with manual settings may be m_txUsedDataSizeW < m_txDataSizeW
 		int m_txRawDataSizeW = 0;
 		int m_txAnalogSignalsSizeW = 0;
+		int m_txBusSignalsSizeW = 0;
 		int m_txDiscreteSignalsSizeW = 0;
 
 		bool m_txRawDataSizeWIsCalculated = false;
@@ -338,6 +337,7 @@ namespace Hardware
 		int m_rxUsedDataSizeW = 0;						// for ports with manual settings may be m_rxUsedDataSizeW < m_rxDataSizeW
 		int m_rxRawDataSizeW = 0;						// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
 		int m_rxAnalogSignalsSizeW = 0;					//
+		int m_rxBusSignalsSizeW = 0;					//
 		int m_rxDiscreteSignalsSizeW = 0;				//
 
 		QVector<TxRxSignalShared> m_rxSignals;			// signals received via port

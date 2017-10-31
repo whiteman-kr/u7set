@@ -54,6 +54,7 @@ namespace Builder
 
 		int sizeW() const { return m_sizeW; }
 		int sizeB() const { return m_sizeW * WORD_SIZE_IN_BYTES; }
+		int sizeBit() const { return m_sizeW * SIZE_16BIT; }
 
 		QString busTypeID() const { return m_srcBus.busTypeId(); }
 

@@ -268,10 +268,14 @@ namespace Builder
 
 		bool generateReadFuncBlockToSignalCode(const UalAfb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
-		bool generateBusComposerCode(const UalItem* composer);
+		bool generateBusComposerCode(const UalItem* ualItem);
+		UalSignal* getBusComposerBusSignal(const UalItem* composerItem);
+		bool generateAnalogSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal &busSignal);
+
 		bool generateBusComposerToSignalCode(const UalItem* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
 		bool fillAnalogBusSignals(const UalItem *composer, const Signal* destSignal);
-		bool generateAnalogSignalToBusCode(const UalItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
+//		bool generateAnalogSignalToBusCode(const UalItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
 		bool generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const UalItem* constAppItem);
 		bool fillDiscreteBusSignals(const UalItem* composer, const Signal* busSignal);
 		bool generateDiscreteSignalToBusCode(const UalItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode);
@@ -283,6 +287,8 @@ namespace Builder
 		bool getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems);
 		bool getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID);
 		UalSignal* getPinInputAppSignal(const LogicPin& inPin);
+
+		UalSignal* getUalSignalByPinCaption(const UalItem* ualItem, const QString& pinCaption, bool isInput);
 
 		bool isConnectedToTerminator(const LogicPin& outPin);
 
@@ -308,6 +314,7 @@ namespace Builder
 		bool copyOptoPortTxData(Hardware::OptoPortShared port);
 		bool copyOptoPortTxRawData(Hardware::OptoPortShared port);
 		bool copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortTxBusSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset);
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace);
