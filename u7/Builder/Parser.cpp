@@ -409,12 +409,6 @@ namespace Builder
 	{
 		assert(m_fblItem);
 		assert(m_schema);
-
-		if (m_fblItem->isAfbElement() == true)
-		{
-			m_afbElement = m_fblItem->toAfbElement()->afbElement();
-		}
-
 		return;
 	}
 
@@ -2242,19 +2236,19 @@ namespace Builder
 			{
 				if (item.m_fblItem->isAfbElement() == true)
 				{
-					assert(item.m_fblItem->toAfbElement()->afbElement().opCode() == item.m_afbElement.opCode());
+					assert(item.m_fblItem->toAfbElement()->afbElement().opCode() == item.afbElement().opCode());
 
-					std::shared_ptr<Afb::AfbComponent> afbComponent = logicModuleDescription->component(item.m_afbElement.opCode());
+					std::shared_ptr<Afb::AfbComponent> afbComponent = logicModuleDescription->component(item.afbElement().opCode());
 
 					if (afbComponent == nullptr)
 					{
-						log->errALP4017(item.m_schema->schemaId(), module->lmDescriptionFile(), item.m_afbElement.opCode(), item.m_fblItem->guid());
+						log->errALP4017(item.m_schema->schemaId(), module->lmDescriptionFile(), item.afbElement().opCode(), item.m_fblItem->guid());
 						result = false;
 					}
 					else
 					{
 						item.m_fblItem->toAfbElement()->afbElement().setComponent(afbComponent);
-						item.m_afbElement.setComponent(afbComponent);
+						item.afbElement().setComponent(afbComponent);
 					}
 				}
 			}
@@ -3920,7 +3914,7 @@ namespace Builder
 
 				if (pointList.size() < 2)
 				{
-					//assert(pointList.size() >= 2);
+					assert(pointList.size() >= 2);
 					continue;
 				}
 
@@ -3949,7 +3943,7 @@ namespace Builder
 
 			if (pointList.size() < 2)
 			{
-				//assert(pointList.size() >= 2);
+				assert(pointList.size() >= 2);
 				continue;
 			}
 
@@ -4193,7 +4187,6 @@ namespace Builder
 
 					// Branch was found for current pin
 					//
-
 					if (bushContainer->bushes[branchIndex].outputPin.isNull() == false)
 					{
 						// Branch has multiple outputs.
@@ -4300,8 +4293,6 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-                        //assert(false);
-
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 								  tr("LogicSchema %1: Internalerror in function, branch suppose to be found, %2.")
 								  .arg(schema->caption())
