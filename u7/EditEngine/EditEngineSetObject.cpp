@@ -44,6 +44,7 @@ namespace EditEngine
 
 			bool ok = r.item->Load(r.newState);
 			assert(ok);
+			Q_UNUSED(ok);
 		}
 
 		*itemsToSelect = selection;
@@ -61,6 +62,7 @@ namespace EditEngine
 
 			bool ok = r.item->Load(r.oldState);
 			assert(ok);
+			Q_UNUSED(ok);
 		}
 
 		*itemsToSelect = selection;

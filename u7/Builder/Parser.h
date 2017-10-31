@@ -162,12 +162,6 @@ namespace Builder
 		//
 		bool setInputOutputsElementsConnection(IssueLogger* log);
 
-		template<typename Iter>
-		std::vector<AppLogicItem> getItemsWithInput(
-			const Iter& begin,
-			const Iter& end,
-			const QUuid& inputGuid);
-
 		bool multichannelProcessing(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 									BushContainer* busheContainer,
 									IssueLogger* log);
