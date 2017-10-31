@@ -29,7 +29,7 @@ namespace VFrame30
 
 	LogicSchema ::~LogicSchema (void)
 	{
-		qDebug() << "LogicSchema::~LogicSchema(void)";
+		qDebug() << "LogicSchema::~LogicSchema(void)  SchemaID = " << schemaId();
 	}
 
 	bool LogicSchema::SaveData(Proto::Envelope* message) const

@@ -409,12 +409,6 @@ namespace Builder
 	{
 		assert(m_fblItem);
 		assert(m_schema);
-
-		if (m_fblItem->isAfbElement() == true)
-		{
-			m_afbElement = m_fblItem->toAfbElement()->afbElement();
-		}
-
 		return;
 	}
 
@@ -1189,9 +1183,28 @@ namespace Builder
 
 		// --
 		//
+		std::multimap<QUuid, AppLogicItem> outputPinToInputItem;				// Key is QUuid of output connected to input
+
+		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
+		{
+			const std::vector<VFrame30::AfbPin>& inputs = currentItem.second.m_fblItem->inputs();
+
+			for (const VFrame30::AfbPin& input : inputs)
+			{
+				const std::vector<QUuid>& assocOutputs = input.associatedIOs();
+
+				if (assocOutputs.size() == 1)		// Only one output can be connected to input
+				{
+					outputPinToInputItem.insert({assocOutputs.front(), currentItem.second});
+				}
+				else
+				{
+					assert(assocOutputs.size() != 1);
+				}
+			}
+		}
+
 		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
-		auto constItemsBegin = constItems.begin();
-		auto constItemsEnd = constItems.end();
 
 		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
 		{
@@ -1199,10 +1212,45 @@ namespace Builder
 
 			for (const VFrame30::AfbPin& out : outputs)
 			{
-				std::vector<AppLogicItem> deps = getItemsWithInput(constItemsBegin, constItemsEnd, out.guid());
-				itemsWithInputs[out.guid()] = deps;
+				auto range = outputPinToInputItem.equal_range(out.guid());
+
+				std::map<QUuid, AppLogicItem> rangeItemsMap;	// set removes duplicats
+				for (auto rangeIt = range.first; rangeIt != range.second; ++rangeIt)
+				{
+					const AppLogicItem& appItem = rangeIt->second;
+					rangeItemsMap[appItem.m_fblItem->guid()] = appItem;
+				}
+
+				std::vector<AppLogicItem> deps;
+				deps.reserve(8);
+
+				for (const auto& item : rangeItemsMap)
+				{
+					deps.push_back(item.second);
+				}
+
+				itemsWithInputs[out.guid()] = std::vector<AppLogicItem>();
+				std::swap(itemsWithInputs[out.guid()], deps);
 			}
 		}
+
+		//---------------------------
+//		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
+
+
+//		auto constItemsBegin = constItems.begin();
+//		auto constItemsEnd = constItems.end();
+
+//		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
+//		{
+//			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
+
+//			for (const VFrame30::AfbPin& out : outputs)
+//			{
+//				std::vector<AppLogicItem> deps = getItemsWithInput(constItemsBegin, constItemsEnd, out.guid());
+//				itemsWithInputs[out.guid()] = deps;
+//			}
+//		}
 
 		// --
 		//
@@ -1258,7 +1306,7 @@ namespace Builder
 			//
 			for (auto depIt = dependantItems.begin(); depIt != dependantItems.end(); ++depIt)
 			{
-				AppLogicItem dep = depIt->second;
+				const AppLogicItem& dep = depIt->second;
 
 				if (dep == currentItem)
 				{
@@ -1335,7 +1383,8 @@ namespace Builder
 				orderedItems.insert(std::next(currentIt), dep);
 				remainItems.erase(dep.m_fblItem->guid());
 
-				// process other dependtants, do not break!
+				// Process other dependtants, do not break!
+				//
 			}
 		}
 
@@ -1446,77 +1495,6 @@ namespace Builder
 		}
 
 		return true;
-	}
-
-	template<typename Iter>
-	std::vector<AppLogicItem> AppLogicModule::getItemsWithInput(
-			const Iter& begin,
-			const Iter& end,
-			const QUuid& guid)
-	{
-		std::map<QUuid, AppLogicItem> result;	// set removes duplicats
-
-		for (auto it = begin; it != end; ++it)
-		{
-			const AppLogicItem& item = it->second;
-			const std::vector<VFrame30::AfbPin>& inputs = item.m_fblItem->inputs();
-
-			//for (const VFrame30::AfbPin& in : inputs)
-			size_t inputCount = inputs.size();
-			for (size_t inputIndex = 0; inputIndex < inputCount; ++inputIndex)
-			{
-				const VFrame30::AfbPin& in = inputs[inputIndex];
-
-				const std::vector<QUuid>& associatedOutputs = in.associatedIOs();
-
-				// !!!
-				// This find is very slow in debug mode, so it was changed to for with pointer
-				//
-//				auto associatedOutputsBegin = associatedOutputs.begin();
-//				auto associatedOutputsEnd = associatedOutputs.end();
-//
-//				auto foundAssociated = std::find(associatedOutputsBegin, associatedOutputsEnd, guid);
-//
-//				if (foundAssociated != associatedOutputsEnd)
-//				{
-//					result[item.m_fblItem->guid()] = item;
-//					break;
-//				}
-
-				// Low level optimization instead of std::find(associatedOutputsBegin, associatedOutputsEnd, guid);
-				//
-				bool found = false;
-
-				const QUuid* assocPtr = associatedOutputs.data();
-				size_t associatedOutputsSize = associatedOutputs.size();
-
-				for (size_t ait = 0; ait < associatedOutputsSize; ++ait, ++assocPtr)
-				//for (const QUuid& a : associatedOutputs)
-				{
-					if (*assocPtr == guid)
-					{
-						result[item.m_fblItem->guid()] = item;
-						found = true;
-						break;
-					}
-				}
-
-				if (found == true)
-				{
-					break;
-				}
-			}
-		}
-
-		std::vector<AppLogicItem> resultVector;
-		resultVector.reserve(8);
-
-		for (const auto& item : result)
-		{
-			resultVector.push_back(item.second);
-		}
-
-		return resultVector;
 	}
 
 	QString AppLogicModule::equipmentId() const
@@ -2258,19 +2236,19 @@ namespace Builder
 			{
 				if (item.m_fblItem->isAfbElement() == true)
 				{
-					assert(item.m_fblItem->toAfbElement()->afbElement().opCode() == item.m_afbElement.opCode());
+					assert(item.m_fblItem->toAfbElement()->afbElement().opCode() == item.afbElement().opCode());
 
-					std::shared_ptr<Afb::AfbComponent> afbComponent = logicModuleDescription->component(item.m_afbElement.opCode());
+					std::shared_ptr<Afb::AfbComponent> afbComponent = logicModuleDescription->component(item.afbElement().opCode());
 
 					if (afbComponent == nullptr)
 					{
-						log->errALP4017(item.m_schema->schemaId(), module->lmDescriptionFile(), item.m_afbElement.opCode(), item.m_fblItem->guid());
+						log->errALP4017(item.m_schema->schemaId(), module->lmDescriptionFile(), item.afbElement().opCode(), item.m_fblItem->guid());
 						result = false;
 					}
 					else
 					{
 						item.m_fblItem->toAfbElement()->afbElement().setComponent(afbComponent);
-						item.m_afbElement.setComponent(afbComponent);
+						item.afbElement().setComponent(afbComponent);
 					}
 				}
 			}
@@ -4209,7 +4187,6 @@ namespace Builder
 
 					// Branch was found for current pin
 					//
-
 					if (bushContainer->bushes[branchIndex].outputPin.isNull() == false)
 					{
 						// Branch has multiple outputs.
@@ -4316,8 +4293,6 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-                        //assert(false);
-
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
 								  tr("LogicSchema %1: Internalerror in function, branch suppose to be found, %2.")
 								  .arg(schema->caption())
