@@ -1593,7 +1593,6 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 	equipmentGroupBoxLayout->addWidget(new QLabel("EquipmentID", &signalCreationSettingsDialog), row, 0);
 	equipmentGroupBoxLayout->addWidget(new QLabel("AppSignalID", &signalCreationSettingsDialog), row, 1);
 	equipmentGroupBoxLayout->addWidget(new QLabel("CustomSignalID", &signalCreationSettingsDialog), row, 2);
-	row++;
 
 	bool atLeastOneLmIsChecked = false;
 
@@ -1606,7 +1605,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 			atLeastOneLmIsChecked = true;
 		}
 
-		equipmentGroupBoxLayout->addWidget(enableLmCheck, row, 0);
+		equipmentGroupBoxLayout->addWidget(enableLmCheck, row + 1, 0);
 		lmCheckBoxList.append(enableLmCheck);
 
 		connect(enableLmCheck, &QCheckBox::toggled, [&lmCheckBoxList, enableLmCheck](bool checked){
@@ -1643,7 +1642,15 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 
 		if (customSignalID.isEmpty())
 		{
-			customSignalID = schemaId;
+			if (appSignalID.isEmpty())
+			{
+				customSignalID = schemaId;
+			}
+			else
+			{
+				customSignalID = appSignalID;
+				customSignalID.remove('#');
+			}
 		}
 
 		if (appSignalID.isEmpty())
@@ -1661,11 +1668,11 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 		}
 
 		QLineEdit* appSignalIdEdit = new QLineEdit(appSignalID, &signalCreationSettingsDialog);
-		equipmentGroupBoxLayout->addWidget(appSignalIdEdit, row, 1);
+		equipmentGroupBoxLayout->addWidget(appSignalIdEdit, row + 1, 1);
 		appSignalIdEditList.append(appSignalIdEdit);
 
 		QLineEdit* customSignalIdEdit = new QLineEdit(customSignalID, &signalCreationSettingsDialog);
-		equipmentGroupBoxLayout->addWidget(customSignalIdEdit, row, 2);
+		equipmentGroupBoxLayout->addWidget(customSignalIdEdit, row + 1, 2);
 		customSignalIdEditList.append(customSignalIdEdit);
 
 		row++;
