@@ -1738,7 +1738,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 		busTypeIdComboBox->setEditText(options->defaultBusTypeId);
 	}
 
-	QLabel* busTypeIdLabel = new QLabel("BusTypeId", &signalCreationSettingsDialog);
+	QLabel* busTypeIdLabel = new QLabel("BusTypeID", &signalCreationSettingsDialog);
 	busTypeIdLabel->setVisible(false);
 
 	fl->addRow(busTypeIdLabel, busTypeIdComboBox);
@@ -1784,7 +1784,10 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 
 	signalCreationSettingsDialog.setWindowTitle("Signal creation settings");
 
-	setWindowPosition(&signalCreationSettingsDialog, options->settingsWindowPositionRect);
+	if (options->settingsWindowPositionRect.isValid() == true)
+	{
+		setWindowPosition(&signalCreationSettingsDialog, options->settingsWindowPositionRect);
+	}
 
 	if (signalCreationSettingsDialog.exec() != QDialog::Accepted)
 	{
