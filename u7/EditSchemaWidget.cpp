@@ -5606,7 +5606,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 	}
 	else
 	{
-		m_createSignalOptions.AppSignalIdList = itemsAppSignals;
+		m_createSignalOptions.appSignalIdList = itemsAppSignals;
 	}
 
 	int counterValue = 0;
@@ -5616,7 +5616,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
-	m_createSignalOptions.LmEquipmentIdList = equipmentIdList;
+	m_createSignalOptions.lmEquipmentIdList = equipmentIdList;
 
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
 														  counterValue,

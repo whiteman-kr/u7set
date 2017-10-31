@@ -39,12 +39,13 @@ const int	FI_ANY = 0,
 
 struct CreatingSignalOptions
 {
-	QStringList LmEquipmentIdList;
-	QStringList SelectedEquipmentIdList;
-	QStringList AppSignalIdList;
-	QStringList CustomSignlIdList;
-	int DefaultSignalTypeIndex = -1;
-	QString DefaultBusTypeId;
+	QStringList lmEquipmentIdList;
+	QStringList selectedEquipmentIdList;
+	QStringList appSignalIdList;
+	QStringList customSignalIdList;
+	int defaultSignalTypeIndex = -1;
+	QString defaultBusTypeId;
+	QRect settingsWindowPositionRect;
 };
 
 
