@@ -1016,6 +1016,8 @@ namespace Builder
 		m_autoSignalPtr->setAcquire(false);
 
 		appendRefSignal(m_autoSignalPtr, false);
+
+		return true;
 	}
 
 	bool UalSignal::createOptoSignal(const UalItem* ualItem,
@@ -1104,27 +1106,6 @@ namespace Builder
 		}
 
 		appendRefSignal(busSignal, false);
-
-		return true;
-	}
-
-
-	bool UalSignal::createBusChildSignal(const UalItem* ualItem,
-										Signal* busChildSignal)
-	{
-		if (ualItem == nullptr || busChildSignal == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		// Bus child signal is not AUTO signal!!!
-		//
-		// instance of busChildSignal is creates by UalSignalMap and added to project's m_signalSet
-		// and destroyed when in m_signalSet is deleted
-		//
-
-		appendRefSignal(busChildSignal, false);
 
 		return true;
 	}
@@ -1224,6 +1205,19 @@ namespace Builder
 		return true;
 	}
 
+	bool UalSignal::appendBusChildRefSignals(const QString& busSignalID, Signal* s)
+	{
+		UalSignal* childSignal = m_busChildSignals.value(busSignalID, nullptr);
+
+		if (childSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return childSignal->appendRefSignal(s, false);
+	}
+
 	Address16 UalSignal::ioBufAddr()
 	{
 		if (m_isInput == true)
@@ -1260,7 +1254,7 @@ namespace Builder
 		return Address16();
 	}
 
-	Signal* UalSignal::firstSignal() const
+	Signal* UalSignal::signal() const
 	{
 		if (m_refSignals.count() < 1)
 		{
@@ -1383,7 +1377,43 @@ namespace Builder
 			s->setUalAddr(ualAddr);
 		}
 
-		return true;
+		if (isBus() == false)
+		{
+			return true;
+		}
+
+		if (m_bus == nullptr)
+		{
+			assert(false);				// m_bus can't be null
+			return false;
+		}
+
+		assert(ualAddr.bit() == 0);		// bus must be aligned to word
+
+		bool result = true;
+
+		for(const BusSignal& busSignal : m_bus->busSignals())
+		{
+			UalSignal* childSignal = m_busChildSignals.value(busSignal.signalID);
+
+			if (childSignal == nullptr)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			int busBitAddr = ualAddr.bitAddress();
+			int busSignalBitAddr = busSignal.inbusAddr.bitAddress();
+
+			Address16 addr(0, 0);
+
+			addr.addBit(busBitAddr + busSignalBitAddr);
+
+			result &= childSignal->setUalAddr(addr);
+		}
+
+		return result;
 	}
 
 	bool UalSignal::setRegBufAddr(Address16 regBufAddr)
@@ -1636,6 +1666,16 @@ namespace Builder
 		return true;
 	}
 
+	UalSignal* UalSignal::getBusChildSignal(const QString& busSignalID)
+	{
+		if (isBus() == false)
+		{
+			assert(false);
+			return nullptr;
+		}
+
+		return m_busChildSignals.value(busSignalID, nullptr);
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -1680,6 +1720,8 @@ namespace Builder
 			// signal already in map
 			//
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
+
+			ualSignal->setUalItem(ualItem);
 
 			appendPinRefToSignal(outPinUuid, ualSignal);
 
@@ -1852,56 +1894,45 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem, Signal* busSignal, BusShared bus, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid)
 	{
-		// busSignal can bee nullptr
+		// s can bee nullptr!!!
 		//
+		UalSignal* busParentSignal = new UalSignal;
 
-		UalSignal* ualSignal = new UalSignal;
-
-		bool result = ualSignal->createBusParentSignal(ualItem, busSignal, bus);
-
-		if (result == false)
-		{
-			delete ualSignal;
-			return nullptr;
-		}
-
-		result = insertNew(outPinUuid, ualSignal);
+		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus);
 
 		if (result == false)
 		{
-			delete ualSignal;
+			delete busParentSignal;
 			return nullptr;
 		}
 
+		result = insertNew(outPinUuid, busParentSignal);
+
+		if (result == false)
+		{
+			delete busParentSignal;
+			return nullptr;
+		}
 
 		const QVector<BusSignal>& busSignals = bus->busSignals();
 
 		for(const BusSignal& busSignal : busSignals)
 		{
-			Signal* s = new Signal;
+			Signal* s = m_compiler.signalSet().appendBusSignal(*busParentSignal->signal(),
+															   bus->srcBus(),
+															   bus->getBusSignal(busSignal.signalID));
 
-			s->setSignalType(busSignal.signalType);
-			s->setDataSize(busSignal.signalType, busSignal.analogFormat);
-			s->setInOutType(E::SignalInOutType::Internal);
+			UalSignal* busChildSignal = createSignal(s);
 
-			QString appSignalID = QString("%1.%2").arg(ualSignal->appSignalID()).arg(busSignal.signalID);
-
-			s->setAppSignalID(appSignalID);
-			s->setCustomAppSignalID(appSignalID.remove("#"));
-
-
-			buildBusSignalCaption(const QString& busParentSignalCaption,
-														 const QString& busTypeID,
-														 const QString& busParentSignalCustomID,
-														 const QString& busChildSignalID,
-														 const QString& busChildSignalCaption)
+			if (busChildSignal != nullptr)
+			{
+				busParentSignal->appendBusChildSignal(busSignal.signalID, busChildSignal);
+			}
 		}
 
-
-
-		return ualSignal;
+		return busParentSignal;
 	}
 
 	bool UalSignalsMap::appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal)
@@ -1996,7 +2027,27 @@ namespace Builder
 
 		m_idToSignalMap.insert(s->appSignalID(), ualSignal);
 
-		return true;
+		if (ualSignal->isBus() == false)
+		{
+			return true;
+		}
+
+		BusShared bus = ualSignal->bus();
+
+		if (bus == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		for(const BusSignal& busSignal : bus->busSignals())
+		{
+			Signal* newSignal = m_compiler.signalSet().appendBusSignal(*s, bus->srcBus(), bus->getBusSignal(busSignal.signalID));
+
+			result &= ualSignal->appendBusChildRefSignals(busSignal.signalID, newSignal);
+		}
+
+		return result;
 	}
 
 	bool UalSignalsMap::insertUalSignal(const UalItem* ualSignal)
@@ -2287,7 +2338,9 @@ namespace Builder
 			return false;
 		}
 
-		QString signalID = newUalSignal->signal()->appSignalID();
+		Signal* s = newUalSignal->signal();
+
+		QString signalID = s->appSignalID();
 
 		if (m_idToSignalMap.contains(signalID) == true)
 		{
@@ -2295,21 +2348,13 @@ namespace Builder
 			return false;
 		}
 
-		if (m_pinToSignalMap.contains(pinUuid) == true)
+		if (pinUuid.isNull() == false && m_pinToSignalMap.contains(pinUuid) == true)
 		{
 			assert(false);
 			return false;
 		}
 
-		Signal* firstSignal = newUalSignal->firstSignal();
-
-		if (firstSignal == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (m_ptrToSignalMap.contains(firstSignal) == true)
+		if (m_ptrToSignalMap.contains(s) == true)
 		{
 			assert(false);
 			return false;
@@ -2321,9 +2366,12 @@ namespace Builder
 
 		m_idToSignalMap.insert(signalID, newUalSignal);
 
-		m_ptrToSignalMap.insert(firstSignal, newUalSignal);
+		m_ptrToSignalMap.insert(s, newUalSignal);
 
-		appendPinRefToSignal(pinUuid, newUalSignal);
+		if (pinUuid.isNull() == false)
+		{
+			appendPinRefToSignal(pinUuid, newUalSignal);
+		}
 
 		return true;
 	}

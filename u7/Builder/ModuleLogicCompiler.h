@@ -114,11 +114,13 @@ namespace Builder
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
 		bool createUalSignalFromReceiver(UalItem* ualItem);
+		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 
 		bool detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat);
 

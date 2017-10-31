@@ -228,7 +228,12 @@ namespace Builder
 
 			for(const VFrame30::BusSignal& busSignal : busSignals)
 			{
-				result &= appendBusSignal(*s, bus, busSignal);
+				Signal* newSignal = appendBusSignal(*s, bus, busSignal);
+
+				if (newSignal == nullptr)
+				{
+					result = false;
+				}
 			}
 		}
 
@@ -333,10 +338,8 @@ namespace Builder
 		}
 	}
 
-	bool SignalSet::appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
+	Signal* SignalSet::appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
 	{
-		bool result = true;
-
 		Signal* newSignal = new Signal();
 
 		newSignal->setAppSignalID(QString(s.appSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalId()));
@@ -346,8 +349,7 @@ namespace Builder
 
 		newSignal->setCaption(caption);
 		newSignal->setEquipmentID(s.equipmentID());
-		newSignal->setBusTypeID(s.busTypeID());
-		//newSignal->setChannel(s.channel());
+//		newSignal->setBusTypeID(s.busTypeID());
 
 		newSignal->setSignalType(busSignal.type());
 		newSignal->setInOutType(E::SignalInOutType::Internal);
@@ -390,32 +392,11 @@ namespace Builder
 		newSignal->setFineAperture(0.5);
 		newSignal->setAdaptiveAperture(false);
 
-	/*
-		// Signal fields from database
-		//
-		int m_ID = 0;
-		int m_signalGroupID = 0;
-		int m_signalInstanceID = 0;
-		int m_changesetID = 0;
-		bool m_checkedOut = false;
-		int m_userID = 0;
-		QDateTime m_created;
-		bool m_deleted = false;
-		QDateTime m_instanceCreated;
-		VcsItemAction m_instanceAction = VcsItemAction::Added;*/
+		m_maxSignalID++;
 
-		if (result == true)
-		{
-			m_maxSignalID++;
+		append(m_maxSignalID, newSignal);
 
-			append(m_maxSignalID, newSignal);
-		}
-		else
-		{
-			delete newSignal;
-		}
-
-		return result;
+		return newSignal;
 	}
 
 	QString SignalSet::buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
@@ -434,7 +415,7 @@ namespace Builder
 											 const QString& busTypeID,
 											 const QString& busParentSignalCustomID,
 											 const QString& busChildSignalID,
-											 const QString& busChildSignalCaption) const
+											 const QString& busChildSignalCaption)
 	{
 		QString caption = busParentSignalCaption;
 

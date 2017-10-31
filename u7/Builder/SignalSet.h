@@ -30,10 +30,11 @@ namespace Builder
 												 const QString& busTypeID,
 												 const QString& busParentSignalCustomID,
 												 const QString& busChildSignalID,
-												 const QString& busChildSignalCaption) const;
+												 const QString& busChildSignalCaption);
+
+		Signal* appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
 
 	private:
-		bool appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
 		QString buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
 
 	private:

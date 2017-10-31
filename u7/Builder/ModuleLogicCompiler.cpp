@@ -727,6 +727,10 @@ namespace Builder
 				result &= createUalSignalFromReceiver(ualItem);
 				break;
 
+			case UalItem::Type::BusExtractor:
+				result &= linkUalSignalsFromBusExtractor(ualItem);
+				break;
+
 			case UalItem::Type::BusComposer:
 				// already processed in previous 'for'
 				break;
@@ -735,7 +739,6 @@ namespace Builder
 			//
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::Terminator:
-			case UalItem::Type::BusExtractor:
 			case UalItem::Type::LoopbackOutput:
 			case UalItem::Type::LoopbackInput:
 				break;
@@ -1149,6 +1152,75 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::linkUalSignalsFromBusExtractor(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		const UalBusExtractor* extractor = ualItem->ualBusExtractor();
+
+		const std::vector<LogicPin>& inputs = extractor->inputs();
+
+		if (inputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		UalSignal* busSignal = m_ualSignals.get(inputs[0].guid());
+
+		if (busSignal == nullptr)
+		{
+			// UalSignal is not found for pin '%1' (Logic schema '%2').
+			//
+			m_log->errALC5120(ualItem->guid(), inputs[0].guid(), ualItem->schemaID());
+			return false;
+		}
+
+		QString busTypeID = extractor->busTypeId();
+
+		BusShared bus = m_signals->getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			// Bus type ID '%1' is undefined (Logic schema '%2').
+			//
+			m_log->errALC5100(busTypeID, ualItem->guid(), ualItem->schemaID());
+			return false;
+		}
+
+		if (busSignal->busTypeID() != busTypeID)
+		{
+			LOG_INTERNAL_ERROR(m_log);			// this error must be detected early, when link BusExtractor input
+			return false;
+		}
+
+		const std::vector<LogicPin>& outputs = extractor->outputs();
+
+		bool result = true;
+
+		for(const LogicPin& outPin : outputs)
+		{
+			UalSignal* busChildSignal = busSignal->getBusChildSignal(outPin.caption());
+
+			if (busChildSignal == nullptr)
+			{
+				assert(false);					// busChildSignal with ID == outPin.caption() is not found, why?
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			// link connected signals to UalSignal
+			//
+			result &= linkConnectedItems(ualItem, outPin, busChildSignal);
+		}
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
 	{
@@ -1193,6 +1265,7 @@ namespace Builder
 				break;
 
 			case UalItem::Type::BusExtractor:
+				result &= linkBusExtractorInput(srcUalItem, destUalItem, inPinUuid, ualSignal);
 				break;
 
 			// link pins to signal only, any checks is not required
@@ -1412,6 +1485,47 @@ namespace Builder
 		}
 
 		bool result = m_ualSignals.appendRefPin(busComposerItem, inPin.guid(), ualSignal);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		if (srcItem == nullptr || busExtractorItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		const UalBusExtractor* busExtractor = busExtractorItem->ualBusExtractor();
+
+		if (busExtractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString busTypeID = busExtractor->busTypeId();
+
+		BusShared bus = m_signals->getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			// Bus type ID '%1' is undefined (Logic schema '%2').
+			//
+			m_log->errALC5100(busTypeID, busExtractorItem->guid(), busExtractorItem->schemaID());
+			return false;
+		}
+
+		if (ualSignal->isBus() != true || ualSignal->busTypeID() != busTypeID)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualSignal->ualItemGuid(), busExtractorItem->guid(), busExtractorItem->schemaID());
+			return false;
+		}
+
+		bool result = m_ualSignals.appendRefPin(busExtractorItem, inPinUuid, ualSignal);
 
 		return result;
 	}
@@ -2626,6 +2740,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//  - tuningable
+		//  - bus child signal
 		//	+ used in UAL || is a SerialRx signal
 
 		for(UalSignal* s : m_ualSignals)
@@ -2633,6 +2748,7 @@ namespace Builder
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isConst() == false &&
+				s->isBusChild() == false &&
 				s->isAcquired() == true &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
@@ -2784,6 +2900,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//  - enableTuning
+		//  - bus child
 		//	+ used in UAL
 
 		for(UalSignal* s : m_ualSignals)
@@ -2791,6 +2908,7 @@ namespace Builder
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isConst() == false &&
+				s->isBusChild() == false &&
 				s->isAcquired() == false &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
@@ -2903,6 +3021,7 @@ namespace Builder
 		//	+ analog
 		//	+ internal
 		//  - enableTuning
+		//  - bus child
 		//	+ used in UAL || is a SerialRx signal (condition: m_optoModuleStorage->isSerialRxSignalExists(m_lm->equipmentIdTemplate(), s->appSignalID()) == true))
 
 		for(UalSignal* s : m_ualSignals)
@@ -2910,6 +3029,7 @@ namespace Builder
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isConst() == false &&
+				s->isBusChild() == false &&
 				s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isInternal() == true &&
@@ -3091,6 +3211,7 @@ namespace Builder
 		//	+ internal
 		//  - enableTuning
 		//	+ used in UAL
+		//  - bus child
 		//	+ auto analog internal signals (auto generated in m_appSignals)
 
 		for(UalSignal* s : m_ualSignals)
@@ -3098,6 +3219,7 @@ namespace Builder
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isConst() == false &&
+				s->isBusChild() == false &&
 				s->isAcquired() == false &&
 				s->isAnalog() == true &&
 				s->isInternal() == true)

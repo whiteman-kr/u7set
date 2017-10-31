@@ -45,6 +45,7 @@ namespace Builder
 	{
 		signalID = bs.signalId();
 		signalType = bs.type();
+		caption = bs.caption();
 
 		inbusAddr.set(0, 0);
 		inbusAddr.addBit(bs.inbusOffset() * SIZE_8BIT + bs.inbusDiscreteBitNo());

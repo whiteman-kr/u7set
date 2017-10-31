@@ -385,13 +385,11 @@ namespace Builder
 									Signal* busSignal,
 									Builder::BusShared bus);
 
-		bool createBusChildSignal(const UalItem* ualItem,
-									Signal* busChildSignal);
-
 		friend class UalSignalsMap;
 
 	public:
 		bool appendRefSignal(Signal* s, bool isOptoSignal);
+		bool appendBusChildRefSignals(const QString &busSignalID, Signal* s);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -412,7 +410,7 @@ namespace Builder
 
 		Address16 ioBufAddr();
 
-		Signal* firstSignal() const;
+		Signal* signal() const;
 
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
@@ -427,10 +425,10 @@ namespace Builder
 
 		QString busTypeID() const { return m_refSignals[0]->busTypeID(); }
 
-		const Signal& constSignal() { return *m_refSignals[0]; }
+		QString caption() const { return m_refSignals[0]->caption(); }
+		QString customAppSignalID() const { return m_refSignals[0]->customAppSignalID(); }
 
-		Signal* signal() { return m_refSignals[0]; }
-		const Signal* signal() const { return m_refSignals[0]; }
+		const Signal& constSignal() { return *m_refSignals[0]; }
 
 		const QVector<Signal*>& refSignals() const { return m_refSignals; }
 		int refSignalsCount() const { return m_refSignals.count(); }
@@ -486,6 +484,9 @@ namespace Builder
 
 		bool appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal);
 
+		BusShared bus() const { return m_bus; }
+
+		UalSignal* getBusChildSignal(const QString& busSignalID);
 
 	private:
 		const UalItem* m_ualItem = nullptr;
@@ -549,7 +550,7 @@ namespace Builder
 
 		UalSignal* createOptoSignal(const UalItem* ualItem, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
 
-		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* busSignal, BusShared bus, QUuid outPinUuid);
+		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);

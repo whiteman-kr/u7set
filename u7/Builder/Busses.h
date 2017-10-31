@@ -12,6 +12,7 @@ namespace Builder
 	{
 	public:
 		QString signalID;
+		QString caption;
 		E::SignalType signalType = E::SignalType::Discrete;
 		Address16 inbusAddr;
 
@@ -65,6 +66,9 @@ namespace Builder
 
 		const QVector<BusSignal>& busSignals() const { return m_signals; }
 
+		const VFrame30::Bus& srcBus() const { return m_srcBus; }
+		VFrame30::BusSignal& getBusSignal(const QString& signalID);
+
 	private:
 		bool buildInBusSignalsMap();
 		bool placeSignals();
@@ -72,7 +76,6 @@ namespace Builder
 		bool checkSignalsOffsets();
 		void buildSignalIndexesArrays();
 
-		VFrame30::BusSignal& getBusSignal(const QString& signalID);
 
 	private:
 		VFrame30::Bus m_srcBus;
