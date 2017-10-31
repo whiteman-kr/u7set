@@ -5426,7 +5426,213 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0007">
+        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0008">
+			<Properties>				
+				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
+				<Category>Other</Category>
+				<OpCode>23</OpCode>
+				<HasRam>true</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>24</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
+				<Pin OpName="i_lim_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>
+				<Pin OpName="i_lim_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="3" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="8" Size="32"/>
+				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>            
+				<Pin OpName="o_max" Caption="max" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
+				<Pin OpName="o_min" Caption="min" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+			</Outputs>
+			<Params>
+				 <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>2</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutMax" Caption="OutMax" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutMin" Caption="OutMin" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>				                      
+			</Params>
+			<CommonScript>
+				<Library>
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+		
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
+	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
+	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0007">
+			<Properties>				
+				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
+				<Category>Other</Category>
+				<OpCode>23</OpCode>
+				<HasRam>true</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>24</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+				<Pin OpName="i_lim_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="32"/>
+				<Pin OpName="i_lim_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="3" Size="32"/>			
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="8" Size="32"/>
+                <Pin OpName="o_max" Caption="max" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
+				<Pin OpName="o_min" Caption="min" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+			</Outputs>
+			<Params>
+				 <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>2</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutMax" Caption="OutMax" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutMin" Caption="OutMin" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>				                
+			</Params>
+			<CommonScript>
+				<Library>
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
+	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+		
+		<AFB id="#limc_fp_v1"         Caption="limc_fp"         Version="1.0000">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -5490,7 +5696,7 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_lim_max" Caption="LimMax" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+				<Param OpName="i_lim_max" Caption="Max" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>100</Value>
 					<Default>0</Default>
 					<LowLimit>-3.40282e+38</LowLimit>
@@ -5499,7 +5705,7 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_lim_min" Caption="LimMin" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+				<Param OpName="i_lim_min" Caption="Min" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
 					<LowLimit>-3.40282e+38</LowLimit>
@@ -5552,7 +5758,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0006">
+		<AFB id="#limc_si_v1"         Caption="limc_si"         Version="1.0000">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -5603,7 +5809,7 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_lim_max" Caption="LimMax" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+				<Param OpName="i_lim_max" Caption="Max" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>100</Value>
 					<Default>0</Default>
 					<LowLimit>-2147483648</LowLimit>
@@ -5612,7 +5818,7 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_lim_min" Caption="LimMin" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+				<Param OpName="i_lim_min" Caption="Min" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
 					<LowLimit>-2147483648</LowLimit>
