@@ -187,6 +187,10 @@ namespace Builder
 
 			if (generateAppLogicCode() == false) break;
 
+			if (copyAcquiredAnalogOptoSignalsToRegBuf() == false) break;
+
+			if (copyAcquiredAnalogBusChildSignalsToRegBuf() == false) break;
+
 			if (copyAcquiredTuningAnalogSignalsToRegBuf() == false) break;
 
 			if (copyAcquiredConstAnalogSignalsToRegBuf() == false) break;
@@ -2630,6 +2634,8 @@ namespace Builder
 		result &= createAcquiredAnalogInputSignalsList();
 		result &= createAcquiredAnalogStrictOutputSignalsList();
 		result &= createAcquiredAnalogInternalSignalsList();
+		result &= createAcquiredAnalogOptoSignalsList();
+		result &= createAcquiredAnalogBusChildSignalsList();
 		result &= createAcquiredAnalogTuninglSignalsList();
 		result &= createAcquiredAnalogConstSignalsList();
 
@@ -2671,6 +2677,8 @@ namespace Builder
 		sortSignalList(m_acquiredAnalogInputSignals);
 		sortSignalList(m_acquiredAnalogStrictOutputSignals);
 		sortSignalList(m_acquiredAnalogInternalSignals);
+		sortSignalList(m_acquiredAnalogOptoSignals);
+		sortSignalList(m_acquiredAnalogBusChildSignals);
 		// sortSignalList(m_acquiredAnalogTuningSignals);			// Not need to sort!
 
 		sortSignalList(m_nonAcquiredAnalogInputSignals);
@@ -3079,6 +3087,48 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::createAcquiredAnalogOptoSignalsList()
+	{
+		m_acquiredAnalogOptoSignals.clear();
+
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isAcquired() == true &&
+				s->isAnalog() == true &&
+				s->isOptoSignal() == true &&
+				s->isBusChild() == false &&
+				s->isConst() == false)
+			{
+				m_acquiredAnalogOptoSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createAcquiredAnalogBusChildSignalsList()
+	{
+		m_acquiredAnalogBusChildSignals.clear();
+
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isAcquired() == true &&
+				s->isAnalog() == true &&
+				s->isBusChild() == true &&
+				s->isConst() == false)
+			{
+				m_acquiredAnalogBusChildSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::createAcquiredAnalogTuninglSignalsList()
 	{
 /*		m_acquiredAnalogTuningSignals.clear();
@@ -3410,6 +3460,8 @@ namespace Builder
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogStrictOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInternalSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogOptoSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogBusChildSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogTuningSignals);
 
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInputSignals);
@@ -3694,6 +3746,8 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredAnalogInputSignalsInRegBuf(m_acquiredAnalogInputSignals);
 		result &= m_memoryMap.appendAcquiredAnalogStrictOutputSignalsInRegBuf(m_acquiredAnalogStrictOutputSignals);
 		result &= m_memoryMap.appendAcquiredAnalogInternalSignalsInRegBuf(m_acquiredAnalogInternalSignals);
+		result &= m_memoryMap.appendAcquiredAnalogOptoSignalsInRegBuf(m_acquiredAnalogOptoSignals);
+		result &= m_memoryMap.appendAcquiredAnalogBusChildSignalsInRegBuf(m_acquiredAnalogBusChildSignals);
 
 		// ++ acquired analog tuning signals
 		result &= m_memoryMap.appendAcquiredAnalogConstSignalsInRegBuf(m_acquiredAnalogConstIntSignals,
@@ -8505,6 +8559,88 @@ namespace Builder
 		///////
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf()
+	{
+		if (m_acquiredAnalogOptoSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		m_code.comment("Copy acquired opto signals in regBuf");
+		m_code.newLine();
+
+		Command cmd;
+
+		for(UalSignal* ualSignal : m_acquiredAnalogOptoSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				return false;
+			}
+
+			if (ualSignal->isAnalog() == false ||
+				ualSignal->isAcquired() == false ||
+				ualSignal->isOptoSignal() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			a;lsfwl;klfmqw lkmw egergn oeirgm
+
+
+
+			assert(ualSignal->isConst() == false);
+
+			if (ualSignal->ualAddr().isValid() == false ||
+				ualSignal->regBufAddr().isValid() == false ||
+				ualSignal->regValueAddr().isValid() == false)
+			{
+				assert(false);				// signal's ualAddr ot regBufAddr is not initialized!
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			countReminder16 = count % SIZE_16BIT;
+
+			assert(ualSignal->regBufAddr().bit() == countReminder16);
+
+			if (countReminder16 == 0 && (signalsCount - count) < SIZE_16BIT && zeroLastWord == true)
+			{
+				cmd.movConst(bitAccAddr, 0);
+				cmd.clearComment();
+				m_code.append(cmd);
+				zeroLastWord = false;
+			}
+
+			cmd.movBit(bitAccAddr, ualSignal->regBufAddr().bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
+			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+			m_code.append(cmd);
+
+			count++;
+
+			if ((count % SIZE_16BIT) == 0 || count == signalsCount)
+			{
+				cmd.clearComment();
+				cmd.mov(ualSignal->regBufAddr().offset(), bitAccAddr);
+				m_code.append(cmd);
+				m_code.newLine();;
+			}
+		}
+
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf()
+	{
+		return true;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf()

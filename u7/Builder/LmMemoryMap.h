@@ -144,6 +144,8 @@ namespace Builder
 			MemoryArea acquiredAnalogInputSignals;
 			MemoryArea acquiredAnalogOutputSignals;
 			MemoryArea acquiredAnalogInternalSignals;
+			MemoryArea acquiredAnalogOptoSignals;
+			MemoryArea acquiredAnalogBusChildSignals;
 			MemoryArea acquiredAnalogTuningSignals;
 			MemoryArea acquiredAnalogConstSignals;
 
@@ -256,6 +258,8 @@ namespace Builder
 		bool appendAcquiredAnalogInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
 													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
 		bool appendAcquiredBussesInRegBuf(const QVector<UalSignal*>& ualSignals);

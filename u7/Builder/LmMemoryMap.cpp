@@ -199,6 +199,8 @@ namespace Builder
 		m_appWordAdressed.acquiredAnalogInputSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredAnalogOutputSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredAnalogInternalSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredAnalogOptoSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredAnalogBusChildSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredAnalogTuningSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredAnalogConstSignals.setStartAddress(appLogicWordData.startAddress());
 
@@ -251,7 +253,9 @@ namespace Builder
 		m_appWordAdressed.acquiredAnalogInputSignals.setStartAddress(m_appWordAdressed.acquiredRawData.nextAddress());
 		m_appWordAdressed.acquiredAnalogOutputSignals.setStartAddress(m_appWordAdressed.acquiredAnalogInputSignals.nextAddress());
 		m_appWordAdressed.acquiredAnalogInternalSignals.setStartAddress(m_appWordAdressed.acquiredAnalogOutputSignals.nextAddress());
-		m_appWordAdressed.acquiredAnalogTuningSignals.setStartAddress(m_appWordAdressed.acquiredAnalogInternalSignals.nextAddress());
+		m_appWordAdressed.acquiredAnalogOptoSignals.setStartAddress(m_appWordAdressed.acquiredAnalogInternalSignals.nextAddress());
+		m_appWordAdressed.acquiredAnalogBusChildSignals.setStartAddress(m_appWordAdressed.acquiredAnalogOptoSignals.nextAddress());
+		m_appWordAdressed.acquiredAnalogTuningSignals.setStartAddress(m_appWordAdressed.acquiredAnalogBusChildSignals.nextAddress());
 		m_appWordAdressed.acquiredAnalogConstSignals.setStartAddress(m_appWordAdressed.acquiredAnalogTuningSignals.nextAddress());
 
 		m_appWordAdressed.acquiredBuses.setStartAddress(m_appWordAdressed.acquiredAnalogConstSignals.nextAddress());
@@ -359,6 +363,8 @@ namespace Builder
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogInputSignals, "acquired analog input signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogOutputSignals, "acquired analog output signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogInternalSignals, "acquired analog internal signals");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogOptoSignals, "acquired analog opto signals");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogBusChildSignals, "acquired analog bus child signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogTuningSignals, "acquired analog tuningable signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogConstSignals, "acquired analog const signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredBuses, "acquired buses");
@@ -731,6 +737,26 @@ namespace Builder
 		bool result = true;
 
 		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogInternalSignals, ualSignals, true);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredAnalogOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogOptoSignals, ualSignals, true);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogBusChildSignals, ualSignals, true);
 		result &= recalculateAddresses();
 
 		return result;

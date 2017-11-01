@@ -177,6 +177,8 @@ namespace Builder
 		bool createAcquiredAnalogInputSignalsList();
 		bool createAcquiredAnalogStrictOutputSignalsList();
 		bool createAcquiredAnalogInternalSignalsList();
+		bool createAcquiredAnalogOptoSignalsList();
+		bool createAcquiredAnalogBusChildSignalsList();
 		bool createAcquiredAnalogTuninglSignalsList();
 		bool createAcquiredAnalogConstSignalsList();
 
@@ -309,6 +311,9 @@ namespace Builder
 
 		bool addToComparatorStorage(const UalAfb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
+
+		bool copyAcquiredAnalogOptoSignalsToRegBuf();
+		bool copyAcquiredAnalogBusChildSignalsToRegBuf();
 
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
@@ -459,6 +464,8 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredAnalogInputSignals;				// acquired analog input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredAnalogStrictOutputSignals;		// acquired analog strict output signals, used in UAL
 		QVector<UalSignal*> m_acquiredAnalogInternalSignals;			// acquired analog internal signals, used in UAL
+		QVector<UalSignal*> m_acquiredAnalogOptoSignals;				// acquired analog opto signals (simple copied from opto buffers)
+		QVector<UalSignal*> m_acquiredAnalogBusChildSignals;			// acquired analog opto signals (unlike to opto signals may require conversion from inbus format)
 		QVector<UalSignal*> m_acquiredAnalogTuningSignals;				// acquired analog internal tuningable signals, no matter used in UAL or not
 
 		QHash<int, UalSignal*> m_acquiredAnalogConstIntSignals;
