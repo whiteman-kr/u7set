@@ -94,7 +94,7 @@ namespace Afb
 	public:
 		AfbSignal(void);
 		AfbSignal(const AfbSignal& that);
-		AfbSignal& operator=(const AfbSignal& that);
+		AfbSignal& operator=(const AfbSignal& that) noexcept;
 
 		// Serialization
 		//
@@ -273,7 +273,7 @@ private:
 	public:
 		AfbElement(void);
 		AfbElement(const AfbElement& that);
-		AfbElement& operator=(const AfbElement& that);
+		AfbElement& operator=(const AfbElement& that) noexcept;
 
 		// Serialization
 		//
@@ -353,7 +353,7 @@ private:
 	private:
 		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
 		//
-		QString m_strID;
+		QString m_strId;
 		QString m_caption;
 		QString m_description;
 		QString m_version = "0.0000";
@@ -373,6 +373,9 @@ private:
 		std::vector<AfbParam> m_params;
 
 		std::shared_ptr<Afb::AfbComponent> m_component;
+
+		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
+		//
 	};
 
 	//

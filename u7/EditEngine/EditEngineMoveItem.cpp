@@ -24,9 +24,9 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::executeCommand(EditSchemaView* schemaView)
+	void MoveItemCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		schemaView->setSelectedItems(m_items);
+		*itemsToSelect = m_items;
 
 		for (std::shared_ptr<VFrame30::SchemaItem> item : m_items)
 		{
@@ -34,16 +34,16 @@ namespace EditEngine
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(schemaView->schema()->gridSize());
+				item->snapToGrid(m_schemaView->schema()->gridSize());
 			}
 		}
 
 		return;
 	}
 
-	void MoveItemCommand::unExecuteCommand(EditSchemaView* schemaView)
+	void MoveItemCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		schemaView->setSelectedItems(m_items);
+		*itemsToSelect = m_items;
 
 		for (std::shared_ptr<VFrame30::SchemaItem> item : m_items)
 		{
@@ -51,7 +51,7 @@ namespace EditEngine
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(schemaView->schema()->gridSize());
+				item->snapToGrid(m_schemaView->schema()->gridSize());
 			}
 		}
 

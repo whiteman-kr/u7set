@@ -16,8 +16,8 @@ namespace EditEngine
 			QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemaView* schemaView) override;
-		virtual void unExecuteCommand(EditSchemaView* schemaView) override;
+		virtual void executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
+		virtual void unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
 
 		// Data
 		//

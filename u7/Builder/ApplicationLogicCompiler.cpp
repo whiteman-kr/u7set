@@ -100,6 +100,7 @@ namespace Builder
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
 			&ApplicationLogicCompiler::processBvbModules,
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
+			&ApplicationLogicCompiler::writeResourcesUsageReport,
 			&ApplicationLogicCompiler::writeSerialDataXml,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
@@ -417,6 +418,28 @@ namespace Builder
 				break;
 			}
 		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::writeResourcesUsageReport()
+	{
+		bool result = true;
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("Resources usage report generation...")));
+
+		for(int i = 0; i < m_moduleCompilers.count(); i++)
+		{
+			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
+
+			ModuleLogicCompiler::ResourcesUsageInfo info = moduleCompiler->resourcesUsageInfo();
+
+			// write to file
+
+		}
+
+		// m_resultWriter->addFile()
 
 		return result;
 	}

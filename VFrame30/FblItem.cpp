@@ -417,6 +417,16 @@ namespace VFrame30
 		return false;
 	}
 
+	bool FblItem::hasInputs() const
+	{
+		return !m_inputPoints.empty();
+	}
+
+	bool FblItem::hasOutputs() const
+	{
+		return !m_outputPoints.empty();
+	}
+
 	int FblItem::inputsCount() const
 	{
 		return static_cast<int>(m_inputPoints.size());

@@ -221,8 +221,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			displayUsedMemoryInfo();
-			displayTimingInfo();
+			displayResourcesUsageInfo();
 
 			msg = QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).
 					arg(m_lm->equipmentIdTemplate());
@@ -10877,7 +10876,7 @@ namespace Builder
 		*/
 	}
 
-	void ModuleLogicCompiler::displayUsedMemoryInfo()
+	void ModuleLogicCompiler::displayResourcesUsageInfo()
 	{
 		QString str;
 
@@ -10947,12 +10946,10 @@ namespace Builder
 				m_log->errALC5078();
 			}
 		}
-	}
 
-	void ModuleLogicCompiler::displayTimingInfo()
-	{
+		//
+
 		QString str_percent;
-		QString str;
 
 		// display IDR phase timing
 		//
@@ -11021,6 +11018,13 @@ namespace Builder
 				m_log->errALC5082();
 			}
 		}
+
+		m_resourcesUsageInfo.lmEquipmentID = m_lm->equipmentIdTemplate();
+		m_resourcesUsageInfo.codeMemoryUsed = percentOfUsedCodeMemory;
+		m_resourcesUsageInfo.bitMemoryused = percentOfUsedBitMemory;
+		m_resourcesUsageInfo.wordMemoryUsed = percentOfUsedWordMemory;
+		m_resourcesUsageInfo.idrPhaseTimeUsed = idrPhaseTimeUsed;
+		m_resourcesUsageInfo.alpPhaseTimeUsed = alpPhaseTimeUsed;
 	}
 
 	void ModuleLogicCompiler::cleanup()

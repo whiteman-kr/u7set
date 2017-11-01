@@ -34,6 +34,7 @@
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
+
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
 		{MouseState::Scrolling, Qt::CursorShape::ArrowCursor},
@@ -70,7 +71,6 @@ const EditSchemaWidget::SizeActionToMouseCursor EditSchemaWidget::m_sizeActionTo
 void addSchemaItem(const QByteArray& itemData);
 
 
-
 //
 // SchemaItemsClipboard
 //
@@ -84,30 +84,14 @@ const char* SchemaItemClipboardData::mimeType = "application/x-radiyschemaset";
 EditSchemaView::EditSchemaView(QWidget* parent) :
 	VFrame30::SchemaView(parent),
 	m_activeLayer(0),
-	m_mouseState(MouseState::None),
-	m_editStartMovingEdge(0),
-	m_editEndMovingEdge(0),
-	m_editStartMovingEdgeX(0),
-	m_editStartMovingEdgeY(0),
-	m_editEndMovingEdgeX(0),
-	m_editEndMovingEdgeY(0),
-	m_movingEdgePointIndex(0)
-	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
+	m_mouseState(MouseState::None)
 {
 }
 
 EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent)
 	: VFrame30::SchemaView(schema, parent),
 	m_activeLayer(0),
-	m_mouseState(MouseState::None),
-	m_editStartMovingEdge(0),
-	m_editEndMovingEdge(0),
-	m_editStartMovingEdgeX(0),
-	m_editStartMovingEdgeY(0),
-	m_editEndMovingEdgeX(0),
-	m_editEndMovingEdgeY(0),
-	m_movingEdgePointIndex(0)
-	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
+	m_mouseState(MouseState::None)
 {
 }
 
@@ -178,6 +162,10 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	{
 		VFrame30::SchemaItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
 	}
+
+	// Draw Edit Connection lines outlines
+	//
+	drawEditConnectionLineOutline(&drawParam);
 
 	// Draw newItem outline
 	//
@@ -384,6 +372,25 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 	return;
 }
 
+void EditSchemaView::drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam)
+{
+	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
+	bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
+
+	if (ctrlIsPressed == true ||
+		altIsPressed == true)
+	{
+		return;
+	}
+
+	for (const EditConnectionLine& ecl : m_editConnectionLines)
+	{
+		ecl.drawOutline(drawParam);
+	}
+
+	return;
+}
+
 void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam)
 {
 	if (m_newItem == nullptr)
@@ -451,19 +458,23 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 			return;
 		}
 
+		if (m_editConnectionLines.size() != 1)
+		{
+			return;
+		}
+
 		posInterfaceFound = true;
-		VFrame30::IPosConnection* pos = dynamic_cast<VFrame30::IPosConnection*>(m_newItem.get());
+		const EditConnectionLine& ecl = m_editConnectionLines.front();
 
-		const std::list<VFrame30::SchemaPoint>& extPoints = pos->GetExtensionPoints();
-
-		if (extPoints.empty() == false)
+		if (ecl.extensionPoints().empty() == false)
 		{
 			drawRullers = true;
-			rullerPoint.X = extPoints.back().X;
-			rullerPoint.Y = extPoints.back().Y;
+			rullerPoint = VFrame30::SchemaPoint(ecl.lastExtensionPoint());
 		}
 	}
 
+	// --
+	//
 	if (posInterfaceFound == false)
 	{
 		assert(posInterfaceFound == true);
@@ -476,6 +487,7 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		outlineColor.setAlphaF(0.5);
 
 		QPen outlinePen(outlineColor);
+		outlinePen.setStyle(Qt::PenStyle::DashLine);
 		outlinePen.setWidth(0);
 
 		QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -599,6 +611,7 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	QPainter* p = drawParam->painter();
 
 	QPen outlinePen(Qt::blue);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -646,8 +659,8 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 		return;
 	}
 
-	float xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
-	float ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
+	double xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
+	double ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
 
 	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
 	if (itemPos == nullptr)
@@ -658,116 +671,26 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	auto si = selectedItems().front();
 
-	// save old state
+	// Get new rect
+	//
+	QRectF newItemRect = sizingRectItem(xdif, ydif, itemPos);
+	newItemRect = newItemRect.normalized();
+
+	// Save old state
 	//
 	std::vector<VFrame30::SchemaPoint> oldPos = si->getPointList();
 
-	// set new pos
+	// Set new pos
 	//
-	double x1 = itemPos->leftDocPt();
-	double y1 = itemPos->topDocPt();
-	double x2 = x1 + itemPos->widthDocPt();
-	double y2 = y1 + itemPos->heightDocPt();
-
-	double minWidth = itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep());
-	double minHeight = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());
-
-	switch (mouseState())
-	{
-	case MouseState::SizingTopLeft:
-		x1 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTop:
-		y1 += ydif;
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTopRight:
-		x2 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingRight:
-		x2 += xdif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		break;
-	case MouseState::SizingBottomRight:
-		x2 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottom:
-		y2 += ydif;
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottomLeft:
-		x1 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingLeft:
-		x1 += xdif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		break;
-	default:
-		assert(false);
-		break;
-	}
-
-	itemPos->setLeftDocPt(std::min(x1, x2));
-	itemPos->setTopDocPt(std::min(y1, y2));
-
-	double width = std::max(std::abs(x2 - x1), itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep()));
-	double height = std::max(std::abs(y2 - y1), itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep()));
-
-	itemPos->setWidthDocPt(width);
-	itemPos->setHeightDocPt(height);
+	itemPos->setLeftDocPt(newItemRect.left());
+	itemPos->setTopDocPt(newItemRect.top());
+	itemPos->setWidthDocPt(newItemRect.width());
+	itemPos->setHeightDocPt(newItemRect.height());
 
 	// Save result for drawing rullers
 	//
-	m_addRectStartPoint = VFrame30::SchemaPoint(x1, y1);
-	m_addRectEndPoint = VFrame30::SchemaPoint(x2, y2);
+	m_addRectStartPoint = VFrame30::SchemaPoint(newItemRect.topLeft());
+	m_addRectEndPoint = VFrame30::SchemaPoint(newItemRect.bottomRight());
 
 	// Draw rullers by bounding rect
 	//
@@ -776,6 +699,7 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	QRectF rullerRect(m_addRectStartPoint, m_addRectEndPoint);
 
 	QPen outlinePen(Qt::blue);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -887,6 +811,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 	QPainter* p = drawParam->painter();
 
 	QPen outlinePen(Qt::blue);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -930,264 +855,13 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		return;
 	}
 
-	if (m_movingEdgePointIndex == -1)
+	if (m_editConnectionLines.size() != 1)
 	{
-		assert(m_movingEdgePointIndex != -1);
+		assert(m_editConnectionLines.size() == 1);
 		return;
 	}
 
-	if (selectedItems().size() != 1)
-	{
-		assert(selectedItems().size() == 1);
-		return;
-	}
-
-	auto si = selectedItems().front();
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(si.get());
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
-		return;
-	}
-
-	std::list<VFrame30::SchemaPoint> pointsList = itemPos->GetPointList();
-	std::vector<VFrame30::SchemaPoint> points(pointsList.begin(), pointsList.end());
-
-	// Save position
-	//
-	auto oldPos = si->getPointList();
-
-	if (m_movingEdgePointIndex < 0 || m_movingEdgePointIndex >= static_cast<int>(points.size()))
-	{
-		assert(m_movingEdgePointIndex >= 0);
-		assert(m_movingEdgePointIndex < static_cast<int>(points.size()));
-		return;
-	}
-
-	QPointF rullerPoint;
-
-	// Calculate new position
-	//
-	switch (mouseState())
-	{
-	case MouseState::MovingHorizontalEdge:
-		{
-			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
-
-			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
-
-			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
-			op.Y += diff;
-
-			points[m_movingEdgePointIndex] = op;
-
-			//
-			op = points[m_movingEdgePointIndex + 1];
-			op.Y += diff;
-
-			points[m_movingEdgePointIndex + 1] = op;
-
-			rullerPoint.setY(op.Y);
-
-			// Если по сторонам есть еще ГОРИЗОНАТЛЬНЫЕ линии то добавить точку,
-			// что бы ребро не тянуло по диагонали соседние отрезки
-			//
-			if (m_movingEdgePointIndex + 2 < static_cast<int>(points.size()) &&
-				std::abs(points[m_movingEdgePointIndex + 2].Y - oldEdgeEnd.Y) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex + 2, oldEdgeEnd);
-			}
-
-			if (m_movingEdgePointIndex - 1 >= 0 &&
-				std::abs(points[m_movingEdgePointIndex - 1].Y - oldEdgeStart.Y) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex, oldEdgeStart);
-			}
-		}
-		break;
-	case MouseState::MovingVerticalEdge:
-		{
-			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
-
-			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
-
-			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
-			op.X += diff;
-
-			points[m_movingEdgePointIndex] = op;
-			//
-			op = points[m_movingEdgePointIndex + 1];
-			op.X += diff;
-
-			points[m_movingEdgePointIndex + 1] = op;
-
-			rullerPoint.setX(op.X);
-
-			// Если по сторонам есть еще ВЕРТИКАЛЬНЫЕ линии то добавить точку,
-			// что бы ребро не тянуло по диагонали соседние отрезки
-			//
-			if (m_movingEdgePointIndex + 2 < static_cast<int>(points.size()) &&
-				std::abs(points[m_movingEdgePointIndex + 2].X - oldEdgeEnd.X) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex + 2, oldEdgeEnd);
-			}
-
-			if (m_movingEdgePointIndex - 1 >= 0 &&
-				std::abs(points[m_movingEdgePointIndex - 1].X - oldEdgeStart.X) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex, oldEdgeStart);
-			}
-		}
-		break;
-	case MouseState::MovingConnectionLinePoint:
-		{
-			double diffX = m_editEndMovingEdgeX - points[m_movingEdgePointIndex].X;
-			double diffY = m_editEndMovingEdgeY - points[m_movingEdgePointIndex].Y;
-
-			// Shift the previouse point
-			//
-			if (m_movingEdgePointIndex - 1 >= 0)
-			{
-				int index = m_movingEdgePointIndex;
-				bool sameDirrection = true;
-				bool wasVert = true;
-				bool wasHorz = true;
-				VFrame30::SchemaPoint curPoint = points[index];
-
-				while (index > 0 && sameDirrection == true)
-				{
-					VFrame30::SchemaPoint prevPoint = points[index - 1];
-
-					if (std::abs(prevPoint.X - curPoint.X) < std::abs(prevPoint.Y - curPoint.Y))
-					{
-						if (wasVert == true)
-						{
-							// The line is vertical
-							//
-							prevPoint.X += diffX;
-							wasHorz = false;
-							wasVert = true;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-					else
-					{
-						if (wasHorz == true)
-						{
-							// The line is horizontal
-							//
-							prevPoint.Y += diffY;
-							wasHorz = true;
-							wasVert = false;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-
-					if (sameDirrection == true)
-					{
-						curPoint = points[index - 1];
-						points[index - 1] = prevPoint;
-					}
-
-					index--;
-				}
-			}
-
-			// Shift the next point
-			//
-			if (m_movingEdgePointIndex + 1 < static_cast<int>(points.size()))
-			{
-				int index = m_movingEdgePointIndex;
-				bool sameDirrection = true;
-				bool wasVert = true;
-				bool wasHorz = true;
-				VFrame30::SchemaPoint curPoint = points[index];
-
-				while (index + 1 < static_cast<int>(points.size()) && sameDirrection == true)
-				{
-					VFrame30::SchemaPoint nextPoint = points[index + 1];
-
-					if (std::abs(nextPoint.X - curPoint.X) < std::abs(nextPoint.Y - curPoint.Y))
-					{
-						if (wasVert == true)
-						{
-							// The line is vertical
-							//
-							nextPoint.X += diffX;
-							wasHorz = false;
-							wasVert = true;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-					else
-					{
-						if (wasHorz == true)
-						{
-							// The line is horizontal
-							//
-							nextPoint.Y += diffY;
-							wasHorz = true;
-							wasVert = false;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-
-					if (sameDirrection == true)
-					{
-						curPoint = points[index + 1];
-						points[index + 1] = nextPoint;
-					}
-
-					index++;
-				}
-			}
-
-			// Shift the moving point
-			//
-			VFrame30::SchemaPoint pt = points[m_movingEdgePointIndex];
-
-			pt.X += diffX;
-			pt.Y += diffY;
-
-			points[m_movingEdgePointIndex] = pt;
-
-			rullerPoint.setX(pt.X);
-			rullerPoint.setY(pt.Y);
-		}
-		break;
-
-		default:
-			void();
-	}
-
-	// Set calculated pos to SchemaItem
-	//
-	pointsList.assign(points.begin(), points.end());
-	itemPos->SetPointList(pointsList);
-	itemPos->RemoveSamePoints();
-
-	// SavePoints to View, so later they will be used in MouseUp action to set new position
-	//
-	m_movingVertexPoints = itemPos->GetPointList();
-
-	// Draw item outline
-	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	const EditConnectionLine& ecl = m_editConnectionLines.front();
 
 	// Draw rullers
 	//
@@ -1197,6 +871,7 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	outlineColor.setAlphaF(0.5);
 
 	QPen outlinePen(outlineColor);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -1207,25 +882,43 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		{
+			double rullerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(0.0, rullerPoint), QPointF(schema()->docWidth(), rullerPoint));
+		}
 		break;
 	case MouseState::MovingVerticalEdge:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
+		{
+			double rullerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(rullerPoint, 0.0), QPointF(rullerPoint, schema()->docHeight()));
+		}
 		break;
 	case MouseState::MovingConnectionLinePoint:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		{
+			QPointF rullerPoint;
+			switch (ecl.mode())
+			{
+			case EditConnectionLine::EditMode::AddToBegin:
+			case EditConnectionLine::EditMode::AddToEnd:
+				rullerPoint = ecl.lastExtensionPoint();
+				break;
+			case EditConnectionLine::EditMode::EditPoint:
+				rullerPoint = ecl.editPointCurrState();
+				break;
+			default:
+				assert(false);
+			}
+
+			p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		}
 		break;
 	default:
 		assert(false);
 		break;
 	}
+
 	p->setRenderHints(oldrenderhints);
-
-
-	// Restore ald position
-	//
-	si->setPointList(oldPos);
 
 	return;
 }
@@ -1621,6 +1314,114 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 	return SchemaItemAction::NoAction;
 }
 
+QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos)
+{
+	if (itemPos == nullptr)
+	{
+		assert(itemPos);
+		return QRectF();
+	}
+
+	double x1 = itemPos->leftDocPt();
+	double y1 = itemPos->topDocPt();
+	double x2 = x1 + itemPos->widthDocPt();
+	double y2 = y1 + itemPos->heightDocPt();
+
+	double minWidth = itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());
+
+	switch (mouseState())
+	{
+	case MouseState::SizingTopLeft:
+		x1 += xdif;
+		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
+		break;
+	case MouseState::SizingTop:
+		y1 += ydif;
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
+		break;
+	case MouseState::SizingTopRight:
+		x2 += xdif;
+		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
+		break;
+	case MouseState::SizingRight:
+		x2 += xdif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		break;
+	case MouseState::SizingBottomRight:
+		x2 += xdif;
+		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
+		break;
+	case MouseState::SizingBottom:
+		y2 += ydif;
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
+		break;
+	case MouseState::SizingBottomLeft:
+		x1 += xdif;
+		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
+		break;
+	case MouseState::SizingLeft:
+		x1 += xdif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+
+	QRectF result(std::min(x1, x2),
+				  std::min(y1, y2),
+				  std::abs(x2 - x1),
+				  std::abs(y2 - y1));
+
+	return result;
+}
+
 
 QUuid EditSchemaView::activeLayerGuid() const
 {
@@ -1722,6 +1523,8 @@ void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30
 	m_selectedItems = items;
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items)
@@ -1754,6 +1557,8 @@ void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item)
@@ -1767,6 +1572,8 @@ void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>
 	m_selectedItems.push_back(item);
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
@@ -1795,6 +1602,8 @@ void EditSchemaView::clearSelection()
 
 	m_selectedItems.clear();
 	emit selectionChanged();
+
+	return;
 }
 
 bool EditSchemaView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
@@ -1896,6 +1705,7 @@ EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, con
 	//
 	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightDown_None, this, std::placeholders::_1)));
 	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
+	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseRightDown_MovingEdgesOrVertex, this, std::placeholders::_1)));
 
 	// Mouse Right Button Up
 	//
@@ -2614,13 +2424,13 @@ void EditSchemaWidget::createActions()
 	return;
 }
 
-bool EditSchemaWidget::event(QEvent* e)
+bool EditSchemaWidget::event(QEvent* event)
 {
 	// Show tool tip
 	//
-	if (e->type() == QEvent::ToolTip)
+	if (event->type() == QEvent::ToolTip)
 	{
-		QHelpEvent* he = static_cast<QHelpEvent*>(e);
+		QHelpEvent* he = static_cast<QHelpEvent*>(event);
 
 		// Get item under cursor
 		//
@@ -2637,10 +2447,10 @@ bool EditSchemaWidget::event(QEvent* e)
 			setToolTip("");
 		}
 
-		return VFrame30::BaseSchemaWidget::event(e);
+		return VFrame30::BaseSchemaWidget::event(event);
 	}
 
-	return VFrame30::BaseSchemaWidget::event(e);
+	return VFrame30::BaseSchemaWidget::event(event);
 }
 
 void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
@@ -2661,8 +2471,6 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 			return;
 	}
 
-	BaseSchemaWidget::keyPressEvent(e);
-
 	// Show properties dialog
 	//
 	if ((e->modifiers().testFlag(Qt::AltModifier) == true &&		// Alt + numeric keypad Enter
@@ -2674,8 +2482,60 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 		properties();
 	}
 
+	// This will update if Moving item in progress and we try to move connection links
+	//
+	if (editSchemaView()->m_editConnectionLines.empty() == false)
+	{
+		bool ctrlIsPressed = e->modifiers() & Qt::ControlModifier;
+		bool altIsPressed = e->modifiers() & Qt::AltModifier;
+
+		if (ctrlIsPressed != m_ctrlWasPressed ||
+			altIsPressed != m_altWasPressed)
+		{
+			m_ctrlWasPressed = ctrlIsPressed;
+			m_altWasPressed = altIsPressed;
+
+			editSchemaView()->update();
+		}
+
+		setFocus();	// As alt could be pressed and MainMenu activated
+		e->ignore();
+		return;
+	}
+
+	BaseSchemaWidget::keyPressEvent(e);
+
 	return;
 }
+
+void EditSchemaWidget::keyReleaseEvent(QKeyEvent* event)
+{
+	// This will update if Moving item in progress and we try to move connection links
+	//
+	if (editSchemaView()->m_editConnectionLines.empty() == false)
+	{
+		bool ctrlIsPressed = event->modifiers() & Qt::ControlModifier;
+		bool altIsPressed = event->modifiers() & Qt::AltModifier;
+
+		if (ctrlIsPressed != m_ctrlWasPressed ||
+			altIsPressed != m_altWasPressed)
+		{
+			m_ctrlWasPressed = ctrlIsPressed;
+			m_altWasPressed = altIsPressed;
+
+			editSchemaView()->update();
+		}
+
+		setFocus();	// As alt could be pressed and MainMenu activated
+		event->accept();
+		return;
+	}
+
+	BaseSchemaWidget::keyReleaseEvent(event);
+
+	return;
+}
+
 
 // Set corresponding to the current situation and user actions context menu
 //
@@ -2687,6 +2547,8 @@ void EditSchemaWidget::setCorrespondingContextMenu()
 
 void EditSchemaWidget::mousePressEvent(QMouseEvent* event)
 {
+	grabKeyboard();
+
 	BaseSchemaWidget::mousePressEvent(event);
 
 	if (event->isAccepted() == true)
@@ -2749,6 +2611,8 @@ void EditSchemaWidget::mousePressEvent(QMouseEvent* event)
 
 void EditSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+	releaseKeyboard();
+
 	if (event->button() == Qt::LeftButton)
 	{
 		for (auto msa = m_mouseLeftUpStateAction.begin(); msa != m_mouseLeftUpStateAction.end(); ++msa)
@@ -2802,9 +2666,19 @@ void EditSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void EditSchemaWidget::mouseDoubleClickEvent(QMouseEvent* event)
 {
+	if (mouseState() == MouseState::MovingConnectionLinePoint ||
+		mouseState() == MouseState::AddSchemaPosConnectionNextPoint)
+	{
+		// It accidental double clicking, ignore it
+		//
+		event->ignore();
+		return;
+	}
+
 	setMouseState(MouseState::None);
 
-	if (selectedItems().empty() == false)
+	if (event->button() == Qt::LeftButton &&
+		selectedItems().empty() == false)
 	{
 		properties();
 	}
@@ -2934,18 +2808,17 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditEdge);
 
-					editSchemaView()->m_editStartMovingEdge = docPoint.y();
-					editSchemaView()->m_editEndMovingEdge = docPoint.y();
+					ecl.setEditEdgeIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 					setMouseState(MouseState::MovingHorizontalEdge);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -2955,18 +2828,17 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditEdge);
 
-					editSchemaView()->m_editStartMovingEdge = docPoint.x();
-					editSchemaView()->m_editEndMovingEdge = docPoint.x();
+					ecl.setEditEdgeIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 					setMouseState(MouseState::MovingVerticalEdge);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -2976,23 +2848,17 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					//if (movingEdgePointIndex == )
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditPoint);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					ecl.setEditPointIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_editStartMovingEdgeX = docPoint.x();
-					editSchemaView()->m_editStartMovingEdgeY = docPoint.y();
-
-					editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
-					editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
-
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 					setMouseState(MouseState::MovingConnectionLinePoint);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -3119,9 +2985,6 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 	// Selection item or area
 	//
-//	editSchemaView()->m_rubberBand->show();
-//	editSchemaView()->m_rubberBand->setGeometry(QRect(me->pos(), QSize()));
-
 	editSchemaView()->m_mouseSelectionStartPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->m_mouseSelectionEndPoint = editSchemaView()->m_mouseSelectionStartPoint;
 
@@ -3232,18 +3095,14 @@ void EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint(QMouseEven
 	//
 	docPoint = magnetPointToPin(docPoint);
 
-	itemPos->DeleteAllPoints();
+	EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(editSchemaView()->m_newItem),
+						   EditConnectionLine::AddToEnd);
 
-	itemPos->AddPoint(docPoint.x(), docPoint.y());		        // Сразу добавляется две точки
-	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
+	ecl.addBasePoint(docPoint);
+	ecl.addExtensionPoint(docPoint);
 
-	// Проверить под кординатой нахождение пина
-	//
-	if (dynamic_cast<VFrame30::FblItem*>(editSchemaView()->m_newItem.get()) != nullptr)
-	{
-		// ??
-		//VFrame30Ext.IFblItem fblItem = schemaView.newItem as VFrame30Ext.IFblItem;
-	}
+	editSchemaView()->m_editConnectionLines.clear();
+	editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 	setMouseState(MouseState::AddSchemaPosConnectionNextPoint);
 
@@ -3377,7 +3236,13 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 		if (itemsForMove.empty() == false)
 		{
+			m_editEngine->startBatch();
+
 			m_editEngine->runMoveItem(xdif, ydif, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
 		}
 	}
 	else
@@ -3484,107 +3349,24 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	double xdif = mouseSizingEndPointDocPt.x() - mouseSizingStartPointDocPt.x();
 	double ydif = mouseSizingEndPointDocPt.y() - mouseSizingStartPointDocPt.y();
 
-	// set new pos
+	// Get new rect
 	//
-	double x1 = itemPos->leftDocPt();
-	double y1 = itemPos->topDocPt();
-	double x2 = x1 + itemPos->widthDocPt();
-	double y2 = y1 + itemPos->heightDocPt();
-
-	double minWidth = itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep());
-	double minHeight = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());
-
-	switch (mouseState())
-	{
-	case MouseState::SizingTopLeft:
-		x1 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTop:
-		y1 += ydif;
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTopRight:
-		x2 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingRight:
-		x2 += xdif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		break;
-	case MouseState::SizingBottomRight:
-		x2 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottom:
-		y2 += ydif;
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottomLeft:
-		x1 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingLeft:
-		x1 += xdif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		break;
-	default:
-		assert(false);
-		break;
-	}
+	QRectF newItemRect = editSchemaView()->sizingRectItem(xdif, ydif, itemPos);
+	newItemRect = newItemRect.normalized();
 
 	// --
 	//
 	std::vector<VFrame30::SchemaPoint> itemPoints;
 
-	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2), std::min(y1, y2)));
-	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2) + std::abs(x2 - x1), std::min(y1, y2) + std::abs(y2 - y1)));
+	itemPoints.push_back(VFrame30::SchemaPoint(newItemRect.topLeft()));
+	itemPoints.push_back(VFrame30::SchemaPoint(newItemRect.bottomRight()));
 
-	m_editEngine->runSetPoints(itemPoints, si);
+	m_editEngine->startBatch();
+	{
+		m_editEngine->runSetPoints(itemPoints, si, true);
+		finishMoveAfbsConnectionLinks();
+	}
+	m_editEngine->endBatch();
 
 	resetAction();
 	return;
@@ -3641,7 +3423,7 @@ void EditSchemaWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 		points[1] = static_cast<VFrame30::SchemaPoint>(QPointF(itemPos->endXDocPt() + xdif, itemPos->endYDocPt() + ydif));
 	}
 
-	m_editEngine->runSetPoints(points, si);
+	m_editEngine->runSetPoints(points, si, true);
 
 	//--
 	//
@@ -3743,23 +3525,29 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint(QMouseEvent* event)
 
 void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* e)
 {
-	assert(editSchemaView()->m_newItem != nullptr);
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
-
-	if (itemPos == nullptr)
+	if (editSchemaView()->m_newItem == nullptr ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
-		assert(itemPos != nullptr);
-		editSchemaView()->m_newItem.reset();
+		assert(editSchemaView()->m_newItem != nullptr);
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
+		resetAction();
 		return;
 	}
 
-	// Add the last point, where cursor is now
+	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
+	if (itemPos == nullptr)
+	{
+		assert(itemPos != nullptr);
+		resetAction();
+		return;
+	}
+
+	// Add the last point, where cursor is now to ALL
 	//
 	mouseRightDown_AddSchemaPosConnectionNextPoint(e);
 
-	itemPos->RemoveSamePoints();
-	itemPos->DeleteAllExtensionPoints();
+	const EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+	ecl.setPointToItem(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(editSchemaView()->m_newItem));
 
 	if (itemPos->GetPointList().size() >= 2)
 	{
@@ -3821,9 +3609,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
 
 				std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-				newPoints = removeUnwantedPoints(newPoints);
+				newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
+				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint, true);
 			}
 			else
 			{
@@ -3843,9 +3631,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.assign(existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-					newPoints = removeUnwantedPoints(newPoints);
+					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint, true);
 				}
 			}
 		}
@@ -3885,9 +3673,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-					newPoints = removeUnwantedPoints(newPoints);
+					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 				}
 				else
 				{
@@ -3898,9 +3686,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-					newPoints = removeUnwantedPoints(newPoints);
+					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 				}
 			}
 			else
@@ -3923,9 +3711,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-						newPoints = removeUnwantedPoints(newPoints);
+						newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 					}
 					else
 					{
@@ -3936,9 +3724,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-						newPoints = removeUnwantedPoints(newPoints);
+						newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 					}
 				}
 			}
@@ -3953,7 +3741,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 			{
 				const std::list<VFrame30::SchemaPoint>& pointList = itemPos->GetPointList();
 
-				std::list<VFrame30::SchemaPoint> newPoints = removeUnwantedPoints(pointList);
+				std::list<VFrame30::SchemaPoint> newPoints = EditConnectionLine::removeUnwantedPoints(pointList);
 
 				itemPos->SetPointList(newPoints);
 				assert(itemPos->GetPointList().size() >= 2);
@@ -3978,9 +3766,12 @@ void EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	if (selectedItems().size() != 1)
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(selectedItems().size() == 1);
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
+
 		resetAction();
 		return;
 	}
@@ -3996,27 +3787,40 @@ void EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	if ((mouseState() == MouseState::MovingHorizontalEdge || mouseState() == MouseState::MovingVerticalEdge) &&
-		std::abs(editSchemaView()->m_editEndMovingEdge - editSchemaView()->m_editStartMovingEdge) < 0.000001)
+	// Check if the real change vertex or edge has been done
+	//
+	EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+
+	if (ecl.mode() == EditConnectionLine::AddToBegin ||
+		ecl.mode() == EditConnectionLine::AddToEnd)
 	{
-		// изменения координат небыло, значит и не надо выполнять команду
+		QPointF lastExtPt = ecl.lastExtensionPoint();
+
+		ecl.moveExtensionPointsToBasePoints();
+		ecl.addExtensionPoint(lastExtPt);
+	}
+
+	auto basePoints = ecl.basePoints();
+
+	std::list<VFrame30::SchemaPoint> newPoints = {basePoints.begin(), basePoints.end()};
+	const std::list<VFrame30::SchemaPoint>& itemPoints = itemPos->GetPointList();
+
+	if (newPoints == itemPoints)
+	{
+		// Nothing has changed, do not exec a command
 		//
 		resetAction();
 		return;
 	}
 
-	if (mouseState() == MouseState::MovingConnectionLinePoint &&
-		std::abs(editSchemaView()->m_editEndMovingEdgeX - editSchemaView()->m_editStartMovingEdgeX) < 0.000001 &&
-		std::abs(editSchemaView()->m_editEndMovingEdgeY - editSchemaView()->m_editStartMovingEdgeY) < 0.000001)
+	if (ecl.mode() == EditConnectionLine::AddToBegin ||
+		ecl.mode() == EditConnectionLine::AddToEnd)
 	{
-		// изменения координат небыло, значит и не надо выполнять команду
-		//
-		resetAction();
-		return;
+		newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 	}
 
-	std::vector<VFrame30::SchemaPoint> setPoints(editSchemaView()->m_movingVertexPoints.begin(), editSchemaView()->m_movingVertexPoints.end());
-	m_editEngine->runSetPoints(setPoints, si);
+	std::vector<VFrame30::SchemaPoint> setPoints(newPoints.begin(), newPoints.end());
+	m_editEngine->runSetPoints(setPoints, si, true);
 
 	resetAction();
 	return;
@@ -4036,9 +3840,6 @@ void EditSchemaWidget::mouseMove_Selection(QMouseEvent* me)
 	editSchemaView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->update();
 
-//	QRect selectionRect = QRect(editSchemaView()->m_rubberBand->pos(), me->pos()).normalized();
-//	editSchemaView()->m_rubberBand->setGeometry(selectionRect);
-
 	return;
 }
 
@@ -4053,6 +3854,14 @@ void EditSchemaWidget::mouseMove_Moving(QMouseEvent* me)
 
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
 
+	// Move links along item
+	//
+	QPointF offset = editSchemaView()->m_editEndDocPt - editSchemaView()->m_editStartDocPt;
+
+	moveAfbsConnectionLinks(offset, mouseState());
+
+	// --
+	//
 	editSchemaView()->update();
 	return;
 }
@@ -4066,17 +3875,72 @@ void EditSchemaWidget::mouseMove_SizingRect(QMouseEvent* me)
 		return;
 	}
 
-	auto si = selectedItems().front();
-
-	if (dynamic_cast<VFrame30::IPosRect*>(si.get()) == nullptr)
+	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
+	if (itemPos == nullptr)
 	{
-		assert(dynamic_cast<VFrame30::IPosRect*>(si.get()) != nullptr);
+		assert(itemPos != nullptr);
 		setMouseState(MouseState::None);
 		return;
 	}
 
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
 
+	// Get possible links offset
+	//
+	double xdif = editSchemaView()->m_editEndDocPt.x() - editSchemaView()->m_editStartDocPt.x();
+	double ydif = editSchemaView()->m_editEndDocPt.y() - editSchemaView()->m_editStartDocPt.y();
+
+	QRectF currentRect(itemPos->leftDocPt(),
+						   itemPos->topDocPt(),
+						   itemPos->widthDocPt(),
+						   itemPos->heightDocPt());
+
+	QRectF newRect = editSchemaView()->sizingRectItem(xdif, ydif, itemPos);
+
+	switch (mouseState())
+	{
+	case MouseState::SizingTop:
+		xdif = 0;
+		ydif = newRect.top() - currentRect.top();
+		break;
+	case MouseState::SizingTopRight:
+		xdif = newRect.right() - currentRect.right();
+		ydif = newRect.top() - currentRect.top();
+		break;
+	case MouseState::SizingRight:
+		xdif = newRect.right() - currentRect.right();
+		ydif = 0;
+		break;
+	case MouseState::SizingBottomRight:
+		xdif = newRect.right() - currentRect.right();
+		ydif = newRect.bottom() - currentRect.bottom();
+		break;
+	case MouseState::SizingBottom:
+		xdif = 0;
+		ydif = newRect.bottom() - currentRect.bottom();
+		break;
+	case MouseState::SizingBottomLeft:
+		xdif = newRect.left() - currentRect.left();
+		ydif = newRect.bottom() - currentRect.bottom();
+		break;
+	case MouseState::SizingLeft:
+		xdif = newRect.left() - currentRect.left();
+		ydif = 0;
+		break;
+	case MouseState::SizingTopLeft:
+		xdif = newRect.left() - currentRect.left();
+		ydif = newRect.top() - currentRect.top();
+		break;
+	default:
+		assert(false);
+	}
+
+	// Move links
+	//
+	moveAfbsConnectionLinks(QPointF(xdif, ydif), mouseState());
+
+	// --
+	//
 	editSchemaView()->update();
 	return;
 }
@@ -4199,19 +4063,7 @@ void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* ev
 	{
 		assert(editSchemaView()->m_newItem != nullptr);
 
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
-		return;
-	}
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
-
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
-
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
+		resetAction();
 		return;
 	}
 
@@ -4221,7 +4073,10 @@ void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* ev
 	//
 	docPoint = magnetPointToPin(docPoint);
 
-	movePosConnectionEndPoint(itemPos, docPoint);
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
+	{
+		movePosConnectionEndPoint(editSchemaView()->m_newItem, &ecl, docPoint);
+	}
 
 	editSchemaView()->update();
 
@@ -4239,43 +4094,48 @@ void EditSchemaWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 		return;
 	}
 
-	if (selectedItems().size() != 1)
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(selectedItems().size() == 1);
-		resetAction();
-		return;
-	}
-
-	auto si = selectedItems().front();
-	assert(si != nullptr);
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(si.get());
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
+		assert(editSchemaView()->m_editConnectionLines.size() != 1);
 		resetAction();
 		return;
 	}
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
+	EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+
 	// --
 	//
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
-		editSchemaView()->m_editEndMovingEdge = docPoint.y();
+		ecl.modifyEdge(docPoint.y());
 		break;
 	case MouseState::MovingVerticalEdge:
-		editSchemaView()->m_editEndMovingEdge = docPoint.x();
+		ecl.modifyEdge(docPoint.x());
 		break;
 	case MouseState::MovingConnectionLinePoint:
-		// magnet point to pin
-		//
-		docPoint = magnetPointToPin(docPoint);
+		{
+			switch (ecl.mode())
+			{
+			case EditConnectionLine::EditMode::EditPoint:
+				docPoint = magnetPointToPin(docPoint);
+				ecl.modifyPoint(docPoint);
+				break;
 
-		editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
-		editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
+			case EditConnectionLine::EditMode::AddToBegin:
+			case EditConnectionLine::EditMode::AddToEnd:
+				docPoint = magnetPointToPin(docPoint);
+				movePosConnectionEndPoint(selectedItems().front(), &ecl, docPoint);
+				break;
+
+			default:
+				assert(false);
+			}
+		}
 		break;
 	default:
 		assert(false);
@@ -4295,45 +4155,81 @@ void EditSchemaWidget::mouseRightDown_None(QMouseEvent*)
 	return;
 }
 
-void EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* event)
+void EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* /*event*/)
 {
-	if (editSchemaView()->m_newItem == nullptr)
+	if (editSchemaView()->m_newItem == nullptr ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(editSchemaView()->m_newItem != nullptr);
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
 
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
+		resetAction();
 		return;
 	}
 
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
-
-	if (itemPos == nullptr)
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
 	{
-		assert(itemPos != nullptr);
+		assert(ecl.extensionPoints().empty() == false);
 
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
+		QPointF lastExtPt = ecl.lastExtensionPoint();
+
+		ecl.moveExtensionPointsToBasePoints();
+		ecl.addExtensionPoint(lastExtPt);
+	}
+
+	// --
+	//
+	editSchemaView()->update();
+
+	return;
+}
+
+void EditSchemaWidget::mouseRightDown_MovingEdgesOrVertex(QMouseEvent* event)
+{
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
+	{
+		assert(selectedItems().size() == 1 );
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
+
+		resetAction();
 		return;
 	}
 
-	const std::list<VFrame30::SchemaPoint>& extPoints = itemPos->GetExtensionPoints();
+	EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
 
-	if (extPoints.empty() == true)
+	if (ecl.mode() != EditConnectionLine::EditMode::EditPoint &&
+		ecl.mode() != EditConnectionLine::EditMode::AddToBegin &&
+		ecl.mode() != EditConnectionLine::EditMode::AddToEnd)
 	{
-		assert(extPoints.size() > 0);
+		assert(false);
+
+		resetAction();
 		return;
 	}
 
-	for (VFrame30::SchemaPoint p : extPoints)
+	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
+
+	switch (ecl.mode())
 	{
-		itemPos->AddPoint(p.X, p.Y);
+	case EditConnectionLine::EditMode::EditPoint:
+		ecl.addPointAndSwitchMode(docPoint);
+		break;
+
+	case EditConnectionLine::EditMode::AddToBegin:
+	case EditConnectionLine::EditMode::AddToEnd:
+		{
+			assert(ecl.extensionPoints().empty() == false);
+			QPointF lastExtPt = ecl.lastExtensionPoint();
+
+			ecl.moveExtensionPointsToBasePoints();
+			ecl.addExtensionPoint(lastExtPt);
+		}
+		break;
+	default:
+		assert(false);
+		resetAction();
 	}
-
-	VFrame30::SchemaPoint lastExtPt = extPoints.back();	// Cache point before deleteing, as it can be removed from REFERENCED list
-	itemPos->DeleteAllExtensionPoints();
-
-	itemPos->AddExtensionPoint(lastExtPt.X, lastExtPt.Y);
 
 	// --
 	//
@@ -4820,280 +4716,296 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
-void EditSchemaWidget::movePosConnectionEndPoint(VFrame30::IPosConnection* item, QPointF toPoint)
+void EditSchemaWidget::movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem,  EditConnectionLine* ecl, QPointF toPoint)
 {
-	double gridSize = schema()->gridSize();
+	assert(schemaItem);
+	assert(ecl);
 
-	auto points = item->GetPointList();
-	auto extPoints = item->GetExtensionPoints();
+	ecl->moveEndPointPos(activeLayer(), toPoint, EditConnectionLine::Auto, schema()->gridSize());
 
-	if (points.empty() == true || extPoints.empty() == true)
-	{
-		assert(points.size() > 0);
-		assert(extPoints.size() > 0);
-		return;
-	}
+	return;
+}
 
-	if (points.size() + extPoints.size() < 2)
-	{
-		assert(points.size() + extPoints.size() >= 2);
-		return;
-	}
+void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
+{
+	editSchemaView()->m_editConnectionLines.clear();
 
-	VFrame30::SchemaPoint ptBase = points.back();
-
-	// Two cases:
-	//	1. If docPoint ouside of horzline, add to main part 3 pointx
-	//	------------+(1)
-	//              |
-	//           (2)+--------+(3)
+	// Go over all selected itmes pins, and add data to m_editConnectionLines
 	//
-	//	2. If docPoint on horz line, add to main part two points
-	//	------------+(1)
-	//              |
-	//       =======+=======
-	//             (2)
-	//
-	bool docPointIsOnHorzLine = false;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedNonLockedItems();
+	std::multiset<std::shared_ptr<VFrame30::SchemaItemLink>> commonLinks;
 
-	// Try to to detect situation 2
-	//
-	std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderDocPoint = activeLayer()->getItemListUnderPoint(toPoint, editSchemaView()->m_newItem->metaObject()->className());
-
-	if (linksUnderDocPoint.empty() == false)
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
-		for (std::shared_ptr<VFrame30::SchemaItem> connItem : linksUnderDocPoint)
+		if (item->isFblItemRect() == false)
 		{
-			VFrame30::IPosConnection* connectionUndertDocPoint = dynamic_cast<VFrame30::IPosConnection*>(connItem.get());
+			continue;
+		}
 
-			// Get all horizontal lines for item connectionUndertDocPoint
+		VFrame30::FblItemRect* fblItemRect = item->toFblItemRect();
+		assert(fblItemRect);
+
+		// Get links with end on pins
+		//
+		double gridSize = schema()->gridSize();
+		int pinGridStep = schema()->pinGridStep();
+
+		fblItemRect->SetConnectionsPos(gridSize, pinGridStep);			// Calc pins' positions
+
+		const std::vector<VFrame30::AfbPin>& inputs = fblItemRect->inputs();
+		const std::vector<VFrame30::AfbPin>& outputs = fblItemRect->outputs();
+
+		std::vector<VFrame30::AfbPin> inOuts;
+		inOuts.reserve(inputs.size() + outputs.size());
+
+		switch (mouseState)
+		{
+		case MouseState::Moving:
+		case MouseState::SizingTop:
+		case MouseState::SizingTopRight:
+		case MouseState::SizingTopLeft:
+			inOuts.insert(inOuts.end(), inputs.begin(), inputs.end());
+			inOuts.insert(inOuts.end(), outputs.begin(), outputs.end());
+			break;
+
+		case MouseState::SizingRight:
+		case MouseState::SizingBottomRight:
+			inOuts.insert(inOuts.end(), outputs.begin(), outputs.end());
+			break;
+
+		case MouseState::SizingLeft:
+		case MouseState::SizingBottomLeft:
+			inOuts.insert(inOuts.end(), inputs.begin(), inputs.end());
+			break;
+		}
+
+		for (const VFrame30::AfbPin& pin : inOuts)
+		{
+			VFrame30::SchemaPoint pinPos = pin.point();
+
+			std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderPin =
+					activeLayer()->getItemListUnderPoint(pinPos, "VFrame30::SchemaItemLink");
+
+			// Check if pin on the Start or End point
 			//
-			std::list<VFrame30::SchemaPoint> underItemPointsList = connectionUndertDocPoint->GetPointList();
-			std::vector<VFrame30::SchemaPoint> underItemPoints = {underItemPointsList.begin(), underItemPointsList.end()};		// In the next loop more conv
-
-			for (size_t i = 0; i < underItemPoints.size(); i++)
+			for (std::shared_ptr<VFrame30::SchemaItem> foundLinkItem : linksUnderPin)
 			{
-				if (i == 0)
+				std::shared_ptr<VFrame30::SchemaItemLink> link = std::dynamic_pointer_cast<VFrame30::SchemaItemLink>(foundLinkItem);
+				assert(link);
+
+				// If this link in selected items, slip it
+				//
+				auto foundInSelectedIt = std::find(selected.begin(), selected.end(), foundLinkItem);
+				if (foundInSelectedIt != selected.end())
 				{
 					continue;
 				}
 
-				VFrame30::SchemaPoint curPos = underItemPoints[i];
-				VFrame30::SchemaPoint prevPos = underItemPoints[i - 1];
+				// Get end points of found link and check if they are on pin
+				//
+				VFrame30::SchemaPoint ptBegin = link->GetPointList().front();
+				VFrame30::SchemaPoint ptEnd = link->GetPointList().back();
 
-				if (std::abs(curPos.Y - prevPos.Y) < 0.000001 &&			// it's horiznotal
-					std::abs(curPos.Y - toPoint.y()) < 0.000001 &&		// docPoint.y is on this link
-					std::min(curPos.X, prevPos.X) <= toPoint.x() &&		// docPoint.x is on this link
-					std::max(curPos.X, prevPos.X) >= toPoint.x())			// docPoint.x is on this link
+				if (pinPos == ptBegin)
 				{
-					// This is horz line, docPoint lies on it
-					//
-					docPointIsOnHorzLine = true;
-					break;
+					EditConnectionLine ecl(link, EditConnectionLine::MoveToPin);
+					ecl.moveToPin_init(link, pin.dirrection(), ptBegin);
+
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
+
+					commonLinks.insert(link);
+				}
+
+				if (pinPos == ptEnd)
+				{
+					EditConnectionLine ecl(link, EditConnectionLine::MoveToPin);
+					ecl.moveToPin_init(link, pin.dirrection(), ptEnd);
+
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
+
+					commonLinks.insert(link);
 				}
 			}
-
-			if (docPointIsOnHorzLine == true)
-			{
-				break;
-			}
 		}
 	}
 
-	if (docPointIsOnHorzLine == true)
+	// Ckeck if there is EditConnectionLine which is going to be moved from both sides
+	// If [SIGNAL1] and [SIGNAL2] are selected, the select their common links, and remove it from editSchemaView()->m_editConnectionLines
+	//
+	// [SIGNAL1]-+---------------+-[SIGNAL2]
+	//
+	for (std::shared_ptr<VFrame30::SchemaItemLink> cl: commonLinks)
 	{
-		//	2. If docPoint on horz line, add to main part two points
-		//	------------+(1) - cornerPoint
-		//              |
-		//       =======+=======
-		//             (2) docCpoint
-		//
-		QPointF cornerPoint(toPoint.x(), ptBase.Y);		// (1)
-		cornerPoint = snapToGrid(cornerPoint);
+		size_t useCount = commonLinks.count(cl);
 
-		item->DeleteAllExtensionPoints();
-		item->AddExtensionPoint(cornerPoint.x(), cornerPoint.y());
-		item->AddExtensionPoint(toPoint.x(), toPoint.y());
-	}
-	else
-	{
-		//	1. If docPoint ouside of horzline, add to main part 3 pointx
-		//	------------+(1)
-		//              |
-		//           (2)+--------+(3)
-		//
-
-		// Add extra points
-		//
-		double horzDistance = std::abs(ptBase.X - toPoint.x()) * (ptBase.X - toPoint.x() > 0.0 ? -1.0 : 1.0);
-		double midPoint = 0.0;
-
-		if (std::abs(ptBase.X - toPoint.x()) < gridSize * 1.0)
+		if (useCount > 1)
 		{
-			midPoint = ptBase.X;
-		}
-		else
-		{
-			midPoint = ptBase.X + horzDistance / 2;
-		}
+			auto it = std::find_if(editSchemaView()->m_editConnectionLines.begin(),
+								   editSchemaView()->m_editConnectionLines.end(),
+									[cl](const EditConnectionLine& ecl)
+									{
+										return ecl.moveToPin_schemaItem() == cl;
+									});
 
-		QPointF onePoint(midPoint, ptBase.Y);
-		onePoint = snapToGrid(onePoint);
-
-		item->DeleteAllExtensionPoints();
-
-		// if onePoint on previous line, then move it to base
-		//
-		if (points.size() > 1)
-		{
-			VFrame30::SchemaPoint lastLinkPt1 = *std::prev(points.end(), 2);
-			VFrame30::SchemaPoint lastLinkPt2 = points.back();
-
-			if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
-				std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
-				((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
-				 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
-				))
+			if (it != editSchemaView()->m_editConnectionLines.end())
 			{
-				onePoint.setX(ptBase.X);
-				onePoint.setY(ptBase.Y);
+				it->moveToPin_setMoveWholeLink();
+
+				// Remmove all other occurances of Link in m_editConnectionLines
+				//
+				auto removeIt = std::remove_if(++it, editSchemaView()->m_editConnectionLines.end(),
+												[cl](const EditConnectionLine& ecl)
+												{
+													return ecl.moveToPin_schemaItem() == cl;
+												});
+
+				editSchemaView()->m_editConnectionLines.erase(removeIt, editSchemaView()->m_editConnectionLines.end());
 			}
 		}
-
-		QPointF twoPoint(onePoint.x(), toPoint.y());
-
-		if (onePoint != ptBase)
-		{
-			item->AddExtensionPoint(onePoint.x(), onePoint.y());
-		}
-		item->AddExtensionPoint(twoPoint.x(), twoPoint.y());
-		item->AddExtensionPoint(toPoint.x(), toPoint.y());
 	}
 
 	return;
 }
 
-std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const
+void EditSchemaWidget::moveAfbsConnectionLinks(QPointF offset, MouseState mouseState)
 {
-	std::vector<VFrame30::SchemaPoint> result = source;
-
-	int sameXPosCount = 0;			// Pairs of points amount by X coordinate
-	int sameYPosCount = 0;			// Pairs of points amount by Y coordinate
-
-	size_t currentPointIndex = 0;	// Index of current point to process
-
-	// In cycle we are processing current point with previous point
-	//
-
-	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
 	{
-		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
-		const VFrame30::SchemaPoint& prevPoint = result.at(currentPointIndex - 1);
+		QPointF eclOffset;
 
-		if (std::abs(curPoint.X - prevPoint.X) < 0.0000001)
+		switch (mouseState)
 		{
-			sameXPosCount ++;
-		}
-		else
-		{
-			// Remove points only if we have more than one pair with same
-			// X coordinates
-			//
-			if (sameXPosCount > 1)
+		case MouseState::Moving:
+			eclOffset = offset;
+			break;
+
+		case MouseState::SizingTop:
+			eclOffset.ry() = offset.y();
+			break;
+
+		case MouseState::SizingBottom:
+			assert(false);
+			return;
+
+		case MouseState::SizingTopLeft:
+			if (ecl.moveToPin_isInput() == true)
 			{
-				assert(currentPointIndex > 0);
-				assert(currentPointIndex <= result.size());
-
-				size_t startIndex = currentPointIndex - sameXPosCount;
-				size_t lastIndex = currentPointIndex - 1;
-
-				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
-
-				currentPointIndex = currentPointIndex - sameXPosCount-1;
-				sameYPosCount = 0;
+				eclOffset = offset;
 			}
-
-			sameXPosCount = 0;
-		}
-
-		if (std::abs(curPoint.Y - prevPoint.Y) < 0.0000001)
-		{
-			sameYPosCount++;
-		}
-		else
-		{
-			// Remove points only if we have more than one pair with same
-			// X coordinates
-			//
-			if (sameYPosCount > 1)
+			else
 			{
-				assert(currentPointIndex > 0);
-				assert(currentPointIndex <= result.size());
-
-				size_t startIndex = currentPointIndex - sameYPosCount;
-				size_t lastIndex = currentPointIndex - 1;
-
-				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
-
-				currentPointIndex = currentPointIndex - sameYPosCount-1;
-				sameXPosCount = 0;
+				eclOffset.ry() = offset.y();
 			}
+			break;
 
-			sameYPosCount = 0;
+		case MouseState::SizingLeft:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				eclOffset.rx() = offset.x();
+			}
+			else
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			break;
+
+		case MouseState::SizingBottomLeft:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				eclOffset.rx() = offset.x();
+			}
+			else
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			break;
+
+		case MouseState::SizingTopRight:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				eclOffset.ry() = offset.y();
+			}
+			else
+			{
+				eclOffset = offset;
+			}
+			break;
+
+		case MouseState::SizingRight:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			else
+			{
+				eclOffset.rx() = offset.x();
+			}
+			break;
+
+		case MouseState::SizingBottomRight:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			else
+			{
+				eclOffset.rx() = offset.x();
+			}
+			break;
+
+		default:
+			assert(false);
 		}
+
+		ecl.moveToPin_offset(activeLayer(), eclOffset, schema()->gridSize());
 	}
 
-	// If some pairs with same coordinate values are placed at the end of
-	// the line, we must remove them!
-	//
-
-	if (sameYPosCount > 1)
-	{
-		assert(currentPointIndex == result.size());
-
-		size_t beginIndex = currentPointIndex - sameYPosCount;
-		size_t lastIndex = currentPointIndex - 1;
-
-		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
-	}
-
-	if (sameXPosCount > 1)
-	{
-		assert(currentPointIndex == result.size());
-
-		size_t beginIndex = currentPointIndex - sameXPosCount;
-		size_t lastIndex = currentPointIndex - 1;
-
-		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
-	}
-
-	// Check points before return
-	//
-
-#ifdef _DEBUG
-	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
-	{
-		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
-		const VFrame30::SchemaPoint& prevPoint = result.at(currentPointIndex - 1);
-
-		// Points must be connected by X or Y axis. In other way - exception must be rised
-		//
-
-		assert((std::abs(curPoint.X - prevPoint.X) < 0.0000001) ||
-				(std::abs(curPoint.Y - prevPoint.Y) < 0.0000001));
-	}
-#endif
-
-	return result;
+	return;
 }
 
-std::list<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const
+void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 {
-	std::vector<VFrame30::SchemaPoint> sourceVector(source.begin(), source.end());
-	sourceVector = removeUnwantedPoints(sourceVector);
+	setFocus();	// As alt could be pressed and MainMeu activated
 
-	std::list<VFrame30::SchemaPoint> result(sourceVector.begin(), sourceVector.end());
-	return result;
+	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
+	bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
+
+	if (ctrlIsPressed == true ||
+		altIsPressed == true)
+	{
+		editSchemaView()->m_editConnectionLines.clear();
+		return;
+	}
+
+	std::vector<std::vector<VFrame30::SchemaPoint>> commandPoints;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> commandItems;
+
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
+	{
+		ecl.moveExtensionPointsToBasePoints();
+		std::vector<QPointF> points = ecl.points();
+
+		std::list<VFrame30::SchemaPoint> uniquePoints(points.begin(), points.end());
+		uniquePoints.unique();
+
+		uniquePoints = EditConnectionLine::removeUnwantedPoints(uniquePoints);
+
+		std::vector<VFrame30::SchemaPoint> resultPoinst(uniquePoints.begin(), uniquePoints.end());
+
+		commandPoints.push_back(resultPoinst);
+		commandItems.push_back(ecl.moveToPin_schemaItem());
+	}
+
+	if (commandPoints.empty() == false)
+	{
+		assert(commandPoints.size() == commandItems.size());
+
+		m_editEngine->runSetPoints(commandPoints, commandItems, false);
+
+		editSchemaView()->m_editConnectionLines.clear();
+	}
+
+	return;
 }
 
 bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out)
@@ -5345,12 +5257,11 @@ void EditSchemaWidget::resetAction()
 	setMouseState(MouseState::None);
 	editSchemaView()->m_newItem.reset();
 
+	editSchemaView()->m_editConnectionLines.clear();
 	editSchemaView()->m_mouseSelectionStartPoint = QPoint();
 	editSchemaView()->m_mouseSelectionEndPoint = QPoint();
 	editSchemaView()->m_editStartDocPt = QPointF();
 	editSchemaView()->m_editEndDocPt = QPointF();
-
-	editSchemaView()->m_movingVertexPoints.clear();
 
 	setMouseCursor(mapFromGlobal(QCursor::pos()));
 
@@ -5366,7 +5277,8 @@ void EditSchemaWidget::clearSelection()
 
 void EditSchemaWidget::contextMenu(const QPoint& pos)
 {
-	if (mouseState() == MouseState::AddSchemaPosConnectionNextPoint)
+	if (mouseState() == MouseState::AddSchemaPosConnectionNextPoint ||
+		mouseState() == MouseState::MovingConnectionLinePoint)
 	{
 		// Don't show context menu, because it's right click for adding next point to connection line
 		//
@@ -5683,7 +5595,19 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
-	qDebug() << equipmentIdList;
+	const VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get());
+	QStringList itemsAppSignals = signalItem->appSignalIdList();
+
+	if (itemsAppSignals.size() == 1 &&
+		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||
+		(itemsAppSignals[0] == QLatin1String("#IN_STRID")) ||
+		(itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
+	{
+	}
+	else
+	{
+		m_createSignalOptions.appSignalIdList = itemsAppSignals;
+	}
 
 	int counterValue = 0;
 	bool nextValRes = db()->nextCounterValue(&counterValue);
@@ -5692,12 +5616,13 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
+	m_createSignalOptions.lmEquipmentIdList = equipmentIdList;
+
 	QStringList signalsIds = SignalsTabPage::createSignal(db(),
-														  equipmentIdList,
 														  counterValue,
 														  schema()->schemaId(),
 														  schema()->caption(),
-														  "",
+														  &m_createSignalOptions,
 														  this);
 
 	if (signalsIds.isEmpty() == false)
@@ -6000,7 +5925,7 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	// IntItems
 	//
 	QLabel* intValueLabel = new QLabel("IntegerValue:");
-	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue));
+	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue, 'g', constItem->precision()));
 	intValueEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), intValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::IntegerType)
@@ -6011,9 +5936,11 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	// FloatItems
 	//
+	QLocale locale;
+
 	QLabel* floatValueLabel = new QLabel("FloatValue:");
-	QLineEdit* floatValueEdit = new QLineEdit(QString::number(floatValue));
-	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::min(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
+	QLineEdit* floatValueEdit = new QLineEdit(locale.toString(floatValue));
+	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::FloatType)
 	{
@@ -6107,8 +6034,11 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	if (result == QDialog::Accepted)
 	{
 		VFrame30::SchemaItemConst::ConstType newType = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+
 		int newIntValue = intValueEdit->text().toInt();
-		double newFloatValue = floatValueEdit->text().toFloat();
+
+		QLocale locale;
+		double newFloatValue = locale.toFloat(floatValueEdit->text());
 		int newDiscreteValue = discreteValueEdit->text().toInt();
 
 		if (newType != type)
@@ -6325,7 +6255,7 @@ void EditSchemaWidget::deleteKey()
 
 void EditSchemaWidget::undo()
 {
-	m_editEngine->undo(1);
+	m_editEngine->undo();
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
@@ -6335,7 +6265,7 @@ void EditSchemaWidget::undo()
 
 void EditSchemaWidget::redo()
 {
-	m_editEngine->redo(1);
+	m_editEngine->redo();
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
@@ -7436,7 +7366,16 @@ void EditSchemaWidget::onLeftKey()
 	{
 		double dif = -schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -7466,7 +7405,16 @@ void EditSchemaWidget::onRightKey()
 	{
 		double dif = schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -7496,7 +7444,16 @@ void EditSchemaWidget::onUpKey()
 	{
 		double dif = -schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -7526,7 +7483,16 @@ void EditSchemaWidget::onDownKey()
 	{
 		double dif = schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -7625,7 +7591,7 @@ void EditSchemaWidget::sameWidth()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7723,7 +7689,7 @@ void EditSchemaWidget::sameHeight()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7851,7 +7817,7 @@ void EditSchemaWidget::sameSize()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7916,7 +7882,7 @@ void EditSchemaWidget::alignLeft()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7981,7 +7947,7 @@ void EditSchemaWidget::alignRight()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -8046,7 +8012,7 @@ void EditSchemaWidget::alignTop()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -8111,7 +8077,7 @@ void EditSchemaWidget::alignBottom()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -8728,6 +8694,21 @@ MouseState EditSchemaWidget::mouseState() const
 void EditSchemaWidget::setMouseState(MouseState state)
 {
 	editSchemaView()->setMouseState(state);
+
+	if (state == MouseState::Moving ||
+		state == MouseState::SizingTopLeft ||
+		state == MouseState::SizingTopLeft ||
+		state == MouseState::SizingTop ||
+		state == MouseState::SizingTopRight ||
+		state == MouseState::SizingRight ||
+		state == MouseState::SizingBottomRight ||
+		state == MouseState::SizingBottom ||
+		state == MouseState::SizingBottomLeft ||
+		state == MouseState::SizingLeft)
+	{
+		initMoveAfbsConnectionLinks(state);
+	}
+
 	return;
 }
 
@@ -9038,4 +9019,3 @@ void SchemaFindDialog::replaceAllPressed()
 
 	return;
 }
-

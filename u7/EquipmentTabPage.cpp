@@ -2253,14 +2253,24 @@ void EquipmentView::addAppSignal()
 	{
 		return;
 	}
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	SignalsTabPage::createSignal(db(),
-								 equipmentIdList,
-								 counter,
-								 module->equipmentId(),
-								 module->equipmentId(),
-								 "",
-								 this);
+//	CreatingSignalOptions options;
+//	SignalsTabPage::createSignal(db(),
+//								 equipmentIdList,
+//								 counter,
+//								 module->equipmentId(),
+//								 module->equipmentId(),
+//								 "",
+//								 options,
+//								 this);
 	return;
 }
 

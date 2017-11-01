@@ -236,7 +236,7 @@ namespace Afb
 		*this = that;
 	}
 
-	AfbSignal& AfbSignal::operator=(const AfbSignal& that)
+	AfbSignal& AfbSignal::operator=(const AfbSignal& that) noexcept
 	{
 		if (this == &that)
 		{
@@ -1443,21 +1443,50 @@ namespace Afb
 		*this = that;
 	}
 
-	AfbElement& AfbElement::operator=(const AfbElement& that)
+	AfbElement& AfbElement::operator=(const AfbElement& that) noexcept
 	{
 		if (this == &that)
 		{
 			return *this;
 		}
 
-		QDomDocument d;
-		QDomElement e = d.createElement(QLatin1String("AFB"));
-		that.saveToXml(&e);
+		// Copy via xml serialization is TOO SLOW,
+		// and it's slows down compilation (ordering items).
+		// If ordering items (struct AppLogicItem) is rewriten without copy,
+		// then it will be possible to uncomment  xml serialization
+		//
 
-		QString errorMessage;
-		this->loadFromXml(e, &errorMessage);
+//		QDomDocument d;
+//		QDomElement e = d.createElement(QLatin1String("AFB"));
+//		that.saveToXml(&e);
 
-		this->m_component = that.m_component;
+//		QString errorMessage;
+//		this->loadFromXml(e, &errorMessage);
+
+//		this->m_component = that.m_component;
+
+		// Member by member copy
+		//
+		m_strId = that.m_strId;
+		m_caption = that.m_caption;
+		m_description = that.m_description;
+		m_version = that.m_version;
+		m_category = that.m_category;
+		m_opCode = that.m_opCode;
+		m_hasRam = that.m_hasRam;
+		m_internalUse = that.m_internalUse;
+		m_minWidth = that.m_minWidth;
+		m_minHeight = that.m_minHeight;
+
+		m_libraryScript = that.m_libraryScript;
+		m_afterCreationScript = that.m_afterCreationScript;
+
+		m_inputSignals = that.m_inputSignals;
+		m_outputSignals = that.m_outputSignals;
+
+		m_params = that.m_params;
+
+		m_component = that.m_component;
 
 		return *this;
 	}
@@ -1499,13 +1528,13 @@ namespace Afb
 			return false;
 		}
 
-		m_strID = xmlElement.attribute("id");
+		m_strId = xmlElement.attribute("id");
 
 		// Caption
 		//
 		if (xmlElement.hasAttribute("Caption") == false)
 		{
-			*errorMessage = tr("Cant find attribute Caption. AFB %1").arg(m_strID);
+			*errorMessage = tr("Cant find attribute Caption. AFB %1").arg(m_strId);
 			return false;
 		}
 
@@ -1515,7 +1544,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute("Version") == false)
 		{
-			*errorMessage = tr("Cant find attribute Version. AFB %1").arg(m_strID);
+			*errorMessage = tr("Cant find attribute Version. AFB %1").arg(m_strId);
 			return false;
 		}
 
@@ -1528,7 +1557,7 @@ namespace Afb
 
 			if (properties.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section Properties. AFB %1").arg(m_strID);
+				*errorMessage = tr("Cant find section Properties. AFB %1").arg(m_strId);
 				return false;
 			}
 
@@ -1539,7 +1568,7 @@ namespace Afb
 
 				if (description.isNull() == true)
 				{
-					*errorMessage = tr("Cant find section Description. AFB %1").arg(m_strID);
+					*errorMessage = tr("Cant find section Description. AFB %1").arg(m_strId);
 					return false;
 				}
 
@@ -1553,7 +1582,7 @@ namespace Afb
 
 				if (category.isNull() == true)
 				{
-					*errorMessage = tr("Cant find section Category. AFB %1").arg(m_strID);
+					*errorMessage = tr("Cant find section Category. AFB %1").arg(m_strId);
 					return false;
 				}
 
@@ -1567,7 +1596,7 @@ namespace Afb
 
 				if (opCode.isNull() == true)
 				{
-					*errorMessage = tr("Cant find section OpCode. AFB %1").arg(m_strID);
+					*errorMessage = tr("Cant find section OpCode. AFB %1").arg(m_strId);
 					return false;
 				}
 
@@ -1582,7 +1611,7 @@ namespace Afb
 
 				if (hasRam.isNull() == true)
 				{
-					*errorMessage = tr("Cant find section HasRam. AFB %1").arg(m_strID);
+					*errorMessage = tr("Cant find section HasRam. AFB %1").arg(m_strId);
 					return false;
 				}
 
@@ -1596,7 +1625,7 @@ namespace Afb
 
 				if (internalUse.isNull() == true)
 				{
-					*errorMessage = tr("Cant find section InternalUse. AFB %1").arg(m_strID);
+					*errorMessage = tr("Cant find section InternalUse. AFB %1").arg(m_strId);
 					return false;
 				}
 
@@ -1641,7 +1670,7 @@ namespace Afb
 
 			if (inputsElement.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section Inputs. AFB %1").arg(m_strID);
+				*errorMessage = tr("Cant find section Inputs. AFB %1").arg(m_strId);
 				return false;
 			}
 
@@ -1657,7 +1686,7 @@ namespace Afb
 				bool ok = afbSignal.loadFromXml(p, errorMessage);
 				if (ok == false)
 				{
-					errorMessage->append(tr(" AFB %1").arg(m_strID));
+					errorMessage->append(tr(" AFB %1").arg(m_strId));
 					return false;
 				}
 
@@ -1674,7 +1703,7 @@ namespace Afb
 
 			if (outputsElement.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section Outputs. AFB %1").arg(m_strID);
+				*errorMessage = tr("Cant find section Outputs. AFB %1").arg(m_strId);
 				return false;
 			}
 
@@ -1690,7 +1719,7 @@ namespace Afb
 				bool ok = afbSignal.loadFromXml(p, errorMessage);
 				if (ok == false)
 				{
-					errorMessage->append(tr(" AFB %1").arg(m_strID));
+					errorMessage->append(tr(" AFB %1").arg(m_strId));
 					return false;
 				}
 
@@ -1707,7 +1736,7 @@ namespace Afb
 
 			if (paramsElement.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section Params. AFB %1").arg(m_strID);
+				*errorMessage = tr("Cant find section Params. AFB %1").arg(m_strId);
 				return false;
 			}
 
@@ -1723,7 +1752,7 @@ namespace Afb
 				bool ok = afbParam.loadFromXml(p, errorMessage);
 				if (ok == false)
 				{
-					errorMessage->append(tr(" AFB %1").arg(m_strID));
+					errorMessage->append(tr(" AFB %1").arg(m_strId));
 					return false;
 				}
 
@@ -1909,7 +1938,7 @@ namespace Afb
 
 		// id
 		//
-		xmlElement->setAttribute(QLatin1String("id"), m_strID);
+		xmlElement->setAttribute(QLatin1String("id"), m_strId);
 
 		// Caption
 		//
@@ -2120,11 +2149,11 @@ namespace Afb
 	//
 	const QString& AfbElement::strID() const
 	{
-		return m_strID;
+		return m_strId;
 	}
 	void AfbElement::setStrID(const QString& strID)
 	{
-		m_strID = strID;
+		m_strId = strID;
 	}
 
 	QString AfbElement::caption() const

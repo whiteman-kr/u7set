@@ -24,7 +24,7 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::executeCommand(EditSchemaView* schemaView)
+	void DeleteItemCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
 		std::for_each(m_items.begin(), m_items.end(),
 			[this](std::shared_ptr<VFrame30::SchemaItem> item)
@@ -33,15 +33,18 @@ namespace EditEngine
 			}
 			);
 
-		schemaView->clearSelection();
+		//schemaView->clearSelection();
+		Q_UNUSED(itemsToSelect);
+
 		return;
 	}
 
-	void DeleteItemCommand::unExecuteCommand(EditSchemaView* schemaView)
+	void DeleteItemCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
 		m_layer->Items.assign(m_prevOrder.begin(), m_prevOrder.end());
 
-		schemaView->setSelectedItems(m_items);
+		*itemsToSelect = m_items;
+
 		return;
 	}
 }

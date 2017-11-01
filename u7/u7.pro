@@ -197,7 +197,10 @@ SOURCES +=\
     IdePropertyEditor.cpp \
     Builder/UalItems.cpp \
     EditEngine/EditEngineSetObject.cpp \
-    ../lib/Address16.cpp
+    ../lib/Address16.cpp \
+    EditEngine/EditEngineSetObject.cpp \
+    EditConnectionLine.cpp \
+    EditEngine/EditEngineBatch.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -332,7 +335,9 @@ HEADERS  += \
     Builder/Busses.h \
     IdePropertyEditor.h \
     Builder/UalItems.h \
-    EditEngine/EditEngineSetObject.h
+    EditEngine/EditEngineSetObject.h \
+    EditConnectionLine.h \
+    EditEngine/EditEngineBatch.h
 
 FORMS    += \
     CreateProjectDialog.ui \

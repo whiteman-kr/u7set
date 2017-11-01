@@ -24,7 +24,8 @@ namespace VFrame30
 		friend Proto::ObjectSerialization<SchemaLayer>;
 
 	private:
-		// Use this func only while serialization, cause during obejcet creation it isnotfully initialized
+		// Use this func only while serialization, cause during obejcet creation it is not fully initialized
+		//
 		static std::shared_ptr<SchemaLayer> CreateObject(const Proto::Envelope& message);
 
 	protected:
@@ -37,6 +38,7 @@ namespace VFrame30
 		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
 
 		// If in the connectioMap there is a pinPos, then increment value, if not then add new record with value 1
+		//
 		void ConnectionMapPosInc(SchemaPoint pinPos);
 		int GetPinPosConnectinCount(SchemaPoint pinPos, SchemaUnit unit) const;
 
@@ -70,12 +72,9 @@ namespace VFrame30
 		// Data
 		//
 	public:
+		std::list<std::shared_ptr<SchemaItem>> Items;		// Layer items
 
-		// Layer items
-		std::list<std::shared_ptr<SchemaItem>> Items;
-
-		// Key is pin position, value is count of pins on the point
-		std::map<SchemaPoint, int> connectionMap;
+		std::map<SchemaPoint, int> connectionMap;			// Key is pin position, value is count of pins on the point
 
 	private:
 		QUuid m_guid;

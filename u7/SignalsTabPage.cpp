@@ -1562,39 +1562,59 @@ SignalsTabPage::~SignalsTabPage()
 	}
 }
 
-QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, const QString& appSignalId, QWidget* parent)
+QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent)
 {
+	assert(options);
+
+	if (options->lmEquipmentIdList.isEmpty())
+	{
+		QMessageBox::warning(parent, "Error", "Lm list is empty");
+		assert(false);
+	}
+
 	QVector<Signal> signalVector;
 
 	QDialog signalCreationSettingsDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	QFormLayout* fl = new QFormLayout;
 
-	QList<QCheckBox*> checkBoxList;
-	QStringList selectedLmIdList;
+	QList<QCheckBox*> lmCheckBoxList;
+	QList<QLineEdit*> appSignalIdEditList;
+	QList<QLineEdit*> customSignalIdEditList;
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
 	QGroupBox *equipmentGroupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
 	equipmentGroupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
-	QVBoxLayout* equipmentGroupBoxLayout = new QVBoxLayout;
+	QGridLayout* equipmentGroupBoxLayout = new QGridLayout;
 	equipmentGroupBox->setLayout(equipmentGroupBoxLayout);
 	vl->addWidget(equipmentGroupBox);
 
-	for (QString lmId : lmIdList)
+	int row = 0;
+	equipmentGroupBoxLayout->addWidget(new QLabel("EquipmentID", &signalCreationSettingsDialog), row, 0);
+	equipmentGroupBoxLayout->addWidget(new QLabel("AppSignalID", &signalCreationSettingsDialog), row, 1);
+	equipmentGroupBoxLayout->addWidget(new QLabel("CustomSignalID", &signalCreationSettingsDialog), row, 2);
+
+	bool atLeastOneLmIsChecked = false;
+
+	for (QString lmId : options->lmEquipmentIdList)
 	{
 		QCheckBox* enableLmCheck = new QCheckBox(lmId, &signalCreationSettingsDialog);
-		enableLmCheck->setChecked(true);
+		if (options->selectedEquipmentIdList.contains(lmId))
+		{
+			enableLmCheck->setChecked(true);
+			atLeastOneLmIsChecked = true;
+		}
 
-		equipmentGroupBoxLayout->addWidget(enableLmCheck);
-		checkBoxList.append(enableLmCheck);
+		equipmentGroupBoxLayout->addWidget(enableLmCheck, row + 1, 0);
+		lmCheckBoxList.append(enableLmCheck);
 
-		connect(enableLmCheck, &QCheckBox::toggled, [&checkBoxList, enableLmCheck](bool checked){
+		connect(enableLmCheck, &QCheckBox::toggled, [&lmCheckBoxList, enableLmCheck](bool checked){
 			if (checked)
 			{
 				return;
 			}
 			bool hasCheckedLm = false;
-			for (QCheckBox* lmCheck : checkBoxList)
+			for (QCheckBox* lmCheck : lmCheckBoxList)
 			{
 				if (lmCheck->isChecked())
 				{
@@ -1607,6 +1627,67 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 				enableLmCheck->setChecked(true);
 			}
 		});
+
+		QString appSignalID;
+		if (row < options->appSignalIdList.count())
+		{
+			appSignalID = options->appSignalIdList[row];
+		}
+
+		QString customSignalID;
+		if (row < options->customSignalIdList.count())
+		{
+			customSignalID = options->customSignalIdList[row];
+		}
+
+		if (customSignalID.isEmpty())
+		{
+			if (appSignalID.isEmpty())
+			{
+				customSignalID = schemaId;
+				if (options->lmEquipmentIdList.count() > 1)
+				{
+					customSignalID += QString("_%1").arg(QChar('A'+row));
+				}
+			}
+			else
+			{
+				customSignalID = appSignalID;
+				customSignalID.remove('#');
+			}
+		}
+
+		if (appSignalID.isEmpty())
+		{
+			appSignalID = customSignalID;
+		}
+
+		if (customSignalID[0] == QChar('#'))
+		{
+			customSignalID = customSignalID.mid(1);
+		}
+		if (appSignalID[0] != QChar('#'))
+		{
+			appSignalID = "#" + appSignalID;
+		}
+
+		QLineEdit* appSignalIdEdit = new QLineEdit(appSignalID, &signalCreationSettingsDialog);
+		equipmentGroupBoxLayout->addWidget(appSignalIdEdit, row + 1, 1);
+		appSignalIdEditList.append(appSignalIdEdit);
+
+		QLineEdit* customSignalIdEdit = new QLineEdit(customSignalID, &signalCreationSettingsDialog);
+		equipmentGroupBoxLayout->addWidget(customSignalIdEdit, row + 1, 2);
+		customSignalIdEditList.append(customSignalIdEdit);
+
+		row++;
+	}
+
+	if (atLeastOneLmIsChecked == false)
+	{
+		for (QCheckBox* lmCheckBox : lmCheckBoxList)
+		{
+			lmCheckBox->setChecked(true);
+		}
 	}
 
 	QGroupBox *signalTypeGroupBox = new QGroupBox("Signal type", &signalCreationSettingsDialog);
@@ -1635,7 +1716,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdComboBox));
 	busTypeIdComboBox->setVisible(false);
 
-	BusStorage busStorage(dbController);
+	BusStorage busStorage(dbc);
 	// Load buses
 	//
 	QString errorMessage;
@@ -1654,14 +1735,21 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		busTypeIdComboBox->addItem(bus->busTypeId());
 	}
 
+	QSettings settings;
 	static const QString defaultBusTypeIdCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultBusTypeId");
 
-	QSettings settings;
-	QString defaultBusTypeId = settings.value(defaultBusTypeIdCaption,
-											  QString("BUSTYPEID_%1").arg(dbController->nextCounterValue(), 4, 10, QLatin1Char('0'))).toString();
-	busTypeIdComboBox->setEditText(defaultBusTypeId);
+	if (options->defaultBusTypeId.isEmpty())
+	{
+		QString defaultBusTypeId = settings.value(defaultBusTypeIdCaption,
+												  QString("BUSTYPEID_%1").arg(dbc->nextCounterValue(), 4, 10, QLatin1Char('0'))).toString();
+		busTypeIdComboBox->setEditText(defaultBusTypeId);
+	}
+	else
+	{
+		busTypeIdComboBox->setEditText(options->defaultBusTypeId);
+	}
 
-	QLabel* busTypeIdLabel = new QLabel("BusTypeId", &signalCreationSettingsDialog);
+	QLabel* busTypeIdLabel = new QLabel("BusTypeID", &signalCreationSettingsDialog);
 	busTypeIdLabel->setVisible(false);
 
 	fl->addRow(busTypeIdLabel, busTypeIdComboBox);
@@ -1671,11 +1759,10 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 	static const QString defaultSignalTypeCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultSignalType");
 
-	int defaultSignalType = settings.value(defaultSignalTypeCaption, 0).toInt();
-
-	if (defaultSignalType < 0)
+	int defaultSignalType = options->defaultSignalTypeIndex;
+	if (defaultSignalType == -1)
 	{
-		defaultSignalType = 0;
+		defaultSignalType = settings.value(defaultSignalTypeCaption, 0).toInt();
 	}
 
 	if (defaultSignalType >= buttons.count())
@@ -1697,8 +1784,48 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-	connect(buttonBox, &QDialogButtonBox::accepted, &signalCreationSettingsDialog, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &signalCreationSettingsDialog, &QDialog::reject);
+	connect(buttonBox, &QDialogButtonBox::accepted, [lmCheckBoxList, appSignalIdEditList, customSignalIdEditList, &signalCreationSettingsDialog](){
+		for (int i = 0; i < lmCheckBoxList.count(); i++)
+		{
+			if (lmCheckBoxList[i]->isChecked() == false)
+			{
+				continue;
+			}
+
+			if (appSignalIdEditList[i]->text().isEmpty())
+			{
+				QMessageBox::warning(&signalCreationSettingsDialog, "Error", "One of AppSignalIDs is empty");
+				return;
+			}
+			if (customSignalIdEditList[i]->text().isEmpty())
+			{
+				QMessageBox::warning(&signalCreationSettingsDialog, "Error", "One of CustomSignalIDs is empty");
+				return;
+			}
+
+			for (int j = i + 1; j < lmCheckBoxList.count(); j++)
+			{
+				if (lmCheckBoxList[j]->isChecked() == false)
+				{
+					continue;
+				}
+
+				if (appSignalIdEditList[i]->text() == appSignalIdEditList[j]->text())
+				{
+					QMessageBox::warning(&signalCreationSettingsDialog, "Error", QString("AppSignalID %1 repeats").arg(appSignalIdEditList[i]->text()));
+					return;
+				}
+
+				if (customSignalIdEditList[i]->text() == customSignalIdEditList[j]->text())
+				{
+					QMessageBox::warning(&signalCreationSettingsDialog, "Error", QString("CustomSignalID %1 repeats").arg(customSignalIdEditList[i]->text()));
+					return;
+				}
+			}
+		}
+		signalCreationSettingsDialog.accept();
+	});
 
 	vl->addLayout(fl);
 	vl->addStretch();
@@ -1708,10 +1835,17 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 	signalCreationSettingsDialog.setWindowTitle("Signal creation settings");
 
+	if (options->settingsWindowPositionRect.isValid() == true)
+	{
+		setWindowPosition(&signalCreationSettingsDialog, options->settingsWindowPositionRect);
+	}
+
 	if (signalCreationSettingsDialog.exec() != QDialog::Accepted)
 	{
 		return QStringList();
 	}
+
+	options->settingsWindowPositionRect = signalCreationSettingsDialog.geometry();
 
 	settings.setValue(defaultSignalTypeCaption, signalTypeButtonGroup->checkedId());
 
@@ -1730,6 +1864,8 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 		case 'B':
 			type = E::SignalType::Bus;
+			settings.setValue(defaultBusTypeIdCaption, busTypeIdComboBox->currentText());
+			options->defaultBusTypeId = busTypeIdComboBox->currentText();
 			break;
 
 		case 'D':
@@ -1737,42 +1873,44 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 			break;
 	}
 
-	for (QCheckBox* check : checkBoxList)
-	{
-		if (check->isChecked())
-		{
-			selectedLmIdList << check->text();
-		}
-	}
+	options->appSignalIdList.clear();
+	options->customSignalIdList.clear();
+	options->selectedEquipmentIdList.clear();
+	options->defaultSignalTypeIndex = signalTypeButtonGroup->checkedId();
 
 	int channelNo = 0;
-	for (QString lmId : selectedLmIdList)
+	for (int i = 0; i < lmCheckBoxList.count(); i++)
 	{
-		QString signalSuffix = QString("%1%2").arg(QChar(E::valueToString<E::SignalType>(type)[0])).arg(schemaCounter, 4, 10, QChar('0'));
-		if (lmIdList.count() > 1)
+		QString currentAppSignalId = appSignalIdEditList[i]->text();
+		options->appSignalIdList << currentAppSignalId;
+
+		QString currentCustomSignalId = customSignalIdEditList[i]->text();
+		options->customSignalIdList << currentCustomSignalId;
+
+		QCheckBox* check = lmCheckBoxList[i];
+		if (check->isChecked() == false)
+		{
+			continue;
+		}
+		QString lmId = check->text();
+		options->selectedEquipmentIdList << lmId;
+
+		if (currentCustomSignalId[0] == QChar('#'))
+		{
+			currentCustomSignalId = currentCustomSignalId.mid(1);
+		}
+		if (currentAppSignalId[0] != QChar('#'))
+		{
+			currentAppSignalId = "#" + currentAppSignalId;
+		}
+
+		QString signalSuffix = QString("%1%2").arg(QChar(E::valueToString<E::SignalType>(type)[0])).arg(counter, 4, 10, QChar('0'));
+		if (options->lmEquipmentIdList.count() > 1)
 		{
 			signalSuffix += QString("_%1").arg(QChar('A' + channelNo));
 		}
 
-		QString newSignalExtStrId = QString("%1_%2").arg(schemaId).arg(signalSuffix);
-		newSignalExtStrId.replace("#", "");
-		QString newSignalStrId = newSignalExtStrId;
-
-		if (appSignalId.isEmpty() == false)
-		{
-			newSignalStrId = QString("%1_%2").arg(appSignalId).arg(signalSuffix);
-		}
-
 		QString newSignalCaption = QString("App signal %1 at schema \"%2\"").arg(signalSuffix).arg(schemaCaption);
-
-		if (newSignalExtStrId[0] == QChar('#'))
-		{
-			newSignalExtStrId = newSignalExtStrId.mid(1);
-		}
-		if (newSignalStrId[0] != QChar('#'))
-		{
-			newSignalStrId = "#" + newSignalStrId;
-		}
 
 		Signal newSignal;
 
@@ -1800,15 +1938,14 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 			case E::SignalType::Bus:
 				newSignal.setBusTypeID(busTypeIdComboBox->currentText());
-				settings.setValue(defaultBusTypeIdCaption, newSignal.busTypeID());
 				break;
 
 			default:
 				break;
 		}
 
-		newSignal.setAppSignalID(newSignalStrId);
-		newSignal.setCustomAppSignalID(newSignalExtStrId);
+		newSignal.setAppSignalID(currentAppSignalId);
+		newSignal.setCustomAppSignalID(currentCustomSignalId);
 		newSignal.setEquipmentID(lmId);
 		newSignal.setCaption(newSignalCaption);
 		signalVector.push_back(newSignal);
@@ -1826,7 +1963,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	{
 		signalPtrVector.push_back(&signal);
 	}
-	SignalPropertiesDialog dlg(dbController, signalPtrVector, false, false, parent);
+	SignalPropertiesDialog dlg(dbc, signalPtrVector, false, false, parent);
 
 	if (dlg.exec() != QDialog::Accepted )
 	{
@@ -1838,7 +1975,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		SignalsModel::trimSignalTextFields(signal);
 	}
 
-	if (dbController->addSignal(type, &signalVector, parent) == false)
+	if (dbc->addSignal(type, &signalVector, parent) == false)
 	{
 		return QStringList();
 	}

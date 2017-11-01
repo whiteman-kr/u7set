@@ -26,6 +26,19 @@ namespace Builder
 	{
 		Q_OBJECT
 
+	public:
+		struct ResourcesUsageInfo
+		{
+			QString lmEquipmentID;
+
+			double codeMemoryUsed = 0;
+			double bitMemoryused = 0;
+			double wordMemoryUsed = 0;
+
+			double idrPhaseTimeUsed = 0;			// Input Data Receive phase time
+			double alpPhaseTimeUsed = 0;			// Application Logic Processing phase time
+		};
+
 	private:
 		struct Module
 		{
@@ -94,6 +107,7 @@ namespace Builder
 		bool pass2();
 
 		QString lmEquipmentID();
+		ResourcesUsageInfo resourcesUsageInfo() { return m_resourcesUsageInfo; }
 
 	private:
 		// pass #1 compilation functions
@@ -338,8 +352,7 @@ namespace Builder
 		bool writeOcmRsSignalsXml();
 		void writeLMCodeTestFile();
 
-		void displayUsedMemoryInfo();
-		void displayTimingInfo();
+		void displayResourcesUsageInfo();
 		void cleanup();
 
 		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
@@ -469,6 +482,8 @@ namespace Builder
 		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
 
 		QString msg;
+
+		ResourcesUsageInfo m_resourcesUsageInfo;
 
 		QVector<FbScal> m_fbScal;
 

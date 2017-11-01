@@ -53,6 +53,8 @@ namespace Builder
 		bool processBvbModules();
 		bool compileModulesLogicsPass2();
 
+		bool writeResourcesUsageReport();
+
 		bool writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode);
 
 		bool writeSerialDataXml();
