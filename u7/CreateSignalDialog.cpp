@@ -280,9 +280,12 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 	CreateSignalDialog d(dbc, options, parent);
 
 	int dialogResult = d.exec();
-	if (dialogResult == QDialog::Accepted)
+
+	*options = d.options();
+
+	if (dialogResult == QDialog::Rejected)
 	{
-		*options = d.options();
+		return QStringList();
 	}
 
 	// Generatuing Signal and show it's properties
@@ -519,8 +522,22 @@ void CreateSignalDialog::accept()
 		{
 			m_result.equipmentIds.push_back(ecb->text());
 
-			m_result.appSignalIds.push_back(m_appSiganalIds[index]->text());
-			m_result.customSignalIds.push_back(m_customSiganalIds[index]->text());
+			m_result.appSignalIds.push_back(m_appSiganalIds[index]->text().trimmed());
+			m_result.customSignalIds.push_back(m_customSiganalIds[index]->text().trimmed());
+
+			if (m_result.appSignalIds.back().isEmpty() == true)
+			{
+				QMessageBox::critical(this, qAppName(), tr("AppSignalID is empty."));
+				m_appSiganalIds[index]->setFocus();
+				return;
+			}
+
+			if (m_result.customSignalIds.back().isEmpty() == true)
+			{
+				QMessageBox::critical(this, qAppName(), tr("CustomSignalID is empty."));
+				m_customSiganalIds[index]->setFocus();
+				return;
+			}
 		}
 
 		index ++;
