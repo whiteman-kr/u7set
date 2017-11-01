@@ -12,6 +12,7 @@
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 #include "SignalsTabPage.h"
+#include "CreateSignalDialog.h"
 #include "EditConnectionLine.h"
 
 #define ControlBarSizeDisplay		10
@@ -511,6 +512,7 @@ private:
 	SchemaFindDialog* m_findDialog = nullptr;
 
 	CreatingSignalOptions m_createSignalOptions;
+	CreatingSignalDialogOptions m_createSignalDialoOptions;
 
 	// --
 	//

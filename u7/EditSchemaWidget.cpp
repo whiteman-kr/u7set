@@ -5596,34 +5596,28 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 	}
 
 	const VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get());
+
 	QStringList itemsAppSignals = signalItem->appSignalIdList();
 
 	if (itemsAppSignals.size() == 1 &&
-		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||
+		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||			// Not good, subject to change. must get default signals value from somewhere
 		(itemsAppSignals[0] == QLatin1String("#IN_STRID")) ||
 		(itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
 	{
+		// This is just created signal item
+		//
+		itemsAppSignals.clear();				// clear - means generate new AppSignalIds
 	}
 	else
 	{
-		m_createSignalOptions.appSignalIdList = itemsAppSignals;
 	}
 
-	int counterValue = 0;
-	bool nextValRes = db()->nextCounterValue(&counterValue);
-	if (nextValRes == false)
-	{
-		return;
-	}
+	m_createSignalDialoOptions.init(schema()->schemaId(),
+									schema()->caption(),
+									equipmentIdList,
+									itemsAppSignals);
 
-	m_createSignalOptions.lmEquipmentIdList = equipmentIdList;
-
-	QStringList signalsIds = SignalsTabPage::createSignal(db(),
-														  counterValue,
-														  schema()->schemaId(),
-														  schema()->caption(),
-														  &m_createSignalOptions,
-														  this);
+	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialoOptions, this);
 
 	if (signalsIds.isEmpty() == false)
 	{
@@ -5637,6 +5631,57 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
 	}
+
+	//--------------------------------------------------
+//	QStringList equipmentIdList = logicSchema()->equipmentIdList();
+//	if (equipmentIdList.isEmpty() == true)
+//	{
+//		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property EquipmentIDs is empty."));
+//		return;
+//	}
+
+//	const VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get());
+//	QStringList itemsAppSignals = signalItem->appSignalIdList();
+
+//	if (itemsAppSignals.size() == 1 &&
+//		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||
+//		(itemsAppSignals[0] == QLatin1String("#IN_STRID")) ||
+//		(itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
+//	{
+//	}
+//	else
+//	{
+//		m_createSignalOptions.appSignalIdList = itemsAppSignals;
+//	}
+
+//	int counterValue = 0;
+//	bool nextValRes = db()->nextCounterValue(&counterValue);
+//	if (nextValRes == false)
+//	{
+//		return;
+//	}
+
+//	m_createSignalOptions.lmEquipmentIdList = equipmentIdList;
+
+//	QStringList signalsIds = SignalsTabPage::createSignal(db(),
+//														  counterValue,
+//														  schema()->schemaId(),
+//														  schema()->caption(),
+//														  &m_createSignalOptions,
+//														  this);
+
+//	if (signalsIds.isEmpty() == false)
+//	{
+//		// Set value
+//		//
+//		QString oneStringIds;
+//		for (QString s : signalsIds)
+//		{
+//			oneStringIds += s + QChar::LineFeed;
+//		}
+
+//		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
+//	}
 
 	return;
 }
