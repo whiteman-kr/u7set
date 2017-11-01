@@ -207,6 +207,7 @@ namespace Builder
 		m_appWordAdressed.acquiredDiscreteInputSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredDiscreteOutputSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredDiscreteInternalSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredDiscreteOptoAndBusChildSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredDiscreteTuningSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredDiscreteConstSignals.setStartAddress(appLogicWordData.startAddress());
 
@@ -258,7 +259,8 @@ namespace Builder
 		m_appWordAdressed.acquiredDiscreteInputSignals.setStartAddress(m_appWordAdressed.acquiredBuses.nextAddress());
 		m_appWordAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteInputSignals.nextAddress());
 		m_appWordAdressed.acquiredDiscreteInternalSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteOutputSignals.nextAddress());
-		m_appWordAdressed.acquiredDiscreteTuningSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteInternalSignals.nextAddress());
+		m_appWordAdressed.acquiredDiscreteOptoAndBusChildSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteInternalSignals.nextAddress());
+		m_appWordAdressed.acquiredDiscreteTuningSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteOptoAndBusChildSignals.nextAddress());
 		m_appWordAdressed.acquiredDiscreteConstSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteTuningSignals.nextAddress());
 
 		m_appWordAdressed.nonAcquiredAnalogInputSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteConstSignals.nextAddress());
@@ -363,6 +365,7 @@ namespace Builder
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInputSignals, "acquired discrete input signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOutputSignals, "acquired discrete output signals (from bit memory)");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals (from bit memory)");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOptoAndBusChildSignals, "acquired discrete opto and bus child signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteTuningSignals, "acquired discrete tuningable signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteConstSignals, "acquired discrete const signals");
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogInputSignals, "non acquired analog input signals");
@@ -635,6 +638,16 @@ namespace Builder
 		bool result = true;
 
 		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInternalSignals, ualSignals, false);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredDiscreteOptoAndBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteOptoAndBusChildSignals, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;

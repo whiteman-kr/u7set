@@ -195,6 +195,8 @@ namespace Builder
 
 			if (copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf() == false) break;
 
+			if (copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf() == false) break;
+
 			if (copyAcquiredTuningDiscreteSignalsToRegBuf() == false) break;
 
 			if (copyAcquiredDiscreteConstSignalsToRegBuf() == false) break;
@@ -2617,6 +2619,7 @@ namespace Builder
 		result &= createAcquiredDiscreteInputSignalsList();
 		result &= createAcquiredDiscreteStrictOutputSignalsList();
 		result &= createAcquiredDiscreteInternalSignalsList();
+		result &= createAcquiredDiscreteOptoAndBusChildSignalsList();
 		result &= createAcquiredDiscreteTuningSignalsList();
 		result &= createAcquiredDiscreteConstSignalsList();
 
@@ -2658,6 +2661,7 @@ namespace Builder
 		sortSignalList(m_acquiredDiscreteInputSignals);
 		sortSignalList(m_acquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_acquiredDiscreteInternalSignals);
+		sortSignalList(m_acquiredDiscreteOptoAndBusChildSignals);
 		sortSignalList(m_acquiredDiscreteConstSignals);
 		// sortSignalList(m_acquiredDiscreteTuningSignals);			// Not need to sort!
 
@@ -2769,6 +2773,26 @@ namespace Builder
 				s->isTuningable() == false)
 			{
 				m_acquiredDiscreteInternalSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createAcquiredDiscreteOptoAndBusChildSignalsList()
+	{
+		m_acquiredDiscreteOptoAndBusChildSignals.clear();
+
+		for(UalSignal* ualSignal : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(ualSignal);
+
+			if (ualSignal->isAcquired() == true &&
+				ualSignal->isDiscrete() == true &&
+				(ualSignal->isOptoSignal() == true || ualSignal->isBusChild() == true) &&
+				ualSignal->isConst() == false)
+			{
+				m_acquiredDiscreteOptoAndBusChildSignals.append(ualSignal);
 			}
 		}
 
@@ -3376,6 +3400,7 @@ namespace Builder
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteStrictOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInternalSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteOptoAndBusChildSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteTuningSignals);
 
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteInputSignals);
@@ -3383,18 +3408,18 @@ namespace Builder
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteInternalSignals);
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteTuningSignals);
 
-/*		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInputSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogOutputSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInputSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogStrictOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInternalSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogTuningSignals);
 
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInputSignals);
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogOutputSignals);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogStrictOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInternalSignals);
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogTuningSignals);
 
 		result &= listUniquenessCheck(signalsMap, m_acquiredBuses);
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredBuses);*/
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredBuses);
 
 		return result;
 	}
@@ -3695,6 +3720,7 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredDiscreteInputSignalsInRegBuf(m_acquiredDiscreteInputSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteStrictOutputSignalsInRegBuf(m_acquiredDiscreteStrictOutputSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteInternalSignalsInRegBuf(m_acquiredDiscreteInternalSignals);
+		result &= m_memoryMap.appendAcquiredDiscreteOptoAndBusChildSignalsInRegBuf(m_acquiredDiscreteOptoAndBusChildSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteTuningSignalsInRegBuf(m_acquiredDiscreteTuningSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteConstSignalsInRegBuf(m_acquiredDiscreteConstSignals);
 
@@ -8855,6 +8881,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf()
 	{
+		return copyScatteredDiscreteSignalsInRegBuf(m_acquiredDiscreteInputSignals, "acquired discrete input signals");
+/*
 		if (m_acquiredDiscreteInputSignals.isEmpty() == true)
 		{
 			return true;
@@ -8939,7 +8967,12 @@ namespace Builder
 			}
 		}
 
-		return true;
+		return true;*/
+	}
+
+	bool ModuleLogicCompiler::copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf()
+	{
+		return copyScatteredDiscreteSignalsInRegBuf(m_acquiredDiscreteOptoAndBusChildSignals, "acquired discrete opto and bus child signals");
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf()
@@ -9026,6 +9059,80 @@ namespace Builder
 
 		m_code.append(cmd);
 		m_code.newLine();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyScatteredDiscreteSignalsInRegBuf(const QVector<UalSignal*>& signalsList, QString description)
+	{
+		if (signalsList.isEmpty() == true)
+		{
+			return true;
+		}
+
+		Comment comment;
+
+		comment.setComment(QString("Copy %1 in regBuf").arg(description));
+		m_code.append(comment);
+		m_code.newLine();
+
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		int signalsCount = signalsList.count();
+
+		int count = 0;
+
+		Command cmd;
+
+		int countReminder16 = 0;
+
+		bool zeroLastWord = (signalsCount % SIZE_16BIT) != 0 ? true : false;
+
+		for(UalSignal* ualSignal : signalsList)
+		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				return false;
+			}
+
+			assert(ualSignal->isConst() == false);
+
+			if (ualSignal->ualAddr().isValid() == false ||
+				ualSignal->regBufAddr().isValid() == false ||
+				ualSignal->regValueAddr().isValid() == false)
+			{
+				assert(false);				// signal's ualAddr ot regBufAddr is not initialized!
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			countReminder16 = count % SIZE_16BIT;
+
+			assert(ualSignal->regBufAddr().bit() == countReminder16);
+
+			if (countReminder16 == 0 && (signalsCount - count) < SIZE_16BIT && zeroLastWord == true)
+			{
+				cmd.movConst(bitAccAddr, 0);
+				cmd.clearComment();
+				m_code.append(cmd);
+				zeroLastWord = false;
+			}
+
+			cmd.movBit(bitAccAddr, ualSignal->regBufAddr().bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
+			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+			m_code.append(cmd);
+
+			count++;
+
+			if ((count % SIZE_16BIT) == 0 || count == signalsCount)
+			{
+				cmd.clearComment();
+				cmd.mov(ualSignal->regBufAddr().offset(), bitAccAddr);
+				m_code.append(cmd);
+				m_code.newLine();;
+			}
+		}
 
 		return true;
 	}

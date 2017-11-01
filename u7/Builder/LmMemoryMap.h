@@ -152,6 +152,7 @@ namespace Builder
 			MemoryArea acquiredDiscreteInputSignals;
 			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
 			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
+			MemoryArea acquiredDiscreteOptoAndBusChildSignals;
 			MemoryArea acquiredDiscreteTuningSignals;
 			MemoryArea acquiredDiscreteConstSignals;
 
@@ -247,6 +248,8 @@ namespace Builder
 		bool appendAcquiredDiscreteInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteOptoAndBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+
 		bool appendAcquiredDiscreteTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteConstSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 
