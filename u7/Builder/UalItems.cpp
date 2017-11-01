@@ -323,7 +323,8 @@ namespace Builder
 
 	bool UalItem::init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg)
 	{
-		m_appLogicItem.m_afbElement = *afbElement.get();
+		// m_appLogicItem.m_afbElement = *afbElement.get();
+
 		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
 					new VFrame30::SchemaItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get(), &errorMsg));
 
