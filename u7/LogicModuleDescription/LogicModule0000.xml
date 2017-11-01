@@ -5426,7 +5426,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0008">
+        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0009">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -5437,8 +5437,8 @@ function(videoItemFblElement, afbElement)
 			</Properties>
 			<Inputs>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
-				<Pin OpName="i_lim_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>
-				<Pin OpName="i_lim_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="3" Size="32"/>
+				<Pin OpName="i_lim_max" Caption="max_val" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>
+				<Pin OpName="i_lim_min" Caption="min_val" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="3" Size="32"/>
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="8" Size="32"/>
@@ -5536,7 +5536,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0007">
+		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0008">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -5547,8 +5547,8 @@ function(videoItemFblElement, afbElement)
 			</Properties>
 			<Inputs>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
-				<Pin OpName="i_lim_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="32"/>
-				<Pin OpName="i_lim_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="3" Size="32"/>			
+				<Pin OpName="i_lim_max" Caption="max_val" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="32"/>
+				<Pin OpName="i_lim_min" Caption="min_val" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="3" Size="32"/>			
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="8" Size="32"/>
