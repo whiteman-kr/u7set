@@ -403,11 +403,11 @@ void CreateSignalDialog::generateNewSignalIds()
 {
 	assert(m_appSiganalIds.size() == m_customSiganalIds.size());
 
+	QString counter = QString("%1").
+						arg(QString::number(m_dbc->nextCounterValue()), 6, '0');
+
 	for (size_t i = 0; i < m_appSiganalIds.size(); i++)
 	{
-		QString counter = QString("%1").
-							arg(QString::number(m_dbc->nextCounterValue()), 6, '0');
-
 		QChar channelLetter = QChar('A' + static_cast<int>(i));
 
 		QString appSignalId = m_appSiganalIds.size() == 1 ?
