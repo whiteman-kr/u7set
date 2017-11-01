@@ -8573,7 +8573,6 @@ namespace Builder
 		m_code.comment("Copy acquired opto signals in regBuf");
 		m_code.newLine();
 
-		Command cmd;
 
 		for(UalSignal* ualSignal : m_acquiredAnalogOptoSignals)
 		{
@@ -8585,18 +8584,14 @@ namespace Builder
 
 			if (ualSignal->isAnalog() == false ||
 				ualSignal->isAcquired() == false ||
-				ualSignal->isOptoSignal() == false)
+				ualSignal->isOptoSignal() == false ||
+				ualSignal->isConst() == true ||
+				ualSignal->isBusChild() == true)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
 				continue;
 			}
-
-			a;lsfwl;klfmqw lkmw egergn oeirgm
-
-
-
-			assert(ualSignal->isConst() == false);
 
 			if (ualSignal->ualAddr().isValid() == false ||
 				ualSignal->regBufAddr().isValid() == false ||
@@ -8607,35 +8602,25 @@ namespace Builder
 				return false;
 			}
 
-			countReminder16 = count % SIZE_16BIT;
-
-			assert(ualSignal->regBufAddr().bit() == countReminder16);
-
-			if (countReminder16 == 0 && (signalsCount - count) < SIZE_16BIT && zeroLastWord == true)
+			if (ualSignal->analogSignalFormat() != E::AnalogAppSignalFormat::Float32 &&
+				ualSignal->analogSignalFormat() != E::AnalogAppSignalFormat::SignedInt32)
 			{
-				cmd.movConst(bitAccAddr, 0);
-				cmd.clearComment();
-				m_code.append(cmd);
-				zeroLastWord = false;
+				assert(false);				// unknown analog format!
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 
-			cmd.movBit(bitAccAddr, ualSignal->regBufAddr().bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
-			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+			Command cmd;
+
+			cmd.mov32(ualSignal->regBufAddr(), ualSignal->ualAddr());
+			cmd.setComment(QString("copy %1").arg(ualSignal->acquiredRefSignalsIDs().join(", ")));
+
 			m_code.append(cmd);
-
-			count++;
-
-			if ((count % SIZE_16BIT) == 0 || count == signalsCount)
-			{
-				cmd.clearComment();
-				cmd.mov(ualSignal->regBufAddr().offset(), bitAccAddr);
-				m_code.append(cmd);
-				m_code.newLine();;
-			}
 		}
 
+		m_code.newLine();
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf()
