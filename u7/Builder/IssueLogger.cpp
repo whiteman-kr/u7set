@@ -2590,13 +2590,13 @@ namespace Builder
 	/// Description:
 	///		All transmitter inputs must be directly linked to a signals. Check transmitter's inputs links.
 	///
-	void IssueLogger::errALC5027(QUuid transmitterUuid)
+	void IssueLogger::errALC5027(QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5027,
-				  QString(tr("All transmitter inputs must be directly linked to a signals.")));
+				  QString(tr("All transmitter inputs must be directly linked to a signals. (Logic schema %1)")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5028
