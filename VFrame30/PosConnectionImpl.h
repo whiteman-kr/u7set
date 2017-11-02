@@ -18,14 +18,6 @@ namespace VFrame30
 		virtual void RemoveSamePoints() = 0;
 		virtual void DeleteAllPoints() = 0;
 		virtual void DeleteLastPoint() = 0;
-
-		// Работа с Extension точками, которые участвуют в отрисовке при создании элемента, DrawOutline
-		//
-		virtual const std::list<SchemaPoint>& GetExtensionPoints() const = 0;
-		virtual void SetExtensionPoints(const std::list<SchemaPoint>& extPoints) = 0;
-		virtual void AddExtensionPoint(double x, double y) = 0;
-		virtual void DeleteAllExtensionPoints() = 0;
-		virtual void DeleteLastExtensionPoint() = 0;
 	};
 
 	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemaItem, public IPosConnection
@@ -109,12 +101,6 @@ namespace VFrame30
 		virtual void RemoveSamePoints() override;
 		virtual void DeleteAllPoints() override;
 		virtual void DeleteLastPoint() override;
-
-		virtual const std::list<SchemaPoint>& GetExtensionPoints() const override;
-		virtual void SetExtensionPoints(const std::list<SchemaPoint>& extPoints) override;
-		virtual void AddExtensionPoint(double x, double y) override;
-		virtual void DeleteAllExtensionPoints() override;
-		virtual void DeleteLastExtensionPoint() override;
 
 		// Реализация интерефейса ISchemaItemPropertiesPos
 		//

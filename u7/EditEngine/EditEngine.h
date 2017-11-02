@@ -44,8 +44,11 @@ namespace EditEngine
 	public:
 		bool addCommand(std::shared_ptr<EditCommand> command, bool runCommand);
 
-		void redo(int levels);
-		void undo(int levels);
+		bool startBatch();		// For performing several commands in a time
+		bool endBatch(bool runCommands = true);
+
+		void redo();
+		void undo();
 
 		bool canUndo() const;
 		bool canRedo() const;
@@ -57,6 +60,10 @@ namespace EditEngine
 		void setModified();
 		void resetModified();
 
+	private:
+		void execute(std::shared_ptr<EditCommand> command);
+		void unExecute(std::shared_ptr<EditCommand> command);
+
 	public:
 		void runAddItem(std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
 		void runAddItem(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
@@ -65,8 +72,8 @@ namespace EditEngine
 		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer);
 		void runDeleteItem(std::shared_ptr<VFrame30::SchemaItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		void runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
-		void runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const std::shared_ptr<VFrame30::SchemaItem>& item);
+		void runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool selectChangedItems);
+		void runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const std::shared_ptr<VFrame30::SchemaItem>& item, bool selectChangedItems);
 
 		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool snapToGrid);
 		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemaItem>& item, bool snapToGrid);
@@ -100,6 +107,9 @@ namespace EditEngine
 
 		bool m_readOnly = false;
 		bool m_modified = false;
+
+		bool m_batch = false;
+		std::vector<std::shared_ptr<EditCommand>> m_batchCommands;
 	};
 
 
@@ -115,25 +125,32 @@ namespace EditEngine
 		EditCommand(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	public:
-		void execute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void unExecute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void execute(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect);
+		void unExecute(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect);
 
 	protected:
-		virtual void executeCommand(EditSchemaView* schemaView) = 0;
-		virtual void unExecuteCommand(EditSchemaView* schemaView) = 0;
+		virtual void executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) = 0;
+		virtual void unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) = 0;
 
-		void saveViewPos(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void restoreViewPos(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void saveViewPos();
+		void restoreViewPos();
 
 		// Data
 		//
 	protected:
 		std::shared_ptr<VFrame30::SchemaLayer> m_activeLayer;		// Active Layer on operation start
 
+		EditSchemaView* m_schemaView = nullptr;
+		QScrollBar* m_hScrollBar = nullptr;
+		QScrollBar* m_vScrollBar = nullptr;
+
 		double m_zoom;
 
-		QScrollBar m_hScrollBar;
-		QScrollBar m_vScrollBar;
+		QScrollBar m_hScrollBarCopy;
+		QScrollBar m_vScrollBarCopy;
+
+		//--
+		friend class BatchCommand;
 	};
 }
 

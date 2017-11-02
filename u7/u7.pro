@@ -194,7 +194,10 @@ SOURCES +=\
     Forms/DialogUpdateFromPreset.cpp \
     Forms/ChooseAfbDialog.cpp \
     IdePropertyEditor.cpp \
-    EditEngine/EditEngineSetObject.cpp
+    EditEngine/EditEngineSetObject.cpp \
+    EditConnectionLine.cpp \
+    EditEngine/EditEngineBatch.cpp \
+    CreateSignalDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -327,7 +330,10 @@ HEADERS  += \
     BusStorage.h \
     Forms/DialogUpdateFromPreset.h \
     IdePropertyEditor.h \
-    EditEngine/EditEngineSetObject.h
+    EditEngine/EditEngineSetObject.h \
+    EditConnectionLine.h \
+    EditEngine/EditEngineBatch.h \
+    CreateSignalDialog.h
 
 FORMS    += \
     CreateProjectDialog.ui \

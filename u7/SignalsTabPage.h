@@ -39,11 +39,13 @@ const int	FI_ANY = 0,
 
 struct CreatingSignalOptions
 {
-	QStringList SelectedEquipmentIdList;
-	QStringList AppSignalIdList;
-	QStringList CustomSignlIdList;
-	int DefaultSignalTypeIndex = -1;
-	QString DefaultBusTypeId;
+	QStringList lmEquipmentIdList;
+	QStringList selectedEquipmentIdList;
+	QStringList appSignalIdList;
+	QStringList customSignalIdList;
+	int defaultSignalTypeIndex = -1;
+	QString defaultBusTypeId;
+	QRect settingsWindowPositionRect;
 };
 
 
@@ -256,7 +258,7 @@ public:
 	SignalsTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~SignalsTabPage();
 
-	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, const QString& appSignalId, CreatingSignalOptions& options, QWidget* parent);
+	static QStringList createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent);
 
 protected:
 	void CreateActions(QToolBar* toolBar);

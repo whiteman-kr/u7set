@@ -112,8 +112,8 @@ namespace Builder
 		bool init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
-		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
-		QString caption() const { return m_appLogicItem.m_afbElement.caption(); }
+		QString afbStrID() const { return m_appLogicItem.afbElement().strID(); }
+		QString caption() const { return m_appLogicItem.afbElement().caption(); }
 
 		QString strID() const;
 
@@ -130,13 +130,13 @@ namespace Builder
 
 		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
 		const std::vector<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
-		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.m_afbElement.params(); }
+		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.afbElement().params(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
 		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemaItemConst(); }
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
-		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
+		const Afb::AfbElement& afb() const { return m_appLogicItem.afbElement(); }
 
 		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 

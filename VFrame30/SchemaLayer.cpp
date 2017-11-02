@@ -1,11 +1,13 @@
 #include "SchemaLayer.h"
 #include "FblItemRect.h"
+#include "PosConnectionImpl.h"
 
 
 namespace VFrame30
 {
 
 	Factory<VFrame30::SchemaLayer> VideoLayerFactory;
+
 
 	SchemaLayer::SchemaLayer(void) :
 		Proto::ObjectSerialization<SchemaLayer>(Proto::ProtoCompress::Never)
@@ -38,7 +40,7 @@ namespace VFrame30
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Обязательное поле, хэш имени класса, по нему восстанавливается класс.
+		message->set_classnamehash(classnamehash);	// Required field, hash of the class name, it restores the class.
 
 		auto layer = message->mutable_schemalayer();
 
@@ -81,7 +83,7 @@ namespace VFrame30
 		m_show = layer.show();
 		m_print = layer.print();
 
-		// Прочитать элементы
+		// Read schema items
 		//
 		Items.clear();
 
@@ -94,14 +96,19 @@ namespace VFrame30
 				assert(item != nullptr);
 				continue;
 			}
+
+			if (item->isType<PosConnectionImpl>() == true)
+			{
+				// Check if it has only one point then drop this item
+				//
+				if (item->toType<PosConnectionImpl>()->GetPointList().size() < 2)
+				{
+					qDebug() << "Warning, PosConnectionImpl is skipped while loading schema layer. it has only " << item->toType<PosConnectionImpl>()->GetPointList().size() << " points.";
+					continue;
+				}
+			}
 			
 			Items.push_back(item);
-		}
-
-		if (layer.items().size() != (int)Items.size())
-		{
-			assert(layer.items().size() == (int)Items.size());
-			return false;
 		}
 
 		return true;
@@ -109,7 +116,7 @@ namespace VFrame30
 
 	std::shared_ptr<SchemaLayer> SchemaLayer::CreateObject(const Proto::Envelope& message)
 	{
-		// Эта функция может создавать только один экземпляр
+		// This func can create only one instance
 		//
 		if (message.has_schemalayer() == false)
 		{
@@ -133,7 +140,6 @@ namespace VFrame30
 
 	// Methods
 	//
-
 	std::shared_ptr<SchemaItem> SchemaLayer::getItemById(const QUuid& id) const
 	{
 		auto foundItem = std::find_if(Items.begin(), Items.end(),
