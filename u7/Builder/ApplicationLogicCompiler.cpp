@@ -612,10 +612,11 @@ namespace Builder
 						.arg(info.alpPhaseTimeUsed, restHeaderColumns[4].length(), 'g', 2);
 		}
 
-		header.resize(maxIdLength, ' ');
+		header = header.leftJustified(maxIdLength, ' ');
+
 		for (int i = 0; i < fileContent.count(); i++)
 		{
-			fileContent[i].resize(maxIdLength, ' ');
+			fileContent[i] = fileContent[i].leftJustified(maxIdLength, ' ');
 			fileContent[i] += restLine[i];
 		}
 
@@ -624,12 +625,13 @@ namespace Builder
 		fileContent.insert(0, header + '|' + restHeaderColumns.join('|'));
 
 		QString delimiter;
-		delimiter.resize(maxIdLength, '-');
+
+		delimiter = delimiter.leftJustified(maxIdLength, '-');
 
 		for (int i = 0; i < restHeaderColumns.count(); i++)
 		{
 			delimiter += "+";
-			delimiter.resize(delimiter.length() + restHeaderColumns[i].length(), '-');
+			delimiter = delimiter.leftJustified(delimiter.length() + restHeaderColumns[i].length(), '-');
 		}
 
 		fileContent.insert(1, delimiter);
