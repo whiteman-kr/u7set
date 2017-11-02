@@ -32,7 +32,7 @@ namespace Builder
 			QString lmEquipmentID;
 
 			double codeMemoryUsed = 0;
-			double bitMemoryused = 0;
+			double bitMemoryUsed = 0;
 			double wordMemoryUsed = 0;
 
 			double idrPhaseTimeUsed = 0;			// Input Data Receive phase time
@@ -184,7 +184,7 @@ namespace Builder
 
 		bool processTransmitters();
 		bool processTransmitter(const AppItem *item);
-		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
+		bool getSignalsConnectedToTransmitter(const AppItem* item, const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
 
 		bool processSerialReceivers();
 		bool processSerialReceiver(const AppItem* item);

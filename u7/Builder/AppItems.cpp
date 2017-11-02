@@ -979,7 +979,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			assert(false);
+//			assert(false);
 			dataSize = -1;		// real data size of bus should be assigned !!!
 			break;
 

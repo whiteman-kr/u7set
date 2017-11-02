@@ -64,7 +64,6 @@ const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 			MEASURE_LIMIT_TYPE_ELECTRIC		= 0,
 			MEASURE_LIMIT_TYPE_PHYSICAL		= 1;
 
-
 // ==============================================================================================
 
 const char* const ErrorType[] =
