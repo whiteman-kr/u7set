@@ -2530,7 +2530,7 @@ namespace Builder
 			checkUfbItemsVersion(schema.get(), ufbs);
 		}
 
-
+		//
 		// Parse Application Logic
 		//
 		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
@@ -3543,7 +3543,7 @@ namespace Builder
 
 			if (result == false)
 			{
-				// Something wron in multichannelProcessing for this schema, stop parsing it
+				// Something wrong in multichannelProcessing for this schema, stop parsing it
 				//
 				return false;
 			}
@@ -3809,11 +3809,15 @@ namespace Builder
 							{
 								if (lmEquipmnetId != signal->lm()->equipmentId())
 								{
-									// Single channel branch contains signals (%1) from different channels (LogicSchema '%2').
+									// Branch contains signals (%1) from different channels (LogicSchema '%2').
 									//
 									m_log->errALP4133(schema->schemaId(), appSignalId, signalElement->guid());
 								}
 							}
+						}
+						else
+						{
+							lmEquipmnetId = signal->lm()->equipmentId();	// Init lmEquipmnetId with first LM
 						}
 					}
 				}

@@ -1850,7 +1850,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Single channel branch contains signals (%1) from different channels (LogicSchema '%2').
+	/// Title: Branch contains signals (%1) from different channels (LogicSchema '%2').
 	///
 	/// Parameters:
 	///		%1 AppSignalID
@@ -1866,7 +1866,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4133,
-				  tr("Single channel branch contains signals (%1) from different channels (LogicSchema '%2').")
+				  tr("Branch contains signals (%1) from different channels (LogicSchema '%2').")
 				  .arg(appSignalId)
 				  .arg(schema));
 	}

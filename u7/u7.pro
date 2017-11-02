@@ -196,7 +196,8 @@ SOURCES +=\
     IdePropertyEditor.cpp \
     EditEngine/EditEngineSetObject.cpp \
     EditConnectionLine.cpp \
-    EditEngine/EditEngineBatch.cpp
+    EditEngine/EditEngineBatch.cpp \
+    CreateSignalDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -331,7 +332,8 @@ HEADERS  += \
     IdePropertyEditor.h \
     EditEngine/EditEngineSetObject.h \
     EditConnectionLine.h \
-    EditEngine/EditEngineBatch.h
+    EditEngine/EditEngineBatch.h \
+    CreateSignalDialog.h
 
 FORMS    += \
     CreateProjectDialog.ui \

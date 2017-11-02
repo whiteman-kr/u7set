@@ -13,6 +13,7 @@
 #include "./Forms/CompareDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include "./Forms/DialogUpdateFromPreset.h"
+#include "CreateSignalDialog.h"
 
 #include <QPalette>
 #include <QDialog>
@@ -2247,30 +2248,11 @@ void EquipmentView::addAppSignal()
 	QStringList equipmentIdList;
 	equipmentIdList << module->equipmentId();
 
-	int counter = 0;
-	bool ok = db()->nextCounterValue(&counter);
-	if (ok == false)
-	{
-		return;
-	}
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//! //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	static CreatingSignalDialogOptions options;
+	options.init(module->equipmentId(), module->equipmentId(), equipmentIdList, QStringList());
 
-//	CreatingSignalOptions options;
-//	SignalsTabPage::createSignal(db(),
-//								 equipmentIdList,
-//								 counter,
-//								 module->equipmentId(),
-//								 module->equipmentId(),
-//								 "",
-//								 options,
-//								 this);
+	CreateSignalDialog::showDialog(db(), &options, this);
+
 	return;
 }
 
