@@ -1496,13 +1496,29 @@ std::vector<std::shared_ptr<VFrame30::SchemaItem>> EditSchemaView::selectedNonLo
 
 void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 {
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> uniqueItems;
+	uniqueItems.reserve(16);
+
+	// In some cases items can be duplicated (batch command), make them unique
+	// We need to keep order of items
+	//
+	for (auto i : items)
+	{
+		auto foundIt = std::find(uniqueItems.begin(), uniqueItems.end(), i);
+
+		if (foundIt == uniqueItems.end())
+		{
+			uniqueItems.push_back(i);
+		}
+	}
+
 	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
 	//
-	if (items.size() == m_selectedItems.size())
+	if (uniqueItems.size() == m_selectedItems.size())
 	{
 		bool differs = false;
 
-		auto i = std::begin(items);
+		auto i = std::begin(uniqueItems);
 		for (auto s = std::begin(m_selectedItems); s != std::end(m_selectedItems) && differs == false; ++s, ++i)
 		{
 			if (*s != *i)
@@ -1520,7 +1536,7 @@ void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30
 
 	// Set new selection
 	//
-	m_selectedItems = items;
+	m_selectedItems = uniqueItems;
 
 	emit selectionChanged();
 
@@ -1906,16 +1922,6 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
-	m_addOutputSignalAction = new QAction(tr("Output"), this);
-	m_addOutputSignalAction->setEnabled(true);
-	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemaOutputSignal.svg"));
-	connect(m_addOutputSignalAction, &QAction::triggered,
-			[this](bool)
-			{
-				auto item = std::make_shared<VFrame30::SchemaItemOutput>(schema()->unit());
-				addItem(item);
-			});
-
 	m_addInOutSignalAction = new QAction(tr("In/Out"), this);
 	m_addInOutSignalAction->setEnabled(true);
 	m_addInOutSignalAction->setIcon(QIcon(":/Images/Images/SchemaInOutSignal.svg"));
@@ -1923,6 +1929,16 @@ void EditSchemaWidget::createActions()
 			[this](bool)
 			{
 				auto item = std::make_shared<VFrame30::SchemaItemInOut>(schema()->unit());
+				addItem(item);
+			});
+
+	m_addOutputSignalAction = new QAction(tr("Output"), this);
+	m_addOutputSignalAction->setEnabled(true);
+	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemaOutputSignal.svg"));
+	connect(m_addOutputSignalAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemOutput>(schema()->unit());
 				addItem(item);
 			});
 
@@ -2211,6 +2227,27 @@ void EditSchemaWidget::createActions()
 	addAction(m_sendBackwardAction);
 
 	//
+	// Transform Into
+	//
+	m_transformAction = new QAction(tr("Transform Into"), this);
+	m_transformAction->setEnabled(true);
+
+	// Transform Into->Input
+	//
+	m_transformIntoInputAction = new QAction(tr("Input"), this);
+	connect(m_transformIntoInputAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoInput);
+
+	// Transform Into->In/Out
+	//
+	m_transformIntoInOutAction = new QAction(tr("In/Out"), this);
+	connect(m_transformIntoInOutAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoInOut);
+
+	// Transform Into->Output
+	//
+	m_transformIntoOutputAction = new QAction(tr("Output"), this);
+	connect(m_transformIntoOutputAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoOutput);
+
+	//
 	// View
 	//
 	m_viewAction = new QAction(tr("View"), this);
@@ -2349,8 +2386,8 @@ void EditSchemaWidget::createActions()
 		{
 			m_addMenu->addAction(m_addLinkAction);
 			m_addMenu->addAction(m_addInputSignalAction);
-			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addInOutSignalAction);
+			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
 			m_addMenu->addAction(m_addAfbAction);
@@ -2412,6 +2449,12 @@ void EditSchemaWidget::createActions()
 		m_orderMenu->addAction(m_bringForwardAction);
 		m_orderMenu->addAction(m_sendBackwardAction);
 		m_orderMenu->addAction(m_sendToBackAction);
+
+	m_transformMenu = new QMenu(this);
+		m_transformAction->setMenu(m_transformMenu);
+		m_transformMenu->addAction(m_transformIntoInputAction);
+		m_transformMenu->addAction(m_transformIntoInOutAction);
+		m_transformMenu->addAction(m_transformIntoOutputAction);
 
 	m_viewMenu = new QMenu(this);
 	m_viewAction->setMenu(m_viewMenu);
@@ -5295,6 +5338,18 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 		return;
 	}
 
+	// All selected are signals?
+	//
+	bool allSelectedAreSignals = selectedItems().empty() == true ? false : true;
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			allSelectedAreSignals = false;
+			break;
+		}
+	}
+
 	// Disable some actions in ReadOnly mode
 	//
 	m_addAction->setDisabled(readOnly());
@@ -5321,6 +5376,11 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	actions << m_editAction;
 	actions << m_orderAction;
 	actions << m_sizeAndPosAction;
+
+	if (allSelectedAreSignals == true)
+	{
+		actions << m_transformAction;
+	}
 
 	// Signal properties
 	//
@@ -8173,6 +8233,120 @@ void EditSchemaWidget::sendBackward()
 	}
 
 	m_editEngine->runSetOrder(EditEngine::SetOrder::SendBackward, selected, activeLayer());
+}
+
+void EditSchemaWidget::transformIntoInput()
+{
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			assert(item->isType<VFrame30::SchemaItemSignal>() == true);
+			return;
+		}
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+
+	for (auto item : selected)
+	{
+		auto signalItem = item->toType<VFrame30::SchemaItemSignal>();
+		assert(signalItem);
+
+		auto transformedItem = signalItem->transformIntoInput();
+		assert(transformedItem);
+
+		newItems.push_back(transformedItem);
+	}
+
+	m_editEngine->startBatch();
+		m_editEngine->runDeleteItem(selected, activeLayer());
+		m_editEngine->runAddItem(newItems, activeLayer());
+	m_editEngine->endBatch();
+
+	return;
+}
+
+void EditSchemaWidget::transformIntoInOut()
+{
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			assert(item->isType<VFrame30::SchemaItemSignal>() == true);
+			return;
+		}
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+
+	for (auto item : selected)
+	{
+		auto signalItem = item->toType<VFrame30::SchemaItemSignal>();
+		assert(signalItem);
+
+		auto transformedItem = signalItem->transformIntoInOut();
+		assert(transformedItem);
+
+		newItems.push_back(transformedItem);
+	}
+
+	m_editEngine->startBatch();
+		m_editEngine->runDeleteItem(selected, activeLayer());
+		m_editEngine->runAddItem(newItems, activeLayer());
+	m_editEngine->endBatch();
+
+	return;
+}
+
+void EditSchemaWidget::transformIntoOutput()
+{
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			assert(item->isType<VFrame30::SchemaItemSignal>() == true);
+			return;
+		}
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+
+	for (auto item : selected)
+	{
+		auto signalItem = item->toType<VFrame30::SchemaItemSignal>();
+		assert(signalItem);
+
+		auto transformedItem = signalItem->transformIntoOutput();
+		assert(transformedItem);
+
+		newItems.push_back(transformedItem);
+	}
+
+	m_editEngine->startBatch();
+		m_editEngine->runDeleteItem(selected, activeLayer());
+		m_editEngine->runAddItem(newItems, activeLayer());
+	m_editEngine->endBatch();
+
+	return;
 }
 
 void EditSchemaWidget::toggleComment()

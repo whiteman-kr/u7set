@@ -57,6 +57,13 @@ namespace VFrame30
 	public:
 		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
+		std::shared_ptr<VFrame30::SchemaItem> transformIntoInput();
+		std::shared_ptr<VFrame30::SchemaItem> transformIntoInOut();
+		std::shared_ptr<VFrame30::SchemaItem> transformIntoOutput();
+
+		template <typename TYPE>
+		std::shared_ptr<VFrame30::SchemaItem> transformIntoType();
+
 		// Properties
 		//
 	public:
@@ -118,6 +125,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		friend class SchemaItemSignal;
+
 	public:
 		SchemaItemInput(void);
 		explicit SchemaItemInput(SchemaUnit unit);
@@ -130,6 +139,7 @@ namespace VFrame30
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
+		bool loadData(const Proto::Envelope& message, bool loadOwnData);
 
 		// Properties and Data
 	public:
@@ -144,6 +154,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		friend class SchemaItemSignal;
+
 	public:
 		SchemaItemOutput(void);
 		explicit SchemaItemOutput(SchemaUnit unit);
@@ -156,6 +168,7 @@ namespace VFrame30
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
+		bool loadData(const Proto::Envelope& message, bool loadOwnData);
 
 		// Properties and Data
 	public:
@@ -169,6 +182,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		friend class SchemaItemSignal;
+
 	public:
 		SchemaItemInOut(void);
 		explicit SchemaItemInOut(SchemaUnit unit);
@@ -181,6 +196,7 @@ namespace VFrame30
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
+		bool loadData(const Proto::Envelope& message, bool loadOwnData);
 
 		// Properties and Data
 	public:

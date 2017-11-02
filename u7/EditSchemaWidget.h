@@ -402,6 +402,10 @@ protected slots:
 	void sendToBack();
 	void sendBackward();
 
+	void transformIntoInput();
+	void transformIntoInOut();
+	void transformIntoOutput();
+
 	void toggleComment();
 
 	void toggleLock();
@@ -565,8 +569,8 @@ private:
 		// ------------------------------
 		QAction* m_addSeparatorAction0 = nullptr;
 		QAction* m_addInputSignalAction = nullptr;
-		QAction* m_addOutputSignalAction = nullptr;
 		QAction* m_addInOutSignalAction = nullptr;
+		QAction* m_addOutputSignalAction = nullptr;
 		QAction* m_addConstantAction = nullptr;
 		QAction* m_addTerminatorAction = nullptr;
 		QAction* m_addAfbAction = nullptr;
@@ -626,6 +630,14 @@ private:
 		QAction* m_bringForwardAction = nullptr;
 		QAction* m_sendToBackAction = nullptr;
 		QAction* m_sendBackwardAction = nullptr;
+
+	// Transform
+	//
+	QMenu* m_transformMenu = nullptr;
+	QAction* m_transformAction = nullptr;
+		QAction* m_transformIntoInputAction = nullptr;
+		QAction* m_transformIntoInOutAction = nullptr;
+		QAction* m_transformIntoOutputAction = nullptr;
 
 	// View
 	//
