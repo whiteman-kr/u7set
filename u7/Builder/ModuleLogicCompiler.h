@@ -32,7 +32,7 @@ namespace Builder
 			QString lmEquipmentID;
 
 			double codeMemoryUsed = 0;
-			double bitMemoryused = 0;
+			double bitMemoryUsed = 0;
 			double wordMemoryUsed = 0;
 
 			double idrPhaseTimeUsed = 0;			// Input Data Receive phase time

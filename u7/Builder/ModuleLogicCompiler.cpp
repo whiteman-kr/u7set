@@ -7004,7 +7004,7 @@ namespace Builder
 
 		m_resourcesUsageInfo.lmEquipmentID = m_lm->equipmentIdTemplate();
 		m_resourcesUsageInfo.codeMemoryUsed = percentOfUsedCodeMemory;
-		m_resourcesUsageInfo.bitMemoryused = percentOfUsedBitMemory;
+		m_resourcesUsageInfo.bitMemoryUsed = percentOfUsedBitMemory;
 		m_resourcesUsageInfo.wordMemoryUsed = percentOfUsedWordMemory;
 		m_resourcesUsageInfo.idrPhaseTimeUsed = idrPhaseTimeUsed;
 		m_resourcesUsageInfo.alpPhaseTimeUsed = alpPhaseTimeUsed;

@@ -388,15 +388,15 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_SHOW_INPUT_ERROR]);
-					QStringList showInputErrorTypeList;
-					for(int t = 0; t < LO_SHOW_INPUT_ERROR_COUNT; t++)
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_SHOW_ERROR_FROM_LIMIT]);
+					QStringList showErrorFromLimitList;
+					for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
 					{
-						showInputErrorTypeList.append(ShowInputErrorStr[t]);
+						showErrorFromLimitList.append(MeasureLimitType[t]);
 					}
-					item->setAttribute(QLatin1String("enumNames"), showInputErrorTypeList);
-					item->setValue(m_options.linearity().showInputErrorType());
-					appendProperty(item, page, LO_PARAM_SHOW_INPUT_ERROR);
+					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
+					item->setValue(m_options.linearity().showErrorFromLimit());
+					appendProperty(item, page, LO_PARAM_SHOW_ERROR_FROM_LIMIT);
 					errorGroup->addSubProperty(item);
 
 				QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements at the single point"));
@@ -1027,7 +1027,7 @@ void OptionsDialog::applyProperty()
 					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());			break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
-					case LO_PARAM_SHOW_INPUT_ERROR:			m_options.linearity().setShowInputErrorType(value.toInt());
+					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setShowErrorFromLimit(value.toInt());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
 					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());		break;
 					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());	break;
