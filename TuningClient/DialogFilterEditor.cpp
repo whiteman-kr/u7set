@@ -12,7 +12,7 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 	assert(objects);
 
     m_tuningFilterEditor = new TuningFilterEditor(filterStorage, objects,
-												  false, true,
+												  false, true, TuningFilter::Source::User,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
 												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 

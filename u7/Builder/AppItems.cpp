@@ -273,7 +273,6 @@ namespace Builder
 
 	bool AppItem::init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg)
 	{
-		m_appLogicItem.m_afbElement = *afbElement.get();
 		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
 					new VFrame30::SchemaItemAfb(VFrame30::SchemaUnit::Display, *afbElement.get(), &errorMsg));
 
@@ -980,7 +979,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			assert(false);
+//			assert(false);
 			dataSize = -1;		// real data size of bus should be assigned !!!
 			break;
 

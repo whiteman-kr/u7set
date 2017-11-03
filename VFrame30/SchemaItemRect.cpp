@@ -224,12 +224,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemRect::searchText(const QString& text) const
-	{
-		return SchemaItem::searchText(text) ||
-				m_text.contains(text, Qt::CaseInsensitive);
-	}
-
 	double SchemaItemRect::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
 	{
 		return gridSize;

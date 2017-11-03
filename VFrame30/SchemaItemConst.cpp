@@ -15,15 +15,13 @@ namespace VFrame30
 	SchemaItemConst::SchemaItemConst(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(ConstType, PropertyNames::type, true, SchemaItemConst::type, SchemaItemConst::setType);
-		auto valIntProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueInteger, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
-		auto valFloatProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::valueFloat, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
-		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
+		ADD_PROPERTY_GET_SET_CAT(ConstType, PropertyNames::type, PropertyNames::constCategory, true, SchemaItemConst::type, SchemaItemConst::setType);
 
-		typeProp->setCategory(PropertyNames::functionalCategory);
-		valIntProp->setCategory(PropertyNames::functionalCategory);
-		valFloatProp->setCategory(PropertyNames::functionalCategory);
-		precisionProp->setCategory(PropertyNames::functionalCategory);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueInteger, PropertyNames::constCategory, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::valueFloat, PropertyNames::constCategory, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueDiscrete, PropertyNames::constCategory, true, SchemaItemConst::discreteValue, SchemaItemConst::setDiscreteValue);
+
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::constCategory, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
 
 		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemConst::horzAlign, SchemaItemConst::setHorzAlign);
 		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemConst::vertAlign, SchemaItemConst::setVertAlign);
@@ -33,6 +31,8 @@ namespace VFrame30
 		// --
 		//
 		addOutput();
+
+		return;
 	}
 
 	SchemaItemConst::~SchemaItemConst()
@@ -57,6 +57,7 @@ namespace VFrame30
 		constitem->set_type(m_type);
 		constitem->set_intvalue(m_intValue);
 		constitem->set_floatvalue(m_floatValue);
+		constitem->set_discretevalue(m_discreteValue);
 		constitem->set_precision(m_precision);
 
 		constitem->set_horzalign(static_cast<int32_t>(m_horzAlign));
@@ -83,9 +84,11 @@ namespace VFrame30
 
 		const Proto::SchemaItemConst& constitem = message.schemaitem().constitem();
 
-		m_type = static_cast<ConstType>(constitem.type());
+		setType(static_cast<ConstType>(constitem.type()));		// Value properties created here
+
 		m_intValue = constitem.intvalue();
 		m_floatValue = constitem.floatvalue();
+		m_discreteValue = constitem.discretevalue();
 		m_precision = constitem.precision();
 
 		setPrecision(m_precision);		// This function will set Presion for valueFloat property
@@ -157,19 +160,30 @@ namespace VFrame30
 
 	QString SchemaItemConst::valueToString() const
 	{
+//		SignedInteger32			SI: 100
+//		UnsignedInteger32		UI: 100
+//		SignedInteger64			SI64: 100
+//		UnsignedInteger64		UI64: 100
+//		Float 					FP: 100
+//		Double					DBL: 0.123
+//		Discrete				0 or 1
+//
 		QString text;
 
 		switch (type())
 		{
-			case ConstType::IntegerType:
-				text = QString("int: %1").arg(QString::number(intValue()));
-				break;
-			case ConstType::FloatType:
-				text = QString("float: %1").arg(QString::number(floatValue(), 'g', precision()));
-				break;
-			default:
-				assert(false);
-				break;
+		case ConstType::IntegerType:
+			text = QString("SI: %1").arg(QString::number(intValue()));
+			break;
+		case ConstType::FloatType:
+			text = QString("FP: %1").arg(QString::number(floatValue(), 'g', precision()));
+			break;
+		case ConstType::Discrete:
+			text = QString("%1").arg(m_discreteValue);
+			break;
+		default:
+			assert(false);
+			break;
 		}
 
 		return text;
@@ -188,14 +202,17 @@ namespace VFrame30
 		QString typeStr;
 		switch (type())
 		{
-			case ConstType::IntegerType:
-				typeStr = "Integer";
-				break;
-			case ConstType::FloatType:
-				typeStr = "Float";
-				break;
-			default:
-				break;
+		case ConstType::IntegerType:
+			typeStr = "Integer";
+			break;
+		case ConstType::FloatType:
+			typeStr = "Float";
+			break;
+		case ConstType::Discrete:
+			typeStr = "Discrete";
+			break;
+		default:
+			break;
 		}
 
 		QString str = QString("Constant:\n\tType: %1\n\tValue: %2")
@@ -215,6 +232,36 @@ namespace VFrame30
 	void SchemaItemConst::setType(SchemaItemConst::ConstType value)
 	{
 		m_type = value;
+
+		switch (m_type)
+		{
+		case ConstType::IntegerType:
+			propertyByCaption(PropertyNames::valueInteger)->setVisible(true);
+			propertyByCaption(PropertyNames::valueFloat)->setVisible(false);
+			propertyByCaption(PropertyNames::valueDiscrete)->setVisible(false);
+			propertyByCaption(PropertyNames::precision)->setVisible(false);
+			emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
+			break;
+		case ConstType::FloatType:
+			propertyByCaption(PropertyNames::valueInteger)->setVisible(false);
+			propertyByCaption(PropertyNames::valueFloat)->setVisible(true);
+			propertyByCaption(PropertyNames::valueDiscrete)->setVisible(false);
+			propertyByCaption(PropertyNames::precision)->setVisible(true);
+			emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
+			break;
+		case ConstType::Discrete:
+			propertyByCaption(PropertyNames::valueInteger)->setVisible(false);
+			propertyByCaption(PropertyNames::valueFloat)->setVisible(false);
+			propertyByCaption(PropertyNames::valueDiscrete)->setVisible(true);
+			propertyByCaption(PropertyNames::precision)->setVisible(false);
+			emit propertyListChanged();		// Explicit emmiting signal, as setVisible does not do it
+			break;
+		default:
+			assert(false);
+			break;
+		}
+
+		return;
 	}
 
 	bool SchemaItemConst::isIntegral() const
@@ -225,6 +272,11 @@ namespace VFrame30
 	bool SchemaItemConst::isFloat() const
 	{
 		return m_type == SchemaItemConst::ConstType::FloatType;
+	}
+
+	bool SchemaItemConst::isDiscrete() const
+	{
+		return m_type == SchemaItemConst::ConstType::Discrete;
 	}
 
 	int SchemaItemConst::intValue() const
@@ -246,6 +298,16 @@ namespace VFrame30
 		m_floatValue = doubleValue;
 	}
 
+	int SchemaItemConst::discreteValue() const
+	{
+		return m_discreteValue;
+	}
+
+	void SchemaItemConst::setDiscreteValue(int discreteValue)
+	{
+		m_discreteValue = qBound(0, discreteValue, 1);
+	}
+
 	int SchemaItemConst::precision() const
 	{
 		return m_precision;
@@ -253,17 +315,7 @@ namespace VFrame30
 
 	void SchemaItemConst::setPrecision(int value)
 	{
-		if (value < 0)
-		{
-			value = 0;
-		}
-
-		if (value > 24)
-		{
-			value = 24;
-		}
-
-		m_precision = value;
+		m_precision = qBound(0, value, 24);
 
 		// Set precision to m_floatValue property
 		//

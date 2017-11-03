@@ -58,7 +58,6 @@ private slots:
 
 	bool				readRacks(const QByteArray& fileData, int fileVersion);
 	bool				readTuningSources(const QByteArray& fileData, int fileVersion);
-	bool				readUnits(const QByteArray& fileData, int fileVersion);
 	bool				readSignals(const QByteArray& fileData, int fileVersion);
 
 signals:

@@ -54,17 +54,15 @@ const int	MEASURE_KIND_UNKNOWN			= -1,
 
 const char* const MeasureLimitType[] =
 {
-			QT_TRANSLATE_NOOP("MeasureBase.h", "InElectric"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Electric"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Physical"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "OutElectric"),
 };
 
 const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLimitType[0]);
 
 const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
-			MEASURE_LIMIT_TYPE_IN_ELECTRIC	= 0,
-			MEASURE_LIMIT_TYPE_PHYSICAL		= 1,
-			MEASURE_LIMIT_TYPE_OUT_ELECTRIC	= 2;
+			MEASURE_LIMIT_TYPE_ELECTRIC		= 0,
+			MEASURE_LIMIT_TYPE_PHYSICAL		= 1;
 
 // ==============================================================================================
 
@@ -182,7 +180,6 @@ private:
 	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
 	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
 
-	bool			m_hasLimit[MEASURE_LIMIT_TYPE_COUNT];
 	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
 	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
 	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
@@ -203,10 +200,11 @@ public:
 
 	void			virtual clear();
 
-	void			set1(const MeasureMultiParam& measureParam);
-	void			set2(const MeasureMultiParam& measureParam);
-	void			set3(const MeasureMultiParam& measureParam);
+	void			fill_measure_aim(const MeasureMultiParam& measureParam);
+	void			fill_measure_aom(const MeasureMultiParam& measureParam);
+	void			set_tun_aom(const MeasureMultiParam& measureParam);
 
+	void			setLimits(const Metrology::SignalParam& param);
 	void			calcError();
 	void			calcAdditionalParam(int limitType);
 
@@ -234,9 +232,6 @@ public:
 	double			measure(int limitType) const;
 	QString			measureStr(int limitType) const;
 	void			setMeasure(int limitType, double value);
-
-	bool			hasLimit(int limitType);
-	void			setHasLimit(int limitType, bool hasLimit);
 
 	double			lowLimit(int limitType) const;
 	void			setLowLimit(int limitType, double lowLimit);

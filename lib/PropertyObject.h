@@ -66,6 +66,15 @@ class PropertyObject;
 			(std::function<int(void)>)std::bind(&GETTER, &OWNER), \
 			std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
+
+enum class PropertySpecificEditor : qint16
+{
+	None = 0,
+	Password,
+	Script,
+	TuningFilter
+};
+
 //
 //
 //			Class Property
@@ -168,27 +177,33 @@ public:
 		m_expert = value;
 	}
 
+	PropertySpecificEditor specificEditor()
+	{
+		return m_specificEditor;
+	}
+
+	void setSpecificEditor(PropertySpecificEditor value)
+	{
+		m_specificEditor = value;
+	}
+
     bool password() const
     {
-        return m_password;
+		return m_specificEditor == PropertySpecificEditor::Password;
     }
     void setPassword(bool value)
     {
-        m_password = value;
-    }
+		m_specificEditor = value ? PropertySpecificEditor::Password : PropertySpecificEditor::None;
+	}
 
 	bool isScript() const
 	{
-		if (m_isScript == false && caption().contains("Script") == true)
-		{
-			return true;
-		}
-
-		return m_isScript;
+		return m_specificEditor == PropertySpecificEditor::Script ||
+				caption().contains("Script") == true;
 	}
 	void setIsScript(bool value)
 	{
-		m_isScript = value;
+		m_specificEditor = value ? PropertySpecificEditor::Script : PropertySpecificEditor::None;
 	}
 
     int precision() const
@@ -237,6 +252,7 @@ protected:
 		m_validator = source->m_validator;
 		m_flags = source->m_flags;
 		m_precision = source->m_precision;
+		m_specificEditor = source->m_specificEditor;
 
 		return;
 	}
@@ -258,11 +274,11 @@ private:
 			bool m_specific : 1;				// Specific property, used in DeviceObject
 			bool m_visible : 1;
 			bool m_expert : 1;
-            bool m_password : 1;
-			bool m_isScript : 1;
 		};
 		uint32_t m_flags;
 	};
+
+	PropertySpecificEditor m_specificEditor = PropertySpecificEditor::None;
 
 	int m_precision = 2;
 };
@@ -1049,12 +1065,15 @@ public:
 
 		m_properties[hash] = property;
 
+		emit propertyListChanged();
+
 		return property.get();
 	}
 
 	PropertyValueNoGetterSetter* addProperty(const QString& caption,
 											 const QString& category,
-											 bool visible)
+											 bool visible,
+											 const QVariant& value)
 	{
 		//std::shared_ptr<PropertyValueNoGetterSetter> property = thePropertyObjectHeap.alloc<PropertyValueNoGetterSetter>();
 		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
@@ -1064,8 +1083,11 @@ public:
 		property->setCaption(caption);
 		property->setCategory(category);
 		property->setVisible(visible);
+		property->setValue(value);
 
 		m_properties[hash] = property;
+
+		emit propertyListChanged();
 
 		return property.get();
 	}
@@ -1104,6 +1126,8 @@ public:
 
 		m_properties[hash] = property;
 
+		emit propertyListChanged();
+
 		return property.get();
 	}
 
@@ -1132,30 +1156,51 @@ public:
 	void removeAllProperties()
 	{
 		m_properties.clear();
+
+		emit propertyListChanged();
 	}
 
 	bool removeProperty(const QString& caption)
 	{
 		uint hash = qHash(caption);
 		size_t removed = m_properties.erase(hash);
-		return removed > 0;
+
+		if (removed > 0)
+		{
+			emit propertyListChanged();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	// Delete all specific properties
 	//
 	void removeSpecificProperties()
 	{
+		bool someRemoved = false;
+
 		for(auto it = m_properties.begin(); it != m_properties.end();)
 		{
 			if(it->second->specific() == true)
 			{
 				it = m_properties.erase(it);
+				someRemoved = true;
 			}
 			else
 			{
 				++it;
 			}
 		}
+
+		if (someRemoved == true)
+		{
+			emit propertyListChanged();
+		}
+
+		return;
 	}
 
 
@@ -1172,12 +1217,23 @@ public:
 			uint hash = qHash(p->caption());
 			m_properties[hash] = p;
 		}
+
+		if (properties.empty() == false)
+		{
+			emit propertyListChanged();
+		}
+
+		return;
 	}
 
 	void addProperty(std::shared_ptr<Property> property)
 	{
 		uint hash = qHash(property->caption());
 		m_properties[hash] = property;
+
+		emit propertyListChanged();
+
+		return;
 	}
 
 
@@ -1334,6 +1390,9 @@ public:
 
 		return result;
 	}
+
+signals:
+	void propertyListChanged();		// One or more properties were added or deleted
 
 private:
 	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)

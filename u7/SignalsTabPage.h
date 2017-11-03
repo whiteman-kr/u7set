@@ -37,6 +37,18 @@ const int	FI_ANY = 0,
 			FI_CAPTION = 4;
 
 
+struct CreatingSignalOptions
+{
+	QStringList lmEquipmentIdList;
+	QStringList selectedEquipmentIdList;
+	QStringList appSignalIdList;
+	QStringList customSignalIdList;
+	int defaultSignalTypeIndex = -1;
+	QString defaultBusTypeId;
+	QRect settingsWindowPositionRect;
+};
+
+
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -246,7 +258,7 @@ public:
 	SignalsTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~SignalsTabPage();
 
-	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent);
+	static QStringList createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent);
 
 protected:
 	void CreateActions(QToolBar* toolBar);
@@ -275,6 +287,7 @@ public slots:
 	void editColumnsVisibilityAndOrder();
 	void changeSignalActionsVisibility();
 
+	void setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
 

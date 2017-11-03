@@ -701,6 +701,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return;
 		}
 
+		// Block signals is required here, as removeProperty, addProperty emit propertyListChanged signal,
+		// but PropertyEditor tries to update values and we have assers
+		//
+		blockSignals(true);
+
 		// Delete all ColumnXX props
 		//
 		std::vector<std::shared_ptr<Property>> allProperties = properties();
@@ -736,6 +741,12 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 									  std::bind(&SchemaItemSignal::setColumnHorzAlign, this, std::placeholders::_1, static_cast<int>(i)));
 		}
 
+		// Allow signals and notify PropertyEditor that it can update property list now
+		//
+		blockSignals(false);
+
+		emit propertyListChanged();
+
 		return;
 	}
 
@@ -765,14 +776,6 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_cachedGridSize * 10;
 	}
 
-	// Text search
-	//
-	bool SchemaItemSignal::searchText(const QString& text) const
-	{
-		return	FblItemRect::searchText(text) ||
-				appSignalIds().contains(text, Qt::CaseInsensitive);
-	}
-
 	QString SchemaItemSignal::toolTipText(int dpiX, int dpiY) const
 	{
 		Q_UNUSED(dpiX);
@@ -788,6 +791,55 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		str.append(tr("\n\nHint: Press F2 to edit AppSignalID(s)"));
 
 		return str;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInput()
+	{
+		return transformIntoType<VFrame30::SchemaItemInput>();
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInOut()
+	{
+		return transformIntoType<VFrame30::SchemaItemInOut>();
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoOutput()
+	{
+		return transformIntoType<VFrame30::SchemaItemOutput>();
+	}
+
+	template <typename TYPE>
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoType()
+	{
+		Proto::Envelope message;
+		SaveData(&message);
+
+		std::shared_ptr<TYPE> item = std::make_shared<TYPE>(this->itemUnit());
+		item->loadData(message, false);
+
+		// item has restored pins which we need to remove and create new ones depending on TYPE
+		//
+		item->removeAllInputs();
+		item->removeAllOutputs();
+
+		QString className(item->metaObject()->className());
+		if (className == "VFrame30::SchemaItemInput")
+		{
+			item->addOutput();
+		}
+
+		if (className == "VFrame30::SchemaItemInOut")
+		{
+			item->addInput();
+			item->addOutput();
+		}
+
+		if (className == "VFrame30::SchemaItemOutput")
+		{
+			item->addInput();
+		}
+
+		return item;
 	}
 
 	QString SchemaItemSignal::appSignalIds() const
@@ -1053,6 +1105,12 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemInput::LoadData(const Proto::Envelope& message)
 	{
+		bool ok = loadData(message, true);
+		return ok;
+	}
+
+	bool SchemaItemInput::loadData(const Proto::Envelope& message, bool loadOwnData)
+	{
 		if (message.has_schemaitem() == false)
 		{
 			assert(message.has_schemaitem());
@@ -1066,9 +1124,14 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		{
 			return false;
 		}
-		
+
 		// --
 		//
+		if (loadOwnData == false)
+		{
+			return true;
+		}
+
 		if (message.schemaitem().has_inputsignal() == false)
 		{
 			assert(message.schemaitem().has_inputsignal());
@@ -1132,14 +1195,19 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemOutput::LoadData(const Proto::Envelope& message)
 	{
+		bool ok = loadData(message, true);
+		return ok;
+	}
+
+	bool SchemaItemOutput::loadData(const Proto::Envelope& message, bool loadOwnData)
+	{
 		if (message.has_schemaitem() == false)
 		{
 			assert(message.has_schemaitem());
 			return false;
 		}
 
-		// --
-		//
+
 		bool result = SchemaItemSignal::LoadData(message);
 		if (result == false)
 		{
@@ -1148,6 +1216,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		// --
 		//
+		if (loadOwnData == false)
+		{
+			return true;
+		}
+
 		if (message.schemaitem().has_outputsignal() == false)
 		{
 			assert(message.schemaitem().has_outputsignal());
@@ -1223,6 +1296,12 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemInOut::LoadData(const Proto::Envelope& message)
 	{
+		bool ok = loadData(message, true);
+		return ok;
+	}
+
+	bool SchemaItemInOut::loadData(const Proto::Envelope& message, bool loadOwnData)
+	{
 		if (message.has_schemaitem() == false)
 		{
 			assert(message.has_schemaitem());
@@ -1239,6 +1318,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		// --
 		//
+		if (loadOwnData == false)
+		{
+			return true;
+		}
+
 		if (message.schemaitem().has_inoutsignal() == false)
 		{
 			assert(message.schemaitem().has_inoutsignal());

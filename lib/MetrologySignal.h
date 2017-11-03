@@ -9,11 +9,13 @@
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
 // and write log history about changing
 
-const int	CFG_FILE_VER_METROLOGY_SIGNALS = 1;
+const char* const	CFG_FILE_NAME_METROLOGY_SIGNALS	= "MetrologySignals.xml";
+const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 2;
 
 // Historty of version
 //
 // version 1 - it is base version
+// version 2 - deleted a few fields SignalParam::writeToXml (story about removing redundant ranges)
 //
 
 namespace Metrology
@@ -150,7 +152,6 @@ namespace Metrology
 		virtual ~SignalParam() {}
 
 	private:
-		static const int NO_UNIT_ID = -1;		//WhiteMan
 
 		Hash					m_hash = 0;							// hash calcHash from AppSignalID
 
@@ -166,33 +167,18 @@ namespace Metrology
 		int						m_lowADC = 0;
 		int						m_highADC = 0;
 
-		double					m_inputElectricLowLimit = 0;
-		double					m_inputElectricHighLimit = 0;
-		E::ElectricUnit			m_inputElectricUnitID = E::ElectricUnit::NoUnit;
-		QString					m_inputElectricUnit;
-		E::SensorType			m_inputElectricSensorType = E::SensorType::NoSensorType;
-		QString					m_inputElectricSensor;
-		int						m_inputElectricPrecision = 3;
+		double					m_physicalLowLimit = 0;
+		double					m_physicalHighLimit = 0;
+		QString					m_physicalUnit;
+		int						m_physicalPrecision = 2;
 
-		double					m_inputPhysicalLowLimit = 0;
-		double					m_inputPhysicalHighLimit = 0;
-		int						m_inputPhysicalUnitID = NO_UNIT_ID;
-		QString					m_inputPhysicalUnit;
-		int						m_inputPhysicalPrecision = 2;
-
-		double					m_outputElectricLowLimit = 0;
-		double					m_outputElectricHighLimit = 0;
-		E::ElectricUnit			m_outputElectricUnitID  = E::ElectricUnit::NoUnit;
-		QString					m_outputElectricUnit;
-		E::SensorType			m_outputElectricSensorType = E::SensorType::NoSensorType;
-		QString					m_outputElectricSensor;
-		int						m_outputElectricPrecision = 3;
-
-		double					m_outputPhysicalLowLimit = 0;
-		double					m_outputPhysicalHighLimit = 0;
-		int						m_outputPhysicalUnitID = NO_UNIT_ID;
-		QString					m_outputPhysicalUnit;
-		int						m_outputPhysicalPrecision = 2;
+		double					m_electricLowLimit = 0;
+		double					m_electricHighLimit = 0;
+		E::ElectricUnit			m_electricUnitID = E::ElectricUnit::NoUnit;
+		QString					m_electricUnit;
+		E::SensorType			m_electricSensorType = E::SensorType::NoSensorType;
+		QString					m_electricSensor;
+		int						m_electricPrecision = 3;
 
 		bool					m_enableTuning = false;
 		double					m_tuningDefaultValue = 0;
@@ -242,85 +228,44 @@ namespace Metrology
 
 		QString					adcRangeStr(bool showHex) const;
 
-		double					inputElectricLowLimit() const { return m_inputElectricLowLimit; }
-		void					setInputElectricLowLimit(double lowLimit) { m_inputElectricLowLimit = lowLimit; }
+		double					physicalLowLimit() const { return m_physicalLowLimit; }
+		void					setPhysicalLowLimit(double lowLimit) { m_physicalLowLimit = lowLimit; }
 
-		double					inputElectricHighLimit() const { return m_inputElectricHighLimit; }
-		void					setInputElectricHighLimit(double highLimit) { m_inputElectricHighLimit = highLimit; }
+		double					physicalHighLimit() const { return m_physicalHighLimit; }
+		void					setPhysicalHighLimit(double highLimit) { m_physicalHighLimit = highLimit; }
 
-		E::ElectricUnit			inputElectricUnitID() const { return m_inputElectricUnitID; }
-		void					setInputElectricUnitID(E::ElectricUnit unitID) { m_inputElectricUnitID = unitID; }
+		QString					physicalUnit() const { return m_physicalUnit; }
+		void					setPhysicalUnit(const QString& unit) { m_physicalUnit = unit; }
 
-		QString					inputElectricUnit() const { return m_inputElectricUnit; }
-		void					setInputElectricUnit(const QString& unit) { m_inputElectricUnit = unit; }
+		int						physicalPrecision() const { return m_physicalPrecision; }
+		void					setPhysicalPrecision(int precision) { m_physicalPrecision = precision; }
 
-		E::SensorType			inputElectricSensorType() const { return m_inputElectricSensorType; }
-		void					setInputElectricSensorType(E::SensorType sensorType) { m_inputElectricSensorType = sensorType; }
+		bool					physicalRangeIsValid() const;
+		QString					physicalRangeStr() const;
 
-		QString					inputElectricSensor() const { return m_inputElectricSensor; }
-		void					setInputElectricSensor(const QString& sensor) { m_inputElectricSensor = sensor; }
+		double					electricLowLimit() const { return m_electricLowLimit; }
+		void					setElectricLowLimit(double lowLimit) { m_electricLowLimit = lowLimit; }
 
-		int						inputElectricPrecision() const { return m_inputElectricPrecision; }
-		void					setInputElectricPrecision(int precision) { m_inputElectricPrecision = precision; }
+		double					electricHighLimit() const { return m_electricHighLimit; }
+		void					setElectricHighLimit(double highLimit) { m_electricHighLimit = highLimit; }
 
-		QString					inputElectricRangeStr() const;
+		E::ElectricUnit			electricUnitID() const { return m_electricUnitID; }
+		void					setElectricUnitID(E::ElectricUnit unitID) { m_electricUnitID = unitID; }
 
-		double					inputPhysicalLowLimit() const { return m_inputPhysicalLowLimit; }
-		void					setInputPhysicalLowLimit(double lowLimit) { m_inputPhysicalLowLimit = lowLimit; }
+		QString					electricUnit() const { return m_electricUnit; }
+		void					setElectricUnit(const QString& unit) { m_electricUnit = unit; }
 
-		double					inputPhysicalHighLimit() const { return m_inputPhysicalHighLimit; }
-		void					setInputPhysicalHighLimit(double highLimit) { m_inputPhysicalHighLimit = highLimit; }
+		E::SensorType			electricSensorType() const { return m_electricSensorType; }
+		void					setElectricSensorType(E::SensorType sensorType) { m_electricSensorType = sensorType; }
 
-		int						inputPhysicalUnitID() const { return m_inputPhysicalUnitID; }
-		void					setInputPhysicalUnitID(int unitID) { m_inputPhysicalUnitID = unitID; }
+		QString					electricSensor() const { return m_electricSensor; }
+		void					setElectricSensor(const QString& sensor) { m_electricSensor = sensor; }
 
-		QString					inputPhysicalUnit() const { return m_inputPhysicalUnit; }
-		void					setInputPhysicalUnit(const QString& unit) { m_inputPhysicalUnit = unit; }
+		int						electricPrecision() const { return m_electricPrecision; }
+		void					setElectricPrecision(int precision) { m_electricPrecision = precision; }
 
-		int						inputPhysicalPrecision() const { return m_inputPhysicalPrecision; }
-		void					setInputPhysicalPrecision(int precision) { m_inputPhysicalPrecision = precision; }
-
-		QString					inputPhysicalRangeStr() const;
-
-		double					outputElectricLowLimit() const { return m_outputElectricLowLimit; }
-		void					setOutputElectricLowLimit(double lowLimit) { m_outputElectricLowLimit = lowLimit; }
-
-		double					outputElectricHighLimit() const { return m_outputElectricHighLimit; }
-		void					setOutputElectricHighLimit(double highLimit) { m_outputElectricHighLimit = highLimit; }
-
-		E::ElectricUnit			outputElectricUnitID() const { return m_outputElectricUnitID; }
-		void					setOutputElectricUnitID(const E::ElectricUnit unitID) { m_outputElectricUnitID = unitID; }
-
-		QString					outputElectricUnit() const { return m_outputElectricUnit; }
-		void					setOutputElectricUnit(const QString& unit) { m_outputElectricUnit = unit; }
-
-		E::SensorType			outputElectricSensorType() const { return m_outputElectricSensorType; }
-		void					setOutputElectricSensorType(const E::SensorType sensorType) { m_outputElectricSensorType = sensorType; }
-
-		QString					outputElectricSensor() const { return m_outputElectricSensor; }
-		void					setOutputElectricSensor(const QString& sensor) { m_outputElectricSensor = sensor; }
-
-		int						outputElectricPrecision() const { return m_outputElectricPrecision; }
-		void					setOutputElectricPrecision(int precision) { m_outputElectricPrecision = precision; }
-
-		QString					outputElectricRangeStr() const;
-
-		double					outputPhysicalLowLimit() const { return m_outputPhysicalLowLimit; }
-		void					setOutputPhysicalLowLimit(double lowLimit) { m_outputPhysicalLowLimit = lowLimit; }
-
-		double					outputPhysicalHighLimit() const { return m_outputPhysicalHighLimit; }
-		void					setOutputPhysicalHighLimit(double highLimit) { m_outputPhysicalHighLimit = highLimit; }
-
-		int						outputPhysicalUnitID() const { return m_outputPhysicalUnitID; }
-		void					setOutputPhysicalUnitID(int unitID) { m_outputPhysicalUnitID = unitID; }
-
-		QString					outputPhysicalUnit() const { return m_outputPhysicalUnit; }
-		void					setOutputPhysicalUnit(const QString& unit) { m_outputPhysicalUnit = unit; }
-
-		int						outputPhysicalPrecision() const { return m_outputPhysicalPrecision; }
-		void					setOutputPhysicalPrecision(int precision) { m_outputPhysicalPrecision = precision; }
-
-		QString					outputPhysicalRangeStr() const;
+		bool					electricRangeIsValid() const;
+		QString					electricRangeStr() const;
 
 		bool					enableTuning() const { return m_enableTuning; }
 		QString					enableTuningStr() const;
@@ -415,7 +360,6 @@ namespace Metrology
 	public:
 
 		Signal() {}
-
 		explicit Signal(const SignalParam& param)
 		{
 			setParam(param);
@@ -423,9 +367,18 @@ namespace Metrology
 			// temporary solution
 			// because u7 can not set electric range
 			//
-			m_param.setInputElectricLowLimit(0);
-			m_param.setInputElectricHighLimit(5);
-			m_param.setInputElectricUnitID(E::ElectricUnit::V);
+			//			if (param.electricLowLimit() == 0 && param.electricHighLimit() == 0)
+			//			{
+			//				m_param.setElectricLowLimit(0);
+			//				m_param.setElectricHighLimit(5);
+			//			}
+
+			//			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+			//			{
+			//				m_param.setElectricUnitID(E::ElectricUnit::V);
+			//			}
+			//
+			//
 		}
 
 		virtual ~Signal() {}

@@ -114,7 +114,8 @@ SOURCES += main.cpp \
     ArchiveData.cpp \
     TcpSignalRecents.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
-    ../lib/Tuning/TuningTcpClient.cpp
+    ../lib/Tuning/TuningTcpClient.cpp \
+    SelectSchemaWidget.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -163,7 +164,9 @@ HEADERS  += \
     ArchiveData.h \
     TcpSignalRecents.h \
     ../lib/Tuning/TuningSignalManager.h \
-    ../lib/Tuning/TuningTcpClient.h
+    ../lib/Tuning/TuningTcpClient.h \
+    SelectSchemaWidget.h
+
 
 FORMS    += \
     DialogSettings.ui \

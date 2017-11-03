@@ -109,7 +109,7 @@ namespace EditEngine
 		return false;
 	}
 
-	void SetOrderCommand::executeCommand(EditSchemaView* schemaView)
+	void SetOrderCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
 		m_oldOrder = m_layer->Items;
 
@@ -165,7 +165,7 @@ namespace EditEngine
 				//
 				for (auto i : m_layer->Items)
 				{
-					bool isSelected =std::find(m_items.begin(), m_items.end(), i) != m_items.end();
+					bool isSelected = std::find(m_items.begin(), m_items.end(), i) != m_items.end();
 					newOrder.push_back(SetOrderItemStruct{isSelected, i});
 				}
 
@@ -259,7 +259,7 @@ namespace EditEngine
 				//
 				for (auto i : m_layer->Items)
 				{
-					bool isSelected =std::find(m_items.begin(), m_items.end(), i) != m_items.end();
+					bool isSelected = std::find(m_items.begin(), m_items.end(), i) != m_items.end();
 					newOrder.push_back(SetOrderItemStruct{isSelected, i});
 				}
 
@@ -306,14 +306,14 @@ namespace EditEngine
 			assert(false);
 		}
 
-		schemaView->setSelectedItems(m_items);
+		*itemsToSelect = m_items;
 
 		return;
 	}
 
-	void SetOrderCommand::unExecuteCommand(EditSchemaView* schemaView)
+	void SetOrderCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		schemaView->setSelectedItems(m_items);
+		*itemsToSelect = m_items;
 
 		assert(m_layer->Items.size() == m_oldOrder.size());
 

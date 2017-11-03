@@ -16,14 +16,14 @@ const char* const			SignalInfoColumn[] =
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "AppSignalID"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Sate"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "State"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Chassis"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Module"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Place"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Caption"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Ph. range"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "El. range"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "El. sensor"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Physical range"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric range"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric sensor"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Calibrator"),
 };
 

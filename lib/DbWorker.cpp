@@ -186,6 +186,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0168.sql", "Upgrade to version 168, Changes in signalInstance table, deletion unit table"},
 	{":/DatabaseUpgrade/Upgrade0169.sql", "Upgrade to version 169, AFBL library (cmp, dec_num and cod_num) was updated"},
 	{":/DatabaseUpgrade/Upgrade0170.sql", "Upgrade to version 170, AFBL library was updated"},
+	{":/DatabaseUpgrade/Upgrade0171.sql", "Upgrade to version 171, AFBL library was updated"},
+	{":/DatabaseUpgrade/Upgrade0172.sql", "Upgrade to version 172, AFBL library was updated"},
+	{":/DatabaseUpgrade/Upgrade0173.sql", "Upgrade to version 173, Fixed lim_fp update error"},
+	{":/DatabaseUpgrade/Upgrade0174.sql", "Upgrade to version 174, AFBL library was updated"},
 };
 
 

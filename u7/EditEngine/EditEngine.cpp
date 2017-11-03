@@ -2,11 +2,13 @@
 #include "EditEngine.h"
 #include "EditSchemaWidget.h"
 #include "EditEngineAddItem.h"
+#include "EditEngineBatch.h"
 #include "EditEngineSetPoints.h"
 #include "EditEngineDeleteItem.h"
 #include "EditEngineMoveItem.h"
 #include "EditEngineSetOrder.h"
 #include "EditEngineSetProperty.h"
+#include "EditEngineSetObject.h"
 #include "EditEngineSetSchemaProperty.h"
 
 namespace EditEngine
@@ -21,6 +23,8 @@ namespace EditEngine
 		assert(schemaView != nullptr);
 		assert(hScrollBar != nullptr);
 		assert(vScrollBar != nullptr);
+
+		m_commands.reserve(MaxCommandCount);
 
 		return;
 	}
@@ -51,46 +55,95 @@ namespace EditEngine
 			return false;
 		}
 
-		// ќчистить commands до текущено уровн€ (current)
-		//
-		m_commands.erase(m_commands.begin() + m_current, m_commands.end());
-
-		// ƒобавить новую команду в стек и выполить ее (runCommand)
-		//
-		m_commands.push_back(command);
-		m_current++;
-
-		if (runCommand == true)
+		if (m_batch == true)
 		{
-			command->execute(m_schemaView, m_hScrollBar, m_vScrollBar);
+			m_batchCommands.push_back(command);
 		}
-
-		if (m_commands.size() > MaxCommandCount)
+		else
 		{
-			m_commands.erase(m_commands.begin(), m_commands.begin() + (m_commands.size() - MaxCommandCount));
-			m_current = static_cast<int>(m_commands.size());	// - 1
+			// ќчистить commands до текущено уровн€ (current)
+			//
+			m_commands.erase(m_commands.begin() + m_current, m_commands.end());
+
+			// ƒобавить новую команду в стек и выполить ее (runCommand)
+			//
+			m_commands.push_back(command);
+			m_current++;
+
+			if (runCommand == true)
+			{
+				execute(command);
+				emit propertiesChanged();
+			}
+
+			if (m_commands.size() > MaxCommandCount)
+			{
+				m_commands.erase(m_commands.begin(), m_commands.begin() + (m_commands.size() - MaxCommandCount));
+				m_current = static_cast<int>(m_commands.size());	// - 1
+			}
+
+			setModified();
+
+			m_schemaView->update();
+
+			emit stateChanged(canUndo(), canRedo());
 		}
-
-		setModified();
-
-		m_schemaView->update();
-
-		emit stateChanged(canUndo(), canRedo());
 
 		return true;
 	}
 
-	void EditEngine::redo(int levels)
+	bool EditEngine::startBatch()
+	{
+		assert(m_batch == false);
+		assert(m_schemaView != nullptr);
+
+		if (readOnly() == true)
+		{
+			QMessageBox mb(m_schemaView);
+			mb.setText(tr("File was opened in readonly mode."));
+			mb.exec();
+			return false;
+		}
+
+		m_batchCommands.clear();
+		m_batch = true;
+
+		return true;
+	}
+
+	bool EditEngine::endBatch(bool runCommands /*= true*/)
+	{
+		if (m_batch == false)
+		{
+			assert(m_batch == true);
+
+			m_batch = false;			// Try to mitigate issue
+			m_batchCommands.clear();
+			return false;
+		}
+
+		m_batch = false;
+
+		if (m_batchCommands.empty() == true)
+		{
+			return false;
+		}
+
+		// Add batch command to m_commands
+		//
+		addCommand(std::make_shared<BatchCommand>(m_schemaView, m_batchCommands, m_hScrollBar, m_vScrollBar), runCommands);
+
+		return true;
+	}
+
+	void EditEngine::redo()
 	{
 		assert(m_schemaView != nullptr);
 
-		for (int i = 0; i < levels; i++)
+		if (m_current < static_cast<int>(m_commands.size()))
 		{
-			if (m_current < static_cast<int>(m_commands.size()))// - 1)
-			{
-				m_commands[m_current]->execute(m_schemaView, m_hScrollBar, m_vScrollBar);
-				m_current++;
-			}
+			execute(m_commands[m_current]);
+			m_current++;
 		}
 
 		setModified();
@@ -103,17 +156,14 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::undo(int levels)
+	void EditEngine::undo()
 	{
 		assert(m_schemaView != nullptr);
 
-		for (int i = 0; i < levels; i++)
+		if (m_current > 0)
 		{
-			if (m_current > 0)
-			{
-				m_current--;
-				m_commands[m_current]->unExecute(m_schemaView, m_hScrollBar, m_vScrollBar);
-			}
+			m_current--;
+			unExecute(m_commands[m_current]);
 		}
 
 		setModified();
@@ -169,6 +219,55 @@ namespace EditEngine
 		}
 	}
 
+	void EditEngine::execute(std::shared_ptr<EditCommand> command)
+	{
+		assert(command);
+
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsToSelect;
+		itemsToSelect.reserve(16);
+
+		// Start
+		//
+		command->execute(&itemsToSelect);
+
+		// Select changed items
+		//
+		selectItems(itemsToSelect);
+
+		return;
+	}
+
+	void EditEngine::unExecute(std::shared_ptr<EditCommand> command)
+	{
+		assert(command);
+
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsToSelect;
+		itemsToSelect.reserve(16);
+
+		// Start
+		//
+		command->unExecute(&itemsToSelect);
+
+		// Select changed items
+		//
+		selectItems(itemsToSelect);
+
+		return;
+	}
+
+	void EditEngine::selectItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	{
+		if (m_schemaView == nullptr)
+		{
+			assert(m_schemaView);
+			return;
+		}
+
+		m_schemaView->setSelectedItems(items);
+
+		return;
+	}
+
 	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
@@ -205,13 +304,13 @@ namespace EditEngine
 		return runDeleteItem(v, layer);
 	}
 
-	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool selectChangedItems)
 	{
-		addCommand(std::make_shared<SetPointsCommand>(m_schemaView, points, items, m_hScrollBar, m_vScrollBar), true);
+		addCommand(std::make_shared<SetPointsCommand>(m_schemaView, points, items, selectChangedItems, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const std::shared_ptr<VFrame30::SchemaItem>& item)
+	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const std::shared_ptr<VFrame30::SchemaItem>& item, bool selectChangedItems)
 	{
 		std::vector<VFrame30::SchemaPoint> ip(points.begin(), points.end());
 
@@ -221,7 +320,7 @@ namespace EditEngine
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 		items.push_back(item);
 
-		runSetPoints(allpoints, items);
+		runSetPoints(allpoints, items, selectChangedItems);
 		return;
 	}
 
@@ -266,6 +365,19 @@ namespace EditEngine
 		return runSetProperty(propertyName, value, items);
 	}
 
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	{
+		addCommand(std::make_shared<SetObjectCommand>(m_schemaView, currentState, newState, items, m_hScrollBar, m_vScrollBar), true);
+	}
+
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::shared_ptr<VFrame30::SchemaItem>& item)
+	{
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		items.push_back(item);
+
+		return runSetObject(currentState, newState, items);
+	}
+
 	void EditEngine::runSetSchemaProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& schema)
 	{
 		addCommand(std::make_shared<SetSchemaPropertyCommand>(m_schemaView, propertyName, value, schema, m_hScrollBar, m_vScrollBar), true);
@@ -279,6 +391,9 @@ namespace EditEngine
 	//
 
 	EditCommand::EditCommand(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar) :
+		m_schemaView(schemaView),
+		m_hScrollBar(hScrollBar),
+		m_vScrollBar(vScrollBar),
 		m_zoom(100.0)
 	{
 		assert(schemaView != nullptr);
@@ -288,62 +403,60 @@ namespace EditEngine
 
 		m_activeLayer = schemaView->activeLayer();
 
-		saveViewPos(schemaView, hScrollBar, vScrollBar);
+		saveViewPos();
 	}
 
-	void EditCommand::execute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	void EditCommand::execute(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		assert(schemaView != nullptr);
-		assert(hScrollBar != nullptr);
-		assert(vScrollBar != nullptr);
+		assert(itemsToSelect);
 
-		schemaView->setActiveLayer(m_activeLayer);
+		m_schemaView->setActiveLayer(m_activeLayer);
+		restoreViewPos();
 
-		restoreViewPos(schemaView, hScrollBar, vScrollBar);
-
-		executeCommand(schemaView);
-	}
-
-	void EditCommand::unExecute(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
-	{
-		assert(schemaView != nullptr);
-		assert(hScrollBar != nullptr);
-		assert(vScrollBar != nullptr);
-
-		schemaView->setActiveLayer(m_activeLayer);
-
-		restoreViewPos(schemaView, hScrollBar, vScrollBar);
-
-		unExecuteCommand(schemaView);
-	}
-
-	void EditCommand::saveViewPos(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
-	{
-		assert(schemaView != nullptr);
-		assert(hScrollBar != nullptr);
-		assert(vScrollBar != nullptr);
-
-		m_zoom = schemaView->zoom();
-
-		m_hScrollBar.setMaximum(hScrollBar->maximum());
-		m_hScrollBar.setValue(hScrollBar->value());
-
-		m_vScrollBar.setMaximum(vScrollBar->maximum());
-		m_vScrollBar.setValue(vScrollBar->value());
+		executeCommand(itemsToSelect);
 
 		return;
 	}
 
-	void EditCommand::restoreViewPos(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	void EditCommand::unExecute(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
-		assert(schemaView != nullptr);
-		assert(hScrollBar != nullptr);
-		assert(vScrollBar != nullptr);
+		assert(itemsToSelect);
 
-		schemaView->setZoom(m_zoom);			// ѕервым должен восстанавливатьс€ Zoom, т.к. он него завис€т скролы
+		m_schemaView->setActiveLayer(m_activeLayer);
+		restoreViewPos();
 
-		hScrollBar->setValue(m_hScrollBar.value());
-		vScrollBar->setValue(m_vScrollBar.value());
+		unExecuteCommand(itemsToSelect);
+
+		return;
+	}
+
+	void EditCommand::saveViewPos()
+	{
+		assert(m_schemaView != nullptr);
+		assert(m_hScrollBar != nullptr);
+		assert(m_vScrollBar != nullptr);
+
+		m_zoom = m_schemaView->zoom();
+
+		m_hScrollBarCopy.setMaximum(m_hScrollBar->maximum());
+		m_hScrollBarCopy.setValue(m_hScrollBar->value());
+
+		m_vScrollBarCopy.setMaximum(m_vScrollBar->maximum());
+		m_vScrollBarCopy.setValue(m_vScrollBar->value());
+
+		return;
+	}
+
+	void EditCommand::restoreViewPos()
+	{
+		assert(m_schemaView != nullptr);
+		assert(m_hScrollBar != nullptr);
+		assert(m_vScrollBar != nullptr);
+
+		m_schemaView->setZoom(m_zoom);			// ѕервым должен восстанавливатьс€ Zoom, т.к. он него завис€т скролы
+
+		m_hScrollBar->setValue(m_hScrollBarCopy.value());
+		m_vScrollBar->setValue(m_vScrollBarCopy.value());
 
 		return;
 	}

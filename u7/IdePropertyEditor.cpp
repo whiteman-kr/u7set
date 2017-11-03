@@ -428,7 +428,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 	QString errorCode;
 
-	bool ok = m_filterStorage.load(text.toUtf8(), &errorCode, TuningFilter::FilterSource::User);
+	bool ok = m_filterStorage.load(text.toUtf8(), &errorCode);
     if (ok == false)
     {
         QLabel* errorLabel = new QLabel(errorCode);
@@ -440,7 +440,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 
 
-	m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage, false, false,
+	m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage, false, false, TuningFilter::Source::Project,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
 												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 

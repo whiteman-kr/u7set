@@ -13,6 +13,7 @@
 #include "./Forms/CompareDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include "./Forms/DialogUpdateFromPreset.h"
+#include "CreateSignalDialog.h"
 
 #include <QPalette>
 #include <QDialog>
@@ -2247,19 +2248,11 @@ void EquipmentView::addAppSignal()
 	QStringList equipmentIdList;
 	equipmentIdList << module->equipmentId();
 
-	int counter = 0;
-	bool ok = db()->nextCounterValue(&counter);
-	if (ok == false)
-	{
-		return;
-	}
+	static CreatingSignalDialogOptions options;
+	options.init(module->equipmentId(), module->equipmentId(), equipmentIdList, QStringList());
 
-	SignalsTabPage::createSignal(db(),
-								 equipmentIdList,
-								 counter,
-								 module->equipmentId(),
-								 module->equipmentId(),
-								 this);
+	CreateSignalDialog::showDialog(db(), &options, this);
+
 	return;
 }
 
@@ -4711,7 +4704,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 	//
 	if (m_propertyEditor != nullptr)
 	{
-		m_propertyEditor->updateProperty("EquipmentID");
+		m_propertyEditor->updatePropertyValues("EquipmentID");
 	}
 
 	// --

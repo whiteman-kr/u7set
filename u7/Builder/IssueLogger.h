@@ -217,7 +217,7 @@ namespace Builder
 		void errALC5024(QString connection, QUuid transmitterUuid, QString schemaID);			// Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').
 		void errALC5025(QString connection, QUuid receiverUuid, QString schemaID);				// Receiver is linked to unknown opto connection '%1'.
 		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
-		void errALC5027(QUuid transmitterUuid);									// All transmitter inputs must be directly linked to a signals.
+		void errALC5027(QUuid transmitterUuid, QString schemaID);									// All transmitter inputs must be directly linked to a signals.
 		void errALC5028(QString appSignalID, QUuid constUuid, QUuid signalUuid);	// Floating point constant is connected to discrete signal '%1'.
 		void errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid);		// The signal '%1' is repeatedly connected to the transmitter '%2'.
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal '%1' is not associated with LM '%2'.
@@ -319,6 +319,8 @@ namespace Builder
 		void errEQP6105(QString appSignalID, int byteOrder);		// Signal %1 has wrong order of byte: %2.
 
 		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);	//Schema %1 specified in Tuning Client %2 does not exist.
+		void errEQP6107(QString property, QString softwareEquipmentId);							//Error parsing property %1 specified in software %2.
+		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 
 
 	public:

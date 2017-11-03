@@ -193,7 +193,11 @@ SOURCES +=\
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
     Forms/ChooseAfbDialog.cpp \
-    IdePropertyEditor.cpp
+    IdePropertyEditor.cpp \
+    EditEngine/EditEngineSetObject.cpp \
+    EditConnectionLine.cpp \
+    EditEngine/EditEngineBatch.cpp \
+    CreateSignalDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -325,7 +329,11 @@ HEADERS  += \
     DbObjectStorage.h \
     BusStorage.h \
     Forms/DialogUpdateFromPreset.h \
-    IdePropertyEditor.h
+    IdePropertyEditor.h \
+    EditEngine/EditEngineSetObject.h \
+    EditConnectionLine.h \
+    EditEngine/EditEngineBatch.h \
+    CreateSignalDialog.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -401,11 +409,12 @@ win32 {
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
+# c++14 support
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+win32:QMAKE_CXXFLAGS += -std:c++14
+unix:QMAKE_CXXFLAGS += -std=c++14
 
-#c++14 support for GCC
+#c++14 support for Windows
 #
 unix:QMAKE_CXXFLAGS += -std=c++14
 

@@ -202,8 +202,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			displayUsedMemoryInfo();
-			displayTimingInfo();
+			displayResourcesUsageInfo();
 
 			msg = QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).
 					arg(m_lm->equipmentIdTemplate());
@@ -666,11 +665,18 @@ namespace Builder
 				bool connectedToFb = false;
 				bool connectedToSignal = false;
 
+				/*if (item->label() == "3TQ00SYN18_1_38595")
+				{
+					int a = 0;
+					a++;
+				}*/
+
 				for(QUuid connectedPinUuid : output.associatedIOs())
 				{
 					if (!m_pinParent.contains(connectedPinUuid))
 					{
-						assert(false);		// pin not found!!!
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
 					}
 					else
 					{
@@ -717,6 +723,35 @@ namespace Builder
 					// output pin connected to shadow signal with same guid
 					//
 					m_outPinSignal.insert(output.guid(), output.guid());
+				}
+			}
+		}
+
+		for(AppItem* item : m_appItems)
+		{
+			if (item->isReceiver() == false)
+			{
+				continue;
+			}
+
+			for(LogicPin output : item->outputs())
+			{
+				for(QUuid connectedPinUuid : output.associatedIOs())
+				{
+					if (!m_pinParent.contains(connectedPinUuid))
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
+					}
+					else
+					{
+						AppItem* connectedAppItem = m_pinParent[connectedPinUuid];
+
+						if (connectedAppItem->isSignal())
+						{
+							m_outPinSignal.insertMulti(output.guid(), connectedAppItem->signal().guid());
+						}
+					}
 				}
 			}
 		}
@@ -2769,7 +2804,7 @@ namespace Builder
 
 		QVector<QPair<QString, QUuid>> connectedSignals;
 
-		if (getSignalsConnectedToTransmitter(transmitter, connectedSignals) == false)
+		if (getSignalsConnectedToTransmitter(item, transmitter, connectedSignals) == false)
 		{
 			return false;
 		}
@@ -2789,6 +2824,14 @@ namespace Builder
 				ASSERT_RETURN_FALSE
 			}
 
+			if (s->isBus() == true)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString("Bus signals connection to transmitters is not implemented now (Logic schema %1)").arg(item->schemaID()));
+				m_log->addItemsIssues(OutputMessageLevel::Error, item->guid(), item->schemaID());
+				return false;
+			}
+
 			result &= m_optoModuleStorage->appendTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 													   m_lm->equipmentIdTemplate(),
 													   s,
@@ -2806,7 +2849,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getSignalsConnectedToTransmitter(const LogicTransmitter& transmitter, QVector<QPair<QString, QUuid>>& connectedSignals)
+	bool ModuleLogicCompiler::getSignalsConnectedToTransmitter(const AppItem* item, const LogicTransmitter& transmitter, QVector<QPair<QString, QUuid>>& connectedSignals)
 	{
 		connectedSignals.clear();
 
@@ -2843,7 +2886,8 @@ namespace Builder
 
 			if (connectedPinParent == nullptr)
 			{
-				ASSERT_RETURN_FALSE
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 
 			QUuid connectedSignalUuid;
@@ -2862,8 +2906,8 @@ namespace Builder
 				{
 					// All transmitter inputs must be directly linked to a signals.
 					//
-					m_log->errALC5027(transmitter.guid());
-					ASSERT_RETURN_FALSE
+					m_log->errALC5027(transmitter.guid(), item->schemaID());
+					return false;
 				}
 
 				QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
@@ -2873,7 +2917,7 @@ namespace Builder
 					// Transmitter input can be linked to one signal only.
 					//
 					m_log->errALC5026(transmitter.guid(), ids);
-					ASSERT_RETURN_FALSE
+					return false;
 				}
 				else
 				{
@@ -6815,7 +6859,7 @@ namespace Builder
 		*/
 	}
 
-	void ModuleLogicCompiler::displayUsedMemoryInfo()
+	void ModuleLogicCompiler::displayResourcesUsageInfo()
 	{
 		QString str;
 
@@ -6885,12 +6929,10 @@ namespace Builder
 				m_log->errALC5078();
 			}
 		}
-	}
 
-	void ModuleLogicCompiler::displayTimingInfo()
-	{
+		//
+
 		QString str_percent;
-		QString str;
 
 		// display IDR phase timing
 		//
@@ -6959,6 +7001,13 @@ namespace Builder
 				m_log->errALC5082();
 			}
 		}
+
+		m_resourcesUsageInfo.lmEquipmentID = m_lm->equipmentIdTemplate();
+		m_resourcesUsageInfo.codeMemoryUsed = percentOfUsedCodeMemory;
+		m_resourcesUsageInfo.bitMemoryUsed = percentOfUsedBitMemory;
+		m_resourcesUsageInfo.wordMemoryUsed = percentOfUsedWordMemory;
+		m_resourcesUsageInfo.idrPhaseTimeUsed = idrPhaseTimeUsed;
+		m_resourcesUsageInfo.alpPhaseTimeUsed = alpPhaseTimeUsed;
 	}
 
 	void ModuleLogicCompiler::cleanup()

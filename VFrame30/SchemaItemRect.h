@@ -32,11 +32,6 @@ namespace VFrame30
 		//
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
-
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
