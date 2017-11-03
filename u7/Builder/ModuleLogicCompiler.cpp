@@ -3611,10 +3611,10 @@ namespace Builder
 			{
 				result &= generateAppSignalCode(appItem);
 
-				if (result == false)
+				/*if (result == false)
 				{
 					break;
-				}
+				}*/
 
 				continue;
 			}
@@ -3623,10 +3623,10 @@ namespace Builder
 			{
 				result &= generateFbCode(appItem);
 
-				if (result == false)
+				/*if (result == false)
 				{
 					break;
-				}
+				}*/
 
 				continue;
 			}
@@ -3830,16 +3830,16 @@ namespace Builder
 		{
 		case E::SignalType::Discrete:
 
-			if (constItem.isIntegral() == false)
+			if (constItem.isDiscrete() == false)
 			{
-				// Floating point constant is connected to discrete signal '%1'
+				// Uncompatible constant type (Logic schema %1).
 				//
-				m_log->errALC5028(appSignal.appSignalID(), constItem.guid(), appSignal.guid());
+				m_log->errALC5028(constItem.guid(), appSignal.schemaID());
 				return false;
 			}
 			else
 			{
-				int constValue = constItem.intValue();
+				int constValue = constItem.discreteValue();
 
 				if (constValue == 0 || constValue == 1)
 				{
@@ -3870,9 +3870,10 @@ namespace Builder
 				}
 				else
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
-							  arg(constItem.floatValue()).arg(appSignal.appSignalID()));
+					// Uncompatible constant type (Logic schema %1).
+					//
+					m_log->errALC5028(constItem.guid(), appSignal.schemaID());
+					return false;
 				}
 				break;
 
@@ -3885,9 +3886,10 @@ namespace Builder
 				}
 				else
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
-							  arg(constItem.intValue()).arg(appSignal.appSignalID()));
+					// Uncompatible constant type (Logic schema %1).
+					//
+					m_log->errALC5028(constItem.guid(), appSignal.schemaID());
+					return false;
 				}
 				break;
 
@@ -4388,16 +4390,16 @@ namespace Builder
 		case E::SignalType::Discrete:
 			// input connected to discrete input
 			//
-			if (constItem.isIntegral() == false)
+			if (constItem.isDiscrete() == false)
 			{
-				// Float constant is connected to discrete input (Logic schema '%1').
+				// Uncompatible constant type (Logic schema %1).
 				//
-				m_log->errALC5060(getSchemaID(constItem), constItem.guid());
+				m_log->errALC5028(constItem.guid(), appFb.schemaID());
 				result = false;
 			}
 			else
 			{
-				int constValue = constItem.intValue();
+				int constValue = constItem.discreteValue();
 
 				if (constValue == 1 || constValue == 0)
 				{
@@ -4422,9 +4424,9 @@ namespace Builder
 			case SIZE_16BIT:
 				if (constItem.isIntegral() == false)
 				{
-					// Float constant is connected to 16-bit input (Logic schema '%1').
+					// Uncompatible constant type (Logic schema %1).
 					//
-					m_log->errALC5061(getSchemaID(constItem), constItem.guid());
+					m_log->errALC5028(constItem.guid(), appFb.schemaID());
 					result = false;
 				}
 				else
@@ -4440,9 +4442,9 @@ namespace Builder
 				case E::DataFormat::SignedInt:
 					if (constItem.isIntegral() == false)
 					{
-						// Float constant is connected to SignedInt input (Logic schema '%1').
+						// Uncompatible constant type (Logic schema %1).
 						//
-						m_log->errALC5062(getSchemaID(constItem), constItem.guid());
+						m_log->errALC5028(constItem.guid(), appFb.schemaID());
 						result = false;
 					}
 					else
@@ -4455,9 +4457,9 @@ namespace Builder
 				case E::DataFormat::Float:
 					if (constItem.isFloat() == false)
 					{
-						// Integer constant is connected to Float input (Logic schema '%1').
+						// Uncompatible constant type (Logic schema %1).
 						//
-						m_log->errALC5063(getSchemaID(constItem), constItem.guid());
+						m_log->errALC5028(constItem.guid(), appFb.schemaID());
 						result = false;
 					}
 					else
