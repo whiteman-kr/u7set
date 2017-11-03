@@ -1390,21 +1390,21 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal)
+	bool ModuleLogicCompiler::linkAfbInput(UalItem* srcItem, UalItem* destItem, QUuid inPinUuid, UalSignal* ualSignal)
 	{
-		if (srcItem == nullptr || afbItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		if (srcItem == nullptr || destItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
 
-		if (afbItem->isAfb() == false)
+		if (destItem->isAfb() == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		UalAfb* ualAfb = m_ualAfbs.value(afbItem->guid(), nullptr);
+		UalAfb* ualAfb = m_ualAfbs.value(destItem->guid(), nullptr);
 
 		if (ualAfb == nullptr)
 		{
@@ -1415,6 +1415,18 @@ namespace Builder
 		LogicAfbSignal inSignal;
 
 		bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
+
+		//
+
+		if (inSignal.type() == E::SignalType::Discrete && inSignal.size() != 1)
+		{
+#pragma message("################# DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE ####################");
+			inSignal.setSize(1);
+
+			qDebug() << "Discrete signal correction AFB " << ualAfb->caption() << " signal " << inSignal.caption();
+		}
+
+		//
 
 		if (result == false)
 		{
@@ -1427,7 +1439,7 @@ namespace Builder
 			{
 				// Bus output is connected to non-bus input.
 				//
-				m_log->errALC5113(srcItem->guid(), afbItem->guid(), afbItem->schemaID());
+				m_log->errALC5113(srcItem->guid(), destItem->guid(), destItem->schemaID());
 				return false;
 			}
 		}
@@ -1437,7 +1449,7 @@ namespace Builder
 			{
 				// Non-bus output is connected to bus input.
 				//
-				m_log->errALC5110(srcItem->guid(), afbItem->guid(), afbItem->schemaID());
+				m_log->errALC5110(srcItem->guid(), destItem->guid(), destItem->schemaID());
 				return false;
 			}
 
@@ -1447,7 +1459,7 @@ namespace Builder
 			{
 				// Uncompatible signals connection (Logic schema '%1').
 				//
-				m_log->errALC5117(srcItem->guid(), afbItem->guid(), afbItem->schemaID());
+				m_log->errALC5117(srcItem->guid(), destItem->guid(), destItem->schemaID());
 				return false;
 			}
 		}
