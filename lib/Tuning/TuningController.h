@@ -16,6 +16,7 @@ public:
 	TuningController() = delete;
 	TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient);
 
+public:
 	AppSignalParam signalParam(const QString& appSignalId, bool* ok);
 	TuningSignalState signalState(const QString& appSignalId, bool* ok);
 
@@ -25,8 +26,8 @@ public:
 	Q_INVOKABLE bool writeValue(QString appSignalId, double value);
 
 private:
-	TuningSignalManager* m_signalManager = nullptr;
-	TuningTcpClient* m_tcpClient = nullptr;
+	ITuningSignalManager* m_signalManager = nullptr;
+	ITuningTcpClient* m_tcpClient = nullptr;
 };
 
 #endif

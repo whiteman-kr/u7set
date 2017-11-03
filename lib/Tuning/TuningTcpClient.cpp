@@ -112,6 +112,18 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 	return;
 }
 
+bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
+{
+	if (isConnected() == false)
+	{
+		return false;
+	}
+
+	TuningWriteCommand command(appSignalId, value);
+	writeTuningSignal(command);
+
+	return true;
+}
 
 void TuningTcpClient::onClientThreadStarted()
 {

@@ -77,12 +77,6 @@ int TuningSignalManager::signalsCount() const
 	return static_cast<int>(m_signals.size());
 }
 
-bool TuningSignalManager::signalExists(Hash hash) const
-{
-	QMutexLocker l(&m_signalsMutex);
-	return m_signals.find(hash) != m_signals.end();
-}
-
 std::vector<AppSignalParam> TuningSignalManager::signalList() const
 {
 	std::vector<AppSignalParam> result;
@@ -111,6 +105,18 @@ std::vector<Hash> TuningSignalManager::signalHashes() const
 	}
 
 	return result;
+}
+
+bool TuningSignalManager::signalExists(Hash hash) const
+{
+	QMutexLocker l(&m_signalsMutex);
+	return m_signals.find(hash) != m_signals.end();
+}
+
+bool TuningSignalManager::signalExists(const QString& appSignalId) const
+{
+	Hash hash = ::calcHash(appSignalId);
+	return TuningSignalManager::signalExists(hash);
 }
 
 AppSignalParam TuningSignalManager::signalParam(Hash hash, bool* found) const
@@ -171,18 +177,6 @@ bool TuningSignalManager::signalParam(const QString& appSignalId, AppSignalParam
 	return signalParam(signalHash, result);
 }
 
-void TuningSignalManager::invalidateStates()
-{
-	QMutexLocker l(&m_statesMutex);
-
-	for (auto p : m_states)
-	{
-		p.second.invalidate();
-	}
-
-	return;
-}
-
 TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
 {
 	if (hash == 0)
@@ -217,6 +211,18 @@ TuningSignalState TuningSignalManager::state(const QString& appSignalId, bool* f
 {
 	Hash signalHash = ::calcHash(appSignalId);
 	return state(signalHash, found);
+}
+
+void TuningSignalManager::invalidateStates()
+{
+	QMutexLocker l(&m_statesMutex);
+
+	for (auto p : m_states)
+	{
+		p.second.invalidate();
+	}
+
+	return;
 }
 
 void TuningSignalManager::setState(const QString& appSignalId, const TuningSignalState& state)

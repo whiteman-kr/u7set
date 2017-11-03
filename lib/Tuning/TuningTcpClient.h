@@ -3,6 +3,7 @@
 
 #include <queue>
 #include "../lib/Tuning/TuningSignalManager.h"
+#include "../lib/Tuning/ITuningTcpClient.h"
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../Proto/network.pb.h"
@@ -39,7 +40,7 @@ struct TuningWriteCommand
 };
 
 
-class TuningTcpClient : public Tcp::Client
+class TuningTcpClient : public Tcp::Client, public ITuningTcpClient
 {
 	Q_OBJECT
 
@@ -66,6 +67,11 @@ public:
 	//
 	void writeTuningSignal(const TuningWriteCommand& data);
 	void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
+
+	// ITuningTcpClient implementation
+	//
+public:
+	virtual bool writeTuningSignal(QString appSignalId, TuningValue value) override;
 
 private:
 	virtual void onClientThreadStarted() override;

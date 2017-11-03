@@ -1,5 +1,4 @@
-#ifndef TUNINGSIGNAL_H
-#define TUNINGSIGNAL_H
+#pragma once
 
 #include "../Hash.h"
 #include "../../Proto/network.pb.h"
@@ -113,4 +112,3 @@ public:
 
 Q_DECLARE_METATYPE(TuningSignalState);
 
-#endif // TUNINGSIGNAL_H

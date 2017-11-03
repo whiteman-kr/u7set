@@ -4,10 +4,9 @@
 #include <unordered_map>
 #include <QMutex>
 
-#include "../lib/Tuning/TuningSignalState.h"
-#include "../AppSignal.h"
+#include "../lib/Tuning/ITuningSignalManager.h"
 
-class TuningSignalManager : public QObject
+class TuningSignalManager : public QObject, public ITuningSignalManager
 {
 	Q_OBJECT
 
@@ -24,23 +23,28 @@ public:
 	// AppSignalParams
 	//
 	int signalsCount() const;
-	bool signalExists(Hash hash) const;
-
 	std::vector<AppSignalParam> signalList() const;
 	std::vector<Hash> signalHashes() const;
 
-	AppSignalParam signalParam(Hash hash, bool* found) const;
-	AppSignalParam signalParam(const QString& appSignalId, bool* found) const;
-
-	bool signalParam(Hash hash, AppSignalParam* result) const;
-	bool signalParam(const QString& appSignalId, AppSignalParam* result) const;
-
-	// States
+	// Implementation ITuningSignalManager
 	//
-	void invalidateStates();
+public:
+	virtual bool signalExists(Hash hash) const override;
+	virtual bool signalExists(const QString& appSignalId) const override;
 
-	TuningSignalState state(Hash hash, bool* found) const;
-	TuningSignalState state(const QString& appSignalId, bool* found) const;
+	virtual AppSignalParam signalParam(Hash hash, bool* found) const override;
+	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
+
+	virtual bool signalParam(Hash hash, AppSignalParam* result) const override;
+	virtual bool signalParam(const QString& appSignalId, AppSignalParam* result) const override;
+
+	virtual TuningSignalState state(Hash hash, bool* found) const override;
+	virtual TuningSignalState state(const QString& appSignalId, bool* found) const override;
+
+	// State manipulation
+	//
+public:
+	void invalidateStates();
 
 	void setState(const QString& appSignalId, const TuningSignalState& state);
 	void setState(Hash signalHash, const TuningSignalState& state);

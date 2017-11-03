@@ -76,11 +76,6 @@ bool TuningController::writeValue(QString appSignalId, double value)
 		return false;
 	}
 
-	if (m_tcpClient->isConnected() == false)
-	{
-		return false;
-	}
-
 	appSignalId = appSignalId.trimmed();
 
 	bool ok = false;
@@ -111,9 +106,7 @@ bool TuningController::writeValue(QString appSignalId, double value)
 		return false;
 	}
 
-	TuningWriteCommand cmd(appSignalId, tuningValue);
+	ok = m_tcpClient->writeTuningSignal(appSignalId, tuningValue);
 
-	m_tcpClient->writeTuningSignal(cmd);
-
-	return true;
+	return ok;
 }
