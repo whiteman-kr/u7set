@@ -6,6 +6,28 @@ TuningValue::TuningValue(const Network::TuningValue& message)
 	return;
 }
 
+double TuningValue::toDouble() const
+{
+	switch (type)
+	{
+	case TuningValueType::Discrete:
+		return intValue;
+
+	case TuningValueType::SignedInteger:
+		return intValue;
+
+	case TuningValueType::Float:
+		return floatValue;
+
+	case TuningValueType::Double:
+		return doubleValue;
+
+	default:
+		assert(false);
+		return 0;
+	}
+}
+
 bool TuningValue::save(Network::TuningValue* message) const
 {
 	if (message == nullptr)

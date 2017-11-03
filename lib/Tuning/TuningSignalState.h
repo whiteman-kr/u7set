@@ -33,6 +33,8 @@ public:
 	TuningValue() = default;
 	TuningValue(const Network::TuningValue& message);
 
+	double toDouble() const;
+
 	bool save(Network::TuningValue* message) const;
 	bool load(const Network::TuningValue& message);
 

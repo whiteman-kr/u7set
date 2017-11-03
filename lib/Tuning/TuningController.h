@@ -2,9 +2,9 @@
 #define TUNINGCONTROLLER_H
 
 #include <QObject>
+#include "../lib/Tuning/ITuningSignalManager.h"
+#include "../lib/Tuning/ITuningTcpClient.h"
 
-class TuningSignalManager;
-class TuningTcpClient;
 class AppSignalParam;
 class TuningSignalState;
 
@@ -14,7 +14,7 @@ class TuningController : public QObject
 
 public:
 	TuningController() = delete;
-	TuningController(TuningSignalManager* signalManager, TuningTcpClient* tcpClient);
+	TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient);
 
 	AppSignalParam signalParam(const QString& appSignalId, bool* ok);
 	TuningSignalState signalState(const QString& appSignalId, bool* ok);

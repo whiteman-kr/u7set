@@ -1,10 +1,10 @@
 #include "TuningController.h"
 #include "../lib/AppSignal.h"
-#include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/Tuning/TuningTcpClient.h"
+#include "../lib/Tuning/ITuningSignalManager.h"
+#include "../lib/Tuning/ITuningTcpClient.h"
 
 
-TuningController::TuningController(TuningSignalManager* signalManager, TuningTcpClient* tcpClient) :
+TuningController::TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient) :
 	m_signalManager(signalManager),
 	m_tcpClient(tcpClient)
 {

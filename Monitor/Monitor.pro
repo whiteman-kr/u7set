@@ -115,7 +115,8 @@ SOURCES += main.cpp \
     TcpSignalRecents.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
-    SelectSchemaWidget.cpp
+    SelectSchemaWidget.cpp \
+    ../lib/Tuning/TuningSignalState.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \

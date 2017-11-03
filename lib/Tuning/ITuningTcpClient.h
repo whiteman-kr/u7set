@@ -1,70 +1,12 @@
-#ifndef TUNINGTCPCLIENT_H
-#define TUNINGTCPCLIENT_H
+#ifndef ITUNINGTCPCLIENT_H
+#define ITUNINGTCPCLIENT_H
 
-#include <queue>
-#include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/Tcp.h"
-#include "../lib/Hash.h"
-#include "../Proto/network.pb.h"
+class
 
-struct TuningSource
+class ITuningTcpClient
 {
-	::Network::DataSourceInfo info;
-	::Network::TuningSourceState state;
-
-	quint64 id() const
-	{
-		return info.id();
-	}
-};
-
-struct TuningWriteCommand
-{
-	Hash m_hash = 0;
-	TuningValue m_value;
-
-	TuningWriteCommand(const QString& appSignalId, const TuningValue& value) :
-		TuningWriteCommand(::calcHash(appSignalId), value)
-	{
-	}
-
-	TuningWriteCommand(Hash hash, const TuningValue& value)
-	{
-		m_hash = hash;
-		m_value = value;
-	}
-
-	bool save(Network::TuningWriteCommand* message) const;
-	bool load(const Network::TuningWriteCommand& message);
-};
-
-
-class TuningTcpClient : public Tcp::Client
-{
-	Q_OBJECT
-
-	Q_ENUM(NetworkError)
-
 public:
-	TuningTcpClient(E::SoftwareType softwareType,
-					QString equipmentID,
-					int majorVersion,
-					int minorVersion,
-					int commitNo,
-					TuningSignalManager* signalManager);
-
-	virtual ~TuningTcpClient();
-
-public:
-	// Tuning sources
-	//
-	QStringList tuningSourcesEquipmentIds() const;
-	std::vector<TuningSource> tuningSourcesInfo() const;
-	bool tuningSourceInfo(quint64 id, TuningSource* result) const;
-
-	// Writing states
-	//
-	void writeTuningSignal(const TuningWriteCommand& data);
+	virtual void writeTuningSignal(const TuningWriteCommand& data) = 0;
 	void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
 
 private:
@@ -158,4 +100,4 @@ private:
 };
 
 
-#endif // TUNINGTCPCLIENT_H
+#endif // ITUNINGTCPCLIENT_H
