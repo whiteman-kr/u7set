@@ -150,7 +150,8 @@ SOURCES +=\
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     TuningClientSignalManager.cpp \
-    DialogFilterEditor.cpp
+    DialogFilterEditor.cpp \
+    ../lib/Tuning/TuningTcpClient.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -202,7 +203,8 @@ HEADERS  += MainWindow.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
     TuningClientSignalManager.h \
-    DialogFilterEditor.h
+    DialogFilterEditor.h \
+    ../lib/Tuning/TuningTcpClient.h
 
 
 FORMS    += \

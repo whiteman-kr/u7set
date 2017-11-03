@@ -21,6 +21,7 @@ enum class TuningValueType
 struct TuningValue
 {
 	Q_GADGET
+
 public:
 	TuningValueType type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue
 	qint32 intValue = 0;

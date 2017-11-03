@@ -70,7 +70,7 @@ class TuningSignalsRead;
 class TuningValue;
 class TuningSignalState;
 class TuningSignalsReadReply;
-class TuningSignalWrite;
+class TuningWriteCommand;
 class TuningSignalsWrite;
 class TuningSignalWriteResult;
 class TuningSignalsWriteReply;
@@ -4401,14 +4401,14 @@ class TuningSignalsReadReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TuningSignalWrite : public ::google::protobuf::Message {
+class TuningWriteCommand : public ::google::protobuf::Message {
  public:
-  TuningSignalWrite();
-  virtual ~TuningSignalWrite();
+  TuningWriteCommand();
+  virtual ~TuningWriteCommand();
 
-  TuningSignalWrite(const TuningSignalWrite& from);
+  TuningWriteCommand(const TuningWriteCommand& from);
 
-  inline TuningSignalWrite& operator=(const TuningSignalWrite& from) {
+  inline TuningWriteCommand& operator=(const TuningWriteCommand& from) {
     CopyFrom(from);
     return *this;
   }
@@ -4422,17 +4422,17 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TuningSignalWrite& default_instance();
+  static const TuningWriteCommand& default_instance();
 
-  void Swap(TuningSignalWrite* other);
+  void Swap(TuningWriteCommand* other);
 
   // implements Message ----------------------------------------------
 
-  TuningSignalWrite* New() const;
+  TuningWriteCommand* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TuningSignalWrite& from);
-  void MergeFrom(const TuningSignalWrite& from);
+  void CopyFrom(const TuningWriteCommand& from);
+  void MergeFrom(const TuningWriteCommand& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -4462,14 +4462,16 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   inline ::google::protobuf::uint64 signalhash() const;
   inline void set_signalhash(::google::protobuf::uint64 value);
 
-  // optional float value = 2 [default = 0];
+  // optional .Network.TuningValue value = 2;
   inline bool has_value() const;
   inline void clear_value();
   static const int kValueFieldNumber = 2;
-  inline float value() const;
-  inline void set_value(float value);
+  inline const ::Network::TuningValue& value() const;
+  inline ::Network::TuningValue* mutable_value();
+  inline ::Network::TuningValue* release_value();
+  inline void set_allocated_value(::Network::TuningValue* value);
 
-  // @@protoc_insertion_point(class_scope:Network.TuningSignalWrite)
+  // @@protoc_insertion_point(class_scope:Network.TuningWriteCommand)
  private:
   inline void set_has_signalhash();
   inline void clear_has_signalhash();
@@ -4479,7 +4481,7 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 signalhash_;
-  float value_;
+  ::Network::TuningValue* value_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
@@ -4489,7 +4491,7 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static TuningSignalWrite* default_instance_;
+  static TuningWriteCommand* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -4547,18 +4549,6 @@ class TuningSignalsWrite : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // optional bool autoApply = 2 [default = false];
   inline bool has_autoapply() const;
   inline void clear_autoapply();
@@ -4566,33 +4556,30 @@ class TuningSignalsWrite : public ::google::protobuf::Message {
   inline bool autoapply() const;
   inline void set_autoapply(bool value);
 
-  // repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
-  inline int tuningsignalwrite_size() const;
-  inline void clear_tuningsignalwrite();
-  static const int kTuningSignalWriteFieldNumber = 3;
-  inline const ::Network::TuningSignalWrite& tuningsignalwrite(int index) const;
-  inline ::Network::TuningSignalWrite* mutable_tuningsignalwrite(int index);
-  inline ::Network::TuningSignalWrite* add_tuningsignalwrite();
-  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >&
-      tuningsignalwrite() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >*
-      mutable_tuningsignalwrite();
+  // repeated .Network.TuningWriteCommand commands = 3;
+  inline int commands_size() const;
+  inline void clear_commands();
+  static const int kCommandsFieldNumber = 3;
+  inline const ::Network::TuningWriteCommand& commands(int index) const;
+  inline ::Network::TuningWriteCommand* mutable_commands(int index);
+  inline ::Network::TuningWriteCommand* add_commands();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >&
+      commands() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >*
+      mutable_commands();
 
   // @@protoc_insertion_point(class_scope:Network.TuningSignalsWrite)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
   inline void set_has_autoapply();
   inline void clear_has_autoapply();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
-  ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite > tuningsignalwrite_;
+  ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand > commands_;
   bool autoapply_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -10426,135 +10413,81 @@ TuningSignalsReadReply::mutable_tuningsignalstate() {
 
 // -------------------------------------------------------------------
 
-// TuningSignalWrite
+// TuningWriteCommand
 
 // optional uint64 signalHash = 1 [default = 0];
-inline bool TuningSignalWrite::has_signalhash() const {
+inline bool TuningWriteCommand::has_signalhash() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TuningSignalWrite::set_has_signalhash() {
+inline void TuningWriteCommand::set_has_signalhash() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TuningSignalWrite::clear_has_signalhash() {
+inline void TuningWriteCommand::clear_has_signalhash() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TuningSignalWrite::clear_signalhash() {
+inline void TuningWriteCommand::clear_signalhash() {
   signalhash_ = GOOGLE_ULONGLONG(0);
   clear_has_signalhash();
 }
-inline ::google::protobuf::uint64 TuningSignalWrite::signalhash() const {
+inline ::google::protobuf::uint64 TuningWriteCommand::signalhash() const {
   return signalhash_;
 }
-inline void TuningSignalWrite::set_signalhash(::google::protobuf::uint64 value) {
+inline void TuningWriteCommand::set_signalhash(::google::protobuf::uint64 value) {
   set_has_signalhash();
   signalhash_ = value;
 }
 
-// optional float value = 2 [default = 0];
-inline bool TuningSignalWrite::has_value() const {
+// optional .Network.TuningValue value = 2;
+inline bool TuningWriteCommand::has_value() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TuningSignalWrite::set_has_value() {
+inline void TuningWriteCommand::set_has_value() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TuningSignalWrite::clear_has_value() {
+inline void TuningWriteCommand::clear_has_value() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TuningSignalWrite::clear_value() {
-  value_ = 0;
+inline void TuningWriteCommand::clear_value() {
+  if (value_ != NULL) value_->::Network::TuningValue::Clear();
   clear_has_value();
 }
-inline float TuningSignalWrite::value() const {
+inline const ::Network::TuningValue& TuningWriteCommand::value() const {
+  return value_ != NULL ? *value_ : *default_instance_->value_;
+}
+inline ::Network::TuningValue* TuningWriteCommand::mutable_value() {
+  set_has_value();
+  if (value_ == NULL) value_ = new ::Network::TuningValue;
   return value_;
 }
-inline void TuningSignalWrite::set_value(float value) {
-  set_has_value();
+inline ::Network::TuningValue* TuningWriteCommand::release_value() {
+  clear_has_value();
+  ::Network::TuningValue* temp = value_;
+  value_ = NULL;
+  return temp;
+}
+inline void TuningWriteCommand::set_allocated_value(::Network::TuningValue* value) {
+  delete value_;
   value_ = value;
+  if (value) {
+    set_has_value();
+  } else {
+    clear_has_value();
+  }
 }
 
 // -------------------------------------------------------------------
 
 // TuningSignalsWrite
 
-// optional string clientEquipmentID = 1;
-inline bool TuningSignalsWrite::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void TuningSignalsWrite::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void TuningSignalsWrite::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void TuningSignalsWrite::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
-  }
-  clear_has_clientequipmentid();
-}
-inline const ::std::string& TuningSignalsWrite::clientequipmentid() const {
-  return *clientequipmentid_;
-}
-inline void TuningSignalsWrite::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsWrite::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsWrite::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TuningSignalsWrite::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  return clientequipmentid_;
-}
-inline ::std::string* TuningSignalsWrite::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TuningSignalsWrite::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
-  } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
 // optional bool autoApply = 2 [default = false];
 inline bool TuningSignalsWrite::has_autoapply() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void TuningSignalsWrite::set_has_autoapply() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void TuningSignalsWrite::clear_has_autoapply() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void TuningSignalsWrite::clear_autoapply() {
   autoapply_ = false;
@@ -10568,29 +10501,29 @@ inline void TuningSignalsWrite::set_autoapply(bool value) {
   autoapply_ = value;
 }
 
-// repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
-inline int TuningSignalsWrite::tuningsignalwrite_size() const {
-  return tuningsignalwrite_.size();
+// repeated .Network.TuningWriteCommand commands = 3;
+inline int TuningSignalsWrite::commands_size() const {
+  return commands_.size();
 }
-inline void TuningSignalsWrite::clear_tuningsignalwrite() {
-  tuningsignalwrite_.Clear();
+inline void TuningSignalsWrite::clear_commands() {
+  commands_.Clear();
 }
-inline const ::Network::TuningSignalWrite& TuningSignalsWrite::tuningsignalwrite(int index) const {
-  return tuningsignalwrite_.Get(index);
+inline const ::Network::TuningWriteCommand& TuningSignalsWrite::commands(int index) const {
+  return commands_.Get(index);
 }
-inline ::Network::TuningSignalWrite* TuningSignalsWrite::mutable_tuningsignalwrite(int index) {
-  return tuningsignalwrite_.Mutable(index);
+inline ::Network::TuningWriteCommand* TuningSignalsWrite::mutable_commands(int index) {
+  return commands_.Mutable(index);
 }
-inline ::Network::TuningSignalWrite* TuningSignalsWrite::add_tuningsignalwrite() {
-  return tuningsignalwrite_.Add();
+inline ::Network::TuningWriteCommand* TuningSignalsWrite::add_commands() {
+  return commands_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >&
-TuningSignalsWrite::tuningsignalwrite() const {
-  return tuningsignalwrite_;
+inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >&
+TuningSignalsWrite::commands() const {
+  return commands_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >*
-TuningSignalsWrite::mutable_tuningsignalwrite() {
-  return &tuningsignalwrite_;
+inline ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >*
+TuningSignalsWrite::mutable_commands() {
+  return &commands_;
 }
 
 // -------------------------------------------------------------------

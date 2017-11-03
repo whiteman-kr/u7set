@@ -1,5 +1,24 @@
 #include "../lib/Tuning/TuningTcpClient.h"
 
+
+
+//
+// TuningWriteCommand
+//
+bool TuningWriteCommand::save(Network::TuningWriteCommand* message) const
+{
+	message->set_signalhash(m_hash);
+	m_value.save(message->mutable_value());
+	return true;
+}
+
+bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
+{
+	m_hash = message.signalhash();
+	m_value.load(message.value());
+	return true;
+}
+
 //
 // TuningTcpClient
 //
@@ -71,18 +90,23 @@ bool TuningTcpClient::tuningSourceInfo(quint64 id, TuningSource* result) const
 	return true;
 }
 
-void TuningTcpClient::writeTuningSignals(const std::vector<std::pair<Hash, TuningValue>>& data)
+void TuningTcpClient::writeTuningSignal(const TuningWriteCommand& data)
+{
+	std::vector<TuningWriteCommand> toVector;
+	toVector.push_back(data);
+
+	return writeTuningSignal(toVector);
+}
+
+void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& data)
 {
 	QMutexLocker l(&m_writeQueueMutex);
 
-	for (const std::pair<Hash, TuningValue>& pair : data)
+	for (const TuningWriteCommand& command : data)
 	{
-		const Hash& hash = pair.first;
-		const TuningValue& value = pair.second;
-
 		// Push command to the queue
 		//
-		m_writeQueue.emplace(hash, value);
+		m_writeQueue.emplace(command);
 	}
 
 	return;
@@ -197,13 +221,16 @@ void TuningTcpClient::resetToProcessTuningSignals()
 
 	if (writeQueueEmpty == false)
 	{
+		// Write request
+		//
 		requestWriteTuningSignals();
-		return;
 	}
-
-	// Request states
-	//
-	requestReadTuningSignals();
+	else
+	{
+		// Request states
+		//
+		requestReadTuningSignals();
+	}
 
 	return;
 }
@@ -338,7 +365,7 @@ void TuningTcpClient::requestReadTuningSignals()
 
 	// Determine the amount of signals needed to be requested
 	//
-	m_readTuningSignalCount = TDS_TUNING_MAX_STATES;
+	m_readTuningSignalCount = TDS_TUNING_MAX_READ_STATES;
 
 	if (m_readTuningSignalIndex >= signalCount - 1)
 	{
@@ -437,69 +464,48 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 void TuningTcpClient::requestWriteTuningSignals()
 {
-	QMutexLocker l(&m_statesMutex);
-
-	// determine the amount of signals needed to be written
-	//
-
-	const int WRITE_TUNING_SIGNALS_MAX = 100;
-
-	int writeTuningSignalCount = WRITE_TUNING_SIGNALS_MAX;
-
-	if (writeTuningSignalCount >= m_writeQueue.size())
-	{
-		writeTuningSignalCount = static_cast<int>(m_writeQueue.size());
-	}
-
-	// create the request
-	//
-
 	assert(isClearToSendRequest());
 
-	m_writeTuningSignals.set_autoapply(true);
-
-	m_writeTuningSignals.mutable_tuningsignalwrite()->Reserve(WRITE_TUNING_SIGNALS_MAX);
-
-	m_writeTuningSignals.mutable_tuningsignalwrite()->Clear();
-
-	for (int i = 0; i < writeTuningSignalCount; i++)
 	{
-		if (m_writeQueue.empty() == true)
+		QMutexLocker l(&m_writeQueueMutex);
+
+		// Determine the amount of signals required to be written
+		//
+		int writeTuningSignalCount = TDS_TUNING_MAX_WRITE_RECORDS;
+
+		if (writeTuningSignalCount >= m_writeQueue.size())
 		{
-			assert(false);
-			break;
+			writeTuningSignalCount = static_cast<int>(m_writeQueue.size());
 		}
 
-		const WriteCommand& cmd = m_writeQueue.front();
+		// Create the request
+		//
+		m_writeTuningSignals.Clear();
 
-		::Network::TuningSignalWrite* wrCmd = new ::Network::TuningSignalWrite();
+		m_writeTuningSignals.set_autoapply(true);
+		m_writeTuningSignals.mutable_commands()->Reserve(writeTuningSignalCount);
 
-		wrCmd->set_value(cmd.m_value);
-		wrCmd->set_signalhash(cmd.m_hash);
+		for (int i = 0; i < writeTuningSignalCount; i++)
+		{
+			if (m_writeQueue.empty() == true)
+			{
+				assert(false);
+				break;
+			}
 
-		m_writeTuningSignals.mutable_tuningsignalwrite()->AddAllocated(wrCmd);
+			const TuningWriteCommand& cmd = m_writeQueue.front();
 
-		m_writeQueue.pop();
+			::Network::TuningWriteCommand* protoCommand = m_writeTuningSignals.mutable_commands()->Add();
+			cmd.save(protoCommand);
+
+			m_writeQueue.pop();
+		}
 	}
 
-	l.unlock();
-
-	//int s = m_writeTuningSignals.mutable_tuningsignalwrite()->size();
-	//int c = m_writeTuningSignals.mutable_tuningsignalwrite()->Capacity();
-
-	//qDebug()<<s;
-	//qDebug()<<c;
-
 	sendRequest(TDS_TUNING_SIGNALS_WRITE, m_writeTuningSignals);
+
+	return;
 }
-
-
-
-
-
-
-
-
 
 void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 {
@@ -538,11 +544,13 @@ void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 	}
 
 	resetToProcessTuningSignals();
+
+	return;
 }
 
 void TuningTcpClient::slot_serversArrived(HostAddressPort address1, HostAddressPort address2)
 {
-	writeLogMessage(tr("TcpTuningClient::slot_configurationArrived"));
+	writeLogMessage(tr("TuningTcpClient::slot_configurationArrived"));
 
 	setServers(address1, address2, true);
 

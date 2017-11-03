@@ -23,11 +23,19 @@ struct TuningWriteCommand
 	Hash m_hash = 0;
 	TuningValue m_value;
 
+	TuningWriteCommand(const QString& appSignalId, const TuningValue& value) :
+		TuningWriteCommand(::calcHash(appSignalId), value)
+	{
+	}
+
 	TuningWriteCommand(Hash hash, const TuningValue& value)
 	{
 		m_hash = hash;
 		m_value = value;
 	}
+
+	bool save(Network::TuningWriteCommand* message) const;
+	bool load(const Network::TuningWriteCommand& message);
 };
 
 
@@ -56,7 +64,8 @@ public:
 
 	// Writing states
 	//
-	void writeTuningSignals(const std::vector<std::pair<Hash, TuningValue>>& data);
+	void writeTuningSignal(const TuningWriteCommand& data);
+	void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
 
 private:
 	virtual void onClientThreadStarted() override;

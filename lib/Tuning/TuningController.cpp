@@ -1,55 +1,50 @@
 #include "TuningController.h"
 #include "../lib/AppSignal.h"
-#include "../lib/Tuning/TuningSignalState.h"
+#include "../lib/Tuning/TuningSignalManager.h"
+#include "../lib/Tuning/TuningTcpClient.h"
 
 
-AppSignalParam TuningController::signalParam(const QString& appSignalID, bool* ok)
+TuningController::TuningController(TuningSignalManager* signalManager, TuningTcpClient* tcpClient) :
+	m_signalManager(signalManager),
+	m_tcpClient(tcpClient)
 {
-	bool result = true;
+	assert(m_signalManager);
+	assert(m_tcpClient);
 
-	AppSignalParam signal;
+	return;
+}
 
-	emit signal_getParam(appSignalID, &signal, &result);
-
-	if (ok != nullptr)
+AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok)
+{
+	if (m_signalManager == nullptr ||
+		ok == nullptr)
 	{
-		*ok = result;
-	}
-
-	if (result == false)
-	{
+		assert(m_signalManager);
+		assert(ok);
 		return AppSignalParam();
 	}
 
-	return signal;
+	return m_signalManager->signalParam(appSignalId, ok);
 }
 
-TuningSignalState TuningController::signalState(const QString& appSignalID, bool* ok)
+TuningSignalState TuningController::signalState(const QString& appSignalId, bool* ok)
 {
-	bool result = true;
-
-	TuningSignalState state;
-
-	emit signal_getState(appSignalID, &state, &result);
-
-	if (ok != nullptr)
+	if (m_signalManager == nullptr ||
+		ok == nullptr)
 	{
-		*ok = result;
-	}
-
-	if (result == false)
-	{
+		assert(m_signalManager);
+		assert(ok);
 		return TuningSignalState();
 	}
 
-	return state;
+	return m_signalManager->state(appSignalId, ok);
 }
 
-QVariant TuningController::signalParam(const QString& appSignalID)
+QVariant TuningController::signalParam(const QString& appSignalId)
 {
 	bool ok = true;
 
-	QVariant result = QVariant::fromValue(signalParam(appSignalID, &ok));
+	QVariant result = QVariant::fromValue(signalParam(appSignalId, &ok));
 
 	if (ok == false)
 	{
@@ -59,11 +54,11 @@ QVariant TuningController::signalParam(const QString& appSignalID)
 	return result;
 }
 
-QVariant TuningController::signalState(const QString& appSignalID)
+QVariant TuningController::signalState(const QString& appSignalId)
 {
 	bool ok = true;
 
-	QVariant result = QVariant::fromValue(signalState(appSignalID, &ok));
+	QVariant result = QVariant::fromValue(signalState(appSignalId, &ok));
 
 	if (ok == false)
 	{
@@ -73,16 +68,52 @@ QVariant TuningController::signalState(const QString& appSignalID)
 	return result;
 }
 
-bool TuningController::writeValue(QString appSignalID, float value)
+bool TuningController::writeValue(QString appSignalId, double value)
 {
-	bool ok = true;
+	if (m_tcpClient == nullptr)
+	{
+		assert(m_tcpClient);
+		return false;
+	}
 
-	emit signal_writeValue(appSignalID, value, &ok);
+	if (m_tcpClient->isConnected() == false)
+	{
+		return false;
+	}
+
+	appSignalId = appSignalId.trimmed();
+
+	bool ok = false;
+	AppSignalParam appSignal = signalParam(appSignalId, &ok);
 
 	if (ok == false)
 	{
 		return false;
 	}
+
+	TuningValue tuningValue;
+
+	tuningValue.type = appSignal.toTuningType();
+
+	switch (tuningValue.type)
+	{
+	case TuningValueType::Discrete:
+		tuningValue.intValue = static_cast<int>(value);
+		break;
+	case TuningValueType::Float:
+		tuningValue.floatValue = static_cast<float>(value);
+		break;
+	case TuningValueType::SignedInteger:
+		tuningValue.intValue = static_cast<qint32>(value);
+		break;
+	default:
+		assert(false);
+		return false;
+	}
+
+	TuningWriteCommand cmd(appSignalId, tuningValue);
+
+	m_tcpClient->writeTuningSignal(cmd);
 
 	return true;
 }

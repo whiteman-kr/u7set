@@ -362,17 +362,16 @@ message TuningSignalsReadReply
 
 // Write tuning signals request
 
-message TuningSignalWrite
+message TuningWriteCommand
 {
     optional uint64 signalHash = 1 [default = 0];
-    optional float value = 2 [default = 0.0];
+	optional TuningValue value = 2;
 }
 
 message TuningSignalsWrite
 {
-    optional string clientEquipmentID = 1;
     optional bool autoApply = 2 [default = false];
-    repeated TuningSignalWrite tuningSignalWrite = 3;
+	repeated TuningWriteCommand commands = 3;
 }
 
 message TuningSignalWriteResult

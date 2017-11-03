@@ -139,9 +139,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* TuningSignalsReadReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   TuningSignalsReadReply_reflection_ = NULL;
-const ::google::protobuf::Descriptor* TuningSignalWrite_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* TuningWriteCommand_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  TuningSignalWrite_reflection_ = NULL;
+  TuningWriteCommand_reflection_ = NULL;
 const ::google::protobuf::Descriptor* TuningSignalsWrite_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   TuningSignalsWrite_reflection_ = NULL;
@@ -853,27 +853,26 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsReadReply));
-  TuningSignalWrite_descriptor_ = file->message_type(36);
-  static const int TuningSignalWrite_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalWrite, signalhash_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalWrite, value_),
+  TuningWriteCommand_descriptor_ = file->message_type(36);
+  static const int TuningWriteCommand_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningWriteCommand, signalhash_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningWriteCommand, value_),
   };
-  TuningSignalWrite_reflection_ =
+  TuningWriteCommand_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      TuningSignalWrite_descriptor_,
-      TuningSignalWrite::default_instance_,
-      TuningSignalWrite_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalWrite, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalWrite, _unknown_fields_),
+      TuningWriteCommand_descriptor_,
+      TuningWriteCommand::default_instance_,
+      TuningWriteCommand_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningWriteCommand, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningWriteCommand, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(TuningSignalWrite));
+      sizeof(TuningWriteCommand));
   TuningSignalsWrite_descriptor_ = file->message_type(37);
-  static const int TuningSignalsWrite_offsets_[3] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWrite, clientequipmentid_),
+  static const int TuningSignalsWrite_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWrite, autoapply_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWrite, tuningsignalwrite_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWrite, commands_),
   };
   TuningSignalsWrite_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1174,7 +1173,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     TuningSignalsReadReply_descriptor_, &TuningSignalsReadReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    TuningSignalWrite_descriptor_, &TuningSignalWrite::default_instance());
+    TuningWriteCommand_descriptor_, &TuningWriteCommand::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     TuningSignalsWrite_descriptor_, &TuningSignalsWrite::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1278,8 +1277,8 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete TuningSignalState_reflection_;
   delete TuningSignalsReadReply::default_instance_;
   delete TuningSignalsReadReply_reflection_;
-  delete TuningSignalWrite::default_instance_;
-  delete TuningSignalWrite_reflection_;
+  delete TuningWriteCommand::default_instance_;
+  delete TuningWriteCommand_reflection_;
   delete TuningSignalsWrite::default_instance_;
   delete TuningSignalsWrite_reflection_;
   delete TuningSignalWriteResult::default_instance_;
@@ -1440,45 +1439,45 @@ void protobuf_AddDesc_network_2eproto() {
     "riteErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t "
     "\001(\006:\0010\"a\n\026TuningSignalsReadReply\022\020\n\005erro"
     "r\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003(\0132\032."
-    "Network.TuningSignalState\"<\n\021TuningSigna"
-    "lWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005value\030\002"
-    " \001(\002:\0010\"\200\001\n\022TuningSignalsWrite\022\031\n\021client"
-    "EquipmentID\030\001 \001(\t\022\030\n\tautoApply\030\002 \001(\010:\005fa"
-    "lse\0225\n\021tuningSignalWrite\030\003 \003(\0132\032.Network"
-    ".TuningSignalWrite\"B\n\027TuningSignalWriteR"
-    "esult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 "
-    "\001(\005:\0010\"b\n\027TuningSignalsWriteReply\022\020\n\005err"
-    "or\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132 .Netwo"
-    "rk.TuningSignalWriteResult\"/\n\022TuningSign"
-    "alsApply\022\031\n\021clientEquipmentID\030\001 \001(\t\"+\n\027T"
-    "uningSignalsApplyReply\022\020\n\005error\030\001 \001(\005:\0010"
-    "\"q\n$SaveAppSignalsStatesToArchiveRequest"
-    "\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n\017appSignal"
-    "States\030\002 \003(\0132\025.Proto.AppSignalState\"N\n\"S"
-    "aveAppSignalsStatesToArchiveReply\022\020\n\005err"
-    "or\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n)"
-    "GetAppSignalStatesFromArchiveStartReques"
-    "t\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010timeType"
-    "\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTi"
-    "me\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016rem"
-    "ovePeriodic\030\006 \001(\010:\004true\"~\n\'GetAppSignalS"
-    "tatesFromArchiveStartReply\022\020\n\005error\030\001 \001("
-    "\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorStr"
-    "ing\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(GetAp"
-    "pSignalStatesFromArchiveNextRequest\022\024\n\tr"
-    "equestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalStates"
-    "FromArchiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\026"
-    "\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001("
-    "\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdataReady\030\004"
-    " \001(\010:\005false\022\033\n\020totalStatesCount\030\005 \001(\005:\0010"
-    "\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021statesIn"
-    "PartCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:\005"
-    "false\022.\n\017appSignalStates\030\t \003(\0132\025.Proto.A"
-    "ppSignalState\"B\n*GetAppSignalStatesFromA"
-    "rchiveCancelRequest\022\024\n\trequestID\030\001 \001(\r:\001"
-    "0\"i\n(GetAppSignalStatesFromArchiveCancel"
-    "Reply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001"
-    "(\005:\003100\022\023\n\013errorString\030\003 \001(\t", 6508);
+    "Network.TuningSignalState\"P\n\022TuningWrite"
+    "Command\022\025\n\nsignalHash\030\001 \001(\004:\0010\022#\n\005value\030"
+    "\002 \001(\0132\024.Network.TuningValue\"]\n\022TuningSig"
+    "nalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005false\022-\n\010c"
+    "ommands\030\003 \003(\0132\033.Network.TuningWriteComma"
+    "nd\"B\n\027TuningSignalWriteResult\022\025\n\nsignalH"
+    "ash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027Tuning"
+    "SignalsWriteReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013w"
+    "riteResult\030\002 \003(\0132 .Network.TuningSignalW"
+    "riteResult\"/\n\022TuningSignalsApply\022\031\n\021clie"
+    "ntEquipmentID\030\001 \001(\t\"+\n\027TuningSignalsAppl"
+    "yReply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSigna"
+    "lsStatesToArchiveRequest\022\031\n\021clientEquipm"
+    "entID\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.P"
+    "roto.AppSignalState\"N\n\"SaveAppSignalsSta"
+    "tesToArchiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\ta"
+    "rchError\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStat"
+    "esFromArchiveStartRequest\022\031\n\021clientEquip"
+    "mentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tsta"
+    "rtTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014s"
+    "ignalHashes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001("
+    "\010:\004true\"~\n\'GetAppSignalStatesFromArchive"
+    "StartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchErro"
+    "r\030\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\treq"
+    "uestID\030\003 \001(\r:\0010\"@\n(GetAppSignalStatesFro"
+    "mArchiveNextRequest\022\024\n\trequestID\030\001 \001(\r:\001"
+    "0\"\271\002\n&GetAppSignalStatesFromArchiveNextR"
+    "eply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001("
+    "\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorStr"
+    "ing\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020t"
+    "otalStatesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCo"
+    "unt\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:"
+    "\0010\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017appSign"
+    "alStates\030\t \003(\0132\025.Proto.AppSignalState\"B\n"
+    "*GetAppSignalStatesFromArchiveCancelRequ"
+    "est\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAppSigna"
+    "lStatesFromArchiveCancelReply\022\020\n\005error\030\001"
+    " \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013error"
+    "String\030\003 \001(\t", 6492);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -1517,7 +1516,7 @@ void protobuf_AddDesc_network_2eproto() {
   TuningValue::default_instance_ = new TuningValue();
   TuningSignalState::default_instance_ = new TuningSignalState();
   TuningSignalsReadReply::default_instance_ = new TuningSignalsReadReply();
-  TuningSignalWrite::default_instance_ = new TuningSignalWrite();
+  TuningWriteCommand::default_instance_ = new TuningWriteCommand();
   TuningSignalsWrite::default_instance_ = new TuningSignalsWrite();
   TuningSignalWriteResult::default_instance_ = new TuningSignalWriteResult();
   TuningSignalsWriteReply::default_instance_ = new TuningSignalsWriteReply();
@@ -1567,7 +1566,7 @@ void protobuf_AddDesc_network_2eproto() {
   TuningValue::default_instance_->InitAsDefaultInstance();
   TuningSignalState::default_instance_->InitAsDefaultInstance();
   TuningSignalsReadReply::default_instance_->InitAsDefaultInstance();
-  TuningSignalWrite::default_instance_->InitAsDefaultInstance();
+  TuningWriteCommand::default_instance_->InitAsDefaultInstance();
   TuningSignalsWrite::default_instance_->InitAsDefaultInstance();
   TuningSignalWriteResult::default_instance_->InitAsDefaultInstance();
   TuningSignalsWriteReply::default_instance_->InitAsDefaultInstance();
@@ -14262,71 +14261,75 @@ void TuningSignalsReadReply::Swap(TuningSignalsReadReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TuningSignalWrite::kSignalHashFieldNumber;
-const int TuningSignalWrite::kValueFieldNumber;
+const int TuningWriteCommand::kSignalHashFieldNumber;
+const int TuningWriteCommand::kValueFieldNumber;
 #endif  // !_MSC_VER
 
-TuningSignalWrite::TuningSignalWrite()
+TuningWriteCommand::TuningWriteCommand()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void TuningSignalWrite::InitAsDefaultInstance() {
+void TuningWriteCommand::InitAsDefaultInstance() {
+  value_ = const_cast< ::Network::TuningValue*>(&::Network::TuningValue::default_instance());
 }
 
-TuningSignalWrite::TuningSignalWrite(const TuningSignalWrite& from)
+TuningWriteCommand::TuningWriteCommand(const TuningWriteCommand& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void TuningSignalWrite::SharedCtor() {
+void TuningWriteCommand::SharedCtor() {
   _cached_size_ = 0;
   signalhash_ = GOOGLE_ULONGLONG(0);
-  value_ = 0;
+  value_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-TuningSignalWrite::~TuningSignalWrite() {
+TuningWriteCommand::~TuningWriteCommand() {
   SharedDtor();
 }
 
-void TuningSignalWrite::SharedDtor() {
+void TuningWriteCommand::SharedDtor() {
   if (this != default_instance_) {
+    delete value_;
   }
 }
 
-void TuningSignalWrite::SetCachedSize(int size) const {
+void TuningWriteCommand::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* TuningSignalWrite::descriptor() {
+const ::google::protobuf::Descriptor* TuningWriteCommand::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return TuningSignalWrite_descriptor_;
+  return TuningWriteCommand_descriptor_;
 }
 
-const TuningSignalWrite& TuningSignalWrite::default_instance() {
+const TuningWriteCommand& TuningWriteCommand::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
   return *default_instance_;
 }
 
-TuningSignalWrite* TuningSignalWrite::default_instance_ = NULL;
+TuningWriteCommand* TuningWriteCommand::default_instance_ = NULL;
 
-TuningSignalWrite* TuningSignalWrite::New() const {
-  return new TuningSignalWrite;
+TuningWriteCommand* TuningWriteCommand::New() const {
+  return new TuningWriteCommand;
 }
 
-void TuningSignalWrite::Clear() {
+void TuningWriteCommand::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     signalhash_ = GOOGLE_ULONGLONG(0);
-    value_ = 0;
+    if (has_value()) {
+      if (value_ != NULL) value_->::Network::TuningValue::Clear();
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
-bool TuningSignalWrite::MergePartialFromCodedStream(
+bool TuningWriteCommand::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -14343,19 +14346,17 @@ bool TuningSignalWrite::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(21)) goto parse_value;
+        if (input->ExpectTag(18)) goto parse_value;
         break;
       }
 
-      // optional float value = 2 [default = 0];
+      // optional .Network.TuningValue value = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_value:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
-                 input, &value_)));
-          set_has_value();
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_value()));
         } else {
           goto handle_uninterpreted;
         }
@@ -14379,16 +14380,17 @@ bool TuningSignalWrite::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void TuningSignalWrite::SerializeWithCachedSizes(
+void TuningWriteCommand::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // optional uint64 signalHash = 1 [default = 0];
   if (has_signalhash()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->signalhash(), output);
   }
 
-  // optional float value = 2 [default = 0];
+  // optional .Network.TuningValue value = 2;
   if (has_value()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(2, this->value(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->value(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -14397,16 +14399,18 @@ void TuningSignalWrite::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* TuningSignalWrite::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* TuningWriteCommand::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // optional uint64 signalHash = 1 [default = 0];
   if (has_signalhash()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->signalhash(), target);
   }
 
-  // optional float value = 2 [default = 0];
+  // optional .Network.TuningValue value = 2;
   if (has_value()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(2, this->value(), target);
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->value(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -14416,7 +14420,7 @@ void TuningSignalWrite::SerializeWithCachedSizes(
   return target;
 }
 
-int TuningSignalWrite::ByteSize() const {
+int TuningWriteCommand::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -14427,9 +14431,11 @@ int TuningSignalWrite::ByteSize() const {
           this->signalhash());
     }
 
-    // optional float value = 2 [default = 0];
+    // optional .Network.TuningValue value = 2;
     if (has_value()) {
-      total_size += 1 + 4;
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->value());
     }
 
   }
@@ -14444,10 +14450,10 @@ int TuningSignalWrite::ByteSize() const {
   return total_size;
 }
 
-void TuningSignalWrite::MergeFrom(const ::google::protobuf::Message& from) {
+void TuningWriteCommand::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const TuningSignalWrite* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const TuningSignalWrite*>(
+  const TuningWriteCommand* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TuningWriteCommand*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -14456,37 +14462,37 @@ void TuningSignalWrite::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void TuningSignalWrite::MergeFrom(const TuningSignalWrite& from) {
+void TuningWriteCommand::MergeFrom(const TuningWriteCommand& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_signalhash()) {
       set_signalhash(from.signalhash());
     }
     if (from.has_value()) {
-      set_value(from.value());
+      mutable_value()->::Network::TuningValue::MergeFrom(from.value());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void TuningSignalWrite::CopyFrom(const ::google::protobuf::Message& from) {
+void TuningWriteCommand::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void TuningSignalWrite::CopyFrom(const TuningSignalWrite& from) {
+void TuningWriteCommand::CopyFrom(const TuningWriteCommand& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool TuningSignalWrite::IsInitialized() const {
+bool TuningWriteCommand::IsInitialized() const {
 
   return true;
 }
 
-void TuningSignalWrite::Swap(TuningSignalWrite* other) {
+void TuningWriteCommand::Swap(TuningWriteCommand* other) {
   if (other != this) {
     std::swap(signalhash_, other->signalhash_);
     std::swap(value_, other->value_);
@@ -14496,11 +14502,11 @@ void TuningSignalWrite::Swap(TuningSignalWrite* other) {
   }
 }
 
-::google::protobuf::Metadata TuningSignalWrite::GetMetadata() const {
+::google::protobuf::Metadata TuningWriteCommand::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = TuningSignalWrite_descriptor_;
-  metadata.reflection = TuningSignalWrite_reflection_;
+  metadata.descriptor = TuningWriteCommand_descriptor_;
+  metadata.reflection = TuningWriteCommand_reflection_;
   return metadata;
 }
 
@@ -14508,9 +14514,8 @@ void TuningSignalWrite::Swap(TuningSignalWrite* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TuningSignalsWrite::kClientEquipmentIDFieldNumber;
 const int TuningSignalsWrite::kAutoApplyFieldNumber;
-const int TuningSignalsWrite::kTuningSignalWriteFieldNumber;
+const int TuningSignalsWrite::kCommandsFieldNumber;
 #endif  // !_MSC_VER
 
 TuningSignalsWrite::TuningSignalsWrite()
@@ -14529,7 +14534,6 @@ TuningSignalsWrite::TuningSignalsWrite(const TuningSignalsWrite& from)
 
 void TuningSignalsWrite::SharedCtor() {
   _cached_size_ = 0;
-  clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   autoapply_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -14539,9 +14543,6 @@ TuningSignalsWrite::~TuningSignalsWrite() {
 }
 
 void TuningSignalsWrite::SharedDtor() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
   if (this != default_instance_) {
   }
 }
@@ -14569,14 +14570,9 @@ TuningSignalsWrite* TuningSignalsWrite::New() const {
 
 void TuningSignalsWrite::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_clientequipmentid()) {
-      if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-        clientequipmentid_->clear();
-      }
-    }
     autoapply_ = false;
   }
-  tuningsignalwrite_.Clear();
+  commands_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -14587,27 +14583,10 @@ bool TuningSignalsWrite::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string clientEquipmentID = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_clientequipmentid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->clientequipmentid().data(), this->clientequipmentid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(16)) goto parse_autoApply;
-        break;
-      }
-
       // optional bool autoApply = 2 [default = false];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_autoApply:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
                  input, &autoapply_)));
@@ -14615,21 +14594,21 @@ bool TuningSignalsWrite::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_tuningSignalWrite;
+        if (input->ExpectTag(26)) goto parse_commands;
         break;
       }
 
-      // repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
+      // repeated .Network.TuningWriteCommand commands = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_tuningSignalWrite:
+         parse_commands:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_tuningsignalwrite()));
+                input, add_commands()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_tuningSignalWrite;
+        if (input->ExpectTag(26)) goto parse_commands;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -14652,24 +14631,15 @@ bool TuningSignalsWrite::MergePartialFromCodedStream(
 
 void TuningSignalsWrite::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      1, this->clientequipmentid(), output);
-  }
-
   // optional bool autoApply = 2 [default = false];
   if (has_autoapply()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->autoapply(), output);
   }
 
-  // repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
-  for (int i = 0; i < this->tuningsignalwrite_size(); i++) {
+  // repeated .Network.TuningWriteCommand commands = 3;
+  for (int i = 0; i < this->commands_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->tuningsignalwrite(i), output);
+      3, this->commands(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -14680,26 +14650,16 @@ void TuningSignalsWrite::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* TuningSignalsWrite::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional string clientEquipmentID = 1;
-  if (has_clientequipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->clientequipmentid().data(), this->clientequipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->clientequipmentid(), target);
-  }
-
   // optional bool autoApply = 2 [default = false];
   if (has_autoapply()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->autoapply(), target);
   }
 
-  // repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
-  for (int i = 0; i < this->tuningsignalwrite_size(); i++) {
+  // repeated .Network.TuningWriteCommand commands = 3;
+  for (int i = 0; i < this->commands_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        3, this->tuningsignalwrite(i), target);
+        3, this->commands(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -14713,25 +14673,18 @@ int TuningSignalsWrite::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional string clientEquipmentID = 1;
-    if (has_clientequipmentid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->clientequipmentid());
-    }
-
     // optional bool autoApply = 2 [default = false];
     if (has_autoapply()) {
       total_size += 1 + 1;
     }
 
   }
-  // repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
-  total_size += 1 * this->tuningsignalwrite_size();
-  for (int i = 0; i < this->tuningsignalwrite_size(); i++) {
+  // repeated .Network.TuningWriteCommand commands = 3;
+  total_size += 1 * this->commands_size();
+  for (int i = 0; i < this->commands_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->tuningsignalwrite(i));
+        this->commands(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -14759,11 +14712,8 @@ void TuningSignalsWrite::MergeFrom(const ::google::protobuf::Message& from) {
 
 void TuningSignalsWrite::MergeFrom(const TuningSignalsWrite& from) {
   GOOGLE_CHECK_NE(&from, this);
-  tuningsignalwrite_.MergeFrom(from.tuningsignalwrite_);
+  commands_.MergeFrom(from.commands_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_clientequipmentid()) {
-      set_clientequipmentid(from.clientequipmentid());
-    }
     if (from.has_autoapply()) {
       set_autoapply(from.autoapply());
     }
@@ -14790,9 +14740,8 @@ bool TuningSignalsWrite::IsInitialized() const {
 
 void TuningSignalsWrite::Swap(TuningSignalsWrite* other) {
   if (other != this) {
-    std::swap(clientequipmentid_, other->clientequipmentid_);
     std::swap(autoapply_, other->autoapply_);
-    tuningsignalwrite_.Swap(&other->tuningsignalwrite_);
+    commands_.Swap(&other->commands_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

@@ -364,6 +364,36 @@ void AppSignalParam::setType(E::SignalType value)
 	m_signalType = value;
 }
 
+TuningValueType AppSignalParam::toTuningType() const
+{
+	switch (m_signalType)
+	{
+	case E::Analog:
+		switch (m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			return TuningValueType::Float;
+		case E::AnalogAppSignalFormat::SignedInt32:
+			return TuningValueType::SignedInteger;
+		default:
+			assert(false);
+			// Unsupported tuning signal type
+			//
+		}
+		return TuningValueType::Discrete;
+
+	case E::Discrete:
+		return TuningValueType::Discrete;
+
+	default:
+		// Unsupported tuning signal type
+		//
+		assert(false);
+	}
+
+	return TuningValueType::Discrete;
+}
+
 E::AnalogAppSignalFormat AppSignalParam::analogSignalFormat() const
 {
 	return m_analogSignalFormat;

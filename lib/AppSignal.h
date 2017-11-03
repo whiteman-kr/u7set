@@ -5,6 +5,7 @@
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
 #include "../lib/TimeStamp.h"
+#include "../lib/Tuning/TuningSignalState.h"
 #include "Types.cpp"
 #include "Types.h"
 
@@ -174,6 +175,8 @@ public:
 	Q_INVOKABLE bool isDiscrete() const;
 	E::SignalType type() const;
 	void setType(E::SignalType value);
+
+	TuningValueType toTuningType() const;
 
 	E::AnalogAppSignalFormat analogSignalFormat() const;
 	void setAnalogSignalFormat(E::AnalogAppSignalFormat value);
