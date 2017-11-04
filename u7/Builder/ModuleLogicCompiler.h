@@ -145,6 +145,8 @@ namespace Builder
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
 		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
 
+		bool appendRefPinToSignal(UalItem* ualItem, UalSignal* ualSignal);
+
 		bool appendUalSignals();
 		bool appendSignalsFromAppItems();
 

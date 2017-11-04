@@ -873,6 +873,33 @@ namespace Builder
 
 		bool result = true;
 
+		UalSignal* ualSignal = m_ualSignals.get(signalID);
+
+		if (ualSignal != nullptr)
+		{
+			result = appendRefPinToSignal(ualItem, ualSignal);
+
+			if (result = false)
+			{
+				return false;
+			}
+
+			if (ualItem->outputs().size() > 0)
+			{
+				if (ualItem->outputs().size() == 1)
+				{
+					result = linkConnectedItems(ualItem, ualItem->outputs()[0], ualSignal);
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR(m_log);			// number of signal's outputs more then 1
+					result = false;
+				}
+			}
+
+			return result;
+		}
+
 		// Only Input and Tuningable signals really can generate UalSignal
 
 		if (s->isInput() == false && s->enableTuning() == false)
@@ -909,7 +936,7 @@ namespace Builder
 
 		const LogicPin& outPin = ualItem->outputs()[0];
 
-		UalSignal* ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
+		ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
 
 		if (ualSignal == nullptr)
 		{
@@ -1849,6 +1876,43 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::appendRefPinToSignal(UalItem* ualItem, UalSignal* ualSignal)
+	{
+		bool result = true;
+
+		for(const LogicPin& inPin : ualItem->inputs())
+		{
+			UalSignal* existsSignal = m_ualSignals.get(inPin.guid());
+
+			if (existsSignal != nullptr && existsSignal != ualSignal)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+			else
+			{
+				m_ualSignals.appendRefPin(ualItem, inPin.guid(), ualSignal);
+			}
+		}
+
+		for(const LogicPin& outPin : ualItem->inputs())
+		{
+			UalSignal* existsSignal = m_ualSignals.get(outPin.guid());
+
+			if (existsSignal != nullptr && existsSignal != ualSignal)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+			else
+			{
+				m_ualSignals.appendRefPin(ualItem, outPin.guid(), ualSignal);
+			}
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::appendUalSignals()
