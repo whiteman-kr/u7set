@@ -1056,7 +1056,8 @@ namespace Builder
 		//
 		m_autoSignalPtr->resetAddresses();
 
-		m_autoSignalPtr->setEquipmentID(lmEquipmentID);			// associate new signal with current lm
+		m_autoSignalPtr->setEquipmentID(lmEquipmentID);						// associate new signal with current lm
+		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
 		m_autoSignalPtr->setAcquire(false);
 
 		appendRefSignal(m_autoSignalPtr, true);
@@ -1674,6 +1675,16 @@ namespace Builder
 		return QString();
 	}
 
+	QString UalSignal::ualItemLabel() const
+	{
+		if (m_ualItem != nullptr)
+		{
+			return m_ualItem->label();
+		}
+
+		return QString();
+	}
+
 	bool UalSignal::appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr)
@@ -2034,7 +2045,6 @@ namespace Builder
 		{
 			if (existsSignal == ualSignal)
 			{
-				assert(false);						// is not an error, but why?
 				return true;
 			}
 

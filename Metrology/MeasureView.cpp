@@ -187,38 +187,45 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 		return result;
 	}
 
-	switch(m_measureType)
+	if (column == MVC_CMN_L_ERROR)
 	{
-		case MEASURE_TYPE_LINEARITY:
-			{
-				LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
-				if (pLinearityMeasurement == nullptr)
+		switch(m_measureType)
+		{
+			case MEASURE_TYPE_LINEARITY:
 				{
-					break;
-				}
+					LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
+					if (pLinearityMeasurement == nullptr)
+					{
+						break;
+					}
 
-				int errorType = theOptions.linearity().errorType();
-				if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
-				{
-					break;
-				}
+					int errorType = theOptions.linearity().errorType();
+					if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
+					{
+						break;
+					}
 
-				if (column == MVC_CMN_L_ERROR)
-				{
-					if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_PHYSICAL, errorType))
+					int showErrorFromLimit = theOptions.linearity().showErrorFromLimit();
+					if (showErrorFromLimit < 0 || showErrorFromLimit >= MEASURE_LIMIT_TYPE_COUNT)
+					{
+						break;
+					}
+
+					if (pLinearityMeasurement->error(showErrorFromLimit, errorType) > pLinearityMeasurement->errorLimit(showErrorFromLimit, errorType))
 					{
 						result = theOptions.measureView().colorErrorLimit();
 					}
+
 				}
-			}
-			break;
+				break;
 
-		case MEASURE_TYPE_COMPARATOR:
+			case MEASURE_TYPE_COMPARATOR:
 
-			break;
+				break;
 
-		default:
-			assert(0);
+			default:
+				assert(0);
+		}
 	}
 
 	return result;
@@ -289,15 +296,6 @@ QString MeasureTable::textLinearity(int row, int column) const
 		detailLimitType = MEASURE_LIMIT_TYPE_PHYSICAL;
 	}
 
-	int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
-
-	switch(theOptions.linearity().showInputErrorType())
-	{
-		case LO_SHOW_INPUT_ERROR_ELECTRIC:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
-		case LO_SHOW_INPUT_ERROR_PHYSICAL:	limitType = MEASURE_LIMIT_TYPE_PHYSICAL;	break;
-		default:							assert(0);
-	}
-
 	QString result;
 
 	switch(column)
@@ -351,8 +349,8 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_SD:						result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_SD), 10, 2); break;
 		case MVC_CMN_L_BORDER:					result = tr("± ") + QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER), 10, 2); break;
 
-		case MVC_CMN_L_ERROR:					result = m->errorStr(limitType); break;
-		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(limitType); break;
+		case MVC_CMN_L_ERROR:					result = m->errorStr(theOptions.linearity().showErrorFromLimit()); break;
+		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(theOptions.linearity().showErrorFromLimit()); break;
 
 		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTime().toString("dd-MM-yyyy hh:mm:ss"); break;
 

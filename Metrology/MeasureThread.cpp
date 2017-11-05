@@ -174,10 +174,10 @@ bool MeasureThread::setActiveSignalParam()
 				continue;
 			}
 
-			if (param.physicalRangeIsValid() == false || param.electricRangeIsValid() == false)
-			{
-				continue;
-			}
+//			if (param.physicalRangeIsValid() == false || param.electricRangeIsValid() == false)
+//			{
+//				continue;
+//			}
 
 			CalibratorManager* pCalibratorManager = theCalibratorBase.calibratorForMeasure(c);
 			if (calibratorIsValid(pCalibratorManager) == false)

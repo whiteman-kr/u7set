@@ -429,17 +429,61 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Resources usage report generation...")));
 
+		QStringList fileContent;
+		QStringList restLine;
+
+		QString header = "LM Equipment ID";
+		int maxIdLength = header.length();
+
+		QStringList restHeaderColumns;
+		restHeaderColumns << "Code memory, %"
+						  << "Bit Memory, %"
+						  << "Word Memory, %"
+						  << "IdrPhase Time, %"
+						  << "AlpPhase Time, %";
+
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
 			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
 
 			ModuleLogicCompiler::ResourcesUsageInfo info = moduleCompiler->resourcesUsageInfo();
 
-			// write to file
+			fileContent << info.lmEquipmentID;
+			maxIdLength = std::max(maxIdLength, info.lmEquipmentID.length());
 
+			restLine << QString("|%1|%2|%3|%4|%5")
+						.arg(info.codeMemoryUsed, restHeaderColumns[0].length(), 'g', 2)
+						.arg(info.bitMemoryUsed, restHeaderColumns[1].length(), 'g', 2)
+						.arg(info.wordMemoryUsed, restHeaderColumns[2].length(), 'g', 2)
+						.arg(info.idrPhaseTimeUsed, restHeaderColumns[3].length(), 'g', 2)
+						.arg(info.alpPhaseTimeUsed, restHeaderColumns[4].length(), 'g', 2);
 		}
 
-		// m_resultWriter->addFile()
+		header = header.leftJustified(maxIdLength, ' ');
+
+		for (int i = 0; i < fileContent.count(); i++)
+		{
+			fileContent[i] = fileContent[i].leftJustified(maxIdLength, ' ');
+			fileContent[i] += restLine[i];
+		}
+
+		fileContent.sort();
+
+		fileContent.insert(0, header + '|' + restHeaderColumns.join('|'));
+
+		QString delimiter;
+
+		delimiter = delimiter.leftJustified(maxIdLength, '-');
+
+		for (int i = 0; i < restHeaderColumns.count(); i++)
+		{
+			delimiter += "+";
+			delimiter = delimiter.leftJustified(delimiter.length() + restHeaderColumns[i].length(), '-');
+		}
+
+		fileContent.insert(1, delimiter);
+
+		m_resultWriter->addFile("Reports", "resources.txt", fileContent);
 
 		return result;
 	}

@@ -2600,37 +2600,34 @@ namespace Builder
 	/// Description:
 	///		All transmitter inputs must be directly linked to a signals. Check transmitter's inputs links.
 	///
-	void IssueLogger::errALC5027(QUuid transmitterUuid)
+	void IssueLogger::errALC5027(QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5027,
-				  QString(tr("All transmitter inputs must be directly linked to a signals.")));
+				  QString(tr("All transmitter inputs must be directly linked to a signals. (Logic schema %1)")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5028
 	///
 	/// IssueType: Error
 	///
-	/// Title: Floating point constant is connected to discrete signal '%1'.
+	/// Title: Uncompatible constant type (Logic schema %1).
 	///
 	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Constant Uuid
-	///		%3 Signal Uuid
+	///		%1 Logis schema ID
 	///
 	/// Description:
-	///		Floating point constant is connected to discrete signal. Change property 'Type' of the constant to 'IntegerType' value.
+	///		Constant is not compatible to destination.
 	///
-	void IssueLogger::errALC5028(QString appSignalID, QUuid constUuid, QUuid signalUuid)
+	void IssueLogger::errALC5028(QUuid constUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constUuid);
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, constUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5028,
-				  QString(tr("Floating point constant is connected to discrete signal '%1'.").arg(appSignalID)));
+				  QString(tr("Uncompatible constant type (Logic schema %1).").arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5030
@@ -4570,15 +4567,15 @@ namespace Builder
 	/// Description:
 	///		Uncompatible signals connection. Check signals type and data format.
 	///
-	void IssueLogger::errALC5117(QUuid uuid1, QUuid uuid2, QString schemaID)
+	void IssueLogger::errALC5117(QUuid uuid1, QString label1, QUuid uuid2, QString label2, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
 		addItemsIssues(OutputMessageLevel::Error, uuid2);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5117,
-				  QString(tr("Uncompatible signals connection (Logic schema '%1').")).
-						arg(schemaID));
+				  QString(tr("Uncompatible signals connection (items %1 and %2) (Logic schema '%3').")).
+						arg(label1).arg(label2).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5118

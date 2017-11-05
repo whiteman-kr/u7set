@@ -1428,14 +1428,29 @@ namespace Builder
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
-		requiredParams.append("i_lim_max");
-		requiredParams.append("i_lim_min");
+
+		bool isConstLimiter = caption() == "limc_fp" || caption() == "limc_si";
+
+		if (isConstLimiter == true)
+		{
+			requiredParams.append("i_lim_max");
+			requiredParams.append("i_lim_min");
+		}
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
-		AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+
+		AppFbParamValue dummy;
+
+		AppFbParamValue& i_lim_max = dummy;
+		AppFbParamValue& i_lim_min = dummy;
+
+		if (caption() == "limc_fp" || caption() == "limc_si")
+		{
+			i_lim_max = m_paramValuesArray["i_lim_max"];
+			i_lim_min = m_paramValuesArray["i_lim_min"];
+		}
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1446,16 +1461,19 @@ namespace Builder
 		case 1:								// signed int limiter
 			m_runTime = 3 + 4;
 
-			CHECK_SIGNED_INT32(i_lim_max);
-			CHECK_SIGNED_INT32(i_lim_min);
-
-			if (i_lim_min.signedIntValue() > i_lim_max.signedIntValue())
+			if (isConstLimiter == true)
 			{
-				// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
-				//
-				m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+				CHECK_SIGNED_INT32(i_lim_max);
+				CHECK_SIGNED_INT32(i_lim_min);
 
-				return false;
+				if (i_lim_min.signedIntValue() > i_lim_max.signedIntValue())
+				{
+					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+					//
+					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+
+					return false;
+				}
 			}
 
 			break;
@@ -1463,16 +1481,19 @@ namespace Builder
 		case 2:								// float limiter
 			m_runTime = 4 + 4;
 
-			CHECK_FLOAT32(i_lim_max);
-			CHECK_FLOAT32(i_lim_min);
-
-			if (i_lim_min.floatValue() > i_lim_max.floatValue())
+			if (isConstLimiter == true)
 			{
-				// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
-				//
-				m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+				CHECK_FLOAT32(i_lim_max);
+				CHECK_FLOAT32(i_lim_min);
 
-				return false;
+				if (i_lim_min.floatValue() > i_lim_max.floatValue())
+				{
+					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+					//
+					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+
+					return false;
+				}
 			}
 
 			break;

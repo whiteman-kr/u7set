@@ -488,7 +488,7 @@ namespace Builder
 		const UalItem* ualItem() const { return m_ualItem; }
 		QUuid ualItemGuid() const;
 		QString ualItemSchemaID() const;
-
+		QString ualItemLabel() const;
 
 		bool appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal);
 

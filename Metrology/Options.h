@@ -604,7 +604,7 @@ const char* const		LinearityParamName[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Limit of error"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of error"),
-						QT_TRANSLATE_NOOP("Options.h", "Show absolute error of input as ..."),
+						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point, (sec)"),
 						QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
 						QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
@@ -622,7 +622,7 @@ const int				LO_PARAM_COUNT					= sizeof(LinearityParamName)/sizeof(LinearityPar
 
 const int				LO_PARAM_ERROR_LIMIT			= 0,
 						LO_PARAM_ERROR_TYPE				= 1,
-						LO_PARAM_SHOW_INPUT_ERROR		= 2,
+						LO_PARAM_SHOW_ERROR_FROM_LIMIT	= 2,
 						LO_PARAM_MEASURE_TIME			= 3,
 						LO_PARAM_MEASURE_IN_POINT		= 4,
 						LO_PARAM_RANGE_TYPE				= 5,
@@ -634,19 +634,6 @@ const int				LO_PARAM_ERROR_LIMIT			= 0,
 						LO_PARAM_SHOW_PHYSICAL_VALUE	= 11,
 						LO_PARAM_WARN_IF_MEASURED		= 12,
 						LO_PARAM_MEASURE_ENTIRE_MODULE	= 13;
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		ShowInputErrorStr[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Electrical"),
-						QT_TRANSLATE_NOOP("Options.h", "Physical"),
-};
-
-const int				LO_SHOW_INPUT_ERROR_COUNT		= sizeof(ShowInputErrorStr)/sizeof(ShowInputErrorStr[0]);
-
-const int				LO_SHOW_INPUT_ERROR_ELECTRIC	= 0,
-						LO_SHOW_INPUT_ERROR_PHYSICAL	= 1;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -697,7 +684,7 @@ private:
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
-	int					m_showInputErrorType = LO_SHOW_INPUT_ERROR_ELECTRIC;		// type of displaing input error
+	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_PHYSICAL;			// type of displaing error denend on limit
 
 	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
 	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7
@@ -722,8 +709,8 @@ public:
 	int					errorType() const { return m_errorType; }
 	void				setErrorType(int type) { m_errorType = type; }
 
-	int					showInputErrorType() const { return m_showInputErrorType; }
-	void				setShowInputErrorType(int type) { m_showInputErrorType = type; }
+	int					showErrorFromLimit() const { return m_showErrorFromLimit; }
+	void				setShowErrorFromLimit(int type) { m_showErrorFromLimit = type; }
 
 	int					measureTimeInPoint() const { return m_measureTimeInPoint; }
 	void				setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }

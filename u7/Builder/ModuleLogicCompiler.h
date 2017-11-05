@@ -32,7 +32,7 @@ namespace Builder
 			QString lmEquipmentID;
 
 			double codeMemoryUsed = 0;
-			double bitMemoryused = 0;
+			double bitMemoryUsed = 0;
 			double wordMemoryUsed = 0;
 
 			double idrPhaseTimeUsed = 0;			// Input Data Receive phase time
@@ -124,7 +124,7 @@ namespace Builder
 
 		bool createUalSignals();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
-		bool createUalSignalFromSignal(UalItem* ualItem);
+		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
 		bool createUalSignalFromReceiver(UalItem* ualItem);

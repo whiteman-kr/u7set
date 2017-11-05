@@ -729,24 +729,54 @@ namespace Builder
 				continue;
 			}
 
+			bool res = true;
+
+			QString label = ualItem->label();
+
+			if (label == "3TZB00SET01_011_1_7_60306")
+			{
+				int a = 0;
+				a++;
+			}
+
 			switch(ualItem->type())
 			{
 			// UAL items that can generate signals
 			//
 			case UalItem::Type::Signal:
-				result &= createUalSignalFromSignal(ualItem);
+				res = createUalSignalFromSignal(ualItem, 1);
+				if (res == false)
+				{
+					int a = 0;
+					a++;
+				}
 				break;
 
 			case UalItem::Type::Const:
-				result &= createUalSignalFromConst(ualItem);
+				res = createUalSignalFromConst(ualItem);
+				if (res == false)
+				{
+					int a = 0;
+					a++;
+				}
 				break;
 
 			case UalItem::Type::Afb:
-				result &= createUalSignalsFromAfbOuts(ualItem);
+				res = createUalSignalsFromAfbOuts(ualItem);
+				if (res == false)
+				{
+					int a = 0;
+					a++;
+				}
 				break;
 
 			case UalItem::Type::BusExtractor:
-				result &= linkUalSignalsFromBusExtractor(ualItem);
+				res = linkUalSignalsFromBusExtractor(ualItem);
+				if (res == false)
+				{
+					int a = 0;
+					a++;
+				}
 				break;
 
 			case UalItem::Type::BusComposer:
@@ -769,6 +799,25 @@ namespace Builder
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
 			}
+
+			result &= res;
+		}
+
+		for(UalItem* ualItem : m_ualItems)
+		{
+			if (ualItem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualItem->isSignal() != true)
+			{
+				continue;
+			}
+
+			result &= createUalSignalFromSignal(ualItem, 2);
 		}
 
 		for(UalSignal* ualSignal : m_ualSignals)
@@ -839,7 +888,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createUalSignalFromSignal(UalItem* ualItem)
+	bool ModuleLogicCompiler::createUalSignalFromSignal(UalItem* ualItem, int passNo)
 	{
 		if (ualItem == nullptr)
 		{
@@ -879,7 +928,7 @@ namespace Builder
 		{
 			result = appendRefPinToSignal(ualItem, ualSignal);
 
-			if (result = false)
+			if (result == false)
 			{
 				return false;
 			}
@@ -906,7 +955,7 @@ namespace Builder
 		{
 			result = checkInOutsConnectedToSignal(ualItem, true);
 
-			if (result == false)
+			if (result == false && passNo > 1)
 			{
 				// Signal '%1' is not connected to any signal source. (Logic schema '%2').
 				//
@@ -914,7 +963,7 @@ namespace Builder
 				return false;
 			}
 
-			return result;
+			return true;
 		}
 
 		if (ualItem->inputs().size() != 0)
@@ -1040,6 +1089,12 @@ namespace Builder
 			return false;
 		}
 
+		if (ualItem->label() == "3TZB00SET01_016_2_61854")
+		{
+			int a = 0;
+			a++;
+		}
+
 		UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
 
 		if (ualAfb == nullptr)
@@ -1068,6 +1123,18 @@ namespace Builder
 			{
 				continue;				// not needed to create signal
 			}
+
+			// -------------------------------------------------------------------
+
+			if (outAfbSignal.type() == E::SignalType::Discrete && outAfbSignal.size() != 1)
+			{
+	#pragma message("################# DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE ####################");
+				outAfbSignal.setSize(1);
+
+				qDebug() << "Discrete signal correction AFB " << ualAfb->caption() << " signal " << outAfbSignal.caption();
+			}
+
+			// -------------------------------------------------------------------
 
 			UalSignal* ualSignal = nullptr;
 
@@ -1377,7 +1444,7 @@ namespace Builder
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
-			m_log->errALC5117(srcItem->guid(), signalItem->guid(), signalItem->schemaID());
+			m_log->errALC5117(srcItem->guid(), srcItem->label(), signalItem->guid(), signalItem->label(), signalItem->schemaID());
 			return false;
 		}
 
@@ -1486,7 +1553,7 @@ namespace Builder
 			{
 				// Uncompatible signals connection (Logic schema '%1').
 				//
-				m_log->errALC5117(srcItem->guid(), destItem->guid(), destItem->schemaID());
+				m_log->errALC5117(srcItem->guid(), srcItem->label(), destItem->guid(), destItem->label(), destItem->schemaID());
 				return false;
 			}
 		}
@@ -1538,7 +1605,7 @@ namespace Builder
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
-			m_log->errALC5117(ualSignal->ualItemGuid(), busComposerItem->guid(), busComposerItem->schemaID());
+			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->appSignalID(), busComposerItem->guid(), busComposerItem->label(), busComposerItem->schemaID());
 			return false;
 		}
 
@@ -1579,7 +1646,7 @@ namespace Builder
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
-			m_log->errALC5117(ualSignal->ualItemGuid(), busExtractorItem->guid(), busExtractorItem->schemaID());
+			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->appSignalID(), busExtractorItem->guid(), busExtractorItem->label(), busExtractorItem->schemaID());
 			return false;
 		}
 
@@ -1897,7 +1964,7 @@ namespace Builder
 			}
 		}
 
-		for(const LogicPin& outPin : ualItem->inputs())
+		for(const LogicPin& outPin : ualItem->outputs())
 		{
 			UalSignal* existsSignal = m_ualSignals.get(outPin.guid());
 
@@ -2731,13 +2798,13 @@ namespace Builder
 			return false;
 		}
 
-		result = listsUniquenessCheck();
+		/*result = listsUniquenessCheck();
 
 		if (result == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
-		}
+		}*/
 
 		sortSignalList(m_acquiredDiscreteInputSignals);
 		sortSignalList(m_acquiredDiscreteStrictOutputSignals);
@@ -6405,10 +6472,25 @@ namespace Builder
 			return false;
 		}
 
-		if (inUalSignal->isCompatible(inAfbSignal) == false)
+		// ------------------------------------------------------------------------------------
+
+		LogicAfbSignal temp_inAfbSignal = inAfbSignal;
+
+		if (inAfbSignal.type() == E::SignalType::Discrete && inAfbSignal.size() != 1)
 		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
+#pragma message("################# DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE ####################");
+			temp_inAfbSignal.setSize(1);
+
+			qDebug() << "Discrete signal correction AFB " << ualAfb->caption() << " signal " << inAfbSignal.caption();
+		}
+
+		// ------------------------------------------------------------------------------------
+
+		if (inUalSignal->isCompatible(temp_inAfbSignal) == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inUalSignal->ualItemGuid(), inUalSignal->ualItemLabel(), ualAfb->schemaID());
 			return false;
 		}
 
@@ -6416,7 +6498,9 @@ namespace Builder
 
 		if (inUalSignal->isConst() == false && inUalSignal->ualAddr().isValid() == false)
 		{
-			LOG_UNDEFINED_UAL_ADDRESS(m_log, inUalSignal);
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(inUalSignal->refSignalIDsJoined(), inUalSignal->ualItemGuid(), inUalSignal->ualItemSchemaID());
 			return false;
 		}
 
@@ -6963,10 +7047,25 @@ namespace Builder
 			return false;
 		}
 
-		if (outUalSignal->isCompatible(outAfbSignal) == false)
+		// ------------------------------------------------------------------------------------
+
+		LogicAfbSignal temp_outAfbSignal = outAfbSignal;
+
+		if (outAfbSignal.type() == E::SignalType::Discrete && outAfbSignal.size() != 1)
 		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
+#pragma message("################# DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE ####################");
+			temp_outAfbSignal.setSize(1);
+
+			qDebug() << "Discrete signal correction AFB " << ualAfb->caption() << " signal " << outAfbSignal.caption();
+		}
+
+		// ------------------------------------------------------------------------------------
+
+		if (outUalSignal->isCompatible(temp_outAfbSignal) == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outUalSignal->ualItemGuid(), outUalSignal->appSignalID(), ualAfb->schemaID());
 			return false;
 		}
 
@@ -9946,7 +10045,16 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(ualSignal->refSignalIDsJoined(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->isAnalog() == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -9977,8 +10085,30 @@ namespace Builder
 				continue;
 			}
 
-			cmd.mov32(txSignalAddress.offset(), ualSignal->ualAddr().offset());
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalIDs().join(", ")).arg(port->connectionID()));
+			if (ualSignal->isConst() == false)
+			{
+				cmd.mov32(txSignalAddress.offset(), ualSignal->ualAddr().offset());
+				cmd.setComment(QString("%1 >> %2").arg(ualSignal->refSignalIDsJoined()).arg(port->connectionID()));
+			}
+			else
+			{
+				switch(ualSignal->analogSignalFormat())
+				{
+				case E::AnalogAppSignalFormat::Float32:
+					cmd.movConstFloat(txSignalAddress.offset(), ualSignal->constAnalogFloatValue());
+					cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
+								   arg(ualSignal->constAnalogFloatValue()).arg(port->connectionID()));
+					break;
+
+				case E::AnalogAppSignalFormat::SignedInt32:
+					cmd.movConstFloat(txSignalAddress.offset(), ualSignal->constAnalogIntValue());
+					cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
+								   arg(ualSignal->constAnalogIntValue()).arg(port->connectionID()));
+					break;
+				default:
+					assert(false);
+				}
+			}
 
 			m_code.append(cmd);
 		}
@@ -10143,7 +10273,16 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->ualAddr().isValid() == false)
+			if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(ualSignal->refSignalIDsJoined(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->isDiscrete() == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -10184,8 +10323,17 @@ namespace Builder
 
 			// copy discrete signal value to bit accumulator
 			//
-			cmd.movBit(bitAccumulatorAddress, bit, ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalIDs().join(", ")).arg(port->connectionID()));
+			if (ualSignal->isConst() == true)
+			{
+				cmd.movBitConst(bitAccumulatorAddress, bit, ualSignal->constDiscreteValue());
+				cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
+							   arg(ualSignal->constDiscreteValue()).arg(port->connectionID()));
+			}
+			else
+			{
+				cmd.movBit(bitAccumulatorAddress, bit, ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
+				cmd.setComment(QString("%1 >> %2").arg(ualSignal->refSignalIDsJoined()).arg(port->connectionID()));
+			}
 
 			m_code.append(cmd);
 
@@ -11218,7 +11366,7 @@ namespace Builder
 
 		m_resourcesUsageInfo.lmEquipmentID = m_lm->equipmentIdTemplate();
 		m_resourcesUsageInfo.codeMemoryUsed = percentOfUsedCodeMemory;
-		m_resourcesUsageInfo.bitMemoryused = percentOfUsedBitMemory;
+		m_resourcesUsageInfo.bitMemoryUsed = percentOfUsedBitMemory;
 		m_resourcesUsageInfo.wordMemoryUsed = percentOfUsedWordMemory;
 		m_resourcesUsageInfo.idrPhaseTimeUsed = idrPhaseTimeUsed;
 		m_resourcesUsageInfo.alpPhaseTimeUsed = alpPhaseTimeUsed;
