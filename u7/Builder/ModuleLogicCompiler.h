@@ -184,7 +184,7 @@ namespace Builder
 
 		bool processTransmitters();
 		bool processTransmitter(const AppItem *item);
-		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
+		bool getSignalsConnectedToTransmitter(const AppItem* item, const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
 
 		bool processSerialReceivers();
 		bool processSerialReceiver(const AppItem* item);

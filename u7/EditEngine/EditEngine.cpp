@@ -232,7 +232,7 @@ namespace EditEngine
 
 		// Select changed items
 		//
-		m_schemaView->setSelectedItems(itemsToSelect);
+		selectItems(itemsToSelect);
 
 		return;
 	}
@@ -250,7 +250,20 @@ namespace EditEngine
 
 		// Select changed items
 		//
-		m_schemaView->setSelectedItems(itemsToSelect);
+		selectItems(itemsToSelect);
+
+		return;
+	}
+
+	void EditEngine::selectItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	{
+		if (m_schemaView == nullptr)
+		{
+			assert(m_schemaView);
+			return;
+		}
+
+		m_schemaView->setSelectedItems(items);
 
 		return;
 	}

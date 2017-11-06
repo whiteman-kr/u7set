@@ -713,20 +713,20 @@ QString LinearityMeasurement::errorStr(int limitType) const
 		return QString();
 	}
 
+	int showErrorFromLimit = theOptions.linearity().showErrorFromLimit();
+	if (showErrorFromLimit < 0 || showErrorFromLimit >= MEASURE_LIMIT_TYPE_COUNT)
+	{
+		assert(0);
+		return QString();
+	}
+
 	QString str;
 
-	if (errorType == MEASURE_ERROR_TYPE_ABSOLUTE)
+	switch(errorType)
 	{
-		switch(theOptions.linearity().showInputErrorType())
-		{
-			case LO_SHOW_INPUT_ERROR_ELECTRIC:	str = QString::number(m_error[limitType][errorType], 10, m_limitPrecision[MEASURE_LIMIT_TYPE_ELECTRIC]) + " " + m_unit[MEASURE_LIMIT_TYPE_ELECTRIC];	break;
-			case LO_SHOW_INPUT_ERROR_PHYSICAL:	str = QString::number(m_error[limitType][errorType], 10, m_limitPrecision[MEASURE_LIMIT_TYPE_PHYSICAL]) + " " + m_unit[MEASURE_LIMIT_TYPE_PHYSICAL];	break;
-			default:							assert(0);
-		}
-	}
-	else
-	{
-		str = QString::number(m_error[limitType][errorType], 10, 2) + " %" ;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 10, m_limitPrecision[showErrorFromLimit]) + " " + m_unit[showErrorFromLimit];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 10, 3) + " %" ;																break;
+		default:							assert(0);
 	}
 
 	return str;
@@ -787,20 +787,20 @@ QString LinearityMeasurement::errorLimitStr(int limitType) const
 		return QString();
 	}
 
+	int showErrorFromLimit = theOptions.linearity().showErrorFromLimit();
+	if (showErrorFromLimit < 0 || showErrorFromLimit >= MEASURE_LIMIT_TYPE_COUNT)
+	{
+		assert(0);
+		return QString();
+	}
+
 	QString str;
 
-	if (errorType == MEASURE_ERROR_TYPE_ABSOLUTE)
+	switch(errorType)
 	{
-		switch(theOptions.linearity().showInputErrorType())
-		{
-			case LO_SHOW_INPUT_ERROR_ELECTRIC:	str = QString::number(m_errorLimit[limitType][errorType], 10, m_limitPrecision[MEASURE_LIMIT_TYPE_ELECTRIC]) + " " + m_unit[MEASURE_LIMIT_TYPE_ELECTRIC];	break;
-			case LO_SHOW_INPUT_ERROR_PHYSICAL:	str = QString::number(m_errorLimit[limitType][errorType], 10, m_limitPrecision[MEASURE_LIMIT_TYPE_PHYSICAL]) + " " + m_unit[MEASURE_LIMIT_TYPE_PHYSICAL];	break;
-			default:							assert(0);
-		}
-	}
-	else
-	{
-		str = QString::number(m_errorLimit[limitType][errorType], 10, 2) + " %";
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 10, m_limitPrecision[showErrorFromLimit]) + " " + m_unit[showErrorFromLimit];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 10, 3) + " %";																break;
+		default:							assert(0);
 	}
 
 	return str;
