@@ -3849,7 +3849,7 @@ namespace Builder
 				}
 				else
 				{
-					// Constant connected to discrete signal or FB input must have value 0 or 1.
+					// Discrete constant must have value 0 or 1 (Logic schema %1).
 					//
 					m_log->errALC5086(constItem.guid(), appSignal.schemaID());
 					return false;

@@ -3373,7 +3373,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5060(QString schemaID, QUuid constantUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+		addItemsIssues(OutputMessageLevel::Error, constantUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5060,
@@ -3893,13 +3893,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').
+	/// Title: Discrete constant must have value 0 or 1 (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Constant connected to discrete signal or FB input must have value 0 or 1. Check constant value.
+	///		Discrete constant must have value 0 or 1.
 	///
 
 	void IssueLogger::errALC5086(QUuid constItemUuid, const QString& schemaID)
@@ -3908,7 +3908,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5086,
-				  QString(tr("Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').")).
+				  QString(tr("Discrete constant must have value 0 or 1 (Logic schema %1).")).
 						arg(schemaID));
 
 	}
