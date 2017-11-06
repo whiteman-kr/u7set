@@ -116,7 +116,5 @@ public:
 	Hash m_writeClient = 0;
 };
 
-Q_DECLARE_METATYPE(TuningValue);
-
-Q_DECLARE_METATYPE(TuningSignalState);
+Q_DECLARE_METATYPE(TuningSignalState)
 

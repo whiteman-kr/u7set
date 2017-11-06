@@ -403,7 +403,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 	float highLimit = 0.0;
 	int precision = 0;
 	TuningValue value;
-	double defaultValue = 0.0;
+	TuningValue defaultValue;
 
 	bool sameValue = true;
 
@@ -433,8 +433,13 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 			lowLimit = asp.lowEngineeringUnits();
 			highLimit = asp.highEngineeringUnits();
 			precision = asp.precision();
+
 			value = fv.value();
-			defaultValue = asp.tuningDefaultValue();
+			value.type = asp.toTuningType();
+
+			defaultValue = TuningValue(asp.tuningDefaultValue());
+			defaultValue.type = asp.toTuningType();
+
 			first = false;
 		}
 		else
@@ -454,7 +459,10 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 				}
 			}
 
-			if (asp.tuningDefaultValue() != defaultValue)
+			TuningValue checkDefaultValue(asp.tuningDefaultValue());
+			checkDefaultValue.type = asp.toTuningType();
+
+			if (checkDefaultValue.type != defaultValue.type || checkDefaultValue != defaultValue)
 			{
 				QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different default value."));
 				return;

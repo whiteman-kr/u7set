@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::schemasDetailsArrived, this, &MainWindow::slot_schemasDetailsUpdated, Qt::DirectConnection);
-	connect(&m_configController, &ConfigController::signalsArrived, m_tcpClient, &TuningClientTcpClient::slot_signalsUpdated, Qt::DirectConnection);
+	connect(&m_configController, &ConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
@@ -404,6 +404,15 @@ void MainWindow::slot_schemasDetailsUpdated(QByteArray data)
 	if (m_filterStorage.loadSchemasDetails(data, &errorStr) == false)
 	{
 		QString completeErrorMessage = QObject::tr("Schemas Details file loading error: %1").arg(errorStr);
+		theLogFile->writeError(completeErrorMessage);
+	}
+}
+
+void MainWindow::slot_signalsUpdated(QByteArray data)
+{
+	if (m_tuningSignalManager.load(data) == false)
+	{
+		QString completeErrorMessage = QObject::tr("Tuning signals file loading error.");
 		theLogFile->writeError(completeErrorMessage);
 	}
 }

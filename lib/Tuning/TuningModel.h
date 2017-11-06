@@ -9,11 +9,10 @@
 
 class TuningModel;
 
-
 class TuningModelSorter
 {
 public:
-	TuningModelSorter(int column, Qt::SortOrder order, TuningSignalManager* tuningSignalManager);
+	TuningModelSorter(int column, Qt::SortOrder order, TuningModel* model, TuningSignalManager* tuningSignalManager);
 
 	bool operator()(Hash hash1, Hash hash2) const
 	{
@@ -28,6 +27,8 @@ private:
 	Qt::SortOrder m_order = Qt::AscendingOrder;
 
 	TuningSignalManager* m_tuningSignalManager = nullptr;
+
+	TuningModel* m_model = nullptr;
 };
 
 class TuningModel : public QAbstractItemModel
@@ -37,6 +38,9 @@ class TuningModel : public QAbstractItemModel
 public:
 	TuningModel(TuningSignalManager* tuningSignalManager, QWidget* parent);
 	~TuningModel();
+
+	TuningValue defaultValue(const AppSignalParam& asp) const;
+	void setDefaultValues(const std::vector<std::pair<Hash, TuningValue>>& values);
 
 public:
 
@@ -104,6 +108,8 @@ protected:
 
 	std::vector<Hash> m_hashes;
 
+	std::map<Hash, TuningValue> m_defaultValues;
+
 	std::vector<int> m_columnsIndexes;
 
 	bool m_blink = false;
@@ -115,13 +121,13 @@ class DialogInputTuningValue : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogInputTuningValue(bool analog, TuningValue value, double defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent);
+	explicit DialogInputTuningValue(bool analog, TuningValue value, TuningValue defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent);
 	~DialogInputTuningValue();
 
 private:
 
 	TuningValue m_value;
-	double m_defaultValue = 0;
+	TuningValue m_defaultValue;
 	double m_lowLimit = 0;
 	double m_highLimit = 0;
 	int m_decimalPlaces = 0;

@@ -7,10 +7,11 @@ using namespace std;
 // TuningItemSorter
 //
 
-TuningModelSorter::TuningModelSorter(int column, Qt::SortOrder order, TuningSignalManager* tuningSignalManager):
+TuningModelSorter::TuningModelSorter(int column, Qt::SortOrder order, TuningModel* model, TuningSignalManager* tuningSignalManager):
 	m_column(column),
 	m_order(order),
-	m_tuningSignalManager(tuningSignalManager)
+	m_tuningSignalManager(tuningSignalManager),
+	m_model(model)
 {
 }
 
@@ -77,8 +78,18 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			v1 = asp1.tuningDefaultValue();
-			v2 = asp2.tuningDefaultValue();
+			TuningValue tv1 = m_model->defaultValue(asp1);
+			TuningValue tv2 = m_model->defaultValue(asp2);
+
+			if (tv1 == tv2)
+			{
+				return asp1.customSignalId() < asp2.customSignalId();
+			}
+
+			if (order == Qt::AscendingOrder)
+				return tv1 < tv2;
+			else
+				return tv1 > tv2;
 		}
 		else
 		{
@@ -91,8 +102,18 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			v1 = QVariant::fromValue<TuningValue>(tss1.value());
-			v2 = QVariant::fromValue<TuningValue>(tss2.value());
+			TuningValue tv1 = tss1.value();
+			TuningValue tv2 = tss2.value();
+
+			if (tv1 == tv2)
+			{
+				return asp1.customSignalId() < asp2.customSignalId();
+			}
+
+			if (order == Qt::AscendingOrder)
+				return tv1 < tv2;
+			else
+				return tv1 > tv2;
 		}
 		else
 		{
@@ -195,6 +216,29 @@ TuningModel::~TuningModel()
 	{
 		delete m_importantFont;
 		m_importantFont = nullptr;
+	}
+}
+
+TuningValue TuningModel::defaultValue(const AppSignalParam& asp) const
+{
+	auto it = m_defaultValues.find(asp.hash());
+	if (it != m_defaultValues.end())
+	{
+		return it->second;
+	}
+
+	TuningValue result(asp.tuningDefaultValue());
+
+	return result;
+}
+
+void TuningModel::setDefaultValues(const std::vector<std::pair<Hash, TuningValue>>& values)
+{
+	m_defaultValues.clear();
+
+	for (auto value : values)
+	{
+		m_defaultValues[value.first] = value.second;
 	}
 }
 
@@ -362,7 +406,7 @@ void TuningModel::sort(int column, Qt::SortOrder order)
 
 	int sortColumnIndex = m_columnsIndexes[column];
 
-	std::sort(m_hashes.begin(), m_hashes.end(), TuningModelSorter(sortColumnIndex, order, m_tuningSignalManager));
+	std::sort(m_hashes.begin(), m_hashes.end(), TuningModelSorter(sortColumnIndex, order, this, m_tuningSignalManager));
 
 	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 
@@ -599,11 +643,11 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		{
 			if (asp.isAnalog())
 			{
-				return QString::number(asp.tuningDefaultValue(), 'f', asp.precision());
+				return defaultValue(asp).toString(asp.precision());
 			}
 			else
 			{
-				return (static_cast<int>(asp.tuningDefaultValue()) == 0 ? tr("0") : tr("1"));
+				return defaultValue(asp).toString();
 			}
 		}
 
@@ -654,8 +698,9 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 // DialogInputTuningValue
 //
 
-DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, double defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent) :
+DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, TuningValue defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	m_value(value),
 	m_defaultValue(defaultValue),
 	m_lowLimit(lowLimit),
 	m_highLimit(highLimit),
@@ -718,7 +763,7 @@ DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, d
 			m_analogEdit->selectAll();
 		}
 
-		m_buttonDefault->setText(tr("Default: ") + QString::number(m_defaultValue, 'f', m_decimalPlaces));
+		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString(m_decimalPlaces));
 	}
 	else
 	{
@@ -736,7 +781,7 @@ DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, d
 			m_discreteCheck->setText(tr("Unknown"));
 		}
 
-		m_buttonDefault->setText(tr("Default: ") + QString::number(m_defaultValue, 'f', 0));
+		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString());
 	}
 }
 
@@ -804,11 +849,11 @@ void DialogInputTuningValue::on_m_buttonDefault_clicked()
 {
 	if (m_analog == true)
 	{
-		m_analogEdit->setText(QString::number(m_defaultValue, 'f', m_decimalPlaces));
+		m_analogEdit->setText(m_defaultValue.toString(m_decimalPlaces));
 	}
 	else
 	{
-		bool defaultState = m_defaultValue == 0.0 ? false : true;
+		bool defaultState = m_defaultValue.intValue == 0 ? false : true;
 
 		m_discreteCheck->setChecked(defaultState);
 

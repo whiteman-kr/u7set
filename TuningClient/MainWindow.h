@@ -53,6 +53,7 @@ private slots:
 	void slot_configurationArrived();
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_schemasDetailsUpdated(QByteArray data);
+	void slot_signalsUpdated(QByteArray data);
 	void slot_schemasGlobalScriptArrived(QByteArray data);
 
 public slots:

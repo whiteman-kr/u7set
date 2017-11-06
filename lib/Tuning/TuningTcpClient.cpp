@@ -587,7 +587,10 @@ void TuningTcpClient::slot_signalsUpdated()
 
 	m_signalHashes = m_signals->signalHashes();
 
-	resetToGetTuningSources();
+	if (isConnected() == true)
+	{
+		resetToGetTuningSources();
+	}
 
 	return;
 }

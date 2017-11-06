@@ -200,7 +200,7 @@ bool TuningClientCfgGenerator::writeSettings()
 		//
 		// filterBySchema
 		//
-		QString equipmentList = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentId", &ok);
+		QString equipmentList = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok);
 		if (ok == false)
 		{
 			return false;

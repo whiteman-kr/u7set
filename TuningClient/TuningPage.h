@@ -13,9 +13,6 @@ class TuningModelClient : public TuningModel
 public:
 	TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent);
 
-	TuningValue defaultValue(Hash hash, bool* ok);
-	void setDefaultValues(const std::vector<std::pair<Hash, TuningValue>>& values);
-
 protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
 	virtual QBrush foregroundColor(const QModelIndex& index) const override;
@@ -24,11 +21,6 @@ protected:
 
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-
-private:
-	TuningSignalManager* m_tuningSignalManager = nullptr;
-
-	std::map<Hash, TuningValue> m_defaultValues;
 
 };
 

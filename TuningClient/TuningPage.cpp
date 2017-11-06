@@ -12,11 +12,8 @@ using namespace std;
 
 
 TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent):
-	TuningModel(tuningSignalManager, parent),
-	m_tuningSignalManager(tuningSignalManager)
+	TuningModel(tuningSignalManager, parent)
 {
-
-	assert(m_tuningSignalManager);
 
 	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
@@ -45,40 +42,6 @@ TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, i
 		m_columnsIndexes  = pageSettings->m_columnsIndexes;
 		removeColumn(Columns::Valid);
 		removeColumn(Columns::OutOfRange);
-	}
-}
-
-
-
-TuningValue TuningModelClient::defaultValue(Hash hash, bool* ok)
-{
-	auto it = m_defaultValues.find(hash);
-	if (it != m_defaultValues.end())
-	{
-		*ok = true;
-		return it->second;
-	}
-
-
-	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, ok);
-	if (*ok == false)
-	{
-		return TuningValue();
-	}
-
-	TuningValue result(asp.tuningDefaultValue());
-
-	return result;
-
-}
-
-void TuningModelClient::setDefaultValues(const std::vector<std::pair<Hash, TuningValue>>& values)
-{
-	m_defaultValues.clear();
-
-	for (auto value : values)
-	{
-		m_defaultValues[value.first] = value.second;
 	}
 }
 
@@ -116,7 +79,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		TuningValue tvDefault(asp.tuningDefaultValue());
+		TuningValue tvDefault(defaultValue(asp));
 
 		if (tvDefault != state.value())
 		{
@@ -373,8 +336,9 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 
 
 //
-// TuningPage
+// FilterButton
 //
+
 FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, QWidget* parent)
 	:QPushButton(caption, parent)
 {
@@ -930,7 +894,7 @@ void TuningPage::slot_setValue()
 	bool first = true;
 	bool analog = false;
 	TuningValue value;
-	double defaultValue = 0.0;
+	TuningValue defaultValue;
 	bool sameValue = true;
 	int precision = 0;
 	double lowLimit = 0;
@@ -963,7 +927,7 @@ void TuningPage::slot_setValue()
 		{
 			analog = asp.isAnalog();
 			value = state.value();
-			defaultValue = asp.tuningDefaultValue();
+			defaultValue = m_model->defaultValue(asp);
 			lowLimit = asp.lowEngineeringUnits();
 			highLimit = asp.highEngineeringUnits();
 			first = false;
@@ -985,7 +949,7 @@ void TuningPage::slot_setValue()
 				}
 			}
 
-			if (defaultValue != asp.tuningDefaultValue())
+			if (defaultValue != m_model->defaultValue(asp))
 			{
 				QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different default values."));
 				return;
@@ -1258,7 +1222,7 @@ void TuningPage::slot_setAll()
 				continue;
 			}
 
-			TuningValue tv = m_model->defaultValue(hash, &ok);
+			TuningValue tv = m_model->defaultValue(asp);
 
 			if (tv != state.newValue() && ok == true)
 			{
