@@ -133,8 +133,8 @@ namespace VFrame30
 
 				if (connectionCount > 1)
 				{
-					p->setBrush(QColor(qRgb(0x00, 0x00, 0xC0)));
-					p->setPen(Qt::NoPen);
+					p->setBrush(pen.color());
+					p->setPen(pen);
 					DrawPinJoint(p, pt.X, pt.Y, pinWidth);
 					p->setBrush(Qt::NoBrush);
 				}
