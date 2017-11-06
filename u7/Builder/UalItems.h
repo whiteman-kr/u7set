@@ -575,7 +575,7 @@ namespace Builder
 
 		void clear();
 
-		bool getReport(QStringList& report);
+		bool getReport(QStringList& report) const;
 
 	private:
 		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);

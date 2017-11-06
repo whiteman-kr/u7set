@@ -669,6 +669,16 @@ namespace Builder
 		return result;
 	}
 
+	bool LmMemoryMap::appendAcquiredAnalogTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogTuningSignals, ualSignals, false);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
 	bool LmMemoryMap::appendAcquiredDiscreteConstSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
 	{
 		bool result = true;
@@ -746,7 +756,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogOptoSignals, ualSignals, true);
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogOptoSignals, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;
@@ -756,7 +766,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogBusChildSignals, ualSignals, true);
+		result &= appendRegSignals(m_appWordAdressed.acquiredAnalogBusChildSignals, ualSignals, false);
 		result &= recalculateAddresses();
 
 		return result;

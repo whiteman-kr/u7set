@@ -1294,11 +1294,21 @@ namespace Builder
 			return false;
 		}
 
-		if (afbSignal.isBus() == true)
+		if (afbSignal.isBus() == true && isBus() == true)
 		{
-			assert(false);			// should be impelmented
+			if (m_bus == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			if (afbSignal.busDataFormat() == m_bus->busDataFormat() &&
+				afbSignal.maxBusSize() >= m_bus->sizeB())
+			{
+				return true;
+			}
+
 			return false;
-//			m_signals[0]->isCompatibleFormat(E::SignalType::Bus);
 		}
 
 		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
@@ -1372,7 +1382,6 @@ namespace Builder
 		if (m_ualAddr.isValid() == true)
 		{
 			Signal* s = signal();
-
 			assert(false);				// m_ualAddr is already set
 			return false;
 		}
@@ -2322,7 +2331,7 @@ namespace Builder
 		m_signalToPinsMap.clear();
 	}
 
-	bool UalSignalsMap::getReport(QStringList& report)
+	bool UalSignalsMap::getReport(QStringList& report) const
 	{
 		QStringList signalIDs;
 
