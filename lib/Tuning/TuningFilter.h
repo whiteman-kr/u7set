@@ -1,6 +1,4 @@
-#ifndef OBJECTFILTER_H
-#define OBJECTFILTER_H
-
+#pragma once
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/PropertyObject.h"
@@ -18,8 +16,8 @@ public:
 	bool useValue() const;
 	void setUseValue(bool value);
 
-	float value() const;
-	void setValue(float value);
+	TuningValue value() const;
+	void setValue(TuningValue value);
 
 	Hash appSignalHash() const;
 
@@ -32,7 +30,7 @@ private:
 	Hash m_appSignalHash = 0;
 
 	bool m_useValue = false;
-	float m_value = 0;
+	TuningValue m_value;
 
 };
 
@@ -262,7 +260,7 @@ public:
 
 	// Operations
 
-	void createAutomaticFilters(const TuningSignalStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds);
+	void createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds);
 
 	void removeFilters(TuningFilter::Source sourceType);
 
@@ -282,10 +280,6 @@ public:
 
 private:
 
-	//void checkFilterSignals(TuningFilter* filter, const std::vector<TuningSignal>& tuningSignals, QStringList& errorLog, int& notFoundCounter);
-
-private:
-
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 };
 
@@ -293,4 +287,4 @@ Q_DECLARE_METATYPE(std::shared_ptr<TuningFilter>)
 
 Q_DECLARE_METATYPE(TuningFilterValue)
 
-#endif // OBJECTFILTER_H
+

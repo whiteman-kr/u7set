@@ -100,14 +100,11 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/TuningController.h \
     ../lib/AppSignal.h \
     ../lib/DbStruct.h \
-    ../lib/Tuning/TuningSignalState.h \
     SchemaItemBus.h \
     Bus.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
-    ../lib/Tuning/ITuningTcpClient.h \
-    ../lib/Tuning/ITuningSignalManager.h \
     ../Proto/network.pb.h
 
 SOURCES += \
@@ -163,7 +160,6 @@ SOURCES += \
     ../lib/Tuning/TuningSignalState.cpp \
     SchemaItemBus.cpp \
     Bus.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
     ../Proto/network.pb.cc
 
 

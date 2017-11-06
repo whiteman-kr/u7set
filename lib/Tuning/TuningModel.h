@@ -9,47 +9,25 @@
 
 class TuningModel;
 
-struct TuningModelRecord
-{
-	AppSignalParam param;
-	TuningSignalState state;
 
-	bool limitsUnbalance() const
-	{
-		if (param.isAnalog() == false)
-		{
-			return false;
-		}
-
-		if (state.valid() == true)
-		{
-			if (TuningSignalState::floatsEqual(param.lowEngineeringUnits(), state.lowBound()) == false ||
-				TuningSignalState::floatsEqual(param.highEngineeringUnits(), state.highBound()) == false)
-			{
-				return true;
-			}
-		}
-		return false;
-
-	}
-};
-
-class TuningModelRecordSorter
+class TuningModelSorter
 {
 public:
-	TuningModelRecordSorter(int column, Qt::SortOrder order);
+	TuningModelSorter(int column, Qt::SortOrder order, TuningSignalManager* tuningSignalManager);
 
-	bool operator()(const TuningModelRecord& o1, const TuningModelRecord& o2) const
+	bool operator()(Hash hash1, Hash hash2) const
 	{
-		return sortFunction(o1, o2, m_column, m_order);
+		return sortFunction(hash1, hash2, m_column, m_order);
 	}
 
-	bool sortFunction(const TuningModelRecord& o1, const TuningModelRecord& o2, int column, Qt::SortOrder order) const;
+	bool sortFunction(Hash hash1, Hash hash2, int column, Qt::SortOrder order) const;
 
 private:
 	int m_column = -1;
 
 	Qt::SortOrder m_order = Qt::AscendingOrder;
+
+	TuningSignalManager* m_tuningSignalManager = nullptr;
 };
 
 class TuningModel : public QAbstractItemModel
@@ -57,7 +35,7 @@ class TuningModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	TuningModel(QWidget* parent);
+	TuningModel(TuningSignalManager* tuningSignalManager, QWidget* parent);
 	~TuningModel();
 
 public:
@@ -76,17 +54,19 @@ public:
 		HighLimit,
 		Default,
 		Valid,
-		Underflow,
-		Overflow,
+		OutOfRange
 	};
 
 
 public:
-	void setItems(std::vector<TuningModelRecord>& signalsList);
+	std::vector<Hash> hashes() const;
+	void setHashes(std::vector<Hash>& hashes);
 
-	TuningModelRecord* item(int index);
-	AppSignalParam* param(int index);
-	TuningSignalState* state(int index);
+	Hash hashByIndex(int index) const;
+
+	TuningSignalManager* tuningSignalManager();
+
+public:
 
 	void addColumn(Columns column);
 	void removeColumn(Columns column);
@@ -103,6 +83,8 @@ public:
 
 	void sort(int column, Qt::SortOrder order) override;
 
+	bool limitsUnbalance(const AppSignalParam& asp, const TuningSignalState& tss) const;
+
 protected:
 	QModelIndex parent(const QModelIndex& index) const override;
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -112,20 +94,20 @@ protected:
 	virtual QBrush foregroundColor(const QModelIndex& index) const;
 
 private:
-
 	QStringList m_columnsNames;
 
 	QFont* m_font = nullptr;
 	QFont* m_importantFont = nullptr;
 
 protected:
-	std::vector<int> m_columnsIndexes;
+	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	std::vector<TuningModelRecord> m_items;
+	std::vector<Hash> m_hashes;
+
+	std::vector<int> m_columnsIndexes;
 
 	bool m_blink = false;
 
-	QWidget* m_parent = nullptr;
 };
 
 class DialogInputTuningValue : public QDialog
@@ -133,15 +115,15 @@ class DialogInputTuningValue : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogInputTuningValue(bool analog, float value, float defaultValue, bool sameValue, float lowLimit, float highLimit, int decimalPlaces, QWidget* parent);
+	explicit DialogInputTuningValue(bool analog, TuningValue value, double defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent);
 	~DialogInputTuningValue();
 
 private:
 
-	float m_value = 0;
-	float m_defaultValue = 0;
-	float m_lowLimit = 0;
-	float m_highLimit = 0;
+	TuningValue m_value;
+	double m_defaultValue = 0;
+	double m_lowLimit = 0;
+	double m_highLimit = 0;
 	int m_decimalPlaces = 0;
 	bool m_analog = true;
 
@@ -155,7 +137,7 @@ private:
 	QPushButton* m_buttonCancel = nullptr;
 
 public:
-	float value() { return m_value; }
+	TuningValue value() { return m_value; }
 
 private slots:
 	void on_m_checkBox_clicked(bool checked);

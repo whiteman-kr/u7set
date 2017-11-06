@@ -42,9 +42,8 @@ void IdePropertyEditor::saveSettings()
 
 ExtWidgets::PropertyTextEditor* IdePropertyEditor::createCodeEditor(Property *property, QWidget* parent)
 {
-    // THIS IS TEMPORARY SOLUTION, NO OTHER WAY TO DECIDE IF THIS IS TUNINGCLIENT FILTERS
 
-    if (property->caption() == "Filters" && property->description() == "Tuning signal filters description in XML format")
+	if (property->specificEditor() == PropertySpecificEditor::TuningFilter)
     {
         // This is Filters Editor for TuningClient
         //
@@ -380,34 +379,24 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
   m_dbController(dbController)
 {
 	SignalSet tuningSignalSet;
+	::Proto::AppSignalSet appSignalSet;
 
 	// Load tuning signals
 	//
 
 	bool ok = m_dbController->getTuningableSignals(&tuningSignalSet, parent);
-
 	if (ok == true)
 	{
 		int count = tuningSignalSet.count();
 
-		Proto::AppSignal pas;
-		AppSignalParam asp;
-
 		for (int i = 0; i < count; i++)
 		{
-			tuningSignalSet[i].serializeTo(&pas);
-
-			ok = asp.load(pas);
-
-			if (ok == false)
-			{
-				assert(false);
-				return;
-			}
-
-			m_signalStorage.addSignal(asp);
+			Proto::AppSignal* pas = appSignalSet.add_appsignal();
+			tuningSignalSet[i].serializeTo(pas);
 		}
 	}
+
+	m_signals.load(appSignalSet);
 }
 
 IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
@@ -428,7 +417,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 	QString errorCode;
 
-	bool ok = m_filterStorage.load(text.toUtf8(), &errorCode);
+	bool ok = m_filters.load(text.toUtf8(), &errorCode);
     if (ok == false)
     {
         QLabel* errorLabel = new QLabel(errorCode);
@@ -440,7 +429,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 
 
-	m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage, false, false, TuningFilter::Source::Project,
+	m_tuningFilterEditor = new TuningFilterEditor(&m_filters, &m_signals, false, false, TuningFilter::Source::Project,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
 												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 
@@ -454,7 +443,7 @@ QString IdeTuningFiltersEditor::text()
 {
     QByteArray data;
 
-    bool ok = m_filterStorage.save(data);
+    bool ok = m_filters.save(data);
     if (ok == true)
     {
         return data.toStdString().c_str();

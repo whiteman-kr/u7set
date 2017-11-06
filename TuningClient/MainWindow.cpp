@@ -41,28 +41,27 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	setCentralWidget(new QLabel(tr("Waiting for configuration...")));
 
-	// TcpSignalClient
+	// TuningClientTcpClient
 	//
-	m_objectManager = new TuningClientSignalManager();
-	m_objectManager->setInstanceId(theSettings.instanceStrId());
-	m_objectManager->setRequestInterval(theSettings.m_requestInterval);
+	m_tcpClient = new TuningClientTcpClient(theSettings.instanceStrId(), 1, 0, USED_SERVER_COMMIT_NUMBER, &m_tuningSignalManager);
+	m_tcpClient->setInstanceId(theSettings.instanceStrId());
+	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
 
-	m_tcpClientThread = new SimpleThread(m_objectManager);
+	m_tcpClientThread = new SimpleThread(m_tcpClient);
 	m_tcpClientThread->start();
 
 	// Global connections
 
-
-
-	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningSignalManager::slot_serversArrived);
+	connect(&m_configController, &ConfigController::serversArrived, m_tcpClient, &TuningClientTcpClient::slot_serversArrived);
 
 	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::schemasDetailsArrived, this, &MainWindow::slot_schemasDetailsUpdated, Qt::DirectConnection);
-	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningSignalManager::slot_signalsUpdated, Qt::DirectConnection);
+	connect(&m_configController, &ConfigController::signalsArrived, m_tcpClient, &TuningClientTcpClient::slot_signalsUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
 			Qt::QueuedConnection);
+
 	// Load user filters
 
 	QString errorCode;
@@ -241,7 +240,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		assert(m_statusBarTuningConnection);
 
 		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-		Tcp::ConnectionState tuningConnState =  m_objectManager->getConnectionState();
+		Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
 
 
 		// ConfigService
@@ -272,14 +271,13 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		}
 
 		m_statusBarTuningConnection->setText(text);
-		m_statusBarTuningConnection->setToolTip(m_objectManager->getStateToolTip());
 		return;
 	}
 
 	return;
 }
 
-void MainWindow::createWorkspace(const TuningSignalStorage* objects)
+void MainWindow::createWorkspace()
 {
 	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
 	{
@@ -291,23 +289,16 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 	m_filterStorage.removeFilters(TuningFilter::Source::Schema);
 	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
 
-	m_filterStorage.createAutomaticFilters(objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
+	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theConfigSettings.equipmentList);
+
 
 	// Find and possibly remove non-existing signals from the list
 
 	bool removedNotFound = false;
 
-	std::vector<Hash> tuningSignalHashArray;
-
-	int count = objects->signalsCount();
-	for (int i = 0; i < count; i++)
-	{
-		tuningSignalHashArray.push_back(objects->signalPtrByIndex(i)->hash());
-	}
-
 	std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
 
-	m_filterStorage.checkAndRemoveFilterSignals(tuningSignalHashArray, removedNotFound, notFoundSignalsAndFilters, this);
+	m_filterStorage.checkAndRemoveFilterSignals(m_tuningSignalManager.signalHashes(), removedNotFound, notFoundSignalsAndFilters, this);
 
 	if (removedNotFound == true)
 	{
@@ -336,12 +327,12 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
-		m_schemasWorkspace = new SchemasWorkspace(&m_configController, m_objectManager, objects, m_globalScript, this);
+		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, m_globalScript, this);
 	}
 
 	if (theConfigSettings.showSignals == true)
 	{
-		m_tuningWorkspace = new TuningWorkspace(m_objectManager, &m_filterStorage, objects, this);
+		m_tuningWorkspace = new TuningWorkspace(&m_tuningSignalManager, m_tcpClient, &m_filterStorage, this);
 	}
 
 	// Now choose, what workspace to display. If both exists, create a tab page.
@@ -386,9 +377,7 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 
 void MainWindow::slot_configurationArrived()
 {
-	TuningSignalStorage objects = m_objectManager->signalsStorage();
-
-	createWorkspace(&objects);
+	createWorkspace();
 
 	return;
 }
@@ -438,13 +427,7 @@ void MainWindow::runPresetEditor()
 
 	TuningClientFilterStorage editFilters = m_filterStorage;
 
-	TuningSignalStorage objects = m_objectManager->signalsStorage();
-
-	DialogFilterEditor d(m_objectManager, &editFilters, &objects,
-							   this);
-
-    //connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
-    //connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
+	DialogFilterEditor d(&m_tuningSignalManager, m_tcpClient, &editFilters, this);
 
 	if (d.exec() == QDialog::Accepted)
 	{
@@ -458,7 +441,7 @@ void MainWindow::runPresetEditor()
 			QMessageBox::critical(this, tr("Error"), errorMsg);
 		}
 
-		createWorkspace(&objects);
+		createWorkspace();
 	}
 }
 
@@ -496,7 +479,7 @@ void MainWindow::showTuningSources()
 {
 	if (theDialogTuningSources == nullptr)
 	{
-		theDialogTuningSources = new DialogTuningSources(m_objectManager, this);
+		theDialogTuningSources = new DialogTuningSources(m_tcpClient, this);
 		theDialogTuningSources->show();
 	}
 	else

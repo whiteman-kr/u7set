@@ -27,12 +27,12 @@ void TuningFilterValue::setUseValue(bool value)
 	m_useValue = value;
 }
 
-float TuningFilterValue::value() const
+TuningValue TuningFilterValue::value() const
 {
 	return m_value;
 }
 
-void TuningFilterValue::setValue(float value)
+void TuningFilterValue::setValue(TuningValue value)
 {
 	m_value = value;
 }
@@ -54,9 +54,28 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 		setUseValue(reader.attributes().value("UseValue").toString() == "true");
 	}
 
-	if (reader.attributes().hasAttribute("Value"))
+	if (reader.attributes().hasAttribute("ValueType"))
 	{
-		setValue(reader.attributes().value("Value").toFloat());
+		TuningValue tv;
+		tv.type = static_cast<TuningValueType>(reader.attributes().value("ValueType").toInt());
+		switch (tv.type)
+		{
+		case TuningValueType::Discrete:
+		case TuningValueType::SignedInteger:
+			tv.intValue = reader.attributes().value("ValueInt").toInt();
+			break;
+		case TuningValueType::Float:
+			tv.floatValue = reader.attributes().value("ValueFloat").toFloat();
+			break;
+		case TuningValueType::Double:
+			tv.doubleValue = reader.attributes().value("ValueDouble").toDouble();
+			break;
+		default:
+			assert(false);
+			return false;
+		}
+
+		setValue(tv);
 	}
 
 	return true;
@@ -65,9 +84,28 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 {
 	writer.writeStartElement("Value");
-	writer.writeAttribute("AppSignalId", appSignalId());
-	writer.writeAttribute("UseValue", useValue() ? "true" : "false");
-	writer.writeAttribute("Value", QString::number(value()));
+	writer.writeAttribute("AppSignalId", m_appSignalId);
+	writer.writeAttribute("UseValue", m_useValue ? "true" : "false");
+
+	writer.writeAttribute("ValueType", QString::number(static_cast<int>(m_value.type)));
+
+	switch (m_value.type)
+	{
+	case TuningValueType::Discrete:
+	case TuningValueType::SignedInteger:
+		writer.writeAttribute("ValueInt", QString::number(m_value.intValue));
+		break;
+	case TuningValueType::Float:
+		writer.writeAttribute("ValueFloat", QString::number(m_value.floatValue));
+		break;
+	case TuningValueType::Double:
+		writer.writeAttribute("ValueDouble", QString::number(m_value.doubleValue));
+		break;
+	default:
+		assert(false);
+		return false;
+	}
+
 	writer.writeEndElement();
 
 	return true;
@@ -412,7 +450,7 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 
 bool TuningFilter::save(QXmlStreamWriter& writer) const
 {
-	if (isSourceUser() == false)
+	if (isSourceUser() == false && isSourceProject() == false)
 	{
 		return true;
 	}
@@ -1339,7 +1377,7 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString* er
 
 }
 
-void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
+void TuningFilterStorage::createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
 {
 	if (objects == nullptr)
 	{

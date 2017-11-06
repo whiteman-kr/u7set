@@ -5,6 +5,7 @@
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
+#include "TuningClientTcpClient.h"
 
 class TuningModelClient : public TuningModel
 {
@@ -12,10 +13,8 @@ class TuningModelClient : public TuningModel
 public:
 	TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent);
 
-	void setValue(const std::vector<int>& selectedRows);
-	void invertValue(const std::vector<int>& selectedRows);
-
-	void updateStates();
+	TuningValue defaultValue(Hash hash, bool* ok);
+	void setDefaultValues(const std::vector<std::pair<Hash, TuningValue>>& values);
 
 protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
@@ -26,18 +25,10 @@ protected:
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-public slots:
-
-	void slot_setAll();
-
-	void slot_undo();
-	void slot_Write();
-	void slot_Apply();
-
-
 private:
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
+	std::map<Hash, TuningValue> m_defaultValues;
 
 };
 
@@ -87,7 +78,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage, QWidget* parent = 0);
 
 	~TuningPage();
 
@@ -116,13 +107,6 @@ public slots:
 
 
 private:
-
-	const TuningSignalStorage* m_objects = nullptr;
-
-	TuningSignalManager* m_tuningSignalManager = nullptr;
-
-	TuningFilterStorage* m_filterStorage = nullptr;
-
 	enum class FilterType
 	{
 		All = 0,
@@ -132,11 +116,36 @@ private:
 		Caption
 	};
 
-	void invertValue();
+private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
 	bool eventFilter(QObject* object, QEvent* event);
+
+	// Signals processing
+
+	void setValue();
+
+	void invertValue();
+
+private slots:
+
+	void slot_setAll();
+
+	void slot_undo();
+	void slot_Write();
+	void slot_Apply();
+
+
+
+private:
+
+	TuningSignalManager* m_tuningSignalManager = nullptr;
+
+	TuningTcpClient* m_tuningTcpClient = nullptr;
+
+	TuningFilterStorage* m_filterStorage = nullptr;
+
 
 	TuningTableView* m_objectList = nullptr;
 

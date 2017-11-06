@@ -2,15 +2,17 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
-TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent) :
+TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningClientFilterStorage* filterStorage, QWidget* parent) :
 	QWidget(parent),
-	m_objects(*objects),
+	m_tuningSignalManager(tuningSignalManager),
+	m_tuningTcpClient(tuningTcpClient),
 	m_filterStorage(filterStorage)
 {
 
-	assert(tuningSignalManager);
-	assert(m_filterStorage),
-			assert(objects);
+	assert(m_tuningSignalManager);
+	assert(m_tuningTcpClient);
+	assert(m_filterStorage);
+
 
 	QVBoxLayout* pLayout = new QVBoxLayout();
 	setLayout(pLayout);
@@ -44,7 +46,7 @@ TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, Tunin
 			continue;
 		}
 
-		TuningPage* tp = new TuningPage(tuningPageIndex++, f, tuningSignalManager, filterStorage, &m_objects);
+		TuningPage* tp = new TuningPage(tuningPageIndex++, f, m_tuningSignalManager, m_tuningTcpClient, filterStorage);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
 
@@ -59,7 +61,7 @@ TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, Tunin
 		//
 		std::shared_ptr<TuningFilter> emptyTabFilter = nullptr;
 
-		m_tuningPage = new TuningPage(tuningPageIndex, emptyTabFilter, tuningSignalManager, filterStorage, &m_objects);
+		m_tuningPage = new TuningPage(tuningPageIndex, emptyTabFilter, tuningSignalManager, m_tuningTcpClient, filterStorage);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, m_tuningPage, &TuningPage::slot_filterTreeChanged);
 

@@ -637,9 +637,21 @@ namespace Hardware
 			}
 		}
 
+		std::vector<std::shared_ptr<Property>> newProperties = properties();
+
+		// Set Specific editors to properties
+		//
+
+		for (std::shared_ptr<Property> p : newProperties)
+		{
+			if (p->caption() == "Filters" && p->description() == "Tuning signal filters description in XML format")
+			{
+				p->setSpecificEditor(PropertySpecificEditor::TuningFilter);
+			}
+		}
+
 		// Set to parsed properties old value
 		//
-		std::vector<std::shared_ptr<Property>> newProperties = properties();
 
 		for (std::shared_ptr<Property> p : oldProperties)
 		{

@@ -4,12 +4,12 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "DialogTuningSourceInfo.h"
 
-DialogTuningSources::DialogTuningSources(TuningSignalManager* tuningSignalManager, QWidget* parent) :
+DialogTuningSources::DialogTuningSources(TuningClientTcpClient* tcpClient, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTuningSources),
-	m_tuningSignalManager(tuningSignalManager)
+	m_tcpClient(tcpClient)
 {
-	assert(tuningSignalManager);
+	assert(m_tcpClient);
 
 	setAttribute(Qt::WA_DeleteOnClose);
 	ui->setupUi(this);
@@ -38,7 +38,7 @@ DialogTuningSources::DialogTuningSources(TuningSignalManager* tuningSignalManage
 	ui->treeWidget->setSortingEnabled(true);
 	ui->treeWidget->sortByColumn(1, Qt::AscendingOrder);// sort by EquipmentID
 
-	connect(m_tuningSignalManager, &TuningSignalManager::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
+	connect(m_tcpClient, &TuningTcpClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
 }
@@ -66,7 +66,7 @@ void DialogTuningSources::slot_tuningSourcesArrived()
 
 void DialogTuningSources::update(bool refreshOnly)
 {
-	std::vector<TuningSource> tsi = m_tuningSignalManager->tuningSourcesInfo();
+	std::vector<TuningSource> tsi = m_tcpClient->tuningSourcesInfo();
 	int count = static_cast<int>(tsi.size());
 
 	if (ui->treeWidget->topLevelItemCount() != count)
@@ -84,22 +84,22 @@ void DialogTuningSources::update(bool refreshOnly)
 
 			TuningSource& ts = tsi[i];
 
-			connectionStrings << QString::number(ts.m_info.id());
-			connectionStrings << ts.m_info.equipmentid().c_str();
-			connectionStrings << ts.m_info.caption().c_str();
-			connectionStrings << ts.m_info.ip().c_str();
-			connectionStrings << QString::number(ts.m_info.port());
+			connectionStrings << QString::number(ts.info.id());
+			connectionStrings << ts.info.equipmentid().c_str();
+			connectionStrings << ts.info.caption().c_str();
+			connectionStrings << ts.info.ip().c_str();
+			connectionStrings << QString::number(ts.info.port());
 
-			QChar chChannel = 'A' + ts.m_info.channel();
+			QChar chChannel = 'A' + ts.info.channel();
 			connectionStrings << chChannel;
 
-			connectionStrings << QString::number(ts.m_info.subsystemid());
-			connectionStrings << ts.m_info.subsystem().c_str();
-			connectionStrings << QString::number(ts.m_info.lmnumber());
+			connectionStrings << QString::number(ts.info.subsystemid());
+			connectionStrings << ts.info.subsystem().c_str();
+			connectionStrings << QString::number(ts.info.lmnumber());
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
 
-			item->setData(0, Qt::UserRole, static_cast<quint64>(ts.m_info.id()));
+			item->setData(0, Qt::UserRole, static_cast<quint64>(ts.info.id()));
 
 			ui->treeWidget->addTopLevelItem(item);
 		}
@@ -126,14 +126,14 @@ void DialogTuningSources::update(bool refreshOnly)
 
 		TuningSource ts;
 
-		if (m_tuningSignalManager->tuningSourceInfo(id, &ts) == true)
+		if (m_tcpClient->tuningSourceInfo(id, &ts) == true)
 		{
 			int col = dynamicColumn;
 
-			item->setText(col++, ts.m_state.isreply() ? tr("Yes") : tr("No"));
-			item->setText(col++, QString::number(ts.m_state.requestcount()));
-			item->setText(col++, QString::number(ts.m_state.replycount()));
-			item->setText(col++, QString::number(ts.m_state.commandqueuesize()));
+			item->setText(col++, ts.state.isreply() ? tr("Yes") : tr("No"));
+			item->setText(col++, QString::number(ts.state.requestcount()));
+			item->setText(col++, QString::number(ts.state.replycount()));
+			item->setText(col++, QString::number(ts.state.commandqueuesize()));
 		}
 	}
 }
@@ -162,7 +162,7 @@ void DialogTuningSources::on_btnDetails_clicked()
 
 	quint64 id = item->data(0, Qt::UserRole).value<quint64>();
 
-	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tuningSignalManager, this, id);
+	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tcpClient, this, id);
 	dlg->exec();
 }
 

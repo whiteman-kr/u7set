@@ -38,7 +38,7 @@ void TuningSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
-	drawParam.setTuningController(&tuningController());
+	drawParam.setTuningController(tuningController());
 	drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 	drawParam.setEditMode(false);
 

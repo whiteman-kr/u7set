@@ -185,7 +185,6 @@ SOURCES +=\
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
-    ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
     ../lib/CsvFile.cpp \
     Builder/AppItems.cpp \
@@ -197,7 +196,9 @@ SOURCES +=\
     EditEngine/EditEngineSetObject.cpp \
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
-    CreateSignalDialog.cpp
+    CreateSignalDialog.cpp \
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../Proto/network.pb.cc
 
 HEADERS  += \
     CentralWidget.h \
@@ -320,7 +321,6 @@ HEADERS  += \
     LogicModule.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
-    ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
@@ -333,7 +333,9 @@ HEADERS  += \
     EditEngine/EditEngineSetObject.h \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
-    CreateSignalDialog.h
+    CreateSignalDialog.h \
+    ../lib/Tuning/TuningSignalManager.h \
+    ../Proto/network.pb.h
 
 FORMS    += \
     CreateProjectDialog.ui \

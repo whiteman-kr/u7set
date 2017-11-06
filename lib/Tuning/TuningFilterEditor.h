@@ -7,15 +7,13 @@
 #include "TuningModel.h"
 #include "../lib/PropertyEditor.h"
 
-
-
 class DialogChooseTuningSignals : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	DialogChooseTuningSignals(const TuningSignalStorage* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent);
+	DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent);
 
 
 	enum class FilterType
@@ -47,7 +45,7 @@ private:
 
 private:
 
-	const TuningSignalStorage* m_signalStorage = nullptr;
+	TuningSignalManager* m_signalManager = nullptr;
 
 	std::shared_ptr<TuningFilter> m_filter;
 
@@ -127,7 +125,7 @@ class TuningFilterEditor : public QWidget
 
 public:
 
-	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
+	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
 								bool readOnly,
 								bool setCurrentEnabled,
 								TuningFilter::Source source,
@@ -141,7 +139,7 @@ public:
 
 signals:
 
-	//void getCurrentSignalValue(Hash appSignalHash, float* value, bool* ok);
+	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);
 
 private slots:
 
@@ -210,7 +208,7 @@ private:
 
 	TuningFilterStorage* m_filterStorage = nullptr;
 
-	const TuningSignalStorage* m_signalStorage = nullptr;
+	TuningSignalManager* m_signalManager = nullptr;
 
 private:
 

@@ -1,5 +1,5 @@
-#ifndef ITUNINGTCPCLIENT_H
-#define ITUNINGTCPCLIENT_H
+#pragma once
+
 #include "TuningSignalState.h"
 
 class ITuningTcpClient
@@ -9,4 +9,3 @@ public:
 };
 
 
-#endif // ITUNINGTCPCLIENT_H

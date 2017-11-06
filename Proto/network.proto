@@ -338,7 +338,7 @@ message TuningValue
     optional int32 type = 1;
 	optional int32 intValue = 2 [default = 0];
 	optional float floatValue = 3  [default = 0.0];
-	optional float doubleValue = 4  [default = 0.0];
+	optional double doubleValue = 4  [default = 0.0];
 }
 
 message TuningSignalState

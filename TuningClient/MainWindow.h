@@ -9,7 +9,7 @@
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
-#include "TuningClientSignalManager.h"
+#include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
 
@@ -32,7 +32,10 @@ private:
 
 
 private:
-	TuningClientSignalManager* m_objectManager = nullptr;
+
+	TuningSignalManager m_tuningSignalManager;
+
+	TuningClientTcpClient* m_tcpClient = nullptr;
 
 	SimpleThread* m_tcpClientThread = nullptr;
 
@@ -64,7 +67,7 @@ private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
-	void createWorkspace(const TuningSignalStorage* objects);
+	void createWorkspace();
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;

@@ -4,6 +4,7 @@
 #include "../../Proto/network.pb.h"
 
 struct TuningValue;
+
 extern bool operator < (const TuningValue& l, const TuningValue& r);
 extern bool operator > (const TuningValue& l, const TuningValue& r);
 extern bool operator == (const TuningValue& l, const TuningValue& r);
@@ -30,9 +31,13 @@ public:
 	// Methods
 	//
 	TuningValue() = default;
+	explicit TuningValue(double value);
 	TuningValue(const Network::TuningValue& message);
 
+	void fromDouble(double value);
 	double toDouble() const;
+
+	QString toString(int precision = -1) const;
 
 	bool save(Network::TuningValue* message) const;
 	bool load(const Network::TuningValue& message);
@@ -41,6 +46,7 @@ public:
 	friend bool operator > (const TuningValue& l, const TuningValue& r);
 	friend bool operator == (const TuningValue& l, const TuningValue& r);
 	friend bool operator != (const TuningValue& l, const TuningValue& r);
+
 };
 
 union TuningSignalStateFlags
@@ -109,6 +115,8 @@ public:
 	int m_writeErrorCode = 0;
 	Hash m_writeClient = 0;
 };
+
+Q_DECLARE_METATYPE(TuningValue);
 
 Q_DECLARE_METATYPE(TuningSignalState);
 

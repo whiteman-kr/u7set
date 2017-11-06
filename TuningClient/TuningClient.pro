@@ -149,9 +149,9 @@ SOURCES +=\
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    TuningClientSignalManager.cpp \
     DialogFilterEditor.cpp \
-    ../lib/Tuning/TuningTcpClient.cpp
+    ../lib/Tuning/TuningTcpClient.cpp \
+    TuningClientTcpClient.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -202,9 +202,9 @@ HEADERS  += MainWindow.h \
     ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
-    TuningClientSignalManager.h \
     DialogFilterEditor.h \
-    ../lib/Tuning/TuningTcpClient.h
+    ../lib/Tuning/TuningTcpClient.h \
+    TuningClientTcpClient.h
 
 
 FORMS    += \

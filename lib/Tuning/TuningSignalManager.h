@@ -50,6 +50,9 @@ public:
 	void setState(Hash signalHash, const TuningSignalState& state);
 	void setState(const std::vector<TuningSignalState>& states);
 
+	void setNewValue(Hash signalHash, const TuningValue& value);
+
+
 	// Signals
 	//
 signals:

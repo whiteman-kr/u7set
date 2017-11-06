@@ -197,6 +197,15 @@ bool TuningClientCfgGenerator::writeSettings()
 			return false;
 		}
 
+		//
+		// filterBySchema
+		//
+		QString equipmentList = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentId", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
 		// Get ip addresses and ports, write them to configurations
 		//
 		{
@@ -222,6 +231,8 @@ bool TuningClientCfgGenerator::writeSettings()
 			xmlWriter.writeAttribute("showSchemasList", (showSchemasList ? "true" : "false"));
 			xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 			xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
+
+			xmlWriter.writeAttribute("equipmentList", equipmentList);
 
 
 		}	// TuningService

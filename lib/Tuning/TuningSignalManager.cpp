@@ -257,3 +257,26 @@ void TuningSignalManager::setState(const std::vector<TuningSignalState>& states)
 
 	return;
 }
+
+void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
+{
+	if (signalHash == 0)
+	{
+		assert(signalHash != 0);
+		return;
+	}
+
+	QMutexLocker l(&m_statesMutex);
+
+	auto it = m_states.find(signalHash);
+	if (it == m_states.end())
+	{
+		assert(false);
+		return;
+	}
+
+	it->second.setNewValue(value);
+
+	return;
+
+}

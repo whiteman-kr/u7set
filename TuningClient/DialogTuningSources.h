@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "TuningClientTcpClient.h"
 
 namespace Ui {
 	class DialogTuningSources;
@@ -14,7 +14,7 @@ class DialogTuningSources : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSources(TuningSignalManager* tuningSignalManager, QWidget* parent = 0);
+	explicit DialogTuningSources(TuningClientTcpClient* tcpClient, QWidget* parent = 0);
 	~DialogTuningSources();
 
 protected:
@@ -60,7 +60,7 @@ private:
 
 	int m_updateStateTimerId = -1;
 
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	TuningClientTcpClient* m_tcpClient = nullptr;
 };
 
 extern DialogTuningSources* theDialogTuningSources;

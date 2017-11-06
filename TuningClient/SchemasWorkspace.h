@@ -5,7 +5,7 @@
 #include "../lib/Tuning/TuningModel.h"
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/Tuning/TuningFilter.h"
+#include "TuningClientTcpClient.h"
 #include "TuningSchemaWidget.h"
 
 class SchemasWorkspace : public QWidget
@@ -13,7 +13,7 @@ class SchemasWorkspace : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SchemasWorkspace(ConfigController* configController, TuningSignalManager* tuningSignalManager, const TuningSignalStorage* objects, const QString& globalScript, QWidget* parent);
+	explicit SchemasWorkspace(ConfigController* configController, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, const QString& globalScript, QWidget* parent);
 	virtual ~SchemasWorkspace();
 
 private slots:
@@ -21,9 +21,11 @@ private slots:
 
 private:
 
+	TuningController m_tuningController;
+
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	TuningSignalStorage m_objects;
+	TuningClientTcpClient* m_tuninTcpClient = nullptr;
 
 	SchemaStorage* m_schemaStorage = nullptr;
 

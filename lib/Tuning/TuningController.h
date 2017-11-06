@@ -1,5 +1,4 @@
-#ifndef TUNINGCONTROLLER_H
-#define TUNINGCONTROLLER_H
+#pragma once
 
 #include <QObject>
 #include "../lib/Tuning/ITuningSignalManager.h"
@@ -29,8 +28,6 @@ private:
 	ITuningSignalManager* m_signalManager = nullptr;
 	ITuningTcpClient* m_tcpClient = nullptr;
 };
-
-#endif
 
 
 

@@ -4101,12 +4101,12 @@ class TuningValue : public ::google::protobuf::Message {
   inline float floatvalue() const;
   inline void set_floatvalue(float value);
 
-  // optional float doubleValue = 4 [default = 0];
+  // optional double doubleValue = 4 [default = 0];
   inline bool has_doublevalue() const;
   inline void clear_doublevalue();
   static const int kDoubleValueFieldNumber = 4;
-  inline float doublevalue() const;
-  inline void set_doublevalue(float value);
+  inline double doublevalue() const;
+  inline void set_doublevalue(double value);
 
   // @@protoc_insertion_point(class_scope:Network.TuningValue)
  private:
@@ -4123,8 +4123,8 @@ class TuningValue : public ::google::protobuf::Message {
 
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 intvalue_;
+  double doublevalue_;
   float floatvalue_;
-  float doublevalue_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
@@ -10088,7 +10088,7 @@ inline void TuningValue::set_floatvalue(float value) {
   floatvalue_ = value;
 }
 
-// optional float doubleValue = 4 [default = 0];
+// optional double doubleValue = 4 [default = 0];
 inline bool TuningValue::has_doublevalue() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -10102,10 +10102,10 @@ inline void TuningValue::clear_doublevalue() {
   doublevalue_ = 0;
   clear_has_doublevalue();
 }
-inline float TuningValue::doublevalue() const {
+inline double TuningValue::doublevalue() const {
   return doublevalue_;
 }
-inline void TuningValue::set_doublevalue(float value) {
+inline void TuningValue::set_doublevalue(double value) {
   set_has_doublevalue();
   doublevalue_ = value;
 }

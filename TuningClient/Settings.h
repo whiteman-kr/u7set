@@ -65,6 +65,8 @@ struct ConfigSettings
 
 	bool filterBySchema = true;
 
+	QStringList equipmentList;
+
 	std::vector<SchemaSettings> schemas;
 
 	QString errorMessage;				// Parsing error message, empty if no errors

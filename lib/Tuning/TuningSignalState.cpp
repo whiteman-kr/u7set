@@ -1,8 +1,37 @@
 #include "TuningSignalState.h"
 
+TuningValue::TuningValue(double value)
+{
+	type = TuningValueType::Double;
+	doubleValue = value;
+	return;
+}
+
 TuningValue::TuningValue(const Network::TuningValue& message)
 {
 	load(message);
+	return;
+}
+void TuningValue::fromDouble(double value)
+{
+	switch (type)
+	{
+	case TuningValueType::Discrete:
+	case TuningValueType::SignedInteger:
+		intValue = static_cast<int>(value);
+		break;
+
+	case TuningValueType::Float:
+		floatValue = static_cast<float>(value);
+		break;
+
+	case TuningValueType::Double:
+		doubleValue = value;
+		break;
+
+	default:
+		assert(false);
+	}
 	return;
 }
 
@@ -21,6 +50,36 @@ double TuningValue::toDouble() const
 
 	case TuningValueType::Double:
 		return doubleValue;
+
+	default:
+		assert(false);
+		return 0;
+	}
+}
+
+QString TuningValue::toString(int precision) const
+{
+	switch (type)
+	{
+	case TuningValueType::Discrete:
+		return intValue == 1 ? "1" : "0";
+
+	case TuningValueType::SignedInteger:
+		return QString::number(intValue);
+
+	case TuningValueType::Float:
+		if (precision < 0)
+		{
+			precision = 6;
+		}
+		return QString::number(floatValue, 'f', precision);
+
+	case TuningValueType::Double:
+		if (precision < 0)
+		{
+			precision = 12;
+		}
+		return QString::number(doubleValue, 'f', precision);
 
 	default:
 		assert(false);
@@ -225,3 +284,4 @@ void TuningSignalState::invalidate()
 {
 	m_flags.valid = false;
 }
+

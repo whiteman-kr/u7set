@@ -2,12 +2,14 @@
 #define TUNINGWORKSPACE_H
 
 #include "TuningPage.h"
+#include "TuningClientTcpClient.h"
+#include "TuningClientFilterStorage.h"
 
 class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent);
+	explicit TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningClientFilterStorage* filterStorage, QWidget* parent);
 	virtual ~TuningWorkspace();
 
 private:
@@ -18,7 +20,9 @@ private:
 
 private:
 
-	TuningSignalStorage m_objects;
+	TuningSignalManager* m_tuningSignalManager = nullptr;
+
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
 	TuningFilterStorage* m_filterStorage = nullptr;
 

@@ -1429,7 +1429,7 @@ void protobuf_AddDesc_network_2eproto() {
     "ingSourceState\"\'\n\021TuningSignalsRead\022\022\n\ns"
     "ignalHash\030\002 \003(\004\"_\n\013TuningValue\022\014\n\004type\030\001"
     " \001(\005\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030"
-    "\003 \001(\002:\0010\022\026\n\013doubleValue\030\004 \001(\002:\0010\"\243\002\n\021Tun"
+    "\003 \001(\002:\0010\022\026\n\013doubleValue\030\004 \001(\001:\0010\"\243\002\n\021Tun"
     "ingSignalState\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n"
     "\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022#\n"
     "\005value\030\004 \001(\0132\024.Network.TuningValue\022*\n\014re"
@@ -13267,17 +13267,17 @@ bool TuningValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(37)) goto parse_doubleValue;
+        if (input->ExpectTag(33)) goto parse_doubleValue;
         break;
       }
 
-      // optional float doubleValue = 4 [default = 0];
+      // optional double doubleValue = 4 [default = 0];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
          parse_doubleValue:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
                  input, &doublevalue_)));
           set_has_doublevalue();
         } else {
@@ -13320,9 +13320,9 @@ void TuningValue::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFloat(3, this->floatvalue(), output);
   }
 
-  // optional float doubleValue = 4 [default = 0];
+  // optional double doubleValue = 4 [default = 0];
   if (has_doublevalue()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(4, this->doublevalue(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(4, this->doublevalue(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -13348,9 +13348,9 @@ void TuningValue::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(3, this->floatvalue(), target);
   }
 
-  // optional float doubleValue = 4 [default = 0];
+  // optional double doubleValue = 4 [default = 0];
   if (has_doublevalue()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(4, this->doublevalue(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(4, this->doublevalue(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -13383,9 +13383,9 @@ int TuningValue::ByteSize() const {
       total_size += 1 + 4;
     }
 
-    // optional float doubleValue = 4 [default = 0];
+    // optional double doubleValue = 4 [default = 0];
     if (has_doublevalue()) {
-      total_size += 1 + 4;
+      total_size += 1 + 8;
     }
 
   }
