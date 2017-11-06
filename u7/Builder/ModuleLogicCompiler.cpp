@@ -3859,68 +3859,6 @@ namespace Builder
 		result &= m_memoryMap.appendNonAcquiredAnalogStrictOutputSignals(m_nonAcquiredAnalogStrictOutputSignals);
 		result &= m_memoryMap.appendNonAcquiredAnalogInternalSignals(m_nonAcquiredAnalogInternalSignals);
 
-
-
-		//result &= m_memoryMap.appendNonAnalogInputSignals(m_nonAcquiredAnalogInputSignals);
-
-
-/*		int regBufOffset = -m_memoryMap.regBufStartAddr();	// minus is OK!
-
-		for(Signal* s : m_nonAcquiredAnalogInputSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendNonAcquiredAnalogInputSignal(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_nonAcquiredAnalogOutputSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendNonAcquiredAnalogOutputSignal(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		for(Signal* s : m_nonAcquiredAnalogInternalSignals)
-		{
-			TEST_PTR_CONTINUE(s);
-
-			Address16 addr = m_memoryMap.appendNonAcquiredAnalogInternalSignal(*s);
-
-			s->setUalAddr(addr);
-			s->setRegBufAddr(addr);
-
-			addr.addWord(regBufOffset);
-			s->setRegValueAddr(addr);
-		}
-
-		result = m_memoryMap.recalculateAddresses(); */
-
 		return result;
 	}
 
