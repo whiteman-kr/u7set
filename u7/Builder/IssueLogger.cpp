@@ -3877,7 +3877,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Discrete constant must have value 0 or 1.
+	/// Title: Discrete constant must have value 0 or 1 (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -3892,7 +3892,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5086,
-				  QString(tr("Discrete constant must have value 0 or 1 (Logic schema '%1').")).
+				  QString(tr("Discrete constant must have value 0 or 1 (Logic schema %1).")).
 						arg(schemaID));
 
 	}

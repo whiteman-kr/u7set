@@ -317,6 +317,8 @@ namespace VFrame30
 	{
 		double radius = pinWidth / 9.0;
 		p->drawEllipse(QRectF(x - radius, y - radius, 2 * radius, 2 * radius));		//Using drawEllipse(QPoint) creates
+
+		return;
 	}
 
 	double FblItem::GetPinWidth(SchemaUnit unit, int dpi) const

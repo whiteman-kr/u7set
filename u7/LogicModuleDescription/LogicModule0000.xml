@@ -355,7 +355,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#bus_simlock_v1"         Caption="bus_simlock"         Version="1.0000">
+        <AFB id="#bus_simlock_v1"         Caption="bus_simlock"         Version="1.0001">
 			<Properties>				
 				<Description>Locking and simulation module</Description>
 				<Category>Bus Logic</Category>
@@ -365,12 +365,12 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>18</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
-				<Pin OpName="i_set" Caption="sim" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
-				<Pin OpName="i_reset" Caption="block" Type="Bus" ByteOrder="BigEndian" OpIndex="2" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+			    <Pin OpName="i_data" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_set" Caption="sim" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_reset" Caption="block" Type="Bus" ByteOrder="BigEndian" OpIndex="2" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="4" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="4" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
 			</Outputs>
 			<Params>
 			</Params>
@@ -9837,7 +9837,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#simlock_v1"         Caption="simlock"         Version="1.0006">
+        <AFB id="#simlock_v1"         Caption="simlock"         Version="1.0007">
 			<Properties>				
 				<Description>Locking and simulation module</Description>
 				<Category>Logic</Category>
@@ -9847,12 +9847,12 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>18</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="16"/>
-				<Pin OpName="i_set" Caption="sim" Type="Discrete" ByteOrder="BigEndian" OpIndex="1" Size="16"/>
-				<Pin OpName="i_reset" Caption="block" Type="Discrete" ByteOrder="BigEndian" OpIndex="2" Size="16"/>
+			    <Pin OpName="i_data" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="1"/>
+				<Pin OpName="i_set" Caption="sim" Type="Discrete" ByteOrder="BigEndian" OpIndex="1" Size="1"/>
+				<Pin OpName="i_reset" Caption="block" Type="Discrete" ByteOrder="BigEndian" OpIndex="2" Size="1"/>
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="16"/>
+			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
 			</Outputs>
 			<Params>
 			</Params>
