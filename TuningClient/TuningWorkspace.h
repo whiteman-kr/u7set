@@ -9,7 +9,7 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent);
+	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
 	virtual ~TuningWorkspace();
 
 private:
@@ -55,6 +55,11 @@ private:
 	std::shared_ptr<TuningFilter> m_treeFilter;	// Currently pressed button filter
 	std::shared_ptr<TuningFilter> m_buttonFilter;	// Currently pressed button filter
 
+	std::map<QString, TuningPage*> m_tuningPagesMap;
+	std::map<QString, TuningWorkspace*> m_tuningWorkspacesMap;
+	std::map<QString, int> m_activeTabPagesMap;
+
+	static int m_instanceCounter;
 
 private slots:
 	void slot_treeSelectionChanged();

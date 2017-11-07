@@ -332,7 +332,7 @@ void MainWindow::createWorkspace()
 
 	if (theConfigSettings.showSignals == true)
 	{
-		m_tuningWorkspace = new TuningWorkspace(m_filterStorage.m_root, m_filterStorage.m_root, &m_tuningSignalManager, m_tcpClient, this);
+		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.m_root, &m_tuningSignalManager, m_tcpClient, this);
 	}
 
 	// Now choose, what workspace to display. If both exists, create a tab page.

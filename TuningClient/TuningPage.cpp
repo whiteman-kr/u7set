@@ -419,6 +419,7 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 // TuningPage
 //
 
+int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
@@ -429,6 +430,13 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 	m_tabFilter(tabFilter),
 	m_buttonFilter(buttonFilter)
 {
+
+	qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+	m_instanceCounter++;
+
+	//assert(m_treeFilter);		They can be nullptr
+	//assert(m_tabFilter);
+	//assert(m_buttonFilter);
 
 	assert(m_tuningSignalManager);
 
@@ -553,6 +561,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 
 TuningPage::~TuningPage()
 {
+	m_instanceCounter--;
+	qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+
 	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(m_tuningPageIndex);
 	if (pageSettings == nullptr)
 	{

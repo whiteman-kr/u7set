@@ -9,6 +9,10 @@
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 _CRT_REPORT_HOOK prevHook = nullptr;
 
 #define FALSE   0
@@ -110,7 +114,7 @@ int main(int argc, char* argv[])
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 	// To see all memory leaks, not only in the own code, comment the next line
-	//prevHook = _CrtSetReportHook(reportingHook);
+	prevHook = _CrtSetReportHook(reportingHook);
 #endif
 
 	int result = 0;
@@ -121,6 +125,8 @@ int main(int argc, char* argv[])
 	a.setOrganizationDomain("radiy.com");
 
 	a.setApplicationVersion(QString("0.1.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
+
+	//int* x = new int[100];
 
 	VFrame30::VFrame30Library::Init();
 
@@ -225,6 +231,8 @@ int main(int argc, char* argv[])
 
 	VFrame30::VFrame30Library::Shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
+
+	_CrtDumpMemoryLeaks();
 
 	return result;
 }

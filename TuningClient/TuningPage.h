@@ -71,7 +71,6 @@ class TuningPage : public QWidget
 	Q_OBJECT
 public:
 	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
-
 	~TuningPage();
 
 	void fillObjectsList();
@@ -174,6 +173,8 @@ private:
 	int m_sortColumn = 0;
 
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+
+	static int m_instanceCounter;
 
 
 };
