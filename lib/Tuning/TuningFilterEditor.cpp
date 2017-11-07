@@ -724,6 +724,11 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 	for (int i = 0; i < m_presetsTree->columnCount(); i++)
 	{
 		m_presetsTree->resizeColumnToContents(i);
+
+		if (m_presetsTree->columnWidth(i) < 200)
+		{
+			m_presetsTree->setColumnWidth(i, 200);
+		}
 	}
 
 	//
@@ -738,6 +743,50 @@ void TuningFilterEditor::saveUserInterfaceSettings(int* propertyEditorSplitterPo
 {
 	*propertyEditorSplitterPos = m_propertyEditor->splitterPosition();
 	*dialogChooseSignalGeometry = m_dialogChooseSignalGeometry;
+}
+
+void TuningFilterEditor::addPreset(TuningFilter::InterfaceType interfaceType)
+{
+	std::shared_ptr<TuningFilter> newFilter = std::make_shared<TuningFilter>(interfaceType);
+
+	QUuid uid = QUuid::createUuid();
+	newFilter->setID(uid.toString());
+	newFilter->setCaption(tr("New Filter"));
+	newFilter->setSource(m_source);
+
+	QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
+	setFilterItemText(newPresetItem, newFilter.get());
+	newPresetItem->setData(0, Qt::UserRole, QVariant::fromValue(newFilter));
+
+	QTreeWidgetItem* parentItem = nullptr;
+	std::shared_ptr<TuningFilter> parentFilter = selectedFilter(&parentItem);
+
+	if (parentItem == nullptr || parentFilter == nullptr)
+	{
+		// no item was selected, add top level item
+		//
+		m_filterStorage->m_root->addChild(newFilter);
+
+		m_presetsTree->addTopLevelItem(newPresetItem);
+
+		newPresetItem->setSelected(true);
+	}
+	else
+	{
+		// an item was selected, add child item
+		//
+		parentFilter->addChild(newFilter);
+
+		parentItem->addChild(newPresetItem);
+
+		parentItem->setExpanded(true);
+
+		parentItem->setSelected(false);
+
+		newPresetItem->setSelected(true);
+	}
+
+	m_modified = true;
 }
 
 void TuningFilterEditor::initUserInterface()
@@ -943,9 +992,11 @@ void TuningFilterEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 		return;
 	}
 
+
+
 	QStringList l;
 	l << filter->caption();
-	l.append(tr("Preset"));
+	l << E::valueToString<TuningFilter::InterfaceType>(filter->interfaceType());
 
 	int i = 0;
 	for (auto s : l)
@@ -957,37 +1008,112 @@ void TuningFilterEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 
 void TuningFilterEditor::on_m_addPreset_clicked()
 {
-	std::shared_ptr<TuningFilter> newFilter = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
 
-	QUuid uid = QUuid::createUuid();
-	newFilter->setID(uid.toString());
-	newFilter->setCaption(tr("New Filter"));
-	newFilter->setSource(m_source);
+	// Get the type of selected filter
+	//
+	std::shared_ptr<TuningFilter> selectedFilter = nullptr;
 
-	QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
-	setFilterItemText(newPresetItem, newFilter.get());
-	newPresetItem->setData(0, Qt::UserRole, QVariant::fromValue(newFilter));
+	QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
 
-	QTreeWidgetItem* parentItem = nullptr;
-	std::shared_ptr<TuningFilter> parentFilter = selectedFilter(&parentItem);
-
-	if (parentItem == nullptr || parentFilter == nullptr)
+	if (selectedItems.isEmpty() == false)
 	{
-		// no item was selected, add top level item
-		//
-		m_filterStorage->m_root->addChild(newFilter);
-		m_presetsTree->addTopLevelItem(newPresetItem);
-	}
-	else
-	{
-		// an item was selected, add child item
-		//
-		parentFilter->addChild(newFilter);
+		QTreeWidgetItem* item = selectedItems[0];
 
-		parentItem->addChild(newPresetItem);
+		selectedFilter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+
+		if (selectedFilter == nullptr)
+		{
+			assert(selectedFilter);
+			return;
+		}
 	}
 
-	m_modified = true;
+	// Allow items
+
+	bool allowTree = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tree);
+	bool allowTabs = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Button);
+	bool allowButtons = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tab);
+
+	if (selectedFilter == nullptr)
+	{
+		// Buttons and Tabs can't be both added to top level
+
+		for (int i = 0; i < m_presetsTree->topLevelItemCount(); i++)
+		{
+			 QTreeWidgetItem* item = m_presetsTree->topLevelItem(i);
+
+			 std::shared_ptr<TuningFilter> f = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+
+			 if (f == nullptr)
+			 {
+				 assert(f);
+				 return;
+			 }
+
+			 if (f->interfaceType() == TuningFilter::InterfaceType::Button)
+			 {
+				 allowTabs = false;
+			 }
+
+			 if (f->interfaceType() == TuningFilter::InterfaceType::Tab)
+			 {
+				 allowButtons = false;
+			 }
+		}
+	}
+
+	// Create menu
+
+	QMenu menu(this);
+
+	{
+		// Tree
+		QAction* action = new QAction(tr("Tree"), &menu);
+
+		auto f = [this]() -> void
+		{
+				addPreset(TuningFilter::InterfaceType::Tree);
+		};
+		connect(action, &QAction::triggered, this, f);
+
+		action->setEnabled(allowTree);
+
+		menu.addAction(action);
+	}
+
+	{
+		// Tab
+		QAction* action = new QAction(tr("Tab"), &menu);
+
+		auto f = [this]() -> void
+		{
+				addPreset(TuningFilter::InterfaceType::Tab);
+		};
+		connect(action, &QAction::triggered, this, f);
+
+		action->setEnabled(allowTabs);
+
+		menu.addAction(action);
+	}
+
+	{
+		// Tab
+		QAction* action = new QAction(tr("Button"), &menu);
+
+		auto f = [this]() -> void
+		{
+				addPreset(TuningFilter::InterfaceType::Button);
+		};
+		connect(action, &QAction::triggered, this, f);
+
+		action->setEnabled(allowButtons);
+
+		menu.addAction(action);
+	}
+
+	// Run the menu
+
+	menu.exec(QCursor::pos());
 }
 
 void TuningFilterEditor::on_m_removePreset_clicked()

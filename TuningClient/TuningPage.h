@@ -70,7 +70,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage, QWidget* parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
 
 	~TuningPage();
 
@@ -81,7 +81,6 @@ public:
 	QColor backColor();
 
 private slots:
-	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
 
@@ -95,7 +94,8 @@ private slots:
 
 public slots:
 
-	void slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
 
 
 private:
@@ -136,16 +136,10 @@ private:
 
 	TuningTcpClient* m_tuningTcpClient = nullptr;
 
-	TuningFilterStorage* m_filterStorage = nullptr;
-
 
 	TuningTableView* m_objectList = nullptr;
 
-	QButtonGroup* m_filterButtonGroup = nullptr;
-
 	QVBoxLayout* m_mainLayout = nullptr;
-
-	QHBoxLayout* m_buttonsLayout = nullptr;
 
 	QHBoxLayout* m_bottomLayout = nullptr;
 

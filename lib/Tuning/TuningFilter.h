@@ -95,7 +95,7 @@ public:
 	bool load(QXmlStreamReader& reader);
 	bool save(QXmlStreamWriter& writer) const;
 
-	bool match(const AppSignalParam& object, bool checkValues) const;
+	bool match(const AppSignalParam& object) const;
 
 	void checkSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 

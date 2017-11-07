@@ -195,7 +195,8 @@ TuningFilter::TuningFilter()
 
 	ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
 
-	ADD_PROPERTY_GETTER_SETTER(InterfaceType, "FilterType", true, TuningFilter::interfaceType, TuningFilter::setInterfaceType);
+	//ADD_PROPERTY_GETTER_SETTER(InterfaceType, "InterfaceType", true, TuningFilter::interfaceType, TuningFilter::setInterfaceType);
+	ADD_PROPERTY_GETTER(InterfaceType, "InterfaceType", true, TuningFilter::interfaceType);
 
 	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
@@ -931,7 +932,7 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 }
 
 
-bool TuningFilter::match(const AppSignalParam& object, bool checkValues) const
+bool TuningFilter::match(const AppSignalParam& object) const
 {
 	if (isEmpty() == true)
 	{
@@ -949,7 +950,7 @@ bool TuningFilter::match(const AppSignalParam& object, bool checkValues) const
 
 	// List of appSignalId
 	//
-	if (checkValues == true && m_signalValuesVec.empty() == false)
+	if (m_signalValuesVec.empty() == false)
 	{
 		if (valueExists(object.hash()) == false)
 		{
@@ -1045,7 +1046,16 @@ bool TuningFilter::match(const AppSignalParam& object, bool checkValues) const
 		}
 	}
 
-	return true;
+	TuningFilter* parent = parentFilter();
+
+	if (parent != nullptr)
+	{
+		return parent->match(object);
+	}
+	else
+	{
+		return true;
+	}
 }
 
 void TuningFilter::checkSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters)

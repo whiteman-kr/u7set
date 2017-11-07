@@ -160,6 +160,8 @@ private slots:
 	void on_m_presetsSignals_clicked();
 private:
 
+	void addPreset(TuningFilter::InterfaceType interfaceType);
+
 	void initUserInterface();
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter>& filter, QTreeWidgetItem* parent);

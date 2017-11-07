@@ -9,12 +9,18 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningClientFilterStorage* filterStorage, QWidget* parent);
+	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent);
 	virtual ~TuningWorkspace();
 
 private:
 
-	void fillFiltersTree();
+	void updateFiltersTree();
+
+	void createButtons();
+
+	void updateTabControl();
+
+	QWidget* createTuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> childWorkspaceFilter);
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
 
@@ -24,18 +30,30 @@ private:
 
 	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
-	TuningFilterStorage* m_filterStorage = nullptr;
+	std::shared_ptr<TuningFilter> m_workspaceFilter;
 
-	QTreeWidget* m_filterTree = nullptr;
-	QLineEdit* m_treeMask = nullptr;
-	QPushButton* m_treeMaskApply = nullptr;
+	// Interface parts
 
+	QWidget* m_treeLayoutWidget = nullptr;
+
+	QVBoxLayout* m_rightLayout = nullptr;
+
+	QHBoxLayout* m_buttonsLayout = nullptr;
 
 	QSplitter* m_hSplitter = nullptr;
 
-	QTabWidget* m_tab = nullptr;
+	// Controls
+
+	QTreeWidget* m_filterTree = nullptr;
+	QLineEdit* m_treeMask = nullptr;
 
 	TuningPage* m_tuningPage = nullptr;
+	QTabWidget* m_tab = nullptr;
+
+	//
+
+	std::shared_ptr<TuningFilter> m_treeFilter;	// Currently pressed button filter
+	std::shared_ptr<TuningFilter> m_buttonFilter;	// Currently pressed button filter
 
 
 private slots:
@@ -44,9 +62,14 @@ private slots:
 	void slot_maskApply();
 
 	void slot_currentTabChanged(int index);
+	void slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
+
 
 signals:
-	void filterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+
 
 };
 

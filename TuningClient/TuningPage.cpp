@@ -420,93 +420,17 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 //
 
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage, QWidget* parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
 	m_tuningPageIndex(tuningPageIndex),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
-	m_filterStorage(filterStorage),
-	m_tabFilter(tabFilter)
+	m_treeFilter(treeFilter),
+	m_tabFilter(tabFilter),
+	m_buttonFilter(buttonFilter)
 {
 
 	assert(m_tuningSignalManager);
-	assert(m_filterStorage);
-
-	std::vector<FilterButton*> buttons;
-
-	// Top buttons
-	//
-	int count = m_filterStorage->m_root->childFiltersCount();
-	for (int i = 0; i < count; i++)
-	{
-		std::shared_ptr<TuningFilter> f = m_filterStorage->m_root->childFilter(i);
-		if (f == nullptr)
-		{
-			assert(f);
-			continue;
-		}
-
-		if (f->isButton() == false)
-		{
-			continue;
-		}
-
-		FilterButton* button = new FilterButton(f, f->caption());
-		buttons.push_back(button);
-
-		connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
-	}
-
-	// Child buttons
-	//
-	if (tabFilter != nullptr)
-	{
-		for (int i = 0; i < tabFilter->childFiltersCount(); i++)
-		{
-			std::shared_ptr<TuningFilter> f = tabFilter->childFilter(i);
-			if (f == nullptr)
-			{
-				assert(f);
-				continue;
-			}
-
-			if (f->isButton() == false)
-			{
-				continue;
-			}
-
-			FilterButton* button = new FilterButton(f, f->caption());
-			buttons.push_back(button);
-
-			connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
-
-		}
-	}
-
-	if (buttons.empty() == false)
-	{
-		m_filterButtonGroup = new QButtonGroup(this);
-
-		m_filterButtonGroup->setExclusive(true);
-
-		m_buttonsLayout = new QHBoxLayout();
-
-		for (auto b: buttons)
-		{
-			m_filterButtonGroup->addButton(b);
-			m_buttonsLayout->addWidget(b);
-		}
-
-		m_buttonsLayout->addStretch();
-
-		// Set the first button checked
-		//
-		buttons[0]->blockSignals(true);
-		buttons[0]->setChecked(true);
-		m_buttonFilter = buttons[0]->filter();
-		buttons[0]->blockSignals(false);
-
-	}
 
 	// Object List
 	//
@@ -575,11 +499,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	}
 
 	m_mainLayout = new QVBoxLayout(this);
-
-	if (m_buttonsLayout != nullptr)
-	{
-		m_mainLayout->addLayout(m_buttonsLayout);
-	}
+	m_mainLayout->setContentsMargins(0, 0, 0, 0);
 
 	m_mainLayout->addWidget(m_objectList);
 	m_mainLayout->addLayout(m_bottomLayout);
@@ -696,7 +616,6 @@ void TuningPage::fillObjectsList()
 
 		if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
 		{
-			bool result = true;
 
 			TuningFilter* treeFilter = m_treeFilter.get();
 
@@ -707,19 +626,19 @@ void TuningPage::fillObjectsList()
 				continue;
 			}
 
-			// Otherwise, check parent filters. Values are checked ONLY for selected filter, not child filters!!!
+			if (treeFilter->match(asp) == false)
+			{
+				continue;
+			}
 
-			bool checkValues = true;
-
+			/*
 			while (treeFilter != nullptr)
 			{
-				if (treeFilter->match(asp, checkValues) == false)
+				if (treeFilter->match(asp) == false)
 				{
 					result = false;
 					break;
 				}
-
-				checkValues = false;
 
 				treeFilter = treeFilter->parentFilter();
 			}
@@ -727,6 +646,7 @@ void TuningPage::fillObjectsList()
 			{
 				continue;
 			}
+			*/
 
 			// Modify the default value from selected filter
 			//
@@ -747,18 +667,15 @@ void TuningPage::fillObjectsList()
 
 		if (m_tabFilter != nullptr)
 		{
-			if (m_tabFilter->match(asp, false) == false)
+			if (m_tabFilter->match(asp) == false)
 			{
 				continue;
 			}
 		}
 
-		// Button Filter
-		//
-
 		if (m_buttonFilter != nullptr)
 		{
-			if (m_buttonFilter->match(asp, false) == false)
+			if (m_buttonFilter->match(asp) == false)
 			{
 				continue;
 			}
@@ -849,21 +766,6 @@ QColor TuningPage::textColor()
 	}
 
 	return QColor();
-
-}
-
-
-void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
-{
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	m_buttonFilter = filter;
-
-	fillObjectsList();
 
 }
 
@@ -995,18 +897,16 @@ void TuningPage::slot_ApplyFilter()
 	fillObjectsList();
 }
 
-void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
+void TuningPage::slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter)
 {
-	if (filter == nullptr)
-	{
-		//qDebug() << "Filter tree removed.";
-	}
-	else
-	{
-		//qDebug() << "Filter tree clicked: " << filter->caption();
-	}
-
 	m_treeFilter = filter;
+
+	fillObjectsList();
+}
+
+void TuningPage::slot_buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter)
+{
+	m_buttonFilter = filter;
 
 	fillObjectsList();
 }
