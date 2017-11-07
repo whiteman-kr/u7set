@@ -136,11 +136,10 @@ namespace Builder
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 
-		bool detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat);
-
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
 		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
+		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
 		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);

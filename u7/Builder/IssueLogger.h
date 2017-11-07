@@ -310,7 +310,7 @@ namespace Builder
 		void errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID);			// Signal '%1' is not connected to any signal source. (Logic schema '%2').
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
 		void errALC5120(QUuid ualItemUuid, QUuid pinUuid, QString schemaID);			// UalSignal is not found for pin '%1' (Logic schema '%2').
-		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input or tuningable signal '%1' (Logic schema '%2').
+		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
 		void errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID);		// UalSignal is not found for pin '%1' (Logic schema '%2').
 
 

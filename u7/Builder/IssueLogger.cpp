@@ -4649,14 +4649,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Can't assign value to input or tuningable signal '%1' (Logic schema '%2')
+	/// Title:	   Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 App signal ID
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Value of input or tuningable signals cannot be modified by UAL.
+	///		Value of input/tuningable/opto/const signals cannot be modified by UAL.
 	///
 	void IssueLogger::errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID)
 	{
@@ -4664,7 +4664,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5121,
-				  QString(tr("Can't assign value to input or tuningable signal '%1' (Logic schema '%2').")).
+				  QString(tr("Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).")).
 							arg(appSignalID).arg(schemaID));
 	}
 

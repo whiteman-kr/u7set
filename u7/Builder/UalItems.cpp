@@ -1151,6 +1151,12 @@ namespace Builder
 			return false;
 		}
 
+		if (s->appSignalID() == "#TZB5_3TQ11S14_IM_1SF")
+		{
+			int a = 0;
+			a++;
+		}
+
 		for(Signal* pesentSignal : m_refSignals)
 		{
 			if (pesentSignal == nullptr)
@@ -1234,6 +1240,8 @@ namespace Builder
 		m_isOutput |= s->isOutput();
 
 		m_isAcquired |= s->isAcquired();
+
+		m_refSignalsIDs = refSignalIDsJoined();
 
 		return true;
 	}
@@ -1323,35 +1331,52 @@ namespace Builder
 			return false;
 		}
 
-		if (afbSignal.isBus() == true && isBus() == true)
+		if (afbSignal.isBus() == true)
 		{
-			if (m_bus == nullptr)
+			if(isBus() == true)
 			{
-				assert(false);
+				// bus signal connection to bus input checking
+				//
+				if (m_bus == nullptr)
+				{
+					assert(false);
+					return false;
+				}
+
+				switch(afbSignal.busDataFormat())
+				{
+				case E::BusDataFormat::Discrete:
+
+					if (m_bus->busDataFormat() == E::BusDataFormat::Discrete)
+					{
+						return true;
+					}
+
+					return false;
+
+				case E::BusDataFormat::Mixed:
+
+					assert(false);	// mixed busses processing is not implemented now
+					return false;
+
+				default:
+					assert(false);
+				}
+
 				return false;
 			}
 
-			switch(afbSignal.busDataFormat())
+			if (isDiscrete() == true)
 			{
-			case E::BusDataFormat::Discrete:
-
-				if (m_bus->busDataFormat() == E::BusDataFormat::Discrete)
+				// discrete signal connection to bus input checking
+				//
+				if (afbSignal.busDataFormat() == E::BusDataFormat::Discrete)
 				{
 					return true;
 				}
 
 				return false;
-
-			case E::BusDataFormat::Mixed:
-
-				assert(false);	// mixed busses processing is not implemented now
-				return false;
-
-			default:
-				assert(false);
 			}
-
-			return false;
 		}
 
 		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
@@ -2136,7 +2161,6 @@ namespace Builder
 				return true;
 			}
 
-			assert(false);
 			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
 			return false;
 		}

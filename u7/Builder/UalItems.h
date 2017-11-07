@@ -478,7 +478,6 @@ namespace Builder
 
 		QString refSignalIDsJoined() const;
 
-
 		QStringList acquiredRefSignalsIDs() const;
 
 		QString optoConnectionID() const;
@@ -503,6 +502,8 @@ namespace Builder
 		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
 
 		QHash<QString, UalSignal*> m_busChildSignals;
+
+		QString m_refSignalsIDs;
 
 		//
 

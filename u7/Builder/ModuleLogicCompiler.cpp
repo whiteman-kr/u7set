@@ -997,6 +997,12 @@ namespace Builder
 			return false;
 		}
 
+		if (ualItem->label() == "3TQ11S14_1_88043")
+		{
+			int a = 0;
+			a++;
+		}
+
 		const UalConst* ualConst = ualItem->ualConst();
 
 		if (ualConst == nullptr)
@@ -1093,6 +1099,27 @@ namespace Builder
 		}
 
 		bool result = true;
+
+		bool isBusProcessing = false;
+
+		result = isBusProcessingAfb(ualAfb, isBusProcessing);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		QString outBusTypeID;
+
+		if (isBusProcessing == true)
+		{
+			result = determineOutBusTypeID(ualAfb, outBusTypeID);
+
+			if (result == false)
+			{
+				return false;
+			}
+		}
 
 		const std::vector<LogicPin>& outputs = ualItem->outputs();
 
@@ -1425,6 +1452,16 @@ namespace Builder
 			return false;
 		}
 
+		UalSignal* existsSignal = m_ualSignals.get(s->appSignalID());
+
+		if (existsSignal != nullptr && existsSignal != ualSignal && existsSignal->isSource() == true)
+		{
+			// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
+			//
+			m_log->errALC5121(s->appSignalID(), signalItem->guid(), signalItem->schemaID());
+			return false;
+		}
+
 		// check signals compatibility
 		//
 		bool result = ualSignal->isCompatible(s);
@@ -1656,108 +1693,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::detectConstSignalType(const LogicPin& outPin, E::SignalType* constSignalType, E::AnalogAppSignalFormat* constAnalogFormat)
-	{
-/*		if (constSignalType == nullptr || constAnalogFormat == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		const std::vector<QUuid>& inputsUuids = outPin.associatedIOs();
-
-		if (inputsUuids.size() == 0)
-		{
-			LOG_INTERNAL_ERROR(m_log);			// Const out pin is unconnected?
-			return false;
-		}
-
-		for(QUuid inPinUuid : inputsUuids)
-		{
-			UalItem* linkedItem = m_pinParent.value(inPinUuid, nullptr);
-
-			if (linkedItem == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			// detect const type by connected signal of Afb input
-
-			if (linkedItem->isSignal() == true)
-			{
-				QString signalID = linkedItem->strID();
-
-				Signal* s = m_signals->getSignal(signalID);
-
-				if (s == nullptr)
-				{
-					continue;
-				}
-
-				if (s->isInput() == true || s->enableTuning() == true)
-				{
-					continue;			// this connection error is detected and reported later
-				}
-
-				*constSignalType = s->signalType();
-				*constAnalogFormat = s->analogSignalFormat();
-
-				return true;
-			}
-
-			if (linkedItem->isAfb() == true)
-			{
-				UalAfb* ualAfb = m_ualAfbs.value(linkedItem->guid(), nullptr);
-
-				if (ualAfb == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					return false;
-				}
-
-				LogicAfbSignal inSignal;
-
-				bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
-
-				if (result == false)
-				{
-					return false;
-				}
-
-				*constSignalType = inSignal.type();
-
-				switch(inSignal.type())
-				{
-				case E::SignalType::Discrete:
-					return true;
-
-				case E::SignalType::Analog:
-					if (inSignal.dataFormat() == E::DataFormat::Float &&
-						inSignal.size() == SIZE_32BIT)
-					{
-						*constAnalogFormat = E::AnalogAppSignalFormat::Float32;
-						return true;
-					}
-
-					if (inSignal.dataFormat() == E::DataFormat::SignedInt &&
-						inSignal.size() == SIZE_32BIT)
-					{
-						*constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
-						return true;
-					}
-
-					return false;
-
-				case E::SignalType::Bus:
-					return false;
-				}
-			}
-		}
-*/
-		return false;
-	}
-
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
@@ -1884,6 +1819,33 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID)
+	{
+		if (ualAfb == nullptr || outBusTypeID == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		for(const LogicPin& inPin : ualAfb->inputs())
+		{
+			LogicAfbSignal afbSignal;
+
+			bool res = ualAfb->getAfbSignalByPin(inPin, &afbSignal);
+
+			if (res == false)
+			{
+				return false;
+			}
+
+			if (afbSignal.isBus() == false)
+			{
+				continue;
+			}
+
+		}
 	}
 
 	bool ModuleLogicCompiler::checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal)
