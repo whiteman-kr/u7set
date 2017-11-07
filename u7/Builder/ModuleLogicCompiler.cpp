@@ -1516,8 +1516,20 @@ namespace Builder
 			return false;
 		}
 
-		if (ualSignal->isBus() == true)
+		result = ualSignal->isCompatible(inSignal);
+
+		if (result == false)
 		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(srcItem->guid(), srcItem->label(), destItem->guid(), destItem->label(), destItem->schemaID());
+			return false;
+		}
+
+
+/*		if (ualSignal->isBus() == true)
+		{
+
 			if (inSignal.isBus() == false)
 			{
 				// Bus output is connected to non-bus input.
@@ -1545,7 +1557,7 @@ namespace Builder
 				m_log->errALC5117(srcItem->guid(), srcItem->label(), destItem->guid(), destItem->label(), destItem->schemaID());
 				return false;
 			}
-		}
+		}*/
 
 		return m_ualSignals.appendRefPin(srcItem, inPinUuid, ualSignal);
 	}
@@ -6173,32 +6185,41 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		const UalAfb* ualAfb = m_ualAfbs[appItem->guid()];
+		const UalAfb* ualAfb = m_ualAfbs.value(appItem->guid(), nullptr);
 
 		TEST_PTR_RETURN_FALSE(ualAfb)
 
 		bool result = false;
 
-		do
+		int busProcessingStepsNumber = 1;
+
+/*		result = calcBusProcessingStepsNumber(ualAfb, &busProcessingStepsNumber);
+
+		if (result == false)
 		{
-			if (generateSignalsToAfbInputsCode(ualAfb) == false) break;
+			return false;
+		}*/
 
-			if (startAfb(ualAfb) == false) break;
+		for(int busProcessingStep = 0; busProcessingStep < busProcessingStepsNumber; busProcessingStep++)
+		{
+			result &= generateSignalsToAfbInputsCode(ualAfb, busProcessingStep);
 
-			if (generateAfbOutputsToSignalsCode(ualAfb) == false) break;
+			result &= startAfb(ualAfb);
 
-			//if (addToComparatorStorage(ualAfb) == false) break;
+			result &= generateAfbOutputsToSignalsCode(ualAfb, busProcessingStep);
 
-			result = true;
+			if (result == false)
+			{
+				break;
+			}
 		}
-		while(false);
 
 		m_code.newLine();
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateSignalsToAfbInputsCode(const UalAfb* ualAfb)
+	bool ModuleLogicCompiler::generateSignalsToAfbInputsCode(const UalAfb* ualAfb, int busProcessingStep)
 	{
 		bool result = true;
 
@@ -6230,107 +6251,13 @@ namespace Builder
 				continue;
 			}
 
-			result &= generateSignalToAfbInputCode(ualAfb, inAfbSignal, inUalSignal);
-
-
-/*			int connectedPinsCount = 1;
-
-			for(QUuid connectedPinGuid : inPin.associatedIOs())
-			{
-				if (connectedPinsCount > 1)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("More than one pin is connected to the input")));
-
-					RESULT_FALSE_BREAK
-				}
-
-				connectedPinsCount++;
-
-				if (!m_pinParent.contains(connectedPinGuid))
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Pin is not found, GUID %1")).arg(connectedPinGuid.toString()));
-
-					RESULT_FALSE_BREAK
-				}
-
-				UalItem* connectedPinParent = m_pinParent[connectedPinGuid];
-
-				if (connectedPinParent == nullptr)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Pin parent is NULL, pin GUID ")).arg(connectedPinGuid.toString()));
-					RESULT_FALSE_BREAK
-				}
-
-				if (connectedPinParent->isConst())
-				{
-					result &= generateWriteConstToFbCode(*appFb, inPin, connectedPinParent->ualConst());
-					continue;
-				}
-
-				if (connectedPinParent->isReceiver())
-				{
-					result &= genearateWriteReceiverToFbCode(*appFb, inPin, connectedPinParent->logicReceiver(), connectedPinGuid);
-					continue;
-				}
-
-				QUuid signalGuid;
-
-				if (connectedPinParent->isSignal())
-				{
-					// input connected to real signal
-					//
-					signalGuid = connectedPinParent->guid();
-				}
-				else
-				{
-					// connectedPinParent is FB
-					//
-					if (!m_outPinSignal.contains(connectedPinGuid))
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
-
-						RESULT_FALSE_BREAK
-					}
-
-					signalGuid = m_outPinSignal[connectedPinGuid];
-				}
-
-				if (m_ualSignals.contains(signalGuid) == false)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
-
-					RESULT_FALSE_BREAK
-				}
-
-				UalSignal* appSignal = m_ualSignals.get(signalGuid);
-
-				if (appSignal == nullptr)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(signalGuid.toString()));
-
-					RESULT_FALSE_BREAK
-				}
-
-				if (!appSignal->isComputed())
-				{
-					m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
-					RESULT_FALSE_BREAK
-				}
-
-				result &= generateWriteSignalToFbCode(*appFb, inPin, *appSignal);
-			}
-
-			if (result == false)
-			{
-				break;
-			}*/
+			result &= generateSignalToAfbInputCode(ualAfb, inAfbSignal, inUalSignal, busProcessingStep);
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal)
+	bool ModuleLogicCompiler::generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep)
 	{
 		if (ualAfb == nullptr || inUalSignal == nullptr)
 		{
@@ -6429,7 +6356,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			assert(false);
+//			assert(false);
 			break;
 
 		default:
@@ -6849,7 +6776,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateAfbOutputsToSignalsCode(const UalAfb* ualAfb)
+	bool ModuleLogicCompiler::generateAfbOutputsToSignalsCode(const UalAfb* ualAfb, int busProcessingStep)
 	{
 		if (ualAfb == nullptr)
 		{
@@ -6892,13 +6819,13 @@ namespace Builder
 				continue;
 			}
 
-			result &= generateAfbOutputToSignalCode(ualAfb, outAfbSignal, outUalSignal);
+			result &= generateAfbOutputToSignalCode(ualAfb, outAfbSignal, outUalSignal, busProcessingStep);
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal)
+	bool ModuleLogicCompiler::generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep)
 	{
 		if (ualAfb == nullptr || outUalSignal == nullptr)
 		{
@@ -6984,6 +6911,57 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::calcBusProcessingStepsNumber(UalAfb* ualAfb, bool* busProcessingStepsNumber)
+	{
+/*		if (ualAfb == nullptr || busProcessingStepsNumber == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		*busProcessingStepsNumber = 0;
+
+		bool isBusProcAfb = false;
+
+		result = isBusProcessingAfb(ualAfb, &isBusProcAfb);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (isBusProcAfb == false)
+		{
+			*busProcessingStepsNumber = 1;
+			return true;
+		}
+
+		int*/
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::isBusProcessingAfb(UalAfb* ualAfb, bool* isBusProcessing)
+	{
+		if (ualAfb == nullptr || isBusProcessing == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		Afbl* afbl = m_afbls.value(ualAfb->strID());
+
+		if (afbl == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		*isBusProcessing = afbl->isBusProcessingAfb();
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::readFbOutputSignals(const UalAfb* appFb)

@@ -64,9 +64,38 @@ namespace Builder
 				hasBusInputs = true;
 				break;
 			}
+
+			// non-bus inputs bus processing afb - it is ok
 		}
 
-		return hasBusInputs;
+		const std::vector<Afb::AfbSignal>& outputSignals = afb().outputSignals();
+
+		bool hasBusOutputs = false;
+		bool hasNonBusOutputs = false;
+
+		for(const Afb::AfbSignal& afbOutSignal : outputSignals)
+		{
+			if (afbOutSignal.type() == E::SignalType::Bus)
+			{
+				hasBusOutputs = true;
+				continue;
+			}
+
+			hasNonBusOutputs = true;
+		}
+
+		if (hasBusInputs == true && hasBusOutputs == true)
+		{
+			if (hasNonBusOutputs == true)
+			{
+				// what should be doing with non-bus output???
+				//
+				assert(false);
+				return false;
+			}
+		}
+
+		return false;
 	}
 
 
@@ -109,7 +138,7 @@ namespace Builder
 
 		QString instantiatorID = ualAfb->instantiatorID();
 
-		if (afbl->hasRam())
+		if (afbl->hasRam() == true)
 		{
 			int opCode = afbl->opCode();
 
@@ -1302,10 +1331,24 @@ namespace Builder
 				return false;
 			}
 
-			if (afbSignal.busDataFormat() == m_bus->busDataFormat() &&
-				afbSignal.maxBusSize() >= m_bus->sizeB())
+			switch(afbSignal.busDataFormat())
 			{
-				return true;
+			case E::BusDataFormat::Discrete:
+
+				if (m_bus->busDataFormat() == E::BusDataFormat::Discrete)
+				{
+					return true;
+				}
+
+				return false;
+
+			case E::BusDataFormat::Mixed:
+
+				assert(false);	// mixed busses processing is not implemented now
+				return false;
+
+			default:
+				assert(false);
 			}
 
 			return false;

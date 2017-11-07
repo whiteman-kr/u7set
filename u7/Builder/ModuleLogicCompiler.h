@@ -270,11 +270,14 @@ namespace Builder
 		bool generateWriteSignalToSignalCode(UalSignal& appSignal, QUuid srcSignalGuid);
 
 		bool generateAfbCode(const UalItem* appItem);
-		bool generateSignalsToAfbInputsCode(const UalAfb* ualAfb);
-		bool generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal);
+		bool generateSignalsToAfbInputsCode(const UalAfb* ualAfb, int busProcessingStep);
+		bool generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
 		bool startAfb(const UalAfb* appFb);
-		bool generateAfbOutputsToSignalsCode(const UalAfb* ualAfb);
-		bool generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal);
+		bool generateAfbOutputsToSignalsCode(const UalAfb* ualAfb, int busProcessingStep);
+		bool generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
+
+		bool calcBusProcessingStepsNumber(UalAfb* ualAfb, bool* busProcessingStepsNumber);
+		bool isBusProcessingAfb(UalAfb* ualAfb, bool* isBusProcessing);
 
 		bool readFbOutputSignals(const UalAfb *appFb);
 

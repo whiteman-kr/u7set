@@ -261,6 +261,7 @@ namespace Builder
 		bool isConstComaparator() const;
 		bool isDynamicComaparator() const;
 		bool isComparator() const;
+		bool isBusPocessingElement() const;
 
 		QString instantiatorID();
 
@@ -438,7 +439,6 @@ namespace Builder
 		bool isCompatible(const LogicAfbSignal& afbSignal) const;
 		bool isCompatible(const Builder::BusSignal& busSignal) const;
 		bool isCompatible(const UalSignal* ualSignal) const;
-
 
 		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
 
