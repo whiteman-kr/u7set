@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 #include "TuningPage.h"
 #include <QKeyEvent>
+#include <QPushButton>
 #include "../VFrame30/DrawParam.h"
 
 using namespace std;
@@ -347,13 +348,47 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 // FilterButton
 //
 
-FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, QWidget* parent)
+FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent)
 	:QPushButton(caption, parent)
 {
 	m_filter = filter;
 	m_caption = caption;
 
 	setCheckable(true);
+
+	if (check == true)
+	{
+		setChecked(true);
+	}
+
+	setMinimumSize(100, 25);
+
+	QColor backColor = Qt::lightGray;
+	QColor textColor = Qt::white;
+
+	QColor backCheckedColor = Qt::darkGray;
+
+	if (filter->backColor().isValid() && filter->textColor().isValid() && filter->backColor() != filter->textColor())
+	{
+		backColor = filter->backColor();
+		textColor = filter->textColor();
+
+		backCheckedColor = filter->backColor();
+	}
+
+	setStyleSheet(tr("\
+					QPushButton {   \
+						background-color: %1;\
+						color: %2;    \
+					}   \
+					QPushButton:checked{\
+						background-color: %3;\
+						border: none;\
+					}\
+					").arg(backColor.name()).arg(textColor.name()).arg(backCheckedColor.name()));
+
+	update();
+
 
 	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
 }
@@ -514,7 +549,6 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 	}
 
 	m_mainLayout = new QVBoxLayout(this);
-	m_mainLayout->setContentsMargins(0, 0, 0, 0);
 
 	m_mainLayout->addWidget(m_objectList);
 	m_mainLayout->addLayout(m_bottomLayout);
@@ -566,6 +600,21 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 	}*/
 
 	m_updateStateTimerId = startTimer(500);
+
+	// Color
+
+	if (m_tabFilter->backColor().isValid() && m_tabFilter->textColor().isValid() && m_tabFilter->backColor() != m_tabFilter->textColor())
+	{
+		QPalette Pal(palette());
+
+		Pal.setColor(QPalette::Background, m_tabFilter->backColor());
+		setAutoFillBackground(true);
+		setPalette(Pal);
+	}
+	else
+	{
+		m_mainLayout->setContentsMargins(0, 0, 0, 0);
+	}
 
 }
 
@@ -769,28 +818,6 @@ void TuningPage::fillObjectsList()
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
-QColor TuningPage::backColor()
-{
-	if (m_tabFilter != nullptr)
-	{
-		return m_tabFilter->backColor();
-	}
-
-	return QColor();
-
-}
-
-QColor TuningPage::textColor()
-{
-	if (m_tabFilter != nullptr)
-	{
-		return m_tabFilter->textColor();
-	}
-
-	return QColor();
-
-}
-
 void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
 {
 	m_sortColumn = column;
@@ -976,8 +1003,8 @@ void TuningPage::timerEvent(QTimerEvent* event)
 
 					if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
 					{
-						QString str = QString("%1:%2").arg(row).arg(col);
-						qDebug() << str;
+						//QString str = QString("%1:%2").arg(row).arg(col);
+						//qDebug() << str;
 
 						m_objectList->update(m_model->index(row, col));
 					}

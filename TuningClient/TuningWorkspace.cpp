@@ -2,6 +2,8 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
+#include <QButtonGroup>
+
 int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
@@ -68,6 +70,19 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 	{
 		mainLayout->addWidget(rightWidget);
 	}
+
+	// Color
+
+	if (workspaceFilter->backColor().isValid() && workspaceFilter->textColor().isValid() && workspaceFilter->backColor() != workspaceFilter->textColor())
+	{
+		QPalette Pal(palette());
+
+		Pal.setColor(QPalette::Background, workspaceFilter->backColor());
+		setAutoFillBackground(true);
+		setPalette(Pal);
+		show();
+	}
+
 }
 
 TuningWorkspace::~TuningWorkspace()
@@ -177,6 +192,9 @@ void TuningWorkspace::createButtons()
 
 	// Buttons
 	//
+
+	bool firstButton = true;
+
 	for (int i = 0; i < m_workspaceFilter->childFiltersCount(); i++)
 	{
 		std::shared_ptr<TuningFilter> f = m_workspaceFilter->childFilter(i);
@@ -191,8 +209,13 @@ void TuningWorkspace::createButtons()
 			continue;
 		}
 
-		FilterButton* button = new FilterButton(f, f->caption());
+		FilterButton* button = new FilterButton(f, f->caption(), firstButton);
 		buttons.push_back(button);
+
+		if (firstButton)
+		{
+			firstButton = false;
+		}
 
 		connect(button, &FilterButton::filterButtonClicked, this, &TuningWorkspace::slot_filterButtonClicked);
 
@@ -214,12 +237,7 @@ void TuningWorkspace::createButtons()
 
 		m_buttonsLayout->addStretch();
 
-		// Set the first button checked
-		//
-		buttons[0]->blockSignals(true);
-		buttons[0]->setChecked(true);
 		m_buttonFilter = buttons[0]->filter();
-		buttons[0]->blockSignals(false);
 	}
 }
 
@@ -228,7 +246,7 @@ void TuningWorkspace::updateTabControl()
 	// Fill tab pages
 	//
 
-	std::vector<std::pair<QWidget*, QString>> tuningPages;
+	std::vector<std::pair<QWidget*, std::shared_ptr<TuningFilter>>> tuningPages;
 
 	int tuningPageIndex = 0;
 
@@ -252,7 +270,7 @@ void TuningWorkspace::updateTabControl()
 
 		tuningPageIndex++;
 
-		tuningPages.push_back(std::make_pair(tp, f->caption()));
+		tuningPages.push_back(std::make_pair(tp, f));
 	}
 
 	// Buttons level tabs
@@ -277,12 +295,14 @@ void TuningWorkspace::updateTabControl()
 
 			tuningPageIndex++;
 
-			tuningPages.push_back(std::make_pair(tp, f->caption()));
+			tuningPages.push_back(std::make_pair(tp, f));
 		}
 	}
 
 	if (tuningPages.empty() == false)
 	{
+
+
 		// Create tab control and add pages
 		//
 		if (m_tab == nullptr)
@@ -291,10 +311,12 @@ void TuningWorkspace::updateTabControl()
 
 			m_rightLayout->addWidget(m_tab);
 
-			connect(m_tab, &QTabWidget::currentChanged, this, &TuningWorkspace::slot_currentTabChanged);
+			m_tab->setVisible(false);
 		}
 		else
 		{
+			m_tab->setVisible(false);
+
 			m_tab->clear();
 		}
 
@@ -302,7 +324,6 @@ void TuningWorkspace::updateTabControl()
 		{
 			m_tuningPage->setVisible(false);
 		}
-		m_tab->setVisible(true);
 
 		for (auto t : tuningPages)
 		{
@@ -312,12 +333,12 @@ void TuningWorkspace::updateTabControl()
 
 			QWidget* tp = t.first;
 
-			QString tabName = t.second;
-
 			l->addWidget(tp);
 
-			m_tab->addTab(w, tabName);
+			m_tab->addTab(w, t.second->caption());
 		}
+
+		m_tab->setVisible(true);
 
 		// set the active tab
 
@@ -507,67 +528,6 @@ void TuningWorkspace::slot_maskReturnPressed()
 void TuningWorkspace::slot_maskApply()
 {
 	updateFiltersTree();
-}
-
-
-void TuningWorkspace::slot_currentTabChanged(int index)
-{
-	/*if (m_tab == nullptr)
-	{
-		assert(m_tab);
-		return;
-	}
-
-	TuningPage* page = dynamic_cast<TuningPage*>(m_tab->widget(index));
-	if (page == nullptr)
-	{
-		assert(page);
-		return;
-	}
-
-	// Set the tab back color
-	//
-
-	QColor backColor = page->backColor();
-	QColor textColor = page->textColor();
-
-	if (backColor.isValid() && textColor.isValid() && backColor != textColor)
-	{
-		// See http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtabwidget-and-qtabbar
-		//
-
-		QString s = QString("\
-							QTabWidget::pane \
-		{\
-								background: solid %1;\
-								border-top: 2px solid %1;\
-								color: %2;\
-							}\
-							QTabWidget::tab-bar\
-		{\
-								alignment: left;\
-							}\
-							QTabBar::tab\
-		{\
-								border: 2px solid #C4C4C3;\
-								border-bottom-color: #C2C7CB;\
-								border-top-left-radius: 4px;\
-								border-top-right-radius: 4px;\
-								min-width: 8px;\
-								padding: 4px;\
-							}\
-							QTabBar::tab:selected\
-		{\
-								background: solid %1;\
-								border-color: #C2C7CB;\
-								border-bottom-color: #C2C7CB;\
-								color: %2;\
-							}\
-							").arg(backColor.name()).arg(textColor.name());
-
-							m_tab->setStyleSheet(s);
-	}
-*/
 }
 
 void TuningWorkspace::slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter)

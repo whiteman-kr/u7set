@@ -66,7 +66,7 @@ private slots:
 	void slot_maskReturnPressed();
 	void slot_maskApply();
 
-	void slot_currentTabChanged(int index);
+
 	void slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter);
 	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 

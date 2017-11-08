@@ -33,7 +33,7 @@ class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, QWidget* parent = nullptr);
+	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent = nullptr);
 
 	std::shared_ptr<TuningFilter> filter();
 
@@ -79,10 +79,6 @@ public:
 	~TuningPage();
 
 	void fillObjectsList();
-
-	QColor textColor();
-
-	QColor backColor();
 
 private slots:
 

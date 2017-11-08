@@ -107,6 +107,9 @@ public:
 	QString ID() const;
 	void setID(const QString& value);
 
+	QString customID() const;
+	void setCustomID(const QString& value);
+
 	QString caption() const;
 	void setCaption(const QString& value);
 
@@ -192,6 +195,7 @@ private:
 	//
 
 	QString m_ID;
+	QString m_customID;
 	QString m_caption;
 
 	Source m_source = Source::User;

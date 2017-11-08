@@ -193,7 +193,10 @@ TuningFilter::TuningFilter()
 	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, TuningFilter::caption, TuningFilter::setCaption);
 	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, TuningFilter::signalType, TuningFilter::setSignalType);
 
-	ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
+	//ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
+	ADD_PROPERTY_GETTER(QString, "ID", true, TuningFilter::ID);
+
+	ADD_PROPERTY_GETTER_SETTER(QString, "CustomID", true, TuningFilter::customID, TuningFilter::setCustomID);
 
 	//ADD_PROPERTY_GETTER_SETTER(InterfaceType, "InterfaceType", true, TuningFilter::interfaceType, TuningFilter::setInterfaceType);
 	ADD_PROPERTY_GETTER(InterfaceType, "InterfaceType", true, TuningFilter::interfaceType);
@@ -237,6 +240,7 @@ TuningFilter& TuningFilter::operator=(const TuningFilter& That)
 void TuningFilter::copy(const TuningFilter& That)
 {
 	m_ID = That.m_ID;
+	m_customID = That.m_customID;
 	m_caption = That.m_caption;
 
 	m_source = That.m_source;
@@ -278,6 +282,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		if (reader.attributes().hasAttribute("ID"))
 		{
 			setID(reader.attributes().value("ID").toString());
+		}
+
+		if (reader.attributes().hasAttribute("CustomID"))
+		{
+			setCustomID(reader.attributes().value("CustomID").toString());
 		}
 
 		if (reader.attributes().hasAttribute("Caption"))
@@ -488,6 +497,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	}
 
 	writer.writeAttribute("ID", ID());
+	writer.writeAttribute("CustomID", customID());
 	writer.writeAttribute("Caption", caption());
 
 	writer.writeAttribute("BackColor", backColor().name());
@@ -527,6 +537,16 @@ QString TuningFilter::ID() const
 void TuningFilter::setID(const QString& value)
 {
 	m_ID = value;
+}
+
+QString TuningFilter::customID() const
+{
+	return m_customID;
+}
+
+void TuningFilter::setCustomID(const QString& value)
+{
+	m_customID = value;
 }
 
 QString TuningFilter::caption() const
