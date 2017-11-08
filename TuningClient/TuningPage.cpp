@@ -15,35 +15,6 @@ using namespace std;
 TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent):
 	TuningModel(tuningSignalManager, parent)
 {
-
-	/*TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
-	if (pageSettings == nullptr)
-	{
-		assert(pageSettings);
-		return;
-	}
-
-	if (pageSettings->m_columnCount == 0)*/
-	{
-		addColumn(Columns::CustomAppSignalID);
-		addColumn(Columns::EquipmentID);
-		addColumn(Columns::Caption);
-		addColumn(Columns::Units);
-		addColumn(Columns::Type);
-
-		addColumn(Columns::Value);
-		addColumn(Columns::LowLimit);
-		addColumn(Columns::HighLimit);
-		addColumn(Columns::Default);
-		//addColumn(Columns::Valid);
-		//addColumn(Columns::OutOfRange);
-	}
-	/*else
-	{
-		m_columnsIndexes  = pageSettings->m_columnsIndexes;
-		removeColumn(Columns::Valid);
-		removeColumn(Columns::OutOfRange);
-	}*/
 }
 
 void TuningModelClient::blink()
@@ -464,7 +435,7 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 
 int TuningPage::m_instanceCounter = 0;
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
+TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
@@ -493,6 +464,22 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 	m_model = new TuningModelClient(m_tuningSignalManager, this);
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
+
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::CustomAppSignalID, 0.15));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::EquipmentID, 0.2));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Caption, 0.15));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Units, 0.05));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Type, 0.05));
+
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Value, 0.1));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::LowLimit, 0.1));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::HighLimit, 0.1));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Default, 0.1));
+
+	for (auto c : m_columnsArray)
+	{
+		m_model->addColumn(c.first);
+	}
 
 	// Filter controls
 	//
@@ -571,34 +558,6 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 
 	fillObjectsList();
 
-	m_objectList->resizeColumnsToContents();
-	/*
-
-	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
-	if (pageSettings == nullptr)
-	{
-		assert(pageSettings);
-		return;
-	}
-
-	if (pageSettings->m_columnCount == 0)
-	{
-		m_objectList->resizeColumnsToContents();
-	}
-	else
-	{
-		for (int i = 0; i < pageSettings->m_columnCount; i++)
-		{
-			int width = pageSettings->m_columnsWidth[i];
-			if (width < 20)
-			{
-				width = 20;
-			}
-
-			m_objectList->setColumnWidth(i, width);
-		}
-	}*/
-
 	m_updateStateTimerId = startTimer(500);
 
 	// Color
@@ -622,28 +581,6 @@ TuningPage::~TuningPage()
 {
 	m_instanceCounter--;
 	qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
-
-	/*
-	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(m_tuningPageIndex);
-	if (pageSettings == nullptr)
-	{
-		assert(pageSettings);
-		return;
-	}
-
-	if (m_model != nullptr && m_objectList != nullptr)
-	{
-		pageSettings->m_columnsIndexes = m_model->columnsIndexes();
-
-		pageSettings->m_columnCount = static_cast<int>(pageSettings->m_columnsIndexes.size());
-
-		pageSettings->m_columnsWidth.resize(pageSettings->m_columnCount);
-
-		for (int i = 0; i < pageSettings->m_columnCount; i++)
-		{
-			pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
-		}
-	}*/
 }
 
 void TuningPage::fillObjectsList()
@@ -1038,6 +975,36 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 	}
 
 	return QWidget::eventFilter(object, event);
+}
+
+void TuningPage::resizeEvent(QResizeEvent *event)
+{
+
+	Q_UNUSED(event);
+
+	if (m_objectList == nullptr)
+	{
+		return;
+	}
+
+	QSize s = m_objectList->size();
+
+	double totalWidth = s.width() - 25;
+
+	for (int c = 0; c < m_columnsArray.size(); c++)
+	{
+		auto columnInfo = m_columnsArray[c];
+
+		int columnWidth = totalWidth * columnInfo.second;
+
+		if (columnWidth >= s.width())
+		{
+			columnWidth = 100;
+		}
+
+		m_objectList->setColumnWidth(c, columnWidth);
+	}
+
 }
 
 void TuningPage::invertValue()

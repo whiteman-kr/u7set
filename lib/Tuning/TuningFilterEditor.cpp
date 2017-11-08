@@ -175,6 +175,7 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	// Objects and model
 	//
 	m_baseModel = new TuningModel(m_signalManager, this);
+
 	m_baseModel->addColumn(TuningModel::Columns::CustomAppSignalID);
 	m_baseModel->addColumn(TuningModel::Columns::AppSignalID);
 	m_baseModel->addColumn(TuningModel::Columns::Type);

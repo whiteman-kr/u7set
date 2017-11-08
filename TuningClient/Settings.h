@@ -73,19 +73,6 @@ struct ConfigSettings
 };
 
 //
-// TuningPageSettings
-//
-
-
-class TuningPageSettings
-{
-public:
-	int m_columnCount = 0;
-	std::vector<int> m_columnsIndexes;
-	std::vector<int> m_columnsWidth;
-};
-
-//
 // Settings
 //
 
@@ -113,8 +100,6 @@ public:
 	void setLanguage(const QString& value);
 
 	bool admin() const;
-
-	TuningPageSettings* tuningPageSettings(int index);
 
 	QString globalAppDataPath();
 
@@ -155,10 +140,6 @@ public:
 	int m_tuningFiltersPropertyEditorSplitterPos = -1;
 
 private:
-
-	// Tuning pages settings
-	//
-	std::vector<TuningPageSettings> m_tuningPageSettings;
 
 	bool m_admin = false;
 

@@ -75,7 +75,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
+	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
 	~TuningPage();
 
 	void fillObjectsList();
@@ -113,6 +113,8 @@ private:
 	virtual void timerEvent(QTimerEvent* event) override;
 
 	bool eventFilter(QObject* object, QEvent* event);
+
+	virtual void resizeEvent(QResizeEvent *event);
 
 	// Signals processing
 
@@ -166,8 +168,6 @@ private:
 
 	std::shared_ptr<TuningFilter> m_buttonFilter = nullptr;
 
-	//int m_tuningPageIndex = 0;
-
 	int m_updateStateTimerId = -1;
 
 	int m_sortColumn = 0;
@@ -176,6 +176,7 @@ private:
 
 	static int m_instanceCounter;
 
+	std::vector<std::pair<TuningModel::Columns, double>> m_columnsArray;
 
 };
 

@@ -248,8 +248,6 @@ void TuningWorkspace::updateTabControl()
 
 	std::vector<std::pair<QWidget*, std::shared_ptr<TuningFilter>>> tuningPages;
 
-	int tuningPageIndex = 0;
-
 	// Workspace level tabs
 
 	for (int i = 0; i < m_workspaceFilter->childFiltersCount(); i++)
@@ -266,9 +264,7 @@ void TuningWorkspace::updateTabControl()
 			continue;
 		}
 
-		QWidget* tp = createTuningPage(tuningPageIndex, f);
-
-		tuningPageIndex++;
+		QWidget* tp = createTuningPage(f);
 
 		tuningPages.push_back(std::make_pair(tp, f));
 	}
@@ -291,9 +287,7 @@ void TuningWorkspace::updateTabControl()
 				continue;
 			}
 
-			QWidget* tp = createTuningPage(tuningPageIndex, f);
-
-			tuningPageIndex++;
+			QWidget* tp = createTuningPage(f);
 
 			tuningPages.push_back(std::make_pair(tp, f));
 		}
@@ -368,7 +362,7 @@ void TuningWorkspace::updateTabControl()
 
 			emptyFilter->setID(uid.toString());
 
-			QWidget* tp = createTuningPage(0, emptyFilter);
+			QWidget* tp = createTuningPage(emptyFilter);
 
 			m_rightLayout->addWidget(tp);
 
@@ -383,7 +377,7 @@ void TuningWorkspace::updateTabControl()
 	}
 }
 
-QWidget* TuningWorkspace::createTuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> childWorkspaceFilter)
+QWidget* TuningWorkspace::createTuningPage(std::shared_ptr<TuningFilter> childWorkspaceFilter)
 {
 	if (childWorkspaceFilter == nullptr)
 	{
@@ -435,7 +429,7 @@ QWidget* TuningWorkspace::createTuningPage(int tuningPageIndex, std::shared_ptr<
 		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningPagesMap.end())
 		{
-			TuningPage* tp = new TuningPage(tuningPageIndex, m_treeFilter, childWorkspaceFilter, m_buttonFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_buttonFilter, m_tuningSignalManager, m_tuningTcpClient);
 
 			m_tuningPagesMap[childWorkspaceFilterId] = tp;
 

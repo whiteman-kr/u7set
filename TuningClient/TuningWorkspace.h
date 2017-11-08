@@ -20,7 +20,7 @@ private:
 
 	void updateTabControl();
 
-	QWidget* createTuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> childWorkspaceFilter);
+	QWidget* createTuningPage(std::shared_ptr<TuningFilter> childWorkspaceFilter);
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
 
