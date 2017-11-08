@@ -93,6 +93,8 @@ namespace Builder
 				assert(false);
 				return false;
 			}
+
+			return true;
 		}
 
 		return false;
@@ -1098,7 +1100,8 @@ namespace Builder
 
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
 											Signal* busSignal,
-											Builder::BusShared bus)
+											Builder::BusShared bus,
+											const QString& outPinCaption)
 	{
 		// create parent Bus signal
 		//
@@ -1115,7 +1118,7 @@ namespace Builder
 		{
 			// create auto bus signal
 			//
-			QString appSignalID = QString("#AUTO_BUS_%1").arg(ualItem->label());
+			QString appSignalID = QString("#AUTO_BUS_%1_%2").arg(ualItem->label()).arg(outPinCaption.toUpper());
 
 			m_autoSignalPtr = new Signal;
 
@@ -1374,9 +1377,9 @@ namespace Builder
 				{
 					return true;
 				}
-
-				return false;
 			}
+
+			return false;
 		}
 
 		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
@@ -1986,7 +1989,9 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, const Signal* s,
+											   const QString& lmEquipmentID,
+											   QUuid outPinUuid)
 	{
 		// create opto signal
 		//
@@ -2058,13 +2063,16 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem,
+													Signal* s, BusShared bus,
+													QUuid outPinUuid,
+													const QString& outPinCaption)
 	{
 		// s can bee nullptr!!!
 		//
 		UalSignal* busParentSignal = new UalSignal;
 
-		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus);
+		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption);
 
 		if (result == false)
 		{

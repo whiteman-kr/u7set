@@ -4691,6 +4691,52 @@ namespace Builder
 							arg(pinCaption).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5123
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different busTypes on AFB inputs (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Different busTypes on AFB inputs.
+	///
+	void IssueLogger::errALC5123(QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5123,
+				  QString(tr("Different busTypes on AFB inputs (Logic schema %1).")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5124
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+	///
+	/// Parameters:
+	///		%1 App signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Different busTypes on AFB inputs.
+	///
+	void IssueLogger::errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, appSignalID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5124,
+				  QString(tr("Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)")).
+								arg(appSignalID).arg(schemaID));
+	}
+
+
 	//
 
 	/// IssueCode: ALC5186

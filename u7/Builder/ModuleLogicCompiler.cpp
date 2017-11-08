@@ -863,7 +863,7 @@ namespace Builder
 
 		Signal* connectedBusSignal = getCompatibleConnectedBusSignal(outPin, busTypeID);
 
-		UalSignal* parentBusSignal = m_ualSignals.createBusParentSignal(ualItem, connectedBusSignal, bus, outPin.guid());
+		UalSignal* parentBusSignal = m_ualSignals.createBusParentSignal(ualItem, connectedBusSignal, bus, outPin.guid(), "OUT");
 
 		if (parentBusSignal == nullptr)
 		{
@@ -1084,7 +1084,7 @@ namespace Builder
 			return false;
 		}
 
-		if (ualItem->label() == "3TZB00SET01_016_2_61854")
+		if (ualItem->label() == "BUSSES_213")
 		{
 			int a = 0;
 			a++;
@@ -1102,7 +1102,7 @@ namespace Builder
 
 		bool isBusProcessing = false;
 
-		result = isBusProcessingAfb(ualAfb, isBusProcessing);
+		result = isBusProcessingAfb(ualAfb, &isBusProcessing);
 
 		if (result == false)
 		{
@@ -1110,13 +1110,24 @@ namespace Builder
 		}
 
 		QString outBusTypeID;
+		BusShared bus;
 
 		if (isBusProcessing == true)
 		{
-			result = determineOutBusTypeID(ualAfb, outBusTypeID);
+			result = determineOutBusTypeID(ualAfb, &outBusTypeID);
 
 			if (result == false)
 			{
+				return false;
+			}
+
+			bus = m_signals->getBus(outBusTypeID);
+
+			if (bus == nullptr)
+			{
+				// Bus type ID '%1' is undefined (Logic schema '%2').
+				//
+				m_log->errALC5100(outBusTypeID, ualItem->guid(), ualItem->schemaID());
 				return false;
 			}
 		}
@@ -1154,15 +1165,36 @@ namespace Builder
 
 			UalSignal* ualSignal = nullptr;
 
-			Signal* s = getCompatibleConnectedSignal(outPin, outAfbSignal);
+			Signal* s = getCompatibleConnectedSignal(outPin, outAfbSignal, outBusTypeID);
 
-			if (s == nullptr)
+			switch(outAfbSignal.type())
 			{
-				ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal);
-			}
-			else
-			{
-				ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
+			case E::SignalType::Analog:
+			case E::SignalType::Discrete:
+				if (s == nullptr)
+				{
+					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal);
+				}
+				else
+				{
+					ualSignal = m_ualSignals.createSignal(ualItem, s, outPin.guid());
+				}
+				break;
+
+			case E::SignalType::Bus:
+
+				if ((s != nullptr && s->isBus() == false) || (bus == nullptr))
+				{
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				ualSignal = m_ualSignals.createBusParentSignal(ualItem, s, bus, outPin.guid(), outAfbSignal.caption());
+				break;
+
+			default:
+				assert(false);
 			}
 
 			if (ualSignal == nullptr)
@@ -1693,7 +1725,7 @@ namespace Builder
 		return result;
 	}
 
-	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
+	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
@@ -1737,58 +1769,14 @@ namespace Builder
 				break;
 
 			case E::SignalType::Bus:
-				assert(false);			// should be implemented
-				continue;
 
-			default:
-				assert(false);
-			}
-		}
+				if (s->isCompatibleFormat(outAfbSignal.type(), busTypeID) == true)
+				{
+					return s;
+				}
 
-		return nullptr;
-	}
-
-	Signal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID)
-	{
-		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
-
-		for(QUuid inPinUuid : connectedPinsUuids)
-		{
-			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
-
-			if (connectedItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (connectedItem->isSignal() == false)
-			{
-				continue;
-			}
-
-			QString signalID = connectedItem->strID();
-
-			Signal* s = m_signals->getSignal(signalID);
-
-			if (s == nullptr)
-			{
-				continue;
-			}
-
-			switch(s->signalType())
-			{
-			case E::SignalType::Discrete:
-			case E::SignalType::Analog:
 				break;
 
-			case E::SignalType::Bus:
-				if (s->busTypeID() == busTypeID)
-				{
-					return s;				// yes!!!
-				}
-				continue;
-
 			default:
 				assert(false);
 			}
@@ -1797,6 +1785,19 @@ namespace Builder
 		return nullptr;
 	}
 
+	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
+	{
+		return getCompatibleConnectedSignal(outPin, outAfbSignal, QString());
+	}
+
+	Signal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID)
+	{
+		LogicAfbSignal dummyBusSignal;
+
+		dummyBusSignal.setType(E::SignalType::Bus);
+
+		return getCompatibleConnectedSignal(outPin, dummyBusSignal, busTypeID);
+	}
 
 	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin)
 	{
@@ -1829,6 +1830,8 @@ namespace Builder
 			return false;
 		}
 
+		outBusTypeID->clear();
+
 		for(const LogicPin& inPin : ualAfb->inputs())
 		{
 			LogicAfbSignal afbSignal;
@@ -1845,7 +1848,50 @@ namespace Builder
 				continue;
 			}
 
+			// inPin is bus
+
+			UalSignal* ualSignal = m_ualSignals.get(inPin.guid());
+
+			if (ualSignal == nullptr)
+			{
+				return false;
+			}
+
+			if (ualSignal->isBus() == true)
+			{
+				if (outBusTypeID->isEmpty() == true)
+				{
+					*outBusTypeID = ualSignal->busTypeID();
+					continue;
+				}
+
+				if (*outBusTypeID != ualSignal->busTypeID())
+				{
+					// Different busTypes on AFB inputs (Logic schema %1).
+					m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID());
+					return false;
+				}
+
+				continue;			// check remaining inputs
+			}
+
+			if (ualSignal->isDiscrete() && afbSignal.isBus() == true && afbSignal.busDataFormat() == E::BusDataFormat::Discrete)
+			{
+				// discrete to "discrete" bus - is allowed connection
+				continue;
+			}
+
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			assert(false);				// this error must be detected earlier
+
+			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->ualItemLabel(),
+							  ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
+
+			return false;
 		}
+
+		return outBusTypeID->isEmpty() == false;
 	}
 
 	bool ModuleLogicCompiler::checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal)
@@ -6140,40 +6186,48 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateAfbCode(const UalItem* appItem)
+	bool ModuleLogicCompiler::generateAfbCode(const UalItem* ualItem)
 	{
-		if (m_ualAfbs.contains(appItem->guid()) == false)
+		if (m_ualAfbs.contains(ualItem->guid()) == false)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		const UalAfb* ualAfb = m_ualAfbs.value(appItem->guid(), nullptr);
+		const UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
 
 		TEST_PTR_RETURN_FALSE(ualAfb)
 
-		bool result = false;
+		bool result = true;
 
 		int busProcessingStepsNumber = 1;
 
-/*		result = calcBusProcessingStepsNumber(ualAfb, &busProcessingStepsNumber);
+		result = calcBusProcessingStepsNumber(ualAfb, &busProcessingStepsNumber);
 
 		if (result == false)
 		{
 			return false;
-		}*/
+		}
+
+		if (ualItem->label() == "BUSSES_163")
+		{
+			int a = 0;
+			a++;
+		}
 
 		for(int busProcessingStep = 0; busProcessingStep < busProcessingStepsNumber; busProcessingStep++)
 		{
 			result &= generateSignalsToAfbInputsCode(ualAfb, busProcessingStep);
 
-			result &= startAfb(ualAfb);
+			if (busProcessingStepsNumber > 1)
+			{
+				result &= startAfb(ualAfb, busProcessingStep + 1);
+			}
+			else
+			{
+				result &= startAfb(ualAfb, -1);
+			}
 
 			result &= generateAfbOutputsToSignalsCode(ualAfb, busProcessingStep);
-
-			if (result == false)
-			{
-				break;
-			}
 		}
 
 		m_code.newLine();
@@ -6270,7 +6324,7 @@ namespace Builder
 
 		Command cmd;
 
-		switch(inUalSignal->signalType())
+		switch(temp_inAfbSignal.type())
 		{
 		case E::SignalType::Discrete:
 			if (inUalSignal->isConst() == true)
@@ -6318,7 +6372,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-//			assert(false);
+			result = generateSignalToAfbBusInputCode(ualAfb, inAfbSignal, inUalSignal, busProcessingStep);
 			break;
 
 		default:
@@ -6328,6 +6382,199 @@ namespace Builder
 
 		return result;
 	}
+
+	bool ModuleLogicCompiler::generateSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep)
+	{
+		if (ualAfb == nullptr || inUalSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		assert(inAfbSignal.isBus() == true);
+		assert(busProcessingStep >= 0);
+
+		bool result = true;
+
+		switch(inUalSignal->signalType())
+		{
+		case E::SignalType::Discrete:
+
+			result =  generateDiscreteSignalToAfbBusInputCode(ualAfb, inAfbSignal, inUalSignal, busProcessingStep);
+			break;
+
+		case E::SignalType::Bus:
+			result =  generateBusSignalToAfbBusInputCode(ualAfb, inAfbSignal, inUalSignal, busProcessingStep);
+
+			break;
+
+		case E::SignalType::Analog:
+			LOG_INTERNAL_ERROR(m_log);			// uncompatible conection, this error must be detected early!
+			return false;
+
+		default:
+			assert(false);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateDiscreteSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep)
+	{
+		if (ualAfb == nullptr || inUalSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (inUalSignal->isDiscrete() == false || inAfbSignal.isBus() == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (inAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
+		{
+			// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+			//
+			m_log->errALC5124(inUalSignal->refSignalIDsJoined(), inUalSignal->ualItemGuid(),
+							  ualAfb->guid(), ualAfb->schemaID());	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+
+			return false;
+		}
+
+		int inputSize = inAfbSignal.size();
+
+		if (inputSize != SIZE_16BIT && inputSize != SIZE_32BIT)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Command cmd;
+
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		for(int i = 0; i < inputSize; i++)
+		{
+			int writeAddr = bitAccAddr;
+
+			if (i >= SIZE_16BIT)
+			{
+				writeAddr++;
+			}
+
+			int writeBit = i % SIZE_16BIT;
+
+			if (inUalSignal->isConst() == true)
+			{
+				cmd.movBitConst(writeAddr, writeBit, inUalSignal->constDiscreteValue());
+			}
+			else
+			{
+				cmd.movBit(writeAddr, writeBit, inUalSignal->ualAddr().offset(), inUalSignal->ualAddr().bit());
+			}
+
+			m_code.append(cmd);
+		}
+
+		cmd.setComment(QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined()));
+
+		if (inputSize == SIZE_16BIT)
+		{
+			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
+		}
+		else
+		{
+			assert(inputSize == SIZE_32BIT);
+			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
+		}
+
+		m_code.append(cmd);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateBusSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep)
+	{
+		if (ualAfb == nullptr || inUalSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+/*		if (inUalSignal->isDiscrete() == false || inAfbSignal.isBus() == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (inAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
+		{
+			// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+			//
+			m_log->errALC5124(inUalSignal->refSignalIDsJoined(), inUalSignal->ualItemGuid(),
+							  ualAfb->guid(), ualAfb->schemaID());	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+
+			return false;
+		}
+
+		int inputSize = inAfbSignal.size();
+
+		if (inputSize != SIZE_16BIT && inputSize != SIZE_32BIT)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Command cmd;
+
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		for(int i = 0; i < inputSize; i++)
+		{
+			int writeAddr = bitAccAddr;
+
+			if (i >= SIZE_16BIT)
+			{
+				writeAddr++;
+			}
+
+			int writeBit = i % SIZE_16BIT;
+
+			if (inUalSignal->isConst() == true)
+			{
+				cmd.movBitConst(writeAddr, writeBit, inUalSignal->constDiscreteValue());
+			}
+			else
+			{
+				cmd.movBit(writeAddr, writeBit, inUalSignal->ualAddr().offset(), inUalSignal->ualAddr().bit());
+			}
+
+			m_code.append(cmd);
+		}
+
+		cmd.setComment(QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined()));
+
+		if (inputSize == SIZE_16BIT)
+		{
+			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
+		}
+		else
+		{
+			assert(inputSize == SIZE_32BIT);
+			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
+		}
+
+		m_code.append(cmd);*/
+
+		return true;
+	}
+
 
 	bool ModuleLogicCompiler::generateWriteConstToFbCode(const UalAfb& appFb, const LogicAfbSignal& inAfbSignal, const UalConst* constItem)
 	{
@@ -6700,19 +6947,8 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::startAfb(const UalAfb* ualAfb)
+	bool ModuleLogicCompiler::startAfb(const UalAfb* ualAfb, int runningStep)
 	{
-		int startCount = 1;
-
-		for(LogicAfbParam param : ualAfb->afb().params())
-		{
-			if (param.opName() == "test_start_count")
-			{
-				startCount = param.value().toInt();
-				break;
-			}
-		}
-
 		int afbOpcode = ualAfb->opcode();
 		int afbInstance = ualAfb->instance();
 		int afbRunTime = ualAfb->runTime();
@@ -6722,15 +6958,15 @@ namespace Builder
 
 		Command cmd;
 
-		if (startCount == 1)
+		cmd.start(afbOpcode, afbInstance, afbCaption, afbRunTime);
+
+		if (runningStep == -1)
 		{
-			cmd.start(afbOpcode, afbInstance, afbCaption, afbRunTime);
 			cmd.setComment(QString(tr("compute %1 @%2")).arg(afbCaption).arg(afbLabel));
 		}
 		else
 		{
-			cmd.nstart(afbOpcode, afbInstance, startCount, afbCaption, afbRunTime);
-			cmd.setComment(QString(tr("compute %1 @%2 %3 times")).arg(afbCaption).arg(afbLabel).arg(startCount));
+			cmd.setComment(QString(tr("compute %1 @%2 (step %3)")).arg(afbCaption).arg(afbLabel).arg(runningStep));
 		}
 
 		m_code.append(cmd);
@@ -6864,7 +7100,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			assert(false);
+			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::AlCompiler, "\"AFB's bus-out to signal\" code generation is not implemented now");
 			break;
 
 		default:
@@ -6875,9 +7111,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::calcBusProcessingStepsNumber(UalAfb* ualAfb, bool* busProcessingStepsNumber)
+	bool ModuleLogicCompiler::calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber)
 	{
-/*		if (ualAfb == nullptr || busProcessingStepsNumber == nullptr)
+		if (ualAfb == nullptr || busProcessingStepsNumber == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
@@ -6887,7 +7123,7 @@ namespace Builder
 
 		bool isBusProcAfb = false;
 
-		result = isBusProcessingAfb(ualAfb, &isBusProcAfb);
+		bool result = isBusProcessingAfb(ualAfb, &isBusProcAfb);
 
 		if (result == false)
 		{
@@ -6900,12 +7136,168 @@ namespace Builder
 			return true;
 		}
 
-		int*/
+		int inputsBusSize = -1;
+		int inputSignalSize = -1;
+
+		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->inputs(), &inputsBusSize, &inputSignalSize, true);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		int outputsBusSize = -1;
+		int outputSignalSize = -1;
+
+		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->outputs(), &outputsBusSize, &outputSignalSize, false);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (outputSignalSize == -1)
+		{
+			outputSignalSize = inputSignalSize;		// may be all bus outputs are connected to terminator
+		}
+
+		if (inputsBusSize != outputsBusSize)
+		{
+			assert(false);						// in and out busses has different sizes
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (inputSignalSize != outputSignalSize)
+		{
+			assert(false);						// input and output signals has different sizes
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (((inputsBusSize % SIZE_16BIT) != 0) ||
+			((outputsBusSize % SIZE_16BIT) != 0) ||
+			((inputSignalSize % SIZE_16BIT) != 0) ||
+			((outputSignalSize % SIZE_16BIT) != 0))
+		{
+			assert(false);						// pins or signals size are not multiple 16
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (inputSignalSize < inputsBusSize)
+		{
+			assert(false);						// is not allowed now
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if ((inputSignalSize % inputsBusSize) != 0)
+		{
+			assert(false);						// signal and bus inputs sizes are not multiples
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		*busProcessingStepsNumber = inputSignalSize / inputsBusSize;
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::isBusProcessingAfb(UalAfb* ualAfb, bool* isBusProcessing)
+	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins, int* pinsSize, int* signalsSize, bool isInputs)
+	{
+		if (ualAfb == nullptr || pinsSize == nullptr || signalsSize == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		*pinsSize = -1;
+		*signalsSize = -1;
+
+		for(const LogicPin& pin : pins)
+		{
+			LogicAfbSignal afbSignal;
+
+			bool result = ualAfb->getAfbSignalByPin(pin, &afbSignal);
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			if (afbSignal.isBus() == false)
+			{
+				continue;
+			}
+
+			if (*pinsSize == -1)
+			{
+				*pinsSize = afbSignal.size();
+			}
+			else
+			{
+				if (*pinsSize != afbSignal.size())
+				{
+					assert(false);				// different bus input sizes
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+			}
+
+			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
+
+			if (ualSignal == nullptr)
+			{
+				if (isInputs == false)
+				{
+					continue;					// output can don't have connected signals (can be connected to terminator)
+				}
+
+				assert(false);					// connected signal is not found
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			if (isInputs == true && ualSignal->isDiscrete() == true)
+			{
+				continue;
+			}
+
+			if (ualSignal->isBus() == false)
+			{
+				assert(false);					// connected signal is not bus
+												// this error must be detected early
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			if (*signalsSize == -1)
+			{
+				*signalsSize = ualSignal->dataSize();
+			}
+			else
+			{
+				if (*signalsSize != ualSignal->dataSize())
+				{
+					// Different busTypes on AFB inputs (Logic schema %1).
+					m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID());
+					return false;
+				}
+			}
+		}
+
+		if (*pinsSize == -1)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing)
 	{
 		if (ualAfb == nullptr || isBusProcessing == nullptr)
 		{

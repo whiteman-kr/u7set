@@ -176,7 +176,7 @@ namespace Builder
 		m_appBitAdressed.memory.lock();
 
 		m_appBitAdressed.bitAccumulator.setStartAddress(appLogicBitData.startAddress());
-		m_appBitAdressed.bitAccumulator.setSizeW(1);        // bit accumulator has 1 word (16 bit) size
+		m_appBitAdressed.bitAccumulator.setSizeW(2);        // bit accumulator has 2 word (32bit) size
 
 		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(appLogicBitData.startAddress());
 		m_appBitAdressed.acquiredDiscreteInternalSignals.setStartAddress(appLogicBitData.startAddress());
@@ -231,7 +231,7 @@ namespace Builder
 		// recalc application bit-addressed memory mapping
 		//
 		m_appBitAdressed.bitAccumulator.setStartAddress(m_appBitAdressed.memory.startAddress());
-		m_appBitAdressed.bitAccumulator.setSizeW(1);
+		m_appBitAdressed.bitAccumulator.setSizeW(2);			// bit accumulator 32 bit size
 
 		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
 		m_appBitAdressed.acquiredDiscreteInternalSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteOutputSignals.nextAddress());

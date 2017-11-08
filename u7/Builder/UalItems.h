@@ -385,7 +385,8 @@ namespace Builder
 
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
-									Builder::BusShared bus);
+									Builder::BusShared bus,
+									const QString& outPinCaption);
 
 		friend class UalSignalsMap;
 
@@ -559,7 +560,7 @@ namespace Builder
 
 		UalSignal* createOptoSignal(const UalItem* ualItem, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
 
-		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid);
+		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);

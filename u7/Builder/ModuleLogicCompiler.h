@@ -136,8 +136,11 @@ namespace Builder
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 
+		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
-		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
+		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
+
+//		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 
@@ -268,17 +271,23 @@ namespace Builder
 		bool generateWriteBusExtractorToSignalCode(UalSignal& appSignal, const UalItem* appBusExtractor, QUuid extractorOutPinUuid);
 		bool generateWriteSignalToSignalCode(UalSignal& appSignal, QUuid srcSignalGuid);
 
-		bool generateAfbCode(const UalItem* appItem);
+		bool generateAfbCode(const UalItem* ualItem);
 		bool generateSignalsToAfbInputsCode(const UalAfb* ualAfb, int busProcessingStep);
 		bool generateSignalToAfbInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
-		bool startAfb(const UalAfb* appFb);
+		bool generateSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
+		bool generateDiscreteSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
+		bool generateBusSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
+
+		bool startAfb(const UalAfb* ualAfb, int runningStep);
+
 		bool generateAfbOutputsToSignalsCode(const UalAfb* ualAfb, int busProcessingStep);
 		bool generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
 
-		bool calcBusProcessingStepsNumber(UalAfb* ualAfb, bool* busProcessingStepsNumber);
-		bool isBusProcessingAfb(UalAfb* ualAfb, bool* isBusProcessing);
+		bool calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber);
+		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins, int* pinsSize, int* signalsSize, bool isInputs);
+		bool isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing);
 
-		bool readFbOutputSignals(const UalAfb *appFb);
+		bool readFbOutputSignals(const UalAfb* appFb);
 
 		//
 		bool generateWriteConstToFbCode(const UalAfb& appFb, const LogicAfbSignal &inAfbSignal, const UalConst* constItem);
