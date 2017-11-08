@@ -213,6 +213,36 @@ TuningSignalState TuningSignalManager::state(const QString& appSignalId, bool* f
 	return state(signalHash, found);
 }
 
+#ifdef Q_DEBUG
+void TuningSignalManager::validateStates()
+{
+	bool ok = false;
+
+	std::vector<Hash> hashes = signalHashes();
+
+	for (Hash hash : hashes)
+	{
+		AppSignalParam asp = signalParam(hash, &ok);
+		if (ok == false)
+		{
+			assert(ok);
+			return;
+		}
+
+		TuningSignalState s = state(hash, &ok);
+
+		s.m_flags.valid = true;
+		s.m_value = TuningValue(asp.tuningDefaultValue(), asp.toTuningType());
+		s.m_highBound = TuningValue(asp.highEngineeringUnits(), asp.toTuningType());
+		s.m_lowBound = TuningValue(asp.lowEngineeringUnits(), asp.toTuningType());
+
+		setState(hash, s);
+	}
+
+	return;
+}
+#endif
+
 void TuningSignalManager::invalidateStates()
 {
 	QMutexLocker l(&m_statesMutex);

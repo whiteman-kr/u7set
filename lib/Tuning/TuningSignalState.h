@@ -31,10 +31,9 @@ public:
 	// Methods
 	//
 	TuningValue() = default;
-	explicit TuningValue(double value);
+	explicit TuningValue(double value, TuningValueType valueType);
 	TuningValue(const Network::TuningValue& message);
 
-	void fromDouble(double value);
 	double toDouble() const;
 
 	QString toString(int precision = -1) const;

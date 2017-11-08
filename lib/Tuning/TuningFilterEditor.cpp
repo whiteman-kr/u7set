@@ -437,8 +437,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 			value = fv.value();
 			value.type = asp.toTuningType();
 
-			defaultValue = TuningValue(asp.tuningDefaultValue());
-			defaultValue.type = asp.toTuningType();
+			defaultValue = TuningValue(asp.tuningDefaultValue(), asp.toTuningType());
 
 			first = false;
 		}
@@ -459,8 +458,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 				}
 			}
 
-			TuningValue checkDefaultValue(asp.tuningDefaultValue());
-			checkDefaultValue.type = asp.toTuningType();
+			TuningValue checkDefaultValue(asp.tuningDefaultValue(), asp.toTuningType());
 
 			if (checkDefaultValue.type != defaultValue.type || checkDefaultValue != defaultValue)
 			{

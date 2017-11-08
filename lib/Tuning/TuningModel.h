@@ -112,8 +112,6 @@ protected:
 
 	std::vector<int> m_columnsIndexes;
 
-	bool m_blink = false;
-
 };
 
 class DialogInputTuningValue : public QDialog

@@ -11,7 +11,9 @@ class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent);
+	TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent);
+
+	void blink();
 
 protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
@@ -21,6 +23,9 @@ protected:
 
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+private:
+	bool m_blink = false;
 
 };
 
@@ -135,7 +140,6 @@ private:
 
 	TuningTcpClient* m_tuningTcpClient = nullptr;
 
-
 	TuningTableView* m_objectList = nullptr;
 
 	QVBoxLayout* m_mainLayout = nullptr;
@@ -166,7 +170,7 @@ private:
 
 	std::shared_ptr<TuningFilter> m_buttonFilter = nullptr;
 
-	int m_tuningPageIndex = 0;
+	//int m_tuningPageIndex = 0;
 
 	int m_updateStateTimerId = -1;
 

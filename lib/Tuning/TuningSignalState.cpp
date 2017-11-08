@@ -1,19 +1,9 @@
 #include "TuningSignalState.h"
 
-TuningValue::TuningValue(double value)
+TuningValue::TuningValue(double value, TuningValueType valueType)
 {
-	type = TuningValueType::Double;
-	doubleValue = value;
-	return;
-}
+	type = valueType;
 
-TuningValue::TuningValue(const Network::TuningValue& message)
-{
-	load(message);
-	return;
-}
-void TuningValue::fromDouble(double value)
-{
 	switch (type)
 	{
 	case TuningValueType::Discrete:
@@ -32,6 +22,12 @@ void TuningValue::fromDouble(double value)
 	default:
 		assert(false);
 	}
+	return;
+}
+
+TuningValue::TuningValue(const Network::TuningValue& message)
+{
+	load(message);
 	return;
 }
 

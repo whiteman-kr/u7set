@@ -227,7 +227,7 @@ TuningValue TuningModel::defaultValue(const AppSignalParam& asp) const
 		return it->second;
 	}
 
-	TuningValue result(asp.tuningDefaultValue());
+	TuningValue result(asp.tuningDefaultValue(), asp.toTuningType());
 
 	return result;
 }
@@ -415,10 +415,10 @@ void TuningModel::sort(int column, Qt::SortOrder order)
 
 bool TuningModel::limitsUnbalance(const AppSignalParam& asp, const TuningSignalState& tss) const
 {
-	if (tss.valid() == true)
+	if (tss.valid() == true && asp.isAnalog() == true)
 	{
-		TuningValue tvHigh(asp.highEngineeringUnits());
-		TuningValue tvLow(asp.lowEngineeringUnits());
+		TuningValue tvHigh(asp.highEngineeringUnits(), asp.toTuningType());
+		TuningValue tvLow(asp.lowEngineeringUnits(), asp.toTuningType());
 
 		if (tss.lowBound() != tvLow || tss.highBound() != tvHigh)
 		{
@@ -804,7 +804,11 @@ void DialogInputTuningValue::accept()
 
 		double inputValue = text.toDouble(&ok);
 
-		m_value.fromDouble(inputValue);
+		TuningValueType oldType = m_value.type;
+
+		TuningValue newValue(inputValue, oldType);
+
+		m_value = newValue;
 
 		if (ok == false)
 		{

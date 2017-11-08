@@ -38,6 +38,17 @@ TuningTcpClient::~TuningTcpClient()
 {
 }
 
+#ifdef Q_DEBUG
+void TuningTcpClient::setSimulationMode(bool value)
+{
+	m_simulationMode = value;
+	if (m_simulationMode == true)
+	{
+		m_signals->validateStates();
+	}
+}
+#endif
+
 QStringList TuningTcpClient::tuningSourcesEquipmentIds() const
 {
 	QMutexLocker l(&m_tuningSourcesMutex);
@@ -100,6 +111,25 @@ void TuningTcpClient::writeTuningSignal(const TuningWriteCommand& data)
 
 void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& data)
 {
+#ifdef Q_DEBUG
+	if (m_simulationMode == true)
+	{
+		bool ok = false;
+
+		for (const TuningWriteCommand& cmd : data)
+		{
+			TuningSignalState state = m_signals->state(cmd.m_hash, &ok);
+			if (ok == true)
+			{
+				state.m_value = cmd.m_value;
+				m_signals->setState(cmd.m_hash, state);
+			}
+		}
+
+		return;
+	}
+#endif
+
 	QMutexLocker l(&m_writeQueueMutex);
 
 	for (const TuningWriteCommand& command : data)
@@ -591,6 +621,14 @@ void TuningTcpClient::slot_signalsUpdated()
 	{
 		resetToGetTuningSources();
 	}
+
+#ifdef Q_DEBUG
+	if (m_simulationMode == true)
+	{
+		m_signals->validateStates();
+	}
+#endif
+
 
 	return;
 }

@@ -11,18 +11,18 @@ using namespace std;
 //
 
 
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent):
+TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent):
 	TuningModel(tuningSignalManager, parent)
 {
 
-	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
+	/*TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
 		assert(pageSettings);
 		return;
 	}
 
-	if (pageSettings->m_columnCount == 0)
+	if (pageSettings->m_columnCount == 0)*/
 	{
 		addColumn(Columns::CustomAppSignalID);
 		addColumn(Columns::EquipmentID);
@@ -37,12 +37,17 @@ TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, i
 		//addColumn(Columns::Valid);
 		//addColumn(Columns::OutOfRange);
 	}
-	else
+	/*else
 	{
 		m_columnsIndexes  = pageSettings->m_columnsIndexes;
 		removeColumn(Columns::Valid);
 		removeColumn(Columns::OutOfRange);
-	}
+	}*/
+}
+
+void TuningModelClient::blink()
+{
+	m_blink = !m_blink;
 }
 
 QBrush TuningModelClient::backColor(const QModelIndex& index) const
@@ -80,6 +85,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 		}
 
 		TuningValue tvDefault(defaultValue(asp));
+		tvDefault.type = asp.toTuningType();
 
 		if (tvDefault != state.value())
 		{
@@ -305,6 +311,8 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 
 	TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
+
+
 	if (role == Qt::EditRole && displayIndex == static_cast<int>(TuningModel::Columns::Value))
 	{
 		bool ok = false;
@@ -314,7 +322,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 			return false;
 		}
 
-		state.setNewValue(TuningValue(v));
+		m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(v, asp.toTuningType()));
 		return true;
 	}
 
@@ -322,12 +330,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 	{
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
-			state.setNewValue(TuningValue(1));
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(1, asp.toTuningType()));
 			return true;
 		}
 		else
 		{
-			state.setNewValue(TuningValue(0));
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(0, asp.toTuningType()));
 			return true;
 		}
 	}
@@ -423,7 +431,6 @@ int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_tuningPageIndex(tuningPageIndex),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
 	m_treeFilter(treeFilter),
@@ -448,7 +455,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 
 	// Models and data
 	//
-	m_model = new TuningModelClient(m_tuningSignalManager, m_tuningPageIndex, this);
+	m_model = new TuningModelClient(m_tuningSignalManager, this);
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
 
@@ -530,6 +537,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 
 	fillObjectsList();
 
+	m_objectList->resizeColumnsToContents();
+	/*
+
 	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
@@ -553,9 +563,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> treeFi
 
 			m_objectList->setColumnWidth(i, width);
 		}
-	}
+	}*/
 
-	m_updateStateTimerId = startTimer(250);
+	m_updateStateTimerId = startTimer(500);
 
 }
 
@@ -564,6 +574,7 @@ TuningPage::~TuningPage()
 	m_instanceCounter--;
 	qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 
+	/*
 	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(m_tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
@@ -583,7 +594,7 @@ TuningPage::~TuningPage()
 		{
 			pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
 		}
-	}
+	}*/
 }
 
 void TuningPage::fillObjectsList()
@@ -928,6 +939,8 @@ void TuningPage::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_updateStateTimerId && m_model->rowCount() > 0 && isVisible() == true)
 	{
+		m_model->blink();
+
 		// Update only visible dynamic items
 		//
 		int from = m_objectList->rowAt(0);
@@ -963,8 +976,8 @@ void TuningPage::timerEvent(QTimerEvent* event)
 
 					if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
 					{
-						//QString str = QString("%1:%2").arg(row).arg(col);
-						//qDebug() << str;
+						QString str = QString("%1:%2").arg(row).arg(col);
+						qDebug() << str;
 
 						m_objectList->update(m_model->index(row, col));
 					}
@@ -972,6 +985,7 @@ void TuningPage::timerEvent(QTimerEvent* event)
 			}
 		}
 	}
+
 }
 
 bool TuningPage::eventFilter(QObject* object, QEvent* event)
@@ -1133,11 +1147,11 @@ void TuningPage::slot_setAll()
 				continue;
 			}
 
-			TuningValue tv = m_model->defaultValue(asp);
+			TuningValue tvDefault = m_model->defaultValue(asp);
 
-			if (tv != state.newValue() && ok == true)
+			if (tvDefault != state.value() && ok == true)
 			{
-				m_tuningSignalManager->setNewValue(hash, tv);
+				m_tuningSignalManager->setNewValue(hash, tvDefault);
 			}
 		}
 	};
@@ -1211,8 +1225,6 @@ void TuningPage::slot_Write()
 
 	int listCount = 0;
 
-	std::vector<std::pair<Hash, float>> writeData;
-
 	for (Hash hash : hashes)
 	{
 		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
@@ -1236,7 +1248,7 @@ void TuningPage::slot_Write()
 		}
 		else
 		{
-			strValue = state.value().toString();
+			strValue = state.newValue().toString();
 		}
 
 		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
@@ -1265,13 +1277,13 @@ void TuningPage::slot_Write()
 			continue;
 		}
 
-		TuningWriteCommand cmd(hash, state.newValue());
-
-		commands.push_back(cmd);
-
 		state.clearUserModified();
 
 		m_tuningSignalManager->setState(hash, state);
+
+		TuningWriteCommand cmd(hash, state.newValue());
+
+		commands.push_back(cmd);
 	}
 
 	m_tuningTcpClient->writeTuningSignal(commands);

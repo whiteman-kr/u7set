@@ -47,6 +47,10 @@ MainWindow::MainWindow(QWidget* parent) :
 	m_tcpClient->setInstanceId(theSettings.instanceStrId());
 	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
 
+#ifdef Q_DEBUG
+	m_tcpClient->setSimulationMode(true);	// For debugging
+#endif
+
 	m_tcpClientThread = new SimpleThread(m_tcpClient);
 	m_tcpClientThread->start();
 

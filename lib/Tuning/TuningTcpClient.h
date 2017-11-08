@@ -57,6 +57,10 @@ public:
 	virtual ~TuningTcpClient();
 
 public:
+#ifdef Q_DEBUG
+	void setSimulationMode(bool value);
+#endif
+
 	// Tuning sources
 	//
 	QStringList tuningSourcesEquipmentIds() const;
@@ -146,6 +150,10 @@ private:
 	int m_readTuningSignalCount = 0;
 
 	std::vector<Hash> m_signalHashes;
+
+#ifdef Q_DEBUG
+	bool m_simulationMode = false;
+#endif
 
 private:
 	// Cached protobug messages
