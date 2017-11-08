@@ -235,8 +235,8 @@ namespace Builder
 		bool processSerialRxSignals();
 
 		bool processTransmitters();
-		bool processTransmitter(const UalItem *item);
-		bool getConnectedSignals(const LogicTransmitter &transmitter, QVector<UalSignal *>* connectedSignals);
+		bool processTransmitter(const UalItem* ualItem);
+		bool getConnectedSignals(const UalItem* transmitterItem, QVector<UalSignal *>* connectedSignals);
 
 		bool processSerialReceivers();
 		bool processSerialReceiver(const UalItem* item);
@@ -278,10 +278,11 @@ namespace Builder
 		bool generateDiscreteSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
 		bool generateBusSignalToAfbBusInputCode(const UalAfb* ualAfb, const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal, int busProcessingStep);
 
-		bool startAfb(const UalAfb* ualAfb, int runningStep);
+		bool startAfb(const UalAfb* ualAfb, int processingStep, int processingStepsNumber);
 
 		bool generateAfbOutputsToSignalsCode(const UalAfb* ualAfb, int busProcessingStep);
 		bool generateAfbOutputToSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
+		bool generateAfbBusOutputToBusSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
 
 		bool calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber);
 		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins, int* pinsSize, int* signalsSize, bool isInputs);
@@ -358,6 +359,7 @@ namespace Builder
 		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset);
 		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port);
 
 		bool finishAppLogicCode();
 		bool setLmAppLANDataSize();

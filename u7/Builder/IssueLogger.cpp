@@ -4736,6 +4736,28 @@ namespace Builder
 								arg(appSignalID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5125
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Input %1 of transmitter is connected unnamed signal (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Transmitter's input
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Different busTypes on AFB inputs.
+	///
+	void IssueLogger::errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5125,
+				  QString(tr("Input %1 of transmitter is connected unnamed signal (Logic schema %2).")).
+								arg(pinCaption).arg(schemaID));
+	}
 
 	//
 

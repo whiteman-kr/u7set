@@ -50,6 +50,7 @@ namespace Hardware
 
 			m_dataFormat = E::DataFormat::UnsignedInt;
 			m_dataSize = ualSignal->bus()->sizeBit();
+			m_busTypeID = ualSignal->bus()->busTypeID();
 			break;
 
 		default:
@@ -82,6 +83,7 @@ namespace Hardware
 		m_byteOrder = item.byteOrder;
 		m_dataSize = item.dataSize;
 		m_addrInBuf.set(item.offsetW + offsetFromBeginningOfBuffer, item.bitNo);
+		m_busTypeID = item.busTypeID;
 
 		return true;
 	}

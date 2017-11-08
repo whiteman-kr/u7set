@@ -1935,7 +1935,7 @@ namespace Builder
 
 	UalSignal* UalSignalsMap::createAutoSignal(const UalItem *ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal)
 	{
-		QString signalID = QString("%1_%2_%3").arg(AUTO_SIGNAL_ID_PREFIX).arg(ualItem->label().arg(outAfbSignal.caption()));
+		QString signalID = QString("%1_%2_%3").arg(AUTO_SIGNAL_ID_PREFIX).arg(ualItem->label()).arg(outAfbSignal.caption());
 
 		signalID = signalID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
 

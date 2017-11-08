@@ -4587,7 +4587,7 @@ namespace Builder
 
 		QVector<UalSignal*> connectedSignals;
 
-		if (getConnectedSignals(transmitter, &connectedSignals) == false)
+		if (getConnectedSignals(ualItem, &connectedSignals) == false)
 		{
 			return false;
 		}
@@ -4605,9 +4605,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getConnectedSignals(const LogicTransmitter& transmitter, QVector<UalSignal*>* connectedSignals)
+	bool ModuleLogicCompiler::getConnectedSignals(const UalItem* transmitterItem, QVector<UalSignal*>* connectedSignals)
 	{
-		if (connectedSignals == nullptr)
+		if (transmitterItem == nullptr || connectedSignals == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
@@ -4615,7 +4615,7 @@ namespace Builder
 
 		connectedSignals->clear();
 
-		const std::vector<LogicPin>& inPins = transmitter.inputs();
+		const std::vector<LogicPin>& inPins = transmitterItem->inputs();
 
 		for(const LogicPin& inPin : inPins)
 		{
@@ -4631,7 +4631,13 @@ namespace Builder
 			{
 				// UalSignal is not found for pin '%1' (Logic schema '%2').
 				//
-				m_log->errALC5120(transmitter.guid(), inPin.guid(), "");
+				m_log->errALC5120(transmitterItem->guid(), inPin.guid(), "");
+				return false;
+			}
+
+			if (ualSignal->isAutoSignal() == true)
+			{
+				m_log->errALC5125(inPin.caption(), transmitterItem->guid(), transmitterItem->schemaID());
 				return false;
 			}
 
@@ -6208,24 +6214,18 @@ namespace Builder
 			return false;
 		}
 
-		if (ualItem->label() == "BUSSES_163")
+		if (busProcessingStepsNumber > 1 && ualAfb->hasRam() == true)
 		{
-			int a = 0;
-			a++;
+			assert(false);				// AFB's with ram is not allow multistep processing now
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
 		}
 
 		for(int busProcessingStep = 0; busProcessingStep < busProcessingStepsNumber; busProcessingStep++)
 		{
 			result &= generateSignalsToAfbInputsCode(ualAfb, busProcessingStep);
 
-			if (busProcessingStepsNumber > 1)
-			{
-				result &= startAfb(ualAfb, busProcessingStep + 1);
-			}
-			else
-			{
-				result &= startAfb(ualAfb, -1);
-			}
+			result &= startAfb(ualAfb, busProcessingStep + 1, busProcessingStepsNumber);
 
 			result &= generateAfbOutputsToSignalsCode(ualAfb, busProcessingStep);
 		}
@@ -6434,6 +6434,14 @@ namespace Builder
 			return false;
 		}
 
+		if (inUalSignal->isConst() == false && inUalSignal->ualAddr().isValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(inUalSignal->refSignalIDsJoined(), inUalSignal->ualItemGuid(), inUalSignal->ualItemSchemaID());
+			return false;
+		}
+
 		if (inAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
 		{
 			// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
@@ -6505,7 +6513,7 @@ namespace Builder
 			return false;
 		}
 
-/*		if (inUalSignal->isDiscrete() == false || inAfbSignal.isBus() == false)
+		if (inUalSignal->isBus() == false || inAfbSignal.isBus() == false)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
@@ -6514,63 +6522,52 @@ namespace Builder
 
 		if (inAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
 		{
-			// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
-			//
-			m_log->errALC5124(inUalSignal->refSignalIDsJoined(), inUalSignal->ualItemGuid(),
-							  ualAfb->guid(), ualAfb->schemaID());	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
-
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);			// unknown BusDataFormat
 			return false;
 		}
 
+		if (inUalSignal->ualAddr().isValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(inUalSignal->refSignalIDsJoined(), inUalSignal->ualItemGuid(), inUalSignal->ualItemSchemaID());
+			return false;
+		}
+
+		assert(inUalSignal->ualAddr().bit() == 0);
+
+		int addrFrom = inUalSignal->ualAddr().offset();
+
+		Command cmd;
+
 		int inputSize = inAfbSignal.size();
 
-		if (inputSize != SIZE_16BIT && inputSize != SIZE_32BIT)
+		switch(inputSize)
 		{
+		case SIZE_16BIT:
+
+			addrFrom += busProcessingStep * 1;			//	+1 word per busProcessingStep
+			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), addrFrom, ualAfb->caption());
+			break;
+
+		case SIZE_32BIT:
+
+			addrFrom += busProcessingStep * 2;			//	+2 words per busProcessingStep
+			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), addrFrom, ualAfb->caption());
+			break;
+
+		default:
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		Command cmd;
+		cmd.setComment(QString("%1.%2 << %3 (part %4)").
+					   arg(ualAfb->caption()).arg(inAfbSignal.caption()).
+					   arg(inUalSignal->refSignalIDsJoined()).arg(busProcessingStep + 1));
 
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
-
-		for(int i = 0; i < inputSize; i++)
-		{
-			int writeAddr = bitAccAddr;
-
-			if (i >= SIZE_16BIT)
-			{
-				writeAddr++;
-			}
-
-			int writeBit = i % SIZE_16BIT;
-
-			if (inUalSignal->isConst() == true)
-			{
-				cmd.movBitConst(writeAddr, writeBit, inUalSignal->constDiscreteValue());
-			}
-			else
-			{
-				cmd.movBit(writeAddr, writeBit, inUalSignal->ualAddr().offset(), inUalSignal->ualAddr().bit());
-			}
-
-			m_code.append(cmd);
-		}
-
-		cmd.setComment(QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined()));
-
-		if (inputSize == SIZE_16BIT)
-		{
-			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
-		}
-		else
-		{
-			assert(inputSize == SIZE_32BIT);
-			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
-		}
-
-		m_code.append(cmd);*/
+		m_code.append(cmd);
 
 		return true;
 	}
@@ -6947,26 +6944,20 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::startAfb(const UalAfb* ualAfb, int runningStep)
+	bool ModuleLogicCompiler::startAfb(const UalAfb* ualAfb, int processingStep, int processingStepsNumber)
 	{
-		int afbOpcode = ualAfb->opcode();
-		int afbInstance = ualAfb->instance();
-		int afbRunTime = ualAfb->runTime();
-
-		QString afbCaption = ualAfb->caption();
-		QString afbLabel = ualAfb->label();
-
 		Command cmd;
 
-		cmd.start(afbOpcode, afbInstance, afbCaption, afbRunTime);
+		cmd.start(ualAfb->opcode(), ualAfb->instance(), ualAfb->caption(), ualAfb->runTime());
 
-		if (runningStep == -1)
+		if (processingStepsNumber == 1)
 		{
-			cmd.setComment(QString(tr("compute %1 @%2")).arg(afbCaption).arg(afbLabel));
+			cmd.setComment(QString(tr("compute %1 @%2")).arg(ualAfb->caption()).arg(ualAfb->label()));
 		}
 		else
 		{
-			cmd.setComment(QString(tr("compute %1 @%2 (step %3)")).arg(afbCaption).arg(afbLabel).arg(runningStep));
+			cmd.setComment(QString(tr("compute %1 @%2 (step %3/%4)")).
+							arg(ualAfb->caption()).arg(ualAfb->label()).arg(processingStep).arg(processingStepsNumber));
 		}
 
 		m_code.append(cmd);
@@ -7100,15 +7091,83 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::AlCompiler, "\"AFB's bus-out to signal\" code generation is not implemented now");
+
+			result = generateAfbBusOutputToBusSignalCode(ualAfb, outAfbSignal, outUalSignal, busProcessingStep);
 			break;
 
 		default:
+			assert(false);
 			LOG_INTERNAL_ERROR(m_log);				// this error should be detect early
 			return false;
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBusOutputToBusSignalCode(const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep)
+	{
+		if (ualAfb == nullptr || outUalSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (outUalSignal->isBus() == false || outAfbSignal.isBus() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (outAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);			// unknown BusDataFormat
+			return false;
+		}
+
+		if (outUalSignal->ualAddr().isValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(outUalSignal->refSignalIDsJoined(), outUalSignal->ualItemGuid(), outUalSignal->ualItemSchemaID());
+			return false;
+		}
+
+		assert(outUalSignal->ualAddr().bit() == 0);
+
+		int addrTo = outUalSignal->ualAddr().offset();
+
+		Command cmd;
+
+		int outputSize = outAfbSignal.size();
+
+		switch(outputSize)
+		{
+		case SIZE_16BIT:
+
+			addrTo += busProcessingStep * 1;			//	+1 word per busProcessingStep
+			cmd.readFuncBlock(addrTo, ualAfb->opcode(), ualAfb->instance(), outAfbSignal.operandIndex(), ualAfb->caption());
+			break;
+
+		case SIZE_32BIT:
+
+			addrTo += busProcessingStep * 2;			//	+2 words per busProcessingStep
+			cmd.readFuncBlock32(addrTo, ualAfb->opcode(), ualAfb->instance(), outAfbSignal.operandIndex(), ualAfb->caption());
+			break;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		cmd.setComment(QString("%1 (part %2) << %3.%4").
+					   arg(outUalSignal->refSignalIDsJoined()).arg(busProcessingStep + 1).
+					   arg(ualAfb->caption()).arg(outAfbSignal.caption()));
+
+		m_code.append(cmd);
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber)
@@ -10188,7 +10247,7 @@ namespace Builder
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxSignal:
-				// code generate later
+				// code for TxSignals is generated after this switch
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::RxRawDataSize:
@@ -10205,6 +10264,8 @@ namespace Builder
 		result &= copyOptoPortRawTxAnalogSignals(port);
 
 		result &= copyOptoPortRawTxDiscreteSignals(port);
+
+		result &= copyOptoPortRawTxBusSignals(port);
 
 		return result;
 	}
@@ -10918,6 +10979,117 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port)
+	{
+		if (port == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		QVector<Hardware::TxRxSignalShared> txSignals;
+
+		port->getTxSignals(txSignals);
+
+		bool result = true;
+
+		Command cmd;
+
+		int count = 0;
+
+		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
+		{
+			if (txSignal->isRaw() == false || txSignal->isBus() == false)
+			{
+				// skip non-Raw and non-Bus signals
+				//
+				continue;
+			}
+
+			UalSignal* ualSignal = m_ualSignals.get(txSignal->appSignalID());
+
+			if (ualSignal == nullptr)
+			{
+				// Signal '%1' is not found (opto port '%2' raw data description).
+				//
+				m_log->errALC5186(txSignal->appSignalID(), port->equipmentID());
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->isBus() == false || ualSignal->bus() == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+				result = false;
+				continue;
+			}
+
+			if (txSignal->busTypeID() != ualSignal->busTypeID())
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+								   QString("BusTypeID of raw data bus TxSignal %1 is not equal to correspond app signal (Opto port %2).").
+										arg(txSignal->appSignalID()).arg(port->equipmentID()));
+				result = false;
+				continue;
+			}
+
+			if (txSignal->dataSize() != ualSignal->bus()->sizeBit())
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+								   QString("DataSize of raw data bus TxSignal %1 is not equal to correspond app signal (Opto port %2).").
+										arg(txSignal->appSignalID()).arg(port->equipmentID()));
+				result = false;
+				continue;
+			}
+
+			if ((txSignal->dataSize() % SIZE_16BIT) != 0)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+								   QString("DataSize of raw data bus TxSignal %1 is not multiple to 16 bit (Opto port %2).").
+										arg(txSignal->appSignalID()).arg(port->equipmentID()));
+				result = false;
+				continue;
+			}
+
+			switch(txSignal->dataSize())
+			{
+			case SIZE_16BIT:
+				cmd.mov(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset());
+				break;
+
+			case SIZE_32BIT:
+				cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset());
+				break;
+
+			default:
+				cmd.movMem(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset(),
+						   txSignal->dataSize() / SIZE_16BIT);
+			}
+
+			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
+
+			m_code.append(cmd);
+
+			count++;
+		}
+
+		if (count > 0)
+		{
+			m_code.newLine();
+		}
+
+		return true;
+
 	}
 
 	bool ModuleLogicCompiler::finishAppLogicCode()

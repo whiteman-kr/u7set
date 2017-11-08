@@ -76,6 +76,8 @@ namespace Hardware
 		int dataSize() const { return m_dataSize; }
 		E::ByteOrder byteOrder() const { return m_byteOrder; }
 
+		QString busTypeID() const { return m_busTypeID; }
+
 	private:
 		Type m_type = Type::Regular;
 
@@ -84,6 +86,7 @@ namespace Hardware
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 		int m_dataSize = 0;					// signal size in tx(rx)Buffer in bits
+		QString m_busTypeID;
 
 		Address16 m_addrInBuf;				// relative signal address from beginning of txBuffer (rxBuffer)
 	};
