@@ -429,16 +429,15 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Resources usage report generation...")));
 
-		QStringList fileContent;
-		QStringList restLine;
+		QList<std::tuple<QString, QString, double, double, double, double, double>> fileContent;
+		QStringList fileContentStringList;
 
 		QString header = "LM Equipment ID";
-		int maxIdLength = header.length();
 
 		QStringList restHeaderColumns;
-		restHeaderColumns << "Code memory, %"
-						  << "Bit Memory, %"
+		restHeaderColumns << "Bit Memory, %"
 						  << "Word Memory, %"
+						  << "Code memory, %"
 						  << "IdrPhase Time, %"
 						  << "AlpPhase Time, %";
 
@@ -448,42 +447,135 @@ namespace Builder
 
 			ModuleLogicCompiler::ResourcesUsageInfo info = moduleCompiler->resourcesUsageInfo();
 
-			fileContent << info.lmEquipmentID;
-			maxIdLength = std::max(maxIdLength, info.lmEquipmentID.length());
+			double maxValue = info.bitMemoryUsed;
+			maxValue = std::max(maxValue, info.wordMemoryUsed);
+			maxValue = std::max(maxValue, info.codeMemoryUsed);
+			maxValue = std::max(maxValue, info.idrPhaseTimeUsed);
+			maxValue = std::max(maxValue, info.alpPhaseTimeUsed);
 
-			restLine << QString("|%1|%2|%3|%4|%5")
-						.arg(info.codeMemoryUsed, restHeaderColumns[0].length(), 'g', 2)
-						.arg(info.bitMemoryUsed, restHeaderColumns[1].length(), 'g', 2)
-						.arg(info.wordMemoryUsed, restHeaderColumns[2].length(), 'g', 2)
-						.arg(info.idrPhaseTimeUsed, restHeaderColumns[3].length(), 'g', 2)
-						.arg(info.alpPhaseTimeUsed, restHeaderColumns[4].length(), 'g', 2);
+			QString firstFieldValue = "  ";
+			if (maxValue > 80)
+			{
+				firstFieldValue = "! ";
+			}
+
+			if (maxValue > 90)
+			{
+				firstFieldValue = "!!";
+			}
+
+			if (maxValue > 100)
+			{
+				firstFieldValue = "##";
+			}
+
+			fileContent << std::make_tuple(firstFieldValue,
+										   info.lmEquipmentID,
+										   info.bitMemoryUsed,
+										   info.wordMemoryUsed,
+										   info.codeMemoryUsed,
+										   info.idrPhaseTimeUsed,
+										   info.alpPhaseTimeUsed);
 		}
 
-		header = header.leftJustified(maxIdLength, ' ');
-
-		for (int i = 0; i < fileContent.count(); i++)
+		auto reportGenerator = [&](QString caption, std::function<bool
+				(std::tuple<QString, QString, double, double, double, double, double>& first,
+				 std::tuple<QString, QString, double, double, double, double, double>& second)> comparator,
+				int expectedRowQuantity = -1)
 		{
-			fileContent[i] = fileContent[i].leftJustified(maxIdLength, ' ');
-			fileContent[i] += restLine[i];
-		}
+			QStringList result;
 
-		fileContent.sort();
+			result << caption;
+			result << "";
 
-		fileContent.insert(0, header + '|' + restHeaderColumns.join('|'));
+			std::sort(fileContent.begin(), fileContent.end(), comparator);
 
-		QString delimiter;
+			if (expectedRowQuantity == -1)
+			{
+				expectedRowQuantity = fileContent.count();
+			}
+			int reportRowQuantity = std::min(expectedRowQuantity, fileContent.count());
 
-		delimiter = delimiter.leftJustified(maxIdLength, '-');
+			int maxIdLength = header.length();
 
-		for (int i = 0; i < restHeaderColumns.count(); i++)
+			for (int i = 0; i < reportRowQuantity; i++)
+			{
+				maxIdLength = std::max(maxIdLength, std::get<1>(fileContent[i]).length());
+			}
+
+			result << "   | " + header.leftJustified(maxIdLength, ' ') + " | " + restHeaderColumns.join(" | ");
+
+			QString delimiter;
+			delimiter = "---+-" + delimiter.leftJustified(maxIdLength, '-');
+
+			for (int i = 0; i < restHeaderColumns.count(); i++)
+			{
+				delimiter += "-+-";
+				delimiter = delimiter.leftJustified(delimiter.length() + restHeaderColumns[i].length(), '-');
+			}
+
+			result << delimiter;
+
+			for (int i = 0; i < reportRowQuantity; i++)
+			{
+				auto& item = fileContent[i];
+				result << std::get<0>(item) + " | " +
+						  std::get<1>(item).leftJustified(maxIdLength, ' ') + " | " +
+						  QString::number(std::get<2>(item), 'f', 2).rightJustified(restHeaderColumns[0].length()) + " | " +
+						  QString::number(std::get<3>(item), 'f', 2).rightJustified(restHeaderColumns[1].length()) + " | " +
+						  QString::number(std::get<4>(item), 'f', 2).rightJustified(restHeaderColumns[2].length()) + " | " +
+						  QString::number(std::get<5>(item), 'f', 2).rightJustified(restHeaderColumns[3].length()) + " | " +
+						  QString::number(std::get<6>(item), 'f', 2).rightJustified(restHeaderColumns[4].length());
+			}
+
+			result << "" << "";
+
+			return result;
+		};
+
+		fileContentStringList = reportGenerator("LM's resources usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
 		{
-			delimiter += "+";
-			delimiter = delimiter.leftJustified(delimiter.length() + restHeaderColumns[i].length(), '-');
-		}
+			return std::get<1>(first) < std::get<1>(second);
+		});
 
-		fileContent.insert(1, delimiter);
+		fileContentStringList << reportGenerator("Top LMs of BitMemory usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<2>(first) > std::get<2>(second);
+		}, 10);
 
-		m_resultWriter->addFile("Reports", "resources.txt", fileContent);
+		fileContentStringList << reportGenerator("Top LMs of WordMemory usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<3>(first) > std::get<3>(second);
+		}, 10);
+
+		fileContentStringList << reportGenerator("Top LMs of CodeMemory usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<4>(first) > std::get<4>(second);
+		}, 10);
+
+		fileContentStringList << reportGenerator("Top LMs of IdrPhase Time usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<5>(first) > std::get<5>(second);
+		}, 10);
+
+		fileContentStringList << reportGenerator("Top LMs of AlpPhase Time usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<6>(first) > std::get<6>(second);
+		}, 10);
+
+		m_resultWriter->addFile("Reports", "resources.txt", fileContentStringList);
 
 		return result;
 	}

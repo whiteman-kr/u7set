@@ -162,79 +162,79 @@ namespace Builder
 
 	bool MonitorCfgGenerator::writeAppDataServiceSection(QXmlStreamWriter& xmlWriter)
 	{
-		bool ok = false;
+		bool ok1 = false;
+		bool ok2 = false;
 
-		// AppDataServiceID1(2)
+		// AppDataServiceID
 		//
-		QString appDataServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID1", &ok).trimmed();
-		if (ok == false)
+		QString appDataServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID1", &ok1).trimmed();
+		QString appDataServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID2", &ok2).trimmed();
+
+		if (ok1 == false || ok2 == false)
 		{
-			return false;
-		}
-
-		if (appDataServiceId1.isEmpty() == true)
-		{
-			QString errorStr = tr("Monitor configuration error %1, property AppDataServiceID1 is invalid")
-							   .arg(m_software->equipmentIdTemplate());
-
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
-			return false;
-		}
-
-		// AppDataServiceID2
-		//
-		QString appDataServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID2", &ok).trimmed();
-		if (ok == false)
-		{
-			return false;
-		}
-
-		if (appDataServiceId2.isEmpty() == true)
-		{
-			QString errorStr = tr("Monitor configuration error %1, property AppDataServiceID2 is invalid")
-							   .arg(m_software->equipmentIdTemplate());
-
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
 			return false;
 		}
 
 		// AppDataServiceStrID1->ClientRequestIP, ClientRequestPort
 		//
-		Hardware::Software* dasObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
-		Hardware::Software* dasObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
+		Hardware::Software* dasObject1 = nullptr;
+		Hardware::Software* dasObject2 = nullptr;
+		ok1 = true;
+		ok2 = true;
 
-		if (dasObject1 == nullptr)
+		if (appDataServiceId1.isEmpty() == false)
 		{
-			QString errorStr = tr("Object %1 is not found").arg(appDataServiceId1);
+			dasObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			if (dasObject1 == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
+
+				QString errorStr = tr("Object %1 is not found").arg(appDataServiceId1);
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok1 = false;
+			}
+		}
+
+		if (appDataServiceId2.isEmpty() == false)
+		{
+			dasObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
+
+			if (dasObject2 == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
+
+				QString errorStr = tr("Object %1 is not found").arg(appDataServiceId2);
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok2 = false;
+			}
+		}
+
+		if (ok1 == false || ok2 == false)
+		{
 			return false;
 		}
 
-		if (dasObject2 == nullptr)
-		{
-			QString errorStr = tr("Object %1 is not found").arg(appDataServiceId2);
-
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-			return false;
-		}
-
+		// Reading AppDataService Settings
+		//
 		AppDataServiceSettings dasSettings1;
+		AppDataServiceSettings dasSettings2;
+		ok1 = true;
+		ok2 = true;
 
-		ok = dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
-		if (ok == false)
+		if (dasObject1 != nullptr)
 		{
-			return false;
+			ok1 = dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
 		}
 
-		AppDataServiceSettings dasSettings2;
+		if (dasObject2 != nullptr)
+		{
+			ok2 = dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
+		}
 
-		ok = dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
-		if (ok == false)
+		if (ok1 == false || ok2 == false)
 		{
 			return false;
 		}
@@ -264,72 +264,82 @@ namespace Builder
 
 	bool MonitorCfgGenerator::writeArchiveServiceSection(QXmlStreamWriter& xmlWriter)
 	{
-		bool ok = true;
+		bool ok1 = true;
+		bool ok2 = true;
 
-		// ArchiveServiceID1(2)
+		// ArchiveServiceID1
 		//
-		QString archiveServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID1", &ok).trimmed();
-		if (ok == false)
+		QString archiveServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID1", &ok1).trimmed();
+		QString archiveServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID2", &ok2).trimmed();
+
+		if (ok1 == false || ok2 == false)
 		{
-			return false;
-		}
-
-		if (archiveServiceId1.isEmpty() == true)
-		{
-			QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceID1 is invalid")
-							   .arg(m_software->equipmentIdTemplate());
-
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
-			return false;
-		}
-
-		// ArchiveServiceID2
-		//
-		QString archiveServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID2", &ok).trimmed();
-		if (ok == false)
-		{
-			return false;
-		}
-
-		if (archiveServiceId2.isEmpty() == true)
-		{
-			QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceID2 is invalid")
-							   .arg(m_software->equipmentIdTemplate());
-
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
 			return false;
 		}
 
 		// ArchiveServiceID1(2)->ClientRequestIP, ClientRequestPort
 		//
-		Hardware::Software* archiveServiceObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(archiveServiceId1));
-		Hardware::Software* archiveServiceObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(archiveServiceId2));
+		Hardware::Software* archiveServiceObject1 = nullptr;
+		Hardware::Software* archiveServiceObject2 = nullptr;
+		ok1 = true;
+		ok2 = true;
 
-		if (archiveServiceObject1 == nullptr)
+		if (archiveServiceId1.isEmpty() == false)
 		{
-			QString errorStr = tr("Object %1 is not found").arg(archiveServiceId1);
+			archiveServiceObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(archiveServiceId1));
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			if (archiveServiceObject1 == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), "ArchiveServiceID1", archiveServiceId1);
+
+				QString errorStr = tr("Object %1 is not found").arg(archiveServiceId1);
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok1 = false;
+			}
+		}
+
+		if (archiveServiceId2.isEmpty() == false)
+		{
+			archiveServiceObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(archiveServiceId2));
+
+			if (archiveServiceObject2 == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", archiveServiceId2);
+
+				QString errorStr = tr("Object %1 is not found").arg(archiveServiceId2);
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok2 = false;
+			}
+		}
+
+		if (ok1 == false || ok2 == false)
+		{
 			return false;
 		}
 
-		if (archiveServiceObject2 == nullptr)
-		{
-			QString errorStr = tr("Object %1 is not found").arg(archiveServiceId2);
-
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-			return false;
-		}
-
+		// Reading ArchiveService Settings
+		//
 		ArchivingServiceSettings archiveServiceSettings1;
-		archiveServiceSettings1.readFromDevice(archiveServiceObject1, m_log);
-
 		ArchivingServiceSettings archiveServiceSettings2;
-		archiveServiceSettings2.readFromDevice(archiveServiceObject2, m_log);
+		ok1 = true;
+		ok2 = true;
+
+		if (archiveServiceObject1 != nullptr)
+		{
+			ok1 = archiveServiceSettings1.readFromDevice(archiveServiceObject1, m_log);
+		}
+
+		if (archiveServiceObject2 != nullptr)
+		{
+			ok2 = archiveServiceSettings2.readFromDevice(archiveServiceObject2, m_log);
+		}
+
+		if (ok1 == false || ok2 == false)
+		{
+			return false;
+		}
 
 		// ArchiveService -- Get ip addresses and ports, write them to configurations
 		//
@@ -357,6 +367,8 @@ namespace Builder
 	bool MonitorCfgGenerator::writeTuningServiceSection(QXmlStreamWriter& xmlWriter)
 	{
 		bool ok = true;
+		bool ok1 = true;
+		bool ok2 = true;
 
 		// TuningEnable
 		//
@@ -388,70 +400,80 @@ namespace Builder
 			m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
 		}
 
-		// TuningServiceID1(2)
+		// TuningServiceID
 		//
-		QString tuningServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID1", &ok).trimmed();
-		if (ok == false)
+		QString tuningServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID1", &ok1).trimmed();
+		QString tuningServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID2", &ok2).trimmed();
+
+		if (ok1 == false || ok2 == false)
 		{
-			return false;
-		}
-
-		if (tuningServiceId1.isEmpty() == true)
-		{
-			QString errorStr = tr("Monitor configuration error %1, property TuningServiceID1 is invalid")
-							   .arg(m_software->equipmentIdTemplate());
-
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
-			return false;
-		}
-
-		// TuningServiceID2
-		//
-		QString tuningServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID2", &ok).trimmed();
-		if (ok == false)
-		{
-			return false;
-		}
-
-		if (tuningServiceId2.isEmpty() == true)
-		{
-			QString errorStr = tr("Monitor configuration error %1, property TuningServiceID2 is invalid")
-							   .arg(m_software->equipmentIdTemplate());
-
-			m_log->writeError(errorStr);
-			writeErrorSection(xmlWriter, errorStr);
 			return false;
 		}
 
 		// TuningServiceID1(2)->ClientRequestIP, ClientRequestPort
 		//
-		Hardware::Software* tuningServiceObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId1));
-		Hardware::Software* tuningServiceObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
+		Hardware::Software* tuningServiceObject1 = nullptr;
+		Hardware::Software* tuningServiceObject2 = nullptr;
+		ok1 = true;
+		ok2 = true;
 
-		if (tuningServiceObject1 == nullptr)
+		if (tuningServiceId1.isEmpty() == false)
 		{
-			QString errorStr = tr("Object %1 is not found").arg(tuningServiceId1);
+			tuningServiceObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId1));
 
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			if (tuningServiceObject1 == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), "TuningServiceID1", tuningServiceId1);
+
+				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId1);
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok1 = false;
+			}
+		}
+
+
+		if (tuningServiceId2.isEmpty() == false)
+		{
+			tuningServiceObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
+
+			if (tuningServiceObject2 == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), "TuningServiceID2", tuningServiceId2);
+
+				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId2);
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok2 = false;
+			}
+		}
+
+		if (ok1 == false || ok2 == false)
+		{
 			return false;
 		}
 
-		if (tuningServiceObject2 == nullptr)
-		{
-			QString errorStr = tr("Object %1 is not found").arg(tuningServiceId2);
-
-			m_log->writeError(errorStr);
-			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-			return false;
-		}
-
+		// Reading TuningService Settings
+		//
 		TuningServiceSettings tuningServiceSettings1;
-		tuningServiceSettings1.readFromDevice(tuningServiceObject1, m_log);
-
 		TuningServiceSettings tuningServiceSettings2;
-		tuningServiceSettings2.readFromDevice(tuningServiceObject2, m_log);
+		ok1 = true;
+		ok2 = true;
+
+		if (tuningServiceObject1 != nullptr)
+		{
+			ok1 = tuningServiceSettings1.readFromDevice(tuningServiceObject1, m_log);
+		}
+
+		if (tuningServiceObject2 != nullptr)
+		{
+			ok2 = tuningServiceSettings2.readFromDevice(tuningServiceObject2, m_log);
+		}
+
+		if (ok1 == false || ok2 == false)
+		{
+			return false;
+		}
 
 		// TuningService -- Get ip addresses and ports, write them to configurations
 		//
