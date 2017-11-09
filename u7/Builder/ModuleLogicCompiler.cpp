@@ -2622,15 +2622,6 @@ namespace Builder
 			return false;
 		}
 
-		if (destAfbSignal.maxBusSize() < bus->sizeB())
-		{
-			// Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
-			//
-			m_log->errALC5114(destAppItem->caption(), destAppItem->caption(),
-							  destAppItem->guid(), destAppItem->schemaID());
-			return false;
-		}
-
 		if (destAfbSignal.busDataFormat() != bus->busDataFormat())
 		{
 			// Uncompatible bus data format of UAL elements (Logic schema '%1').
