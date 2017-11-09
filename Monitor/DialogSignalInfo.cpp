@@ -278,7 +278,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 
 	updateData();
 
-	m_updateStateTimerId = startTimer(500);
+	m_updateStateTimerId = startTimer(200);
 }
 
 DialogSignalInfo::~DialogSignalInfo()
