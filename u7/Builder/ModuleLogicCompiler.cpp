@@ -4635,7 +4635,24 @@ namespace Builder
 				return false;
 			}
 
-			if (ualSignal->isAutoSignal() == true)
+			QStringList ids;
+
+			ualSignal->refSignalIDs(&ids);
+
+			bool find = false;
+
+			for(const QString& id : ids)
+			{
+				Signal* s = m_signals->getSignal(id);
+
+				if (s != nullptr)
+				{
+					find = true;
+					break;
+				}
+			}
+
+			if (find == false)
 			{
 				m_log->errALC5125(inPin.caption(), transmitterItem->guid(), transmitterItem->schemaID());
 				return false;
