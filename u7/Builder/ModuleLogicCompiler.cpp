@@ -4713,7 +4713,7 @@ namespace Builder
 			return false;
 		}
 
-		Signal* rxSignal = m_signals->getSignal(rxSignalID);
+		UalSignal* rxSignal = m_ualSignals.get(rxSignalID);
 
 		if (rxSignal == nullptr)
 		{
@@ -4721,18 +4721,12 @@ namespace Builder
 			return false;
 		}
 
-		assert(false);
-		LOG_INTERNAL_ERROR(m_log);
-		return false;
-
-		/* reimplement this call with UalSignal parameter WhiteMan 27.10.2017
-		 *
-		 * bool result = m_optoModuleStorage->appendSerialRxSignal(item->schemaID(),
-																	connectionID,
-																	item->guid(),
-																	m_lm->equipmentIdTemplate(),
-																	rxSignal);
-		return result;*/
+		bool result = m_optoModuleStorage->appendSerialRxSignal(item->schemaID(),
+																connectionID,
+																item->guid(),
+																m_lm->equipmentIdTemplate(),
+																rxSignal);
+		return result;
 	}
 
 	bool ModuleLogicCompiler::setOptoRawInSignalsAsComputed()

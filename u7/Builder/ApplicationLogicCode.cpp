@@ -1111,7 +1111,6 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 	}
 
-
 	void Command::prevMov32(quint16 addrTo, quint16 addrFrom)
 	{
 		m_code.clear();
@@ -1123,6 +1122,26 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 	}
 
+	void Command::fill(quint16 addrTo, quint16 addrFrom, quint16 addrBit)
+	{
+		m_code.clear();
+
+		m_result = true;
+
+/*		m_code.setOpCode(LmCommandCode::FILL);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);*/
+
+	}
+
+	void Command::fill(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+		assert(addrTo.bit() == 0);
+
+		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
+	}
 
 	void Command::generateBinCode(E::ByteOrder byteOrder)
 	{

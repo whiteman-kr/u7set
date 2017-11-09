@@ -35,6 +35,7 @@ namespace Builder
 		MOVCF = 24,
 		PMOV = 25,
 		PMOV32 = 26,
+		FILL = 27,
 	};
 
 
@@ -86,6 +87,7 @@ namespace Builder
 		{	LmCommandCode::MOVCF,		3,	"MOVCF",	false,	11,	6					},
 		{	LmCommandCode::PMOV,		3,	"PMOV",		false,	11,	CALC_RUNTIME		},
 		{	LmCommandCode::PMOV32,		3,	"PMOV32",	false,	11,	14					},
+		{	LmCommandCode::FILL,		4,	"FILL",		false,	11,	14					},
 	};
 
 	const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
@@ -318,6 +320,8 @@ namespace Builder
 		void movConstIfFlag(quint16 addrTo, quint16 constVal);
 		void prevMov(quint16 addrTo, quint16 addrFrom);
 		void prevMov32(quint16 addrTo, quint16 addrFrom);
+		void fill(quint16 addrTo, quint16 addrFrom, quint16 addrBit);
+		void fill(Address16 addrTo, Address16 addrFrom);
 
 		// --
 
