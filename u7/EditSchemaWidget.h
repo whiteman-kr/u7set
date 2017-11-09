@@ -341,8 +341,8 @@ protected slots:
 
 	void f2Key();
 	void f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item);
-	void f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item);
-	void f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item);
+	bool f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine);
+	bool f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine);
 	void f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item);
 	void f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item);
 	void f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item);
@@ -374,7 +374,6 @@ protected slots:
 
 	void addTransmitter();
 	void addReceiver();
-	void addConnectionItem(std::shared_ptr<VFrame30::SchemaItemConnection> schemaItem);
 
 	void addAfbElement();			// Add Application Functional Block
 	void addUfbElement();			// Add User Functional Block

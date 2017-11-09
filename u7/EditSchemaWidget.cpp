@@ -1,9 +1,11 @@
 #include "Stable.h"
 #include <QRubberBand>
 #include <QClipboard>
+#include <QComboBox>
 #include <QCompleter>
 #include <QMimeData>
 #include <QToolTip>
+#include <QGroupBox>
 #include "EditEngine/EditEngine.h"
 #include "EditSchemaWidget.h"
 #include "SchemaPropertiesDialog.h"
@@ -5801,13 +5803,13 @@ void EditSchemaWidget::f2Key()
 
 	if (item->isType<VFrame30::SchemaItemReceiver>() == true)
 	{
-		f2KeyForReceiver(item);
+		f2KeyForReceiver(item, true);
 		return;
 	}
 
 	if (item->isType<VFrame30::SchemaItemTransmitter>() == true)
 	{
-		f2KeyForTransmitter(item);
+		f2KeyForTransmitter(item, true);
 		return;
 	}
 
@@ -5859,23 +5861,45 @@ void EditSchemaWidget::f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item)
 	return;
 }
 
-void EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item)
+bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine)
 {
 	if (item == nullptr)
 	{
 		assert(item);
-		return;
+		return false;
 	}
 
 	VFrame30::SchemaItemReceiver* receiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 	if (receiver == nullptr)
 	{
 		assert(receiver);
-		return;
+		return false;
 	}
 
 	QString connectionId = receiver->connectionId();
 	QString appSignalId = receiver->appSignalId();
+
+	// Get all connections
+	//
+	Hardware::ConnectionStorage connections(db());
+
+	QString errorMessage;
+
+	bool ok = connections.load(&errorMessage);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMessage);
+		return false;
+	}
+
+	auto ls = logicSchema();
+	if (ls == nullptr)
+	{
+		assert(ls);
+		return false;
+	}
+
+	QStringList connectionIds = connections.filterByMoudules(ls->equipmentIdList());
 
 	// Show input dialog
 	//
@@ -5888,20 +5912,46 @@ void EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
-	QLineEdit* connectionIdEdit = new QLineEdit(connectionId);
+	QComboBox* connectionIdControl = new QComboBox;
+	connectionIdControl->setEditable(true);
+	connectionIdControl->addItems(connectionIds);
+	connectionIdControl->setMaxVisibleItems(20);
+
+	QCompleter* completer = new QCompleter(connectionIds);
+	completer->setFilterMode(Qt::MatchContains);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setMaxVisibleItems(20);
+	connectionIdControl->setCompleter(completer);
+
+	// Set current value, to selecte value in the list, controll must be non editable ((
+	//
+	connectionIdControl->setEditable(false);
+	connectionIdControl->setCurrentText(connectionId);
+	connectionIdControl->setEditable(true);
+	if (connectionIdControl->currentText() != connectionId)
+	{
+		connectionIdControl->setCurrentText(connectionId);
+	}
 
 	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
 	QLineEdit* appSignalIdEdit = new QLineEdit(appSignalId);
 
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
+	// --
+	//
 	QVBoxLayout* layout = new QVBoxLayout;
 
 	layout->addWidget(connectionIdLabel);
-	layout->addWidget(connectionIdEdit);
+	layout->addWidget(connectionIdControl);
 
 	layout->addWidget(appSignalIdLabel);
 	layout->addWidget(appSignalIdEdit);
+
+	layout->addWidget(spacer);
 
 	layout->addWidget(buttonBox);
 
@@ -5916,69 +5966,152 @@ void EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 
 	if (result == QDialog::Accepted)
 	{
-		QString newConnectionId = connectionIdEdit->text().trimmed();
+		QString newConnectionId = connectionIdControl->currentText().trimmed();
 		QString newAppSignalId = appSignalIdEdit->text().trimmed();
 
-		if (newConnectionId != connectionId)
+		if (newConnectionId != connectionId ||
+			newAppSignalId != appSignalId)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
-		}
-
-		if (newAppSignalId != appSignalId)
-		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
+			if (setViaEditEngine == true)
+			{
+				m_editEngine->startBatch();
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
+				m_editEngine->endBatch();
+			}
+			else
+			{
+				receiver->setConnectionId(newConnectionId);
+				receiver->setAppSignalId(newAppSignalId);
+			}
 		}
 
 		editSchemaView()->update();
+
+		return true;
 	}
 
-	return;
+	return false;
 }
 
-void EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item)
+bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine)
 {
 	if (item == nullptr)
 	{
 		assert(item);
-		return;
+		return false;
 	}
 
 	VFrame30::SchemaItemTransmitter* transmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
 	if (transmitter == nullptr)
 	{
 		assert(transmitter);
-		return;
+		return false;
 	}
 
 	QString connectionId = transmitter->connectionId();
 
-	// Show input dialog
+	// Get all connections
 	//
-	QInputDialog inputDialog(this);
+	Hardware::ConnectionStorage connections(db());
 
-	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-	inputDialog.setWindowTitle("Set ConnectionID");
-	inputDialog.setLabelText(tr("ConnectionID:"));
-	inputDialog.setTextEchoMode(QLineEdit::Normal);
-	inputDialog.resize(400, inputDialog.height());
+	QString errorMessage;
 
-	inputDialog.setTextValue(connectionId);
-
-	int inputDialogRecult = inputDialog.exec();
-	QString newValue = inputDialog.textValue();
-
-	if (inputDialogRecult == QDialog::Accepted &&
-		newValue.isNull() == false &&
-		connectionId != newValue)
+	bool ok = connections.load(&errorMessage);
+	if (ok == false)
 	{
-		// Set value
-		//
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newValue), item);
-
-		editSchemaView()->update();
+		QMessageBox::critical(this, qAppName(), errorMessage);
+		return false;
 	}
 
-	return;
+	auto ls = logicSchema();
+	if (ls == nullptr)
+	{
+		assert(ls);
+		return false;
+	}
+
+	QStringList connectionIds = connections.filterByMoudules(ls->equipmentIdList());
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set Transmitter Params"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
+	QComboBox* connectionIdControl = new QComboBox;
+
+	connectionIdControl->addItems(connectionIds);
+	connectionIdControl->setMaxVisibleItems(20);
+
+	QCompleter* completer = new QCompleter(connectionIds);
+	completer->setFilterMode(Qt::MatchContains);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setMaxVisibleItems(20);
+	connectionIdControl->setCompleter(completer);
+
+	// Set current value, to selecte value in the list, controll must be non editable ((
+	//
+	connectionIdControl->setEditable(false);
+	connectionIdControl->setCurrentText(connectionId);
+	connectionIdControl->setEditable(true);
+	if (connectionIdControl->currentText() != connectionId)
+	{
+		connectionIdControl->setCurrentText(connectionId);
+	}
+
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	// --
+	//
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(connectionIdLabel);
+	layout->addWidget(connectionIdControl);
+
+	layout->addWidget(spacer);
+
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		QString newConnectionId = connectionIdControl->currentText().trimmed();
+
+		if (newConnectionId != connectionId)
+		{
+			if (setViaEditEngine == true)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
+			}
+			else
+			{
+				transmitter->setConnectionId(newConnectionId);
+			}
+		}
+
+		editSchemaView()->update();
+
+		return true;
+	}
+
+	return false;
 }
 
 void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
@@ -6030,7 +6163,7 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	// IntItems
 	//
 	QLabel* intValueLabel = new QLabel("IntegerValue:");
-	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue, 'g', constItem->precision()));
+	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue));
 	intValueEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), intValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::IntegerType)
@@ -6065,25 +6198,32 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 		discreteValueEdit->setEnabled(false);
 	}
 
+	// Spacer
+	//
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+
 	// --
 	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-	QVBoxLayout* layout = new QVBoxLayout;
+	QGridLayout* layout = new QGridLayout;
 
-	layout->addWidget(typeLabel);
-	layout->addWidget(typeCombo);
+	layout->addWidget(typeLabel, 0, 0);
+	layout->addWidget(typeCombo, 0, 1);
 
-	layout->addWidget(intValueLabel);
-	layout->addWidget(intValueEdit);
+	layout->addWidget(intValueLabel, 1, 0);
+	layout->addWidget(intValueEdit, 1, 1);
 
-	layout->addWidget(floatValueLabel);
-	layout->addWidget(floatValueEdit);
+	layout->addWidget(floatValueLabel, 2, 0);
+	layout->addWidget(floatValueEdit, 2, 1);
 
-	layout->addWidget(discreteValueLabel);
-	layout->addWidget(discreteValueEdit);
+	layout->addWidget(discreteValueLabel, 3, 0);
+	layout->addWidget(discreteValueEdit, 3, 1);
 
-	layout->addWidget(buttonBox);
+	layout->addWidget(spacer, 4, 0, 1, 2);
+
+	layout->addWidget(buttonBox, 5, 0, 1, 2);
 
 	d.setLayout(layout);
 
@@ -7180,113 +7320,28 @@ void EditSchemaWidget::clipboardDataChanged()
 void EditSchemaWidget::addTransmitter()
 {
 	auto schemaItem = std::make_shared<VFrame30::SchemaItemTransmitter>(schema()->unit());
-	addConnectionItem(schemaItem);
+
+	bool ok = f2KeyForTransmitter(schemaItem, false);
+	if (ok == false)
+	{
+		return;
+	}
+
+	addItem(schemaItem);
+	return;
 }
 
 void EditSchemaWidget::addReceiver()
 {
 	auto schemaItem = std::make_shared<VFrame30::SchemaItemReceiver>(schema()->unit());
-	addConnectionItem(schemaItem);
-}
 
-void EditSchemaWidget::addConnectionItem(std::shared_ptr<VFrame30::SchemaItemConnection> schemaItem)
-{
-	if (schema()->isLogicSchema() == false)
-	{
-		assert(false);		// No sense to add sconnection to non applogic schema
-		return;
-	}
+	bool ok = f2KeyForReceiver(schemaItem, false);
 
-	// Select connectionId from existing connections
-	//
-	Hardware::ConnectionStorage connections(db());
-
-	QString errorMessage;
-
-	bool ok = connections.load(&errorMessage);
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), errorMessage);
-
-		addItem(schemaItem);
 		return;
 	}
 
-	// Find all connections for Schema EquipmentIDs
-	//
-	std::shared_ptr<VFrame30::LogicSchema> s = logicSchema();
-
-	std::set<std::shared_ptr<Hardware::Connection>> chassisConnectios;
-
-	QStringList lms = s->equipmentIdList();
-	for (QString lm : lms)
-	{
-		// Let's assume that LM has a Chassis parent, and LM's id is like SUSTEM_RACK_CHASSIS_LM.
-		// Try to cut ID to chassis
-		//
-		int lastUnderscoreIndex = lm.lastIndexOf('_');
-		if (lastUnderscoreIndex != -1)
-		{
-			lm = lm.left(lastUnderscoreIndex + 1);
-		}
-
-		std::vector<std::shared_ptr<Hardware::Connection>> lmConnections;
-		lmConnections = connections.get(QStringList() << lm.trimmed());
-
-		for (const std::shared_ptr<Hardware::Connection>& c : lmConnections)
-		{
-			chassisConnectios.insert(c);
-		}
-	}
-
-	// --
-	//
-	std::vector<std::shared_ptr<Hardware::Connection>> chassisConnectionsVector;
-	chassisConnectionsVector.reserve(chassisConnectios.size());
-
-	for (std::shared_ptr<Hardware::Connection> c : chassisConnectios)
-	{
-		chassisConnectionsVector.push_back(c);
-	}
-
-	std::sort(chassisConnectionsVector.begin(), chassisConnectionsVector.end(),
-		[](const std::shared_ptr<Hardware::Connection>& c1, const std::shared_ptr<Hardware::Connection>& c2) -> bool
-		{
-			return c1->connectionID() < c2->connectionID();
-		});
-
-
-	// Show menu
-	//
-	QObject actionParent;
-
-	QList<QAction*> menuActions;
-
-	QAction* empty = new QAction(QString("ConnectionID"), &actionParent);
-	empty->setData(empty->text());
-	menuActions << empty;
-
-	for (const std::shared_ptr<Hardware::Connection>& c : chassisConnectionsVector)
-	{
-		QString caption = QString("%1\t%2 <-> %3").arg(c->connectionID()).arg(c->port1EquipmentID()).arg(c->port2EquipmentID());
-		QAction* a = new QAction(caption , &actionParent);
-		a->setData(c->connectionID());
-
-		menuActions << a;
-	}
-
-	QPoint menuPos = QCursor::pos();
-
-	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
-	if (triggeredAction == nullptr)
-	{
-		return;
-	}
-
-	schemaItem->setConnectionId(triggeredAction->data().toString());
-
-	// Add item
-	//
 	addItem(schemaItem);
 	return;
 }
