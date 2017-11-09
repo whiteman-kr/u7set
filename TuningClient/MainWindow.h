@@ -7,7 +7,7 @@
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
-#include "LogFile.h"
+#include "../lib/LogFile.h"
 #include "UserManager.h"
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
@@ -47,7 +47,8 @@ private:
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
-	int m_mainWindowTimerId = -1;
+	int m_mainWindowTimerId_250ms = -1;
+	int m_mainWindowTimerId_500ms = -1;
 
 private slots:
 	void slot_configurationArrived();
@@ -70,6 +71,11 @@ private:
 
 	void createWorkspace();
 
+signals:
+	void timerTick500();
+
+private:
+
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pUsersAction = nullptr;
@@ -89,7 +95,7 @@ private:
 
 extern MainWindow* theMainWindow;
 
-extern LogFile* theLogFile;
+extern Log::LogFile* theLogFile;
 
 extern UserManager theUserManager;
 

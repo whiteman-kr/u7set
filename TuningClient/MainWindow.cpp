@@ -26,11 +26,9 @@ MainWindow::MainWindow(QWidget* parent) :
 		resize(1024, 768);
 	}
 
-	theLogFile = new LogFile("TuningClient", QDir::toNativeSeparators(theSettings.localAppDataPath()));
+	theLogFile = new Log::LogFile("TuningClient");
 
-	theLogFile->write("--");
-	theLogFile->write("-----------------------");
-	theLogFile->write("--");
+	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
 	createActions();
@@ -80,9 +78,9 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	//
 
-	m_mainWindowTimerId = startTimer(100);
+	m_mainWindowTimerId_250ms = startTimer(250);
 
-
+	m_mainWindowTimerId_500ms = startTimer(500);
 
 	m_configController.start();
 }
@@ -204,7 +202,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	// Update status bar
 	//
-	if  (event->timerId() == m_mainWindowTimerId)
+	if  (event->timerId() == m_mainWindowTimerId_250ms)
 	{
 		if (theSharedMemorySingleApp != nullptr)
 		{
@@ -276,6 +274,11 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 		m_statusBarTuningConnection->setText(text);
 		return;
+	}
+
+	if  (event->timerId() == m_mainWindowTimerId_500ms)
+	{
+		emit timerTick500();
 	}
 
 	return;
@@ -553,6 +556,6 @@ void MainWindow::showAbout()
 }
 
 MainWindow* theMainWindow = nullptr;
-LogFile* theLogFile = nullptr;
+Log::LogFile* theLogFile = nullptr;
 
 UserManager theUserManager;

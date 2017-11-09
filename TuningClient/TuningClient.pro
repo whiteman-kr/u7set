@@ -122,7 +122,7 @@ SOURCES +=\
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
-    LogFile.cpp \
+    ../lib/LogFile.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     UserManager.cpp \
@@ -151,7 +151,7 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
-    TuningClientTcpClient.cpp
+    TuningClientTcpClient.cpp 
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -175,7 +175,7 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
-    LogFile.h \
+        ../lib/LogFile.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     UserManager.h \
@@ -204,7 +204,7 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \
-    TuningClientTcpClient.h
+    TuningClientTcpClient.h 
 
 
 FORMS    += \

@@ -111,6 +111,7 @@ void loadLanguage(const QString& rLanguage)
 
 int main(int argc, char* argv[])
 {
+
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 	// To see all memory leaks, not only in the own code, comment the next line

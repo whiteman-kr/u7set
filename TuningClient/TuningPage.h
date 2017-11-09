@@ -110,8 +110,6 @@ private:
 
 private:
 
-	virtual void timerEvent(QTimerEvent* event) override;
-
 	bool eventFilter(QObject* object, QEvent* event);
 
 	virtual void resizeEvent(QResizeEvent *event);
@@ -123,6 +121,8 @@ private:
 	void invertValue();
 
 private slots:
+
+	void slot_timerTick500();
 
 	void slot_setAll();
 
@@ -168,13 +168,13 @@ private:
 
 	std::shared_ptr<TuningFilter> m_buttonFilter = nullptr;
 
-	int m_updateStateTimerId = -1;
-
 	int m_sortColumn = 0;
 
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 
 	static int m_instanceCounter;
+
+	int m_instanceNo = -1;
 
 	std::vector<std::pair<TuningModel::Columns, double>> m_columnsArray;
 

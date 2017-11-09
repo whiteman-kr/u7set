@@ -445,6 +445,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 {
 
 	qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+	m_instanceNo = m_instanceCounter;
 	m_instanceCounter++;
 
 	//assert(m_treeFilter);		They can be nullptr
@@ -558,8 +559,6 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 
 	fillObjectsList();
 
-	m_updateStateTimerId = startTimer(500);
-
 	// Color
 
 	if (m_tabFilter->backColor().isValid() && m_tabFilter->textColor().isValid() && m_tabFilter->backColor() != m_tabFilter->textColor())
@@ -574,6 +573,8 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 	{
 		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 	}
+
+	connect(theMainWindow, &MainWindow::timerTick500, this, &TuningPage::slot_timerTick500);
 
 }
 
@@ -897,61 +898,6 @@ void TuningPage::slot_buttonFilterSelectionChanged(std::shared_ptr<TuningFilter>
 	fillObjectsList();
 }
 
-void TuningPage::timerEvent(QTimerEvent* event)
-{
-	assert(event);
-
-	if  (event->timerId() == m_updateStateTimerId && m_model->rowCount() > 0 && isVisible() == true)
-	{
-		m_model->blink();
-
-		// Update only visible dynamic items
-		//
-		int from = m_objectList->rowAt(0);
-		int to = m_objectList->rowAt(m_objectList->height() - m_objectList->horizontalHeader()->height());
-
-		if (from == -1)
-		{
-			from = 0;
-		}
-
-		if (to == -1)
-		{
-			to = m_model->rowCount() - 1;
-		}
-
-		// Redraw visible table items
-		//
-		for (int row = from; row <= to; row++)
-		{
-			/*TuningSignalState* state = m_model->state(row);
-
-			if (state == nullptr)
-			{
-				assert(state);
-				continue;
-			}*/
-
-			//if (state->needRedraw() == true || state->userModified() == true)
-			{
-				for (int col = 0; col < m_model->columnCount(); col++)
-				{
-					int displayIndex = m_model->columnIndex(col);
-
-					if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
-					{
-						//QString str = QString("%1:%2").arg(row).arg(col);
-						//qDebug() << str;
-
-						m_objectList->update(m_model->index(row, col));
-					}
-				}
-			}
-		}
-	}
-
-}
-
 bool TuningPage::eventFilter(QObject* object, QEvent* event)
 {
 	if (object == m_objectList && event->type()==QEvent::KeyPress)
@@ -1052,6 +998,62 @@ void TuningPage::invertValue()
 			m_tuningSignalManager->setNewValue(hash, tv);
 		}
 	}
+}
+
+void TuningPage::slot_timerTick500()
+{
+	if  (isVisible() == true && m_model->rowCount() > 0)
+	{
+
+		//qDebug() << m_instanceNo;
+
+		m_model->blink();
+
+		// Update only visible dynamic items
+		//
+		int from = m_objectList->rowAt(0);
+		int to = m_objectList->rowAt(m_objectList->height() - m_objectList->horizontalHeader()->height());
+
+		if (from == -1)
+		{
+			from = 0;
+		}
+
+		if (to == -1)
+		{
+			to = m_model->rowCount() - 1;
+		}
+
+		// Redraw visible table items
+		//
+		for (int row = from; row <= to; row++)
+		{
+			/*TuningSignalState* state = m_model->state(row);
+
+			if (state == nullptr)
+			{
+				assert(state);
+				continue;
+			}*/
+
+			//if (state->needRedraw() == true || state->userModified() == true)
+			{
+				for (int col = 0; col < m_model->columnCount(); col++)
+				{
+					int displayIndex = m_model->columnIndex(col);
+
+					if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
+					{
+						//QString str = QString("%1:%2").arg(row).arg(col);
+						//qDebug() << str;
+
+						m_objectList->update(m_model->index(row, col));
+					}
+				}
+			}
+		}
+	}
+
 }
 
 void TuningPage::slot_setAll()
