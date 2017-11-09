@@ -251,7 +251,6 @@ namespace Afb
 		m_size = that.m_size;
 		m_byteOrder = that.m_byteOrder;
 		m_busDataFormat = that.m_busDataFormat;
-		m_maxBusSize = that.m_maxBusSize;
 
 		return *this;
 	}
@@ -386,21 +385,6 @@ namespace Afb
 			}
 		}
 
-		// MaxBusSize
-		//
-		if (xmlElement.hasAttribute(QLatin1String("MaxBusSize")) == false)
-		{
-			if (type() == E::SignalType::Bus)
-			{
-				*errorMessage = QString("Not set MaxBusSize for pin %2").arg(m_caption);
-				return false;
-			}
-		}
-		else
-		{
-			m_maxBusSize = xmlElement.attribute(QLatin1String("MaxBusSize")).toInt();
-		}
-
 		return true;
 	}
 
@@ -445,10 +429,6 @@ namespace Afb
 		// BusDataFormat
 		//
 		element->setAttribute(QLatin1String("BusDataFormat"), E::valueToString(m_busDataFormat));
-
-		// MaxBusSize
-		//
-		element->setAttribute(QLatin1String("MaxBusSize"), m_maxBusSize);
 
 		return true;
 	}
@@ -579,16 +559,6 @@ namespace Afb
 		bool ok = false;
 		m_busDataFormat = E::stringToValue<E::BusDataFormat>(value, &ok);
 		return ok;
-	}
-
-	int AfbSignal::maxBusSize() const
-	{
-		return m_maxBusSize;
-	}
-
-	void AfbSignal::setMaxBusSize(int value)
-	{
-		m_maxBusSize = value;
 	}
 
 	//
