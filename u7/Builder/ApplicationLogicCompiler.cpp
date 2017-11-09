@@ -594,6 +594,8 @@ namespace Builder
 						  << "IdrPhase Time, %"
 						  << "AlpPhase Time, %";
 
+		int maxIdLength = header.length();
+
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
 			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
@@ -622,6 +624,8 @@ namespace Builder
 				firstFieldValue = "##";
 			}
 
+			maxIdLength = std::max(maxIdLength, info.lmEquipmentID.length());
+
 			fileContent << std::make_tuple(firstFieldValue,
 										   info.lmEquipmentID,
 										   info.bitMemoryUsed,
@@ -648,13 +652,6 @@ namespace Builder
 				expectedRowQuantity = fileContent.count();
 			}
 			int reportRowQuantity = std::min(expectedRowQuantity, fileContent.count());
-
-			int maxIdLength = header.length();
-
-			for (int i = 0; i < reportRowQuantity; i++)
-			{
-				maxIdLength = std::max(maxIdLength, std::get<1>(fileContent[i]).length());
-			}
 
 			result << "   | " + header.leftJustified(maxIdLength, ' ') + " | " + restHeaderColumns.join(" | ");
 
