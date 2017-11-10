@@ -21,6 +21,13 @@ namespace Builder
 {
 
 	class ApplicationLogicCompiler;
+	class ModuleLogicCompiler;
+
+	typedef bool (ModuleLogicCompiler::*ModuleLogicCompilerProc)(void);
+	typedef std::pair<ModuleLogicCompilerProc, const char*> ProcToCall;
+	typedef std::vector<ProcToCall> ProcsToCallArray;
+
+#define PROC_TO_CALL(procName)		{ &procName, #procName }
 
 	class ModuleLogicCompiler : public QObject
 	{
@@ -391,9 +398,11 @@ namespace Builder
 
 		const HashedVector<QString, Signal*>& chassisSignals() const { return m_chassisSignals; }
 
-		bool writeSignalLists() const;
+		bool writeSignalLists();
 		bool writeSignalList(const QVector<UalSignal *> &signalList, QString listName) const;
 		bool writeUalSignalsList() const;
+
+		bool runProcs(const ProcsToCallArray& procArray);
 
 	private:
 		static const int ERR_VALUE = -1;
@@ -528,4 +537,5 @@ namespace Builder
 
 		Tuning::TuningData* m_tuningData = nullptr;
 	};
+
 }

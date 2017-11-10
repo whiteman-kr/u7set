@@ -97,42 +97,25 @@ namespace Builder
 			m_log->wrnALC5001(m_lm->equipmentIdTemplate());
 		}
 
-		bool result = false;
-
-		do
+		ProcsToCallArray procs =
 		{
-			if (loadLMSettings() == false) break;
+			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
+			PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
+			PROC_TO_CALL(ModuleLogicCompiler::createChassisSignalsMap),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
+			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::processSerialRxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
+			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
+			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
+			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion),
+			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
+			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
+		};
 
-			if (loadModulesSettings() == false) break;
-
-			if (createChassisSignalsMap() == false) break;
-
-			if (createUalItemsMaps() == false) break;
-
-			if (createUalAfbsMap() == false) break;
-
-			if (createUalSignals() == false) break;
-
-			if (processTxSignals() == false) break;
-
-			if (processSerialRxSignals() == false) break;
-
-			if (buildTuningData() == false) break;
-
-			if (createSignalLists() == false) break;
-
-			if (disposeSignalsInMemory() == false) break;
-
-			if (appendAfbsForAnalogInOutSignalsConversion() == false) break;
-
-			if (setOutputSignalsAsComputed() == false) break;
-
-			if (setOptoRawInSignalsAsComputed() == false) break;
-
-			result = true;
-		}
-
-		while(false);
+		bool result = runProcs(procs);
 
 		if (result == true)
 		{
@@ -158,69 +141,36 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, msg);
 
-		bool result = false;
-
-		do
+		ProcsToCallArray procs =
 		{
-			if (finalizeOptoConnectionsProcessing() == false) break;
+			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
+			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
+			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
+			PROC_TO_CALL(ModuleLogicCompiler::generateAppStartCommand),
+			PROC_TO_CALL(ModuleLogicCompiler::initAfbs),
+			PROC_TO_CALL(ModuleLogicCompiler::startAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
+//			PROC_TO_CALL(ModuleLogicCompiler::copySerialRxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredConstAnalogSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
+			PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
+			PROC_TO_CALL(ModuleLogicCompiler::finishAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
+			PROC_TO_CALL(ModuleLogicCompiler::calculateCodeRunTime),
+			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
+		};
 
-			if (setOptoUalSignalsAddresses() == false) break;
-
-			if (writeSignalLists() == false) break;
-
-			// LM program code generation
-			//
-			if (generateAppStartCommand() == false) break;
-
-			if (initAfbs() == false) break;
-
-			if (startAppLogicCode() == false) break;
-
-			// if (!initAfbs()) break;
-
-			if (copyAcquiredRawDataInRegBuf() == false) break;
-
-			if (convertAnalogInputSignals() == false) break;
-
-			if (copySerialRxSignals() == false) break;
-
-			if (generateAppLogicCode() == false) break;
-
-			if (copyAcquiredAnalogOptoSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredAnalogBusChildSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredTuningAnalogSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredConstAnalogSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredDiscreteInputSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredTuningDiscreteSignalsToRegBuf() == false) break;
-
-			if (copyAcquiredDiscreteConstSignalsToRegBuf() == false) break;
-
-			if (copyOutputSignalsInOutputModulesMemory() == false) break;
-
-			if (copyOptoConnectionsTxData() == false) break;
-
-			if (finishAppLogicCode() == false) break;
-
-			//
-
-			if (setLmAppLANDataSize() == false) break;
-
-			if (calculateCodeRunTime() == false) break;
-
-			if (writeResult() == false) break;
-
-			result = true;
-		}
-		while(false);
+		bool result = runProcs(procs);
 
 		if (result == true)
 		{
@@ -4858,96 +4808,6 @@ namespace Builder
 			ualSignal->setUalAddr(rxAddress);
 		}
 
-		/*
-		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
-
-				if (connection == nullptr)
-				{
-					// Receiver is linked to unknown opto connection '%1'.
-					//
-					m_log->errALC5025(receiver.connectionId(), receiver.guid(), appSignal.schemaID());
-					return false;
-				}
-
-				if (appSignal.enableTuning() == true)
-				{
-					// Can't assign value to tuningable signal '%1' (Logic schema '%2').
-					//
-					m_log->errALC5071(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
-					return false;
-				}
-
-				if (appSignal.isInput() == true)
-				{
-					// Can't assign value to input signal '%1' (Logic schema '%2').
-					//
-					m_log->errALC5087(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
-					return false;
-				}
-
-				Signal* destSignal = m_signals->getSignal(appSignal.appSignalID());
-
-				if (destSignal == nullptr)
-				{
-					// Signal identifier '%1' is not found.
-					//
-					m_log->errALC5000(appSignal.appSignalID(), appSignal.guid());
-					return false;
-				}
-
-				Command cmd;
-
-				if (receiver.isOutputPin(pinGuid) == true)
-				{
-					SignalAddress16 rxAddress;
-
-					if (m_optoModuleStorage->getRxSignalAbsAddress(appSignal.schemaID(),
-																   receiver.connectionId(),
-																   receiver.appSignalId(),
-																   m_lm->equipmentIdTemplate(),
-																   receiver.guid(),
-																   rxAddress) == false)
-					{
-						return false;
-					}
-
-					Signal* srcSignal = m_signals->getSignal(receiver.appSignalId());
-
-					if (srcSignal == nullptr)
-					{
-						// Signal identifier '%1' is not found.
-						//
-						m_log->errALC5000(receiver.appSignalId(), receiver.guid());
-						return false;
-					}
-
-					if (checkSignalsCompatibility(*srcSignal, receiver.guid(), *destSignal, appSignal.guid()) == false)
-					{
-						return false;
-					}
-
-					QString str;
-
-					str = QString(tr("%1 >> %2 => %3")).arg(receiver.connectionId()).arg(receiver.appSignalId()).arg(destSignal->appSignalID());
-
-					if (destSignal->isAnalog())
-					{
-						cmd.mov32(destSignal->ualAddr().offset(), rxAddress.offset());
-					}
-					else
-					{
-						if (destSignal->isDiscrete())
-						{
-							cmd.movBit(destSignal->ualAddr().offset(), destSignal->ualAddr().bit(),
-									   rxAddress.offset(), rxAddress.bit());
-						}
-						else
-						{
-							assert(false);		// unknown type of signal
-							return false;
-						}
-					}
-*/
 		return result;
 	}
 
@@ -11952,7 +11812,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::writeSignalLists() const
+	bool ModuleLogicCompiler::writeSignalLists()
 	{
 		bool result = true;
 
@@ -12028,6 +11888,27 @@ namespace Builder
 
 		return buildFile != nullptr;
 	}
+
+
+	bool ModuleLogicCompiler::runProcs(const ProcsToCallArray& procArray)
+	{
+		bool result = true;
+
+		for(const ProcToCall& proc : procArray)
+		{
+			result &= (this->*proc.first)();
+
+			if (result == false)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+								   QString(tr("%1 finished with error")).arg(proc.second));
+				break;
+			}
+		}
+
+		return result;
+	}
+
 
 	// ---------------------------------------------------------------------------------------
 	//
