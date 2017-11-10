@@ -404,6 +404,11 @@ namespace Builder
 
 		bool runProcs(const ProcsToCallArray& procArray);
 
+		Address16 constBit0Addr() const { return m_memoryMap.constBit0Addr(); }
+		Address16 constBit1Addr() const { return m_memoryMap.constBit1Addr(); }
+
+		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
+
 	private:
 		static const int ERR_VALUE = -1;
 

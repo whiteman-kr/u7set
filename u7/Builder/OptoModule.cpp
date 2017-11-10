@@ -2367,6 +2367,21 @@ namespace Hardware
 					continue;
 				}
 
+				std::shared_ptr<Connection> connection = OptoModuleStorage::getConnection(port->connectionID());
+
+				if (connection == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				if (connection->isSinglePort() == true)
+				{
+					continue;
+				}
+
+				assert(connection->isPortToPort() == true);
+
 				OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(port->linkedPortID());
 
 				if (linkedPort != nullptr)
@@ -2441,17 +2456,13 @@ namespace Hardware
 					}
 					else
 					{
-						// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
-						//
-						//m_log->errALC5085(port->equipmentID(), port->connectionID());
-						//
 						rxStartAddress += port->rxDataSizeW();
 					}
 
 					continue;
 				}
 
-				// connection is in OptoPort::Mode::Opto
+				assert(connection->isPortToPort() == true);
 
 				port->setRxBufAddress(rxStartAddress);
 

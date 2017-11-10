@@ -755,20 +755,20 @@ namespace Builder
 				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 				Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
 
-				writeOptoVhdFile(cn->connectionID(), p1, p2);
-				writeOptoVhdFile(cn->connectionID(), p2, p1);
+				writeOptoPortToPortVhdFile(cn->connectionID(), p1, p2);
+				writeOptoPortToPortVhdFile(cn->connectionID(), p2, p1);
 			}
 			else
 			{
-//				Hardware::OptoPort* p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
-//				writeOptoVhdFile(cn->connectionID(), p1);
+				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+				writeOptoSinglePortVhdFile(cn->connectionID(), p1);
 			}
 		}
 
 		return true;
 	}
 
-	bool ApplicationLogicCompiler::writeOptoVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort)
+	bool ApplicationLogicCompiler::writeOptoPortToPortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort)
 	{
 		if (outPort == nullptr || inPort == nullptr)
 		{
@@ -830,7 +830,7 @@ namespace Builder
 
 		list.append("--");
 
-		str = QString("-- Connection ID:\t%1").arg(connectionID);
+		str = QString("-- Port-to-port connection ID:\t%1").arg(connectionID);
 		list.append(str);
 
 		str = QString("-- Opto port ID:\t%1").arg(inPort->equipmentID());
@@ -953,6 +953,190 @@ namespace Builder
 
 		return true;
 	}
+
+	bool ApplicationLogicCompiler::writeOptoSinglePortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort)
+	{
+		if (outPort == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (outPort->txSignalsCount() == 0)
+		{
+			return true;
+		}
+
+		QString outPortID = outPort->equipmentID().toLower();
+
+		QString vhdFileName = QString("%1_tx.vhd").arg(outPortID);
+		QString bdfFileName = QString("%1_tx.bdf").arg(outPortID);
+
+		BdfFile bdfFile;
+
+		QStringList list;
+		QString str;
+
+		int inBusWidth = outPort->txDataSizeW() * SIZE_16BIT;
+
+		quint32 dataID = outPort->txDataID();
+
+		QVector<Hardware::TxRxSignalShared> txAnalogs;
+
+		outPort->getTxAnalogSignals(txAnalogs, false);
+
+		QVector<Hardware::TxRxSignalShared> txDiscretes;
+
+		outPort->getTxDiscreteSignals(txDiscretes, false);
+
+		list.append("--");
+		list.append("-- This file has been generated automatically by RPCT software");
+		list.append("--");
+
+		BuildInfo bi = m_resultWriter->buildInfo();
+
+		str = QString("-- Project:\t%1").arg(bi.project);
+		list.append(str);
+
+		str = QString("-- Build No:\t%1").arg(bi.id);
+		list.append(str);
+
+		str = QString("-- Build type:\t%1").arg(bi.release == true ? "Release" : "Debug");
+		list.append(str);
+
+		str = QString("-- Build date:\t%1").arg(bi.dateStr());
+		list.append(str);
+
+		str = QString("-- User:\t%1").arg(bi.user);
+		list.append(str);
+
+		str = QString("-- Host:\t%1").arg(bi.workstation);
+		list.append(str);
+
+		list.append("--");
+
+		str = QString("-- Single-port connection ID:\t%1").arg(connectionID);
+		list.append(str);
+
+		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
+		list.append(str);
+
+		str.sprintf("-- Rx data ID:\t\t%u (0x%08X)", dataID, dataID);
+		list.append(str);
+
+		list.append("--\n");
+
+		// declaration section
+
+		list.append("library ieee;");
+		list.append("use ieee.std_logic_1164.all;");
+		list.append("use ieee.numeric_std.all;\n");
+
+		str = QString("entity %1_tx is\n\tport (\n").arg(outPortID);
+		list.append(str);
+
+		str = QString("\t\tconst_rx_data_id : out std_logic_vector(32-1 downto 0);");
+		list.append(str);
+
+		bdfFile.addConnector32("const_rx_data_id");
+
+		str = QString("\t\trx_data_id : out std_logic_vector(32-1 downto 0);\n");
+		list.append(str);
+
+		bdfFile.addConnector32("rx_data_id");
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
+			{
+				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->dataSize());
+
+				list.append(str);
+
+				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->dataSize());
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
+			{
+				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete->appSignalID().remove("#"));
+				list.append(str);
+
+				bdfFile.addConnector1(txDiscrete->appSignalID());
+			}
+
+			list.append("");
+		}
+
+		str = QString("\t\t%1 : in std_logic_vector(%2-1 downto 0)").arg(outPortID).arg(inBusWidth);
+		list.append(str);
+
+		str = QString("\t);\nend %1_tx;\n").arg(outPortID);
+		list.append(str);
+
+		// architecture section
+
+		str = QString("architecture arch of %1_tx is").arg(outPortID);
+		list.append(str);
+
+		str = QString("\tsignal in_data : std_logic_vector(%1-1 downto 0);").arg(inBusWidth);
+		list.append(str);
+
+		str = QString("begin");
+		list.append(str);
+
+		str = QString("\tin_data <= %1;\n").arg(outPortID);
+		list.append(str);
+
+		str = QString("\tconst_rx_data_id <= std_logic_vector(to_unsigned(%1,32));").arg(dataID);
+		list.append(str);
+		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n");
+		list.append(str);
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
+			{
+				str = QString("\t%1 <= in_data(%2-1 downto %3);").
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->dataSize()).
+						arg(txAnalog->addrInBuf().offset() * 16);
+
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
+			{
+				str = QString("\t%1 <= in_data(%2);").
+						arg(txDiscrete->appSignalID().remove("#")).
+						arg(txDiscrete->addrInBuf().offset() * 16 + txDiscrete->addrInBuf().bit());
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		list.append("end arch;");
+
+		m_resultWriter->addFile("Opto-vhd", vhdFileName, list);
+
+		m_resultWriter->addFile("Opto-vhd", bdfFileName, bdfFile.stringList());
+
+		return true;
+	}
+
+
 
 	bool ApplicationLogicCompiler::writeOptoModulesReport()
 	{

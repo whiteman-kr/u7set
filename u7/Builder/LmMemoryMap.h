@@ -120,6 +120,7 @@ namespace Builder
 			MemoryArea memory;
 
 			MemoryArea bitAccumulator;
+			MemoryArea constBits;
 
 			MemoryArea acquiredDiscreteOutputSignals;
 			MemoryArea acquiredDiscreteInternalSignals;
@@ -304,6 +305,9 @@ namespace Builder
 
 		int getMemoryReadCount(int address) const;
 		int getMemoryWriteCount(int address) const;
+
+		Address16 constBit0Addr() const;
+		Address16 constBit1Addr() const;
 	};
 
 }

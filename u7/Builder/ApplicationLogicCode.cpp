@@ -1128,10 +1128,10 @@ namespace Builder
 
 		m_result = true;
 
-/*		m_code.setOpCode(LmCommandCode::FILL);
+		m_code.setOpCode(LmCommandCode::FILL);
 		m_code.setWord2(addrTo);
-		m_code.setWord3(addrFrom);*/
-
+		m_code.setWord3(addrFrom);
+		m_code.setWord4(addrBit);
 	}
 
 	void Command::fill(Address16 addrTo, Address16 addrFrom)

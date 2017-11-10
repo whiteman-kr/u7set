@@ -178,6 +178,9 @@ namespace Builder
 		m_appBitAdressed.bitAccumulator.setStartAddress(appLogicBitData.startAddress());
 		m_appBitAdressed.bitAccumulator.setSizeW(2);        // bit accumulator has 2 word (32bit) size
 
+		m_appBitAdressed.constBits.setStartAddress(appLogicBitData.startAddress());
+		m_appBitAdressed.constBits.setSizeW(2);				// const bits: bit 0 == 0, bit 1 == 1
+
 		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(appLogicBitData.startAddress());
 		m_appBitAdressed.acquiredDiscreteInternalSignals.setStartAddress(appLogicBitData.startAddress());
 
@@ -233,7 +236,10 @@ namespace Builder
 		m_appBitAdressed.bitAccumulator.setStartAddress(m_appBitAdressed.memory.startAddress());
 		m_appBitAdressed.bitAccumulator.setSizeW(2);			// bit accumulator 32 bit size
 
-		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
+		m_appBitAdressed.constBits.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
+		m_appBitAdressed.constBits.setSizeW(1);					// const bits: bit 0 == 0, bit 1 == 1
+
+		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appBitAdressed.constBits.nextAddress());
 		m_appBitAdressed.acquiredDiscreteInternalSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteOutputSignals.nextAddress());
 
 		m_appBitAdressed.nonAcquiredDiscreteOutputSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteInternalSignals.nextAddress());
@@ -337,6 +343,7 @@ namespace Builder
 		addSection(memFile, m_appBitAdressed.memory, "Application logic bit-addressed memory");
 
 		addRecord(memFile, m_appBitAdressed.bitAccumulator, "bit accumulator");
+		addRecord(memFile, m_appBitAdressed.constBits, "const bits");
 
 		memFile.append("");
 
@@ -1088,5 +1095,16 @@ namespace Builder
 
 		return m_memory[address].writeCount;
 	}
+
+	Address16 LmMemoryMap::constBit0Addr() const
+	{
+		return Address16(m_appBitAdressed.constBits.startAddress(), 0);
+	}
+
+	Address16 LmMemoryMap::constBit1Addr() const
+	{
+		return Address16(m_appBitAdressed.constBits.startAddress(), 1);
+	}
+
 }
 

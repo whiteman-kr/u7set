@@ -11889,7 +11889,6 @@ namespace Builder
 		return buildFile != nullptr;
 	}
 
-
 	bool ModuleLogicCompiler::runProcs(const ProcsToCallArray& procArray)
 	{
 		bool result = true;
@@ -11907,6 +11906,34 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	Address16 ModuleLogicCompiler::getConstBitAddr(UalSignal* constDiscreteUalSignal)
+	{
+		if (constDiscreteUalSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return Address16();
+		}
+
+		if (constDiscreteUalSignal->isConst() == false || constDiscreteUalSignal->isDiscrete() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return Address16();
+		}
+
+		if (constDiscreteUalSignal->constDiscreteValue() == 0)
+		{
+			return constBit0Addr();
+		}
+
+		if (constDiscreteUalSignal->constDiscreteValue() == 1)
+		{
+			return constBit1Addr();
+		}
+
+		LOG_INTERNAL_ERROR(m_log);
+		return Address16();
 	}
 
 
