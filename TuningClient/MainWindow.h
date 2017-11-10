@@ -63,6 +63,7 @@ public slots:
 	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
+	void showLog();
 	void showAbout();
 
 private:

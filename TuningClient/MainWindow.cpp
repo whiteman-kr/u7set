@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget* parent) :
 		resize(1024, 768);
 	}
 
-	theLogFile = new Log::LogFile("TuningClient");
+	theLogFile = new Log::LogFile(qAppName()/*QString(), 800, 3*/);
 
 	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
@@ -138,8 +138,7 @@ void MainWindow::createActions()
 
 	m_pLogAction = new QAction(tr("Log..."), this);
 	m_pLogAction->setStatusTip(tr("Show application log"));
-	//m_pLogAction->setEnabled(false);
-	//connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
+	connect(m_pLogAction, &QAction::triggered, this, &MainWindow::showLog);
 
 	m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
@@ -204,6 +203,8 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	//
 	if  (event->timerId() == m_mainWindowTimerId_250ms)
 	{
+		//theLogFile->writeMessage("Timer");
+
 		if (theSharedMemorySingleApp != nullptr)
 		{
 			bool ok = theSharedMemorySingleApp->lock();
@@ -502,6 +503,11 @@ void MainWindow::showTuningSources()
 	{
 		theDialogTuningSources->activateWindow();
 	}
+}
+
+void MainWindow::showLog()
+{
+	theLogFile->view(this);
 }
 
 void MainWindow::showAbout()
