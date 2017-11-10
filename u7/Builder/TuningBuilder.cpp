@@ -69,7 +69,7 @@ namespace Builder
 				return false;
 			}
 
-            std::shared_ptr<LogicModule> lmDescription = m_lmDescriptionSet->get(m);
+            std::shared_ptr<LmDescription> lmDescription = m_lmDescriptionSet->get(m);
             if (lmDescription == nullptr)
             {
                 assert(lmDescription);

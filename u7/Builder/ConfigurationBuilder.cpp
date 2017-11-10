@@ -163,7 +163,7 @@ namespace Builder
 
 			std::vector<Hardware::DeviceModule*> subsystemModules;
 
-			std::vector<LogicModule*> subsystemModulesDescriptions;
+			std::vector<LmDescription*> subsystemModulesDescriptions;
 
 			for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
 			{
@@ -194,7 +194,7 @@ namespace Builder
 					//
 					subsystemModules.push_back(lm);
 
-					LogicModule* description = m_lmDescriptions->get(lm).get();
+					LmDescription* description = m_lmDescriptions->get(lm).get();
 
 					if (description == nullptr)
 					{
@@ -220,7 +220,7 @@ namespace Builder
 				return false;
 			}
 
-			for (LogicModule* logicModuleDescription : subsystemModulesDescriptions)
+			for (LmDescription* logicModuleDescription : subsystemModulesDescriptions)
 			{
 				if (runConfigurationScriptFile(subsystemModules, logicModuleDescription) == false)
 				{
@@ -298,7 +298,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ConfigurationBuilder::runConfigurationScriptFile(const std::vector<Hardware::DeviceModule*>& subsystemModules, LogicModule* logicModuleDescription)
+	bool ConfigurationBuilder::runConfigurationScriptFile(const std::vector<Hardware::DeviceModule*>& subsystemModules, LmDescription* logicModuleDescription)
 	{
 		bool ok = false;
 

@@ -9,7 +9,7 @@
 #include "../lib/TimeStamp.h"
 #include "Builder/OptoModule.h"
 #include "version.h"
-#include "LogicModule.h"
+#include "../lib/LmDescription.h"
 
 #include <QtQml>
 

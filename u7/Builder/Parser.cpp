@@ -2224,7 +2224,7 @@ namespace Builder
 		{
 			assert(module->lmDescriptionFile().isEmpty() == false);
 
-			std::shared_ptr<LogicModule> logicModuleDescription = lmDescriptionSet->get(module->lmDescriptionFile());
+			std::shared_ptr<LmDescription> logicModuleDescription = lmDescriptionSet->get(module->lmDescriptionFile());
 			if (logicModuleDescription == nullptr)
 			{
 				log->errALP4016(QString("Look schema for %1").arg(module->equipmentId()), module->lmDescriptionFile());
@@ -3062,7 +3062,7 @@ namespace Builder
 			return false;
 		}
 
-		std::shared_ptr<LogicModule> lmd = m_lmDescriptions->get(lmDescriptionFile);
+		std::shared_ptr<LmDescription> lmd = m_lmDescriptions->get(lmDescriptionFile);
 		if (lmd == nullptr)
 		{
 			assert(lmd);
