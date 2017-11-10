@@ -13,8 +13,8 @@
 		<AppDataSize>2</AppDataSize>
 		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>
 		<AppLogicBitDataSize>256</AppLogicBitDataSize>
-		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>;
-		<AppLogicWordDataSize>3570</AppLogicWordDataSize>;
+		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>
+		<AppLogicWordDataSize>3570</AppLogicWordDataSize>
 		<ModuleDataOffset>0</ModuleDataOffset>
 		<ModuleDataSize>2560</ModuleDataSize>
 		<TuningDataOffset>46336</TuningDataOffset>
