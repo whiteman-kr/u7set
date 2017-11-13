@@ -51,9 +51,22 @@ namespace Hardware
 		for(QString str : list)
 		{
 			RawDataDescriptionItem item;
+
 			bool res = true;
 
+			int commentIndex = str.indexOf("//");
+
+			if (commentIndex != -1)
+			{
+				str = str.mid(0, commentIndex);
+			}
+
 			str = str.trimmed();
+
+			if (str.isEmpty() == true)
+			{
+				continue;
+			}
 
 			QString itemTypeStr = str.section("=", 0, 0).trimmed();
 
