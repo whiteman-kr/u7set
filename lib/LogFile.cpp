@@ -5,8 +5,7 @@
 #include <QTextStream>
 #include <QDateTime>
 #include <QAbstractItemModel>
-
-#include "Windows.h"
+#include <QComboBox>
 
 namespace Log
 {
@@ -14,9 +13,12 @@ namespace Log
 	// LogFileRecord
 	//
 
-	const int LogFileRecord::typeCont = 4;
+	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "TEXT"};
 
-	const char* LogFileRecord::typeTextShort[] = {"ERR", "WRN", "MSG", ""};
+	const char* messageTypeTextLong[] = {"All", "Error", "Warning", "Message", "Text"};
+
+	const int messageTypeCount = sizeof(messageTypeTextShort) / sizeof(messageTypeTextShort[0]);
+
 
 	QString LogFileRecord::toString()
 	{
@@ -26,13 +28,13 @@ namespace Log
 		}
 
 		int intType = static_cast<int>(type);
-		if (intType < 0 || intType >= typeCont)
+		if (intType < 0 || intType >= messageTypeCount)
 		{
 			assert(false);
 			return QString();
 		}
 
-		return QString("%1\t%2\t%3\t%4\r\n").arg(time.toString("dd.MM.yyyy hh:mm:ss")).arg(intType).arg(typeTextShort[intType]).arg(text);
+		return QString("%1\t%2\t%3\t%4\r\n").arg(time.toString("dd.MM.yyyy hh:mm:ss")).arg(intType).arg(messageTypeTextShort[intType]).arg(text);
 	}
 
 	//
@@ -559,6 +561,416 @@ namespace Log
 		}
 	}
 
+
+	//
+	// LogRecordModel
+	//
+	LogRecordModel::LogRecordModel()
+	{
+		m_columnsNames << tr("Time");
+		m_columnsNames << tr("Type");
+		m_columnsNames << tr("Message");
+
+		m_columnsWidthPercent.push_back(0.15);
+		m_columnsWidthPercent.push_back(0.05);
+		m_columnsWidthPercent.push_back(0.8);
+	}
+
+	LogRecordModel::~LogRecordModel()
+	{
+
+	}
+
+	void LogRecordModel::setRecords(std::vector<LogFileRecord>* records)
+	{
+		m_records.swap(*records);
+
+		fillRecords();
+	}
+
+	void LogRecordModel::addRecord(const LogFileRecord& record)
+	{
+		m_records.push_back(record);
+
+		if (processRecordFilter(record) == true)
+		{
+			int index = static_cast<int>(m_filteredRecordsIndex.size() + 1);
+
+			beginInsertRows(QModelIndex(), index, index);
+
+			m_filteredRecordsIndex.push_back(static_cast<int>(m_records.size() - 1));
+
+			insertRows(index, 1);
+
+			endInsertRows();
+		}
+
+	}
+
+	void LogRecordModel::setFilter(MessageType messageType, const QString& text)
+	{
+		m_filterMessageType = messageType;
+		m_filterText = text;
+
+		fillRecords();
+	}
+
+	void LogRecordModel::fillRecords()
+	{
+		// Remove data from the model
+
+		if (rowCount() > 0)
+		{
+			beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+
+			removeRows(0, rowCount());
+
+			m_filteredRecordsIndex.clear();
+
+			endRemoveRows();
+		}
+
+		// Process filters
+
+		int count = static_cast<int>(m_records.size());
+
+		m_filteredRecordsIndex.reserve(count);
+
+		for (int i = 0; i < count; i++)
+		{
+			const LogFileRecord& rec = m_records[i];
+
+			if (processRecordFilter(rec) == true)
+			{
+				m_filteredRecordsIndex.push_back(i);
+			}
+		}
+
+		// Set data to the model
+
+		if (m_filteredRecordsIndex.empty() == false)
+		{
+			int count = static_cast<int>(m_filteredRecordsIndex.size());
+
+			beginInsertRows(QModelIndex(), 0, count - 1);
+
+			insertRows(0, static_cast<int>(count));
+
+			endInsertRows();
+		}
+
+	}
+
+	bool LogRecordModel::processRecordFilter(const LogFileRecord& record) const
+	{
+		if (m_filterMessageType != MessageType::All)
+		{
+			if (m_filterMessageType != record.type)
+			{
+				return false;
+			}
+		}
+
+		if (m_filterText.isEmpty() == false)
+		{
+			if (record.text.contains(m_filterText) == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	double LogRecordModel::columnWidthPercent(int index)
+	{
+		if (index < 0 || index >= m_columnsWidthPercent.size())
+		{
+			assert(false);
+			return 100;
+		}
+
+		return m_columnsWidthPercent[index];
+	}
+
+	int LogRecordModel::rowCount(const QModelIndex& parent) const
+	{
+		Q_UNUSED(parent);
+		return static_cast<int>(m_filteredRecordsIndex.size());
+	}
+
+	int LogRecordModel::columnCount(const QModelIndex& parent) const
+	{
+		Q_UNUSED(parent);
+		return static_cast<int>(m_columnsNames.size());
+	}
+
+	QModelIndex LogRecordModel::index(int row, int column, const QModelIndex& parent) const
+	{
+		Q_UNUSED(parent);
+		return createIndex(row, column);
+	}
+
+	QModelIndex LogRecordModel::parent(const QModelIndex& index) const
+	{
+		Q_UNUSED(index);
+		return QModelIndex();
+	}
+
+	QVariant LogRecordModel::data(const QModelIndex& index, int role) const
+	{
+		if (role == Qt::DisplayRole)
+		{
+
+			int col = index.column();
+
+			if (col < 0 || col >= m_columnsNames.size())
+			{
+				assert(false);
+				return QVariant();
+			}
+
+			int row = index.row();
+			if (row >= m_filteredRecordsIndex.size())
+			{
+				assert(false);
+				return QVariant();
+			}
+
+			int recordIndex = m_filteredRecordsIndex[row];
+
+			const LogFileRecord& rec = m_records[recordIndex];
+
+			int displayIndex = col;
+
+			if (displayIndex == static_cast<int>(Columns::Time))
+			{
+				return rec.time.toString("dd.MM.yyyy hh:mm:ss");
+			}
+
+			if (displayIndex == static_cast<int>(Columns::Type))
+			{
+				int intType = static_cast<int>(rec.type);
+				if (intType < 0 || intType >= messageTypeCount)
+				{
+					assert(false);
+					return QString();
+				}
+
+				return messageTypeTextShort[intType];
+			}
+
+			if (displayIndex == static_cast<int>(Columns::Text))
+			{
+				return rec.text;
+			}
+		}
+		return QVariant();
+	}
+
+	QVariant LogRecordModel::headerData(int section, Qt::Orientation orientation, int role) const
+	{
+		if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+		{
+			if (section < 0 || section >= m_columnsNames.size())
+			{
+				assert(false);
+				return QVariant();
+			}
+
+			return m_columnsNames.at(section);
+		}
+
+		return QVariant();
+	}
+
+	//
+	// LogFileDialog
+	//
+
+	LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent)
+		:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+		  m_worker(worker)
+	{
+		setAttribute(Qt::WA_DeleteOnClose);
+
+		QVBoxLayout* mainLayout = new QVBoxLayout();
+		setLayout(mainLayout);
+
+		QHBoxLayout* topLayout = new QHBoxLayout();
+		mainLayout->addLayout(topLayout);
+
+		//
+
+		topLayout->addWidget(new QLabel("Type:"));
+
+		//
+
+		m_typeCombo = new QComboBox();
+
+		m_typeCombo->blockSignals(true);
+
+		connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &LogFileDialog::onTypeComboIndexChanged);
+
+		for (int i = 0; i < messageTypeCount; i++)
+		{
+			m_typeCombo->addItem(messageTypeTextLong[i]);
+		}
+		m_typeCombo->setCurrentIndex(0);
+
+		m_typeCombo->blockSignals(false);
+
+		topLayout->addWidget(m_typeCombo);
+
+		//
+
+
+		topLayout->addStretch();
+
+		//
+
+		m_filterLineEdit = new QLineEdit();
+		topLayout->addWidget(m_filterLineEdit);
+
+		connect(m_filterLineEdit, &QLineEdit::returnPressed, this, &LogFileDialog::onFilter);
+
+		//
+
+		QPushButton* b = new QPushButton(tr("Filter"));
+		topLayout->addWidget(b);
+
+		connect(b, &QPushButton::clicked, this, &LogFileDialog::onFilter);
+
+		topLayout->addStretch();
+
+		//
+
+		m_autoScroll = new QPushButton(tr("Auto Scroll"));
+		m_autoScroll->setCheckable(true);
+		m_autoScroll->setChecked(true);
+		topLayout->addWidget(m_autoScroll);
+
+		//
+
+		m_table = new QTableView();
+		m_table->setModel(&m_model);
+		m_table->verticalHeader()->hide();
+		m_table->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
+		m_table->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+		m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+		m_table->setSortingEnabled(false);
+
+		//
+
+		mainLayout->addWidget(m_table);
+
+		//
+
+		m_counterLabel = new QLabel();
+		mainLayout->addWidget(m_counterLabel);
+
+		setMinimumSize(1024, 600);
+
+		//
+
+		connect(m_worker, &LogFileWorker::readComplete, this, &LogFileDialog::onReadComplete);
+
+		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived);
+
+		m_worker->read();
+
+
+	}
+
+	LogFileDialog::~LogFileDialog()
+	{
+
+	}
+
+	void LogFileDialog::resizeEvent(QResizeEvent *event)
+	{
+
+		Q_UNUSED(event);
+
+		if (m_table == nullptr)
+		{
+			return;
+		}
+
+		QSize s = m_table->size();
+
+		double totalWidth = s.width() - 25;
+
+		for (int c = 0; c < m_table->horizontalHeader()->count() ; c++)
+		{
+			int columnWidth = totalWidth * m_model.columnWidthPercent(c);
+
+			if (columnWidth >= s.width())
+			{
+				columnWidth = 100;
+			}
+			m_table->setColumnWidth(c, columnWidth);
+		}
+
+	}
+
+	void LogFileDialog::onTypeComboIndexChanged(int index)
+	{
+		Q_UNUSED(index);
+		onFilter();
+	}
+
+	void LogFileDialog::onFilter()
+	{
+		int typeComboIndex = m_typeCombo->currentIndex();
+
+		if (typeComboIndex < 0 || typeComboIndex >= messageTypeCount)
+		{
+			assert(false);
+			return;
+		}
+
+		MessageType filterMessageType = static_cast<MessageType>(typeComboIndex);
+
+		QString filterText = m_filterLineEdit->text();
+
+		m_model.setFilter(filterMessageType, filterText);
+
+		m_counterLabel->setText(tr("Total records: %1").arg(m_model.rowCount()));
+	}
+
+	void LogFileDialog::onReadComplete()
+	{
+		qDebug() << "onLoadComplete";
+
+		std::vector<LogFileRecord> loadResult;
+
+		m_worker->getLoadedData(&loadResult);
+
+		m_model.setRecords(&loadResult);
+
+		m_counterLabel->setText(tr("Total records: %1").arg(m_model.rowCount()));
+
+		m_table->scrollToBottom();
+	}
+
+	void LogFileDialog::onRecordArrived(LogFileRecord record)
+	{
+		if (isVisible() == false)
+		{
+			return;
+		}
+
+		m_model.addRecord(record);
+
+		m_counterLabel->setText(tr("Total records: %1").arg(m_model.rowCount()));
+
+		if (m_autoScroll->isChecked() == true)
+		{
+			m_table->scrollToBottom();
+		}
+	}
+
 	//
 	// LogFile
 	//
@@ -641,330 +1053,6 @@ namespace Log
 		Q_UNUSED(result);
 
 		m_logDialog = nullptr;
-	}
-
-	//
-	// LogRecordModel
-	//
-	LogRecordModel::LogRecordModel()
-	{
-		m_columnsNames << tr("Time");
-		m_columnsNames << tr("Type");
-		m_columnsNames << tr("Message");
-
-		m_columnsWidthPercent.push_back(0.15);
-		m_columnsWidthPercent.push_back(0.05);
-		m_columnsWidthPercent.push_back(0.8);
-	}
-
-	LogRecordModel::~LogRecordModel()
-	{
-
-	}
-
-	void LogRecordModel::setRecords(std::vector<LogFileRecord>* records)
-	{
-		if (rowCount() > 0)
-		{
-			beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
-
-			removeRows(0, rowCount());
-
-			m_records.clear();
-
-			endRemoveRows();
-		}
-
-		//
-		if (records->empty() == false)
-		{
-			int count = static_cast<int>(records->size());
-
-			beginInsertRows(QModelIndex(), 0, count - 1);
-
-			records->swap(m_records);
-
-			insertRows(0, static_cast<int>(count));
-
-			endInsertRows();
-		}
-	}
-
-	void LogRecordModel::addRecord(const LogFileRecord& record)
-	{
-		int index = static_cast<int>(m_records.size() + 1);
-
-		beginInsertRows(QModelIndex(), index, index);
-
-		m_records.push_back(record);
-
-		insertRows(index, 1);
-
-		endInsertRows();
-	}
-
-	double LogRecordModel::columnWidthPercent(int index)
-	{
-		if (index < 0 || index >= m_columnsWidthPercent.size())
-		{
-			assert(false);
-			return 100;
-		}
-
-		return m_columnsWidthPercent[index];
-	}
-
-	int LogRecordModel::rowCount(const QModelIndex& parent) const
-	{
-		Q_UNUSED(parent);
-		return static_cast<int>(m_records.size());
-	}
-
-	int LogRecordModel::columnCount(const QModelIndex& parent) const
-	{
-		Q_UNUSED(parent);
-		return static_cast<int>(m_columnsNames.size());
-	}
-
-	QModelIndex LogRecordModel::index(int row, int column, const QModelIndex& parent) const
-	{
-		Q_UNUSED(parent);
-		return createIndex(row, column);
-	}
-
-	QModelIndex LogRecordModel::parent(const QModelIndex& index) const
-	{
-		Q_UNUSED(index);
-		return QModelIndex();
-	}
-
-	QVariant LogRecordModel::data(const QModelIndex& index, int role) const
-	{
-		if (role == Qt::DisplayRole)
-		{
-
-			int col = index.column();
-
-			if (col < 0 || col >= m_columnsNames.size())
-			{
-				assert(false);
-				return QVariant();
-			}
-
-			int row = index.row();
-			if (row >= m_records.size())
-			{
-				assert(false);
-				return QVariant();
-			}
-
-			const LogFileRecord& rec = m_records[row];
-
-			int displayIndex = col;
-
-			if (displayIndex == static_cast<int>(Columns::Time))
-			{
-				return rec.time.toString("dd.MM.yyyy hh:mm:ss");
-			}
-
-			if (displayIndex == static_cast<int>(Columns::Type))
-			{
-				return LogFileRecord::typeTextShort[static_cast<int>(rec.type)];
-			}
-
-			if (displayIndex == static_cast<int>(Columns::Text))
-			{
-				return rec.text;
-			}
-		}
-		return QVariant();
-	}
-
-	QVariant LogRecordModel::headerData(int section, Qt::Orientation orientation, int role) const
-	{
-		if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-		{
-			if (section < 0 || section >= m_columnsNames.size())
-			{
-				assert(false);
-				return QVariant();
-			}
-
-			return m_columnsNames.at(section);
-		}
-
-		return QVariant();
-	}
-
-	//
-	// LogFileDialog
-	//
-
-	LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent)
-		:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-		  m_worker(worker)
-	{
-		setAttribute(Qt::WA_DeleteOnClose);
-
-		QVBoxLayout* mainLayout = new QVBoxLayout();
-		setLayout(mainLayout);
-
-		QHBoxLayout* topLayout = new QHBoxLayout();
-		mainLayout->addLayout(topLayout);
-
-		//
-
-		topLayout->addWidget(new QLabel("Type:"));
-
-		//
-
-		m_typeCombo = new QComboBox();
-		topLayout->addWidget(m_typeCombo);
-
-		//
-
-		QPushButton* b = new QPushButton(tr("Choose Period..."));
-		topLayout->addWidget(b);
-
-		connect(b, &QPushButton::clicked, this, &LogFileDialog::onChoosePeriod);
-
-		topLayout->addStretch();
-
-		//
-
-		m_filter = new QLineEdit();
-		topLayout->addWidget(m_filter);
-
-		connect(m_filter, &QLineEdit::returnPressed, this, &LogFileDialog::onFilter);
-
-		//
-
-		b = new QPushButton(tr("Filter"));
-		topLayout->addWidget(b);
-
-		connect(b, &QPushButton::clicked, this, &LogFileDialog::onFilter);
-
-		topLayout->addStretch();
-
-		//
-
-		m_autoScroll = new QPushButton(tr("Auto Scroll"));
-		m_autoScroll->setCheckable(true);
-		m_autoScroll->setChecked(true);
-		topLayout->addWidget(m_autoScroll);
-
-		connect(m_autoScroll, &QPushButton::clicked, this, &LogFileDialog::onAutoScroll);
-
-		//
-
-		m_table = new QTableView();
-		m_table->setModel(&m_model);
-		m_table->verticalHeader()->hide();
-		m_table->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
-		m_table->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-		m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-		m_table->setSortingEnabled(false);
-
-		//
-
-		mainLayout->addWidget(m_table);
-
-		//
-
-		m_counterLabel = new QLabel();
-		mainLayout->addWidget(m_counterLabel);
-
-		setMinimumSize(1024, 600);
-
-		//
-
-		connect(m_worker, &LogFileWorker::readComplete, this, &LogFileDialog::onReadComplete);
-
-		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived);
-
-		m_worker->read();
-
-
-	}
-
-	LogFileDialog::~LogFileDialog()
-	{
-
-	}
-
-	void LogFileDialog::resizeEvent(QResizeEvent *event)
-	{
-
-		Q_UNUSED(event);
-
-		if (m_table == nullptr)
-		{
-			return;
-		}
-
-		QSize s = m_table->size();
-
-		double totalWidth = s.width() - 25;
-
-		for (int c = 0; c < m_table->horizontalHeader()->count() ; c++)
-		{
-			int columnWidth = totalWidth * m_model.columnWidthPercent(c);
-
-			if (columnWidth >= s.width())
-			{
-				columnWidth = 100;
-			}
-			m_table->setColumnWidth(c, columnWidth);
-		}
-
-	}
-
-	void LogFileDialog::onChoosePeriod()
-	{
-
-	}
-
-	void LogFileDialog::onFilter()
-	{
-
-	}
-
-	void LogFileDialog::onAutoScroll()
-	{
-
-	}
-
-
-	void LogFileDialog::onReadComplete()
-	{
-		qDebug() << "onLoadComplete";
-
-		std::vector<LogFileRecord> loadResult;
-
-		m_worker->getLoadedData(&loadResult);
-
-		m_model.setRecords(&loadResult);
-
-		m_counterLabel->setText(tr("Total records: %1").arg(m_model.rowCount()));
-
-		m_table->scrollToBottom();
-	}
-
-	void LogFileDialog::onRecordArrived(LogFileRecord record)
-	{
-		if (isVisible() == false)
-		{
-			return;
-		}
-
-		m_model.addRecord(record);
-
-		m_counterLabel->setText(tr("Total records: %1").arg(m_model.rowCount()));
-
-		if (m_autoScroll->isChecked() == true)
-		{
-			m_table->scrollToBottom();
-		}
 	}
 }
 

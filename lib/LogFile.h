@@ -11,6 +11,7 @@ namespace Log
 {
 	enum class MessageType
 	{
+		All = 0,
 		Error,
 		Warning,
 		Message,
@@ -19,10 +20,6 @@ namespace Log
 
 	struct LogFileRecord
 	{
-		static const int typeCont;
-
-		static const char* typeTextShort[];
-
 		QDateTime time;
 		MessageType type;
 		QString text;
@@ -30,8 +27,6 @@ namespace Log
 		QString toString();
 
 	};
-
-	class LogFileDialog;
 
 	class LogFileWorker : public SimpleThreadWorker
 	{
@@ -102,6 +97,98 @@ namespace Log
 		std::vector<LogFileRecord> m_readResult;
 	};
 
+	class LogRecordModel : public QAbstractItemModel
+	{
+		Q_OBJECT
+
+	public:
+		LogRecordModel();
+		~LogRecordModel();
+
+	public:
+
+		enum class Columns
+		{
+			Time = 0,
+			Type,
+			Text
+		};
+
+
+	public:
+		void setRecords(std::vector<LogFileRecord>* records);
+		void addRecord(const LogFileRecord& record);
+
+		void setFilter(MessageType messageType, const QString& text);
+
+	private:
+		void fillRecords();
+
+		bool processRecordFilter(const LogFileRecord& record) const;
+
+	public:
+		double columnWidthPercent(int index);
+
+		virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+		virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+		virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+
+
+	protected:
+		virtual QModelIndex parent(const QModelIndex& index) const override;
+		virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+		virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+	private:
+		QStringList m_columnsNames;
+		std::vector<double> m_columnsWidthPercent;
+
+		std::vector<int> m_filteredRecordsIndex;
+		std::vector<LogFileRecord> m_records;
+
+		MessageType m_filterMessageType = MessageType::All;
+		QString m_filterText;
+
+	protected:
+	};
+
+	class LogFileDialog : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+
+		LogFileDialog(LogFileWorker* worker, QWidget* parent);
+		virtual ~LogFileDialog();
+
+	private:
+		virtual void resizeEvent(QResizeEvent *event);
+
+	private:
+
+		LogFileWorker* m_worker = nullptr;
+
+		QComboBox* m_typeCombo = nullptr;
+
+		QLineEdit* m_filterLineEdit = nullptr;
+
+		QPushButton* m_autoScroll = nullptr;
+
+		LogRecordModel m_model;
+
+		QTableView* m_table = nullptr;
+
+		QLabel* m_counterLabel = nullptr;
+
+	private slots:
+		void onTypeComboIndexChanged(int index);
+		void onFilter();
+
+		void onReadComplete();
+		void onRecordArrived(LogFileRecord record);
+
+	};
+
 	class LogFile : public QObject
 	{
 		Q_OBJECT
@@ -133,90 +220,6 @@ namespace Log
 
 		LogFileDialog* m_logDialog = nullptr;
 	};
-
-	class LogRecordModel : public QAbstractItemModel
-	{
-		Q_OBJECT
-
-	public:
-		LogRecordModel();
-		~LogRecordModel();
-
-	public:
-
-		enum class Columns
-		{
-			Time = 0,
-			Type,
-			Text
-		};
-
-
-	public:
-		void setRecords(std::vector<LogFileRecord>* records);
-		void addRecord(const LogFileRecord& record);
-
-		double columnWidthPercent(int index);
-
-	public:
-
-		virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-		virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-		virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-
-
-	protected:
-		virtual QModelIndex parent(const QModelIndex& index) const override;
-		virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-		virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-	private:
-		QStringList m_columnsNames;
-		std::vector<double> m_columnsWidthPercent;
-
-		std::vector<LogFileRecord> m_records;
-
-	protected:
-	};
-
-	class LogFileDialog : public QDialog
-	{
-		Q_OBJECT
-
-	public:
-
-		LogFileDialog(LogFileWorker* worker, QWidget* parent);
-		virtual ~LogFileDialog();
-
-	private:
-		virtual void resizeEvent(QResizeEvent *event);
-
-	private:
-
-		LogFileWorker* m_worker = nullptr;
-
-		QComboBox* m_typeCombo = nullptr;
-
-		QLineEdit* m_filter = nullptr;
-
-		QPushButton* m_autoScroll = nullptr;
-
-		LogRecordModel m_model;
-
-		QTableView* m_table = nullptr;
-
-		QLabel* m_counterLabel = nullptr;
-
-	private slots:
-		void onChoosePeriod();
-		void onFilter();
-		void onAutoScroll();
-
-		void onReadComplete();
-		void onRecordArrived(LogFileRecord record);
-
-	};
-
 }
 
 #endif // LOGFILE_H
