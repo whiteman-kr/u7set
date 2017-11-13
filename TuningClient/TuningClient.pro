@@ -175,7 +175,7 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
-        ../lib/LogFile.h \
+    ../lib/LogFile.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     UserManager.h \

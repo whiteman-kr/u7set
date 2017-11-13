@@ -101,3 +101,4 @@ extern Log::LogFile* theLogFile;
 extern UserManager theUserManager;
 
 #endif // MAINWINDOW_H
+

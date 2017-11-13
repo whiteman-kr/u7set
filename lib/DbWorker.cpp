@@ -191,6 +191,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0173.sql", "Upgrade to version 173, Fixed lim_fp update error"},
 	{":/DatabaseUpgrade/Upgrade0174.sql", "Upgrade to version 174, AFBL library was updated"},
 	{":/DatabaseUpgrade/Upgrade0175.sql", "Upgrade to version 175, AFBL library was updated"},
+	{":/DatabaseUpgrade/Upgrade0176.sql", "Upgrade to version 176, AFBL: Attr MaxBusSize moved to attr Size in LogicModule description"},
+	{":/DatabaseUpgrade/Upgrade0177.sql", "Upgrade to version 177, Add bus_xor, set i_bus_width to 16 for bus_or, bus_and"},
 };
 
 

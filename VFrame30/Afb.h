@@ -138,9 +138,6 @@ namespace Afb
 		void setBusDataFormat(E::BusDataFormat value);
 		bool setBusDataFormat(const QString& value);
 
-		int maxBusSize() const;
-		void setMaxBusSize(int value);
-
 		// Data
 		//
 private:
@@ -154,7 +151,6 @@ private:
 		int m_size = 0;
 		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
 		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Discrete;
-		int m_maxBusSize = 16;
 
 		// WARNING!!!
 		// Operator= is present, don't forget to add new fields to it

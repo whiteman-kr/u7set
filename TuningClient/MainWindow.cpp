@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget* parent) :
 		resize(1024, 768);
 	}
 
-	theLogFile = new Log::LogFile(qAppName()/*QString(), 800, 3*/);
+	theLogFile = new Log::LogFile(qAppName());
 
 	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
@@ -507,7 +507,10 @@ void MainWindow::showTuningSources()
 
 void MainWindow::showLog()
 {
-	theLogFile->view(this);
+	if (theLogFile != nullptr)
+	{
+		theLogFile->view(this);
+	}
 }
 
 void MainWindow::showAbout()
