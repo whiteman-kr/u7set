@@ -26,11 +26,9 @@ MainWindow::MainWindow(QWidget* parent) :
 		resize(1024, 768);
 	}
 
-	theLogFile = new LogFile("TuningClient", QDir::toNativeSeparators(theSettings.localAppDataPath()));
+	theLogFile = new Log::LogFile(qAppName());
 
-	theLogFile->write("--");
-	theLogFile->write("-----------------------");
-	theLogFile->write("--");
+	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
 	createActions();
@@ -137,8 +135,7 @@ void MainWindow::createActions()
 
 	m_pLogAction = new QAction(tr("Log..."), this);
 	m_pLogAction->setStatusTip(tr("Show application log"));
-	//m_pLogAction->setEnabled(false);
-	//connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
+	connect(m_pLogAction, &QAction::triggered, this, &MainWindow::showLog);
 
 	m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
@@ -505,6 +502,14 @@ void MainWindow::showTuningSources()
 	}
 }
 
+void MainWindow::showLog()
+{
+	if (theLogFile != nullptr)
+	{
+		theLogFile->view(this);
+	}
+}
+
 void MainWindow::showAbout()
 {
 	QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
@@ -557,6 +562,6 @@ void MainWindow::showAbout()
 }
 
 MainWindow* theMainWindow = nullptr;
-LogFile* theLogFile = nullptr;
+Log::LogFile* theLogFile = nullptr;
 
 UserManager theUserManager;
