@@ -4894,7 +4894,7 @@ namespace Builder
 
 	/// IssueCode: ALC5192
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
 	///
@@ -4906,9 +4906,9 @@ namespace Builder
 	/// Description:
 	///		Tx signal specified in port raw data description isn't connected to transmitter. Connect signal to transmitter.
 	///
-	void IssueLogger::errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	void IssueLogger::wrnALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID)
 	{
-		LOG_ERROR(IssueType::AlCompiler,
+		LOG_WARNING0(IssueType::AlCompiler,
 				  5192,
 				  QString(tr("Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').")).
 						arg(appSignalID).arg(portID).arg(connectionID));
@@ -4916,7 +4916,7 @@ namespace Builder
 
 	/// IssueCode: ALC5193
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
 	///
@@ -4928,9 +4928,9 @@ namespace Builder
 	/// Description:
 	///		Rx signal specified in port raw data description isn't assigned to reciever.
 	///
-	void IssueLogger::errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	void IssueLogger::wrnALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
 	{
-		LOG_ERROR(IssueType::AlCompiler,
+		LOG_WARNING0(IssueType::AlCompiler,
 				  5193,
 				  QString(tr("Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').")).
 						arg(appSignalID).arg(portID).arg(connectionID));

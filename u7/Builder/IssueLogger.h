@@ -322,8 +322,8 @@ namespace Builder
 		void errALC5189(const QString& appSignalID, const QString& portID, const QString& lmID);		// Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
 		void errALC5190(const QString& appSignalID, const QString& portID, const QString& lmID);		// Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
 		void errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID);		// Serial Rx signal '%1' is not associated with LM '%2' .
-		void errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connect to transmitter (Connection '%3').
-		void errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+		void wrnALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connected to transmitter (Connection '%3').
+		void wrnALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
 		void wrnALC5194(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
 
 		// EQP			Equipment issues						6000-6999

@@ -1053,7 +1053,7 @@ namespace Builder
 	}
 
 	bool UalSignal::createOptoSignal(const UalItem* ualItem,
-									const Signal* s,
+									Signal* s,
 									const QString& lmEquipmentID,
 									 BusShared bus)
 	{
@@ -1074,12 +1074,9 @@ namespace Builder
 			return false;
 		}
 
-		assert(s->equipmentID() != lmEquipmentID);				// s - is a signal from another LM received by Opto connection
-
-		// create new instance of Signal
-
 		m_isOptoSignal = true;
 
+		// create new instance of Signal
 		m_autoSignalPtr = new Signal(*s);
 
 		// reset signal addresses to invalid state
@@ -1989,7 +1986,7 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, const Signal* s,
+	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, Signal* s,
 											   const QString& lmEquipmentID,
 											   QUuid outPinUuid)
 	{

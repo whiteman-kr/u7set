@@ -106,7 +106,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
-			PROC_TO_CALL(ModuleLogicCompiler::processSerialRxSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
 			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
@@ -4395,7 +4395,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::processSerialRxSignals()
+	bool ModuleLogicCompiler::processSinglePortRxSignals()
 	{
 		if (m_optoModuleStorage == nullptr)
 		{
@@ -4413,7 +4413,7 @@ namespace Builder
 			// add regular Rx signals from receivers in rxSignal lists of all Serial (only!) ports associated with current LM
 			// check that added regulat Rx signals exists in current LM
 			//
-			if (processSerialReceivers() == false) break;
+			if (processSinglePortReceivers() == false) break;
 
 			if (m_optoModuleStorage->initSerialRawRxSignals(lmID) == false) break;
 
@@ -4548,7 +4548,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::processSerialReceivers()
+	bool ModuleLogicCompiler::processSinglePortReceivers()
 	{
 		bool result = true;
 
@@ -4562,13 +4562,13 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			result &= processSerialReceiver(item);
+			result &= processSinglePortReceiver(item);
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::processSerialReceiver(const UalItem* item)
+	bool ModuleLogicCompiler::processSinglePortReceiver(const UalItem* item)
 	{
 		TEST_PTR_RETURN_FALSE(item);
 
@@ -9003,64 +9003,70 @@ namespace Builder
 
 	bool ModuleLogicCompiler::setLmAppLANDataUID(const QByteArray& lmAppCode, quint64& uniqueID)
 	{
-		Crc64 crc;
-
-		crc.add(lmAppCode);
-
-/*		QVector<Signal*> acquiredSignals;
+		QVector<UalSignal*> acquiredSignals;
 
 		acquiredSignals.append(m_acquiredDiscreteInputSignals);
 		acquiredSignals.append(m_acquiredDiscreteStrictOutputSignals);
 		acquiredSignals.append(m_acquiredDiscreteInternalSignals);
 		acquiredSignals.append(m_acquiredDiscreteTuningSignals);
-
+		acquiredSignals.append(m_acquiredDiscreteConstSignals);
+		acquiredSignals.append(m_acquiredDiscreteOptoAndBusChildSignals);
 		acquiredSignals.append(m_acquiredAnalogInputSignals);
-		acquiredSignals.append(m_acquiredAnalogOutputSignals);
+		acquiredSignals.append(m_acquiredAnalogStrictOutputSignals);
 		acquiredSignals.append(m_acquiredAnalogInternalSignals);
+		acquiredSignals.append(m_acquiredAnalogOptoSignals);
+		acquiredSignals.append(m_acquiredAnalogBusChildSignals);
 		acquiredSignals.append(m_acquiredAnalogTuningSignals);
-
 		acquiredSignals.append(m_acquiredBuses);
 
-		int count = acquiredSignals.count();
+		QStringList constSignalsIDs;
 
-		// sort acquiredSignals by bitAddress ascending
-		//
-		for(int k = 0; k < count - 1; k++)
+		for(const UalSignal* constIntSignal : m_acquiredAnalogConstIntSignals)
 		{
-			Signal* s1 = acquiredSignals[k];
-
-			TEST_PTR_CONTINUE(s1);
-
-			for(int i = k + 1; i < count; i++)
-			{
-				Signal* s2 = acquiredSignals[i];
-
-				TEST_PTR_CONTINUE(s2);
-
-				if (s1->regBufAddr().bitAddress() > s2->regBufAddr().bitAddress())
-				{
-					acquiredSignals[k] = s2;
-					acquiredSignals[i] = s1;
-				}
-			}
+			constSignalsIDs.append(constIntSignal->appSignalID());
 		}
+
+		for(const UalSignal* constFloatSignal : m_acquiredAnalogConstFloatSignals)
+		{
+			constSignalsIDs.append(constFloatSignal->appSignalID());
+		}
+
+		constSignalsIDs.sort();
+
+		for(const QString& constSignalID : constSignalsIDs)
+		{
+			UalSignal* constUalSignal = m_ualSignals.get(constSignalID);
+
+			if (constUalSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			acquiredSignals.append(constUalSignal);
+		}
+
+		Crc64 crc;
+
+		crc.add(lmAppCode);
 
 		// add signals to UID
 		//
-		for(Signal* s : acquiredSignals)
+		for(UalSignal* ualSignal: acquiredSignals)
 		{
-			TEST_PTR_CONTINUE(s);
+			TEST_PTR_CONTINUE(ualSignal);
 
-			if (s->regBufAddr().isValid() == true)
+			crc.add(ualSignal->appSignalID());
+
+			if (ualSignal->regBufAddr().isValid() == true)
 			{
-				crc.add(s->appSignalID());
-				crc.add(s->regBufAddr().bitAddress());
+				crc.add(ualSignal->regBufAddr().bitAddress());
 			}
 			else
 			{
 				assert(false);
 			}
-		}*/
+		}
 
 		uniqueID = crc.result();
 

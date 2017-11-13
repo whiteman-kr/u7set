@@ -240,7 +240,7 @@ namespace Hardware
 				else
 				{
 					m_rxRawDataSize = item.rxRawDataSize = -1;
-					m_txRawDataSizeIsAuto = item.rxRawDataSizeIsAuto = true;
+					m_rxRawDataSizeIsAuto = item.rxRawDataSizeIsAuto = true;
 				}
 
 				item.type = RawDataDescriptionItem::Type::RxRawDataSize;

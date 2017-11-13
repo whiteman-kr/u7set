@@ -122,9 +122,9 @@ namespace Hardware
 		bool calculateTxDataID();
 
 		bool appendSerialRxSignal(const Builder::UalSignal* rxSignal);
-		bool initSerialRawRxSignals();
-		bool sortSerialRxSignals();
-		bool calculateSerialRxSignalsAddresses();
+		bool initSinglePortRawRxSignals();
+		bool sortSinglePortRxSignals();
+		bool calculateSinglePortRxSignalsAddresses();
 		bool calculateSerialRxDataID();
 
 		bool copyOpticalPortsTxInRxSignals();

@@ -238,14 +238,14 @@ namespace Builder
 		bool setOutputSignalsAsComputed();
 
 		bool processTxSignals();
-		bool processSerialRxSignals();
+		bool processSinglePortRxSignals();
 
 		bool processTransmitters();
 		bool processTransmitter(const UalItem* ualItem);
 		bool getConnectedSignals(const UalItem* transmitterItem, QVector<UalSignal *>* connectedSignals);
 
-		bool processSerialReceivers();
-		bool processSerialReceiver(const UalItem* item);
+		bool processSinglePortReceivers();
+		bool processSinglePortReceiver(const UalItem* item);
 
 		bool setOptoRawInSignalsAsComputed();
 

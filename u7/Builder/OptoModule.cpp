@@ -326,7 +326,7 @@ namespace Hardware
 			{
 				// Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
 				//
-				m_log->errALC5192(rawTxSignal.appSignalID, m_equipmentID, m_connectionID);
+				m_log->wrnALC5192(rawTxSignal.appSignalID, m_equipmentID, m_connectionID);
 				result = false;
 			}
 			else
@@ -536,7 +536,7 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoPort::initSerialRawRxSignals()
+	bool OptoPort::initSinglePortRawRxSignals()
 	{
 		if (isSinglePortConnection() == false)
 		{
@@ -553,8 +553,7 @@ namespace Hardware
 			{
 				// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
 				//
-				m_log->errALC5193(rawRxSignal.appSignalID, m_equipmentID, m_connectionID);
-				result = false;
+				m_log->wrnALC5193(rawRxSignal.appSignalID, m_equipmentID, m_connectionID);
 				continue;
 			}
 
@@ -564,7 +563,7 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoPort::sortSerialRxSignals()
+	bool OptoPort::sortSinglePortRxSignals()
 	{
 		if (isSinglePortConnection() == false)
 		{
@@ -577,7 +576,7 @@ namespace Hardware
 		return sortTxRxSignalList(m_rxSignals);
 	}
 
-	bool OptoPort::calculateSerialRxSignalsAddresses()
+	bool OptoPort::calculateSinglePortRxSignalsAddresses()
 	{
 		if (isUsedInConnection() == false)
 		{
@@ -586,7 +585,7 @@ namespace Hardware
 
 		if (isSinglePortConnection() == false)
 		{
-			return true;				// process Serial ports only
+			return true;
 		}
 
 		m_rxDataSizeW = 0;
@@ -2874,7 +2873,7 @@ namespace Hardware
 
 	bool OptoModuleStorage::sortSerialRxSignals(const QString& lmID)
 	{
-		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::sortSerialRxSignals);
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::sortSinglePortRxSignals);
 	}
 
 	bool OptoModuleStorage::initRawTxSignals(const QString& lmID)
@@ -2899,12 +2898,12 @@ namespace Hardware
 
 	bool OptoModuleStorage::initSerialRawRxSignals(const QString& lmID)
 	{
-		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::initSerialRawRxSignals);
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::initSinglePortRawRxSignals);
 	}
 
 	bool OptoModuleStorage::calculateSerialRxSignalsAddresses(const QString& lmID)
 	{
-		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSerialRxSignalsAddresses);
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSinglePortRxSignalsAddresses);
 	}
 
 	bool OptoModuleStorage::calculateSerialRxDataIDs(const QString& lmID)

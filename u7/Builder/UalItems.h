@@ -379,7 +379,7 @@ namespace Builder
 								E::AnalogAppSignalFormat analogFormat);
 
 		bool createOptoSignal(const UalItem* ualItem,
-								const Signal* s,
+								Signal* s,
 								const QString &lmEquipmentID,
 								BusShared bus);
 
@@ -558,7 +558,7 @@ namespace Builder
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
-		UalSignal* createOptoSignal(const UalItem* ualItem, const Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
+		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
 
 		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption);
 
