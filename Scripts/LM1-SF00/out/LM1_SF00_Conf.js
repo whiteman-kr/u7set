@@ -153,7 +153,7 @@ function module_lm_1(builder, root, module, confCollection, log, signalSet, subs
         return false;
     }
     if (module.propertyValue("EquipmentID") == undefined) {
-        log.errCFG3000("EquipmentID", "LM-1");
+        log.errCFG3000("EquipmentID", "LM");
         return false;
     }
     var checkProperties = ["ModuleFamily", "Place"];
@@ -180,7 +180,7 @@ function module_lm_1_statistics(builder, module, confCollection, log, subsystemS
         return false;
     }
     if (module.propertyValue("EquipmentID") == undefined) {
-        log.errCFG3000("EquipmentID", "LM-1");
+        log.errCFG3000("EquipmentID", "LM");
         return false;
     }
     var checkProperties = ["ModuleFamily", "SubsystemID"];
@@ -214,12 +214,12 @@ function module_lm_1_statistics(builder, module, confCollection, log, subsystemS
         }
         var configStartFrames = 2;
         var configFrameCount = 19; // number of frames in each configuration
-        var confFirmware = confCollection.jsGet("LM-1", subSysID, ssKeyValue, uartId, frameSize, frameCount);
+        var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount);
         var frameStorageConfig = 1;
         var ptr = 14;
         var LMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
         confFirmware.writeLog("---\r\n");
-        confFirmware.writeLog("LM-1 for subsystem " + subSysID + ", LMNumber " + LMNumber + ": Frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
+        confFirmware.writeLog(module.jsPropertyString("Caption") + " for subsystem " + subSysID + ", LMNumber " + LMNumber + ": Frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
         return true;
     }
     return false;
@@ -229,7 +229,7 @@ function module_lm_1_statistics(builder, module, confCollection, log, subsystemS
 //
 function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (module.propertyValue("EquipmentID") == undefined) {
-        log.errCFG3000("EquipmentID", "LM-1");
+        log.errCFG3000("EquipmentID", "LM");
         return false;
     }
     var checkProperties = ["SubsystemID", "LMNumber", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
@@ -272,7 +272,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
         return false;
     }
-    var confFirmware = confCollection.jsGet("LM-1", subSysID, ssKeyValue, uartId, frameSize, frameCount);
+    var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount);
     var descriptionVersion = 1;
     confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
     confFirmware.writeLog("---\r\n");
