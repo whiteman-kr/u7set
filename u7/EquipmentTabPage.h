@@ -145,6 +145,7 @@ public slots:
 	void addSoftware();
 
 	void addPreset();
+	void replaceObject();
 
 	void addPresetRack();
 	void addPresetChassis();
@@ -155,7 +156,7 @@ public slots:
 
 	void choosePreset(Hardware::DeviceType type);
 
-	void addPresetToConfiguration(const DbFileInfo& fileInfo);
+	std::shared_ptr<Hardware::DeviceObject> addPresetToConfiguration(const DbFileInfo& fileInfo);
 	QModelIndex addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection);
 
 	void addInOutsToSignals();
@@ -278,8 +279,8 @@ private:
 		QAction* m_addWorkstationAction = nullptr;
 		QAction* m_addSoftwareAction = nullptr;
 
-	//----------------------------------
 	QAction* m_addFromPresetAction = nullptr;
+	QAction* m_replaceAction = nullptr;
 
 	//----------------------------------
 	QMenu* m_addPresetMenu = nullptr;

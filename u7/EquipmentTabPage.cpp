@@ -1548,12 +1548,74 @@ void EquipmentView::addPreset()
 			return;
 		}
 
-		DialogChoosePreset d(this, db(), selectedObject->deviceType());
+		DialogChoosePreset d(this, db(), selectedObject->deviceType(), false);
 		if (d.exec() == QDialog::Accepted && d.selectedPreset != nullptr)
 		{
 			addPresetToConfiguration(d.selectedPreset->fileInfo());
 			emit updateState();
 		}
+	}
+
+	return;
+}
+
+void EquipmentView::replaceObject()
+{
+	if (isConfigurationMode() == false)
+	{
+		assert(isConfigurationMode() == true);
+		return;
+	}
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(selectedIndexList.size() == 1);
+		return;
+	}
+
+	QModelIndex singleSelectedIndex = selectedIndexList[0];
+
+	Hardware::DeviceObject* selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
+	if (selectedObject == nullptr)
+	{
+		assert(selectedObject != nullptr);
+		return;
+	}
+
+	if (selectedObject->presetRoot() == false)
+	{
+		assert(selectedObject->presetRoot());
+	}
+
+	DialogChoosePreset d(this, db(), selectedObject->deviceType(), true);
+
+	if (d.exec() == QDialog::Accepted &&
+		d.selectedPreset != nullptr)
+	{
+		std::shared_ptr<Hardware::DeviceObject> selectedPreset = d.selectedPreset;
+
+		if (selectedObject->presetName() == selectedPreset->presetName())
+		{
+			QMessageBox::critical(this, qAppName(), tr("Cannot replace object to itself."));
+			return;
+		}
+
+		// Delete the old one
+		//
+		deleteSelectedDevices();
+
+		// Add new preset
+		//
+		addPresetToConfiguration(selectedPreset->fileInfo());
+
+		// Update properties
+		//
+
+		// --
+		//
+		emit updateState();
 	}
 
 	return;
@@ -1794,7 +1856,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 	return;
 }
 
-void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
+std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 {
 	assert(fileInfo.fileId() != -1);
 	assert(fileInfo.parentId() != -1);
@@ -1807,7 +1869,7 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 	bool ok = db()->getDeviceTreeLatestVersion(fileInfo, &device, this);
 	if (ok == false)
 	{
-		return;
+		return std::shared_ptr<Hardware::DeviceObject>();
 	}
 
 	if (device->fileInfo().fileId() != fileInfo.fileId() ||
@@ -1815,7 +1877,7 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 	{
 		assert(device->fileInfo().fileId() == fileInfo.fileId());
 		assert(device->presetRoot() == true);
-		return;
+		return std::shared_ptr<Hardware::DeviceObject>();
 	}
 
 	// If this is LM modlue, then set SusbSysID to the default value
@@ -1859,7 +1921,7 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 	{
 		// Don't know after which item insrt new object
 		//
-		return;
+		return std::shared_ptr<Hardware::DeviceObject>();
 	}
 
 	if (selected.empty() == false)
@@ -1871,7 +1933,7 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 	//
 	addDeviceObject(device, parentModelIndex, true);
 
-	return;
+	return device;
 }
 
 QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection)
@@ -2814,7 +2876,6 @@ void EquipmentView::deleteSelectedDevices()
 
 	// blocker will enable undoChangesDeviceObject::selectionChanged
 	//
-
 	emit updateState();
 
 	return;
@@ -3600,6 +3661,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// -----------------
 	m_equipmentView->addAction(m_addFromPresetAction);
+	m_equipmentView->addAction(m_replaceAction);
 
 	// -----------------
 	m_equipmentView->addAction(m_addNewPresetAction);
@@ -3677,11 +3739,11 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// ToolBar
 	//
-
 	m_toolBar = new QToolBar(this);
 	m_toolBar->addAction(m_addObjectAction);
 	m_toolBar->addAction(m_addFromPresetAction);
 	m_toolBar->addAction(m_addNewPresetAction);
+	m_toolBar->addAction(m_replaceAction);
 
 	m_separatorActionA = new QAction(tr("Preset"), this);
 	m_separatorActionA->setSeparator(true);
@@ -3792,6 +3854,11 @@ void EquipmentTabPage::CreateActions()
 	m_addFromPresetAction->setStatusTip(tr("Add preset to the configuration..."));
 	m_addFromPresetAction->setEnabled(true);
 	connect(m_addFromPresetAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPreset);
+
+	m_replaceAction = new QAction(tr("Replace with..."), this);
+	m_replaceAction->setStatusTip(tr("Replace selected object with selected one"));
+	m_replaceAction->setEnabled(false);
+	connect(m_replaceAction, &QAction::triggered, m_equipmentView, &EquipmentView::replaceObject);
 
 	//----------------------------------
 	m_addPresetMenu = new QMenu(this);
@@ -4030,6 +4097,7 @@ void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QM
 void EquipmentTabPage::setActionState()
 {
 	assert(m_addFromPresetAction);
+	assert(m_replaceAction);
 	assert(m_addNewPresetAction);
 	assert(m_addSystemAction);
 	assert(m_addSystemAction);
@@ -4072,11 +4140,13 @@ void EquipmentTabPage::setActionState()
 	{
 		m_addNewPresetAction->setVisible(true);
 		m_addFromPresetAction->setVisible(false);
+		m_replaceAction->setVisible(false);
 	}
 	else
 	{
 		m_addNewPresetAction->setVisible(false);
 		m_addFromPresetAction->setVisible(true);
+		m_replaceAction->setVisible(true);
 	}
 
 	// Disable all
@@ -4105,6 +4175,8 @@ void EquipmentTabPage::setActionState()
 	m_addPresetControllerAction->setEnabled(false);
 	m_addPresetWorkstationAction->setEnabled(false);
 	m_addPresetSoftwareAction->setEnabled(false);
+
+	m_replaceAction->setEnabled(false);
 
 	m_inOutsToSignals->setEnabled(false);
 	//m_inOutsToSignals->setVisible(false);
@@ -4160,6 +4232,11 @@ void EquipmentTabPage::setActionState()
 		{
 			m_addAppSignal->setEnabled(true);
 			m_addAppSignal->setVisible(true);
+		}
+
+		if (device->presetRoot() == true)
+		{
+			m_replaceAction->setEnabled(true);
 		}
 	}
 
