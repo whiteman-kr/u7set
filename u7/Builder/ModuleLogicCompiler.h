@@ -155,15 +155,6 @@ namespace Builder
 
 		bool appendRefPinToSignal(UalItem* ualItem, UalSignal* ualSignal);
 
-/*		bool appendUalSignals();
-		bool appendSignalsFromAppItems();
-
-		bool appendAfbOutputsAutoSignals(UalItem* appItem);
-		bool appendAfbNonBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems);
-		bool appendAfbBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus);
-
-		bool appendBusComposerOutputAutoSignal(UalItem* busComposer);*/
-
 		bool checkBusAndAfbInputCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem, QUuid destPinUuid);
 		bool checkBusAndSignalCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
 		bool checkBusAndBusExtractorCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
@@ -242,7 +233,8 @@ namespace Builder
 
 		bool processTransmitters();
 		bool processTransmitter(const UalItem* ualItem);
-		bool getConnectedSignals(const UalItem* transmitterItem, QVector<UalSignal *>* connectedSignals);
+		bool getConnectedSignals(const UalItem* transmitterItem, QVector<QPair<QString, UalSignal *>>* connectedSignals);
+		bool getNearestSignalID(const LogicPin& inPin, QString* nearestSignalID);
 
 		bool processSinglePortReceivers();
 		bool processSinglePortReceiver(const UalItem* item);

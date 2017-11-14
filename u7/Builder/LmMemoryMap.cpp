@@ -223,7 +223,7 @@ namespace Builder
 		m_appWordAdressed.nonAcquiredBuses.setStartAddress(appLogicWordData.startAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.wordAccumulator.setSizeW(1);        // word accumulator has 1 word size
+		m_appWordAdressed.wordAccumulator.setSizeW(2);        // word accumulator has 2 word size
 
 		return recalculateAddresses();
 	}
@@ -280,7 +280,7 @@ namespace Builder
 		m_appWordAdressed.nonAcquiredBuses.setStartAddress(m_appWordAdressed.nonAcquiredAnalogInternalSignals.nextAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredBuses.nextAddress());
-		m_appWordAdressed.wordAccumulator.setSizeW(1);
+		m_appWordAdressed.wordAccumulator.setSizeW(2);
 
 		if (m_appWordAdressed.wordAccumulator.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
@@ -865,124 +865,6 @@ namespace Builder
 
 		return Address16(m_appWordAdressed.acquiredRawData.startAddress(), 0);
 	}
-
-/*	Address16 LmMemoryMap::appendAcquiredAnalogInputSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isAnalog() == true &&
-			   signal.isInput() == true);
-
-		return m_appWordAdressed.acquiredAnalogInputSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendAcquiredAnalogOutputSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isAnalog() == true &&
-			   signal.isOutput() == true);
-
-		return m_appWordAdressed.acquiredAnalogOutputSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendAcquiredAnalogInternalSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isAnalog() == true &&
-			   signal.isInternal() == true);
-
-		return m_appWordAdressed.acquiredAnalogInternalSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendAcquiredAnalogTuningSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isAnalog() == true &&
-			   signal.isInternal() == true &&
-			   signal.enableTuning() == true);
-
-		return m_appWordAdressed.acquiredAnalogTuningSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendAcquiredBus(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isBus() == true);
-
-		return m_appWordAdressed.acquiredBuses.appendSignal(signal);
-	}
-
-
-	Address16 LmMemoryMap::appendAcquiredDiscreteInputSignalInRegBuf(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isDiscrete() == true &&
-			   signal.isInput() == true);
-
-		return m_appWordAdressed.acquiredDiscreteInputSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendAcquiredDiscreteOutputSignalInRegBuf(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isDiscrete() == true &&
-			   signal.isOutput() == true);
-
-		return m_appWordAdressed.acquiredDiscreteOutputSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendAcquiredDiscreteInternalSignalInRegBuf(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isDiscrete() == true &&
-			   signal.isInternal() == true);
-
-		return m_appWordAdressed.acquiredDiscreteInternalSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendAcquiredDiscreteTuningSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == true &&
-			   signal.isDiscrete() == true &&
-			   signal.isInternal() == true &&
-			   signal.enableTuning() == true);
-
-		return m_appWordAdressed.acquiredDiscreteTuningSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendNonAcquiredAnalogInputSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == false &&
-			   signal.isAnalog() == true &&
-			   signal.isInput() == true);
-
-		return m_appWordAdressed.nonAcquiredAnalogInputSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendNonAcquiredAnalogOutputSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == false &&
-			   signal.isAnalog() == true &&
-			   signal.isOutput() == true);
-
-		return m_appWordAdressed.nonAcquiredAnalogOutputSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendNonAcquiredAnalogInternalSignal(const Signal& signal)
-	{
-		assert(signal.isAcquired() == false &&
-			   signal.isAnalog() == true &&
-			   signal.isInternal() == true);
-
-		return m_appWordAdressed.nonAcquiredAnalogInternalSignals.appendSignal(signal);
-	}
-
-	Address16 LmMemoryMap::appendNonAcquiredBus(const Signal& signal)
-	{
-		assert(signal.isAcquired() == false &&
-			   signal.isBus() == true);
-
-		return m_appWordAdressed.nonAcquiredBuses.appendSignal(signal);
-	}*/
 
 	double LmMemoryMap::bitAddressedMemoryUsed()
 	{

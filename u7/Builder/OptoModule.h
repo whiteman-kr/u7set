@@ -23,11 +23,6 @@ namespace Builder
 
 namespace Hardware
 {
-//	class Connection;
-//	enum Connection::Type;
-
-//	class ConnectionStorage;
-
 	typedef std::shared_ptr<Connection> ConnectionShared;
 
 	class OptoModuleStorage;
@@ -50,12 +45,13 @@ namespace Hardware
 	public:
 		TxRxSignal();
 
-		bool init(const Builder::UalSignal* ualSignal);
+		bool init(const QString& nearestSignalID, const Builder::UalSignal* ualSignal);
 
 		bool initRawSignal(const RawDataDescriptionItem& item, int offsetFromBeginningOfBuffer);
 
-		QString appSignalID() const { return m_appSignalIDs.first(); }
+		QString appSignalID() const;
 		const QStringList& appSignalIDs() const { return m_appSignalIDs; }
+		QString appSignalIDsJoined() const { return appSignalIDs().join(", "); }
 
 		bool hasSignalID(const QString& signalID);
 
@@ -81,6 +77,7 @@ namespace Hardware
 	private:
 		Type m_type = Type::Regular;
 
+		QString m_nearestSignalID;
 		QStringList m_appSignalIDs;
 		E::SignalType m_signalType = E::SignalType::Analog;
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
@@ -115,13 +112,13 @@ namespace Hardware
 
 		bool initSettings(ConnectionShared cn);
 
-		bool appendTxSignal(const Builder::UalSignal* txSignal);
+		bool appendTxSignal(const QString& nearestSignalID, const Builder::UalSignal* txSignal);
 		bool initRawTxSignals();
 		bool sortTxSignals();
 		bool calculateTxSignalsAddresses();
 		bool calculateTxDataID();
 
-		bool appendSerialRxSignal(const Builder::UalSignal* rxSignal);
+		bool appendSinglePortRxSignal(const Builder::UalSignal* rxSignal);
 		bool initSinglePortRawRxSignals();
 		bool sortSinglePortRxSignals();
 		bool calculateSinglePortRxSignalsAddresses();
@@ -481,10 +478,11 @@ namespace Hardware
 						 const QString& connectionID,
 						 QUuid transmitterUuid,
 						 const QString& lmID,
+						 const QString& nearestSignalID,
 						 const Builder::UalSignal* ualSignal,
 						 bool* signalAlreadyInList);
 
-		bool appendSerialRxSignal(const QString& schemaID,
+		bool appendSinglePortRxSignal(const QString& schemaID,
 									  const QString& connectionID,
 									  QUuid receiverUuid,
 									  const QString& lmID,

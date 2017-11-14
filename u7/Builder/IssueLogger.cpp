@@ -4759,6 +4759,28 @@ namespace Builder
 								arg(pinCaption).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5126
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal and bus inputs sizes are not multiples (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///	Signal and bus inputs sizes are not multiples.
+	///
+	void IssueLogger::errALC5126(QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5126,
+				  QString(tr("Signal and bus inputs sizes are not multiples (Logic schema %1).")).arg(schemaID));
+	}
+
+
 	//
 
 	/// IssueCode: ALC5186

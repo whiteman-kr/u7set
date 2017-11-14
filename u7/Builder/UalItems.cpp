@@ -1151,12 +1151,6 @@ namespace Builder
 			return false;
 		}
 
-		if (s->appSignalID() == "#TZB5_3TQ11S14_IM_1SF")
-		{
-			int a = 0;
-			a++;
-		}
-
 		for(Signal* pesentSignal : m_refSignals)
 		{
 			if (pesentSignal == nullptr)

@@ -1349,6 +1349,14 @@ namespace Builder
 						arg(getConstValueString());
 			break;
 
+		case LmCommandCode::FILL:
+			params = QString("%1, %2[%3]").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
+			break;
+
+
 		default:
 			assert(false);
 		}
@@ -1502,6 +1510,7 @@ namespace Builder
 		case LmCommandCode::RDFBTS32:
 		case LmCommandCode::MOVCF:
 		case LmCommandCode::PMOV32:
+		case LmCommandCode::FILL:
 			assert(lmCommand->runTime != CALC_RUNTIME);
 			cmdExecTime = lmCommand->runTime;
 			break;

@@ -19,7 +19,7 @@ namespace Hardware
 	{
 	}
 
-	bool TxRxSignal::init(const Builder::UalSignal* ualSignal)
+	bool TxRxSignal::init(const QString& nearestSignalID, const Builder::UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr)
 		{
@@ -27,7 +27,11 @@ namespace Hardware
 			return false;
 		}
 
+		m_nearestSignalID = nearestSignalID;
 		m_appSignalIDs = ualSignal->refSignalIDs();
+
+		assert(hasSignalID(m_nearestSignalID));
+
 		m_signalType = ualSignal->signalType();
 		m_byteOrder = ualSignal->byteOrder();
 
@@ -87,6 +91,17 @@ namespace Hardware
 
 		return true;
 	}
+
+	QString TxRxSignal::appSignalID() const
+	{
+		if (m_nearestSignalID.isEmpty() == true)
+		{
+			return m_appSignalIDs.first();
+		}
+
+		return m_nearestSignalID;
+	}
+
 
 	bool TxRxSignal::hasSignalID(const QString& signalID)
 	{
@@ -327,7 +342,6 @@ namespace Hardware
 				// Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
 				//
 				m_log->wrnALC5192(rawTxSignal.appSignalID, m_equipmentID, m_connectionID);
-				result = false;
 			}
 			else
 			{
@@ -516,7 +530,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::appendSerialRxSignal(const Builder::UalSignal* rxSignal)
+	bool OptoPort::appendSinglePortRxSignal(const Builder::UalSignal* rxSignal)
 	{
 		TEST_PTR_RETURN_FALSE(rxSignal);
 
@@ -1677,7 +1691,7 @@ namespace Hardware
 		}
 	}
 
-	bool OptoPort::appendTxSignal(const Builder::UalSignal* ualSignal)
+	bool OptoPort::appendTxSignal(const QString& nearestSignalID, const Builder::UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr)
 		{
@@ -1694,7 +1708,7 @@ namespace Hardware
 
 		TxRxSignalShared txSignal = std::make_shared<TxRxSignal>();
 
-		bool res = txSignal->init(ualSignal);
+		bool res = txSignal->init(nearestSignalID, ualSignal);
 
 		if (res == false)
 		{
@@ -1734,7 +1748,7 @@ namespace Hardware
 
 		TxRxSignalShared rxSignal = std::make_shared<TxRxSignal>();
 
-		bool res = rxSignal->init(ualSignal);
+		bool res = rxSignal->init(ualSignal->appSignalID(), ualSignal);
 
 		if (res == false)
 		{
@@ -2948,6 +2962,7 @@ namespace Hardware
 										const QString& connectionID,
 										QUuid transmitterUuid,
 										const QString& lmID,
+										const QString& nearestSignalID,
 										const Builder::UalSignal* ualSignal,
 										bool* signalAlreadyInList)
 	{
@@ -2996,7 +3011,7 @@ namespace Hardware
 				}
 				else
 				{
-					result = p1->appendTxSignal(ualSignal);
+					result = p1->appendTxSignal(nearestSignalID, ualSignal);
 				}
 				return result;
 			}
@@ -3040,7 +3055,7 @@ namespace Hardware
 			}
 			else
 			{
-				result = p1->appendTxSignal(ualSignal);
+				result = p1->appendTxSignal(nearestSignalID, ualSignal);
 			}
 
 			return result;
@@ -3054,7 +3069,7 @@ namespace Hardware
 			}
 			else
 			{
-				result = p2->appendTxSignal(ualSignal);
+				result = p2->appendTxSignal(nearestSignalID, ualSignal);
 			}
 
 			return result;
@@ -3067,7 +3082,7 @@ namespace Hardware
 		return false;
 	}
 
-	bool OptoModuleStorage::appendSerialRxSignal(const QString& schemaID,
+	bool OptoModuleStorage::appendSinglePortRxSignal(const QString& schemaID,
 													 const QString& connectionID,
 													 QUuid receiverUuid,
 													 const QString& lmID,
@@ -3109,7 +3124,7 @@ namespace Hardware
 			return false;
 		}
 
-		bool result = p1->appendSerialRxSignal(ualSignal);
+		bool result = p1->appendSinglePortRxSignal(ualSignal);
 
 		return result;
 	}

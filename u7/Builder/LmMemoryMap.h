@@ -274,24 +274,6 @@ namespace Builder
 
 		Address16 setAcquiredRawDataSize(int sizeW);
 
-/*		Address16 appendAcquiredAnalogInputSignal(const Signal& signal);
-		Address16 appendAcquiredAnalogOutputSignal(const Signal& signal);
-		Address16 appendAcquiredAnalogInternalSignal(const Signal& signal);
-		Address16 appendAcquiredAnalogTuningSignal(const Signal& signal);
-
-		Address16 appendAcquiredBus(const Signal& signal);
-
-		Address16 appendAcquiredDiscreteOutputSignalInRegBuf(const Signal& signal);
-		Address16 appendAcquiredDiscreteInternalSignalInRegBuf(const Signal& signal);
-
-		Address16 appendAcquiredDiscreteTuningSignal(const Signal& signal);
-
-		Address16 appendNonAcquiredAnalogInputSignal(const Signal& signal);
-		Address16 appendNonAcquiredAnalogOutputSignal(const Signal& signal);
-		Address16 appendNonAcquiredAnalogInternalSignal(const Signal& signal);
-
-		Address16 appendNonAcquiredBus(const Signal& signal);*/
-
 		double bitAddressedMemoryUsed();
 		double wordAddressedMemoryUsed();
 

@@ -670,52 +670,24 @@ namespace Builder
 
 			bool res = true;
 
-			QString label = ualItem->label();
-
-			if (label == "3TZB00SET01_011_1_7_60306")
-			{
-				int a = 0;
-				a++;
-			}
-
 			switch(ualItem->type())
 			{
 			// UAL items that can generate signals
 			//
 			case UalItem::Type::Signal:
 				res = createUalSignalFromSignal(ualItem, 1);
-				if (res == false)
-				{
-					int a = 0;
-					a++;
-				}
 				break;
 
 			case UalItem::Type::Const:
 				res = createUalSignalFromConst(ualItem);
-				if (res == false)
-				{
-					int a = 0;
-					a++;
-				}
 				break;
 
 			case UalItem::Type::Afb:
 				res = createUalSignalsFromAfbOuts(ualItem);
-				if (res == false)
-				{
-					int a = 0;
-					a++;
-				}
 				break;
 
 			case UalItem::Type::BusExtractor:
 				res = linkUalSignalsFromBusExtractor(ualItem);
-				if (res == false)
-				{
-					int a = 0;
-					a++;
-				}
 				break;
 
 			case UalItem::Type::BusComposer:
@@ -947,12 +919,6 @@ namespace Builder
 			return false;
 		}
 
-		if (ualItem->label() == "3TQ11S14_1_88043")
-		{
-			int a = 0;
-			a++;
-		}
-
 		const UalConst* ualConst = ualItem->ualConst();
 
 		if (ualConst == nullptr)
@@ -1032,12 +998,6 @@ namespace Builder
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
-		}
-
-		if (ualItem->label() == "BUSSES_213")
-		{
-			int a = 0;
-			a++;
 		}
 
 		UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
@@ -1884,601 +1844,6 @@ namespace Builder
 		return result;
 	}
 
-/*	bool ModuleLogicCompiler::appendUalSignals()
-	{
-		bool result = true;
-
-		for(UalItem* item : m_ualItems)
-		{
-			if (item == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			if (item->isSignal() == false)
-			{
-				continue;
-			}
-
-			if (m_chassisSignals.contains(item->strID()) == false)
-			{
-				// The signal '%1' is not associated with LM '%2'.
-				//
-				m_log->errALC5030(item->strID(), m_lm->equipmentIdTemplate(), item->guid());
-				return false;
-			}
-
-			result &= m_ualSignals.insertUalSignal(item);
-		}
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::appendSignalsFromAppItems()
-	{
-		// m_appSignals map contains signals:
-		//
-		// 1) real signals from schema input/output elements
-		// 2) auto signals from AFB outputs (ref by out pin Uuid)
-		// 3) auto bus signals from BusComposer outputs (ref by out pin Uuid)
-		// 4) expanded busses auto signals linked to BusExtractor outputs (ref by out pin Uuid)
-		// 5) auto signals from Receiver outputs (ref by out pin Uuid)
-
-		bool result = true;
-
-		for(UalItem* item : m_ualItems)
-		{
-			if (item == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			switch(item->type())
-			{
-			// items that generate signals
-			//
-			case UalItem::Type::Signal:
-				break;												// 1) already added in appendUalSignals()
-
-			case UalItem::Type::Afb:
-				result &= appendAfbOutputsAutoSignals(item);		// 2)
-				break;
-
-			case UalItem::Type::BusComposer:
-				result &= appendBusComposerOutputAutoSignal(item);	// 3)
-				break;
-
-			case UalItem::Type::Receiver:
-				//assert(false);					// should be implemented
-				break;
-
-			case UalItem::Type::BusExtractor:
-				//assert(false);					// should be implemented
-				break;
-
-			// items that is not generate signals
-			//
-			case UalItem::Type::Const:
-			case UalItem::Type::Transmitter:
-			case UalItem::Type::Terminator:
-				break;
-
-			// unknown item type
-			default:
-				assert(false);
-				result = false;
-			}
-		}
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::appendAfbOutputsAutoSignals(UalItem* appItem)
-	{
-		if (appItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		if (appItem->isAfb() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		UalAfb* appFb = m_ualAfbs.value(appItem->guid(), nullptr);
-
-		if (appFb == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		bool isBusProcessingAFb = false;
-		QString busTypeID;
-
-		bool result = getBusProcessingParams(appFb, isBusProcessingAFb, busTypeID);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		BusShared bus;
-
-		if (isBusProcessingAFb == true)
-		{
-			bus = m_signals->getBus(busTypeID);
-
-			if (bus == nullptr)
-			{
-				// Bus type ID '%1' is undefined (Logic schema '%2').
-				//
-				m_log->errALC5100(busTypeID, appItem->guid(), appItem->schemaID());
-				return false;
-			}
-		}
-
-		// find AFB bus outputs, which NOT connected to signals
-		// create and add to m_appSignals map bus 'auto' signals
-		//
-		for(const LogicPin& outPin : appItem->outputs())
-		{
-			LogicAfbSignal outAfbSignal;
-
-			result = appFb->getAfbSignalByPin(outPin, &outAfbSignal);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			ConnectedAppItems connectedAppItems;
-
-			bool res = getConnectedAppItems(outPin, &connectedAppItems);
-
-			if (res == false)
-			{
-				result = false;
-				continue;
-			}
-
-			switch(outAfbSignal.type())
-			{
-			case E::SignalType::Analog:
-			case E::SignalType::Discrete:
-				result &= appendAfbNonBusOutputsAutoSignals(appItem, outPin, connectedAppItems);
-				break;
-
-			case E::SignalType::Bus:
-				if (isBusProcessingAFb == false)
-				{
-					// Output of type 'Bus' is occured in non-bus processing AFB (Logic schema '%1').
-					//
-					m_log->errALC5111(appItem->guid(), appItem->schemaID());
-					result = false;
-				}
-				else
-				{
-					result &= appendAfbBusOutputsAutoSignals(appItem, outPin, connectedAppItems, bus);
-				}
-				break;
-
-			default:
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-			}
-
-			if (result == false)
-			{
-				return false;
-			}
-		}
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::appendAfbNonBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems)
-	{
-		if (appItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		bool needToCreateAutoSignal = false;
-		bool connectedToSignal = false;
-
-		bool result = true;
-
-		for(const std::pair<QUuid, UalItem*>& pair : connectedAppItems)
-		{
-			UalItem* connectedAppItem = pair.second;
-
-			if (connectedAppItem == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			UalItem::Type connectedItemType = connectedAppItem->type();
-
-			switch(connectedItemType)
-			{
-			// allowed AFB's output connections
-			//
-			case UalItem::Type::Afb:
-			case UalItem::Type::BusComposer:
-			case UalItem::Type::LoopbackOutput:
-				needToCreateAutoSignal = true;
-				break;
-
-			case UalItem::Type::Terminator:		// not need to create signal
-				break;
-
-			case UalItem::Type::Signal:
-				connectedToSignal = true;
-				m_outPinSignal.insertMulti(outPin.guid(), connectedAppItem->signal().guid());
-				break;
-
-			// disallowed connections or connection to unknown item type
-			//
-			case UalItem::Type::Transmitter:
-				// AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
-				//
-				m_log->errALC5107(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
-				result = false;
-				break;
-
-			case UalItem::Type::BusExtractor:
-				// Non-bus output of AFB is connected to BusExtractor (Logic schema '%1').
-				//
-				m_log->errALC5110(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
-				result = false;
-				break;
-
-			default:
-				assert(false);
-			}
-		}
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		if (needToCreateAutoSignal == true && connectedToSignal == false)
-		{
-			// create auto signal with Uuid of this output pin
-			//
-			const UalAfb* appFb = m_ualAfbs.value(appItem->guid(), nullptr);
-
-			if (appFb == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			result = m_ualSignals.insertNonBusAutoSignal(appFb, outPin);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			// output pin connected to auto signal with same guid
-			//
-			m_outPinSignal.insert(outPin.guid(), outPin.guid());
-		}
-
-		return true;
-	}
-
-	bool ModuleLogicCompiler::appendAfbBusOutputsAutoSignals(UalItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus)
-	{
-		if (appItem == nullptr || bus == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		bool needToCreateAutoSignal = false;
-		bool connectedToSignal = false;
-
-		bool result = true;
-
-		for(const std::pair<QUuid, UalItem*>& pair : connectedAppItems)
-		{
-			QUuid connectedPinUuid = pair.first;
-			UalItem* connectedAppItem = pair.second;
-
-			if (connectedAppItem == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			UalItem::Type connectedItemType = connectedAppItem->type();
-
-			bool res = true;
-
-			switch(connectedItemType)
-			{
-			// allowed AFB's output connections
-			//
-			case UalItem::Type::Afb:
-				{
-					res = checkBusAndAfbInputCompatibility(appItem, bus, connectedAppItem, connectedPinUuid);
-
-					if (res == false)
-					{
-						result = false;
-						break;
-					}
-
-					needToCreateAutoSignal = true;
-				}
-				break;
-
-			case UalItem::Type::BusExtractor:
-				{
-					res = checkBusAndBusExtractorCompatibility(appItem, bus, connectedAppItem);
-
-					if (res == false)
-					{
-						result = false;
-						break;
-					}
-
-					needToCreateAutoSignal = true;
-				}
-				break;
-
-			case UalItem::Type::LoopbackOutput:
-				assert(false);						// should be implemented
-				needToCreateAutoSignal = true;
-				break;
-
-			case UalItem::Type::Terminator:			// not need to create signal
-				break;
-
-			case UalItem::Type::Signal:
-				{
-					res = checkBusAndSignalCompatibility(appItem, bus, connectedAppItem);
-
-					if (res == false)
-					{
-						result = false;
-						break;
-					}
-
-					connectedToSignal = true;
-					m_outPinSignal.insertMulti(outPin.guid(), connectedAppItem->signal().guid());
-				}
-				break;
-
-			// disallowed connections or connection to unknown item type
-			//
-			case UalItem::Type::Transmitter:
-				// AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
-				//
-				m_log->errALC5107(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
-				result = false;
-				break;
-
-			case UalItem::Type::BusComposer:
-				// Non-bus output of AFB is connected to BusExtractor (Logic schema '%1').
-				//
-				m_log->errALC5110(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
-				result = false;
-				break;
-
-			default:
-				assert(false);
-			}
-		}
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		if (needToCreateAutoSignal == true && connectedToSignal == false)
-		{
-			// create auto signal with Uuid of this output pin
-			//
-			const UalAfb* appFb = m_ualAfbs.value(appItem->guid(), nullptr);
-
-			if (appFb == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			result = m_ualSignals.insertBusAutoSignal(appFb, outPin, bus);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			// output pin connected to auto signal with same guid
-			//
-			m_outPinSignal.insert(outPin.guid(), outPin.guid());
-		}
-
-		return true;
-	}
-
-	bool ModuleLogicCompiler::appendBusComposerOutputAutoSignal(UalItem* appItem)
-	{
-		if (appItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		if (appItem->isBusComposer() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		if (appItem->outputs().size() != 1)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		const UalBusComposer* ualBusComposer = appItem->ualBusComposer();
-
-		if (ualBusComposer == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		QString busTypeID = ualBusComposer->busTypeId();
-
-		BusShared bus = m_signals->getBus(busTypeID);
-
-		if (bus == nullptr)
-		{
-			// Bus type ID '%1' is undefined (Logic schema '%2').
-			//
-			m_log->errALC5100(busTypeID, appItem->guid(), appItem->schemaID());
-			return false;
-		}
-
-		const LogicPin& outPin = appItem->outputs()[0];
-
-		ConnectedAppItems connectedAppItems;
-
-		bool result = getConnectedAppItems(outPin, &connectedAppItems);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		bool needToCreateAutoSignal = false;
-		bool connectedToSignal = false;
-
-		for(const std::pair<QUuid, UalItem*>& pair : connectedAppItems)
-		{
-			QUuid connectedPinUuid = pair.first;
-			UalItem* connectedAppItem = pair.second;
-
-			if (connectedAppItem == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			bool res = true;
-
-			switch(connectedAppItem->type())
-			{
-			// allowed BusComposer connections
-			//
-			case UalItem::Type::Afb:
-				{
-					res = checkBusAndAfbInputCompatibility(appItem, bus, connectedAppItem, connectedPinUuid);
-
-					if (res == false)
-					{
-						result = false;
-						break;
-					}
-
-					needToCreateAutoSignal = true;
-				}
-				break;
-
-			case UalItem::Type::BusExtractor:
-				{
-					res = checkBusAndBusExtractorCompatibility(appItem, bus, connectedAppItem);
-
-					if (res == false)
-					{
-						result = false;
-						break;
-					}
-
-					needToCreateAutoSignal = true;
-				}
-				break;
-
-			case UalItem::Type::Terminator:		// not need to create signal
-				break;
-
-			case UalItem::Type::Signal:
-				{
-					res = checkBusAndSignalCompatibility(appItem, bus, connectedAppItem);
-
-					if (res == false)
-					{
-						result = false;
-						break;
-					}
-
-					connectedToSignal = true;
-					m_outPinSignal.insertMulti(outPin.guid(), connectedAppItem->signal().guid());
-				}
-				break;
-
-			// disallowed connections or connection to unknown item type
-			//
-			case UalItem::Type::BusComposer:
-				// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
-				//
-				m_log->errALC5102(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
-				result = false;
-				break;
-
-			case UalItem::Type::Transmitter:
-				// Bus composer cannot be directly connected to transmitter (Logic schema %1).
-				//
-				m_log->errALC5101(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
-				result = false;
-				break;
-
-			default:
-				assert(false);
-			}
-		}
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		if (needToCreateAutoSignal == true && connectedToSignal == false)
-		{
-			// create auto signal with Uuid of this output pin
-			//
-			result = m_ualSignals.insertBusAutoSignal(appItem, outPin, bus);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			// output pin connected to auto signal with same guid
-			//
-			m_outPinSignal.insert(outPin.guid(), outPin.guid());
-		}
-
-		return result;
-	}
-*/
 	bool ModuleLogicCompiler::checkBusAndAfbInputCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem, QUuid destPinUuid)
 	{
 		if (srcAppItem == nullptr || bus == nullptr || destAppItem == nullptr)
@@ -4469,7 +3834,7 @@ namespace Builder
 
 		bool result = true;
 
-		QVector<UalSignal*> connectedSignals;
+		QVector<QPair<QString, UalSignal*>> connectedSignals;
 
 		if (getConnectedSignals(ualItem, &connectedSignals) == false)
 		{
@@ -4478,18 +3843,19 @@ namespace Builder
 
 		bool signalAlreadyInTxList = false;
 
-		for(const UalSignal* connectedSignal : connectedSignals)
+		for(const QPair<QString, UalSignal*>& connectedSignal : connectedSignals)
 		{
 			result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), transmitter.connectionId(), transmitter.guid(),
 													   m_lm->equipmentIdTemplate(),
-													   connectedSignal,
+													   connectedSignal.first,
+													   connectedSignal.second,
 													   &signalAlreadyInTxList);
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getConnectedSignals(const UalItem* transmitterItem, QVector<UalSignal*>* connectedSignals)
+	bool ModuleLogicCompiler::getConnectedSignals(const UalItem* transmitterItem, QVector<QPair<QString, UalSignal*>>* connectedSignals)
 	{
 		if (transmitterItem == nullptr || connectedSignals == nullptr)
 		{
@@ -4500,6 +3866,8 @@ namespace Builder
 		connectedSignals->clear();
 
 		const std::vector<LogicPin>& inPins = transmitterItem->inputs();
+
+		bool result = true;
 
 		for(const LogicPin& inPin : inPins)
 		{
@@ -4538,11 +3906,49 @@ namespace Builder
 
 			if (find == false)
 			{
+				// Input %1 of transmitter is connected unnamed signal (Logic schema %2).
+				//
 				m_log->errALC5125(inPin.caption(), transmitterItem->guid(), transmitterItem->schemaID());
 				return false;
 			}
 
-			connectedSignals->append(ualSignal);
+			QString nearestSignalID;
+
+			result &= getNearestSignalID(inPin, &nearestSignalID);
+
+			connectedSignals->append(QPair<QString, UalSignal*>(nearestSignalID, ualSignal));
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::getNearestSignalID(const LogicPin& inPin, QString* nearestSignalID)
+	{
+		if (nearestSignalID == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		nearestSignalID->clear();
+
+		const std::vector<QUuid>& accosiatedOutputsUuids = inPin.associatedIOs();
+
+		for(QUuid outPinUuid : accosiatedOutputsUuids)
+		{
+			UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+
+			if (ualItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (ualItem->isSignal() == true)
+			{
+				*nearestSignalID = ualItem->strID();
+				break;
+			}
 		}
 
 		return true;
@@ -4614,7 +4020,7 @@ namespace Builder
 			return false;
 		}
 
-		bool result = m_optoModuleStorage->appendSerialRxSignal(item->schemaID(),
+		bool result = m_optoModuleStorage->appendSinglePortRxSignal(item->schemaID(),
 																connectionID,
 																item->guid(),
 																m_lm->equipmentIdTemplate(),
@@ -5003,6 +4409,16 @@ namespace Builder
 		comment.setComment(tr("Start of application logic code"));
 
 		m_code.append(comment);
+		m_code.newLine();
+
+		cmd.movBitConst(m_memoryMap.constBit0Addr(), 0);
+		cmd.setComment("init const bit 0");
+		m_code.append(cmd);
+
+		cmd.movBitConst(m_memoryMap.constBit1Addr(), 1);
+		cmd.setComment("init const bit 1");
+		m_code.append(cmd);
+
 		m_code.newLine();
 
 		return true;
@@ -5570,42 +4986,47 @@ namespace Builder
 
 		Command cmd;
 
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+		int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
 
-		for(int i = 0; i < inputSize; i++)
+		if (inUalSignal->isConst() == true)
 		{
-			int writeAddr = bitAccAddr;
-
-			if (i >= SIZE_16BIT)
+			switch(inUalSignal->constDiscreteValue())
 			{
-				writeAddr++;
+			case 0:
+				cmd.fill(Address16(wordAccAddr, 0), m_memoryMap.constBit0Addr());
+				break;
+
+			case 1:
+				cmd.fill(Address16(wordAccAddr, 0), m_memoryMap.constBit1Addr());
+				break;
+
+			default:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
-
-			int writeBit = i % SIZE_16BIT;
-
-			if (inUalSignal->isConst() == true)
-			{
-				cmd.movBitConst(writeAddr, writeBit, inUalSignal->constDiscreteValue());
-			}
-			else
-			{
-				cmd.movBit(writeAddr, writeBit, inUalSignal->ualAddr().offset(), inUalSignal->ualAddr().bit());
-			}
-
-			m_code.append(cmd);
-		}
-
-		cmd.setComment(QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined()));
-
-		if (inputSize == SIZE_16BIT)
-		{
-			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
 		}
 		else
 		{
-			assert(inputSize == SIZE_32BIT);
-			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), bitAccAddr, ualAfb->caption());
+			cmd.fill(Address16(wordAccAddr, 0), inUalSignal->ualAddr());
 		}
+
+		m_code.append(cmd);
+
+		if (inputSize == SIZE_16BIT)
+		{
+			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+		}
+		else
+		{
+			cmd.mov(wordAccAddr + 1, wordAccAddr);
+			m_code.append(cmd);
+
+			assert(inputSize == SIZE_32BIT);
+			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+		}
+
+		cmd.setComment(QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined()));
 
 		m_code.append(cmd);
 
@@ -5972,10 +5393,12 @@ namespace Builder
 			return false;
 		}
 
-		if ((inputSignalSize % inputsBusSize) != 0)
+		if ((inputSignalSize % inputsBusSize) != 0 ||
+			(outputSignalSize % outputsBusSize) != 0)
 		{
-			assert(false);						// signal and bus inputs sizes are not multiples
-			LOG_INTERNAL_ERROR(m_log);
+			// Signal and bus inputs sizes are not multiples (Logic schema %1).
+			//
+			m_log->errALC5126(ualAfb->guid(), ualAfb->schemaID());
 			return false;
 		}
 
@@ -8708,30 +8131,44 @@ namespace Builder
 				continue;
 			}
 
-			Signal* s = m_signals->getSignal(txSignal->appSignalID());
+			UalSignal* ualSignal = m_ualSignals.get(txSignal->appSignalID());
 
-			if (s == nullptr)
+			if (ualSignal == nullptr || ualSignal->isAnalog() == false)
 			{
-				// Signal '%1' is not found (opto port '%2' raw data description).
-				//
-				m_log->errALC5186(txSignal->appSignalID(), port->equipmentID());
-				result = false;
-				continue;
-			}
-
-			if (s->isCompatibleFormat(txSignal->signalType(), txSignal->dataFormat(), txSignal->dataSize(), txSignal->byteOrder()) == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log,
-								   Builder::IssueType::NotDefined,
-								   QString(tr("Format of signal '%1' isn't compatible with format in port '%2' raw data description (Connection '%3')")).
-								   arg(txSignal->appSignalID()).
-								   arg(port->equipmentID()).
-								   arg(port->connectionID()));
-
+				LOG_INTERNAL_ERROR(m_log);
 				return false;
 			}
 
-			cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), s->ualAddr().offset());
+			if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+				return false;
+			}
+
+			if (ualSignal->isConst() == true)
+			{
+				switch(ualSignal->analogSignalFormat())
+				{
+				case E::AnalogAppSignalFormat::Float32:
+					cmd.movConstFloat(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->constAnalogFloatValue());
+					break;
+
+				case E::AnalogAppSignalFormat::SignedInt32:
+					cmd.movConstInt32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->constAnalogIntValue());
+					break;
+
+				default:
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+			}
+			else
+			{
+				cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset());
+			}
 
 			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
 
@@ -8754,6 +8191,8 @@ namespace Builder
 
 		int count = 0;
 
+		QHash<int, Hardware::TxRxSignalShared> txDiscretes;
+
 		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
 		{
 			if (txSignal->isRaw() == false || txSignal->isDiscrete() == false)
@@ -8763,16 +8202,79 @@ namespace Builder
 				continue;
 			}
 
+			txDiscretes.insertMulti(txSignal->addrInBuf().offset(), txSignal);
+
 			count++;
 		}
 
-		if (count > 0)
+		if (count == 0)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("Raw tx discrete signals isn't implement now (port %1).  ")).
-							   arg(port->equipmentID()));
-			return false;
+			return true;
 		}
+
+		QVector<int> offsets(QVector<int>::fromList(txDiscretes.uniqueKeys()));
+
+		qSort(offsets);
+
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		Command cmd;
+
+		for(int offset : offsets)
+		{
+			cmd.movConst(bitAccAddr, 0);
+			m_code.append(cmd);
+
+			QList<Hardware::TxRxSignalShared> discretes = txDiscretes.values(offset);
+
+			count = 0;
+
+			for(Hardware::TxRxSignalShared discrete : discretes)
+			{
+				UalSignal* ualSignal = m_ualSignals.get(discrete->appSignalID());
+
+				if (ualSignal == nullptr || ualSignal->isDiscrete() == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
+				{
+					// Undefined UAL address of signal '%1' (Logic schema '%2').
+					//
+					m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
+					return false;
+				}
+
+				Address16 addrInBuf = discrete->addrInBuf();
+
+				if (ualSignal->isConst() == true)
+				{
+					cmd.movBitConst(bitAccAddr, addrInBuf.bit(), ualSignal->constDiscreteValue());
+				}
+				else
+				{
+					cmd.movBit(bitAccAddr, addrInBuf.bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
+				}
+
+				cmd.setComment(QString("%1 >> %2").arg(discrete->appSignalID()).arg(port->connectionID()));
+
+				m_code.append(cmd);
+
+				count++;
+			}
+
+			if (count > 0)
+			{
+				cmd.mov(port->txBufAbsAddress() + offset, bitAccAddr);
+				cmd.clearComment();
+
+				m_code.append(cmd);
+			}
+		}
+
+		m_code.newLine();
 
 		return true;
 	}
