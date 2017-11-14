@@ -4,7 +4,35 @@
 LmDescription::LmDescription(QObject *parent)
 	: QObject(parent)
 {
+}
 
+LmDescription::LmDescription(const LmDescription& src)
+{
+	m_descriptionNumber = src.m_descriptionNumber;
+	m_configurationScriptFile = src.m_configurationScriptFile;
+	m_version = src.m_version;
+
+	m_flashMemory = src.m_flashMemory;
+	m_memory = src.m_memory;
+	m_logicUnit = src.m_logicUnit;
+	m_optoInterface = src.m_optoInterface;
+
+	// AFBs
+	//
+	for (const std::pair<int, std::shared_ptr<Afb::AfbComponent>>& p : src.m_afbComponents)
+	{
+		std::shared_ptr<Afb::AfbComponent> afbComponentCopy = std::make_shared<Afb::AfbComponent>(*p.second.get());
+		m_afbComponents.insert({p.first, afbComponentCopy});
+	}
+
+	m_afbs.reserve(src.m_afbs.size());
+	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbs)
+	{
+		std::shared_ptr<Afb::AfbElement> afbCopy = std::make_shared<Afb::AfbElement>(*afb.get());
+		m_afbs.push_back(afbCopy);
+	}
+
+	return;
 }
 
 LmDescription::~LmDescription()

@@ -1476,8 +1476,8 @@ namespace Afb
 	bool AfbElement::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-				xmlElement.isNull() == true ||
-				xmlElement.tagName() != QLatin1String("AFB"))
+			xmlElement.isNull() == true ||
+			xmlElement.tagName() != QLatin1String("AFB"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);

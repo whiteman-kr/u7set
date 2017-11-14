@@ -24,6 +24,7 @@ class LmDescription : public QObject
 
 public:
 	explicit LmDescription(QObject* parent = 0);
+	explicit LmDescription(const LmDescription& src);
 	virtual ~LmDescription();
 
 	// Loading and parsing XML
@@ -129,6 +130,9 @@ public:
 	// Data
 	//
 private:
+
+	// !!! Copy constructor is defined, don't forget to add new memers copy to it
+	//
 	int m_descriptionNumber = -1;
     QString m_configurationScriptFile;
     QString m_version;
@@ -142,6 +146,9 @@ private:
 	//
 	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents;		// Key is OpCode of AFBComponent
 	std::vector<std::shared_ptr<Afb::AfbElement>> m_afbs;
+
+	// !!! Copy constructor is defined, don't forget to add new memers copy to it
+	//
 };
 
 #endif // LOGICMODULE_H

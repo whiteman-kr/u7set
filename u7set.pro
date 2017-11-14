@@ -22,4 +22,7 @@ SUBDIRS += qtservice \
     DiagDataService \
     TuningClient \
     TuningIPEN \
-    mconf
+    mconf \
+    LmModel \
+    LmModelConsole
+

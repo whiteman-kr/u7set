@@ -22,8 +22,6 @@ public:
     void append(QVariant v);
     Q_INVOKABLE int jsSize();
     Q_INVOKABLE QVariant jsAt(int i);
-
-
 };
 
 namespace Hardware

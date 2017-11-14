@@ -1,6 +1,7 @@
 #pragma once
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
+#include <memory>
 
 class QDomElement;
 class QXmlStreamReader;
@@ -17,6 +18,7 @@ namespace Afb
 	{
 	public:
 		AfbComponent();
+		AfbComponent(const AfbComponent& src) = default;
 
 		// Serialization
 		//
@@ -376,8 +378,7 @@ private:
 	//
 	//	AfbElementCollection
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
-		public DebugInstCounter<AfbElementCollection>
+	class VFRAME30LIBSHARED_EXPORT AfbElementCollection
 	{
 	public:
 		AfbElementCollection(void);
