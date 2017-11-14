@@ -7,7 +7,7 @@
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
-#include "LogFile.h"
+#include "../lib/LogFile.h"
 #include "UserManager.h"
 #include "TuningClientSignalManager.h"
 #include "TuningClientFilterStorage.h"
@@ -58,6 +58,7 @@ public slots:
 	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
+	void showLog();
 	void showAbout();
 
 private:
@@ -85,8 +86,9 @@ private:
 
 extern MainWindow* theMainWindow;
 
-extern LogFile* theLogFile;
+extern Log::LogFile* theLogFile;
 
 extern UserManager theUserManager;
 
 #endif // MAINWINDOW_H
+

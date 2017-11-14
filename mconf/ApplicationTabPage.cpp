@@ -65,7 +65,7 @@ void ApplicationTabPage::openFileClicked()
 
 	QString errorCode;
 
-	bool result = m_confFirmware.load(fileName, errorCode, true);
+	bool result = m_confFirmware.load(fileName, errorCode);
 
 	if (result == false)
 	{

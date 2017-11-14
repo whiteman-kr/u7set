@@ -2127,22 +2127,25 @@ namespace ExtWidgets
 		{
             PropertyObject* pObject = i.get();
 
+			QString propertyName = property->propertyName();
+
 			// Do not set property, if it has same value
-            if (pObject->propertyValue(property->propertyName()) == value)
+
+			if (pObject->propertyValue(propertyName) == value)
 			{
 				continue;
 			}
 
-            QVariant oldValue = pObject->propertyValue(property->propertyName());
+			QVariant oldValue = pObject->propertyValue(propertyName);
 
-            pObject->setPropertyValue(property->propertyName(), value);
+			pObject->setPropertyValue(propertyName, value);
 
-            QVariant newValue = pObject->propertyValue(property->propertyName());
+			QVariant newValue = pObject->propertyValue(propertyName);
 
 			if (oldValue == newValue && errorString.isEmpty() == true)
 			{
 				errorString = QString("Property: %1 - incorrect input value")
-							  .arg(property->propertyName());
+							  .arg(propertyName);
 			}
 
             modifiedObjects.append(i);
