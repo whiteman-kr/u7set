@@ -191,7 +191,7 @@ bool DbController::openProject(QString projectName, QString username, QString pa
 	//
 	emit signal_openProject(projectName, username, password);
 
-	bool result = waitForComplete(parentWidget, tr("Openning project"));
+	bool result = waitForComplete(parentWidget, tr("Opening project"));
 
 	if (result == false)
 	{
