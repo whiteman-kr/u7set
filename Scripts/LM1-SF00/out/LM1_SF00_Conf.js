@@ -52,7 +52,8 @@ var FamilyLMID = 0x1100;
 //var configScriptVersion = 26;		// added UniqueID computing
 //var configScriptVersion = 27;		// First script that supports subsystems filtering
 //var configScriptVersion : number = 28;	// Code is written using TypeScript
-var configScriptVersion = 29; // Added module place checking
+//var configScriptVersion: number = 29;		// Added module place checking
+var configScriptVersion = 30; // ModuleID for LM is placed in .mct file
 //
 function main(builder, root, logicModules, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -156,7 +157,7 @@ function module_lm_1(builder, root, module, confCollection, log, signalSet, subs
         log.errCFG3000("EquipmentID", "LM");
         return false;
     }
-    var checkProperties = ["ModuleFamily", "Place"];
+    var checkProperties = ["ModuleFamily", "ModuleVersion", "Place"];
     for (var cp = 0; cp < checkProperties.length; cp++) {
         if (module.propertyValue(checkProperties[cp]) == undefined) {
             log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
@@ -183,7 +184,7 @@ function module_lm_1_statistics(builder, module, confCollection, log, subsystemS
         log.errCFG3000("EquipmentID", "LM");
         return false;
     }
-    var checkProperties = ["ModuleFamily", "SubsystemID"];
+    var checkProperties = ["ModuleFamily", "ModuleVersion", "SubsystemID"];
     for (var cp = 0; cp < checkProperties.length; cp++) {
         if (module.propertyValue(checkProperties[cp]) == undefined) {
             log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
@@ -244,6 +245,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     //
     var subSysID = module.jsPropertyString("SubsystemID");
     var LMNumber = module.jsPropertyInt("LMNumber");
+    var moduleId = module.jsPropertyInt("ModuleFamily") + module.jsPropertyInt("ModuleVersion");
     // Constants
     //
     var frameSize = logicModuleDescription.FlashMemory_ConfigFrameSize;
@@ -280,6 +282,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     confFirmware.writeLog("EquipmentID = " + equipmentID + "\r\n");
     confFirmware.writeLog("Subsystem ID = " + subSysID + "\r\n");
     confFirmware.writeLog("Key value = " + ssKeyValue + "\r\n");
+    confFirmware.writeLog("ModuleID = " + moduleId + "\r\n");
     confFirmware.writeLog("UartID = " + uartId + "\r\n");
     confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
     confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
@@ -578,14 +581,14 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     confFirmware.jsSetUniqueID(LMNumber, uniqueID);
     return true;
 }
-function generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, offset, log, flags, configFrames, dataFrames, txId) {
+function generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, offset, log, flags, configFrames, dataFrames, moduleId) {
     // TxRx Block's configuration structure
     //
     var ptr = offset;
-    confFirmware.writeLog("    TxRxConfig: [" + frame + ":" + ptr + "] flags = " + flags +
-        "; [" + frame + ":" + (ptr + 2) + "] configFrames = " + configFrames +
-        "; [" + frame + ":" + (ptr + 4) + "] dataFrames = " + dataFrames +
-        "; [" + frame + ":" + (ptr + 6) + "] txId = " + txId + "\r\n");
+    confFirmware.writeLog("    TxRxConfig: [" + frame + ":" + ptr + "] Flags = " + flags +
+        "; [" + frame + ":" + (ptr + 2) + "] ConfigFrames = " + configFrames +
+        "; [" + frame + ":" + (ptr + 4) + "] DataFrames = " + dataFrames +
+        "; [" + frame + ":" + (ptr + 6) + "] ModuleId = " + moduleId + "\r\n");
     if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "TxRxFlags", flags) == false) {
         return false;
     }
@@ -598,7 +601,7 @@ function generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, offse
         return false;
     }
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Tx ID", txId) == false) {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "ModuleID", moduleId) == false) {
         return false;
     }
     ptr += 2;
