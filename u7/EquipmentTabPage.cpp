@@ -1551,7 +1551,7 @@ void EquipmentView::addPreset()
 		DialogChoosePreset d(this, db(), selectedObject->deviceType(), false);
 		if (d.exec() == QDialog::Accepted && d.selectedPreset != nullptr)
 		{
-			addPresetToConfiguration(d.selectedPreset->fileInfo());
+			addPresetToConfiguration(d.selectedPreset->fileInfo(), true);
 			emit updateState();
 		}
 	}
@@ -1602,19 +1602,98 @@ void EquipmentView::replaceObject()
 			return;
 		}
 
-		// Delete the old one
+		// selectedObject can be not fully loaded, as not all branches could be open in the UI.
+		// Load selectedObject from the equipment
+		//
+		std::shared_ptr<Hardware::DeviceObject> selectedObjectFullTree;
+
+		bool ok = db()->getDeviceTreeLatestVersion(selectedObject->fileInfo(), &selectedObjectFullTree, this);
+		if (ok == false)
+		{
+			return;
+		}
+
+		assert(selectedObjectFullTree);
+
+		// Delete selected device
 		//
 		deleteSelectedDevices();
 
-		// Add new preset
+		// Object will not be added to DB in the next line, it must be changed before adding
 		//
-		addPresetToConfiguration(selectedPreset->fileInfo());
+		std::shared_ptr<Hardware::DeviceObject> device = addPresetToConfiguration(selectedPreset->fileInfo(), false);
 
-		// Update properties
-		//
+		if (device == nullptr || device->presetRoot() == false)
+		{
+			assert(device);
+			assert(device->presetRoot());
+			return;
+		}
 
-		// --
+		// Update proprties form deleted device, recursive lambda
 		//
+		std::function<void(Hardware::DeviceObject*, Hardware::DeviceObject*)> updatePropertuFunc =
+			[&updatePropertuFunc](Hardware::DeviceObject* dst, const Hardware::DeviceObject* src)
+			{
+				if (dst->deviceType() != src->deviceType() ||
+					dst->equipmentIdTemplate() != src->equipmentIdTemplate())
+				{
+					return;
+				}
+
+				std::vector<std::shared_ptr<Property>> dstProps = dst->properties();
+
+				for (std::shared_ptr<Property> dstProp : dstProps)
+				{
+					if (dstProp->caption() == Hardware::PropertyNames::presetName ||	// special case: we really don't want to update this prop, as it will brake an object
+						dstProp->updateFromPreset() == true ||
+						dstProp->readOnly() == true ||
+						dstProp->visible() == false)
+					{
+						continue;
+					}
+
+					QVariant srcValue = src->propertyValue(dstProp->caption());
+
+					if (srcValue.isValid() == false ||
+						srcValue.type() != dstProp->value().type())
+					{
+						continue;
+					}
+
+					dstProp->setValue(srcValue);
+				}
+
+				for (int childIndex = 0; childIndex < dst->childrenCount(); childIndex++)
+				{
+					Hardware::DeviceObject* dstChild = dst->child(childIndex);
+					assert(dstChild);
+
+					QString dstChildTemplateId = dstChild->equipmentIdTemplate();
+
+					// Find the pair for this child
+					//
+					for (int srcChildIndex = 0; srcChildIndex < src->childrenCount(); srcChildIndex++)
+					{
+						Hardware::DeviceObject* srcChild = src->child(srcChildIndex);
+						assert(srcChild);
+
+						if (srcChild->equipmentIdTemplate() == dstChildTemplateId)
+						{
+							updatePropertuFunc(dstChild, srcChild);
+							break;
+						}
+					}
+				}
+
+				return;
+			};
+
+		updatePropertuFunc(device.get(), selectedObjectFullTree.get());	// Recursive func
+
+		// Add device
+		//
+		addDeviceObject(device, selectionModel()->selectedRows().at(0), true);
 		emit updateState();
 	}
 
@@ -1845,7 +1924,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 		connect(a, &QAction::triggered,
 			[this, p]()
 			{
-				addPresetToConfiguration(p->fileInfo());
+				addPresetToConfiguration(p->fileInfo(), true);
 			});
 
 		menu->addAction(a);
@@ -1856,7 +1935,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 	return;
 }
 
-std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
+std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo, bool addToEquipment)
 {
 	assert(fileInfo.fileId() != -1);
 	assert(fileInfo.parentId() != -1);
@@ -1931,7 +2010,15 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 
 	// --
 	//
-	addDeviceObject(device, parentModelIndex, true);
+	if (addToEquipment == true)
+	{
+		addDeviceObject(device, parentModelIndex, true);
+	}
+	else
+	{
+		// Do nothing - probably object needs to be changed before adding
+		//
+	}
 
 	return device;
 }
