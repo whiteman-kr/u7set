@@ -2440,6 +2440,7 @@ namespace Builder
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
+		LOG_MESSAGE(m_log, "");
 		LOG_MESSAGE(m_log, tr("Ordering User Functional Blocks items..."));
 
 		ok = m_applicationData->orderUfbItems(m_log);
@@ -2613,12 +2614,17 @@ namespace Builder
 	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
 	{
 		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String("%.") + ::UfbFileExtension);
+		m_log->writeMessage(tr("Loaded %1 UFB logic file(s).").arg(out->size()));
+		m_log->writeMessage("");
 		return ok;
 	}
 
 	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out)
 	{
-		return loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String("%.") + ::AlFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String("%.") + ::AlFileExtension);
+		m_log->writeMessage(tr("Loaded %1 Application Logic file(s).").arg(out->size()));
+		m_log->writeMessage("");
+		return ok;
 	}
 
 	template<typename SchemaType>
