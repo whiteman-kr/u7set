@@ -189,6 +189,7 @@ namespace Tuning
 		m_sourceIP = source.lmAddressPort();
 		m_sourceUniqueID = source.uniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
+		m_lmModuleType = static_cast<quint16>(source.lmModuleType());
 		m_subsystemCode = static_cast<quint16>(source.lmSubsystemID());
 
 		m_tuningRomStartAddrW = settings.tuningDataOffsetW;
@@ -597,7 +598,7 @@ namespace Tuning
 		rupHeader.flags.tuningData = 1;
 
 		rupHeader.dataId = 0;
-		rupHeader.moduleType = Hardware::DeviceModule::FamilyType::LM;	// 0x1100
+		rupHeader.moduleType = m_lmModuleType;
 		rupHeader.numerator = m_rupNumerator;
 		rupHeader.framesQuantity = 1;
 		rupHeader.frameNumber = 0;
@@ -951,7 +952,7 @@ namespace Tuning
 			result &= false;
 		}
 
-		if (rupHeader.moduleType != Hardware::DeviceModule::FamilyType::LM)
+		if (rupHeader.moduleType != m_lmModuleType)
 		{
 			m_stat.errRupModuleType++;
 			result &= false;
