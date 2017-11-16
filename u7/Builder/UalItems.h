@@ -173,6 +173,8 @@ namespace Builder
 
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 
+		const LogicPin* getPin(QUuid pinUuid) const;
+
 	protected:
 		AppLogicItem m_appLogicItem;							// structure from parser
 

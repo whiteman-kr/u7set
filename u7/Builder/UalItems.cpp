@@ -476,6 +476,32 @@ namespace Builder
 		return m_type;
 	}
 
+	const LogicPin* UalItem::getPin(QUuid pinUuid) const
+	{
+		const std::vector<LogicPin>& inputPins = inputs();
+
+		for(const LogicPin& inPin : inputPins)
+		{
+			if (inPin.guid() == pinUuid)
+			{
+				return &inPin;
+			}
+		}
+
+		const std::vector<LogicPin>& outputPins = outputs();
+
+		for(const LogicPin& outPin : outputPins)
+		{
+			if (outPin.guid() == pinUuid)
+			{
+				return &outPin;
+			}
+		}
+
+		return nullptr;
+	}
+
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppFbParamValue class implementation

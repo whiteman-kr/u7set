@@ -3947,7 +3947,49 @@ namespace Builder
 			if (ualItem->isSignal() == true)
 			{
 				*nearestSignalID = ualItem->strID();
-				break;
+				return true;
+			}
+		}
+
+		if (accosiatedOutputsUuids.size() != 1)
+		{
+			return true;
+		}
+
+		QUuid outPinUuid = accosiatedOutputsUuids[0];
+
+		UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+
+		if (ualItem == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const LogicPin* outPin = ualItem->getPin(outPinUuid);
+
+		if (outPin == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const std::vector<QUuid> associatedInputs = outPin->associatedIOs();
+
+		for(QUuid inPinUuid : associatedInputs)
+		{
+			UalItem* ualItem = m_pinParent.value(inPinUuid, nullptr);
+
+			if (ualItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (ualItem->isSignal() == true)
+			{
+				*nearestSignalID = ualItem->strID();
+				return true;
 			}
 		}
 
