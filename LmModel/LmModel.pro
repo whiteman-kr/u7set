@@ -35,7 +35,8 @@ SOURCES += \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
-    DeviceEmulator.cpp
+    DeviceEmulator.cpp \
+    Component.cpp
 
 HEADERS += \
         LmModel.h \
@@ -47,7 +48,8 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/ProtoSerialization.h \
     ../lib/Types.h \
-    DeviceEmulator.h
+    DeviceEmulator.h \
+    Component.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

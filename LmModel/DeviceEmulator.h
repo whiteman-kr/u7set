@@ -3,15 +3,17 @@
 
 #include <memory>
 #include <functional>
+#include <map>
 #include <QObject>
 #include <QTextStream>
 #include <QTimerEvent>
 #include "../lib/LmDescription.h"
 #include "Eeprom.h"
+#include "Component.h"
 
 namespace LmModel
 {
-	enum class DeviceMode
+		enum class DeviceMode
 	{
 		Start,
 		Fault,
@@ -150,6 +152,7 @@ namespace LmModel
 		mutable int m_timerId = -1;
 
 		LogicUnitData m_logicUnit;
+
 
 		// Info output
 		//

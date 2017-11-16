@@ -452,17 +452,20 @@ namespace LmModel
 
 	bool DeviceEmulator::command_wrfbc32()
 	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter++);
-
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
 		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
 		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		m_logicUnit.programCounter++;
 
-		??? this is AfbOpCode ????? !!!!!!!!
-		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+		m_logicUnit.programCounter++;
 
+		quint16 dataHigh = getWord(m_logicUnit.programCounter++);
+		quint16 dataLow = getWord(m_logicUnit.programCounter++);
 
+		PreLoadedParam p(implNo, implParamOpIndex, dataHigh, dataLow);
 
-		fault("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
