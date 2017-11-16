@@ -122,7 +122,7 @@ SOURCES +=\
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
-    LogFile.cpp \
+    ../lib/LogFile.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     UserManager.cpp \
@@ -175,7 +175,7 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
-    LogFile.h \
+    ../lib/LogFile.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     UserManager.h \

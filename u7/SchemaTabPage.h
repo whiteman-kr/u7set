@@ -41,6 +41,7 @@ signals:
 	void deleteFileSignal(std::vector<DbFileInfo> files);
 	void checkInSignal(std::vector<DbFileInfo> files);
 	void undoChangesSignal(std::vector<DbFileInfo> files);
+	void editSchemasProperties(std::vector<DbFileInfo> files);
 
 	// Protected slots
 	//
@@ -63,6 +64,7 @@ protected slots:
 	void slot_SetWorkcopy();
 	void slot_RefreshFiles();
 	void slot_doubleClicked(const QModelIndex& index);
+	void slot_properties();
 
 public slots:
 	void filesViewSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
@@ -114,6 +116,7 @@ protected:
 	// --
 	QAction* m_separatorAction3 = nullptr;
 	QAction* m_refreshFileAction = nullptr;
+	QAction* m_propertiesAction = nullptr;
 	// End of ConextMenu
 };
 
@@ -158,6 +161,8 @@ protected slots:
 	void viewFiles(std::vector<DbFileInfo> files);
 	void cloneFile(DbFileInfo file);
 
+	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
+
 
 private slots:
 	void ctrlF();
@@ -184,7 +189,6 @@ private:
 };
 
 
-
 //
 //
 // SchemasTabPage
@@ -200,6 +204,7 @@ private:
 public:
 	virtual ~SchemasTabPage();
 
+public:
 	template<typename SchemaType>
 	static SchemasTabPage* create(
 			DbController* dbcontroller,	QWidget* parent,
@@ -209,6 +214,8 @@ public:
 	bool saveUnsavedSchemas();
 
 	void refreshControlTabPage();
+
+	std::vector<EditSchemaTabPage*> getOpenSchemas();
 
 public slots:
 	void projectOpened();
@@ -311,6 +318,8 @@ protected:
 	// Properties
 	//
 public:
+	std::shared_ptr<VFrame30::Schema> schema();
+
 	const DbFileInfo& fileInfo() const;
 	void setFileInfo(const DbFileInfo& fi);
 

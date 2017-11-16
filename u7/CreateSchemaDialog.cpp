@@ -83,6 +83,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		ui->lmDescriptionFileComboBox->setVisible(true);
 
 		std::vector<DbFileInfo> files;
+		QStringList fileNameList;
 		bool ok = db->getFileList(&files, db->afblFileId(), "%.xml", true, this);
 
 		if (ok == true)
@@ -96,6 +97,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 			for (const DbFileInfo& fi : files)
 			{
 				ui->lmDescriptionFileComboBox->addItem(fi.fileName());
+				fileNameList.push_back(fi.fileName());
 			}
 		}
 
@@ -107,16 +109,25 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 			lmDescriptionFile = schema->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
 		}
 
+		QString defaultLmDescriptionFile;
+
 		if ((isLogicSchema() == true ||	isUfbSchema() == true) &&
-			(lmDescriptionFile.isEmpty() == false ||
-			theSettings.m_lastSelectedLmDescriptionFile.isEmpty() == true))
+			(lmDescriptionFile.isEmpty() == false || theSettings.m_lastSelectedLmDescriptionFile.isEmpty() == true))
 		{
-			ui->lmDescriptionFileComboBox->setEditText(lmDescriptionFile);
+			defaultLmDescriptionFile = lmDescriptionFile;
 		}
 		else
 		{
-			ui->lmDescriptionFileComboBox->setEditText(theSettings.m_lastSelectedLmDescriptionFile);
+			defaultLmDescriptionFile = theSettings.m_lastSelectedLmDescriptionFile;
 		}
+
+		if (fileNameList.contains(defaultLmDescriptionFile) == false &&
+			fileNameList.isEmpty() == false)
+		{
+			defaultLmDescriptionFile = fileNameList.first();
+		}
+
+		ui->lmDescriptionFileComboBox->setEditText(defaultLmDescriptionFile);
 	}
 	else
 	{

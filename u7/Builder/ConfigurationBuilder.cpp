@@ -455,7 +455,7 @@ namespace Builder
 				return false;
 			}
 
-			if (buildResultWriter.addFile(path, fileName + ".mct", f.log()) == nullptr)
+			if (buildResultWriter.addFile(path, fileName + ".mct", f.scriptLog()) == nullptr)
 			{
 				return false;
 			}
