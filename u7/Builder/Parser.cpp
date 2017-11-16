@@ -412,6 +412,60 @@ namespace Builder
 		return;
 	}
 
+	const Afb::AfbElement& AppLogicItem::afbElement() const				// Specific instance!!! with initialized Params
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement();
+		}
+		else
+		{
+			assert(m_fblItem->isAfbElement());
+			static const Afb::AfbElement dummy;
+			return dummy;
+		}
+	}
+
+	Afb::AfbElement& AppLogicItem::afbElement()							// Specific instance!!! with initialized Params
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement();
+		}
+		else
+		{
+			assert(m_fblItem->isAfbElement());
+			static Afb::AfbElement dummy;
+			return dummy;
+		}
+	}
+
+	std::shared_ptr<Afb::AfbComponent> AppLogicItem::afbComponent()
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement().component();
+		}
+		else
+		{
+			assert(false);	// Just ask yourself, why are you here?
+			return std::shared_ptr<Afb::AfbComponent>();
+		}
+	}
+
+	std::shared_ptr<Afb::AfbComponent> AppLogicItem::afbComponent() const
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement().component();
+		}
+		else
+		{
+			assert(false);	// Just ask yourself, why are you here?
+			return std::shared_ptr<Afb::AfbComponent>();
+		}
+	}
+
 	bool AppLogicItem::operator < (const AppLogicItem& li) const
 	{
 		return this->m_fblItem.get() < li.m_fblItem.get();

@@ -100,32 +100,6 @@ namespace Builder
 		//
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::Schema> m_schema;
-		const Afb::AfbElement& afbElement() const				// Specific instance!!! with initialized Params
-		{
-			if (m_fblItem->isAfbElement() == true)
-			{
-				return m_fblItem->toAfbElement()->afbElement();
-			}
-			else
-			{
-				assert(m_fblItem->isAfbElement());
-				static const Afb::AfbElement dummy;
-				return dummy;
-			}
-		}
-		Afb::AfbElement& afbElement()						// Specific instance!!! with initialized Params
-		{
-			if (m_fblItem->isAfbElement() == true)
-			{
-				return m_fblItem->toAfbElement()->afbElement();
-			}
-			else
-			{
-				assert(m_fblItem->isAfbElement());
-				static Afb::AfbElement dummy;
-				return dummy;
-			}
-		}
 
 		QUuid m_groupId;								// ShchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
 														// This id is empty if item is not in group
@@ -136,6 +110,12 @@ namespace Builder
 		AppLogicItem(const AppLogicItem&) = default;
 		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
 					 std::shared_ptr<VFrame30::Schema> schema);
+
+		const Afb::AfbElement& afbElement() const;
+		Afb::AfbElement& afbElement();
+
+		std::shared_ptr<Afb::AfbComponent> afbComponent();
+		std::shared_ptr<Afb::AfbComponent> afbComponent() const;
 
 		// Items can be kept in set, it is just comparing m_fblItem pointres
 		//
