@@ -1,18 +1,18 @@
-#include "LogicModule.h"
-#include "../lib/DeviceObject.h"
+#include "LmDescription.h"
+#include "DeviceObject.h"
 
-LogicModule::LogicModule(QObject *parent)
+LmDescription::LmDescription(QObject *parent)
 	: QObject(parent)
 {
 
 }
 
-LogicModule::~LogicModule()
+LmDescription::~LmDescription()
 {
 
 }
 
-bool LogicModule::load(const QByteArray& file, QString* errorMessage)
+bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -40,7 +40,7 @@ bool LogicModule::load(const QByteArray& file, QString* errorMessage)
 	return load(doc, errorMessage);
 }
 
-bool LogicModule::load(const QString& file, QString* errorMessage)
+bool LmDescription::load(const QString& file, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -68,7 +68,7 @@ bool LogicModule::load(const QString& file, QString* errorMessage)
 	return load(doc, errorMessage);
 }
 
-bool LogicModule::load(QDomDocument doc, QString* errorMessage)
+bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -217,7 +217,7 @@ bool LogicModule::load(QDomDocument doc, QString* errorMessage)
 	return true;
 }
 
-bool LogicModule::loadAfbComponents(const QDomElement& element, QString* errorMessage)
+bool LmDescription::loadAfbComponents(const QDomElement& element, QString* errorMessage)
 {
 	assert(element.tagName() == "AFBImplementation");
 
@@ -267,7 +267,7 @@ bool LogicModule::loadAfbComponents(const QDomElement& element, QString* errorMe
 }
 
 
-bool LogicModule::loadAfbs(const QDomElement& element, QString* errorMessage)
+bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 {
 	assert(element.tagName() == "AFBL");
 
@@ -334,7 +334,7 @@ bool LogicModule::loadAfbs(const QDomElement& element, QString* errorMessage)
 	return true;
 }
 
-QString LogicModule::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
+QString LmDescription::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||
 		logicModule->isFSCConfigurationModule() == false)
@@ -355,7 +355,7 @@ QString LogicModule::lmDescriptionFile(const Hardware::DeviceModule* logicModule
 	return lmDescriptionFile;
 }
 
-void LogicModule::dump() const
+void LmDescription::dump() const
 {
 	qDebug() << "LogicModule Description:";
 
@@ -364,7 +364,7 @@ void LogicModule::dump() const
 	return;
 }
 
-bool LogicModule::FlashMemory::load(const QDomDocument& document, QString* errorMessage)
+bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -435,7 +435,7 @@ bool LogicModule::FlashMemory::load(const QDomDocument& document, QString* error
 	return errorMessage->isEmpty();
 }
 
-bool LogicModule::Memory::load(const QDomDocument& document, QString* errorMessage)
+bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -517,7 +517,7 @@ bool LogicModule::Memory::load(const QDomDocument& document, QString* errorMessa
 	return errorMessage->isEmpty();
 }
 
-bool LogicModule::LogicUnit::load(const QDomDocument& document, QString* errorMessage)
+bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -586,7 +586,7 @@ bool LogicModule::LogicUnit::load(const QDomDocument& document, QString* errorMe
 	return errorMessage->isEmpty();
 }
 
-bool LogicModule::OptoInterface::load(const QDomDocument& document, QString* errorMessage)
+bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -657,52 +657,52 @@ bool LogicModule::OptoInterface::load(const QDomDocument& document, QString* err
 }
 
 
-int LogicModule::descriptionNumber() const
+int LmDescription::descriptionNumber() const
 {
 	return m_descriptionNumber;
 }
 
-const QString& LogicModule::configurationStringFile() const
+const QString& LmDescription::configurationStringFile() const
 {
     return m_configurationScriptFile;
 }
 
-QString LogicModule::jsConfigurationStringFile() const
+QString LmDescription::jsConfigurationStringFile() const
 {
 	return m_configurationScriptFile;
 }
 
-const QString& LogicModule::version() const
+const QString& LmDescription::version() const
 {
     return m_version;
 }
 
-const LogicModule::FlashMemory& LogicModule::flashMemory() const
+const LmDescription::FlashMemory& LmDescription::flashMemory() const
 {
 	return m_flashMemory;
 }
 
-const LogicModule::Memory& LogicModule::memory() const
+const LmDescription::Memory& LmDescription::memory() const
 {
 	return m_memory;
 }
 
-const LogicModule::LogicUnit& LogicModule::logicUnit() const
+const LmDescription::LogicUnit& LmDescription::logicUnit() const
 {
 	return m_logicUnit;
 }
 
-const LogicModule::OptoInterface& LogicModule::optoInterface() const
+const LmDescription::OptoInterface& LmDescription::optoInterface() const
 {
 	return m_optoInterface;
 }
 
-const std::vector<std::shared_ptr<Afb::AfbElement>>& LogicModule::afbs() const
+const std::vector<std::shared_ptr<Afb::AfbElement>>& LmDescription::afbs() const
 {
 	return m_afbs;
 }
 
-std::shared_ptr<Afb::AfbComponent> LogicModule::component(int opCode) const
+std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const
 {
 	auto it = m_afbComponents.find(opCode);
 
@@ -712,194 +712,4 @@ std::shared_ptr<Afb::AfbComponent> LogicModule::component(int opCode) const
 	}
 
 	return it->second;
-}
-
-LogicModuleSet::LogicModuleSet()
-{
-
-}
-
-bool LogicModuleSet::loadFile(DbController* db, QString fileName, QString* errorString)
-{
-	if (errorString != nullptr)
-	{
-		errorString->clear();
-	}
-
-	if (db == nullptr ||
-		fileName.isEmpty() == true)
-	{
-		assert(db);
-		assert(fileName.isEmpty() == false);
-
-		if (errorString != nullptr)
-		{
-			*errorString = tr("Function input parameters error");
-		}
-
-		return false;
-	}
-
-	std::vector<DbFileInfo> fileList;
-
-	bool result = db->getFileList(&fileList, db->afblFileId(), fileName, true, nullptr);
-	if (result == false)
-	{
-		if (errorString != nullptr)
-		{
-			*errorString = tr("Error of getting file list from the database, parent file ID %1, filter '%2', database message '%3'.")
-							  .arg(db->afblFileId())
-							  .arg(fileName)
-							  .arg(db->lastError());
-		}
-
-		return false;
-	}
-
-	if (fileList.size() != 1)
-	{
-		if (errorString != nullptr)
-		{
-			*errorString = tr("File LmDescriptionFile %1 is not found.").arg(fileName);
-		}
-
-		return false;
-	}
-
-	// Get description file from the DB
-	//
-	std::shared_ptr<DbFile> file;
-	result = db->getLatestVersion(fileList[0], &file, nullptr);
-	if (result == false)
-	{
-		if (errorString != nullptr)
-		{
-			*errorString = tr("Getting file instance error, file ID %1, file name '%2', database message '%3'.")
-						   .arg(fileList[0].fileId())
-						   .arg(fileList[0].fileName())
-						   .arg(db->lastError());
-		}
-
-		return false;
-	}
-
-	// Parse file
-	//
-	QString parseErrorMessage;
-	std::shared_ptr<LogicModule> lmd = std::make_shared<LogicModule>();
-
-	result = lmd->load(file->data(), &parseErrorMessage);
-
-	if (result == false)
-	{
-		if (errorString != nullptr)
-		{
-			*errorString = tr("Cannot parse file %1. Error message: %2").arg(fileName).arg(parseErrorMessage);
-		}
-		return false;
-	}
-
-	add(fileName, lmd);
-
-	return true;
-}
-
-bool LogicModuleSet::has(QString fileName) const
-{
-	return m_lmDescriptions.count(fileName) > 0;
-}
-
-void LogicModuleSet::add(QString fileName, std::shared_ptr<LogicModule> lm)
-{
-	assert(lm);
-	m_lmDescriptions[fileName] = lm;
-}
-
-std::shared_ptr<LogicModule> LogicModuleSet::get(QString fileName) const
-{
-	auto it = m_lmDescriptions.find(fileName);
-
-	if (it == std::end(m_lmDescriptions))
-	{
-		return std::shared_ptr<LogicModule>();
-	}
-	else
-	{
-		return it->second;
-	}
-}
-
-std::shared_ptr<LogicModule> LogicModuleSet::get(QString fileName)
-{
-	auto it = m_lmDescriptions.find(fileName);
-
-	if (it == std::end(m_lmDescriptions))
-	{
-		return std::shared_ptr<LogicModule>();
-	}
-	else
-	{
-		return it->second;
-	}
-}
-
-std::shared_ptr<LogicModule> LogicModuleSet::get(const Hardware::DeviceModule* logicModule) const
-{
-	if (logicModule == nullptr ||
-		logicModule->isFSCConfigurationModule() == false)
-	{
-		assert(logicModule);
-		assert(logicModule->isFSCConfigurationModule());
-		return std::shared_ptr<LogicModule>();
-	}
-
-	auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
-	if (lmDescriptionFileProp == nullptr)
-	{
-		assert(lmDescriptionFileProp);
-		return std::shared_ptr<LogicModule>();
-	}
-
-	QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
-	if (lmDescriptionFile.isEmpty() == true)
-	{
-		assert(lmDescriptionFile.isEmpty() == false);
-		return std::shared_ptr<LogicModule>();
-	}
-
-	return get(lmDescriptionFile);
-}
-
-std::shared_ptr<LogicModule> LogicModuleSet::get(Hardware::DeviceModule* logicModule)
-{
-	if (logicModule == nullptr ||
-		logicModule->isFSCConfigurationModule() == false)
-	{
-		assert(logicModule);
-		assert(logicModule->isFSCConfigurationModule());
-		return std::shared_ptr<LogicModule>();
-	}
-
-	auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
-	if (lmDescriptionFileProp == nullptr)
-	{
-		assert(lmDescriptionFileProp);
-		return std::shared_ptr<LogicModule>();
-	}
-
-	QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
-	if (lmDescriptionFile.isEmpty() == true)
-	{
-		assert(lmDescriptionFile.isEmpty() == false);
-		return std::shared_ptr<LogicModule>();
-	}
-
-	return get(lmDescriptionFile);
-}
-
-QString LogicModuleSet::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
-{
-	assert(logicModule);
-	assert(logicModule->isFSCConfigurationModule());
-	return LogicModule::lmDescriptionFile(logicModule);
 }

@@ -190,6 +190,11 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0172.sql", "Upgrade to version 172, AFBL library was updated"},
 	{":/DatabaseUpgrade/Upgrade0173.sql", "Upgrade to version 173, Fixed lim_fp update error"},
 	{":/DatabaseUpgrade/Upgrade0174.sql", "Upgrade to version 174, AFBL library was updated"},
+	{":/DatabaseUpgrade/Upgrade0175.sql", "Upgrade to version 175, AFBL library was updated"},
+	{":/DatabaseUpgrade/Upgrade0176.sql", "Upgrade to version 176, AFBL: Attr MaxBusSize moved to attr Size in LogicModule description"},
+	{":/DatabaseUpgrade/Upgrade0177.sql", "Upgrade to version 177, Add bus_xor, set i_bus_width to 16 for bus_or, bus_and"},
+	{":/DatabaseUpgrade/Upgrade0178.sql", "Upgrade to version 178, Add new LM descriptions: LM1-SF00 and LM1-SR01"},
+	{":/DatabaseUpgrade/Upgrade0179.sql", "Upgrade to version 179, To LM1-SF00.xml and LM1-SR01.xml added MaxInstCount per AfbComponent"},
 };
 
 

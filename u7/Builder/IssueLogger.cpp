@@ -2590,37 +2590,34 @@ namespace Builder
 	/// Description:
 	///		All transmitter inputs must be directly linked to a signals. Check transmitter's inputs links.
 	///
-	void IssueLogger::errALC5027(QUuid transmitterUuid)
+	void IssueLogger::errALC5027(QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5027,
-				  QString(tr("All transmitter inputs must be directly linked to a signals.")));
+				  QString(tr("All transmitter inputs must be directly linked to a signals. (Logic schema %1)")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5028
 	///
 	/// IssueType: Error
 	///
-	/// Title: Floating point constant is connected to discrete signal '%1'.
+	/// Title: Uncompatible constant type (Logic schema %1).
 	///
 	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Constant Uuid
-	///		%3 Signal Uuid
+	///		%1 Logis schema ID
 	///
 	/// Description:
-	///		Floating point constant is connected to discrete signal. Change property 'Type' of the constant to 'IntegerType' value.
+	///		Constant is not compatible to destination.
 	///
-	void IssueLogger::errALC5028(QString appSignalID, QUuid constUuid, QUuid signalUuid)
+	void IssueLogger::errALC5028(QUuid constUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constUuid);
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, constUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5028,
-				  QString(tr("Floating point constant is connected to discrete signal '%1'.").arg(appSignalID)));
+				  QString(tr("Uncompatible constant type (Logic schema %1).").arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5029
@@ -3376,7 +3373,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5060(QString schemaID, QUuid constantUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+		addItemsIssues(OutputMessageLevel::Error, constantUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5060,
@@ -3896,13 +3893,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').
+	/// Title: Discrete constant must have value 0 or 1 (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Constant connected to discrete signal or FB input must have value 0 or 1. Check constant value.
+	///		Discrete constant must have value 0 or 1.
 	///
 
 	void IssueLogger::errALC5086(QUuid constItemUuid, const QString& schemaID)
@@ -3911,7 +3908,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5086,
-				  QString(tr("Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').")).
+				  QString(tr("Discrete constant must have value 0 or 1 (Logic schema %1).")).
 						arg(schemaID));
 
 	}

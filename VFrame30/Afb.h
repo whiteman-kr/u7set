@@ -39,11 +39,15 @@ namespace Afb
         int versionOpIndex() const;
         void setVersionOpIndex(int value);
 
+		int maxInstCount() const;
+		void setMaxInstCount(int value);
+
 	private:
 		int m_opCode = -1;
 		QString m_caption;
 		int m_impVersion = -1;
         int m_versionOpIndex = -1;
+		int m_maxInstCount = 0;
 	};
 
 
@@ -138,9 +142,6 @@ namespace Afb
 		void setBusDataFormat(E::BusDataFormat value);
 		bool setBusDataFormat(const QString& value);
 
-		int maxBusSize() const;
-		void setMaxBusSize(int value);
-
 		// Data
 		//
 private:
@@ -154,7 +155,6 @@ private:
 		int m_size = 0;
 		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
 		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Discrete;
-		int m_maxBusSize = 16;
 
 		// WARNING!!!
 		// Operator= is present, don't forget to add new fields to it

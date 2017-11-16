@@ -15,7 +15,7 @@
 
 #include "../u7/Connection.h"
 
-class LogicModule;
+class LmDescription;
 
 namespace Builder
 {
@@ -184,7 +184,7 @@ namespace Builder
 
 		bool processTransmitters();
 		bool processTransmitter(const AppItem *item);
-		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
+		bool getSignalsConnectedToTransmitter(const AppItem* item, const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
 
 		bool processSerialReceivers();
 		bool processSerialReceiver(const AppItem* item);
@@ -298,7 +298,7 @@ namespace Builder
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorStorage* m_cmpStorage = nullptr;
 
-		std::shared_ptr<LogicModule> m_lmDescription;
+		std::shared_ptr<LmDescription> m_lmDescription;
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;

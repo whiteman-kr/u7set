@@ -64,6 +64,8 @@ namespace EditEngine
 		void execute(std::shared_ptr<EditCommand> command);
 		void unExecute(std::shared_ptr<EditCommand> command);
 
+		void selectItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
+
 	public:
 		void runAddItem(std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
 		void runAddItem(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer);

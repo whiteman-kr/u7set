@@ -14,7 +14,7 @@ class DialogChoosePreset : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogChoosePreset(QWidget *parent, DbController *db, Hardware::DeviceType selectedType);
+	DialogChoosePreset(QWidget *parent, DbController* db, Hardware::DeviceType selectedType, bool limitToSelectedType);
 	~DialogChoosePreset();
 
 protected:

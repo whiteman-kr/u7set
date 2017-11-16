@@ -69,7 +69,7 @@ namespace Builder
 				return false;
 			}
 
-            std::shared_ptr<LogicModule> lmDescription = m_lmDescriptionSet->get(m);
+            std::shared_ptr<LmDescription> lmDescription = m_lmDescriptionSet->get(m);
             if (lmDescription == nullptr)
             {
                 assert(lmDescription);
@@ -93,7 +93,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = (Hardware::ModuleFirmwareWriter*)m_firmwareCollection.jsGet(tr("LM-1"), subsysStrID, subsysID, 0x104, frameSize, frameCount);
+			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection.get(m->caption(), subsysStrID, subsysID, 0x104, frameSize, frameCount);
 			if (firmware == nullptr)
 			{
 				assert(firmware);

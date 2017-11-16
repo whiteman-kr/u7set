@@ -665,11 +665,18 @@ namespace Builder
 				bool connectedToFb = false;
 				bool connectedToSignal = false;
 
+				/*if (item->label() == "3TQ00SYN18_1_38595")
+				{
+					int a = 0;
+					a++;
+				}*/
+
 				for(QUuid connectedPinUuid : output.associatedIOs())
 				{
 					if (!m_pinParent.contains(connectedPinUuid))
 					{
-						assert(false);		// pin not found!!!
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
 					}
 					else
 					{
@@ -716,6 +723,35 @@ namespace Builder
 					// output pin connected to shadow signal with same guid
 					//
 					m_outPinSignal.insert(output.guid(), output.guid());
+				}
+			}
+		}
+
+		for(AppItem* item : m_appItems)
+		{
+			if (item->isReceiver() == false)
+			{
+				continue;
+			}
+
+			for(LogicPin output : item->outputs())
+			{
+				for(QUuid connectedPinUuid : output.associatedIOs())
+				{
+					if (!m_pinParent.contains(connectedPinUuid))
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
+					}
+					else
+					{
+						AppItem* connectedAppItem = m_pinParent[connectedPinUuid];
+
+						if (connectedAppItem->isSignal())
+						{
+							m_outPinSignal.insertMulti(output.guid(), connectedAppItem->signal().guid());
+						}
+					}
 				}
 			}
 		}
@@ -2768,7 +2804,7 @@ namespace Builder
 
 		QVector<QPair<QString, QUuid>> connectedSignals;
 
-		if (getSignalsConnectedToTransmitter(transmitter, connectedSignals) == false)
+		if (getSignalsConnectedToTransmitter(item, transmitter, connectedSignals) == false)
 		{
 			return false;
 		}
@@ -2788,6 +2824,14 @@ namespace Builder
 				ASSERT_RETURN_FALSE
 			}
 
+			if (s->isBus() == true)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString("Bus signals connection to transmitters is not implemented now (Logic schema %1)").arg(item->schemaID()));
+				m_log->addItemsIssues(OutputMessageLevel::Error, item->guid(), item->schemaID());
+				return false;
+			}
+
 			result &= m_optoModuleStorage->appendTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 													   m_lm->equipmentIdTemplate(),
 													   s,
@@ -2805,7 +2849,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getSignalsConnectedToTransmitter(const LogicTransmitter& transmitter, QVector<QPair<QString, QUuid>>& connectedSignals)
+	bool ModuleLogicCompiler::getSignalsConnectedToTransmitter(const AppItem* item, const LogicTransmitter& transmitter, QVector<QPair<QString, QUuid>>& connectedSignals)
 	{
 		connectedSignals.clear();
 
@@ -2842,7 +2886,8 @@ namespace Builder
 
 			if (connectedPinParent == nullptr)
 			{
-				ASSERT_RETURN_FALSE
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 
 			QUuid connectedSignalUuid;
@@ -2861,8 +2906,8 @@ namespace Builder
 				{
 					// All transmitter inputs must be directly linked to a signals.
 					//
-					m_log->errALC5027(transmitter.guid());
-					ASSERT_RETURN_FALSE
+					m_log->errALC5027(transmitter.guid(), item->schemaID());
+					return false;
 				}
 
 				QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
@@ -2872,7 +2917,7 @@ namespace Builder
 					// Transmitter input can be linked to one signal only.
 					//
 					m_log->errALC5026(transmitter.guid(), ids);
-					ASSERT_RETURN_FALSE
+					return false;
 				}
 				else
 				{
@@ -3566,10 +3611,10 @@ namespace Builder
 			{
 				result &= generateAppSignalCode(appItem);
 
-				if (result == false)
+				/*if (result == false)
 				{
 					break;
-				}
+				}*/
 
 				continue;
 			}
@@ -3578,10 +3623,10 @@ namespace Builder
 			{
 				result &= generateFbCode(appItem);
 
-				if (result == false)
+				/*if (result == false)
 				{
 					break;
-				}
+				}*/
 
 				continue;
 			}
@@ -3785,16 +3830,16 @@ namespace Builder
 		{
 		case E::SignalType::Discrete:
 
-			if (constItem.isIntegral() == false)
+			if (constItem.isDiscrete() == false)
 			{
-				// Floating point constant is connected to discrete signal '%1'
+				// Uncompatible constant type (Logic schema %1).
 				//
-				m_log->errALC5028(appSignal.appSignalID(), constItem.guid(), appSignal.guid());
+				m_log->errALC5028(constItem.guid(), appSignal.schemaID());
 				return false;
 			}
 			else
 			{
-				int constValue = constItem.intValue();
+				int constValue = constItem.discreteValue();
 
 				if (constValue == 0 || constValue == 1)
 				{
@@ -3804,7 +3849,7 @@ namespace Builder
 				}
 				else
 				{
-					// Constant connected to discrete signal or FB input must have value 0 or 1.
+					// Discrete constant must have value 0 or 1 (Logic schema %1).
 					//
 					m_log->errALC5086(constItem.guid(), appSignal.schemaID());
 					return false;
@@ -3825,9 +3870,10 @@ namespace Builder
 				}
 				else
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
-							  arg(constItem.floatValue()).arg(appSignal.appSignalID()));
+					// Uncompatible constant type (Logic schema %1).
+					//
+					m_log->errALC5028(constItem.guid(), appSignal.schemaID());
+					return false;
 				}
 				break;
 
@@ -3840,9 +3886,10 @@ namespace Builder
 				}
 				else
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
-							  arg(constItem.intValue()).arg(appSignal.appSignalID()));
+					// Uncompatible constant type (Logic schema %1).
+					//
+					m_log->errALC5028(constItem.guid(), appSignal.schemaID());
+					return false;
 				}
 				break;
 
@@ -4343,16 +4390,16 @@ namespace Builder
 		case E::SignalType::Discrete:
 			// input connected to discrete input
 			//
-			if (constItem.isIntegral() == false)
+			if (constItem.isDiscrete() == false)
 			{
-				// Float constant is connected to discrete input (Logic schema '%1').
+				// Uncompatible constant type (Logic schema %1).
 				//
-				m_log->errALC5060(getSchemaID(constItem), constItem.guid());
+				m_log->errALC5028(constItem.guid(), appFb.schemaID());
 				result = false;
 			}
 			else
 			{
-				int constValue = constItem.intValue();
+				int constValue = constItem.discreteValue();
 
 				if (constValue == 1 || constValue == 0)
 				{
@@ -4377,9 +4424,9 @@ namespace Builder
 			case SIZE_16BIT:
 				if (constItem.isIntegral() == false)
 				{
-					// Float constant is connected to 16-bit input (Logic schema '%1').
+					// Uncompatible constant type (Logic schema %1).
 					//
-					m_log->errALC5061(getSchemaID(constItem), constItem.guid());
+					m_log->errALC5028(constItem.guid(), appFb.schemaID());
 					result = false;
 				}
 				else
@@ -4395,9 +4442,9 @@ namespace Builder
 				case E::DataFormat::SignedInt:
 					if (constItem.isIntegral() == false)
 					{
-						// Float constant is connected to SignedInt input (Logic schema '%1').
+						// Uncompatible constant type (Logic schema %1).
 						//
-						m_log->errALC5062(getSchemaID(constItem), constItem.guid());
+						m_log->errALC5028(constItem.guid(), appFb.schemaID());
 						result = false;
 					}
 					else
@@ -4410,9 +4457,9 @@ namespace Builder
 				case E::DataFormat::Float:
 					if (constItem.isFloat() == false)
 					{
-						// Integer constant is connected to Float input (Logic schema '%1').
+						// Uncompatible constant type (Logic schema %1).
 						//
-						m_log->errALC5063(getSchemaID(constItem), constItem.guid());
+						m_log->errALC5028(constItem.guid(), appFb.schemaID());
 						result = false;
 					}
 					else

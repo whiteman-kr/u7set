@@ -182,7 +182,6 @@ SOURCES +=\
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
@@ -197,7 +196,9 @@ SOURCES +=\
     EditEngine/EditEngineSetObject.cpp \
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
-    CreateSignalDialog.cpp
+    CreateSignalDialog.cpp \
+    LogicModuleSet.cpp \
+    ../lib/LmDescription.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -317,7 +318,6 @@ HEADERS  += \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningModel.h \
-    LogicModule.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
     ../lib/Tuning/TuningSignalStorage.h \
@@ -333,7 +333,9 @@ HEADERS  += \
     EditEngine/EditEngineSetObject.h \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
-    CreateSignalDialog.h
+    CreateSignalDialog.h \
+    LogicModuleSet.h \
+    ../lib/LmDescription.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -394,7 +396,9 @@ DISTFILES += \
     Ufbl/file2pgsql.exe \
     Ufbl/_convert_all.bat \
     LogicModuleDescription/LogicModule0000.xml \
-    ../Proto/network.proto
+    ../Proto/network.proto \
+    LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

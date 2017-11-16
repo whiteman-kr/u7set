@@ -217,8 +217,8 @@ namespace Builder
 		void errALC5024(QString connection, QUuid transmitterUuid, QString schemaID);			// Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').
 		void errALC5025(QString connection, QUuid receiverUuid, QString schemaID);				// Receiver is linked to unknown opto connection '%1'.
 		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
-		void errALC5027(QUuid transmitterUuid);									// All transmitter inputs must be directly linked to a signals.
-		void errALC5028(QString appSignalID, QUuid constUuid, QUuid signalUuid);	// Floating point constant is connected to discrete signal '%1'.
+		void errALC5027(QUuid transmitterUuid, QString schemaID);									// All transmitter inputs must be directly linked to a signals.
+		void errALC5028(QUuid constUuid, QString schemaID);						// Uncompatible constant type (Logic schema %1).
 		void errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid);		// The signal '%1' is repeatedly connected to the transmitter '%2'.
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal '%1' is not associated with LM '%2'.
 		void errALC5031(QString appSignalID);												// The signal '%1' can be bind to Logic Module or Equipment Signal.
@@ -276,7 +276,7 @@ namespace Builder
 		void errALC5083(const QString& receiverPortID, const QString& connectionID, const QString& lmID, QUuid receiverUuid);	// Receiver of connection '%1' (port '%2') is not associated with LM '%3'
 		void errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid);							// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
 		void errALC5085(const QString& portEquipmentID, const QString& connectionID);	// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
-		void errALC5086(QUuid constItemUuid, const QString& schemaID);				// Constant connected to discrete signal or FB input must have value 0 or 1.
+		void errALC5086(QUuid constItemUuid, const QString& schemaID);				// Discrete constant must have value 0 or 1 (Logic schema %1).
 		void errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid);		// Can't assign value to input signal '%1' (Logic schema '%2').
 		void errALC5088(QString fbCaption, QString paramCaption, QUuid itemUuid);	// Value of parameter '%1.%2' must be greater then 0.
 		void errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom);			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
