@@ -9,6 +9,8 @@
 #include <QDockWidget>
 #include <QLabel>
 #include <QProgressBar>
+#include <QComboBox>
+#include <QClipboard>
 
 #include "../lib/SimpleThread.h"
 
@@ -223,7 +225,7 @@ private slots:
 	//
 	void					showStatistic();
 	void					aboutConnection() {};
-	void					aboutApp() {};
+	void					aboutApp();
 
 	// Slots of tab -- page measure type
 	//

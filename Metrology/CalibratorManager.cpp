@@ -17,6 +17,7 @@
 CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
 	: QDialog(parent)
 	, m_pCalibrator (pCalibrator)
+	, m_readyForManage(true)
 {
 	loadSettings(pCalibrator);
 
@@ -33,7 +34,7 @@ CalibratorManager::~CalibratorManager()
 	}
 
 	m_pCalibrator = nullptr;
-	m_readyForManage = false;
+	m_readyForManage = true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -70,6 +71,32 @@ QString CalibratorManager::calibratorPort() const
 	}
 
 	return m_pCalibrator->portName();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool CalibratorManager::isReadyForManage() const
+{
+	bool ready = true;
+
+	m_mutex.lock();
+
+		ready = m_readyForManage;
+
+	m_mutex.unlock();
+
+	return ready;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::setReadyForManage(bool ready)
+{
+	m_mutex.lock();
+
+		m_readyForManage = ready;
+
+	m_mutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -345,7 +372,7 @@ void CalibratorManager::onCalibratorDisconnect()
 
 	enableInterface(false);
 
-	m_readyForManage = true;
+	setReadyForManage(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -379,7 +406,7 @@ bool CalibratorManager::setUnit(int mode, int unit)
 		return false;
 	}
 
-	m_readyForManage = true;
+	setReadyForManage(true);
 
 	emit calibratorSetUnit(mode, unit);
 
@@ -433,7 +460,7 @@ void CalibratorManager::onValueChanged()
 
 	enableInterface(true);
 
-	m_readyForManage = true;
+	setReadyForManage(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -478,7 +505,7 @@ void CalibratorManager::value()
 		return;
 	}
 
-	m_readyForManage = false;
+	setReadyForManage(false);
 
 	emit calibratorGetValue();
 }
@@ -492,7 +519,7 @@ void CalibratorManager::setValue(double value)
 		return;
 	}
 
-	m_readyForManage = false;
+	setReadyForManage(false);
 
 	emit calibratorSetValue(value);
 }
@@ -520,7 +547,7 @@ void CalibratorManager::stepDown()
 		return;
 	}
 
-	m_readyForManage = false;
+	setReadyForManage(false);
 
 	emit calibratorStepDown();
 }
@@ -541,7 +568,7 @@ void CalibratorManager::stepUp()
 		return;
 	}
 
-	m_readyForManage = false;
+	setReadyForManage(false);
 
 	emit calibratorStepUp();
 }

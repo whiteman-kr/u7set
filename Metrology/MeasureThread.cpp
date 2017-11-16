@@ -580,6 +580,8 @@ void MeasureThread::measureLinearity()
 				{
 					break;
 				}
+
+				msleep(1);
 			}
 		}
 
