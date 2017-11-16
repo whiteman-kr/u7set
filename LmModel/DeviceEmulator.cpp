@@ -464,7 +464,7 @@ namespace LmModel
 		quint16 dataHigh = getWord(m_logicUnit.programCounter++);
 		quint16 dataLow = getWord(m_logicUnit.programCounter++);
 
-		PreLoadedParam p(implNo, implParamOpIndex, dataHigh, dataLow);
+		InstantiatorParam ip(implNo, implParamOpIndex, dataHigh, dataLow);
 
 		return false;
 	}

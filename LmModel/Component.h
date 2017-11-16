@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <QObject>
+#include "../VFrame30/Afb.h"
 
 namespace LmModel
 {
@@ -18,46 +19,46 @@ namespace LmModel
 		quint16 dataHigh = 0;
 	};
 
-	struct InstantiatorComponent
-	{
-		quint16 opCode = 0;
-		std::map<quint16, InstantiatorParam> params;			// Key InstantiatorParam::implParamOpIndex
-	};
+//	struct InstantiatorComponent
+//	{
+//		quint16 opCode = 0;
+//		std::map<quint16, InstantiatorParam> params;			// Key InstantiatorParam::implParamOpIndex
+//	};
 
-	class InstantiatorSet
+//	class InstantiatorSet
+//	{
+//	public:
+//		InstantiatorSet();
+
+//	public:
+//		clear();
+//		bool addInstantiatorParam(quint16 compOpCode, const InstantiatorParam& param, QString* errorMessage);
+
+//	private:
+//		std::map<quint16, InstantiatorComponent> m_components;		// Key InstantiatorComponent::opCode
+//	};
+
+//	class ComponentImpl
+//	{
+
+//	};
+
+	class ModelComponent : public Afb::AfbComponent
 	{
 	public:
-		InstantiatorSet();
-
-	public:
-		clear();
-		bool addInstantiatorParam(quint16 compOpCode, const InstantiatorParam& param, QString* errorMessage);
+		ModelComponent();
 
 	private:
-		std::map<quint16, InstantiatorComponent> m_components;		// Key InstantiatorComponent::opCode
+		//std::map<quint16, ComponentImpl> m_implements;	// Key is ImplementationNo
 	};
 
-	class ComponentImpl
-	{
-
-	};
-
-	class Component
+	class AfbComponentSet
 	{
 	public:
-		Component();
+		AfbComponentSet();
 
 	private:
-		std::map<quint16, ComponentImpl> m_implements;	// Key is ImplementationNo
-	};
-
-	class ComponentSet
-	{
-	public:
-		ComponentSet();
-
-	private:
-		std::map<quint16, std::shared_ptr<Component>> m_components;		// Key is component opcode
+		std::map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode
 	};
 }
 
