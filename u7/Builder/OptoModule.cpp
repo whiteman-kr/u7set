@@ -730,7 +730,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::calculateSerialRxDataID()
+	bool OptoPort::calculateSinglePortRxDataID()
 	{
 		m_rxDataID = 0;
 
@@ -1595,7 +1595,9 @@ namespace Hardware
 
 		list.append(QString(tr("Port Rx data:\n")));
 
-		str.sprintf("%04d:%02d  [%04d:%02d]  RxDataID = 0x%08X (%u)\n", rxBufAbsAddress(), 0, 0, 0, rxDataID(), rxDataID());
+		QString linkedPort = linkedPortID();
+
+		str.sprintf("%04d:%02d  [%04d:%02d]  RxDataID = 0x%08X (%u) linkedPortID = %s\n", rxBufAbsAddress(), 0, 0, 0, rxDataID(), rxDataID(), C_STR(linkedPort));
 		list.append(str);
 
 		list.append("Rx raw signals:\n");
@@ -2922,7 +2924,7 @@ namespace Hardware
 
 	bool OptoModuleStorage::calculateSerialRxDataIDs(const QString& lmID)
 	{
-		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSerialRxDataID);
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSinglePortRxDataID);
 	}
 
 	bool OptoModuleStorage::calculateRxBufAddresses(const QString &lmID)
@@ -3359,11 +3361,18 @@ namespace Hardware
 
 	OptoPort* OptoModuleStorage::jsGetOptoPort(const QString& optoPortStrID)
 	{
+		if (optoPortStrID == "USB_SHDU1_CH01_MD00_OPTOPORT01")
+		{
+			int a = 0;
+			a++;
+		}
 		OptoPortShared port = getOptoPort(optoPortStrID);
 
 		if (port != nullptr)
 		{
 			OptoPort* portPtr = port.get();
+
+			quint32 txID = portPtr->txDataID();
 
 			QQmlEngine::setObjectOwnership(portPtr, QQmlEngine::ObjectOwnership::CppOwnership);
 			return portPtr;

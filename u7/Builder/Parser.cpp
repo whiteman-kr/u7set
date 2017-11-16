@@ -2947,7 +2947,9 @@ namespace Builder
 				Hardware::DeviceModule* module = device->toModule();
 				assert(module);
 
-				if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
+				if (module != nullptr &&
+					module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM &&
+					module->moduleFamily() != Hardware::DeviceModule::FamilyType::BVB)
 				{
 					// EquipmentID '%1' must be LM family module type (Logic Schema '%2').
 					//

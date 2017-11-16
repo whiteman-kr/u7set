@@ -216,10 +216,16 @@ namespace Builder
 			std::vector<Hardware::DeviceModule*> lmModules;
 			findLmModules(equipmentSet.root(), &lmModules);
 
+			std::vector<Hardware::DeviceModule*> lmAndBvbModules;
+
+			findModulesByFamily(equipmentSet.root(), &lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
+			findModulesByFamily(equipmentSet.root(), &lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
+
 			LmDescriptionSet lmDescriptions;
 
 			ok = true;
-			for (Hardware::DeviceModule* lm : lmModules)
+
+			for (Hardware::DeviceModule* lm : lmAndBvbModules)
 			{
 				ok &= loadLogicModuleDescription(&db, lm, &lmDescriptions);
 			}
@@ -553,6 +559,40 @@ namespace Builder
 		}
 
 		return;
+	}
+
+	void BuildWorkerThread::findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const
+	{
+		if (object == nullptr ||
+			out == nullptr)
+		{
+			assert(object);
+			assert(out);
+			return;
+		}
+
+		for (int i = 0; i < object->childrenCount(); i++)
+		{
+			Hardware::DeviceObject* child = object->child(i);
+
+			if (child->deviceType() == Hardware::DeviceType::Module)
+			{
+				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+
+				if (module->moduleFamily() == family)
+				{
+					out->push_back(module);
+				}
+			}
+
+			if (child->deviceType() < Hardware::DeviceType::Module)
+			{
+				findModulesByFamily(child, out, family);
+			}
+		}
+
+		return;
+
 	}
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)

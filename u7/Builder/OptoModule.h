@@ -122,7 +122,7 @@ namespace Hardware
 		bool initSinglePortRawRxSignals();
 		bool sortSinglePortRxSignals();
 		bool calculateSinglePortRxSignalsAddresses();
-		bool calculateSerialRxDataID();
+		bool calculateSinglePortRxDataID();
 
 		bool copyOpticalPortsTxInRxSignals();
 

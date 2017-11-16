@@ -98,7 +98,7 @@ namespace Builder
 			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
-			&ApplicationLogicCompiler::processBvbModules,
+//			&ApplicationLogicCompiler::processBvbModules,
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeResourcesUsageReport,
 			&ApplicationLogicCompiler::writeSerialDataXml,
@@ -186,7 +186,8 @@ namespace Builder
 		{
 			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
 
-			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
+			if (module->isLogicModule() == true ||
+				module->isBvb() == true)
 			{
 				Hardware::DeviceObject* parent = startFromDevice->parent();
 
@@ -267,6 +268,11 @@ namespace Builder
 				LOG_INTERNAL_ERROR(m_log);
 				assert(false);
 				return false;
+			}
+
+			if (lm->isBvb() == true)
+			{
+				continue;
 			}
 
 			for(int i = 0; i < SoftwareCfgGenerator::LM_ETHERNET_ADAPTERS_COUNT; i++)

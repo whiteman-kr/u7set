@@ -283,7 +283,7 @@ namespace Builder
 					{
 						std::shared_ptr<Hardware::DeviceModule> module = std::dynamic_pointer_cast<Hardware::DeviceModule>(device);
 
-						if (module != nullptr && module->isLogicModule() == true)
+						if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
 						{
 							s.setLm(module);
 							deviceOK = true;

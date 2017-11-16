@@ -71,8 +71,8 @@ namespace Builder
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
 		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
-
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
+		void findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const;
 
 		// Expand Devices StrId
 		//

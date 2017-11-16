@@ -40,6 +40,8 @@ namespace Builder
 
 		m_lmDescription = appLogicCompiler.m_lmDescriptions->get(lm);
 
+		assert(m_lmDescription != nullptr);
+
 		m_appLogicData = appLogicCompiler.m_appLogicData;
 		m_resultWriter = appLogicCompiler.m_resultWriter;
 		m_log = appLogicCompiler.m_log;
@@ -285,6 +287,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::loadModulesSettings()
 	{
+		if (m_lm->isBvb() == true)
+		{
+			return true;
+		}
+
 		bool result = true;
 
 		// build Module structures array
@@ -371,7 +378,7 @@ namespace Builder
 						continue;
 					}
 
-					if (deviceModule->isLogicModule() == false)
+					if (deviceModule->isLogicModule() == false && deviceModule->isBvb() == false)
 					{
 						assert(false); // signal must be associated with Logic Module only
 						continue;
@@ -3147,6 +3154,11 @@ namespace Builder
 			return false;
 		}
 
+		if (m_lm->isBvb() == true)
+		{
+			return true;
+		}
+
 		bool result = true;
 
 		// append FBs  for analog input signals conversion
@@ -3214,6 +3226,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::findFbsForAnalogInOutSignalsConversion()
 	{
+		if (m_lm->isBvb() == true)
+		{
+			return true;
+		}
+
 		bool result = true;
 
 		// find AFB: scal_16ui_32fp, scal_16ui_32si, scal_32fp_16ui, scal_32si_16ui
