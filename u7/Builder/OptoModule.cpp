@@ -3361,28 +3361,11 @@ namespace Hardware
 
 	OptoPort* OptoModuleStorage::jsGetOptoPort(const QString& optoPortStrID)
 	{
-		if (optoPortStrID == "USB_SHFS5_CH01_MD05_OPTOPORT01")
-		{
-			int a = 0;
-			a++;
-		}
-
-		if (optoPortStrID == "USB_SHDU1_CH01_MD00_OPTOPORT01")
-		{
-			int a = 0;
-			a++;
-		}
-
 		OptoPortShared port = getOptoPort(optoPortStrID);
 
 		if (port != nullptr)
 		{
 			OptoPort* portPtr = port.get();
-
-			QString thisPortID = portPtr->equipmentID();
-			quint32 thisPortDataID = portPtr->txDataID();
-			bool isLinked = portPtr->isLinked();
-
 			QQmlEngine::setObjectOwnership(portPtr, QQmlEngine::ObjectOwnership::CppOwnership);
 			return portPtr;
 		}
