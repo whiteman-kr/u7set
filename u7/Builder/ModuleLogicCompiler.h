@@ -142,6 +142,7 @@ namespace Builder
 		bool linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkLoopbackSource(UalItem* srcItem, UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
@@ -449,6 +450,8 @@ namespace Builder
 
 		QHash<QString, QString> m_linkedValidtySignalsID;		// device signals with linked validity signals
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
+
+		QHash<QString, UalSignal*> m_loopbacks;					// loopbackSourceID => loopback source ualSignal
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL

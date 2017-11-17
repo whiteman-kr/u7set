@@ -11,6 +11,7 @@
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemBus.h"
+#include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/LogicSchema.h"
 
@@ -118,8 +119,8 @@ namespace Builder
 			Terminator,
 			BusComposer,
 			BusExtractor,
-			LoopbackOutput,
-			LoopbackInput
+			LoopbackSource,
+			LoopbackTarget
 		};
 
 		UalItem();
@@ -143,8 +144,8 @@ namespace Builder
 		bool isTerminator() const { return type() == UalItem::Type::Terminator; }
 		bool isBusComposer() const { return type() == UalItem::Type::BusComposer; }
 		bool isBusExtractor() const { return type() == UalItem::Type::BusExtractor; }
-		bool isLoopbackOutput() const { return type() == UalItem::Type::LoopbackOutput; }
-		bool isLoopbackInput() const { return type() == UalItem::Type::LoopbackInput; }
+		bool isLoopbackSource() const { return type() == UalItem::Type::LoopbackSource; }
+		bool isLoopbackTarget() const { return type() == UalItem::Type::LoopbackTarget; }
 
 		Type type() const;
 
@@ -461,6 +462,11 @@ namespace Builder
 		bool isBusChild() const { return m_isBusChild; }
 		void setBusChild(bool busChild) { m_isBusChild = busChild; }
 
+		bool isLoopbackSource() const { return m_loopbackSourceID.isEmpty() == false; }
+
+		void setLoopbackSourceID(const QString& loopbackSourceID);
+		QString loopbackSourceID() const;
+
 		//
 
 		bool isConst() const { return m_isConst; }
@@ -515,6 +521,10 @@ namespace Builder
 		int m_constDiscreteValue = 0;
 		int m_constIntValue = 0;
 		double m_constFloatValue = 0;
+
+		//
+
+		QString m_loopbackSourceID;
 
 		//
 

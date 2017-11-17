@@ -4828,6 +4828,28 @@ namespace Builder
 				  QString(tr("Signal and bus inputs sizes are not multiples (Logic schema %1).")).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5127
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Duplicate loopback source ID %1 (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Loopback sourceID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Loopback source IDs can't duplicate.
+	///
+	void IssueLogger::errALC5127(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, loopbackSourceItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5127,
+				  QString(tr("Duplicate loopback source ID %1 (Logic schema %2).")).
+								arg(loopbackSourceID).arg(schemaID));
+	}
 
 	//
 

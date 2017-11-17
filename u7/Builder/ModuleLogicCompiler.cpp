@@ -701,8 +701,8 @@ namespace Builder
 			//
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::Terminator:
-			case UalItem::Type::LoopbackOutput:
-			case UalItem::Type::LoopbackInput:
+			case UalItem::Type::LoopbackSource:
+			case UalItem::Type::LoopbackTarget:
 				break;
 
 			// unknown item's type
@@ -1329,10 +1329,13 @@ namespace Builder
 				result &= linkBusExtractorInput(srcUalItem, destUalItem, inPinUuid, ualSignal);
 				break;
 
+			case UalItem::Type::LoopbackSource:
+				result &= linkLoopbackSource(srcUalItem, destUalItem, inPinUuid, ualSignal);
+				break;
+
 			// link pins to signal only, any checks is not required
 			//
 			case UalItem::Type::Transmitter:
-			case UalItem::Type::LoopbackOutput:
 				m_ualSignals.appendRefPin(destUalItem, inPinUuid, ualSignal);
 				break;
 
@@ -1343,7 +1346,7 @@ namespace Builder
 			//
 			case UalItem::Type::Const:
 			case UalItem::Type::Receiver:
-			case UalItem::Type::LoopbackInput:
+			case UalItem::Type::LoopbackTarget:
 				m_log->errALC5116(srcUalItem->guid(), destUalItem->guid(), destUalItem->schemaID());
 				result = false;
 				break;
@@ -1578,6 +1581,39 @@ namespace Builder
 		bool result = m_ualSignals.appendRefPin(busExtractorItem, inPinUuid, ualSignal);
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::linkLoopbackSource(UalItem* srcItem, UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		if (srcItem == nullptr || loopbackSourceItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (loopbackSourceItem->isLoopbackSource() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString loopbackID = loopbackSourceItem->strID();
+
+		if (m_loopbacks.contains(loopbackID) == true)
+		{
+			// Duplicate loopback source ID %1 (Logic schema %2).
+			//
+			m_log->errALC5127(loopbackID, loopbackSourceItem->guid(), loopbackSourceItem->schemaID());
+			return false;
+		}
+
+		m_loopbacks.insert(loopbackID, ualSignal);
+
+		ualSignal->setLoopbackSourceID(loopbackID);
+
+		m_ualSignals.appendRefPin(loopbackSourceItem, inPinUuid, ualSignal);
+
+		return true;
 	}
 
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID)
@@ -4768,8 +4804,8 @@ namespace Builder
 			case UalItem::Type::Receiver:
 			case UalItem::Type::Terminator:
 			case UalItem::Type::BusExtractor:
-			case UalItem::Type::LoopbackOutput:
-			case UalItem::Type::LoopbackInput:
+			case UalItem::Type::LoopbackSource:
+			case UalItem::Type::LoopbackTarget:
 				break;
 
 			case UalItem::Type::Unknown:

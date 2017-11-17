@@ -8,7 +8,7 @@
 #include "SchemaItemConnection.h"
 #include "SchemaItemTerminator.h"
 #include "SchemaItemBus.h"
-
+#include "SchemaItemLoopback.h"
 
 namespace VFrame30
 {
@@ -845,6 +845,16 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this) != nullptr;
 	}
 
+	bool FblItemRect::isLoopbackSourceElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemLoopbackSource*>(this) != nullptr;
+	}
+
+	bool FblItemRect::isLoopbackTargetElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemLoopbackTarget*>(this) != nullptr;
+	}
+
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
 	{
 		return dynamic_cast<VFrame30::SchemaItemSignal*>(this);
@@ -953,6 +963,26 @@ namespace VFrame30
 	const VFrame30::SchemaItemBusExtractor* FblItemRect::toBusExtractorElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this);
+	}
+
+	VFrame30::SchemaItemLoopbackSource* FblItemRect::toLoopbackSourceElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemLoopbackSource*>(this);
+	}
+
+	const VFrame30::SchemaItemLoopbackSource* FblItemRect::toLoopbackSourceElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemLoopbackSource*>(this);
+	}
+
+	VFrame30::SchemaItemLoopbackTarget* FblItemRect::toLoopbackTargetElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemLoopbackTarget*>(this);
+	}
+
+	const VFrame30::SchemaItemLoopbackTarget* FblItemRect::toLoopbackTargetElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemLoopbackTarget*>(this);
 	}
 
 	// Weight propertie

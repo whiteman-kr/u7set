@@ -371,7 +371,7 @@ namespace Builder
 
 	QString UalItem::strID() const
 	{
-		if (m_appLogicItem.m_fblItem->isSignalElement())
+		if (m_appLogicItem.m_fblItem->isSignalElement() == true)
 		{
 			VFrame30::SchemaItemSignal* itemSignal= m_appLogicItem.m_fblItem->toSignalElement();
 
@@ -384,7 +384,7 @@ namespace Builder
 			return itemSignal->appSignalIds();
 		}
 
-		if (m_appLogicItem.m_fblItem->isAfbElement())
+		if (m_appLogicItem.m_fblItem->isAfbElement() == true)
 		{
 			VFrame30::SchemaItemAfb* itemFb= m_appLogicItem.m_fblItem->toAfbElement();
 
@@ -397,7 +397,7 @@ namespace Builder
 			return itemFb->afbStrID();
 		}
 
-		if (m_appLogicItem.m_fblItem->isConstElement())
+		if (m_appLogicItem.m_fblItem->isConstElement() == true)
 		{
 			VFrame30::SchemaItemConst* itemConst= m_appLogicItem.m_fblItem->toSchemaItemConst();
 
@@ -408,6 +408,19 @@ namespace Builder
 			}
 
 			return QString("Const(%1)").arg(itemConst->valueToString());
+		}
+
+		if (m_appLogicItem.m_fblItem->isLoopbackSourceElement() == true)
+		{
+			const VFrame30::SchemaItemLoopbackSource* loopbackSource= m_appLogicItem.m_fblItem->toLoopbackSourceElement();
+
+			if (loopbackSource == nullptr)
+			{
+				assert(false);
+				return "";
+			}
+
+			return loopbackSource->loopbackId();
 		}
 
 		assert(false);		// unknown type of item
@@ -466,6 +479,18 @@ namespace Builder
 		if (m_appLogicItem.m_fblItem->isBusExtractorElement() == true)
 		{
 			m_type = Type::BusExtractor;
+			return m_type;
+		}
+
+		if (m_appLogicItem.m_fblItem->isLoopbackSourceElement() == true)
+		{
+			m_type = Type::LoopbackSource;
+			return m_type;
+		}
+
+		if (m_appLogicItem.m_fblItem->isLoopbackTargetElement() == true)
+		{
+			m_type = Type::LoopbackTarget;
 			return m_type;
 		}
 
@@ -1416,6 +1441,27 @@ namespace Builder
 	bool UalSignal::isCompatible(const UalSignal* ualSignal) const
 	{
 		return isCompatible(ualSignal->signal());
+	}
+
+	void UalSignal::setLoopbackSourceID(const QString& loopbackSourceID)
+	{
+		if (m_loopbackSourceID.isEmpty() == false)
+		{
+			assert(false);				// reassigning of m_loopbackSourceID, why?
+		}
+
+		m_loopbackSourceID = loopbackSourceID;
+	}
+
+	QString UalSignal::loopbackSourceID() const
+	{
+		if (m_loopbackSourceID.isEmpty() == true)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_loopbackSourceID;
 	}
 
 	E::SignalType UalSignal::constType() const
