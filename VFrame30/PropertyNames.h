@@ -133,6 +133,8 @@ namespace VFrame30
 		static const QString fineAperture;
 		static const QString adaptiveAperture;
 
+		static const QString loopbackId;
+
 		static const QString busTypeId;
 		static const QString busTypeFileName;
 		static const QString busAutoSignalPlacemanet;

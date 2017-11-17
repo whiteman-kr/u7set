@@ -20,8 +20,8 @@ namespace VFrame30
 		setDocWidth(mm2in(420));
 		setDocHeight(mm2in(297));
 
-		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Frame", false));
+		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
 		return;
@@ -73,6 +73,33 @@ namespace VFrame30
 		if (result == false)
 		{
 			return false;
+		}
+
+		// Set the right order for layers, a lot of layers were saved in wrong order (logic, frame, notes)
+		// We need order Frame, Logic, Notes
+		//
+		int frameLayerIndex = -1;
+		int logicLayerIndex = -1;
+
+		for (size_t layerIndex = 0; layerIndex < Layers.size(); layerIndex++)
+		{
+			if (Layers[layerIndex]->name() == QLatin1String("Frame"))
+			{
+				frameLayerIndex = static_cast<int>(layerIndex);
+			}
+
+			if (Layers[layerIndex]->name() == QLatin1String("Logic"))
+			{
+				logicLayerIndex = static_cast<int>(layerIndex);
+			}
+		}
+
+		if (frameLayerIndex != -1 &&
+			logicLayerIndex != -1 &&
+			logicLayerIndex < frameLayerIndex)
+		{
+			std::swap(Layers[frameLayerIndex], Layers[logicLayerIndex]);
+			setActiveLayer(Layers[frameLayerIndex]);	// frameLayerIndex after swap points to LogicLayer
 		}
 
 		// --

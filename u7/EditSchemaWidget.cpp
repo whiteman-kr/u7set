@@ -29,6 +29,7 @@
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemPushButton.h"
 #include "../VFrame30/SchemaItemLineEdit.h"
+#include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
@@ -68,6 +69,9 @@ const EditSchemaWidget::SizeActionToMouseCursor EditSchemaWidget::m_sizeActionTo
 		{SchemaItemAction::ChangeSizeBottomLeft, MouseState::SizingBottomLeft, Qt::SizeBDiagCursor},
 		{SchemaItemAction::ChangeSizeLeft, MouseState::SizingLeft, Qt::SizeHorCursor}
 	};
+
+
+QString EditSchemaWidget::m_lastUsedLoopbackId = "";
 
 
 void addSchemaItem(const QByteArray& itemData);
@@ -1427,41 +1431,17 @@ QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, VFrame30::IPosRe
 
 QUuid EditSchemaView::activeLayerGuid() const
 {
-	if (m_activeLayer >= static_cast<int>(schema()->Layers.size()))
-	{
-		assert(m_activeLayer < static_cast<int>(schema()->Layers.size()));
-		return QUuid();
-	}
-
-	return schema()->Layers[m_activeLayer]->guid();
+	return schema()->activeLayerGuid();
 }
 
 std::shared_ptr<VFrame30::SchemaLayer> EditSchemaView::activeLayer()
 {
-	if (m_activeLayer >= static_cast<int>(schema()->Layers.size()))
-	{
-		assert(m_activeLayer < static_cast<int>(schema()->Layers.size()));
-		return std::make_shared<VFrame30::SchemaLayer>("Error", false);
-	}
-
-	return schema()->Layers[m_activeLayer];
+	return schema()->activeLayer();
 }
 
 void EditSchemaView::setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer)
 {
-	for (int i = 0; i < static_cast<int>(schema()->Layers.size()); i++)
-	{
-		if (schema()->Layers[i] == layer)
-		{
-			m_activeLayer = i;
-			return;
-		}
-	}
-
-	// Layer was not found
-	//
-	assert(false);
-	return;
+	return schema()->setActiveLayer(layer);
 }
 
 MouseState EditSchemaView::mouseState() const
@@ -1911,8 +1891,18 @@ void EditSchemaWidget::createActions()
 				addItem(text);
 			});
 
+	// ----------------------------------------
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
+
+	m_addLinkAction = new QAction(tr("Link"), this);
+	m_addLinkAction->setEnabled(true);
+	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemaLink.svg"));
+	connect(m_addLinkAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemLink>(schema()->unit()));
+			});
 
 	m_addInputSignalAction = new QAction(tr("Input"), this);
 	m_addInputSignalAction->setEnabled(true);
@@ -1962,19 +1952,23 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemTerminator>(schema()->unit()));
 			});
 
+	// ----------------------------------------
+	m_addSeparatorAfb = new QAction(this);
+	m_addSeparatorAfb->setSeparator(true);
+
 	m_addAfbAction = new QAction(tr("App Functional Block"), this);
 	m_addAfbAction->setEnabled(true);
 	m_addAfbAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
 	connect(m_addAfbAction, &QAction::triggered, this, &EditSchemaWidget::addAfbElement);
 
-	m_addLinkAction = new QAction(tr("Link"), this);
-	m_addLinkAction->setEnabled(true);
-	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemaLink.svg"));
-	connect(m_addLinkAction, &QAction::triggered,
-			[this](bool)
-			{
-				addItem(std::make_shared<VFrame30::SchemaItemLink>(schema()->unit()));
-			});
+	m_addUfbAction = new QAction(tr("User Functional Block"), this);
+	m_addUfbAction->setEnabled(true);
+	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
+	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
+
+	// ----------------------------------------
+	m_addSeparatorConn = new QAction(this);
+	m_addSeparatorConn->setSeparator(true);
 
 	m_addTransmitter = new QAction(tr("Transmitter"), this);
 	m_addTransmitter->setEnabled(true);
@@ -1986,11 +1980,21 @@ void EditSchemaWidget::createActions()
 	m_addReceiver->setIcon(QIcon(":/Images/Images/SchemaReceiver.svg"));
 	connect(m_addReceiver, &QAction::triggered, this, &EditSchemaWidget::addReceiver);
 
-	m_addUfbAction = new QAction(tr("User Functional Block"), this);
-	m_addUfbAction->setEnabled(true);
-	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
-	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
+	// ----------------------------------------
+	m_addSeparatorLoop = new QAction(this);
+	m_addSeparatorLoop->setSeparator(true);
 
+	m_addLoopbackSource = new QAction(tr("Loopback Source"), this);
+	m_addLoopbackSource->setEnabled(true);
+	m_addLoopbackSource->setIcon(QIcon(":/Images/Images/SchemaLoopbackSource.svg"));
+	connect(m_addLoopbackSource, &QAction::triggered, this, &EditSchemaWidget::addLoopbackSource);
+
+	m_addLoopbackTarget = new QAction(tr("Loopback Target"), this);
+	m_addLoopbackTarget->setEnabled(true);
+	m_addLoopbackTarget->setIcon(QIcon(":/Images/Images/SchemaLoopbackTarget.svg"));
+	connect(m_addLoopbackTarget, &QAction::triggered, this, &EditSchemaWidget::addLoopbackTarget);
+
+	// ----------------------------------------
 	m_addSeparatorBus = new QAction(this);
 	m_addSeparatorBus->setSeparator(true);
 
@@ -2392,10 +2396,18 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
+
+			m_addMenu->addAction(m_addSeparatorAfb);
 			m_addMenu->addAction(m_addAfbAction);
+			m_addMenu->addAction(m_addUfbAction);
+
+			m_addMenu->addAction(m_addSeparatorConn);
 			m_addMenu->addAction(m_addTransmitter);
 			m_addMenu->addAction(m_addReceiver);
-			m_addMenu->addAction(m_addUfbAction);
+
+			m_addMenu->addAction(m_addSeparatorLoop);
+			m_addMenu->addAction(m_addLoopbackSource);
+			m_addMenu->addAction(m_addLoopbackTarget);
 
 			m_addMenu->addAction(m_addSeparatorBus);
 			m_addMenu->addAction(m_addBusComposer);
@@ -2409,7 +2421,13 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
+
+			m_addMenu->addAction(m_addSeparatorAfb);
 			m_addMenu->addAction(m_addAfbAction);
+
+			m_addMenu->addAction(m_addSeparatorLoop);
+			m_addMenu->addAction(m_addLoopbackSource);
+			m_addMenu->addAction(m_addLoopbackTarget);
 
 			m_addMenu->addAction(m_addSeparatorBus);
 			m_addMenu->addAction(m_addBusComposer);
@@ -5813,6 +5831,12 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
+	if (item->isType<VFrame30::SchemaItemLoopback>() == true)
+	{
+		f2KeyForLoopback(item);
+		return;
+	}
+
 	if (item->isType<VFrame30::SchemaItemValue>() == true)
 	{
 		f2KeyForValue(item);
@@ -6340,6 +6364,47 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 	{
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
 		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemLoopback* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
+
+	if (loopbackItem == nullptr)
+	{
+		assert(loopbackItem);
+		return;
+	}
+
+	QString loopbackId = loopbackItem->loopbackId();
+
+	// Show input dialog
+	//
+	bool ok = false;
+	QString newValue = QInputDialog::getText(this,
+											 tr("Set LoopbackID"),
+											 tr("LoopbackID:"),
+											 QLineEdit::Normal,
+											 loopbackId,
+											 &ok).trimmed();
+
+	if (ok == true &&
+		newValue.isEmpty() == false &&
+		newValue != loopbackId)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(newValue), item);
+		editSchemaView()->update();
+
+		EditSchemaWidget::m_lastUsedLoopbackId = newValue;
 	}
 
 	return;
@@ -6925,6 +6990,26 @@ void EditSchemaWidget::editPaste()
 		}
 	}
 
+	// Paste appSignalID to VFrame30::SchemaItemLoopback
+	//
+	{
+		bool allItemsAreLoopbacks = true;
+		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		{
+			if (dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get()) == nullptr)
+			{
+				allItemsAreLoopbacks = false;
+				break;
+			}
+		}
+
+		if (allItemsAreLoopbacks == true)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(mimeData->text()), selected);
+			EditSchemaWidget::m_lastUsedLoopbackId = mimeData->text();
+		}
+	}
+
 	// Paste appSignalID to VFrame30::SchemaItemValue
 	//
 	{
@@ -7290,6 +7375,25 @@ void EditSchemaWidget::clipboardDataChanged()
 		return;
 	}
 
+	// if Any SchemaItemLoopback is selected and Text is in the clipboard
+	//
+	bool allItemsAreLoopbacks = true;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get()) == nullptr)
+		{
+			allItemsAreLoopbacks = false;
+			break;
+		}
+	}
+
+	if (allItemsAreLoopbacks == true &&
+		mimeData->hasText() == true)
+	{
+		m_editPasteAction->setEnabled(true);
+		return;
+	}
+
 	// if Any SchemaItemValue is selected and AppSignalID is in the clipboard
 	//
 	bool allItemsAreValues = true;
@@ -7344,6 +7448,31 @@ void EditSchemaWidget::addReceiver()
 
 	addItem(schemaItem);
 	return;
+}
+
+void EditSchemaWidget::addLoopbackSource()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemLoopbackSource>(schema()->unit());
+
+	QString loopbackId = QString("LBID_%1").arg(db()->nextCounterValue());
+	EditSchemaWidget::m_lastUsedLoopbackId = loopbackId;
+
+	schemaItem->setLoopbackId(loopbackId);
+
+	addItem(schemaItem);
+	return;
+}
+
+void EditSchemaWidget::addLoopbackTarget()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemLoopbackTarget>(schema()->unit());
+
+	if (EditSchemaWidget::m_lastUsedLoopbackId.isEmpty() == false)
+	{
+		schemaItem->setLoopbackId(EditSchemaWidget::m_lastUsedLoopbackId);
+	}
+
+	addItem(schemaItem);
 }
 
 void EditSchemaWidget::addAfbElement()

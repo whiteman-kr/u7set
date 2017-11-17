@@ -20,6 +20,7 @@
 #include "../../VFrame30/SchemaItemUfb.h"
 #include "../../VFrame30/SchemaItemBus.h"
 #include "../../VFrame30/SchemaItemTerminator.h"
+#include "../../VFrame30/SchemaItemLoopback.h"
 #include "../../VFrame30/HorzVertLinks.h"
 #include "../../VFrame30/PropertyNames.h"
 
@@ -785,7 +786,7 @@ namespace Builder
 	{
 		// Params:
 		//	groupId: is used for marking all UFB items as a single group, for AppLogic it can be null
-		//	label: is used to make new labels for UFB
+		//	label: is used to make new labels for UFBs
 		//
 
 		// Make a copy of ordered items
@@ -848,6 +849,14 @@ namespace Builder
 				oldToNewPins[pin.guid()] = newPinGuid;
 
 				pin.setGuid(newPinGuid);
+			}
+
+			// Set new loopbackIds
+			//
+			if (ali.m_fblItem->isType<VFrame30::SchemaItemLoopback>() == true)
+			{
+				auto loopbackItem = ali.m_fblItem->toType<VFrame30::SchemaItemLoopback>();
+				loopbackItem->setLoopbackId(label + "_" + loopbackItem->loopbackId());
 			}
 		}
 
@@ -1335,7 +1344,7 @@ namespace Builder
 				if (foundDepIterator == itemsWithInputs.end())
 				{
 					assert(foundDepIterator != itemsWithInputs.end());
-					log->errINT1001("Output was not fount in itemsWithInputs map, assert(foundDepIterator != itemsWithInputs.end())");
+					log->errINT1001("Output was not found in itemsWithInputs map, assert(foundDepIterator != itemsWithInputs.end())");
 					continue;
 				}
 
@@ -1386,7 +1395,7 @@ namespace Builder
 
 				if (dependantIsAbove != currentIt)
 				{
-					// Save hostory, if this is the third switch item, then skip it
+					// Save history
 					//
 					auto histForCurrentItem = std::find_if(
 												  changeOrderHistory.begin(),
@@ -1408,7 +1417,18 @@ namespace Builder
 					{
 						int switchCounter = histForCurrentItem->getChangeCount(*dependantIsAbove);
 
-						if (switchCounter == 2)
+#define STRICT_LOOPBACK
+#ifdef STRICT_LOOPBACK
+						// if this is the second switch, then it's error, use LoopbackSource/Target to make it right
+						//
+						if (switchCounter >= 1)
+						{
+							log->errALP4060(currentItem.m_schema->schemaId(), currentItem.m_fblItem->buildName(), currentItem.m_fblItem->guid());
+						}
+#endif
+						// if this is the third switch item, then skip it
+						//
+						if (switchCounter >= 2)
 						{
 							continue;
 						}
@@ -1423,7 +1443,8 @@ namespace Builder
 					//
 					auto tempIter = currentIt;
 
-					currentIt = orderedItems.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and part of the algorithm!
+					currentIt = orderedItems.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and
+																					// the part of the the algorithm!
 
 					orderedItems.erase(tempIter);
 
@@ -2459,12 +2480,19 @@ namespace Builder
 			checkAfbItemsVersion(schema.get());
 		}
 
-		// Check Ufbs Busses versions
+		// Check UFBs Busses versions
 		//
 		assert(m_busSet);
 		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
 		{
 			checkBusItemsVersion(schema.get(), *m_busSet);
+		}
+
+		// Check UFBs LooopbackSource.loopbackId for uniness
+		//
+		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
+		{
+			checkForUniqueLoopbackId(schema.get());
 		}
 
 		// Parse User Functional Blocks
@@ -2586,7 +2614,6 @@ namespace Builder
 			checkUfbItemsVersion(schema.get(), ufbs);
 		}
 
-		//
 		// Parse Application Logic
 		//
 		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
@@ -2648,6 +2675,13 @@ namespace Builder
 		if (ok == false)
 		{
 			result = false;
+		}
+
+		// Check UFBs LooopbackSource.loopbackId for uniness
+		//
+		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
+		{
+			checkForUniqueLoopbackId(module);
 		}
 
 		// Set AfbComponent to AfbElements
@@ -3309,6 +3343,99 @@ namespace Builder
 		return ok;
 	}
 
+	bool Parser::checkForUniqueLoopbackId(VFrame30::Schema* schema)
+	{
+		if (schema == nullptr)
+		{
+			assert(schema);
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", Schema %1")
+							  .arg(reinterpret_cast<size_t>(schema)));
+			return false;
+		}
+
+		bool ok = true;
+
+		std::map<QString, std::shared_ptr<VFrame30::SchemaItem>> loopbackIds;		// Key is LoopbackID
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
+		{
+			if (l->compile() == true)
+			{
+				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				{
+					VFrame30::SchemaItemLoopbackSource* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopbackSource*>(si.get());
+
+					if (loopbackItem != nullptr)
+					{
+						QString loopbackId = loopbackItem->loopbackId();
+
+						if (loopbackIds.count(loopbackId) == 0)
+						{
+							// Ok
+							//
+							loopbackIds.insert({loopbackId, si});
+						}
+						else
+						{
+							std::vector<QUuid> itemGuids = {si->guid(), loopbackIds[loopbackId]->guid()};
+
+							m_log->errALP4061(schema->schemaId(), loopbackId, itemGuids);
+						}
+					}
+				}
+
+				// We can parse only one layer
+				//
+				break;
+			}
+		}
+
+		return ok;
+	}
+
+	bool Parser::checkForUniqueLoopbackId(std::shared_ptr<AppLogicModule> module)
+	{
+		if (module == nullptr)
+		{
+			assert(module);
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", module %1")
+							  .arg(reinterpret_cast<size_t>(module.get())));
+			return false;
+		}
+
+		bool ok = true;
+
+		std::map<QString, std::shared_ptr<VFrame30::SchemaItem>> loopbackIds;		// Key is LoopbackID
+
+		for (const AppLogicItem& appLogicItem : module->items())
+		{
+			VFrame30::SchemaItemLoopbackSource* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopbackSource*>(appLogicItem.m_fblItem.get());
+
+			if (loopbackItem != nullptr)
+			{
+				QString loopbackId = loopbackItem->loopbackId();
+
+				if (loopbackIds.count(loopbackId) == 0)
+				{
+					// Ok
+					//
+					loopbackIds.insert({loopbackId, appLogicItem.m_fblItem});
+				}
+				else
+				{
+					std::vector<QUuid> itemGuids = {loopbackItem->guid(), loopbackIds[loopbackId]->guid()};
+
+					m_log->errALP4061(appLogicItem.m_schema->schemaId(), loopbackId, itemGuids);
+				}
+			}
+		}
+
+		return ok;
+	}
+
+
+
+
 	bool Parser::parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema)
 	{
 		if (ufbSchema.get() == nullptr)
@@ -3388,7 +3515,8 @@ namespace Builder
 				item->isType<VFrame30::SchemaItemOutput>() == true ||
 				item->isType<VFrame30::SchemaItemConst>() == true ||
 				item->isType<VFrame30::SchemaItemTerminator>() == true ||
-				item->isType<VFrame30::SchemaItemAfb>() == true)
+				item->isType<VFrame30::SchemaItemAfb>() == true ||
+				item->isType<VFrame30::SchemaItemLoopback>() == true)
 			{
 				// All theses items are allowed to be used on UFB schema
 				//

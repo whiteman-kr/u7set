@@ -406,15 +406,17 @@ message SchemaItem
 	optional SchemaItemBusComposer BusComposer = 151;		// +SchemaItemBus, FblItemRect
 	optional SchemaItemBusExtractor BusExtractor = 152;		// +SchemaItemBus, FblItemRect
 
+    optional SchemaItemLoopback LoopbackItem = 155;			// +FblItemRect
+	optional SchemaItemLoopbackSource loopbackSource = 156;	// +SchemaItemLoopback, FblItemRect
+	optional SchemaItemLoopbackTarget loopbackTarget = 157;	// +SchemaItemLoopback, FblItemRect
+
     optional SchemaItemControl control = 200;				// +FblItemRect
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
 	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
 }
 
 //
-//
 // PosRectImpl
-//
 //
 message PosRectImpl
 {
@@ -426,9 +428,7 @@ message PosRectImpl
 
 
 //
-//
 // PosLineImpl
-//
 //
 message PosLineImpl
 {
@@ -440,9 +440,7 @@ message PosLineImpl
 
 
 //
-//
 // PosConnectionImpl
-//
 //
 message PosConnectionImpl
 {
@@ -451,9 +449,7 @@ message PosConnectionImpl
 
 
 //
-//
 // SchemaItemRect
-//
 //
 message SchemaItemRect
 {
@@ -470,9 +466,7 @@ message SchemaItemRect
 }
 
 //
-//
 // SchemaItemLine
-//
 //
 message SchemaItemLine
 {
@@ -481,9 +475,7 @@ message SchemaItemLine
 }
 
 //
-//
 // SchemaItemPath
-//
 //
 message SchemaItemPath
 {
@@ -493,9 +485,7 @@ message SchemaItemPath
 
 
 //
-//
 // FblConnectionPoint
-//
 //
 message FblConnectionPoint
 {
@@ -513,9 +503,7 @@ message FblConnectionPoint
 
 
 //
-//
 // FblItem
-//
 //
 message FblItem
 {
@@ -524,9 +512,7 @@ message FblItem
 
 
 //
-//
 // FblItemRect
-//
 //
 message FblItemRect
 {
@@ -542,9 +528,7 @@ message FblItemRect
 
 
 //
-//
 // FblItemLine
-//
 //
 message FblItemLine
 {
@@ -554,9 +538,7 @@ message FblItemLine
 
 
 //
-//
 // SchemaItemSignal
-//
 //
 message SchemaItemSignalColumn
 {
@@ -575,48 +557,33 @@ message SchemaItemSignal
 }
 
 //
-//
 // SchemaItemInput
-//
 //
 message SchemaItemInput
 {
 }
 
-
-//
-//
 // SchemaItemOutput
-//
 //
 message SchemaItemOutput
 {
 }
 
-//
-//
 // SchemaItemInOut
-//
 //
 message SchemaItemInOut
 {
 }
 
-
-//
 //
 // SchemaItemLink
-//
 //
 message SchemaItemLink
 {
 }
 
-
-//
 //
 // SchemaItemAfb
-//
 //
 message SchemaItemAfb
 {
@@ -629,9 +596,7 @@ message SchemaItemAfb
 }
 
 //
-//
 // SchemaItemConst
-//
 //
 message SchemaItemConst
 {
@@ -645,29 +610,21 @@ message SchemaItemConst
 }
 
 //
-//
 // SchemaItemConnection
-//
 //
 message SchemaItemConnection
 {
     optional string connectionid = 1;
 }
 
-//
-//
 // SchemaItemTransmitter
-//
 //
 message SchemaItemTransmitter
 {
     optional int32 pinCount = 1 [default = 1];
 }
 
-//
-//
 // SchemaItemReceiver
-//
 //
 message SchemaItemReceiver
 {
@@ -679,9 +636,7 @@ message SchemaItemReceiver
 }
 
 //
-//
 // SchemaItemUfb
-//
 //
 message SchemaItemUfb
 {
@@ -691,18 +646,14 @@ message SchemaItemUfb
 }
 
 //
-//
 // SchemaItemTerminator
-//
 //
 message SchemaItemTerminator
 {
 }
 
 //
-//
 // SchemaItemValue
-//
 //
 message SchemaItemValue
 {
@@ -755,9 +706,7 @@ message SchemaItemValue
 }
 
 //
-//
 // SchemaItemBus
-//
 //
 message SchemaItemBus
 {
@@ -766,19 +715,13 @@ message SchemaItemBus
 	optional Bus bus = 5;
 }
 
-//
-//
 // SchemaItemBusComposer
-//
 //
 message SchemaItemBusComposer
 {
 }
 
-//
-//
 // SchemaItemBusExtractor
-//
 //
 message SchemaItemBusExtractor
 {
@@ -787,8 +730,28 @@ message SchemaItemBusExtractor
 
 //
 //
-// SchemaItemControl
+// SchemaItemLoopback
 //
+//
+message SchemaItemLoopback
+{
+    optional string loopbackId = 2;
+}
+
+// SchemaItemLoopbackSource
+//
+message SchemaItemLoopbackSource
+{
+}
+
+// SchemaItemLoopbackTarget
+//
+message SchemaItemLoopbackTarget
+{
+}
+
+//
+// SchemaItemControl
 //
 message SchemaItemControl
 {
@@ -797,9 +760,7 @@ message SchemaItemControl
 }
 
 //
-//
 // SchemaItemPushButton
-//
 //
 message SchemaItemPushButton
 {
@@ -819,9 +780,7 @@ message SchemaItemPushButton
 }
 
 //
-//
 // SchemaItemLineEdit
-//
 //
 message SchemaItemLineEdit
 {
@@ -967,13 +926,6 @@ message Property
 	required string value = 2;
 }
 
-//------------------------------------------------------------------------------------------
-//
-//
-//			??????
-//
-//
-//------------------------------------------------------------------------------------------
 
 
 

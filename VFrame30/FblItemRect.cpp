@@ -605,7 +605,7 @@ namespace VFrame30
 							 itemUnit(),
 							 str,
 							 drawRect,
-							 Qt::TextDontClip | Qt::AlignBottom | Qt::AlignLeft);
+							 Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
 	}
 
 

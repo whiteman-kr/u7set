@@ -1771,6 +1771,54 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4060
+	///
+	/// IssueType: Error
+	///
+	/// Title: Loopback detected in LogicSchema %1, SchemaItem '%2'. To resolve issue use Loopback Source/Target items.
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item description
+	///
+	/// Description:
+	///		On schema loopback made via links or signals, to resolve issue use Loopback Source/Target items.
+	///
+	void IssueLogger::errALP4060(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4060,
+				  tr("Loopback detected in LogicSchema %1, SchemaItem '%2'. To resolve issue use Loopback Source/Target items.")
+				  .arg(schema)
+				  .arg(schemaItem));
+	}
+
+	/// IssueCode: ALP4061
+	///
+	/// IssueType: Error
+	///
+	/// Title: Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.
+	///
+	/// Parameters:
+	///		%1 LoopbackID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Two or more LoopbackSource have the same LoopbackID.
+	///
+	void IssueLogger::errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuids, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4061,
+				  tr("Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.")
+				  .arg(loopbackId)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4130
 	///
 	/// IssueType: Error

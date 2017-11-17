@@ -130,6 +130,8 @@ namespace VFrame30
 	const QString PropertyNames::fineAperture("FineAperture");
 	const QString PropertyNames::adaptiveAperture("AdaptiveAperture");
 
+	const QString PropertyNames::loopbackId("LoopbackID");
+
 	const QString PropertyNames::busTypeId("BusTypeID");
 	const QString PropertyNames::busTypeFileName("FileName");
 	const QString PropertyNames::busAutoSignalPlacemanet("AutoSignalPlacement");

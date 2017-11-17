@@ -108,6 +108,11 @@ namespace VFrame30
 		SchemaUnit unit() const;
 		void setUnit(SchemaUnit value);
 
+		int activeLayerIndex() const;
+		QUuid activeLayerGuid() const;
+		std::shared_ptr<VFrame30::SchemaLayer> activeLayer() const;
+		void setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer);
+
 		double gridSize() const;
 		void setGridSize(double value);
 
@@ -147,6 +152,7 @@ namespace VFrame30
 
 		SchemaUnit m_unit = SchemaUnit::Inch;	// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 
+		int m_activeLayer = 0;
 		double m_gridSize = 1.0;				// Grid size for this schema, depends on SchemaUnit
 		int m_pinGridStep = 2;					// Grid multiplier to determine vertical distance between pins
 

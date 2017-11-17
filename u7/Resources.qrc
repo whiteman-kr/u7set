@@ -1,4 +1,4 @@
-<RCC>
+<RCC>  
     <qresource prefix="/Images">
         <file>Images/cross.png</file>
         <file>Images/lock.png</file>
@@ -30,6 +30,8 @@
         <file>Images/SchemaItemValue.svg</file>
         <file>Images/SchemaBusComposer.svg</file>
         <file>Images/SchemaBusExtractor.svg</file>
+        <file>Images/SchemaLoopbackSource.svg</file>
+        <file>Images/SchemaLoopbackTarget.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
