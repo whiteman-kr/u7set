@@ -691,7 +691,7 @@ void MainWindow::updateUfbsAfbs()
 				}
 			}
 
-			std::shared_ptr<LogicModule> logicModuleDescription = logicModuleSet.get(lmDescriptionFile);
+			std::shared_ptr<LmDescription> logicModuleDescription = logicModuleSet.get(lmDescriptionFile);
 			if (logicModuleDescription == nullptr)
 			{
 				assert(logicModuleDescription);

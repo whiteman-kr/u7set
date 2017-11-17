@@ -412,6 +412,60 @@ namespace Builder
 		return;
 	}
 
+	const Afb::AfbElement& AppLogicItem::afbElement() const				// Specific instance!!! with initialized Params
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement();
+		}
+		else
+		{
+			assert(m_fblItem->isAfbElement());
+			static const Afb::AfbElement dummy;
+			return dummy;
+		}
+	}
+
+	Afb::AfbElement& AppLogicItem::afbElement()							// Specific instance!!! with initialized Params
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement();
+		}
+		else
+		{
+			assert(m_fblItem->isAfbElement());
+			static Afb::AfbElement dummy;
+			return dummy;
+		}
+	}
+
+	std::shared_ptr<Afb::AfbComponent> AppLogicItem::afbComponent()
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement().component();
+		}
+		else
+		{
+			assert(false);	// Just ask yourself, why are you here?
+			return std::shared_ptr<Afb::AfbComponent>();
+		}
+	}
+
+	std::shared_ptr<Afb::AfbComponent> AppLogicItem::afbComponent() const
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement().component();
+		}
+		else
+		{
+			assert(false);	// Just ask yourself, why are you here?
+			return std::shared_ptr<Afb::AfbComponent>();
+		}
+	}
+
 	bool AppLogicItem::operator < (const AppLogicItem& li) const
 	{
 		return this->m_fblItem.get() < li.m_fblItem.get();
@@ -2224,7 +2278,7 @@ namespace Builder
 		{
 			assert(module->lmDescriptionFile().isEmpty() == false);
 
-			std::shared_ptr<LogicModule> logicModuleDescription = lmDescriptionSet->get(module->lmDescriptionFile());
+			std::shared_ptr<LmDescription> logicModuleDescription = lmDescriptionSet->get(module->lmDescriptionFile());
 			if (logicModuleDescription == nullptr)
 			{
 				log->errALP4016(QString("Look schema for %1").arg(module->equipmentId()), module->lmDescriptionFile());
@@ -2441,6 +2495,7 @@ namespace Builder
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
+		LOG_MESSAGE(m_log, "");
 		LOG_MESSAGE(m_log, tr("Ordering User Functional Blocks items..."));
 
 		ok = m_applicationData->orderUfbItems(m_log);
@@ -2614,12 +2669,17 @@ namespace Builder
 	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
 	{
 		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String("%.") + ::UfbFileExtension);
+		m_log->writeMessage(tr("Loaded %1 UFB logic file(s).").arg(out->size()));
+		m_log->writeMessage("");
 		return ok;
 	}
 
 	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out)
 	{
-		return loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String("%.") + ::AlFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String("%.") + ::AlFileExtension);
+		m_log->writeMessage(tr("Loaded %1 Application Logic file(s).").arg(out->size()));
+		m_log->writeMessage("");
+		return ok;
 	}
 
 	template<typename SchemaType>
@@ -3065,7 +3125,7 @@ namespace Builder
 			return false;
 		}
 
-		std::shared_ptr<LogicModule> lmd = m_lmDescriptions->get(lmDescriptionFile);
+		std::shared_ptr<LmDescription> lmd = m_lmDescriptions->get(lmDescriptionFile);
 		if (lmd == nullptr)
 		{
 			assert(lmd);

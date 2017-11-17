@@ -209,6 +209,9 @@ int SqlFieldBase::init(int objectType, int)
 
 		case SQL_TABLE_REPORT_HEADER:
 
+			append("ObjectID",						QVariant::Int);
+			append("ReportID",						QVariant::Int);
+
 			break;
 
 		case SQL_TABLE_RACK_GROUP:

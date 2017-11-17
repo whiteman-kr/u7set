@@ -11,7 +11,7 @@
 #include "UalItems.h"
 #include "../Connection.h"
 
-class LogicModule;
+class LmDescription;
 class OutputLog;
 
 namespace Builder
@@ -108,7 +108,7 @@ namespace Hardware
 	public:
 		OptoPort();
 
-		bool init(const DeviceController* controller, int portNo, LogicModule *lmDescription, Builder::IssueLogger* log);
+		bool init(const DeviceController* controller, int portNo, LmDescription *lmDescription, Builder::IssueLogger* log);
 
 		bool initSettings(ConnectionShared cn);
 
@@ -390,7 +390,7 @@ namespace Hardware
 		OptoModule();
 		~OptoModule();
 
-		bool init(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log);
+		bool init(DeviceModule* module, LmDescription* lmDescription, Builder::IssueLogger* log);
 
 		bool isLmOrBvb();
 		bool isOcm();
@@ -432,7 +432,7 @@ namespace Hardware
 		//
 		QString m_equipmentID;
 		DeviceModule* m_deviceModule = nullptr;
-		LogicModule* m_lmDescription = nullptr;
+		LmDescription* m_lmDescription = nullptr;
 
 		int m_place = 0;
 

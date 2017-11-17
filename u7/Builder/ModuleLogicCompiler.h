@@ -15,7 +15,7 @@
 
 #include "../u7/Connection.h"
 
-class LogicModule;
+class LmDescription;
 
 namespace Builder
 {
@@ -393,7 +393,7 @@ namespace Builder
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorStorage* m_cmpStorage = nullptr;
 
-		std::shared_ptr<LogicModule> m_lmDescription;
+		std::shared_ptr<LmDescription> m_lmDescription;
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;

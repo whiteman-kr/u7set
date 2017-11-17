@@ -1,6 +1,6 @@
 #include "OptoModule.h"
 
-#include "../LogicModule.h"
+#include "../lib/LmDescription.h"
 #include "../Builder/Builder.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
@@ -132,7 +132,7 @@ namespace Hardware
 	{
 	}
 
-	bool OptoPort::init(const DeviceController* controller, int portNo, LogicModule* lmDescription, Builder::IssueLogger* log)
+	bool OptoPort::init(const DeviceController* controller, int portNo, LmDescription* lmDescription, Builder::IssueLogger* log)
 	{
 		if (controller == nullptr ||
 			log == nullptr ||
@@ -1942,7 +1942,7 @@ namespace Hardware
 	{
 	}
 
-	bool OptoModule::init(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log)
+	bool OptoModule::init(DeviceModule* module, LmDescription* lmDescription, Builder::IssueLogger* log)
 	{
 		if (module == nullptr || lmDescription == nullptr || log == nullptr)
 		{
@@ -3470,11 +3470,11 @@ namespace Hardware
 			return false;
 		}
 
-		std::shared_ptr<LogicModule> lmDescription = m_lmDescriptionSet->get(chassisLm);
+		std::shared_ptr<LmDescription> lmDescription = m_lmDescriptionSet->get(chassisLm);
 
 		if (lmDescription == nullptr)
 		{
-			QString lmDescriptionFile = LogicModule::lmDescriptionFile(module);
+			QString lmDescriptionFile = LmDescription::lmDescriptionFile(module);
 
 			m_log->errEQP6004(module->equipmentIdTemplate(), lmDescriptionFile, module->uuid());
 			return false;

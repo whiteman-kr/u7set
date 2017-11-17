@@ -8,8 +8,9 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/TimeStamp.h"
 #include "Builder/OptoModule.h"
+#include "Builder/ModuleFirmwareWriter.h"
 #include "version.h"
-#include "LogicModule.h"
+#include "../lib/LmDescription.h"
 
 #include <QtQml>
 
@@ -126,7 +127,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<TimeStamp>();
 	qRegisterMetaType<TimeSpan>();
 
-    qmlRegisterType<QJsVariantList>();
+	qmlRegisterType<JsVariantList>();
     qmlRegisterType<Hardware::OptoPort>();
 
 
