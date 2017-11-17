@@ -44,6 +44,24 @@ namespace Builder
 
 			double idrPhaseTimeUsed = 0;			// Input Data Receive phase time
 			double alpPhaseTimeUsed = 0;			// Application Logic Processing phase time
+
+			//
+
+			CodeFragmentMetrics initAfbs;
+			CodeFragmentMetrics copyAcquiredRawDataInRegBuf;
+			CodeFragmentMetrics convertAnalogInputSignals;
+			CodeFragmentMetrics appLogicCode;
+			CodeFragmentMetrics copyAcquiredAnalogOptoSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredAnalogBusChildSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredTuningAnalogSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredConstAnalogSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteInputSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredTuningDiscreteSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
+			CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;
+			CodeFragmentMetrics copyOptoConnectionsTxData;
 		};
 
 	private:
@@ -246,8 +264,6 @@ namespace Builder
 		bool finalizeOptoConnectionsProcessing();
 		bool setOptoUalSignalsAddresses();
 
-		bool generateAppStartCommand();
-
 		bool initAfbs();
 		bool initAppFbParams(UalAfb* appFb, bool instantiatorsOnly);
 		bool displayAfbParams(const UalAfb& appFb);
@@ -256,10 +272,6 @@ namespace Builder
 
 		bool copyAcquiredRawDataInRegBuf();
 		bool convertAnalogInputSignals();
-
-		bool copySerialRxSignals();
-		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
-		bool copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 
 		bool generateAppLogicCode();
 
@@ -349,6 +361,7 @@ namespace Builder
 		void writeLMCodeTestFile();
 
 		void displayResourcesUsageInfo();
+		void calcOptoDiscretesStatistics();
 		void cleanup();
 
 		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);

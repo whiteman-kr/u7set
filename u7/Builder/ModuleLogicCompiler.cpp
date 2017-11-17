@@ -147,12 +147,10 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
 			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
-			PROC_TO_CALL(ModuleLogicCompiler::generateAppStartCommand),
 			PROC_TO_CALL(ModuleLogicCompiler::initAfbs),
 			PROC_TO_CALL(ModuleLogicCompiler::startAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
 			PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
-//			PROC_TO_CALL(ModuleLogicCompiler::copySerialRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf),
@@ -187,6 +185,8 @@ namespace Builder
 			msg = QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
 			LOG_MESSAGE(m_log, msg);
 		}
+
+		calcOptoDiscretesStatistics();
 
 		cleanup();
 
@@ -4214,23 +4214,20 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateAppStartCommand()
+	bool ModuleLogicCompiler::initAfbs()
 	{
+		m_code.init(&m_resourcesUsageInfo.initAfbs);
+
 		Command cmd;
 
 		// first command in program!
-
+		//
 		cmd.appStart(0);		// real address is set in startAppLogicCode function
-
 		cmd.setComment(tr("set address of application logic code start"));
+
 		m_code.append(cmd);
 		m_code.newLine();
 
-		return true;
-	}
-
-	bool ModuleLogicCompiler::initAfbs()
-	{
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
 		bool result = true;
@@ -4272,14 +4269,21 @@ namespace Builder
 			}
 		}
 
-		Command cmd;
-
 		cmd.stop();
 
 		m_code.comment(tr("End of FB's initialization code section"));
 		m_code.newLine();
 		m_code.append(cmd);
 		m_code.newLine();
+
+		// set APPSTART command to current address
+		//
+		cmd.appStart(m_code.commandAddress());
+		cmd.clearComment();
+
+		m_code.replaceAt(0, cmd);
+
+		m_code.calculate(&m_resourcesUsageInfo.initAfbs);
 
 		return result;
 	}
@@ -4447,23 +4451,10 @@ namespace Builder
 
 	bool ModuleLogicCompiler::startAppLogicCode()
 	{
-		// set APPSTART command to current address
-		//
-		Command cmd;
-
-		cmd.appStart(m_code.commandAddress());
-
-		m_code.replaceAt(0, cmd);
-
-		//
-		//
-
-		Comment comment;
-
-		comment.setComment(tr("Start of application logic code"));
-
-		m_code.append(comment);
+		m_code.comment(tr("Start of application logic code"));
 		m_code.newLine();
+
+		Command cmd;
 
 		cmd.movBitConst(m_memoryMap.constBit0Addr(), 0);
 		cmd.setComment("init const bit 0");
@@ -4499,6 +4490,8 @@ namespace Builder
 		{
 			return true;
 		}
+
+		m_code.init(&m_resourcesUsageInfo.convertAnalogInputSignals);
 
 		m_code.comment("Convertion of analog input signals");
 		m_code.newLine();
@@ -4583,158 +4576,9 @@ namespace Builder
 			m_code.newLine();
 		}
 
-		return result;
-	}
-
-	bool ModuleLogicCompiler::copySerialRxSignals()
-	{
-		// copying serial rx signals from rx buffers to signals in LM memory
-		//
-		QList<Hardware::OptoPortShared> ports;
-
-		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), ports);
-
-		bool first = true;
-
-		Comment comment;
-		Command cmd;
-
-		bool result = true;
-
-		for(const Hardware::OptoPortShared& port : ports)
-		{
-			if (port == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (port->isSinglePortConnection() == false || port->rxSignalsCount() == 0)
-			{
-				continue;
-			}
-
-			if (first == true)
-			{
-				comment.setComment("Copying serial ports rx signals from rx buffers to signals in LMs memory");
-
-				m_code.append(comment);
-				m_code.newLine();
-
-				first = false;
-			}
-
-			comment.setComment(QString("Copying rx signals of serial port %1").arg(port->equipmentID()));
-
-			m_code.append(comment);
-			m_code.newLine();
-
-			const QVector<Hardware::TxRxSignalShared>& rxSignals = port->rxSignals();
-
-			for(const Hardware::TxRxSignalShared& rxSignal : rxSignals)
-			{
-				if(rxSignal == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				switch(rxSignal->signalType())
-				{
-				case E::SignalType::Analog:
-					result &= copySerialRxAnalogSignal(port, rxSignal);
-					break;
-
-				case E::SignalType::Discrete:
-					result &= copySerialRxDiscreteSignal(port, rxSignal);
-					break;
-
-				default:
-					assert(false);
-				}
-			}
-		}
-
-		if (first == false)
-		{
-			m_code.newLine();
-		}
+		m_code.calculate(&m_resourcesUsageInfo.convertAnalogInputSignals);
 
 		return result;
-	}
-
-	bool ModuleLogicCompiler::copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal)
-	{
-		TEST_PTR_RETURN_FALSE(port);
-		TEST_PTR_RETURN_FALSE(rxSignal);
-
-		if (rxSignal->signalType() != E::SignalType::Analog ||
-			rxSignal->dataSize() != SIZE_32BIT)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		Signal* s = m_signals->getSignal(rxSignal->appSignalID());
-
-		if (s == nullptr)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		if (s->ualAddr().isValid() == false)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		bool res = s->isCompatibleFormat(rxSignal->signalType(), rxSignal->dataFormat(), rxSignal->dataSize(), rxSignal->byteOrder());
-
-		if (res == false)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		Command cmd;
-
-		cmd.mov32(s->ualAddr().offset(), port->rxBufAbsAddress() + rxSignal->addrInBuf().offset());
-		cmd.setComment(QString("copy rx signal %1").arg(rxSignal->appSignalID()));
-
-		m_code.append(cmd);
-
-		return true;
-	}
-
-	bool ModuleLogicCompiler::copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal)
-	{
-		TEST_PTR_RETURN_FALSE(port);
-		TEST_PTR_RETURN_FALSE(rxSignal);
-
-		if (rxSignal->signalType() != E::SignalType::Discrete)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		Signal* s = m_signals->getSignal(rxSignal->appSignalID());
-
-		if (s == nullptr)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		if (s->ualAddr().isValid() == false)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		Command cmd;
-
-		cmd.movBit(s->ualAddr().offset(), s->ualAddr().bit(),
-				   port->rxBufAbsAddress() + rxSignal->addrInBuf().offset(),
-				   rxSignal->addrInBuf().bit());
-		cmd.setComment(QString("copy rx signal %1").arg(rxSignal->appSignalID()));
-
-		m_code.append(cmd);
-
-		return true;
 	}
 
 	bool ModuleLogicCompiler::generateAppLogicCode()
@@ -4742,6 +4586,8 @@ namespace Builder
 		LOG_MESSAGE(m_log, QString("Generation of application logic code was started..."));
 
 		bool result = true;
+
+		m_code.init(&m_resourcesUsageInfo.appLogicCode);
 
 		m_code.comment("Application logic code");
 		m_code.newLine();
@@ -4779,6 +4625,8 @@ namespace Builder
 				result = false;
 			}
 		}
+
+		m_code.calculate(&m_resourcesUsageInfo.appLogicCode);
 
 		return result;
 	}
@@ -5802,6 +5650,7 @@ namespace Builder
 			{
 				cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
 				cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
+				m_code.append(cmd);
 			}
 		}
 		else
@@ -5810,9 +5659,8 @@ namespace Builder
 
 			cmd.movBit(busChildSignal->ualAddr(), inputSignal->ualAddr());
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
+			m_code.append(cmd);
 		}
-
-		m_code.append(cmd);
 
 		return true;
 	}
@@ -6276,6 +6124,8 @@ namespace Builder
 			return true;
 		}
 
+		m_code.init(&m_resourcesUsageInfo.copyAcquiredAnalogOptoSignalsToRegBuf);
+
 		bool result = true;
 
 		m_code.comment("Copy acquired opto signals in regBuf");
@@ -6328,6 +6178,8 @@ namespace Builder
 
 		m_code.newLine();
 
+		m_code.calculate(&m_resourcesUsageInfo.copyAcquiredAnalogOptoSignalsToRegBuf);
+
 		return result;
 	}
 
@@ -6342,6 +6194,8 @@ namespace Builder
 		{
 			return true;
 		}
+
+		m_code.init(&m_resourcesUsageInfo.copyAcquiredTuningAnalogSignalsToRegBuf);
 
 		Comment cmnt;
 
@@ -6455,6 +6309,8 @@ namespace Builder
 
 		m_code.newLine();
 
+		m_code.calculate(&m_resourcesUsageInfo.copyAcquiredTuningAnalogSignalsToRegBuf);
+
 		return true;
 	}
 
@@ -6464,6 +6320,8 @@ namespace Builder
 		{
 			return true;
 		}
+
+		m_code.init(&m_resourcesUsageInfo.copyAcquiredTuningDiscreteSignalsToRegBuf);
 
 		Comment cmnt;
 
@@ -6709,102 +6567,30 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf()
 	{
-		return copyScatteredDiscreteSignalsInRegBuf(m_acquiredDiscreteInputSignals, "acquired discrete input signals");
-/*
-		if (m_acquiredDiscreteInputSignals.isEmpty() == true)
-		{
-			return true;
-		}
+		m_code.init(&m_resourcesUsageInfo.copyAcquiredDiscreteInputSignalsToRegBuf);
 
-		Comment comment;
+		bool result = copyScatteredDiscreteSignalsInRegBuf(m_acquiredDiscreteInputSignals, "acquired discrete input signals");
 
-		comment.setComment("Copy acquired discrete input signals in regBuf");
-		m_code.append(comment);
-		m_code.newLine();
+		m_code.calculate(&m_resourcesUsageInfo.copyAcquiredDiscreteInputSignalsToRegBuf);
 
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
-
-		int signalsCount = m_acquiredDiscreteInputSignals.count();
-
-		int count = 0;
-
-		Command cmd;
-
-		int countReminder16 = 0;
-
-		bool zeroLastWord = (signalsCount % SIZE_16BIT) != 0 ? true : false;
-
-		for(UalSignal* ualSignal : m_acquiredDiscreteInputSignals)
-		{
-			if (ualSignal == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				return false;
-			}
-
-			assert(ualSignal->isConst() == false);
-
-			if (ualSignal->ualAddr().isValid() == false ||
-				ualSignal->regBufAddr().isValid() == false ||
-				ualSignal->regValueAddr().isValid() == false)
-			{
-				assert(false);				// signal's ualAddr ot regBufAddr is not initialized!
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			Signal* inputSignal = ualSignal->getInputSignal();
-
-			if (inputSignal == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				return false;
-			}
-
-			if (ualSignal->ualAddr() != inputSignal->ualAddr() ||
-				ualSignal->ualAddr() != inputSignal->ioBufAddr())
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			countReminder16 = count % SIZE_16BIT;
-
-			assert(ualSignal->regBufAddr().bit() == countReminder16);
-
-			if (countReminder16 == 0 && (signalsCount - count) < SIZE_16BIT && zeroLastWord == true)
-			{
-				cmd.movConst(bitAccAddr, 0);
-				cmd.clearComment();
-				m_code.append(cmd);
-				zeroLastWord = false;
-			}
-
-			cmd.movBit(bitAccAddr, ualSignal->regBufAddr().bit(), inputSignal->ioBufAddr().offset(), inputSignal->ioBufAddr().bit());
-			cmd.setComment(QString("copy %1").arg(ualSignal->acquiredRefSignalsIDs().join(", ")));
-			m_code.append(cmd);
-
-			count++;
-
-			if ((count % SIZE_16BIT) == 0 || count == signalsCount)
-			{
-				cmd.clearComment();
-				cmd.mov(ualSignal->regBufAddr().offset(), bitAccAddr);
-				m_code.append(cmd);
-				m_code.newLine();;
-			}
-		}
-
-		return true;*/
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf()
 	{
-		return copyScatteredDiscreteSignalsInRegBuf(m_acquiredDiscreteOptoAndBusChildSignals, "acquired discrete opto and bus child signals");
+		m_code.init(&m_resourcesUsageInfo.copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf);
+
+		bool result = copyScatteredDiscreteSignalsInRegBuf(m_acquiredDiscreteOptoAndBusChildSignals, "acquired discrete opto and bus child signals");
+
+		m_code.calculate(&m_resourcesUsageInfo.copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf);
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf()
 	{
+		m_code.init(&m_resourcesUsageInfo.copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf);
+
 		if (m_acquiredDiscreteStrictOutputSignals.isEmpty() == false)
 		{
 			assert(m_memoryMap.acquiredDiscreteOutputSignalsSizeW() ==
@@ -6840,6 +6626,8 @@ namespace Builder
 			m_code.append(cmd);
 			m_code.newLine();
 		}
+
+		m_code.calculate(&m_resourcesUsageInfo.copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf);
 
 		return true;
 	}
@@ -6967,11 +6755,15 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory()
 	{
+		m_code.init(&m_resourcesUsageInfo.copyOutputSignalsInOutputModulesMemory);
+
 		bool result = true;
 
 		//		result &= initOutputModulesMemory(); is now requred now!!
 		result &= conevrtOutputAnalogSignals();
 		result &= copyOutputDiscreteSignals();
+
+		m_code.calculate(&m_resourcesUsageInfo.copyOutputSignalsInOutputModulesMemory);
 
 		return result;
 	}
@@ -7348,6 +7140,8 @@ namespace Builder
 			return true;
 		}
 
+		m_code.init(&m_resourcesUsageInfo.copyOptoConnectionsTxData);
+
 		for(Hardware::OptoModuleShared& module : modules)
 		{
 			if (module == nullptr)
@@ -7394,6 +7188,8 @@ namespace Builder
 				result &= copyOptoPortTxData(port);
 			}
 		}
+
+		m_code.calculate(&m_resourcesUsageInfo.copyOptoConnectionsTxData);
 
 		return result;
 	}
@@ -9112,6 +8908,83 @@ namespace Builder
 		m_resourcesUsageInfo.wordMemoryUsed = percentOfUsedWordMemory;
 		m_resourcesUsageInfo.idrPhaseTimeUsed = idrPhaseTimeUsed;
 		m_resourcesUsageInfo.alpPhaseTimeUsed = alpPhaseTimeUsed;
+
+		//
+
+		LOG_MESSAGE(m_log, QString("Init AFBs code: %1").arg(m_resourcesUsageInfo.initAfbs.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Analog inputs conversion code: %1").arg(m_resourcesUsageInfo.convertAnalogInputSignals.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Application logic code: %1").arg(m_resourcesUsageInfo.appLogicCode.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Acquired analog opto signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredAnalogOptoSignalsToRegBuf.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Acquired tuning analog signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredTuningAnalogSignalsToRegBuf.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Acquired tuning discrete signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredTuningDiscreteSignalsToRegBuf.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Acquired discrete input signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredDiscreteInputSignalsToRegBuf.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Acquired discrete output and internal signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Acquired discrete opto and bus child signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf.codePercentStr()));
+		LOG_MESSAGE(m_log, QString("Output signals copying to output modules: %1").arg(m_resourcesUsageInfo.copyOutputSignalsInOutputModulesMemory.codePercentStr()));
+
+		LOG_MESSAGE(m_log, QString("Opto connections tx data copying: %1").arg(m_resourcesUsageInfo.copyOptoConnectionsTxData.codePercentStr()));
+
+/*		CodeFragmentMetrics copyAcquiredRawDataInRegBuf;
+		CodeFragmentMetrics copyAcquiredAnalogBusChildSignalsToRegBuf;
+		CodeFragmentMetrics copyAcquiredConstAnalogSignalsToRegBuf;
+		CodeFragmentMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
+		CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
+		CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;*/
+	}
+
+	void ModuleLogicCompiler::calcOptoDiscretesStatistics()
+	{
+		QList<Hardware::OptoPortShared> associatedPorts;
+
+		bool res = m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), associatedPorts);
+
+		QHash<UalSignal*, int> signalsRefs;
+
+		for(Hardware::OptoPortShared port : associatedPorts)
+		{
+			const QVector<Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+
+			for(Hardware::TxRxSignalShared txSignal : txSignals)
+			{
+				if (txSignal->isDiscrete() == false || txSignal->isRegular() == false)
+				{
+					continue;
+				}
+
+				UalSignal* ualSignal = m_ualSignals.get(txSignal->appSignalID());
+
+				if (ualSignal == nullptr)
+				{
+					LOG_NULLPTR_ERROR(m_log);
+					continue;
+				}
+
+				int refCount = signalsRefs.value(ualSignal, 0);
+
+				refCount++;
+
+				signalsRefs.insert(ualSignal, refCount);
+			}
+		}
+
+		int ref1Count = 0;
+
+		for(int refCount : signalsRefs)
+		{
+			if (refCount == 1)
+			{
+				ref1Count++;
+			}
+		}
+
+		double percent = 0;
+
+		if (signalsRefs.count() != 0)
+		{
+			percent = static_cast<double>(ref1Count) / static_cast<double>(signalsRefs.count()) * 100;
+		}
+
+		LOG_MESSAGE(m_log, QString("Percent of discretes transmitted via 1 opto-port: %1").arg(percent));
 	}
 
 	void ModuleLogicCompiler::cleanup()

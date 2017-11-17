@@ -1736,6 +1736,20 @@ namespace Builder
 		return m_result;
 	}
 
+	void CodeFragmentMetrics::setEndAddr(int endAddr)
+	{
+		m_endAddr = endAddr;
+
+		m_codePercent = static_cast<double>(m_endAddr - m_startAddr) * 100.0 / 65536.0 ;
+	}
+
+
+	QString CodeFragmentMetrics::codePercentStr() const
+	{
+		QString str;
+
+		return str.sprintf("%.2f%", static_cast<float>(m_codePercent));
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -2277,4 +2291,25 @@ namespace Builder
 		return true;
 	}
 
+	void ApplicationLogicCode::init(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setStartAddr(m_commandAddress);
+	}
+
+	void ApplicationLogicCode::calculate(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setEndAddr(m_commandAddress);
+	}
 }

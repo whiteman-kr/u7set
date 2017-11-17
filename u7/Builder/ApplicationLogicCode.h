@@ -402,6 +402,23 @@ namespace Builder
 
 	typedef QVector<Command> Commands;
 
+	struct CodeFragmentMetrics
+	{
+		void setStartAddr(int startAddr) { m_startAddr = startAddr; }
+		void setEndAddr(int endAddr);
+
+		double codePercent() const { return m_codePercent; }
+		QString codePercentStr() const;
+
+	private:
+		int m_startAddr = 0;
+		int m_endAddr = 0;
+		int m_runTime = 0;
+
+		double m_codePercent = 0;
+
+	};
+
 	class ApplicationLogicCode : public QObject
 	{
 		Q_OBJECT
@@ -443,6 +460,9 @@ namespace Builder
 		void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 		int commandAddress() const { return m_commandAddress; }
+
+		void init(CodeFragmentMetrics* codeFragmentMetrics);
+		void calculate(CodeFragmentMetrics* codeFragmentMetrics);
 	};
 
 }
