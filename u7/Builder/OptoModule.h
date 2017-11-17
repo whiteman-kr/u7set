@@ -170,12 +170,39 @@ namespace Hardware
 
 		Q_INVOKABLE quint16 portID() const { return linkID(); }					// rename in java!
 
-		Q_INVOKABLE quint32 txDataID() const { return m_txDataID; }
+		Q_INVOKABLE quint32 txDataID() const
+		{
+			QString thisPortID= m_equipmentID;
+			QString linkedPortID = m_linkedPortID;
+			quint32 id = m_txDataID;
+
+			return m_txDataID;
+		}
 		quint32 rxDataID() const { return m_rxDataID; }
 
 		Q_INVOKABLE QString equipmentID() const { return m_equipmentID; }
 
-		Q_INVOKABLE QString linkedPortID() const { return m_linkedPortID; }
+		Q_INVOKABLE QString linkedPortID() const
+		{
+			QString thisPortID= m_equipmentID;
+			QString linkedPortID = m_linkedPortID;
+			quint32 id = m_txDataID;
+
+			if (m_equipmentID == "USB_SHFS5_CH01_MD05_OPTOPORT01")
+			{
+				int a = 0;
+				a++;
+			}
+
+			if (m_equipmentID == "USB_SHDU1_CH01_MD00_OPTOPORT01")
+			{
+
+				int a = 0;
+				a++;
+			}
+
+			return m_linkedPortID;
+		}
 		void setLinkedPortID(const QString& linkedPortID) { m_linkedPortID = linkedPortID; }
 
 		Q_INVOKABLE bool isLinked() const { return !m_linkedPortID.isEmpty(); }

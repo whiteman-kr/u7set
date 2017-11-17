@@ -426,11 +426,7 @@ namespace Builder
 
 					if (validitySignalID.isEmpty() == false)
 					{
-						if (m_linkedValidtySignalsID.contains(deviceSignal->equipmentIdTemplate()) == true)
-						{
-							assert(false);
-						}
-						else
+						if (m_linkedValidtySignalsID.contains(deviceSignal->equipmentIdTemplate()) == false)
 						{
 							// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
 							//
