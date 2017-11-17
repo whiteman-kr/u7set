@@ -602,7 +602,7 @@ namespace Hardware
 
 			if (frame >= frameCount())
 			{
-				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: data is too big. frame = %2, frameCount = %3").arg(channel).arg(frame).arg(frameCount()));
+				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount()));
 				return false;
 			}
 
@@ -659,7 +659,7 @@ namespace Hardware
 
 					if (frame >= frameCount())
 					{
-						log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: data is too big. frame = %2, frameCount = %3").arg(channel).arg(frame).arg(frameCount()));
+						log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount()));
 						return false;
 					}
 
