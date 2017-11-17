@@ -5798,8 +5798,11 @@ namespace Builder
 
 		if (inputSignal->isConst() == true)
 		{
-			cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
-			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
+			if (inputSignal->constDiscreteValue() != 0)
+			{
+				cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
+				cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
+			}
 		}
 		else
 		{
@@ -8370,9 +8373,20 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->isBus() == false || ualSignal->bus() == nullptr)
+			if (ualSignal->isBus() == false)
 			{
-				LOG_INTERNAL_ERROR(m_log);
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+								   QString("Raw tx UalSignal %1 is not bus(Opto port %2).").
+										arg(txSignal->appSignalID()).arg(port->equipmentID()));
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->bus() == nullptr)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+								   QString("Raw tx UalSignal %1 is not bus undefined (Opto port %2).").
+										arg(txSignal->appSignalID()).arg(port->equipmentID()));
 				result = false;
 				continue;
 			}
