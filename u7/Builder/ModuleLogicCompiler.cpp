@@ -8376,7 +8376,7 @@ namespace Builder
 			if (ualSignal->isBus() == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
-								   QString("Raw tx UalSignal %1 is not bus(Opto port %2).").
+								   QString("Raw tx UalSignal %1 type is not a Bus (Opto port %2).").
 										arg(txSignal->appSignalID()).arg(port->equipmentID()));
 				result = false;
 				continue;
@@ -8385,7 +8385,7 @@ namespace Builder
 			if (ualSignal->bus() == nullptr)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
-								   QString("Raw tx UalSignal %1 is not bus undefined (Opto port %2).").
+								   QString("Raw tx UalSignal %1 bus description is undefined (Opto port %2).").
 										arg(txSignal->appSignalID()).arg(port->equipmentID()));
 				result = false;
 				continue;
