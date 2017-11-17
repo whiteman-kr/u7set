@@ -1429,7 +1429,7 @@ namespace Builder
 		//
 		QString parseErrorMessage;
 
-		std::shared_ptr<LogicModule> lmd = std::make_shared<LogicModule>();
+		std::shared_ptr<LmDescription> lmd = std::make_shared<LmDescription>();
 
 		result = lmd->load(file->data(), &parseErrorMessage);
 

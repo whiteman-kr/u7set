@@ -9,33 +9,9 @@
 //
 // ----------------------------------------------------------------------------
 
-class QJsVariantList : public QObject
-{
-    Q_OBJECT
-
-    QVariantList l;
-
-public:
-    QJsVariantList(QObject* parent);
-    ~QJsVariantList();
-
-    void append(QVariant v);
-    Q_INVOKABLE int jsSize();
-    Q_INVOKABLE QVariant jsAt(int i);
-
-
-};
 
 namespace Hardware
 {
-
-	class ModuleFirmwareData
-	{
-	public:
-		quint64 uniqueID = 0;
-		QByteArray data;
-	};
-
 	class ModuleFirmware : public QObject
 	{
 		Q_OBJECT
@@ -53,71 +29,48 @@ namespace Hardware
 		//
 	public:
 		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName,
-				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, int descriptionFieldsVersion, const QStringList& descriptionFields);
-		bool load(QString fileName, QString &errorCode, bool readDataFrames);
+				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId);
+
+		bool loadHeader(QString fileName, QString &errorCode);
+		bool load(QString fileName, QString &errorCode);
+
 		bool isEmpty() const;
 
-		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
-		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
-		Q_INVOKABLE bool setData32(int frameIndex, int offset, quint32 data);
-        bool setData64(int frameIndex, int offset, quint64 data);
-
-		Q_INVOKABLE quint8 data8(int frameIndex, int offset);
-		Q_INVOKABLE quint16 data16(int frameIndex, int offset);
-		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
-
-        Q_INVOKABLE QJsVariantList* calcHash64(QString dataString);
-        Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);
-        Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
-
-		Q_INVOKABLE quint32 calcCrc32(int frameIndex, int start, int count);
-
-        Q_INVOKABLE void writeLog(QString logString);
-
-		Q_INVOKABLE void jsSetDescriptionFields(int descriptionVersion, QString fields);
-
-		void setDescriptionFields(int descriptionVersion, const QStringList& fields);
-
-		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
-
+		int frameCount() const;
 		const std::vector<quint8> frame(int frameIndex) const;
-
-		quint64 uniqueID(int lmNumber);
-		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
-
-		void setGenericUniqueId(int lmNumber, quint64 genericUniqueId);
-
-	private:
-
-		bool load_version1(const QJsonObject& jConfig, bool readDataFrames);
-		bool load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames);
-		bool load_version5(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
 
 		// Properties
 		//
 	public:
+		int fileVersion() const;
+		int maxFileVersion() const;
+
 		QString caption() const;
 		QString subsysId() const;
 		quint16 ssKey() const;
 		int uartId() const;
 		int frameSize() const;
 		int frameSizeWithCRC() const;
-		int frameCount() const;
 		int changesetId() const;
-		int fileVersion() const;
-		int maxFileVersion() const;
 
 		QString projectName() const;
 		QString userName() const;
 		int buildNumber() const;
 		QString buildConfig() const;
 
-		const QByteArray& log() const;
+	private:
+		bool loadFromFile(QString fileName, QString& errorCode, bool readDataFrames);
 
+		bool load_version1(const QJsonObject& jConfig, bool readDataFrames);
+		bool load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames);
+		bool load_version5(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
 
 		// Data
 		//
 	protected:
+		int m_fileVersion = 0;
+		int m_maxFileVersion = 5;	//Latest version
+
 		QString m_caption;
 		QString m_subsysId;
 		quint16 m_ssKey = 0;
@@ -125,38 +78,16 @@ namespace Hardware
 		int m_frameSize = 0;
 		int m_frameSizeWithCRC = 0;
 		int m_changesetId = 0;
-		int m_fileVersion = 0;
-		int m_maxFileVersion = 5;	//Latest version
+
 
 		QString m_projectName;
 		QString m_userName;
 		int m_buildNumber = 0;
 		QString m_buildConfig;
 
-
-		// data description
-		//
-		QStringList m_descriptionFields;
-		int m_descriptionFieldsVersion = 0;
-		std::map<int, std::vector<QVariantList>> m_descriptonData;
-
-		// channel data
-		//
-		std::map<int, ModuleFirmwareData> m_channelData;
-
-		// Unique ID
-		//
-		std::map<int, quint64> m_dataUniqueIDMap;
-
 		// binary data
 		//
 		std::vector<std::vector<quint8>> m_frames;
-
-
-		QByteArray m_log;
-
 	};
-
-
 }
 

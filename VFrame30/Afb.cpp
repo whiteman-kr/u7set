@@ -63,6 +63,16 @@ namespace Afb
 
 		m_versionOpIndex = xmlElement.attribute(QLatin1String("VersionOpIndex")).toInt();
 
+		// MaxInstCount
+		//
+		if (xmlElement.hasAttribute(QLatin1String("MaxInstCount")) == false)
+		{
+			*errorMessage = QString("AFBCompoment %1 does not have attribute MaxInstCount").arg(m_caption);
+			return false;
+		}
+
+		m_maxInstCount = xmlElement.attribute(QLatin1String("MaxInstCount")).toInt();
+
 		return true;
 	}
 
@@ -114,114 +124,15 @@ namespace Afb
 		m_versionOpIndex = value;
 	}
 
-	//
-	//				AfbComponenAfbType
-	//
-	//	AfbType::AfbType() :
-	//		m_type(Type::UNKNOWN)
-	//	{
-	//	}
+	int AfbComponent::maxInstCount() const
+	{
+		return m_maxInstCount;
+	}
 
-	//	AfbType::AfbType(const AfbType& t) :
-	//		m_type(t.m_type)
-	//	{
-	//	}
-
-	//	AfbType::AfbType(AfbType::Type t) :
-	//		m_type(t)
-	//	{
-	//	}
-
-	//	void AfbType::fromOpCode(int opCode)
-	//	{
-	//#ifdef Q_DEBUG
-	//		if (toText(opCode) == "UNKNOWN")
-	//		{
-	//			//assert(false);
-	//			m_type = Type::UNKNOWN;
-	//			return;
-	//		}
-	//#endif
-	//		m_type = static_cast<Type>(opCode);
-	//		return;
-	//	}
-
-	//	int AfbType::toOpCode() const
-	//	{
-	//		return static_cast<int>(m_type);
-	//	}
-
-	//	QString AfbType::text() const
-	//	{
-	//		return toText(toOpCode());
-	//	}
-
-	//	QString AfbType::toText() const
-	//	{
-	//		return toText(toOpCode());
-	//	}
-
-	//	QString AfbType::toText(int opCode)
-	//	{
-	//		switch (static_cast<Type>(opCode))
-	//		{
-	//			case Type::UNKNOWN:
-	//				return "UNKNOWN";
-	//			case Type::LOGIC:
-	//				return "LOGIC";
-	//			case Type::NOT:
-	//				return "NOT";
-	//			case Type::TCT:
-	//				return "TCT";
-	//			case Type::FLIP_FLOP:
-	//				return "FLIP_FLOP";
-	//			case Type::CTUD:
-	//				return "CTUD";
-	//			case Type::MAJ:
-	//				return "MAJ";
-	//			case Type::SRSST:
-	//				return "SRSST";
-	//			case Type::BCOD:
-	//				return "BCOD";
-	//			case Type::BDEC:
-	//				return "BDEC";
-	//			case Type::BCOMP:
-	//				return "BCOMP";
-	//			case Type::DAMPER:
-	//				return "DAMPER";
-	//			case Type::MEM:
-	//				return "MEM";
-	//			case Type::MATH:
-	//				return "MATH";
-	//			case Type::SCALE:
-	//				return "SCALE";
-	//			case Type::SCALE_P:
-	//				return "SCALE_P";
-	//			case Type::FUNC:
-	//				return "FUNC";
-	//			case Type::INT:
-	//				return "INT";
-	//			case Type::DPCOMP:
-	//				return "DPCOMP";
-	//			case Type::MUX:
-	//				return "MUX";
-	//			case Type::LATCH:
-	//				return "LATCH";
-	//			case Type::LIM:
-	//				return "LIM";
-	//			case Type::DEAD_ZONE:
-	//				return "DEAD_ZONE";
-	//			case Type::POL:
-	//				return "POL";
-	//			case Type::DER:
-	//				return "DER";
-	//			case Type::MISMATCH:
-	//				return "MISMATCH";
-	//			default:
-	//				assert(false);
-	//				return "UNKNOWN";
-	//		}
-	//	}
+	void AfbComponent::setMaxInstCount(int value)
+	{
+		m_maxInstCount = value;
+	}
 
 
 	//
@@ -787,91 +698,91 @@ namespace Afb
 
 		// OpName
 		//
-		if (xmlElement.hasAttribute("OpName") == false)
+		if (xmlElement.hasAttribute(QLatin1String("OpName")) == false)
 		{
 			*errorMessage = "Can't find attribute OpName.";
 			return false;
 		}
 
-		m_opName = xmlElement.attribute("OpName");
+		m_opName = xmlElement.attribute(QLatin1String("OpName"));
 
 		// Caption
 		//
-		if (xmlElement.hasAttribute("Caption") == false)
+		if (xmlElement.hasAttribute(QLatin1String("Caption")) == false)
 		{
 			*errorMessage = "Can't find attribute Caption.";
 			return false;
 		}
 
-		m_caption = xmlElement.attribute("Caption");
+		m_caption = xmlElement.attribute(QLatin1String("Caption"));
 
 		// Visible
 		//
-		if (xmlElement.hasAttribute("Visible") == false)
+		if (xmlElement.hasAttribute(QLatin1String("Visible")) == false)
 		{
 			*errorMessage = "Can't find attribute Visible.";
 			return false;
 		}
 
-		m_visible = xmlElement.attribute("Visible").compare("true", Qt::CaseInsensitive) == 0;
+		m_visible = xmlElement.attribute(QLatin1String("Visible")).compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 		// OpIndex
 		//
-		if (xmlElement.hasAttribute("OpIndex") == false)
+		if (xmlElement.hasAttribute(QLatin1String("OpIndex")) == false)
 		{
 			*errorMessage = "Can't find attribute OpIndex.";
 			return false;
 		}
 
-		m_operandIndex = xmlElement.attribute("OpIndex").toInt();
+		m_operandIndex = xmlElement.attribute(QLatin1String("OpIndex")).toInt();
 
 		// Size
 		//
-		if (xmlElement.hasAttribute("Size") == false)
+		if (xmlElement.hasAttribute(QLatin1String("Size")) == false)
 		{
 			*errorMessage = "Can't find attribute Size.";
 			return false;
 		}
 
-		m_size = xmlElement.attribute("Size").toInt();
+		m_size = xmlElement.attribute(QLatin1String("Size")).toInt();
 
 		// Instantiator
 		//
-		if (xmlElement.hasAttribute("Instantiator") == false)
+		if (xmlElement.hasAttribute(QLatin1String("Instantiator")) == false)
 		{
 			*errorMessage = "Can't find attribute Instantiator.";
 			return false;
 		}
 
-		m_instantiator = xmlElement.attribute("Instantiator").compare("true", Qt::CaseInsensitive) == 0;
+		m_instantiator = xmlElement.attribute(QLatin1String("Instantiator")).compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 		// User
 		//
-		if (xmlElement.hasAttribute("User") == false)
+		if (xmlElement.hasAttribute(QLatin1String("User")) == false)
 		{
 			*errorMessage = "Can't find attribute User.";
 			return false;
 		}
 
-		m_user = xmlElement.attribute("User").compare("true", Qt::CaseInsensitive) == 0;
+		m_user = xmlElement.attribute(QLatin1String("User")).compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 		// Type
 		//
-		if (xmlElement.hasAttribute("Type") == false)
+		if (xmlElement.hasAttribute(QLatin1String("Type")) == false)
 		{
 			*errorMessage = QString("Can't find attribute Type. Pin %1").arg(m_caption);
 			return false;
 		}
 
-		QString typeAttribute = xmlElement.attribute("Type");
+		QString typeAttribute = xmlElement.attribute(QLatin1String("Type"));
 
-		if (typeAttribute.compare(QLatin1String("Analog"), Qt::CaseInsensitive) == 0)
+		if (typeAttribute.compare(QLatin1String(QLatin1String("Analog")), Qt::CaseInsensitive) == 0)
 		{
 			m_type = E::SignalType::Analog;
 		}
 		else
 		{
-			if (typeAttribute.compare(QLatin1String("Discrete"), Qt::CaseInsensitive) == 0)
+			if (typeAttribute.compare(QLatin1String(QLatin1String("Discrete")), Qt::CaseInsensitive) == 0)
 			{
 				m_type = E::SignalType::Discrete;
 			}
@@ -886,13 +797,13 @@ namespace Afb
 		//
 		if (isAnalog() == true)
 		{
-			if (xmlElement.hasAttribute("DataFormat") == false)
+			if (xmlElement.hasAttribute(QLatin1String("DataFormat")) == false)
 			{
 				*errorMessage = QString("Can't find attribute DataFormat. Param %1").arg(m_caption);
 				return false;
 			}
 
-			QString dataFormatAttribute = xmlElement.attribute("DataFormat");
+			QString dataFormatAttribute = xmlElement.attribute(QLatin1String("DataFormat"));
 
 			if (dataFormatAttribute.compare(QLatin1String("UnsignedInt"), Qt::CaseInsensitive) == 0)
 			{
@@ -974,7 +885,7 @@ namespace Afb
 		};
 
 		{
-			QDomElement valueElement = xmlElement.firstChildElement("Value");
+			QDomElement valueElement = xmlElement.firstChildElement(QLatin1String("Value"));
 
 			if (valueElement.isNull() == true)
 			{
@@ -989,7 +900,7 @@ namespace Afb
 		// Section <Default>
 		//
 		{
-			QDomElement defaultElement = xmlElement.firstChildElement("Default");
+			QDomElement defaultElement = xmlElement.firstChildElement(QLatin1String("Default"));
 
 			if (user() == true &&
 					defaultElement.isNull() == true)
@@ -1010,7 +921,7 @@ namespace Afb
 			// Section <LowLimit>
 			//
 			{
-				QDomElement e = xmlElement.firstChildElement("LowLimit");
+				QDomElement e = xmlElement.firstChildElement(QLatin1String("LowLimit"));
 
 				if (user() == true &&
 						e.isNull() == true)
@@ -1029,7 +940,7 @@ namespace Afb
 			// Section <HighLimit>
 			//
 			{
-				QDomElement e = xmlElement.firstChildElement("HighLimit");
+				QDomElement e = xmlElement.firstChildElement(QLatin1String("HighLimit"));
 
 				if (user() == true &&
 						e.isNull() == true)
@@ -1049,7 +960,7 @@ namespace Afb
 		// Section <Units>
 		//
 		{
-			QDomElement e = xmlElement.firstChildElement("Units");
+			QDomElement e = xmlElement.firstChildElement(QLatin1String("Units"));
 
 			if (e.isNull() == true)
 			{
@@ -1067,11 +978,11 @@ namespace Afb
 		m_changedScript.clear();
 
 		{
-			QDomElement s = xmlElement.firstChildElement("Script");
+			QDomElement s = xmlElement.firstChildElement(QLatin1String("Script"));
 
 			if (s.isNull() == false)
 			{
-				QDomElement sc = s.firstChildElement("Changed");
+				QDomElement sc = s.firstChildElement(QLatin1String("Changed"));
 
 				if (sc.isNull() == false)
 				{
@@ -1492,38 +1403,38 @@ namespace Afb
 
 		// id
 		//
-		if (xmlElement.hasAttribute("id") == false)
+		if (xmlElement.hasAttribute(QLatin1String("id")) == false)
 		{
 			*errorMessage = tr("Cant find attribute id.");
 			return false;
 		}
 
-		m_strId = xmlElement.attribute("id");
+		m_strId = xmlElement.attribute(QLatin1String("id"));
 
 		// Caption
 		//
-		if (xmlElement.hasAttribute("Caption") == false)
+		if (xmlElement.hasAttribute(QLatin1String("Caption")) == false)
 		{
 			*errorMessage = tr("Cant find attribute Caption. AFB %1").arg(m_strId);
 			return false;
 		}
 
-		m_caption = xmlElement.attribute("Caption");
+		m_caption = xmlElement.attribute(QLatin1String("Caption"));
 
 		// Version
 		//
-		if (xmlElement.hasAttribute("Version") == false)
+		if (xmlElement.hasAttribute(QLatin1String("Version")) == false)
 		{
 			*errorMessage = tr("Cant find attribute Version. AFB %1").arg(m_strId);
 			return false;
 		}
 
-		m_version = xmlElement.attribute("Version");
+		m_version = xmlElement.attribute(QLatin1String("Version"));
 
 		// Section Properties
 		//
 		{
-			QDomElement properties = xmlElement.firstChildElement("Properties");
+			QDomElement properties = xmlElement.firstChildElement(QLatin1String("Properties"));
 
 			if (properties.isNull() == true)
 			{
@@ -1534,7 +1445,7 @@ namespace Afb
 			// Section Properties::Description
 			//
 			{
-				QDomElement description = properties.firstChildElement("Description");
+				QDomElement description = properties.firstChildElement(QLatin1String("Description"));
 
 				if (description.isNull() == true)
 				{
@@ -1548,7 +1459,7 @@ namespace Afb
 			// Section Properties::Category
 			//
 			{
-				QDomElement category = properties.firstChildElement("Category");
+				QDomElement category = properties.firstChildElement(QLatin1String("Category"));
 
 				if (category.isNull() == true)
 				{
@@ -1562,7 +1473,7 @@ namespace Afb
 			// Section Properties::OpCode
 			//
 			{
-				QDomElement opCode = properties.firstChildElement("OpCode");
+				QDomElement opCode = properties.firstChildElement(QLatin1String("OpCode"));
 
 				if (opCode.isNull() == true)
 				{
@@ -1577,7 +1488,7 @@ namespace Afb
 			// Section Properties::HasRam
 			//
 			{
-				QDomElement hasRam = properties.firstChildElement("HasRam");
+				QDomElement hasRam = properties.firstChildElement(QLatin1String("HasRam"));
 
 				if (hasRam.isNull() == true)
 				{
@@ -1591,7 +1502,7 @@ namespace Afb
 			// Section Properties::InternalUse
 			//
 			{
-				QDomElement internalUse = properties.firstChildElement("InternalUse");
+				QDomElement internalUse = properties.firstChildElement(QLatin1String("InternalUse"));
 
 				if (internalUse.isNull() == true)
 				{
@@ -1605,7 +1516,7 @@ namespace Afb
 			// Section Properties::MinWidth
 			//
 			{
-				QDomElement minWidth = properties.firstChildElement("MinWidth");
+				QDomElement minWidth = properties.firstChildElement(QLatin1String("MinWidth"));
 
 				if (minWidth.isNull() == true)
 				{
@@ -1620,7 +1531,7 @@ namespace Afb
 			// Section Properties::MinHeight
 			//
 			{
-				QDomElement minHeight = properties.firstChildElement("MinHeight");
+				QDomElement minHeight = properties.firstChildElement(QLatin1String("MinHeight"));
 
 				if (minHeight.isNull() == true)
 				{
@@ -1636,7 +1547,7 @@ namespace Afb
 		// Section <Inputs>
 		//
 		{
-			QDomElement inputsElement = xmlElement.firstChildElement("Inputs");
+			QDomElement inputsElement = xmlElement.firstChildElement(QLatin1String("Inputs"));
 
 			if (inputsElement.isNull() == true)
 			{
@@ -1644,7 +1555,7 @@ namespace Afb
 				return false;
 			}
 
-			QDomElement p = inputsElement.firstChildElement("Pin");
+			QDomElement p = inputsElement.firstChildElement(QLatin1String("Pin"));
 			m_inputSignals.clear();
 
 			while (p.isNull() == false)
@@ -1662,14 +1573,14 @@ namespace Afb
 
 				m_inputSignals.push_back(afbSignal);
 
-				p = p.nextSiblingElement("Pin");
+				p = p.nextSiblingElement(QLatin1String("Pin"));
 			}
 		}
 
 		// Section <Outputs>
 		//
 		{
-			QDomElement outputsElement = xmlElement.firstChildElement("Outputs");
+			QDomElement outputsElement = xmlElement.firstChildElement(QLatin1String("Outputs"));
 
 			if (outputsElement.isNull() == true)
 			{
@@ -1677,7 +1588,7 @@ namespace Afb
 				return false;
 			}
 
-			QDomElement p = outputsElement.firstChildElement("Pin");
+			QDomElement p = outputsElement.firstChildElement(QLatin1String("Pin"));
 			m_outputSignals.clear();
 
 			while (p.isNull() == false)
@@ -1695,14 +1606,14 @@ namespace Afb
 
 				m_outputSignals.push_back(afbSignal);
 
-				p = p.nextSiblingElement("Pin");
+				p = p.nextSiblingElement(QLatin1String("Pin"));
 			}
 		}
 
 		// Section <Params>
 		//
 		{
-			QDomElement paramsElement = xmlElement.firstChildElement("Params");
+			QDomElement paramsElement = xmlElement.firstChildElement(QLatin1String("Params"));
 
 			if (paramsElement.isNull() == true)
 			{
@@ -1710,7 +1621,7 @@ namespace Afb
 				return false;
 			}
 
-			QDomElement p = paramsElement.firstChildElement("Param");
+			QDomElement p = paramsElement.firstChildElement(QLatin1String("Param"));
 			m_params.clear();
 
 			while (p.isNull() == false)
@@ -1728,7 +1639,7 @@ namespace Afb
 
 				m_params.push_back(afbParam);
 
-				p = p.nextSiblingElement("Param");
+				p = p.nextSiblingElement(QLatin1String("Param"));
 			}
 		}
 
@@ -1738,13 +1649,13 @@ namespace Afb
 		m_afterCreationScript.clear();
 
 		{
-			QDomElement commonScriptElement = xmlElement.firstChildElement("CommonScript");
+			QDomElement commonScriptElement = xmlElement.firstChildElement(QLatin1String("CommonScript"));
 
 			if (commonScriptElement.isNull() == false)
 			{
 				// Section <Library>
 				//
-				QDomElement libraryElement = commonScriptElement.firstChildElement("Library");
+				QDomElement libraryElement = commonScriptElement.firstChildElement(QLatin1String("Library"));
 
 				if (libraryElement.isNull() == false)
 				{
@@ -1753,7 +1664,7 @@ namespace Afb
 
 				// Section <AfterCreation>
 				//
-				QDomElement afterCreationElement = commonScriptElement.firstChildElement("AfterCreation");
+				QDomElement afterCreationElement = commonScriptElement.firstChildElement(QLatin1String("AfterCreation"));
 
 				if (afterCreationElement.isNull() == false)
 				{
@@ -1777,7 +1688,7 @@ namespace Afb
 			return !xmlReader.hasError();
 		}
 
-		if (QString::compare(xmlReader.name().toString(), "ApplicationFunctionalBlocks", Qt::CaseInsensitive) != 0)
+		if (QString::compare(xmlReader.name().toString(), QLatin1String("ApplicationFunctionalBlocks"), Qt::CaseInsensitive) != 0)
 		{
 			errorMsg = QObject::tr("The file is not an ApplicationFunctionalBlocks file.");
 			return !xmlReader.hasError();
@@ -1789,15 +1700,15 @@ namespace Afb
 		}
 
 
-		if (QString::compare(xmlReader.name().toString(), "AfbElement", Qt::CaseInsensitive) != 0)
+		if (QString::compare(xmlReader.name().toString(), QLatin1String("AfbElement"), Qt::CaseInsensitive) != 0)
 		{
 			errorMsg = QObject::tr("AfbElement expected.");
 			return !xmlReader.hasError();
 		}
 
-		if (xmlReader.attributes().hasAttribute("StrId"))
+		if (xmlReader.attributes().hasAttribute(QLatin1String("StrId")) == true)
 		{
-			setStrID(xmlReader.attributes().value("StrId").toString());
+			setStrID(xmlReader.attributes().value(QLatin1String("StrId")).toString());
 		}
 
 		// Reading params
@@ -1806,23 +1717,23 @@ namespace Afb
 
 		while (xmlReader.readNextStartElement())
 		{
-			if (QString::compare(xmlReader.name().toString(), "Properties", Qt::CaseInsensitive) == 0)
+			if (QString::compare(xmlReader.name().toString(), QLatin1String("Properties"), Qt::CaseInsensitive) == 0)
 			{
 				while (xmlReader.readNextStartElement())
 				{
-					if (QString::compare(xmlReader.name().toString(), "Caption", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), QLatin1String("Caption"), Qt::CaseInsensitive) == 0)
 					{
 						setCaption(xmlReader.readElementText());
 						continue;
 					}
 
-					if (QString::compare(xmlReader.name().toString(), "Version", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), QLatin1String("Version"), Qt::CaseInsensitive) == 0)
 					{
 						setVersion(xmlReader.readElementText());
 						continue;
 					}
 
-					if (QString::compare(xmlReader.name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), QLatin1String("OpCode"), Qt::CaseInsensitive) == 0)
 					{
 						int opCode = xmlReader.readElementText().toInt();
 						setOpCode(opCode);
@@ -1836,13 +1747,13 @@ namespace Afb
 			}
 
 
-			if (QString::compare(xmlReader.name().toString(), "Params", Qt::CaseInsensitive) == 0)
+			if (QString::compare(xmlReader.name().toString(), QLatin1String("Params"), Qt::CaseInsensitive) == 0)
 			{
 				// Read params
 				//
 				while (xmlReader.readNextStartElement())
 				{
-					if (QString::compare(xmlReader.name().toString(), "AfbElementParam", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), QLatin1String("AfbElementParam"), Qt::CaseInsensitive) == 0)
 					{
 						AfbParam afbParam;
 						afbParam.deprecatedLoadFromXml(&xmlReader);

@@ -8,7 +8,7 @@ QString DialogChoosePreset::m_lastSelectedPreset;
 Qt::SortOrder DialogChoosePreset::m_lastSortOrder = Qt::SortOrder::AscendingOrder;
 
 
-DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardware::DeviceType selectedType) :
+DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardware::DeviceType selectedType, bool limitToSelectedType) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogChoosePreset),
 	m_db(db)
@@ -84,52 +84,59 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 
 		bool showPreset = false;
 
-		switch (selectedType)
+		if (limitToSelectedType == true)
 		{
-		case Hardware::DeviceType::System:
-			if (presetType == Hardware::DeviceType::Rack ||
-				presetType == Hardware::DeviceType::Chassis ||
-				presetType == Hardware::DeviceType::Module ||
-				presetType == Hardware::DeviceType::Controller ||
-				presetType == Hardware::DeviceType::Workstation)
+			showPreset = (selectedType == presetType);
+		}
+		else
+		{
+			switch (selectedType)
 			{
-				showPreset = true;
-			}
-			break;
+			case Hardware::DeviceType::System:
+				if (presetType == Hardware::DeviceType::Rack ||
+					presetType == Hardware::DeviceType::Chassis ||
+					presetType == Hardware::DeviceType::Module ||
+					presetType == Hardware::DeviceType::Controller ||
+					presetType == Hardware::DeviceType::Workstation)
+				{
+					showPreset = true;
+				}
+				break;
 
-		case Hardware::DeviceType::Rack:
-			if (presetType == Hardware::DeviceType::Chassis ||
-				presetType == Hardware::DeviceType::Module ||
-				presetType == Hardware::DeviceType::Controller ||
-				presetType == Hardware::DeviceType::Workstation)
-			{
-				showPreset = true;
-			}
-			break;
+			case Hardware::DeviceType::Rack:
+				if (presetType == Hardware::DeviceType::Chassis ||
+					presetType == Hardware::DeviceType::Module ||
+					presetType == Hardware::DeviceType::Controller ||
+					presetType == Hardware::DeviceType::Workstation)
+				{
+					showPreset = true;
+				}
+				break;
 
-		case Hardware::DeviceType::Chassis:
-			if (presetType == Hardware::DeviceType::Module ||
-				presetType == Hardware::DeviceType::Controller ||
-				presetType == Hardware::DeviceType::Workstation)
-			{
-				showPreset = true;
-			}
-			break;
+			case Hardware::DeviceType::Chassis:
+				if (presetType == Hardware::DeviceType::Module ||
+					presetType == Hardware::DeviceType::Controller ||
+					presetType == Hardware::DeviceType::Workstation)
+				{
+					showPreset = true;
+				}
+				break;
 
-		case Hardware::DeviceType::Module:
-			if (presetType == Hardware::DeviceType::Controller)
-			{
-				showPreset = true;
-			}
-			break;
+			case Hardware::DeviceType::Module:
+				if (presetType == Hardware::DeviceType::Controller)
+				{
+					showPreset = true;
+				}
+				break;
 
-		case Hardware::DeviceType::Workstation:
-			if (presetType == Hardware::DeviceType::Controller ||
-				presetType == Hardware::DeviceType::Software)
-			{
-				showPreset = true;
+			case Hardware::DeviceType::Workstation:
+				if (presetType == Hardware::DeviceType::Controller ||
+					presetType == Hardware::DeviceType::Software)
+				{
+					showPreset = true;
+				}
+				break;
 			}
-			break;
 		}
 
 		if (showPreset == false)

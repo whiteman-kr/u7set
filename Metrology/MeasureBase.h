@@ -35,7 +35,6 @@ const int	MeasureTimeout[] =
 
 const int	MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(MeasureTimeout[0]);
 
-
 // ==============================================================================================
 
 const char* const	MeasureKind[] =
@@ -44,11 +43,11 @@ const char* const	MeasureKind[] =
 			QT_TRANSLATE_NOOP("MeasureBase.h", " in several racks"),
 };
 
-const int	MEASURE_KIND_COUNT = sizeof(MeasureKind)/sizeof(MeasureKind[0]);
+const int	MEASURE_KIND_COUNT		= sizeof(MeasureKind)/sizeof(MeasureKind[0]);
 
-const int	MEASURE_KIND_UNKNOWN			= -1,
-			MEASURE_KIND_ONE				= 0,
-			MEASURE_KIND_MULTI				= 1;
+const int	MEASURE_KIND_UNKNOWN	= -1,
+			MEASURE_KIND_ONE		= 0,
+			MEASURE_KIND_MULTI		= 1;
 
 // ==============================================================================================
 

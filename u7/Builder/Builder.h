@@ -4,7 +4,7 @@
 #include "../lib/Signal.h"
 #include "../TuningService/TuningDataStorage.h"
 
-#include "../LogicModule.h"
+#include "LogicModuleSet.h"
 
 #include "OptoModule.h"
 #include "Subsystem.h"

@@ -32,7 +32,7 @@
 #include "../VFrame30/Session.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
-#include "LogicModule.h"
+#include "../lib/LmDescription.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
@@ -5114,7 +5114,7 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 
 	// Parse file
 	//
-	LogicModule lm;
+	LmDescription lm;
 	QString parseErrorMessage;
 
 	result = lm.load(file->data(), &parseErrorMessage);
