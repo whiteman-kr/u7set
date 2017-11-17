@@ -13,7 +13,6 @@
 namespace Builder
 {
 
-
 	// ---------------------------------------------------------------------------------
 	//
 	//	ModuleLogicCompiler class implementation

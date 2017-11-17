@@ -3380,6 +3380,8 @@ namespace Hardware
 			OptoPort* portPtr = port.get();
 
 			QString thisPortID = portPtr->equipmentID();
+			quint32 thisPortDataID = portPtr->txDataID();
+			bool isLinked = portPtr->isLinked();
 
 			QQmlEngine::setObjectOwnership(portPtr, QQmlEngine::ObjectOwnership::CppOwnership);
 			return portPtr;
