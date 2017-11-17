@@ -547,16 +547,16 @@ namespace Hardware
 		const int storageConfigFrame = 1;
 		const int startDataFrame = 2;
 
-		const int LMNumber_Min = 1;
-		const int LMNumber_Max = 12;
-
 		quint16 ssKeyValue = m_ssKey << 6;
 
 		if (frameCount() < 3)
 		{
-			log->errINT1000(QString("ModuleFirmware::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId()));
+			log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId()));
 			return false;
 		}
+
+		const int LMNumber_Min = 1;
+		const int LMNumber_Max = 64;
 
 		// sort channel data by growing channel number
 		//
@@ -564,6 +564,12 @@ namespace Hardware
 		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
 		{
 			int channel = it->first;
+
+			if (channel < LMNumber_Min || channel > LMNumber_Max)
+			{
+				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: Wrong LM number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
+				return false;
+			}
 
 			const QByteArray& channelData = it->second;
 
@@ -596,7 +602,7 @@ namespace Hardware
 
 			if (frame >= frameCount())
 			{
-				log->errINT1000(QString("ModuleFirmware::storeChannelData error, LM number %1: data is too big. frame = %2, frameCount = %3").arg(channel).arg(frame).arg(frameCount()));
+				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: data is too big. frame = %2, frameCount = %3").arg(channel).arg(frame).arg(frameCount()));
 				return false;
 			}
 
@@ -651,6 +657,12 @@ namespace Hardware
 						index = 0;
 					}
 
+					if (frame >= frameCount())
+					{
+						log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: data is too big. frame = %2, frameCount = %3").arg(channel).arg(frame).arg(frameCount()));
+						return false;
+					}
+
 					m_frames[frame][index++] = channelData[i];
 				}
 
@@ -695,11 +707,6 @@ namespace Hardware
 		for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
 		{
 			int channel = channelNumbersAndSize[i].first;
-			if (channel < LMNumber_Min || channel > LMNumber_Max)
-			{
-				log->errINT1000(QString("ModuleFirmware::storeChannelData error, LM number %1: Wrong LM number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
-				return false;
-			}
 
 			quint8* ptrChannel = ptrChannelTable + (sizeof(quint16) * 3) *(channel - 1);
 
@@ -711,14 +718,8 @@ namespace Hardware
 			ptrChannel += sizeof(quint32);
 		}
 
-		ptr += (sizeof(quint16)  + sizeof(quint32)) * LMNumber_Max;
-
 		return true;
 	}
-
-
-
-
 
 	//
 	//
