@@ -1241,15 +1241,23 @@ namespace Builder
 
 		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
 		{
-			const std::vector<VFrame30::AfbPin>& inputs = currentItem.second.m_fblItem->inputs();
+			const AppLogicItem& appLogicItem = currentItem.second;
+			std::shared_ptr<VFrame30::FblItemRect> fblItem = appLogicItem.m_fblItem;
+			// qDebug() << "FblItem " << fblItem->label();
+
+			const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
 
 			for (const VFrame30::AfbPin& input : inputs)
 			{
 				const std::vector<QUuid>& assocOutputs = input.associatedIOs();
+//				for (const QUuid& u : assocOutputs)
+//				{
+//					qDebug() << "\t Assoc Outs" << u;
+//				}
 
 				if (assocOutputs.size() == 1)		// Only one output can be connected to input
 				{
-					outputPinToInputItem.insert({assocOutputs.front(), currentItem.second});
+					outputPinToInputItem.insert({assocOutputs.front(), appLogicItem});
 				}
 				else
 				{
@@ -1469,7 +1477,7 @@ namespace Builder
 
 				QString signalStrId = signalElement->appSignalIds();
 
-				signalInputItems.insert(signalStrId, li);
+				signalInputItems.insertMulti(signalStrId, li);
 				continue;
 			}
 
