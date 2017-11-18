@@ -178,6 +178,9 @@ namespace Hardware
 		Q_INVOKABLE QString linkedPortID() const { return m_linkedPortID; }
 		void setLinkedPortID(const QString& linkedPortID) { m_linkedPortID = linkedPortID; }
 
+		void setDisableDataIDControl(bool disable) { m_disableDataIDControl = disable; }
+		bool disableDataIDControl() const { return m_disableDataIDControl; }
+
 		Q_INVOKABLE bool isLinked() const { return !m_linkedPortID.isEmpty(); }
 
 		Q_INVOKABLE QString connectionID() const { return m_connectionID; }
@@ -281,6 +284,8 @@ namespace Hardware
 		Connection::Type m_connectionType = Connection::Type::PortToPort;
 
 		bool m_enableSerial = false;
+
+		bool m_disableDataIDControl = false;
 
 		// if m_enableSerial == true settings
 		//

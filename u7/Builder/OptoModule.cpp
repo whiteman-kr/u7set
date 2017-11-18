@@ -287,6 +287,7 @@ namespace Hardware
 			setEnableSerial(cn->port1EnableSerial());
 			setSerialMode(cn->port1SerialMode());
 			setEnableDuplex(cn->port1EnableDuplex());
+			setDisableDataIDControl(cn->disableDataId());
 
 			setManualSettings(cn->manualSettings());
 			setManualTxStartAddressW(cn->port1ManualTxStartAddress());
@@ -312,6 +313,7 @@ namespace Hardware
 			setEnableSerial(cn->port2EnableSerial());
 			setSerialMode(cn->port2SerialMode());
 			setEnableDuplex(cn->port2EnableDuplex());
+			setDisableDataIDControl(cn->disableDataId());
 
 			setManualSettings(cn->manualSettings());
 			setManualTxStartAddressW(cn->port2ManualTxStartAddress());
@@ -507,6 +509,11 @@ namespace Hardware
 		m_txDataID = 0;
 
 		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (disableDataIDControl() == true)
 		{
 			return true;
 		}

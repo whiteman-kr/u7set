@@ -341,6 +341,7 @@ namespace Builder
 		bool copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxBusSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
+		bool isCopyOptimizationAllowed(const Commands& copyCode, int* srcAddr);
 		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset);
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace);
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module);

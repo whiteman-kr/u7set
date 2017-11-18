@@ -4635,14 +4635,14 @@ namespace Builder
 	/// Description:
 	///		UalSignal is not found for pin with specified Uuid. Contact to RPCT developers.
 	///
-	void IssueLogger::errALC5120(QUuid ualItemUuid, QUuid pinUuid, QString schemaID)
+	void IssueLogger::errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5120,
-				  QString(tr("UalSignal is not found for pin '%1' (Logic schema '%2').")).
-							arg(pinUuid.toString()).arg(schemaID));
+				  QString(tr("UalSignal is not found for pin %1.%2 (Logic schema '%3').")).
+							arg(ualItemLabel).arg(pin).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5121
@@ -4769,7 +4769,7 @@ namespace Builder
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///	Signal and bus inputs sizes are not multiples.
+	///		Signal and bus inputs sizes are not multiples.
 	///
 	void IssueLogger::errALC5126(QUuid ualItemUuid, QString schemaID)
 	{
@@ -4779,6 +4779,55 @@ namespace Builder
 				  5126,
 				  QString(tr("Signal and bus inputs sizes are not multiples (Logic schema %1).")).arg(schemaID));
 	}
+
+	/// IssueCode: ALC5127
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Output bus type cannot be determined (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Output bus type cannot be determined.
+	///
+	void IssueLogger::errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5127,
+				  QString(tr("Output bus type cannot be determined (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5128
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		All AFB's bus inputs connected to discretes. Output bus type cannot be determined.
+	///
+	void IssueLogger::errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5128,
+				  QString(tr("All AFB's bus inputs connected to discretes (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+
+	void errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID);		//
 
 
 	//
@@ -4962,7 +5011,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: // Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
+	/// Title: Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
 	///
 	/// Parameters:
 	///		%1 Opto port 1 ID
