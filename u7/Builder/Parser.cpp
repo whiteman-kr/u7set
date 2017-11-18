@@ -412,6 +412,60 @@ namespace Builder
 		return;
 	}
 
+	const Afb::AfbElement& AppLogicItem::afbElement() const				// Specific instance!!! with initialized Params
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement();
+		}
+		else
+		{
+			assert(m_fblItem->isAfbElement());
+			static const Afb::AfbElement dummy;
+			return dummy;
+		}
+	}
+
+	Afb::AfbElement& AppLogicItem::afbElement()							// Specific instance!!! with initialized Params
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement();
+		}
+		else
+		{
+			assert(m_fblItem->isAfbElement());
+			static Afb::AfbElement dummy;
+			return dummy;
+		}
+	}
+
+	std::shared_ptr<Afb::AfbComponent> AppLogicItem::afbComponent()
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement().component();
+		}
+		else
+		{
+			assert(false);	// Just ask yourself, why are you here?
+			return std::shared_ptr<Afb::AfbComponent>();
+		}
+	}
+
+	std::shared_ptr<Afb::AfbComponent> AppLogicItem::afbComponent() const
+	{
+		if (m_fblItem->isAfbElement() == true)
+		{
+			return m_fblItem->toAfbElement()->afbElement().component();
+		}
+		else
+		{
+			assert(false);	// Just ask yourself, why are you here?
+			return std::shared_ptr<Afb::AfbComponent>();
+		}
+	}
+
 	bool AppLogicItem::operator < (const AppLogicItem& li) const
 	{
 		return this->m_fblItem.get() < li.m_fblItem.get();
@@ -1187,15 +1241,23 @@ namespace Builder
 
 		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
 		{
-			const std::vector<VFrame30::AfbPin>& inputs = currentItem.second.m_fblItem->inputs();
+			const AppLogicItem& appLogicItem = currentItem.second;
+			std::shared_ptr<VFrame30::FblItemRect> fblItem = appLogicItem.m_fblItem;
+			// qDebug() << "FblItem " << fblItem->label();
+
+			const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
 
 			for (const VFrame30::AfbPin& input : inputs)
 			{
 				const std::vector<QUuid>& assocOutputs = input.associatedIOs();
+//				for (const QUuid& u : assocOutputs)
+//				{
+//					qDebug() << "\t Assoc Outs" << u;
+//				}
 
 				if (assocOutputs.size() == 1)		// Only one output can be connected to input
 				{
-					outputPinToInputItem.insert({assocOutputs.front(), currentItem.second});
+					outputPinToInputItem.insert({assocOutputs.front(), appLogicItem});
 				}
 				else
 				{
@@ -1415,7 +1477,7 @@ namespace Builder
 
 				QString signalStrId = signalElement->appSignalIds();
 
-				signalInputItems.insert(signalStrId, li);
+				signalInputItems.insertMulti(signalStrId, li);
 				continue;
 			}
 

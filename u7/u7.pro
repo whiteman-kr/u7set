@@ -396,7 +396,9 @@ DISTFILES += \
     Ufbl/file2pgsql.exe \
     Ufbl/_convert_all.bat \
     LogicModuleDescription/LogicModule0000.xml \
-    ../Proto/network.proto
+    ../Proto/network.proto \
+    LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0011">
+<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0012">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -37,31 +37,31 @@
 	</OptoInterface>
 	
 	<AFBImplementation>
-		<AFBComponent Caption="LOGIC"		OpCode="1"	ImpVersion="206"	VersionOpIndex="22"/>
-		<AFBComponent Caption="NOT"			OpCode="2"	ImpVersion="103"	VersionOpIndex="3"/>
-		<AFBComponent Caption="TCT"			OpCode="3"	ImpVersion="207"	VersionOpIndex="14"/>
-		<AFBComponent Caption="FLIP_FLOP" 	OpCode="4"  ImpVersion="106"    VersionOpIndex="9"/>
-		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"/>
-		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="106"	VersionOpIndex="23"/>
-		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"/>
-		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="37"/>
-		<AFBComponent Caption="BDEC"		OpCode="9"	ImpVersion="103"	VersionOpIndex="37"/>
-		<AFBComponent Caption="BCOMP"		OpCode="10"	ImpVersion="110"	VersionOpIndex="12"/>
-		<AFBComponent Caption="DAMPER"		OpCode="11"	ImpVersion="108"	VersionOpIndex="21"/>		<!-- 	OpIndex 19 as in BDEC  !!!!!-->
-		<AFBComponent Caption="MEM"			OpCode="12"	ImpVersion="5"		VersionOpIndex="44"/>		<!-- 	ImpVersion="0" OpIndex="44 -->
-		<AFBComponent Caption="MATH"		OpCode="13"	ImpVersion="104"	VersionOpIndex="14"/>
-		<AFBComponent Caption="SCALE"		OpCode="14"	ImpVersion="107"	VersionOpIndex="16"/>		<!-- 	OpIndex 16 as in SCALE_P  !!!!!-->
-		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="1"		VersionOpIndex="13"/>		<!-- 	Same OpIndex, ImpVersion="0"-->
-		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="5"		VersionOpIndex="29"/>
-		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="2"		VersionOpIndex="16"/>		<!-- 	Same OpIndex, ImpVersion-->
-		<AFBComponent Caption="MUX"			OpCode="21"	ImpVersion="1"		VersionOpIndex="8"/>		<!-- 	Same ImpVersion="0"-->
-		<AFBComponent Caption="LATCH"		OpCode="22"	ImpVersion="3"		VersionOpIndex="15"/>
-		<AFBComponent Caption="LIM"			OpCode="23"	ImpVersion="5"		VersionOpIndex="14"/>
-		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="5"		VersionOpIndex="15"/>
-		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"/>
-		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="4"		VersionOpIndex="28"/>
-		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="1"		VersionOpIndex="22"/>
-		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"/>
+	    <AFBComponent Caption="LOGIC"		OpCode="1"	ImpVersion="206"	VersionOpIndex="22"	MaxInstCount="256"/>
+		<AFBComponent Caption="NOT"			OpCode="2"	ImpVersion="103"	VersionOpIndex="3"	MaxInstCount="1"/>
+		<AFBComponent Caption="TCT"			OpCode="3"	ImpVersion="207"	VersionOpIndex="14"	MaxInstCount="256"/>
+		<AFBComponent Caption="FLIP_FLOP" 	OpCode="4"  ImpVersion="106"    VersionOpIndex="9"	MaxInstCount="256"/>
+		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"	MaxInstCount="256"/>
+		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="106"	VersionOpIndex="23"	MaxInstCount="256"/>
+		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"	MaxInstCount="1"/>
+		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="37"	MaxInstCount="256"/>
+		<AFBComponent Caption="BDEC"		OpCode="9"	ImpVersion="103"	VersionOpIndex="37"	MaxInstCount="256"/>
+		<AFBComponent Caption="BCOMP"		OpCode="10"	ImpVersion="110"	VersionOpIndex="12"	MaxInstCount="512"/>
+		<AFBComponent Caption="DAMPER"		OpCode="11"	ImpVersion="108"	VersionOpIndex="21"	MaxInstCount="256"/>
+		<AFBComponent Caption="MEM"			OpCode="12"	ImpVersion="5"		VersionOpIndex="44"	MaxInstCount="256"/>
+		<AFBComponent Caption="MATH"		OpCode="13"	ImpVersion="104"	VersionOpIndex="14"	MaxInstCount="256"/>
+		<AFBComponent Caption="SCALE"		OpCode="14"	ImpVersion="107"	VersionOpIndex="16"	MaxInstCount="256"/>
+		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="1"		VersionOpIndex="13"	MaxInstCount="256"/>
+		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="5"		VersionOpIndex="29"	MaxInstCount="256"/>
+		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="2"		VersionOpIndex="16"	MaxInstCount="512"/>
+		<AFBComponent Caption="MUX"			OpCode="21"	ImpVersion="1"		VersionOpIndex="8"	MaxInstCount="1"/>
+		<AFBComponent Caption="LATCH"		OpCode="22"	ImpVersion="3"		VersionOpIndex="15"	MaxInstCount="256"/>
+		<AFBComponent Caption="LIM"			OpCode="23"	ImpVersion="5"		VersionOpIndex="14"	MaxInstCount="256"/>
+		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="5"		VersionOpIndex="15"	MaxInstCount="256"/>
+		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"	MaxInstCount="256"/>
+		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="4"		VersionOpIndex="28"	MaxInstCount="256"/>
+		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="1"		VersionOpIndex="22"	MaxInstCount="256"/>
+		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"	MaxInstCount="256"/>
 	</AFBImplementation>
 	<AFBL>
 

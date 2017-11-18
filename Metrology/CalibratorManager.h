@@ -25,6 +25,8 @@ public:
 
 private:
 
+	mutable QMutex	m_mutex;
+
 	Calibrator*		m_pCalibrator = nullptr;
 	bool			m_readyForManage = false;
 
@@ -38,7 +40,9 @@ public:
 	bool			calibratorIsConnected();
 	int				calibratorChannel() const;
 	QString			calibratorPort() const;
-	bool			isReadyForManage() const { return m_readyForManage; }
+
+	bool			isReadyForManage() const;
+	void			setReadyForManage(bool ready);
 
 	// elements of interface - Menu
 	//
