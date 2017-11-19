@@ -112,78 +112,62 @@ namespace Builder
 		clear();
 	}
 
-	bool AfblsMap::addInstance(UalAfb* ualAfb)
+	bool AfblsMap::addInstance(UalAfb* ualAfb, IssueLogger* log)
 	{
+		TEST_PTR_RETURN_FALSE(log);
+
 		if (ualAfb == nullptr)
 		{
-			assert(false);
+			LOG_NULLPTR_ERROR(log);
 			return false;
 		}
 
 		QString afbStrID = ualAfb->strID();
 
-		if (contains(afbStrID) == false)
-		{
-			assert(false);			// unknown FBL strID
-			return false;
-		}
-
-		Afbl* afbl = (*this)[afbStrID];
+		Afbl* afbl = (*this).value(afbStrID, nullptr);
 
 		if (afbl == nullptr)
 		{
-			assert(false);
-			return 0;
+			LOG_INTERNAL_ERROR(log);			// unknown FBL strID
+			return false;
+		}
+
+		int opCode = afbl->opCode();
+
+		if (m_fblInstance.contains(opCode) == false)
+		{
+			// Unknown AFB type (opCode) (Logic schema %1, item %2).
+			//
+			log->errALC5129(ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
+			return false;
 		}
 
 		int instance = 0;
 
+
 		QString instantiatorID = ualAfb->instantiatorID();
 
-		if (afbl->hasRam() == true)
+		if (afbl->hasRam() == false && m_nonRamFblInstance.contains(instantiatorID) == true)
 		{
-			int opCode = afbl->opCode();
-
-			if (m_fblInstance.contains(opCode))
-			{
-				instance = m_fblInstance[opCode];
-
-				instance++;
-
-				m_fblInstance[opCode] = instance;
-
-				m_nonRamFblInstance.insert(instantiatorID, instance);
-			}
-			else
-			{
-				assert(false);		// unknown opcode
-			}
+			// ualAfb has no RAM and its instantiatorID already exists - existing instance would be used
+			//
+			instance = m_nonRamFblInstance.value(instantiatorID);
 		}
 		else
 		{
-			// Calculate non-RAM Fbl instance
-			//
-			if (m_nonRamFblInstance.contains(instantiatorID))
+			// ualAfb has RAM or ualAfb has no RAM and its instantiatorID is not exist - new instance would be created
+
+			instance = m_fblInstance[opCode];
+
+			instance++;
+
+			m_fblInstance[opCode] = instance;
+
+			if (afbl->hasRam() == false)
 			{
-				instance = m_nonRamFblInstance.value(instantiatorID);
-			}
-			else
-			{
-				int opCode = afbl->opCode();
-				if (m_fblInstance.contains(opCode))
-				{
-					instance = m_fblInstance[opCode];
-
-					instance++;
-
-					m_fblInstance[opCode] = instance;
-
-					m_nonRamFblInstance.insert(instantiatorID, instance);
-				}
-				else
-				{
-					assert(false);		// unknown opcode
-				}
+				// append new instantiatorID for non-RAM afb
+				//
+				m_nonRamFblInstance.insert(instantiatorID, instance);
 			}
 		}
 

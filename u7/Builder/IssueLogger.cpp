@@ -4826,8 +4826,28 @@ namespace Builder
 						arg(schemaID).arg(itemLabel));
 	}
 
+	/// IssueCode: ALC5129
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown AFB type (opCode) (Logic schema %1, item %2).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Unknown AFB type (opCode) (Logic schema %1, item %2). Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
 
-	void errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID);		//
+		LOG_ERROR(IssueType::AlCompiler,
+				  5129,
+				  QString(tr("Unknown AFB type (opCode) (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
 
 
 	//

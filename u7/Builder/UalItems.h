@@ -79,7 +79,7 @@ namespace Builder
 	public:
 		virtual ~AfblsMap();
 
-		bool addInstance(UalAfb* ualAfb);
+		bool addInstance(UalAfb* ualAfb, IssueLogger *log);
 		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
 		void clear();
 
