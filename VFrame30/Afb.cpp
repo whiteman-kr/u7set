@@ -284,6 +284,10 @@ namespace Afb
 		m_maxInstCount = value;
 	}
 
+	const std::map<int, AfbComponentPin>& AfbComponent::pins() const
+	{
+		return m_pins;
+	}
 
 	//
 	//							AfbSignal

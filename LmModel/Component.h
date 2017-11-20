@@ -10,52 +10,56 @@ namespace LmModel
 
 	struct InstantiatorParam
 	{
-		InstantiatorParam(quint16 implNo, quint16 implParamOpIndex, quint16 dataLow, quint16 dataHigh);
+		InstantiatorParam() = default;
+		InstantiatorParam(const InstantiatorParam&) = default;
+		InstantiatorParam(quint16 instNo, quint16 instParamOpIndex, quint16 dataLow, quint16 dataHigh);
 
-		quint16 implNo = 0;
-		quint16 implParamOpIndex = 0;
+		quint16 instNo = 0;
+		quint16 instParamOpIndex = 0;
 
 		quint16 dataLow = 0;
 		quint16 dataHigh = 0;
 	};
 
-//	struct InstantiatorComponent
-//	{
-//		quint16 opCode = 0;
-//		std::map<quint16, InstantiatorParam> params;			// Key InstantiatorParam::implParamOpIndex
-//	};
+	// AfbComponentInstance, contains a set of params (InstantiatorParam) for this instance
+	//
+	class ComponentInst
+	{
+	public:
+		ComponentInst();
 
-//	class InstantiatorSet
-//	{
-//	public:
-//		InstantiatorSet();
+	public:
+		bool addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const InstantiatorParam& instParam, QString* errorMessage);
 
-//	public:
-//		clear();
-//		bool addInstantiatorParam(quint16 compOpCode, const InstantiatorParam& param, QString* errorMessage);
+	private:
+		std::map<quint16, InstantiatorParam> m_params;		// Key is InstantiatorParam.instParamOpIndex
+	};
 
-//	private:
-//		std::map<quint16, InstantiatorComponent> m_components;		// Key InstantiatorComponent::opCode
-//	};
-
-//	class ComponentImpl
-//	{
-
-//	};
-
+	// Model Component with a set of Instances
+	//
 	class ModelComponent : public Afb::AfbComponent
 	{
 	public:
-		ModelComponent();
+		ModelComponent() = delete;
+		ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp);
+
+	public:
+		bool addInstantiatorParam(const InstantiatorParam& instParam, QString* errorMessage);
 
 	private:
-		//std::map<quint16, ComponentImpl> m_implements;	// Key is ImplementationNo
+		std::map<quint16, ComponentInst> m_instances;			// Key is instNo
+		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
 	};
+
 
 	class AfbComponentSet
 	{
 	public:
 		AfbComponentSet();
+
+	public:
+		void clear();
+		bool addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const InstantiatorParam& instParam, QString* errorMessage);
 
 	private:
 		std::map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode

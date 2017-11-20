@@ -198,8 +198,13 @@ namespace LmModel
 		//
 		bool result = true;
 
+		// Initialization before work cycle
+		//
 		m_logicUnit = LogicUnitData();
+		m_afbComponents.clear();
 
+		// Run work cylce
+		//
 		do
 		{
 			quint16 commandWord = getWord(m_logicUnit.programCounter);
@@ -379,6 +384,7 @@ namespace LmModel
 
 	bool DeviceEmulator::command_wrfbc()
 	{
+		eqweqweqw
 		fault("Command not implemented " __FUNCTION__);
 		return false;
 	}
@@ -455,6 +461,7 @@ namespace LmModel
 		quint16 commandWord = getWord(m_logicUnit.programCounter);
 		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
 		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
 		m_logicUnit.programCounter++;
 
 		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
@@ -464,9 +471,28 @@ namespace LmModel
 		quint16 dataHigh = getWord(m_logicUnit.programCounter++);
 		quint16 dataLow = getWord(m_logicUnit.programCounter++);
 
-		InstantiatorParam ip(implNo, implParamOpIndex, dataHigh, dataLow);
+		// --
+		//
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
 
-		return false;
+		if (afbComp == nullptr)
+		{
+			fault(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			return false;
+		}
+
+		// --
+		//
+		InstantiatorParam ip(implNo, implParamOpIndex, dataHigh, dataLow);
+		QString errorMessage;
+		bool ok = m_afbComponents.addInstantiatorParam(afbComp, ip, &errorMessage);
+
+		if (ok == false)
+		{
+			fault(QString("Run command_wrfbc32 error, %1").arg(errorMessage));
+		}
+
+		return ok;
 	}
 
 	bool DeviceEmulator::command_rdfbts32()

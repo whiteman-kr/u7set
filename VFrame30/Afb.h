@@ -85,6 +85,8 @@ namespace Afb
 		int maxInstCount() const;
 		void setMaxInstCount(int value);
 
+		const std::map<int, AfbComponentPin>& pins() const;
+
 	private:
 		int m_opCode = -1;
 		QString m_caption;

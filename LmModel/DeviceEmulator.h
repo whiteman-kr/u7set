@@ -153,6 +153,8 @@ namespace LmModel
 
 		LogicUnitData m_logicUnit;
 
+		AfbComponentSet m_afbComponents;
+
 
 		// Info output
 		//

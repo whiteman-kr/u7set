@@ -46,10 +46,15 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 
-	while (lm.isFaultMode() == false || lm.isPowerOn() == true)
-	{
-		QThread::yieldCurrentThread();
-	};
+
+	getc(stdin);
+
+//	while (lm.isFaultMode() == false || lm.isPowerOn() == true)
+//	{
+//		QApp
+
+//		QThread::yieldCurrentThread();
+//	};
 
 	return 0;
 }
