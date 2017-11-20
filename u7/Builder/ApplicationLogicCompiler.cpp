@@ -730,7 +730,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, int lmDescriptionNumber, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -745,7 +745,7 @@ namespace Builder
 
 		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount,metadataFieldsVersion, metadataFields);
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount, lmDescriptionNumber, metadataFieldsVersion, metadataFields);
 
 		if (multichannelFile != nullptr)
 		{

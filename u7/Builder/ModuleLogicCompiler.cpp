@@ -260,6 +260,8 @@ namespace Builder
 		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
+		m_lmDescriptionNumber = m_lmDescription->descriptionNumber();
+
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
 		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
@@ -6425,7 +6427,7 @@ namespace Builder
 		}
 
 		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentIdTemplate(), m_lm->caption(),
-														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, uniqueID, m_code);
+														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_lmDescriptionNumber, uniqueID, m_code);
 		if (result == false)
 		{
 			return false;
