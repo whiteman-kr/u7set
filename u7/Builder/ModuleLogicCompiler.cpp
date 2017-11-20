@@ -1198,7 +1198,7 @@ namespace Builder
 			if (s == nullptr)
 			{
 				m_log->errALC5000(signalID, ualItem->guid(), ualItem->schemaID());
-				return nullptr;
+				return false;
 			}
 
 			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, m_lm->equipmentIdTemplate(), signalPin.guid());
@@ -5702,7 +5702,7 @@ namespace Builder
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		UalItem* connectedItem = nullptr;
@@ -5726,7 +5726,7 @@ namespace Builder
 			{
 				assert(false);
 				LOG_INTERNAL_ERROR(m_log);
-				return false;
+				return nullptr;
 			}
 
 			*connectedOutPinUuid = associatedOuts[0];
@@ -5795,7 +5795,7 @@ namespace Builder
 		if (extractor == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		// getting extractor's input pin
@@ -5805,7 +5805,7 @@ namespace Builder
 		if (inputs.size() != 1)
 		{
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		QUuid connectedOutPinUuid;
@@ -5836,7 +5836,7 @@ namespace Builder
 		default:
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		const UalSignal* srcSignal = m_ualSignals.get(srcSignalUuid);
@@ -5845,7 +5845,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signal is not found, GUID: %1")).arg(srcSignalUuid.toString()));
-			return false;
+			return nullptr;
 		}
 
 		return srcSignal;
@@ -5995,7 +5995,7 @@ namespace Builder
 		if (associatedOuts.size() != 1)
 		{
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		QUuid associatedOutUuid = associatedOuts[0];
@@ -6005,7 +6005,7 @@ namespace Builder
 		if (connectedPinParent == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		UalSignal* appSignal = nullptr;
