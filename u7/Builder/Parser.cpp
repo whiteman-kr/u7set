@@ -1416,7 +1416,7 @@ namespace Builder
 					{
 						int switchCounter = histForCurrentItem->getChangeCount(*dependantIsAbove);
 
-						if (switchCounter == 2)
+						if (switchCounter == 10)
 						{
 							continue;
 						}
