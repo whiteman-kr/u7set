@@ -3686,7 +3686,7 @@ namespace Builder
 
 		// get Functional Block instance
 		//
-		bool result = m_afbls.addInstance(appFb);
+		bool result = m_afbls.addInstance(appFb, m_log);
 
 		if (result == false)
 		{
@@ -8085,8 +8085,6 @@ namespace Builder
 
 		const QVector<Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
-		bool result = true;
-
 		Command cmd;
 
 		int count = 0;
@@ -9025,6 +9023,8 @@ namespace Builder
 		m_resourcesUsageInfo.idrPhaseTimeUsed = idrPhaseTimeUsed;
 		m_resourcesUsageInfo.alpPhaseTimeUsed = alpPhaseTimeUsed;
 
+		getAfblUsageInfo();
+
 		//
 
 		LOG_MESSAGE(m_log, QString("Init AFBs code: %1").arg(m_resourcesUsageInfo.initAfbs.codePercentStr()));
@@ -9052,7 +9052,7 @@ namespace Builder
 	{
 		QList<Hardware::OptoPortShared> associatedPorts;
 
-		bool res = m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), associatedPorts);
+		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), associatedPorts);
 
 		QHash<UalSignal*, int> signalsRefs;
 
@@ -9101,6 +9101,45 @@ namespace Builder
 		}
 
 		LOG_MESSAGE(m_log, QString("Percent of discretes transmitted via 1 opto-port: %1").arg(percent));
+	}
+
+	bool ModuleLogicCompiler::getAfblUsageInfo()
+	{
+		bool result = true;
+
+		if (m_lmDescription == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		m_resourcesUsageInfo.afblUsageInfo.clear();
+
+		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& components = m_lmDescription->afbComponents();
+
+		for(std::pair<int, std::shared_ptr<Afb::AfbComponent>> pair : components)
+		{
+			int componentOpCode = pair.first;
+			std::shared_ptr<Afb::AfbComponent> component = pair.second;
+
+			AfblUsageInfo aui;
+
+			aui.opCode = componentOpCode;
+			aui.caption = component->caption();
+			aui.maxInstances = component->maxInstCount();
+			aui.version = component->impVersion();
+
+			aui.usedInstances = m_afbls.getUsedInstances(componentOpCode);
+
+			if (aui.maxInstances != 0)
+			{
+				aui.usagePercent = static_cast<double>(aui.usedInstances) * 100.0 / static_cast<double>(aui.maxInstances);
+			}
+
+			m_resourcesUsageInfo.afblUsageInfo.append(aui);
+		}
+
+		return result;
 	}
 
 	void ModuleLogicCompiler::cleanup()

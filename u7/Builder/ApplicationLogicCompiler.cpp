@@ -449,6 +449,8 @@ namespace Builder
 
 		int maxIdLength = header.length();
 
+		QStringList afbsUsage;
+
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
 			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
@@ -486,6 +488,20 @@ namespace Builder
 										   info.codeMemoryUsed,
 										   info.idrPhaseTimeUsed,
 										   info.alpPhaseTimeUsed);
+
+			//
+			afbsUsage.append("");
+			afbsUsage.append(QString("LM %1 AFB components usage").arg(info.lmEquipmentID));
+			afbsUsage.append("");
+
+			for(const ModuleLogicCompiler::AfblUsageInfo& afblUsage : info.afblUsageInfo)
+			{
+				afbsUsage.append(QString("%1 %2 %3 %4 %5").arg(afblUsage.opCode).arg(afblUsage.caption).
+								 arg(afblUsage.usedInstances).arg(afblUsage.maxInstances).arg(afblUsage.usagePercent));
+			}
+
+			afbsUsage.append("");
+			//
 		}
 
 		auto reportGenerator = [&](QString caption, std::function<bool
@@ -577,6 +593,9 @@ namespace Builder
 		{
 			return std::get<6>(first) > std::get<6>(second);
 		}, 10);
+
+		fileContentStringList.append("");
+		fileContentStringList.append(afbsUsage);
 
 		m_resultWriter->addFile("Reports", "resources.txt", fileContentStringList);
 

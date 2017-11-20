@@ -143,7 +143,7 @@ namespace Builder
 		}
 
 		int instance = 0;
-
+		int maxInstances = afbl->maxInstances();
 
 		QString instantiatorID = ualAfb->instantiatorID();
 
@@ -160,6 +160,14 @@ namespace Builder
 			instance = m_fblInstance[opCode];
 
 			instance++;
+
+			if (instance > maxInstances)
+			{
+				// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+				//
+				log->errALC5130(afbl->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+				return false;
+			}
 
 			m_fblInstance[opCode] = instance;
 
@@ -307,6 +315,11 @@ namespace Builder
 		assert(false);
 
 		return LogicAfbSignal();
+	}
+
+	int AfblsMap::getUsedInstances(int opCode) const
+	{
+		return m_fblInstance.value(opCode, 0);
 	}
 
 	// ---------------------------------------------------------------------------------------

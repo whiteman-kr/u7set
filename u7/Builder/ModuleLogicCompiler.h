@@ -34,6 +34,16 @@ namespace Builder
 		Q_OBJECT
 
 	public:
+		struct AfblUsageInfo
+		{
+			int opCode = -1;
+			QString caption;
+			int usedInstances = 0;
+			int maxInstances = 0;
+			double usagePercent = 0;
+			int version = 0;				// version of AFB implementation
+		};
+
 		struct ResourcesUsageInfo
 		{
 			QString lmEquipmentID;
@@ -62,6 +72,8 @@ namespace Builder
 			CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
 			CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;
 			CodeFragmentMetrics copyOptoConnectionsTxData;
+
+			QVector<AfblUsageInfo> afblUsageInfo;
 		};
 
 	private:
@@ -363,6 +375,7 @@ namespace Builder
 
 		void displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();
+		bool getAfblUsageInfo();
 		void cleanup();
 
 		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);

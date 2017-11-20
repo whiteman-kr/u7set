@@ -58,6 +58,10 @@ namespace Builder
 
 		bool isBusProcessingAfb() const;
 
+		int maxInstances() const { return m_afb->component()->maxInstCount(); }
+		int version() const { return m_afb->component()->impVersion(); }
+		QString componentCaption() const { return m_afb->component()->caption(); }
+
 	private:
 		bool isBusProcessingAfbChecking() const;
 
@@ -84,6 +88,8 @@ namespace Builder
 		void clear();
 
 		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
+
+		int getUsedInstances(int opCode) const;
 
 	private:
 
