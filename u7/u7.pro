@@ -197,7 +197,6 @@ SOURCES +=\
     Builder/UalItems.cpp \
     EditEngine/EditEngineSetObject.cpp \
     ../lib/Address16.cpp \
-    EditEngine/EditEngineSetObject.cpp \
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
     CreateSignalDialog.cpp \
