@@ -202,6 +202,7 @@ namespace Hardware
 		jObject.insert("framesCount", frameCount());
 		jObject.insert("buildNumber", m_buildNumber);
 		jObject.insert("buildConfig", m_buildConfig);
+		jObject.insert("lmDescriptionNumber", m_lmDescriptionNumber);
 		jObject.insert("changesetId", m_changesetId);
 		jObject.insert("fileVersion", fileVersion());
 		jObject.insert("buildSoftware", m_buildSoftware);
@@ -689,6 +690,7 @@ namespace Hardware
 		*(quint16*)ptr = qToBigEndian((quint16)m_buildNumber);	// Build number
 		ptr += sizeof(quint16);
 
+		*(quint16*)ptr = qToBigEndian((quint16)m_lmDescriptionNumber);	// Description number
 		ptr += sizeof(quint16);	//reserved
 
 		ptr += sizeof(quint32);	//reserved
@@ -747,7 +749,7 @@ namespace Hardware
 		m_changesetId = changesetId;
 	}
 
-	ModuleFirmwareWriter* ModuleFirmwareCollection::get(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount)
+	ModuleFirmwareWriter* ModuleFirmwareCollection::get(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber)
 	{
 		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
@@ -755,16 +757,16 @@ namespace Hardware
 
 		if (newFirmware == true)
 		{
-			fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, m_projectName, m_userName,
+			fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, lmDescriptionNumber, m_projectName, m_userName,
 					m_buildNo, m_debug ? "debug" : "release", m_changesetId);
 		}
 
 		return &fw;
 	}
 
-	QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount)
+	QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber)
 	{
-		ModuleFirmwareWriter* fw = get(caption, subsysId, ssKey, uartId, frameSize, frameCount);
+		ModuleFirmwareWriter* fw = get(caption, subsysId, ssKey, uartId, frameSize, frameCount, lmDescriptionNumber);
 
 		QQmlEngine::setObjectOwnership(fw, QQmlEngine::ObjectOwnership::CppOwnership);
 

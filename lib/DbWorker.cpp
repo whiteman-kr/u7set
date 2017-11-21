@@ -196,6 +196,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0178.sql", "Upgrade to version 178, Add new LM descriptions: LM1-SF00 and LM1-SR01"},
 	{":/DatabaseUpgrade/Upgrade0179.sql", "Upgrade to version 179, To LM1-SF00.xml and LM1-SR01.xml added MaxInstCount per AfbComponent"},
 	{":/DatabaseUpgrade/Upgrade0180.sql", "Upgrade to version 180, Fixing DataUid generating in OCMN module"},
+	{":/DatabaseUpgrade/Upgrade0181.sql", "Upgrade to version 181, TxDiagDataSize in LMs has been changed from 176 to 188 words"},
+	{":/DatabaseUpgrade/Upgrade0182.sql", "Upgrade to version 182, update LM Scripts, LmDescriptions is now written to LM"},
 };
 
 

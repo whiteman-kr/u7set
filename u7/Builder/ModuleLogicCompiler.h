@@ -323,6 +323,8 @@ namespace Builder
 		int m_lmNumber = 0;
 		int m_lmChannel = 0;
 
+		int m_lmDescriptionNumber = 0;
+
 		// LM's calculated memory offsets and sizes
 		//
 		LmMemoryMap m_memoryMap;
