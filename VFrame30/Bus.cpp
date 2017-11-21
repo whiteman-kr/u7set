@@ -55,6 +55,7 @@ namespace VFrame30
 			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusDiscreteBitNo, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusDiscreteBitNo, BusSignal::setInbusDiscreteBitNo);
 			break;
 		case E::SignalType::Bus:
+			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, BusSignal::busTypeId, BusSignal::setBusTypeId);
 			// Inbus settings (manual)
 			//
 			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
