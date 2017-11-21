@@ -54,6 +54,11 @@ namespace VFrame30
 			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
 			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusDiscreteBitNo, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusDiscreteBitNo, BusSignal::setInbusDiscreteBitNo);
 			break;
+		case E::SignalType::Bus:
+			// Inbus settings (manual)
+			//
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
+			break;
 		default:
 			assert(false);
 		}
@@ -90,6 +95,7 @@ namespace VFrame30
 		message->set_coarseaperture(m_coarseAperture);
 		message->set_fineaperture(m_fineAperture);
 		message->set_adaptiveaperture(m_adaptiveAperture);
+		message->set_bustypeid(m_busTypeId.toStdString());
 
 		message->set_inbusoffset(m_inbusOffset);
 		message->set_inbusdiscretebitno(m_inbusDiscreteBitNo);
@@ -115,6 +121,7 @@ namespace VFrame30
 		m_coarseAperture = message.coarseaperture();
 		m_fineAperture = message.fineaperture();
 		m_adaptiveAperture = message.adaptiveaperture();
+		m_busTypeId = QString::fromStdString(message.bustypeid());
 
 		m_inbusOffset = message.inbusoffset();
 		m_inbusDiscreteBitNo = message.inbusdiscretebitno();
@@ -212,6 +219,17 @@ namespace VFrame30
 	void BusSignal::setAdaptiveAperture(bool adaptive)
 	{
 		m_adaptiveAperture = adaptive;
+	}
+
+	QString BusSignal::busTypeId() const
+	{
+		return m_busTypeId;
+	}
+
+	void BusSignal::setBusTypeId(const QString& value)
+	{
+		assert(m_type == E::SignalType::Bus);
+		m_busTypeId = value;
 	}
 
 	int BusSignal::inbusOffset() const
