@@ -220,6 +220,8 @@ namespace Builder
 		bool createAcquiredBusSignalsList();
 		bool createNonAcquiredBusSignalsList();
 
+		bool groupTxSignals();
+
 		bool appendLinkedValiditySignal(const Signal* s);
 
 		bool listsUniquenessCheck() const;

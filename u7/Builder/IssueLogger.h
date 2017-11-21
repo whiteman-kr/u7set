@@ -273,7 +273,6 @@ namespace Builder
 		void wrnALC5081();											// Usage of ALP phase time exceed 90%.
 		void errALC5082();											// Usage of ALP phase time exceed 100%.
 		void errALC5083(const QString& receiverPortID, const QString& connectionID, const QString& lmID, QUuid receiverUuid);	// Receiver of connection '%1' (port '%2') is not associated with LM '%3'
-		void errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid);							// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
 		void errALC5085(const QString& portEquipmentID, const QString& connectionID);	// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
 		void errALC5086(QUuid constItemUuid, const QString& schemaID);				// Discrete constant must have value 0 or 1 (Logic schema %1).
 		void errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid);		// Can't assign value to input signal '%1' (Logic schema '%2').
@@ -290,7 +289,6 @@ namespace Builder
 		void errALC5098(QString signalID, QString busTypeID);						// Bus signal '%1' offset out of range (bus type '%2').
 		void errALC5099(QString busTypeID);											// Bus size must be multiple of 2 bytes (bus type %1).
 		void errALC5100(QString busTypeID, QUuid item, QString schemaID);			// Bus type ID '%1' is undefined (Logic schema '%2').
-		void errALC5101(QUuid composerUuid, QUuid transmitterUuid, QString schemaID);	// Bus composer cannot be directly connected to transmitter (Logic schema %1).
 		void errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID);	// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
 		void errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID);		// Different bus types of bus composer and signal '%1' (Logic schema '%2').
 		void errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID);		// Bus composer is connected to non-bus signal '%1' (Logic schema '%2').

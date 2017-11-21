@@ -110,6 +110,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
 			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
+//			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
 			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion),
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
@@ -2733,6 +2734,86 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::groupTxSignals()
+	{
+		QList<Hardware::OptoPortShared> associatedPorts;
+
+		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), associatedPorts);
+
+		QHash<UalSignal*, UalSignal*> acquiredInternalDiscretes;
+
+		for(UalSignal* s : m_acquiredDiscreteInternalSignals)
+		{
+			acquiredInternalDiscretes.insert(s, s);
+		}
+
+		QHash<QString, QSet<UalSignal*>> portsTxSignalSets;
+
+		for(Hardware::OptoPortShared port : associatedPorts)
+		{
+			QVector<Hardware::TxRxSignalShared> txSignals;
+
+			port->getTxDiscreteSignals(txSignals, true);
+
+			QSet<UalSignal*> set;
+
+			for(Hardware::TxRxSignalShared txSignal : txSignals)
+			{
+				UalSignal* s = m_ualSignals.get(txSignal->appSignalID());
+
+				if (s == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				if (acquiredInternalDiscretes.contains(s) == false)
+				{
+					continue;
+				}
+
+				set.insert(s);
+			}
+
+			if (set.size() > 0)
+			{
+				portsTxSignalSets.insert(port->equipmentID(), set);
+			}
+		}
+
+		//
+
+		QStringList portIDs = portsTxSignalSets.keys();
+
+		for(const QString& portID : portIDs)
+		{
+			QSet<UalSignal*>& set = portsTxSignalSets[portID];
+
+			LOG_MESSAGE(m_log, QString("Port %1 acquired discrete internal txSignals count = %2").arg(portID).arg(set.count()));
+		}
+
+		QVector<QString>& vPortIDs = QVector<QString>::fromList(portIDs);
+
+		int count = vPortIDs.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				QString s1ID = vPortIDs[i];
+				QString s2ID = vPortIDs[k];
+
+				QSet<UalSignal*>& set1 = portsTxSignalSets[s1ID];
+				QSet<UalSignal*>& set2 = portsTxSignalSets[s2ID];
+
+				LOG_MESSAGE(m_log, QString("%1 intersect %2 = %3").
+							arg(s1ID).arg(s2ID).arg(set1.intersect(set2).count()));
+			}
+		}
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::appendLinkedValiditySignal(const Signal* s)
 	{
 		TEST_PTR_RETURN_FALSE(s);
@@ -4221,7 +4302,7 @@ namespace Builder
 													   ualReceiver->appSignalId(),
 													   m_lm->equipmentIdTemplate(),
 													   ualReceiver->guid(),
-													   rxAddress);
+													   &rxAddress);
 			if (res == false)
 			{
 				result = false;
@@ -7262,6 +7343,8 @@ namespace Builder
 		//
 		if (port->manualSettings() == true && port->txUsedDataSizeW() < port->txDataSizeW())
 		{
+		/* UNCOMMENT UNCOMMENT UNCOMMENT UNCOMMENT
+		 *
 			int fillSize = port->txDataSizeW() - port->txUsedDataSizeW();
 
 			cmd.setMem(port->txBufAbsAddress() + port->txUsedDataSizeW(),
@@ -7270,6 +7353,9 @@ namespace Builder
 
 			m_code.append(cmd);
 			m_code.newLine();
+
+		 UNCOMMENT UNCOMMENT UNCOMMENT UNCOMMENT */
+
 		}
 
 		return result;
@@ -7300,8 +7386,6 @@ namespace Builder
 		int offset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
 
 		Command cmd;
-
-		// qDebug() << "Fill port " << C_STR(port->equipmentID()) << " raw data";
 
 		int txRawDataSizeW = port->txRawDataSizeW();
 
@@ -7428,7 +7512,7 @@ namespace Builder
 
 			SignalAddress16 txSignalAddress;
 
-			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), txSignalAddress);
+			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), &txSignalAddress);
 
 			if (res == false)
 			{
@@ -7541,7 +7625,7 @@ namespace Builder
 
 			SignalAddress16 txSignalAddress;
 
-			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), txSignalAddress);
+			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), &txSignalAddress);
 
 			if (res == false)
 			{
