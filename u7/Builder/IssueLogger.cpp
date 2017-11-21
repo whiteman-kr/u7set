@@ -4728,7 +4728,7 @@ namespace Builder
 	void IssueLogger::errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, appSignalID);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5124,
