@@ -93,7 +93,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection.get(m->caption(), subsysStrID, subsysID, 0x104, frameSize, frameCount);
+			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection.get(m->caption(), subsysStrID, subsysID, 0x104, frameSize, frameCount, lmDescription->descriptionNumber());
 			if (firmware == nullptr)
 			{
 				assert(firmware);

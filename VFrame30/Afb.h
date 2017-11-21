@@ -13,6 +13,47 @@ namespace Proto
 
 namespace Afb
 {
+	enum class AfbComponentPinType
+	{
+		Param,
+		Input,
+		Output
+	};
+
+	class AfbComponentPin
+	{
+	public:
+		AfbComponentPin() = default;
+		AfbComponentPin(const AfbComponentPin&) = default;
+		AfbComponentPin(AfbComponentPin&&) = default;
+		AfbComponentPin(const QString caption, int opIndex, AfbComponentPinType type);
+
+		AfbComponentPin& operator=(const AfbComponentPin&) = default;
+		AfbComponentPin& operator=(AfbComponentPin&&) = default;
+
+	public:
+		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
+		bool saveToXml(QDomElement* xmlElement) const;
+
+	public:
+		QString caption() const;
+		void setCaption(const QString& value);
+
+		int opIndex() const;
+		void setOpIndex(int value);
+
+		AfbComponentPinType type() const;
+		void setType(AfbComponentPinType value);
+
+		bool isInputOrParam() const;
+		bool isOutput() const;
+
+	private:
+		QString m_caption;
+		int m_opIndex = -1;
+		AfbComponentPinType m_type = AfbComponentPinType::Param;
+	};
+
 	class VFRAME30LIBSHARED_EXPORT AfbComponent
 	{
 	public:
@@ -48,6 +89,8 @@ namespace Afb
 		int m_impVersion = -1;
         int m_versionOpIndex = -1;
 		int m_maxInstCount = 0;
+
+		std::map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
 	};
 
 

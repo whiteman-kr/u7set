@@ -111,7 +111,7 @@ namespace Builder
 		Hardware::ModuleFirmwareWriter m_moduleFirmware;
 
 	public:
-		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList &descriptionFields);
+		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList &descriptionFields);
 
 		bool setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& appLogicBinCode, const std::vector<QVariantList> &descriptionData);
 
@@ -208,7 +208,7 @@ namespace Builder
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 
-		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList &descriptionFields);
+		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList &descriptionFields);
 		bool writeMultichannelFiles();
 
 		bool writeConfigurationXmlFiles();
