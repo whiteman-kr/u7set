@@ -2794,7 +2794,7 @@ namespace Builder
 			LOG_MESSAGE(m_log, QString("Port %1 acquired discrete internal txSignals count = %2").arg(portID).arg(set.count()));
 		}
 
-		QVector<QString>& vPortIDs = QVector<QString>::fromList(portIDs);
+		QVector<QString>&& vPortIDs = QVector<QString>::fromList(portIDs);
 
 		int count = vPortIDs.count();
 
