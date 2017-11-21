@@ -22,25 +22,83 @@ MemWriteMap::Error MemWriteMap::write(int addr, int size)
 	{
 		int writeAddr = addr + i;
 
-		WriteMap::iterator it = m_writeMap.find(writeAddr);
+		int writeCount = m_writeMap.value(writeAddr, 0);
 
-		if (it == m_writeMap.end())
+		if (writeCount == 0)
 		{
-			m_writeMap.insert(std::pair<int, int>(writeAddr, 1));
+			m_writeMap.insert(writeAddr, 1);
 			continue;
 		}
 
-		int writeCount = m_writeMap[writeAddr];
-
-		if (m_checkRewrite == true && writeCount > 0)
+		if (m_checkRewrite == true)
 		{
 			return MemWriteMap::Error::MemRewrite;
 		}
 
-		m_writeMap[writeAddr] = writeCount;
+		writeCount++;
+
+		m_writeMap.insert(writeAddr, writeCount);
 	}
 
 	return MemWriteMap::Error::Ok;
+}
+
+void MemWriteMap::getNonWrittenAreas(AreaList* areaList)
+{
+	if (areaList == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	Area* area = nullptr;
+
+	for(int i = 0; i < m_size; i++ )
+	{
+		int writeAddr = m_startAddr + i;
+
+		if (m_writeMap.contains(writeAddr) == false)
+		{
+			// addr is not written
+			//
+			if (area == nullptr)
+			{
+				// start new non written area
+				//
+				area = new Area(writeAddr, 1);
+			}
+			else
+			{
+				// extend current non written area
+				//
+				area->second++;
+			}
+
+			continue;
+		}
+
+		// addr is written
+
+		if (area != nullptr)
+		{
+			// finalize current non written area
+			//
+			areaList->append(*area);
+
+			delete area;
+
+			area = nullptr;
+		}
+	}
+
+	if (area != nullptr)
+	{
+		// finalize last non written area
+		//
+		areaList->append(*area);
+
+		delete area;
+	}
 }
 
 bool MemWriteMap::addrInRange(int addr)

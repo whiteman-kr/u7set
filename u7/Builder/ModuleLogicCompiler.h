@@ -12,6 +12,7 @@
 #include "LmMemoryMap.h"
 #include "ComparatorStorage.h"
 #include "UalItems.h"
+#include "MemWriteMap.h"
 
 #include "../u7/Connection.h"
 
@@ -356,14 +357,14 @@ namespace Builder
 		bool copyOptoPortTxBusSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
 		bool isCopyOptimizationAllowed(const Commands& copyCode, int* srcAddr);
-		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module);
-		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID);
-		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset);
-		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port);
-		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port);
-		bool copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset, MemWriteMap& memWriteMap);
+		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap);
+		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap);
+		bool copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap);
 
 		bool finishAppLogicCode();
 		bool setLmAppLANDataSize();
