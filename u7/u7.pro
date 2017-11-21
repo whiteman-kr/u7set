@@ -201,7 +201,8 @@ SOURCES +=\
     EditEngine/EditEngineBatch.cpp \
     CreateSignalDialog.cpp \
     LogicModuleSet.cpp \
-    ../lib/LmDescription.cpp
+    ../lib/LmDescription.cpp \
+    Builder/MemWriteMap.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -340,7 +341,8 @@ HEADERS  += \
     EditEngine/EditEngineBatch.h \
     CreateSignalDialog.h \
     LogicModuleSet.h \
-    ../lib/LmDescription.h
+    ../lib/LmDescription.h \
+    Builder/MemWriteMap.h
 
 FORMS    += \
     CreateProjectDialog.ui \

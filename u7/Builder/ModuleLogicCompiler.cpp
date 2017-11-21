@@ -7343,8 +7343,6 @@ namespace Builder
 		//
 		if (port->manualSettings() == true && port->txUsedDataSizeW() < port->txDataSizeW())
 		{
-		/* UNCOMMENT UNCOMMENT UNCOMMENT UNCOMMENT
-		 *
 			int fillSize = port->txDataSizeW() - port->txUsedDataSizeW();
 
 			cmd.setMem(port->txBufAbsAddress() + port->txUsedDataSizeW(),
@@ -7353,9 +7351,6 @@ namespace Builder
 
 			m_code.append(cmd);
 			m_code.newLine();
-
-		 UNCOMMENT UNCOMMENT UNCOMMENT UNCOMMENT */
-
 		}
 
 		return result;
