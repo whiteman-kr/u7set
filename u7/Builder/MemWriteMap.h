@@ -12,6 +12,7 @@ public:
 		MemRewrite
 	};
 
+public:
 	MemWriteMap(int startAddr, int size, bool checkRewrite);
 	virtual ~MemWriteMap();
 

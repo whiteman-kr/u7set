@@ -7,6 +7,10 @@ MemWriteMap::MemWriteMap(int startAddr, int size, bool checkRewrite) :
 {
 }
 
+MemWriteMap::~MemWriteMap()
+{
+}
+
 MemWriteMap::Error MemWriteMap::write(int addr, int size)
 {
 	if (addrInRange(addr, size) == false)
