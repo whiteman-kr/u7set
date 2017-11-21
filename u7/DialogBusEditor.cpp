@@ -703,23 +703,13 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 		return;
 	}
 
-	if (type == E::SignalType::Bus)
-	{
-		QString busTypeId = QInputDialog::getText(this, tr("Add Signal"),
-													  tr("Enter BusTypeId:"), QLineEdit::Normal,
-													  "BUSTYPEID", &ok);
-		busTypeId = busTypeId.trimmed();
-
-		if (ok == false || busTypeId.isEmpty() == true)
-		{
-			return;
-		}
-
-		bs.setBusTypeId(busTypeId);
-	}
-
 	bs.setSignalId(signalId);
 	bs.setCaption(signalId);
+
+	if (type == E::SignalType::Bus)
+	{
+		bs.setBusTypeId("BUSTYPEID");
+	}
 
 	const std::vector<VFrame30::BusSignal>& busSignals = bus->busSignals();
 	for (const VFrame30::BusSignal& checkBs : busSignals)
