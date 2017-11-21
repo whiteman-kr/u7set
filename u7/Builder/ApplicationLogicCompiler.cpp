@@ -451,6 +451,34 @@ namespace Builder
 
 		QStringList afbsUsage;
 
+		QStringList afbsUsageHeader;
+		afbsUsageHeader << "OpCode"
+						<< "Caption"
+						<< "UsagePercent"
+						<< "UsedInstances"
+						<< "MaxInstances"
+						<< "Version";
+
+		auto getFirstFieldValue = [](double value) -> QString
+		{
+			if (value > 100)
+			{
+				return "##";
+			}
+
+			if (value > 90)
+			{
+				return "!!";
+			}
+
+			if (value > 80)
+			{
+				return "! ";
+			}
+
+			return "  ";
+		};
+
 		for(int i = 0; i < m_moduleCompilers.count(); i++)
 		{
 			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
@@ -463,21 +491,7 @@ namespace Builder
 			maxValue = std::max(maxValue, info.idrPhaseTimeUsed);
 			maxValue = std::max(maxValue, info.alpPhaseTimeUsed);
 
-			QString firstFieldValue = "  ";
-			if (maxValue > 80)
-			{
-				firstFieldValue = "! ";
-			}
-
-			if (maxValue > 90)
-			{
-				firstFieldValue = "!!";
-			}
-
-			if (maxValue > 100)
-			{
-				firstFieldValue = "##";
-			}
+			QString firstFieldValue = getFirstFieldValue(maxValue);
 
 			maxIdLength = std::max(maxIdLength, info.lmEquipmentID.length());
 
@@ -489,19 +503,48 @@ namespace Builder
 										   info.idrPhaseTimeUsed,
 										   info.alpPhaseTimeUsed);
 
+			// creating AFBL Usage tables
 			//
+			if (info.afblUsageInfo.count() == 0)
+			{
+				continue;
+			}
+
+			int captionLength = afbsUsageHeader[1].length();
+			for(const ModuleLogicCompiler::AfblUsageInfo& afblUsage : info.afblUsageInfo)
+			{
+				captionLength = std::max(captionLength, afblUsage.caption.length());
+			}
+
 			afbsUsage.append("");
 			afbsUsage.append(QString("LM %1 AFB components usage").arg(info.lmEquipmentID));
 			afbsUsage.append("");
 
+			QString headerRow = "  ";
+			QString delimiterRow = "--";
+
+			for (int j = 0; j < afbsUsageHeader.count(); j++)
+			{
+				int length = (j == 1) ? captionLength : afbsUsageHeader[j].length();
+				headerRow += " | " + afbsUsageHeader[j].leftJustified(length);
+				delimiterRow += "-+-" + QString().leftJustified(length, '-');
+			}
+
+			afbsUsage << headerRow << delimiterRow;
+
 			for(const ModuleLogicCompiler::AfblUsageInfo& afblUsage : info.afblUsageInfo)
 			{
-				afbsUsage.append(QString("%1 %2 %3 %4 %5").arg(afblUsage.opCode).arg(afblUsage.caption).
-								 arg(afblUsage.usedInstances).arg(afblUsage.maxInstances).arg(afblUsage.usagePercent));
+				afbsUsage << getFirstFieldValue(afblUsage.usagePercent) + " | " +
+							 QString::number(afblUsage.opCode).rightJustified(afbsUsageHeader[0].length()) + " | " +
+						afblUsage.caption.leftJustified(captionLength) + " | " +
+						QString::number(afblUsage.usagePercent, 'f', 2).rightJustified(afbsUsageHeader[2].length()) + " | " +
+						QString::number(afblUsage.usedInstances).rightJustified(afbsUsageHeader[3].length()) + " | " +
+						QString::number(afblUsage.maxInstances).rightJustified(afbsUsageHeader[4].length()) + " | " +
+						QString::number(afblUsage.version).rightJustified(afbsUsageHeader[5].length());
 			}
 
 			afbsUsage.append("");
-			//
+			// creating AFBL Usage tables complete
 		}
 
 		auto reportGenerator = [&](QString caption, std::function<bool
