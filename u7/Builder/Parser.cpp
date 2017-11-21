@@ -497,47 +497,25 @@ namespace Builder
 		struct HistoryItem
 		{
 			AppLogicItem ChangeItem;
-			int count;
+			int count = 0;
 		};
 
 		AppLogicItem item;
-		std::list<HistoryItem> history;
+		std::map<QUuid, HistoryItem> history;	// Key is HistoryItem.ChangeItem.m_fblItem->guid
 
+		// --
+		//
 		int getChangeCount(const AppLogicItem& forItem)
 		{
-			auto it = std::find_if(history.begin(), history.end(),
-				[&forItem](const HistoryItem& hi)
-				{
-					return hi.ChangeItem.m_fblItem == forItem.m_fblItem;
-				});
-
-			if (it == history.end())
-			{
-				return 0;
-			}
-			else
-			{
-				return it->count;
-			}
+			const HistoryItem& historyItem = history[forItem.m_fblItem->guid()];
+			return historyItem.count;
 		}
 
-		void incChangeCount(const AppLogicItem& forItem)
+		int incChangeCount(const AppLogicItem& forItem)
 		{
-			auto it = std::find_if(history.begin(), history.end(),
-				[&forItem](const HistoryItem& hi)
-				{
-					return hi.ChangeItem.m_fblItem == forItem.m_fblItem;
-				});
-
-			if (it == history.end())
-			{
-				HistoryItem hi{forItem, 1};
-				history.push_back(hi);
-			}
-			else
-			{
-				it->count++;
-			}
+			HistoryItem& historyItem = history[forItem.m_fblItem->guid()];
+			historyItem.count++;
+			return historyItem.count;
 		}
 	};
 
@@ -674,30 +652,19 @@ namespace Builder
 			}
 		}
 
-		for (const auto& item : fblItems)
-		{
-			if (item.second.m_fblItem->outputsCount() == 0)
-			{
-				orderedList.push_back(item.second);	// items without outputs must be at the end of the list
-				continue;
-			}
-		}
+//		for (const auto& item : fblItems)
+//		{
+//			if (item.second.m_fblItem->outputsCount() == 0)
+//			{
+//				orderedList.push_back(item.second);	// items without outputs must be at the end of the list
+//				continue;
+//			}
+//		}
 
 		for (const AppLogicItem& orderedItem : orderedList)
 		{
 			fblItems.erase(orderedItem.m_fblItem->guid());
 		}
-
-//		if (hasItemsWithouInputs == false)
-//		{
-//			// Imposible set exucution order for module, there is no first item,
-//			// firts item can be item without inputs
-//			//
-//			log->errALP4020(moduleEquipmentId());
-
-//			result = false;
-//			return result;
-//		}
 
 		int pass = 1;
 		size_t checkRemainsCount = -1;			// it's ok to give a second change for setItemsOrder to remove some items form fblItems
@@ -796,7 +763,7 @@ namespace Builder
 		for (const AppLogicItem& ali : m_items)
 		{
 			QByteArray buffer;
-			buffer.reserve(1024);
+			buffer.reserve(2048);
 
 			ali.m_fblItem->Save(buffer);
 
@@ -1242,7 +1209,7 @@ namespace Builder
 		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
 		{
 			const AppLogicItem& appLogicItem = currentItem.second;
-			std::shared_ptr<VFrame30::FblItemRect> fblItem = appLogicItem.m_fblItem;
+			const std::shared_ptr<VFrame30::FblItemRect>& fblItem = appLogicItem.m_fblItem;
 			// qDebug() << "FblItem " << fblItem->label();
 
 			const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
@@ -1316,7 +1283,8 @@ namespace Builder
 
 		// --
 		//
-		std::list<ChangeOrder> changeOrderHistory;
+		//std::map<ChangeOrder> changeOrderHistory;
+		std::map<QUuid, ChangeOrder> changeOrderHistory;		// Key is ChangeOrder.item.m_fblItem->guid()
 
 		// Set other items
 		//
@@ -1396,34 +1364,20 @@ namespace Builder
 				{
 					// Save hostory, if this is the third switch item, then skip it
 					//
-					auto histForCurrentItem = std::find_if(
-												  changeOrderHistory.begin(),
-												  changeOrderHistory.end(),
-												  [&currentItem](const ChangeOrder& co)
-					{
-						return co.item == currentItem;
-					});
+					ChangeOrder& co = changeOrderHistory[currentItem.m_fblItem->guid()];
 
-					if (histForCurrentItem == changeOrderHistory.end())
+					if (co.item.m_fblItem == nullptr)
 					{
-						ChangeOrder co;
+						// Just created
+						//
 						co.item = currentItem;
-						co.incChangeCount(*dependantIsAbove);
-
-						changeOrderHistory.push_back(co);
 					}
-					else
-					{
-						int switchCounter = histForCurrentItem->getChangeCount(*dependantIsAbove);
 
-						if (switchCounter == 10)
-						{
-							continue;
-						}
-						else
-						{
-							histForCurrentItem->incChangeCount(*dependantIsAbove);
-						}
+					int switchCounter = co.incChangeCount(*dependantIsAbove);
+
+					if (switchCounter >= 10)
+					{
+						continue;
 					}
 
 					// Dependant item is above currentItem, so let's move currentItem right before dependand one
@@ -2738,10 +2692,21 @@ namespace Builder
 			return true;		// it is not a error
 		}
 
-		out->reserve(fileList.size());
+		// Sort file list, it'll guarantee the same order of schemas from build to build
+		//
+		std::sort(fileList.begin(), fileList.end(),
+				  [](const DbFileInfo& f1, const DbFileInfo& f2)
+				  {
+						return f1.fileName() < f2.fileName();
+				  });
 
 		// Get file data and read it
 		//
+		out->reserve(fileList.size());
+
+		std::vector<QFuture<std::shared_ptr<VFrame30::Schema>>> loadSchemaTasks;
+		loadSchemaTasks.reserve(fileList.size());
+
 		bool result = true;
 		for (DbFileInfo& fi : fileList)
 		{
@@ -2771,17 +2736,113 @@ namespace Builder
 
 			// Read schema files
 			//
-			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
+			IssueLogger* scopeLog = m_log;		// cant pass m_log to lambda, so make a copy
+
+			auto task = QtConcurrent::run([file, scopeLog]() -> std::shared_ptr<VFrame30::Schema>
+				{
+					std::shared_ptr<VFrame30::Schema> result = VFrame30::Schema::Create(file.get()->data());
+
+					if (result == nullptr)
+					{
+						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+						//
+						scopeLog->errCMN0010(file->fileName());
+					}
+
+					return result;
+				});
+
+			loadSchemaTasks.push_back(task);
+
+//			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
+
+//			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
+
+//			if (ls == nullptr)
+//			{
+//				assert(ls != nullptr);
+
+//				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+//				//
+//				m_log->errCMN0010(file->fileName());
+
+//				result = false;
+//				continue;
+//			}
+
+//			if (ls->excludeFromBuild() == true)
+//			{
+//				// Schema is excluded from build (Schema '%1').
+//				//
+//				m_log->wrnALP4004(ls->schemaId());
+//				continue;
+//			}
+
+//			// Remove all commented items from the schema
+//			//
+//			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+//			{
+//				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
+
+//				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
+//				{
+//					assert(item);
+
+//					if (item->isCommented() == false)
+//					{
+//						newItemList.push_back(item);
+//					}
+//				}
+
+//				layer->Items.swap(newItemList);
+//			}
+
+//			// Add to schema list
+//			//
+//			out->push_back(ls);
+		}
+
+		// Wait for finish and process interrupt request
+		//
+		bool iterruptRequest = false;
+
+		do
+		{
+			bool allFinished = true;
+			for (auto& task : loadSchemaTasks)
+			{
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
+			}
+
+			if (allFinished == true)
+			{
+				break;
+			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
+			}
+		}
+		while (1);
+
+
+		for (auto& task : loadSchemaTasks)
+		{
+			std::shared_ptr<VFrame30::Schema> schema = task.result();
 
 			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
 
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-
-				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
-				//
-				m_log->errCMN0010(file->fileName());
 
 				result = false;
 				continue;
@@ -2848,7 +2909,7 @@ namespace Builder
 
 				uuids.insert(std::make_pair(layer->guid(), schema->schemaId()));		// Layer guid is also included in check
 
-				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+				for (const std::shared_ptr<VFrame30::SchemaItem>& item : layer->Items)
 				{
 					if (item->isFblItem() == false)
 					{
@@ -3149,7 +3210,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
 				{
 					if (dynamic_cast<VFrame30::SchemaItemAfb*>(si.get()) != nullptr)
 					{
@@ -3209,7 +3270,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
 				{
 					if (dynamic_cast<VFrame30::SchemaItemBus*>(si.get()) != nullptr)
 					{
@@ -3274,7 +3335,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
 				{
 					if (si->isType<VFrame30::SchemaItemUfb>() == true)
 					{
@@ -3533,7 +3594,7 @@ namespace Builder
 		// Check if all signal elements are from related Logic Module
 		//
 		bool alienLmIds = false;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		for (std::shared_ptr<VFrame30::SchemaItem>& item : layer->Items)
 		{
 			if (item->isType<VFrame30::SchemaItemSignal>() == false)
 			{
@@ -3584,13 +3645,24 @@ namespace Builder
 		// Serializae layer, so it can be restored for each equipmentId
 		//
 		QByteArray layerData;
-		layer->Save(layerData);
+		if (equipmentIds.size() > 1)
+		{
+			layer->Save(layerData);		// If there is only one equipmentId, dont serialize it, just use the existing layer
+		}
 
 		// Parse layer for each LM
 		//
 		for (QString equipmentId : equipmentIds)
 		{
-			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer(VFrame30::SchemaLayer::Create(layerData));
+			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer;
+			if (equipmentIds.size() > 1)
+			{
+				moduleLayer = VFrame30::SchemaLayer::Create(layerData);
+			}
+			else
+			{
+				moduleLayer = layer;		// If there is only one equipmentId, dont serialize it, just use the existing layer
+			}
 
 			if (moduleLayer.get() == nullptr)
 			{
@@ -4472,7 +4544,7 @@ namespace Builder
 		const AppLogicData* appLogicData = applicationData();
 		const auto& ufbs = appLogicData->ufbs();
 
-		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : ufbs)
+		for (const std::pair<QString, std::shared_ptr<AppLogicModule>>& ufb : ufbs)
 		{
 			const std::list<AppLogicItem>& items = ufb.second->items();
 
