@@ -2935,7 +2935,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5042,
-				  QString(tr("Signal '%1' is not exists in connection '%2'. (Logic schema '%3')")).
+				  QString(tr("Signal %1 is not exists in connection %2 (Logic schema %3).")).
 						arg(appSignalID).
 						arg(connectionID).
 						arg(schemaID));
@@ -3829,29 +3829,6 @@ namespace Builder
 						arg(connectionID).arg(receiverPortID).arg(lmID));
 	}
 
-	/// IssueCode: ALC5084
-	///
-	/// IssueType: Error
-	///
-	/// Title: Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
-	///
-	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Connection ID
-	///
-	/// Description:
-	///		Signal is not exists in specified serial connection. Use PortRawDataDescription to define receiving signals.
-	///
-	void IssueLogger::errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5084,
-				  QString(tr("Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.")).
-						arg(appSignalID).arg(connectionID));
-	}
-
 	/// IssueCode: ALC5085
 	///
 	/// IssueType: Error
@@ -4189,28 +4166,6 @@ namespace Builder
 		LOG_ERROR(IssueType::AlCompiler,
 				  5100,
 				  QString(tr("Bus type ID '%1' is undefined (Logic schema '%2').")).arg(busTypeID).arg(schemaID));
-	}
-
-	/// IssueCode: ALC5101
-	///
-	/// IssueType: Error
-	///
-	/// Title:	   Bus composer cannot be directly connected to transmitter (Logic schema %1).
-	///
-	/// Parameters:
-	///		%1 Logic schema ID
-	///
-	/// Description:
-	///		Bus composer can't be directly connected to transmitter. Intermediate signal should be used.
-	///
-	void IssueLogger::errALC5101(QUuid composerUuid, QUuid transmitterUuid, QString schemaID)
-	{
-		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5101,
-				  QString(tr("Bus composer cannot be directly connected to transmitter (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5102
@@ -4728,7 +4683,7 @@ namespace Builder
 	void IssueLogger::errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, appSignalID);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5124,

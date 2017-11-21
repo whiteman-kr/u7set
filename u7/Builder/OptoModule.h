@@ -152,10 +152,8 @@ namespace Hardware
 		bool isPortToPortConnection() const { return m_connectionType ==  Connection::Type::PortToPort; }
 		bool isSinglePortConnection() const { return m_connectionType ==  Connection::Type::SinglePort; }
 
-//		Address16 getTxSignalAddrInBuf(const QString& appSignalID) const;
-
-		bool getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const;
-		bool getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const;
+		bool getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const;
+		bool getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const;
 
 		bool parseRawDescription();
 		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage);
@@ -498,7 +496,7 @@ namespace Hardware
 								   const QString& appSignalID,
 								   const QString& receiverLM,
 								   QUuid receiverUuid,
-								   SignalAddress16& addr);
+								   SignalAddress16* addr);
 
 		static std::shared_ptr<Connection> getConnection(const QString& connectionID);
 
