@@ -44,6 +44,9 @@ namespace Builder
 	{
 		QThread::currentThread()->setTerminationEnabled(true);
 
+		QTime buildTime;
+		buildTime.start();
+
 		bool ok = false;
 		QString str;
 
@@ -418,6 +421,13 @@ namespace Builder
 		}
 
 		db.closeProject(nullptr);
+
+		// Display build time
+		//
+		int buildEllapsed = buildTime.elapsed() / 1000;
+		int durationSecs = buildEllapsed % 60;
+		int durationMins = buildEllapsed / 60;
+		LOG_MESSAGE(m_log, QString("Build time: %1 minute(s) %2 second(s)").arg(durationMins).arg(durationSecs));
 
 		// Set Shceme Items Issues to GlobalMessanger
 		//
