@@ -652,14 +652,14 @@ namespace Builder
 			}
 		}
 
-		for (const auto& item : fblItems)
-		{
-			if (item.second.m_fblItem->outputsCount() == 0)
-			{
-				orderedList.push_back(item.second);	// items without outputs must be at the end of the list
-				continue;
-			}
-		}
+//		for (const auto& item : fblItems)
+//		{
+//			if (item.second.m_fblItem->outputsCount() == 0)
+//			{
+//				orderedList.push_back(item.second);	// items without outputs must be at the end of the list
+//				continue;
+//			}
+//		}
 
 		for (const AppLogicItem& orderedItem : orderedList)
 		{
@@ -2692,10 +2692,21 @@ namespace Builder
 			return true;		// it is not a error
 		}
 
-		out->reserve(fileList.size());
+		// Sort file list, it'll guarantee the same order of schemas from build to build
+		//
+		std::sort(fileList.begin(), fileList.end(),
+				  [](const DbFileInfo& f1, const DbFileInfo& f2)
+				  {
+						return f1.fileName() < f2.fileName();
+				  });
 
 		// Get file data and read it
 		//
+		out->reserve(fileList.size());
+
+		std::vector<QFuture<std::shared_ptr<VFrame30::Schema>>> loadSchemaTasks;
+		loadSchemaTasks.reserve(fileList.size());
+
 		bool result = true;
 		for (DbFileInfo& fi : fileList)
 		{
@@ -2725,17 +2736,113 @@ namespace Builder
 
 			// Read schema files
 			//
-			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
+			IssueLogger* scopeLog = m_log;		// cant pass m_log to lambda, so make a copy
+
+			auto task = QtConcurrent::run([file, scopeLog]() -> std::shared_ptr<VFrame30::Schema>
+				{
+					std::shared_ptr<VFrame30::Schema> result = VFrame30::Schema::Create(file.get()->data());
+
+					if (result == nullptr)
+					{
+						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+						//
+						scopeLog->errCMN0010(file->fileName());
+					}
+
+					return result;
+				});
+
+			loadSchemaTasks.push_back(task);
+
+//			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
+
+//			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
+
+//			if (ls == nullptr)
+//			{
+//				assert(ls != nullptr);
+
+//				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+//				//
+//				m_log->errCMN0010(file->fileName());
+
+//				result = false;
+//				continue;
+//			}
+
+//			if (ls->excludeFromBuild() == true)
+//			{
+//				// Schema is excluded from build (Schema '%1').
+//				//
+//				m_log->wrnALP4004(ls->schemaId());
+//				continue;
+//			}
+
+//			// Remove all commented items from the schema
+//			//
+//			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+//			{
+//				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
+
+//				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
+//				{
+//					assert(item);
+
+//					if (item->isCommented() == false)
+//					{
+//						newItemList.push_back(item);
+//					}
+//				}
+
+//				layer->Items.swap(newItemList);
+//			}
+
+//			// Add to schema list
+//			//
+//			out->push_back(ls);
+		}
+
+		// Wait for finish and process interrupt request
+		//
+		bool iterruptRequest = false;
+
+		do
+		{
+			bool allFinished = true;
+			for (auto& task : loadSchemaTasks)
+			{
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
+			}
+
+			if (allFinished == true)
+			{
+				break;
+			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
+			}
+		}
+		while (1);
+
+
+		for (auto& task : loadSchemaTasks)
+		{
+			std::shared_ptr<VFrame30::Schema> schema = task.result();
 
 			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
 
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-
-				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
-				//
-				m_log->errCMN0010(file->fileName());
 
 				result = false;
 				continue;
