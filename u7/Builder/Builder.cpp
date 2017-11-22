@@ -1061,7 +1061,7 @@ namespace Builder
 
 		if (lmDescriptionFile.isEmpty() == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QObject::tr("Property LmDescriptionFile is empty. LogicModule %1").arg(logicModule->equipmentIdTemplate()));
+			m_log->errEQP6020(logicModule->equipmentIdTemplate(), logicModule->uuid());
 			return false;
 		}
 

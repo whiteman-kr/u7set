@@ -5317,6 +5317,28 @@ namespace Builder
 	}
 
 
+	/// IssueCode: EQP6020
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property LmDescriptionFile is empty, LogicModule %1.
+	///
+	/// Parameters:
+	///		%1 LogicModule EquipmentID
+	///
+	/// Description:
+	///		Property LmDescriptionFile is empty.
+	///
+	void IssueLogger::errEQP6020(QString lm, QUuid lmUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, lmUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6020,
+				  tr("Property LmDescriptionFile is empty, LogicModule %1.")
+				  .arg(lm));
+	}
+
 
 	/// IssueCode: EQP6100
 	///
