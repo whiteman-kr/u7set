@@ -64,6 +64,7 @@ private:
 	int						m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
+	double					m_percent = 0;
 
 public:
 
@@ -91,6 +92,9 @@ public:
 	CalibratorManager*		calibratorManager() const { return m_pCalibratorManager; }
 	QString					calibratorStr() const;
 	void					setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
+
+	double					percent() const { return m_percent; }
+	void					setPercent(double percent) { m_percent= percent; }
 
 	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
 };
@@ -151,10 +155,6 @@ private:
 	// all racks that received form CgfSrv
 	//
 	RackBase				m_rackBase;
-
-	// all units that received form CgfSrv
-	//
-	UnitList				m_unitList;
 
 	// all signals that received form CgfSrv
 	//
@@ -259,7 +259,6 @@ public:
 
 	// other bases
 	//
-	UnitList&				units() { return m_unitList; }						// units that received form CgfSrv
 	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }		// output signals
 	TuningBase&				tuning() { return m_tuningBase; }					// sources and signals of tuning
 

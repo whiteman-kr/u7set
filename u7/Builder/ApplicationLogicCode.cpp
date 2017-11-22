@@ -206,15 +206,67 @@ namespace Builder
 		return LmCommand::getSizeW(cmdCode);
 	}
 
+	void CommandCode::calcCrc5()
+	{
+		opCode.CRC5 = 0;
+
+		const int DATA_SIZE = 64;
+		const int CRC_SIZE = 5;
+		const int BIT_COUNT = DATA_SIZE - CRC_SIZE;
+
+		const quint64 UPPER_BIT = 0x8000000000000000ll;
+
+		const quint64 POLYNOM = 0x05ll << BIT_COUNT;
+
+		quint64 crc5  =  0x1fll << BIT_COUNT;
+
+		quint64 data = 0;
+
+		data |= word1;
+		data <<= SIZE_16BIT;
+
+		data |= word2;
+		data <<= SIZE_16BIT;
+
+		data |= word3;
+		data <<= SIZE_16BIT;
+
+		data |= word4;
+
+		for(int i = 0; i < DATA_SIZE; i++)
+		{
+			if (((data ^ crc5) & UPPER_BIT) != 0)
+			{
+				crc5 <<= 1;
+				crc5 ^= POLYNOM;
+			}
+			else
+			{
+				crc5 <<= 1;
+			}
+
+			data <<= 1;
+		}
+
+		// Shift back into position
+		crc5 >>= BIT_COUNT;
+
+		opCode.CRC5 = crc5;
+	}
+
+	void CommandCode::clear()
+	{
+		word1 = 0;
+		word2 = 0;
+		word3 = 0;
+		word4 = 0;
+	}
 
 	QString CommandCode::getFbTypeStr() const
 	{
 		assert(false);
 		return QString();
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//return Afb::AfbType::toText(getFbType());
 	}
-
 
 	void CommandCode::setConstFloat(float floatValue)
 	{
@@ -241,7 +293,6 @@ namespace Builder
 		m_const.int32Value = int32Value;
 		m_constDataFormat = E::DataFormat::SignedInt;
 	}
-
 
 	qint32 CommandCode::getConstInt32() const
 	{
@@ -462,6 +513,8 @@ namespace Builder
 
 	void Command::nop()
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::NOP);
@@ -470,6 +523,8 @@ namespace Builder
 
 	void Command::start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_fbExecTime = fbRunTime;
@@ -492,6 +547,8 @@ namespace Builder
 
 	void Command::stop()
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::STOP);
@@ -500,6 +557,8 @@ namespace Builder
 
 	void Command::mov(quint16 addrTo, quint16 addrFrom)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOV);
@@ -512,9 +571,18 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::mov(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov(addrTo.offset(), addrFrom.offset());
+	}
 
 	void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		assert(sizeW > 0);
@@ -539,9 +607,18 @@ namespace Builder
 		writeArea(addrTo, sizeW);
 	}
 
+	void Command::movMem(Address16 addrTo, Address16 addrFrom, quint16 sizeW)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		movMem(addrTo.offset(), addrFrom.offset(), sizeW);
+	}
 
 	void Command::movConst(quint16 addrTo, quint16 constVal)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOVC);
@@ -556,6 +633,8 @@ namespace Builder
 
 	void Command::movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOVBC);
@@ -579,9 +658,17 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::movBitConst(Address16 addr16, quint16 constBit)
+	{
+		assert(addr16.isValid() == true);
+
+		movBitConst(addr16.offset(), addr16.bit(), constBit);
+	}
 
 	void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::WRFB);
@@ -599,6 +686,8 @@ namespace Builder
 
 	void Command::readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::RDFB);
@@ -616,6 +705,8 @@ namespace Builder
 
 	void Command::writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::WRFBC);
@@ -629,6 +720,8 @@ namespace Builder
 
 	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::WRFBB);
@@ -644,9 +737,15 @@ namespace Builder
 		read16(addrFrom);
 	}
 
+	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(), fbCaption);
+	}
 
 	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::RDFBB);
@@ -670,8 +769,15 @@ namespace Builder
 		m_memoryMap->write16(addrTo);
 	}
 
+	void Command::readFuncBlockBit(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo, fbCaption);
+	}
+
 	void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::RDFBTS);
@@ -685,6 +791,8 @@ namespace Builder
 
 	void Command::setMem(quint16 addr, quint16 constValue, quint16 sizeW)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		assert(sizeW > 0);
@@ -709,6 +817,8 @@ namespace Builder
 
 	void Command::movBit(quint16 addrTo, quint16 bitTo, quint16 addrFrom, quint16 bitFrom)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOVB);
@@ -734,8 +844,18 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::movBit(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+
+		movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit());
+	}
+
 	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_fbExecTime = fbRunTime;
@@ -757,6 +877,8 @@ namespace Builder
 
 	void Command::appStart(quint16 appStartAddr)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::APPSTART);
@@ -766,6 +888,8 @@ namespace Builder
 
 	void Command::mov32(quint16 addrTo, quint16 addrFrom)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOV32);
@@ -778,9 +902,18 @@ namespace Builder
 		write32(addrTo);
 	}
 
+	void Command::mov32(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov32(addrTo.offset(), addrFrom.offset());
+	}
 
 	void Command::movConstInt32(quint16 addrTo, qint32 constInt32)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOVC32);
@@ -797,6 +930,8 @@ namespace Builder
 
 	void Command::movConstUInt32(quint16 addrTo, quint32 constUInt32)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOVC32);
@@ -813,6 +948,8 @@ namespace Builder
 
 	void Command::movConstFloat(quint16 addrTo, float constFloat)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
@@ -831,6 +968,8 @@ namespace Builder
 
 	void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::WRFB32);
@@ -845,9 +984,17 @@ namespace Builder
 		read32(addrFrom);
 	}
 
+	void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		assert(addrFrom.bit() == 0);
+
+		writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
+	}
 
 	void Command::readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::RDFB32);
@@ -862,9 +1009,17 @@ namespace Builder
 		write32(addrTo);
 	}
 
+	void Command::readFuncBlock32(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		assert(addrTo.bit() == 0);
+
+		readFuncBlock32(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
+	}
 
 	void Command::writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::WRFBC32);
@@ -880,6 +1035,8 @@ namespace Builder
 
 	void Command::writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float constFloat, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
@@ -897,6 +1054,8 @@ namespace Builder
 
 	void Command::readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::RDFBTS32);
@@ -912,6 +1071,8 @@ namespace Builder
 
 	void Command::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
@@ -929,6 +1090,8 @@ namespace Builder
 
 	void Command::movConstIfFlag(quint16 addrTo, quint16 constVal)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOVCF);
@@ -939,6 +1102,8 @@ namespace Builder
 
 	void Command::prevMov(quint16 addrTo, quint16 addrFrom)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::PMOV);
@@ -946,9 +1111,10 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 	}
 
-
 	void Command::prevMov32(quint16 addrTo, quint16 addrFrom)
 	{
+		m_code.clear();
+
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::PMOV32);
@@ -956,6 +1122,26 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 	}
 
+	void Command::fill(quint16 addrTo, quint16 addrFrom, quint16 addrBit)
+	{
+		m_code.clear();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::FILL);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+		m_code.setWord4(addrBit);
+	}
+
+	void Command::fill(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+		assert(addrTo.bit() == 0);
+
+		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
+	}
 
 	void Command::generateBinCode(E::ByteOrder byteOrder)
 	{
@@ -964,6 +1150,8 @@ namespace Builder
 		int cmdSizeW = sizeW();
 
 		m_binCode.resize(cmdSizeW * sizeof(quint16));
+
+		m_code.calcCrc5();
 
 		for(int i = 0; i < cmdSizeW; i++)
 		{
@@ -1161,6 +1349,14 @@ namespace Builder
 						arg(getConstValueString());
 			break;
 
+		case LmCommandCode::FILL:
+			params = QString("%1, %2[%3]").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
+			break;
+
+
 		default:
 			assert(false);
 		}
@@ -1314,6 +1510,7 @@ namespace Builder
 		case LmCommandCode::RDFBTS32:
 		case LmCommandCode::MOVCF:
 		case LmCommandCode::PMOV32:
+		case LmCommandCode::FILL:
 			assert(lmCommand->runTime != CALC_RUNTIME);
 			cmdExecTime = lmCommand->runTime;
 			break;
@@ -1539,6 +1736,20 @@ namespace Builder
 		return m_result;
 	}
 
+	void CodeFragmentMetrics::setEndAddr(int endAddr)
+	{
+		m_endAddr = endAddr;
+
+		m_codePercent = static_cast<double>(m_endAddr - m_startAddr) * 100.0 / 65536.0 ;
+	}
+
+
+	QString CodeFragmentMetrics::codePercentStr() const
+	{
+		QString str;
+
+		return str.sprintf("%.2f%", static_cast<float>(m_codePercent));
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -1595,6 +1806,19 @@ namespace Builder
 		m_codeItems.append(newCommand);
 	}
 
+	void ApplicationLogicCode::append(const Commands& commands)
+	{
+		for(const Command& cmd : commands)
+		{
+			Command* newCommand = new Command(cmd);
+
+			newCommand->setAddress(m_commandAddress);
+
+			m_commandAddress += newCommand->sizeW();
+
+			m_codeItems.append(newCommand);
+		}
+	}
 
 	void ApplicationLogicCode::append(const Comment& cmt)
 	{
@@ -2067,4 +2291,25 @@ namespace Builder
 		return true;
 	}
 
+	void ApplicationLogicCode::init(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setStartAddr(m_commandAddress);
+	}
+
+	void ApplicationLogicCode::calculate(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setEndAddr(m_commandAddress);
+	}
 }

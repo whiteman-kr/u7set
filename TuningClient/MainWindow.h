@@ -7,7 +7,7 @@
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
-#include "LogFile.h"
+#include "../lib/LogFile.h"
 #include "UserManager.h"
 #include "TuningClientSignalManager.h"
 #include "TuningClientFilterStorage.h"
@@ -48,8 +48,6 @@ private:
 
 private slots:
 	void slot_configurationArrived();
-	void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
-
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_schemasDetailsUpdated(QByteArray data);
 	void slot_schemasGlobalScriptArrived(QByteArray data);
@@ -60,6 +58,7 @@ public slots:
 	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
+	void showLog();
 	void showAbout();
 
 private:
@@ -87,8 +86,9 @@ private:
 
 extern MainWindow* theMainWindow;
 
-extern LogFile* theLogFile;
+extern Log::LogFile* theLogFile;
 
 extern UserManager theUserManager;
 
 #endif // MAINWINDOW_H
+

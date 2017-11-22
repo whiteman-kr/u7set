@@ -72,7 +72,6 @@ private:
 	const QVector<QString>& appSignalIDs() const;
 	const AppSignals& appSignals() const;
 	const AppDataSourcesIP& appDataSources() const;
-	const UnitList& units() const;
 
 	bool getAppSignalStateState(Hash hash, AppSignalState& state);
 	bool getDataSourceState(Hash hash, AppSignalState& state);
@@ -106,7 +105,6 @@ private:
 	const AppDataSourcesIP& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const AppSignalStates& m_appSignalStates;
-	const UnitList& m_units;
 
 	void buildAppSignalIDs();
 
@@ -116,7 +114,6 @@ public:
 							const AppDataSourcesIP& appDataSources,
 							const AppSignals& appSignals,
 							const AppSignalStates& appSignalStates,
-							const UnitList& units,
 							std::shared_ptr<CircularLogger> logger);
 
 	const QVector<QString>& appSignalIDs() const { return m_appSignalIDs; }
@@ -124,7 +121,6 @@ public:
 
 	const AppSignals& appSignals() const { return m_appSignals; }
 	const AppDataSourcesIP& appDataSources() const { return  m_appDataSources; }
-	const UnitList& units() const { return m_units; }
 
 	bool getAppSignalState(Hash hash, AppSignalState& state);
 };

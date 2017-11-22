@@ -35,11 +35,6 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		}
 	}
 
-	if (!dbController->getUnits(Signal::unitList.get(), parent))
-	{
-		QMessageBox::critical(parent, "Error", "Could not get unit list from database");
-	}
-
 	QVector<Signal*> signalPtrVector;
 
 	QStringList foundSignalID;
@@ -173,44 +168,70 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 		}
 
-		signalProperties->propertyByCaption("Type")->setReadOnly(true);
-		signalProperties->propertyByCaption("InOutType")->setReadOnly(true);
-		signalProperties->propertyByCaption("DataSize")->setReadOnly(true);
+		signalProperties->propertyByCaption(typeCaption)->setReadOnly(true);
+		signalProperties->propertyByCaption(inOutTypeCaption)->setReadOnly(true);
+		signalProperties->propertyByCaption(dataSizeCaption)->setReadOnly(true);
+		signalProperties->propertyByCaption(byteOrderCaption)->setReadOnly(true);
 
-		if (!signalProperties->signal().isInternal())
+		auto& s = signalProperties->signal();
+		if (s.signalType() == E::SignalType::Bus)
 		{
-			signalProperties->propertyByCaption("EnableTuning")->setVisible(false);
-			signalProperties->propertyByCaption("TuningDefaultValue")->setVisible(false);
+			signalProperties->propertyByCaption(dataSizeCaption)->setVisible(false);
+			signalProperties->propertyByCaption(byteOrderCaption)->setVisible(false);
+
+			signalProperties->propertyByCaption(enableTuningCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningDefaultValueCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
+		}
+		else
+		{
+			signalProperties->propertyByCaption(busTypeIDCaption)->setVisible(false);
 		}
 
-		if (signalProperties->signal().isAnalog())
+		if (s.isInternal() == false)
 		{
-			if (!signalProperties->signal().isInput())
+			signalProperties->propertyByCaption(enableTuningCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningDefaultValueCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
+		}
+
+		if (s.isAnalog())
+		{
+			if (s.isInput() == false)
 			{
-				signalProperties->propertyByCaption("LowValidRange")->setVisible(false);
-				signalProperties->propertyByCaption("HighValidRange")->setVisible(false);
-				signalProperties->propertyByCaption("FilteringTime")->setVisible(false);
-				signalProperties->propertyByCaption("SpreadTolerance")->setVisible(false);
+				signalProperties->propertyByCaption(lowValidRangeCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highValidRangeCaption)->setVisible(false);
+				signalProperties->propertyByCaption(filteringTimeCaption)->setVisible(false);
+				signalProperties->propertyByCaption(spreadToleranceCaption)->setVisible(false);
+
+				signalProperties->propertyByCaption(electricLowLimitCaption)->setVisible(false);
+				signalProperties->propertyByCaption(electricHighLimitCaption)->setVisible(false);
+				signalProperties->propertyByCaption(electricUnitCaption)->setVisible(false);
+				signalProperties->propertyByCaption(sensorTypeCaption)->setVisible(false);
 			}
 
-			if (signalProperties->signal().isInternal())
+			if (s.isInternal())
 			{
-				signalProperties->propertyByCaption("LowADC")->setVisible(false);
-				signalProperties->propertyByCaption("HighADC")->setVisible(false);
+				signalProperties->propertyByCaption(lowADCCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highADCCaption)->setVisible(false);
 			}
 
-			if (signalProperties->signal().isOutput())
+			if (s.isOutput())
 			{
-				signalProperties->propertyByCaption("LowADC")->setVisible(false);
-				signalProperties->propertyByCaption("HighADC")->setVisible(false);
+				signalProperties->propertyByCaption(lowADCCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highADCCaption)->setVisible(false);
 			}
 			else
 			{
-				signalProperties->propertyByCaption("LowDAC")->setVisible(false);
-				signalProperties->propertyByCaption("HighDAC")->setVisible(false);
-				signalProperties->propertyByCaption("OutputMode")->setVisible(false);
+				signalProperties->propertyByCaption(lowDACCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highDACCaption)->setVisible(false);
+
+				signalProperties->propertyByCaption(outputModeCaption)->setVisible(false);
 			}
 		}
+
 		m_objList.push_back(signalProperties);
 	}
 
@@ -345,7 +366,7 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 		for (auto property : signalProperties->propertiesDependentOnPrecision())
 		{
 			property->setPrecision(precision);
-			m_propertyEditor->updateProperty(property->caption());
+			m_propertyEditor->updatePropertyValues(property->caption());
 		}
 	}
 }
@@ -478,29 +499,29 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	Signal& signal = *m_signalVector[0];
-	settings.setValue("SignalsTabPage/LastEditedSignal/lowADC", signal.lowADC());
-	settings.setValue("SignalsTabPage/LastEditedSignal/highADC", signal.highADC());
-	settings.setValue("SignalsTabPage/LastEditedSignal/lowEngeneeringUnits", signal.lowEngeneeringUnits());
-	settings.setValue("SignalsTabPage/LastEditedSignal/highEngeneeringUnits", signal.highEngeneeringUnits());
-	settings.setValue("SignalsTabPage/LastEditedSignal/unitID", signal.unitID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/lowValidRange", signal.lowValidRange());
-	settings.setValue("SignalsTabPage/LastEditedSignal/highValidRange", signal.highValidRange());
-	settings.setValue("SignalsTabPage/LastEditedSignal/unbalanceLimit", signal.unbalanceLimit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/inputLowLimit", signal.inputLowLimit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/inputHighLimit", signal.inputHighLimit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/inputUnitID", signal.inputUnitID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/inputSensorID", signal.inputSensorType());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputLowLimit", signal.outputLowLimit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputHighLimit", signal.outputHighLimit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputUnitID", signal.outputUnitID());
-    settings.setValue("SignalsTabPage/LastEditedSignal/outputMode", signal.outputMode());
-    settings.setValue("SignalsTabPage/LastEditedSignal/outputSensorID", signal.outputSensorType());
-	settings.setValue("SignalsTabPage/LastEditedSignal/acquire", signal.acquire());
-	settings.setValue("SignalsTabPage/LastEditedSignal/calculated", signal.calculated());
-	settings.setValue("SignalsTabPage/LastEditedSignal/normalState", signal.normalState());
-	settings.setValue("SignalsTabPage/LastEditedSignal/decimalPlaces", signal.decimalPlaces());
-	settings.setValue("SignalsTabPage/LastEditedSignal/aperture", signal.aperture());
-	settings.setValue("SignalsTabPage/LastEditedSignal/filteringTime", signal.filteringTime());
-	settings.setValue("SignalsTabPage/LastEditedSignal/spreadTolerance", signal.spreadTolerance());
-	settings.setValue("SignalsTabPage/LastEditedSignal/byteOrder", signal.byteOrder());
+
+	auto saver = [&settings](const QString& name, auto value)
+	{
+		settings.setValue(lastEditedSignalFieldValuePlace + name, value);
+	};
+
+	saver(lowADCCaption, signal.lowADC());
+	saver(highADCCaption, signal.highADC());
+	saver(lowEngeneeringUnitsCaption, signal.lowEngeneeringUnits());
+	saver(highEngeneeringUnitsCaption, signal.highEngeneeringUnits());
+	saver(unitCaption, signal.unit());
+	saver(lowValidRangeCaption, signal.lowValidRange());
+	saver(highValidRangeCaption, signal.highValidRange());
+	saver(electricLowLimitCaption, signal.electricLowLimit());
+	saver(electricHighLimitCaption, signal.electricHighLimit());
+	saver(electricUnitCaption, signal.electricUnit());
+	saver(sensorTypeCaption, signal.sensorType());
+	saver(outputModeCaption, signal.outputMode());
+	saver(acquireCaption, signal.acquire());
+	saver(decimalPlacesCaption, signal.decimalPlaces());
+	saver(coarseApertureCaption, signal.coarseAperture());
+	saver(fineApertureCaption, signal.fineAperture());
+	saver(filteringTimeCaption, signal.filteringTime());
+	saver(spreadToleranceCaption, signal.spreadTolerance());
+	saver(byteOrderCaption, signal.byteOrder());
 }

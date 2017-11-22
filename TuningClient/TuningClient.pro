@@ -122,7 +122,7 @@ SOURCES +=\
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
-    LogFile.cpp \
+    ../lib/LogFile.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     UserManager.cpp \
@@ -135,7 +135,6 @@ SOURCES +=\
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     ../lib/Tuning/TuningController.cpp \
-    TuningClientFilterEditor.cpp \
     TuningClientFilterStorage.cpp \
     SchemaStorage.cpp \
     SchemasWorkspace.cpp \
@@ -151,7 +150,8 @@ SOURCES +=\
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
-    TuningClientSignalManager.cpp
+    TuningClientSignalManager.cpp \
+    DialogFilterEditor.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -175,7 +175,7 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
-    LogFile.h \
+    ../lib/LogFile.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     UserManager.h \
@@ -188,7 +188,6 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
     ../lib/Tuning/TuningController.h \
-    TuningClientFilterEditor.h \
     TuningClientFilterStorage.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
@@ -204,7 +203,8 @@ HEADERS  += MainWindow.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningSignalStorage.h \
-    TuningClientSignalManager.h
+    TuningClientSignalManager.h \
+    DialogFilterEditor.h
 
 
 FORMS    += \

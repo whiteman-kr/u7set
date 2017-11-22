@@ -778,19 +778,59 @@ namespace Hardware
 		}
 
 		std::vector<std::shared_ptr<Connection>> result;
+		result.reserve(m_objectsVector.size());
 
 		for (std::shared_ptr<Connection> connection : m_objectsVector)
 		{
 			for (const QString& mask : masks)
 			{
 				if (connection->connectionID().contains(mask, Qt::CaseInsensitive) == true ||
-						connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-						connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true)
+					connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
+					connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					result.push_back(connection);
 				}
 			}
 		}
+
+		return result;
+	}
+
+	QStringList ConnectionStorage::filterByMoudules(const QStringList& modules) const
+	{
+		std::set<QString> chassisConnectios;
+
+		for (QString lm : modules)
+		{
+			// Let's assume that module (LM) has a Chassis parent, and LM's id is like SYSTEM_RACK_CHASSIS_LM.
+			// Try to cut ID to chassis
+			//
+			int lastUnderscoreIndex = lm.lastIndexOf('_');
+			if (lastUnderscoreIndex != -1)
+			{
+				lm = lm.left(lastUnderscoreIndex + 1);
+			}
+
+			std::vector<std::shared_ptr<Hardware::Connection>> lmConnections;
+			lmConnections = get(QStringList() << lm.trimmed());
+
+			for (const std::shared_ptr<Hardware::Connection>& c : lmConnections)
+			{
+				chassisConnectios.insert(c->connectionID());
+			}
+		}
+
+		// --
+		//
+		QStringList result;
+		result.reserve(static_cast<int>(chassisConnectios.size()));
+
+		for (const QString& c : chassisConnectios)
+		{
+			result.push_back(c);
+		}
+
+		qSort(result);
 
 		return result;
 	}

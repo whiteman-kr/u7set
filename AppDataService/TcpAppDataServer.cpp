@@ -191,9 +191,9 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 			continue;
 		}
 
-		Proto::AppSignalParam* appSignalParam = m_getAppSignalParamReply.add_appsignalparams();
+		Proto::AppSignal* appSignalParam = m_getAppSignalParamReply.add_appsignals();
 
-		signal->serializeToProtoAppSignalParam(appSignalParam);
+		signal->serializeTo(appSignalParam);
 	}
 
 	sendReply(m_getAppSignalParamReply);
@@ -234,7 +234,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 
 		Proto::AppSignal* appSignal = m_getAppSignalReply.add_appsignals();
 
-		signal->serializeToProtoAppSignal(appSignal);
+		signal->serializeTo(appSignal);
 	}
 
 	sendReply(m_getAppSignalReply);
@@ -273,7 +273,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		if (result == false)
 		{
-			assert(false);			// unknown hash
+			//assert(false);			// unknown hash
 			continue;
 		}
 
@@ -317,12 +317,6 @@ const AppSignals& TcpAppDataServer::appSignals() const
 const AppDataSourcesIP& TcpAppDataServer::appDataSources() const
 {
 	return m_thread->appDataSources();
-}
-
-
-const UnitList& TcpAppDataServer::units() const
-{
-	return m_thread->units();
 }
 
 
@@ -372,26 +366,6 @@ void TcpAppDataServer::onGetUnitsRequest()
 {
 	m_getUnitsReply.Clear();
 
-	const UnitList& unitList = units();
-
-	if (unitList.count() > ADS_GET_DATA_UNITS_MAX)
-	{
-		m_getUnitsReply.set_error(TO_INT(NetworkError::UnitsExceed));
-
-	}
-	else
-	{
-		for(const QPair<int, QString>& unit : unitList)
-		{
-			Network::Unit* u = m_getUnitsReply.add_units();
-
-			u->set_id(unit.first);
-			u->set_unit(unit.second.toStdString());
-		}
-
-		m_getUnitsReply.set_error(TO_INT(NetworkError::Success));
-	}
-
 	sendReply(m_getUnitsReply);
 }
 
@@ -407,13 +381,11 @@ TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddr
 												const AppDataSourcesIP& appDataSources,
 												const AppSignals& appSignals,
 												const AppSignalStates& appSignalStates,
-												const UnitList& units,
 												std::shared_ptr<CircularLogger> logger) :
 	Tcp::ServerThread(listenAddressPort, server, logger),
 	m_appDataSources(appDataSources),
 	m_appSignals(appSignals),
-	m_appSignalStates(appSignalStates),
-	m_units(units)
+	m_appSignalStates(appSignalStates)
 {
 	server->setThread(this);
 	buildAppSignalIDs();

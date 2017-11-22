@@ -29,7 +29,7 @@ namespace VFrame30
 
 	LogicSchema ::~LogicSchema (void)
 	{
-		qDebug() << "LogicSchema::~LogicSchema(void)";
+		qDebug() << "LogicSchema::~LogicSchema(void)  SchemaID = " << schemaId();
 	}
 
 	bool LogicSchema::SaveData(Proto::Envelope* message) const
@@ -224,6 +224,11 @@ namespace VFrame30
 	void LogicSchema::setEquipmentIds(const QString& s)
 	{
 		m_equipmentIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+
+		for (QString& id : m_equipmentIds)
+		{
+			id = id.trimmed();
+		}
 	}
 
 	void LogicSchema::setEquipmentIdList(const QStringList& s)

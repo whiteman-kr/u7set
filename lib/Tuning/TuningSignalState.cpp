@@ -105,6 +105,16 @@ void TuningSignalState::copy(const TuningSignalState& source)
 		m_value = source.value();
 	}
 
+	if (userModified() == false)
+	{
+		if (m_editValue != m_value)
+		{
+			m_flags.m_needRedraw = true;
+
+			m_editValue = m_value;
+		}
+	}
+
 	m_flags.m_underflow = m_value < m_readLowLimit;
 	m_flags.m_overflow = m_value > m_readHighLimit;
 
@@ -185,4 +195,16 @@ void TuningSignalState::onSendValue(float value)
 void TuningSignalState::invalidate()
 {
 	m_flags.m_valid = false;
+}
+
+bool TuningSignalState::floatsEqual(float x, float y)
+{
+	float epsilon = std::numeric_limits<float>::epsilon();
+
+	if (std::fabs(x - y) >= epsilon)
+	{
+		return false;
+	}
+
+	return true;
 }

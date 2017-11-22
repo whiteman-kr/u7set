@@ -22,7 +22,7 @@ class SchemaPropertiesDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit SchemaPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget *parent = 0);
+	explicit SchemaPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent);
 	virtual ~SchemaPropertiesDialog();
 
 public:

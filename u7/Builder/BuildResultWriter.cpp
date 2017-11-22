@@ -18,13 +18,14 @@ namespace Builder
 	//
 	// --------------------------------------------------------------------------------------
 
-	BuildFile::BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag)
+	BuildFile::BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress)
 	{
 		m_fileName = removeHeadTailSeparator(fileName);
 
 		m_info.pathFileName = constructPathFileName(subDir, fileName);
 		m_info.ID = id;
 		m_info.tag = tag;
+		m_info.compressed = compress;
 	}
 
 
@@ -184,7 +185,16 @@ namespace Builder
 			return false;
 		}
 
-		qint64 written = m_file.write(data);
+		qint64 written = 0;
+
+		if (m_info.compressed == true)
+		{
+			written = m_file.write(qCompress(data));
+		}
+		else
+		{
+			written = m_file.write(data);
+		}
 
 		if (written == -1)
 		{
@@ -207,11 +217,24 @@ namespace Builder
 			return false;
 		}
 
-		QTextStream textStream(&m_file);
+		QByteArray data;
+
+		QTextStream textStream(&data);
 
 		textStream << dataString;
 
 		textStream.flush();
+
+		if (m_info.compressed == true)
+		{
+			m_file.write(qCompress(data));
+		}
+		else
+		{
+			m_file.write(data);
+		}
+
+		m_file.flush();
 
 		m_file.close();
 
@@ -226,7 +249,9 @@ namespace Builder
 			return false;
 		}
 
-		QTextStream textStream(&m_file);
+		QByteArray data;
+
+		QTextStream textStream(&data);
 
 		for(auto string : stringList)
 		{
@@ -234,6 +259,17 @@ namespace Builder
 		}
 
 		textStream.flush();
+
+		if (m_info.compressed == true)
+		{
+			m_file.write(qCompress(data));
+		}
+		else
+		{
+			m_file.write(data);
+		}
+
+		m_file.flush();
 
 		m_file.close();
 
@@ -277,7 +313,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 					  QString(tr("Build file '%1' is not found")).
 					  arg(buildFile->pathFileName()).arg(m_subDir));
 			return false;
@@ -297,7 +333,7 @@ namespace Builder
 
 		if (buildFile == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 					  QString(tr("Build file '%1' is not found")).
 					  arg(pathFileName).arg(m_subDir));
 			return false;
@@ -316,7 +352,7 @@ namespace Builder
 
 		if (buildFile == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 					  QString(tr("Build file '%1' is not found")).
 					  arg(pathFileName).arg(m_subDir));
 			return false;
@@ -362,7 +398,7 @@ namespace Builder
 	// --------------------------------------------------------------------------------------
 
 	MultichannelFile::MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID,
-									   QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList& descriptionFields) :
+									   QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList& descriptionFields) :
 		m_buildResultWriter(buildResultWriter),
 		m_log(buildResultWriter.log()),
 		m_subsysStrID(subsysStrID),
@@ -372,8 +408,10 @@ namespace Builder
 	{
 		BuildInfo bi = m_buildResultWriter.buildInfo();
 
-		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
-						 bi.project, bi.user, bi.id, bi.typeStr(), bi.changeset, descriptionFieldsVersion, descriptionFields);
+		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount, lmDescriptionNumber,
+						 bi.project, bi.user, bi.id, bi.typeStr(), bi.changeset);
+
+		m_moduleFirmware.setDescriptionFields(descriptionFieldsVersion, descriptionFields);
 	}
 
 
@@ -616,7 +654,7 @@ namespace Builder
 
 			if (m_log != nullptr)
 			{
-				LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
+				LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
 			}
 
 			return false;
@@ -629,7 +667,7 @@ namespace Builder
 
 		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.release, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
 		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
+			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
 			return false;
 		}
 
@@ -642,7 +680,7 @@ namespace Builder
 
 		if (m_buildInfo.release == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
 		}
 		else
 		{
@@ -745,12 +783,11 @@ namespace Builder
 		return result;
 	}
 
-
-	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag)
+	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress)
 	{
 		assert(fileName.isEmpty() == false);
 
-		BuildFile* buildFile = new BuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = new BuildFile(subDir, fileName, id, tag, compress);
 
 		QString pathFileName = buildFile->pathFileName();
 
@@ -766,7 +803,6 @@ namespace Builder
 		}
 
 		m_buildFiles.insert(pathFileName, buildFile);
-
 
 		if (id.isEmpty() == false)
 		{
@@ -788,27 +824,27 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress)
 	{
-		return addFile(subDir, fileName, "", "", data);
+		return addFile(subDir, fileName, "", "", data, compress);
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString, bool compress)
 	{
-		return addFile(subDir, fileName, "", "", dataString);
+		return addFile(subDir, fileName, "", "", dataString, compress);
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList, bool compress)
 	{
-		return addFile(subDir, fileName, "", "", stringList);
+		return addFile(subDir, fileName, "", "", stringList, compress);
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data, bool compress)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
 
 		if (buildFile == nullptr)
 		{
@@ -827,9 +863,9 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString, bool compress)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
 
 		if (buildFile == nullptr)
 		{
@@ -848,9 +884,9 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList, bool compress)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
 
 		if (buildFile == nullptr)
 		{
@@ -867,7 +903,6 @@ namespace Builder
 
 		return buildFile;
 	}
-
 
 	bool BuildResultWriter::writeConfigurationXmlFiles()
 	{
@@ -908,7 +943,7 @@ namespace Builder
 	}
 
 
-	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList& descriptionFields)
+	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList& descriptionFields)
 	{
 		MultichannelFile* multichannelFile = nullptr;
 
@@ -925,7 +960,7 @@ namespace Builder
 
 			if (multichannelFile->subsysID() != subsysID)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 						  QString(tr("Different subsysID (%1 & %2) for subsysStrID = '%3'")).
 						  arg(multichannelFile->subsysID()).arg(subsysID).arg(subsysStrID));
 
@@ -934,7 +969,7 @@ namespace Builder
 		}
 		else
 		{
-			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, descriptionFieldsVersion, descriptionFields);
+			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, lmDescriptionNumber, descriptionFieldsVersion, descriptionFields);
 
 			m_multichannelFiles.insert(subsysStrID, multichannelFile);
 		}
@@ -1009,6 +1044,17 @@ namespace Builder
 		return nullptr;
 	}
 
+	BuildFile* BuildResultWriter::getBuildFileByID(const QString& buildFileID) const
+	{
+		QString buildFilePathName = m_buildFileIDMap.value(buildFileID, QString());
+
+		if (buildFilePathName.isEmpty() == true)
+		{
+			return nullptr;
+		}
+
+		return m_buildFiles.value(buildFilePathName, nullptr);
+	}
 
 	bool BuildResultWriter::checkBuildFilePtr(const BuildFile* buildFile) const
 	{

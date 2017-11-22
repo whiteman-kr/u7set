@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SchemaPoint.h"
+#include "../lib/Types.h"
 
 class QPainter;
 
@@ -30,6 +31,7 @@ namespace VFrame30
 		AfbPin(ConnectionDirrection dirrection,
 			   const QUuid& guid,
 			   int operandIndex,
+			   E::SignalType signalType,
 			   QString caption);
 
 		AfbPin(ConnectionDirrection dirrection, const QUuid& guid, const Afb::AfbSignal& afbSignal);
@@ -77,6 +79,9 @@ namespace VFrame30
 		int afbOperandIndex() const;
 		void setAfbOperandIndex(int value);
 
+		E::SignalType signalType() const;			// Here we care ONLY about is it BUS or its regular signal, ceep in mind that a lot of code does not care about analog/discrete pin
+		void setSignalType(E::SignalType value);
+
 		QString caption() const;
 		void setCaption(QString caption);
 
@@ -87,6 +92,7 @@ namespace VFrame30
 		SchemaPoint m_point;				// Don't remove position!!!
 		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
+		E::SignalType m_signalType;			// Here we care ONLY about is it BUS or its regular signal, ceep in mind that a lot of code does not care about analog/discrete pin
 
 		std::vector<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
 		
@@ -133,16 +139,19 @@ namespace VFrame30
 
 		bool GetConnectionPoint(const QUuid& guid, VFrame30::AfbPin* pResult) const;
 
+		bool hasInputs() const;
+		bool hasOutputs() const;
+
 		int inputsCount() const;
 		int outputsCount() const;
 
 		void addInput();
 		void addInput(const Afb::AfbSignal& s);
-		void addInput(int opIndex, QString caption);
+		void addInput(int opIndex, E::SignalType signalType, QString caption);
 
 		void addOutput();
 		void addOutput(const Afb::AfbSignal& s);
-		void addOutput(int opIndex, QString caption);
+		void addOutput(int opIndex, E::SignalType signalType, QString caption);
 
 		void removeAllInputs();
 		void removeAllOutputs();

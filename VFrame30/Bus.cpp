@@ -9,11 +9,12 @@ namespace VFrame30
 	// BusSignal
 	//
 	BusSignal::BusSignal() :
-		BusSignal(E::SignalType::Discrete)
+		BusSignal(E::SignalType::Discrete)		// Here proprties will be created
 	{
 	}
 
-	BusSignal::BusSignal(const BusSignal& src)
+	BusSignal::BusSignal(const BusSignal& src) :
+		BusSignal(src.m_type)					// Here proprties will be created
 	{
 		*this = src;
 	}
@@ -21,18 +22,43 @@ namespace VFrame30
 	BusSignal::BusSignal(E::SignalType type) :
 		m_type(type)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::name, true, BusSignal::name, BusSignal::setName);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busSignalId, true, BusSignal::signalId, BusSignal::setSignalId);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::caption, true, BusSignal::caption, BusSignal::setCaption);
 		ADD_PROPERTY_GETTER(E::SignalType, PropertyNames::type, true, BusSignal::type);
 
 		switch (type)
 		{
 		case E::SignalType::Analog:
 			ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::analogFormat, true, BusSignal::analogFormat, BusSignal::setAnalogFormat);
+			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::units, true, BusSignal::units, BusSignal::setUnits);
+			ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, BusSignal::precision, BusSignal::setPrecision);
+
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::coarseAperture, PropertyNames::apertureCategory, true, BusSignal::coarseAperture, BusSignal::setCoarseAperture);
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fineAperture, PropertyNames::apertureCategory, true, BusSignal::fineAperture, BusSignal::setFineAperture);
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::adaptiveAperture, PropertyNames::apertureCategory, true, BusSignal::adaptiveAperture, BusSignal::setAdaptiveAperture);
+
+			// Inbus settings (manual)
+			//
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusAnalogSize, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogSize, BusSignal::setInbusAnalogSize);
+			ADD_PROPERTY_GET_SET_CAT(E::DataFormat, PropertyNames::busInbusAnalogFormat, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogFormat, BusSignal::setInbusAnalogFormat);
+			ADD_PROPERTY_GET_SET_CAT(E::ByteOrder, PropertyNames::busInbusAnalogByteOrder, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogByteOrder, BusSignal::setInbusAnalogByteOrder);
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busAnalogLowLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::busAnalogLowLimit, BusSignal::setBusAnalogLowLimit);
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busAnalogHightLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::busAnalogHighLimit, BusSignal::setBusAnalogHightLimit);
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busInbusAnalogLowLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogLowLimit, BusSignal::setInbusAnalogLowLimit);
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::busInbusAnalogHightLimit, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogHighLimit, BusSignal::setInbusAnalogHightLimit);
 			break;
 		case E::SignalType::Discrete:
+			// Inbus settings (manual)
+			//
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusDiscreteBitNo, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusDiscreteBitNo, BusSignal::setInbusDiscreteBitNo);
 			break;
 		case E::SignalType::Bus:
 			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, BusSignal::busTypeId, BusSignal::setBusTypeId);
+			// Inbus settings (manual)
+			//
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
 			break;
 		default:
 			assert(false);
@@ -41,184 +67,94 @@ namespace VFrame30
 		return;
 	}
 
-	bool BusSignal::load(const QDomElement& domElement, QString* errorMessage)
+	BusSignal& BusSignal::operator= (const BusSignal& src)
 	{
-		if (domElement.isNull() == true ||
-			errorMessage == nullptr)
+		if (this != &src)
 		{
-			assert(domElement.isNull() == false);
-			assert(errorMessage != nullptr);
+			Proto::BusSignal message;
+			src.save(&message);
+			this->load(message);
+		}
+
+		return *this;
+	}
+
+	bool BusSignal::save(Proto::BusSignal* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
 			return false;
 		}
 
-		// Name
-		//
-		if (domElement.hasAttribute(QLatin1String("Name")) == false)
-		{
-			*errorMessage += "Cant find attribute Name in BusSignal";
-			return false;
-		}
+		message->set_signalid(m_signalId.toStdString());
+		message->set_caption(m_caption.toStdString());
+		message->set_type(static_cast<int>(m_type));
+		message->set_units(m_units.toStdString());
+		message->set_analogformat(static_cast<int>(m_analogFormat));
+		message->set_precision(m_precision);
+		message->set_coarseaperture(m_coarseAperture);
+		message->set_fineaperture(m_fineAperture);
+		message->set_adaptiveaperture(m_adaptiveAperture);
+		message->set_bustypeid(m_busTypeId.toStdString());
 
-		m_name = domElement.attribute(QLatin1String("Name"));
-
-		// Type
-		//
-		{
-			if (domElement.hasAttribute(QLatin1String("Type")) == false)
-			{
-				*errorMessage += "Cant find attribute Type in BusSignal";
-				return false;
-			}
-
-			QString strType = domElement.attribute(QLatin1String("Type"));
-
-			if (strType.compare(QLatin1String("Analog"), Qt::CaseInsensitive) == 0)
-			{
-				m_type = E::SignalType::Analog;
-			}
-			else
-			{
-				if (strType.compare(QLatin1String("Discrete"), Qt::CaseInsensitive) == 0)
-				{
-					m_type = E::SignalType::Discrete;
-				}
-				else
-				{
-					if (strType.compare(QLatin1String("Bus"), Qt::CaseInsensitive) == 0)
-					{
-						m_type = E::SignalType::Bus;
-					}
-					else
-					{
-						*errorMessage += "Attribute Type has wrong value: " + strType;
-						return false;
-					}
-				}
-			}
-		}
-
-		// AnalogFormat
-		//
-		if (m_type == E::SignalType::Analog)
-		{
-			if (domElement.hasAttribute(QLatin1String("AnalogFormat")) == false)
-			{
-				*errorMessage += "Cant find attribute AnalogFormat in BusSignal";
-				return false;
-			}
-
-			QString strAnalogFormat = domElement.attribute(QLatin1String("AnalogFormat"));
-
-			if (strAnalogFormat.compare(QLatin1String("Float32"), Qt::CaseInsensitive) == 0)
-			{
-				m_analogDataFormat = E::AnalogAppSignalFormat::Float32;
-			}
-			else
-			{
-				if (strAnalogFormat.compare(QLatin1String("SignedInt32"), Qt::CaseInsensitive) == 0)
-				{
-					m_analogDataFormat = E::AnalogAppSignalFormat::SignedInt32;
-				}
-				else
-				{
-					*errorMessage += "Attribute AnalogFormat has wrong value: " + strAnalogFormat;
-					return false;
-				}
-			}
-		}
-
-		// BusTypeID
-		//
-		if (m_type == E::SignalType::Bus)
-		{
-			if (domElement.hasAttribute(QLatin1String("BusTypeID")) == false)
-			{
-				*errorMessage += "Cant find attribute BusTypeID in BusSignal";
-				return false;
-			}
-
-			m_busTypeId = domElement.attribute(QLatin1String("BusTypeID"));
-		}
+		message->set_inbusoffset(m_inbusOffset);
+		message->set_inbusdiscretebitno(m_inbusDiscreteBitNo);
+		message->set_inbusanalogsize(m_inbusAnalogSize);
+		message->set_inbusanalogformat(static_cast<int>(m_inbusAnalogFormat));
+		message->set_inbusanalogbyteorder(static_cast<int>(m_inbusAnalogByteOrder));
+		message->set_busanaloglowlimit(m_busAnalogLowLimit);
+		message->set_busanaloghighlimit(m_busAnalogHighLimit);
+		message->set_inbusanaloglowlimit(m_inbusAnalogLowLimit);
+		message->set_inbusanaloghighlimit(m_inbusAnalogHighLimit);
 
 		return true;
 	}
 
-	bool BusSignal::save(QDomElement* domElement) const
+	bool BusSignal::load(const Proto::BusSignal& message)
 	{
-		if (domElement == nullptr)
-		{
-			assert(domElement);
-			return false;
-		}
+		m_signalId = QString::fromStdString(message.signalid());
+		m_caption = QString::fromStdString(message.caption());
+		m_type = static_cast<E::SignalType>(message.type());
+		m_units = QString::fromStdString(message.units());
+		m_analogFormat = static_cast<E::AnalogAppSignalFormat>(message.analogformat());
+		m_precision = message.precision();
+		m_coarseAperture = message.coarseaperture();
+		m_fineAperture = message.fineaperture();
+		m_adaptiveAperture = message.adaptiveaperture();
+		m_busTypeId = QString::fromStdString(message.bustypeid());
 
-		domElement->setTagName(QLatin1String("BusSignal"));
-
-		// Name
-		//
-		domElement->setAttribute(QLatin1String("Name"), m_name);
-
-		// Type
-		//
-		domElement->setAttribute(QLatin1String("Type"), E::valueToString(m_type));
-
-		switch (m_type)
-		{
-		case E::SignalType::Discrete:
-			break;
-		case E::SignalType::Analog:
-			domElement->setAttribute(QLatin1String("AnalogFormat"), E::valueToString(m_analogDataFormat));
-			break;
-		case E::SignalType::Bus:
-			domElement->setAttribute(QLatin1String("BusTypeID"), m_busTypeId);
-			break;
-		default:
-			assert(false);
-		}
+		m_inbusOffset = message.inbusoffset();
+		m_inbusDiscreteBitNo = message.inbusdiscretebitno();
+		m_inbusAnalogSize = message.inbusanalogsize();
+		m_inbusAnalogFormat = static_cast<E::DataFormat>(message.inbusanalogformat());
+		m_inbusAnalogByteOrder = static_cast<E::ByteOrder>(message.inbusanalogbyteorder());
+		m_busAnalogLowLimit = message.busanaloglowlimit();
+		m_busAnalogHighLimit = message.busanaloghighlimit();
+		m_inbusAnalogLowLimit = message.inbusanaloglowlimit();
+		m_inbusAnalogHighLimit = message.inbusanaloghighlimit();
 
 		return true;
 	}
 
-	bool BusSignal::save(QXmlStreamWriter* stream) const
+	QString BusSignal::signalId() const
 	{
-		if (stream == nullptr)
-		{
-			assert(stream);
-			return false;
-		}
-
-		// Name
-		//
-		stream->writeAttribute(QLatin1String("Name"), m_name);
-
-		// Type
-		//
-		stream->writeAttribute(QLatin1String("Type"), E::valueToString(m_type));
-
-		switch (m_type)
-		{
-		case E::SignalType::Discrete:
-			break;
-		case E::SignalType::Analog:
-			stream->writeAttribute(QLatin1String("AnalogFormat"), E::valueToString(m_analogDataFormat));
-			break;
-		case E::SignalType::Bus:
-			stream->writeAttribute(QLatin1String("BusTypeID"), m_busTypeId);
-			break;
-		default:
-			assert(false);
-		}
-
-		return true;
+		return m_signalId;
 	}
 
-	QString BusSignal::name() const
+	void BusSignal::setSignalId(const QString& value)
 	{
-		return m_name;
+		m_signalId = value.trimmed();
 	}
 
-	void BusSignal::setName(const QString& value)
+	QString BusSignal::caption() const
 	{
-		m_name = value.trimmed();
+		return m_caption;
+	}
+
+	void BusSignal::setCaption(const QString& value)
+	{
+		m_caption = value.trimmed();
 	}
 
 	E::SignalType BusSignal::type() const
@@ -226,19 +162,64 @@ namespace VFrame30
 		return m_type;
 	}
 
-	void BusSignal::setType(E::SignalType value)
+	QString BusSignal::units() const
 	{
-		m_type = value;
+		return m_units;
+	}
+
+	void BusSignal::setUnits(const QString& value)
+	{
+		m_units = value.trimmed();
 	}
 
 	E::AnalogAppSignalFormat BusSignal::analogFormat() const
 	{
-		return m_analogDataFormat;
+		return m_analogFormat;
 	}
 
 	void BusSignal::setAnalogFormat(E::AnalogAppSignalFormat value)
 	{
-		m_analogDataFormat = value;
+		m_analogFormat = value;
+	}
+
+	int BusSignal::precision() const
+	{
+		return m_precision;
+	}
+
+	void BusSignal::setPrecision(int value)
+	{
+		m_precision = value;
+	}
+
+	double BusSignal::coarseAperture() const
+	{
+		return m_coarseAperture;
+	}
+
+	void BusSignal::setCoarseAperture(double aperture)
+	{
+		m_coarseAperture = aperture;
+	}
+
+	double BusSignal::fineAperture() const
+	{
+		return m_fineAperture;
+	}
+
+	void BusSignal::setFineAperture(double aperture)
+	{
+		m_fineAperture = aperture;
+	}
+
+	bool BusSignal::adaptiveAperture() const
+	{
+		return m_adaptiveAperture;
+	}
+
+	void BusSignal::setAdaptiveAperture(bool adaptive)
+	{
+		m_adaptiveAperture = adaptive;
 	}
 
 	QString BusSignal::busTypeId() const
@@ -248,103 +229,225 @@ namespace VFrame30
 
 	void BusSignal::setBusTypeId(const QString& value)
 	{
-		m_busTypeId = value.trimmed();
+		assert(m_type == E::SignalType::Bus);
+		m_busTypeId = value;
 	}
 
+	int BusSignal::inbusOffset() const
+	{
+		return m_inbusOffset;
+	}
+
+	void BusSignal::setInbusOffset(int value)
+	{
+		m_inbusOffset = value;
+	}
+
+	int BusSignal::inbusDiscreteBitNo() const
+	{
+		return m_inbusDiscreteBitNo;
+	}
+
+	void BusSignal::setInbusDiscreteBitNo(int value)
+	{
+		m_inbusDiscreteBitNo = value;
+	}
+
+	int BusSignal::inbusAnalogSize() const
+	{
+		return m_inbusAnalogSize;
+	}
+
+	void BusSignal::setInbusAnalogSize(int value)
+	{
+		m_inbusAnalogSize = value;
+	}
+
+	E::DataFormat BusSignal::inbusAnalogFormat() const
+	{
+		return m_inbusAnalogFormat;
+	}
+
+	void BusSignal::setInbusAnalogFormat(E::DataFormat value)
+	{
+		m_inbusAnalogFormat = value;
+	}
+
+	E::ByteOrder BusSignal::inbusAnalogByteOrder() const
+	{
+		return m_inbusAnalogByteOrder;
+	}
+
+	void BusSignal::setInbusAnalogByteOrder(E::ByteOrder value)
+	{
+		m_inbusAnalogByteOrder = value;
+	}
+
+	double BusSignal::busAnalogLowLimit() const
+	{
+		return m_busAnalogLowLimit;
+	}
+
+	void BusSignal::setBusAnalogLowLimit(double value)
+	{
+		m_busAnalogLowLimit = value;
+	}
+
+	double BusSignal::busAnalogHighLimit() const
+	{
+		return m_busAnalogHighLimit;
+	}
+
+	void BusSignal::setBusAnalogHightLimit(double value)
+	{
+		m_busAnalogHighLimit = value;
+	}
+
+	double BusSignal::inbusAnalogLowLimit() const
+	{
+		return m_inbusAnalogLowLimit;
+	}
+
+	void BusSignal::setInbusAnalogLowLimit(double value)
+	{
+		m_inbusAnalogLowLimit = value;
+	}
+
+	double BusSignal::inbusAnalogHighLimit() const
+	{
+		return m_inbusAnalogHighLimit;
+	}
+
+	void BusSignal::setInbusAnalogHightLimit(double value)
+	{
+		m_inbusAnalogHighLimit = value;
+	}
 
 	//
 	// Bus
 	//
-	Bus::Bus()
+	Bus::Bus() :
+		PropertyObject(),
+		Proto::ObjectSerialization<Bus>(Proto::ProtoCompress::Never),
+		m_uuid(QUuid::createUuid())
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, Bus::busTypeId, Bus::setBusTypeId);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, Bus::busTypeId,  Bus::setBusTypeId);
+
 		auto fileNameProp = ADD_PROPERTY_GETTER(QString, PropertyNames::busTypeFileName, true, Bus::fileName);
 		fileNameProp->setExpert(true);
 
-		setUuid(QUuid::createUuid());
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::busAutoSignalPlacemanet, PropertyNames::busSettingCategory, true, Bus::autoSignalPlacement, Bus::setAutoSignalPlacement);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busManualBusSize, PropertyNames::busSettingCategory, true, Bus::manualBusSize, Bus::setManualBusSize);
+
+		return;
 	}
 
 
 	Bus::Bus(const Bus& src):
-		Bus()
+		Bus()	// Here properties will be created
 	{
 		*this = src;
 	}
 
-	bool Bus::load(const QByteArray& data, QString* errorMessage)
+	Bus& Bus::operator= (const Bus& src)
 	{
-		if (errorMessage == nullptr)
+		if (this != &src)
 		{
+			Proto::Bus message;
+			src.save(&message);
+			this->load(message);
+		}
+
+		return *this;
+	}
+
+	bool Bus::save(Proto::Bus* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
 			return false;
 		}
 
-		errorMessage->clear();
+		bool ok = true;
 
-		// Parse doc
-		//
-		QDomDocument doc;
-		int parseErrorLine = -1;
-		int parseErrorColumn = -1;
+		Proto::Write(message->mutable_uuid(), m_uuid);
+		message->set_bustypeid(m_busTypeId.toStdString());
+		message->set_autosignalplacement(m_autoSignalPlacement);
+		message->set_manualbussize(m_manualBusSize);
 
-		bool ok = doc.setContent(data, errorMessage, &parseErrorLine, &parseErrorColumn);
-		if (ok == false)
+		for (const BusSignal& bs : m_busSignals)
 		{
-			errorMessage->append(QString(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
+			Proto::BusSignal* busSignalMessage = message->add_bussignals();
+			ok &= bs.save(busSignalMessage);
+		}
+
+		return ok;
+	}
+
+	bool Bus::load(const Proto::Bus& message)
+	{
+		bool ok = true;
+
+		m_uuid = Proto::Read(message.uuid());
+		m_busTypeId = QString::fromStdString(message.bustypeid());
+		m_autoSignalPlacement = message.autosignalplacement();
+		m_manualBusSize = message.manualbussize();
+
+		int busSignalCount = message.bussignals_size();
+
+		m_busSignals.clear();
+		m_busSignals.reserve(busSignalCount);
+
+		for (int i = 0; i < busSignalCount; i++)
+		{
+			const Proto::BusSignal& busSignalMessage = message.bussignals(i);
+
+			m_busSignals.emplace_back();
+			ok &= m_busSignals.back().load(busSignalMessage);
+		}
+
+		return ok;
+	}
+
+	bool Bus::SaveData(Proto::Envelope* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
 			return false;
 		}
 
-		// Read root element <BusType>
-		//
-		QDomElement busType = doc.documentElement();
+		std::string className = {"Bus"};
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		message->set_classnamehash(classnamehash);
 
-		if (busType.isNull() == true ||
-			busType.tagName() != "BusType")
+		bool ok = save(message->mutable_bus());
+
+		return ok;
+	}
+
+	bool Bus::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_bus() == false ||
+			message.classnamehash() != CUtils::GetClassHashCode("Bus"))
 		{
-			*errorMessage = QString("Can't find section BusType.");
+			assert(message.has_bus());
+			assert(message.classnamehash() == CUtils::GetClassHashCode("Bus"));
 			return false;
 		}
 
-		if (busType.hasAttribute(QLatin1String("ID")) == false)
-		{
-			*errorMessage = QString("Can't find attribute ID in section BusType.");
-			return false;
-		}
+		bool ok = load(message.bus());
 
-		if (busType.hasAttribute(QLatin1String("Uuid")) == false)
-		{
-			*errorMessage = QString("Can't find attribute Uuid in section BusType.");
-			return false;
-		}
+		return ok;
+	}
 
-		m_busTypeId = busType.attribute(QLatin1String("ID"));
-		m_uuid = QUuid(busType.attribute(QLatin1String("Uuid")));
+	std::shared_ptr<Bus> Bus::CreateObject(const Proto::Envelope& message)
+	{
+		std::shared_ptr<Bus> object = std::make_shared<Bus>();
+		object->LoadData(message);
 
-		// Read set of <BusSignal>
-		//
-		{
-			QDomNodeList busSignalList = busType.elementsByTagName(QLatin1String("BusSignal"));
-
-			m_busSignals.clear();
-			m_busSignals.reserve(busSignalList.size());
-
-			for (int i = 0; i < busSignalList.size(); ++i)
-			{
-				QDomElement busSignalElement = busSignalList.at(i).toElement();
-
-				BusSignal busSignal;
-				ok = busSignal.load(busSignalElement, errorMessage);
-
-				if (ok == false)
-				{
-					errorMessage->append(QString(" Error parsing %1 bus type").arg(m_busTypeId));
-					return false;
-				}
-
-				m_busSignals.push_back(busSignal);
-			}
-		}
-
-		return true;
+		return object;
 	}
 
 	QUuid Bus::uuid() const
@@ -355,57 +458,6 @@ namespace VFrame30
 	void Bus::setUuid(const QUuid& uuid)
 	{
 		m_uuid = uuid;
-	}
-
-	bool Bus::save(QByteArray* data) const
-	{
-		if (data == nullptr)
-		{
-			assert(data);
-			return false;
-		}
-
-		// Save is done via QXmlStreamWriter, because QDomDocument from run to run sometimes can keep the same xml in different way
-		// for example attributes can be in different order, it's still the same xml but,
-		// as we calc hash from the XML for checking version (SchemaItemBus) it's good idea to have always the SAME xml for same data
-		// So, just use QXmlStreamWriter for saving and QDomDocument for reading bus xml.
-		//
-		QXmlStreamWriter stream(data);
-
-		stream.setAutoFormatting(true);
-		stream.writeStartDocument();
-
-		stream.writeStartElement("BusType");
-		stream.writeAttribute(QLatin1String("ID"), m_busTypeId);
-		stream.writeAttribute(QLatin1String("Uuid"), m_uuid.toString());
-
-		for (const BusSignal& busSignal : m_busSignals)
-		{
-			stream.writeStartElement(QLatin1String("BusSignal"));
-			busSignal.save(&stream);
-			stream.writeEndElement();	// BusSignal
-		}
-
-		stream.writeEndElement();	// BusType
-		stream.writeEndDocument();
-
-//		QDomDocument doc;
-
-//		QDomElement busTypeElement = doc.createElement(QLatin1String("BusType"));
-//		doc.appendChild(busTypeElement);
-
-//		busTypeElement.setAttribute(QLatin1String("ID"), m_busTypeId);
-
-//		for (const BusSignal& busSignal : m_busSignals)
-//		{
-//			QDomElement busSignalElement = doc.createElement(QLatin1String("BusSignal"));
-//			busTypeElement.appendChild(busSignalElement);
-
-//			busSignal.save(&busSignalElement);
-//		}
-
-//		*data = doc.toByteArray();
-		return true;
 	}
 
 	QString Bus::fileName() const
@@ -432,16 +484,14 @@ namespace VFrame30
 	Hash Bus::calcHash() const
 	{
 		QByteArray data;
-		bool ok = save(&data);
+		bool ok = Save(data);
 
 		if (ok == false)
 		{
 			return UNDEFINED_HASH;
 		}
 
-		QString xml(data);
-		Hash h = ::calcHash(xml);
-
+		Hash h = ::calcHash(data);
 		return h;
 	}
 
@@ -465,7 +515,7 @@ namespace VFrame30
 		m_busSignals.push_back(signal);
 	}
 
-	bool Bus::removeSignal(int index)
+	bool Bus::removeSignalAt(int index)
 	{
 		if (index < 0 || index >= static_cast<int>(m_busSignals.size()))
 		{
@@ -476,7 +526,26 @@ namespace VFrame30
 		m_busSignals.erase(m_busSignals.begin() + index);
 
 		return true;
+	}
 
+	bool Bus::autoSignalPlacement() const
+	{
+		return m_autoSignalPlacement;
+	}
+
+	void Bus::setAutoSignalPlacement(bool value)
+	{
+		m_autoSignalPlacement = value;
+	}
+
+	int Bus::manualBusSize() const
+	{
+		return m_manualBusSize;
+	}
+
+	void Bus::setManualBusSize(int value)
+	{
+		m_manualBusSize = qBound(0, value, 256);
 	}
 
 	//

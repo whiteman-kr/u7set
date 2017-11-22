@@ -5,9 +5,6 @@
 
 namespace VFrame30
 {
-
-	static const double BusSideLineWidth = mm2in(0.4);
-
 	//
 	//
 	//		SchemaItemBus
@@ -51,7 +48,7 @@ namespace VFrame30
 		QString busTypeId() const;
 
 		const VFrame30::Bus& busType() const;
-		void setBusType(const VFrame30::Bus&bus);
+		void setBusType(const VFrame30::Bus& bus);
 
 		Hash busTypeHash() const;
 
@@ -91,11 +88,6 @@ namespace VFrame30
 		//
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
-
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
 
 		// Public Methods
 		//
@@ -144,11 +136,6 @@ namespace VFrame30
 		//
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
-
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
 
 		// Public Methods
 		//

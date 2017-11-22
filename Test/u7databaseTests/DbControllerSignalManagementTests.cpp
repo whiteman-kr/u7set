@@ -70,10 +70,10 @@ void DbControllerSignalTests::addSignalTest()
 	Signal newSignal;
 	newSignal.setCaption("testCaption");
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.3);
+	newSignal.setFineAperture(0.7);
 	newSignal.setAppSignalID("testAppSignal");
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID("testCustomAppSignal");
 	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
@@ -85,25 +85,16 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
-//	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(E::InputUnit::V);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
+	newSignal.setSensorType(E::SensorType::mV_L_TXK);
+	newSignal.setElectricUnit(E::ElectricUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName("testObjectName");
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
-	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-//	newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
-	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setUnit("mV");
 
 	signalsToAdd.push_back(newSignal);
 
@@ -128,25 +119,17 @@ void DbControllerSignalTests::addSignalTest()
 	QVERIFY2(query.value("appSignalID").toString() == newSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
 	QVERIFY2(query.value("customAppSignalID").toString() == newSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
 	QVERIFY2(query.value("caption").toString() == newSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	//QVERIFY2(query.value("dataFormatId").toInt() == newSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
 	QVERIFY2(query.value("dataSize").toInt() == newSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == newSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == newSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
-	QVERIFY2(query.value("unitId").toInt() == newSignal.unitID(), qPrintable(QString("Error: unitId is wrong")));
-	QVERIFY2(query.value("unbalanceLimit").toDouble() == newSignal.unbalanceLimit(), qPrintable(QString("Error: unbalanceLimit is wrong")));
-	QVERIFY2(query.value("inputLowLimit").toDouble() == newSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
-	QVERIFY2(query.value("inputHighLimit").toDouble() == newSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
-	QVERIFY2(query.value("inputUnitId").toInt() == newSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
-//	QVERIFY2(query.value("inputSensorId").toInt() == newSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
-	QVERIFY2(query.value("outputLowLimit").toDouble() == newSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
-	QVERIFY2(query.value("outputHighLimit").toDouble() == newSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
-	QVERIFY2(query.value("outputUnitId").toInt() == newSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
-//	QVERIFY2(query.value("outputSensorId").toInt() == newSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
+	QVERIFY2(query.value("unit").toString() == newSignal.unit(), qPrintable(QString("Error: unit is wrong")));
+	QVERIFY2(query.value("electricLowLimit").toDouble() == newSignal.electricLowLimit(), qPrintable(QString("Error: electricLowLimit is wrong")));
+	QVERIFY2(query.value("electricHighLimit").toDouble() == newSignal.electricHighLimit(), qPrintable(QString("Error: electricHighLimit is wrong")));
+	QVERIFY2(query.value("electricUnit").toInt() == newSignal.electricUnit(), qPrintable(QString("Error: electricUnit is wrong")));
 	QVERIFY2(query.value("acquire").toBool() == newSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
-	QVERIFY2(query.value("calculated").toBool() == newSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
-	QVERIFY2(query.value("normalState").toInt() == newSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
 	QVERIFY2(query.value("decimalPlaces").toInt() == newSignal.decimalPlaces(), qPrintable(QString("Error: decimalPlaces is wrong")));
-	QVERIFY2(query.value("aperture").toDouble() == newSignal.aperture(), qPrintable(QString("Error: aperture is wrong")));
+	QVERIFY2(query.value("coarseAperture").toDouble() == newSignal.coarseAperture(), qPrintable(QString("Error: coarse aperture is wrong")));
+	QVERIFY2(query.value("fineAperture").toDouble() == newSignal.fineAperture(), qPrintable(QString("Error: fine aperture is wrong")));
 	QVERIFY2(query.value("inOutType").toInt() == int(newSignal.inOutType()), qPrintable(QString("Error: inOutType is wrong")));
 	QVERIFY2(query.value("equipmentID").toString() == newSignal.equipmentID(), qPrintable(QString("Error: deviceStrId is wrong")));
 	QVERIFY2(query.value("filteringTime").toDouble() == newSignal.filteringTime(), qPrintable(QString("Error: filteringTime is wrong")));
@@ -176,10 +159,10 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
 	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+	newSignal.setElectricUnit(1);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -189,12 +172,12 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 	newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
+	newSignal.setOutputunit(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setType(E::SignalType::Discrete);
 	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setunit(1);
 
 	signalsToAdd.push_back(newSignal);
 
@@ -224,19 +207,19 @@ void DbControllerSignalTests::addSignalTest()
 	QVERIFY2(query.value("appSignalID").toString() == newSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
 	QVERIFY2(query.value("customAppSignalID").toString() == newSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
 	QVERIFY2(query.value("caption").toString() == newSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	QVERIFY2(query.value("dataFormatId").toInt() == newSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
+	QVERIFY2(query.value("analogSignalFormat").toInt() == newSignal.dataFormatInt(), qPrintable(QString("Error: analogSignalFormat is wrong")));
 	QVERIFY2(query.value("dataSize").toInt() == newSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == newSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == newSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
-	QVERIFY2(query.value("unitId").toInt() == newSignal.unitID(), qPrintable(QString("Error: unitId is wrong")));
+	QVERIFY2(query.value("unit").toInt() == newSignal.unit(), qPrintable(QString("Error: unit is wrong")));
 	QVERIFY2(query.value("unbalanceLimit").toDouble() == newSignal.unbalanceLimit(), qPrintable(QString("Error: unbalanceLimit is wrong")));
 	QVERIFY2(query.value("inputLowLimit").toDouble() == newSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
-	QVERIFY2(query.value("inputHighLimit").toDouble() == newSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
-	QVERIFY2(query.value("inputUnitId").toInt() == newSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
+	QVERIFY2(query.value("electricHighLimit").toDouble() == newSignal.electricHighLimit(), qPrintable(QString("Error: electricHighLimit is wrong")));
+	QVERIFY2(query.value("electricUnit").toInt() == newSignal.electricUnit(), qPrintable(QString("Error: electricUnit is wrong")));
 	QVERIFY2(query.value("inputSensorId").toInt() == newSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
 	QVERIFY2(query.value("outputLowLimit").toDouble() == newSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
 	QVERIFY2(query.value("outputHighLimit").toDouble() == newSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
-	QVERIFY2(query.value("outputUnitId").toInt() == newSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
+	QVERIFY2(query.value("outputunit").toInt() == newSignal.outputunit(), qPrintable(QString("Error: outputunit is wrong")));
 	QVERIFY2(query.value("outputSensorId").toInt() == newSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
 	QVERIFY2(query.value("acquire").toBool() == newSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
 	QVERIFY2(query.value("calculated").toBool() == newSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
@@ -271,12 +254,12 @@ void DbControllerSignalTests::getSignalIdsTest()
 	Signal newSignal;
 	newSignal.setCaption("firstSignalForGetSignalIdsTest");
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.3);
+	newSignal.setFineAperture(0.8);
 	newSignal.setAppSignalID("firstSignalForGetSignalIdsTest");
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID("firstSignalForGetSignalIdsTest");
- newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
@@ -286,25 +269,15 @@ void DbControllerSignalTests::getSignalIdsTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
-//	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(E::InputUnit::V);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
+	newSignal.setElectricUnit(E::ElectricUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName("firstSignalForGetSignalIdsTest");
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
-	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-//	newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
-	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setUnit("mV");
 
 	signalsToAdd.push_back(newSignal);
 
@@ -312,7 +285,6 @@ void DbControllerSignalTests::getSignalIdsTest()
 	newSignal.setAppSignalID("firstSignalForGetSignalIdsTest");
 	newSignal.setCustomAppSignalID("firstSignalForGetSignalIdsTest");
 	newSignal.setEquipmentID("firstSignalForGetSignalIdsTest");
-	newSignal.setObjectName("firstSignalForGetSignalIdsTest");
 
 	signalsToAdd.push_back(newSignal);
 
@@ -360,10 +332,9 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	Signal newSignal;
 	newSignal.setCaption(firstCaption);
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.3);
 	newSignal.setAppSignalID(firstCaption);
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
 	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
@@ -375,25 +346,16 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
-//	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(E::InputUnit::V);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
+	newSignal.setElectricUnit(E::ElectricUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName(firstCaption);
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	//newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
-	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setUnit("kg");
 
 	signalsToAdd.push_back(newSignal);
 
@@ -401,7 +363,6 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	newSignal.setAppSignalID(secondCaption);
 	newSignal.setCustomAppSignalID(secondCaption);
 	newSignal.setEquipmentID(secondCaption);
-	newSignal.setObjectName(secondCaption);
 
 	signalsToAdd.push_back(newSignal);
 
@@ -461,38 +422,6 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	db.close();
 }
 
-void DbControllerSignalTests::getUnitsTest()
-{
-	QSqlDatabase db = QSqlDatabase::database();
-
-	db.setHostName(m_databaseHost);
-	db.setUserName(m_databaseUser);
-	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
-
-	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
-
-	UnitList result;
-	QSqlQuery query;
-
-	bool ok = m_dbController->getUnits(&result, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
-
-	ok = query.exec("SELECT * FROM get_units()");
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-
-	int unitIndex = 0;
-
-	while (query.next())
-	{
-		QVERIFY2(result.at(unitIndex).first == query.value("unitId").toInt(), qPrintable("Error: wrong unitId"));
-		QVERIFY2(result.at(unitIndex).second == query.value("unit_en").toString(), qPrintable("Error: wrong unit_en"));
-		unitIndex++;
-	}
-
-	db.close();
-	
-}
 
 void DbControllerSignalTests::getLatestSignalTest()
 {
@@ -516,10 +445,10 @@ void DbControllerSignalTests::getLatestSignalTest()
 	Signal newSignal;
 	newSignal.setCaption(firstCaption);
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.3);
+	newSignal.setFineAperture(0.34);
 	newSignal.setAppSignalID(firstCaption);
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
 	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
@@ -531,25 +460,16 @@ void DbControllerSignalTests::getLatestSignalTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
-//	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(E::InputUnit::V);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
+	newSignal.setElectricUnit(E::ElectricUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName(firstCaption);
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-//	newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
-	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setUnit("kg");
 
 	signalsToAdd.push_back(newSignal);
 	
@@ -594,25 +514,18 @@ void DbControllerSignalTests::getLatestSignalTest()
 	QVERIFY2(query.value("appSignalID").toString() == resultSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
 	QVERIFY2(query.value("customAppSignalID").toString() == resultSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
 	QVERIFY2(query.value("caption").toString() == resultSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	//QVERIFY2(query.value("dataFormatId").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: dataFormatId is wrong")));
+	//QVERIFY2(query.value("analogSignalFormat").toInt() == resultSignal.dataFormatInt(), qPrintable(QString("Error: analogSignalFormat is wrong")));
 	QVERIFY2(query.value("dataSize").toInt() == resultSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == resultSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == resultSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
-	QVERIFY2(query.value("unitId").toInt() == resultSignal.unitID(), qPrintable(QString("Error: unitId is wrong")));
-	QVERIFY2(query.value("unbalanceLimit").toDouble() == resultSignal.unbalanceLimit(), qPrintable(QString("Error: unbalanceLimit is wrong")));
-	QVERIFY2(query.value("inputLowLimit").toDouble() == resultSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
-	QVERIFY2(query.value("inputHighLimit").toDouble() == resultSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
-	QVERIFY2(query.value("inputUnitId").toInt() == resultSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
-//	QVERIFY2(query.value("inputSensorId").toInt() == resultSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
-	QVERIFY2(query.value("outputLowLimit").toDouble() == resultSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
-	QVERIFY2(query.value("outputHighLimit").toDouble() == resultSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
-	QVERIFY2(query.value("outputUnitId").toInt() == resultSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
-//	QVERIFY2(query.value("outputSensorId").toInt() == resultSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
+	QVERIFY2(query.value("unit").toString() == resultSignal.unit(), qPrintable(QString("Error: unit is wrong")));
+	QVERIFY2(query.value("electricLowLimit").toDouble() == resultSignal.electricLowLimit(), qPrintable(QString("Error: electricLowLimit is wrong")));
+	QVERIFY2(query.value("electricHighLimit").toDouble() == resultSignal.electricHighLimit(), qPrintable(QString("Error: electricHighLimit is wrong")));
+	QVERIFY2(query.value("electricUnit").toInt() == resultSignal.electricUnit(), qPrintable(QString("Error: electricUnit is wrong")));
 	QVERIFY2(query.value("acquire").toBool() == resultSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
-	QVERIFY2(query.value("calculated").toBool() == resultSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
-	QVERIFY2(query.value("normalState").toInt() == resultSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
 	QVERIFY2(query.value("decimalPlaces").toInt() == resultSignal.decimalPlaces(), qPrintable(QString("Error: decimalPlaces is wrong")));
-	QVERIFY2(query.value("aperture").toDouble() == resultSignal.aperture(), qPrintable(QString("Error: aperture is wrong")));
+	QVERIFY2(query.value("coarseAperture").toDouble() == resultSignal.coarseAperture(), qPrintable(QString("Error: coarse aperture is wrong")));
+	QVERIFY2(query.value("fineAperture").toDouble() == resultSignal.fineAperture(), qPrintable(QString("Error: fine aperture is wrong")));
 	QVERIFY2(query.value("inOutType").toInt() == int(resultSignal.inOutType()), qPrintable(QString("Error: inOutType is wrong")));
 	QVERIFY2(query.value("equipmentID").toString() == resultSignal.equipmentID(), qPrintable(QString("Error: deviceStrId is wrong")));
 	QVERIFY2(query.value("filteringTime").toDouble() == resultSignal.filteringTime(), qPrintable(QString("Error: filteringTime is wrong")));
@@ -645,10 +558,10 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	Signal newSignal;
 	newSignal.setCaption(firstCaption);
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.32);
+	newSignal.setFineAperture(1.0);
 	newSignal.setAppSignalID(firstCaption);
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
 	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
@@ -660,24 +573,16 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
-//	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(E::InputUnit::V);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
+	newSignal.setElectricUnit(E::ElectricUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName(firstCaption);
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	//newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setUnit("kg");
 
 	signalsToAdd.push_back(newSignal);
 
@@ -710,9 +615,9 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
 
 	resultSignal.setAcquire(false);
-	resultSignal.setAperture(0.4);
+	resultSignal.setCoarseAperture(1.4);
+	resultSignal.setFineAperture(1.1);
 	resultSignal.setByteOrder(E::ByteOrder::BigEndian);
-	resultSignal.setCalculated(false);
 	resultSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	resultSignal.setDataSize(40);
 	resultSignal.setDecimalPlaces(4);
@@ -722,23 +627,16 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setHighEngeneeringUnits(1783.7);
 	resultSignal.setHighValidRange(2333.8);
 	resultSignal.setInOutType(E::SignalInOutType::Output);
-	resultSignal.setInputHighLimit(1928.3);
-	resultSignal.setInputLowLimit(12.8);
-//	resultSignal.setInputSensorID(3452);
-	resultSignal.setInputUnitID(E::InputUnit::V);
+	resultSignal.setElectricHighLimit(1928.3);
+	resultSignal.setElectricLowLimit(12.8);
+	resultSignal.setElectricUnit(E::ElectricUnit::V);
 	resultSignal.setLowADC(4321);
 	resultSignal.setLowEngeneeringUnits(123.4);
 	resultSignal.setLowValidRange(125.3);
-	resultSignal.setNormalState(7564);
-	resultSignal.setOutputHighLimit(5263.1);
-	resultSignal.setOutputLowLimit(754.7);
 	resultSignal.setOutputMode(E::OutputMode::Minus10_Plus10_V);
-	//resultSignal.setOutputSensorID(34847);
-	resultSignal.setOutputUnitID(1);
 	resultSignal.setSpreadTolerance(2346.8);
 	resultSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-	resultSignal.setUnbalanceLimit(2345.3);
-	resultSignal.setUnitID(2);
+	resultSignal.setUnit("kq");
 
 	ObjectState os;
 
@@ -756,21 +654,14 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	QVERIFY2(query.value("dataSize").toInt() == resultSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
 	QVERIFY2(query.value("lowAdc").toInt() == resultSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
 	QVERIFY2(query.value("highAdc").toInt() == resultSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
-	QVERIFY2(query.value("unitId").toInt() == resultSignal.unitID(), qPrintable(QString("Error: unitId is wrong")));
-	QVERIFY2(query.value("unbalanceLimit").toDouble() == resultSignal.unbalanceLimit(), qPrintable(QString("Error: unbalanceLimit is wrong")));
-	QVERIFY2(query.value("inputLowLimit").toDouble() == resultSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
-	QVERIFY2(query.value("inputHighLimit").toDouble() == resultSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
-	QVERIFY2(query.value("inputUnitId").toInt() == resultSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
-//	QVERIFY2(query.value("inputSensorId").toInt() == resultSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
-	QVERIFY2(query.value("outputLowLimit").toDouble() == resultSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
-	QVERIFY2(query.value("outputHighLimit").toDouble() == resultSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
-	QVERIFY2(query.value("outputUnitId").toInt() == resultSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
-//	QVERIFY2(query.value("outputSensorId").toInt() == resultSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
+	QVERIFY2(query.value("unit").toString() == resultSignal.unit(), qPrintable(QString("Error: unit is wrong")));
+	QVERIFY2(query.value("electricLowLimit").toDouble() == resultSignal.electricLowLimit(), qPrintable(QString("Error: electricLowLimit is wrong")));
+	QVERIFY2(query.value("electricHighLimit").toDouble() == resultSignal.electricHighLimit(), qPrintable(QString("Error: electricHighLimit is wrong")));
+	QVERIFY2(query.value("electricUnit").toInt() == resultSignal.electricUnit(), qPrintable(QString("Error: electricUnit is wrong")));
 	QVERIFY2(query.value("acquire").toBool() == resultSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
-	QVERIFY2(query.value("calculated").toBool() == resultSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
-	QVERIFY2(query.value("normalState").toInt() == resultSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
 	QVERIFY2(query.value("decimalPlaces").toInt() == resultSignal.decimalPlaces(), qPrintable(QString("Error: decimalPlaces is wrong")));
-	QVERIFY2(query.value("aperture").toDouble() == resultSignal.aperture(), qPrintable(QString("Error: aperture is wrong")));
+	QVERIFY2(query.value("coarseAperture").toDouble() == resultSignal.coarseAperture(), qPrintable(QString("Error: coarse aperture is wrong")));
+	QVERIFY2(query.value("fineAperture").toDouble() == resultSignal.fineAperture(), qPrintable(QString("Error: fine aperture is wrong")));
 	QVERIFY2(query.value("inOutType").toInt() == int(resultSignal.inOutType()), qPrintable(QString("Error: inOutType is wrong")));
 	QVERIFY2(query.value("equipmentID").toString() == resultSignal.equipmentID(), qPrintable(QString("Error: deviceStrId is wrong")));
 	QVERIFY2(query.value("filteringTime").toDouble() == resultSignal.filteringTime(), qPrintable(QString("Error: filteringTime is wrong")));
@@ -803,10 +694,10 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	Signal newSignal;
 	newSignal.setCaption(firstCaption);
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.3);
+	newSignal.setFineAperture(1.0);
 	newSignal.setAppSignalID(firstCaption);
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
 	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
@@ -818,24 +709,16 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
-//	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(E::InputUnit::V);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
+	newSignal.setElectricUnit(E::ElectricUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName(firstCaption);
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-//	newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
 	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setSignalType(E::SignalType::Discrete);// setType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setSignalType(E::SignalType::Discrete);
+	newSignal.setUnit("kl");
 
 	signalsToAdd.push_back(newSignal);
 
@@ -897,10 +780,10 @@ void DbControllerSignalTests::deleteSignalTest()
 	Signal newSignal;
 	newSignal.setCaption(firstCaption);
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.3);
+	newSignal.setFineAperture(1.1);
 	newSignal.setAppSignalID(firstCaption);
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
 	newSignal.setCustomAppSignalID(firstCaption);
 	newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	newSignal.setDataSize(30);
@@ -912,25 +795,15 @@ void DbControllerSignalTests::deleteSignalTest()
 	newSignal.setHighEngeneeringUnits(3245.6);
 	newSignal.setHighValidRange(3546.4);
 	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setInputHighLimit(2345.3);
-	newSignal.setInputLowLimit(134.4);
-//	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(E::InputUnit::V);
+	newSignal.setElectricHighLimit(2345.3);
+	newSignal.setElectricLowLimit(134.4);
+	newSignal.setElectricUnit(E::ElectricUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName(firstCaption);
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
-	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-//	newSignal.setOutputSensorID(13443);
-	newSignal.setOutputUnitID(1);
-	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setUnitID(1);
+	newSignal.setUnit("qq");
 
 	signalsToAdd.push_back(newSignal);
 
@@ -1049,7 +922,7 @@ void DbControllerSignalTests::getSignalsTest()
 
 	SignalSet signalsFromDb;
 
-	bool ok = m_dbController->getSignals(&signalsFromDb, 0);
+	bool ok = m_dbController->getSignals(&signalsFromDb, false, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 
 	assert(signalsFromDb.isEmpty() == false);
@@ -1240,29 +1113,23 @@ void DbControllerSignalTests::getSpecificSignalsTest()
 		QVERIFY2(query.value("appSignalID").toString() == currentSignal.appSignalID(), qPrintable(QString("Error: value appSignalID is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("appSignalID").toString()).arg(currentSignal.appSignalID())));
 		QVERIFY2(query.value("customAppSignalID").toString() == currentSignal.customAppSignalID(), qPrintable(QString("Error: value customAppSignalID is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("customAppSignalID").toString()).arg(currentSignal.customAppSignalID())));
 		QVERIFY2(query.value("caption").toString() == currentSignal.caption(), qPrintable(QString("Error: value name is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("caption").toString()).arg(currentSignal.caption())));
-		QVERIFY2(query.value("dataFormatId").toInt() == currentSignal.analogSignalFormatInt(), qPrintable(QString("Error: value dataFormatId is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("dataFormatId").toInt()).arg(currentSignal.analogSignalFormatInt())));
+		QVERIFY2(query.value("analogSignalFormat").toInt() == currentSignal.analogSignalFormatInt(), qPrintable(QString("Error: value analogSignalFormat is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("analogSignalFormat").toInt()).arg(currentSignal.analogSignalFormatInt())));
 		QVERIFY2(query.value("dataSize").toInt() == currentSignal.dataSize(), qPrintable(QString("Error: value dataSize is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("dataSize").toInt()).arg(currentSignal.dataSize())));
 		QVERIFY2(query.value("lowAdc").toInt() == currentSignal.lowADC(), qPrintable(QString("Error: value lowAdc is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("lowAdc").toInt()).arg(currentSignal.lowADC())));
 		QVERIFY2(query.value("highAdc").toInt() == currentSignal.highADC(), qPrintable(QString("Error: value highAdc is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("highAdc").toInt()).arg(currentSignal.highADC())));
 		QVERIFY2(query.value("lowengeneeringunits").toInt() == currentSignal.lowEngeneeringUnits(), qPrintable(QString("Error: value lowengeneeringunits is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("lowengeneeringunits").toInt()).arg(currentSignal.lowEngeneeringUnits())));
 		QVERIFY2(query.value("highengeneeringunits").toInt() == currentSignal.highEngeneeringUnits(), qPrintable(QString("Error: value highengeneeringunits is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("highengeneeringunits").toInt()).arg(currentSignal.highEngeneeringUnits())));
-		QVERIFY2(query.value("unitId").toInt() == currentSignal.unitID(), qPrintable(QString("Error: value unitId is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("unitId").toInt()).arg(currentSignal.unitID())));
+		QVERIFY2(query.value("unit").toString() == currentSignal.unit(), qPrintable(QString("Error: value unit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("unit").toString()).arg(currentSignal.unit())));
 		QVERIFY2(query.value("lowvalidrange").toInt() == currentSignal.lowValidRange(), qPrintable(QString("Error: value lowvalidrange is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("lowvalidrange").toInt()).arg(currentSignal.lowValidRange())));
 		QVERIFY2(query.value("highvalidrange").toInt() == currentSignal.highValidRange(), qPrintable(QString("Error: value highvalidrange is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("highvalidrange").toInt()).arg(currentSignal.highValidRange())));
-		QVERIFY2(query.value("unbalanceLimit").toInt() == currentSignal.unbalanceLimit(), qPrintable(QString("Error: value unbalanceLimit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("unbalanceLimit").toInt()).arg(currentSignal.unbalanceLimit())));
-		QVERIFY2(query.value("inputLowLimit").toInt() == currentSignal.inputLowLimit(), qPrintable(QString("Error: value inputLowLimit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("inputLowLimit").toInt()).arg(currentSignal.inputLowLimit())));
-		QVERIFY2(query.value("inputHighLimit").toInt() == currentSignal.inputHighLimit(), qPrintable(QString("Error: value inputHighLimit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("inputHighLimit").toInt()).arg(currentSignal.inputHighLimit())));
-		QVERIFY2(query.value("inputUnitId").toInt() == currentSignal.inputUnitIDInt(), qPrintable(QString("Error: value inputUnitId is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("inputUnitId").toInt()).arg(currentSignal.inputUnitIDInt())));
-		QVERIFY2(query.value("inputSensorId").toInt() == currentSignal.inputSensorTypeInt(), qPrintable(QString("Error: value inputSensorId is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("inputSensorId").toInt()).arg(currentSignal.inputSensorTypeInt())));
-		QVERIFY2(query.value("outputLowLimit").toInt() == currentSignal.outputLowLimit(), qPrintable(QString("Error: value outputLowLimit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("outputLowLimit").toInt()).arg(currentSignal.outputLowLimit())));
-		QVERIFY2(query.value("outputHighLimit").toInt() == currentSignal.outputHighLimit(), qPrintable(QString("Error: value outputHighLimit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("outputHighLimit").toInt()).arg(currentSignal.outputHighLimit())));
-		QVERIFY2(query.value("outputUnitId").toInt() == currentSignal.outputUnitID(), qPrintable(QString("Error: value outputUnitId is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("outputUnitId").toInt()).arg(currentSignal.outputUnitID())));
-		QVERIFY2(query.value("outputSensorId").toInt() == currentSignal.outputSensorTypeInt(), qPrintable(QString("Error: value outputSensorId is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("outputSensorId").toInt()).arg(currentSignal.outputSensorTypeInt())));
+		QVERIFY2(query.value("electricLowLimit").toInt() == currentSignal.electricLowLimit(), qPrintable(QString("Error: value electricLowLimit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("electricLowLimit").toInt()).arg(currentSignal.electricLowLimit())));
+		QVERIFY2(query.value("electricHighLimit").toInt() == currentSignal.electricHighLimit(), qPrintable(QString("Error: value electricHighLimit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("electricHighLimit").toInt()).arg(currentSignal.electricHighLimit())));
+		QVERIFY2(query.value("electricUnit").toInt() == currentSignal.electricUnit(), qPrintable(QString("Error: value electricUnit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("electricUnit").toInt()).arg(currentSignal.electricUnit())));
+		QVERIFY2(query.value("sensorType").toInt() == currentSignal.sensorType(), qPrintable(QString("Error: value sensorType is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("sensorType").toInt()).arg(currentSignal.sensorType())));
 		QVERIFY2(query.value("acquire").toBool() == currentSignal.acquire(), qPrintable(QString("Error: value acquire is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("acquire").toBool()).arg(currentSignal.acquire())));
-		QVERIFY2(query.value("calculated").toBool() == currentSignal.calculated(), qPrintable(QString("Error: value calculated is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("calculated").toBool()).arg(currentSignal.calculated())));
-		QVERIFY2(query.value("normalState").toInt() == currentSignal.normalState(), qPrintable(QString("Error: value normalState is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("normalState").toInt()).arg(currentSignal.normalState())));
 		QVERIFY2(query.value("decimalPlaces").toInt() == currentSignal.decimalPlaces(), qPrintable(QString("Error: value decimalPlaces is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("decimalPlaces").toInt()).arg(currentSignal.decimalPlaces())));
-		QVERIFY2(query.value("aperture").toInt() == currentSignal.aperture(), qPrintable(QString("Error: value aperture is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("aperture").toInt()).arg(currentSignal.aperture())));
+		QVERIFY2(query.value("coarseAperture").toInt() == currentSignal.coarseAperture(), qPrintable(QString("Error: value coarse aperture is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("coarseAperture").toDouble()).arg(currentSignal.coarseAperture())));
+		QVERIFY2(query.value("fineAperture").toInt() == currentSignal.fineAperture(), qPrintable(QString("Error: value fine aperture is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("fineAperture").toDouble()).arg(currentSignal.fineAperture())));
 		QVERIFY2(query.value("inOutType").toInt() == currentSignal.inOutTypeInt(), qPrintable(QString("Error: value inOutType is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("inOutType").toInt()).arg(currentSignal.inOutTypeInt())));
 		QVERIFY2(query.value("equipmentID").toString() == currentSignal.equipmentID(), qPrintable(QString("Error: value equipmentID is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("equipmentID").toString()).arg(currentSignal.equipmentID())));
 		QVERIFY2(query.value("outputRangeMode").toInt() == currentSignal.outputModeInt(), qPrintable(QString("Error: value outputRangeMode is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("outputRangeMode").toInt()).arg(currentSignal.outputModeInt())));

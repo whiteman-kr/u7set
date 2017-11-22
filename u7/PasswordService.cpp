@@ -7,7 +7,7 @@ PasswordService::PasswordService()
 {
 }
 
-bool PasswordService::checkPassword(const QString& password, const QString& passwordConfirmation, bool showMessageBox, QWidget* parent)
+bool PasswordService::checkPassword(QString password, QString passwordConfirmation, QString username, bool showMessageBox, QWidget* parent)
 {
 	if (password.size() < 6)
 	{
@@ -41,7 +41,8 @@ bool PasswordService::checkPassword(const QString& password, const QString& pass
 		return false;
 	}
 
-static const QString standardPassword[] = {
+	std::vector<QString> standardPassword =
+	{
 		"123456", "1234567", "12345678", "123456789", "1234567890", "1234567890-", "12345567890-=", "1234567890-=\"", "123123", "windows", "kirovograd",
 		"0987654", "09876543", "098765432", "0987654321", "password", "`12345'", "`123456", "`1234567", "`12345678", "`123456789",
 		"qwerty", "qwertyu", "qwertyui", "qwertyuio", "qwertyuiop", "qwertyuiop[", "qwertyuiop[]", "admin123", "123admin",
@@ -49,11 +50,17 @@ static const QString standardPassword[] = {
 		"zxcvbn", "zxcvbnm", "zxcvbnm,", "zxcvbnm,.", "zxcvbnm,./",
 		"dragon", "baseball", "football", "letmein", "monkey", "696969", "superman",
 		"abc123", "qwe123", "zxc123", "123qwe","123asd", "123zxc"
-		};
+	};
 
-	for (unsigned int i = 0; i < sizeof(standardPassword) / sizeof(standardPassword[0]); i++)
+	standardPassword.push_back(username);
+	for (int i = 0; i <= 999; i++)
 	{
-		if (password == standardPassword[i])
+		standardPassword.push_back(username + QString::number(i));
+	}
+
+	for (QString str : standardPassword)
+	{
+		if (password.compare(str, Qt::CaseInsensitive) == 0)
 		{
 			if (showMessageBox == true)
 			{

@@ -32,26 +32,16 @@ private:
 };
 
 
-class AppSignalManager
+class AppSignalManager : public QObject
 {
+	Q_OBJECT
+
 public:
 	AppSignalManager();
 	virtual ~AppSignalManager();
 
 public:
 	void reset();
-
-	// Units
-	//
-	struct AppSignalUnits
-	{
-		int id;
-		QString unit;
-	};
-
-	void setUnits(const std::vector<AppSignalUnits>& units);
-	std::map<int, QString> units() const;
-	QString units(int id) const;
 
 	// Signal Params
 	//
@@ -69,12 +59,17 @@ public:
 
 	void setState(const QString& appSignalId, const AppSignalState& state);
 	void setState(Hash signalHash, const AppSignalState& state);
+	void setState(const std::vector<AppSignalState>& states);
 
 	AppSignalState signalState(Hash signalHash, bool* found) const;
 	AppSignalState signalState(const QString& appSignalId, bool* found) const;
 
-	int signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result) const;
-	int signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result) const;
+	void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
+	void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
+
+signals:
+	void addSignalToPriorityList(Hash signalHash) const;
+	void addSignalsToPriorityList(QVector<Hash> signalHash) const;
 
 private:
 	mutable QMutex m_unitsMutex;

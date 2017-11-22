@@ -41,8 +41,8 @@ namespace Proto
 	};
 
 
-	// Шаблон и реализация необходимых фукнций сериализации
-	// у VFrameType должны быть реализованы функции CreateObject, SaveData, LoadData
+	// Template and imlementation seriazlization functions
+	// VFrameType must have functions CreateObject, SaveData, LoadData
 	//
 	template <typename VFrameType>
 	class ObjectSerialization
@@ -442,7 +442,7 @@ namespace Proto
 	};
 
 
-	// Функции для сериализации данных
+	// Helper serialization functions
 	//
 	const QUuid& Read(const Proto::Uuid& message);
 	void Write(Proto::Uuid* pMessage, const QUuid& guid);

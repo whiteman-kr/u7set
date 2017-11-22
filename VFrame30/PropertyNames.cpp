@@ -9,6 +9,7 @@ namespace VFrame30
 	const QString PropertyNames::commented("Commented");
 	const QString PropertyNames::objectName("ObjectName");
 	const QString PropertyNames::name("Name");
+	const QString PropertyNames::guid("Uuid");
 
 	const QString PropertyNames::fontName("FontName");
 	const QString PropertyNames::fontSize("FontSize");
@@ -18,6 +19,7 @@ namespace VFrame30
 	const QString PropertyNames::type("Type");
 	const QString PropertyNames::valueInteger("ValueInteger");
 	const QString PropertyNames::valueFloat("ValueFloat");
+	const QString PropertyNames::valueDiscrete("ValueDiscrete");
 	const QString PropertyNames::precision("Precision");
 	const QString PropertyNames::precisionPropText("Number of decimals after period, -1: take value from the signal description");
 	const QString PropertyNames::analogFormat("AnalogFormat");
@@ -36,6 +38,7 @@ namespace VFrame30
 	const QString PropertyNames::label("Label");
 	const QString PropertyNames::caption("Caption");
 	const QString PropertyNames::maxLength("MaxLength");
+	const QString PropertyNames::multiLine("MultiLine");
 
 	// SchemaItemValue Colors
 	//
@@ -116,14 +119,35 @@ namespace VFrame30
 	const QString PropertyNames::alignVert("AlignVert");
 
 	const QString PropertyNames::dataType("DataType");
+	const QString PropertyNames::units("Units");
 
 	const QString PropertyNames::appSignalIDs("AppSignalIDs");
 	const QString PropertyNames::appSignalId("AppSignalID");
 	const QString PropertyNames::connectionId("ConnectionID");
 	const QString PropertyNames::signalSource("SignalSource");
 
+	const QString PropertyNames::coarseAperture("CoarseAperture");
+	const QString PropertyNames::fineAperture("FineAperture");
+	const QString PropertyNames::adaptiveAperture("AdaptiveAperture");
+
 	const QString PropertyNames::busTypeId("BusTypeID");
 	const QString PropertyNames::busTypeFileName("FileName");
+	const QString PropertyNames::busAutoSignalPlacemanet("AutoSignalPlacement");
+	const QString PropertyNames::busManualBusSize("ManualBusSize");
+	const QString PropertyNames::busSignalId("SignalID");
+
+	const QString PropertyNames::busInbusOffset("Offset");
+	const QString PropertyNames::busInbusDiscreteBitNo("BitNo");
+	const QString PropertyNames::busInbusAnalogSize("Size");
+	const QString PropertyNames::busInbusAnalogFormat("Format");
+	const QString PropertyNames::busInbusAnalogByteOrder("ButeOrder");
+	const QString PropertyNames::busAnalogLowLimit("BusSignalLowLimit");
+	const QString PropertyNames::busAnalogHightLimit("BusSignalHighLimit");
+	const QString PropertyNames::busInbusAnalogLowLimit("InbusSignalLowLimit");
+	const QString PropertyNames::busInbusAnalogHightLimit("InbusSignalHighLimit");
+
+	const QString PropertyNames::busSettingCategory("Bus Settings");
+	const QString PropertyNames::busInbusSettingCategory("InBus Settings (Manual Signal Placement)");
 
 	const QString PropertyNames::behaviourCategory("Behaviour");
 	const QString PropertyNames::appearanceCategory("Appearance");
@@ -134,6 +158,8 @@ namespace VFrame30
 	const QString PropertyNames::parametersCategory("Parameters");
 	const QString PropertyNames::controlCategory("Control");
 	const QString PropertyNames::scriptsCategory("Scripts");
+	const QString PropertyNames::apertureCategory("Aperture");
+	const QString PropertyNames::constCategory("Const");
 
 	const QString PropertyNames::widgetPropStyleSheet("Property holds the widget's style sheet.\nThe style sheet contains a textual description of customizations to the widget's style.");
 	const QString PropertyNames::widgetPropToolTip("Property holds the widget's tooltip.");

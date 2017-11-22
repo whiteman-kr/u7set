@@ -33,6 +33,7 @@ namespace VFrame30
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemSignal::appSignalIds, SchemaItemSignal::setAppSignalIds);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::multiLine, PropertyNames::appearanceCategory, true, SchemaItemSignal::multiLine, SchemaItemSignal::setMultiLine);
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::monitorCategory, true, SchemaItemSignal::precision, SchemaItemSignal::setPrecision);
 		ADD_PROPERTY_GET_SET_CAT(E::AnalogFormat, PropertyNames::analogFormat, PropertyNames::monitorCategory, true, SchemaItemSignal::analogFormat, SchemaItemSignal::setAnalogFormat);
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::columnCount, PropertyNames::monitorCategory, true, SchemaItemSignal::columnCount, SchemaItemSignal::setColumnCount);
@@ -67,6 +68,7 @@ namespace VFrame30
 			Proto::Write(ps, strId);
 		}
 
+		signal->set_multiline(m_multiLine);
 		signal->set_precision(m_precision);
 		signal->set_analogformat(static_cast<int>(m_analogFormat));
 
@@ -118,6 +120,7 @@ namespace VFrame30
 			m_appSignalIds.push_back(s);
 		}
 
+		m_multiLine = signal.multiline();
 		m_precision = signal.precision();
 		m_analogFormat = static_cast<E::AnalogFormat>(signal.analogformat());
 
@@ -138,6 +141,24 @@ namespace VFrame30
 
 	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
+		if (multiChannel() == true)
+		{
+			QString pinCaption = QString::number(m_appSignalIds.size());
+
+			std::vector<VFrame30::AfbPin>* ins = const_cast<SchemaItemSignal*>(this)->mutableInputs();
+			std::vector<VFrame30::AfbPin>* outs = const_cast<SchemaItemSignal*>(this)->mutableOutputs();
+
+			for (VFrame30::AfbPin& pin : *ins)
+			{
+				pin.setCaption(pinCaption);
+			}
+
+			for (VFrame30::AfbPin& pin : *outs)
+			{
+				pin.setCaption(pinCaption);
+			}
+		}
+
 		FblItemRect::Draw(drawParam, schema, layer);
 
 		if (drawParam->isMonitorMode() == true)
@@ -408,19 +429,31 @@ namespace VFrame30
 
 		// Draw column text
 		//
-		double columntHeight = rect.height() / signalIds.size();
+		double columntHeight = 0;
+		double minLineHeight = qMax(drawParam->gridSize() * drawParam->pinGridStep(), m_font.drawSize());
 
-		if (columntHeight < m_font.drawSize())
+		if (multiLine() == true)
 		{
-			columntHeight = m_font.drawSize();
+			columntHeight = rect.height() / signalIds.size();
+			if (columntHeight < minLineHeight)
+			{
+				columntHeight = minLineHeight;
+			}
+		}
+		else
+		{
+			columntHeight = minLineHeight;
 		}
 
-		for (int i = 0; i < signalIds.size(); i++)
+		int lineCount = signalIds.size();
+		if (multiLine() == false && lineCount != 0)
 		{
-			QString appSignalId = signalIds[i];
+			lineCount = 1;
+		}
 
+		for (int i = 0; i < lineCount; i++)
+		{
 			double top = rect.top() + i * columntHeight;
-
 			double startOffset = 0;
 
 			for (size_t columnIndex = 0; columnIndex < m_columns.size(); columnIndex++)
@@ -437,20 +470,41 @@ namespace VFrame30
 
 				double left = rect.left() + startOffset;
 
-				// --
-				//
-				QString text = getCoulumnText(drawParam, column.data, appSignals[i], appSignalStates[i], m_analogFormat, m_precision);
+				if (multiLine() == false && column.data == E::ColumnData::State)
+				{
+					// Divide column state on signal count and draw all them
+					//
+					double subColumnWidth = columnWidth / signalIds.size();
 
-				QRectF textRect(left, top, columnWidth, columntHeight);
+					for (int f = 0; f < signalIds.size(); f++)
+					{
+						QString text = getCoulumnText(drawParam, column.data, appSignals[f], appSignalStates[f], m_analogFormat, m_precision);
 
-				textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
-				textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+						QRectF textRect(left + subColumnWidth * f, top, subColumnWidth, columntHeight);
+						textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
+						textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
 
-				painter->setPen(textColor());
+						painter->setPen(textColor());
 
-				QRectF boundingRect = rect.intersected(textRect);
+						QRectF boundingRect = rect.intersected(textRect);
 
-				DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+						DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+					}
+				}
+				else
+				{
+					QString text = getCoulumnText(drawParam, column.data, appSignals[i], appSignalStates[i], m_analogFormat, m_precision);
+
+					QRectF textRect(left, top, columnWidth, columntHeight);
+					textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+					textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+
+					painter->setPen(textColor());
+
+					QRectF boundingRect = rect.intersected(textRect);
+
+					DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+				}
 
 				// --
 				//
@@ -467,30 +521,34 @@ namespace VFrame30
 		//
 		painter->setPen(linePen);
 
-		for (int i = 0; i < signalIds.size(); i++)
+		if (multiLine() == true)
 		{
-			QString appSignalId = signalIds[i];
-
-			double top = rect.top() + i * columntHeight;
-			double bottom = top + columntHeight;
-
-			if (bottom > rect.bottom() ||
-				i == signalIds.size() - 1)	// Dont draw the last line
+			for (int i = 0; i < lineCount; i++)
 			{
-				break;
-			}
+				double top = rect.top() + i * columntHeight;
+				double bottom = top + columntHeight;
 
-			painter->drawLine(drawParam->gridToDpi(rect.left(), bottom),
-							  drawParam->gridToDpi(rect.right(), bottom));
+				if (bottom > rect.bottom() ||
+					i == signalIds.size() - 1)	// Dont draw the last line
+				{
+					break;
+				}
+
+				painter->drawLine(drawParam->gridToDpi(rect.left(), bottom),
+								  drawParam->gridToDpi(rect.right(), bottom));
+			}
 		}
 
 		//  Draw vertical deviders
 		//
+		std::vector<double> xpos;
+		xpos.reserve(32);
+
 		double startOffset = 0;
+
 		for (size_t i = 0; i < m_columns.size(); i++)
 		{
 			const Column& c = m_columns[i];
-
 			double width = rect.width() * (c.width / 100.0);
 
 			// if this is the last column, give all rest width to it
@@ -500,22 +558,39 @@ namespace VFrame30
 				width = rect.width() - startOffset;
 			}
 
-			// --
-			//
+			if (multiLine() == false && c.data == E::ColumnData::State)
+			{
+				double subColumnWidth = width / signalIds.size();
+
+				for (int f = 0; f < signalIds.size(); f++)
+				{
+					double x = rect.left() + startOffset + subColumnWidth * (f + 1);
+					xpos.push_back(x);
+				}
+
+				startOffset += width;
+				continue;
+			}
+
 			startOffset += width;
 
-			if (startOffset >= rect.width())
+			if (i < m_columns.size() - 1)	// don't draw last vert line
+			{
+				xpos.push_back(rect.left() + startOffset);
+			}
+		}
+
+		for (double x : xpos)
+		{
+			QPointF pt1 = drawParam->gridToDpi(x, rect.top());
+			QPointF pt2 = drawParam->gridToDpi(x, rect.bottom());
+
+			if (pt1.x() >= rect.right())
 			{
 				break;
 			}
 
-			// Draw vertical line devider from othe columns
-			//
-			if (i < m_columns.size() - 1)	// For all columns exceprt last
-			{
-				painter->drawLine(drawParam->gridToDpi(rect.left() + startOffset, rect.top()),
-								  drawParam->gridToDpi(rect.left() + startOffset, rect.bottom()));
-			}
+			painter->drawLine(pt1, pt2);
 		}
 
 		return;
@@ -626,6 +701,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return;
 		}
 
+		// Block signals is required here, as removeProperty, addProperty emit propertyListChanged signal,
+		// but PropertyEditor tries to update values and we have assers
+		//
+		blockSignals(true);
+
 		// Delete all ColumnXX props
 		//
 		std::vector<std::shared_ptr<Property>> allProperties = properties();
@@ -661,18 +741,27 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 									  std::bind(&SchemaItemSignal::setColumnHorzAlign, this, std::placeholders::_1, static_cast<int>(i)));
 		}
 
+		// Allow signals and notify PropertyEditor that it can update property list now
+		//
+		blockSignals(false);
+
+		emit propertyListChanged();
+
 		return;
 	}
 
 	double SchemaItemSignal::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
 	{
-		int linesCount = m_appSignalIds.size();
-		if (linesCount == 0)
+		if (m_multiLine == true)
 		{
-			linesCount = 1;
+			int linesCount = qBound(1, m_appSignalIds.size(), 64);
+			return linesCount * gridSize * pinGridStep;
 		}
-
-		return linesCount * gridSize * pinGridStep;
+		else
+		{
+			int linesCount = 1;
+			return linesCount * gridSize * pinGridStep;
+		}
 	}
 
 	double SchemaItemSignal::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
@@ -687,12 +776,70 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_cachedGridSize * 10;
 	}
 
-	// Text search
-	//
-	bool SchemaItemSignal::searchText(const QString& text) const
+	QString SchemaItemSignal::toolTipText(int dpiX, int dpiY) const
 	{
-		return	FblItemRect::searchText(text) ||
-				appSignalIds().contains(text, Qt::CaseInsensitive);
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = {"Signal(s): "};
+
+		for (QString signalId : m_appSignalIds)
+		{
+			str.append(tr("\n\t%1").arg(signalId));
+		}
+
+		str.append(tr("\n\nHint: Press F2 to edit AppSignalID(s)"));
+
+		return str;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInput()
+	{
+		return transformIntoType<VFrame30::SchemaItemInput>();
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInOut()
+	{
+		return transformIntoType<VFrame30::SchemaItemInOut>();
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoOutput()
+	{
+		return transformIntoType<VFrame30::SchemaItemOutput>();
+	}
+
+	template <typename TYPE>
+	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoType()
+	{
+		Proto::Envelope message;
+		SaveData(&message);
+
+		std::shared_ptr<TYPE> item = std::make_shared<TYPE>(this->itemUnit());
+		item->loadData(message, false);
+
+		// item has restored pins which we need to remove and create new ones depending on TYPE
+		//
+		item->removeAllInputs();
+		item->removeAllOutputs();
+
+		QString className(item->metaObject()->className());
+		if (className == "VFrame30::SchemaItemInput")
+		{
+			item->addOutput();
+		}
+
+		if (className == "VFrame30::SchemaItemInOut")
+		{
+			item->addInput();
+			item->addOutput();
+		}
+
+		if (className == "VFrame30::SchemaItemOutput")
+		{
+			item->addInput();
+		}
+
+		return item;
 	}
 
 	QString SchemaItemSignal::appSignalIds() const
@@ -743,6 +890,16 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	QStringList* SchemaItemSignal::mutable_appSignalIds()
 	{
 		return &m_appSignalIds;
+	}
+
+	bool SchemaItemSignal::multiLine() const
+	{
+		return m_multiLine;
+	}
+
+	void SchemaItemSignal::setMultiLine(bool value)
+	{
+		m_multiLine = value;
 	}
 
 	bool SchemaItemSignal::multiChannel() const
@@ -948,6 +1105,12 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemInput::LoadData(const Proto::Envelope& message)
 	{
+		bool ok = loadData(message, true);
+		return ok;
+	}
+
+	bool SchemaItemInput::loadData(const Proto::Envelope& message, bool loadOwnData)
+	{
 		if (message.has_schemaitem() == false)
 		{
 			assert(message.has_schemaitem());
@@ -961,9 +1124,14 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		{
 			return false;
 		}
-		
+
 		// --
 		//
+		if (loadOwnData == false)
+		{
+			return true;
+		}
+
 		if (message.schemaitem().has_inputsignal() == false)
 		{
 			assert(message.schemaitem().has_inputsignal());
@@ -1027,14 +1195,19 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemOutput::LoadData(const Proto::Envelope& message)
 	{
+		bool ok = loadData(message, true);
+		return ok;
+	}
+
+	bool SchemaItemOutput::loadData(const Proto::Envelope& message, bool loadOwnData)
+	{
 		if (message.has_schemaitem() == false)
 		{
 			assert(message.has_schemaitem());
 			return false;
 		}
 
-		// --
-		//
+
 		bool result = SchemaItemSignal::LoadData(message);
 		if (result == false)
 		{
@@ -1043,6 +1216,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		// --
 		//
+		if (loadOwnData == false)
+		{
+			return true;
+		}
+
 		if (message.schemaitem().has_outputsignal() == false)
 		{
 			assert(message.schemaitem().has_outputsignal());
@@ -1118,6 +1296,12 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemInOut::LoadData(const Proto::Envelope& message)
 	{
+		bool ok = loadData(message, true);
+		return ok;
+	}
+
+	bool SchemaItemInOut::loadData(const Proto::Envelope& message, bool loadOwnData)
+	{
 		if (message.has_schemaitem() == false)
 		{
 			assert(message.has_schemaitem());
@@ -1134,6 +1318,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		// --
 		//
+		if (loadOwnData == false)
+		{
+			return true;
+		}
+
 		if (message.schemaitem().has_inoutsignal() == false)
 		{
 			assert(message.schemaitem().has_inoutsignal());

@@ -42,11 +42,10 @@ namespace VFrame30
 		busitem->set_bustypeid(m_bus.busTypeId().toStdString());
 		busitem->set_bustypehash(m_busTypeHash);
 
-		QByteArray busXml;
-		m_bus.save(&busXml);
-		busitem->set_bustypexml(busXml.constData(), busXml.size());
+		Proto::Bus* busMessage = busitem->mutable_bus();
+		result &= m_bus.save(busMessage);
 
-		return true;
+		return result;
 	}
 
 	bool SchemaItemBus::LoadData(const Proto::Envelope& message)
@@ -70,10 +69,9 @@ namespace VFrame30
 		m_bus.setBusTypeId(QString::fromStdString(busitem.bustypeid()));
 		m_busTypeHash = busitem.bustypehash();
 
-		QByteArray xml = QByteArray::fromRawData(busitem.bustypexml().data(),
-												 static_cast<int>(busitem.bustypexml().size()));
-		QString erorrMessaage;
-		m_bus.load(xml, &erorrMessaage);
+
+		const Proto::Bus& busMessage = busitem.bus();
+		result &= m_bus.load(busMessage);
 
 		setBusPins(m_bus);
 
@@ -147,7 +145,7 @@ namespace VFrame30
 	SchemaItemBusComposer::SchemaItemBusComposer(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addOutput(-1, "bus_out");
+		addOutput(-1, E::SignalType::Bus, "bus_out");
 	}
 
 	SchemaItemBusComposer::~SchemaItemBusComposer()
@@ -271,12 +269,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemBusComposer::searchText(const QString& text) const
-	{
-		return	FblItemRect::searchText(text) ||
-				busTypeId().contains(text, Qt::CaseInsensitive);
-	}
-
 	double SchemaItemBusComposer::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
 	{
 		// Cache values
@@ -305,7 +297,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			addInput(-1, busSignal.name());
+			addInput(-1, E::SignalType::Discrete, busSignal.signalId());
 		}
 
 		adjustHeight();
@@ -329,7 +321,7 @@ namespace VFrame30
 	SchemaItemBusExtractor::SchemaItemBusExtractor(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addInput(-1, "bus_in");
+		addInput(-1, E::SignalType::Bus, "bus_in");
 	}
 
 	SchemaItemBusExtractor::~SchemaItemBusExtractor()
@@ -495,14 +487,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemBusExtractor::searchText(const QString& text) const
-	{
-		bool f0 = FblItemRect::searchText(text);
-		bool f1 = busTypeId().contains(text, Qt::CaseInsensitive);
-
-		return f0 || f1;
-	}
-
 	double SchemaItemBusExtractor::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
 	{
 		// Cache values
@@ -536,7 +520,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : busType().busSignals())
 		{
-			QString propName = "ShowOut_" + busSignal.name();
+			QString propName = "ShowOut_" + busSignal.signalId();
 
 			auto it = std::find_if(props.begin(), props.end(),
 					[&propName](std::shared_ptr<Property> p)
@@ -547,7 +531,7 @@ namespace VFrame30
 			if (it == props.end())
 			{
 				assert(false);
-				addOutput(-1, busSignal.name());
+				addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
 			}
 			else
 			{
@@ -558,7 +542,7 @@ namespace VFrame30
 				}
 				else
 				{
-					addOutput(-1, busSignal.name());
+					addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
 				}
 			}
 		}
@@ -578,7 +562,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			QString propName = "ShowOut_" + busSignal.name();
+			QString propName = "ShowOut_" + busSignal.signalId();
 
 			auto it = std::find_if(props.begin(), props.end(),
 					[&propName](std::shared_ptr<Property> p)
@@ -588,9 +572,8 @@ namespace VFrame30
 
 			if (it == props.end())
 			{
-				auto p = this->addProperty(propName, PropertyNames::parametersCategory, true);
+				auto p = this->addProperty(propName, PropertyNames::parametersCategory, true, QVariant(true));
 				p->setSpecific(true);
-				p->setValue(true);
 			}
 			else
 			{

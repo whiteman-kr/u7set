@@ -25,12 +25,11 @@ private:
 
 	virtual void onConnection() override;
 
-	void sendSignalStatesToArchiveRequest();
+	void sendSignalStatesToArchiveRequest(bool sendNow);
 	void onSaveAppSignalsStatesReply(const char* replyData, quint32 replyDataSize);
 
 private slots:
 	void onTimer();
-	void onConnectionKeepAliveTimer();
 	void onSignalStatesQueueIsNotEmpty();
 
 private:
@@ -41,7 +40,8 @@ private:
 	AppSignalStatesQueue& m_signalStatesQueue;
 
 	QTimer m_timer;
-	QTimer m_connectionKeepAliveTimer;
+
+	int m_connectionKeepAliveCounter = 0;
 
 	qint64 m_saveAppSignalsStateErrorReplyCount = 0;
 };

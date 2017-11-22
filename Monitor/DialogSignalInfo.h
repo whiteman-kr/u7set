@@ -34,6 +34,8 @@ public:
 	DialogSignalInfo(const AppSignalParam& signal, QWidget* parent);
 	~DialogSignalInfo();
 
+	static bool showDialog(QString appSignalId, QWidget* parent);
+
 public:
 	enum class ViewType
 	{

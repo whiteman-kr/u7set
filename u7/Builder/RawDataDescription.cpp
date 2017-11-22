@@ -51,9 +51,22 @@ namespace Hardware
 		for(QString str : list)
 		{
 			RawDataDescriptionItem item;
+
 			bool res = true;
 
+			int commentIndex = str.indexOf("//");
+
+			if (commentIndex != -1)
+			{
+				str = str.mid(0, commentIndex);
+			}
+
 			str = str.trimmed();
+
+			if (str.isEmpty() == true)
+			{
+				continue;
+			}
 
 			QString itemTypeStr = str.section("=", 0, 0).trimmed();
 
@@ -227,7 +240,7 @@ namespace Hardware
 				else
 				{
 					m_rxRawDataSize = item.rxRawDataSize = -1;
-					m_txRawDataSizeIsAuto = item.rxRawDataSizeIsAuto = true;
+					m_rxRawDataSizeIsAuto = item.rxRawDataSizeIsAuto = true;
 				}
 
 				item.type = RawDataDescriptionItem::Type::RxRawDataSize;
@@ -357,7 +370,7 @@ namespace Hardware
 
 		QString signalTypeStr = descItemsList.at(1).trimmed();
 
-		if (signalTypeStr != "A" && signalTypeStr != "D")
+		if (signalTypeStr != "A" && signalTypeStr != "D" && signalTypeStr != "B")
 		{
 			msg = QString("Invalid %1 value of parameter SignalType in opto-port '%2' raw data description.").
 					arg(keywordStr).arg(portEquipmentID);
@@ -370,17 +383,33 @@ namespace Hardware
 		{
 			item.signalType = E::SignalType::Analog;
 		}
-		else
+
+		if (signalTypeStr == "D")
 		{
 			item.signalType = E::SignalType::Discrete;
+		}
+
+		if (signalTypeStr == "B")
+		{
+			item.signalType = E::SignalType::Bus;
 		}
 
 		// 3) DataFormat
 
 		QString dataFormatStr = descItemsList.at(2).trimmed();
 
-		if (dataFormatStr != "FLOAT" &&
-			dataFormatStr != "SINT" &&
+		if (item.signalType == E::SignalType::Analog &&
+			dataFormatStr != "FLOAT" &&
+			dataFormatStr != "SINT")
+		{
+			msg = QString("Invalid %1 value of parameter DataFormat in opto-port '%2' raw data description.").
+					arg(keywordStr).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		if (item.signalType == E::SignalType::Discrete &&
 			dataFormatStr != "UINT")
 		{
 			msg = QString("Invalid %1 value of parameter DataFormat in opto-port '%2' raw data description.").
@@ -390,23 +419,27 @@ namespace Hardware
 			return false;
 		}
 
+		if (item.signalType == E::SignalType::Bus)
+		{
+			item.busTypeID = dataFormatStr;
+		}
+
 		if (dataFormatStr == "FLOAT")
 		{
 			item.dataFormat = E::DataFormat::Float;
 		}
-		else
+
+		if (dataFormatStr == "SINT")
 		{
-			if (dataFormatStr == "SINT")
-			{
-				item.dataFormat = E::DataFormat::SignedInt;
-			}
-			else
-			{
-				item.dataFormat = E::DataFormat::UnsignedInt;
-			}
+			item.dataFormat = E::DataFormat::SignedInt;
 		}
 
-		if (item.signalType == E::SignalType::Discrete && item.dataFormat !=E::DataFormat::UnsignedInt)
+		if (dataFormatStr == "UNIT")
+		{
+			item.dataFormat = E::DataFormat::UnsignedInt;
+		}
+
+		if (item.signalType == E::SignalType::Discrete && item.dataFormat != E::DataFormat::UnsignedInt)
 		{
 			msg = QString("Discrete signal '%1' in raw data description of port '%2' must have UINT data format.").
 					arg(item.appSignalID).arg(portEquipmentID);
@@ -415,7 +448,9 @@ namespace Hardware
 			return false;
 		}
 
-		if (item.signalType == E::SignalType::Analog && item.dataFormat == E::DataFormat::UnsignedInt)
+		if (item.signalType == E::SignalType::Analog &&
+			item.dataFormat != E::DataFormat::Float &&
+			item.dataFormat != E::DataFormat::SignedInt)
 		{
 			msg = QString("Analog signal '%1' in raw data description of port '%2' must have SINT or FLOAT data format.").
 					arg(item.appSignalID).arg(portEquipmentID);
@@ -449,6 +484,15 @@ namespace Hardware
 		if (item.signalType == E::SignalType::Analog && item.dataSize != SIZE_32BIT)
 		{
 			msg = QString("Analog signal '%1' in raw data description of port '%2' must have 32-bit data size.").
+					arg(item.appSignalID).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);
+			return false;
+		}
+
+		if (item.signalType == E::SignalType::Bus && (item.dataSize % SIZE_16BIT) != 0)
+		{
+			msg = QString("Bus signal '%1' in raw data description of port '%2' must have data size multiple to 16 bit.").
 					arg(item.appSignalID).arg(portEquipmentID);
 
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);

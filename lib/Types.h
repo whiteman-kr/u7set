@@ -90,6 +90,18 @@ public:
 	};
 	Q_ENUM(SignalType)
 
+	enum class BusDataFormat
+	{
+		Discrete,
+		Mixed
+		//AnalogFloat32 ???
+		//AnalogSigneInt32 ???
+		//AnalogUnsignedInt32 ???
+		//AnalogSigneInt16 ???
+		//AnalogUnsignedInt16 ???
+	};
+	Q_ENUM(BusDataFormat)
+
 	// SignalFunction
 	//
 	enum class SignalFunction
@@ -168,15 +180,22 @@ public:
 
 	// InputUnit
 	//
-	enum InputUnit
+	enum ElectricUnit
 	{
-		NoInputUnit = 1,
-		mA = 15,
-		mV = 11,
-		Ohm = 20,
-		V = 12,
+		NoUnit = 0,
+		mA = 1,
+		mV = 2,
+		Ohm = 3,
+		V = 4,
+
+		// oder version
+		// NoInputUnit = 1,
+		// mA = 15,
+		// mV = 11,
+		// Ohm = 20,
+		// V = 12,
 	};
-	Q_ENUM(InputUnit)
+	Q_ENUM(ElectricUnit)
 
 	// SensorType
 	//
@@ -247,6 +266,17 @@ public:
 	};
 	Q_ENUM(ConfigCheckerState)
 
+	// TimeType
+	//
+	enum class TimeType
+	{
+		Plant,
+		System,
+		Local,
+		ArchiveId
+	};
+	Q_ENUM(TimeType)
+
 public:
 	// Convert enum value (not index) to QString
 	//
@@ -298,6 +328,48 @@ public:
 		return result;
 	}
 
+	// Convert QString to enum value (not index)
+	//
+	template <typename ENUM_TYPE>
+	static ENUM_TYPE stringToValue(const QString& str, bool* ok = nullptr)
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		if (ok != nullptr)
+		{
+			*ok = true;
+		}
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return static_cast<ENUM_TYPE>(me.value(0));
+		}
+
+		int keyCount = me.keyCount();
+
+		for (int i = 0; i < keyCount; i++)
+		{
+			if (QString::fromLocal8Bit(me.key(i)) == str)
+			{
+				return static_cast<ENUM_TYPE>(me.value(i));
+			}
+		}
+
+		if (ok == nullptr)
+		{
+			assert(false);		// key is not found!
+		}
+		else
+		{
+			*ok = false;
+		}
+
+		return static_cast<ENUM_TYPE>(me.value(0));
+	}
+
 	// Get list of enum values and assigned String
 	//
 	template <typename ENUM_TYPE>
@@ -323,6 +395,35 @@ public:
 		return result;
 	}
 
+
+	// Get list of enum keys converted to QString
+	//
+	template <typename ENUM_TYPE>
+	static QStringList enumKeyStrings()
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		QStringList result;
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return result;
+		}
+
+		int keyCount = me.keyCount();
+
+		for (int i = 0; i < keyCount; i++)
+		{
+			result.append(QString::fromLocal8Bit(me.key(i)));
+		}
+
+		return result;
+	}
+
+
 	// Check if enum containes value
 	//
 	template <typename ENUM_TYPE>
@@ -340,6 +441,7 @@ public:
 				return true;
 			}
 		}
+
 		return false;
 	}
 };
@@ -404,8 +506,13 @@ const int	WORD_SIZE = 16,
 
 const int	ANALOG_SIZE_W = 2;
 
+const int	WORD_SIZE_IN_BYTES = 2;				// WORD size in bytes
+
 const int	SIZE_1BIT = 1;
 const int	SIZE_8BIT = 8;
 const int	SIZE_16BIT = 16;
 const int	SIZE_32BIT = 32;
+
+const int	SIZE_1WORD = 1;
+const int	SIZE_2WORD = 2;
 

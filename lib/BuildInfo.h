@@ -35,6 +35,7 @@ namespace Builder
 		QString tag;							// file tag
 		QString ID;								// file ID
 		qint64 size = 0;						// size of file
+		bool compressed = false;
 		QString md5;							// MD5 hash of file
 		QHash<QString, QString> metadata;		// metadata (pairs of strings)
 

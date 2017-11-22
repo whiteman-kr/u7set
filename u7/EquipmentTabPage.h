@@ -3,7 +3,7 @@
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
-#include "CodeEditor.h"
+#include "IdePropertyEditor.h"
 
 class DbController;
 
@@ -145,6 +145,7 @@ public slots:
 	void addSoftware();
 
 	void addPreset();
+	void replaceObject();
 
 	void addPresetRack();
 	void addPresetChassis();
@@ -155,7 +156,7 @@ public slots:
 
 	void choosePreset(Hardware::DeviceType type);
 
-	void addPresetToConfiguration(const DbFileInfo& fileInfo);
+	std::shared_ptr<Hardware::DeviceObject> addPresetToConfiguration(const DbFileInfo& fileInfo, bool addToEquipment);
 	QModelIndex addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection);
 
 	void addInOutsToSignals();
@@ -184,7 +185,7 @@ public slots:
 
 	void updateFromPreset();
 	bool updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObject> device,
-								std::shared_ptr<Hardware::DeviceObject> preset,
+								std::shared_ptr<Hardware::DeviceObject> preset, const QStringList& forceUpdateProperties, const QStringList& presetsToUpdate,
 								std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 								std::vector<Hardware::DeviceObject*>* deleteDeviceList,
 								std::vector<std::pair<int, int> >* addDeviceList);
@@ -278,8 +279,8 @@ private:
 		QAction* m_addWorkstationAction = nullptr;
 		QAction* m_addSoftwareAction = nullptr;
 
-	//----------------------------------
 	QAction* m_addFromPresetAction = nullptr;
+	QAction* m_replaceAction = nullptr;
 
 	//----------------------------------
 	QMenu* m_addPresetMenu = nullptr;

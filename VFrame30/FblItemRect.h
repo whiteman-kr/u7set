@@ -3,6 +3,7 @@
 #include "PosRectImpl.h"
 #include "FblItem.h"
 #include "FontParam.h"
+#include "../lib/CUtils.h"
 
 namespace VFrame30
 {
@@ -16,10 +17,15 @@ namespace VFrame30
 	class SchemaItemReceiver;
 	class SchemaItemTransmitter;
 	class SchemaItemTerminator;
+	class SchemaItemBusComposer;
+	class SchemaItemBusExtractor;
 }
 
 namespace VFrame30
 {
+	static const double BusSideLineWidth = mm2in(0.4);
+
+
 	class VFRAME30LIBSHARED_EXPORT FblItemRect : public PosRectImpl, public FblItem
 	{
 		Q_OBJECT
@@ -74,11 +80,6 @@ namespace VFrame30
 
 		virtual void dump() const override;
 
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
-
 		// Properties and Data
 		//
 	public:
@@ -94,6 +95,8 @@ namespace VFrame30
 		bool isReceiverElement() const;
 		bool isTransmitterElement() const;
 		bool isTerminatorElement() const;
+		bool isBusComposerElement() const;
+		bool isBusExtractorElement() const;
 
 		VFrame30::SchemaItemSignal* toSignalElement();
 		const VFrame30::SchemaItemSignal* toSignalElement() const;
@@ -121,6 +124,12 @@ namespace VFrame30
 
 		VFrame30::SchemaItemTerminator* toTerminatorElement();
 		const VFrame30::SchemaItemTerminator* toTerminatorElement() const;
+
+		VFrame30::SchemaItemBusComposer* toBusComposerElement();
+		const VFrame30::SchemaItemBusComposer* toBusComposerElement() const;
+
+		VFrame30::SchemaItemBusExtractor* toBusExtractorElement();
+		const VFrame30::SchemaItemBusExtractor* toBusExtractorElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

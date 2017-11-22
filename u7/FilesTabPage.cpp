@@ -812,71 +812,14 @@ void FileTreeView::addFile()
 	return;
 }
 
+void FileTreeView::viewFile()
+{
+	runFileEditor(true);
+}
+
 void FileTreeView::editFile()
 {
-    QModelIndexList selectedIndexList = selectionModel()->selectedRows();
-
-    if (selectedIndexList.isEmpty() == true)
-    {
-        return;
-    }
-
-    std::vector<DbFileInfo> files;
-    files.reserve(static_cast<size_t>(selectedIndexList.size()));
-
-    for (QModelIndex& mi : selectedIndexList)
-    {
-        if (mi.parent().isValid() == false)
-        {
-            // Forbid any actions to root items
-            //
-            continue;
-        }
-
-        FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
-        assert(f);
-
-        if (f->state() == VcsState::CheckedOut &&
-            (db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
-        {
-            files.push_back(*f);
-        }
-    }
-
-    if (files.size() != 1)
-    {
-        // Which file?
-        //
-        return;
-    }
-
-    auto fileInfo = files[0];
-
-
-    std::shared_ptr<DbFile> f;
-    if (db()->getLatestVersion(fileInfo, &f, this) == false)
-    {
-        QMessageBox::critical(this, "Error", "Get latest version error!");
-        return;
-    }
-
-    QByteArray data;
-    f->swapData(data);
-
-    DialogFileEditor d(fileInfo.fileName(), &data, db(), false, this);
-    if (d.exec() != QDialog::Accepted)
-    {
-        return;
-    }
-
-    f->swapData(data);
-
-    if (db()->setWorkcopy(f, this) == false)
-    {
-        QMessageBox::critical(this, "Error", "Set work copy error!");
-        return;
-    }
-
+	runFileEditor(false);
 }
 
 void FileTreeView::deleteFile()
@@ -1392,6 +1335,83 @@ bool FileTreeView::getLatestFileVersionRecursive(const DbFileInfo& f, const QStr
 	return true;
 }
 
+void FileTreeView::runFileEditor(bool viewOnly)
+{
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.reserve(static_cast<size_t>(selectedIndexList.size()));
+
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid any actions to root items
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		assert(f);
+
+		if (viewOnly == true ||
+			(f->state() == VcsState::CheckedOut &&
+			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())))
+		{
+			files.push_back(*f);
+		}
+	}
+
+	if (files.size() != 1)
+	{
+		// Which file?
+		//
+		return;
+	}
+
+	DbFileInfo fileInfo = files[0];
+
+	bool readOnly = true;
+
+	if (viewOnly == false)
+	{
+		if (fileInfo.state() == VcsState::CheckedOut)
+		{
+			readOnly = false;
+		}
+	}
+
+
+	std::shared_ptr<DbFile> f;
+	if (db()->getLatestVersion(fileInfo, &f, this) == false)
+	{
+		QMessageBox::critical(this, "Error", "Get latest version error!");
+		return;
+	}
+
+	QByteArray data;
+	f->swapData(data);
+
+	DialogFileEditor d(fileInfo.fileName(), &data, db(), readOnly, this);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	f->swapData(data);
+
+	if (db()->setWorkcopy(f, this) == false)
+	{
+		QMessageBox::critical(this, "Error", "Set work copy error!");
+		return;
+	}
+}
+
 
 
 void FileTreeView::setWorkcopy()
@@ -1550,6 +1570,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// -----------------
 	m_fileView->addAction(m_addFileAction);
+	m_fileView->addAction(m_viewFileAction);
     m_fileView->addAction(m_editFileAction);
 	m_fileView->addAction(m_deleteFileAction);
 
@@ -1616,7 +1637,12 @@ void FilesTabPage::createActions()
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_fileView, &FileTreeView::addFile);
 
-    m_editFileAction = new QAction(tr("Edit file"), this);
+	m_viewFileAction = new QAction(tr("View file"), this);
+	m_viewFileAction->setStatusTip(tr("View file..."));
+	m_viewFileAction->setEnabled(false);
+	connect(m_viewFileAction, &QAction::triggered, m_fileView, &FileTreeView::viewFile);
+
+	m_editFileAction = new QAction(tr("Edit file"), this);
     m_editFileAction->setStatusTip(tr("Edit file..."));
     m_editFileAction->setEnabled(false);
     connect(m_editFileAction, &QAction::triggered, m_fileView, &FileTreeView::editFile);
@@ -1800,6 +1826,8 @@ void FilesTabPage::setActionState()
             break;
         }
     }
+
+	m_viewFileAction->setEnabled(editableExtension && selectedIndexList.size() == 1);
     m_editFileAction->setEnabled(editableExtension && canAnyBeCheckedIn && selectedIndexList.size() == 1);
 
 	return;

@@ -55,15 +55,16 @@ private:
 	void fillBusProperties();
 	void fillBusSignals();
 
-	bool addBus(VFrame30::Bus bus);
+	bool addBus(const std::shared_ptr<VFrame30::Bus> bus);
 
 	void updateButtonsEnableState();
 	void updateBusTreeItemText(QTreeWidgetItem* item);
-	void updateBusTreeItemText(QTreeWidgetItem* item, const VFrame30::Bus& bus);
+	void updateBusTreeItemText(QTreeWidgetItem* item, const VFrame30::Bus* bus);
 	void updateSignalsTreeItemText(QTreeWidgetItem* item, const VFrame30::BusSignal& signal);
 
 	VFrame30::Bus* getCurrentBus(QUuid* uuid = nullptr);
 
+	bool reloadBus(const QUuid& busUuid);
 	bool saveBus(const QUuid& busUuid);
 
 private:
@@ -110,9 +111,9 @@ private:
 
 	QMenu* m_addSignalMenu = nullptr;
 
-	QAction* m_analogAction = nullptr;
-	QAction* m_discreteAction = nullptr;
-	QAction* m_busAction = nullptr;
+	QAction* m_addSignalAnalogAction = nullptr;
+	QAction* m_addSignalDiscreteAction = nullptr;
+	QAction* m_addSignalBusAction = nullptr;
 
 	PropertyEditorDialog* m_propEditorDialog = nullptr;
 };

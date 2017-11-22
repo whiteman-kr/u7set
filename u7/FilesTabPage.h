@@ -120,6 +120,7 @@ public:
 	//
 public slots:
 	void addFile();
+	void viewFile();
     void editFile();
 	void deleteFile();
 	void checkOutFile();
@@ -134,6 +135,8 @@ public slots:
 
 private:
 	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
+
+	void runFileEditor(bool viewOnly);
 
 
 	// Protected props
@@ -179,6 +182,7 @@ private:
 
 	//
 	QAction* m_addFileAction = nullptr;
+	QAction* m_viewFileAction = nullptr;
     QAction* m_editFileAction = nullptr;
     QAction* m_deleteFileAction = nullptr;
 	//----------------------------------

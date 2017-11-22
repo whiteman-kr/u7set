@@ -39,7 +39,7 @@ private:
 	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
 	bool					hasConnectedCalibrators();
 	bool					setCalibratorUnit();
-	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalUnit, double electricHighLimit);
+	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
 
 	// function of measure
 	//
@@ -50,6 +50,8 @@ public:
 
 	void					init(QWidget* parent = 0);
 	void					setMeasureType(int measureType) { m_measureType = measureType; }
+	bool					enableMesureIsSignal();
+	bool					signalIsMeasured(QString& signalID);
 	bool					setActiveSignalParam();
 
 	void					stop() { m_cmdStopMeasure = true; }
@@ -60,12 +62,14 @@ protected:
 
 signals:
 
-	void					showMsgBox(QString);
+	void					msgBox(int type, QString text, int* result = nullptr);
 
 	void					measureInfo(QString);
 	void					measureInfo(int);
 
 	void					measureComplite(Measurement*);
+
+	void					setNextMeasureSignal(bool& signalIsSelected);
 
 public slots:
 
@@ -73,8 +77,6 @@ public slots:
 	void					tuningSocketDisconnected();
 
 private slots:
-
-	void					msgBox(QString text) const { QMessageBox::information(m_parent, tr("Measurement process"), text); }
 
 	void					updateSignalParam(const Hash& signalHash);
 

@@ -19,7 +19,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 132;
+const int DatabaseProjectVersion = 168;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -29,7 +29,7 @@ const char* ProjectName = "testproject";
 const char* ProjectAdministratorName = "Administrator";
 const char* ProjectAdministratorPassword = "P2ssw0rd";
 
-const int AmountOfThreadsInMultiThreadTest = 10;
+const int AmountOfThreadsInMultiThreadTest = 8;
 const int AmountOfItemsInMultiThreadTest = 500;
 
 int main(int argc, char *argv[])
@@ -46,10 +46,19 @@ int main(int argc, char *argv[])
 	db.setPassword(DatabaseUserPassword);
 	db.setDatabaseName("postgres");
 
-	assert (db.open() == true);
+
+    bool ok = db.open();
+    if (ok == false)
+    {
+        QSqlError error = db.lastError();
+
+        qDebug() << "Database open error: " << error.text();
+
+        return 1;
+    }
 
 	QSqlQuery query;
-	bool ok = query.exec(QString("SELECT datname FROM pg_database WHERE datname = '%1'").arg(QString("u7_") + ProjectName));
+    ok = query.exec(QString("SELECT datname FROM pg_database WHERE datname = '%1'").arg(QString("u7_") + ProjectName));
 
 	assert (ok == true);
 
@@ -58,8 +67,9 @@ int main(int argc, char *argv[])
 		ok = query.exec(QString("DROP DATABASE %1").arg(QString("u7_") + ProjectName));
 		if (ok == false)
 		{
-			qDebug() << "Error: " << query.lastError().databaseText();
-			assert(false);
+			qDebug() << "FAIL: " << query.lastError().databaseText();
+			QTest::qVerify(ok == true, "ok == true", qPrintable(query.lastError().databaseText()), __FILE__, __LINE__);
+			return 1;
 		}
 	}
 
@@ -180,11 +190,10 @@ int main(int argc, char *argv[])
 		int version = query.value(0).toInt();
 		if (version != DatabaseProjectVersion)
 		{
-			qDebug() << "Invalid database version, " << DatabaseProjectVersion << " required, current: " << version;
+			qDebug() << "Invalid database version, " << ::DatabaseProjectVersion << " required, current: " << version;
 			db.close();
 			throw 1;
 		}
-
 
 		UserTests userTests;
 		FileTests fileTests;
@@ -208,215 +217,231 @@ int main(int argc, char *argv[])
 
 		dbControllerProjectTests.setProjectVersion(DatabaseProjectVersion);
 
-		int testResult;
-		testResult = QTest::qExec(&userTests, argc, argv);
+		// Database User functions
+		//
+		int testResult = 0;
+
+		testResult |= QTest::qExec(&userTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " user test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " user test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&fileTests, argc, argv);
+		// Database File functions
+		//
+		testResult |= QTest::qExec(&fileTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&signalTests, argc, argv);
+		// Database Signal functions
+		//
+		testResult |= QTest::qExec(&signalTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " signal test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " signal test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&otherTests, argc, argv);
+		// Database Other functions
+		//
+		testResult |= QTest::qExec(&otherTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&projectPropertyTests, argc, argv);
+		// Database Project Property functions
+		//
+		testResult |= QTest::qExec(&projectPropertyTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " project property test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " project property test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&propertyObjectTests, argc, argv);
+		// Property Obejct functions
+		//
+		testResult |= QTest::qExec(&propertyObjectTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " propertyObject test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " propertyObject test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		db.close();
 
-		testResult = QTest::qExec(&dbControllerProjectTests, argc, argv);
+		testResult |= QTest::qExec(&dbControllerProjectTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerProject test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerProject test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&dbControllerUserTests, argc, argv);
+		testResult |= QTest::qExec(&dbControllerUserTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerUser test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerUser test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&dbControllerFileTests, argc, argv);
+		testResult |= QTest::qExec(&dbControllerFileTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerFile test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerFile test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&dbControllerSignalTests, argc, argv);
+		testResult |= QTest::qExec(&dbControllerSignalTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerSignal test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerSignal test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);
+		testResult |= QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerHardwareConfigurationTests test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerHardwareConfigurationTests test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&dbControllerBuildTests, argc, argv);
+		testResult |= QTest::qExec(&dbControllerBuildTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerBuildTests test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerBuildTests test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
-		testResult = QTest::qExec(&dbControllerVersionTests, argc, argv);
+		testResult |= QTest::qExec(&dbControllerVersionTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerVersionTests test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerVersionTests test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
+
+		throw testResult;
 
 		// Multi-thread testing
 		//
+//		qDebug() << "********* Start testing of Multi Thread File tests *********";
 
-		qDebug() << "********* Start testing of MultiThreadFile tests *********";
+//		std::vector<MultiThreadFileTest*> multiThreadFileTest;
 
-		std::vector<MultiThreadFileTest*> multiThreadFileTest;
+//		for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
+//		{
+//			MultiThreadFileTest* thread = new MultiThreadFileTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfItemsInMultiThreadTest);
+//			thread->start();
 
-		for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
-		{
-			MultiThreadFileTest* thread = new MultiThreadFileTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfItemsInMultiThreadTest);
+//			multiThreadFileTest.push_back(thread);
+//		}
 
-			thread->start();
+//		for (MultiThreadFileTest* thread : multiThreadFileTest)
+//		{
+//			while (thread->isFinished() == false)
+//			{
+//				QThread::yieldCurrentThread();
+//			}
 
-			multiThreadFileTest.push_back(thread);
-		}
+//			delete thread;
+//		}
 
-		for (MultiThreadFileTest* thread : multiThreadFileTest)
-		{
-			while (thread->isFinished() == false)
-			{
-			}
+//		qDebug() << "********* Finished testing of MultiThreadFile tests *********";
+//		qDebug() << "********* Started testing of MultiThreadSignal tests *********";
 
-			delete thread;
-		}
+//		std::vector<MultiThreadSignalTest*> multiThreadSignalTest;
 
-		qDebug() << "********* Finished testing of MultiThreadFile tests *********";
-		qDebug() << "********* Started testing of MultiThreadSignal tests *********";
+//		for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
+//		{
+//			MultiThreadSignalTest* thread = new MultiThreadSignalTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfItemsInMultiThreadTest);
 
-		std::vector<MultiThreadSignalTest*> multiThreadSignalTest;
+//			thread->start();
 
-		for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
-		{
-			MultiThreadSignalTest* thread = new MultiThreadSignalTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfItemsInMultiThreadTest);
+//			multiThreadSignalTest.push_back(thread);
+//		}
 
-			thread->start();
+//		for (MultiThreadSignalTest* thread : multiThreadSignalTest)
+//		{
+//			while (thread->isFinished() == false)
+//			{
+//			}
 
-			multiThreadSignalTest.push_back(thread);
-		}
+//			delete thread;
+//		}
 
-		for (MultiThreadSignalTest* thread : multiThreadSignalTest)
-		{
-			while (thread->isFinished() == false)
-			{
-			}
+//		qDebug() << "********* Finished testing of MultiThreadSignal tests *********";
+//		qDebug() << "********* Started testing of MultiThreadStressSignal tests *********";
 
-			delete thread;
-		}
+//		std::vector<int> signalIds;
 
-		qDebug() << "********* Finished testing of MultiThreadSignal tests *********";
-		qDebug() << "********* Started testing of MultiThreadStressSignal tests *********";
+//		int userIdForSignalStressTest = MultiThreadSignalTest::create_user(DatabaseHost,
+//																		   DatabaseUser,
+//																		   DatabaseUserPassword,
+//																		   ProjectName);
 
-		std::vector<int> signalIds;
+//		int errCode = MultiThreadSignalTest::fillSignalIdsVector(signalIds,
+//																 userIdForSignalStressTest,
+//																 AmountOfItemsInMultiThreadTest,
+//																 DatabaseHost,
+//																 DatabaseUser,
+//																 DatabaseUserPassword,
+//																 ProjectName);
 
-		int userIdForSignalStressTest = MultiThreadSignalTest::create_user(DatabaseHost,
-																		   DatabaseUser,
-																		   DatabaseUserPassword,
-																		   ProjectName);
+//		if (errCode == 0)
+//		{
+//			MultiThreadGetSignalTest* threadGetLatestSignal = new MultiThreadGetSignalTest(DatabaseHost,
+//																						   DatabaseUser,
+//																						   DatabaseUserPassword,
+//																						   ProjectName,
+//																						   signalIds);
 
-		int errCode = MultiThreadSignalTest::fillSignalIdsVector(signalIds,
-																 userIdForSignalStressTest,
-																 AmountOfItemsInMultiThreadTest,
-																 DatabaseHost,
-																 DatabaseUser,
-																 DatabaseUserPassword,
-																 ProjectName);
-
-		if (errCode == 0)
-		{
-			MultiThreadGetSignalTest* threadGetLatestSignal = new MultiThreadGetSignalTest(DatabaseHost,
-																						   DatabaseUser,
-																						   DatabaseUserPassword,
-																						   ProjectName,
-																						   signalIds);
-
-			MultiThreadSignalCheckInTest* threadCheckInCheckOut = new MultiThreadSignalCheckInTest(DatabaseHost,
-																								   DatabaseUser,
-																								   DatabaseUserPassword,
-																								   ProjectName,
-																								   userIdForSignalStressTest,
-																								   signalIds,
-																								   threadGetLatestSignal);
-
+//			MultiThreadSignalCheckInTest* threadCheckInCheckOut = new MultiThreadSignalCheckInTest(DatabaseHost,
+//																								   DatabaseUser,
+//																								   DatabaseUserPassword,
+//																								   ProjectName,
+//																								   userIdForSignalStressTest,
+//																								   signalIds,
+//																								   threadGetLatestSignal);
 
 
-			threadGetLatestSignal->start();
-			threadCheckInCheckOut->start();
 
-			while (threadCheckInCheckOut->isFinished() == false)
-			{
-			}
+//			threadGetLatestSignal->start();
+//			threadCheckInCheckOut->start();
 
-			while (threadGetLatestSignal->isFinished() == false)
-			{
-			}
+//			while (threadCheckInCheckOut->isFinished() == false)
+//			{
+//			}
 
-			delete threadCheckInCheckOut;
-			delete threadGetLatestSignal;
-		}
-		else
-			qDebug() << "FAIL: errCode is " << errCode << ": can not fill vector with fileIds or create user";
+//			while (threadGetLatestSignal->isFinished() == false)
+//			{
+//			}
 
-		qDebug() << "********* Finished testing of MultiThreadStressSignal tests *********";
+//			delete threadCheckInCheckOut;
+//			delete threadGetLatestSignal;
+//		}
+//		else
+//		{
+//			qDebug() << "FAIL: errCode is " << errCode << ": can not fill vector with fileIds or create user";
+//		}
+
+//		qDebug() << "********* Finished testing of MultiThreadStressSignal tests *********";
 	}
 	catch (int retval)
 	{

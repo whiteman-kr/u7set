@@ -21,12 +21,10 @@ struct TuningModelRecord
 			return false;
 		}
 
-		float scalePercent = std::fabs(param.lowEngineeringUnits() - param.highEngineeringUnits()) / 100.0;
-
 		if (state.valid() == true)
 		{
-			if ((std::fabs(param.lowEngineeringUnits() - state.readLowLimit()) > scalePercent)  ||
-				std::fabs(param.highEngineeringUnits() - state.readHighLimit()) > scalePercent)
+			if (TuningSignalState::floatsEqual(param.lowEngineeringUnits(), state.readLowLimit()) == false ||
+				TuningSignalState::floatsEqual(param.highEngineeringUnits(), state.readHighLimit()) == false)
 			{
 				return true;
 			}
@@ -84,8 +82,9 @@ public:
 
 
 public:
-	void setSignals(std::vector<TuningModelRecord>& signalsList);
+	void setItems(std::vector<TuningModelRecord>& signalsList);
 
+	TuningModelRecord* item(int index);
 	AppSignalParam* param(int index);
 	TuningSignalState* state(int index);
 

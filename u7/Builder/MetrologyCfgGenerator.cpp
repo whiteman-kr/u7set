@@ -221,9 +221,6 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::writeMetrologySignalsXml()
 	{
-		UnitList unitInfo;
-		m_dbController->getUnits(&unitInfo, nullptr);
-
 		QByteArray data;
 		XmlWriteHelper xml(&data);
 
@@ -323,27 +320,6 @@ namespace Builder
 				}
 				xml.writeEndElement();
 
-
-				// Writing units
-				//
-				xml.writeStartElement("Units");
-				{
-					xml.writeIntAttribute("Count", unitInfo.count());
-
-					int unitCount = unitInfo.count();
-					for (int i = 0; i < unitCount; i++)
-					{
-						xml.writeStartElement("Unit");
-						{
-							xml.writeIntAttribute("ID", unitInfo.keyAt(i));
-							xml.writeStringAttribute("Caption", unitInfo[i]);
-						}
-						xml.writeEndElement();
-					}
-				}
-				xml.writeEndElement();	// </Units>
-
-
 				// Creating signal list
 				//
 				QVector<Metrology::SignalParam> signalsToWrite;
@@ -356,43 +332,11 @@ namespace Builder
 
 					bool hasWrongField = false;
 
-					if (unitInfo.contains(signal.unitID()) == false)
-					{
-						// Signal %1 has wrong unitID: %2.
-						//
-						m_log->errEQP6101(signal.appSignalID(), signal.unitID());
-						hasWrongField = true;
-					}
-
-					if (unitInfo.contains(signal.inputUnitID()) == false)
-					{
-						// Signal %1 has wrong unitID: %2.
-						//
-						m_log->errEQP6101(signal.appSignalID(), signal.inputUnitID());
-						hasWrongField = true;
-					}
-
-					if (unitInfo.contains(signal.outputUnitID()) == false)
-					{
-						// Signal %1 has wrong unitID: %2.
-						//
-						m_log->errEQP6101(signal.appSignalID(), signal.outputUnitID());
-						hasWrongField = true;
-					}
-
-					if (signal.inputSensorType() < 0 || signal.inputSensorType() >= SENSOR_TYPE_COUNT)
+					if (signal.sensorType() < 0 || signal.sensorType() >= SENSOR_TYPE_COUNT)
 					{
 						// Signal %1 has wrong type of sensor: %2.
 						//
-						m_log->errEQP6102(signal.appSignalID(), signal.inputSensorType());
-						hasWrongField = true;
-					}
-
-					if (signal.outputSensorType() < 0 || signal.outputSensorType() >= SENSOR_TYPE_COUNT)
-					{
-						// Signal %1 has wrong type of sensor: %2.
-						//
-						m_log->errEQP6102(signal.appSignalID(), signal.outputSensorType());
+						m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
 						hasWrongField = true;
 					}
 
@@ -401,14 +345,6 @@ namespace Builder
 						// Signal %1 has wrong type of output range mode: %2.
 						//
 						m_log->errEQP6103(signal.appSignalID(), signal.outputMode());
-						hasWrongField = true;
-					}
-
-					if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
-					{
-						// Signal %1 has wrong input/output type: %2.
-						//
-						m_log->errEQP6104(signal.appSignalID(), TO_INT(signal.inOutType()));
 						hasWrongField = true;
 					}
 
@@ -443,7 +379,7 @@ namespace Builder
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "MetrologySignals.xml", CFG_FILE_ID_METROLOGY_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, CFG_FILE_NAME_METROLOGY_SIGNALS, CFG_FILE_ID_METROLOGY_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{

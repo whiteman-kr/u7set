@@ -38,23 +38,23 @@ ArchRequestContext::ArchRequestContext(const ArchRequestParam& param, const QTim
 
 	switch(m_requestTimeType)
 	{
-	case TimeType::Plant:
-	case TimeType::System:
-	case TimeType::ArchiveId:
+	case E::TimeType::Plant:
+	case E::TimeType::System:
+	case E::TimeType::ArchiveId:
 
 		m_requestStartTime = param.startTime;
 		m_requestEndTime = param.endTime;
 
 		break;
 
-	case TimeType::Local:
+	case E::TimeType::Local:
 		{
 			// convert local time to system time
 			//
 			m_requestStartTime = param.startTime - m_localTimeOffset;
 			m_requestEndTime = param.endTime - m_localTimeOffset;
 
-			m_requestTimeType = TimeType::System;
+			m_requestTimeType = E::TimeType::System;
 		}
 		break;
 
@@ -62,7 +62,7 @@ ArchRequestContext::ArchRequestContext(const ArchRequestParam& param, const QTim
 		assert(false);
 	}
 
-	if (m_requestTimeType != TimeType::ArchiveId)
+	if (m_requestTimeType != E::TimeType::ArchiveId)
 	{
 		// expand request time from both sides
 		//
@@ -205,7 +205,9 @@ bool ArchRequestContext::createGetSignalStatesQueryStr(ArchiveShared archive)
 		}
 		else
 		{
-			m_statesQueryStr.append(QString("ORDER BY %1").arg(Archive::FIELD_ARCH_ID));
+			m_statesQueryStr.append(QString("ORDER BY %1").arg(m_cmpField));		// !!!
+
+//			m_statesQueryStr.append(QString("ORDER BY %1").arg(Archive::FIELD_ARCH_ID));
 		}
 	}
 
@@ -276,7 +278,7 @@ bool ArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlDatabase
 
 bool ArchRequestContext::initArchId(QSqlDatabase& db)
 {
-	if (m_requestTimeType == TimeType::ArchiveId)
+	if (m_requestTimeType == E::TimeType::ArchiveId)
 	{
 		m_startArchID = m_requestStartTime;
 		m_endArchID = m_requestEndTime;
@@ -383,21 +385,21 @@ void ArchRequestContext::getNextStates()
 
 		switch(m_requestTimeType)
 		{
-		case TimeType::ArchiveId:
+		case E::TimeType::ArchiveId:
 			if (archid < m_requestStartTime || archid > m_requestEndTime)
 			{
 				skipRecord = true;
 			}
 			break;
 
-		case TimeType::Plant:
+		case E::TimeType::Plant:
 			if (plantTime < m_requestStartTime || plantTime > m_requestEndTime)
 			{
 				skipRecord = true;
 			}
 			break;
 
-		case TimeType::System:
+		case E::TimeType::System:
 			if (systemTime < m_requestStartTime || systemTime > m_requestEndTime)
 			{
 				skipRecord = true;

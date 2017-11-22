@@ -156,7 +156,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
 		{
-			result &= readMetrologySignals(fileData);				// fill Units and MetrologySignals
+			result &= readMetrologySignals(fileData);				// fill MetrologySignals
 		}
 
 		m_loadedFiles.append(bfi.pathFileName);
@@ -202,9 +202,14 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 
 	theOptions.projectInfo().setCfgFileVersion(fileVersion);
 
+	if (fileVersion != CFG_FILE_VER_METROLOGY_SIGNALS)
+	{
+		qDebug() << tr("ConfigSocket::readMetrologySignals - failed fileVersion, waited:") << CFG_FILE_VER_METROLOGY_SIGNALS << tr(", recieved:") << fileVersion;
+		return false;
+	}
+
 	result &= readRacks(fileData, fileVersion);
 	result &= readTuningSources(fileData, fileVersion);
-	result &= readUnits(fileData, fileVersion);
 	result &= readSignals(fileData, fileVersion);
 
 	return result;
@@ -304,54 +309,6 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 	}
 
 	qDebug() << "ConfigSocket::readTuningSources - Tuning sources were loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count();
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool ConfigSocket::readUnits(const QByteArray& fileData, int fileVersion)
-{
-	Q_UNUSED(fileVersion);
-
-	bool result = true;
-
-	XmlReadHelper xml(fileData);
-
-	if (xml.findElement("Units") == false)
-	{
-		qDebug() << "ConfigSocket::readUnits - Units section not found";
-		return false;
-	}
-
-	int unitCount = 0;
-	result &= xml.readIntAttribute("Count", &unitCount);
-
-	for(int u = 0; u < unitCount; u++)
-	{
-		if (xml.findElement("Unit") == false)
-		{
-			result = false;
-			break;
-		}
-
-		int unitID = 0;
-		QString unitCaption;
-
-		result &= xml.readIntAttribute("ID", &unitID);
-		result &= xml.readStringAttribute("Caption", &unitCaption);
-
-		theSignalBase.units().append(unitID, unitCaption);
-	}
-
-	if (unitCount != theSignalBase.units().count())
-	{
-		qDebug() << "ConfigSocket::readUnits - Units loading error, loaded: " << theSignalBase.units().count() << " from " << unitCount;
-		assert(false);
-		return false;
-	}
-
-	qDebug() << "ConfigSocket::readUnits - Units were loaded: " << theSignalBase.units().count();
 
 	return result;
 }

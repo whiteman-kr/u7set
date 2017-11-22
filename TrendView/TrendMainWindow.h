@@ -96,6 +96,7 @@ namespace TrendLib
 		QComboBox* m_viewCombo = nullptr;
 		QComboBox* m_lanesCombo = nullptr;
 		QComboBox* m_timeTypeCombo = nullptr;
+		QPushButton* m_refreshButton = nullptr;
 		QPushButton* m_signalsButton = nullptr;
 
 		QAction* m_refreshAction = nullptr;

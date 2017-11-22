@@ -135,6 +135,8 @@ public:
 
 	TuningSourceState		state(quint64 sourceID);
 	void					setState(quint64 sourceID, const Network::TuningSourceState& state);
+
+	void					sortByID();
 };
 
 // ==============================================================================================

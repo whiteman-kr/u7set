@@ -25,18 +25,19 @@
 #include "../lib/WidgetUtils.h"
 #include "SignalPropertiesDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
+#include "BusStorage.h"
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
 SC_DEVICE_STR_ID = 2,
-SC_NAME = 3,
-SC_CHANNEL = 4,
-SC_TYPE = 5,
-SC_NORMAL_STATE = 6,
+SC_BUS_TYPE_ID = 3,
+SC_NAME = 4,
+SC_CHANNEL = 5,
+SC_TYPE = 6,
 SC_ACQUIRE = 7,
 SC_IN_OUT_TYPE = 8,
 SC_DATA_SIZE = 9,
-SC_ANALOG_DATA_FORMAT = 10,
+SC_ANALOG_SIGNAL_FORMAT = 10,
 SC_LOW_ADC = 11,
 SC_HIGH_ADC = 12,
 SC_LOW_LIMIT = 13,
@@ -44,16 +45,15 @@ SC_HIGH_LIMIT = 14,
 SC_UNIT = 15,
 SC_DROP_LIMIT = 16,
 SC_EXCESS_LIMIT = 17,
-SC_UNBALANCE_LIMIT = 18,
-SC_OUTPUT_MODE = 19,
-SC_DECIMAL_PLACES = 20,
-SC_APERTURE = 21,
-SC_FILTERING_TIME = 22,
-SC_SPREAD_TOLERANCE = 23,
-SC_BYTE_ORDER = 24,
-SC_ENABLE_TUNING = 25,
-SC_TUNING_DEFAULT_VALUE = 26,
-SC_LAST_CHANGE_USER = 27;
+SC_OUTPUT_MODE = 18,
+SC_DECIMAL_PLACES = 19,
+SC_APERTURE = 20,
+SC_FILTERING_TIME = 21,
+SC_SPREAD_TOLERANCE = 22,
+SC_BYTE_ORDER = 23,
+SC_ENABLE_TUNING = 24,
+SC_TUNING_DEFAULT_VALUE = 25,
+SC_LAST_CHANGE_USER = 26;
 
 
 const char* Columns[] =
@@ -61,14 +61,14 @@ const char* Columns[] =
 	"AppSignalID",
 	"CustomAppSignalID",
 	"EquipmentID",
+	"BusTypeID",
 	"Caption",
 	"Channel",
-	"A/D",
-	"Normal\nstate",
+	"A/D/B",
 	"Acquire",
 	"Input-output\ntype",
 	"Data\nsize",
-	"Analog\nData format",
+	"Analog\nSignal format",
 	"Low ADC",
 	"High ADC",
 	"Low\nEngeneering Units",
@@ -76,7 +76,6 @@ const char* Columns[] =
 	"Unit",
 	"Low\nValid Range",
 	"High\nValid Range",
-	"Unbalance limit",
 	"Output\nmode",
 	"Decimal\nplaces",
 	"Aperture",
@@ -108,10 +107,8 @@ SignalsModel* SignalsModel::m_instance = nullptr;
 
 
 
-SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
+SignalsDelegate::SignalsDelegate(SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
 	QStyledItemDelegate(parent),
-	m_dataFormatInfo(dataFormatInfo),
-	m_unitInfo(unitInfo),
 	m_signalSet(signalSet),
 	m_model(model),
 	m_proxyModel(proxyModel)
@@ -149,6 +146,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		//
 		case SC_STR_ID:
 		case SC_EXT_STR_ID:
+		case SC_BUS_TYPE_ID:
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			QRegExp rx4ID("^[#]?[A-Za-z\\d_]*$");
@@ -156,6 +154,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 			return le;
 		}
 		case SC_NAME:
+		case SC_UNIT:
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			QRegExp rx4Name("^.+$");
@@ -164,7 +163,6 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_LOW_ADC:
 		case SC_HIGH_ADC:
-		case SC_NORMAL_STATE:
 		case SC_DECIMAL_PLACES:
 		{
 			QLineEdit* le = new QLineEdit(parent);
@@ -173,6 +171,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_DATA_SIZE:
 		{
+			return nullptr;	//Read only
 			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].signalType() == E::SignalType::Discrete)
 			{
 				return nullptr;
@@ -185,7 +184,6 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_HIGH_LIMIT:
 		case SC_DROP_LIMIT:
 		case SC_EXCESS_LIMIT:
-		case SC_UNBALANCE_LIMIT:
 		case SC_APERTURE:
 		case SC_FILTERING_TIME:
 		case SC_SPREAD_TOLERANCE:
@@ -202,16 +200,10 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		// ComboBox
 		//
-		case SC_ANALOG_DATA_FORMAT:
+		case SC_ANALOG_SIGNAL_FORMAT:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			cb->addItems(m_dataFormatInfo.getValuesList());
-			return cb;
-		}
-		case SC_UNIT:
-		{
-			QComboBox* cb = new QComboBox(parent);
-			cb->addItems(m_unitInfo.getValuesList());
+			cb->addItems(E::enumKeyStrings<E::AnalogAppSignalFormat>());
 			return cb;
 		}
 		case SC_OUTPUT_MODE:
@@ -232,15 +224,16 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_IN_OUT_TYPE:
 		{
+			return nullptr;	//Read only
 			QComboBox* cb = new QComboBox(parent);
-			for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
-			{
-				cb->addItem(InOutTypeStr[i]);
-			}
+
+			cb->addItems(E::enumKeyStrings<E::SignalInOutType>());
+
 			return cb;
 		}
 		case SC_BYTE_ORDER:
 		{
+			return nullptr;	//Read only
 			QComboBox* cb = new QComboBox(parent);
 
 			auto byteOrderList = E::enumValues<E::ByteOrder>();
@@ -278,28 +271,27 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		//
 		case SC_STR_ID: if (le) le->setText(s.appSignalID()); break;
 		case SC_EXT_STR_ID: if (le) le->setText(s.customAppSignalID()); break;
+		case SC_BUS_TYPE_ID: if (le) le->setText(s.busTypeID()); break;
 		case SC_NAME: if (le) le->setText(s.caption()); break;
 		case SC_DEVICE_STR_ID: if (le) le->setText(s.equipmentID()); break;
 
 		case SC_DATA_SIZE: if (le) le->setText(QString::number(s.dataSize())); break;
 		case SC_LOW_ADC: if (le) le->setText(QString::number(s.lowADC())); break;
 		case SC_HIGH_ADC: if (le) le->setText(QString::number(s.highADC())); break;
-		case SC_NORMAL_STATE: if (le) le->setText(QString::number(s.normalState())); break;
 		case SC_DECIMAL_PLACES: if (le) le->setText(QString::number(s.decimalPlaces())); break;
 
 		case SC_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.lowEngeneeringUnits())); break;
 		case SC_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.highEngeneeringUnits())); break;
 		case SC_DROP_LIMIT: if (le) le->setText(QString("%1").arg(s.lowValidRange())); break;
 		case SC_EXCESS_LIMIT: if (le) le->setText(QString("%1").arg(s.highValidRange())); break;
-		case SC_UNBALANCE_LIMIT: if (le) le->setText(QString("%1").arg(s.unbalanceLimit())); break;
-		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.aperture())); break;
+		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.coarseAperture())); break;
 		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
 		case SC_SPREAD_TOLERANCE: if (le) le->setText(QString("%1").arg(s.spreadTolerance())); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue())); break;
 		// ComboBox
 		//
-		case SC_ANALOG_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt())); break;
-		case SC_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.unitID())); break;
+		case SC_ANALOG_SIGNAL_FORMAT: assert(false);/* WhiteMan if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt()));*/ break;
+		case SC_UNIT: if (le) le->setText(s.unit()); break;
 		case SC_OUTPUT_MODE: if (cb) cb->setCurrentIndex(s.outputMode()); break;
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
 		case SC_ENABLE_TUNING: if (cb) cb->setCurrentIndex(s.enableTuning()); break;
@@ -337,7 +329,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 				{
 					strId = '#' + strId;
 				}
-				s.setAppSignalID(strId);
+				s.setAppSignalID(strId.trimmed());
 			}
 			break;
 		}
@@ -351,32 +343,43 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 				{
 					strId = strId.mid(1);
 				}
-				s.setCustomAppSignalID(strId);
+				s.setCustomAppSignalID(strId.trimmed());
 			}
 			break;
 		}
-		case SC_NAME: if (le) s.setCaption(le->text()); break;
-		case SC_DEVICE_STR_ID: if (le) s.setEquipmentID(le->text()); break;
+		case SC_BUS_TYPE_ID:
+		{
+			if (le)
+			{
+				QString busId = le->text();
+				if (!busId.isEmpty() && busId[0] == '#')
+				{
+					busId = busId.mid(1);
+				}
+				s.setBusTypeID(busId.trimmed());
+			}
+			break;
+		}
+		case SC_NAME: if (le) s.setCaption(le->text().trimmed()); break;
+		case SC_DEVICE_STR_ID: if (le) s.setEquipmentID(le->text().trimmed()); break;
 
 		case SC_DATA_SIZE: if (le) s.setDataSize(le->text().toInt()); break;
 		case SC_LOW_ADC: if (le) s.setLowADC(le->text().toInt()); break;
 		case SC_HIGH_ADC: if (le) s.setHighADC(le->text().toInt()); break;
-		case SC_NORMAL_STATE: if (le) s.setNormalState(le->text().toInt()); break;
 		case SC_DECIMAL_PLACES: if (le) s.setDecimalPlaces(le->text().toInt()); break;
 
 		case SC_LOW_LIMIT: if (le) s.setLowEngeneeringUnits(le->text().toDouble()); break;
 		case SC_HIGH_LIMIT: if (le) s.setHighEngeneeringUnits(le->text().toDouble()); break;
 		case SC_DROP_LIMIT: if (le) s.setLowValidRange(le->text().toDouble()); break;
 		case SC_EXCESS_LIMIT: if (le) s.setHighValidRange(le->text().toDouble()); break;
-		case SC_UNBALANCE_LIMIT: if (le) s.setUnbalanceLimit(le->text().toDouble()); break;
-		case SC_APERTURE: if (le) s.setAperture(le->text().toDouble()); break;
+		case SC_APERTURE: if (le) s.setCoarseAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
 		case SC_SPREAD_TOLERANCE: if (le) s.setSpreadTolerance(le->text().toDouble()); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_ANALOG_DATA_FORMAT: if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
-		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
+	case SC_ANALOG_SIGNAL_FORMAT: assert(false); /* WhiteMan if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex())));*/ break;
+		case SC_UNIT: if (le) s.setUnit(le->text().trimmed()); break;
 		case SC_OUTPUT_MODE: if (cb) s.setOutputMode(static_cast<E::OutputMode>(cb->currentIndex())); break;
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_ENABLE_TUNING: if (cb) s.setEnableTuning(cb->currentIndex() == 0 ? false : true); break;
@@ -447,22 +450,11 @@ int SignalsModel::columnCount(const QModelIndex &) const
 	return COLUMNS_COUNT;
 }
 
-
-QString SignalsModel::getUnitStr(int unitID) const
+QString SignalsModel::getSensorStr(int sensorType) const
 {
-	if (m_unitInfo.contains(unitID))
+	if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
 	{
-		return m_unitInfo.value(unitID);
-	}
-
-	return tr("Unknown unit");
-}
-
-QString SignalsModel::getSensorStr(int sensorID) const
-{
-	if (sensorID >= 0 && sensorID < SENSOR_TYPE_COUNT)
-	{
-		return SensorTypeStr[sensorID];
+		return SensorTypeStr[sensorType];
 	}
 	else
 	{
@@ -721,43 +713,34 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
 					case SC_STR_ID: return signal.appSignalID();
 					case SC_EXT_STR_ID: return signal.customAppSignalID();
+					case SC_BUS_TYPE_ID: return signal.busTypeID();
 					case SC_NAME: return signal.caption();
 					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 					case SC_TYPE: return QChar('A');
-					case SC_ANALOG_DATA_FORMAT:
-						if (m_dataFormatInfo.contains(signal.analogSignalFormatInt()))
-						{
-							return m_dataFormatInfo.value(signal.analogSignalFormatInt());
-						}
-						else
-						{
-							return tr("Unknown data format");
-						}
-
+					case SC_ANALOG_SIGNAL_FORMAT: return E::valueToString<E::AnalogAppSignalFormat>(signal.analogSignalFormat());
 					case SC_DATA_SIZE: return signal.dataSize();
 					case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
 					case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
 					case SC_LOW_LIMIT: return signal.lowEngeneeringUnits();
 					case SC_HIGH_LIMIT: return signal.highEngeneeringUnits();
-					case SC_UNIT: return getUnitStr(signal.unitID());
+					case SC_UNIT: return signal.unit();
 
 					case SC_DROP_LIMIT: return signal.lowValidRange();
 					case SC_EXCESS_LIMIT: return signal.highValidRange();
-					case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 
 					case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
 
 					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 					case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 
-					case SC_NORMAL_STATE: return signal.normalState();
 					case SC_DECIMAL_PLACES: return signal.decimalPlaces();
-					case SC_APERTURE: return signal.aperture();
+					case SC_APERTURE: return signal.coarseAperture();
 					case SC_FILTERING_TIME: return signal.filteringTime();
 					case SC_SPREAD_TOLERANCE: return signal.spreadTolerance();
 					case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
 
-					case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
+					case SC_IN_OUT_TYPE: return E::valueToString<E::SignalInOutType>(signal.inOutType());
+
 					case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 
 					case SC_DEVICE_STR_ID: return signal.equipmentID();
@@ -774,16 +757,17 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
 					case SC_STR_ID: return signal.appSignalID();
 					case SC_EXT_STR_ID: return signal.customAppSignalID();
+					case SC_BUS_TYPE_ID: return signal.busTypeID();
 					case SC_NAME: return signal.caption();
 					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
-					case SC_TYPE: return QChar('D');
-					case SC_ANALOG_DATA_FORMAT: return "";
+					case SC_TYPE: return (signal.signalType() == E::SignalType::Discrete) ? QChar('D') : QChar('B');
+					case SC_ANALOG_SIGNAL_FORMAT: return "";
 
 					case SC_DATA_SIZE: return signal.dataSize();
 					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 					case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 					case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
-					case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
+					case SC_IN_OUT_TYPE: return E::valueToString<E::SignalInOutType>(signal.inOutType());
 					case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 					case SC_DEVICE_STR_ID: return signal.equipmentID();
 
@@ -795,11 +779,9 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 					case SC_DROP_LIMIT:
 					case SC_EXCESS_LIMIT:
-					case SC_UNBALANCE_LIMIT:
 
 					case SC_OUTPUT_MODE:
 
-					case SC_NORMAL_STATE:
 					case SC_DECIMAL_PLACES:
 					case SC_APERTURE:
 					case SC_FILTERING_TIME:
@@ -875,23 +857,22 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 		{
 			case SC_STR_ID: signal.setAppSignalID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setCustomAppSignalID(value.toString()); break;
+			case SC_BUS_TYPE_ID: signal.setBusTypeID(value.toString()); break;
 			case SC_NAME: signal.setCaption(value.toString()); break;
-			case SC_ANALOG_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
+			case SC_ANALOG_SIGNAL_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
 			case SC_LOW_LIMIT: signal.setLowEngeneeringUnits(value.toDouble()); break;
 			case SC_HIGH_LIMIT: signal.setHighEngeneeringUnits(value.toDouble()); break;
-			case SC_UNIT: signal.setUnitID(value.toInt()); break;
+			case SC_UNIT: signal.setUnit(value.toString()); break;
 			case SC_DROP_LIMIT: signal.setLowValidRange(value.toDouble()); break;
 			case SC_EXCESS_LIMIT: signal.setHighValidRange(value.toDouble()); break;
-			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
 			case SC_OUTPUT_MODE: signal.setOutputMode(static_cast<E::OutputMode>(value.toInt())); break;
 			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
 			case SC_ENABLE_TUNING: signal.setEnableTuning(value.toBool()); break;
-			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
-			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
+			case SC_APERTURE: signal.setCoarseAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
 			case SC_SPREAD_TOLERANCE: signal.setSpreadTolerance(value.toDouble()); break;
 			case SC_TUNING_DEFAULT_VALUE: signal.setTuningDefaultValue(value.toDouble()); break;
@@ -945,10 +926,7 @@ void SignalsModel::loadSignals()
 		m_usernameMap[list[i].userId()] = list[i].username();
 	}
 
-	dbController()->getUnits(&m_unitInfo, m_parentWindow);
-	*Signal::unitList = m_unitInfo;
-
-	if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
+	if (!dbController()->getSignals(&m_signalSet, false, m_parentWindow))
 	{
 		QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
 	}
@@ -1002,8 +980,6 @@ void SignalsModel::clearSignals()
 		m_signalSet.clear();
 		endRemoveRows();
 	}
-
-	m_unitInfo.clear();
 }
 
 Signal*SignalsModel::getSignalByStrID(const QString signalStrID)
@@ -1055,7 +1031,7 @@ void SignalsModel::addSignal()
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
 	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete") << tr("Bus"));
-	signalTypeCombo->setCurrentIndex(0);
+	signalTypeCombo->setCurrentIndex(1);
 
 	fl->addRow(tr("Signal type"), signalTypeCombo);
 
@@ -1117,45 +1093,33 @@ void SignalsModel::addSignal()
 			break;
 	}
 
-
-	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
-	signal.setHighADC(settings.value("SignalsTabPage/LastEditedSignal/highADC").toInt());
-	signal.setLowEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/lowEngeneeringUnits").toDouble());
-	signal.setHighEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/highEngeneeringUnits").toDouble());
-	int unit = settings.value("SignalsTabPage/LastEditedSignal/unitID").toInt();
-	if (unit != -1)
+	auto loader = [&settings](const QString& name)
 	{
-		signal.setUnitID(m_unitInfo.keyAt(unit));
-	}
-	signal.setLowValidRange(settings.value("SignalsTabPage/LastEditedSignal/lowValidRange").toDouble());
-	signal.setHighValidRange(settings.value("SignalsTabPage/LastEditedSignal/highValidRange").toDouble());
-	signal.setUnbalanceLimit(settings.value("SignalsTabPage/LastEditedSignal/unbalanceLimit").toDouble());
+		return settings.value(lastEditedSignalFieldValuePlace + name);
+	};
 
-	signal.setInputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/inputLowLimit").toDouble());
-	signal.setInputHighLimit(settings.value("SignalsTabPage/LastEditedSignal/inputHighLimit").toDouble());
-    signal.setInputUnitID(static_cast<E::InputUnit>(settings.value("SignalsTabPage/LastEditedSignal/inputUnitID").toInt()));
-    signal.setInputSensorType(static_cast<E::SensorType>(settings.value("SignalsTabPage/LastEditedSignal/inputSensorID").toInt()));
+	signal.setLowADC(loader(lowADCCaption).toInt());
+	signal.setHighADC(loader(highADCCaption).toInt());
+	signal.setLowEngeneeringUnits(loader(lowEngeneeringUnitsCaption).toDouble());
+	signal.setHighEngeneeringUnits(loader(highEngeneeringUnitsCaption).toDouble());
+	signal.setUnit(loader(unitCaption).toString());
+	signal.setLowValidRange(loader(lowValidRangeCaption).toDouble());
+	signal.setHighValidRange(loader(highValidRangeCaption).toDouble());
 
-	signal.setOutputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/outputLowLimit").toDouble());
-	signal.setOutputHighLimit(settings.value("SignalsTabPage/LastEditedSignal/outputHighLimit").toDouble());
-	unit = settings.value("SignalsTabPage/LastEditedSignal/outputUnitID").toInt();
-	if (unit != -1)
-	{
-		signal.setOutputUnitID(m_unitInfo.keyAt(unit));
-	}
+	signal.setElectricLowLimit(loader(electricLowLimitCaption).toDouble());
+	signal.setElectricHighLimit(loader(electricHighLimitCaption).toDouble());
+	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(electricUnitCaption).toInt()));
+	signal.setSensorType(static_cast<E::SensorType>(loader(sensorTypeCaption).toInt()));
+	signal.setOutputMode(static_cast<E::OutputMode>(loader(outputModeCaption).toInt()));
 
-	signal.setOutputMode(static_cast<E::OutputMode>(settings.value("SignalsTabPage/LastEditedSignal/outputMode").toInt()));
-    signal.setOutputSensorType(static_cast<E::SensorType>(settings.value("SignalsTabPage/LastEditedSignal/outputSensorID").toInt()));
-
-	signal.setAcquire(settings.value("SignalsTabPage/LastEditedSignal/acquire").toBool());
-	signal.setCalculated(settings.value("SignalsTabPage/LastEditedSignal/calculated").toBool());
-	signal.setNormalState(settings.value("SignalsTabPage/LastEditedSignal/normalState").toInt());
-	signal.setDecimalPlaces(settings.value("SignalsTabPage/LastEditedSignal/decimalPlaces").toInt());
-	signal.setAperture(settings.value("SignalsTabPage/LastEditedSignal/aperture").toDouble());
-	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
-	signal.setSpreadTolerance(settings.value("SignalsTabPage/LastEditedSignal/spreadTolerance").toDouble());
+	signal.setAcquire(loader(acquireCaption).toBool());
+	signal.setDecimalPlaces(loader(decimalPlacesCaption).toInt());
+	signal.setCoarseAperture(loader(coarseApertureCaption).toDouble());
+	signal.setFineAperture(loader(fineApertureCaption).toDouble());
+	signal.setFilteringTime(loader(filteringTimeCaption).toDouble());
+	signal.setSpreadTolerance(loader(spreadToleranceCaption).toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);
-	signal.setByteOrder(E::ByteOrder(settings.value("SignalsTabPage/LastEditedSignal/byteOrder").toInt()));
+	signal.setByteOrder(E::ByteOrder(loader(byteOrderCaption).toInt()));
 
 	if (!deviceIdEdit->text().isEmpty())
 	{
@@ -1172,6 +1136,8 @@ void SignalsModel::addSignal()
 	}
 
 	SignalPropertiesDialog dlg(dbController(), QVector<Signal*>() << &signal, false, false, m_parentWindow);
+
+	trimSignalTextFields(signal);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1265,6 +1231,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 			if (dlg.isEditedSignal(ids[i]))
 			{
 				ObjectState state;
+				trimSignalTextFields(*signalVector[i]);
 				dbController()->setSignalWorkcopy(signalVector[i], &state, parentWindow());
 				states.append(state);
 			}
@@ -1281,9 +1248,20 @@ bool SignalsModel::editSignals(QVector<int> ids)
 	return false;
 }
 
+void SignalsModel::trimSignalTextFields(Signal& signal)
+{
+	signal.setAppSignalID(signal.appSignalID().trimmed());
+	signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
+	signal.setEquipmentID(signal.equipmentID().trimmed());
+	signal.setBusTypeID(signal.busTypeID().trimmed());
+	signal.setCaption(signal.caption().trimmed());
+	signal.setUnit(signal.unit().trimmed());
+}
+
 void SignalsModel::saveSignal(Signal& signal)
 {
 	ObjectState state;
+	trimSignalTextFields(signal);
 	dbController()->setSignalWorkcopy(&signal, &state, parentWindow());
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
@@ -1299,17 +1277,6 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 {
 	QList<int> resultSignalIDs;
 	m_signalSet.buildID2IndexMap();
-
-	auto idMaker = [](QString prefix, QString id) {
-		if (id[0] == '#')
-		{
-			return '#' + prefix + id.mid(1);
-		}
-		else
-		{
-			return prefix + id;
-		}
-	};
 
 	QSet<int> clonedSignalIDs;
 	QList<int> signalIDsList = signalIDs.toList();
@@ -1340,15 +1307,15 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 			clonedSignalIDs.insert(groupSignalID);
 		}
 
-		QString prefix = "CLONE_";
-		int prefixNumerator = 1;
+		QString suffix = "_CLONE";
+		int suffixNumerator = 1;
 		bool hasConflict;
 		do
 		{
 			hasConflict = false;
 			for (int groupSignalID : groupSignalIDs)
 			{
-				if (m_signalSet.contains(idMaker(prefix, m_signalSet.value(groupSignalID).appSignalID())))
+				if (m_signalSet.contains(m_signalSet.value(groupSignalID).appSignalID() + suffix))
 				{
 					hasConflict = true;
 					break;
@@ -1356,13 +1323,13 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 			}
 			if (hasConflict)
 			{
-				prefixNumerator++;
-				prefix = QString("CLONE%1_").arg(prefixNumerator);
+				suffixNumerator++;
+				suffix = QString("_CLONE%1").arg(suffixNumerator);
 			}
 		}
-		while (hasConflict && prefixNumerator < 1000);
+		while (hasConflict && suffixNumerator < 1000);
 
-		if (prefixNumerator >= 1000)
+		if (suffixNumerator >= 1000)
 		{
 			assert(false);
 			return QList<int>();
@@ -1373,9 +1340,10 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 		{
 			const Signal&& groupSignal = m_signalSet.value(groupSignalIDs[i]);
 			groupSignals[i] = groupSignal;
+			trimSignalTextFields(groupSignals[i]);
 
-			groupSignals[i].setAppSignalID(idMaker(prefix, groupSignal.appSignalID()));
-			groupSignals[i].setCustomAppSignalID(idMaker(prefix, groupSignal.customAppSignalID()));
+			groupSignals[i].setAppSignalID(groupSignal.appSignalID() + suffix);
+			groupSignals[i].setCustomAppSignalID(groupSignal.customAppSignalID() + suffix);
 		}
 
 		dbController()->addSignal(type, &groupSignals, m_parentWindow);
@@ -1514,6 +1482,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
+	m_signalsView->setColumnWidth(SC_BUS_TYPE_ID, 400);
 	m_signalsView->setColumnWidth(SC_NAME, 400);
 	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
 
@@ -1593,39 +1562,59 @@ SignalsTabPage::~SignalsTabPage()
 	}
 }
 
-QStringList SignalsTabPage::createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent)
+QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent)
 {
+	assert(options);
+
+	if (options->lmEquipmentIdList.isEmpty())
+	{
+		QMessageBox::warning(parent, "Error", "Lm list is empty");
+		assert(false);
+	}
+
 	QVector<Signal> signalVector;
 
 	QDialog signalCreationSettingsDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	QFormLayout* fl = new QFormLayout;
 
-	QList<QCheckBox*> checkBoxList;
-	QStringList selectedLmIdList;
+	QList<QCheckBox*> lmCheckBoxList;
+	QList<QLineEdit*> appSignalIdEditList;
+	QList<QLineEdit*> customSignalIdEditList;
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	QGroupBox *groupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
-	groupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
-	QVBoxLayout* groupBoxLayout = new QVBoxLayout;
-	groupBox->setLayout(groupBoxLayout);
-	vl->addWidget(groupBox);
+	QGroupBox *equipmentGroupBox = new QGroupBox("EquipmentID for signals", &signalCreationSettingsDialog);
+	equipmentGroupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QGridLayout* equipmentGroupBoxLayout = new QGridLayout;
+	equipmentGroupBox->setLayout(equipmentGroupBoxLayout);
+	vl->addWidget(equipmentGroupBox);
 
-	for (QString lmId : lmIdList)
+	int row = 0;
+	equipmentGroupBoxLayout->addWidget(new QLabel("EquipmentID", &signalCreationSettingsDialog), row, 0);
+	equipmentGroupBoxLayout->addWidget(new QLabel("AppSignalID", &signalCreationSettingsDialog), row, 1);
+	equipmentGroupBoxLayout->addWidget(new QLabel("CustomSignalID", &signalCreationSettingsDialog), row, 2);
+
+	bool atLeastOneLmIsChecked = false;
+
+	for (QString lmId : options->lmEquipmentIdList)
 	{
 		QCheckBox* enableLmCheck = new QCheckBox(lmId, &signalCreationSettingsDialog);
-		enableLmCheck->setChecked(true);
+		if (options->selectedEquipmentIdList.contains(lmId))
+		{
+			enableLmCheck->setChecked(true);
+			atLeastOneLmIsChecked = true;
+		}
 
-		groupBoxLayout->addWidget(enableLmCheck);
-		checkBoxList.append(enableLmCheck);
+		equipmentGroupBoxLayout->addWidget(enableLmCheck, row + 1, 0);
+		lmCheckBoxList.append(enableLmCheck);
 
-		connect(enableLmCheck, &QCheckBox::toggled, [&checkBoxList, enableLmCheck](bool checked){
+		connect(enableLmCheck, &QCheckBox::toggled, [&lmCheckBoxList, enableLmCheck](bool checked){
 			if (checked)
 			{
 				return;
 			}
 			bool hasCheckedLm = false;
-			for (QCheckBox* lmCheck : checkBoxList)
+			for (QCheckBox* lmCheck : lmCheckBoxList)
 			{
 				if (lmCheck->isChecked())
 				{
@@ -1638,18 +1627,205 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 				enableLmCheck->setChecked(true);
 			}
 		});
+
+		QString appSignalID;
+		if (row < options->appSignalIdList.count())
+		{
+			appSignalID = options->appSignalIdList[row];
+		}
+
+		QString customSignalID;
+		if (row < options->customSignalIdList.count())
+		{
+			customSignalID = options->customSignalIdList[row];
+		}
+
+		if (customSignalID.isEmpty())
+		{
+			if (appSignalID.isEmpty())
+			{
+				customSignalID = schemaId;
+				if (options->lmEquipmentIdList.count() > 1)
+				{
+					customSignalID += QString("_%1").arg(QChar('A'+row));
+				}
+			}
+			else
+			{
+				customSignalID = appSignalID;
+				customSignalID.remove('#');
+			}
+		}
+
+		if (appSignalID.isEmpty())
+		{
+			appSignalID = customSignalID;
+		}
+
+		if (customSignalID[0] == QChar('#'))
+		{
+			customSignalID = customSignalID.mid(1);
+		}
+		if (appSignalID[0] != QChar('#'))
+		{
+			appSignalID = "#" + appSignalID;
+		}
+
+		QLineEdit* appSignalIdEdit = new QLineEdit(appSignalID, &signalCreationSettingsDialog);
+		equipmentGroupBoxLayout->addWidget(appSignalIdEdit, row + 1, 1);
+		appSignalIdEditList.append(appSignalIdEdit);
+
+		QLineEdit* customSignalIdEdit = new QLineEdit(customSignalID, &signalCreationSettingsDialog);
+		equipmentGroupBoxLayout->addWidget(customSignalIdEdit, row + 1, 2);
+		customSignalIdEditList.append(customSignalIdEdit);
+
+		row++;
 	}
 
-	QComboBox* signalTypeCombo = new QComboBox(&signalCreationSettingsDialog);
-	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
-	signalTypeCombo->setCurrentIndex(0);
+	if (atLeastOneLmIsChecked == false)
+	{
+		for (QCheckBox* lmCheckBox : lmCheckBoxList)
+		{
+			lmCheckBox->setChecked(true);
+		}
+	}
 
-	fl->addRow(tr("Signal type"), signalTypeCombo);
+	QGroupBox *signalTypeGroupBox = new QGroupBox("Signal type", &signalCreationSettingsDialog);
+	signalTypeGroupBox->setStyleSheet("QGroupBox{border:1px solid gray;border-radius:5px;margin-top: 1ex;} QGroupBox::title{subcontrol-origin: margin;subcontrol-position:top center;padding:0 3px;}");
+	QVBoxLayout* signalTypeGroupBoxLayout = new QVBoxLayout;
+	signalTypeGroupBox->setLayout(signalTypeGroupBoxLayout);
+
+	QButtonGroup* signalTypeButtonGroup = new QButtonGroup(&signalCreationSettingsDialog);
+
+	signalTypeButtonGroup->setExclusive(true);
+
+	static const QString discreteCaption("Discrete");
+	static const QString analogFloat32Caption("Analog Float32");
+	static const QString analogSignedInt32Caption("Analog SignedInt32");
+	static const QString busCaption("Bus");
+
+	QVector<QRadioButton*> buttons;
+	QRadioButton* busButton;
+	buttons.push_back(new QRadioButton(discreteCaption, signalTypeGroupBox));
+	buttons.push_back(new QRadioButton(analogFloat32Caption, signalTypeGroupBox));
+	buttons.push_back(new QRadioButton(analogSignedInt32Caption, signalTypeGroupBox));
+	buttons.push_back(busButton = new QRadioButton(busCaption, signalTypeGroupBox));
+
+	QComboBox* busTypeIdComboBox = new QComboBox(&signalCreationSettingsDialog);
+	busTypeIdComboBox->setEditable(true);
+	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdComboBox));
+	busTypeIdComboBox->setVisible(false);
+
+	BusStorage busStorage(dbc);
+	// Load buses
+	//
+	QString errorMessage;
+
+	if (busStorage.load(&errorMessage) == false)
+	{
+		QMessageBox::critical(parent, qAppName(), tr("Bus loading error: %1").arg(errorMessage));
+	}
+
+	int count = busStorage.count();
+
+	for (int i = 0; i < count; i++)
+	{
+		const std::shared_ptr<VFrame30::Bus> bus = busStorage.get(i);
+
+		busTypeIdComboBox->addItem(bus->busTypeId());
+	}
+
+	QSettings settings;
+	static const QString defaultBusTypeIdCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultBusTypeId");
+
+	if (options->defaultBusTypeId.isEmpty())
+	{
+		QString defaultBusTypeId = settings.value(defaultBusTypeIdCaption,
+												  QString("BUSTYPEID_%1").arg(dbc->nextCounterValue(), 4, 10, QLatin1Char('0'))).toString();
+		busTypeIdComboBox->setEditText(defaultBusTypeId);
+	}
+	else
+	{
+		busTypeIdComboBox->setEditText(options->defaultBusTypeId);
+	}
+
+	QLabel* busTypeIdLabel = new QLabel("BusTypeID", &signalCreationSettingsDialog);
+	busTypeIdLabel->setVisible(false);
+
+	fl->addRow(busTypeIdLabel, busTypeIdComboBox);
+
+	connect(busButton, &QRadioButton::toggled, busTypeIdLabel, &QLabel::setVisible);
+	connect(busButton, &QRadioButton::toggled, busTypeIdComboBox, &QComboBox::setVisible);
+
+	static const QString defaultSignalTypeCaption("SignalsTabPage/onSignalCreationFromLogicSchema/defaultSignalType");
+
+	int defaultSignalType = options->defaultSignalTypeIndex;
+	if (defaultSignalType == -1)
+	{
+		defaultSignalType = settings.value(defaultSignalTypeCaption, 0).toInt();
+	}
+
+	if (defaultSignalType >= buttons.count())
+	{
+		defaultSignalType = buttons.count() - 1;
+	}
+
+	buttons[defaultSignalType]->setChecked(true);
+
+	int index = 0;
+
+	for (auto b : buttons)
+	{
+		signalTypeButtonGroup->addButton(b, index++);
+		signalTypeGroupBoxLayout->addWidget(b);
+	}
+
+	vl->addWidget(signalTypeGroupBox);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-	connect(buttonBox, &QDialogButtonBox::accepted, &signalCreationSettingsDialog, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &signalCreationSettingsDialog, &QDialog::reject);
+	connect(buttonBox, &QDialogButtonBox::accepted, [lmCheckBoxList, appSignalIdEditList, customSignalIdEditList, &signalCreationSettingsDialog](){
+		for (int i = 0; i < lmCheckBoxList.count(); i++)
+		{
+			if (lmCheckBoxList[i]->isChecked() == false)
+			{
+				continue;
+			}
+
+			if (appSignalIdEditList[i]->text().isEmpty())
+			{
+				QMessageBox::warning(&signalCreationSettingsDialog, "Error", "One of AppSignalIDs is empty");
+				return;
+			}
+			if (customSignalIdEditList[i]->text().isEmpty())
+			{
+				QMessageBox::warning(&signalCreationSettingsDialog, "Error", "One of CustomSignalIDs is empty");
+				return;
+			}
+
+			for (int j = i + 1; j < lmCheckBoxList.count(); j++)
+			{
+				if (lmCheckBoxList[j]->isChecked() == false)
+				{
+					continue;
+				}
+
+				if (appSignalIdEditList[i]->text() == appSignalIdEditList[j]->text())
+				{
+					QMessageBox::warning(&signalCreationSettingsDialog, "Error", QString("AppSignalID %1 repeats").arg(appSignalIdEditList[i]->text()));
+					return;
+				}
+
+				if (customSignalIdEditList[i]->text() == customSignalIdEditList[j]->text())
+				{
+					QMessageBox::warning(&signalCreationSettingsDialog, "Error", QString("CustomSignalID %1 repeats").arg(customSignalIdEditList[i]->text()));
+					return;
+				}
+			}
+		}
+		signalCreationSettingsDialog.accept();
+	});
 
 	vl->addLayout(fl);
 	vl->addStretch();
@@ -1659,44 +1835,82 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 	signalCreationSettingsDialog.setWindowTitle("Signal creation settings");
 
+	if (options->settingsWindowPositionRect.isValid() == true)
+	{
+		setWindowPosition(&signalCreationSettingsDialog, options->settingsWindowPositionRect);
+	}
+
 	if (signalCreationSettingsDialog.exec() != QDialog::Accepted)
 	{
 		return QStringList();
 	}
 
-	E::SignalType type = static_cast<E::SignalType>(signalTypeCombo->currentIndex());
+	options->settingsWindowPositionRect = signalCreationSettingsDialog.geometry();
 
-	for (QCheckBox* check : checkBoxList)
+	settings.setValue(defaultSignalTypeCaption, signalTypeButtonGroup->checkedId());
+
+	QRadioButton* checkedSignalTypeButton = dynamic_cast<QRadioButton*>(signalTypeButtonGroup->checkedButton());
+	if (checkedSignalTypeButton == nullptr)
 	{
-		if (check->isChecked())
-		{
-			selectedLmIdList << check->text();
-		}
+		return QStringList();
 	}
 
-	int channelNo = 0;
-	for (QString lmId : selectedLmIdList)
+	E::SignalType type;
+	switch (checkedSignalTypeButton->text()[0].unicode())
 	{
-		QString signalSuffix = QString("%1%2").arg(QChar(E::valueToString<E::SignalType>(type)[0])).arg(schemaCounter, 4, 10, QChar('0'));
-		if (lmIdList.count() > 1)
+		case 'A':
+			type = E::SignalType::Analog;
+			break;
+
+		case 'B':
+			type = E::SignalType::Bus;
+			settings.setValue(defaultBusTypeIdCaption, busTypeIdComboBox->currentText());
+			options->defaultBusTypeId = busTypeIdComboBox->currentText();
+			break;
+
+		case 'D':
+			type = E::SignalType::Discrete;
+			break;
+	}
+
+	options->appSignalIdList.clear();
+	options->customSignalIdList.clear();
+	options->selectedEquipmentIdList.clear();
+	options->defaultSignalTypeIndex = signalTypeButtonGroup->checkedId();
+
+	int channelNo = 0;
+	for (int i = 0; i < lmCheckBoxList.count(); i++)
+	{
+		QString currentAppSignalId = appSignalIdEditList[i]->text();
+		options->appSignalIdList << currentAppSignalId;
+
+		QString currentCustomSignalId = customSignalIdEditList[i]->text();
+		options->customSignalIdList << currentCustomSignalId;
+
+		QCheckBox* check = lmCheckBoxList[i];
+		if (check->isChecked() == false)
+		{
+			continue;
+		}
+		QString lmId = check->text();
+		options->selectedEquipmentIdList << lmId;
+
+		if (currentCustomSignalId[0] == QChar('#'))
+		{
+			currentCustomSignalId = currentCustomSignalId.mid(1);
+		}
+		if (currentAppSignalId[0] != QChar('#'))
+		{
+			currentAppSignalId = "#" + currentAppSignalId;
+		}
+
+		QString signalSuffix = QString("%1%2").arg(QChar(E::valueToString<E::SignalType>(type)[0])).arg(counter, 4, 10, QChar('0'));
+		if (options->lmEquipmentIdList.count() > 1)
 		{
 			signalSuffix += QString("_%1").arg(QChar('A' + channelNo));
 		}
 
-		QString newSignalExtStrId = QString("%1_%2").arg(schemaId).arg(signalSuffix);
-		newSignalExtStrId.replace("#", "");
-		QString newSignalStrId = newSignalExtStrId;
-
 		QString newSignalCaption = QString("App signal %1 at schema \"%2\"").arg(signalSuffix).arg(schemaCaption);
-
-		if (newSignalExtStrId[0] == QChar('#'))
-		{
-			newSignalExtStrId = newSignalExtStrId.mid(1);
-		}
-		if (newSignalStrId[0] != QChar('#'))
-		{
-			newSignalStrId = "#" + newSignalStrId;
-		}
 
 		Signal newSignal;
 
@@ -1705,8 +1919,17 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 		switch (type)
 		{
 			case E::SignalType::Analog:
-				newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-				newSignal.setDataSize(FLOAT32_SIZE);
+				if (checkedSignalTypeButton->text() == analogFloat32Caption)
+				{
+					newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+					newSignal.setDataSize(FLOAT32_SIZE);
+				}
+
+				if (checkedSignalTypeButton->text() == analogSignedInt32Caption)
+				{
+					newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
+					newSignal.setDataSize(SIGNED_INT32_SIZE);
+				}
 				break;
 
 			case E::SignalType::Discrete:
@@ -1714,12 +1937,15 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 				break;
 
 			case E::SignalType::Bus:
+				newSignal.setBusTypeID(busTypeIdComboBox->currentText());
+				break;
+
 			default:
 				break;
 		}
 
-		newSignal.setAppSignalID(newSignalStrId);
-		newSignal.setCustomAppSignalID(newSignalExtStrId);
+		newSignal.setAppSignalID(currentAppSignalId);
+		newSignal.setCustomAppSignalID(currentCustomSignalId);
 		newSignal.setEquipmentID(lmId);
 		newSignal.setCaption(newSignalCaption);
 		signalVector.push_back(newSignal);
@@ -1737,23 +1963,35 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	{
 		signalPtrVector.push_back(&signal);
 	}
-	SignalPropertiesDialog dlg(dbController, signalPtrVector, false, false, parent);
+	SignalPropertiesDialog dlg(dbc, signalPtrVector, false, false, parent);
 
 	if (dlg.exec() != QDialog::Accepted )
 	{
 		return QStringList();
 	}
 
-	if (dbController->addSignal(type, &signalVector, parent) == false)
+	for (Signal& signal : signalVector)
+	{
+		SignalsModel::trimSignalTextFields(signal);
+	}
+
+	if (dbc->addSignal(type, &signalVector, parent) == false)
 	{
 		return QStringList();
 	}
 
+	SignalsModel* model = SignalsModel::instance();
+	model->loadSignals();
+
+	QList<int> selectIdList;
 	QStringList result;
 	for (Signal& signal : signalVector)
 	{
 		result << signal.appSignalID();
+		selectIdList << signal.ID();
 	}
+
+	model->parentWindow()->setSelection(selectIdList);
 
 	return result;
 }
@@ -2118,6 +2356,26 @@ void SignalsTabPage::changeSignalActionsVisibility()
 	}
 }
 
+void SignalsTabPage::setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID)
+{
+	if (selectedRowsSignalID.isEmpty())
+	{
+		return;
+	}
+	if (focusedCellSignalID == -1)
+	{
+		focusedCellSignalID = selectedRowsSignalID.last();
+	}
+	m_selectedRowsSignalID = selectedRowsSignalID;
+
+	int focusedRow = m_signalsModel->keyIndex(focusedCellSignalID);
+
+	m_lastVerticalScrollPosition = m_signalsView->rowViewportPosition(focusedRow);
+	m_lastHorizontalScrollPosition = 0;
+
+	restoreSelection(focusedCellSignalID);
+}
+
 void SignalsTabPage::saveSelection()
 {
 	// Save signal id list of selected rows and signal id with column number of focused cell
@@ -2200,7 +2458,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 	{
 		case ST_DISCRETE:
 		case ST_BUS:
-			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
+			for (int i = SC_ANALOG_SIGNAL_FORMAT; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, true);
 			}
@@ -2208,7 +2466,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 
 		case ST_ANALOG:
 		case ST_ANY:
-			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
+			for (int i = SC_ANALOG_SIGNAL_FORMAT; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, false);
 			}

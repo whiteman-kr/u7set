@@ -16,6 +16,7 @@ namespace VFrame30
 		static const QString commented;
 		static const QString objectName;
 		static const QString name;
+		static const QString guid;
 
 		static const QString fontName;
 		static const QString fontSize;
@@ -25,6 +26,7 @@ namespace VFrame30
 		static const QString type;
 		static const QString valueInteger;
 		static const QString valueFloat;
+		static const QString valueDiscrete;
 		static const QString precision;
 		static const QString precisionPropText;
 		static const QString analogFormat;
@@ -43,6 +45,7 @@ namespace VFrame30
 		static const QString label;
 		static const QString caption;
 		static const QString maxLength;
+		static const QString multiLine;
 
 		// SchemaItemValue Colors
 		//
@@ -119,14 +122,34 @@ namespace VFrame30
 		static const QString alignVert;
 
 		static const QString dataType;
+		static const QString units;
 
 		static const QString appSignalIDs;
 		static const QString appSignalId;
 		static const QString connectionId;
 		static const QString signalSource;
 
+		static const QString coarseAperture;
+		static const QString fineAperture;
+		static const QString adaptiveAperture;
+
 		static const QString busTypeId;
 		static const QString busTypeFileName;
+		static const QString busAutoSignalPlacemanet;
+		static const QString busManualBusSize;
+		static const QString busSignalId;
+		static const QString busInbusOffset;
+		static const QString busInbusDiscreteBitNo;
+		static const QString busInbusAnalogSize;
+		static const QString busInbusAnalogFormat;
+		static const QString busInbusAnalogByteOrder;
+		static const QString busAnalogLowLimit;
+		static const QString busAnalogHightLimit;
+		static const QString busInbusAnalogLowLimit;
+		static const QString busInbusAnalogHightLimit;
+
+		static const QString busSettingCategory;
+		static const QString busInbusSettingCategory;
 
 		static const QString behaviourCategory;
 		static const QString appearanceCategory;
@@ -137,6 +160,8 @@ namespace VFrame30
 		static const QString parametersCategory;
 		static const QString controlCategory;
 		static const QString scriptsCategory;
+		static const QString apertureCategory;
+		static const QString constCategory;
 
 		static const QString widgetPropStyleSheet;
 		static const QString widgetPropToolTip;

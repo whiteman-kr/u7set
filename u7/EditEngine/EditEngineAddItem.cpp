@@ -18,14 +18,16 @@ namespace EditEngine
 		return;
 	}
 
-	void AddItemCommand::executeCommand(EditSchemaView* schemaView)
+	void AddItemCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
 		m_layer->Items.insert(m_layer->Items.end(), m_items.begin(), m_items.end());
 
-		schemaView->setSelectedItems(m_items);
+		itemsToSelect->assign(m_items.begin(), m_items.end());
+
+		return;
 	}
 
-	void AddItemCommand::unExecuteCommand(EditSchemaView* schemaView)
+	void AddItemCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
 	{
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{
@@ -45,6 +47,8 @@ namespace EditEngine
 			}
 		}
 
-		schemaView->setSelectedItems(m_selectedItems);
+		itemsToSelect->assign(m_selectedItems.begin(), m_selectedItems.end());
+
+		return;
 	}
 }

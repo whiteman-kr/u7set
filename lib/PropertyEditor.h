@@ -61,6 +61,8 @@ namespace ExtWidgets
 	public:
 		PropertyTextEditor(QWidget* parent);
 
+        virtual ~PropertyTextEditor();
+
 		virtual void setText(const QString& text) = 0;
 
 		virtual QString text() = 0;
@@ -294,6 +296,8 @@ namespace ExtWidgets
 
 		QSet<QtProperty*> propertyByName(const QString& propertyName);
 
+		void updateProperty(QtProperty* property);
+
 		void emitSetValue(QtProperty* property, const QVariant& value);
 
 	private:
@@ -309,7 +313,6 @@ namespace ExtWidgets
         QMap<const QtProperty*, Data> values;
 
 	public slots:
-        void setValue(QtProperty* property, const QVariant& value);
 		void setAttribute (QtProperty* property, const QString& attribute, const QVariant& value);
 
 	signals:
@@ -367,12 +370,12 @@ namespace ExtWidgets
 		// Public functions
 		//
 	public:
-		void updateProperty(const QString& propertyName);
+		void updatePropertyValues(const QString& propertyName);
 
-		void setObjects(const QList<std::shared_ptr<PropertyObject> >& objects);
+		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
+		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
+
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
-
-		void clearProperties();
 
 		void setExpertMode(bool expertMode);
 
@@ -393,10 +396,11 @@ namespace ExtWidgets
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
 
-		virtual PropertyTextEditor* createCodeEditor(bool script, QWidget* parent);
+        virtual PropertyTextEditor* createCodeEditor(Property *property, QWidget* parent);
 
 	protected slots:
-		void updateProperties();
+		void updatePropertiesList();
+		void updatePropertiesValues();
 
 	private slots:
 		void onValueChanged(QtProperty* property, QVariant value);
@@ -407,27 +411,26 @@ namespace ExtWidgets
 		void showErrorMessage(QString message);
         void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
-		// Data
-		//
-	protected:
-        QtGroupPropertyManager* m_propertyGroupManager = nullptr;
-
-        QtMultiVariantPropertyManager* m_propertyVariantManager = nullptr;
-
-        QList<std::shared_ptr<PropertyObject>> m_objects;
-
-		// Private Data
-		//
 	private:
+		void fillProperties();
+		void clearProperties();
+
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool> > &values);
 		QtProperty* createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
 
 	private:
+		// Private Data
+		//
+		QtGroupPropertyManager* m_propertyGroupManager = nullptr;
+
+		QtMultiVariantPropertyManager* m_propertyVariantManager = nullptr;
+
+		QList<std::shared_ptr<PropertyObject>> m_objects;
+
 		bool m_expertMode = false;
 		bool m_readOnly = false;
 
 		QString m_scriptHelp;
-
 		QPoint m_scriptHelpWindowPos;
 		QByteArray m_scriptHelpWindowGeometry;
 

@@ -127,7 +127,6 @@ void AppDataServiceWorker::runTcpAppDataServer()
 															m_enabledAppDataSources,
 															m_appSignals,
 															m_signalStates,
-															m_unitInfo,
 															m_logger);
 	m_tcpAppDataServerThread->start();
 }
@@ -274,7 +273,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 			result &= readDataSources(fileData);			// fill m_appDataSources
 		}
 
-		if (bfi.ID == CFG_FILE_ID_APP_SIGNALS)
+		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
 		{
 			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
 		}
@@ -376,92 +375,37 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 {
-	bool result = true;
+	::Proto::AppSignalSet signalSet;
 
-	XmlReadHelper xml(fileData);
+	bool result = signalSet.ParseFromArray(fileData.constData(), fileData.size());
 
-	if (xml.findElement("Units") == false)
+	if (result == false)
 	{
 		return false;
 	}
 
-	int unitCount = 0;
+	int signalCount = signalSet.appsignal_size();
 
-	result &= xml.readIntAttribute("Count", &unitCount);
-
-	for(int count = 0; count < unitCount; count++)
+	for(int i = 0; i < signalCount; i++)
 	{
-		if(xml.findElement("Unit") == false)
+		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
+
+		if (m_appSignals.contains(QString::fromStdString(appSignal.appsignalid())) == true)
 		{
-			result = false;
-			break;
+			assert(false);
+			continue;
 		}
 
-		int unitID = 0;
-		QString unitCaption;
+		Signal* s = new Signal;
 
-		result &= xml.readIntAttribute("ID", &unitID);
-		result &= xml.readStringAttribute("Caption", &unitCaption);
+		s->serializeFrom(appSignal);
 
-		m_unitInfo.append(unitID, unitCaption);
+		m_appSignals.insert(s->appSignalID(), s);
 	}
-
-	if (m_unitInfo.count() != unitCount)
-	{
-		qDebug() << "Units loading error";
-		assert(false);
-		return false;
-	}
-
-	if (xml.findElement("Signals") == false)
-	{
-		return false;
-	}
-
-	int signalCount = 0;
-
-	result &= xml.readIntAttribute("Count", &signalCount);
-
-	//quint64 time1 = QDateTime::currentMSecsSinceEpoch();
-
-	for(int count = 0; count < signalCount; count++)
-	{
-		if (xml.findElement("Signal") == false)
-		{
-			result = false;
-			break;
-		}
-
-		Signal* signal = new Signal();
-
-		bool res = signal->readFromXml(xml);	// time-expensive function !!!
-
-		if (res == true)
-		{
-			if (m_appSignals.contains(signal->appSignalID()) == false)
-			{
-				m_appSignals.insert(signal->appSignalID(), signal);
-			}
-			else
-			{
-				res = false;
-			}
-		}
-
-		if (res == false)
-		{
-			delete signal;
-		}
-
-		result &= res;
-	}
-
-	//quint64 time2 = QDateTime::currentMSecsSinceEpoch();
-	//qDebug() << "time " << (time2 - time1) << " per 1 " << (time2 - time1)/289;
 
 	m_appSignals.buildHash2Signal();
 
-	return result;
+	return true;
 }
 
 
@@ -508,8 +452,6 @@ void AppDataServiceWorker::clearConfiguration()
 	stopTcpAppDataServer();
 	stopDataChannelThreads();
 	stopTcpArchiveClientThreads();
-
-	m_unitInfo.clear();
 
 	m_appSignals.clear();
 	m_enabledAppDataSources.clear();

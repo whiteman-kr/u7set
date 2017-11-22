@@ -10,9 +10,6 @@
 #include <QTabWidget>
 #include <QTableView>
 #include <QDockWidget>
-#include <QLabel>
-#include <QProgressBar>
-#include <QComboBox>
 #include <QCloseEvent>
 
 #include "Options.h"
@@ -27,6 +24,7 @@
 #include "TuningSignalList.h"
 #include "OutputSignalList.h"
 #include "Statistic.h"
+#include "version.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -46,13 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().Signals(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
-	// load measurements
-	//
-	//	for(int type = 0; type < MEASURE_YPE_COUNT; type++)
-	//	{
-	//		theMeasurementBase.load(type);
-	//	}
-
 	// init interface
 	//
 	createInterface();
@@ -65,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
 	connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
+	connect(&m_measureThread, &MeasureThread::msgBox, this, &MainWindow::measureThreadMsgBox, Qt::BlockingQueuedConnection);
+	connect(&m_measureThread, &MeasureThread::setNextMeasureSignal, this, &MainWindow::setNextMeasureSignal, Qt::BlockingQueuedConnection);
 	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
 	m_measureThread.init(this);
@@ -274,6 +267,7 @@ void MainWindow::createMenu()
 	m_pMeasureMenu->addSeparator();
 	m_pMeasureMenu->addAction(m_pExportMeasureAction);
 
+
 	m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
 
 	m_pEditMenu->addAction(m_pCopyMeasureAction);
@@ -281,6 +275,7 @@ void MainWindow::createMenu()
 	m_pEditMenu->addSeparator();
 	m_pEditMenu->addAction(m_pSelectAllMeasureAction);
 	m_pEditMenu->addSeparator();
+
 
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
 
@@ -296,6 +291,7 @@ void MainWindow::createMenu()
 	m_pSettingMenu->addSeparator();
 	m_pSettingMenu->addAction(m_pShowRackListAction);
 	m_pSettingMenu->addAction(m_pShowSignalListAction);
+	m_pSettingMenu->addSeparator();
 	m_pSettingMenu->addAction(m_pShowComparatorsListAction);
 	m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
 	m_pSettingMenu->addAction(m_pShowTuningSignalListAction);
@@ -702,15 +698,15 @@ void MainWindow::createStatusBar()
 
 	m_statusEmpty->setText(QString());
 
-	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: offline "));
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 
-	m_statusConnectToAppDataServer->setText(tr(" AppDataService: offline "));
+	m_statusConnectToAppDataServer->setText(tr(" AppDataService: off "));
 	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToAppDataServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 
-	m_statusConnectToTuningServer->setText(tr(" TuningService: offline "));
+	m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToTuningServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 }
@@ -901,6 +897,9 @@ void MainWindow::updateSignalsOnToolBar()
 			continue;
 		}
 
+		// add StrID of input signal into ComboBox
+		// index of signal in ComboBox and in array signalForMeasure may not match due to sorting
+		//
 		m_asSignalCombo->addItem(signal.strID(), s);
 
 
@@ -1344,72 +1343,6 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MainWindow::signalIsMeasured(QString& signalID)
-{
-	MeasureSignal measureSignal = theSignalBase.activeSignal();
-	if (measureSignal.isEmpty() == true)
-	{
-		return false;
-	}
-
-	MetrologyMultiSignal signal;
-
-	switch (theOptions.toolBar().outputSignalType())
-	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:			signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
-		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
-		default:								assert(0);
-	}
-
-	if (signal.isEmpty() == true)
-	{
-		return false;
-	}
-
-	// temporary solution
-	// metrologySignal.setStatistic(theMeasureBase.statisticItem(param.hash()));
-	//
-	//
-	MeasureView* pMeasureView = activeMeasureView();
-	if (pMeasureView == nullptr)
-	{
-		return false;
-	}
-
-	bool result = false;
-
-	for(int c = 0; c < Metrology::ChannelCount; c++)
-	{
-		Metrology::Signal* pMetrologySignal = signal.metrologySignal(c);
-		if (pMetrologySignal == nullptr)
-		{
-			continue;
-		}
-
-		Metrology::SignalParam& param = pMetrologySignal->param();
-		if (param.isValid() == false)
-		{
-			continue;
-		}
-
-		pMetrologySignal->setStatistic(pMeasureView->table().m_measureBase.statistic(param.hash()));
-		if (pMetrologySignal->statistic().measureCount() != 0)
-		{
-			signalID.append(param.customAppSignalID() + "\n");
-
-			result = true;
-		}
-	}
-	//
-	//
-	// temporary solution
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void MainWindow::startMeasure()
 {
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
@@ -1432,16 +1365,6 @@ void MainWindow::startMeasure()
 	if (signalSourceIsValid(true) == false)
 	{
 		return;
-	}
-
-	QString measuredSignals;
-
-	if (signalIsMeasured(measuredSignals) == true)
-	{
-		if (QMessageBox::question(this, windowTitle(), tr("Following signals were measured:\n\n%1\nDo you want to measure them again?").arg(measuredSignals)) == QMessageBox::No)
-		{
-			return;
-		}
 	}
 
 	m_measureThread.setMeasureType(m_measureType);
@@ -1630,6 +1553,57 @@ void MainWindow::showStatistic()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::aboutApp()
+{
+	QDialog aboutDialog(this);
+
+	QHBoxLayout* hl = new QHBoxLayout;
+
+	QLabel* logo = new QLabel(&aboutDialog);
+	logo->setPixmap(QPixmap(":/icons/Logo.png"));
+
+	hl->addWidget(logo);
+
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
+
+	//QString text = "<h3>" + qApp->applicationName() + ": version " + qApp->applicationVersion() + "</h3>";
+	QString text = "<h3>" + qApp->applicationName() + ": version " + "1.6" + "</h3>";
+#ifndef Q_DEBUG
+	text += "Build: Release";
+#else
+	text += "Build: Debug";
+#endif
+	text += "<br>Commit date: " LAST_SERVER_COMMIT_DATE;
+	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+	text += "<br>Qt version: " QT_VERSION_STR;
+
+	QLabel* label = new QLabel(text, &aboutDialog);
+	label->setIndent(10);
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	vl->addWidget(label);
+
+	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
+		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+	});
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+	buttonBox->addButton(QDialogButtonBox::Ok);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+	mainLayout->addLayout(hl);
+	mainLayout->addWidget(buttonBox);
+	aboutDialog.setLayout(mainLayout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
+
+	aboutDialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::setMeasureKind(int index)
 {
 	int kind = index;
@@ -1710,26 +1684,20 @@ void MainWindow::setRack(int index)
 
 void MainWindow::setMeasureSignal(int index)
 {
-	if (m_measureThread.isRunning() == true)
-	{
-		QMessageBox::critical(this, windowTitle(), tr("Measurement process is running"));
-		return;
-	}
-
-	if (index == -1)
+	if (index < 0 || index >= m_asSignalCombo->count())
 	{
 		theSignalBase.clearActiveSignal();
 		return;
 	}
 
-	index = m_asSignalCombo->currentData().toInt();
-	if (index < 0 || index >= theSignalBase.signalForMeasureCount())
+	int signalIndex = m_asSignalCombo->currentData().toInt();
+	if (signalIndex < 0 || signalIndex >= theSignalBase.signalForMeasureCount())
 	{
 		theSignalBase.clearActiveSignal();
 		return;
 	}
 
-	MeasureSignal measureSignal = theSignalBase.signalForMeasure(index);
+	MeasureSignal measureSignal = theSignalBase.signalForMeasure(signalIndex);
 	if (measureSignal.isEmpty() == true)
 	{
 		assert(false);
@@ -1904,9 +1872,22 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	connectedState.append(tr("\nLoaded signals: %1").arg(theSignalBase.signalCount()));
 
+	if (CFG_FILE_VER_METROLOGY_SIGNALS != theOptions.projectInfo().cfgFileVersion())
+	{
+		connectedState.append(tr("\n\nFailed version of %1. Current version: %2. Received version: %3 ")
+								.arg(CFG_FILE_NAME_METROLOGY_SIGNALS)
+								.arg(CFG_FILE_VER_METROLOGY_SIGNALS)
+								.arg(theOptions.projectInfo().cfgFileVersion()));
+	}
+
 	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToConfigServer->setToolTip(connectedState);
+
+	if (theSignalBase.signalCount() == 0)
+	{
+		m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 255, 160);");
+	}
 
 	updateRacksOnToolBar();
 	updateSignalsOnToolBar();
@@ -1931,7 +1912,7 @@ void MainWindow::signalSocketConnected()
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: on "));
 	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: 0").arg(signalSocketAddress.addressStr()).arg(signalSocketAddress.port()));
+	m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\n").arg(signalSocketAddress.addressStr()).arg(signalSocketAddress.port()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1965,9 +1946,19 @@ void MainWindow::tuningSocketConnected()
 
 	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
 
+	QString connectedState = tr("Connected: %1 : %2").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
+
+	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
+	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
+
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToTuningServer->setToolTip(tr("Connected: %1 : %2\nTuning signals: 0").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port()));
+	m_statusConnectToTuningServer->setToolTip(connectedState);
+
+	if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+	{
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2012,8 +2003,22 @@ void MainWindow::tuningSignalsCreated()
 	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
 	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
 
-	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
-	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	if (m_pTuningSocket->isConnected() == true)
+	{
+		m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+
+		if (theSignalBase.tuning().Sources().count() == 0 && theSignalBase.tuning().Signals().count() != 0)
+		{
+			m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 255, 160);");
+		}
+	}
+	else
+	{
+		m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
+		m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
+	}
+
 	m_statusConnectToTuningServer->setToolTip(connectedState);
 }
 
@@ -2074,6 +2079,78 @@ void MainWindow::setMeasureThreadInfo(QString msg)
 void MainWindow::setMeasureThreadInfo(int timeout)
 {
 	m_statusMeasureTimeout->setValue(timeout);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::measureThreadMsgBox(int type, QString text, int* result)
+{
+	switch (type)
+	{
+		case QMessageBox::Question:
+
+			if (result == nullptr)
+			{
+				break;
+			}
+
+			*result = QMessageBox::question(this, windowTitle(), text);
+
+			break;
+
+		case QMessageBox::Information:
+
+			QMessageBox::information(this, windowTitle(), text);
+
+			break;
+
+		default:
+			assert(0);
+			break;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
+{
+	signalIsSelected = false;
+
+	int nextComboIndex = m_asSignalCombo->currentIndex() + 1;
+	if (nextComboIndex < 0 || nextComboIndex >= m_asSignalCombo->count())
+	{
+		return;
+	}
+
+	int nextSignalIndex = m_asSignalCombo->itemData(nextComboIndex).toInt();
+	if (nextSignalIndex < 0 || nextSignalIndex >= theSignalBase.signalForMeasureCount())
+	{
+		return;
+	}
+
+	MeasureSignal currActiveSignal = theSignalBase.activeSignal();
+	if (currActiveSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	MeasureSignal nextActiveSignal = theSignalBase.signalForMeasure(nextSignalIndex);
+	if (nextActiveSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	// if module numbers not equal then disabling selection of next input
+	//
+	if (	currActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
+			currActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
+	{
+		return;
+	}
+
+	m_asSignalCombo->setCurrentIndex(nextComboIndex);
+
+	signalIsSelected = true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

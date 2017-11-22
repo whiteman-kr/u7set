@@ -1,15 +1,18 @@
 #include "Stable.h"
 #include <QRubberBand>
 #include <QClipboard>
+#include <QComboBox>
 #include <QCompleter>
 #include <QMimeData>
+#include <QToolTip>
+#include <QGroupBox>
 #include "EditEngine/EditEngine.h"
 #include "EditSchemaWidget.h"
 #include "SchemaPropertiesDialog.h"
 #include "SchemaLayersDialog.h"
 #include "SchemaItemPropertiesDialog.h"
-#include "ChooseAfbDialog.h"
-#include "ChooseUfbDialog.h"
+#include "./Forms/ChooseAfbDialog.h"
+#include "./Forms/ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
 #include "Connection.h"
@@ -29,9 +32,10 @@
 #include "../VFrame30/Session.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
-#include "LogicModule.h"
+#include "../lib/LmDescription.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
+
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
@@ -69,7 +73,6 @@ const EditSchemaWidget::SizeActionToMouseCursor EditSchemaWidget::m_sizeActionTo
 void addSchemaItem(const QByteArray& itemData);
 
 
-
 //
 // SchemaItemsClipboard
 //
@@ -83,30 +86,14 @@ const char* SchemaItemClipboardData::mimeType = "application/x-radiyschemaset";
 EditSchemaView::EditSchemaView(QWidget* parent) :
 	VFrame30::SchemaView(parent),
 	m_activeLayer(0),
-	m_mouseState(MouseState::None),
-	m_editStartMovingEdge(0),
-	m_editEndMovingEdge(0),
-	m_editStartMovingEdgeX(0),
-	m_editStartMovingEdgeY(0),
-	m_editEndMovingEdgeX(0),
-	m_editEndMovingEdgeY(0),
-	m_movingEdgePointIndex(0)
-	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
+	m_mouseState(MouseState::None)
 {
 }
 
 EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent)
 	: VFrame30::SchemaView(schema, parent),
 	m_activeLayer(0),
-	m_mouseState(MouseState::None),
-	m_editStartMovingEdge(0),
-	m_editEndMovingEdge(0),
-	m_editStartMovingEdgeX(0),
-	m_editStartMovingEdgeY(0),
-	m_editEndMovingEdgeX(0),
-	m_editEndMovingEdgeY(0),
-	m_movingEdgePointIndex(0)
-	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
+	m_mouseState(MouseState::None)
 {
 }
 
@@ -177,6 +164,10 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	{
 		VFrame30::SchemaItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
 	}
+
+	// Draw Edit Connection lines outlines
+	//
+	drawEditConnectionLineOutline(&drawParam);
 
 	// Draw newItem outline
 	//
@@ -383,6 +374,25 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 	return;
 }
 
+void EditSchemaView::drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam)
+{
+	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
+	bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
+
+	if (ctrlIsPressed == true ||
+		altIsPressed == true)
+	{
+		return;
+	}
+
+	for (const EditConnectionLine& ecl : m_editConnectionLines)
+	{
+		ecl.drawOutline(drawParam);
+	}
+
+	return;
+}
+
 void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam)
 {
 	if (m_newItem == nullptr)
@@ -450,19 +460,23 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 			return;
 		}
 
+		if (m_editConnectionLines.size() != 1)
+		{
+			return;
+		}
+
 		posInterfaceFound = true;
-		VFrame30::IPosConnection* pos = dynamic_cast<VFrame30::IPosConnection*>(m_newItem.get());
+		const EditConnectionLine& ecl = m_editConnectionLines.front();
 
-		const std::list<VFrame30::SchemaPoint>& extPoints = pos->GetExtensionPoints();
-
-		if (extPoints.empty() == false)
+		if (ecl.extensionPoints().empty() == false)
 		{
 			drawRullers = true;
-			rullerPoint.X = extPoints.back().X;
-			rullerPoint.Y = extPoints.back().Y;
+			rullerPoint = VFrame30::SchemaPoint(ecl.lastExtensionPoint());
 		}
 	}
 
+	// --
+	//
 	if (posInterfaceFound == false)
 	{
 		assert(posInterfaceFound == true);
@@ -475,6 +489,7 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		outlineColor.setAlphaF(0.5);
 
 		QPen outlinePen(outlineColor);
+		outlinePen.setStyle(Qt::PenStyle::DashLine);
 		outlinePen.setWidth(0);
 
 		QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -598,6 +613,7 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	QPainter* p = drawParam->painter();
 
 	QPen outlinePen(Qt::blue);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -645,8 +661,8 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 		return;
 	}
 
-	float xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
-	float ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
+	double xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
+	double ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
 
 	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
 	if (itemPos == nullptr)
@@ -657,116 +673,26 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	auto si = selectedItems().front();
 
-	// save old state
+	// Get new rect
+	//
+	QRectF newItemRect = sizingRectItem(xdif, ydif, itemPos);
+	newItemRect = newItemRect.normalized();
+
+	// Save old state
 	//
 	std::vector<VFrame30::SchemaPoint> oldPos = si->getPointList();
 
-	// set new pos
+	// Set new pos
 	//
-	double x1 = itemPos->leftDocPt();
-	double y1 = itemPos->topDocPt();
-	double x2 = x1 + itemPos->widthDocPt();
-	double y2 = y1 + itemPos->heightDocPt();
-
-	double minWidth = itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep());
-	double minHeight = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());
-
-	switch (mouseState())
-	{
-	case MouseState::SizingTopLeft:
-		x1 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTop:
-		y1 += ydif;
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTopRight:
-		x2 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingRight:
-		x2 += xdif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		break;
-	case MouseState::SizingBottomRight:
-		x2 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottom:
-		y2 += ydif;
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottomLeft:
-		x1 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingLeft:
-		x1 += xdif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		break;
-	default:
-		assert(false);
-		break;
-	}
-
-	itemPos->setLeftDocPt(std::min(x1, x2));
-	itemPos->setTopDocPt(std::min(y1, y2));
-
-	double width = std::max(std::abs(x2 - x1), itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep()));
-	double height = std::max(std::abs(y2 - y1), itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep()));
-
-	itemPos->setWidthDocPt(width);
-	itemPos->setHeightDocPt(height);
+	itemPos->setLeftDocPt(newItemRect.left());
+	itemPos->setTopDocPt(newItemRect.top());
+	itemPos->setWidthDocPt(newItemRect.width());
+	itemPos->setHeightDocPt(newItemRect.height());
 
 	// Save result for drawing rullers
 	//
-	m_addRectStartPoint = VFrame30::SchemaPoint(x1, y1);
-	m_addRectEndPoint = VFrame30::SchemaPoint(x2, y2);
+	m_addRectStartPoint = VFrame30::SchemaPoint(newItemRect.topLeft());
+	m_addRectEndPoint = VFrame30::SchemaPoint(newItemRect.bottomRight());
 
 	// Draw rullers by bounding rect
 	//
@@ -775,6 +701,7 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	QRectF rullerRect(m_addRectStartPoint, m_addRectEndPoint);
 
 	QPen outlinePen(Qt::blue);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -886,6 +813,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 	QPainter* p = drawParam->painter();
 
 	QPen outlinePen(Qt::blue);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -929,264 +857,13 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		return;
 	}
 
-	if (m_movingEdgePointIndex == -1)
+	if (m_editConnectionLines.size() != 1)
 	{
-		assert(m_movingEdgePointIndex != -1);
+		assert(m_editConnectionLines.size() == 1);
 		return;
 	}
 
-	if (selectedItems().size() != 1)
-	{
-		assert(selectedItems().size() == 1);
-		return;
-	}
-
-	auto si = selectedItems().front();
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(si.get());
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
-		return;
-	}
-
-	std::list<VFrame30::SchemaPoint> pointsList = itemPos->GetPointList();
-	std::vector<VFrame30::SchemaPoint> points(pointsList.begin(), pointsList.end());
-
-	// Save position
-	//
-	auto oldPos = si->getPointList();
-
-	if (m_movingEdgePointIndex < 0 || m_movingEdgePointIndex >= static_cast<int>(points.size()))
-	{
-		assert(m_movingEdgePointIndex >= 0);
-		assert(m_movingEdgePointIndex < static_cast<int>(points.size()));
-		return;
-	}
-
-	QPointF rullerPoint;
-
-	// Calculate new position
-	//
-	switch (mouseState())
-	{
-	case MouseState::MovingHorizontalEdge:
-		{
-			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
-
-			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
-
-			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
-			op.Y += diff;
-
-			points[m_movingEdgePointIndex] = op;
-
-			//
-			op = points[m_movingEdgePointIndex + 1];
-			op.Y += diff;
-
-			points[m_movingEdgePointIndex + 1] = op;
-
-			rullerPoint.setY(op.Y);
-
-			// Если по сторонам есть еще ГОРИЗОНАТЛЬНЫЕ линии то добавить точку,
-			// что бы ребро не тянуло по диагонали соседние отрезки
-			//
-			if (m_movingEdgePointIndex + 2 < static_cast<int>(points.size()) &&
-				std::abs(points[m_movingEdgePointIndex + 2].Y - oldEdgeEnd.Y) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex + 2, oldEdgeEnd);
-			}
-
-			if (m_movingEdgePointIndex - 1 >= 0 &&
-				std::abs(points[m_movingEdgePointIndex - 1].Y - oldEdgeStart.Y) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex, oldEdgeStart);
-			}
-		}
-		break;
-	case MouseState::MovingVerticalEdge:
-		{
-			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
-
-			VFrame30::SchemaPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::SchemaPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
-
-			VFrame30::SchemaPoint op = points[m_movingEdgePointIndex];
-			op.X += diff;
-
-			points[m_movingEdgePointIndex] = op;
-			//
-			op = points[m_movingEdgePointIndex + 1];
-			op.X += diff;
-
-			points[m_movingEdgePointIndex + 1] = op;
-
-			rullerPoint.setX(op.X);
-
-			// Если по сторонам есть еще ВЕРТИКАЛЬНЫЕ линии то добавить точку,
-			// что бы ребро не тянуло по диагонали соседние отрезки
-			//
-			if (m_movingEdgePointIndex + 2 < static_cast<int>(points.size()) &&
-				std::abs(points[m_movingEdgePointIndex + 2].X - oldEdgeEnd.X) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex + 2, oldEdgeEnd);
-			}
-
-			if (m_movingEdgePointIndex - 1 >= 0 &&
-				std::abs(points[m_movingEdgePointIndex - 1].X - oldEdgeStart.X) < 0.000001)
-			{
-				points.insert(points.begin() + m_movingEdgePointIndex, oldEdgeStart);
-			}
-		}
-		break;
-	case MouseState::MovingConnectionLinePoint:
-		{
-			double diffX = m_editEndMovingEdgeX - points[m_movingEdgePointIndex].X;
-			double diffY = m_editEndMovingEdgeY - points[m_movingEdgePointIndex].Y;
-
-			// Shift the previouse point
-			//
-			if (m_movingEdgePointIndex - 1 >= 0)
-			{
-				int index = m_movingEdgePointIndex;
-				bool sameDirrection = true;
-				bool wasVert = true;
-				bool wasHorz = true;
-				VFrame30::SchemaPoint curPoint = points[index];
-
-				while (index > 0 && sameDirrection == true)
-				{
-					VFrame30::SchemaPoint prevPoint = points[index - 1];
-
-					if (std::abs(prevPoint.X - curPoint.X) < std::abs(prevPoint.Y - curPoint.Y))
-					{
-						if (wasVert == true)
-						{
-							// The line is vertical
-							//
-							prevPoint.X += diffX;
-							wasHorz = false;
-							wasVert = true;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-					else
-					{
-						if (wasHorz == true)
-						{
-							// The line is horizontal
-							//
-							prevPoint.Y += diffY;
-							wasHorz = true;
-							wasVert = false;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-
-					if (sameDirrection == true)
-					{
-						curPoint = points[index - 1];
-						points[index - 1] = prevPoint;
-					}
-
-					index--;
-				}
-			}
-
-			// Shift the next point
-			//
-			if (m_movingEdgePointIndex + 1 < static_cast<int>(points.size()))
-			{
-				int index = m_movingEdgePointIndex;
-				bool sameDirrection = true;
-				bool wasVert = true;
-				bool wasHorz = true;
-				VFrame30::SchemaPoint curPoint = points[index];
-
-				while (index + 1 < static_cast<int>(points.size()) && sameDirrection == true)
-				{
-					VFrame30::SchemaPoint nextPoint = points[index + 1];
-
-					if (std::abs(nextPoint.X - curPoint.X) < std::abs(nextPoint.Y - curPoint.Y))
-					{
-						if (wasVert == true)
-						{
-							// The line is vertical
-							//
-							nextPoint.X += diffX;
-							wasHorz = false;
-							wasVert = true;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-					else
-					{
-						if (wasHorz == true)
-						{
-							// The line is horizontal
-							//
-							nextPoint.Y += diffY;
-							wasHorz = true;
-							wasVert = false;
-						}
-						else
-						{
-							sameDirrection = false;
-						}
-					}
-
-					if (sameDirrection == true)
-					{
-						curPoint = points[index + 1];
-						points[index + 1] = nextPoint;
-					}
-
-					index++;
-				}
-			}
-
-			// Shift the moving point
-			//
-			VFrame30::SchemaPoint pt = points[m_movingEdgePointIndex];
-
-			pt.X += diffX;
-			pt.Y += diffY;
-
-			points[m_movingEdgePointIndex] = pt;
-
-			rullerPoint.setX(pt.X);
-			rullerPoint.setY(pt.Y);
-		}
-		break;
-
-		default:
-			void();
-	}
-
-	// Set calculated pos to SchemaItem
-	//
-	pointsList.assign(points.begin(), points.end());
-	itemPos->SetPointList(pointsList);
-	itemPos->RemoveSamePoints();
-
-	// SavePoints to View, so later they will be used in MouseUp action to set new position
-	//
-	m_movingVertexPoints = itemPos->GetPointList();
-
-	// Draw item outline
-	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	const EditConnectionLine& ecl = m_editConnectionLines.front();
 
 	// Draw rullers
 	//
@@ -1196,6 +873,7 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	outlineColor.setAlphaF(0.5);
 
 	QPen outlinePen(outlineColor);
+	outlinePen.setStyle(Qt::PenStyle::DashLine);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -1206,25 +884,43 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		{
+			double rullerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(0.0, rullerPoint), QPointF(schema()->docWidth(), rullerPoint));
+		}
 		break;
 	case MouseState::MovingVerticalEdge:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
+		{
+			double rullerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(rullerPoint, 0.0), QPointF(rullerPoint, schema()->docHeight()));
+		}
 		break;
 	case MouseState::MovingConnectionLinePoint:
-		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		{
+			QPointF rullerPoint;
+			switch (ecl.mode())
+			{
+			case EditConnectionLine::EditMode::AddToBegin:
+			case EditConnectionLine::EditMode::AddToEnd:
+				rullerPoint = ecl.lastExtensionPoint();
+				break;
+			case EditConnectionLine::EditMode::EditPoint:
+				rullerPoint = ecl.editPointCurrState();
+				break;
+			default:
+				assert(false);
+			}
+
+			p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+		}
 		break;
 	default:
 		assert(false);
 		break;
 	}
+
 	p->setRenderHints(oldrenderhints);
-
-
-	// Restore ald position
-	//
-	si->setPointList(oldPos);
 
 	return;
 }
@@ -1620,6 +1316,114 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 	return SchemaItemAction::NoAction;
 }
 
+QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos)
+{
+	if (itemPos == nullptr)
+	{
+		assert(itemPos);
+		return QRectF();
+	}
+
+	double x1 = itemPos->leftDocPt();
+	double y1 = itemPos->topDocPt();
+	double x2 = x1 + itemPos->widthDocPt();
+	double y2 = y1 + itemPos->heightDocPt();
+
+	double minWidth = itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());
+
+	switch (mouseState())
+	{
+	case MouseState::SizingTopLeft:
+		x1 += xdif;
+		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
+		break;
+	case MouseState::SizingTop:
+		y1 += ydif;
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
+		break;
+	case MouseState::SizingTopRight:
+		x2 += xdif;
+		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
+		break;
+	case MouseState::SizingRight:
+		x2 += xdif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		break;
+	case MouseState::SizingBottomRight:
+		x2 += xdif;
+		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
+		break;
+	case MouseState::SizingBottom:
+		y2 += ydif;
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
+		break;
+	case MouseState::SizingBottomLeft:
+		x1 += xdif;
+		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
+		break;
+	case MouseState::SizingLeft:
+		x1 += xdif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+
+	QRectF result(std::min(x1, x2),
+				  std::min(y1, y2),
+				  std::abs(x2 - x1),
+				  std::abs(y2 - y1));
+
+	return result;
+}
+
 
 QUuid EditSchemaView::activeLayerGuid() const
 {
@@ -1694,13 +1498,29 @@ std::vector<std::shared_ptr<VFrame30::SchemaItem>> EditSchemaView::selectedNonLo
 
 void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
 {
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> uniqueItems;
+	uniqueItems.reserve(16);
+
+	// In some cases items can be duplicated (batch command), make them unique
+	// We need to keep order of items
+	//
+	for (auto i : items)
+	{
+		auto foundIt = std::find(uniqueItems.begin(), uniqueItems.end(), i);
+
+		if (foundIt == uniqueItems.end())
+		{
+			uniqueItems.push_back(i);
+		}
+	}
+
 	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
 	//
-	if (items.size() == m_selectedItems.size())
+	if (uniqueItems.size() == m_selectedItems.size())
 	{
 		bool differs = false;
 
-		auto i = std::begin(items);
+		auto i = std::begin(uniqueItems);
 		for (auto s = std::begin(m_selectedItems); s != std::end(m_selectedItems) && differs == false; ++s, ++i)
 		{
 			if (*s != *i)
@@ -1718,9 +1538,11 @@ void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30
 
 	// Set new selection
 	//
-	m_selectedItems = items;
+	m_selectedItems = uniqueItems;
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items)
@@ -1753,6 +1575,8 @@ void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item)
@@ -1766,6 +1590,8 @@ void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>
 	m_selectedItems.push_back(item);
 
 	emit selectionChanged();
+
+	return;
 }
 
 void EditSchemaView::addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
@@ -1794,6 +1620,8 @@ void EditSchemaView::clearSelection()
 
 	m_selectedItems.clear();
 	emit selectionChanged();
+
+	return;
 }
 
 bool EditSchemaView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
@@ -1895,6 +1723,7 @@ EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, con
 	//
 	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightDown_None, this, std::placeholders::_1)));
 	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
+	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseRightDown_MovingEdgesOrVertex, this, std::placeholders::_1)));
 
 	// Mouse Right Button Up
 	//
@@ -2095,16 +1924,6 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
-	m_addOutputSignalAction = new QAction(tr("Output"), this);
-	m_addOutputSignalAction->setEnabled(true);
-	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemaOutputSignal.svg"));
-	connect(m_addOutputSignalAction, &QAction::triggered,
-			[this](bool)
-			{
-				auto item = std::make_shared<VFrame30::SchemaItemOutput>(schema()->unit());
-				addItem(item);
-			});
-
 	m_addInOutSignalAction = new QAction(tr("In/Out"), this);
 	m_addInOutSignalAction->setEnabled(true);
 	m_addInOutSignalAction->setIcon(QIcon(":/Images/Images/SchemaInOutSignal.svg"));
@@ -2112,6 +1931,16 @@ void EditSchemaWidget::createActions()
 			[this](bool)
 			{
 				auto item = std::make_shared<VFrame30::SchemaItemInOut>(schema()->unit());
+				addItem(item);
+			});
+
+	m_addOutputSignalAction = new QAction(tr("Output"), this);
+	m_addOutputSignalAction->setEnabled(true);
+	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemaOutputSignal.svg"));
+	connect(m_addOutputSignalAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemOutput>(schema()->unit());
 				addItem(item);
 			});
 
@@ -2400,6 +2229,27 @@ void EditSchemaWidget::createActions()
 	addAction(m_sendBackwardAction);
 
 	//
+	// Transform Into
+	//
+	m_transformAction = new QAction(tr("Transform Into"), this);
+	m_transformAction->setEnabled(true);
+
+	// Transform Into->Input
+	//
+	m_transformIntoInputAction = new QAction(tr("Input"), this);
+	connect(m_transformIntoInputAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoInput);
+
+	// Transform Into->In/Out
+	//
+	m_transformIntoInOutAction = new QAction(tr("In/Out"), this);
+	connect(m_transformIntoInOutAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoInOut);
+
+	// Transform Into->Output
+	//
+	m_transformIntoOutputAction = new QAction(tr("Output"), this);
+	connect(m_transformIntoOutputAction, &QAction::triggered, this, &EditSchemaWidget::transformIntoOutput);
+
+	//
 	// View
 	//
 	m_viewAction = new QAction(tr("View"), this);
@@ -2488,13 +2338,22 @@ void EditSchemaWidget::createActions()
 	m_findNextAction = new QAction(tr("Find Next"), this);
 	m_findNextAction->setEnabled(true);
 	m_findNextAction->setShortcut(QKeySequence::FindNext);
-	connect(m_findNextAction, &QAction::triggered, this, &EditSchemaWidget::findNext);
+	connect(m_findNextAction, &QAction::triggered, this,
+			[this]()
+			{
+				findNext(theSettings.m_findSchemaItemCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+			});
 	addAction(m_findNextAction);
 
 	m_findPrevAction = new QAction(tr("Find Previous"), this);
 	m_findPrevAction->setEnabled(true);
 	m_findPrevAction->setShortcut(QKeySequence::FindPrevious);
-	connect(m_findPrevAction, &QAction::triggered, this, &EditSchemaWidget::findPrev);
+	connect(m_findPrevAction, &QAction::triggered, this,
+			[this]()
+			{
+				findPrev(theSettings.m_findSchemaItemCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+			});
+
 	addAction(m_findPrevAction);
 
 	//
@@ -2529,8 +2388,8 @@ void EditSchemaWidget::createActions()
 		{
 			m_addMenu->addAction(m_addLinkAction);
 			m_addMenu->addAction(m_addInputSignalAction);
-			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addInOutSignalAction);
+			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
 			m_addMenu->addAction(m_addAfbAction);
@@ -2593,6 +2452,12 @@ void EditSchemaWidget::createActions()
 		m_orderMenu->addAction(m_sendBackwardAction);
 		m_orderMenu->addAction(m_sendToBackAction);
 
+	m_transformMenu = new QMenu(this);
+		m_transformAction->setMenu(m_transformMenu);
+		m_transformMenu->addAction(m_transformIntoInputAction);
+		m_transformMenu->addAction(m_transformIntoInOutAction);
+		m_transformMenu->addAction(m_transformIntoOutputAction);
+
 	m_viewMenu = new QMenu(this);
 	m_viewAction->setMenu(m_viewMenu);
 		m_viewMenu->addAction(m_zoomInAction);
@@ -2602,6 +2467,35 @@ void EditSchemaWidget::createActions()
 		m_viewMenu->addAction(m_snapToGridAction);
 
 	return;
+}
+
+bool EditSchemaWidget::event(QEvent* event)
+{
+	// Show tool tip
+	//
+	if (event->type() == QEvent::ToolTip)
+	{
+		QHelpEvent* he = static_cast<QHelpEvent*>(event);
+
+		// Get item under cursor
+		//
+		QPointF docPoint = widgetPointToDocument(he->pos(), false);
+		std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
+
+		if (itemUnderPoint != nullptr)
+		{
+			QString toolTip = itemUnderPoint->toolTipText(this->physicalDpiX(), this->physicalDpiY());
+			setToolTip(toolTip);
+		}
+		else
+		{
+			setToolTip("");
+		}
+
+		return VFrame30::BaseSchemaWidget::event(event);
+	}
+
+	return VFrame30::BaseSchemaWidget::event(event);
 }
 
 void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
@@ -2622,8 +2516,6 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 			return;
 	}
 
-	BaseSchemaWidget::keyPressEvent(e);
-
 	// Show properties dialog
 	//
 	if ((e->modifiers().testFlag(Qt::AltModifier) == true &&		// Alt + numeric keypad Enter
@@ -2635,8 +2527,60 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 		properties();
 	}
 
+	// This will update if Moving item in progress and we try to move connection links
+	//
+	if (editSchemaView()->m_editConnectionLines.empty() == false)
+	{
+		bool ctrlIsPressed = e->modifiers() & Qt::ControlModifier;
+		bool altIsPressed = e->modifiers() & Qt::AltModifier;
+
+		if (ctrlIsPressed != m_ctrlWasPressed ||
+			altIsPressed != m_altWasPressed)
+		{
+			m_ctrlWasPressed = ctrlIsPressed;
+			m_altWasPressed = altIsPressed;
+
+			editSchemaView()->update();
+		}
+
+		setFocus();	// As alt could be pressed and MainMenu activated
+		e->ignore();
+		return;
+	}
+
+	BaseSchemaWidget::keyPressEvent(e);
+
 	return;
 }
+
+void EditSchemaWidget::keyReleaseEvent(QKeyEvent* event)
+{
+	// This will update if Moving item in progress and we try to move connection links
+	//
+	if (editSchemaView()->m_editConnectionLines.empty() == false)
+	{
+		bool ctrlIsPressed = event->modifiers() & Qt::ControlModifier;
+		bool altIsPressed = event->modifiers() & Qt::AltModifier;
+
+		if (ctrlIsPressed != m_ctrlWasPressed ||
+			altIsPressed != m_altWasPressed)
+		{
+			m_ctrlWasPressed = ctrlIsPressed;
+			m_altWasPressed = altIsPressed;
+
+			editSchemaView()->update();
+		}
+
+		setFocus();	// As alt could be pressed and MainMenu activated
+		event->accept();
+		return;
+	}
+
+	BaseSchemaWidget::keyReleaseEvent(event);
+
+	return;
+}
+
 
 // Set corresponding to the current situation and user actions context menu
 //
@@ -2648,6 +2592,8 @@ void EditSchemaWidget::setCorrespondingContextMenu()
 
 void EditSchemaWidget::mousePressEvent(QMouseEvent* event)
 {
+	grabKeyboard();
+
 	BaseSchemaWidget::mousePressEvent(event);
 
 	if (event->isAccepted() == true)
@@ -2710,6 +2656,8 @@ void EditSchemaWidget::mousePressEvent(QMouseEvent* event)
 
 void EditSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+	releaseKeyboard();
+
 	if (event->button() == Qt::LeftButton)
 	{
 		for (auto msa = m_mouseLeftUpStateAction.begin(); msa != m_mouseLeftUpStateAction.end(); ++msa)
@@ -2763,9 +2711,19 @@ void EditSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void EditSchemaWidget::mouseDoubleClickEvent(QMouseEvent* event)
 {
+	if (mouseState() == MouseState::MovingConnectionLinePoint ||
+		mouseState() == MouseState::AddSchemaPosConnectionNextPoint)
+	{
+		// It accidental double clicking, ignore it
+		//
+		event->ignore();
+		return;
+	}
+
 	setMouseState(MouseState::None);
 
-	if (selectedItems().empty() == false)
+	if (event->button() == Qt::LeftButton &&
+		selectedItems().empty() == false)
 	{
 		properties();
 	}
@@ -2895,18 +2853,17 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditEdge);
 
-					editSchemaView()->m_editStartMovingEdge = docPoint.y();
-					editSchemaView()->m_editEndMovingEdge = docPoint.y();
+					ecl.setEditEdgeIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 					setMouseState(MouseState::MovingHorizontalEdge);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -2916,18 +2873,17 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditEdge);
 
-					editSchemaView()->m_editStartMovingEdge = docPoint.x();
-					editSchemaView()->m_editEndMovingEdge = docPoint.x();
+					ecl.setEditEdgeIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 					setMouseState(MouseState::MovingVerticalEdge);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -2937,23 +2893,17 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
-					//if (movingEdgePointIndex == )
+					EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem),
+										   EditConnectionLine::EditMode::EditPoint);
 
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
-					//
-					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					ecl.setEditPointIndex(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(selectedItem), movingEdgePointIndex);
 
-					editSchemaView()->m_editStartMovingEdgeX = docPoint.x();
-					editSchemaView()->m_editStartMovingEdgeY = docPoint.y();
-
-					editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
-					editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
-
-					editSchemaView()->m_movingEdgePointIndex = movingEdgePointIndex;
+					editSchemaView()->m_editConnectionLines.clear();
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 					setMouseState(MouseState::MovingConnectionLinePoint);
-
 					setMouseCursor(me->pos());
+
 					editSchemaView()->update();
 
 					return;
@@ -3080,9 +3030,6 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 	// Selection item or area
 	//
-//	editSchemaView()->m_rubberBand->show();
-//	editSchemaView()->m_rubberBand->setGeometry(QRect(me->pos(), QSize()));
-
 	editSchemaView()->m_mouseSelectionStartPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->m_mouseSelectionEndPoint = editSchemaView()->m_mouseSelectionStartPoint;
 
@@ -3193,18 +3140,14 @@ void EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint(QMouseEven
 	//
 	docPoint = magnetPointToPin(docPoint);
 
-	itemPos->DeleteAllPoints();
+	EditConnectionLine ecl(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(editSchemaView()->m_newItem),
+						   EditConnectionLine::AddToEnd);
 
-	itemPos->AddPoint(docPoint.x(), docPoint.y());		        // Сразу добавляется две точки
-	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
+	ecl.addBasePoint(docPoint);
+	ecl.addExtensionPoint(docPoint);
 
-	// Проверить под кординатой нахождение пина
-	//
-	if (dynamic_cast<VFrame30::FblItem*>(editSchemaView()->m_newItem.get()) != nullptr)
-	{
-		// ??
-		//VFrame30Ext.IFblItem fblItem = schemaView.newItem as VFrame30Ext.IFblItem;
-	}
+	editSchemaView()->m_editConnectionLines.clear();
+	editSchemaView()->m_editConnectionLines.push_back(ecl);
 
 	setMouseState(MouseState::AddSchemaPosConnectionNextPoint);
 
@@ -3338,7 +3281,13 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 		if (itemsForMove.empty() == false)
 		{
+			m_editEngine->startBatch();
+
 			m_editEngine->runMoveItem(xdif, ydif, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
 		}
 	}
 	else
@@ -3445,107 +3394,24 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	double xdif = mouseSizingEndPointDocPt.x() - mouseSizingStartPointDocPt.x();
 	double ydif = mouseSizingEndPointDocPt.y() - mouseSizingStartPointDocPt.y();
 
-	// set new pos
+	// Get new rect
 	//
-	double x1 = itemPos->leftDocPt();
-	double y1 = itemPos->topDocPt();
-	double x2 = x1 + itemPos->widthDocPt();
-	double y2 = y1 + itemPos->heightDocPt();
-
-	double minWidth = itemPos->minimumPossibleWidthDocPt(schema()->gridSize(), schema()->pinGridStep());
-	double minHeight = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());
-
-	switch (mouseState())
-	{
-	case MouseState::SizingTopLeft:
-		x1 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTop:
-		y1 += ydif;
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingTopRight:
-		x2 += xdif;
-		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y1
-		{
-			y1 = y2 - minHeight;
-		}
-		break;
-	case MouseState::SizingRight:
-		x2 += xdif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		break;
-	case MouseState::SizingBottomRight:
-		x2 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x2
-		{
-			x2 = x1 + minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottom:
-		y2 += ydif;
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingBottomLeft:
-		x1 += xdif;
-		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		if (y2 - y1 < minHeight)	// y2
-		{
-			y2 = y1 + minHeight;
-		}
-		break;
-	case MouseState::SizingLeft:
-		x1 += xdif;
-		if (x2 - x1 < minWidth)		// x1
-		{
-			x1 = x2 - minWidth;
-		}
-		break;
-	default:
-		assert(false);
-		break;
-	}
+	QRectF newItemRect = editSchemaView()->sizingRectItem(xdif, ydif, itemPos);
+	newItemRect = newItemRect.normalized();
 
 	// --
 	//
 	std::vector<VFrame30::SchemaPoint> itemPoints;
 
-	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2), std::min(y1, y2)));
-	itemPoints.push_back(VFrame30::SchemaPoint(std::min(x1, x2) + std::abs(x2 - x1), std::min(y1, y2) + std::abs(y2 - y1)));
+	itemPoints.push_back(VFrame30::SchemaPoint(newItemRect.topLeft()));
+	itemPoints.push_back(VFrame30::SchemaPoint(newItemRect.bottomRight()));
 
-	m_editEngine->runSetPoints(itemPoints, si);
+	m_editEngine->startBatch();
+	{
+		m_editEngine->runSetPoints(itemPoints, si, true);
+		finishMoveAfbsConnectionLinks();
+	}
+	m_editEngine->endBatch();
 
 	resetAction();
 	return;
@@ -3602,7 +3468,7 @@ void EditSchemaWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 		points[1] = static_cast<VFrame30::SchemaPoint>(QPointF(itemPos->endXDocPt() + xdif, itemPos->endYDocPt() + ydif));
 	}
 
-	m_editEngine->runSetPoints(points, si);
+	m_editEngine->runSetPoints(points, si, true);
 
 	//--
 	//
@@ -3704,23 +3570,29 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint(QMouseEvent* event)
 
 void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* e)
 {
-	assert(editSchemaView()->m_newItem != nullptr);
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
-
-	if (itemPos == nullptr)
+	if (editSchemaView()->m_newItem == nullptr ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
-		assert(itemPos != nullptr);
-		editSchemaView()->m_newItem.reset();
+		assert(editSchemaView()->m_newItem != nullptr);
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
+		resetAction();
 		return;
 	}
 
-	// Add the last point, where cursor is now
+	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
+	if (itemPos == nullptr)
+	{
+		assert(itemPos != nullptr);
+		resetAction();
+		return;
+	}
+
+	// Add the last point, where cursor is now to ALL
 	//
 	mouseRightDown_AddSchemaPosConnectionNextPoint(e);
 
-	itemPos->RemoveSamePoints();
-	itemPos->DeleteAllExtensionPoints();
+	const EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+	ecl.setPointToItem(std::dynamic_pointer_cast<VFrame30::PosConnectionImpl>(editSchemaView()->m_newItem));
 
 	if (itemPos->GetPointList().size() >= 2)
 	{
@@ -3737,8 +3609,15 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		bool startPointAddedToOther = false;	// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 		bool endPointAddedToOther = false;		// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = activeLayer()->getItemUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = activeLayer()->getItemUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderStartPoint =
+				activeLayer()->getItemListUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderEndPoint =
+				activeLayer()->getItemListUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = linksUnderStartPoint.size() == 1 ? linksUnderStartPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = linksUnderEndPoint.size() == 1 ? linksUnderEndPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
 
 		std::shared_ptr<VFrame30::SchemaItem> fblRectUnderStartPoint =
 			activeLayer()->findPinUnderPoint(startPoint, schema()->gridSize(), schema()->pinGridStep());
@@ -3775,9 +3654,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
 
 				std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-				newPoints = removeUnwantedPoints(newPoints);
+				newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
+				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint, true);
 			}
 			else
 			{
@@ -3797,9 +3676,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.assign(existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-					newPoints = removeUnwantedPoints(newPoints);
+					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint, true);
 				}
 			}
 		}
@@ -3839,9 +3718,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-					newPoints = removeUnwantedPoints(newPoints);
+					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 				}
 				else
 				{
@@ -3852,9 +3731,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-					newPoints = removeUnwantedPoints(newPoints);
+					newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 				}
 			}
 			else
@@ -3877,9 +3756,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-						newPoints = removeUnwantedPoints(newPoints);
+						newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 					}
 					else
 					{
@@ -3890,9 +3769,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 						std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
-						newPoints = removeUnwantedPoints(newPoints);
+						newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 
-						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint, true);
 					}
 				}
 			}
@@ -3907,7 +3786,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 			{
 				const std::list<VFrame30::SchemaPoint>& pointList = itemPos->GetPointList();
 
-				std::list<VFrame30::SchemaPoint> newPoints = removeUnwantedPoints(pointList);
+				std::list<VFrame30::SchemaPoint> newPoints = EditConnectionLine::removeUnwantedPoints(pointList);
 
 				itemPos->SetPointList(newPoints);
 				assert(itemPos->GetPointList().size() >= 2);
@@ -3932,9 +3811,12 @@ void EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	if (selectedItems().size() != 1)
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(selectedItems().size() == 1);
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
+
 		resetAction();
 		return;
 	}
@@ -3950,27 +3832,40 @@ void EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	if ((mouseState() == MouseState::MovingHorizontalEdge || mouseState() == MouseState::MovingVerticalEdge) &&
-		std::abs(editSchemaView()->m_editEndMovingEdge - editSchemaView()->m_editStartMovingEdge) < 0.000001)
+	// Check if the real change vertex or edge has been done
+	//
+	EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+
+	if (ecl.mode() == EditConnectionLine::AddToBegin ||
+		ecl.mode() == EditConnectionLine::AddToEnd)
 	{
-		// изменения координат небыло, значит и не надо выполнять команду
+		QPointF lastExtPt = ecl.lastExtensionPoint();
+
+		ecl.moveExtensionPointsToBasePoints();
+		ecl.addExtensionPoint(lastExtPt);
+	}
+
+	auto basePoints = ecl.basePoints();
+
+	std::list<VFrame30::SchemaPoint> newPoints = {basePoints.begin(), basePoints.end()};
+	const std::list<VFrame30::SchemaPoint>& itemPoints = itemPos->GetPointList();
+
+	if (newPoints == itemPoints)
+	{
+		// Nothing has changed, do not exec a command
 		//
 		resetAction();
 		return;
 	}
 
-	if (mouseState() == MouseState::MovingConnectionLinePoint &&
-		std::abs(editSchemaView()->m_editEndMovingEdgeX - editSchemaView()->m_editStartMovingEdgeX) < 0.000001 &&
-		std::abs(editSchemaView()->m_editEndMovingEdgeY - editSchemaView()->m_editStartMovingEdgeY) < 0.000001)
+	if (ecl.mode() == EditConnectionLine::AddToBegin ||
+		ecl.mode() == EditConnectionLine::AddToEnd)
 	{
-		// изменения координат небыло, значит и не надо выполнять команду
-		//
-		resetAction();
-		return;
+		newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
 	}
 
-	std::vector<VFrame30::SchemaPoint> setPoints(editSchemaView()->m_movingVertexPoints.begin(), editSchemaView()->m_movingVertexPoints.end());
-	m_editEngine->runSetPoints(setPoints, si);
+	std::vector<VFrame30::SchemaPoint> setPoints(newPoints.begin(), newPoints.end());
+	m_editEngine->runSetPoints(setPoints, si, true);
 
 	resetAction();
 	return;
@@ -3990,9 +3885,6 @@ void EditSchemaWidget::mouseMove_Selection(QMouseEvent* me)
 	editSchemaView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->update();
 
-//	QRect selectionRect = QRect(editSchemaView()->m_rubberBand->pos(), me->pos()).normalized();
-//	editSchemaView()->m_rubberBand->setGeometry(selectionRect);
-
 	return;
 }
 
@@ -4007,6 +3899,14 @@ void EditSchemaWidget::mouseMove_Moving(QMouseEvent* me)
 
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
 
+	// Move links along item
+	//
+	QPointF offset = editSchemaView()->m_editEndDocPt - editSchemaView()->m_editStartDocPt;
+
+	moveAfbsConnectionLinks(offset, mouseState());
+
+	// --
+	//
 	editSchemaView()->update();
 	return;
 }
@@ -4020,17 +3920,72 @@ void EditSchemaWidget::mouseMove_SizingRect(QMouseEvent* me)
 		return;
 	}
 
-	auto si = selectedItems().front();
-
-	if (dynamic_cast<VFrame30::IPosRect*>(si.get()) == nullptr)
+	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
+	if (itemPos == nullptr)
 	{
-		assert(dynamic_cast<VFrame30::IPosRect*>(si.get()) != nullptr);
+		assert(itemPos != nullptr);
 		setMouseState(MouseState::None);
 		return;
 	}
 
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
 
+	// Get possible links offset
+	//
+	double xdif = editSchemaView()->m_editEndDocPt.x() - editSchemaView()->m_editStartDocPt.x();
+	double ydif = editSchemaView()->m_editEndDocPt.y() - editSchemaView()->m_editStartDocPt.y();
+
+	QRectF currentRect(itemPos->leftDocPt(),
+						   itemPos->topDocPt(),
+						   itemPos->widthDocPt(),
+						   itemPos->heightDocPt());
+
+	QRectF newRect = editSchemaView()->sizingRectItem(xdif, ydif, itemPos);
+
+	switch (mouseState())
+	{
+	case MouseState::SizingTop:
+		xdif = 0;
+		ydif = newRect.top() - currentRect.top();
+		break;
+	case MouseState::SizingTopRight:
+		xdif = newRect.right() - currentRect.right();
+		ydif = newRect.top() - currentRect.top();
+		break;
+	case MouseState::SizingRight:
+		xdif = newRect.right() - currentRect.right();
+		ydif = 0;
+		break;
+	case MouseState::SizingBottomRight:
+		xdif = newRect.right() - currentRect.right();
+		ydif = newRect.bottom() - currentRect.bottom();
+		break;
+	case MouseState::SizingBottom:
+		xdif = 0;
+		ydif = newRect.bottom() - currentRect.bottom();
+		break;
+	case MouseState::SizingBottomLeft:
+		xdif = newRect.left() - currentRect.left();
+		ydif = newRect.bottom() - currentRect.bottom();
+		break;
+	case MouseState::SizingLeft:
+		xdif = newRect.left() - currentRect.left();
+		ydif = 0;
+		break;
+	case MouseState::SizingTopLeft:
+		xdif = newRect.left() - currentRect.left();
+		ydif = newRect.top() - currentRect.top();
+		break;
+	default:
+		assert(false);
+	}
+
+	// Move links
+	//
+	moveAfbsConnectionLinks(QPointF(xdif, ydif), mouseState());
+
+	// --
+	//
 	editSchemaView()->update();
 	return;
 }
@@ -4149,25 +4104,11 @@ void EditSchemaWidget::mouseMove_AddSchemaPosRectEndPoint(QMouseEvent* event)
 
 void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* event)
 {
-	double gridSize = schema()->gridSize();
-
 	if (editSchemaView()->m_newItem == nullptr)
 	{
 		assert(editSchemaView()->m_newItem != nullptr);
 
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
-		return;
-	}
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
-
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
-
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
+		resetAction();
 		return;
 	}
 
@@ -4177,72 +4118,10 @@ void EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint(QMouseEvent* ev
 	//
 	docPoint = magnetPointToPin(docPoint);
 
-	// --
-	//
-	auto points = itemPos->GetPointList();
-	auto extPoints = itemPos->GetExtensionPoints();
-
-	if (points.empty() == true || extPoints.empty() == true)
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
 	{
-		assert(points.size() > 0);
-		assert(extPoints.size() > 0);
-		return;
+		movePosConnectionEndPoint(editSchemaView()->m_newItem, &ecl, docPoint);
 	}
-
-	if (points.size() + extPoints.size() < 2)
-	{
-		assert(points.size() + extPoints.size() >= 2);
-		return;
-	}
-
-	VFrame30::SchemaPoint ptBase = points.back();
-
-	// Add extra points
-	//
-	double horzDistance = std::abs(ptBase.X - docPoint.x()) * (ptBase.X - docPoint.x() > 0.0 ? -1.0 : 1.0);
-	double midPoint = 0.0;
-
-	if (std::abs(ptBase.X - docPoint.x()) < gridSize * 1.0)
-	{
-		midPoint = ptBase.X;
-	}
-	else
-	{
-		midPoint = ptBase.X + horzDistance / 2;
-	}
-
-	QPointF onePoint(midPoint, ptBase.Y);
-	onePoint = snapToGrid(onePoint);
-
-	itemPos->DeleteAllExtensionPoints();
-
-	// if onePoint on previous line, then move it to base
-	//
-	if (points.size() > 1)
-	{
-		VFrame30::SchemaPoint lastLinkPt1 = *std::prev(points.end(), 2);
-		VFrame30::SchemaPoint lastLinkPt2 = points.back();
-
-		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
-			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
-			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
-			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
-			))
-		{
-			onePoint.setX(ptBase.X);
-			onePoint.setY(ptBase.Y);
-		}
-	}
-
-	QPointF twoPoint(onePoint.x(), docPoint.y());
-
-	if (onePoint != ptBase)
-	{
-		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
-	}
-	itemPos->AddExtensionPoint(twoPoint.x(), twoPoint.y());
-	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
-
 
 	editSchemaView()->update();
 
@@ -4260,43 +4139,48 @@ void EditSchemaWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 		return;
 	}
 
-	if (selectedItems().size() != 1)
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(selectedItems().size() == 1);
-		resetAction();
-		return;
-	}
-
-	auto si = selectedItems().front();
-	assert(si != nullptr);
-
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(si.get());
-	if (itemPos == nullptr)
-	{
-		assert(itemPos != nullptr);
+		assert(editSchemaView()->m_editConnectionLines.size() != 1);
 		resetAction();
 		return;
 	}
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
+	EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
+
 	// --
 	//
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
-		editSchemaView()->m_editEndMovingEdge = docPoint.y();
+		ecl.modifyEdge(docPoint.y());
 		break;
 	case MouseState::MovingVerticalEdge:
-		editSchemaView()->m_editEndMovingEdge = docPoint.x();
+		ecl.modifyEdge(docPoint.x());
 		break;
 	case MouseState::MovingConnectionLinePoint:
-		// magnet point to pin
-		//
-		docPoint = magnetPointToPin(docPoint);
+		{
+			switch (ecl.mode())
+			{
+			case EditConnectionLine::EditMode::EditPoint:
+				docPoint = magnetPointToPin(docPoint);
+				ecl.modifyPoint(docPoint);
+				break;
 
-		editSchemaView()->m_editEndMovingEdgeX = docPoint.x();
-		editSchemaView()->m_editEndMovingEdgeY = docPoint.y();
+			case EditConnectionLine::EditMode::AddToBegin:
+			case EditConnectionLine::EditMode::AddToEnd:
+				docPoint = magnetPointToPin(docPoint);
+				movePosConnectionEndPoint(selectedItems().front(), &ecl, docPoint);
+				break;
+
+			default:
+				assert(false);
+			}
+		}
 		break;
 	default:
 		assert(false);
@@ -4316,45 +4200,81 @@ void EditSchemaWidget::mouseRightDown_None(QMouseEvent*)
 	return;
 }
 
-void EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* event)
+void EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* /*event*/)
 {
-	if (editSchemaView()->m_newItem == nullptr)
+	if (editSchemaView()->m_newItem == nullptr ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
 	{
 		assert(editSchemaView()->m_newItem != nullptr);
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
 
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
+		resetAction();
 		return;
 	}
 
-	VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get());
-
-	if (itemPos == nullptr)
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
 	{
-		assert(itemPos != nullptr);
+		assert(ecl.extensionPoints().empty() == false);
 
-		setMouseState(MouseState::None);
-		setMouseCursor(event->pos());
+		QPointF lastExtPt = ecl.lastExtensionPoint();
+
+		ecl.moveExtensionPointsToBasePoints();
+		ecl.addExtensionPoint(lastExtPt);
+	}
+
+	// --
+	//
+	editSchemaView()->update();
+
+	return;
+}
+
+void EditSchemaWidget::mouseRightDown_MovingEdgesOrVertex(QMouseEvent* event)
+{
+	if (selectedItems().size() != 1 ||
+		editSchemaView()->m_editConnectionLines.size() != 1)
+	{
+		assert(selectedItems().size() == 1 );
+		assert(editSchemaView()->m_editConnectionLines.size() == 1);
+
+		resetAction();
 		return;
 	}
 
-	const std::list<VFrame30::SchemaPoint>& extPoints = itemPos->GetExtensionPoints();
+	EditConnectionLine& ecl = editSchemaView()->m_editConnectionLines.front();
 
-	if (extPoints.empty() == true)
+	if (ecl.mode() != EditConnectionLine::EditMode::EditPoint &&
+		ecl.mode() != EditConnectionLine::EditMode::AddToBegin &&
+		ecl.mode() != EditConnectionLine::EditMode::AddToEnd)
 	{
-		assert(extPoints.size() > 0);
+		assert(false);
+
+		resetAction();
 		return;
 	}
 
-	for (VFrame30::SchemaPoint p : extPoints)
+	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
+
+	switch (ecl.mode())
 	{
-		itemPos->AddPoint(p.X, p.Y);
+	case EditConnectionLine::EditMode::EditPoint:
+		ecl.addPointAndSwitchMode(docPoint);
+		break;
+
+	case EditConnectionLine::EditMode::AddToBegin:
+	case EditConnectionLine::EditMode::AddToEnd:
+		{
+			assert(ecl.extensionPoints().empty() == false);
+			QPointF lastExtPt = ecl.lastExtensionPoint();
+
+			ecl.moveExtensionPointsToBasePoints();
+			ecl.addExtensionPoint(lastExtPt);
+		}
+		break;
+	default:
+		assert(false);
+		resetAction();
 	}
-
-	VFrame30::SchemaPoint lastExtPt = extPoints.back();	// Cache point before deleteing, as it can be removed from REFERENCED list
-	itemPos->DeleteAllExtensionPoints();
-
-	itemPos->AddExtensionPoint(lastExtPt.X, lastExtPt.Y);
 
 	// --
 	//
@@ -4685,7 +4605,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 	//
 	int movingEdgePointIndex = -1;
 
-	// Частные случаи установки курсора
+	// Setting cursor specific cases
 	//
 	if (mouseState() == MouseState::None)
 	{
@@ -4697,7 +4617,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 
 		if (selectedItems().empty() == true)
 		{
-			auto itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
+			std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
 
 			// Если элемент не выделен, то его можно только перемещать
 			//
@@ -4709,9 +4629,9 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 			}
 		}
 
-		for (auto si = editSchemaView()->selectedItems().begin(); si != editSchemaView()->selectedItems().end(); ++si)
+		for (std::shared_ptr<VFrame30::SchemaItem> si : editSchemaView()->selectedItems())
 		{
-			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si->get(), docPos, &movingEdgePointIndex);
+			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si.get(), docPos, &movingEdgePointIndex);
 
 			if (possibleAction != SchemaItemAction::NoAction)
 			{
@@ -4841,127 +4761,296 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
-std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const
+void EditSchemaWidget::movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem,  EditConnectionLine* ecl, QPointF toPoint)
 {
-	std::vector<VFrame30::SchemaPoint> result = source;
+	assert(schemaItem);
+	assert(ecl);
 
-	int sameXPosCount = 0;			// Pairs of points amount by X coordinate
-	int sameYPosCount = 0;			// Pairs of points amount by Y coordinate
+	ecl->moveEndPointPos(activeLayer(), toPoint, EditConnectionLine::Auto, schema()->gridSize());
 
-	size_t currentPointIndex = 0;	// Index of current point to process
-
-	// In cycle we are processing current point with previous point
-	//
-
-	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
-	{
-		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
-		const VFrame30::SchemaPoint& prevPoint = result.at(currentPointIndex - 1);
-
-		if (std::abs(curPoint.X - prevPoint.X) < 0.0000001)
-		{
-			sameXPosCount ++;
-		}
-		else
-		{
-			// Remove points only if we have more than one pair with same
-			// X coordinates
-			//
-			if (sameXPosCount > 1)
-			{
-				assert(currentPointIndex > 0);
-				assert(currentPointIndex <= result.size());
-
-				size_t startIndex = currentPointIndex - sameXPosCount;
-				size_t lastIndex = currentPointIndex - 1;
-
-				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
-
-				currentPointIndex = currentPointIndex - sameXPosCount-1;
-				sameYPosCount = 0;
-			}
-
-			sameXPosCount = 0;
-		}
-
-		if (std::abs(curPoint.Y - prevPoint.Y) < 0.0000001)
-		{
-			sameYPosCount++;
-		}
-		else
-		{
-			// Remove points only if we have more than one pair with same
-			// X coordinates
-			//
-			if (sameYPosCount > 1)
-			{
-				assert(currentPointIndex > 0);
-				assert(currentPointIndex <= result.size());
-
-				size_t startIndex = currentPointIndex - sameYPosCount;
-				size_t lastIndex = currentPointIndex - 1;
-
-				result.erase(result.begin() + startIndex, result.begin() + lastIndex);
-
-				currentPointIndex = currentPointIndex - sameYPosCount-1;
-				sameXPosCount = 0;
-			}
-
-			sameYPosCount = 0;
-		}
-	}
-
-	// If some pairs with same coordinate values are placed at the end of
-	// the line, we must remove them!
-	//
-
-	if (sameYPosCount > 1)
-	{
-		assert(currentPointIndex == result.size());
-
-		size_t beginIndex = currentPointIndex - sameYPosCount;
-		size_t lastIndex = currentPointIndex - 1;
-
-		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
-	}
-
-	if (sameXPosCount > 1)
-	{
-		assert(currentPointIndex == result.size());
-
-		size_t beginIndex = currentPointIndex - sameXPosCount;
-		size_t lastIndex = currentPointIndex - 1;
-
-		result.erase(result.begin() + beginIndex, result.begin() + lastIndex);
-	}
-
-	// Check points before return
-	//
-
-#ifdef _DEBUG
-	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
-	{
-		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
-		const VFrame30::SchemaPoint& prevPoint = result.at(currentPointIndex - 1);
-
-		// Points must be connected by X or Y axis. In other way - exception must be rised
-		//
-
-		assert((std::abs(curPoint.X - prevPoint.X) < 0.0000001) ||
-				(std::abs(curPoint.Y - prevPoint.Y) < 0.0000001));
-	}
-#endif
-
-	return result;
+	return;
 }
 
-std::list<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const
+void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 {
-	std::vector<VFrame30::SchemaPoint> sourceVector(source.begin(), source.end());
-	sourceVector = removeUnwantedPoints(sourceVector);
+	editSchemaView()->m_editConnectionLines.clear();
 
-	std::list<VFrame30::SchemaPoint> result(sourceVector.begin(), sourceVector.end());
-	return result;
+	// Go over all selected itmes pins, and add data to m_editConnectionLines
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedNonLockedItems();
+	std::multiset<std::shared_ptr<VFrame30::SchemaItemLink>> commonLinks;
+
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (item->isFblItemRect() == false)
+		{
+			continue;
+		}
+
+		VFrame30::FblItemRect* fblItemRect = item->toFblItemRect();
+		assert(fblItemRect);
+
+		// Get links with end on pins
+		//
+		double gridSize = schema()->gridSize();
+		int pinGridStep = schema()->pinGridStep();
+
+		fblItemRect->SetConnectionsPos(gridSize, pinGridStep);			// Calc pins' positions
+
+		const std::vector<VFrame30::AfbPin>& inputs = fblItemRect->inputs();
+		const std::vector<VFrame30::AfbPin>& outputs = fblItemRect->outputs();
+
+		std::vector<VFrame30::AfbPin> inOuts;
+		inOuts.reserve(inputs.size() + outputs.size());
+
+		switch (mouseState)
+		{
+		case MouseState::Moving:
+		case MouseState::SizingTop:
+		case MouseState::SizingTopRight:
+		case MouseState::SizingTopLeft:
+			inOuts.insert(inOuts.end(), inputs.begin(), inputs.end());
+			inOuts.insert(inOuts.end(), outputs.begin(), outputs.end());
+			break;
+
+		case MouseState::SizingRight:
+		case MouseState::SizingBottomRight:
+			inOuts.insert(inOuts.end(), outputs.begin(), outputs.end());
+			break;
+
+		case MouseState::SizingLeft:
+		case MouseState::SizingBottomLeft:
+			inOuts.insert(inOuts.end(), inputs.begin(), inputs.end());
+			break;
+		}
+
+		for (const VFrame30::AfbPin& pin : inOuts)
+		{
+			VFrame30::SchemaPoint pinPos = pin.point();
+
+			std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderPin =
+					activeLayer()->getItemListUnderPoint(pinPos, "VFrame30::SchemaItemLink");
+
+			// Check if pin on the Start or End point
+			//
+			for (std::shared_ptr<VFrame30::SchemaItem> foundLinkItem : linksUnderPin)
+			{
+				std::shared_ptr<VFrame30::SchemaItemLink> link = std::dynamic_pointer_cast<VFrame30::SchemaItemLink>(foundLinkItem);
+				assert(link);
+
+				// If this link in selected items, slip it
+				//
+				auto foundInSelectedIt = std::find(selected.begin(), selected.end(), foundLinkItem);
+				if (foundInSelectedIt != selected.end())
+				{
+					continue;
+				}
+
+				// Get end points of found link and check if they are on pin
+				//
+				VFrame30::SchemaPoint ptBegin = link->GetPointList().front();
+				VFrame30::SchemaPoint ptEnd = link->GetPointList().back();
+
+				if (pinPos == ptBegin)
+				{
+					EditConnectionLine ecl(link, EditConnectionLine::MoveToPin);
+					ecl.moveToPin_init(link, pin.dirrection(), ptBegin);
+
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
+
+					commonLinks.insert(link);
+				}
+
+				if (pinPos == ptEnd)
+				{
+					EditConnectionLine ecl(link, EditConnectionLine::MoveToPin);
+					ecl.moveToPin_init(link, pin.dirrection(), ptEnd);
+
+					editSchemaView()->m_editConnectionLines.push_back(ecl);
+
+					commonLinks.insert(link);
+				}
+			}
+		}
+	}
+
+	// Ckeck if there is EditConnectionLine which is going to be moved from both sides
+	// If [SIGNAL1] and [SIGNAL2] are selected, the select their common links, and remove it from editSchemaView()->m_editConnectionLines
+	//
+	// [SIGNAL1]-+---------------+-[SIGNAL2]
+	//
+	for (std::shared_ptr<VFrame30::SchemaItemLink> cl: commonLinks)
+	{
+		size_t useCount = commonLinks.count(cl);
+
+		if (useCount > 1)
+		{
+			auto it = std::find_if(editSchemaView()->m_editConnectionLines.begin(),
+								   editSchemaView()->m_editConnectionLines.end(),
+									[cl](const EditConnectionLine& ecl)
+									{
+										return ecl.moveToPin_schemaItem() == cl;
+									});
+
+			if (it != editSchemaView()->m_editConnectionLines.end())
+			{
+				it->moveToPin_setMoveWholeLink();
+
+				// Remmove all other occurances of Link in m_editConnectionLines
+				//
+				auto removeIt = std::remove_if(++it, editSchemaView()->m_editConnectionLines.end(),
+												[cl](const EditConnectionLine& ecl)
+												{
+													return ecl.moveToPin_schemaItem() == cl;
+												});
+
+				editSchemaView()->m_editConnectionLines.erase(removeIt, editSchemaView()->m_editConnectionLines.end());
+			}
+		}
+	}
+
+	return;
+}
+
+void EditSchemaWidget::moveAfbsConnectionLinks(QPointF offset, MouseState mouseState)
+{
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
+	{
+		QPointF eclOffset;
+
+		switch (mouseState)
+		{
+		case MouseState::Moving:
+			eclOffset = offset;
+			break;
+
+		case MouseState::SizingTop:
+			eclOffset.ry() = offset.y();
+			break;
+
+		case MouseState::SizingBottom:
+			assert(false);
+			return;
+
+		case MouseState::SizingTopLeft:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				eclOffset = offset;
+			}
+			else
+			{
+				eclOffset.ry() = offset.y();
+			}
+			break;
+
+		case MouseState::SizingLeft:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				eclOffset.rx() = offset.x();
+			}
+			else
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			break;
+
+		case MouseState::SizingBottomLeft:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				eclOffset.rx() = offset.x();
+			}
+			else
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			break;
+
+		case MouseState::SizingTopRight:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				eclOffset.ry() = offset.y();
+			}
+			else
+			{
+				eclOffset = offset;
+			}
+			break;
+
+		case MouseState::SizingRight:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			else
+			{
+				eclOffset.rx() = offset.x();
+			}
+			break;
+
+		case MouseState::SizingBottomRight:
+			if (ecl.moveToPin_isInput() == true)
+			{
+				assert(false);	// Don't add outputs in this case
+			}
+			else
+			{
+				eclOffset.rx() = offset.x();
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		ecl.moveToPin_offset(activeLayer(), eclOffset, schema()->gridSize());
+	}
+
+	return;
+}
+
+void EditSchemaWidget::finishMoveAfbsConnectionLinks()
+{
+	setFocus();	// As alt could be pressed and MainMeu activated
+
+	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
+	bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
+
+	if (ctrlIsPressed == true ||
+		altIsPressed == true)
+	{
+		editSchemaView()->m_editConnectionLines.clear();
+		return;
+	}
+
+	std::vector<std::vector<VFrame30::SchemaPoint>> commandPoints;
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> commandItems;
+
+	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
+	{
+		ecl.moveExtensionPointsToBasePoints();
+		std::vector<QPointF> points = ecl.points();
+
+		std::list<VFrame30::SchemaPoint> uniquePoints(points.begin(), points.end());
+		uniquePoints.unique();
+
+		uniquePoints = EditConnectionLine::removeUnwantedPoints(uniquePoints);
+
+		std::vector<VFrame30::SchemaPoint> resultPoinst(uniquePoints.begin(), uniquePoints.end());
+
+		commandPoints.push_back(resultPoinst);
+		commandItems.push_back(ecl.moveToPin_schemaItem());
+	}
+
+	if (commandPoints.empty() == false)
+	{
+		assert(commandPoints.size() == commandItems.size());
+
+		m_editEngine->runSetPoints(commandPoints, commandItems, false);
+
+		editSchemaView()->m_editConnectionLines.clear();
+	}
+
+	return;
 }
 
 bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out)
@@ -5025,7 +5114,7 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 
 	// Parse file
 	//
-	LogicModule lm;
+	LmDescription lm;
 	QString parseErrorMessage;
 
 	result = lm.load(file->data(), &parseErrorMessage);
@@ -5157,7 +5246,7 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = db()->getFileList(&fileList, db()->busTypesFileId(), QLatin1String(".xml"), true, this);
+	bool ok = db()->getFileList(&fileList, db()->busTypesFileId(), ::BusFileExtension, true, this);
 	if (ok == false)
 	{
 		return false;
@@ -5187,18 +5276,22 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 		}
 
 		VFrame30::Bus bus;
-		QString errorMessage;
-
-		ok = bus.load(f->data(), &errorMessage);
+		ok = bus.Load(f->data());
 
 		if (ok == false)
 		{
-			QMessageBox::critical(this, qAppName(), "Parsing file " + f->fileName() + " error: " + errorMessage);
+			QMessageBox::critical(this, qAppName(), "Load file " + f->fileName() + " error.");
 			return false;
 		}
 
 		busses.push_back(bus);
 	}
+
+	std::sort(busses.begin(), busses.end(),
+			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
+			{
+				return b1.busTypeId() < b2.busTypeId();
+			});
 
 	std::swap(busses, *out);
 	return true;
@@ -5209,12 +5302,11 @@ void EditSchemaWidget::resetAction()
 	setMouseState(MouseState::None);
 	editSchemaView()->m_newItem.reset();
 
+	editSchemaView()->m_editConnectionLines.clear();
 	editSchemaView()->m_mouseSelectionStartPoint = QPoint();
 	editSchemaView()->m_mouseSelectionEndPoint = QPoint();
 	editSchemaView()->m_editStartDocPt = QPointF();
 	editSchemaView()->m_editEndDocPt = QPointF();
-
-	editSchemaView()->m_movingVertexPoints.clear();
 
 	setMouseCursor(mapFromGlobal(QCursor::pos()));
 
@@ -5230,7 +5322,8 @@ void EditSchemaWidget::clearSelection()
 
 void EditSchemaWidget::contextMenu(const QPoint& pos)
 {
-	if (mouseState() == MouseState::AddSchemaPosConnectionNextPoint)
+	if (mouseState() == MouseState::AddSchemaPosConnectionNextPoint ||
+		mouseState() == MouseState::MovingConnectionLinePoint)
 	{
 		// Don't show context menu, because it's right click for adding next point to connection line
 		//
@@ -5245,6 +5338,18 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 		setMouseCursor(pos);
 
 		return;
+	}
+
+	// All selected are signals?
+	//
+	bool allSelectedAreSignals = selectedItems().empty() == true ? false : true;
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			allSelectedAreSignals = false;
+			break;
+		}
 	}
 
 	// Disable some actions in ReadOnly mode
@@ -5273,6 +5378,11 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	actions << m_editAction;
 	actions << m_orderAction;
 	actions << m_sizeAndPosAction;
+
+	if (allSelectedAreSignals == true)
+	{
+		actions << m_transformAction;
+	}
 
 	// Signal properties
 	//
@@ -5547,21 +5657,29 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		return;
 	}
 
-	qDebug() << equipmentIdList;
+	const VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get());
 
-	int counterValue = 0;
-	bool nextValRes = db()->nextCounterValue(&counterValue);
-	if (nextValRes == false)
+	QStringList itemsAppSignals = signalItem->appSignalIdList();
+
+	if (itemsAppSignals.size() == 1 &&
+		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||			// Not good, subject to change. must get default signals value from somewhere
+		(itemsAppSignals[0] == QLatin1String("#IN_STRID")) ||
+		(itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
 	{
-		return;
+		// This is just created signal item
+		//
+		itemsAppSignals.clear();				// clear - means generate new AppSignalIds
+	}
+	else
+	{
 	}
 
-	QStringList signalsIds = SignalsTabPage::createSignal(db(),
-														  equipmentIdList,
-														  counterValue,
-														  schema()->schemaId(),
-														  schema()->caption(),
-														  this);
+	m_createSignalDialoOptions.init(schema()->schemaId(),
+									schema()->caption(),
+									equipmentIdList,
+									itemsAppSignals);
+
+	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialoOptions, this);
 
 	if (signalsIds.isEmpty() == false)
 	{
@@ -5575,6 +5693,57 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
 	}
+
+	//--------------------------------------------------
+//	QStringList equipmentIdList = logicSchema()->equipmentIdList();
+//	if (equipmentIdList.isEmpty() == true)
+//	{
+//		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property EquipmentIDs is empty."));
+//		return;
+//	}
+
+//	const VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get());
+//	QStringList itemsAppSignals = signalItem->appSignalIdList();
+
+//	if (itemsAppSignals.size() == 1 &&
+//		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||
+//		(itemsAppSignals[0] == QLatin1String("#IN_STRID")) ||
+//		(itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
+//	{
+//	}
+//	else
+//	{
+//		m_createSignalOptions.appSignalIdList = itemsAppSignals;
+//	}
+
+//	int counterValue = 0;
+//	bool nextValRes = db()->nextCounterValue(&counterValue);
+//	if (nextValRes == false)
+//	{
+//		return;
+//	}
+
+//	m_createSignalOptions.lmEquipmentIdList = equipmentIdList;
+
+//	QStringList signalsIds = SignalsTabPage::createSignal(db(),
+//														  counterValue,
+//														  schema()->schemaId(),
+//														  schema()->caption(),
+//														  &m_createSignalOptions,
+//														  this);
+
+//	if (signalsIds.isEmpty() == false)
+//	{
+//		// Set value
+//		//
+//		QString oneStringIds;
+//		for (QString s : signalsIds)
+//		{
+//			oneStringIds += s + QChar::LineFeed;
+//		}
+
+//		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
+//	}
 
 	return;
 }
@@ -5602,165 +5771,723 @@ void EditSchemaWidget::f2Key()
 	}
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
-
 	if (selected.size() != 1)
 	{
 		return;
 	}
 
 	std::shared_ptr<VFrame30::SchemaItem> item = selected.at(0);
-	assert(item);
-
-	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-	VFrame30::SchemaItemTransmitter* itemTransmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
-	VFrame30::SchemaItemRect* itemRect = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
-	VFrame30::SchemaItemValue* itemValue = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-
-	if (itemRect != nullptr)
+	if (item == nullptr)
 	{
-		QString text = itemRect->text();
-
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
-
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set text");
-		inputDialog.setLabelText(tr("Text:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-		inputDialog.setTextValue(text);
-
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
-
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			text != newValue)
-		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
-			editSchemaView()->update();
-		}
-
+		assert(item);
 		return;
 	}
 
-	if (itemSignal != nullptr || itemReceiver != nullptr)
+	if (item->isType<VFrame30::SchemaItemRect>() == true)
 	{
-		QString appSignalId;
-
-		if (itemSignal != nullptr)
-		{
-			appSignalId = itemSignal->appSignalIds();
-		}
-
-		if (itemReceiver != nullptr)
-		{
-			appSignalId = itemReceiver->appSignalId();
-		}
-
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
-
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set AppSignalID");
-		inputDialog.setLabelText(tr("AppSignalID:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-		inputDialog.setTextValue(appSignalId);
-
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
-
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			appSignalId != newValue)
-		{
-			// Set value
-			//
-			if (itemSignal != nullptr)
-			{
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
-			}
-
-			if (itemReceiver != nullptr)
-			{
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
-			}
-
-			editSchemaView()->update();
-		}
-
+		f2KeyForRect(item);
 		return;
 	}
 
-	if (itemTransmitter != nullptr)
+	if (item->isType<VFrame30::SchemaItemSignal>() == true)
 	{
-		QString connectionId = itemTransmitter->connectionId();
-
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
-
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set ConnectionID");
-		inputDialog.setLabelText(tr("ConnectionID:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-
-		inputDialog.setTextValue(connectionId);
-
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
-
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			connectionId != newValue)
-		{
-			// Set value
-			//
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newValue), item);
-
-			editSchemaView()->update();
-		}
-
+		f2KeyForSignal(item);
 		return;
 	}
 
-	if (itemValue != nullptr)
+	if (item->isType<VFrame30::SchemaItemConst>() == true)
 	{
-		QString text = itemValue->signalId();
+		f2KeyForConst(item);
+		return;
+	}
 
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
+	if (item->isType<VFrame30::SchemaItemReceiver>() == true)
+	{
+		f2KeyForReceiver(item, true);
+		return;
+	}
 
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set AppSignalID");
-		inputDialog.setLabelText(tr("AppSignalID:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-		inputDialog.setTextValue(text);
+	if (item->isType<VFrame30::SchemaItemTransmitter>() == true)
+	{
+		f2KeyForTransmitter(item, true);
+		return;
+	}
 
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
+	if (item->isType<VFrame30::SchemaItemValue>() == true)
+	{
+		f2KeyForValue(item);
+		return;
+	}
 
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			text != newValue)
-		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
-			editSchemaView()->update();
-		}
-
+	if (item->isType<VFrame30::SchemaItemBus>() == true)
+	{
+		f2KeyForBus(item);
 		return;
 	}
 
 	return;
 }
 
+void EditSchemaWidget::f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemRect* rectItem = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
+	if (rectItem == nullptr)
+	{
+		assert(rectItem);
+		return;
+	}
+
+	QString text = rectItem->text();
+
+	// Show input dialog
+	//
+	bool ok;
+	QString newValue = QInputDialog::getMultiLineText(this, tr("Set text"),
+													  tr("Text:"), text, &ok);
+	if (ok == true &&
+		newValue.isEmpty() == false &&
+		newValue != text)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return false;
+	}
+
+	VFrame30::SchemaItemReceiver* receiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+	if (receiver == nullptr)
+	{
+		assert(receiver);
+		return false;
+	}
+
+	QString connectionId = receiver->connectionId();
+	QString appSignalId = receiver->appSignalId();
+
+	// Get all connections
+	//
+	Hardware::ConnectionStorage connections(db());
+
+	QString errorMessage;
+
+	bool ok = connections.load(&errorMessage);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMessage);
+		return false;
+	}
+
+	auto ls = logicSchema();
+	if (ls == nullptr)
+	{
+		assert(ls);
+		return false;
+	}
+
+	QStringList connectionIds = connections.filterByMoudules(ls->equipmentIdList());
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set Receiver Params"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
+	QComboBox* connectionIdControl = new QComboBox;
+	connectionIdControl->setEditable(true);
+	connectionIdControl->addItems(connectionIds);
+	connectionIdControl->setMaxVisibleItems(20);
+
+	QCompleter* completer = new QCompleter(connectionIds);
+	completer->setFilterMode(Qt::MatchContains);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setMaxVisibleItems(20);
+	connectionIdControl->setCompleter(completer);
+
+	// Set current value, to selecte value in the list, controll must be non editable ((
+	//
+	connectionIdControl->setEditable(false);
+	connectionIdControl->setCurrentText(connectionId);
+	connectionIdControl->setEditable(true);
+	if (connectionIdControl->currentText() != connectionId)
+	{
+		connectionIdControl->setCurrentText(connectionId);
+	}
+
+	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
+	QLineEdit* appSignalIdEdit = new QLineEdit(appSignalId);
+
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	// --
+	//
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(connectionIdLabel);
+	layout->addWidget(connectionIdControl);
+
+	layout->addWidget(appSignalIdLabel);
+	layout->addWidget(appSignalIdEdit);
+
+	layout->addWidget(spacer);
+
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		QString newConnectionId = connectionIdControl->currentText().trimmed();
+		QString newAppSignalId = appSignalIdEdit->text().trimmed();
+
+		if (newConnectionId != connectionId ||
+			newAppSignalId != appSignalId)
+		{
+			if (setViaEditEngine == true)
+			{
+				m_editEngine->startBatch();
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
+				m_editEngine->endBatch();
+			}
+			else
+			{
+				receiver->setConnectionId(newConnectionId);
+				receiver->setAppSignalId(newAppSignalId);
+			}
+		}
+
+		editSchemaView()->update();
+
+		return true;
+	}
+
+	return false;
+}
+
+bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return false;
+	}
+
+	VFrame30::SchemaItemTransmitter* transmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
+	if (transmitter == nullptr)
+	{
+		assert(transmitter);
+		return false;
+	}
+
+	QString connectionId = transmitter->connectionId();
+
+	// Get all connections
+	//
+	Hardware::ConnectionStorage connections(db());
+
+	QString errorMessage;
+
+	bool ok = connections.load(&errorMessage);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMessage);
+		return false;
+	}
+
+	auto ls = logicSchema();
+	if (ls == nullptr)
+	{
+		assert(ls);
+		return false;
+	}
+
+	QStringList connectionIds = connections.filterByMoudules(ls->equipmentIdList());
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set Transmitter Params"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
+	QComboBox* connectionIdControl = new QComboBox;
+
+	connectionIdControl->addItems(connectionIds);
+	connectionIdControl->setMaxVisibleItems(20);
+
+	QCompleter* completer = new QCompleter(connectionIds);
+	completer->setFilterMode(Qt::MatchContains);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setMaxVisibleItems(20);
+	connectionIdControl->setCompleter(completer);
+
+	// Set current value, to selecte value in the list, controll must be non editable ((
+	//
+	connectionIdControl->setEditable(false);
+	connectionIdControl->setCurrentText(connectionId);
+	connectionIdControl->setEditable(true);
+	if (connectionIdControl->currentText() != connectionId)
+	{
+		connectionIdControl->setCurrentText(connectionId);
+	}
+
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	// --
+	//
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(connectionIdLabel);
+	layout->addWidget(connectionIdControl);
+
+	layout->addWidget(spacer);
+
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		QString newConnectionId = connectionIdControl->currentText().trimmed();
+
+		if (newConnectionId != connectionId)
+		{
+			if (setViaEditEngine == true)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
+			}
+			else
+			{
+				transmitter->setConnectionId(newConnectionId);
+			}
+		}
+
+		editSchemaView()->update();
+
+		return true;
+	}
+
+	return false;
+}
+
+void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
+	if (constItem == nullptr)
+	{
+		assert(constItem);
+		return;
+	}
+
+	VFrame30::SchemaItemConst::ConstType type = constItem->type();
+	int intValue = constItem->intValue();
+	double floatValue = constItem->floatValue();
+	int discreteValue = constItem->discreteValue();
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set Const Params"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// Type Items
+	//
+	QLabel* typeLabel = new QLabel("Const Type:");
+
+	QComboBox* typeCombo = new QComboBox();
+	typeCombo->addItem("IntegerType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::IntegerType));
+	typeCombo->addItem("FloatType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::FloatType));
+	typeCombo->addItem("Discrete", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::Discrete));
+
+	int dataIndex = typeCombo->findData(QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(type));
+	assert(dataIndex != -1);
+	if (dataIndex != -1)
+	{
+		typeCombo->setCurrentIndex(dataIndex);
+	}
+
+	// IntItems
+	//
+	QLabel* intValueLabel = new QLabel("IntegerValue:");
+	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue));
+	intValueEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), intValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::IntegerType)
+	{
+		intValueLabel->setEnabled(false);
+		intValueEdit->setEnabled(false);
+	}
+
+	// FloatItems
+	//
+	QLocale locale;
+
+	QLabel* floatValueLabel = new QLabel("FloatValue:");
+	QLineEdit* floatValueEdit = new QLineEdit(locale.toString(floatValue));
+	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::FloatType)
+	{
+		floatValueLabel->setEnabled(false);
+		floatValueEdit->setEnabled(false);
+	}
+
+	// DiscreteItems
+	//
+	QLabel* discreteValueLabel = new QLabel("DiscreteValue (0 or 1):");
+	QLineEdit* discreteValueEdit = new QLineEdit(QString::number(discreteValue));
+	discreteValueEdit->setValidator(new QIntValidator(0, 1, discreteValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::Discrete)
+	{
+		discreteValueLabel->setEnabled(false);
+		discreteValueEdit->setEnabled(false);
+	}
+
+	// Spacer
+	//
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QGridLayout* layout = new QGridLayout;
+
+	layout->addWidget(typeLabel, 0, 0);
+	layout->addWidget(typeCombo, 0, 1);
+
+	layout->addWidget(intValueLabel, 1, 0);
+	layout->addWidget(intValueEdit, 1, 1);
+
+	layout->addWidget(floatValueLabel, 2, 0);
+	layout->addWidget(floatValueEdit, 2, 1);
+
+	layout->addWidget(discreteValueLabel, 3, 0);
+	layout->addWidget(discreteValueEdit, 3, 1);
+
+	layout->addWidget(spacer, 4, 0, 1, 2);
+
+	layout->addWidget(buttonBox, 5, 0, 1, 2);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	connect(typeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			[typeCombo, intValueLabel, intValueEdit, floatValueLabel, floatValueEdit, discreteValueLabel, discreteValueEdit](int)
+			{
+				VFrame30::SchemaItemConst::ConstType type = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+
+				if (type == VFrame30::SchemaItemConst::ConstType::IntegerType)
+				{
+					intValueLabel->setEnabled(true);
+					intValueEdit->setEnabled(true);
+
+					floatValueLabel->setEnabled(false);
+					floatValueEdit->setEnabled(false);
+
+					discreteValueLabel->setEnabled(false);
+					discreteValueEdit->setEnabled(false);
+				}
+
+				if (type == VFrame30::SchemaItemConst::ConstType::FloatType)
+				{
+					intValueLabel->setEnabled(false);
+					intValueEdit->setEnabled(false);
+
+					floatValueLabel->setEnabled(true);
+					floatValueEdit->setEnabled(true);
+
+					discreteValueLabel->setEnabled(false);
+					discreteValueEdit->setEnabled(false);
+				}
+
+				if (type == VFrame30::SchemaItemConst::ConstType::Discrete)
+				{
+					intValueLabel->setEnabled(false);
+					intValueEdit->setEnabled(false);
+
+					floatValueLabel->setEnabled(false);
+					floatValueEdit->setEnabled(false);
+
+					discreteValueLabel->setEnabled(true);
+					discreteValueEdit->setEnabled(true);
+				}
+			});
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		VFrame30::SchemaItemConst::ConstType newType = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+
+		int newIntValue = intValueEdit->text().toInt();
+
+		QLocale locale;
+		double newFloatValue = locale.toFloat(floatValueEdit->text());
+		int newDiscreteValue = discreteValueEdit->text().toInt();
+
+		if (newType != type)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::type, QVariant(newType), item);
+		}
+
+		if (newIntValue != intValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueInteger, QVariant(newIntValue), item);
+		}
+
+		if (newFloatValue != floatValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(newFloatValue), item);
+		}
+
+		if (newDiscreteValue != discreteValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant(newDiscreteValue), item);
+		}
+
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+	if (signalItem == nullptr)
+	{
+		assert(signalItem);
+		return;
+	}
+
+	QString appSignalId = signalItem->appSignalIds();
+
+	// Show input dialog
+	//
+	bool ok;
+	QString newValue = QInputDialog::getMultiLineText(this, tr("Set AppSignalID(s)"),
+													  tr("AppSignalID(s):"), appSignalId, &ok).trimmed();
+	if (ok == true &&
+		newValue.isEmpty() == false &&
+		newValue != appSignalId)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemValue* valueItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
+	if (valueItem == nullptr)
+	{
+		assert(valueItem);
+		return;
+	}
+
+	QString text = valueItem->signalId();
+
+	// Show input dialog
+	//
+	QInputDialog inputDialog(this);
+
+	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+	inputDialog.setWindowTitle("Set AppSignalID");
+	inputDialog.setLabelText(tr("AppSignalID:"));
+	inputDialog.setTextEchoMode(QLineEdit::Normal);
+	inputDialog.resize(400, inputDialog.height());
+	inputDialog.setTextValue(text);
+
+	int inputDialogRecult = inputDialog.exec();
+	QString newValue = inputDialog.textValue();
+
+	if (inputDialogRecult == QDialog::Accepted &&
+		newValue.isNull() == false &&
+		text != newValue)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemBus* busItem = dynamic_cast<VFrame30::SchemaItemBus*>(item.get());
+	if (busItem == nullptr)
+	{
+		assert(busItem);
+		return;
+	}
+
+	QString text = busItem->busTypeId();
+
+	// Get Bus list
+	//
+	std::vector<VFrame30::Bus> busses;
+
+	bool ok = loadBusses(&busses);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set BusType"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// Type Items
+	//
+	QLabel* busTypeLabel = new QLabel("Select BusType:");
+
+	QComboBox* busTypeCombo = new QComboBox();
+
+	for (int i = 0; i < static_cast<int>(busses.size()); i++)
+	{
+		busTypeCombo->addItem(busses[i].busTypeId(), QVariant(i));
+	}
+
+	int dataIndex = busTypeCombo->findText(text);
+	if (dataIndex != -1)
+	{
+		busTypeCombo->setCurrentIndex(dataIndex);
+	}
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(busTypeLabel);
+	layout->addWidget(busTypeCombo);
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted && text != busTypeCombo->currentText())
+	{
+		int selectedBusIndex = busTypeCombo->currentData().toInt();
+		const VFrame30::Bus& newBus = busses[selectedBusIndex];
+
+		QByteArray oldState;
+		busItem->Save(oldState);
+
+		busItem->setBusType(newBus);
+
+		QByteArray newState;
+		busItem->Save(newState);
+
+		// Return object to prev state, it is not neccessary indeed, as it will be loaded into the new state in edit engine
+		//
+		busItem->Load(oldState);
+
+		// Run command
+		//
+		m_editEngine->runSetObject(oldState, newState, item);
+
+		editSchemaView()->update();
+	}
+
+
+	return;
+}
 
 void EditSchemaWidget::deleteKey()
 {
@@ -5773,7 +6500,7 @@ void EditSchemaWidget::deleteKey()
 
 void EditSchemaWidget::undo()
 {
-	m_editEngine->undo(1);
+	m_editEngine->undo();
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
@@ -5783,7 +6510,7 @@ void EditSchemaWidget::undo()
 
 void EditSchemaWidget::redo()
 {
-	m_editEngine->redo(1);
+	m_editEngine->redo();
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
@@ -5835,6 +6562,14 @@ void EditSchemaWidget::selectItem(std::shared_ptr<VFrame30::SchemaItem> item)
 	items.push_back(item);
 	editSchemaView()->setSelectedItems(items);
 
+	editSchemaView()->update();
+	return;
+}
+
+void EditSchemaWidget::selectItems(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items)
+{
+	editSchemaView()->clearSelection();
+	editSchemaView()->setSelectedItems(items);
 	editSchemaView()->update();
 	return;
 }
@@ -6058,15 +6793,20 @@ void EditSchemaWidget::editPaste()
 
 		bool okInteger = false;
 		bool okFloat = false;
+		bool okDiscrete = false;
 
 		int constInt = mimeData->text().toInt(&okInteger);
 		double constFloat = mimeData->text().toDouble(&okFloat);
+		int constDiscrete = mimeData->text().toInt(&okDiscrete);
 
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constIntItems;
 		constIntItems.reserve(selected.size());
 
 		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
 		constFloatItems.reserve(selected.size());
+
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constDiscreteItems;
+		constDiscreteItems.reserve(selected.size());
 
 		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 		{
@@ -6094,6 +6834,13 @@ void EditSchemaWidget::editPaste()
 				}
 				break;
 
+			case VFrame30::SchemaItemConst::ConstType::Discrete:
+				if (okDiscrete == true)
+				{
+					constDiscreteItems.push_back(item);
+				}
+				break;
+
 			default:
 				assert(false);
 				allItemsAreConsts = false;
@@ -6110,6 +6857,11 @@ void EditSchemaWidget::editPaste()
 			if (okFloat == true && constFloatItems.empty() == false)
 			{
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(constFloat), constFloatItems);
+			}
+
+			if (okDiscrete == true && constDiscreteItems.empty() == false)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant(constDiscrete), constDiscreteItems);
 			}
 		}
 	}
@@ -6427,6 +7179,9 @@ void EditSchemaWidget::clipboardDataChanged()
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
 	constFloatItems.reserve(selected.size());
 
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constDiscreteItems;
+	constDiscreteItems.reserve(selected.size());
+
 	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
 	{
 		VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
@@ -6452,6 +7207,12 @@ void EditSchemaWidget::clipboardDataChanged()
 				constFloatItems.push_back(item);
 			}
 			break;
+		case VFrame30::SchemaItemConst::ConstType::Discrete:
+			if (okInteger == true)
+			{
+				constDiscreteItems.push_back(item);
+			}
+			break;
 
 		default:
 			assert(false);
@@ -6461,13 +7222,9 @@ void EditSchemaWidget::clipboardDataChanged()
 
 	if (allItemsAreConsts == true)
 	{
-		if (okInteger == true && constIntItems.empty() == false)
-		{
-			m_editPasteAction->setEnabled(true);
-			return;
-		}
-
-		if (okFloat == true && constFloatItems.empty() == false)
+		if ((okInteger == true && constIntItems.empty() == false) ||
+			(okFloat  == true && constFloatItems.empty() == false) ||
+			(okInteger  == true && constDiscreteItems.empty() == false))
 		{
 			m_editPasteAction->setEnabled(true);
 			return;
@@ -6563,113 +7320,28 @@ void EditSchemaWidget::clipboardDataChanged()
 void EditSchemaWidget::addTransmitter()
 {
 	auto schemaItem = std::make_shared<VFrame30::SchemaItemTransmitter>(schema()->unit());
-	addConnectionItem(schemaItem);
+
+	bool ok = f2KeyForTransmitter(schemaItem, false);
+	if (ok == false)
+	{
+		return;
+	}
+
+	addItem(schemaItem);
+	return;
 }
 
 void EditSchemaWidget::addReceiver()
 {
 	auto schemaItem = std::make_shared<VFrame30::SchemaItemReceiver>(schema()->unit());
-	addConnectionItem(schemaItem);
-}
 
-void EditSchemaWidget::addConnectionItem(std::shared_ptr<VFrame30::SchemaItemConnection> schemaItem)
-{
-	if (schema()->isLogicSchema() == false)
-	{
-		assert(false);		// No sense to add sconnection to non applogic schema
-		return;
-	}
+	bool ok = f2KeyForReceiver(schemaItem, false);
 
-	// Select connectionId from existing connections
-	//
-	Hardware::ConnectionStorage connections(db());
-
-	QString errorMessage;
-
-	bool ok = connections.load(&errorMessage);
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), errorMessage);
-
-		addItem(schemaItem);
 		return;
 	}
 
-	// Find all connections for Schema EquipmentIDs
-	//
-	std::shared_ptr<VFrame30::LogicSchema> s = logicSchema();
-
-	std::set<std::shared_ptr<Hardware::Connection>> chassisConnectios;
-
-	QStringList lms = s->equipmentIdList();
-	for (QString lm : lms)
-	{
-		// Let's assume that LM has a Chassis parent, and LM's id is like SUSTEM_RACK_CHASSIS_LM.
-		// Try to cut ID to chassis
-		//
-		int lastUnderscoreIndex = lm.lastIndexOf('_');
-		if (lastUnderscoreIndex != -1)
-		{
-			lm = lm.left(lastUnderscoreIndex + 1);
-		}
-
-		std::vector<std::shared_ptr<Hardware::Connection>> lmConnections;
-		lmConnections = connections.get(QStringList() << lm.trimmed());
-
-		for (const std::shared_ptr<Hardware::Connection>& c : lmConnections)
-		{
-			chassisConnectios.insert(c);
-		}
-	}
-
-	// --
-	//
-	std::vector<std::shared_ptr<Hardware::Connection>> chassisConnectionsVector;
-	chassisConnectionsVector.reserve(chassisConnectios.size());
-
-	for (std::shared_ptr<Hardware::Connection> c : chassisConnectios)
-	{
-		chassisConnectionsVector.push_back(c);
-	}
-
-	std::sort(chassisConnectionsVector.begin(), chassisConnectionsVector.end(),
-		[](const std::shared_ptr<Hardware::Connection>& c1, const std::shared_ptr<Hardware::Connection>& c2) -> bool
-		{
-			return c1->connectionID() < c2->connectionID();
-		});
-
-
-	// Show menu
-	//
-	QObject actionParent;
-
-	QList<QAction*> menuActions;
-
-	QAction* empty = new QAction(QString("ConnectionID"), &actionParent);
-	empty->setData(empty->text());
-	menuActions << empty;
-
-	for (const std::shared_ptr<Hardware::Connection>& c : chassisConnectionsVector)
-	{
-		QString caption = QString("%1\t%2 <-> %3").arg(c->connectionID()).arg(c->port1EquipmentID()).arg(c->port2EquipmentID());
-		QAction* a = new QAction(caption , &actionParent);
-		a->setData(c->connectionID());
-
-		menuActions << a;
-	}
-
-	QPoint menuPos = QCursor::pos();
-
-	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
-	if (triggeredAction == nullptr)
-	{
-		return;
-	}
-
-	schemaItem->setConnectionId(triggeredAction->data().toString());
-
-	// Add item
-	//
 	addItem(schemaItem);
 	return;
 }
@@ -6771,58 +7443,24 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 		return;
 	}
 
-	// Select BustType from existing
-	//
-	std::vector<DbFileInfo> fileInfos;
-
-	bool ok = db()->getFileList(&fileInfos, db()->busTypesFileId(), ".xml", true, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	std::vector<std::shared_ptr<DbFile>> files;
-
-	ok = db()->getLatestVersion(fileInfos, &files, this);
-	if (ok == false)
-	{
-		return;
-	}
-
-	// Parse files
+	// Get Bus list
 	//
 	std::vector<VFrame30::Bus> busses;
-	busses.reserve(files.size());
 
+	bool ok = loadBusses(&busses);
 
-	for (std::shared_ptr<DbFile> f : files)
+	if (ok == false)
 	{
-		VFrame30::Bus bus;
-		QString errorMessage;
-
-		ok = bus.load(f->data(), &errorMessage);
-		if (ok == false)
-		{
-			QMessageBox::critical(this, qAppName(), QString("Error reading %1 file: %2").arg(f->fileName()).arg(errorMessage));
-			continue;
-		}
-
-		busses.push_back(bus);
+		return;
 	}
 
-	std::sort(busses.begin(), busses.end(),
-			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
-			{
-				return b1.busTypeId() < b2.busTypeId();
-			});
+	// Select BustType from existing
+	//
+
 	// Show menu
 	//
 	QObject actionParent;
 	QList<QAction*> menuActions;
-
-//	QAction* empty = new QAction(QString("BusTypeID"), &actionParent);
-//	empty->setData(empty->text());
-//	menuActions << empty;
 
 	for (const VFrame30::Bus& bus : busses)
 	{
@@ -6888,7 +7526,16 @@ void EditSchemaWidget::onLeftKey()
 	{
 		double dif = -schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -6918,7 +7565,16 @@ void EditSchemaWidget::onRightKey()
 	{
 		double dif = schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -6948,7 +7604,16 @@ void EditSchemaWidget::onUpKey()
 	{
 		double dif = -schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -6978,7 +7643,16 @@ void EditSchemaWidget::onDownKey()
 	{
 		double dif = schemaView()->schema()->gridSize();
 
-		m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+		initMoveAfbsConnectionLinks(MouseState::Moving);
+		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);
+		{
+			m_editEngine->startBatch();
+			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
+
+			finishMoveAfbsConnectionLinks();
+
+			m_editEngine->endBatch();
+		}
 	}
 
 	return;
@@ -7077,7 +7751,7 @@ void EditSchemaWidget::sameWidth()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7175,7 +7849,7 @@ void EditSchemaWidget::sameHeight()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7303,7 +7977,7 @@ void EditSchemaWidget::sameSize()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+	m_editEngine->runSetPoints(newPoints, selectedFiltered, true);
 
 	return;
 }
@@ -7368,7 +8042,7 @@ void EditSchemaWidget::alignLeft()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7433,7 +8107,7 @@ void EditSchemaWidget::alignRight()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7498,7 +8172,7 @@ void EditSchemaWidget::alignTop()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7563,7 +8237,7 @@ void EditSchemaWidget::alignBottom()
 		newPoints.push_back(points);
 	}
 
-	m_editEngine->runSetPoints(newPoints, selected);
+	m_editEngine->runSetPoints(newPoints, selected, true);
 
 	return;
 }
@@ -7614,6 +8288,120 @@ void EditSchemaWidget::sendBackward()
 	}
 
 	m_editEngine->runSetOrder(EditEngine::SetOrder::SendBackward, selected, activeLayer());
+}
+
+void EditSchemaWidget::transformIntoInput()
+{
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			assert(item->isType<VFrame30::SchemaItemSignal>() == true);
+			return;
+		}
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+
+	for (auto item : selected)
+	{
+		auto signalItem = item->toType<VFrame30::SchemaItemSignal>();
+		assert(signalItem);
+
+		auto transformedItem = signalItem->transformIntoInput();
+		assert(transformedItem);
+
+		newItems.push_back(transformedItem);
+	}
+
+	m_editEngine->startBatch();
+		m_editEngine->runDeleteItem(selected, activeLayer());
+		m_editEngine->runAddItem(newItems, activeLayer());
+	m_editEngine->endBatch();
+
+	return;
+}
+
+void EditSchemaWidget::transformIntoInOut()
+{
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			assert(item->isType<VFrame30::SchemaItemSignal>() == true);
+			return;
+		}
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+
+	for (auto item : selected)
+	{
+		auto signalItem = item->toType<VFrame30::SchemaItemSignal>();
+		assert(signalItem);
+
+		auto transformedItem = signalItem->transformIntoInOut();
+		assert(transformedItem);
+
+		newItems.push_back(transformedItem);
+	}
+
+	m_editEngine->startBatch();
+		m_editEngine->runDeleteItem(selected, activeLayer());
+		m_editEngine->runAddItem(newItems, activeLayer());
+	m_editEngine->endBatch();
+
+	return;
+}
+
+void EditSchemaWidget::transformIntoOutput()
+{
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	for (auto item : selectedItems())
+	{
+		if (item->isType<VFrame30::SchemaItemSignal>() == false)
+		{
+			assert(item->isType<VFrame30::SchemaItemSignal>() == true);
+			return;
+		}
+	}
+
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
+	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+
+	for (auto item : selected)
+	{
+		auto signalItem = item->toType<VFrame30::SchemaItemSignal>();
+		assert(signalItem);
+
+		auto transformedItem = signalItem->transformIntoOutput();
+		assert(transformedItem);
+
+		newItems.push_back(transformedItem);
+	}
+
+	m_editEngine->startBatch();
+		m_editEngine->runDeleteItem(selected, activeLayer());
+		m_editEngine->runAddItem(newItems, activeLayer());
+	m_editEngine->endBatch();
+
+	return;
 }
 
 void EditSchemaWidget::toggleComment()
@@ -7743,6 +8531,9 @@ void EditSchemaWidget::find()
 
 		connect(m_findDialog, &SchemaFindDialog::findPrev, this, &EditSchemaWidget::findPrev);
 		connect(m_findDialog, &SchemaFindDialog::findNext, this, &EditSchemaWidget::findNext);
+
+		connect(m_findDialog, &SchemaFindDialog::replaceAndFind, this, &EditSchemaWidget::replaceAndFind);
+		connect(m_findDialog, &SchemaFindDialog::replaceAll, this, &EditSchemaWidget::replaceAll);
 	}
 
 	m_findDialog->show();
@@ -7752,7 +8543,7 @@ void EditSchemaWidget::find()
 	return;
 }
 
-void EditSchemaWidget::findNext()
+void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 {
 	if (m_findDialog == nullptr)
 	{
@@ -7820,11 +8611,12 @@ void EditSchemaWidget::findNext()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -7835,11 +8627,12 @@ void EditSchemaWidget::findNext()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -7858,7 +8651,7 @@ void EditSchemaWidget::findNext()
 	return;
 }
 
-void EditSchemaWidget::findPrev()
+void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 {
 	if (m_findDialog == nullptr)
 	{
@@ -7926,11 +8719,12 @@ void EditSchemaWidget::findPrev()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -7941,11 +8735,12 @@ void EditSchemaWidget::findPrev()
 	{
 		std::shared_ptr<VFrame30::SchemaItem> item = *it;
 
-		bool found = item->searchText(searchText);
+		auto result = item->searchTextByProps(searchText, cs);
 
-		if (found == true)
+		if (result.empty() == false)
 		{
 			selectItem(item);
+			m_findDialog->updateFoundInformation(item, result, searchText, cs);
 			return;
 		}
 	}
@@ -7960,6 +8755,187 @@ void EditSchemaWidget::findPrev()
 	m_findDialog->raise();
 	m_findDialog->activateWindow();
 	m_findDialog->setFocusToEditLine();
+
+	return;
+}
+
+int EditSchemaWidget::replace(std::shared_ptr<VFrame30::SchemaItem> item, QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return 0;
+	}
+
+	QByteArray oldState;
+	item->Save(oldState);
+
+	int replaceCount = item->replace(findText, replaceWith, cs);
+
+	QByteArray newState;
+	item->Save(newState);
+
+	item->Load(oldState);
+
+	if (replaceCount != 0)
+	{
+		m_editEngine->runSetObject(oldState, newState, item);
+	}
+
+	return replaceCount;
+}
+
+void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	auto& selected = selectedItems();		// Keep reference!!!!
+
+	// Get start iterator
+	//
+	auto searchStartIterator = layer->Items.begin();
+
+	if (selected.empty() == true)
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+	else
+	{
+		searchStartIterator = std::find(layer->Items.begin(), layer->Items.end(), selected.front());
+
+		if (searchStartIterator == layer->Items.end())
+		{
+			searchStartIterator = layer->Items.begin();
+		}
+		else
+		{
+			// Replace text in selected item
+			//
+			replace(*searchStartIterator, findText, replaceWith, cs);
+			searchStartIterator ++;
+		}
+	}
+
+	// Text in current selected item replaced, find and select next item
+	//
+	if (searchStartIterator == layer->Items.end())
+	{
+		searchStartIterator = layer->Items.begin();
+	}
+
+	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		auto result = item->searchTextByProps(findText, cs);
+
+		if (result.empty() == false)
+		{
+			selectItem(item);
+
+			if (m_findDialog != nullptr)
+			{
+				m_findDialog->updateFoundInformation(item, result, findText, cs);
+			}
+			return;
+		}
+	}
+
+	// Serach text from the beginning
+	//
+	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
+	{
+		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+
+		auto result = item->searchTextByProps(findText, cs);
+
+		if (result.empty() == false)
+		{
+			selectItem(item);
+
+			if (m_findDialog != nullptr)
+			{
+				m_findDialog->updateFoundInformation(item, result, findText, cs);
+			}
+			return;
+		}
+	}
+
+	// Text not found
+	//
+	clearSelection();
+
+	QMessageBox::information(this, qApp->applicationName(), tr("Text <b>%1</b> not found.").arg(findText));
+
+	if (m_findDialog != nullptr)
+	{
+		m_findDialog->show();
+		m_findDialog->raise();
+		m_findDialog->activateWindow();
+		m_findDialog->setFocusToEditLine();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+{
+	// Look for text
+	//
+	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
+	assert(layer);
+
+	if (layer->Items.empty() == true)
+	{
+		clearSelection();
+		return;
+	}
+
+	// If there are selected items, then replace only in selected
+	// else relace in all layer's items
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items = selectedItems();
+	if (items.empty() == true)
+	{
+		items.assign(layer->Items.begin(), layer->Items.end());
+	}
+
+	// Replace
+	//
+	int count = 0;
+
+	std::vector<std::shared_ptr<VFrame30::SchemaItem>> replacedInItems;
+	replacedInItems.reserve(items.size());
+
+	for(std::shared_ptr<VFrame30::SchemaItem> item : items)
+	{
+		int itemReplaces = replace(item, findText, replaceWith, cs);
+
+		if (itemReplaces != 0)
+		{
+			count += itemReplaces;
+			replacedInItems.push_back(item);
+		}
+	}
+
+	if (count == 0)
+	{
+		QMessageBox::information(this, tr("Replace All Result"), tr("Text <b>%1</b> not found.").arg(findText));
+	}
+	else
+	{
+		selectItems(replacedInItems);
+		QMessageBox::information(this, tr("Replace All Result"), tr("%1 replaced to %2 in %3 item(s).").arg(findText).arg(replaceWith).arg(replacedInItems.size()));
+	}
 
 	return;
 }
@@ -7992,6 +8968,21 @@ MouseState EditSchemaWidget::mouseState() const
 void EditSchemaWidget::setMouseState(MouseState state)
 {
 	editSchemaView()->setMouseState(state);
+
+	if (state == MouseState::Moving ||
+		state == MouseState::SizingTopLeft ||
+		state == MouseState::SizingTopLeft ||
+		state == MouseState::SizingTop ||
+		state == MouseState::SizingTopRight ||
+		state == MouseState::SizingRight ||
+		state == MouseState::SizingBottomRight ||
+		state == MouseState::SizingBottom ||
+		state == MouseState::SizingBottomLeft ||
+		state == MouseState::SizingLeft)
+	{
+		initMoveAfbsConnectionLinks(state);
+	}
+
 	return;
 }
 
@@ -8086,23 +9077,80 @@ void EditSchemaWidget::setCompareItemActions(const std::map<QUuid, CompareAction
 SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	QDialog(parent)
 {
-	m_lineEdit = new QLineEdit();
+	setWindowTitle(tr("Find and Replace"));
+
+	setWindowFlags((windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// FindText/Replace - text for search
+	//
+	m_findTextEdit = new QLineEdit();
+	m_replaceTextEdit = new QLineEdit();
 
 	QCompleter* searchCompleter = new QCompleter(theSettings.buildSearchCompleter(), this);
 	searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-	m_lineEdit->setCompleter(searchCompleter);
 
+	m_findTextEdit->setCompleter(searchCompleter);
+	m_replaceTextEdit->setCompleter(searchCompleter);
+
+	// CaseSensivity check box
+	//
+	m_caseSensitiveCheckBox = new QCheckBox(tr("Case Sensitive"));
+	m_caseSensitiveCheckBox->setChecked(theSettings.m_findSchemaItemCaseSensitive);
+
+	// Find Result
+	//
+	m_findResult = new QTextEdit;
+	m_findResult->setReadOnly(true);
+
+	auto p = qApp->palette("QListView");
+
+	QColor highlight = p.highlight().color();
+	QColor highlightText = p.highlightedText().color();
+
+	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
+							 .arg(highlight.name())
+							 .arg(highlightText.name());
+
+	m_findResult->setStyleSheet(selectionColor);
+
+	// Find buttons
+	//
 	m_prevButton = new QPushButton(tr("Find Previous"));
+	m_nextButton = new QPushButton(tr("Find Next"));
+
+	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
 	//m_prevButton->setShortcut(QKeySequence::FindPrevious);	// Done via Actions, works much faster
 
-	m_nextButton = new QPushButton(tr("Find Next"));
-	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
+	// Replace buttons
+	//
+	m_replaceAllButton = new QPushButton(tr("Replace All"));
+	m_replaceButton = new QPushButton(tr("Replace && Find"));
 
+	connect(m_replaceButton, &QPushButton::clicked, this, &SchemaFindDialog::replaceAndFindPressed);
+	connect(m_replaceAllButton, &QPushButton::clicked, this, &SchemaFindDialog::replaceAllPressed);
+
+	// --
+	//
 	QGridLayout* layout = new QGridLayout();
 
-	layout->addWidget(m_lineEdit, 0, 0, 1, 2);
-	layout->addWidget(m_prevButton, 1, 0);
-	layout->addWidget(m_nextButton, 1, 1);
+	layout->addWidget(new QLabel("Find:"), 0, 0, 1, 1);
+	layout->addWidget(m_findTextEdit, 0, 1, 1, 3);
+
+	layout->addWidget(new QLabel("Replace with:"), 1, 0, 1, 1);
+	layout->addWidget(m_replaceTextEdit, 1, 1, 1, 3);
+
+	layout->addWidget(m_caseSensitiveCheckBox, 2, 0, 1, 4);
+
+	layout->addWidget(m_findResult, 3, 0, 1, 4);
+
+	layout->addWidget(m_replaceAllButton, 4, 0);
+	layout->addWidget(m_replaceButton, 4, 1);
+
+	layout->addWidget(m_prevButton, 4, 2);
+	layout->addWidget(m_nextButton, 4, 3);
 
 	setLayout(layout);
 
@@ -8116,32 +9164,52 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	prevAction->setShortcut(QKeySequence::FindPrevious);
 	addAction(prevAction);
 
-	connect(nextAction, &QAction::triggered, this, &SchemaFindDialog::findNext);
-	connect(prevAction, &QAction::triggered, this, &SchemaFindDialog::findPrev);
+	// Find buttons
+	//
+	connect(m_caseSensitiveCheckBox, &QCheckBox::toggled, this,
+			[](bool checked)
+			{
+				theSettings.m_findSchemaItemCaseSensitive = checked;
+			});
+
+	auto findNextFunc = [this]()
+		{
+			emit findNext(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		};
+
+	auto findPrevFunc = [this]()
+		{
+			emit findPrev(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		};
+
+	connect(nextAction, &QAction::triggered, this, findNextFunc);
+	connect(prevAction, &QAction::triggered, this, findPrevFunc);
 
 	// --
 	//
-	connect(m_prevButton, &QPushButton::clicked, this, &SchemaFindDialog::findPrev);
-	connect(m_nextButton, &QPushButton::clicked, this, &SchemaFindDialog::findNext);
+	connect(m_nextButton, &QPushButton::clicked, this, findNextFunc);
+	connect(m_prevButton, &QPushButton::clicked, this, findPrevFunc);
 
 	m_nextButton->setDefault(true);
+
+	return;
 }
 
 QString SchemaFindDialog::findText() const
 {
-	assert(m_lineEdit);
+	assert(m_findTextEdit);
 
-	QString text = m_lineEdit->text().trimmed();
+	QString text = m_findTextEdit->text().trimmed();
 
 	return text;
 }
 
 void SchemaFindDialog::setFocusToEditLine()
 {
-	assert(m_lineEdit);
+	assert(m_findTextEdit);
 
-	m_lineEdit->setFocus();
-	m_lineEdit->selectAll();
+	m_findTextEdit->setFocus();
+	m_findTextEdit->selectAll();
 
 	return;
 }
@@ -8156,7 +9224,7 @@ void SchemaFindDialog::updateCompleter()
 	{
 		theSettings.buildSearchCompleter() << searchText;
 
-		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_lineEdit->completer()->model());
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findTextEdit->completer()->model());
 		assert(completerModel);
 
 		if (completerModel != nullptr)
@@ -8166,3 +9234,62 @@ void SchemaFindDialog::updateCompleter()
 	}
 }
 
+void SchemaFindDialog::updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
+											  const std::list<std::pair<QString, QString>>& foundProps,
+											  QString searchText,
+											  Qt::CaseSensitivity /*cs*/)
+{
+
+	QString itemCaption = QString(item->metaObject()->className());
+
+	if (itemCaption.startsWith("VFrame30::SchemaItem") == true)
+	{
+		itemCaption.remove(0, 20);		// 20 is length of VFrame30::SchemaItem
+	}
+
+	QString infoText = itemCaption + "\n";
+
+	for (auto p : foundProps)
+	{
+		infoText.append(QString("%1 : %2\n").arg(p.first).arg(p.second));
+	}
+
+	m_findResult->setText(infoText);
+
+	// To do: highlight all searchText with CaseSensitivity
+	//
+
+	return;
+}
+
+void SchemaFindDialog::replaceAndFindPressed()
+{
+	QString findText = m_findTextEdit->text();
+	QString replaceWith = m_replaceTextEdit->text();
+	Qt::CaseSensitivity cs = m_caseSensitiveCheckBox->isChecked() == true ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+	if (findText.trimmed().isEmpty() == true)
+	{
+		return;
+	}
+
+	emit replaceAndFind(findText, replaceWith, cs);
+
+	return;
+}
+
+void SchemaFindDialog::replaceAllPressed()
+{
+	QString findText = m_findTextEdit->text();
+	QString replaceWith = m_replaceTextEdit->text();
+	Qt::CaseSensitivity cs = m_caseSensitiveCheckBox->isChecked() == true ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+	if (findText.trimmed().isEmpty() == true)
+	{
+		return;
+	}
+
+	emit replaceAll(findText, replaceWith, cs);
+
+	return;
+}

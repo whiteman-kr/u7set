@@ -528,7 +528,8 @@ public:
 const char* const		LinearityPointSensor[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "%"),
-						QT_TRANSLATE_NOOP("Options.h", "0 - 5 V"),
+						QT_TRANSLATE_NOOP("Options.h", "0 .. 5 V"),
+						QT_TRANSLATE_NOOP("Options.h", "-10 .. 10 V"),
 						QT_TRANSLATE_NOOP("Options.h", "0 - 5 mA"),
 						QT_TRANSLATE_NOOP("Options.h", "4 - 20 mA"),
 						QT_TRANSLATE_NOOP("Options.h", "0 - 100 °C"),
@@ -542,12 +543,13 @@ const int				POINT_SENSOR_COUNT			= sizeof(LinearityPointSensor)/sizeof(Linearit
 const int				POINT_SENSOR_UNKNOWN		= -1,
 						POINT_SENSOR_PERCENT		= 0,
 						POINT_SENSOR_U_0_5_V		= 1,
-						POINT_SENSOR_I_0_5_MA		= 2,
-						POINT_SENSOR_I_4_20_MA		= 3,
-						POINT_SENSOR_T_0_100_C		= 4,
-						POINT_SENSOR_T_0_150_C		= 5,
-						POINT_SENSOR_T_0_200_C		= 6,
-						POINT_SENSOR_T_0_400_C		= 7;
+						POINT_SENSOR_U_m10_10_V		= 2,
+						POINT_SENSOR_I_0_5_MA		= 3,
+						POINT_SENSOR_I_4_20_MA		= 4,
+						POINT_SENSOR_T_0_100_C		= 5,
+						POINT_SENSOR_T_0_150_C		= 6,
+						POINT_SENSOR_T_0_200_C		= 7,
+						POINT_SENSOR_T_0_400_C		= 8;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -602,7 +604,7 @@ const char* const		LinearityParamName[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Limit of error"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of error"),
-						QT_TRANSLATE_NOOP("Options.h", "Show absolute error of input as ..."),
+						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point, (sec)"),
 						QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
 						QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
@@ -611,38 +613,27 @@ const char* const		LinearityParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range, (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Points of range"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
-						QT_TRANSLATE_NOOP("Options.h", "Show column of input values"),
-						QT_TRANSLATE_NOOP("Options.h", "Show column of output values"),
+						QT_TRANSLATE_NOOP("Options.h", "Show columns of physcal values"),
+						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 };
 
-const int				LO_PARAM_COUNT				= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
+const int				LO_PARAM_COUNT					= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
 
-const int				LO_PARAM_ERROR_LIMIT		= 0,
-						LO_PARAM_ERROR_TYPE			= 1,
-						LO_PARAM_SHOW_INPUT_ERROR	= 2,
-						LO_PARAM_MEASURE_TIME		= 3,
-						LO_PARAM_MEASURE_IN_POINT	= 4,
-						LO_PARAM_RANGE_TYPE			= 5,
-						LO_PARAM_POINT_COUNT		= 6,
-						LO_PARAM_LOW_RANGE			= 7,
-						LO_PARAM_HIGH_RANGE			= 8,
-						LO_PARAM_VALUE_POINTS		= 9,
-						LO_PARAM_LIST_TYPE			= 10,
-						LO_PARAM_SHOW_INPUT_RANGE	= 11,
-						LO_PARAM_SHOW_OUTPUT_RANGE	= 12;
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		ShowInputErrorStr[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Electrical"),
-						QT_TRANSLATE_NOOP("Options.h", "Physical"),
-};
-
-const int				LO_SHOW_INPUT_ERROR_COUNT		= sizeof(ShowInputErrorStr)/sizeof(ShowInputErrorStr[0]);
-
-const int				LO_SHOW_INPUT_ERROR_ELECTRIC	= 0,
-						LO_SHOW_INPUT_ERROR_PHYSICAL	= 1;
+const int				LO_PARAM_ERROR_LIMIT			= 0,
+						LO_PARAM_ERROR_TYPE				= 1,
+						LO_PARAM_SHOW_ERROR_FROM_LIMIT	= 2,
+						LO_PARAM_MEASURE_TIME			= 3,
+						LO_PARAM_MEASURE_IN_POINT		= 4,
+						LO_PARAM_RANGE_TYPE				= 5,
+						LO_PARAM_POINT_COUNT			= 6,
+						LO_PARAM_LOW_RANGE				= 7,
+						LO_PARAM_HIGH_RANGE				= 8,
+						LO_PARAM_VALUE_POINTS			= 9,
+						LO_PARAM_LIST_TYPE				= 10,
+						LO_PARAM_SHOW_PHYSICAL_VALUE	= 11,
+						LO_PARAM_WARN_IF_MEASURED		= 12,
+						LO_PARAM_MEASURE_ENTIRE_MODULE	= 13;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -693,7 +684,7 @@ private:
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
-	int					m_showInputErrorType = LO_SHOW_INPUT_ERROR_ELECTRIC;		// type of displaing input error
+	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_PHYSICAL;			// type of displaing error denend on limit
 
 	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
 	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7
@@ -703,8 +694,10 @@ private:
 	double				m_highLimitRange = 100;										// high limit of the range for automatic division
 
 	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
-	bool				m_showInputRangeColumn = true;								// show column input values
-	bool				m_showOutputRangeColumn = false;							// show column output values
+	bool				m_showPhyscalValueColumn = true;							// show columns of physcal values
+
+	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
+	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 
 public:
 
@@ -716,8 +709,8 @@ public:
 	int					errorType() const { return m_errorType; }
 	void				setErrorType(int type) { m_errorType = type; }
 
-	int					showInputErrorType() const { return m_showInputErrorType; }
-	void				setShowInputErrorType(int type) { m_showInputErrorType = type; }
+	int					showErrorFromLimit() const { return m_showErrorFromLimit; }
+	void				setShowErrorFromLimit(int type) { m_showErrorFromLimit = type; }
 
 	int					measureTimeInPoint() const { return m_measureTimeInPoint; }
 	void				setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }
@@ -737,11 +730,14 @@ public:
 	int					viewType() const { return m_viewType; }
 	void				setViewType(int type) { m_viewType = type; }
 
-	bool				showInputRangeColumn() const { return m_showInputRangeColumn; }
-	void				setShowInputRangeColumn(bool show) { m_showInputRangeColumn = show; }
+	bool				showPhyscalValueColumn() const { return m_showPhyscalValueColumn; }
+	void				setShowPhyscalValueColumn(bool show) { m_showPhyscalValueColumn = show; }
 
-	bool				showOutputRangeColumn() const { return m_showOutputRangeColumn; }
-	void				setShowOutputRangeColumn(bool show) { m_showOutputRangeColumn = show; }
+	bool				warningIfMeasured() const { return m_warningIfMeasured; }
+	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
+
+	bool				measureEntireModule() const { return m_measureEntireModule; }
+	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
 
 public:
 

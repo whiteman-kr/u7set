@@ -120,6 +120,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 	ui->tabWidget->tabBar()->setExpanding(true);
 	ui->tabWidget->setStyleSheet("QTabBar::tab { min-width: 100px; height: 28;}");
 
+	setAttribute(Qt::WA_DeleteOnClose);
+
 	QString str;
 
 	m_precision = signal.precision();
@@ -177,8 +179,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 
 	if (m_signal.isAnalog())
 	{
-		str = QString("%1 - %2").arg(m_signal.unitId()).arg(m_signal.unit());
-		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("UnitID") << str));
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << m_signal.unit()));
 	}
 
 	ui->treeProperties->addTopLevelItem(itemGroup1);
@@ -277,12 +278,30 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 
 	updateData();
 
-	m_updateStateTimerId = startTimer(500);
+	m_updateStateTimerId = startTimer(200);
 }
 
 DialogSignalInfo::~DialogSignalInfo()
 {
 	delete ui;
+}
+
+bool DialogSignalInfo::showDialog(QString appSignalId, QWidget* parent)
+{
+	bool ok = false;
+	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+
+	if (ok == true)
+	{
+		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
+		dsi->show();
+	}
+	else
+	{
+		QMessageBox::critical(parent, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+	}
+
+	return ok;
 }
 
 void DialogSignalInfo::prepareContextMenu(const QPoint& pos)
@@ -585,8 +604,8 @@ void QLabelAppSignalDragAndDrop::mouseMoveEvent(QMouseEvent* event)
 
 	// Save signals to protobufer
 	//
-	::Proto::AppSignalParamSet protoSetMessage;
-	::Proto::AppSignalParam* protoSignalMessage = protoSetMessage.add_items();
+	::Proto::AppSignalSet protoSetMessage;
+	::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
 	m_appSignalParam.save(protoSignalMessage);
 
 	QByteArray data;

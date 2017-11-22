@@ -1,6 +1,7 @@
 #include "Trend.h"
 #include <QPainter>
 #include <cfloat>
+#include <type_traits>
 #include "../Proto/trends.pb.h"
 
 namespace TrendLib
@@ -549,8 +550,8 @@ namespace TrendLib
 		double minInchInterval = 1.0/4.0;	// 1/4 in -- minimum inches interval
 		double gridValue = 1.0;
 
-		double pow = 1e-30;
-		for (int mult = 0; mult <= 60; mult++, pow *= 10.0)
+		double pow = 1e-100;
+		for (int mult = 0; mult <= 200; mult++, pow *= 10.0)
 		{
 			for (size_t i = 0; i < possibleGridIntervals.size(); i++)
 			{
@@ -572,11 +573,17 @@ namespace TrendLib
 		double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
 		int gridCount = static_cast<int>(delta / gridValue) + 2;
 
-		if (gridCount < 0 || gridCount > 100)
+		if (gridCount < 0)
+		{
+			assert(false);
+			gridCount = 0;
+		}
+
+		if (gridCount > 100)
 		{
 			// Something wrong
 			//
-			assert(false);
+			gridCount = 100;
 			return;
 		}
 
@@ -686,8 +693,8 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		double minInchInterval = 3.0/8.0;	// minimum inches interval
 		double gridValue = 1.0;
 
-		double pow = 1e-30;
-		for (int mult = 0; mult <= 60; mult++, pow *= 10.0)
+		double pow = 1e-100;
+		for (int mult = 0; mult <= 200; mult++, pow *= 10.0)
 		{
 			for (size_t i = 0; i < possibleGridIntervals.size(); i++)
 			{
@@ -709,11 +716,17 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
 		int gridCount = static_cast<int>(delta / gridValue) + 2;
 
-		if (gridCount < 0 || gridCount > 100)
+		if (gridCount < 0)
 		{
 			// Something wrong
 			//
 			assert(false);
+			return;
+		}
+
+		if (gridCount > 100)
+		{
+			gridCount = 100;
 			return;
 		}
 
@@ -914,7 +927,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		QRectF textBoundRect;
 		drawText(painter, "0", textBoundRect, drawParam, Qt::AlignLeft | Qt::AlignTop, &textBoundRect);
 
-		TimeType timeType = drawParam.timeType();
+		E::TimeType timeType = drawParam.timeType();
 
 		QPen linePen(signal.color(), drawParam.cosmeticPenWidth(), Qt::SolidLine);
 		painter->setPen(linePen);
@@ -1058,7 +1071,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 			return;
 		}
 
-		TimeType timeType = drawParam.timeType();
+		E::TimeType timeType = drawParam.timeType();
 
 		QPen linePen(signal.color(), drawParam.cosmeticPenWidth());
 		painter->setPen(linePen);
@@ -1102,7 +1115,10 @@ static const int recomendedSize = 8192;
 
 //					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
 //					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
-//					qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex << ", Flags: " << state.flags << ", value: " << state.value;
+//					qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex
+//							 << ", Flags: " << state.flags
+//							 << ", value: " << state.value
+//							 << ", timestamp: " << ct.toDateTime().toString("HH:mm:ss.zzz");
 //					pointIndex ++;
 
 					if (lines.isEmpty() == true)
@@ -1195,7 +1211,7 @@ static const int recomendedSize = 8192;
 		double dpiX = static_cast<double>(drawParam.dpiX());
 		double dpiY = static_cast<double>(drawParam.dpiY());
 
-		TimeType timeType = drawParam.timeType();
+		E::TimeType timeType = drawParam.timeType();
 
 		std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
 		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
@@ -1502,14 +1518,18 @@ static const int recomendedSize = 8192;
 		return;
 	}
 
-	TrendStateItem Trend::rullerSignalState(const TrendRuller& ruller, QString appSignalId, TimeType timeType) const
+	TrendStateItem Trend::rullerSignalState(const TrendRuller& ruller, QString appSignalId, E::TimeType timeType) const
 	{
-		TimeStamp rullerTime = ruller.timeStamp();
+		const TimeStamp& rullerTime = ruller.timeStamp();
 
 		// Getting data whitout requesting if it is not present
 		//
 		std::list<std::shared_ptr<OneHourData>> signalData;
-		signalSet().getExistingTrendData(appSignalId, rullerTime.toDateTime(), rullerTime.toDateTime(), timeType, &signalData);
+
+		TimeStamp minus1hour(rullerTime.timeStamp - 1_hour);
+		TimeStamp plus1hour(rullerTime.timeStamp + 1_hour);
+
+		signalSet().getExistingTrendData(appSignalId, minus1hour.toDateTime(), plus1hour.toDateTime(), timeType, &signalData);
 
 		// Look for state at point ruller.timeStamp
 		//
@@ -1524,33 +1544,83 @@ static const int recomendedSize = 8192;
 			{
 				const std::vector<TrendStateItem>& states = record.states;
 
-				if (states.empty() == false &&
-					states.back().getTime(timeType) < rullerTime)
+				if (states.empty() == true)
+				{
+					continue;
+				}
+
+				if (states.back().getTime(timeType) < rullerTime)
 				{
 					lastState = states.back();
 					continue;	// to next record
 				}
 
-				for (const TrendStateItem& state : states)
+//				//for (const TrendStateItem& state : states)							// for by index is faster
+//				size_t stateCount = states.size();
+//				for (size_t stateIndex = 0; stateIndex < stateCount; ++stateIndex)
+//				{
+//					const TrendStateItem& state = states[stateIndex];
+
+//					TimeStamp ts = state.getTime(timeType);
+//					if (ts >= rullerTime)
+//					{
+//						// Got it, we need to return prev point.
+//						// if currnet state not valid, then we assume last state is not valid also
+//						//
+//						if (state.isValid() == false)
+//						{
+//							return state;
+//						}
+//						else
+//						{
+//							return lastState;
+//						}
+//					}
+
+//					//lastState = state;
+//					static_assert(std::is_pod<TrendStateItem>::value, "TrendStateItem must be a POD type.");
+//					memcpy(&lastState, &state, sizeof(lastState));
+//				}
+
+static const TrendStateItem fakeState = TrendStateItem();
+				auto stateIt = std::lower_bound(states.begin(), states.end(), fakeState,
+								 [&rullerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
+								 {
+										TimeStamp ts = state.getTime(timeType);
+										return ts < rullerTime;
+								 });
+
+				if (stateIt != states.end())
 				{
-					TimeStamp ts = state.getTime(timeType);
-					if (ts >= rullerTime)
+					if (rullerTime == (*stateIt).getTime(timeType))
 					{
-						// Got it, we need to return prev point.
-						// if currnet state not valid, then we assume last state is not valid also
+						// That is the exact value
 						//
-						if (state.isValid() == false)
+						return *stateIt;
+					}
+					else
+					{
+						if (stateIt == states.begin()) // and it is not equeal to the first (se the prev cond)
 						{
-							return state;
+							// Take the last value from the previous states vector
+							//
+							return lastState;
 						}
 						else
 						{
-							return lastState;
+							--stateIt;
+							return *stateIt;
 						}
 					}
-
-					lastState = state;
 				}
+				else
+				{
+					// value is beyond the last item
+					//
+					assert(false);	// we have checked it before
+				}
+
+				assert(false);
 			}
 		}
 

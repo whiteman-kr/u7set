@@ -3,18 +3,16 @@
 #include <QSqlError>
 #include <QDebug>
 
-DbControllerVersionControlTests::DbControllerVersionControlTests()
+DbControllerVersionControlTests::DbControllerVersionControlTests() :
+	m_db(new DbController())
 {
-	m_dbController = new DbController();
-
-	m_databaseHost = "127.0.0.1";
-	m_databaseName = "dbcontrollerversiontesting";
-	m_databaseUser = "u7";
-	m_adminPassword = "P2ssw0rd";
 }
 
 void DbControllerVersionControlTests::initTestCase()
 {
+	m_db->setServerUsername(m_databaseUser);
+	m_db->setServerPassword(m_adminPassword);
+
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 	db.setHostName(m_databaseHost);
@@ -40,14 +38,14 @@ void DbControllerVersionControlTests::initTestCase()
 
 	db.close();
 
-	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_dbController->lastError()));
+	ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_dbController->lastError()));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db->lastError()));
 }
 
 void DbControllerVersionControlTests::isAnyCheckedOutTest()
@@ -59,18 +57,18 @@ void DbControllerVersionControlTests::isAnyCheckedOutTest()
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("u7_" + m_databaseName);
 
-	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
+	QVERIFY2(db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
 
 	QSqlQuery query;
 
 	bool ok = query.exec("SELECT * FROM add_file(1, 'isAnycheckedOutTest', 1, 'testtesttest', '{}')");
-	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	bool result = false;
+	int result = 0;
 
-	ok = m_dbController->isAnyCheckedOut(&result);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
-	QVERIFY2 (result == true, qPrintable("Error: there are some checked out files, but function isAnyCheckedOut ignored it"));
+	ok = m_db->isAnyCheckedOut(&result);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	QVERIFY2(result == 1, qPrintable("Error: there are some checked out files, but function isAnyCheckedOut ignored it"));
 
 	db.close();
 }
@@ -101,8 +99,8 @@ void DbControllerVersionControlTests::lastChangesetIdTest()
 
 	int result = 0;
 
-	ok = m_dbController->lastChangesetId(&result);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->lastChangesetId(&result);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	assert(result != 0);
 
@@ -118,7 +116,8 @@ void DbControllerVersionControlTests::cleanupTestCase()
 		QSqlDatabase::removeDatabase(connection);
 	}
 
-	QVERIFY2 (m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0) == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->deleteProject(m_databaseName, m_adminPassword, true, nullptr);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	delete m_dbController;
+	return;
 }

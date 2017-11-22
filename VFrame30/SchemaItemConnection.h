@@ -81,15 +81,11 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
-
 		// Public Methods
 		//
 	public:
 		virtual QString buildName() const override;
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties
 		//
@@ -133,16 +129,12 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-		// Text search
-		//
-	public:
-		virtual bool searchText(const QString& text) const override;
-
 		// Public Methods
 		//
 	public:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties
 		//

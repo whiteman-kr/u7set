@@ -77,7 +77,6 @@ public:
 	bool infoMode() const;
 	void setInfoMode(bool value);
 
-
 	int buildWarningLevel() const;
 	void setBuildWarningLevel(int value);
 
@@ -129,6 +128,11 @@ public:
 	QPoint m_scriptHelpWindowPos;
 	QByteArray m_scriptHelpWindowGeometry;
 
+    // Tuning Filters editor Options
+    //
+	QByteArray m_tuningFiltersDialogChooseSignalGeometry;
+    int m_tuningFiltersPropertyEditorSplitterPos = -1;
+
 	// Connection editor
 	//
 	QPoint m_connectionEditorWindowPos;
@@ -140,6 +144,7 @@ public:
 	QStringList m_connectionEditorMasks;
 
 	// Bus Editor
+	//
 	QPoint m_busEditorWindowPos;
 	QByteArray m_busEditorWindowGeometry;
 	QByteArray m_busEditorMainSplitterState;
@@ -160,6 +165,10 @@ public:
     QPoint m_schemaItemPropertiesWindowPos;
     QByteArray m_schemaItemPropertiesWindowGeometry;
     int m_schemaItemSplitterState = 0;
+
+	// Find SchemaItem
+	//
+	bool m_findSchemaItemCaseSensitive = false;
 
 	// Configurator properties
 	//

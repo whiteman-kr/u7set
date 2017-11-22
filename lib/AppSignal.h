@@ -5,6 +5,7 @@
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
 #include "../lib/TimeStamp.h"
+#include "Types.cpp"
 #include "Types.h"
 
 
@@ -17,8 +18,8 @@ struct AppSignalParamMimeType
 namespace Proto
 {
 	class AppSignalState;
-	class AppSignalParam;
-	class AppSignalParamSet;
+	class AppSignal;
+	class AppSignalSet;
 }
 
 
@@ -69,21 +70,27 @@ class AppSignalState
 	Q_PROPERTY(double Value READ value)
 
 public:
+	AppSignalState() = default;
+	AppSignalState(const AppSignalState&) = default;
+	AppSignalState(AppSignalState&&) = default;
+	AppSignalState(const Proto::AppSignalState& protoState);
+	~AppSignalState() = default;
+
+	AppSignalState& operator= (const AppSignalState& state) = default;
+	AppSignalState& operator= (const SimpleAppSignalState& smState);
+
 	static const quint32 VALID = 1;
 	static const quint32 INVALID = 0;
 
 	Q_INVOKABLE Hash hash() const;
 	const Times& time() const;
+	const TimeStamp& time(E::TimeType timeType) const;
 	Q_INVOKABLE double value() const;
 
 	Q_INVOKABLE bool isValid() const;
-	//bool isOverflow() const;
-	//bool isUnderflow() const;
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
-
-	const AppSignalState& operator = (const SimpleAppSignalState& smState);
 
 public:
 	Hash m_hash = 0;					// == calcHash(AppSignalID)
@@ -133,8 +140,8 @@ class AppSignalParam
 public:
 	AppSignalParam();
 
-	bool load(const ::Proto::AppSignalParam& message);
-	void save(::Proto::AppSignalParam* message) const;
+	bool load(const Proto::AppSignal &message);
+	void save(::Proto::AppSignal* message) const;
 
 	// Properties
 	//
@@ -191,7 +198,7 @@ public:
 
 	double inputLowLimit() const;
 	double inputHighLimit() const;
-	E::InputUnit inputUnitId() const;
+	E::ElectricUnit inputUnitId() const;
 	E::SensorType inputSensorType() const;
 
 	double outputLowLimit() const;
@@ -234,7 +241,6 @@ private:
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
-	int m_unitId = NO_UNIT_ID;
 	QString m_unit;
 
 	double m_lowValidRange = 0;
@@ -242,10 +248,10 @@ private:
 	double m_lowEngeneeringUnits = 0;
 	double m_highEngeneeringUnits = 100;
 
-	double m_inputLowLimit = 0;										// low electric value for input range
-	double m_inputHighLimit = 0;									// high electric value for input range
-	E::InputUnit m_inputUnitId = E::InputUnit::NoInputUnit;			// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_inputSensorType = E::SensorType::NoSensorType;	// electric sensor type for input range (was created for m_inputUnitID)
+	double m_electricLowLimit = 0;										// low electric value for input range
+	double m_electricHighLimit = 0;									// high electric value for input range
+	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;			// electric unit for input range (mA, mV, Ohm, V ....)
+	E::SensorType m_sensorType = E::SensorType::NoSensorType;	// electric sensor type for input range (was created for m_inputUnitID)
 
 	double m_outputLowLimit = 0;									// low physical value for output range
 	double m_outputHighLimit = 0;									// high physical value for output range
@@ -254,7 +260,8 @@ private:
 	E::SensorType m_outputSensorType = E::SensorType::NoSensorType;	// electric sensor type for output range (was created for m_outputMode)
 
 	int m_precision = 2;
-	double m_aperture = 1;
+	double m_coarseAperture = 1;
+	double m_fineAperture = 0.5;
 	double m_filteringTime = 0.005;
 	double m_spreadTolerance = 2;
 	bool m_enableTuning = false;

@@ -111,14 +111,17 @@ namespace VFrame30
 		QString formatSqriptError(const QJSValue& scriptValue) const;
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 
-		// Text search
+		// Text search/replace
 		//
 	public:
-		virtual bool searchText(const QString& text) const;
+		//	first - property where text found
+		//	second - property value
+		std::list<std::pair<QString, QString>> searchTextByProps(const QString& text, Qt::CaseSensitivity cs) const;
+		virtual int replace(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 
 		// Draw Functions
 		//
-	public:
+
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
@@ -251,6 +254,8 @@ namespace VFrame30
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const;
+
+		virtual QString toolTipText(int dpiX, int dpiY) const;
 
 		QString lastScriptError() const;
 

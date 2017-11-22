@@ -89,75 +89,10 @@ void AppSignalManager::reset()
 	return;
 }
 
-void AppSignalManager::setUnits(const std::vector<AppSignalUnits>& units)
-{
-	std::map<int, QString> unitsCopy;
-
-	{
-		QMutexLocker l(&m_unitsMutex);
-
-		m_units.clear();
-
-		for (const AppSignalUnits& u : units)
-		{
-			m_units[u.id] = u.unit;
-		}
-
-		unitsCopy = m_units;
-	}
-
-	//  units in appsignals
-	//
-	{
-		QMutexLocker l(&m_paramsMutex);
-
-		for (auto& spair : m_signalParams)		// & is must be here, in other case pair will be a copy and AppSignalParam will be copy also
-		{
-			AppSignalParam& s = spair.second;
-			auto foundUnitIt = unitsCopy.find(s.unitId());
-
-			if (foundUnitIt == unitsCopy.end())
-			{
-				qDebug() << Q_FUNC_INFO << " Can't find unit, UnitID = " << s.unitId() << ", AppSiagnalID = " << s.appSignalId();
-			}
-			else
-			{
-				s.setUnit(foundUnitIt->second);
-			}
-		}
-	}
-
-	return;
-}
-
-std::map<int, QString> AppSignalManager::units() const
-{
-	QMutexLocker l(&m_unitsMutex);
-	return std::map<int, QString>(m_units);
-}
-
-QString AppSignalManager::units(int id) const
-{
-	QMutexLocker l(&m_unitsMutex);
-
-	auto it = m_units.find(id);
-
-	if (it == m_units.end())
-	{
-		return QString();
-	}
-	else
-	{
-		return it->second;
-	}
-}
-
 void AppSignalManager::addSignal(const AppSignalParam& signal)
 {
 	QMutexLocker l(&m_paramsMutex);
-
 	m_signalParams[signal.hash()] = signal;
-
 	return;
 }
 
@@ -250,7 +185,61 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 
 	QMutexLocker l(&m_statesMutex);
 
-	m_signalStates[signalHash] = state;
+	AppSignalState& storedState = m_signalStates[signalHash];
+
+	if (state.time().system.timeStamp >= storedState.time().system.timeStamp)
+	{
+		storedState = state;
+	}
+	else
+	{
+		// if difference more then 1h, something wrong and we update state
+		//
+		qint64 diff = storedState.time().system.timeStamp - state.time().system.timeStamp;
+
+		if (diff > 1_hour)
+		{
+			storedState = state;
+		}
+	}
+
+	return;
+}
+
+void AppSignalManager::setState(const std::vector<AppSignalState>& states)
+{
+	QMutexLocker l(&m_statesMutex);
+
+	for (const AppSignalState& state : states)
+	{
+		AppSignalState& storedState = m_signalStates[state.hash()];
+
+		if (state.time().system.timeStamp >= storedState.time().system.timeStamp)
+		{
+			storedState = state;
+		}
+		else
+		{
+			// if difference more then 1h, something wrong and we update state
+			//
+			qint64 diff = storedState.time().system.timeStamp - state.time().system.timeStamp;
+
+			if (diff > 1_hour)
+			{
+				storedState = state;
+			}
+			else
+			{
+				// Skip setting state
+				//
+//				if (state.time().system.timeStamp != 0)
+//				{
+//					static int aaa = 0;
+//					qDebug() << aaa++ << " Skip setting state, diff is " << diff << " storedTime: " << storedState.time().system.toDate() << ", State: " << state.time().system.toDate();
+//				}
+			}
+		}
+	}
 
 	return;
 }
@@ -263,24 +252,28 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 		return AppSignalState();
 	}
 
+	emit addSignalToPriorityList(signalHash);
+
 	QMutexLocker l(&m_statesMutex);
 
-	AppSignalState result;
-	result.m_flags.valid = false;
-
 	auto foundState = m_signalStates.find(signalHash);
-
-	if (foundState != m_signalStates.end())
-	{
-		result = foundState->second;
-	}
 
 	if (found != nullptr)
 	{
 		*found = !(foundState == m_signalStates.end());
 	}
 
-	return result;
+	if (foundState != m_signalStates.end())
+	{
+		return foundState->second;
+	}
+	else
+	{
+		AppSignalState result;
+		result.m_flags.valid = false;
+
+		return result;
+	}
 }
 
 AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
@@ -289,39 +282,47 @@ AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* f
 	return signalState(h, found);
 }
 
-int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result) const
+void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 {
 	if (result == nullptr)
 	{
 		assert(result);
-		return 0;
+		return;
 	}
+
+	emit addSignalsToPriorityList(QVector<Hash>::fromStdVector(appSignalHashes));
 
 	QMutexLocker l(&m_statesMutex);
 
-	int found = 0;
+	int foundCount = 0;
 
 	for (const Hash& signalHash : appSignalHashes)
 	{
-		AppSignalState state;
-
-		state.m_flags.valid = false;
-
 		auto foundState = m_signalStates.find(signalHash);
 
 		if (foundState != m_signalStates.end())
 		{
-			state = foundState->second;
-			found ++;
+			result->push_back(foundState->second);
+			foundCount ++;
 		}
+		else
+		{
+			AppSignalState state;				// Non valid state, hash will be 0 or something like UNDEFINED
+			state.m_flags.valid = false;
 
-		result->push_back(state);
+			result->push_back(state);
+		}
 	}
 
-	return found;
+	if (found != nullptr)
+	{
+		*found = foundCount;
+	}
+
+	return;
 }
 
-int AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result) const
+void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
 {
 	std::vector<Hash> appSignalHashes;
 	appSignalHashes.reserve(appSignalIds.size());
@@ -332,9 +333,14 @@ int AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std:
 		appSignalHashes.push_back(h);
 	}
 
-	assert(appSignalIds.size() == appSignalHashes.size());
+	if (appSignalIds.size() != appSignalHashes.size())
+	{
+		assert(appSignalIds.size() == appSignalHashes.size());
+		return;
+	}
 
-	return signalState(appSignalHashes, result);
+	signalState(appSignalHashes, result, found);
+	return;
 }
 
 

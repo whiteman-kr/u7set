@@ -181,15 +181,18 @@ void ProjectsTabPage::createProject()
 			bool result = dbController()->createProject(projectName, administratorPassword, this);
 			if (result == true)
 			{
-				dbController()->upgradeProject(projectName, administratorPassword, false, this);
+				bool upgradeOk = dbController()->upgradeProject(projectName, administratorPassword, false, this);
 
-				// Open project to write Description property
-				//
-				result = dbController()->openProject(projectName, "Administrator", administratorPassword, this);
-				if (result == true)
+				if (upgradeOk == true)
 				{
-					dbController()->setProjectProperty("Description", dialog.projectDescription, this);
-					dbController()->closeProject(this);
+					// Open project to write Description property
+					//
+					result = dbController()->openProject(projectName, "Administrator", administratorPassword, this);
+					if (result == true)
+					{
+						dbController()->setProjectProperty("Description", dialog.projectDescription, this);
+						dbController()->closeProject(this);
+					}
 				}
 			}
 
@@ -515,10 +518,10 @@ void ProjectsTabPage::selectProject(const QString& projectName)
 	for (int i = 0; i < m_projectTable->rowCount(); i++)
 	{
 		QTableWidgetItem* item = m_projectTable->item(i, 0);
-
 		assert(item != nullptr);
 
-		if (item->text().toLower() == lcProjectName)
+		if (item != nullptr &&
+			item->text().toLower() == lcProjectName)
 		{
 			m_projectTable->setCurrentCell(i, 0);
 			break;

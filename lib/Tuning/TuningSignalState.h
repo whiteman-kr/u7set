@@ -59,6 +59,9 @@ public:
 	void invalidate();
 
 public:
+	static bool floatsEqual(float x, float y);
+
+public:
 	TuningSignalStateFlags m_flags;
 
 	float m_value = 0;

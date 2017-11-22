@@ -18,18 +18,18 @@ class DbProgress;
 
 class DbWorker : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 private:
-    DbWorker();
-
-    void getSignalData(QSqlQuery& q, Signal &s);
-    QString getSignalDataStr(const Signal& s);
+	DbWorker();
 
 	void getObjectState(QSqlQuery& q, ObjectState& os);
 
 public:
     DbWorker(DbProgress* progress);
+
+	static void getSignalData(QSqlQuery& q, Signal &s);
+	static QString getSignalDataStr(const Signal& s);
 
 protected:
 	QString postgresConnectionName() const;
@@ -95,10 +95,13 @@ public slots:
 
     // File management
     //
+	void slot_isFileExists(QString fileName, int parentId, int* fileId);
+
     void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
     void getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
 
-    void slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+	void slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
+	void slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
     void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);
@@ -133,7 +136,9 @@ public slots:
     // Signal management
     //
     void slot_getSignalsIDs(QVector<int>* signalsIDs);
-    void slot_getSignals(SignalSet* signalSet);
+	void slot_getSignals(SignalSet* signalSet, bool excludeDeleted);
+	void slot_getTuningableSignals(SignalSet* signalSet);
+	void getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly);
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
 
@@ -164,9 +169,9 @@ public slots:
 
 	// Units management
 	//
-	void slot_getUnits(UnitList* units);
+/*	void slot_getUnits(UnitList* units);
 	void slot_addUnit(QString unitEn, QString unitRu, int* newUnitID);
-	void slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);
+	void slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);*/
 
     // Build management
     //

@@ -36,8 +36,12 @@ DbController::DbController() :
 	connect(this, &DbController::signal_updateUser, m_worker, &DbWorker::slot_updateUser);
 	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
 
+	connect(this, &DbController::signal_isFileExists, m_worker, &DbWorker::slot_isFileExists);
+
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
+
 	connect(this, &DbController::signal_getFileInfo, m_worker, &DbWorker::slot_getFileInfo);
+	connect(this, &DbController::signal_getFilesInfo, m_worker, &DbWorker::slot_getFilesInfo);
 
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
@@ -72,6 +76,7 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
 	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
+	connect(this, &DbController::signal_getTuningableSignals, m_worker, &DbWorker::slot_getTuningableSignals);
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
@@ -87,10 +92,6 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getSignalHistory, m_worker, &DbWorker::slot_getSignalHistory);
 	connect(this, &DbController::signal_getSpecificSignals, m_worker, &DbWorker::slot_getSpecificSignals);
-
-	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
-	connect(this, &DbController::signal_addUnit, m_worker, &DbWorker::slot_addUnit);
-	connect(this, &DbController::signal_updateUnit, m_worker, &DbWorker::slot_updateUnit);
 
 	connect(this, &DbController::signal_buildStart, m_worker, &DbWorker::slot_buildStart);
 	connect(this, &DbController::signal_buildFinish, m_worker, &DbWorker::slot_buildFinish);
@@ -190,7 +191,7 @@ bool DbController::openProject(QString projectName, QString username, QString pa
 	//
 	emit signal_openProject(projectName, username, password);
 
-	bool result = waitForComplete(parentWidget, tr("Openning project"));
+	bool result = waitForComplete(parentWidget, tr("Opening project"));
 
 	if (result == false)
 	{
@@ -440,6 +441,32 @@ bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
 	return result;
 }
 
+bool DbController::isFileExists(QString fileName, int parentId, int* fileId, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (fileId == nullptr)
+	{
+		assert(fileId != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_isFileExists(fileName, parentId, fileId);
+
+	bool result = waitForComplete(parentWidget, tr("Getting file information..."));
+	return result;
+}
+
 bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget)
 {
 	return getFileList(files, parentId, QString(), removeDeleted, parentWidget);
@@ -468,6 +495,32 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QSt
 	emit signal_getFileList(files, parentId, filter, removeDeleted);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
+	return result;
+}
+
+bool DbController::getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileInfo(parentId, fileName, out);
+
+	bool result = waitForComplete(parentWidget, tr("Geting file info"));
 	return result;
 }
 
@@ -521,7 +574,7 @@ bool DbController::getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo
 
 	// Emit signal end wait for complete
 	//
-	emit signal_getFileInfo(fileIds, out);
+	emit signal_getFilesInfo(fileIds, out);
 
 	bool result = waitForComplete(parentWidget, tr("Geting files info"));
 	return result;
@@ -1445,7 +1498,7 @@ bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
 }
 
 
-bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
+bool DbController::getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget)
 {
 	if (signalSet == nullptr)
 	{
@@ -1462,13 +1515,36 @@ bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
 		return false;
 	}
 
-	emit signal_getSignals(signalSet);
+	emit signal_getSignals(signalSet, excludeDeleted);
 
 	ok = waitForComplete(parentWidget, tr("Reading signals"));
 
 	return ok;
 }
 
+bool DbController::getTuningableSignals(SignalSet* signalSet, QWidget* parentWidget)
+{
+	if (signalSet == nullptr)
+	{
+		assert(signalSet != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getTuningableSignals(signalSet);
+
+	ok = waitForComplete(parentWidget, tr("Reading tuningable signals"));
+
+	return ok;
+}
 
 bool DbController::getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget)
 {
@@ -1541,92 +1617,6 @@ bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSigna
 	emit signal_addSignal(signalType, newSignal);
 
 	ok = waitForComplete(parentWidget, tr("Adding signals"));
-
-	return ok;
-}
-
-
-bool DbController::getUnits(UnitList *units, QWidget* parentWidget)
-{
-	if (units == nullptr)
-	{
-		assert(units != nullptr);
-		return false;
-	}
-
-	// Init progress and check availability
-	//
-	bool ok = initOperation();
-
-	if (ok == false)
-	{
-		return false;
-	}
-
-	emit signal_getUnits(units);
-
-	ok = waitForComplete(parentWidget, tr("Reading units"));
-
-	return ok;
-}
-
-
-// On success return ID of newly created unit (newUnitID >= 1)
-// On error:
-//		newUnitID == -1 - unit with 'unitEn' already exists
-//		newUnitID == -2 - unit with 'unitRu' already exists
-//
-bool DbController::addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget)
-{
-	if (newUnitID == nullptr)
-	{
-		assert(newUnitID != nullptr);
-		return false;
-	}
-
-	// Init progress and check availability
-	//
-	bool ok = initOperation();
-
-	if (ok == false)
-	{
-		return false;
-	}
-
-	emit signal_addUnit(unitEn, unitRu, newUnitID);
-
-	ok = waitForComplete(parentWidget, tr("Add unit"));
-
-	return ok;
-}
-
-
-// On success return count of updated units, result == 1
-// On error:
-//		result == 0  - unit with 'unitID' is not found
-//		result == -1 - unit with 'unitEn' already exists
-//		result == -2 - unit with 'unitRu' already exists
-//
-bool DbController::updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget)
-{
-	if (result == nullptr)
-	{
-		assert(result != nullptr);
-		return false;
-	}
-
-	// Init progress and check availability
-	//
-	bool ok = initOperation();
-
-	if (ok == false)
-	{
-		return false;
-	}
-
-	emit signal_updateUnit(unitID, unitEn, unitRu, result);
-
-	ok = waitForComplete(parentWidget, tr("Update unit"));
 
 	return ok;
 }
@@ -2146,7 +2136,7 @@ bool DbController::waitForComplete(QWidget* parentWidget, const QString& descrip
 {
 	bool result = m_progress.run(parentWidget, description);
 
-	if (result == false || m_progress.hasError())
+	if (result == false || m_progress.hasError() == true)
 	{
 		m_lastError = m_progress.errorMessage();
 	}

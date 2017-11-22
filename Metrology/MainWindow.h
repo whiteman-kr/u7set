@@ -9,6 +9,8 @@
 #include <QDockWidget>
 #include <QLabel>
 #include <QProgressBar>
+#include <QComboBox>
+#include <QClipboard>
 
 #include "../lib/SimpleThread.h"
 
@@ -179,7 +181,6 @@ public:
 	MeasureThread&			measureThread() { return m_measureThread; }
 
 	bool					signalSourceIsValid(bool showMsg);
-	bool					signalIsMeasured(QString& signalID);
 
 protected:
 
@@ -224,7 +225,7 @@ private slots:
 	//
 	void					showStatistic();
 	void					aboutConnection() {};
-	void					aboutApp() {};
+	void					aboutApp();
 
 	// Slots of tab -- page measure type
 	//
@@ -276,6 +277,8 @@ private slots:
 	void					measureThreadStoped();
 	void					setMeasureThreadInfo(QString msg);
 	void					setMeasureThreadInfo(int timeout);
+	void					measureThreadMsgBox(int type, QString text, int *result = nullptr);
+	void					setNextMeasureSignal(bool& measureNextSignal);
 	void					measureComplite(Measurement* pMeasurement);
 
 	// Slots for enable measuring

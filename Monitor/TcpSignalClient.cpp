@@ -91,10 +91,6 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 		processSignalParam(data);
 		break;
 
-	case ADS_GET_UNITS:
-		processUnits(data);
-		break;
-
 	case ADS_GET_APP_SIGNAL_STATE:
 		processSignalState(data);
 		break;
@@ -270,7 +266,8 @@ void TcpSignalClient::requestSignalParam(int startIndex)
 
 	if (startIndex >= m_signalList.size())
 	{
-		requestUnits();
+		requestSignalState(0);		// END OF RECEIVING SIGNALS PARAMS,
+									// Here the new loop starts!!!
 		return;
 	}
 
@@ -310,9 +307,9 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		return;
 	}
 
-	for (int i = 0; i < m_getSignalParamReply.appsignalparams_size(); i++)
+	for (int i = 0; i < m_getSignalParamReply.appsignals_size(); i++)
 	{
-		const ::Proto::AppSignalParam& protoSignal = m_getSignalParamReply.appsignalparams(i);
+		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignals(i);
 
 		AppSignalParam s;
 		s.load(protoSignal);
@@ -331,57 +328,6 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 	return;
 }
 
-// Units
-//
-void TcpSignalClient::requestUnits()
-{
-	assert(isClearToSendRequest());
-	sendRequest(ADS_GET_UNITS, m_getUnitsRequest);
-	return;
-}
-
-void TcpSignalClient::processUnits(const QByteArray& data)
-{
-	bool ok = m_getUnitsReply.ParseFromArray(data.constData(), data.size());
-
-	if (ok == false)
-	{
-		assert(ok);
-		resetToGetState();
-		return;
-	}
-
-	if (m_getUnitsReply.error() != 0)
-	{
-		qDebug() << "TcpSignalClient::processUnits, error received: " << m_getUnitsReply.error();
-		assert(m_getUnitsReply.error() != 0);
-
-		resetToGetState();
-		return;
-	}
-
-	std::vector<AppSignalManager::AppSignalUnits> units;
-	units.reserve(m_getUnitsReply.units_size());
-
-	for (int i = 0; i < m_getUnitsReply.units_size(); i++)
-	{
-		const ::Network::Unit& u = m_getUnitsReply.units(i);
-
-		AppSignalManager::AppSignalUnits appUnits{u.id(), QString::fromStdString(u.unit())};
-
-		units.push_back(appUnits);
-	}
-
-	theSignals.setUnits(units);
-
-	qDebug() << "TcpSignalClient::processUnits UnitsCount: " << units.size();
-
-	emit signalParamAndUnitsArrived();
-
-	resetToGetState();				// Switch to next get
-
-	return;
-}
 
 // AppSignalState
 //
@@ -397,7 +343,7 @@ void TcpSignalClient::requestSignalState(int startIndex)
 	}
 
 	m_getSignalStateRequest.mutable_signalhashes()->Clear();
-	m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX );
+	m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 	for (int i = startIndex;
 		 i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX &&
@@ -432,21 +378,20 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 		return;
 	}
 
-	for (int i = 0; i < m_getSignalStateReply.appsignalstates_size(); i++)
+	int signalStateCount = m_getSignalStateReply.appsignalstates_size();
+
+	std::vector<AppSignalState> states;
+	states.reserve(signalStateCount);
+
+	for (int i = 0; i < signalStateCount; i++)
 	{
 		const ::Proto::AppSignalState& protoState = m_getSignalStateReply.appsignalstates(i);
+		assert(protoState.hash() != 0);
 
-		if (protoState.hash() == 0)
-		{
-			assert(protoState.hash() != 0);
-			continue;
-		}
-
-		AppSignalState state;
-		state.load(protoState);
-
-		theSignals.setState(protoState.hash(), state);
+		states.emplace_back(protoState);
 	}
+
+	theSignals.setState(states);
 
 	requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
 
@@ -458,7 +403,7 @@ void TcpSignalClient::slot_configurationArrived(ConfigSettings configuration)
 	HostAddressPort s1 = configuration.appDataService1.address();
 	HostAddressPort s2 = configuration.appDataService2.address();
 
-	if (serverAddressPort(0) == s1 ||
+	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)
 	{
 		setServers(s1, s2, true);

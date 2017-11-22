@@ -49,9 +49,12 @@ public:
 
 	// File management
 	//
+	bool isFileExists(QString fileName, int parentId, int* fileId, QWidget* parentWidget);
+
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
 
+	bool getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 
@@ -103,7 +106,8 @@ public:
 	// Signals management
 	//
 	bool getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
-	bool getSignals(SignalSet* signalSet, QWidget* parentWidget);
+	bool getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget);
+	bool getTuningableSignals(SignalSet* signalSet, QWidget* parentWidget);
 	bool getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget);
 	bool getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
@@ -128,9 +132,9 @@ public:
 
 	// Units management
 	//
-	bool getUnits(UnitList* units, QWidget* parentWidget);
+/*	bool getUnits(UnitList* units, QWidget* parentWidget);
 	bool addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget);
-	bool updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget);
+	bool updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget);*/
 
 	// Build management
 	//
@@ -163,8 +167,12 @@ signals:
 	void signal_updateUser(DbUser user);
 	void signal_getUserList(std::vector<DbUser>* out);
 
+	bool signal_isFileExists(QString fileName, int parentId, int* fileId);
+
 	void signal_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
-	void signal_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+
+	void signal_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
+	void signal_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
 	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
@@ -197,12 +205,12 @@ signals:
 	void signal_addDeviceObject(Hardware::DeviceObject* device, int parentId);
 
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
-	void signal_getSignals(SignalSet* signalSet);
+	void signal_getSignals(SignalSet* signalSet, bool excludeDeleted);
+	void signal_getTuningableSignals(SignalSet* signalSet);
 	void signal_getLatestSignal(int signalID, Signal* signal);
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
-	void signal_getDataFormats(DataFormatList* dataFormats);
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
@@ -218,12 +226,6 @@ signals:
 
 	void signal_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void signal_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
-
-	// Units management
-	//
-	void signal_getUnits(UnitList* units);
-	void signal_addUnit(QString unitEn, QString unitRu, int* newUnitID);
-	void signal_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);
 
 	// Build management
 	//

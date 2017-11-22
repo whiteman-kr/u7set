@@ -22,7 +22,8 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		void drawAfbHelp(QPainter* painter, const QRect& drawRect) const;
 
 		// Serialization
 		//
@@ -33,6 +34,7 @@ namespace VFrame30
 		// Methods
 		//
 	public:
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 		virtual QString buildName() const override;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);

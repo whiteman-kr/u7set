@@ -18,6 +18,7 @@ namespace Builder
 
 		bool writeAppDataServiceSection(QXmlStreamWriter& xmlWriter);
 		bool writeArchiveServiceSection(QXmlStreamWriter& xmlWriter);
+		bool writeTuningServiceSection(QXmlStreamWriter& xmlWriter);
 
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
@@ -41,10 +42,11 @@ namespace Builder
 		Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
 		if (object == nullptr)
 		{
+			m_log->errCFG3021(m_software->equipmentId(), property, strId);
+
 			QString errorStr = tr("Object %1 is not found")
 							   .arg(strId);
 
-			m_log->writeError(errorStr);
 			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
 			*ok = false;

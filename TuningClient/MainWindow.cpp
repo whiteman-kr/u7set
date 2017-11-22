@@ -8,7 +8,7 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
-#include "TuningClientFilterEditor.h"
+#include "DialogFilterEditor.h"
 #include "version.h"
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -26,11 +26,9 @@ MainWindow::MainWindow(QWidget* parent) :
 		resize(1024, 768);
 	}
 
-	theLogFile = new LogFile("TuningClient", QDir::toNativeSeparators(theSettings.localAppDataPath()));
+	theLogFile = new Log::LogFile(qAppName());
 
-	theLogFile->write("--");
-	theLogFile->write("-----------------------");
-	theLogFile->write("--");
+	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
 	createActions();
@@ -67,7 +65,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	QString errorCode;
 
-	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode, TuningFilter::FilterSource::User) == false)
+	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -137,8 +135,7 @@ void MainWindow::createActions()
 
 	m_pLogAction = new QAction(tr("Log..."), this);
 	m_pLogAction->setStatusTip(tr("Show application log"));
-	//m_pLogAction->setEnabled(false);
-	//connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
+	connect(m_pLogAction, &QAction::triggered, this, &MainWindow::showLog);
 
 	m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
@@ -288,7 +285,8 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 
 	// Update automatic filters
 
-	m_filterStorage.removeFilters(TuningFilter::FilterSource::Automatic);
+	m_filterStorage.removeFilters(TuningFilter::Source::Schema);
+	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
 
 	m_filterStorage.createAutomaticFilters(objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
 
@@ -296,7 +294,17 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 
 	bool removedNotFound = false;
 
-	m_filterStorage.checkSignals(objects, removedNotFound, this);
+	std::vector<Hash> tuningSignalHashArray;
+
+	int count = objects->signalsCount();
+	for (int i = 0; i < count; i++)
+	{
+		tuningSignalHashArray.push_back(objects->signalPtrByIndex(i)->hash());
+	}
+
+	std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
+
+	m_filterStorage.checkAndRemoveFilterSignals(tuningSignalHashArray, removedNotFound, notFoundSignalsAndFilters, this);
 
 	if (removedNotFound == true)
 	{
@@ -382,22 +390,14 @@ void MainWindow::slot_configurationArrived()
 	return;
 }
 
-void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry)
-{
-	theSettings.m_presetEditorSignalsTableColumnWidth = signalsTableColumnWidth;
-	theSettings.m_presetEditorPresetsTreeColumnWidth = presetsTreeColumnWidth;
-	theSettings.m_presetEditorPos = pos;
-	theSettings.m_presetEditorGeometry = geometry;
-}
-
 void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 {
 	QString errorStr;
 
 
-	m_filterStorage.removeFilters(TuningFilter::FilterSource::Project);
+	m_filterStorage.removeFilters(TuningFilter::Source::Project);
 
-	if (m_filterStorage.load(data, &errorStr, TuningFilter::FilterSource::Project) == false)
+	if (m_filterStorage.load(data, &errorStr) == false)
 	{
 		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
 		theLogFile->writeError(completeErrorMessage);
@@ -437,15 +437,11 @@ void MainWindow::runPresetEditor()
 
 	TuningSignalStorage objects = m_objectManager->signalsStorage();
 
-	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects,
-							   theSettings.m_presetEditorSignalsTableColumnWidth,
-							   theSettings.m_presetEditorPresetsTreeColumnWidth,
-							   theSettings.m_presetEditorPos,
-							   theSettings.m_presetEditorGeometry,
+	DialogFilterEditor d(m_objectManager, &editFilters, &objects,
 							   this);
 
-	connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
-	connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
+    //connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
+    //connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
 
 	if (d.exec() == QDialog::Accepted)
 	{
@@ -506,6 +502,14 @@ void MainWindow::showTuningSources()
 	}
 }
 
+void MainWindow::showLog()
+{
+	if (theLogFile != nullptr)
+	{
+		theLogFile->view(this);
+	}
+}
+
 void MainWindow::showAbout()
 {
 	QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
@@ -558,6 +562,6 @@ void MainWindow::showAbout()
 }
 
 MainWindow* theMainWindow = nullptr;
-LogFile* theLogFile = nullptr;
+Log::LogFile* theLogFile = nullptr;
 
 UserManager theUserManager;

@@ -34,17 +34,17 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	//
 	m_addSignalMenu = new QMenu(this);
 
-	m_analogAction = new QAction("Analog signal", this);
-	m_discreteAction = new QAction("Discrete signal", this);
-	m_busAction = new QAction("Bus signal", this);
+	m_addSignalAnalogAction = new QAction("Analog signal", this);
+	m_addSignalDiscreteAction = new QAction("Discrete signal", this);
+	m_addSignalBusAction = new QAction("Bus signal", this);
 
-	connect(m_analogAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Analog);});
-	connect(m_discreteAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Discrete);});
-	connect(m_busAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Bus);});
+	connect(m_addSignalAnalogAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Analog);});
+	connect(m_addSignalDiscreteAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Discrete);});
+	connect(m_addSignalBusAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Bus);});
 
-	m_addSignalMenu->addAction(m_analogAction);
-	m_addSignalMenu->addAction(m_discreteAction);
-	m_addSignalMenu->addAction(m_busAction);
+	m_addSignalMenu->addAction(m_addSignalAnalogAction);
+	m_addSignalMenu->addAction(m_addSignalDiscreteAction);
+	m_addSignalMenu->addAction(m_addSignalBusAction);
 
 	// m_busTree
 	//
@@ -103,19 +103,21 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	m_signalsTree = new QTreeWidget();
 
 	l.clear();
-	l << tr("Name");
+	l << tr("SignalID");
+	l << tr("Caption");
 	l << tr("Type");
-	l << tr("Signal Format");
-	l << tr("BusTypeID");
+	l << tr("Format");
+	l << tr("Placement");
 
 	m_signalsTree->setColumnCount(l.size());
 	m_signalsTree->setHeaderLabels(l);
 
 	il = 0;
-	m_signalsTree->setColumnWidth(il++, 140);
-	m_signalsTree->setColumnWidth(il++, 40);
-	m_signalsTree->setColumnWidth(il++, 40);
-	m_signalsTree->setColumnWidth(il++, 40);
+	m_signalsTree->setColumnWidth(il++, 150);
+	m_signalsTree->setColumnWidth(il++, 150);
+	m_signalsTree->setColumnWidth(il++, 60);
+	m_signalsTree->setColumnWidth(il++, 50);
+	m_signalsTree->setColumnWidth(il++, 100);
 
 	m_signalsTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_signalsTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -337,7 +339,7 @@ DialogBusEditor::~DialogBusEditor()
 
 void DialogBusEditor::onAdd()
 {
-	VFrame30::Bus bus;
+	std::shared_ptr<VFrame30::Bus> bus = std::make_shared<VFrame30::Bus>();
 
 	bool ok = false;
 
@@ -353,16 +355,17 @@ void DialogBusEditor::onAdd()
 	int count = m_busses.count();
 	for (int i = 0; i < count; i++)
 	{
-		const VFrame30::Bus& bus = m_busses.get(i);
-		if (bus.busTypeId() == busTypeId)
+		const std::shared_ptr<VFrame30::Bus> existingBus = m_busses.get(i);
+
+		if (existingBus->busTypeId() == busTypeId)
 		{
 			QMessageBox::critical(this, qAppName(), tr("A bus with specified type ID already exists!"));
 			return;
 		}
 	}
 
-	bus.setUuid(QUuid::createUuid());
-	bus.setBusTypeId(busTypeId);
+	bus->setUuid(QUuid::createUuid());
+	bus->setBusTypeId(busTypeId);
 
 	addBus(bus);
 
@@ -444,13 +447,13 @@ void DialogBusEditor::onClone()
 		return;
 	}
 
-	VFrame30::Bus cloneBus = *bus;
+	std::shared_ptr<VFrame30::Bus> cloneBus = std::make_shared<VFrame30::Bus>(*bus);
 
 	bool ok = false;
 
 	QString busTypeId = QInputDialog::getText(this, tr("Clone Bus"),
 										 tr("Enter bus type ID:"), QLineEdit::Normal,
-										 cloneBus.busTypeId() + " (clone)", &ok);
+										 cloneBus->busTypeId() + " (clone)", &ok);
 
 	if (ok == false || busTypeId.isEmpty() == true)
 	{
@@ -460,16 +463,16 @@ void DialogBusEditor::onClone()
 	int count = m_busses.count();
 	for (int i = 0; i < count; i++)
 	{
-		const VFrame30::Bus& bus = m_busses.get(i);
-		if (bus.busTypeId() == busTypeId)
+		const std::shared_ptr<VFrame30::Bus> existingBus = m_busses.get(i);
+		if (existingBus->busTypeId() == busTypeId)
 		{
 			QMessageBox::critical(this, qAppName(), tr("A bus with specified type ID already exists!"));
 			return;
 		}
 	}
 
-	cloneBus.setUuid(QUuid::createUuid());
-	cloneBus.setBusTypeId(busTypeId);
+	cloneBus->setUuid(QUuid::createUuid());
+	cloneBus->setBusTypeId(busTypeId);
 
 	addBus(cloneBus);
 
@@ -631,28 +634,17 @@ void DialogBusEditor::onUndo()
 		}
 		else
 		{
-			// read previous data from file
+			// Read previous data from file
+			//
 
-			std::shared_ptr<DbFile> file = nullptr;
-
-			DbFileInfo fi = m_busses.fileInfo(uuid);
-
-			bool ok = m_db->getLatestVersion(fi, &file, this);
-			if (ok == true && file != nullptr)
+			bool ok = reloadBus(uuid);
+			if (ok == true)
 			{
-				QByteArray data;
-				file->swapData(data);
+				updateBusTreeItemText(item);
 
-				VFrame30::Bus* bus = m_busses.getPtr(uuid);
+				fillBusProperties();
 
-				QString errorMessage;
-
-				if (bus != nullptr && bus->load(data, &errorMessage) == true)
-				{
-					updateBusTreeItemText(item);
-					fillBusProperties();
-					fillBusSignals();
-				}
+				fillBusSignals();
 			}
 		}
 	}
@@ -699,24 +691,32 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	VFrame30::BusSignal bs(type);
 
 	bool ok = false;
+	QString defaultSignalId = QString("sid_%1").arg(bus->busSignals().size());
 
-	QString signalName = QInputDialog::getText(this, tr("Add Signal"),
-										 tr("Enter signal name:"), QLineEdit::Normal,
-										 tr("name"), &ok);
+	QString signalId = QInputDialog::getText(this, tr("Add Signal"),
+												  tr("Enter SignalID:"), QLineEdit::Normal,
+												  defaultSignalId, &ok);
+	signalId = signalId.trimmed();
 
-	if (ok == false || signalName.isEmpty() == true)
+	if (ok == false || signalId.isEmpty() == true)
 	{
 		return;
 	}
 
-	bs.setName(signalName);
+	bs.setSignalId(signalId);
+	bs.setCaption(signalId);
+
+	if (type == E::SignalType::Bus)
+	{
+		bs.setBusTypeId("BUSTYPEID");
+	}
 
 	const std::vector<VFrame30::BusSignal>& busSignals = bus->busSignals();
 	for (const VFrame30::BusSignal& checkBs : busSignals)
 	{
-		if (checkBs.name() == bs.name())
+		if (checkBs.signalId() == bs.signalId())
 		{
-			QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(bs.name()));
+			QMessageBox::critical(this, qAppName(), tr("A signal with SignalID '%1' already exists!").arg(bs.signalId()));
 			return;
 		}
 	}
@@ -730,6 +730,10 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	item->setData(0, Qt::UserRole, m_signalsTree->topLevelItemCount());
 
 	m_signalsTree->addTopLevelItem(item);
+
+	m_signalsTree->clearSelection();
+
+	item->setSelected(true);
 
 	saveBus(uuid);
 
@@ -806,22 +810,22 @@ void DialogBusEditor::onSignalEdit()
 				return;
 			}
 
-			// Check for duplicate signal names
+			// Check for duplicate SignalIDs
 			//
 
-			bool duplicateNames = false;
+			bool duplicateSignalIds = false;
 
 			for (int j = 0; j < busSignals.size(); j++)
 			{
-				if (editIndex != j && busSignals[j].name() == editSignal->name())
+				if (editIndex != j && busSignals[j].signalId() == editSignal->signalId())
 				{
-					QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(busSignals[j].name()));
-					duplicateNames = true;
+					QMessageBox::critical(this, qAppName(), tr("A signal with SignalID '%1' already exists!").arg(busSignals[j].signalId()));
+					duplicateSignalIds = true;
 					break;
 				}
 			}
 
-			if (duplicateNames == true)
+			if (duplicateSignalIds == true)
 			{
 				continue;
 			}
@@ -874,7 +878,7 @@ void DialogBusEditor::onSignalRemove()
 
 	for (int i = static_cast<int>(indexesToDelete.size() - 1); i >= 0; i--)
 	{
-		bus->removeSignal(indexesToDelete[i]);
+		bus->removeSignalAt(indexesToDelete[i]);
 	}
 
 	fillBusSignals();
@@ -1048,44 +1052,44 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 			return;
 		}
 
+		// Check if bus ID already exists
+
 		bool alreadyExists = false;
 
 		int count = m_busses.count();
 		for (int i = 0; i < count; i++)
 		{
-			const VFrame30::Bus& bus = m_busses.get(i);
-			if (bus.busTypeId() == editBus->busTypeId() && bus.uuid() != editBus->uuid())
+			const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(i);
+			if (bus->busTypeId() == editBus->busTypeId() && bus->uuid() != editBus->uuid())
 			{
-				QMessageBox::critical(this, qAppName(), tr("A bus with type ID '%1' already exists!").arg(bus.busTypeId()));
+				QMessageBox::critical(this, qAppName(), tr("A bus with type ID '%1' already exists!").arg(bus->busTypeId()));
 				alreadyExists = true;
 				break;
 			}
 		}
 
+		// Skip if bus ID already exists
+
 		if (alreadyExists == true)
 		{
 			refillPropeties = true;
+
+			reloadBus(editBus->uuid());
+
 			continue;
 		}
+
+		// Save and update bus information
+
+		saveBus(editBus->uuid());
 
 		for (QTreeWidgetItem* item : m_busTree->selectedItems())
 		{
 			QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-			VFrame30::Bus* listBus = m_busses.getPtr(uuid);
-			if (listBus == nullptr)
+			if (editBus->uuid() == uuid)
 			{
-				assert(listBus);
-				return;
-			}
-
-			if (editBus->uuid() == listBus->uuid())
-			{
-				listBus->setBusTypeId(editBus->busTypeId());
-
-				updateBusTreeItemText(item, *listBus);
-
-				saveBus(uuid);
+				updateBusTreeItemText(item, editBus);
 			}
 		}
 	}
@@ -1094,6 +1098,8 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 	{
 		fillBusProperties();
 	}
+
+	fillBusSignals();
 
 	return;
 }
@@ -1144,11 +1150,11 @@ void DialogBusEditor::fillBusList()
 
 	for (int i = 0; i < count; i++)
 	{
-		const VFrame30::Bus& bus = m_busses.get(i);
+		const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(i);
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 
-		item->setData(0, Qt::UserRole, bus.uuid());
+		item->setData(0, Qt::UserRole, bus->uuid());
 
 		m_busTree->addTopLevelItem(item);
 
@@ -1195,13 +1201,11 @@ void DialogBusEditor::fillBusProperties()
 
 		QUuid uuid = d.toUuid();
 
-		VFrame30::Bus bus = m_busses.get(uuid);
+		std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
 
-		std::shared_ptr<VFrame30::Bus> busPtr = std::make_shared<VFrame30::Bus>(bus);
+		busObjects.push_back(bus);
 
-		busObjects.push_back(busPtr);
-
-		if (m_busses.fileInfo(bus.uuid()).state() == VcsState::CheckedOut)
+		if (m_busses.fileInfo(bus->uuid()).state() == VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}
@@ -1251,13 +1255,13 @@ void DialogBusEditor::fillBusSignals()
 	return;
 }
 
-bool DialogBusEditor::addBus(VFrame30::Bus bus)
+bool DialogBusEditor::addBus(const std::shared_ptr<VFrame30::Bus> bus)
 {
 	// Add bus, update UI
 	//
-	m_busses.add(bus.uuid(), bus);
+	m_busses.add(bus->uuid(), bus);
 
-	bool ok = saveBus(bus.uuid());
+	bool ok = saveBus(bus->uuid());
 	if (ok == false)
 	{
 		return false;
@@ -1265,7 +1269,7 @@ bool DialogBusEditor::addBus(VFrame30::Bus bus)
 
 	QTreeWidgetItem* item = new QTreeWidgetItem();
 
-	item->setData(0, Qt::UserRole, bus.uuid());
+	item->setData(0, Qt::UserRole, bus->uuid());
 
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
 
@@ -1296,9 +1300,9 @@ void DialogBusEditor::updateButtonsEnableState()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		const VFrame30::Bus& bus = m_busses.get(uuid);
+		const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
 
-		if (m_busses.fileInfo(bus.uuid()).state() == VcsState::CheckedOut)
+		if (m_busses.fileInfo(bus->uuid()).state() == VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}
@@ -1357,9 +1361,9 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 
 	QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-	const VFrame30::Bus& bus = m_busses.get(uuid);
+	const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
 
-	updateBusTreeItemText(item, bus);
+	updateBusTreeItemText(item, bus.get());
 
 	DbFileInfo fi = m_busses.fileInfo(uuid);
 
@@ -1379,9 +1383,16 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 	return;
 }
 
-void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item, const VFrame30::Bus& bus)
+void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item, const VFrame30::Bus* bus)
 {
-	item->setText(0, bus.busTypeId());
+	if (bus == nullptr)
+	{
+		assert(bus);
+		return;
+	}
+
+	item->setText(0, bus->busTypeId());
+	return;
 }
 
 void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFrame30::BusSignal& signal)
@@ -1392,26 +1403,56 @@ void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFr
 		return;
 	}
 
-	item->setText(0, signal.name());
-	item->setText(1, E::valueToString<E::SignalType>(signal.type()));
+	item->setText(0, signal.signalId());
+	item->setText(1, signal.caption());
+	item->setText(2, E::valueToString<E::SignalType>(signal.type()));
+
+	// Type
 
 	if (signal.type() == E::SignalType::Analog)
 	{
-		item->setText(2, E::valueToString<E::AnalogAppSignalFormat>(signal.analogFormat()));
+		item->setText(3, E::valueToString<E::AnalogAppSignalFormat>(signal.analogFormat()));
 	}
 	else
 	{
-		item->setText(2, "");
+		if (signal.type() == E::SignalType::Discrete)
+		{
+			item->setText(3, "");
+		}
+		else
+		{
+			assert(signal.type() == E::SignalType::Bus);
+			item->setText(3, signal.busTypeId());
+		}
 	}
 
-	if (signal.type() == E::SignalType::Bus)
+	// Placement
+
+	VFrame30::Bus* bus = getCurrentBus();
+	if (bus == nullptr)
 	{
-		item->setText(3, signal.busTypeId());
+		return;
+	}
+
+	QString stringPlacement;
+
+	if (bus->autoSignalPlacement() == true)
+	{
+		stringPlacement = tr("Auto");
 	}
 	else
 	{
-		item->setText(3, "");
+		if (signal.type() == E::SignalType::Discrete)
+		{
+			stringPlacement = tr("Offset %1, Bit %2").arg(signal.inbusOffset()).arg(signal.inbusDiscreteBitNo());
+		}
+		else
+		{
+			stringPlacement = tr("Offset %1").arg(signal.inbusOffset());
+		}
 	}
+
+	item->setText(4, stringPlacement);
 
 	return;
 }
@@ -1437,7 +1478,20 @@ VFrame30::Bus* DialogBusEditor::getCurrentBus(QUuid* uuid)
 		*uuid = itemUuid;
 	}
 
-	return m_busses.getPtr(itemUuid);
+	return m_busses.get(itemUuid).get();
+}
+
+bool DialogBusEditor::reloadBus(const QUuid& busUuid)
+{
+	bool ok = m_busses.reload(busUuid);
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Failed to reload bus with UUID=").arg(busUuid.toString()));
+		return false;
+	}
+
+	return true;
 }
 
 bool DialogBusEditor::saveBus(const QUuid& busUuid)

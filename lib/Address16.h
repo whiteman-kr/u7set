@@ -25,6 +25,14 @@ public:
 	Address16(const Address16& addr) : m_offset(addr.m_offset), m_bit(addr.m_bit) {}
 	Address16(int offset, int bit) : m_offset(offset), m_bit(bit) {}
 
+	Address16& operator = (const Address16& addr)
+	{
+		m_offset = addr.m_offset;
+		m_bit = addr.m_bit;
+
+		return *this;
+	}
+
 	void set(int offset, int bit) { m_offset = offset; m_bit = bit; }
 	void setOffset(int offset) { m_offset = offset; }
 	void setBit(int bit) { m_bit = bit; }
@@ -84,8 +92,13 @@ public:
 
 	bool isValid() const { return m_offset != BAD_ADDRESS && m_bit != BAD_ADDRESS; }
 
-	QString toString() const
+	QString toString(bool zeroPadded = false) const
 	{
+		if (zeroPadded == true)
+		{
+			return QString().sprintf("%05d:%02d", m_offset, m_bit);
+		}
+
 		return QString("%1:%2").arg(m_offset).arg(m_bit);
 	}
 
@@ -101,6 +114,8 @@ public:
 	int bitAddress() const { return m_offset * 16 + m_bit; }
 };
 
+bool operator == (const Address16& addr1, const Address16& addr2);
+bool operator != (const Address16& addr1, const Address16& addr2);
 
 class SignalAddress16 : public Address16
 {

@@ -36,6 +36,7 @@ namespace TrendLib
 		s.setValue("Trends/MainWindow/pos", m_mainWindowPos);
 		s.setValue("Trends/MainWindow/geometry", m_mainWindowGeometry);
 		s.setValue("Trends/MainWindow/state", m_mainWindowState);
+
 		s.setValue("Trends/MainWindow/ToolBar/viewType", m_viewType);
 		s.setValue("Trends/MainWindow/ToolBar/laneCount", m_laneCount);
 		s.setValue("Trends/MainWindow/ToolBar/timeTypeIndex", m_timeTypeIndex);
@@ -51,6 +52,7 @@ namespace TrendLib
 		m_mainWindowPos = s.value("Trends/MainWindow/pos", QPoint(200, 200)).toPoint();
 		m_mainWindowGeometry = s.value("Trends/MainWindow/geometry").toByteArray();
 		m_mainWindowState = s.value("Trends/MainWindow/state").toByteArray();
+
 		m_viewType = s.value("Trends/MainWindow/ToolBar/viewType", 0).toInt();
 		m_laneCount = s.value("Trends/MainWindow/ToolBar/laneCount", 2).toInt();
 		m_timeTypeIndex = s.value("Trends/MainWindow/ToolBar/timeTypeIndex", 0).toInt();

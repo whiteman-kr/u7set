@@ -1,6 +1,8 @@
 #ifndef DRAWPARAM_H
 #define DRAWPARAM_H
 #include "../lib/TimeStamp.h"
+#include "../lib/Types.h"
+
 
 namespace Proto
 {
@@ -41,8 +43,8 @@ namespace TrendLib
 		TrendViewMode viewMode() const;
 		void setViewMode(TrendViewMode value);
 
-		TimeType timeType() const;
-		void setTimeType(TimeType value);
+		E::TimeType timeType() const;
+		void setTimeType(E::TimeType value);
 
 		int laneCount() const;
 		void setLaneCount(int value);
@@ -77,7 +79,7 @@ namespace TrendLib
 		int m_dpiY = 96;
 
 		TrendViewMode m_viewMode = TrendViewMode::Separated;
-		TimeType m_timeType = TimeType::Local;
+		E::TimeType m_timeType = E::TimeType::Local;
 		int m_laneCount = 1;
 
 		QColor m_backColor1st = {qRgb(0xE0, 0xE0, 0xE0)};

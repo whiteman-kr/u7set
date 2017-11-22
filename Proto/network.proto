@@ -40,7 +40,7 @@ message GetAppSignalParamRequest
 message GetAppSignalParamReply
 {
 	optional int32 error = 1 [default = 0];
-	repeated Proto.AppSignalParam appSignalParams = 2;			// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
+	repeated Proto.AppSignal appSignals = 2;				// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
 }
 
 // Get class Signal
@@ -414,21 +414,24 @@ message SaveAppSignalsStatesToArchiveReply
 message GetAppSignalStatesFromArchiveStartRequest
 {
     optional string clientEquipmentID = 1;
-    optional int32 timeType = 2 [default = 1];		// enum TimeType values:
-                                                        // 0 - plant time
-							// 1 - system time
-							// 2 - local time
-							// 3 - archive id
+	optional int32 timeType = 2 [default = 1];		// enum TimeType values:
+	                                                // 0 - plant time
+													// 1 - system time
+													// 2 - local time
+													// 3 - archive id
     optional sfixed64 startTime = 3 [default = 0];
     optional sfixed64 endTime = 4 [default = 0];
 
-    repeated uint64 signalHashes = 5;			// max hashes count should be less or equal to 32 (ARCH_REQUEST_MAX_SIGNALS at SocketIO.h)
+    repeated uint64 signalHashes = 5;				// max hashes count should be less or equal to 32 (ARCH_REQUEST_MAX_SIGNALS at SocketIO.h)
+
+    optional bool removePeriodic = 6 [default = true];
 }
 
 message GetAppSignalStatesFromArchiveStartReply
 {
     optional int32 error = 1 [default = 0];
     optional int32 archError = 2 [default = 100];
+	optional string errorString = 4;
     optional uint32 requestID = 3 [default = 0];
 }
 
@@ -444,6 +447,7 @@ message GetAppSignalStatesFromArchiveNextReply
     optional int32 error = 1 [default = 0];
     optional int32 archError = 2 [default = 100];
     optional uint32 requestID = 3 [default = 0];
+	optional string errorString = 10;
     optional bool dataReady = 4 [default = false];
     optional int32 totalStatesCount = 5 [default = 0];		// The actual number of transmitted states can be less than totalStatesCount
     optional int32 sentStatesCount = 6 [default = 0];
@@ -462,8 +466,8 @@ message GetAppSignalStatesFromArchiveCancelRequest
 message GetAppSignalStatesFromArchiveCancelReply
 {
     optional int32 error = 1 [default = 0];
-
     optional int32 archError = 2 [default = 100];
+	optional string errorString = 3;
 }
 
 

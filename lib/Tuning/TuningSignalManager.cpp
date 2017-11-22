@@ -1,4 +1,5 @@
 #include "../lib/Tuning/TuningSignalManager.h"
+#include "../lib/Tuning/TuningModel.h"
 
 
 
@@ -112,18 +113,39 @@ TuningSignalState TuningSignalManager::stateByHash(Hash hash) const
 	auto it = m_statesMap.find(hash);
 	if (it == m_statesMap.end())
 	{
-		assert(false);
 		return TuningSignalState();
 	}
 
 	int index = it->second;
 	if (index < 0 || index >= m_states.size())
 	{
-		assert(false);
 		return TuningSignalState();
 	}
 
 	return m_states[index];
+}
+
+void TuningSignalManager::updateStates(std::vector<TuningModelRecord>& items)
+{
+	if (items.size() == 0)
+	{
+		return;
+	}
+
+	QMutexLocker l(&m_statesMutex);
+
+	int count = static_cast<int>(items.size());
+
+	for (int i = 0; i < count; i++)
+	{
+		TuningModelRecord& item = items[i];
+
+		TuningSignalState state = stateByHash(item.param.hash());
+
+		item.state.copy(state);
+	}
+
+	l.unlock();
 }
 
 // WARNING!!! Lock the m_statesMutex before calling this function!!!

@@ -1,5 +1,6 @@
 #pragma once
 #include <QHostInfo>
+#include "../VFrame30/PosConnectionImpl.h"
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaView.h"
@@ -10,10 +11,14 @@
 #include "../VFrame30/SchemaItemBus.h"
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
+#include "SignalsTabPage.h"
+#include "CreateSignalDialog.h"
+#include "EditConnectionLine.h"
 
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemaUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
+
 
 
 enum class MouseState
@@ -115,6 +120,7 @@ protected:
 	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawSelection(QPainter* p);
+	void drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam);
 	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
 	void drawSelectionArea(QPainter* p);
 	void drawMovingItems(VFrame30::CDrawParam* drawParam);
@@ -129,6 +135,8 @@ protected:
 	//
 protected:
 	SchemaItemAction getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex);
+
+	QRectF sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos);
 
 	// Signals
 signals:
@@ -166,6 +174,8 @@ private:
 	int m_activeLayer;
 	MouseState m_mouseState;
 
+	// Temporary data can be changed in EditSchemaWidget
+	//
 protected:
 	std::shared_ptr<VFrame30::SchemaItem> m_newItem;
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
@@ -189,24 +199,9 @@ protected:
 
 	// Variables for changing ConnectionLine
 	//
-	double m_editStartMovingEdge;				// Start pos fro moving edge
-	double m_editEndMovingEdge;					// End pos for moving edge
-	double m_editStartMovingEdgeX;				// Ќачальна€ координата дл€ перемещени€ вершины
-	double m_editStartMovingEdgeY;				// Ќачальна€ координата дл€ перемещени€ вершины
-	double m_editEndMovingEdgeX;				//  онечна€ координата дл€ перемещени€ грани
-	double m_editEndMovingEdgeY;				//  онечна€ координата дл€ перемещени€ грани
-	int m_movingEdgePointIndex;					// »ндекс точки при перемещении вершины или грани
+	std::list<EditConnectionLine> m_editConnectionLines;	// Add new or edit PosConnectionImpl items
 
-												// ѕри перемещении вершины соединительно линии здесь
-												// соххран€ютс€ точки (в отрисовке), и потом они
-												// используютс€ при завершении (MouseUp) редактировани€.
-	std::list<VFrame30::SchemaPoint> m_movingVertexPoints;
-
-	//QRubberBand* m_rubberBand;				// Not don yet, on linux same CPU ussage for repainting everything and using QRubberBand
-												// TO DO, test CPU Usage on Windows, if it has any advatages, move to using QRubberBand!!!!
-
-
-	// Temporary data, can be changed in EditSchemaWidget
+	// Temporary data can be changed in EditSchemaWidget
 	//
 	friend EditSchemaWidget;
 };
@@ -231,7 +226,9 @@ public:
 protected:
 	void createActions();
 
+	virtual bool event(QEvent* event) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
+	virtual void keyReleaseEvent(QKeyEvent* event) override;
 
 	// Set corresponding to the current situation and user actions context menu
 	//
@@ -239,9 +236,7 @@ protected:
 
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
-
 	virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
-
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
 
 	// Mouse Left Button Down
@@ -275,9 +270,11 @@ protected:
 	void mouseMove_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Down
+	// WARNING, if you add another function in MouseRightUp, add in EditSchemaWidget::contextMenu(const QPoint& pos) exception for this MouseMode
 	//
 	void mouseRightDown_None(QMouseEvent* event);
 	void mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* event);
+	void mouseRightDown_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Up
 	//
@@ -300,9 +297,16 @@ protected:
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
-	std::vector<VFrame30::SchemaPoint> removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source) const;
-	std::list<VFrame30::SchemaPoint> removeUnwantedPoints(const std::list<VFrame30::SchemaPoint>& source) const;
+	void movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem, EditConnectionLine* ecl, QPointF toPoint);
 
+	// Move ConnectionLinks withFblItemPects' pins
+	//
+	void initMoveAfbsConnectionLinks(MouseState mouseState);
+	void moveAfbsConnectionLinks(QPointF offset, MouseState mouseState);
+	void finishMoveAfbsConnectionLinks();
+
+	// --
+	//
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 	bool loadBusses(std::vector<VFrame30::Bus>* out);
@@ -334,7 +338,16 @@ protected slots:
 	void addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem);
 
 	void escapeKey();
+
 	void f2Key();
+	void f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item);
+	bool f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine);
+	bool f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine);
+	void f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item);
+
 	void deleteKey();
 
 	void undo();
@@ -345,6 +358,7 @@ protected slots:
 
 	void selectAll();
 	void selectItem(std::shared_ptr<VFrame30::SchemaItem> item);
+	void selectItems(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items);
 
 	void editCut();
 	void editCopy();
@@ -360,7 +374,6 @@ protected slots:
 
 	void addTransmitter();
 	void addReceiver();
-	void addConnectionItem(std::shared_ptr<VFrame30::SchemaItemConnection> schemaItem);
 
 	void addAfbElement();			// Add Application Functional Block
 	void addUfbElement();			// Add User Functional Block
@@ -388,13 +401,21 @@ protected slots:
 	void sendToBack();
 	void sendBackward();
 
+	void transformIntoInput();
+	void transformIntoInOut();
+	void transformIntoOutput();
+
 	void toggleComment();
 
 	void toggleLock();
 
 	void find();
-	void findNext();
-	void findPrev();
+	void findNext(Qt::CaseSensitivity cs);
+	void findPrev(Qt::CaseSensitivity cs);
+
+	int replace(std::shared_ptr<VFrame30::SchemaItem> item, QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+	void replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+	void replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 
 	void hideWorkDialogs();
 
@@ -456,9 +477,6 @@ private:
 	SchemaPropertiesDialog* m_schemaPropertiesDialog = nullptr;
 	SchemaItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
 
-	// Temporary and state variables
-	//
-
 	//Qt::MouseButtons m_mousePressedButtons;
 
 	struct MouseStateCursor
@@ -495,6 +513,14 @@ private:
 	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initializend in constructor
 
 	SchemaFindDialog* m_findDialog = nullptr;
+
+	CreatingSignalOptions m_createSignalOptions;
+	CreatingSignalDialogOptions m_createSignalDialoOptions;
+
+	// --
+	//
+	bool m_ctrlWasPressed = false;
+	bool m_altWasPressed = false;
 
 	// Actions
 	//
@@ -542,8 +568,8 @@ private:
 		// ------------------------------
 		QAction* m_addSeparatorAction0 = nullptr;
 		QAction* m_addInputSignalAction = nullptr;
-		QAction* m_addOutputSignalAction = nullptr;
 		QAction* m_addInOutSignalAction = nullptr;
+		QAction* m_addOutputSignalAction = nullptr;
 		QAction* m_addConstantAction = nullptr;
 		QAction* m_addTerminatorAction = nullptr;
 		QAction* m_addAfbAction = nullptr;
@@ -604,6 +630,14 @@ private:
 		QAction* m_sendToBackAction = nullptr;
 		QAction* m_sendBackwardAction = nullptr;
 
+	// Transform
+	//
+	QMenu* m_transformMenu = nullptr;
+	QAction* m_transformAction = nullptr;
+		QAction* m_transformIntoInputAction = nullptr;
+		QAction* m_transformIntoInOutAction = nullptr;
+		QAction* m_transformIntoOutputAction = nullptr;
+
 	// View
 	//
 	QMenu* m_viewMenu = nullptr;
@@ -649,15 +683,35 @@ public:
 	void setFocusToEditLine();
 
 signals:
-	void findPrev();
-	void findNext();
+	void findPrev(Qt::CaseSensitivity cs);
+	void findNext(Qt::CaseSensitivity cs);
+
+	void replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+	void replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+
+protected slots:
+	void replaceAndFindPressed();
+	void replaceAllPressed();
 
 public slots:
 	void updateCompleter();
+	void updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
+								const std::list<std::pair<QString, QString>>& foundProps,
+								QString searchText,
+								Qt::CaseSensitivity cs);
 
 private:
-	QLineEdit* m_lineEdit = nullptr;
+	QLineEdit* m_findTextEdit = nullptr;
+	QLineEdit* m_replaceTextEdit = nullptr;
+
+	QCheckBox* m_caseSensitiveCheckBox = nullptr;
+	QTextEdit* m_findResult = nullptr;
+
 	QPushButton* m_prevButton = nullptr;
 	QPushButton* m_nextButton = nullptr;
+
+	QPushButton* m_replaceButton = nullptr;
+	QPushButton* m_replaceAllButton = nullptr;
+
 };
 

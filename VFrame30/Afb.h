@@ -13,6 +13,47 @@ namespace Proto
 
 namespace Afb
 {
+	enum class AfbComponentPinType
+	{
+		Param,
+		Input,
+		Output
+	};
+
+	class AfbComponentPin
+	{
+	public:
+		AfbComponentPin() = default;
+		AfbComponentPin(const AfbComponentPin&) = default;
+		AfbComponentPin(AfbComponentPin&&) = default;
+		AfbComponentPin(const QString caption, int opIndex, AfbComponentPinType type);
+
+		AfbComponentPin& operator=(const AfbComponentPin&) = default;
+		AfbComponentPin& operator=(AfbComponentPin&&) = default;
+
+	public:
+		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
+		bool saveToXml(QDomElement* xmlElement) const;
+
+	public:
+		QString caption() const;
+		void setCaption(const QString& value);
+
+		int opIndex() const;
+		void setOpIndex(int value);
+
+		AfbComponentPinType type() const;
+		void setType(AfbComponentPinType value);
+
+		bool isInputOrParam() const;
+		bool isOutput() const;
+
+	private:
+		QString m_caption;
+		int m_opIndex = -1;
+		AfbComponentPinType m_type = AfbComponentPinType::Param;
+	};
+
 	class VFRAME30LIBSHARED_EXPORT AfbComponent
 	{
 	public:
@@ -39,11 +80,17 @@ namespace Afb
         int versionOpIndex() const;
         void setVersionOpIndex(int value);
 
+		int maxInstCount() const;
+		void setMaxInstCount(int value);
+
 	private:
 		int m_opCode = -1;
 		QString m_caption;
 		int m_impVersion = -1;
         int m_versionOpIndex = -1;
+		int m_maxInstCount = 0;
+
+		std::map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
 	};
 
 
@@ -94,7 +141,7 @@ namespace Afb
 	public:
 		AfbSignal(void);
 		AfbSignal(const AfbSignal& that);
-		AfbSignal& operator=(const AfbSignal& that);
+		AfbSignal& operator=(const AfbSignal& that) noexcept;
 
 		// Serialization
 		//
@@ -115,9 +162,11 @@ namespace Afb
 		E::SignalType type() const;
 		Q_INVOKABLE int jsType() const;
 		void setType(E::SignalType type);
+		bool setType(const QString& type);
 
 		E::DataFormat dataFormat() const;
 		void setDataFormat(E::DataFormat dataFormat);
+		bool setDataFormat(const QString& dataFormat);
 
 		Q_INVOKABLE int operandIndex() const;
 		void setOperandIndex(int value);
@@ -127,9 +176,15 @@ namespace Afb
 
 		E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
+		bool setByteOrder(const QString& value);
 
 		bool isAnalog() const;
 		bool isDiscrete() const;
+		bool isBus() const;
+
+		E::BusDataFormat busDataFormat() const;
+		void setBusDataFormat(E::BusDataFormat value);
+		bool setBusDataFormat(const QString& value);
 
 		// Data
 		//
@@ -143,6 +198,9 @@ private:
 		int m_operandIndex = 0;
 		int m_size = 0;
 		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
+		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Discrete;
+
+		// WARNING!!!
 		// Operator= is present, don't forget to add new fields to it
 		//
 	};
@@ -258,31 +316,20 @@ private:
 	public:
 		AfbElement(void);
 		AfbElement(const AfbElement& that);
-		AfbElement& operator=(const AfbElement& that);
+		AfbElement& operator=(const AfbElement& that) noexcept;
 
 		// Serialization
 		//
 	public:
 		bool loadFromXml(const Proto::AfbElementXml& data, QString* errorMsg);
-//		bool loadFromXml(const QByteArray& data, QString &errorMsg);
 		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
 		bool deprecatedFormatLoad(const Proto::AfbElementXml& data, QString& errorMsg);
 
 		bool saveToXml(Proto::AfbElementXml* dst) const;
-//		bool saveToXml(QByteArray* dst) const;
 		bool saveToXml(QDomElement* xmlElement) const;
 
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
 		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
-
-//	protected:
-//		virtual bool SaveData(Proto::Envelope* message) const override;
-//		virtual bool LoadData(const Proto::Envelope& message) override;
-
-//	private:
-//		// Use this func only in serialization, as while object creation is not fully initialized  and must be read
-//		//
-//		static std::shared_ptr<AfbElement> CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//
@@ -349,7 +396,7 @@ private:
 	private:
 		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
 		//
-		QString m_strID;
+		QString m_strId;
 		QString m_caption;
 		QString m_description;
 		QString m_version = "0.0000";
@@ -369,6 +416,9 @@ private:
 		std::vector<AfbParam> m_params;
 
 		std::shared_ptr<Afb::AfbComponent> m_component;
+
+		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
+		//
 	};
 
 	//

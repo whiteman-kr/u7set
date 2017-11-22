@@ -4,6 +4,8 @@
 #include "MonitorConfigController.h"
 #include "SchemaManager.h"
 #include "TcpSignalClient.h"
+#include "TcpSignalRecents.h"
+#include "SelectSchemaWidget.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -64,7 +66,9 @@ protected slots:
 
 	// slots
 protected:
+	void slot_archive();
 	void slot_trends();
+
 	void slot_signalSnapshot();
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
@@ -80,6 +84,10 @@ signals:
 
 	// Properties
 	//
+public:
+	MonitorConfigController* configController();
+	const MonitorConfigController* configController() const;
+
 protected:
 
 	// Data
@@ -100,6 +108,9 @@ private:
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
+
+	TcpSignalRecents* m_tcpSignalRecents = nullptr;
+	SimpleThread* m_tcpRecentsThread = nullptr;
 
 	// File menu
 	//
@@ -125,20 +136,22 @@ private:
 	QAction* m_historyBack = nullptr;
 	QAction* m_historyForward = nullptr;
 
+	QAction* m_archiveAction = nullptr;
 	QAction* m_trendsAction = nullptr;
+
 	QAction* m_signalSnapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 
 	// Logo
 	//
 	QLabel* m_logoLabel = nullptr;
-	QWidget* m_logoSpacer = nullptr;
+	QWidget* m_spacer = nullptr;
 
 	// Controls
 	//
 	MonitorToolBar* m_toolBar = nullptr;
 
-	SchemaListWidget* m_schemaListWidget = nullptr;
+	SelectSchemaWidget* m_selectSchemaWidget = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;
@@ -147,37 +160,15 @@ private:
 	int m_updateStatusBarTimerId = -1;
 };
 
-class SchemaListWidget : public QWidget
-{
-	Q_OBJECT
-
-public:
-	SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget);
-	virtual ~SchemaListWidget();
-
-signals:
-	void selectionChanged(QString schemaId);
-
-protected slots:
-	void slot_configurationArrived(ConfigSettings);
-	void slot_schemaChanged(QString strId);
-	void slot_indexChanged(int index);
-
-private:
-	MonitorConfigController* m_configController = nullptr;
-	MonitorCentralWidget* m_centraWidget = nullptr;
-
-	QLabel* m_label = nullptr;
-	QComboBox* m_comboBox = nullptr;
-};
-
 class MonitorToolBar : public QToolBar
 {
 	Q_OBJECT
 
 public:
-	explicit MonitorToolBar(const QString &tittle, QWidget *parent = Q_NULLPTR);
-	explicit MonitorToolBar(QWidget *parent = Q_NULLPTR);
+	explicit MonitorToolBar(const QString &tittle, QWidget* parent = Q_NULLPTR);
+
+public:
+	void addAction(QAction* action);
 
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent *event) override;

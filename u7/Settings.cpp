@@ -89,6 +89,7 @@ Settings::Settings() :
 	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation))),
 	m_expertMode(false)
 {
+    qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 }
 
 Settings::~Settings()
@@ -131,6 +132,9 @@ void Settings::writeUserScope() const
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
 	s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
+
+	s.setValue("TuningFiltersEditor/DialogChooseSignalGeometry", m_tuningFiltersDialogChooseSignalGeometry);
+    s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
 
 	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
 
@@ -199,6 +203,9 @@ void Settings::loadUserScope()
 
 	m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
 	m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
+
+	m_tuningFiltersDialogChooseSignalGeometry = s.value("TuningFiltersEditor/DialogChooseSignalGeometry").toByteArray();
+    m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
 
 	m_loginCompleter = s.value("LoginDialog/loginCompleter").toStringList();
 	if (m_loginCompleter.isEmpty() == true)

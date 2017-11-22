@@ -117,7 +117,6 @@ SOURCES +=\
     Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
     Subsystem.cpp \
-    ChooseAfbDialog.cpp \
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
@@ -166,7 +165,7 @@ SOURCES +=\
     DialogSettingsConfigurator.cpp \
     Builder/ArchivingServiceCfgGenerator.cpp \
     Builder/TuningClientCfgGenerator.cpp \
-    ChooseUfbDialog.cpp \
+    Forms/ChooseUfbDialog.cpp \
     Builder/ModulesRawData.cpp \
     Builder/BdfFile.cpp \
     SchemaListModel.cpp \
@@ -182,18 +181,28 @@ SOURCES +=\
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    DialogTuningFiltersEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
-    CodeEditor.cpp \
     ../lib/CsvFile.cpp \
-    Builder/AppItems.cpp \
     DialogBusEditor.cpp \
-    BusStorage.cpp
+    BusStorage.cpp \
+    Forms/DialogUpdateFromPreset.cpp \
+    Forms/ChooseAfbDialog.cpp \
+    Builder/SignalSet.cpp \
+    Builder/Busses.cpp \
+    IdePropertyEditor.cpp \
+    Builder/UalItems.cpp \
+    EditEngine/EditEngineSetObject.cpp \
+    ../lib/Address16.cpp \
+    EditConnectionLine.cpp \
+    EditEngine/EditEngineBatch.cpp \
+    CreateSignalDialog.cpp \
+    LogicModuleSet.cpp \
+    ../lib/LmDescription.cpp \
+    Builder/MemWriteMap.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -244,7 +253,7 @@ HEADERS  += \
     DialogSubsystemListEditor.h \
     ../lib/Types.h \
     Subsystem.h \
-    ChooseAfbDialog.h \
+    Forms/ChooseAfbDialog.h \
     EquipmentVcsDialog.h \
     ../lib/DataSource.h \
     ../lib/SocketIO.h \
@@ -294,7 +303,7 @@ HEADERS  += \
     DialogSettingsConfigurator.h \
     Builder/ArchivingServiceCfgGenerator.h \
     Builder/TuningClientCfgGenerator.h \
-    ChooseUfbDialog.h \
+    Forms/ChooseUfbDialog.h \
     ../lib/LmLimits.h \
     Builder/ModulesRawData.h \
     Builder/BdfFile.h \
@@ -312,20 +321,28 @@ HEADERS  += \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningSignalState.h \
-    DialogTuningFiltersEditor.h \
     ../lib/Tuning/TuningModel.h \
-    LogicModule.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
-    CodeEditor.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
-    Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
-    BusStorage.h
+    BusStorage.h \
+    Forms/DialogUpdateFromPreset.h \
+    Builder/SignalSet.h \
+    Builder/Busses.h \
+    IdePropertyEditor.h \
+    Builder/UalItems.h \
+    EditEngine/EditEngineSetObject.h \
+    EditConnectionLine.h \
+    EditEngine/EditEngineBatch.h \
+    CreateSignalDialog.h \
+    LogicModuleSet.h \
+    ../lib/LmDescription.h \
+    Builder/MemWriteMap.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -335,7 +352,7 @@ FORMS    += \
     UserManagementDialog.ui \
     CheckInDialog.ui \
     DialogSubsystemListEditor.ui \
-    ChooseAfbDialog.ui \
+    Forms/ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \
     CreateSchemaDialog.ui \
     SchemaLayersDialog.ui \
@@ -343,7 +360,7 @@ FORMS    += \
     SchemaItemPropertiesDialog.ui \
     DialogChoosePreset.ui \
     DialogSettingsConfigurator.ui \
-    ChooseUfbDialog.ui \
+    Forms/ChooseUfbDialog.ui \
     Forms/SelectChangesetDialog.ui \
     Forms/FileHistoryDialog.ui \
     Forms/ChangesetDetailsDialog.ui \
@@ -385,7 +402,12 @@ DISTFILES += \
     Ufbl/UFB_A4_LANDSCAPE.templ_ufb \
     Ufbl/file2pgsql.exe \
     Ufbl/_convert_all.bat \
-    LogicModuleDescription/LogicModule0000.xml
+    LogicModuleDescription/LogicModule0000.xml \
+    ../Proto/network.proto \
+    LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml \
+    LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
@@ -400,9 +422,14 @@ win32 {
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
+# c++14 support
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+win32:QMAKE_CXXFLAGS += -std:c++14
+unix:QMAKE_CXXFLAGS += -std=c++14
+
+#c++14 support for Windows
+#
+unix:QMAKE_CXXFLAGS += -std=c++14
 
 #Optimization flags
 #

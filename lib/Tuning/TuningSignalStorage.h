@@ -13,6 +13,8 @@ public:
 
 	bool loadSignals(const QByteArray& data, QString* errorCode);
 
+	bool addSignal(const AppSignalParam& param);
+
 	// Object accessing
 
 	int signalsCount() const;

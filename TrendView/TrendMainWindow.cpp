@@ -24,7 +24,7 @@ namespace TrendLib
 {
 
 	TrendMainWindow::TrendMainWindow(QWidget* parent) :
-		QMainWindow(parent),
+		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 		ui(new Ui::TrendsMainWindow)
 	{
 		ui->setupUi(this);
@@ -52,7 +52,7 @@ namespace TrendLib
 		layout->addWidget(m_trendWidget, 0, 0);
 
 		m_trendWidget->setViewMode(static_cast<TrendLib::TrendViewMode>(theSettings.m_viewType));
-		m_trendWidget->setTimeType(static_cast<TimeType>(theSettings.m_timeType));
+		m_trendWidget->setTimeType(static_cast<E::TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
 		// Slider Widged
@@ -61,6 +61,13 @@ namespace TrendLib
 
 		layout->setRowStretch(0, 1);
 		layout->addWidget(m_trendSlider, 1, 0);
+
+		// Refresh Action
+		//
+		m_refreshAction = new QAction(tr("Refresh"), this);
+		m_refreshAction->setShortcut(QKeySequence::Refresh);
+		connect(m_refreshAction, &QAction::triggered, this, &TrendMainWindow::actionRefreshTriggered);
+		addAction(m_refreshAction);
 
 		//--
 		//
@@ -77,6 +84,7 @@ namespace TrendLib
 		connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
 		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
 		connect(m_timeTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
+		connect(m_refreshButton, &QPushButton::clicked, m_refreshAction, &QAction::triggered);
 		connect(m_signalsButton, &QPushButton::clicked, this, &TrendMainWindow::signalsButton);
 
 		setMinimumSize(500, 300);
@@ -108,13 +116,6 @@ namespace TrendLib
 		m_trendSlider->setPageStep(t);
 
 		m_trendSlider->setLaneDuration(t * theSettings.m_laneCount);
-
-		// Refresh Action
-		//
-		m_refreshAction = new QAction(tr("Refresh"), this);
-		m_refreshAction->setShortcut(QKeySequence::Refresh);
-		connect(m_refreshAction, &QAction::triggered, this, &TrendMainWindow::actionRefreshTriggered);
-		addAction(m_refreshAction);
 
 		// Contect Menu
 		//
@@ -203,6 +204,11 @@ namespace TrendLib
 	{
 		setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
+		if (isMinimized() == true)
+		{
+			showNormal();
+		}
+
 		QRect screenRect  = QApplication::desktop()->availableGeometry(this);
 		QRect intersectRect = screenRect.intersected(frameGeometry());
 
@@ -242,7 +248,7 @@ namespace TrendLib
 		std::vector<TrendLib::TrendSignalParam> discreteSignals = signalSet().discreteSignals();
 		std::vector<TrendLib::TrendSignalParam> analogSignals = signalSet().analogSignals();
 
-		if (discreteSignals.size() + analogSignals.size() > 12)
+		if (discreteSignals.size() + analogSignals.size() > 16)
 		{
 			return false;
 		}
@@ -371,9 +377,9 @@ static int stdColorIndex = 0;
 		m_toolBar->addWidget(timeTypeLabel);
 
 		m_timeTypeCombo = new QComboBox(m_toolBar);
-		m_timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(TimeType::Local));
-		m_timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(TimeType::System));
-		m_timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(TimeType::Plant));
+		m_timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(E::TimeType::Local));
+		m_timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(E::TimeType::System));
+		m_timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(E::TimeType::Plant));
 		m_toolBar->addWidget(m_timeTypeCombo);
 
 		// 	AutoScale
@@ -388,6 +394,11 @@ static int stdColorIndex = 0;
 		QWidget* empty = new QWidget();
 		empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		m_toolBar->addWidget(empty);
+
+		// Signals
+		//
+		m_refreshButton = new QPushButton("Refresh");
+		m_toolBar->addWidget(m_refreshButton);
 
 		// Signals
 		//
@@ -475,7 +486,7 @@ static int stdColorIndex = 0;
 
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
-		::Proto::AppSignalParamSet protoSetMessage;
+		::Proto::AppSignalSet protoSetMessage;
 		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
 
 		if (ok == false)
@@ -486,9 +497,9 @@ static int stdColorIndex = 0;
 
 		// Parse data
 		//
-		for (int i = 0; i < protoSetMessage.items_size(); i++)
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
 		{
-			const ::Proto::AppSignalParam& appSignalMessage = protoSetMessage.items(i);
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
 
 			AppSignalParam appSignalParam;
 			ok = appSignalParam.load(appSignalMessage);
@@ -848,7 +859,7 @@ static int lastCopyCount = false;
 		qint64 startTimeValue = m_trendWidget->startTime().timeStamp;
 		qint64 finishTimeValue = m_trendWidget->startTime().timeStamp + m_trendWidget->duration();
 
-		TimeType timeType = m_trendWidget->timeType();
+		E::TimeType timeType = m_trendWidget->timeType();
 
 		for (TrendLib::TrendSignalParam& ts : analogs)
 		{
@@ -1086,7 +1097,7 @@ static int lastCopyCount = false;
 
 	void TrendMainWindow::timeTypeComboCurrentIndexChanged(int index)
 	{
-		TimeType timeType = m_timeTypeCombo->itemData(index).value<TimeType>();
+		E::TimeType timeType = m_timeTypeCombo->itemData(index).value<E::TimeType>();
 		m_trendWidget->setTimeType(timeType);
 		theSettings.m_timeType = static_cast<int>(timeType);
 
@@ -1115,7 +1126,10 @@ static int lastCopyCount = false;
 
 		m_timeCombo->blockSignals(true);		// Block changes, as tr("Custom") is deleting there
 
-		m_timeCombo->addItem(tr("Custom"));		// Duplicates are disabled
+		if (m_timeCombo->findText(tr("Custom")) == -1)
+		{
+			m_timeCombo->addItem(tr("Custom"));		// Duplicates are disabled
+		}
 		m_timeCombo->setCurrentText(tr("Custom"));
 
 		m_timeCombo->blockSignals(false);

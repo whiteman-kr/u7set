@@ -240,10 +240,19 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeIntAttribute(PROP_COUNT, m_associatedSignals.count());
 
+	QString signalsIDs;
+
 	for(const QString& appSignalID : m_associatedSignals)
 	{
-		xml.writeStringElement(SIGNAL_ID_ELEMENT, appSignalID);
+		signalsIDs += QString("%1,").arg(appSignalID);
 	}
+
+	if (signalsIDs.length() > 0)
+	{
+		signalsIDs = signalsIDs.mid(0, signalsIDs.length() - 1);		// remove last comma
+	}
+
+	xml.writeString(signalsIDs);
 
 	xml.writeEndElement();	// </AssociatedSignals>
 
@@ -302,22 +311,11 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readIntAttribute(PROP_COUNT, &signalCount);
 
-	m_associatedSignals.clear();
+	QString signalIDs;
 
-	for(int count = 0; count < signalCount; count++)
-	{
-		if (xml.findElement(SIGNAL_ID_ELEMENT) == false)
-		{
-			result = false;
-			break;
-		}
+	result &= xml.readStringElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &signalIDs);
 
-		QString signalID;
-
-		result &= xml.readStringElement(SIGNAL_ID_ELEMENT, &signalID);
-
-		m_associatedSignals.append(signalID);
-	}
+	m_associatedSignals = signalIDs.split(",", QString::SkipEmptyParts);
 
 	if (signalCount != m_associatedSignals.count())
 	{
@@ -372,7 +370,7 @@ void DataSource::processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>&
 		{
 			QHostAddress host(ip);
 
-			QString msg  =QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
+			QString msg = QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
 					arg(host.toString()).
 					arg(rupFrame.header.dataId).
 					arg(m_lmDataID);

@@ -1434,7 +1434,7 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 		QString userName = QDir::home().dirName();
 
 		Hardware::ModuleFirmware conf;
-		conf.init("Caption", "subsysId", 0, 0, 0, 0, "projectName", userName, 0, "release", 0, 0, QStringList());
+		conf.init("Caption", "subsysId", 0, 0, 0, 0, 0, "projectName", userName, 0, "release", 0);
 
 		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
 		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
@@ -1581,7 +1581,17 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 
 	QString errorCode;
 
-	bool result = m_confFirmware.load(fileName, errorCode, writeToFlash == true);
+
+	bool result = false;
+
+	if (writeToFlash == true)
+	{
+		result = m_confFirmware.load(fileName, errorCode);
+	}
+	else
+	{
+		result = m_confFirmware.loadHeader(fileName, errorCode);
+	}
 
 	if (result == false)
 	{
@@ -1602,6 +1612,7 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 	m_Log->writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
 	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
 	m_Log->writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
+	m_Log->writeMessage(tr("LM Description Number: %1").arg(m_confFirmware.lmDescriptionNumber()));
 	m_Log->writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
 	m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
 	m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(m_confFirmware.frameSizeWithCRC())));

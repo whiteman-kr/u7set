@@ -37,6 +37,36 @@ CONFIG(release, debug|release) {
 }
 
 
+# Force prebuild version control info
+#
+win32 {
+    contains(QMAKE_TARGET.arch, x86_64){
+        QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
+        system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake))
+        system(chdir $$PWD & \
+            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/Monitor.pro)
+    }
+    else{
+        QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
+        system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake))
+        system(chdir $$PWD & \
+            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/Monitor.pro)
+    }
+}
+unix {
+    QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
+    system(cd $$PWD/../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make; \
+        cd $$PWD; \
+        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/Monitor.pro)
+}
+
+
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
@@ -76,7 +106,14 @@ SOURCES += main.cpp \
     MonitorView.cpp \
     MonitorTrends.cpp \
     DialogChooseTrendSignals.cpp \
-    TrendTcpClient.cpp
+    TrendTcpClient.cpp \
+    MonitorArchive.cpp \
+    DialogChooseArchiveSignals.cpp \
+    ArchiveTcpClient.cpp \
+    ArchiveModelView.cpp \
+    ArchiveData.cpp \
+    TcpSignalRecents.cpp \
+    SelectSchemaWidget.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -117,7 +154,14 @@ HEADERS  += \
     MonitorView.h \
     MonitorTrends.h \
     DialogChooseTrendSignals.h \
-    TrendTcpClient.h
+    TrendTcpClient.h \
+    MonitorArchive.h \
+    DialogChooseArchiveSignals.h \
+    ArchiveTcpClient.h \
+    ArchiveModelView.h \
+    ArchiveData.h \
+    TcpSignalRecents.h \
+    SelectSchemaWidget.h
 
 FORMS    += \
     DialogSettings.ui \
@@ -125,7 +169,8 @@ FORMS    += \
     DialogSignalSearch.ui \
     DialogSignalSnapshot.ui \
     DialogColumns.ui \
-    DialogChooseTrendSignals.ui
+    DialogChooseTrendSignals.ui \
+    DialogChooseArchiveSignals.ui
 
 
 # Optimization flags
@@ -156,6 +201,11 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #c++11 support for GCC
 #
 unix:QMAKE_CXXFLAGS += -std=c++11
+
+
+#c++14 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++14
 
 
 # VFrame30 library

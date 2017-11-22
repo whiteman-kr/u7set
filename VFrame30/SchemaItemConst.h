@@ -19,7 +19,8 @@ namespace VFrame30
 		enum ConstType
 		{
 			IntegerType,
-			FloatType
+			FloatType,
+			Discrete
 		};
 		Q_ENUM(ConstType)
 
@@ -49,6 +50,8 @@ namespace VFrame30
 
 		virtual QString buildName() const override;
 
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
+
 		// Properties
 		//
 	public:
@@ -57,12 +60,16 @@ namespace VFrame30
 
 		bool isIntegral() const;
 		bool isFloat() const;
+		bool isDiscrete() const;
 
 		int intValue() const;
 		void setIntValue(int intValue);
 
 		double floatValue() const;
 		void setFloatValue(double floatValue);
+
+		int discreteValue() const;
+		void setDiscreteValue(int discreteValue);
 
 		int precision() const;
 		void setPrecision(int value);
@@ -79,7 +86,8 @@ namespace VFrame30
 		ConstType m_type = ConstType::FloatType;
 		int m_intValue = 0;
 		double m_floatValue = 0.0;
-		int m_precision = 2;
+		int m_discreteValue = 0;
+		int m_precision = 6;
 
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;

@@ -10,6 +10,8 @@
 namespace Builder
 {
 
+	class UalSignal;
+
 	struct MemoryArea
 	{
 	public:
@@ -53,15 +55,6 @@ namespace Builder
 			bool isDiscrete() const { return m_isDiscrete; }
 		};
 
-	private:
-		int m_startAddress = 0;
-		int m_sizeW = 0;
-
-		bool m_locked = false;
-
-		Address16 m_nextSignalAddress;
-		QVector<SignalAddress16> m_signals;
-
 	public:
 		void setStartAddress(int startAddress);
 
@@ -80,11 +73,23 @@ namespace Builder
 
 		MemoryArea& operator = (const MemoryArea& ma);
 
-		Address16 appendSignal(const Signal &signal);
+		Address16 appendSignal(const UalSignal* ualSignal, bool appendAcquiredOnly);
 
 		bool hasSignals() const { return m_signals.size() > 0; }
 
 		QVector<SignalAddress16>& getSignals() { return m_signals; }
+
+		void appendUalRefSignals(const Address16& addr16, const UalSignal* ualSignal, bool appendAcquiredOnly);
+
+	private:
+		int m_startAddress = 0;
+		int m_sizeW = 0;
+
+		bool m_locked = false;
+
+		Address16 m_nextSignalAddress;
+		QVector<SignalAddress16> m_signals;
+
 	};
 
 
@@ -115,6 +120,7 @@ namespace Builder
 			MemoryArea memory;
 
 			MemoryArea bitAccumulator;
+			MemoryArea constBits;
 
 			MemoryArea acquiredDiscreteOutputSignals;
 			MemoryArea acquiredDiscreteInternalSignals;
@@ -139,14 +145,19 @@ namespace Builder
 			MemoryArea acquiredAnalogInputSignals;
 			MemoryArea acquiredAnalogOutputSignals;
 			MemoryArea acquiredAnalogInternalSignals;
+			MemoryArea acquiredAnalogOptoSignals;
+			MemoryArea acquiredAnalogBusChildSignals;
 			MemoryArea acquiredAnalogTuningSignals;
+			MemoryArea acquiredAnalogConstSignals;
 
 			MemoryArea acquiredBuses;
 
 			MemoryArea acquiredDiscreteInputSignals;
 			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
 			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
+			MemoryArea acquiredDiscreteOptoAndBusChildSignals;
 			MemoryArea acquiredDiscreteTuningSignals;
+			MemoryArea acquiredDiscreteConstSignals;
 
 			MemoryArea nonAcquiredAnalogInputSignals;
 			MemoryArea nonAcquiredAnalogOutputSignals;
@@ -173,8 +184,10 @@ namespace Builder
 		int m_sectionStartAddrW = -1;
 
 		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW = -1);
+		void addRecordSignals(QStringList& memFile, MemoryArea& memArea, const QString& title);
 		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
 		void addSignals(QStringList& memFile, MemoryArea& memArea);
+
 
 	public:
 
@@ -208,12 +221,14 @@ namespace Builder
 
 		int acquiredRawDataAddress() const { return m_appWordAdressed.acquiredRawData.startAddress(); }
 
-		int aquiredDiscreteInputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInputSignals.startAddress(); }
-		int aquiredDiscreteOutputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteOutputSignals.startAddress(); }
-		int aquiredDiscreteInternalSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInternalSignals.startAddress(); }
+		int acquiredDiscreteInputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInputSignals.startAddress(); }
+		int acquiredDiscreteOutputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteOutputSignals.startAddress(); }
+		int acquiredDiscreteInternalSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInternalSignals.startAddress(); }
+		int acquiredDiscreteConstSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteConstSignals.startAddress(); }
 
 		int acquiredDiscreteOutputSignalsInRegBufSizeW() const {  return m_appWordAdressed.acquiredDiscreteOutputSignals.sizeW(); }
 		int acquiredDiscreteInternalSignalsInRegBufSizeW() const {  return m_appWordAdressed.acquiredDiscreteInternalSignals.sizeW(); }
+		int acquiredDiscreteConstSignalsInRegBufSizeW() const { return m_appWordAdressed.acquiredDiscreteConstSignals.sizeW(); }
 
 		//
 
@@ -224,32 +239,40 @@ namespace Builder
 
 		void getFile(QStringList& memFile);
 
-		Address16 appendAcquiredDiscreteOutputSignal(const Signal& signal);
-		Address16 appendAcquiredDiscreteInternalSignal(const Signal& signal);
+		bool appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
+		bool appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals, bool setUalAddrEqualToRegBufAddr);
+		bool appendRegAnalogConstSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
 
-		Address16 appendNonAcquiredDiscreteOutputSignal(const Signal& signal);
-		Address16 appendNonAcquiredDiscreteInternalSignal(const Signal& signal);
+		bool appendAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals);
+
+		bool appendAcquiredDiscreteInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteOptoAndBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+
+		bool appendAcquiredDiscreteTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogTuningSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteConstSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+
+		bool appendAcquiredAnalogInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogBusChildSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredAnalogConstSignalsInRegBuf(const QHash<int, UalSignal *>& acquiredAnalogConstIntSignals,
+													  const QHash<float, UalSignal *>& acquiredAnalogConstFloatSignals);
+		bool appendAcquiredBussesInRegBuf(const QVector<UalSignal*>& ualSignals);
+
+		bool appendNonAcquiredAnalogInputSignals(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredAnalogStrictOutputSignals(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredAnalogInternalSignals(const QVector<UalSignal*>& ualSignals);
+
+		bool appendNonAcquiredBusses(const QVector<UalSignal*>& ualSignals);
 
 		Address16 setAcquiredRawDataSize(int sizeW);
-
-		Address16 appendAcquiredAnalogInputSignal(const Signal& signal);
-		Address16 appendAcquiredAnalogOutputSignal(const Signal& signal);
-		Address16 appendAcquiredAnalogInternalSignal(const Signal& signal);
-		Address16 appendAcquiredAnalogTuningSignal(const Signal& signal);
-
-		Address16 appendAcquiredBus(const Signal& signal);
-
-		Address16 appendAcquiredDiscreteInputSignalInRegBuf(const Signal& signal);
-		Address16 appendAcquiredDiscreteOutputSignalInRegBuf(const Signal& signal);
-		Address16 appendAcquiredDiscreteInternalSignalInRegBuf(const Signal& signal);
-
-		Address16 appendAcquiredDiscreteTuningSignal(const Signal& signal);
-
-		Address16 appendNonAcquiredAnalogInputSignal(const Signal& signal);
-		Address16 appendNonAcquiredAnalogOutputSignal(const Signal& signal);
-		Address16 appendNonAcquiredAnalogInternalSignal(const Signal& signal);
-
-		Address16 appendNonAcquiredBus(const Signal& signal);
 
 		double bitAddressedMemoryUsed();
 		double wordAddressedMemoryUsed();
@@ -264,6 +287,9 @@ namespace Builder
 
 		int getMemoryReadCount(int address) const;
 		int getMemoryWriteCount(int address) const;
+
+		Address16 constBit0Addr() const;
+		Address16 constBit1Addr() const;
 	};
 
 }

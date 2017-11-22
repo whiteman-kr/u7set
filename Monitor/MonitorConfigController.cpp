@@ -242,7 +242,7 @@ void MonitorConfigController::start()
 	return;
 }
 
-void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
 
@@ -287,6 +287,18 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			// Get <Configuration>
 			//
 			QDomElement configElement = xml.documentElement();
+
+			// BuildInfo node
+			//
+			QDomNodeList buildInfoNodes = configElement.elementsByTagName("BuildInfo");
+			if (buildInfoNodes.size() != 1)
+			{
+				readSettings.errorMessage += tr("Parsing BuildInfo node error.\n");
+			}
+			else
+			{
+				result &= xmlReadBuildInfoNode(buildInfoNodes.item(0), &readSettings);
+			}
 
 			// Software node
 			//
@@ -362,14 +374,31 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	// Emit signal to inform everybody about new configuration
 	//
-	emit configurationArrived(readSettings);
-
 	{
 		QMutexLocker locker(&m_confugurationMutex);
 		m_configuration = readSettings;
 	}
 
+	emit configurationArrived(readSettings);
+
 	return;
+}
+
+bool MonitorConfigController::xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting)
+{
+	if (outSetting == nullptr ||
+		buildInfoNode.nodeName() != "BuildInfo")
+	{
+		assert(outSetting);
+		assert(buildInfoNode.nodeName() == "BuildInfo");
+		return false;
+	}
+
+	QDomElement element = buildInfoNode.toElement();
+
+	outSetting->project = element.attribute(QLatin1String("Project"));
+
+	return true;
 }
 
 bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
@@ -395,6 +424,8 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 		outSetting->errorMessage += "The received file has different EquipmentID then expected.\n";
 		return false;
 	}
+
+	outSetting->softwareEquipmentId = appEquipmentId;
 
 	// Read Type attribute
 	//
@@ -466,16 +497,16 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 		{
 			QDomElement dasXmlElement = dasNodes.at(0).toElement();
 
-			QString dasId1 = dasXmlElement.attribute("AppDataServiceID1");
-			QString dasIp1 = dasXmlElement.attribute("ip1");
-			int dasPort1 = dasXmlElement.attribute("port1").toInt();
+			QString id1 = dasXmlElement.attribute("AppDataServiceID1");
+			QString ip1 = dasXmlElement.attribute("ip1");
+			int port1 = dasXmlElement.attribute("port1").toInt();
 
-			QString dasId2 = dasXmlElement.attribute("AppDataServiceID2");
-			QString dasIp2 = dasXmlElement.attribute("ip2");
-			int dasPort2 = dasXmlElement.attribute("port2").toInt();
+			QString id2 = dasXmlElement.attribute("AppDataServiceID2");
+			QString ip2 = dasXmlElement.attribute("ip2");
+			int port2 = dasXmlElement.attribute("port2").toInt();
 
-			outSetting->appDataService1 = ConfigConnection(dasId1, dasIp1, dasPort1);
-			outSetting->appDataService2 = ConfigConnection(dasId2, dasIp2, dasPort2);
+			outSetting->appDataService1 = ConfigConnection(id1, ip1, port1);
+			outSetting->appDataService2 = ConfigConnection(id2, ip2, port2);
 		}
 	}
 
@@ -493,17 +524,72 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 		{
 			QDomElement dasXmlElement = dasNodes.at(0).toElement();
 
-			QString asId1 = dasXmlElement.attribute("AppDataServiceID1");
-			QString asIp1 = dasXmlElement.attribute("ip1");
-			int asPort1 = dasXmlElement.attribute("port1").toInt();
+			QString id1 = dasXmlElement.attribute("AppDataServiceID1");
+			QString ip1 = dasXmlElement.attribute("ip1");
+			int port1 = dasXmlElement.attribute("port1").toInt();
 
-			QString asId2 = dasXmlElement.attribute("AppDataServiceID2");
-			QString asIp2 = dasXmlElement.attribute("ip2");
-			int asPort2 = dasXmlElement.attribute("port2").toInt();
+			QString id2 = dasXmlElement.attribute("AppDataServiceID2");
+			QString ip2 = dasXmlElement.attribute("ip2");
+			int port2 = dasXmlElement.attribute("port2").toInt();
 
-			outSetting->archiveService1 = ConfigConnection(asId1, asIp1, asPort1);
-			outSetting->archiveService2 = ConfigConnection(asId2, asIp2, asPort2);
+			outSetting->archiveService1 = ConfigConnection(id1, ip1, port1);
+			outSetting->archiveService2 = ConfigConnection(id2, ip2, port2);
 		}
+	}
+
+	// Get Tuning data
+	//
+	{
+//		// TuningService data
+//		//
+//		QDomNodeList tuningServiceNodes = settingsElement.elementsByTagName("TuningService");
+
+//		if (tuningServiceNodes.isEmpty() == true)
+//		{
+//			outSetting->errorMessage += tr("Cannot find TuningService tag %1\n");
+//			return false;
+//		}
+//		else
+//		{
+//			QDomElement tuningServiceElement = tuningServiceNodes.at(0).toElement();
+
+//			bool enableTuning = tuningServiceElement.attribute("port1").compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+
+//			QString id1 = tuningServiceElement.attribute("TuningServiceID1");
+//			QString ip1 = tuningServiceElement.attribute("ip1");
+//			int port1 = tuningServiceElement.attribute("port1").toInt();
+
+//			QString id2 = tuningServiceElement.attribute("TuningServiceID2");
+//			QString ip2 = tuningServiceElement.attribute("ip2");
+//			int port2 = tuningServiceElement.attribute("port2").toInt();
+
+//			outSetting->tuningEnabled = enableTuning;
+//			outSetting->tuningService1 = ConfigConnection(id1, ip1, port1);
+//			outSetting->tuningService2 = ConfigConnection(id2, ip2, port2);
+//		}
+
+//		// TuningSources
+//		//
+//		QDomNodeList tuningSourceNodes = settingsElement.elementsByTagName("TuningSources");
+
+//		if (tuningSourceNodes.isEmpty() == true)
+//		{
+//			outSetting->errorMessage += tr("Cannot find tuningSourceNodes tag %1\n").arg("TuningSources");
+//			return false;
+//		}
+//		else
+//		{
+//			QDomElement tuningSourceElement = tuningSourceNodes.at(0).toElement();
+
+//			QString str = tuningSourceElement.text().trimmed();
+//			str = str.replace(QChar(QChar::LineFeed), QChar(';'));
+//			str = str.replace(QChar(QChar::CarriageReturn), QChar(';'));
+//			str = str.replace(QChar(QChar::Tabulation), QChar(';'));
+
+//			QStringList tuningSourceList = str.split(QChar(';'), QString::SkipEmptyParts);
+
+//			outSetting->tuningSources = tuningSourceList;
+//		}
 	}
 
 	return outSetting->errorMessage.isEmpty();

@@ -168,25 +168,7 @@ void TuningModelClient::updateStates()
 		m_blink = !m_blink;
 	}
 
-	if (m_items.size() == 0)
-	{
-		return;
-	}
-
-	QMutexLocker l(&m_tuningSignalManager->m_statesMutex);
-
-	int count = static_cast<int>(m_items.size());
-
-	for (int i = 0; i < count; i++)
-	{
-		TuningModelRecord& item = m_items[i];
-
-		TuningSignalState state = m_tuningSignalManager->stateByHash(item.param.hash());
-
-		item.state.copy(state);
-	}
-
-	l.unlock();
+	m_tuningSignalManager->updateStates(m_items);
 
 	return;
 }
@@ -213,9 +195,15 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (o.state.valid() == false || o.limitsUnbalance() == true)
+		if (o.state.valid() == false)
 		{
 			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+
+		if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.value()) == false)
+		{
+			QColor color = QColor(Qt::gray);
 			return QBrush(color);
 		}
 	}
@@ -306,7 +294,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (o.state.valid() == false || o.limitsUnbalance() == true)
+		if (o.state.valid() == false)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -515,21 +503,19 @@ void TuningModelClient::slot_setAll()
 
 	auto fAllToDefault = [this]() -> void
 	{
-			for (TuningModelRecord& o : m_items)
-	{
+		for (TuningModelRecord& o : m_items)
+		{
 			if (o.state.valid() == false)
-	{
-			continue;
-}
+			{
+				continue;
+			}
+			if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.editValue()) == false)
+			{
+				o.state.onEditValue(o.param.tuningDefaultValue());
+			}
+		}
 
-			float scalePercent = std::fabs(o.param.lowEngineeringUnits() - o.param.highEngineeringUnits()) / 100.0;
-
-			if (fabs(o.param.tuningDefaultValue() - o.state.editValue()) > scalePercent)
-	{
-			o.state.onEditValue(o.param.tuningDefaultValue());
-}
-}
-};
+	};
 
 	connect(actionAllToDefault, &QAction::triggered, this, fAllToDefault);
 
@@ -1127,7 +1113,10 @@ void TuningPage::fillObjectsList()
 		}
 	}
 
-	m_model->setSignals(filteredObjects);
+	m_tuningSignalManager->updateStates(filteredObjects);
+
+	m_model->setItems(filteredObjects);
+
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 

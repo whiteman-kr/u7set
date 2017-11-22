@@ -37,11 +37,23 @@ const int	FI_ANY = 0,
 			FI_CAPTION = 4;
 
 
+struct CreatingSignalOptions
+{
+	QStringList lmEquipmentIdList;
+	QStringList selectedEquipmentIdList;
+	QStringList appSignalIdList;
+	QStringList customSignalIdList;
+	int defaultSignalTypeIndex = -1;
+	QString defaultBusTypeId;
+	QRect settingsWindowPositionRect;
+};
+
+
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = 0);
+	explicit SignalsDelegate(SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = 0);
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
@@ -60,8 +72,6 @@ protected:
 	bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
 
 private:
-	const DataFormatList& m_dataFormatInfo;
-	const UnitList& m_unitInfo;
 	SignalSet& m_signalSet;
 	SignalsModel* m_model;
 	SignalsProxyModel* m_proxyModel;
@@ -85,7 +95,7 @@ public:
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex & index) const;
 
-	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel) { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, this, signalsProxyModel, parent()); }
+	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel) { return new SignalsDelegate(m_signalSet, this, signalsProxyModel, parent()); }
 
 	void clearSignals();
 
@@ -109,6 +119,7 @@ public:
 	bool checkoutSignal(int index, QString& message);
 	bool undoSignal(int id);
 	bool editSignals(QVector<int> ids);
+	static void trimSignalTextFields(Signal& signal);
 	void saveSignal(Signal& signal);
 	QList<int> cloneSignals(const QSet<int>& signalIDs);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
@@ -131,15 +142,12 @@ private:
 	// Data
 	//
 	SignalSet m_signalSet;
-	DataFormatList m_dataFormatInfo;
-	UnitList m_unitInfo;
 	QMap<int, QString> m_usernameMap;
 
 	SignalsTabPage* m_parentWindow;
 	DbController* m_dbController;
 	static SignalsModel* m_instance;
 
-	QString getUnitStr(int unitID) const;
 	QString getSensorStr(int sensorID) const;
 	QString getOutputModeStr(int outputMode) const;
 	QString getUserStr(int userID) const;
@@ -250,7 +258,7 @@ public:
 	SignalsTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~SignalsTabPage();
 
-	static QStringList createSignal(DbController* dbController, const QStringList& lmIdList, int schemaCounter, const QString& schemaId, const QString& schemaCaption, QWidget* parent);
+	static QStringList createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent);
 
 protected:
 	void CreateActions(QToolBar* toolBar);
@@ -279,6 +287,7 @@ public slots:
 	void editColumnsVisibilityAndOrder();
 	void changeSignalActionsVisibility();
 
+	void setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
 

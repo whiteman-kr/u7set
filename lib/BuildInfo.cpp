@@ -63,6 +63,7 @@ namespace Builder
 		xmlWriter.writeAttribute("Name", pathFileName);
 		xmlWriter.writeAttribute("ID", ID);
 		xmlWriter.writeAttribute("Tag", tag);
+		xmlWriter.writeAttribute("Compressed", compressed == true ? "Yes" : "No" );
 		xmlWriter.writeAttribute("Size", QString::number(size));
 		xmlWriter.writeAttribute("MD5", md5);
 
@@ -86,6 +87,10 @@ namespace Builder
 		pathFileName = xmlReader.attributes().value("Name").toString();
 		ID = xmlReader.attributes().value("ID").toString();
 		tag = xmlReader.attributes().value("Tag").toString();
+
+		QString compressedStr = xmlReader.attributes().value("Compressed").toString();
+		compressed = compressedStr == "Yes" ? true : false;
+
 		size = xmlReader.attributes().value("Size").toInt();
 		md5 = xmlReader.attributes().value("MD5").toString();
 
@@ -121,5 +126,4 @@ namespace Builder
 
 		return QString();
 	}
-
 }

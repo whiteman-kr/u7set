@@ -492,6 +492,11 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 
 	QString	arrayStr;
 
+	// DEBUG
+	//Hash testHash = 0x612a4feb53b2378all;
+	//static qint64 prevSystemTime = 0;
+	// DEBUG
+
 	do
 	{
 		SimpleAppSignalState state;
@@ -502,6 +507,18 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 		{
 			break;
 		}
+
+		// DEBUG
+		/*if (state.hash == testHash)
+		{
+			if (prevSystemTime > state.time.system.timeStamp)
+			{
+				assert(false);
+			}
+
+			prevSystemTime = state.time.system.timeStamp;
+		}*/
+		// DEBUG
 
 		ArchSignal archSignal = m_archive->getArchSignal(state.hash);
 
@@ -688,9 +705,9 @@ bool ArchWriteThreadWorker::writeTimeMark()
 
 	if (result == false)
 	{
-		assert(false);
 		DEBUG_LOG_ERR(m_logger, query.lastError().text());
 		m_db.close();
+		assert(false);
 		return false;
 	}
 
@@ -710,14 +727,9 @@ void ArchWriteThreadWorker::onTimer()
 		}
 	}
 
-	QTime t = QTime::currentTime();
+	writeStatesToArchive(true);
 
-	int currMinute = t.minute();
-	int currSecond = t.second();
-
-	bool writeNow = (currSecond % 5) == 0 ? true : false;
-
-	writeStatesToArchive(writeNow);
+	int currMinute = QTime::currentTime().minute();
 
 	if (currMinute != m_prevMinute)
 	{

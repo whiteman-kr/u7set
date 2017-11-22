@@ -2,14 +2,9 @@
 #include <QSql>
 #include <QSqlError>
 
-DbControllerUserTests::DbControllerUserTests()
+DbControllerUserTests::DbControllerUserTests() :
+	m_db(new DbController())
 {
-	m_dbController = new DbController();
-
-	m_databaseHost = "127.0.0.1";
-	m_databaseName = "dbcontrollerusertestsproject";
-	m_databaseUser = "u7";
-	m_adminPassword = "P2ssw0rd";
 }
 
 void DbControllerUserTests::initTestCase()
@@ -18,6 +13,9 @@ void DbControllerUserTests::initTestCase()
 	{
 		QSqlDatabase::removeDatabase(connection);
 	}
+
+	m_db->setServerUsername(m_databaseUser);
+	m_db->setServerPassword(m_adminPassword);
 
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
@@ -44,14 +42,14 @@ void DbControllerUserTests::initTestCase()
 
 	db.close();
 
-	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_dbController->lastError()));
+	ok = m_db->createProject(m_databaseName, m_adminPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_dbController->lastError()));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db->lastError()));
 }
 
 void DbControllerUserTests::createUserTest()
@@ -74,8 +72,8 @@ void DbControllerUserTests::createUserTest()
 	newUser.setDisabled(false);
 	newUser.setReadonly(false);
 
-	bool ok = m_dbController->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -118,8 +116,8 @@ void DbControllerUserTests::createUserTest()
 	newUser.setPassword(password);
 	newUser.setNewPassword(password);
 
-	ok = m_dbController->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec("SELECT * from Users");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -169,8 +167,8 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(false);
 	newUser.setReadonly(false);
 
-	bool ok = m_dbController->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	firstName = firstName + "UPDATED";
 	lastName = lastName + "UPDATED";
@@ -183,8 +181,8 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(true);
 	newUser.setReadonly(true);
 
-	ok = m_dbController->updateUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->updateUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -228,8 +226,8 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(false);
 	newUser.setReadonly(false);
 
-	ok = m_dbController->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	firstName = firstName + "UPDATED";
 	lastName = lastName + "UPDATED";
@@ -242,8 +240,8 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(true);
 	newUser.setReadonly(true);
 
-	ok = m_dbController->updateUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->updateUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec("SELECT * from Users");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -277,8 +275,8 @@ void DbControllerUserTests::getUserListTest()
 {
 	std::vector<DbUser> usersList;
 
-	bool ok = m_dbController->getUserList(&usersList, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->getUserList(&usersList, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -341,13 +339,16 @@ void DbControllerUserTests::getUserListTest()
 
 void DbControllerUserTests::cleanupTestCase()
 {
-	bool ok = m_dbController->closeProject(0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not close project: " + m_dbController->lastError()));
-	ok = m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not delete project: " + m_dbController->lastError()));
+	bool ok = m_db->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not close project: " + m_db->lastError()));
+
+	ok = m_db->deleteProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not delete project: " + m_db->lastError()));
 
 	for (QString connection : QSqlDatabase::connectionNames())
 	{
 		QSqlDatabase::removeDatabase(connection);
 	}
+
+	return;
 }

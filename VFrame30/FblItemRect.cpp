@@ -7,6 +7,7 @@
 #include "SchemaItemAfb.h"
 #include "SchemaItemConnection.h"
 #include "SchemaItemTerminator.h"
+#include "SchemaItemBus.h"
 
 
 namespace VFrame30
@@ -333,11 +334,20 @@ namespace VFrame30
 		//
 		p->fillRect(r, fillColor());
 
+		// Regular pen
 		//
 		QPen pen(lineColor());
 		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 		p->setPen(pen);
 
+		// Bus pen
+		//
+		QPen busPen(lineColor());
+		busPen.setWidthF(BusSideLineWidth);
+		busPen.setCapStyle(Qt::FlatCap);
+
+		// --
+		//
 		p->drawRect(r);
 
 		// Draw in/outs
@@ -354,6 +364,10 @@ namespace VFrame30
 		QPen redPen(QColor(0xE0B00000));
 		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 
+		QPen redBusPen(redPen.color());
+		redBusPen.setWidthF(BusSideLineWidth);
+		redBusPen.setCapStyle(Qt::FlatCap);
+
 		for (const AfbPin& input : inputPins)
 		{
 			// Get pin position
@@ -368,13 +382,30 @@ namespace VFrame30
 			QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
 			QPointF pt2(drawParam->gridToDpi(vip.X + pinWidth, vip.Y));
 
-			p->setPen(pen);
+			if (input.signalType() == E::SignalType::Bus)
+			{
+				p->setPen(busPen);
+			}
+			else
+			{
+				p->setPen(pen);
+			}
+
 			p->drawLine(pt1, pt2);
 
 			if (connectionCount > 1)
 			{
+				if (input.signalType() == E::SignalType::Bus)
+				{
+					p->setPen(busPen);
+				}
+				else
+				{
+					p->setPen(pen);
+				}
+
 				p->setBrush(pen.color());
-				p->setPen(pen);
+
 				DrawPinJoint(p, pt1.x(), pt1.y(), pinWidth);
 				p->setBrush(Qt::NoBrush);
 			}
@@ -382,7 +413,15 @@ namespace VFrame30
 			{
 				// Draw red cross error mark
 				//
-				p->setPen(redPen);
+				if (input.signalType() == E::SignalType::Bus)
+				{
+					p->setPen(redBusPen);
+				}
+				else
+				{
+					p->setPen(redPen);
+				}
+
 				DrawPinCross(p, pt1.x(), pt1.y(), pinWidth);
 			}
 
@@ -423,13 +462,29 @@ namespace VFrame30
 			QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
 			QPointF pt2(drawParam->gridToDpi(vip.X - pinWidth, vip.Y));
 
-			p->setPen(pen);
+			if (output.signalType() == E::SignalType::Bus)
+			{
+				p->setPen(busPen);
+			}
+			else
+			{
+				p->setPen(pen);
+			}
+
 			p->drawLine(pt1, pt2);
 
 			if (connectionCount > 1)
 			{
+				if (output.signalType() == E::SignalType::Bus)
+				{
+					p->setPen(busPen);
+				}
+				else
+				{
+					p->setPen(pen);
+				}
+
 				p->setBrush(pen.color());
-				p->setPen(pen);
 				DrawPinJoint(p, pt1.x(), pt1.y(), pinWidth);
 				p->setBrush(Qt::NoBrush);
 			}
@@ -437,7 +492,15 @@ namespace VFrame30
 			{
 				// Draw red cross error mark
 				//
-				p->setPen(redPen);
+				if (output.signalType() == E::SignalType::Bus)
+				{
+					p->setPen(redBusPen);
+				}
+				else
+				{
+					p->setPen(redPen);
+				}
+
 				DrawPinCross(p, pt1.x(), pt1.y(), pinWidth);
 			}
 
@@ -689,13 +752,6 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItemRect::searchText(const QString& text) const
-	{
-		return	SchemaItem::searchText(text) ||
-				m_label.contains(text, Qt::CaseInsensitive) ||
-				m_userText.contains(text, Qt::CaseInsensitive);
-	}
-
 	// Properties and Data
 	//
 	IMPLEMENT_FONT_PROPERTIES(FblItemRect, Font, m_font);
@@ -777,6 +833,16 @@ namespace VFrame30
 	bool FblItemRect::isTerminatorElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this) != nullptr;
+	}
+
+	bool FblItemRect::isBusComposerElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusComposer*>(this) != nullptr;
+	}
+
+	bool FblItemRect::isBusExtractorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this) != nullptr;
 	}
 
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
@@ -867,6 +933,26 @@ namespace VFrame30
 	const VFrame30::SchemaItemTerminator* FblItemRect::toTerminatorElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this);
+	}
+
+	VFrame30::SchemaItemBusComposer* FblItemRect::toBusComposerElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemBusComposer*>(this);
+	}
+
+	const VFrame30::SchemaItemBusComposer* FblItemRect::toBusComposerElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusComposer*>(this);
+	}
+
+	VFrame30::SchemaItemBusExtractor* FblItemRect::toBusExtractorElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemBusExtractor*>(this);
+	}
+
+	const VFrame30::SchemaItemBusExtractor* FblItemRect::toBusExtractorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this);
 	}
 
 	// Weight propertie

@@ -25,6 +25,8 @@ namespace Builder
 	{
 		Q_OBJECT
 
+	public:
+
 	private:
 		QString m_fileName;			// filename only, like "filename.xml"
 
@@ -37,7 +39,7 @@ namespace Builder
 		static QString removeHeadTailSeparator(const QString& str);
 
 	protected:
-		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
+		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress);
 
 		bool open(const BuildResult& buildResult, bool textMode, IssueLogger* log);
 
@@ -109,7 +111,7 @@ namespace Builder
 		Hardware::ModuleFirmwareWriter m_moduleFirmware;
 
 	public:
-		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList &descriptionFields);
+		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList &descriptionFields);
 
 		bool setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& appLogicBinCode, const std::vector<QVariantList> &descriptionData);
 
@@ -183,7 +185,7 @@ namespace Builder
 		QMap<QString, QString> m_buildFileIDMap;
 
 	private:
-		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
+		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress);
 
 		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
@@ -196,17 +198,17 @@ namespace Builder
 		bool start(DbController *db, IssueLogger* log, bool release, int changesetID);
 		bool finish();
 
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& dataString);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& dataString, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QStringList& stringList, bool compress = false);
 
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList, bool compress = false);
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 
-		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList &descriptionFields);
+		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList &descriptionFields);
 		bool writeMultichannelFiles();
 
 		bool writeConfigurationXmlFiles();
@@ -216,6 +218,8 @@ namespace Builder
 		IssueLogger* log() { return m_log; }
 
 		BuildFile* getBuildFile(const QString& pathFileName) const;
+		BuildFile* getBuildFileByID(const QString& buildFileID) const;
+
 		bool checkBuildFilePtr(const BuildFile* buildFile) const;
 
 		bool isDebug() const;

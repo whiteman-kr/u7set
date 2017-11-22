@@ -11,15 +11,16 @@ namespace VFrame30
 		m_associatedIOs.reserve(32);
 	}
 
-	AfbPin::AfbPin(
-			ConnectionDirrection dirrection,
+	AfbPin::AfbPin(ConnectionDirrection dirrection,
 			const QUuid& guid,
 			int operandIndex,
+			E::SignalType signalType,
 			QString caption) :
 		m_guid(guid),
 		m_point(0, 0),
 		m_dirrection(dirrection),
 		m_afbOperandIndex(operandIndex),
+		m_signalType(signalType),
 		m_caption(caption)
 	{
 		m_associatedIOs.reserve(32);
@@ -32,6 +33,7 @@ namespace VFrame30
 		m_point(0, 0),
 		m_dirrection(dirrection),
 		m_afbOperandIndex(afbSignal.operandIndex()),
+		m_signalType(afbSignal.type()),
 		m_caption(afbSignal.caption())
 	{
 		m_associatedIOs.reserve(32);
@@ -50,6 +52,7 @@ namespace VFrame30
 		cpm->set_dirrection(static_cast<Proto::ConnectionDirrection>(dirrection()));
 		Proto::Write(cpm->mutable_uuid(), m_guid);
 		cpm->set_operandindex(m_afbOperandIndex);
+		cpm->set_signaltype(static_cast<int>(m_signalType));
 		cpm->set_caption(m_caption.toStdString());
 
 		for (const QUuid au : m_associatedIOs)
@@ -68,6 +71,7 @@ namespace VFrame30
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
 		m_guid = Proto::Read(cpm.uuid());
 		m_afbOperandIndex = cpm.operandindex();
+		m_signalType = static_cast<E::SignalType>(cpm.signaltype());
 		m_caption = QString::fromStdString(cpm.caption());
 
 		m_associatedIOs.clear();
@@ -190,6 +194,16 @@ namespace VFrame30
 		m_afbOperandIndex = value;
 	}
 
+	E::SignalType AfbPin::signalType() const
+	{
+		return m_signalType;
+	}
+
+	void AfbPin::setSignalType(E::SignalType value)
+	{
+		m_signalType = value;
+	}
+
 	QString AfbPin::caption() const
 	{
 		return m_caption;
@@ -303,6 +317,8 @@ namespace VFrame30
 	{
 		double radius = pinWidth / 9.0;
 		p->drawEllipse(QRectF(x - radius, y - radius, 2 * radius, 2 * radius));		//Using drawEllipse(QPoint) creates
+
+		return;
 	}
 
 	double FblItem::GetPinWidth(SchemaUnit unit, int dpi) const
@@ -403,6 +419,16 @@ namespace VFrame30
 		return false;
 	}
 
+	bool FblItem::hasInputs() const
+	{
+		return !m_inputPoints.empty();
+	}
+
+	bool FblItem::hasOutputs() const
+	{
+		return !m_outputPoints.empty();
+	}
+
 	int FblItem::inputsCount() const
 	{
 		return static_cast<int>(m_inputPoints.size());
@@ -415,7 +441,7 @@ namespace VFrame30
 
 	void FblItem::addInput()
 	{
-		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), -1, "");
+		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), -1, E::SignalType::Discrete, "");
 		m_inputPoints.push_back(cp);
 	}
 
@@ -425,9 +451,9 @@ namespace VFrame30
 		m_inputPoints.push_back(cp);
 	}
 
-	void FblItem::addInput(int opIndex, QString caption)
+	void FblItem::addInput(int opIndex, E::SignalType signalType, QString caption)
 	{
-		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), opIndex, caption);
+		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), opIndex, signalType, caption);
 		m_inputPoints.push_back(cp);
 	}
 
@@ -443,7 +469,7 @@ namespace VFrame30
 
 	void FblItem::addOutput()
 	{
-		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), -1, "");
+		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), -1, E::SignalType::Discrete, "");
 		m_outputPoints.push_back(cp);
 	}
 
@@ -453,9 +479,9 @@ namespace VFrame30
 		m_outputPoints.push_back(cp);
 	}
 
-	void FblItem::addOutput(int opIndex, QString caption)
+	void FblItem::addOutput(int opIndex, E::SignalType signalType, QString caption)
 	{
-		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), opIndex, caption);
+		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), opIndex, signalType, caption);
 		m_outputPoints.push_back(cp);
 	}
 

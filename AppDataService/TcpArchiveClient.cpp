@@ -13,8 +13,7 @@ TcpArchiveClient::TcpArchiveClient(int channel,
 	m_channel(channel),
 	m_logger(logger),
 	m_signalStatesQueue(signalStatesQueue),
-	m_timer(this),
-	m_connectionKeepAliveTimer(this)
+	m_timer(this)
 {
 }
 
@@ -40,16 +39,12 @@ void TcpArchiveClient::onClientThreadStarted()
 								arg(m_channel + 1).arg(serverAddressPort(0).addressPortStr()));
 
 	connect(&m_timer, &QTimer::timeout, this, &TcpArchiveClient::onTimer);
-	connect(&m_connectionKeepAliveTimer, &QTimer::timeout, this, &TcpArchiveClient::onConnectionKeepAliveTimer);
 	connect(&m_signalStatesQueue, &AppSignalStatesQueue::queueNotEmpty, this, &TcpArchiveClient::onSignalStatesQueueIsNotEmpty);
 
-	m_timer.setInterval(10);
+	m_timer.setInterval(1000);
 	m_timer.start();
 
 	setWatchdogTimerTimeout(10000);
-
-	m_connectionKeepAliveTimer.setSingleShot(true);
-	m_connectionKeepAliveTimer.start(5000);
 }
 
 void TcpArchiveClient::onClientThreadFinished()
@@ -62,14 +57,14 @@ void TcpArchiveClient::onConnection()
 {
 }
 
-void TcpArchiveClient::sendSignalStatesToArchiveRequest()
+void TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 {
 	if (isClearToSendRequest() == false)
 	{
 		return;
 	}
 
-	if (m_signalStatesQueue.size() < 100)
+	if (sendNow == false && m_signalStatesQueue.size() < 100)
 	{
 		return;
 	}
@@ -77,6 +72,11 @@ void TcpArchiveClient::sendSignalStatesToArchiveRequest()
 	Network::SaveAppSignalsStatesToArchiveRequest request;
 
 	int count = 0;
+
+	// DEBUG
+//	Hash testHash = 0x612a4feb53b2378all;
+//	static qint64 prevSystemTime = 0;
+	// DEBUG
 
 	do
 	{
@@ -88,6 +88,18 @@ void TcpArchiveClient::sendSignalStatesToArchiveRequest()
 		{
 			break;
 		}
+
+		// DEBUG
+		/*if (state.hash == testHash)
+		{
+			if (prevSystemTime > state.time.system.timeStamp)
+			{
+				assert(false);
+			}
+
+			prevSystemTime = state.time.system.timeStamp;
+		}*/
+		// DEBUG
 
 		Proto::AppSignalState* appSignalState = request.add_appsignalstates();
 
@@ -112,7 +124,7 @@ void TcpArchiveClient::sendSignalStatesToArchiveRequest()
 
 	sendRequest(ARCHS_SAVE_APP_SIGNALS_STATES, request);
 
-	m_connectionKeepAliveTimer.start(5000);
+	m_connectionKeepAliveCounter = 0;
 
 	qDebug() << "Send SaveSignalsToArchive count = " << count;
 }
@@ -127,7 +139,7 @@ void TcpArchiveClient::onSaveAppSignalsStatesReply(const char* replyData, quint3
 
 	if (errorCode == NetworkError::Success)
 	{
-		sendSignalStatesToArchiveRequest();
+		sendSignalStatesToArchiveRequest(false);
 	}
 	else
 	{
@@ -142,22 +154,27 @@ void TcpArchiveClient::onSaveAppSignalsStatesReply(const char* replyData, quint3
 
 void TcpArchiveClient::onTimer()
 {
-	sendSignalStatesToArchiveRequest();
-}
+	sendSignalStatesToArchiveRequest(true);
 
-void TcpArchiveClient::onConnectionKeepAliveTimer()
-{
-	if (isClearToSendRequest() == true)
+	m_connectionKeepAliveCounter++;
+
+	if (m_connectionKeepAliveCounter > 4)
 	{
-		sendRequest(ARCHS_CONNECTION_ALIVE);
+		if (isClearToSendRequest() == true)
+		{
+			sendRequest(ARCHS_CONNECTION_ALIVE);
 
-		m_connectionKeepAliveTimer.start(5000);
+			qDebug() << "ARCHS_CONNECTION_ALIVE";
+
+			m_connectionKeepAliveCounter = 0;
+		}
 	}
 }
 
+
 void TcpArchiveClient::onSignalStatesQueueIsNotEmpty()
 {
-	sendSignalStatesToArchiveRequest();
+	sendSignalStatesToArchiveRequest(false);
 }
 
 

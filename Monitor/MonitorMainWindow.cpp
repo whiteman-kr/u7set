@@ -2,12 +2,14 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QComboBox>
+#include <QToolButton>
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
 #include "DialogSignalSearch.h"
 #include "DialogSignalSnapshot.h"
+#include "MonitorArchive.h"
 #include "MonitorTrends.h"
 #include "../VFrame30/Schema.h"
 
@@ -30,6 +32,16 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 
 	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
 	connect(m_tcpSignalClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
+
+	// TcpSignalClient
+	//
+	m_tcpSignalRecents = new TcpSignalRecents(&m_configController, fakeAddress, fakeAddress);
+
+	m_tcpRecentsThread = new SimpleThread(m_tcpSignalRecents);
+	m_tcpRecentsThread->start();
+
+	connect(&theSignals, &AppSignalManager::addSignalToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignal, Qt::QueuedConnection);
+	connect(&theSignals, &AppSignalManager::addSignalsToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignals, Qt::QueuedConnection);
 
 	// --
 	//
@@ -59,7 +71,7 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
 
-	connect(m_schemaListWidget, &SchemaListWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	// --
 	//
@@ -72,7 +84,6 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	// Try attach memory segment, that keep information
 	// about instance status
 	//
-
 	m_instanceTimer = new QTimer(this);
 	m_instanceTimer->start(100);
 
@@ -199,7 +210,7 @@ void MonitorMainWindow::showLogo()
 
 	if (m_toolBar->frameSize().height() < logo.height())
 	{
-		logo = logo.scaledToHeight(m_toolBar->frameSize().height(), Qt::FastTransformation);
+		logo = logo.scaledToHeight(m_toolBar->frameSize().height(), Qt::SmoothTransformation);
 	}
 
 	// Show logo if it was enabled in settings
@@ -305,6 +316,12 @@ void MonitorMainWindow::createActions()
 	m_historyForward->setShortcut(QKeySequence::Forward);
 	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
 
+	m_archiveAction = new QAction(tr("Archive"), this);
+	m_archiveAction->setIcon(QIcon(":/Images/Images/Archive.svg"));
+	m_archiveAction->setEnabled(true);
+	m_archiveAction->setData(QVariant("IAmIndependentArchive"));	// This is required to find this action in MonitorToolBar for drag and drop
+	connect(m_archiveAction, &QAction::triggered, this, &MonitorMainWindow::slot_archive);
+
 	m_trendsAction = new QAction(tr("Trends"), this);
 	m_trendsAction->setIcon(QIcon(":/Images/Images/Trends.svg"));
 	m_trendsAction->setEnabled(true);
@@ -355,7 +372,10 @@ void MonitorMainWindow::createMenus()
 	viewMenu->addAction(m_historyBack );
 
 	viewMenu->addSeparator();
+	viewMenu->addAction(m_archiveAction);
 	viewMenu->addAction(m_trendsAction);
+
+	viewMenu->addSeparator();
 	viewMenu->addAction(m_signalSnapshotAction);
 	viewMenu->addAction(m_findSignalAction);
 
@@ -382,46 +402,47 @@ void MonitorMainWindow::createMenus()
 
 void MonitorMainWindow::createToolBars()
 {
-	m_toolBar = new MonitorToolBar(this);
+	m_toolBar = new MonitorToolBar("ToolBar", this);
 	m_toolBar->setObjectName("MonitorMainToolBar");
 
-	m_toolBar->setMovable(false);
-	m_toolBar->setIconSize(QSize(28, 28));
-	m_toolBar->setStyleSheet("QToolBar{spacing:2px;padding:2px;}");
-
 	m_toolBar->addAction(m_newTabAction);
-	m_toolBar->addSeparator();
 
-	m_toolBar->addAction(m_zoomInAction);
-	m_toolBar->addAction(m_zoomOutAction);
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_archiveAction);
+	m_toolBar->addAction(m_trendsAction);
 
-	m_schemaListWidget = new SchemaListWidget(&m_configController, monitorCentralWidget());
-	m_schemaListWidget->setMinimumWidth(300);
-	m_toolBar->addWidget(m_schemaListWidget);
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_signalSnapshotAction);
+	m_toolBar->addAction(m_findSignalAction);
 
+	m_toolBar->addSeparator();
+	m_selectSchemaWidget = new SelectSchemaWidget(&m_configController, monitorCentralWidget());
+	m_selectSchemaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_selectSchemaWidget->setMaximumWidth(1280);
+	m_toolBar->addWidget(m_selectSchemaWidget);
+
+	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_historyBack);
 	m_toolBar->addAction(m_historyForward);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_trendsAction);
-	m_toolBar->addAction(m_signalSnapshotAction);
-	m_toolBar->addAction(m_findSignalAction);
+	m_toolBar->addAction(m_zoomInAction);
+	m_toolBar->addAction(m_zoomOutAction);
+
+	// Spacer between actions and logo
+	//
+	m_spacer = new QWidget(this);
+	m_spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+	m_toolBar->addWidget(m_spacer);
 
 	// Create logo for toolbar
 	//
 	m_logoLabel = new QLabel(this);
-
-	// Spacer between actions and logo
-	//
-	m_logoSpacer = new QWidget(this);
-	m_logoSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-	m_toolBar->addWidget(m_logoSpacer);
 	m_toolBar->addWidget(m_logoLabel);
-
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
+
+	int space = m_toolBar->sizeHint().height() / 6;
+	m_toolBar->setStyleSheet(QString("QToolBar{spacing:%1;padding:%1;}").arg(space));
 
 	return;
 }
@@ -587,6 +608,83 @@ void MonitorMainWindow::checkMonitorSingleInstance()
 	}
 }
 
+void MonitorMainWindow::slot_archive()
+{
+	qDebug() << "";
+	qDebug() << Q_FUNC_INFO;
+
+	// Get Archive list
+	//
+	std::vector<QString> archives = MonitorArchive::getArchiveList();
+
+	// Choose window
+	//
+	QString archiveWindowToActivate;
+
+	if (archives.empty() == true)
+	{
+		archiveWindowToActivate.clear();	// if archiveWindowToActivate is empty, then create new ArchiveWidget
+	}
+	else
+	{
+		QMenu menu;
+
+		QAction* newArchiveAction = menu.addAction("New Window...");
+		newArchiveAction->setData(QVariant::fromValue<int>(-1));		// Data -1 means, create new widget
+
+		menu.addSeparator();
+
+		for (size_t i = 0; i < archives.size(); i++)
+		{
+			QAction* a = menu.addAction(archives[i]);
+			assert(a);
+
+			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in archives vector
+		}
+
+		QAction* triggeredAction = menu.exec(QCursor::pos());
+		if (triggeredAction == nullptr)
+		{
+			return;
+		}
+
+		QVariant data = triggeredAction->data();
+
+		bool ok = false;
+		size_t archiveIndex = data.toInt(&ok);
+
+		if (archiveIndex == -1)
+		{
+			archiveWindowToActivate.clear();	// if trendToActivate is empty, then create new trend
+		}
+		else
+		{
+			if (ok == false || archiveIndex < 0 || archiveIndex >= archives.size())
+			{
+				assert(ok == true);
+				assert(archiveIndex >= 0 && archiveIndex < archives.size());
+				return;
+			}
+
+			archiveWindowToActivate = archives.at(archiveIndex);
+		}
+	}
+
+	// Start new trend or activate chosen one
+	//
+	if (archiveWindowToActivate.isEmpty() == true)
+	{
+		std::vector<AppSignalParam> appSignals;
+		MonitorArchive::startNewWidget(&m_configController, appSignals, this);
+	}
+	else
+	{
+		MonitorArchive::activateWindow(archiveWindowToActivate);
+	}
+
+	return;
+}
+
 void MonitorMainWindow::slot_trends()
 {
 	qDebug() << "";
@@ -707,159 +805,33 @@ void MonitorMainWindow::tcpSignalClient_connectionReset()
 }
 
 
-SchemaListWidget::SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
-	m_configController(configController),
-	m_centraWidget(centralWidget)
+MonitorConfigController* MonitorMainWindow::configController()
 {
-	assert(m_configController);
-	assert(m_centraWidget);
-
-	m_label = new QLabel;
-	m_label->setText(tr("Schema:"));
-
-	m_comboBox = new QComboBox;
-
-	QLayout* layout = new QVBoxLayout(this);
-
-	layout->addWidget(m_label);
-	layout->addWidget(m_comboBox);
-
-	setLayout(layout);
-
-	connect(m_configController, &MonitorConfigController::configurationArrived, this, &SchemaListWidget::slot_configurationArrived);
-	connect(m_centraWidget, &MonitorCentralWidget::signal_schemaChanged, this, &SchemaListWidget::slot_schemaChanged);
-	connect(m_comboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SchemaListWidget::slot_indexChanged);
+	return &m_configController;
 }
 
-SchemaListWidget::~SchemaListWidget()
+const MonitorConfigController* MonitorMainWindow::configController() const
 {
-
-}
-
-void SchemaListWidget::slot_configurationArrived(ConfigSettings /*configuration*/)
-{
-	assert(m_comboBox);
-	assert(m_configController);
-	assert(m_centraWidget);
-
-	m_comboBox->blockSignals(true);		// don;'t want to emit slot_indexChanged
-
-	// Save state
-	//
-	QVariant selected;
-
-	MonitorSchemaWidget* tab = m_centraWidget->currentTab();
-	if (tab != nullptr)
-	{
-		selected = tab->schemaId();
-	}
-
-	// Clear all and fill with new data;
-	//
-	m_comboBox->clear();
-
-	std::vector<VFrame30::SchemaDetails> schemas = m_configController->schemasDetails();
-
-	std::sort(schemas.begin(), schemas.end(),
-		[](const VFrame30::SchemaDetails& s1, const VFrame30::SchemaDetails& s2) -> bool
-		{
-			return s1.m_schemaId < s2.m_schemaId;
-		});
-
-	for (const VFrame30::SchemaDetails& s : schemas)
-	{
-		QVariant data = QVariant::fromValue(s.m_schemaId);
-		m_comboBox->addItem(s.m_schemaId + "  " + s.m_caption, data);
-	}
-
-	// Restore selected
-	//
-	if (selected.isValid() == true)
-	{
-		int index = m_comboBox->findData(selected);
-
-		if (index != -1)
-		{
-			m_comboBox->setCurrentIndex(index);
-		}
-		else
-		{
-			m_comboBox->setCurrentIndex(-1);
-		}
-	}
-	else
-	{
-		m_comboBox->setCurrentIndex(-1);
-	}
-
-	// Allow signals
-	//
-	m_comboBox->blockSignals(false);	// Allow to emit signals
-
-	return;
-}
-
-void SchemaListWidget::slot_schemaChanged(QString strId)
-{
-	if (m_comboBox == nullptr ||
-		m_configController == nullptr)
-	{
-		assert(m_comboBox);
-		assert(m_configController);
-		return;
-	}
-
-	m_comboBox->blockSignals(true);		// don;'t want to emit slot_indexChanged
-
-	// Restore selected
-	//
-	QVariant data = QVariant::fromValue(strId);
-
-	int index = m_comboBox->findData(data);
-
-	if (index != -1)
-	{
-		m_comboBox->setCurrentIndex(index);
-	}
-	else
-	{
-		m_comboBox->setCurrentIndex(-1);
-	}
-
-	// Allow signals
-	//
-	m_comboBox->blockSignals(false);	// Allo wto emit signals
-
-	return;
-}
-
-void SchemaListWidget::slot_indexChanged(int /*index*/)
-{
-	QVariant data = m_comboBox->currentData();
-
-	if (data.isValid() == false ||
-		data.type() != QVariant::String)
-	{
-		return;
-	}
-
-	QString strId = data.toString();
-
-	emit selectionChanged(strId);
-
-	return;
+	return &m_configController;
 }
 
 MonitorToolBar::MonitorToolBar(const QString& tittle, QWidget* parent) :
 	QToolBar(tittle, parent)
 {
 	setAcceptDrops(true);
+	setMovable(false);
+
+	return;
 }
 
-MonitorToolBar::MonitorToolBar(QWidget* parent) :
-	QToolBar(parent)
+void MonitorToolBar::addAction(QAction* action)
 {
-	setAcceptDrops(true);
+	assert(action);
+
+	QWidget::addAction(action);
+	widgetForAction(action)->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
+
+	return;
 }
 
 void MonitorToolBar::dragEnterEvent(QDragEnterEvent* event)
@@ -867,23 +839,39 @@ void MonitorToolBar::dragEnterEvent(QDragEnterEvent* event)
 	// Find Trend action
 	//
 	QWidget* trendActionWidget = nullptr;
-	QList<QAction*> allActions = actions();
+	QWidget* archiveActionWidget = nullptr;
 
+	QList<QAction*> allActions = actions();
 	for (QAction* a : allActions)
 	{
 		QVariant d = a->data();
+
 		if (d.isValid() &&
-			d.type() == QVariant::String &&
-			d.toString() == QLatin1String("IAmIndependentTrend"))
+			d.type() == QVariant::String)
 		{
-			trendActionWidget = widgetForAction(a);
-			trendActionWidget->setAcceptDrops(true);
-			break;
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendActionWidget = widgetForAction(a);
+				trendActionWidget->setAcceptDrops(true);
+			}
+
+			if (d.toString() == QLatin1String("IAmIndependentArchive"))
+			{
+				archiveActionWidget = widgetForAction(a);
+				archiveActionWidget->setAcceptDrops(true);
+			}
 		}
 	}
 
 	if (trendActionWidget != nullptr &&
 		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	if (archiveActionWidget != nullptr &&
+		archiveActionWidget->geometry().contains(event->pos()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		event->acceptProposedAction();
@@ -898,18 +886,29 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 	//
 	QWidget* trendActionWidget = nullptr;
 	QAction* trendAction = nullptr;
+
+	QWidget* archiveActionWidget = nullptr;
+	QAction* archiveAction = nullptr;
+
 	QList<QAction*> allActions = actions();
 
 	for (QAction* a : allActions)
 	{
 		QVariant d = a->data();
 		if (d.isValid() &&
-			d.type() == QVariant::String &&
-			d.toString() == QLatin1String("IAmIndependentTrend"))
+			d.type() == QVariant::String)
 		{
-			trendAction = a;
-			trendActionWidget = widgetForAction(trendAction);
-			break;
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendAction = a;
+				trendActionWidget = widgetForAction(trendAction);
+			}
+
+			if (d.toString() == QLatin1String("IAmIndependentArchive"))
+			{
+				archiveAction = a;
+				archiveActionWidget = widgetForAction(archiveAction);
+			}
 		}
 	}
 
@@ -931,7 +930,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		//
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
-		::Proto::AppSignalParamSet protoSetMessage;
+		::Proto::AppSignalSet protoSetMessage;
 		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
 
 		if (ok == false)
@@ -941,13 +940,13 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		}
 
 		std::vector<AppSignalParam> appSignals;
-		appSignals.reserve(protoSetMessage.items_size());
+		appSignals.reserve(protoSetMessage.appsignal_size());
 
 		// Parse data
 		//
-		for (int i = 0; i < protoSetMessage.items_size(); i++)
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
 		{
-			const ::Proto::AppSignalParam& appSignalMessage = protoSetMessage.items(i);
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
 
 			AppSignalParam appSignalParam;
 			ok = appSignalParam.load(appSignalMessage);
@@ -961,6 +960,57 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		if (appSignals.empty() == false)
 		{
 			m->showTrends(appSignals);
+		}
+	}
+
+	if (archiveAction != nullptr &&
+		archiveActionWidget != nullptr &&
+		archiveActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		// Lets assume parent isMonitorMainWindow
+		//
+		MonitorMainWindow* mainWindow = dynamic_cast<MonitorMainWindow*>(this->parent());
+		if (mainWindow == nullptr)
+		{
+			assert(mainWindow);
+			return;
+		}
+
+		// Load data from drag and drop
+		//
+		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+		::Proto::AppSignalSet protoSetMessage;
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+		if (ok == false)
+		{
+			event->acceptProposedAction();
+			return;
+		}
+
+		std::vector<AppSignalParam> appSignals;
+		appSignals.reserve(protoSetMessage.appsignal_size());
+
+		// Parse data
+		//
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+		{
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+			AppSignalParam appSignalParam;
+			ok = appSignalParam.load(appSignalMessage);
+
+			if (ok == true)
+			{
+				appSignals.push_back(appSignalParam);
+			}
+		}
+
+		if (appSignals.empty() == false)
+		{
+			MonitorArchive::startNewWidget(mainWindow->configController(), appSignals, mainWindow);
 		}
 	}
 

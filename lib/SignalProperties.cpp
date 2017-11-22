@@ -10,55 +10,6 @@ SignalProperties::SignalProperties(Signal& signal) :
 
 void SignalProperties::initProperties()
 {
-	static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
-	static const QString signalGroupIDCaption("SignalGroupID");
-	static const QString signalInstanceIDCaption("SignalInstanceID");
-	static const QString changesetIDCaption("ChangesetID");
-	static const QString checkedOutCaption("CheckedOut");
-	static const QString userIdCaption("UserID");
-	static const QString channelCaption("Channel");
-	static const QString createdCaption("Created");
-	static const QString deletedCaption("Deleted");
-	static const QString instanceCreatedCaption("InstanceCreated");
-	//static const QString instanceActionCaption("InstanceAction");
-	static const QString typeCaption("Type");
-	static const QString inOutTypeCaption("InOutType");
-	static const QString cacheValidator("^[#]?[A-Za-z\\d_]*$");
-	static const QString appSignalIDCaption("AppSignalID");
-	static const QString customSignalIDCaption("CustomAppSignalID");
-	static const QString captionCaption("Caption");
-	static const QString captionValidator("^.+$");
-	static const QString analogDataFormatCaption("AnalogDataFormat");
-	static const QString dataSizeCaption("DataSize");
-	static const QString lowADCCaption("LowADC");
-	static const QString highADCCaption("HighADC");
-	static const QString lowDACCaption("LowDAC");
-	static const QString highDACCaption("HighDAC");
-	static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
-	static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
-	static const QString unitCaption("Unit");
-	static const QString lowValidRangeCaption("LowValidRange");
-	static const QString highValidRangeCaption("HighValidRange");
-	static const QString unbalanceLimitCaption("UnbalanceLimit");
-	static const QString outputModeCaption("OutputMode");
-	static const QString acquireCaption("Acquire");
-	static const QString normalStateCaption("NormalState");
-	static const QString decimalPlacesCaption("DecimalPlaces");
-	static const QString apertureCaption("Aperture");
-	static const QString adaptiveApertureCaption("AdaptiveAperture");
-	static const QString filteringTimeCaption("FilteringTime");
-	static const QString spreadToleranceCaption("SpreadTolerance");
-	static const QString byteOrderCaption("ByteOrder");
-	static const QString equipmentIDCaption("EquipmentID");
-	static const QString enableTuningCaption("EnableTuning");
-	static const QString tuningDefaultValueCaption("TuningDefaultValue");
-	static const QString identificationCategory("1 Identification");
-	static const QString signalTypeCategory("2 Signal type");
-	static const QString dataFormatCategory("3 Data Format");
-	static const QString signalProcessingCategory("4 Signal processing");
-	static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
-	static const QString tuningCategory("6 Tuning");
-
 	ADD_PROPERTY_GETTER_INDIRECT(int, idCaption, false, Signal::ID, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(int, signalGroupIDCaption, false, Signal::signalGroupID, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(int, signalInstanceIDCaption, false, Signal::signalInstanceID, m_signal);
@@ -69,7 +20,6 @@ void SignalProperties::initProperties()
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, createdCaption, false, Signal::created, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(bool, deletedCaption, false, Signal::deleted, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated, m_signal);
-	//ADD_PROPERTY_GETTER_INDIRECT(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction, m_signal);
 
 	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalType, typeCaption, true, Signal::signalType, Signal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(signalTypeCategory);
@@ -85,6 +35,9 @@ void SignalProperties::initProperties()
 	extStrIdProperty->setValidator(cacheValidator);
 	extStrIdProperty->setCategory(identificationCategory);
 
+	auto busTypeIDProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, busTypeIDCaption, true, Signal::busTypeID, Signal::setBusTypeID, m_signal);
+	busTypeIDProperty->setCategory(identificationCategory);
+
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, captionCaption, true, Signal::caption, Signal::setCaption, m_signal);
 	nameProperty->setValidator(captionValidator);
 	nameProperty->setCategory(identificationCategory);
@@ -95,9 +48,17 @@ void SignalProperties::initProperties()
 	auto enableTuningProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning, m_signal);
 	enableTuningProperty->setCategory(tuningCategory);
 
-	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
+	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(float, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
 	m_propertiesDependentOnPrecision.push_back(tuningDefaultValueProperty);
 	tuningDefaultValueProperty->setCategory(tuningCategory);
+
+	auto tuningLowBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(float, tuningLowBoundCaption, true, Signal::tuningLowBound, Signal::setTuningLowBound, m_signal);
+	m_propertiesDependentOnPrecision.push_back(tuningLowBoundProperty);
+	tuningLowBoundProperty->setCategory(tuningCategory);
+
+	auto tuningHighBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(float, tuningHighBoundCaption, true, Signal::tuningHighBound, Signal::setTuningHighBound, m_signal);
+	m_propertiesDependentOnPrecision.push_back(tuningHighBoundProperty);
+	tuningHighBoundProperty->setCategory(tuningCategory);
 
 	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
 										(std::function<int(void)>)std::bind(&Signal::dataSize, &m_signal),
@@ -117,11 +78,11 @@ void SignalProperties::initProperties()
 			}
 		}
 
-		auto analogDataFormatProperty = addProperty<E::AnalogAppSignalFormat>(analogDataFormatCaption, QString(), true,
+		auto analogSignalFormatProperty = addProperty<E::AnalogAppSignalFormat>(analogSignalFormatCaption, QString(), true,
 																			  (std::function<E::AnalogAppSignalFormat(void)>)std::bind(&Signal::analogSignalFormat, &m_signal),
 																			  std::bind(static_cast<void (Signal::*)(E::AnalogAppSignalFormat)>(&Signal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
 
-		analogDataFormatProperty->setCategory(dataFormatCategory);
+		analogSignalFormatProperty->setCategory(dataFormatCategory);
 
 		auto lowADCProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC, m_signal);
 		lowADCProperty->setCategory(signalProcessingCategory);
@@ -151,21 +112,36 @@ void SignalProperties::initProperties()
 		m_propertiesDependentOnPrecision.push_back(highValidRangeProperty);
 		highValidRangeProperty->setCategory(signalProcessingCategory);
 
-		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode, m_signal);
-		outputModePropetry->setCategory(signalProcessingCategory);
+		auto unitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, unitCaption, true, Signal::unit, Signal::setUnit, m_signal);
+		unitProperty->setCategory(signalProcessingCategory);
 
-		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(unitCaption, true, Signal::unitList, Signal::unitID, Signal::setUnitID, m_signal);
-		unitProperty->setCategory(dataFormatCategory);
+		auto electricLowLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, electricLowLimitCaption, true, Signal::electricLowLimit, Signal::setElectricLowLimit, m_signal);
+		electricLowLimitProperty->setPrecision(3);
+		electricLowLimitProperty->setCategory(electricParametersCategory);
 
-		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit, m_signal);
-		m_propertiesDependentOnPrecision.push_back(unbalanceLimitProperty);
-		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);
+		auto electricHighLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, electricHighLimitCaption, true, Signal::electricHighLimit, Signal::setElectricHighLimit, m_signal);
+		electricHighLimitProperty->setPrecision(3);
+		electricHighLimitProperty->setCategory(electricParametersCategory);
+
+		auto electricUnitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::ElectricUnit, electricUnitCaption, true, Signal::electricUnit, Signal::setElectricUnit, m_signal);
+		electricUnitProperty->setCategory(electricParametersCategory);
+
+		std::shared_ptr<OrderedHash<int, QString>> sensorTypeHash = generateOrderedHashFromStringArray(SensorTypeStr, SENSOR_TYPE_COUNT);
+		auto sensorTypeProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(sensorTypeCaption, true, sensorTypeHash, Signal::sensorType, Signal::setSensorTypeInt, m_signal);
+		sensorTypeProperty->setCategory(electricParametersCategory);
+
+		std::shared_ptr<OrderedHash<int, QString>> outputModeHash = generateOrderedHashFromStringArray(OutputModeStr, OUTPUT_MODE_COUNT);
+		auto outputModePropetry = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(outputModeCaption, true, outputModeHash, Signal::outputMode, Signal::setOutputModeInt, m_signal);
+		outputModePropetry->setCategory(electricParametersCategory);
 
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
 
-		auto apertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, apertureCaption, true, Signal::aperture, Signal::setAperture, m_signal);
-		apertureProperty->setCategory(onlineMonitoringSystemCategory);
+		auto coarseApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, coarseApertureCaption, true, Signal::coarseAperture, Signal::setCoarseAperture, m_signal);
+		coarseApertureProperty->setCategory(onlineMonitoringSystemCategory);
+
+		auto fineApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, fineApertureCaption, true, Signal::fineAperture, Signal::setFineAperture, m_signal);
+		fineApertureProperty->setCategory(onlineMonitoringSystemCategory);
 
 		auto adaptiveApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);
 		adaptiveApertureProperty->setCategory(onlineMonitoringSystemCategory);
@@ -178,15 +154,20 @@ void SignalProperties::initProperties()
 		filteringTimePropetry->setPrecision(6);
 		filteringTimePropetry->setCategory(signalProcessingCategory);
 	}
-	else
-	{
-		auto normalStateProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, normalStateCaption, true, Signal::normalState, Signal::setNormalState, m_signal);
-		normalStateProperty->setCategory(onlineMonitoringSystemCategory);
-	}
 
 	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire, m_signal);
 	acquireProperty->setCategory(onlineMonitoringSystemCategory);
 
 	auto byteOrderProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(dataFormatCategory);
+}
+
+std::shared_ptr<OrderedHash<int, QString> > SignalProperties::generateOrderedHashFromStringArray(const char* const* array, size_t size)
+{
+	auto result = std::make_shared<OrderedHash<int, QString>>();
+	for (size_t i = 0; i < size; i++)
+	{
+		result->append(i, array[i]);
+	}
+	return result;
 }

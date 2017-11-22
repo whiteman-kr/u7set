@@ -785,14 +785,15 @@ void LinearityPoint::setPercent(double value)
 	{
 		switch(s)
 		{
-			case POINT_SENSOR_PERCENT:		m_sensorValue[s] = value;					break;
-			case POINT_SENSOR_U_0_5_V:		m_sensorValue[s] = value * 5 / 100;			break;
-			case POINT_SENSOR_I_0_5_MA:		m_sensorValue[s] = value * 5 / 100;			break;
-			case POINT_SENSOR_I_4_20_MA:	m_sensorValue[s] = value * 16 / 100 + 4;	break;
-			case POINT_SENSOR_T_0_100_C:	m_sensorValue[s] = value * 100 / 100;		break;
-			case POINT_SENSOR_T_0_150_C:	m_sensorValue[s] = value * 150 / 100;		break;
-			case POINT_SENSOR_T_0_200_C:	m_sensorValue[s] = value * 200 / 100;		break;
-			case POINT_SENSOR_T_0_400_C:	m_sensorValue[s] = value * 400 / 100;		break;
+			case POINT_SENSOR_PERCENT:		m_sensorValue[s] = value;						break;
+			case POINT_SENSOR_U_0_5_V:		m_sensorValue[s] = value * 5 / 100;				break;
+			case POINT_SENSOR_U_m10_10_V:	m_sensorValue[s] = value * 20 / 100 + (-10);	break;
+			case POINT_SENSOR_I_0_5_MA:		m_sensorValue[s] = value * 5 / 100;				break;
+			case POINT_SENSOR_I_4_20_MA:	m_sensorValue[s] = value * 16 / 100 + 4;		break;
+			case POINT_SENSOR_T_0_100_C:	m_sensorValue[s] = value * 100 / 100;			break;
+			case POINT_SENSOR_T_0_150_C:	m_sensorValue[s] = value * 150 / 100;			break;
+			case POINT_SENSOR_T_0_200_C:	m_sensorValue[s] = value * 200 / 100;			break;
+			case POINT_SENSOR_T_0_400_C:	m_sensorValue[s] = value * 400 / 100;			break;
 			default:						assert(0);
 		}
 	}
@@ -976,7 +977,7 @@ void LinearityOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-	m_showInputErrorType = s.value(QString("%1ShowInputErrorType").arg(LINEARITY_OPTIONS_KEY), LO_SHOW_INPUT_ERROR_PHYSICAL).toInt();
+	m_showErrorFromLimit = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MEASURE_LIMIT_TYPE_PHYSICAL).toInt();
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
 	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
@@ -986,8 +987,10 @@ void LinearityOption::load()
 	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
 	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
-	m_showInputRangeColumn = s.value(QString("%1ShowInputRangeColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
-	m_showOutputRangeColumn = s.value(QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), false).toBool();
+	m_showPhyscalValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
+
+	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(LINEARITY_OPTIONS_KEY), true).toBool();
+	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -998,7 +1001,7 @@ void LinearityOption::save()
 
 	s.setValue(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), m_errorLimit);
 	s.setValue(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
-	s.setValue(QString("%1ShowInputErrorType").arg(LINEARITY_OPTIONS_KEY), m_showInputErrorType);
+	s.setValue(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), m_showErrorFromLimit);
 
 	s.setValue(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
 	s.setValue(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
@@ -1008,8 +1011,10 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-	s.setValue(QString("%1ShowInputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showInputRangeColumn);
-	s.setValue(QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
+	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showPhyscalValueColumn);
+
+	s.setValue(QString("%1WarningIfMeasured").arg(LINEARITY_OPTIONS_KEY), m_warningIfMeasured);
+	s.setValue(QString("%1MeasureEntireModule").arg(LINEARITY_OPTIONS_KEY), m_measureEntireModule);
 
 	m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
@@ -1022,7 +1027,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 
 	m_errorLimit = from.m_errorLimit;
 	m_errorType = from.m_errorType;
-	m_showInputErrorType = from.m_showInputErrorType;
+	m_showErrorFromLimit = from.m_showErrorFromLimit;
 
 	m_measureTimeInPoint = from.m_measureTimeInPoint;
 	m_measureCountInPoint = from.m_measureCountInPoint;
@@ -1032,8 +1037,10 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_highLimitRange = from.m_highLimitRange;
 
 	m_viewType = from.m_viewType;
-	m_showInputRangeColumn = from.m_showInputRangeColumn;
-	m_showOutputRangeColumn = from.m_showOutputRangeColumn;
+	m_showPhyscalValueColumn = from.m_showPhyscalValueColumn;
+
+	m_warningIfMeasured = from.m_warningIfMeasured;
+	m_measureEntireModule = from.m_measureEntireModule;
 
 	return *this;
 }

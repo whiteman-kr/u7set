@@ -67,11 +67,15 @@ public:
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
 
+	// Signal Seacrh dialog
+	//
 	QPoint m_signalSearchPos;
 	QByteArray m_signalSearchGeometry;
 	int m_signalSearchColumnCount = 0;
 	QByteArray m_signalSearchColumnWidth;
 
+	// Signal Snapshot
+	//
 	QPoint m_signalSnapshotPos;
 	QByteArray m_signalSnapshotGeometry;
 	QVector<int> m_signalSnapshotColumns;
@@ -82,6 +86,15 @@ public:
 	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
 
 	QStringList m_trendSignalsDialogFilterCompleter;
+
+	// Archive window
+	//
+	QPoint m_archiveWindowPos;
+	QByteArray m_archiveWindowGeometry;
+	QByteArray m_archiveWindowState;
+	QByteArray m_archiveHorzHeader;
+	int m_archiveTimeType = static_cast<int>(E::TimeType::Local);
+	QStringList m_archiveSignalsDialogFilterCompleter;
 
 private:
 	mutable QMutex m_mutex;
