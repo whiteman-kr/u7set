@@ -18,7 +18,7 @@ namespace Hardware
 	{
 	}
 
-	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, const QString &projectName,
+	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber, const QString &projectName,
 							  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId)
 	{
 		m_caption = caption;
@@ -27,6 +27,7 @@ namespace Hardware
 		m_uartId = uartId;
 		m_frameSize = frameSize;
 		m_frameSizeWithCRC = frameSize + sizeof(quint64);
+		m_lmDescriptionNumber = lmDescriptionNumber;
 		m_projectName = projectName;
 		m_userName = userName;
 		m_buildNumber = buildNumber;
@@ -142,6 +143,11 @@ namespace Hardware
 		return m_buildConfig;
 	}
 
+	int ModuleFirmware::lmDescriptionNumber() const
+	{
+		return m_lmDescriptionNumber;
+	}
+
 	bool ModuleFirmware::loadFromFile(QString fileName, QString& errorCode, bool readDataFrames)
 	{
 		errorCode.clear();
@@ -185,7 +191,8 @@ namespace Hardware
 		case 4:
 			return load_version2_3_4(jConfig, readDataFrames);
 		case 5:
-			return load_version5(jConfig, readDataFrames, errorCode);
+		case 6:
+			return load_version5_6(jConfig, readDataFrames, errorCode);
 		default:
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
@@ -483,7 +490,7 @@ namespace Hardware
 
 	}
 
-	bool ModuleFirmware::load_version5(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode)
+	bool ModuleFirmware::load_version5_6(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode)
 	{
 		if (jConfig.value("projectName").isUndefined() == true)
 		{
@@ -545,6 +552,15 @@ namespace Hardware
 		else
 		{
 			m_buildNumber = (int)jConfig.value("buildNumber").toDouble();
+		}
+
+		if (jConfig.value("lmDescriptionNumber").isUndefined() == true)
+		{
+			m_lmDescriptionNumber = 0;
+		}
+		else
+		{
+			m_lmDescriptionNumber = (int)jConfig.value("lmDescriptionNumber").toDouble();
 		}
 
 		if (jConfig.value("changesetId").isUndefined() == true)

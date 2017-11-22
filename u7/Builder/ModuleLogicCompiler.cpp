@@ -110,6 +110,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
 			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
+//			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
 			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion),
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
@@ -244,6 +245,8 @@ namespace Builder
 
 		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
+
+		m_lmDescriptionNumber = m_lmDescription->descriptionNumber();
 
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
@@ -2733,6 +2736,86 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::groupTxSignals()
+	{
+		QList<Hardware::OptoPortShared> associatedPorts;
+
+		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), associatedPorts);
+
+		QHash<UalSignal*, UalSignal*> acquiredInternalDiscretes;
+
+		for(UalSignal* s : m_acquiredDiscreteInternalSignals)
+		{
+			acquiredInternalDiscretes.insert(s, s);
+		}
+
+		QHash<QString, QSet<UalSignal*>> portsTxSignalSets;
+
+		for(Hardware::OptoPortShared port : associatedPorts)
+		{
+			QVector<Hardware::TxRxSignalShared> txSignals;
+
+			port->getTxDiscreteSignals(txSignals, true);
+
+			QSet<UalSignal*> set;
+
+			for(Hardware::TxRxSignalShared txSignal : txSignals)
+			{
+				UalSignal* s = m_ualSignals.get(txSignal->appSignalID());
+
+				if (s == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				if (acquiredInternalDiscretes.contains(s) == false)
+				{
+					continue;
+				}
+
+				set.insert(s);
+			}
+
+			if (set.size() > 0)
+			{
+				portsTxSignalSets.insert(port->equipmentID(), set);
+			}
+		}
+
+		//
+
+		QStringList portIDs = portsTxSignalSets.keys();
+
+		for(const QString& portID : portIDs)
+		{
+			QSet<UalSignal*>& set = portsTxSignalSets[portID];
+
+			LOG_MESSAGE(m_log, QString("Port %1 acquired discrete internal txSignals count = %2").arg(portID).arg(set.count()));
+		}
+
+		QVector<QString>&& vPortIDs = QVector<QString>::fromList(portIDs);
+
+		int count = vPortIDs.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				QString s1ID = vPortIDs[i];
+				QString s2ID = vPortIDs[k];
+
+				QSet<UalSignal*>& set1 = portsTxSignalSets[s1ID];
+				QSet<UalSignal*>& set2 = portsTxSignalSets[s2ID];
+
+				LOG_MESSAGE(m_log, QString("%1 intersect %2 = %3").
+							arg(s1ID).arg(s2ID).arg(set1.intersect(set2).count()));
+			}
+		}
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::appendLinkedValiditySignal(const Signal* s)
 	{
 		TEST_PTR_RETURN_FALSE(s);
@@ -4221,7 +4304,7 @@ namespace Builder
 													   ualReceiver->appSignalId(),
 													   m_lm->equipmentIdTemplate(),
 													   ualReceiver->guid(),
-													   rxAddress);
+													   &rxAddress);
 			if (res == false)
 			{
 				result = false;
@@ -7301,15 +7384,10 @@ namespace Builder
 
 		Command cmd;
 
-		// qDebug() << "Fill port " << C_STR(port->equipmentID()) << " raw data";
-
+		int txRawDataStartAddr = port->txBufAbsAddress() + offset;
 		int txRawDataSizeW = port->txRawDataSizeW();
 
-		cmd.setMem(port->txBufAbsAddress() + offset, 0, txRawDataSizeW);
-		cmd.setComment("initialize tx raw data memory");
-
-		m_code.append(cmd);
-		m_code.newLine();
+		MemWriteMap memWriteMap(txRawDataStartAddr, txRawDataSizeW, true);
 
 		const Hardware::RawDataDescription& rawDataDescription = port->rawDataDescription();
 
@@ -7323,19 +7401,19 @@ namespace Builder
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxAllModulesRawData:
-				result &= copyOptoPortAllNativeRawData(port, offset);
+				result &= copyOptoPortAllNativeRawData(port, offset, memWriteMap);
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxModuleRawData:
-				result &= copyOptoPortTxModuleRawData(port, offset, item.modulePlace);
+				result &= copyOptoPortTxModuleRawData(port, offset, item.modulePlace, memWriteMap);
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxPortRawData:
-				result &= copyOptoPortTxOptoPortRawData(port, offset, item.portEquipmentID);
+				result &= copyOptoPortTxOptoPortRawData(port, offset, item.portEquipmentID, memWriteMap);
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxConst16:
-				result &= copyOptoPortTxConst16RawData(port, item.const16Value, offset);
+				result &= copyOptoPortTxConst16RawData(port, item.const16Value, offset, memWriteMap);
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxSignal:
@@ -7353,11 +7431,55 @@ namespace Builder
 			}
 		}
 
-		result &= copyOptoPortRawTxAnalogSignals(port);
+		result &= copyOptoPortRawTxAnalogSignals(port, memWriteMap);
 
-		result &= copyOptoPortRawTxDiscreteSignals(port);
+		result &= copyOptoPortRawTxDiscreteSignals(port, memWriteMap);
 
-		result &= copyOptoPortRawTxBusSignals(port);
+		result &= copyOptoPortRawTxBusSignals(port, memWriteMap);
+
+		MemWriteMap::AreaList nonWrittenAreas;
+
+		memWriteMap.getNonWrittenAreas(&nonWrittenAreas);
+
+		bool first = true;
+
+		for(MemWriteMap::Area nonWrittenArea : nonWrittenAreas)
+		{
+			Command cmd;
+
+			switch(nonWrittenArea.second)
+			{
+			case 0:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+
+			case 1:
+				cmd.movConst(nonWrittenArea.first, 0);
+				break;
+
+			case 2:
+				cmd.movConstInt32(nonWrittenArea.first, 0);
+				break;
+
+			default:
+				cmd.setMem(nonWrittenArea.first, 0, nonWrittenArea.second);
+			}
+
+			if (first == true)
+			{
+				cmd.setComment("fill non written txRawData by 0");
+				first = false;
+			}
+
+			m_code.append(cmd);
+		}
+
+		if (first == false)
+		{
+			m_code.newLine();
+		}
 
 		return result;
 	}
@@ -7428,7 +7550,7 @@ namespace Builder
 
 			SignalAddress16 txSignalAddress;
 
-			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), txSignalAddress);
+			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), &txSignalAddress);
 
 			if (res == false)
 			{
@@ -7541,7 +7663,7 @@ namespace Builder
 
 			SignalAddress16 txSignalAddress;
 
-			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), txSignalAddress);
+			bool res = port->getTxSignalAbsAddress(txSignal->appSignalID(), &txSignalAddress);
 
 			if (res == false)
 			{
@@ -7810,7 +7932,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset)
+	bool ModuleLogicCompiler::copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset, MemWriteMap& memWriteMap)
 	{
 		if (port == nullptr)
 		{
@@ -7829,14 +7951,14 @@ namespace Builder
 				continue;
 			}
 
-			result &= copyOptoPortTxModuleRawData(port, offset, module);
+			result &= copyOptoPortTxModuleRawData(port, offset, module, memWriteMap);
 		}
 
 		return result;
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int place)
+	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int place, MemWriteMap& memWriteMap)
 	{
 		if (port == nullptr)
 		{
@@ -7854,11 +7976,11 @@ namespace Builder
 			return false;
 		}
 
-		return copyOptoPortTxModuleRawData(port, offset, module);
+		return copyOptoPortTxModuleRawData(port, offset, module, memWriteMap);
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module)
+	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module, MemWriteMap& memWriteMap)
 	{
 		if (port == nullptr || module == nullptr)
 		{
@@ -7908,6 +8030,8 @@ namespace Builder
 
 			toAddr = port->txBufAbsAddress() + offset + localOffset;
 
+			int sizeW = 0;
+
 			fromAddr = m_memoryMap.getModuleDataOffset(module->place());
 
 			switch(item.type)
@@ -7922,6 +8046,8 @@ namespace Builder
 
 				cmd.mov(toAddr, fromAddr);
 
+				sizeW = 1;
+
 				localOffset++;
 
 				break;
@@ -7931,6 +8057,8 @@ namespace Builder
 				fromAddr += moduleDiagDataOffset + item.offset;
 
 				cmd.mov(toAddr, fromAddr);
+
+				sizeW = 1;
 
 				localOffset++;
 
@@ -7943,6 +8071,8 @@ namespace Builder
 
 				cmd.mov32(toAddr, fromAddr);
 
+				sizeW = 2;
+
 				localOffset += 2;
 
 				break;
@@ -7952,6 +8082,8 @@ namespace Builder
 				fromAddr += moduleDiagDataOffset + item.offset;
 
 				cmd.mov32(toAddr, fromAddr);
+
+				sizeW = 2;
 
 				localOffset += 2;
 
@@ -7970,6 +8102,10 @@ namespace Builder
 				}
 
 				m_code.append(cmd);
+
+				//
+
+				memWriteMap.write(toAddr, sizeW);
 			}
 		}
 
@@ -7986,7 +8122,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID)
+	bool ModuleLogicCompiler::copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID, MemWriteMap& memWriteMap)
 	{
 		if (port == nullptr)
 		{
@@ -8038,9 +8174,9 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(port->txBufAbsAddress() + offset,
-				   portWithRxRawData->rxBufAbsAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W,
-				   portTxRawDataSizeW);
+		int writeAddr = port->txBufAbsAddress() + offset;
+		int writeSizeW = portTxRawDataSizeW;
+		cmd.movMem(writeAddr, portWithRxRawData->rxBufAbsAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W, writeSizeW);
 
 		cmd.setComment(QString("copying raw data received on port %1").arg(portWithRxRawData->equipmentID()));
 
@@ -8049,11 +8185,14 @@ namespace Builder
 
 		offset += portTxRawDataSizeW;
 
+		//
+
+		memWriteMap.write(writeAddr, writeSizeW);
+
 		return true;
 	}
 
-
-	bool ModuleLogicCompiler::copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset)
+	bool ModuleLogicCompiler::copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset, MemWriteMap& memWriteMap)
 	{
 		if (port == nullptr)
 		{
@@ -8063,7 +8202,10 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movConst(port->txBufAbsAddress() + offset, const16value);
+		int writeAddr = port->txBufAbsAddress() + offset;
+		int writeSizeW = 1;
+
+		cmd.movConst(writeAddr, const16value);
 
 		cmd.setComment(QString("copying raw data const16 value = %1").arg(const16value));
 
@@ -8072,11 +8214,15 @@ namespace Builder
 
 		offset++;
 
+		//
+
+		memWriteMap.write(writeAddr, writeSizeW);
+
 		return true;
 
 	}
 
-	bool ModuleLogicCompiler::copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port)
+	bool ModuleLogicCompiler::copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap)
 	{
 		if (port == nullptr)
 		{
@@ -8084,6 +8230,8 @@ namespace Builder
 		}
 
 		const QVector<Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+
+		bool result = true;
 
 		Command cmd;
 
@@ -8114,16 +8262,18 @@ namespace Builder
 				return false;
 			}
 
+			int writeAddr = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
+
 			if (ualSignal->isConst() == true)
 			{
 				switch(ualSignal->analogSignalFormat())
 				{
 				case E::AnalogAppSignalFormat::Float32:
-					cmd.movConstFloat(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->constAnalogFloatValue());
+					cmd.movConstFloat(writeAddr, ualSignal->constAnalogFloatValue());
 					break;
 
 				case E::AnalogAppSignalFormat::SignedInt32:
-					cmd.movConstInt32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->constAnalogIntValue());
+					cmd.movConstInt32(writeAddr, ualSignal->constAnalogIntValue());
 					break;
 
 				default:
@@ -8134,12 +8284,22 @@ namespace Builder
 			}
 			else
 			{
-				cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset());
+				cmd.mov32(writeAddr, ualSignal->ualAddr().offset());
 			}
 
 			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
 
 			m_code.append(cmd);
+
+			//
+
+			MemWriteMap::Error err = memWriteMap.write32(writeAddr);
+
+			if (err != MemWriteMap::Error::Ok)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
 
 			count++;
 		}
@@ -8149,10 +8309,10 @@ namespace Builder
 			m_code.newLine();
 		}
 
-		return true;
+		return result;
 	}
 
-	bool ModuleLogicCompiler::copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port)
+	bool ModuleLogicCompiler::copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap)
 	{
 		const QVector<Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
@@ -8184,6 +8344,8 @@ namespace Builder
 		qSort(offsets);
 
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		bool result = true;
 
 		Command cmd;
 
@@ -8234,19 +8396,31 @@ namespace Builder
 
 			if (count > 0)
 			{
-				cmd.mov(port->txBufAbsAddress() + offset, bitAccAddr);
+				int writeAddr = port->txBufAbsAddress() + offset;
+
+				cmd.mov(writeAddr, bitAccAddr);
 				cmd.clearComment();
 
 				m_code.append(cmd);
+
+				//
+
+				MemWriteMap::Error err = memWriteMap.write16(writeAddr);
+
+				if (err != MemWriteMap::Error::Ok)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+				}
 			}
 		}
 
 		m_code.newLine();
 
-		return true;
+		return result;
 	}
 
-	bool ModuleLogicCompiler::copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port)
+	bool ModuleLogicCompiler::copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap)
 	{
 		if (port == nullptr)
 		{
@@ -8337,24 +8511,32 @@ namespace Builder
 				continue;
 			}
 
+			int writeAddr = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
+			int writeSizeW = 0;
+
 			switch(txSignal->dataSize())
 			{
 			case SIZE_16BIT:
-				cmd.mov(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset());
+				writeSizeW = 1;
+				cmd.mov(writeAddr, ualSignal->ualAddr().offset());
 				break;
 
 			case SIZE_32BIT:
-				cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset());
+				writeSizeW = 2;
+				cmd.mov32(writeAddr, ualSignal->ualAddr().offset());
 				break;
 
 			default:
-				cmd.movMem(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), ualSignal->ualAddr().offset(),
-						   txSignal->dataSize() / SIZE_16BIT);
+				writeSizeW = txSignal->dataSize() / SIZE_16BIT;
+				cmd.movMem(writeAddr, ualSignal->ualAddr().offset(), writeSizeW);
 			}
 
 			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
-
 			m_code.append(cmd);
+
+			//
+
+			memWriteMap.write(writeAddr, writeSizeW);
 
 			count++;
 		}
@@ -8429,7 +8611,7 @@ namespace Builder
 		}
 
 		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentIdTemplate(), m_lm->caption(),
-														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, uniqueID, m_code);
+														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_lmDescriptionNumber, uniqueID, m_code);
 		if (result == false)
 		{
 			return false;

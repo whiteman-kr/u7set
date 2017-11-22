@@ -26,6 +26,7 @@ function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, 
 //
 "use strict";
 var FamilyLMID = 0x1100;
+var LMDescriptionNumber = 0;
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
 //var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
@@ -53,7 +54,8 @@ var FamilyLMID = 0x1100;
 //var configScriptVersion = 27;		// First script that supports subsystems filtering
 //var configScriptVersion : number = 28;	// Code is written using TypeScript
 //var configScriptVersion: number = 29;		// Added module place checking
-var configScriptVersion = 30; // ModuleID for LM is placed in .mct file
+//var configScriptVersion: number = 30;		// ModuleID for LM is placed in .mct file
+var configScriptVersion = 31; // Add LmDescriptionVersion to Storage Format frame
 //
 function main(builder, root, logicModules, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -215,7 +217,7 @@ function module_lm_1_statistics(builder, module, confCollection, log, subsystemS
         }
         var configStartFrames = 2;
         var configFrameCount = 19; // number of frames in each configuration
-        var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount);
+        var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
         var frameStorageConfig = 1;
         var ptr = 14;
         var LMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
@@ -274,7 +276,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
         return false;
     }
-    var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount);
+    var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
     var descriptionVersion = 1;
     confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
     confFirmware.writeLog("---\r\n");
@@ -286,6 +288,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     confFirmware.writeLog("UartID = " + uartId + "\r\n");
     confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
     confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
+    confFirmware.writeLog("LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
     // Configuration storage format
     //
     var frameStorageConfig = 1;
@@ -312,8 +315,13 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] BuildNo = " + buildNo + "\r\n");
     ptr += 2;
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMDescriptionNumber", LMDescriptionNumber) == false) {
+        return false;
+    }
+    confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
+    ptr += 2;
     // reserved
-    ptr += 6;
+    ptr += 4;
     // write LMNumberCount, if old value is less than current. If it is the same, output an error.
     //
     var oldLMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
