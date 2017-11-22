@@ -187,18 +187,22 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
     ../lib/CsvFile.cpp \
-    Builder/AppItems.cpp \
     DialogBusEditor.cpp \
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
     Forms/ChooseAfbDialog.cpp \
+    Builder/SignalSet.cpp \
+    Builder/Busses.cpp \
     IdePropertyEditor.cpp \
+    Builder/UalItems.cpp \
     EditEngine/EditEngineSetObject.cpp \
+    ../lib/Address16.cpp \
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
     CreateSignalDialog.cpp \
     LogicModuleSet.cpp \
-    ../lib/LmDescription.cpp
+    ../lib/LmDescription.cpp \
+    Builder/MemWriteMap.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -324,18 +328,21 @@ HEADERS  += \
     ../lib/AppSignal.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
-    Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
     BusStorage.h \
     Forms/DialogUpdateFromPreset.h \
+    Builder/SignalSet.h \
+    Builder/Busses.h \
     IdePropertyEditor.h \
+    Builder/UalItems.h \
     EditEngine/EditEngineSetObject.h \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
     CreateSignalDialog.h \
     LogicModuleSet.h \
-    ../lib/LmDescription.h
+    ../lib/LmDescription.h \
+    Builder/MemWriteMap.h
 
 FORMS    += \
     CreateProjectDialog.ui \

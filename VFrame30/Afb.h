@@ -180,6 +180,7 @@ namespace Afb
 
 		bool isAnalog() const;
 		bool isDiscrete() const;
+		bool isBus() const;
 
 		E::BusDataFormat busDataFormat() const;
 		void setBusDataFormat(E::BusDataFormat value);

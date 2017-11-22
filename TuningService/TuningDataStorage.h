@@ -49,7 +49,7 @@ namespace Tuning
 
 		const QVector<Signal*>& getSignals(int type) const;
 
-		void getAcquiredAnalogSignals(QVector<Signal *>& analogSignals);
+		void getAcquiredAnalogSignals(QVector<Signal*>& analogSignals);
 		void getAcquiredDiscreteSignals(QVector<Signal*>& discreteSignals);
 
 		int getSignalsCount() const;

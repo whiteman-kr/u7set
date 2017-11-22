@@ -6,6 +6,7 @@
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "Subsystem.h"
+#include "SignalSet.h"
 
 namespace Builder
 {

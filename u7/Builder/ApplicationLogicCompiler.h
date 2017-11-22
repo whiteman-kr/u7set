@@ -9,6 +9,8 @@
 
 #include "Subsystem.h"
 
+#include "../VFrame30/Bus.h"
+
 
 namespace Builder
 {
@@ -45,7 +47,6 @@ namespace Builder
 		bool findLMs();
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
-		bool checkAppSignals();
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
@@ -59,7 +60,8 @@ namespace Builder
 		bool writeSerialDataXml();
 		bool writeOptoConnectionsReport();
 		bool writeOptoVhdFiles();
-		bool writeOptoVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort);
+		bool writeOptoPortToPortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort);
+		bool writeOptoSinglePortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort);
 		bool writeOptoModulesReport();
 
 		bool writeAppSignalSetFile();
@@ -87,6 +89,9 @@ namespace Builder
 		QVector<ModuleLogicCompiler*> m_moduleCompilers;
 
 		QVector<Hardware::DeviceModule*> m_lm;
+
+		QHash<int, QString> m_busSignals;
+		int m_maxSignalID = -1;
 
 		friend class ModuleLogicCompiler;
 	};
