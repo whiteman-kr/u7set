@@ -1985,21 +1985,29 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is not found in Application Signals.
+	/// Title: Signal '%1' is not found in Application Signals (Logic schema '%2').
 	///
 	/// Parameters:
 	///		%1 Application signal ID
+	///		%2 Logic schema ID
 	///
 	/// Description:
 	///		Signal idendifier is not found in application signals.
 	///
-	void IssueLogger::errALC5000(QString appSignalID, QUuid itemUuid)
+	void IssueLogger::errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		if (schemaID.isEmpty() == true)
+		{
+			addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		}
+		else
+		{
+			addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		}
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5000,
-				  tr("Signal '%1' is not found in Application Signals.").arg(appSignalID));
+				  tr("Signal '%1' is not found in Application Signals (Logic schema '%2').").arg(appSignalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5001
@@ -2082,13 +2090,14 @@ namespace Builder
 	/// Description:
 	///		Outpuf of AFB is connected to signal with uncompatible data format.
 	///
-	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
+	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5004,
-				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data format.").arg(afbCaption).arg(output).arg(appSignalID));
+				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data format. (Logic schema '%4')").
+						arg(afbCaption).arg(output).arg(appSignalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5005
@@ -2182,7 +2191,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5008,
-				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Schema '%4')").
+				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Logic schema '%4')").
 					arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
 
@@ -2214,25 +2223,26 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog signal '%1' is connected to discrete input '%2.%3'.
+	/// Title: Analog signal '%1' is connected to discrete input '%2.%3' (Logic schema '%4').
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///		%2 AFB caption
 	///		%3 AFB input
+	///		%4 Logic schema ID
 	///
 	/// Description:
 	///		Discrete signal is connected to analog input of AFB.
 	///
-	void IssueLogger::errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
+	void IssueLogger::errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5010,
-				  tr("Analog signal '%1' is connected to discrete input '%2.%3'.").arg(appSignalID).arg(afbCaption).arg(input));
+				  tr("Analog signal '%1' is connected to discrete input '%2.%3' (Logic schema '%4').").
+				  arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
-
 
 	/// IssueCode: ALC5011
 	///
@@ -2620,32 +2630,6 @@ namespace Builder
 				  QString(tr("Uncompatible constant type (Logic schema %1).").arg(schemaID)));
 	}
 
-	/// IssueCode: ALC5029
-	///
-	/// IssueType: Error
-	///
-	/// Title: The signal '%1' is repeatedly connected to the transmitter '%2'.
-	///
-	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Connection ID
-	///		%3 Signal Uuid
-	///		%4 Transmitter Uuid
-	///
-	/// Description:
-	///		The same signal can be connected only once to the transmitter. Check transmitter input links.
-	///
-	void IssueLogger::errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5029,
-				  QString(tr("The signal '%1' is repeatedly connected to the transmitter '%2'.").
-						  arg(appSignalID).arg(connection)));
-	}
-
 	/// IssueCode: ALC5030
 	///
 	/// IssueType: Error
@@ -2951,7 +2935,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5042,
-				  QString(tr("Signal '%1' is not exists in connection '%2'. (Logic schema '%3')")).
+				  QString(tr("Signal %1 is not exists in connection %2 (Logic schema %3).")).
 						arg(appSignalID).
 						arg(connectionID).
 						arg(schemaID));
@@ -3845,29 +3829,6 @@ namespace Builder
 						arg(connectionID).arg(receiverPortID).arg(lmID));
 	}
 
-	/// IssueCode: ALC5084
-	///
-	/// IssueType: Error
-	///
-	/// Title: Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
-	///
-	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Connection ID
-	///
-	/// Description:
-	///		Signal is not exists in specified serial connection. Use PortRawDataDescription to define receiving signals.
-	///
-	void IssueLogger::errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5084,
-				  QString(tr("Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.")).
-						arg(appSignalID).arg(connectionID));
-	}
-
 	/// IssueCode: ALC5085
 	///
 	/// IssueType: Error
@@ -3899,7 +3860,7 @@ namespace Builder
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Discrete constant must have value 0 or 1.
+	///		Discrete constant must have value 0 or 1. Check constant value.
 	///
 
 	void IssueLogger::errALC5086(QUuid constItemUuid, const QString& schemaID)
@@ -4022,6 +3983,852 @@ namespace Builder
 					arg(appSignalID));
 	}
 
+	/// IssueCode: ALC5092
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus type ID '%1' of signal '%2' is undefined.
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///		%2 Application signal ID
+	///
+	/// Description:
+	///		Specified BusTypeID of signal is undefined. Check signals BusTypeID property.
+	///
+	void IssueLogger::errALC5092(QString busTypeID, QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5092,
+				  QString(tr("Bus type ID '%1' of signal '%2' is undefined.")).
+						arg(busTypeID).arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5093
+	///
+	/// IssueType: Warning
+	///
+	/// Title:	   Coarse aperture of signal '%1' less then fine aperture.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Coarse aperture of specified signal less then fine aperture. Check signal's properties.
+	///
+	void IssueLogger::wrnALC5093(QString appSignalID)
+	{
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5093,
+				  QString(tr("Coarse aperture of signal '%1' less then fine aperture.")).arg(appSignalID));
+	}
+
+	/// IssueCode: ALC5094
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
+	///
+	/// Parameters:
+	///		%1 In bus signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Size of in bus analog signal is not multiple 16 bits. Check in bus signal properties.
+	///
+	void IssueLogger::errALC5094(QString inBusSignalID, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5094,
+				  QString(tr("Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').")).
+						arg(inBusSignalID).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5095
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///
+	/// Description:
+	///		The bus size must be a multiple of 2 bytes (1 word). Check bus properties.
+	///
+	void IssueLogger::errALC5095(QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5095,
+				  QString(tr("The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').")).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5096
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
+	///
+	/// Parameters:
+	///		%1 In bus signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Offset of in bus analog signal is not multiple of 2 bytes (1 word). Check in bus signal properties.
+	///
+	void IssueLogger::errALC5096(QString inBusSignalID, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5096,
+				  QString(tr("Offset of in bus analog signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
+							arg(inBusSignalID).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5097
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus signals '%1' and '%2' are overlapped (bus type '%3').
+	///
+	/// Parameters:
+	///		%1 Bus signal ID
+	///		%2 Bus signal ID
+	///		%3 Bus type ID
+	///
+	/// Description:
+	///		Bus signals are overlaped. Check bus signal offsets.
+	///
+	void IssueLogger::errALC5097(QString signalID1, QString signalID2, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5097,
+				  QString(tr("Bus signals '%1' and '%2' are overlapped (bus type '%3').")).
+							arg(signalID1).arg(signalID2).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5098
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus signal '%1' offset out of range (bus type '%2').
+	///
+	/// Parameters:
+	///		%1 Bus signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Bus signal offset out of range. Check bus or signal properties.
+	///
+	void IssueLogger::errALC5098(QString signalID, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5098,
+				  QString(tr("Bus signal '%1' offset out of range (bus type '%2').")).
+							arg(signalID).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5099
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus size must be multiple of 2 bytes (bus type %1).
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///
+	/// Description:
+	///		Bus size must be multiple of 2 bytes. Check bus properties.
+	///
+	void IssueLogger::errALC5099(QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5099,
+				  QString(tr("Bus size must be multiple of 2 bytes (bus type %1).")).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5100
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus type ID '%1' is undefined (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Bus type ID is undefined. Check UAL item properties.
+	///
+	void IssueLogger::errALC5100(QString busTypeID, QUuid item, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, item, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5100,
+				  QString(tr("Bus type ID '%1' is undefined (Logic schema '%2').")).arg(busTypeID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5102
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Output of bus composer can't be connected to input of another bus composer. Nested busses is not allowed.
+	///
+	void IssueLogger::errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, composer1Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, composer2Guid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5102,
+				  QString(tr("Output of bus composer can't be connected to input of another bus composer (Logic schema %1).")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5103
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different bus types of bus composer and signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Different bus types of bus composer and signal. Harmonize bus type of elements.
+	///
+	void IssueLogger::errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5103,
+				  QString(tr("Different bus types of bus composer and signal '%1' (Logic schema '%2').")).
+						arg(signalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5104
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Bus composer is connected to non-bus signal.
+	///
+	void IssueLogger::errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5104,
+				  QString(tr("Bus composer is connected to non-bus signal '%1' (Logic schema '%2').")).
+						arg(signalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5105
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Undefined UAL address of signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Bus composer is connected to non-bus signal.
+	///
+	void IssueLogger::errALC5105(QString signalID, QUuid signalUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5105,
+				  QString(tr("Undefined UAL address of signal '%1' (Logic schema '%2').")).
+						arg(signalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5106
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Pin with caption '%1' is not found in schema item (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Pin caption
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Pin with caption '%1' is not found in schema item. Contact with RPCT developers.
+	///
+	void IssueLogger::errALC5106(QString pinCaption, QUuid schemaItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, schemaItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5106,
+				  QString(tr("Pin with caption '%1' is not found in schema item (Logic schema '%2').")).
+						arg(pinCaption).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5107
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used. Check Afb and transmitter connection.
+	///
+	void IssueLogger::errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5107,
+				  QString(tr("AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema '%1').")).
+								arg(schemaID));
+	}
+
+	/// IssueCode: ALC5108
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Cannot identify AFB bus type (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Cannot identify AFB bus type based on its inputs.
+	///
+	void IssueLogger::errALC5108(QUuid afbUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5108,
+				  QString(tr("Cannot identify AFB bus type (Logic schema '%1'').").arg(schemaID)));
+	}
+
+	/// IssueCode: ALC5109
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different bus types on AFB inputs (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Busses of different types is connected to AFB's inputs.
+	///
+	void IssueLogger::errALC5109(QUuid afbUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5109,
+				  QString(tr("Different bus types on AFB inputs (Logic schema '%1'').").arg(schemaID)));
+	}
+
+	/// IssueCode: ALC5110
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Non-bus output is connected to bus input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Non-bus output cannot be connected to bus input.
+	///
+	void IssueLogger::errALC5110(QUuid item1, QUuid item2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, item1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, item2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5110,
+				  QString(tr("Non-bus output is connected to bus input (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5111
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Output of type 'Bus' is occured in non-bus processing AFB (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Output of type 'Bus' is occured in non-bus processing AFB. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5111(QUuid afbUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5111,
+				  QString(tr("Output of type 'Bus' is occured in non-bus processing AFB (Logic schema '%1'")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5112
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different bus types of UAL elements (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Different bus types of UAL elements.
+	///
+	void IssueLogger::errALC5112(QUuid uuid1, QUuid uuid2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5112,
+				  QString(tr("Different bus types of UAL elements (Logic schema %1).")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5113
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus output is connected to non-bus input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Bus output cannot be connected to non-bus input.
+	///
+	void IssueLogger::errALC5113(QUuid item1, QUuid item2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, item1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, item2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5113,
+				  QString(tr("Bus output is connected to non-bus input (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5114
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
+	///
+	/// Parameters:
+	///		%1 Logic item caption
+	///		%2 Logic input caption
+	///		%3 Logic schema ID
+	///
+	/// Description:
+	///		Connected bus size exceed max allowed bus size of specified input.
+	///
+	void IssueLogger::errALC5114(QString itemCaption, QString inputCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5114,
+				  QString(tr("Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').")).
+						arg(itemCaption).arg(inputCaption).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5115
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Uncompatible bus data format of UAL elements (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Uncompatible bus data format of UAL elements.
+	///
+	void IssueLogger::errALC5115(QUuid uuid1, QUuid uuid2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5115,
+				  QString(tr("Uncompatible bus data format of UAL elements (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5116
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Disallowed connection of UAL elements (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Disallowed connection of UAL elements. Check connection.
+	///
+	void IssueLogger::errALC5116(QUuid uuid1, QUuid uuid2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5116,
+				  QString(tr("Disallowed connection of UAL elements (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5117
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Uncompatible signals connection (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Uncompatible signals connection. Check signals type and data format.
+	///
+	void IssueLogger::errALC5117(QUuid uuid1, QString label1, QUuid uuid2, QString label2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5117,
+				  QString(tr("Uncompatible signals connection (items %1 and %2) (Logic schema '%3').")).
+						arg(label1).arg(label2).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5118
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal '%1' is not connected to any signal source. (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Signal is not connected to any signal source. Signal's value is undefined.
+	///
+	void IssueLogger::errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5118,
+				  QString(tr("Signal '%1' is not connected to any signal source. (Logic schema '%2').")).
+						arg(appSignalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5119
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Constant and linked schema items has different types.
+	///
+	void IssueLogger::errALC5119(QUuid constItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, constItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5119,
+				  QString(tr("Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5120
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Schema item pin Guid
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		UalSignal is not found for pin with specified Uuid. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5120,
+				  QString(tr("UalSignal is not found for pin %1.%2 (Logic schema '%3').")).
+							arg(ualItemLabel).arg(pin).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5121
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 App signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Value of input/tuningable/opto/const signals cannot be modified by UAL.
+	///
+	void IssueLogger::errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5121,
+				  QString(tr("Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).")).
+							arg(appSignalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5122
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Schema item pin caption
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		UalSignal is not found for pin with specified caption. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5122,
+				  QString(tr("UalSignal is not found for pin '%1' (Logic schema '%2').")).
+							arg(pinCaption).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5123
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different busTypes on AFB inputs (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Different busTypes on AFB inputs.
+	///
+	void IssueLogger::errALC5123(QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5123,
+				  QString(tr("Different busTypes on AFB inputs (Logic schema %1).")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5124
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+	///
+	/// Parameters:
+	///		%1 App signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Different busTypes on AFB inputs.
+	///
+	void IssueLogger::errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5124,
+				  QString(tr("Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)")).
+								arg(appSignalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5125
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Input %1 of transmitter is connected unnamed signal (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Transmitter's input
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Different busTypes on AFB inputs.
+	///
+	void IssueLogger::errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5125,
+				  QString(tr("Input %1 of transmitter is connected unnamed signal (Logic schema %2).")).
+								arg(pinCaption).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5126
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal and bus inputs sizes are not multiples (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Signal and bus inputs sizes are not multiples.
+	///
+	void IssueLogger::errALC5126(QUuid ualItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5126,
+				  QString(tr("Signal and bus inputs sizes are not multiples (Logic schema %1).")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5127
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Output bus type cannot be determined (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Output bus type cannot be determined.
+	///
+	void IssueLogger::errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5127,
+				  QString(tr("Output bus type cannot be determined (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5128
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		All AFB's bus inputs connected to discretes. Output bus type cannot be determined.
+	///
+	void IssueLogger::errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5128,
+				  QString(tr("All AFB's bus inputs connected to discretes (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5129
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown AFB type (opCode) (Logic schema %1, item %2).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Unknown AFB type (opCode) (Logic schema %1, item %2). Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5129,
+				  QString(tr("Unknown AFB type (opCode) (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5130
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+	///
+	/// Parameters:
+	///		%1 AFB component caption
+	///		%2 Logic schema ID
+	///		%3 Schema item label
+	///
+	/// Description:
+	///		 Max instances of specified AFB component is used.
+	///
+	void IssueLogger::errALC5130(QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5130,
+				  QString(tr("Max instances of AFB component '%1' is used (Logic schema %2, item %3)")).
+						arg(afbComponentCaption).arg(schemaID).arg(itemLabel));
+	}
+
+	//
 
 	/// IssueCode: ALC5186
 	///
@@ -4156,7 +4963,7 @@ namespace Builder
 
 	/// IssueCode: ALC5192
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
 	///
@@ -4168,9 +4975,9 @@ namespace Builder
 	/// Description:
 	///		Tx signal specified in port raw data description isn't connected to transmitter. Connect signal to transmitter.
 	///
-	void IssueLogger::errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	void IssueLogger::wrnALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID)
 	{
-		LOG_ERROR(IssueType::AlCompiler,
+		LOG_WARNING0(IssueType::AlCompiler,
 				  5192,
 				  QString(tr("Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').")).
 						arg(appSignalID).arg(portID).arg(connectionID));
@@ -4178,7 +4985,7 @@ namespace Builder
 
 	/// IssueCode: ALC5193
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
 	///
@@ -4190,9 +4997,9 @@ namespace Builder
 	/// Description:
 	///		Rx signal specified in port raw data description isn't assigned to reciever.
 	///
-	void IssueLogger::errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	void IssueLogger::wrnALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
 	{
-		LOG_ERROR(IssueType::AlCompiler,
+		LOG_WARNING0(IssueType::AlCompiler,
 				  5193,
 				  QString(tr("Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').")).
 						arg(appSignalID).arg(portID).arg(connectionID));
@@ -4202,7 +5009,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: // Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
+	/// Title: Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
 	///
 	/// Parameters:
 	///		%1 Opto port 1 ID
@@ -4464,6 +5271,28 @@ namespace Builder
 				  );
 	}
 
+
+	/// IssueCode: EQP6020
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property LmDescriptionFile is empty, LogicModule %1.
+	///
+	/// Parameters:
+	///		%1 LogicModule EquipmentID
+	///
+	/// Description:
+	///		Property LmDescriptionFile is empty.
+	///
+	void IssueLogger::errEQP6020(QString lm, QUuid lmUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, lmUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6020,
+				  tr("Property LmDescriptionFile is empty, LogicModule %1.")
+				  .arg(lm));
+	}
 
 
 	/// IssueCode: EQP6100

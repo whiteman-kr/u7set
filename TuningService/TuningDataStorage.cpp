@@ -246,7 +246,8 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
+//						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
+						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(float);
 						testSizeB = true;
@@ -281,7 +282,8 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
+//						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
+						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(qint32);
 						testSizeB = true;
@@ -326,7 +328,8 @@ namespace  Tuning
 
 						//Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo);
 
-						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo));
+//						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo));
+						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo));
 
 						//
 

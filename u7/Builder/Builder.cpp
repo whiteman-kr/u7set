@@ -44,6 +44,9 @@ namespace Builder
 	{
 		QThread::currentThread()->setTerminationEnabled(true);
 
+		QTime buildTime;
+		buildTime.start();
+
 		bool ok = false;
 		QString str;
 
@@ -181,11 +184,28 @@ namespace Builder
 			LOG_SUCCESS(m_log, tr("Ok"));
 
 			//
-			// SignalSet
+			// Loading BusTypes
 			//
-			SignalSet signalSet;
+			VFrame30::BusSet busSet;
 
-			if (loadSignals(&db, &signalSet, equipmentSet) == false)
+			ok = loadBusses(&db, &busSet);
+
+			if (ok == false)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load BusTypes files"));
+			}
+
+			//
+			// Builder::SignalSet
+			//
+			SignalSet signalSet(&busSet, &buildWriter, m_log);
+
+			if (signalSet.prepareBusses() == false)
+			{
+				break;
+			}
+
+			if (loadSignals(&db, &signalSet, &equipmentSet) == false)
 			{
 				break;
 			}
@@ -199,10 +219,16 @@ namespace Builder
 			std::vector<Hardware::DeviceModule*> lmModules;
 			findLmModules(equipmentSet.root(), &lmModules);
 
+			std::vector<Hardware::DeviceModule*> lmAndBvbModules;
+
+			findModulesByFamily(equipmentSet.root(), &lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
+			findModulesByFamily(equipmentSet.root(), &lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
+
 			LmDescriptionSet lmDescriptions;
 
 			ok = true;
-			for (Hardware::DeviceModule* lm : lmModules)
+
+			for (Hardware::DeviceModule* lm : lmAndBvbModules)
 			{
 				ok &= loadLogicModuleDescription(&db, lm, &lmDescriptions);
 			}
@@ -271,18 +297,6 @@ namespace Builder
 			}
 
 			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, &fscDescriptions, m_log);
-
-			//
-			// Loading BusTypes
-			//
-			VFrame30::BusSet busSet;
-
-			ok = loadBusses(&db, &busSet);
-
-			if (ok == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load BusTypes files"));
-			}
 
 			//
 			// Parse application logic
@@ -407,6 +421,13 @@ namespace Builder
 		}
 
 		db.closeProject(nullptr);
+
+		// Display build time
+		//
+		int buildEllapsed = buildTime.elapsed() / 1000;
+		int durationSecs = buildEllapsed % 60;
+		int durationMins = buildEllapsed / 60;
+		LOG_MESSAGE(m_log, QString("Build time: %1 minute(s) %2 second(s)").arg(durationMins).arg(durationSecs));
 
 		// Set Shceme Items Issues to GlobalMessanger
 		//
@@ -548,6 +569,40 @@ namespace Builder
 		}
 
 		return;
+	}
+
+	void BuildWorkerThread::findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const
+	{
+		if (object == nullptr ||
+			out == nullptr)
+		{
+			assert(object);
+			assert(out);
+			return;
+		}
+
+		for (int i = 0; i < object->childrenCount(); i++)
+		{
+			Hardware::DeviceObject* child = object->child(i);
+
+			if (child->deviceType() == Hardware::DeviceType::Module)
+			{
+				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+
+				if (module->moduleFamily() == family)
+				{
+					out->push_back(module);
+				}
+			}
+
+			if (child->deviceType() < Hardware::DeviceType::Module)
+			{
+				findModulesByFamily(child, out, family);
+			}
+		}
+
+		return;
+
 	}
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
@@ -860,10 +915,11 @@ namespace Builder
     }
 
 
-    bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet& equipment)
+	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment)
 	{
 		if (db == nullptr ||
-			signalSet == nullptr)
+			signalSet == nullptr ||
+			equipment == nullptr)
 		{
 			assert(false);
 			return false;
@@ -871,7 +927,7 @@ namespace Builder
 
 		LOG_EMPTY_LINE(m_log);
 
-		LOG_MESSAGE(m_log, tr("Loading application logic signals"));
+		LOG_MESSAGE(m_log, tr("Loading application signals"));
 
 		bool result = db->getSignals(signalSet, true, nullptr);
 
@@ -883,11 +939,25 @@ namespace Builder
 			return false;
 		}
 
-		LOG_MESSAGE(m_log, QString(tr("Checking application signals")));
+		result = signalSet->checkSignals();
 
-		// Check some signals's properties and init Signal::lm property
-		//
-		result = checkAppSignals(*signalSet, equipment);
+		if (result == false)
+		{
+			return false;
+		}
+
+		signalSet->buildID2IndexMap();
+
+		result = signalSet->expandBusSignals();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		signalSet->buildID2IndexMap();				// rebuild map after expand
+
+		result = signalSet->bindSignalsToLMs(equipment);
 
 		if (result == false)
 		{
@@ -896,182 +966,9 @@ namespace Builder
 
 		LOG_SUCCESS(m_log, tr("Ok"));
 
-		if (signalSet->expandBusSignals() == false)
-		{
-			//LOG_WARNING_OBSOLETE(m_log, "", "SignalsSet->expandBusSignals() is not implemented!");
-		}
-
-		signalSet->buildID2IndexMap();
-
 		signalSet->initCalculatedSignalsProperties();
 
 		return true;
-	}
-
-
-	bool BuildWorkerThread::checkAppSignals(SignalSet& signalSet, Hardware::EquipmentSet& equipment)
-	{
-		bool result = true;
-
-		int signalCount = signalSet.count();
-
-		if (signalCount == 0)
-		{
-			return true;
-		}
-
-		QHash<QString, int> appSignalIDMap;
-		QHash<QString, int> customAppSignalIDMap;
-
-		for(int i = 0; i < signalCount; i++)
-		{
-			Signal& s = signalSet[i];
-
-			// check AppSignalID
-			//
-			if (appSignalIDMap.contains(s.appSignalID()) == true)
-			{
-				// Application signal identifier '%1' is not unique.
-				//
-				m_log->errALC5016(s.appSignalID());
-				result = false;
-				continue;
-			}
-			else
-			{
-				appSignalIDMap.insert(s.appSignalID(), i);
-			}
-
-			// check CustomAppSignalID
-			//
-			if (customAppSignalIDMap.contains(s.customAppSignalID()) == true)
-			{
-				// Custom application signal identifier '%1' is not unique.
-				//
-				m_log->errALC5017(s.customAppSignalID());
-				result = false;
-				continue;
-			}
-			else
-			{
-				customAppSignalIDMap.insert(s.customAppSignalID(), i);
-			}
-
-			// check EquipmentID
-			//
-			s.setLm(nullptr);
-
-			if (s.equipmentID().isEmpty() == true)
-			{
-				// Application signal '%1' is not bound to any device object.
-				//
-				m_log->wrnALC5012(s.appSignalID());
-			}
-			else
-			{
-				std::shared_ptr<Hardware::DeviceObject> deviceObjectShared = equipment.deviceObjectSharedPointer(s.equipmentID());
-
-				if (deviceObjectShared == nullptr)
-				{
-					// Application signal '%1' is bound to unknown device object '%2'.
-					//
-					m_log->errALC5013(s.appSignalID(), s.equipmentID());
-					result = false;
-					continue;
-				}
-
-				Hardware::DeviceObject* deviceObject = deviceObjectShared.get();
-
-				if (deviceObject->isModule() == true)
-				{
-					// device is Module
-					//
-					Hardware::DeviceModule* module = deviceObject->toModule();
-
-					if (module == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					if (module->isLogicModule())
-					{
-						s.setLm(std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObjectShared));
-					}
-					else
-					{
-						// The signal '%1' can be bind to Logic Module or Equipment Signal.
-						//
-						m_log->errALC5031(s.appSignalID());
-						result = false;
-						continue;
-					}
-				}
-				else
-				{
-					if (deviceObject->isSignal())
-					{
-						// device is Signal
-						//
-						Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(deviceObject->getParentChassis());
-
-						if (chassis == nullptr)
-						{
-							assert(false);
-							continue;
-						}
-
-						std::shared_ptr<Hardware::DeviceModule> lm = chassis->getLogicModuleSharedPointer();
-
-						if (lm != nullptr)
-						{
-							s.setLm(lm);
-						}
-						else
-						{
-							// Can't find logic module associated with signal '%1' (no LM in chassis '%2').
-							//
-							m_log->errALC5033(s.appSignalID(), chassis->equipmentId());
-							result = false;
-							continue;
-						}
-					}
-					else
-					{
-						// The signal '%1' can be bind to Logic Module or Equipment Signal.
-						//
-						m_log->errALC5031(s.appSignalID());
-						result = false;
-						continue;
-					}
-				}
-			}
-
-			// check other signal properties
-			//
-			if (s.isDiscrete())
-			{
-				if (s.dataSize() != 1)
-				{
-					// Discrete signal '%1' must have DataSize equal to 1.
-					//
-					m_log->errALC5014(s.appSignalID());
-					result = false;
-				}
-			}
-			else
-			{
-				if (s.isAnalog() == true && s.dataSize() != 32)
-				{
-					// Analog signal '%1' must have DataSize equal to 32.
-					//
-					m_log->errALC5015(s.appSignalID());
-					result = false;
-				}
-			}
-		}
-
-		return result;
 	}
 
 	bool BuildWorkerThread::loadBusses(DbController* db, VFrame30::BusSet* out)
@@ -1164,7 +1061,7 @@ namespace Builder
 
 		if (lmDescriptionFile.isEmpty() == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QObject::tr("Property LmDescriptionFile is empty. LogicModule %1").arg(logicModule->equipmentIdTemplate()));
+			m_log->errEQP6020(logicModule->equipmentIdTemplate(), logicModule->uuid());
 			return false;
 		}
 
@@ -1211,6 +1108,8 @@ namespace Builder
 		Parser alPareser(db, m_log, appLogicData, &lmDescriptions, equipment, signalSet, busSet, changesetId, debug());
 
 		bool result = alPareser.parse();
+
+		result = m_log->errorCount() == 0;
 
 		if (result == false)
 		{

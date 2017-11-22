@@ -7,6 +7,7 @@
 #include "SchemaItemAfb.h"
 #include "SchemaItemConnection.h"
 #include "SchemaItemTerminator.h"
+#include "SchemaItemBus.h"
 
 
 namespace VFrame30
@@ -834,6 +835,16 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this) != nullptr;
 	}
 
+	bool FblItemRect::isBusComposerElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusComposer*>(this) != nullptr;
+	}
+
+	bool FblItemRect::isBusExtractorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this) != nullptr;
+	}
+
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
 	{
 		return dynamic_cast<VFrame30::SchemaItemSignal*>(this);
@@ -922,6 +933,26 @@ namespace VFrame30
 	const VFrame30::SchemaItemTerminator* FblItemRect::toTerminatorElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this);
+	}
+
+	VFrame30::SchemaItemBusComposer* FblItemRect::toBusComposerElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemBusComposer*>(this);
+	}
+
+	const VFrame30::SchemaItemBusComposer* FblItemRect::toBusComposerElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusComposer*>(this);
+	}
+
+	VFrame30::SchemaItemBusExtractor* FblItemRect::toBusExtractorElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemBusExtractor*>(this);
+	}
+
+	const VFrame30::SchemaItemBusExtractor* FblItemRect::toBusExtractorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this);
 	}
 
 	// Weight propertie

@@ -116,8 +116,8 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		ModuleFirmwareWriter* get(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount);
-		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount);
+		ModuleFirmwareWriter* get(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber);
+		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber);
 
 		quint64 getFirmwareUniqueId(const QString &subsystemID, int lmNumber);
 

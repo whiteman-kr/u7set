@@ -741,3 +741,9 @@ std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const
 
 	return it->second;
 }
+
+const std::map<int, std::shared_ptr<Afb::AfbComponent>>& LmDescription::afbComponents() const
+{
+	return m_afbComponents;
+}
+

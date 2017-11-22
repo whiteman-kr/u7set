@@ -127,6 +127,8 @@ public:
 
 	std::shared_ptr<Afb::AfbComponent> component(int opCode) const;
 
+	const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbComponents() const;
+
 	// Data
 	//
 private:

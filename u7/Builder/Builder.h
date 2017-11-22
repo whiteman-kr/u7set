@@ -12,7 +12,7 @@
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "ComparatorStorage.h"
-
+#include "SignalSet.h"
 
 // Forware declarations
 //
@@ -71,8 +71,8 @@ namespace Builder
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
 		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
-
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
+		void findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const;
 
 		// Expand Devices StrId
 		//
@@ -94,9 +94,7 @@ namespace Builder
 
 		// Load Application Logic signals
 		//
-		bool loadSignals(DbController *db, SignalSet* signalSet, Hardware::EquipmentSet &equipment);
-
-		bool checkAppSignals(SignalSet& signalSet, Hardware::EquipmentSet& equipment);
+		bool loadSignals(DbController *db, SignalSet* signalSet, Hardware::EquipmentSet* equipment);
 
 		// Load BusTypes (VFrame30::BusSet)
 		//

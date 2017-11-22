@@ -27,7 +27,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName,
+		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, int lmDescriptionNumber, const QString &projectName,
 				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId);
 
 		bool loadHeader(QString fileName, QString &errorCode);
@@ -56,19 +56,20 @@ namespace Hardware
 		QString userName() const;
 		int buildNumber() const;
 		QString buildConfig() const;
+		int lmDescriptionNumber() const;
 
 	private:
 		bool loadFromFile(QString fileName, QString& errorCode, bool readDataFrames);
 
 		bool load_version1(const QJsonObject& jConfig, bool readDataFrames);
 		bool load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames);
-		bool load_version5(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
+		bool load_version5_6(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
 
 		// Data
 		//
 	protected:
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 5;	//Latest version
+		int m_maxFileVersion = 6;	//Latest version
 
 		QString m_caption;
 		QString m_subsysId;
@@ -83,6 +84,7 @@ namespace Hardware
 		QString m_userName;
 		int m_buildNumber = 0;
 		QString m_buildConfig;
+		int m_lmDescriptionNumber = 0;
 
 		// binary data
 		//

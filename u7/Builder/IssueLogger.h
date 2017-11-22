@@ -190,17 +190,17 @@ namespace Builder
 		// ALC			Application logic compiler				5000-5999
 		//
 
-		void errALC5000(QString appSignalID, QUuid itemUuid);					// Signal identifier '%1' is not found.
+		void errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID);		// Signal identifier '%1' is not found (Logic schema '%2').
 		void wrnALC5001(QString logicModuleID);									// Application logic for module '%1' is not found.
 		void errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid);					// Value of signal '%1' is undefined (Logic schema '%2').
 		void errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Analog output '%1.%2' is connected to discrete signal '%3'.
-		void errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data format.
+		void errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid, QString schemaID);		// Output '%1.%2' is connected to signal '%3' with uncompatible data format.
 		void errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data size.
 		void errALC5006(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Discrete output '%1.%2' is connected to analog signal '%3'.
 		void errALC5007(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Discrete signal '%1' is connected to analog input '%2.%3'.
-		void errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, const QString &schemaID);		// Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Schema '%4')
+		void errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, const QString &schemaID);		// Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Logic schema '%4')
 		void errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Signal '%1' is connected to input '%2.%3' with uncompatible data size.
-		void errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Analog signal '%1' is connected to discrete input '%2.%3'.
+		void errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, QString schemaID);		// Analog signal '%1' is connected to discrete input '%2.%3'.
 		void errALC5011(QString itemLabel, QString schemaId, QUuid itemUuid);	// Application item '%1' has unknown type, SchemaID '%2'.
 		void wrnALC5012(QString appSignalID);									// Application signal '%1' is not bound to any device object.
 		void errALC5013(QString appSignalID, QString equipmentID);				// Application signal '%1' is bound to unknown device object '%2'.
@@ -219,7 +219,6 @@ namespace Builder
 		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
 		void errALC5027(QUuid transmitterUuid, QString schemaID);									// All transmitter inputs must be directly linked to a signals.
 		void errALC5028(QUuid constUuid, QString schemaID);						// Uncompatible constant type (Logic schema %1).
-		void errALC5029(QString appSignalID, QString connection, QUuid signalUuid, QUuid transmitterUuid);		// The signal '%1' is repeatedly connected to the transmitter '%2'.
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal '%1' is not associated with LM '%2'.
 		void errALC5031(QString appSignalID);												// The signal '%1' can be bind to Logic Module or Equipment Signal.
 		void errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);		// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
@@ -274,7 +273,6 @@ namespace Builder
 		void wrnALC5081();											// Usage of ALP phase time exceed 90%.
 		void errALC5082();											// Usage of ALP phase time exceed 100%.
 		void errALC5083(const QString& receiverPortID, const QString& connectionID, const QString& lmID, QUuid receiverUuid);	// Receiver of connection '%1' (port '%2') is not associated with LM '%3'
-		void errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid);							// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
 		void errALC5085(const QString& portEquipmentID, const QString& connectionID);	// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
 		void errALC5086(QUuid constItemUuid, const QString& schemaID);				// Discrete constant must have value 0 or 1 (Logic schema %1).
 		void errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid);		// Can't assign value to input signal '%1' (Logic schema '%2').
@@ -282,7 +280,44 @@ namespace Builder
 		void errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom);			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
 		void errALC5090(QString appSignalID);						// Analog signal aperture should be greate then 0.
 		void errALC5091(QString appSignalID);						// Input/output application signal '%1' should be bound to equipment signal.
-
+		void errALC5092(QString busTypeID, QString appSignalID);	// Bus type ID '%1' of signal '%2' is undefined.
+		void wrnALC5093(QString appSignalID);						// Coarse aperture of signal '%1' less then fine aperture.
+		void errALC5094(QString inBusSignalID, QString busTypeID);	// Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
+		void errALC5095(QString busTypeID);							// The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').
+		void errALC5096(QString inBusSignalID, QString busTypeID);	// Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
+		void errALC5097(QString signalID1, QString signalID2, QString busTypeID);	// Bus signals '%1' and '%2' are overlapped (bus type '%3').
+		void errALC5098(QString signalID, QString busTypeID);						// Bus signal '%1' offset out of range (bus type '%2').
+		void errALC5099(QString busTypeID);											// Bus size must be multiple of 2 bytes (bus type %1).
+		void errALC5100(QString busTypeID, QUuid item, QString schemaID);			// Bus type ID '%1' is undefined (Logic schema '%2').
+		void errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID);	// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
+		void errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID);		// Different bus types of bus composer and signal '%1' (Logic schema '%2').
+		void errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID);		// Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
+		void errALC5105(QString signalID, QUuid signalUuid, QString schemaID);			// Undefined UAL address of signal '%1' (Logic schema '%2').
+		void errALC5106(QString pinCaption, QUuid schemaItemUuid, QString schemaID);	// Pin with caption '%1' is not found in schema item (Logic schema '%2').
+		void errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID);		// Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
+		void errALC5108(QUuid afbUuid, QString schemaID);								// Cannot identify AFB bus type (Logic schema %1).
+		void errALC5109(QUuid afbUuid, QString schemaID);								// Different bus types on AFB inputs (Logic schema %1).
+		void errALC5110(QUuid item1, QUuid item2, QString schemaID);					// Non-bus output is connected to bus input.
+		void errALC5111(QUuid afbUuid, QString schemaID);								// Output of type 'Bus' is occured  in non-bus processing AFB (Logic schema '%1').
+		void errALC5112(QUuid uuid1, QUuid uuid2, QString schemaID);					// Different bus types on UAL elements (Logic schema %1).
+		void errALC5113(QUuid item1, QUuid item2, QString schemaID);					// Bus output is connected to non-bus input.
+		void errALC5114(QString itemCaption, QString inputCaption, QUuid itemUuid, QString schemaID);	// Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
+		void errALC5115(QUuid uuid1, QUuid uuid2, QString schemaID);					// Uncompatible bus data format of UAL elements (Logic schema '%1').
+		void errALC5116(QUuid uuid1, QUuid uuid2, QString schemaID);					// Disallowed connection of UAL elements (Logic schema '%1').
+		void errALC5117(QUuid uuid1, QString label1, QUuid uuid2, QString label2, QString schemaID);	// Uncompatible signals connection (Logic schema '%1').
+		void errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID);			// Signal '%1' is not connected to any signal source. (Logic schema '%2').
+		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
+		void errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID);			// UalSignal is not found for pin '%1' (Logic schema '%2').
+		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
+		void errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID);		// UalSignal is not found for pin '%1' (Logic schema '%2').
+		void errALC5123(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB inputs (Logic schema %1).
+		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+		void errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID);	// Input %1 of transmitter is connected unnamed signal (Logic schema %2).
+		void errALC5126(QUuid ualItemUuid, QString schemaID);							// Signal and bus inputs sizes are not multiples (Logic schema %1).
+		void errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Output bus type cannot be determined (Logic schema %1, item %2)
+		void errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
+		void errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Unknown AFB type (opCode) (Logic schema %1, item %2).
+		void errALC5130(QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
@@ -290,8 +325,8 @@ namespace Builder
 		void errALC5189(const QString& appSignalID, const QString& portID, const QString& lmID);		// Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
 		void errALC5190(const QString& appSignalID, const QString& portID, const QString& lmID);		// Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
 		void errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID);		// Serial Rx signal '%1' is not associated with LM '%2' .
-		void errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connect to transmitter (Connection '%3').
-		void errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+		void wrnALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connected to transmitter (Connection '%3').
+		void wrnALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
 		void wrnALC5194(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
 
 		// EQP			Equipment issues						6000-6999
@@ -308,6 +343,8 @@ namespace Builder
 
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
 		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
+
+		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
 
 		// Subset of EQP -- Generation Software Configuration
 		//
