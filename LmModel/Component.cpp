@@ -3,11 +3,10 @@
 namespace LmModel
 {
 
-	InstantiatorParam::InstantiatorParam(quint16 instNo, quint16 implParamOpIndex, quint16 dataLow, quint16 dataHigh) :
+	InstantiatorParam::InstantiatorParam(quint16 instNo, quint16 implParamOpIndex, quint32 data) :
 		instNo(instNo),
 		instParamOpIndex(implParamOpIndex),
-		dataLow(dataLow),
-		dataHigh(dataHigh)
+		data(data)
 	{
 	}
 

@@ -382,10 +382,47 @@ namespace LmModel
 		return false;
 	}
 
+	// OpCode 10
+	// Entry constant DDD to the functional block N, impelementation of block R, option W
+	//
 	bool DeviceEmulator::command_wrfbc()
 	{
-		eqweqweqw
-		fault("Command not implemented " __FUNCTION__);
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+		m_logicUnit.programCounter++;
+
+		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+		m_logicUnit.programCounter++;
+
+		quint16 data = getWord(m_logicUnit.programCounter);
+		m_logicUnit.programCounter++;
+
+		// --
+		//
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+
+		if (afbComp == nullptr)
+		{
+			fault(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			return false;
+		}
+
+		// --
+		//
+		InstantiatorParam ip(implNo, implParamOpIndex, data);
+
+		QString errorMessage;
+		bool ok = m_afbComponents.addInstantiatorParam(afbComp, ip, &errorMessage);
+
+		if (ok == false)
+		{
+			fault(QString("Run command_wrfbc error, %1").arg(errorMessage));
+		}
+
+		return ok;
 		return false;
 	}
 
@@ -456,6 +493,9 @@ namespace LmModel
 		return false;
 	}
 
+	// OpCode 22
+	// Entry constant DDD to the functional block N, impelementation of block R, option W(DDD(31..16))  and W+1(DDD(15..0))
+	//
 	bool DeviceEmulator::command_wrfbc32()
 	{
 		quint16 commandWord = getWord(m_logicUnit.programCounter);
@@ -468,8 +508,8 @@ namespace LmModel
 		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
 		m_logicUnit.programCounter++;
 
-		quint16 dataHigh = getWord(m_logicUnit.programCounter++);
-		quint16 dataLow = getWord(m_logicUnit.programCounter++);
+		quint32 data = getDword(m_logicUnit.programCounter);
+		m_logicUnit.programCounter += 2;
 
 		// --
 		//
@@ -483,7 +523,7 @@ namespace LmModel
 
 		// --
 		//
-		InstantiatorParam ip(implNo, implParamOpIndex, dataHigh, dataLow);
+		InstantiatorParam ip(implNo, implParamOpIndex, data);
 		QString errorMessage;
 		bool ok = m_afbComponents.addInstantiatorParam(afbComp, ip, &errorMessage);
 
@@ -528,6 +568,11 @@ namespace LmModel
 	quint16 DeviceEmulator::getWord(int wordOffset) const
 	{
 		return getData<quint16>(wordOffset * 2);
+	}
+
+	quint16 DeviceEmulator::getDword(int wordOffset) const
+	{
+		return getData<quint32>(wordOffset * 2);
 	}
 
 	template <typename TYPE>

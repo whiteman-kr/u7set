@@ -12,13 +12,12 @@ namespace LmModel
 	{
 		InstantiatorParam() = default;
 		InstantiatorParam(const InstantiatorParam&) = default;
-		InstantiatorParam(quint16 instNo, quint16 instParamOpIndex, quint16 dataLow, quint16 dataHigh);
+		InstantiatorParam(quint16 instNo, quint16 instParamOpIndex, quint32 data);
 
 		quint16 instNo = 0;
 		quint16 instParamOpIndex = 0;
 
-		quint16 dataLow = 0;
-		quint16 dataHigh = 0;
+		quint32 data = 0;
 	};
 
 	// AfbComponentInstance, contains a set of params (InstantiatorParam) for this instance

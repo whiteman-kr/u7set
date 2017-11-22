@@ -128,6 +128,7 @@ namespace LmModel
 		//
 	private:
 		quint16 getWord(int wordOffset) const;
+		quint16 getDword(int wordOffset) const;
 
 		template <typename TYPE>
 		TYPE getData(int eepromOffset) const;
