@@ -98,7 +98,8 @@ namespace Builder
 	VFrame30::BusSignal Bus::m_invalidBusSignal;
 	BusSignal Bus::m_invalidSignal;
 
-	Bus::Bus(const VFrame30::Bus bus, IssueLogger* log) :
+	Bus::Bus(const Busses& busses, const VFrame30::Bus bus, IssueLogger* log) :
+		m_busses(busses),
 		m_srcBus(bus),
 		m_log(log)
 	{
@@ -137,6 +138,8 @@ namespace Builder
 				m_sizeW = 0;
 			}
 
+			m_isInitialized = true;
+
 			return true;
 		}
 
@@ -170,7 +173,9 @@ namespace Builder
 
 		buildSignalIndexesArrays();
 
-		return result;
+		m_isInitialized = true;
+
+		return true;
 	}
 
 	void Bus::writeReport(QStringList& list)
@@ -267,6 +272,40 @@ namespace Builder
 				hasDiscreteSignals = true;
 				break;
 
+			case E::SignalType::Bus:
+				{
+					BusShared childBus = m_busses.getBus(busSignal.busTypeId());
+
+					if (childBus == nullptr)
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+										   QString("BusTypeID %1 of bus signal %2.%3 is undefined.").
+												arg(busSignal.busTypeId()).arg(busTypeID()).arg(busSignal.signalId()));
+						return false;
+					}
+
+					if (childBus->isInitialized() == false)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					switch(childBus->busDataFormat())
+					{
+					case E::BusDataFormat::Discrete:
+						hasDiscreteSignals = true;
+						break;
+
+					case E::BusDataFormat::Mixed:
+						hasAnalogSignals = true;
+						break;
+
+					default:
+						assert(false);			// unknown E::BusDataFormat
+					}
+				}
+				break;
+
 			default:
 				assert(false);
 			}
@@ -291,17 +330,18 @@ namespace Builder
 		int discreteSignalsCount = 0;
 
 		int analogSignalsSizeBit = 0;
+		int busSignalsSizeBit = 0;
 
 		QStringList analogSignals;
+		QStringList busSignals;
 		QStringList discreteSignals;
 
-		const std::vector<VFrame30::BusSignal>& busSignals = m_srcBus.busSignals();
-
-		for(const VFrame30::BusSignal& busSignal : busSignals)
+		for(const VFrame30::BusSignal& busSignal : m_srcBus.busSignals())
 		{
 			switch(busSignal.type())
 			{
 			case E::SignalType::Analog:
+
 				if ((busSignal.inbusAnalogSize() % SIZE_16BIT) != 0)
 				{
 					// Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
@@ -316,9 +356,30 @@ namespace Builder
 
 				break;
 
-			case E::SignalType::Discrete:
-				discreteSignalsCount++;
+			case E::SignalType::Bus:
+				{
+					int busSizeBits = m_busses.getBusSizeBits(busSignal.busTypeId());
 
+					if (busSizeBits < 0)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					if ((busSizeBits % SIZE_16BIT) != 0)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					busSignalsSizeBit += busSizeBits;
+					busSignals.append(busSignal.signalId());
+				}
+				break;
+
+			case E::SignalType::Discrete:
+
+				discreteSignalsCount++;
 				discreteSignals.append(busSignal.signalId());
 
 				break;
@@ -336,6 +397,8 @@ namespace Builder
 
 		m_sizeW = analogSignalsSizeBit / SIZE_16BIT;
 
+		m_sizeW += busSignalsSizeBit / SIZE_16BIT;
+
 		m_sizeW += discreteSignalsCount / SIZE_16BIT;
 
 		if ((discreteSignalsCount % SIZE_16BIT) != 0)
@@ -346,10 +409,12 @@ namespace Builder
 		// signals ordering by alphabet
 		//
 		analogSignals.sort(Qt::CaseInsensitive);
+		busSignals.sort(Qt::CaseInsensitive);
 		discreteSignals.sort(Qt::CaseInsensitive);
 
 		QStringList signalsOrder = analogSignals;
 
+		signalsOrder.append(busSignals);
 		signalsOrder.append(discreteSignals);
 
 		// calculate signals addresses in bus
@@ -584,6 +649,22 @@ namespace Builder
 		return m_srcBus.busSignals()[index];
 	}
 
+	QStringList Bus::getChildBussesIDs()
+	{
+		QStringList childBussesIDs;
+
+		for(const VFrame30::BusSignal& busSignal : m_srcBus.busSignals())
+		{
+			if (busSignal.type() != E::SignalType::Bus)
+			{
+				continue;
+			}
+
+			childBussesIDs.append(busSignal.busTypeId());
+		}
+
+		return childBussesIDs;
+	}
 
 	Busses::Busses(VFrame30::BusSet* busSet, IssueLogger* log) :
 		m_busSet(busSet),
@@ -615,16 +696,23 @@ namespace Builder
 				continue;
 			}
 
-			BusShared bus = std::make_shared<Bus>(srcBus, m_log);
+			BusShared bus = std::make_shared<Bus>(*this, srcBus, m_log);
 
-			if (bus->init() == true)
-			{
-				m_busses.insert(srcBus.busTypeId(), bus);
-			}
-			else
-			{
-				result = false;
-			}
+			m_busses.insert(srcBus.busTypeId(), bus);
+		}
+
+		QVector<BusShared> busInitOrder;
+
+		result = getBusInitOrder(&busInitOrder);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		for(BusShared bus : busInitOrder)
+		{
+			result &= bus->init();
 		}
 
 		return result;
@@ -659,5 +747,78 @@ namespace Builder
 		return m_busses.value(busTypeID, nullptr);
 	}
 
+	bool Busses::getBusInitOrder(QVector<BusShared>* busInitOrder)
+	{
+		if (busInitOrder == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		busInitOrder->clear();
+
+		QHash<QString, BusShared> nonOrderedBusses = m_busses;
+		QHash<QString, BusShared> orderedBusses;
+
+		do
+		{
+			int orderedCount = 0;
+
+			for(BusShared bus : m_busses)
+			{
+				if (nonOrderedBusses.contains(bus->busTypeID()) == false)
+				{
+					continue;
+				}
+
+				QStringList childBussesIDs = bus->getChildBussesIDs();
+
+				bool hasUnresolvedChildBus = false;
+
+				for(const QString childBusID : childBussesIDs)
+				{
+					if (orderedBusses.contains(childBusID) == true)
+					{
+						continue;
+					}
+
+					hasUnresolvedChildBus = true;
+					break;
+				}
+
+				if (hasUnresolvedChildBus == true)
+				{
+					continue;
+				}
+
+				busInitOrder->append(bus);
+
+				orderedBusses.insert(bus->busTypeID(), bus);
+
+				nonOrderedBusses.remove(bus->busTypeID());
+
+				orderedCount++;
+
+				if (nonOrderedBusses.count() == 0)
+				{
+					break;
+				}
+			}
+
+			if (orderedCount == 0)
+			{
+				// Can't resolve bus interdependencies: %1
+				//
+				QStringList unresolvedBussesIDs = nonOrderedBusses.uniqueKeys();
+
+				m_log->errALC5131(unresolvedBussesIDs.join(", "));
+
+				return false;
+			}
+		}
+		while(busInitOrder->count() < m_busses.count());
+
+		return true;
+	}
 
 }

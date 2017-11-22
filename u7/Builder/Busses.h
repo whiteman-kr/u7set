@@ -40,13 +40,15 @@ namespace Builder
 		bool isValid() const;
 	};
 
+	class Busses;
+
 	class Bus
 	{
 	public:
 		static QString INVALUD_BUS_SIGNAL_ID;
 
 	public:
-		Bus(const VFrame30::Bus bus, IssueLogger* log);
+		Bus(const Busses& busses, const VFrame30::Bus bus, IssueLogger* log);
 
 		bool init();
 
@@ -70,6 +72,10 @@ namespace Builder
 		const VFrame30::Bus& srcBus() const { return m_srcBus; }
 		VFrame30::BusSignal& getBusSignal(const QString& signalID);
 
+		QStringList getChildBussesIDs();
+
+		bool isInitialized() const { return m_isInitialized; }
+
 	private:
 		bool buildInBusSignalsMap();
 		bool placeSignals();
@@ -77,8 +83,8 @@ namespace Builder
 		bool checkSignalsOffsets();
 		void buildSignalIndexesArrays();
 
-
 	private:
+		const Busses& m_busses;
 		VFrame30::Bus m_srcBus;
 		IssueLogger* m_log = nullptr;
 
@@ -96,6 +102,8 @@ namespace Builder
 
 		static VFrame30::BusSignal m_invalidBusSignal;
 		static BusSignal m_invalidSignal;
+
+		bool m_isInitialized = false;
 	};
 
 	typedef std::shared_ptr<Bus> BusShared;
@@ -110,6 +118,9 @@ namespace Builder
 		bool writeReport(BuildResultWriter* resultWriter);
 
 		BusShared getBus(const QString& busTypeID) const;
+
+	private:
+		bool getBusInitOrder(QVector<BusShared>* busInitOrder);
 
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;

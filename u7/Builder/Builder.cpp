@@ -948,14 +948,14 @@ namespace Builder
 
 		signalSet->buildID2IndexMap();
 
-		result = signalSet->expandBusSignals();
+/*		result = signalSet->expandBusSignals();
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		signalSet->buildID2IndexMap();				// rebuild map after expand
+		signalSet->buildID2IndexMap();				// rebuild map after expand  */
 
 		result = signalSet->bindSignalsToLMs(equipment);
 

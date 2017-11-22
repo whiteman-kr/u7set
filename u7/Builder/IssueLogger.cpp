@@ -4828,6 +4828,26 @@ namespace Builder
 						arg(afbComponentCaption).arg(schemaID).arg(itemLabel));
 	}
 
+	/// IssueCode: ALC5131
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Can't resolve busses interdependencies: %1
+	///
+	/// Parameters:
+	///		%1 Buses with interdependensies list
+	///
+	/// Description:
+	///		 Specified busses have interdependencies that cannot be resolved.
+	///
+	void IssueLogger::errALC5131(QString unresolvedBusList)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5131,
+				  QString(tr("Can't resolve busses interdependencies: %1")).
+						arg(unresolvedBusList));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
