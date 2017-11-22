@@ -199,6 +199,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0181.sql", "Upgrade to version 181, TxDiagDataSize in LMs has been changed from 176 to 188 words"},
 	{":/DatabaseUpgrade/Upgrade0182.sql", "Upgrade to version 182, update LM Scripts, LmDescriptions is now written to LM"},
 	{":/DatabaseUpgrade/Upgrade0183.sql", "Upgrade to version 183, Removed some signals from Platform Interface Controller in in-out modules and OCM/OCMN"},
+	{":/DatabaseUpgrade/Upgrade0184.sql", "Upgrade to version 184, Updated LM1_SF00.xml, LM1_SR01.xml, added pins for components"},
 };
 
 
