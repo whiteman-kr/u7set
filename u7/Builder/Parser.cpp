@@ -636,37 +636,86 @@ namespace Builder
 		//
 		std::list<AppLogicItem> orderedList;
 
-		// Add all inputs and outputs
-		// Warning:	Can be optimized by removing items from fblItems on the same
-		//			loop
+		// Add all "inputs"
 		//
-		bool hasItemsWithouInputs = false;
-
 		for (const auto& item : fblItems)
 		{
 			if (item.second.m_fblItem->inputsCount() == 0)
 			{
 				orderedList.push_front(item.second);	// items without inputs must be at the begining of the list
-				hasItemsWithouInputs = true;
 				continue;
 			}
 		}
 
-//		for (const auto& item : fblItems)
-//		{
-//			if (item.second.m_fblItem->outputsCount() == 0)
-//			{
-//				orderedList.push_back(item.second);	// items without outputs must be at the end of the list
-//				continue;
-//			}
-//		}
+		// Get all outputs and assigned to them inputs, it's a dependand map
+		//
+		std::multimap<QUuid, AppLogicItem> outputPinToInputItem;				// Key is QUuid of output connected to input
 
+		for (const std::pair<QUuid, AppLogicItem>& currentItem : constFblItems)
+		{
+			const AppLogicItem& appLogicItem = currentItem.second;
+			const std::shared_ptr<VFrame30::FblItemRect>& fblItem = appLogicItem.m_fblItem;
+			// qDebug() << "FblItem " << fblItem->label();
+
+			const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
+
+			for (const VFrame30::AfbPin& input : inputs)
+			{
+				const std::vector<QUuid>& assocOutputs = input.associatedIOs();
+//				for (const QUuid& u : assocOutputs)
+//				{
+//					qDebug() << "\t Assoc Outs" << u;
+//				}
+
+				if (assocOutputs.size() == 1)		// Only one output can be connected to input
+				{
+					outputPinToInputItem.insert({assocOutputs.front(), appLogicItem});
+				}
+				else
+				{
+					assert(assocOutputs.size() != 1);
+				}
+			}
+		}
+
+		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
+
+		for (const std::pair<QUuid, AppLogicItem>& currentItem : constFblItems)
+		{
+			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
+
+			for (const VFrame30::AfbPin& out : outputs)
+			{
+				auto range = outputPinToInputItem.equal_range(out.guid());
+
+				std::map<QUuid, AppLogicItem> rangeItemsMap;	// set removes duplicats
+				for (auto rangeIt = range.first; rangeIt != range.second; ++rangeIt)
+				{
+					const AppLogicItem& appItem = rangeIt->second;
+					rangeItemsMap[appItem.m_fblItem->guid()] = appItem;
+				}
+
+				std::vector<AppLogicItem> deps;
+				deps.reserve(8);
+
+				for (const auto& item : rangeItemsMap)
+				{
+					deps.push_back(item.second);
+				}
+
+				itemsWithInputs[out.guid()] = std::vector<AppLogicItem>();
+				std::swap(itemsWithInputs[out.guid()], deps);
+			}
+		}
+
+		// Remove already added items
+		//
 		for (const AppLogicItem& orderedItem : orderedList)
 		{
 			fblItems.erase(orderedItem.m_fblItem->guid());
 		}
 
-		int pass = 1;
+		int pass = 0;
 		size_t checkRemainsCount = -1;			// it's ok to give a second change for setItemsOrder to remove some items form fblItems
 		while (fblItems.empty() == false)
 		{
@@ -675,15 +724,24 @@ namespace Builder
 				break;
 			}
 
-			qDebug() << "Pass " << pass++;
+			qDebug() << "Pass " << ++pass;
 
-			setItemsOrder(log, fblItems, orderedList, constFblItems, interruptProcess);
+			// If this is not firts pass, then we need to start oreder loop form the last item (pass > 1)
+			// as all items before just added (in the end of this loop orderedList.push_back(item);) already were ordered
+			//
+			bool startLoopFromLastItem = pass > 1;
+
+			bool ok = setItemsOrder(log, fblItems, orderedList, itemsWithInputs, startLoopFromLastItem, interruptProcess);
+
+			if (ok == false)
+			{
+				return false;
+			}
 
 			if (*interruptProcess == true)
 			{
 				break;
 			}
-
 
 			if (checkRemainsCount == fblItems.size())
 			{
@@ -1191,7 +1249,8 @@ namespace Builder
 	bool AppLogicModule::setItemsOrder(IssueLogger* log,
 									   std::map<QUuid, AppLogicItem>& remainItems,
 									   std::list<AppLogicItem>& orderedItems,
-									   const std::map<QUuid, AppLogicItem>& constItems,
+									   const std::map<QUuid, std::vector<AppLogicItem>>& itemsWithInputs,
+									   bool startLoopFromLastItem,
 									   bool* interruptProcess)
 	{
 		if (log == nullptr ||
@@ -1204,90 +1263,17 @@ namespace Builder
 
 		// --
 		//
-		std::multimap<QUuid, AppLogicItem> outputPinToInputItem;				// Key is QUuid of output connected to input
-
-		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
-		{
-			const AppLogicItem& appLogicItem = currentItem.second;
-			const std::shared_ptr<VFrame30::FblItemRect>& fblItem = appLogicItem.m_fblItem;
-			// qDebug() << "FblItem " << fblItem->label();
-
-			const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
-
-			for (const VFrame30::AfbPin& input : inputs)
-			{
-				const std::vector<QUuid>& assocOutputs = input.associatedIOs();
-//				for (const QUuid& u : assocOutputs)
-//				{
-//					qDebug() << "\t Assoc Outs" << u;
-//				}
-
-				if (assocOutputs.size() == 1)		// Only one output can be connected to input
-				{
-					outputPinToInputItem.insert({assocOutputs.front(), appLogicItem});
-				}
-				else
-				{
-					assert(assocOutputs.size() != 1);
-				}
-			}
-		}
-
-		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
-
-		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
-		{
-			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
-
-			for (const VFrame30::AfbPin& out : outputs)
-			{
-				auto range = outputPinToInputItem.equal_range(out.guid());
-
-				std::map<QUuid, AppLogicItem> rangeItemsMap;	// set removes duplicats
-				for (auto rangeIt = range.first; rangeIt != range.second; ++rangeIt)
-				{
-					const AppLogicItem& appItem = rangeIt->second;
-					rangeItemsMap[appItem.m_fblItem->guid()] = appItem;
-				}
-
-				std::vector<AppLogicItem> deps;
-				deps.reserve(8);
-
-				for (const auto& item : rangeItemsMap)
-				{
-					deps.push_back(item.second);
-				}
-
-				itemsWithInputs[out.guid()] = std::vector<AppLogicItem>();
-				std::swap(itemsWithInputs[out.guid()], deps);
-			}
-		}
-
-		//---------------------------
-//		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
-
-
-//		auto constItemsBegin = constItems.begin();
-//		auto constItemsEnd = constItems.end();
-
-//		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
-//		{
-//			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
-
-//			for (const VFrame30::AfbPin& out : outputs)
-//			{
-//				std::vector<AppLogicItem> deps = getItemsWithInput(constItemsBegin, constItemsEnd, out.guid());
-//				itemsWithInputs[out.guid()] = deps;
-//			}
-//		}
-
-		// --
-		//
-		//std::map<ChangeOrder> changeOrderHistory;
 		std::map<QUuid, ChangeOrder> changeOrderHistory;		// Key is ChangeOrder.item.m_fblItem->guid()
 
 		// Set other items
 		//
+		auto currentIt = orderedItems.begin();
+
+		if (startLoopFromLastItem == true && orderedItems.empty() == false)
+		{
+			currentIt = std::prev(orderedItems.end());
+		}
+
 		for (auto currentIt = orderedItems.begin(); currentIt != orderedItems.end(); ++currentIt)
 		{
 			if (*interruptProcess == true)
@@ -1345,6 +1331,18 @@ namespace Builder
 					continue;
 				}
 
+				auto remainIt = remainItems.find(dep.m_fblItem->guid());
+				if (remainIt != remainItems.end())
+				{
+					// Obviusly dependant item is not in orderedList yet, add it right after currentItem
+					//
+					assert(std::find(orderedItems.begin(), orderedItems.end(), dep) == orderedItems.end());
+
+					orderedItems.insert(std::next(currentIt), dep);
+					remainItems.erase(remainIt);
+					continue;	// Process other dependtants, do not break!
+				}
+
 				// Check if dependant item is below current, if so, thats ok, don't do anything
 				//
 				auto dependantisBelow = std::find(currentIt, orderedItems.end(), dep);
@@ -1392,12 +1390,7 @@ namespace Builder
 					continue;	// Process other dependtants, do not break!
 				}
 
-				// Obviusly dependant item is not in orderedList yet, add it right after currentItem
-				//
-				assert(std::find(orderedItems.begin(), orderedItems.end(), dep) == orderedItems.end());
-
-				orderedItems.insert(std::next(currentIt), dep);
-				remainItems.erase(dep.m_fblItem->guid());
+				assert(false);
 
 				// Process other dependtants, do not break!
 				//
