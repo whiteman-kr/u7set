@@ -405,6 +405,8 @@ DISTFILES += \
     LogicModuleDescription/LogicModule0000.xml \
     ../Proto/network.proto \
     LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml \
+    LogicModuleDescription/LM1_SF00.xml \
     LogicModuleDescription/LM1_SR01.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
