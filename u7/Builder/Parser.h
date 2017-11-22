@@ -162,7 +162,8 @@ namespace Builder
 		bool setItemsOrder(IssueLogger* log,
 						   std::map<QUuid, AppLogicItem>& remainItems,
 						   std::list<AppLogicItem>& orderedItems,
-						   const std::map<QUuid, AppLogicItem>& constItems,
+						   const std::map<QUuid, std::vector<AppLogicItem>>& itemsWithInputs,
+						   bool startLoopFromLastItem,
 						   bool* interruptProcess);
 
 		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
