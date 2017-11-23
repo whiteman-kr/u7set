@@ -1,8 +1,9 @@
-#include "DataAquisitionServiceWidget.h"
+#include "AppDataServiceWidget.h"
 #include "TcpAppDataClient.h"
 #include <QTableView>
 #include <QAction>
 #include <QHeaderView>
+#include <QStandardItemModel>
 
 const int DSC_CAPTION = 0,
 DSC_IP = 1,
@@ -225,26 +226,25 @@ void DataSourcesStateModel::reloadList()
 }
 
 
-DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
+AppDataServiceWidget::AppDataServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
 	BaseServiceStateWidget(ip, portIndex, parent)
 {
-	m_clientSocket = new TcpAppDataClient(HostAddressPort(ip, PORT_APP_DATA_SERVICE_CLIENT_REQUEST));
-	m_appDataClientTread = new SimpleThread(m_clientSocket);
+	setStateTabMaxRowQuantity(8);
+
+	m_tcpClientSocket = new TcpAppDataClient(HostAddressPort(getWorkingClientRequestIp(), PORT_APP_DATA_SERVICE_CLIENT_REQUEST));
+	m_appDataClientTread = new SimpleThread(m_tcpClientSocket);
 
 	// Data Sources
-	m_dataSourcesStateModel = new DataSourcesStateModel(m_clientSocket, this);
-	m_dataSourcesView = new QTableView;
+	m_dataSourcesStateModel = new DataSourcesStateModel(m_tcpClientSocket, this);
+	m_dataSourcesView = addTabWithTableView(100, tr("AppData Sources"));;
 	m_dataSourcesView->setModel(m_dataSourcesStateModel);
 
-	connect(m_clientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, m_dataSourcesStateModel, &DataSourcesStateModel::reloadList);
-	connect(m_clientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &DataAquisitionServiceWidget::updateSourceStateColumns);
-	connect(m_clientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
-
-	addTab(m_dataSourcesView, tr("Data Sources"));
+	connect(m_tcpClientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, m_dataSourcesStateModel, &DataSourcesStateModel::reloadList);
+	connect(m_tcpClientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &AppDataServiceWidget::updateSourceStateColumns);
+	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
 
 	QSettings settings;
 	QHeaderView* horizontalHeader = m_dataSourcesView->horizontalHeader();
-	horizontalHeader->setDefaultSectionSize(100);
 	for (int i = 0; i < DSC_COUNT; i++)
 	{
 		m_dataSourcesView->setColumnWidth(i, settings.value(QString("DataAquisitionServiceWidget/SourceColumnWidth/%1").arg(QString(dataSourceColumnStr[i]).replace("/", "|")).replace("\n", " "),
@@ -270,47 +270,63 @@ DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portInd
 
 	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
 	horizontalHeader->addActions(m_sourceTableHeadersContextMenuActions->actions());
-	connect(m_sourceTableHeadersContextMenuActions, &QActionGroup::triggered, this, &DataAquisitionServiceWidget::changeSourceColumnVisibility);
-	connect(horizontalHeader, &QHeaderView::sectionResized, this, &DataAquisitionServiceWidget::saveSourceColumnWidth);
+	connect(m_sourceTableHeadersContextMenuActions, &QActionGroup::triggered, this, &AppDataServiceWidget::changeSourceColumnVisibility);
+	connect(horizontalHeader, &QHeaderView::sectionResized, this, &AppDataServiceWidget::saveSourceColumnWidth);
 
 	// Signals
-	m_signalStateModel = new SignalStateModel(m_clientSocket, this);
-	m_signalsView = new QTableView;
+	m_signalStateModel = new SignalStateModel(m_tcpClientSocket, this);
+	m_signalsView = addTabWithTableView(250, tr("Signals"));;
 	m_signalsView->setModel(m_signalStateModel);
 
-	connect(m_clientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
-	connect(m_clientSocket, &TcpAppDataClient::appSignalsStateUpdated, this, &DataAquisitionServiceWidget::updateSignalStateColumns);
-	connect(m_clientSocket, &TcpAppDataClient::disconnected, m_signalStateModel, &SignalStateModel::invalidateData);
+	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
+	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalsStateUpdated, this, &AppDataServiceWidget::updateSignalStateColumns);
+	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_signalStateModel, &SignalStateModel::invalidateData);
 
-	addTab(m_signalsView, tr("Signals"));
+	addTab(new QTableView(this), tr("Clients"));
 
-	//For pausing requests if window hided
-	//
-	/*QTimer* timer = new QTimer(this);
-	connect(timer, &QTimer::timeout, this, &DataAquisitionServiceWidget::checkVisibility);
-	timer->start(5);*/
+	addTab(new QTableView(this), tr("Settings"));
+
+	addTab(new QTableView(this), tr("Log"));
 
 	m_appDataClientTread->start();
 }
 
-DataAquisitionServiceWidget::~DataAquisitionServiceWidget()
+AppDataServiceWidget::~AppDataServiceWidget()
 {
 	m_appDataClientTread->quitAndWait();
 }
 
-void DataAquisitionServiceWidget::updateSourceInfo()
+void AppDataServiceWidget::updateServiceState()
+{
+}
+
+void AppDataServiceWidget::updateStateInfo()
+{
+	if (m_serviceInfo.servicestate() == ServiceState::Work)
+	{
+		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
+		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
+		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
+
+		stateTabModel()->setData(stateTabModel()->index(5, 1), "???");
+		stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
+		stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
+	}
+}
+
+void AppDataServiceWidget::updateSourceInfo()
 {
 	m_dataSourcesStateModel->updateData(m_dataSourcesView->indexAt(QPoint(0, 0)),
 										m_dataSourcesView->indexAt(QPoint(m_dataSourcesView->width(), m_dataSourcesView->height())));
 }
 
-void DataAquisitionServiceWidget::updateSignalInfo()
+void AppDataServiceWidget::updateSignalInfo()
 {
 	m_signalStateModel->updateData(m_signalsView->indexAt(QPoint(0, 0)),
 								   m_signalsView->indexAt(QPoint(m_signalsView->width(), m_signalsView->height())));
 }
 
-void DataAquisitionServiceWidget::updateSourceStateColumns()
+void AppDataServiceWidget::updateSourceStateColumns()
 {
 	int firstRow = m_dataSourcesView->rowAt(0);
 	int lastRow = m_dataSourcesView->rowAt(m_signalsView->height());
@@ -336,7 +352,7 @@ void DataAquisitionServiceWidget::updateSourceStateColumns()
 										lastColumn);
 }
 
-void DataAquisitionServiceWidget::updateSignalStateColumns()
+void AppDataServiceWidget::updateSignalStateColumns()
 {
 	int firstRow = m_signalsView->rowAt(0);
 	int lastColumn = m_signalsView->columnAt(m_signalsView->width());
@@ -362,7 +378,7 @@ void DataAquisitionServiceWidget::updateSignalStateColumns()
 								   lastColumn);
 }
 
-void DataAquisitionServiceWidget::checkVisibility()
+void AppDataServiceWidget::checkVisibility()
 {
 	/*if (isVisible() && !m_dataSourcesStateModel->isActive())
 	{
@@ -375,19 +391,19 @@ void DataAquisitionServiceWidget::checkVisibility()
 	}*/
 }
 
-void DataAquisitionServiceWidget::saveSourceColumnWidth(int index)
+void AppDataServiceWidget::saveSourceColumnWidth(int index)
 {
 	QSettings settings;
 	settings.setValue(QString("DataAquisitionServiceWidget/SourceColumnWidth/%1").arg(QString(dataSourceColumnStr[index]).replace("/", "|")).replace("\n", " "), m_dataSourcesView->columnWidth(index));
 }
 
-void DataAquisitionServiceWidget::saveSourceColumnVisibility(int index, bool visible)
+void AppDataServiceWidget::saveSourceColumnVisibility(int index, bool visible)
 {
 	QSettings settings;
 	settings.setValue(QString("DataAquisitionServiceWidget/SourceColumnVisibility/%1").arg(QString(dataSourceColumnStr[index]).replace("/", "|")).replace("\n", " "), visible);
 }
 
-void DataAquisitionServiceWidget::changeSourceColumnVisibility(QAction* action)
+void AppDataServiceWidget::changeSourceColumnVisibility(QAction* action)
 {
 	int actionIndex = m_sourceTableHeadersContextMenuActions->actions().indexOf(action);
 	if (actionIndex == 0)

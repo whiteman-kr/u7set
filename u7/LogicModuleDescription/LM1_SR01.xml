@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0013">
+<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0014">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -23,10 +23,10 @@
 		<TxDiagDataSize>188</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
-		<ALPPhaseTime>2500</ALPPhaseTime>
 		<ClockFrequency>96000000</ClockFrequency>
 		<CycleDuration>5000</CycleDuration>
-		<IDRPhaseTime>1000</IDRPhaseTime>
+		<IDRPhaseTime>500</IDRPhaseTime>
+		<ALPPhaseTime>3500</ALPPhaseTime>
 	</LogicUnit>
 	<OptoInterface>
 		<OptoPortCount>3</OptoPortCount>
@@ -11558,10 +11558,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_16si_v1"       Caption="be_to_le_16si"       Version="1.0002">
+		<AFB id="#be_to_le_16si_v1"       Caption="be_to_le_16si"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
@@ -11592,10 +11592,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#le_to_be_16si_v1"       Caption="le_to_be_16si"       Version="1.0002">
+		<AFB id="#le_to_be_16si_v1"       Caption="le_to_be_16si"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
@@ -11626,10 +11626,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0002">
+		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -11660,10 +11660,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0002">
+		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0003">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -11694,10 +11694,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0002">
+		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to liggle-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -11728,10 +11728,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0002">
+		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0003">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -11762,10 +11762,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0002">
+		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0003">
 			<Properties>
-				<Description>Type convertor block from signed int to floating point</Description>
-				<Category>Convertor</Category>
+				<Description>Type converter block from signed int to floating point</Description>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -11796,10 +11796,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0002">
+		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0003">
 			<Properties>
-				<Description>Type convertor block from floating point to signed int</Description>
-				<Category>Convertor</Category>
+				<Description>Type converter block from floating point to signed int</Description>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
