@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0013">
+<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0014">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -23,10 +23,10 @@
 		<TxDiagDataSize>188</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
-		<ALPPhaseTime>2500</ALPPhaseTime>
 		<ClockFrequency>96000000</ClockFrequency>
 		<CycleDuration>5000</CycleDuration>
-		<IDRPhaseTime>1000</IDRPhaseTime>
+		<IDRPhaseTime>500</IDRPhaseTime>
+		<ALPPhaseTime>3500</ALPPhaseTime>
 	</LogicUnit>
 	<OptoInterface>
 		<OptoPortCount>3</OptoPortCount>

@@ -184,6 +184,7 @@
         <file>Upgrade0182.sql</file>
         <file>Upgrade0183.sql</file>
         <file>Upgrade0184.sql</file>
+        <file>Upgrade0185.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
