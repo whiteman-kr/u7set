@@ -3,17 +3,7 @@
 namespace LmModel
 {
 
-	DeviceEmulator::DeviceEmulator(int logicModuleNumber,
-								   const LmDescription& lmDescription,
-								   const Eeprom& tuningEeprom,
-								   const Eeprom& confEeprom,
-								   const Eeprom& appLogicEeprom,
-								   QTextStream* outputStream) :
-		m_logicModuleNumber(logicModuleNumber),
-		m_lmDescription(lmDescription),
-		m_tuningEeprom(tuningEeprom),
-		m_confEeprom(confEeprom),
-		m_appLogicEeprom(appLogicEeprom),
+	DeviceEmulator::DeviceEmulator(QTextStream* outputStream) :
 		m_output(outputStream)
 	{
 		assert(outputStream);
@@ -25,6 +15,114 @@ namespace LmModel
 	DeviceEmulator::~DeviceEmulator()
 	{
 		output() << "DeviceEmulator: Instance destroyed" << endl;
+	}
+
+	bool DeviceEmulator::init(int logicModuleNumber,
+							  const LmDescription& lmDescription,
+							  const Eeprom& tuningEeprom,
+							  const Eeprom& confEeprom,
+							  const Eeprom& appLogicEeprom)
+	{
+		output() << "DeviceEmulator: Init device" << endl;
+
+		m_logicModuleNumber = logicModuleNumber;
+		m_lmDescription = lmDescription;
+		m_tuningEeprom = tuningEeprom;
+		m_confEeprom = confEeprom;
+		m_appLogicEeprom = appLogicEeprom;
+
+		bool ok = initMemory();
+		if (ok == false)
+		{
+			output() << "DeviceEmulator: Init memory error" << endl;
+		}
+
+		return ok;
+	}
+
+	bool DeviceEmulator::initMemory()
+	{
+		bool ok = true;
+
+		// RAM - I/O modules
+		//
+		const LmDescription::Memory& memory = m_lmDescription.memory();
+
+		for (quint32 i = 0; i < memory.m_moduleCount; i++)
+		{
+			ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
+									  memory.m_moduleDataSize,
+									  QString("Input I/O Module %1").arg(i + 1));
+
+			ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
+									  memory.m_moduleDataSize,
+									  QString("Output I/O Module %1").arg(i + 1));
+		}
+
+		// RAM - TX/RX Opto Interfaces
+		//
+		const LmDescription::OptoInterface& optoInterface = m_lmDescription.optoInterface();
+
+		for (quint32 i = 0; i < optoInterface.m_optoPortCount; i++)
+		{
+			ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
+									  optoInterface.m_optoPortDataSize,
+									  QString("Rx Opto Port  %1").arg(i + 1));
+
+			ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
+									  optoInterface.m_optoPortDataSize,
+									  QString("Tx Opto Port  %1").arg(i + 1));
+		}
+
+		// RAM - ApplicationLogic Block, bit/word access
+		//
+		ok &= m_ram.addMemoryArea(RamAccess::ReadWrite,
+								  memory.m_appLogicBitDataOffset,
+								  memory.m_appLogicBitDataSize,
+								  QLatin1String("Appliaction Logic Block (bit access)"));
+
+		ok &= m_ram.addMemoryArea(RamAccess::ReadWrite,
+								  memory.m_appLogicWordDataOffset,
+								  memory.m_appLogicWordDataSize,
+								  QLatin1String("Appliaction Logic Block (word access)"));
+
+		// RAM - Tuninng Block
+		//
+		ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+								  memory.m_tuningDataOffset,
+								  memory.m_tuningDataSize,
+								  QLatin1String("Tuning Block"));
+
+		// RAM - Diag Data
+		//
+		ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+								  memory.m_txDiagDataOffset,
+								  memory.m_txDiagDataSize,
+								  QLatin1String("Input Diag Data"));
+
+		ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+								  memory.m_txDiagDataOffset,
+								  memory.m_txDiagDataSize,
+								  QLatin1String("Output Diag Data"));
+
+
+		// RAM - App Data
+		//
+		ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+								  memory.m_appDataOffset,
+								  memory.m_appDataSize,
+								  QLatin1String("Input App Data"));
+
+		ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+								  memory.m_appDataOffset,
+								  memory.m_appDataSize,
+								  QLatin1String("Output App Data"));
+
+		return ok;
 	}
 
 	void DeviceEmulator::pause()
@@ -407,9 +505,9 @@ namespace LmModel
 
 		// Command Logic
 		//
+		bool ok = m_ram.writeBit(addr, data & 0x01, bitNo);
 
-
-		return true;
+		return ok;
 	}
 
 	bool DeviceEmulator::command_wrbf()

@@ -24,7 +24,8 @@ class LmDescription : public QObject
 
 public:
 	explicit LmDescription(QObject* parent = 0);
-	explicit LmDescription(const LmDescription& src);
+	explicit LmDescription(const LmDescription& that);
+	LmDescription& operator=(const LmDescription& src);
 	virtual ~LmDescription();
 
 	// Loading and parsing XML
@@ -76,6 +77,7 @@ public:
 		quint32 m_appLogicWordDataSize = 0xFFFFFFFF;
 		quint32 m_moduleDataOffset = 0xFFFFFFFF;
 		quint32 m_moduleDataSize = 0xFFFFFFFF;
+		quint32 m_moduleCount = 14;
 		quint32 m_tuningDataOffset = 0xFFFFFFFF;
 		quint32 m_tuningDataSize = 0xFFFFFFFF;
 		quint32 m_txDiagDataOffset = 0xFFFFFFFF;

@@ -17,6 +17,7 @@
 		<AppLogicWordDataSize>3570</AppLogicWordDataSize>
 		<ModuleDataOffset>0</ModuleDataOffset>
 		<ModuleDataSize>2560</ModuleDataSize>
+		<ModuleCount>14</ModuleCount>
 		<TuningDataOffset>46336</TuningDataOffset>
 		<TuningDataSize>7620</TuningDataSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>

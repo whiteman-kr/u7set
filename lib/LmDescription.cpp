@@ -6,7 +6,13 @@ LmDescription::LmDescription(QObject *parent)
 {
 }
 
-LmDescription::LmDescription(const LmDescription& src)
+LmDescription::LmDescription(const LmDescription& that)
+{
+	*this = that;
+	return;
+}
+
+LmDescription& LmDescription::operator=(const LmDescription& src)
 {
 	m_descriptionNumber = src.m_descriptionNumber;
 	m_configurationScriptFile = src.m_configurationScriptFile;
@@ -32,7 +38,7 @@ LmDescription::LmDescription(const LmDescription& src)
 		m_afbs.push_back(afbCopy);
 	}
 
-	return;
+	return *this;
 }
 
 LmDescription::~LmDescription()
@@ -535,6 +541,7 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 
 	m_moduleDataOffset = getSectionUintValue(QLatin1String("ModuleDataOffset"), errorMessage);
 	m_moduleDataSize = getSectionUintValue(QLatin1String("ModuleDataSize"), errorMessage);
+	m_moduleCount = getSectionUintValue(QLatin1String("ModuleCount"), errorMessage);
 
 	m_tuningDataOffset = getSectionUintValue(QLatin1String("TuningDataOffset"), errorMessage);
 	m_tuningDataSize = getSectionUintValue(QLatin1String("TuningDataSize"), errorMessage);

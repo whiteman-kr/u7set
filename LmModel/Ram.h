@@ -22,8 +22,14 @@ namespace LmModel
 		RamAreaInfo(RamAccess access, quint32 offset, quint32 size, QString name);
 
 	public:
-		bool contains(RamAccess access, quint32 offset) const;
+		bool contains(RamAccess access, quint32 offsetW) const;
 		bool overlapped(RamAccess access, quint32 offset, quint32 size) const;
+
+	public:
+		QString name() const;
+		RamAccess access() const;
+		quint32 offset() const;
+		quint32 size() const;
 
 	private:
 		QString m_name;
@@ -38,9 +44,16 @@ namespace LmModel
 	public:
 		RamArea(RamAccess access, quint32 offset, quint32 size, QString name);
 
+	public:
+		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
+
+	private:
+
+
 	private:
 		QByteArray m_data;
 	};
+
 
 	class Ram
 	{
@@ -49,7 +62,12 @@ namespace LmModel
 
 	public:
 		void reset();
-		bool addMemoryArea(RamAccess access, quint32 offset, quint32 size, QString name);			// offset and size in 16 bit words
+		bool addMemoryArea(RamAccess access, quint32 offsetW, quint32 sizeW, QString name);			// offset and size in 16 bit words
+
+		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
+
+	private:
+		RamArea* memoryArea(RamAccess access, quint32 offsetW);
 
 	private:
 		std::vector<std::shared_ptr<RamArea>> m_memoryAreas;

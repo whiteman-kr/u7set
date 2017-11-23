@@ -9,6 +9,7 @@
 #include <QTimerEvent>
 #include "../lib/LmDescription.h"
 #include "Eeprom.h"
+#include "Ram.h"
 #include "Component.h"
 
 namespace LmModel
@@ -74,13 +75,15 @@ namespace LmModel
 		Q_OBJECT
 
 	public:
-		DeviceEmulator(int logicModuleNumber,
-					   const LmDescription& lmDescription,
-					   const Eeprom& tuningEeprom,
-					   const Eeprom& confEeprom,
-					   const Eeprom& appLogicEeprom,
-					   QTextStream* outputStream);
+		explicit DeviceEmulator(QTextStream* outputStream);
 		virtual ~DeviceEmulator();
+
+		bool init(int logicModuleNumber,
+				  const LmDescription& lmDescription,
+				  const Eeprom& tuningEeprom,
+				  const Eeprom& confEeprom,
+				  const Eeprom& appLogicEeprom);
+		bool initMemory();
 
 	public slots:
 		void pause();
@@ -148,6 +151,8 @@ namespace LmModel
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
 
+		Ram m_ram;
+
 		QByteArray m_plainAppLogic;			// Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
 
 		// Current state
@@ -162,7 +167,7 @@ namespace LmModel
 
 		// Info output
 		//
-		mutable QTextStream* m_output;
+		mutable QTextStream* m_output = nullptr;
 	};
 }
 

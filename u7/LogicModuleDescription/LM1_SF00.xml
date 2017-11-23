@@ -17,16 +17,17 @@
 		<AppLogicWordDataSize>3570</AppLogicWordDataSize>
 		<ModuleDataOffset>0</ModuleDataOffset>
 		<ModuleDataSize>2560</ModuleDataSize>
+		<ModuleCount>14</ModuleCount>
 		<TuningDataOffset>46336</TuningDataOffset>
 		<TuningDataSize>7620</TuningDataSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
 		<TxDiagDataSize>188</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
-		<ALPPhaseTime>2500</ALPPhaseTime>
 		<ClockFrequency>96000000</ClockFrequency>
 		<CycleDuration>5000</CycleDuration>
 		<IDRPhaseTime>1000</IDRPhaseTime>
+		<ALPPhaseTime>2500</ALPPhaseTime>
 	</LogicUnit>
 	<OptoInterface>
 		<OptoPortCount>3</OptoPortCount>

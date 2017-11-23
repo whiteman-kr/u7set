@@ -80,7 +80,15 @@ namespace LmModel
 			assert(m_workerThread.isFinished());
 		}
 
-		m_device = new DeviceEmulator(logicModuleNumber, *m_lmDescription.get(), m_tuningEeprom, m_confEeprom, m_appLogicEeprom, &output());
+		m_device = new DeviceEmulator(&output());
+		bool ok = m_device->init(logicModuleNumber, *m_lmDescription.get(), m_tuningEeprom, m_confEeprom, m_appLogicEeprom);
+
+		if (ok == false)
+		{
+			delete m_device;
+			m_device = nullptr;
+			return false;
+		}
 
 		m_device->moveToThread(&m_workerThread);
 

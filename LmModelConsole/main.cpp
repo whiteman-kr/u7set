@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
 
 	// Loading files
 	//
-	QByteArray lmDescription = readFile("D:\\Develop\\build\\LM1_SR01.xml");
+	//QByteArray lmDescription = readFile("D:\\Develop\\build\\LM1_SR01.xml");
+	QByteArray lmDescription = readFile("D:/Develop/u7set/u7/LogicModuleDescription/LM1_SR01.xml");
 	QByteArray tub = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.tub");
 	QByteArray mcb = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.mcb");
 	QByteArray alb = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.alb");
