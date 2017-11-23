@@ -54,9 +54,9 @@ namespace Builder
 
 		void writeReport(QStringList& list);
 
-		int sizeW() const { return m_sizeW; }
-		int sizeB() const { return m_sizeW * WORD_SIZE_IN_BYTES; }
-		int sizeBit() const { return m_sizeW * SIZE_16BIT; }
+		int sizeW() const;
+		int sizeB() const;
+		int sizeBit() const;
 
 		QString busTypeID() const { return m_srcBus.busTypeId(); }
 
@@ -93,7 +93,7 @@ namespace Builder
 		QHash<QString, int>	m_inBusSignalsMap;	// in bus signalID => signal index in m_srcBus.signals
 
 		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Mixed;
-		int m_sizeW = 0;
+		int m_sizeW = -1;
 
 		QVector<BusSignal> m_signals;
 
@@ -118,6 +118,7 @@ namespace Builder
 		bool writeReport(BuildResultWriter* resultWriter);
 
 		BusShared getBus(const QString& busTypeID) const;
+		int getBusSizeBits(const QString& busTypeID) const;
 
 	private:
 		bool getBusInitOrder(QVector<BusShared>* busInitOrder);

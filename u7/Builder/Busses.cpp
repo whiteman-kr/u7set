@@ -213,6 +213,24 @@ namespace Builder
 		list.append("");
 	}
 
+	int Bus::sizeW() const
+	{
+		assert(m_sizeW != -1);
+		assert(m_isInitialized == true);
+
+		return m_sizeW;
+	}
+
+	int Bus::sizeB() const
+	{
+		return sizeW() * WORD_SIZE_IN_BYTES;
+	}
+
+	int Bus::sizeBit() const
+	{
+		return sizeW() * SIZE_16BIT;
+	}
+
 	const BusSignal& Bus::signalByID(const QString& signalID) const
 	{
 		for(const BusSignal& busSignal : m_signals)
@@ -745,6 +763,19 @@ namespace Builder
 	BusShared Busses::getBus(const QString& busTypeID) const
 	{
 		return m_busses.value(busTypeID, nullptr);
+	}
+
+	int Busses::getBusSizeBits(const QString& busTypeID) const
+	{
+		BusShared bus = getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			assert(false);
+			return -1;
+		}
+
+		return bus->sizeBit();
 	}
 
 	bool Busses::getBusInitOrder(QVector<BusShared>* busInitOrder)
