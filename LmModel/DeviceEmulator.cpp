@@ -232,7 +232,8 @@ namespace LmModel
 				break;
 			}
 		}
-		while (m_logicUnit.programCounter < m_plainAppLogic.size());
+		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
 
 		return result;
 	}
@@ -340,9 +341,35 @@ namespace LmModel
 		return false;
 	}
 
+	// OpCode 3
+	// Command stop, output signal Stop
+	//
 	bool DeviceEmulator::command_stop()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		assert(command == 3);
+		m_logicUnit.programCounter++;
+
+		// Command logic
+		//
+		if (m_logicUnit.phase == CyclePhase::IdrPhase)
+		{
+			m_logicUnit.programCounter = m_logicUnit.appStartAddress;
+			m_logicUnit.phase = CyclePhase::AlpPhase;
+			return true;
+		}
+
+		if (m_logicUnit.phase == CyclePhase::AlpPhase)
+		{
+			m_logicUnit.programCounter = m_logicUnit.appStartAddress;
+			m_logicUnit.phase = CyclePhase::ODT;
+			return true;
+		}
+
+		fault(QString("Command STOP in wrong phase %1").arg(static_cast<int>(m_logicUnit.phase)));
+
 		return false;
 	}
 
@@ -364,10 +391,25 @@ namespace LmModel
 		return false;
 	}
 
+	// OpCode 7
+	//
 	bool DeviceEmulator::command_movbc()
 	{
-		fault("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		assert(command == 7);
+		m_logicUnit.programCounter++;
+
+		quint16 addr = getWord(m_logicUnit.programCounter++);
+		quint16 data = getWord(m_logicUnit.programCounter++);
+		quint16 bitNo = getWord(m_logicUnit.programCounter++);
+
+		// Command Logic
+		//
+
+
+		return true;
 	}
 
 	bool DeviceEmulator::command_wrbf()
@@ -423,7 +465,6 @@ namespace LmModel
 		}
 
 		return ok;
-		return false;
 	}
 
 	bool DeviceEmulator::command_wrfbb()

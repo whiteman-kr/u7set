@@ -56,7 +56,9 @@ namespace LmModel
 	enum class CyclePhase
 	{
 		IdrPhase,
-		AlpPhase
+		AlpPhase,
+		ODT,
+		ST
 	};
 
 	struct LogicUnitData
@@ -65,6 +67,7 @@ namespace LmModel
 		CyclePhase phase = CyclePhase::IdrPhase;
 		quint16 appStartAddress = 0xFFFF;
 	};
+
 
 	class DeviceEmulator : public QObject
 	{
