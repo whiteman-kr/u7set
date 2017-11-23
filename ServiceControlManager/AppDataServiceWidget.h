@@ -59,14 +59,18 @@ private:
 	TcpAppDataClient* m_clientSocket;
 };
 
-class DataAquisitionServiceWidget : public BaseServiceStateWidget
+class AppDataServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	DataAquisitionServiceWidget(quint32 ip, int portIndex, QWidget *parent = 0);
-	~DataAquisitionServiceWidget();
+	AppDataServiceWidget(quint32 ip, int portIndex, QWidget *parent = 0);
+	~AppDataServiceWidget();
 
 public slots:
+	void updateServiceState();
+
+	void updateStateInfo();
+
 	void updateSourceInfo();
 	void updateSourceStateColumns();
 
@@ -84,7 +88,7 @@ private:
 	QTableView* m_signalsView = nullptr;
 	QActionGroup* m_sourceTableHeadersContextMenuActions = nullptr;
 
-	TcpAppDataClient* m_clientSocket;
+	TcpAppDataClient* m_tcpClientSocket;
 	SimpleThread* m_appDataClientTread;
 
 	void saveSourceColumnVisibility(int index, bool visible);

@@ -7,6 +7,8 @@
 
 class QAction;
 class QLabel;
+class QTableView;
+class QStandardItemModel;
 
 class BaseServiceStateWidget : public QMainWindow
 {
@@ -16,6 +18,11 @@ public:
 	virtual ~BaseServiceStateWidget();
 
 	int addTab(QWidget* page, const QString& label);
+	QTableView* addTabWithTableView(int defaultSectionSize, const QString& label);
+	void addStateTab();
+	QStandardItemModel* stateTabModel() { return m_stateTabModel; }
+	void setStateTabMaxRowQuantity(int rowQuantity) { m_stateTabMaxRowQuantity = rowQuantity; }
+	quint32 getWorkingClientRequestIp();
 
 signals:
 	void needToReloadData();
@@ -56,6 +63,9 @@ private:
 	QLabel* m_uptimeStatus = nullptr;
 	QLabel* m_runningStatus = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
+
+	QStandardItemModel* m_stateTabModel = nullptr;
+	int m_stateTabMaxRowQuantity = 5;
 };
 
 #endif // BASESERVICESTATEWIDGET_H

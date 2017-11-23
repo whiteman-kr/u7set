@@ -731,6 +731,10 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 
 	m_signalsTree->addTopLevelItem(item);
 
+	m_signalsTree->clearSelection();
+
+	item->setSelected(true);
+
 	saveBus(uuid);
 
 	return;
