@@ -27,7 +27,7 @@ namespace LmModel
 		void clear();					// Clear buffer and reset size
 
 		bool loadData(const QByteArray& fileData, QString* errorMessage);
-		bool loadVersion5(const QJsonObject& jConfig, QString* errorMessage);
+		bool loadVersion6(const QJsonObject& jConfig, QString* errorMessage);
 
 		bool parseAllocationFrame();
 

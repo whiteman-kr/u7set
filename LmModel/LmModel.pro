@@ -36,7 +36,8 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     DeviceEmulator.cpp \
-    Component.cpp
+    Component.cpp \
+    Ram.cpp
 
 HEADERS += \
         LmModel.h \
@@ -49,7 +50,8 @@ HEADERS += \
     ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     DeviceEmulator.h \
-    Component.h
+    Component.h \
+    Ram.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

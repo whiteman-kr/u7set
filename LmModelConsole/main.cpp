@@ -7,7 +7,7 @@ QByteArray readFile(QString fileName)
 {
 	QFile file(fileName);
 
-	bool ok = file.open(QIODevice::ReadOnly);
+	bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
 	if (ok == false)
 	{
 		return QByteArray();
@@ -24,10 +24,10 @@ int main(int argc, char *argv[])
 
 	// Loading files
 	//
-	QByteArray lmDescription = readFile("D:/Develop/build/LogicModule0000.xml");
-	QByteArray tub = readFile("D:/Develop/build/LM-1.tub");
-	QByteArray mcb = readFile("D:/Develop/build/LM-1.mcb");
-	QByteArray alb = readFile("D:/Develop/build/LM-1.alb");
+	QByteArray lmDescription = readFile("D:\\Develop\\build\\LM1_SR01.xml");
+	QByteArray tub = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.tub");
+	QByteArray mcb = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.mcb");
+	QByteArray alb = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.alb");
 
 	// --
 	//

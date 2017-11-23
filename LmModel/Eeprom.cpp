@@ -78,8 +78,8 @@ namespace LmModel
 
 		switch (fileVersion)
 		{
-		case 5:
-			return loadVersion5(jConfig, errorMessage);
+		case 6:
+			return loadVersion6(jConfig, errorMessage);
 		default:
 			// Unsupported version
 			//
@@ -90,7 +90,7 @@ namespace LmModel
 		return true;
 	}
 
-	bool Eeprom::loadVersion5(const QJsonObject& jConfig, QString* errorMessage)
+	bool Eeprom::loadVersion6(const QJsonObject& jConfig, QString* errorMessage)
 	{
 		if (errorMessage == nullptr)
 		{
