@@ -174,8 +174,11 @@ namespace Builder
 
 		if (result == true)
 		{
-			displayResourcesUsageInfo();
+			result &= displayResourcesUsageInfo();
+		}
 
+		if (result == true)
+		{
 			msg = QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).
 					arg(m_lm->equipmentIdTemplate());
 
@@ -9055,11 +9058,13 @@ namespace Builder
 		*/
 	}
 
-	void ModuleLogicCompiler::displayResourcesUsageInfo()
+	bool ModuleLogicCompiler::displayResourcesUsageInfo()
 	{
 		QString str;
 
 		double percentOfUsedCodeMemory = (m_code.commandAddress() * 100.0) / 65536.0;
+
+		bool result = true;
 
 		str.sprintf("%.2f", percentOfUsedCodeMemory);
 		LOG_MESSAGE(m_log, QString(tr("Code memory used - %1%")).arg(str));
@@ -9077,6 +9082,7 @@ namespace Builder
 				// Usage of code memory exceed 100%.
 				//
 				m_log->errALC5074();
+				result = false;
 			}
 		}
 
@@ -9100,6 +9106,7 @@ namespace Builder
 				// Usage of bit-addressed memory exceed 100%.
 				//
 				m_log->errALC5076();
+				result = false;
 			}
 		}
 
@@ -9123,6 +9130,7 @@ namespace Builder
 				// Usage of word-addressed memory exceed 100%.
 				//
 				m_log->errALC5078();
+				result = false;
 			}
 		}
 
@@ -9161,6 +9169,7 @@ namespace Builder
 				// Usage of IDR phase time exceed 100%.
 				//
 				m_log->errALC5080();
+				result = false;
 			}
 		}
 
@@ -9195,6 +9204,7 @@ namespace Builder
 				// Usage of ALP phase time exceed 100%.
 				//
 				m_log->errALC5082();
+				result = false;
 			}
 		}
 
@@ -9205,7 +9215,7 @@ namespace Builder
 		m_resourcesUsageInfo.idrPhaseTimeUsed = idrPhaseTimeUsed;
 		m_resourcesUsageInfo.alpPhaseTimeUsed = alpPhaseTimeUsed;
 
-		getAfblUsageInfo();
+		result &= getAfblUsageInfo();
 
 		//
 
@@ -9228,6 +9238,8 @@ namespace Builder
 		CodeFragmentMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
 		CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
 		CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;*/
+
+		return result;
 	}
 
 	void ModuleLogicCompiler::calcOptoDiscretesStatistics()

@@ -376,7 +376,7 @@ namespace Builder
 		bool writeOcmRsSignalsXml();
 		void writeLMCodeTestFile();
 
-		void displayResourcesUsageInfo();
+		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();
 		bool getAfblUsageInfo();
 		void cleanup();
