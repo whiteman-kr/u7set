@@ -680,6 +680,7 @@ namespace VFrame30
 			if (si->busTypeHash() != bus.calcHash())
 			{
 				si->setBusType(bus);
+				si->adjustHeight(gridSize(), pinGridStep());
 
 				(*updatedItemCount) ++;
 			}
