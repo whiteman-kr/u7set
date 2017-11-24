@@ -70,9 +70,9 @@ namespace LmModel
 		return;
 	}
 
-	bool RamArea::writeBit(quint32 offsetW, quint32 data, quint32 bitNo)
+	bool RamArea::writeBit(quint32 offsetW, quint16 data, quint32 bitNo)
 	{
-		if (contains(RamAccess::WriteOnly, offsetW) == false ||
+		if (contains(RamAccess::Write, offsetW) == false ||
 			bitNo >= 16)
 		{
 			return false;
@@ -93,6 +93,32 @@ namespace LmModel
 		word |= (data << bitNo);
 
 		qToBigEndian<quint16>(word, m_data.data() + byteOffset);
+
+		return true;
+	}
+
+	bool RamArea::readBit(quint32 offsetW, quint32 bitNo, quint16* data) const
+	{
+		if (contains(RamAccess::Read, offsetW) == false ||
+			bitNo >= 16 ||
+			data == nullptr)
+		{
+			return false;
+		}
+
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset >= m_data.size())
+		{
+			assert(byteOffset < m_data.size());
+			return false;
+		}
+
+		quint16 word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+
+		word >>=  bitNo;
+		word &= 0x01;
+
+		*data = word;
 
 		return true;
 	}
@@ -133,7 +159,7 @@ namespace LmModel
 
 	bool Ram::writeBit(quint32 offsetW, quint32 data, quint32 bitNo)
 	{
-		RamArea* area = memoryArea(RamAccess::WriteOnly, offsetW);
+		RamArea* area = memoryArea(RamAccess::Write, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -144,7 +170,33 @@ namespace LmModel
 		return ok;
 	}
 
+	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data) const
+	{
+		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		bool ok = area->readBit(offsetW, bitNo, data);
+
+		return ok;
+	}
+
 	RamArea* Ram::memoryArea(RamAccess access, quint32 offsetW)
+	{
+		for (std::shared_ptr<RamArea> area : m_memoryAreas)
+		{
+			if (area->contains(access, offsetW) == true)
+			{
+				return area.get();
+			}
+		}
+
+		return nullptr;
+	}
+
+	const RamArea* Ram::memoryArea(RamAccess access, quint32 offsetW) const
 	{
 		for (std::shared_ptr<RamArea> area : m_memoryAreas)
 		{

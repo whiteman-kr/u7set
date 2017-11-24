@@ -42,7 +42,7 @@ function check_param_range(paramValue: number, minValue: number, maxValue: numbe
 //
 //	LOGIC, OpCode 1
 //
-function afb_logic(instance: ComponentInstance) : boolean
+function afb_logic(instance: ComponentInstance) : string
 {
 	// Define input opIndexes
 	//
@@ -110,13 +110,13 @@ function afb_logic(instance: ComponentInstance) : boolean
 	//	
 	instance.addOutputParamWord(o_result, result);
 	
-	return true;
+	return "";
 }
 
 //
 //	NOT, OpCode 2
 //
-function afb_not(instance: ComponentInstance) : boolean
+function afb_not(instance: ComponentInstance) : string
 {
 	// Define input opIndexes
 	//
@@ -136,5 +136,5 @@ function afb_not(instance: ComponentInstance) : boolean
 	//	
 	instance.addOutputParamWord(o_result, result);
 	
-	return true;
+	return "";
 }

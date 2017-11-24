@@ -87,6 +87,18 @@ namespace LmModel
 		return true;
 	}
 
+	const ComponentParam* ComponentInstance::param(int opIndex) const
+	{
+		auto it = m_params.find(opIndex);
+		if (it == m_params.end())
+		{
+			return nullptr;
+		}
+
+		const ComponentParam* componentParam = &it->second;
+		return componentParam;
+	}
+
 	bool ComponentInstance::paramExists(int opIndex) const
 	{
 		return m_params.count(opIndex) > 0;
@@ -146,21 +158,23 @@ namespace LmModel
 
 	bool ModelComponent::addParam(int instanceNo, const ComponentParam& instParam, QString* errorMessage)
 	{
-		if (static_cast<int>(instanceNo) >= m_afbComp->maxInstCount())
-		{
-			// To Do - ¬ы€снить, у ёрика номер реализации с 1, а ¬ити?
-			// “огда и условие другое надо дл €ошибки
-			//
-			int To_Do;
+		int To_Do;	// uncommnet this check when Yourik will make start instance from 0
 
-			// Maximum of instatiator is reached
-			//
-			*errorMessage = QString("InstanceNo (%1) is higher then maximum (%2), Component %3")
-								.arg(instanceNo)
-								.arg(m_afbComp->maxInstCount())
-								.arg(m_afbComp->caption());
-			return false;
-		}
+//		if (static_cast<int>(instanceNo) >= m_afbComp->maxInstCount())
+//		{
+//			// To Do - ¬ы€снить, у ёрика номер реализации с 1, а ¬ити?
+//			// “огда и условие другое надо дл €ошибки
+//			//
+//			int To_Do;
+
+//			// Maximum of instatiator is reached
+//			//
+//			*errorMessage = QString("InstanceNo (%1) is higher then maximum (%2), Component %3")
+//								.arg(instanceNo)
+//								.arg(m_afbComp->maxInstCount())
+//								.arg(m_afbComp->caption());
+//			return false;
+//		}
 
 		// Check if instParam.implParamOpIndex really exists in AfbComponent
 		//

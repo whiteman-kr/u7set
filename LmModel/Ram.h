@@ -9,8 +9,8 @@ namespace LmModel
 {
 	enum class RamAccess
 	{
-		ReadOnly  = 0x01,
-		WriteOnly = 0x02,
+		Read  = 0x01,
+		Write = 0x02,
 		ReadWrite = 0x03
 	};
 
@@ -33,7 +33,7 @@ namespace LmModel
 
 	private:
 		QString m_name;
-		RamAccess m_access = RamAccess::ReadOnly;
+		RamAccess m_access = RamAccess::Read;
 		quint32 m_offset = 0xFFFFFFFF;
 		quint32 m_size = 0;
 	};
@@ -45,7 +45,8 @@ namespace LmModel
 		RamArea(RamAccess access, quint32 offset, quint32 size, QString name);
 
 	public:
-		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
+		bool writeBit(quint32 offsetW, quint16 data, quint32 bitNo);
+		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
 
 	private:
 
@@ -65,9 +66,11 @@ namespace LmModel
 		bool addMemoryArea(RamAccess access, quint32 offsetW, quint32 sizeW, QString name);			// offset and size in 16 bit words
 
 		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
+		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
 
 	private:
 		RamArea* memoryArea(RamAccess access, quint32 offsetW);
+		const RamArea* memoryArea(RamAccess access, quint32 offsetW) const;
 
 	private:
 		std::vector<std::shared_ptr<RamArea>> m_memoryAreas;

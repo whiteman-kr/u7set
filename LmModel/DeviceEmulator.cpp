@@ -71,12 +71,12 @@ namespace LmModel
 
 		for (quint32 i = 0; i < memory.m_moduleCount; i++)
 		{
-			ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+			ok &= m_ram.addMemoryArea(RamAccess::Read,
 									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
 									  memory.m_moduleDataSize,
 									  QString("Input I/O Module %1").arg(i + 1));
 
-			ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+			ok &= m_ram.addMemoryArea(RamAccess::Write,
 									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
 									  memory.m_moduleDataSize,
 									  QString("Output I/O Module %1").arg(i + 1));
@@ -88,12 +88,12 @@ namespace LmModel
 
 		for (quint32 i = 0; i < optoInterface.m_optoPortCount; i++)
 		{
-			ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+			ok &= m_ram.addMemoryArea(RamAccess::Read,
 									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
 									  optoInterface.m_optoPortDataSize,
 									  QString("Rx Opto Port  %1").arg(i + 1));
 
-			ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+			ok &= m_ram.addMemoryArea(RamAccess::Write,
 									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
 									  optoInterface.m_optoPortDataSize,
 									  QString("Tx Opto Port  %1").arg(i + 1));
@@ -113,19 +113,19 @@ namespace LmModel
 
 		// RAM - Tuninng Block
 		//
-		ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+		ok &= m_ram.addMemoryArea(RamAccess::Read,
 								  memory.m_tuningDataOffset,
 								  memory.m_tuningDataSize,
 								  QLatin1String("Tuning Block"));
 
 		// RAM - Diag Data
 		//
-		ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+		ok &= m_ram.addMemoryArea(RamAccess::Read,
 								  memory.m_txDiagDataOffset,
 								  memory.m_txDiagDataSize,
 								  QLatin1String("Input Diag Data"));
 
-		ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+		ok &= m_ram.addMemoryArea(RamAccess::Write,
 								  memory.m_txDiagDataOffset,
 								  memory.m_txDiagDataSize,
 								  QLatin1String("Output Diag Data"));
@@ -133,12 +133,12 @@ namespace LmModel
 
 		// RAM - App Data
 		//
-		ok &= m_ram.addMemoryArea(RamAccess::ReadOnly,
+		ok &= m_ram.addMemoryArea(RamAccess::Read,
 								  memory.m_appDataOffset,
 								  memory.m_appDataSize,
 								  QLatin1String("Input App Data"));
 
-		ok &= m_ram.addMemoryArea(RamAccess::WriteOnly,
+		ok &= m_ram.addMemoryArea(RamAccess::Write,
 								  memory.m_appDataOffset,
 								  memory.m_appDataSize,
 								  QLatin1String("Output App Data"));
@@ -533,7 +533,18 @@ namespace LmModel
 			return false;
 		}
 
-		//qDebug() << jsResult.toString();
+		QString resultMessage = jsResult.toString();
+
+		if (resultMessage.isEmpty() == false)
+		{
+			QString formatted = QString("DeviceEmulator: command_startafb, AFB %1 (%2), instance %3, message: %4")
+									.arg(component->caption())
+									.arg(component->opCode())
+									.arg(implNo)
+									.arg(resultMessage);
+
+			output() << formatted << endl;
+		}
 
 		return true;
 	}
@@ -605,6 +616,15 @@ namespace LmModel
 		// Command Logic
 		//
 		bool ok = m_ram.writeBit(addr, data & 0x01, bitNo);
+		if (ok == false)
+		{
+			QString formattedMessage = QString("Write bit in memory error, addrw %1, data %2, bitno %3")
+										.arg(addr)
+										.arg(data & 0x01)
+										.arg(bitNo);
+			fault(formattedMessage);
+			return false;
+		}
 
 		return ok;
 	}
@@ -659,21 +679,167 @@ namespace LmModel
 		if (ok == false)
 		{
 			fault(QString("Run command_wrfbc error, %1").arg(errorMessage));
+			return false;
 		}
 
 		return ok;
 	}
 
+	// OpCode 11
+	// Read bit from memory, write it to AFB
+	//
 	bool DeviceEmulator::command_wrfbb()
 	{
-		fault("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		assert(command == 11);
+		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+		m_logicUnit.programCounter++;
+
+		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+		m_logicUnit.programCounter++;
+
+		quint16 address = getWord(m_logicUnit.programCounter);
+		m_logicUnit.programCounter++;
+
+		quint16 bitNo = getWord(m_logicUnit.programCounter);
+		m_logicUnit.programCounter++;
+
+		// --
+		//
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+
+		if (afbComp == nullptr)
+		{
+			fault(QString("command_wrfbb, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			return false;
+		}
+
+		// Read bit from memory
+		//
+		if (bitNo > 15)
+		{
+			QString formattedError = QString("command_wrfbb, bitNo is out of range (>15). BitNo %1, AFB %2 (%3), instance %4, operand OpIndex %5.")
+										.arg(bitNo)
+										.arg(afbComp->caption())
+										.arg(afbComp->opCode())
+										.arg(implNo)
+										.arg(implParamOpIndex);
+			fault(formattedError);
+			return false;
+		}
+
+		quint16 data = 0;
+		bool ok = m_ram.readBit(address, bitNo, &data);
+		if (ok == false)
+		{
+			QString formattedMessage = QString("command_wrfbb, Read bit from memory error, addrw %1, bitno %3")
+										.arg(address)
+										.arg(bitNo);
+			fault(formattedMessage);
+			return false;
+		}
+
+		// --
+		//
+		ComponentParam param(implParamOpIndex, data);
+		QString errorMessage;
+
+		ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
+
+		if (ok == false)
+		{
+			fault(QString("command_wrfbb error, %1").arg(errorMessage));
+			return false;
+		}
+
+		return ok;
 	}
 
+	// OpCode 12
+	// Read the first bit from result of AFB and write it to memory
+	//
 	bool DeviceEmulator::command_rdfbb()
 	{
-		fault("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+		m_logicUnit.programCounter++;
+
+		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+		m_logicUnit.programCounter++;
+
+		quint16 address = getWord(m_logicUnit.programCounter);
+		m_logicUnit.programCounter++;
+
+		quint16 bitNo = getWord(m_logicUnit.programCounter);
+		m_logicUnit.programCounter++;
+
+		// --
+		//
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+
+		if (afbComp == nullptr)
+		{
+			fault(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			return false;
+		}
+
+		if (bitNo > 15)
+		{
+			QString formattedError = QString("command_rdfbb, bitNo is out of range (>15). BitNo %1, AFB %2 (%3), instance %4, output OpIndex %5.")
+										.arg(bitNo)
+										.arg(afbComp->caption())
+										.arg(afbComp->opCode())
+										.arg(implNo)
+										.arg(implParamOpIndex);
+			fault(formattedError);
+			return false;
+		}
+
+		// --
+		//
+		const ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
+		if (instance == nullptr)
+		{
+			QString formattedError = QString("command_rdfbb, instance %1 does not exists, AFB %2 (%3).")
+										.arg(implNo)
+										.arg(afbComp->caption())
+										.arg(afbComp->opCode());
+			fault(formattedError);
+			return false;
+		}
+
+		const ComponentParam* param = instance->param(implParamOpIndex);
+		if (param == nullptr)
+		{
+			QString formattedError = QString("command_rdfbb, param %1 does not exists, AFB %2 (%3), instance %4.")
+										.arg(implParamOpIndex)
+										.arg(afbComp->caption())
+										.arg(afbComp->opCode())
+										.arg(implNo);
+			fault(formattedError);
+			return false;
+		}
+
+		quint16 value = param->wordValue() & 0x01;
+
+		bool ok = m_ram.writeBit(address, value, bitNo);
+		if (ok == false)
+		{
+			QString formattedMessage = QString("Write bit in memory error, addrw %1, data %2, bitno %3")
+										.arg(address)
+										.arg(value)
+										.arg(bitNo);
+			fault(formattedMessage);
+			return false;
+		}
+
+		return true;
 	}
 
 	bool DeviceEmulator::command_rdfbts()

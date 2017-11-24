@@ -19,7 +19,7 @@ namespace LmModel
 
 	public:
 		ComponentParam() = default;
-		ComponentParam(const ComponentParam&that);
+		ComponentParam(const ComponentParam& that);
 		ComponentParam(quint16 paramOpIndex, quint32 data);
 		ComponentParam& operator=(const ComponentParam& that);
 
@@ -56,6 +56,7 @@ namespace LmModel
 
 	public:
 		bool addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage);
+		const ComponentParam* param(int opIndex) const;
 
 	public:	// For access from JavaScript
 		Q_INVOKABLE bool paramExists(int opIndex) const;
