@@ -23,7 +23,8 @@ namespace LmModel
 		bool load(const QByteArray& logicModuleDescription,
 				  const QByteArray& tuningBitsream,
 				  const QByteArray& confBitstream,
-				  const QByteArray& appLogicBitstream);
+				  const QByteArray& appLogicBitstream,
+				  const QString& simulationScript);
 
 		void clear();
 
@@ -61,6 +62,8 @@ namespace LmModel
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
+
+		QString m_simulationScript;
 
 		// Running Emulation
 		//

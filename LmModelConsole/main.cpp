@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
 
 	// Loading files
 	//
-	//QByteArray lmDescription = readFile("D:\\Develop\\build\\LM1_SR01.xml");
 	QByteArray lmDescription = readFile("D:/Develop/u7set/u7/LogicModuleDescription/LM1_SR01.xml");
+	QByteArray simScript = readFile("D:/Develop/u7set/LmModel/Scripts/out/LM1_SR01_SIM.js");
 	QByteArray tub = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.tub");
 	QByteArray mcb = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.mcb");
 	QByteArray alb = readFile("D:/Develop/build/test_simulator-debug/build/SUBSYSID00/LM1-SR01.alb");
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	QTextStream textStream(stdout);
 	LmModel::LogicModule lm(&textStream);
 
-	ok = lm.load(lmDescription, tub, mcb, alb);
+	ok = lm.load(lmDescription, tub, mcb, alb, simScript);
 	if (ok == false)
 	{
 		return 1;

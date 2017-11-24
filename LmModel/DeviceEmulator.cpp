@@ -1,4 +1,5 @@
 #include "DeviceEmulator.h"
+#include <QQmlEngine>
 
 namespace LmModel
 {
@@ -21,12 +22,14 @@ namespace LmModel
 							  const LmDescription& lmDescription,
 							  const Eeprom& tuningEeprom,
 							  const Eeprom& confEeprom,
-							  const Eeprom& appLogicEeprom)
+							  const Eeprom& appLogicEeprom,
+							  const QString& simulationScript)
 	{
 		output() << "DeviceEmulator: Init device" << endl;
 
 		m_logicModuleNumber = logicModuleNumber;
 		m_lmDescription = lmDescription;
+		m_simulationScript = simulationScript;
 		m_tuningEeprom = tuningEeprom;
 		m_confEeprom = confEeprom;
 		m_appLogicEeprom = appLogicEeprom;
@@ -35,6 +38,24 @@ namespace LmModel
 		if (ok == false)
 		{
 			output() << "DeviceEmulator: Init memory error" << endl;
+		}
+
+		// Evaluate simulation script
+		//
+		m_evaluatedJs = m_jsEngine.evaluate(m_simulationScript);
+
+		if (m_evaluatedJs.isError() == true)
+		{
+			QString str = QString("DeviceEmulator: Evaluate simulation script error:"
+								  "\tLine %1\n"
+								  "\tStack: %2\n"
+								  "\tMessage: %3")
+						  .arg(m_evaluatedJs.property("lineNumber").toInt())
+						  .arg(m_evaluatedJs.property("stack").toString())
+						  .arg(m_evaluatedJs.toString());
+
+			output() << str << endl;
+			return false;
 		}
 
 		return ok;
@@ -435,8 +456,86 @@ namespace LmModel
 
 	bool DeviceEmulator::command_startafb()
 	{
-		fault("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+		m_logicUnit.programCounter++;
+
+		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+		m_logicUnit.programCounter++;
+
+		// Get afb component
+		//
+		std::shared_ptr<Afb::AfbComponent> component = m_lmDescription.component(funcBlock);
+		if (component == nullptr)
+		{
+			QString str = QString("STARTAFB error, component not found. ComponentOpCode %1")
+							.arg(funcBlock);
+			fault(str);
+			return false;
+		}
+
+		ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
+		if (instance == false)
+		{
+			QString str = QString("STARTAFB error, component instance not found. ComponentOpCode %1, Instance %2")
+							.arg(funcBlock)
+							.arg(implNo);
+			fault(str);
+			return false;
+		}
+
+		// Run script
+		//
+		if (m_evaluatedJs.isError() == true)
+		{
+			fault("Simulation script is not evaluated. " __FUNCTION__);
+			return false;
+		}
+
+		// Set argument list
+		//
+		QJSValue jsInstance = m_jsEngine.newQObject(instance);
+		QQmlEngine::setObjectOwnership(instance, QQmlEngine::CppOwnership);
+
+		QJSValueList args;
+		args << jsInstance;
+
+		// Run script
+		//
+		QString simulationFunc = component->simulationFunc();
+
+		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false)
+		{
+			fault(QString("Script function %1 not found. " __FUNCTION__).arg(simulationFunc));
+			return false;
+		}
+
+		if (m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
+		{
+			fault(QString("Script function %1 is not collable. " __FUNCTION__).arg(simulationFunc));
+			return false;
+		}
+
+		QJSValue jsResult = m_jsEngine.globalObject().property(simulationFunc).call(args);
+
+		if (jsResult.isError() == true)
+		{
+			QString str = QString("Script running uncaught exception at line %1\n"
+								  "\tStack: %2\n"
+								  "\tMessage: %3\n")
+						  .arg(jsResult.property("lineNumber").toInt())
+						  .arg(jsResult.property("stack").toString())
+						  .arg(jsResult.toString());
+
+			fault(str + __FUNCTION__);
+			return false;
+		}
+
+		qDebug() << jsResult.toString();
+
+		return true;
 	}
 
 	// OpCode 3
@@ -552,7 +651,7 @@ namespace LmModel
 
 		// --
 		//
-		InstantiatorParam ip(implNo, implParamOpIndex, data);
+		ComponentParam ip(implNo, implParamOpIndex, data);
 
 		QString errorMessage;
 		bool ok = m_afbComponents.addInstantiatorParam(afbComp, ip, &errorMessage);
@@ -662,7 +761,7 @@ namespace LmModel
 
 		// --
 		//
-		InstantiatorParam ip(implNo, implParamOpIndex, data);
+		ComponentParam ip(implNo, implParamOpIndex, data);
 		QString errorMessage;
 		bool ok = m_afbComponents.addInstantiatorParam(afbComp, ip, &errorMessage);
 

@@ -197,6 +197,10 @@ namespace Afb
 
 		m_maxInstCount = xmlElement.attribute(QLatin1String("MaxInstCount")).toInt();
 
+		// SimulationFunc
+		//
+		m_simulationFunc = xmlElement.attribute(QLatin1String("SimulationFunc"));
+
 		// Pins
 		//
 		{
@@ -282,6 +286,16 @@ namespace Afb
 	void AfbComponent::setMaxInstCount(int value)
 	{
 		m_maxInstCount = value;
+	}
+
+	QString AfbComponent::simulationFunc() const
+	{
+		return m_simulationFunc;
+	}
+
+	void AfbComponent::setSimulationFunc(const QString& value)
+	{
+		m_simulationFunc = value;
 	}
 
 	const std::map<int, AfbComponentPin>& AfbComponent::pins() const

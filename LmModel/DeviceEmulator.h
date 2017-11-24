@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QTextStream>
 #include <QTimerEvent>
+#include <QJSEngine>
 #include "../lib/LmDescription.h"
 #include "Eeprom.h"
 #include "Ram.h"
@@ -82,7 +83,8 @@ namespace LmModel
 				  const LmDescription& lmDescription,
 				  const Eeprom& tuningEeprom,
 				  const Eeprom& confEeprom,
-				  const Eeprom& appLogicEeprom);
+				  const Eeprom& appLogicEeprom,
+				  const QString& simulationScript);
 		bool initMemory();
 
 	public slots:
@@ -146,13 +148,11 @@ namespace LmModel
 	private:
 		int m_logicModuleNumber = -1;
 		LmDescription m_lmDescription;
+		QString m_simulationScript;
 
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
-
-		Ram m_ram;
-
 		QByteArray m_plainAppLogic;			// Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
 
 		// Current state
@@ -160,10 +160,13 @@ namespace LmModel
 		DeviceMode m_currentMode = DeviceMode::Start;
 		mutable int m_timerId = -1;
 
+		Ram m_ram;
 		LogicUnitData m_logicUnit;
 
 		AfbComponentSet m_afbComponents;
 
+		QJSEngine m_jsEngine;
+		QJSValue m_evaluatedJs;
 
 		// Info output
 		//

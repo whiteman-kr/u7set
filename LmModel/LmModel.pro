@@ -84,3 +84,7 @@ unix {
     LIBS += -lprotobuf
 }
 
+DISTFILES += \
+    Scripts/LM1_SR01_SIM.ts \
+    Scripts/tsconfig.json
+

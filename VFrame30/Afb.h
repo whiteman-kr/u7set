@@ -85,6 +85,9 @@ namespace Afb
 		int maxInstCount() const;
 		void setMaxInstCount(int value);
 
+		QString simulationFunc() const;
+		void setSimulationFunc(const QString& value);
+
 		const std::map<int, AfbComponentPin>& pins() const;
 
 	private:
@@ -93,6 +96,7 @@ namespace Afb
 		int m_impVersion = -1;
         int m_versionOpIndex = -1;
 		int m_maxInstCount = 0;
+		QString m_simulationFunc;
 
 		std::map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
 	};

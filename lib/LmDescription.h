@@ -115,8 +115,12 @@ public:
 	//
 public:
 	int descriptionNumber() const;
+
 	const QString& configurationStringFile() const;
 	Q_INVOKABLE QString jsConfigurationStringFile() const;
+
+	QString simualtionScriptFile() const;
+
     const QString& version() const;
 
 	const FlashMemory& flashMemory() const;
@@ -139,6 +143,7 @@ private:
 	//
 	int m_descriptionNumber = -1;
     QString m_configurationScriptFile;
+	QString m_simulationScriptFile;
     QString m_version;
 
 	FlashMemory m_flashMemory;

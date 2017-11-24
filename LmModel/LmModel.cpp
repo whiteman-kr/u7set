@@ -31,7 +31,8 @@ namespace LmModel
 	bool LogicModule::load(const QByteArray& logicModuleDescription,
 						   const QByteArray& tuningBitsream,
 						   const QByteArray& confBitstream,
-						   const QByteArray& appLogicBitstream)
+						   const QByteArray& appLogicBitstream,
+						   const QString& simulationScript)
 	{
 		clear();
 
@@ -52,6 +53,8 @@ namespace LmModel
 		ok &= loadEeprom(tuningBitsream, &m_tuningEeprom);
 		ok &= loadEeprom(confBitstream, &m_confEeprom);
 		ok &= loadEeprom(appLogicBitstream, &m_appLogicEeprom);
+
+		m_simulationScript = simulationScript;
 
 		return ok;
 	}
@@ -81,7 +84,7 @@ namespace LmModel
 		}
 
 		m_device = new DeviceEmulator(&output());
-		bool ok = m_device->init(logicModuleNumber, *m_lmDescription.get(), m_tuningEeprom, m_confEeprom, m_appLogicEeprom);
+		bool ok = m_device->init(logicModuleNumber, *m_lmDescription.get(), m_tuningEeprom, m_confEeprom, m_appLogicEeprom, m_simulationScript);
 
 		if (ok == false)
 		{
