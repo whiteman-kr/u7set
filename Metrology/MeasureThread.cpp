@@ -518,6 +518,8 @@ void MeasureThread::run()
 
 void MeasureThread::measureLinearity()
 {
+	saveStateTunSignals();
+
 	int pointCount = theOptions.linearity().points().count();
 	for(int p = 0; p < pointCount; p++)
 	{
@@ -618,6 +620,8 @@ void MeasureThread::measureLinearity()
 
 		emit measureInfo(tr(""));
 	}
+
+	restoreStateTunSignals();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -646,6 +650,58 @@ void MeasureThread::tuningSocketDisconnected()
 	}
 
 	stopMeasure();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::saveStateTunSignals()
+{
+	if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+	{
+		return;
+	}
+
+	for(int c = 0; c < Metrology::ChannelCount; c ++)
+	{
+		if (m_activeSignalParam[c].isValid() == false)
+		{
+			continue;
+		}
+
+		Metrology::SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);;
+		if (outParam.isValid() == false)
+		{
+			continue;
+		}
+
+		m_tunSignalState[c] = theSignalBase.signalState(outParam.hash()).value();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::restoreStateTunSignals()
+{
+	if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+	{
+		return;
+	}
+
+	for(int c = 0; c < Metrology::ChannelCount; c ++)
+	{
+		if (m_activeSignalParam[c].isValid() == false)
+		{
+			continue;
+		}
+
+		Metrology::SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);;
+		if (outParam.isValid() == false)
+		{
+			continue;
+		}
+
+		theSignalBase.tuning().appendCmdFowWrite(outParam.hash(), m_tunSignalState[c]);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
