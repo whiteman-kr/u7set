@@ -111,8 +111,9 @@ private:
 
 	QMenu* m_addSignalMenu = nullptr;
 
-	QAction* m_analogAction = nullptr;
-	QAction* m_discreteAction = nullptr;
+	QAction* m_addSignalAnalogAction = nullptr;
+	QAction* m_addSignalDiscreteAction = nullptr;
+	QAction* m_addSignalBusAction = nullptr;
 
 	PropertyEditorDialog* m_propEditorDialog = nullptr;
 };

@@ -43,6 +43,7 @@ namespace Hardware
 		QString appSignalID;									// for type - TxSignal, RxSignal
 		E::SignalType signalType = E::SignalType::Discrete;		//
 		E::DataFormat dataFormat = E::DataFormat::UnsignedInt;	//
+		QString busTypeID;
 		int dataSize = 0;										//
 		E::ByteOrder byteOrder = E::ByteOrder::BigEndian;		//
 		int offsetW = 0;										//

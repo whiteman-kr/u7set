@@ -67,7 +67,7 @@ interface ModuleFirmware {
 
 interface ModuleFirmwareCollection {
 
-	jsGet(caption: string, subSysID: string, ssKeyValue: number, uartId: number, frameSize: number, frameCount: number): ModuleFirmware;
+	jsGet(caption: string, subSysID: string, ssKeyValue: number, uartId: number, frameSize: number, frameCount: number, LMDescriptionNumber: number): ModuleFirmware;
 }
 
 interface IssueLogger {
@@ -143,6 +143,8 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 var FamilyBVB15ID: number = 0x5600;
 
 var configScriptVersion: number = 1;
+
+var LMDescriptionNumber: number = 0;
 
 //
 
@@ -355,7 +357,7 @@ function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confC
 		var configStartFrames: number = 2;
 		var configFrameCount: number = 19;          // number of frames in each configuration
 
-		var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount);
+		var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
 
 		var frameStorageConfig: number = 1;
 		var ptr: number = 14;
@@ -431,7 +433,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 		return false;
 	}
 
-	var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount);
+	var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
 
 	var descriptionVersion = 1;
 
@@ -445,6 +447,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	confFirmware.writeLog("UartID = " + uartId + "\r\n");
 	confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
 	confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
+	confFirmware.writeLog("LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
 
 	// Configuration storage format
 	//
@@ -480,8 +483,14 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] BuildNo = " + buildNo + "\r\n");
 	ptr += 2;
 
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMDescriptionNumber", LMDescriptionNumber) == false) {
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
+	ptr += 2;
+
 	// reserved
-	ptr += 6;
+	ptr += 4;
 
 	// write LMNumberCount, if old value is less than current. If it is the same, output an error.
 	//

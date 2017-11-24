@@ -222,6 +222,7 @@ namespace Tuning
 
 		quint64 m_sourceUniqueID = 0;
 		quint16 m_lmNumber = 0;
+		quint16 m_lmModuleType = 0;
 		quint16 m_subsystemCode = 0;
 
 		int m_tuningRomStartAddrW = 0;

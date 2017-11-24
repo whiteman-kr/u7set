@@ -2,12 +2,21 @@
 #include <QFile>
 #include "../lib/Signal.h"
 #include "../lib/DataSource.h"
+#include "../lib/WUtils.h"
 
 // --------------------------------------------------------------------------------------------------------
 //
 // Signal class implementation
 //
 // --------------------------------------------------------------------------------------------------------
+
+QString Signal::BUS_SIGNAL_ID_SEPARATOR(".");
+
+QString Signal::BUS_SIGNAL_MACRO_BUSTYPEID("$(BUSTYPEID)");
+QString Signal::BUS_SIGNAL_MACRO_BUSID("$(BUSID)");
+QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALID("$(BUSSIGNALID)");
+QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION("$(BUSSIGNALCAPTION)");
+
 
 Signal::Signal()
 {
@@ -112,6 +121,11 @@ void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat data
 	}
 }
 
+void Signal::setDataSizeW(int sizeW)
+{
+	m_dataSize = sizeW * SIZE_16BIT;
+}
+
 E::DataFormat Signal::dataFormat() const
 {
 	switch(m_signalType)
@@ -145,56 +159,74 @@ E::DataFormat Signal::dataFormat() const
 
 bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const
 {
-	if (m_signalType != signalType)
+	if (signalType == E::SignalType::Bus)
 	{
+		assert(false);			// use isCompatibleFormat(signalType, busTtypeID)
 		return false;
 	}
 
-	if (m_byteOrder != byteOrder)
-	{
-		return false;
-	}
+	return isCompatibleFormatPrivate(signalType, dataFormat, size, byteOrder, "");
+}
 
-	if (m_signalType == E::SignalType::Analog)
+bool Signal::isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const
+{
+	switch(signalType)
 	{
-		if (m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 &&
-			(dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE))
+	case E::SignalType::Analog:
+
+		switch(analogFormat)
 		{
-			return true;
-		}
+		case E::AnalogAppSignalFormat::Float32:
+			return isCompatibleFormatPrivate(signalType, E::DataFormat::Float, FLOAT32_SIZE, byteOrder, "");
 
-		if (m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32 &&
-			(dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE))
-		{
-			return true;
-		}
+		case E::AnalogAppSignalFormat::SignedInt32:
+			return isCompatibleFormatPrivate(signalType, E::DataFormat::SignedInt, SIGNED_INT32_SIZE, byteOrder, "");
 
-		return false;
+		default:
+			assert(false);
+		}
+		break;
+
+	case E::SignalType::Discrete:
+		return isCompatibleFormatPrivate(signalType, E::DataFormat::UnsignedInt, DISCRETE_SIZE, byteOrder, "");
+
+	default:
+		assert(false);
 	}
 
-	if (m_signalType == E::SignalType::Discrete)
-	{
-		if (size == DISCRETE_SIZE)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	assert(false);
 	return false;
 }
 
 bool Signal::isCompatibleFormat(const SignalAddress16& sa16) const
 {
-	return isCompatibleFormat(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder());
+	return isCompatibleFormatPrivate(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder(), "");
 }
 
-void Signal::initCalculatedProperties()
+bool Signal::isCompatibleFormat(const Signal& s) const
 {
-	m_hash = calcHash(m_appSignalID);
+	if (s.signalType() == E::SignalType::Bus)
+	{
+		return isCompatibleFormat(E::SignalType::Bus, s.busTypeID());
+	}
+
+	return isCompatibleFormat(s.signalType(), s.analogSignalFormat(), s.byteOrder());
 }
+
+bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const
+{
+	if (signalType != E::SignalType::Bus)
+	{
+		assert(false);		// use other isCompatibelFormat functions
+		return false;
+	}
+
+	return isCompatibleFormatPrivate(signalType,
+									 E::DataFormat::UnsignedInt,		// param is not checked for Bus signals
+									 SIZE_1BIT,							// param is not checked for Bus signals
+									 E::BigEndian,						// param is not checked for Bus signals
+									 busTypeID);
+}
+
 
 void Signal::resetAddresses()
 {
@@ -992,65 +1024,51 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	m_regValidityAddr.setBit(s.regvalidityaddr().bit());
 }
 
-
-/*
-void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const
+void Signal::initCalculatedProperties()
 {
-	if (message == nullptr)
-	{
-		assert(message);
-		return;
-	}
-
-	message->set_hash(calcHash(m_appSignalID));
-	message->set_appsignalid(m_appSignalID.toStdString());
-	message->set_customsignalid(m_customAppSignalID.toStdString());
-	message->set_caption(m_caption.toStdString());
-	message->set_equipmentid(m_equipmentID.toStdString());
-
-	message->set_channel(static_cast<int>(m_channel));
-	message->set_inouttype(static_cast<int>(m_inOutType));
-	message->set_signaltype(m_signalType);
-	message->set_analogsignalformat(static_cast<int>(m_analogSignalFormat));
-	message->set_byteorder(m_byteOrder);
-
-	message->set_unitid(m_unitID);
-
-	if (unitList() != nullptr && unitList()->contains(m_unitID) == true)
-	{
-		message->set_unit(unitList()->value(m_unitID).toStdString());
-	}
-	else
-	{
-		message->set_unit("???");
-	}
-
-	message->set_lowvalidrange(m_lowValidRange);
-	message->set_highvalidrange(m_highValidRange);
-	message->set_lowengeneeringunits(m_lowEngeneeringUnits);
-	message->set_highengeneeringunits(m_highEngeneeringUnits);
-
-	message->set_inputlowlimit(m_inputLowLimit);
-	message->set_inputhighlimit(m_inputHighLimit);
-	message->set_inputunitid(m_inputUnitID);
-	message->set_inputsensortype(m_inputSensorType);
-
-	message->set_outputlowlimit(m_outputLowLimit);
-	message->set_outputhighlimit(m_outputHighLimit);
-	message->set_outputunitid(m_outputUnitID);
-	message->set_outputmode(m_outputMode);
-	message->set_outputsensortype(m_outputSensorType);
-
-	message->set_precision(m_decimalPlaces);
-	message->set_aperture(m_roughAperture);
-	message->set_filteringtime(m_filteringTime);
-	message->set_spreadtolerance(m_spreadTolerance);
-	message->set_enabletuning(m_enableTuning);
-	message->set_tuningdefaultvalue(m_tuningDefaultValue);
-
-	return;
+	m_hash = calcHash(m_appSignalID);
 }
-*/
+
+bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
+{
+	if (m_signalType != signalType)
+	{
+		return false;
+	}
+
+	switch(m_signalType)
+	{
+	case E::SignalType::Analog:
+			if (m_byteOrder != byteOrder)
+			{
+				return false;
+			}
+
+			switch(m_analogSignalFormat)
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				return (dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE);
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				return (dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE);
+
+			default:
+				assert(false);
+			}
+
+			return false;
+
+	case E::SignalType::Discrete:
+		return size == DISCRETE_SIZE;
+
+	case E::SignalType::Bus:
+		return m_busTypeID == busTypeID;
+	}
+
+	assert(false);
+	return false;
+}
+
 
 // --------------------------------------------------------------------------------------------------------
 //
@@ -1114,7 +1132,7 @@ bool SignalSet::ID2IndexMapIsEmpty()
 	return m_strID2IndexMap.isEmpty();
 }
 
-bool SignalSet::contains(const QString& appSignalID)
+bool SignalSet::contains(const QString& appSignalID) const
 {
 	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
 	{
@@ -1143,22 +1161,7 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 	return &(*this)[index];
 }
 
-bool SignalSet::expandBusSignals()
-{
-	return false;
-}
 
-void SignalSet::initCalculatedSignalsProperties()
-{
-	int signalsCount = count();
-
-	for(int i = 0; i < signalsCount; i++)
-	{
-		Signal& s = (*this)[i];
-
-		s.initCalculatedProperties();
-	}
-}
 
 void SignalSet::append(const int& signalID, Signal *signal)
 {
@@ -1219,6 +1222,7 @@ void SignalSet::resetAddresses()
 		(*this)[i].resetAddresses();
 	}
 }
+
 
 //
 

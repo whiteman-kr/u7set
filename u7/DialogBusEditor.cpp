@@ -34,14 +34,17 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	//
 	m_addSignalMenu = new QMenu(this);
 
-	m_analogAction = new QAction("Analog signal", this);
-	m_discreteAction = new QAction("Discrete signal", this);
+	m_addSignalAnalogAction = new QAction("Analog signal", this);
+	m_addSignalDiscreteAction = new QAction("Discrete signal", this);
+	m_addSignalBusAction = new QAction("Bus signal", this);
 
-	connect(m_analogAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Analog);});
-	connect(m_discreteAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Discrete);});
+	connect(m_addSignalAnalogAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Analog);});
+	connect(m_addSignalDiscreteAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Discrete);});
+	connect(m_addSignalBusAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Bus);});
 
-	m_addSignalMenu->addAction(m_analogAction);
-	m_addSignalMenu->addAction(m_discreteAction);
+	m_addSignalMenu->addAction(m_addSignalAnalogAction);
+	m_addSignalMenu->addAction(m_addSignalDiscreteAction);
+	m_addSignalMenu->addAction(m_addSignalBusAction);
 
 	// m_busTree
 	//
@@ -101,16 +104,20 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 
 	l.clear();
 	l << tr("SignalID");
+	l << tr("Caption");
 	l << tr("Type");
-	l << tr("Signal Format");
+	l << tr("Format");
+	l << tr("Placement");
 
 	m_signalsTree->setColumnCount(l.size());
 	m_signalsTree->setHeaderLabels(l);
 
 	il = 0;
 	m_signalsTree->setColumnWidth(il++, 150);
+	m_signalsTree->setColumnWidth(il++, 150);
 	m_signalsTree->setColumnWidth(il++, 60);
 	m_signalsTree->setColumnWidth(il++, 50);
+	m_signalsTree->setColumnWidth(il++, 100);
 
 	m_signalsTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_signalsTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -699,6 +706,11 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	bs.setSignalId(signalId);
 	bs.setCaption(signalId);
 
+	if (type == E::SignalType::Bus)
+	{
+		bs.setBusTypeId("BUSTYPEID");
+	}
+
 	const std::vector<VFrame30::BusSignal>& busSignals = bus->busSignals();
 	for (const VFrame30::BusSignal& checkBs : busSignals)
 	{
@@ -718,6 +730,10 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	item->setData(0, Qt::UserRole, m_signalsTree->topLevelItemCount());
 
 	m_signalsTree->addTopLevelItem(item);
+
+	m_signalsTree->clearSelection();
+
+	item->setSelected(true);
 
 	saveBus(uuid);
 
@@ -1083,6 +1099,8 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 		fillBusProperties();
 	}
 
+	fillBusSignals();
+
 	return;
 }
 
@@ -1386,17 +1404,55 @@ void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFr
 	}
 
 	item->setText(0, signal.signalId());
-	item->setText(1, E::valueToString<E::SignalType>(signal.type()));
+	item->setText(1, signal.caption());
+	item->setText(2, E::valueToString<E::SignalType>(signal.type()));
+
+	// Type
 
 	if (signal.type() == E::SignalType::Analog)
 	{
-		item->setText(2, E::valueToString<E::AnalogAppSignalFormat>(signal.analogFormat()));
+		item->setText(3, E::valueToString<E::AnalogAppSignalFormat>(signal.analogFormat()));
 	}
 	else
 	{
-		assert(signal.type() == E::SignalType::Discrete);
-		item->setText(2, "");
+		if (signal.type() == E::SignalType::Discrete)
+		{
+			item->setText(3, "");
+		}
+		else
+		{
+			assert(signal.type() == E::SignalType::Bus);
+			item->setText(3, signal.busTypeId());
+		}
 	}
+
+	// Placement
+
+	VFrame30::Bus* bus = getCurrentBus();
+	if (bus == nullptr)
+	{
+		return;
+	}
+
+	QString stringPlacement;
+
+	if (bus->autoSignalPlacement() == true)
+	{
+		stringPlacement = tr("Auto");
+	}
+	else
+	{
+		if (signal.type() == E::SignalType::Discrete)
+		{
+			stringPlacement = tr("Offset %1, Bit %2").arg(signal.inbusOffset()).arg(signal.inbusDiscreteBitNo());
+		}
+		else
+		{
+			stringPlacement = tr("Offset %1").arg(signal.inbusOffset());
+		}
+	}
+
+	item->setText(4, stringPlacement);
 
 	return;
 }

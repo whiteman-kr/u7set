@@ -195,6 +195,12 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0177.sql", "Upgrade to version 177, Add bus_xor, set i_bus_width to 16 for bus_or, bus_and"},
 	{":/DatabaseUpgrade/Upgrade0178.sql", "Upgrade to version 178, Add new LM descriptions: LM1-SF00 and LM1-SR01"},
 	{":/DatabaseUpgrade/Upgrade0179.sql", "Upgrade to version 179, To LM1-SF00.xml and LM1-SR01.xml added MaxInstCount per AfbComponent"},
+	{":/DatabaseUpgrade/Upgrade0180.sql", "Upgrade to version 180, Fixing DataUid generating in OCMN module"},
+	{":/DatabaseUpgrade/Upgrade0181.sql", "Upgrade to version 181, TxDiagDataSize in LMs has been changed from 176 to 188 words"},
+	{":/DatabaseUpgrade/Upgrade0182.sql", "Upgrade to version 182, update LM Scripts, LmDescriptions is now written to LM"},
+	{":/DatabaseUpgrade/Upgrade0183.sql", "Upgrade to version 183, Removed some signals from Platform Interface Controller in in-out modules and OCM/OCMN"},
+	{":/DatabaseUpgrade/Upgrade0184.sql", "Upgrade to version 184, Updated LM1_SF00.xml, LM1_SR01.xml, added pins for components"},
+	{":/DatabaseUpgrade/Upgrade0185.sql", "Upgrade to version 185, Updated LM1_SR01.xml, set IDR phase to 500, ALP phase to 3500"},
 };
 
 
