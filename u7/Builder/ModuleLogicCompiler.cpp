@@ -8251,10 +8251,20 @@ namespace Builder
 
 			UalSignal* ualSignal = m_ualSignals.get(txSignal->appSignalID());
 
-			if (ualSignal == nullptr || ualSignal->isAnalog() == false)
+			if (ualSignal == nullptr)
 			{
 				LOG_INTERNAL_ERROR(m_log);
-				return false;
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->isAnalog() == false)
+			{
+				// Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.
+				//
+				m_log->errALC5131(txSignal->appSignalID(), port->equipmentID());
+				result = false;
+				continue;
 			}
 
 			if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
@@ -8262,7 +8272,8 @@ namespace Builder
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
 				m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
-				return false;
+				result = false;
+				continue;
 			}
 
 			int writeAddr = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
@@ -8365,10 +8376,20 @@ namespace Builder
 			{
 				UalSignal* ualSignal = m_ualSignals.get(discrete->appSignalID());
 
-				if (ualSignal == nullptr || ualSignal->isDiscrete() == false)
+				if (ualSignal == nullptr)
 				{
 					LOG_INTERNAL_ERROR(m_log);
-					return false;
+					result = false;
+					continue;
+				}
+
+				if (ualSignal->isDiscrete() == false)
+				{
+					// Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.
+					//
+					m_log->errALC5131(discrete->appSignalID(), port->equipmentID());
+					result = false;
+					continue;
 				}
 
 				if (ualSignal->isConst() == false && ualSignal->ualAddr().isValid() == false)
@@ -8376,7 +8397,8 @@ namespace Builder
 					// Undefined UAL address of signal '%1' (Logic schema '%2').
 					//
 					m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
-					return false;
+					result = false;
+					continue;
 				}
 
 				Address16 addrInBuf = discrete->addrInBuf();
@@ -8460,11 +8482,11 @@ namespace Builder
 				continue;
 			}
 
-			if (ualSignal->isBus() == false)
+			if (ualSignal->isBus() == false || ualSignal->busTypeID() != txSignal->busTypeID())
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
-								   QString("Raw tx UalSignal %1 type is not a Bus (Opto port %2).").
-										arg(txSignal->appSignalID()).arg(port->equipmentID()));
+				// Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.
+				//
+				m_log->errALC5131(txSignal->appSignalID(), port->equipmentID());
 				result = false;
 				continue;
 			}
@@ -8483,15 +8505,6 @@ namespace Builder
 				// Undefined UAL address of signal '%1' (Logic schema '%2').
 				//
 				m_log->errALC5105(ualSignal->appSignalID(), ualSignal->ualItemGuid(), ualSignal->ualItemSchemaID());
-				result = false;
-				continue;
-			}
-
-			if (txSignal->busTypeID() != ualSignal->busTypeID())
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
-								   QString("BusTypeID of raw data bus TxSignal %1 is not equal to correspond app signal (Opto port %2).").
-										arg(txSignal->appSignalID()).arg(port->equipmentID()));
 				result = false;
 				continue;
 			}

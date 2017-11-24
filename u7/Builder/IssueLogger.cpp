@@ -4832,6 +4832,28 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
+	/// Title:	   Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.
+	///
+	/// Parameters:
+	///		%1 App signal ID
+	///		%2 Opto port equipmentID
+	///
+	/// Description:
+	///		 Type of signal connected to opto port isn't correspond to its type specified in raw data description.
+	///
+	void IssueLogger::errALC5131(QString appSignalID, QString portID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5131,
+				  QString(tr("Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.")).
+						arg(appSignalID).arg(portID));
+	}
+
+
+	/// IssueCode: ALC5132
+	///
+	/// IssueType: Error
+	///
 	/// Title:	   Can't resolve busses interdependencies: %1
 	///
 	/// Parameters:
@@ -4840,10 +4862,10 @@ namespace Builder
 	/// Description:
 	///		 Specified busses have interdependencies that cannot be resolved.
 	///
-	void IssueLogger::errALC5131(QString unresolvedBusList)
+	void IssueLogger::errALC5132(QString unresolvedBusList)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
-				  5131,
+				  5132,
 				  QString(tr("Can't resolve busses interdependencies: %1")).
 						arg(unresolvedBusList));
 	}

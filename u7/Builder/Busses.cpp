@@ -842,7 +842,7 @@ namespace Builder
 				//
 				QStringList unresolvedBussesIDs = nonOrderedBusses.uniqueKeys();
 
-				m_log->errALC5131(unresolvedBussesIDs.join(", "));
+				m_log->errALC5132(unresolvedBussesIDs.join(", "));
 
 				return false;
 			}

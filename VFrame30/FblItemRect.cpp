@@ -650,8 +650,18 @@ namespace VFrame30
 		return r;
 	}
 
-	void FblItemRect::adjustHeight()
+	void FblItemRect::adjustHeight(double gridSize /*= -1*/, int pinGridStep /*= -1*/)
 	{
+		if (gridSize > 0)
+		{
+			m_cachedGridSize = gridSize;
+		}
+
+		if (pinGridStep > 0)
+		{
+			m_cachedPinGridStep = pinGridStep;
+		}
+
 		// Here m_gridSize and m_pingGridStep are cached copies from Schema, they set in CalcPointPos
 		//
 		if (m_cachedGridSize < 0 || m_cachedPinGridStep == 0)
