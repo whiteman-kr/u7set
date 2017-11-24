@@ -1,18 +1,26 @@
 #include "Component.h"
+#include <QQmlEngine>
 
 namespace LmModel
 {
 
-	ComponentParam::ComponentParam(quint16 instNo, quint16 paramOpIndex, quint32 data) :
-		m_instNo(instNo),
+	ComponentParam::ComponentParam(const ComponentParam& that)
+	{
+		*this = that;
+	}
+
+	ComponentParam::ComponentParam(quint16 paramOpIndex, quint32 data) :
 		m_paramOpIndex(paramOpIndex),
 		m_data(data)
 	{
 	}
 
-	int ComponentParam::instanceNo() const
+	ComponentParam& ComponentParam::operator=(const ComponentParam& that)
 	{
-		return m_instNo;
+		m_paramOpIndex = that.m_paramOpIndex;
+		m_data = that.m_data;
+
+		return *this;
 	}
 
 	int ComponentParam::opIndex() const
@@ -25,10 +33,22 @@ namespace LmModel
 		return m_data & 0xFFFF;
 	}
 
+	void ComponentParam::setWordValue(quint16 value)
+	{
+		m_data = 0;
+		m_data = value;
+	}
+
 	double ComponentParam::floatValue() const
 	{
 		float fp = *reinterpret_cast<const float*>(&m_data);
 		return static_cast<double>(fp);
+	}
+
+	void ComponentParam::setFloatValue(double value)
+	{
+		float floatVal = static_cast<float>(value);
+		*reinterpret_cast<float*>(&m_data) = floatVal;
 	}
 
 	qint32 ComponentParam::signedIntValue() const
@@ -36,27 +56,33 @@ namespace LmModel
 		return static_cast<qint32>(m_data);
 	}
 
-	ComponentInstance::ComponentInstance()
+	void ComponentParam::setSignedIntValue(qint32 value)
+	{
+		m_data = static_cast<quint32>(value);
+	}
+
+	ComponentInstance::ComponentInstance(quint16 instanceNo) :
+		m_instanceNo(instanceNo)
 	{
 	}
 
-	bool ComponentInstance::addInputParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& instParam, QString* errorMessage)
+	bool ComponentInstance::addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage)
 	{
 		assert(errorMessage);
 		assert(afbComp);
 
-		if (m_params.count(instParam.opIndex()) != 0)
+		if (m_params.count(param.opIndex()) != 0)
 		{
 			// This parameter already has been initialized
 			//
 			*errorMessage = QString("Pin with opIndex %1 already has been initialized, InstanceNo %2, AfbComponent %2")
-								.arg(instParam.opIndex())
-								.arg(instParam.instanceNo())
+								.arg(param.opIndex())
+								.arg(m_instanceNo)
 								.arg(afbComp->caption());
 			return false;
 		}
 
-		m_params[instParam.opIndex()] = instParam;
+		m_params[param.opIndex()] = param;
 
 		return true;
 	}
@@ -66,16 +92,48 @@ namespace LmModel
 		return m_params.count(opIndex) > 0;
 	}
 
-	ComponentParam ComponentInstance::param(int opIndex) const
+	QObject* ComponentInstance::param(int opIndex)
 	{
 		auto it = m_params.find(opIndex);
 		if (it == m_params.end())
 		{
-			return ComponentParam();
+			return nullptr;
 		}
 
-		const ComponentParam& componentParam = it->second;
+		ComponentParam* componentParam = &it->second;
+		QQmlEngine::setObjectOwnership(componentParam, QQmlEngine::ObjectOwnership::CppOwnership);
+
 		return componentParam;
+	}
+
+	bool ComponentInstance::addOutputParamWord(int opIndex, quint16 value)
+	{
+		ComponentParam param(opIndex, 0);
+		param.setWordValue(value);
+
+		m_params[opIndex] = param;
+
+		return true;
+	}
+
+	bool ComponentInstance::addOutputParamFloat(int opIndex, float value)
+	{
+		ComponentParam param(opIndex, 0);
+		param.setFloatValue(value);
+
+		m_params[opIndex] = param;
+
+		return true;
+	}
+
+	bool ComponentInstance::addOutputParamSignedInt(int opIndex, qint32 value)
+	{
+		ComponentParam param(opIndex, 0);
+		param.setSignedIntValue(value);
+
+		m_params[opIndex] = param;
+
+		return true;
 	}
 
 	ModelComponent::ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp) :
@@ -86,9 +144,9 @@ namespace LmModel
 		return;
 	}
 
-	bool ModelComponent::addParam(const ComponentParam& instParam, QString* errorMessage)
+	bool ModelComponent::addParam(int instanceNo, const ComponentParam& instParam, QString* errorMessage)
 	{
-		if (static_cast<int>(instParam.instanceNo()) >= m_afbComp->maxInstCount())
+		if (static_cast<int>(instanceNo) >= m_afbComp->maxInstCount())
 		{
 			// To Do - ¬ы€снить, у ёрика номер реализации с 1, а ¬ити?
 			// “огда и условие другое надо дл €ошибки
@@ -98,7 +156,7 @@ namespace LmModel
 			// Maximum of instatiator is reached
 			//
 			*errorMessage = QString("InstanceNo (%1) is higher then maximum (%2), Component %3")
-								.arg(instParam.instanceNo())
+								.arg(instanceNo)
 								.arg(m_afbComp->maxInstCount())
 								.arg(m_afbComp->caption());
 			return false;
@@ -120,9 +178,15 @@ namespace LmModel
 
 		// Get or add instance and set new param
 		//
-		ComponentInstance& compInst = m_instances[instParam.instanceNo()];
+		auto compInstIt = m_instances.find(instanceNo);
+		if (compInstIt == m_instances.end())
+		{
+			compInstIt = m_instances.emplace(instanceNo, instanceNo).first;		// Insert new item and update iterator
+		}
 
-		bool ok = compInst.addInputParam(m_afbComp, instParam, errorMessage);
+		ComponentInstance& compInst = compInstIt->second;
+
+		bool ok = compInst.addParam(m_afbComp, instParam, errorMessage);
 
 		return ok;
 	}
@@ -136,6 +200,8 @@ namespace LmModel
 		}
 
 		ComponentInstance* result = &isntanceIt->second;
+		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::CppOwnership);
+
 		return result;
 	}
 
@@ -149,7 +215,7 @@ namespace LmModel
 		return;
 	}
 
-	bool AfbComponentSet::addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& instParam, QString* errorMessage)
+	bool AfbComponentSet::addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const ComponentParam& instParam, QString* errorMessage)
 	{
 		assert(errorMessage);
 
@@ -177,7 +243,7 @@ namespace LmModel
 
 		// --
 		//
-		bool ok = modelComponent->addParam(instParam, errorMessage);
+		bool ok = modelComponent->addParam(instanceNo, instParam, errorMessage);
 
 		return ok;
 	}
@@ -193,6 +259,8 @@ namespace LmModel
 		std::shared_ptr<ModelComponent>	component = componentIt->second;
 
 		ComponentInstance* result = component->instance(instance);
+		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::CppOwnership);
+
 		return result;
 	}
 

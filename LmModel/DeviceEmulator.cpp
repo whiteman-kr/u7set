@@ -533,7 +533,7 @@ namespace LmModel
 			return false;
 		}
 
-		qDebug() << jsResult.toString();
+		//qDebug() << jsResult.toString();
 
 		return true;
 	}
@@ -651,10 +651,10 @@ namespace LmModel
 
 		// --
 		//
-		ComponentParam ip(implNo, implParamOpIndex, data);
+		ComponentParam param(implParamOpIndex, data);
 
 		QString errorMessage;
-		bool ok = m_afbComponents.addInstantiatorParam(afbComp, ip, &errorMessage);
+		bool ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
 
 		if (ok == false)
 		{
@@ -761,9 +761,10 @@ namespace LmModel
 
 		// --
 		//
-		ComponentParam ip(implNo, implParamOpIndex, data);
+		ComponentParam param(implParamOpIndex, data);
 		QString errorMessage;
-		bool ok = m_afbComponents.addInstantiatorParam(afbComp, ip, &errorMessage);
+
+		bool ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
 
 		if (ok == false)
 		{
