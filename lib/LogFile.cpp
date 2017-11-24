@@ -6,6 +6,11 @@
 #include <QDateTime>
 #include <QAbstractItemModel>
 #include <QComboBox>
+#include <QUuid>
+#include "Hash.h"
+
+
+//#define LOGFILE_USE_HEADER	// Uncomment this to use header
 
 namespace Log
 {
@@ -13,18 +18,19 @@ namespace Log
 	// LogFileRecord
 	//
 
-	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "TEXT"};
+	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "TXT"};
 
 	const char* messageTypeTextLong[] = {"All", "Error", "Warning", "Message", "Text"};
 
 	const int messageTypeCount = sizeof(messageTypeTextShort) / sizeof(messageTypeTextShort[0]);
 
+	const char* messageTimeFormat = {"dd.MM.yyyy hh:mm:ss.zzz"};
 
-	QString LogFileRecord::toString()
+	QString LogFileRecord::toString(const QString& sessionHashString)
 	{
 		if (type == MessageType::Text)
 		{
-			return QString("%1\r\n").arg(text);
+			return QString("%1\t%2\r\n").arg(sessionHashString).arg(text);
 		}
 
 		int intType = static_cast<int>(type);
@@ -34,24 +40,111 @@ namespace Log
 			return QString();
 		}
 
-		return QString("%1\t%2\t%3\t%4\r\n").arg(time.toString("dd.MM.yyyy hh:mm:ss")).arg(intType).arg(messageTypeTextShort[intType]).arg(text);
+		return QString("%1\t%2\t\t%3\t%4\r\n").arg(sessionHashString).arg(time.toString(messageTimeFormat)).arg(messageTypeTextShort[intType]).arg(text);
+	}
+
+	bool LogFileRecord::loadFromString(const QString& source, quint64 currentSessionHash)
+	{
+		QString str = source;
+
+		// Session Hash
+
+		int tabPos = str.indexOf('\t');
+		if (tabPos == -1)
+		{
+			return false;
+		}
+
+		QString s = str.left(tabPos).trimmed();
+		str.remove(0, tabPos + 1);
+		str = str.trimmed();
+
+		sessionHash = s.toULongLong();
+
+		if (currentSessionHash != 0 && sessionHash != currentSessionHash)
+		{
+			// Wrong session
+			return false;
+		}
+
+		type = MessageType::Text;
+
+		// Time
+
+		tabPos = str.indexOf('\t');
+		if (tabPos == -1)
+		{
+			// This is simple text
+			text = str;
+			return true;
+		}
+
+		s = str.left(tabPos).trimmed();
+		str.remove(0, tabPos + 1);
+		str = str.trimmed();
+
+		time = QDateTime::fromString(s, messageTimeFormat);
+
+		// Type
+
+		tabPos = str.indexOf('\t');
+		if (tabPos == -1)
+		{
+			// This is simple text
+			text = str;
+			return true;
+		}
+
+		s = str.left(tabPos).trimmed();
+		str.remove(0, tabPos + 1);
+		str = str.trimmed();
+
+		if (s == "ERR")
+		{
+			type = MessageType::Error;
+		}
+		else
+		{
+			if (s == "WRN")
+			{
+				type = MessageType::Warning;
+			}
+			else
+			{
+				if (s == "MSG")
+				{
+					type = MessageType::Message;
+				}
+
+			}
+		}
+
+		// Text
+
+		text = str;
+		return true;
 	}
 
 	//
 	// LogFileWorker
 	//
 
-	LogFileWorker::LogFileWorker(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
+	LogFileWorker::LogFileWorker(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash)
 		:m_logName(logName),
 		  m_path(path),
 		  m_maxFileSize(maxFileSize),
-		  m_maxFilesCount(maxFilesCount)
+		  m_maxFilesCount(maxFilesCount),
+		  m_sessionHash(sessionHash),
+		  m_sessionHashString(QString::number(sessionHash).leftJustified(21, ' '))
 	{
 		if (m_path.isEmpty() == true)
 		{
 			QString localAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 			m_path = QDir::toNativeSeparators(localAppDataPath);
 		}
+
+
+
 
 		qDebug() << "Log path : " << m_path;
 
@@ -69,6 +162,7 @@ namespace Log
 
 		r.time = QDateTime::currentDateTime();
 		r.type = type;
+		r.sessionHash = m_sessionHash;
 		r.text = text;
 
 		emit recordArrived(r);
@@ -78,9 +172,9 @@ namespace Log
 		return true;
 	}
 
-	void LogFileWorker::read()
+	void LogFileWorker::read(bool currentSessionOnly)
 	{
-		emit readStart();
+		emit readStart(currentSessionOnly);
 	}
 
 	void LogFileWorker::getLoadedData(std::vector<LogFileRecord> *result)
@@ -329,10 +423,6 @@ namespace Log
 			return true;
 		}
 
-		QDateTime startTime;
-		QDateTime endTime;
-		int recordsCount = 0;
-
 		QString fileName = getLogFileName(m_currentFileNumber);
 
 		// Check current file size and switch to the next file if needed
@@ -348,13 +438,20 @@ namespace Log
 			}
 		}
 
+
+#ifdef LOGFILE_USE_HEADER
 		// Read current file information
+
+		QDateTime startTime;
+		QDateTime endTime;
+		int recordsCount = 0;
 
 		if (readLogFileInfo(fileName, startTime, endTime, recordsCount) == false)
 		{
 			startTime = QDateTime::currentDateTime();
 			endTime = startTime;
 		}
+#endif
 
 		// Open file for writing
 
@@ -367,17 +464,19 @@ namespace Log
 
 		// Write header data
 
+#ifdef LOGFILE_USE_HEADER
 		endTime = QDateTime::currentDateTime();
 
 		recordsCount += static_cast<int>(m_queue.size());
 
 		writeLogFileInfo(file, startTime, endTime, recordsCount);
+#endif
 
 		// Write records
 
 		for (LogFileRecord& record : m_queue)
 		{
-			file.write(record.toString().toUtf8());
+			file.write(record.toString(m_sessionHashString).toUtf8());
 		}
 
 		file.close();
@@ -436,7 +535,7 @@ namespace Log
 		return true;
 	}
 
-	bool LogFileWorker::readFileRecords(const QString& fileName, std::vector<LogFileRecord>* result)
+	bool LogFileWorker::readFileRecords(const QString& fileName, bool currentSessionOnly, std::vector<LogFileRecord>* result)
 	{
 		qDebug() << fileName;
 
@@ -460,6 +559,7 @@ namespace Log
 
 		QTextStream stream(&f);
 
+#ifdef LOGFILE_USE_HEADER
 		// Read and skip header
 
 		const int headerLinesCount = 7;
@@ -471,6 +571,7 @@ namespace Log
 				return false;
 			}
 		}
+#endif
 
 		QString str;
 
@@ -484,50 +585,10 @@ namespace Log
 				break;
 			}
 
-			// Time
-
-			int tabPos = str.indexOf('\t');
-			if (tabPos == -1)
+			if (record.loadFromString(str, currentSessionOnly == true ? m_sessionHash : 0) == true)
 			{
-				record.type = MessageType::Text;
-				record.text = str.trimmed();
 				result->push_back(record);
-				continue;
 			}
-
-			QString s = str.left(tabPos).trimmed();
-			str.remove(0, tabPos + 1);
-
-			record.time = QDateTime::fromString(s, "dd.MM.yyyy hh:mm:ss");
-
-			// Type
-
-			tabPos = str.indexOf('\t');
-			if (tabPos == -1)
-			{
-				continue;
-			}
-
-			s = str.left(tabPos).trimmed();
-			str.remove(0, tabPos + 1);
-
-			record.type = static_cast<MessageType>(s.toInt());
-
-			// Type text
-			tabPos = str.indexOf('\t');
-			if (tabPos == -1)
-			{
-				continue;
-			}
-
-			s = str.left(tabPos).trimmed();
-			str.remove(0, tabPos + 1);
-
-			// Text
-
-			record.text = str.trimmed();
-
-			result->push_back(record);
 		}
 
 
@@ -536,13 +597,13 @@ namespace Log
 	}
 
 
-	void LogFileWorker::slot_load()
+	void LogFileWorker::slot_load(bool currentSessionOnly)
 	{
 		std::vector<LogFileRecord> readResult;
 
 		for (int i = 0; i < m_maxFilesCount; i++)
 		{
-			readFileRecords(getLogFileName(i), &readResult);
+			readFileRecords(getLogFileName(i), currentSessionOnly, &readResult);
 		}
 
 		{
@@ -745,7 +806,7 @@ namespace Log
 
 			if (displayIndex == static_cast<int>(Columns::Time))
 			{
-				return rec.time.toString("dd.MM.yyyy hh:mm:ss");
+				return rec.time.toString(messageTimeFormat);
 			}
 
 			if (displayIndex == static_cast<int>(Columns::Type))
@@ -845,6 +906,14 @@ namespace Log
 
 		//
 
+		m_allSessions = new QPushButton(tr("All Sessions"));
+		m_allSessions->setCheckable(true);
+		m_allSessions->setChecked(false);
+		topLayout->addWidget(m_allSessions);
+		connect(m_allSessions, &QPushButton::clicked, this, &LogFileDialog::onAllSessionsClicked);
+
+		//
+
 		m_autoScroll = new QPushButton(tr("Auto Scroll"));
 		m_autoScroll->setCheckable(true);
 		m_autoScroll->setChecked(true);
@@ -877,7 +946,8 @@ namespace Log
 
 		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived);
 
-		m_worker->read();
+		m_worker->read(true);
+		enableControls(false);
 
 
 	}
@@ -914,6 +984,14 @@ namespace Log
 
 	}
 
+	void LogFileDialog::enableControls(bool enable)
+	{
+		m_typeCombo->setEnabled(enable);
+		m_filterLineEdit->setEnabled(enable);
+		m_allSessions->setEnabled(enable);
+		m_autoScroll->setEnabled(enable);
+	}
+
 	void LogFileDialog::onTypeComboIndexChanged(int index)
 	{
 		Q_UNUSED(index);
@@ -939,6 +1017,12 @@ namespace Log
 		m_counterLabel->setText(tr("Total records: %1").arg(m_model.rowCount()));
 	}
 
+	void LogFileDialog::onAllSessionsClicked()
+	{
+		m_worker->read(m_allSessions->isChecked() == false);
+		enableControls(false);
+	}
+
 	void LogFileDialog::onReadComplete()
 	{
 		qDebug() << "onLoadComplete";
@@ -952,6 +1036,8 @@ namespace Log
 		m_counterLabel->setText(tr("Total records: %1").arg(m_model.rowCount()));
 
 		m_table->scrollToBottom();
+
+		enableControls(true);
 	}
 
 	void LogFileDialog::onRecordArrived(LogFileRecord record)
@@ -977,8 +1063,11 @@ namespace Log
 
 	LogFile::LogFile(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
 	{
+		QUuid uuid = QUuid::createUuid();
 
-		m_logFileWorker = new LogFileWorker(logName, path, maxFileSize, maxFilesCount);
+		m_sessionHash = ::calcHash(uuid.toString());
+
+		m_logFileWorker = new LogFileWorker(logName, path, maxFileSize, maxFilesCount, m_sessionHash);
 
 		connect(m_logFileWorker, &LogFileWorker::flushFailure, this, &LogFile::onFlushFailure);
 
