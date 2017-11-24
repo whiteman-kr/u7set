@@ -31,6 +31,9 @@ namespace Builder
 			assert(false);			// unknown E::AnalogAppSignalFormat
 			return true;
 
+		case E::SignalType::Bus:
+			return false;
+
 		case E::SignalType::Discrete:
 			return false;
 		}
@@ -41,11 +44,12 @@ namespace Builder
 		return true;
 	}
 
-	void BusSignal::init(const VFrame30::BusSignal& bs)
+	void BusSignal::init(const Busses& busses, const VFrame30::BusSignal& bs)
 	{
 		signalID = bs.signalId();
 		signalType = bs.type();
 		caption = bs.caption();
+		busTypeID = bs.busTypeId();
 
 		inbusAddr.set(0, 0);
 		inbusAddr.addBit(bs.inbusOffset() * SIZE_8BIT + bs.inbusDiscreteBitNo());
@@ -63,12 +67,14 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			assert(false);		// bus inside bus is not allowed
+			inbusSizeBits = busses.getBusSizeBits(bs.busTypeId());
+			assert(inbusSizeBits != -1);
 			break;
 
 		default:
 			assert(false);		// unknown signal type
 		}
+
 		inbusAnalogFormat  = bs.inbusAnalogFormat();
 		inbusAnalogByteOrder = bs.inbusAnalogByteOrder();
 		busAnalogLowLimit = bs.busAnalogLowLimit();
@@ -180,6 +186,23 @@ namespace Builder
 
 	void Bus::writeReport(QStringList& list)
 	{
+		QString busTypeIdStr("BusTypeID");
+
+		int maxBusTypeIdLen = busTypeIdStr.length();
+
+		for(const BusSignal& s : m_signals)
+		{
+			if (s.signalType == E::SignalType::Bus)
+			{
+				int len = s.busTypeID.length();
+
+				if (maxBusTypeIdLen < len)
+				{
+					maxBusTypeIdLen = len;
+				}
+			}
+		}
+
 		QString separator("-------------------------------------------------------------------");
 
 		list.append(separator);
@@ -195,15 +218,36 @@ namespace Builder
 			return;
 		}
 
-		list.append(QString(" OffsetW:Bit   Size\tType\tConvert\t SignalID"));
+		list.append(QString(" OffsetW:Bit   Size\tType\t%1\tConvert\t SignalID").arg(busTypeIdStr.leftJustified(maxBusTypeIdLen, ' ')));
 		list.append(separator);
 
 		for(const BusSignal& s : m_signals)
 		{
-			list.append(QString("   %1    %2\t%3\t%4\t %5").
+			QString signalTypeStr;
+
+			switch(s.signalType)
+			{
+			case E::SignalType::Analog:
+				signalTypeStr = "A";
+				break;
+
+			case E::SignalType::Discrete:
+				signalTypeStr = "D";
+				break;
+
+			case E::SignalType::Bus:
+				signalTypeStr = "B";
+				break;
+
+			default:
+				assert(false);
+			}
+
+			list.append(QString("   %1    %2\t%3\t%4\t%5\t %6").
 							arg(s.inbusAddr.toString(true)).
 							arg(s.inbusSizeBits).
-							arg(s.signalType == E::SignalType::Analog ? "A" : "D").
+							arg(signalTypeStr).
+							arg(s.busTypeID.leftJustified(maxBusTypeIdLen, ' ')).
 							arg(s.conversionRequired() == true ? "Yes" : "No").
 							arg(s.signalID));
 		}
@@ -445,17 +489,18 @@ namespace Builder
 
 			BusSignal busSignal;
 
-			busSignal.init(srcBusSignal);
+			busSignal.init(m_busses, srcBusSignal);
 			busSignal.inbusAddr = inBusAddr;
 
 			switch(srcBusSignal.type())
 			{
 			case E::SignalType::Analog:
-				inBusAddr.addBit(busSignal.inbusSizeBits);
-				break;
-
 			case E::SignalType::Discrete:
-				inBusAddr.addBit(SIZE_1BIT);
+			case E::SignalType::Bus:
+
+				assert(busSignal.inbusSizeBits != -1);
+				inBusAddr.addBit(busSignal.inbusSizeBits);
+
 				break;
 
 			default:
@@ -554,7 +599,7 @@ namespace Builder
 
 			BusSignal busSignal;
 
-			busSignal.init(srcBusSignal);
+			busSignal.init(m_busses, srcBusSignal);
 
 			Address16 inBusAddr(0, 0);
 
@@ -629,6 +674,7 @@ namespace Builder
 	void Bus::buildSignalIndexesArrays()
 	{
 		m_analogSignalIndexes.clear();
+		m_busSignalIndexes.clear();
 		m_discreteSignalIndexes.clear();
 
 		int count = m_signals.count();
@@ -641,6 +687,10 @@ namespace Builder
 			{
 			case E::SignalType::Analog:
 				m_analogSignalIndexes.push_back(i);
+				break;
+
+			case E::SignalType::Bus:
+				m_busSignalIndexes.push_back(i);
 				break;
 
 			case E::SignalType::Discrete:

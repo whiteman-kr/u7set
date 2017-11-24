@@ -8,6 +8,8 @@
 
 namespace Builder
 {
+	class Busses;
+
 	class BusSignal
 	{
 	public:
@@ -15,6 +17,7 @@ namespace Builder
 		QString caption;
 		E::SignalType signalType = E::SignalType::Discrete;
 		Address16 inbusAddr;
+		QString busTypeID;
 
 		// analog signals conversion parameters
 		//
@@ -34,13 +37,11 @@ namespace Builder
 		//
 
 		bool conversionRequired() const;
-		void init(const VFrame30::BusSignal& bs);
+		void init(const Busses& busses, const VFrame30::BusSignal& bs);
 		bool isOverlaped(const BusSignal& bs);
 
 		bool isValid() const;
 	};
-
-	class Busses;
 
 	class Bus
 	{
@@ -98,6 +99,7 @@ namespace Builder
 		QVector<BusSignal> m_signals;
 
 		std::vector<int> m_analogSignalIndexes;
+		std::vector<int> m_busSignalIndexes;
 		std::map<int, std::vector<int>> m_discreteSignalIndexes;		// discrete signals offset => discrete signal indexes
 
 		static VFrame30::BusSignal m_invalidBusSignal;

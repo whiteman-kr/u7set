@@ -6745,9 +6745,7 @@ namespace Builder
 			return true;
 		}
 
-		assert(m_memoryMap.acquiredDiscreteConstSignalsInRegBufSizeW() == 1);			// always 1 word!
-
-		m_code.append(Comment("Copy acquired discrete const signals values:"));
+		assert(m_memoryMap.acquiredDiscreteConstSignalsInRegBufSizeW() == 1);			// if > 0 then always 1 word!
 
 		QStringList const0Signals;
 		QStringList const1Signals;
@@ -6769,6 +6767,10 @@ namespace Builder
 				const1Signals.append(ualSignal->acquiredRefSignalsIDs());
 			}
 		}
+
+		assert(const0Signals.size() != 0 || const1Signals.size() != 0);		// why m_memoryMap.acquiredDiscreteConstSignalsInRegBufSizeW() !=0, but const signals is not found ???
+
+		m_code.append(Comment("Copy acquired discrete const signals values:"));
 
 		m_code.append(Comment(QString("const 0: %1").arg(const0Signals.join(", "))));
 		m_code.append(Comment(QString("const 1: %1").arg(const1Signals.join(", "))));
