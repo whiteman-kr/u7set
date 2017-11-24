@@ -10249,10 +10249,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_16si_v1"       Caption="be_to_le_16si"       Version="1.0002">
+		<AFB id="#be_to_le_16si_v1"       Caption="be_to_le_16si"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
@@ -10283,10 +10283,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#le_to_be_16si_v1"       Caption="le_to_be_16si"       Version="1.0002">
+		<AFB id="#le_to_be_16si_v1"       Caption="le_to_be_16si"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
@@ -10317,10 +10317,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0002">
+		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -10351,10 +10351,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0002">
+		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0003">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -10385,10 +10385,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0002">
+		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0003">
 			<Properties>
 				<Description>Converts big-endian to liggle-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -10419,10 +10419,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0002">
+		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0003">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
-				<Category>Convertor</Category>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -10453,10 +10453,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0002">
+		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0003">
 			<Properties>
-				<Description>Type convertor block from signed int to floating point</Description>
-				<Category>Convertor</Category>
+				<Description>Type converter block from signed int to floating point</Description>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -10487,10 +10487,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0002">
+		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0003">
 			<Properties>
-				<Description>Type convertor block from floating point to signed int</Description>
-				<Category>Convertor</Category>
+				<Description>Type converter block from floating point to signed int</Description>
+				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>

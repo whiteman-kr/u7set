@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 --
 -- Automaicaly generated file by file2pgsql, version 1.0
--- Host: smart-win, User: Serhiy Malokhatko, Date: 22.11.2017 14:30:10
+-- Host: smart-win, User: Serhiy Malokhatko, Date: 23.11.2017 08:39:02
 -- FileName: BVB15Module0000.xml
 --
 ---------------------------------------------------------------------------

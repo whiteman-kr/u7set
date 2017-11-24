@@ -26,7 +26,6 @@ private:
 	void createTcpConnection(quint32 ip, quint16 port);
 	void dropTcpConnection();
 
-	QStandardItemModel* m_stateTabModel = nullptr;
 	QStandardItemModel* m_clientsTabModel = nullptr;
 	QStandardItemModel* m_buildTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
