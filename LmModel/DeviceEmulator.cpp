@@ -450,8 +450,14 @@ namespace LmModel
 
 	bool DeviceEmulator::command_nop()
 	{
-		fault("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+
+		assert(command == 1);
+
+		m_logicUnit.programCounter++;
+		return true;
 	}
 
 	bool DeviceEmulator::command_startafb()
