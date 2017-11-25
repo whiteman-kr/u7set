@@ -624,10 +624,43 @@ namespace LmModel
 		return false;
 	}
 
+	// OpCode 5
+	// Copy data from memory address1 to memory address2, N words
+	//
 	bool DeviceEmulator::command_movmem()
 	{
-		FAULT("Command not implemented ");
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		assert(command == 5);
+		m_logicUnit.programCounter++;
+
+		quint16 addr2 = getWord(m_logicUnit.programCounter++);
+		quint16 addr1 = getWord(m_logicUnit.programCounter++);
+		quint16 n = getWord(m_logicUnit.programCounter++);
+
+		// Command Logic
+		//
+		bool ok = true;
+		for (quint16 offset = 0; offset < n; offset++)
+		{
+			quint16 data;
+
+			ok &= m_ram.readWord(addr1 + offset, &data);
+			ok &= m_ram.writeWord(addr2 + offset, data);
+		}
+
+		if (ok == false)
+		{
+			QString formattedMessage = QString("Move memory error, addr1 %1, addr2, number of words %2")
+										.arg(addr1)
+										.arg(addr2)
+										.arg(n);
+			FAULT(formattedMessage);
+			return false;
+		}
+
+		return ok;
 	}
 
 	// OpCode 6
