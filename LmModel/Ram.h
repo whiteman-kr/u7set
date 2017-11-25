@@ -48,8 +48,12 @@ namespace LmModel
 		bool writeBit(quint32 offsetW, quint16 data, quint32 bitNo);
 		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
 
-	private:
+		bool writeWord(quint32 offsetW, quint16 data);
+		bool readWord(quint32 offsetW, quint16* data) const;
 
+	private:
+		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data);
+		template<typename TYPE> bool readData(quint32 offsetW, TYPE* data) const;
 
 	private:
 		QByteArray m_data;
@@ -67,6 +71,9 @@ namespace LmModel
 
 		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
 		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
+
+		bool writeWord(quint32 offsetW, quint32 data);
+		bool readWord(quint32 offsetW, quint16* data) const;
 
 	private:
 		RamArea* memoryArea(RamAccess access, quint32 offsetW);

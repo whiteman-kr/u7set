@@ -13,6 +13,16 @@
 #include "Ram.h"
 #include "Component.h"
 
+#ifndef __FUNCTION_NAME__
+	#ifdef WIN32   //WINDOWS
+		#define __FUNCTION_NAME__   __FUNCTION__
+	#else          //*NIX
+		#define __FUNCTION_NAME__   __func__
+	#endif
+#endif
+
+#define FAULT(message) fault(message, __FUNCTION_NAME__);
+
 namespace LmModel
 {
 		enum class DeviceMode
@@ -92,7 +102,7 @@ namespace LmModel
 		void start(int cycles);
 
 	private:
-		void fault(QString reasone);
+		void fault(QString reasone, QString func);
 
 	private:
 		virtual void timerEvent(QTimerEvent* event) override;

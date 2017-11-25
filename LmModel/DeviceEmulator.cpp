@@ -169,10 +169,35 @@ namespace LmModel
 		}
 	}
 
-	void DeviceEmulator::fault(QString reasone)
+	void DeviceEmulator::fault(QString reasone, QString func)
 	{
-		output() << "DeviceEmulator: Fault, Reasone: " << reasone << endl;
+		QString phase;
+		switch (m_logicUnit.phase)
+		{
+		case CyclePhase::IdrPhase:	phase = "IDR";	break;
+		case CyclePhase::AlpPhase:	phase = "ALP";	break;
+		case CyclePhase::ODT:		phase = "ODT";	break;
+		case CyclePhase::ST:		phase = "ST";	break;
+		default:
+			assert(false);
+		}
+
+		QString str1 = QString("DeviceEmulator: Fault");
+		QString str2 = QString("DeviceEmulator: \tPhase: %1, ProgramCounter: %2 (0x%3), function: %4")
+						.arg(phase)
+						.arg(m_logicUnit.programCounter)
+						.arg(m_logicUnit.programCounter, 4, 16, QChar('0'))
+						.arg(func);
+		QString str3 = QString("DeviceEmulator: \tReasone: %1")
+						.arg(reasone);
+
+		output() << str1 << endl;
+		output() << str2 << endl;
+		output() << str3 << endl;
+
 		m_currentMode = DeviceMode::Fault;
+
+		return;
 	}
 
 	void DeviceEmulator::timerEvent(QTimerEvent* event)
@@ -280,7 +305,7 @@ namespace LmModel
 
 		if (result == false)
 		{
-			fault("Loading configuration error");
+			fault("Loading configuration error", "processLoadEeprom()");
 			return false;
 		}
 
@@ -292,7 +317,7 @@ namespace LmModel
 		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleNumber);
 		if (startFrame == -1)
 		{
-			fault(QString("Can't get start frame for logic number %1").arg(m_logicModuleNumber));
+			FAULT(QString("Can't get start frame for logic number %1").arg(m_logicModuleNumber));
 			return false;
 		}
 
@@ -322,6 +347,8 @@ namespace LmModel
 		m_logicUnit = LogicUnitData();
 		m_afbComponents.clear();
 
+		qDebug() << __FUNCTION_NAME__;
+
 		// Run work cylce
 		//
 		do
@@ -340,7 +367,7 @@ namespace LmModel
 
 			if (ok == false && m_currentMode != DeviceMode::Fault)
 			{
-				fault("Run command %1 unknown error.");
+				FAULT("Run command %1 unknown error.");
 				result = false;
 				break;
 			}
@@ -443,11 +470,13 @@ namespace LmModel
 			return command_fillb();
 
 		default:
-			fault(QString("Unknown command code %1").arg(static_cast<int>(commandCode)));
+			FAULT(QString("Unknown command code %1").arg(static_cast<int>(commandCode)));
 			return false;
 		}
 	}
 
+	// OpCode 1
+	//
 	bool DeviceEmulator::command_nop()
 	{
 		quint16 commandWord = getWord(m_logicUnit.programCounter);
@@ -460,6 +489,8 @@ namespace LmModel
 		return true;
 	}
 
+	// OpCode 2
+	//
 	bool DeviceEmulator::command_startafb()
 	{
 		quint16 commandWord = getWord(m_logicUnit.programCounter);
@@ -478,7 +509,7 @@ namespace LmModel
 		{
 			QString str = QString("STARTAFB error, component not found. ComponentOpCode %1")
 							.arg(funcBlock);
-			fault(str);
+			FAULT(str);
 			return false;
 		}
 
@@ -488,7 +519,7 @@ namespace LmModel
 			QString str = QString("STARTAFB error, component instance not found. ComponentOpCode %1, Instance %2")
 							.arg(funcBlock)
 							.arg(implNo);
-			fault(str);
+			FAULT(str);
 			return false;
 		}
 
@@ -496,7 +527,7 @@ namespace LmModel
 		//
 		if (m_evaluatedJs.isError() == true)
 		{
-			fault("Simulation script is not evaluated. " __FUNCTION__);
+			FAULT("Simulation script is not evaluated.");
 			return false;
 		}
 
@@ -514,13 +545,13 @@ namespace LmModel
 
 		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false)
 		{
-			fault(QString("Script function %1 not found. " __FUNCTION__).arg(simulationFunc));
+			FAULT(QString("Script function %1 not found.").arg(simulationFunc));
 			return false;
 		}
 
 		if (m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
 		{
-			fault(QString("Script function %1 is not collable. " __FUNCTION__).arg(simulationFunc));
+			FAULT(QString("Script function %1 is not collable. ").arg(simulationFunc));
 			return false;
 		}
 
@@ -535,7 +566,7 @@ namespace LmModel
 						  .arg(jsResult.property("stack").toString())
 						  .arg(jsResult.toString());
 
-			fault(str + __FUNCTION__);
+			FAULT(str);
 			return false;
 		}
 
@@ -582,27 +613,50 @@ namespace LmModel
 			return true;
 		}
 
-		fault(QString("Command STOP in wrong phase %1").arg(static_cast<int>(m_logicUnit.phase)));
+		FAULT("Command STOP in wrong phase.");
 
 		return false;
 	}
 
 	bool DeviceEmulator::command_mov()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented ");
 		return false;
 	}
 
 	bool DeviceEmulator::command_movmem()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented ");
 		return false;
 	}
 
+	// OpCode 6
+	// Set constant to memory by address
+	//
 	bool DeviceEmulator::command_movc()
 	{
-		fault("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		assert(command == 6);
+		m_logicUnit.programCounter++;
+
+		quint16 addr = getWord(m_logicUnit.programCounter++);
+		quint16 data = getWord(m_logicUnit.programCounter++);
+
+		// Command Logic
+		//
+		bool ok = m_ram.writeWord(addr, data);
+		if (ok == false)
+		{
+			QString formattedMessage = QString("Write memory error, addr %1, data %2")
+										.arg(addr)
+										.arg(data);
+			FAULT(formattedMessage);
+			return false;
+		}
+
+		return ok;
 	}
 
 	// OpCode 7
@@ -628,22 +682,26 @@ namespace LmModel
 										.arg(addr)
 										.arg(data & 0x01)
 										.arg(bitNo);
-			fault(formattedMessage);
+			FAULT(formattedMessage);
 			return false;
 		}
 
 		return ok;
 	}
 
+	// OpCode 8
+	//
 	bool DeviceEmulator::command_wrbf()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented");
 		return false;
 	}
 
+	// OpCode 9
+	//
 	bool DeviceEmulator::command_rdbf()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented");
 		return false;
 	}
 
@@ -671,7 +729,7 @@ namespace LmModel
 
 		if (afbComp == nullptr)
 		{
-			fault(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
 			return false;
 		}
 
@@ -684,7 +742,7 @@ namespace LmModel
 
 		if (ok == false)
 		{
-			fault(QString("Run command_wrfbc error, %1").arg(errorMessage));
+			FAULT(QString("Run command_wrfbc error, %1").arg(errorMessage));
 			return false;
 		}
 
@@ -719,7 +777,7 @@ namespace LmModel
 
 		if (afbComp == nullptr)
 		{
-			fault(QString("command_wrfbb, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			FAULT(QString("command_wrfbb, AfbComponent with OpCode %1 not found").arg(funcBlock));
 			return false;
 		}
 
@@ -733,7 +791,7 @@ namespace LmModel
 										.arg(afbComp->opCode())
 										.arg(implNo)
 										.arg(implParamOpIndex);
-			fault(formattedError);
+			FAULT(formattedError);
 			return false;
 		}
 
@@ -744,7 +802,7 @@ namespace LmModel
 			QString formattedMessage = QString("command_wrfbb, Read bit from memory error, addrw %1, bitno %3")
 										.arg(address)
 										.arg(bitNo);
-			fault(formattedMessage);
+			FAULT(formattedMessage);
 			return false;
 		}
 
@@ -757,7 +815,7 @@ namespace LmModel
 
 		if (ok == false)
 		{
-			fault(QString("command_wrfbb error, %1").arg(errorMessage));
+			FAULT(QString("command_wrfbb error, %1").arg(errorMessage));
 			return false;
 		}
 
@@ -791,7 +849,7 @@ namespace LmModel
 
 		if (afbComp == nullptr)
 		{
-			fault(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
 			return false;
 		}
 
@@ -803,7 +861,7 @@ namespace LmModel
 										.arg(afbComp->opCode())
 										.arg(implNo)
 										.arg(implParamOpIndex);
-			fault(formattedError);
+			FAULT(formattedError);
 			return false;
 		}
 
@@ -816,7 +874,7 @@ namespace LmModel
 										.arg(implNo)
 										.arg(afbComp->caption())
 										.arg(afbComp->opCode());
-			fault(formattedError);
+			FAULT(formattedError);
 			return false;
 		}
 
@@ -828,7 +886,7 @@ namespace LmModel
 										.arg(afbComp->caption())
 										.arg(afbComp->opCode())
 										.arg(implNo);
-			fault(formattedError);
+			FAULT(formattedError);
 			return false;
 		}
 
@@ -841,37 +899,47 @@ namespace LmModel
 										.arg(address)
 										.arg(value)
 										.arg(bitNo);
-			fault(formattedMessage);
+			FAULT(formattedMessage);
 			return false;
 		}
 
 		return true;
 	}
 
+	// OpCode 13
+	//
 	bool DeviceEmulator::command_rdfbts()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 14
+	//
 	bool DeviceEmulator::command_setmem()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 15
+	//
 	bool DeviceEmulator::command_movb()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 16
+	//
 	bool DeviceEmulator::command_nstart()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 17
+	//
 	bool DeviceEmulator::command_appstart()
 	{
 		m_logicUnit.programCounter ++;
@@ -879,27 +947,35 @@ namespace LmModel
 		return true;
 	}
 
+	// OpCode 18
+	//
 	bool DeviceEmulator::command_mov32()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 19
+	//
 	bool DeviceEmulator::command_movc32()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 20
+	//
 	bool DeviceEmulator::command_wrfb32()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 21
+	//
 	bool DeviceEmulator::command_rdfb32()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
@@ -927,7 +1003,7 @@ namespace LmModel
 
 		if (afbComp == nullptr)
 		{
-			fault(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
 			return false;
 		}
 
@@ -940,41 +1016,52 @@ namespace LmModel
 
 		if (ok == false)
 		{
-			fault(QString("Run command_wrfbc32 error, %1").arg(errorMessage));
+			FAULT(QString("Run command_wrfbc32 error, %1").arg(errorMessage));
 		}
 
 		return ok;
 	}
 
+	// OpCode 23
+	//
 	bool DeviceEmulator::command_rdfbts32()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 24
+	//
 	bool DeviceEmulator::command_movcf()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 25
+	//
 	bool DeviceEmulator::command_pmov()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 26
+	//
 	bool DeviceEmulator::command_pmov32()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
 
+	// OpCode 27
+	//
 	bool DeviceEmulator::command_fillb()
 	{
-		fault("Command not implemented " __FUNCTION__);
+		FAULT("Command not implemented " __FUNCTION__);
 		return false;
 	}
+
 
 	quint16 DeviceEmulator::getWord(int wordOffset) const
 	{

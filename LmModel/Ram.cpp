@@ -123,6 +123,53 @@ namespace LmModel
 		return true;
 	}
 
+	bool RamArea::writeWord(quint32 offsetW, quint16 data)
+	{
+		return writeData<quint16>(offsetW, data);
+	}
+
+	bool RamArea::readWord(quint32 offsetW, quint16* data) const
+	{
+		return readData<quint16>(offsetW, data);
+	}
+
+	template<typename TYPE>
+	bool RamArea::writeData(quint32 offsetW, TYPE data)
+	{
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			byteOffset >= m_data.size() - sizeof(TYPE))
+		{
+			assert(byteOffset >= 0 &&
+				   byteOffset - sizeof(TYPE) <= m_data.size());
+			return false;
+		}
+
+		qToBigEndian<TYPE>(data, m_data.data() + byteOffset);
+		return true;
+	}
+
+	template<typename TYPE>
+	bool RamArea::readData(quint32 offsetW, TYPE* data) const
+	{
+		if (data == nullptr)
+		{
+			assert(data);
+			return false;
+		}
+
+		int byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset < 0 ||
+			byteOffset >= m_data.size() - sizeof(TYPE))
+		{
+			assert(byteOffset >= 0 &&
+				   byteOffset - sizeof(TYPE) <= m_data.size());
+			return false;
+		}
+
+		*data = qFromBigEndian<TYPE>(m_data.constData() + byteOffset);
+		return true;
+	}
 
 	Ram::Ram()
 	{
@@ -166,7 +213,6 @@ namespace LmModel
 		}
 
 		bool ok = area->writeBit(offsetW, data, bitNo);
-
 		return ok;
 	}
 
@@ -179,7 +225,30 @@ namespace LmModel
 		}
 
 		bool ok = area->readBit(offsetW, bitNo, data);
+		return ok;
+	}
 
+	bool Ram::writeWord(quint32 offsetW, quint32 data)
+	{
+		RamArea* area = memoryArea(RamAccess::Write, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		bool ok = area->writeWord(offsetW, data);
+		return ok;
+	}
+
+	bool Ram::readWord(quint32 offsetW, quint16* data) const
+	{
+		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		bool ok = area->readWord(offsetW, data);
 		return ok;
 	}
 
