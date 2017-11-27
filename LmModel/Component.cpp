@@ -1,5 +1,6 @@
 #include "Component.h"
 #include <type_traits>
+#include <cfenv>
 #include <QQmlEngine>
 
 namespace LmModel
@@ -41,13 +42,13 @@ namespace LmModel
 		m_data = value;
 	}
 
-	double ComponentParam::floatValue() const
+	float ComponentParam::floatValue() const
 	{
 		float fp = *reinterpret_cast<const float*>(&m_data);
 		return static_cast<double>(fp);
 	}
 
-	void ComponentParam::setFloatValue(double value)
+	void ComponentParam::setFloatValue(float value)
 	{
 		float floatVal = static_cast<float>(value);
 		*reinterpret_cast<float*>(&m_data) = floatVal;
@@ -174,7 +175,7 @@ namespace LmModel
 			}
 		}
 
-		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
+		setSignedIntValue(result);
 
 		// Setting math flags, matters only:
 		// zero
@@ -188,8 +189,140 @@ namespace LmModel
 		}
 		else
 		{
-			m_mathFlags.zero = (result & 0xFFFFFFFF) == 0;
+			m_mathFlags.zero = (result == 0);
 		}
+
+		return;
+	}
+
+	void ComponentParam::addFloatingPoint(ComponentParam* operand)
+	{
+		if (operand == nullptr)
+		{
+			assert(operand);
+			return;
+		}
+
+		resetMathFlags();
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		float op1 = this->floatValue();
+		float op2 = operand->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = op1 + op2;
+
+		// Setting math flags
+		//
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
+		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
+		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
+													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
+													// Some compilers can optimize it!
+
+		setFloatValue(result);
+
+		return;
+	}
+
+	void ComponentParam::subFloatingPoint(ComponentParam* operand)
+	{
+		if (operand == nullptr)
+		{
+			assert(operand);
+			return;
+		}
+
+		resetMathFlags();
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		float op1 = this->floatValue();
+		float op2 = operand->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = op1 - op2;
+
+		// Setting math flags
+		//
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
+		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
+		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
+													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
+													// Some compilers can optimize it!
+
+		setFloatValue(result);
+
+		return;
+	}
+
+	void ComponentParam::mulFloatingPoint(ComponentParam* operand)
+	{
+		if (operand == nullptr)
+		{
+			assert(operand);
+			return;
+		}
+
+		resetMathFlags();
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		float op1 = this->floatValue();
+		float op2 = operand->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = op1 * op2;
+
+		// Setting math flags
+		//
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
+		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
+		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
+													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
+													// Some compilers can optimize it!
+
+		setFloatValue(result);
+
+		return;
+	}
+
+	void ComponentParam::divFloatingPoint(ComponentParam* operand)
+	{
+		if (operand == nullptr)
+		{
+			assert(operand);
+			return;
+		}
+
+		resetMathFlags();
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		float op1 = this->floatValue();
+		float op2 = operand->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = op1 / op2;
+
+		// Setting math flags
+		//
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
+		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
+		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
+													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
+													// Some compilers can optimize it!
+
+		setFloatValue(result);
 
 		return;
 	}

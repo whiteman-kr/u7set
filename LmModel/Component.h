@@ -35,8 +35,8 @@ namespace LmModel
 		quint16 wordValue() const;
 		void setWordValue(quint16 value);
 
-		double floatValue() const;
-		void setFloatValue(double value);
+		float floatValue() const;
+		void setFloatValue(float value);
 
 		qint32 signedIntValue() const;
 		void setSignedIntValue(qint32 value);
@@ -46,6 +46,11 @@ namespace LmModel
 		void subSignedInteger(ComponentParam* operand);
 		void mulSignedInteger(ComponentParam* operand);
 		void divSignedInteger(ComponentParam* operand);
+
+		void addFloatingPoint(ComponentParam* operand);
+		void subFloatingPoint(ComponentParam* operand);
+		void mulFloatingPoint(ComponentParam* operand);
+		void divFloatingPoint(ComponentParam* operand);
 
 	private:
 		void resetMathFlags();

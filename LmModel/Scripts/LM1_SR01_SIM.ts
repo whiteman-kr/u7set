@@ -20,6 +20,11 @@ interface ComponentParam
 	subSignedInteger(operand: ComponentParam) : void;	// -=
 	mulSignedInteger(operand: ComponentParam) : void;	// *=
 	divSignedInteger(operand: ComponentParam) : void;	// /=
+
+	addFloatingPoint(operand: ComponentParam) : void;	// +=
+	subFloatingPoint(operand: ComponentParam) : void;	// -=
+	mulFloatingPoint(operand: ComponentParam) : void;	// *=
+	divFloatingPoint(operand: ComponentParam) : void;	// /=	
 }
 interface ComponentInstance 
 {
@@ -181,9 +186,6 @@ function afb_math(instance: ComponentInstance) : string
 	switch (conf.AsWord)
 	{
 		case 1: // SI +
-			//<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>				
-			//<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
-			//<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>		
 			operand1.addSignedInteger(operand2);
 			break;
 		 case 2: // SI -
@@ -195,32 +197,31 @@ function afb_math(instance: ComponentInstance) : string
 		case 4: // SI /
 			operand1.divSignedInteger(operand2);
 			break;
-		// case 5: // FP +
-		// 	{
-		// 		throw new Error("Math FP + not implemneted yet.");
-		// 	}
-		// 	break;
-		// case 6: // FP -
-		// 	{
-		// 		throw new Error("Math FP - not implemneted yet.");
-		// 	}
-		// 	break;
-		// case 7: // FP *
-		// 	{
-		// 		throw new Error("Math FP * not implemneted yet.");
-		// 	}
-		// 	break;
-		// case 8: // FP /
-		// 	{
-		// 		throw new Error("Math FP / not implemneted yet.");
-		// 	}
-		// 	break;
+		case 5: // FP +
+			operand1.addFloatingPoint(operand2);
+			break;
+		case 6: // FP -
+			operand1.subFloatingPoint(operand2);
+			break;
+		case 7: // FP *
+			operand1.mulFloatingPoint(operand2);
+		 	break;
+		case 8: // FP /
+			operand1.divFloatingPoint(operand2);
+		 	break;		
 		default:
-			throw new Error("Unknown AFB configuration: " + conf + ", or this configuration is not implemented yet.");
+			throw new Error("Unknown AFB configuration: " + conf.AsSignedInt + ", or this configuration is not implemented yet.");
 	}
 
 	// Save result
 	//	
 	instance.addOutputParam(o_result, operand1);
+
+	instance.addOutputParamWord(o_overflow, operand1.MathOverflow ? 0x0001 : 0x0000);	
+	instance.addOutputParamWord(o_underflow, operand1.MathUnderflow ? 0x0001 : 0x0000);
+	instance.addOutputParamWord(o_zero, operand1.MathZero ? 0x0001 : 0x0000);
+	instance.addOutputParamWord(o_nan, operand1.MathNan ? 0x0001 : 0x0000);
+	instance.addOutputParamWord(o_div_by_zero, operand1.MathDivByZero ? 0x0001 : 0x0000);
+
 	return "";
 }
