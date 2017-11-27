@@ -73,11 +73,12 @@ namespace LmModel
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
-		qint64 op1 = this->signedIntValue();
-		qint64 op2 = operand->signedIntValue();
-		qint64 result = op1 + op2;
+		qint32 op1 = this->signedIntValue();
+		qint32 op2 = operand->signedIntValue();
+		qint32 result = op1 + op2;
+		qint64 wideResult = static_cast<qint64>(op1) + static_cast<qint64>(op2);
 
-		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
+		setSignedIntValue(result);
 
 		// Setting math flags, matters only:
 		// overflow
@@ -85,10 +86,10 @@ namespace LmModel
 		//
 		resetMathFlags();
 
-		m_mathFlags.overflow = result > std::numeric_limits<qint32>::max() ||
-							   result < std::numeric_limits<qint32>::min();
+		m_mathFlags.overflow = wideResult > std::numeric_limits<qint32>::max() ||
+							   wideResult < std::numeric_limits<qint32>::min();
 
-		m_mathFlags.zero = (result & 0xFFFFFFFF) == 0;
+		m_mathFlags.zero = (result == 0);
 
 		return;
 	}
@@ -111,11 +112,12 @@ namespace LmModel
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
-		qint64 op1 = this->signedIntValue();
-		qint64 op2 = operand->signedIntValue();
-		qint64 result = op1 * op2;
+		qint32 op1 = this->signedIntValue();
+		qint32 op2 = operand->signedIntValue();
+		qint32 result = op1 * op2;
+		qint64 wideResult = static_cast<qint64>(op1) * static_cast<qint64>(op2);
 
-		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
+		setSignedIntValue(result);
 
 		// Setting math flags, matters only:
 		// overflow
@@ -123,10 +125,10 @@ namespace LmModel
 		//
 		resetMathFlags();
 
-		m_mathFlags.overflow = result > std::numeric_limits<qint32>::max() ||
-							   result < std::numeric_limits<qint32>::min();
+		m_mathFlags.overflow = wideResult > std::numeric_limits<qint32>::max() ||
+							   wideResult < std::numeric_limits<qint32>::min();
 
-		m_mathFlags.zero = (result & 0xFFFFFFFF) == 0;
+		m_mathFlags.zero = (result == 0);
 
 		return;
 	}
@@ -141,13 +143,35 @@ namespace LmModel
 
 		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
 		//
-		qint64 op1 = this->signedIntValue();
-		qint64 op2 = operand->signedIntValue();
-		qint64 result = 0;
+		qint32 op1 = this->signedIntValue();
+		qint32 op2 = operand->signedIntValue();
+		qint32 result = 0;
 
 		if (op2 != 0)
 		{
 			result = op1 / op2;
+		}
+		else
+		{
+			//  X / 0 = -1
+			// -X / 0 =  1
+			//  0 / 0 = -1
+			//
+			if (op1 == 0)
+			{
+				result = -1;
+			}
+			else
+			{
+				if (op1 < 0)
+				{
+					result = 1;
+				}
+				else
+				{
+					result = -1;
+				}
+			}
 		}
 
 		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
@@ -161,7 +185,6 @@ namespace LmModel
 		if (op2 == 0)
 		{
 			m_mathFlags.divByZero = true;
-			int to_do_should_we_set_zero_flag_gere;
 		}
 		else
 		{
