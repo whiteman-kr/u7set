@@ -1,4 +1,5 @@
 #include "Component.h"
+#include <type_traits>
 #include <QQmlEngine>
 
 namespace LmModel
@@ -19,6 +20,7 @@ namespace LmModel
 	{
 		m_paramOpIndex = that.m_paramOpIndex;
 		m_data = that.m_data;
+		m_mathFlags.data = that.m_mathFlags.data;
 
 		return *this;
 	}
@@ -59,6 +61,81 @@ namespace LmModel
 	void ComponentParam::setSignedIntValue(qint32 value)
 	{
 		m_data = static_cast<quint32>(value);
+	}
+
+	void ComponentParam::addSignedInteger(ComponentParam* operand)
+	{
+		if (operand == nullptr)
+		{
+			assert(operand);
+			return;
+		}
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		qint64 op1 = this->signedIntValue();
+		qint64 op2 = operand->signedIntValue();
+		qint64 result = op1 + op2;
+
+		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
+
+		// Setting math flags, matters only:
+		// m_mathOverflow
+		// m_mathZero
+		//
+		resetMathFlags();
+
+		m_mathFlags.overflow = result > std::numeric_limits<qint32>::max() ||
+							   result < std::numeric_limits<qint32>::min();
+
+		m_mathFlags.zero = (result & 0xFFFFFFFF) == 0;
+
+		return;
+	}
+
+	void ComponentParam::subSignedInteger(ComponentParam* operand)
+	{
+		assert(false);
+	}
+
+	void ComponentParam::mulSignedInteger(ComponentParam* operand)
+	{
+		assert(false);
+	}
+
+	void ComponentParam::divSignedInteger(ComponentParam* operand)
+	{
+		assert(false);
+	}
+
+	void ComponentParam::resetMathFlags()
+	{
+		m_mathFlags.data = 0;
+	}
+
+	bool ComponentParam::mathOverflow() const
+	{
+		return m_mathFlags.overflow;
+	}
+
+	bool ComponentParam::mathUnderflow() const
+	{
+		return m_mathFlags.underflow;
+	}
+
+	bool ComponentParam::mathZero() const
+	{
+		return m_mathFlags.zero;
+	}
+
+	bool ComponentParam::mathNan() const
+	{
+		return m_mathFlags.nan;
+	}
+
+	bool ComponentParam::mathDivByZero() const
+	{
+		return m_mathFlags.divByZero;
 	}
 
 	ComponentInstance::ComponentInstance(quint16 instanceNo) :
@@ -118,13 +195,24 @@ namespace LmModel
 		return componentParam;
 	}
 
+	bool ComponentInstance::addOutputParam(int opIndex, ComponentParam* param)
+	{
+		if (param == nullptr)
+		{
+			assert(param);
+			return false;
+		}
+
+		m_params[opIndex] = *param;
+		return true;
+	}
+
 	bool ComponentInstance::addOutputParamWord(int opIndex, quint16 value)
 	{
 		ComponentParam param(opIndex, 0);
 		param.setWordValue(value);
 
 		m_params[opIndex] = param;
-
 		return true;
 	}
 
@@ -134,7 +222,6 @@ namespace LmModel
 		param.setFloatValue(value);
 
 		m_params[opIndex] = param;
-
 		return true;
 	}
 
@@ -144,7 +231,6 @@ namespace LmModel
 		param.setSignedIntValue(value);
 
 		m_params[opIndex] = param;
-
 		return true;
 	}
 
@@ -152,7 +238,6 @@ namespace LmModel
 		m_afbComp(afbComp)
 	{
 		assert(m_afbComp);
-
 		return;
 	}
 

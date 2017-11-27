@@ -51,6 +51,9 @@ namespace LmModel
 		bool writeWord(quint32 offsetW, quint16 data);
 		bool readWord(quint32 offsetW, quint16* data) const;
 
+		bool writeSignedInt(quint32 offsetW, qint32 data);
+		bool readSignedInt(quint32 offsetW, qint32* data) const;
+
 	private:
 		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data);
 		template<typename TYPE> bool readData(quint32 offsetW, TYPE* data) const;
@@ -74,6 +77,9 @@ namespace LmModel
 
 		bool writeWord(quint32 offsetW, quint32 data);
 		bool readWord(quint32 offsetW, quint16* data) const;
+
+		bool writeSignedInt(quint32 offsetW, qint32 data);
+		bool readSignedInt(quint32 offsetW, qint32* data) const;
 
 	private:
 		RamArea* memoryArea(RamAccess access, quint32 offsetW);

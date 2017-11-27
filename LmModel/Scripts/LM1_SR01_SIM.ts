@@ -5,13 +5,28 @@ interface ComponentParam
 	AsWord: number;
 	AsFloat: number;
 	AsSignedInt: number;
-}
 
+	// Math operations result flags
+	//
+	MathOverflow: boolean;
+	MathUnderflow: boolean;
+	MathZero: boolean;
+	MathNan: boolean;
+	MathDivByZero: boolean;
+
+	// Math operations
+	//
+	addSignedInteger(operand: ComponentParam) : void;	// +=
+	subSignedInteger(operand: ComponentParam) : void;	// -=
+	mulSignedInteger(operand: ComponentParam) : void;	// *=
+	divSignedInteger(operand: ComponentParam) : void;	// /=
+}
 interface ComponentInstance 
 {
 	paramExists(opIndex: number): boolean;
 	param(opIndex: number): ComponentParam;
 
+	addOutputParam(opIndex: number, value: ComponentParam): boolean;
 	addOutputParamWord(opIndex: number, value: number): boolean;
 	addOutputParamFloat(opIndex: number, value: number): boolean;
 	addOutputParamSignedInt(opIndex: number, value: number): boolean;
@@ -79,28 +94,22 @@ function afb_logic(instance: ComponentInstance) : string
 	switch (conf.AsWord)
 	{
 		case 1: // AND
+			for (var i = 1; i < inputs.length; i++)
 			{
-				for (var i = 1; i < inputs.length; i++)
-				{
-					result &= inputs[i].AsWord;
-				}
+				result &= inputs[i].AsWord;
 			}
 			break;        
 		case 2: // OR
+			for (var i = 1; i < inputs.length; i++)
 			{
-				for (var i = 1; i < inputs.length; i++)
-				{
-					result |= inputs[i].AsWord;
-				}
+				result |= inputs[i].AsWord;
 			}
 			break;
 		case 2: // XOR
+			for (var i = 1; i < inputs.length; i++)
 			{
-				for (var i = 1; i < inputs.length; i++)
-				{
-					result ^= inputs[i].AsWord;
-				}			
-			}
+				result ^= inputs[i].AsWord;
+			}			
 			break;        
 		default:
 			throw new Error("Unknown AFB configuration: " + conf);
@@ -136,5 +145,82 @@ function afb_not(instance: ComponentInstance) : string
 	//	
 	instance.addOutputParamWord(o_result, result);
 	
+	return "";
+}
+
+//
+//	MATH, OpCode 13
+//
+function afb_math(instance: ComponentInstance) : string
+{
+	// Define input opIndexes
+	//
+	const i_conf = 0;
+	const i_1_oprd = 1;
+	const i_2_oprd = 3;
+	const o_result = 6;
+	const o_mat_edi = 8;
+	const o_overflow = 9;
+	const o_underflow = 10;
+	const o_zero = 11;
+	const o_nan = 12;
+	const o_div_by_zero = 13;
+	
+	// Get params,  check_param throws exception in case of error
+	//
+	check_param_exist(instance, i_conf, "i_conf");
+	check_param_exist(instance, i_1_oprd, "i_1_oprd");
+	check_param_exist(instance, i_2_oprd, "i_2_oprd");
+	
+	let conf: ComponentParam = instance.param(i_conf);
+	let operand1: ComponentParam = instance.param(i_1_oprd);
+	let operand2: ComponentParam = instance.param(i_2_oprd);
+
+	// Logic	conf: 1'-'+' (SI),  '2'-'-' (SI),  '3'-'*' (SI),  '4'-'/' (SI), '5'-'+' (FP),  '6'-'-' (FP),  '7'-'*' (FP),  '8'-'/' (FP)   
+	//
+	switch (conf.AsWord)
+	{
+		case 1: // SI +
+			//<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>				
+			//<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+			//<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>		
+			operand1.addSignedInteger(operand2);
+			break;
+		 case 2: // SI -
+			operand1.subSignedInteger(operand2);
+			break;
+		case 3: // SI *
+			operand1.mulSignedInteger(operand2);
+			break;
+		case 4: // SI /
+			operand1.divSignedInteger(operand2);
+			break;
+		// case 5: // FP +
+		// 	{
+		// 		throw new Error("Math FP + not implemneted yet.");
+		// 	}
+		// 	break;
+		// case 6: // FP -
+		// 	{
+		// 		throw new Error("Math FP - not implemneted yet.");
+		// 	}
+		// 	break;
+		// case 7: // FP *
+		// 	{
+		// 		throw new Error("Math FP * not implemneted yet.");
+		// 	}
+		// 	break;
+		// case 8: // FP /
+		// 	{
+		// 		throw new Error("Math FP / not implemneted yet.");
+		// 	}
+		// 	break;
+		default:
+			throw new Error("Unknown AFB configuration: " + conf + ", or this configuration is not implemented yet.");
+	}
+
+	// Save result
+	//	
+	instance.addOutputParam(o_result, operand1);
 	return "";
 }

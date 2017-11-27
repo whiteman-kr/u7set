@@ -133,6 +133,16 @@ namespace LmModel
 		return readData<quint16>(offsetW, data);
 	}
 
+	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data)
+	{
+		return writeData<qint32>(offsetW, data);
+	}
+
+	bool RamArea::readSignedInt(quint32 offsetW, qint32* data) const
+	{
+		return readData<qint32>(offsetW, data);
+	}
+
 	template<typename TYPE>
 	bool RamArea::writeData(quint32 offsetW, TYPE data)
 	{
@@ -249,6 +259,30 @@ namespace LmModel
 		}
 
 		bool ok = area->readWord(offsetW, data);
+		return ok;
+	}
+
+	bool Ram::writeSignedInt(quint32 offsetW, qint32 data)
+	{
+		RamArea* area = memoryArea(RamAccess::Write, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		bool ok = area->writeSignedInt(offsetW, data);
+		return ok;
+	}
+
+	bool Ram::readSignedInt(quint32 offsetW, qint32* data) const
+	{
+		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		bool ok = area->readSignedInt(offsetW, data);
 		return ok;
 	}
 

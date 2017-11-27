@@ -1005,11 +1005,68 @@ namespace LmModel
 	}
 
 	// OpCode 21
+	// Read data from functional block, write it to memory
 	//
 	bool DeviceEmulator::command_rdfb32()
 	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+		m_logicUnit.programCounter++;
+
+		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+		m_logicUnit.programCounter++;
+
+		quint16 address = getWord(m_logicUnit.programCounter);
+		m_logicUnit.programCounter++;
+
+		// Get data from functional block
+		//
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+		if (afbComp == nullptr)
+		{
+			FAULT(QString("AfbComponent with OpCode %1 not found").arg(funcBlock));
+			return false;
+		}
+
+		const ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
+		if (instance == nullptr)
+		{
+			QString formattedError = QString("Instance %1 does not exists, AFB %2 (%3).")
+										.arg(implNo)
+										.arg(afbComp->caption())
+										.arg(afbComp->opCode());
+			FAULT(formattedError);
+			return false;
+		}
+
+		const ComponentParam* param = instance->param(implParamOpIndex);
+		if (param == nullptr)
+		{
+			QString formattedError = QString("command_rdfbb, param %1 does not exists, AFB %2 (%3), instance %4.")
+										.arg(implParamOpIndex)
+										.arg(afbComp->caption())
+										.arg(afbComp->opCode())
+										.arg(implNo);
+			FAULT(formattedError);
+			return false;
+		}
+
+		qint32 data = param->signedIntValue();
+
+		bool ok = m_ram.writeSignedInt(address, data);
+		if (ok == false)
+		{
+			QString formattedMessage = QString("Write memory error, addrw %1, data %2")
+										.arg(address)
+										.arg(data);
+			FAULT(formattedMessage);
+			return false;
+		}
+
+		return true;
 	}
 
 	// OpCode 22
@@ -1101,7 +1158,7 @@ namespace LmModel
 		return getData<quint16>(wordOffset * 2);
 	}
 
-	quint16 DeviceEmulator::getDword(int wordOffset) const
+	quint32 DeviceEmulator::getDword(int wordOffset) const
 	{
 		return getData<quint32>(wordOffset * 2);
 	}

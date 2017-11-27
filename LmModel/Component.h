@@ -17,6 +17,12 @@ namespace LmModel
 		Q_PROPERTY(double AsFloat READ floatValue)
 		Q_PROPERTY(qint32 AsSignedInt READ signedIntValue)
 
+		Q_PROPERTY(bool MathOverflow READ mathOverflow)
+		Q_PROPERTY(bool MathUnderflow READ mathUnderflow)
+		Q_PROPERTY(bool MathZero READ mathZero)
+		Q_PROPERTY(bool MathNan READ mathNan)
+		Q_PROPERTY(bool MathDivByZero READ mathDivByZero)
+
 	public:
 		ComponentParam() = default;
 		ComponentParam(const ComponentParam& that);
@@ -35,11 +41,40 @@ namespace LmModel
 		qint32 signedIntValue() const;
 		void setSignedIntValue(qint32 value);
 
+	public slots:
+		void addSignedInteger(ComponentParam* operand);
+		void subSignedInteger(ComponentParam* operand);
+		void mulSignedInteger(ComponentParam* operand);
+		void divSignedInteger(ComponentParam* operand);
+
+	private:
+		void resetMathFlags();
+		bool mathOverflow() const;
+		bool mathUnderflow() const;
+		bool mathZero() const;
+		bool mathNan() const;
+		bool mathDivByZero() const;
+
 	private:
 		// Warning, class has operator =
 		//
 		quint16 m_paramOpIndex = 0;
 		quint32 m_data = 0;
+
+		// Math operations flags
+		//
+		union
+		{
+			struct
+			{
+				bool overflow : 1;
+				bool underflow  : 1;
+				bool zero : 1;
+				bool nan : 1;
+				bool divByZero : 1;
+			};
+			quint32 data = 0;
+		} m_mathFlags;
 		// Warning, class has operator =
 		//
 	};
@@ -61,6 +96,7 @@ namespace LmModel
 	public:	// For access from JavaScript
 		Q_INVOKABLE bool paramExists(int opIndex) const;
 		Q_INVOKABLE QObject* param(int opIndex);
+		Q_INVOKABLE bool addOutputParam(int opIndex, ComponentParam* param);
 		Q_INVOKABLE bool addOutputParamWord(int opIndex, quint16 value);
 		Q_INVOKABLE bool addOutputParamFloat(int opIndex, float value);
 		Q_INVOKABLE bool addOutputParamSignedInt(int opIndex, qint32 value);
