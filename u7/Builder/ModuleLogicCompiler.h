@@ -313,7 +313,8 @@ namespace Builder
 		bool generateBusComposerCode(const UalItem* ualItem);
 		UalSignal* getBusComposerBusSignal(const UalItem* composerItem);
 		bool generateAnalogSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal &busSignal);
+		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateBusSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
 
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
@@ -335,7 +336,7 @@ namespace Builder
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
 
-		bool copyAcquiredConstAnalogSignalsToRegBuf();
+		bool copyAcquiredAnalogConstSignalsToRegBuf();
 
 		bool copyAcquiredDiscreteInputSignalsToRegBuf();
 		bool copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf();

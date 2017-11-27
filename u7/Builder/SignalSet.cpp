@@ -228,12 +228,12 @@ namespace Builder
 
 			for(const VFrame30::BusSignal& busSignal : busSignals)
 			{
-				Signal* newSignal = appendBusChildSignal(*s, bus, busSignal);
+			/*	Signal* newSignal = appendBusChildSignal(*s, bus, busSignal);
 
 				if (newSignal == nullptr)
 				{
 					result = false;
-				}
+				}*/
 			}
 		}
 
@@ -338,7 +338,7 @@ namespace Builder
 		}
 	}
 
-	Signal* SignalSet::appendBusChildSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
+	Signal* SignalSet::appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal)
 	{
 		m_maxSignalID++;
 
@@ -349,12 +349,12 @@ namespace Builder
 		return newSignal;
 	}
 
-	Signal* SignalSet::createBusChildSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
+	Signal* SignalSet::createBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal)
 	{
 		Signal* newSignal = new Signal();
 
-		newSignal->setAppSignalID(QString(s.appSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalId()));
-		newSignal->setCustomAppSignalID(QString(s.customAppSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalId()));
+		newSignal->setAppSignalID(QString(s.appSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setCustomAppSignalID(QString(s.customAppSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
 
 		QString caption = buildBusSignalCaption(s, bus, busSignal);
 
@@ -362,7 +362,7 @@ namespace Builder
 		newSignal->setEquipmentID(s.equipmentID());
 //		newSignal->setBusTypeID(s.busTypeID());
 
-		newSignal->setSignalType(busSignal.type());
+		newSignal->setSignalType(busSignal.signalType);
 		newSignal->setInOutType(E::SignalInOutType::Internal);
 
 		newSignal->setByteOrder(E::ByteOrder::BigEndian);
@@ -370,25 +370,28 @@ namespace Builder
 		switch(newSignal->signalType())
 		{
 		case E::SignalType::Analog:
-			newSignal->setUnit(busSignal.units());
+			newSignal->setUnit(busSignal.units);
 			newSignal->setDataSize(SIZE_32BIT);
-			newSignal->setAnalogSignalFormat(busSignal.analogFormat());
+			newSignal->setAnalogSignalFormat(busSignal.analogFormat);
 
-			newSignal->setLowADC(busSignal.busAnalogLowLimit());
-			newSignal->setHighADC(busSignal.busAnalogHighLimit());
+			newSignal->setLowADC(busSignal.inbusAnalogLowLimit);
+			newSignal->setHighADC(busSignal.inbusAnalogHighLimit);
 
-			newSignal->setLowEngeneeringUnits(busSignal.busAnalogLowLimit());
-			newSignal->setHighEngeneeringUnits(busSignal.busAnalogHighLimit());
+			newSignal->setLowEngeneeringUnits(busSignal.busAnalogLowLimit);
+			newSignal->setHighEngeneeringUnits(busSignal.busAnalogHighLimit);
 
-			newSignal->setLowValidRange(busSignal.busAnalogLowLimit());
-			newSignal->setHighValidRange(busSignal.busAnalogHighLimit());
-
+			newSignal->setLowValidRange(busSignal.busAnalogLowLimit);
+			newSignal->setHighValidRange(busSignal.busAnalogHighLimit);
 			break;
 
 		case E::SignalType::Discrete:
 			newSignal->setUnit("");
 			newSignal->setDataSize(SIZE_1BIT);
+			break;
 
+		case E::SignalType::Bus:
+			newSignal->setBusTypeID(busSignal.busTypeID);
+			newSignal->setDataSize(busSignal.inbusSizeBits);
 			break;
 
 		default:
@@ -406,14 +409,14 @@ namespace Builder
 		return newSignal;
 	}
 
-	QString SignalSet::buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
+	QString SignalSet::buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal)
 	{
 		QString caption = s.caption();
 
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSTYPEID, bus.busTypeId());
+		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSTYPEID, bus->busTypeID());
 		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSID, s.customAppSignalID());
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALID, busSignal.signalId());
-		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION, busSignal.caption());
+		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALID, busSignal.signalID);
+		caption.replace(Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION, busSignal.caption);
 
 		return caption;
 	}

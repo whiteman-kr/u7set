@@ -50,6 +50,7 @@ namespace Builder
 		signalType = bs.type();
 		caption = bs.caption();
 		busTypeID = bs.busTypeId();
+		units = bs.units();
 
 		inbusAddr.set(0, 0);
 		inbusAddr.addBit(bs.inbusOffset() * SIZE_8BIT + bs.inbusDiscreteBitNo());

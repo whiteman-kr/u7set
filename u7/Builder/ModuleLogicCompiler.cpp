@@ -156,7 +156,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf),
-			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredConstAnalogSignalsToRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsToRegBuf),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf),
@@ -793,7 +793,7 @@ namespace Builder
 
 		Signal* connectedBusSignal = getCompatibleConnectedBusSignal(outPin, busTypeID);
 
-		UalSignal* parentBusSignal = m_ualSignals.createBusParentSignal(ualItem, connectedBusSignal, bus, outPin.guid(), "OUT");
+		UalSignal* parentBusSignal = m_ualSignals.createBusParentSignal(ualItem, connectedBusSignal, bus, outPin.guid(), outPin.caption());
 
 		if (parentBusSignal == nullptr)
 		{
@@ -2550,7 +2550,7 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(ualSignal);
 
-			if (ualSignal->isConst() == false || ualSignal->isAnalog() == false)
+			if (ualSignal->isConst() == false || ualSignal->isAnalog() == false || ualSignal->isAcquired() == false)
 			{
 				continue;
 			}
@@ -5613,6 +5613,10 @@ namespace Builder
 				res = generateDiscreteSignalToBusCode(inputSignal, busChildSignal, busSignal);
 				break;
 
+			case E::SignalType::Bus:
+				res = generateBusSignalToBusCode(inputSignal, busChildSignal, busSignal);
+				break;
+
 			default:
 				assert(false);
 				LOG_INTERNAL_ERROR(m_log);
@@ -5767,6 +5771,70 @@ namespace Builder
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
 			m_code.append(cmd);
 		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateBusSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal)
+	{
+		if (inputSignal == nullptr || busChildSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		if (inputSignal->ualAddr().isValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(inputSignal->appSignalID(), inputSignal->ualItemGuid(), inputSignal->ualItemSchemaID());
+			return false;
+		}
+
+		if (busChildSignal->ualAddr().isValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(busChildSignal->appSignalID(), busChildSignal->ualItemGuid(), busChildSignal->ualItemSchemaID());
+			return false;
+		}
+
+		if (busSignal.conversionRequired() == true)
+		{
+			LOG_INTERNAL_ERROR(m_log);				// bus signals conversion is not implemented now
+			return false;
+		}
+
+		if (inputSignal->busTypeID() != busChildSignal->busTypeID() ||
+				inputSignal->sizeW() != busChildSignal->sizeW())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
+		QString busChildSignalIDs = busChildSignal->refSignalIDsJoined();
+
+		Command cmd;
+
+		int busSizeW = busChildSignal->sizeW();
+
+		switch(busSizeW)
+		{
+		case 1:
+			cmd.mov(busChildSignal->ualAddr(), inputSignal->ualAddr());
+			break;
+
+		case 2:
+			cmd.mov32(busChildSignal->ualAddr(), inputSignal->ualAddr());
+			break;
+
+		default:
+			cmd.movMem(busChildSignal->ualAddr(), inputSignal->ualAddr(), busSizeW);
+		}
+
+		cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
+		m_code.append(cmd);
 
 		return true;
 	}
@@ -6567,7 +6635,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredConstAnalogSignalsToRegBuf()
+	bool ModuleLogicCompiler::copyAcquiredAnalogConstSignalsToRegBuf()
 	{
 		if (m_acquiredAnalogConstIntSignals.isEmpty() == true &&
 			m_acquiredAnalogConstFloatSignals.isEmpty() == true)

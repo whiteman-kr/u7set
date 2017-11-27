@@ -18,6 +18,7 @@ namespace Builder
 		E::SignalType signalType = E::SignalType::Discrete;
 		Address16 inbusAddr;
 		QString busTypeID;
+		QString units;
 
 		// analog signals conversion parameters
 		//
@@ -76,6 +77,8 @@ namespace Builder
 		QStringList getChildBussesIDs();
 
 		bool isInitialized() const { return m_isInitialized; }
+
+		const Busses& busses() const { return m_busses; }
 
 	private:
 		bool buildInBusSignalsMap();

@@ -142,7 +142,7 @@ namespace Builder
 			return false;
 		}
 
-		int instance = 0;
+		int instance = -1;
 		int maxInstances = afbl->maxInstances();
 
 		QString instantiatorID = ualAfb->instantiatorID();
@@ -179,15 +179,9 @@ namespace Builder
 			}
 		}
 
-		if (instance == 0)
+		if (instance < 0)
 		{
 			assert(false);				// invalid instance number
-			return false;
-		}
-
-		if (instance > MAX_FB_INSTANCE)
-		{
-			assert(false);				// reached the max instance number
 			return false;
 		}
 
@@ -216,9 +210,9 @@ namespace Builder
 
 		// initialize map Fbl opCode -> current instance
 		//
-		if (!m_fblInstance.contains(logicAfb->opCode()))
+		if (m_fblInstance.contains(logicAfb->opCode()) == false)
 		{
-			m_fblInstance.insert(logicAfb->opCode(), 0);
+			m_fblInstance.insert(logicAfb->opCode(), -1);			// init by -1, but used instances values is beginning from 0
 		}
 
 		// add AfbElement in/out signals to m_fblsSignals map
@@ -1407,7 +1401,20 @@ namespace Builder
 			return false;
 		}
 
-		return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
+		switch(busSignal.signalType)
+		{
+		case E::SignalType::Analog:
+		case E::SignalType::Discrete:
+			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
+
+		case E::SignalType::Bus:
+			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.busTypeID);
+
+		default:
+			assert(false);
+		}
+
+		return false;
 	}
 
 	bool UalSignal::isCompatible(const UalSignal* ualSignal) const
@@ -1464,10 +1471,15 @@ namespace Builder
 
 		assert(ualAddr.isValid() == true);
 
-		if (m_ualAddr.isValid() == true)
+		if (m_ualAddr.isValid() == true && m_isBusChild == true)
+		{
+			return true;			// ualAddress of bus child signal is allredy set, its ok
+		}
+
+		if (m_ualAddr.isValid() == true && m_isBusChild == false)
 		{
 			Signal* s = signal();
-			assert(false);				// m_ualAddr is already set
+			assert(false);				// why and where m_ualAddr is already set???
 			return false;
 		}
 
@@ -2057,9 +2069,7 @@ namespace Builder
 
 			for(const BusSignal& busSignal : busSignals)
 			{
-				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(),
-																   bus->srcBus(),
-																   bus->getBusSignal(busSignal.signalID));
+				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(), bus, busSignal);
 
 				templateSignal->setEquipmentID(s->equipmentID());
 
@@ -2078,7 +2088,8 @@ namespace Builder
 	}
 
 	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem,
-													Signal* s, BusShared bus,
+													Signal* s,
+													BusShared bus,
 													QUuid outPinUuid,
 													const QString& outPinCaption)
 	{
@@ -2106,16 +2117,45 @@ namespace Builder
 
 		for(const BusSignal& busSignal : busSignals)
 		{
-			Signal* s = m_compiler.signalSet().appendBusChildSignal(*busParentSignal->signal(),
-															   bus->srcBus(),
-															   bus->getBusSignal(busSignal.signalID));
+			Signal* sChild = m_compiler.signalSet().appendBusChildSignal(*busParentSignal->signal(), bus, busSignal);
 
-			UalSignal* busChildSignal = createSignal(s);
+			UalSignal* busChildSignal = nullptr;
+
+			switch(busSignal.signalType)
+			{
+			case E::SignalType::Analog:
+			case E::SignalType::Discrete:
+				busChildSignal = createSignal(sChild);
+				break;
+
+			case E::SignalType::Bus:
+				{
+					BusShared childBus = bus->busses().getBus(busSignal.busTypeID);
+
+					if (childBus == nullptr)
+					{
+						result = false;
+						continue;
+					}
+
+					busChildSignal = createBusParentSignal(ualItem, sChild, childBus, QUuid(), busSignal.caption);
+				}
+				break;
+
+			default:
+				assert(false);
+			}
 
 			if (busChildSignal != nullptr)
 			{
-				busParentSignal->appendBusChildSignal(busSignal.signalID, busChildSignal);
+				result &= busParentSignal->appendBusChildSignal(busSignal.signalID, busChildSignal);
 			}
+		}
+
+		if (result == false)
+		{
+			delete busParentSignal;
+			return nullptr;
 		}
 
 		return busParentSignal;
@@ -2226,7 +2266,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
-			Signal* newSignal = m_compiler.signalSet().appendBusChildSignal(*s, bus->srcBus(), bus->getBusSignal(busSignal.signalID));
+			Signal* newSignal = m_compiler.signalSet().appendBusChildSignal(*s, bus, busSignal);
 
 			result &= ualSignal->appendBusChildRefSignals(busSignal.signalID, newSignal);
 		}
