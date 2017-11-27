@@ -989,11 +989,35 @@ namespace LmModel
 	}
 
 	// OpCode 19
+	// mov 32bit constant to memory
 	//
 	bool DeviceEmulator::command_movc32()
 	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
+		quint16 commandWord = getWord(m_logicUnit.programCounter);
+		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+		assert(command == 19);
+		m_logicUnit.programCounter++;
+
+		quint16 address = getWord(m_logicUnit.programCounter);
+		m_logicUnit.programCounter++;
+
+		quint32 data = getDword(m_logicUnit.programCounter);
+		m_logicUnit.programCounter += 2;
+
+		// Command Logic
+		//
+		bool ok = m_ram.writeDword(address, data);
+		if (ok == false)
+		{
+			QString formattedMessage = QString("Write memory error, addr %1, data %2")
+										.arg(address)
+										.arg(data);
+			FAULT(formattedMessage);
+			return false;
+		}
+
+		return ok;
 	}
 
 	// OpCode 20

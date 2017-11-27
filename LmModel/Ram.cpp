@@ -133,6 +133,16 @@ namespace LmModel
 		return readData<quint16>(offsetW, data);
 	}
 
+	bool RamArea::writeDword(quint32 offsetW, quint32 data)
+	{
+		return writeData<quint32>(offsetW, data);
+	}
+
+	bool RamArea::readDword(quint32 offsetW, quint32* data) const
+	{
+		return readData<quint32>(offsetW, data);
+	}
+
 	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data)
 	{
 		return writeData<qint32>(offsetW, data);
@@ -238,7 +248,7 @@ namespace LmModel
 		return ok;
 	}
 
-	bool Ram::writeWord(quint32 offsetW, quint32 data)
+	bool Ram::writeWord(quint32 offsetW, quint16 data)
 	{
 		RamArea* area = memoryArea(RamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -259,6 +269,30 @@ namespace LmModel
 		}
 
 		bool ok = area->readWord(offsetW, data);
+		return ok;
+	}
+
+	bool Ram::writeDword(quint32 offsetW, quint32 data)
+	{
+		RamArea* area = memoryArea(RamAccess::Write, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		bool ok = area->writeDword(offsetW, data);
+		return ok;
+	}
+
+	bool Ram::readDword(quint32 offsetW, quint32* data) const
+	{
+		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		bool ok = area->readDword(offsetW, data);
 		return ok;
 	}
 

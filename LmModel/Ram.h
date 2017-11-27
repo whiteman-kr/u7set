@@ -51,6 +51,9 @@ namespace LmModel
 		bool writeWord(quint32 offsetW, quint16 data);
 		bool readWord(quint32 offsetW, quint16* data) const;
 
+		bool writeDword(quint32 offsetW, quint32 data);
+		bool readDword(quint32 offsetW, quint32* data) const;
+
 		bool writeSignedInt(quint32 offsetW, qint32 data);
 		bool readSignedInt(quint32 offsetW, qint32* data) const;
 
@@ -75,8 +78,11 @@ namespace LmModel
 		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
 		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
 
-		bool writeWord(quint32 offsetW, quint32 data);
+		bool writeWord(quint32 offsetW, quint16 data);
 		bool readWord(quint32 offsetW, quint16* data) const;
+
+		bool writeDword(quint32 offsetW, quint32 data);
+		bool readDword(quint32 offsetW, quint32* data) const;
 
 		bool writeSignedInt(quint32 offsetW, qint32 data);
 		bool readSignedInt(quint32 offsetW, qint32* data) const;
