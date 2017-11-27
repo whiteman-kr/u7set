@@ -318,6 +318,7 @@ namespace Builder
 		void errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
 		void errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Unknown AFB type (opCode) (Logic schema %1, item %2).
 		void errALC5130(QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+		void errALC5131(QString appSignalID, QString portID);		// Tx signal %1 is specified in raw data description of opto port %2 as discrete, but connected signal isn't discrete.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

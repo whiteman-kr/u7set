@@ -32,6 +32,8 @@ private:
 
 	MeasureMultiParam		m_activeSignalParam[Metrology::ChannelCount];
 
+	double					m_tunSignalState[Metrology::ChannelCount];
+
 	void					waitMeasureTimeout();
 
 	// calibrators
@@ -45,6 +47,11 @@ private:
 	//
 	void					measureLinearity();
 	void					measureComprators();
+
+	// function for tunning signal
+	//
+	void					saveStateTunSignals();
+	void					restoreStateTunSignals();
 
 public:
 
