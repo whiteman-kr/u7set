@@ -86,5 +86,7 @@ unix {
 
 DISTFILES += \
     Scripts/LM1_SR01_SIM.ts \
-    Scripts/tsconfig.json
+    Scripts/tsconfig.json \
+    Scripts/build.bat \
+    Scripts/out/LM1_SR01_SIM.js
 

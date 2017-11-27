@@ -80,8 +80,8 @@ namespace LmModel
 		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
 
 		// Setting math flags, matters only:
-		// m_mathOverflow
-		// m_mathZero
+		// overflow
+		// zero
 		//
 		resetMathFlags();
 
@@ -95,17 +95,80 @@ namespace LmModel
 
 	void ComponentParam::subSignedInteger(ComponentParam* operand)
 	{
-		assert(false);
+		ComponentParam negativeParam = *operand;
+		negativeParam.setSignedIntValue(negativeParam.signedIntValue() * (-1));
+
+		return addSignedInteger(&negativeParam);
 	}
 
 	void ComponentParam::mulSignedInteger(ComponentParam* operand)
 	{
-		assert(false);
+		if (operand == nullptr)
+		{
+			assert(operand);
+			return;
+		}
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		qint64 op1 = this->signedIntValue();
+		qint64 op2 = operand->signedIntValue();
+		qint64 result = op1 * op2;
+
+		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
+
+		// Setting math flags, matters only:
+		// overflow
+		// zero
+		//
+		resetMathFlags();
+
+		m_mathFlags.overflow = result > std::numeric_limits<qint32>::max() ||
+							   result < std::numeric_limits<qint32>::min();
+
+		m_mathFlags.zero = (result & 0xFFFFFFFF) == 0;
+
+		return;
 	}
 
 	void ComponentParam::divSignedInteger(ComponentParam* operand)
 	{
-		assert(false);
+		if (operand == nullptr)
+		{
+			assert(operand);
+			return;
+		}
+
+		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		//
+		qint64 op1 = this->signedIntValue();
+		qint64 op2 = operand->signedIntValue();
+		qint64 result = 0;
+
+		if (op2 != 0)
+		{
+			result = op1 / op2;
+		}
+
+		setSignedIntValue(static_cast<qint32>(result & 0xFFFFFFFF));
+
+		// Setting math flags, matters only:
+		// zero
+		// divByZero
+		//
+		resetMathFlags();
+
+		if (op2 == 0)
+		{
+			m_mathFlags.divByZero = true;
+			int to_do_should_we_set_zero_flag_gere;
+		}
+		else
+		{
+			m_mathFlags.zero = (result & 0xFFFFFFFF) == 0;
+		}
+
+		return;
 	}
 
 	void ComponentParam::resetMathFlags()
