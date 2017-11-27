@@ -1001,7 +1001,7 @@ namespace Builder
 
 			if (multichannelFile->getFileData(fileData) == true)
 			{
-				BuildFile* buildFile = addFile(multichannelFile->subsysStrID(), multichannelFile->lmCaption() + ".alb", fileData);
+				BuildFile* buildFile = addFile(multichannelFile->subsysStrID(), multichannelFile->subsysStrID().toLower() + ".alb", fileData);
 
 				if (buildFile == nullptr)
 				{
