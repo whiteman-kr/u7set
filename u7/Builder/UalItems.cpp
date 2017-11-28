@@ -134,6 +134,12 @@ namespace Builder
 
 		int opCode = afbl->opCode();
 
+		if (opCode == static_cast<int>(Afb::AfbType::NOT))
+		{
+			int a = 0;
+			a++;
+		}
+
 		if (m_fblInstance.contains(opCode) == false)
 		{
 			// Unknown AFB type (opCode) (Logic schema %1, item %2).
@@ -161,7 +167,7 @@ namespace Builder
 
 			instance++;
 
-			if (instance > maxInstances)
+			if (instance >= maxInstances)
 			{
 				// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
 				//
@@ -662,7 +668,9 @@ namespace Builder
 			return m_instantiatorID;
 		}
 
-		m_instantiatorID = afb().strID();
+		m_instantiatorID = QString("opCode:%1").arg(afb().opCode());
+
+		bool firstParam = true;
 
 		// append instantiator param's values to instantiatorID
 		//
@@ -671,6 +679,12 @@ namespace Builder
 			if (paramValue.instantiator() == false)
 			{
 				continue;
+			}
+
+			if (firstParam == true)
+			{
+				m_instantiatorID += ":params";
+				firstParam = false;
 			}
 
 			switch(paramValue.dataFormat())

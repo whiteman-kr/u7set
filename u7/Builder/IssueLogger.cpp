@@ -4849,7 +4849,6 @@ namespace Builder
 						arg(appSignalID).arg(portID));
 	}
 
-
 	/// IssueCode: ALC5132
 	///
 	/// IssueType: Error
@@ -4868,6 +4867,30 @@ namespace Builder
 				  5132,
 				  QString(tr("Can't resolve busses interdependencies: %1")).
 						arg(unresolvedBusList));
+	}
+
+	/// IssueCode: ALC5133
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Application signal with equipmentID %1 is not found (Logic schema %2, item %3).
+	///
+	/// Parameters:
+	///		%1 Application signal's equipmemtID
+	///		%2 Logic schema ID
+	///		%3 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5133(QString signalEquipmentID, QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5133,
+				  QString(tr("Application signal with equipmentID %1 is not found (Logic schema %2, item %3).")).
+						arg(signalEquipmentID).arg(schemaID).arg(itemLabel));
 	}
 
 	//
