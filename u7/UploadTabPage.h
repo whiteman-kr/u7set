@@ -77,13 +77,9 @@ private:
 private:
 
 	QSplitter* m_vsplitter = nullptr;
-
 	QListWidget* m_pBuildList = nullptr;
-
 	QListWidget* m_pSubsystemList = nullptr;
-
 	QComboBox* m_pConfigurationCombo = nullptr;
-
 	QComboBox* m_pFileTypeCombo = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
@@ -113,7 +109,6 @@ private:
 	int m_currentSubsystemIndex = -1;
 
 	bool m_uploading = false;
-
 };
 
 

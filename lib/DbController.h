@@ -331,6 +331,7 @@ public:
 	//
 protected:
 	DbController* db();
+	const DbController* db() const;
 
 	// Data
 	//

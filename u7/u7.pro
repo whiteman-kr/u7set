@@ -202,7 +202,9 @@ SOURCES +=\
     CreateSignalDialog.cpp \
     LogicModuleSet.cpp \
     ../lib/LmDescription.cpp \
-    Builder/MemWriteMap.cpp
+    Builder/MemWriteMap.cpp \
+    SimulatorTabPage.cpp \
+    Simulator/SimulatorWidget.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -342,7 +344,9 @@ HEADERS  += \
     CreateSignalDialog.h \
     LogicModuleSet.h \
     ../lib/LmDescription.h \
-    Builder/MemWriteMap.h
+    Builder/MemWriteMap.h \
+    SimulatorTabPage.h \
+    Simulator/SimulatorWidget.h
 
 FORMS    += \
     CreateProjectDialog.ui \

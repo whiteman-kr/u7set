@@ -125,6 +125,9 @@ void Settings::writeUserScope() const
 
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
 
+	s.setValue("SimulatorTabPage/BuildDockSplitter", m_simBuildSplitter);
+	s.setValue("SimulatorTabPage/WidgetState", m_simWigetState);
+
     s.setValue("TextEditorProperties/pos", m_DialogTextEditorWindowPos);
     s.setValue("TextEditorProperties/geometry", m_DialogTextEditorWindowGeometry);
 
@@ -194,6 +197,9 @@ void Settings::loadUserScope()
 	}
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
+
+	m_simBuildSplitter = s.value("SimulatorTabPage/BuildDockSplitter").toByteArray();
+	m_simWigetState = s.value("SimulatorTabPage/WidgetState").toByteArray();
 
     m_DialogTextEditorWindowPos = s.value("TextEditorProperties/pos", QPoint(-1, -1)).toPoint();
     m_DialogTextEditorWindowGeometry = s.value("TextEditorProperties/geometry").toByteArray();

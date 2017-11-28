@@ -2378,3 +2378,8 @@ DbController* HasDbController::db()
 	return m_db;
 }
 
+const DbController* HasDbController::db() const
+{
+	return m_db;
+}
+

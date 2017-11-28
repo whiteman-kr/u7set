@@ -17,6 +17,7 @@
 #include "DialogBusEditor.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
+#include "SimulatorTabPage.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
 #include "version.h"
@@ -91,6 +92,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_uploadTabPage, tr("&Upload"));
+
+	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
 
 	// --
 	//
