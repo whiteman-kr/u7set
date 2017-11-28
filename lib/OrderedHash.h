@@ -557,6 +557,8 @@ public:
 	const VALUE value(const KEY& key) const;
 	const VALUE value(const KEY& key, const VALUE& defaultValue) const;
 
+	QList<KEY> keys() const { return m_map.keys(); }
+
 	int indexOf(const KEY& key)
 	{
 		if (m_map.contains(key))

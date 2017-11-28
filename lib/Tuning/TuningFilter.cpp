@@ -1258,6 +1258,8 @@ bool TuningFilterStorage::save(QByteArray& data)
 {
     QXmlStreamWriter writer(&data);
 
+	writer.setCodec("UTF-8");
+
     writer.setAutoFormatting(true);
     writer.writeStartDocument();
 

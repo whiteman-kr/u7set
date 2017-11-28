@@ -6,6 +6,9 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QTableView>
+#include <QHeaderView>
+#include <QStandardItemModel>
 #include "../lib/Types.h"
 #include "../lib/WidgetUtils.h"
 
@@ -49,6 +52,8 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 
 	setWindowPosition(this, QString("Service_%1_%2/geometry").arg(QHostAddress(ip).toString()).arg(serviceInfo[portIndex].port));
 
+	addStateTab();
+
 	updateServiceState();
 }
 
@@ -69,6 +74,24 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 
 void BaseServiceStateWidget::updateServiceState()
 {
+	ServiceState serviceState = static_cast<ServiceState>(m_serviceInfo.servicestate());
+
+	if (serviceState != TO_INT(ServiceState::Unavailable) && serviceState != TO_INT(ServiceState::Undefined))
+	{
+		m_stateTabModel->setData(m_stateTabModel->index(0, 1), "Yes");
+
+		m_stateTabModel->setRowCount(serviceState == ServiceState::Work ? m_stateTabMaxRowQuantity : 3);
+
+		m_stateTabModel->setData(m_stateTabModel->index(1, 0), "Uptime");
+		m_stateTabModel->setData(m_stateTabModel->index(2, 0), "Runing state");
+	}
+	else
+	{
+		m_stateTabModel->setData(m_stateTabModel->index(0, 1), "No");
+		m_stateTabModel->setRowCount(1);
+		return;
+	}
+
 	QString serviceName = "Unknown Service";
 	QString serviceShortName = "???";
 	for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
@@ -82,8 +105,6 @@ void BaseServiceStateWidget::updateServiceState()
 	}
 
 	assert(serviceShortName != "???");
-
-	ServiceState serviceState = static_cast<ServiceState>(m_serviceInfo.servicestate());
 
 	switch (serviceState)
 	{
@@ -108,7 +129,11 @@ void BaseServiceStateWidget::updateServiceState()
 				int m = time % 60; time /= 60;
 				int h = time % 24; time /= 24;
 
-				m_uptimeStatus->setText(tr("Uptime ") + QString("(%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+				QString&& uptimeStr = QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+
+				m_stateTabModel->setData(m_stateTabModel->index(1, 1), uptimeStr);
+
+				m_uptimeStatus->setText(tr("Uptime ") + uptimeStr);
 				m_uptimeStatus->setHidden(false);
 
 				m_runningStatus->setHidden(false);
@@ -132,17 +157,35 @@ void BaseServiceStateWidget::updateServiceState()
 	}
 
 	QString runningStateStr;
+	QString serviceUptimeStr;
 	switch (serviceState)
 	{
 		case ServiceState::Work:
 			{
+				runningStateStr = tr("Running");
+
+				m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
+
 				quint32 time = m_serviceInfo.serviceuptime();
 
 				int s = time % 60; time /= 60;
 				int m = time % 60; time /= 60;
 				int h = time % 24; time /= 24;
 
-				runningStateStr = tr("Running") + QString(" (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+				QString&& serviceUptimeStr = QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+
+				m_stateTabModel->setData(m_stateTabModel->index(3, 1), serviceUptimeStr);
+
+				quint32 ip = m_serviceInfo.clientrequestip();
+				quint16 port = m_serviceInfo.clientrequestport();
+				QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
+				if (ip != getWorkingClientRequestIp())
+				{
+					address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(getWorkingClientRequestIp()).toString() + QString(":%1").arg(port);
+				}
+
+				m_stateTabModel->setData(m_stateTabModel->index(4, 0), "Client request address");
+				m_stateTabModel->setData(m_stateTabModel->index(4, 1), address);
 			}
 			break;
 
@@ -172,7 +215,8 @@ void BaseServiceStateWidget::updateServiceState()
 			break;
 	}
 
-	m_runningStatus->setText(runningStateStr);
+	m_runningStatus->setText(runningStateStr + " " + serviceUptimeStr);
+	m_stateTabModel->setData(m_stateTabModel->index(2, 1), runningStateStr);
 
 	switch(serviceState)
 	{
@@ -299,6 +343,52 @@ void BaseServiceStateWidget::serviceNotFound()
 int BaseServiceStateWidget::addTab(QWidget* page, const QString& label)
 {
 	return m_tabWidget->addTab(page, label);
+}
+
+QTableView* BaseServiceStateWidget::addTabWithTableView(int defaultSectionSize, const QString& label)
+{
+	QTableView* newTableView = new QTableView(this);
+
+	newTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(newTableView->fontMetrics().height() * 1.4));
+	newTableView->verticalHeader()->hide();
+
+	newTableView->horizontalHeader()->setDefaultSectionSize(defaultSectionSize);
+	newTableView->horizontalHeader()->setStretchLastSection(true);
+	newTableView->horizontalHeader()->setHighlightSections(false);
+
+	newTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	newTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	newTableView->setAlternatingRowColors(true);
+
+	addTab(newTableView, label);
+
+	return newTableView;
+}
+
+void BaseServiceStateWidget::addStateTab()
+{
+	QTableView* stateTableView = addTabWithTableView(250, "State");
+
+	m_stateTabModel = new QStandardItemModel(1, 2, this);
+	stateTableView->setModel(m_stateTabModel);
+
+	m_stateTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_stateTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_stateTabModel->setData(m_stateTabModel->index(0, 0), "Connected to service");
+	m_stateTabModel->setData(m_stateTabModel->index(0, 1), "No");
+}
+
+quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
+{
+	QHostAddress address(m_serviceInfo.clientrequestip());
+
+	if (address == QHostAddress::AnyIPv4)
+	{
+		address.setAddress(m_ip);
+	}
+
+	return address.toIPv4Address();
 }
 
 void BaseServiceStateWidget::sendCommand(int command)

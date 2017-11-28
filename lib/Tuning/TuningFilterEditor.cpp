@@ -740,7 +740,10 @@ TuningFilterEditor::~TuningFilterEditor()
 
 void TuningFilterEditor::saveUserInterfaceSettings(int* propertyEditorSplitterPos, QByteArray* dialogChooseSignalGeometry)
 {
-	*propertyEditorSplitterPos = m_propertyEditor->splitterPosition();
+	if (m_propertyEditor != nullptr)
+	{
+		*propertyEditorSplitterPos = m_propertyEditor->splitterPosition();
+	}
 	*dialogChooseSignalGeometry = m_dialogChooseSignalGeometry;
 }
 

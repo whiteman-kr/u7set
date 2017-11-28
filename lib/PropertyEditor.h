@@ -372,7 +372,9 @@ namespace ExtWidgets
 	public:
 		void updatePropertyValues(const QString& propertyName);
 
-		void setObjects(const QList<std::shared_ptr<PropertyObject> >& objects);
+		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
+		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
+
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 
 		void setExpertMode(bool expertMode);

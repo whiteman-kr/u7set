@@ -182,23 +182,28 @@ SOURCES +=\
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
     ../lib/AppSignal.cpp \
     ../lib/CsvFile.cpp \
-    Builder/AppItems.cpp \
     DialogBusEditor.cpp \
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
     Forms/ChooseAfbDialog.cpp \
+    Builder/SignalSet.cpp \
+    Builder/Busses.cpp \
     IdePropertyEditor.cpp \
+    Builder/UalItems.cpp \
     EditEngine/EditEngineSetObject.cpp \
+    ../lib/Address16.cpp \
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
     CreateSignalDialog.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
-    ../Proto/network.pb.cc
+    ../Proto/network.pb.cc \
+    LogicModuleSet.cpp \
+    ../lib/LmDescription.cpp \
+    Builder/MemWriteMap.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -318,24 +323,28 @@ HEADERS  += \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningModel.h \
-    LogicModule.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
     ../lib/AppSignal.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
-    Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
     BusStorage.h \
     Forms/DialogUpdateFromPreset.h \
+    Builder/SignalSet.h \
+    Builder/Busses.h \
     IdePropertyEditor.h \
+    Builder/UalItems.h \
     EditEngine/EditEngineSetObject.h \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
     CreateSignalDialog.h \
     ../lib/Tuning/TuningSignalManager.h \
-    ../Proto/network.pb.h
+    ../Proto/network.pb.h \
+    LogicModuleSet.h \
+    ../lib/LmDescription.h \
+    Builder/MemWriteMap.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -396,7 +405,11 @@ DISTFILES += \
     Ufbl/file2pgsql.exe \
     Ufbl/_convert_all.bat \
     LogicModuleDescription/LogicModule0000.xml \
-    ../Proto/network.proto
+    ../Proto/network.proto \
+    LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml \
+    LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

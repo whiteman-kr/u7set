@@ -370,7 +370,7 @@ void DataSource::processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>&
 		{
 			QHostAddress host(ip);
 
-			QString msg  =QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
+			QString msg = QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
 					arg(host.toString()).
 					arg(rupFrame.header.dataId).
 					arg(m_lmDataID);

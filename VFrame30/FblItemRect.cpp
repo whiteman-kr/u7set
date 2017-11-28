@@ -7,6 +7,7 @@
 #include "SchemaItemAfb.h"
 #include "SchemaItemConnection.h"
 #include "SchemaItemTerminator.h"
+#include "SchemaItemBus.h"
 
 
 namespace VFrame30
@@ -649,8 +650,18 @@ namespace VFrame30
 		return r;
 	}
 
-	void FblItemRect::adjustHeight()
+	void FblItemRect::adjustHeight(double gridSize /*= -1*/, int pinGridStep /*= -1*/)
 	{
+		if (gridSize > 0)
+		{
+			m_cachedGridSize = gridSize;
+		}
+
+		if (pinGridStep > 0)
+		{
+			m_cachedPinGridStep = pinGridStep;
+		}
+
 		// Here m_gridSize and m_pingGridStep are cached copies from Schema, they set in CalcPointPos
 		//
 		if (m_cachedGridSize < 0 || m_cachedPinGridStep == 0)
@@ -834,6 +845,16 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this) != nullptr;
 	}
 
+	bool FblItemRect::isBusComposerElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusComposer*>(this) != nullptr;
+	}
+
+	bool FblItemRect::isBusExtractorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this) != nullptr;
+	}
+
 	VFrame30::SchemaItemSignal* FblItemRect::toSignalElement()
 	{
 		return dynamic_cast<VFrame30::SchemaItemSignal*>(this);
@@ -922,6 +943,26 @@ namespace VFrame30
 	const VFrame30::SchemaItemTerminator* FblItemRect::toTerminatorElement() const
 	{
 		return dynamic_cast<const VFrame30::SchemaItemTerminator*>(this);
+	}
+
+	VFrame30::SchemaItemBusComposer* FblItemRect::toBusComposerElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemBusComposer*>(this);
+	}
+
+	const VFrame30::SchemaItemBusComposer* FblItemRect::toBusComposerElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusComposer*>(this);
+	}
+
+	VFrame30::SchemaItemBusExtractor* FblItemRect::toBusExtractorElement()
+	{
+		return dynamic_cast<VFrame30::SchemaItemBusExtractor*>(this);
+	}
+
+	const VFrame30::SchemaItemBusExtractor* FblItemRect::toBusExtractorElement() const
+	{
+		return dynamic_cast<const VFrame30::SchemaItemBusExtractor*>(this);
 	}
 
 	// Weight propertie

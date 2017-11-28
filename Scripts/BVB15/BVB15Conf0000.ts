@@ -67,7 +67,7 @@ interface ModuleFirmware {
 
 interface ModuleFirmwareCollection {
 
-	jsGet(caption: string, subSysID: string, ssKeyValue: number, uartId: number, frameSize: number, frameCount: number): ModuleFirmware;
+	jsGet(caption: string, subSysID: string, ssKeyValue: number, uartId: number, frameSize: number, frameCount: number, LMDescriptionNumber: number): ModuleFirmware;
 }
 
 interface IssueLogger {
@@ -143,6 +143,8 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 var FamilyBVB15ID: number = 0x5600;
 
 var configScriptVersion: number = 1;
+
+var LMDescriptionNumber: number = 0;
 
 //
 
@@ -355,7 +357,7 @@ function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confC
 		var configStartFrames: number = 2;
 		var configFrameCount: number = 19;          // number of frames in each configuration
 
-		var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount);
+		var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
 
 		var frameStorageConfig: number = 1;
 		var ptr: number = 14;
@@ -379,7 +381,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 		return false;
 	}
 
-	var checkProperties: string[] = ["SubsystemID", "LMNumber", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID",
+	var checkProperties: string[] = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID",
 		"Bit0_TemperatureSensor1", "Bit1_TemperatureSensor2", "Bit2_TemperatureSensor3", "Bit3_E14", "Bit4_E15", "Bit5_E16", "Bit6_SimulationInputMode"];
 	for (var cp: number = 0; cp < checkProperties.length; cp++) {
 		if (module.propertyValue(checkProperties[cp]) == undefined) {
@@ -431,7 +433,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 		return false;
 	}
 
-	var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount);
+	var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
 
 	var descriptionVersion = 1;
 
@@ -445,6 +447,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	confFirmware.writeLog("UartID = " + uartId + "\r\n");
 	confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
 	confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
+	confFirmware.writeLog("LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
 
 	// Configuration storage format
 	//
@@ -480,8 +483,14 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] BuildNo = " + buildNo + "\r\n");
 	ptr += 2;
 
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMDescriptionNumber", LMDescriptionNumber) == false) {
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
+	ptr += 2;
+
 	// reserved
-	ptr += 6;
+	ptr += 4;
 
 	// write LMNumberCount, if old value is less than current. If it is the same, output an error.
 	//
@@ -1084,7 +1093,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	// SubblockNum
 
-	value = chassis.jsPropertyInt("Place");
+	value = module.jsPropertyInt("SubsystemChannel");
 	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "SubblockNum", value) == false) {
 		return false;
 	}

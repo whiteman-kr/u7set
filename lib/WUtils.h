@@ -21,6 +21,13 @@
 										return false; \
 									}
 
+#define TEST_PTR_LOG_RETURN_FALSE(ptr, log)	if (ptr == nullptr) \
+											{	\
+												assert(false);	\
+												LOG_INTERNAL_ERROR(log); \
+												return false; \
+											}
+
 #define TEST_PTR_CONTINUE(ptr)		if (ptr == nullptr) \
 									{	\
 										assert(false);	\

@@ -398,7 +398,7 @@ namespace Builder
 	// --------------------------------------------------------------------------------------
 
 	MultichannelFile::MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID,
-									   QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList& descriptionFields) :
+									   QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList& descriptionFields) :
 		m_buildResultWriter(buildResultWriter),
 		m_log(buildResultWriter.log()),
 		m_subsysStrID(subsysStrID),
@@ -408,8 +408,10 @@ namespace Builder
 	{
 		BuildInfo bi = m_buildResultWriter.buildInfo();
 
-		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
-						 bi.project, bi.user, bi.id, bi.typeStr(), bi.changeset, descriptionFieldsVersion, descriptionFields);
+		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount, lmDescriptionNumber,
+						 bi.project, bi.user, bi.id, bi.typeStr(), bi.changeset);
+
+		m_moduleFirmware.setDescriptionFields(descriptionFieldsVersion, descriptionFields);
 	}
 
 
@@ -941,7 +943,7 @@ namespace Builder
 	}
 
 
-	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList& descriptionFields)
+	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList& descriptionFields)
 	{
 		MultichannelFile* multichannelFile = nullptr;
 
@@ -967,7 +969,7 @@ namespace Builder
 		}
 		else
 		{
-			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, descriptionFieldsVersion, descriptionFields);
+			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, lmDescriptionNumber, descriptionFieldsVersion, descriptionFields);
 
 			m_multichannelFiles.insert(subsysStrID, multichannelFile);
 		}
@@ -999,7 +1001,7 @@ namespace Builder
 
 			if (multichannelFile->getFileData(fileData) == true)
 			{
-				BuildFile* buildFile = addFile(multichannelFile->subsysStrID(), multichannelFile->lmCaption() + ".alb", fileData);
+				BuildFile* buildFile = addFile(multichannelFile->subsysStrID(), multichannelFile->subsysStrID().toLower() + ".alb", fileData);
 
 				if (buildFile == nullptr)
 				{

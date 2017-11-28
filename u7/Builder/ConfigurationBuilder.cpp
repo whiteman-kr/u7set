@@ -163,7 +163,7 @@ namespace Builder
 
 			std::vector<Hardware::DeviceModule*> subsystemModules;
 
-			std::vector<LogicModule*> subsystemModulesDescriptions;
+			std::vector<LmDescription*> subsystemModulesDescriptions;
 
 			for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
 			{
@@ -194,7 +194,7 @@ namespace Builder
 					//
 					subsystemModules.push_back(lm);
 
-					LogicModule* description = m_lmDescriptions->get(lm).get();
+					LmDescription* description = m_lmDescriptions->get(lm).get();
 
 					if (description == nullptr)
 					{
@@ -220,7 +220,7 @@ namespace Builder
 				return false;
 			}
 
-			for (LogicModule* logicModuleDescription : subsystemModulesDescriptions)
+			for (LmDescription* logicModuleDescription : subsystemModulesDescriptions)
 			{
 				if (runConfigurationScriptFile(subsystemModules, logicModuleDescription) == false)
 				{
@@ -298,7 +298,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ConfigurationBuilder::runConfigurationScriptFile(const std::vector<Hardware::DeviceModule*>& subsystemModules, LogicModule* logicModuleDescription)
+	bool ConfigurationBuilder::runConfigurationScriptFile(const std::vector<Hardware::DeviceModule*>& subsystemModules, LmDescription* logicModuleDescription)
 	{
 		bool ok = false;
 
@@ -436,26 +436,18 @@ namespace Builder
 				return false;
 			}
 
-			QString path = f.subsysId();
-			QString fileName = f.caption();
-
-			if (path.isEmpty())
+			if (f.subsysId().isEmpty())
 			{
 				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
 				return false;
 			}
-			if (fileName.isEmpty())
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
-				return false;
-			}
 
-			if (buildResultWriter.addFile(path, fileName + ".mcb", data) == nullptr)
+			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".mcb", data) == nullptr)
 			{
 				return false;
 			}
 
-			if (buildResultWriter.addFile(path, fileName + ".mct", f.log()) == nullptr)
+			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".mct", f.scriptLog()) == nullptr)
 			{
 				return false;
 			}

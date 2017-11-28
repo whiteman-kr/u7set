@@ -1247,6 +1247,7 @@ message BusSignal
 	optional double coarseAperture = 12 [default = 1];
 	optional double fineAperture = 13 [default = 0.5];
 	optional bool adaptiveAperture = 14 [default = false];
+	optional string busTypeId = 15;
 
     optional int32 inbusOffset = 32;
 	optional int32 inbusDiscreteBitNo = 40;

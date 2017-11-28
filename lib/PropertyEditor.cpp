@@ -1697,6 +1697,13 @@ namespace ExtWidgets
 		}
 	}
 
+	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
+	{
+		QList<std::shared_ptr<PropertyObject>> list =
+				QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>::fromStdVector(objects));
+
+		return setObjects(list);
+	}
 
 	void PropertyEditor::setObjects(const QList<std::shared_ptr<PropertyObject>>& objects)
 	{
@@ -2127,22 +2134,25 @@ namespace ExtWidgets
 		{
             PropertyObject* pObject = i.get();
 
+			QString propertyName = property->propertyName();
+
 			// Do not set property, if it has same value
-            if (pObject->propertyValue(property->propertyName()) == value)
+
+			if (pObject->propertyValue(propertyName) == value)
 			{
 				continue;
 			}
 
-            QVariant oldValue = pObject->propertyValue(property->propertyName());
+			QVariant oldValue = pObject->propertyValue(propertyName);
 
-            pObject->setPropertyValue(property->propertyName(), value);
+			pObject->setPropertyValue(propertyName, value);
 
-            QVariant newValue = pObject->propertyValue(property->propertyName());
+			QVariant newValue = pObject->propertyValue(propertyName);
 
 			if (oldValue == newValue && errorString.isEmpty() == true)
 			{
 				errorString = QString("Property: %1 - incorrect input value")
-							  .arg(property->propertyName());
+							  .arg(propertyName);
 			}
 
             modifiedObjects.append(i);

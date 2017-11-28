@@ -20,7 +20,7 @@
 		<TuningDataOffset>46336</TuningDataOffset>
 		<TuningDataSize>7620</TuningDataSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
-		<TxDiagDataSize>74</TxDiagDataSize>
+		<TxDiagDataSize>92</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
 		<ALPPhaseTime>2500</ALPPhaseTime>

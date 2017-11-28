@@ -62,7 +62,6 @@ SOURCES += MainWindow.cpp \
     main.cpp \
     ../lib/JsonSerializable.cpp \
     BaseServiceStateWidget.cpp \
-    DataAquisitionServiceWidget.cpp \
     ConfigurationServiceWidget.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/XmlHelper.cpp \
@@ -83,7 +82,8 @@ SOURCES += MainWindow.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppDataSource.cpp \
     ../lib/CircularLogger.cpp \
-    TcpConfigServiceClient.cpp
+    TcpConfigServiceClient.cpp \
+    AppDataServiceWidget.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -94,7 +94,6 @@ HEADERS  += MainWindow.h \
     version.h \
     ../lib/JsonSerializable.h \
     BaseServiceStateWidget.h \
-    DataAquisitionServiceWidget.h \
     ConfigurationServiceWidget.h \
     ../lib/SimpleThread.h \
     ../lib/XmlHelper.h \
@@ -117,7 +116,8 @@ HEADERS  += MainWindow.h \
     ../lib/AppDataSource.h \
     ../lib/CircularLogger.h \
     TcpConfigServiceClient.h \
-    ../lib/WidgetUtils.h
+    ../lib/WidgetUtils.h \
+    AppDataServiceWidget.h
 
 FORMS    +=
 

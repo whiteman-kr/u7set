@@ -8,9 +8,10 @@
 #include "../lib/Signal.h"
 
 #include "RawDataDescription.h"
+#include "UalItems.h"
 #include "../Connection.h"
 
-class LogicModule;
+class LmDescription;
 class OutputLog;
 
 namespace Builder
@@ -22,11 +23,6 @@ namespace Builder
 
 namespace Hardware
 {
-//	class Connection;
-//	enum Connection::Type;
-
-//	class ConnectionStorage;
-
 	typedef std::shared_ptr<Connection> ConnectionShared;
 
 	class OptoModuleStorage;
@@ -49,18 +45,19 @@ namespace Hardware
 	public:
 		TxRxSignal();
 
-		bool init(const QString& appSignalID,
-				  E::SignalType signalType,
-				  E::DataFormat dataFormat,
-				  int dataSize,
-				  E::ByteOrder byteOrder);
+		bool init(const QString& nearestSignalID, const Builder::UalSignal* ualSignal);
 
 		bool initRawSignal(const RawDataDescriptionItem& item, int offsetFromBeginningOfBuffer);
 
-		QString appSignalID() const { return m_appSignalID; }
+		QString appSignalID() const;
+		const QStringList& appSignalIDs() const { return m_appSignalIDs; }
+		QString appSignalIDsJoined() const { return appSignalIDs().join(", "); }
+
+		bool hasSignalID(const QString& signalID);
 
 		bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
+		bool isBus() const { return m_signalType == E::SignalType::Bus; }
 
 		bool isRaw() const { return m_type == Type::Raw; }
 		bool isRegular() const { return m_type == Type::Regular; }
@@ -75,14 +72,18 @@ namespace Hardware
 		int dataSize() const { return m_dataSize; }
 		E::ByteOrder byteOrder() const { return m_byteOrder; }
 
+		QString busTypeID() const { return m_busTypeID; }
+
 	private:
 		Type m_type = Type::Regular;
 
-		QString m_appSignalID;
+		QString m_nearestSignalID;
+		QStringList m_appSignalIDs;
 		E::SignalType m_signalType = E::SignalType::Analog;
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 		int m_dataSize = 0;					// signal size in tx(rx)Buffer in bits
+		QString m_busTypeID;
 
 		Address16 m_addrInBuf;				// relative signal address from beginning of txBuffer (rxBuffer)
 	};
@@ -107,21 +108,21 @@ namespace Hardware
 	public:
 		OptoPort();
 
-		bool init(const DeviceController* controller, int portNo, LogicModule *lmDescription, Builder::IssueLogger* log);
+		bool init(const DeviceController* controller, int portNo, LmDescription *lmDescription, Builder::IssueLogger* log);
 
 		bool initSettings(ConnectionShared cn);
 
-		bool appendTxSignal(const Signal* txSignal);
+		bool appendTxSignal(const QString& nearestSignalID, const Builder::UalSignal* txSignal);
 		bool initRawTxSignals();
 		bool sortTxSignals();
 		bool calculateTxSignalsAddresses();
 		bool calculateTxDataID();
 
-		bool appendSerialRxSignal(const Signal* rxSignal);
-		bool initSerialRawRxSignals();
-		bool sortSerialRxSignals();
-		bool calculateSerialRxSignalsAddresses();
-		bool calculateSerialRxDataID();
+		bool appendSinglePortRxSignal(const Builder::UalSignal* rxSignal);
+		bool initSinglePortRawRxSignals();
+		bool sortSinglePortRxSignals();
+		bool calculateSinglePortRxSignalsAddresses();
+		bool calculateSinglePortRxDataID();
 
 		bool copyOpticalPortsTxInRxSignals();
 
@@ -130,8 +131,8 @@ namespace Hardware
 		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getRxSignals(QVector<TxRxSignalShared>& rxSignals) const;
 
-		const HashedVector<QString, TxRxSignalShared>& txSignals() const { return m_txSignals; }
-		const HashedVector<QString, TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
+		const QVector<TxRxSignalShared>& txSignals() const { return m_txSignals; }
+		const QVector<TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
 
 		int rxSignalsCount() const { return m_rxSignals.count(); }
 
@@ -139,7 +140,10 @@ namespace Hardware
 		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
 
 		bool isTxSignalExists(const QString& appSignalID);
+		bool isTxSignalExists(const Builder::UalSignal* ualSignal);
+
 		bool isRxSignalExists(const QString& appSignalID);
+		bool isRxSignalExists(const Builder::UalSignal* ualSignal);
 
 		bool isSerialRxSignalExists(const QString& appSignalID);
 
@@ -148,10 +152,8 @@ namespace Hardware
 		bool isPortToPortConnection() const { return m_connectionType ==  Connection::Type::PortToPort; }
 		bool isSinglePortConnection() const { return m_connectionType ==  Connection::Type::SinglePort; }
 
-//		Address16 getTxSignalAddrInBuf(const QString& appSignalID) const;
-
-		bool getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const;
-		bool getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const;
+		bool getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const;
+		bool getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const;
 
 		bool parseRawDescription();
 		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage);
@@ -173,6 +175,9 @@ namespace Hardware
 
 		Q_INVOKABLE QString linkedPortID() const { return m_linkedPortID; }
 		void setLinkedPortID(const QString& linkedPortID) { m_linkedPortID = linkedPortID; }
+
+		void setDisableDataIDControl(bool disable) { m_disableDataIDControl = disable; }
+		bool disableDataIDControl() const { return m_disableDataIDControl; }
 
 		Q_INVOKABLE bool isLinked() const { return !m_linkedPortID.isEmpty(); }
 
@@ -223,6 +228,7 @@ namespace Hardware
 		bool hasTxRawData() const { return m_rawDataDescriptionStr.isEmpty() == false; }
 
 		int txAnalogSignalsSizeW() const { return m_txAnalogSignalsSizeW; }
+		int txBusSignalsSizeW() const { return m_txBusSignalsSizeW; }
 		int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
 
 		int txSignalsCount() const { return m_txSignals.count();}
@@ -260,30 +266,14 @@ namespace Hardware
 		void writeInfo(QStringList& list) const;
 
 	private:
-		bool appendTxSignal(const QString& appSignalID,
-							E::SignalType signalType,
-							E::DataFormat dataFormat,
-							int dataSize,
-							E::ByteOrder byteOrder);
+		bool appendRxSignal(const Builder::UalSignal* ualSignal);
 
-		bool appendRxSignal(const QString& appSignalID,
-							E::SignalType signalType,
-							E::DataFormat dataFormat,
-							int dataSize,
-							E::ByteOrder byteOrder);
+		void sortByOffsetBitNoAscending(QVector<TxRxSignalShared>& list);
+		void sortByAppSignalIdAscending(QVector<TxRxSignalShared>& list);
 
-		void sortByOffsetBitNoAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
-		void sortByAppSignalIdAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
+		bool checkSignalsOffsets(const QVector<TxRxSignalShared>& signalList, int startIndex, int count);
 
-		bool checkSignalsOffsets(const HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
-
-		bool sortTxRxSignalList(HashedVector<QString, TxRxSignalShared>& signalList);
-
-		void copyHashedVectorToPairVector(const HashedVector<QString, TxRxSignalShared>& hVector,
-										  QVector<QPair<QString, TxRxSignalShared>>& pVector);
-
-		void copyPairVectorToHashedVector(const QVector<QPair<QString, TxRxSignalShared>>& pVector,
-										  HashedVector<QString, TxRxSignalShared>& hVector);
+		bool sortTxRxSignalList(QVector<TxRxSignalShared> &signalList);
 
 	private:
 		QString m_equipmentID;
@@ -292,6 +282,8 @@ namespace Hardware
 		Connection::Type m_connectionType = Connection::Type::PortToPort;
 
 		bool m_enableSerial = false;
+
+		bool m_disableDataIDControl = false;
 
 		// if m_enableSerial == true settings
 		//
@@ -331,12 +323,14 @@ namespace Hardware
 		int m_txUsedDataSizeW = 0;						// for ports with manual settings may be m_txUsedDataSizeW < m_txDataSizeW
 		int m_txRawDataSizeW = 0;
 		int m_txAnalogSignalsSizeW = 0;
+		int m_txBusSignalsSizeW = 0;
 		int m_txDiscreteSignalsSizeW = 0;
 
 		bool m_txRawDataSizeWIsCalculated = false;
 		bool m_txRawDataSizeWCalculationStarted = false;
 
-		HashedVector<QString, TxRxSignalShared> m_txSignals;			// signals transmitted via port
+		QVector<TxRxSignalShared> m_txSignals;			// signals transmitted via port
+		QHash<QString, TxRxSignalShared> m_txSignalIDs;
 
 		//
 
@@ -346,9 +340,11 @@ namespace Hardware
 		int m_rxUsedDataSizeW = 0;						// for ports with manual settings may be m_rxUsedDataSizeW < m_rxDataSizeW
 		int m_rxRawDataSizeW = 0;						// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
 		int m_rxAnalogSignalsSizeW = 0;					//
+		int m_rxBusSignalsSizeW = 0;					//
 		int m_rxDiscreteSignalsSizeW = 0;				//
 
-		HashedVector<QString, TxRxSignalShared> m_rxSignals;			// signals received via port
+		QVector<TxRxSignalShared> m_rxSignals;			// signals received via port
+		QHash<QString, TxRxSignalShared> m_rxSignalIDs;
 	};
 
 	typedef std::shared_ptr<OptoPort> OptoPortShared;
@@ -370,7 +366,7 @@ namespace Hardware
 		OptoModule();
 		~OptoModule();
 
-		bool init(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log);
+		bool init(DeviceModule* module, LmDescription* lmDescription, Builder::IssueLogger* log);
 
 		bool isLmOrBvb();
 		bool isOcm();
@@ -412,7 +408,7 @@ namespace Hardware
 		//
 		QString m_equipmentID;
 		DeviceModule* m_deviceModule = nullptr;
-		LogicModule* m_lmDescription = nullptr;
+		LmDescription* m_lmDescription = nullptr;
 
 		int m_place = 0;
 
@@ -485,21 +481,22 @@ namespace Hardware
 						 const QString& connectionID,
 						 QUuid transmitterUuid,
 						 const QString& lmID,
-						 const Signal* appSignalID,
+						 const QString& nearestSignalID,
+						 const Builder::UalSignal* ualSignal,
 						 bool* signalAlreadyInList);
 
-		bool appendSerialRxSignal(const QString& schemaID,
+		bool appendSinglePortRxSignal(const QString& schemaID,
 									  const QString& connectionID,
 									  QUuid receiverUuid,
 									  const QString& lmID,
-									  const Signal* appSignal);
+									  const Builder::UalSignal* ualSignal);
 
 		bool getRxSignalAbsAddress(const QString& schemaID,
 								   const QString& connectionID,
 								   const QString& appSignalID,
 								   const QString& receiverLM,
 								   QUuid receiverUuid,
-								   SignalAddress16& addr);
+								   SignalAddress16* addr);
 
 		static std::shared_ptr<Connection> getConnection(const QString& connectionID);
 

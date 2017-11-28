@@ -401,7 +401,10 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
 
 IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
 {
-	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+	if (m_tuningFilterEditor != nullptr)
+	{
+		m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+	}
 }
 
 void IdeTuningFiltersEditor::setText(const QString& text)
@@ -412,19 +415,17 @@ void IdeTuningFiltersEditor::setText(const QString& text)
         return;
     }
 
-
 	// Load presets
 
 	QString errorCode;
 
-	bool ok = m_filters.load(text.toUtf8(), &errorCode);
+	QByteArray rawData = text.toLocal8Bit();
+
+	bool ok = m_filters.load(rawData, &errorCode);
+
     if (ok == false)
     {
-        QLabel* errorLabel = new QLabel(errorCode);
-
-        QHBoxLayout* l = new QHBoxLayout(this);
-        l->addWidget(errorLabel);
-        return;
+		QMessageBox::critical(this, qAppName(), errorCode);
     }
 
 
@@ -444,9 +445,13 @@ QString IdeTuningFiltersEditor::text()
     QByteArray data;
 
     bool ok = m_filters.save(data);
+
     if (ok == true)
     {
-        return data.toStdString().c_str();
+		QString s = QString::fromLocal8Bit(data);
+
+		return s;
+
     }
 
     return QString();

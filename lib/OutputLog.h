@@ -27,6 +27,7 @@
 #define LOG_OK(logObject) logObject->writeSuccess(QObject::tr("Ok"), __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 #define LOG_INTERNAL_ERROR(logObject)	logObject->writeError(QObject::tr("Internal error! File: %1 Line: %2 Function: %3").arg(__FILE__).arg(__LINE__).arg(Q_FUNC_INFO), __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_NULLPTR_ERROR(logObject)	logObject->writeError(QObject::tr("Null pointer occurred! File: %1 Line: %2 Function: %3").arg(__FILE__).arg(__LINE__).arg(Q_FUNC_INFO), __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 
 class OutputLogItem

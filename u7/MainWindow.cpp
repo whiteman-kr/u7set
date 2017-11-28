@@ -259,10 +259,10 @@ void MainWindow::createActions()
 	m_busEditorAction->setEnabled(false);
 	connect(m_busEditorAction, &QAction::triggered, this, &MainWindow::runBusEditor);
 
-	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs..."), this);
-	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs on all schemas"));
+	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs/Busses..."), this);
+	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs/Busses on all schemas"));
 	m_updateUfbsAfbs->setEnabled(false);
-	connect(m_updateUfbsAfbs, &QAction::triggered, this, &MainWindow::updateUfbsAfbs);
+	connect(m_updateUfbsAfbs, &QAction::triggered, this, &MainWindow::updateUfbsAfbsBusses);
 
     m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
@@ -524,7 +524,7 @@ void MainWindow::runBusEditor()
 
 
 
-void MainWindow::updateUfbsAfbs()
+void MainWindow::updateUfbsAfbsBusses()
 {
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -540,11 +540,11 @@ void MainWindow::updateUfbsAfbs()
 	}
 
 	QMessageBox mb(this);
-	mb.setText(tr("Update schemas AFBs/UFBs."));
+	mb.setText(tr("Update schemas AFBs/UFBs/Bussus."));
 	mb.setInformativeText(tr("To perform operation all Application Logic and UFB schemas must be checked in."));
 	mb.setIcon(QMessageBox::NoIcon);
 	QPushButton* updateButton = mb.addButton(tr("Update"), QMessageBox::ActionRole);
-	/*QPushButton* cancelButton = */mb.addButton(QMessageBox::Cancel);
+	mb.addButton(QMessageBox::Cancel);
 
 	mb.exec();
 
@@ -555,6 +555,16 @@ void MainWindow::updateUfbsAfbs()
 
 	showUfbLibraryTabPage(true);
 	GlobalMessanger::instance()->fireChangeCurrentTab(m_logicSchema);
+
+	// Get Busses
+	//
+	std::vector<VFrame30::Bus> busses;
+	bool ok = EditSchemaWidget::loadBusses(dbController(), &busses, this);
+
+	if (ok == false)
+	{
+		return;
+	}
 
 	// Get UFB schema list
 	//
@@ -589,7 +599,7 @@ void MainWindow::updateUfbsAfbs()
 		QMessageBox mbError(this);
 
 		mbError.setIcon(QMessageBox::Critical);
-		mbError.setText(tr("Update AFBs/UFBs error."));
+		mbError.setText(tr("Update AFBs/UFBs/Busses error."));
 		mbError.setInformativeText("There are some checked out Application Logic and/or UFB schemas. CheckIn these files and repeat operation.");
 		mbError.setDetailedText(checkedOutFiles.join(QChar::LineSeparator));
 
@@ -602,7 +612,7 @@ void MainWindow::updateUfbsAfbs()
 	LogicModuleSet logicModuleSet;
 	int totalUpdatedAfbs = 0;
 
-	QProgressDialog progress("Updating AFBs on UFB schemas...", "Abort", 0, static_cast<int>(ufbSchemaFileInfos.size() + alSchemaFileInfos.size()), this);
+	QProgressDialog progress("Updating AFBs/Bussses on UFB schemas...", "Abort", 0, static_cast<int>(ufbSchemaFileInfos.size() + alSchemaFileInfos.size()), this);
 	progress.setWindowModality(Qt::WindowModal);
 	int progressIndicator = 0;
 
@@ -691,7 +701,7 @@ void MainWindow::updateUfbsAfbs()
 				}
 			}
 
-			std::shared_ptr<LogicModule> logicModuleDescription = logicModuleSet.get(lmDescriptionFile);
+			std::shared_ptr<LmDescription> logicModuleDescription = logicModuleSet.get(lmDescriptionFile);
 			if (logicModuleDescription == nullptr)
 			{
 				assert(logicModuleDescription);
@@ -701,24 +711,48 @@ void MainWindow::updateUfbsAfbs()
 			// Update AFBs on schemas
 			//
 			int thisSchemaUpdatedCount = 0;
-			int updatedCount = 0;
-			QString updateErrorMessage;
 
-			ok = schema->updateAllSchemaItemFbs(logicModuleDescription->afbs(), &updatedCount, &updateErrorMessage);
-
-			if (ok == false)
 			{
-				QMessageBox::critical(this, qAppName(), updateErrorMessage);
-				break;
+				int updatedCount = 0;
+				QString updateErrorMessage;
+
+				ok = schema->updateAllSchemaItemFbs(logicModuleDescription->afbs(), &updatedCount, &updateErrorMessage);
+
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), updateErrorMessage);
+					break;
+				}
+
+				totalUpdatedAfbs += updatedCount;
+				thisSchemaUpdatedCount += updatedCount;
 			}
 
-			totalUpdatedAfbs += updatedCount;
-			thisSchemaUpdatedCount += updatedCount;
+			// Update Busses on schemas
+			//
+			{
+				int updatedCount = 0;
+				QString updateErrorMessage;
+
+				ok = schema->updateAllSchemaItemBusses(busses, &updatedCount, &updateErrorMessage);
+
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), updateErrorMessage);
+					break;
+				}
+
+				totalUpdatedAfbs += updatedCount;
+				thisSchemaUpdatedCount += updatedCount;
+			}
 
 			// Update UFBs on schemas
 			//
 			if (schema->isLogicSchema() == true)
 			{
+				int updatedCount = 0;
+				QString updateErrorMessage;
+
 				ok = schema->updateAllSchemaItemUfb(ufbSchemas, &updatedCount, &updateErrorMessage);
 
 				if (ok == false)

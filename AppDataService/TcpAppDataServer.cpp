@@ -273,7 +273,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		if (result == false)
 		{
-			assert(false);			// unknown hash
+			//assert(false);			// unknown hash
 			continue;
 		}
 

@@ -571,6 +571,13 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::mov(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov(addrTo.offset(), addrFrom.offset());
+	}
 
 	void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
 	{
@@ -600,6 +607,13 @@ namespace Builder
 		writeArea(addrTo, sizeW);
 	}
 
+	void Command::movMem(Address16 addrTo, Address16 addrFrom, quint16 sizeW)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		movMem(addrTo.offset(), addrFrom.offset(), sizeW);
+	}
 
 	void Command::movConst(quint16 addrTo, quint16 constVal)
 	{
@@ -644,6 +658,12 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::movBitConst(Address16 addr16, quint16 constBit)
+	{
+		assert(addr16.isValid() == true);
+
+		movBitConst(addr16.offset(), addr16.bit(), constBit);
+	}
 
 	void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
 	{
@@ -717,6 +737,10 @@ namespace Builder
 		read16(addrFrom);
 	}
 
+	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(), fbCaption);
+	}
 
 	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
@@ -743,6 +767,11 @@ namespace Builder
 		}
 
 		m_memoryMap->write16(addrTo);
+	}
+
+	void Command::readFuncBlockBit(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo, fbCaption);
 	}
 
 	void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
@@ -815,6 +844,14 @@ namespace Builder
 		write16(addrTo);
 	}
 
+	void Command::movBit(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+
+		movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit());
+	}
+
 	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime)
 	{
 		m_code.clear();
@@ -865,6 +902,13 @@ namespace Builder
 		write32(addrTo);
 	}
 
+	void Command::mov32(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov32(addrTo.offset(), addrFrom.offset());
+	}
 
 	void Command::movConstInt32(quint16 addrTo, qint32 constInt32)
 	{
@@ -940,6 +984,12 @@ namespace Builder
 		read32(addrFrom);
 	}
 
+	void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		assert(addrFrom.bit() == 0);
+
+		writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
+	}
 
 	void Command::readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
@@ -959,6 +1009,12 @@ namespace Builder
 		write32(addrTo);
 	}
 
+	void Command::readFuncBlock32(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		assert(addrTo.bit() == 0);
+
+		readFuncBlock32(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
+	}
 
 	void Command::writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption)
 	{
@@ -1055,7 +1111,6 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 	}
 
-
 	void Command::prevMov32(quint16 addrTo, quint16 addrFrom)
 	{
 		m_code.clear();
@@ -1067,6 +1122,26 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 	}
 
+	void Command::fill(quint16 addrTo, quint16 addrFrom, quint16 addrBit)
+	{
+		m_code.clear();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::FILL);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+		m_code.setWord4(addrBit);
+	}
+
+	void Command::fill(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+		assert(addrTo.bit() == 0);
+
+		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
+	}
 
 	void Command::generateBinCode(E::ByteOrder byteOrder)
 	{
@@ -1274,6 +1349,14 @@ namespace Builder
 						arg(getConstValueString());
 			break;
 
+		case LmCommandCode::FILL:
+			params = QString("%1, %2[%3]").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
+			break;
+
+
 		default:
 			assert(false);
 		}
@@ -1427,6 +1510,7 @@ namespace Builder
 		case LmCommandCode::RDFBTS32:
 		case LmCommandCode::MOVCF:
 		case LmCommandCode::PMOV32:
+		case LmCommandCode::FILL:
 			assert(lmCommand->runTime != CALC_RUNTIME);
 			cmdExecTime = lmCommand->runTime;
 			break;
@@ -1652,6 +1736,20 @@ namespace Builder
 		return m_result;
 	}
 
+	void CodeFragmentMetrics::setEndAddr(int endAddr)
+	{
+		m_endAddr = endAddr;
+
+		m_codePercent = static_cast<double>(m_endAddr - m_startAddr) * 100.0 / 65536.0 ;
+	}
+
+
+	QString CodeFragmentMetrics::codePercentStr() const
+	{
+		QString str;
+
+		return str.sprintf("%.2f%", static_cast<float>(m_codePercent));
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -1708,6 +1806,19 @@ namespace Builder
 		m_codeItems.append(newCommand);
 	}
 
+	void ApplicationLogicCode::append(const Commands& commands)
+	{
+		for(const Command& cmd : commands)
+		{
+			Command* newCommand = new Command(cmd);
+
+			newCommand->setAddress(m_commandAddress);
+
+			m_commandAddress += newCommand->sizeW();
+
+			m_codeItems.append(newCommand);
+		}
+	}
 
 	void ApplicationLogicCode::append(const Comment& cmt)
 	{
@@ -2180,4 +2291,25 @@ namespace Builder
 		return true;
 	}
 
+	void ApplicationLogicCode::init(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setStartAddr(m_commandAddress);
+	}
+
+	void ApplicationLogicCode::calculate(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setEndAddr(m_commandAddress);
+	}
 }

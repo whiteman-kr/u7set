@@ -17,6 +17,8 @@ namespace VFrame30
 	class SchemaItemReceiver;
 	class SchemaItemTransmitter;
 	class SchemaItemTerminator;
+	class SchemaItemBusComposer;
+	class SchemaItemBusExtractor;
 }
 
 namespace VFrame30
@@ -71,7 +73,7 @@ namespace VFrame30
 		QRectF itemRectWithPins() const;								// Get item rect with inputs and outputs
 		QRectF itemRectPinIndent(QPaintDevice* paintDevice) const;		// Get item rect without inputs and outputs
 
-		Q_INVOKABLE void adjustHeight();
+		Q_INVOKABLE void adjustHeight(double gridSize = -1, int pinGridStep = -1);
 
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
@@ -93,6 +95,8 @@ namespace VFrame30
 		bool isReceiverElement() const;
 		bool isTransmitterElement() const;
 		bool isTerminatorElement() const;
+		bool isBusComposerElement() const;
+		bool isBusExtractorElement() const;
 
 		VFrame30::SchemaItemSignal* toSignalElement();
 		const VFrame30::SchemaItemSignal* toSignalElement() const;
@@ -120,6 +124,12 @@ namespace VFrame30
 
 		VFrame30::SchemaItemTerminator* toTerminatorElement();
 		const VFrame30::SchemaItemTerminator* toTerminatorElement() const;
+
+		VFrame30::SchemaItemBusComposer* toBusComposerElement();
+		const VFrame30::SchemaItemBusComposer* toBusComposerElement() const;
+
+		VFrame30::SchemaItemBusExtractor* toBusExtractorElement();
+		const VFrame30::SchemaItemBusExtractor* toBusExtractorElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

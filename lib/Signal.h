@@ -70,6 +70,14 @@ class Signal
 	friend class SignalTests;
 
 public:
+	static QString BUS_SIGNAL_ID_SEPARATOR;
+
+	static QString BUS_SIGNAL_MACRO_BUSTYPEID;
+	static QString BUS_SIGNAL_MACRO_BUSID;
+	static QString BUS_SIGNAL_MACRO_BUSSIGNALID;
+	static QString BUS_SIGNAL_MACRO_BUSSIGNALCAPTION;
+
+public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const Hardware::DeviceSignal& deviceSignal);
@@ -118,6 +126,7 @@ public:
 	int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
 	void setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat);
+	void setDataSizeW(int sizeW);
 
 	int sizeW() const { return (m_dataSize / SIZE_16BIT + (m_dataSize % SIZE_16BIT ? 1 : 0)); }
 
@@ -132,7 +141,10 @@ public:
 	E::DataFormat dataFormat() const;
 
 	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
+	bool isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
+	bool isCompatibleFormat(const Signal& s) const;
+	bool isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const;
 
 	// Analog signal properties
 
@@ -287,7 +299,7 @@ public:
 	void serializeTo(Proto::AppSignal* s) const;
 	void serializeFrom(const Proto::AppSignal &s);
 
-	//void serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const;
+	void initCalculatedProperties();
 
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
@@ -307,9 +319,8 @@ private:
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
 
+	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 	//
-
-	void initCalculatedProperties();
 
 private:
 	// Signal identificators
@@ -390,8 +401,8 @@ private:
 	//
 	Hash m_hash = 0;						// == calcHash(m_appSignalID)
 
-	Address16 m_ioBufAddr;					// signal address in i/o modules buffers
-											// only for signals of input/output modules (input and output signals)
+	Address16 m_ioBufAddr;					// signal address in i/o modules buffers for signals of input/output modules (input and output signals)
+											// or
 
 	Address16 m_tuningAddr;					// signal address in tuning buffer
 											// only for tuningable signals
@@ -430,11 +441,8 @@ public:
 	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
 	bool ID2IndexMapIsEmpty();
 
-	bool contains(const QString& appSignalID);
+	bool contains(const QString& appSignalID) const;
 	Signal* getSignal(const QString& appSignalID);
-
-	bool expandBusSignals();
-	void initCalculatedSignalsProperties();
 
 	virtual void append(const int& signalID, Signal* signal) override;
 	virtual void remove(const int& signalID) override;
