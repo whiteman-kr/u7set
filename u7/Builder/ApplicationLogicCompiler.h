@@ -25,6 +25,7 @@ namespace Builder
 
 	public:
 		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+								 const std::vector<Hardware::DeviceModule*>& lmModules,
 								 Hardware::EquipmentSet* equipmentSet,
 								 Hardware::OptoModuleStorage* optoModuleStorage,
 								 Hardware::ConnectionStorage* connections,
@@ -43,9 +44,6 @@ namespace Builder
 
 	private:
 		bool isBuildCancelled();
-
-		bool findLMs();
-		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
@@ -72,6 +70,7 @@ namespace Builder
 
 	private:
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		const std::vector<Hardware::DeviceModule*> m_lmModules;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
@@ -87,8 +86,6 @@ namespace Builder
 		static IssueLogger* m_log;
 
 		QVector<ModuleLogicCompiler*> m_moduleCompilers;
-
-		QVector<Hardware::DeviceModule*> m_lm;
 
 		QHash<int, QString> m_busSignals;
 		int m_maxSignalID = -1;

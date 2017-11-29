@@ -131,7 +131,7 @@ namespace Builder
 		};
 
 	public:
-		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
 
 		SignalSet& signalSet() { return *m_signals; }

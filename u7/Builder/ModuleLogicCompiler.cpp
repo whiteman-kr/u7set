@@ -28,7 +28,7 @@ namespace Builder
 
 	const char* ModuleLogicCompiler::TEST_DATA_DIR = "TestData/";
 
-	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
+	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
 		m_memoryMap(appLogicCompiler.m_log),
 		m_ualSignals(*this, appLogicCompiler.m_log)

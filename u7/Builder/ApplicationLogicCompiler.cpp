@@ -20,6 +20,7 @@ namespace Builder
 
 
 	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+													   const std::vector<Hardware::DeviceModule*>& lmModules,
 													   Hardware::EquipmentSet *equipmentSet,
 													   Hardware::OptoModuleStorage *optoModuleStorage,
 													   Hardware::ConnectionStorage *connections,
@@ -32,6 +33,7 @@ namespace Builder
 													   BuildResultWriter* buildResultWriter,
 													   IssueLogger *log) :
 		m_subsystems(subsystems),
+		m_lmModules(lmModules),
 		m_equipmentSet(equipmentSet),
 		m_optoModuleStorage(optoModuleStorage),
 		m_signals(signalSet),
@@ -94,7 +96,6 @@ namespace Builder
 
 		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
 		{
-			&ApplicationLogicCompiler::findLMs,
 			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
@@ -145,80 +146,6 @@ namespace Builder
 		return false;
 	}
 
-	bool ApplicationLogicCompiler::findLMs()
-	{
-		// find all logic modules (LMs) in project
-		// fills m_lm vector
-		//
-		m_lm.clear();
-
-		findLM(m_deviceRoot);
-
-		if (m_lm.count() == 0)
-		{
-			LOG_MESSAGE(m_log, tr("Logic modules (LMs) not found!"));
-		}
-		else
-		{
-			LOG_MESSAGE(m_log, QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()));
-		}
-
-		return true;
-	}
-
-	void ApplicationLogicCompiler::findLM(Hardware::DeviceObject* startFromDevice)
-	{
-		// find logic modules (LMs), recursive
-		//
-		if (startFromDevice == nullptr)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__));
-			assert(false);
-			return;
-		}
-
-		if (startFromDevice->deviceType() == Hardware::DeviceType::Signal)
-		{
-			return;
-		}
-
-		if (startFromDevice->deviceType() == Hardware::DeviceType::Module)
-		{
-			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
-
-			if (module->isLogicModule() == true ||
-				module->isBvb() == true)
-			{
-				Hardware::DeviceObject* parent = startFromDevice->parent();
-
-				if (parent != nullptr)
-				{
-					if (parent->deviceType() == Hardware::DeviceType::Chassis)
-					{
-						// LM must be installed in the chassis
-						//
-						m_lm.append(reinterpret_cast<Hardware::DeviceModule*>(startFromDevice));
-					}
-					else
-					{
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM %1 is not installed in the chassis")).arg(module->equipmentIdTemplate()));
-					}
-				}
-			}
-
-			return;
-		}
-
-		int childrenCount = startFromDevice->childrenCount();
-
-		for(int i = 0; i < childrenCount; i++)
-		{
-			Hardware::DeviceObject* device = startFromDevice->child(i);
-
-			findLM(device);
-		}
-	}
-
 	bool ApplicationLogicCompiler::prepareOptoConnectionsProcessing()
 	{
 		if (m_optoModuleStorage == nullptr ||
@@ -259,9 +186,9 @@ namespace Builder
 
 		bool result = true;
 
-		QHash<QString, Hardware::DeviceModule*> ip2Modules;
+		QHash<QString, const Hardware::DeviceModule*> ip2Modules;
 
-		for(Hardware::DeviceModule* lm : m_lm)
+		for(const Hardware::DeviceModule* lm : m_lmModules)
 		{
 			if (lm == nullptr)
 			{
@@ -283,7 +210,6 @@ namespace Builder
 
 				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, m_log);
 
-
 				switch(ethernetAdapterNo)
 				{
 				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1:
@@ -295,7 +221,7 @@ namespace Builder
 
 						if (ip2Modules.contains(lmNetProperties.tuningIP) == true)
 						{
-							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.tuningIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.tuningIP];
 
 							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.tuningIP, lm1->uuid(), lm->uuid());
 
@@ -318,7 +244,7 @@ namespace Builder
 
 						if (ip2Modules.contains(lmNetProperties.appDataIP) == true)
 						{
-							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.appDataIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.appDataIP];
 
 							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.appDataIP, lm1->uuid(), lm->uuid());
 
@@ -336,7 +262,7 @@ namespace Builder
 
 						if (ip2Modules.contains(lmNetProperties.diagDataIP) == true)
 						{
-							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.diagDataIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.diagDataIP];
 
 							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.diagDataIP, lm1->uuid(), lm->uuid());
 
@@ -373,9 +299,16 @@ namespace Builder
 
 		// first compiler pass
 		//
-		for(int i = 0; i < m_lm.count(); i++)
+		for(const Hardware::DeviceModule* lm : m_lmModules)
 		{
-			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, m_lm[i]);
+			if (lm == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, lm);
 
 			m_moduleCompilers.append(moduleLogicCompiler);
 
@@ -405,18 +338,16 @@ namespace Builder
 
 		// second compiler pass
 		//
-		for(int i = 0; i < m_moduleCompilers.count(); i++)
+		for(ModuleLogicCompiler* moduleLogicCompiler : m_moduleCompilers)
 		{
-			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
-
-			if (moduleCompiler == nullptr)
+			if (moduleLogicCompiler == nullptr)
 			{
-				assert(false);
+				LOG_NULLPTR_ERROR(m_log);
 				result = false;
-				break;
+				continue;
 			}
 
-			result &= moduleCompiler->pass2();
+			result &= moduleLogicCompiler->pass2();
 
 			if (isBuildCancelled() == true)
 			{
@@ -700,8 +631,6 @@ namespace Builder
 
 		QString delim = "==================================================================================";
 		QString delim2 = "----------------------------------------------------------------------------------";
-
-		QString str;
 
 		for(int i = 0; i < count; i++)
 		{
