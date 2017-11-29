@@ -107,6 +107,7 @@ namespace Builder
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
+			&ApplicationLogicCompiler::writeSubsystemsXml,
 		};
 
 		bool result = true;
@@ -571,7 +572,7 @@ namespace Builder
 		fileContentStringList.append("");
 		fileContentStringList.append(afbsUsage);
 
-		m_resultWriter->addFile("Reports", "resources.txt", fileContentStringList);
+		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Resources.txt", fileContentStringList);
 
 		return result;
 	}
@@ -712,7 +713,7 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile("Reports", "connections.txt", "", "", list);
+		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Connections.txt", "", "", list);
 
 		return true;
 	}
@@ -944,9 +945,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile("Opto-vhd", vhdFileName, list);
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, vhdFileName, list);
 
-		m_resultWriter->addFile("Opto-vhd", bdfFileName, bdfFile.stringList());
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1126,9 +1127,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile("Opto-vhd", vhdFileName, list);
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, vhdFileName, list);
 
-		m_resultWriter->addFile("Opto-vhd", bdfFileName, bdfFile.stringList());
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1196,7 +1197,7 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile("Reports", "opto-modules.txt", "", "", list);
+		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Opto-modules.txt", "", "", list);
 
 		return true;
 	}
@@ -1232,9 +1233,160 @@ namespace Builder
 
 		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* appSignalSetFile = m_resultWriter->addFile("Common", QString("AppSignals.asgs"), CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
+		BuildFile* appSignalSetFile = m_resultWriter->addFile(BuildResultWriter::COMMON_DIR, QString("AppSignals.asgs"), CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
+	}
+
+	bool ApplicationLogicCompiler::writeSubsystemsXml()
+	{
+		bool result = true;
+
+		int subsystemsCount = m_subsystems->count();
+
+		QHash<QString, std::shared_ptr<Hardware::Subsystem>> subsystems;
+
+		for(int i = 0; i < subsystemsCount; i++)
+		{
+			std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+
+			if (subsystem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			subsystems.insert(subsystem->subsystemId(), subsystem);
+		}
+
+		QHash<QString, QString> subsystemModules;
+		QHash<QString, const Hardware::DeviceModule*> modules;
+
+		for(const Hardware::DeviceModule* module : m_lmModules)
+		{
+			if (module == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			modules.insert(module->equipmentIdTemplate(), module);
+
+			QString lmSubsystem;
+
+			bool res= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, m_log);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			if (subsystems.contains(lmSubsystem) == false)
+			{
+				// Subsystem '%1' is not found in subsystem set (Logic Module '%2').
+				m_log->errCFG3001(lmSubsystem, module->equipmentIdTemplate());
+				result = false;
+				continue;
+			}
+
+			subsystemModules.insertMulti(lmSubsystem, module->equipmentIdTemplate());
+		}
+
+		QByteArray data;
+		XmlWriteHelper xml(&data);
+
+		xml.setAutoFormatting(true);
+		xml.writeStartDocument();
+
+		m_resultWriter->buildInfo().writeToXml(*xml.xmlStreamWriter());
+
+		xml.writeStartElement("Subsystems");
+		xml.writeIntAttribute("Count", subsystemsCount);
+
+		QStringList subsystemIDs = subsystems.uniqueKeys();
+
+		subsystemIDs.sort();
+
+		for(const QString& subsystemID : subsystemIDs)
+		{
+			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems.value(subsystemID, nullptr);
+
+			if (subsystem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			QStringList subsysModuleIds = subsystemModules.values(subsystemID);
+			subsysModuleIds.sort();
+
+			xml.writeStartElement("Subsystem");
+
+			xml.writeStringAttribute("Id", subsystem->subsystemId());
+			xml.writeStringAttribute("Caption", subsystem->caption());
+			xml.writeIntAttribute("Index", subsystem->index());
+			xml.writeIntAttribute("Key", subsystem->key());
+			xml.writeIntAttribute("ModulesCount", subsysModuleIds.count());
+
+			for(const QString& moduleID : subsysModuleIds)
+			{
+				const Hardware::DeviceModule* module = modules.value(moduleID, nullptr);
+
+				if (module == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				int lmNumber = 0;
+				int lmChannel = 0;
+				QString lmSubsystem = 0;
+
+				bool res = true;
+
+				res &= DeviceHelper::getIntProperty(module, "LMNumber", &lmNumber, m_log);
+				res &= DeviceHelper::getIntProperty(module, "SubsystemChannel", &lmChannel, m_log);
+				res &= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, m_log);
+
+				if (res == false)
+				{
+					result = false;
+					continue;
+				}
+
+				xml.writeStartElement("Module");
+
+				xml.writeStringAttribute("EquipmentId", module->equipmentIdTemplate());
+				xml.writeStringAttribute("SubsystemId", lmSubsystem);
+				xml.writeIntAttribute("LmNumber", lmNumber);
+				xml.writeIntAttribute("SubsystemChannel", lmChannel);
+				xml.writeIntAttribute("ModuleType", module->moduleType());
+				xml.writeIntAttribute("ModuleFamily", module->moduleFamily());
+				xml.writeIntAttribute("ModuleVersion", module->moduleVersion());
+				xml.writeIntAttribute("CustomModuleFamily", module->customModuleFamily());
+
+				xml.writeEndElement(); // </Module>
+			}
+
+			xml.writeEndElement(); // </Subsystem>
+		}
+
+		xml.writeEndElement(); // </Subsystems>
+		xml.writeEndDocument();
+
+		BuildFile* buildFile = m_resultWriter->addFile(BuildResultWriter::COMMON_DIR, "Subsystems.xml", "", "",  data);
+
+		if (buildFile == nullptr)
+		{
+			result = false;
+		}
+
+		return result;
 	}
 
 	const LmDescriptionSet& ApplicationLogicCompiler::lmDescriptionSet() const

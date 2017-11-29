@@ -485,7 +485,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Subsystem '%1' is not found in subsystem set (Logic Moudle '%2').
+	/// Title: Subsystem '%1' is not found in subsystem set (Logic Module '%2').
 	///
 	///
 	/// Parameters:
@@ -499,7 +499,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3001,
-				  tr("Subsystem '%1' is not found in subsystem set (Logic Moudle '%2').")
+				  tr("Subsystem '%1' is not found in subsystem set (Logic Module '%2').")
 				  .arg(subSysID)
 				  .arg(module));
 	}

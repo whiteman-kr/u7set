@@ -63,6 +63,7 @@ namespace Builder
 		bool writeOptoModulesReport();
 
 		bool writeAppSignalSetFile();
+		bool writeSubsystemsXml();
 
 		const LmDescriptionSet& lmDescriptionSet() const;
 

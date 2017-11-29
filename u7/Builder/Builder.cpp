@@ -317,7 +317,7 @@ namespace Builder
 			Tuning::TuningDataStorage tuningDataStorage;
 			ComparatorStorage comparatorStorage;
 
-			ok = compileApplicationLogic(&subsystems, lmModules, &equipmentSet, &opticModuleStorage,
+			ok = compileApplicationLogic(&subsystems, lmAndBvbModules, &equipmentSet, &opticModuleStorage,
 										 &connections, &signalSet, &lmDescriptions, &appLogicData,
 										 &tuningDataStorage, &comparatorStorage, &busSet, &buildWriter);
 
