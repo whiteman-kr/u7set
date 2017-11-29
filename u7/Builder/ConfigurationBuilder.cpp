@@ -436,26 +436,18 @@ namespace Builder
 				return false;
 			}
 
-			QString path = f.subsysId();
-			QString fileName = f.caption();
-
-			if (path.isEmpty())
+			if (f.subsysId().isEmpty())
 			{
 				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
 				return false;
 			}
-			if (fileName.isEmpty())
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
-				return false;
-			}
 
-			if (buildResultWriter.addFile(path, fileName + ".mcb", data) == nullptr)
+			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".mcb", data) == nullptr)
 			{
 				return false;
 			}
 
-			if (buildResultWriter.addFile(path, fileName + ".mct", f.scriptLog()) == nullptr)
+			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".mct", f.scriptLog()) == nullptr)
 			{
 				return false;
 			}

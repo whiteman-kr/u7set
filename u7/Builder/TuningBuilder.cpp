@@ -156,21 +156,13 @@ namespace Builder
 				return false;
 			}
 
-			QString path = f.subsysId();
-			QString fileName = f.caption();
-
-			if (path.isEmpty())
+			if (f.subsysId().isEmpty())
 			{
 				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
 				return false;
 			}
-			if (fileName.isEmpty())
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
-				return false;
-			}
 
-			if (buildResultWriter.addFile(path, fileName + ".tub", data) == nullptr)
+			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".tub", data) == nullptr)
 			{
 				return false;
 			}

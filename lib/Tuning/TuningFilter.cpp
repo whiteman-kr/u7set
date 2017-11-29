@@ -412,7 +412,7 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 
 bool TuningFilter::save(QXmlStreamWriter& writer) const
 {
-	if (isSourceUser() == false)
+	if (isSourceUser() == false && isSourceProject() == false)
 	{
 		return true;
 	}
@@ -1189,6 +1189,8 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
 bool TuningFilterStorage::save(QByteArray& data)
 {
     QXmlStreamWriter writer(&data);
+
+	writer.setCodec("UTF-8");
 
     writer.setAutoFormatting(true);
     writer.writeStartDocument();
