@@ -660,10 +660,12 @@ namespace Builder
 
 		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount, lmDescriptionNumber, metadataFieldsVersion, metadataFields);
+		Hardware::ModuleFirmwareWriter* firmware = m_resultWriter->firmwareCollection()->get(lmCaption, subsystemID, subsystemKey, static_cast<int>(UartID::LmAppLogicUart), frameSize, frameCount, lmDescriptionNumber);
 
-		if (multichannelFile != nullptr)
+		if (firmware != nullptr)
 		{
+			firmware->setDescriptionFields(static_cast<int>(UartID::LmAppLogicUart), metadataFieldsVersion, metadataFields);
+
 			QByteArray binCode;
 
 			appLogicCode.getBinCode(binCode);
@@ -672,7 +674,7 @@ namespace Builder
 
 			appLogicCode.getAsmMetadata(metadata);
 
-			result &= multichannelFile->setChannelData(lmNumber, frameSize, frameCount, uniqueID, binCode, metadata);
+			result &= firmware->setChannelData(static_cast<int>(UartID::LmAppLogicUart), lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
 		}
 		else
 		{

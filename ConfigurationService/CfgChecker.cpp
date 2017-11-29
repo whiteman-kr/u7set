@@ -12,7 +12,7 @@
 //
 // ------------------------------------------------------------------------------------
 
-QStringList redundantFileExtensions = QStringList() << ".alb" << ".asm" << ".mcb" << ".mct" << ".mem" << ".mif" << ".tub" << ".tun" << ".txt";
+QStringList redundantFileExtensions = QStringList() << ".alb" << ".asm" << ".mcb" << ".mct" << ".mem" << ".mif" << ".tub" << ".tun" << ".txt" << ".bts";
 
 CfgCheckerWorker::CfgCheckerWorker(const QString& workFolder,
 								   const QString& autoloadBuildFolder,

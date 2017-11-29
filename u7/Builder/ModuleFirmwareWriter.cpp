@@ -42,14 +42,64 @@ namespace Hardware
 	}
 
 
-	void ModuleFirmwareWriter::setDescriptionFields(int descriptionVersion, const QStringList& fields)
+	void ModuleFirmwareWriter::setDescriptionFields(int uartId, int descriptionVersion, const QStringList& fields)
 	{
-		m_descriptionFieldsVersion = descriptionVersion;
-		m_descriptionFields = fields;
+		if (m_channelData.find(uartId) == m_channelData.end())
+		{
+			m_channelData[uartId] = ModuleFirmwareChannelData();
+		}
+
+		ModuleFirmwareChannelData& data = m_channelData[uartId];
+
+		data.descriptionFieldsVersion = descriptionVersion;
+		data.descriptionFields = fields;
+	}
+
+	bool ModuleFirmwareWriter::setChannelData(int uartId, QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log)
+	{
+		if (log == nullptr)
+		{
+			assert(log);
+			return false;
+		}
+
+		if (this->frameSize(uartId) != frameSize)
+		{
+			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize(uartId)));
+			return false;
+		}
+
+		if (this->frameCount(uartId) != frameCount)
+		{
+			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize(uartId)));
+			return false;
+		}
+
+		if (m_channelData.find(uartId) == m_channelData.end())
+		{
+			m_channelData[uartId] = ModuleFirmwareChannelData();
+		}
+
+		ModuleFirmwareChannelData& data = m_channelData[uartId];
+
+		if (data.binaryDataMap.find(channel) != data.binaryDataMap.end())
+		{
+			log->errCFG3003(channel, equipmentID);
+			return false;
+		}
+
+		data.channelUniqueId[channel] = uniqueID;
+
+		data.descriptonData[channel] = descriptionData;
+
+		data.binaryDataMap[channel] = binaryData;
+
+		return true;
 	}
 
 	bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 	{
+
 		if (log == nullptr)
 		{
 			assert(log);
@@ -64,119 +114,143 @@ namespace Hardware
 			}
 		}
 
-		// Count CRC64 for all frames
-
-		for (int i = 0; i < frameCount(); i++)
-		{
-			std::vector<quint8>& frame = m_frames[i];
-
-			Crc::setDataBlockCrc(i, frame.data(), (int)frame.size());
-		}
-
-		// Save all frames to file
-
-		const int frameStringWidth = 16;
-
 		QJsonObject jObject;
 
-		for (int i = 0; i < frameCount(); i++)
-		{
-			const std::vector<quint8>& frame = m_frames[i];
+		int firmwareRecordIndex = 0;
 
-			QJsonObject jFrame;
-
-
-			int dataSize = (int)frame.size();
-			int linesCount = ceil((float)dataSize / 2 / frameStringWidth);
-
-			int dataPos = 0;
-
-			const int numCharsCount = 4;					// number of symbols in number "0000" (4)
-			const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
-
-			QByteArray str;
-			str.resize(recCharsCount * frameStringWidth - 1);
-
-			char buf[10];
-
-			for (int l = 0; l < linesCount; l++)
-			{
-				str.fill(' ');
-
-				for (int i = 0; i < frameStringWidth; i++)
-				{
-					quint16 value = ((quint16)frame[dataPos++] << 8);
-					if (dataPos >= dataSize)
-					{
-						assert(false);
-						break;
-					}
-
-					value |= frame[dataPos++];
-
-					snprintf(buf, sizeof(buf), "%hx", value);
-
-					int len = static_cast<int>(strlen(buf));
-
-					memset(str.data() + i * recCharsCount, '0', numCharsCount);
-					memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
-
-					if (dataPos >= dataSize)
-					{
-						str[i * recCharsCount + numCharsCount] = 0;
-						break;
-					}
-				}
-
-				jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
-			}
-			jFrame.insert("frameIndex", i);
-
-
-			jObject.insert("z_frame_" + QString().number(i).rightJustified(4, '0'), jFrame);
-		}
-
-		//description
-		//
-
-		if (m_descriptionFields.empty() == false && m_descriptonData.empty() == false)
+		for (auto it = m_firmwareData.begin(); it != m_firmwareData.end(); it++)
 		{
 
-			for (auto channelDescription : m_descriptonData)
+			int	uartId = it->first;
+
+			ModuleFirmwareData& data = it->second;
+
+			// Count CRC64 for all frames
+
+			for (int i = 0; i < frameCount(uartId); i++)
 			{
-				QJsonObject jDescription;
+				std::vector<quint8>& frame = data.frames[i];
 
-				int channel = channelDescription.first;
-				const std::vector<QVariantList>& descriptionItems = channelDescription.second;
+				Crc::setDataBlockCrc(i, frame.data(), (int)frame.size());
+			}
 
-				// Description header string
+			// Save all frames to file
 
-				QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(m_descriptionFields, true);
+			QJsonObject jFirmware;
 
-				jDescription.insert("desc fields", descriptionHeaderString);
+			const int frameStringWidth = 16;
 
-				// Description strings
+			for (int i = 0; i < frameCount(uartId); i++)
+			{
+				const std::vector<quint8>& frame = data.frames[i];
 
-				int diIndex = 0;
-				for (auto di : descriptionItems)
+				QJsonObject jFrame;
+
+				int dataSize = (int)frame.size();
+				int linesCount = ceil((float)dataSize / 2 / frameStringWidth);
+
+				int dataPos = 0;
+
+				const int numCharsCount = 4;					// number of symbols in number "0000" (4)
+				const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
+
+				QByteArray str;
+				str.resize(recCharsCount * frameStringWidth - 1);
+
+				char buf[10];
+
+				for (int l = 0; l < linesCount; l++)
 				{
-					if (di.size() != m_descriptionFields.size())
+					str.fill(' ');
+
+					for (int i = 0; i < frameStringWidth; i++)
 					{
-						qDebug() << "number of data items (" << di.size() << ") must be equal to number of header items (" << m_descriptionFields.size() << ")";
-						assert(false);
-						return false;
+						quint16 value = ((quint16)frame[dataPos++] << 8);
+						if (dataPos >= dataSize)
+						{
+							assert(false);
+							break;
+						}
+
+						value |= frame[dataPos++];
+
+						snprintf(buf, sizeof(buf), "%hx", value);
+
+						int len = static_cast<int>(strlen(buf));
+
+						memset(str.data() + i * recCharsCount, '0', numCharsCount);
+						memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
+
+						if (dataPos >= dataSize)
+						{
+							str[i * recCharsCount + numCharsCount] = 0;
+							break;
+						}
 					}
 
-					QString descriptionString = QString("%1;%2").arg(m_descriptionFieldsVersion).arg(CsvFile::getCsvString(di, true));
-
-					jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), descriptionString);
+					jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
 				}
+				jFrame.insert("frameIndex", i);
 
-				if (descriptionItems.empty() == false)
-				{
-					jObject.insert("z_description_channel_" + QString::number(channel).rightJustified(2, '0'), jDescription);
-				}
+
+				jFirmware.insert("z_frame_" + QString().number(i).rightJustified(4, '0'), jFrame);
 			}
+
+			//description
+			//
+			if (m_channelData.find(uartId) != m_channelData.end())
+			{
+
+				ModuleFirmwareChannelData& cd = m_channelData[uartId];
+
+				if (cd.descriptionFields.empty() == false && cd.descriptionFields.empty() == false)
+				{
+
+					for (auto channelDescription : cd.descriptonData)
+					{
+						QJsonObject jDescription;
+
+						int channel = channelDescription.first;
+						const std::vector<QVariantList>& descriptionItems = channelDescription.second;
+
+						// Description header string
+
+						QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(cd.descriptionFields, true);
+
+						jDescription.insert("desc fields", descriptionHeaderString);
+
+						// Description strings
+
+						int diIndex = 0;
+						for (auto di : descriptionItems)
+						{
+							if (di.size() != cd.descriptionFields.size())
+							{
+								qDebug() << "number of data items (" << di.size() << ") must be equal to number of header items (" << cd.descriptionFields.size() << ")";
+								assert(false);
+								return false;
+							}
+
+							QString descriptionString = QString("%1;%2").arg(cd.descriptionFieldsVersion).arg(CsvFile::getCsvString(di, true));
+
+							jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), descriptionString);
+						}
+
+						if (descriptionItems.empty() == false)
+						{
+							jFirmware.insert("z_description_channel_" + QString::number(channel).rightJustified(2, '0'), jDescription);
+						}
+					}
+				}
+
+				jFirmware.insert("uartId", uartId);
+				jFirmware.insert("frameSize", frameSize(uartId));
+				jFirmware.insert("frameSizeWithCRC", frameSizeWithCRC(uartId));
+				jFirmware.insert("framesCount", frameCount(uartId));
+			}
+
+
+			jObject.insert("z_firmware_" + QString::number(firmwareRecordIndex++), jFirmware);
 		}
 
 		// properties
@@ -196,10 +270,6 @@ namespace Hardware
 		jObject.insert("projectName", m_projectName);
 		jObject.insert("caption", caption());
 		jObject.insert("subsysId", subsysId());
-		jObject.insert("uartId", uartId());
-		jObject.insert("frameSize", frameSize());
-		jObject.insert("frameSizeWithCRC", frameSizeWithCRC());
-		jObject.insert("framesCount", frameCount());
 		jObject.insert("buildNumber", m_buildNumber);
 		jObject.insert("buildConfig", m_buildConfig);
 		jObject.insert("lmDescriptionNumber", m_lmDescriptionNumber);
@@ -207,58 +277,36 @@ namespace Hardware
 		jObject.insert("fileVersion", fileVersion());
 		jObject.insert("buildSoftware", m_buildSoftware);
 		jObject.insert("buildTime", m_buildTime);
+		jObject.insert("firmwaresCount", static_cast<int>(m_firmwareData.size()));
 
 		dest = QJsonDocument(jObject).toJson();
 
 		return true;
 	}
 
-	bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log)
-	{
-		if (log == nullptr)
-		{
-			assert(log);
-			return false;
-		}
-
-		if (this->frameSize() != frameSize)
-		{
-			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize()));
-			return false;
-		}
-
-		if (this->frameCount() != frameCount)
-		{
-			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize()));
-			return false;
-		}
-
-		auto it = m_channelData.find(channel);
-		if (it != m_channelData.end())
-		{
-			log->errCFG3003(channel, equipmentID);
-			return false;
-		}
-
-		m_channelUniqueId[channel] = uniqueID;
-
-		m_descriptonData[channel] = descriptionData;
-
-		m_channelData[channel] = data;
-
-		return true;
-	}
 
 	bool ModuleFirmwareWriter::setData8(int frameIndex, int offset, quint8 data)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(data)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
 		}
 
-		quint8* ptr = static_cast<quint8*>(m_frames[frameIndex].data() + offset);
+		quint8* ptr = static_cast<quint8*>(fd.frames[frameIndex].data() + offset);
 		*ptr = data;
 
 		return true;
@@ -266,8 +314,20 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::setData16(int frameIndex, int offset, quint16 data)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(data)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -275,7 +335,7 @@ namespace Hardware
 
 		quint16 dataBE= qToBigEndian(data);
 
-		quint16* ptr = reinterpret_cast<quint16*>(m_frames[frameIndex].data() + offset);
+		quint16* ptr = reinterpret_cast<quint16*>(fd.frames[frameIndex].data() + offset);
 		*ptr = dataBE;
 
 		return true;
@@ -283,8 +343,20 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::setData32(int frameIndex, int offset, quint32 data)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(data)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -292,7 +364,7 @@ namespace Hardware
 
 		quint32 dataBE = qToBigEndian(data);
 
-		quint32* ptr = reinterpret_cast<quint32*>(m_frames[frameIndex].data() + offset);
+		quint32* ptr = reinterpret_cast<quint32*>(fd.frames[frameIndex].data() + offset);
 		*ptr = dataBE;
 
 		return true;
@@ -300,8 +372,20 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::setData64(int frameIndex, int offset, quint64 data)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(data)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -309,7 +393,7 @@ namespace Hardware
 
 		quint64 dataBE = qToBigEndian(data);
 
-		quint64* ptr = reinterpret_cast<quint64*>(m_frames[frameIndex].data() + offset);
+		quint64* ptr = reinterpret_cast<quint64*>(fd.frames[frameIndex].data() + offset);
 		*ptr = dataBE;
 
 		return true;
@@ -317,27 +401,51 @@ namespace Hardware
 
 	quint8 ModuleFirmwareWriter::data8(int frameIndex, int offset)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(quint8)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(quint8)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		return static_cast<quint8>(*(m_frames[frameIndex].data() + offset));
+		return static_cast<quint8>(*(fd.frames[frameIndex].data() + offset));
 
 	}
 
 	quint16 ModuleFirmwareWriter::data16(int frameIndex, int offset)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(quint16)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(quint16)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		std::vector<quint8>& frameData = m_frames[frameIndex];
+		std::vector<quint8>& frameData = fd.frames[frameIndex];
 
 		quint16 data = *(reinterpret_cast<quint16*>(frameData.data() + offset));
 		return qFromBigEndian(data);
@@ -345,14 +453,26 @@ namespace Hardware
 
 	quint32 ModuleFirmwareWriter::data32(int frameIndex, int offset)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(quint32)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(quint32)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		std::vector<quint8>& frameData = m_frames[frameIndex];
+		std::vector<quint8>& frameData = fd.frames[frameIndex];
 
 		quint32 data = *(reinterpret_cast<quint32*>(frameData.data() + offset));
 		return qFromBigEndian(data);
@@ -376,25 +496,47 @@ namespace Hardware
 
 	QString ModuleFirmwareWriter::storeCrc64(int frameIndex, int start, int count, int offset)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(quint64)) || start + count > frameSize())
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(quint64)) || start + count > frameSize(uartID))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return QString();
 		}
 
-		quint64 result = Crc::crc64(m_frames[frameIndex].data() + start, count);
+		quint64 result = Crc::crc64(fd.frames[frameIndex].data() + start, count);
 		setData64(frameIndex, offset, result);
-
-		//qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
 
 		return QString::number(result, 16);
 	}
 
 	QString ModuleFirmwareWriter::storeHash64(int frameIndex, int offset, QString dataString)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				offset > (int)(frameSize() - sizeof(quint64)))
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				offset > (int)(frameSize(uartID) - sizeof(quint64)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return QString("");
@@ -413,23 +555,37 @@ namespace Hardware
 
 	quint32 ModuleFirmwareWriter::calcCrc32(int frameIndex, int start, int count)
 	{
-		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-				start + count > frameSize())
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		{
+			assert(false);
+			return false;
+		}
+
+		ModuleFirmwareData& fd = m_firmwareData[uartID];
+
+		//
+
+		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
+				start + count > frameSize(uartID))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		quint64 result = Crc::crc64(m_frames[frameIndex].data() + start, count);
+		quint64 result = Crc::crc64(fd.frames[frameIndex].data() + start, count);
 
 		return result & 0xffffffff;
 	}
 
 	void ModuleFirmwareWriter::jsSetDescriptionFields(int descriptionVersion, QString fields)
 	{
-		m_descriptionFieldsVersion = descriptionVersion;
-		m_descriptionFields = fields.split(';');
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		setDescriptionFields(uartID, descriptionVersion, fields.split(';'));
 	}
+
 
 	void ModuleFirmwareWriter::jsAddDescription(int channel, QString descriptionCSV)
 	{
@@ -441,18 +597,30 @@ namespace Hardware
 			v.append(s);
 		}
 
-		auto cd = m_descriptonData.find(channel);
-		if (cd == m_descriptonData.end())
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_channelData.find(uartID) == m_channelData.end())
+		{
+			assert(false);
+			return;
+		}
+
+		ModuleFirmwareChannelData& cd = m_channelData[uartID];
+
+		//
+
+		auto dd = cd.descriptonData.find(channel);
+		if (dd == cd.descriptonData.end())
 		{
 			std::vector<QVariantList> descriptonData;
 			descriptonData.push_back(v);
 
-			m_descriptonData[channel] = descriptonData;
+			cd.descriptonData[channel] = descriptonData;
 
 		}
 		else
 		{
-			std::vector<QVariantList>& descriptonData = cd->second;
+			std::vector<QVariantList>& descriptonData = dd->second;
 			descriptonData.push_back(v);
 		}
 
@@ -460,7 +628,17 @@ namespace Hardware
 
 	void ModuleFirmwareWriter::jsSetUniqueID(int lmNumber, quint64 uniqueID)
 	{
-		m_channelUniqueId[lmNumber] = uniqueID;
+		int uartID = static_cast<int>(UartID::LmConfigUart);
+
+		if (m_channelData.find(uartID) == m_channelData.end())
+		{
+			assert(false);
+			return;
+		}
+
+		ModuleFirmwareChannelData& cd = m_channelData[uartID];
+
+		cd.channelUniqueId[lmNumber] = uniqueID;
 	}
 
 
@@ -474,10 +652,18 @@ namespace Hardware
 		return m_scriptLog;
 	}
 
-	quint64 ModuleFirmwareWriter::uniqueID(int lmNumber)
+	quint64 ModuleFirmwareWriter::uniqueID(int uartId, int lmNumber) const
 	{
-		auto it = m_channelUniqueId.find(lmNumber);
-		if (it == m_channelUniqueId.end())
+		if (m_channelData.find(uartId) == m_channelData.end())
+		{
+			assert(false);
+			return 0;
+		}
+
+		const ModuleFirmwareChannelData& data = m_channelData.at(uartId);
+
+		auto it = data.channelUniqueId.find(lmNumber);
+		if (it == data.channelUniqueId.end())
 		{
 			assert(false);
 			return 0;
@@ -488,45 +674,62 @@ namespace Hardware
 
 	void ModuleFirmwareWriter::setGenericUniqueId(int lmNumber, quint64 genericUniqueId)
 	{
-		if (m_channelData.empty() == false)
+
+		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
 		{
-			// This case is used for Application and Tuning data (data is stored in Channel Data)
 
-			if (m_channelData.find(lmNumber) == m_channelData.end())
+			int uartId = it->first;
+
+			if (uartId == static_cast<int>(UartID::LmConfigUart))
 			{
-				assert(false);
-				return;
+				// This case is used for Configuration data (data is stored in frames)
+
+				if (m_firmwareData.find(uartId) == m_firmwareData.end())
+				{
+					assert(false);
+					return;
+				}
+
+				ModuleFirmwareData& data = m_firmwareData[uartId];
+
+				const int ConfigDataStartFrame = 2;
+
+				const int LMNumberConfigFrameCount = 19;
+
+				int frameNumber = ConfigDataStartFrame + LMNumberConfigFrameCount * (lmNumber - 1);
+
+				const int UniqueIdOffset = 4;
+
+				quint64 uidBE = qToBigEndian(genericUniqueId);
+
+				if (frameNumber < 0 || frameNumber >= (int)data.frames.size())
+				{
+					assert(false);
+					return;
+				}
+
+				std::vector<quint8>& frame = data.frames[frameNumber];
+
+				quint8* pData = frame.data();
+
+				quint64* pUniqueIdPtr = (quint64*)(pData + UniqueIdOffset);
+
+				*pUniqueIdPtr = uidBE;
 			}
-
-			m_channelUniqueId[lmNumber] = genericUniqueId;
-		}
-		else
-		{
-			// This case is used for Configuration data (data is stored in frames)
-
-			const int ConfigDataStartFrame = 2;
-
-			const int LMNumberConfigFrameCount = 19;
-
-			int frameNumber = ConfigDataStartFrame + LMNumberConfigFrameCount * (lmNumber - 1);
-
-			const int UniqueIdOffset = 4;
-
-			quint64 uidBE = qToBigEndian(genericUniqueId);
-
-			if (frameNumber < 0 || frameNumber >= (int)m_frames.size())
+			else
 			{
-				assert(false);
-				return;
+				// This case is used for Application and Tuning data (data is stored in Channel Data)
+
+				ModuleFirmwareChannelData& channelData = it->second;
+
+				if (channelData.channelUniqueId.find(lmNumber) == channelData.channelUniqueId.end())
+				{
+					assert(false);
+					return;
+				}
+
+				channelData.channelUniqueId[lmNumber] = genericUniqueId;
 			}
-
-			std::vector<quint8>& frame = m_frames[frameNumber];
-
-			quint8* pData = frame.data();
-
-			quint64* pUniqueIdPtr = (quint64*)(pData + UniqueIdOffset);
-
-			*pUniqueIdPtr = uidBE;
 		}
 	}
 
@@ -550,174 +753,190 @@ namespace Hardware
 
 		quint16 ssKeyValue = m_ssKey << 6;
 
-		if (frameCount() < 3)
-		{
-			log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId()));
-			return false;
-		}
-
-		const int LMNumber_Min = 1;
-		const int LMNumber_Max = 64;
-
-		// sort channel data by growing channel number
-		//
-		std::vector<std::pair<int, int>> channelNumbersAndSize;
 		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
 		{
-			int channel = it->first;
+			int uartId = it->first;
 
-			if (channel < LMNumber_Min || channel > LMNumber_Max)
+			if (frameCount(uartId) < 3)
 			{
-				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: Wrong LM number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
+				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId()));
 				return false;
 			}
 
-			const QByteArray& channelData = it->second;
+			const ModuleFirmwareChannelData& channelData = it->second;
 
-			double fSize = (double)channelData.size() / frameSize();
-			fSize = ceil(fSize);
-			int size = (int)fSize;
-
-			channelNumbersAndSize.push_back(std::make_pair(channel, size));
-		}
-		std::sort(channelNumbersAndSize.begin(), channelNumbersAndSize.end(), [](std::pair<int, int> a, std::pair<int, int> b)
-		{
-			return a.first < b.first;
-		});
-
-		// place channel data to frames
-		//
-		std::vector<int> channelStartFrame;
-
-		int frame = startDataFrame;
-		int maxChannel = 1;
-
-		for (size_t c = 0; c < channelNumbersAndSize.size(); c++)
-		{
-			int channel = channelNumbersAndSize[c].first;
-			if (channel > maxChannel)
-			{
-				maxChannel = channel;
-			}
-			int size = (quint16)channelNumbersAndSize[c].second;
-
-			if (frame >= frameCount())
-			{
-				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount()));
-				return false;
-			}
-
-			channelStartFrame.push_back(frame);
-
-			// channel data
+			// sort channel data by growing channel number
 			//
-			const QByteArray& channelData = m_channelData[channel];
+			const int LMNumber_Min = 1;
+			const int LMNumber_Max = 64;
 
-			quint64 uniqueId = m_channelUniqueId[channel];
-
-			// channel service information
-			//
-			quint8* ptr = m_frames[frame].data();
-
-			*(quint16*)ptr = qToBigEndian((quint16)0x0001);		//Channel configuration version
-			ptr += sizeof(quint16);
-
-			*(quint16*)ptr = qToBigEndian((quint16)uartId());	//Data type (configuration)
-			ptr += sizeof(quint16);
-
-			if (uniqueId == 0)
+			std::vector<std::pair<int, int>> channelNumbersAndSize;
+			for (auto it = channelData.binaryDataMap.begin(); it != channelData.binaryDataMap.end(); it++)
 			{
-				QByteArray bytes = subsysId().toUtf8();
+				int channel = it->first;
 
-				*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
-				ptr += sizeof(quint64);
-			}
-			else
-			{
-				*(quint64*)ptr = qToBigEndian(uniqueId);
-				ptr += sizeof(quint64);
-			}
-
-			*(quint16*)ptr = qToBigEndian((quint16)size);           // Frames count
-			ptr += sizeof(quint16);
-
-			frame++;
-
-			if (size != 0)
-			{
-				// store channel data in frames
-				//
-				int index = 0;
-				for (int i = 0; i < channelData.size(); i++)
+				if (channel < LMNumber_Min || channel > LMNumber_Max)
 				{
-					if (index >= frameSize())
-					{
-						// data is bigger than frame - switch to the next frame
-						//
-						frame++;
-						index = 0;
-					}
-
-					if (frame >= frameCount())
-					{
-						log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount()));
-						return false;
-					}
-
-					m_frames[frame][index++] = channelData[i];
+					log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: Wrong LM number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
+					return false;
 				}
 
-				//switch to the next frame
-				//
-				frame++;
+				const QByteArray& data = it->second;
+
+				double fSize = (double)data.size() / frameSize(uartId);
+				fSize = ceil(fSize);
+				int size = (int)fSize;
+
+				channelNumbersAndSize.push_back(std::make_pair(channel, size));
 			}
-		}
+			std::sort(channelNumbersAndSize.begin(), channelNumbersAndSize.end(), [](std::pair<int, int> a, std::pair<int, int> b)
+			{
+				return a.first < b.first;
+			});
+
+			// place channel data to frames
+			//
+			if (m_firmwareData.find(uartId) == m_firmwareData.end())
+			{
+				assert(false);
+				return false;
+			}
+
+			ModuleFirmwareData& firmwareData = m_firmwareData[uartId];
+
+			std::vector<int> channelStartFrame;
+
+			int frame = startDataFrame;
+			int maxChannel = 1;
+
+			for (size_t c = 0; c < channelNumbersAndSize.size(); c++)
+			{
+				int channel = channelNumbersAndSize[c].first;
+				if (channel > maxChannel)
+				{
+					maxChannel = channel;
+				}
+				int size = (quint16)channelNumbersAndSize[c].second;
+
+				if (frame >= frameCount(uartId))
+				{
+					log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount(uartId)));
+					return false;
+				}
+
+				channelStartFrame.push_back(frame);
+
+				// channel data
+				//
+				const QByteArray& binaryData = channelData.binaryDataMap.at(channel);
+
+				quint64 uniqueId = channelData.channelUniqueId.at(channel);
+
+				// channel service information
+				//
+
+				quint8* ptr = firmwareData.frames[frame].data();
+
+				*(quint16*)ptr = qToBigEndian((quint16)0x0001);		//Channel configuration version
+				ptr += sizeof(quint16);
+
+				*(quint16*)ptr = qToBigEndian((quint16)uartId);	//Data type (configuration)
+				ptr += sizeof(quint16);
+
+				if (uniqueId == 0)
+				{
+					QByteArray bytes = subsysId().toUtf8();
+
+					*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
+					ptr += sizeof(quint64);
+				}
+				else
+				{
+					*(quint64*)ptr = qToBigEndian(uniqueId);
+					ptr += sizeof(quint64);
+				}
+
+				*(quint16*)ptr = qToBigEndian((quint16)size);           // Frames count
+				ptr += sizeof(quint16);
+
+				frame++;
+
+				if (size != 0)
+				{
+					// store channel data in frames
+					//
+					int index = 0;
+					for (int i = 0; i < binaryData.size(); i++)
+					{
+						if (index >= frameSize(uartId))
+						{
+							// data is bigger than frame - switch to the next frame
+							//
+							frame++;
+							index = 0;
+						}
+
+						if (frame >= frameCount(uartId))
+						{
+							log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount(uartId)));
+							return false;
+						}
+
+						firmwareData.frames[frame][index++] = binaryData[i];
+					}
+
+					//switch to the next frame
+					//
+					frame++;
+				}
+			}
 
 
-		// fill storage config frame
-		//
-		quint8* ptr = m_frames[storageConfigFrame].data();
+			// fill storage config frame
+			//
+			quint8* ptr = firmwareData.frames[storageConfigFrame].data();
 
-		*(quint16*)ptr = qToBigEndian((quint16)0xCA70);	// Configuration reference mark
-		ptr += sizeof(quint16);
+			*(quint16*)ptr = qToBigEndian((quint16)0xCA70);	// Configuration reference mark
+			ptr += sizeof(quint16);
 
-		*(quint16*)ptr = qToBigEndian((quint16)0x0001);	// Configuration structure version
-		ptr += sizeof(quint16);
+			*(quint16*)ptr = qToBigEndian((quint16)0x0001);	// Configuration structure version
+			ptr += sizeof(quint16);
 
-		*(quint16*)ptr = qToBigEndian((quint16)ssKeyValue);	// Subsystem key
-		ptr += sizeof(quint16);
+			*(quint16*)ptr = qToBigEndian((quint16)ssKeyValue);	// Subsystem key
+			ptr += sizeof(quint16);
 
-		*(quint16*)ptr = qToBigEndian((quint16)m_buildNumber);	// Build number
-		ptr += sizeof(quint16);
+			*(quint16*)ptr = qToBigEndian((quint16)m_buildNumber);	// Build number
+			ptr += sizeof(quint16);
 
-		*(quint16*)ptr = qToBigEndian((quint16)m_lmDescriptionNumber);	// Description number
-		ptr += sizeof(quint16);	//reserved
+			*(quint16*)ptr = qToBigEndian((quint16)m_lmDescriptionNumber);	// Description number
+			ptr += sizeof(quint16);	//reserved
 
-		ptr += sizeof(quint32);	//reserved
+			ptr += sizeof(quint32);	//reserved
 
-		*(quint16*)ptr = qToBigEndian((quint16)maxChannel);	// Configuration channels quantity
-		ptr += sizeof(quint16);
+			*(quint16*)ptr = qToBigEndian((quint16)maxChannel);	// Configuration channels quantity
+			ptr += sizeof(quint16);
 
-		if (channelNumbersAndSize.size() != channelStartFrame.size())
-		{
-			assert(channelNumbersAndSize.size() == channelStartFrame.size());
-			return false;
-		}
+			if (channelNumbersAndSize.size() != channelStartFrame.size())
+			{
+				assert(channelNumbersAndSize.size() == channelStartFrame.size());
+				return false;
+			}
 
-		quint8* ptrChannelTable = ptr;
+			quint8* ptrChannelTable = ptr;
 
-		for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
-		{
-			int channel = channelNumbersAndSize[i].first;
+			for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
+			{
+				int channel = channelNumbersAndSize[i].first;
 
-			quint8* ptrChannel = ptrChannelTable + (sizeof(quint16) * 3) *(channel - 1);
+				quint8* ptrChannel = ptrChannelTable + (sizeof(quint16) * 3) *(channel - 1);
 
-			quint16 startFrame = (quint16)channelStartFrame[i];
+				quint16 startFrame = (quint16)channelStartFrame[i];
 
-			*(quint16*)ptrChannel = qToBigEndian(startFrame);
-			ptrChannel += sizeof(quint16);
+				*(quint16*)ptrChannel = qToBigEndian(startFrame);
+				ptrChannel += sizeof(quint16);
 
-			ptrChannel += sizeof(quint32);
+				ptrChannel += sizeof(quint32);
+			}
 		}
 
 		return true;
@@ -755,25 +974,16 @@ namespace Hardware
 
 		ModuleFirmwareWriter& fw = m_firmwares[subsysId];
 
-		if (newFirmware == true)
+		if (newFirmware == true || fw.firmwareExists(uartId) == false)
 		{
-			fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, lmDescriptionNumber, m_projectName, m_userName,
+			fw.init(uartId, frameSize, frameCount, caption, subsysId, ssKey, lmDescriptionNumber, m_projectName, m_userName,
 					m_buildNo, m_debug ? "debug" : "release", m_changesetId);
 		}
 
 		return &fw;
 	}
 
-	QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber)
-	{
-		ModuleFirmwareWriter* fw = get(caption, subsysId, ssKey, uartId, frameSize, frameCount, lmDescriptionNumber);
-
-		QQmlEngine::setObjectOwnership(fw, QQmlEngine::ObjectOwnership::CppOwnership);
-
-		return fw;
-	}
-
-	quint64 ModuleFirmwareCollection::getFirmwareUniqueId(const QString &subsystemID, int lmNumber)
+	quint64 ModuleFirmwareCollection::firmwareUniqueId(int uartId, const QString &subsystemID, int lmNumber)
 	{
 		if (m_firmwares.count(subsystemID) == 0)
 		{
@@ -783,7 +993,7 @@ namespace Hardware
 
 		ModuleFirmwareWriter& fw = m_firmwares[subsystemID];
 
-		return fw.uniqueID(lmNumber);
+		return fw.uniqueID(uartId, lmNumber);
 	}
 
 	void ModuleFirmwareCollection::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)

@@ -45,9 +45,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	pLeftLayout->addWidget(new QLabel(tr("Choose File Type:")));
 	m_pFileTypeCombo = new QComboBox();
-	m_pFileTypeCombo->addItem(tr("Application Logic (*.alb)"), tr("*.alb"));
-	m_pFileTypeCombo->addItem(tr("FSC Configuration (*.mcb)"), tr("*.mcb"));
-	m_pFileTypeCombo->addItem(tr("Tuning (*.tub)"), tr("*.tub"));
+	m_pFileTypeCombo->addItem(tr("Bitstream Files (*.bts)"), tr("*.bts"));
 	m_pFileTypeCombo->setCurrentIndex(0);
 	connect(m_pFileTypeCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::fileTypeChanged);
 	pLeftLayout->addWidget(m_pFileTypeCombo);
@@ -298,7 +296,7 @@ void UploadTabPage::findSubsystemsInBuild(int index)
 	{
 		QDir subsystemPath = buildPath + QDir::separator() + s;
 
-		QStringList binaryFiles = QDir(subsystemPath).entryList(QStringList() << "*.mcb" << "*.alb" << "*.tub",
+		QStringList binaryFiles = QDir(subsystemPath).entryList(QStringList() << "*.bts",
 										 QDir::Files| QDir::NoSymLinks);
 
 		if (binaryFiles.isEmpty() == false)

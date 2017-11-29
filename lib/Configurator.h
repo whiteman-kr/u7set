@@ -299,6 +299,8 @@ private:
 	volatile bool m_cancelFlag = false;
 
 	bool m_verify = true;
+
+	int m_currentUartId = -1;
 };
 
 

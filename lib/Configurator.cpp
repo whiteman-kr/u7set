@@ -1020,14 +1020,22 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 				frameSize = pingReplyVersioned.frameSize;
 				blockCount = pingReplyVersioned.romSize / pingReplyVersioned.blockSize;
 
-				// Check if the connector in correct Uart
-				//
-				if (moduleUartId != conf->uartId())
+				m_currentUartId = moduleUartId;
+
+				m_Log->writeMessage(tr("UART ID is %1h").arg(QString::number(m_currentUartId, 16)));
+
+				// Check if firmware exists for current uart
+
+				if (conf->firmwareExists(m_currentUartId) == false)
 				{
-					throw tr("Wrong UART, use %1h port.").arg(QString::number(conf->uartId(), 16));
+					throw tr("No firmware data exists for current UART ID.");
 				}
 
-				int confFrameDataSize = conf->frameSize();
+				m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf->frameSize(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf->frameSizeWithCRC(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf->frameCount(m_currentUartId))));
+
+				int confFrameDataSize = conf->frameSize(m_currentUartId);
 
 				if (pingReplyVersioned.frameSize < confFrameDataSize)
 				{
@@ -1180,7 +1188,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 			{
 				m_Log->writeMessage("Write configuration...");
 
-				for (int i = 0; i < conf->frameCount(); i++)
+				for (int i = 0; i < conf->frameCount(m_currentUartId); i++)
 				{
 					if (m_cancelFlag == true)
 					{
@@ -1204,7 +1212,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 						throw tr("Wrong FrameIndex %1").arg(frameIndex);
 					}
 
-					const std::vector<quint8> frameData = conf->frame(i);
+					const std::vector<quint8> frameData = conf->frame(m_currentUartId, i);
 
 					if (frameData.size() != blockSize)
 					{
@@ -1434,7 +1442,7 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 		QString userName = QDir::home().dirName();
 
 		Hardware::ModuleFirmware conf;
-		conf.init("Caption", "subsysId", 0, 0, 0, 0, 0, "projectName", userName, 0, "release", 0);
+		conf.init(0, 0, 0, "Caption", "subsysId", 0, 0, "projectName", userName, 0, "release", 0);
 
 		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
 		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
@@ -1613,10 +1621,6 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
 	m_Log->writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
 	m_Log->writeMessage(tr("LM Description Number: %1").arg(m_confFirmware.lmDescriptionNumber()));
-	m_Log->writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
-	m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
-	m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(m_confFirmware.frameSizeWithCRC())));
-	m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
 
 	if (writeToFlash == true)
 	{
