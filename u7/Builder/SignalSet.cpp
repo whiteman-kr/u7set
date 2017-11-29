@@ -202,44 +202,6 @@ namespace Builder
 		return result;
 	}
 
-	bool SignalSet::expandBusSignals()
-	{
-		if (m_busSignals.count() == 0)
-		{
-			return true;
-		}
-
-		bool result = true;
-
-		for(QString busSignalID : m_busSignals)
-		{
-			Signal* s = getSignal(busSignalID);
-
-			if (s == nullptr)
-			{
-				result = false;
-				LOG_INTERNAL_ERROR(m_log);
-				continue;
-			}
-
-			const VFrame30::Bus& bus = m_busSet->bus(s->busTypeID());
-
-			const std::vector<VFrame30::BusSignal>& busSignals = bus.busSignals();
-
-			for(const VFrame30::BusSignal& busSignal : busSignals)
-			{
-			/*	Signal* newSignal = appendBusChildSignal(*s, bus, busSignal);
-
-				if (newSignal == nullptr)
-				{
-					result = false;
-				}*/
-			}
-		}
-
-		return result;
-	}
-
 	bool SignalSet::bindSignalsToLMs(Hardware::EquipmentSet* equipment)
 	{
 		TEST_PTR_RETURN_FALSE(equipment);

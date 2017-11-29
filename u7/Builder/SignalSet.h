@@ -20,7 +20,6 @@ namespace Builder
 
 		bool prepareBusses();
 		bool checkSignals();
-		bool expandBusSignals();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();
 
