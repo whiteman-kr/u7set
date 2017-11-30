@@ -220,7 +220,7 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Loading LogicModule descriptions..."));
 
 			std::vector<Hardware::DeviceModule*> lmModules;
-			findLmModules(equipmentSet.root(), &lmModules);
+			findModulesByFamily(equipmentSet.root(), &lmModules, Hardware::DeviceModule::FamilyType::LM);
 
 			std::vector<Hardware::DeviceModule*> lmAndBvbModules;
 
@@ -320,7 +320,7 @@ namespace Builder
 			Tuning::TuningDataStorage tuningDataStorage;
 			ComparatorStorage comparatorStorage;
 
-			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage,
+			ok = compileApplicationLogic(&subsystems, lmAndBvbModules, &equipmentSet, &opticModuleStorage,
 										 &connections, &signalSet, &lmDescriptions, &appLogicData,
 										 &tuningDataStorage, &comparatorStorage, &busSet, &buildWriter);
 
@@ -500,39 +500,6 @@ namespace Builder
 		return true;
 	}
 
-	void BuildWorkerThread::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
-	{
-		if (object == nullptr ||
-			out == nullptr)
-		{
-			assert(object);
-			assert(out);
-			return;
-		}
-
-		for (int i = 0; i < object->childrenCount(); i++)
-		{
-			Hardware::DeviceObject* child = object->child(i);
-
-			if (child->deviceType() == Hardware::DeviceType::Module)
-			{
-				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-
-				if (module->isLogicModule() == true)
-				{
-					out->push_back(module);
-				}
-			}
-
-			if (child->deviceType() < Hardware::DeviceType::Module)
-			{
-				findLmModules(child, out);
-			}
-		}
-
-		return;
-	}
-
 	void BuildWorkerThread::findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
 	{
 		if (object == nullptr ||
@@ -590,7 +557,7 @@ namespace Builder
 				}
 			}
 
-			if (child->deviceType() < Hardware::DeviceType::Module)
+			if (static_cast<int>(child->deviceType()) < static_cast<int>(Hardware::DeviceType::Module))
 			{
 				findModulesByFamily(child, out, family);
 			}
@@ -943,15 +910,6 @@ namespace Builder
 
 		signalSet->buildID2IndexMap();
 
-		result = signalSet->expandBusSignals();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		signalSet->buildID2IndexMap();				// rebuild map after expand
-
 		result = signalSet->bindSignalsToLMs(equipment);
 
 		if (result == false)
@@ -1119,6 +1077,7 @@ namespace Builder
 
 
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
+													const std::vector<Hardware::DeviceModule*>& lmModules,
 													Hardware::EquipmentSet* equipmentSet,
 													Hardware::OptoModuleStorage* optoModuleStorage,
 													Hardware::ConnectionStorage* connections,
@@ -1134,6 +1093,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
 		ApplicationLogicCompiler appLogicCompiler(subsystems,
+												  lmModules,
 												  equipmentSet,
 												  optoModuleStorage,
 												  connections,

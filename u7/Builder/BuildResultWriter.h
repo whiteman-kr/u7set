@@ -196,6 +196,9 @@ namespace Builder
 		bool isDebug() const;
 		bool isRelease() const;
 
+		static const QString COMMON_DIR;
+		static const QString REPORTS_DIR;
+		static const QString OPTO_VHD_DIR;
 	};
 }
 

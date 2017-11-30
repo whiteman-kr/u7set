@@ -20,6 +20,7 @@ namespace Builder
 
 
 	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+													   const std::vector<Hardware::DeviceModule*>& lmModules,
 													   Hardware::EquipmentSet *equipmentSet,
 													   Hardware::OptoModuleStorage *optoModuleStorage,
 													   Hardware::ConnectionStorage *connections,
@@ -32,6 +33,7 @@ namespace Builder
 													   BuildResultWriter* buildResultWriter,
 													   IssueLogger *log) :
 		m_subsystems(subsystems),
+		m_lmModules(lmModules),
 		m_equipmentSet(equipmentSet),
 		m_optoModuleStorage(optoModuleStorage),
 		m_signals(signalSet),
@@ -94,7 +96,6 @@ namespace Builder
 
 		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
 		{
-			&ApplicationLogicCompiler::findLMs,
 			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
@@ -106,6 +107,7 @@ namespace Builder
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
+			&ApplicationLogicCompiler::writeSubsystemsXml,
 		};
 
 		bool result = true;
@@ -143,80 +145,6 @@ namespace Builder
 		}
 
 		return false;
-	}
-
-	bool ApplicationLogicCompiler::findLMs()
-	{
-		// find all logic modules (LMs) in project
-		// fills m_lm vector
-		//
-		m_lm.clear();
-
-		findLM(m_deviceRoot);
-
-		if (m_lm.count() == 0)
-		{
-			LOG_MESSAGE(m_log, tr("Logic modules (LMs) not found!"));
-		}
-		else
-		{
-			LOG_MESSAGE(m_log, QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()));
-		}
-
-		return true;
-	}
-
-	void ApplicationLogicCompiler::findLM(Hardware::DeviceObject* startFromDevice)
-	{
-		// find logic modules (LMs), recursive
-		//
-		if (startFromDevice == nullptr)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__));
-			assert(false);
-			return;
-		}
-
-		if (startFromDevice->deviceType() == Hardware::DeviceType::Signal)
-		{
-			return;
-		}
-
-		if (startFromDevice->deviceType() == Hardware::DeviceType::Module)
-		{
-			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
-
-			if (module->isLogicModule() == true ||
-				module->isBvb() == true)
-			{
-				Hardware::DeviceObject* parent = startFromDevice->parent();
-
-				if (parent != nullptr)
-				{
-					if (parent->deviceType() == Hardware::DeviceType::Chassis)
-					{
-						// LM must be installed in the chassis
-						//
-						m_lm.append(reinterpret_cast<Hardware::DeviceModule*>(startFromDevice));
-					}
-					else
-					{
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM %1 is not installed in the chassis")).arg(module->equipmentIdTemplate()));
-					}
-				}
-			}
-
-			return;
-		}
-
-		int childrenCount = startFromDevice->childrenCount();
-
-		for(int i = 0; i < childrenCount; i++)
-		{
-			Hardware::DeviceObject* device = startFromDevice->child(i);
-
-			findLM(device);
-		}
 	}
 
 	bool ApplicationLogicCompiler::prepareOptoConnectionsProcessing()
@@ -259,9 +187,9 @@ namespace Builder
 
 		bool result = true;
 
-		QHash<QString, Hardware::DeviceModule*> ip2Modules;
+		QHash<QString, const Hardware::DeviceModule*> ip2Modules;
 
-		for(Hardware::DeviceModule* lm : m_lm)
+		for(const Hardware::DeviceModule* lm : m_lmModules)
 		{
 			if (lm == nullptr)
 			{
@@ -283,7 +211,6 @@ namespace Builder
 
 				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, m_log);
 
-
 				switch(ethernetAdapterNo)
 				{
 				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1:
@@ -295,7 +222,7 @@ namespace Builder
 
 						if (ip2Modules.contains(lmNetProperties.tuningIP) == true)
 						{
-							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.tuningIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.tuningIP];
 
 							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.tuningIP, lm1->uuid(), lm->uuid());
 
@@ -318,7 +245,7 @@ namespace Builder
 
 						if (ip2Modules.contains(lmNetProperties.appDataIP) == true)
 						{
-							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.appDataIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.appDataIP];
 
 							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.appDataIP, lm1->uuid(), lm->uuid());
 
@@ -336,7 +263,7 @@ namespace Builder
 
 						if (ip2Modules.contains(lmNetProperties.diagDataIP) == true)
 						{
-							Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.diagDataIP];
+							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.diagDataIP];
 
 							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.diagDataIP, lm1->uuid(), lm->uuid());
 
@@ -373,9 +300,16 @@ namespace Builder
 
 		// first compiler pass
 		//
-		for(int i = 0; i < m_lm.count(); i++)
+		for(const Hardware::DeviceModule* lm : m_lmModules)
 		{
-			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, m_lm[i]);
+			if (lm == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, lm);
 
 			m_moduleCompilers.append(moduleLogicCompiler);
 
@@ -405,18 +339,16 @@ namespace Builder
 
 		// second compiler pass
 		//
-		for(int i = 0; i < m_moduleCompilers.count(); i++)
+		for(ModuleLogicCompiler* moduleLogicCompiler : m_moduleCompilers)
 		{
-			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
-
-			if (moduleCompiler == nullptr)
+			if (moduleLogicCompiler == nullptr)
 			{
-				assert(false);
+				LOG_NULLPTR_ERROR(m_log);
 				result = false;
-				break;
+				continue;
 			}
 
-			result &= moduleCompiler->pass2();
+			result &= moduleLogicCompiler->pass2();
 
 			if (isBuildCancelled() == true)
 			{
@@ -640,7 +572,7 @@ namespace Builder
 		fileContentStringList.append("");
 		fileContentStringList.append(afbsUsage);
 
-		m_resultWriter->addFile("Reports", "resources.txt", fileContentStringList);
+		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Resources.txt", fileContentStringList);
 
 		return result;
 	}
@@ -702,8 +634,6 @@ namespace Builder
 
 		QString delim = "==================================================================================";
 		QString delim2 = "----------------------------------------------------------------------------------";
-
-		QString str;
 
 		for(int i = 0; i < count; i++)
 		{
@@ -785,7 +715,7 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile("Reports", "connections.txt", "", "", list);
+		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Connections.txt", "", "", list);
 
 		return true;
 	}
@@ -1017,9 +947,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile("Opto-vhd", vhdFileName, list);
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, vhdFileName, list);
 
-		m_resultWriter->addFile("Opto-vhd", bdfFileName, bdfFile.stringList());
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1199,9 +1129,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile("Opto-vhd", vhdFileName, list);
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, vhdFileName, list);
 
-		m_resultWriter->addFile("Opto-vhd", bdfFileName, bdfFile.stringList());
+		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1269,7 +1199,7 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile("Reports", "opto-modules.txt", "", "", list);
+		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Opto-modules.txt", "", "", list);
 
 		return true;
 	}
@@ -1305,9 +1235,160 @@ namespace Builder
 
 		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* appSignalSetFile = m_resultWriter->addFile("Common", QString("AppSignals.asgs"), CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
+		BuildFile* appSignalSetFile = m_resultWriter->addFile(BuildResultWriter::COMMON_DIR, QString("AppSignals.asgs"), CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
+	}
+
+	bool ApplicationLogicCompiler::writeSubsystemsXml()
+	{
+		bool result = true;
+
+		int subsystemsCount = m_subsystems->count();
+
+		QHash<QString, std::shared_ptr<Hardware::Subsystem>> subsystems;
+
+		for(int i = 0; i < subsystemsCount; i++)
+		{
+			std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+
+			if (subsystem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			subsystems.insert(subsystem->subsystemId(), subsystem);
+		}
+
+		QHash<QString, QString> subsystemModules;
+		QHash<QString, const Hardware::DeviceModule*> modules;
+
+		for(const Hardware::DeviceModule* module : m_lmModules)
+		{
+			if (module == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			modules.insert(module->equipmentIdTemplate(), module);
+
+			QString lmSubsystem;
+
+			bool res= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, m_log);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			if (subsystems.contains(lmSubsystem) == false)
+			{
+				// Subsystem '%1' is not found in subsystem set (Logic Module '%2').
+				m_log->errCFG3001(lmSubsystem, module->equipmentIdTemplate());
+				result = false;
+				continue;
+			}
+
+			subsystemModules.insertMulti(lmSubsystem, module->equipmentIdTemplate());
+		}
+
+		QByteArray data;
+		XmlWriteHelper xml(&data);
+
+		xml.setAutoFormatting(true);
+		xml.writeStartDocument();
+
+		m_resultWriter->buildInfo().writeToXml(*xml.xmlStreamWriter());
+
+		xml.writeStartElement("Subsystems");
+		xml.writeIntAttribute("Count", subsystemsCount);
+
+		QStringList subsystemIDs = subsystems.uniqueKeys();
+
+		subsystemIDs.sort();
+
+		for(const QString& subsystemID : subsystemIDs)
+		{
+			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems.value(subsystemID, nullptr);
+
+			if (subsystem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			QStringList subsysModuleIds = subsystemModules.values(subsystemID);
+			subsysModuleIds.sort();
+
+			xml.writeStartElement("Subsystem");
+
+			xml.writeStringAttribute("Id", subsystem->subsystemId());
+			xml.writeStringAttribute("Caption", subsystem->caption());
+			xml.writeIntAttribute("Index", subsystem->index());
+			xml.writeIntAttribute("Key", subsystem->key());
+			xml.writeIntAttribute("ModulesCount", subsysModuleIds.count());
+
+			for(const QString& moduleID : subsysModuleIds)
+			{
+				const Hardware::DeviceModule* module = modules.value(moduleID, nullptr);
+
+				if (module == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				int lmNumber = 0;
+				int lmChannel = 0;
+				QString lmSubsystem = 0;
+
+				bool res = true;
+
+				res &= DeviceHelper::getIntProperty(module, "LMNumber", &lmNumber, m_log);
+				res &= DeviceHelper::getIntProperty(module, "SubsystemChannel", &lmChannel, m_log);
+				res &= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, m_log);
+
+				if (res == false)
+				{
+					result = false;
+					continue;
+				}
+
+				xml.writeStartElement("Module");
+
+				xml.writeStringAttribute("EquipmentId", module->equipmentIdTemplate());
+				xml.writeStringAttribute("SubsystemId", lmSubsystem);
+				xml.writeIntAttribute("LmNumber", lmNumber);
+				xml.writeIntAttribute("SubsystemChannel", lmChannel);
+				xml.writeIntAttribute("ModuleType", module->moduleType());
+				xml.writeIntAttribute("ModuleFamily", module->moduleFamily());
+				xml.writeIntAttribute("ModuleVersion", module->moduleVersion());
+				xml.writeIntAttribute("CustomModuleFamily", module->customModuleFamily());
+
+				xml.writeEndElement(); // </Module>
+			}
+
+			xml.writeEndElement(); // </Subsystem>
+		}
+
+		xml.writeEndElement(); // </Subsystems>
+		xml.writeEndDocument();
+
+		BuildFile* buildFile = m_resultWriter->addFile(BuildResultWriter::COMMON_DIR, "Subsystems.xml", "", "",  data);
+
+		if (buildFile == nullptr)
+		{
+			result = false;
+		}
+
+		return result;
 	}
 
 	const LmDescriptionSet& ApplicationLogicCompiler::lmDescriptionSet() const

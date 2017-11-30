@@ -70,7 +70,6 @@ namespace Builder
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
-		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const;
 
@@ -116,7 +115,8 @@ namespace Builder
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
+		bool compileApplicationLogic(	Hardware::SubsystemStorage* subsystems,
+										const std::vector<Hardware::DeviceModule*>& lmModules,
 										Hardware::EquipmentSet*equipmentSet,
 										Hardware::OptoModuleStorage* optoModuleStorage,
 										Hardware::ConnectionStorage* connections,
