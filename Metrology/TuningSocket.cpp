@@ -127,8 +127,6 @@ void TuningSocket::requestTuningSourcesInfo()
 		return;
 	}
 
-	m_getTuningSourcesInfo.set_clientequipmentid(equipmentID.toUtf8());
-
 	sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_getTuningSourcesInfo);
 }
 
@@ -201,8 +199,6 @@ void TuningSocket::requestTuningSourcesState()
 		return;
 	}
 
-	m_getTuningSourcesStates.set_clientequipmentid(equipmentID.toUtf8());
-
 	sendRequest(TDS_GET_TUNING_SOURCES_STATES, m_getTuningSourcesStates);
 }
 
@@ -272,8 +268,6 @@ void TuningSocket::requestReadTuningSignals()
 		requestTuningSourcesState();
 		return;
 	}
-
-	m_readTuningSignals.set_clientequipmentid(equipmentID.toUtf8());
 
 	m_readTuningSignals.mutable_signalhash()->Reserve(signalForReadCount);
 

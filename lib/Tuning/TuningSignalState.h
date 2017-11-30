@@ -81,6 +81,8 @@ public:
 
 	Q_INVOKABLE TuningValue value() const;
 
+	double valueToDouble() const;
+
 	TuningValue newValue() const;
 	void setNewValue(const TuningValue& value);
 
