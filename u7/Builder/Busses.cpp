@@ -753,6 +753,11 @@ namespace Builder
 
 		const std::vector<VFrame30::Bus>& busses = m_busSet->busses();
 
+		if (busses.size() == 0)
+		{
+			return true;
+		}
+
 		bool result = true;
 
 		for(const VFrame30::Bus& srcBus : busses)
