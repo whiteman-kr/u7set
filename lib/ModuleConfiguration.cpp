@@ -35,6 +35,7 @@ namespace Hardware
 
 		ModuleFirmwareData data;
 
+		data.uartType = E::valueToString<E::UartID>(uartId);
 		data.frameSize = frameSize;
 		data.frameSizeWithCRC = frameSize + sizeof(quint64);
 
@@ -64,7 +65,20 @@ namespace Hardware
 		return m_firmwareData.size() == 0;
 	}
 
-	bool ModuleFirmware::firmwareExists(int uartId) const
+	std::vector<std::pair<int, QString>> ModuleFirmware::uartList() const
+	{
+		std::vector<std::pair<int, QString>> result;
+
+		for (auto it : m_firmwareData)
+		{
+			ModuleFirmwareData& data = it.second;
+			result.push_back(std::make_pair(it.first, data.uartType));
+		}
+
+		return result;
+	}
+
+	bool ModuleFirmware::uartExists(int uartId) const
 	{
 		return m_firmwareData.find(uartId) != m_firmwareData.end();
 	}
@@ -286,12 +300,6 @@ namespace Hardware
 
 		//
 
-		if (readDataFrames == false)
-		{
-			return true;
-		}
-
-
 		if (jConfig.value("firmwaresCount").isUndefined() == true)
 		{
 			return false;
@@ -333,101 +341,110 @@ namespace Hardware
 				data.frameSizeWithCRC = data.frameSize + sizeof(quint64);
 			}
 
-			std::vector<quint8> frameVec;
-			frameVec.resize(data.frameSizeWithCRC);
-
-			quint16* framePtr = (quint16*)frameVec.data();
-
-			int frameStringWidth = -1;
-			int linesCount = 0;
-
-			for (int v = 0; v < framesCount; v++)
-			{
-
-				QJsonValue jFrameVal = jFirmwareObject.value("z_frame_" + QString::number(v).rightJustified(4, '0'));
-				if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
-				{
-					assert(false);
-					return false;
-				}
-
-				QJsonObject jFrame = jFrameVal.toObject();
-
-				if (jFrame.value("frameIndex").isUndefined() == true)
-				{
-					assert(false);
-					return false;
-				}
-
-				if (frameStringWidth == -1)
-				{
-					QString firstString = jFrame.value("data0000").toString();
-
-					frameStringWidth = firstString.split(' ').size();
-					if (frameStringWidth == 0)
-					{
-						assert(false);
-						return false;
-					}
-
-					linesCount = ceil((float)data.frameSize / 2 / frameStringWidth);
-				}
-
-				int dataPos = 0;
-
-				quint16* ptr = framePtr;
-
-				for (int l = 0; l < linesCount; l++)
-				{
-					QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
-
-					QJsonValue v = jFrame.value(stringName);
-
-					if (v.isUndefined() == true)
-					{
-						assert(false);
-						return false;
-					}
-
-					QString stringValue = v.toString();
-
-					for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
-					{
-						bool ok = false;
-						quint16 v = s.toUInt(&ok, 16);
-
-						if (ok == false)
-						{
-							assert(false);
-							return false;
-						}
-
-						if (dataPos >= data.frameSizeWithCRC / sizeof(quint16))
-						{
-							assert(false);
-							break;
-						}
-
-						dataPos++;
-
-						*ptr++ = qToBigEndian(v);
-					}
-				}
-
-				if (Crc::checkDataBlockCrc(v, frameVec) == false)
-				{
-					errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
-					return false;
-				}
-
-				data.frames.push_back(frameVec);
-			}
-
 			if (jFirmwareObject.value("uartId").isUndefined() == true)
 			{
 				return false;
 			}
 			int uartId = (int)jFirmwareObject.value("uartId").toDouble();
+
+			if (jFirmwareObject.value("uartType").isUndefined() == true)
+			{
+				return false;
+			}
+			data.uartType = jFirmwareObject.value("uartType").toString();
+
+			if (readDataFrames == true)
+			{
+				std::vector<quint8> frameVec;
+				frameVec.resize(data.frameSizeWithCRC);
+
+				quint16* framePtr = (quint16*)frameVec.data();
+
+				int frameStringWidth = -1;
+				int linesCount = 0;
+
+				for (int v = 0; v < framesCount; v++)
+				{
+
+					QJsonValue jFrameVal = jFirmwareObject.value("z_frame_" + QString::number(v).rightJustified(4, '0'));
+					if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
+					{
+						assert(false);
+						return false;
+					}
+
+					QJsonObject jFrame = jFrameVal.toObject();
+
+					if (jFrame.value("frameIndex").isUndefined() == true)
+					{
+						assert(false);
+						return false;
+					}
+
+					if (frameStringWidth == -1)
+					{
+						QString firstString = jFrame.value("data0000").toString();
+
+						frameStringWidth = firstString.split(' ').size();
+						if (frameStringWidth == 0)
+						{
+							assert(false);
+							return false;
+						}
+
+						linesCount = ceil((float)data.frameSize / 2 / frameStringWidth);
+					}
+
+					int dataPos = 0;
+
+					quint16* ptr = framePtr;
+
+					for (int l = 0; l < linesCount; l++)
+					{
+						QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+
+						QJsonValue v = jFrame.value(stringName);
+
+						if (v.isUndefined() == true)
+						{
+							assert(false);
+							return false;
+						}
+
+						QString stringValue = v.toString();
+
+						for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
+						{
+							bool ok = false;
+							quint16 v = s.toUInt(&ok, 16);
+
+							if (ok == false)
+							{
+								assert(false);
+								return false;
+							}
+
+							if (dataPos >= data.frameSizeWithCRC / sizeof(quint16))
+							{
+								assert(false);
+								break;
+							}
+
+							dataPos++;
+
+							*ptr++ = qToBigEndian(v);
+						}
+					}
+
+					if (Crc::checkDataBlockCrc(v, frameVec) == false)
+					{
+						errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
+						return false;
+					}
+
+					data.frames.push_back(frameVec);
+				}
+			}
 
 			m_firmwareData[uartId] = data;
 		}

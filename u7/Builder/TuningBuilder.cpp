@@ -88,7 +88,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(m->caption(), subsysStrID, subsysID, static_cast<int>(UartID::LmTuningUart), frameSize, frameCount, lmDescription->descriptionNumber());
+			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(m->caption(), subsysStrID, subsysID, static_cast<int>(E::UartID::LmTuning), frameSize, frameCount, lmDescription->descriptionNumber());
 			if (firmware == nullptr)
 			{
 				assert(firmware);
@@ -124,11 +124,11 @@ namespace Builder
 
 				tuningData->getMetadataFields(metadataFields, &metadataFieldsVersion);
 
-				firmware->setDescriptionFields(static_cast<int>(UartID::LmTuningUart), metadataFieldsVersion, metadataFields);
+				firmware->setDescriptionFields(static_cast<int>(E::UartID::LmTuning), metadataFieldsVersion, metadataFields);
 				descriptionData = tuningData->metadata();
 			}
 
-			if (firmware->setChannelData(static_cast<int>(UartID::LmTuningUart), m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
+			if (firmware->setChannelData(static_cast<int>(E::UartID::LmTuning), m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
 			{
 				return false;
 			}

@@ -363,7 +363,7 @@ namespace Builder
 
 		int subsysID = m_subsystems->ssKey(subsysStrID);
 
-		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(subsystemModules[0]->caption(), subsysStrID, subsysID, static_cast<int>(UartID::LmConfigUart), frameSize, frameCount, lmDescription->descriptionNumber());
+		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(subsystemModules[0]->caption(), subsysStrID, subsysID, static_cast<int>(E::UartID::LmConfig), frameSize, frameCount, lmDescription->descriptionNumber());
 
 		QJSValue jsFirmware = m_jsEngine.newQObject(firmware);
 		QQmlEngine::setObjectOwnership(firmware, QQmlEngine::CppOwnership);

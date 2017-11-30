@@ -244,6 +244,9 @@ namespace Hardware
 				}
 
 				jFirmware.insert("uartId", uartId);
+
+				jFirmware.insert("uartType", data.uartType);
+
 				jFirmware.insert("frameSize", frameSize(uartId));
 				jFirmware.insert("frameSizeWithCRC", frameSizeWithCRC(uartId));
 				jFirmware.insert("framesCount", frameCount(uartId));
@@ -287,7 +290,7 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::setData8(int frameIndex, int offset, quint8 data)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -314,7 +317,7 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::setData16(int frameIndex, int offset, quint16 data)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -343,7 +346,7 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::setData32(int frameIndex, int offset, quint32 data)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -372,7 +375,7 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::setData64(int frameIndex, int offset, quint64 data)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -401,7 +404,7 @@ namespace Hardware
 
 	quint8 ModuleFirmwareWriter::data8(int frameIndex, int offset)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -426,7 +429,7 @@ namespace Hardware
 
 	quint16 ModuleFirmwareWriter::data16(int frameIndex, int offset)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -453,7 +456,7 @@ namespace Hardware
 
 	quint32 ModuleFirmwareWriter::data32(int frameIndex, int offset)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -496,7 +499,7 @@ namespace Hardware
 
 	QString ModuleFirmwareWriter::storeCrc64(int frameIndex, int start, int count, int offset)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -523,7 +526,7 @@ namespace Hardware
 
 	QString ModuleFirmwareWriter::storeHash64(int frameIndex, int offset, QString dataString)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -555,7 +558,7 @@ namespace Hardware
 
 	quint32 ModuleFirmwareWriter::calcCrc32(int frameIndex, int start, int count)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
@@ -581,7 +584,7 @@ namespace Hardware
 
 	void ModuleFirmwareWriter::jsSetDescriptionFields(int descriptionVersion, QString fields)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		setDescriptionFields(uartID, descriptionVersion, fields.split(';'));
 	}
@@ -597,7 +600,7 @@ namespace Hardware
 			v.append(s);
 		}
 
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_channelData.find(uartID) == m_channelData.end())
 		{
@@ -628,7 +631,7 @@ namespace Hardware
 
 	void ModuleFirmwareWriter::jsSetUniqueID(int lmNumber, quint64 uniqueID)
 	{
-		int uartID = static_cast<int>(UartID::LmConfigUart);
+		int uartID = static_cast<int>(E::UartID::LmConfig);
 
 		if (m_channelData.find(uartID) == m_channelData.end())
 		{
@@ -680,7 +683,7 @@ namespace Hardware
 
 			int uartId = it->first;
 
-			if (uartId == static_cast<int>(UartID::LmConfigUart))
+			if (uartId == static_cast<int>(E::UartID::LmConfig))
 			{
 				// This case is used for Configuration data (data is stored in frames)
 
@@ -974,7 +977,7 @@ namespace Hardware
 
 		ModuleFirmwareWriter& fw = m_firmwares[subsysId];
 
-		if (newFirmware == true || fw.firmwareExists(uartId) == false)
+		if (newFirmware == true || fw.uartExists(uartId) == false)
 		{
 			fw.init(uartId, frameSize, frameCount, caption, subsysId, ssKey, lmDescriptionNumber, m_projectName, m_userName,
 					m_buildNo, m_debug ? "debug" : "release", m_changesetId);

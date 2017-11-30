@@ -43,12 +43,34 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pSubsystemList, &QListWidget::currentRowChanged, this, &UploadTabPage::subsystemChanged);
 	pLeftLayout->addWidget(m_pSubsystemList);
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose File Type:")));
-	m_pFileTypeCombo = new QComboBox();
-	m_pFileTypeCombo->addItem(tr("Bitstream Files (*.bts)"), tr("*.bts"));
-	m_pFileTypeCombo->setCurrentIndex(0);
-	connect(m_pFileTypeCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::fileTypeChanged);
-	pLeftLayout->addWidget(m_pFileTypeCombo);
+	pLeftLayout->addWidget(new QLabel(tr("Firmware Types:")));
+	m_pFirmwareListWidget = new QTreeWidget();
+	pLeftLayout->addWidget(m_pFirmwareListWidget);
+
+	QStringList l;
+	l << tr("UartID");
+	l << tr("Type");
+	l << tr("Upload Count");
+
+	m_pFirmwareListWidget->setColumnCount(l.size());
+	m_pFirmwareListWidget->setHeaderLabels(l);
+
+	int il = 0;
+	m_pFirmwareListWidget->setColumnWidth(il++, 80);
+	m_pFirmwareListWidget->setColumnWidth(il++, 140);
+	m_pFirmwareListWidget->setColumnWidth(il++, 140);
+
+	m_pFirmwareListWidget->setRootIsDecorated(false);
+
+	QHBoxLayout* bl = new QHBoxLayout();
+
+	bl->addStretch();
+
+	QPushButton* b = new QPushButton(tr("Reset Upload Counters"));
+	bl->addWidget(b);
+	connect(b, &QPushButton::clicked, this, &UploadTabPage::resetFirmwareLabels);
+
+	pLeftLayout->addLayout(bl);
 
 	pLeftLayout->addStretch();
 
@@ -156,13 +178,17 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
-	connect(this, &UploadTabPage::showConfDataFileInfo, m_pConfigurator, &Configurator::showConfDataFileInfo);
-	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::writeConfDataFile);
+	connect(this, &UploadTabPage::showConfDataFileInfo, m_pConfigurator, &Configurator::showBinaryFileInfo);
+	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::uploadBinaryFile);
 	connect(this, &UploadTabPage::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 
 	connect(m_pConfigurator, &Configurator::communicationStarted, this, &UploadTabPage::disableControls);
 	connect(m_pConfigurator, &Configurator::communicationFinished, this, &UploadTabPage::enableControls);
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &UploadTabPage::communicationReadFinished);
+
+	//connect(m_pConfigurator, &Configurator::loadFileError, this, &UploadTabPage::removeFirmwareLabels);
+	connect(m_pConfigurator, &Configurator::loadHeaderComplete, this, &UploadTabPage::loadHeaderComplete);
+	connect(m_pConfigurator, &Configurator::uploadSuccessful, this, &UploadTabPage::uploadSuccessful);
 
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 
@@ -255,13 +281,6 @@ void UploadTabPage::configurationTypeChanged(const QString& s)
 	findProjectBuilds();
 }
 
-void UploadTabPage::fileTypeChanged(const QString& s)
-{
-	Q_UNUSED(s);
-
-	findProjectBuilds();
-}
-
 
 void UploadTabPage::findSubsystemsInBuild(int index)
 {
@@ -330,36 +349,29 @@ void UploadTabPage::subsystemChanged(int index)
 	m_currentSubsystem = item->text();
 	m_currentSubsystemIndex = m_pSubsystemList->currentRow();
 
-
-	QVariant d = m_pFileTypeCombo->currentData();
-	if (d.isNull() || d.isValid() == false)
-	{
-		return;
-	}
-
-	QString fileType = d.toString();
-
 	QString searchPath = m_buildSearchPath + QDir::separator() + m_currentBuild + QDir::separator() + m_currentSubsystem;
 
-	QStringList files = QDir(searchPath).entryList(QStringList(fileType),
-															  QDir::Files|QDir::NoSymLinks);
+	QStringList binaryFiles = QDir(searchPath).entryList(QStringList() << "*.bts",
+									 QDir::Files| QDir::NoSymLinks);
 
-	if (files.isEmpty() == true)
+	if (binaryFiles.isEmpty() == true)
 	{
 		m_outputLog.writeError(tr("No Output Bitstream files found in %1!").arg(searchPath));
 		return;
 	}
 
-	if (files.size() > 1)
+	if (binaryFiles.size() > 1)
 	{
 		m_outputLog.writeError(tr("More than one Output Bitstream file found in %1!").arg(searchPath));
 		return;
 	}
 
-	m_currentFileName = searchPath + QDir::separator() + files[0];
+	m_currentFileName = searchPath + QDir::separator() + binaryFiles[0];
+
+	removeFirmwareLabels();
 
 	emit showConfDataFileInfo(m_currentFileName);
-	//m_outputLog.writeMessage(tr("File selected to upload: %1").arg(m_currentFileName));
+
 }
 
 void UploadTabPage::closeEvent(QCloseEvent* e)
@@ -547,6 +559,86 @@ void UploadTabPage::writeLog(const OutputLogItem& logItem)
 
 	QString s = logItem.toHtml();
 	m_pLog->append(s);
+
+	return;
+}
+
+void UploadTabPage::removeFirmwareLabels()
+{
+	m_pFirmwareListWidget->clear();
+}
+
+void UploadTabPage::resetFirmwareLabels()
+{
+	int count = m_pFirmwareListWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = m_pFirmwareListWidget->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		item->setData(2, Qt::UserRole, 0);
+		item->setText(2, "0");
+	}
+}
+
+void UploadTabPage::loadHeaderComplete(std::vector<int> uartIDList, QStringList uartTypeList)
+{
+	removeFirmwareLabels();
+
+	if (uartIDList.size() != uartTypeList.size())
+	{
+		assert(false);
+		return;
+	}
+
+	for (int i = 0; i < static_cast<int>(uartIDList.size()); i++)
+	{
+		int uartID = uartIDList[i];
+
+		QStringList l;
+		l << tr("%1h").arg(QString::number(uartID, 16));
+		l << uartTypeList[i];
+		l << "0";
+
+		QTreeWidgetItem* item = new QTreeWidgetItem(l);
+
+		item->setData(0, Qt::UserRole, uartID);
+		item->setData(2, Qt::UserRole, 0);
+
+		m_pFirmwareListWidget->addTopLevelItem(item);
+	}
+
+	m_pFirmwareListWidget->sortByColumn(0, Qt::AscendingOrder);
+}
+
+void UploadTabPage::uploadSuccessful(int uartID)
+{
+	int count = m_pFirmwareListWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = m_pFirmwareListWidget->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		int itemUartId = item->data(0, Qt::UserRole).toInt();
+		if (uartID == itemUartId)
+		{
+			int itemUploadCount = item->data(2, Qt::UserRole).toInt();
+			itemUploadCount++;
+
+			item->setData(2, Qt::UserRole, itemUploadCount);
+			item->setText(2, QString::number(itemUploadCount));
+
+			break;
+		}
+	}
 
 	return;
 }

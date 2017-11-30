@@ -1307,9 +1307,9 @@ namespace Builder
 			}
 
 
-			quint64 appUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(UartID::LmAppLogicUart), subsysID, lmNumber);
-			quint64 cfgUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(UartID::LmConfigUart), subsysID, lmNumber);
-			quint64 tunUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(UartID::LmTuningUart), subsysID, lmNumber);
+			quint64 appUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmAppLogic), subsysID, lmNumber);
+			quint64 cfgUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmConfig), subsysID, lmNumber);
+			quint64 tunUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmTuning), subsysID, lmNumber);
 
 			quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
 

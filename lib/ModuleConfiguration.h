@@ -18,6 +18,8 @@ namespace Hardware
 		int frameSize = 0;
 		int frameSizeWithCRC = 0;
 
+		QString uartType;
+
 		// binary data
 		//
 		std::vector<std::vector<quint8>> frames;
@@ -46,7 +48,8 @@ namespace Hardware
 		//
 		bool isEmpty() const;
 
-		bool firmwareExists(int uartId) const;
+		std::vector<std::pair<int, QString> > uartList() const;
+		bool uartExists(int uartId) const;
 
 		int frameSize(int uartId) const;
 		int frameSizeWithCRC(int uartId) const;

@@ -1026,7 +1026,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 
 				// Check if firmware exists for current uart
 
-				if (conf->firmwareExists(m_currentUartId) == false)
+				if (conf->uartExists(m_currentUartId) == false)
 				{
 					throw tr("No firmware data exists for current UART ID.");
 				}
@@ -1278,6 +1278,8 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 		// --
 		//
 		m_Log->writeSuccess(tr("Successful."));
+
+		emit uploadSuccessful(m_currentUartId);
 	}
 	catch (QString str)
 	{
@@ -1568,12 +1570,12 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 	return;
 }
 
-void Configurator::showConfDataFileInfo(const QString& fileName)
+void Configurator::showBinaryFileInfo(const QString& fileName)
 {
 	processConfDataFile(fileName, false);
 }
 
-void Configurator::writeConfDataFile(const QString& fileName)
+void Configurator::uploadBinaryFile(const QString& fileName)
 {
 	processConfDataFile(fileName, true);
 }
@@ -1582,7 +1584,7 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 {
 	emit communicationStarted();
 
-	Hardware::ModuleFirmware m_confFirmware;
+	Hardware::ModuleFirmware confFirmware;
 
 	m_Log->writeMessage(tr("//----------------------"));
 	m_Log->writeMessage(tr("File: %1").arg(fileName));
@@ -1594,11 +1596,11 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 
 	if (writeToFlash == true)
 	{
-		result = m_confFirmware.load(fileName, errorCode);
+		result = confFirmware.load(fileName, errorCode);
 	}
 	else
 	{
-		result = m_confFirmware.loadHeader(fileName, errorCode);
+		result = confFirmware.loadHeader(fileName, errorCode);
 	}
 
 	if (result == false)
@@ -1611,20 +1613,35 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 
 		m_Log->writeError(str);
 		emit communicationFinished();
+		emit loadFileError();
 		return;
 	}
 
-	m_Log->writeMessage(tr("File Version: %1").arg(m_confFirmware.fileVersion()));
-	m_Log->writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
-	m_Log->writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
-	m_Log->writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
-	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
-	m_Log->writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
-	m_Log->writeMessage(tr("LM Description Number: %1").arg(m_confFirmware.lmDescriptionNumber()));
+	m_Log->writeMessage(tr("File Version: %1").arg(confFirmware.fileVersion()));
+	m_Log->writeMessage(tr("SubsysID: %1").arg(confFirmware.subsysId()));
+	m_Log->writeMessage(tr("ChangesetID: %1").arg(confFirmware.changesetId()));
+	m_Log->writeMessage(tr("Build User: %1").arg(confFirmware.userName()));
+	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(confFirmware.buildNumber())));
+	m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
+	m_Log->writeMessage(tr("LM Description Number: %1").arg(confFirmware.lmDescriptionNumber()));
 
 	if (writeToFlash == true)
 	{
-		writeConfigurationWorker(&m_confFirmware);
+		writeConfigurationWorker(&confFirmware);
+	}
+	else
+	{
+		std::vector<std::pair<int, QString>> uartList = confFirmware.uartList();
+		std::vector<int> uartId;
+		QStringList uartType;
+
+		for (auto it : uartList)
+		{
+			uartId.push_back(it.first);
+			uartType.push_back(it.second);
+		}
+
+		emit loadHeaderComplete(uartId, uartType);
 	}
 
 	emit communicationFinished();
@@ -1633,7 +1650,7 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 
 }
 
-void Configurator::writeConfData(ModuleFirmware *conf)
+void Configurator::uploadConfData(ModuleFirmware *conf)
 {
 	emit communicationStarted();
 
