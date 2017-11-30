@@ -9,6 +9,7 @@
 //
 // ----------------------------------------------------------------------------
 
+typedef std::pair<int, QString> UartPair;
 
 namespace Hardware
 {
@@ -48,7 +49,7 @@ namespace Hardware
 		//
 		bool isEmpty() const;
 
-		std::vector<std::pair<int, QString> > uartList() const;
+		std::vector<UartPair> uartList() const;
 		bool uartExists(int uartId) const;
 
 		int frameSize(int uartId) const;

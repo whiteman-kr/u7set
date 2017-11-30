@@ -11,6 +11,7 @@
 #include "Builder/ModuleFirmwareWriter.h"
 #include "version.h"
 #include "../lib/LmDescription.h"
+#include "../lib/Configurator.h"
 
 #include <QtQml>
 
@@ -126,10 +127,10 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<E::SignalType>();
 	qRegisterMetaType<TimeStamp>();
 	qRegisterMetaType<TimeSpan>();
+	qRegisterMetaType<std::vector<UartPair>>();
 
 	qmlRegisterType<JsVariantList>();
     qmlRegisterType<Hardware::OptoPort>();
-
 
     // Start database communication thread
 	//

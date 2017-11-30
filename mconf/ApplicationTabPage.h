@@ -18,8 +18,18 @@ public:
 	bool isFileLoaded() const;
 	Hardware::ModuleFirmware* configuration();
 
-protected slots:
+private slots:
 	void openFileClicked();
+	void on_resetCountersButton_clicked();
+
+public slots:
+	void uploadSuccessful(int uartID);
+
+private:
+	void clearUartData();
+	void fillUartData();
+
+
 
 private:
 	Ui::ApplicationTabPage ui;

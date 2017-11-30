@@ -125,6 +125,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(m_pConfigurator, &Configurator::communicationStarted, this, &ModuleConfigurator::disableControls);
 	connect(m_pConfigurator, &Configurator::communicationFinished, this, &ModuleConfigurator::enableControls);
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
+
+	connect(m_pConfigurator, &Configurator::uploadSuccessful, appTabPage, &ApplicationTabPage::uploadSuccessful);
 	
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 	
