@@ -68,7 +68,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QPushButton* b = new QPushButton(tr("Reset Upload Counters"));
 	bl->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &UploadTabPage::resetFirmwareLabels);
+	connect(b, &QPushButton::clicked, this, &UploadTabPage::resetUartData);
 
 	pLeftLayout->addLayout(bl);
 
@@ -186,7 +186,6 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pConfigurator, &Configurator::communicationFinished, this, &UploadTabPage::enableControls);
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &UploadTabPage::communicationReadFinished);
 
-	//connect(m_pConfigurator, &Configurator::loadFileError, this, &UploadTabPage::removeFirmwareLabels);
 	connect(m_pConfigurator, &Configurator::loadHeaderComplete, this, &UploadTabPage::loadHeaderComplete);
 	connect(m_pConfigurator, &Configurator::uploadSuccessful, this, &UploadTabPage::uploadSuccessful);
 
@@ -368,7 +367,7 @@ void UploadTabPage::subsystemChanged(int index)
 
 	m_currentFileName = searchPath + QDir::separator() + binaryFiles[0];
 
-	removeFirmwareLabels();
+	clearUartData();
 
 	emit showConfDataFileInfo(m_currentFileName);
 
@@ -563,12 +562,12 @@ void UploadTabPage::writeLog(const OutputLogItem& logItem)
 	return;
 }
 
-void UploadTabPage::removeFirmwareLabels()
+void UploadTabPage::clearUartData()
 {
 	m_pFirmwareListWidget->clear();
 }
 
-void UploadTabPage::resetFirmwareLabels()
+void UploadTabPage::resetUartData()
 {
 	int count = m_pFirmwareListWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
@@ -585,23 +584,18 @@ void UploadTabPage::resetFirmwareLabels()
 	}
 }
 
-void UploadTabPage::loadHeaderComplete(std::vector<int> uartIDList, QStringList uartTypeList)
+void UploadTabPage::loadHeaderComplete(std::vector<UartPair> uartList)
 {
-	removeFirmwareLabels();
+	clearUartData();
 
-	if (uartIDList.size() != uartTypeList.size())
+	for (auto it : uartList)
 	{
-		assert(false);
-		return;
-	}
-
-	for (int i = 0; i < static_cast<int>(uartIDList.size()); i++)
-	{
-		int uartID = uartIDList[i];
+		int uartID = it.first;
+		QString uartType = it.second;
 
 		QStringList l;
 		l << tr("%1h").arg(QString::number(uartID, 16));
-		l << uartTypeList[i];
+		l << uartType;
 		l << "0";
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);

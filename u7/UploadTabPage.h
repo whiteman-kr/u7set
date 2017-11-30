@@ -73,9 +73,9 @@ private:
 
 private slots:
 
-	void removeFirmwareLabels();
-	void resetFirmwareLabels();
-	void loadHeaderComplete(std::vector<int> uartIDList, QStringList uartTypeList);
+	void clearUartData();
+	void resetUartData();
+	void loadHeaderComplete(std::vector<UartPair> uartList);
 	void uploadSuccessful(int uartID);
 
 	// Data

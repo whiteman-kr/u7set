@@ -1613,7 +1613,6 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 
 		m_Log->writeError(str);
 		emit communicationFinished();
-		emit loadFileError();
 		return;
 	}
 
@@ -1631,17 +1630,8 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 	}
 	else
 	{
-		std::vector<std::pair<int, QString>> uartList = confFirmware.uartList();
-		std::vector<int> uartId;
-		QStringList uartType;
-
-		for (auto it : uartList)
-		{
-			uartId.push_back(it.first);
-			uartType.push_back(it.second);
-		}
-
-		emit loadHeaderComplete(uartId, uartType);
+		std::vector<UartPair> uartList = confFirmware.uartList();
+		emit loadHeaderComplete(uartList);
 	}
 
 	emit communicationFinished();
