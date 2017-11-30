@@ -796,6 +796,11 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(resultWriter);
 
+		if (m_busses.count() == 0)
+		{
+			return true;
+		}
+
 		QStringList busTypeIDs = m_busses.keys();
 
 		busTypeIDs.sort();
