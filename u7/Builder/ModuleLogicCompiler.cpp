@@ -966,12 +966,30 @@ namespace Builder
 
 			constSignalType = E::SignalType::Analog;
 			constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
+
+			if (ualConst->intValue() < std::numeric_limits<qint32>::min() || ualConst->intValue() > std::numeric_limits<qint32>::max())
+			{
+				// Integer constant value out of range (Logic schema %1, item %2)
+				//
+				m_log->errALC5134(ualItem->guid(), ualItem->label(), ualItem->schemaID());
+				return false;
+			}
+
 			break;
 
 		case VFrame30::SchemaItemConst::ConstType::FloatType:
 
 			constSignalType = E::SignalType::Analog;
 			constAnalogFormat = E::AnalogAppSignalFormat::Float32;
+
+			if (ualConst->floatValue() < std::numeric_limits<float>::min() || ualConst->floatValue() > std::numeric_limits<float>::max())
+			{
+				// Float constant value out of range (Logic schema %1, item %2)
+				//
+				m_log->errALC5135(ualItem->guid(), ualItem->label(), ualItem->schemaID());
+				return false;
+			}
+
 			break;
 
 		default:
