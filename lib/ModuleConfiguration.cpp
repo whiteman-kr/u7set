@@ -65,9 +65,9 @@ namespace Hardware
 		return m_firmwareData.size() == 0;
 	}
 
-	std::vector<std::pair<int, QString>> ModuleFirmware::uartList() const
+	std::vector<UartPair> ModuleFirmware::uartList() const
 	{
-		std::vector<std::pair<int, QString>> result;
+		std::vector<UartPair> result;
 
 		for (auto it : m_firmwareData)
 		{

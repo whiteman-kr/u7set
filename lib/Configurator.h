@@ -220,6 +220,7 @@ typedef CONF_IDENTIFICATION_DATA_V2 CONF_IDENTIFICATION_DATA;	// Current version
 
 using namespace Hardware;
 
+Q_DECLARE_METATYPE(std::vector<UartPair>);
 //
 //	Configurator
 //
@@ -228,7 +229,7 @@ class Configurator : public QObject
 	Q_OBJECT
 
 public:
-        Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
+	Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
 	virtual ~Configurator();
 	
 	void cancelOperation();
@@ -271,8 +272,7 @@ signals:
 	void communicationFinished();
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
-	void loadFileError();
-	void loadHeaderComplete(std::vector<int> uartID, QStringList uartType);
+	void loadHeaderComplete(std::vector<UartPair> uartList);
 	void uploadSuccessful(int uartID);
 
 public:
