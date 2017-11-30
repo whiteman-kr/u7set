@@ -118,7 +118,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
 	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
-	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::writeConfData);
+	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadConfData);
 	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::writeDiagData);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
 	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 	

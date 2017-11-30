@@ -35,10 +35,7 @@ void ApplicationTabPage::openFileClicked()
 	fd.setFileMode(QFileDialog::ExistingFile);
 
 	QStringList filters;
-    filters << "Firmwares (*.mcb *.alb *.tub)"
-            << "Module configuration files (*.mcb)"
-			<< "Application logic files (*.alb)"
-            << "Tuning parameters files (*.tub)"
+	filters << "Bitstream files (*.bts)"
 			<< "All files (*.*)";
 
 	fd.setNameFilters(filters);
@@ -82,8 +79,7 @@ void ApplicationTabPage::openFileClicked()
 	}
 
 	ui.fileNameEdit->setText(fileName);
-    ui.UartIdEdit->setText(QString::number(m_confFirmware.uartId(), 16));
-	
+
     theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
 
 	theLog.writeMessage(tr("File Version: %1").arg(m_confFirmware.fileVersion()));
@@ -93,10 +89,6 @@ void ApplicationTabPage::openFileClicked()
 	theLog.writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
 	theLog.writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
 	theLog.writeMessage(tr("LM Description Number: %1").arg(m_confFirmware.lmDescriptionNumber()));
-	theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
-	theLog.writeMessage(tr("FrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
-	theLog.writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(m_confFirmware.frameSizeWithCRC())));
-	theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
 
 	return;
 }

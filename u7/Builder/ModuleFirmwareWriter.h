@@ -25,6 +25,23 @@ private:
 
 namespace Hardware
 {
+	struct ModuleFirmwareChannelData
+	{
+		// Channel binary data
+		//
+		std::map<int, QByteArray> binaryDataMap;
+
+		// Channel Unique ID
+		//
+		std::map<int, quint64> channelUniqueId;
+
+		// Channel Data description
+		//
+		QStringList descriptionFields;		// Header line
+		int descriptionFieldsVersion = 0;
+		std::map<int, std::vector<QVariantList>> descriptonData;
+	};
+
 	//
 	// ModuleFirmwareWriter
 	//
@@ -39,8 +56,8 @@ namespace Hardware
 
 		// Functions called and used by Application Logic and Tuning Builder
 		//
-		void setDescriptionFields(int descriptionVersion, const QStringList& fields);
-		bool setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log);
+		void setDescriptionFields(int uartId, int descriptionVersion, const QStringList& fields);
+		bool setChannelData(int uartId, QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log);
 
 		// Functions called and used by Configuration Script
 		//
@@ -72,7 +89,7 @@ namespace Hardware
 
 		// Functions that are used to calculate Unique ID
 		//
-		quint64 uniqueID(int lmNumber);
+		quint64 uniqueID(int uartId, int lmNumber) const;
 		void setGenericUniqueId(int lmNumber, quint64 genericUniqueId);
 
 	private:
@@ -80,19 +97,10 @@ namespace Hardware
 		bool storeChannelData(Builder::IssueLogger* log);
 
 	private:
-		// Channel data
-		//
-		std::map<int, QByteArray> m_channelData;
 
-		// Channel Unique ID
+		// Channel data map, key is UartId
 		//
-		std::map<int, quint64> m_channelUniqueId;
-
-		// Channel Data description
-		//
-		QStringList m_descriptionFields;		// Header line
-		int m_descriptionFieldsVersion = 0;
-		std::map<int, std::vector<QVariantList>> m_descriptonData;
+		std::map<int, ModuleFirmwareChannelData> m_channelData;
 
 		// Script execution log
 		//
@@ -117,10 +125,8 @@ namespace Hardware
 		//
 	public:
 		ModuleFirmwareWriter* get(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber);
-		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber);
 
-		quint64 getFirmwareUniqueId(const QString &subsystemID, int lmNumber);
-
+		quint64 firmwareUniqueId(int uartId, const QString &subsystemID, int lmNumber);
 		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
 
 		// Properties

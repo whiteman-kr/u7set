@@ -140,8 +140,6 @@ namespace Builder
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
 
 		void generateLmsUniqueID(BuildResultWriter& buildWriter,
-								 TuningBuilder& tuningBuilder,
-								 ConfigurationBuilder& cfgBuilder,
 								 const std::vector<Hardware::DeviceModule *>& lmModules,
 								 LmsUniqueIdMap& lmsUniqueIdMap);
 

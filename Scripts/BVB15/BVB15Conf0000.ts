@@ -16,7 +16,6 @@ enum DeviceObjectType {
 
 interface Builder {
 	jsIsInterruptRequested(): boolean;
-	jsBuildNo(): number;
 }
 
 interface DeviceObject {
@@ -63,11 +62,9 @@ interface ModuleFirmware {
 	jsSetUniqueID(LMNumber: number, uniqueID: number): void;
 	calcHash64(dataString: string): JsVariantList;
 
-}
+	buildNumber(): number;
 
-interface ModuleFirmwareCollection {
 
-	jsGet(caption: string, subSysID: string, ssKeyValue: number, uartId: number, frameSize: number, frameCount: number, LMDescriptionNumber: number): ModuleFirmware;
 }
 
 interface IssueLogger {
@@ -148,7 +145,7 @@ var LMDescriptionNumber: number = 0;
 
 //
 
-function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[], confCollection: ModuleFirmwareCollection,
+function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[], confFirmware: ModuleFirmware,
 	log: IssueLogger, signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule): boolean {
 
 	if (logicModules.length != 0) {
@@ -162,7 +159,7 @@ function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[]
 			continue;
 		}
 
-		var result: boolean = module_bvb15(builder, root, logicModules[i], confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
+		var result: boolean = module_bvb15(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
 		if (result == false) {
 			return false;
 		}
@@ -179,7 +176,7 @@ function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[]
 			continue;
 		}
 
-		var result: boolean = module_bvb15_1_statistics(builder, logicModules[i], confCollection, log, subsystemStorage, logicModuleDescription);
+		var result: boolean = module_bvb15_1_statistics(builder, logicModules[i], confFirmware, log, subsystemStorage, logicModuleDescription);
 		if (result == false) {
 			return false;
 		}
@@ -272,7 +269,7 @@ function valToADC(val: number, lowLimit: number, highLimit: number, lowADC: numb
 	return Math.round(res);
 }
 
-function module_bvb15(builder: Builder, root: DeviceObject, module: DeviceObject, confCollection: ModuleFirmwareCollection, log: IssueLogger,
+function module_bvb15(builder: Builder, root: DeviceObject, module: DeviceObject, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule): boolean {
 	if (module.jsDeviceType() != DeviceObjectType.Module) {
 		return false;
@@ -301,13 +298,13 @@ function module_bvb15(builder: Builder, root: DeviceObject, module: DeviceObject
 
 		// Generate Configuration
 		//
-		return generate_bvb15_rev1(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
+		return generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
 	}
 
 	return false;
 }
 
-function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confCollection: ModuleFirmwareCollection, log: IssueLogger,
+function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confFirmware: ModuleFirmware, log: IssueLogger,
 	subsystemStorage: SubsystemStorage, logicModuleDescription: LogicModule) {
 	if (module.jsDeviceType() != DeviceObjectType.Module) {
 		return false;
@@ -357,8 +354,6 @@ function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confC
 		var configStartFrames: number = 2;
 		var configFrameCount: number = 19;          // number of frames in each configuration
 
-		var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
-
 		var frameStorageConfig: number = 1;
 		var ptr: number = 14;
 
@@ -374,7 +369,7 @@ function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confC
 // Generate configuration for module BVB-15
 //
 //
-function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: DeviceObject, confCollection: ModuleFirmwareCollection, log: IssueLogger,
+function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: DeviceObject, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule) {
 	if (module.propertyValue("EquipmentID") == undefined) {
 		log.errCFG3000("EquipmentID", "BVB-15");
@@ -433,8 +428,6 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 		return false;
 	}
 
-	var confFirmware: ModuleFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
-
 	var descriptionVersion = 1;
 
 	confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
@@ -476,7 +469,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] ssKey = " + ssKey + "\r\n");
 	ptr += 2;
 
-	var buildNo: number = builder.jsBuildNo();
+	var buildNo: number = confFirmware.buildNumber();
 	if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "BuildNo", buildNo) == false) {
 		return false;
 	}

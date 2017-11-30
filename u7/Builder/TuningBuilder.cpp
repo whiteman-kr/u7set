@@ -9,29 +9,26 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
-								 Tuning::TuningDataStorage *tuningDataStorage, IssueLogger *log, int buildNo, int changesetId, bool debug,
-                                 QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> lmModules, const LmDescriptionSet* lmDescriptionSet):
+								 Tuning::TuningDataStorage *tuningDataStorage, const std::vector<Hardware::DeviceModule *> lmModules,
+								 const LmDescriptionSet* lmDescriptionSet, Hardware::ModuleFirmwareCollection* firmwareCollection, IssueLogger *log):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
 		m_tuningDataStorage(tuningDataStorage),
-		m_log(log),
         m_lmModules(lmModules),
 		m_lmDescriptionSet(lmDescriptionSet),
-		m_buildNo(buildNo),
-		m_changesetId(changesetId),
-		m_debug(debug),
-		m_projectName(projectName),
-		m_userName(userName)
+		m_firmwareCollection(firmwareCollection),
+		m_log(log)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
 		assert(m_signalSet);
 		assert(m_subsystems);
 		assert(m_tuningDataStorage);
-		assert(m_log);
         assert(m_lmDescriptionSet);
+		assert(m_firmwareCollection);
+		assert(m_log);
 
 		return;
 	}
@@ -49,8 +46,6 @@ namespace Builder
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
 			return false;
 		}
-
-		m_firmwareCollection.init(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
 		for (Hardware::DeviceModule* m : m_lmModules)
 		{
@@ -93,7 +88,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection.get(m->caption(), subsysStrID, subsysID, 0x104, frameSize, frameCount, lmDescription->descriptionNumber());
+			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(m->caption(), subsysStrID, subsysID, static_cast<int>(E::UartID::LmTuning), frameSize, frameCount, lmDescription->descriptionNumber());
 			if (firmware == nullptr)
 			{
 				assert(firmware);
@@ -129,11 +124,11 @@ namespace Builder
 
 				tuningData->getMetadataFields(metadataFields, &metadataFieldsVersion);
 
-				firmware->setDescriptionFields(metadataFieldsVersion, metadataFields);
+				firmware->setDescriptionFields(static_cast<int>(E::UartID::LmTuning), metadataFieldsVersion, metadataFields);
 				descriptionData = tuningData->metadata();
 			}
 
-			if (firmware->setChannelData(m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
+			if (firmware->setChannelData(static_cast<int>(E::UartID::LmTuning), m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
 			{
 				return false;
 			}
@@ -141,46 +136,6 @@ namespace Builder
 
 		return true;
 	}
-
-	bool TuningBuilder::writeBinaryFiles(BuildResultWriter &buildResultWriter)
-	{
-		std::map<QString, Hardware::ModuleFirmwareWriter>& firmwares = m_firmwareCollection.firmwares();
-		for (auto it = firmwares.begin(); it != firmwares.end(); it++)
-		{
-			Hardware::ModuleFirmwareWriter& f = it->second;
-
-			QByteArray data;
-
-			if (f.save(data, m_log) == false)
-			{
-				return false;
-			}
-
-			if (f.subsysId().isEmpty())
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
-				return false;
-			}
-
-			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".tub", data) == nullptr)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	quint64 TuningBuilder::getFirmwareUniqueId(const QString &subsystemID, int lmNumber)
-	{
-		return m_firmwareCollection.getFirmwareUniqueId(subsystemID, lmNumber);
-	}
-
-	void TuningBuilder::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
-	{
-		m_firmwareCollection.setGenericUniqueId(subsystemID, lmNumber, genericUniqueId);
-	}
-
 
 	DbController* TuningBuilder::db()
 	{
@@ -192,24 +147,5 @@ namespace Builder
 		return m_log;
 	}
 
-	int TuningBuilder::buildNo() const
-	{
-		return m_buildNo;
-	}
-
-	int TuningBuilder::changesetId() const
-	{
-		return m_changesetId;
-	}
-
-	bool TuningBuilder::debug() const
-	{
-		return m_debug;
-	}
-
-	bool TuningBuilder::release() const
-	{
-		return !debug();
-	}
 }
 
