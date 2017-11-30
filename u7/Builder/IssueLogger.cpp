@@ -3173,14 +3173,14 @@ namespace Builder
 	/// Description:
 	///		Value of first specified parameter must be greate then the value of second parameneter. Correct prameter's values.
 	///
-	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid)
+	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5052,
-				  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%1.%3'.")).
-				  arg(fbCaption).arg(param1).arg(param2));
+				  QString(tr("Value of parameter %1.%2 must be greate then the value of %1.%3 (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5053
