@@ -602,6 +602,9 @@ namespace Builder
 	//
 	// --------------------------------------------------------------------------------------
 
+	const QString BuildResultWriter::COMMON_DIR("Common");
+	const QString BuildResultWriter::REPORTS_DIR("Reports");
+	const QString BuildResultWriter::OPTO_VHD_DIR("Opto-vhd");
 
 	BuildResultWriter::BuildResultWriter(QObject *parent) :
 		QObject(parent)

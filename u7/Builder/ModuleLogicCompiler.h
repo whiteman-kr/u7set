@@ -131,7 +131,7 @@ namespace Builder
 		};
 
 	public:
-		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
 
 		SignalSet& signalSet() { return *m_signals; }
@@ -165,7 +165,9 @@ namespace Builder
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
-		bool createUalSignalFromReceiver(UalItem* ualItem);
+		bool createUalSignalsFromReceiver(UalItem* ualItem);
+		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
+		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
@@ -311,9 +313,10 @@ namespace Builder
 		//
 
 		bool generateBusComposerCode(const UalItem* ualItem);
-		UalSignal* getBusComposerBusSignal(const UalItem* composerItem);
+		UalSignal* getBusComposerBusSignal(const UalItem* composerItem, bool* connectedToTedrminatorOnly);
 		bool generateAnalogSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal &busSignal);
+		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateBusSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
 
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
@@ -335,7 +338,7 @@ namespace Builder
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
 
-		bool copyAcquiredConstAnalogSignalsToRegBuf();
+		bool copyAcquiredAnalogConstSignalsToRegBuf();
 
 		bool copyAcquiredDiscreteInputSignalsToRegBuf();
 		bool copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf();
@@ -467,8 +470,6 @@ namespace Builder
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
-
-		QHash<UalItem*, UalSignal*> m_busComposers;
 
 		// service maps
 		//

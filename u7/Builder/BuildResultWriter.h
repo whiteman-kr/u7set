@@ -228,6 +228,10 @@ namespace Builder
 		quint64 getAppUniqueId(const QString& subsystemID, int lmNumber);
 
 		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
+
+		static const QString COMMON_DIR;
+		static const QString REPORTS_DIR;
+		static const QString OPTO_VHD_DIR;
 	};
 }
 

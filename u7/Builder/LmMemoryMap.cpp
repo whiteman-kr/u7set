@@ -702,6 +702,11 @@ namespace Builder
 				continue;
 			}
 
+			if (m_appWordAdressed.acquiredDiscreteConstSignals.sizeW() == 0)
+			{
+				m_appWordAdressed.acquiredDiscreteConstSignals.setSizeW(1);			// always 1 word!
+			}
+
 			Address16 addr;
 
 			if (ualSignal->constDiscreteValue() == 0)
@@ -721,8 +726,6 @@ namespace Builder
 
 			ualSignal->setRegValueAddr(addr);
 		}
-
-		m_appWordAdressed.acquiredDiscreteConstSignals.setSizeW(1);			// always 1 word!
 
 		result &= recalculateAddresses();
 

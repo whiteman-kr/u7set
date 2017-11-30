@@ -18,6 +18,8 @@ public:
 	XmlWriteHelper(QByteArray* data);
 	~XmlWriteHelper();
 
+	QXmlStreamWriter* xmlStreamWriter() const;
+
 	void setAutoFormatting(bool autoFormatting);
 	void writeStartDocument();
 	void writeEndDocument();
