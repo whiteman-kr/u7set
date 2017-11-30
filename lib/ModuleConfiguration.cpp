@@ -18,15 +18,13 @@ namespace Hardware
 	{
 	}
 
-	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber, const QString &projectName,
-							  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId)
+	void ModuleFirmware::init(int uartId, int frameSize, int frameCount,
+							  QString caption, QString subsysId, int ssKey, int lmDescriptionNumber,
+							  const QString &projectName, const QString &userName, int buildNumber, const QString& buildConfig, int changesetId)
 	{
 		m_caption = caption;
 		m_subsysId = subsysId;
 		m_ssKey = ssKey;
-		m_uartId = uartId;
-		m_frameSize = frameSize;
-		m_frameSizeWithCRC = frameSize + sizeof(quint64);
 		m_lmDescriptionNumber = lmDescriptionNumber;
 		m_projectName = projectName;
 		m_userName = userName;
@@ -35,13 +33,19 @@ namespace Hardware
 		m_changesetId = changesetId;
 		m_fileVersion = maxFileVersion();
 
-		m_frames.clear();
-		m_frames.resize(frameCount);
+		ModuleFirmwareData data;
 
+		data.uartType = E::valueToString<E::UartID>(uartId);
+		data.frameSize = frameSize;
+		data.frameSizeWithCRC = frameSize + sizeof(quint64);
+
+		data.frames.resize(frameCount);
 		for (int i = 0; i < frameCount; i++)
 		{
-			m_frames[i].resize(m_frameSizeWithCRC);
+			data.frames[i].resize(data.frameSizeWithCRC);
 		}
+
+		m_firmwareData[uartId] = data;
 
 		return;
 	}
@@ -58,23 +62,79 @@ namespace Hardware
 
 	bool ModuleFirmware::isEmpty() const
 	{
-		return m_frames.size() == 0;
+		return m_firmwareData.size() == 0;
 	}
 
-	int ModuleFirmware::frameCount() const
+	std::vector<std::pair<int, QString>> ModuleFirmware::uartList() const
 	{
-		return static_cast<int>(m_frames.size());
-	}
+		std::vector<std::pair<int, QString>> result;
 
-	const std::vector<quint8> ModuleFirmware::frame(int frameIndex) const
-	{
-		if (frameIndex < 0 || frameIndex >= frameCount())
+		for (auto it : m_firmwareData)
 		{
-			assert(frameIndex >= 0 && frameIndex < frameCount());
+			ModuleFirmwareData& data = it.second;
+			result.push_back(std::make_pair(it.first, data.uartType));
+		}
+
+		return result;
+	}
+
+	bool ModuleFirmware::uartExists(int uartId) const
+	{
+		return m_firmwareData.find(uartId) != m_firmwareData.end();
+	}
+
+	int ModuleFirmware::frameSize(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return it->second.frameSize;
+	}
+
+	int ModuleFirmware::frameSizeWithCRC(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return it->second.frameSizeWithCRC;
+	}
+
+	int ModuleFirmware::frameCount(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return static_cast<int>(it->second.frames.size());
+	}
+
+	const std::vector<quint8> ModuleFirmware::frame(int uartId, int frameIndex) const
+	{
+		if (frameIndex < 0 || frameIndex >= frameCount(uartId))
+		{
+			assert(frameIndex >= 0 && frameIndex < frameCount(uartId));
 			return std::vector<quint8>();
 		}
 
-		return m_frames[frameIndex];
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return std::vector<quint8>();
+		}
+
+		return it->second.frames[frameIndex];
 	}
 
 	int ModuleFirmware::fileVersion() const
@@ -98,24 +158,9 @@ namespace Hardware
 		return m_subsysId;
 	}
 
-	int ModuleFirmware::uartId() const
-	{
-		return m_uartId;
-	}
-
 	quint16 ModuleFirmware::ssKey() const
 	{
 		return m_ssKey;
-	}
-
-	int ModuleFirmware::frameSize() const
-	{
-		return m_frameSize;
-	}
-
-	int ModuleFirmware::frameSizeWithCRC() const
-	{
-		return m_frameSizeWithCRC;
 	}
 
 	int ModuleFirmware::changesetId() const
@@ -151,7 +196,7 @@ namespace Hardware
 	bool ModuleFirmware::loadFromFile(QString fileName, QString& errorCode, bool readDataFrames)
 	{
 		errorCode.clear();
-		m_frames.clear();
+		m_firmwareData.clear();
 
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly)  == false)
@@ -185,14 +230,7 @@ namespace Hardware
 		switch (m_fileVersion)
 		{
 		case 1:
-			return load_version1(jConfig, readDataFrames);
-		case 2:
-		case 3:
-		case 4:
-			return load_version2_3_4(jConfig, readDataFrames);
-		case 5:
-		case 6:
-			return load_version5_6(jConfig, readDataFrames, errorCode);
+			return load_version1(jConfig, readDataFrames, errorCode);
 		default:
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
@@ -200,8 +238,9 @@ namespace Hardware
 
 	}
 
-	bool ModuleFirmware::load_version1(const QJsonObject &jConfig, bool readDataFrames)
+	bool ModuleFirmware::load_version1(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode)
 	{
+
 		if (jConfig.value("projectName").isUndefined() == true)
 		{
 			return false;
@@ -225,316 +264,6 @@ namespace Hardware
 			return false;
 		}
 		m_subsysId = jConfig.value("subsysId").toString();
-
-		if (jConfig.value("uartId").isUndefined() == true)
-		{
-			return false;
-		}
-		m_uartId = (int)jConfig.value("uartId").toDouble();
-
-		if (jConfig.value("frameSize").isUndefined() == true)
-		{
-			return false;
-		}
-		m_frameSize = (int)jConfig.value("frameSize").toDouble();
-
-		m_frameSizeWithCRC = m_frameSize + sizeof(quint64);
-
-		if (jConfig.value("changesetId").isUndefined() == true)
-		{
-			return false;
-		}
-		m_changesetId = (int)jConfig.value("changesetId").toDouble();
-
-		//
-
-		if (readDataFrames == false)
-		{
-			return true;
-		}
-
-		if (jConfig.value("framesCount").isUndefined() == true)
-		{
-			return false;
-		}
-		int framesCount = (int)jConfig.value("framesCount").toDouble();
-
-		for (int v = 0; v < framesCount; v++)
-		{
-
-			QJsonValue jFrameVal = jConfig.value("z_frame_" + QString::number(v));
-			if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
-			{
-				assert(false);
-
-				m_frames.clear();
-				return false;
-			}
-
-			QJsonObject jFrame = jFrameVal.toObject();
-
-			if (jFrame.value("frameIndex").isUndefined() == true)
-			{
-				assert(false);
-
-				m_frames.clear();
-				return false;
-			}
-
-			if (jFrame.value("data").isUndefined() == true || jFrame.value("data").isArray() == false)
-			{
-				assert(false);
-
-				m_frames.clear();
-				return false;
-			}
-
-			QJsonArray array = jFrame.value("data").toArray();
-
-			std::vector<quint8> frame;
-
-			frame.resize(array.size() + sizeof(quint64));
-
-			for (int i = 0; i < array.size(); i++)
-			{
-				frame[i] = (int)array[i].toInt();
-			}
-
-			// Count CRC
-
-			Crc::setDataBlockCrc(v, frame.data(), (int)frame.size());
-
-			m_frames.push_back(frame);
-		}
-
-		return true;
-
-	}
-
-	bool ModuleFirmware::load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames)
-	{
-		if (jConfig.value("projectName").isUndefined() == true)
-		{
-			return false;
-		}
-		m_projectName = jConfig.value("projectName").toString();
-
-		if (jConfig.value("userName").isUndefined() == true)
-		{
-			return false;
-		}
-		m_userName = jConfig.value("userName").toString();
-
-		if (jConfig.value("caption").isUndefined() == true)
-		{
-			return false;
-		}
-		m_caption = jConfig.value("caption").toString();
-
-		if (jConfig.value("subsysId").isUndefined() == true)
-		{
-			return false;
-		}
-		m_subsysId = jConfig.value("subsysId").toString();
-
-		if (jConfig.value("uartId").isUndefined() == true)
-		{
-			return false;
-		}
-		m_uartId = (int)jConfig.value("uartId").toDouble();
-
-		if (jConfig.value("frameSize").isUndefined() == true)
-		{
-			return false;
-		}
-		m_frameSize = (int)jConfig.value("frameSize").toDouble();
-
-		m_frameSizeWithCRC = m_frameSize + sizeof(quint64);
-
-		if (jConfig.value("buildConfig").isUndefined() == true)
-		{
-			m_buildConfig.clear();
-		}
-		else
-		{
-			m_buildConfig = jConfig.value("buildConfig").toString();
-		}
-
-		if (jConfig.value("buildNumber").isUndefined() == true)
-		{
-			m_buildNumber = 0;
-		}
-		else
-		{
-			m_buildNumber = (int)jConfig.value("buildNumber").toDouble();
-		}
-
-		if (jConfig.value("changesetId").isUndefined() == true)
-		{
-			return false;
-		}
-		m_changesetId = (int)jConfig.value("changesetId").toDouble();
-
-		//
-
-		if (readDataFrames == false)
-		{
-			return true;
-		}
-
-		if (jConfig.value("framesCount").isUndefined() == true)
-		{
-			return false;
-		}
-		int framesCount = (int)jConfig.value("framesCount").toDouble();
-
-		std::vector<quint8> frameVec;
-		frameVec.resize(m_frameSizeWithCRC);
-
-		quint16* framePtr = (quint16*)frameVec.data();
-
-		int frameStringWidth = -1;
-		int linesCount = 0;
-
-		for (int v = 0; v < framesCount; v++)
-		{
-
-			QJsonValue jFrameVal = jConfig.value("z_frame_" + QString::number(v).rightJustified(4, '0'));
-			if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
-			{
-				assert(false);
-
-				m_frames.clear();
-				return false;
-			}
-
-			QJsonObject jFrame = jFrameVal.toObject();
-
-			if (jFrame.value("frameIndex").isUndefined() == true)
-			{
-				assert(false);
-
-				m_frames.clear();
-				return false;
-			}
-
-			if (frameStringWidth == -1)
-			{
-				QString firstString = jFrame.value("data0000").toString();
-
-				frameStringWidth = firstString.split(' ').size();
-				if (frameStringWidth == 0)
-				{
-					assert(false);
-
-					m_frames.clear();
-					return false;
-				}
-
-				linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
-			}
-
-			int dataPos = 0;
-
-			quint16* ptr = framePtr;
-
-			for (int l = 0; l < linesCount; l++)
-			{
-				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
-
-				QJsonValue v = jFrame.value(stringName);
-
-				if (v.isUndefined() == true)
-				{
-					assert(false);
-
-					m_frames.clear();
-					return false;
-				}
-
-				QString stringValue = v.toString();
-
-				for (QString& s : stringValue.split(' '))
-				{
-					bool ok = false;
-					quint16 v = s.toUInt(&ok, 16);
-
-					if (ok == false)
-					{
-						assert(false);
-
-						m_frames.clear();
-						return false;
-					}
-
-					if (dataPos >= m_frameSize / sizeof(quint16))
-					{
-						assert(false);
-						break;
-					}
-
-					dataPos++;
-
-					*ptr++ = qToBigEndian(v);
-				}
-			}
-
-			// Count CRC
-
-			Crc::setDataBlockCrc(v, frameVec.data(), (int)frameVec.size());
-
-			m_frames.push_back(frameVec);
-		}
-
-		return true;
-
-	}
-
-	bool ModuleFirmware::load_version5_6(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode)
-	{
-		if (jConfig.value("projectName").isUndefined() == true)
-		{
-			return false;
-		}
-		m_projectName = jConfig.value("projectName").toString();
-
-		if (jConfig.value("userName").isUndefined() == true)
-		{
-			return false;
-		}
-		m_userName = jConfig.value("userName").toString();
-
-		if (jConfig.value("caption").isUndefined() == true)
-		{
-			return false;
-		}
-		m_caption = jConfig.value("caption").toString();
-
-		if (jConfig.value("subsysId").isUndefined() == true)
-		{
-			return false;
-		}
-		m_subsysId = jConfig.value("subsysId").toString();
-
-		if (jConfig.value("uartId").isUndefined() == true)
-		{
-			return false;
-		}
-		m_uartId = (int)jConfig.value("uartId").toDouble();
-
-		if (jConfig.value("frameSize").isUndefined() == true)
-		{
-			return false;
-		}
-		m_frameSize = (int)jConfig.value("frameSize").toDouble();
-
-		m_frameSizeWithCRC = (int)jConfig.value("frameSizeWithCRC").toDouble();
-
-		if (m_frameSizeWithCRC <= m_frameSize)
-		{
-			assert(false);
-			m_frameSizeWithCRC = m_frameSize + sizeof(quint64);
-		}
 
 		if (jConfig.value("buildConfig").isUndefined() == true)
 		{
@@ -571,115 +300,153 @@ namespace Hardware
 
 		//
 
-		if (readDataFrames == false)
-		{
-			return true;
-		}
-
-		if (jConfig.value("framesCount").isUndefined() == true)
+		if (jConfig.value("firmwaresCount").isUndefined() == true)
 		{
 			return false;
 		}
-		int framesCount = (int)jConfig.value("framesCount").toDouble();
+		int firmwaresCount = (int)jConfig.value("firmwaresCount").toDouble();
 
-		std::vector<quint8> frameVec;
-		frameVec.resize(m_frameSizeWithCRC);
-
-		quint16* framePtr = (quint16*)frameVec.data();
-
-		int frameStringWidth = -1;
-		int linesCount = 0;
-
-		for (int v = 0; v < framesCount; v++)
+		for (int f = 0; f < firmwaresCount; f++)
 		{
-
-			QJsonValue jFrameVal = jConfig.value("z_frame_" + QString::number(v).rightJustified(4, '0'));
-			if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
+			QJsonValue jFirmware = jConfig.value("z_firmware_" + QString::number(f));
+			if (jFirmware.isUndefined() == true || jFirmware.isObject() == false)
 			{
 				assert(false);
-
-				m_frames.clear();
 				return false;
 			}
 
-			QJsonObject jFrame = jFrameVal.toObject();
+			QJsonObject jFirmwareObject = jFirmware.toObject();
 
-			if (jFrame.value("frameIndex").isUndefined() == true)
+			if (jFirmwareObject.value("framesCount").isUndefined() == true)
 			{
-				assert(false);
-
-				m_frames.clear();
 				return false;
 			}
+			int framesCount = (int)jFirmwareObject.value("framesCount").toDouble();
 
-			if (frameStringWidth == -1)
+			//
+
+			ModuleFirmwareData data;
+
+			if (jFirmwareObject.value("frameSize").isUndefined() == true)
 			{
-				QString firstString = jFrame.value("data0000").toString();
+				return false;
+			}
+			data.frameSize = (int)jFirmwareObject.value("frameSize").toDouble();
 
-				frameStringWidth = firstString.split(' ').size();
-				if (frameStringWidth == 0)
-				{
-					assert(false);
+			data.frameSizeWithCRC = (int)jFirmwareObject.value("frameSizeWithCRC").toDouble();
 
-					m_frames.clear();
-					return false;
-				}
-
-				linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
+			if (data.frameSizeWithCRC <= data.frameSize)
+			{
+				assert(false);
+				data.frameSizeWithCRC = data.frameSize + sizeof(quint64);
 			}
 
-			int dataPos = 0;
-
-			quint16* ptr = framePtr;
-
-			for (int l = 0; l < linesCount; l++)
+			if (jFirmwareObject.value("uartId").isUndefined() == true)
 			{
-				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+				return false;
+			}
+			int uartId = (int)jFirmwareObject.value("uartId").toDouble();
 
-				QJsonValue v = jFrame.value(stringName);
+			if (jFirmwareObject.value("uartType").isUndefined() == true)
+			{
+				return false;
+			}
+			data.uartType = jFirmwareObject.value("uartType").toString();
 
-				if (v.isUndefined() == true)
+			if (readDataFrames == true)
+			{
+				std::vector<quint8> frameVec;
+				frameVec.resize(data.frameSizeWithCRC);
+
+				quint16* framePtr = (quint16*)frameVec.data();
+
+				int frameStringWidth = -1;
+				int linesCount = 0;
+
+				for (int v = 0; v < framesCount; v++)
 				{
-					assert(false);
 
-					m_frames.clear();
-					return false;
-				}
-
-				QString stringValue = v.toString();
-
-				for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
-				{
-					bool ok = false;
-					quint16 v = s.toUInt(&ok, 16);
-
-					if (ok == false)
+					QJsonValue jFrameVal = jFirmwareObject.value("z_frame_" + QString::number(v).rightJustified(4, '0'));
+					if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
 					{
 						assert(false);
-
-						m_frames.clear();
 						return false;
 					}
 
-					if (dataPos >= m_frameSizeWithCRC / sizeof(quint16))
+					QJsonObject jFrame = jFrameVal.toObject();
+
+					if (jFrame.value("frameIndex").isUndefined() == true)
 					{
 						assert(false);
-						break;
+						return false;
 					}
 
-					dataPos++;
+					if (frameStringWidth == -1)
+					{
+						QString firstString = jFrame.value("data0000").toString();
 
-					*ptr++ = qToBigEndian(v);
+						frameStringWidth = firstString.split(' ').size();
+						if (frameStringWidth == 0)
+						{
+							assert(false);
+							return false;
+						}
+
+						linesCount = ceil((float)data.frameSize / 2 / frameStringWidth);
+					}
+
+					int dataPos = 0;
+
+					quint16* ptr = framePtr;
+
+					for (int l = 0; l < linesCount; l++)
+					{
+						QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+
+						QJsonValue v = jFrame.value(stringName);
+
+						if (v.isUndefined() == true)
+						{
+							assert(false);
+							return false;
+						}
+
+						QString stringValue = v.toString();
+
+						for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
+						{
+							bool ok = false;
+							quint16 v = s.toUInt(&ok, 16);
+
+							if (ok == false)
+							{
+								assert(false);
+								return false;
+							}
+
+							if (dataPos >= data.frameSizeWithCRC / sizeof(quint16))
+							{
+								assert(false);
+								break;
+							}
+
+							dataPos++;
+
+							*ptr++ = qToBigEndian(v);
+						}
+					}
+
+					if (Crc::checkDataBlockCrc(v, frameVec) == false)
+					{
+						errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
+						return false;
+					}
+
+					data.frames.push_back(frameVec);
 				}
 			}
 
-			if (Crc::checkDataBlockCrc(v, frameVec) == false)
-			{
-				errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
-				return false;
-			}
-
-			m_frames.push_back(frameVec);
+			m_firmwareData[uartId] = data;
 		}
 
 		return true;

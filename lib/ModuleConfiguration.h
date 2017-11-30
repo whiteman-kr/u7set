@@ -12,14 +12,24 @@
 
 namespace Hardware
 {
+
+	struct ModuleFirmwareData
+	{
+		int frameSize = 0;
+		int frameSizeWithCRC = 0;
+
+		QString uartType;
+
+		// binary data
+		//
+		std::vector<std::vector<quint8>> frames;
+
+	};
+
+
 	class ModuleFirmware : public QObject
 	{
 		Q_OBJECT
-
-		Q_PROPERTY(int UartID READ uartId)
-		Q_PROPERTY(int SSKey READ ssKey)
-		Q_PROPERTY(int FrameSize READ frameSize)
-		Q_PROPERTY(int FrameCount READ frameCount)
 
 	public:
 		ModuleFirmware();
@@ -28,16 +38,23 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, int lmDescriptionNumber, const QString &projectName,
+		void init(int uartId, int frameSize, int frameCount, QString caption, QString subsysId, int ssKey, int lmDescriptionNumber, const QString &projectName,
 				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId);
 
 		bool loadHeader(QString fileName, QString &errorCode);
 		bool load(QString fileName, QString &errorCode);
 
+		// Data access
+		//
 		bool isEmpty() const;
 
-		int frameCount() const;
-		const std::vector<quint8> frame(int frameIndex) const;
+		std::vector<std::pair<int, QString> > uartList() const;
+		bool uartExists(int uartId) const;
+
+		int frameSize(int uartId) const;
+		int frameSizeWithCRC(int uartId) const;
+		int frameCount(int uartId) const;
+		const std::vector<quint8> frame(int uartId, int frameIndex) const;
 
 		// Properties
 		//
@@ -48,38 +65,29 @@ namespace Hardware
 		QString caption() const;
 		QString subsysId() const;
 		quint16 ssKey() const;
-		int uartId() const;
-		int frameSize() const;
-		int frameSizeWithCRC() const;
 		int changesetId() const;
 
 		QString projectName() const;
 		QString userName() const;
-		int buildNumber() const;
+		Q_INVOKABLE int buildNumber() const;
 		QString buildConfig() const;
 		int lmDescriptionNumber() const;
 
 	private:
 		bool loadFromFile(QString fileName, QString& errorCode, bool readDataFrames);
 
-		bool load_version1(const QJsonObject& jConfig, bool readDataFrames);
-		bool load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames);
-		bool load_version5_6(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
+		bool load_version1(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
 
 		// Data
 		//
 	protected:
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 6;	//Latest version
+		int m_maxFileVersion = 1;	//Latest version
 
 		QString m_caption;
 		QString m_subsysId;
 		quint16 m_ssKey = 0;
-		int m_uartId = 0;
-		int m_frameSize = 0;
-		int m_frameSizeWithCRC = 0;
 		int m_changesetId = 0;
-
 
 		QString m_projectName;
 		QString m_userName;
@@ -87,9 +95,10 @@ namespace Hardware
 		QString m_buildConfig;
 		int m_lmDescriptionNumber = 0;
 
-		// binary data
+		// Frame data map, key is uartID
 		//
-		std::vector<std::vector<quint8>> m_frames;
+		std::map<int, ModuleFirmwareData> m_firmwareData;
+
 	};
 }
 

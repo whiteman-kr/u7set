@@ -28,6 +28,11 @@ namespace Builder
 			return false;
 		}
 
+		if (m_busses.count() == 0)
+		{
+			return true;
+		}
+
 		return m_busses.writeReport(m_resultWriter);
 	}
 

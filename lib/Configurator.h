@@ -257,10 +257,10 @@ public slots:
 	void readConfiguration(int param);
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
-	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName);
+	void showBinaryFileInfo(const QString& fileName);
+	void uploadBinaryFile(const QString& fileName);
 
-	void writeConfData(ModuleFirmware* conf);
+	void uploadConfData(ModuleFirmware* conf);
 	void readFirmware(const QString &fileName);
 	void eraseFlashMemory(int param);
 
@@ -270,6 +270,10 @@ signals:
 	void communicationStarted();
 	void communicationFinished();
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
+
+	void loadFileError();
+	void loadHeaderComplete(std::vector<int> uartID, QStringList uartType);
+	void uploadSuccessful(int uartID);
 
 public:
 	// Properties
@@ -299,7 +303,8 @@ private:
 	volatile bool m_cancelFlag = false;
 
 	bool m_verify = true;
-};
 
+	int m_currentUartId = -1;
+};
 
 #endif // CONFIGURATOR_H

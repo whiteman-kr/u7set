@@ -29,7 +29,7 @@ var FamilyBVB15ID = 0x5600;
 var configScriptVersion = 1;
 var LMDescriptionNumber = 0;
 //
-function main(builder, root, logicModules, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
+function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
         var subSysID = logicModules[0].jsPropertyString("SubsystemID");
         log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
@@ -38,7 +38,7 @@ function main(builder, root, logicModules, confCollection, log, signalSet, subsy
         if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyBVB15ID) {
             continue;
         }
-        var result = module_bvb15(builder, root, logicModules[i], confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
+        var result = module_bvb15(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
         if (result == false) {
             return false;
         }
@@ -50,7 +50,7 @@ function main(builder, root, logicModules, confCollection, log, signalSet, subsy
         if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyBVB15ID) {
             continue;
         }
-        var result = module_bvb15_1_statistics(builder, logicModules[i], confCollection, log, subsystemStorage, logicModuleDescription);
+        var result = module_bvb15_1_statistics(builder, logicModules[i], confFirmware, log, subsystemStorage, logicModuleDescription);
         if (result == false) {
             return false;
         }
@@ -123,7 +123,7 @@ function valToADC(val, lowLimit, highLimit, lowADC, highADC) {
     var res = (highADC - lowADC) * (val - lowLimit) / (highLimit - lowLimit) + lowADC;
     return Math.round(res);
 }
-function module_bvb15(builder, root, module, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
+function module_bvb15(builder, root, module, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (module.jsDeviceType() != DeviceObjectType.Module) {
         return false;
     }
@@ -146,11 +146,11 @@ function module_bvb15(builder, root, module, confCollection, log, signalSet, sub
         }
         // Generate Configuration
         //
-        return generate_bvb15_rev1(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
+        return generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
     }
     return false;
 }
-function module_bvb15_1_statistics(builder, module, confCollection, log, subsystemStorage, logicModuleDescription) {
+function module_bvb15_1_statistics(builder, module, confFirmware, log, subsystemStorage, logicModuleDescription) {
     if (module.jsDeviceType() != DeviceObjectType.Module) {
         return false;
     }
@@ -189,7 +189,6 @@ function module_bvb15_1_statistics(builder, module, confCollection, log, subsyst
         }
         var configStartFrames = 2;
         var configFrameCount = 19; // number of frames in each configuration
-        var confFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
         var frameStorageConfig = 1;
         var ptr = 14;
         var LMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
@@ -202,7 +201,7 @@ function module_bvb15_1_statistics(builder, module, confCollection, log, subsyst
 // Generate configuration for module BVB-15
 //
 //
-function generate_bvb15_rev1(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
+function generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (module.propertyValue("EquipmentID") == undefined) {
         log.errCFG3000("EquipmentID", "BVB-15");
         return false;
@@ -248,7 +247,6 @@ function generate_bvb15_rev1(builder, module, root, confCollection, log, signalS
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
         return false;
     }
-    var confFirmware = confCollection.jsGet("BVB-15", subSysID, ssKeyValue, uartId, frameSize, frameCount, LMDescriptionNumber);
     var descriptionVersion = 1;
     confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
     confFirmware.writeLog("---\r\n");
@@ -280,7 +278,7 @@ function generate_bvb15_rev1(builder, module, root, confCollection, log, signalS
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] ssKey = " + ssKey + "\r\n");
     ptr += 2;
-    var buildNo = builder.jsBuildNo();
+    var buildNo = confFirmware.buildNumber();
     if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "BuildNo", buildNo) == false) {
         return false;
     }

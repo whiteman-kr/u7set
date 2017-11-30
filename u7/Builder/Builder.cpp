@@ -118,6 +118,9 @@ namespace Builder
 				break;
 			}
 
+			const BuildInfo& bi = buildWriter.buildInfo();
+			buildWriter.firmwareCollection()->init(bi.project, bi.user, bi.id, bi.release == false, bi.changeset);
+
 			//
 			// Get Equipment from the database
 			//
@@ -333,8 +336,8 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
-			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, m_log,
-                                        buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules, &lmDescriptions);
+			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage,
+										lmModules, &lmDescriptions, buildWriter.firmwareCollection(), m_log);
 
 			ok = tuningBuilder.build();
 
@@ -350,8 +353,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, m_log,
-                                               buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName());
+			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, buildWriter.firmwareCollection(), m_log);
 
 			ok = cfgBuilder.build(buildWriter);
 
@@ -364,7 +366,7 @@ namespace Builder
 
 			LmsUniqueIdMap lmsUniqueIdMap;
 
-			generateLmsUniqueID(buildWriter, tuningBuilder, cfgBuilder, lmModules, lmsUniqueIdMap);
+			generateLmsUniqueID(buildWriter, lmModules, lmsUniqueIdMap);
 
 			//
 			// Generate MATS software configurations
@@ -381,6 +383,7 @@ namespace Builder
 			// Write logic, configuration and tuning binary files
 			//
 
+
 			ok = writeBinaryFiles(buildWriter);
 
 			if (ok == false ||
@@ -389,15 +392,7 @@ namespace Builder
 				break;
 			}
 
-			ok = tuningBuilder.writeBinaryFiles(buildWriter);
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			ok = cfgBuilder.writeBinaryFiles(buildWriter);
+			ok = cfgBuilder.writeDataFiles(buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1230,15 +1225,13 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= buildResultWriter.writeMultichannelFiles();
+		result &= buildResultWriter.writeBinaryFiles();
 
 		return result;
 	}
 
 
 	void BuildWorkerThread::generateLmsUniqueID(BuildResultWriter& buildWriter,
-												TuningBuilder& tuningBuilder,
-												ConfigurationBuilder& cfgBuilder,
 												const std::vector<Hardware::DeviceModule *>& lmModules,
 												LmsUniqueIdMap &lmsUniqueIdMap)
 	{
@@ -1273,15 +1266,14 @@ namespace Builder
 				continue;
 			}
 
-			quint64 appUniqueId = buildWriter.getAppUniqueId(subsysID, lmNumber);
-			quint64 tunUniqueId = tuningBuilder.getFirmwareUniqueId(subsysID, lmNumber);
-			quint64 cfgUniqueId = cfgBuilder.getFirmwareUniqueId(subsysID, lmNumber);
+
+			quint64 appUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmAppLogic), subsysID, lmNumber);
+			quint64 cfgUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmConfig), subsysID, lmNumber);
+			quint64 tunUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmTuning), subsysID, lmNumber);
 
 			quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
 
-			buildWriter.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-			tuningBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-			cfgBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			buildWriter.firmwareCollection()->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
 		}
