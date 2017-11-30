@@ -70,10 +70,15 @@ namespace LmModel
 	{
 	public:
 		Ram();
+		Ram(const Ram& that);
 
 	public:
 		void reset();
 		bool addMemoryArea(RamAccess access, quint32 offsetW, quint32 sizeW, QString name);			// offset and size in 16 bit words
+
+		std::vector<RamAreaInfo> memoryAreasInfo() const;
+		RamAreaInfo memoryAreaInfo(QString name) const;
+		RamAreaInfo memoryAreaInfo(int index) const;
 
 		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
 		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
@@ -92,6 +97,8 @@ namespace LmModel
 		const RamArea* memoryArea(RamAccess access, quint32 offsetW) const;
 
 	private:
+		// Pay attention to the copy constructr
+		//
 		std::vector<std::shared_ptr<RamArea>> m_memoryAreas;
 	};
 

@@ -16,6 +16,32 @@ CONFIG += warn_on				# The compiler should output as many warnings as possible. 
 
 PRECOMPILED_HEADER = Stable.h
 
+# DESTDIR
+#
+win32 {
+    CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+    CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+    CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+    CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
+
+CONFIG(debug, debug|release) {
+    OBJECTS_DIR = debug
+    MOC_DIR = debug/moc
+    RCC_DIR = debug/rcc
+    UI_DIR = debug/ui
+}
+
+CONFIG(release, debug|release) {
+    OBJECTS_DIR = release
+    MOC_DIR = release/moc
+    RCC_DIR = release/rcc
+    UI_DIR = release/ui
+}
+
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the

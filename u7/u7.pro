@@ -204,7 +204,8 @@ SOURCES +=\
     ../lib/LmDescription.cpp \
     Builder/MemWriteMap.cpp \
     SimulatorTabPage.cpp \
-    Simulator/SimulatorWidget.cpp
+    Simulator/SimulatorWidget.cpp \
+    Simulator/SimulatorMemoryWidget.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -346,7 +347,8 @@ HEADERS  += \
     ../lib/LmDescription.h \
     Builder/MemWriteMap.h \
     SimulatorTabPage.h \
-    Simulator/SimulatorWidget.h
+    Simulator/SimulatorWidget.h \
+    Simulator/SimulatorMemoryWidget.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -503,4 +505,16 @@ DEFINES += USE_CREDENTIAL_STORE
 INCLUDEPATH += ./qtkeychain-0.8
 
 include(../Tools/qtkeychain-0.8/qt5keychain.pri)
+
+# LmModel Lib
+#
+INCLUDEPATH += $$PWD/../LmModel
+DEPENDPATH += $$PWD/../LmModel
+
+win32 {
+    LIBS += -L$$DESTDIR -lLmModel
+}
+unix {
+    LIBS += -lLmModel
+}
 

@@ -195,6 +195,17 @@ namespace LmModel
 	{
 	}
 
+	Ram::Ram(const Ram& that)
+	{
+		m_memoryAreas.reserve(that.m_memoryAreas.size());
+
+		for (std::shared_ptr<RamArea> thatArea : that.m_memoryAreas)
+		{
+			std::shared_ptr<RamArea> area = std::make_shared<RamArea>(*thatArea.get());
+			m_memoryAreas.push_back(area);
+		}
+	}
+
 	void Ram::reset()
 	{
 		m_memoryAreas.clear();
@@ -222,6 +233,40 @@ namespace LmModel
 		m_memoryAreas.push_back(ramArea);
 
 		return true;
+	}
+
+	std::vector<RamAreaInfo> Ram::memoryAreasInfo() const
+	{
+		std::vector<RamAreaInfo> result;
+		for (const auto& area : m_memoryAreas)
+		{
+			result.emplace_back(*area.get());
+		}
+
+		return result;
+	}
+
+	RamAreaInfo Ram::memoryAreaInfo(QString name) const
+	{
+		for (const auto& area : m_memoryAreas)
+		{
+			if (area->name() == name)
+			{
+				return *area.get();
+			}
+		}
+
+		return RamAreaInfo();
+	}
+
+	RamAreaInfo Ram::memoryAreaInfo(int index) const
+	{
+		if (index < 0 || static_cast<size_t>(index) >= m_memoryAreas.size())
+		{
+			return RamAreaInfo();
+		}
+
+		return *(m_memoryAreas[index].get());
 	}
 
 	bool Ram::writeBit(quint32 offsetW, quint32 data, quint32 bitNo)

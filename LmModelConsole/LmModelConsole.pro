@@ -33,18 +33,15 @@ SOURCES += main.cpp
 
 # LmModel Lib
 #
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../LmModel/release/ -lLmModel
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../LmModel/debug/ -lLmModel
-else:unix:!macx: LIBS += -L$$OUT_PWD/../LmModel/ -lLmModel
-
 INCLUDEPATH += $$PWD/../LmModel
 DEPENDPATH += $$PWD/../LmModel
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LmModel/release/libLmModel.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LmModel/debug/libLmModel.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LmModel/release/LmModel.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LmModel/debug/LmModel.lib
-else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../LmModel/libLmModel.a
+win32 {
+    LIBS += -L$$DESTDIR -lLmModel
+}
+unix {
+    LIBS += -lLmModel
+}
 
 
 # VFrame30 library
@@ -71,4 +68,3 @@ win32 {
 unix {
     LIBS += -lprotobuf
 }
-

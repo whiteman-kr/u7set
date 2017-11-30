@@ -6,6 +6,8 @@
 #include "../lib/DbController.h"
 
 class SimulatorProjectWidget;
+class SimulatorMemoryWidget;
+class SimulatorToolBar;
 
 class SimulatorWidget : public QMainWindow, HasDbController
 {
@@ -15,14 +17,19 @@ public:
 	virtual ~SimulatorWidget();
 
 protected:
+	void createToolBar();
 	void createDocks();
+	QDockWidget* createMemoryDock(QString caption);
+
+	virtual void showEvent(QShowEvent*) override;
 
 protected slots:
 	void loadBuild(QString buildPath);
 
 private:
-	QDockWidget* m_projectDock = nullptr;
+	SimulatorToolBar* m_toolBar = nullptr;
 	SimulatorProjectWidget* m_projectWidget = nullptr;
+	//std::vector<SimulatorMemoryWidget*> m_memoryWidgets;
 };
 
 
@@ -65,6 +72,17 @@ private:
 
 	QLabel* m_equipmentLabel = nullptr;
 	QTreeWidget* m_equipmentTree = nullptr;
+};
+
+
+class SimulatorToolBar : public QToolBar
+{
+	Q_OBJECT
+public:
+	explicit SimulatorToolBar(const QString& title, QWidget* parent = nullptr);
+	virtual ~SimulatorToolBar();
+
+private:
 };
 
 #endif // SIMULATORWIDGET_H

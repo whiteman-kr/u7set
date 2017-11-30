@@ -304,7 +304,6 @@ static int stdColorIndex = 0;
 		m_toolBar->setMovable(false);
 		m_toolBar->setIconSize(QSize(28, 28));
 
-
 		m_toolBar->addAction(ui->actionOpen);
 		m_toolBar->addAction(ui->actionSave);
 		m_toolBar->addAction(ui->actionPrint);
