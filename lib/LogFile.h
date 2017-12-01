@@ -22,9 +22,12 @@ namespace Log
 	{
 		QDateTime time;
 		MessageType type;
+		quint64 sessionHash;
 		QString text;
 
-		QString toString();
+		QString toString(const QString& sessionHashString);
+
+		bool loadFromString(const QString& source, quint64 currentSessionHash);
 
 	};
 
@@ -33,14 +36,14 @@ namespace Log
 		Q_OBJECT
 	public:
 
-		LogFileWorker(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount);
+		LogFileWorker(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash);
 		virtual ~LogFileWorker();
 
 		bool write(MessageType type, const QString& text);
 
 		// Loading funtcions
 
-		void read();
+		void read(bool currentSessionOnly);
 
 		void getLoadedData(std::vector<LogFileRecord> *result);
 
@@ -60,18 +63,18 @@ namespace Log
 
 		bool switchToNextLogFile();
 
-		bool readFileRecords(const QString& fileName, std::vector<LogFileRecord>* result);
+		bool readFileRecords(const QString& fileName, bool currentSessionOnly, std::vector<LogFileRecord>* result);
 
 	private slots:
 
 		void slot_onTimer();
 
-		void slot_load();
+		void slot_load(bool currentSessionOnly);
 
 	signals:
 		void flushFailure();
 
-		void readStart();
+		void readStart(bool currentSessionOnly);
 
 		void readComplete();
 
@@ -90,6 +93,9 @@ namespace Log
 		int m_maxFilesCount;
 
 		int m_currentFileNumber = 0;
+
+		quint64 m_sessionHash = 0;
+		QString m_sessionHashString;
 
 		const int m_serviceStringLength = 80;
 
@@ -164,6 +170,8 @@ namespace Log
 	private:
 		virtual void resizeEvent(QResizeEvent *event);
 
+		void enableControls(bool enable);
+
 	private:
 
 		LogFileWorker* m_worker = nullptr;
@@ -171,6 +179,8 @@ namespace Log
 		QComboBox* m_typeCombo = nullptr;
 
 		QLineEdit* m_filterLineEdit = nullptr;
+
+		QPushButton* m_allSessions = nullptr;
 
 		QPushButton* m_autoScroll = nullptr;
 
@@ -183,6 +193,8 @@ namespace Log
 	private slots:
 		void onTypeComboIndexChanged(int index);
 		void onFilter();
+
+		void onAllSessionsClicked();
 
 		void onReadComplete();
 		void onRecordArrived(LogFileRecord record);
@@ -219,6 +231,8 @@ namespace Log
 		SimpleThread m_logThread;
 
 		LogFileDialog* m_logDialog = nullptr;
+
+		quint64 m_sessionHash;
 	};
 }
 

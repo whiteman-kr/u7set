@@ -1,7 +1,7 @@
 #pragma once
 #include "MainTabPage.h"
 #include "../lib/OutputLog.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "../lib/Configurator.h"
 #include "Builder/IssueLogger.h"
 
@@ -32,7 +32,6 @@ public:
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
-	void fileTypeChanged(const QString& s);
 	void findSubsystemsInBuild(int index);
 	void subsystemChanged(int index);
 
@@ -72,6 +71,13 @@ public slots:
 private:
 	void writeLog(const OutputLogItem& logItem);
 
+private slots:
+
+	void clearUartData();
+	void resetUartData();
+	void loadHeaderComplete(std::vector<UartPair> uartList);
+	void uploadSuccessful(int uartID);
+
 	// Data
 	//
 private:
@@ -84,7 +90,7 @@ private:
 
 	QComboBox* m_pConfigurationCombo = nullptr;
 
-	QComboBox* m_pFileTypeCombo = nullptr;
+	QTreeWidget* m_pFirmwareListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
@@ -115,5 +121,6 @@ private:
 	bool m_uploading = false;
 
 };
+
 
 

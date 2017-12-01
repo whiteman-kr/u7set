@@ -118,13 +118,15 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
 	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
-	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::writeConfData);
+	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadConfData);
 	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::writeDiagData);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
 	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 	
 	connect(m_pConfigurator, &Configurator::communicationStarted, this, &ModuleConfigurator::disableControls);
 	connect(m_pConfigurator, &Configurator::communicationFinished, this, &ModuleConfigurator::enableControls);
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
+
+	connect(m_pConfigurator, &Configurator::uploadSuccessful, appTabPage, &ApplicationTabPage::uploadSuccessful);
 	
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 	

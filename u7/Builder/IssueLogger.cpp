@@ -485,7 +485,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Subsystem '%1' is not found in subsystem set (Logic Moudle '%2').
+	/// Title: Subsystem '%1' is not found in subsystem set (Logic Module '%2').
 	///
 	///
 	/// Parameters:
@@ -499,7 +499,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3001,
-				  tr("Subsystem '%1' is not found in subsystem set (Logic Moudle '%2').")
+				  tr("Subsystem '%1' is not found in subsystem set (Logic Module '%2').")
 				  .arg(subSysID)
 				  .arg(module));
 	}
@@ -3173,14 +3173,14 @@ namespace Builder
 	/// Description:
 	///		Value of first specified parameter must be greate then the value of second parameneter. Correct prameter's values.
 	///
-	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid)
+	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5052,
-				  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%1.%3'.")).
-				  arg(fbCaption).arg(param1).arg(param2));
+				  QString(tr("Value of parameter %1.%2 must be greate then the value of %1.%3 (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5053
@@ -4827,6 +4827,122 @@ namespace Builder
 				  QString(tr("Max instances of AFB component '%1' is used (Logic schema %2, item %3)")).
 						arg(afbComponentCaption).arg(schemaID).arg(itemLabel));
 	}
+
+	/// IssueCode: ALC5131
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.
+	///
+	/// Parameters:
+	///		%1 App signal ID
+	///		%2 Opto port equipmentID
+	///
+	/// Description:
+	///		 Type of signal connected to opto port isn't correspond to its type specified in raw data description.
+	///
+	void IssueLogger::errALC5131(QString appSignalID, QString portID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5131,
+				  QString(tr("Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.")).
+						arg(appSignalID).arg(portID));
+	}
+
+	/// IssueCode: ALC5132
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Can't resolve busses interdependencies: %1
+	///
+	/// Parameters:
+	///		%1 Buses with interdependensies list
+	///
+	/// Description:
+	///		 Specified busses have interdependencies that cannot be resolved.
+	///
+	void IssueLogger::errALC5132(QString unresolvedBusList)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5132,
+				  QString(tr("Can't resolve busses interdependencies: %1")).
+						arg(unresolvedBusList));
+	}
+
+	/// IssueCode: ALC5133
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Application signal with equipmentID %1 is not found (Logic schema %2, item %3).
+	///
+	/// Parameters:
+	///		%1 Application signal's equipmemtID
+	///		%2 Logic schema ID
+	///		%3 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5133(QString signalEquipmentID, QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5133,
+				  QString(tr("Application signal with equipmentID %1 is not found (Logic schema %2, item %3).")).
+						arg(signalEquipmentID).arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5134
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Integer constant value out of range (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5134,
+				  QString(tr("Integer constant value out of range %1..%2 (Logic schema %3, item %4).")).
+						arg(std::numeric_limits<qint32>::min()).
+						arg(std::numeric_limits<qint32>::max()).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5135
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Float constant value out of range (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5135,
+				  QString(tr("Float constant value out of range %1..%2 (Logic schema %3, item %4).")).
+						arg(std::numeric_limits<float>::min()).
+						arg(std::numeric_limits<float>::max()).
+						arg(schemaID).arg(itemLabel));
+	}
+
 
 	//
 

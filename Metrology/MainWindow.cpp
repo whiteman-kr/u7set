@@ -1567,8 +1567,8 @@ void MainWindow::aboutApp()
 	QVBoxLayout* vl = new QVBoxLayout;
 	hl->addLayout(vl);
 
-	//QString text = "<h3>" + qApp->applicationName() + ": version " + qApp->applicationVersion() + "</h3>";
-	QString text = "<h3>" + qApp->applicationName() + ": version " + "1.6" + "</h3>";
+	QString text = "<h3>" + qApp->applicationName() + ": version " + qApp->applicationVersion() + "</h3>";
+	//QString text = "<h3>" + qApp->applicationName() + ": version " + "1.6" + "</h3>";
 #ifndef Q_DEBUG
 	text += "Build: Release";
 #else
