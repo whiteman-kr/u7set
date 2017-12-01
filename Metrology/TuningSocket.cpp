@@ -369,32 +369,43 @@ void TuningSocket::requestWriteTuningSignals()
 		return;
 	}
 
-	m_writeTuningSignals.set_clientequipmentid(equipmentID.toUtf8());
 	m_writeTuningSignals.set_autoapply(true);
 
-	m_writeTuningSignals.mutable_tuningsignalwrite()->Reserve(cmdCount);
+	m_writeTuningSignals.mutable_commands()->Reserve(cmdCount);
 
-	m_writeTuningSignals.mutable_tuningsignalwrite()->Clear();
+	m_writeTuningSignals.mutable_commands()->Clear();
 
 	for (int i = 0; i < cmdCount && i < TUNING_SOCKET_MAX_WRITE_CMD; i++)
 	{
 		TuningWriteCmd cmd = theSignalBase.tuning().cmdFowWrite(i);
+
 		if (cmd.signalHash() == 0)
 		{
 			assert(cmd.signalHash() != 0);
 			continue;
 		}
 
-		Network::TuningSignalWrite* wrCmd = new Network::TuningSignalWrite();
+		Network::TuningWriteCommand* wrCmd = new Network::TuningWriteCommand();
+
 		if (wrCmd == nullptr)
 		{
 			continue;
 		}
 
-		wrCmd->set_value(cmd.value());
 		wrCmd->set_signalhash(cmd.signalHash());
 
-		m_writeTuningSignals.mutable_tuningsignalwrite()->AddAllocated(wrCmd);
+		Network::TuningValue* tv = new Network::TuningValue();
+
+		assert(false);		// WM: check code below is needs checking
+
+		tv.set_type(0/* need set value of enum TuningValueType */);
+
+		tv.set_floatvalue(cmd.value());
+		// or need tv.set_intvalue(); dependent from TuningValueType
+
+		wrCmd->set_value(tv);
+
+		m_writeTuningSignals.mutable_commands()->AddAllocated(wrCmd);
 	}
 
 	sendRequest(TDS_TUNING_SIGNALS_WRITE, m_writeTuningSignals);
