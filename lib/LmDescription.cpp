@@ -498,6 +498,8 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 
 	m_codeMemorySize = getSectionUintValue(QLatin1String("CodeMemorySize"), errorMessage);
 
+	m_appMemorySize = getSectionUintValue(QLatin1String("AppMemorySize"), errorMessage);
+
 	m_appDataOffset = getSectionUintValue(QLatin1String("AppDataOffset"), errorMessage);
 	m_appDataSize= getSectionUintValue(QLatin1String("AppDataSize"), errorMessage);
 
