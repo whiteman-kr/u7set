@@ -28,6 +28,10 @@ IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController
 
     setScriptHelpWindowPos(theSettings.m_scriptHelpWindowPos);
     setScriptHelpWindowGeometry(theSettings.m_scriptHelpWindowGeometry);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		setFontSizeF(fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 }
 
 IdePropertyEditor::~IdePropertyEditor()

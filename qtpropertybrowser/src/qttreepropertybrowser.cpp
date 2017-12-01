@@ -99,6 +99,9 @@ public:
 
     void sortItems(int column, Qt::SortOrder order);
 
+	qreal fontSizeF() const;
+	void setFontSizeF(qreal size);
+
 private:
     void updateItem(QTreeWidgetItem *item);
 
@@ -475,7 +478,7 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent)
     layout->addWidget(m_treeWidget);
     parent->setFocusProxy(m_treeWidget);
 
-    m_treeWidget->setColumnCount(2);
+	m_treeWidget->setColumnCount(2);
     QStringList labels;
     labels.append(QCoreApplication::translate("QtTreePropertyBrowser", "Property"));
     labels.append(QCoreApplication::translate("QtTreePropertyBrowser", "Value"));
@@ -732,6 +735,19 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
 void QtTreePropertyBrowserPrivate::sortItems(int column, Qt::SortOrder order)
 {
     m_treeWidget->sortItems(column, order);
+}
+
+qreal QtTreePropertyBrowserPrivate::fontSizeF() const
+{
+	return m_treeWidget->font().pointSizeF();
+}
+
+void QtTreePropertyBrowserPrivate::setFontSizeF(qreal size)
+{
+	QFont f = m_treeWidget->font();
+	f.setPointSizeF(size);
+	m_treeWidget->setFont(f);
+	m_treeWidget->header()->setFont(f);
 }
 
 /*!
@@ -1101,6 +1117,16 @@ void QtTreePropertyBrowser::editItem(QtBrowserItem *item)
 void QtTreePropertyBrowser::sortItems(int column, Qt::SortOrder order)
 {
     d_ptr->sortItems(column, order);
+}
+
+qreal QtTreePropertyBrowser::fontSizeF() const
+{
+	return d_ptr->fontSizeF();
+}
+
+void QtTreePropertyBrowser::setFontSizeF(qreal size)
+{
+	d_ptr->setFontSizeF(size);
 }
 
 #if QT_VERSION >= 0x040400

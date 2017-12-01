@@ -3813,6 +3813,10 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_propertyEditor = new IdePropertyEditor(m_splitter, dbcontroller);
     m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
 
 	m_splitter->addWidget(m_equipmentView);

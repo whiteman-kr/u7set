@@ -3,7 +3,7 @@
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QMessageBox>
-#include <QSettings>
+#include "Settings.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
@@ -141,10 +141,12 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	m_tryCheckout(tryCheckout),
 	m_parent(parent)
 {
-	QSettings settings;
-
 	QVBoxLayout* vl = new QVBoxLayout;
 	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
 
