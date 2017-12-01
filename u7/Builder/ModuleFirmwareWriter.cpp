@@ -247,9 +247,9 @@ namespace Hardware
 
 				jFirmware.insert("uartType", data.uartType);
 
-				jFirmware.insert("frameSize", eepromFramePayloadSize(uartId));
-				jFirmware.insert("frameSizeWithCRC", eepromFrameSize(uartId));
-				jFirmware.insert("framesCount", eepromFrameCount(uartId));
+				jFirmware.insert("eepromFramePayloadSize", eepromFramePayloadSize(uartId));
+				jFirmware.insert("eepromFrameSize", eepromFrameSize(uartId));
+				jFirmware.insert("eepromFrameCount", eepromFrameCount(uartId));
 			}
 
 
