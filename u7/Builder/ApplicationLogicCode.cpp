@@ -1382,7 +1382,7 @@ namespace Builder
 	{
 		QString cmdStr;
 
-		cmdStr.sprintf("%04X\t", m_address);
+		cmdStr.sprintf("%05X\t", m_address);
 
 		for(int w = 0; w < sizeW(); w++)
 		{

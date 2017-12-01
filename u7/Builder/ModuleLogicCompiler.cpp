@@ -233,13 +233,23 @@ namespace Builder
 		appLogicWordData.setStartAddress(m_lmDescription->memory().m_appLogicWordDataOffset);
 		appLogicWordData.setSizeW(m_lmDescription->memory().m_appLogicWordDataSize);
 
-		m_memoryMap.init(moduleData,
+		m_memoryMap.init(m_lmDescription->memory().m_appMemorySize,
+						 moduleData,
 						 optoInterfaceData,
 						 appLogicBitData,
 						 tuningData,
 						 appLogicWordData);
 
 		m_code.setMemoryMap(&m_memoryMap, m_log);
+
+		m_lmCodeMemorySize = m_lmDescription->memory().m_codeMemorySize;
+		m_lmAppMemorySize = m_lmDescription->memory().m_appMemorySize;
+
+		if (m_lmCodeMemorySize == 0 || m_lmAppMemorySize == 0)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
 		m_lmClockFrequency = m_lmDescription->logicUnit().m_clockFrequency;
 		m_lmALPPhaseTime = m_lmDescription->logicUnit().m_alpPhaseTime;
@@ -9290,7 +9300,7 @@ namespace Builder
 	{
 		QString str;
 
-		double percentOfUsedCodeMemory = (m_code.commandAddress() * 100.0) / 65536.0;
+		double percentOfUsedCodeMemory = (m_code.commandAddress() * 100.0) / m_lmCodeMemorySize;
 
 		bool result = true;
 

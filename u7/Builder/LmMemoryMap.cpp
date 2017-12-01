@@ -123,17 +123,19 @@ namespace Builder
 		m_log(log)
 	{
 		assert(m_log != nullptr);
-
-		m_memory.resize(APP_MEMORY_SIZE);
 	}
 
 
-	bool LmMemoryMap::init(	const MemoryArea& moduleData,
+	bool LmMemoryMap::init(	int appMemorySize,
+							const MemoryArea& moduleData,
 							const MemoryArea& optoInterfaceData,
 							const MemoryArea& appLogicBitData,
 							const MemoryArea& tuningData,
 							const MemoryArea& appLogicWordData)
 	{
+		m_appMemorySize = appMemorySize;
+
+		m_memory.resize(m_appMemorySize);
 
 		// init modules memory mapping
 		//
@@ -890,7 +892,7 @@ namespace Builder
 
 	bool LmMemoryMap::read16(int address)
 	{
-		if (address < 0 || address >= APP_MEMORY_SIZE)
+		if (address < 0 || address >= m_appMemorySize)
 		{
 			// Read address %1 of application memory is out of range 0..65535.
 			//
@@ -925,7 +927,7 @@ namespace Builder
 
 	bool LmMemoryMap::write16(int address)
 	{
-		if (address < 0 || address >= APP_MEMORY_SIZE)
+		if (address < 0 || address >= m_appMemorySize)
 		{
 			// Write address %1 of application memory is out of range 0..65535.
 			//
@@ -960,7 +962,7 @@ namespace Builder
 
 	int LmMemoryMap::getMemoryReadCount(int address) const
 	{
-		if (address < 0 || address >= APP_MEMORY_SIZE)
+		if (address < 0 || address >= m_appMemorySize)
 		{
 			assert(false);
 			return 0;
@@ -972,7 +974,7 @@ namespace Builder
 
 	int LmMemoryMap::getMemoryWriteCount(int address) const
 	{
-		if (address < 0 || address >= APP_MEMORY_SIZE)
+		if (address < 0 || address >= m_appMemorySize)
 		{
 			assert(false);
 			return 0;
