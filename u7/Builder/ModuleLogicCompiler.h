@@ -437,6 +437,8 @@ namespace Builder
 
 		// LM's and modules settings
 		//
+		int m_lmCodeMemorySize = 0;
+		int m_lmAppMemorySize = 0;
 		int m_lmAppLogicFrameSize = 0;
 		int m_lmAppLogicFrameCount = 0;
 

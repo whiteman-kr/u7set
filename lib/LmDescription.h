@@ -69,6 +69,8 @@ public:
 
 	struct Memory
 	{
+		quint32 m_codeMemorySize = 0xFFFFFFFF;
+		quint32 m_appMemorySize = 0xFFFFFFFF;
 		quint32 m_appDataOffset = 0xFFFFFFFF;
 		quint32 m_appDataSize = 0xFFFFFFFF;
 		quint32 m_appLogicBitDataOffset = 0xFFFFFFFF;

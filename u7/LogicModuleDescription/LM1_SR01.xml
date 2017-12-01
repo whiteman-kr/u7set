@@ -9,6 +9,8 @@
 		<TuningFrameSize>1016</TuningFrameSize>		
 	</FlashMemory>
 	<Memory>
+	    <CodeMemorySize>98304</CodeMemorySize>
+		<AppMemorySize>65536</AppMemorySize>
 		<AppDataOffset>57782</AppDataOffset>
 		<AppDataSize>2</AppDataSize>
 		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>

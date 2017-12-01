@@ -120,7 +120,7 @@ namespace Hardware
 		data = file.readAll();
 		file.close();
 
-		return parse(data, errorCode, false);
+		return parse(data, false, errorCode);
 	}
 
 	bool ModuleFirmware::parse(const QByteArray& data, bool readDataFrames, QString* errorCode)
@@ -256,25 +256,25 @@ namespace Hardware
 
 			QJsonObject jFirmwareObject = jFirmware.toObject();
 
-			if (jFirmwareObject.value(QLatin1String("framesCount")).isUndefined() == true)
+			if (jFirmwareObject.value(QLatin1String("eepromFrameCount")).isUndefined() == true)
 			{
-				*errorCode = "Parse firmware error: cant find field framesCount";
+				*errorCode = "Parse firmware error: cant find field eepromFrameCount";
 				return false;
 			}
-			int framesCount = jFirmwareObject.value(QLatin1String("framesCount")).toInt();
+			int framesCount = jFirmwareObject.value(QLatin1String("eepromFrameCount")).toInt();
 
 			//
 
 			ModuleFirmwareData data;
 
-			if (jFirmwareObject.value(QLatin1String("frameSize")).isUndefined() == true)
+			if (jFirmwareObject.value(QLatin1String("eepromFramePayloadSize")).isUndefined() == true)
 			{
-				*errorCode = "Parse firmware error: cant find field frameSize";
+				*errorCode = "Parse firmware error: cant find field eepromFramePayloadSize";
 				return false;
 			}
-			data.frameSize = jFirmwareObject.value(QLatin1String("frameSize")).toInt();
+			data.frameSize = jFirmwareObject.value(QLatin1String("eepromFramePayloadSize")).toInt();
 
-			data.frameSizeWithCRC = jFirmwareObject.value(QLatin1String("frameSizeWithCRC")).toInt();
+			data.frameSizeWithCRC = jFirmwareObject.value(QLatin1String("eepromFrameSize")).toInt();
 
 			if (data.frameSizeWithCRC <= data.frameSize)
 			{
