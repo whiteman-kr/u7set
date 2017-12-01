@@ -982,7 +982,7 @@ namespace Builder
 			constSignalType = E::SignalType::Analog;
 			constAnalogFormat = E::AnalogAppSignalFormat::Float32;
 
-			if (ualConst->floatValue() < std::numeric_limits<float>::min() || ualConst->floatValue() > std::numeric_limits<float>::max())
+			if (ualConst->floatValue() < std::numeric_limits<float>::lowest() || ualConst->floatValue() > std::numeric_limits<float>::max())
 			{
 				// Float constant value out of range (Logic schema %1, item %2)
 				//
