@@ -1,7 +1,7 @@
 #ifndef MODULEFIRMWAREWRITER_H
 #define MODULEFIRMWAREWRITER_H
 
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "IssueLogger.h"
 
 //
@@ -57,7 +57,7 @@ namespace Hardware
 		// Functions called and used by Application Logic and Tuning Builder
 		//
 		void setDescriptionFields(int uartId, int descriptionVersion, const QStringList& fields);
-		bool setChannelData(int uartId, QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log);
+		bool setChannelData(int uartId, QString equipmentID, int channel, int eepromFramePayloadSize, int eepromFrameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log);
 
 		// Functions called and used by Configuration Script
 		//

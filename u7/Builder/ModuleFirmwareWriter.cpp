@@ -63,15 +63,15 @@ namespace Hardware
 			return false;
 		}
 
-		if (this->frameSize(uartId) != frameSize)
+		if (this->eepromFramePayloadSize(uartId) != frameSize)
 		{
-			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize(uartId)));
+			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(this->eepromFramePayloadSize(uartId)));
 			return false;
 		}
 
-		if (this->frameCount(uartId) != frameCount)
+		if (this->eepromFrameCount(uartId) != frameCount)
 		{
-			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(this->frameSize(uartId)));
+			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(this->eepromFramePayloadSize(uartId)));
 			return false;
 		}
 
@@ -127,7 +127,7 @@ namespace Hardware
 
 			// Count CRC64 for all frames
 
-			for (int i = 0; i < frameCount(uartId); i++)
+			for (int i = 0; i < eepromFrameCount(uartId); i++)
 			{
 				std::vector<quint8>& frame = data.frames[i];
 
@@ -140,7 +140,7 @@ namespace Hardware
 
 			const int frameStringWidth = 16;
 
-			for (int i = 0; i < frameCount(uartId); i++)
+			for (int i = 0; i < eepromFrameCount(uartId); i++)
 			{
 				const std::vector<quint8>& frame = data.frames[i];
 
@@ -247,9 +247,9 @@ namespace Hardware
 
 				jFirmware.insert("uartType", data.uartType);
 
-				jFirmware.insert("frameSize", frameSize(uartId));
-				jFirmware.insert("frameSizeWithCRC", frameSizeWithCRC(uartId));
-				jFirmware.insert("framesCount", frameCount(uartId));
+				jFirmware.insert("eepromFramePayloadSize", eepromFramePayloadSize(uartId));
+				jFirmware.insert("eepromFrameSize", eepromFrameSize(uartId));
+				jFirmware.insert("eepromFrameCount", eepromFrameCount(uartId));
 			}
 
 
@@ -303,7 +303,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(data)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -330,7 +330,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(data)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -359,7 +359,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(data)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -388,7 +388,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(data)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -417,7 +417,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(quint8)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint8)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
@@ -442,7 +442,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(quint16)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint16)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
@@ -469,7 +469,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(quint32)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint32)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
@@ -512,7 +512,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(quint64)) || start + count > frameSize(uartID))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint64)) || start + count > eepromFramePayloadSize(uartID))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return QString();
@@ -539,7 +539,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(frameSize(uartID) - sizeof(quint64)))
+				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint64)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return QString("");
@@ -571,7 +571,7 @@ namespace Hardware
 		//
 
 		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				start + count > frameSize(uartID))
+				start + count > eepromFramePayloadSize(uartID))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
@@ -760,7 +760,7 @@ namespace Hardware
 		{
 			int uartId = it->first;
 
-			if (frameCount(uartId) < 3)
+			if (eepromFrameCount(uartId) < 3)
 			{
 				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId()));
 				return false;
@@ -786,7 +786,7 @@ namespace Hardware
 
 				const QByteArray& data = it->second;
 
-				double fSize = (double)data.size() / frameSize(uartId);
+				double fSize = (double)data.size() / eepromFramePayloadSize(uartId);
 				fSize = ceil(fSize);
 				int size = (int)fSize;
 
@@ -821,9 +821,9 @@ namespace Hardware
 				}
 				int size = (quint16)channelNumbersAndSize[c].second;
 
-				if (frame >= frameCount(uartId))
+				if (frame >= eepromFrameCount(uartId))
 				{
-					log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount(uartId)));
+					log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(eepromFrameCount(uartId)));
 					return false;
 				}
 
@@ -871,7 +871,7 @@ namespace Hardware
 					int index = 0;
 					for (int i = 0; i < binaryData.size(); i++)
 					{
-						if (index >= frameSize(uartId))
+						if (index >= eepromFramePayloadSize(uartId))
 						{
 							// data is bigger than frame - switch to the next frame
 							//
@@ -879,9 +879,9 @@ namespace Hardware
 							index = 0;
 						}
 
-						if (frame >= frameCount(uartId))
+						if (frame >= eepromFrameCount(uartId))
 						{
-							log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(frameCount(uartId)));
+							log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(eepromFrameCount(uartId)));
 							return false;
 						}
 

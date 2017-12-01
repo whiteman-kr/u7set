@@ -1031,11 +1031,11 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 					throw tr("No firmware data exists for current UART ID.");
 				}
 
-				m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf->frameSize(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf->frameSizeWithCRC(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf->frameCount(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf->eepromFramePayloadSize(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf->eepromFrameSize(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf->eepromFrameCount(m_currentUartId))));
 
-				int confFrameDataSize = conf->frameSize(m_currentUartId);
+				int confFrameDataSize = conf->eepromFramePayloadSize(m_currentUartId);
 
 				if (pingReplyVersioned.frameSize < confFrameDataSize)
 				{
@@ -1188,7 +1188,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 			{
 				m_Log->writeMessage("Write configuration...");
 
-				for (int i = 0; i < conf->frameCount(m_currentUartId); i++)
+				for (int i = 0; i < conf->eepromFrameCount(m_currentUartId); i++)
 				{
 					if (m_cancelFlag == true)
 					{
@@ -1590,17 +1590,15 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 	m_Log->writeMessage(tr("File: %1").arg(fileName));
 
 	QString errorCode;
-
-
 	bool result = false;
 
 	if (writeToFlash == true)
 	{
-		result = confFirmware.load(fileName, errorCode);
+		result = confFirmware.load(fileName, &errorCode);
 	}
 	else
 	{
-		result = confFirmware.loadHeader(fileName, errorCode);
+		result = confFirmware.loadHeader(fileName, &errorCode);
 	}
 
 	if (result == false)

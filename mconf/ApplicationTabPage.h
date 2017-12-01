@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "ui_applicationtabpage.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 
 using namespace Hardware;
 

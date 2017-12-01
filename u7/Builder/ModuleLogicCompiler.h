@@ -3,7 +3,7 @@
 #include "../lib/DeviceObject.h"
 
 #include "../lib/OrderedHash.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 
 #include "../TuningService/TuningDataStorage.h"
 
@@ -437,6 +437,8 @@ namespace Builder
 
 		// LM's and modules settings
 		//
+		int m_lmCodeMemorySize = 0;
+		int m_lmAppMemorySize = 0;
 		int m_lmAppLogicFrameSize = 0;
 		int m_lmAppLogicFrameCount = 0;
 
