@@ -46,7 +46,6 @@ HEADERS += \
     ../lib/DeviceObject.h \
     ../lib/OutputLog.h \
     ../Proto/serialization.pb.h \
-    ../lib/ModuleConfiguration.h \
     ../lib/ProtoSerialization.h \
     Settings.h \
     ApplicationTabPage.h \
@@ -57,7 +56,8 @@ HEADERS += \
         ../lib/CUtils.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../lib/Configurator.h
+    ../lib/Configurator.h \
+    ../lib/ModuleFirmware.h
 
 SOURCES += \
 	main.cpp \
@@ -65,7 +65,6 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/OutputLog.cpp \
     ../Proto/serialization.pb.cc \
-    ../lib/ModuleConfiguration.cpp \
     ../lib/ProtoSerialization.cpp \
     Settings.cpp \
     ApplicationTabPage.cpp \
@@ -74,7 +73,8 @@ SOURCES += \
     SettingsForm.cpp \
     ../lib/Crc.cpp \
     ../lib/Types.cpp \
-    ../lib/Configurator.cpp
+    ../lib/Configurator.cpp \
+    ../lib/ModuleFirmware.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \

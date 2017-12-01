@@ -1,9 +1,12 @@
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "../lib/Crc.h"
-#include "../lib/CUtils.h"
 #include <QMap>
 #include <QHash>
 #include <QtEndian>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
 
 //-----------------------------------------------------------------------------
 
@@ -18,9 +21,18 @@ namespace Hardware
 	{
 	}
 
-	void ModuleFirmware::init(int uartId, int frameSize, int frameCount,
-							  QString caption, QString subsysId, int ssKey, int lmDescriptionNumber,
-							  const QString &projectName, const QString &userName, int buildNumber, const QString& buildConfig, int changesetId)
+	void ModuleFirmware::init(int uartId,
+							  int frameSize,
+							  int frameCount,
+							  QString caption,
+							  QString subsysId,
+							  int ssKey,
+							  int lmDescriptionNumber,
+							  QString projectName,
+							  QString userName,
+							  int buildNumber,
+							  QString buildConfig,
+							  int changesetId)
 	{
 		m_caption = caption;
 		m_subsysId = subsysId;
@@ -35,6 +47,7 @@ namespace Hardware
 
 		ModuleFirmwareData data;
 
+		data.uartId = uartId;
 		data.uartType = E::valueToString<E::UartID>(uartId);
 		data.frameSize = frameSize;
 		data.frameSizeWithCRC = frameSize + sizeof(quint64);
@@ -83,7 +96,7 @@ namespace Hardware
 		return m_firmwareData.find(uartId) != m_firmwareData.end();
 	}
 
-	int ModuleFirmware::frameSize(int uartId) const
+	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
@@ -95,7 +108,7 @@ namespace Hardware
 		return it->second.frameSize;
 	}
 
-	int ModuleFirmware::frameSizeWithCRC(int uartId) const
+	int ModuleFirmware::eepromFrameSize(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
@@ -107,7 +120,7 @@ namespace Hardware
 		return it->second.frameSizeWithCRC;
 	}
 
-	int ModuleFirmware::frameCount(int uartId) const
+	int ModuleFirmware::eepromFrameCount(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
@@ -119,19 +132,23 @@ namespace Hardware
 		return static_cast<int>(it->second.frames.size());
 	}
 
-	const std::vector<quint8> ModuleFirmware::frame(int uartId, int frameIndex) const
+
+
+	const std::vector<quint8>& ModuleFirmware::frame(int uartId, int frameIndex) const
 	{
-		if (frameIndex < 0 || frameIndex >= frameCount(uartId))
+static const std::vector<quint8> err;
+
+		if (frameIndex < 0 || frameIndex >= eepromFrameCount(uartId))
 		{
-			assert(frameIndex >= 0 && frameIndex < frameCount(uartId));
-			return std::vector<quint8>();
+			assert(frameIndex >= 0 && frameIndex < eepromFrameCount(uartId));
+			return err;
 		}
 
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
 		{
 			assert(false);
-			return std::vector<quint8>();
+			return err;
 		}
 
 		return it->second.frames[frameIndex];
@@ -218,13 +235,13 @@ namespace Hardware
 
 		QJsonObject jConfig = document.object();
 
-		if (jConfig.value("fileVersion").isUndefined() == true)
+		if (jConfig.value(QLatin1String("fileVersion")).isUndefined() == true)
 		{
 			m_fileVersion = 1;	// in old files there is no version information
 		}
 		else
 		{
-			m_fileVersion = (int)jConfig.value("fileVersion").toInt();
+			m_fileVersion = jConfig.value(QLatin1String("fileVersion")).toInt();
 		}
 
 		switch (m_fileVersion)
@@ -235,76 +252,74 @@ namespace Hardware
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
-
 	}
 
 	bool ModuleFirmware::load_version1(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode)
 	{
-
-		if (jConfig.value("projectName").isUndefined() == true)
+		if (jConfig.value(QLatin1String("projectName")).isUndefined() == true)
 		{
 			return false;
 		}
-		m_projectName = jConfig.value("projectName").toString();
+		m_projectName = jConfig.value(QLatin1String("projectName")).toString();
 
-		if (jConfig.value("userName").isUndefined() == true)
+		if (jConfig.value(QLatin1String("userName")).isUndefined() == true)
 		{
 			return false;
 		}
-		m_userName = jConfig.value("userName").toString();
+		m_userName = jConfig.value(QLatin1String("userName")).toString();
 
-		if (jConfig.value("caption").isUndefined() == true)
+		if (jConfig.value(QLatin1String("caption")).isUndefined() == true)
 		{
 			return false;
 		}
-		m_caption = jConfig.value("caption").toString();
+		m_caption = jConfig.value(QLatin1String("caption")).toString();
 
-		if (jConfig.value("subsysId").isUndefined() == true)
+		if (jConfig.value(QLatin1String("subsysId")).isUndefined() == true)
 		{
 			return false;
 		}
-		m_subsysId = jConfig.value("subsysId").toString();
+		m_subsysId = jConfig.value(QLatin1String("subsysId")).toString();
 
-		if (jConfig.value("buildConfig").isUndefined() == true)
+		if (jConfig.value(QLatin1String("buildConfig")).isUndefined() == true)
 		{
 			m_buildConfig.clear();
 		}
 		else
 		{
-			m_buildConfig = jConfig.value("buildConfig").toString();
+			m_buildConfig = jConfig.value(QLatin1String("buildConfig")).toString();
 		}
 
-		if (jConfig.value("buildNumber").isUndefined() == true)
+		if (jConfig.value(QLatin1String("buildNumber")).isUndefined() == true)
 		{
 			m_buildNumber = 0;
 		}
 		else
 		{
-			m_buildNumber = (int)jConfig.value("buildNumber").toDouble();
+			m_buildNumber = jConfig.value(QLatin1String("buildNumber")).toInt();
 		}
 
-		if (jConfig.value("lmDescriptionNumber").isUndefined() == true)
+		if (jConfig.value(QLatin1String("lmDescriptionNumber")).isUndefined() == true)
 		{
 			m_lmDescriptionNumber = 0;
 		}
 		else
 		{
-			m_lmDescriptionNumber = (int)jConfig.value("lmDescriptionNumber").toDouble();
+			m_lmDescriptionNumber = jConfig.value(QLatin1String("lmDescriptionNumber")).toInt();
 		}
 
-		if (jConfig.value("changesetId").isUndefined() == true)
+		if (jConfig.value(QLatin1String("changesetId")).isUndefined() == true)
 		{
 			return false;
 		}
-		m_changesetId = (int)jConfig.value("changesetId").toDouble();
+		m_changesetId = jConfig.value(QLatin1String("changesetId")).toInt();
 
+		//--
 		//
-
-		if (jConfig.value("firmwaresCount").isUndefined() == true)
+		if (jConfig.value(QLatin1String("firmwaresCount")).isUndefined() == true)
 		{
 			return false;
 		}
-		int firmwaresCount = (int)jConfig.value("firmwaresCount").toDouble();
+		int firmwaresCount = jConfig.value(QLatin1String("firmwaresCount")).toInt();
 
 		for (int f = 0; f < firmwaresCount; f++)
 		{
@@ -317,23 +332,23 @@ namespace Hardware
 
 			QJsonObject jFirmwareObject = jFirmware.toObject();
 
-			if (jFirmwareObject.value("framesCount").isUndefined() == true)
+			if (jFirmwareObject.value(QLatin1String("framesCount")).isUndefined() == true)
 			{
 				return false;
 			}
-			int framesCount = (int)jFirmwareObject.value("framesCount").toDouble();
+			int framesCount = jFirmwareObject.value(QLatin1String("framesCount")).toInt();
 
 			//
 
 			ModuleFirmwareData data;
 
-			if (jFirmwareObject.value("frameSize").isUndefined() == true)
+			if (jFirmwareObject.value(QLatin1String("frameSize")).isUndefined() == true)
 			{
 				return false;
 			}
-			data.frameSize = (int)jFirmwareObject.value("frameSize").toDouble();
+			data.frameSize = jFirmwareObject.value(QLatin1String("frameSize")).toInt();
 
-			data.frameSizeWithCRC = (int)jFirmwareObject.value("frameSizeWithCRC").toDouble();
+			data.frameSizeWithCRC = jFirmwareObject.value(QLatin1String("frameSizeWithCRC")).toInt();
 
 			if (data.frameSizeWithCRC <= data.frameSize)
 			{
@@ -341,17 +356,17 @@ namespace Hardware
 				data.frameSizeWithCRC = data.frameSize + sizeof(quint64);
 			}
 
-			if (jFirmwareObject.value("uartId").isUndefined() == true)
+			if (jFirmwareObject.value(QLatin1String("uartId")).isUndefined() == true)
 			{
 				return false;
 			}
-			int uartId = (int)jFirmwareObject.value("uartId").toDouble();
+			data.uartId = jFirmwareObject.value(QLatin1String("uartId")).toInt();
 
-			if (jFirmwareObject.value("uartType").isUndefined() == true)
+			if (jFirmwareObject.value(QLatin1String("uartType")).isUndefined() == true)
 			{
 				return false;
 			}
-			data.uartType = jFirmwareObject.value("uartType").toString();
+			data.uartType = jFirmwareObject.value(QLatin1String("uartType")).toString();
 
 			if (readDataFrames == true)
 			{
@@ -375,7 +390,7 @@ namespace Hardware
 
 					QJsonObject jFrame = jFrameVal.toObject();
 
-					if (jFrame.value("frameIndex").isUndefined() == true)
+					if (jFrame.value(QLatin1String("frameIndex")).isUndefined() == true)
 					{
 						assert(false);
 						return false;
@@ -383,7 +398,7 @@ namespace Hardware
 
 					if (frameStringWidth == -1)
 					{
-						QString firstString = jFrame.value("data0000").toString();
+						QString firstString = jFrame.value(QLatin1String("data0000")).toString();
 
 						frameStringWidth = firstString.split(' ').size();
 						if (frameStringWidth == 0)
@@ -446,7 +461,7 @@ namespace Hardware
 				}
 			}
 
-			m_firmwareData[uartId] = data;
+			m_firmwareData[data.uartId] = data;
 		}
 
 		return true;

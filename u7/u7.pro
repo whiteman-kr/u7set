@@ -104,7 +104,7 @@ SOURCES +=\
     EditEngine/EditEngineMoveItem.cpp \
     EditEngine/EditEngineSetPoints.cpp \
     EditEngine/EditEngineSetProperty.cpp \
-    ../lib/ModuleConfiguration.cpp \
+    ../lib/ModuleFirmware.cpp \
     BuildTabPage.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbProgress.cpp \
@@ -241,7 +241,7 @@ HEADERS  += \
     EditEngine/EditEngineMoveItem.h \
     EditEngine/EditEngineSetPoints.h \
     EditEngine/EditEngineSetProperty.h \
-    ../lib/ModuleConfiguration.h \
+    ../lib/ModuleFirmware.h \
     BuildTabPage.h \
     ../lib/OutputLog.h \
     ../lib/DbProgress.h \
