@@ -97,36 +97,6 @@ namespace Builder
 		QString subDir() const { return m_subDir; }
 	};
 
-
-	class MultichannelFile
-	{
-	private:
-		BuildResultWriter& m_buildResultWriter;
-		IssueLogger* m_log = nullptr;
-		QString m_subsysStrID;
-		int m_subsysID = 0;
-		QString m_lmEquipmentID;
-		QString m_lmCaption;
-
-		Hardware::ModuleFirmwareWriter m_moduleFirmware;
-
-	public:
-		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList &descriptionFields);
-
-		bool setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& appLogicBinCode, const std::vector<QVariantList> &descriptionData);
-
-		bool getFileData(QByteArray& fileData);
-
-		QString subsysStrID() const { return m_subsysStrID; }
-		QString lmCaption() const { return m_lmCaption; }
-		QString lmEquipmentID() const { return m_lmEquipmentID; }
-		int subsysID() const { return m_subsysID; }
-
-		quint64 getFirmwareUniqueId(int lmNumber);
-		void setGenericUniqueId(int lmNumber, quint64 genericUniqueId);
-	};
-
-
 	class BuildResult : public QObject
 	{
 	private:
@@ -180,7 +150,7 @@ namespace Builder
 
 		HashedVector<QString, ConfigurationXmlFile*> m_cfgFiles;
 
-		HashedVector<QString, MultichannelFile*> m_multichannelFiles;
+		Hardware::ModuleFirmwareCollection m_firmwareCollection;
 
 		QMap<QString, QString> m_buildFileIDMap;
 
@@ -208,14 +178,15 @@ namespace Builder
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 
-		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int lmDescriptionNumber, int descriptionFieldsVersion, const QStringList &descriptionFields);
-		bool writeMultichannelFiles();
+		bool writeBinaryFiles();
 
 		bool writeConfigurationXmlFiles();
 
 		BuildInfo buildInfo() const { return m_buildInfo; }
 
 		IssueLogger* log() { return m_log; }
+
+		Hardware::ModuleFirmwareCollection* firmwareCollection() { return &m_firmwareCollection; }
 
 		BuildFile* getBuildFile(const QString& pathFileName) const;
 		BuildFile* getBuildFileByID(const QString& buildFileID) const;
@@ -225,9 +196,9 @@ namespace Builder
 		bool isDebug() const;
 		bool isRelease() const;
 
-		quint64 getAppUniqueId(const QString& subsystemID, int lmNumber);
-
-		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
+		static const QString COMMON_DIR;
+		static const QString REPORTS_DIR;
+		static const QString OPTO_VHD_DIR;
 	};
 }
 

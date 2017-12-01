@@ -101,15 +101,7 @@ namespace Builder
 
 	void CommandCode::setFbInstance(quint16 fbInstance)
 	{
-		if (fbInstance > MAX_FB_INSTANCE)
-		{
-			assert(false);
-			setNoCommand();
-		}
-		else
-		{
-			param.fbInstance = fbInstance;
-		}
+		param.fbInstance = fbInstance;
 	}
 
 

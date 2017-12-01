@@ -291,7 +291,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_MAJ_paramValues()
 	{
 		QStringList requiredParams;
@@ -313,7 +312,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_SRSST_paramValues()
 	{
@@ -480,8 +478,9 @@ namespace Builder
 
 		requiredParams.append("i_conf");
 
-		if (caption() == "dampc_si" ||
-			caption() == "dampc_fp")
+		bool isConstDamper = caption() == "dampc_si" ||	caption() == "dampc_fp";
+
+		if (isConstDamper == true)
 		{
 			requiredParams.append("i_del");
 		}
@@ -492,8 +491,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		if (caption() == "dampc_si" ||
-			caption() == "dampc_fp")
+		if (isConstDamper == true)
 		{
 			AppFbParamValue& i_del = m_paramValuesArray["i_del"];
 			CHECK_SIGNED_INT32(i_del)
@@ -1222,7 +1220,9 @@ namespace Builder
 		requiredParams.append("i_max");
 		requiredParams.append("i_min");
 
-		if (caption() == "integratorc")
+		bool isConstIntegrator = caption() == "integratorc";
+
+		if (isConstIntegrator == true)
 		{
 			requiredParams.append("i_ti");
 			requiredParams.append("i_ki");
@@ -1230,7 +1230,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		if (caption() == "integratorc")
+		if (isConstIntegrator == true)
 		{
 			AppFbParamValue& i_ti = m_paramValuesArray["i_ti"];
 			AppFbParamValue& i_ki = m_paramValuesArray["i_ki"];
@@ -1263,7 +1263,7 @@ namespace Builder
 		{
 			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 			//
-			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid());
+			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid(), schemaID(), label());
 
 			return false;
 		}
@@ -1441,17 +1441,6 @@ namespace Builder
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		AppFbParamValue dummy;
-
-		AppFbParamValue& i_lim_max = dummy;
-		AppFbParamValue& i_lim_min = dummy;
-
-		if (caption() == "limc_fp" || caption() == "limc_si")
-		{
-			i_lim_max = m_paramValuesArray["i_lim_max"];
-			i_lim_min = m_paramValuesArray["i_lim_min"];
-		}
-
 		CHECK_UNSIGNED_INT(i_conf);
 
 		m_runTime = 0;
@@ -1463,6 +1452,9 @@ namespace Builder
 
 			if (isConstLimiter == true)
 			{
+				AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+				AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+
 				CHECK_SIGNED_INT32(i_lim_max);
 				CHECK_SIGNED_INT32(i_lim_min);
 
@@ -1470,7 +1462,7 @@ namespace Builder
 				{
 					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 					//
-					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 
 					return false;
 				}
@@ -1483,6 +1475,9 @@ namespace Builder
 
 			if (isConstLimiter == true)
 			{
+				AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+				AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+
 				CHECK_FLOAT32(i_lim_max);
 				CHECK_FLOAT32(i_lim_min);
 
@@ -1490,7 +1485,7 @@ namespace Builder
 				{
 					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 					//
-					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 
 					return false;
 				}
@@ -1628,7 +1623,9 @@ namespace Builder
 		requiredParams.append("i_max");
 		requiredParams.append("i_min");
 
-		if (caption() == "derivc")
+		bool isConstDerivative = caption() == "derivc";
+
+		if (isConstDerivative == true)
 		{
 			requiredParams.append("i_kd");
 			requiredParams.append("i_td");
@@ -1636,7 +1633,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		if (caption() == "derivc")
+		if (isConstDerivative == true)
 		{
 			AppFbParamValue& i_kd = m_paramValuesArray["i_kd"];
 			AppFbParamValue& i_td = m_paramValuesArray["i_td"];
@@ -1669,7 +1666,7 @@ namespace Builder
 		{
 			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 			//
-			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid());
+			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid(), schemaID(), label());
 
 			return false;
 		}

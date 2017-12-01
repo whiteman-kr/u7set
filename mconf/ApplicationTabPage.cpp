@@ -8,6 +8,23 @@ ApplicationTabPage::ApplicationTabPage(QWidget *parent)
 	ui.setupUi(this);
 
 	connect(ui.openButton, &QAbstractButton::clicked, this, &ApplicationTabPage::openFileClicked);
+
+
+	QStringList l;
+	l << tr("UartID");
+	l << tr("Type");
+	l << tr("Upload Count");
+
+	ui.firmwareListWidget->setColumnCount(l.size());
+	ui.firmwareListWidget->setHeaderLabels(l);
+
+	int il = 0;
+	ui.firmwareListWidget->setColumnWidth(il++, 80);
+	ui.firmwareListWidget->setColumnWidth(il++, 140);
+	ui.firmwareListWidget->setColumnWidth(il++, 140);
+
+	ui.firmwareListWidget->setRootIsDecorated(false);
+
 }
 
 ApplicationTabPage::~ApplicationTabPage()
@@ -35,14 +52,11 @@ void ApplicationTabPage::openFileClicked()
 	fd.setFileMode(QFileDialog::ExistingFile);
 
 	QStringList filters;
-    filters << "Firmwares (*.mcb *.alb *.tub)"
-            << "Module configuration files (*.mcb)"
-			<< "Application logic files (*.alb)"
-            << "Tuning parameters files (*.tub)"
+	filters << "Bitstream files (*.bts)"
 			<< "All files (*.*)";
 
 	fd.setNameFilters(filters);
-	
+
 	if (fd.exec() == QDialog::Rejected)
 	{
 		return;
@@ -63,6 +77,8 @@ void ApplicationTabPage::openFileClicked()
 		return;
 	}
 
+	clearUartData();
+
 	QString errorCode;
 
 	bool result = m_confFirmware.load(fileName, errorCode);
@@ -82,9 +98,8 @@ void ApplicationTabPage::openFileClicked()
 	}
 
 	ui.fileNameEdit->setText(fileName);
-    ui.UartIdEdit->setText(QString::number(m_confFirmware.uartId(), 16));
-	
-    theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
+
+	theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
 
 	theLog.writeMessage(tr("File Version: %1").arg(m_confFirmware.fileVersion()));
 	theLog.writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
@@ -93,10 +108,89 @@ void ApplicationTabPage::openFileClicked()
 	theLog.writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
 	theLog.writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
 	theLog.writeMessage(tr("LM Description Number: %1").arg(m_confFirmware.lmDescriptionNumber()));
-	theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
-	theLog.writeMessage(tr("FrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
-	theLog.writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(m_confFirmware.frameSizeWithCRC())));
-	theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
+
+	fillUartData();
 
 	return;
 }
+
+void ApplicationTabPage::on_resetCountersButton_clicked()
+{
+
+	int count = ui.firmwareListWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = ui.firmwareListWidget->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		item->setData(2, Qt::UserRole, 0);
+		item->setText(2, "0");
+	}
+}
+
+void ApplicationTabPage::uploadSuccessful(int uartID)
+{
+	int count = ui.firmwareListWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = ui.firmwareListWidget->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		int itemUartId = item->data(0, Qt::UserRole).toInt();
+		if (uartID == itemUartId)
+		{
+			int itemUploadCount = item->data(2, Qt::UserRole).toInt();
+			itemUploadCount++;
+
+			item->setData(2, Qt::UserRole, itemUploadCount);
+			item->setText(2, QString::number(itemUploadCount));
+
+			break;
+		}
+	}
+
+	return;
+}
+
+
+void ApplicationTabPage::clearUartData()
+{
+	ui.firmwareListWidget->clear();
+}
+
+void ApplicationTabPage::fillUartData()
+{
+	std::vector<std::pair<int, QString>> uartList = m_confFirmware.uartList();
+
+	clearUartData();
+
+	for (auto it : uartList)
+	{
+		int uartID = it.first;
+		QString uartType = it.second;
+
+		QStringList l;
+		l << tr("%1h").arg(QString::number(uartID, 16));
+		l << uartType;
+		l << "0";
+
+		QTreeWidgetItem* item = new QTreeWidgetItem(l);
+
+		item->setData(0, Qt::UserRole, uartID);
+		item->setData(2, Qt::UserRole, 0);
+
+		ui.firmwareListWidget->addTopLevelItem(item);
+	}
+	ui.firmwareListWidget->sortByColumn(0, Qt::AscendingOrder);
+}
+
+
+

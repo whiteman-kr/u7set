@@ -220,6 +220,7 @@ typedef CONF_IDENTIFICATION_DATA_V2 CONF_IDENTIFICATION_DATA;	// Current version
 
 using namespace Hardware;
 
+Q_DECLARE_METATYPE(std::vector<UartPair>);
 //
 //	Configurator
 //
@@ -228,7 +229,7 @@ class Configurator : public QObject
 	Q_OBJECT
 
 public:
-        Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
+	Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
 	virtual ~Configurator();
 	
 	void cancelOperation();
@@ -257,10 +258,10 @@ public slots:
 	void readConfiguration(int param);
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
-	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName);
+	void showBinaryFileInfo(const QString& fileName);
+	void uploadBinaryFile(const QString& fileName);
 
-	void writeConfData(ModuleFirmware* conf);
+	void uploadConfData(ModuleFirmware* conf);
 	void readFirmware(const QString &fileName);
 	void eraseFlashMemory(int param);
 
@@ -270,6 +271,9 @@ signals:
 	void communicationStarted();
 	void communicationFinished();
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
+
+	void loadHeaderComplete(std::vector<UartPair> uartList);
+	void uploadSuccessful(int uartID);
 
 public:
 	// Properties
@@ -299,7 +303,8 @@ private:
 	volatile bool m_cancelFlag = false;
 
 	bool m_verify = true;
-};
 
+	int m_currentUartId = -1;
+};
 
 #endif // CONFIGURATOR_H

@@ -32,7 +32,6 @@ public:
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
-	void fileTypeChanged(const QString& s);
 	void findSubsystemsInBuild(int index);
 	void subsystemChanged(int index);
 
@@ -72,6 +71,13 @@ public slots:
 private:
 	void writeLog(const OutputLogItem& logItem);
 
+private slots:
+
+	void clearUartData();
+	void resetUartData();
+	void loadHeaderComplete(std::vector<UartPair> uartList);
+	void uploadSuccessful(int uartID);
+
 	// Data
 	//
 private:
@@ -80,7 +86,7 @@ private:
 	QListWidget* m_pBuildList = nullptr;
 	QListWidget* m_pSubsystemList = nullptr;
 	QComboBox* m_pConfigurationCombo = nullptr;
-	QComboBox* m_pFileTypeCombo = nullptr;
+	QTreeWidget* m_pFirmwareListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
@@ -110,5 +116,6 @@ private:
 
 	bool m_uploading = false;
 };
+
 
 

@@ -201,6 +201,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0183.sql", "Upgrade to version 183, Removed some signals from Platform Interface Controller in in-out modules and OCM/OCMN"},
 	{":/DatabaseUpgrade/Upgrade0184.sql", "Upgrade to version 184, Updated LM1_SF00.xml, LM1_SR01.xml, added pins for components"},
 	{":/DatabaseUpgrade/Upgrade0185.sql", "Upgrade to version 185, Updated LM1_SR01.xml, set IDR phase to 500, ALP phase to 3500"},
+	{":/DatabaseUpgrade/Upgrade0186.sql", "Upgrade to version 186, Configuration scripts update, ModuleFirmware functions review "},
 };
 
 

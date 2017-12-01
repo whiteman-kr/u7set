@@ -579,10 +579,6 @@ namespace Builder
 		UalSignal* get(QUuid pinUuid) const { return m_pinToSignalMap.value(pinUuid, nullptr); }
 		bool contains(QUuid pinUuid) const { return m_pinToSignalMap.contains(pinUuid); }
 
-		bool insertUalSignal(const UalItem* appItem);
-		bool insertNonBusAutoSignal(const UalAfb* appFb, const LogicPin& outputPin);
-		bool insertBusAutoSignal(const UalItem* appItem, const LogicPin& outputPin, BusShared bus);
-
 		void clear();
 
 		bool getReport(QStringList& report) const;
