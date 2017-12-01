@@ -4893,6 +4893,57 @@ namespace Builder
 						arg(signalEquipmentID).arg(schemaID).arg(itemLabel));
 	}
 
+	/// IssueCode: ALC5134
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Integer constant value out of range (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5134,
+				  QString(tr("Integer constant value out of range %1..%2 (Logic schema %3, item %4).")).
+						arg(std::numeric_limits<qint32>::min()).
+						arg(std::numeric_limits<qint32>::max()).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5135
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Float constant value out of range (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5135,
+				  QString(tr("Float constant value out of range %1..%2 (Logic schema %3, item %4).")).
+						arg(std::numeric_limits<float>::min()).
+						arg(std::numeric_limits<float>::max()).
+						arg(schemaID).arg(itemLabel));
+	}
+
+
 	//
 
 	/// IssueCode: ALC5186
