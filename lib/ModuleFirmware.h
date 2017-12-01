@@ -53,8 +53,14 @@ namespace Hardware
 				  QString buildConfig,
 				  int changesetId);
 
-		bool loadHeader(QString fileName, QString &errorCode);
-		bool load(QString fileName, QString &errorCode);
+		bool load(QString fileName, QString* errorCode);
+		bool load(const QByteArray& data, QString* errorCode);
+
+		bool loadHeader(QString fileName, QString* errorCode);
+
+	private:
+		bool parse(const QByteArray& data, bool readDataFrames, QString* errorCode);
+		bool parse_version1(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode);
 
 		// Data access
 		//
@@ -63,7 +69,7 @@ namespace Hardware
 
 		std::vector<UartPair> uartList() const;
 
-		bool uartExists(E::UartID) const;
+		bool uartExists(E::UartID uartId) const;
 		bool uartExists(int uartId) const;
 
 		int eepromFramePayloadSize(E::UartID uartId) const;
@@ -75,7 +81,7 @@ namespace Hardware
 		int eepromFrameCount(E::UartID uartId) const;
 		int eepromFrameCount(int uartId) const;
 
-		const std::vector<quint8>& frame(E::UartID, int frameIndex) const;
+		const std::vector<quint8>& frame(E::UartID uartId, int frameIndex) const;
 		const std::vector<quint8>& frame(int uartId, int frameIndex) const;
 
 		// Properties, for access from JS it is "public slots"
@@ -94,10 +100,6 @@ namespace Hardware
 		int buildNumber() const;
 		QString buildConfig() const;
 		int lmDescriptionNumber() const;
-
-	private:
-		bool loadFromFile(QString fileName, QString& errorCode, bool readDataFrames);
-		bool load_version1(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
 
 		// Data
 		//

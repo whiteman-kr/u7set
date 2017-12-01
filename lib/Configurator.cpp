@@ -1590,17 +1590,15 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 	m_Log->writeMessage(tr("File: %1").arg(fileName));
 
 	QString errorCode;
-
-
 	bool result = false;
 
 	if (writeToFlash == true)
 	{
-		result = confFirmware.load(fileName, errorCode);
+		result = confFirmware.load(fileName, &errorCode);
 	}
 	else
 	{
-		result = confFirmware.loadHeader(fileName, errorCode);
+		result = confFirmware.loadHeader(fileName, &errorCode);
 	}
 
 	if (result == false)

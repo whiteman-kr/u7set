@@ -80,8 +80,7 @@ void ApplicationTabPage::openFileClicked()
 	clearUartData();
 
 	QString errorCode;
-
-	bool result = m_confFirmware.load(fileName, errorCode);
+	bool result = m_confFirmware.load(fileName, &errorCode);
 
 	if (result == false)
 	{
