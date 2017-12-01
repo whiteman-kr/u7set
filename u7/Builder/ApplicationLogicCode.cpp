@@ -1391,7 +1391,7 @@ namespace Builder
 			cmdStr += QString("%1 ").arg(codeWordStr);
 		}
 
-		int tabLen = 32 - (cmdStr.length() - 1 + 4);
+		int tabLen = 32 - (cmdStr.length() - 1 + 3);
 
 		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 
