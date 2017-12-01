@@ -11,7 +11,7 @@
 #include "../lib/Factory.h"
 #include "../lib/Types.h"
 #include "../lib/ProtoSerialization.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 
 class DbController;
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "MainTabPage.h"
 #include "../lib/OutputLog.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "../lib/Configurator.h"
 #include "Builder/IssueLogger.h"
 

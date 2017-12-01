@@ -78,7 +78,7 @@ SOURCES += \
     ../lib/Crc.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
-    ../lib/ModuleConfiguration.cpp \
+    ../lib/ModuleFirmware.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/SocketIO.cpp \
@@ -146,7 +146,7 @@ HEADERS  += \
     ../lib/Factory.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ModuleConfiguration.h \
+    ../lib/ModuleFirmware.h \
     ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/OrderedHash.h \

@@ -1,6 +1,6 @@
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "../lib/Crc.h"
-#include "../lib/CUtils.h"
+#include "../lib/Types.h"
 #include <QMap>
 #include <QHash>
 #include <QtEndian>
@@ -35,6 +35,7 @@ namespace Hardware
 
 		ModuleFirmwareData data;
 
+		data.uartId = uartId;
 		data.uartType = E::valueToString<E::UartID>(uartId);
 		data.frameSize = frameSize;
 		data.frameSizeWithCRC = frameSize + sizeof(quint64);
@@ -83,7 +84,7 @@ namespace Hardware
 		return m_firmwareData.find(uartId) != m_firmwareData.end();
 	}
 
-	int ModuleFirmware::frameSize(int uartId) const
+	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
@@ -95,7 +96,7 @@ namespace Hardware
 		return it->second.frameSize;
 	}
 
-	int ModuleFirmware::frameSizeWithCRC(int uartId) const
+	int ModuleFirmware::eepromFrameSize(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
@@ -107,7 +108,7 @@ namespace Hardware
 		return it->second.frameSizeWithCRC;
 	}
 
-	int ModuleFirmware::frameCount(int uartId) const
+	int ModuleFirmware::eepromFrameCount(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
@@ -119,19 +120,19 @@ namespace Hardware
 		return static_cast<int>(it->second.frames.size());
 	}
 
-	const std::vector<quint8> ModuleFirmware::frame(int uartId, int frameIndex) const
+	const std::vector<quint8>& ModuleFirmware::frame(int uartId, int frameIndex) const
 	{
-		if (frameIndex < 0 || frameIndex >= frameCount(uartId))
+		if (frameIndex < 0 || frameIndex >= eepromFrameCount(uartId))
 		{
-			assert(frameIndex >= 0 && frameIndex < frameCount(uartId));
-			return std::vector<quint8>();
+			assert(frameIndex >= 0 && frameIndex < eepromFrameCount(uartId));
+			return m_emptyVector;
 		}
 
 		auto it = m_firmwareData.find(uartId);
 		if (it == m_firmwareData.end())
 		{
 			assert(false);
-			return std::vector<quint8>();
+			return m_emptyVector;
 		}
 
 		return it->second.frames[frameIndex];
@@ -224,7 +225,7 @@ namespace Hardware
 		}
 		else
 		{
-			m_fileVersion = (int)jConfig.value("fileVersion").toInt();
+			m_fileVersion = jConfig.value("fileVersion").toInt();
 		}
 
 		switch (m_fileVersion)
@@ -280,7 +281,7 @@ namespace Hardware
 		}
 		else
 		{
-			m_buildNumber = (int)jConfig.value("buildNumber").toDouble();
+			m_buildNumber = jConfig.value("buildNumber").toInt();
 		}
 
 		if (jConfig.value("lmDescriptionNumber").isUndefined() == true)
@@ -289,14 +290,14 @@ namespace Hardware
 		}
 		else
 		{
-			m_lmDescriptionNumber = (int)jConfig.value("lmDescriptionNumber").toDouble();
+			m_lmDescriptionNumber = jConfig.value("lmDescriptionNumber").toInt();
 		}
 
 		if (jConfig.value("changesetId").isUndefined() == true)
 		{
 			return false;
 		}
-		m_changesetId = (int)jConfig.value("changesetId").toDouble();
+		m_changesetId = jConfig.value("changesetId").toInt();
 
 		//
 
@@ -304,7 +305,7 @@ namespace Hardware
 		{
 			return false;
 		}
-		int firmwaresCount = (int)jConfig.value("firmwaresCount").toDouble();
+		int firmwaresCount = jConfig.value("firmwaresCount").toInt();
 
 		for (int f = 0; f < firmwaresCount; f++)
 		{
@@ -321,7 +322,7 @@ namespace Hardware
 			{
 				return false;
 			}
-			int framesCount = (int)jFirmwareObject.value("framesCount").toDouble();
+			int framesCount = jFirmwareObject.value("framesCount").toInt();
 
 			//
 
@@ -331,9 +332,9 @@ namespace Hardware
 			{
 				return false;
 			}
-			data.frameSize = (int)jFirmwareObject.value("frameSize").toDouble();
+			data.frameSize = jFirmwareObject.value("frameSize").toInt();
 
-			data.frameSizeWithCRC = (int)jFirmwareObject.value("frameSizeWithCRC").toDouble();
+			data.frameSizeWithCRC = jFirmwareObject.value("frameSizeWithCRC").toInt();
 
 			if (data.frameSizeWithCRC <= data.frameSize)
 			{
@@ -345,7 +346,7 @@ namespace Hardware
 			{
 				return false;
 			}
-			int uartId = (int)jFirmwareObject.value("uartId").toDouble();
+			data.uartId = jFirmwareObject.value("uartId").toInt();
 
 			if (jFirmwareObject.value("uartType").isUndefined() == true)
 			{
@@ -446,7 +447,7 @@ namespace Hardware
 				}
 			}
 
-			m_firmwareData[uartId] = data;
+			m_firmwareData[data.uartId] = data;
 		}
 
 		return true;

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../lib/ProtoSerialization.h"
-#include "../lib/DeviceObject.h"
-
 // ----------------------------------------------------------------------------
 //
 //						Module Configuration
@@ -19,6 +16,7 @@ namespace Hardware
 		int frameSize = 0;
 		int frameSizeWithCRC = 0;
 
+		int uartId = -1;
 		QString uartType;
 
 		// binary data
@@ -39,7 +37,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(int uartId, int frameSize, int frameCount, QString caption, QString subsysId, int ssKey, int lmDescriptionNumber, const QString &projectName,
+		void init(int uartId, int eepromFramePayloadSize, int eepromFrameCount, QString caption, QString subsysId, int ssKey, int lmDescriptionNumber, const QString &projectName,
 				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId);
 
 		bool loadHeader(QString fileName, QString &errorCode);
@@ -52,10 +50,10 @@ namespace Hardware
 		std::vector<UartPair> uartList() const;
 		bool uartExists(int uartId) const;
 
-		int frameSize(int uartId) const;
-		int frameSizeWithCRC(int uartId) const;
-		int frameCount(int uartId) const;
-		const std::vector<quint8> frame(int uartId, int frameIndex) const;
+		int eepromFramePayloadSize(int uartId) const;
+		int eepromFrameSize(int uartId) const;
+		int eepromFrameCount(int uartId) const;
+		const std::vector<quint8>& frame(int uartId, int frameIndex) const;
 
 		// Properties
 		//
@@ -99,6 +97,10 @@ namespace Hardware
 		// Frame data map, key is uartID
 		//
 		std::map<int, ModuleFirmwareData> m_firmwareData;
+
+		// An empty vector, returned by ModuleFirmware::frame in error case
+		//
+		std::vector<quint8> m_emptyVector;
 
 	};
 }
