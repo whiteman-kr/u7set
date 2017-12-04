@@ -432,6 +432,19 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 			return nodeText.toUInt();
 		};
 
+	auto getSectionBoolDefaultValue =
+		[&element](QLatin1String section, bool defaultValue) -> bool
+		{
+			QDomNodeList nl = element.elementsByTagName(section);
+			if (nl.size() != 1)
+			{
+				return defaultValue;
+			}
+
+			QString nodeText = nl.at(0).toElement().text();
+			return nodeText.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		};
+
 	// Getting data
 	//
 
@@ -440,14 +453,17 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	m_appLogicFrameCount = getSectionUintValue(QLatin1String("AppLogicFrameCount"), errorMessage);
 	m_appLogicFrameSize = getSectionUintValue(QLatin1String("AppLogicFrameSize"), errorMessage);
 	m_appLogicUartId = getSectionUintDefaultValue(QLatin1String("AppLogicUartID"), 0);
+	m_appLogicWriteBitstream = getSectionBoolDefaultValue(QLatin1String("AppLogicWriteBitstream"), false);
 
 	m_configFrameCount = getSectionUintValue(QLatin1String("ConfigFrameCount"), errorMessage);
 	m_configFrameSize = getSectionUintValue(QLatin1String("ConfigFrameSize"), errorMessage);
 	m_configUartId = getSectionUintDefaultValue(QLatin1String("ConfigUartID"), 0);
+	m_configWriteBitstream = getSectionBoolDefaultValue(QLatin1String("ConfigWriteBitstream"), false);
 
 	m_tuningFrameCount = getSectionUintValue(QLatin1String("TuningFrameCount"), errorMessage);
 	m_tuningFrameSize = getSectionUintValue(QLatin1String("TuningFrameSize"), errorMessage);
 	m_tuningUartId = getSectionUintDefaultValue(QLatin1String("TuningUartID"), 0);
+	m_tuningWriteBitstream = getSectionBoolDefaultValue(QLatin1String("TuningWriteBitstream"), false);
 
 	return errorMessage->isEmpty();
 }

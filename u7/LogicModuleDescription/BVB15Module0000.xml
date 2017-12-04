@@ -4,12 +4,15 @@
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
 		<AppLogicUartID>0</AppLogicUartID>
+		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
 		<ConfigFrameCount>256</ConfigFrameCount>
 		<ConfigFrameSize>1016</ConfigFrameSize>
 		<ConfigUartID>5636</ConfigUartID>
+		<ConfigWriteBitstream>true</ConfigWriteBitstream>
 		<TuningFrameCount>0</TuningFrameCount>
 		<TuningFrameSize>0</TuningFrameSize>
 		<TuningUartID>0</TuningUartID>
+		<TuningWriteBitstream>false</TuningWriteBitstream>
 	</FlashMemory>
 	<Memory>
 		<CodeMemorySize>65536</CodeMemorySize>
