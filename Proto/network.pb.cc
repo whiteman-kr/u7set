@@ -94,9 +94,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetServiceInfoReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetServiceInfoReply_reflection_ = NULL;
-const ::google::protobuf::Descriptor* TcpClientIntroduceMyself_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* TcpSoftwareInfo_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  TcpClientIntroduceMyself_reflection_ = NULL;
+  TcpSoftwareInfo_reflection_ = NULL;
 const ::google::protobuf::Descriptor* ConfigurationServiceState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ConfigurationServiceState_reflection_ = NULL;
@@ -555,25 +555,27 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetServiceInfoReply));
-  TcpClientIntroduceMyself_descriptor_ = file->message_type(21);
-  static const int TcpClientIntroduceMyself_offsets_[5] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpClientIntroduceMyself, softwaretype_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpClientIntroduceMyself, equipmentid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpClientIntroduceMyself, majorversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpClientIntroduceMyself, minorversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpClientIntroduceMyself, commitno_),
+  TcpSoftwareInfo_descriptor_ = file->message_type(21);
+  static const int TcpSoftwareInfo_offsets_[7] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, softwaretype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, equipmentid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, majorversion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, minorversion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, commitno_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, username_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, buildno_),
   };
-  TcpClientIntroduceMyself_reflection_ =
+  TcpSoftwareInfo_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      TcpClientIntroduceMyself_descriptor_,
-      TcpClientIntroduceMyself::default_instance_,
-      TcpClientIntroduceMyself_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpClientIntroduceMyself, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpClientIntroduceMyself, _unknown_fields_),
+      TcpSoftwareInfo_descriptor_,
+      TcpSoftwareInfo::default_instance_,
+      TcpSoftwareInfo_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(TcpClientIntroduceMyself));
+      sizeof(TcpSoftwareInfo));
   ConfigurationServiceState_descriptor_ = file->message_type(22);
   static const int ConfigurationServiceState_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationServiceState, currentbuilddirectory_),
@@ -1143,7 +1145,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetServiceInfoReply_descriptor_, &GetServiceInfoReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    TcpClientIntroduceMyself_descriptor_, &TcpClientIntroduceMyself::default_instance());
+    TcpSoftwareInfo_descriptor_, &TcpSoftwareInfo::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ConfigurationServiceState_descriptor_, &ConfigurationServiceState::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1247,8 +1249,8 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete ServiceInfo_reflection_;
   delete GetServiceInfoReply::default_instance_;
   delete GetServiceInfoReply_reflection_;
-  delete TcpClientIntroduceMyself::default_instance_;
-  delete TcpClientIntroduceMyself_reflection_;
+  delete TcpSoftwareInfo::default_instance_;
+  delete TcpSoftwareInfo_reflection_;
   delete ConfigurationServiceState::default_instance_;
   delete ConfigurationServiceState_reflection_;
   delete ConfigurationServiceClientInfo::default_instance_;
@@ -1368,116 +1370,116 @@ void protobuf_AddDesc_network_2eproto() {
     "ntRequestPort\030\n \001(\005:\0010\022\023\n\013buildBranch\030\013 "
     "\001(\t\022\021\n\tcommitSHA\030\014 \001(\t\"R\n\023GetServiceInfo"
     "Reply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serviceInfo\030\002"
-    " \002(\0132\024.Network.ServiceInfo\"\203\001\n\030TcpClient"
-    "IntroduceMyself\022\024\n\014softwareType\030\001 \002(\005\022\023\n"
-    "\013equipmentId\030\002 \002(\t\022\024\n\014majorVersion\030\003 \002(\005"
-    "\022\024\n\014minorVersion\030\004 \002(\005\022\020\n\010commitNo\030\005 \002(\005"
-    "\"x\n\031ConfigurationServiceState\022\035\n\025current"
-    "BuildDirectory\030\001 \002(\t\022!\n\031checkBuildAttemp"
-    "tQuantity\030\002 \002(\005\022\031\n\021buildCheckerState\030\003 \002"
-    "(\005\"\316\001\n\036ConfigurationServiceClientInfo\022\024\n"
-    "\014softwareType\030\001 \002(\005\022\023\n\013equipmentId\030\002 \002(\t"
-    "\022\n\n\002ip\030\003 \002(\005\022\016\n\006uptime\030\005 \002(\003\022\020\n\010isActual"
-    "\030\006 \002(\010\022\025\n\rreplyQuantity\030\007 \002(\003\022\024\n\014majorVe"
-    "rsion\030\010 \002(\005\022\024\n\014minorVersion\030\t \002(\005\022\020\n\010com"
-    "mitNo\030\n \002(\005\"W\n\033ConfigurationServiceClien"
-    "ts\0228\n\007clients\030\001 \003(\0132\'.Network.Configurat"
-    "ionServiceClientInfo\"\213\001\n\tBuildInfo\022\017\n\007pr"
-    "oject\030\001 \002(\t\022\016\n\002id\030\002 \002(\005:\002-1\022\026\n\007release\030\003"
-    " \002(\010:\005false\022\014\n\004date\030\004 \002(\003\022\024\n\tchangeset\030\005"
-    " \002(\005:\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workstation\030\007 \002"
-    "(\t\"e\n\034ConfigurationServiceSettings\022\023\n\013eq"
-    "uipmentID\030\001 \002(\t\022\031\n\021autoloadBuildPath\030\002 \002"
-    "(\t\022\025\n\rworkDirectory\030\003 \002(\t\"\026\n\024GetTuningSo"
-    "urcesInfo\"`\n\031GetTuningSourcesInfoReply\022\020"
-    "\n\005error\030\001 \001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003"
-    "(\0132\027.Network.DataSourceInfo\"\030\n\026GetTuning"
-    "SourcesStates\"\345\t\n\021TuningSourceState\022\023\n\010s"
-    "ourceID\030\001 \001(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005false"
-    "\022\027\n\014requestCount\030\003 \001(\003:\0010\022\025\n\nreplyCount\030"
-    "\004 \001(\003:\0010\022\033\n\020commandQueueSize\030\005 \001(\005:\0010\022\034\n"
-    "\021errUntimelyReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030\007"
-    " \001(\003:\0010\022\031\n\016errPartialSent\030\010 \001(\003:\0010\022\027\n\014er"
-    "rReplySize\030\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:"
-    "\0010\022 \n\025errRupProtocolVersion\030\013 \001(\003:\0010\022\032\n\017"
-    "errRupFrameSize\030\014 \001(\003:\0010\022\036\n\023errRupNonTun"
-    "ingData\030\r \001(\003:\0010\022\033\n\020errRupModuleType\030\016 \001"
-    "(\003:\0010\022\037\n\024errRupFramesQuantity\030\017 \001(\003:\0010\022\034"
-    "\n\021errRupFrameNumber\030\020 \001(\003:\0010\022\"\n\027errFotip"
-    "ProtocolVersion\030\021 \001(\003:\0010\022\033\n\020errFotipUniq"
-    "ueID\030\022 \001(\003:\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003:"
-    "\0010\022 \n\025errFotipSubsystemCode\030\024 \001(\003:\0010\022 \n\025"
-    "errFotipOperationCode\030\025 \001(\003:\0010\022\034\n\021errFot"
-    "ipFrameSize\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize\030"
-    "\027 \001(\003:\0010\022\037\n\024errFotipRomFrameSize\030\030 \001(\003:\001"
-    "0\022&\n\033fotipFlagBoundsCheckSuccess\030\031 \001(\003:\001"
-    "0\022 \n\025fotipFlagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024f"
-    "otipFlagDataTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFla"
-    "gOpCodeErr\030\034 \001(\003:\0010\022 \n\025fotipFlagStartAdd"
-    "rErr\030\035 \001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030\036 \001"
-    "(\003:\0010\022#\n\030fotipFlagRomFrameSizeErr\030\037 \001(\003:"
-    "\0010\022 \n\025fotipFlagFrameSizeErr\030  \001(\003:\0010\022&\n\033"
-    "fotipFlagProtocolVersionErr\030! \001(\003:\0010\022#\n\030"
-    "fotipFlagSubsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fot"
-    "ipFlagUniueIDErr\030# \001(\003:\0010\022\035\n\022fotipFlagOf"
-    "fsetErr\030$ \001(\003:\0010\022 \n\025fotipFlagApplySucces"
-    "s\030% \001(\003:\0010\022\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022!"
-    "\n\026errAnalogLowBoundCheck\030\' \001(\003:\0010\022\"\n\027err"
-    "AnalogHighBoundCheck\030( \001(\003:\0010\"g\n\033GetTuni"
-    "ngSourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0226"
-    "\n\022tuningSourcesState\030\002 \003(\0132\032.Network.Tun"
-    "ingSourceState\"\'\n\021TuningSignalsRead\022\022\n\ns"
-    "ignalHash\030\002 \003(\004\"_\n\013TuningValue\022\014\n\004type\030\001"
-    " \001(\005\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030"
-    "\003 \001(\002:\0010\022\026\n\013doubleValue\030\004 \001(\001:\0010\"\243\002\n\021Tun"
-    "ingSignalState\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n"
-    "\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022#\n"
-    "\005value\030\004 \001(\0132\024.Network.TuningValue\022*\n\014re"
-    "adLowBound\030\005 \001(\0132\024.Network.TuningValue\022+"
-    "\n\rreadHighBound\030\006 \001(\0132\024.Network.TuningVa"
-    "lue\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031\n\016w"
-    "riteErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t "
-    "\001(\006:\0010\"a\n\026TuningSignalsReadReply\022\020\n\005erro"
-    "r\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003(\0132\032."
-    "Network.TuningSignalState\"P\n\022TuningWrite"
-    "Command\022\025\n\nsignalHash\030\001 \001(\004:\0010\022#\n\005value\030"
-    "\002 \001(\0132\024.Network.TuningValue\"]\n\022TuningSig"
-    "nalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005false\022-\n\010c"
-    "ommands\030\003 \003(\0132\033.Network.TuningWriteComma"
-    "nd\"B\n\027TuningSignalWriteResult\022\025\n\nsignalH"
-    "ash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027Tuning"
-    "SignalsWriteReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013w"
-    "riteResult\030\002 \003(\0132 .Network.TuningSignalW"
-    "riteResult\"/\n\022TuningSignalsApply\022\031\n\021clie"
-    "ntEquipmentID\030\001 \001(\t\"+\n\027TuningSignalsAppl"
-    "yReply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSigna"
-    "lsStatesToArchiveRequest\022\031\n\021clientEquipm"
-    "entID\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.P"
-    "roto.AppSignalState\"N\n\"SaveAppSignalsSta"
-    "tesToArchiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\ta"
-    "rchError\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStat"
-    "esFromArchiveStartRequest\022\031\n\021clientEquip"
-    "mentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tsta"
-    "rtTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014s"
-    "ignalHashes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001("
-    "\010:\004true\"~\n\'GetAppSignalStatesFromArchive"
-    "StartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchErro"
-    "r\030\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\treq"
-    "uestID\030\003 \001(\r:\0010\"@\n(GetAppSignalStatesFro"
-    "mArchiveNextRequest\022\024\n\trequestID\030\001 \001(\r:\001"
-    "0\"\271\002\n&GetAppSignalStatesFromArchiveNextR"
-    "eply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001("
-    "\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorStr"
-    "ing\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020t"
-    "otalStatesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCo"
-    "unt\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:"
-    "\0010\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017appSign"
-    "alStates\030\t \003(\0132\025.Proto.AppSignalState\"B\n"
-    "*GetAppSignalStatesFromArchiveCancelRequ"
-    "est\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAppSigna"
-    "lStatesFromArchiveCancelReply\022\020\n\005error\030\001"
-    " \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013error"
-    "String\030\003 \001(\t", 6492);
+    " \002(\0132\024.Network.ServiceInfo\"\235\001\n\017TcpSoftwa"
+    "reInfo\022\024\n\014softwareType\030\001 \002(\005\022\023\n\013equipmen"
+    "tId\030\002 \002(\t\022\024\n\014majorVersion\030\003 \002(\005\022\024\n\014minor"
+    "Version\030\004 \002(\005\022\020\n\010commitNo\030\005 \002(\005\022\020\n\010userN"
+    "ame\030\006 \002(\t\022\017\n\007buildNo\030\007 \002(\005\"x\n\031Configurat"
+    "ionServiceState\022\035\n\025currentBuildDirectory"
+    "\030\001 \002(\t\022!\n\031checkBuildAttemptQuantity\030\002 \002("
+    "\005\022\031\n\021buildCheckerState\030\003 \002(\005\"\316\001\n\036Configu"
+    "rationServiceClientInfo\022\024\n\014softwareType\030"
+    "\001 \002(\005\022\023\n\013equipmentId\030\002 \002(\t\022\n\n\002ip\030\003 \002(\005\022\016"
+    "\n\006uptime\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010\022\025\n\rrepl"
+    "yQuantity\030\007 \002(\003\022\024\n\014majorVersion\030\010 \002(\005\022\024\n"
+    "\014minorVersion\030\t \002(\005\022\020\n\010commitNo\030\n \002(\005\"W\n"
+    "\033ConfigurationServiceClients\0228\n\007clients\030"
+    "\001 \003(\0132\'.Network.ConfigurationServiceClie"
+    "ntInfo\"\213\001\n\tBuildInfo\022\017\n\007project\030\001 \002(\t\022\016\n"
+    "\002id\030\002 \002(\005:\002-1\022\026\n\007release\030\003 \002(\010:\005false\022\014\n"
+    "\004date\030\004 \002(\003\022\024\n\tchangeset\030\005 \002(\005:\0010\022\014\n\004use"
+    "r\030\006 \002(\t\022\023\n\013workstation\030\007 \002(\t\"e\n\034Configur"
+    "ationServiceSettings\022\023\n\013equipmentID\030\001 \002("
+    "\t\022\031\n\021autoloadBuildPath\030\002 \002(\t\022\025\n\rworkDire"
+    "ctory\030\003 \002(\t\"\026\n\024GetTuningSourcesInfo\"`\n\031G"
+    "etTuningSourcesInfoReply\022\020\n\005error\030\001 \001(\005:"
+    "\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Network.D"
+    "ataSourceInfo\"\030\n\026GetTuningSourcesStates\""
+    "\345\t\n\021TuningSourceState\022\023\n\010sourceID\030\001 \001(\004:"
+    "\0010\022\026\n\007isReply\030\002 \001(\010:\005false\022\027\n\014requestCou"
+    "nt\030\003 \001(\003:\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020co"
+    "mmandQueueSize\030\005 \001(\005:\0010\022\034\n\021errUntimelyRe"
+    "play\030\006 \001(\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016err"
+    "PartialSent\030\010 \001(\003:\0010\022\027\n\014errReplySize\030\t \001"
+    "(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:\0010\022 \n\025errRupPr"
+    "otocolVersion\030\013 \001(\003:\0010\022\032\n\017errRupFrameSiz"
+    "e\030\014 \001(\003:\0010\022\036\n\023errRupNonTuningData\030\r \001(\003:"
+    "\0010\022\033\n\020errRupModuleType\030\016 \001(\003:\0010\022\037\n\024errRu"
+    "pFramesQuantity\030\017 \001(\003:\0010\022\034\n\021errRupFrameN"
+    "umber\030\020 \001(\003:\0010\022\"\n\027errFotipProtocolVersio"
+    "n\030\021 \001(\003:\0010\022\033\n\020errFotipUniqueID\030\022 \001(\003:\0010\022"
+    "\033\n\020errFotipLmNumber\030\023 \001(\003:\0010\022 \n\025errFotip"
+    "SubsystemCode\030\024 \001(\003:\0010\022 \n\025errFotipOperat"
+    "ionCode\030\025 \001(\003:\0010\022\034\n\021errFotipFrameSize\030\026 "
+    "\001(\003:\0010\022\032\n\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n\024er"
+    "rFotipRomFrameSize\030\030 \001(\003:\0010\022&\n\033fotipFlag"
+    "BoundsCheckSuccess\030\031 \001(\003:\0010\022 \n\025fotipFlag"
+    "WriteSuccess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTy"
+    "peErr\030\033 \001(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001"
+    "(\003:\0010\022 \n\025fotipFlagStartAddrErr\030\035 \001(\003:\0010\022"
+    "\036\n\023fotipFlagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fotip"
+    "FlagRomFrameSizeErr\030\037 \001(\003:\0010\022 \n\025fotipFla"
+    "gFrameSizeErr\030  \001(\003:\0010\022&\n\033fotipFlagProto"
+    "colVersionErr\030! \001(\003:\0010\022#\n\030fotipFlagSubsy"
+    "stemKeyErr\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDE"
+    "rr\030# \001(\003:\0010\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:"
+    "\0010\022 \n\025fotipFlagApplySuccess\030% \001(\003:\0010\022\032\n\017"
+    "fotipFlagSetSOR\030& \001(\003:\0010\022!\n\026errAnalogLow"
+    "BoundCheck\030\' \001(\003:\0010\022\"\n\027errAnalogHighBoun"
+    "dCheck\030( \001(\003:\0010\"g\n\033GetTuningSourcesState"
+    "sReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSource"
+    "sState\030\002 \003(\0132\032.Network.TuningSourceState"
+    "\"\'\n\021TuningSignalsRead\022\022\n\nsignalHash\030\002 \003("
+    "\004\"_\n\013TuningValue\022\014\n\004type\030\001 \001(\005\022\023\n\010intVal"
+    "ue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001(\002:\0010\022\026\n\013do"
+    "ubleValue\030\004 \001(\001:\0010\"\243\002\n\021TuningSignalState"
+    "\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\001"
+    "0\022\024\n\005valid\030\003 \001(\010:\005false\022#\n\005value\030\004 \001(\0132\024"
+    ".Network.TuningValue\022*\n\014readLowBound\030\005 \001"
+    "(\0132\024.Network.TuningValue\022+\n\rreadHighBoun"
+    "d\030\006 \001(\0132\024.Network.TuningValue\022\036\n\017writeIn"
+    "Progress\030\007 \001(\010:\005false\022\031\n\016writeErrorCode\030"
+    "\010 \001(\005:\0010\022\026\n\013writeClient\030\t \001(\006:\0010\"a\n\026Tuni"
+    "ngSignalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021"
+    "tuningSignalState\030\002 \003(\0132\032.Network.Tuning"
+    "SignalState\"P\n\022TuningWriteCommand\022\025\n\nsig"
+    "nalHash\030\001 \001(\004:\0010\022#\n\005value\030\002 \001(\0132\024.Networ"
+    "k.TuningValue\"]\n\022TuningSignalsWrite\022\030\n\ta"
+    "utoApply\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132"
+    "\033.Network.TuningWriteCommand\"B\n\027TuningSi"
+    "gnalWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020"
+    "\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteRe"
+    "ply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003"
+    "(\0132 .Network.TuningSignalWriteResult\"/\n\022"
+    "TuningSignalsApply\022\031\n\021clientEquipmentID\030"
+    "\001 \001(\t\"+\n\027TuningSignalsApplyReply\022\020\n\005erro"
+    "r\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStatesToArch"
+    "iveRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n"
+    "\017appSignalStates\030\002 \003(\0132\025.Proto.AppSignal"
+    "State\"N\n\"SaveAppSignalsStatesToArchiveRe"
+    "ply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005"
+    ":\003100\"\271\001\n)GetAppSignalStatesFromArchiveS"
+    "tartRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023"
+    "\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\001"
+    "0\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 "
+    "\003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\"~\n\'Get"
+    "AppSignalStatesFromArchiveStartReply\022\020\n\005"
+    "error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023"
+    "\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\001"
+    "0\"@\n(GetAppSignalStatesFromArchiveNextRe"
+    "quest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSi"
+    "gnalStatesFromArchiveNextReply\022\020\n\005error\030"
+    "\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequ"
+    "estID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\td"
+    "ataReady\030\004 \001(\010:\005false\022\033\n\020totalStatesCoun"
+    "t\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034"
+    "\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPa"
+    "rt\030\010 \001(\010:\005false\022.\n\017appSignalStates\030\t \003(\013"
+    "2\025.Proto.AppSignalState\"B\n*GetAppSignalS"
+    "tatesFromArchiveCancelRequest\022\024\n\trequest"
+    "ID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesFromArc"
+    "hiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarc"
+    "hError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001(\t", 6518);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -1501,7 +1503,7 @@ void protobuf_AddDesc_network_2eproto() {
   GetServiceInfoRequest::default_instance_ = new GetServiceInfoRequest();
   ServiceInfo::default_instance_ = new ServiceInfo();
   GetServiceInfoReply::default_instance_ = new GetServiceInfoReply();
-  TcpClientIntroduceMyself::default_instance_ = new TcpClientIntroduceMyself();
+  TcpSoftwareInfo::default_instance_ = new TcpSoftwareInfo();
   ConfigurationServiceState::default_instance_ = new ConfigurationServiceState();
   ConfigurationServiceClientInfo::default_instance_ = new ConfigurationServiceClientInfo();
   ConfigurationServiceClients::default_instance_ = new ConfigurationServiceClients();
@@ -1551,7 +1553,7 @@ void protobuf_AddDesc_network_2eproto() {
   GetServiceInfoRequest::default_instance_->InitAsDefaultInstance();
   ServiceInfo::default_instance_->InitAsDefaultInstance();
   GetServiceInfoReply::default_instance_->InitAsDefaultInstance();
-  TcpClientIntroduceMyself::default_instance_->InitAsDefaultInstance();
+  TcpSoftwareInfo::default_instance_->InitAsDefaultInstance();
   ConfigurationServiceState::default_instance_->InitAsDefaultInstance();
   ConfigurationServiceClientInfo::default_instance_->InitAsDefaultInstance();
   ConfigurationServiceClients::default_instance_->InitAsDefaultInstance();
@@ -8052,71 +8054,78 @@ void GetServiceInfoReply::Swap(GetServiceInfoReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TcpClientIntroduceMyself::kSoftwareTypeFieldNumber;
-const int TcpClientIntroduceMyself::kEquipmentIdFieldNumber;
-const int TcpClientIntroduceMyself::kMajorVersionFieldNumber;
-const int TcpClientIntroduceMyself::kMinorVersionFieldNumber;
-const int TcpClientIntroduceMyself::kCommitNoFieldNumber;
+const int TcpSoftwareInfo::kSoftwareTypeFieldNumber;
+const int TcpSoftwareInfo::kEquipmentIdFieldNumber;
+const int TcpSoftwareInfo::kMajorVersionFieldNumber;
+const int TcpSoftwareInfo::kMinorVersionFieldNumber;
+const int TcpSoftwareInfo::kCommitNoFieldNumber;
+const int TcpSoftwareInfo::kUserNameFieldNumber;
+const int TcpSoftwareInfo::kBuildNoFieldNumber;
 #endif  // !_MSC_VER
 
-TcpClientIntroduceMyself::TcpClientIntroduceMyself()
+TcpSoftwareInfo::TcpSoftwareInfo()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void TcpClientIntroduceMyself::InitAsDefaultInstance() {
+void TcpSoftwareInfo::InitAsDefaultInstance() {
 }
 
-TcpClientIntroduceMyself::TcpClientIntroduceMyself(const TcpClientIntroduceMyself& from)
+TcpSoftwareInfo::TcpSoftwareInfo(const TcpSoftwareInfo& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void TcpClientIntroduceMyself::SharedCtor() {
+void TcpSoftwareInfo::SharedCtor() {
   _cached_size_ = 0;
   softwaretype_ = 0;
   equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   majorversion_ = 0;
   minorversion_ = 0;
   commitno_ = 0;
+  username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  buildno_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-TcpClientIntroduceMyself::~TcpClientIntroduceMyself() {
+TcpSoftwareInfo::~TcpSoftwareInfo() {
   SharedDtor();
 }
 
-void TcpClientIntroduceMyself::SharedDtor() {
+void TcpSoftwareInfo::SharedDtor() {
   if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
     delete equipmentid_;
+  }
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    delete username_;
   }
   if (this != default_instance_) {
   }
 }
 
-void TcpClientIntroduceMyself::SetCachedSize(int size) const {
+void TcpSoftwareInfo::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* TcpClientIntroduceMyself::descriptor() {
+const ::google::protobuf::Descriptor* TcpSoftwareInfo::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return TcpClientIntroduceMyself_descriptor_;
+  return TcpSoftwareInfo_descriptor_;
 }
 
-const TcpClientIntroduceMyself& TcpClientIntroduceMyself::default_instance() {
+const TcpSoftwareInfo& TcpSoftwareInfo::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
   return *default_instance_;
 }
 
-TcpClientIntroduceMyself* TcpClientIntroduceMyself::default_instance_ = NULL;
+TcpSoftwareInfo* TcpSoftwareInfo::default_instance_ = NULL;
 
-TcpClientIntroduceMyself* TcpClientIntroduceMyself::New() const {
-  return new TcpClientIntroduceMyself;
+TcpSoftwareInfo* TcpSoftwareInfo::New() const {
+  return new TcpSoftwareInfo;
 }
 
-void TcpClientIntroduceMyself::Clear() {
+void TcpSoftwareInfo::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     softwaretype_ = 0;
     if (has_equipmentid()) {
@@ -8127,12 +8136,18 @@ void TcpClientIntroduceMyself::Clear() {
     majorversion_ = 0;
     minorversion_ = 0;
     commitno_ = 0;
+    if (has_username()) {
+      if (username_ != &::google::protobuf::internal::kEmptyString) {
+        username_->clear();
+      }
+    }
+    buildno_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
-bool TcpClientIntroduceMyself::MergePartialFromCodedStream(
+bool TcpSoftwareInfo::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -8214,6 +8229,39 @@ bool TcpClientIntroduceMyself::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(50)) goto parse_userName;
+        break;
+      }
+
+      // required string userName = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_userName:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_username()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->username().data(), this->username().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(56)) goto parse_buildNo;
+        break;
+      }
+
+      // required int32 buildNo = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_buildNo:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &buildno_)));
+          set_has_buildno();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -8234,7 +8282,7 @@ bool TcpClientIntroduceMyself::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void TcpClientIntroduceMyself::SerializeWithCachedSizes(
+void TcpSoftwareInfo::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // required int32 softwareType = 1;
   if (has_softwaretype()) {
@@ -8265,13 +8313,27 @@ void TcpClientIntroduceMyself::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->commitno(), output);
   }
 
+  // required string userName = 6;
+  if (has_username()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->username().data(), this->username().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->username(), output);
+  }
+
+  // required int32 buildNo = 7;
+  if (has_buildno()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->buildno(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
 }
 
-::google::protobuf::uint8* TcpClientIntroduceMyself::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* TcpSoftwareInfo::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // required int32 softwareType = 1;
   if (has_softwaretype()) {
@@ -8303,6 +8365,21 @@ void TcpClientIntroduceMyself::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->commitno(), target);
   }
 
+  // required string userName = 6;
+  if (has_username()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->username().data(), this->username().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->username(), target);
+  }
+
+  // required int32 buildNo = 7;
+  if (has_buildno()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->buildno(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -8310,7 +8387,7 @@ void TcpClientIntroduceMyself::SerializeWithCachedSizes(
   return target;
 }
 
-int TcpClientIntroduceMyself::ByteSize() const {
+int TcpSoftwareInfo::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -8349,6 +8426,20 @@ int TcpClientIntroduceMyself::ByteSize() const {
           this->commitno());
     }
 
+    // required string userName = 6;
+    if (has_username()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->username());
+    }
+
+    // required int32 buildNo = 7;
+    if (has_buildno()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->buildno());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -8361,10 +8452,10 @@ int TcpClientIntroduceMyself::ByteSize() const {
   return total_size;
 }
 
-void TcpClientIntroduceMyself::MergeFrom(const ::google::protobuf::Message& from) {
+void TcpSoftwareInfo::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const TcpClientIntroduceMyself* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const TcpClientIntroduceMyself*>(
+  const TcpSoftwareInfo* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TcpSoftwareInfo*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -8373,7 +8464,7 @@ void TcpClientIntroduceMyself::MergeFrom(const ::google::protobuf::Message& from
   }
 }
 
-void TcpClientIntroduceMyself::MergeFrom(const TcpClientIntroduceMyself& from) {
+void TcpSoftwareInfo::MergeFrom(const TcpSoftwareInfo& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_softwaretype()) {
@@ -8391,46 +8482,54 @@ void TcpClientIntroduceMyself::MergeFrom(const TcpClientIntroduceMyself& from) {
     if (from.has_commitno()) {
       set_commitno(from.commitno());
     }
+    if (from.has_username()) {
+      set_username(from.username());
+    }
+    if (from.has_buildno()) {
+      set_buildno(from.buildno());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void TcpClientIntroduceMyself::CopyFrom(const ::google::protobuf::Message& from) {
+void TcpSoftwareInfo::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void TcpClientIntroduceMyself::CopyFrom(const TcpClientIntroduceMyself& from) {
+void TcpSoftwareInfo::CopyFrom(const TcpSoftwareInfo& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool TcpClientIntroduceMyself::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000001f) != 0x0000001f) return false;
+bool TcpSoftwareInfo::IsInitialized() const {
+  if ((_has_bits_[0] & 0x0000007f) != 0x0000007f) return false;
 
   return true;
 }
 
-void TcpClientIntroduceMyself::Swap(TcpClientIntroduceMyself* other) {
+void TcpSoftwareInfo::Swap(TcpSoftwareInfo* other) {
   if (other != this) {
     std::swap(softwaretype_, other->softwaretype_);
     std::swap(equipmentid_, other->equipmentid_);
     std::swap(majorversion_, other->majorversion_);
     std::swap(minorversion_, other->minorversion_);
     std::swap(commitno_, other->commitno_);
+    std::swap(username_, other->username_);
+    std::swap(buildno_, other->buildno_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
 }
 
-::google::protobuf::Metadata TcpClientIntroduceMyself::GetMetadata() const {
+::google::protobuf::Metadata TcpSoftwareInfo::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = TcpClientIntroduceMyself_descriptor_;
-  metadata.reflection = TcpClientIntroduceMyself_reflection_;
+  metadata.descriptor = TcpSoftwareInfo_descriptor_;
+  metadata.reflection = TcpSoftwareInfo_reflection_;
   return metadata;
 }
 

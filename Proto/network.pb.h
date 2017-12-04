@@ -55,7 +55,7 @@ class GetUnitsReply;
 class GetServiceInfoRequest;
 class ServiceInfo;
 class GetServiceInfoReply;
-class TcpClientIntroduceMyself;
+class TcpSoftwareInfo;
 class ConfigurationServiceState;
 class ConfigurationServiceClientInfo;
 class ConfigurationServiceClients;
@@ -2375,14 +2375,14 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TcpClientIntroduceMyself : public ::google::protobuf::Message {
+class TcpSoftwareInfo : public ::google::protobuf::Message {
  public:
-  TcpClientIntroduceMyself();
-  virtual ~TcpClientIntroduceMyself();
+  TcpSoftwareInfo();
+  virtual ~TcpSoftwareInfo();
 
-  TcpClientIntroduceMyself(const TcpClientIntroduceMyself& from);
+  TcpSoftwareInfo(const TcpSoftwareInfo& from);
 
-  inline TcpClientIntroduceMyself& operator=(const TcpClientIntroduceMyself& from) {
+  inline TcpSoftwareInfo& operator=(const TcpSoftwareInfo& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2396,17 +2396,17 @@ class TcpClientIntroduceMyself : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TcpClientIntroduceMyself& default_instance();
+  static const TcpSoftwareInfo& default_instance();
 
-  void Swap(TcpClientIntroduceMyself* other);
+  void Swap(TcpSoftwareInfo* other);
 
   // implements Message ----------------------------------------------
 
-  TcpClientIntroduceMyself* New() const;
+  TcpSoftwareInfo* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TcpClientIntroduceMyself& from);
-  void MergeFrom(const TcpClientIntroduceMyself& from);
+  void CopyFrom(const TcpSoftwareInfo& from);
+  void MergeFrom(const TcpSoftwareInfo& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2469,7 +2469,26 @@ class TcpClientIntroduceMyself : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 commitno() const;
   inline void set_commitno(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:Network.TcpClientIntroduceMyself)
+  // required string userName = 6;
+  inline bool has_username() const;
+  inline void clear_username();
+  static const int kUserNameFieldNumber = 6;
+  inline const ::std::string& username() const;
+  inline void set_username(const ::std::string& value);
+  inline void set_username(const char* value);
+  inline void set_username(const char* value, size_t size);
+  inline ::std::string* mutable_username();
+  inline ::std::string* release_username();
+  inline void set_allocated_username(::std::string* username);
+
+  // required int32 buildNo = 7;
+  inline bool has_buildno() const;
+  inline void clear_buildno();
+  static const int kBuildNoFieldNumber = 7;
+  inline ::google::protobuf::int32 buildno() const;
+  inline void set_buildno(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.TcpSoftwareInfo)
  private:
   inline void set_has_softwaretype();
   inline void clear_has_softwaretype();
@@ -2481,6 +2500,10 @@ class TcpClientIntroduceMyself : public ::google::protobuf::Message {
   inline void clear_has_minorversion();
   inline void set_has_commitno();
   inline void clear_has_commitno();
+  inline void set_has_username();
+  inline void clear_has_username();
+  inline void set_has_buildno();
+  inline void clear_has_buildno();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2489,16 +2512,18 @@ class TcpClientIntroduceMyself : public ::google::protobuf::Message {
   ::google::protobuf::int32 majorversion_;
   ::google::protobuf::int32 minorversion_;
   ::google::protobuf::int32 commitno_;
+  ::std::string* username_;
+  ::google::protobuf::int32 buildno_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static TcpClientIntroduceMyself* default_instance_;
+  static TcpSoftwareInfo* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -7922,78 +7947,78 @@ inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInf
 
 // -------------------------------------------------------------------
 
-// TcpClientIntroduceMyself
+// TcpSoftwareInfo
 
 // required int32 softwareType = 1;
-inline bool TcpClientIntroduceMyself::has_softwaretype() const {
+inline bool TcpSoftwareInfo::has_softwaretype() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TcpClientIntroduceMyself::set_has_softwaretype() {
+inline void TcpSoftwareInfo::set_has_softwaretype() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TcpClientIntroduceMyself::clear_has_softwaretype() {
+inline void TcpSoftwareInfo::clear_has_softwaretype() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TcpClientIntroduceMyself::clear_softwaretype() {
+inline void TcpSoftwareInfo::clear_softwaretype() {
   softwaretype_ = 0;
   clear_has_softwaretype();
 }
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::softwaretype() const {
+inline ::google::protobuf::int32 TcpSoftwareInfo::softwaretype() const {
   return softwaretype_;
 }
-inline void TcpClientIntroduceMyself::set_softwaretype(::google::protobuf::int32 value) {
+inline void TcpSoftwareInfo::set_softwaretype(::google::protobuf::int32 value) {
   set_has_softwaretype();
   softwaretype_ = value;
 }
 
 // required string equipmentId = 2;
-inline bool TcpClientIntroduceMyself::has_equipmentid() const {
+inline bool TcpSoftwareInfo::has_equipmentid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TcpClientIntroduceMyself::set_has_equipmentid() {
+inline void TcpSoftwareInfo::set_has_equipmentid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TcpClientIntroduceMyself::clear_has_equipmentid() {
+inline void TcpSoftwareInfo::clear_has_equipmentid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TcpClientIntroduceMyself::clear_equipmentid() {
+inline void TcpSoftwareInfo::clear_equipmentid() {
   if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
     equipmentid_->clear();
   }
   clear_has_equipmentid();
 }
-inline const ::std::string& TcpClientIntroduceMyself::equipmentid() const {
+inline const ::std::string& TcpSoftwareInfo::equipmentid() const {
   return *equipmentid_;
 }
-inline void TcpClientIntroduceMyself::set_equipmentid(const ::std::string& value) {
+inline void TcpSoftwareInfo::set_equipmentid(const ::std::string& value) {
   set_has_equipmentid();
   if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
     equipmentid_ = new ::std::string;
   }
   equipmentid_->assign(value);
 }
-inline void TcpClientIntroduceMyself::set_equipmentid(const char* value) {
+inline void TcpSoftwareInfo::set_equipmentid(const char* value) {
   set_has_equipmentid();
   if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
     equipmentid_ = new ::std::string;
   }
   equipmentid_->assign(value);
 }
-inline void TcpClientIntroduceMyself::set_equipmentid(const char* value, size_t size) {
+inline void TcpSoftwareInfo::set_equipmentid(const char* value, size_t size) {
   set_has_equipmentid();
   if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
     equipmentid_ = new ::std::string;
   }
   equipmentid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* TcpClientIntroduceMyself::mutable_equipmentid() {
+inline ::std::string* TcpSoftwareInfo::mutable_equipmentid() {
   set_has_equipmentid();
   if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
     equipmentid_ = new ::std::string;
   }
   return equipmentid_;
 }
-inline ::std::string* TcpClientIntroduceMyself::release_equipmentid() {
+inline ::std::string* TcpSoftwareInfo::release_equipmentid() {
   clear_has_equipmentid();
   if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -8003,7 +8028,7 @@ inline ::std::string* TcpClientIntroduceMyself::release_equipmentid() {
     return temp;
   }
 }
-inline void TcpClientIntroduceMyself::set_allocated_equipmentid(::std::string* equipmentid) {
+inline void TcpSoftwareInfo::set_allocated_equipmentid(::std::string* equipmentid) {
   if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
     delete equipmentid_;
   }
@@ -8017,69 +8042,161 @@ inline void TcpClientIntroduceMyself::set_allocated_equipmentid(::std::string* e
 }
 
 // required int32 majorVersion = 3;
-inline bool TcpClientIntroduceMyself::has_majorversion() const {
+inline bool TcpSoftwareInfo::has_majorversion() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void TcpClientIntroduceMyself::set_has_majorversion() {
+inline void TcpSoftwareInfo::set_has_majorversion() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void TcpClientIntroduceMyself::clear_has_majorversion() {
+inline void TcpSoftwareInfo::clear_has_majorversion() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void TcpClientIntroduceMyself::clear_majorversion() {
+inline void TcpSoftwareInfo::clear_majorversion() {
   majorversion_ = 0;
   clear_has_majorversion();
 }
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::majorversion() const {
+inline ::google::protobuf::int32 TcpSoftwareInfo::majorversion() const {
   return majorversion_;
 }
-inline void TcpClientIntroduceMyself::set_majorversion(::google::protobuf::int32 value) {
+inline void TcpSoftwareInfo::set_majorversion(::google::protobuf::int32 value) {
   set_has_majorversion();
   majorversion_ = value;
 }
 
 // required int32 minorVersion = 4;
-inline bool TcpClientIntroduceMyself::has_minorversion() const {
+inline bool TcpSoftwareInfo::has_minorversion() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void TcpClientIntroduceMyself::set_has_minorversion() {
+inline void TcpSoftwareInfo::set_has_minorversion() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void TcpClientIntroduceMyself::clear_has_minorversion() {
+inline void TcpSoftwareInfo::clear_has_minorversion() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void TcpClientIntroduceMyself::clear_minorversion() {
+inline void TcpSoftwareInfo::clear_minorversion() {
   minorversion_ = 0;
   clear_has_minorversion();
 }
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::minorversion() const {
+inline ::google::protobuf::int32 TcpSoftwareInfo::minorversion() const {
   return minorversion_;
 }
-inline void TcpClientIntroduceMyself::set_minorversion(::google::protobuf::int32 value) {
+inline void TcpSoftwareInfo::set_minorversion(::google::protobuf::int32 value) {
   set_has_minorversion();
   minorversion_ = value;
 }
 
 // required int32 commitNo = 5;
-inline bool TcpClientIntroduceMyself::has_commitno() const {
+inline bool TcpSoftwareInfo::has_commitno() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void TcpClientIntroduceMyself::set_has_commitno() {
+inline void TcpSoftwareInfo::set_has_commitno() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void TcpClientIntroduceMyself::clear_has_commitno() {
+inline void TcpSoftwareInfo::clear_has_commitno() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void TcpClientIntroduceMyself::clear_commitno() {
+inline void TcpSoftwareInfo::clear_commitno() {
   commitno_ = 0;
   clear_has_commitno();
 }
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::commitno() const {
+inline ::google::protobuf::int32 TcpSoftwareInfo::commitno() const {
   return commitno_;
 }
-inline void TcpClientIntroduceMyself::set_commitno(::google::protobuf::int32 value) {
+inline void TcpSoftwareInfo::set_commitno(::google::protobuf::int32 value) {
   set_has_commitno();
   commitno_ = value;
+}
+
+// required string userName = 6;
+inline bool TcpSoftwareInfo::has_username() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void TcpSoftwareInfo::set_has_username() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void TcpSoftwareInfo::clear_has_username() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void TcpSoftwareInfo::clear_username() {
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    username_->clear();
+  }
+  clear_has_username();
+}
+inline const ::std::string& TcpSoftwareInfo::username() const {
+  return *username_;
+}
+inline void TcpSoftwareInfo::set_username(const ::std::string& value) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(value);
+}
+inline void TcpSoftwareInfo::set_username(const char* value) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(value);
+}
+inline void TcpSoftwareInfo::set_username(const char* value, size_t size) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TcpSoftwareInfo::mutable_username() {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  return username_;
+}
+inline ::std::string* TcpSoftwareInfo::release_username() {
+  clear_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = username_;
+    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TcpSoftwareInfo::set_allocated_username(::std::string* username) {
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    delete username_;
+  }
+  if (username) {
+    set_has_username();
+    username_ = username;
+  } else {
+    clear_has_username();
+    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 buildNo = 7;
+inline bool TcpSoftwareInfo::has_buildno() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void TcpSoftwareInfo::set_has_buildno() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void TcpSoftwareInfo::clear_has_buildno() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void TcpSoftwareInfo::clear_buildno() {
+  buildno_ = 0;
+  clear_has_buildno();
+}
+inline ::google::protobuf::int32 TcpSoftwareInfo::buildno() const {
+  return buildno_;
+}
+inline void TcpSoftwareInfo::set_buildno(::google::protobuf::int32 value) {
+  set_has_buildno();
+  buildno_ = value;
 }
 
 // -------------------------------------------------------------------

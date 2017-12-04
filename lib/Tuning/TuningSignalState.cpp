@@ -202,7 +202,7 @@ TuningValue TuningSignalState::value() const
 
 double TuningSignalState::valueToDouble() const
 {
-	m_value.toDouble();
+	return m_value.toDouble();
 }
 
 TuningValue TuningSignalState::newValue() const

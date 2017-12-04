@@ -398,12 +398,12 @@ void TuningSocket::requestWriteTuningSignals()
 
 		assert(false);		// WM: check code below is needs checking
 
-		tv.set_type(0/* need set value of enum TuningValueType */);
+		tv->set_type(0/* need set value of enum TuningValueType */);
 
-		tv.set_floatvalue(cmd.value());
+		tv->set_floatvalue(cmd.value());
 		// or need tv.set_intvalue(); dependent from TuningValueType
 
-		wrCmd->set_value(tv);
+		wrCmd->set_allocated_value(tv);
 
 		m_writeTuningSignals.mutable_commands()->AddAllocated(wrCmd);
 	}

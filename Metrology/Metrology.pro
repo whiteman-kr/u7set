@@ -116,7 +116,8 @@ SOURCES += \
     OutputSignalBase.cpp \
     RackBase.cpp \
     MeasureBase.cpp \
-    ../lib/CircularLogger.cpp
+    ../lib/CircularLogger.cpp \
+    ../lib/Tuning/TuningSignalState.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -186,7 +187,8 @@ HEADERS  += \
     OutputSignalBase.h \
     RackBase.h \
     MeasureBase.h \
-    ../lib/CircularLogger.h
+    ../lib/CircularLogger.h \
+    ../lib/Tuning/TuningSignalState.h
 #../lib/ExcelHelper.h
 
 FORMS    +=

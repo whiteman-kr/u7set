@@ -4,6 +4,34 @@
 namespace Tcp
 {
 
+	void SoftwareInfo::serializeTo(Network::TcpSoftwareInfo* info)
+	{
+		if (info == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		info->set_softwaretype(static_cast<int>(softwareType));
+		info->set_equipmentid(equipmentID.toStdString());
+		info->set_majorversion(majorVersion);
+		info->set_minorversion(minorVersion);
+		info->set_commitno(commitNo);
+		info->set_username(userName.toStdString());
+		info->set_buildno(buildNo);
+	}
+
+	void SoftwareInfo::serializeFrom(const Network::TcpSoftwareInfo& info)
+	{
+		softwareType = static_cast<E::SoftwareType>(info.softwaretype());
+		equipmentID = QString::fromStdString(info.equipmentid());
+		majorVersion = info.majorversion();
+		minorVersion = info.minorversion();
+		commitNo = info.commitno();
+		userName = QString::fromStdString(info.username());
+		buildNo = info.buildno();
+	}
+
 	void ConnectionState::dump()
 	{
 		if (isConnected == false)
@@ -29,7 +57,6 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	SocketWorker::SocketWorker() :
-		m_state(std::make_shared<ConnectionState>()),
 		m_mutex(QMutex::Recursive),
 		m_watchdogTimer(this)
 	{
@@ -431,22 +458,22 @@ namespace Tcp
 	{
 		m_stateMutex.lock();
 
-		ConnectionState state = *m_state;
+		ConnectionState state = m_state;
 
 		m_stateMutex.unlock();
 
 		return state;
 	}
 
-	std::shared_ptr<const ConnectionState> SocketWorker::getConnectionStatePtr() const
-	{
-		return m_state;
-	}
-
-
 	HostAddressPort SocketWorker::peerAddr() const
 	{
-		return m_state->peerAddr;
+		m_stateMutex.lock();
+
+		HostAddressPort peerAddr = m_state.peerAddr;
+
+		m_stateMutex.unlock();
+
+		return peerAddr;
 	}
 
 
@@ -454,13 +481,13 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state->isConnected = true;
-		m_state->peerAddr = peerAddr;
-		m_state->startTime = QDateTime::currentMSecsSinceEpoch();
-		m_state->sentBytes = 0;
-		m_state->receivedBytes = 0;
-		m_state->requestCount = 0;
-		m_state->replyCount = 0;
+		m_state.isConnected = true;
+		m_state.peerAddr = peerAddr;
+		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
+		m_state.sentBytes = 0;
+		m_state.receivedBytes = 0;
+		m_state.requestCount = 0;
+		m_state.replyCount = 0;
 	}
 
 
@@ -468,13 +495,13 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state->isConnected = false;
-		m_state->peerAddr.clear();
-		m_state->startTime = 0;
-		m_state->sentBytes = 0;
-		m_state->receivedBytes = 0;
-		m_state->requestCount = 0;
-		m_state->replyCount = 0;
+		m_state.isConnected = false;
+		m_state.peerAddr.clear();
+		m_state.startTime = 0;
+		m_state.sentBytes = 0;
+		m_state.receivedBytes = 0;
+		m_state.requestCount = 0;
+		m_state.replyCount = 0;
 	}
 
 
@@ -482,7 +509,7 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state->sentBytes += bytes;
+		m_state.sentBytes += bytes;
 	}
 
 
@@ -490,14 +517,14 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state->receivedBytes += bytes;
+		m_state.receivedBytes += bytes;
 	}
 
 	void SocketWorker::addRequest()
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state->requestCount++;
+		m_state.requestCount++;
 	}
 
 
@@ -505,7 +532,7 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state->replyCount++;
+		m_state.replyCount++;
 	}
 
 
@@ -611,9 +638,9 @@ namespace Tcp
 
 		if (m_header.id == RQID_INTRODUCE_MYSELF)
 		{
-			Network::TcpClientIntroduceMyself message;
+			Network::TcpSoftwareInfo inMessage;
 
-			bool result = message.ParseFromArray(m_receiveDataBuffer, m_header.dataSize);
+			bool result = inMessage.ParseFromArray(m_receiveDataBuffer, m_header.dataSize);
 
 			if (result == false)
 			{
@@ -621,13 +648,17 @@ namespace Tcp
 				return;
 			}
 
-			m_state->softwareType = IntToEnum<E::SoftwareType>(message.softwaretype());
-			m_state->equipmentID = QString::fromStdString(message.equipmentid());
-			m_state->majorVersion = message.majorversion();
-			m_state->minorVersion = message.minorversion();
-			m_state->commitNo = message.commitno();
+			m_stateMutex.lock();
 
-			sendReply();
+			m_state.connectedSoftwareInfo.serializeFrom(inMessage);
+
+			Network::TcpSoftwareInfo outMessage;
+
+			m_state.localSoftwareInfo.serializeTo(&outMessage);
+
+			m_stateMutex.unlock();
+
+			sendReply(outMessage);
 		}
 		else
 		{
@@ -926,13 +957,13 @@ namespace Tcp
 
 	void Listener::updateClientsList()
 	{
-		std::list<std::shared_ptr<const ConnectionState>> clientsInfo;
+		std::list<ConnectionState> clientsInfo;
 
 		QList<const SocketWorker*>&& servers = m_runningServers.keys();
 
 		for (const SocketWorker* server : servers)
 		{
-			clientsInfo.push_back(server->getConnectionStatePtr());
+			clientsInfo.push_back(server->getConnectionState());
 		}
 
 		emit connectedClientsListChanged(clientsInfo);
@@ -1135,13 +1166,15 @@ namespace Tcp
 	{
 		qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
 
-		Network::TcpClientIntroduceMyself message;
+		Network::TcpSoftwareInfo message;
 
 		message.set_softwaretype(TO_INT(m_softwareType));
 		message.set_equipmentid(m_equipmentID.toStdString());
 		message.set_majorversion(m_majorVersion);
 		message.set_minorversion(m_minorVersion);
 		message.set_commitno(m_commitNo);
+		message.set_username(m_userName);
+		message.set_buildno(m_buildNo);
 
 		sendRequest(RQID_INTRODUCE_MYSELF, message);
 	}

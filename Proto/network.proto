@@ -187,13 +187,15 @@ message GetServiceInfoReply
 }
 
 
-message TcpClientIntroduceMyself
+message TcpSoftwareInfo
 {
     required int32 softwareType = 1;
     required string equipmentId = 2;
     required int32 majorVersion = 3;
     required int32 minorVersion = 4;
     required int32 commitNo = 5;
+    required string userName = 6;
+    required int32 buildNo = 7;
 }
 
 

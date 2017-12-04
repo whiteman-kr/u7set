@@ -10,6 +10,7 @@
 #include <cassert>
 
 #include "../Proto/serialization.pb.h"
+#include "../Proto/network.pb.h"
 
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
@@ -26,6 +27,20 @@ namespace Tcp
 	const int TCP_AUTO_ACK_TIMER_INTERVAL = 1000;				// 1 second
 	const int TCP_CONNECT_TIMEOUT = 3;							// 3 seconds
 
+	struct SoftwareInfo
+	{
+		E::SoftwareType softwareType;
+		QString equipmentID;
+		int majorVersion = 0;
+		int minorVersion = 0;
+		int commitNo = 0;
+		QString userName;
+		int buildNo = 0;
+
+		void serializeTo(Network::TcpSoftwareInfo* info);
+		void serializeFrom(const Network::TcpSoftwareInfo& info);
+	};
+
 	struct ConnectionState
 	{
 		bool isConnected = false;
@@ -41,11 +56,8 @@ namespace Tcp
 		qint64 requestCount = 0;
 		qint64 replyCount = 0;
 
-		E::SoftwareType softwareType;
-		QString equipmentID;
-		int majorVersion;
-		int minorVersion;
-		int commitNo;
+		SoftwareInfo connectedSoftwareInfo;
+		SoftwareInfo localSoftwareInfo;
 
 		bool isActual = false;
 
@@ -99,7 +111,7 @@ namespace Tcp
 
 		QTcpSocket* m_tcpSocket = nullptr;
 
-		std::shared_ptr<ConnectionState> m_state;
+		ConnectionState m_state;
 
 		mutable QMutex m_stateMutex;
 		mutable QMutex m_mutex;
@@ -184,7 +196,6 @@ namespace Tcp
 		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState() const;
-		std::shared_ptr<const ConnectionState> getConnectionStatePtr() const;
 
 		HostAddressPort peerAddr() const;
 	};
@@ -303,7 +314,7 @@ namespace Tcp
 		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
 
 	signals:
-		void connectedClientsListChanged(std::list<std::shared_ptr<const ConnectionState>> listOfClientStates);
+		void connectedClientsListChanged(std::list<ConnectionState> listOfClientStates);
 
 	private:
 		virtual void onThreadStarted() override;
