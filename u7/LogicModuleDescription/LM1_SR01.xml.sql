@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 --
 -- Automaicaly generated file by file2pgsql, version 1.0
--- Host: smart-win, User: Serhiy Malokhatko, Date: 04.12.2017 08:58:51
+-- Host: bv, User: bv, Date: 04.12.2017 13:31:42
 -- FileName: LM1_SR01.xml
 --
 ---------------------------------------------------------------------------

@@ -258,6 +258,7 @@ namespace Builder
 
 		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
+		m_lmAppLogicUartId = m_lmDescription->flashMemory().m_appLogicUartId;
 
 		m_lmDescriptionNumber = m_lmDescription->descriptionNumber();
 
@@ -8851,7 +8852,7 @@ namespace Builder
 			return false;
 		}
 
-		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentIdTemplate(), m_lm->caption(),
+		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lmAppLogicUartId, m_lm->equipmentIdTemplate(), m_lm->caption(),
 														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_lmDescriptionNumber, uniqueID, m_code);
 		if (result == false)
 		{

@@ -355,15 +355,17 @@ namespace Builder
 			jsLogicModules.setProperty(i, module);
 		}
 
-		int frameSize = lmDescription->flashMemory().m_tuningFrameSize;
+		int frameSize = lmDescription->flashMemory().m_configFrameSize;
 
-		int frameCount = lmDescription->flashMemory().m_tuningFrameCount;
+		int frameCount = lmDescription->flashMemory().m_configFrameCount;
 
 		QString subsysStrID = subsystemModules[0]->propertyValue("SubsystemID").toString();
 
 		int subsysID = m_subsystems->ssKey(subsysStrID);
 
-		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(subsystemModules[0]->caption(), subsysStrID, subsysID, static_cast<int>(E::UartID::LmConfig), frameSize, frameCount, lmDescription->descriptionNumber());
+		int configUartId = lmDescription->flashMemory().m_configUartId;
+
+		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->createFirmware(subsystemModules[0]->caption(), subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->descriptionNumber());
 
 		QJSValue jsFirmware = m_jsEngine.newQObject(firmware);
 		QQmlEngine::setObjectOwnership(firmware, QQmlEngine::CppOwnership);

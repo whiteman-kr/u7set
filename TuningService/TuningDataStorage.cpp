@@ -173,7 +173,14 @@ namespace  Tuning
 
 		// calculate used tuning frames count
 		//
-		m_usedFramesCount = (totalSize / m_tuningFrameSizeBytes + ((totalSize % m_tuningFrameSizeBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
+		if (m_tuningFrameSizeBytes == 0)
+		{
+			m_usedFramesCount = 0;
+		}
+		else
+		{
+			m_usedFramesCount = (totalSize / m_tuningFrameSizeBytes + ((totalSize % m_tuningFrameSizeBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
+		}
 
 		return result;
 	}

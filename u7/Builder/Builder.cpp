@@ -1266,14 +1266,29 @@ namespace Builder
 				continue;
 			}
 
+			Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
 
-			quint64 appUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmAppLogic), subsysID, lmNumber);
-			quint64 cfgUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmConfig), subsysID, lmNumber);
-			quint64 tunUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmTuning), subsysID, lmNumber);
+			quint64 genericUniqueId = 0;
+			bool first = true;
 
-			quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
+			std::vector<UartPair> uarts = fw.uartList();
 
-			buildWriter.firmwareCollection()->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			for (auto fi : uarts)
+			{
+				int uartId = fi.first;
+
+				if (first == true)
+				{
+					first = false;
+					genericUniqueId = fw.uniqueID(uartId, lmNumber);
+				}
+				else
+				{
+					genericUniqueId ^= fw.uniqueID(uartId, lmNumber);
+				}
+			}
+
+			fw.setGenericUniqueId(lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
 		}
