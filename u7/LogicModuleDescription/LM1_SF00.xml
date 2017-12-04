@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0012">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0013">
 	<FlashMemory>
-		<AppLogicFrameCount>256</AppLogicFrameCount>
+	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
+		<AppLogicUartID>257</AppLogicUartID>
 		<ConfigFrameCount>256</ConfigFrameCount>
 		<ConfigFrameSize>1016</ConfigFrameSize>
+		<ConfigUartID>258</ConfigUartID>
 		<TuningFrameCount>256</TuningFrameCount>
-		<TuningFrameSize>1016</TuningFrameSize>		
+		<TuningFrameSize>1016</TuningFrameSize>
+		<TuningUartID>260</TuningUartID>
 	</FlashMemory>
 	<Memory>
 	    <CodeMemorySize>65536</CodeMemorySize>

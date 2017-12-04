@@ -54,10 +54,15 @@ public:
 	{
 		quint32 m_appLogicFrameCount = 0xFFFFFFFF;
 		quint32 m_appLogicFrameSize = 0xFFFFFFFF;
+		quint32 m_appLogicUartId = 0;
+
 		quint32 m_configFrameCount = 0xFFFFFFFF;
 		quint32 m_configFrameSize = 0xFFFFFFFF;
+		quint32 m_configUartId = 0;
+
 		quint32 m_tuningFrameCount = 0xFFFFFFFF;
 		quint32 m_tuningFrameSize = 0xFFFFFFFF;
+		quint32 m_tuningUartId = 0;
 
 		quint32 configFrameCount() const { return m_configFrameCount; }
 		quint32 configFrameSize() const { return m_configFrameSize; }
