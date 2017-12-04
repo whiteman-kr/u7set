@@ -89,8 +89,12 @@ signals:
 	void disconnected();
 
 public:
-	TcpAppDataClient(const HostAddressPort& serverAddressPort);
-	TcpAppDataClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TcpAppDataClient(const HostAddressPort& serverAddressPort,
+					 const Tcp::SoftwareInfo& softwareInfo);
+
+	TcpAppDataClient(const HostAddressPort& serverAddressPort1,
+					 const HostAddressPort& serverAddressPort2,
+					 const Tcp::SoftwareInfo &softwareInfo);
 	virtual ~TcpAppDataClient();
 
 	virtual void onClientThreadStarted() override;

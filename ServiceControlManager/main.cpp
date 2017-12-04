@@ -7,10 +7,11 @@
 #include <QSettings>
 #include <stdlib.h>
 #include <google/protobuf/stubs/common.h>
-//#include "version.h"
 
 #include "../lib/SocketIO.h"
+#include "../lib/Tcp.h"
 
+#include "version.h"
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";
 const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
@@ -90,7 +91,9 @@ int main(int argc, char *argv[])
         qApp->installTranslator(appTranslator);
     }
 
-    MainWindow w;
+	Tcp::SoftwareInfo si;
+
+	MainWindow w(si);
     w.showMaximized();
 
 	atexit(google::protobuf::ShutdownProtobufLibrary);

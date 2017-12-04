@@ -1,8 +1,50 @@
 #include "../lib/Tcp.h"
 #include "../Proto/network.pb.h"
+#include <stdlib.h>
+#include "version.h"
 
 namespace Tcp
 {
+
+	const int SoftwareInfo::UNDEFINED_BUILD_NO = -1;
+
+	SoftwareInfo::SoftwareInfo()
+	{
+	}
+
+	SoftwareInfo::SoftwareInfo(const SoftwareInfo& si)
+	{
+		m_softwareType = si.m_softwareType;
+		m_equipmentID = si.m_equipmentID;
+		m_majorVersion = si.m_majorVersion;
+		m_minorVersion = si.m_minorVersion;
+		m_commitNo = si.m_commitNo;
+		m_buildNo = si.m_buildNo;
+		m_userName = si.m_userName;
+	}
+
+	void SoftwareInfo::init(E::SoftwareType softwareType,
+								 const QString& equipmentID,
+								 int majorVersion,
+								 int minorVersion,
+								 int buildNo)
+	{
+		m_softwareType = softwareType;
+		m_equipmentID = equipmentID;
+		m_majorVersion = majorVersion;
+		m_minorVersion = minorVersion;
+		m_commitNo = USED_SERVER_COMMIT_NUMBER;
+		m_buildNo = buildNo;
+
+#ifdef Q_OS_LINUX
+		m_userName = getenv("USER");
+#endif
+
+#ifdef Q_OS_WIN
+		m_userName = getenv("USERNAME");
+#endif
+	}
+
 
 	void SoftwareInfo::serializeTo(Network::TcpSoftwareInfo* info)
 	{
@@ -12,24 +54,24 @@ namespace Tcp
 			return;
 		}
 
-		info->set_softwaretype(static_cast<int>(softwareType));
-		info->set_equipmentid(equipmentID.toStdString());
-		info->set_majorversion(majorVersion);
-		info->set_minorversion(minorVersion);
-		info->set_commitno(commitNo);
-		info->set_username(userName.toStdString());
-		info->set_buildno(buildNo);
+		info->set_softwaretype(static_cast<int>(m_softwareType));
+		info->set_equipmentid(m_equipmentID.toStdString());
+		info->set_majorversion(m_majorVersion);
+		info->set_minorversion(m_minorVersion);
+		info->set_commitno(m_commitNo);
+		info->set_username(m_userName.toStdString());
+		info->set_buildno(m_buildNo);
 	}
 
 	void SoftwareInfo::serializeFrom(const Network::TcpSoftwareInfo& info)
 	{
-		softwareType = static_cast<E::SoftwareType>(info.softwaretype());
-		equipmentID = QString::fromStdString(info.equipmentid());
-		majorVersion = info.majorversion();
-		minorVersion = info.minorversion();
-		commitNo = info.commitno();
-		userName = QString::fromStdString(info.username());
-		buildNo = info.buildno();
+		m_softwareType = static_cast<E::SoftwareType>(info.softwaretype());
+		m_equipmentID = QString::fromStdString(info.equipmentid());
+		m_majorVersion = info.majorversion();
+		m_minorVersion = info.minorversion();
+		m_commitNo = info.commitno();
+		m_userName = QString::fromStdString(info.username());
+		m_buildNo = info.buildno();
 	}
 
 	void ConnectionState::dump()
@@ -56,13 +98,14 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	SocketWorker::SocketWorker() :
+	SocketWorker::SocketWorker(const SoftwareInfo& softwareInfo) :
 		m_mutex(QMutex::Recursive),
 		m_watchdogTimer(this)
 	{
+		m_state.localSoftwareInfo = softwareInfo;
+
 		m_receiveDataBuffer = new char[TCP_MAX_DATA_SIZE];
 	}
-
 
 	SocketWorker::~SocketWorker()
 	{
@@ -75,7 +118,6 @@ namespace Tcp
 
 		connect(&m_watchdogTimer, &QTimer::timeout, this, &SocketWorker::onWatchdogTimerTimeout);
 	}
-
 
 	void SocketWorker::createSocket()
 	{
@@ -465,6 +507,11 @@ namespace Tcp
 		return state;
 	}
 
+	SoftwareInfo SocketWorker::localSoftwareInfo() const
+	{
+		return getConnectionState().localSoftwareInfo;
+	}
+
 	HostAddressPort SocketWorker::peerAddr() const
 	{
 		m_stateMutex.lock();
@@ -545,7 +592,8 @@ namespace Tcp
 	int Server::staticId = 0;
 
 
-	Server::Server() :
+	Server::Server(const SoftwareInfo& sotwareInfo) :
+		SocketWorker(sotwareInfo),
 		m_autoAckTimer(this)
 	{
 		m_id = staticId;
@@ -613,7 +661,6 @@ namespace Tcp
 	{
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
 	}
-
 
 	void Server::onHeaderAndDataReady()
 	{
@@ -1030,37 +1077,22 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	Client::Client(const HostAddressPort &serverAddressPort,
-				   E::SoftwareType softwareType,
-				   const QString equipmentID,
-				   int majorVersion,
-				   int minorVersion,
-				   int commitNo) :
+				   const SoftwareInfo& softwareInfo) :
+		SocketWorker(softwareInfo),
 		m_periodicTimer(this),
-		m_replyTimeoutTimer(this),
-		m_softwareType(softwareType),
-		m_equipmentID(equipmentID),
-		m_majorVersion(majorVersion),
-		m_minorVersion(minorVersion),
-		m_commitNo(commitNo)
+		m_replyTimeoutTimer(this)
 	{
 		setServer(serverAddressPort, false);
 		initReadStatusVariables();
 	}
 
 
-	Client::Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2,
-				   E::SoftwareType softwareType,
-				   const QString equipmentID,
-				   int majorVersion,
-				   int minorVersion,
-				   int commitNo) :
+	Client::Client(const HostAddressPort& serverAddressPort1,
+				   const HostAddressPort& serverAddressPort2,
+				   const SoftwareInfo& softwareInfo) :
+		SocketWorker(softwareInfo),
 		m_periodicTimer(this),
-		m_replyTimeoutTimer(this),
-		m_softwareType(softwareType),
-		m_equipmentID(equipmentID),
-		m_majorVersion(majorVersion),
-		m_minorVersion(minorVersion),
-		m_commitNo(commitNo)
+		m_replyTimeoutTimer(this)
 	{
 		setServers(serverAddressPort1, serverAddressPort2, false);
 		initReadStatusVariables();
@@ -1095,6 +1127,11 @@ namespace Tcp
 		m_serversAddressPort[1] = serverAddressPort2;
 
 		selectServer1(reconnect);
+	}
+
+	QString Client::equipmentID() const
+	{
+		return localSoftwareInfo().equipmentID();
 	}
 
 	HostAddressPort Client::currentServerAddressPort()
@@ -1166,15 +1203,11 @@ namespace Tcp
 	{
 		qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
 
+		SoftwareInfo locSoftwareInfo = localSoftwareInfo();
+
 		Network::TcpSoftwareInfo message;
 
-		message.set_softwaretype(TO_INT(m_softwareType));
-		message.set_equipmentid(m_equipmentID.toStdString());
-		message.set_majorversion(m_majorVersion);
-		message.set_minorversion(m_minorVersion);
-		message.set_commitno(m_commitNo);
-		message.set_username(m_userName);
-		message.set_buildno(m_buildNo);
+		locSoftwareInfo.serializeTo(&message);
 
 		sendRequest(RQID_INTRODUCE_MYSELF, message);
 	}

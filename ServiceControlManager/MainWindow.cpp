@@ -17,10 +17,10 @@
 #include <functional>
 #include <QHeaderView>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(const Tcp::SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_trayIcon(new QSystemTrayIcon(this)),
-	m_serviceModel(new ServiceTableModel(this)),
+	m_serviceModel(new ServiceTableModel(softwareInfo, this)),
 	m_serviceTable(new QTableView(this))
 {
 	qRegisterMetaType<Network::ServiceInfo>("ServiceInformation");

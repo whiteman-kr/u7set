@@ -20,9 +20,9 @@ ServiceData::ServiceData() :
 	information.set_servicestate(TO_INT(ServiceState::Undefined));
 }
 
-
-ServiceTableModel::ServiceTableModel(QObject *parent) :
+ServiceTableModel::ServiceTableModel(const Tcp::SoftwareInfo& softwareInfo, QObject* parent) :
 	QAbstractTableModel(parent),
+	m_softwareInfo(softwareInfo),
 	m_freezeUpdate(false),
 	m_timer(parent)
 {

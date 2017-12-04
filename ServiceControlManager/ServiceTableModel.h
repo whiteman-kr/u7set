@@ -6,6 +6,7 @@
 #include "../lib/UdpSocket.h"
 #include "../lib/Service.h"
 #include "../lib/Types.h"
+#include "../lib/Tcp.h"
 
 
 // For QueuedConnection (scan network)
@@ -43,7 +44,7 @@ class ServiceTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit ServiceTableModel(QObject *parent = 0);
+	explicit ServiceTableModel(const Tcp::SoftwareInfo& softwareInfo, QObject* parent = 0);
 	~ServiceTableModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
@@ -68,6 +69,7 @@ public slots:
 
 private:
 	QVector<HostInfo> m_hostsInfo;
+	Tcp::SoftwareInfo m_softwareInfo;
 	bool m_freezeUpdate;
 
 	QTimer m_timer;

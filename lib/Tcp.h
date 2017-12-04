@@ -27,18 +27,39 @@ namespace Tcp
 	const int TCP_AUTO_ACK_TIMER_INTERVAL = 1000;				// 1 second
 	const int TCP_CONNECT_TIMEOUT = 3;							// 3 seconds
 
-	struct SoftwareInfo
+	class SoftwareInfo
 	{
-		E::SoftwareType softwareType;
-		QString equipmentID;
-		int majorVersion = 0;
-		int minorVersion = 0;
-		int commitNo = 0;
-		QString userName;
-		int buildNo = 0;
+	public:
+		static const int UNDEFINED_BUILD_NO;
+
+		SoftwareInfo();
+		SoftwareInfo(const SoftwareInfo& si);
+
+		void init(E::SoftwareType softwareType,
+				  const QString& equipmentID,
+				  int majorVersion,
+				  int minorVersion,
+				  int buildNo);
 
 		void serializeTo(Network::TcpSoftwareInfo* info);
 		void serializeFrom(const Network::TcpSoftwareInfo& info);
+
+		E::SoftwareType softwareType() const { return m_softwareType; }
+		QString equipmentID() const { return m_equipmentID; }
+		int majorVersion() const { return m_majorVersion; }
+		int minorVersion() const { return m_minorVersion; }
+		int commitNo() const { return m_commitNo; }
+		QString userName() const { return m_userName; }
+		int buildNo() const { return m_buildNo; }
+
+	private:
+		E::SoftwareType m_softwareType = E::SoftwareType::Unknown;
+		QString m_equipmentID;
+		int m_majorVersion = 0;
+		int m_minorVersion = 0;
+		int m_commitNo = 0;
+		QString m_userName;
+		int m_buildNo = UNDEFINED_BUILD_NO;
 	};
 
 	struct ConnectionState
@@ -177,7 +198,8 @@ namespace Tcp
 		void disconnected(const SocketWorker* socketWorker);
 
 	public:
-		SocketWorker();
+		SocketWorker(const SoftwareInfo& softwareInfo);
+
 		virtual ~SocketWorker();
 
 		bool isConnected() const;
@@ -196,6 +218,8 @@ namespace Tcp
 		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState() const;
+
+		SoftwareInfo localSoftwareInfo() const;
 
 		HostAddressPort peerAddr() const;
 	};
@@ -248,13 +272,15 @@ namespace Tcp
 		void onAutoAckTimer();
 
 	public:
-		Server();
+		Server(const SoftwareInfo& sotwareInfo);
 		virtual ~Server();
 
 		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
 												// { return new ServerDerivedClass(); }
 
 		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
+
+		SoftwareInfo localSoftwareInfo();
 
 		int id() const { return m_id; }
 
@@ -402,12 +428,6 @@ namespace Tcp
 
 		char* m_protobufBuffer = nullptr;
 
-		E::SoftwareType m_softwareType;
-		const QString m_equipmentID;
-		int m_majorVersion;
-		int m_minorVersion;
-		int m_commitNo;
-
 	private:
 		void autoSwitchServer();
 		void selectServer(int serverIndex, bool reconnect);
@@ -435,18 +455,11 @@ namespace Tcp
 
 	public:
 		Client(const HostAddressPort& serverAddressPort,
-			   E::SoftwareType softwareType,
-			   const QString equipmentID,
-			   int majorVersion,
-			   int minorVersion,
-			   int commitNo);
+			   const SoftwareInfo& softwareInfo);
 
-		Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2,
-			   E::SoftwareType softwareType,
-			   const QString equipmentID,
-			   int majorVersion,
-			   int minorVersion,
-			   int commitNo);
+		Client(const HostAddressPort& serverAddressPort1,
+			   const HostAddressPort& serverAddressPort2,
+			   const SoftwareInfo& softwareInfo);
 
 		virtual ~Client();
 
@@ -456,7 +469,7 @@ namespace Tcp
 		void selectServer1(bool reconnect) { selectServer(0, reconnect); }
 		void selectServer2(bool reconnect) { selectServer(1, reconnect); }
 
-		QString equipmentID() const { return m_equipmentID; }
+		QString equipmentID() const;
 
 		HostAddressPort currentServerAddressPort();
 		HostAddressPort serverAddressPort(int serverIndex);
