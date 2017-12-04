@@ -72,6 +72,11 @@ namespace Builder
                 return false;
             }
 
+			if (lmDescription->flashMemory().m_tuningWriteBitstream == false)
+			{
+				return true;
+			}
+
 			QString subsysStrID = m->propertyValue("SubsystemID").toString();
 
 			int channel = m->propertyValue("LMNumber").toInt();

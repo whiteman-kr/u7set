@@ -219,9 +219,12 @@ namespace Builder
 
 			for (LmDescription* logicModuleDescription : subsystemModulesDescriptions)
 			{
-				if (runConfigurationScriptFile(subsystemModules, logicModuleDescription) == false)
+				if (logicModuleDescription->flashMemory().m_configWriteBitstream == true)
 				{
-					return false;
+					if (runConfigurationScriptFile(subsystemModules, logicModuleDescription) == false)
+					{
+						return false;
+					}
 				}
 			}
 		}

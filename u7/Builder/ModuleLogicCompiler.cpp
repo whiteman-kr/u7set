@@ -258,9 +258,6 @@ namespace Builder
 
 		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
-		m_lmAppLogicUartId = m_lmDescription->flashMemory().m_appLogicUartId;
-
-		m_lmDescriptionNumber = m_lmDescription->descriptionNumber();
 
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
@@ -8852,11 +8849,17 @@ namespace Builder
 			return false;
 		}
 
-		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lmAppLogicUartId, m_lm->equipmentIdTemplate(), m_lm->caption(),
-														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_lmDescriptionNumber, uniqueID, m_code);
-		if (result == false)
+		if (m_lmDescription->flashMemory().m_appLogicWriteBitstream == true)
 		{
-			return false;
+			int appLogicUartId = m_lmDescription->flashMemory().m_appLogicUartId;
+			int lmDescriptionNumber = m_lmDescription->descriptionNumber();
+
+			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, appLogicUartId, m_lm->equipmentIdTemplate(), m_lm->caption(),
+														   m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, lmDescriptionNumber, uniqueID, m_code);
+			if (result == false)
+			{
+				return false;
+			}
 		}
 
 /*		QStringList mifCode;
