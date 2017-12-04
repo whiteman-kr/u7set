@@ -23,6 +23,7 @@ namespace Hardware
 	}
 
 	void ModuleFirmware::init(int uartId,
+							  QString uartType,
 							  int frameSize,
 							  int frameCount,
 							  QString caption,
@@ -49,7 +50,7 @@ namespace Hardware
 		ModuleFirmwareData data;
 
 		data.uartId = uartId;
-		data.uartType = E::valueToString<E::UartID>(uartId);
+		data.uartType = uartType;
 		data.frameSize = frameSize;
 		data.frameSizeWithCRC = frameSize + sizeof(quint64);
 
@@ -417,19 +418,9 @@ namespace Hardware
 		return result;
 	}
 
-	bool ModuleFirmware::uartExists(E::UartID uartId) const
-	{
-		return uartExists(static_cast<int>(uartId));
-	}
-
 	bool ModuleFirmware::uartExists(int uartId) const
 	{
 		return m_firmwareData.find(uartId) != m_firmwareData.end();
-	}
-
-	int ModuleFirmware::eepromFramePayloadSize(E::UartID uartId) const
-	{
-		return eepromFramePayloadSize(static_cast<int>(uartId));
 	}
 
 	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
@@ -444,11 +435,6 @@ namespace Hardware
 		return it->second.frameSize;
 	}
 
-	int ModuleFirmware::eepromFrameSize(E::UartID uartId) const
-	{
-		return eepromFrameSize(static_cast<int>(uartId));
-	}
-
 	int ModuleFirmware::eepromFrameSize(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
@@ -461,11 +447,6 @@ namespace Hardware
 		return it->second.frameSizeWithCRC;
 	}
 
-	int ModuleFirmware::eepromFrameCount(E::UartID uartId) const
-	{
-		return eepromFrameCount(static_cast<int>(uartId));
-	}
-
 	int ModuleFirmware::eepromFrameCount(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
@@ -476,11 +457,6 @@ namespace Hardware
 		}
 
 		return static_cast<int>(it->second.frames.size());
-	}
-
-	const std::vector<quint8>& ModuleFirmware::frame(E::UartID uartId, int frameIndex) const
-	{
-		return frame(static_cast<int>(uartId), frameIndex);
 	}
 
 	const std::vector<quint8>& ModuleFirmware::frame(int uartId, int frameIndex) const

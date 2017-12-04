@@ -61,26 +61,26 @@ namespace Hardware
 
 		// Functions called and used by Configuration Script
 		//
-		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
-		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
-		Q_INVOKABLE bool setData32(int frameIndex, int offset, quint32 data);
-		bool setData64(int frameIndex, int offset, quint64 data);
+		Q_INVOKABLE bool setData8(int uartID, int frameIndex, int offset, quint8 data);
+		Q_INVOKABLE bool setData16(int uartID, int frameIndex, int offset, quint16 data);
+		Q_INVOKABLE bool setData32(int uartID, int frameIndex, int offset, quint32 data);
+		bool setData64(int uartID, int frameIndex, int offset, quint64 data);
 
-		Q_INVOKABLE quint8 data8(int frameIndex, int offset);
-		Q_INVOKABLE quint16 data16(int frameIndex, int offset);
-		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
+		Q_INVOKABLE quint8 data8(int uartID, int frameIndex, int offset);
+		Q_INVOKABLE quint16 data16(int uartID, int frameIndex, int offset);
+		Q_INVOKABLE quint32 data32(int uartID, int frameIndex, int offset);
 
 		Q_INVOKABLE JsVariantList* calcHash64(QString dataString);
-		Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);
-		Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
+		Q_INVOKABLE QString storeCrc64(int uartID, int frameIndex, int start, int count, int offset);
+		Q_INVOKABLE QString storeHash64(int uartID, int frameIndex, int offset, QString dataString);
 
-		Q_INVOKABLE quint32 calcCrc32(int frameIndex, int start, int count);
+		Q_INVOKABLE quint32 calcCrc32(int uartID, int frameIndex, int start, int count);
 
-		Q_INVOKABLE void jsSetDescriptionFields(int descriptionVersion, QString fields);
+		Q_INVOKABLE void jsSetDescriptionFields(int uartID, int descriptionVersion, QString fields);
 
-		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
+		Q_INVOKABLE void jsAddDescription(int uartID, int channel, QString descriptionCSV);
 
-		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
+		Q_INVOKABLE void jsSetUniqueID(int uartID, int lmNumber, quint64 uniqueID);
 
 		// Script execution log
 		//
@@ -124,7 +124,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		ModuleFirmwareWriter* get(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber);
+		ModuleFirmwareWriter* get(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber);
 
 		quint64 firmwareUniqueId(int uartId, const QString &subsystemID, int lmNumber);
 		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
@@ -137,6 +137,7 @@ namespace Hardware
 		//
 	public:
 		std::map<QString, ModuleFirmwareWriter>& firmwares();
+		const ModuleFirmwareWriter& firmware(const QString& subsystemID) const;
 
 	private:
 		std::map<QString, ModuleFirmwareWriter> m_firmwares;

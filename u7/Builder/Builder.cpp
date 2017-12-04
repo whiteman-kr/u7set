@@ -1266,12 +1266,37 @@ namespace Builder
 				continue;
 			}
 
+			const Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
+
+			quint64 genericUniqueId = 0;
+			bool first = true;
+
+			std::vector<UartPair> uarts = fw.uartList();
+
+			for (auto fi : uarts)
+			{
+				int uartId = fi.first;
+
+				if (first == true)
+				{
+					first = false;
+					genericUniqueId = fw.uniqueID(uartId, lmNumber);
+				}
+				else
+				{
+					genericUniqueId ^= fw.uniqueID(uartId, lmNumber);
+				}
+			}
+
+
+			/*
+			fw.uniqueID(uartId, lmNumber);
 
 			quint64 appUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmAppLogic), subsysID, lmNumber);
 			quint64 cfgUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmConfig), subsysID, lmNumber);
-			quint64 tunUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmTuning), subsysID, lmNumber);
+			quint64 tunUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmTuning), subsysID, lmNumber);*/
 
-			quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
+			//quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
 
 			buildWriter.firmwareCollection()->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
 

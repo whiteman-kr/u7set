@@ -277,23 +277,6 @@ public:
 	};
 	Q_ENUM(TimeType)
 
-	// UartID
-	//
-	enum class UartID
-	{
-		LmAppLogic = 0x101,
-		LmConfig = 0x102,
-		LmService = 0x103,
-		LmTuning = 0x104,
-		Aim = 0x203,
-		Aom = 0x303,
-		Dim = 0x403,
-		Dom = 0x503,
-		Aifm = 0x603,
-		Ocm = 0x703
-	};
-	Q_ENUM(UartID)
-
 public:
 	// Convert enum value (not index) to QString
 	//

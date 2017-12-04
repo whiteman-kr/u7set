@@ -577,7 +577,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, int lmDescriptionNumber, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, int appLogicUartId, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, int lmDescriptionNumber, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -592,11 +592,11 @@ namespace Builder
 
 		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
 
-		Hardware::ModuleFirmwareWriter* firmware = m_resultWriter->firmwareCollection()->get(lmCaption, subsystemID, subsystemKey, static_cast<int>(E::UartID::LmAppLogic), frameSize, frameCount, lmDescriptionNumber);
+		Hardware::ModuleFirmwareWriter* firmware = m_resultWriter->firmwareCollection()->get(lmCaption, subsystemID, subsystemKey, appLogicUartId, "AppLogic", frameSize, frameCount, lmDescriptionNumber);
 
 		if (firmware != nullptr)
 		{
-			firmware->setDescriptionFields(static_cast<int>(E::UartID::LmAppLogic), metadataFieldsVersion, metadataFields);
+			firmware->setDescriptionFields(appLogicUartId, metadataFieldsVersion, metadataFields);
 
 			QByteArray binCode;
 
@@ -606,7 +606,7 @@ namespace Builder
 
 			appLogicCode.getAsmMetadata(metadata);
 
-			result &= firmware->setChannelData(static_cast<int>(E::UartID::LmAppLogic), lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
+			result &= firmware->setChannelData(appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
 		}
 		else
 		{
