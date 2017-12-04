@@ -112,6 +112,10 @@ public:
 
     void sortItems(int column, Qt::SortOrder order);
 
+	qreal fontSizeF() const;
+	void setFontSizeF(qreal size);
+
+
 Q_SIGNALS:
 
     void collapsed(QtBrowserItem *item);
@@ -124,8 +128,8 @@ protected:
 
 private:
 
-    QtTreePropertyBrowserPrivate *d_ptr;
-    Q_DECLARE_PRIVATE(QtTreePropertyBrowser)
+	QtTreePropertyBrowserPrivate *d_ptr;
+	Q_DECLARE_PRIVATE(QtTreePropertyBrowser)
     Q_DISABLE_COPY(QtTreePropertyBrowser)
 
     Q_PRIVATE_SLOT(d_func(), void slotCollapsed(const QModelIndex &))

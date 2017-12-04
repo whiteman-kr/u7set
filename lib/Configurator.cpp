@@ -1444,7 +1444,7 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 		QString userName = QDir::home().dirName();
 
 		Hardware::ModuleFirmware conf;
-		conf.init(0, 0, 0, "Caption", "subsysId", 0, 0, "projectName", userName, 0, "release", 0);
+		conf.init(0, QString(), 0, 0, "Caption", "subsysId", 0, 0, "projectName", userName, 0, "release", 0);
 
 		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
 		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||

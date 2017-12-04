@@ -1039,8 +1039,14 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 	// Calculate points count
 	//
-	int horzGridCount = (int)(frameWidth / gridSize);
-	int vertGridCount = (int)(frameHeight / gridSize);
+	if (gridSize == 0)
+	{
+		assert(gridSize);
+		return;
+	}
+
+	int horzGridCount = qBound(0, static_cast<int>(frameWidth / gridSize), 1024);
+	int vertGridCount = qBound(0, static_cast<int>(frameHeight / gridSize), 1024);
 
 	// Drawing grid
 	//
@@ -1052,9 +1058,13 @@ void EditSchemaView::drawGrid(QPainter* p)
 	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiX();
 	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiY();
 
+	std::vector<QPointF> points;
+	points.reserve(1024);
+
 	for (int v = 0; v < vertGridCount; v++)
 	{
 		pt.setY(static_cast<double>(v + 1) * gridSize * dpiY * scale);
+		points.clear();
 
 		for (int h = 0; h < horzGridCount; h++)
 		{
@@ -1065,8 +1075,10 @@ void EditSchemaView::drawGrid(QPainter* p)
 				continue;
 			}
 
-			p->drawPoint(pt);
+			points.push_back(pt);
 		}
+
+		p->drawPoints(points.data(), static_cast<int>(points.size()));
 	}
 
 	return;
