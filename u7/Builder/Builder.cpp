@@ -1288,16 +1288,6 @@ namespace Builder
 				}
 			}
 
-
-			/*
-			fw.uniqueID(uartId, lmNumber);
-
-			quint64 appUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmAppLogic), subsysID, lmNumber);
-			quint64 cfgUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmConfig), subsysID, lmNumber);
-			quint64 tunUniqueId = buildWriter.firmwareCollection()->firmwareUniqueId(static_cast<int>(E::UartID::LmTuning), subsysID, lmNumber);*/
-
-			//quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
-
 			buildWriter.firmwareCollection()->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);

@@ -718,13 +718,6 @@ namespace Hardware
 			return false;
 		}
 
-		if (m_channelData.size() == 0)
-		{
-			// no channel data supplied
-			//
-			return true;
-		}
-
 		const int storageConfigFrame = 1;
 		const int startDataFrame = 2;
 
@@ -734,13 +727,21 @@ namespace Hardware
 		{
 			int uartId = it->first;
 
+			const ModuleFirmwareChannelData& channelData = it->second;
+
+			if (channelData.binaryDataMap.empty() == true)
+			{
+				// no channel data supplied
+				//
+				continue;
+			}
+
 			if (eepromFrameCount(uartId) < 3)
 			{
 				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId()));
 				return false;
 			}
 
-			const ModuleFirmwareChannelData& channelData = it->second;
 
 			// sort channel data by growing channel number
 			//
