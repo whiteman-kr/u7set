@@ -1266,7 +1266,7 @@ namespace Builder
 				continue;
 			}
 
-			const Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
+			Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
 
 			quint64 genericUniqueId = 0;
 			bool first = true;
@@ -1288,7 +1288,7 @@ namespace Builder
 				}
 			}
 
-			buildWriter.firmwareCollection()->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			fw.setGenericUniqueId(lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
 		}

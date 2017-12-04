@@ -118,10 +118,14 @@ namespace Hardware
 
 		int firmwareRecordIndex = 0;
 
+		int firmwareCount = 0;
+
 		for (auto it = m_firmwareData.begin(); it != m_firmwareData.end(); it++)
 		{
 
 			int	uartId = it->first;
+
+			firmwareCount++;
 
 			ModuleFirmwareData& data = it->second;
 
@@ -280,7 +284,7 @@ namespace Hardware
 		jObject.insert("fileVersion", fileVersion());
 		jObject.insert("buildSoftware", m_buildSoftware);
 		jObject.insert("buildTime", m_buildTime);
-		jObject.insert("firmwaresCount", static_cast<int>(m_firmwareData.size()));
+		jObject.insert("firmwaresCount", firmwareCount);
 
 		dest = QJsonDocument(jObject).toJson();
 
@@ -946,7 +950,7 @@ namespace Hardware
 		m_changesetId = changesetId;
 	}
 
-	ModuleFirmwareWriter* ModuleFirmwareCollection::get(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber)
+	ModuleFirmwareWriter* ModuleFirmwareCollection::createFirmware(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber)
 	{
 		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
@@ -961,48 +965,21 @@ namespace Hardware
 		return &fw;
 	}
 
-	quint64 ModuleFirmwareCollection::firmwareUniqueId(int uartId, const QString &subsystemID, int lmNumber)
-	{
-		if (m_firmwares.count(subsystemID) == 0)
-		{
-			assert(false);
-			return 0;
-		}
-
-		ModuleFirmwareWriter& fw = m_firmwares[subsystemID];
-
-		return fw.uniqueID(uartId, lmNumber);
-	}
-
-	void ModuleFirmwareCollection::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
-	{
-		if (m_firmwares.count(subsystemID) == 0)
-		{
-			assert(false);
-			return;
-		}
-
-		ModuleFirmwareWriter& fw = m_firmwares[subsystemID];
-
-		fw.setGenericUniqueId(lmNumber, genericUniqueId);
-	}
-
 	std::map<QString, ModuleFirmwareWriter>& ModuleFirmwareCollection::firmwares()
 	{
 		return m_firmwares;
 	}
 
-	const ModuleFirmwareWriter& ModuleFirmwareCollection::firmware(const QString& subsystemID) const
+	ModuleFirmwareWriter& ModuleFirmwareCollection::firmware(const QString& subsystemID)
 	{
 static ModuleFirmwareWriter err;
 
-		auto it =  m_firmwares.find(subsystemID);
-		if (it == m_firmwares.end())
+		if (m_firmwares.find(subsystemID) == m_firmwares.end())
 		{
 			return err;
 		}
 
-		return it->second;
+		return m_firmwares.at(subsystemID);
 	}
 
 

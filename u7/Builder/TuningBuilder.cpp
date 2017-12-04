@@ -90,7 +90,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(m->caption(), subsysStrID, subsysID, tuningUartId, "Tuning", frameSize, frameCount, lmDescription->descriptionNumber());
+			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->createFirmware(m->caption(), subsysStrID, subsysID, tuningUartId, "Tuning", frameSize, frameCount, lmDescription->descriptionNumber());
 			if (firmware == nullptr)
 			{
 				assert(firmware);

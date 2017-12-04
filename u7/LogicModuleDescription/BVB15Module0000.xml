@@ -3,7 +3,7 @@
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
-		<AppLogicUartID>257</AppLogicUartID>
+		<AppLogicUartID>0</AppLogicUartID>
 		<ConfigFrameCount>256</ConfigFrameCount>
 		<ConfigFrameSize>1016</ConfigFrameSize>
 		<ConfigUartID>5636</ConfigUartID>

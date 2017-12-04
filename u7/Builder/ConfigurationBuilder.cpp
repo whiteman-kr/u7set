@@ -365,7 +365,7 @@ namespace Builder
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
-		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(subsystemModules[0]->caption(), subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->descriptionNumber());
+		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->createFirmware(subsystemModules[0]->caption(), subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->descriptionNumber());
 
 		QJSValue jsFirmware = m_jsEngine.newQObject(firmware);
 		QQmlEngine::setObjectOwnership(firmware, QQmlEngine::CppOwnership);

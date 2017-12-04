@@ -124,10 +124,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		ModuleFirmwareWriter* get(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber);
-
-		quint64 firmwareUniqueId(int uartId, const QString &subsystemID, int lmNumber);
-		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
+		ModuleFirmwareWriter* createFirmware(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber);
 
 		// Properties
 		//
@@ -137,7 +134,7 @@ namespace Hardware
 		//
 	public:
 		std::map<QString, ModuleFirmwareWriter>& firmwares();
-		const ModuleFirmwareWriter& firmware(const QString& subsystemID) const;
+		ModuleFirmwareWriter& firmware(const QString& subsystemID);
 
 	private:
 		std::map<QString, ModuleFirmwareWriter> m_firmwares;
