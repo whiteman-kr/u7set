@@ -269,7 +269,7 @@ namespace Builder
 
 			Hardware::SubsystemStorage subsystems;
 
-			ok = loadSubsystems(db, lmModules, &subsystems);
+			ok = loadSubsystems(db, lmAndBvbModules, &subsystems);
 
 			if (ok == false)
 			{
@@ -580,7 +580,7 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicMoudles, Hardware::SubsystemStorage* subsystems)
+	bool BuildWorkerThread::loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicModules, Hardware::SubsystemStorage* subsystems)
 	{
 		if (subsystems == nullptr)
 		{
@@ -648,7 +648,7 @@ namespace Builder
 			int moduleVersion = -1;
 			QString LmDescriptionFile;
 
-			for (const Hardware::DeviceModule* lm : logicMoudles)
+			for (const Hardware::DeviceModule* lm : logicModules)
 			{
 				assert(lm);
 				assert(lm->isFSCConfigurationModule() == true);
@@ -677,6 +677,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 
@@ -692,6 +693,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 
@@ -714,6 +716,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 			}
@@ -1266,7 +1269,7 @@ namespace Builder
 				continue;
 			}
 
-			const Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
+			Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
 
 			quint64 genericUniqueId = 0;
 			bool first = true;
@@ -1288,7 +1291,7 @@ namespace Builder
 				}
 			}
 
-			buildWriter.firmwareCollection()->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			fw.setGenericUniqueId(lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
 		}

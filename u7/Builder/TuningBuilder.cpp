@@ -72,6 +72,11 @@ namespace Builder
                 return false;
             }
 
+			if (lmDescription->flashMemory().m_tuningWriteBitstream == false)
+			{
+				return true;
+			}
+
 			QString subsysStrID = m->propertyValue("SubsystemID").toString();
 
 			int channel = m->propertyValue("LMNumber").toInt();
@@ -90,7 +95,7 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->get(m->caption(), subsysStrID, subsysID, tuningUartId, "Tuning", frameSize, frameCount, lmDescription->descriptionNumber());
+			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->createFirmware(m->caption(), subsysStrID, subsysID, tuningUartId, "Tuning", frameSize, frameCount, lmDescription->descriptionNumber());
 			if (firmware == nullptr)
 			{
 				assert(firmware);

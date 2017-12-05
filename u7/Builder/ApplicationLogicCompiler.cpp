@@ -592,7 +592,7 @@ namespace Builder
 
 		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
 
-		Hardware::ModuleFirmwareWriter* firmware = m_resultWriter->firmwareCollection()->get(lmCaption, subsystemID, subsystemKey, appLogicUartId, "AppLogic", frameSize, frameCount, lmDescriptionNumber);
+		Hardware::ModuleFirmwareWriter* firmware = m_resultWriter->firmwareCollection()->createFirmware(lmCaption, subsystemID, subsystemKey, appLogicUartId, "AppLogic", frameSize, frameCount, lmDescriptionNumber);
 
 		if (firmware != nullptr)
 		{
