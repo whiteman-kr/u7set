@@ -16,7 +16,7 @@ public:
 	~ApplicationTabPage();
 
 	bool isFileLoaded() const;
-	Hardware::ModuleFirmware* configuration();
+	Hardware::ModuleFirmwareStorage* configuration();
 
 private slots:
 	void openFileClicked();
@@ -34,7 +34,7 @@ private:
 private:
 	Ui::ApplicationTabPage ui;
     //ConfigDataReader m_reader;
-	ModuleFirmware m_confFirmware;
+	ModuleFirmwareStorage m_confFirmware;
 };
 
 #endif // APPLICATIONTABPAGE_H

@@ -42,20 +42,17 @@ namespace Hardware
 	}
 
 
-	void ModuleFirmwareWriter::setDescriptionFields(int uartId, int descriptionVersion, const QStringList& fields)
+	void ModuleFirmwareWriter::setDescriptionFields(const QString& subsysId, int uartId, int descriptionVersion, const QStringList& fields)
 	{
-		if (m_channelData.find(uartId) == m_channelData.end())
-		{
-			m_channelData[uartId] = ModuleFirmwareChannelData();
-		}
+		ModuleChannelData& subsystemChannelData = m_moduleChannelData[subsysId];
 
-		ModuleFirmwareChannelData& data = m_channelData[uartId];
+		UartChannelData& data = subsystemChannelData.channelData[uartId];
 
 		data.descriptionFieldsVersion = descriptionVersion;
 		data.descriptionFields = fields;
 	}
 
-	bool ModuleFirmwareWriter::setChannelData(int uartId, QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log)
+	bool ModuleFirmwareWriter::setChannelData(const QString& subsysId, int uartId, QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log)
 	{
 		if (log == nullptr)
 		{
@@ -63,36 +60,49 @@ namespace Hardware
 			return false;
 		}
 
-		if (this->eepromFramePayloadSize(uartId) != frameSize)
+		// Check for correct firmware parameters
+
+		bool ok = false;
+
+		const ModuleFirmware& sf = moduleFirmware(subsysId, &ok);
+
+		if (ok == false)
 		{
-			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(this->eepromFramePayloadSize(uartId)));
+			log->errINT1000(QString("FirmwareWriter::setChannelData error, subsystem %1 does not exist.").arg(subsysId));
 			return false;
 		}
 
-		if (this->eepromFrameCount(uartId) != frameCount)
+		if (sf.eepromFramePayloadSize(uartId) != frameSize)
 		{
-			log->errINT1000(QString("ModuleFirmware::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(this->eepromFramePayloadSize(uartId)));
+			log->errINT1000(QString("FirmwareWriter::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(sf.eepromFramePayloadSize(uartId)));
 			return false;
 		}
 
-		if (m_channelData.find(uartId) == m_channelData.end())
+		if (sf.eepromFrameCount(uartId) != frameCount)
 		{
-			m_channelData[uartId] = ModuleFirmwareChannelData();
+			log->errINT1000(QString("FirmwareWriter::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(sf.eepromFramePayloadSize(uartId)));
+			return false;
 		}
 
-		ModuleFirmwareChannelData& data = m_channelData[uartId];
+		// Set the data for channel
 
-		if (data.binaryDataMap.find(channel) != data.binaryDataMap.end())
+		ModuleChannelData& subsystemChannelData = m_moduleChannelData[subsysId];
+
+		UartChannelData& moduleChannelData = subsystemChannelData.channelData[uartId];
+
+		// Check if data for this channel already exists
+
+		if (moduleChannelData.binaryDataMap.find(channel) != moduleChannelData.binaryDataMap.end())
 		{
 			log->errCFG3003(channel, equipmentID);
 			return false;
 		}
 
-		data.channelUniqueId[channel] = uniqueID;
+		moduleChannelData.uniqueIdMap[channel] = uniqueID;
 
-		data.descriptonData[channel] = descriptionData;
+		moduleChannelData.descriptonDataMap[channel] = descriptionData;
 
-		data.binaryDataMap[channel] = binaryData;
+		moduleChannelData.binaryDataMap[channel] = binaryData;
 
 		return true;
 	}
@@ -106,111 +116,122 @@ namespace Hardware
 			return false;
 		}
 
-		if (m_channelData.size() != 0)
+		if (storeChannelData(log) == false)
 		{
-			if (storeChannelData(log) == false)
-			{
-				return false;
-			}
+			return false;
 		}
 
 		QJsonObject jObject;
 
-		int firmwareRecordIndex = 0;
+		int subsystemIndex = 0;
 
-		int firmwareCount = 0;
+		QJsonArray jSubsystemArray;
 
-		for (auto it = m_firmwareData.begin(); it != m_firmwareData.end(); it++)
+		for (auto fwi : m_firmwares)
 		{
+			const QString& subsystemId = fwi.first;
 
-			int	uartId = it->first;
+			ModuleFirmware& fw = fwi.second;
 
-			firmwareCount++;
+			ModuleChannelData& moduleChannelData = m_moduleChannelData[subsystemId];
 
-			ModuleFirmwareData& data = it->second;
+			QJsonObject jSubsystem;
 
-			// Count CRC64 for all frames
+			std::vector<UartPair> uarts = fw.uartList();
 
-			for (int i = 0; i < eepromFrameCount(uartId); i++)
+			QJsonArray jFirmwaresArray;
+
+			for (auto it : uarts)
 			{
-				std::vector<quint8>& frame = data.frames[i];
+				int	uartId = it.first;
 
-				Crc::setDataBlockCrc(i, frame.data(), (int)frame.size());
-			}
-
-			// Save all frames to file
-
-			QJsonObject jFirmware;
-
-			const int frameStringWidth = 16;
-
-			for (int i = 0; i < eepromFrameCount(uartId); i++)
-			{
-				const std::vector<quint8>& frame = data.frames[i];
-
-				QJsonObject jFrame;
-
-				int dataSize = (int)frame.size();
-				int linesCount = ceil((float)dataSize / 2 / frameStringWidth);
-
-				int dataPos = 0;
-
-				const int numCharsCount = 4;					// number of symbols in number "0000" (4)
-				const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
-
-				QByteArray str;
-				str.resize(recCharsCount * frameStringWidth - 1);
-
-				char buf[10];
-
-				for (int l = 0; l < linesCount; l++)
+				bool ok = false;
+				ModuleFirmwareData& data = fw.firmwareData(uartId, &ok);
+				if (ok == false)
 				{
-					str.fill(' ');
-
-					for (int i = 0; i < frameStringWidth; i++)
-					{
-						quint16 value = ((quint16)frame[dataPos++] << 8);
-						if (dataPos >= dataSize)
-						{
-							assert(false);
-							break;
-						}
-
-						value |= frame[dataPos++];
-
-						snprintf(buf, sizeof(buf), "%hx", value);
-
-						int len = static_cast<int>(strlen(buf));
-
-						memset(str.data() + i * recCharsCount, '0', numCharsCount);
-						memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
-
-						if (dataPos >= dataSize)
-						{
-							str[i * recCharsCount + numCharsCount] = 0;
-							break;
-						}
-					}
-
-					jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
+					assert(false);
+					continue;
 				}
-				jFrame.insert("frameIndex", i);
 
+				UartChannelData& uartChannelData = moduleChannelData.channelData[uartId];
 
-				jFirmware.insert("z_frame_" + QString().number(i).rightJustified(4, '0'), jFrame);
-			}
+				// Count CRC64 for all frames
 
-			//description
-			//
-			if (m_channelData.find(uartId) != m_channelData.end())
-			{
+				int framesCount = static_cast<int>(data.frames.size());
 
-				ModuleFirmwareChannelData& cd = m_channelData[uartId];
-
-				if (cd.descriptionFields.empty() == false && cd.descriptionFields.empty() == false)
+				for (int i = 0; i < framesCount; i++)
 				{
+					std::vector<quint8>& frame = data.frames[i];
 
-					for (auto channelDescription : cd.descriptonData)
+					Crc::setDataBlockCrc(i, frame.data(), (int)frame.size());
+				}
+
+				// Save all frames to file
+
+				QJsonObject jFirmware;
+
+				const int frameStringWidth = 16;
+
+				for (int i = 0; i < framesCount; i++)
+				{
+					const std::vector<quint8>& frame = data.frames[i];
+
+					QJsonObject jFrame;
+
+					int dataSize = (int)frame.size();
+					int linesCount = ceil((float)dataSize / 2 / frameStringWidth);
+
+					int dataPos = 0;
+
+					const int numCharsCount = 4;					// number of symbols in number "0000" (4)
+					const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
+
+					QByteArray str;
+					str.resize(recCharsCount * frameStringWidth - 1);
+
+					char buf[10];
+
+					for (int l = 0; l < linesCount; l++)
+					{
+						str.fill(' ');
+
+						for (int i = 0; i < frameStringWidth; i++)
+						{
+							quint16 value = ((quint16)frame[dataPos++] << 8);
+							if (dataPos >= dataSize)
+							{
+								assert(false);
+								break;
+							}
+
+							value |= frame[dataPos++];
+
+							snprintf(buf, sizeof(buf), "%hx", value);
+
+							int len = static_cast<int>(strlen(buf));
+
+							memset(str.data() + i * recCharsCount, '0', numCharsCount);
+							memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
+
+							if (dataPos >= dataSize)
+							{
+								str[i * recCharsCount + numCharsCount] = 0;
+								break;
+							}
+						}
+
+						jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
+					}
+					jFrame.insert("frameIndex", i);
+
+					jFirmware.insert("z_frame_" + QString().number(i).rightJustified(4, '0'), jFrame);
+				}
+
+				//description
+				//
+				if (uartChannelData.descriptionFields.empty() == false)
+				{
+					for (auto channelDescription : uartChannelData.descriptonDataMap)
 					{
 						QJsonObject jDescription;
 
@@ -219,7 +240,7 @@ namespace Hardware
 
 						// Description header string
 
-						QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(cd.descriptionFields, true);
+						QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(uartChannelData.descriptionFields, true);
 
 						jDescription.insert("desc fields", descriptionHeaderString);
 
@@ -228,14 +249,14 @@ namespace Hardware
 						int diIndex = 0;
 						for (auto di : descriptionItems)
 						{
-							if (di.size() != cd.descriptionFields.size())
+							if (di.size() != uartChannelData.descriptionFields.size())
 							{
-								qDebug() << "number of data items (" << di.size() << ") must be equal to number of header items (" << cd.descriptionFields.size() << ")";
+								qDebug() << "number of data items (" << di.size() << ") must be equal to number of header items (" << uartChannelData.descriptionFields.size() << ")";
 								assert(false);
 								return false;
 							}
 
-							QString descriptionString = QString("%1;%2").arg(cd.descriptionFieldsVersion).arg(CsvFile::getCsvString(di, true));
+							QString descriptionString = QString("%1;%2").arg(uartChannelData.descriptionFieldsVersion).arg(CsvFile::getCsvString(di, true));
 
 							jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), descriptionString);
 						}
@@ -245,20 +266,30 @@ namespace Hardware
 							jFirmware.insert("z_description_channel_" + QString::number(channel).rightJustified(2, '0'), jDescription);
 						}
 					}
+
+					jFirmware.insert("uartId", uartId);
+
+					jFirmware.insert("uartType", data.uartType);
+
+					jFirmware.insert("eepromFramePayloadSize", data.frameSize);
+					jFirmware.insert("eepromFrameSize", data.frameSizeWithCRC);
+					jFirmware.insert("eepromFrameCount", static_cast<int>(data.frames.size()));
+
+					jFirmwaresArray.push_back(jFirmware);
 				}
 
-				jFirmware.insert("uartId", uartId);
 
-				jFirmware.insert("uartType", data.uartType);
+				jSubsystem.insert("z_firmwares", jFirmwaresArray);
 
-				jFirmware.insert("eepromFramePayloadSize", eepromFramePayloadSize(uartId));
-				jFirmware.insert("eepromFrameSize", eepromFrameSize(uartId));
-				jFirmware.insert("eepromFrameCount", eepromFrameCount(uartId));
+				jSubsystem.insert("caption", fw.caption());
+				jSubsystem.insert("lmDescriptionNumber", fw.lmDescriptionNumber());
+				jSubsystem.insert("subsystemId", subsystemId);
 			}
 
-
-			jObject.insert("z_firmware_" + QString::number(firmwareRecordIndex++), jFirmware);
+			jSubsystemArray.push_back(jSubsystem);
 		}
+
+		jObject.insert("z_subsystems", jSubsystemArray);
 
 		// properties
 		//
@@ -273,64 +304,90 @@ namespace Hardware
 
 		QString m_buildTime = QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
 
+		QStringList subsystemList = subsystemsList();
+		QString subsystems;
+		for (const QString& s : subsystemList)
+		{
+			subsystems.push_back(s + " ");
+		}
+
+		jObject.insert("subsystems", subsystems.trimmed());
 		jObject.insert("userName", m_userName);
 		jObject.insert("projectName", m_projectName);
-		jObject.insert("caption", caption());
-		jObject.insert("subsysId", subsysId());
 		jObject.insert("buildNumber", m_buildNumber);
-		jObject.insert("buildConfig", m_buildConfig);
-		jObject.insert("lmDescriptionNumber", m_lmDescriptionNumber);
+		jObject.insert("buildConfig", m_debug ? "debug" : "release");
 		jObject.insert("changesetId", m_changesetId);
 		jObject.insert("fileVersion", fileVersion());
 		jObject.insert("buildSoftware", m_buildSoftware);
 		jObject.insert("buildTime", m_buildTime);
-		jObject.insert("firmwaresCount", firmwareCount);
 
 		dest = QJsonDocument(jObject).toJson();
 
 		return true;
 	}
 
-
-	bool ModuleFirmwareWriter::setData8(int uartID, int frameIndex, int offset, quint8 data)
+	void ModuleFirmwareWriter::setScriptFirmware(QString subsysId, int uartID)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		scriptFirmware = nullptr;
+		scriptFirmwareData = nullptr;
+
+		bool ok = false;
+		ModuleFirmware& fw = moduleFirmware(subsysId, &ok);
+		if (ok == false)
 		{
 			assert(false);
+			return;
+		}
+
+		ModuleFirmwareData& fd = fw.firmwareData(uartID, &ok);
+		if (ok == false)
+		{
+			assert(false);
+			return;
+		}
+
+		ModuleChannelData& cd = m_moduleChannelData[subsysId];
+
+		scriptFirmware = &fw;
+		scriptFirmwareData = &fd;
+		scriptUartChannelData = &cd.channelData[uartID];
+	}
+
+	bool ModuleFirmwareWriter::setData8(int frameIndex, int offset, quint8 data)
+	{
+		if (scriptFirmwareData == nullptr)
+		{
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
 		}
 
-		quint8* ptr = static_cast<quint8*>(fd.frames[frameIndex].data() + offset);
+		quint8* ptr = static_cast<quint8*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = data;
 
 		return true;
 	}
 
-	bool ModuleFirmwareWriter::setData16(int uartID, int frameIndex, int offset, quint16 data)
+	bool ModuleFirmwareWriter::setData16(int frameIndex, int offset, quint16 data)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -338,26 +395,24 @@ namespace Hardware
 
 		quint16 dataBE= qToBigEndian(data);
 
-		quint16* ptr = reinterpret_cast<quint16*>(fd.frames[frameIndex].data() + offset);
+		quint16* ptr = reinterpret_cast<quint16*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = dataBE;
 
 		return true;
 	}
 
-	bool ModuleFirmwareWriter::setData32(int uartID, int frameIndex, int offset, quint32 data)
+	bool ModuleFirmwareWriter::setData32(int frameIndex, int offset, quint32 data)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -365,26 +420,25 @@ namespace Hardware
 
 		quint32 dataBE = qToBigEndian(data);
 
-		quint32* ptr = reinterpret_cast<quint32*>(fd.frames[frameIndex].data() + offset);
+		quint32* ptr = reinterpret_cast<quint32*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = dataBE;
 
 		return true;
 	}
 
-	bool ModuleFirmwareWriter::setData64(int uartID, int frameIndex, int offset, quint64 data)
+	bool ModuleFirmwareWriter::setData64(int frameIndex, int offset, quint64 data)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmware);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(data)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(data)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -392,80 +446,74 @@ namespace Hardware
 
 		quint64 dataBE = qToBigEndian(data);
 
-		quint64* ptr = reinterpret_cast<quint64*>(fd.frames[frameIndex].data() + offset);
+		quint64* ptr = reinterpret_cast<quint64*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = dataBE;
 
 		return true;
 	}
 
-	quint8 ModuleFirmwareWriter::data8(int uartID, int frameIndex, int offset)
+	quint8 ModuleFirmwareWriter::data8(int frameIndex, int offset)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint8)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(quint8)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		return static_cast<quint8>(*(fd.frames[frameIndex].data() + offset));
+		return static_cast<quint8>(*(scriptFirmwareData->frames[frameIndex].data() + offset));
 
 	}
 
-	quint16 ModuleFirmwareWriter::data16(int uartID, int frameIndex, int offset)
+	quint16 ModuleFirmwareWriter::data16(int frameIndex, int offset)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint16)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(quint16)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		std::vector<quint8>& frameData = fd.frames[frameIndex];
+		std::vector<quint8>& frameData = scriptFirmwareData->frames[frameIndex];
 
 		quint16 data = *(reinterpret_cast<quint16*>(frameData.data() + offset));
 		return qFromBigEndian(data);
 	}
 
-	quint32 ModuleFirmwareWriter::data32(int uartID, int frameIndex, int offset)
+	quint32 ModuleFirmwareWriter::data32(int frameIndex, int offset)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint32)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(quint32)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		std::vector<quint8>& frameData = fd.frames[frameIndex];
+		std::vector<quint8>& frameData = scriptFirmwareData->frames[frameIndex];
 
 		quint32 data = *(reinterpret_cast<quint32*>(frameData.data() + offset));
 		return qFromBigEndian(data);
@@ -487,45 +535,41 @@ namespace Hardware
 		return vl;
 	}
 
-	QString ModuleFirmwareWriter::storeCrc64(int uartID, int frameIndex, int start, int count, int offset)
+	QString ModuleFirmwareWriter::storeCrc64(int frameIndex, int start, int count, int offset)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint64)) || start + count > eepromFramePayloadSize(uartID))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(quint64)) || start + count > scriptFirmwareData->frameSize)
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return QString();
 		}
 
-		quint64 result = Crc::crc64(fd.frames[frameIndex].data() + start, count);
-		setData64(uartID, frameIndex, offset, result);
+		quint64 result = Crc::crc64(scriptFirmwareData->frames[frameIndex].data() + start, count);
+		setData64(frameIndex, offset, result);
 
 		return QString::number(result, 16);
 	}
 
-	QString ModuleFirmwareWriter::storeHash64(int uartID, int frameIndex, int offset, QString dataString)
+	QString ModuleFirmwareWriter::storeHash64(int frameIndex, int offset, QString dataString)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				offset > (int)(eepromFramePayloadSize(uartID) - sizeof(quint64)))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->frameSize - sizeof(quint64)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return QString("");
@@ -534,7 +578,7 @@ namespace Hardware
 		QByteArray bytes = dataString.toUtf8();
 
 		quint64 result = CUtils::calcHash(bytes.data(), bytes.size());
-		setData64(uartID, frameIndex, offset, result);
+		setData64(frameIndex, offset, result);
 
 		return QString::number(result, 16);
 
@@ -542,38 +586,49 @@ namespace Hardware
 
 	}
 
-	quint32 ModuleFirmwareWriter::calcCrc32(int uartID, int frameIndex, int start, int count)
+	quint32 ModuleFirmwareWriter::calcCrc32(int frameIndex, int start, int count)
 	{
-		if (m_firmwareData.find(uartID) == m_firmwareData.end())
+		if (scriptFirmwareData == nullptr)
 		{
-			assert(false);
+			assert(scriptFirmwareData);
 			return false;
 		}
 
-		ModuleFirmwareData& fd = m_firmwareData[uartID];
-
 		//
 
-		if (frameIndex >= static_cast<int>(fd.frames.size()) ||
-				start + count > eepromFramePayloadSize(uartID))
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				start + count > scriptFirmwareData->frameSize)
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
 		}
 
-		quint64 result = Crc::crc64(fd.frames[frameIndex].data() + start, count);
+		quint64 result = Crc::crc64(scriptFirmwareData->frames[frameIndex].data() + start, count);
 
 		return result & 0xffffffff;
 	}
 
-	void ModuleFirmwareWriter::jsSetDescriptionFields(int uartID, int descriptionVersion, QString fields)
+	void ModuleFirmwareWriter::jsSetDescriptionFields(int descriptionVersion, QString fields)
 	{
-		setDescriptionFields(uartID, descriptionVersion, fields.split(';'));
+		if (scriptFirmware == nullptr || scriptFirmwareData == nullptr)
+		{
+			assert(scriptFirmware);
+			assert(scriptFirmwareData);
+			return;
+		}
+
+		setDescriptionFields(scriptFirmware->subsysId(), scriptFirmwareData->uartId , descriptionVersion, fields.split(';'));
 	}
 
 
-	void ModuleFirmwareWriter::jsAddDescription(int uartID, int channel, QString descriptionCSV)
+	void ModuleFirmwareWriter::jsAddDescription(int channel, QString descriptionCSV)
 	{
+		if (scriptUartChannelData == nullptr)
+		{
+			assert(scriptUartChannelData);
+			return;
+		}
+
 		QStringList l = descriptionCSV.split(';');
 
 		QVariantList v;
@@ -582,23 +637,15 @@ namespace Hardware
 			v.append(s);
 		}
 
-		if (m_channelData.find(uartID) == m_channelData.end())
-		{
-			assert(false);
-			return;
-		}
-
-		ModuleFirmwareChannelData& cd = m_channelData[uartID];
-
 		//
 
-		auto dd = cd.descriptonData.find(channel);
-		if (dd == cd.descriptonData.end())
+		auto dd = scriptUartChannelData->descriptonDataMap.find(channel);
+		if (dd == scriptUartChannelData->descriptonDataMap.end())
 		{
 			std::vector<QVariantList> descriptonData;
 			descriptonData.push_back(v);
 
-			cd.descriptonData[channel] = descriptonData;
+			scriptUartChannelData->descriptonDataMap[channel] = descriptonData;
 
 		}
 		else
@@ -609,42 +656,44 @@ namespace Hardware
 
 	}
 
-	void ModuleFirmwareWriter::jsSetUniqueID(int uartID, int lmNumber, quint64 uniqueID)
+	void ModuleFirmwareWriter::jsSetUniqueID(int lmNumber, quint64 uniqueID)
 	{
-		if (m_channelData.find(uartID) == m_channelData.end())
+		if (scriptUartChannelData == nullptr)
 		{
-			assert(false);
+			assert(scriptUartChannelData);
 			return;
 		}
 
-		ModuleFirmwareChannelData& cd = m_channelData[uartID];
+		scriptUartChannelData->uniqueIdMap[lmNumber] = uniqueID;
 
-		cd.channelUniqueId[lmNumber] = uniqueID;
 	}
 
 
 	void ModuleFirmwareWriter::writeLog(QString logString)
 	{
-		m_scriptLog.append(logString);
+		QByteArray& log = m_scriptLog[scriptFirmware->subsysId()];
+
+		log.append(logString);
 	}
 
-	const QByteArray& ModuleFirmwareWriter::scriptLog() const
+	const QByteArray& ModuleFirmwareWriter::scriptLog(const QString& subsysId) const
 	{
-		return m_scriptLog;
-	}
-
-	quint64 ModuleFirmwareWriter::uniqueID(int uartId, int lmNumber) const
-	{
-		if (m_channelData.find(uartId) == m_channelData.end())
+static QByteArray err;
+		if (m_scriptLog.find(subsysId) == m_scriptLog.end())
 		{
-			assert(false);
-			return 0;
+			return err;
 		}
+		return m_scriptLog.at(subsysId);
+	}
 
-		const ModuleFirmwareChannelData& data = m_channelData.at(uartId);
+	quint64 ModuleFirmwareWriter::uniqueID(const QString& subsysId, int uartId, int lmNumber) const
+	{
+		const ModuleChannelData& subsystemChannelData = m_moduleChannelData.at(subsysId);
 
-		auto it = data.channelUniqueId.find(lmNumber);
-		if (it == data.channelUniqueId.end())
+		const UartChannelData& data = subsystemChannelData.channelData.at(uartId);
+
+		auto it = data.uniqueIdMap.find(lmNumber);
+		if (it == data.uniqueIdMap.end())
 		{
 			assert(false);
 			return 0;
@@ -653,27 +702,41 @@ namespace Hardware
 		return it->second;
 	}
 
-	void ModuleFirmwareWriter::setGenericUniqueId(int lmNumber, quint64 genericUniqueId)
+	void ModuleFirmwareWriter::setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId)
 	{
+		bool ok = false;
 
-		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
+		ModuleFirmware& sf = moduleFirmware(subsysId, &ok);
+		if (ok == false)
 		{
+			assert(false);
+			return;
+		}
 
+		ModuleChannelData& subsystemChannelData = m_moduleChannelData[subsysId];
+
+		for (auto it = subsystemChannelData.channelData.begin(); it != subsystemChannelData.channelData.end(); it++)
+		{
 			int uartId = it->first;
 
-			ModuleFirmwareChannelData& channelData = it->second;
+			UartChannelData& channelData = it->second;
 
 			if (channelData.binaryDataMap.empty() == true)
 			{
 				// This case is used for Configuration data (data is stored in frames, no binary data exists)
 
-				if (m_firmwareData.find(uartId) == m_firmwareData.end())
+				if (sf.uartExists(uartId) == false)
 				{
 					assert(false);
 					return;
 				}
 
-				ModuleFirmwareData& data = m_firmwareData[uartId];
+				ModuleFirmwareData& data = sf.firmwareData(uartId, &ok);
+				if (ok == false)
+				{
+					assert(false);
+					return;
+				}
 
 				const int ConfigDataStartFrame = 2;
 
@@ -703,13 +766,13 @@ namespace Hardware
 			{
 				// This case is used for Application and Tuning data (data is stored in Channel Data)
 
-				if (channelData.channelUniqueId.find(lmNumber) == channelData.channelUniqueId.end())
+				if (channelData.uniqueIdMap.find(lmNumber) == channelData.uniqueIdMap.end())
 				{
 					assert(false);
 					return;
 				}
 
-				channelData.channelUniqueId[lmNumber] = genericUniqueId;
+				channelData.uniqueIdMap[lmNumber] = genericUniqueId;
 			}
 		}
 	}
@@ -725,262 +788,211 @@ namespace Hardware
 		const int storageConfigFrame = 1;
 		const int startDataFrame = 2;
 
-		quint16 ssKeyValue = m_ssKey << 6;
-
-		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
+		for (auto it : m_firmwares)
 		{
-			int uartId = it->first;
+			ModuleFirmware& fw = it.second;
 
-			const ModuleFirmwareChannelData& channelData = it->second;
+			quint16 ssKeyValue = fw.ssKey() << 6;
 
-			if (channelData.binaryDataMap.empty() == true)
+			ModuleChannelData& cd = m_moduleChannelData[fw.subsysId()];
+
+			for (auto it = cd.channelData.begin(); it != cd.channelData.end(); it++)
 			{
-				// no channel data supplied
-				//
-				continue;
-			}
+				// Check if channel data exists for current uartId
 
-			if (eepromFrameCount(uartId) < 3)
-			{
-				log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(subsysId()));
-				return false;
-			}
+				const UartChannelData& channelData = it->second;
 
-
-			// sort channel data by growing channel number
-			//
-			const int LMNumber_Min = 1;
-			const int LMNumber_Max = 64;
-
-			std::vector<std::pair<int, int>> channelNumbersAndSize;
-			for (auto it = channelData.binaryDataMap.begin(); it != channelData.binaryDataMap.end(); it++)
-			{
-				int channel = it->first;
-
-				if (channel < LMNumber_Min || channel > LMNumber_Max)
+				if (channelData.binaryDataMap.empty() == true)
 				{
-					log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: Wrong LM number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
-					return false;
-				}
-
-				const QByteArray& data = it->second;
-
-				double fSize = (double)data.size() / eepromFramePayloadSize(uartId);
-				fSize = ceil(fSize);
-				int size = (int)fSize;
-
-				channelNumbersAndSize.push_back(std::make_pair(channel, size));
-			}
-			std::sort(channelNumbersAndSize.begin(), channelNumbersAndSize.end(), [](std::pair<int, int> a, std::pair<int, int> b)
-			{
-				return a.first < b.first;
-			});
-
-			// place channel data to frames
-			//
-			if (m_firmwareData.find(uartId) == m_firmwareData.end())
-			{
-				assert(false);
-				return false;
-			}
-
-			ModuleFirmwareData& firmwareData = m_firmwareData[uartId];
-
-			std::vector<int> channelStartFrame;
-
-			int frame = startDataFrame;
-			int maxChannel = 1;
-
-			for (size_t c = 0; c < channelNumbersAndSize.size(); c++)
-			{
-				int channel = channelNumbersAndSize[c].first;
-				if (channel > maxChannel)
-				{
-					maxChannel = channel;
-				}
-				int size = (quint16)channelNumbersAndSize[c].second;
-
-				if (frame >= eepromFrameCount(uartId))
-				{
-					log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(eepromFrameCount(uartId)));
-					return false;
-				}
-
-				channelStartFrame.push_back(frame);
-
-				// channel data
-				//
-				const QByteArray& binaryData = channelData.binaryDataMap.at(channel);
-
-				quint64 uniqueId = channelData.channelUniqueId.at(channel);
-
-				// channel service information
-				//
-
-				quint8* ptr = firmwareData.frames[frame].data();
-
-				*(quint16*)ptr = qToBigEndian((quint16)0x0001);		//Channel configuration version
-				ptr += sizeof(quint16);
-
-				*(quint16*)ptr = qToBigEndian((quint16)uartId);	//Data type (configuration)
-				ptr += sizeof(quint16);
-
-				if (uniqueId == 0)
-				{
-					QByteArray bytes = subsysId().toUtf8();
-
-					*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
-					ptr += sizeof(quint64);
-				}
-				else
-				{
-					*(quint64*)ptr = qToBigEndian(uniqueId);
-					ptr += sizeof(quint64);
-				}
-
-				*(quint16*)ptr = qToBigEndian((quint16)size);           // Frames count
-				ptr += sizeof(quint16);
-
-				frame++;
-
-				if (size != 0)
-				{
-					// store channel data in frames
+					// no channel data supplied
 					//
-					int index = 0;
-					for (int i = 0; i < binaryData.size(); i++)
+					continue;
+				}
+
+				int uartId = it->first;
+
+				if (fw.eepromFrameCount(uartId) < 3)
+				{
+					log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, subsystem %1: At least 3 frames needed.").arg(fw.subsysId()));
+					return false;
+				}
+
+				// sort channel data by growing channel number
+				//
+				const int LMNumber_Min = 1;
+				const int LMNumber_Max = 64;
+
+				std::vector<std::pair<int, int>> channelNumbersAndSize;
+				for (auto it = channelData.binaryDataMap.begin(); it != channelData.binaryDataMap.end(); it++)
+				{
+					int channel = it->first;
+
+					if (channel < LMNumber_Min || channel > LMNumber_Max)
 					{
-						if (index >= eepromFramePayloadSize(uartId))
-						{
-							// data is bigger than frame - switch to the next frame
-							//
-							frame++;
-							index = 0;
-						}
-
-						if (frame >= eepromFrameCount(uartId))
-						{
-							log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(subsysId()).arg(channel).arg(frame).arg(eepromFrameCount(uartId)));
-							return false;
-						}
-
-						firmwareData.frames[frame][index++] = binaryData[i];
+						log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, LM number %1: Wrong LM number, expected %2..%3.").arg(channel).arg(LMNumber_Min).arg(LMNumber_Max));
+						return false;
 					}
 
-					//switch to the next frame
-					//
-					frame++;
+					const QByteArray& data = it->second;
+
+					double fSize = (double)data.size() / fw.eepromFramePayloadSize(uartId);
+					fSize = ceil(fSize);
+					int size = (int)fSize;
+
+					channelNumbersAndSize.push_back(std::make_pair(channel, size));
 				}
-			}
+				std::sort(channelNumbersAndSize.begin(), channelNumbersAndSize.end(), [](std::pair<int, int> a, std::pair<int, int> b)
+				{
+					return a.first < b.first;
+				});
+
+				// place channel data to frames
+
+				bool ok = false;
+
+				ModuleFirmwareData& firmwareData = fw.firmwareData(uartId, &ok);
+				if (ok == false)
+				{
+					assert(false);
+					return false;
+				}
+
+				std::vector<int> channelStartFrame;
+
+				int frame = startDataFrame;
+				int maxChannel = 1;
+
+				for (size_t c = 0; c < channelNumbersAndSize.size(); c++)
+				{
+					int channel = channelNumbersAndSize[c].first;
+					if (channel > maxChannel)
+					{
+						maxChannel = channel;
+					}
+					int size = (quint16)channelNumbersAndSize[c].second;
+
+					if (frame >= fw.eepromFrameCount(uartId))
+					{
+						log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(fw.subsysId()).arg(channel).arg(frame).arg(fw.eepromFrameCount(uartId)));
+						return false;
+					}
+
+					channelStartFrame.push_back(frame);
+
+					// channel data
+					//
+					const QByteArray& binaryData = channelData.binaryDataMap.at(channel);
+
+					quint64 uniqueId = channelData.uniqueIdMap.at(channel);
+
+					// channel service information
+					//
+
+					quint8* ptr = firmwareData.frames[frame].data();
+
+					*(quint16*)ptr = qToBigEndian((quint16)0x0001);		//Channel configuration version
+					ptr += sizeof(quint16);
+
+					*(quint16*)ptr = qToBigEndian((quint16)uartId);	//Data type (configuration)
+					ptr += sizeof(quint16);
+
+					if (uniqueId == 0)
+					{
+						QByteArray bytes = fw.subsysId().toUtf8();
+
+						*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
+						ptr += sizeof(quint64);
+					}
+					else
+					{
+						*(quint64*)ptr = qToBigEndian(uniqueId);
+						ptr += sizeof(quint64);
+					}
+
+					*(quint16*)ptr = qToBigEndian((quint16)size);           // Frames count
+					ptr += sizeof(quint16);
+
+					frame++;
+
+					if (size != 0)
+					{
+						// store channel data in frames
+						//
+						int index = 0;
+						for (int i = 0; i < binaryData.size(); i++)
+						{
+							if (index >= fw.eepromFramePayloadSize(uartId))
+							{
+								// data is bigger than frame - switch to the next frame
+								//
+								frame++;
+								index = 0;
+							}
+
+							if (frame >= fw.eepromFrameCount(uartId))
+							{
+								log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(fw.subsysId()).arg(channel).arg(frame).arg(fw.eepromFrameCount(uartId)));
+								return false;
+							}
+
+							firmwareData.frames[frame][index++] = binaryData[i];
+						}
+
+						//switch to the next frame
+						//
+						frame++;
+					}
+				}
 
 
-			// fill storage config frame
-			//
-			quint8* ptr = firmwareData.frames[storageConfigFrame].data();
+				// fill storage config frame
+				//
+				quint8* ptr = firmwareData.frames[storageConfigFrame].data();
 
-			*(quint16*)ptr = qToBigEndian((quint16)0xCA70);	// Configuration reference mark
-			ptr += sizeof(quint16);
+				*(quint16*)ptr = qToBigEndian((quint16)0xCA70);	// Configuration reference mark
+				ptr += sizeof(quint16);
 
-			*(quint16*)ptr = qToBigEndian((quint16)0x0001);	// Configuration structure version
-			ptr += sizeof(quint16);
+				*(quint16*)ptr = qToBigEndian((quint16)0x0001);	// Configuration structure version
+				ptr += sizeof(quint16);
 
-			*(quint16*)ptr = qToBigEndian((quint16)ssKeyValue);	// Subsystem key
-			ptr += sizeof(quint16);
+				*(quint16*)ptr = qToBigEndian((quint16)ssKeyValue);	// Subsystem key
+				ptr += sizeof(quint16);
 
-			*(quint16*)ptr = qToBigEndian((quint16)m_buildNumber);	// Build number
-			ptr += sizeof(quint16);
+				*(quint16*)ptr = qToBigEndian((quint16)m_buildNumber);	// Build number
+				ptr += sizeof(quint16);
 
-			*(quint16*)ptr = qToBigEndian((quint16)m_lmDescriptionNumber);	// Description number
-			ptr += sizeof(quint16);	//reserved
+				*(quint16*)ptr = qToBigEndian((quint16)fw.lmDescriptionNumber());	// Description number
+				ptr += sizeof(quint16);	//reserved
 
-			ptr += sizeof(quint32);	//reserved
+				ptr += sizeof(quint32);	//reserved
 
-			*(quint16*)ptr = qToBigEndian((quint16)maxChannel);	// Configuration channels quantity
-			ptr += sizeof(quint16);
+				*(quint16*)ptr = qToBigEndian((quint16)maxChannel);	// Configuration channels quantity
+				ptr += sizeof(quint16);
 
-			if (channelNumbersAndSize.size() != channelStartFrame.size())
-			{
-				assert(channelNumbersAndSize.size() == channelStartFrame.size());
-				return false;
-			}
+				if (channelNumbersAndSize.size() != channelStartFrame.size())
+				{
+					assert(channelNumbersAndSize.size() == channelStartFrame.size());
+					return false;
+				}
 
-			quint8* ptrChannelTable = ptr;
+				quint8* ptrChannelTable = ptr;
 
-			for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
-			{
-				int channel = channelNumbersAndSize[i].first;
+				for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
+				{
+					int channel = channelNumbersAndSize[i].first;
 
-				quint8* ptrChannel = ptrChannelTable + (sizeof(quint16) * 3) *(channel - 1);
+					quint8* ptrChannel = ptrChannelTable + (sizeof(quint16) * 3) *(channel - 1);
 
-				quint16 startFrame = (quint16)channelStartFrame[i];
+					quint16 startFrame = (quint16)channelStartFrame[i];
 
-				*(quint16*)ptrChannel = qToBigEndian(startFrame);
-				ptrChannel += sizeof(quint16);
+					*(quint16*)ptrChannel = qToBigEndian(startFrame);
+					ptrChannel += sizeof(quint16);
 
-				ptrChannel += sizeof(quint32);
+					ptrChannel += sizeof(quint32);
+				}
 			}
 		}
 
 		return true;
 	}
-
-	//
-	//
-	// ModuleFirmwareCollection
-	//
-	//
-
-	ModuleFirmwareCollection::ModuleFirmwareCollection():
-		m_buildNo(0),
-		m_debug(false),
-		m_changesetId(0)
-	{
-	}
-
-	ModuleFirmwareCollection::~ModuleFirmwareCollection()
-	{
-	}
-
-	void ModuleFirmwareCollection::init(const QString& projectName, const QString& userName, int buildNo, bool debug, int changesetId)
-	{
-		m_projectName = projectName;
-		m_userName = userName;
-		m_buildNo = buildNo;
-		m_debug = debug;
-		m_changesetId = changesetId;
-	}
-
-	ModuleFirmwareWriter* ModuleFirmwareCollection::createFirmware(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber)
-	{
-		bool newFirmware = m_firmwares.count(subsysId) == 0;
-
-		ModuleFirmwareWriter& fw = m_firmwares[subsysId];
-
-		if (newFirmware == true || fw.uartExists(uartId) == false)
-		{
-			fw.init(uartId, uartType, frameSize, frameCount, caption, subsysId, ssKey, lmDescriptionNumber, m_projectName, m_userName,
-					m_buildNo, m_debug ? "debug" : "release", m_changesetId);
-		}
-
-		return &fw;
-	}
-
-	std::map<QString, ModuleFirmwareWriter>& ModuleFirmwareCollection::firmwares()
-	{
-		return m_firmwares;
-	}
-
-	ModuleFirmwareWriter& ModuleFirmwareCollection::firmware(const QString& subsystemID)
-	{
-static ModuleFirmwareWriter err;
-
-		if (m_firmwares.find(subsystemID) == m_firmwares.end())
-		{
-			return err;
-		}
-
-		return m_firmwares.at(subsystemID);
-	}
-
-
 }

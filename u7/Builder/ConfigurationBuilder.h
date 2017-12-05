@@ -45,7 +45,7 @@ namespace Builder
 	public:
 		ConfigurationBuilder() = delete;
         ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, const std::vector<Hardware::DeviceModule *> &lmModules, LmDescriptionSet* lmDescriptions, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
-							 Hardware::OptoModuleStorage *opticModuleStorage, Hardware::ModuleFirmwareCollection* firmwareCollection, IssueLogger* log);
+							 Hardware::OptoModuleStorage *opticModuleStorage, Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger* log);
 		virtual ~ConfigurationBuilder();
 
 		bool build(BuildResultWriter &buildResultWriter);
@@ -65,7 +65,7 @@ namespace Builder
 
 
 	private:
-		Hardware::ModuleFirmwareCollection* m_firmwareCollection = nullptr;
+		Hardware::ModuleFirmwareWriter* m_firmwareWriter = nullptr;
 
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
 		DbController* m_db = nullptr;

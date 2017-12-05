@@ -14,14 +14,6 @@
 namespace Hardware
 {
 
-    ModuleFirmware::ModuleFirmware()
-	{
-	}
-
-	ModuleFirmware::~ModuleFirmware()
-	{
-	}
-
 	void ModuleFirmware::init(int uartId,
 							  QString uartType,
 							  int frameSize,
@@ -29,23 +21,12 @@ namespace Hardware
 							  QString caption,
 							  QString subsysId,
 							  int ssKey,
-							  int lmDescriptionNumber,
-							  QString projectName,
-							  QString userName,
-							  int buildNumber,
-							  QString buildConfig,
-							  int changesetId)
+							  int lmDescriptionNumber)
 	{
 		m_caption = caption;
 		m_subsysId = subsysId;
 		m_ssKey = ssKey;
 		m_lmDescriptionNumber = lmDescriptionNumber;
-		m_projectName = projectName;
-		m_userName = userName;
-		m_buildNumber = buildNumber;
-		m_buildConfig = buildConfig;
-		m_changesetId = changesetId;
-		m_fileVersion = maxFileVersion();
 
 		ModuleFirmwareData data;
 
@@ -65,7 +46,146 @@ namespace Hardware
 		return;
 	}
 
-	bool ModuleFirmware::load(QString fileName, QString* errorCode)
+	bool ModuleFirmware::isEmpty() const
+	{
+		return m_firmwareData.size() == 0;
+	}
+
+	std::vector<UartPair> ModuleFirmware::uartList() const
+	{
+		std::vector<UartPair> result;
+
+		for (auto it : m_firmwareData)
+		{
+			ModuleFirmwareData& data = it.second;
+			result.push_back(std::make_pair(it.first, data.uartType));
+		}
+
+		return result;
+	}
+
+	bool ModuleFirmware::uartExists(int uartId) const
+	{
+		return m_firmwareData.find(uartId) != m_firmwareData.end();
+	}
+
+	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return it->second.frameSize;
+	}
+
+	int ModuleFirmware::eepromFrameSize(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return it->second.frameSizeWithCRC;
+	}
+
+	int ModuleFirmware::eepromFrameCount(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return static_cast<int>(it->second.frames.size());
+	}
+
+	ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok)
+	{
+static ModuleFirmwareData err;
+		if (ok == false)
+		{
+			assert(ok);
+			return err;
+		}
+
+		if (uartExists(uartId) == false)
+		{
+			*ok = false;
+			return err;
+		}
+
+		*ok = true;
+		return m_firmwareData[uartId];
+	}
+
+	const std::vector<quint8>& ModuleFirmware::frame(int uartId, int frameIndex) const
+	{
+static const std::vector<quint8> err;
+
+		if (frameIndex < 0 || frameIndex >= eepromFrameCount(uartId))
+		{
+			assert(frameIndex >= 0 && frameIndex < eepromFrameCount(uartId));
+			return err;
+		}
+
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return err;
+		}
+
+		return it->second.frames[frameIndex];
+	}
+
+	QString ModuleFirmware::caption() const
+	{
+		return m_caption;
+	}
+
+	QString ModuleFirmware::subsysId() const
+	{
+		return m_subsysId;
+	}
+
+	quint16 ModuleFirmware::ssKey() const
+	{
+		return m_ssKey;
+	}
+
+	int ModuleFirmware::lmDescriptionNumber() const
+	{
+		return m_lmDescriptionNumber;
+	}
+
+	//
+	// ModuleFirmware
+	//
+
+	ModuleFirmwareStorage::ModuleFirmwareStorage()
+	{
+	}
+
+	ModuleFirmwareStorage::~ModuleFirmwareStorage()
+	{
+	}
+
+	void ModuleFirmwareStorage::setProjectInfo(const QString& projectName, const QString& userName, int buildNumber, bool debug, int changesetId)
+	{
+		m_projectName = projectName;
+		m_userName = userName;
+		m_buildNumber = buildNumber;
+		m_debug = debug;
+		m_changesetId = changesetId;
+	}
+
+	bool ModuleFirmwareStorage::load(QString fileName, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
@@ -89,7 +209,7 @@ namespace Hardware
 		return parse(data, true, errorCode);
 	}
 
-	bool ModuleFirmware::load(const QByteArray& data, QString* errorCode)
+	bool ModuleFirmwareStorage::load(const QByteArray& data, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
@@ -100,7 +220,7 @@ namespace Hardware
 		return parse(data, true, errorCode);
 	}
 
-	bool ModuleFirmware::loadHeader(QString fileName, QString* errorCode)
+	bool ModuleFirmwareStorage::loadHeader(QString fileName, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
@@ -124,7 +244,55 @@ namespace Hardware
 		return parse(data, false, errorCode);
 	}
 
-	bool ModuleFirmware::parse(const QByteArray& data, bool readDataFrames, QString* errorCode)
+	QStringList ModuleFirmwareStorage::subsystemsList()
+	{
+		QStringList result;
+
+		for (auto fw : m_firmwares)
+		{
+			result.push_back(fw.first);
+		}
+
+		return result;
+
+	}
+
+	void ModuleFirmwareStorage::createSubsystemFirmware(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber)
+	{
+		bool newSubsystem = m_firmwares.count(subsysId) == 0;
+
+		ModuleFirmware& subsystemData = m_firmwares[subsysId];
+
+		if (newSubsystem == true || subsystemData.uartExists(uartId) == false)
+		{
+			subsystemData.init(uartId, uartType, frameSize, frameCount, caption, subsysId, ssKey, lmDescriptionNumber);
+		}
+
+		return;
+	}
+
+	ModuleFirmware& ModuleFirmwareStorage::moduleFirmware(const QString& subsysId, bool* ok)
+	{
+static ModuleFirmware err;
+		if (ok == nullptr)
+		{
+			assert(ok);
+			return err;
+		}
+
+		if (m_firmwares.find(subsysId) == m_firmwares.end())
+		{
+			*ok = false;
+			return err;
+		}
+
+		*ok = true;
+		return m_firmwares.at(subsysId);
+	}
+
+
+
+	bool ModuleFirmwareStorage::parse(const QByteArray& data, bool readDataFrames, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
@@ -132,7 +300,7 @@ namespace Hardware
 			return false;
 		}
 
-		m_firmwareData.clear();
+		m_firmwares.clear();
 
 		QJsonParseError error;
 		QJsonDocument document = QJsonDocument::fromJson(data, &error);
@@ -156,15 +324,15 @@ namespace Hardware
 
 		switch (m_fileVersion)
 		{
-		case 1:
-			return parse_version1(jConfig, readDataFrames, errorCode);
+		//case 1:
+			//return parse_version1(jConfig, readDataFrames, errorCode);
 		default:
 			*errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
 	}
 
-	bool ModuleFirmware::parse_version1(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode)
+	/*bool ModuleFirmware::parse_version1(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
@@ -397,142 +565,44 @@ namespace Hardware
 		}
 
 		return true;
-	}
+	}*/
 
 
-	bool ModuleFirmware::isEmpty() const
-	{
-		return m_firmwareData.size() == 0;
-	}
 
-	std::vector<UartPair> ModuleFirmware::uartList() const
-	{
-		std::vector<UartPair> result;
-
-		for (auto it : m_firmwareData)
-		{
-			ModuleFirmwareData& data = it.second;
-			result.push_back(std::make_pair(it.first, data.uartType));
-		}
-
-		return result;
-	}
-
-	bool ModuleFirmware::uartExists(int uartId) const
-	{
-		return m_firmwareData.find(uartId) != m_firmwareData.end();
-	}
-
-	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
-	{
-		auto it = m_firmwareData.find(uartId);
-		if (it == m_firmwareData.end())
-		{
-			assert(false);
-			return -1;
-		}
-
-		return it->second.frameSize;
-	}
-
-	int ModuleFirmware::eepromFrameSize(int uartId) const
-	{
-		auto it = m_firmwareData.find(uartId);
-		if (it == m_firmwareData.end())
-		{
-			assert(false);
-			return -1;
-		}
-
-		return it->second.frameSizeWithCRC;
-	}
-
-	int ModuleFirmware::eepromFrameCount(int uartId) const
-	{
-		auto it = m_firmwareData.find(uartId);
-		if (it == m_firmwareData.end())
-		{
-			assert(false);
-			return -1;
-		}
-
-		return static_cast<int>(it->second.frames.size());
-	}
-
-	const std::vector<quint8>& ModuleFirmware::frame(int uartId, int frameIndex) const
-	{
-static const std::vector<quint8> err;
-
-		if (frameIndex < 0 || frameIndex >= eepromFrameCount(uartId))
-		{
-			assert(frameIndex >= 0 && frameIndex < eepromFrameCount(uartId));
-			return err;
-		}
-
-		auto it = m_firmwareData.find(uartId);
-		if (it == m_firmwareData.end())
-		{
-			assert(false);
-			return err;
-		}
-
-		return it->second.frames[frameIndex];
-	}
-
-	int ModuleFirmware::fileVersion() const
+	int ModuleFirmwareStorage::fileVersion() const
 	{
 		return m_fileVersion;
 	}
 
-	int ModuleFirmware::maxFileVersion() const
+	int ModuleFirmwareStorage::maxFileVersion() const
 	{
 		return m_maxFileVersion;
 	}
 
-
-	QString ModuleFirmware::caption() const
-    {
-		return m_caption;
-    }
-
-	QString ModuleFirmware::subsysId() const
-	{
-		return m_subsysId;
-	}
-
-	quint16 ModuleFirmware::ssKey() const
-	{
-		return m_ssKey;
-	}
-
-	int ModuleFirmware::changesetId() const
+	int ModuleFirmwareStorage::changesetId() const
 	{
 		return m_changesetId;
 	}
 
-	QString ModuleFirmware::projectName() const
+	QString ModuleFirmwareStorage::projectName() const
 	{
 		return m_projectName;
 	}
 
-	QString ModuleFirmware::userName() const
+	QString ModuleFirmwareStorage::userName() const
 	{
 		return m_userName;
 	}
 
-	int ModuleFirmware::buildNumber() const
+	int ModuleFirmwareStorage::buildNumber() const
 	{
 		return m_buildNumber;
 	}
 
-	QString ModuleFirmware::buildConfig() const
+	QString ModuleFirmwareStorage::buildConfig() const
 	{
-		return m_buildConfig;
+		return m_debug ? "debug" : "release";
 	}
 
-	int ModuleFirmware::lmDescriptionNumber() const
-	{
-		return m_lmDescriptionNumber;
-	}
 
 }

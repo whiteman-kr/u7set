@@ -592,26 +592,27 @@ namespace Builder
 
 		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
 
-		Hardware::ModuleFirmwareWriter* firmware = m_resultWriter->firmwareCollection()->createFirmware(lmCaption, subsystemID, subsystemKey, appLogicUartId, "AppLogic", frameSize, frameCount, lmDescriptionNumber);
+		Hardware::ModuleFirmwareWriter* firmwareWriter = m_resultWriter->firmwareWriter();
 
-		if (firmware != nullptr)
+		if (firmwareWriter == nullptr)
 		{
-			firmware->setDescriptionFields(appLogicUartId, metadataFieldsVersion, metadataFields);
-
-			QByteArray binCode;
-
-			appLogicCode.getBinCode(binCode);
-
-			std::vector<QVariantList> metadata;
-
-			appLogicCode.getAsmMetadata(metadata);
-
-			result &= firmware->setChannelData(appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
+			assert(firmwareWriter);
+			return false;
 		}
-		else
-		{
-			result = false;
-		}
+
+		firmwareWriter->createSubsystemFirmware(lmCaption, subsystemID, subsystemKey, appLogicUartId, "AppLogic", frameSize, frameCount, lmDescriptionNumber);
+
+		firmwareWriter->setDescriptionFields(subsystemID, appLogicUartId, metadataFieldsVersion, metadataFields);
+
+		QByteArray binCode;
+
+		appLogicCode.getBinCode(binCode);
+
+		std::vector<QVariantList> metadata;
+
+		appLogicCode.getAsmMetadata(metadata);
+
+		result &= firmwareWriter->setChannelData(subsystemID, appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
 
 		return result;
 	}

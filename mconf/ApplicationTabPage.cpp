@@ -34,10 +34,11 @@ ApplicationTabPage::~ApplicationTabPage()
 
 bool ApplicationTabPage::isFileLoaded() const
 {
-    return m_confFirmware.isEmpty() == false;
+	return false;
+	//return m_confFirmware.isEmpty() == false;
 }
 
-ModuleFirmware *ApplicationTabPage::configuration()
+ModuleFirmwareStorage *ApplicationTabPage::configuration()
 {
     return &m_confFirmware;
 }
@@ -101,12 +102,12 @@ void ApplicationTabPage::openFileClicked()
 	theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
 
 	theLog.writeMessage(tr("File Version: %1").arg(m_confFirmware.fileVersion()));
-	theLog.writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
+	//theLog.writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
 	theLog.writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
 	theLog.writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
 	theLog.writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
 	theLog.writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
-	theLog.writeMessage(tr("LM Description Number: %1").arg(m_confFirmware.lmDescriptionNumber()));
+	//theLog.writeMessage(tr("LM Description Number: %1").arg(m_confFirmware.lmDescriptionNumber()));
 
 	fillUartData();
 
@@ -167,7 +168,7 @@ void ApplicationTabPage::clearUartData()
 
 void ApplicationTabPage::fillUartData()
 {
-	std::vector<std::pair<int, QString>> uartList = m_confFirmware.uartList();
+	/*std::vector<std::pair<int, QString>> uartList = m_confFirmware.uartList();
 
 	clearUartData();
 
@@ -188,7 +189,7 @@ void ApplicationTabPage::fillUartData()
 
 		ui.firmwareListWidget->addTopLevelItem(item);
 	}
-	ui.firmwareListWidget->sortByColumn(0, Qt::AscendingOrder);
+	ui.firmwareListWidget->sortByColumn(0, Qt::AscendingOrder);*/
 }
 
 

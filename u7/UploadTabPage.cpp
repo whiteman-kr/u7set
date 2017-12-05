@@ -431,7 +431,8 @@ void UploadTabPage::upload()
 	try
 	{
 
-		emit writeConfDataFile(m_currentFileName);
+		assert(false);
+		emit writeConfDataFile(m_currentFileName, "SUBSYSID0");
 	}
 	catch(QString message)
 	{

@@ -43,7 +43,7 @@ signals:
 
 	//void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName);
+	void writeConfDataFile(const QString& fileName, const QString& subsystemId);
 	void eraseFlashMemory(int);
 	void cancelOperation();
 

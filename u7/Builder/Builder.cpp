@@ -119,7 +119,7 @@ namespace Builder
 			}
 
 			const BuildInfo& bi = buildWriter.buildInfo();
-			buildWriter.firmwareCollection()->init(bi.project, bi.user, bi.id, bi.release == false, bi.changeset);
+			buildWriter.firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.release == false, bi.changeset);
 
 			//
 			// Get Equipment from the database
@@ -337,7 +337,7 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
 			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage,
-										lmModules, &lmDescriptions, buildWriter.firmwareCollection(), m_log);
+										lmModules, &lmDescriptions, buildWriter.firmwareWriter(), m_log);
 
 			ok = tuningBuilder.build();
 
@@ -353,7 +353,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, buildWriter.firmwareCollection(), m_log);
+			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, buildWriter.firmwareWriter(), m_log);
 
 			ok = cfgBuilder.build(buildWriter);
 
@@ -1266,12 +1266,19 @@ namespace Builder
 				continue;
 			}
 
-			Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
+			Hardware::ModuleFirmwareWriter* firmwareWriter = buildWriter.firmwareWriter();
 
 			quint64 genericUniqueId = 0;
 			bool first = true;
 
-			std::vector<UartPair> uarts = fw.uartList();
+			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->moduleFirmware(subsysID, &ok);
+			if (ok == false)
+			{
+				assert(ok);
+				continue;
+			}
+
+			std::vector<UartPair> uarts = moduleFirmware.uartList();
 
 			for (auto fi : uarts)
 			{
@@ -1280,15 +1287,15 @@ namespace Builder
 				if (first == true)
 				{
 					first = false;
-					genericUniqueId = fw.uniqueID(uartId, lmNumber);
+					genericUniqueId = firmwareWriter->uniqueID(subsysID, uartId, lmNumber);
 				}
 				else
 				{
-					genericUniqueId ^= fw.uniqueID(uartId, lmNumber);
+					genericUniqueId ^= firmwareWriter->uniqueID(subsysID, uartId, lmNumber);
 				}
 			}
 
-			fw.setGenericUniqueId(lmNumber, genericUniqueId);
+			firmwareWriter->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
 		}

@@ -272,7 +272,8 @@ void ModuleConfigurator::configureClicked()
 			//
 			disableControls();
 
-			emit writeConfData(page->configuration());
+			assert(false);
+			emit writeConfData(page->configuration(), "SUBSYSID00");
 		}
 	}
 	catch(QString message)

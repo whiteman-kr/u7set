@@ -57,7 +57,7 @@ namespace Builder
 	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot,
 											   const std::vector<Hardware::DeviceModule*>& lmModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
 											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
-											   Hardware::ModuleFirmwareCollection* firmwareCollection, IssueLogger *log):
+											   Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
 		m_buildWorkerThread(buildWorkerThread),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
@@ -67,7 +67,7 @@ namespace Builder
 		m_subsystems(subsystems),
 		m_opticModuleStorage(opticModuleStorage),
 		m_log(log),
-		m_firmwareCollection(firmwareCollection)
+		m_firmwareWriter(firmwareWriter)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
@@ -75,7 +75,7 @@ namespace Builder
 		assert(m_subsystems);
 		assert(m_opticModuleStorage);
 		assert(m_log);
-		assert(m_firmwareCollection);
+		assert(m_firmwareWriter);
 
 		return;
 	}
@@ -368,10 +368,10 @@ namespace Builder
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
-		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->createFirmware(subsystemModules[0]->caption(), subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->descriptionNumber());
+		m_firmwareWriter->createSubsystemFirmware(subsystemModules[0]->caption(), subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->descriptionNumber());
 
-		QJSValue jsFirmware = m_jsEngine.newQObject(firmware);
-		QQmlEngine::setObjectOwnership(firmware, QQmlEngine::CppOwnership);
+		QJSValue jsFirmware = m_jsEngine.newQObject(m_firmwareWriter);
+		QQmlEngine::setObjectOwnership(m_firmwareWriter, QQmlEngine::CppOwnership);
 
 		QJSValue jsLog = m_jsEngine.newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
@@ -441,21 +441,20 @@ namespace Builder
 
 	bool ConfigurationBuilder::writeDataFiles(BuildResultWriter &buildResultWriter)
 	{
+		QStringList subsystemsList = m_firmwareWriter->subsystemsList();
+
 		// Save confCollection items to binary files
 		//
-		for (auto i = m_firmwareCollection->firmwares().begin(); i != m_firmwareCollection->firmwares().end(); i++)
+		for (auto ss : subsystemsList)
 		{
-			Hardware::ModuleFirmwareWriter& f = i->second;
+			const QByteArray& log = m_firmwareWriter->scriptLog(ss);
 
-			if (f.subsysId().isEmpty())
+			if (log.isEmpty() == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
-				return false;
-			}
-
-			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".mct", f.scriptLog()) == nullptr)
-			{
-				return false;
+				if (buildResultWriter.addFile(ss, ss.toLower() + ".mct", log) == nullptr)
+				{
+					return false;
+				}
 			}
 		}
 
