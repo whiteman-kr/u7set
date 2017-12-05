@@ -160,6 +160,7 @@ namespace Tuning
 	public:
 		TuningSourceWorker(const TuningServiceSettings& settings,
 						   const TuningSource& source,
+						   bool skipModuleTypeChecking,
 						   std::shared_ptr<CircularLogger> logger);
 		~TuningSourceWorker();
 
@@ -214,6 +215,7 @@ namespace Tuning
 
 	private:
 		std::shared_ptr<CircularLogger> m_logger;
+		bool m_skipModuleTypeChecking = false;
 
 		// data from tuning source
 		//
@@ -283,6 +285,7 @@ namespace Tuning
 	public:
 		TuningSourceWorkerThread(const TuningServiceSettings& settings,
 								 const TuningSource& source,
+								 bool skipModuleTypeChecking,
 								 std::shared_ptr<CircularLogger> logger);
 
 		~TuningSourceWorkerThread();
