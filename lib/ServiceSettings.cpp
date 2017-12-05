@@ -203,7 +203,7 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 		archServiceID[channel] = appDataServiceChannel[channel].archServiceStrID;
 	}
 
-	if (archServiceID[DATA_CHANNEL_1] == archServiceID[DATA_CHANNEL_2])
+	if (archServiceID[DATA_CHANNEL_1].isEmpty() == false && archServiceID[DATA_CHANNEL_1] == archServiceID[DATA_CHANNEL_2])
 	{
 		log->wrnCFG3024(software->equipmentIdTemplate(), archServiceID[DATA_CHANNEL_1]);
 	}

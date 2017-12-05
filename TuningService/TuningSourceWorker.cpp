@@ -178,8 +178,10 @@ namespace Tuning
 
 	TuningSourceWorker::TuningSourceWorker(const TuningServiceSettings& settings,
 										   const TuningSource& source,
+										   bool skipModuleTypeChecking,
 										   std::shared_ptr<CircularLogger> logger) :
 		m_logger(logger),
+		m_skipModuleTypeChecking(skipModuleTypeChecking),
 		m_timer(this),
 		m_socket(this),
 		m_replyQueue(this, 10),
@@ -952,10 +954,12 @@ namespace Tuning
 			result &= false;
 		}
 
-		if (rupHeader.moduleType != m_lmModuleType)
+		if (m_skipModuleTypeChecking == false && rupHeader.moduleType != m_lmModuleType)
 		{
 			m_stat.errRupModuleType++;
 			result &= false;
+
+			qDebug() << "Invalid moduleType of" << m_sourceEquipmentID << "( waiting" << m_lmModuleType << ", receiving" << rupHeader.moduleType << ")";
 		}
 
 		if (rupHeader.framesQuantity != 1)
@@ -1202,9 +1206,10 @@ namespace Tuning
 
 	TuningSourceWorkerThread::TuningSourceWorkerThread(const TuningServiceSettings& settings,
 													   const TuningSource& source,
+													   bool skipModuleTypeChecking,
 													   std::shared_ptr<CircularLogger> logger)
 	{
-		m_sourceWorker = new TuningSourceWorker(settings, source, logger);
+		m_sourceWorker = new TuningSourceWorker(settings, source, skipModuleTypeChecking, logger);
 
 		addWorker(m_sourceWorker);
 	}

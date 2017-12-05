@@ -86,6 +86,8 @@ namespace Tuning
 		HostAddressPort m_cfgServiceIP1;
 		HostAddressPort m_cfgServiceIP2;
 
+		bool m_skipModuleTypeChecking = false;
+
 		std::shared_ptr<CircularLogger> m_logger;
 
 		TuningServiceSettings m_cfgSettings;
