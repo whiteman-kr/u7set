@@ -5708,6 +5708,8 @@ namespace Builder
 
 		int count = 0;
 
+		m_code.append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
 			UalSignal* inputSignal = getUalSignalByPinCaption(ualItem, busSignal.signalID, true);
@@ -7671,35 +7673,15 @@ namespace Builder
 
 		for(MemWriteMap::Area nonWrittenArea : nonWrittenAreas)
 		{
-			Command cmd;
-
-			switch(nonWrittenArea.second)
-			{
-			case 0:
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-
-			case 1:
-				cmd.movConst(nonWrittenArea.first, 0);
-				break;
-
-			case 2:
-				cmd.movConstInt32(nonWrittenArea.first, 0);
-				break;
-
-			default:
-				cmd.setMem(nonWrittenArea.first, 0, nonWrittenArea.second);
-			}
+			QString comment;
 
 			if (first == true)
 			{
-				cmd.setComment("fill non written txRawData by 0");
+				comment = "fill non written txRawData by 0";
 				first = false;
 			}
 
-			m_code.append(cmd);
+			m_code.append(codeSetMemory(nonWrittenArea.first, 0, nonWrittenArea.second, comment));
 		}
 
 		if (first == false)
@@ -9910,6 +9892,45 @@ namespace Builder
 		return Address16();
 	}
 
+	Commands ModuleLogicCompiler::codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment)
+	{
+		assert(addrFrom >=0 && addrFrom < static_cast<int>(m_lmDescription->memory().m_appMemorySize));
+		assert(addrFrom + sizeW < static_cast<int>(m_lmDescription->memory().m_appMemorySize));
+
+		Command cmd;
+
+		switch(sizeW)
+		{
+		case 1:
+			cmd.movConst(addrFrom, constValue);
+			break;
+
+		case 2:
+			{
+				quint32 constValue32 = constValue;
+
+				constValue32 <<= 16;
+				constValue32 &= constValue;
+
+				cmd.movConstUInt32(addrFrom, constValue32);
+			}
+			break;
+
+		default:
+			cmd.setMem(addrFrom, constValue, sizeW);
+		}
+
+		if (comment.isEmpty() == false)
+		{
+			cmd.setComment(comment);
+		}
+
+		Commands code;
+
+		code.append(cmd);
+
+		return code;
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//

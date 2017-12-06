@@ -412,6 +412,8 @@ namespace Builder
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
+		Commands codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
+
 	private:
 		static const int ERR_VALUE = -1;
 
