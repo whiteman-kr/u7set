@@ -2346,6 +2346,9 @@ namespace Builder
 			str.append(E::valueToString<E::SignalType>(ualSignal->signalType()));
 			str += ";";
 
+			str.append(E::valueToString<E::SignalInOutType>(ualSignal->inOutType()));
+			str += ";";
+
 			str.append(E::valueToString<E::AnalogAppSignalFormat>(ualSignal->analogSignalFormat()));
 			str += ";";
 
