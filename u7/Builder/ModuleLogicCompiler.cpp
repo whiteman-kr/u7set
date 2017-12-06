@@ -6514,7 +6514,57 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf()
 	{
-		return true;
+		if (m_acquiredAnalogBusChildSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		m_code.comment("Copy acquired analog bus child signals to reg buf");
+		m_code.newLine();
+
+		bool result = true;
+
+		for(UalSignal* ualSignal : m_acquiredAnalogBusChildSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->ualAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->regBufAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->sizeW() != 2)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			Command cmd;
+
+			cmd.mov32(ualSignal->regBufAddr(), ualSignal->ualAddr());
+			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+
+			m_code.append(cmd);
+		}
+
+		m_code.newLine();
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf()
