@@ -39,6 +39,7 @@ namespace Builder
 
 		result &= writeSettings();
 		result &= writeTuningLMs();
+		result &= writeBatFile();
 
 		return result;
 	}
@@ -186,5 +187,23 @@ namespace Builder
 		xml.writeEndElement();				//	</TuningLMs>
 
 		return result;
+	}
+
+	bool TuningServiceCfgGenerator::writeBatFile()
+	{
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForBat();
+
+		content += "TuningSrv";
+		content += " -e";
+		content += " -cfgip1=127.0.0.1";
+		content += " -id=" + m_software->equipmentIdTemplate() + "\n";
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::BAT_DIR, m_software->equipmentIdTemplate() + ".bat", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
 	}
 }

@@ -481,6 +481,21 @@ namespace Builder
 		return result;
 	}
 
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForBat()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "@rem Project: " + b.project + "\n";
+		comments += "@rem ID: " + QString::number(b.id) + "\n";
+		comments += "@rem Type: " + b.typeStr() + "\n";
+		comments += "@rem Date: " + b.dateStr() + "\n";
+		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "@rem User: " + b.user + "\n";
+		comments += "@rem Workstation: " + b.workstation + "\n";
+
+		return comments;
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties class implementation

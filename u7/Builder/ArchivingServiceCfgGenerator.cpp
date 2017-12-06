@@ -24,7 +24,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		result = writeSettings();
+		result &= writeSettings();
+		result &= writeBatFile();
 
 		return result;
 	}
@@ -85,6 +86,24 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(buildFile);
 
 		return m_cfgXml->addLinkToFile(buildFile);
+	}
+
+	bool ArchivingServiceCfgGenerator::writeBatFile()
+	{
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForBat();
+
+		content += "ArchSrv";
+		content += " -e";
+		content += " -cfgip1=127.0.0.1";
+		content += " -id=" + m_software->equipmentIdTemplate() + "\n";
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::BAT_DIR, m_software->equipmentIdTemplate() + ".bat", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
 	}
 
 }

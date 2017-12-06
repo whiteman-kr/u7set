@@ -45,6 +45,8 @@ namespace Builder
 		static bool buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log);
 		static bool checkLmToSoftwareLinks(IssueLogger* log);
 
+		QString getBuildInfoCommentsForBat();
+
 
 	public:
 		SoftwareCfgGenerator(	DbController* db,
