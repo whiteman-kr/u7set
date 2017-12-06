@@ -492,7 +492,7 @@ namespace Hardware
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
 			assert(false);
-			return false;
+			return QString();
 		}
 
 		ModuleFirmwareData& fd = m_firmwareData[uartID];
@@ -517,7 +517,7 @@ namespace Hardware
 		if (m_firmwareData.find(uartID) == m_firmwareData.end())
 		{
 			assert(false);
-			return false;
+			return QString();
 		}
 
 		ModuleFirmwareData& fd = m_firmwareData[uartID];
