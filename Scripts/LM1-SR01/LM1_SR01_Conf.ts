@@ -42,8 +42,6 @@ interface JsVariantList {
 
 interface ModuleFirmware {
 
-	setScriptFirmware(subsysId: string, uartID: number): void;
-
 	setData8(frameIndex: number, offset: number, data: number): boolean;
 	setData16(frameIndex: number, offset: number, data: number): boolean;
 	setData32(frameIndex: number, offset: number, data: number): boolean;
@@ -184,8 +182,6 @@ function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[]
 	if (logicModules.length != 0) {
 		var subSysID: string = logicModules[0].jsPropertyString("SubsystemID");
 		log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
-
-		confFirmware.setScriptFirmware(subSysID, logicModuleDescription.FlashMemory_ConfigUartId);
 	}
 
 	for (var i: number = 0; i < logicModules.length; i++) {

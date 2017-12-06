@@ -975,7 +975,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmwareStorage *storage, cons
 	}
 
 	bool ok = false;
-	Hardware::ModuleFirmware& conf = storage->moduleFirmware(subsystemId, &ok);
+	Hardware::ModuleFirmware& conf = storage->firmware(subsystemId, &ok);
 
 	if (ok == false)
 	{
@@ -1614,7 +1614,7 @@ void Configurator::processConfDataFile(const QString& fileName, const QString& s
 	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(confFirmware.buildNumber())));
 	m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
 
-	QStringList subsystemList = confFirmware.subsystemsList();
+	QStringList subsystemList = confFirmware.subsystems();
 	QString subsystems;
 	for (const QString& s : subsystemList)
 	{

@@ -48,7 +48,6 @@ namespace Builder
 		buildTime.start();
 
 		bool ok = false;
-		QString str;
 
 		// Start logging to output string, this string will be written as file to build output
 		//
@@ -353,16 +352,17 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, buildWriter.firmwareWriter(), m_log);
+			ConfigurationBuilder cfgBuilder(this, &m_jsEngine, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, buildWriter.firmwareWriter(), m_log);
 
 			ok = cfgBuilder.build(buildWriter);
-
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
+
+			generateModulesInformation(buildWriter, lmAndBvbModules);
 
 			LmsUniqueIdMap lmsUniqueIdMap;
 
@@ -1231,6 +1231,54 @@ namespace Builder
 	}
 
 
+	void BuildWorkerThread::generateModulesInformation(BuildResultWriter& buildWriter,
+							   const std::vector<Hardware::DeviceModule *>& lmModules)
+	{
+		for (auto it = lmModules.begin(); it != lmModules.end(); it++)
+		{
+			Hardware::DeviceModule* lm = *it;
+
+			if (lm == nullptr)
+			{
+				assert(lm);
+				continue;
+			}
+
+			QString subsysID = lm->propertyValue("SubsystemID").toString();
+			if (subsysID.isEmpty())
+			{
+				assert(false);
+				continue;
+			}
+
+			bool ok = false;
+			int lmNumber = lm->propertyValue("LMNumber").toInt(&ok);
+			if (ok == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			int subsystemChannel = lm->propertyValue("SubsystemChannel").toInt(&ok);
+			if (ok == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			Hardware::ModuleFirmwareWriter* firmwareWriter = buildWriter.firmwareWriter();
+
+			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->firmware(subsysID, &ok);
+			if (ok == false)
+			{
+				assert(ok);
+				continue;
+			}
+
+			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
+		}
+	}
+
 	void BuildWorkerThread::generateLmsUniqueID(BuildResultWriter& buildWriter,
 												const std::vector<Hardware::DeviceModule *>& lmModules,
 												LmsUniqueIdMap &lmsUniqueIdMap)
@@ -1271,7 +1319,7 @@ namespace Builder
 			quint64 genericUniqueId = 0;
 			bool first = true;
 
-			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->moduleFirmware(subsysID, &ok);
+			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->firmware(subsysID, &ok);
 			if (ok == false)
 			{
 				assert(ok);

@@ -3,6 +3,7 @@
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
 #include "BdfFile.h"
+#include "../lib/LmDescription.h"
 
 #include "../lib/ServiceSettings.h"
 
@@ -577,7 +578,15 @@ namespace Builder
 		return result;
 	}
 
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, int appLogicUartId, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, int lmDescriptionNumber, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID,
+													 int subsystemKey,
+													 std::shared_ptr<LmDescription> lmDescription,
+													 QString lmEquipmentID,
+													 int lmNumber,
+													 int frameSize,
+													 int frameCount,
+													 quint64 uniqueID,
+													 ApplicationLogicCode& appLogicCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -600,9 +609,16 @@ namespace Builder
 			return false;
 		}
 
-		firmwareWriter->createSubsystemFirmware(lmCaption, subsystemID, subsystemKey, appLogicUartId, "AppLogic", frameSize, frameCount, lmDescriptionNumber);
+		firmwareWriter->createFirmware(subsystemID,
+									   subsystemKey,
+									   lmDescription->flashMemory().m_appLogicUartId,
+									   "AppLogic",
+									   frameSize,
+									   frameCount,
+									   lmDescription->configurationStringFile(),
+									   lmDescription->descriptionNumber());
 
-		firmwareWriter->setDescriptionFields(subsystemID, appLogicUartId, metadataFieldsVersion, metadataFields);
+		firmwareWriter->setDescriptionFields(subsystemID, lmDescription->flashMemory().m_appLogicUartId, metadataFieldsVersion, metadataFields);
 
 		QByteArray binCode;
 
@@ -612,7 +628,7 @@ namespace Builder
 
 		appLogicCode.getAsmMetadata(metadata);
 
-		result &= firmwareWriter->setChannelData(subsystemID, appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
+		result &= firmwareWriter->setChannelData(subsystemID, lmDescription->flashMemory().m_appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
 
 		return result;
 	}

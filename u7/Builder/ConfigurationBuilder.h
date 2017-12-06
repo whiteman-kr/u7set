@@ -44,7 +44,7 @@ namespace Builder
 		Q_OBJECT
 	public:
 		ConfigurationBuilder() = delete;
-        ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, const std::vector<Hardware::DeviceModule *> &lmModules, LmDescriptionSet* lmDescriptions, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
+		ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, QJSEngine* jsEngine, DbController* db, Hardware::DeviceRoot* deviceRoot, const std::vector<Hardware::DeviceModule *> &lmModules, LmDescriptionSet* lmDescriptions, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 							 Hardware::OptoModuleStorage *opticModuleStorage, Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger* log);
 		virtual ~ConfigurationBuilder();
 
@@ -68,6 +68,7 @@ namespace Builder
 		Hardware::ModuleFirmwareWriter* m_firmwareWriter = nullptr;
 
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
+		QJSEngine* m_jsEngine = nullptr;
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
         std::vector<Hardware::DeviceModule*> m_lmModules;
@@ -76,8 +77,6 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::OptoModuleStorage *m_opticModuleStorage = nullptr;
 		mutable IssueLogger* m_log = nullptr;
-
-		QJSEngine m_jsEngine;
 	};
 
 }

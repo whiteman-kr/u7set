@@ -15,40 +15,35 @@ namespace Hardware
 {
 
 	void ModuleFirmware::init(int uartId,
-							  QString uartType,
+							  const QString& uartType,
 							  int frameSize,
 							  int frameCount,
-							  QString caption,
-							  QString subsysId,
+							  const QString& subsysId,
 							  int ssKey,
+							  const QString& lmDescriptionFile,
 							  int lmDescriptionNumber)
 	{
-		m_caption = caption;
 		m_subsysId = subsysId;
 		m_ssKey = ssKey;
+		m_lmDescriptionFile = lmDescriptionFile;
 		m_lmDescriptionNumber = lmDescriptionNumber;
 
 		ModuleFirmwareData data;
 
 		data.uartId = uartId;
 		data.uartType = uartType;
-		data.frameSize = frameSize;
-		data.frameSizeWithCRC = frameSize + sizeof(quint64);
+		data.eepromFramePayloadSize = frameSize;
+		data.eepromFrameSize = frameSize + sizeof(quint64);
 
 		data.frames.resize(frameCount);
 		for (int i = 0; i < frameCount; i++)
 		{
-			data.frames[i].resize(data.frameSizeWithCRC);
+			data.frames[i].resize(data.eepromFrameSize);
 		}
 
 		m_firmwareData[uartId] = data;
 
 		return;
-	}
-
-	bool ModuleFirmware::isEmpty() const
-	{
-		return m_firmwareData.size() == 0;
 	}
 
 	std::vector<UartPair> ModuleFirmware::uartList() const
@@ -69,42 +64,6 @@ namespace Hardware
 		return m_firmwareData.find(uartId) != m_firmwareData.end();
 	}
 
-	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
-	{
-		auto it = m_firmwareData.find(uartId);
-		if (it == m_firmwareData.end())
-		{
-			assert(false);
-			return -1;
-		}
-
-		return it->second.frameSize;
-	}
-
-	int ModuleFirmware::eepromFrameSize(int uartId) const
-	{
-		auto it = m_firmwareData.find(uartId);
-		if (it == m_firmwareData.end())
-		{
-			assert(false);
-			return -1;
-		}
-
-		return it->second.frameSizeWithCRC;
-	}
-
-	int ModuleFirmware::eepromFrameCount(int uartId) const
-	{
-		auto it = m_firmwareData.find(uartId);
-		if (it == m_firmwareData.end())
-		{
-			assert(false);
-			return -1;
-		}
-
-		return static_cast<int>(it->second.frames.size());
-	}
-
 	ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok)
 	{
 static ModuleFirmwareData err;
@@ -122,6 +81,42 @@ static ModuleFirmwareData err;
 
 		*ok = true;
 		return m_firmwareData[uartId];
+	}
+
+	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return it->second.eepromFramePayloadSize;
+	}
+
+	int ModuleFirmware::eepromFrameSize(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return it->second.eepromFrameSize;
+	}
+
+	int ModuleFirmware::eepromFrameCount(int uartId) const
+	{
+		auto it = m_firmwareData.find(uartId);
+		if (it == m_firmwareData.end())
+		{
+			assert(false);
+			return -1;
+		}
+
+		return static_cast<int>(it->second.frames.size());
 	}
 
 	const std::vector<quint8>& ModuleFirmware::frame(int uartId, int frameIndex) const
@@ -144,11 +139,6 @@ static const std::vector<quint8> err;
 		return it->second.frames[frameIndex];
 	}
 
-	QString ModuleFirmware::caption() const
-	{
-		return m_caption;
-	}
-
 	QString ModuleFirmware::subsysId() const
 	{
 		return m_subsysId;
@@ -159,9 +149,42 @@ static const std::vector<quint8> err;
 		return m_ssKey;
 	}
 
+	QString ModuleFirmware::lmDescriptionFile() const
+	{
+		return m_lmDescriptionFile;
+	}
+
 	int ModuleFirmware::lmDescriptionNumber() const
 	{
 		return m_lmDescriptionNumber;
+	}
+
+	void ModuleFirmware::addLogicModuleInfo(
+							const QString& equipmentId,
+							int lmNumber,
+							int subsystemChannel,
+							int moduleFamily,
+							int customModuleVersion,
+							int moduleVersion,
+							int moduleType
+							)
+	{
+		LogicModuleInfo info;
+
+		info.equipmentId = equipmentId;
+		info.lmNumber = lmNumber;
+		info.subsystemChannel = subsystemChannel;
+		info.moduleFamily = moduleFamily;
+		info.customModuleVersion = customModuleVersion;
+		info.moduleVersion = moduleVersion;
+		info.moduleType = moduleType;
+
+		m_lmInfo.push_back(info);
+	}
+
+	const std::vector<LogicModuleInfo>& ModuleFirmware::logicModulesInfo() const
+	{
+		return m_lmInfo;
 	}
 
 	//
@@ -244,20 +267,14 @@ static const std::vector<quint8> err;
 		return parse(data, false, errorCode);
 	}
 
-	QStringList ModuleFirmwareStorage::subsystemsList()
-	{
-		QStringList result;
-
-		for (auto fw : m_firmwares)
-		{
-			result.push_back(fw.first);
-		}
-
-		return result;
-
-	}
-
-	void ModuleFirmwareStorage::createSubsystemFirmware(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber)
+	void ModuleFirmwareStorage::createFirmware(const QString& subsysId,
+											   int ssKey,
+											   int uartId,
+											   const QString& uartType,
+											   int frameSize,
+											   int frameCount,
+											   const QString& lmDescriptionFile,
+											   int lmDescriptionNumber)
 	{
 		bool newSubsystem = m_firmwares.count(subsysId) == 0;
 
@@ -265,13 +282,13 @@ static const std::vector<quint8> err;
 
 		if (newSubsystem == true || subsystemData.uartExists(uartId) == false)
 		{
-			subsystemData.init(uartId, uartType, frameSize, frameCount, caption, subsysId, ssKey, lmDescriptionNumber);
+			subsystemData.init(uartId, uartType, frameSize, frameCount, subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
 		}
 
 		return;
 	}
 
-	ModuleFirmware& ModuleFirmwareStorage::moduleFirmware(const QString& subsysId, bool* ok)
+	ModuleFirmware& ModuleFirmwareStorage::firmware(const QString& subsysId, bool* ok)
 	{
 static ModuleFirmware err;
 		if (ok == nullptr)
@@ -290,7 +307,17 @@ static ModuleFirmware err;
 		return m_firmwares.at(subsysId);
 	}
 
+	QStringList ModuleFirmwareStorage::subsystems()
+	{
+		QStringList result;
 
+		for (auto fw : m_firmwares)
+		{
+			result.push_back(fw.first);
+		}
+
+		return result;
+	}
 
 	bool ModuleFirmwareStorage::parse(const QByteArray& data, bool readDataFrames, QString* errorCode)
 	{

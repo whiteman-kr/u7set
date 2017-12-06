@@ -43,12 +43,7 @@ namespace Hardware
 		std::map<int, std::vector<QVariantList>> descriptonDataMap;
 	};
 
-	struct ModuleChannelData
-	{
-		// Subsystem data map, key is UartId
-		//
-		std::map<int, UartChannelData> channelData;
-	};
+	typedef std::map<int, UartChannelData> ModuleChannelData;
 
 	//
 	// ModuleFirmwareWriter
@@ -60,6 +55,8 @@ namespace Hardware
     public:
 		ModuleFirmwareWriter();
 
+		UartChannelData& uartChannelData(const QString& subsysId, int uartId);
+
 		bool save(QByteArray &dest, Builder::IssueLogger* log);
 
 		// Functions called and used by Application Logic and Tuning Builder
@@ -69,7 +66,7 @@ namespace Hardware
 
 		// Functions called and used by Configuration Script
 		//
-		Q_INVOKABLE void setScriptFirmware(QString subsysId, int uartID);
+		void setScriptFirmware(QString subsysId, int uartID);
 
 		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
 		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
@@ -99,7 +96,7 @@ namespace Hardware
 
 		// Functions that are used to calculate Unique ID
 		//
-		quint64 uniqueID(const QString& subsysId, int uartId, int lmNumber) const;
+		quint64 uniqueID(const QString& subsysId, int uartId, int lmNumber);
 		void setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId);
 
 	private:

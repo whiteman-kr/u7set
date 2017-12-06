@@ -64,7 +64,6 @@ function main(builder, root, logicModules, confFirmware, log, signalSet, subsyst
     if (logicModules.length != 0) {
         var subSysID = logicModules[0].jsPropertyString("SubsystemID");
         log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
-        confFirmware.setScriptFirmware(subSysID, logicModuleDescription.FlashMemory_ConfigUartId);
     }
     for (var i = 0; i < logicModules.length; i++) {
         if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyLMID) {

@@ -54,11 +54,12 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot,
+	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, QJSEngine* jsEngine, DbController* db, Hardware::DeviceRoot* deviceRoot,
 											   const std::vector<Hardware::DeviceModule*>& lmModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
 											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
 											   Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
 		m_buildWorkerThread(buildWorkerThread),
+		m_jsEngine(jsEngine),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_lmModules(lmModules),
@@ -337,22 +338,22 @@ namespace Builder
 
 		// Attach objects
 		//
-		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
+		m_jsEngine->installExtensions(QJSEngine::ConsoleExtension);
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
-		QJSValue jsBuilder = m_jsEngine.newQObject(this);
+		QJSValue jsBuilder = m_jsEngine->newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsRoot = m_jsEngine.newQObject(m_deviceRoot);
+		QJSValue jsRoot = m_jsEngine->newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
 
-		QJSValue jsLogicModules = m_jsEngine.newArray((int)subsystemModules.size());
+		QJSValue jsLogicModules = m_jsEngine->newArray((int)subsystemModules.size());
 		for (int i = 0; i < subsystemModules.size(); i++)
 		{
 			assert(jsLogicModules.isArray());
 
-			QJSValue module = m_jsEngine.newQObject(subsystemModules[i]);
+			QJSValue module = m_jsEngine->newQObject(subsystemModules[i]);
 			QQmlEngine::setObjectOwnership(subsystemModules[i], QQmlEngine::CppOwnership);
 
 			jsLogicModules.setProperty(i, module);
@@ -368,43 +369,45 @@ namespace Builder
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
-		m_firmwareWriter->createSubsystemFirmware(subsystemModules[0]->caption(), subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->descriptionNumber());
+		m_firmwareWriter->createFirmware(subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->configurationStringFile(), lmDescription->descriptionNumber());
 
-		QJSValue jsFirmware = m_jsEngine.newQObject(m_firmwareWriter);
+		m_firmwareWriter->setScriptFirmware(subsysStrID, configUartId);
+
+		QJSValue jsFirmware = m_jsEngine->newQObject(m_firmwareWriter);
 		QQmlEngine::setObjectOwnership(m_firmwareWriter, QQmlEngine::CppOwnership);
 
-		QJSValue jsLog = m_jsEngine.newQObject(m_log);
+		QJSValue jsLog = m_jsEngine->newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
-		QJSValue jsSignalSetObject = m_jsEngine.newQObject(&jsSignalSet);
+		QJSValue jsSignalSetObject = m_jsEngine->newQObject(&jsSignalSet);
 		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
 
-		QJSValue jsSubsystems = m_jsEngine.newQObject(m_subsystems);
+		QJSValue jsSubsystems = m_jsEngine->newQObject(m_subsystems);
 		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
 
-		QJSValue jsOpticModuleStorage = m_jsEngine.newQObject(m_opticModuleStorage);
+		QJSValue jsOpticModuleStorage = m_jsEngine->newQObject(m_opticModuleStorage);
 		QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
 
-		QJSValue jsLogicModuleDescription = m_jsEngine.newQObject(lmDescription);
+		QJSValue jsLogicModuleDescription = m_jsEngine->newQObject(lmDescription);
 		QQmlEngine::setObjectOwnership(lmDescription, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
 
-		QJSValue jsEval = m_jsEngine.evaluate(contents);
+		QJSValue jsEval = m_jsEngine->evaluate(contents);
 		if (jsEval.isError() == true)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Module configuration script '%1' evaluation failed at line %2: %3").arg(lmDescription->configurationStringFile()).arg(jsEval.property("lineNumber").toInt()).arg(jsEval.toString()));
 			return false;
 		}
 
-		if (!m_jsEngine.globalObject().hasProperty("main"))
+		if (!m_jsEngine->globalObject().hasProperty("main"))
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Script has no \"main\" function"));
 			return false;
 		}
 
-		if (!m_jsEngine.globalObject().property("main").isCallable())
+		if (!m_jsEngine->globalObject().property("main").isCallable())
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("\"main\" property of script is not callable"));
 			return false;
@@ -422,7 +425,7 @@ namespace Builder
 		args << jsOpticModuleStorage;
 		args << jsLogicModuleDescription;
 
-		QJSValue jsResult = m_jsEngine.globalObject().property("main").call(args);
+		QJSValue jsResult = m_jsEngine->globalObject().property("main").call(args);
 
 		if (jsResult.isError() == true)
 		{
@@ -441,7 +444,7 @@ namespace Builder
 
 	bool ConfigurationBuilder::writeDataFiles(BuildResultWriter &buildResultWriter)
 	{
-		QStringList subsystemsList = m_firmwareWriter->subsystemsList();
+		QStringList subsystemsList = m_firmwareWriter->subsystems();
 
 		// Save confCollection items to binary files
 		//

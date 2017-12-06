@@ -17,8 +17,8 @@ namespace Hardware
 
 	struct ModuleFirmwareData
 	{
-		int frameSize = 0;
-		int frameSizeWithCRC = 0;
+		int eepromFramePayloadSize = 0;
+		int eepromFrameSize = 0;
 
 		int uartId = -1;
 		QString uartType;
@@ -28,15 +28,26 @@ namespace Hardware
 		std::vector<std::vector<quint8>> frames;
 	};
 
+	struct LogicModuleInfo
+	{
+		QString equipmentId;
+		int lmNumber;
+		int subsystemChannel;
+
+		int moduleFamily;
+		int customModuleVersion;
+		int moduleVersion;
+		int moduleType;
+	};
+
 	class ModuleFirmware
 	{
 	public:
-		void init(int uartId, QString uartType,
+		void init(int uartId, const QString& uartType,
 				  int eepromFramePayloadSize,
 				  int eepromFrameCount,
-				  QString caption,
-				  QString subsysId,
-				  int ssKey,
+				  const QString& subsysId,
+				  int ssKey, const QString& lmDescriptionFile,
 				  int lmDescriptionNumber);
 
 
@@ -44,36 +55,45 @@ namespace Hardware
 		// Data access
 		//
 	public:
-		bool isEmpty() const;
-
 		std::vector<UartPair> uartList() const;
 		bool uartExists(int uartId) const;
+
+		ModuleFirmwareData& firmwareData(int uartId, bool* ok);
 
 		int eepromFramePayloadSize(int uartId) const;
 		int eepromFrameSize(int uartId) const;
 		int eepromFrameCount(int uartId) const;
 
-		ModuleFirmwareData& firmwareData(int uartId, bool* ok);
-
 		const std::vector<quint8>& frame(int uartId, int frameIndex) const;
 
-		QString caption() const;
 		QString subsysId() const;
 		quint16 ssKey() const;
+		QString lmDescriptionFile() const;
 		int lmDescriptionNumber() const;
 
+		void addLogicModuleInfo(const QString& equipmentId,
+								int lmNumber,
+								int subsystemChannel,
+								int moduleFamily,
+								int customModuleVersion,
+								int moduleVersion,
+								int moduleType
+								);
+
+		const std::vector<LogicModuleInfo>& logicModulesInfo() const;
+
 	private:
-		QString m_caption;
 		QString m_subsysId;
 		quint16 m_ssKey = 0;
+		QString m_lmDescriptionFile;
 		int m_lmDescriptionNumber = 0;
 
 		// Module data map, key is UartID
 		//
 		std::map<int, ModuleFirmwareData> m_firmwareData;
 
+		std::vector<LogicModuleInfo> m_lmInfo;
 	};
-
 
 	class ModuleFirmwareStorage : public QObject
 	{
@@ -86,6 +106,8 @@ namespace Hardware
 		// Methods
 		//
 	public:
+		// Initializing and loading
+		//
 		void setProjectInfo(const QString& projectName, const QString& userName, int buildNumber, bool debug, int changesetId);
 
 		bool load(QString fileName, QString* errorCode);
@@ -93,11 +115,12 @@ namespace Hardware
 
 		bool loadHeader(QString fileName, QString* errorCode);
 
-		QStringList subsystemsList();
+		// Firmware operations
+		//
+		void createFirmware(const QString& subsysId, int ssKey, int uartId, const QString& uartType, int frameSize, int frameCount, const QString& lmDescriptionFile, int lmDescriptionNumber);
+		ModuleFirmware& firmware(const QString& subsysId, bool* ok);
 
-		void createSubsystemFirmware(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber);
-
-		ModuleFirmware& moduleFirmware(const QString& subsysId, bool* ok);
+		QStringList subsystems();
 
 	private:
 		bool parse(const QByteArray& data, bool readDataFrames, QString* errorCode);
