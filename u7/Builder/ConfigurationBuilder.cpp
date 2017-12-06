@@ -369,7 +369,14 @@ namespace Builder
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
-		m_firmwareWriter->createFirmware(subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->configurationStringFile(), lmDescription->descriptionNumber());
+		m_firmwareWriter->createFirmware(subsysStrID,
+										 subsysID,
+										 configUartId,
+										 "Configuration",
+										 frameSize,
+										 frameCount,
+										 lmDescription->lmDescriptionFile(subsystemModules[0]),
+										lmDescription->descriptionNumber());
 
 		m_firmwareWriter->setScriptFirmware(subsysStrID, configUartId);
 

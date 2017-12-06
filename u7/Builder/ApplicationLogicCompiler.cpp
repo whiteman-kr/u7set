@@ -580,12 +580,14 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID,
 													 int subsystemKey,
-													 std::shared_ptr<LmDescription> lmDescription,
+													 int appLogicUartId,
 													 QString lmEquipmentID,
 													 int lmNumber,
 													 int frameSize,
 													 int frameCount,
 													 quint64 uniqueID,
+													 const QString& lmDesctriptionFile,
+													 int lmDescriptionNumber,
 													 ApplicationLogicCode& appLogicCode)
 	{
 		if (m_resultWriter == nullptr)
@@ -611,14 +613,14 @@ namespace Builder
 
 		firmwareWriter->createFirmware(subsystemID,
 									   subsystemKey,
-									   lmDescription->flashMemory().m_appLogicUartId,
+									   appLogicUartId,
 									   "AppLogic",
 									   frameSize,
 									   frameCount,
-									   lmDescription->configurationStringFile(),
-									   lmDescription->descriptionNumber());
+									   lmDesctriptionFile,
+									   lmDescriptionNumber);
 
-		firmwareWriter->setDescriptionFields(subsystemID, lmDescription->flashMemory().m_appLogicUartId, metadataFieldsVersion, metadataFields);
+		firmwareWriter->setDescriptionFields(subsystemID, appLogicUartId, metadataFieldsVersion, metadataFields);
 
 		QByteArray binCode;
 
@@ -628,7 +630,7 @@ namespace Builder
 
 		appLogicCode.getAsmMetadata(metadata);
 
-		result &= firmwareWriter->setChannelData(subsystemID, lmDescription->flashMemory().m_appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
+		result &= firmwareWriter->setChannelData(subsystemID, appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
 
 		return result;
 	}

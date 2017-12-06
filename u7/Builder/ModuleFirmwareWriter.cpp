@@ -142,10 +142,10 @@ namespace Hardware
 
 			QJsonObject jSubsystemInfo;
 
-			jSubsystemInfo.insert("lmDescriptionFile", fw.lmDescriptionFile());
-			jSubsystemInfo.insert("lmDescriptionNumber", fw.lmDescriptionNumber());
-			jSubsystemInfo.insert("subsystemId", fw.subsysId());
-			jSubsystemInfo.insert("subsystemKey", fw.ssKey());
+			jSubsystemInfo.insert(QLatin1String("lmDescriptionFile"), fw.lmDescriptionFile());
+			jSubsystemInfo.insert(QLatin1String("lmDescriptionNumber"), fw.lmDescriptionNumber());
+			jSubsystemInfo.insert(QLatin1String("subsystemId"), fw.subsysId());
+			jSubsystemInfo.insert(QLatin1String("subsystemKey"), fw.ssKey());
 
 			const std::vector<LogicModuleInfo>& lmInfo = fw.logicModulesInfo();
 
@@ -155,23 +155,23 @@ namespace Hardware
 			{
 				QJsonObject jModuleInfo;
 
-				jModuleInfo.insert("equipmentId", info.equipmentId);
-				jModuleInfo.insert("lmNumber", info.lmNumber);
-				jModuleInfo.insert("subsystemChannel", info.subsystemChannel);
-				jModuleInfo.insert("moduleFamily", info.moduleFamily);
-				jModuleInfo.insert("customModuleVersion", info.customModuleVersion);
-				jModuleInfo.insert("moduleVersion", info.moduleVersion);
-				jModuleInfo.insert("moduleType", info.moduleType);
+				jModuleInfo.insert(QLatin1String("equipmentId"), info.equipmentId);
+				jModuleInfo.insert(QLatin1String("lmNumber"), info.lmNumber);
+				jModuleInfo.insert(QLatin1String("channel"), E::valueToString<E::Channel>(info.channel));
+				jModuleInfo.insert(QLatin1String("moduleFamily"), info.moduleFamily);
+				jModuleInfo.insert(QLatin1String("customModuleVersion"), info.customModuleVersion);
+				jModuleInfo.insert(QLatin1String("moduleVersion"), info.moduleVersion);
+				jModuleInfo.insert(QLatin1String("moduleType"), info.moduleType);
 
 				jModuleInfoArray.push_back(jModuleInfo);
 			}
 
-			jSubsystemInfo.insert("modules", jModuleInfoArray);
+			jSubsystemInfo.insert(QLatin1String("z_modules"), jModuleInfoArray);
 
 			jSubsystemInfoArray.push_back(jSubsystemInfo);
 		}
 
-		jObject.insert("z_i_subsystemsInfo", jSubsystemInfoArray);
+		jObject.insert(QLatin1String("z_i_subsystemsInfo"), jSubsystemInfoArray);
 
 		// Store Subsystems Data
 
@@ -222,37 +222,36 @@ namespace Hardware
 
 				for (int i = 0; i < framesCount; i++)
 				{
+					const int numCharsCount = 4;					// number of symbols in number "0000" (4)
+					const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
+
 					const std::vector<quint8>& frame = firmwareData.frames[i];
 
 					QJsonObject jFrame;
 
-					int dataSize = (int)frame.size();
-					int dataPos = 0;
+					int frameSize = (int)frame.size();
 
-					int frameStartOffset = 0;
+					int frameDataSize = 0;
 
-					// Determine if frame is empty
+					// Determine last non-zero position in frame data
 
-					bool frameIsEmpty = true;
-					for (int f = 0; f < dataSize - sizeof(quint64); f++)
+					for (int f = 0; f < frameSize - sizeof(quint64); f++)
 					{
 						if (frame[f] != 0)
 						{
-							frameIsEmpty = false;
-							break;
+							frameDataSize = f;
 						}
 					}
-
-					if (frameIsEmpty == true)
+					if (frameDataSize & 1)
 					{
-						frameStartOffset = dataSize - sizeof(quint64);
-						dataSize = sizeof(quint64);
+						frameDataSize++;	// data size must be word-aligned
 					}
 
-					int linesCount = ceil((float)dataSize / 2 / frameStringWidth);
+					int linesCount = ceil((float)frameDataSize / 2 / frameStringWidth);
 
-					const int numCharsCount = 4;					// number of symbols in number "0000" (4)
-					const int recCharsCount = numCharsCount + 1;	// number of symbols in number "0000 " (with space)
+					// Frame data
+
+					int dataPos = 0;
 
 					QByteArray str;
 					str.resize(recCharsCount * frameStringWidth - 1);
@@ -265,14 +264,14 @@ namespace Hardware
 
 						for (int i = 0; i < frameStringWidth; i++)
 						{
-							quint16 value = ((quint16)frame[frameStartOffset + dataPos++] << 8);
-							if (dataPos >= dataSize)
+							quint16 value = ((quint16)frame[dataPos++] << 8);
+							if (dataPos >= frameDataSize)
 							{
 								assert(false);
 								break;
 							}
 
-							value |= frame[frameStartOffset + dataPos++];
+							value |= frame[dataPos++];
 
 							snprintf(buf, sizeof(buf), "%hx", value);
 
@@ -281,7 +280,7 @@ namespace Hardware
 							memset(str.data() + i * recCharsCount, '0', numCharsCount);
 							memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
 
-							if (dataPos >= dataSize)
+							if (dataPos >= frameDataSize)
 							{
 								str[i * recCharsCount + numCharsCount] = 0;
 								break;
@@ -291,8 +290,40 @@ namespace Hardware
 						jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
 					}
 
-					jFrame.insert("frameIndex", i);
-					jFrame.insert("frameIsEmpty", frameIsEmpty ? 1 : 0);
+					// CRC
+
+					str.fill(' ');
+
+					dataPos = frameSize - sizeof(quint64);
+
+					for (int i = 0; i < frameStringWidth; i++)
+					{
+						quint16 value = ((quint16)frame[dataPos++] << 8);
+						if (dataPos >= frameSize)
+						{
+							assert(false);
+							break;
+						}
+
+						value |= frame[dataPos++];
+
+						snprintf(buf, sizeof(buf), "%hx", value);
+
+						int len = static_cast<int>(strlen(buf));
+
+						memset(str.data() + i * recCharsCount, '0', numCharsCount);
+						memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
+
+						if (dataPos >= frameSize)
+						{
+							str[i * recCharsCount + numCharsCount] = 0;
+							break;
+						}
+					}
+
+					jFrame.insert("frameCrc", QJsonValue(str.data()));
+
+					jFrame.insert(QLatin1String("frameIndex"), i);
 
 					jFirmwareData.insert("z_frame_" + QString().number(i).rightJustified(4, '0'), jFrame);
 				}
@@ -337,25 +368,25 @@ namespace Hardware
 						}
 					}
 
-					jFirmwareData.insert("uartId", uartId);
-					jFirmwareData.insert("uartType", firmwareData.uartType);
-					jFirmwareData.insert("eepromFramePayloadSize", firmwareData.eepromFramePayloadSize);
-					jFirmwareData.insert("eepromFrameSize", firmwareData.eepromFrameSize);
-					jFirmwareData.insert("eepromFrameCount", static_cast<int>(firmwareData.frames.size()));
+					jFirmwareData.insert(QLatin1String("uartId"), uartId);
+					jFirmwareData.insert(QLatin1String("uartType"), firmwareData.uartType);
+					jFirmwareData.insert(QLatin1String("eepromFramePayloadSize"), firmwareData.eepromFramePayloadSize);
+					jFirmwareData.insert(QLatin1String("eepromFrameSize"), firmwareData.eepromFrameSize);
+					jFirmwareData.insert(QLatin1String("eepromFrameCount"), static_cast<int>(firmwareData.frames.size()));
 
 					jFirmwaresDataArray.push_back(jFirmwareData);
 				}
 
 
-				jSubsystemData.insert("z_firmwareData", jFirmwaresDataArray);
+				jSubsystemData.insert(QLatin1String("z_firmwareData"), jFirmwaresDataArray);
 
-				jSubsystemData.insert("subsystemId", subsystemId);
+				jSubsystemData.insert(QLatin1String("subsystemId"), subsystemId);
 			}
 
 			jSubsystemDataArray.push_back(jSubsystemData);
 		}
 
-		jObject.insert("z_s_subsystemsData", jSubsystemDataArray);
+		jObject.insert(QLatin1String("z_s_subsystemsData"), jSubsystemDataArray);
 
 		// properties
 		//
@@ -370,14 +401,14 @@ namespace Hardware
 
 		QString m_buildTime = QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
 
-		jObject.insert("userName", m_userName);
-		jObject.insert("projectName", m_projectName);
-		jObject.insert("buildNumber", m_buildNumber);
-		jObject.insert("buildConfig", m_debug ? "debug" : "release");
-		jObject.insert("changesetId", m_changesetId);
-		jObject.insert("fileVersion", fileVersion());
-		jObject.insert("buildSoftware", m_buildSoftware);
-		jObject.insert("buildTime", m_buildTime);
+		jObject.insert(QLatin1String("userName"), m_userName);
+		jObject.insert(QLatin1String("projectName"), m_projectName);
+		jObject.insert(QLatin1String("buildNumber"), m_buildNumber);
+		jObject.insert(QLatin1String("buildConfig"), m_debug ? "debug" : "release");
+		jObject.insert(QLatin1String("changesetId"), m_changesetId);
+		jObject.insert(QLatin1String("fileVersion"), maxFileVersion());
+		jObject.insert(QLatin1String("buildSoftware"), m_buildSoftware);
+		jObject.insert(QLatin1String("buildTime"), m_buildTime);
 
 		dest = QJsonDocument(jObject).toJson();
 

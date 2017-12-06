@@ -95,7 +95,14 @@ namespace Builder
 				return false;
 			}
 
-			m_firmwareWriter->createFirmware(subsysStrID, subsysID, tuningUartId, "Tuning", frameSize, frameCount, lmDescription->configurationStringFile(), lmDescription->descriptionNumber());
+			m_firmwareWriter->createFirmware(subsysStrID,
+											 subsysID,
+											 tuningUartId,
+											 "Tuning",
+											 frameSize,
+											 frameCount,
+											 lmDescription->lmDescriptionFile(m),
+											 lmDescription->descriptionNumber());
 
 			QByteArray data;
 			quint64 uniqueID = 0;

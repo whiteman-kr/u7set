@@ -32,7 +32,7 @@ namespace Hardware
 	{
 		QString equipmentId;
 		int lmNumber;
-		int subsystemChannel;
+		int channel;
 
 		int moduleFamily;
 		int customModuleVersion;
@@ -50,7 +50,9 @@ namespace Hardware
 				  int ssKey, const QString& lmDescriptionFile,
 				  int lmDescriptionNumber);
 
-
+		void init(const QString& subsysId,
+				  int ssKey, const QString& lmDescriptionFile,
+				  int lmDescriptionNumber);
 
 		// Data access
 		//
@@ -73,12 +75,13 @@ namespace Hardware
 
 		void addLogicModuleInfo(const QString& equipmentId,
 								int lmNumber,
-								int subsystemChannel,
+								int channel,
 								int moduleFamily,
 								int customModuleVersion,
 								int moduleVersion,
 								int moduleType
 								);
+		void addLogicModuleInfo(const LogicModuleInfo& lmi);
 
 		const std::vector<LogicModuleInfo>& logicModulesInfo() const;
 
@@ -124,7 +127,7 @@ namespace Hardware
 
 	private:
 		bool parse(const QByteArray& data, bool readDataFrames, QString* errorCode);
-		bool parse_version1(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode);
+		bool parse_version2(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode);
 
 		// Properties, for access from JS it is "public slots"
 		//
@@ -142,7 +145,7 @@ namespace Hardware
 		//
 	protected:
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 1;	//Latest version
+		int m_maxFileVersion = 2;	//Latest version
 
 		QString m_projectName;
 		QString m_userName;

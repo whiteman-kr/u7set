@@ -46,6 +46,17 @@ namespace Hardware
 		return;
 	}
 
+	void ModuleFirmware::init(const QString& subsysId,
+			  int ssKey, const QString& lmDescriptionFile,
+			  int lmDescriptionNumber)
+	{
+		m_subsysId = subsysId;
+		m_ssKey = ssKey;
+		m_lmDescriptionFile = lmDescriptionFile;
+		m_lmDescriptionNumber = lmDescriptionNumber;
+	}
+
+
 	std::vector<UartPair> ModuleFirmware::uartList() const
 	{
 		std::vector<UartPair> result;
@@ -162,7 +173,7 @@ static const std::vector<quint8> err;
 	void ModuleFirmware::addLogicModuleInfo(
 							const QString& equipmentId,
 							int lmNumber,
-							int subsystemChannel,
+							int channel,
 							int moduleFamily,
 							int customModuleVersion,
 							int moduleVersion,
@@ -173,14 +184,21 @@ static const std::vector<quint8> err;
 
 		info.equipmentId = equipmentId;
 		info.lmNumber = lmNumber;
-		info.subsystemChannel = subsystemChannel;
+		info.channel = channel;
 		info.moduleFamily = moduleFamily;
 		info.customModuleVersion = customModuleVersion;
 		info.moduleVersion = moduleVersion;
 		info.moduleType = moduleType;
 
-		m_lmInfo.push_back(info);
+		addLogicModuleInfo(info);
+
 	}
+
+	void ModuleFirmware::addLogicModuleInfo(const LogicModuleInfo& lmi)
+	{
+		m_lmInfo.push_back(lmi);
+	}
+
 
 	const std::vector<LogicModuleInfo>& ModuleFirmware::logicModulesInfo() const
 	{
@@ -351,21 +369,27 @@ static ModuleFirmware err;
 
 		switch (m_fileVersion)
 		{
-		//case 1:
-			//return parse_version1(jConfig, readDataFrames, errorCode);
+		case 1:
+			*errorCode = tr("This file version is not supported.");
+			return false;
+		case 2:
+			return parse_version2(jConfig, readDataFrames, errorCode);
 		default:
 			*errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
 	}
 
-	/*bool ModuleFirmware::parse_version1(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode)
+	bool ModuleFirmwareStorage::parse_version2(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
 			assert(errorCode);
 			return false;
 		}
+
+		// Load general parameters
+		//
 
 		if (jConfig.value(QLatin1String("projectName")).isUndefined() == true)
 		{
@@ -381,27 +405,14 @@ static ModuleFirmware err;
 		}
 		m_userName = jConfig.value(QLatin1String("userName")).toString();
 
-		if (jConfig.value(QLatin1String("caption")).isUndefined() == true)
-		{
-			*errorCode = "Parse firmware error: cant find field caption";
-			return false;
-		}
-		m_caption = jConfig.value(QLatin1String("caption")).toString();
-
-		if (jConfig.value(QLatin1String("subsysId")).isUndefined() == true)
-		{
-			*errorCode = "Parse firmware error: cant find field subsysId";
-			return false;
-		}
-		m_subsysId = jConfig.value(QLatin1String("subsysId")).toString();
-
 		if (jConfig.value(QLatin1String("buildConfig")).isUndefined() == true)
 		{
-			m_buildConfig.clear();
+			m_debug = true;
 		}
 		else
 		{
-			m_buildConfig = jConfig.value(QLatin1String("buildConfig")).toString();
+
+			m_debug = jConfig.value(QLatin1String("buildConfig")).toString() == "debug";
 		}
 
 		if (jConfig.value(QLatin1String("buildNumber")).isUndefined() == true)
@@ -413,21 +424,135 @@ static ModuleFirmware err;
 			m_buildNumber = jConfig.value(QLatin1String("buildNumber")).toInt();
 		}
 
-		if (jConfig.value(QLatin1String("lmDescriptionNumber")).isUndefined() == true)
-		{
-			m_lmDescriptionNumber = 0;
-		}
-		else
-		{
-			m_lmDescriptionNumber = jConfig.value(QLatin1String("lmDescriptionNumber")).toInt();
-		}
-
 		if (jConfig.value(QLatin1String("changesetId")).isUndefined() == true)
 		{
 			*errorCode = "Parse firmware error: cant find field changesetId";
 			return false;
 		}
 		m_changesetId = jConfig.value(QLatin1String("changesetId")).toInt();
+
+		// Load subsystems information
+		//
+
+		QJsonArray jSubsystemInfoArray = jConfig.value(QLatin1String("z_i_subsystemsInfo")).toArray();
+
+		for (const QJsonValueRef jSubsystemInfoRef : jSubsystemInfoArray)
+		{
+			ModuleFirmware fw;
+
+			QJsonObject jSubsystemInfo = jSubsystemInfoRef.toObject();
+
+			if (jSubsystemInfo.value(QLatin1String("subsystemId")).isUndefined() == true)
+			{
+				*errorCode = "Parse firmware error: cant find field subsystemId";
+				return false;
+			}
+			QString subsysId = jConfig.value(QLatin1String("subsystemId")).toString();
+
+			if (jSubsystemInfo.value(QLatin1String("subsystemKey")).isUndefined() == true)
+			{
+				*errorCode = "Parse firmware error: cant find field subsystemKey";
+				return false;
+			}
+			int ssKey = jConfig.value(QLatin1String("subsystemKey")).toInt();
+
+			if (jSubsystemInfo.value(QLatin1String("lmDescriptionFile")).isUndefined() == true)
+			{
+				*errorCode = "Parse firmware error: cant find field lmDescriptionFile";
+				return false;
+			}
+			QString lmDescriptionFile = jConfig.value(QLatin1String("lmDescriptionFile")).toString();
+
+			if (jSubsystemInfo.value(QLatin1String("lmDescriptionNumber")).isUndefined() == true)
+			{
+				*errorCode = "Parse firmware error: cant find field lmDescriptionNumber";
+				return false;
+			}
+			int lmDescriptionNumber = jConfig.value(QLatin1String("lmDescriptionNumber")).toInt();
+
+			fw.init(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+
+			// Load modules information
+			//
+
+			QJsonArray jModuleInfoArray = jConfig.value(QLatin1String("z_modules")).toArray();
+
+			for (const QJsonValueRef jModuleInfoRef: jModuleInfoArray)
+			{
+				LogicModuleInfo lmi;
+
+				QJsonObject jModuleInfo = jModuleInfoRef.toObject();
+
+				if (jModuleInfo.value(QLatin1String("equipmentId")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field equipmentId";
+					return false;
+				}
+				lmi.equipmentId = jModuleInfo.value(QLatin1String("lmNumber")).toInt();
+
+				if (jModuleInfo.value(QLatin1String("lmNumber")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field lmNumber";
+					return false;
+				}
+				lmi.lmNumber = jModuleInfo.value(QLatin1String("lmNumber")).toInt();
+
+				if (jModuleInfo.value(QLatin1String("channel")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field channel";
+					return false;
+				}
+				lmi.channel = jModuleInfo.value(QLatin1String("channel")).toInt();
+
+				if (jModuleInfo.value(QLatin1String("moduleFamily")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field moduleFamily";
+					return false;
+				}
+				lmi.moduleFamily = jModuleInfo.value(QLatin1String("moduleFamily")).toInt();
+
+				if (jModuleInfo.value(QLatin1String("customModuleVersion")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field customModuleVersion";
+					return false;
+				}
+				lmi.customModuleVersion = jModuleInfo.value(QLatin1String("customModuleVersion")).toInt();
+
+				if (jModuleInfo.value(QLatin1String("moduleVersion")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field moduleVersion";
+					return false;
+				}
+				lmi.moduleVersion = jModuleInfo.value(QLatin1String("moduleVersion")).toInt();
+
+				if (jModuleInfo.value(QLatin1String("moduleType")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field moduleType";
+					return false;
+				}
+				lmi.moduleType = jModuleInfo.value(QLatin1String("moduleType")).toInt();
+
+				fw.addLogicModuleInfo(lmi);
+
+			}
+
+			m_firmwares[fw.subsysId()] = fw;
+		}
+
+		// Load subsystems firmware data
+		//
+
+
+
+
+
+
+/*
+
+
+
+
+
 
 		//--
 		//
@@ -589,10 +714,10 @@ static ModuleFirmware err;
 			}
 
 			m_firmwareData[data.uartId] = data;
-		}
+		}*/
 
 		return true;
-	}*/
+	}
 
 
 
