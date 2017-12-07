@@ -55,6 +55,9 @@
          <height>80</height>
         </size>
        </property>
+       <property name="rootIsDecorated">
+        <bool>true</bool>
+       </property>
        <column>
         <property name="text">
          <string notr="true">1</string>

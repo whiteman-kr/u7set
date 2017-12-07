@@ -1615,13 +1615,14 @@ void Configurator::processConfDataFile(const QString& fileName, const QString& s
 	m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
 
 	QStringList subsystemList = confFirmware.subsystems();
+
 	QString subsystems;
 	for (const QString& s : subsystemList)
 	{
 		subsystems.push_back(s + " ");
 	}
 
-	m_Log->writeMessage(tr("Subsystems: %1").arg(subsystems));
+	m_Log->writeMessage(tr("Subsystems: %1").arg(subsystems.trimmed()));
 
 	if (writeToFlash == true)
 	{

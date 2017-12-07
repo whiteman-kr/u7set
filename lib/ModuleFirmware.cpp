@@ -14,9 +14,9 @@
 namespace Hardware
 {
 
-	void ModuleFirmware::init(int uartId,
+	void ModuleFirmware::initFirmwareData(int uartId,
 							  const QString& uartType,
-							  int frameSize,
+							  int eepromFramePayloadSize,
 							  int frameCount,
 							  const QString& subsysId,
 							  int ssKey,
@@ -32,13 +32,20 @@ namespace Hardware
 
 		data.uartId = uartId;
 		data.uartType = uartType;
-		data.eepromFramePayloadSize = frameSize;
-		data.eepromFrameSize = frameSize + sizeof(quint64);
+		data.eepromFramePayloadSize = eepromFramePayloadSize;
+		data.eepromFrameSize = eepromFramePayloadSize + sizeof(quint64);
 
 		data.frames.resize(frameCount);
 		for (int i = 0; i < frameCount; i++)
 		{
-			data.frames[i].resize(data.eepromFrameSize);
+			std::vector<quint8>& vec = data.frames[i];
+
+			vec.resize(data.eepromFrameSize);
+
+			for (int j = 0; j < data.eepromFrameSize; j++)
+			{
+				vec[j] = 0;
+			}
 		}
 
 		m_firmwareData[uartId] = data;
@@ -46,7 +53,7 @@ namespace Hardware
 		return;
 	}
 
-	void ModuleFirmware::init(const QString& subsysId,
+	void ModuleFirmware::initFirmwareData(const QString& subsysId,
 			  int ssKey, const QString& lmDescriptionFile,
 			  int lmDescriptionNumber)
 	{
@@ -300,7 +307,7 @@ static const std::vector<quint8> err;
 
 		if (newSubsystem == true || subsystemData.uartExists(uartId) == false)
 		{
-			subsystemData.init(uartId, uartType, frameSize, frameCount, subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+			subsystemData.initFirmwareData(uartId, uartType, frameSize, frameCount, subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
 		}
 
 		return;
@@ -325,7 +332,12 @@ static ModuleFirmware err;
 		return m_firmwares.at(subsysId);
 	}
 
-	QStringList ModuleFirmwareStorage::subsystems()
+	bool ModuleFirmwareStorage::isEmpty() const
+	{
+		return m_firmwares.empty() == true;
+	}
+
+	QStringList ModuleFirmwareStorage::subsystems() const
 	{
 		QStringList result;
 
@@ -447,35 +459,35 @@ static ModuleFirmware err;
 				*errorCode = "Parse firmware error: cant find field subsystemId";
 				return false;
 			}
-			QString subsysId = jConfig.value(QLatin1String("subsystemId")).toString();
+			QString subsysId = jSubsystemInfo.value(QLatin1String("subsystemId")).toString();
 
 			if (jSubsystemInfo.value(QLatin1String("subsystemKey")).isUndefined() == true)
 			{
 				*errorCode = "Parse firmware error: cant find field subsystemKey";
 				return false;
 			}
-			int ssKey = jConfig.value(QLatin1String("subsystemKey")).toInt();
+			int ssKey = jSubsystemInfo.value(QLatin1String("subsystemKey")).toInt();
 
 			if (jSubsystemInfo.value(QLatin1String("lmDescriptionFile")).isUndefined() == true)
 			{
 				*errorCode = "Parse firmware error: cant find field lmDescriptionFile";
 				return false;
 			}
-			QString lmDescriptionFile = jConfig.value(QLatin1String("lmDescriptionFile")).toString();
+			QString lmDescriptionFile = jSubsystemInfo.value(QLatin1String("lmDescriptionFile")).toString();
 
 			if (jSubsystemInfo.value(QLatin1String("lmDescriptionNumber")).isUndefined() == true)
 			{
 				*errorCode = "Parse firmware error: cant find field lmDescriptionNumber";
 				return false;
 			}
-			int lmDescriptionNumber = jConfig.value(QLatin1String("lmDescriptionNumber")).toInt();
+			int lmDescriptionNumber = jSubsystemInfo.value(QLatin1String("lmDescriptionNumber")).toInt();
 
-			fw.init(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+			fw.initFirmwareData(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
 
 			// Load modules information
 			//
 
-			QJsonArray jModuleInfoArray = jConfig.value(QLatin1String("z_modules")).toArray();
+			QJsonArray jModuleInfoArray = jSubsystemInfo.value(QLatin1String("z_modules")).toArray();
 
 			for (const QJsonValueRef jModuleInfoRef: jModuleInfoArray)
 			{
@@ -488,7 +500,7 @@ static ModuleFirmware err;
 					*errorCode = "Parse firmware error: cant find field equipmentId";
 					return false;
 				}
-				lmi.equipmentId = jModuleInfo.value(QLatin1String("lmNumber")).toInt();
+				lmi.equipmentId = jModuleInfo.value(QLatin1String("equipmentId")).toString();
 
 				if (jModuleInfo.value(QLatin1String("lmNumber")).isUndefined() == true)
 				{
@@ -539,99 +551,96 @@ static ModuleFirmware err;
 			m_firmwares[fw.subsysId()] = fw;
 		}
 
+		if (readDataFrames == false)
+		{
+			return true;
+		}
+
 		// Load subsystems firmware data
 		//
 
+		QJsonArray jSubsystemDataArray = jConfig.value(QLatin1String("z_s_subsystemsData")).toArray();
 
-
-
-
-
-/*
-
-
-
-
-
-
-		//--
-		//
-		if (jConfig.value(QLatin1String("firmwaresCount")).isUndefined() == true)
+		for (const QJsonValueRef jSubsystemDataRef : jSubsystemDataArray)
 		{
-			*errorCode = "Parse firmware error: cant find field firmwaresCount";
-			return false;
-		}
-		int firmwaresCount = jConfig.value(QLatin1String("firmwaresCount")).toInt();
+			QJsonObject jSubsystemData = jSubsystemDataRef.toObject();
 
-		for (int f = 0; f < firmwaresCount; f++)
-		{
-			QString zFirmware = "z_firmware_" + QString::number(f);
-
-			QJsonValue jFirmware = jConfig.value(zFirmware);
-			if (jFirmware.isUndefined() == true || jFirmware.isObject() == false)
+			if (jSubsystemData.value(QLatin1String("subsystemId")).isUndefined() == true)
 			{
-				assert(false);
-				*errorCode = "Parse firmware error: cant find field " + zFirmware;
+				*errorCode = "Parse firmware error: cant find field subsystemId";
+				return false;
+			}
+			QString subsystemId = jSubsystemData.value(QLatin1String("subsystemId")).toString();
+
+			bool ok = false;
+			ModuleFirmware& fw = firmware(subsystemId, &ok);
+			if (ok == false)
+			{
+				*errorCode = tr("Parse firmware error: unknown subsystem %1 in z_s_subsystemsData").arg(subsystemId);
 				return false;
 			}
 
-			QJsonObject jFirmwareObject = jFirmware.toObject();
-
-			if (jFirmwareObject.value(QLatin1String("eepromFrameCount")).isUndefined() == true)
-			{
-				*errorCode = "Parse firmware error: cant find field eepromFrameCount";
-				return false;
-			}
-			int framesCount = jFirmwareObject.value(QLatin1String("eepromFrameCount")).toInt();
-
+			// Load firmware data
 			//
 
-			ModuleFirmwareData data;
+			QJsonArray jFirmwareDataArray = jSubsystemData.value(QLatin1String("z_firmwareData")).toArray();
 
-			if (jFirmwareObject.value(QLatin1String("eepromFramePayloadSize")).isUndefined() == true)
+			for (const QJsonValueRef jFirmwareDataRef : jFirmwareDataArray)
 			{
-				*errorCode = "Parse firmware error: cant find field eepromFramePayloadSize";
-				return false;
-			}
-			data.frameSize = jFirmwareObject.value(QLatin1String("eepromFramePayloadSize")).toInt();
+				QJsonObject jFirmwareData = jFirmwareDataRef.toObject();
 
-			data.frameSizeWithCRC = jFirmwareObject.value(QLatin1String("eepromFrameSize")).toInt();
+				if (jFirmwareData.value(QLatin1String("eepromFrameCount")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field eepromFrameCount";
+					return false;
+				}
+				int eepromFrameCount = jFirmwareData.value(QLatin1String("eepromFrameCount")).toInt();
 
-			if (data.frameSizeWithCRC <= data.frameSize)
-			{
-				assert(false);
-				data.frameSizeWithCRC = data.frameSize + sizeof(quint64);
-			}
+				if (jFirmwareData.value(QLatin1String("eepromFramePayloadSize")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field eepromFramePayloadSize";
+					return false;
+				}
+				int eepromFramePayloadSize = jFirmwareData.value(QLatin1String("eepromFramePayloadSize")).toInt();
 
-			if (jFirmwareObject.value(QLatin1String("uartId")).isUndefined() == true)
-			{
-				*errorCode = "Parse firmware error: cant find field uartId";
-				return false;
-			}
-			data.uartId = jFirmwareObject.value(QLatin1String("uartId")).toInt();
+				if (jFirmwareData.value(QLatin1String("eepromFrameSize")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field eepromFrameSize";
+					return false;
+				}
+				//int eepromFrameSize = jFirmwareData.value(QLatin1String("eepromFrameSize")).toInt();
 
-			if (jFirmwareObject.value(QLatin1String("uartType")).isUndefined() == true)
-			{
-				*errorCode = "Parse firmware error: cant find field uartType";
-				return false;
-			}
-			data.uartType = jFirmwareObject.value(QLatin1String("uartType")).toString();
+				if (jFirmwareData.value(QLatin1String("uartId")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field uartId";
+					return false;
+				}
+				int uartId = jFirmwareData.value(QLatin1String("uartId")).toInt();
 
-			if (readDataFrames == true)
-			{
-				std::vector<quint8> frameVec;
-				frameVec.resize(data.frameSizeWithCRC);
+				if (jFirmwareData.value(QLatin1String("uartType")).isUndefined() == true)
+				{
+					*errorCode = "Parse firmware error: cant find field uartType";
+					return false;
+				}
+				QString uartType = jFirmwareData.value(QLatin1String("uartType")).toString();
 
-				quint16* framePtr = (quint16*)frameVec.data();
+				fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, eepromFrameCount, subsystemId, 0, QString(), 0);
 
-				int frameStringWidth = -1;
-				int linesCount = 0;
+				// Load data binary frames
+				//
 
-				for (int v = 0; v < framesCount; v++)
+				ModuleFirmwareData& firmwareData = fw.firmwareData(uartId, &ok);
+				if (ok == false)
+				{
+					assert(false);
+					return false;
+				}
+
+				for (int v = 0; v < eepromFrameCount; v++)
 				{
 					QString zFrame = "z_frame_" + QString::number(v).rightJustified(4, '0');
 
-					QJsonValue jFrameVal = jFirmwareObject.value(zFrame);
+					QJsonValue jFrameVal = jFirmwareData.value(zFrame);
 					if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
 					{
 						assert(false);
@@ -648,35 +657,45 @@ static ModuleFirmware err;
 						return false;
 					}
 
-					if (frameStringWidth == -1)
-					{
-						QString firstString = jFrame.value(QLatin1String("data0000")).toString();
-
-						frameStringWidth = firstString.split(' ').size();
-						if (frameStringWidth == 0)
-						{
-							assert(false);
-							*errorCode = QString("Parse firmware error: cant find %1 of ").arg(firstString) + zFrame;
-							return false;
-						}
-
-						linesCount = ceil((float)data.frameSize / 2 / frameStringWidth);
-					}
-
 					int dataPos = 0;
 
-					quint16* ptr = framePtr;
+					quint16* framePtr = (quint16*)firmwareData.frames[v].data();
+
+					const int frameStringWidth = 16;
+					const int linesCount = ceil((float)firmwareData.eepromFrameSize / 2 / frameStringWidth) + 1;	//add 1 for CRC special line
 
 					for (int l = 0; l < linesCount; l++)
 					{
-						QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+						QJsonValue v;
 
-						QJsonValue v = jFrame.value(stringName);
-						if (v.isUndefined() == true)
+						if (l == linesCount - 1)
 						{
-							assert(false);
-							*errorCode = QString("Parse firmware error: cant find %1 of ").arg(stringName) + zFrame;
-							return false;
+							//CRC special line
+
+							QString stringName = "frameCrc";
+							v = jFrame.value(stringName);
+
+							dataPos = eepromFramePayloadSize / sizeof(quint16);	// set data pointer to CRC
+
+							if (v.isUndefined() == true)
+							{
+								assert(false);
+								*errorCode = QString("Parse firmware error: cant find %1 of ").arg(stringName) + zFrame;
+								return false;
+							}
+						}
+						else
+						{
+							// Data line
+							QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+							v = jFrame.value(stringName);
+
+							if (v.isUndefined() == true)
+							{
+								// data strings may be skipped
+								//
+								continue;
+							}
 						}
 
 						QString stringValue = v.toString();
@@ -692,29 +711,24 @@ static ModuleFirmware err;
 								return false;
 							}
 
-							if (dataPos >= data.frameSizeWithCRC / sizeof(quint16))
+							if (dataPos >= firmwareData.eepromFrameSize / sizeof(quint16))
 							{
 								assert(false);
 								break;
 							}
 
-							dataPos++;
-							*ptr++ = qToBigEndian(v);
+							framePtr[dataPos++] = qToBigEndian(v);
 						}
-					}
+					} // linesCount
 
-					if (Crc::checkDataBlockCrc(v, frameVec) == false)
+					if (Crc::checkDataBlockCrc(v, firmwareData.frames[v]) == false)
 					{
 						*errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
 						return false;
 					}
-
-					data.frames.push_back(frameVec);
-				}
-			}
-
-			m_firmwareData[data.uartId] = data;
-		}*/
+				} // eepromFrameCount
+			} // jFirmwareDataRef
+		}// jSubsystemDataRef
 
 		return true;
 	}

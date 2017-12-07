@@ -43,14 +43,14 @@ namespace Hardware
 	class ModuleFirmware
 	{
 	public:
-		void init(int uartId, const QString& uartType,
+		void initFirmwareData(int uartId, const QString& uartType,
 				  int eepromFramePayloadSize,
 				  int eepromFrameCount,
 				  const QString& subsysId,
 				  int ssKey, const QString& lmDescriptionFile,
 				  int lmDescriptionNumber);
 
-		void init(const QString& subsysId,
+		void initFirmwareData(const QString& subsysId,
 				  int ssKey, const QString& lmDescriptionFile,
 				  int lmDescriptionNumber);
 
@@ -123,7 +123,8 @@ namespace Hardware
 		void createFirmware(const QString& subsysId, int ssKey, int uartId, const QString& uartType, int frameSize, int frameCount, const QString& lmDescriptionFile, int lmDescriptionNumber);
 		ModuleFirmware& firmware(const QString& subsysId, bool* ok);
 
-		QStringList subsystems();
+		bool isEmpty() const;
+		QStringList subsystems() const;
 
 	private:
 		bool parse(const QByteArray& data, bool readDataFrames, QString* errorCode);
