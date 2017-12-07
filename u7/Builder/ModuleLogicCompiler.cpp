@@ -147,7 +147,7 @@ namespace Builder
 		{
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
-//			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
+			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
 			PROC_TO_CALL(ModuleLogicCompiler::initAfbs),
 			PROC_TO_CALL(ModuleLogicCompiler::startAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
