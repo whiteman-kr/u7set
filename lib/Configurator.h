@@ -272,7 +272,7 @@ signals:
 	void communicationFinished();
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
-	void loadHeaderComplete(std::vector<UartPair> uartList);
+	void loadHeaderComplete(std::map<QString, std::vector<UartPair>> subsystemUartsInfo);
 	void uploadSuccessful(int uartID);
 
 public:

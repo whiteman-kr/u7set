@@ -1580,8 +1580,11 @@ void Configurator::processConfDataFile(const QString& fileName, const QString& s
 
 	Hardware::ModuleFirmwareStorage confFirmware;
 
-	m_Log->writeMessage(tr("//----------------------"));
-	m_Log->writeMessage(tr("File: %1").arg(fileName));
+	//if (writeToFlash == false)
+	{
+		m_Log->writeMessage(tr("//----------------------"));
+		m_Log->writeMessage(tr("File: %1").arg(fileName));
+	}
 
 	QString errorCode;
 	bool result = false;
@@ -1608,31 +1611,40 @@ void Configurator::processConfDataFile(const QString& fileName, const QString& s
 		return;
 	}
 
-	m_Log->writeMessage(tr("File Version: %1").arg(confFirmware.fileVersion()));
-	m_Log->writeMessage(tr("ChangesetID: %1").arg(confFirmware.changesetId()));
-	m_Log->writeMessage(tr("Build User: %1").arg(confFirmware.userName()));
-	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(confFirmware.buildNumber())));
-	m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
-
-	QStringList subsystemList = confFirmware.subsystems();
-
-	QString subsystems;
-	for (const QString& s : subsystemList)
+	if (writeToFlash == false)
 	{
-		subsystems.push_back(s + " ");
+		m_Log->writeMessage(tr("File Version: %1").arg(confFirmware.fileVersion()));
+		m_Log->writeMessage(tr("ChangesetID: %1").arg(confFirmware.changesetId()));
+		m_Log->writeMessage(tr("Build User: %1").arg(confFirmware.userName()));
+		m_Log->writeMessage(tr("Build No: %1").arg(QString::number(confFirmware.buildNumber())));
+		m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
+		m_Log->writeMessage(tr("Subsystems: %1").arg(confFirmware.subsystemsString()));
 	}
-
-	m_Log->writeMessage(tr("Subsystems: %1").arg(subsystems.trimmed()));
 
 	if (writeToFlash == true)
 	{
+		m_Log->writeMessage(tr("Uploading firmware for subsystem %1").arg(subsystemId));
 		writeConfigurationWorker(&confFirmware, subsystemId);
 	}
-	/*else
+	else
 	{
-		std::vector<UartPair> uartList = confFirmware.uartList();
-		emit loadHeaderComplete(uartList);
-	}*/
+		std::map<QString, std::vector<UartPair>> subsystemUartsInfo;
+
+		for (const QString& s : confFirmware.subsystems())
+		{
+			bool ok = false;
+			ModuleFirmware& firmware = confFirmware.firmware(s, &ok);
+			if (ok == false)
+			{
+				assert(false);
+				return;
+			}
+
+			subsystemUartsInfo[s] = firmware.uartList();
+
+		}
+		emit loadHeaderComplete(subsystemUartsInfo);
+	}
 
 	emit communicationFinished();
 

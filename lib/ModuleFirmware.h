@@ -125,6 +125,7 @@ namespace Hardware
 
 		bool isEmpty() const;
 		QStringList subsystems() const;
+		QString subsystemsString() const;
 
 	private:
 		bool parse(const QByteArray& data, bool readDataFrames, QString* errorCode);

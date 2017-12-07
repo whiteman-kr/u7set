@@ -122,16 +122,8 @@ void ApplicationTabPage::openFileClicked()
 	theLog.writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
 	theLog.writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
 	theLog.writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
+	theLog.writeMessage(tr("Subsystems: %1").arg(m_confFirmware.subsystemsString()));
 
-	QStringList subsystemList = m_confFirmware.subsystems();
-
-	QString subsystems = "Subsystems: ";
-
-	for (const QString& s : subsystemList)
-	{
-		subsystems.push_back(s + " ");
-	}
-	theLog.writeMessage(subsystems.trimmed());
 
 	fillUartData();
 
@@ -151,8 +143,14 @@ void ApplicationTabPage::on_resetCountersButton_clicked()
 			return;
 		}
 
-		item->setData(columnUploadCount, Qt::UserRole, 0);
-		item->setText(columnUploadCount, "0");
+		int childCount = item->childCount();
+		for (int c = 0; c < childCount; c++)
+		{
+			QTreeWidgetItem* childItem = item->child(c);
+
+			childItem->setData(columnUploadCount, Qt::UserRole, 0);
+			childItem->setText(columnUploadCount, "0");
+		}
 	}
 }
 

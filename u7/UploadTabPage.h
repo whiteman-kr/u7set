@@ -32,8 +32,7 @@ public:
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
-	void findSubsystemsInBuild(int index);
-	void subsystemChanged(int index);
+	void buildChanged(int index);
 
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
@@ -70,12 +69,13 @@ public slots:
 
 private:
 	void writeLog(const OutputLogItem& logItem);
+	QString subsystemId();
 
 private slots:
 
 	void clearUartData();
 	void resetUartData();
-	void loadHeaderComplete(std::vector<UartPair> uartList);
+	void loadHeaderComplete(std::map<QString, std::vector<UartPair> > subsystemsUartsInfo);
 	void uploadSuccessful(int uartID);
 
 	// Data
@@ -85,8 +85,6 @@ private:
 	QSplitter* m_vsplitter = nullptr;
 
 	QListWidget* m_pBuildList = nullptr;
-
-	QListWidget* m_pSubsystemList = nullptr;
 
 	QComboBox* m_pConfigurationCombo = nullptr;
 
@@ -120,6 +118,10 @@ private:
 
 	bool m_uploading = false;
 
+	const int columnSubsysId = 0;
+	const int columnUartId = 1;
+	const int columnUartType = 2;
+	const int columnUploadCount = 3;
 };
 
 

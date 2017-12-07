@@ -349,6 +349,18 @@ static ModuleFirmware err;
 		return result;
 	}
 
+	QString ModuleFirmwareStorage::subsystemsString() const
+	{
+		QString result;
+
+		for (auto fw : m_firmwares)
+		{
+			result.push_back(fw.first + " ");
+		}
+
+		return result.trimmed();
+	}
+
 	bool ModuleFirmwareStorage::parse(const QByteArray& data, bool readDataFrames, QString* errorCode)
 	{
 		if (errorCode == nullptr)
@@ -551,11 +563,6 @@ static ModuleFirmware err;
 			m_firmwares[fw.subsysId()] = fw;
 		}
 
-		if (readDataFrames == false)
-		{
-			return true;
-		}
-
 		// Load subsystems firmware data
 		//
 
@@ -626,105 +633,108 @@ static ModuleFirmware err;
 
 				fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, eepromFrameCount, subsystemId, 0, QString(), 0);
 
-				// Load data binary frames
-				//
-
-				ModuleFirmwareData& firmwareData = fw.firmwareData(uartId, &ok);
-				if (ok == false)
+				if (readDataFrames == true)
 				{
-					assert(false);
-					return false;
-				}
+					// Load data binary frames
+					//
 
-				for (int v = 0; v < eepromFrameCount; v++)
-				{
-					QString zFrame = "z_frame_" + QString::number(v).rightJustified(4, '0');
-
-					QJsonValue jFrameVal = jFirmwareData.value(zFrame);
-					if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
+					ModuleFirmwareData& firmwareData = fw.firmwareData(uartId, &ok);
+					if (ok == false)
 					{
 						assert(false);
-						*errorCode = "Parse firmware error: cant find field " + zFrame;
 						return false;
 					}
 
-					QJsonObject jFrame = jFrameVal.toObject();
-
-					if (jFrame.value(QLatin1String("frameIndex")).isUndefined() == true)
+					for (int v = 0; v < eepromFrameCount; v++)
 					{
-						assert(false);
-						*errorCode = "Parse firmware error: cant find frameIndex of " + zFrame;
-						return false;
-					}
+						QString zFrame = "z_frame_" + QString::number(v).rightJustified(4, '0');
 
-					int dataPos = 0;
-
-					quint16* framePtr = (quint16*)firmwareData.frames[v].data();
-
-					const int frameStringWidth = 16;
-					const int linesCount = ceil((float)firmwareData.eepromFrameSize / 2 / frameStringWidth) + 1;	//add 1 for CRC special line
-
-					for (int l = 0; l < linesCount; l++)
-					{
-						QJsonValue v;
-
-						if (l == linesCount - 1)
+						QJsonValue jFrameVal = jFirmwareData.value(zFrame);
+						if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
 						{
-							//CRC special line
-
-							QString stringName = "frameCrc";
-							v = jFrame.value(stringName);
-
-							dataPos = eepromFramePayloadSize / sizeof(quint16);	// set data pointer to CRC
-
-							if (v.isUndefined() == true)
-							{
-								assert(false);
-								*errorCode = QString("Parse firmware error: cant find %1 of ").arg(stringName) + zFrame;
-								return false;
-							}
-						}
-						else
-						{
-							// Data line
-							QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
-							v = jFrame.value(stringName);
-
-							if (v.isUndefined() == true)
-							{
-								// data strings may be skipped
-								//
-								continue;
-							}
+							assert(false);
+							*errorCode = "Parse firmware error: cant find field " + zFrame;
+							return false;
 						}
 
-						QString stringValue = v.toString();
+						QJsonObject jFrame = jFrameVal.toObject();
 
-						for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
+						if (jFrame.value(QLatin1String("frameIndex")).isUndefined() == true)
 						{
-							bool ok = false;
-							quint16 v = s.toUInt(&ok, 16);
-
-							if (ok == false)
-							{
-								assert(false);
-								return false;
-							}
-
-							if (dataPos >= firmwareData.eepromFrameSize / sizeof(quint16))
-							{
-								assert(false);
-								break;
-							}
-
-							framePtr[dataPos++] = qToBigEndian(v);
+							assert(false);
+							*errorCode = "Parse firmware error: cant find frameIndex of " + zFrame;
+							return false;
 						}
-					} // linesCount
 
-					if (Crc::checkDataBlockCrc(v, firmwareData.frames[v]) == false)
-					{
-						*errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
-						return false;
+						int dataPos = 0;
+
+						quint16* framePtr = (quint16*)firmwareData.frames[v].data();
+
+						const int frameStringWidth = 16;
+						const int linesCount = ceil((float)firmwareData.eepromFrameSize / 2 / frameStringWidth) + 1;	//add 1 for CRC special line
+
+						for (int l = 0; l < linesCount; l++)
+						{
+							QJsonValue v;
+
+							if (l == linesCount - 1)
+							{
+								//CRC special line
+
+								QString stringName = "frameCrc";
+								v = jFrame.value(stringName);
+
+								dataPos = eepromFramePayloadSize / sizeof(quint16);	// set data pointer to CRC
+
+								if (v.isUndefined() == true)
+								{
+									assert(false);
+									*errorCode = QString("Parse firmware error: cant find %1 of ").arg(stringName) + zFrame;
+									return false;
+								}
+							}
+							else
+							{
+								// Data line
+								QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+								v = jFrame.value(stringName);
+
+								if (v.isUndefined() == true)
+								{
+									// data strings may be skipped
+									//
+									continue;
+								}
+							}
+
+							QString stringValue = v.toString();
+
+							for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
+							{
+								bool ok = false;
+								quint16 v = s.toUInt(&ok, 16);
+
+								if (ok == false)
+								{
+									assert(false);
+									return false;
+								}
+
+								if (dataPos >= firmwareData.eepromFrameSize / sizeof(quint16))
+								{
+									assert(false);
+									break;
+								}
+
+								framePtr[dataPos++] = qToBigEndian(v);
+							}
+						} // linesCount
+
+						if (Crc::checkDataBlockCrc(v, firmwareData.frames[v]) == false)
+						{
+							*errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
+							return false;
+						}
 					}
 				} // eepromFrameCount
 			} // jFirmwareDataRef
