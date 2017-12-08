@@ -964,6 +964,9 @@ void Configurator::readConfigurationWorker(int /*param*/)
 
 void Configurator::writeConfigurationWorker(ModuleFirmwareStorage *storage, const QString& subsystemId)
 {
+	//emit uploadSuccessful(0x101);
+	//return;
+
 	m_cancelFlag = false;
 
 	// Open port

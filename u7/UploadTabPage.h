@@ -33,6 +33,7 @@ public:
 protected slots:
 	void configurationTypeChanged(const QString& s);
 	void buildChanged(int index);
+	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
@@ -73,7 +74,7 @@ private:
 
 private slots:
 
-	void clearUartData();
+	void clearSubsystemsUartData();
 	void resetUartData();
 	void loadHeaderComplete(std::map<QString, std::vector<UartPair> > subsystemsUartsInfo);
 	void uploadSuccessful(int uartID);
@@ -88,7 +89,9 @@ private:
 
 	QComboBox* m_pConfigurationCombo = nullptr;
 
-	QTreeWidget* m_pFirmwareListWidget = nullptr;
+	QTreeWidget* m_pSubsystemsListWidget = nullptr;
+
+	QTreeWidget* m_pUartListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
@@ -119,9 +122,11 @@ private:
 	bool m_uploading = false;
 
 	const int columnSubsysId = 0;
-	const int columnUartId = 1;
-	const int columnUartType = 2;
-	const int columnUploadCount = 3;
+	const int columnUartId = 0;
+	const int columnUartType = 1;
+	const int columnUploadCount = 2;
+
+	std::map<QString, std::vector<UartPair>> m_subsystemsUartsInfo;
 };
 
 
