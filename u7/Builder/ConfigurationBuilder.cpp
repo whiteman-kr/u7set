@@ -55,14 +55,14 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, QJSEngine* jsEngine, DbController* db, Hardware::DeviceRoot* deviceRoot,
-											   const std::vector<Hardware::DeviceModule*>& lmModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
+											   const std::vector<Hardware::DeviceModule*>& fscModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
 											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
 											   Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
 		m_buildWorkerThread(buildWorkerThread),
 		m_jsEngine(jsEngine),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
-		m_lmModules(lmModules),
+		m_fscModules(fscModules),
 		m_lmDescriptions(lmDescriptions),
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
@@ -105,7 +105,7 @@ namespace Builder
 
 		// Check if logic modules have unknown subsystems
 		//
-		for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
+		for (auto it = m_fscModules.begin(); it != m_fscModules.end(); it++)
 		{
 			Hardware::DeviceModule* lm = *it;
 			if (lm == nullptr)
@@ -163,7 +163,7 @@ namespace Builder
 
 			std::vector<LmDescription*> subsystemModulesDescriptions;
 
-			for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
+			for (auto it = m_fscModules.begin(); it != m_fscModules.end(); it++)
 			{
 				Hardware::DeviceModule* lm = *it;
 				if (lm == nullptr)
@@ -233,7 +233,7 @@ namespace Builder
 		// Find all LM modules and save ssKey and channel information
 		//
 
-		std::sort(m_lmModules.begin(), m_lmModules.end(),
+		std::sort(m_fscModules.begin(), m_fscModules.end(),
 				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
 		{
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
@@ -242,7 +242,7 @@ namespace Builder
 		QStringList lmReport;
 		lmReport << "Jumpers configuration for LM modules";
 
-		for (Hardware::DeviceModule* m : m_lmModules)
+		for (Hardware::DeviceModule* m : m_fscModules)
 		{
 			if (m->propertyExists("SubsystemID") == false)
 			{

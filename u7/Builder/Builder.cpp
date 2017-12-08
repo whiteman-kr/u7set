@@ -1274,7 +1274,7 @@ namespace Builder
 			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->firmware(subsysID, &ok);
 			if (ok == false)
 			{
-				assert(ok);
+				// No module firmware exists for this module, maybe it
 				continue;
 			}
 
