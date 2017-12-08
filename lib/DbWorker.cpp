@@ -206,6 +206,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0188.sql", "Upgrade to version 188, Added UartIDs to LM1_SF00.xml, LM1_SR01.xml"},
 	{":/DatabaseUpgrade/Upgrade0189.sql", "Upgrade to version 189, Added enables write to bitstream for LM1_SF00.xml, LM1_SR01.xml"},
 	{":/DatabaseUpgrade/Upgrade0190.sql", "Upgrade to version 190, LM1-SF00 preset update, ModuleVersion changed"},
+	{":/DatabaseUpgrade/Upgrade0191.sql", "Upgrade to version 191, Configuration scripts update, ModuleFirmware functions review "},
 };
 
 
