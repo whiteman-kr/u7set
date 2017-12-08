@@ -79,7 +79,7 @@ namespace Builder
 
 		// Load subsystems
 		//
-		bool loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicMoudles, Hardware::SubsystemStorage* subsystems);
+		bool loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicModules, Hardware::SubsystemStorage* subsystems);
 
 		// Check same Uuids and same StrIds
 		//

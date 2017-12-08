@@ -15,7 +15,6 @@ namespace Tuning
 	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
 	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
 
-
 	TuningServiceWorker::TuningServiceWorker(const QString& serviceName,
 											 int& argc,
 											 char** argv,
@@ -57,6 +56,7 @@ namespace Tuning
 //		cp.addSingleValueOption("b", "BuildPath", "Path to RPCT project build.", "");
 		cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
 		cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+		cp.addSimpleOption("mt", "Skip moduleType checking in RUP protocol ");
 	}
 
 	void TuningServiceWorker::loadSettings()
@@ -73,11 +73,14 @@ namespace Tuning
 
 		m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
+		m_skipModuleTypeChecking = cmdLineParser().optionIsSet("mt");
+
 		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
 //		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(m_cfgServiceIP1.addressPortStr()));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(m_cfgServiceIP2.addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Skip moduleType checking in RUP protocol = %1")).arg(m_skipModuleTypeChecking == true ? "Yes" : "No"));
 	}
 
 
@@ -399,7 +402,8 @@ namespace Tuning
 				continue;
 			}
 
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource,
+																						m_skipModuleTypeChecking, m_logger);
 
 			if (sourceWorkerThread == nullptr)
 			{
