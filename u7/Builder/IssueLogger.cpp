@@ -5624,6 +5624,29 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6109
+	///
+	/// IssueType: Error
+	///
+	/// Title: Equipment ID '%1' specified in TuningSourceEquipmentID property of Tuning Client '%2' does not exist.
+	///
+	/// Parameters:
+	///		%1 Tuning Source Equipment ID
+	///		%2 TuningClient Equipment ID
+	///
+	/// Description:
+	///		Equipment object that is specified in TuningSourceEquipmentID property of the Tuning Client does not exist.
+	///
+	void IssueLogger::errEQP6109(QString equipmentId, QString tuningClientEquipmentId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6109,
+				  tr("Equipment ID '%1' specified in TuningSourceEquipmentID property of Tuning Client '%2' does not exist.")
+				  .arg(equipmentId)
+				  .arg(tuningClientEquipmentId)
+				  );
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)
