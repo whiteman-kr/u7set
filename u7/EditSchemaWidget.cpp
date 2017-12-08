@@ -5266,6 +5266,11 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 		return false;
 	}
 
+	if (fileList.empty() == true)
+	{
+		return true;	// It is not error, just no any busses
+	}
+
 	// Get Busses latest version from the DB
 	//
 	std::vector<std::shared_ptr<DbFile>> files;
