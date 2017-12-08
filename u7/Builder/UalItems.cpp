@@ -1115,9 +1115,17 @@ namespace Builder
 		//
 		m_autoSignalPtr->resetAddresses();
 
+		if (lmEquipmentID != s->lm()->equipmentIdTemplate())
+		{
+			// this signal is not native for current LM
+			// reset Acquired flag
+			//
+			m_autoSignalPtr->setAcquire(false);
+		}
+
 		m_autoSignalPtr->setEquipmentID(lmEquipmentID);						// associate new signal with current lm
 		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
-		m_autoSignalPtr->setAcquire(false);
+
 
 		appendRefSignal(m_autoSignalPtr, true);
 
