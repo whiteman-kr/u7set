@@ -325,6 +325,18 @@ bool TuningClientCfgGenerator::writeTuningSignals(std::vector<Hash>* tuningSigna
 		tuningSourceEquipmentIdMasks = tuningSourceEquipmentId.split(';');
 	}
 
+	// Check for valid EquipmentIds
+	//
+
+	for (const QString& tuningEquipmentID : tuningSourceEquipmentIdMasks)
+	{
+		if (m_equipment->deviceObject(tuningEquipmentID) == nullptr)
+		{
+			m_log->errEQP6109(tuningEquipmentID, m_software->equipmentIdTemplate());
+			return false;
+		}
+	}
+
 	// Write signals
 	//
 
