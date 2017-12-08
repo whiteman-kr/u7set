@@ -227,31 +227,15 @@ namespace Hardware
 
 					const std::vector<quint8>& frame = firmwareData.frames[i];
 
-					QJsonObject jFrame;
-
 					int frameSize = (int)frame.size();
 
-					int frameDataSize = 0;
+					int linesCount = ceil((float)frameSize / 2 / frameStringWidth);
 
-					// Determine last non-zero position in frame data
-
-					for (int f = 0; f < frameSize - sizeof(quint64); f++)
-					{
-						if (frame[f] != 0)
-						{
-							frameDataSize = f;
-						}
-					}
-					if (frameDataSize & 1)
-					{
-						frameDataSize++;	// data size must be word-aligned
-					}
-
-					int linesCount = ceil((float)frameDataSize / 2 / frameStringWidth);
+					QJsonObject jFrame;
 
 					// Frame data
 
-					int dataPos = 0;
+					int dataBytePos = 0;
 
 					QByteArray str;
 					str.resize(recCharsCount * frameStringWidth - 1);
@@ -260,18 +244,44 @@ namespace Hardware
 
 					for (int l = 0; l < linesCount; l++)
 					{
+						// Check if line is full of zeroes
+
+						bool lineOfZeroes = true;
+
+						for (int i = 0; i < frameStringWidth * sizeof(quint16); i++)
+						{
+							if (dataBytePos + i >= frameSize)
+							{
+								break;
+							}
+
+							if (frame[dataBytePos + i] != 0)
+							{
+								lineOfZeroes = false;
+								break;
+							}
+						}
+
+						if (lineOfZeroes == true)
+						{
+							dataBytePos += frameStringWidth * sizeof(quint16);
+							continue;
+						}
+
+						// Write line
+
 						str.fill(' ');
 
 						for (int i = 0; i < frameStringWidth; i++)
 						{
-							quint16 value = ((quint16)frame[dataPos++] << 8);
-							if (dataPos >= frameDataSize)
+							quint16 value = ((quint16)frame[dataBytePos++] << 8);
+							if (dataBytePos >= frameSize)
 							{
 								assert(false);
 								break;
 							}
 
-							value |= frame[dataPos++];
+							value |= frame[dataBytePos++];
 
 							snprintf(buf, sizeof(buf), "%hx", value);
 
@@ -280,7 +290,7 @@ namespace Hardware
 							memset(str.data() + i * recCharsCount, '0', numCharsCount);
 							memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
 
-							if (dataPos >= frameDataSize)
+							if (dataBytePos >= frameSize)
 							{
 								str[i * recCharsCount + numCharsCount] = 0;
 								break;
@@ -289,39 +299,6 @@ namespace Hardware
 
 						jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.data()));
 					}
-
-					// CRC
-
-					str.fill(' ');
-
-					dataPos = frameSize - sizeof(quint64);
-
-					for (int i = 0; i < frameStringWidth; i++)
-					{
-						quint16 value = ((quint16)frame[dataPos++] << 8);
-						if (dataPos >= frameSize)
-						{
-							assert(false);
-							break;
-						}
-
-						value |= frame[dataPos++];
-
-						snprintf(buf, sizeof(buf), "%hx", value);
-
-						int len = static_cast<int>(strlen(buf));
-
-						memset(str.data() + i * recCharsCount, '0', numCharsCount);
-						memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
-
-						if (dataPos >= frameSize)
-						{
-							str[i * recCharsCount + numCharsCount] = 0;
-							break;
-						}
-					}
-
-					jFrame.insert("frameCrc", QJsonValue(str.data()));
 
 					jFrame.insert(QLatin1String("frameIndex"), i);
 

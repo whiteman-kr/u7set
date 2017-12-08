@@ -666,45 +666,26 @@ static ModuleFirmware err;
 							return false;
 						}
 
-						int dataPos = 0;
+						int dataWordPos = 0;
 
-						quint16* framePtr = (quint16*)firmwareData.frames[v].data();
+						quint16* frameWordPtr = (quint16*)firmwareData.frames[v].data();
 
 						const int frameStringWidth = 16;
-						const int linesCount = ceil((float)firmwareData.eepromFrameSize / 2 / frameStringWidth) + 1;	//add 1 for CRC special line
+						const int linesCount = ceil((float)firmwareData.eepromFrameSize / 2 / frameStringWidth);
 
 						for (int l = 0; l < linesCount; l++)
 						{
 							QJsonValue v;
 
-							if (l == linesCount - 1)
+							QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+							v = jFrame.value(stringName);
+
+							if (v.isUndefined() == true)
 							{
-								//CRC special line
-
-								QString stringName = "frameCrc";
-								v = jFrame.value(stringName);
-
-								dataPos = eepromFramePayloadSize / sizeof(quint16);	// set data pointer to CRC
-
-								if (v.isUndefined() == true)
-								{
-									assert(false);
-									*errorCode = QString("Parse firmware error: cant find %1 of ").arg(stringName) + zFrame;
-									return false;
-								}
-							}
-							else
-							{
-								// Data line
-								QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
-								v = jFrame.value(stringName);
-
-								if (v.isUndefined() == true)
-								{
-									// data strings may be skipped
-									//
-									continue;
-								}
+								// data strings may be skipped
+								//
+								dataWordPos += frameStringWidth;
+								continue;
 							}
 
 							QString stringValue = v.toString();
@@ -720,13 +701,13 @@ static ModuleFirmware err;
 									return false;
 								}
 
-								if (dataPos >= firmwareData.eepromFrameSize / sizeof(quint16))
+								if (dataWordPos >= firmwareData.eepromFrameSize / sizeof(quint16))
 								{
 									assert(false);
 									break;
 								}
 
-								framePtr[dataPos++] = qToBigEndian(v);
+								frameWordPtr[dataWordPos++] = qToBigEndian(v);
 							}
 						} // linesCount
 
