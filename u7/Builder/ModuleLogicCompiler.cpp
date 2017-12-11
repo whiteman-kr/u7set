@@ -259,8 +259,6 @@ namespace Builder
 		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
-		m_lmDescriptionNumber = m_lmDescription->descriptionNumber();
-
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
 		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
@@ -3423,16 +3421,24 @@ namespace Builder
 
 			UalItem appItem;
 
-			bool res = createAfbForAnalogInputSignalConversion(*s, appItem);
+			bool needConversion = false;
 
-			if (res == true)
+			bool res = createAfbForAnalogInputSignalConversion(*s, &appItem, &needConversion);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			s->setNeedConversion(needConversion);
+
+			if (needConversion == true)
 			{
 				UalAfb* appFb = createUalAfb(appItem);
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
 			}
-
-			result &= res;
 		}
 
 		// append FBs  for analog output signals conversion
@@ -3446,16 +3452,24 @@ namespace Builder
 
 			UalItem appItem;
 
-			bool res = createFbForAnalogOutputSignalConversion(*s, appItem);
+			bool needConversion = false;
 
-			if (res == true)
+			bool res = createFbForAnalogOutputSignalConversion(*s, &appItem, &needConversion);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			s->setNeedConversion(needConversion);
+
+			if (needConversion == true)
 			{
 				UalAfb* appFb = createUalAfb(appItem);
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
 			}
-
-			result &= res;
 		}
 
 		return result;
@@ -3628,8 +3642,14 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem)
+	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion)
 	{
+		if (appItem == nullptr || needConversion == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
 		assert(signal.isAnalog());
 		assert(signal.isInput());
 		assert(signal.equipmentID().isEmpty() == false);
@@ -3658,11 +3678,11 @@ namespace Builder
 
 		if (signalsIsCompatible == true)
 		{
-			signal.setNeedConversion(false);
+			*needConversion = false;
 			return true;
 		}
 
-		signal.setNeedConversion(true);
+		*needConversion = true;
 
 		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
 		{
@@ -3701,7 +3721,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1));
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -3722,7 +3742,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -3743,7 +3763,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem)
+	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isOutput());
@@ -3773,11 +3793,11 @@ namespace Builder
 
 		if (signalsIsCompatible == true)
 		{
-			signal.setNeedConversion(false);
+			*needConversion = false;
 			return true;
 		}
 
-		signal.setNeedConversion(true);
+		*needConversion = true;
 
 		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
 		{
@@ -3816,7 +3836,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -3837,7 +3857,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -5710,6 +5730,8 @@ namespace Builder
 
 		int count = 0;
 
+		m_code.append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
 			UalSignal* inputSignal = getUalSignalByPinCaption(ualItem, busSignal.signalID, true);
@@ -6514,7 +6536,57 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf()
 	{
-		return true;
+		if (m_acquiredAnalogBusChildSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		m_code.comment("Copy acquired analog bus child signals to reg buf");
+		m_code.newLine();
+
+		bool result = true;
+
+		for(UalSignal* ualSignal : m_acquiredAnalogBusChildSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->ualAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->regBufAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->sizeW() != 2)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			Command cmd;
+
+			cmd.mov32(ualSignal->regBufAddr(), ualSignal->ualAddr());
+			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+
+			m_code.append(cmd);
+		}
+
+		m_code.newLine();
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf()
@@ -7673,35 +7745,15 @@ namespace Builder
 
 		for(MemWriteMap::Area nonWrittenArea : nonWrittenAreas)
 		{
-			Command cmd;
-
-			switch(nonWrittenArea.second)
-			{
-			case 0:
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-
-			case 1:
-				cmd.movConst(nonWrittenArea.first, 0);
-				break;
-
-			case 2:
-				cmd.movConstInt32(nonWrittenArea.first, 0);
-				break;
-
-			default:
-				cmd.setMem(nonWrittenArea.first, 0, nonWrittenArea.second);
-			}
+			QString comment;
 
 			if (first == true)
 			{
-				cmd.setComment("fill non written txRawData by 0");
+				comment = "fill non written txRawData by 0";
 				first = false;
 			}
 
-			m_code.append(cmd);
+			m_code.append(codeSetMemory(nonWrittenArea.first, 0, nonWrittenArea.second, comment));
 		}
 
 		if (first == false)
@@ -8851,11 +8903,17 @@ namespace Builder
 			return false;
 		}
 
-		result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, m_lm->equipmentIdTemplate(), m_lm->caption(),
-														m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, m_lmDescriptionNumber, uniqueID, m_code);
-		if (result == false)
+		if (m_lmDescription->flashMemory().m_appLogicWriteBitstream == true)
 		{
-			return false;
+			int appLogicUartId = m_lmDescription->flashMemory().m_appLogicUartId;
+			int lmDescriptionNumber = m_lmDescription->descriptionNumber();
+
+			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, appLogicUartId, m_lm->equipmentIdTemplate(), m_lm->caption(),
+														   m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, lmDescriptionNumber, uniqueID, m_code);
+			if (result == false)
+			{
+				return false;
+			}
 		}
 
 /*		QStringList mifCode;
@@ -9906,6 +9964,45 @@ namespace Builder
 		return Address16();
 	}
 
+	Commands ModuleLogicCompiler::codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment)
+	{
+		assert(addrFrom >=0 && addrFrom < static_cast<int>(m_lmDescription->memory().m_appMemorySize));
+		assert(addrFrom + sizeW < static_cast<int>(m_lmDescription->memory().m_appMemorySize));
+
+		Command cmd;
+
+		switch(sizeW)
+		{
+		case 1:
+			cmd.movConst(addrFrom, constValue);
+			break;
+
+		case 2:
+			{
+				quint32 constValue32 = constValue;
+
+				constValue32 <<= 16;
+				constValue32 &= constValue;
+
+				cmd.movConstUInt32(addrFrom, constValue32);
+			}
+			break;
+
+		default:
+			cmd.setMem(addrFrom, constValue, sizeW);
+		}
+
+		if (comment.isEmpty() == false)
+		{
+			cmd.setComment(comment);
+		}
+
+		Commands code;
+
+		code.append(cmd);
+
+		return code;
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//

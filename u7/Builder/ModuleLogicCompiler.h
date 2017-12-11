@@ -256,8 +256,8 @@ namespace Builder
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem);
-		bool createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem);
+		bool createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
+		bool createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
 
 		UalAfb* createUalAfb(const UalItem& appItem);
@@ -412,6 +412,8 @@ namespace Builder
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
+		Commands codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
+
 	private:
 		static const int ERR_VALUE = -1;
 
@@ -452,8 +454,6 @@ namespace Builder
 		int m_lmSubsystemKey = 0;
 		int m_lmNumber = 0;
 		int m_lmChannel = 0;
-
-		int m_lmDescriptionNumber = 0;
 
 		// LM's calculated memory offsets and sizes
 		//

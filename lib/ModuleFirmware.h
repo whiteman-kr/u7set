@@ -40,7 +40,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(int uartId,
+		void init(int uartId, QString uartType,
 				  int eepromFramePayloadSize,
 				  int eepromFrameCount,
 				  QString caption,
@@ -69,19 +69,14 @@ namespace Hardware
 
 		std::vector<UartPair> uartList() const;
 
-		bool uartExists(E::UartID uartId) const;
 		bool uartExists(int uartId) const;
 
-		int eepromFramePayloadSize(E::UartID uartId) const;
 		int eepromFramePayloadSize(int uartId) const;
 
-		int eepromFrameSize(E::UartID uartId) const;
 		int eepromFrameSize(int uartId) const;
 
-		int eepromFrameCount(E::UartID uartId) const;
 		int eepromFrameCount(int uartId) const;
 
-		const std::vector<quint8>& frame(E::UartID uartId, int frameIndex) const;
 		const std::vector<quint8>& frame(int uartId, int frameIndex) const;
 
 		// Properties, for access from JS it is "public slots"

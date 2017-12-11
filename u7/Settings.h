@@ -127,6 +127,8 @@ public:
 
 	// Property Editor Options
 	//
+	double m_propertyEditorFontScaleFactor = 1.0;
+
 	QPoint m_multiLinePropertyEditorWindowPos;
 	QByteArray m_multiLinePropertyEditorGeometry;
 
