@@ -9,7 +9,6 @@ ApplicationTabPage::ApplicationTabPage(QWidget *parent)
 
 	connect(ui.openButton, &QAbstractButton::clicked, this, &ApplicationTabPage::openFileClicked);
 
-
 	QStringList l;
 	l << tr("Subsystem");
 	l << tr("UartID");
@@ -63,8 +62,6 @@ void ApplicationTabPage::openFileClicked()
 {
 	QFileDialog fd(this);
 
-	//fd.setOption(QFileDialog::Option::DontUseNativeDialog);
-
 	fd.setAcceptMode(QFileDialog::AcceptOpen);
 	fd.setFileMode(QFileDialog::ExistingFile);
 
@@ -94,40 +91,18 @@ void ApplicationTabPage::openFileClicked()
 		return;
 	}
 
-	clearUartData();
-
-	QString errorCode;
-	bool result = m_confFirmware.load(fileName, &errorCode);
-
-	if (result == false)
-	{
-		QMessageBox mb(this);
-		QString str = tr("File %1 wasn't loaded!").arg(fileName);
-		if (errorCode.isEmpty() == false)
-		{
-			str += "\r\n\r\n" + errorCode;
-		}
-		mb.setText(str);
-		mb.setIcon(QMessageBox::Critical);
-		mb.exec();
-		return;
-	}
-
 	ui.fileNameEdit->setText(fileName);
 
-	theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
+	clearUartData();
 
-	theLog.writeMessage(tr("File Version: %1").arg(m_confFirmware.fileVersion()));
-	theLog.writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
-	theLog.writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
-	theLog.writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
-	theLog.writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
-	theLog.writeMessage(tr("Subsystems: %1").arg(m_confFirmware.subsystemsString()));
-
-
-	fillUartData();
+	emit loadBinaryFile(fileName, &m_confFirmware);
 
 	return;
+}
+
+void ApplicationTabPage::loadBinaryFileHeaderComplete()
+{
+	fillUartData();
 }
 
 void ApplicationTabPage::on_resetCountersButton_clicked()
@@ -154,7 +129,7 @@ void ApplicationTabPage::on_resetCountersButton_clicked()
 	}
 }
 
-void ApplicationTabPage::uploadSuccessful(int uartID)
+void ApplicationTabPage::uploadComplete(int uartID)
 {
 	QString subsystem = subsystemId();
 

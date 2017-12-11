@@ -292,6 +292,36 @@ static const std::vector<quint8> err;
 		return parse(data, false, errorCode);
 	}
 
+	bool ModuleFirmwareStorage::hasBinaryData() const
+	{
+		for (auto f : m_firmwares)
+		{
+			ModuleFirmware& mf = f.second;
+
+			std::vector<UartPair> uarts = mf.uartList();
+
+			for (auto u : uarts)
+			{
+				bool ok = false;
+
+				ModuleFirmwareData& md = mf.firmwareData(u.first, &ok);
+
+				if (ok == false)
+				{
+					assert(false);
+					return false;
+				}
+
+				if (md.frames.empty() == false)
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	void ModuleFirmwareStorage::createFirmware(const QString& subsysId,
 											   int ssKey,
 											   int uartId,
@@ -631,10 +661,15 @@ static ModuleFirmware err;
 				}
 				QString uartType = jFirmwareData.value(QLatin1String("uartType")).toString();
 
-				fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, eepromFrameCount, subsystemId, 0, QString(), 0);
-
-				if (readDataFrames == true)
+				if (readDataFrames == false)
 				{
+					fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, 0, subsystemId, 0, QString(), 0);
+
+				}
+				else
+				{
+					fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, eepromFrameCount, subsystemId, 0, QString(), 0);
+
 					// Load data binary frames
 					//
 

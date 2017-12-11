@@ -801,168 +801,67 @@ void Configurator::setSettings(QString device, bool showDebugInfo, bool verify)
 
 void Configurator::readConfiguration(int param)
 {
-	emit communicationStarted();
+	emit operationStarted();
 
-	readConfigurationWorker(param);
+	readFirmwareWorker(param);
 
-	emit communicationFinished();
+	emit operationFinished();
 
 	return;
 }
 
-void Configurator::readConfigurationWorker(int /*param*/)
+
+void Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData)
 {
-	// Open port
-	//
-	bool ok = openConnection();
-	if (ok == false)
+	if (storage == nullptr)
 	{
+		assert(storage);
 		return;
 	}
 
-	try
-	{
-		//
-		// PING command
-		//
-        std::vector<quint8> nopReply;
-		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+	m_Log->writeMessage(tr("//----------------------"));
+	m_Log->writeMessage(tr("File: %1").arg(fileName));
 
-        if (send(0, Nop, 0, 0, std::vector<quint8>(), &pingReceivedHeader, &nopReply) == false)
+	QString errorCode;
+	bool result = false;
+
+	if (loadBinaryData == true)
+	{
+		result = storage->load(fileName, &errorCode);
+	}
+	else
+	{
+		result = storage->loadHeader(fileName, &errorCode);
+	}
+
+	if (result == false)
+	{
+		QString str = tr("File %1 wasn't loaded!").arg(fileName);
+		if (errorCode.isEmpty() == false)
 		{
-			throw tr("Communication error (ping send error).");
+			str += "\r\n\r\n" + errorCode;
 		}
 
-		int protocolVersion = pingReceivedHeader.version;
-		int moduleUartId = 0;
-		int blockSize = 0;
-		
-        switch (protocolVersion)
-        {
-        case 1:
-            {
-                CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
-
-                // Check if the connector in the configuartion UART
-                //
-                if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-                {
-                    throw tr("Wrong UART, use configuration port.");
-                }
-
-                protocolVersion = pingReplyVersioned.version;
-                moduleUartId = pingReplyVersioned.moduleUartId;
-                blockSize = pingReplyVersioned.blockSize;
-
-                // Ignore Wrong moduleUartId flag
-                //
-                pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
-
-                // Check flags
-                //
-                if (pingReplyVersioned.flagStateSuccess() != true)
-                {
-					pingReplyVersioned.dumpFlagsState(m_Log);
-                    throw tr("Communication error.");
-                }
-            }
-            break;
-        default:
-			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-            throw tr("Communication error.");
-        }
-
-        assert(protocolVersion != 0);
-        assert(moduleUartId != 0);
-        assert(blockSize != 0);
-
-        //
-        // READ indentification block
-        //
-		m_Log->writeMessage(tr("Read identification block."));
-		
-        std::vector<quint8> identificationData;
-        switch (protocolVersion)
-        {
-        case 1:
-            {
-                CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
-
-                if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &identificationData) == false)
-                {
-                    throw tr("Communication error.");
-                }
-
-                assert(protocolVersion == readReceivedHeader.version);
-
-                // Ignoring all flags, CRC, etc
-                //
-
-				dumpIdentificationData(identificationData, blockSize);
-            }
-            break;
-        default:
-            assert(false);
-        }
-	
-
-        //
-        // READ command
-        //
-        std::vector<quint8> readData;
-        CONF_HEADER readReceivedHeader = CONF_HEADER();
-		
-        if (send(moduleUartId, Read, ConfiguartionFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
-        {
-            throw tr("Communication error.");
-        }
-
-        assert(protocolVersion == readReceivedHeader.version);
-		
-        switch (protocolVersion)
-        {
-        case 1:
-            {
-                CONF_HEADER_V1 readReply = *reinterpret_cast<CONF_HEADER_V1*>(&readReceivedHeader);
-
-                // Check flags
-                //
-                if (readReply.flagStateSuccess() != true)
-                {
-					readReceivedHeader.dumpFlagsState(m_Log);
-                    throw tr("Communication error.");
-                }
-
-                // Send factoryNo, Crc's and other to interface
-                //
-                emit communicationReadFinished(readReply.version, readData);
-            }
-            break;
-        default:
-			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-            throw tr("Communication error.");
-        }
-				
-        // --
-        //
-		m_Log->writeSuccess(tr("Successful."));
-	}
-	catch (QString str)
-	{
 		m_Log->writeError(str);
+		return;
 	}
 
-	// Close connection
-	//
-	if (closeConnection() == false)
+	if (loadBinaryData == false)
 	{
-		m_Log->writeError(tr("CloseConnection failed with error "));
+		m_Log->writeMessage(tr("File Version: %1").arg(storage->fileVersion()));
+		m_Log->writeMessage(tr("ChangesetID: %1").arg(storage->changesetId()));
+		m_Log->writeMessage(tr("Build User: %1").arg(storage->userName()));
+		m_Log->writeMessage(tr("Build No: %1").arg(QString::number(storage->buildNumber())));
+		m_Log->writeMessage(tr("Build Config: %1").arg(storage->buildConfig()));
+		m_Log->writeMessage(tr("Subsystems: %1").arg(storage->subsystemsString()));
+
+		emit loadBinaryFileHeaderComplete();
 	}
 
 	return;
 }
 
-void Configurator::writeConfigurationWorker(ModuleFirmwareStorage *storage, const QString& subsystemId)
+void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QString& subsystemId)
 {
 	//emit uploadSuccessful(0x101);
 	//return;
@@ -1276,7 +1175,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmwareStorage *storage, cons
 		//
 		m_Log->writeSuccess(tr("Successful."));
 
-		emit uploadSuccessful(m_currentUartId);
+		emit uploadFirmwareComplete(m_currentUartId);
 	}
 	catch (QString str)
 	{
@@ -1288,6 +1187,158 @@ void Configurator::writeConfigurationWorker(ModuleFirmwareStorage *storage, cons
 	if (closeConnection() == false)
 	{
 		m_Log->writeError(tr("CloseConnection failed."));
+	}
+
+	return;
+}
+
+void Configurator::readFirmwareWorker(int /*param*/)
+{
+	// Open port
+	//
+	bool ok = openConnection();
+	if (ok == false)
+	{
+		return;
+	}
+
+	try
+	{
+		//
+		// PING command
+		//
+		std::vector<quint8> nopReply;
+		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+
+		if (send(0, Nop, 0, 0, std::vector<quint8>(), &pingReceivedHeader, &nopReply) == false)
+		{
+			throw tr("Communication error (ping send error).");
+		}
+
+		int protocolVersion = pingReceivedHeader.version;
+		int moduleUartId = 0;
+		int blockSize = 0;
+
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
+
+				// Check if the connector in the configuartion UART
+				//
+				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
+				{
+					throw tr("Wrong UART, use configuration port.");
+				}
+
+				protocolVersion = pingReplyVersioned.version;
+				moduleUartId = pingReplyVersioned.moduleUartId;
+				blockSize = pingReplyVersioned.blockSize;
+
+				// Ignore Wrong moduleUartId flag
+				//
+				pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
+
+				// Check flags
+				//
+				if (pingReplyVersioned.flagStateSuccess() != true)
+				{
+					pingReplyVersioned.dumpFlagsState(m_Log);
+					throw tr("Communication error.");
+				}
+			}
+			break;
+		default:
+			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+			throw tr("Communication error.");
+		}
+
+		assert(protocolVersion != 0);
+		assert(moduleUartId != 0);
+		assert(blockSize != 0);
+
+		//
+		// READ indentification block
+		//
+		m_Log->writeMessage(tr("Read identification block."));
+
+		std::vector<quint8> identificationData;
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
+
+				if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &identificationData) == false)
+				{
+					throw tr("Communication error.");
+				}
+
+				assert(protocolVersion == readReceivedHeader.version);
+
+				// Ignoring all flags, CRC, etc
+				//
+
+				dumpIdentificationData(identificationData, blockSize);
+			}
+			break;
+		default:
+			assert(false);
+		}
+
+
+		//
+		// READ command
+		//
+		std::vector<quint8> readData;
+		CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+		if (send(moduleUartId, Read, ConfiguartionFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+		{
+			throw tr("Communication error.");
+		}
+
+		assert(protocolVersion == readReceivedHeader.version);
+
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_HEADER_V1 readReply = *reinterpret_cast<CONF_HEADER_V1*>(&readReceivedHeader);
+
+				// Check flags
+				//
+				if (readReply.flagStateSuccess() != true)
+				{
+					readReceivedHeader.dumpFlagsState(m_Log);
+					throw tr("Communication error.");
+				}
+
+				// Send factoryNo, Crc's and other to interface
+				//
+				emit communicationReadFinished(readReply.version, readData);
+			}
+			break;
+		default:
+			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+			throw tr("Communication error.");
+		}
+
+		// --
+		//
+		m_Log->writeSuccess(tr("Successful."));
+	}
+	catch (QString str)
+	{
+		m_Log->writeError(str);
+	}
+
+	// Close connection
+	//
+	if (closeConnection() == false)
+	{
+		m_Log->writeError(tr("CloseConnection failed with error "));
 	}
 
 	return;
@@ -1331,14 +1382,14 @@ void Configurator::dumpIdentificationData(const std::vector<quint8>& identificat
 
 void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc)
 {
-	emit communicationStarted();
+	emit operationStarted();
 
     // Open port
     //
     if (openConnection() == false)
     {
 		m_Log->writeError(tr("Cannot open ") + device() + ".");
-        emit communicationFinished();
+		emit operationFinished();
         return;
     }
 
@@ -1563,115 +1614,42 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 		m_Log->writeError(tr("CloseConnection failed."));
     }
 
-	emit communicationFinished();
+	emit operationFinished();
 	return;
 }
 
-void Configurator::showBinaryFileInfo(const QString& fileName)
+void Configurator::loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage)
 {
-	processConfDataFile(fileName, QString(), false);
+	m_fileName = fileName;
+
+	emit operationStarted();
+
+	loadBinaryFileWorker(fileName, storage, false);
+
+	emit operationFinished();
 }
 
-void Configurator::uploadBinaryFile(const QString& fileName, const QString& subsystemId)
+void Configurator::uploadFirmware(ModuleFirmwareStorage *storage, const QString& subsystemId)
 {
-	processConfDataFile(fileName, subsystemId, true);
+	emit operationStarted();
+
+	// If no binary data was loaded, load it
+	//
+	if (storage->hasBinaryData() == false)
+	{
+		loadBinaryFileWorker(m_fileName, storage, true);
+	}
+
+	uploadFirmwareWorker(storage, subsystemId);
+
+	emit operationFinished();
 }
-
-void Configurator::processConfDataFile(const QString& fileName, const QString& subsystemId, bool writeToFlash)
-{
-	emit communicationStarted();
-
-	Hardware::ModuleFirmwareStorage confFirmware;
-
-	//if (writeToFlash == false)
-	{
-		m_Log->writeMessage(tr("//----------------------"));
-		m_Log->writeMessage(tr("File: %1").arg(fileName));
-	}
-
-	QString errorCode;
-	bool result = false;
-
-	if (writeToFlash == true)
-	{
-		result = confFirmware.load(fileName, &errorCode);
-	}
-	else
-	{
-		result = confFirmware.loadHeader(fileName, &errorCode);
-	}
-
-	if (result == false)
-	{
-		QString str = tr("File %1 wasn't loaded!").arg(fileName);
-		if (errorCode.isEmpty() == false)
-		{
-			str += "\r\n\r\n" + errorCode;
-		}
-
-		m_Log->writeError(str);
-		emit communicationFinished();
-		return;
-	}
-
-	if (writeToFlash == false)
-	{
-		m_Log->writeMessage(tr("File Version: %1").arg(confFirmware.fileVersion()));
-		m_Log->writeMessage(tr("ChangesetID: %1").arg(confFirmware.changesetId()));
-		m_Log->writeMessage(tr("Build User: %1").arg(confFirmware.userName()));
-		m_Log->writeMessage(tr("Build No: %1").arg(QString::number(confFirmware.buildNumber())));
-		m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
-		m_Log->writeMessage(tr("Subsystems: %1").arg(confFirmware.subsystemsString()));
-	}
-
-	if (writeToFlash == true)
-	{
-		m_Log->writeMessage(tr("Uploading firmware for subsystem %1").arg(subsystemId));
-		writeConfigurationWorker(&confFirmware, subsystemId);
-	}
-	else
-	{
-		std::map<QString, std::vector<UartPair>> subsystemUartsInfo;
-
-		for (const QString& s : confFirmware.subsystems())
-		{
-			bool ok = false;
-			ModuleFirmware& firmware = confFirmware.firmware(s, &ok);
-			if (ok == false)
-			{
-				assert(false);
-				return;
-			}
-
-			subsystemUartsInfo[s] = firmware.uartList();
-
-		}
-		emit loadHeaderComplete(subsystemUartsInfo);
-	}
-
-	emit communicationFinished();
-
-	return;
-
-}
-
-void Configurator::uploadConfData(ModuleFirmwareStorage *storage, const QString& subsystemId)
-{
-	emit communicationStarted();
-
-	writeConfigurationWorker(storage, subsystemId);
-
-	emit communicationFinished();
-
-}
-
-
 
 void Configurator::readFirmware(const QString& fileName)
 {
 	m_cancelFlag = false;
 
-	emit communicationStarted();
+	emit operationStarted();
 
 	// Open outputFile
 	//
@@ -1680,7 +1658,7 @@ void Configurator::readFirmware(const QString& fileName)
 	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)
 	{
 		m_Log->writeError(tr("Cannot open output file %1, %2").arg(fileName).arg(file.error()));
-		emit communicationFinished();
+		emit operationFinished();
 		return;
 	}
 
@@ -1692,7 +1670,7 @@ void Configurator::readFirmware(const QString& fileName)
 	if (openConnection() == false)
 	{
 		m_Log->writeError(tr("Cannot open ") + device() + ".");
-		emit communicationFinished();
+		emit operationFinished();
 		return;
 	}
 
@@ -1922,7 +1900,7 @@ void Configurator::readFirmware(const QString& fileName)
 		m_Log->writeError(tr("CloseConnection failed."));
 	}
 
-	emit communicationFinished();
+	emit operationFinished();
 	return;
 }
 
@@ -1930,14 +1908,14 @@ void Configurator::eraseFlashMemory(int)
 {
 	m_cancelFlag = false;
 
-	emit communicationStarted();
+	emit operationStarted();
 
 	// Open port
 	//
 	if (openConnection() == false)
 	{
 		m_Log->writeError(tr("Cannot open ") + device() + ".");
-		emit communicationFinished();
+		emit operationFinished();
 		return;
 	}
 
@@ -2098,7 +2076,7 @@ void Configurator::eraseFlashMemory(int)
 		m_Log->writeError(tr("CloseConnection failed."));
 	}
 
-	emit communicationFinished();
+	emit operationFinished();
 	return;
 }
 

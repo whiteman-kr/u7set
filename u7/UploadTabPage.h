@@ -41,9 +41,9 @@ signals:
 	void readConfiguration(int);
 	void readFirmware(QString fileName);
 
-	//void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
-	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName, const QString& subsystemId);
+	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId);
+
 	void eraseFlashMemory(int);
 	void cancelOperation();
 
@@ -76,8 +76,8 @@ private slots:
 
 	void clearSubsystemsUartData();
 	void resetUartData();
-	void loadHeaderComplete(std::map<QString, std::vector<UartPair> > subsystemsUartsInfo);
-	void uploadSuccessful(int uartID);
+	void loadBinaryFileHeaderComplete();
+	void uploadComplete(int uartID);
 
 	// Data
 	//
@@ -85,9 +85,11 @@ private:
 
 	QSplitter* m_vsplitter = nullptr;
 
+	QComboBox* m_pConfigurationCombo = nullptr;
+
 	QListWidget* m_pBuildList = nullptr;
 
-	QComboBox* m_pConfigurationCombo = nullptr;
+	QTextEdit* m_pFileInfoWidget = nullptr;
 
 	QTreeWidget* m_pSubsystemsListWidget = nullptr;
 
@@ -108,6 +110,8 @@ private:
 	Configurator* m_pConfigurator = nullptr;
 	QThread* m_pConfigurationThread = nullptr;
 
+	Hardware::ModuleFirmwareStorage m_firmware;
+
 	Builder::IssueLogger m_outputLog;
 
 	QString m_buildSearchPath;
@@ -125,8 +129,6 @@ private:
 	const int columnUartId = 0;
 	const int columnUartType = 1;
 	const int columnUploadCount = 2;
-
-	std::map<QString, std::vector<UartPair>> m_subsystemsUartsInfo;
 };
 
 

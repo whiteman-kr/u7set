@@ -118,6 +118,8 @@ namespace Hardware
 
 		bool loadHeader(QString fileName, QString* errorCode);
 
+		bool hasBinaryData() const;
+
 		// Firmware operations
 		//
 		void createFirmware(const QString& subsysId, int ssKey, int uartId, const QString& uartType, int frameSize, int frameCount, const QString& lmDescriptionFile, int lmDescriptionNumber);

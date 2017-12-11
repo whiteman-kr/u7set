@@ -245,12 +245,11 @@ protected:
 
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
-	void readConfigurationWorker(int param);
-	void writeConfigurationWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
+	void loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData);
+	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
+	void readFirmwareWorker(int param);
 	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize);
-
-	void processConfDataFile(const QString& fileName, const QString& subsystemId, bool writeToFlash);
 	// Slots
 	//
 public slots:
@@ -258,22 +257,22 @@ public slots:
 	void readConfiguration(int param);
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
-	void showBinaryFileInfo(const QString& fileName);
-	void uploadBinaryFile(const QString& fileName, const QString& subsystemId);
+	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
-	void uploadConfData(ModuleFirmwareStorage* storage, const QString& subsystemId);
 	void readFirmware(const QString &fileName);
 	void eraseFlashMemory(int param);
 
 	// Signals
 	//
 signals:
-	void communicationStarted();
-	void communicationFinished();
-    void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
+	void operationStarted();
+	void operationFinished();
 
-	void loadHeaderComplete(std::map<QString, std::vector<UartPair>> subsystemUartsInfo);
-	void uploadSuccessful(int uartID);
+	void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
+
+	void loadBinaryFileHeaderComplete();
+	void uploadFirmwareComplete(int uartID);
 
 public:
 	// Properties
@@ -294,9 +293,9 @@ private:
 	bool m_showDebugInfo = false;
 	uint32_t m_configuratorfactoryNo = 0;
 
-        QSerialPort *m_serialPort;
+	QSerialPort *m_serialPort;
 
-        OutputLog* m_Log;
+	OutputLog* m_Log;
 
 	mutable QMutex mutex;			// m_device
 
@@ -305,6 +304,8 @@ private:
 	bool m_verify = true;
 
 	int m_currentUartId = -1;
+
+	QString m_fileName;
 };
 
 #endif // CONFIGURATOR_H

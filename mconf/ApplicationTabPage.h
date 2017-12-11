@@ -20,12 +20,16 @@ public:
 	Hardware::ModuleFirmwareStorage* configuration();
 	QString subsystemId();
 
+signals:
+	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+
 private slots:
 	void openFileClicked();
 	void on_resetCountersButton_clicked();
 
 public slots:
-	void uploadSuccessful(int uartID);
+	void loadBinaryFileHeaderComplete();
+	void uploadComplete(int uartID);
 
 private:
 	void clearUartData();

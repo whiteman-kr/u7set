@@ -38,6 +38,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pBuildList, &QListWidget::currentRowChanged, this, &UploadTabPage::buildChanged);
 	pLeftLayout->addWidget(m_pBuildList);
 
+	pLeftLayout->addWidget(new QLabel(tr("Bitstream File Summary:")));
+	m_pFileInfoWidget = new QTextEdit();
+	pLeftLayout->addWidget(m_pFileInfoWidget);
+
 	// Create Build list widget
 
 	pLeftLayout->addWidget(new QLabel(tr("Subsystems:")));
@@ -198,16 +202,16 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
-	connect(this, &UploadTabPage::showConfDataFileInfo, m_pConfigurator, &Configurator::showBinaryFileInfo);
-	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::uploadBinaryFile);
+	connect(this, &UploadTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
+	connect(this, &UploadTabPage::uploadFirmware, m_pConfigurator, &Configurator::uploadFirmware);
 	connect(this, &UploadTabPage::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 
-	connect(m_pConfigurator, &Configurator::communicationStarted, this, &UploadTabPage::disableControls);
-	connect(m_pConfigurator, &Configurator::communicationFinished, this, &UploadTabPage::enableControls);
+	connect(m_pConfigurator, &Configurator::operationStarted, this, &UploadTabPage::disableControls);
+	connect(m_pConfigurator, &Configurator::operationFinished, this, &UploadTabPage::enableControls);
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &UploadTabPage::communicationReadFinished);
 
-	connect(m_pConfigurator, &Configurator::loadHeaderComplete, this, &UploadTabPage::loadHeaderComplete);
-	connect(m_pConfigurator, &Configurator::uploadSuccessful, this, &UploadTabPage::uploadSuccessful);
+	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, this, &UploadTabPage::loadBinaryFileHeaderComplete);
+	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, this, &UploadTabPage::uploadComplete);
 
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 
@@ -341,7 +345,8 @@ void UploadTabPage::buildChanged(int index)
 
 	m_currentFileName = buildPath + QDir::separator() + binaryFiles[0];
 
-	emit showConfDataFileInfo(m_currentFileName);
+	emit loadBinaryFile(m_currentFileName, &m_firmware);
+
 }
 
 void UploadTabPage::subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2)
@@ -358,13 +363,15 @@ void UploadTabPage::subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* it
 
 	QString subsystemId = subsystemItem->data(columnSubsysId, Qt::UserRole).toString();
 
-	if (m_subsystemsUartsInfo.find(subsystemId) == m_subsystemsUartsInfo.end())
+	bool ok = false;
+	const ModuleFirmware& mf = m_firmware.firmware(subsystemId, &ok);
+	if (ok == false)
 	{
 		assert(false);
 		return;
 	}
 
-	const std::vector<UartPair>& uartList = m_subsystemsUartsInfo[subsystemId];
+	const std::vector<UartPair>& uartList = mf.uartList();
 
 	m_pUartListWidget->clear();
 
@@ -450,7 +457,7 @@ void UploadTabPage::upload()
 
 	try
 	{
-		emit writeConfDataFile(m_currentFileName, subsysId);
+		emit uploadFirmware(&m_firmware, subsysId);
 	}
 	catch(QString message)
 	{
@@ -618,16 +625,14 @@ void UploadTabPage::resetUartData()
 	}
 }
 
-void UploadTabPage::loadHeaderComplete(std::map<QString, std::vector<UartPair>> subsystemsUartsInfo)
+void UploadTabPage::loadBinaryFileHeaderComplete()
 {
-	m_subsystemsUartsInfo = subsystemsUartsInfo;
-
 	clearSubsystemsUartData();
 
-	for (auto sui : m_subsystemsUartsInfo)
-	{
-		const QString& subsystemId = sui.first;
+	QStringList subsystemsList = m_firmware.subsystems();
 
+	for (const QString& subsystemId : subsystemsList)
+	{
 		QTreeWidgetItem* subsystemItem = new QTreeWidgetItem(QStringList() << subsystemId);
 		subsystemItem->setData(columnSubsysId, Qt::UserRole, subsystemId);
 
@@ -639,9 +644,17 @@ void UploadTabPage::loadHeaderComplete(std::map<QString, std::vector<UartPair>> 
 	{
 		m_pSubsystemsListWidget->setCurrentItem(m_pSubsystemsListWidget->topLevelItem(0));
 	}
+
+	QString infoText;
+	infoText.append(tr("File: %1\r\n").arg(m_currentFileName));
+	infoText.append(tr("ChangesetID: %1\r\n").arg(m_firmware.changesetId()));
+	infoText.append(tr("Build User: %1\r\n").arg(m_firmware.userName()));
+	infoText.append(tr("Build No: %1\r\n").arg(QString::number(m_firmware.buildNumber())));
+	infoText.append(tr("Build Config: %1\r\n").arg(m_firmware.buildConfig()));
+	m_pFileInfoWidget->setText(infoText);
 }
 
-void UploadTabPage::uploadSuccessful(int uartID)
+void UploadTabPage::uploadComplete(int uartID)
 {
 	int count = m_pUartListWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
