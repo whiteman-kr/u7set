@@ -8,13 +8,16 @@
 //
 // -------------------------------------------------------------------------------------
 
-std::list<std::shared_ptr<const Tcp::ConnectionState>> CfgControlServer::m_connectionStates;
-
-CfgControlServer::CfgControlServer(const QString& equipmentID, const QString& autoloadBuildPath, const QString& workDirectory, const QString& buildPath, const CfgCheckerWorker& checkerWorker, std::shared_ptr<CircularLogger> logger) :
-	CfgServer(buildPath, logger),
+CfgControlServer::CfgControlServer(const Tcp::SoftwareInfo& softwareInfo,
+								   const QString& autoloadBuildPath,
+								   const QString& workDirectory,
+								   const QString& buildPath,
+								   const CfgCheckerWorker& checkerWorker,
+								   std::shared_ptr<CircularLogger> logger) :
+	CfgServer(softwareInfo, buildPath, logger),
 	m_logger(logger),
 	m_checkerWorker(checkerWorker),
-	m_equipmentID(equipmentID),
+	m_equipmentID(softwareInfo.equipmentID()),
 	m_autoloadBuildPath(autoloadBuildPath),
 	m_workDirectory(workDirectory)
 {
@@ -23,7 +26,7 @@ CfgControlServer::CfgControlServer(const QString& equipmentID, const QString& au
 
 CfgControlServer* CfgControlServer::getNewInstance()
 {
-	return new CfgControlServer(m_equipmentID, m_autoloadBuildPath, m_workDirectory, m_rootFolder, m_checkerWorker, m_logger);
+	return new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory, m_rootFolder, m_checkerWorker, m_logger);
 }
 
 void CfgControlServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -55,6 +58,15 @@ void CfgControlServer::processRequest(quint32 requestID, const char* requestData
 	}
 }
 
+void CfgControlServer::updateClientsInfo(const std::list<Tcp::ConnectionState>& connectionStates)
+{
+	m_statesMutex.lock();
+
+	m_connectionStates = connectionStates;
+
+	m_statesMutex.unlock();
+}
+
 void CfgControlServer::sendServiceState()
 {
 	Network::ConfigurationServiceState message;
@@ -70,29 +82,35 @@ void CfgControlServer::sendClientList()
 {
 	Network::ConfigurationServiceClients message;
 
-	for(const std::shared_ptr<const Tcp::ConnectionState>& state : m_connectionStates)
+	m_statesMutex.lock();
+
+	for(const Tcp::ConnectionState& state : m_connectionStates)
 	{
-		if (!E::containes<E::SoftwareType>(TO_INT(state->softwareType)))
+		const Tcp::SoftwareInfo& si = state.connectedSoftwareInfo;
+
+		if (E::containes<E::SoftwareType>(TO_INT(si.softwareType())) == false)
 		{
 			continue;
 		}
 
 		Network::ConfigurationServiceClientInfo* i = message.add_clients();
 
-		i->set_softwaretype(TO_INT(state->softwareType));
+		i->set_softwaretype(TO_INT(si.softwareType()));
 
-		i->set_equipmentid(state->equipmentID.toStdString());
+		i->set_equipmentid(si.equipmentID().toStdString());
 
-		i->set_majorversion(state->majorVersion);
-		i->set_minorversion(state->minorVersion);
-		i->set_commitno(state->commitNo);
+		i->set_majorversion(si.majorVersion());
+		i->set_minorversion(si.minorVersion());
+		i->set_commitno(si.commitNo());
 
-		i->set_ip(state->peerAddr.address32());
+		i->set_ip(state.peerAddr.address32());
 
-		i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state->startTime);
-		i->set_isactual(state->isActual);
-		i->set_replyquantity(state->replyCount);
+		i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
+		i->set_isactual(state.isActual);
+		i->set_replyquantity(state.replyCount);
 	}
+
+	m_statesMutex.unlock();
 
 	sendReply(message);
 }

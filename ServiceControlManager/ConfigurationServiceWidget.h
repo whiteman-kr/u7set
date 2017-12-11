@@ -4,13 +4,15 @@
 class QStandardItemModel;
 class TcpConfigServiceClient;
 
+#include "../lib/Tcp.h"
 #include "BaseServiceStateWidget.h"
+
 
 class ConfigurationServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	ConfigurationServiceWidget(quint32 ip, int portIndex, QWidget *parent = 0);
+	ConfigurationServiceWidget(const SoftwareInfo& softwareInfo, quint32 ip, int portIndex, QWidget *parent = 0);
 	~ConfigurationServiceWidget();
 
 public slots:

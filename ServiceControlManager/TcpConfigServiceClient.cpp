@@ -4,7 +4,7 @@
 
 
 TcpConfigServiceClient::TcpConfigServiceClient(const HostAddressPort& serverAddressPort,
-											   const Tcp::SoftwareInfo& softwareInfo) :
+											   const SoftwareInfo& softwareInfo) :
 	Tcp::Client(serverAddressPort, softwareInfo)
 {
 }
@@ -12,7 +12,7 @@ TcpConfigServiceClient::TcpConfigServiceClient(const HostAddressPort& serverAddr
 
 TcpConfigServiceClient::TcpConfigServiceClient(const HostAddressPort& serverAddressPort1,
 											   const HostAddressPort& serverAddressPort2,
-											   const Tcp::SoftwareInfo& softwareInfo) :
+											   const SoftwareInfo& softwareInfo) :
 	Tcp::Client(serverAddressPort1, serverAddressPort2, softwareInfo)
 {
 }

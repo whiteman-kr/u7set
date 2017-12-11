@@ -11,16 +11,16 @@ public:
 	BaseServiceWorker(const QString& serviceName,
 					  int& argc,
 					  char** argv,
-					  const VersionInfo& versionInfo,
+					  const SoftwareInfo& softwareInfo,
 					  std::shared_ptr<CircularLogger> logger) :
-		ServiceWorker(ServiceType::BaseService, serviceName, argc, argv, versionInfo, logger),
+		ServiceWorker(ServiceType::BaseService, serviceName, argc, argv, softwareInfo, logger),
 		m_logger(logger)
 	{
 	}
 
 	virtual ServiceWorker* createInstance() const override
 	{
-		BaseServiceWorker* newInstance = new BaseServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+		BaseServiceWorker* newInstance = new BaseServiceWorker(serviceName(), argc(), argv(), softwareInfo(), m_logger);
 		return newInstance;
 	}
 
@@ -71,9 +71,11 @@ int main(int argc, char *argv[])
 
 	logger->setLogCodeInfo(false);
 
-	VersionInfo vi = VERSION_INFO(1, 0);
+	SoftwareInfo si;
 
-	BaseServiceWorker baseServiceWorker("RPCT Base Service", argc, argv, vi, logger);
+	si.init(E::SoftwareType::BaseService, "", 1, 0);			// EquipmentID will be set after command line args processing
+
+	BaseServiceWorker baseServiceWorker("RPCT Base Service", argc, argv, si, logger);
 
 	ServiceStarter serviceStarter(app, baseServiceWorker, logger);
 

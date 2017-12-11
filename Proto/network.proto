@@ -155,29 +155,37 @@ message GetUnitsReply
     repeated Unit units = 2;
 }
 
+
+message SoftwareInfo
+{
+    required int32 softwareType = 1 [default = 8000];		// E::SoftwareType::Unknown = 8000
+    required string equipmentId = 2;
+    required int32 majorVersion = 3 [default = 0];
+    required int32 minorVersion = 4 [default = 0];
+    required int32 commitNo = 5 [default = 0];
+    required string buildBranch = 6;
+    required string commitSHA = 7;
+    required string userName = 8;
+    required int32 buildNo = 9 [default = 0];
+    required uint32 crc = 10 [default = 0];
+}
+
 // Get Service Info
 //
-
 message GetServiceInfoRequest
 {
 }
 
 message ServiceInfo
 {
-    optional int32 type = 1 [default = 0];	    // ServiceType::BaseService
-    optional int32 majorVersion = 2 [default = 0];
-    optional int32 minorVersion = 3 [default = 0];
-    optional int32 commitNo = 4 [default = 0];
-    optional uint32 crc = 5 [default = 0];
-    optional int64 uptime = 6 [default = 0];
-    optional int32 serviceState = 7 [default = 0];    // ServiceState::Undefined;
-    optional int64 serviceUptime = 8 [default = 0];
+    required SoftwareInfo softwareInfo = 1;
 
-    optional uint32 clientRequestIP = 9 [default = 0];
-    optional int32 clientRequestPort = 10 [default = 0];
+    optional int64 uptime = 2 [default = 0];
+    optional int32 serviceState = 3 [default = 0];		// ServiceState::Undefined;
+    optional int64 serviceUptime = 4 [default = 0];
 
-    optional string buildBranch = 11;
-    optional string commitSHA = 12;
+    optional uint32 clientRequestIP = 5 [default = 0];
+    optional int32 clientRequestPort = 6 [default = 0];
 }
 
 message GetServiceInfoReply
@@ -185,19 +193,6 @@ message GetServiceInfoReply
     required int32 error = 1 [default = 0];
     required ServiceInfo serviceInfo = 2;
 }
-
-
-message TcpSoftwareInfo
-{
-    required int32 softwareType = 1;
-    required string equipmentId = 2;
-    required int32 majorVersion = 3;
-    required int32 minorVersion = 4;
-    required int32 commitNo = 5;
-    required string userName = 6;
-    required int32 buildNo = 7;
-}
-
 
 message ConfigurationServiceState
 {

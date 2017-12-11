@@ -52,10 +52,10 @@ class GetAppDataSourcesStatesReply;
 class GetUnitsRequest;
 class Unit;
 class GetUnitsReply;
+class SoftwareInfo;
 class GetServiceInfoRequest;
 class ServiceInfo;
 class GetServiceInfoReply;
-class TcpSoftwareInfo;
 class ConfigurationServiceState;
 class ConfigurationServiceClientInfo;
 class ConfigurationServiceClients;
@@ -2007,6 +2007,198 @@ class GetUnitsReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class SoftwareInfo : public ::google::protobuf::Message {
+ public:
+  SoftwareInfo();
+  virtual ~SoftwareInfo();
+
+  SoftwareInfo(const SoftwareInfo& from);
+
+  inline SoftwareInfo& operator=(const SoftwareInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SoftwareInfo& default_instance();
+
+  void Swap(SoftwareInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  SoftwareInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SoftwareInfo& from);
+  void MergeFrom(const SoftwareInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 softwareType = 1 [default = 8000];
+  inline bool has_softwaretype() const;
+  inline void clear_softwaretype();
+  static const int kSoftwareTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 softwaretype() const;
+  inline void set_softwaretype(::google::protobuf::int32 value);
+
+  // required string equipmentId = 2;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIdFieldNumber = 2;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // required int32 majorVersion = 3 [default = 0];
+  inline bool has_majorversion() const;
+  inline void clear_majorversion();
+  static const int kMajorVersionFieldNumber = 3;
+  inline ::google::protobuf::int32 majorversion() const;
+  inline void set_majorversion(::google::protobuf::int32 value);
+
+  // required int32 minorVersion = 4 [default = 0];
+  inline bool has_minorversion() const;
+  inline void clear_minorversion();
+  static const int kMinorVersionFieldNumber = 4;
+  inline ::google::protobuf::int32 minorversion() const;
+  inline void set_minorversion(::google::protobuf::int32 value);
+
+  // required int32 commitNo = 5 [default = 0];
+  inline bool has_commitno() const;
+  inline void clear_commitno();
+  static const int kCommitNoFieldNumber = 5;
+  inline ::google::protobuf::int32 commitno() const;
+  inline void set_commitno(::google::protobuf::int32 value);
+
+  // required string buildBranch = 6;
+  inline bool has_buildbranch() const;
+  inline void clear_buildbranch();
+  static const int kBuildBranchFieldNumber = 6;
+  inline const ::std::string& buildbranch() const;
+  inline void set_buildbranch(const ::std::string& value);
+  inline void set_buildbranch(const char* value);
+  inline void set_buildbranch(const char* value, size_t size);
+  inline ::std::string* mutable_buildbranch();
+  inline ::std::string* release_buildbranch();
+  inline void set_allocated_buildbranch(::std::string* buildbranch);
+
+  // required string commitSHA = 7;
+  inline bool has_commitsha() const;
+  inline void clear_commitsha();
+  static const int kCommitSHAFieldNumber = 7;
+  inline const ::std::string& commitsha() const;
+  inline void set_commitsha(const ::std::string& value);
+  inline void set_commitsha(const char* value);
+  inline void set_commitsha(const char* value, size_t size);
+  inline ::std::string* mutable_commitsha();
+  inline ::std::string* release_commitsha();
+  inline void set_allocated_commitsha(::std::string* commitsha);
+
+  // required string userName = 8;
+  inline bool has_username() const;
+  inline void clear_username();
+  static const int kUserNameFieldNumber = 8;
+  inline const ::std::string& username() const;
+  inline void set_username(const ::std::string& value);
+  inline void set_username(const char* value);
+  inline void set_username(const char* value, size_t size);
+  inline ::std::string* mutable_username();
+  inline ::std::string* release_username();
+  inline void set_allocated_username(::std::string* username);
+
+  // required int32 buildNo = 9 [default = 0];
+  inline bool has_buildno() const;
+  inline void clear_buildno();
+  static const int kBuildNoFieldNumber = 9;
+  inline ::google::protobuf::int32 buildno() const;
+  inline void set_buildno(::google::protobuf::int32 value);
+
+  // required uint32 crc = 10 [default = 0];
+  inline bool has_crc() const;
+  inline void clear_crc();
+  static const int kCrcFieldNumber = 10;
+  inline ::google::protobuf::uint32 crc() const;
+  inline void set_crc(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.SoftwareInfo)
+ private:
+  inline void set_has_softwaretype();
+  inline void clear_has_softwaretype();
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_majorversion();
+  inline void clear_has_majorversion();
+  inline void set_has_minorversion();
+  inline void clear_has_minorversion();
+  inline void set_has_commitno();
+  inline void clear_has_commitno();
+  inline void set_has_buildbranch();
+  inline void clear_has_buildbranch();
+  inline void set_has_commitsha();
+  inline void clear_has_commitsha();
+  inline void set_has_username();
+  inline void clear_has_username();
+  inline void set_has_buildno();
+  inline void clear_has_buildno();
+  inline void set_has_crc();
+  inline void clear_has_crc();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* equipmentid_;
+  ::google::protobuf::int32 softwaretype_;
+  ::google::protobuf::int32 majorversion_;
+  ::google::protobuf::int32 minorversion_;
+  ::google::protobuf::int32 commitno_;
+  ::std::string* buildbranch_;
+  ::std::string* commitsha_;
+  ::std::string* username_;
+  ::google::protobuf::int32 buildno_;
+  ::google::protobuf::uint32 crc_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static SoftwareInfo* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class GetServiceInfoRequest : public ::google::protobuf::Message {
  public:
   GetServiceInfoRequest();
@@ -2133,80 +2325,54 @@ class ServiceInfo : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 type = 1 [default = 0];
-  inline bool has_type() const;
-  inline void clear_type();
-  static const int kTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 type() const;
-  inline void set_type(::google::protobuf::int32 value);
+  // required .Network.SoftwareInfo softwareInfo = 1;
+  inline bool has_softwareinfo() const;
+  inline void clear_softwareinfo();
+  static const int kSoftwareInfoFieldNumber = 1;
+  inline const ::Network::SoftwareInfo& softwareinfo() const;
+  inline ::Network::SoftwareInfo* mutable_softwareinfo();
+  inline ::Network::SoftwareInfo* release_softwareinfo();
+  inline void set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo);
 
-  // optional int32 majorVersion = 2 [default = 0];
-  inline bool has_majorversion() const;
-  inline void clear_majorversion();
-  static const int kMajorVersionFieldNumber = 2;
-  inline ::google::protobuf::int32 majorversion() const;
-  inline void set_majorversion(::google::protobuf::int32 value);
-
-  // optional int32 minorVersion = 3 [default = 0];
-  inline bool has_minorversion() const;
-  inline void clear_minorversion();
-  static const int kMinorVersionFieldNumber = 3;
-  inline ::google::protobuf::int32 minorversion() const;
-  inline void set_minorversion(::google::protobuf::int32 value);
-
-  // optional int32 commitNo = 4 [default = 0];
-  inline bool has_commitno() const;
-  inline void clear_commitno();
-  static const int kCommitNoFieldNumber = 4;
-  inline ::google::protobuf::int32 commitno() const;
-  inline void set_commitno(::google::protobuf::int32 value);
-
-  // optional uint32 crc = 5 [default = 0];
-  inline bool has_crc() const;
-  inline void clear_crc();
-  static const int kCrcFieldNumber = 5;
-  inline ::google::protobuf::uint32 crc() const;
-  inline void set_crc(::google::protobuf::uint32 value);
-
-  // optional int64 uptime = 6 [default = 0];
+  // optional int64 uptime = 2 [default = 0];
   inline bool has_uptime() const;
   inline void clear_uptime();
-  static const int kUptimeFieldNumber = 6;
+  static const int kUptimeFieldNumber = 2;
   inline ::google::protobuf::int64 uptime() const;
   inline void set_uptime(::google::protobuf::int64 value);
 
-  // optional int32 serviceState = 7 [default = 0];
+  // optional int32 serviceState = 3 [default = 0];
   inline bool has_servicestate() const;
   inline void clear_servicestate();
-  static const int kServiceStateFieldNumber = 7;
+  static const int kServiceStateFieldNumber = 3;
   inline ::google::protobuf::int32 servicestate() const;
   inline void set_servicestate(::google::protobuf::int32 value);
 
-  // optional int64 serviceUptime = 8 [default = 0];
+  // optional int64 serviceUptime = 4 [default = 0];
   inline bool has_serviceuptime() const;
   inline void clear_serviceuptime();
-  static const int kServiceUptimeFieldNumber = 8;
+  static const int kServiceUptimeFieldNumber = 4;
   inline ::google::protobuf::int64 serviceuptime() const;
   inline void set_serviceuptime(::google::protobuf::int64 value);
 
-  // optional uint32 clientRequestIP = 9 [default = 0];
+  // optional uint32 clientRequestIP = 5 [default = 0];
   inline bool has_clientrequestip() const;
   inline void clear_clientrequestip();
-  static const int kClientRequestIPFieldNumber = 9;
+  static const int kClientRequestIPFieldNumber = 5;
   inline ::google::protobuf::uint32 clientrequestip() const;
   inline void set_clientrequestip(::google::protobuf::uint32 value);
 
-  // optional int32 clientRequestPort = 10 [default = 0];
+  // optional int32 clientRequestPort = 6 [default = 0];
   inline bool has_clientrequestport() const;
   inline void clear_clientrequestport();
-  static const int kClientRequestPortFieldNumber = 10;
+  static const int kClientRequestPortFieldNumber = 6;
   inline ::google::protobuf::int32 clientrequestport() const;
   inline void set_clientrequestport(::google::protobuf::int32 value);
 
-  // optional string buildBranch = 11;
+  // optional string buildBranch = 7;
   inline bool has_buildbranch() const;
   inline void clear_buildbranch();
-  static const int kBuildBranchFieldNumber = 11;
+  static const int kBuildBranchFieldNumber = 7;
   inline const ::std::string& buildbranch() const;
   inline void set_buildbranch(const ::std::string& value);
   inline void set_buildbranch(const char* value);
@@ -2215,10 +2381,10 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline ::std::string* release_buildbranch();
   inline void set_allocated_buildbranch(::std::string* buildbranch);
 
-  // optional string commitSHA = 12;
+  // optional string commitSHA = 8;
   inline bool has_commitsha() const;
   inline void clear_commitsha();
-  static const int kCommitSHAFieldNumber = 12;
+  static const int kCommitSHAFieldNumber = 8;
   inline const ::std::string& commitsha() const;
   inline void set_commitsha(const ::std::string& value);
   inline void set_commitsha(const char* value);
@@ -2229,16 +2395,8 @@ class ServiceInfo : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Network.ServiceInfo)
  private:
-  inline void set_has_type();
-  inline void clear_has_type();
-  inline void set_has_majorversion();
-  inline void clear_has_majorversion();
-  inline void set_has_minorversion();
-  inline void clear_has_minorversion();
-  inline void set_has_commitno();
-  inline void clear_has_commitno();
-  inline void set_has_crc();
-  inline void clear_has_crc();
+  inline void set_has_softwareinfo();
+  inline void clear_has_softwareinfo();
   inline void set_has_uptime();
   inline void clear_has_uptime();
   inline void set_has_servicestate();
@@ -2256,21 +2414,17 @@ class ServiceInfo : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 type_;
-  ::google::protobuf::int32 majorversion_;
-  ::google::protobuf::int32 minorversion_;
-  ::google::protobuf::int32 commitno_;
+  ::Network::SoftwareInfo* softwareinfo_;
   ::google::protobuf::int64 uptime_;
-  ::google::protobuf::uint32 crc_;
-  ::google::protobuf::int32 servicestate_;
   ::google::protobuf::int64 serviceuptime_;
+  ::google::protobuf::int32 servicestate_;
   ::google::protobuf::uint32 clientrequestip_;
-  ::google::protobuf::int32 clientrequestport_;
   ::std::string* buildbranch_;
   ::std::string* commitsha_;
+  ::google::protobuf::int32 clientrequestport_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -2372,158 +2526,6 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static GetServiceInfoReply* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class TcpSoftwareInfo : public ::google::protobuf::Message {
- public:
-  TcpSoftwareInfo();
-  virtual ~TcpSoftwareInfo();
-
-  TcpSoftwareInfo(const TcpSoftwareInfo& from);
-
-  inline TcpSoftwareInfo& operator=(const TcpSoftwareInfo& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const TcpSoftwareInfo& default_instance();
-
-  void Swap(TcpSoftwareInfo* other);
-
-  // implements Message ----------------------------------------------
-
-  TcpSoftwareInfo* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TcpSoftwareInfo& from);
-  void MergeFrom(const TcpSoftwareInfo& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 softwareType = 1;
-  inline bool has_softwaretype() const;
-  inline void clear_softwaretype();
-  static const int kSoftwareTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 softwaretype() const;
-  inline void set_softwaretype(::google::protobuf::int32 value);
-
-  // required string equipmentId = 2;
-  inline bool has_equipmentid() const;
-  inline void clear_equipmentid();
-  static const int kEquipmentIdFieldNumber = 2;
-  inline const ::std::string& equipmentid() const;
-  inline void set_equipmentid(const ::std::string& value);
-  inline void set_equipmentid(const char* value);
-  inline void set_equipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_equipmentid();
-  inline ::std::string* release_equipmentid();
-  inline void set_allocated_equipmentid(::std::string* equipmentid);
-
-  // required int32 majorVersion = 3;
-  inline bool has_majorversion() const;
-  inline void clear_majorversion();
-  static const int kMajorVersionFieldNumber = 3;
-  inline ::google::protobuf::int32 majorversion() const;
-  inline void set_majorversion(::google::protobuf::int32 value);
-
-  // required int32 minorVersion = 4;
-  inline bool has_minorversion() const;
-  inline void clear_minorversion();
-  static const int kMinorVersionFieldNumber = 4;
-  inline ::google::protobuf::int32 minorversion() const;
-  inline void set_minorversion(::google::protobuf::int32 value);
-
-  // required int32 commitNo = 5;
-  inline bool has_commitno() const;
-  inline void clear_commitno();
-  static const int kCommitNoFieldNumber = 5;
-  inline ::google::protobuf::int32 commitno() const;
-  inline void set_commitno(::google::protobuf::int32 value);
-
-  // required string userName = 6;
-  inline bool has_username() const;
-  inline void clear_username();
-  static const int kUserNameFieldNumber = 6;
-  inline const ::std::string& username() const;
-  inline void set_username(const ::std::string& value);
-  inline void set_username(const char* value);
-  inline void set_username(const char* value, size_t size);
-  inline ::std::string* mutable_username();
-  inline ::std::string* release_username();
-  inline void set_allocated_username(::std::string* username);
-
-  // required int32 buildNo = 7;
-  inline bool has_buildno() const;
-  inline void clear_buildno();
-  static const int kBuildNoFieldNumber = 7;
-  inline ::google::protobuf::int32 buildno() const;
-  inline void set_buildno(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:Network.TcpSoftwareInfo)
- private:
-  inline void set_has_softwaretype();
-  inline void clear_has_softwaretype();
-  inline void set_has_equipmentid();
-  inline void clear_has_equipmentid();
-  inline void set_has_majorversion();
-  inline void clear_has_majorversion();
-  inline void set_has_minorversion();
-  inline void clear_has_minorversion();
-  inline void set_has_commitno();
-  inline void clear_has_commitno();
-  inline void set_has_username();
-  inline void clear_has_username();
-  inline void set_has_buildno();
-  inline void clear_has_buildno();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::std::string* equipmentid_;
-  ::google::protobuf::int32 softwaretype_;
-  ::google::protobuf::int32 majorversion_;
-  ::google::protobuf::int32 minorversion_;
-  ::google::protobuf::int32 commitno_;
-  ::std::string* username_;
-  ::google::protobuf::int32 buildno_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
-
-  friend void  protobuf_AddDesc_network_2eproto();
-  friend void protobuf_AssignDesc_network_2eproto();
-  friend void protobuf_ShutdownFile_network_2eproto();
-
-  void InitAsDefaultInstance();
-  static TcpSoftwareInfo* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -7515,131 +7517,475 @@ GetUnitsReply::mutable_units() {
 
 // -------------------------------------------------------------------
 
+// SoftwareInfo
+
+// required int32 softwareType = 1 [default = 8000];
+inline bool SoftwareInfo::has_softwaretype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SoftwareInfo::set_has_softwaretype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SoftwareInfo::clear_has_softwaretype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SoftwareInfo::clear_softwaretype() {
+  softwaretype_ = 8000;
+  clear_has_softwaretype();
+}
+inline ::google::protobuf::int32 SoftwareInfo::softwaretype() const {
+  return softwaretype_;
+}
+inline void SoftwareInfo::set_softwaretype(::google::protobuf::int32 value) {
+  set_has_softwaretype();
+  softwaretype_ = value;
+}
+
+// required string equipmentId = 2;
+inline bool SoftwareInfo::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SoftwareInfo::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SoftwareInfo::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SoftwareInfo::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& SoftwareInfo::equipmentid() const {
+  return *equipmentid_;
+}
+inline void SoftwareInfo::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void SoftwareInfo::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void SoftwareInfo::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* SoftwareInfo::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 majorVersion = 3 [default = 0];
+inline bool SoftwareInfo::has_majorversion() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SoftwareInfo::set_has_majorversion() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SoftwareInfo::clear_has_majorversion() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SoftwareInfo::clear_majorversion() {
+  majorversion_ = 0;
+  clear_has_majorversion();
+}
+inline ::google::protobuf::int32 SoftwareInfo::majorversion() const {
+  return majorversion_;
+}
+inline void SoftwareInfo::set_majorversion(::google::protobuf::int32 value) {
+  set_has_majorversion();
+  majorversion_ = value;
+}
+
+// required int32 minorVersion = 4 [default = 0];
+inline bool SoftwareInfo::has_minorversion() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SoftwareInfo::set_has_minorversion() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SoftwareInfo::clear_has_minorversion() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SoftwareInfo::clear_minorversion() {
+  minorversion_ = 0;
+  clear_has_minorversion();
+}
+inline ::google::protobuf::int32 SoftwareInfo::minorversion() const {
+  return minorversion_;
+}
+inline void SoftwareInfo::set_minorversion(::google::protobuf::int32 value) {
+  set_has_minorversion();
+  minorversion_ = value;
+}
+
+// required int32 commitNo = 5 [default = 0];
+inline bool SoftwareInfo::has_commitno() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SoftwareInfo::set_has_commitno() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SoftwareInfo::clear_has_commitno() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SoftwareInfo::clear_commitno() {
+  commitno_ = 0;
+  clear_has_commitno();
+}
+inline ::google::protobuf::int32 SoftwareInfo::commitno() const {
+  return commitno_;
+}
+inline void SoftwareInfo::set_commitno(::google::protobuf::int32 value) {
+  set_has_commitno();
+  commitno_ = value;
+}
+
+// required string buildBranch = 6;
+inline bool SoftwareInfo::has_buildbranch() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SoftwareInfo::set_has_buildbranch() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SoftwareInfo::clear_has_buildbranch() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SoftwareInfo::clear_buildbranch() {
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    buildbranch_->clear();
+  }
+  clear_has_buildbranch();
+}
+inline const ::std::string& SoftwareInfo::buildbranch() const {
+  return *buildbranch_;
+}
+inline void SoftwareInfo::set_buildbranch(const ::std::string& value) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(value);
+}
+inline void SoftwareInfo::set_buildbranch(const char* value) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(value);
+}
+inline void SoftwareInfo::set_buildbranch(const char* value, size_t size) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_buildbranch() {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  return buildbranch_;
+}
+inline ::std::string* SoftwareInfo::release_buildbranch() {
+  clear_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = buildbranch_;
+    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_buildbranch(::std::string* buildbranch) {
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    delete buildbranch_;
+  }
+  if (buildbranch) {
+    set_has_buildbranch();
+    buildbranch_ = buildbranch;
+  } else {
+    clear_has_buildbranch();
+    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string commitSHA = 7;
+inline bool SoftwareInfo::has_commitsha() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SoftwareInfo::set_has_commitsha() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SoftwareInfo::clear_has_commitsha() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SoftwareInfo::clear_commitsha() {
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    commitsha_->clear();
+  }
+  clear_has_commitsha();
+}
+inline const ::std::string& SoftwareInfo::commitsha() const {
+  return *commitsha_;
+}
+inline void SoftwareInfo::set_commitsha(const ::std::string& value) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(value);
+}
+inline void SoftwareInfo::set_commitsha(const char* value) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(value);
+}
+inline void SoftwareInfo::set_commitsha(const char* value, size_t size) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_commitsha() {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  return commitsha_;
+}
+inline ::std::string* SoftwareInfo::release_commitsha() {
+  clear_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = commitsha_;
+    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_commitsha(::std::string* commitsha) {
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    delete commitsha_;
+  }
+  if (commitsha) {
+    set_has_commitsha();
+    commitsha_ = commitsha;
+  } else {
+    clear_has_commitsha();
+    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string userName = 8;
+inline bool SoftwareInfo::has_username() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SoftwareInfo::set_has_username() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SoftwareInfo::clear_has_username() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SoftwareInfo::clear_username() {
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    username_->clear();
+  }
+  clear_has_username();
+}
+inline const ::std::string& SoftwareInfo::username() const {
+  return *username_;
+}
+inline void SoftwareInfo::set_username(const ::std::string& value) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(value);
+}
+inline void SoftwareInfo::set_username(const char* value) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(value);
+}
+inline void SoftwareInfo::set_username(const char* value, size_t size) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_username() {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  return username_;
+}
+inline ::std::string* SoftwareInfo::release_username() {
+  clear_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = username_;
+    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_username(::std::string* username) {
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    delete username_;
+  }
+  if (username) {
+    set_has_username();
+    username_ = username;
+  } else {
+    clear_has_username();
+    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 buildNo = 9 [default = 0];
+inline bool SoftwareInfo::has_buildno() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void SoftwareInfo::set_has_buildno() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void SoftwareInfo::clear_has_buildno() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void SoftwareInfo::clear_buildno() {
+  buildno_ = 0;
+  clear_has_buildno();
+}
+inline ::google::protobuf::int32 SoftwareInfo::buildno() const {
+  return buildno_;
+}
+inline void SoftwareInfo::set_buildno(::google::protobuf::int32 value) {
+  set_has_buildno();
+  buildno_ = value;
+}
+
+// required uint32 crc = 10 [default = 0];
+inline bool SoftwareInfo::has_crc() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SoftwareInfo::set_has_crc() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SoftwareInfo::clear_has_crc() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void SoftwareInfo::clear_crc() {
+  crc_ = 0u;
+  clear_has_crc();
+}
+inline ::google::protobuf::uint32 SoftwareInfo::crc() const {
+  return crc_;
+}
+inline void SoftwareInfo::set_crc(::google::protobuf::uint32 value) {
+  set_has_crc();
+  crc_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // GetServiceInfoRequest
 
 // -------------------------------------------------------------------
 
 // ServiceInfo
 
-// optional int32 type = 1 [default = 0];
-inline bool ServiceInfo::has_type() const {
+// required .Network.SoftwareInfo softwareInfo = 1;
+inline bool ServiceInfo::has_softwareinfo() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ServiceInfo::set_has_type() {
+inline void ServiceInfo::set_has_softwareinfo() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void ServiceInfo::clear_has_type() {
+inline void ServiceInfo::clear_has_softwareinfo() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void ServiceInfo::clear_type() {
-  type_ = 0;
-  clear_has_type();
+inline void ServiceInfo::clear_softwareinfo() {
+  if (softwareinfo_ != NULL) softwareinfo_->::Network::SoftwareInfo::Clear();
+  clear_has_softwareinfo();
 }
-inline ::google::protobuf::int32 ServiceInfo::type() const {
-  return type_;
+inline const ::Network::SoftwareInfo& ServiceInfo::softwareinfo() const {
+  return softwareinfo_ != NULL ? *softwareinfo_ : *default_instance_->softwareinfo_;
 }
-inline void ServiceInfo::set_type(::google::protobuf::int32 value) {
-  set_has_type();
-  type_ = value;
+inline ::Network::SoftwareInfo* ServiceInfo::mutable_softwareinfo() {
+  set_has_softwareinfo();
+  if (softwareinfo_ == NULL) softwareinfo_ = new ::Network::SoftwareInfo;
+  return softwareinfo_;
+}
+inline ::Network::SoftwareInfo* ServiceInfo::release_softwareinfo() {
+  clear_has_softwareinfo();
+  ::Network::SoftwareInfo* temp = softwareinfo_;
+  softwareinfo_ = NULL;
+  return temp;
+}
+inline void ServiceInfo::set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo) {
+  delete softwareinfo_;
+  softwareinfo_ = softwareinfo;
+  if (softwareinfo) {
+    set_has_softwareinfo();
+  } else {
+    clear_has_softwareinfo();
+  }
 }
 
-// optional int32 majorVersion = 2 [default = 0];
-inline bool ServiceInfo::has_majorversion() const {
+// optional int64 uptime = 2 [default = 0];
+inline bool ServiceInfo::has_uptime() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void ServiceInfo::set_has_majorversion() {
+inline void ServiceInfo::set_has_uptime() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void ServiceInfo::clear_has_majorversion() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void ServiceInfo::clear_majorversion() {
-  majorversion_ = 0;
-  clear_has_majorversion();
-}
-inline ::google::protobuf::int32 ServiceInfo::majorversion() const {
-  return majorversion_;
-}
-inline void ServiceInfo::set_majorversion(::google::protobuf::int32 value) {
-  set_has_majorversion();
-  majorversion_ = value;
-}
-
-// optional int32 minorVersion = 3 [default = 0];
-inline bool ServiceInfo::has_minorversion() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void ServiceInfo::set_has_minorversion() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void ServiceInfo::clear_has_minorversion() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void ServiceInfo::clear_minorversion() {
-  minorversion_ = 0;
-  clear_has_minorversion();
-}
-inline ::google::protobuf::int32 ServiceInfo::minorversion() const {
-  return minorversion_;
-}
-inline void ServiceInfo::set_minorversion(::google::protobuf::int32 value) {
-  set_has_minorversion();
-  minorversion_ = value;
-}
-
-// optional int32 commitNo = 4 [default = 0];
-inline bool ServiceInfo::has_commitno() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void ServiceInfo::set_has_commitno() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void ServiceInfo::clear_has_commitno() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void ServiceInfo::clear_commitno() {
-  commitno_ = 0;
-  clear_has_commitno();
-}
-inline ::google::protobuf::int32 ServiceInfo::commitno() const {
-  return commitno_;
-}
-inline void ServiceInfo::set_commitno(::google::protobuf::int32 value) {
-  set_has_commitno();
-  commitno_ = value;
-}
-
-// optional uint32 crc = 5 [default = 0];
-inline bool ServiceInfo::has_crc() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void ServiceInfo::set_has_crc() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void ServiceInfo::clear_has_crc() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void ServiceInfo::clear_crc() {
-  crc_ = 0u;
-  clear_has_crc();
-}
-inline ::google::protobuf::uint32 ServiceInfo::crc() const {
-  return crc_;
-}
-inline void ServiceInfo::set_crc(::google::protobuf::uint32 value) {
-  set_has_crc();
-  crc_ = value;
-}
-
-// optional int64 uptime = 6 [default = 0];
-inline bool ServiceInfo::has_uptime() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void ServiceInfo::set_has_uptime() {
-  _has_bits_[0] |= 0x00000020u;
-}
 inline void ServiceInfo::clear_has_uptime() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void ServiceInfo::clear_uptime() {
   uptime_ = GOOGLE_LONGLONG(0);
@@ -7653,15 +7999,15 @@ inline void ServiceInfo::set_uptime(::google::protobuf::int64 value) {
   uptime_ = value;
 }
 
-// optional int32 serviceState = 7 [default = 0];
+// optional int32 serviceState = 3 [default = 0];
 inline bool ServiceInfo::has_servicestate() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void ServiceInfo::set_has_servicestate() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void ServiceInfo::clear_has_servicestate() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void ServiceInfo::clear_servicestate() {
   servicestate_ = 0;
@@ -7675,15 +8021,15 @@ inline void ServiceInfo::set_servicestate(::google::protobuf::int32 value) {
   servicestate_ = value;
 }
 
-// optional int64 serviceUptime = 8 [default = 0];
+// optional int64 serviceUptime = 4 [default = 0];
 inline bool ServiceInfo::has_serviceuptime() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void ServiceInfo::set_has_serviceuptime() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void ServiceInfo::clear_has_serviceuptime() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void ServiceInfo::clear_serviceuptime() {
   serviceuptime_ = GOOGLE_LONGLONG(0);
@@ -7697,15 +8043,15 @@ inline void ServiceInfo::set_serviceuptime(::google::protobuf::int64 value) {
   serviceuptime_ = value;
 }
 
-// optional uint32 clientRequestIP = 9 [default = 0];
+// optional uint32 clientRequestIP = 5 [default = 0];
 inline bool ServiceInfo::has_clientrequestip() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void ServiceInfo::set_has_clientrequestip() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void ServiceInfo::clear_has_clientrequestip() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void ServiceInfo::clear_clientrequestip() {
   clientrequestip_ = 0u;
@@ -7719,15 +8065,15 @@ inline void ServiceInfo::set_clientrequestip(::google::protobuf::uint32 value) {
   clientrequestip_ = value;
 }
 
-// optional int32 clientRequestPort = 10 [default = 0];
+// optional int32 clientRequestPort = 6 [default = 0];
 inline bool ServiceInfo::has_clientrequestport() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void ServiceInfo::set_has_clientrequestport() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void ServiceInfo::clear_has_clientrequestport() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void ServiceInfo::clear_clientrequestport() {
   clientrequestport_ = 0;
@@ -7741,15 +8087,15 @@ inline void ServiceInfo::set_clientrequestport(::google::protobuf::int32 value) 
   clientrequestport_ = value;
 }
 
-// optional string buildBranch = 11;
+// optional string buildBranch = 7;
 inline bool ServiceInfo::has_buildbranch() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void ServiceInfo::set_has_buildbranch() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void ServiceInfo::clear_has_buildbranch() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void ServiceInfo::clear_buildbranch() {
   if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
@@ -7811,15 +8157,15 @@ inline void ServiceInfo::set_allocated_buildbranch(::std::string* buildbranch) {
   }
 }
 
-// optional string commitSHA = 12;
+// optional string commitSHA = 8;
 inline bool ServiceInfo::has_commitsha() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void ServiceInfo::set_has_commitsha() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void ServiceInfo::clear_has_commitsha() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void ServiceInfo::clear_commitsha() {
   if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
@@ -7943,260 +8289,6 @@ inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInf
   } else {
     clear_has_serviceinfo();
   }
-}
-
-// -------------------------------------------------------------------
-
-// TcpSoftwareInfo
-
-// required int32 softwareType = 1;
-inline bool TcpSoftwareInfo::has_softwaretype() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void TcpSoftwareInfo::set_has_softwaretype() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void TcpSoftwareInfo::clear_has_softwaretype() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void TcpSoftwareInfo::clear_softwaretype() {
-  softwaretype_ = 0;
-  clear_has_softwaretype();
-}
-inline ::google::protobuf::int32 TcpSoftwareInfo::softwaretype() const {
-  return softwaretype_;
-}
-inline void TcpSoftwareInfo::set_softwaretype(::google::protobuf::int32 value) {
-  set_has_softwaretype();
-  softwaretype_ = value;
-}
-
-// required string equipmentId = 2;
-inline bool TcpSoftwareInfo::has_equipmentid() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void TcpSoftwareInfo::set_has_equipmentid() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void TcpSoftwareInfo::clear_has_equipmentid() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void TcpSoftwareInfo::clear_equipmentid() {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    equipmentid_->clear();
-  }
-  clear_has_equipmentid();
-}
-inline const ::std::string& TcpSoftwareInfo::equipmentid() const {
-  return *equipmentid_;
-}
-inline void TcpSoftwareInfo::set_equipmentid(const ::std::string& value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void TcpSoftwareInfo::set_equipmentid(const char* value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void TcpSoftwareInfo::set_equipmentid(const char* value, size_t size) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TcpSoftwareInfo::mutable_equipmentid() {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  return equipmentid_;
-}
-inline ::std::string* TcpSoftwareInfo::release_equipmentid() {
-  clear_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = equipmentid_;
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TcpSoftwareInfo::set_allocated_equipmentid(::std::string* equipmentid) {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete equipmentid_;
-  }
-  if (equipmentid) {
-    set_has_equipmentid();
-    equipmentid_ = equipmentid;
-  } else {
-    clear_has_equipmentid();
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// required int32 majorVersion = 3;
-inline bool TcpSoftwareInfo::has_majorversion() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void TcpSoftwareInfo::set_has_majorversion() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void TcpSoftwareInfo::clear_has_majorversion() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void TcpSoftwareInfo::clear_majorversion() {
-  majorversion_ = 0;
-  clear_has_majorversion();
-}
-inline ::google::protobuf::int32 TcpSoftwareInfo::majorversion() const {
-  return majorversion_;
-}
-inline void TcpSoftwareInfo::set_majorversion(::google::protobuf::int32 value) {
-  set_has_majorversion();
-  majorversion_ = value;
-}
-
-// required int32 minorVersion = 4;
-inline bool TcpSoftwareInfo::has_minorversion() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void TcpSoftwareInfo::set_has_minorversion() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void TcpSoftwareInfo::clear_has_minorversion() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void TcpSoftwareInfo::clear_minorversion() {
-  minorversion_ = 0;
-  clear_has_minorversion();
-}
-inline ::google::protobuf::int32 TcpSoftwareInfo::minorversion() const {
-  return minorversion_;
-}
-inline void TcpSoftwareInfo::set_minorversion(::google::protobuf::int32 value) {
-  set_has_minorversion();
-  minorversion_ = value;
-}
-
-// required int32 commitNo = 5;
-inline bool TcpSoftwareInfo::has_commitno() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void TcpSoftwareInfo::set_has_commitno() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void TcpSoftwareInfo::clear_has_commitno() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void TcpSoftwareInfo::clear_commitno() {
-  commitno_ = 0;
-  clear_has_commitno();
-}
-inline ::google::protobuf::int32 TcpSoftwareInfo::commitno() const {
-  return commitno_;
-}
-inline void TcpSoftwareInfo::set_commitno(::google::protobuf::int32 value) {
-  set_has_commitno();
-  commitno_ = value;
-}
-
-// required string userName = 6;
-inline bool TcpSoftwareInfo::has_username() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void TcpSoftwareInfo::set_has_username() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void TcpSoftwareInfo::clear_has_username() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void TcpSoftwareInfo::clear_username() {
-  if (username_ != &::google::protobuf::internal::kEmptyString) {
-    username_->clear();
-  }
-  clear_has_username();
-}
-inline const ::std::string& TcpSoftwareInfo::username() const {
-  return *username_;
-}
-inline void TcpSoftwareInfo::set_username(const ::std::string& value) {
-  set_has_username();
-  if (username_ == &::google::protobuf::internal::kEmptyString) {
-    username_ = new ::std::string;
-  }
-  username_->assign(value);
-}
-inline void TcpSoftwareInfo::set_username(const char* value) {
-  set_has_username();
-  if (username_ == &::google::protobuf::internal::kEmptyString) {
-    username_ = new ::std::string;
-  }
-  username_->assign(value);
-}
-inline void TcpSoftwareInfo::set_username(const char* value, size_t size) {
-  set_has_username();
-  if (username_ == &::google::protobuf::internal::kEmptyString) {
-    username_ = new ::std::string;
-  }
-  username_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TcpSoftwareInfo::mutable_username() {
-  set_has_username();
-  if (username_ == &::google::protobuf::internal::kEmptyString) {
-    username_ = new ::std::string;
-  }
-  return username_;
-}
-inline ::std::string* TcpSoftwareInfo::release_username() {
-  clear_has_username();
-  if (username_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = username_;
-    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TcpSoftwareInfo::set_allocated_username(::std::string* username) {
-  if (username_ != &::google::protobuf::internal::kEmptyString) {
-    delete username_;
-  }
-  if (username) {
-    set_has_username();
-    username_ = username;
-  } else {
-    clear_has_username();
-    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// required int32 buildNo = 7;
-inline bool TcpSoftwareInfo::has_buildno() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
-}
-inline void TcpSoftwareInfo::set_has_buildno() {
-  _has_bits_[0] |= 0x00000040u;
-}
-inline void TcpSoftwareInfo::clear_has_buildno() {
-  _has_bits_[0] &= ~0x00000040u;
-}
-inline void TcpSoftwareInfo::clear_buildno() {
-  buildno_ = 0;
-  clear_has_buildno();
-}
-inline ::google::protobuf::int32 TcpSoftwareInfo::buildno() const {
-  return buildno_;
-}
-inline void TcpSoftwareInfo::set_buildno(::google::protobuf::int32 value) {
-  set_has_buildno();
-  buildno_ = value;
 }
 
 // -------------------------------------------------------------------

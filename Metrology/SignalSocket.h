@@ -25,8 +25,13 @@ class SignalSocket : public Tcp::Client
 
 public:
 
-	SignalSocket(const HostAddressPort& serverAddressPort);
-	SignalSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	SignalSocket(const HostAddressPort& serverAddressPort,
+				 const SoftwareInfo& softwareInfo);
+
+	SignalSocket(const HostAddressPort& serverAddressPort1,
+				 const HostAddressPort& serverAddressPort2,
+				 const SoftwareInfo& softwareInfo);
+
 	virtual ~SignalSocket();
 
 private:

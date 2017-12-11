@@ -9,26 +9,17 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort) :
-	Tcp::Client(serverAddressPort,
-				E::SoftwareType::Metrology,
-				theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY),
-				0,
-				1,
-				USED_SERVER_COMMIT_NUMBER)
+SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort, const SoftwareInfo& softwareInfo) :
+	Tcp::Client(serverAddressPort, softwareInfo)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1,
-				serverAddressPort2,
-				E::SoftwareType::Metrology,
-				theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY),
-				0,
-				1,
-				USED_SERVER_COMMIT_NUMBER)
+SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2,
+						   const SoftwareInfo& softwareInfo) :
+	Tcp::Client(serverAddressPort1, serverAddressPort2, softwareInfo)
 {
 }
 

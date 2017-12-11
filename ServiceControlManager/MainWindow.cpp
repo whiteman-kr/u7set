@@ -17,7 +17,7 @@
 #include <functional>
 #include <QHeaderView>
 
-MainWindow::MainWindow(const Tcp::SoftwareInfo& softwareInfo, QWidget* parent) :
+MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_trayIcon(new QSystemTrayIcon(this)),
 	m_serviceModel(new ServiceTableModel(softwareInfo, this)),

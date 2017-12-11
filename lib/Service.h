@@ -15,29 +15,13 @@
 #include "../lib/CircularLogger.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/CommandLineParser.h"
+#include "../lib/SoftwareInfo.h"
 #include "../Proto/network.pb.h"
-
-
-struct VersionInfo
-{
-	int majorVersion;
-	int minorVersion;
-	int commitNo;
-	QString buildBranch;
-	QString commitSHA;
-};
-
-
-#define VERSION_INFO(majorVersion, minorVersion) {	majorVersion, \
-													minorVersion, \
-													USED_SERVER_COMMIT_NUMBER, \
-													BUILD_BRANCH, \
-													USED_SERVER_COMMIT_SHA }
 
 
 struct ServiceInfo
 {
-	ServiceType serviceType;
+	E::SoftwareType softwareType;
 	quint16 port;
 	const char* name;
 	const char* shortName;
@@ -46,12 +30,12 @@ struct ServiceInfo
 
 const ServiceInfo serviceInfo[] =
 {
-	{ ServiceType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
-	{ ServiceType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
-	{ ServiceType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
-	{ ServiceType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
-	{ ServiceType::ArchivingService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
-	{ ServiceType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
+	{ E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
+	{ E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
+	{ E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
+	{ E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
+	{ E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
+	{ E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
 };
 
 const int SERVICE_TYPE_COUNT = sizeof(serviceInfo) / sizeof (ServiceInfo);
@@ -70,11 +54,10 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ServiceWorker(ServiceType serviceType,
+	ServiceWorker(const SoftwareInfo& softwareInfo,
 				  const QString& serviceName,
 				  int& argc,
 				  char** argv,
-				  const VersionInfo& versionInfo,
 				  std::shared_ptr<CircularLogger> logger);
 
 	virtual ~ServiceWorker();
@@ -85,10 +68,9 @@ public:
 	QString appPath() const;
 	QString cmdLine() const;
 
-	ServiceType serviceType() const;
 	QString serviceName() const;
 
-	const VersionInfo& versionInfo() const;
+	const SoftwareInfo& softwareInfo() const;
 
 	void initAndProcessCmdLineSettings();
 
@@ -131,11 +113,10 @@ private:
 	void onThreadFinished() final;
 
 private:
-	ServiceType m_serviceType = ServiceType::BaseService;
+	SoftwareInfo m_softwareInfo;
 	QString m_serviceName;
 	int& m_argc;
 	char** m_argv = nullptr;
-	VersionInfo m_versionInfo;
 	CircularLoggerShared m_logger;
 
 	QSettings m_settings;

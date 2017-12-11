@@ -5,8 +5,8 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 
-ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
-	BaseServiceStateWidget(ip, portIndex, parent)
+ConfigurationServiceWidget::ConfigurationServiceWidget(const SoftwareInfo& softwareInfo, quint32 ip, int portIndex, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, ip, portIndex, parent)
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &ConfigurationServiceWidget::updateStateInfo);
 
@@ -243,11 +243,7 @@ void ConfigurationServiceWidget::clearServiceData()
 
 void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
-	Tcp::SoftwareInfo si;
-
-	si.init(E::SoftwareType::ServiceControlManager, "SCM", 1, 0, Tcp::SoftwareInfo::UNDEFINED_BUILD_NO);
-
-	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, port), si);
+	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, port), softwareInfo());
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
 
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &ConfigurationServiceWidget::updateServiceState);

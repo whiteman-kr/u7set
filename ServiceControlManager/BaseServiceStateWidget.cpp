@@ -13,8 +13,9 @@
 #include "../lib/WidgetUtils.h"
 
 
-BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidget *parent) :
+BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 ip, int portIndex, QWidget *parent) :
 	QMainWindow(parent),
+	m_softwareInfo(softwareInfo),
 	m_ip(ip),
 	m_portIndex(portIndex)
 {

@@ -226,12 +226,13 @@ void DataSourcesStateModel::reloadList()
 }
 
 
-AppDataServiceWidget::AppDataServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
-	BaseServiceStateWidget(ip, portIndex, parent)
+AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 ip, int portIndex, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, ip, portIndex, parent)
 {
 	setStateTabMaxRowQuantity(8);
 
-	m_tcpClientSocket = new TcpAppDataClient(HostAddressPort(getWorkingClientRequestIp(), PORT_APP_DATA_SERVICE_CLIENT_REQUEST));
+	m_tcpClientSocket = new TcpAppDataClient(HostAddressPort(getWorkingClientRequestIp(), PORT_APP_DATA_SERVICE_CLIENT_REQUEST),
+											 softwareInfo);
 	m_appDataClientTread = new SimpleThread(m_tcpClientSocket);
 
 	// Data Sources

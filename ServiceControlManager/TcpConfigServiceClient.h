@@ -17,11 +17,12 @@ class TcpConfigServiceClient : public Tcp::Client
 
 public:
 	TcpConfigServiceClient(const HostAddressPort& serverAddressPort,
-						   const Tcp::SoftwareInfo& softwareInfo);
+						   const SoftwareInfo& softwareInfo);
 
 	TcpConfigServiceClient(const HostAddressPort& serverAddressPort1,
 						   const HostAddressPort& serverAddressPort2,
-						   const Tcp::SoftwareInfo& softwareInfo);
+						   const SoftwareInfo& softwareInfo);
+
 	virtual ~TcpConfigServiceClient();
 
 	virtual void onClientThreadStarted() override;

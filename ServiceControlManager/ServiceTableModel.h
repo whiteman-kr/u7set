@@ -44,7 +44,7 @@ class ServiceTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit ServiceTableModel(const Tcp::SoftwareInfo& softwareInfo, QObject* parent = 0);
+	explicit ServiceTableModel(const SoftwareInfo& softwareInfo, QObject* parent = 0);
 	~ServiceTableModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
@@ -69,7 +69,7 @@ public slots:
 
 private:
 	QVector<HostInfo> m_hostsInfo;
-	Tcp::SoftwareInfo m_softwareInfo;
+	SoftwareInfo m_softwareInfo;
 	bool m_freezeUpdate;
 
 	QTimer m_timer;

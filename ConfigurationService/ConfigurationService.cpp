@@ -18,9 +18,9 @@ const char* const ConfigurationServiceWorker::SETTING_WORK_DIRECTORY = "WorkDire
 
 ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceName,
 													   int& argc, char** argv,
-													   const VersionInfo& versionInfo,
+													   const SoftwareInfo& softwareInfo,
 													   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::ConfigurationService, serviceName, argc, argv, versionInfo, logger),
+	ServiceWorker(ServiceType::ConfigurationService, serviceName, argc, argv, softwareInfo, logger),
 	m_logger(logger)
 {
 }
@@ -101,7 +101,12 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-	CfgControlServer* cfgControlServer = new CfgControlServer(m_equipmentID, m_autoloadBuildPath, m_workDirectory, buildPath, *m_cfgCheckerWorker, m_logger);
+	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo,
+															  m_autoloadBuildPath,
+															  m_workDirectory,
+															  buildPath,
+															  *m_cfgCheckerWorker,
+															  m_logger);
 
 	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
 

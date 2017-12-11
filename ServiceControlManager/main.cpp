@@ -91,7 +91,9 @@ int main(int argc, char *argv[])
         qApp->installTranslator(appTranslator);
     }
 
-	Tcp::SoftwareInfo si;
+	SoftwareInfo si;
+
+	si.init(E::SoftwareType::ServiceControlManager, "SCM", 1, 0);
 
 	MainWindow w(si);
     w.showMaximized();

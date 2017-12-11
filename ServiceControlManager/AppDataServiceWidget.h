@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include "../lib/OrderedHash.h"
 #include "../lib/AppDataSource.h"
+#include "../lib/Tcp.h"
 #include "BaseServiceStateWidget.h"
 
 
@@ -63,7 +64,7 @@ class AppDataServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	AppDataServiceWidget(quint32 ip, int portIndex, QWidget *parent = 0);
+	AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 ip, int portIndex, QWidget *parent = 0);
 	~AppDataServiceWidget();
 
 public slots:

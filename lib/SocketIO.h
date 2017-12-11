@@ -108,7 +108,7 @@ struct ServiceSettings
 	char serviceStrID[256];
 };
 
-
+/*
 enum class ServiceType
 {
 	BaseService,
@@ -118,7 +118,7 @@ enum class ServiceType
 	ArchivingService,
 	DiagDataService
 };
-
+*/
 
 enum ServiceState
 {

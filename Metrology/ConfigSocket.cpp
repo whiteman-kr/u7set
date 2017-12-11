@@ -12,7 +12,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
+ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort, const SoftwareInfo& softwareInfo)
 {
 	// use only SOCKET_SERVER_TYPE_PRIMARY
 	//
@@ -24,16 +24,12 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 
 	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_REQUEST);
 
-	m_cfgLoaderThread = new CfgLoaderThread(equipmentID,
+	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
 											1,
 											serverAddressPort,
 											serverAddressPort2,
 											false,
-											nullptr,
-											E::SoftwareType::Metrology,
-											0,
-											1,
-											USED_SERVER_COMMIT_NUMBER);
+											nullptr);
 
 	if (m_cfgLoaderThread == nullptr)
 	{
@@ -47,26 +43,25 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
+ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2,
+						   const SoftwareInfo& softwareInfo)
 {
 	// use only SOCKET_SERVER_TYPE_PRIMARY
 	//
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
+
 	if (equipmentID.isEmpty() == true)
 	{
 		return;
 	}
 
-	m_cfgLoaderThread = new CfgLoaderThread(equipmentID,
+	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
 											1,
 											serverAddressPort1,
 											serverAddressPort2,
 											false,
-											nullptr,
-											E::SoftwareType::Metrology,
-											0,
-											1,
-											USED_SERVER_COMMIT_NUMBER);
+											nullptr);
 
 	if (m_cfgLoaderThread == nullptr)
 	{

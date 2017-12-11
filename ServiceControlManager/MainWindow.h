@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-	explicit MainWindow(const Tcp::SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
+	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
     ~MainWindow();
 
 private:

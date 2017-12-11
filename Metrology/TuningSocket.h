@@ -39,8 +39,12 @@ class TuningSocket : public Tcp::Client
 
 public:
 
-	TuningSocket(const HostAddressPort& serverAddressPort);
-	TuningSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TuningSocket(const HostAddressPort& serverAddressPort,
+				 const SoftwareInfo& softwareInfo);
+
+	TuningSocket(const HostAddressPort& serverAddressPort1,
+				 const HostAddressPort& serverAddressPort2,
+				 const SoftwareInfo& softwareInfo);
 	virtual ~TuningSocket();
 
 private:

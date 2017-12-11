@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "../lib/UdpSocket.h"
 #include "../lib/Service.h"
+#include "../lib/Tcp.h"
 
 class QAction;
 class QLabel;
@@ -14,7 +15,7 @@ class BaseServiceStateWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceStateWidget(quint32 ip, int portIndex, QWidget *parent = 0);
+	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 ip, int portIndex, QWidget *parent = 0);
 	virtual ~BaseServiceStateWidget();
 
 	int addTab(QWidget* page, const QString& label);
@@ -23,6 +24,8 @@ public:
 	QStandardItemModel* stateTabModel() { return m_stateTabModel; }
 	void setStateTabMaxRowQuantity(int rowQuantity) { m_stateTabMaxRowQuantity = rowQuantity; }
 	quint32 getWorkingClientRequestIp();
+
+	const SoftwareInfo& softwareInfo() { return m_softwareInfo; }
 
 signals:
 	void needToReloadData();
@@ -45,6 +48,8 @@ protected:
 
 	quint32 m_ip = 0;
 	int m_portIndex = 0;
+
+	SoftwareInfo m_softwareInfo;
 
 	Network::ServiceInfo m_serviceInfo;
 

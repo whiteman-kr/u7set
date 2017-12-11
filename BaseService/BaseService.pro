@@ -66,7 +66,8 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
     ../lib/WUtils.cpp \
-    BaseServiceMain.cpp
+    BaseServiceMain.cpp \
+    ../lib/SoftwareInfo.cpp
 
 HEADERS += \
     ../lib/SocketIO.h \
@@ -82,7 +83,8 @@ HEADERS += \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     ../lib/CommandLineParser.h \
-    ../lib/WUtils.h
+    ../lib/WUtils.h \
+    ../lib/SoftwareInfo.h
 
 include(../qtservice/src/qtservice.pri)
 

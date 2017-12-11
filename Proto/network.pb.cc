@@ -85,6 +85,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetUnitsReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetUnitsReply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* SoftwareInfo_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  SoftwareInfo_reflection_ = NULL;
 const ::google::protobuf::Descriptor* GetServiceInfoRequest_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetServiceInfoRequest_reflection_ = NULL;
@@ -94,9 +97,6 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetServiceInfoReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetServiceInfoReply_reflection_ = NULL;
-const ::google::protobuf::Descriptor* TcpSoftwareInfo_descriptor_ = NULL;
-const ::google::protobuf::internal::GeneratedMessageReflection*
-  TcpSoftwareInfo_reflection_ = NULL;
 const ::google::protobuf::Descriptor* ConfigurationServiceState_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ConfigurationServiceState_reflection_ = NULL;
@@ -499,7 +499,31 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetUnitsReply));
-  GetServiceInfoRequest_descriptor_ = file->message_type(18);
+  SoftwareInfo_descriptor_ = file->message_type(18);
+  static const int SoftwareInfo_offsets_[10] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, softwaretype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, equipmentid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, majorversion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, minorversion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, commitno_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, buildbranch_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, commitsha_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, username_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, buildno_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, crc_),
+  };
+  SoftwareInfo_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      SoftwareInfo_descriptor_,
+      SoftwareInfo::default_instance_,
+      SoftwareInfo_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SoftwareInfo, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(SoftwareInfo));
+  GetServiceInfoRequest_descriptor_ = file->message_type(19);
   static const int GetServiceInfoRequest_offsets_[1] = {
   };
   GetServiceInfoRequest_reflection_ =
@@ -513,13 +537,9 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetServiceInfoRequest));
-  ServiceInfo_descriptor_ = file->message_type(19);
-  static const int ServiceInfo_offsets_[12] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, type_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, majorversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, minorversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, commitno_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, crc_),
+  ServiceInfo_descriptor_ = file->message_type(20);
+  static const int ServiceInfo_offsets_[8] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, softwareinfo_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, uptime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, servicestate_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, serviceuptime_),
@@ -539,7 +559,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ServiceInfo));
-  GetServiceInfoReply_descriptor_ = file->message_type(20);
+  GetServiceInfoReply_descriptor_ = file->message_type(21);
   static const int GetServiceInfoReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetServiceInfoReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetServiceInfoReply, serviceinfo_),
@@ -555,27 +575,6 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetServiceInfoReply));
-  TcpSoftwareInfo_descriptor_ = file->message_type(21);
-  static const int TcpSoftwareInfo_offsets_[7] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, softwaretype_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, equipmentid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, majorversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, minorversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, commitno_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, username_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, buildno_),
-  };
-  TcpSoftwareInfo_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      TcpSoftwareInfo_descriptor_,
-      TcpSoftwareInfo::default_instance_,
-      TcpSoftwareInfo_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TcpSoftwareInfo, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(TcpSoftwareInfo));
   ConfigurationServiceState_descriptor_ = file->message_type(22);
   static const int ConfigurationServiceState_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationServiceState, currentbuilddirectory_),
@@ -1139,13 +1138,13 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetUnitsReply_descriptor_, &GetUnitsReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    SoftwareInfo_descriptor_, &SoftwareInfo::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetServiceInfoRequest_descriptor_, &GetServiceInfoRequest::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ServiceInfo_descriptor_, &ServiceInfo::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetServiceInfoReply_descriptor_, &GetServiceInfoReply::default_instance());
-  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    TcpSoftwareInfo_descriptor_, &TcpSoftwareInfo::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ConfigurationServiceState_descriptor_, &ConfigurationServiceState::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1243,14 +1242,14 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete Unit_reflection_;
   delete GetUnitsReply::default_instance_;
   delete GetUnitsReply_reflection_;
+  delete SoftwareInfo::default_instance_;
+  delete SoftwareInfo_reflection_;
   delete GetServiceInfoRequest::default_instance_;
   delete GetServiceInfoRequest_reflection_;
   delete ServiceInfo::default_instance_;
   delete ServiceInfo_reflection_;
   delete GetServiceInfoReply::default_instance_;
   delete GetServiceInfoReply_reflection_;
-  delete TcpSoftwareInfo::default_instance_;
-  delete TcpSoftwareInfo_reflection_;
   delete ConfigurationServiceState::default_instance_;
   delete ConfigurationServiceState_reflection_;
   delete ConfigurationServiceClientInfo::default_instance_;
@@ -1360,126 +1359,127 @@ void protobuf_AddDesc_network_2eproto() {
     "(\0132\033.Network.AppDataSourceState\"\021\n\017GetUn"
     "itsRequest\" \n\004Unit\022\n\n\002id\030\001 \001(\005\022\014\n\004unit\030\002"
     " \001(\t\"\?\n\rGetUnitsReply\022\020\n\005error\030\001 \001(\005:\0010\022"
-    "\034\n\005units\030\002 \003(\0132\r.Network.Unit\"\027\n\025GetServ"
-    "iceInfoRequest\"\235\002\n\013ServiceInfo\022\017\n\004type\030\001"
-    " \001(\005:\0010\022\027\n\014majorVersion\030\002 \001(\005:\0010\022\027\n\014mino"
-    "rVersion\030\003 \001(\005:\0010\022\023\n\010commitNo\030\004 \001(\005:\0010\022\016"
-    "\n\003crc\030\005 \001(\r:\0010\022\021\n\006uptime\030\006 \001(\003:\0010\022\027\n\014ser"
-    "viceState\030\007 \001(\005:\0010\022\030\n\rserviceUptime\030\010 \001("
-    "\003:\0010\022\032\n\017clientRequestIP\030\t \001(\r:\0010\022\034\n\021clie"
-    "ntRequestPort\030\n \001(\005:\0010\022\023\n\013buildBranch\030\013 "
-    "\001(\t\022\021\n\tcommitSHA\030\014 \001(\t\"R\n\023GetServiceInfo"
-    "Reply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serviceInfo\030\002"
-    " \002(\0132\024.Network.ServiceInfo\"\235\001\n\017TcpSoftwa"
-    "reInfo\022\024\n\014softwareType\030\001 \002(\005\022\023\n\013equipmen"
-    "tId\030\002 \002(\t\022\024\n\014majorVersion\030\003 \002(\005\022\024\n\014minor"
-    "Version\030\004 \002(\005\022\020\n\010commitNo\030\005 \002(\005\022\020\n\010userN"
-    "ame\030\006 \002(\t\022\017\n\007buildNo\030\007 \002(\005\"x\n\031Configurat"
-    "ionServiceState\022\035\n\025currentBuildDirectory"
-    "\030\001 \002(\t\022!\n\031checkBuildAttemptQuantity\030\002 \002("
-    "\005\022\031\n\021buildCheckerState\030\003 \002(\005\"\316\001\n\036Configu"
-    "rationServiceClientInfo\022\024\n\014softwareType\030"
-    "\001 \002(\005\022\023\n\013equipmentId\030\002 \002(\t\022\n\n\002ip\030\003 \002(\005\022\016"
-    "\n\006uptime\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010\022\025\n\rrepl"
-    "yQuantity\030\007 \002(\003\022\024\n\014majorVersion\030\010 \002(\005\022\024\n"
-    "\014minorVersion\030\t \002(\005\022\020\n\010commitNo\030\n \002(\005\"W\n"
-    "\033ConfigurationServiceClients\0228\n\007clients\030"
-    "\001 \003(\0132\'.Network.ConfigurationServiceClie"
-    "ntInfo\"\213\001\n\tBuildInfo\022\017\n\007project\030\001 \002(\t\022\016\n"
-    "\002id\030\002 \002(\005:\002-1\022\026\n\007release\030\003 \002(\010:\005false\022\014\n"
-    "\004date\030\004 \002(\003\022\024\n\tchangeset\030\005 \002(\005:\0010\022\014\n\004use"
-    "r\030\006 \002(\t\022\023\n\013workstation\030\007 \002(\t\"e\n\034Configur"
-    "ationServiceSettings\022\023\n\013equipmentID\030\001 \002("
-    "\t\022\031\n\021autoloadBuildPath\030\002 \002(\t\022\025\n\rworkDire"
-    "ctory\030\003 \002(\t\"\026\n\024GetTuningSourcesInfo\"`\n\031G"
-    "etTuningSourcesInfoReply\022\020\n\005error\030\001 \001(\005:"
-    "\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Network.D"
-    "ataSourceInfo\"\030\n\026GetTuningSourcesStates\""
-    "\345\t\n\021TuningSourceState\022\023\n\010sourceID\030\001 \001(\004:"
-    "\0010\022\026\n\007isReply\030\002 \001(\010:\005false\022\027\n\014requestCou"
-    "nt\030\003 \001(\003:\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020co"
-    "mmandQueueSize\030\005 \001(\005:\0010\022\034\n\021errUntimelyRe"
-    "play\030\006 \001(\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016err"
-    "PartialSent\030\010 \001(\003:\0010\022\027\n\014errReplySize\030\t \001"
-    "(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:\0010\022 \n\025errRupPr"
-    "otocolVersion\030\013 \001(\003:\0010\022\032\n\017errRupFrameSiz"
-    "e\030\014 \001(\003:\0010\022\036\n\023errRupNonTuningData\030\r \001(\003:"
-    "\0010\022\033\n\020errRupModuleType\030\016 \001(\003:\0010\022\037\n\024errRu"
-    "pFramesQuantity\030\017 \001(\003:\0010\022\034\n\021errRupFrameN"
-    "umber\030\020 \001(\003:\0010\022\"\n\027errFotipProtocolVersio"
-    "n\030\021 \001(\003:\0010\022\033\n\020errFotipUniqueID\030\022 \001(\003:\0010\022"
-    "\033\n\020errFotipLmNumber\030\023 \001(\003:\0010\022 \n\025errFotip"
-    "SubsystemCode\030\024 \001(\003:\0010\022 \n\025errFotipOperat"
-    "ionCode\030\025 \001(\003:\0010\022\034\n\021errFotipFrameSize\030\026 "
-    "\001(\003:\0010\022\032\n\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n\024er"
-    "rFotipRomFrameSize\030\030 \001(\003:\0010\022&\n\033fotipFlag"
-    "BoundsCheckSuccess\030\031 \001(\003:\0010\022 \n\025fotipFlag"
-    "WriteSuccess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTy"
-    "peErr\030\033 \001(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001"
-    "(\003:\0010\022 \n\025fotipFlagStartAddrErr\030\035 \001(\003:\0010\022"
-    "\036\n\023fotipFlagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fotip"
-    "FlagRomFrameSizeErr\030\037 \001(\003:\0010\022 \n\025fotipFla"
-    "gFrameSizeErr\030  \001(\003:\0010\022&\n\033fotipFlagProto"
-    "colVersionErr\030! \001(\003:\0010\022#\n\030fotipFlagSubsy"
-    "stemKeyErr\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDE"
-    "rr\030# \001(\003:\0010\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:"
-    "\0010\022 \n\025fotipFlagApplySuccess\030% \001(\003:\0010\022\032\n\017"
-    "fotipFlagSetSOR\030& \001(\003:\0010\022!\n\026errAnalogLow"
-    "BoundCheck\030\' \001(\003:\0010\022\"\n\027errAnalogHighBoun"
-    "dCheck\030( \001(\003:\0010\"g\n\033GetTuningSourcesState"
-    "sReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSource"
-    "sState\030\002 \003(\0132\032.Network.TuningSourceState"
-    "\"\'\n\021TuningSignalsRead\022\022\n\nsignalHash\030\002 \003("
-    "\004\"_\n\013TuningValue\022\014\n\004type\030\001 \001(\005\022\023\n\010intVal"
-    "ue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001(\002:\0010\022\026\n\013do"
-    "ubleValue\030\004 \001(\001:\0010\"\243\002\n\021TuningSignalState"
-    "\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\001"
-    "0\022\024\n\005valid\030\003 \001(\010:\005false\022#\n\005value\030\004 \001(\0132\024"
-    ".Network.TuningValue\022*\n\014readLowBound\030\005 \001"
-    "(\0132\024.Network.TuningValue\022+\n\rreadHighBoun"
-    "d\030\006 \001(\0132\024.Network.TuningValue\022\036\n\017writeIn"
-    "Progress\030\007 \001(\010:\005false\022\031\n\016writeErrorCode\030"
-    "\010 \001(\005:\0010\022\026\n\013writeClient\030\t \001(\006:\0010\"a\n\026Tuni"
-    "ngSignalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021"
-    "tuningSignalState\030\002 \003(\0132\032.Network.Tuning"
-    "SignalState\"P\n\022TuningWriteCommand\022\025\n\nsig"
-    "nalHash\030\001 \001(\004:\0010\022#\n\005value\030\002 \001(\0132\024.Networ"
-    "k.TuningValue\"]\n\022TuningSignalsWrite\022\030\n\ta"
-    "utoApply\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132"
-    "\033.Network.TuningWriteCommand\"B\n\027TuningSi"
-    "gnalWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020"
-    "\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteRe"
-    "ply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003"
-    "(\0132 .Network.TuningSignalWriteResult\"/\n\022"
-    "TuningSignalsApply\022\031\n\021clientEquipmentID\030"
-    "\001 \001(\t\"+\n\027TuningSignalsApplyReply\022\020\n\005erro"
-    "r\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStatesToArch"
-    "iveRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n"
-    "\017appSignalStates\030\002 \003(\0132\025.Proto.AppSignal"
-    "State\"N\n\"SaveAppSignalsStatesToArchiveRe"
-    "ply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005"
-    ":\003100\"\271\001\n)GetAppSignalStatesFromArchiveS"
-    "tartRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023"
-    "\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\001"
-    "0\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 "
-    "\003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\"~\n\'Get"
-    "AppSignalStatesFromArchiveStartReply\022\020\n\005"
-    "error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023"
-    "\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\001"
-    "0\"@\n(GetAppSignalStatesFromArchiveNextRe"
-    "quest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSi"
-    "gnalStatesFromArchiveNextReply\022\020\n\005error\030"
-    "\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequ"
-    "estID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\td"
-    "ataReady\030\004 \001(\010:\005false\022\033\n\020totalStatesCoun"
-    "t\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034"
-    "\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPa"
-    "rt\030\010 \001(\010:\005false\022.\n\017appSignalStates\030\t \003(\013"
-    "2\025.Proto.AppSignalState\"B\n*GetAppSignalS"
-    "tatesFromArchiveCancelRequest\022\024\n\trequest"
-    "ID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesFromArc"
-    "hiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarc"
-    "hError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001(\t", 6518);
+    "\034\n\005units\030\002 \003(\0132\r.Network.Unit\"\344\001\n\014Softwa"
+    "reInfo\022\032\n\014softwareType\030\001 \002(\005:\0048000\022\023\n\013eq"
+    "uipmentId\030\002 \002(\t\022\027\n\014majorVersion\030\003 \002(\005:\0010"
+    "\022\027\n\014minorVersion\030\004 \002(\005:\0010\022\023\n\010commitNo\030\005 "
+    "\002(\005:\0010\022\023\n\013buildBranch\030\006 \002(\t\022\021\n\tcommitSHA"
+    "\030\007 \002(\t\022\020\n\010userName\030\010 \002(\t\022\022\n\007buildNo\030\t \002("
+    "\005:\0010\022\016\n\003crc\030\n \002(\r:\0010\"\027\n\025GetServiceInfoRe"
+    "quest\"\342\001\n\013ServiceInfo\022+\n\014softwareInfo\030\001 "
+    "\002(\0132\025.Network.SoftwareInfo\022\021\n\006uptime\030\002 \001"
+    "(\003:\0010\022\027\n\014serviceState\030\003 \001(\005:\0010\022\030\n\rservic"
+    "eUptime\030\004 \001(\003:\0010\022\032\n\017clientRequestIP\030\005 \001("
+    "\r:\0010\022\034\n\021clientRequestPort\030\006 \001(\005:\0010\022\023\n\013bu"
+    "ildBranch\030\007 \001(\t\022\021\n\tcommitSHA\030\010 \001(\t\"R\n\023Ge"
+    "tServiceInfoReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013s"
+    "erviceInfo\030\002 \002(\0132\024.Network.ServiceInfo\"x"
+    "\n\031ConfigurationServiceState\022\035\n\025currentBu"
+    "ildDirectory\030\001 \002(\t\022!\n\031checkBuildAttemptQ"
+    "uantity\030\002 \002(\005\022\031\n\021buildCheckerState\030\003 \002(\005"
+    "\"\316\001\n\036ConfigurationServiceClientInfo\022\024\n\014s"
+    "oftwareType\030\001 \002(\005\022\023\n\013equipmentId\030\002 \002(\t\022\n"
+    "\n\002ip\030\003 \002(\005\022\016\n\006uptime\030\005 \002(\003\022\020\n\010isActual\030\006"
+    " \002(\010\022\025\n\rreplyQuantity\030\007 \002(\003\022\024\n\014majorVers"
+    "ion\030\010 \002(\005\022\024\n\014minorVersion\030\t \002(\005\022\020\n\010commi"
+    "tNo\030\n \002(\005\"W\n\033ConfigurationServiceClients"
+    "\0228\n\007clients\030\001 \003(\0132\'.Network.Configuratio"
+    "nServiceClientInfo\"\213\001\n\tBuildInfo\022\017\n\007proj"
+    "ect\030\001 \002(\t\022\016\n\002id\030\002 \002(\005:\002-1\022\026\n\007release\030\003 \002"
+    "(\010:\005false\022\014\n\004date\030\004 \002(\003\022\024\n\tchangeset\030\005 \002"
+    "(\005:\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workstation\030\007 \002(\t"
+    "\"e\n\034ConfigurationServiceSettings\022\023\n\013equi"
+    "pmentID\030\001 \002(\t\022\031\n\021autoloadBuildPath\030\002 \002(\t"
+    "\022\025\n\rworkDirectory\030\003 \002(\t\"\026\n\024GetTuningSour"
+    "cesInfo\"`\n\031GetTuningSourcesInfoReply\022\020\n\005"
+    "error\030\001 \001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\013"
+    "2\027.Network.DataSourceInfo\"\030\n\026GetTuningSo"
+    "urcesStates\"\345\t\n\021TuningSourceState\022\023\n\010sou"
+    "rceID\030\001 \001(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005false\022\027"
+    "\n\014requestCount\030\003 \001(\003:\0010\022\025\n\nreplyCount\030\004 "
+    "\001(\003:\0010\022\033\n\020commandQueueSize\030\005 \001(\005:\0010\022\034\n\021e"
+    "rrUntimelyReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030\007 \001"
+    "(\003:\0010\022\031\n\016errPartialSent\030\010 \001(\003:\0010\022\027\n\014errR"
+    "eplySize\030\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:\0010"
+    "\022 \n\025errRupProtocolVersion\030\013 \001(\003:\0010\022\032\n\017er"
+    "rRupFrameSize\030\014 \001(\003:\0010\022\036\n\023errRupNonTunin"
+    "gData\030\r \001(\003:\0010\022\033\n\020errRupModuleType\030\016 \001(\003"
+    ":\0010\022\037\n\024errRupFramesQuantity\030\017 \001(\003:\0010\022\034\n\021"
+    "errRupFrameNumber\030\020 \001(\003:\0010\022\"\n\027errFotipPr"
+    "otocolVersion\030\021 \001(\003:\0010\022\033\n\020errFotipUnique"
+    "ID\030\022 \001(\003:\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003:\0010"
+    "\022 \n\025errFotipSubsystemCode\030\024 \001(\003:\0010\022 \n\025er"
+    "rFotipOperationCode\030\025 \001(\003:\0010\022\034\n\021errFotip"
+    "FrameSize\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize\030\027 "
+    "\001(\003:\0010\022\037\n\024errFotipRomFrameSize\030\030 \001(\003:\0010\022"
+    "&\n\033fotipFlagBoundsCheckSuccess\030\031 \001(\003:\0010\022"
+    " \n\025fotipFlagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024fot"
+    "ipFlagDataTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFlagO"
+    "pCodeErr\030\034 \001(\003:\0010\022 \n\025fotipFlagStartAddrE"
+    "rr\030\035 \001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030\036 \001(\003"
+    ":\0010\022#\n\030fotipFlagRomFrameSizeErr\030\037 \001(\003:\0010"
+    "\022 \n\025fotipFlagFrameSizeErr\030  \001(\003:\0010\022&\n\033fo"
+    "tipFlagProtocolVersionErr\030! \001(\003:\0010\022#\n\030fo"
+    "tipFlagSubsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fotip"
+    "FlagUniueIDErr\030# \001(\003:\0010\022\035\n\022fotipFlagOffs"
+    "etErr\030$ \001(\003:\0010\022 \n\025fotipFlagApplySuccess\030"
+    "% \001(\003:\0010\022\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022!\n\026"
+    "errAnalogLowBoundCheck\030\' \001(\003:\0010\022\"\n\027errAn"
+    "alogHighBoundCheck\030( \001(\003:\0010\"g\n\033GetTuning"
+    "SourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022"
+    "tuningSourcesState\030\002 \003(\0132\032.Network.Tunin"
+    "gSourceState\"\'\n\021TuningSignalsRead\022\022\n\nsig"
+    "nalHash\030\002 \003(\004\"_\n\013TuningValue\022\014\n\004type\030\001 \001"
+    "(\005\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 "
+    "\001(\002:\0010\022\026\n\013doubleValue\030\004 \001(\001:\0010\"\243\002\n\021Tunin"
+    "gSignalState\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005e"
+    "rror\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022#\n\005v"
+    "alue\030\004 \001(\0132\024.Network.TuningValue\022*\n\014read"
+    "LowBound\030\005 \001(\0132\024.Network.TuningValue\022+\n\r"
+    "readHighBound\030\006 \001(\0132\024.Network.TuningValu"
+    "e\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031\n\016wri"
+    "teErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t \001("
+    "\006:\0010\"a\n\026TuningSignalsReadReply\022\020\n\005error\030"
+    "\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003(\0132\032.Ne"
+    "twork.TuningSignalState\"P\n\022TuningWriteCo"
+    "mmand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022#\n\005value\030\002 "
+    "\001(\0132\024.Network.TuningValue\"]\n\022TuningSigna"
+    "lsWrite\022\030\n\tautoApply\030\002 \001(\010:\005false\022-\n\010com"
+    "mands\030\003 \003(\0132\033.Network.TuningWriteCommand"
+    "\"B\n\027TuningSignalWriteResult\022\025\n\nsignalHas"
+    "h\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSi"
+    "gnalsWriteReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013wri"
+    "teResult\030\002 \003(\0132 .Network.TuningSignalWri"
+    "teResult\"/\n\022TuningSignalsApply\022\031\n\021client"
+    "EquipmentID\030\001 \001(\t\"+\n\027TuningSignalsApplyR"
+    "eply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignals"
+    "StatesToArchiveRequest\022\031\n\021clientEquipmen"
+    "tID\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Pro"
+    "to.AppSignalState\"N\n\"SaveAppSignalsState"
+    "sToArchiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarc"
+    "hError\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStates"
+    "FromArchiveStartRequest\022\031\n\021clientEquipme"
+    "ntID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstart"
+    "Time\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014sig"
+    "nalHashes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:"
+    "\004true\"~\n\'GetAppSignalStatesFromArchiveSt"
+    "artReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030"
+    "\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\treque"
+    "stID\030\003 \001(\r:\0010\"@\n(GetAppSignalStatesFromA"
+    "rchiveNextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\""
+    "\271\002\n&GetAppSignalStatesFromArchiveNextRep"
+    "ly\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:"
+    "\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorStrin"
+    "g\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020tot"
+    "alStatesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCoun"
+    "t\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010"
+    "\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017appSignal"
+    "States\030\t \003(\0132\025.Proto.AppSignalState\"B\n*G"
+    "etAppSignalStatesFromArchiveCancelReques"
+    "t\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAppSignalS"
+    "tatesFromArchiveCancelReply\022\020\n\005error\030\001 \001"
+    "(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorSt"
+    "ring\030\003 \001(\t", 6530);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -1500,10 +1500,10 @@ void protobuf_AddDesc_network_2eproto() {
   GetUnitsRequest::default_instance_ = new GetUnitsRequest();
   Unit::default_instance_ = new Unit();
   GetUnitsReply::default_instance_ = new GetUnitsReply();
+  SoftwareInfo::default_instance_ = new SoftwareInfo();
   GetServiceInfoRequest::default_instance_ = new GetServiceInfoRequest();
   ServiceInfo::default_instance_ = new ServiceInfo();
   GetServiceInfoReply::default_instance_ = new GetServiceInfoReply();
-  TcpSoftwareInfo::default_instance_ = new TcpSoftwareInfo();
   ConfigurationServiceState::default_instance_ = new ConfigurationServiceState();
   ConfigurationServiceClientInfo::default_instance_ = new ConfigurationServiceClientInfo();
   ConfigurationServiceClients::default_instance_ = new ConfigurationServiceClients();
@@ -1550,10 +1550,10 @@ void protobuf_AddDesc_network_2eproto() {
   GetUnitsRequest::default_instance_->InitAsDefaultInstance();
   Unit::default_instance_->InitAsDefaultInstance();
   GetUnitsReply::default_instance_->InitAsDefaultInstance();
+  SoftwareInfo::default_instance_->InitAsDefaultInstance();
   GetServiceInfoRequest::default_instance_->InitAsDefaultInstance();
   ServiceInfo::default_instance_->InitAsDefaultInstance();
   GetServiceInfoReply::default_instance_->InitAsDefaultInstance();
-  TcpSoftwareInfo::default_instance_->InitAsDefaultInstance();
   ConfigurationServiceState::default_instance_->InitAsDefaultInstance();
   ConfigurationServiceClientInfo::default_instance_->InitAsDefaultInstance();
   ConfigurationServiceClients::default_instance_->InitAsDefaultInstance();
@@ -6956,6 +6956,649 @@ void GetUnitsReply::Swap(GetUnitsReply* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int SoftwareInfo::kSoftwareTypeFieldNumber;
+const int SoftwareInfo::kEquipmentIdFieldNumber;
+const int SoftwareInfo::kMajorVersionFieldNumber;
+const int SoftwareInfo::kMinorVersionFieldNumber;
+const int SoftwareInfo::kCommitNoFieldNumber;
+const int SoftwareInfo::kBuildBranchFieldNumber;
+const int SoftwareInfo::kCommitSHAFieldNumber;
+const int SoftwareInfo::kUserNameFieldNumber;
+const int SoftwareInfo::kBuildNoFieldNumber;
+const int SoftwareInfo::kCrcFieldNumber;
+#endif  // !_MSC_VER
+
+SoftwareInfo::SoftwareInfo()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void SoftwareInfo::InitAsDefaultInstance() {
+}
+
+SoftwareInfo::SoftwareInfo(const SoftwareInfo& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void SoftwareInfo::SharedCtor() {
+  _cached_size_ = 0;
+  softwaretype_ = 8000;
+  equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  majorversion_ = 0;
+  minorversion_ = 0;
+  commitno_ = 0;
+  buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  buildno_ = 0;
+  crc_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+SoftwareInfo::~SoftwareInfo() {
+  SharedDtor();
+}
+
+void SoftwareInfo::SharedDtor() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    delete buildbranch_;
+  }
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    delete commitsha_;
+  }
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    delete username_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void SoftwareInfo::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* SoftwareInfo::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return SoftwareInfo_descriptor_;
+}
+
+const SoftwareInfo& SoftwareInfo::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+SoftwareInfo* SoftwareInfo::default_instance_ = NULL;
+
+SoftwareInfo* SoftwareInfo::New() const {
+  return new SoftwareInfo;
+}
+
+void SoftwareInfo::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    softwaretype_ = 8000;
+    if (has_equipmentid()) {
+      if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+        equipmentid_->clear();
+      }
+    }
+    majorversion_ = 0;
+    minorversion_ = 0;
+    commitno_ = 0;
+    if (has_buildbranch()) {
+      if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+        buildbranch_->clear();
+      }
+    }
+    if (has_commitsha()) {
+      if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+        commitsha_->clear();
+      }
+    }
+    if (has_username()) {
+      if (username_ != &::google::protobuf::internal::kEmptyString) {
+        username_->clear();
+      }
+    }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    buildno_ = 0;
+    crc_ = 0u;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool SoftwareInfo::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required int32 softwareType = 1 [default = 8000];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &softwaretype_)));
+          set_has_softwaretype();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_equipmentId;
+        break;
+      }
+
+      // required string equipmentId = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_equipmentId:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_equipmentid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->equipmentid().data(), this->equipmentid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_majorVersion;
+        break;
+      }
+
+      // required int32 majorVersion = 3 [default = 0];
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_majorVersion:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &majorversion_)));
+          set_has_majorversion();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(32)) goto parse_minorVersion;
+        break;
+      }
+
+      // required int32 minorVersion = 4 [default = 0];
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_minorVersion:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &minorversion_)));
+          set_has_minorversion();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_commitNo;
+        break;
+      }
+
+      // required int32 commitNo = 5 [default = 0];
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_commitNo:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &commitno_)));
+          set_has_commitno();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(50)) goto parse_buildBranch;
+        break;
+      }
+
+      // required string buildBranch = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_buildBranch:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_buildbranch()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->buildbranch().data(), this->buildbranch().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(58)) goto parse_commitSHA;
+        break;
+      }
+
+      // required string commitSHA = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_commitSHA:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_commitsha()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->commitsha().data(), this->commitsha().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(66)) goto parse_userName;
+        break;
+      }
+
+      // required string userName = 8;
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_userName:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_username()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->username().data(), this->username().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(72)) goto parse_buildNo;
+        break;
+      }
+
+      // required int32 buildNo = 9 [default = 0];
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_buildNo:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &buildno_)));
+          set_has_buildno();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(80)) goto parse_crc;
+        break;
+      }
+
+      // required uint32 crc = 10 [default = 0];
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_crc:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &crc_)));
+          set_has_crc();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void SoftwareInfo::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required int32 softwareType = 1 [default = 8000];
+  if (has_softwaretype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->softwaretype(), output);
+  }
+
+  // required string equipmentId = 2;
+  if (has_equipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->equipmentid().data(), this->equipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->equipmentid(), output);
+  }
+
+  // required int32 majorVersion = 3 [default = 0];
+  if (has_majorversion()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->majorversion(), output);
+  }
+
+  // required int32 minorVersion = 4 [default = 0];
+  if (has_minorversion()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->minorversion(), output);
+  }
+
+  // required int32 commitNo = 5 [default = 0];
+  if (has_commitno()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->commitno(), output);
+  }
+
+  // required string buildBranch = 6;
+  if (has_buildbranch()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->buildbranch().data(), this->buildbranch().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->buildbranch(), output);
+  }
+
+  // required string commitSHA = 7;
+  if (has_commitsha()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->commitsha().data(), this->commitsha().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      7, this->commitsha(), output);
+  }
+
+  // required string userName = 8;
+  if (has_username()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->username().data(), this->username().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      8, this->username(), output);
+  }
+
+  // required int32 buildNo = 9 [default = 0];
+  if (has_buildno()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->buildno(), output);
+  }
+
+  // required uint32 crc = 10 [default = 0];
+  if (has_crc()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(10, this->crc(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* SoftwareInfo::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required int32 softwareType = 1 [default = 8000];
+  if (has_softwaretype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->softwaretype(), target);
+  }
+
+  // required string equipmentId = 2;
+  if (has_equipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->equipmentid().data(), this->equipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->equipmentid(), target);
+  }
+
+  // required int32 majorVersion = 3 [default = 0];
+  if (has_majorversion()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->majorversion(), target);
+  }
+
+  // required int32 minorVersion = 4 [default = 0];
+  if (has_minorversion()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->minorversion(), target);
+  }
+
+  // required int32 commitNo = 5 [default = 0];
+  if (has_commitno()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->commitno(), target);
+  }
+
+  // required string buildBranch = 6;
+  if (has_buildbranch()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->buildbranch().data(), this->buildbranch().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->buildbranch(), target);
+  }
+
+  // required string commitSHA = 7;
+  if (has_commitsha()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->commitsha().data(), this->commitsha().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        7, this->commitsha(), target);
+  }
+
+  // required string userName = 8;
+  if (has_username()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->username().data(), this->username().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        8, this->username(), target);
+  }
+
+  // required int32 buildNo = 9 [default = 0];
+  if (has_buildno()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->buildno(), target);
+  }
+
+  // required uint32 crc = 10 [default = 0];
+  if (has_crc()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(10, this->crc(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int SoftwareInfo::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required int32 softwareType = 1 [default = 8000];
+    if (has_softwaretype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->softwaretype());
+    }
+
+    // required string equipmentId = 2;
+    if (has_equipmentid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->equipmentid());
+    }
+
+    // required int32 majorVersion = 3 [default = 0];
+    if (has_majorversion()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->majorversion());
+    }
+
+    // required int32 minorVersion = 4 [default = 0];
+    if (has_minorversion()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->minorversion());
+    }
+
+    // required int32 commitNo = 5 [default = 0];
+    if (has_commitno()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->commitno());
+    }
+
+    // required string buildBranch = 6;
+    if (has_buildbranch()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->buildbranch());
+    }
+
+    // required string commitSHA = 7;
+    if (has_commitsha()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->commitsha());
+    }
+
+    // required string userName = 8;
+    if (has_username()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->username());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // required int32 buildNo = 9 [default = 0];
+    if (has_buildno()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->buildno());
+    }
+
+    // required uint32 crc = 10 [default = 0];
+    if (has_crc()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->crc());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void SoftwareInfo::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const SoftwareInfo* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const SoftwareInfo*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void SoftwareInfo::MergeFrom(const SoftwareInfo& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_softwaretype()) {
+      set_softwaretype(from.softwaretype());
+    }
+    if (from.has_equipmentid()) {
+      set_equipmentid(from.equipmentid());
+    }
+    if (from.has_majorversion()) {
+      set_majorversion(from.majorversion());
+    }
+    if (from.has_minorversion()) {
+      set_minorversion(from.minorversion());
+    }
+    if (from.has_commitno()) {
+      set_commitno(from.commitno());
+    }
+    if (from.has_buildbranch()) {
+      set_buildbranch(from.buildbranch());
+    }
+    if (from.has_commitsha()) {
+      set_commitsha(from.commitsha());
+    }
+    if (from.has_username()) {
+      set_username(from.username());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_buildno()) {
+      set_buildno(from.buildno());
+    }
+    if (from.has_crc()) {
+      set_crc(from.crc());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void SoftwareInfo::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void SoftwareInfo::CopyFrom(const SoftwareInfo& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SoftwareInfo::IsInitialized() const {
+  if ((_has_bits_[0] & 0x000003ff) != 0x000003ff) return false;
+
+  return true;
+}
+
+void SoftwareInfo::Swap(SoftwareInfo* other) {
+  if (other != this) {
+    std::swap(softwaretype_, other->softwaretype_);
+    std::swap(equipmentid_, other->equipmentid_);
+    std::swap(majorversion_, other->majorversion_);
+    std::swap(minorversion_, other->minorversion_);
+    std::swap(commitno_, other->commitno_);
+    std::swap(buildbranch_, other->buildbranch_);
+    std::swap(commitsha_, other->commitsha_);
+    std::swap(username_, other->username_);
+    std::swap(buildno_, other->buildno_);
+    std::swap(crc_, other->crc_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata SoftwareInfo::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = SoftwareInfo_descriptor_;
+  metadata.reflection = SoftwareInfo_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
 #endif  // !_MSC_VER
 
 GetServiceInfoRequest::GetServiceInfoRequest()
@@ -7112,11 +7755,7 @@ void GetServiceInfoRequest::Swap(GetServiceInfoRequest* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int ServiceInfo::kTypeFieldNumber;
-const int ServiceInfo::kMajorVersionFieldNumber;
-const int ServiceInfo::kMinorVersionFieldNumber;
-const int ServiceInfo::kCommitNoFieldNumber;
-const int ServiceInfo::kCrcFieldNumber;
+const int ServiceInfo::kSoftwareInfoFieldNumber;
 const int ServiceInfo::kUptimeFieldNumber;
 const int ServiceInfo::kServiceStateFieldNumber;
 const int ServiceInfo::kServiceUptimeFieldNumber;
@@ -7132,6 +7771,7 @@ ServiceInfo::ServiceInfo()
 }
 
 void ServiceInfo::InitAsDefaultInstance() {
+  softwareinfo_ = const_cast< ::Network::SoftwareInfo*>(&::Network::SoftwareInfo::default_instance());
 }
 
 ServiceInfo::ServiceInfo(const ServiceInfo& from)
@@ -7142,11 +7782,7 @@ ServiceInfo::ServiceInfo(const ServiceInfo& from)
 
 void ServiceInfo::SharedCtor() {
   _cached_size_ = 0;
-  type_ = 0;
-  majorversion_ = 0;
-  minorversion_ = 0;
-  commitno_ = 0;
-  crc_ = 0u;
+  softwareinfo_ = NULL;
   uptime_ = GOOGLE_LONGLONG(0);
   servicestate_ = 0;
   serviceuptime_ = GOOGLE_LONGLONG(0);
@@ -7169,6 +7805,7 @@ void ServiceInfo::SharedDtor() {
     delete commitsha_;
   }
   if (this != default_instance_) {
+    delete softwareinfo_;
   }
 }
 
@@ -7195,16 +7832,12 @@ ServiceInfo* ServiceInfo::New() const {
 
 void ServiceInfo::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    type_ = 0;
-    majorversion_ = 0;
-    minorversion_ = 0;
-    commitno_ = 0;
-    crc_ = 0u;
+    if (has_softwareinfo()) {
+      if (softwareinfo_ != NULL) softwareinfo_->::Network::SoftwareInfo::Clear();
+    }
     uptime_ = GOOGLE_LONGLONG(0);
     servicestate_ = 0;
     serviceuptime_ = GOOGLE_LONGLONG(0);
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     clientrequestip_ = 0u;
     clientrequestport_ = 0;
     if (has_buildbranch()) {
@@ -7228,87 +7861,21 @@ bool ServiceInfo::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int32 type = 1 [default = 0];
+      // required .Network.SoftwareInfo softwareInfo = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &type_)));
-          set_has_type();
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_softwareinfo()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_majorVersion;
+        if (input->ExpectTag(16)) goto parse_uptime;
         break;
       }
 
-      // optional int32 majorVersion = 2 [default = 0];
+      // optional int64 uptime = 2 [default = 0];
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_majorVersion:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &majorversion_)));
-          set_has_majorversion();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(24)) goto parse_minorVersion;
-        break;
-      }
-
-      // optional int32 minorVersion = 3 [default = 0];
-      case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_minorVersion:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &minorversion_)));
-          set_has_minorversion();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(32)) goto parse_commitNo;
-        break;
-      }
-
-      // optional int32 commitNo = 4 [default = 0];
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_commitNo:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &commitno_)));
-          set_has_commitno();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(40)) goto parse_crc;
-        break;
-      }
-
-      // optional uint32 crc = 5 [default = 0];
-      case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_crc:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &crc_)));
-          set_has_crc();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(48)) goto parse_uptime;
-        break;
-      }
-
-      // optional int64 uptime = 6 [default = 0];
-      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_uptime:
@@ -7319,12 +7886,12 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(56)) goto parse_serviceState;
+        if (input->ExpectTag(24)) goto parse_serviceState;
         break;
       }
 
-      // optional int32 serviceState = 7 [default = 0];
-      case 7: {
+      // optional int32 serviceState = 3 [default = 0];
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_serviceState:
@@ -7335,12 +7902,12 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(64)) goto parse_serviceUptime;
+        if (input->ExpectTag(32)) goto parse_serviceUptime;
         break;
       }
 
-      // optional int64 serviceUptime = 8 [default = 0];
-      case 8: {
+      // optional int64 serviceUptime = 4 [default = 0];
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_serviceUptime:
@@ -7351,12 +7918,12 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(72)) goto parse_clientRequestIP;
+        if (input->ExpectTag(40)) goto parse_clientRequestIP;
         break;
       }
 
-      // optional uint32 clientRequestIP = 9 [default = 0];
-      case 9: {
+      // optional uint32 clientRequestIP = 5 [default = 0];
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_clientRequestIP:
@@ -7367,12 +7934,12 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(80)) goto parse_clientRequestPort;
+        if (input->ExpectTag(48)) goto parse_clientRequestPort;
         break;
       }
 
-      // optional int32 clientRequestPort = 10 [default = 0];
-      case 10: {
+      // optional int32 clientRequestPort = 6 [default = 0];
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_clientRequestPort:
@@ -7383,12 +7950,12 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(90)) goto parse_buildBranch;
+        if (input->ExpectTag(58)) goto parse_buildBranch;
         break;
       }
 
-      // optional string buildBranch = 11;
-      case 11: {
+      // optional string buildBranch = 7;
+      case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_buildBranch:
@@ -7400,12 +7967,12 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(98)) goto parse_commitSHA;
+        if (input->ExpectTag(66)) goto parse_commitSHA;
         break;
       }
 
-      // optional string commitSHA = 12;
-      case 12: {
+      // optional string commitSHA = 8;
+      case 8: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_commitSHA:
@@ -7439,72 +8006,53 @@ bool ServiceInfo::MergePartialFromCodedStream(
 
 void ServiceInfo::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional int32 type = 1 [default = 0];
-  if (has_type()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->type(), output);
+  // required .Network.SoftwareInfo softwareInfo = 1;
+  if (has_softwareinfo()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->softwareinfo(), output);
   }
 
-  // optional int32 majorVersion = 2 [default = 0];
-  if (has_majorversion()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->majorversion(), output);
-  }
-
-  // optional int32 minorVersion = 3 [default = 0];
-  if (has_minorversion()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->minorversion(), output);
-  }
-
-  // optional int32 commitNo = 4 [default = 0];
-  if (has_commitno()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->commitno(), output);
-  }
-
-  // optional uint32 crc = 5 [default = 0];
-  if (has_crc()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->crc(), output);
-  }
-
-  // optional int64 uptime = 6 [default = 0];
+  // optional int64 uptime = 2 [default = 0];
   if (has_uptime()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(6, this->uptime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->uptime(), output);
   }
 
-  // optional int32 serviceState = 7 [default = 0];
+  // optional int32 serviceState = 3 [default = 0];
   if (has_servicestate()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->servicestate(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->servicestate(), output);
   }
 
-  // optional int64 serviceUptime = 8 [default = 0];
+  // optional int64 serviceUptime = 4 [default = 0];
   if (has_serviceuptime()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(8, this->serviceuptime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(4, this->serviceuptime(), output);
   }
 
-  // optional uint32 clientRequestIP = 9 [default = 0];
+  // optional uint32 clientRequestIP = 5 [default = 0];
   if (has_clientrequestip()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(9, this->clientrequestip(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->clientrequestip(), output);
   }
 
-  // optional int32 clientRequestPort = 10 [default = 0];
+  // optional int32 clientRequestPort = 6 [default = 0];
   if (has_clientrequestport()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->clientrequestport(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->clientrequestport(), output);
   }
 
-  // optional string buildBranch = 11;
+  // optional string buildBranch = 7;
   if (has_buildbranch()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->buildbranch().data(), this->buildbranch().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      11, this->buildbranch(), output);
+      7, this->buildbranch(), output);
   }
 
-  // optional string commitSHA = 12;
+  // optional string commitSHA = 8;
   if (has_commitsha()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->commitsha().data(), this->commitsha().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      12, this->commitsha(), output);
+      8, this->commitsha(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -7515,74 +8063,56 @@ void ServiceInfo::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* ServiceInfo::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional int32 type = 1 [default = 0];
-  if (has_type()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->type(), target);
+  // required .Network.SoftwareInfo softwareInfo = 1;
+  if (has_softwareinfo()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->softwareinfo(), target);
   }
 
-  // optional int32 majorVersion = 2 [default = 0];
-  if (has_majorversion()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->majorversion(), target);
-  }
-
-  // optional int32 minorVersion = 3 [default = 0];
-  if (has_minorversion()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->minorversion(), target);
-  }
-
-  // optional int32 commitNo = 4 [default = 0];
-  if (has_commitno()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->commitno(), target);
-  }
-
-  // optional uint32 crc = 5 [default = 0];
-  if (has_crc()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->crc(), target);
-  }
-
-  // optional int64 uptime = 6 [default = 0];
+  // optional int64 uptime = 2 [default = 0];
   if (has_uptime()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(6, this->uptime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->uptime(), target);
   }
 
-  // optional int32 serviceState = 7 [default = 0];
+  // optional int32 serviceState = 3 [default = 0];
   if (has_servicestate()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->servicestate(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->servicestate(), target);
   }
 
-  // optional int64 serviceUptime = 8 [default = 0];
+  // optional int64 serviceUptime = 4 [default = 0];
   if (has_serviceuptime()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(8, this->serviceuptime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(4, this->serviceuptime(), target);
   }
 
-  // optional uint32 clientRequestIP = 9 [default = 0];
+  // optional uint32 clientRequestIP = 5 [default = 0];
   if (has_clientrequestip()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(9, this->clientrequestip(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->clientrequestip(), target);
   }
 
-  // optional int32 clientRequestPort = 10 [default = 0];
+  // optional int32 clientRequestPort = 6 [default = 0];
   if (has_clientrequestport()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->clientrequestport(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->clientrequestport(), target);
   }
 
-  // optional string buildBranch = 11;
+  // optional string buildBranch = 7;
   if (has_buildbranch()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->buildbranch().data(), this->buildbranch().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        11, this->buildbranch(), target);
+        7, this->buildbranch(), target);
   }
 
-  // optional string commitSHA = 12;
+  // optional string commitSHA = 8;
   if (has_commitsha()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->commitsha().data(), this->commitsha().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        12, this->commitsha(), target);
+        8, this->commitsha(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -7596,86 +8126,56 @@ int ServiceInfo::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional int32 type = 1 [default = 0];
-    if (has_type()) {
+    // required .Network.SoftwareInfo softwareInfo = 1;
+    if (has_softwareinfo()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->type());
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->softwareinfo());
     }
 
-    // optional int32 majorVersion = 2 [default = 0];
-    if (has_majorversion()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->majorversion());
-    }
-
-    // optional int32 minorVersion = 3 [default = 0];
-    if (has_minorversion()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->minorversion());
-    }
-
-    // optional int32 commitNo = 4 [default = 0];
-    if (has_commitno()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->commitno());
-    }
-
-    // optional uint32 crc = 5 [default = 0];
-    if (has_crc()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->crc());
-    }
-
-    // optional int64 uptime = 6 [default = 0];
+    // optional int64 uptime = 2 [default = 0];
     if (has_uptime()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->uptime());
     }
 
-    // optional int32 serviceState = 7 [default = 0];
+    // optional int32 serviceState = 3 [default = 0];
     if (has_servicestate()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->servicestate());
     }
 
-    // optional int64 serviceUptime = 8 [default = 0];
+    // optional int64 serviceUptime = 4 [default = 0];
     if (has_serviceuptime()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->serviceuptime());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    // optional uint32 clientRequestIP = 9 [default = 0];
+    // optional uint32 clientRequestIP = 5 [default = 0];
     if (has_clientrequestip()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->clientrequestip());
     }
 
-    // optional int32 clientRequestPort = 10 [default = 0];
+    // optional int32 clientRequestPort = 6 [default = 0];
     if (has_clientrequestport()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->clientrequestport());
     }
 
-    // optional string buildBranch = 11;
+    // optional string buildBranch = 7;
     if (has_buildbranch()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->buildbranch());
     }
 
-    // optional string commitSHA = 12;
+    // optional string commitSHA = 8;
     if (has_commitsha()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -7709,20 +8209,8 @@ void ServiceInfo::MergeFrom(const ::google::protobuf::Message& from) {
 void ServiceInfo::MergeFrom(const ServiceInfo& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_type()) {
-      set_type(from.type());
-    }
-    if (from.has_majorversion()) {
-      set_majorversion(from.majorversion());
-    }
-    if (from.has_minorversion()) {
-      set_minorversion(from.minorversion());
-    }
-    if (from.has_commitno()) {
-      set_commitno(from.commitno());
-    }
-    if (from.has_crc()) {
-      set_crc(from.crc());
+    if (from.has_softwareinfo()) {
+      mutable_softwareinfo()->::Network::SoftwareInfo::MergeFrom(from.softwareinfo());
     }
     if (from.has_uptime()) {
       set_uptime(from.uptime());
@@ -7733,8 +8221,6 @@ void ServiceInfo::MergeFrom(const ServiceInfo& from) {
     if (from.has_serviceuptime()) {
       set_serviceuptime(from.serviceuptime());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_clientrequestip()) {
       set_clientrequestip(from.clientrequestip());
     }
@@ -7764,17 +8250,17 @@ void ServiceInfo::CopyFrom(const ServiceInfo& from) {
 }
 
 bool ServiceInfo::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
+  if (has_softwareinfo()) {
+    if (!this->softwareinfo().IsInitialized()) return false;
+  }
   return true;
 }
 
 void ServiceInfo::Swap(ServiceInfo* other) {
   if (other != this) {
-    std::swap(type_, other->type_);
-    std::swap(majorversion_, other->majorversion_);
-    std::swap(minorversion_, other->minorversion_);
-    std::swap(commitno_, other->commitno_);
-    std::swap(crc_, other->crc_);
+    std::swap(softwareinfo_, other->softwareinfo_);
     std::swap(uptime_, other->uptime_);
     std::swap(servicestate_, other->servicestate_);
     std::swap(serviceuptime_, other->serviceuptime_);
@@ -8029,6 +8515,9 @@ void GetServiceInfoReply::CopyFrom(const GetServiceInfoReply& from) {
 bool GetServiceInfoReply::IsInitialized() const {
   if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
+  if (has_serviceinfo()) {
+    if (!this->serviceinfo().IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -8047,489 +8536,6 @@ void GetServiceInfoReply::Swap(GetServiceInfoReply* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = GetServiceInfoReply_descriptor_;
   metadata.reflection = GetServiceInfoReply_reflection_;
-  return metadata;
-}
-
-
-// ===================================================================
-
-#ifndef _MSC_VER
-const int TcpSoftwareInfo::kSoftwareTypeFieldNumber;
-const int TcpSoftwareInfo::kEquipmentIdFieldNumber;
-const int TcpSoftwareInfo::kMajorVersionFieldNumber;
-const int TcpSoftwareInfo::kMinorVersionFieldNumber;
-const int TcpSoftwareInfo::kCommitNoFieldNumber;
-const int TcpSoftwareInfo::kUserNameFieldNumber;
-const int TcpSoftwareInfo::kBuildNoFieldNumber;
-#endif  // !_MSC_VER
-
-TcpSoftwareInfo::TcpSoftwareInfo()
-  : ::google::protobuf::Message() {
-  SharedCtor();
-}
-
-void TcpSoftwareInfo::InitAsDefaultInstance() {
-}
-
-TcpSoftwareInfo::TcpSoftwareInfo(const TcpSoftwareInfo& from)
-  : ::google::protobuf::Message() {
-  SharedCtor();
-  MergeFrom(from);
-}
-
-void TcpSoftwareInfo::SharedCtor() {
-  _cached_size_ = 0;
-  softwaretype_ = 0;
-  equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  majorversion_ = 0;
-  minorversion_ = 0;
-  commitno_ = 0;
-  username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  buildno_ = 0;
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-}
-
-TcpSoftwareInfo::~TcpSoftwareInfo() {
-  SharedDtor();
-}
-
-void TcpSoftwareInfo::SharedDtor() {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete equipmentid_;
-  }
-  if (username_ != &::google::protobuf::internal::kEmptyString) {
-    delete username_;
-  }
-  if (this != default_instance_) {
-  }
-}
-
-void TcpSoftwareInfo::SetCachedSize(int size) const {
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-}
-const ::google::protobuf::Descriptor* TcpSoftwareInfo::descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return TcpSoftwareInfo_descriptor_;
-}
-
-const TcpSoftwareInfo& TcpSoftwareInfo::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
-  return *default_instance_;
-}
-
-TcpSoftwareInfo* TcpSoftwareInfo::default_instance_ = NULL;
-
-TcpSoftwareInfo* TcpSoftwareInfo::New() const {
-  return new TcpSoftwareInfo;
-}
-
-void TcpSoftwareInfo::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    softwaretype_ = 0;
-    if (has_equipmentid()) {
-      if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-        equipmentid_->clear();
-      }
-    }
-    majorversion_ = 0;
-    minorversion_ = 0;
-    commitno_ = 0;
-    if (has_username()) {
-      if (username_ != &::google::protobuf::internal::kEmptyString) {
-        username_->clear();
-      }
-    }
-    buildno_ = 0;
-  }
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
-}
-
-bool TcpSoftwareInfo::MergePartialFromCodedStream(
-    ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
-  ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required int32 softwareType = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &softwaretype_)));
-          set_has_softwaretype();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(18)) goto parse_equipmentId;
-        break;
-      }
-
-      // required string equipmentId = 2;
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_equipmentId:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_equipmentid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->equipmentid().data(), this->equipmentid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(24)) goto parse_majorVersion;
-        break;
-      }
-
-      // required int32 majorVersion = 3;
-      case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_majorVersion:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &majorversion_)));
-          set_has_majorversion();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(32)) goto parse_minorVersion;
-        break;
-      }
-
-      // required int32 minorVersion = 4;
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_minorVersion:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &minorversion_)));
-          set_has_minorversion();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(40)) goto parse_commitNo;
-        break;
-      }
-
-      // required int32 commitNo = 5;
-      case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_commitNo:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &commitno_)));
-          set_has_commitno();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(50)) goto parse_userName;
-        break;
-      }
-
-      // required string userName = 6;
-      case 6: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_userName:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_username()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->username().data(), this->username().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(56)) goto parse_buildNo;
-        break;
-      }
-
-      // required int32 buildNo = 7;
-      case 7: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_buildNo:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &buildno_)));
-          set_has_buildno();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectAtEnd()) return true;
-        break;
-      }
-
-      default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
-        }
-        DO_(::google::protobuf::internal::WireFormat::SkipField(
-              input, tag, mutable_unknown_fields()));
-        break;
-      }
-    }
-  }
-  return true;
-#undef DO_
-}
-
-void TcpSoftwareInfo::SerializeWithCachedSizes(
-    ::google::protobuf::io::CodedOutputStream* output) const {
-  // required int32 softwareType = 1;
-  if (has_softwaretype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->softwaretype(), output);
-  }
-
-  // required string equipmentId = 2;
-  if (has_equipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->equipmentid().data(), this->equipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      2, this->equipmentid(), output);
-  }
-
-  // required int32 majorVersion = 3;
-  if (has_majorversion()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->majorversion(), output);
-  }
-
-  // required int32 minorVersion = 4;
-  if (has_minorversion()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->minorversion(), output);
-  }
-
-  // required int32 commitNo = 5;
-  if (has_commitno()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->commitno(), output);
-  }
-
-  // required string userName = 6;
-  if (has_username()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->username().data(), this->username().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      6, this->username(), output);
-  }
-
-  // required int32 buildNo = 7;
-  if (has_buildno()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->buildno(), output);
-  }
-
-  if (!unknown_fields().empty()) {
-    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
-        unknown_fields(), output);
-  }
-}
-
-::google::protobuf::uint8* TcpSoftwareInfo::SerializeWithCachedSizesToArray(
-    ::google::protobuf::uint8* target) const {
-  // required int32 softwareType = 1;
-  if (has_softwaretype()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->softwaretype(), target);
-  }
-
-  // required string equipmentId = 2;
-  if (has_equipmentid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->equipmentid().data(), this->equipmentid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        2, this->equipmentid(), target);
-  }
-
-  // required int32 majorVersion = 3;
-  if (has_majorversion()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->majorversion(), target);
-  }
-
-  // required int32 minorVersion = 4;
-  if (has_minorversion()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->minorversion(), target);
-  }
-
-  // required int32 commitNo = 5;
-  if (has_commitno()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->commitno(), target);
-  }
-
-  // required string userName = 6;
-  if (has_username()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->username().data(), this->username().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        6, this->username(), target);
-  }
-
-  // required int32 buildNo = 7;
-  if (has_buildno()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->buildno(), target);
-  }
-
-  if (!unknown_fields().empty()) {
-    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
-        unknown_fields(), target);
-  }
-  return target;
-}
-
-int TcpSoftwareInfo::ByteSize() const {
-  int total_size = 0;
-
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required int32 softwareType = 1;
-    if (has_softwaretype()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->softwaretype());
-    }
-
-    // required string equipmentId = 2;
-    if (has_equipmentid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->equipmentid());
-    }
-
-    // required int32 majorVersion = 3;
-    if (has_majorversion()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->majorversion());
-    }
-
-    // required int32 minorVersion = 4;
-    if (has_minorversion()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->minorversion());
-    }
-
-    // required int32 commitNo = 5;
-    if (has_commitno()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->commitno());
-    }
-
-    // required string userName = 6;
-    if (has_username()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->username());
-    }
-
-    // required int32 buildNo = 7;
-    if (has_buildno()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->buildno());
-    }
-
-  }
-  if (!unknown_fields().empty()) {
-    total_size +=
-      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
-        unknown_fields());
-  }
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = total_size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-  return total_size;
-}
-
-void TcpSoftwareInfo::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  const TcpSoftwareInfo* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const TcpSoftwareInfo*>(
-      &from);
-  if (source == NULL) {
-    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
-  } else {
-    MergeFrom(*source);
-  }
-}
-
-void TcpSoftwareInfo::MergeFrom(const TcpSoftwareInfo& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_softwaretype()) {
-      set_softwaretype(from.softwaretype());
-    }
-    if (from.has_equipmentid()) {
-      set_equipmentid(from.equipmentid());
-    }
-    if (from.has_majorversion()) {
-      set_majorversion(from.majorversion());
-    }
-    if (from.has_minorversion()) {
-      set_minorversion(from.minorversion());
-    }
-    if (from.has_commitno()) {
-      set_commitno(from.commitno());
-    }
-    if (from.has_username()) {
-      set_username(from.username());
-    }
-    if (from.has_buildno()) {
-      set_buildno(from.buildno());
-    }
-  }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
-}
-
-void TcpSoftwareInfo::CopyFrom(const ::google::protobuf::Message& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void TcpSoftwareInfo::CopyFrom(const TcpSoftwareInfo& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool TcpSoftwareInfo::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000007f) != 0x0000007f) return false;
-
-  return true;
-}
-
-void TcpSoftwareInfo::Swap(TcpSoftwareInfo* other) {
-  if (other != this) {
-    std::swap(softwaretype_, other->softwaretype_);
-    std::swap(equipmentid_, other->equipmentid_);
-    std::swap(majorversion_, other->majorversion_);
-    std::swap(minorversion_, other->minorversion_);
-    std::swap(commitno_, other->commitno_);
-    std::swap(username_, other->username_);
-    std::swap(buildno_, other->buildno_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
-}
-
-::google::protobuf::Metadata TcpSoftwareInfo::GetMetadata() const {
-  protobuf_AssignDescriptorsOnce();
-  ::google::protobuf::Metadata metadata;
-  metadata.descriptor = TcpSoftwareInfo_descriptor_;
-  metadata.reflection = TcpSoftwareInfo_reflection_;
   return metadata;
 }
 

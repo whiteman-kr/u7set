@@ -6,74 +6,6 @@
 namespace Tcp
 {
 
-	const int SoftwareInfo::UNDEFINED_BUILD_NO = -1;
-
-	SoftwareInfo::SoftwareInfo()
-	{
-	}
-
-	SoftwareInfo::SoftwareInfo(const SoftwareInfo& si)
-	{
-		m_softwareType = si.m_softwareType;
-		m_equipmentID = si.m_equipmentID;
-		m_majorVersion = si.m_majorVersion;
-		m_minorVersion = si.m_minorVersion;
-		m_commitNo = si.m_commitNo;
-		m_buildNo = si.m_buildNo;
-		m_userName = si.m_userName;
-	}
-
-	void SoftwareInfo::init(E::SoftwareType softwareType,
-								 const QString& equipmentID,
-								 int majorVersion,
-								 int minorVersion,
-								 int buildNo)
-	{
-		m_softwareType = softwareType;
-		m_equipmentID = equipmentID;
-		m_majorVersion = majorVersion;
-		m_minorVersion = minorVersion;
-		m_commitNo = USED_SERVER_COMMIT_NUMBER;
-		m_buildNo = buildNo;
-
-#ifdef Q_OS_LINUX
-		m_userName = getenv("USER");
-#endif
-
-#ifdef Q_OS_WIN
-		m_userName = getenv("USERNAME");
-#endif
-	}
-
-
-	void SoftwareInfo::serializeTo(Network::TcpSoftwareInfo* info)
-	{
-		if (info == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		info->set_softwaretype(static_cast<int>(m_softwareType));
-		info->set_equipmentid(m_equipmentID.toStdString());
-		info->set_majorversion(m_majorVersion);
-		info->set_minorversion(m_minorVersion);
-		info->set_commitno(m_commitNo);
-		info->set_username(m_userName.toStdString());
-		info->set_buildno(m_buildNo);
-	}
-
-	void SoftwareInfo::serializeFrom(const Network::TcpSoftwareInfo& info)
-	{
-		m_softwareType = static_cast<E::SoftwareType>(info.softwaretype());
-		m_equipmentID = QString::fromStdString(info.equipmentid());
-		m_majorVersion = info.majorversion();
-		m_minorVersion = info.minorversion();
-		m_commitNo = info.commitno();
-		m_userName = QString::fromStdString(info.username());
-		m_buildNo = info.buildno();
-	}
-
 	void ConnectionState::dump()
 	{
 		if (isConnected == false)
@@ -512,6 +444,11 @@ namespace Tcp
 		return getConnectionState().localSoftwareInfo;
 	}
 
+	SoftwareInfo SocketWorker::connectedSoftwareInfo() const
+	{
+		return getConnectionState().connectedSoftwareInfo;
+	}
+
 	HostAddressPort SocketWorker::peerAddr() const
 	{
 		m_stateMutex.lock();
@@ -685,7 +622,7 @@ namespace Tcp
 
 		if (m_header.id == RQID_INTRODUCE_MYSELF)
 		{
-			Network::TcpSoftwareInfo inMessage;
+			Network::SoftwareInfo inMessage;
 
 			bool result = inMessage.ParseFromArray(m_receiveDataBuffer, m_header.dataSize);
 
@@ -699,7 +636,7 @@ namespace Tcp
 
 			m_state.connectedSoftwareInfo.serializeFrom(inMessage);
 
-			Network::TcpSoftwareInfo outMessage;
+			Network::SoftwareInfo outMessage;
 
 			m_state.localSoftwareInfo.serializeTo(&outMessage);
 
@@ -1205,7 +1142,7 @@ namespace Tcp
 
 		SoftwareInfo locSoftwareInfo = localSoftwareInfo();
 
-		Network::TcpSoftwareInfo message;
+		Network::SoftwareInfo message;
 
 		locSoftwareInfo.serializeTo(&message);
 

@@ -20,7 +20,7 @@ ServiceData::ServiceData() :
 	information.set_servicestate(TO_INT(ServiceState::Undefined));
 }
 
-ServiceTableModel::ServiceTableModel(const Tcp::SoftwareInfo& softwareInfo, QObject* parent) :
+ServiceTableModel::ServiceTableModel(const SoftwareInfo& softwareInfo, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_softwareInfo(softwareInfo),
 	m_freezeUpdate(false),
@@ -491,16 +491,17 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 		{
 			serviceType = index.column();
 		}
+
 		switch (static_cast<ServiceType>(serviceType))
 		{
 			case ServiceType::AppDataService:
-				serviceData.statusWidget = new AppDataServiceWidget(m_hostsInfo[index.row()].ip, index.column());
+				serviceData.statusWidget = new AppDataServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, index.column());
 				break;
 			case ServiceType::ConfigurationService:
-				serviceData.statusWidget = new ConfigurationServiceWidget(m_hostsInfo[index.row()].ip, index.column());
+				serviceData.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, index.column());
 				break;
 			default:
-				serviceData.statusWidget = new BaseServiceStateWidget(m_hostsInfo[index.row()].ip, index.column());
+				serviceData.statusWidget = new BaseServiceStateWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, index.column());
 				break;
 		}
 	}

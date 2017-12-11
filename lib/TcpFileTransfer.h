@@ -122,22 +122,12 @@ namespace Tcp
 	public:
 		FileClient(const QString& rootFolder,
 				   const HostAddressPort& serverAddressPort,
-
-				   E::SoftwareType softwareType,
-				   const QString equipmentID,
-				   int majorVersion,
-				   int minorVersion,
-				   int commitNo);
+				   const SoftwareInfo& softwareInfo);
 
 		FileClient(const QString& rootFolder,
 				   const HostAddressPort& serverAddressPort1,
 				   const HostAddressPort& serverAddressPort2,
-
-				   E::SoftwareType softwareType,
-				   const QString equipmentID,
-				   int majorVersion,
-				   int minorVersion,
-				   int commitNo);
+				   const SoftwareInfo& softwareInfo);
 
 		void downloadFile(const QString& fileName) { emit signal_downloadFile(fileName); }
 
@@ -160,7 +150,7 @@ namespace Tcp
 	class FileServer : public Server, public FileTransfer
 	{
 	public:
-		FileServer(const QString& rootFolder, std::shared_ptr<CircularLogger> logger);
+		FileServer(const QString& rootFolder, const SoftwareInfo& softwareInfo, std::shared_ptr<CircularLogger> logger);
 
 		virtual Server* getNewInstance() override;
 

@@ -30,8 +30,8 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 //
 // -------------------------------------------------------------------------------------
 
-CfgServer::CfgServer(const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
-	Tcp::FileServer(buildFolder, logger),
+CfgServer::CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
+	Tcp::FileServer(buildFolder, softwareInfo, logger),
 	m_logger(logger)
 {
 }
@@ -39,7 +39,7 @@ CfgServer::CfgServer(const QString& buildFolder, std::shared_ptr<CircularLogger>
 
 CfgServer* CfgServer::getNewInstance()
 {
-	return new CfgServer(m_rootFolder, m_logger);
+	return new CfgServer(localSoftwareInfo(), m_rootFolder, m_logger);
 }
 
 
@@ -138,22 +138,18 @@ void CfgServer::readBuildXml()
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoader::CfgLoader(const QString& appEquipmentID,
+CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						int appInstance,
 						const HostAddressPort& serverAddressPort1,
 						const HostAddressPort& serverAddressPort2,
 						bool enableDownloadCfg,
-						std::shared_ptr<CircularLogger> logger,
-						E::SoftwareType softwareType,
-						int majorVersion,
-						int minorVersion,
-						int commitNo) :
-	Tcp::FileClient("", serverAddressPort1, serverAddressPort2, softwareType, appEquipmentID, majorVersion, minorVersion, commitNo),
+						std::shared_ptr<CircularLogger> logger) :
+	Tcp::FileClient("", serverAddressPort1, serverAddressPort2, softwareInfo),
 	m_logger(logger),
 	m_timer(this),
 	m_enableDownloadConfiguration(enableDownloadCfg)
 {
-	changeApp(appEquipmentID, appInstance);
+	changeApp(softwareInfo.equipmentID(), appInstance);
 
 	// DELETE after periodic CFG requests to be added
 	//
@@ -861,27 +857,19 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoaderThread::CfgLoaderThread(	const QString& appStrID,
+CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 									int appInstance,
 									const HostAddressPort& serverAddressPort1,
 									const HostAddressPort& serverAddressPort2,
 									bool enableDownloadCfg,
-									std::shared_ptr<CircularLogger> logger,
-									E::SoftwareType softwareType,
-									int majorVersion,
-									int minorVersion,
-									int commitNo)
+									std::shared_ptr<CircularLogger> logger)
 {
-	m_cfgLoader = new CfgLoader(appStrID,
+	m_cfgLoader = new CfgLoader(softwareInfo,
 								appInstance,
 								serverAddressPort1,
 								serverAddressPort2,
 								enableDownloadCfg,
-								logger,
-								softwareType,
-								majorVersion,
-								minorVersion,
-								commitNo);		// it will be deleted during SimpleThread destruction
+								logger);		// it will be deleted during SimpleThread destruction
 
 	addWorker(m_cfgLoader);
 

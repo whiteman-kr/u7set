@@ -17,7 +17,7 @@ public:
 	ConfigurationServiceWorker(const QString& serviceName,
 							   int& argc,
 							   char** argv,
-							   const VersionInfo& versionInfo,
+							   const SoftwareInfo& softwareInfo,
 							   std::shared_ptr<CircularLogger> logger);
 
 	virtual ServiceWorker* createInstance() const override;

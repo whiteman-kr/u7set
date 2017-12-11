@@ -155,7 +155,8 @@ public:
 	//
 	enum SoftwareType
 	{
-		Unknown = 8999,
+		Unknown = 8000,
+		BaseService = 8999,
 		Monitor = 9000,
 		ConfigurationService = 9001,
 		AppDataService = 9002,

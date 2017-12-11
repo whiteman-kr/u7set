@@ -9,17 +9,15 @@
 
 int ServiceWorker::m_instanceNo = 0;
 
-ServiceWorker::ServiceWorker(ServiceType serviceType,
+ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 const QString& serviceName,
 							 int& argc,
 							 char** argv,
-							 const VersionInfo& versionInfo,
 							 std::shared_ptr<CircularLogger> logger) :
-	m_serviceType(serviceType),
 	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
-	m_versionInfo(versionInfo),
+	m_softwareInfo(softwareInfo),
 	m_logger(logger),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
 	m_cmdLineParser(argc, argv)
@@ -85,22 +83,15 @@ QString ServiceWorker::cmdLine() const
 	return cl.trimmed();
 }
 
-
-ServiceType ServiceWorker::serviceType() const
-{
-	return m_serviceType;
-}
-
-
 QString ServiceWorker::serviceName() const
 {
 	return m_serviceName;
 }
 
 
-const VersionInfo& ServiceWorker::versionInfo() const
+const SoftwareInfo& ServiceWorker::softwareInfo() const
 {
-	return m_versionInfo;
+	return m_softwareInfo;
 }
 
 void ServiceWorker::initAndProcessCmdLineSettings()
@@ -114,6 +105,11 @@ void ServiceWorker::initAndProcessCmdLineSettings()
 	init();
 
 	processCmdLineSettings();
+
+	if (m_cmdLineParser.optionIsSet("id") == true)
+	{
+		m_softwareInfo.setEquipmentID(m_cmdLineParser.optionValue("id"));
+	}
 }
 
 void ServiceWorker::setService(Service* service)
@@ -378,17 +374,11 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	QMutexLocker locker(&m_mutex);
 
-	const VersionInfo& vi = serviceWorker->versionInfo();
+	Network::SoftwareInfo* si = new Network::SoftwareInfo();
 
-	serviceInfo.set_type(TO_INT(serviceWorker->serviceType()));
+	serviceWorker->softwareInfo().serializeTo(si);
 
-	serviceInfo.set_majorversion(vi.majorVersion);
-	serviceInfo.set_minorversion(vi.minorVersion);
-	serviceInfo.set_commitno(vi.commitNo);
-	serviceInfo.set_buildbranch(C_STR(vi.buildBranch));
-	serviceInfo.set_commitsha(C_STR(vi.commitSHA));
-
-	serviceInfo.set_crc(m_crc);
+	serviceInfo.set_allocated_softwareinfo(si);
 	serviceInfo.set_uptime((QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000);
 
 	serviceInfo.set_servicestate(TO_INT(m_state));
@@ -563,16 +553,16 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 	//
 	if (cmdLineParser.optionIsSet("v") == true)
 	{
-		const VersionInfo& vi = m_serviceWorker.versionInfo();
+		const SoftwareInfo& si = m_serviceWorker.softwareInfo();
 
 		QString versionInfo =
 			QString("\nApplication:\t%1\nVersion:\t%2.%3.%4 (%5)\nCommit SHA:\t%6\n").
 				arg(m_serviceWorker.serviceName()).
-				arg(vi.majorVersion).
-				arg(vi.minorVersion).
-				arg(vi.commitNo).
-				arg(vi.buildBranch).
-				arg(vi.commitSHA);
+				arg(si.majorVersion()).
+				arg(si.minorVersion()).
+				arg(si.commitNo()).
+				arg(si.buildBranch()).
+				arg(si.commitSHA());
 
 		std::cout << C_STR(versionInfo);
 
