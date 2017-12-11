@@ -248,19 +248,23 @@ protected:
 	bool loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData);
 	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
-	void readFirmwareWorker(int param);
+	void readServiceInformationWorker(int param);
+	bool readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxFrameCount);
+
 	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize);
 	// Slots
 	//
 public slots:
 	void setSettings(QString device, bool showDebugInfo, bool verify);
-	void readConfiguration(int param);
-    void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
+
+	void readServiceInformation(int param);
+	void uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
 	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
 	void readFirmware(const QString &fileName);
+	void readProjectInformation();
 	void eraseFlashMemory(int param);
 
 	// Signals
@@ -273,6 +277,7 @@ signals:
 
 	void loadBinaryFileHeaderComplete();
 	void uploadFirmwareComplete(int uartID);
+	void readProjectInformationComplete(int subsystemId, int buildNumber);
 
 public:
 	// Properties

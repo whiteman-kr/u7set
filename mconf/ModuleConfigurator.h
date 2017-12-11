@@ -43,7 +43,7 @@ private slots:
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
 	
-	void readConfiguration(int);
+	void readServiceInformation(int);
 	void readFirmware(QString fileName);
 
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);

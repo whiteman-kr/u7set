@@ -799,11 +799,11 @@ void Configurator::setSettings(QString device, bool showDebugInfo, bool verify)
 	return;
 }
 
-void Configurator::readConfiguration(int param)
+void Configurator::readServiceInformation(int param)
 {
 	emit operationStarted();
 
-	readFirmwareWorker(param);
+	readServiceInformationWorker(param);
 
 	emit operationFinished();
 
@@ -1195,7 +1195,7 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 	return;
 }
 
-void Configurator::readFirmwareWorker(int /*param*/)
+void Configurator::readServiceInformationWorker(int /*param*/)
 {
 	// Open port
 	//
@@ -1347,6 +1347,206 @@ void Configurator::readFirmwareWorker(int /*param*/)
 	return;
 }
 
+bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxFrameCount)
+{
+	if (firmwareData == nullptr)
+	{
+		assert(firmwareData);
+		return false;
+	}
+
+	// Open port
+	//
+	if (openConnection() == false)
+	{
+		m_Log->writeError(tr("Cannot open ") + device() + ".");
+		emit operationFinished();
+		return false;
+	}
+
+	bool result = true;
+
+	try
+	{
+		//
+		// PING command
+		//
+		std::vector<uint8_t> nopReply;
+		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+
+		if (send(0, Nop, 0, 0, std::vector<uint8_t>(), &pingReceivedHeader, &nopReply) == false)
+		{
+			throw tr("Communication error.");
+		}
+
+		int protocolVersion = pingReceivedHeader.version;
+		int moduleUartId = 0;
+		int eepromFrameSize = 0;
+		int eepromSize = 0;
+
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
+
+				// Check if the connector in the configuartion UART
+				//
+				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
+				{
+					// Read any memomy type!!!
+					//
+					//throw tr("Wrong UART, use configuration port.");
+				}
+
+				protocolVersion = pingReplyVersioned.version;
+				moduleUartId = pingReplyVersioned.moduleUartId;
+				eepromFrameSize = pingReplyVersioned.blockSize;
+				eepromSize = pingReplyVersioned.romSize;
+
+				// Write log and output file
+				//
+				m_Log->writeEmptyLine();
+				m_Log->writeMessage("PING Reply:");
+				m_Log->writeMessage(QString("ProtocolVersion: %1").arg(protocolVersion));
+				m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(moduleUartId).arg(moduleUartId, 4, 16, QLatin1Char('0')));
+				m_Log->writeMessage(QString("BlockSize: %1 (%2h)").arg(eepromFrameSize).arg(eepromFrameSize, 4, 16, QLatin1Char('0')));
+				m_Log->writeMessage(QString("RomSize: %1 (%2h)").arg(eepromSize).arg(eepromSize, 4, 16, QLatin1Char('0')));
+
+				// --
+				//
+				if (eepromSize % eepromFrameSize != 0)
+				{
+					throw tr("Flash memory block count is not an intergral multiple.");
+				}
+
+				// Ignore Wrong moduleUartId flag
+				//
+				pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
+
+				// Check flags
+				//
+				if (pingReplyVersioned.flagStateSuccess() != true)
+				{
+					pingReplyVersioned.dumpFlagsState(m_Log);
+					throw tr("Communication error.");
+				}
+			}
+			break;
+		default:
+			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+			throw tr("Communication error.");
+		}
+
+		assert(protocolVersion != 0);
+		assert(moduleUartId != 0);
+		assert(eepromFrameSize != 0);
+
+		int eepromFramesCount = eepromSize / eepromFrameSize;
+
+		//
+		// READ command
+		//
+
+		// Disabel showing DebugInfo (too much information)
+		bool oldStateShowDebugInfo = showDebugInfo();
+
+		// restore ShwoDebugInfo state throw shared_ptr and deleter
+		//
+		auto deleter = [this, oldStateShowDebugInfo](bool*)
+			{
+				this->setShowDebugInfo(oldStateShowDebugInfo);
+			};
+		std::shared_ptr<bool> scopedRestoreShowDebugInfo(nullptr, deleter);
+
+		setShowDebugInfo(false);
+
+		firmwareData->uartId = moduleUartId;
+		firmwareData->eepromFrameSize = eepromFrameSize;
+		firmwareData->frames.resize(eepromFramesCount);
+
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < eepromFramesCount; i++)
+				{
+					if (m_cancelFlag == true)
+					{
+						m_Log->writeMessage(tr("Firmware reading cancelled."));
+						break;
+					}
+
+					if (maxFrameCount != -1 && i >= maxFrameCount)
+					{
+						break;
+					}
+
+					m_Log->writeMessage(tr("Reading block ") + QString().setNum(i));
+
+					std::vector<quint8>& readData = firmwareData->frames[i];
+					CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+					if (send(moduleUartId, Read, i, eepromFrameSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+					{
+						throw tr("Communication error.");
+					}
+
+					assert(protocolVersion == readReceivedHeader.version);
+
+					if (i == 0)
+					{
+						dumpIdentificationData(readData, eepromFrameSize);
+					}
+
+					switch (protocolVersion)
+					{
+					case 1:
+						{
+							CONF_HEADER_V1 readReply = *reinterpret_cast<CONF_HEADER_V1*>(&readReceivedHeader);
+
+							// Check flags
+							//
+							if (readReply.flagStateSuccess() != true)
+							{
+								readReceivedHeader.dumpFlagsState(m_Log);
+								throw tr("Communication error.");
+							}
+						}
+						break;
+					default:
+						m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+						throw tr("Communication error.");
+					}
+				}
+			}
+			break;
+		default:
+			assert(false);
+		}
+
+		// --
+		//
+		m_Log->writeSuccess(tr("Successful."));
+	}
+
+	catch (QString str)
+	{
+		m_Log->writeError(str);
+		result = false;
+	}
+
+	// Close connection
+	//
+	if (closeConnection() == false)
+	{
+		m_Log->writeError(tr("CloseConnection failed."));
+		result = false;
+	}
+
+	return result;
+}
+
 void Configurator::dumpIdentificationData(const std::vector<quint8>& identificationData, int blockSize)
 {
 	if (identificationData.size() != blockSize)
@@ -1383,7 +1583,7 @@ void Configurator::dumpIdentificationData(const std::vector<quint8>& identificat
 }
 
 
-void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc)
+void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc)
 {
 	emit operationStarted();
 
@@ -1670,7 +1870,6 @@ void Configurator::readFirmware(const QString& fileName)
 	}
 
 	QTextStream out(&file);
-	//out << "Result: " << qSetFieldWidth(10) << left << 3.14 << 2.7;
 
 	// Open port
 	//
@@ -1681,231 +1880,115 @@ void Configurator::readFirmware(const QString& fileName)
 		return;
 	}
 
-	try
+	ModuleFirmwareData fd;
+
+	if (readFirmwareWorker(&fd, -1) == false)
 	{
-		//
-		// PING command
-		//
-		std::vector<uint8_t> nopReply;
-		CONF_HEADER pingReceivedHeader = CONF_HEADER();
-
-		if (send(0, Nop, 0, 0, std::vector<uint8_t>(), &pingReceivedHeader, &nopReply) == false)
-		{
-			throw tr("Communication error.");
-		}
-
-		int protocolVersion = pingReceivedHeader.version;
-		int moduleUartId = 0;
-		int blockSize = 0;
-		int romSize = 0;
-
-		switch (protocolVersion)
-		{
-		case 1:
-			{
-				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
-
-				// Check if the connector in the configuartion UART
-				//
-				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-				{
-					// Read any memomy type!!!
-					//
-					//throw tr("Wrong UART, use configuration port.");
-				}
-
-				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
-				blockSize = pingReplyVersioned.blockSize;
-				romSize = pingReplyVersioned.romSize;
-
-				// Write log and output file
-				//
-				m_Log->writeEmptyLine();
-				m_Log->writeMessage("PING Reply:");
-				m_Log->writeMessage(QString("ProtocolVersion: %1").arg(protocolVersion));
-				m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(moduleUartId).arg(moduleUartId, 4, 16, QLatin1Char('0')));
-				m_Log->writeMessage(QString("BlockSize: %1 (%2h)").arg(blockSize).arg(blockSize, 4, 16, QLatin1Char('0')));
-				m_Log->writeMessage(QString("RomSize: %1 (%2h)").arg(romSize).arg(romSize, 4, 16, QLatin1Char('0')));
-
-				out << "PING Reply:\n";
-				out << QString("ProtocolVersion: %1\n").arg(protocolVersion);
-				out << QString("UartId: %1 (%2h)\n").arg(moduleUartId).arg(moduleUartId, 4, 16, QLatin1Char('0'));
-				out << QString("BlockSize: %1 (%2h)\n").arg(blockSize).arg(blockSize, 4, 16, QLatin1Char('0'));
-				out << QString("RomSize: %1 (%2h)\n").arg(romSize).arg(romSize, 4, 16, QLatin1Char('0'));
-
-				// --
-				//
-				if (romSize % blockSize != 0)
-				{
-					throw tr("Flash memory block count is not an intergral multiple.");
-				}
-
-				// Ignore Wrong moduleUartId flag
-				//
-				pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
-
-				// Check flags
-				//
-				if (pingReplyVersioned.flagStateSuccess() != true)
-				{
-					pingReplyVersioned.dumpFlagsState(m_Log);
-					throw tr("Communication error.");
-				}
-			}
-			break;
-		default:
-			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-			throw tr("Communication error.");
-		}
-
-		assert(protocolVersion != 0);
-		assert(moduleUartId != 0);
-		assert(blockSize != 0);
-
-		int blockCount = romSize / blockSize;
-
-		//
-		// READ command
-		//
-
-		// Disabel showing DebugInfo (too much information)
-		bool oldStateShowDebugInfo = showDebugInfo();
-
-		// restore ShwoDebugInfo state throw shared_ptr and deleter
-		//
-		auto deleter = [this, oldStateShowDebugInfo](bool*)
-			{
-				this->setShowDebugInfo(oldStateShowDebugInfo);
-			};
-		std::shared_ptr<bool> scopedRestoreShowDebugInfo(nullptr, deleter);
-
-		setShowDebugInfo(false);
-
-		switch (protocolVersion)
-		{
-		case 1:
-			{
-				for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < blockCount; i++)
-				{
-					if (m_cancelFlag == true)
-					{
-						m_Log->writeMessage(tr("Firmware reading cancelled."));
-						break;
-					}
-
-					m_Log->writeMessage(tr("Reading block ") + QString().setNum(i));
-					out << "FrameIndex " << i << "\n";
-
-					std::vector<quint8> readData;
-					CONF_HEADER readReceivedHeader = CONF_HEADER();
-
-					if (send(moduleUartId, Read, i, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
-					{
-						throw tr("Communication error.");
-					}
-
-					assert(protocolVersion == readReceivedHeader.version);
-
-					if (i == 0)
-					{
-						dumpIdentificationData(readData, blockSize);
-					}
-
-					switch (protocolVersion)
-					{
-					case 1:
-						{
-							CONF_HEADER_V1 readReply = *reinterpret_cast<CONF_HEADER_V1*>(&readReceivedHeader);
-
-							// Check flags
-							//
-							if (readReply.flagStateSuccess() != true)
-							{
-								readReceivedHeader.dumpFlagsState(m_Log);
-								throw tr("Communication error.");
-							}
-
-							// Write frame dump to outut file
-							//
-							QString dataString;
-
-							for (size_t i = 0 ; i < readData.size(); i++)
-							{
-								if (i % 32 == 0 && i != 0)
-								{
-									QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
-									out << s << "\n";
-									dataString.clear();
-								}
-
-								dataString += (i %16 ? " " : " ' ")  + QString().setNum(readData[i], 16).rightJustified(2, '0');
-
-								if (i == readData.size() - 1 && i % 32 > 0)	// last iteration
-								{
-									QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
-									out << s << "\n";
-									dataString.clear();
-								}
-							}
-
-							//m_Log->writeDump(readData);
-						}
-						break;
-					default:
-						m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-						throw tr("Communication error.");
-					}
-
-//					std::vector<uint8_t> writeData;
-//					writeData.resize(blockSize, 0);
-
-//					// Set Crc to databuffer
-//					//
-//					Crc::setDataBlockCrc(i, writeData.data(), static_cast<int>(writeData.size()));
-
-//					// --
-//					//
-//					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-//					if (send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &std::vector<uint8_t>()) == false)
-//					{
-//						throw tr("Communication error.");
-//					}
-
-//					if (replyHeader.version != 1)
-//					{
-//						throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
-//					}
-
-//					//
-//					if (replyHeader.flagStateSuccess() != true)
-//					{
-//						replyHeader.dumpFlagsState(m_Log);
-//						throw tr("Communication error.");
-//					}
-				}
-			}
-			break;
-		default:
-			assert(false);
-		}
-
-		// --
-		//
-		m_Log->writeSuccess(tr("Successful."));
-	}
-	catch (QString str)
-	{
-		m_Log->writeError(str);
+		emit operationFinished();
+		return;
 	}
 
+	m_Log->writeEmptyLine();
+	m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0')));
+	m_Log->writeMessage(QString("EEPROM frame size: %1 (%2h)").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0')));
+	m_Log->writeMessage(QString("EEPROM frames count: %1").arg(fd.frames.size()));
 
-	// Close connection
+	out << QString("UartId: %1 (%2h)\n").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0'));
+	out << QString("EEPROM frame size: %1 (%2h)\n").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0'));
+	out << QString("EEPROM frames count: %1 (%2h)\n").arg(fd.frames.size());
+
+	for (int i = 0; i < fd.frames.size(); i++)
+	{
+		out << "FrameIndex " << i << "\n";
+
+		const std::vector<quint8>& frame = fd.frames[i];
+
+		// Write frame dump to outut file
+		//
+		QString dataString;
+
+		for (size_t i = 0 ; i < frame.size(); i++)
+		{
+			if (i % 32 == 0 && i != 0)
+			{
+				QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
+				out << s << "\n";
+				dataString.clear();
+			}
+
+			dataString += (i %16 ? " " : " ' ")  + QString().setNum(frame[i], 16).rightJustified(2, '0');
+
+			if (i == frame.size() - 1 && i % 32 > 0)	// last iteration
+			{
+				QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
+				out << s << "\n";
+				dataString.clear();
+			}
+		}
+	}
+
+	emit operationFinished();
+	return;
+}
+
+void Configurator::readProjectInformation()
+{
+	m_cancelFlag = false;
+
+	emit operationStarted();
+
+	// Open port
 	//
-	if (closeConnection() == false)
+	if (openConnection() == false)
 	{
-		m_Log->writeError(tr("CloseConnection failed."));
+		m_Log->writeError(tr("Cannot open ") + device() + ".");
+		emit operationFinished();
+		return;
 	}
+
+	ModuleFirmwareData fd;
+
+	const int ReadFramesCount = 2;
+
+	if (readFirmwareWorker(&fd, ReadFramesCount) == false)
+	{
+		emit operationFinished();
+		return;
+	}
+
+	m_Log->writeEmptyLine();
+	m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0')));
+	m_Log->writeMessage(QString("EEPROM frame size: %1 (%2h)").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0')));
+	m_Log->writeMessage(QString("EEPROM frames count: %1").arg(fd.frames.size()));
+
+	if (fd.frames.size() < ReadFramesCount)
+	{
+		m_Log->writeError(QString("EEPROM frames is less than expected: %1").arg(ReadFramesCount));
+		emit operationFinished();
+		return;
+	}
+
+	const int formatFrameIndex = 1;
+
+	const std::vector<quint8>& formatFrame = fd.frames[formatFrameIndex];
+
+	const quint16* dataPtr = (quint16*)formatFrame.data();
+
+	quint16 marker = *dataPtr++;
+	quint16 version = *dataPtr++;
+	quint16 ssKey = *dataPtr++;
+	quint16 buildNumber = *dataPtr++;
+
+	if (marker != 0xCA70 && version != 1)
+	{
+		m_Log->writeError(QString("Wrong storage format marker (0x%1) or version (%2), expected 0xca70, version 1.")
+						  .arg(QString::number(marker, 16))
+						  .arg(version));
+		emit operationFinished();
+		return;
+	}
+
+	emit readProjectInformationComplete(ssKey, buildNumber);
 
 	emit operationFinished();
 	return;

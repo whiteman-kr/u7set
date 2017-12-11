@@ -34,7 +34,7 @@ ApplicationTabPage::ApplicationTabPage(QWidget *parent)
 
 	// Create Subsystems list widget
 
-	pLeftLayout->addWidget(new QLabel(tr("Subsystems:")));
+	pLeftLayout->addWidget(new QLabel(tr("Choose the Subsystem:")));
 	m_pSubsystemsListWidget = new QTreeWidget();
 	m_pSubsystemsListWidget->setRootIsDecorated(false);
 	connect(m_pSubsystemsListWidget, &QTreeWidget::currentItemChanged, this, &ApplicationTabPage::subsystemChanged);

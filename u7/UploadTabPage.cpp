@@ -35,7 +35,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Create Build list widget
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose Build:")));
+	pLeftLayout->addWidget(new QLabel(tr("Choose the Build:")));
 	m_pBuildList = new QListWidget();
 	connect(m_pBuildList, &QListWidget::currentRowChanged, this, &UploadTabPage::buildChanged);
 	pLeftLayout->addWidget(m_pBuildList);
@@ -47,7 +47,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Create Subsystems list widget
 
-	pLeftLayout->addWidget(new QLabel(tr("Subsystems:")));
+	pLeftLayout->addWidget(new QLabel(tr("Choose the Subsystem:")));
 	m_pSubsystemsListWidget = new QTreeWidget();
 	m_pSubsystemsListWidget->setRootIsDecorated(false);
 	connect(m_pSubsystemsListWidget, &QTreeWidget::currentItemChanged, this, &UploadTabPage::subsystemChanged);
@@ -112,9 +112,8 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	QHBoxLayout* pButtonsLayout = new QHBoxLayout();
 
-	m_pReadButton = new QPushButton(tr("&Read"));
-	pButtonsLayout->addWidget(m_pReadButton);
-
+	m_pReadToFileButton = new QPushButton(tr("&Read to File"));
+	pButtonsLayout->addWidget(m_pReadToFileButton);
 
 	if (theSettings.isExpertMode() == true)
 	{
@@ -129,6 +128,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	pButtonsLayout->addWidget(m_pSettingsButton);
 
 	pButtonsLayout->addStretch();
+
+	m_pReadProjectInformation = new QPushButton(tr("Get Project Info"));
+	m_pReadProjectInformation->setEnabled(false);
+	pButtonsLayout->addWidget(m_pReadProjectInformation);
 
 	m_pConfigureButton = new QPushButton(tr("&Configure"));
 	m_pConfigureButton->setEnabled(false);
@@ -171,7 +174,8 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &UploadTabPage::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &UploadTabPage::projectClosed);
 
-	connect(m_pReadButton, &QAbstractButton::clicked, this, &UploadTabPage::read);
+	connect(m_pReadToFileButton, &QAbstractButton::clicked, this, &UploadTabPage::read);
+
 	connect(m_pConfigureButton, &QAbstractButton::clicked, this, &UploadTabPage::upload);
 	if (m_pEraseButton != nullptr)
 	{
@@ -199,8 +203,8 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
-	//connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
+	connect(m_pReadProjectInformation, &QAbstractButton::clicked, m_pConfigurator, &Configurator::readProjectInformation);
 
 	connect(this, &UploadTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
 	connect(this, &UploadTabPage::uploadFirmware, m_pConfigurator, &Configurator::uploadFirmware);
@@ -212,6 +216,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, this, &UploadTabPage::loadBinaryFileHeaderComplete);
 	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, this, &UploadTabPage::uploadComplete);
+	connect(m_pConfigurator, &Configurator::readProjectInformationComplete, this, &UploadTabPage::readProjectInformationComplete);
 
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 
@@ -447,7 +452,7 @@ void UploadTabPage::upload()
 		return;
 	}
 
-	QString subsysId = subsystemId();
+	QString subsysId = selectedSubsystem();
 
 	if (subsysId.isEmpty())
 	{
@@ -539,7 +544,7 @@ void UploadTabPage::disableControls()
 
 	bool enable = false;
 
-	m_pReadButton->setEnabled(enable);
+	m_pReadToFileButton->setEnabled(enable);
 	m_pConfigureButton->setEnabled(enable);
 	if (m_pEraseButton)
 	{
@@ -557,8 +562,9 @@ void UploadTabPage::enableControls()
 
 	bool enable = true;
 
-	m_pReadButton->setEnabled(enable);
+	m_pReadToFileButton->setEnabled(enable);
 	m_pConfigureButton->setEnabled(enable);
+	m_pReadProjectInformation->setEnabled(enable);
 	if (m_pEraseButton)
 	{
 		m_pEraseButton->setEnabled(enable);
@@ -587,7 +593,7 @@ void UploadTabPage::writeLog(const OutputLogItem& logItem)
 	return;
 }
 
-QString UploadTabPage::subsystemId()
+QString UploadTabPage::selectedSubsystem()
 {
 	for (QTreeWidgetItem* item : m_pSubsystemsListWidget->selectedItems())
 	{
@@ -601,6 +607,25 @@ QString UploadTabPage::subsystemId()
 
 	return QString();
 }
+
+void UploadTabPage::selectSubsystem(const QString& id)
+{
+	int count = m_pSubsystemsListWidget->topLevelItemCount();
+
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = m_pSubsystemsListWidget->takeTopLevelItem(i);
+
+		QVariant vData = item->data(columnSubsysId, Qt::UserRole);
+
+		if (vData.isValid() && vData.toString() == id)
+		{
+			item->setSelected(true);
+			return;
+		}
+	}
+}
+
 
 void UploadTabPage::clearSubsystemsUartData()
 {
@@ -681,6 +706,35 @@ void UploadTabPage::uploadComplete(int uartID)
 		}
 	}
 	return;
+}
+
+void UploadTabPage::readProjectInformationComplete(int subsystemId, int buildNumber)
+{
+	m_outputLog.writeMessage(tr("Subsystem Key is %1").arg(subsystemId));
+	m_outputLog.writeMessage(tr("Build Number is %1").arg(buildNumber));
+
+	bool subsystemFound = false;
+
+	QStringList subsystems = m_firmware.subsystems();
+	for (auto s : subsystems)
+	{
+		bool ok = false;
+		const ModuleFirmware& fw = m_firmware.firmware(s, &ok);
+		if (ok == false)
+		{
+			assert(false);
+			return;
+		}
+
+		if (subsystemId == fw.ssKey())
+		{
+			// Select the subsystem
+			//
+			selectSubsystem(fw.subsysId());
+			subsystemFound = true;
+			break;
+		}
+	}
 }
 
 void UploadTabPage::timerEvent(QTimerEvent* pTimerEvent)

@@ -114,12 +114,12 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	
 	connect(this, &ModuleConfigurator::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 	
-	connect(this, &ModuleConfigurator::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
+	connect(this, &ModuleConfigurator::readServiceInformation, m_pConfigurator, &Configurator::readServiceInformation);
 	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
 	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
 	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadFirmware);
-	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::writeDiagData);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
+	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::uploadServiceInformation);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
 	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 	
 	connect(m_pConfigurator, &Configurator::operationStarted, this, &ModuleConfigurator::disableControls);
@@ -300,7 +300,7 @@ void ModuleConfigurator::readClicked()
 			//
 			disableControls();
 
-			emit readConfiguration(0);
+			emit readServiceInformation(0);
 		}
 
 		if (dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget()) != nullptr)

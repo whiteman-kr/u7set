@@ -42,7 +42,7 @@ signals:
 	void readFirmware(QString fileName);
 
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
-	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem);
 
 	void eraseFlashMemory(int);
 	void cancelOperation();
@@ -70,7 +70,8 @@ public slots:
 
 private:
 	void writeLog(const OutputLogItem& logItem);
-	QString subsystemId();
+	QString selectedSubsystem();
+	void selectSubsystem(const QString& id);
 
 private slots:
 
@@ -78,6 +79,7 @@ private slots:
 	void resetUartData();
 	void loadBinaryFileHeaderComplete();
 	void uploadComplete(int uartID);
+	void readProjectInformationComplete(int selectedSubsystem, int buildNumber);
 
 	// Data
 	//
@@ -97,7 +99,9 @@ private:
 
 	QTextEdit* m_pLog = nullptr;
 
-	QPushButton* m_pReadButton = nullptr;
+	QPushButton* m_pReadProjectInformation = nullptr;
+
+	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;
 
