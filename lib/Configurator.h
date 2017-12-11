@@ -179,8 +179,8 @@ struct CONF_IDENTIFICATION_DATA_V1
 
 	void dump(OutputLog *log) const;
 
-	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
-	void createNextConfiguration(Hardware::ModuleFirmware* conf);
+	void createFirstConfiguration();
+	void createNextConfiguration();
 
 	static int structVersion() {	return 1;	}
 };
@@ -208,8 +208,8 @@ struct CONF_IDENTIFICATION_DATA_V2
 
 	void dump(OutputLog *log) const;
 
-	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
-	void createNextConfiguration(Hardware::ModuleFirmware* conf);
+	void createFirstConfiguration(Hardware::ModuleFirmwareStorage* storage);
+	void createNextConfiguration(Hardware::ModuleFirmwareStorage* storage);
 
 	static int structVersion() {	return 2;	}
 };
@@ -246,11 +246,11 @@ protected:
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
 	void readConfigurationWorker(int param);
-	void writeConfigurationWorker(ModuleFirmware* conf);
+	void writeConfigurationWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
 	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize);
 
-	void processConfDataFile(const QString& fileName, bool writeToFlash);
+	void processConfDataFile(const QString& fileName, const QString& subsystemId, bool writeToFlash);
 	// Slots
 	//
 public slots:
@@ -259,9 +259,9 @@ public slots:
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
 	void showBinaryFileInfo(const QString& fileName);
-	void uploadBinaryFile(const QString& fileName);
+	void uploadBinaryFile(const QString& fileName, const QString& subsystemId);
 
-	void uploadConfData(ModuleFirmware* conf);
+	void uploadConfData(ModuleFirmwareStorage* storage, const QString& subsystemId);
 	void readFirmware(const QString &fileName);
 	void eraseFlashMemory(int param);
 
@@ -272,7 +272,7 @@ signals:
 	void communicationFinished();
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
-	void loadHeaderComplete(std::vector<UartPair> uartList);
+	void loadHeaderComplete(std::map<QString, std::vector<UartPair>> subsystemUartsInfo);
 	void uploadSuccessful(int uartID);
 
 public:

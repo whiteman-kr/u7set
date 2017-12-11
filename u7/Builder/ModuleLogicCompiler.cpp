@@ -8905,11 +8905,17 @@ namespace Builder
 
 		if (m_lmDescription->flashMemory().m_appLogicWriteBitstream == true)
 		{
-			int appLogicUartId = m_lmDescription->flashMemory().m_appLogicUartId;
-			int lmDescriptionNumber = m_lmDescription->descriptionNumber();
-
-			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, appLogicUartId, m_lm->equipmentIdTemplate(), m_lm->caption(),
-														   m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, lmDescriptionNumber, uniqueID, m_code);
+			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID,
+														   m_lmSubsystemKey,
+														   m_lmDescription->flashMemory().m_appLogicUartId,
+														   m_lm->equipmentIdTemplate(),
+														   m_lmNumber,
+														   m_lmAppLogicFrameSize,
+														   m_lmAppLogicFrameCount,
+														   uniqueID,
+														   m_lmDescription->lmDescriptionFile(m_lm),
+														   m_lmDescription->descriptionNumber(),
+														   m_code);
 			if (result == false)
 			{
 				return false;

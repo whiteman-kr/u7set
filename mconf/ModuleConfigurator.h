@@ -47,7 +47,7 @@ signals:
 	void readFirmware(QString fileName);
 
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
-	void writeConfData(ModuleFirmware* conf);
+	void writeConfData(ModuleFirmwareStorage *storage, const QString& subsystemId);
 	void eraseFlashMemory(int);
 	
 private:

@@ -233,10 +233,8 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log) const
 	return;
 }
 
-void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration(Hardware::ModuleFirmware* conf)
+void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
 {
-	Q_UNUSED(conf);
-
 	marker = IdentificationStructMarker;
 	version = CONF_IDENTIFICATION_DATA_V1::structVersion();
 	moduleUuid = QUuid::createUuid();	// Add this record to database Uniquie MODULE identifier
@@ -255,10 +253,8 @@ void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration(Hardware::ModuleFirmw
 	lastConfiguration = firstConfiguration;
 }
 
-void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration(Hardware::ModuleFirmware *conf)
+void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration()
 {
-	Q_UNUSED(conf);
-
 	// last configuration record
 	//
 	count ++;			// Incerement configartion counter
@@ -311,13 +307,8 @@ void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log) const
 	return;
 }
 
-void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmware *conf)
+void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmwareStorage* storage)
 {
-	if (conf == nullptr)
-	{
-		assert(conf);
-		return;
-	}
 
 	marker = IdentificationStructMarker;
 	version = CONF_IDENTIFICATION_DATA_V2::structVersion();
@@ -331,25 +322,19 @@ void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmw
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
 	strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
 
-	firstConfiguration.buildNo = conf->buildNumber();
+	firstConfiguration.buildNo = storage->buildNumber();
 
-	QString buildConfig = conf->buildConfig().right(sizeof(firstConfiguration.buildConfig) - 1);
+	QString buildConfig = storage->buildConfig().right(sizeof(firstConfiguration) - 1);
 	strncpy(firstConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
 
-	QString userName = conf->userName().right(sizeof(firstConfiguration.userName) - 1);
+	QString userName = storage->userName().right(sizeof(firstConfiguration.userName) - 1);
 	strncpy(firstConfiguration.userName, userName.toStdString().data(), sizeof(firstConfiguration.userName));
 
 	lastConfiguration = firstConfiguration;
 }
 
-void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmware *conf)
+void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwareStorage* storage)
 {
-	if (conf == nullptr)
-	{
-		assert(conf);
-		return;
-	}
-
 	// last configuration record
 	//
 	count ++;			// Incerement configartion counter
@@ -360,12 +345,12 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
 	strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
-	lastConfiguration.buildNo = conf->buildNumber();
+	lastConfiguration.buildNo = storage->buildNumber();
 
-	QString buildConfig = conf->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
+	QString buildConfig = storage->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
 	strncpy(lastConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
 
-	QString userName = conf->userName().right(sizeof(lastConfiguration.userName) - 1);
+	QString userName = storage->userName().right(sizeof(lastConfiguration.userName) - 1);
 	strncpy(lastConfiguration.userName, userName.toStdString().data(), sizeof(lastConfiguration.userName));
 }
 
@@ -977,8 +962,11 @@ void Configurator::readConfigurationWorker(int /*param*/)
 	return;
 }
 
-void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
+void Configurator::writeConfigurationWorker(ModuleFirmwareStorage *storage, const QString& subsystemId)
 {
+	//emit uploadSuccessful(0x101);
+	//return;
+
 	m_cancelFlag = false;
 
 	// Open port
@@ -986,6 +974,15 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 	if (openConnection() == false)
 	{
 		m_Log->writeError(tr("Cannot open ") + device() + ".");
+		return;
+	}
+
+	bool ok = false;
+	Hardware::ModuleFirmware& conf = storage->firmware(subsystemId, &ok);
+
+	if (ok == false)
+	{
+		assert(false);
 		return;
 	}
 
@@ -1026,16 +1023,16 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 
 				// Check if firmware exists for current uart
 
-				if (conf->uartExists(m_currentUartId) == false)
+				if (conf.uartExists(m_currentUartId) == false)
 				{
 					throw tr("No firmware data exists for current UART ID.");
 				}
 
-				m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf->eepromFramePayloadSize(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf->eepromFrameSize(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf->eepromFrameCount(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf.eepromFramePayloadSize(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf.eepromFrameSize(m_currentUartId))));
+				m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf.eepromFrameCount(m_currentUartId))));
 
-				int confFrameDataSize = conf->eepromFramePayloadSize(m_currentUartId);
+				int confFrameDataSize = conf.eepromFramePayloadSize(m_currentUartId);
 
 				if (pingReplyVersioned.frameSize < confFrameDataSize)
 				{
@@ -1119,12 +1116,12 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 
 			// This is the first configuration
 			//
-			pReadIdentificationStruct->createFirstConfiguration(conf);
+			pReadIdentificationStruct->createFirstConfiguration(storage);
 
 		}
 		else
 		{
-			pReadIdentificationStruct->createNextConfiguration(conf);
+			pReadIdentificationStruct->createNextConfiguration(storage);
 			//pReadIdentificationStruct->dump(m_Log);
 
 		}
@@ -1188,7 +1185,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 			{
 				m_Log->writeMessage("Write configuration...");
 
-				for (int i = 0; i < conf->eepromFrameCount(m_currentUartId); i++)
+				for (int i = 0; i < conf.eepromFrameCount(m_currentUartId); i++)
 				{
 					if (m_cancelFlag == true)
 					{
@@ -1212,7 +1209,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 						throw tr("Wrong FrameIndex %1").arg(frameIndex);
 					}
 
-					const std::vector<quint8> frameData = conf->frame(m_currentUartId, i);
+					const std::vector<quint8> frameData = conf.frame(m_currentUartId, i);
 
 					if (frameData.size() != blockSize)
 					{
@@ -1443,8 +1440,8 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 
 		QString userName = QDir::home().dirName();
 
-		Hardware::ModuleFirmware conf;
-		conf.init(0, QString(), 0, 0, "Caption", "subsysId", 0, 0, "projectName", userName, 0, "release", 0);
+		Hardware::ModuleFirmwareStorage storage;
+		storage.setProjectInfo("projectName", userName, 0, false, 0);
 
 		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
 		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
@@ -1466,12 +1463,12 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 
 			// This is the first configuration
 			//
-			pReadIdentificationStruct->createFirstConfiguration(&conf);
+			pReadIdentificationStruct->createFirstConfiguration(&storage);
 
 		}
 		else
 		{
-			pReadIdentificationStruct->createNextConfiguration(&conf);
+			pReadIdentificationStruct->createNextConfiguration(&storage);
 			//pReadIdentificationStruct->dump(m_Log);
 
 		}
@@ -1572,22 +1569,25 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 
 void Configurator::showBinaryFileInfo(const QString& fileName)
 {
-	processConfDataFile(fileName, false);
+	processConfDataFile(fileName, QString(), false);
 }
 
-void Configurator::uploadBinaryFile(const QString& fileName)
+void Configurator::uploadBinaryFile(const QString& fileName, const QString& subsystemId)
 {
-	processConfDataFile(fileName, true);
+	processConfDataFile(fileName, subsystemId, true);
 }
 
-void Configurator::processConfDataFile(const QString& fileName, bool writeToFlash)
+void Configurator::processConfDataFile(const QString& fileName, const QString& subsystemId, bool writeToFlash)
 {
 	emit communicationStarted();
 
-	Hardware::ModuleFirmware confFirmware;
+	Hardware::ModuleFirmwareStorage confFirmware;
 
-	m_Log->writeMessage(tr("//----------------------"));
-	m_Log->writeMessage(tr("File: %1").arg(fileName));
+	//if (writeToFlash == false)
+	{
+		m_Log->writeMessage(tr("//----------------------"));
+		m_Log->writeMessage(tr("File: %1").arg(fileName));
+	}
 
 	QString errorCode;
 	bool result = false;
@@ -1614,22 +1614,39 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 		return;
 	}
 
-	m_Log->writeMessage(tr("File Version: %1").arg(confFirmware.fileVersion()));
-	m_Log->writeMessage(tr("SubsysID: %1").arg(confFirmware.subsysId()));
-	m_Log->writeMessage(tr("ChangesetID: %1").arg(confFirmware.changesetId()));
-	m_Log->writeMessage(tr("Build User: %1").arg(confFirmware.userName()));
-	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(confFirmware.buildNumber())));
-	m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
-	m_Log->writeMessage(tr("LM Description Number: %1").arg(confFirmware.lmDescriptionNumber()));
+	if (writeToFlash == false)
+	{
+		m_Log->writeMessage(tr("File Version: %1").arg(confFirmware.fileVersion()));
+		m_Log->writeMessage(tr("ChangesetID: %1").arg(confFirmware.changesetId()));
+		m_Log->writeMessage(tr("Build User: %1").arg(confFirmware.userName()));
+		m_Log->writeMessage(tr("Build No: %1").arg(QString::number(confFirmware.buildNumber())));
+		m_Log->writeMessage(tr("Build Config: %1").arg(confFirmware.buildConfig()));
+		m_Log->writeMessage(tr("Subsystems: %1").arg(confFirmware.subsystemsString()));
+	}
 
 	if (writeToFlash == true)
 	{
-		writeConfigurationWorker(&confFirmware);
+		m_Log->writeMessage(tr("Uploading firmware for subsystem %1").arg(subsystemId));
+		writeConfigurationWorker(&confFirmware, subsystemId);
 	}
 	else
 	{
-		std::vector<UartPair> uartList = confFirmware.uartList();
-		emit loadHeaderComplete(uartList);
+		std::map<QString, std::vector<UartPair>> subsystemUartsInfo;
+
+		for (const QString& s : confFirmware.subsystems())
+		{
+			bool ok = false;
+			ModuleFirmware& firmware = confFirmware.firmware(s, &ok);
+			if (ok == false)
+			{
+				assert(false);
+				return;
+			}
+
+			subsystemUartsInfo[s] = firmware.uartList();
+
+		}
+		emit loadHeaderComplete(subsystemUartsInfo);
 	}
 
 	emit communicationFinished();
@@ -1638,11 +1655,11 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 
 }
 
-void Configurator::uploadConfData(ModuleFirmware *conf)
+void Configurator::uploadConfData(ModuleFirmwareStorage *storage, const QString& subsystemId)
 {
 	emit communicationStarted();
 
-	writeConfigurationWorker(conf);
+	writeConfigurationWorker(storage, subsystemId);
 
 	emit communicationFinished();
 

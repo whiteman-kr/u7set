@@ -10,7 +10,7 @@ namespace Builder
 
 	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 								 Tuning::TuningDataStorage *tuningDataStorage, const std::vector<Hardware::DeviceModule *> lmModules,
-								 const LmDescriptionSet* lmDescriptionSet, Hardware::ModuleFirmwareCollection* firmwareCollection, IssueLogger *log):
+								 const LmDescriptionSet* lmDescriptionSet, Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
@@ -18,7 +18,7 @@ namespace Builder
 		m_tuningDataStorage(tuningDataStorage),
         m_lmModules(lmModules),
 		m_lmDescriptionSet(lmDescriptionSet),
-		m_firmwareCollection(firmwareCollection),
+		m_firmwareWriter(firmwareWriter),
 		m_log(log)
 	{
 		assert(m_db);
@@ -27,7 +27,7 @@ namespace Builder
 		assert(m_subsystems);
 		assert(m_tuningDataStorage);
         assert(m_lmDescriptionSet);
-		assert(m_firmwareCollection);
+		assert(m_firmwareWriter);
 		assert(m_log);
 
 		return;
@@ -95,12 +95,14 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->createFirmware(m->caption(), subsysStrID, subsysID, tuningUartId, "Tuning", frameSize, frameCount, lmDescription->descriptionNumber());
-			if (firmware == nullptr)
-			{
-				assert(firmware);
-				return false;
-			}
+			m_firmwareWriter->createFirmware(subsysStrID,
+											 subsysID,
+											 tuningUartId,
+											 "Tuning",
+											 frameSize,
+											 frameCount,
+											 lmDescription->lmDescriptionFile(m),
+											 lmDescription->descriptionNumber());
 
 			QByteArray data;
 			quint64 uniqueID = 0;
@@ -131,11 +133,11 @@ namespace Builder
 
 				tuningData->getMetadataFields(metadataFields, &metadataFieldsVersion);
 
-				firmware->setDescriptionFields(tuningUartId, metadataFieldsVersion, metadataFields);
+				m_firmwareWriter->setDescriptionFields(subsysStrID, tuningUartId, metadataFieldsVersion, metadataFields);
 				descriptionData = tuningData->metadata();
 			}
 
-			if (firmware->setChannelData(tuningUartId, m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
+			if (m_firmwareWriter->setChannelData(subsysStrID, tuningUartId, m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
 			{
 				return false;
 			}

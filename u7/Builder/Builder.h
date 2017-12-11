@@ -139,6 +139,9 @@ namespace Builder
 
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
 
+		void generateModulesInformation(BuildResultWriter& buildWriter,
+								   const std::vector<Hardware::DeviceModule *>& lmModules);
+
 		void generateLmsUniqueID(BuildResultWriter& buildWriter,
 								 const std::vector<Hardware::DeviceModule *>& lmModules,
 								 LmsUniqueIdMap& lmsUniqueIdMap);
@@ -200,6 +203,9 @@ namespace Builder
 		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
 
 		IssueLogger* m_log = nullptr;					// Probably it's better to make it as shared_ptr
+
+		QJSEngine m_jsEngine;
+
 	};
 
 	// LogicModule Description Set

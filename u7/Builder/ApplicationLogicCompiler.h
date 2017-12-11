@@ -53,7 +53,17 @@ namespace Builder
 
 		bool writeResourcesUsageReport();
 
-		bool writeBinCodeForLm(QString subsystemID, int subsystemKey, int appLogicUartId, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, int lmDescriptionNumber, quint64 uniqueID, ApplicationLogicCode& appLogicCode);
+		bool writeBinCodeForLm(QString subsystemID,
+							   int subsystemKey,
+							   int appLogicUartId,
+							   QString lmEquipmentID,
+							   int lmNumber,
+							   int frameSize,
+							   int frameCount,
+							   quint64 uniqueID,
+							   const QString& lmDesctriptionFile,
+							   int lmDescriptionNumber,
+							   ApplicationLogicCode& appLogicCode);
 
 		bool writeSerialDataXml();
 		bool writeOptoConnectionsReport();

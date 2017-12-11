@@ -211,19 +211,13 @@ void ModuleConfigurator::configureClicked()
 
 			if (page->isFactoryNoValid() == false)
 			{
-				QMessageBox msgBox(this);
-				msgBox.setText(tr("Invalid FactoryNo."));
-				msgBox.setInformativeText(tr("Enter valid data."));
-				msgBox.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid FactoryNo."));
 				return;
 			}
 
             if (page->isFirmwareCrcValid() == false)
 			{
-				QMessageBox msgBox(this);
-                msgBox.setText(tr("Invalid Firmware CRC."));
-				msgBox.setInformativeText(tr("Enter valid data."));
-				msgBox.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid Firmware CRC."));
 				return;
 			}
 
@@ -234,11 +228,7 @@ void ModuleConfigurator::configureClicked()
 
 			if (factoryNo == 0)
 			{
-				QMessageBox msgBox(this);
-				msgBox.setText(tr("Invalid FactoryNo."));
-				msgBox.setInformativeText(tr("Enter valid data."));
-
-				msgBox.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid FactoryNo."));
 				return;
 			}
 
@@ -262,9 +252,13 @@ void ModuleConfigurator::configureClicked()
 
 			if (page->isFileLoaded() == false)
 			{
-				QMessageBox mb(this);
-				mb.setText(tr("Configuration file was not loaded."));
-				mb.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Configuration file was not loaded."));
+				return;
+			}
+
+			if (page->subsystemId().isEmpty() == true)
+			{
+				QMessageBox::critical(this, qApp->applicationName(), tr("Subsystem is not selected."));
 				return;
 			}
 
@@ -272,7 +266,7 @@ void ModuleConfigurator::configureClicked()
 			//
 			disableControls();
 
-			emit writeConfData(page->configuration());
+			emit writeConfData(page->configuration(), page->subsystemId());
 		}
 	}
 	catch(QString message)

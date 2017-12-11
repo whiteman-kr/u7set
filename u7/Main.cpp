@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<TimeStamp>();
 	qRegisterMetaType<TimeSpan>();
 	qRegisterMetaType<std::vector<UartPair>>();
+	qRegisterMetaType<std::map<QString, std::vector<UartPair>>>();
 
 	qmlRegisterType<JsVariantList>();
     qmlRegisterType<Hardware::OptoPort>();

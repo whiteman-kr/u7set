@@ -16,7 +16,9 @@ public:
 	~ApplicationTabPage();
 
 	bool isFileLoaded() const;
-	Hardware::ModuleFirmware* configuration();
+
+	Hardware::ModuleFirmwareStorage* configuration();
+	QString subsystemId();
 
 private slots:
 	void openFileClicked();
@@ -29,12 +31,15 @@ private:
 	void clearUartData();
 	void fillUartData();
 
-
+	const int columnSubsysId = 0;
+	const int columnUartId = 1;
+	const int columnUartType = 2;
+	const int columnUploadCount = 3;
 
 private:
 	Ui::ApplicationTabPage ui;
     //ConfigDataReader m_reader;
-	ModuleFirmware m_confFirmware;
+	ModuleFirmwareStorage m_confFirmware;
 };
 
 #endif // APPLICATIONTABPAGE_H
