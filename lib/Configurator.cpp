@@ -215,7 +215,7 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log) const
 
 	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
 
-	log->writeMessage("BlockId: " + moduleUuid.toQUuid().toString());
+	log->writeMessage("Module Id: " + moduleUuid.toQUuid().toString());
 	log->writeMessage("Configuration counter: " + QString().setNum(count));
 			
 	log->writeMessage("First time configured: ");
@@ -285,7 +285,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log) const
 
 	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
 
-	log->writeMessage("BlockId: " + moduleUuid.toQUuid().toString());
+	log->writeMessage("Module Id: " + moduleUuid.toQUuid().toString());
 	log->writeMessage("Configuration counter: " + QString().setNum(count));
 
 	log->writeMessage("First time configured: ");
@@ -921,6 +921,8 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 
 				m_currentUartId = moduleUartId;
 
+				emit uploadFirmwareStart(m_currentUartId);
+
 				m_Log->writeMessage(tr("UART ID is %1h").arg(QString::number(m_currentUartId, 16)));
 
 				// Check if firmware exists for current uart
@@ -1406,12 +1408,13 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 
 				// Write log and output file
 				//
+
 				m_Log->writeEmptyLine();
 				m_Log->writeMessage("PING Reply:");
 				m_Log->writeMessage(QString("ProtocolVersion: %1").arg(protocolVersion));
 				m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(moduleUartId).arg(moduleUartId, 4, 16, QLatin1Char('0')));
-				m_Log->writeMessage(QString("BlockSize: %1 (%2h)").arg(eepromFrameSize).arg(eepromFrameSize, 4, 16, QLatin1Char('0')));
-				m_Log->writeMessage(QString("RomSize: %1 (%2h)").arg(eepromSize).arg(eepromSize, 4, 16, QLatin1Char('0')));
+				m_Log->writeMessage(QString("EEPROM frame size: %1 (%2h)").arg(eepromFrameSize).arg(eepromFrameSize, 4, 16, QLatin1Char('0')));
+				m_Log->writeMessage(QString("EEPROM size: %1 (%2h)").arg(eepromSize).arg(eepromSize, 4, 16, QLatin1Char('0')));
 
 				// --
 				//
@@ -1527,7 +1530,6 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 
 		// --
 		//
-		m_Log->writeSuccess(tr("Successful."));
 	}
 
 	catch (QString str)
@@ -1871,15 +1873,6 @@ void Configurator::readFirmware(const QString& fileName)
 
 	QTextStream out(&file);
 
-	// Open port
-	//
-	if (openConnection() == false)
-	{
-		m_Log->writeError(tr("Cannot open ") + device() + ".");
-		emit operationFinished();
-		return;
-	}
-
 	ModuleFirmwareData fd;
 
 	if (readFirmwareWorker(&fd, -1) == false)
@@ -1887,11 +1880,6 @@ void Configurator::readFirmware(const QString& fileName)
 		emit operationFinished();
 		return;
 	}
-
-	m_Log->writeEmptyLine();
-	m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0')));
-	m_Log->writeMessage(QString("EEPROM frame size: %1 (%2h)").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0')));
-	m_Log->writeMessage(QString("EEPROM frames count: %1").arg(fd.frames.size()));
 
 	out << QString("UartId: %1 (%2h)\n").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0'));
 	out << QString("EEPROM frame size: %1 (%2h)\n").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0'));
@@ -1927,43 +1915,31 @@ void Configurator::readFirmware(const QString& fileName)
 		}
 	}
 
+	m_Log->writeSuccess(tr("Successful."));
+
 	emit operationFinished();
 	return;
 }
 
-void Configurator::readProjectInformation()
+void Configurator::detectSubsystem_v1()
 {
 	m_cancelFlag = false;
 
 	emit operationStarted();
 
-	// Open port
-	//
-	if (openConnection() == false)
-	{
-		m_Log->writeError(tr("Cannot open ") + device() + ".");
-		emit operationFinished();
-		return;
-	}
-
 	ModuleFirmwareData fd;
 
-	const int ReadFramesCount = 2;
+	const int readFramesCount = 2;
 
-	if (readFirmwareWorker(&fd, ReadFramesCount) == false)
+	if (readFirmwareWorker(&fd, readFramesCount) == false)
 	{
 		emit operationFinished();
 		return;
 	}
 
-	m_Log->writeEmptyLine();
-	m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0')));
-	m_Log->writeMessage(QString("EEPROM frame size: %1 (%2h)").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0')));
-	m_Log->writeMessage(QString("EEPROM frames count: %1").arg(fd.frames.size()));
-
-	if (fd.frames.size() < ReadFramesCount)
+	if (fd.frames.size() < readFramesCount)
 	{
-		m_Log->writeError(QString("EEPROM frames is less than expected: %1").arg(ReadFramesCount));
+		m_Log->writeError(QString("EEPROM frames is less than expected: %1").arg(readFramesCount));
 		emit operationFinished();
 		return;
 	}
@@ -1974,10 +1950,9 @@ void Configurator::readProjectInformation()
 
 	const quint16* dataPtr = (quint16*)formatFrame.data();
 
-	quint16 marker = *dataPtr++;
-	quint16 version = *dataPtr++;
-	quint16 ssKey = *dataPtr++;
-	quint16 buildNumber = *dataPtr++;
+	quint16 marker = qFromBigEndian(*dataPtr++);
+	quint16 version = qFromBigEndian(*dataPtr++);
+	quint16 ssKey = qFromBigEndian(*dataPtr++) >> 6;
 
 	if (marker != 0xCA70 && version != 1)
 	{
@@ -1988,9 +1963,10 @@ void Configurator::readProjectInformation()
 		return;
 	}
 
-	emit readProjectInformationComplete(ssKey, buildNumber);
+	emit detectSubsystemComplete(ssKey);
 
 	emit operationFinished();
+
 	return;
 }
 

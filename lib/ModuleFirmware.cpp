@@ -14,20 +14,12 @@
 namespace Hardware
 {
 
-	void ModuleFirmware::initFirmwareData(int uartId,
+	void ModuleFirmware::addFirmwareData(int uartId,
 							  const QString& uartType,
 							  int eepromFramePayloadSize,
-							  int frameCount,
-							  const QString& subsysId,
-							  int ssKey,
-							  const QString& lmDescriptionFile,
-							  int lmDescriptionNumber)
-	{
-		m_subsysId = subsysId;
-		m_ssKey = ssKey;
-		m_lmDescriptionFile = lmDescriptionFile;
-		m_lmDescriptionNumber = lmDescriptionNumber;
+							  int frameCount)
 
+	{
 		ModuleFirmwareData data;
 
 		data.uartId = uartId;
@@ -53,7 +45,7 @@ namespace Hardware
 		return;
 	}
 
-	void ModuleFirmware::initFirmwareData(const QString& subsysId,
+	void ModuleFirmware::init(const QString& subsysId,
 			  int ssKey, const QString& lmDescriptionFile,
 			  int lmDescriptionNumber)
 	{
@@ -310,9 +302,14 @@ static const std::vector<quint8> err;
 
 		ModuleFirmware& subsystemData = m_firmwares[subsysId];
 
-		if (newSubsystem == true || subsystemData.uartExists(uartId) == false)
+		if (newSubsystem == true)
 		{
-			subsystemData.initFirmwareData(uartId, uartType, frameSize, frameCount, subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+			subsystemData.init(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+		}
+
+		if (subsystemData.uartExists(uartId) == false)
+		{
+			subsystemData.addFirmwareData(uartId, uartType, frameSize, frameCount);
 		}
 
 		return;
@@ -511,7 +508,7 @@ static ModuleFirmware err;
 			}
 			int lmDescriptionNumber = jSubsystemInfo.value(QLatin1String("lmDescriptionNumber")).toInt();
 
-			fw.initFirmwareData(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+			fw.init(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
 
 			// Load modules information
 			//
@@ -579,6 +576,7 @@ static ModuleFirmware err;
 
 			m_firmwares[fw.subsysId()] = fw;
 		}
+
 
 		// Load subsystems firmware data
 		//
@@ -648,7 +646,7 @@ static ModuleFirmware err;
 				}
 				QString uartType = jFirmwareData.value(QLatin1String("uartType")).toString();
 
-				fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, readBinaryData ? eepromFrameCount : 0, subsystemId, 0, QString(), 0);
+				fw.addFirmwareData(uartId, uartType, eepromFramePayloadSize, readBinaryData ? eepromFrameCount : 0);
 
 				if (readBinaryData == true)
 				{

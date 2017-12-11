@@ -43,14 +43,11 @@ namespace Hardware
 	class ModuleFirmware
 	{
 	public:
-		void initFirmwareData(int uartId, const QString& uartType,
+		void addFirmwareData(int uartId, const QString& uartType,
 				  int eepromFramePayloadSize,
-				  int eepromFrameCount,
-				  const QString& subsysId,
-				  int ssKey, const QString& lmDescriptionFile,
-				  int lmDescriptionNumber);
+				  int eepromFrameCount);
 
-		void initFirmwareData(const QString& subsysId,
+		void init(const QString& subsysId,
 				  int ssKey, const QString& lmDescriptionFile,
 				  int lmDescriptionNumber);
 

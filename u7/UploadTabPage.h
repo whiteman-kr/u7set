@@ -43,6 +43,7 @@ signals:
 
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
 	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem);
+	void detectSubsystem();
 
 	void eraseFlashMemory(int);
 	void cancelOperation();
@@ -77,9 +78,11 @@ private slots:
 
 	void clearSubsystemsUartData();
 	void resetUartData();
+
 	void loadBinaryFileHeaderComplete();
+	void uploadStart(int uartID);
 	void uploadComplete(int uartID);
-	void readProjectInformationComplete(int selectedSubsystem, int buildNumber);
+	void detectSubsystemComplete(int selectedSubsystem);
 
 	// Data
 	//
@@ -91,15 +94,13 @@ private:
 
 	QListWidget* m_pBuildList = nullptr;
 
-	QTextEdit* m_pFileInfoWidget = nullptr;
-
 	QTreeWidget* m_pSubsystemsListWidget = nullptr;
 
 	QTreeWidget* m_pUartListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
-	QPushButton* m_pReadProjectInformation = nullptr;
+	QPushButton* m_pDetectSubsystemButton = nullptr;
 
 	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
@@ -133,6 +134,7 @@ private:
 	const int columnUartId = 0;
 	const int columnUartType = 1;
 	const int columnUploadCount = 2;
+	const int columnUartStatus = 3;
 };
 
 

@@ -264,7 +264,7 @@ public slots:
 	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
 	void readFirmware(const QString &fileName);
-	void readProjectInformation();
+	void detectSubsystem_v1();
 	void eraseFlashMemory(int param);
 
 	// Signals
@@ -276,8 +276,9 @@ signals:
 	void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 	void loadBinaryFileHeaderComplete();
+	void uploadFirmwareStart(int uartID);
 	void uploadFirmwareComplete(int uartID);
-	void readProjectInformationComplete(int subsystemId, int buildNumber);
+	void detectSubsystemComplete(int subsystemId);
 
 public:
 	// Properties
