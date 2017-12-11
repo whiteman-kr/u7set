@@ -244,7 +244,7 @@ static const std::vector<quint8> err;
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly)  == false)
 		{
-			*errorCode = QString("Open file %1 error: ")
+			*errorCode = QString("Open file %1 error: %2")
 							.arg(fileName)
 							.arg(file.errorString());
 			return false;
@@ -279,7 +279,7 @@ static const std::vector<quint8> err;
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly)  == false)
 		{
-			*errorCode = QString("Open file %1 error: ")
+			*errorCode = QString("Open file %1 error: %2")
 							.arg(fileName)
 							.arg(file.errorString());
 			return false;
@@ -294,32 +294,7 @@ static const std::vector<quint8> err;
 
 	bool ModuleFirmwareStorage::hasBinaryData() const
 	{
-		for (auto f : m_firmwares)
-		{
-			ModuleFirmware& mf = f.second;
-
-			std::vector<UartPair> uarts = mf.uartList();
-
-			for (auto u : uarts)
-			{
-				bool ok = false;
-
-				ModuleFirmwareData& md = mf.firmwareData(u.first, &ok);
-
-				if (ok == false)
-				{
-					assert(false);
-					return false;
-				}
-
-				if (md.frames.empty() == false)
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
+		return m_hasBinaryData;
 	}
 
 	void ModuleFirmwareStorage::createFirmware(const QString& subsysId,
@@ -401,6 +376,8 @@ static ModuleFirmware err;
 
 		m_firmwares.clear();
 
+		m_hasBinaryData = false;
+
 		QJsonParseError error;
 		QJsonDocument document = QJsonDocument::fromJson(data, &error);
 
@@ -421,20 +398,30 @@ static ModuleFirmware err;
 			m_fileVersion = jConfig.value(QLatin1String("fileVersion")).toInt();
 		}
 
+		bool result = false;
+
 		switch (m_fileVersion)
 		{
 		case 1:
 			*errorCode = tr("This file version is not supported.");
 			return false;
 		case 2:
-			return parse_version2(jConfig, readDataFrames, errorCode);
+			result = parse_version2(jConfig, readDataFrames, errorCode);
+			break;
 		default:
 			*errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
+
+		if (result == false)
+		{
+			m_hasBinaryData = false;
+		}
+
+		return result;
 	}
 
-	bool ModuleFirmwareStorage::parse_version2(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode)
+	bool ModuleFirmwareStorage::parse_version2(const QJsonObject& jConfig, bool readBinaryData, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
@@ -661,14 +648,11 @@ static ModuleFirmware err;
 				}
 				QString uartType = jFirmwareData.value(QLatin1String("uartType")).toString();
 
-				if (readDataFrames == false)
-				{
-					fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, 0, subsystemId, 0, QString(), 0);
+				fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, readBinaryData ? eepromFrameCount : 0, subsystemId, 0, QString(), 0);
 
-				}
-				else
+				if (readBinaryData == true)
 				{
-					fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, eepromFrameCount, subsystemId, 0, QString(), 0);
+					m_hasBinaryData = true;
 
 					// Load data binary frames
 					//

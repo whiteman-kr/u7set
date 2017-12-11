@@ -151,6 +151,8 @@ namespace Hardware
 		int m_fileVersion = 0;
 		int m_maxFileVersion = 2;	//Latest version
 
+		bool m_hasBinaryData = false;
+
 		QString m_projectName;
 		QString m_userName;
 		int m_changesetId = 0;

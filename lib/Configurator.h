@@ -245,7 +245,7 @@ protected:
 
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
-	void loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData);
+	bool loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData);
 	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
 	void readFirmwareWorker(int param);

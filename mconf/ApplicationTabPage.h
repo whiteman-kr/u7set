@@ -2,7 +2,6 @@
 #define APPLICATIONTABPAGE_H
 
 #include <QWidget>
-#include "ui_applicationtabpage.h"
 #include "../lib/ModuleFirmware.h"
 
 using namespace Hardware;
@@ -24,6 +23,7 @@ signals:
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
 
 private slots:
+	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 	void openFileClicked();
 	void on_resetCountersButton_clicked();
 
@@ -32,18 +32,24 @@ public slots:
 	void uploadComplete(int uartID);
 
 private:
-	void clearUartData();
-	void fillUartData();
+	void clearSubsystemsUartData();
 
 	const int columnSubsysId = 0;
-	const int columnUartId = 1;
-	const int columnUartType = 2;
-	const int columnUploadCount = 3;
+	const int columnUartId = 0;
+	const int columnUartType = 1;
+	const int columnUploadCount = 2;
 
 private:
-	Ui::ApplicationTabPage ui;
-    //ConfigDataReader m_reader;
-	ModuleFirmwareStorage m_confFirmware;
+
+	QLineEdit* m_pFileNameEdit = nullptr;
+
+	QTextEdit* m_pFileInfoWidget = nullptr;
+
+	QTreeWidget* m_pSubsystemsListWidget = nullptr;
+
+	QTreeWidget* m_pUartListWidget = nullptr;
+
+	ModuleFirmwareStorage m_firmware;
 };
 
 #endif // APPLICATIONTABPAGE_H

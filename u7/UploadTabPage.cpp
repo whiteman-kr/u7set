@@ -33,6 +33,8 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pConfigurationCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::configurationTypeChanged);
 	pLeftLayout->addWidget(m_pConfigurationCombo);
 
+	// Create Build list widget
+
 	pLeftLayout->addWidget(new QLabel(tr("Choose Build:")));
 	m_pBuildList = new QListWidget();
 	connect(m_pBuildList, &QListWidget::currentRowChanged, this, &UploadTabPage::buildChanged);
@@ -40,9 +42,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	pLeftLayout->addWidget(new QLabel(tr("Bitstream File Summary:")));
 	m_pFileInfoWidget = new QTextEdit();
+	m_pFileInfoWidget->setReadOnly(true);
 	pLeftLayout->addWidget(m_pFileInfoWidget);
 
-	// Create Build list widget
+	// Create Subsystems list widget
 
 	pLeftLayout->addWidget(new QLabel(tr("Subsystems:")));
 	m_pSubsystemsListWidget = new QTreeWidget();
@@ -82,12 +85,9 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pUartListWidget->setColumnWidth(il++, 140);
 	m_pUartListWidget->setColumnWidth(il++, 140);
 
-
-
 	//
 
 	QHBoxLayout* bl = new QHBoxLayout();
-
 	bl->addStretch();
 
 	QPushButton* b = new QPushButton(tr("Reset Upload Counters"));
@@ -652,6 +652,7 @@ void UploadTabPage::loadBinaryFileHeaderComplete()
 	infoText.append(tr("Build No: %1\r\n").arg(QString::number(m_firmware.buildNumber())));
 	infoText.append(tr("Build Config: %1\r\n").arg(m_firmware.buildConfig()));
 	m_pFileInfoWidget->setText(infoText);
+
 }
 
 void UploadTabPage::uploadComplete(int uartID)

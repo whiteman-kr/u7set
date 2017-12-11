@@ -19,12 +19,12 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	m_tabWidget = new QTabWidget(this);
 	
-	DiagTabPage* diagTabPage = new DiagTabPage();
 	ApplicationTabPage* appTabPage = new ApplicationTabPage();
+	DiagTabPage* diagTabPage = new DiagTabPage();
 
-	m_tabWidget->addTab(diagTabPage, "Diag");
-	m_tabWidget->addTab(appTabPage, "Application");
-	
+	m_tabWidget->addTab(appTabPage, "Output Bitstream Files");
+	m_tabWidget->addTab(diagTabPage, "Service Information");
+
 	// Log
 	//
 	m_pLog = new QTextEdit();
@@ -63,7 +63,6 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	QVBoxLayout* pLeftLayout = new QVBoxLayout();
 	
 	pLeftLayout->addWidget(m_tabWidget);
-	pLeftLayout->addWidget(m_pLog, 1);
 		
 	// Right Layout (buttons)
 	//
@@ -84,7 +83,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Main, dialog layout
 	//
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
-	pMainLayout->addLayout(pLeftLayout);
+	pMainLayout->addLayout(pLeftLayout, 1);
+	pMainLayout->addWidget(m_pLog, 2);
 	pMainLayout->addLayout(pRightLayout);
 	
 	QWidget* pCentralWidget = new QWidget();
@@ -142,6 +142,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Start Timer
 	//
 	m_logTimerId = startTimer(2);
+
+	setMinimumSize(1280, 768);
 
 	// --
 	//

@@ -811,26 +811,27 @@ void Configurator::readConfiguration(int param)
 }
 
 
-void Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData)
+bool Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData)
 {
 	if (storage == nullptr)
 	{
 		assert(storage);
-		return;
+		return false;
 	}
 
-	m_Log->writeMessage(tr("//----------------------"));
-	m_Log->writeMessage(tr("File: %1").arg(fileName));
 
 	QString errorCode;
 	bool result = false;
 
 	if (loadBinaryData == true)
 	{
+		m_Log->writeMessage(tr("Loading binary data..."));
 		result = storage->load(fileName, &errorCode);
 	}
 	else
 	{
+		m_Log->writeMessage(tr("//----------------------"));
+		m_Log->writeMessage(tr("File: %1").arg(fileName));
 		result = storage->loadHeader(fileName, &errorCode);
 	}
 
@@ -843,7 +844,7 @@ void Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareS
 		}
 
 		m_Log->writeError(str);
-		return;
+		return result;
 	}
 
 	if (loadBinaryData == false)
@@ -858,12 +859,14 @@ void Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareS
 		emit loadBinaryFileHeaderComplete();
 	}
 
-	return;
+	return result;
 }
 
 void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QString& subsystemId)
 {
-	//emit uploadSuccessful(0x101);
+	m_Log->writeMessage(tr("Uploading binary data for subsystem %1").arg(subsystemId));
+
+	//emit uploadFirmwareComplete(0x101);
 	//return;
 
 	m_cancelFlag = false;
@@ -1637,7 +1640,11 @@ void Configurator::uploadFirmware(ModuleFirmwareStorage *storage, const QString&
 	//
 	if (storage->hasBinaryData() == false)
 	{
-		loadBinaryFileWorker(m_fileName, storage, true);
+		if (loadBinaryFileWorker(m_fileName, storage, true) == false)
+		{
+			emit operationFinished();
+			return;
+		}
 	}
 
 	uploadFirmwareWorker(storage, subsystemId);
