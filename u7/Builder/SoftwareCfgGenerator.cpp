@@ -496,6 +496,47 @@ namespace Builder
 		return comments;
 	}
 
+	void SoftwareCfgGenerator::getConfigIP(QString& cfgIP1, QString& cfgIP2)
+	{
+		TEST_PTR_RETURN(m_equipment);
+		TEST_PTR_RETURN(m_software);
+
+		auto ipGetter = [=](QString channelIdSuffix) -> QString
+		{
+			auto channelObject = m_equipment->deviceObject(m_software->equipmentIdTemplate() + channelIdSuffix);
+
+			if (channelObject == nullptr)
+			{
+				return "";
+			}
+
+			auto configurationServiceIdProperty = channelObject->propertyByCaption("ConfigurationServiceID");
+			if (configurationServiceIdProperty == nullptr)
+			{
+				return "";
+			}
+
+			QString configurationID = configurationServiceIdProperty->value().toString();
+
+			auto* configurationServiceObject = m_equipment->deviceObject(configurationID);
+			if (configurationServiceObject == nullptr)
+			{
+				return "";
+			}
+
+			auto configurationIpProperty = configurationServiceObject->propertyByCaption("ClientRequestIP");
+			if (configurationIpProperty== nullptr)
+			{
+				return "";
+			}
+
+			return configurationIpProperty->value().toString();
+		};
+
+		cfgIP1 = ipGetter("_DATACH01");
+		cfgIP2 = ipGetter("_DATACH02");
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties class implementation

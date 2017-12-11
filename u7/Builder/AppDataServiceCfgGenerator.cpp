@@ -336,9 +336,23 @@ namespace Builder
 
 		QString content = getBuildInfoCommentsForBat();
 
-		content += "AppDataSrv";
+		content += "AppDataSrv.exe";
 		content += " -e";
-		content += " -cfgip1=127.0.0.1";
+
+		QString cfgIP1;
+		QString cfgIP2;
+		getConfigIP(cfgIP1, cfgIP2);
+
+		if (cfgIP1.isEmpty() == false)
+		{
+			content += " -cfgip1=" + cfgIP1;
+		}
+
+		if (cfgIP2.isEmpty() == false && cfgIP1 != cfgIP2)
+		{
+			content += " -cfgip2=" + cfgIP1;
+		}
+
 		content += " -id=" + m_software->equipmentIdTemplate() + "\n";
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::BAT_DIR, m_software->equipmentIdTemplate() + ".bat", content);
