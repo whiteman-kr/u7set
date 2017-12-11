@@ -1,7 +1,7 @@
 #ifndef MODULEFIRMWAREWRITER_H
 #define MODULEFIRMWAREWRITER_H
 
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "IssueLogger.h"
 
 //
@@ -25,6 +25,23 @@ private:
 
 namespace Hardware
 {
+	struct ModuleFirmwareChannelData
+	{
+		// Channel binary data
+		//
+		std::map<int, QByteArray> binaryDataMap;
+
+		// Channel Unique ID
+		//
+		std::map<int, quint64> channelUniqueId;
+
+		// Channel Data description
+		//
+		QStringList descriptionFields;		// Header line
+		int descriptionFieldsVersion = 0;
+		std::map<int, std::vector<QVariantList>> descriptonData;
+	};
+
 	//
 	// ModuleFirmwareWriter
 	//
@@ -39,31 +56,31 @@ namespace Hardware
 
 		// Functions called and used by Application Logic and Tuning Builder
 		//
-		void setDescriptionFields(int descriptionVersion, const QStringList& fields);
-		bool setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log);
+		void setDescriptionFields(int uartId, int descriptionVersion, const QStringList& fields);
+		bool setChannelData(int uartId, QString equipmentID, int channel, int eepromFramePayloadSize, int eepromFrameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log);
 
 		// Functions called and used by Configuration Script
 		//
-		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
-		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
-		Q_INVOKABLE bool setData32(int frameIndex, int offset, quint32 data);
-		bool setData64(int frameIndex, int offset, quint64 data);
+		Q_INVOKABLE bool setData8(int uartID, int frameIndex, int offset, quint8 data);
+		Q_INVOKABLE bool setData16(int uartID, int frameIndex, int offset, quint16 data);
+		Q_INVOKABLE bool setData32(int uartID, int frameIndex, int offset, quint32 data);
+		bool setData64(int uartID, int frameIndex, int offset, quint64 data);
 
-		Q_INVOKABLE quint8 data8(int frameIndex, int offset);
-		Q_INVOKABLE quint16 data16(int frameIndex, int offset);
-		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
+		Q_INVOKABLE quint8 data8(int uartID, int frameIndex, int offset);
+		Q_INVOKABLE quint16 data16(int uartID, int frameIndex, int offset);
+		Q_INVOKABLE quint32 data32(int uartID, int frameIndex, int offset);
 
 		Q_INVOKABLE JsVariantList* calcHash64(QString dataString);
-		Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);
-		Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
+		Q_INVOKABLE QString storeCrc64(int uartID, int frameIndex, int start, int count, int offset);
+		Q_INVOKABLE QString storeHash64(int uartID, int frameIndex, int offset, QString dataString);
 
-		Q_INVOKABLE quint32 calcCrc32(int frameIndex, int start, int count);
+		Q_INVOKABLE quint32 calcCrc32(int uartID, int frameIndex, int start, int count);
 
-		Q_INVOKABLE void jsSetDescriptionFields(int descriptionVersion, QString fields);
+		Q_INVOKABLE void jsSetDescriptionFields(int uartID, int descriptionVersion, QString fields);
 
-		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
+		Q_INVOKABLE void jsAddDescription(int uartID, int channel, QString descriptionCSV);
 
-		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
+		Q_INVOKABLE void jsSetUniqueID(int uartID, int lmNumber, quint64 uniqueID);
 
 		// Script execution log
 		//
@@ -72,7 +89,7 @@ namespace Hardware
 
 		// Functions that are used to calculate Unique ID
 		//
-		quint64 uniqueID(int lmNumber);
+		quint64 uniqueID(int uartId, int lmNumber) const;
 		void setGenericUniqueId(int lmNumber, quint64 genericUniqueId);
 
 	private:
@@ -80,19 +97,10 @@ namespace Hardware
 		bool storeChannelData(Builder::IssueLogger* log);
 
 	private:
-		// Channel data
-		//
-		std::map<int, QByteArray> m_channelData;
 
-		// Channel Unique ID
+		// Channel data map, key is UartId
 		//
-		std::map<int, quint64> m_channelUniqueId;
-
-		// Channel Data description
-		//
-		QStringList m_descriptionFields;		// Header line
-		int m_descriptionFieldsVersion = 0;
-		std::map<int, std::vector<QVariantList>> m_descriptonData;
+		std::map<int, ModuleFirmwareChannelData> m_channelData;
 
 		// Script execution log
 		//
@@ -116,12 +124,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		ModuleFirmwareWriter* get(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber);
-		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, int lmDescriptionNumber);
-
-		quint64 getFirmwareUniqueId(const QString &subsystemID, int lmNumber);
-
-		void setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId);
+		ModuleFirmwareWriter* createFirmware(QString caption, QString subsysId, int ssKey, int uartId, QString uartType, int frameSize, int frameCount, int lmDescriptionNumber);
 
 		// Properties
 		//
@@ -131,6 +134,7 @@ namespace Hardware
 		//
 	public:
 		std::map<QString, ModuleFirmwareWriter>& firmwares();
+		ModuleFirmwareWriter& firmware(const QString& subsystemID);
 
 	private:
 		std::map<QString, ModuleFirmwareWriter> m_firmwares;

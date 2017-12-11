@@ -3,7 +3,7 @@
 #include "../lib/DeviceObject.h"
 
 #include "../lib/OrderedHash.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 
 #include "../TuningService/TuningDataStorage.h"
 
@@ -131,7 +131,7 @@ namespace Builder
 		};
 
 	public:
-		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
 
 		SignalSet& signalSet() { return *m_signals; }
@@ -165,7 +165,9 @@ namespace Builder
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
-		bool createUalSignalFromReceiver(UalItem* ualItem);
+		bool createUalSignalsFromReceiver(UalItem* ualItem);
+		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
+		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
@@ -254,8 +256,8 @@ namespace Builder
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem);
-		bool createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem);
+		bool createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
+		bool createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
 
 		UalAfb* createUalAfb(const UalItem& appItem);
@@ -311,9 +313,10 @@ namespace Builder
 		//
 
 		bool generateBusComposerCode(const UalItem* ualItem);
-		UalSignal* getBusComposerBusSignal(const UalItem* composerItem);
+		UalSignal* getBusComposerBusSignal(const UalItem* composerItem, bool* connectedToTedrminatorOnly);
 		bool generateAnalogSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal &busSignal);
+		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateBusSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
 
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
@@ -335,7 +338,7 @@ namespace Builder
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
 
-		bool copyAcquiredConstAnalogSignalsToRegBuf();
+		bool copyAcquiredAnalogConstSignalsToRegBuf();
 
 		bool copyAcquiredDiscreteInputSignalsToRegBuf();
 		bool copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf();
@@ -409,6 +412,8 @@ namespace Builder
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
+		Commands codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
+
 	private:
 		static const int ERR_VALUE = -1;
 
@@ -434,6 +439,8 @@ namespace Builder
 
 		// LM's and modules settings
 		//
+		int m_lmCodeMemorySize = 0;
+		int m_lmAppMemorySize = 0;
 		int m_lmAppLogicFrameSize = 0;
 		int m_lmAppLogicFrameCount = 0;
 
@@ -447,8 +454,6 @@ namespace Builder
 		int m_lmSubsystemKey = 0;
 		int m_lmNumber = 0;
 		int m_lmChannel = 0;
-
-		int m_lmDescriptionNumber = 0;
 
 		// LM's calculated memory offsets and sizes
 		//
@@ -467,8 +472,6 @@ namespace Builder
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
-
-		QHash<UalItem*, UalSignal*> m_busComposers;
 
 		// service maps
 		//

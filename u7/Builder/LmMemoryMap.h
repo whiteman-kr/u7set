@@ -175,6 +175,7 @@ namespace Builder
 			int writeCount = 0;
 		};
 
+		int m_appMemorySize = 0;
 		QVector<ReadWriteAccess> m_memory;
 
 		IssueLogger* m_log = nullptr;
@@ -193,7 +194,8 @@ namespace Builder
 
 		LmMemoryMap(IssueLogger* log);
 
-		bool init(const MemoryArea& moduleData,
+		bool init(	int appMemorySize,
+					const MemoryArea& moduleData,
 					const MemoryArea& optoInterfaceData,
 					const MemoryArea& appLogicBitData,
 					const MemoryArea& tuningData,

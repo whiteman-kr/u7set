@@ -1119,7 +1119,7 @@ void SignalsModel::addSignal()
 	signal.setFilteringTime(loader(filteringTimeCaption).toDouble());
 	signal.setSpreadTolerance(loader(spreadToleranceCaption).toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);
-	signal.setByteOrder(E::ByteOrder(loader(byteOrderCaption).toInt()));
+	signal.setByteOrder(E::ByteOrder::BigEndian);
 
 	if (!deviceIdEdit->text().isEmpty())
 	{

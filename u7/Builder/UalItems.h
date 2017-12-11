@@ -424,6 +424,7 @@ namespace Builder
 		Signal* signal() const;
 
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
+		E::SignalInOutType inOutType() const { return m_refSignals[0]->inOutType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
 		int dataSize() const { return m_refSignals[0]->dataSize(); }
 		int sizeW() const { return m_refSignals[0]->sizeW(); }
@@ -578,10 +579,6 @@ namespace Builder
 
 		UalSignal* get(QUuid pinUuid) const { return m_pinToSignalMap.value(pinUuid, nullptr); }
 		bool contains(QUuid pinUuid) const { return m_pinToSignalMap.contains(pinUuid); }
-
-		bool insertUalSignal(const UalItem* appItem);
-		bool insertNonBusAutoSignal(const UalAfb* appFb, const LogicPin& outputPin);
-		bool insertBusAutoSignal(const UalItem* appItem, const LogicPin& outputPin, BusShared bus);
 
 		void clear();
 

@@ -118,6 +118,9 @@ namespace Builder
 				break;
 			}
 
+			const BuildInfo& bi = buildWriter.buildInfo();
+			buildWriter.firmwareCollection()->init(bi.project, bi.user, bi.id, bi.release == false, bi.changeset);
+
 			//
 			// Get Equipment from the database
 			//
@@ -217,7 +220,7 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Loading LogicModule descriptions..."));
 
 			std::vector<Hardware::DeviceModule*> lmModules;
-			findLmModules(equipmentSet.root(), &lmModules);
+			findModulesByFamily(equipmentSet.root(), &lmModules, Hardware::DeviceModule::FamilyType::LM);
 
 			std::vector<Hardware::DeviceModule*> lmAndBvbModules;
 
@@ -266,7 +269,7 @@ namespace Builder
 
 			Hardware::SubsystemStorage subsystems;
 
-			ok = loadSubsystems(db, lmModules, &subsystems);
+			ok = loadSubsystems(db, lmAndBvbModules, &subsystems);
 
 			if (ok == false)
 			{
@@ -317,7 +320,7 @@ namespace Builder
 			Tuning::TuningDataStorage tuningDataStorage;
 			ComparatorStorage comparatorStorage;
 
-			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage,
+			ok = compileApplicationLogic(&subsystems, lmAndBvbModules, &equipmentSet, &opticModuleStorage,
 										 &connections, &signalSet, &lmDescriptions, &appLogicData,
 										 &tuningDataStorage, &comparatorStorage, &busSet, &buildWriter);
 
@@ -333,8 +336,8 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
-			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, m_log,
-                                        buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules, &lmDescriptions);
+			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage,
+										lmModules, &lmDescriptions, buildWriter.firmwareCollection(), m_log);
 
 			ok = tuningBuilder.build();
 
@@ -350,8 +353,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, m_log,
-                                               buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName());
+			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, buildWriter.firmwareCollection(), m_log);
 
 			ok = cfgBuilder.build(buildWriter);
 
@@ -364,7 +366,7 @@ namespace Builder
 
 			LmsUniqueIdMap lmsUniqueIdMap;
 
-			generateLmsUniqueID(buildWriter, tuningBuilder, cfgBuilder, lmModules, lmsUniqueIdMap);
+			generateLmsUniqueID(buildWriter, lmModules, lmsUniqueIdMap);
 
 			//
 			// Generate MATS software configurations
@@ -381,6 +383,7 @@ namespace Builder
 			// Write logic, configuration and tuning binary files
 			//
 
+
 			ok = writeBinaryFiles(buildWriter);
 
 			if (ok == false ||
@@ -389,15 +392,7 @@ namespace Builder
 				break;
 			}
 
-			ok = tuningBuilder.writeBinaryFiles(buildWriter);
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			ok = cfgBuilder.writeBinaryFiles(buildWriter);
+			ok = cfgBuilder.writeDataFiles(buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -505,39 +500,6 @@ namespace Builder
 		return true;
 	}
 
-	void BuildWorkerThread::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
-	{
-		if (object == nullptr ||
-			out == nullptr)
-		{
-			assert(object);
-			assert(out);
-			return;
-		}
-
-		for (int i = 0; i < object->childrenCount(); i++)
-		{
-			Hardware::DeviceObject* child = object->child(i);
-
-			if (child->deviceType() == Hardware::DeviceType::Module)
-			{
-				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-
-				if (module->isLogicModule() == true)
-				{
-					out->push_back(module);
-				}
-			}
-
-			if (child->deviceType() < Hardware::DeviceType::Module)
-			{
-				findLmModules(child, out);
-			}
-		}
-
-		return;
-	}
-
 	void BuildWorkerThread::findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
 	{
 		if (object == nullptr ||
@@ -595,7 +557,7 @@ namespace Builder
 				}
 			}
 
-			if (child->deviceType() < Hardware::DeviceType::Module)
+			if (static_cast<int>(child->deviceType()) < static_cast<int>(Hardware::DeviceType::Module))
 			{
 				findModulesByFamily(child, out, family);
 			}
@@ -618,7 +580,7 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicMoudles, Hardware::SubsystemStorage* subsystems)
+	bool BuildWorkerThread::loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicModules, Hardware::SubsystemStorage* subsystems)
 	{
 		if (subsystems == nullptr)
 		{
@@ -686,7 +648,7 @@ namespace Builder
 			int moduleVersion = -1;
 			QString LmDescriptionFile;
 
-			for (const Hardware::DeviceModule* lm : logicMoudles)
+			for (const Hardware::DeviceModule* lm : logicModules)
 			{
 				assert(lm);
 				assert(lm->isFSCConfigurationModule() == true);
@@ -715,6 +677,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 
@@ -730,6 +693,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 
@@ -752,6 +716,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 			}
@@ -948,15 +913,6 @@ namespace Builder
 
 		signalSet->buildID2IndexMap();
 
-		result = signalSet->expandBusSignals();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		signalSet->buildID2IndexMap();				// rebuild map after expand
-
 		result = signalSet->bindSignalsToLMs(equipment);
 
 		if (result == false)
@@ -1124,6 +1080,7 @@ namespace Builder
 
 
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
+													const std::vector<Hardware::DeviceModule*>& lmModules,
 													Hardware::EquipmentSet* equipmentSet,
 													Hardware::OptoModuleStorage* optoModuleStorage,
 													Hardware::ConnectionStorage* connections,
@@ -1139,6 +1096,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
 		ApplicationLogicCompiler appLogicCompiler(subsystems,
+												  lmModules,
 												  equipmentSet,
 												  optoModuleStorage,
 												  connections,
@@ -1270,15 +1228,13 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= buildResultWriter.writeMultichannelFiles();
+		result &= buildResultWriter.writeBinaryFiles();
 
 		return result;
 	}
 
 
 	void BuildWorkerThread::generateLmsUniqueID(BuildResultWriter& buildWriter,
-												TuningBuilder& tuningBuilder,
-												ConfigurationBuilder& cfgBuilder,
 												const std::vector<Hardware::DeviceModule *>& lmModules,
 												LmsUniqueIdMap &lmsUniqueIdMap)
 	{
@@ -1313,15 +1269,29 @@ namespace Builder
 				continue;
 			}
 
-			quint64 appUniqueId = buildWriter.getAppUniqueId(subsysID, lmNumber);
-			quint64 tunUniqueId = tuningBuilder.getFirmwareUniqueId(subsysID, lmNumber);
-			quint64 cfgUniqueId = cfgBuilder.getFirmwareUniqueId(subsysID, lmNumber);
+			Hardware::ModuleFirmwareWriter& fw = buildWriter.firmwareCollection()->firmware(subsysID);
 
-			quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
+			quint64 genericUniqueId = 0;
+			bool first = true;
 
-			buildWriter.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-			tuningBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-			cfgBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			std::vector<UartPair> uarts = fw.uartList();
+
+			for (auto fi : uarts)
+			{
+				int uartId = fi.first;
+
+				if (first == true)
+				{
+					first = false;
+					genericUniqueId = fw.uniqueID(uartId, lmNumber);
+				}
+				else
+				{
+					genericUniqueId ^= fw.uniqueID(uartId, lmNumber);
+				}
+			}
+
+			fw.setGenericUniqueId(lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
 		}

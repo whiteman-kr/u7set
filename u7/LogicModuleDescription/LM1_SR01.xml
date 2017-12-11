@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0014">
+<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0015">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
+		<AppLogicUartID>257</AppLogicUartID>
+		<AppLogicWriteBitstream>true</AppLogicWriteBitstream>
 		<ConfigFrameCount>256</ConfigFrameCount>
 		<ConfigFrameSize>1016</ConfigFrameSize>
+		<ConfigUartID>258</ConfigUartID>
+		<ConfigWriteBitstream>true</ConfigWriteBitstream>
 		<TuningFrameCount>256</TuningFrameCount>
 		<TuningFrameSize>1016</TuningFrameSize>		
+		<TuningUartID>260</TuningUartID>
+		<TuningWriteBitstream>true</TuningWriteBitstream>
 	</FlashMemory>
 	<Memory>
+	    <CodeMemorySize>98304</CodeMemorySize>
+		<AppMemorySize>65536</AppMemorySize>
 		<AppDataOffset>57782</AppDataOffset>
 		<AppDataSize>2</AppDataSize>
 		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>
@@ -223,7 +231,7 @@
 			<Pin OpName="o_bcomp_edi"	OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="12"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DAMPER"		OpCode="11"	ImpVersion="108"	VersionOpIndex="21"	MaxInstCount="256">
+		<AFBComponent Caption="DAMPER"		OpCode="11"	ImpVersion="111"	VersionOpIndex="21"	MaxInstCount="256">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_del"			OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_data_dff"	OpIndex ="3"	PinType = "Input"/>
@@ -334,7 +342,7 @@
 			<Pin OpName="o_nan"			OpIndex ="28"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="29"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="2"		VersionOpIndex="16"	MaxInstCount="512">
+		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="3"		VersionOpIndex="16"	MaxInstCount="512">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_hys"			OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="3"	PinType = "Input"/>
@@ -344,6 +352,7 @@
 			<Pin OpName="o_overflow"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_nan"			OpIndex ="13"	PinType = "Output"/>
+			<Pin OpName="o_param_err"	OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_dpcomp_edi"	OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
@@ -367,7 +376,7 @@
 			<Pin OpName="o_latch_edi"	OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="LIM"			OpCode="23"	ImpVersion="5"		VersionOpIndex="14"	MaxInstCount="256">
+		<AFBComponent Caption="LIM"			OpCode="23"	ImpVersion="7"		VersionOpIndex="14"	MaxInstCount="256">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_lim_max"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_lim_min"		OpIndex ="3"	PinType = "Param"/>
@@ -378,8 +387,9 @@
 			<Pin OpName="o_max"			OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_min"			OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
+			<Pin OpName="o_param_err"	OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="5"		VersionOpIndex="13"	MaxInstCount="256">
+		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="6"		VersionOpIndex="13"	MaxInstCount="256">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data_x"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="3"	PinType = "Input"/>
@@ -390,6 +400,7 @@
 			<Pin OpName="o_nan"			OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_dz_edi"		OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
+			<Pin OpName="o_param_err"	OpIndex ="14"	PinType = "Output"/>
 		</AFBComponent>
 		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"	MaxInstCount="256">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
@@ -1323,7 +1334,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmp_dh_fp_eq_v1" Caption="cmp_dh_fp_eq" Version="1.0005">
+		<AFB id="#cmp_dh_fp_eq_v1" Caption="cmp_dh_fp_eq" Version="1.0006">
 			<Properties>								
 				<Description>Comparator Block, equal single-precision floating-point comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
@@ -1344,6 +1355,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -1391,6 +1403,18 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1420,6 +1444,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -1435,7 +1460,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>	
 
-		<AFB id="#cmp_dh_fp_gr_v1" Caption="cmp_dh_fp_gr" Version="1.0005">
+		<AFB id="#cmp_dh_fp_gr_v1" Caption="cmp_dh_fp_gr" Version="1.0006">
 			<Properties>												
 				<Description>Comparator Block, greater than single-precision floating-point format comparison (dynamic hysteresis)</Description>
 				 <Category>Compare</Category>
@@ -1454,6 +1479,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -1501,6 +1527,18 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1530,6 +1568,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	videoItemFblElement.adjustHeight();
 
 	return true;
@@ -1544,7 +1583,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_dh_fp_ls_v1" Caption="cmp_dh_fp_ls" Version="1.0005">
+		<AFB id="#cmp_dh_fp_ls_v1" Caption="cmp_dh_fp_ls" Version="1.0006">
 			<Properties>												
 				<Description>Comparator Block, less than single-precision floating-point comparison (dynamic hysteresis)</Description>
 				<Category>Compare</Category>
@@ -1560,10 +1599,10 @@ function(videoItemFblElement, afbElement)
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
-
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -1611,6 +1650,18 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1640,6 +1691,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -1655,7 +1707,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_dh_fp_ne_v1" Caption="cmp_dh_fp_ne" Version="1.0005">
+		<AFB id="#cmp_dh_fp_ne_v1" Caption="cmp_dh_fp_ne" Version="1.0006">
 			<Properties>								
 				<Description>Comparator Block, not equal single-precision floating-point format comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
@@ -1674,6 +1726,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -1721,6 +1774,18 @@ function(videoItemFblElement, afbElement)
 			</Changed>
 					</Script>
 				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1750,6 +1815,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -1765,7 +1831,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_fp_eq_v1"    Caption="cmp_fp_eq"    Version="1.0006">
+		<AFB id="#cmp_fp_eq_v1"    Caption="cmp_fp_eq"    Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, equal single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
@@ -1788,7 +1854,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1883,7 +1949,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_fp_gr_v1"    Caption="cmp_fp_gr"    Version="1.0006">
+		<AFB id="#cmp_fp_gr_v1"    Caption="cmp_fp_gr"    Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, greater than single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
@@ -1907,7 +1973,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2001,7 +2067,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>	
 
-		<AFB id="#cmp_fp_ls_v1"    Caption="cmp_fp_ls"    Version="1.0006">
+		<AFB id="#cmp_fp_ls_v1"    Caption="cmp_fp_ls"    Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, less than single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
@@ -2024,7 +2090,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2119,7 +2185,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmp_fp_ne_v1"    Caption="cmp_fp_ne"    Version="1.0006">
+		<AFB id="#cmp_fp_ne_v1"    Caption="cmp_fp_ne"    Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, not equal single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
@@ -2142,7 +2208,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2237,7 +2303,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmp_si_eq_v1"    Caption="cmp_si_eq"    Version="1.0005">
+		<AFB id="#cmp_si_eq_v1"    Caption="cmp_si_eq"    Version="1.0006">
 			<Properties>
 				<Description>Comparator Block, equal 32-bit signed int comparison</Description>
 				<Category>Compare</Category>
@@ -2257,7 +2323,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2279,7 +2345,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_si_gr_v1"    Caption="cmp_si_gr"    Version="1.0005">
+		<AFB id="#cmp_si_gr_v1"    Caption="cmp_si_gr"    Version="1.0006">
 			<Properties>								
 				<Description>Comparator Block, greater than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -2299,7 +2365,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2321,7 +2387,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_si_ls_v1"    Caption="cmp_si_ls"    Version="1.0005">
+		<AFB id="#cmp_si_ls_v1"    Caption="cmp_si_ls"    Version="1.0006">
 			<Properties>								
 				<Description>Comparator Block, less than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -2341,7 +2407,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2363,7 +2429,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_si_ne_v1"    Caption="cmp_si_ne"    Version="1.0005">
+		<AFB id="#cmp_si_ne_v1"    Caption="cmp_si_ne"    Version="1.0006">
 			<Properties>
 				<Description>Comparator Block, not equal 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -2383,7 +2449,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -3900,7 +3966,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0007">
+		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0008">
 			<Properties>				
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -3919,6 +3985,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -3987,6 +4054,18 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -4018,6 +4097,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -4033,7 +4113,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0006">
+		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0007">
 			<Properties>				
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4050,6 +4130,7 @@ function(videoItemFblElement, afbElement)
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -4071,6 +4152,18 @@ function(videoItemFblElement, afbElement)
 					</Script>
 				</Param>           
 				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -4110,6 +4203,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	}
 	
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -4125,7 +4219,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0007">
+		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0008">
 			<Properties>
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4144,6 +4238,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -4211,7 +4306,19 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>    
+				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -4243,6 +4350,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -4258,7 +4366,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0006">
+		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0007">
 			<Properties>
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4275,6 +4383,7 @@ function(videoItemFblElement, afbElement)
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -4306,7 +4415,19 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
+				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -4335,6 +4456,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	}
 
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -5936,7 +6058,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0009">
+        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0010">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -5955,6 +6077,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>            
 				<Pin OpName="o_max" Caption="max" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 				<Pin OpName="o_min" Caption="min" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="15" Size="1"/>
 			</Outputs>
 			<Params>
 				 <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -6001,7 +6124,19 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>				                      
+				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6031,6 +6166,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
 	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
 	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -6046,7 +6182,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0008">
+		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0009">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -6064,6 +6200,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="8" Size="32"/>
                 <Pin OpName="o_max" Caption="max" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 				<Pin OpName="o_min" Caption="min" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="15" Size="1"/>
 			</Outputs>
 			<Params>
 				 <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -6098,7 +6235,19 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>				                
+				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6127,6 +6276,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	
 	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
 	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 
 	videoItemFblElement.adjustHeight();
 
@@ -6445,7 +6595,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#func_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0005">
+		<AFB id="#math_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0006">
 			<Properties>				
 				<Description>mathtion Block outputs the cosine calculation result</Description>
 				<Category>Math</Category>

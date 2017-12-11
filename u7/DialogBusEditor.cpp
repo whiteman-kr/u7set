@@ -95,6 +95,10 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 
 	m_busPropertyEditor = new ExtWidgets::PropertyEditor(this);
 	m_busPropertyEditor->setExpertMode(theSettings.isExpertMode());
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		m_busPropertyEditor->setFontSizeF(m_busPropertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
 	connect(m_busPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogBusEditor::onBusPropertiesChanged);
 

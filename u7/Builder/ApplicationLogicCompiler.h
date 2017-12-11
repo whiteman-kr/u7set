@@ -25,6 +25,7 @@ namespace Builder
 
 	public:
 		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
+								 const std::vector<Hardware::DeviceModule*>& lmModules,
 								 Hardware::EquipmentSet* equipmentSet,
 								 Hardware::OptoModuleStorage* optoModuleStorage,
 								 Hardware::ConnectionStorage* connections,
@@ -44,9 +45,6 @@ namespace Builder
 	private:
 		bool isBuildCancelled();
 
-		bool findLMs();
-		void findLM(Hardware::DeviceObject* startFromDevice);
-
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
@@ -55,7 +53,7 @@ namespace Builder
 
 		bool writeResourcesUsageReport();
 
-		bool writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, int lmDescriptionNumber, quint64 uniqueID, ApplicationLogicCode& appLogicCode);
+		bool writeBinCodeForLm(QString subsystemID, int subsystemKey, int appLogicUartId, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, int lmDescriptionNumber, quint64 uniqueID, ApplicationLogicCode& appLogicCode);
 
 		bool writeSerialDataXml();
 		bool writeOptoConnectionsReport();
@@ -65,6 +63,7 @@ namespace Builder
 		bool writeOptoModulesReport();
 
 		bool writeAppSignalSetFile();
+		bool writeSubsystemsXml();
 
 		const LmDescriptionSet& lmDescriptionSet() const;
 
@@ -72,6 +71,7 @@ namespace Builder
 
 	private:
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		const std::vector<Hardware::DeviceModule*> m_lmModules;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
@@ -87,8 +87,6 @@ namespace Builder
 		static IssueLogger* m_log;
 
 		QVector<ModuleLogicCompiler*> m_moduleCompilers;
-
-		QVector<Hardware::DeviceModule*> m_lm;
 
 		QHash<int, QString> m_busSignals;
 		int m_maxSignalID = -1;

@@ -101,15 +101,7 @@ namespace Builder
 
 	void CommandCode::setFbInstance(quint16 fbInstance)
 	{
-		if (fbInstance > MAX_FB_INSTANCE)
-		{
-			assert(false);
-			setNoCommand();
-		}
-		else
-		{
-			param.fbInstance = fbInstance;
-		}
+		param.fbInstance = fbInstance;
 	}
 
 
@@ -1390,7 +1382,7 @@ namespace Builder
 	{
 		QString cmdStr;
 
-		cmdStr.sprintf("%04X\t", m_address);
+		cmdStr.sprintf("%05X\t", m_address);
 
 		for(int w = 0; w < sizeW(); w++)
 		{
@@ -1399,7 +1391,7 @@ namespace Builder
 			cmdStr += QString("%1 ").arg(codeWordStr);
 		}
 
-		int tabLen = 32 - (cmdStr.length() - 1 + 4);
+		int tabLen = 32 - (cmdStr.length() - 1 + 3);
 
 		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 

@@ -201,6 +201,11 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0183.sql", "Upgrade to version 183, Removed some signals from Platform Interface Controller in in-out modules and OCM/OCMN"},
 	{":/DatabaseUpgrade/Upgrade0184.sql", "Upgrade to version 184, Updated LM1_SF00.xml, LM1_SR01.xml, added pins for components"},
 	{":/DatabaseUpgrade/Upgrade0185.sql", "Upgrade to version 185, Updated LM1_SR01.xml, set IDR phase to 500, ALP phase to 3500"},
+	{":/DatabaseUpgrade/Upgrade0186.sql", "Upgrade to version 186, Configuration scripts update, ModuleFirmware functions review "},
+	{":/DatabaseUpgrade/Upgrade0187.sql", "Upgrade to version 187, Added CodeMemorySize to LM1_SF00.xml, LM1_SR01.xml"},
+	{":/DatabaseUpgrade/Upgrade0188.sql", "Upgrade to version 188, Added UartIDs to LM1_SF00.xml, LM1_SR01.xml"},
+	{":/DatabaseUpgrade/Upgrade0189.sql", "Upgrade to version 189, Added enables write to bitstream for LM1_SF00.xml, LM1_SR01.xml"},
+	{":/DatabaseUpgrade/Upgrade0190.sql", "Upgrade to version 190, LM1-SF00 preset update, ModuleVersion changed"},
 };
 
 

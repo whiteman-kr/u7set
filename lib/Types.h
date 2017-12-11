@@ -457,21 +457,6 @@ const char* const DataFormatStr[] =
 	"Float",
 };
 
-enum class UartID
-{
-	LmAppLogicUart = 0x101,
-	LmConfigUart = 0x102,
-	LmServiceUart = 0x103,
-	LmTuningUart = 0x104,
-	AimUart = 0x203,
-	AomUart = 0x303,
-	DimUart = 0x403,
-	DomUart = 0x503,
-	AifmUart = 0x603,
-	OcmUart = 0x703
-
-};
-
 
 #define TO_INT(enumValue) (static_cast<int>(enumValue))
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
