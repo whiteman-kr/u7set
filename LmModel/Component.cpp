@@ -462,23 +462,16 @@ namespace LmModel
 
 	bool ModelComponent::addParam(int instanceNo, const ComponentParam& instParam, QString* errorMessage)
 	{
-		int To_Do;	// uncommnet this check when Yourik will make start instance from 0
-
-//		if (static_cast<int>(instanceNo) >= m_afbComp->maxInstCount())
-//		{
-//			// To Do - ¬ы€снить, у ёрика номер реализации с 1, а ¬ити?
-//			// “огда и условие другое надо дл €ошибки
-//			//
-//			int To_Do;
-
-//			// Maximum of instatiator is reached
-//			//
-//			*errorMessage = QString("InstanceNo (%1) is higher then maximum (%2), Component %3")
-//								.arg(instanceNo)
-//								.arg(m_afbComp->maxInstCount())
-//								.arg(m_afbComp->caption());
-//			return false;
-//		}
+		if (static_cast<int>(instanceNo) >= m_afbComp->maxInstCount())
+		{
+			// Maximum of instatiator is reached
+			//
+			*errorMessage = QString("InstanceNo (%1) is higher then maximum (%2), Component %3")
+								.arg(instanceNo)
+								.arg(m_afbComp->maxInstCount())
+								.arg(m_afbComp->caption());
+			return false;
+		}
 
 		// Check if instParam.implParamOpIndex really exists in AfbComponent
 		//
