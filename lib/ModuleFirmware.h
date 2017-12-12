@@ -35,7 +35,7 @@ namespace Hardware
 		int channel;
 
 		int moduleFamily;
-		int customModuleVersion;
+		int customModuleFamily;
 		int moduleVersion;
 		int moduleType;
 	};
@@ -75,7 +75,7 @@ namespace Hardware
 								int lmNumber,
 								int channel,
 								int moduleFamily,
-								int customModuleVersion,
+								int customModuleFamily,
 								int moduleVersion,
 								int moduleType
 								);
