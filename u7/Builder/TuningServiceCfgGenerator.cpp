@@ -195,7 +195,7 @@ namespace Builder
 
 		QString content = getBuildInfoCommentsForBat();
 
-		content += "TuningSrv";
+		content += "TuningSrv.exe";
 		content += " -e";
 
 		QString cfgIP1;

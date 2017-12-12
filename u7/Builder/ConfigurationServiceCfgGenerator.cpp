@@ -37,7 +37,7 @@ namespace Builder
 
 		QString content = getBuildInfoCommentsForBat();
 
-		content += "CfgSrv";
+		content += "CfgSrv.exe";
 		content += " -e";
 		content += " -id=" + m_software->equipmentIdTemplate();
 
