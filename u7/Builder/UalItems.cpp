@@ -1095,6 +1095,12 @@ namespace Builder
 			return false;
 		}
 
+		if (s->lm() == nullptr)
+		{
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
+
 		// Opto UalSignal creation from receiver
 		//
 		m_ualItem = ualItem;
@@ -1102,40 +1108,37 @@ namespace Builder
 
 		m_isOptoSignal = true;
 
-		// create new instance of Signal
-		m_autoSignalPtr = new Signal(*s);
+		Signal* refSignal = nullptr;
+
+		if (lmEquipmentID == s->lm()->equipmentIdTemplate())
+		{
+			// this signal is native for current LM
+			// no create new signal, use existing
+			//
+			refSignal = s;
+		}
+		else
+		{
+			// this signal is not native for current LM
+			// create new instance of Signal
+			//
+			refSignal = m_autoSignalPtr = new Signal(*s);
+
+			refSignal->setAcquire(false);								// reset Acquired flag
+			refSignal->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
+			refSignal->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
+		}
 
 		// reset signal addresses to invalid state
 		// ualAddr of opto signal should be set later in setOptoUalSignalsAddresses()
 		//
-		m_autoSignalPtr->resetAddresses();
+		refSignal->resetAddresses();
 
-		bool result = true;
-
-		if (s->lm() == nullptr)
-		{
-			LOG_INTERNAL_ERROR(log);
-			result = false;
-		}
-		else
-		{
-			if (lmEquipmentID != s->lm()->equipmentIdTemplate())
-			{
-				// this signal is not native for current LM
-				// reset Acquired flag
-				//
-				m_autoSignalPtr->setAcquire(false);
-			}
-		}
-
-		m_autoSignalPtr->setEquipmentID(lmEquipmentID);						// associate new signal with current lm
-		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
-
-		appendRefSignal(m_autoSignalPtr, true);
+		appendRefSignal(refSignal, true);
 
 		setComputed();
 
-		return result;
+		return true;
 	}
 
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,

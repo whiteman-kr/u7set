@@ -6482,7 +6482,6 @@ namespace Builder
 		m_code.comment("Copy acquired opto signals in regBuf");
 		m_code.newLine();
 
-
 		for(UalSignal* ualSignal : m_acquiredAnalogOptoSignals)
 		{
 			if (ualSignal == nullptr)
