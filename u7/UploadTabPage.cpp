@@ -210,7 +210,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &UploadTabPage::communicationReadFinished);
 
 	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, this, &UploadTabPage::loadBinaryFileHeaderComplete);
-	connect(m_pConfigurator, &Configurator::uploadFirmwareStart, this, &UploadTabPage::uploadStart);
+	connect(m_pConfigurator, &Configurator::uartOperationStart, this, &UploadTabPage::uartOperationStart);
 	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, this, &UploadTabPage::uploadComplete);
 	connect(m_pConfigurator, &Configurator::detectSubsystemComplete, this, &UploadTabPage::detectSubsystemComplete);
 
@@ -688,7 +688,7 @@ void UploadTabPage::loadBinaryFileHeaderComplete()
 	//}
 }
 
-void UploadTabPage::uploadStart(int uartID)
+void UploadTabPage::uartOperationStart(int uartID, QString operation)
 {
 	int count = m_pUartListWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
@@ -704,7 +704,7 @@ void UploadTabPage::uploadStart(int uartID)
 
 		if (uartID == itemUartId)
 		{
-			item->setText(columnUartStatus, tr("Uploading"));
+			item->setText(columnUartStatus, operation);
 			return;
 		}
 	}

@@ -205,30 +205,24 @@ void CONF_SERVICE_DATA_V1::setFirmwareCrc(uint32_t value)
 //
 // CONF_IDENTIFICATION_DATA_V1
 //
-void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog* log) const
+void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 {
-	if (log == nullptr)
-	{
-		assert(log);
-		return;
-	}
+	out << QString("Identification struct version: %1").arg(structVersion());
 
-	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
-
-	log->writeMessage("Module Id: " + moduleUuid.toQUuid().toString());
-	log->writeMessage("Configuration counter: " + QString().setNum(count));
+	out << "Module Id: " + moduleUuid.toQUuid().toString();
+	out << "Configuration counter: " + QString().setNum(count);
 			
-	log->writeMessage("First time configured: ");
-	log->writeMessage("__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString());
-	log->writeMessage("__Host: " + QString(firstConfiguration.host));
-	log->writeMessage("__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString());
-	log->writeMessage("__Configurator factory no: " + QString().setNum(firstConfiguration.configuratorFactoryNo));
+	out << "First time configured: ";
+	out << "__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString();
+	out << "__Host: " + QString(firstConfiguration.host);
+	out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
+	out << "__Configurator factory no: " + QString().setNum(firstConfiguration.configuratorFactoryNo);
 
-	log->writeMessage("Last time configured: ");
-	log->writeMessage("__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString());
-	log->writeMessage("__Host: " + QString(lastConfiguration.host));
-	log->writeMessage("__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString());
-	log->writeMessage("__Configurator factory no: " + QString().setNum(lastConfiguration.configuratorFactoryNo));
+	out << "Last time configured: ";
+	out << "__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString();
+	out << "__Host: " + QString(lastConfiguration.host);
+	out << "__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString();
+	out << "__Configurator factory no: " + QString().setNum(lastConfiguration.configuratorFactoryNo);
 
 	return;
 }
@@ -275,34 +269,28 @@ void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration()
 //
 // CONF_IDENTIFICATION_DATA_V2
 //
-void CONF_IDENTIFICATION_DATA_V2::dump(OutputLog* log) const
+void CONF_IDENTIFICATION_DATA_V2::dump(QStringList& out) const
 {
-	if (log == nullptr)
-	{
-		assert(log);
-		return;
-	}
+	out << QString("Identification struct version: %1").arg(structVersion());
 
-	log->writeMessage(QString("Identification struct version: %1").arg(structVersion()));
+	out << "Module Id: " + moduleUuid.toQUuid().toString();
+	out << "Configuration counter: " + QString().setNum(count);
 
-	log->writeMessage("Module Id: " + moduleUuid.toQUuid().toString());
-	log->writeMessage("Configuration counter: " + QString().setNum(count));
+	out << "First time configured: ";
+	out << "__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString();
+	out << "__Host: " + QString(firstConfiguration.host);
+	out << "__User: " + QString(firstConfiguration.userName);
+	out << "__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0');
+	out << "__Build Config: " + QString(firstConfiguration.buildConfig);
+	out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 
-	log->writeMessage("First time configured: ");
-	log->writeMessage("__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString());
-	log->writeMessage("__Host: " + QString(firstConfiguration.host));
-	log->writeMessage("__User: " + QString(firstConfiguration.userName));
-	log->writeMessage("__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0'));
-	log->writeMessage("__Build Config: " + QString(firstConfiguration.buildConfig));
-	log->writeMessage("__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString());
-
-	log->writeMessage("Last time configured: ");
-	log->writeMessage("__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString());
-	log->writeMessage("__Host: " + QString(lastConfiguration.host));
-	log->writeMessage("__User: " + QString(lastConfiguration.userName));
-	log->writeMessage("__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0'));
-	log->writeMessage("__Build Config: " + QString(lastConfiguration.buildConfig));
-	log->writeMessage("__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString());
+	out << "Last time configured: ";
+	out << "__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString();
+	out << "__Host: " + QString(lastConfiguration.host);
+	out << "__User: " + QString(lastConfiguration.userName);
+	out << "__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0');
+	out << "__Build Config: " + QString(lastConfiguration.buildConfig);
+	out << "__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString();
 
 	return;
 }
@@ -921,7 +909,7 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 
 				m_currentUartId = moduleUartId;
 
-				emit uploadFirmwareStart(m_currentUartId);
+				emit uartOperationStart(m_currentUartId, "Uploading");
 
 				m_Log->writeMessage(tr("UART ID is %1h").arg(QString::number(m_currentUartId, 16)));
 
@@ -1285,7 +1273,14 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 				// Ignoring all flags, CRC, etc
 				//
 
-				dumpIdentificationData(identificationData, blockSize);
+				QStringList dumpLog;
+
+				dumpIdentificationData(identificationData, blockSize, dumpLog);
+
+				for (auto s : dumpLog)
+				{
+					m_Log->writeMessage(s);
+				}
 			}
 			break;
 		default:
@@ -1406,6 +1401,8 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 				eepromFrameSize = pingReplyVersioned.blockSize;
 				eepromSize = pingReplyVersioned.romSize;
 
+				emit uartOperationStart(moduleUartId, "Reading");
+
 				// Write log and output file
 				//
 
@@ -1499,7 +1496,14 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 
 					if (i == 0)
 					{
-						dumpIdentificationData(readData, eepromFrameSize);
+						QStringList dumpLog;
+
+						dumpIdentificationData(readData, eepromFrameSize, dumpLog);
+
+						for (auto s : dumpLog)
+						{
+							m_Log->writeMessage(s);
+						}
 					}
 
 					switch (protocolVersion)
@@ -1549,11 +1553,11 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 	return result;
 }
 
-void Configurator::dumpIdentificationData(const std::vector<quint8>& identificationData, int blockSize)
+void Configurator::dumpIdentificationData(const std::vector<quint8>& identificationData, int blockSize, QStringList& out)
 {
 	if (identificationData.size() != blockSize)
 	{
-		m_Log->writeMessage(tr("Identification block is empty."));
+		out << tr("Identification block is empty.");
 	}
 
 	const CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<const CONF_IDENTIFICATION_DATA*>(identificationData.data());
@@ -1564,23 +1568,23 @@ void Configurator::dumpIdentificationData(const std::vector<quint8>& identificat
 		case 1:
 			{
 				const CONF_IDENTIFICATION_DATA_V1* pReadIdentificationStruct_v1 = reinterpret_cast<const CONF_IDENTIFICATION_DATA_V1*>(identificationData.data());
-				pReadIdentificationStruct_v1->dump(m_Log);
+				pReadIdentificationStruct_v1->dump(out);
 			}
 			break;
 		case 2:
 			{
 
 				const CONF_IDENTIFICATION_DATA_V2* pReadIdentificationStruct_v2 = reinterpret_cast<const CONF_IDENTIFICATION_DATA_V2*>(identificationData.data());
-				pReadIdentificationStruct_v2->dump(m_Log);
+				pReadIdentificationStruct_v2->dump(out);
 			}
 			break;
 		default:
-			m_Log->writeMessage(tr("Unknown identification block version: ") + QString().setNum(pReadIdentificationStruct->version));
+			out << tr("Unknown identification block version: ") + QString().setNum(pReadIdentificationStruct->version);
 		}
 	}
 	else
 	{
-		m_Log->writeMessage(tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16));
+		out << tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16);
 	}
 }
 
@@ -1883,13 +1887,23 @@ void Configurator::readFirmware(const QString& fileName)
 
 	out << QString("UartId: %1 (%2h)\n").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0'));
 	out << QString("EEPROM frame size: %1 (%2h)\n").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0'));
-	out << QString("EEPROM frames count: %1 (%2h)\n").arg(fd.frames.size());
+	out << QString("EEPROM frames count: %1\n").arg(fd.frames.size());
 
-	for (int i = 0; i < fd.frames.size(); i++)
+	for (int f = 0; f < fd.frames.size(); f++)
 	{
-		out << "FrameIndex " << i << "\n";
+		out << "FrameIndex " << f << "\n";
 
-		const std::vector<quint8>& frame = fd.frames[i];
+		const std::vector<quint8>& frame = fd.frames[f];
+
+		if (f == 0)
+		{
+			QStringList dumpLog;
+			dumpIdentificationData(frame, static_cast<int>(frame.size()), dumpLog);
+			for (auto s : dumpLog)
+			{
+				out << s << "\n";
+			}
+		}
 
 		// Write frame dump to outut file
 		//

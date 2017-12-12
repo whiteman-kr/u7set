@@ -137,7 +137,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(appTabPage, &ApplicationTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
 
 	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, appTabPage, &ApplicationTabPage::loadBinaryFileHeaderComplete);
-	connect(m_pConfigurator, &Configurator::uploadFirmwareStart, appTabPage, &ApplicationTabPage::uploadStart);
+	connect(m_pConfigurator, &Configurator::uartOperationStart, appTabPage, &ApplicationTabPage::uartOperationStart);
 	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, appTabPage, &ApplicationTabPage::uploadComplete);
 	
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);

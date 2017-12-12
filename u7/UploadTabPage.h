@@ -80,7 +80,7 @@ private slots:
 	void resetUartData();
 
 	void loadBinaryFileHeaderComplete();
-	void uploadStart(int uartID);
+	void uartOperationStart(int uartID, QString operation);
 	void uploadComplete(int uartID);
 	void detectSubsystemComplete(int selectedSubsystem);
 

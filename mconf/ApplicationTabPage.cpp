@@ -259,7 +259,7 @@ void ApplicationTabPage::on_resetCountersButton_clicked()
 	}
 }
 
-void ApplicationTabPage::uploadStart(int uartID)
+void ApplicationTabPage::uartOperationStart(int uartID, QString operation)
 {
 	int count = m_pUartListWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
@@ -275,7 +275,7 @@ void ApplicationTabPage::uploadStart(int uartID)
 
 		if (uartID == itemUartId)
 		{
-			item->setText(columnUartStatus, tr("Uploading"));
+			item->setText(columnUartStatus, operation);
 			return;
 		}
 	}

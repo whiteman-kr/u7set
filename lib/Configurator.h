@@ -177,7 +177,7 @@ struct CONF_IDENTIFICATION_DATA_V1
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(OutputLog *log) const;
+	void dump(QStringList &out) const;
 
 	void createFirstConfiguration();
 	void createNextConfiguration();
@@ -206,7 +206,7 @@ struct CONF_IDENTIFICATION_DATA_V2
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(OutputLog *log) const;
+	void dump(QStringList &out) const;
 
 	void createFirstConfiguration(Hardware::ModuleFirmwareStorage* storage);
 	void createNextConfiguration(Hardware::ModuleFirmwareStorage* storage);
@@ -251,7 +251,7 @@ protected:
 	void readServiceInformationWorker(int param);
 	bool readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxFrameCount);
 
-	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize);
+	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize, QStringList &out);
 	// Slots
 	//
 public slots:
@@ -276,7 +276,7 @@ signals:
 	void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 	void loadBinaryFileHeaderComplete();
-	void uploadFirmwareStart(int uartID);
+	void uartOperationStart(int uartID, QString operation);
 	void uploadFirmwareComplete(int uartID);
 	void detectSubsystemComplete(int subsystemId);
 
