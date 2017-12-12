@@ -9,6 +9,8 @@
 #include <QTimerEvent>
 #include <QJSEngine>
 #include "../lib/LmDescription.h"
+#include "../lib/ModuleFirmware.h"
+#include "Output.h"
 #include "Eeprom.h"
 #include "Ram.h"
 #include "Component.h"
@@ -23,9 +25,9 @@
 
 #define FAULT(message) fault(message, __FUNCTION_NAME__);
 
-namespace LmModel
+namespace Sim
 {
-		enum class DeviceMode
+	enum class DeviceMode
 	{
 		Start,
 		Fault,
@@ -81,15 +83,15 @@ namespace LmModel
 	};
 
 
-	class DeviceEmulator : public QObject
+	class DeviceEmulator : public QObject, protected Output
 	{
 		Q_OBJECT
 
 	public:
-		explicit DeviceEmulator(QTextStream* outputStream);
+		explicit DeviceEmulator(const Output& output);
 		virtual ~DeviceEmulator();
 
-		bool init(int logicModuleNumber,
+		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,
 				  const LmDescription& lmDescription,
 				  const Eeprom& tuningEeprom,
 				  const Eeprom& confEeprom,
@@ -151,12 +153,11 @@ namespace LmModel
 		template <typename TYPE>
 		TYPE getData(int eepromOffset) const;
 
-	private:
-		QTextStream& output();
-		QTextStream& output() const;
+	public:
+		const Hardware::LogicModuleInfo& logicModuleInfo() const;
 
 	private:
-		int m_logicModuleNumber = -1;
+		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 		QString m_simulationScript;
 

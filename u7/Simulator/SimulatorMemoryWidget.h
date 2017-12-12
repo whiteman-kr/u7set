@@ -1,6 +1,6 @@
 #pragma once
 #include <QtWidgets>
-#include "../LmModel/Ram.h"
+#include "../Simulator/Ram.h"
 
 class MemoryView;
 class MemoryHexView;
@@ -9,7 +9,7 @@ class SimulatorMemoryWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit SimulatorMemoryWidget(const LmModel::Ram ram, QWidget* parent = nullptr);
+	explicit SimulatorMemoryWidget(const Sim::Ram ram, QWidget* parent = nullptr);
 	virtual ~SimulatorMemoryWidget();
 
 protected:
@@ -21,7 +21,7 @@ protected slots:
 	void currentAreaChanged(int index);
 
 private:
-	LmModel::Ram m_ram;
+	Sim::Ram m_ram;
 
 	QComboBox* m_ramAreaCombo = nullptr;
 	QLabel* m_areaInfoLabel = nullptr;
@@ -39,8 +39,8 @@ public:
 	MemoryView();
 
 public:
-	void setAreaInfo(const LmModel::RamAreaInfo& areaInfo);
-	const LmModel::RamAreaInfo& areaInfo() const;
+	void setAreaInfo(const Sim::RamAreaInfo& areaInfo);
+	const Sim::RamAreaInfo& areaInfo() const;
 
 protected:
 	void setScrollrange();
@@ -48,7 +48,7 @@ protected:
 	virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
-	LmModel::RamAreaInfo m_areaInfo;
+	Sim::RamAreaInfo m_areaInfo;
 	MemoryHexView* m_hexView = nullptr;
 	QScrollBar* m_scroll = nullptr;
 };
@@ -57,7 +57,7 @@ class MemoryHexView : public QWidget
 {
 	Q_OBJECT
 public:
-	MemoryHexView(LmModel::RamAreaInfo* memoryArea, QScrollBar* scroll);
+	MemoryHexView(Sim::RamAreaInfo* memoryArea, QScrollBar* scroll);
 
 	int wordsInLine() const;		// Calc number of words in the line depending on the widget width, can be power of 2: [1, 2, 4, 8, 16]
 	int lineCount() const;			// Calc number of lines depending on the widget height
@@ -67,6 +67,6 @@ protected:
 	virtual void paintEvent(QPaintEvent* event) override;
 
 private:
-	LmModel::RamAreaInfo* m_memoryArea = nullptr;
+	Sim::RamAreaInfo* m_memoryArea = nullptr;
 	QScrollBar* m_scroll = nullptr;
 };

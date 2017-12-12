@@ -3,7 +3,7 @@
 #include <cfenv>
 #include <QQmlEngine>
 
-namespace LmModel
+namespace Sim
 {
 
 	ComponentParam::ComponentParam(const ComponentParam& that)

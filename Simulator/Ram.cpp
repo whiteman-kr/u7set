@@ -1,7 +1,7 @@
 #include "Ram.h"
 #include <cassert>
 
-namespace LmModel
+namespace Sim
 {
 
 	RamAreaInfo::RamAreaInfo(RamAccess access, quint32 offset, quint32 size, QString name) :

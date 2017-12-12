@@ -82,15 +82,15 @@ void SimulatorWidget::createDocks()
 QDockWidget* SimulatorWidget::createMemoryDock(QString caption)
 {
 	// -----------------
-static LmModel::Ram ram;
-	ram.addMemoryArea(LmModel::RamAccess::Read, 8192 * 0, 8192, "Input Module 1");
-	ram.addMemoryArea(LmModel::RamAccess::Read, 8192 * 1, 8192, "Input Module 2");
-	ram.addMemoryArea(LmModel::RamAccess::Read, 8192 * 2, 8192, "Input Module 3");
+static Sim::Ram ram;
+	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 0, 8192, "Input Module 1");
+	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 1, 8192, "Input Module 2");
+	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 2, 8192, "Input Module 3");
 
-	ram.addMemoryArea(LmModel::RamAccess::Write, 8192 * 0, 8192, "Output Module 1");
-	ram.addMemoryArea(LmModel::RamAccess::Write, 8192 * 1, 8192, "Output Module 2");
-	ram.addMemoryArea(LmModel::RamAccess::Write, 8192 * 2, 8192, "Output Module 3");
-	ram.addMemoryArea(LmModel::RamAccess::Write, 8192 * 3 + 4, 224, "Not event");
+	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 0, 8192, "Output Module 1");
+	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 1, 8192, "Output Module 2");
+	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 2, 8192, "Output Module 3");
+	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 3 + 4, 224, "Not event");
 	//-----------------
 
 	QDockWidget* dock = new QDockWidget(caption, this, 0);

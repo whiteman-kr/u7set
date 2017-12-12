@@ -3,7 +3,7 @@
 #include <vector>
 #include <QByteArray>
 
-namespace LmModel
+namespace Sim
 {
 	namespace UartID
 	{
@@ -77,7 +77,7 @@ namespace LmModel
 		//
 		int m_framePayloadSize = 0;
 
-		// Data from paresed allocation frame
+		// Data from parsed allocation frame
 		//
 		quint16	m_subsystemKey = 0;
 		quint16	m_buildNo = 0;

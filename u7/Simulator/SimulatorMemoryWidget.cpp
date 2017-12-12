@@ -1,6 +1,6 @@
 #include "SimulatorMemoryWidget.h"
 
-SimulatorMemoryWidget::SimulatorMemoryWidget(const LmModel::Ram ram, QWidget* parent) :
+SimulatorMemoryWidget::SimulatorMemoryWidget(const Sim::Ram ram, QWidget* parent) :
 	QWidget(parent),
 	m_ram(ram)
 {
@@ -59,9 +59,9 @@ void SimulatorMemoryWidget::updateAreaCombo()
 
 	int lastIndex = m_ramAreaCombo->currentIndex();
 
-	std::vector<LmModel::RamAreaInfo> areas = m_ram.memoryAreasInfo();
+	std::vector<Sim::RamAreaInfo> areas = m_ram.memoryAreasInfo();
 
-	for (const LmModel::RamAreaInfo& ma : areas)
+	for (const Sim::RamAreaInfo& ma : areas)
 	{
 		m_ramAreaCombo->addItem(ma.name());
 	}
@@ -84,9 +84,9 @@ void SimulatorMemoryWidget::updateAreaInfo()
 	QString access;
 	switch (currentAreaInfo.access())
 	{
-	case LmModel::RamAccess::Read:		access = "Read";		break;
-	case LmModel::RamAccess::Write:		access = "Write";		break;
-	case LmModel::RamAccess::ReadWrite:	access = "ReadWrite";	break;
+	case Sim::RamAccess::Read:		access = "Read";		break;
+	case Sim::RamAccess::Write:		access = "Write";		break;
+	case Sim::RamAccess::ReadWrite:	access = "ReadWrite";	break;
 	default:
 		assert(false);
 	}
@@ -143,14 +143,14 @@ MemoryView::MemoryView()
 	return;
 }
 
-void MemoryView::setAreaInfo(const LmModel::RamAreaInfo& areaInfo)
+void MemoryView::setAreaInfo(const Sim::RamAreaInfo& areaInfo)
 {
 	m_areaInfo = areaInfo;
 	setScrollrange();
 	return;
 }
 
-const LmModel::RamAreaInfo& MemoryView::areaInfo() const
+const Sim::RamAreaInfo& MemoryView::areaInfo() const
 {
 	return m_areaInfo;
 }
@@ -199,7 +199,7 @@ void MemoryView::resizeEvent(QResizeEvent*)
 	return;
 }
 
-MemoryHexView::MemoryHexView(LmModel::RamAreaInfo* memoryArea, QScrollBar* scroll) :
+MemoryHexView::MemoryHexView(Sim::RamAreaInfo* memoryArea, QScrollBar* scroll) :
 	m_memoryArea(memoryArea),
 	m_scroll(scroll)
 {

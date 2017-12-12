@@ -7,11 +7,11 @@
 QT       -= gui
 QT		 += xml qml
 
-TARGET = LmModel
+TARGET = Simulator
 TEMPLATE = lib
 
 CONFIG += staticlib
-CONFIG += c++14					# C++14 support is enabled.
+CONFIG += c++17					# C++17 support is enabled.
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
 PRECOMPILED_HEADER = Stable.h
@@ -54,30 +54,41 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        LmModel.cpp \
+    LmModel.cpp \
     Eeprom.cpp \
+    DeviceEmulator.cpp \
+    Component.cpp \
+    Ram.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
-    DeviceEmulator.cpp \
-    Component.cpp \
-    Ram.cpp
+    ../lib/ModuleFirmware.cpp \
+    Simulator.cpp \
+    Output.cpp \
+    ../lib/Crc.cpp \
+    Subsystem.cpp
 
 HEADERS += \
-        LmModel.h \
-    Eeprom.h \
     Stable.h \
+    LmModel.h \
+    Eeprom.h \
+    DeviceEmulator.h \
+    Component.h \
+    Ram.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
     ../lib/ProtoSerialization.h \
     ../lib/Types.h \
-    DeviceEmulator.h \
-    Component.h \
-    Ram.h
+    ../lib/ModuleFirmware.h \
+    Simulator.h \
+    Output.h \
+    ../lib/Crc.h \
+    Subsystem.h
+
 unix {
     target.path = /usr/lib
     INSTALLS += target

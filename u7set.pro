@@ -4,7 +4,7 @@ CONFIG += ordered
 
 win32:SUBDIRS += Protobuf
 SUBDIRS += qtservice \
-    LmModel \
+    Simulator \
     qtpropertybrowser \
     GetGitProjectVersion \
     BaseService \
@@ -24,5 +24,5 @@ SUBDIRS += qtservice \
     TuningClient \
     TuningIPEN \
     mconf \
-    LmModelConsole
+    SimulatorConsole
 

@@ -5,7 +5,7 @@
 #include <QObject>
 #include "../VFrame30/Afb.h"
 
-namespace LmModel
+namespace Sim
 {
 
 	class ComponentParam : public QObject

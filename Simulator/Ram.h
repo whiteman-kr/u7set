@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-namespace LmModel
+namespace Sim
 {
 	enum class RamAccess
 	{

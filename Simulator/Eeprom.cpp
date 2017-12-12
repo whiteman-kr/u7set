@@ -2,7 +2,7 @@
 #include <cassert>
 #include <QJsonDocument>
 
-namespace LmModel
+namespace Sim
 {
 
 	Eeprom::Eeprom(int uartId) :
@@ -65,16 +65,24 @@ namespace LmModel
 		}
 
 		QJsonObject jConfig = document.object();
-		int fileVersion = 1;
+		int fileVersion = 0;
 
 		if (jConfig.value("fileVersion").isUndefined() == true)
 		{
-			fileVersion = 1;	// in old files there is no version information
+			*errorMessage = QLatin1String("Cant detect bts file version. fileVersion is not found.");
 		}
 		else
 		{
 			fileVersion = jConfig.value("fileVersion").toInt();
 		}
+
+		if (jConfig.value("firmwaresCount").isUndefined() == true)
+		{
+			*errorMessage = QLatin1String("Cant detect count of firmwares in bts files. firmwaresCount is not found.");
+			return false;
+		}
+
+		int firmwaresCount = (int)jConfig.value("firmwaresCount").toInt();
 
 		switch (fileVersion)
 		{

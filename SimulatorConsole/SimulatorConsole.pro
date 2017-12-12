@@ -31,16 +31,16 @@ unix {
 
 SOURCES += main.cpp
 
-# LmModel Lib
+# Simulator Lib
 #
-INCLUDEPATH += $$PWD/../LmModel
-DEPENDPATH += $$PWD/../LmModel
+INCLUDEPATH += $$PWD/../Simulator
+DEPENDPATH += $$PWD/../Simulator
 
 win32 {
-    LIBS += -L$$DESTDIR -lLmModel
+    LIBS += -L$$DESTDIR -lSimulator
 }
 unix {
-    LIBS += -lLmModel
+    LIBS += -lSimulator
 }
 
 

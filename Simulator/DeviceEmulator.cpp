@@ -1,33 +1,30 @@
 #include "DeviceEmulator.h"
 #include <QQmlEngine>
 
-namespace LmModel
+namespace Sim
 {
 
-	DeviceEmulator::DeviceEmulator(QTextStream* outputStream) :
-		m_output(outputStream)
+	DeviceEmulator::DeviceEmulator(const Output& output) :
+		Output(output, "DeviceEmulator")
 	{
-		assert(outputStream);
-		output() << "DeviceEmulator: Instance created" << endl;
-
 		return;
 	}
 
 	DeviceEmulator::~DeviceEmulator()
 	{
-		output() << "DeviceEmulator: Instance destroyed" << endl;
 	}
 
-	bool DeviceEmulator::init(int logicModuleNumber,
+	bool DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
 							  const LmDescription& lmDescription,
 							  const Eeprom& tuningEeprom,
 							  const Eeprom& confEeprom,
 							  const Eeprom& appLogicEeprom,
 							  const QString& simulationScript)
 	{
-		output() << "DeviceEmulator: Init device" << endl;
+		setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
+		writeMessage(tr("Init device."));
 
-		m_logicModuleNumber = logicModuleNumber;
+		m_logicModuleInfo = logicModuleInfo;
 		m_lmDescription = lmDescription;
 		m_simulationScript = simulationScript;
 		m_tuningEeprom = tuningEeprom;
@@ -37,7 +34,8 @@ namespace LmModel
 		bool ok = initMemory();
 		if (ok == false)
 		{
-			output() << "DeviceEmulator: Init memory error" << endl;
+			writeError(tr("Init memory error."));
+			return false;
 		}
 
 		// Evaluate simulation script
@@ -46,7 +44,7 @@ namespace LmModel
 
 		if (m_evaluatedJs.isError() == true)
 		{
-			QString str = QString("DeviceEmulator: Evaluate simulation script error:"
+			QString str = QString("Evaluate simulation script error:\n"
 								  "\tLine %1\n"
 								  "\tStack: %2\n"
 								  "\tMessage: %3")
@@ -54,7 +52,7 @@ namespace LmModel
 						  .arg(m_evaluatedJs.property("stack").toString())
 						  .arg(m_evaluatedJs.toString());
 
-			output() << str << endl;
+			writeError(str);
 			return false;
 		}
 
@@ -148,7 +146,7 @@ namespace LmModel
 
 	void DeviceEmulator::pause()
 	{
-		output() << "DeviceEmulator: Pause" << endl;
+		writeMessage(tr("Pause"));
 
 		if (m_timerId != -1)
 		{
@@ -161,7 +159,7 @@ namespace LmModel
 
 	void DeviceEmulator::start(int cycles)
 	{
-		output() << "DeviceEmulator: Start, cyles = " << cycles << endl;
+		writeMessage(tr("Start, cycles = %1").arg(cycles));
 
 		if (m_timerId == -1)
 		{
@@ -182,18 +180,18 @@ namespace LmModel
 			assert(false);
 		}
 
-		QString str1 = QString("DeviceEmulator: Fault");
-		QString str2 = QString("DeviceEmulator: \tPhase: %1, ProgramCounter: %2 (0x%3), function: %4")
+		QString str1 = QString("Fault");
+		QString str2 = QString("\tPhase: %1, ProgramCounter: %2 (0x%3), function: %4")
 						.arg(phase)
 						.arg(m_logicUnit.programCounter)
 						.arg(m_logicUnit.programCounter, 4, 16, QChar('0'))
 						.arg(func);
-		QString str3 = QString("DeviceEmulator: \tReasone: %1")
+		QString str3 = QString("\tReasone: %1")
 						.arg(reasone);
 
-		output() << str1 << endl;
-		output() << str2 << endl;
-		output() << str3 << endl;
+		writeError(str1);
+		writeError(str2);
+		writeError(str3);
 
 		m_currentMode = DeviceMode::Fault;
 
@@ -220,7 +218,7 @@ namespace LmModel
 				break;
 			default:
 				assert(false);
-				output() << "DeviceEmulator: Unknown device mode: " << static_cast<int>(m_currentMode) << endl;
+				writeError(tr("Unknown device mode: %1").arg(static_cast<int>(m_currentMode)));
 			}
 		}
 
@@ -230,7 +228,7 @@ namespace LmModel
 	bool DeviceEmulator::processStartMode()
 	{
 		assert(m_currentMode == DeviceMode::Start);
-		output() << "DeviceEmulator: Start mode" << endl;
+		writeMessage(tr("Start mode"));
 
 		m_currentMode = DeviceMode::LoadEeprom;
 
@@ -247,7 +245,7 @@ namespace LmModel
 	bool DeviceEmulator::processLoadEeprom()
 	{
 		assert(m_currentMode == DeviceMode::LoadEeprom);
-		output() << "DeviceEmulator: LoadEeprom mode" << endl;
+		writeMessage(tr("LoadEeprom mode"));
 
 		bool result = true;
 		bool ok = true;
@@ -255,51 +253,65 @@ namespace LmModel
 		ok = m_tuningEeprom.parseAllocationFrame();
 		if (ok == false)
 		{
-			output() << "DeviceEmulator: Parse tuning EEPROM allocation frame error" << endl;
+			writeError(tr("Parse tuning EEPROM allocation frame error."));
 			result = false;
 		}
 
 		ok = m_confEeprom.parseAllocationFrame();
 		if (ok == false)
 		{
-			output() << "DeviceEmulator: Parse configuration EEPROM allocation frame error" << endl;
+			writeError(tr("Parse configuration EEPROM allocation frame error."));
 			result = false;
 		}
 
 		ok = m_appLogicEeprom.parseAllocationFrame();
 		if (ok == false)
 		{
-			output() << "DeviceEmulator: Parse application logic EEPROM allocation frame error" << endl;
+			writeError(tr("Parse application logic EEPROM allocation frame error."));
 			result = false;
 		}
 
 		if (m_tuningEeprom.subsystemKey() != m_confEeprom.subsystemKey() ||
 			m_tuningEeprom.subsystemKey() != m_appLogicEeprom.subsystemKey())
 		{
-			output() << "DeviceEmulator: EEPROMs have different subsystemKeys" <<
-						", tuningEeprom.subsystemKey = " << m_tuningEeprom.subsystemKey() <<
-						", confEeprom.subsystemKey = " << m_confEeprom.subsystemKey() <<
-						", appLogicEeprom.subsystemKey = " << m_appLogicEeprom.subsystemKey() << endl;
+			QString str = tr("EEPROMs have different subsystemKeys: \n"
+						  "\ttuningEeprom.subsystemKey: %1\n"
+						  "\tconfEeprom.subsystemKey: %2\n"
+						  "\tappLogicEeprom.subsystemKey: %3")
+							.arg(m_tuningEeprom.subsystemKey())
+							.arg(m_confEeprom.subsystemKey())
+							.arg(m_appLogicEeprom.subsystemKey());
+			writeError(str);
+
 			result = false;
 		}
 
 		if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() ||
 			m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
 		{
-			output() << "DeviceEmulator: EEPROMs have different buildNo" <<
-						", tuningEeprom.buildNo = " << m_tuningEeprom.buildNo() <<
-						", confEeprom.buildNo = " << m_confEeprom.buildNo() <<
-						", appLogicEeprom.buildNo = " << m_appLogicEeprom.buildNo() << endl;
+			QString str = tr("EEPROMs have different buildNo: \n"
+						  "\ttuningEeprom.buildNo: %1\n"
+						  "\tconfEeprom.buildNo: %2\n"
+						  "\tappLogicEeprom.buildNo: %3")
+							.arg(m_tuningEeprom.buildNo())
+							.arg(m_confEeprom.buildNo())
+							.arg(m_appLogicEeprom.buildNo());
+			writeError(str);
+
 			result = false;
 		}
 
 		if (m_tuningEeprom.configrationsCount() != m_confEeprom.configrationsCount() ||
 			m_tuningEeprom.configrationsCount() != m_appLogicEeprom.configrationsCount())
 		{
-			output() << "DeviceEmulator: EEPROMs have different configrationsCount" <<
-						", tuningEeprom.configrationsCount = " << m_tuningEeprom.configrationsCount() <<
-						", confEeprom.configrationsCount = " << m_confEeprom.configrationsCount() <<
-						", appLogicEeprom.configrationsCount = " << m_appLogicEeprom.configrationsCount() << endl;
+			QString str = tr("EEPROMs EEPROMs have different configrationsCount: \n"
+						  "\ttuningEeprom.configrationsCount: %1\n"
+						  "\tconfEeprom.configrationsCount: %2\n"
+						  "\tappLogicEeprom.configrationsCount: %3")
+							.arg(m_tuningEeprom.configrationsCount())
+							.arg(m_confEeprom.configrationsCount())
+							.arg(m_appLogicEeprom.configrationsCount());
+			writeError(str);
 			result = false;
 		}
 
@@ -314,10 +326,10 @@ namespace LmModel
 		m_plainAppLogic.clear();
 		m_plainAppLogic.reserve(1024 * 1024);
 
-		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleNumber);
+		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
 		if (startFrame == -1)
 		{
-			FAULT(QString("Can't get start frame for logic number %1").arg(m_logicModuleNumber));
+			FAULT(QString("Can't get start frame for logic number %1").arg(m_logicModuleInfo.lmNumber));
 			return false;
 		}
 
@@ -574,13 +586,12 @@ namespace LmModel
 
 		if (resultMessage.isEmpty() == false)
 		{
-			QString formatted = QString("DeviceEmulator: command_startafb, AFB %1 (%2), instance %3, message: %4")
+			QString formatted = QString("Command_startafb, AFB %1 (%2), instance %3, message: %4")
 									.arg(component->caption())
 									.arg(component->opCode())
 									.arg(implNo)
 									.arg(resultMessage);
-
-			output() << formatted << endl;
+			writeMessage(formatted);
 		}
 
 		return true;
@@ -1203,14 +1214,9 @@ namespace LmModel
 		return result;
 	}
 
-	QTextStream& DeviceEmulator::output()
+	const Hardware::LogicModuleInfo& DeviceEmulator::logicModuleInfo() const
 	{
-		return *m_output;
-	}
-
-	QTextStream& DeviceEmulator::output() const
-	{
-		return *m_output;
+		return m_logicModuleInfo;
 	}
 
 }

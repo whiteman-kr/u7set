@@ -4,26 +4,27 @@
 #include <QTextStream>
 #include <QByteArray>
 #include <QThread>
-#include "../lib/LmDescription.h"
+#include "Output.h"
 #include "Eeprom.h"
 #include "DeviceEmulator.h"
+#include "../lib/LmDescription.h"
+#include "../lib/ModuleFirmware.h"
 
 
-namespace LmModel
+namespace Sim
 {
-	class LogicModule : public QObject
+	class LogicModule : public QObject, protected Output
 	{
 		Q_OBJECT
 
 	public:
-		explicit LogicModule(QTextStream* textStream = nullptr);
+		explicit LogicModule(const Output& output);
 		virtual ~LogicModule();
 
 	public:
-		bool load(const QByteArray& logicModuleDescription,
-				  const QByteArray& tuningBitsream,
-				  const QByteArray& confBitstream,
-				  const QByteArray& appLogicBitstream,
+		bool load(const Hardware::LogicModuleInfo& lmInfo,
+				  const LmDescription& lmDescription,
+				  const Hardware::ModuleFirmware& firmware,
 				  const QString& simulationScript);
 
 		void clear();
@@ -49,14 +50,15 @@ namespace LmModel
 		//
 	protected:
 		bool loadLmDescription(const QByteArray& logicModuleDescription);
-		bool loadEeprom(const QByteArray& fileData, Eeprom* eeprom);
+		bool loadEeprom(const Hardware::ModuleFirmware& firmware, Eeprom* eeprom);
 
-		QTextStream& output();
-		QTextStream& output() const;
+	public:
+		const Hardware::LogicModuleInfo& logicModuleInfo() const;
 
 	private:
 		// Loaded LM data
 		//
+		Hardware::LogicModuleInfo m_logicModuleInfo;
 		std::unique_ptr<LmDescription> m_lmDescription;
 
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
@@ -69,13 +71,6 @@ namespace LmModel
 		//
 		QThread m_workerThread;
 		DeviceEmulator* m_device = nullptr;
-
-		// Text output variables
-		//
-		mutable QTextStream* m_textStream = nullptr;
-
-		FILE* m_nullDevice = nullptr;			// If m_textStream is null, then m_nullTextStream is used instead
-		mutable QTextStream m_nullTextStream;
 	};
 
 }
