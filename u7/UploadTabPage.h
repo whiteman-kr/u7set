@@ -101,7 +101,6 @@ private:
 	QTextEdit* m_pLog = nullptr;
 
 	QPushButton* m_pDetectSubsystemButton = nullptr;
-
 	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;

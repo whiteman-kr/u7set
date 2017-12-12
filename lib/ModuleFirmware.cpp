@@ -93,6 +93,25 @@ static ModuleFirmwareData err;
 		return m_firmwareData[uartId];
 	}
 
+	const ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok) const
+	{
+static ModuleFirmwareData err;
+		if (ok == false)
+		{
+			assert(ok);
+			return err;
+		}
+
+		if (uartExists(uartId) == false)
+		{
+			*ok = false;
+			return err;
+		}
+
+		*ok = true;
+		return m_firmwareData.at(uartId);
+	}
+
 	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
 	{
 		auto it = m_firmwareData.find(uartId);
@@ -428,6 +447,13 @@ static ModuleFirmware err;
 
 		// Load general parameters
 		//
+
+		if (jConfig.value(QLatin1String("buildSoftware")).isUndefined() == true)
+		{
+			*errorCode = "Parse firmware error: cant find field buildSoftware";
+			return false;
+		}
+		m_buildSoftware = jConfig.value(QLatin1String("buildSoftware")).toString();
 
 		if (jConfig.value(QLatin1String("projectName")).isUndefined() == true)
 		{

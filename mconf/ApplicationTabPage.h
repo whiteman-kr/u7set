@@ -17,7 +17,8 @@ public:
 	bool isFileLoaded() const;
 
 	Hardware::ModuleFirmwareStorage* configuration();
-	QString subsystemId();
+	QString selectedSubsystem();
+	void selectSubsystem(const QString& id);
 
 signals:
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
@@ -29,21 +30,25 @@ private slots:
 
 public slots:
 	void loadBinaryFileHeaderComplete();
+	void uploadStart(int uartID);
 	void uploadComplete(int uartID);
+	void detectSubsystemComplete(int selectedSubsystem);
+
+	void enableControls();
 
 private:
 	void clearSubsystemsUartData();
 
 	const int columnSubsysId = 0;
+
 	const int columnUartId = 0;
 	const int columnUartType = 1;
 	const int columnUploadCount = 2;
+	const int columnUartStatus = 3;
 
 private:
 
 	QLineEdit* m_pFileNameEdit = nullptr;
-
-	QTextEdit* m_pFileInfoWidget = nullptr;
 
 	QTreeWidget* m_pSubsystemsListWidget = nullptr;
 

@@ -58,6 +58,7 @@ namespace Hardware
 		bool uartExists(int uartId) const;
 
 		ModuleFirmwareData& firmwareData(int uartId, bool* ok);
+		const ModuleFirmwareData& firmwareData(int uartId, bool* ok) const;
 
 		int eepromFramePayloadSize(int uartId) const;
 		int eepromFrameSize(int uartId) const;
@@ -150,6 +151,7 @@ namespace Hardware
 
 		bool m_hasBinaryData = false;
 
+		QString m_buildSoftware;
 		QString m_projectName;
 		QString m_userName;
 		int m_changesetId = 0;

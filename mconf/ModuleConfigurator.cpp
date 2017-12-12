@@ -37,6 +37,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	m_pReadButton = new QPushButton(tr("&Read"));
 
+	m_pDetectSubsystemButton = new QPushButton(tr("Detect Subsystem"));
+
 	// Write Data to module (Configure)
 	//
 	m_pConfigureButton = new QPushButton(tr("&Configure"));
@@ -67,6 +69,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Right Layout (buttons)
 	//
 	QVBoxLayout* pRightLayout = new QVBoxLayout();
+	pRightLayout->addWidget(m_pDetectSubsystemButton);
 	pRightLayout->addWidget(m_pConfigureButton);
 	pRightLayout->addWidget(m_pReadButton);
 
@@ -94,6 +97,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// GUI
 	//
+	connect(m_pDetectSubsystemButton, &QAbstractButton::clicked, this, &ModuleConfigurator::detectSubsystem);
 	connect(m_pConfigureButton, &QAbstractButton::clicked, this, &ModuleConfigurator::configureClicked);
 	connect(m_pReadButton, &QAbstractButton::clicked, this, &ModuleConfigurator::readClicked);
 
@@ -118,17 +122,22 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
 	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
+	connect(this, &ModuleConfigurator::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem_v1);
 	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadFirmware);
 	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::uploadServiceInformation);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
 	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 	
 	connect(m_pConfigurator, &Configurator::operationStarted, this, &ModuleConfigurator::disableControls);
 	connect(m_pConfigurator, &Configurator::operationFinished, this, &ModuleConfigurator::enableControls);
+	connect(m_pConfigurator, &Configurator::operationFinished, appTabPage, &ApplicationTabPage::enableControls);
+	connect(m_pConfigurator, &Configurator::detectSubsystemComplete, appTabPage, &ApplicationTabPage::detectSubsystemComplete);
+
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
 
 	connect(appTabPage, &ApplicationTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
 
 	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, appTabPage, &ApplicationTabPage::loadBinaryFileHeaderComplete);
+	connect(m_pConfigurator, &Configurator::uploadFirmwareStart, appTabPage, &ApplicationTabPage::uploadStart);
 	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, appTabPage, &ApplicationTabPage::uploadComplete);
 	
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
@@ -261,7 +270,7 @@ void ModuleConfigurator::configureClicked()
 				return;
 			}
 
-			if (page->subsystemId().isEmpty() == true)
+			if (page->selectedSubsystem().isEmpty() == true)
 			{
 				QMessageBox::critical(this, qApp->applicationName(), tr("Subsystem is not selected."));
 				return;
@@ -271,7 +280,7 @@ void ModuleConfigurator::configureClicked()
 			//
 			disableControls();
 
-			emit writeConfData(page->configuration(), page->subsystemId());
+			emit writeConfData(page->configuration(), page->selectedSubsystem());
 		}
 	}
 	catch(QString message)
@@ -409,6 +418,7 @@ void ModuleConfigurator::disableControls()
 
 	m_pReadButton->setEnabled(false);
 	m_pConfigureButton->setEnabled(false);
+	m_pDetectSubsystemButton->setEnabled(false);
 	
 	if (m_pEraseButton != nullptr)
 	{
@@ -425,6 +435,7 @@ void ModuleConfigurator::enableControls()
 
 	m_pReadButton->setEnabled(true);
 	m_pConfigureButton->setEnabled(true);
+	m_pDetectSubsystemButton->setEnabled(true);
 
 	if (m_pEraseButton != nullptr)
 	{

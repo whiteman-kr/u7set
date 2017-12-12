@@ -368,7 +368,7 @@ namespace Hardware
 		// properties
 		//
 
-		QString m_buildSoftware = qApp->applicationName() +" v" + qApp->applicationVersion();
+		m_buildSoftware = qApp->applicationName() +" v" + qApp->applicationVersion();
 #ifndef Q_DEBUG
 		m_buildSoftware += ", release";
 #else

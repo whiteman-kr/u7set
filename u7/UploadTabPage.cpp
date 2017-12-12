@@ -56,9 +56,6 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	int il = 0;
 	m_pSubsystemsListWidget->setColumnWidth(il++, 100);
-	m_pSubsystemsListWidget->setColumnWidth(il++, 80);
-	m_pSubsystemsListWidget->setColumnWidth(il++, 140);
-	m_pSubsystemsListWidget->setColumnWidth(il++, 140);
 
 	// Create UART list widget
 
@@ -78,8 +75,8 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	il = 0;
 	m_pUartListWidget->setColumnWidth(il++, 80);
-	m_pUartListWidget->setColumnWidth(il++, 140);
-	m_pUartListWidget->setColumnWidth(il++, 80);
+	m_pUartListWidget->setColumnWidth(il++, 100);
+	m_pUartListWidget->setColumnWidth(il++, 100);
 	m_pUartListWidget->setColumnWidth(il++, 60);
 
 	//
