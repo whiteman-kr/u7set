@@ -14,20 +14,12 @@
 namespace Hardware
 {
 
-	void ModuleFirmware::initFirmwareData(int uartId,
+	void ModuleFirmware::addFirmwareData(int uartId,
 							  const QString& uartType,
 							  int eepromFramePayloadSize,
-							  int frameCount,
-							  const QString& subsysId,
-							  int ssKey,
-							  const QString& lmDescriptionFile,
-							  int lmDescriptionNumber)
-	{
-		m_subsysId = subsysId;
-		m_ssKey = ssKey;
-		m_lmDescriptionFile = lmDescriptionFile;
-		m_lmDescriptionNumber = lmDescriptionNumber;
+							  int frameCount)
 
+	{
 		ModuleFirmwareData data;
 
 		data.uartId = uartId;
@@ -53,7 +45,7 @@ namespace Hardware
 		return;
 	}
 
-	void ModuleFirmware::initFirmwareData(const QString& subsysId,
+	void ModuleFirmware::init(const QString& subsysId,
 			  int ssKey, const QString& lmDescriptionFile,
 			  int lmDescriptionNumber)
 	{
@@ -99,6 +91,25 @@ static ModuleFirmwareData err;
 
 		*ok = true;
 		return m_firmwareData[uartId];
+	}
+
+	const ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok) const
+	{
+static ModuleFirmwareData err;
+		if (ok == false)
+		{
+			assert(ok);
+			return err;
+		}
+
+		if (uartExists(uartId) == false)
+		{
+			*ok = false;
+			return err;
+		}
+
+		*ok = true;
+		return m_firmwareData.at(uartId);
 	}
 
 	int ModuleFirmware::eepromFramePayloadSize(int uartId) const
@@ -244,7 +255,7 @@ static const std::vector<quint8> err;
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly)  == false)
 		{
-			*errorCode = QString("Open file %1 error: ")
+			*errorCode = QString("Open file %1 error: %2")
 							.arg(fileName)
 							.arg(file.errorString());
 			return false;
@@ -279,7 +290,7 @@ static const std::vector<quint8> err;
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly)  == false)
 		{
-			*errorCode = QString("Open file %1 error: ")
+			*errorCode = QString("Open file %1 error: %2")
 							.arg(fileName)
 							.arg(file.errorString());
 			return false;
@@ -290,6 +301,11 @@ static const std::vector<quint8> err;
 		file.close();
 
 		return parse(data, false, errorCode);
+	}
+
+	bool ModuleFirmwareStorage::hasBinaryData() const
+	{
+		return m_hasBinaryData;
 	}
 
 	void ModuleFirmwareStorage::createFirmware(const QString& subsysId,
@@ -305,9 +321,14 @@ static const std::vector<quint8> err;
 
 		ModuleFirmware& subsystemData = m_firmwares[subsysId];
 
-		if (newSubsystem == true || subsystemData.uartExists(uartId) == false)
+		if (newSubsystem == true)
 		{
-			subsystemData.initFirmwareData(uartId, uartType, frameSize, frameCount, subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+			subsystemData.init(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+		}
+
+		if (subsystemData.uartExists(uartId) == false)
+		{
+			subsystemData.addFirmwareData(uartId, uartType, frameSize, frameCount);
 		}
 
 		return;
@@ -371,6 +392,8 @@ static ModuleFirmware err;
 
 		m_firmwares.clear();
 
+		m_hasBinaryData = false;
+
 		QJsonParseError error;
 		QJsonDocument document = QJsonDocument::fromJson(data, &error);
 
@@ -391,20 +414,30 @@ static ModuleFirmware err;
 			m_fileVersion = jConfig.value(QLatin1String("fileVersion")).toInt();
 		}
 
+		bool result = false;
+
 		switch (m_fileVersion)
 		{
 		case 1:
 			*errorCode = tr("This file version is not supported.");
 			return false;
 		case 2:
-			return parse_version2(jConfig, readDataFrames, errorCode);
+			result = parse_version2(jConfig, readDataFrames, errorCode);
+			break;
 		default:
 			*errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
 		}
+
+		if (result == false)
+		{
+			m_hasBinaryData = false;
+		}
+
+		return result;
 	}
 
-	bool ModuleFirmwareStorage::parse_version2(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode)
+	bool ModuleFirmwareStorage::parse_version2(const QJsonObject& jConfig, bool readBinaryData, QString* errorCode)
 	{
 		if (errorCode == nullptr)
 		{
@@ -414,6 +447,13 @@ static ModuleFirmware err;
 
 		// Load general parameters
 		//
+
+		if (jConfig.value(QLatin1String("buildSoftware")).isUndefined() == true)
+		{
+			*errorCode = "Parse firmware error: cant find field buildSoftware";
+			return false;
+		}
+		m_buildSoftware = jConfig.value(QLatin1String("buildSoftware")).toString();
 
 		if (jConfig.value(QLatin1String("projectName")).isUndefined() == true)
 		{
@@ -494,7 +534,7 @@ static ModuleFirmware err;
 			}
 			int lmDescriptionNumber = jSubsystemInfo.value(QLatin1String("lmDescriptionNumber")).toInt();
 
-			fw.initFirmwareData(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
+			fw.init(subsysId, ssKey, lmDescriptionFile, lmDescriptionNumber);
 
 			// Load modules information
 			//
@@ -562,6 +602,7 @@ static ModuleFirmware err;
 
 			m_firmwares[fw.subsysId()] = fw;
 		}
+
 
 		// Load subsystems firmware data
 		//
@@ -631,10 +672,12 @@ static ModuleFirmware err;
 				}
 				QString uartType = jFirmwareData.value(QLatin1String("uartType")).toString();
 
-				fw.initFirmwareData(uartId, uartType, eepromFramePayloadSize, eepromFrameCount, subsystemId, 0, QString(), 0);
+				fw.addFirmwareData(uartId, uartType, eepromFramePayloadSize, readBinaryData ? eepromFrameCount : 0);
 
-				if (readDataFrames == true)
+				if (readBinaryData == true)
 				{
+					m_hasBinaryData = true;
+
 					// Load data binary frames
 					//
 

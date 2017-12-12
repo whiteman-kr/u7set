@@ -389,7 +389,8 @@ namespace Builder
 		bool createOptoSignal(const UalItem* ualItem,
 								Signal* s,
 								const QString &lmEquipmentID,
-								BusShared bus);
+								BusShared bus,
+								IssueLogger* log);
 
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,

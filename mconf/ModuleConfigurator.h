@@ -43,9 +43,10 @@ private slots:
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
 	
-	void readConfiguration(int);
+	void readServiceInformation(int);
 	void readFirmware(QString fileName);
 
+	void detectSubsystem();
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 	void writeConfData(ModuleFirmwareStorage *storage, const QString& subsystemId);
 	void eraseFlashMemory(int);
@@ -58,6 +59,7 @@ private:
 
 	QTextEdit* m_pLog = nullptr;
 
+	QPushButton* m_pDetectSubsystemButton = nullptr;
 	QPushButton* m_pReadButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;

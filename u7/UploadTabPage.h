@@ -41,9 +41,10 @@ signals:
 	void readConfiguration(int);
 	void readFirmware(QString fileName);
 
-	//void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
-	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName, const QString& subsystemId);
+	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem);
+	void detectSubsystem();
+
 	void eraseFlashMemory(int);
 	void cancelOperation();
 
@@ -70,29 +71,36 @@ public slots:
 
 private:
 	void writeLog(const OutputLogItem& logItem);
-	QString subsystemId();
+	QString selectedSubsystem();
+	void selectSubsystem(const QString& id);
 
 private slots:
 
 	void clearSubsystemsUartData();
 	void resetUartData();
-	void loadHeaderComplete(std::map<QString, std::vector<UartPair> > subsystemsUartsInfo);
-	void uploadSuccessful(int uartID);
+
+	void loadBinaryFileHeaderComplete();
+	void uartOperationStart(int uartID, QString operation);
+	void uploadComplete(int uartID);
+	void detectSubsystemComplete(int selectedSubsystem);
 
 	// Data
 	//
 private:
 
 	QSplitter* m_vsplitter = nullptr;
-	QListWidget* m_pBuildList = nullptr;
 
 	QComboBox* m_pConfigurationCombo = nullptr;
+
+	QListWidget* m_pBuildList = nullptr;
+
 	QTreeWidget* m_pSubsystemsListWidget = nullptr;
 	QTreeWidget* m_pUartListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
-	QPushButton* m_pReadButton = nullptr;
+	QPushButton* m_pDetectSubsystemButton = nullptr;
+	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;
 
@@ -104,6 +112,8 @@ private:
 
 	Configurator* m_pConfigurator = nullptr;
 	QThread* m_pConfigurationThread = nullptr;
+
+	Hardware::ModuleFirmwareStorage m_firmware;
 
 	Builder::IssueLogger m_outputLog;
 
@@ -122,8 +132,7 @@ private:
 	const int columnUartId = 0;
 	const int columnUartType = 1;
 	const int columnUploadCount = 2;
-
-	std::map<QString, std::vector<UartPair>> m_subsystemsUartsInfo;
+	const int columnUartStatus = 3;
 };
 
 

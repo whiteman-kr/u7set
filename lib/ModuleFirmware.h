@@ -43,14 +43,11 @@ namespace Hardware
 	class ModuleFirmware
 	{
 	public:
-		void initFirmwareData(int uartId, const QString& uartType,
+		void addFirmwareData(int uartId, const QString& uartType,
 				  int eepromFramePayloadSize,
-				  int eepromFrameCount,
-				  const QString& subsysId,
-				  int ssKey, const QString& lmDescriptionFile,
-				  int lmDescriptionNumber);
+				  int eepromFrameCount);
 
-		void initFirmwareData(const QString& subsysId,
+		void init(const QString& subsysId,
 				  int ssKey, const QString& lmDescriptionFile,
 				  int lmDescriptionNumber);
 
@@ -61,6 +58,7 @@ namespace Hardware
 		bool uartExists(int uartId) const;
 
 		ModuleFirmwareData& firmwareData(int uartId, bool* ok);
+		const ModuleFirmwareData& firmwareData(int uartId, bool* ok) const;
 
 		int eepromFramePayloadSize(int uartId) const;
 		int eepromFrameSize(int uartId) const;
@@ -118,6 +116,8 @@ namespace Hardware
 
 		bool loadHeader(QString fileName, QString* errorCode);
 
+		bool hasBinaryData() const;
+
 		// Firmware operations
 		//
 		void createFirmware(const QString& subsysId, int ssKey, int uartId, const QString& uartType, int frameSize, int frameCount, const QString& lmDescriptionFile, int lmDescriptionNumber);
@@ -149,6 +149,9 @@ namespace Hardware
 		int m_fileVersion = 0;
 		int m_maxFileVersion = 2;	//Latest version
 
+		bool m_hasBinaryData = false;
+
+		QString m_buildSoftware;
 		QString m_projectName;
 		QString m_userName;
 		int m_changesetId = 0;
