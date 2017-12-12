@@ -43,6 +43,7 @@ public:
 
 	bool			isReadyForManage() const;
 	void			setReadyForManage(bool ready);
+	void			waitReadyForManage();
 
 	// elements of interface - Menu
 	//

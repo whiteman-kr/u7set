@@ -668,13 +668,17 @@ void MeasureThread::saveStateTunSignals()
 			continue;
 		}
 
-		Metrology::SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);;
-		if (outParam.isValid() == false)
+		Metrology::SignalParam tunParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (tunParam.isValid() == false)
 		{
 			continue;
 		}
 
-		m_tunSignalState[c] = theSignalBase.signalState(outParam.hash()).value();
+		m_tunSignalState[c] = theSignalBase.signalState(tunParam.hash()).value();
+
+//		QString val_str;
+//		val_str.sprintf("Tun save - %.3f", m_tunSignalState[c]);
+//		emit msgBox(QMessageBox::Information, val_str);
 	}
 }
 
@@ -694,13 +698,17 @@ void MeasureThread::restoreStateTunSignals()
 			continue;
 		}
 
-		Metrology::SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);;
-		if (outParam.isValid() == false)
+		Metrology::SignalParam tunParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (tunParam.isValid() == false)
 		{
 			continue;
 		}
 
-		theSignalBase.tuning().appendCmdFowWrite(outParam.hash(), m_tunSignalState[c]);
+//		QString val_str;
+//		val_str.sprintf("Tun restore - %.3f", m_tunSignalState[c]);
+//		emit msgBox(QMessageBox::Information, val_str);
+
+		theSignalBase.tuning().appendCmdFowWrite(tunParam.hash(), m_tunSignalState[c]);
 	}
 }
 

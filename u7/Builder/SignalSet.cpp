@@ -327,6 +327,7 @@ namespace Builder
 
 		newSignal->setCaption(caption);
 		newSignal->setEquipmentID(s.equipmentID());
+		newSignal->setLm(s.lm());
 //		newSignal->setBusTypeID(s.busTypeID());
 
 		newSignal->setSignalType(busSignal.signalType);
