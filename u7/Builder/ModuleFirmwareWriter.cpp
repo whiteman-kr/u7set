@@ -159,7 +159,7 @@ namespace Hardware
 				jModuleInfo.insert(QLatin1String("lmNumber"), info.lmNumber);
 				jModuleInfo.insert(QLatin1String("channel"), E::valueToString<E::Channel>(info.channel));
 				jModuleInfo.insert(QLatin1String("moduleFamily"), info.moduleFamily);
-				jModuleInfo.insert(QLatin1String("customModuleVersion"), info.customModuleVersion);
+				jModuleInfo.insert(QLatin1String("customModuleFamily"), info.customModuleFamily);
 				jModuleInfo.insert(QLatin1String("moduleVersion"), info.moduleVersion);
 				jModuleInfo.insert(QLatin1String("moduleType"), info.moduleType);
 

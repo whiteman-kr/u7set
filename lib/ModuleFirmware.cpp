@@ -193,7 +193,7 @@ static const std::vector<quint8> err;
 							int lmNumber,
 							int channel,
 							int moduleFamily,
-							int customModuleVersion,
+							int customModuleFamily,
 							int moduleVersion,
 							int moduleType
 							)
@@ -204,7 +204,7 @@ static const std::vector<quint8> err;
 		info.lmNumber = lmNumber;
 		info.channel = channel;
 		info.moduleFamily = moduleFamily;
-		info.customModuleVersion = customModuleVersion;
+		info.customModuleFamily = customModuleFamily;
 		info.moduleVersion = moduleVersion;
 		info.moduleType = moduleType;
 
@@ -575,12 +575,12 @@ static ModuleFirmware err;
 				}
 				lmi.moduleFamily = jModuleInfo.value(QLatin1String("moduleFamily")).toInt();
 
-				if (jModuleInfo.value(QLatin1String("customModuleVersion")).isUndefined() == true)
+				if (jModuleInfo.value(QLatin1String("customModuleFamily")).isUndefined() == true)
 				{
-					*errorCode = "Parse firmware error: cant find field customModuleVersion";
+					*errorCode = "Parse firmware error: cant find field customModuleFamily";
 					return false;
 				}
-				lmi.customModuleVersion = jModuleInfo.value(QLatin1String("customModuleVersion")).toInt();
+				lmi.customModuleFamily = jModuleInfo.value(QLatin1String("customModuleFamily")).toInt();
 
 				if (jModuleInfo.value(QLatin1String("moduleVersion")).isUndefined() == true)
 				{

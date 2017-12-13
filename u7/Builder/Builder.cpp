@@ -314,6 +314,17 @@ namespace Builder
 			}
 
 			//
+			// Save LogicModule Descriptions
+			//
+			ok = saveLogicModuleDescriptions(lmDescriptions, &buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Compile application logic
 			//
 			Tuning::TuningDataStorage tuningDataStorage;
@@ -1078,6 +1089,30 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
+														BuildResultWriter* buildResultWriter)
+	{
+		assert(buildResultWriter);
+
+		QStringList lmFiles = lmDescriptions.fileList();
+		for (QString fileName : lmFiles)
+		{
+			auto file = lmDescriptions.rowFile(fileName);
+
+			if (file.second == false)
+			{
+				m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. " __FUNCTION__));
+				return false;
+			}
+
+			BuildFile* buildFile = buildResultWriter->addFile(QLatin1String("LmDescriptions"), fileName, file.first, false);
+			assert(buildFile);
+			Q_UNUSED(buildFile);
+		}
+
+		return true;
+	}
+
 
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
 													const std::vector<Hardware::DeviceModule*>& lmModules,
@@ -1517,7 +1552,20 @@ namespace Builder
 
 		add(fileName, lmd);
 
+		m_rawLmDescriptions[fileName] = file->data();
+
 		return true;
+	}
+
+	std::pair<QString, bool> LmDescriptionSet::rowFile(QString fileName) const
+	{
+		auto it = m_rawLmDescriptions.find(fileName);
+		if (it == m_rawLmDescriptions.end())
+		{
+			return {QString(), false};
+		}
+
+		return {it->second, true};
 	}
 
 
