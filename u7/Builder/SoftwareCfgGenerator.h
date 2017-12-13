@@ -46,7 +46,7 @@ namespace Builder
 		static bool checkLmToSoftwareLinks(IssueLogger* log);
 
 		QString getBuildInfoCommentsForBat();
-		void getConfigIP(QString& cfgIP1, QString& cfgIP2);
+		bool getConfigIpFromChannels(QString& cfgIP1, QString& cfgIP2);
 
 
 	public:

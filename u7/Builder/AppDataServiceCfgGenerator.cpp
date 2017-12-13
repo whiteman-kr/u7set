@@ -341,7 +341,10 @@ namespace Builder
 
 		QString cfgIP1;
 		QString cfgIP2;
-		getConfigIP(cfgIP1, cfgIP2);
+		if (getConfigIpFromChannels(cfgIP1, cfgIP2) == false)
+		{
+			return false;
+		}
 
 		if (cfgIP1.isEmpty() == false)
 		{

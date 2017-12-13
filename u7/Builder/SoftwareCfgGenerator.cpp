@@ -496,24 +496,28 @@ namespace Builder
 		return comments;
 	}
 
-	void SoftwareCfgGenerator::getConfigIP(QString& cfgIP1, QString& cfgIP2)
+	bool SoftwareCfgGenerator::getConfigIpFromChannels(QString& cfgIP1, QString& cfgIP2)
 	{
-		TEST_PTR_RETURN(m_equipment);
-		TEST_PTR_RETURN(m_software);
+		TEST_PTR_RETURN_FALSE(m_equipment);
+		TEST_PTR_RETURN_FALSE(m_software);
 
-		auto ipGetter = [=](QString channelIdSuffix) -> QString
+		auto ipGetter = [=](QString channelIdSuffix, QString& ip) -> bool
 		{
 			auto channelObject = m_equipment->deviceObject(m_software->equipmentIdTemplate() + channelIdSuffix);
 
 			if (channelObject == nullptr)
 			{
-				return "";
+				TEST_PTR_RETURN_FALSE(m_log);
+				m_log->errCFG3014(channelIdSuffix, m_software->equipmentIdTemplate());
+				return false;
 			}
 
 			auto configurationServiceIdProperty = channelObject->propertyByCaption("ConfigurationServiceID");
 			if (configurationServiceIdProperty == nullptr)
 			{
-				return "";
+				TEST_PTR_RETURN_FALSE(m_log);
+				m_log->errCFG3020(m_software->equipmentIdTemplate() + channelIdSuffix, "ConfigurationServiceID");
+				return false;
 			}
 
 			QString configurationID = configurationServiceIdProperty->value().toString();
@@ -521,20 +525,28 @@ namespace Builder
 			auto* configurationServiceObject = m_equipment->deviceObject(configurationID);
 			if (configurationServiceObject == nullptr)
 			{
-				return "";
+				TEST_PTR_RETURN_FALSE(m_log);
+				m_log->errCFG3021(m_software->equipmentIdTemplate() + channelIdSuffix, "ConfigurationServiceID", configurationID);
+				return false;
 			}
 
 			auto configurationIpProperty = configurationServiceObject->propertyByCaption("ClientRequestIP");
 			if (configurationIpProperty== nullptr)
 			{
-				return "";
+				TEST_PTR_RETURN_FALSE(m_log);
+				m_log->errCFG3020(configurationID, "ClientRequestIP");
+				return false;
 			}
 
-			return configurationIpProperty->value().toString();
+			ip = configurationIpProperty->value().toString();
+			return true;
 		};
 
-		cfgIP1 = ipGetter("_DATACH01");
-		cfgIP2 = ipGetter("_DATACH02");
+		bool result = true;
+		result &= ipGetter("_DATACH01", cfgIP1);
+		result &= ipGetter("_DATACH02", cfgIP2);
+
+		return result;
 	}
 
 	// ---------------------------------------------------------------------------------
