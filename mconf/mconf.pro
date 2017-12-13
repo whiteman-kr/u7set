@@ -77,8 +77,7 @@ SOURCES += \
     ../lib/ModuleFirmware.cpp
 
 FORMS += moduleconfigurator.ui \
-	diagtabpage.ui \
-	applicationtabpage.ui
+	diagtabpage.ui
 
 RESOURCES +=	moduleconfigurator.qrc
 

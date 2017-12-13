@@ -12,7 +12,7 @@ namespace Builder
 		TuningBuilder() = delete;
         TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 					  Tuning::TuningDataStorage *tuningDataStorage, const std::vector<Hardware::DeviceModule*> lmModules,
-					  const LmDescriptionSet* lmDescriptionSet, Hardware::ModuleFirmwareCollection* firmwareCollection, IssueLogger* log);
+					  const LmDescriptionSet* lmDescriptionSet, Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger* log);
 		virtual ~TuningBuilder();
 
 		bool build();
@@ -25,7 +25,7 @@ namespace Builder
 
 
 	private:
-		Hardware::ModuleFirmwareCollection* m_firmwareCollection = nullptr;
+		Hardware::ModuleFirmwareWriter* m_firmwareWriter = nullptr;
 
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;

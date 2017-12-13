@@ -54,20 +54,21 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot,
-											   const std::vector<Hardware::DeviceModule*>& lmModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
+	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, QJSEngine* jsEngine, DbController* db, Hardware::DeviceRoot* deviceRoot,
+											   const std::vector<Hardware::DeviceModule*>& fscModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
 											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
-											   Hardware::ModuleFirmwareCollection* firmwareCollection, IssueLogger *log):
+											   Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
 		m_buildWorkerThread(buildWorkerThread),
+		m_jsEngine(jsEngine),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
-		m_lmModules(lmModules),
+		m_fscModules(fscModules),
 		m_lmDescriptions(lmDescriptions),
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
 		m_opticModuleStorage(opticModuleStorage),
 		m_log(log),
-		m_firmwareCollection(firmwareCollection)
+		m_firmwareWriter(firmwareWriter)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
@@ -75,7 +76,7 @@ namespace Builder
 		assert(m_subsystems);
 		assert(m_opticModuleStorage);
 		assert(m_log);
-		assert(m_firmwareCollection);
+		assert(m_firmwareWriter);
 
 		return;
 	}
@@ -104,7 +105,7 @@ namespace Builder
 
 		// Check if logic modules have unknown subsystems
 		//
-		for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
+		for (auto it = m_fscModules.begin(); it != m_fscModules.end(); it++)
 		{
 			Hardware::DeviceModule* lm = *it;
 			if (lm == nullptr)
@@ -162,7 +163,7 @@ namespace Builder
 
 			std::vector<LmDescription*> subsystemModulesDescriptions;
 
-			for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
+			for (auto it = m_fscModules.begin(); it != m_fscModules.end(); it++)
 			{
 				Hardware::DeviceModule* lm = *it;
 				if (lm == nullptr)
@@ -232,7 +233,7 @@ namespace Builder
 		// Find all LM modules and save ssKey and channel information
 		//
 
-		std::sort(m_lmModules.begin(), m_lmModules.end(),
+		std::sort(m_fscModules.begin(), m_fscModules.end(),
 				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
 		{
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
@@ -241,7 +242,7 @@ namespace Builder
 		QStringList lmReport;
 		lmReport << "Jumpers configuration for LM modules";
 
-		for (Hardware::DeviceModule* m : m_lmModules)
+		for (Hardware::DeviceModule* m : m_fscModules)
 		{
 			if (m->propertyExists("SubsystemID") == false)
 			{
@@ -337,22 +338,22 @@ namespace Builder
 
 		// Attach objects
 		//
-		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
+		m_jsEngine->installExtensions(QJSEngine::ConsoleExtension);
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
-		QJSValue jsBuilder = m_jsEngine.newQObject(this);
+		QJSValue jsBuilder = m_jsEngine->newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsRoot = m_jsEngine.newQObject(m_deviceRoot);
+		QJSValue jsRoot = m_jsEngine->newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
 
-		QJSValue jsLogicModules = m_jsEngine.newArray((int)subsystemModules.size());
+		QJSValue jsLogicModules = m_jsEngine->newArray((int)subsystemModules.size());
 		for (int i = 0; i < subsystemModules.size(); i++)
 		{
 			assert(jsLogicModules.isArray());
 
-			QJSValue module = m_jsEngine.newQObject(subsystemModules[i]);
+			QJSValue module = m_jsEngine->newQObject(subsystemModules[i]);
 			QQmlEngine::setObjectOwnership(subsystemModules[i], QQmlEngine::CppOwnership);
 
 			jsLogicModules.setProperty(i, module);
@@ -368,43 +369,52 @@ namespace Builder
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
-		Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection->createFirmware(subsystemModules[0]->caption(), subsysStrID, subsysID, configUartId, "Configuration", frameSize, frameCount, lmDescription->descriptionNumber());
+		m_firmwareWriter->createFirmware(subsysStrID,
+										 subsysID,
+										 configUartId,
+										 "Configuration",
+										 frameSize,
+										 frameCount,
+										 lmDescription->lmDescriptionFile(subsystemModules[0]),
+										lmDescription->descriptionNumber());
 
-		QJSValue jsFirmware = m_jsEngine.newQObject(firmware);
-		QQmlEngine::setObjectOwnership(firmware, QQmlEngine::CppOwnership);
+		m_firmwareWriter->setScriptFirmware(subsysStrID, configUartId);
 
-		QJSValue jsLog = m_jsEngine.newQObject(m_log);
+		QJSValue jsFirmware = m_jsEngine->newQObject(m_firmwareWriter);
+		QQmlEngine::setObjectOwnership(m_firmwareWriter, QQmlEngine::CppOwnership);
+
+		QJSValue jsLog = m_jsEngine->newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
-		QJSValue jsSignalSetObject = m_jsEngine.newQObject(&jsSignalSet);
+		QJSValue jsSignalSetObject = m_jsEngine->newQObject(&jsSignalSet);
 		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
 
-		QJSValue jsSubsystems = m_jsEngine.newQObject(m_subsystems);
+		QJSValue jsSubsystems = m_jsEngine->newQObject(m_subsystems);
 		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
 
-		QJSValue jsOpticModuleStorage = m_jsEngine.newQObject(m_opticModuleStorage);
+		QJSValue jsOpticModuleStorage = m_jsEngine->newQObject(m_opticModuleStorage);
 		QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
 
-		QJSValue jsLogicModuleDescription = m_jsEngine.newQObject(lmDescription);
+		QJSValue jsLogicModuleDescription = m_jsEngine->newQObject(lmDescription);
 		QQmlEngine::setObjectOwnership(lmDescription, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
 
-		QJSValue jsEval = m_jsEngine.evaluate(contents);
+		QJSValue jsEval = m_jsEngine->evaluate(contents);
 		if (jsEval.isError() == true)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Module configuration script '%1' evaluation failed at line %2: %3").arg(lmDescription->configurationStringFile()).arg(jsEval.property("lineNumber").toInt()).arg(jsEval.toString()));
 			return false;
 		}
 
-		if (!m_jsEngine.globalObject().hasProperty("main"))
+		if (!m_jsEngine->globalObject().hasProperty("main"))
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Script has no \"main\" function"));
 			return false;
 		}
 
-		if (!m_jsEngine.globalObject().property("main").isCallable())
+		if (!m_jsEngine->globalObject().property("main").isCallable())
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("\"main\" property of script is not callable"));
 			return false;
@@ -422,7 +432,7 @@ namespace Builder
 		args << jsOpticModuleStorage;
 		args << jsLogicModuleDescription;
 
-		QJSValue jsResult = m_jsEngine.globalObject().property("main").call(args);
+		QJSValue jsResult = m_jsEngine->globalObject().property("main").call(args);
 
 		if (jsResult.isError() == true)
 		{
@@ -441,21 +451,20 @@ namespace Builder
 
 	bool ConfigurationBuilder::writeDataFiles(BuildResultWriter &buildResultWriter)
 	{
+		QStringList subsystemsList = m_firmwareWriter->subsystems();
+
 		// Save confCollection items to binary files
 		//
-		for (auto i = m_firmwareCollection->firmwares().begin(); i != m_firmwareCollection->firmwares().end(); i++)
+		for (auto ss : subsystemsList)
 		{
-			Hardware::ModuleFirmwareWriter& f = i->second;
+			const QByteArray& log = m_firmwareWriter->scriptLog(ss);
 
-			if (f.subsysId().isEmpty())
+			if (log.isEmpty() == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
-				return false;
-			}
-
-			if (buildResultWriter.addFile(f.subsysId(), f.subsysId().toLower() + ".mct", f.scriptLog()) == nullptr)
-			{
-				return false;
+				if (buildResultWriter.addFile(ss, ss.toLower() + ".mct", log) == nullptr)
+				{
+					return false;
+				}
 			}
 		}
 

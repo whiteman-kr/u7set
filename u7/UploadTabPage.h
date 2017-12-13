@@ -32,8 +32,8 @@ public:
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
-	void findSubsystemsInBuild(int index);
-	void subsystemChanged(int index);
+	void buildChanged(int index);
+	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
@@ -41,9 +41,10 @@ signals:
 	void readConfiguration(int);
 	void readFirmware(QString fileName);
 
-	//void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
-	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName);
+	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem);
+	void detectSubsystem();
+
 	void eraseFlashMemory(int);
 	void cancelOperation();
 
@@ -70,13 +71,18 @@ public slots:
 
 private:
 	void writeLog(const OutputLogItem& logItem);
+	QString selectedSubsystem();
+	void selectSubsystem(const QString& id);
 
 private slots:
 
-	void clearUartData();
+	void clearSubsystemsUartData();
 	void resetUartData();
-	void loadHeaderComplete(std::vector<UartPair> uartList);
-	void uploadSuccessful(int uartID);
+
+	void loadBinaryFileHeaderComplete();
+	void uartOperationStart(int uartID, QString operation);
+	void uploadComplete(int uartID);
+	void detectSubsystemComplete(int selectedSubsystem);
 
 	// Data
 	//
@@ -84,17 +90,18 @@ private:
 
 	QSplitter* m_vsplitter = nullptr;
 
-	QListWidget* m_pBuildList = nullptr;
-
-	QListWidget* m_pSubsystemList = nullptr;
-
 	QComboBox* m_pConfigurationCombo = nullptr;
 
-	QTreeWidget* m_pFirmwareListWidget = nullptr;
+	QListWidget* m_pBuildList = nullptr;
+
+	QTreeWidget* m_pSubsystemsListWidget = nullptr;
+
+	QTreeWidget* m_pUartListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
-	QPushButton* m_pReadButton = nullptr;
+	QPushButton* m_pDetectSubsystemButton = nullptr;
+	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;
 
@@ -106,6 +113,8 @@ private:
 
 	Configurator* m_pConfigurator = nullptr;
 	QThread* m_pConfigurationThread = nullptr;
+
+	Hardware::ModuleFirmwareStorage m_firmware;
 
 	Builder::IssueLogger m_outputLog;
 
@@ -120,6 +129,11 @@ private:
 
 	bool m_uploading = false;
 
+	const int columnSubsysId = 0;
+	const int columnUartId = 0;
+	const int columnUartType = 1;
+	const int columnUploadCount = 2;
+	const int columnUartStatus = 3;
 };
 
 

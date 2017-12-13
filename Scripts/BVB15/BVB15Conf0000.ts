@@ -41,23 +41,23 @@ interface JsVariantList {
 }
 
 interface ModuleFirmware {
-	setData8(uartId: number, frameIndex: number, offset: number, data: number): boolean;
-	setData16(uartId: number, frameIndex: number, offset: number, data: number): boolean;
-	setData32(uartId: number, frameIndex: number, offset: number, data: number): boolean;
+	setData8(frameIndex: number, offset: number, data: number): boolean;
+	setData16(frameIndex: number, offset: number, data: number): boolean;
+	setData32( frameIndex: number, offset: number, data: number): boolean;
 
-	data8(uartId: number, frameIndex: number, offset: number): number;
-	data16(uartId: number, frameIndex: number, offset: number): number;
-	data32(uartId: number, frameIndex: number, offset: number): number;
+	data8(frameIndex: number, offset: number): number;
+	data16(frameIndex: number, offset: number): number;
+	data32(frameIndex: number, offset: number): number;
 
-	storeCrc64(uartId: number, frameIndex: number, start: number, count: number, offset: number): string;
-	storeHash64(uartId: number, frameIndex: number, offset: number, dataString: string): string;
+	storeCrc64(frameIndex: number, start: number, count: number, offset: number): string;
+	storeHash64(frameIndex: number, offset: number, dataString: string): string;
 
-	calcCrc32(uartId: number, frameIndex: number, start: number, count: number): number;
+	calcCrc32(frameIndex: number, start: number, count: number): number;
 	calcHash64(dataString: string): JsVariantList;
 
-	jsSetDescriptionFields(uartId: number, descriptionVersion: number, description: string): void;
-	jsAddDescription(uartId: number, channel: number, description: string): void;
-	jsSetUniqueID(uartId: number, LMNumber: number, uniqueID: number): void;
+	jsSetDescriptionFields(descriptionVersion: number, description: string): void;
+	jsAddDescription(channel: number, description: string): void;
+	jsSetUniqueID(LMNumber: number, uniqueID: number): void;
 
 	writeLog(message: string): void;
 	buildNumber(): number;
@@ -140,14 +140,10 @@ var configScriptVersion: number = 1;
 
 var LMDescriptionNumber: number = 0;
 
-var UartID: number = 0;
-
 //
 
 function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[], confFirmware: ModuleFirmware,
 	log: IssueLogger, signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule): boolean {
-
-	UartID = logicModuleDescription.FlashMemory_ConfigUartId;
 
 	if (logicModules.length != 0) {
 		var subSysID: string = logicModules[0].jsPropertyString("SubsystemID");
@@ -191,9 +187,9 @@ function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[]
 }
 
 function setData8(confFirmware: ModuleFirmware, log: IssueLogger, channel: number, equpmentID: string, frameIndex: number, offset: number, caption: string, data: number): boolean {
-	confFirmware.jsAddDescription(UartID, channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + data.toString(16));
+	confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + data.toString(16));
 
-	if (confFirmware.setData8(UartID, frameIndex, offset, data) == false) {
+	if (confFirmware.setData8(frameIndex, offset, data) == false) {
 		log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData8");
 		return false;
 	}
@@ -201,9 +197,9 @@ function setData8(confFirmware: ModuleFirmware, log: IssueLogger, channel: numbe
 }
 
 function setData16(confFirmware: ModuleFirmware, log: IssueLogger, channel: number, equpmentID: string, frameIndex: number, offset: number, caption: string, data: number): boolean {
-	confFirmware.jsAddDescription(UartID, channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + data.toString(16));
+	confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + data.toString(16));
 
-	if (confFirmware.setData16(UartID, frameIndex, offset, data) == false) {
+	if (confFirmware.setData16(frameIndex, offset, data) == false) {
 		log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData16");
 		return false;
 	}
@@ -211,9 +207,9 @@ function setData16(confFirmware: ModuleFirmware, log: IssueLogger, channel: numb
 }
 
 function setData32(confFirmware: ModuleFirmware, log: IssueLogger, channel: number, equpmentID: string, frameIndex: number, offset: number, caption: string, data: number): boolean {
-	confFirmware.jsAddDescription(UartID, channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + data.toString(16));
+	confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + data.toString(16));
 
-	if (confFirmware.setData32(UartID, frameIndex, offset, data) == false) {
+	if (confFirmware.setData32(frameIndex, offset, data) == false) {
 		log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData32");
 		return false;
 	}
@@ -221,9 +217,9 @@ function setData32(confFirmware: ModuleFirmware, log: IssueLogger, channel: numb
 }
 
 function storeCrc64(confFirmware: ModuleFirmware, log: IssueLogger, channel: number, equpmentID: string, frameIndex: number, start: number, count: number, offset: number): string {
-	var result: string = confFirmware.storeCrc64(UartID, frameIndex, start, count, offset);
+	var result: string = confFirmware.storeCrc64(frameIndex, start, count, offset);
 
-	confFirmware.jsAddDescription(UartID, channel, equpmentID + ";" + frameIndex + ";" + offset + ";" + "0;" + "64;" + "CRC64;0x" + result);
+	confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";" + "0;" + "64;" + "CRC64;0x" + result);
 
 	if (result == "") {
 		log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function storeCrc64");
@@ -232,9 +228,9 @@ function storeCrc64(confFirmware: ModuleFirmware, log: IssueLogger, channel: num
 }
 
 function storeHash64(confFirmware: ModuleFirmware, log: IssueLogger, channel: number, equpmentID: string, frameIndex: number, offset: number, caption: string, data: string): string {
-	var result: string = confFirmware.storeHash64(UartID, frameIndex, offset, data);
+	var result: string = confFirmware.storeHash64(frameIndex, offset, data);
 
-	confFirmware.jsAddDescription(UartID, channel, equpmentID + ";" + frameIndex + ";" + offset + ";" + "0;" + "64;" + caption + ";0x" + result);
+	confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";" + "0;" + "64;" + caption + ";0x" + result);
 
 	if (result == "") {
 		log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function storeHash64");
@@ -356,7 +352,7 @@ function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confF
 		var frameStorageConfig: number = 1;
 		var ptr: number = 14;
 
-		var LMNumberCount: number = confFirmware.data16(UartID, frameStorageConfig, ptr);
+		var LMNumberCount: number = confFirmware.data16(frameStorageConfig, ptr);
 		confFirmware.writeLog("---\r\n");
 		confFirmware.writeLog("BVB-15 for subsystem " + subSysID + ", LMNumber " + LMNumber + ": Frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
 		return true;
@@ -429,7 +425,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 
 	var descriptionVersion = 1;
 
-	confFirmware.jsSetDescriptionFields(UartID, descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
+	confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
 
 	confFirmware.writeLog("---\r\n");
 	confFirmware.writeLog("Module: BVB-15\r\n");
@@ -486,7 +482,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 
 	// write LMNumberCount, if old value is less than current. If it is the same, output an error.
 	//
-	var oldLMNumberCount: number = confFirmware.data16(UartID, frameStorageConfig, ptr);
+	var oldLMNumberCount: number = confFirmware.data16(frameStorageConfig, ptr);
 
 	if (oldLMNumberCount == LMNumber) {
 		log.errCFG3003(LMNumber, module.jsPropertyString("EquipmentID"));

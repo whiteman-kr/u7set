@@ -33,37 +33,55 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pConfigurationCombo, &QComboBox::currentTextChanged, this, &UploadTabPage::configurationTypeChanged);
 	pLeftLayout->addWidget(m_pConfigurationCombo);
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose Build:")));
+	// Create Build list widget
+
+	pLeftLayout->addWidget(new QLabel(tr("Choose the Build:")));
 	m_pBuildList = new QListWidget();
-	connect(m_pBuildList, &QListWidget::currentRowChanged, this, &UploadTabPage::findSubsystemsInBuild);
+	connect(m_pBuildList, &QListWidget::currentRowChanged, this, &UploadTabPage::buildChanged);
 	pLeftLayout->addWidget(m_pBuildList);
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose Subsystem:")));
-	m_pSubsystemList = new QListWidget();
-	connect(m_pSubsystemList, &QListWidget::currentRowChanged, this, &UploadTabPage::subsystemChanged);
-	pLeftLayout->addWidget(m_pSubsystemList);
+	// Create Subsystems list widget
 
-	pLeftLayout->addWidget(new QLabel(tr("Firmware Types:")));
-	m_pFirmwareListWidget = new QTreeWidget();
-	pLeftLayout->addWidget(m_pFirmwareListWidget);
+	pLeftLayout->addWidget(new QLabel(tr("Choose the Subsystem:")));
+	m_pSubsystemsListWidget = new QTreeWidget();
+	m_pSubsystemsListWidget->setRootIsDecorated(false);
+	connect(m_pSubsystemsListWidget, &QTreeWidget::currentItemChanged, this, &UploadTabPage::subsystemChanged);
+	pLeftLayout->addWidget(m_pSubsystemsListWidget, 2);
 
 	QStringList l;
+	l << tr("Subsystem");
+
+	m_pSubsystemsListWidget->setColumnCount(l.size());
+	m_pSubsystemsListWidget->setHeaderLabels(l);
+
+	int il = 0;
+	m_pSubsystemsListWidget->setColumnWidth(il++, 100);
+
+	// Create UART list widget
+
+	pLeftLayout->addWidget(new QLabel(tr("Firmware Types:")));
+	m_pUartListWidget = new QTreeWidget();
+	m_pUartListWidget->setRootIsDecorated(false);
+	pLeftLayout->addWidget(m_pUartListWidget);
+
+	l.clear();
 	l << tr("UartID");
 	l << tr("Type");
 	l << tr("Upload Count");
+	l << tr("Status");
 
-	m_pFirmwareListWidget->setColumnCount(l.size());
-	m_pFirmwareListWidget->setHeaderLabels(l);
+	m_pUartListWidget->setColumnCount(l.size());
+	m_pUartListWidget->setHeaderLabels(l);
 
-	int il = 0;
-	m_pFirmwareListWidget->setColumnWidth(il++, 80);
-	m_pFirmwareListWidget->setColumnWidth(il++, 140);
-	m_pFirmwareListWidget->setColumnWidth(il++, 140);
+	il = 0;
+	m_pUartListWidget->setColumnWidth(il++, 80);
+	m_pUartListWidget->setColumnWidth(il++, 100);
+	m_pUartListWidget->setColumnWidth(il++, 100);
+	m_pUartListWidget->setColumnWidth(il++, 60);
 
-	m_pFirmwareListWidget->setRootIsDecorated(false);
+	//
 
 	QHBoxLayout* bl = new QHBoxLayout();
-
 	bl->addStretch();
 
 	QPushButton* b = new QPushButton(tr("Reset Upload Counters"));
@@ -88,9 +106,8 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	QHBoxLayout* pButtonsLayout = new QHBoxLayout();
 
-	m_pReadButton = new QPushButton(tr("&Read"));
-	pButtonsLayout->addWidget(m_pReadButton);
-
+	m_pReadToFileButton = new QPushButton(tr("&Read to File"));
+	pButtonsLayout->addWidget(m_pReadToFileButton);
 
 	if (theSettings.isExpertMode() == true)
 	{
@@ -105,6 +122,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	pButtonsLayout->addWidget(m_pSettingsButton);
 
 	pButtonsLayout->addStretch();
+
+	m_pDetectSubsystemButton = new QPushButton(tr("Detect Subsystem"));
+	m_pDetectSubsystemButton->setEnabled(false);
+	pButtonsLayout->addWidget(m_pDetectSubsystemButton);
 
 	m_pConfigureButton = new QPushButton(tr("&Configure"));
 	m_pConfigureButton->setEnabled(false);
@@ -147,7 +168,9 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &UploadTabPage::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &UploadTabPage::projectClosed);
 
-	connect(m_pReadButton, &QAbstractButton::clicked, this, &UploadTabPage::read);
+	connect(m_pReadToFileButton, &QAbstractButton::clicked, this, &UploadTabPage::read);
+	connect(m_pDetectSubsystemButton, &QAbstractButton::clicked, this, &UploadTabPage::detectSubsystem);
+
 	connect(m_pConfigureButton, &QAbstractButton::clicked, this, &UploadTabPage::upload);
 	if (m_pEraseButton != nullptr)
 	{
@@ -175,19 +198,21 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
-	//connect(this, &UploadTabPage::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
+	connect(this, &UploadTabPage::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem_v1);
 
-	connect(this, &UploadTabPage::showConfDataFileInfo, m_pConfigurator, &Configurator::showBinaryFileInfo);
-	connect(this, &UploadTabPage::writeConfDataFile, m_pConfigurator, &Configurator::uploadBinaryFile);
+	connect(this, &UploadTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
+	connect(this, &UploadTabPage::uploadFirmware, m_pConfigurator, &Configurator::uploadFirmware);
 	connect(this, &UploadTabPage::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 
-	connect(m_pConfigurator, &Configurator::communicationStarted, this, &UploadTabPage::disableControls);
-	connect(m_pConfigurator, &Configurator::communicationFinished, this, &UploadTabPage::enableControls);
+	connect(m_pConfigurator, &Configurator::operationStarted, this, &UploadTabPage::disableControls);
+	connect(m_pConfigurator, &Configurator::operationFinished, this, &UploadTabPage::enableControls);
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &UploadTabPage::communicationReadFinished);
 
-	connect(m_pConfigurator, &Configurator::loadHeaderComplete, this, &UploadTabPage::loadHeaderComplete);
-	connect(m_pConfigurator, &Configurator::uploadSuccessful, this, &UploadTabPage::uploadSuccessful);
+	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, this, &UploadTabPage::loadBinaryFileHeaderComplete);
+	connect(m_pConfigurator, &Configurator::uartOperationStart, this, &UploadTabPage::uartOperationStart);
+	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, this, &UploadTabPage::uploadComplete);
+	connect(m_pConfigurator, &Configurator::detectSubsystemComplete, this, &UploadTabPage::detectSubsystemComplete);
 
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 
@@ -265,8 +290,6 @@ void UploadTabPage::findProjectBuilds()
 	m_pBuildList->clear();
 	m_pBuildList->addItems(builds);
 
-	m_pSubsystemList->clear();
-
 	if (m_currentBuildIndex != -1 && m_currentBuildIndex < m_pBuildList->count())
 	{
 		m_pBuildList->setCurrentRow(m_currentBuildIndex);
@@ -281,7 +304,7 @@ void UploadTabPage::configurationTypeChanged(const QString& s)
 }
 
 
-void UploadTabPage::findSubsystemsInBuild(int index)
+void UploadTabPage::buildChanged(int index)
 {
 	Q_UNUSED(index);
 
@@ -296,81 +319,79 @@ void UploadTabPage::findSubsystemsInBuild(int index)
 		return;
 	}
 
+	clearSubsystemsUartData();
+
+	m_currentFileName.clear();
+
 	m_currentBuild = item->text();
 
 	m_currentBuildIndex = m_pBuildList->currentRow();
 
 	QString buildPath = m_buildSearchPath + QDir::separator() + m_currentBuild;
 
-	QStringList subsystems = QDir(buildPath).entryList(QStringList("*"),
-									 QDir::Dirs | QDir::NoSymLinks);
-
-	m_pSubsystemList->clear();
-
-	// add only directories that contain binary files
-	//
-
-	for (QString s : subsystems)
-	{
-		QDir subsystemPath = buildPath + QDir::separator() + s;
-
-		QStringList binaryFiles = QDir(subsystemPath).entryList(QStringList() << "*.bts",
-										 QDir::Files| QDir::NoSymLinks);
-
-		if (binaryFiles.isEmpty() == false)
-		{
-			m_pSubsystemList->addItem(s);
-		}
-	}
-
-	if (m_currentSubsystemIndex != -1 && m_currentSubsystemIndex < m_pSubsystemList->count())
-	{
-		m_pSubsystemList->setCurrentRow(m_currentSubsystemIndex);
-	}
-}
-
-void UploadTabPage::subsystemChanged(int index)
-{
-	Q_UNUSED(index);
-
-	//clearLog();
-
-	m_currentFileName.clear();
-
-	QListWidgetItem* item = m_pSubsystemList->currentItem();
-	if (item == nullptr)
-	{
-		m_pConfigureButton->setEnabled(false);
-		return;
-	}
-
-	m_pConfigureButton->setEnabled(true);
-	m_currentSubsystem = item->text();
-	m_currentSubsystemIndex = m_pSubsystemList->currentRow();
-
-	QString searchPath = m_buildSearchPath + QDir::separator() + m_currentBuild + QDir::separator() + m_currentSubsystem;
-
-	QStringList binaryFiles = QDir(searchPath).entryList(QStringList() << "*.bts",
+	QStringList binaryFiles = QDir(buildPath).entryList(QStringList() << "*.bts",
 									 QDir::Files| QDir::NoSymLinks);
 
 	if (binaryFiles.isEmpty() == true)
 	{
-		m_outputLog.writeError(tr("No Output Bitstream files found in %1!").arg(searchPath));
+		m_outputLog.writeError(tr("No Output Bitstream files found in %1!").arg(buildPath));
 		return;
 	}
 
 	if (binaryFiles.size() > 1)
 	{
-		m_outputLog.writeError(tr("More than one Output Bitstream file found in %1!").arg(searchPath));
+		m_outputLog.writeError(tr("More than one Output Bitstream file found in %1!").arg(buildPath));
 		return;
 	}
 
-	m_currentFileName = searchPath + QDir::separator() + binaryFiles[0];
+	m_currentFileName = buildPath + QDir::separator() + binaryFiles[0];
 
-	clearUartData();
+	emit loadBinaryFile(m_currentFileName, &m_firmware);
 
-	emit showConfDataFileInfo(m_currentFileName);
+}
 
+void UploadTabPage::subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2)
+{
+	Q_UNUSED(item1);
+	Q_UNUSED(item2);
+
+
+	QTreeWidgetItem* subsystemItem = m_pSubsystemsListWidget->currentItem();
+	if (subsystemItem == nullptr)
+	{
+		return;
+	}
+
+	QString subsystemId = subsystemItem->data(columnSubsysId, Qt::UserRole).toString();
+
+	bool ok = false;
+	const ModuleFirmware& mf = m_firmware.firmware(subsystemId, &ok);
+	if (ok == false)
+	{
+		assert(false);
+		return;
+	}
+
+	const std::vector<UartPair>& uartList = mf.uartList();
+
+	m_pUartListWidget->clear();
+
+	for (auto it : uartList)
+	{
+		int uartID = it.first;
+		QString uartType = it.second;
+
+		QStringList l;
+		l << tr("%1h").arg(QString::number(uartID, 16));
+		l << uartType;
+		l << "0";
+
+		QTreeWidgetItem* uartItem = new QTreeWidgetItem(l);
+		uartItem->setData(columnUartId, Qt::UserRole, uartID);
+		uartItem->setData(columnUploadCount, Qt::UserRole, 0);
+
+		m_pUartListWidget->addTopLevelItem(uartItem);
+	}
 }
 
 void UploadTabPage::closeEvent(QCloseEvent* e)
@@ -388,7 +409,6 @@ void UploadTabPage::projectOpened()
 void UploadTabPage::projectClosed()
 {
 	m_pBuildList->clear();
-	m_pSubsystemList->clear();
 
 	this->setEnabled(false);
 	return;
@@ -424,14 +444,21 @@ void UploadTabPage::upload()
 {
 	if (m_currentFileName.isEmpty())
 	{
-		m_outputLog.writeError(tr("No Output Bitstream File selected!"));
+		QMessageBox::critical(this, qApp->applicationName(), tr("Configuration file was not loaded."));
+		return;
+	}
+
+	QString subsysId = selectedSubsystem();
+
+	if (subsysId.isEmpty())
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("Subsystem is not selected."));
 		return;
 	}
 
 	try
 	{
-
-		emit writeConfDataFile(m_currentFileName);
+		emit uploadFirmware(&m_firmware, subsysId);
 	}
 	catch(QString message)
 	{
@@ -513,7 +540,8 @@ void UploadTabPage::disableControls()
 
 	bool enable = false;
 
-	m_pReadButton->setEnabled(enable);
+	m_pReadToFileButton->setEnabled(enable);
+	m_pDetectSubsystemButton->setEnabled(enable);
 	m_pConfigureButton->setEnabled(enable);
 	if (m_pEraseButton)
 	{
@@ -531,7 +559,8 @@ void UploadTabPage::enableControls()
 
 	bool enable = true;
 
-	m_pReadButton->setEnabled(enable);
+	m_pReadToFileButton->setEnabled(enable);
+	m_pDetectSubsystemButton->setEnabled(enable);
 	m_pConfigureButton->setEnabled(enable);
 	if (m_pEraseButton)
 	{
@@ -540,13 +569,27 @@ void UploadTabPage::enableControls()
 	m_pSettingsButton->setEnabled(enable);
 	m_pCancelButton->setEnabled(!enable);
 	m_pClearLogButton->setEnabled(enable);
+
+
+	// Clear status of all Uarts
+	//
+	int count = m_pUartListWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = m_pUartListWidget->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+		item->setText(columnUartStatus, QString());
+	}
 }
 
 void UploadTabPage::communicationReadFinished()
 {
 
 }
-
 
 void UploadTabPage::writeLog(const OutputLogItem& logItem)
 {
@@ -562,79 +605,175 @@ void UploadTabPage::writeLog(const OutputLogItem& logItem)
 	return;
 }
 
-void UploadTabPage::clearUartData()
+QString UploadTabPage::selectedSubsystem()
 {
-	m_pFirmwareListWidget->clear();
+	for (QTreeWidgetItem* item : m_pSubsystemsListWidget->selectedItems())
+	{
+		QVariant vData = item->data(columnSubsysId, Qt::UserRole);
+
+		if (vData.isValid())
+		{
+			return vData.toString();
+		}
+	}
+
+	return QString();
+}
+
+void UploadTabPage::selectSubsystem(const QString& id)
+{
+	m_pSubsystemsListWidget->clearSelection();
+
+	int count = m_pSubsystemsListWidget->topLevelItemCount();
+
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = m_pSubsystemsListWidget->topLevelItem(i);
+
+		QVariant vData = item->data(columnSubsysId, Qt::UserRole);
+
+		if (vData.isValid() && vData.toString() == id)
+		{
+			m_pSubsystemsListWidget->setCurrentItem(item);
+			return;
+		}
+	}
+}
+
+
+void UploadTabPage::clearSubsystemsUartData()
+{
+	m_pSubsystemsListWidget->clear();
+	m_pUartListWidget->clear();
 }
 
 void UploadTabPage::resetUartData()
 {
-	int count = m_pFirmwareListWidget->topLevelItemCount();
+	int count = m_pUartListWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
 	{
-		QTreeWidgetItem* item = m_pFirmwareListWidget->topLevelItem(i);
+		QTreeWidgetItem* item = m_pUartListWidget->topLevelItem(i);
 		if (item == nullptr)
 		{
 			assert(item);
 			return;
 		}
 
-		item->setData(2, Qt::UserRole, 0);
-		item->setText(2, "0");
+		item->setData(columnUploadCount, Qt::UserRole, 0);
+		item->setText(columnUploadCount, "0");
 	}
 }
 
-void UploadTabPage::loadHeaderComplete(std::vector<UartPair> uartList)
+void UploadTabPage::loadBinaryFileHeaderComplete()
 {
-	clearUartData();
+	clearSubsystemsUartData();
 
-	for (auto it : uartList)
+	QStringList subsystemsList = m_firmware.subsystems();
+
+	for (const QString& subsystemId : subsystemsList)
 	{
-		int uartID = it.first;
-		QString uartType = it.second;
+		QTreeWidgetItem* subsystemItem = new QTreeWidgetItem(QStringList() << subsystemId);
+		subsystemItem->setData(columnSubsysId, Qt::UserRole, subsystemId);
 
-		QStringList l;
-		l << tr("%1h").arg(QString::number(uartID, 16));
-		l << uartType;
-		l << "0";
-
-		QTreeWidgetItem* item = new QTreeWidgetItem(l);
-
-		item->setData(0, Qt::UserRole, uartID);
-		item->setData(2, Qt::UserRole, 0);
-
-		m_pFirmwareListWidget->addTopLevelItem(item);
+		m_pSubsystemsListWidget->sortByColumn(columnUartId, Qt::AscendingOrder);
+		m_pSubsystemsListWidget->addTopLevelItem(subsystemItem);
 	}
 
-	m_pFirmwareListWidget->sortByColumn(0, Qt::AscendingOrder);
+	// Better make user to think
+	//
+
+	//if (m_pSubsystemsListWidget->topLevelItemCount() > 0)
+	//{
+		//m_pSubsystemsListWidget->setCurrentItem(m_pSubsystemsListWidget->topLevelItem(0));
+	//}
 }
 
-void UploadTabPage::uploadSuccessful(int uartID)
+void UploadTabPage::uartOperationStart(int uartID, QString operation)
 {
-	int count = m_pFirmwareListWidget->topLevelItemCount();
+	int count = m_pUartListWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
 	{
-		QTreeWidgetItem* item = m_pFirmwareListWidget->topLevelItem(i);
+		QTreeWidgetItem* item = m_pUartListWidget->topLevelItem(i);
 		if (item == nullptr)
 		{
 			assert(item);
 			return;
 		}
 
-		int itemUartId = item->data(0, Qt::UserRole).toInt();
+		int itemUartId = item->data(columnUartId, Qt::UserRole).toInt();
+
 		if (uartID == itemUartId)
 		{
-			int itemUploadCount = item->data(2, Qt::UserRole).toInt();
+			item->setText(columnUartStatus, operation);
+			return;
+		}
+	}
+	return;
+}
+
+void UploadTabPage::uploadComplete(int uartID)
+{
+	int count = m_pUartListWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* item = m_pUartListWidget->topLevelItem(i);
+		if (item == nullptr)
+		{
+			assert(item);
+			return;
+		}
+
+		int itemUartId = item->data(columnUartId, Qt::UserRole).toInt();
+
+		if (uartID == itemUartId)
+		{
+			int itemUploadCount = item->data(columnUploadCount, Qt::UserRole).toInt();
 			itemUploadCount++;
 
-			item->setData(2, Qt::UserRole, itemUploadCount);
-			item->setText(2, QString::number(itemUploadCount));
+			item->setData(columnUploadCount, Qt::UserRole, itemUploadCount);
+			item->setText(columnUploadCount, QString::number(itemUploadCount));
 
+			return;
+		}
+	}
+	return;
+}
+
+void UploadTabPage::detectSubsystemComplete(int subsystemId)
+{
+	m_outputLog.writeMessage(tr("Subsystem Key is %1").arg(subsystemId));
+
+	bool subsystemFound = false;
+
+	QStringList subsystems = m_firmware.subsystems();
+	for (auto s : subsystems)
+	{
+		bool ok = false;
+		const ModuleFirmware& fw = m_firmware.firmware(s, &ok);
+		if (ok == false)
+		{
+			assert(false);
+			return;
+		}
+
+		if (subsystemId == fw.ssKey())
+		{
+			// Select the subsystem
+			//
+			m_outputLog.writeMessage(tr("Subsystem ID is %1").arg(fw.subsysId()));
+			selectSubsystem(fw.subsysId());
+			subsystemFound = true;
 			break;
 		}
 	}
 
-	return;
+	if (subsystemFound == false)
+	{
+		m_pSubsystemsListWidget->clearSelection();
+		m_outputLog.writeMessage(tr("Subsystem ID is unknown"));
+	}
+
+	m_outputLog.writeSuccess(tr("Successful."));
 }
 
 void UploadTabPage::timerEvent(QTimerEvent* pTimerEvent)
