@@ -756,7 +756,8 @@ static ModuleFirmware err;
 
 						if (Crc::checkDataBlockCrc(v, firmwareData.frames[v]) == false)
 						{
-							*errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
+
+							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.").arg(fw.subsysId()).arg(QString::number(uartId, 16)).arg(v);
 							return false;
 						}
 					}
