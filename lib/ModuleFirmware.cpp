@@ -8,7 +8,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
-
+#include <math.h>
 //-----------------------------------------------------------------------------
 
 namespace Hardware
