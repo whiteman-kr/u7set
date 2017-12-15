@@ -19,12 +19,12 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	m_tabWidget = new QTabWidget(this);
 	
-	DiagTabPage* diagTabPage = new DiagTabPage();
 	ApplicationTabPage* appTabPage = new ApplicationTabPage();
+	DiagTabPage* diagTabPage = new DiagTabPage();
 
-	m_tabWidget->addTab(diagTabPage, "Diag");
-	m_tabWidget->addTab(appTabPage, "Application");
-	
+	m_tabWidget->addTab(appTabPage, "Output Bitstream Files");
+	m_tabWidget->addTab(diagTabPage, "Service Information");
+
 	// Log
 	//
 	m_pLog = new QTextEdit();
@@ -36,6 +36,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Read data from module button
 	//
 	m_pReadButton = new QPushButton(tr("&Read"));
+
+	m_pDetectSubsystemButton = new QPushButton(tr("Detect Subsystem"));
 
 	// Write Data to module (Configure)
 	//
@@ -63,11 +65,11 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	QVBoxLayout* pLeftLayout = new QVBoxLayout();
 	
 	pLeftLayout->addWidget(m_tabWidget);
-	pLeftLayout->addWidget(m_pLog, 1);
 		
 	// Right Layout (buttons)
 	//
 	QVBoxLayout* pRightLayout = new QVBoxLayout();
+	pRightLayout->addWidget(m_pDetectSubsystemButton);
 	pRightLayout->addWidget(m_pConfigureButton);
 	pRightLayout->addWidget(m_pReadButton);
 
@@ -84,7 +86,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Main, dialog layout
 	//
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
-	pMainLayout->addLayout(pLeftLayout);
+	pMainLayout->addLayout(pLeftLayout, 1);
+	pMainLayout->addWidget(m_pLog, 2);
 	pMainLayout->addLayout(pRightLayout);
 	
 	QWidget* pCentralWidget = new QWidget();
@@ -94,6 +97,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// GUI
 	//
+	connect(m_pDetectSubsystemButton, &QAbstractButton::clicked, this, &ModuleConfigurator::detectSubsystem);
 	connect(m_pConfigureButton, &QAbstractButton::clicked, this, &ModuleConfigurator::configureClicked);
 	connect(m_pReadButton, &QAbstractButton::clicked, this, &ModuleConfigurator::readClicked);
 
@@ -114,19 +118,27 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	
 	connect(this, &ModuleConfigurator::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 	
-	connect(this, &ModuleConfigurator::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
+	connect(this, &ModuleConfigurator::readServiceInformation, m_pConfigurator, &Configurator::readServiceInformation);
 	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
 	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
-	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadConfData);
-	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::writeDiagData);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
+	connect(this, &ModuleConfigurator::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem_v1);
+	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadFirmware);
+	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::uploadServiceInformation);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
 	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 	
-	connect(m_pConfigurator, &Configurator::communicationStarted, this, &ModuleConfigurator::disableControls);
-	connect(m_pConfigurator, &Configurator::communicationFinished, this, &ModuleConfigurator::enableControls);
+	connect(m_pConfigurator, &Configurator::operationStarted, this, &ModuleConfigurator::disableControls);
+	connect(m_pConfigurator, &Configurator::operationFinished, this, &ModuleConfigurator::enableControls);
+	connect(m_pConfigurator, &Configurator::operationFinished, appTabPage, &ApplicationTabPage::enableControls);
+	connect(m_pConfigurator, &Configurator::detectSubsystemComplete, appTabPage, &ApplicationTabPage::detectSubsystemComplete);
+
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
 
-	connect(m_pConfigurator, &Configurator::uploadSuccessful, appTabPage, &ApplicationTabPage::uploadSuccessful);
+	connect(appTabPage, &ApplicationTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
+
+	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, appTabPage, &ApplicationTabPage::loadBinaryFileHeaderComplete);
+	connect(m_pConfigurator, &Configurator::uartOperationStart, appTabPage, &ApplicationTabPage::uartOperationStart);
+	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, appTabPage, &ApplicationTabPage::uploadComplete);
 	
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 	
@@ -139,6 +151,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Start Timer
 	//
 	m_logTimerId = startTimer(2);
+
+	setMinimumSize(1280, 768);
 
 	// --
 	//
@@ -211,19 +225,13 @@ void ModuleConfigurator::configureClicked()
 
 			if (page->isFactoryNoValid() == false)
 			{
-				QMessageBox msgBox(this);
-				msgBox.setText(tr("Invalid FactoryNo."));
-				msgBox.setInformativeText(tr("Enter valid data."));
-				msgBox.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid FactoryNo."));
 				return;
 			}
 
             if (page->isFirmwareCrcValid() == false)
 			{
-				QMessageBox msgBox(this);
-                msgBox.setText(tr("Invalid Firmware CRC."));
-				msgBox.setInformativeText(tr("Enter valid data."));
-				msgBox.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid Firmware CRC."));
 				return;
 			}
 
@@ -234,11 +242,7 @@ void ModuleConfigurator::configureClicked()
 
 			if (factoryNo == 0)
 			{
-				QMessageBox msgBox(this);
-				msgBox.setText(tr("Invalid FactoryNo."));
-				msgBox.setInformativeText(tr("Enter valid data."));
-
-				msgBox.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid FactoryNo."));
 				return;
 			}
 
@@ -262,9 +266,13 @@ void ModuleConfigurator::configureClicked()
 
 			if (page->isFileLoaded() == false)
 			{
-				QMessageBox mb(this);
-				mb.setText(tr("Configuration file was not loaded."));
-				mb.exec();
+				QMessageBox::critical(this, qApp->applicationName(), tr("Configuration file was not loaded."));
+				return;
+			}
+
+			if (page->selectedSubsystem().isEmpty() == true)
+			{
+				QMessageBox::critical(this, qApp->applicationName(), tr("Subsystem is not selected."));
 				return;
 			}
 
@@ -272,7 +280,7 @@ void ModuleConfigurator::configureClicked()
 			//
 			disableControls();
 
-			emit writeConfData(page->configuration());
+			emit writeConfData(page->configuration(), page->selectedSubsystem());
 		}
 	}
 	catch(QString message)
@@ -301,7 +309,7 @@ void ModuleConfigurator::readClicked()
 			//
 			disableControls();
 
-			emit readConfiguration(0);
+			emit readServiceInformation(0);
 		}
 
 		if (dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget()) != nullptr)
@@ -410,6 +418,7 @@ void ModuleConfigurator::disableControls()
 
 	m_pReadButton->setEnabled(false);
 	m_pConfigureButton->setEnabled(false);
+	m_pDetectSubsystemButton->setEnabled(false);
 	
 	if (m_pEraseButton != nullptr)
 	{
@@ -426,6 +435,7 @@ void ModuleConfigurator::enableControls()
 
 	m_pReadButton->setEnabled(true);
 	m_pConfigureButton->setEnabled(true);
+	m_pDetectSubsystemButton->setEnabled(true);
 
 	if (m_pEraseButton != nullptr)
 	{

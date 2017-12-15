@@ -389,7 +389,8 @@ namespace Builder
 		bool createOptoSignal(const UalItem* ualItem,
 								Signal* s,
 								const QString &lmEquipmentID,
-								BusShared bus);
+								BusShared bus,
+								IssueLogger* log);
 
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
@@ -424,6 +425,7 @@ namespace Builder
 		Signal* signal() const;
 
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
+		E::SignalInOutType inOutType() const { return m_refSignals[0]->inOutType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
 		int dataSize() const { return m_refSignals[0]->dataSize(); }
 		int sizeW() const { return m_refSignals[0]->sizeW(); }

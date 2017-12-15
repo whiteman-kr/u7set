@@ -1086,40 +1086,55 @@ namespace Builder
 	bool UalSignal::createOptoSignal(const UalItem* ualItem,
 									Signal* s,
 									const QString& lmEquipmentID,
-									 BusShared bus)
+									BusShared bus,
+									IssueLogger* log)
 	{
-		if (ualItem == nullptr)
+		if (ualItem == nullptr || s == nullptr || log == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
+		if (s->lm() == nullptr)
+		{
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
+
+		// Opto UalSignal creation from receiver
+		//
 		m_ualItem = ualItem;
 		m_bus = bus;
 
-		// Opto UalSignal creation from receiver
-
-		if (s == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
 		m_isOptoSignal = true;
 
-		// create new instance of Signal
-		m_autoSignalPtr = new Signal(*s);
+		Signal* refSignal = nullptr;
+
+		if (lmEquipmentID == s->lm()->equipmentIdTemplate())
+		{
+			// this signal is native for current LM
+			// no create new signal, use existing
+			//
+			refSignal = s;
+		}
+		else
+		{
+			// this signal is not native for current LM
+			// create new instance of Signal
+			//
+			refSignal = m_autoSignalPtr = new Signal(*s);
+
+			refSignal->setAcquire(false);								// reset Acquired flag
+			refSignal->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
+			refSignal->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
+		}
 
 		// reset signal addresses to invalid state
 		// ualAddr of opto signal should be set later in setOptoUalSignalsAddresses()
 		//
-		m_autoSignalPtr->resetAddresses();
+		refSignal->resetAddresses();
 
-		m_autoSignalPtr->setEquipmentID(lmEquipmentID);						// associate new signal with current lm
-		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
-		m_autoSignalPtr->setAcquire(false);
-
-		appendRefSignal(m_autoSignalPtr, true);
+		appendRefSignal(refSignal, true);
 
 		setComputed();
 
@@ -2028,7 +2043,8 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, Signal* s,
+	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem,
+											   Signal* s,
 											   const QString& lmEquipmentID,
 											   QUuid outPinUuid)
 	{
@@ -2060,7 +2076,7 @@ namespace Builder
 			}
 		}
 
-		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus);
+		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus, m_log);
 
 		if (result == false)
 		{
@@ -2083,8 +2099,6 @@ namespace Builder
 			for(const BusSignal& busSignal : busSignals)
 			{
 				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(), bus, busSignal);
-
-				templateSignal->setEquipmentID(s->equipmentID());
 
 				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, QUuid());
 
@@ -2344,6 +2358,9 @@ namespace Builder
 			}
 
 			str.append(E::valueToString<E::SignalType>(ualSignal->signalType()));
+			str += ";";
+
+			str.append(E::valueToString<E::SignalInOutType>(ualSignal->inOutType()));
 			str += ";";
 
 			str.append(E::valueToString<E::AnalogAppSignalFormat>(ualSignal->analogSignalFormat()));

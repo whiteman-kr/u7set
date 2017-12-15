@@ -878,33 +878,21 @@ namespace Builder
 	{
 		bool result = true;
 
-		std::map<QString, Hardware::ModuleFirmwareWriter>& firmwares = m_firmwareCollection.firmwares();
+		QByteArray fileData;
 
-		if (firmwares.empty() == false)
+		if (m_firmwareWriter.save(fileData, m_log) == true)
 		{
-			LOG_EMPTY_LINE(m_log);
-		}
+			BuildFile* buildFile = addFile("", QString("%1-%2.bts").arg(m_buildInfo.project).arg(QString::number(m_buildInfo.id).rightJustified(6, '0')), fileData);
 
-		for(auto it = firmwares.begin(); it != firmwares.end(); it++)
-		{
-			Hardware::ModuleFirmwareWriter& firmware = it->second;
-
-			QByteArray fileData;
-
-			if (firmware.save(fileData, m_log) == true)
+			if (buildFile == nullptr)
 			{
-				BuildFile* buildFile = addFile(firmware.subsysId(), firmware.subsysId().toLower() + ".bts", fileData);
-
-				if (buildFile == nullptr)
-				{
-					result = false;
-				}
-			}
-			else
-			{
-				//assert(false);
 				result = false;
 			}
+		}
+		else
+		{
+			//assert(false);
+			result = false;
 		}
 
 		return result;

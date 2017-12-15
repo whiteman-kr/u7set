@@ -3421,16 +3421,24 @@ namespace Builder
 
 			UalItem appItem;
 
-			bool res = createAfbForAnalogInputSignalConversion(*s, appItem);
+			bool needConversion = false;
 
-			if (res == true)
+			bool res = createAfbForAnalogInputSignalConversion(*s, &appItem, &needConversion);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			s->setNeedConversion(needConversion);
+
+			if (needConversion == true)
 			{
 				UalAfb* appFb = createUalAfb(appItem);
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
 			}
-
-			result &= res;
 		}
 
 		// append FBs  for analog output signals conversion
@@ -3444,16 +3452,24 @@ namespace Builder
 
 			UalItem appItem;
 
-			bool res = createFbForAnalogOutputSignalConversion(*s, appItem);
+			bool needConversion = false;
 
-			if (res == true)
+			bool res = createFbForAnalogOutputSignalConversion(*s, &appItem, &needConversion);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			s->setNeedConversion(needConversion);
+
+			if (needConversion == true)
 			{
 				UalAfb* appFb = createUalAfb(appItem);
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
 			}
-
-			result &= res;
 		}
 
 		return result;
@@ -3626,8 +3642,14 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem)
+	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion)
 	{
+		if (appItem == nullptr || needConversion == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
 		assert(signal.isAnalog());
 		assert(signal.isInput());
 		assert(signal.equipmentID().isEmpty() == false);
@@ -3656,11 +3678,11 @@ namespace Builder
 
 		if (signalsIsCompatible == true)
 		{
-			signal.setNeedConversion(false);
+			*needConversion = false;
 			return true;
 		}
 
-		signal.setNeedConversion(true);
+		*needConversion = true;
 
 		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
 		{
@@ -3699,7 +3721,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1));
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -3720,7 +3742,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -3741,7 +3763,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem)
+	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isOutput());
@@ -3771,11 +3793,11 @@ namespace Builder
 
 		if (signalsIsCompatible == true)
 		{
-			signal.setNeedConversion(false);
+			*needConversion = false;
 			return true;
 		}
 
-		signal.setNeedConversion(true);
+		*needConversion = true;
 
 		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
 		{
@@ -3814,7 +3836,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -3835,7 +3857,7 @@ namespace Builder
 				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
-				result = appItem.init(fb.pointer, errorMsg);
+				result = appItem->init(fb.pointer, errorMsg);
 
 				if (errorMsg.isEmpty() == false)
 				{
@@ -6460,7 +6482,6 @@ namespace Builder
 		m_code.comment("Copy acquired opto signals in regBuf");
 		m_code.newLine();
 
-
 		for(UalSignal* ualSignal : m_acquiredAnalogOptoSignals)
 		{
 			if (ualSignal == nullptr)
@@ -6514,7 +6535,57 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf()
 	{
-		return true;
+		if (m_acquiredAnalogBusChildSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		m_code.comment("Copy acquired analog bus child signals to reg buf");
+		m_code.newLine();
+
+		bool result = true;
+
+		for(UalSignal* ualSignal : m_acquiredAnalogBusChildSignals)
+		{
+			if (ualSignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->ualAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->regBufAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualSignal->sizeW() != 2)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			Command cmd;
+
+			cmd.mov32(ualSignal->regBufAddr(), ualSignal->ualAddr());
+			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+
+			m_code.append(cmd);
+		}
+
+		m_code.newLine();
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf()
@@ -8833,11 +8904,17 @@ namespace Builder
 
 		if (m_lmDescription->flashMemory().m_appLogicWriteBitstream == true)
 		{
-			int appLogicUartId = m_lmDescription->flashMemory().m_appLogicUartId;
-			int lmDescriptionNumber = m_lmDescription->descriptionNumber();
-
-			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID, m_lmSubsystemKey, appLogicUartId, m_lm->equipmentIdTemplate(), m_lm->caption(),
-														   m_lmNumber, m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, lmDescriptionNumber, uniqueID, m_code);
+			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID,
+														   m_lmSubsystemKey,
+														   m_lmDescription->flashMemory().m_appLogicUartId,
+														   m_lm->equipmentIdTemplate(),
+														   m_lmNumber,
+														   m_lmAppLogicFrameSize,
+														   m_lmAppLogicFrameCount,
+														   uniqueID,
+														   m_lmDescription->lmDescriptionFile(m_lm),
+														   m_lmDescription->descriptionNumber(),
+														   m_code);
 			if (result == false)
 			{
 				return false;

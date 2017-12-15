@@ -256,8 +256,8 @@ namespace Builder
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem);
-		bool createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem);
+		bool createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
+		bool createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
 
 		UalAfb* createUalAfb(const UalItem& appItem);

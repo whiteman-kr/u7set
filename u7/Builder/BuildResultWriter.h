@@ -150,7 +150,7 @@ namespace Builder
 
 		HashedVector<QString, ConfigurationXmlFile*> m_cfgFiles;
 
-		Hardware::ModuleFirmwareCollection m_firmwareCollection;
+		Hardware::ModuleFirmwareWriter m_firmwareWriter;
 
 		QMap<QString, QString> m_buildFileIDMap;
 
@@ -186,7 +186,7 @@ namespace Builder
 
 		IssueLogger* log() { return m_log; }
 
-		Hardware::ModuleFirmwareCollection* firmwareCollection() { return &m_firmwareCollection; }
+		Hardware::ModuleFirmwareWriter* firmwareWriter() { return &m_firmwareWriter; }
 
 		BuildFile* getBuildFile(const QString& pathFileName) const;
 		BuildFile* getBuildFileByID(const QString& buildFileID) const;
