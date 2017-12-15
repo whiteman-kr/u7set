@@ -341,7 +341,7 @@ namespace Builder
 
 		QString cfgIP1;
 		QString cfgIP2;
-		if (getConfigIpFromChannels(cfgIP1, cfgIP2) == false)
+		if (getConfigIp(cfgIP1, cfgIP2) == false)
 		{
 			return false;
 		}

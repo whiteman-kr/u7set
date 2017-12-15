@@ -97,9 +97,12 @@ namespace Builder
 		content += "ArchSrv.exe";
 		content += " -e";
 
-		/*QString cfgIP1;
+		QString cfgIP1;
 		QString cfgIP2;
-		getConfigIP(cfgIP1, cfgIP2);
+		if (getConfigIp(cfgIP1, cfgIP2) == false)
+		{
+			return false;
+		}
 
 		if (cfgIP1.isEmpty() == false)
 		{
@@ -109,9 +112,7 @@ namespace Builder
 		if (cfgIP2.isEmpty() == false && cfgIP1 != cfgIP2)
 		{
 			content += " -cfgip2=" + cfgIP1;
-		}*/
-
-		content += " -cfgip1=127.0.0.1";
+		}
 
 		content += " -id=" + m_software->equipmentIdTemplate() + "\n";
 

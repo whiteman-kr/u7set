@@ -496,28 +496,44 @@ namespace Builder
 		return comments;
 	}
 
-	bool SoftwareCfgGenerator::getConfigIpFromChannels(QString& cfgIP1, QString& cfgIP2)
+	bool SoftwareCfgGenerator::getConfigIp(QString& cfgIP1, QString& cfgIP2)
 	{
 		TEST_PTR_RETURN_FALSE(m_equipment);
 		TEST_PTR_RETURN_FALSE(m_software);
 
-		auto ipGetter = [=](QString channelIdSuffix, QString& ip) -> bool
+		auto ipGetter = [=](int channel, QString& ip) -> bool
 		{
-			auto channelObject = m_equipment->deviceObject(m_software->equipmentIdTemplate() + channelIdSuffix);
+			QString configurationServiceIdPropertyCaption = QString("ConfigurationServiceID%1").arg(channel);
+			auto configurationServiceIdProperty = m_software->propertyByCaption(configurationServiceIdPropertyCaption);
 
-			if (channelObject == nullptr)
-			{
-				TEST_PTR_RETURN_FALSE(m_log);
-				m_log->errCFG3014(channelIdSuffix, m_software->equipmentIdTemplate());
-				return false;
-			}
+			QString objectName = m_software->equipmentIdTemplate();
+			QString propertyName = configurationServiceIdPropertyCaption;
 
-			auto configurationServiceIdProperty = channelObject->propertyByCaption("ConfigurationServiceID");
 			if (configurationServiceIdProperty == nullptr)
 			{
-				TEST_PTR_RETURN_FALSE(m_log);
-				m_log->errCFG3020(m_software->equipmentIdTemplate() + channelIdSuffix, "ConfigurationServiceID");
-				return false;
+				QString channelIdSuffix = QString("_DATACH0%1").arg(channel);
+				auto channelObject = m_equipment->deviceObject(m_software->equipmentIdTemplate() + channelIdSuffix);
+
+				if (channelObject == nullptr)
+				{
+					TEST_PTR_RETURN_FALSE(m_log);
+
+					m_log->errCFG3020(objectName, propertyName);
+					m_log->errCFG3014(channelIdSuffix, m_software->equipmentIdTemplate());
+
+					return false;
+				}
+
+				objectName = m_software->equipmentIdTemplate() + channelIdSuffix;
+				propertyName = "ConfigurationServiceID";
+
+				configurationServiceIdProperty = channelObject->propertyByCaption(propertyName);
+				if (configurationServiceIdProperty == nullptr)
+				{
+					TEST_PTR_RETURN_FALSE(m_log);
+					m_log->errCFG3020(objectName, propertyName);
+					return false;
+				}
 			}
 
 			QString configurationID = configurationServiceIdProperty->value().toString();
@@ -526,7 +542,7 @@ namespace Builder
 			if (configurationServiceObject == nullptr)
 			{
 				TEST_PTR_RETURN_FALSE(m_log);
-				m_log->errCFG3021(m_software->equipmentIdTemplate() + channelIdSuffix, "ConfigurationServiceID", configurationID);
+				m_log->errCFG3021(objectName, propertyName, configurationID);
 				return false;
 			}
 
@@ -543,8 +559,8 @@ namespace Builder
 		};
 
 		bool result = true;
-		result &= ipGetter("_DATACH01", cfgIP1);
-		result &= ipGetter("_DATACH02", cfgIP2);
+		result &= ipGetter(1, cfgIP1);
+		result &= ipGetter(2, cfgIP2);
 
 		return result;
 	}
