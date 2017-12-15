@@ -8,7 +8,7 @@
 //
 // -------------------------------------------------------------------------------------
 
-CfgControlServer::CfgControlServer(const Tcp::SoftwareInfo& softwareInfo,
+CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 								   const QString& autoloadBuildPath,
 								   const QString& workDirectory,
 								   const QString& buildPath,
@@ -21,7 +21,6 @@ CfgControlServer::CfgControlServer(const Tcp::SoftwareInfo& softwareInfo,
 	m_autoloadBuildPath(autoloadBuildPath),
 	m_workDirectory(workDirectory)
 {
-
 }
 
 CfgControlServer* CfgControlServer::getNewInstance()
@@ -86,7 +85,7 @@ void CfgControlServer::sendClientList()
 
 	for(const Tcp::ConnectionState& state : m_connectionStates)
 	{
-		const Tcp::SoftwareInfo& si = state.connectedSoftwareInfo;
+		const SoftwareInfo& si = state.connectedSoftwareInfo;
 
 		if (E::containes<E::SoftwareType>(TO_INT(si.softwareType())) == false)
 		{

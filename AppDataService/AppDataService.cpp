@@ -21,12 +21,12 @@ const char* const AppDataServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
 const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
 const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
 
-AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName,
+AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
+										   const QString& serviceName,
 										   int& argc,
 										   char** argv,
-										   const VersionInfo &versionInfo,
 										   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_logger(logger),
 	m_timer(this),
 	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
@@ -46,7 +46,7 @@ AppDataServiceWorker::~AppDataServiceWorker()
 
 ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	AppDataServiceWorker* newInstance = new AppDataServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
 
 	newInstance->init();
 
@@ -91,7 +91,7 @@ void AppDataServiceWorker::loadSettings()
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger, E::SoftwareType::AppDataService, 0, 1, USED_SERVER_COMMIT_NUMBER);
+	CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
 
 	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
@@ -120,7 +120,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo());
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_cfgSettings.clientRequestIP,
 															tcpAppDataSever,
@@ -154,13 +154,9 @@ void AppDataServiceWorker::runTcpArchiveClientThreads()
 			continue;
 		}
 
-		TcpArchiveClient* client = new TcpArchiveClient(channel,
+		TcpArchiveClient* client = new TcpArchiveClient(softwareInfo(),
+														channel,
 														m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
-														E::SoftwareType::AppDataService,
-														m_equipmentID,
-														m_majorVersion,
-														m_minorVersion,
-														USED_SERVER_COMMIT_NUMBER,
 														m_logger,
 														m_signalStatesQueue);
 

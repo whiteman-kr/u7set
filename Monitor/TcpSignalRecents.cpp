@@ -129,7 +129,7 @@ std::vector<Hash> RecentUsed::hashes() const
 
 
 TcpSignalRecents::TcpSignalRecents(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::Monitor, theSettings.instanceStrId(), -1, -1, -1),
+	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2),
 	m_cfgController(configController)
 {
 	assert(m_cfgController);

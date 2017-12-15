@@ -11,12 +11,12 @@ namespace TuningIPEN
 	// -------------------------------------------------------------------------------------
 
 
-	TuningIPENServiceWorker::TuningIPENServiceWorker(const QString& serviceName,
+	TuningIPENServiceWorker::TuningIPENServiceWorker(const SoftwareInfo& softwareInfo,
+													 const QString& serviceName,
 													 int& argc,
 													 char** argv,
-													 const VersionInfo& versionInfo,
 													 std::shared_ptr<CircularLogger> logger) :
-		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo, logger),
+		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 		m_logger(logger),
 		m_timer(this)
 	{
@@ -31,7 +31,7 @@ namespace TuningIPEN
 
 	ServiceWorker* TuningIPENServiceWorker::createInstance() const
 	{
-		TuningIPENServiceWorker* tuningIPENServiceWorker = new TuningIPENServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+		TuningIPENServiceWorker* tuningIPENServiceWorker = new TuningIPENServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
 
 		return tuningIPENServiceWorker;
 	}

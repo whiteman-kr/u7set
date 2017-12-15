@@ -15,12 +15,12 @@ namespace Tuning
 	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
 	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
 
-	TuningServiceWorker::TuningServiceWorker(const QString& serviceName,
+	TuningServiceWorker::TuningServiceWorker(const SoftwareInfo& softwareInfo,
+											 const QString& serviceName,
 											 int& argc,
 											 char** argv,
-											 const VersionInfo& versionInfo,
 											 std::shared_ptr<CircularLogger> logger) :
-		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo, logger),
+		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 		m_logger(logger),
 		m_timer(this)
 	{
@@ -34,7 +34,7 @@ namespace Tuning
 
 	ServiceWorker* TuningServiceWorker::createInstance() const
 	{
-		TuningServiceWorker* newInstance = new TuningServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+		TuningServiceWorker* newInstance = new TuningServiceWorker(softwareInfo(),serviceName(), argc(), argv(), m_logger);
 
 		newInstance->init();
 
@@ -148,7 +148,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger, E::SoftwareType::TuningService, 0, 1, USED_SERVER_COMMIT_NUMBER);
+		CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
 
 		m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 

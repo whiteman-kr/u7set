@@ -419,12 +419,12 @@ namespace Tcp
 		virtual void onWatchdogTimerTimeout() override;
 
 	public:
-		Client(const HostAddressPort& serverAddressPort,
-			   const SoftwareInfo& softwareInfo);
+		Client(const SoftwareInfo& softwareInfo,
+			   const HostAddressPort& serverAddressPort);
 
-		Client(const HostAddressPort& serverAddressPort1,
-			   const HostAddressPort& serverAddressPort2,
-			   const SoftwareInfo& softwareInfo);
+		Client(const SoftwareInfo& softwareInfo,
+			   const HostAddressPort& serverAddressPort1,
+			   const HostAddressPort& serverAddressPort2);
 
 		virtual ~Client();
 

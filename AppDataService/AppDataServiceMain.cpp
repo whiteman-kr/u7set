@@ -16,9 +16,11 @@ int main(int argc, char *argv[])
 
 	logger->setLogCodeInfo(false);
 
-	VersionInfo vi = VERSION_INFO(1, 0);
+	SoftwareInfo si;
 
-	AppDataServiceWorker appDataServiceWorker("RPCT Application Data Service", argc, argv, vi, logger);
+	si.init(E::SoftwareType::AppDataService, "", 1, 0);
+
+	AppDataServiceWorker appDataServiceWorker(si, "RPCT Application Data Service", argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, appDataServiceWorker, logger);
 

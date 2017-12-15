@@ -231,8 +231,8 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 {
 	setStateTabMaxRowQuantity(8);
 
-	m_tcpClientSocket = new TcpAppDataClient(HostAddressPort(getWorkingClientRequestIp(), PORT_APP_DATA_SERVICE_CLIENT_REQUEST),
-											 softwareInfo);
+	assert(false);			// WM: const PORT_APP_DATA_SERVICE_CLIENT_REQUEST in next code should be replaced by port from RPCT configueration!!!!
+	m_tcpClientSocket = new TcpAppDataClient(softwareInfo, HostAddressPort(getWorkingClientRequestIp(), PORT_APP_DATA_SERVICE_CLIENT_REQUEST));
 	m_appDataClientTread = new SimpleThread(m_tcpClientSocket);
 
 	// Data Sources

@@ -16,12 +16,12 @@ class TcpConfigServiceClient : public Tcp::Client
 	Q_OBJECT
 
 public:
-	TcpConfigServiceClient(const HostAddressPort& serverAddressPort,
-						   const SoftwareInfo& softwareInfo);
+	TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort);
 
-	TcpConfigServiceClient(const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2,
-						   const SoftwareInfo& softwareInfo);
+	TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2);
 
 	virtual ~TcpConfigServiceClient();
 

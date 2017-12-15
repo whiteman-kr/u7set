@@ -215,7 +215,7 @@ QString Settings::instanceStrId()
 	return m_instanceStrId;
 }
 
-void Settings::setInstanceId(const QString& value)
+void Settings::setInstanceStrId(const QString& value)
 {
 	QMutexLocker l(&m);
 	m_instanceStrId = value;

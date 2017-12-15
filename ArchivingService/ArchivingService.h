@@ -16,10 +16,10 @@ class ArchivingServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ArchivingServiceWorker(const QString &serviceName,
+	ArchivingServiceWorker(const SoftwareInfo& softwareInfo,
+						   const QString &serviceName,
 						   int &argc,
 						   char **argv,
-						   const VersionInfo &versionInfo,
 						   std::shared_ptr<CircularLogger> logger);
 	~ArchivingServiceWorker();
 

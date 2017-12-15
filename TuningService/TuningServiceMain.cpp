@@ -16,9 +16,11 @@ int main(int argc, char *argv[])
 
 	logger->setLogCodeInfo(false);
 
-	VersionInfo vi = VERSION_INFO(1, 0);
+	SoftwareInfo si;
 
-	Tuning::TuningServiceWorker tuningServiceWorker("RPCT Tuning Service", argc, argv, vi, logger);
+	si.init(E::SoftwareType::TuningService, "", 1, 0);
+
+	Tuning::TuningServiceWorker tuningServiceWorker(si, "RPCT Tuning Service", argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, tuningServiceWorker, logger);
 

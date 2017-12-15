@@ -243,7 +243,7 @@ void ConfigurationServiceWidget::clearServiceData()
 
 void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
-	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, port), softwareInfo());
+	m_tcpClientSocket = new TcpConfigServiceClient(softwareInfo(), HostAddressPort(ip, port));
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
 
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &ConfigurationServiceWidget::updateServiceState);

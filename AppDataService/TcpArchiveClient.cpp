@@ -1,15 +1,11 @@
 #include "TcpArchiveClient.h"
 
-TcpArchiveClient::TcpArchiveClient(int channel,
+TcpArchiveClient::TcpArchiveClient(const SoftwareInfo& softwareInfo,
+								   int channel,
 								   const HostAddressPort& serverAddressPort,
-								   E::SoftwareType softwareType,
-								   const QString equipmentID,
-								   int majorVersion,
-								   int minorVersion,
-								   int commitNo,
 								   CircularLoggerShared logger,
 								   AppSignalStatesQueue& signalStatesQueue) :
-	Tcp::Client(serverAddressPort, softwareType, equipmentID, majorVersion, minorVersion, commitNo),
+	Tcp::Client(softwareInfo, serverAddressPort),
 	m_channel(channel),
 	m_logger(logger),
 	m_signalStatesQueue(signalStatesQueue),

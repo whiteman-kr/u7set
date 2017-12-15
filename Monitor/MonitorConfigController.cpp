@@ -32,7 +32,8 @@ HostAddressPort ConfigConnection::address() const
 	return h;
 }
 
-MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
+MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2) :
+	m_softwareInfo(softwareInfo)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
@@ -124,7 +125,7 @@ MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostA
 
 	// --
 	//
-	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2, false, nullptr, E::SoftwareType::Monitor, 0, 1, USED_SERVER_COMMIT_NUMBER);
+	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo, m_appInstanceNo, address1,  address2, false, nullptr);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
 
@@ -226,6 +227,11 @@ Tcp::ConnectionState MonitorConfigController::getConnectionState() const
 	result = m_cfgLoaderThread->getConnectionState();
 
 	return result;
+}
+
+const SoftwareInfo& MonitorConfigController::softwareInfo() const
+{
+	return m_softwareInfo;
 }
 
 void MonitorConfigController::start()

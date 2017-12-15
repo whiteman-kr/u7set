@@ -7,7 +7,8 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer()
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo) :
+	Tcp::Server(softwareInfo)
 {
 
 }
@@ -20,7 +21,7 @@ TcpAppDataServer::~TcpAppDataServer()
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	TcpAppDataServer* newServer =  new TcpAppDataServer();
+	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo());
 
 	newServer->setThread(m_thread);
 

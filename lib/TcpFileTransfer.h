@@ -120,14 +120,14 @@ namespace Tcp
 		void signal_endFileDownload(const QString fileName, FileTransferResult errorCode, const QString md5);
 
 	public:
-		FileClient(const QString& rootFolder,
-				   const HostAddressPort& serverAddressPort,
-				   const SoftwareInfo& softwareInfo);
+		FileClient(const SoftwareInfo& softwareInfo,
+				   const QString& rootFolder,
+				   const HostAddressPort& serverAddressPort);
 
-		FileClient(const QString& rootFolder,
+		FileClient(const SoftwareInfo& softwareInfo,
+				   const QString& rootFolder,
 				   const HostAddressPort& serverAddressPort1,
-				   const HostAddressPort& serverAddressPort2,
-				   const SoftwareInfo& softwareInfo);
+				   const HostAddressPort& serverAddressPort2);
 
 		void downloadFile(const QString& fileName) { emit signal_downloadFile(fileName); }
 

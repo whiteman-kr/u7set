@@ -9,17 +9,17 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort, const SoftwareInfo& softwareInfo) :
-	Tcp::Client(serverAddressPort, softwareInfo)
+SignalSocket::SignalSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort) :
+	Tcp::Client(softwareInfo, serverAddressPort)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2,
-						   const SoftwareInfo& softwareInfo) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2, softwareInfo)
+SignalSocket::SignalSocket(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2) :
+	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2)
 {
 }
 

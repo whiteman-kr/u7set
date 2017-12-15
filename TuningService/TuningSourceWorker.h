@@ -108,10 +108,11 @@ namespace Tuning
 			void init(const Signal* s, int index, int tuningRomFraeSizeW);
 
 			bool valid() const { return m_valid; }
-			float value() const { return m_value; }
-			float defaultValue() const { return m_defaultValue; }
-			float readLowBound() const { return m_readLowBound; }
-			float readHighBound() const { return m_readHighBound; }
+			const TuningValue& currentValue() const { return m_currentValue; }
+			const TuningValue& readLowBound() const { return m_readLowBound; }
+			const TuningValue& readHighBound() const { return m_readHighBound; }
+
+			const TuningValue& defaultValue() const { return m_defaultValue; }
 
 			int offset() const { return m_offset; }
 			int bit() const { return m_bit; }
@@ -125,15 +126,12 @@ namespace Tuning
 
 			QString appSignalID() const;
 
+			void setProtoTuningValue(Network::TuningValue* tuningValue);
+
 		private:
 			FotipV2::DataType getTuningSignalType(const Signal* s);
 
 		private:
-			// state fields
-			//
-			bool m_valid = false;
-			float m_value = 0;
-
 			// static fields
 			//
 			const Signal* m_signal = nullptr;
@@ -147,14 +145,17 @@ namespace Tuning
 
 			// signal properties from RPCT Databse
 			//
-			float m_lowBound = 0;
-			float m_highBoud = 0;
-			float m_defaultValue = 0;
+			TuningValue m_lowBound;
+			TuningValue m_highBoud;
+			TuningValue m_defaultValue;
 
-			// signal properties read from LM
+			// tuning signal state and bounds from LM
 			//
-			float m_readLowBound = 0;
-			float m_readHighBound = 0;
+			bool m_valid = false;
+
+			TuningValue m_currentValue;
+			TuningValue m_readLowBound;
+			TuningValue m_readHighBound;
 		};
 
 	public:

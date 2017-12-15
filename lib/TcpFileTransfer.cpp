@@ -67,10 +67,9 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileClient::FileClient(const QString& rootFolder,
-						   const HostAddressPort &serverAddressPort,
-						   const SoftwareInfo& softwareInfo) :
-		Client(serverAddressPort, softwareInfo)
+	FileClient::FileClient(const SoftwareInfo& softwareInfo, const QString& rootFolder,
+						   const HostAddressPort &serverAddressPort) :
+		Client(softwareInfo, serverAddressPort)
 	{
 		m_rootFolder = rootFolder;
 
@@ -79,13 +78,11 @@ namespace Tcp
 		init();
 	}
 
-	FileClient::FileClient(const QString &rootFolder,
+	FileClient::FileClient(const SoftwareInfo& softwareInfo,
+						   const QString &rootFolder,
 						   const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2,
-						   const SoftwareInfo& softwareInfo) :
-		Client(serverAddressPort1,
-			   serverAddressPort2,
-			   softwareInfo)
+						   const HostAddressPort& serverAddressPort2) :
+		Client(softwareInfo, serverAddressPort1, serverAddressPort2)
 	{
 		m_rootFolder = rootFolder;
 

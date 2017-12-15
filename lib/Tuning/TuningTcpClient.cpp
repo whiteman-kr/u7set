@@ -22,13 +22,9 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 // TuningTcpClient
 //
-TuningTcpClient::TuningTcpClient(E::SoftwareType softwareType,
-								 QString equipmentID,
-								 int majorVersion,
-								 int minorVersion,
-								 int commitNo,
+TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo,
 								 TuningSignalManager* signalManager) :
-	Tcp::Client(HostAddressPort(QLatin1String("0.0.0.0"), 0), softwareType, equipmentID, majorVersion, minorVersion, commitNo),
+	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0)),
 	m_signals(signalManager)
 {
 	assert(m_signals);

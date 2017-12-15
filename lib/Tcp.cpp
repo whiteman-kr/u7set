@@ -1013,8 +1013,8 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	Client::Client(const HostAddressPort &serverAddressPort,
-				   const SoftwareInfo& softwareInfo) :
+	Client::Client(const SoftwareInfo& softwareInfo,
+				   const HostAddressPort &serverAddressPort) :
 		SocketWorker(softwareInfo),
 		m_periodicTimer(this),
 		m_replyTimeoutTimer(this)
@@ -1024,9 +1024,9 @@ namespace Tcp
 	}
 
 
-	Client::Client(const HostAddressPort& serverAddressPort1,
-				   const HostAddressPort& serverAddressPort2,
-				   const SoftwareInfo& softwareInfo) :
+	Client::Client(const SoftwareInfo& softwareInfo,
+				   const HostAddressPort& serverAddressPort1,
+				   const HostAddressPort& serverAddressPort2) :
 		SocketWorker(softwareInfo),
 		m_periodicTimer(this),
 		m_replyTimeoutTimer(this)

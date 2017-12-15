@@ -5,10 +5,7 @@
 class TuningClientTcpClient : public TuningTcpClient
 {
 public:
-	TuningClientTcpClient(QString equipmentID,
-						  int majorVersion,
-						  int minorVersion,
-						  int commitNo,
+	TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 						  TuningSignalManager* signalManager);
 
 	virtual void writeLogError(const QString& message);

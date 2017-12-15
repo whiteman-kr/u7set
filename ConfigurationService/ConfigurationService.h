@@ -14,10 +14,10 @@ class ConfigurationServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ConfigurationServiceWorker(const QString& serviceName,
+	ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
+							   const QString& serviceName,
 							   int& argc,
 							   char** argv,
-							   const SoftwareInfo& softwareInfo,
 							   std::shared_ptr<CircularLogger> logger);
 
 	virtual ServiceWorker* createInstance() const override;

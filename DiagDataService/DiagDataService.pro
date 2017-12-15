@@ -87,7 +87,8 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     ../u7/Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
-    DiagDataServiceMain.cpp
+    DiagDataServiceMain.cpp \
+    ../lib/SoftwareInfo.cpp
 
 HEADERS += \
 	Stable.h \
@@ -125,7 +126,8 @@ HEADERS += \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     ../u7/Builder/ModulesRawData.h \
-    ../lib/CommandLineParser.h
+    ../lib/CommandLineParser.h \
+    ../lib/SoftwareInfo.h
 
 include(../qtservice/src/qtservice.pri)
 

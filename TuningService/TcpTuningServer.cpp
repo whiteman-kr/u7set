@@ -12,6 +12,7 @@ namespace Tuning
 	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
 
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service, std::shared_ptr<CircularLogger> logger) :
+		Tcp::Server(service.softwareInfo()),
 		m_service(service),
 		m_logger(logger)
 	{
@@ -83,10 +84,10 @@ namespace Tuning
 
 		m_getTuningSourcesInfo.ParseFromArray(requestData, requestDataSize);
 
-		QString clientRequestID = QString::fromStdString(m_getTuningSourcesInfo.clientequipmentid());
+		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_GET_TUNING_SOURCES_INFO request from %1, %2")).
-					  arg(clientRequestID).arg(peerAddr().addressStr()));
+					  arg(clientEquipmentID).arg(peerAddr().addressStr()));
 
 
 		QVector<const TuningClientContext*> clientContexts;
@@ -95,14 +96,14 @@ namespace Tuning
 
 		NetworkError errCode = NetworkError::Success;
 
-		if (clientRequestID == SCM_CLIENT_ID)
+		if (clientEquipmentID == SCM_CLIENT_ID)
 		{
 			m_service.getAllClientContexts(clientContexts);
 		}
 		else
 		{
 			const TuningClientContext* clntContext =
-					m_service.getClientContext(clientRequestID);
+					m_service.getClientContext(clientEquipmentID);
 
 			if (clntContext == nullptr)
 			{
@@ -158,18 +159,18 @@ namespace Tuning
 
 		m_getTuningSourcesStates.ParseFromArray(requestData, requestDataSize);
 
-		QString clientRequestID = QString::fromStdString(m_getTuningSourcesStates.clientequipmentid());
+		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
 		QVector<const TuningClientContext*> clientContexts;
 
-		if (clientRequestID == SCM_CLIENT_ID)
+		if (clientEquipmentID == SCM_CLIENT_ID)
 		{
 			m_service.getAllClientContexts(clientContexts);
 		}
 		else
 		{
 			const TuningClientContext* clntContext =
-					m_service.getClientContext(clientRequestID);
+					m_service.getClientContext(clientEquipmentID);
 
 			if (clntContext == nullptr)
 			{
@@ -218,10 +219,10 @@ namespace Tuning
 	{
 		m_tuningSignalsReadRequest.ParseFromArray(requestData, requestDataSize);
 
-		QString clientRequestID = QString::fromStdString(m_tuningSignalsReadRequest.clientequipmentid());
+		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
 		const TuningClientContext* clientContext =
-				m_service.getClientContext(clientRequestID);
+				m_service.getClientContext(clientEquipmentID);
 
 		NetworkError errCode = NetworkError::Success;
 
@@ -264,16 +265,16 @@ namespace Tuning
 	{
 		m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
 
-		QString clientRequestID = QString::fromStdString(m_tuningSignalsWriteRequest.clientequipmentid());
+		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_TUNING_SIGNALS_WRITE request from client %1, %2 (Signals %3, AutoApply is %4)")).
-					  arg(clientRequestID).
+					  arg(clientEquipmentID).
 					  arg(peerAddr().addressStr()).
-					  arg(m_tuningSignalsWriteRequest.tuningsignalwrite_size()).
+					  arg(m_tuningSignalsWriteRequest.commands_size()).
 					  arg(m_tuningSignalsWriteRequest.autoapply() == true ? "TRUE" : "FALSE"));
 
 		const TuningClientContext* clientContext =
-				m_service.getClientContext(clientRequestID);
+				m_service.getClientContext(clientEquipmentID);
 
 		NetworkError errCode = NetworkError::Success;
 

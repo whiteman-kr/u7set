@@ -19,7 +19,13 @@ int main(int argc, char *argv[])
 	logger->setLogCodeInfo(false);
 
 	QApplication a(argc, argv);
-	TuningIPEN::TuningMainWindow w(argc, argv, logger);
+
+	SoftwareInfo si;
+
+	si.init(E::SoftwareType::TuningService, "", 1, 0);
+
+	TuningIPEN::TuningMainWindow w(si, argc, argv, logger);
+
 	w.show();
 
 	int result =  a.exec();

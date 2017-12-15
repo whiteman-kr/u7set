@@ -150,8 +150,12 @@ int main(int argc, char* argv[])
 
 	if (clientID.isEmpty() == false)
 	{
-		theSettings.setInstanceId(clientID);
+	    theSettings.setInstanceStrId(clientID);
 	}
+
+	SoftwareInfo softwareInfo;
+
+	softwareInfo.init(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1);
 
 	// Check to run the application in one instance
 	//
@@ -189,7 +193,7 @@ int main(int argc, char* argv[])
 
 			// Run the application
 			//
-			theMainWindow = new MainWindow();
+			theMainWindow = new MainWindow(softwareInfo);
 			theMainWindow->show();
 
 			result = a.exec();

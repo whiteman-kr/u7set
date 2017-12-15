@@ -66,7 +66,10 @@ private:
 	void clearDataSources();
 
 public:
-	TcpAppDataClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TcpAppDataClient(const SoftwareInfo& softwareInfo,
+					 const HostAddressPort& serverAddressPort1,
+					 const HostAddressPort& serverAddressPort2);
+
 	virtual ~TcpAppDataClient();
 
 	virtual void onClientThreadStarted() override;

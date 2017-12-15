@@ -84,7 +84,8 @@ HEADERS += \
     ../Proto/serialization.pb.h \
     ../lib/CommandLineParser.h \
     ../lib/WUtils.h \
-    ../lib/SoftwareInfo.h
+    ../lib/SoftwareInfo.h \
+    ../lib/OrderedHash.h
 
 include(../qtservice/src/qtservice.pri)
 

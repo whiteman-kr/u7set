@@ -88,7 +88,7 @@ public:
 	void RestoreSystem();
 
 	QString instanceStrId();
-	void setInstanceId(const QString& value);
+	void setInstanceStrId(const QString& value);
 
 	void setConfiguratorAddress1(const QString& address, int port);
 	HostAddressPort configuratorAddress1();

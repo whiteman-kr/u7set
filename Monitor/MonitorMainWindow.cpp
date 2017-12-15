@@ -15,9 +15,9 @@
 
 const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
 
-MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
+MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
-	m_configController(theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
+	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
 	m_schemaManager(&m_configController)
 {
 	qDebug() << Q_FUNC_INFO;

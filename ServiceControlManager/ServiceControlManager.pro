@@ -84,7 +84,9 @@ SOURCES += MainWindow.cpp \
     ../lib/CircularLogger.cpp \
     TcpConfigServiceClient.cpp \
     AppDataServiceWidget.cpp \
-    ../lib/SoftwareInfo.cpp
+    ../lib/SoftwareInfo.cpp \
+    ../lib/Service.cpp \
+    ../lib/CommandLineParser.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -119,7 +121,12 @@ HEADERS  += MainWindow.h \
     TcpConfigServiceClient.h \
     ../lib/WidgetUtils.h \
     AppDataServiceWidget.h \
-    ../lib/SoftwareInfo.h
+    ../lib/SoftwareInfo.h \
+    ../lib/OrderedHash.h \
+    ../lib/Service.h \
+    ../lib/CommandLineParser.h
+
+include(../qtservice/src/qtservice.pri)
 
 FORMS    +=
 

@@ -95,7 +95,8 @@ SOURCES += \
     ../u7/Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
-    TcpArchiveClient.cpp
+    TcpArchiveClient.cpp \
+    ../lib/SoftwareInfo.cpp
 
 HEADERS += \
 	Stable.h \
@@ -144,7 +145,8 @@ HEADERS += \
     ../u7/Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     TcpArchiveClient.h \
-    ../lib/TimeStamp.h
+    ../lib/TimeStamp.h \
+    ../lib/SoftwareInfo.h
 
 include(../qtservice/src/qtservice.pri)
 

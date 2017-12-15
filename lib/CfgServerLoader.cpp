@@ -144,7 +144,7 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						const HostAddressPort& serverAddressPort2,
 						bool enableDownloadCfg,
 						std::shared_ptr<CircularLogger> logger) :
-	Tcp::FileClient("", serverAddressPort1, serverAddressPort2, softwareInfo),
+	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2),
 	m_logger(logger),
 	m_timer(this),
 	m_enableDownloadConfiguration(enableDownloadCfg)

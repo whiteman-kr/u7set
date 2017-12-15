@@ -245,7 +245,7 @@ signals:
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
-	CfgLoaderThread(const SoftwareInfo &softwareInfo,
+	CfgLoaderThread(const SoftwareInfo& softwareInfo,
 					int appInstance,
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,

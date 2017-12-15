@@ -151,7 +151,8 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
-    TuningClientTcpClient.cpp 
+    TuningClientTcpClient.cpp \ 
+    ../lib/SoftwareInfo.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -204,7 +205,8 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \
-    TuningClientTcpClient.h 
+    TuningClientTcpClient.h \ 
+    ../lib/SoftwareInfo.h
 
 
 FORMS    += \

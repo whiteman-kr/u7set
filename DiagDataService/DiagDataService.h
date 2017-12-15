@@ -13,10 +13,10 @@ class DiagDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	DiagDataServiceWorker(const QString& serviceName,
+	DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
+						  const QString& serviceName,
 						  int& argc,
 						  char** argv,
-						  const VersionInfo& versionInfo,
 						  std::shared_ptr<CircularLogger> logger);
 	virtual ~DiagDataServiceWorker();
 

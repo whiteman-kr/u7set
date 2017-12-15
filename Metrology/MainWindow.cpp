@@ -80,7 +80,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 	HostAddressPort signalSocketAddress1 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_PRIMARY);
 	HostAddressPort signalSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_RESERVE);
 
-	m_pSignalSocket = new SignalSocket(signalSocketAddress1, signalSocketAddress2, softwareInfo);
+	m_pSignalSocket = new SignalSocket(softwareInfo, signalSocketAddress1, signalSocketAddress2);
 	m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
 
 	connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
@@ -96,7 +96,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 	HostAddressPort tuningSocketAddress1 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
 	HostAddressPort tuningSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_RESERVE);
 
-	m_pTuningSocket = new TuningSocket(tuningSocketAddress1, tuningSocketAddress2, softwareInfo);
+	m_pTuningSocket = new TuningSocket(softwareInfo, tuningSocketAddress1, tuningSocketAddress2);
 	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
 
 	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);

@@ -85,16 +85,17 @@ namespace Tuning
 		}
 
 		m_valid = false;
-		m_value = 0;
 
 		m_signal = s;
 		m_signalHash = ::calcHash(s->appSignalID());
 
 		m_type = getTuningSignalType(s);
 		m_index = index;
-		m_lowBound = s->lowEngeneeringUnits();
+
+		assert(false);
+/*		m_lowBound = s->lowEngeneeringUnits();
 		m_highBoud = s->highEngeneeringUnits();
-		m_defaultValue = s->tuningDefaultValue();
+		m_defaultValue = s->tuningDefaultValue();*/
 
 		m_offset = s->tuningAddr().offset();
 		m_bit = s->tuningAddr().bit();
@@ -105,19 +106,23 @@ namespace Tuning
 	void TuningSourceWorker::TuningSignal::setState(bool valid, float value)
 	{
 		m_valid = valid;
-		m_value = value;
+
+		assert(false);
+		//m_value = value;
 	}
 
 
 	void TuningSourceWorker::TuningSignal::setReadLowBound(float readLowBound)
 	{
-		m_readLowBound = readLowBound;
+		assert(false);
+		//m_readLowBound = readLowBound;
 	}
 
 
 	void TuningSourceWorker::TuningSignal::setReadHighBound(float readHighBound)
 	{
-		m_readHighBound = readHighBound;
+		assert(false);
+		//m_readHighBound = readHighBound;
 	}
 
 
@@ -132,6 +137,17 @@ namespace Tuning
 		return m_signal->appSignalID();
 	}
 
+	void TuningSourceWorker::TuningSignal::setProtoTuningValue(Network::TuningValue* tuningValue)
+	{
+		TEST_PTR_RETURN(tuningValue);
+
+		assert(false);
+		/*tuningValue->set_type(1);
+		optional int32 intValue = 2 [default = 0];
+		optional float floatValue = 3  [default = 0.0];
+		optional double doubleValue = 4  [default = 0.0];*/
+
+	}
 
 	FotipV2::DataType TuningSourceWorker::TuningSignal::getTuningSignalType(const Signal* s)
 	{
@@ -273,11 +289,12 @@ namespace Tuning
 
 		TuningSignal& signal = m_tuningSignals[signalIndex];
 
-		tss.set_valid(signal.valid());
+		assert(false);
+/*		tss.mutable_value()->set_valid(signal.valid());
 		tss.set_value(signal.value());
 		tss.set_readlowbound(signal.readLowBound());
 		tss.set_readhighbound(signal.readHighBound());
-		tss.set_error(TO_INT(NetworkError::Success));
+		tss.set_error(TO_INT(NetworkError::Success));*/
 	}
 
 

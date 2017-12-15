@@ -77,7 +77,7 @@ private:
 	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 public:
-	TcpAppDataServer();
+	TcpAppDataServer(const SoftwareInfo& softwareInfo);
 	virtual ~TcpAppDataServer();
 
 	virtual void onServerThreadStarted() override;

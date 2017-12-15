@@ -19,10 +19,10 @@ namespace Tuning
 		Q_OBJECT
 
 	public:
-		TuningServiceWorker(const QString &serviceName,
+		TuningServiceWorker(const SoftwareInfo& softwareInfo,
+							const QString &serviceName,
 							int &argc,
 							char **argv,
-							const VersionInfo &versionInfo,
 							std::shared_ptr<CircularLogger> logger);
 		~TuningServiceWorker();
 

@@ -1,6 +1,45 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
 
+
+//QHash<E::SoftwareType, ServiceInfo> serviceInfoMap = initServiceInfoMap();
+
+ServiceInfo::ServiceInfo()
+{
+}
+
+ServiceInfo::ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _name, QString _shortName) :
+	softwareType(_softwareType),
+	port(_port),
+	name(_name),
+	shortName(_shortName)
+{
+}
+
+
+HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo()
+{
+	HashedVector<E::SoftwareType, ServiceInfo> sInfoMap;
+
+	const ServiceInfo serviceInfo[] =
+	{
+		ServiceInfo(E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv"),
+		ServiceInfo(E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv"),
+		ServiceInfo(E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv"),
+		ServiceInfo(E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv"),
+		ServiceInfo(E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv"),
+		ServiceInfo(E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv"),
+	};
+
+	for(const ServiceInfo& sInfo : serviceInfo)
+	{
+		sInfoMap.insert(sInfo.softwareType, sInfo);
+	}
+
+	return sInfoMap;
+}
+
+
 // -------------------------------------------------------------------------------------
 //
 // ServiceWorker class implementation
@@ -93,6 +132,12 @@ const SoftwareInfo& ServiceWorker::softwareInfo() const
 {
 	return m_softwareInfo;
 }
+
+const E::SoftwareType ServiceWorker::softwareType() const
+{
+	return m_softwareInfo.softwareType();
+}
+
 
 void ServiceWorker::initAndProcessCmdLineSettings()
 {
@@ -345,7 +390,9 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, serviceInfo[TO_INT(m_serviceWorkerFactory.serviceType())].port, m_logger);
+	ServiceInfo sInfo = serviceInfo.value(m_serviceWorkerFactory.softwareType());
+
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.port, m_logger);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);

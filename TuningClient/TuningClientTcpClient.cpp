@@ -2,12 +2,9 @@
 #include "TuningClientTcpClient.h"
 #include "version.h"
 
-TuningClientTcpClient::TuningClientTcpClient(QString equipmentID,
-											 int majorVersion,
-											 int minorVersion,
-											 int commitNo,
-											 TuningSignalManager* signalManager)
-	:TuningTcpClient(E::SoftwareType::TuningClient, equipmentID, majorVersion, minorVersion, commitNo, signalManager)
+TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
+											 TuningSignalManager* signalManager) :
+	TuningTcpClient(softwareInfo, signalManager)
 {
 
 }

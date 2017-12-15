@@ -47,11 +47,7 @@ class TuningTcpClient : public Tcp::Client, public ITuningTcpClient
 	Q_ENUM(NetworkError)
 
 public:
-	TuningTcpClient(E::SoftwareType softwareType,
-					QString equipmentID,
-					int majorVersion,
-					int minorVersion,
-					int commitNo,
+	TuningTcpClient(const SoftwareInfo& softwareInfo,
 					TuningSignalManager* signalManager);
 
 	virtual ~TuningTcpClient();

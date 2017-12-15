@@ -249,7 +249,7 @@ namespace Tuning
 
 	void TuningClientContext::writeSignalStates(const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply& reply) const
 	{
-		int writeRequestCount = request.tuningsignalwrite_size();
+		int writeRequestCount = request.commands_size();
 
 		bool autoApply = request.autoapply();
 
@@ -263,9 +263,9 @@ namespace Tuning
 
 			TEST_PTR_CONTINUE(writeResult);
 
-			const Network::TuningSignalWrite& tsw = request.tuningsignalwrite(i);
+			const Network::TuningWriteCommand& writeCmd = request.commands(i);
 
-			Hash signalHash = tsw.signalhash();
+			Hash signalHash = writeCmd.signalhash();
 
 			writeResult->set_signalhash(signalHash);
 
@@ -277,7 +277,8 @@ namespace Tuning
 				continue;
 			}
 
-			sourceContext->writeSignalState(signalHash, tsw.value(), *writeResult);
+			assert(false);
+			//sourceContext->writeSignalState(signalHash, writeCmd.value(), *writeResult);
 
 			if (autoApply == true)
 			{

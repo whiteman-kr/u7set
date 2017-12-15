@@ -21,24 +21,18 @@
 
 struct ServiceInfo
 {
-	E::SoftwareType softwareType;
-	quint16 port;
-	const char* name;
-	const char* shortName;
+	ServiceInfo();
+	ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _name, QString _shortName);
+
+	E::SoftwareType softwareType = E::SoftwareType::Unknown;
+	quint16 port = 0;
+	QString name;
+	QString shortName;
 };
 
+HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo();
 
-const ServiceInfo serviceInfo[] =
-{
-	{ E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
-	{ E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
-	{ E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
-	{ E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
-	{ E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
-	{ E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
-};
-
-const int SERVICE_TYPE_COUNT = sizeof(serviceInfo) / sizeof (ServiceInfo);
+static HashedVector<E::SoftwareType, ServiceInfo> serviceInfo = initServiceInfo();
 
 class Service;
 
@@ -71,6 +65,7 @@ public:
 	QString serviceName() const;
 
 	const SoftwareInfo& softwareInfo() const;
+	const E::SoftwareType softwareType() const;
 
 	void initAndProcessCmdLineSettings();
 

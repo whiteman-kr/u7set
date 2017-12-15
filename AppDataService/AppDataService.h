@@ -21,10 +21,10 @@ public:
 	static const int m_minorVersion = 5;
 
 public:
-	AppDataServiceWorker(const QString& serviceName,
+	AppDataServiceWorker(const SoftwareInfo& softwareInfo,
+						 const QString& serviceName,
 						 int& argc,
 						 char** argv,
-						 const VersionInfo& versionInfo,
 						 std::shared_ptr<CircularLogger> logger);
 	~AppDataServiceWorker();
 

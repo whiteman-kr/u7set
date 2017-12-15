@@ -11,9 +11,9 @@
 #include "DialogFilterEditor.h"
 #include "version.h"
 
-MainWindow::MainWindow(QWidget* parent) :
+MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
-	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2())
+	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
 {
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	// TuningClientTcpClient
 	//
-	m_tcpClient = new TuningClientTcpClient(theSettings.instanceStrId(), 1, 0, USED_SERVER_COMMIT_NUMBER, &m_tuningSignalManager);
+	m_tcpClient = new TuningClientTcpClient(softwareInfo, &m_tuningSignalManager);
 	m_tcpClient->setInstanceId(theSettings.instanceStrId());
 	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
 

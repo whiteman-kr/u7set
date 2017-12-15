@@ -18,7 +18,7 @@ class ConfigController : public QObject
 public:
 	ConfigController() = delete;
 
-	ConfigController(QWidget* parent, HostAddressPort address1, HostAddressPort address2);
+	ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, QWidget* parent);
 	virtual ~ConfigController();
 
 	// Methods

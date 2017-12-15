@@ -69,7 +69,7 @@ void DialogSettings::on_DialogSettings_accepted()
 {
 	// ID
 
-	theSettings.setInstanceId(ui->m_instanceID->text());
+	theSettings.setInstanceStrId(ui->m_instanceID->text());
 
 	// IP Configuration
 

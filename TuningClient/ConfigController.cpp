@@ -7,10 +7,10 @@
 // ConfigController
 //
 
-ConfigController::ConfigController(QWidget* parent, HostAddressPort address1, HostAddressPort address2)
-	:m_parent(parent),
-	  m_address1(address1),
-	  m_address2(address2)
+ConfigController::ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, QWidget* parent) :
+	m_parent(parent),
+	m_address1(address1),
+	m_address2(address2)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 	qRegisterMetaType<HostAddressPort>("HostAddressPort");
@@ -103,7 +103,7 @@ ConfigController::ConfigController(QWidget* parent, HostAddressPort address1, Ho
 
 	// --
 	//
-	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2, false, nullptr, E::SoftwareType::TuningClient, 0, 1, USED_SERVER_COMMIT_NUMBER);
+	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo, m_appInstanceNo, address1,  address2, false, nullptr);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigController::slot_configurationReady);
 

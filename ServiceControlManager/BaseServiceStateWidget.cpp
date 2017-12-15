@@ -22,7 +22,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	m_tabWidget = new QTabWidget(this);
 	setCentralWidget(m_tabWidget);
 
-	m_serviceInfo.set_type(portIndex);
+	m_serviceInfo.mutable_softwareinfo()->set_softwaretype(softwareInfo.softwareType());
 	m_serviceInfo.set_servicestate(TO_INT(ServiceState::Undefined));
 
 	QToolBar* toolBar = addToolBar("Service actions");
@@ -40,7 +40,9 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 
 	m_socketThread = new UdpSocketThread();
 
-	m_baseClientSocket = new UdpClientSocket(QHostAddress(ip), serviceInfo[portIndex].port);
+	int port = serviceInfo[softwareInfo.softwareType()].port;
+
+	m_baseClientSocket = new UdpClientSocket(QHostAddress(ip), port);
 	connect(m_baseClientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceStateWidget::serviceNotFound);
 	connect(m_baseClientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceStateWidget::serviceAckReceived);
 
@@ -51,7 +53,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	connect(m_timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
 	m_timer->start(500);
 
-	setWindowPosition(this, QString("Service_%1_%2/geometry").arg(QHostAddress(ip).toString()).arg(serviceInfo[portIndex].port));
+	setWindowPosition(this, QString("Service_%1_%2/geometry").arg(QHostAddress(ip).toString()).arg(port));
 
 	addStateTab();
 
@@ -95,9 +97,10 @@ void BaseServiceStateWidget::updateServiceState()
 
 	QString serviceName = "Unknown Service";
 	QString serviceShortName = "???";
-	for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+
+	for (int i = 0; i < serviceInfo.count(); i++)
 	{
-		if (static_cast<ServiceType>(m_serviceInfo.type()) == serviceInfo[i].serviceType)
+		if (static_cast<E::SoftwareType>(m_serviceInfo.softwareinfo().softwaretype()) == serviceInfo[i].softwareType)
 		{
 			serviceName = serviceInfo[i].name;
 			serviceShortName = serviceInfo[i].shortName;
@@ -116,9 +119,9 @@ void BaseServiceStateWidget::updateServiceState()
 			{
 				setWindowTitle(serviceName +
 							   QString(" v%1.%2.%3 - %4:%5")
-							   .arg(m_serviceInfo.majorversion())
-							   .arg(m_serviceInfo.minorversion())
-							   .arg(m_serviceInfo.commitno())
+							   .arg(m_serviceInfo.softwareinfo().majorversion())
+							   .arg(m_serviceInfo.softwareinfo().minorversion())
+							   .arg(m_serviceInfo.softwareinfo().commitno())
 							   .arg(QHostAddress(m_ip).toString())
 							   .arg(serviceInfo[m_portIndex].port));
 

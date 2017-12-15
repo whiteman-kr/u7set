@@ -3,17 +3,17 @@
 #include "version.h"
 
 
-TcpConfigServiceClient::TcpConfigServiceClient(const HostAddressPort& serverAddressPort,
-											   const SoftwareInfo& softwareInfo) :
-	Tcp::Client(serverAddressPort, softwareInfo)
+TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+											   const HostAddressPort& serverAddressPort) :
+	Tcp::Client(softwareInfo, serverAddressPort)
 {
 }
 
 
-TcpConfigServiceClient::TcpConfigServiceClient(const HostAddressPort& serverAddressPort1,
-											   const HostAddressPort& serverAddressPort2,
-											   const SoftwareInfo& softwareInfo) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2, softwareInfo)
+TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+											   const HostAddressPort& serverAddressPort1,
+											   const HostAddressPort& serverAddressPort2) :
+	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2)
 {
 }
 

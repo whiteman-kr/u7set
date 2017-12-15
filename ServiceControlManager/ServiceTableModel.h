@@ -27,17 +27,10 @@ struct ServiceData
 
 struct HostInfo
 {
-	quint32 ip;
-	ServiceData servicesData[SERVICE_TYPE_COUNT];
+	QVector<ServiceData> servicesData;
+	quint32 ip = 0;
 
-	HostInfo() :
-		ip(0)
-	{
-		for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
-		{
-			servicesData[i].information.set_type(TO_INT(serviceInfo[i].serviceType));
-		}
-	}
+	HostInfo();
 };
 
 class ServiceTableModel : public QAbstractTableModel
@@ -65,7 +58,7 @@ public slots:
 	void removeHost(int row);
 	void openServiceStatusWidget(const QModelIndex& index);
 
-	void setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo serviceInfo);
+	void setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo sInfo);
 
 private:
 	QVector<HostInfo> m_hostsInfo;
