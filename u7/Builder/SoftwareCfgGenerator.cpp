@@ -481,6 +481,90 @@ namespace Builder
 		return result;
 	}
 
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForBat()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "@rem Project: " + b.project + "\n";
+		comments += "@rem ID: " + QString::number(b.id) + "\n";
+		comments += "@rem Type: " + b.typeStr() + "\n";
+		comments += "@rem Date: " + b.dateStr() + "\n";
+		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "@rem User: " + b.user + "\n";
+		comments += "@rem Workstation: " + b.workstation + "\n";
+
+		return comments;
+	}
+
+	bool SoftwareCfgGenerator::getConfigIp(QString& cfgIP1, QString& cfgIP2)
+	{
+		TEST_PTR_RETURN_FALSE(m_equipment);
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		auto ipGetter = [=](int channel, QString& ip) -> bool
+		{
+			QString configurationServiceIdPropertyCaption = QString("ConfigurationServiceID%1").arg(channel);
+			auto configurationServiceIdProperty = m_software->propertyByCaption(configurationServiceIdPropertyCaption);
+
+			QString objectName = m_software->equipmentIdTemplate();
+			QString propertyName = configurationServiceIdPropertyCaption;
+
+			if (configurationServiceIdProperty == nullptr)
+			{
+				QString channelIdSuffix = QString("_DATACH0%1").arg(channel);
+				auto channelObject = m_equipment->deviceObject(m_software->equipmentIdTemplate() + channelIdSuffix);
+
+				if (channelObject == nullptr)
+				{
+					TEST_PTR_RETURN_FALSE(m_log);
+
+					m_log->errCFG3020(objectName, propertyName);
+					m_log->errCFG3014(channelIdSuffix, m_software->equipmentIdTemplate());
+
+					return false;
+				}
+
+				objectName = m_software->equipmentIdTemplate() + channelIdSuffix;
+				propertyName = "ConfigurationServiceID";
+
+				configurationServiceIdProperty = channelObject->propertyByCaption(propertyName);
+				if (configurationServiceIdProperty == nullptr)
+				{
+					TEST_PTR_RETURN_FALSE(m_log);
+					m_log->errCFG3020(objectName, propertyName);
+					return false;
+				}
+			}
+
+			QString configurationID = configurationServiceIdProperty->value().toString();
+
+			auto* configurationServiceObject = m_equipment->deviceObject(configurationID);
+			if (configurationServiceObject == nullptr)
+			{
+				TEST_PTR_RETURN_FALSE(m_log);
+				m_log->errCFG3021(objectName, propertyName, configurationID);
+				return false;
+			}
+
+			auto configurationIpProperty = configurationServiceObject->propertyByCaption("ClientRequestIP");
+			if (configurationIpProperty== nullptr)
+			{
+				TEST_PTR_RETURN_FALSE(m_log);
+				m_log->errCFG3020(configurationID, "ClientRequestIP");
+				return false;
+			}
+
+			ip = configurationIpProperty->value().toString();
+			return true;
+		};
+
+		bool result = true;
+		result &= ipGetter(1, cfgIP1);
+		result &= ipGetter(2, cfgIP2);
+
+		return result;
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties class implementation

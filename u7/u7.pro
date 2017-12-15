@@ -203,7 +203,8 @@ SOURCES +=\
     ../Proto/network.pb.cc \
     LogicModuleSet.cpp \
     ../lib/LmDescription.cpp \
-    Builder/MemWriteMap.cpp
+    Builder/MemWriteMap.cpp \
+    Builder/ConfigurationServiceCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -344,7 +345,8 @@ HEADERS  += \
     ../Proto/network.pb.h \
     LogicModuleSet.h \
     ../lib/LmDescription.h \
-    Builder/MemWriteMap.h
+    Builder/MemWriteMap.h \
+    Builder/ConfigurationServiceCfgGenerator.h
 
 FORMS    += \
     CreateProjectDialog.ui \
