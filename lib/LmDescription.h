@@ -25,13 +25,15 @@ class LmDescription : public QObject
 
 public:
 	explicit LmDescription(QObject* parent = 0);
+	explicit LmDescription(const LmDescription& that);
+	LmDescription& operator=(const LmDescription& src);
 	virtual ~LmDescription();
 
 	// Loading and parsing XML
 	//
 public:
-	bool load(const QByteArray& file, QString* errorMessage);
-	bool load(const QString& file, QString* errorMessage);
+	bool load(const QByteArray& xml, QString* errorMessage);
+	bool load(const QString& xml, QString* errorMessage);
 	bool load(QDomDocument doc, QString* errorMessage);
 
 protected:
@@ -87,6 +89,7 @@ public:
 		quint32 m_appLogicWordDataSize = 0xFFFFFFFF;
 		quint32 m_moduleDataOffset = 0xFFFFFFFF;
 		quint32 m_moduleDataSize = 0xFFFFFFFF;
+		quint32 m_moduleCount = 14;
 		quint32 m_tuningDataOffset = 0xFFFFFFFF;
 		quint32 m_tuningDataSize = 0xFFFFFFFF;
 		quint32 m_txDiagDataOffset = 0xFFFFFFFF;
@@ -124,8 +127,12 @@ public:
 	//
 public:
 	int descriptionNumber() const;
+
 	const QString& configurationStringFile() const;
 	Q_INVOKABLE QString jsConfigurationStringFile() const;
+
+	QString simualtionScriptFile() const;
+
     const QString& version() const;
 
 	const FlashMemory& flashMemory() const;
@@ -143,8 +150,12 @@ public:
 	// Data
 	//
 private:
+
+	// !!! Copy constructor is defined, don't forget to add new memers copy to it
+	//
 	int m_descriptionNumber = -1;
     QString m_configurationScriptFile;
+	QString m_simulationScriptFile;
     QString m_version;
 
 	FlashMemory m_flashMemory;
@@ -156,6 +167,9 @@ private:
 	//
 	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents;		// Key is OpCode of AFBComponent
 	std::vector<std::shared_ptr<Afb::AfbElement>> m_afbs;
+
+	// !!! Copy constructor is defined, don't forget to add new memers copy to it
+	//
 };
 
 #endif // LOGICMODULE_H

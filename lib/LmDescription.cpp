@@ -4,7 +4,42 @@
 LmDescription::LmDescription(QObject *parent)
 	: QObject(parent)
 {
+}
 
+LmDescription::LmDescription(const LmDescription& that)
+{
+	*this = that;
+	return;
+}
+
+LmDescription& LmDescription::operator=(const LmDescription& src)
+{
+	m_descriptionNumber = src.m_descriptionNumber;
+	m_configurationScriptFile = src.m_configurationScriptFile;
+	m_simulationScriptFile = src.m_simulationScriptFile;
+	m_version = src.m_version;
+
+	m_flashMemory = src.m_flashMemory;
+	m_memory = src.m_memory;
+	m_logicUnit = src.m_logicUnit;
+	m_optoInterface = src.m_optoInterface;
+
+	// AFBs
+	//
+	for (const std::pair<int, std::shared_ptr<Afb::AfbComponent>>& p : src.m_afbComponents)
+	{
+		std::shared_ptr<Afb::AfbComponent> afbComponentCopy = std::make_shared<Afb::AfbComponent>(*p.second.get());
+		m_afbComponents.insert({p.first, afbComponentCopy});
+	}
+
+	m_afbs.reserve(src.m_afbs.size());
+	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbs)
+	{
+		std::shared_ptr<Afb::AfbElement> afbCopy = std::make_shared<Afb::AfbElement>(*afb.get());
+		m_afbs.push_back(afbCopy);
+	}
+
+	return *this;
 }
 
 LmDescription::~LmDescription()
@@ -12,7 +47,7 @@ LmDescription::~LmDescription()
 
 }
 
-bool LmDescription::load(const QByteArray& file, QString* errorMessage)
+bool LmDescription::load(const QByteArray& xml, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -20,7 +55,7 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 		return false;
 	}
 
-	if (file.isEmpty() == true)
+	if (xml.isEmpty() == true)
 	{
 		*errorMessage = tr("Input LogicModule description file is empty.");
 		return false;
@@ -30,7 +65,7 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 	int parseErrorLine = -1;
 	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(file, false, errorMessage, &parseErrorLine, &parseErrorColumn);
+	bool ok = doc.setContent(xml, false, errorMessage, &parseErrorLine, &parseErrorColumn);
 	if (ok == false)
 	{
 		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
@@ -40,7 +75,7 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 	return load(doc, errorMessage);
 }
 
-bool LmDescription::load(const QString& file, QString* errorMessage)
+bool LmDescription::load(const QString& xml, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -48,7 +83,7 @@ bool LmDescription::load(const QString& file, QString* errorMessage)
 		return false;
 	}
 
-	if (file.isEmpty() == true)
+	if (xml.isEmpty() == true)
 	{
 		*errorMessage = tr("Input LogicModule description file is empty.");
 		return false;
@@ -58,7 +93,7 @@ bool LmDescription::load(const QString& file, QString* errorMessage)
 	int parseErrorLine = -1;
 	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(file, errorMessage, &parseErrorLine, &parseErrorColumn);
+	bool ok = doc.setContent(xml, errorMessage, &parseErrorLine, &parseErrorColumn);
 	if (ok == false)
 	{
 		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
@@ -121,6 +156,16 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
         errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
         return false;
     }
+
+	// Attribute SimulationScriptFile
+	//
+	m_simulationScriptFile = logicModuleElement.attribute("SimulationScriptFile");
+
+	if (m_simulationScriptFile.isEmpty() == true)
+	{
+		errorMessage->append(tr("Cant't find attribute SimulationScriptFile"));
+		return false;
+	}
 
     // Attribute Version
     //
@@ -544,6 +589,7 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 
 	m_moduleDataOffset = getSectionUintValue(QLatin1String("ModuleDataOffset"), errorMessage);
 	m_moduleDataSize = getSectionUintValue(QLatin1String("ModuleDataSize"), errorMessage);
+	m_moduleCount = getSectionUintValue(QLatin1String("ModuleCount"), errorMessage);
 
 	m_tuningDataOffset = getSectionUintValue(QLatin1String("TuningDataOffset"), errorMessage);
 	m_tuningDataSize = getSectionUintValue(QLatin1String("TuningDataSize"), errorMessage);
@@ -707,6 +753,11 @@ const QString& LmDescription::configurationStringFile() const
 QString LmDescription::jsConfigurationStringFile() const
 {
 	return m_configurationScriptFile;
+}
+
+QString LmDescription::simualtionScriptFile() const
+{
+	return m_simulationScriptFile;
 }
 
 const QString& LmDescription::version() const
