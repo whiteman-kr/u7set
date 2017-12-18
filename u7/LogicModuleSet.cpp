@@ -2,7 +2,10 @@
 
 LogicModuleSet::LogicModuleSet()
 {
+}
 
+LogicModuleSet::~LogicModuleSet()
+{
 }
 
 bool LogicModuleSet::loadFile(DbController* db, QString fileName, QString* errorString)

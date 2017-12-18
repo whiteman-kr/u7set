@@ -6,8 +6,10 @@
 class LogicModuleSet : public QObject
 {
 	Q_OBJECT
+
 public:
 	LogicModuleSet();
+	virtual ~LogicModuleSet();
 
 public:
 	bool loadFile(DbController* db, QString fileName, QString* errorString);
