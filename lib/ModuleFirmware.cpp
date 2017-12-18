@@ -308,6 +308,20 @@ static const std::vector<quint8> err;
 		return m_hasBinaryData;
 	}
 
+	void ModuleFirmwareStorage::clear()
+	{
+		m_fileVersion = 0;
+		m_hasBinaryData = false;
+		m_buildSoftware.clear();
+		m_projectName.clear();
+		m_userName.clear();
+		m_changesetId = 0;
+		m_buildNumber = 0;
+		m_firmwares.clear();
+
+		return;
+	}
+
 	void ModuleFirmwareStorage::createFirmware(const QString& subsysId,
 											   int ssKey,
 											   int uartId,

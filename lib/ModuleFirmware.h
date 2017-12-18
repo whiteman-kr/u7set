@@ -113,10 +113,11 @@ namespace Hardware
 
 		bool load(QString fileName, QString* errorCode);
 		bool load(const QByteArray& data, QString* errorCode);
-
 		bool loadHeader(QString fileName, QString* errorCode);
 
 		bool hasBinaryData() const;
+
+		void clear();
 
 		// Firmware operations
 		//
@@ -147,7 +148,7 @@ namespace Hardware
 		//
 	protected:
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 2;	//Latest version
+		static const int m_maxFileVersion = 2;	// Latest version
 
 		bool m_hasBinaryData = false;
 
@@ -159,7 +160,6 @@ namespace Hardware
 		bool m_debug = false;
 
 		std::map<QString, ModuleFirmware> m_firmwares;
-
 	};
 }
 

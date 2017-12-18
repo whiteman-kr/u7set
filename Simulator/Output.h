@@ -11,6 +11,7 @@ namespace Sim
 	{
 	protected:
 		Output(QTextStream* outputStream, QString outputScope, std::shared_ptr<QMutex> mutex);
+
 	public:
 		Output() = delete;
 		explicit Output(QTextStream* outputStream, QString outputScope = "");

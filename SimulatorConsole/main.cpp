@@ -3,35 +3,28 @@
 #include <QDebug>
 #include "../Simulator/Simulator.h"
 
-QByteArray readFile(QString fileName)
-{
-	QFile file(fileName);
+//QByteArray readFile(QString fileName)
+//{
+//	QFile file(fileName);
 
-	bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
-	if (ok == false)
-	{
-		return QByteArray();
-	}
+//	bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
+//	if (ok == false)
+//	{
+//		return QByteArray();
+//	}
 
-	return file.readAll();
-}
+//	return file.readAll();
+//}
 
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
 	bool ok = true;
-
-	// Loading files
-	//
-//	QByteArray lmDescription = readFile("D:/Develop/u7set/u7/LogicModuleDescription/LM1_SR01.xml");
-//	QByteArray simScript = readFile("D:/Develop/u7set/LmModel/Scripts/out/LM1_SR01_SIM.js");
-//	QByteArray bts = readFile("D:/Develop/build/test_simulator_bts-debug/build/test_simulator_bts-000026.bts");
+	QTextStream textStream(stdout);
 
 	// --
 	//
-	QTextStream textStream(stdout);
-
 	Sim::Simulator simulator(&textStream);
 
 	ok = simulator.load("D:/Develop/build/test_simulator_bts-debug/build");

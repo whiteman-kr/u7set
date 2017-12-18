@@ -12,7 +12,7 @@ namespace Sim
 	{
 	}
 
-	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription)
+	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const QString simulationScript)
 	{
 		if (firmware.uartExists(UartID::ApplicationLogic) == false)
 		{
@@ -38,16 +38,21 @@ namespace Sim
 			return true;
 		}
 
-		for (const Hardware::LogicModuleInfo& lm : lms)
+		for (const Hardware::LogicModuleInfo& lmInfo : lms)
 		{
-			std::shared_ptr<LogicModule> logicModule = addDevice(lm);
+			std::shared_ptr<LogicModule> logicModule = addDevice(lmInfo);
 			if (logicModule == nullptr)
 			{
 				return false;
 			}
 
-//			logicModule->init(lm, lmDescription, )
-//			Hardware::ModuleFirmwareData& firmwareData(int uartId, bool* ok);
+			writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
+
+			bool ok = logicModule->load(lmInfo, lmDescription, firmware, simulationScript);
+			if (ok == false)
+			{
+				return false;
+			}
 		}
 
 		return false;

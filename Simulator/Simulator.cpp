@@ -31,8 +31,6 @@ namespace Sim
 			return false;
 		}
 
-		QDir dir(buildPath);
-
 		// Load bts file
 		//
 		bool ok = loadFirmwares(buildPath);
@@ -62,7 +60,7 @@ namespace Sim
 		{
 			writeMessage(QObject::tr("Load subsystem: %1").arg(subsystemId));
 
-			const Hardware::ModuleFirmware& firmware = mfs.firmware(subsystemId, &ok);
+			const Hardware::ModuleFirmware& firmware = m_firmwares.firmware(subsystemId, &ok);
 			if (ok == false)
 			{
 				writeError(QObject::tr("Subsystem %1 in not found in bitstream file.").arg(subsystemId));
@@ -115,6 +113,15 @@ namespace Sim
 
 	bool Simulator::loadFirmwares(QString buildPath)
 	{
+		m_firmwares.clear();
+
+		QDir dir(buildPath);
+		if (dir.exists() == false)
+		{
+			writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
+			return false;
+		}
+
 		QStringList btsFilter = {"*.bts"};
 		QFileInfoList btsFiles = dir.entryInfoList(btsFilter, QDir::Files);
 
@@ -145,9 +152,65 @@ namespace Sim
 		return true;
 	}
 
-	bool SimulatorloadLmDescriptions(QString buildPath)
+	bool Simulator::loadLmDescriptions(QString buildPath)
 	{
+		m_lmDescriptions.clear();
 
+		QDir dir(buildPath);
+		if (dir.exists() == false)
+		{
+			writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
+			return false;
+		}
+
+		bool ok = dir.cd("LmDescriptions");
+		if (ok == false)
+		{
+			writeError(QObject::tr("Path %1/LmDescriptions does not exist").arg(buildPath));
+			return false;
+		}
+
+		QStringList xmlFilter = {"*.xml"};
+		QFileInfoList xmlFiles = dir.entryInfoList(xmlFilter, QDir::Files);
+
+		if (xmlFiles.size() == 0)
+		{
+			writeError(QObject::tr("LogicModule description file(s) not found, path %1").arg(buildPath));
+			return false;
+		}
+
+		for (QFileInfo& fi : xmlFiles)
+		{
+			QString fileName = fi.canonicalFilePath();
+			writeMessage(QObject::tr("Load LogicModule description file: %1").arg(fi.fileName()));
+
+			QFile file(fileName);
+			ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+			if (ok == false)
+			{
+				writeError(QObject::tr("Open file error: %1")
+							.arg(file.errorString()));
+			}
+
+			QByteArray xmlData = file.readAll();
+
+			QString errorMessage;
+			std::shared_ptr<LmDescription> lmDescription = std::make_shared<LmDescription>();
+
+			ok = lmDescription->load(xmlData, &errorMessage);
+			if (ok == false)
+			{
+				writeError(QObject::tr("Loading file %1 error: %2")
+							.arg(fileName)
+							.arg(errorMessage));
+				return false;
+			}
+
+			m_lmDescriptions[fi.fileName()] = lmDescription;
+		}
+
+		return true;
 	}
 
 }

@@ -13,7 +13,11 @@ namespace Sim
 	class Simulator : protected Output
 	{
 	public:
-		explicit Simulator(QTextStream* outputStream);
+		// outputStream - stream for console output
+		// to out to stdout: [code]QTextStream textStream(stdout);[/code]
+		// outputStream can be nullptr
+		//
+		explicit Simulator(QTextStream* outputStream = nullptr);
 		virtual ~Simulator();
 
 	public:

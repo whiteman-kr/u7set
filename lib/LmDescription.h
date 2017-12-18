@@ -32,8 +32,8 @@ public:
 	// Loading and parsing XML
 	//
 public:
-	bool load(const QByteArray& file, QString* errorMessage);
-	bool load(const QString& file, QString* errorMessage);
+	bool load(const QByteArray& xml, QString* errorMessage);
+	bool load(const QString& xml, QString* errorMessage);
 	bool load(QDomDocument doc, QString* errorMessage);
 
 protected:

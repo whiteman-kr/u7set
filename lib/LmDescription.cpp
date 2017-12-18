@@ -47,7 +47,7 @@ LmDescription::~LmDescription()
 
 }
 
-bool LmDescription::load(const QByteArray& file, QString* errorMessage)
+bool LmDescription::load(const QByteArray& xml, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -55,7 +55,7 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 		return false;
 	}
 
-	if (file.isEmpty() == true)
+	if (xml.isEmpty() == true)
 	{
 		*errorMessage = tr("Input LogicModule description file is empty.");
 		return false;
@@ -65,7 +65,7 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 	int parseErrorLine = -1;
 	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(file, false, errorMessage, &parseErrorLine, &parseErrorColumn);
+	bool ok = doc.setContent(xml, false, errorMessage, &parseErrorLine, &parseErrorColumn);
 	if (ok == false)
 	{
 		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
@@ -75,7 +75,7 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 	return load(doc, errorMessage);
 }
 
-bool LmDescription::load(const QString& file, QString* errorMessage)
+bool LmDescription::load(const QString& xml, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
@@ -83,7 +83,7 @@ bool LmDescription::load(const QString& file, QString* errorMessage)
 		return false;
 	}
 
-	if (file.isEmpty() == true)
+	if (xml.isEmpty() == true)
 	{
 		*errorMessage = tr("Input LogicModule description file is empty.");
 		return false;
@@ -93,7 +93,7 @@ bool LmDescription::load(const QString& file, QString* errorMessage)
 	int parseErrorLine = -1;
 	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(file, errorMessage, &parseErrorLine, &parseErrorColumn);
+	bool ok = doc.setContent(xml, errorMessage, &parseErrorLine, &parseErrorColumn);
 	if (ok == false)
 	{
 		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
