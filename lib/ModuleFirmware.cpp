@@ -8,8 +8,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
+#include <math.h>
 
-//-----------------------------------------------------------------------------
 
 namespace Hardware
 {
@@ -77,7 +77,7 @@ namespace Hardware
 	ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok)
 	{
 static ModuleFirmwareData err;
-		if (ok == false)
+		if (ok == nullptr)
 		{
 			assert(ok);
 			return err;
@@ -96,7 +96,7 @@ static ModuleFirmwareData err;
 	const ModuleFirmwareData& ModuleFirmware::firmwareData(int uartId, bool* ok) const
 	{
 static ModuleFirmwareData err;
-		if (ok == false)
+		if (ok == nullptr)
 		{
 			assert(ok);
 			return err;
@@ -770,7 +770,8 @@ static ModuleFirmware err;
 
 						if (Crc::checkDataBlockCrc(v, firmwareData.frames[v]) == false)
 						{
-							*errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
+
+							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.").arg(fw.subsysId()).arg(QString::number(uartId, 16)).arg(v);
 							return false;
 						}
 					}
