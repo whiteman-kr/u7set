@@ -35,44 +35,26 @@ namespace Sim
 
 		// Load bts file
 		//
-		QStringList btsFilter = {"*.bts"};
-		QFileInfoList btsFiles = dir.entryInfoList(btsFilter, QDir::Files);
-
-		if (btsFiles.size() == 0)
-		{
-			writeError(QObject::tr("Bitstream file not found, path %1").arg(buildPath));
-			return false;
-		}
-
-		if (btsFiles.size() > 1)
-		{
-			writeError(QObject::tr("There are more than one bitstream file, path %1").arg(buildPath));
-			return false;
-		}
-
-		QString btsFileName = btsFiles.front().canonicalFilePath();
-		writeMessage(QObject::tr("Load bitstream file: %1").arg(btsFiles.front().fileName()));
-
-		Hardware::ModuleFirmwareStorage mfs;
-		QString errorMessage;
-
-		bool ok = mfs.load(btsFileName, &errorMessage);
+		bool ok = loadFirmwares(buildPath);
 		if (ok == false)
 		{
-			writeError(QObject::tr("Loading bitstream file error: %1").arg(errorMessage));
 			return false;
 		}
 
-		QStringList subsystems = mfs.subsystems();
+		QStringList subsystems = m_firmwares.subsystems();
 		if (subsystems.isEmpty() == true)
 		{
 			writeError(QObject::tr("Bitstream file does not contain any subsystem."));
 			return false;
 		}
 
-		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-		int to_do_init_m_lmDescriptions;
+		// Load LoficModules Descriptions
+		//
+		ok = loadLmDescriptions(buildPath);
+		if (ok == false)
+		{
+			return false;
+		}
 
 		// Load subsystems
 		//
@@ -129,6 +111,43 @@ namespace Sim
 		//
 
 		return true;
+	}
+
+	bool Simulator::loadFirmwares(QString buildPath)
+	{
+		QStringList btsFilter = {"*.bts"};
+		QFileInfoList btsFiles = dir.entryInfoList(btsFilter, QDir::Files);
+
+		if (btsFiles.size() == 0)
+		{
+			writeError(QObject::tr("Bitstream file not found, path %1").arg(buildPath));
+			return false;
+		}
+
+		if (btsFiles.size() > 1)
+		{
+			writeError(QObject::tr("There are more than one bitstream file, path %1").arg(buildPath));
+			return false;
+		}
+
+		QString btsFileName = btsFiles.front().canonicalFilePath();
+		writeMessage(QObject::tr("Load bitstream file: %1").arg(btsFiles.front().fileName()));
+
+		QString errorMessage;
+
+		bool ok = m_firmwares.load(btsFileName, &errorMessage);
+		if (ok == false)
+		{
+			writeError(QObject::tr("Loading bitstream file error: %1").arg(errorMessage));
+			return false;
+		}
+
+		return true;
+	}
+
+	bool SimulatorloadLmDescriptions(QString buildPath)
+	{
+
 	}
 
 }

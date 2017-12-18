@@ -1,6 +1,8 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 #include <map>
+#include "../lib/ModuleFirmware.h"
+#include "../lib/LmDescription.h"
 #include "Output.h"
 #include "Subsystem.h"
 
@@ -18,6 +20,13 @@ namespace Sim
 		bool load(QString buildPath);
 
 	private:
+		bool loadFirmwares(QString buildPath);
+		bool loadLmDescriptions(QString buildPath);
+
+	private:
+		Hardware::ModuleFirmwareStorage m_firmwares;	// Loaded bts file
+
+		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;
 		std::map<QString, Subsystem> m_subsystems;		// Key is subsystemId;
 	};
 
