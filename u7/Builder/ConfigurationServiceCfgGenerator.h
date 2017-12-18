@@ -5,22 +5,20 @@
 namespace Builder
 {
 
-	class ArchivingServiceCfgGenerator : public SoftwareCfgGenerator
+	class ConfigurationServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		ArchivingServiceCfgGenerator(DbController* db,
+		ConfigurationServiceCfgGenerator(DbController* db,
 									Hardware::Software* software,
 									SignalSet* signalSet,
 									Hardware::EquipmentSet* equipment,
 									BuildResultWriter* buildResultWriter);
 
-		~ArchivingServiceCfgGenerator();
+		~ConfigurationServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
 
 	private:
-		bool writeSettings();
-		bool writeArchSignalsFile();
 		bool writeBatFile();
 
 	};
