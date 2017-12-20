@@ -3,6 +3,11 @@
 #include <vector>
 #include <QByteArray>
 
+namespace Hardware
+{
+	struct ModuleFirmwareData;
+}
+
 namespace Sim
 {
 	namespace UartID
@@ -21,13 +26,10 @@ namespace Sim
 		// Access
 		//
 	public:
-		bool init(int frameSize, int frameCount, int fillWith = 0x00);
-		bool fill(int fillWith);
+		bool init(const Hardware::ModuleFirmwareData& data, char fillWith = '\0');
+		bool fill(char fillWith);
 		bool reset();					// Set data with FFs
 		void clear();					// Clear buffer and reset size
-
-		bool loadData(const QByteArray& fileData, QString* errorMessage);
-		bool loadVersion6(const QJsonObject& jConfig, QString* errorMessage);
 
 		bool parseAllocationFrame();
 
@@ -65,18 +67,15 @@ namespace Sim
 		//
 	private:
 		int m_uartId = 0;
+		QString uartType;
 		QByteArray m_data;
 		int m_frameSize = 0;
 		int m_frameCount = 0;
+		int m_framePayloadSize = 0;
 
 		// Parsed Data
 		//
 	private:
-
-		// Data from bitstream file
-		//
-		int m_framePayloadSize = 0;
-
 		// Data from parsed allocation frame
 		//
 		quint16	m_subsystemKey = 0;

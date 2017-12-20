@@ -33,20 +33,17 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	std::shared_ptr<Sim::LogicModule> logicModule = simulator.logicModule("");
+	if (logicModule == nullptr)
+	{
+		return 2;
+	}
 
-	//Sim::LogicModule lm(&textStream);
-
-//	ok = lm.load(lmDescription, bts, simScript);
-//	if (ok == false)
-//	{
-//		return 1;
-//	}
-
-//	ok = lm.powerOn(0, true);
-//	if (ok == false)
-//	{
-//		return 2;
-//	}
+	ok = logicModule->powerOn(true);
+	if (ok == false)
+	{
+		return 3;
+	}
 
 
 	getc(stdin);

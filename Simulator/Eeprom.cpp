@@ -1,6 +1,7 @@
 #include "Eeprom.h"
 #include <cassert>
 #include <QJsonDocument>
+#include "../lib/ModuleFirmware.h"
 
 namespace Sim
 {
@@ -14,21 +15,29 @@ namespace Sim
 	{
 	}
 
-	bool Eeprom::init(int frameSize, int frameCount, int fillWith)
+	bool Eeprom::init(const Hardware::ModuleFirmwareData& data, char fillWith)
 	{
-		m_frameSize = frameSize;
-		m_frameCount = frameCount;
+		m_uartId = data.uartId;
+		uartType = data.uartType;
 
-		m_data.resize(m_frameSize * m_frameCount);
+		m_frameSize = data.eepromFrameSize;
+		m_frameCount = static_cast<int>(data.frames.size());
 
-		bool ok = fill(fillWith);
+		m_data = data.toByteArray();
+		fill(fillWith);
 
-		return ok;
+		if (m_data.size() != m_frameSize * m_frameCount)
+		{
+			assert(m_data.size() == m_frameSize * m_frameCount);
+			return false;
+		}
+
+		return true;
 	}
 
-	bool Eeprom::fill(int fillWith)
+	bool Eeprom::fill(char fillWith)
 	{
-		m_data.fill((char)fillWith);
+		m_data.fill(fillWith);
 		return true;
 	}
 
@@ -45,218 +54,6 @@ namespace Sim
 		m_data.clear();
 
 		return;
-	}
-
-	bool Eeprom::loadData(const QByteArray& fileData, QString* errorMessage)
-	{
-		if (errorMessage == nullptr)
-		{
-			assert(errorMessage);
-			return false;
-		}
-
-		QJsonDocument document = QJsonDocument::fromJson(fileData);
-
-		if (document.isEmpty() == true ||
-			document.isNull() == true ||
-			document.isObject() == false)
-		{
-			return false;
-		}
-
-		QJsonObject jConfig = document.object();
-		int fileVersion = 0;
-
-		if (jConfig.value("fileVersion").isUndefined() == true)
-		{
-			*errorMessage = QLatin1String("Cant detect bts file version. fileVersion is not found.");
-		}
-		else
-		{
-			fileVersion = jConfig.value("fileVersion").toInt();
-		}
-
-		if (jConfig.value("firmwaresCount").isUndefined() == true)
-		{
-			*errorMessage = QLatin1String("Cant detect count of firmwares in bts files. firmwaresCount is not found.");
-			return false;
-		}
-
-		int firmwaresCount = (int)jConfig.value("firmwaresCount").toInt();
-
-		switch (fileVersion)
-		{
-		case 6:
-			return loadVersion6(jConfig, errorMessage);
-		default:
-			// Unsupported version
-			//
-			*errorMessage = QString("Unsupported file version, version = %1").arg(fileVersion);
-			return false;
-		}
-
-		return true;
-	}
-
-	bool Eeprom::loadVersion6(const QJsonObject& jConfig, QString* errorMessage)
-	{
-		if (errorMessage == nullptr)
-		{
-			assert(errorMessage);
-			return false;
-		}
-
-		// --
-		//
-		if (jConfig.value("uartId").isUndefined() == true)
-		{
-			*errorMessage = QString("Undefined UartID");
-			return false;
-		}
-
-		int loadedUartId = jConfig.value("uartId").toInt();
-		if (loadedUartId != m_uartId)
-		{
-			*errorMessage = QString("Wrong file UartID, expected %1, loaded %2").arg(m_uartId).arg(loadedUartId);
-			return false;
-		}
-
-		// --
-		//
-		if (jConfig.value("frameSize").isUndefined() == true)
-		{
-			*errorMessage = QString("Undefined FrameSize");
-			return false;
-		}
-
-		m_framePayloadSize = jConfig.value("frameSize").toInt();
-		if (m_framePayloadSize > m_frameSize)	// Example: Payload = 1016, frameSize = 1024
-		{
-			*errorMessage = QString("Frame PayloadSize (frameSize) is wrong.");
-			return false;
-		}
-
-		// --
-		//
-		int frameSizeWithCRC = jConfig.value("frameSizeWithCRC").toInt();
-		if (frameSizeWithCRC != m_frameSize)
-		{
-			*errorMessage = QString("Undefined FrameSizeWithCRC");
-			return false;
-		}
-
-		// Loading frame data
-		//
-		if (jConfig.value("framesCount").isUndefined() == true)
-		{
-			return false;
-		}
-		int framesCount = (int)jConfig.value("framesCount").toDouble();
-
-		if (framesCount != m_frameCount)
-		{
-			*errorMessage = QString("Wrong framesCount");
-			return false;
-		}
-
-		QByteArray frameData;
-		frameData.resize(m_frameSize);
-
-		quint16* framePtr = (quint16*)frameData.data();
-
-		int frameStringWidth = -1;
-		int linesCount = 0;
-
-		for (int frameIndex = 0; frameIndex < framesCount; frameIndex++)
-		{
-			QString tagName = "z_frame_" + QString::number(frameIndex).rightJustified(4, '0');
-
-			QJsonValue jFrameVal = jConfig.value(tagName);
-			if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
-			{
-				*errorMessage = QString("Tag %1 is not defined").arg(tagName);
-				return false;
-			}
-
-			QJsonObject jFrame = jFrameVal.toObject();
-			if (jFrame.value("frameIndex").isUndefined() == true)
-			{
-				*errorMessage = QString("Tag frameIndex for %1 is not defined").arg(tagName);
-				return false;
-			}
-
-			if (frameStringWidth == -1)
-			{
-				QString firstString = jFrame.value("data0000").toString();
-
-				frameStringWidth = firstString.split(' ').size();
-				if (frameStringWidth == 0)
-				{
-					*errorMessage = QString("Parse data for %1 error").arg(tagName);
-					return false;
-				}
-
-				linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
-			}
-
-			int dataPos = 0;
-			quint16* ptr = framePtr;
-
-			for (int l = 0; l < linesCount; l++)
-			{
-				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
-				QJsonValue v = jFrame.value(stringName);
-
-				if (v.isUndefined() == true)
-				{
-					*errorMessage = QString("Tag %1 is not defined").arg(stringName);
-					return false;
-				}
-
-				QString stringValue = v.toString();
-
-				for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
-				{
-					bool ok = false;
-					quint16 v = s.toUInt(&ok, 16);
-
-					if (ok == false)
-					{
-						*errorMessage = QString("Conversion %1 error, tag %1").arg(s).arg(stringName);
-						return false;
-					}
-
-					if (dataPos >= m_frameSize / sizeof(quint16))
-					{
-						assert(false);
-						break;
-					}
-
-					dataPos++;
-					*ptr++ = qToBigEndian(v);
-				}
-			}
-
-//			if (Crc::checkDataBlockCrc(frameIndex, frameData) == false)
-//			{
-//				errorCode = QString("File data is corrupt, CRC check error in frame %1.").arg(frameIndex);
-//				return false;
-//			}
-
-			for (int copyIndex = 0; copyIndex < frameData.size(); copyIndex ++)
-			{
-				int dataIndex = frameIndex * m_frameSize + copyIndex;
-				if (dataIndex >= m_data.size())
-				{
-					assert(false);
-					return false;
-				}
-
-				m_data[dataIndex] = frameData[copyIndex];
-			}
-		}
-
-		return true;
 	}
 
 	bool Eeprom::parseAllocationFrame()
@@ -333,21 +130,25 @@ namespace Sim
 
 	qint32 Eeprom::getSint32(int frameIndex, int wordOffset)
 	{
+		int to_to;
 		return 0;
 	}
 
 	quint32 Eeprom::getUint32(int frameIndex, int wordOffset)
 	{
+		int to_to;
 		return 0;
 	}
 
 	float Eeprom::getFloat(int frameIndex, int wordOffset)
 	{
+		int to_to;
 		return 0;
 	}
 
 	double Eeprom::getDouble(int frameIndex, int wordOffset)
 	{
+		int to_to;
 		return 0;
 	}
 

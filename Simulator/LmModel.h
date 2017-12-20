@@ -32,7 +32,7 @@ namespace Sim
 		// Running LM
 		//
 	public:
-		bool powerOn(int logicModuleNumber, bool autoStart);
+		bool powerOn(bool autoStart);
 		bool powerOff();
 
 		bool pause();
@@ -49,8 +49,7 @@ namespace Sim
 		// --
 		//
 	protected:
-		bool loadLmDescription(const QByteArray& logicModuleDescription);
-		bool loadEeprom(const Hardware::ModuleFirmware& firmware, Eeprom* eeprom);
+		bool loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom);
 
 	public:
 		const Hardware::LogicModuleInfo& logicModuleInfo() const;
@@ -59,7 +58,7 @@ namespace Sim
 		// Loaded LM data
 		//
 		Hardware::LogicModuleInfo m_logicModuleInfo;
-		std::unique_ptr<LmDescription> m_lmDescription;
+		LmDescription m_lmDescription;
 
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);

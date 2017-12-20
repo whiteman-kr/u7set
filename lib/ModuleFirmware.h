@@ -26,6 +26,8 @@ namespace Hardware
 		// binary data
 		//
 		std::vector<std::vector<quint8>> frames;
+
+		QByteArray toByteArray() const;
 	};
 
 	struct LogicModuleInfo

@@ -46,9 +46,17 @@ namespace Sim
 			return false;
 		}
 
-		// Load LoficModules Descriptions
+		// Load LogicModules Descriptions
 		//
 		ok = loadLmDescriptions(buildPath);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Load AFBL simulation scripts
+		//
+		ok = loadSimulationScripts(buildPath);
 		if (ok == false)
 		{
 			return false;
@@ -93,9 +101,20 @@ namespace Sim
 
 			const LmDescription& lmDescription = *(lmit->second.get());
 
+			// Get simulation script
+			//
+			auto simScriptIt = m_simScript.find(lmDescription.simualtionScriptFile());
+			if (simScriptIt == m_simScript.end())
+			{
+				writeError(QObject::tr("Cannot find AFBL simulation script file %1").arg(lmDescription.simualtionScriptFile()));
+				return false;
+			}
+
+			const QString& simulationScript = simScriptIt->second;
+
 			// Upload data to susbystem
 			//
-			ok = ss.load(firmware, lmDescription);
+			ok = ss.load(firmware, lmDescription, simulationScript);
 			if (ok == false)
 			{
 				// Error must be reported in Subsystem::load
@@ -104,9 +123,6 @@ namespace Sim
 			}
 
 		}
-
-		// Load LmDescriptions
-		//
 
 		return true;
 	}
@@ -191,6 +207,7 @@ namespace Sim
 			{
 				writeError(QObject::tr("Open file error: %1")
 							.arg(file.errorString()));
+				return false;
 			}
 
 			QByteArray xmlData = file.readAll();
@@ -211,6 +228,67 @@ namespace Sim
 		}
 
 		return true;
+	}
+
+	bool Simulator::loadSimulationScripts(QString buildPath)
+	{
+		m_simScript.clear();
+
+		QDir dir(buildPath);
+		if (dir.exists() == false)
+		{
+			writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
+			return false;
+		}
+
+		bool ok = dir.cd("Simulation");
+		if (ok == false)
+		{
+			writeError(QObject::tr("Path %1/Simulation does not exist").arg(buildPath));
+			return false;
+		}
+
+		QStringList sjFilter = {"*.js"};
+		QFileInfoList jsFiles = dir.entryInfoList(sjFilter, QDir::Files);
+
+		for (QFileInfo& fi : jsFiles)
+		{
+			QString fileName = fi.canonicalFilePath();
+			writeMessage(QObject::tr("Load AFBL simulation script: %1").arg(fi.fileName()));
+
+			QFile file(fileName);
+			ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+			if (ok == false)
+			{
+				writeError(QObject::tr("Open file error: %1")
+							.arg(file.errorString()));
+				return false;
+			}
+
+			QByteArray jsData = file.readAll();
+			QString js(jsData);
+
+			m_simScript[fi.fileName()] = js;
+		}
+
+		return true;
+	}
+
+	std::shared_ptr<LogicModule> Simulator::logicModule(QString equipmentId)
+	{
+		for (auto it = m_subsystems.begin(); it != m_subsystems.end(); ++it)
+		{
+			Subsystem& ss = it->second;
+
+			std::shared_ptr<LogicModule> lm = ss.logicModule(equipmentId);
+			if (lm != nullptr)
+			{
+				return lm;
+			}
+		}
+
+		return std::shared_ptr<LogicModule>();
 	}
 
 }

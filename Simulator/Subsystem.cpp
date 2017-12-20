@@ -55,7 +55,21 @@ namespace Sim
 			}
 		}
 
-		return false;
+		return true;
+	}
+
+	std::shared_ptr<LogicModule> Subsystem::logicModule(QString equipmentId)
+	{
+		auto it = m_devicesByEquipmentId.find(equipmentId);
+
+		if (it == m_devicesByEquipmentId.end())
+		{
+			return std::shared_ptr<LogicModule>();
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 
 	std::vector<Hardware::LogicModuleInfo> Subsystem::logicModulesInfo() const

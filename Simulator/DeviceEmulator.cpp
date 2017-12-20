@@ -56,6 +56,22 @@ namespace Sim
 			return false;
 		}
 
+		// --
+		//
+		ok = initEeprom();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		ok = parseAppLogicCode();
+		if (ok == false)
+		{
+			return false;
+		}
+
 		return ok;
 	}
 
@@ -157,6 +173,171 @@ namespace Sim
 		return;
 	}
 
+	bool DeviceEmulator::initEeprom()
+	{
+		writeMessage(tr("Init EEPROM"));
+
+		bool result = true;
+		bool ok = true;
+
+		ok = m_tuningEeprom.parseAllocationFrame();
+		if (ok == false)
+		{
+			writeError(tr("Parse tuning EEPROM allocation frame error."));
+			result = false;
+		}
+
+		ok = m_confEeprom.parseAllocationFrame();
+		if (ok == false)
+		{
+			writeError(tr("Parse configuration EEPROM allocation frame error."));
+			result = false;
+		}
+
+		ok = m_appLogicEeprom.parseAllocationFrame();
+		if (ok == false)
+		{
+			writeError(tr("Parse application logic EEPROM allocation frame error."));
+			result = false;
+		}
+
+		if (m_tuningEeprom.subsystemKey() != m_confEeprom.subsystemKey() ||
+			m_tuningEeprom.subsystemKey() != m_appLogicEeprom.subsystemKey())
+		{
+			QString str = tr("EEPROMs have different subsystemKeys: \n"
+						  "\ttuningEeprom.subsystemKey: %1\n"
+						  "\tconfEeprom.subsystemKey: %2\n"
+						  "\tappLogicEeprom.subsystemKey: %3")
+							.arg(m_tuningEeprom.subsystemKey())
+							.arg(m_confEeprom.subsystemKey())
+							.arg(m_appLogicEeprom.subsystemKey());
+			writeError(str);
+			result = false;
+		}
+
+		if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() ||
+			m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
+		{
+			QString str = tr("EEPROMs have different buildNo: \n"
+						  "\ttuningEeprom.buildNo: %1\n"
+						  "\tconfEeprom.buildNo: %2\n"
+						  "\tappLogicEeprom.buildNo: %3")
+							.arg(m_tuningEeprom.buildNo())
+							.arg(m_confEeprom.buildNo())
+							.arg(m_appLogicEeprom.buildNo());
+			writeError(str);
+			result = false;
+		}
+
+		if (m_tuningEeprom.configrationsCount() != m_confEeprom.configrationsCount() ||
+			m_tuningEeprom.configrationsCount() != m_appLogicEeprom.configrationsCount())
+		{
+			QString str = tr("EEPROMs EEPROMs have different configrationsCount: \n"
+						  "\ttuningEeprom.configrationsCount: %1\n"
+						  "\tconfEeprom.configrationsCount: %2\n"
+						  "\tappLogicEeprom.configrationsCount: %3")
+							.arg(m_tuningEeprom.configrationsCount())
+							.arg(m_confEeprom.configrationsCount())
+							.arg(m_appLogicEeprom.configrationsCount());
+			writeError(str);
+			result = false;
+		}
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		// Get plain application logic data for specific LmNumber
+		//
+		m_plainAppLogic.clear();
+		m_plainAppLogic.reserve(m_appLogicEeprom.size());
+
+		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
+		if (startFrame == -1)
+		{
+			writeError(QString("Can't get start frame for logic number %1").arg(m_logicModuleInfo.lmNumber));
+			return false;
+		}
+
+		for (int i = startFrame + 1; i < m_appLogicEeprom.frameCount(); i++)	// 1st frame is service information  [D8.21.19, 3.1.1.2.2.1]
+		{
+			for (int f = 0; f < m_appLogicEeprom.framePayloadSize(); f++)
+			{
+				m_plainAppLogic.push_back(m_appLogicEeprom.getByte(i, f));
+			}
+		}
+
+		return result;
+	}
+
+	bool DeviceEmulator::parseAppLogicCode()
+	{
+		// Parse AppLogic code:
+		// First, parse code for IDR phase to command STOP
+		// Then parse ALP phase from address which can be found in IDR phase (command START) to the second command STOP
+		//
+		int programCounter = 0;
+
+		do
+		{
+			quint16 commandWord = getWord(m_logicUnit.programCounter);
+			quint16 command = (commandWord & 0x7C0) >> 6;
+
+
+		}
+		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
+
+
+	}
+
+	bool DeviceEmulator::processOperate()
+	{
+		// One LogicModule Cycle
+		//
+		bool result = true;
+
+		// Initialization before work cycle
+		//
+		m_logicUnit = LogicUnitData();
+		m_afbComponents.clear();
+
+		// Run work cylce
+		//
+		do
+		{
+			quint16 commandWord = getWord(m_logicUnit.programCounter);
+
+			//quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+			quint16 command = (commandWord & 0x7C0) >> 6;
+			//quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+
+			//qDebug() << "DeviceEmulator::processOperate Command " << command << ", N " << funcBlock;
+
+			// Control command processing
+			//
+			bool ok = runCommand(static_cast<LmCommandCode>(command));
+
+			if (ok == false && m_currentMode != DeviceMode::Fault)
+			{
+				FAULT("Run command %1 unknown error.");
+				result = false;
+				break;
+			}
+
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				result = false;
+				break;
+			}
+		}
+		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
+
+		return result;
+	}
+
 	void DeviceEmulator::start(int cycles)
 	{
 		writeMessage(tr("Start, cycles = %1").arg(cycles));
@@ -244,156 +425,154 @@ namespace Sim
 
 	bool DeviceEmulator::processLoadEeprom()
 	{
-		assert(m_currentMode == DeviceMode::LoadEeprom);
-		writeMessage(tr("LoadEeprom mode"));
+//		assert(m_currentMode == DeviceMode::LoadEeprom);
+//		writeMessage(tr("LoadEeprom mode"));
 
-		bool result = true;
-		bool ok = true;
+//		bool result = true;
+//		bool ok = true;
 
-		ok = m_tuningEeprom.parseAllocationFrame();
-		if (ok == false)
-		{
-			writeError(tr("Parse tuning EEPROM allocation frame error."));
-			result = false;
-		}
+//		ok = m_tuningEeprom.parseAllocationFrame();
+//		if (ok == false)
+//		{
+//			writeError(tr("Parse tuning EEPROM allocation frame error."));
+//			result = false;
+//		}
 
-		ok = m_confEeprom.parseAllocationFrame();
-		if (ok == false)
-		{
-			writeError(tr("Parse configuration EEPROM allocation frame error."));
-			result = false;
-		}
+//		ok = m_confEeprom.parseAllocationFrame();
+//		if (ok == false)
+//		{
+//			writeError(tr("Parse configuration EEPROM allocation frame error."));
+//			result = false;
+//		}
 
-		ok = m_appLogicEeprom.parseAllocationFrame();
-		if (ok == false)
-		{
-			writeError(tr("Parse application logic EEPROM allocation frame error."));
-			result = false;
-		}
+//		ok = m_appLogicEeprom.parseAllocationFrame();
+//		if (ok == false)
+//		{
+//			writeError(tr("Parse application logic EEPROM allocation frame error."));
+//			result = false;
+//		}
 
-		if (m_tuningEeprom.subsystemKey() != m_confEeprom.subsystemKey() ||
-			m_tuningEeprom.subsystemKey() != m_appLogicEeprom.subsystemKey())
-		{
-			QString str = tr("EEPROMs have different subsystemKeys: \n"
-						  "\ttuningEeprom.subsystemKey: %1\n"
-						  "\tconfEeprom.subsystemKey: %2\n"
-						  "\tappLogicEeprom.subsystemKey: %3")
-							.arg(m_tuningEeprom.subsystemKey())
-							.arg(m_confEeprom.subsystemKey())
-							.arg(m_appLogicEeprom.subsystemKey());
-			writeError(str);
+//		if (m_tuningEeprom.subsystemKey() != m_confEeprom.subsystemKey() ||
+//			m_tuningEeprom.subsystemKey() != m_appLogicEeprom.subsystemKey())
+//		{
+//			QString str = tr("EEPROMs have different subsystemKeys: \n"
+//						  "\ttuningEeprom.subsystemKey: %1\n"
+//						  "\tconfEeprom.subsystemKey: %2\n"
+//						  "\tappLogicEeprom.subsystemKey: %3")
+//							.arg(m_tuningEeprom.subsystemKey())
+//							.arg(m_confEeprom.subsystemKey())
+//							.arg(m_appLogicEeprom.subsystemKey());
+//			writeError(str);
 
-			result = false;
-		}
+//			result = false;
+//		}
 
-		if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() ||
-			m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
-		{
-			QString str = tr("EEPROMs have different buildNo: \n"
-						  "\ttuningEeprom.buildNo: %1\n"
-						  "\tconfEeprom.buildNo: %2\n"
-						  "\tappLogicEeprom.buildNo: %3")
-							.arg(m_tuningEeprom.buildNo())
-							.arg(m_confEeprom.buildNo())
-							.arg(m_appLogicEeprom.buildNo());
-			writeError(str);
+//		if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() ||
+//			m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
+//		{
+//			QString str = tr("EEPROMs have different buildNo: \n"
+//						  "\ttuningEeprom.buildNo: %1\n"
+//						  "\tconfEeprom.buildNo: %2\n"
+//						  "\tappLogicEeprom.buildNo: %3")
+//							.arg(m_tuningEeprom.buildNo())
+//							.arg(m_confEeprom.buildNo())
+//							.arg(m_appLogicEeprom.buildNo());
+//			writeError(str);
 
-			result = false;
-		}
+//			result = false;
+//		}
 
-		if (m_tuningEeprom.configrationsCount() != m_confEeprom.configrationsCount() ||
-			m_tuningEeprom.configrationsCount() != m_appLogicEeprom.configrationsCount())
-		{
-			QString str = tr("EEPROMs EEPROMs have different configrationsCount: \n"
-						  "\ttuningEeprom.configrationsCount: %1\n"
-						  "\tconfEeprom.configrationsCount: %2\n"
-						  "\tappLogicEeprom.configrationsCount: %3")
-							.arg(m_tuningEeprom.configrationsCount())
-							.arg(m_confEeprom.configrationsCount())
-							.arg(m_appLogicEeprom.configrationsCount());
-			writeError(str);
-			result = false;
-		}
+//		if (m_tuningEeprom.configrationsCount() != m_confEeprom.configrationsCount() ||
+//			m_tuningEeprom.configrationsCount() != m_appLogicEeprom.configrationsCount())
+//		{
+//			QString str = tr("EEPROMs EEPROMs have different configrationsCount: \n"
+//						  "\ttuningEeprom.configrationsCount: %1\n"
+//						  "\tconfEeprom.configrationsCount: %2\n"
+//						  "\tappLogicEeprom.configrationsCount: %3")
+//							.arg(m_tuningEeprom.configrationsCount())
+//							.arg(m_confEeprom.configrationsCount())
+//							.arg(m_appLogicEeprom.configrationsCount());
+//			writeError(str);
+//			result = false;
+//		}
 
-		if (result == false)
-		{
-			fault("Loading configuration error", "processLoadEeprom()");
-			return false;
-		}
+//		if (result == false)
+//		{
+//			fault("Loading configuration error", "processLoadEeprom()");
+//			return false;
+//		}
 
-		// Get plain application logic data for specific m_logicModuleNumber
-		//
-		m_plainAppLogic.clear();
-		m_plainAppLogic.reserve(1024 * 1024);
+//		// Get plain application logic data for specific m_logicModuleNumber
+//		//
+//		m_plainAppLogic.clear();
+//		m_plainAppLogic.reserve(1024 * 1024);
 
-		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
-		if (startFrame == -1)
-		{
-			FAULT(QString("Can't get start frame for logic number %1").arg(m_logicModuleInfo.lmNumber));
-			return false;
-		}
+//		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
+//		if (startFrame == -1)
+//		{
+//			FAULT(QString("Can't get start frame for logic number %1").arg(m_logicModuleInfo.lmNumber));
+//			return false;
+//		}
 
-		for (int i = startFrame + 1; i < m_appLogicEeprom.frameCount(); i++)	// 1st frame is service information  [D8.21.19, 3.1.1.2.2.1]
-		{
-			for (int f = 0; f < m_appLogicEeprom.framePayloadSize(); f++)
-			{
-				m_plainAppLogic.push_back(m_appLogicEeprom.getByte(i, f));
-			}
-		}
+//		for (int i = startFrame + 1; i < m_appLogicEeprom.frameCount(); i++)	// 1st frame is service information  [D8.21.19, 3.1.1.2.2.1]
+//		{
+//			for (int f = 0; f < m_appLogicEeprom.framePayloadSize(); f++)
+//			{
+//				m_plainAppLogic.push_back(m_appLogicEeprom.getByte(i, f));
+//			}
+//		}
 
-		// --
-		//
-		m_currentMode = DeviceMode::Operate;
+//		// --
+//		//
+//		m_currentMode = DeviceMode::Operate;
 
-		return result;
-	}
+//		return result;
+//	}
 
-	bool DeviceEmulator::processOperate()
-	{
-		// One LogicModule Cycle
-		//
-		bool result = true;
+//	bool DeviceEmulator::processOperate()
+//	{
+//		// One LogicModule Cycle
+//		//
+//		bool result = true;
 
-		// Initialization before work cycle
-		//
-		m_logicUnit = LogicUnitData();
-		m_afbComponents.clear();
+//		// Initialization before work cycle
+//		//
+//		m_logicUnit = LogicUnitData();
+//		m_afbComponents.clear();
 
-		qDebug() << __FUNCTION_NAME__;
+//		// Run work cylce
+//		//
+//		do
+//		{
+//			quint16 commandWord = getWord(m_logicUnit.programCounter);
 
-		// Run work cylce
-		//
-		do
-		{
-			quint16 commandWord = getWord(m_logicUnit.programCounter);
+//			//quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//			quint16 command = (commandWord & 0x7C0) >> 6;
+//			//quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
 
-			quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-			quint16 command = (commandWord & 0x7C0) >> 6;
-			quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//			//qDebug() << "DeviceEmulator::processOperate Command " << command << ", N " << funcBlock;
 
-			qDebug() << "DeviceEmulator::processOperate Command " << command << ", N " << funcBlock;
+//			// Control command processing
+//			//
+//			bool ok = runCommand(static_cast<LmCommandCode>(command));
 
-			// Control command processing
-			//
-			bool ok = runCommand(static_cast<LmCommandCode>(command));
+//			if (ok == false && m_currentMode != DeviceMode::Fault)
+//			{
+//				FAULT("Run command %1 unknown error.");
+//				result = false;
+//				break;
+//			}
 
-			if (ok == false && m_currentMode != DeviceMode::Fault)
-			{
-				FAULT("Run command %1 unknown error.");
-				result = false;
-				break;
-			}
+//			if (m_currentMode == DeviceMode::Fault)
+//			{
+//				result = false;
+//				break;
+//			}
+//		}
+//		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+//			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
 
-			if (m_currentMode == DeviceMode::Fault)
-			{
-				result = false;
-				break;
-			}
-		}
-		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
-
-		return result;
+//		return result;
 	}
 
 	bool DeviceEmulator::runCommand(LmCommandCode commandCode)

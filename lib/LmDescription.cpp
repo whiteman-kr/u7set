@@ -262,6 +262,11 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	return true;
 }
 
+void LmDescription::clear()
+{
+	*this = LmDescription();
+}
+
 bool LmDescription::loadAfbComponents(const QDomElement& element, QString* errorMessage)
 {
 	assert(element.tagName() == "AFBImplementation");

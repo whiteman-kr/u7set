@@ -25,6 +25,8 @@ namespace Sim
 	public:
 		bool load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const QString simulationScript);
 
+		std::shared_ptr<LogicModule> logicModule(QString equipmentId);
+
 	private:
 		std::vector<Hardware::LogicModuleInfo> logicModulesInfo() const;
 

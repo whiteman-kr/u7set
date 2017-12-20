@@ -36,6 +36,8 @@ public:
 	bool load(const QString& xml, QString* errorMessage);
 	bool load(QDomDocument doc, QString* errorMessage);
 
+	void clear();
+
 protected:
 	bool loadAfbComponents(const QDomElement& element, QString* errorMessage);
 	bool loadAfbs(const QDomElement& element, QString* errorMessage);

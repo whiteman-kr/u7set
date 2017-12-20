@@ -97,7 +97,11 @@ namespace Sim
 				  const Eeprom& confEeprom,
 				  const Eeprom& appLogicEeprom,
 				  const QString& simulationScript);
+
+	private:
 		bool initMemory();
+		bool initEeprom();
+		bool parseAppLogicCode();
 
 	public slots:
 		void pause();
@@ -164,6 +168,7 @@ namespace Sim
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
+
 		QByteArray m_plainAppLogic;			// Just AppLogic data for specific m_logicModuleNumber and cleaned CRCs
 
 		// Current state

@@ -14,6 +14,21 @@
 namespace Hardware
 {
 
+	QByteArray ModuleFirmwareData::toByteArray() const
+	{
+		QByteArray ba;
+		ba.reserve(eepromFrameSize * static_cast<int>(frames.size()));
+
+		for (const std::vector<quint8>& frame : frames)
+		{
+			QByteArray rawData = QByteArray::fromRawData(reinterpret_cast<const char*>(frame.data()),
+														 static_cast<int>(frame.size()));
+			ba.push_back(rawData);
+		}
+
+		return ba;
+	}
+
 	void ModuleFirmware::addFirmwareData(int uartId,
 							  const QString& uartType,
 							  int eepromFramePayloadSize,

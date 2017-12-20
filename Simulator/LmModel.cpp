@@ -12,12 +12,12 @@ namespace Sim
 	LogicModule::~LogicModule()
 	{
 		powerOff();
-
 		return;
 	}
 
 
-	bool LogicModule::load(const Hardware::LogicModuleInfo& lmInfo, const LmDescription& lmDescription,
+	bool LogicModule::load(const Hardware::LogicModuleInfo& lmInfo,
+						   const LmDescription& lmDescription,
 						   const Hardware::ModuleFirmware& firmware,
 						   const QString& simulationScript)
 	{
@@ -25,46 +25,25 @@ namespace Sim
 
 		clear();
 
+		m_simulationScript = simulationScript;
+		m_lmDescription = lmDescription;
+
 		bool ok = true;
 
-//		ok &= loadLmDescription(lmDescription);
-//		if (ok == false)
-//		{
-//			return false;
-//		}
+		if (m_lmDescription.flashMemory().m_tuningWriteBitstream == true)
+		{
+			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_tuningUartId, &m_tuningEeprom);
+		}
 
-//		assert(m_lmDescription);
+		if (m_lmDescription.flashMemory().m_configWriteBitstream == true)
+		{
+			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_configUartId, &m_confEeprom);
+		}
 
-//		m_tuningEeprom.init(m_lmDescription->flashMemory().m_tuningFrameSize + 8, m_lmDescription->flashMemory().m_tuningFrameCount, 0xFF);
-//		m_confEeprom.init(m_lmDescription->flashMemory().m_configFrameSize + 8, m_lmDescription->flashMemory().m_configFrameCount, 0xFF);
-//		m_appLogicEeprom.init(m_lmDescription->flashMemory().m_appLogicFrameSize + 8, m_lmDescription->flashMemory().m_appLogicFrameCount, 0xFF);
-
-//		Hardware::ModuleFirmwareStorage mf;
-//		QString errorMessage;
-
-//		ok = mf.load(firmware, &errorMessage);
-//		if (ok == false)
-//		{
-//			output() << "Parse bitstream file error: " << errorMessage << endl;
-//			return false;
-//		}
-
-//		if (m_lmDescription->flashMemory().m_tuningWriteBitstream == true)
-//		{
-//			ok &= loadEeprom(mf, &m_tuningEeprom);
-//		}
-
-//		if (m_lmDescription->flashMemory().m_configWriteBitstream == true)
-//		{
-//			ok &= loadEeprom(mf, &m_confEeprom);
-//		}
-
-//		if (m_lmDescription->flashMemory().m_appLogicWriteBitstream == true)
-//		{
-//			ok &= loadEeprom(mf, &m_appLogicEeprom);
-//		}
-
-//		m_simulationScript = simulationScript;
+		if (m_lmDescription.flashMemory().m_appLogicWriteBitstream == true)
+		{
+			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
+		}
 
 		return ok;
 	}
@@ -73,16 +52,18 @@ namespace Sim
 	{
 		writeMessage(QObject::tr("Clear."));
 
-		m_lmDescription.reset();
+		m_lmDescription.clear();
 
 		m_tuningEeprom.clear();
 		m_confEeprom.clear();
 		m_appLogicEeprom.clear();
 
+		m_simulationScript.clear();
+
 		return;
 	}
 
-	bool LogicModule::powerOn(int logicModuleNumber, bool autoStart)
+	bool LogicModule::powerOn(bool autoStart)
 	{
 		writeMessage(tr("PowerOn, autoStart = ").arg(autoStart));
 
@@ -93,29 +74,35 @@ namespace Sim
 			assert(m_workerThread.isFinished());
 		}
 
-//		m_device = new DeviceEmulator(&output());
-//		bool ok = m_device->init(logicModuleNumber, *m_lmDescription.get(), m_tuningEeprom, m_confEeprom, m_appLogicEeprom, m_simulationScript);
+		m_device = new DeviceEmulator(*this);
 
-//		if (ok == false)
-//		{
-//			delete m_device;
-//			m_device = nullptr;
-//			return false;
-//		}
+		bool ok = m_device->init(m_logicModuleInfo,
+								 m_lmDescription,
+								 m_tuningEeprom,
+								 m_confEeprom,
+								 m_appLogicEeprom,
+								 m_simulationScript);
 
-//		m_device->moveToThread(&m_workerThread);
+		if (ok == false)
+		{
+			delete m_device;
+			m_device = nullptr;
+			return false;
+		}
 
-//		connect(&m_workerThread, &QThread::finished, m_device, &QObject::deleteLater);
+		m_device->moveToThread(&m_workerThread);
 
-//		connect(this, &LogicModule::signal_pause, m_device, &DeviceEmulator::pause, Qt::QueuedConnection);
-//		connect(this, &LogicModule::signal_start, m_device, &DeviceEmulator::start, Qt::QueuedConnection);
+		connect(&m_workerThread, &QThread::finished, m_device, &QObject::deleteLater);
 
-//		m_workerThread.start();
+		connect(this, &LogicModule::signal_pause, m_device, &DeviceEmulator::pause, Qt::QueuedConnection);
+		connect(this, &LogicModule::signal_start, m_device, &DeviceEmulator::start, Qt::QueuedConnection);
 
-//		if (autoStart == true)
-//		{
-//			start();
-//		}
+		m_workerThread.start();
+
+		if (autoStart == true)
+		{
+			start();
+		}
 
 		return true;
 	}
@@ -174,24 +161,7 @@ namespace Sim
 		return false;
 	}
 
-	bool LogicModule::loadLmDescription(const QByteArray& logicModuleDescription)
-	{
-		writeMessage(tr("Load Logic Module description."));
-
-		m_lmDescription = std::make_unique<LmDescription>();
-
-		QString errorString;
-
-		bool ok = m_lmDescription->load(logicModuleDescription, &errorString);
-		if (ok == false)
-		{
-			writeMessage(tr("Load Logic Module description error: %1").arg(errorString));
-		}
-
-		return ok;
-	}
-
-	bool LogicModule::loadEeprom(const Hardware::ModuleFirmware& firmware, Eeprom* eeprom)
+	bool LogicModule::loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom)
 	{
 		if (eeprom == nullptr)
 		{
@@ -199,14 +169,21 @@ namespace Sim
 			return false;
 		}
 
-		QString errorMessage;
+		bool ok = true;
 
-//		bool ok = eeprom->loadData(fileData, &errorMessage);
-//		if (ok == false)
-//		{
-//			output() << "LogicModule: Loading EEPROM error: " << errorMessage << endl;
-//			return false;
-//		}
+		const Hardware::ModuleFirmwareData& data = firmware.firmwareData(uartId, &ok);
+		if (ok == false)
+		{
+			writeError(QObject::tr("Loading eeprom data error, UartID = %1").arg(uartId));
+			return false;
+		}
+
+		ok = eeprom->init(data);
+		if (ok == false)
+		{
+			writeError(QObject::tr("LogicModule: Loading EEPROM error"));
+			return false;
+		}
 
 		return true;
 	}
