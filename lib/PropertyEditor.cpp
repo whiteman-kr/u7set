@@ -501,6 +501,10 @@ namespace ExtWidgets
 			move(theSettings.m_multiLinePropertyEditorWindowPos);
 			restoreGeometry(theSettings.m_multiLinePropertyEditorGeometry);
 		}
+		else
+		{
+			resize(1024, 768);
+		}
 
 		QVBoxLayout* vl = new QVBoxLayout();
 
