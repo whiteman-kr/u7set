@@ -2,79 +2,98 @@
 #include <QSettings>
 #include "DialogPassword.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <lm.h>
+#endif
+
 //
-// User
+// LogonWorkspace
 //
 
-User::User()
+LogonWorkspace::LogonWorkspace(UserManager* userManager, QWidget* parent):
+	QWidget(parent),
+	m_userManager(userManager)
 {
-	ADD_PROPERTY_GETTER_SETTER(QString, "StrID", true, User::name, User::setName);
-	ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, User::description, User::setDescription);
+	QHBoxLayout* l = new QHBoxLayout(this);
 
-	auto propPassword = ADD_PROPERTY_GETTER_SETTER(QString, "Password", true, User::password, User::setPassword);
-	propPassword->setPassword(true);
+	m_loginButton = new QPushButton(tr("Login"));
+	connect(m_loginButton, &QPushButton::clicked, this, &LogonWorkspace::onButtonLogin);
+	l->addWidget(m_loginButton);
 
-	ADD_PROPERTY_GETTER_SETTER(bool, "Administrator", true, User::admin, User::setAdmin);
+	m_logoutButton = new QPushButton(tr("Logout"));
+	connect(m_logoutButton, &QPushButton::clicked, this, &LogonWorkspace::onButtonLogout);
+	l->addWidget(m_logoutButton);
+	m_logoutButton->setEnabled(false);
+
+	l->addWidget(new QLabel(tr("User:")));
+
+	m_loginUserName = new QLabel(tr("-"));
+	l->addWidget(m_loginUserName);
+
+	l->addWidget(new QLabel(tr("Logout Pending Time:")));
+
+	m_logoutPendingTime = new QLabel(tr("-"));
+	l->addWidget(m_logoutPendingTime);
+
+	l->addStretch();
+
+	QMargins m = l->contentsMargins();
+	m.setBottom(0);
+	l->setContentsMargins(m);
+
+	connect(m_userManager, &UserManager::loggedOn, this, &LogonWorkspace::onUserManagerLogin);
+	connect(m_userManager, &UserManager::loggedOut, this, &LogonWorkspace::onUserManagerLogout);
 }
 
-User::User(const QString& name, const QString& description, const QString& password, bool admin)
-	:User()
+void LogonWorkspace::onButtonLogin()
 {
-	m_name = name;
-	m_description = description;
-	m_password = password;
-	m_admin = admin;
+	if (m_userManager->isLoggedIn() == true)
+	{
+		return;
+	}
+
+	m_userManager->login(this, false);
 }
 
-User& User::operator=(const User& That)
+void LogonWorkspace::onButtonLogout()
 {
-	m_name = That.m_name;
-	m_description = That.m_description;
-	m_password = That.m_password;
-	m_admin = That.m_admin;
-	return* this;
+	m_userManager->logout();
 }
 
-
-QString User::name() const
+void LogonWorkspace::onUserManagerLogin()
 {
-	return m_name;
+	m_loginButton->setEnabled(false);
+	m_logoutButton->setEnabled(true);
+
+	m_loginUserName->setText(m_userManager->loggedInUser());
 }
 
-void User::setName(const QString& value)
+void LogonWorkspace::onUserManagerLogout()
 {
-	m_name = value;
+	m_loginButton->setEnabled(true);
+	m_logoutButton->setEnabled(false);
+
+	m_loginUserName->setText(tr("-"));
+	m_logoutPendingTime->setText("-");
 }
 
-QString User::description() const
+void LogonWorkspace::onTimer()
 {
-	return m_description;
-}
+	if (m_userManager->isLoggedIn() == true)
+	{
+		int s = QDateTime::currentDateTime().secsTo(m_userManager->logoutPendingTime());
 
-void User::setDescription(const QString& value)
-{
-	m_description = value;
+		QTime logoutTime(0, 0, 0);
+		logoutTime = logoutTime.addSecs(s);
 
-}
+		m_logoutPendingTime->setText(logoutTime.toString("hh:mm:ss"));
 
-QString User::password() const
-{
-	return m_password;
-}
-
-void User::setPassword(const QString& value)
-{
-	m_password = value;
-}
-
-bool User::admin() const
-{
-	return m_admin;
-}
-
-void User::setAdmin(bool value)
-{
-	m_admin = value;
+		if (s <= 0)
+		{
+			m_userManager->logout();
+		}
+	}
 }
 
 //
@@ -83,25 +102,116 @@ void User::setAdmin(bool value)
 
 UserManager::UserManager()
 {
-	QCryptographicHash md5Generator(QCryptographicHash::Md5);
-	md5Generator.addData(QString("").toUtf8());
-	m_emptyMd5 = md5Generator.result().toHex();
+	User user;
+	user.m_admin = true;
+	user.m_name = "Administrator";
+	m_users.push_back(user);
+
+	user.m_admin = true;
+	user.m_name = "bv";
+	m_users.push_back(user);
+
+	user.m_admin = false;
+	user.m_name = "user";
+	m_users.push_back(user);
+}
+
+void UserManager::setConfiguration(const std::vector<User> users, LogonMode logonMode, int sessionMaxLengthSeconds)
+{
+	m_users = users;
+	m_logonMode = logonMode;
+	m_sessionMaxLengthSeconds = sessionMaxLengthSeconds;
+
+	m_loggedIn = false;
+}
+
+bool UserManager::login(QWidget* parent, bool adminNeeded)
+{
+	// If admin is needed, but currently logged user is not an admin - force logout and ask admin password
+	//
+	if (m_loggedIn == true && adminNeeded == true)
+	{
+		for (const User& u : m_users)
+		{
+			if (u.m_name == m_loggedInUser && u.m_admin == false)
+			{
+				QMessageBox::warning(parent, qAppName(), tr("The requested operation requires administrator rights. Please login as an administrator."));
+
+				logout();
+				break;
+			}
+		}
+	}
+
+	if (m_loggedIn == false)
+	{
+		// Ask the password
+
+		if (requestPassword(parent, adminNeeded) == false)
+		{
+			return false;
+		}
+
+		m_logonTime = QDateTime::currentDateTime();
+	}
+
+	// Refresh pending time
+
+	m_logoutPendingTime = QDateTime::currentDateTime().addSecs(m_sessionMaxLengthSeconds);
+
+	if (m_loggedIn == false)
+	{
+		emit loggedOn();
+	}
+
+	if (m_logonMode == LogonMode::Permanent)
+	{
+		m_loggedIn = true;
+	}
+
+	return true;
+}
+
+void UserManager::logout()
+{
+	m_loggedIn = false;
+
+	emit loggedOut();
+}
+
+LogonMode UserManager::logonMode() const
+{
+	return m_logonMode;
+}
+
+std::vector<User> UserManager::users() const
+{
+	return m_users;
+}
+
+bool UserManager::isLoggedIn() const
+{
+	return m_loggedIn;
+}
+
+QString UserManager::loggedInUser() const
+{
+	return m_loggedInUser;
+}
+
+QDateTime UserManager::loginTime() const
+{
+	return m_logonTime;
+}
+
+QDateTime UserManager::logoutPendingTime() const
+{
+	return m_logoutPendingTime;
 }
 
 bool UserManager::requestPassword(QWidget* parent, bool adminNeeded)
 {
-	bool noPasswordsExist = true;
-
-	for (const User& users : m_users)
-	{
-		if (users.password() != m_emptyMd5)
-		{
-			noPasswordsExist = false;
-			break;
-		}
-	}
-
-	if (noPasswordsExist == true)
+	if (m_users.empty() == true)
 	{
 		return true;
 	}
@@ -113,47 +223,38 @@ bool UserManager::requestPassword(QWidget* parent, bool adminNeeded)
 		return false;
 	}
 
-	return true;
-}
+	bool result = false;
 
+#ifdef Q_OS_WIN
+	HANDLE phToken=NULL;
 
-void UserManager::Restore()
-{
-	QSettings s(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName() + "Users");
-
-	int count = s.value("Users/count", 0).toInt();
-	m_users.clear();
-	m_users.reserve(count);
-	for (int index = 0; index < count; index++)
+	if (LogonUser(reinterpret_cast<LPCWSTR>(d.userName().data()),
+				  0,
+				  reinterpret_cast<LPCWSTR>(d.password().data()),
+				  LOGON32_LOGON_INTERACTIVE,
+				  LOGON32_PROVIDER_DEFAULT,
+				  &phToken) == TRUE)
 	{
-		User user;
-		user.setName(s.value(QString("Users/User%1/name").arg(index)).toString());
-		user.setDescription(s.value(QString("Users/User%1/description").arg(index)).toString());
-		user.setPassword(s.value(QString("Users/User%1/password").arg(index)).toString());
-		user.setAdmin(s.value(QString("Users/User%1/admin").arg(index)).toBool());
-		m_users.push_back(user);
+		result = true;
 	}
 
-	if (m_users.empty() == true)
+	if (phToken != nullptr)
 	{
-		m_users.push_back(User("Administrator", "Built-in administrator", m_emptyMd5, true));
+		CloseHandle (phToken);
 	}
-}
+#endif
 
-void UserManager::Store()
-{
-	QSettings s(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName() + "Users");
+#ifdef Q_OS_LINUX
+	assert(false);
+	result = true;
+#endif
 
-	s.setValue("Users/count", static_cast<quint64>(m_users.size()));
-
-	int index = 0;
-	for (const User& u : m_users)
+	if (result == false)
 	{
-		s.setValue(QString("Users/User%1/name").arg(index), u.name());
-		s.setValue(QString("Users/User%1/description").arg(index), u.description());
-		s.setValue(QString("Users/User%1/password").arg(index), u.password());
-		s.setValue(QString("Users/User%1/admin").arg(index), u.admin());
-		index++;
+		QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
 	}
-}
 
+	m_loggedInUser = d.userName();
+
+	return result;
+}

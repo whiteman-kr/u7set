@@ -133,16 +133,26 @@ int main(int argc, char* argv[])
 
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
-	theUserManager.Restore();
 
 	loadLanguage(theSettings.language());
 
 	// Parse the command line
 	//
+
 	QCommandLineParser parser;
+
+	parser.addHelpOption();
+	parser.addVersionOption();
+
+	// A string option with id (-id)
 
 	QCommandLineOption idOption("id", "Set the TuningClient ID.", "TuningClient ID");
 	parser.addOption(idOption);
+
+	// A boolean option with simulation (-simulate)
+
+	QCommandLineOption simulationOption("simulate", "Simulate signals values");
+	parser.addOption(simulationOption);
 
 	parser.process(*qApp);
 
@@ -152,6 +162,11 @@ int main(int argc, char* argv[])
 	{
 	    theSettings.setInstanceStrId(clientID);
 	}
+
+	theSettings.m_simulationMode = parser.isSet(simulationOption);
+
+	//
+	//
 
 	SoftwareInfo softwareInfo;
 

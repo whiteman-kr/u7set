@@ -10,22 +10,24 @@ DialogPassword::DialogPassword(const UserManager* userManager, bool adminNeeded,
 {
 	ui->setupUi(this);
 
+	ui->m_passwordEdit->setEchoMode(QLineEdit::Password);
+
 	int selectedIndex = -1;
 
 	setWindowTitle(adminNeeded ? tr("Enter Administrator Password") : tr("Enter Password"));
 
 	int i = 0;
 
-	for (const User& user : m_userManager->m_users)
+	for (const User& user : m_userManager->users())
 	{
-		if (adminNeeded && user.admin() == false)
+		if (adminNeeded && user.m_admin == false)
 		{
 			continue;
 		}
 
-		ui->m_userCombo->addItem(user.name(), i);
+		ui->m_userCombo->addItem(user.m_name, i);
 
-		if (user.name() == m_lastUser)
+		if (user.m_name == m_lastUser)
 		{
 			selectedIndex = i;
 		}
@@ -44,6 +46,16 @@ DialogPassword::~DialogPassword()
 	delete ui;
 }
 
+QString DialogPassword::userName()
+{
+	return m_lastUser;
+}
+
+QString DialogPassword::password()
+{
+	return m_password;
+}
+
 void DialogPassword::accept()
 {
 	QVariant data = ui->m_userCombo->currentData();
@@ -54,25 +66,14 @@ void DialogPassword::accept()
 
 	int index = data.toInt();
 
-	if (index < 0 || index >= m_userManager->m_users.size())
+	if (index < 0 || index >= m_userManager->users().size())
 	{
 		assert(false);
 		return;
 	}
 
-	const User& user = m_userManager->m_users[index];
-
-	QCryptographicHash md5Generator(QCryptographicHash::Md5);
-	md5Generator.addData(ui->m_passwordEdit->text().toUtf8());
-
-	if (user.password() != md5Generator.result().toHex())
-	{
-		QMessageBox::critical(this, tr("Password"), tr("Wrong password!"));
-		QDialog::reject();
-		return;
-	}
-
-	m_lastUser = user.name();
+	m_lastUser =  ui->m_userCombo->currentText();
+	m_password = ui->m_passwordEdit->text();
 
 	QDialog::accept();
 

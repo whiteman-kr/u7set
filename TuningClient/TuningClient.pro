@@ -43,11 +43,10 @@ unix {
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-#protobuf
+#libs
 #
 win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
-
+        LIBS += -L$$DESTDIR -lprotobuf -lKernel32 -lAdvapi32
         INCLUDEPATH += ./../Protobuf
 }
 unix {
@@ -126,7 +125,6 @@ SOURCES +=\
     ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     UserManager.cpp \
-    DialogUsers.cpp \
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
     DialogPassword.cpp \
@@ -180,7 +178,6 @@ HEADERS  += MainWindow.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     UserManager.h \
-    DialogUsers.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
     DialogPassword.h \
@@ -212,7 +209,6 @@ HEADERS  += MainWindow.h \
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
-    DialogUsers.ui \
     DialogTuningSourceInfo.ui \
     DialogPassword.ui
 
