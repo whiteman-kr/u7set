@@ -297,6 +297,10 @@ namespace Afb
 		*this = that;
 	}
 
+	AfbSignal::~AfbSignal()
+	{
+	}
+
 	AfbSignal& AfbSignal::operator=(const AfbSignal& that) noexcept
 	{
 		if (this == &that)
@@ -1542,8 +1546,8 @@ namespace Afb
 	bool AfbElement::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-				xmlElement.isNull() == true ||
-				xmlElement.tagName() != QLatin1String("AFB"))
+			xmlElement.isNull() == true ||
+			xmlElement.tagName() != QLatin1String("AFB"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -2378,15 +2382,6 @@ namespace Afb
 	//
 
 	AfbElementCollection::AfbElementCollection(void)
-	{
-		Init();
-	}
-
-	AfbElementCollection::~AfbElementCollection(void)
-	{
-	}
-
-	void AfbElementCollection::Init(void)
 	{
 	}
 
