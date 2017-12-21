@@ -237,7 +237,9 @@ int main(int argc, char* argv[])
 	VFrame30::VFrame30Library::Shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
+#if defined (Q_OS_WIN)
 	_CrtDumpMemoryLeaks();
+#endif
 
 	return result;
 }

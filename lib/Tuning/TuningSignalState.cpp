@@ -1,4 +1,5 @@
 #include "TuningSignalState.h"
+#include <cmath>
 
 TuningValue::TuningValue(double value, TuningValueType valueType)
 {
