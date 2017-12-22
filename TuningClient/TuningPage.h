@@ -17,6 +17,10 @@ public:
 
 	void updateStates();
 
+	bool hasPendingChanges();
+
+	bool write();
+
 protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
 	virtual QBrush foregroundColor(const QModelIndex& index) const override;
@@ -96,6 +100,12 @@ public:
 	QColor textColor();
 
 	QColor backColor();
+
+	bool askForSavePendingChanges();
+
+	bool write();
+
+	void undo();
 
 private slots:
 	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);

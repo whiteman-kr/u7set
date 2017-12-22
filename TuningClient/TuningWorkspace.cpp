@@ -159,7 +159,7 @@ void TuningWorkspace::fillFiltersTree()
 	{
 		m_filterTree = new QTreeWidget();
 		m_filterTree->setSortingEnabled(true);
-		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
+		connect(m_filterTree, &QTreeWidget::currentItemChanged, this, &TuningWorkspace::slot_currentItemChanged);
 
 		QStringList headerLabels;
 		headerLabels << tr("Caption");
@@ -347,16 +347,23 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 }
 
 
-void TuningWorkspace::slot_treeSelectionChanged()
+void TuningWorkspace::slot_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
-	QList<QTreeWidgetItem*> selectedItems = m_filterTree->selectedItems();
-	if (selectedItems.isEmpty() == true)
+
+	if (m_tuningPage != nullptr && m_tuningPage->askForSavePendingChanges() == false)
+	{
+		m_treeItemToSelect = previous;
+		QTimer::singleShot(10, this, &TuningWorkspace::slot_selectPreviousTreeItem);
+		return;
+	}
+
+	if (current == nullptr)
 	{
 		emit filterSelectionChanged(nullptr);
 	}
 	else
 	{
-		std::shared_ptr<TuningFilter> filter = selectedItems[0]->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+		std::shared_ptr<TuningFilter> filter = current->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
 		emit filterSelectionChanged(filter);
 	}
 }
@@ -430,4 +437,14 @@ void TuningWorkspace::slot_currentTabChanged(int index)
 							m_tab->setStyleSheet(s);
 	}
 
+}
+
+void TuningWorkspace::slot_selectPreviousTreeItem()
+{
+	if (m_filterTree != nullptr && m_treeItemToSelect != nullptr)
+	{
+		m_filterTree->blockSignals(true);
+		m_filterTree->setCurrentItem(m_treeItemToSelect);
+		m_filterTree->blockSignals(false);
+	}
 }

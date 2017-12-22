@@ -173,6 +173,106 @@ void TuningModelClient::updateStates()
 	return;
 }
 
+bool TuningModelClient::hasPendingChanges()
+{
+	for (TuningModelRecord& rec : m_items)
+	{
+		if (rec.state.userModified() == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool TuningModelClient::write()
+{
+	if (theUserManager.requestPassword(m_parent, false) == false)
+	{
+		return false;
+	}
+
+	QString str = tr("New values will be written:") + QString("\r\n\r\n");
+	QString strValue;
+
+	bool modifiedFound = false;
+	int modifiedCount = 0;
+
+	for (TuningModelRecord& o : m_items)
+	{
+		if (o.state.userModified() == false)
+		{
+			continue;
+		}
+
+		modifiedFound = true;
+		modifiedCount++;
+	}
+
+	if (modifiedFound == false)
+	{
+		return false;
+	}
+
+	int listCount = 0;
+
+	std::vector<std::pair<Hash, float>> writeData;
+
+	for (TuningModelRecord& o : m_items)
+	{
+		if (o.state.userModified() == false)
+		{
+			continue;
+		}
+
+		if (listCount >= 10)
+		{
+			str += tr("and %1 more values.").arg(modifiedCount - listCount);
+			break;
+		}
+
+		if (o.param.isAnalog() == true)
+		{
+			strValue = QString::number(o.state.editValue(), 'f', o.param.precision());
+		}
+		else
+		{
+			strValue = o.state.editValue() == 0 ? tr("0") : tr("1");
+		}
+
+		str += tr("%1 (%2) = %3\r\n").arg(o.param.appSignalId()).arg(o.param.caption()).arg(strValue);
+
+		listCount++;
+	}
+
+	str += QString("\r\n") + tr("Are you sure you want to continue?");
+
+	if (QMessageBox::warning(m_parent, tr("Write Changes"),
+							 str,
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return false;
+	}
+
+	for (TuningModelRecord& o : m_items)
+	{
+		if (o.state.userModified() == false)
+		{
+			continue;
+		}
+
+		o.state.clearUserModified();
+
+		writeData.push_back(std::pair<Hash, float>(o.param.hash(), o.state.editValue()));
+	}
+
+	m_tuningSignalManager->writeTuningSignals(writeData);
+
+	return true;
+}
+
 QBrush TuningModelClient::backColor(const QModelIndex& index) const
 {
 	int col = index.column();
@@ -540,87 +640,7 @@ void TuningModelClient::slot_undo()
 
 void TuningModelClient::slot_Write()
 {
-	if (theUserManager.requestPassword(m_parent, false) == false)
-	{
-		return;
-	}
-
-	QString str = tr("New values will be written:") + QString("\r\n\r\n");
-	QString strValue;
-
-	bool modifiedFound = false;
-	int modifiedCount = 0;
-
-	for (TuningModelRecord& o : m_items)
-	{
-		if (o.state.userModified() == false)
-		{
-			continue;
-		}
-
-		modifiedFound = true;
-		modifiedCount++;
-	}
-
-	if (modifiedFound == false)
-	{
-		return;
-	}
-
-	int listCount = 0;
-
-	std::vector<std::pair<Hash, float>> writeData;
-
-	for (TuningModelRecord& o : m_items)
-	{
-		if (o.state.userModified() == false)
-		{
-			continue;
-		}
-
-		if (listCount >= 10)
-		{
-			str += tr("and %1 more values.").arg(modifiedCount - listCount);
-			break;
-		}
-
-		if (o.param.isAnalog() == true)
-		{
-			strValue = QString::number(o.state.editValue(), 'f', o.param.precision());
-		}
-		else
-		{
-			strValue = o.state.editValue() == 0 ? tr("0") : tr("1");
-		}
-
-		str += tr("%1 (%2) = %3\r\n").arg(o.param.appSignalId()).arg(o.param.caption()).arg(strValue);
-
-		listCount++;
-	}
-
-	str += QString("\r\n") + tr("Are you sure you want to continue?");
-
-	if (QMessageBox::warning(m_parent, tr("Write Changes"),
-							 str,
-							 QMessageBox::Yes | QMessageBox::No,
-							 QMessageBox::No) != QMessageBox::Yes)
-	{
-		return;
-	}
-
-	for (TuningModelRecord& o : m_items)
-	{
-		if (o.state.userModified() == false)
-		{
-			continue;
-		}
-
-		o.state.clearUserModified();
-
-		writeData.push_back(std::pair<Hash, float>(o.param.hash(), o.state.editValue()));
-	}
-
-	m_tuningSignalManager->writeTuningSignals(writeData);
+	write();
 }
 
 void TuningModelClient::slot_Apply()
@@ -1128,7 +1148,6 @@ QColor TuningPage::backColor()
 	}
 
 	return QColor();
-
 }
 
 QColor TuningPage::textColor()
@@ -1139,9 +1158,46 @@ QColor TuningPage::textColor()
 	}
 
 	return QColor();
-
 }
 
+bool TuningPage::askForSavePendingChanges()
+{
+	bool hasPendingChanges = m_model->hasPendingChanges();
+
+	if (hasPendingChanges == false)
+	{
+		return true;
+	}
+
+	int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Please select the following:"), tr("Write"), tr("Undo"), tr("Cancel"));
+
+	if (result == 0)
+	{
+		if (write() == false)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	if (result == 1)
+	{
+		undo();
+		return true;
+	}
+
+	return false;
+}
+
+bool TuningPage::write()
+{
+	return m_model->write();
+}
+
+void TuningPage::undo()
+{
+	m_model->slot_undo();
+}
 
 void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 {
@@ -1154,7 +1210,6 @@ void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 	m_buttonFilter = filter;
 
 	fillObjectsList();
-
 }
 
 void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
@@ -1208,11 +1263,22 @@ void TuningPage::slot_tableDoubleClicked(const QModelIndex& index)
 void TuningPage::slot_FilterTypeIndexChanged(int index)
 {
 	Q_UNUSED(index);
+
+	if (askForSavePendingChanges() == false)
+	{
+		return;
+	}
+
 	fillObjectsList();
 }
 
 void TuningPage::slot_ApplyFilter()
 {
+	if (askForSavePendingChanges() == false)
+	{
+		return;
+	}
+
 	fillObjectsList();
 }
 

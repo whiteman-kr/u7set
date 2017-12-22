@@ -44,13 +44,17 @@ private:
 	const int columnErrorIndex = 1;
 	const int columnSorIndex = 2;
 
+	QTreeWidgetItem* m_treeItemToSelect = nullptr;
+
 
 private slots:
-	void slot_treeSelectionChanged();
+	void slot_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void slot_maskReturnPressed();
 	void slot_maskApply();
 
 	void slot_currentTabChanged(int index);
+
+	void slot_selectPreviousTreeItem();
 
 signals:
 	void filterSelectionChanged(std::shared_ptr<TuningFilter> filter);
