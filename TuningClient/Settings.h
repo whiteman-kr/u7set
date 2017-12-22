@@ -65,6 +65,14 @@ struct ConfigSettings
 
 	bool filterBySchema = true;
 
+	bool showSOR = true;
+
+	bool loginPerOperation = false;
+
+	int loginSessionLength = 120;
+
+	QStringList usersAccounts;
+
 	std::vector<SchemaSettings> schemas;
 
 	QString errorMessage;				// Parsing error message, empty if no errors

@@ -76,6 +76,8 @@ private:
 	QAction* m_pAboutAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarLmErrors = nullptr;
+	QLabel* m_statusBarSor = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
 

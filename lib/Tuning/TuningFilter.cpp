@@ -1076,6 +1076,27 @@ void TuningFilter::removeNotExistingSignals(const std::vector<Hash>& signalHashe
 	}
 }
 
+
+const std::vector<QString>& TuningFilter::equipmentHashes() const
+{
+	return m_equipmentHashes;
+}
+
+void TuningFilter::setEquipmentHashes(std::vector<QString> value)
+{
+	m_equipmentHashes = value;
+}
+
+const std::vector<Hash>& TuningFilter::signalsHashes() const
+{
+	return m_signalsHashes;
+}
+
+void TuningFilter::setSignalsHashes(std::vector<Hash> value)
+{
+	m_signalsHashes = value;
+}
+
 //
 // ObjectFilterStorage
 //
@@ -1339,6 +1360,60 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString* er
 
 	return true;
 
+}
+
+void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalStorage* objects, TuningFilter* filter)
+{
+	if (objects == nullptr)
+	{
+		assert(objects);
+		return;
+	}
+
+	if (filter == nullptr)
+	{
+		filter = m_root.get();
+	}
+
+	if (filter->isEmpty() == false)
+	{
+		std::vector<Hash> signalsHashes;
+		std::vector<QString> equipmentHashes;
+
+		int count = objects->signalsCount();
+		for (int i = 0; i < count; i++)
+		{
+			AppSignalParam* asp = objects->signalPtrByIndex(i);
+			if (asp == nullptr)
+			{
+				assert(asp);
+				return;
+			}
+
+			if (filter->match(*asp, true) == false)
+			{
+				continue;
+			}
+
+			signalsHashes.push_back(asp->hash());
+
+			const QString aspEquipmentId = asp->equipmentId();
+
+			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), aspEquipmentId) == equipmentHashes.end())
+			{
+				equipmentHashes.push_back(aspEquipmentId);
+			}
+		}
+
+		filter->setSignalsHashes(signalsHashes);
+		filter->setEquipmentHashes(equipmentHashes);
+	}
+
+	int count = filter->childFiltersCount();
+	for (int i = 0; i < count; i++)
+	{
+		createSignalsAndEqipmentHashes(objects, filter->childFilter(i).get());
+	}
 }
 
 void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)

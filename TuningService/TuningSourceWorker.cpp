@@ -1122,6 +1122,10 @@ namespace Tuning
 		{
 			m_stat.fotipFlagSetSOR++;
 		}
+		else
+		{
+			m_stat.fotipFlagSetSOR = 0;	// added by Vintenko 22.12.2017
+		}
 
 		return result;
 	}

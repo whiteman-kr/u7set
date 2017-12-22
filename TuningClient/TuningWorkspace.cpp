@@ -5,6 +5,7 @@
 TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent) :
 	QWidget(parent),
 	m_objects(*objects),
+	m_tuningSignalManager(tuningSignalManager),
 	m_filterStorage(filterStorage)
 {
 
@@ -116,6 +117,11 @@ TuningWorkspace::~TuningWorkspace()
 	}
 }
 
+void TuningWorkspace::onTimer()
+{
+	updateTreeItemsStatus();
+}
+
 void TuningWorkspace::fillFiltersTree()
 {
 	// Fill the filter tree
@@ -157,9 +163,22 @@ void TuningWorkspace::fillFiltersTree()
 
 		QStringList headerLabels;
 		headerLabels << tr("Caption");
+		headerLabels << tr("Status");
+		if (theConfigSettings.showSOR == true)
+		{
+			headerLabels << tr("SOR");
+		}
+		headerLabels << tr("");
 
 		m_filterTree->setColumnCount(headerLabels.size());
 		m_filterTree->setHeaderLabels(headerLabels);
+
+		m_filterTree->setColumnWidth(columnName, 200);
+		m_filterTree->setColumnWidth(columnErrorIndex, 60);
+		if (theConfigSettings.showSOR == true)
+		{
+			m_filterTree->setColumnWidth(columnSorIndex, 60);
+		}
 
 		m_treeMask = new QLineEdit();
 		connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
@@ -257,6 +276,74 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 		addChildTreeObjects(f, item, mask);
 	}
+}
+
+void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
+{
+	if (treeItem == nullptr)
+	{
+
+		if (m_filterTree->topLevelItemCount() == 0)
+		{
+			return;
+		}
+
+		treeItem = m_filterTree->topLevelItem(0);
+	}
+
+	std::shared_ptr<TuningFilter> filter = treeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	const std::vector<QString>& equipmentHashes = filter->equipmentHashes();
+
+	if (equipmentHashes.empty() == false)
+	{
+		// Print the data in status and SOR columns
+		//
+
+		int lmErrorsCount = m_tuningSignalManager->getLMErrorsCount(equipmentHashes);
+		if (lmErrorsCount == 0)
+		{
+			treeItem->setText(columnErrorIndex, QString());
+			treeItem->setBackground(columnErrorIndex, QBrush(Qt::white));
+			treeItem->setForeground(columnErrorIndex, QBrush(Qt::black));
+		}
+		else
+		{
+			treeItem->setText(columnErrorIndex, QString("ERR (%1)").arg(lmErrorsCount));
+			treeItem->setBackground(columnErrorIndex, QBrush(Qt::red));
+			treeItem->setForeground(columnErrorIndex, QBrush(Qt::white));
+		}
+
+		if (theConfigSettings.showSOR == true)
+		{
+			int sorCount = m_tuningSignalManager->getSORCount(equipmentHashes);
+			if (sorCount == 0)
+			{
+				treeItem->setText(columnSorIndex, QString());
+				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
+				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
+			}
+			else
+			{
+				treeItem->setText(columnSorIndex, QString("SOR (%1)").arg(sorCount));
+				treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+				treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
+			}
+		}
+	}
+
+	int count = treeItem->childCount();
+	for (int i = 0; i < count; i++)
+	{
+		updateTreeItemsStatus(treeItem->child(i));
+	}
+
+
 }
 
 

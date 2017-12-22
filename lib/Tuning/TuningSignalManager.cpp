@@ -929,6 +929,90 @@ void TuningSignalManager::connectTuningController(TuningController* controller)
 	connect(controller, &TuningController::signal_getState, this, &TuningSignalManager::slot_signalState, Qt::DirectConnection);
 }
 
+int TuningSignalManager::getLMErrorsCount()
+{
+	return getLMErrorsCount(std::vector<QString>());
+
+}
+
+int TuningSignalManager::getLMErrorsCount(const std::vector<QString>& equipmentHashes)
+{
+	int result = 0;
+
+	QMutexLocker l(&m_tuningSourcesMutex);
+
+	for (auto it : m_tuningSources)
+	{
+		const TuningSource& ts = it.second;
+
+		if (equipmentHashes.empty() == false)
+		{
+			// Filter from list
+			//
+			const QString tseid = QString(ts.m_info.equipmentid().c_str());
+			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
+			{
+				continue;
+			}
+		}
+
+		if (ts.m_state.isreply() == false)
+		{
+			result++;
+			continue;
+		}
+
+		if (ts.m_state.errfotipuniqueid() > 0)
+		{
+			result++;
+		}
+
+		// Add here more errors
+	}
+
+	l.unlock();
+
+	return result;
+}
+
+int TuningSignalManager::getSORCount()
+{
+	return getSORCount(std::vector<QString>());
+}
+
+int TuningSignalManager::getSORCount(const std::vector<QString>& equipmentHashes)
+{
+	int result = 0;
+
+	QMutexLocker l(&m_tuningSourcesMutex);
+
+	for (auto it : m_tuningSources)
+	{
+		const TuningSource& ts = it.second;
+
+		if (equipmentHashes.empty() == false)
+		{
+			// Filter from list
+			//
+			const QString tseid = QString(ts.m_info.equipmentid().c_str());
+			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
+			{
+				continue;
+			}
+		}
+
+		if (ts.m_state.isreply() == true && ts.m_state.fotipflagsetsor() > 0)
+		{
+			result++;
+		}
+	}
+
+	l.unlock();
+
+	return result;
+}
+
+
 QString TuningSignalManager::networkErrorStr(NetworkError error)
 {
 	switch (error)

@@ -76,6 +76,16 @@ public:
 
 	void connectTuningController(TuningController* controller);
 
+	//
+	// Status and counters
+	//
+	int getLMErrorsCount();
+	int getLMErrorsCount(const std::vector<QString>& equipmentHashes);
+
+	int getSORCount();
+	int getSORCount(const std::vector<QString>& equipmentHashes);
+
+
 private:
 
 	virtual void onClientThreadStarted() override;

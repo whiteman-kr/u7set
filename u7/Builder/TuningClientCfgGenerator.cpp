@@ -197,6 +197,44 @@ bool TuningClientCfgGenerator::writeSettings()
 			return false;
 		}
 
+		/*
+		//
+		// showSOR
+		//
+		bool showSOR = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSOR", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
+		// loginPerOperation
+		//
+		bool loginPerOperation = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "LoginPerOperation", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
+		// usersAccounts
+		//
+		QString usersAccounts = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "UsersAccounts", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
+		// loginSessionLength
+		//
+		int loginSessionLength = getObjectProperty<int>(m_software->equipmentIdTemplate(), "LoginSessionLength", &ok);
+		if (ok == false)
+		{
+			return false;
+		}*/
+
+
 		// Get ip addresses and ports, write them to configurations
 		//
 		{
@@ -222,6 +260,10 @@ bool TuningClientCfgGenerator::writeSettings()
 			xmlWriter.writeAttribute("showSchemasList", (showSchemasList ? "true" : "false"));
 			xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 			xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
+			/*xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
+			xmlWriter.writeAttribute("loginPerOperation", (loginPerOperation ? "true" : "false"));
+			xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));
+			xmlWriter.writeAttribute("usersAccounts", usersAccounts);*/
 
 
 		}	// TuningService
