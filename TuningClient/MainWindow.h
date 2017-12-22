@@ -30,6 +30,8 @@ private:
 	void createMenu();
 	void createStatusBar();
 
+	void closeEvent(QCloseEvent *event) override;
+
 
 private:
 	TuningClientSignalManager* m_objectManager = nullptr;

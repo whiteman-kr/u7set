@@ -1160,6 +1160,11 @@ QColor TuningPage::textColor()
 	return QColor();
 }
 
+bool TuningPage::hasPendingChanges()
+{
+	return m_model->hasPendingChanges();
+}
+
 bool TuningPage::askForSavePendingChanges()
 {
 	bool hasPendingChanges = m_model->hasPendingChanges();

@@ -10,6 +10,8 @@ public:
 	explicit TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent);
 	virtual ~TuningWorkspace();
 
+	bool hasPendingChanges();
+
 public:
 	void onTimer();
 

@@ -202,6 +202,20 @@ void MainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	if (m_tuningWorkspace != nullptr && m_tuningWorkspace->hasPendingChanges() == true)
+	{
+		int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Are you sure you want to exit?"), tr("Yes"), tr("No"));
+
+		if (result == 1)
+		{
+			event->ignore();
+		}
+	}
+
+}
+
 void MainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);

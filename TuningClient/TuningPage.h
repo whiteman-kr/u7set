@@ -101,6 +101,7 @@ public:
 
 	QColor backColor();
 
+	bool hasPendingChanges();
 	bool askForSavePendingChanges();
 
 	bool write();

@@ -117,6 +117,16 @@ TuningWorkspace::~TuningWorkspace()
 	}
 }
 
+bool TuningWorkspace::hasPendingChanges()
+{
+	if (m_tuningPage != nullptr)
+	{
+		return m_tuningPage->hasPendingChanges();
+	}
+
+	return true;
+}
+
 void TuningWorkspace::onTimer()
 {
 	updateTreeItemsStatus();
