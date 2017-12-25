@@ -315,6 +315,10 @@ namespace Afb
 		*this = that;
 	}
 
+	AfbSignal::~AfbSignal()
+	{
+	}
+
 	AfbSignal& AfbSignal::operator=(const AfbSignal& that) noexcept
 	{
 		if (this == &that)
@@ -2396,15 +2400,6 @@ namespace Afb
 	//
 
 	AfbElementCollection::AfbElementCollection(void)
-	{
-		Init();
-	}
-
-	AfbElementCollection::~AfbElementCollection(void)
-	{
-	}
-
-	void AfbElementCollection::Init(void)
 	{
 	}
 

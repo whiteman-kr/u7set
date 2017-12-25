@@ -11,6 +11,18 @@ namespace Hardware
 	class DeviceModule;
 }
 
+struct LmCommand
+{
+	int code = -1;
+	QString caption;
+	QString simulationFunc;
+	QString parseFunc;
+	QString description;
+
+	bool loadFromXml(const QDomElement& element, QString* errorMessage);
+};
+
+
 class LmDescription : public QObject
 {
 	Q_OBJECT
@@ -39,6 +51,7 @@ public:
 	void clear();
 
 protected:
+	bool loadCommands(const QDomElement& element, QString* errorMessage);
 	bool loadAfbComponents(const QDomElement& element, QString* errorMessage);
 	bool loadAfbs(const QDomElement& element, QString* errorMessage);
 
@@ -132,13 +145,11 @@ public:
 
 	const QString& configurationStringFile() const;
 	Q_INVOKABLE QString jsConfigurationStringFile() const;
-
 	QString simualtionScriptFile() const;
 
     const QString& version() const;
 
 	const FlashMemory& flashMemory() const;
-
 	const Memory& memory() const;
 	const LogicUnit& logicUnit() const;
 	const OptoInterface& optoInterface() const;
@@ -146,8 +157,10 @@ public:
 	const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs() const;
 
 	std::shared_ptr<Afb::AfbComponent> component(int opCode) const;
-
 	const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbComponents() const;
+
+	LmCommand command(int commandCode) const;
+	const std::map<int, LmCommand>& commands() const;
 
 	// Data
 	//
@@ -165,6 +178,10 @@ private:
 	LogicUnit m_logicUnit;
 	OptoInterface m_optoInterface;
 
+	// Possible commands
+	//
+	std::map<int, LmCommand> m_commands;		// Key is command.code
+
 	// AFBs
 	//
 	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents;		// Key is OpCode of AFBComponent
@@ -173,5 +190,6 @@ private:
 	// !!! Copy constructor is defined, don't forget to add new memers copy to it
 	//
 };
+
 
 #endif // LOGICMODULE_H

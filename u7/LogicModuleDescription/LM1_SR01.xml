@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js"  SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0015">
+<LogicModule DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js"  SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0016">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -44,6 +44,36 @@
 		<OptoInterfaceDataOffset>35840</OptoInterfaceDataOffset>
 		<OptoPortDataSize>2560</OptoPortDataSize>
 	</OptoInterface>
+
+    <LogicUnitCommnads>
+	    <Command Caption="nop"		Code="1"	SimulationFunc="command_nop"		ParseFunc="parse_nop"		Description="No operation"/>
+		<Command Caption="startafb"	Code="2"	SimulationFunc="command_startafb"	ParseFunc="parse_startafb"	Description="Start AFB"/>
+		<Command Caption="stop"		Code="3"	SimulationFunc="command_stop"		ParseFunc="parse_stop"		Description="Stop phase (IDR or ALP)"/>
+		<Command Caption="mov"		Code="4"	SimulationFunc="command_mov"		ParseFunc="parse_mov"		Description="Copy 16-bit word from memory to memory"/>
+		<Command Caption="movmem"	Code="5"	SimulationFunc="command_movmem"		ParseFunc="parse_movmem"	Description="Copy array of 16-bit words from memory to memory"/>
+		<Command Caption="movc"		Code="6"	SimulationFunc="command_movc"		ParseFunc="parse_movc"		Description="Write 16-bit word constant to memory"/>
+		<Command Caption="movbc"	Code="7"	SimulationFunc="command_movbc"		ParseFunc="parse_movbc"		Description="Write 1-bit constant to memory"/>
+		<Command Caption="wrfb"		Code="8"	SimulationFunc="command_wrfb"		ParseFunc="parse_wrfb"		Description="Read 16-bit word from memory and write to AFB input"/>
+		<Command Caption="rdfb"		Code="9"	SimulationFunc="command_rdfb"		ParseFunc="parse_rdfb"		Description="Read 16-bit word from AFB output and write to memory"/>
+		<Command Caption="wrfbc"	Code="10"	SimulationFunc="command_wrfbc"		ParseFunc="parse_wrfbc"		Description="Write 16-bit word constant to AFB input"/>
+		<Command Caption="wrfbb"	Code="11"	SimulationFunc="command_wrfbb"		ParseFunc="parse_wrfbb"		Description="Read 1-bit from memory and write to AFB input"/>
+		<Command Caption="rdfbb"	Code="12"	SimulationFunc="command_rdfbb"		ParseFunc="parse_rdfbb"		Description="Read 1-bit from AFB output and write to memory"/>
+		<Command Caption="rdfbts"	Code="13"	SimulationFunc="command_rdfbts"		ParseFunc="parse_rdfbts"	Description="Read 16-bit word from AFB output, compare to constant and set flag if equal"/>
+		<Command Caption="setmem"	Code="14"	SimulationFunc="command_setmem"		ParseFunc="parse_setmem"	Description="Set memory area to 16-bit word constant"/>
+		<Command Caption="movb"		Code="15"	SimulationFunc="command_movb"		ParseFunc="parse_movb"		Description="Copy 1-bit from memory to memory"/>
+		<Command Caption="nstart"	Code="16"	SimulationFunc="command_nstart"		ParseFunc="parse_nstart"	Description="Start AFB n-times"/>
+		<Command Caption="appstart"	Code="17"	SimulationFunc="command_appstart"	ParseFunc="parse_appstart"	Description="Set ALP phase start address"/>
+		<Command Caption="mov32"	Code="18"	SimulationFunc="command_mov32"		ParseFunc="parse_mov32"		Description="Copy 32-bit data from memory to memory"/>
+		<Command Caption="movc32"	Code="19"	SimulationFunc="command_movc32"		ParseFunc="parse_movc32"	Description="Write 32-bit constant to memory"/>
+		<Command Caption="wrfb32"	Code="20"	SimulationFunc="command_wrfb32"		ParseFunc="parse_wrfb32"	Description="Read 32-bit data from memory and write to AFB input"/>
+		<Command Caption="rdfb32"	Code="21"	SimulationFunc="command_rdfb32"		ParseFunc="parse_rdfb32"	Description="Read 32-bit data from AFB output and write to memory"/>
+		<Command Caption="wrfbc32"	Code="22"	SimulationFunc="command_wrfbc32"	ParseFunc="parse_wrfbc32"	Description="Write 32-bit constant to AFB input"/>
+		<Command Caption="rdfbts32"	Code="23"	SimulationFunc="command_rdfbts32"	ParseFunc="parse_rdfbts32"	Description="Read 32-bit data from AFB output, compare to constant and set flag if equal"/>
+		<Command Caption="movcf"	Code="24"	SimulationFunc="command_movcf"		ParseFunc="parse_movcf"		Description="Write 16-bit constant to memory if flag is set [rdfbts(32)]"/>
+		<Command Caption="pmov"		Code="25"	SimulationFunc="command_pmov"		ParseFunc="parse_pmov"		Description="Copy 16-bit word from memory to memory written in prior cycle"/>
+		<Command Caption="pmov32"	Code="26"	SimulationFunc="command_pmov32"		ParseFunc="parse_pmov32"	Description="Copy 32-bit data from memory to memory written in prior cycle"/>
+		<Command Caption="fillb"	Code="27"	SimulationFunc="command_fillb"		ParseFunc="parse_fillb"		Description="Fill 16-bit word with 1-bit constant and write it to memory"/>
+	</LogicUnitCommnads>
 	
 	<AFBImplementation>
 	    <AFBComponent Caption="LOGIC"		OpCode="1"	ImpVersion="206"	VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_logic">
