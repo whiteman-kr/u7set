@@ -157,6 +157,8 @@ public:
 	std::shared_ptr<Afb::AfbComponent> component(int opCode) const;
 	const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbComponents() const;
 
+	QString commandCodeParseFunc() const;
+
 	LmCommand command(int commandCode) const;
 	const std::map<int, LmCommand>& commands() const;
 
@@ -178,6 +180,7 @@ private:
 
 	// Possible commands
 	//
+	QString m_commandCodeParseFunc;				// Function to get(parse) command code
 	std::map<int, LmCommand> m_commands;		// Key is command.code
 
 	// AFBs

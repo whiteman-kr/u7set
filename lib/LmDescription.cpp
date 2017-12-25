@@ -377,6 +377,17 @@ bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessa
 
 	m_commands.clear();
 
+	// Attribute CommandCodeParseFunc
+	//
+	m_commandCodeParseFunc = element.attribute(QLatin1String("CommandCodeParseFunc"));
+	if (m_commandCodeParseFunc.isEmpty() == true)
+	{
+		errorMessage->append(tr("Cant't find attribute CommandCodeParseFunc"));
+		return false;
+	}
+
+	// Parse command list
+	//
 	QDomNodeList nodeList = element.elementsByTagName(QLatin1String("Command"));
 	for (int i = 0; i < nodeList.size(); i++)
 	{
@@ -955,6 +966,11 @@ std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const
 const std::map<int, std::shared_ptr<Afb::AfbComponent>>& LmDescription::afbComponents() const
 {
 	return m_afbComponents;
+}
+
+QString LmDescription::commandCodeParseFunc() const
+{
+	return m_commandCodeParseFunc;
 }
 
 LmCommand LmDescription::command(int commandCode) const

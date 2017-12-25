@@ -45,7 +45,7 @@
 		<OptoPortDataSize>2560</OptoPortDataSize>
 	</OptoInterface>
 
-    <LogicUnitCommnads>
+    <LogicUnitCommnads CommandCodeParseFunc="parse_command_code">
 	    <Command Caption="nop"		Code="1"	SimulationFunc="command_nop"		ParseFunc="parse_nop"		Description="No operation"/>
 		<Command Caption="startafb"	Code="2"	SimulationFunc="command_startafb"	ParseFunc="parse_startafb"	Description="Start AFB"/>
 		<Command Caption="stop"		Code="3"	SimulationFunc="command_stop"		ParseFunc="parse_stop"		Description="Stop phase (IDR or ALP)"/>
