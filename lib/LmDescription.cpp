@@ -35,7 +35,23 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 	}
 	else
 	{
-		code = element.attribute(QLatin1String("Code")).toInt();
+		QString str = element.attribute(QLatin1String("Code"));
+		bool ok = false;
+		code = static_cast<quint16>(str.toInt(&ok, 16));
+	}
+
+	// CodeMask
+	//
+	if (element.hasAttribute(QLatin1String("CodeMask")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute CodeMask.");
+		return false;
+	}
+	else
+	{
+		QString str = element.attribute(QLatin1String("CodeMask"));
+		bool ok = false;
+		codeMask = static_cast<quint16>(str.toInt(&ok, 16));
 	}
 
 	// SimulationFunc
@@ -376,15 +392,6 @@ bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessa
 	}
 
 	m_commands.clear();
-
-	// Attribute CommandCodeParseFunc
-	//
-	m_commandCodeParseFunc = element.attribute(QLatin1String("CommandCodeParseFunc"));
-	if (m_commandCodeParseFunc.isEmpty() == true)
-	{
-		errorMessage->append(tr("Cant't find attribute CommandCodeParseFunc"));
-		return false;
-	}
 
 	// Parse command list
 	//
@@ -966,11 +973,6 @@ std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const
 const std::map<int, std::shared_ptr<Afb::AfbComponent>>& LmDescription::afbComponents() const
 {
 	return m_afbComponents;
-}
-
-QString LmDescription::commandCodeParseFunc() const
-{
-	return m_commandCodeParseFunc;
 }
 
 LmCommand LmDescription::command(int commandCode) const

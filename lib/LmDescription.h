@@ -13,7 +13,8 @@ namespace Hardware
 
 struct LmCommand
 {
-	int code = -1;
+	quint16 code = 0;
+	quint16 codeMask = 0;
 	QString caption;
 	QString simulationFunc;
 	QString parseFunc;
@@ -157,8 +158,6 @@ public:
 	std::shared_ptr<Afb::AfbComponent> component(int opCode) const;
 	const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbComponents() const;
 
-	QString commandCodeParseFunc() const;
-
 	LmCommand command(int commandCode) const;
 	const std::map<int, LmCommand>& commands() const;
 
@@ -180,7 +179,6 @@ private:
 
 	// Possible commands
 	//
-	QString m_commandCodeParseFunc;				// Function to get(parse) command code
 	std::map<int, LmCommand> m_commands;		// Key is command.code
 
 	// AFBs
