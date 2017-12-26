@@ -2,6 +2,7 @@
 #define SETTINGS_H
 
 #include "../lib/HostAddressPort.h"
+#include "UserManager.h"
 
 //
 // ConfigConnection
@@ -54,6 +55,10 @@ struct ConfigSettings
 	ConfigConnection tuns2;				// Tuning Service connection params
 
 	bool autoApply = true;
+
+	LogonMode logonMode = LogonMode::Permanent;
+
+	std::vector<User> users;
 
 	bool showSignals = true;
 
@@ -110,6 +115,10 @@ public:
 public:
 
 	int m_requestInterval = 10;
+
+#ifdef Q_DEBUG
+	bool m_simulationMode = false;
+#endif
 
 	//
 

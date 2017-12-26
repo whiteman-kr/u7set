@@ -18,6 +18,9 @@ public:
 	explicit DialogPassword(const UserManager* userManager, bool adminNeeded, QWidget* parent);
 	~DialogPassword();
 
+	QString userName();
+	QString password();
+
 private:
 
 	virtual void accept();
@@ -28,6 +31,8 @@ private:
 	static QString m_lastUser;
 
 	const UserManager* m_userManager = nullptr;
+
+	QString m_password;
 };
 
 #endif // DIALOGPASSWORD_H

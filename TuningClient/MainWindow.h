@@ -25,6 +25,8 @@ public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~MainWindow();
 
+	UserManager* userManager();
+
 private:
 	void createActions();
 	void createMenu();
@@ -43,9 +45,16 @@ private:
 
 	ConfigController m_configController;
 
+	QVBoxLayout* m_mainLayout = nullptr;
+
+	LogonWorkspace* m_logonWorkspace = nullptr;
+
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
+
+	UserManager m_userManager;
+public:
 
 	int m_mainWindowTimerId_250ms = -1;
 	int m_mainWindowTimerId_500ms = -1;
@@ -60,7 +69,6 @@ private slots:
 public slots:
 	void exit();
 	void runPresetEditor();
-	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
 	void showLog();
@@ -79,7 +87,6 @@ private:
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
-	QAction* m_pUsersAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pLogAction = nullptr;
@@ -97,8 +104,6 @@ private:
 extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
-
-extern UserManager theUserManager;
 
 #endif // MAINWINDOW_H
 

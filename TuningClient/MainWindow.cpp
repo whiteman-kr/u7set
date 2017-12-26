@@ -7,7 +7,6 @@
 #include "DialogSettings.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "DialogTuningSources.h"
-#include "DialogUsers.h"
 #include "DialogFilterEditor.h"
 #include "version.h"
 
@@ -25,6 +24,9 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	{
 		resize(1024, 768);
 	}
+
+	//
+	//
 
 	theLogFile = new Log::LogFile(qAppName());
 
@@ -46,7 +48,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
 
 #ifdef Q_DEBUG
-	m_tcpClient->setSimulationMode(true);	// For debugging
+	m_tcpClient->setSimulationMode(theSettings.m_simulationMode);	// For debugging
 #endif
 
 	m_tcpClientThread = new SimpleThread(m_tcpClient);
@@ -100,6 +102,10 @@ MainWindow::~MainWindow()
 	delete theLogFile;
 }
 
+UserManager* MainWindow::userManager()
+{
+	return &m_userManager;
+}
 
 void MainWindow::createActions()
 {
@@ -117,12 +123,6 @@ void MainWindow::createActions()
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
 	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
-
-	m_pUsersAction = new QAction(tr("Users..."), this);
-	m_pUsersAction->setStatusTip(tr("Edit users"));
-	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
-	m_pUsersAction->setEnabled(true);
-	connect(m_pUsersAction, &QAction::triggered, this, &MainWindow::runUsersEditor);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -163,7 +163,6 @@ void MainWindow::createMenu()
 
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
 	pServiceMenu->addAction(m_pTuningSourcesAction);
-	pServiceMenu->addAction(m_pUsersAction);
 	pServiceMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -320,6 +319,19 @@ void MainWindow::createWorkspace()
 	}
 
 	// Create workspaces
+	if (m_mainLayout == nullptr)
+	{
+		QWidget* w = new QWidget(this);
+		m_mainLayout = new QVBoxLayout(w);
+		m_mainLayout->setContentsMargins(0, 0, 0, 0);
+		setCentralWidget(w);
+	}
+
+	if (m_logonWorkspace != nullptr)
+	{
+		delete m_logonWorkspace;
+		m_logonWorkspace = nullptr;
+	}
 
 	if (m_tuningWorkspace != nullptr)
 	{
@@ -343,13 +355,24 @@ void MainWindow::createWorkspace()
 		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.m_root, &m_tuningSignalManager, m_tcpClient, this);
 	}
 
+	// Create login workspace
+
+	if (m_userManager.logonMode() == LogonMode::Permanent && m_userManager.users().empty() == false)
+	{
+		m_logonWorkspace = new LogonWorkspace(&m_userManager, this);
+
+		connect(this, &MainWindow::timerTick500, m_logonWorkspace, &LogonWorkspace::onTimer);
+
+		m_mainLayout->addWidget(m_logonWorkspace);
+	}
+
 	// Now choose, what workspace to display. If both exists, create a tab page.
 
 	if (m_schemasWorkspace == nullptr && m_tuningWorkspace != nullptr)
 	{
 		// Show Tuning Workspace
 		//
-		setCentralWidget(m_tuningWorkspace);
+		m_mainLayout->addWidget(m_tuningWorkspace, 2);
 	}
 	else
 	{
@@ -357,7 +380,7 @@ void MainWindow::createWorkspace()
 		{
 			// Show Schemas Workspace
 			//
-			setCentralWidget(m_schemasWorkspace);
+			m_mainLayout->addWidget(m_schemasWorkspace, 2);
 		}
 		else
 		{
@@ -370,13 +393,11 @@ void MainWindow::createWorkspace()
 				tab->addTab(m_schemasWorkspace, tr("Schemas"));
 				tab->addTab(m_tuningWorkspace, tr("Signals"));
 
-				//tab->setStyleSheet("QTabWidget::tab-bar{alignment:center; }");
-
-				setCentralWidget(tab);
+				m_mainLayout->addWidget(tab, 2);
 			}
 			else
 			{
-				setCentralWidget(new QLabel("No workspaces exist, configuration error."));
+				m_mainLayout->addWidget(new QLabel("No workspaces exist, configuration error."));
 			}
 		}
 	}
@@ -437,7 +458,7 @@ void MainWindow::exit()
 
 void MainWindow::runPresetEditor()
 {
-	if (theUserManager.requestPassword(this, false) == false)
+	if (m_userManager.login(this, false) == false)
 	{
 		return;
 	}
@@ -462,24 +483,9 @@ void MainWindow::runPresetEditor()
 	}
 }
 
-void MainWindow::runUsersEditor()
-{
-	if (theUserManager.requestPassword(this, true) == false)
-	{
-		return;
-	}
-
-	DialogUsers d(theUserManager, this);
-	if (d.exec() == QDialog::Accepted && theSettings.admin() == true)
-	{
-		theUserManager = d.m_userManager;
-		theUserManager.Store();
-	}
-}
-
 void MainWindow::showSettings()
 {
-	if (theUserManager.requestPassword(this, true) == false)
+	if (m_userManager.login(this, true) == false)
 	{
 		return;
 	}
@@ -567,4 +573,3 @@ void MainWindow::showAbout()
 MainWindow* theMainWindow = nullptr;
 Log::LogFile* theLogFile = nullptr;
 
-UserManager theUserManager;

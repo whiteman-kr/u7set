@@ -1186,7 +1186,7 @@ void TuningPage::slot_undo()
 
 void TuningPage::slot_Write()
 {
-	if (theUserManager.requestPassword(this, false) == false)
+	if (theMainWindow->userManager()->login(this, false) == false)
 	{
 		return;
 	}

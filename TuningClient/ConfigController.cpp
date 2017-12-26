@@ -396,6 +396,22 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	theConfigSettings = readSettings;
 
+	// Modify logon mode
+
+	/*switch (theConfigSettings.logonMode)
+	{
+		case 0:
+			theMainWindow->userManager()->setLogonMode(LogonMode::Permanent);
+		break;
+		case 1:
+			theMainWindow->userManager()->setLogonMode(LogonMode::PerOperation);
+		break;
+	default:
+		assert(false);
+	}
+
+	theMainWindow->userManager()->setUsers(theConfigSettings.users);*/
+
 	// Emit signals to inform everybody about new configuration
 	//
 
