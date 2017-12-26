@@ -1378,7 +1378,7 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalStora
 	if (filter->isEmpty() == false)
 	{
 		std::vector<Hash> signalsHashes;
-		std::vector<QString> equipmentHashes;
+		std::map<QString, int> equipmentHashesMap;
 
 		int count = objects->signalsCount();
 		for (int i = 0; i < count; i++)
@@ -1399,13 +1399,16 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalStora
 
 			const QString aspEquipmentId = asp->equipmentId();
 
-			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), aspEquipmentId) == equipmentHashes.end())
-			{
-				equipmentHashes.push_back(aspEquipmentId);
-			}
+			equipmentHashesMap[aspEquipmentId] = 1;
 		}
 
 		filter->setSignalsHashes(signalsHashes);
+
+		std::vector<QString> equipmentHashes;
+		for (auto it : equipmentHashesMap)
+		{
+			equipmentHashes.push_back(it.first);
+		}
 		filter->setEquipmentHashes(equipmentHashes);
 	}
 

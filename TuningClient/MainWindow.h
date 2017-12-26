@@ -8,6 +8,7 @@
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "../lib/LogFile.h"
+#include "../lib/Tuning/TuningLog.h"
 #include "UserManager.h"
 #include "TuningClientSignalManager.h"
 #include "TuningClientFilterStorage.h"
@@ -91,6 +92,8 @@ private:
 extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
+
+extern TuningLog::TuningLog* theTuningLog;
 
 extern UserManager theUserManager;
 

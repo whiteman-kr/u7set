@@ -60,6 +60,7 @@ namespace Builder
 		// Log softaware version
 		//
 		LOG_MESSAGE(m_log, qApp->applicationName() + " v" + qApp->applicationVersion());
+		LOG_MESSAGE(m_log, tr("Started at: ") + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss"));
 
 		// Create database controller and open project
 		//

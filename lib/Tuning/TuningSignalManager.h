@@ -5,6 +5,7 @@
 
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningController.h"
+#include "../lib/Tuning/TuningLog.h"
 
 #include "../Proto/network.pb.h"
 #include "../lib/Tcp.h"
@@ -37,7 +38,7 @@ class TuningSignalManager : public Tcp::Client
 	Q_OBJECT
 
 public:
-	TuningSignalManager(E::SoftwareType softwareType, const QString equipmentID, int majorVersion, int minorVersion, int commitNo);
+	TuningSignalManager(E::SoftwareType softwareType, const QString equipmentID, int majorVersion, int minorVersion, int commitNo, TuningLog::TuningLog* tuningLog);
 	virtual ~TuningSignalManager();
 
 	void setInstanceId(const QString& instanceId);
@@ -181,6 +182,8 @@ private:
 
 	// Processing
 	//
+
+	TuningLog::TuningLog* m_tuningLog = nullptr;
 
 	std::queue<WriteCommand> m_writeQueue;
 

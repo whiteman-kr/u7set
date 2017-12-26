@@ -1000,6 +1000,10 @@ namespace Tuning
 			}
 			result = false;
 		}
+		else
+		{
+			m_stat.errFotipUniqueID = 0;		// added by Vintenko 26.12.2017
+		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{

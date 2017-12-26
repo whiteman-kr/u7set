@@ -2,8 +2,8 @@
 #include "TuningClientSignalManager.h"
 #include "version.h"
 
-TuningClientSignalManager::TuningClientSignalManager()
-	:TuningSignalManager(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1, USED_SERVER_COMMIT_NUMBER)
+TuningClientSignalManager::TuningClientSignalManager(TuningLog::TuningLog* tuningLog)
+	:TuningSignalManager(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1, USED_SERVER_COMMIT_NUMBER, tuningLog)
 {
 
 }
