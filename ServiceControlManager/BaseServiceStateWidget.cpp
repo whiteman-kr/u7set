@@ -40,7 +40,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 
 	m_socketThread = new UdpSocketThread();
 
-	int port = serviceInfo[softwareInfo.softwareType()].port;
+	int port = serviceInfo[portIndex].port;
 
 	m_baseClientSocket = new UdpClientSocket(QHostAddress(ip), port);
 	connect(m_baseClientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceStateWidget::serviceNotFound);
