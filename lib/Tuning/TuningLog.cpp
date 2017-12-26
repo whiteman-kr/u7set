@@ -133,7 +133,7 @@ namespace TuningLog
 	{
 		QDate tm = QDate::currentDate();
 
-		return QString("%1%2%3_%4%5%6.log")
+		return QString("%1%2%3Signals_%4%5%6.log")
 				.arg(m_path)
 				.arg(QDir::separator())
 				.arg(m_logName)
