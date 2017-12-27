@@ -198,7 +198,7 @@ bool TuningClientCfgGenerator::writeSettings()
 		}
 
 		//
-		// filterBySchema
+		// equipmentList
 		//
 		QString equipmentList = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok);
 		if (ok == false)
@@ -274,7 +274,6 @@ bool TuningClientCfgGenerator::writeSettings()
 			xmlWriter.writeAttribute("usersAccounts", usersAccounts);*/
 
 			xmlWriter.writeAttribute("equipmentList", equipmentList);
-
 
 		}	// TuningService
 

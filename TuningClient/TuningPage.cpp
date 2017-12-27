@@ -22,6 +22,25 @@ void TuningModelClient::blink()
 	m_blink = !m_blink;
 }
 
+bool TuningModelClient::hasPendingChanges()
+{
+	for (int row = 0; row < static_cast<int>(m_hashes.size()); row++)
+	{
+		Hash hash = m_hashes[row];
+
+		bool ok = false;
+
+		const TuningSignalState tss = m_tuningSignalManager->state(hash, &ok);
+
+		if (tss.userModified() == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 QBrush TuningModelClient::backColor(const QModelIndex& index) const
 {
 	int col = index.column();
@@ -756,6 +775,148 @@ void TuningPage::fillObjectsList()
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
+bool TuningPage::hasPendingChanges()
+{
+	return m_model->hasPendingChanges();
+}
+
+bool TuningPage::askForSavePendingChanges()
+{
+	bool hasPendingChanges = m_model->hasPendingChanges();
+
+	if (hasPendingChanges == false)
+	{
+		return true;
+	}
+
+	int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Please select the following:"), tr("Write"), tr("Undo"), tr("Cancel"));
+
+	if (result == 0)
+	{
+		if (write() == false)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	if (result == 1)
+	{
+		undo();
+		return true;
+	}
+
+	return false;
+}
+
+bool TuningPage::write()
+{
+	if (theMainWindow->userManager()->login(this, false) == false)
+	{
+		return false;
+	}
+
+	QString str = tr("New values will be written:") + QString("\r\n\r\n");
+	QString strValue;
+
+	bool modifiedFound = false;
+	int modifiedCount = 0;
+
+	std::vector<Hash> hashes = m_model->hashes();
+
+	bool ok = false;
+
+	for (Hash hash : hashes)
+	{
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		modifiedFound = true;
+		modifiedCount++;
+	}
+
+	if (modifiedFound == false)
+	{
+		return false;
+	}
+
+	int listCount = 0;
+
+	for (Hash hash : hashes)
+	{
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		if (listCount >= 10)
+		{
+			str += tr("and %1 more values.").arg(modifiedCount - listCount);
+			break;
+		}
+
+		if (asp.isAnalog() == true)
+		{
+			strValue = state.value().toString(asp.precision());
+		}
+		else
+		{
+			strValue = state.newValue().toString();
+		}
+
+		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
+
+		listCount++;
+	}
+
+	str += QString("\r\n") + tr("Are you sure you want to continue?");
+
+	if (QMessageBox::warning(this, tr("Write Changes"),
+							 str,
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return false;
+	}
+
+	std::vector<TuningWriteCommand> commands;
+
+	for (Hash hash : hashes)
+	{
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		state.clearUserModified();
+
+		m_tuningSignalManager->setState(hash, state);
+
+		TuningWriteCommand cmd(hash, state.newValue());
+
+		commands.push_back(cmd);
+	}
+
+	m_tuningTcpClient->writeTuningSignal(commands);
+
+	return true;
+}
+
+void TuningPage::undo()
+{
+	slot_undo();
+}
+
 void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
 {
 	m_sortColumn = column;
@@ -1186,103 +1347,7 @@ void TuningPage::slot_undo()
 
 void TuningPage::slot_Write()
 {
-	if (theMainWindow->userManager()->login(this, false) == false)
-	{
-		return;
-	}
-
-	QString str = tr("New values will be written:") + QString("\r\n\r\n");
-	QString strValue;
-
-	bool modifiedFound = false;
-	int modifiedCount = 0;
-
-	std::vector<Hash> hashes = m_model->hashes();
-
-	bool ok = false;
-
-	for (Hash hash : hashes)
-	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.userModified() == false)
-		{
-			continue;
-		}
-
-		modifiedFound = true;
-		modifiedCount++;
-	}
-
-	if (modifiedFound == false)
-	{
-		return;
-	}
-
-	int listCount = 0;
-
-	for (Hash hash : hashes)
-	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.userModified() == false)
-		{
-			continue;
-		}
-
-		if (listCount >= 10)
-		{
-			str += tr("and %1 more values.").arg(modifiedCount - listCount);
-			break;
-		}
-
-		if (asp.isAnalog() == true)
-		{
-			strValue = state.value().toString(asp.precision());
-		}
-		else
-		{
-			strValue = state.newValue().toString();
-		}
-
-		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
-
-		listCount++;
-	}
-
-	str += QString("\r\n") + tr("Are you sure you want to continue?");
-
-	if (QMessageBox::warning(this, tr("Write Changes"),
-							 str,
-							 QMessageBox::Yes | QMessageBox::No,
-							 QMessageBox::No) != QMessageBox::Yes)
-	{
-		return;
-	}
-
-	std::vector<TuningWriteCommand> commands;
-
-	for (Hash hash : hashes)
-	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.userModified() == false)
-		{
-			continue;
-		}
-
-		state.clearUserModified();
-
-		m_tuningSignalManager->setState(hash, state);
-
-		TuningWriteCommand cmd(hash, state.newValue());
-
-		commands.push_back(cmd);
-	}
-
-	m_tuningTcpClient->writeTuningSignal(commands);
+	write();
 }
 
 void TuningPage::slot_Apply()

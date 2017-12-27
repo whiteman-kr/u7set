@@ -150,7 +150,9 @@ SOURCES +=\
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     TuningClientTcpClient.cpp \ 
-    ../lib/SoftwareInfo.cpp
+    ../lib/SoftwareInfo.cpp \
+    ../lib/Tuning/TuningLog.cpp
+    ../lib/Tuning/TuningLog.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -203,8 +205,9 @@ HEADERS  += MainWindow.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \
     TuningClientTcpClient.h \ 
-    ../lib/SoftwareInfo.h
-
+    ../lib/SoftwareInfo.h \
+    ../lib/Tuning/TuningLog.h
+    ../lib/Tuning/TuningLog.h
 
 FORMS    += \
     DialogSettings.ui \

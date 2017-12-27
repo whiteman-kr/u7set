@@ -33,6 +33,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
+	theTuningLog = new TuningLog::TuningLog(qAppName());
+
 	createActions();
 	createMenu();
 	createStatusBar();
@@ -98,8 +100,9 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowState = saveState();
 
 	theLogFile->writeMessage(tr("Application finished."));
-
 	delete theLogFile;
+
+	delete theTuningLog;
 }
 
 UserManager* MainWindow::userManager()
@@ -202,6 +205,20 @@ void MainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarSor, 0);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	if (m_tuningWorkspace != nullptr && m_tuningWorkspace->hasPendingChanges() == true)
+	{
+		int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Are you sure you want to exit?"), tr("Yes"), tr("No"));
+
+		if (result == 1)
+		{
+			event->ignore();
+		}
+	}
+
 }
 
 void MainWindow::timerEvent(QTimerEvent* event)
@@ -316,7 +333,6 @@ void MainWindow::timerEvent(QTimerEvent* event)
 			m_statusBarSor->setStyleSheet("color : white; background-color: red");
 		}
 
-		//
 		if (m_tuningWorkspace != nullptr)
 		{
 			m_tuningWorkspace->onTimer();
@@ -345,6 +361,8 @@ void MainWindow::createWorkspace()
 
 	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theConfigSettings.equipmentList);
 
+
+	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager);
 
 	// Find and possibly remove non-existing signals from the list
 
@@ -619,4 +637,5 @@ void MainWindow::showAbout()
 
 MainWindow* theMainWindow = nullptr;
 Log::LogFile* theLogFile = nullptr;
+TuningLog::TuningLog* theTuningLog = nullptr;
 

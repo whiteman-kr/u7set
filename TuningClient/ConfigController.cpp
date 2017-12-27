@@ -574,7 +574,6 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
 
-
 			QString equipmentListString = dasXmlElement.attribute("equipmentList");
 			equipmentListString.replace('\n', ';');
 			equipmentListString.remove('\r');

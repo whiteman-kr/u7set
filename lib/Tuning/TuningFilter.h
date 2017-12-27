@@ -274,6 +274,7 @@ public:
 	VFrame30::SchemaDetails schemaDetails(int index);
 
 	// Operations
+
 	void createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter = nullptr);
 
 	void createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds);

@@ -15,6 +15,8 @@ public:
 
 	void blink();
 
+	bool hasPendingChanges();
+
 protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
 	virtual QBrush foregroundColor(const QModelIndex& index) const override;
@@ -79,6 +81,13 @@ public:
 	~TuningPage();
 
 	void fillObjectsList();
+
+	bool hasPendingChanges();
+	bool askForSavePendingChanges();
+
+	bool write();
+
+	void undo();
 
 private slots:
 

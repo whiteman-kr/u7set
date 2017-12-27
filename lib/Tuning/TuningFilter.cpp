@@ -1445,11 +1445,12 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 	if (filter->isEmpty() == false)
 	{
 		std::vector<Hash> signalsHashes;
-		std::vector<QString> equipmentHashes;
+		std::map<QString, int> equipmentHashesMap;
 
 		std::vector<Hash> hashes = objects->signalHashes();
 
-		for (int i = 0; i < hashes.size(); i++)
+		int count = static_cast<int>(hashes.size());
+		for (int i = 0; i < count; i++)
 		{
 			bool ok = false;
 			AppSignalParam asp = objects->signalParam(hashes[i], &ok);
@@ -1468,13 +1469,17 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 
 			const QString aspEquipmentId = asp.equipmentId();
 
-			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), aspEquipmentId) == equipmentHashes.end())
-			{
-				equipmentHashes.push_back(aspEquipmentId);
-			}
+			equipmentHashesMap[aspEquipmentId] = 1;
 		}
 
 		filter->setSignalsHashes(signalsHashes);
+
+		std::vector<QString> equipmentHashes;
+		for (auto it : equipmentHashesMap)
+		{
+			equipmentHashes.push_back(it.first);
+		}
+
 		filter->setEquipmentHashes(equipmentHashes);
 	}
 
