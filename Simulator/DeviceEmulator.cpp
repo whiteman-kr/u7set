@@ -3,6 +3,41 @@
 
 namespace Sim
 {
+	DeviceCommand::DeviceCommand(const DeviceCommand& that)
+	{
+		*this = that;
+	}
+
+	DeviceCommand& DeviceCommand::operator=(const DeviceCommand& that)
+	{
+		if (Q_UNLIKELY(this == &that))
+		{
+			return *this;
+		}
+
+		this->setParent(that.parent());
+		*static_cast<LmCommand*>(this) = *static_cast<const LmCommand*>(&that);
+
+		m_offset = that.m_offset;
+
+		m_size = that.m_size;
+		m_string = that.m_string;
+
+		m_afbOpCode = that.m_afbOpCode;
+		m_afbInstance = that.m_afbInstance;
+		m_afbPinOpCode = that.m_afbPinOpCode;
+
+		m_bitNo0 = that.m_bitNo0;
+		m_bitNo1 = that.m_bitNo1;
+
+		m_word0 = that.m_word0;
+		m_word1 = that.m_word1;
+
+		m_dword0 = that.m_dword0;
+		m_dword1 = that.m_dword1;
+
+		return *this;
+	}
 
 	DeviceEmulator::DeviceEmulator(const Output& output) :
 		Output(output, "DeviceEmulator")
@@ -274,68 +309,170 @@ namespace Sim
 	bool DeviceEmulator::parseAppLogicCode()
 	{
 		// Parse AppLogic code:
-		// First, parse code for IDR phase to command STOP
-		// Then parse ALP phase from address which can be found in IDR phase (command START) to the second command STOP
+		// Parse till commandWord is 0x0000
 		//
+		bool ok = true;
 		int programCounter = 0;
+		const std::vector<LmCommand> commands = m_lmDescription.commandsAsVector();
 
 		do
 		{
-			quint16 commandWord = getWord(m_logicUnit.programCounter);
-			quint16 command = (commandWord & 0x7C0) >> 6;
+			quint16 commandWord = getWord(programCounter);
+			if (commandWord == 0x0000)
+			{
+				break;
+			}
 
+			bool commandFound = false;
+			for (const LmCommand& c : commands)
+			{
+				quint16 commandCode = (commandWord & c.codeMask);
+				if (commandCode == c.code)
+				{
+					commandFound = true;
+
+					// Parse this command
+					//
+					ok = parseCommand(c, programCounter);
+					if (ok == false)
+					{
+						return false;
+					}
+
+					break;
+				}
+			}
+
+			if (commandFound == false)
+			{
+				QString str = tr("Parse command error, command cannot be found for word 0x%1\n")
+									.arg(commandWord, 4, 16, QChar('0'));
+				writeError(str);
+				return false;
+			}
 
 		}
-		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
+		while (programCounter < m_plainAppLogic.size());
 
+		return true;
+	}
 
+	bool DeviceEmulator::parseCommand(const LmCommand& command, int programCounter)
+	{
+		quint16 commandWord = getWord(programCounter);
+		quint16 commandCode = (commandWord & command.codeMask);
+		if (commandCode != command.code)
+		{
+			assert(commandCode == command.code);
+			return false;
+		}
+
+		// --
+		//
+		m_commands.emplace_back();
+		DeviceCommand& deviceCommand = m_commands.back();
+
+		deviceCommand.m_offset = programCounter;
+
+		// Set argument list
+		//
+		QJSValue jsDeviceEmulator = m_jsEngine.newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
+		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
+
+		QJSValueList args;
+		args << jsDeviceEmulator;
+		args << jsDeviceCommand;
+
+		//--
+		//
+		const QString parseFunc = command.parseFunc;
+
+		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
+			m_jsEngine.globalObject().property(parseFunc).isCallable())
+		{
+			writeError(tr("Parse Application Logic Code error, script function %1 not found or is not callable.")
+							.arg(parseFunc));
+			return false;
+		}
+
+		QJSValue jsResult = m_jsEngine.globalObject().property(parseFunc).call(args);
+		if (jsResult.isError() == true)
+		{
+			dumpJsError(jsResult);
+			return false;
+		}
+
+		// --
+		//
+
+		return true;
+	}
+
+	void DeviceEmulator::dumpJsError(const QJSValue& value)
+	{
+		if (value.isError() == true)
+		{
+			QString str = QString("Script running uncaught exception at line %1\n"
+								  "\tStack: %2\n"
+								  "\tMessage: %3\n")
+							.arg(value.property("lineNumber").toInt())
+							.arg(value.property("stack").toString())
+							.arg(value.toString());
+			writeError(str);
+		}
+
+		return;
 	}
 
 	bool DeviceEmulator::processOperate()
 	{
 		// One LogicModule Cycle
 		//
-		bool result = true;
+		//bool result = true;
 
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
 		m_afbComponents.clear();
 
+		return false;
+
 		// Run work cylce
 		//
-		do
-		{
-			quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		do
+//		{
+//			quint16 commandWord = getWord(m_logicUnit.programCounter);
 
-			//quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-			quint16 command = (commandWord & 0x7C0) >> 6;
-			//quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//			//quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//			quint16 command = (commandWord & 0x7C0) >> 6;
+//			//quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
 
-			//qDebug() << "DeviceEmulator::processOperate Command " << command << ", N " << funcBlock;
+//			//qDebug() << "DeviceEmulator::processOperate Command " << command << ", N " << funcBlock;
 
-			// Control command processing
-			//
-			bool ok = runCommand(static_cast<LmCommandCode>(command));
+//			// Control command processing
+//			//
+//			bool ok = runCommand(static_cast<LmCommandCode>(command));
 
-			if (ok == false && m_currentMode != DeviceMode::Fault)
-			{
-				FAULT("Run command %1 unknown error.");
-				result = false;
-				break;
-			}
+//			if (ok == false && m_currentMode != DeviceMode::Fault)
+//			{
+//				FAULT("Run command %1 unknown error.");
+//				result = false;
+//				break;
+//			}
 
-			if (m_currentMode == DeviceMode::Fault)
-			{
-				result = false;
-				break;
-			}
-		}
-		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
+//			if (m_currentMode == DeviceMode::Fault)
+//			{
+//				result = false;
+//				break;
+//			}
+//		}
+//		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+//			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
 
-		return result;
+//		return result;
 	}
 
 	void DeviceEmulator::start(int cycles)
@@ -391,9 +528,6 @@ namespace Sim
 			case DeviceMode::Fault:
 				processFaultMode();
 				break;
-			case DeviceMode::LoadEeprom:
-				processLoadEeprom();
-				break;
 			case DeviceMode::Operate:
 				processOperate();
 				break;
@@ -411,7 +545,7 @@ namespace Sim
 		assert(m_currentMode == DeviceMode::Start);
 		writeMessage(tr("Start mode"));
 
-		m_currentMode = DeviceMode::LoadEeprom;
+		m_currentMode = DeviceMode::Operate;
 
 		return true;
 	}
@@ -423,8 +557,8 @@ namespace Sim
 		return true;
 	}
 
-	bool DeviceEmulator::processLoadEeprom()
-	{
+//	bool DeviceEmulator::processLoadEeprom()
+//	{
 //		assert(m_currentMode == DeviceMode::LoadEeprom);
 //		writeMessage(tr("LoadEeprom mode"));
 
@@ -573,798 +707,798 @@ namespace Sim
 //			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
 
 //		return result;
-	}
+//	}
 
-	bool DeviceEmulator::runCommand(LmCommandCode commandCode)
-	{
-		switch (commandCode)
-		{
-		case LmCommandCode::NOP:
-			return command_nop();
+//	bool DeviceEmulator::runCommand(LmCommandCode commandCode)
+//	{
+//		switch (commandCode)
+//		{
+//		case LmCommandCode::NOP:
+//			return command_nop();
 
-		case LmCommandCode::START:
-			return command_startafb();
+//		case LmCommandCode::START:
+//			return command_startafb();
 
-		case LmCommandCode::STOP:
-			return command_stop();
+//		case LmCommandCode::STOP:
+//			return command_stop();
 
-		case LmCommandCode::MOV:
-			return command_mov();
+//		case LmCommandCode::MOV:
+//			return command_mov();
 
-		case LmCommandCode::MOVMEM:
-			return command_movmem();
+//		case LmCommandCode::MOVMEM:
+//			return command_movmem();
 
-		case LmCommandCode::MOVC:
-			return command_movc();
+//		case LmCommandCode::MOVC:
+//			return command_movc();
 
-		case LmCommandCode::MOVBC:
-			return command_movbc();
+//		case LmCommandCode::MOVBC:
+//			return command_movbc();
 
-		case LmCommandCode::WRFB:
-			return command_wrbf();
+//		case LmCommandCode::WRFB:
+//			return command_wrbf();
 
-		case LmCommandCode::RDFB:
-			return command_rdbf();
+//		case LmCommandCode::RDFB:
+//			return command_rdbf();
 
-		case LmCommandCode::WRFBC:
-			return command_wrfbc();
+//		case LmCommandCode::WRFBC:
+//			return command_wrfbc();
 
-		case LmCommandCode::WRFBB:
-			return command_wrfbb();
+//		case LmCommandCode::WRFBB:
+//			return command_wrfbb();
 
-		case LmCommandCode::RDFBB:
-			return command_rdfbb();
+//		case LmCommandCode::RDFBB:
+//			return command_rdfbb();
 
-		case LmCommandCode::RDFBTS:
-			return command_rdfbts();
+//		case LmCommandCode::RDFBTS:
+//			return command_rdfbts();
 
-		case LmCommandCode::SETMEM:
-			return command_setmem();
-
-		case LmCommandCode::MOVB:
-			return command_movb();
-
-		case LmCommandCode::NSTART:
-			return command_nstart();
-
-		case LmCommandCode::APPSTART:
-			return command_appstart();
-
-		case LmCommandCode::MOV32:
-			return command_mov32();
-
-		case LmCommandCode::MOVC32:
-			return command_movc32();
-
-		case LmCommandCode::WRFB32:
-			return command_wrfb32();
-
-		case LmCommandCode::RDFB32:
-			return command_rdfb32();
-
-		case LmCommandCode::WRFBC32:
-			return command_wrfbc32();
-
-		case LmCommandCode::RDFBTS32:
-			return command_rdfbts32();
-
-		case LmCommandCode::MOVCF:
-			return command_movcf();
-
-		case LmCommandCode::PMOV:
-			return command_pmov();
-
-		case LmCommandCode::PMOV32:
-			return command_pmov32();
-
-		case LmCommandCode::FILLB:
-			return command_fillb();
-
-		default:
-			FAULT(QString("Unknown command code %1").arg(static_cast<int>(commandCode)));
-			return false;
-		}
-	}
-
-	// OpCode 1
-	//
-	bool DeviceEmulator::command_nop()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-
-		assert(command == 1);
-
-		m_logicUnit.programCounter++;
-		return true;
-	}
-
-	// OpCode 2
-	//
-	bool DeviceEmulator::command_startafb()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
-		m_logicUnit.programCounter++;
-
-		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
-		m_logicUnit.programCounter++;
-
-		// Get afb component
-		//
-		std::shared_ptr<Afb::AfbComponent> component = m_lmDescription.component(funcBlock);
-		if (component == nullptr)
-		{
-			QString str = QString("STARTAFB error, component not found. ComponentOpCode %1")
-							.arg(funcBlock);
-			FAULT(str);
-			return false;
-		}
-
-		ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
-		if (instance == false)
-		{
-			QString str = QString("STARTAFB error, component instance not found. ComponentOpCode %1, Instance %2")
-							.arg(funcBlock)
-							.arg(implNo);
-			FAULT(str);
-			return false;
-		}
-
-		// Run script
-		//
-		if (m_evaluatedJs.isError() == true)
-		{
-			FAULT("Simulation script is not evaluated.");
-			return false;
-		}
-
-		// Set argument list
-		//
-		QJSValue jsInstance = m_jsEngine.newQObject(instance);
-		QQmlEngine::setObjectOwnership(instance, QQmlEngine::CppOwnership);
-
-		QJSValueList args;
-		args << jsInstance;
-
-		// Run script
-		//
-		QString simulationFunc = component->simulationFunc();
-
-		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false)
-		{
-			FAULT(QString("Script function %1 not found.").arg(simulationFunc));
-			return false;
-		}
-
-		if (m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
-		{
-			FAULT(QString("Script function %1 is not collable. ").arg(simulationFunc));
-			return false;
-		}
-
-		QJSValue jsResult = m_jsEngine.globalObject().property(simulationFunc).call(args);
-
-		if (jsResult.isError() == true)
-		{
-			QString str = QString("Script running uncaught exception at line %1\n"
-								  "\tStack: %2\n"
-								  "\tMessage: %3\n")
-						  .arg(jsResult.property("lineNumber").toInt())
-						  .arg(jsResult.property("stack").toString())
-						  .arg(jsResult.toString());
-
-			FAULT(str);
-			return false;
-		}
-
-		QString resultMessage = jsResult.toString();
-
-		if (resultMessage.isEmpty() == false)
-		{
-			QString formatted = QString("Command_startafb, AFB %1 (%2), instance %3, message: %4")
-									.arg(component->caption())
-									.arg(component->opCode())
-									.arg(implNo)
-									.arg(resultMessage);
-			writeMessage(formatted);
-		}
-
-		return true;
-	}
-
-	// OpCode 3
-	// Command stop, output signal Stop
-	//
-	bool DeviceEmulator::command_stop()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		assert(command == 3);
-		m_logicUnit.programCounter++;
-
-		// Command logic
-		//
-		if (m_logicUnit.phase == CyclePhase::IdrPhase)
-		{
-			m_logicUnit.programCounter = m_logicUnit.appStartAddress;
-			m_logicUnit.phase = CyclePhase::AlpPhase;
-			return true;
-		}
-
-		if (m_logicUnit.phase == CyclePhase::AlpPhase)
-		{
-			m_logicUnit.programCounter = m_logicUnit.appStartAddress;
-			m_logicUnit.phase = CyclePhase::ODT;
-			return true;
-		}
-
-		FAULT("Command STOP in wrong phase.");
-
-		return false;
-	}
-
-	bool DeviceEmulator::command_mov()
-	{
-		FAULT("Command not implemented ");
-		return false;
-	}
-
-	// OpCode 5
-	// Copy data from memory address1 to memory address2, N words
-	//
-	bool DeviceEmulator::command_movmem()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		assert(command == 5);
-		m_logicUnit.programCounter++;
-
-		quint16 addr2 = getWord(m_logicUnit.programCounter++);
-		quint16 addr1 = getWord(m_logicUnit.programCounter++);
-		quint16 n = getWord(m_logicUnit.programCounter++);
-
-		// Command Logic
-		//
-		bool ok = true;
-		for (quint16 offset = 0; offset < n; offset++)
-		{
-			quint16 data;
-
-			ok &= m_ram.readWord(addr1 + offset, &data);
-			ok &= m_ram.writeWord(addr2 + offset, data);
-		}
-
-		if (ok == false)
-		{
-			QString formattedMessage = QString("Move memory error, addr1 %1, addr2, number of words %2")
-										.arg(addr1)
-										.arg(addr2)
-										.arg(n);
-			FAULT(formattedMessage);
-			return false;
-		}
-
-		return ok;
-	}
-
-	// OpCode 6
-	// Set constant to memory by address
-	//
-	bool DeviceEmulator::command_movc()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		assert(command == 6);
-		m_logicUnit.programCounter++;
-
-		quint16 addr = getWord(m_logicUnit.programCounter++);
-		quint16 data = getWord(m_logicUnit.programCounter++);
-
-		// Command Logic
-		//
-		bool ok = m_ram.writeWord(addr, data);
-		if (ok == false)
-		{
-			QString formattedMessage = QString("Write memory error, addr %1, data %2")
-										.arg(addr)
-										.arg(data);
-			FAULT(formattedMessage);
-			return false;
-		}
-
-		return ok;
-	}
-
-	// OpCode 7
-	//
-	bool DeviceEmulator::command_movbc()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		assert(command == 7);
-		m_logicUnit.programCounter++;
-
-		quint16 addr = getWord(m_logicUnit.programCounter++);
-		quint16 data = getWord(m_logicUnit.programCounter++);
-		quint16 bitNo = getWord(m_logicUnit.programCounter++);
-
-		// Command Logic
-		//
-		bool ok = m_ram.writeBit(addr, data & 0x01, bitNo);
-		if (ok == false)
-		{
-			QString formattedMessage = QString("Write bit in memory error, addrw %1, data %2, bitno %3")
-										.arg(addr)
-										.arg(data & 0x01)
-										.arg(bitNo);
-			FAULT(formattedMessage);
-			return false;
-		}
-
-		return ok;
-	}
-
-	// OpCode 8
-	//
-	bool DeviceEmulator::command_wrbf()
-	{
-		FAULT("Command not implemented");
-		return false;
-	}
-
-	// OpCode 9
-	//
-	bool DeviceEmulator::command_rdbf()
-	{
-		FAULT("Command not implemented");
-		return false;
-	}
-
-	// OpCode 10
-	// Entry constant DDD to the functional block N, impelementation of block R, option W
-	//
-	bool DeviceEmulator::command_wrfbc()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
-		m_logicUnit.programCounter++;
-
-		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
-		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
-		m_logicUnit.programCounter++;
-
-		quint16 data = getWord(m_logicUnit.programCounter);
-		m_logicUnit.programCounter++;
-
-		// --
-		//
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
-
-		if (afbComp == nullptr)
-		{
-			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
-			return false;
-		}
-
-		// --
-		//
-		ComponentParam param(implParamOpIndex, data);
-
-		QString errorMessage;
-		bool ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
-
-		if (ok == false)
-		{
-			FAULT(QString("Run command_wrfbc error, %1").arg(errorMessage));
-			return false;
-		}
-
-		return ok;
-	}
-
-	// OpCode 11
-	// Read bit from memory, write it to AFB
-	//
-	bool DeviceEmulator::command_wrfbb()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		assert(command == 11);
-		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
-		m_logicUnit.programCounter++;
-
-		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
-		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
-		m_logicUnit.programCounter++;
-
-		quint16 address = getWord(m_logicUnit.programCounter);
-		m_logicUnit.programCounter++;
-
-		quint16 bitNo = getWord(m_logicUnit.programCounter);
-		m_logicUnit.programCounter++;
-
-		// --
-		//
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
-
-		if (afbComp == nullptr)
-		{
-			FAULT(QString("command_wrfbb, AfbComponent with OpCode %1 not found").arg(funcBlock));
-			return false;
-		}
-
-		// Read bit from memory
-		//
-		if (bitNo > 15)
-		{
-			QString formattedError = QString("command_wrfbb, bitNo is out of range (>15). BitNo %1, AFB %2 (%3), instance %4, operand OpIndex %5.")
-										.arg(bitNo)
-										.arg(afbComp->caption())
-										.arg(afbComp->opCode())
-										.arg(implNo)
-										.arg(implParamOpIndex);
-			FAULT(formattedError);
-			return false;
-		}
-
-		quint16 data = 0;
-		bool ok = m_ram.readBit(address, bitNo, &data);
-		if (ok == false)
-		{
-			QString formattedMessage = QString("command_wrfbb, Read bit from memory error, addrw %1, bitno %3")
-										.arg(address)
-										.arg(bitNo);
-			FAULT(formattedMessage);
-			return false;
-		}
-
-		// --
-		//
-		ComponentParam param(implParamOpIndex, data);
-		QString errorMessage;
-
-		ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
-
-		if (ok == false)
-		{
-			FAULT(QString("command_wrfbb error, %1").arg(errorMessage));
-			return false;
-		}
-
-		return ok;
-	}
-
-	// OpCode 12
-	// Read the first bit from result of AFB and write it to memory
-	//
-	bool DeviceEmulator::command_rdfbb()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
-		m_logicUnit.programCounter++;
-
-		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
-		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
-		m_logicUnit.programCounter++;
-
-		quint16 address = getWord(m_logicUnit.programCounter);
-		m_logicUnit.programCounter++;
-
-		quint16 bitNo = getWord(m_logicUnit.programCounter);
-		m_logicUnit.programCounter++;
-
-		// --
-		//
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
-
-		if (afbComp == nullptr)
-		{
-			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
-			return false;
-		}
-
-		if (bitNo > 15)
-		{
-			QString formattedError = QString("command_rdfbb, bitNo is out of range (>15). BitNo %1, AFB %2 (%3), instance %4, output OpIndex %5.")
-										.arg(bitNo)
-										.arg(afbComp->caption())
-										.arg(afbComp->opCode())
-										.arg(implNo)
-										.arg(implParamOpIndex);
-			FAULT(formattedError);
-			return false;
-		}
-
-		// --
-		//
-		const ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
-		if (instance == nullptr)
-		{
-			QString formattedError = QString("command_rdfbb, instance %1 does not exists, AFB %2 (%3).")
-										.arg(implNo)
-										.arg(afbComp->caption())
-										.arg(afbComp->opCode());
-			FAULT(formattedError);
-			return false;
-		}
-
-		const ComponentParam* param = instance->param(implParamOpIndex);
-		if (param == nullptr)
-		{
-			QString formattedError = QString("command_rdfbb, param %1 does not exists, AFB %2 (%3), instance %4.")
-										.arg(implParamOpIndex)
-										.arg(afbComp->caption())
-										.arg(afbComp->opCode())
-										.arg(implNo);
-			FAULT(formattedError);
-			return false;
-		}
-
-		quint16 value = param->wordValue() & 0x01;
-
-		bool ok = m_ram.writeBit(address, value, bitNo);
-		if (ok == false)
-		{
-			QString formattedMessage = QString("Write bit in memory error, addrw %1, data %2, bitno %3")
-										.arg(address)
-										.arg(value)
-										.arg(bitNo);
-			FAULT(formattedMessage);
-			return false;
-		}
-
-		return true;
-	}
-
-	// OpCode 13
-	//
-	bool DeviceEmulator::command_rdfbts()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 14
-	//
-	bool DeviceEmulator::command_setmem()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 15
-	//
-	bool DeviceEmulator::command_movb()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 16
-	//
-	bool DeviceEmulator::command_nstart()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 17
-	//
-	bool DeviceEmulator::command_appstart()
-	{
-		m_logicUnit.programCounter ++;
-		m_logicUnit.appStartAddress = getWord(m_logicUnit.programCounter++);
-		return true;
-	}
-
-	// OpCode 18
-	//
-	bool DeviceEmulator::command_mov32()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 19
-	// mov 32bit constant to memory
-	//
-	bool DeviceEmulator::command_movc32()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		assert(command == 19);
-		m_logicUnit.programCounter++;
-
-		quint16 address = getWord(m_logicUnit.programCounter);
-		m_logicUnit.programCounter++;
-
-		quint32 data = getDword(m_logicUnit.programCounter);
-		m_logicUnit.programCounter += 2;
-
-		// Command Logic
-		//
-		bool ok = m_ram.writeDword(address, data);
-		if (ok == false)
-		{
-			QString formattedMessage = QString("Write memory error, addr %1, data %2")
-										.arg(address)
-										.arg(data);
-			FAULT(formattedMessage);
-			return false;
-		}
-
-		return ok;
-	}
-
-	// OpCode 20
-	//
-	bool DeviceEmulator::command_wrfb32()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 21
-	// Read data from functional block, write it to memory
-	//
-	bool DeviceEmulator::command_rdfb32()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
-		m_logicUnit.programCounter++;
-
-		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
-		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
-		m_logicUnit.programCounter++;
-
-		quint16 address = getWord(m_logicUnit.programCounter);
-		m_logicUnit.programCounter++;
-
-		// Get data from functional block
-		//
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
-		if (afbComp == nullptr)
-		{
-			FAULT(QString("AfbComponent with OpCode %1 not found").arg(funcBlock));
-			return false;
-		}
-
-		const ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
-		if (instance == nullptr)
-		{
-			QString formattedError = QString("Instance %1 does not exists, AFB %2 (%3).")
-										.arg(implNo)
-										.arg(afbComp->caption())
-										.arg(afbComp->opCode());
-			FAULT(formattedError);
-			return false;
-		}
-
-		const ComponentParam* param = instance->param(implParamOpIndex);
-		if (param == nullptr)
-		{
-			QString formattedError = QString("command_rdfbb, param %1 does not exists, AFB %2 (%3), instance %4.")
-										.arg(implParamOpIndex)
-										.arg(afbComp->caption())
-										.arg(afbComp->opCode())
-										.arg(implNo);
-			FAULT(formattedError);
-			return false;
-		}
-
-		qint32 data = param->signedIntValue();
-
-		bool ok = m_ram.writeSignedInt(address, data);
-		if (ok == false)
-		{
-			QString formattedMessage = QString("Write memory error, addrw %1, data %2")
-										.arg(address)
-										.arg(data);
-			FAULT(formattedMessage);
-			return false;
-		}
-
-		return true;
-	}
-
-	// OpCode 22
-	// Entry constant DDD to the functional block N, impelementation of block R, option W(DDD(31..16))  and W+1(DDD(15..0))
-	//
-	bool DeviceEmulator::command_wrfbc32()
-	{
-		quint16 commandWord = getWord(m_logicUnit.programCounter);
-		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
-		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
-		m_logicUnit.programCounter++;
-
-		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
-		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
-		m_logicUnit.programCounter++;
-
-		quint32 data = getDword(m_logicUnit.programCounter);
-		m_logicUnit.programCounter += 2;
-
-		// --
-		//
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
-
-		if (afbComp == nullptr)
-		{
-			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
-			return false;
-		}
-
-		// --
-		//
-		ComponentParam param(implParamOpIndex, data);
-		QString errorMessage;
-
-		bool ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
-
-		if (ok == false)
-		{
-			FAULT(QString("Run command_wrfbc32 error, %1").arg(errorMessage));
-		}
-
-		return ok;
-	}
-
-	// OpCode 23
-	//
-	bool DeviceEmulator::command_rdfbts32()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 24
-	//
-	bool DeviceEmulator::command_movcf()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 25
-	//
-	bool DeviceEmulator::command_pmov()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 26
-	//
-	bool DeviceEmulator::command_pmov32()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
-
-	// OpCode 27
-	//
-	bool DeviceEmulator::command_fillb()
-	{
-		FAULT("Command not implemented " __FUNCTION__);
-		return false;
-	}
+//		case LmCommandCode::SETMEM:
+//			return command_setmem();
+
+//		case LmCommandCode::MOVB:
+//			return command_movb();
+
+//		case LmCommandCode::NSTART:
+//			return command_nstart();
+
+//		case LmCommandCode::APPSTART:
+//			return command_appstart();
+
+//		case LmCommandCode::MOV32:
+//			return command_mov32();
+
+//		case LmCommandCode::MOVC32:
+//			return command_movc32();
+
+//		case LmCommandCode::WRFB32:
+//			return command_wrfb32();
+
+//		case LmCommandCode::RDFB32:
+//			return command_rdfb32();
+
+//		case LmCommandCode::WRFBC32:
+//			return command_wrfbc32();
+
+//		case LmCommandCode::RDFBTS32:
+//			return command_rdfbts32();
+
+//		case LmCommandCode::MOVCF:
+//			return command_movcf();
+
+//		case LmCommandCode::PMOV:
+//			return command_pmov();
+
+//		case LmCommandCode::PMOV32:
+//			return command_pmov32();
+
+//		case LmCommandCode::FILLB:
+//			return command_fillb();
+
+//		default:
+//			FAULT(QString("Unknown command code %1").arg(static_cast<int>(commandCode)));
+//			return false;
+//		}
+//	}
+
+//	// OpCode 1
+//	//
+//	bool DeviceEmulator::command_nop()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+
+//		assert(command == 1);
+
+//		m_logicUnit.programCounter++;
+//		return true;
+//	}
+
+//	// OpCode 2
+//	//
+//	bool DeviceEmulator::command_startafb()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//		m_logicUnit.programCounter++;
+
+//		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+//		m_logicUnit.programCounter++;
+
+//		// Get afb component
+//		//
+//		std::shared_ptr<Afb::AfbComponent> component = m_lmDescription.component(funcBlock);
+//		if (component == nullptr)
+//		{
+//			QString str = QString("STARTAFB error, component not found. ComponentOpCode %1")
+//							.arg(funcBlock);
+//			FAULT(str);
+//			return false;
+//		}
+
+//		ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
+//		if (instance == false)
+//		{
+//			QString str = QString("STARTAFB error, component instance not found. ComponentOpCode %1, Instance %2")
+//							.arg(funcBlock)
+//							.arg(implNo);
+//			FAULT(str);
+//			return false;
+//		}
+
+//		// Run script
+//		//
+//		if (m_evaluatedJs.isError() == true)
+//		{
+//			FAULT("Simulation script is not evaluated.");
+//			return false;
+//		}
+
+//		// Set argument list
+//		//
+//		QJSValue jsInstance = m_jsEngine.newQObject(instance);
+//		QQmlEngine::setObjectOwnership(instance, QQmlEngine::CppOwnership);
+
+//		QJSValueList args;
+//		args << jsInstance;
+
+//		// Run script
+//		//
+//		QString simulationFunc = component->simulationFunc();
+
+//		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false)
+//		{
+//			FAULT(QString("Script function %1 not found.").arg(simulationFunc));
+//			return false;
+//		}
+
+//		if (m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
+//		{
+//			FAULT(QString("Script function %1 is not collable. ").arg(simulationFunc));
+//			return false;
+//		}
+
+//		QJSValue jsResult = m_jsEngine.globalObject().property(simulationFunc).call(args);
+
+//		if (jsResult.isError() == true)
+//		{
+//			QString str = QString("Script running uncaught exception at line %1\n"
+//								  "\tStack: %2\n"
+//								  "\tMessage: %3\n")
+//						  .arg(jsResult.property("lineNumber").toInt())
+//						  .arg(jsResult.property("stack").toString())
+//						  .arg(jsResult.toString());
+
+//			FAULT(str);
+//			return false;
+//		}
+
+//		QString resultMessage = jsResult.toString();
+
+//		if (resultMessage.isEmpty() == false)
+//		{
+//			QString formatted = QString("Command_startafb, AFB %1 (%2), instance %3, message: %4")
+//									.arg(component->caption())
+//									.arg(component->opCode())
+//									.arg(implNo)
+//									.arg(resultMessage);
+//			writeMessage(formatted);
+//		}
+
+//		return true;
+//	}
+
+//	// OpCode 3
+//	// Command stop, output signal Stop
+//	//
+//	bool DeviceEmulator::command_stop()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		assert(command == 3);
+//		m_logicUnit.programCounter++;
+
+//		// Command logic
+//		//
+//		if (m_logicUnit.phase == CyclePhase::IdrPhase)
+//		{
+//			m_logicUnit.programCounter = m_logicUnit.appStartAddress;
+//			m_logicUnit.phase = CyclePhase::AlpPhase;
+//			return true;
+//		}
+
+//		if (m_logicUnit.phase == CyclePhase::AlpPhase)
+//		{
+//			m_logicUnit.programCounter = m_logicUnit.appStartAddress;
+//			m_logicUnit.phase = CyclePhase::ODT;
+//			return true;
+//		}
+
+//		FAULT("Command STOP in wrong phase.");
+
+//		return false;
+//	}
+
+//	bool DeviceEmulator::command_mov()
+//	{
+//		FAULT("Command not implemented ");
+//		return false;
+//	}
+
+//	// OpCode 5
+//	// Copy data from memory address1 to memory address2, N words
+//	//
+//	bool DeviceEmulator::command_movmem()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		assert(command == 5);
+//		m_logicUnit.programCounter++;
+
+//		quint16 addr2 = getWord(m_logicUnit.programCounter++);
+//		quint16 addr1 = getWord(m_logicUnit.programCounter++);
+//		quint16 n = getWord(m_logicUnit.programCounter++);
+
+//		// Command Logic
+//		//
+//		bool ok = true;
+//		for (quint16 offset = 0; offset < n; offset++)
+//		{
+//			quint16 data;
+
+//			ok &= m_ram.readWord(addr1 + offset, &data);
+//			ok &= m_ram.writeWord(addr2 + offset, data);
+//		}
+
+//		if (ok == false)
+//		{
+//			QString formattedMessage = QString("Move memory error, addr1 %1, addr2, number of words %2")
+//										.arg(addr1)
+//										.arg(addr2)
+//										.arg(n);
+//			FAULT(formattedMessage);
+//			return false;
+//		}
+
+//		return ok;
+//	}
+
+//	// OpCode 6
+//	// Set constant to memory by address
+//	//
+//	bool DeviceEmulator::command_movc()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		assert(command == 6);
+//		m_logicUnit.programCounter++;
+
+//		quint16 addr = getWord(m_logicUnit.programCounter++);
+//		quint16 data = getWord(m_logicUnit.programCounter++);
+
+//		// Command Logic
+//		//
+//		bool ok = m_ram.writeWord(addr, data);
+//		if (ok == false)
+//		{
+//			QString formattedMessage = QString("Write memory error, addr %1, data %2")
+//										.arg(addr)
+//										.arg(data);
+//			FAULT(formattedMessage);
+//			return false;
+//		}
+
+//		return ok;
+//	}
+
+//	// OpCode 7
+//	//
+//	bool DeviceEmulator::command_movbc()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		assert(command == 7);
+//		m_logicUnit.programCounter++;
+
+//		quint16 addr = getWord(m_logicUnit.programCounter++);
+//		quint16 data = getWord(m_logicUnit.programCounter++);
+//		quint16 bitNo = getWord(m_logicUnit.programCounter++);
+
+//		// Command Logic
+//		//
+//		bool ok = m_ram.writeBit(addr, data & 0x01, bitNo);
+//		if (ok == false)
+//		{
+//			QString formattedMessage = QString("Write bit in memory error, addrw %1, data %2, bitno %3")
+//										.arg(addr)
+//										.arg(data & 0x01)
+//										.arg(bitNo);
+//			FAULT(formattedMessage);
+//			return false;
+//		}
+
+//		return ok;
+//	}
+
+//	// OpCode 8
+//	//
+//	bool DeviceEmulator::command_wrbf()
+//	{
+//		FAULT("Command not implemented");
+//		return false;
+//	}
+
+//	// OpCode 9
+//	//
+//	bool DeviceEmulator::command_rdbf()
+//	{
+//		FAULT("Command not implemented");
+//		return false;
+//	}
+
+//	// OpCode 10
+//	// Entry constant DDD to the functional block N, impelementation of block R, option W
+//	//
+//	bool DeviceEmulator::command_wrfbc()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//		m_logicUnit.programCounter++;
+
+//		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+//		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+//		m_logicUnit.programCounter++;
+
+//		quint16 data = getWord(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter++;
+
+//		// --
+//		//
+//		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+
+//		if (afbComp == nullptr)
+//		{
+//			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+//			return false;
+//		}
+
+//		// --
+//		//
+//		ComponentParam param(implParamOpIndex, data);
+
+//		QString errorMessage;
+//		bool ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
+
+//		if (ok == false)
+//		{
+//			FAULT(QString("Run command_wrfbc error, %1").arg(errorMessage));
+//			return false;
+//		}
+
+//		return ok;
+//	}
+
+//	// OpCode 11
+//	// Read bit from memory, write it to AFB
+//	//
+//	bool DeviceEmulator::command_wrfbb()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		assert(command == 11);
+//		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//		m_logicUnit.programCounter++;
+
+//		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+//		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+//		m_logicUnit.programCounter++;
+
+//		quint16 address = getWord(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter++;
+
+//		quint16 bitNo = getWord(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter++;
+
+//		// --
+//		//
+//		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+
+//		if (afbComp == nullptr)
+//		{
+//			FAULT(QString("command_wrfbb, AfbComponent with OpCode %1 not found").arg(funcBlock));
+//			return false;
+//		}
+
+//		// Read bit from memory
+//		//
+//		if (bitNo > 15)
+//		{
+//			QString formattedError = QString("command_wrfbb, bitNo is out of range (>15). BitNo %1, AFB %2 (%3), instance %4, operand OpIndex %5.")
+//										.arg(bitNo)
+//										.arg(afbComp->caption())
+//										.arg(afbComp->opCode())
+//										.arg(implNo)
+//										.arg(implParamOpIndex);
+//			FAULT(formattedError);
+//			return false;
+//		}
+
+//		quint16 data = 0;
+//		bool ok = m_ram.readBit(address, bitNo, &data);
+//		if (ok == false)
+//		{
+//			QString formattedMessage = QString("command_wrfbb, Read bit from memory error, addrw %1, bitno %3")
+//										.arg(address)
+//										.arg(bitNo);
+//			FAULT(formattedMessage);
+//			return false;
+//		}
+
+//		// --
+//		//
+//		ComponentParam param(implParamOpIndex, data);
+//		QString errorMessage;
+
+//		ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
+
+//		if (ok == false)
+//		{
+//			FAULT(QString("command_wrfbb error, %1").arg(errorMessage));
+//			return false;
+//		}
+
+//		return ok;
+//	}
+
+//	// OpCode 12
+//	// Read the first bit from result of AFB and write it to memory
+//	//
+//	bool DeviceEmulator::command_rdfbb()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//		m_logicUnit.programCounter++;
+
+//		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+//		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+//		m_logicUnit.programCounter++;
+
+//		quint16 address = getWord(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter++;
+
+//		quint16 bitNo = getWord(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter++;
+
+//		// --
+//		//
+//		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+
+//		if (afbComp == nullptr)
+//		{
+//			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+//			return false;
+//		}
+
+//		if (bitNo > 15)
+//		{
+//			QString formattedError = QString("command_rdfbb, bitNo is out of range (>15). BitNo %1, AFB %2 (%3), instance %4, output OpIndex %5.")
+//										.arg(bitNo)
+//										.arg(afbComp->caption())
+//										.arg(afbComp->opCode())
+//										.arg(implNo)
+//										.arg(implParamOpIndex);
+//			FAULT(formattedError);
+//			return false;
+//		}
+
+//		// --
+//		//
+//		const ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
+//		if (instance == nullptr)
+//		{
+//			QString formattedError = QString("command_rdfbb, instance %1 does not exists, AFB %2 (%3).")
+//										.arg(implNo)
+//										.arg(afbComp->caption())
+//										.arg(afbComp->opCode());
+//			FAULT(formattedError);
+//			return false;
+//		}
+
+//		const ComponentParam* param = instance->param(implParamOpIndex);
+//		if (param == nullptr)
+//		{
+//			QString formattedError = QString("command_rdfbb, param %1 does not exists, AFB %2 (%3), instance %4.")
+//										.arg(implParamOpIndex)
+//										.arg(afbComp->caption())
+//										.arg(afbComp->opCode())
+//										.arg(implNo);
+//			FAULT(formattedError);
+//			return false;
+//		}
+
+//		quint16 value = param->wordValue() & 0x01;
+
+//		bool ok = m_ram.writeBit(address, value, bitNo);
+//		if (ok == false)
+//		{
+//			QString formattedMessage = QString("Write bit in memory error, addrw %1, data %2, bitno %3")
+//										.arg(address)
+//										.arg(value)
+//										.arg(bitNo);
+//			FAULT(formattedMessage);
+//			return false;
+//		}
+
+//		return true;
+//	}
+
+//	// OpCode 13
+//	//
+//	bool DeviceEmulator::command_rdfbts()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 14
+//	//
+//	bool DeviceEmulator::command_setmem()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 15
+//	//
+//	bool DeviceEmulator::command_movb()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 16
+//	//
+//	bool DeviceEmulator::command_nstart()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 17
+//	//
+//	bool DeviceEmulator::command_appstart()
+//	{
+//		m_logicUnit.programCounter ++;
+//		m_logicUnit.appStartAddress = getWord(m_logicUnit.programCounter++);
+//		return true;
+//	}
+
+//	// OpCode 18
+//	//
+//	bool DeviceEmulator::command_mov32()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 19
+//	// mov 32bit constant to memory
+//	//
+//	bool DeviceEmulator::command_movc32()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		assert(command == 19);
+//		m_logicUnit.programCounter++;
+
+//		quint16 address = getWord(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter++;
+
+//		quint32 data = getDword(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter += 2;
+
+//		// Command Logic
+//		//
+//		bool ok = m_ram.writeDword(address, data);
+//		if (ok == false)
+//		{
+//			QString formattedMessage = QString("Write memory error, addr %1, data %2")
+//										.arg(address)
+//										.arg(data);
+//			FAULT(formattedMessage);
+//			return false;
+//		}
+
+//		return ok;
+//	}
+
+//	// OpCode 20
+//	//
+//	bool DeviceEmulator::command_wrfb32()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 21
+//	// Read data from functional block, write it to memory
+//	//
+//	bool DeviceEmulator::command_rdfb32()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//		m_logicUnit.programCounter++;
+
+//		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+//		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+//		m_logicUnit.programCounter++;
+
+//		quint16 address = getWord(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter++;
+
+//		// Get data from functional block
+//		//
+//		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+//		if (afbComp == nullptr)
+//		{
+//			FAULT(QString("AfbComponent with OpCode %1 not found").arg(funcBlock));
+//			return false;
+//		}
+
+//		const ComponentInstance* instance = m_afbComponents.componentInstance(funcBlock, implNo);
+//		if (instance == nullptr)
+//		{
+//			QString formattedError = QString("Instance %1 does not exists, AFB %2 (%3).")
+//										.arg(implNo)
+//										.arg(afbComp->caption())
+//										.arg(afbComp->opCode());
+//			FAULT(formattedError);
+//			return false;
+//		}
+
+//		const ComponentParam* param = instance->param(implParamOpIndex);
+//		if (param == nullptr)
+//		{
+//			QString formattedError = QString("command_rdfbb, param %1 does not exists, AFB %2 (%3), instance %4.")
+//										.arg(implParamOpIndex)
+//										.arg(afbComp->caption())
+//										.arg(afbComp->opCode())
+//										.arg(implNo);
+//			FAULT(formattedError);
+//			return false;
+//		}
+
+//		qint32 data = param->signedIntValue();
+
+//		bool ok = m_ram.writeSignedInt(address, data);
+//		if (ok == false)
+//		{
+//			QString formattedMessage = QString("Write memory error, addrw %1, data %2")
+//										.arg(address)
+//										.arg(data);
+//			FAULT(formattedMessage);
+//			return false;
+//		}
+
+//		return true;
+//	}
+
+//	// OpCode 22
+//	// Entry constant DDD to the functional block N, impelementation of block R, option W(DDD(31..16))  and W+1(DDD(15..0))
+//	//
+//	bool DeviceEmulator::command_wrfbc32()
+//	{
+//		quint16 commandWord = getWord(m_logicUnit.programCounter);
+//		quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
+//		quint16 command = (commandWord & 0x7C0) >> 6;		Q_UNUSED(command);
+//		quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+//		m_logicUnit.programCounter++;
+
+//		quint16 implNo = getWord(m_logicUnit.programCounter) >> 6;
+//		quint16 implParamOpIndex = getWord(m_logicUnit.programCounter) & 0b0000000000111111;
+//		m_logicUnit.programCounter++;
+
+//		quint32 data = getDword(m_logicUnit.programCounter);
+//		m_logicUnit.programCounter += 2;
+
+//		// --
+//		//
+//		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(funcBlock);
+
+//		if (afbComp == nullptr)
+//		{
+//			FAULT(QString("Run command_wrfbc32 error, AfbComponent with OpCode %1 not found").arg(funcBlock));
+//			return false;
+//		}
+
+//		// --
+//		//
+//		ComponentParam param(implParamOpIndex, data);
+//		QString errorMessage;
+
+//		bool ok = m_afbComponents.addInstantiatorParam(afbComp, implNo, param, &errorMessage);
+
+//		if (ok == false)
+//		{
+//			FAULT(QString("Run command_wrfbc32 error, %1").arg(errorMessage));
+//		}
+
+//		return ok;
+//	}
+
+//	// OpCode 23
+//	//
+//	bool DeviceEmulator::command_rdfbts32()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 24
+//	//
+//	bool DeviceEmulator::command_movcf()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 25
+//	//
+//	bool DeviceEmulator::command_pmov()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 26
+//	//
+//	bool DeviceEmulator::command_pmov32()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
+
+//	// OpCode 27
+//	//
+//	bool DeviceEmulator::command_fillb()
+//	{
+//		FAULT("Command not implemented " __FUNCTION__);
+//		return false;
+//	}
 
 
 	quint16 DeviceEmulator::getWord(int wordOffset) const

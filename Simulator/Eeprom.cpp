@@ -15,7 +15,7 @@ namespace Sim
 	{
 	}
 
-	bool Eeprom::init(const Hardware::ModuleFirmwareData& data, char fillWith)
+	bool Eeprom::init(const Hardware::ModuleFirmwareData& data)
 	{
 		m_uartId = data.uartId;
 		uartType = data.uartType;
@@ -24,7 +24,6 @@ namespace Sim
 		m_frameCount = static_cast<int>(data.frames.size());
 
 		m_data = data.toByteArray();
-		fill(fillWith);
 
 		if (m_data.size() != m_frameSize * m_frameCount)
 		{
@@ -81,6 +80,7 @@ namespace Sim
 		m_subsystemKey = subsystemKey;
 		m_buildNo = buildNo;
 		m_configrationsCount = configrationsCount;
+		m_configrationsCount
 
 		if (m_configrationsCount > 128)					// Just some reasonable number
 		{

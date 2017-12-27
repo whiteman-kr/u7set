@@ -997,3 +997,16 @@ const std::map<int, LmCommand>& LmDescription::commands() const
 {
 	return m_commands;
 }
+
+std::vector<LmCommand> LmDescription::commandsAsVector() const
+{
+	std::vector<LmCommand> result;
+	result.reserve(m_commands.size());
+
+	for (auto p : m_commands)
+	{
+		result.push_back(p.second);
+	}
+
+	return result;
+}

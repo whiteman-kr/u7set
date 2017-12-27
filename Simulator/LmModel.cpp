@@ -25,6 +25,7 @@ namespace Sim
 
 		clear();
 
+		m_logicModuleInfo = lmInfo;
 		m_simulationScript = simulationScript;
 		m_lmDescription = lmDescription;
 
@@ -65,7 +66,7 @@ namespace Sim
 
 	bool LogicModule::powerOn(bool autoStart)
 	{
-		writeMessage(tr("PowerOn, autoStart = ").arg(autoStart));
+		writeMessage(tr("PowerOn, autoStart = %1").arg(autoStart));
 
 		if (m_workerThread.isRunning() == true)
 		{

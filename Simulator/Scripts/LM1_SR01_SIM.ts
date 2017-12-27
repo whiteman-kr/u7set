@@ -26,6 +26,7 @@ interface ComponentParam
 	mulFloatingPoint(operand: ComponentParam) : void;	// *=
 	divFloatingPoint(operand: ComponentParam) : void;	// /=	
 }
+
 interface ComponentInstance 
 {
 	paramExists(opIndex: number): boolean;
@@ -37,6 +38,9 @@ interface ComponentInstance
 	addOutputParamSignedInt(opIndex: number, value: number): boolean;
 }
 
+// 
+// Service function for checking if param exists, if param does not exist the exception is thrown
+//
 function check_param_exist(instance: ComponentInstance, opIndex: number, paramName: string) : boolean
 {
 	if (instance.paramExists(opIndex) == false)
@@ -47,6 +51,9 @@ function check_param_exist(instance: ComponentInstance, opIndex: number, paramNa
 	return true;
 }
 
+// 
+// Service function for checking param range, if param out of range the exception is thrown
+//
 function check_param_range(paramValue: number, minValue: number, maxValue: number, paramName: string) : boolean
 {
 	if (paramValue < minValue ||
@@ -58,6 +65,60 @@ function check_param_range(paramValue: number, minValue: number, maxValue: numbe
 	
 	return true;
 }
+
+//
+// Device Emultaor interface for cpp class DeviceEmulator
+//
+interface DeviceEmulator
+{
+	getWord(offset: number) : number;		// Get word (16 bit) by offset from code memory, offset is word aligned
+	getDword(offset: number) : number;		// Get double word (32 bit) by offset from code memory, offset is word aligned
+}
+
+//
+// Logic Module parsed command
+//
+interface Command
+{
+	Offset: number;
+	Size: number;
+	AsString: string;
+	
+	AfbOpCode: number;
+	AfbInstance: number;
+	AfbPinOpCode: number;
+
+	BitNo0: number;
+	BitNo1: number;
+
+	Word0: number;
+	Word1: number;
+
+	Dword0: number;
+	Dword1: number;
+}
+
+// Command: nop
+// Code: 1
+//
+function parse_nop(device: DeviceEmulator, command: Command) : boolean
+{
+	command.Size = 1;	// 1 word
+	command.AsString = "nop";
+	return true;
+}
+
+// Command: appstart
+// Code: 17
+//
+function parse_appstart(device: DeviceEmulator, command: Command) : boolean
+{
+	command.Size = 2;										// 2 words
+	command.Word0 = device.getWord(command.Offset + 1);		// Word0 keeps ALP phase start address
+	command.AsString = "appstart 0x" + command.Word0.toString(16);
+	return true;
+}
+
 
 //
 //	LOGIC, OpCode 1

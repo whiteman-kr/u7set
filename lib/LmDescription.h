@@ -162,6 +162,7 @@ public:
 
 	LmCommand command(int commandCode) const;
 	const std::map<int, LmCommand>& commands() const;
+	std::vector<LmCommand> commandsAsVector() const;
 
 	// Data
 	//

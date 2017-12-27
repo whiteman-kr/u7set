@@ -4,6 +4,7 @@
 #include <memory>
 #include <functional>
 #include <map>
+#include <vector>
 #include <QObject>
 #include <QTextStream>
 #include <QTimerEvent>
@@ -31,40 +32,7 @@ namespace Sim
 	{
 		Start,
 		Fault,
-		LoadEeprom,
 		Operate
-	};
-
-	enum class LmCommandCode		// The same enum is in compiler, move it to lib in future
-	{
-		NoCommand = 0,
-		NOP = 1,
-		START = 2,
-		STOP = 3,
-		MOV = 4,
-		MOVMEM = 5,
-		MOVC = 6,
-		MOVBC = 7,
-		WRFB = 8,
-		RDFB = 9,
-		WRFBC = 10,
-		WRFBB = 11,
-		RDFBB = 12,
-		RDFBTS = 13,
-		SETMEM = 14,
-		MOVB = 15,
-		NSTART = 16,
-		APPSTART = 17,
-		MOV32 = 18,
-		MOVC32 = 19,
-		WRFB32 = 20,
-		RDFB32 = 21,
-		WRFBC32 = 22,
-		RDFBTS32 = 23,
-		MOVCF = 24,
-		PMOV = 25,
-		PMOV32 = 26,
-		FILLB = 27,
 	};
 
 	enum class CyclePhase
@@ -80,6 +48,57 @@ namespace Sim
 		int programCounter = 0;					// current offeset of program memory, in words
 		CyclePhase phase = CyclePhase::IdrPhase;
 		quint16 appStartAddress = 0xFFFF;
+	};
+
+
+	class DeviceCommand : public QObject, public LmCommand
+	{
+		Q_OBJECT
+
+		Q_PROPERTY(int Offset MEMBER m_offset)
+		Q_PROPERTY(int Size MEMBER m_size)
+		Q_PROPERTY(QString AsString MEMBER m_string)
+
+		Q_PROPERTY(quint16 AfbOpCode MEMBER m_afbOpCode)
+		Q_PROPERTY(quint16 AfbInstance MEMBER m_afbInstance)
+		Q_PROPERTY(quint16 AfbPinOpCode MEMBER m_afbPinOpCode)
+
+		Q_PROPERTY(quint16 BitNo0 MEMBER m_bitNo0)
+		Q_PROPERTY(quint16 BitNo1 MEMBER m_bitNo1)
+
+		Q_PROPERTY(quint16 Word0 MEMBER m_word0)
+		Q_PROPERTY(quint16 Word1 MEMBER m_word1)
+
+		Q_PROPERTY(quint32 Dword0 MEMBER m_dword0)
+		Q_PROPERTY(quint32 Dword1 MEMBER m_dword1)
+	public:
+		DeviceCommand() = default;
+		DeviceCommand(const DeviceCommand& that);
+		DeviceCommand& operator=(const DeviceCommand& that);
+
+	public:
+		// WARNING: Copy constructor is defined, do not forget to add there new members
+		//
+		int m_offset = 0;				// Offset in Code Memory, words
+
+		int m_size = 0;					// Command size in words. Set in parse script
+		QString m_string;				// Set in parse script
+
+		quint16 m_afbOpCode = 0;		// Set in parse script
+		quint16 m_afbInstance = 0;		// Set in parse script
+		quint16 m_afbPinOpCode = 0;		// Set in parse script
+
+		quint16 m_bitNo0 = 0;			// Set in parse script
+		quint16 m_bitNo1 = 0;			// Set in parse script
+
+		quint16 m_word0 = 0;			// Set in parse script
+		quint16 m_word1 = 0;			// Set in parse script
+
+		quint32 m_dword0 = 0;			// Set in parse script
+		quint32 m_dword1 = 0;			// Set in parse script
+
+		// WARNING: Copy constructor is defined, do not forget to add there new members
+		//
 	};
 
 
@@ -102,6 +121,9 @@ namespace Sim
 		bool initMemory();
 		bool initEeprom();
 		bool parseAppLogicCode();
+		bool parseCommand(const LmCommand& command, int programCounter);
+
+		void dumpJsError(const QJSValue& value);
 
 	public slots:
 		void pause();
@@ -115,44 +137,44 @@ namespace Sim
 
 		bool processStartMode();
 		bool processFaultMode();
-		bool processLoadEeprom();
+//		bool processLoadEeprom();
 		bool processOperate();
 
-		bool runCommand(LmCommandCode commandCode);
+//		bool runCommand(LmCommandCode commandCode);
 
-		bool command_nop();			// 1
-		bool command_startafb();	// 2
-		bool command_stop();		// 3
-		bool command_mov();			// 4
-		bool command_movmem();		// 5
-		bool command_movc();		// 6
-		bool command_movbc();		// 7
-		bool command_wrbf();		// 8
-		bool command_rdbf();		// 9
-		bool command_wrfbc();		// 10
-		bool command_wrfbb();		// 11
-		bool command_rdfbb();		// 12
-		bool command_rdfbts();		// 13
-		bool command_setmem();		// 14
-		bool command_movb();		// 15
-		bool command_nstart();		// 16
-		bool command_appstart();	// 17
-		bool command_mov32();		// 18
-		bool command_movc32();		// 19
-		bool command_wrfb32();		// 20
-		bool command_rdfb32();		// 21
-		bool command_wrfbc32();		// 22
-		bool command_rdfbts32();	// 23
-		bool command_movcf();		// 24
-		bool command_pmov();		// 25
-		bool command_pmov32();		// 26
-		bool command_fillb();		// 27
+//		bool command_nop();			// 1
+//		bool command_startafb();	// 2
+//		bool command_stop();		// 3
+//		bool command_mov();			// 4
+//		bool command_movmem();		// 5
+//		bool command_movc();		// 6
+//		bool command_movbc();		// 7
+//		bool command_wrbf();		// 8
+//		bool command_rdbf();		// 9
+//		bool command_wrfbc();		// 10
+//		bool command_wrfbb();		// 11
+//		bool command_rdfbb();		// 12
+//		bool command_rdfbts();		// 13
+//		bool command_setmem();		// 14
+//		bool command_movb();		// 15
+//		bool command_nstart();		// 16
+//		bool command_appstart();	// 17
+//		bool command_mov32();		// 18
+//		bool command_movc32();		// 19
+//		bool command_wrfb32();		// 20
+//		bool command_rdfb32();		// 21
+//		bool command_wrfbc32();		// 22
+//		bool command_rdfbts32();	// 23
+//		bool command_movcf();		// 24
+//		bool command_pmov();		// 25
+//		bool command_pmov32();		// 26
+//		bool command_fillb();		// 27
 
 		// Getting data from m_plainAppLogic
 		//
 	private:
-		quint16 getWord(int wordOffset) const;
-		quint32 getDword(int wordOffset) const;
+		Q_INVOKABLE quint16 getWord(int wordOffset) const;
+		Q_INVOKABLE quint32 getDword(int wordOffset) const;
 
 		template <typename TYPE>
 		TYPE getData(int eepromOffset) const;
@@ -178,6 +200,8 @@ namespace Sim
 
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
+
+		std::vector<DeviceCommand> m_commands;
 
 		AfbComponentSet m_afbComponents;
 

@@ -33,13 +33,13 @@ namespace Hardware
 	struct LogicModuleInfo
 	{
 		QString equipmentId;
-		int lmNumber;
-		int channel;
+		int lmNumber = 0;
+		int channel = 0;
 
-		int moduleFamily;
-		int customModuleFamily;
-		int moduleVersion;
-		int moduleType;
+		int moduleFamily = 0;
+		int customModuleFamily = 0;
+		int moduleVersion = 0;
+		int moduleType = 0;
 	};
 
 	class ModuleFirmware

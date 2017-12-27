@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	std::shared_ptr<Sim::LogicModule> logicModule = simulator.logicModule("");
+	std::shared_ptr<Sim::LogicModule> logicModule = simulator.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
 	if (logicModule == nullptr)
 	{
 		return 2;
@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
 	{
 		return 3;
 	}
-
 
 	getc(stdin);
 

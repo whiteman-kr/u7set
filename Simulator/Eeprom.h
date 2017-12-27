@@ -26,7 +26,7 @@ namespace Sim
 		// Access
 		//
 	public:
-		bool init(const Hardware::ModuleFirmwareData& data, char fillWith = '\0');
+		bool init(const Hardware::ModuleFirmwareData& data);
 		bool fill(char fillWith);
 		bool reset();					// Set data with FFs
 		void clear();					// Clear buffer and reset size
