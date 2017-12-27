@@ -12,6 +12,9 @@ public:
 	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
 	virtual ~TuningWorkspace();
 
+public:
+	void onTimer();
+
 private:
 
 	void updateFiltersTree();
@@ -23,6 +26,8 @@ private:
 	QWidget* createTuningPage(std::shared_ptr<TuningFilter> childWorkspaceFilter);
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
+
+	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
 
 private:
 
@@ -49,6 +54,10 @@ private:
 
 	TuningPage* m_tuningPage = nullptr;
 	QTabWidget* m_tab = nullptr;
+
+	const int columnName = 0;
+	const int columnErrorIndex = 1;
+	const int columnSorIndex = 2;
 
 	//
 

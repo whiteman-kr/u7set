@@ -179,6 +179,14 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
+	m_statusBarLmErrors = new QLabel();
+	m_statusBarLmErrors->setAlignment(Qt::AlignHCenter);
+	m_statusBarLmErrors->setMinimumWidth(100);
+
+	m_statusBarSor = new QLabel();
+	m_statusBarSor->setAlignment(Qt::AlignHCenter);
+	m_statusBarSor->setMinimumWidth(100);
+
 	m_statusBarConfigConnection = new QLabel();
 	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
 	m_statusBarConfigConnection->setMinimumWidth(100);
@@ -190,6 +198,8 @@ void MainWindow::createStatusBar()
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addPermanentWidget(m_statusBarLmErrors, 0);
+	statusBar()->addPermanentWidget(m_statusBarSor, 0);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
 }
@@ -273,7 +283,44 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		}
 
 		m_statusBarTuningConnection->setText(text);
-		return;
+
+		// Lm Errors tool
+
+		assert(m_statusBarLmErrors);
+
+		int errorsCount = m_tcpClient->getLMErrorsCount();
+		if (errorsCount == 0)
+		{
+			m_statusBarLmErrors->setText(QString());
+			m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarLmErrors->setText(QString("LM Errors: %1").arg(errorsCount));
+			m_statusBarLmErrors->setStyleSheet("color : white; background-color: red");
+		}
+
+		// Sor tool
+
+		assert(m_statusBarSor);
+
+		int sorCount = m_tcpClient->getSORCount();
+		if (sorCount == 0)
+		{
+			m_statusBarSor->setText(QString());
+			m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarSor->setText(QString("SOR: %1").arg(sorCount));
+			m_statusBarSor->setStyleSheet("color : white; background-color: red");
+		}
+
+		//
+		if (m_tuningWorkspace != nullptr)
+		{
+			m_tuningWorkspace->onTimer();
+		}
 	}
 
 	if  (event->timerId() == m_mainWindowTimerId_500ms)

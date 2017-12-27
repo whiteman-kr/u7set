@@ -68,6 +68,15 @@ public:
 	void writeTuningSignal(const TuningWriteCommand& data);
 	void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
 
+	//
+	// Status and counters
+	//
+	int getLMErrorsCount();
+	int getLMErrorsCount(const std::vector<QString>& equipmentHashes);
+
+	int getSORCount();
+	int getSORCount(const std::vector<QString>& equipmentHashes);
+
 	// ITuningTcpClient implementation
 	//
 public:
