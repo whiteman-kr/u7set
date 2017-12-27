@@ -6,7 +6,7 @@
 class TuningClientSignalManager : public TuningSignalManager
 {
 public:
-	TuningClientSignalManager();
+	TuningClientSignalManager(TuningLog::TuningLog* tuningLog);
 
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);

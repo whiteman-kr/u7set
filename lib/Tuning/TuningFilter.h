@@ -103,6 +103,13 @@ public:
 
 	void removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter);
 
+	const std::vector<QString>& equipmentHashes() const;
+	void setEquipmentHashes(std::vector<QString> value);
+
+	const std::vector<Hash>& signalsHashes() const;
+	void setSignalsHashes(std::vector<Hash> value);
+
+
 public:
 	// Properties
 	//
@@ -223,6 +230,11 @@ private:
 
 	std::vector<std::shared_ptr<TuningFilter>> m_childFilters;
 
+	// Hashes of equipment
+
+	std::vector<QString> m_equipmentHashes;
+	std::vector<Hash> m_signalsHashes;
+
 	TuningFilter* m_parentFilter = nullptr;
 
 };
@@ -261,6 +273,8 @@ public:
 	VFrame30::SchemaDetails schemaDetails(int index);
 
 	// Operations
+
+	void createSignalsAndEqipmentHashes(const TuningSignalStorage* objects, TuningFilter* filter = nullptr);
 
 	void createAutomaticFilters(const TuningSignalStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds);
 
