@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
 
@@ -141,6 +142,7 @@ namespace Afb
 	public:
 		AfbSignal(void);
 		AfbSignal(const AfbSignal& that);
+		virtual ~AfbSignal();
 		AfbSignal& operator=(const AfbSignal& that) noexcept;
 
 		// Serialization
@@ -424,14 +426,10 @@ private:
 	//
 	//	AfbElementCollection
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
-		public DebugInstCounter<AfbElementCollection>
+	class VFRAME30LIBSHARED_EXPORT AfbElementCollection
 	{
 	public:
 		AfbElementCollection(void);
-		virtual ~AfbElementCollection(void);
-
-		void Init(void);
 
 		// Serialization
 		//
