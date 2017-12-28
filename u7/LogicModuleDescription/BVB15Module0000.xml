@@ -13,6 +13,7 @@
 		<TuningFrameSize>0</TuningFrameSize>
 		<TuningUartID>0</TuningUartID>
 		<TuningWriteBitstream>false</TuningWriteBitstream>
+		<MaxConfigurationCount>62</MaxConfigurationCount>
 	</FlashMemory>
 	<Memory>
 		<CodeMemorySize>65536</CodeMemorySize>

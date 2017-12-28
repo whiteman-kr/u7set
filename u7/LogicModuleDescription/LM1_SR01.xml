@@ -13,6 +13,7 @@
 		<TuningFrameSize>1016</TuningFrameSize>		
 		<TuningUartID>260</TuningUartID>
 		<TuningWriteBitstream>true</TuningWriteBitstream>
+		<MaxConfigurationCount>12</MaxConfigurationCount>
 	</FlashMemory>
 	<Memory>
 	    <CodeMemorySize>98304</CodeMemorySize>
@@ -4894,7 +4895,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#derivc_v1"       Caption="derivc"       Version="1.0008">
+        <AFB id="#derivc_v1"       Caption="derivc"       Version="1.0009">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4929,10 +4930,10 @@ function(videoItemFblElement, afbElement)
 					</Script>
 				</Param>
 				<Param OpName="i_td" Caption="Td" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>2147483647</HighLimit>
+				    <Value>5</Value>
+					<Default>5</Default>
+					<LowLimit>5</LowLimit>
+					<HighLimit>350000</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -5637,7 +5638,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#integratorc_v1"  Caption="integratorc"  Version="1.0007">
+        <AFB id="#integratorc_v1"  Caption="integratorc"  Version="1.0008">
 			<Properties>
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -5674,10 +5675,10 @@ function(videoItemFblElement, afbElement)
 					</Script>
 				</Param>
 				<Param OpName="i_ti" Caption="TI" Visible="true" OpIndex="2" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>2147483647</HighLimit>
+				    <Value>5</Value>
+					<Default>5</Default>
+					<LowLimit>5</LowLimit>
+					<HighLimit>350000</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
