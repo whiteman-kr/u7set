@@ -55,6 +55,8 @@ namespace Sim
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(QString Caption MEMBER (m_command.caption) CONSTANT)
+
 		Q_PROPERTY(int Offset MEMBER m_offset)
 		Q_PROPERTY(int Size MEMBER m_size)
 		Q_PROPERTY(QString AsString MEMBER m_string)
@@ -72,13 +74,15 @@ namespace Sim
 		Q_PROPERTY(quint32 Dword0 MEMBER m_dword0)
 		Q_PROPERTY(quint32 Dword1 MEMBER m_dword1)
 	public:
-		DeviceCommand() = default;
+		DeviceCommand(const LmCommand& command);
 		DeviceCommand(const DeviceCommand& that);
 		DeviceCommand& operator=(const DeviceCommand& that);
 
 	public:
 		// WARNING: Copy constructor is defined, do not forget to add there new members
 		//
+		LmCommand m_command;
+
 		int m_offset = 0;				// Offset in Code Memory, words
 
 		int m_size = 0;					// Command size in words. Set in parse script
@@ -172,7 +176,7 @@ namespace Sim
 
 		// Getting data from m_plainAppLogic
 		//
-	private:
+	public:
 		Q_INVOKABLE quint16 getWord(int wordOffset) const;
 		Q_INVOKABLE quint32 getDword(int wordOffset) const;
 

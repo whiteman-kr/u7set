@@ -31,7 +31,7 @@ namespace Sim
 		bool reset();					// Set data with FFs
 		void clear();					// Clear buffer and reset size
 
-		bool parseAllocationFrame();
+		bool parseAllocationFrame(int maxConfigurationCount);
 
 	public:
 		quint8 getByte(int frameIndex, int byteOffset);
@@ -61,7 +61,7 @@ namespace Sim
 		quint16 subsystemKey() const;
 		quint16 buildNo() const;
 		quint16 configrationsCount() const;
-		int configFrameIndex(int configurationNo) const;
+		int configFrameIndex(int LmNumber) const;
 
 		// Data here
 		//

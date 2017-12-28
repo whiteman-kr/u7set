@@ -1,4 +1,6 @@
 
+var CommandWidth = 10;			// leftJustified("appstart", CommandWidth, " ") + rightJustified(command.Word0.toString(16), 4, "0") + "h";
+
 interface ComponentParam
 {
 	OpIndex: number;
@@ -66,6 +68,24 @@ function check_param_range(paramValue: number, minValue: number, maxValue: numbe
 	return true;
 }
 
+function leftJustified(str: string, width: number, fill: string) : string
+{
+	while (str.length < width)
+	{
+		str +=  fill;
+	}	
+	return str;
+}
+
+function rightJustified(str: string, width: number, fill: string) : string
+{
+	while (str.length < width)
+	{
+		str = fill + str
+	}	
+	return str;
+}
+
 //
 // Device Emultaor interface for cpp class DeviceEmulator
 //
@@ -80,6 +100,8 @@ interface DeviceEmulator
 //
 interface Command
 {
+	Caption: string;
+
 	Offset: number;
 	Size: number;
 	AsString: string;
@@ -104,7 +126,27 @@ interface Command
 function parse_nop(device: DeviceEmulator, command: Command) : boolean
 {
 	command.Size = 1;	// 1 word
-	command.AsString = "nop";
+	command.AsString = command.Caption;
+	return true;
+}
+
+// Command: wrfbc
+// Code: 10
+//
+function parse_wrfbc(device: DeviceEmulator, command: Command) : boolean
+{
+	command.Size = 3;
+	
+	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
+	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
+	command.AfbPinOpCode = device.getWord(command.Offset + 1) & 0b111111;	// Lowest 6 bit
+
+	command.Word0 = device.getWord(command.Offset + 2);						// Word0 - data address
+
+	// WRFBC OR.0[0], #3
+	command.AsString = leftJustified(command.Caption, CommandWidth, " ") +  
+							command.AfbOpCode + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "], #" +
+							rightJustified(command.Word0.toString(16), 4, "0") + "h";
 	return true;
 }
 
@@ -115,7 +157,7 @@ function parse_appstart(device: DeviceEmulator, command: Command) : boolean
 {
 	command.Size = 2;										// 2 words
 	command.Word0 = device.getWord(command.Offset + 1);		// Word0 keeps ALP phase start address
-	command.AsString = "appstart 0x" + command.Word0.toString(16);
+	command.AsString = leftJustified(command.Caption, CommandWidth, " ") + rightJustified(command.Word0.toString(16), 4, "0") + "h";
 	return true;
 }
 

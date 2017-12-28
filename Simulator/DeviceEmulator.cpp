@@ -3,6 +3,12 @@
 
 namespace Sim
 {
+	DeviceCommand::DeviceCommand(const LmCommand& command) :
+		m_command(command)
+	{
+
+	}
+
 	DeviceCommand::DeviceCommand(const DeviceCommand& that)
 	{
 		*this = that;
@@ -16,7 +22,8 @@ namespace Sim
 		}
 
 		this->setParent(that.parent());
-		*static_cast<LmCommand*>(this) = *static_cast<const LmCommand*>(&that);
+
+		m_command = that.m_command;
 
 		m_offset = that.m_offset;
 
@@ -215,21 +222,21 @@ namespace Sim
 		bool result = true;
 		bool ok = true;
 
-		ok = m_tuningEeprom.parseAllocationFrame();
+		ok = m_tuningEeprom.parseAllocationFrame(m_lmDescription.flashMemory().m_maxConfigurationCount);
 		if (ok == false)
 		{
 			writeError(tr("Parse tuning EEPROM allocation frame error."));
 			result = false;
 		}
 
-		ok = m_confEeprom.parseAllocationFrame();
+		ok = m_confEeprom.parseAllocationFrame(m_lmDescription.flashMemory().m_maxConfigurationCount);
 		if (ok == false)
 		{
 			writeError(tr("Parse configuration EEPROM allocation frame error."));
 			result = false;
 		}
 
-		ok = m_appLogicEeprom.parseAllocationFrame();
+		ok = m_appLogicEeprom.parseAllocationFrame(m_lmDescription.flashMemory().m_maxConfigurationCount);
 		if (ok == false)
 		{
 			writeError(tr("Parse application logic EEPROM allocation frame error."));
@@ -289,7 +296,7 @@ namespace Sim
 		m_plainAppLogic.reserve(m_appLogicEeprom.size());
 
 		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
-		if (startFrame == -1)
+		if (startFrame == 0)
 		{
 			writeError(QString("Can't get start frame for logic number %1").arg(m_logicModuleInfo.lmNumber));
 			return false;
@@ -339,6 +346,24 @@ namespace Sim
 						return false;
 					}
 
+					// Move ProgramCounter
+					//
+					assert(m_commands.empty() == false);
+
+					int commandSize = m_commands.back().m_size;
+					if (commandSize == 0)
+					{
+						QString str = tr("Parse command %1 error, ProgramCounter %2, returned command size is 0.\n")
+											.arg(c.caption)
+											.arg(programCounter);
+						writeError(str);
+						return false;
+					}
+
+					programCounter += commandSize;
+
+					qDebug() << m_commands.back().m_string;
+
 					break;
 				}
 			}
@@ -369,7 +394,7 @@ namespace Sim
 
 		// --
 		//
-		m_commands.emplace_back();
+		m_commands.emplace_back(command);
 		DeviceCommand& deviceCommand = m_commands.back();
 
 		deviceCommand.m_offset = programCounter;
@@ -391,10 +416,15 @@ namespace Sim
 		const QString parseFunc = command.parseFunc;
 
 		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
-			m_jsEngine.globalObject().property(parseFunc).isCallable())
+			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
 		{
-			writeError(tr("Parse Application Logic Code error, script function %1 not found or is not callable.")
-							.arg(parseFunc));
+			writeError(tr("Parse Application Logic Code error, script function %1 not found or is not callable. "
+						  "HasProperty %1: %2, "
+						  "Collable: %3")
+							.arg(parseFunc)
+							.arg(m_jsEngine.globalObject().hasProperty(parseFunc))
+							.arg(m_jsEngine.globalObject().property(parseFunc).isCallable())
+						);
 			return false;
 		}
 

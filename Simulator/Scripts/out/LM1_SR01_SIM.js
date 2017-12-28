@@ -1,15 +1,66 @@
+var CommandWidth = 10; // leftJustified("appstart", CommandWidth, " ") + rightJustified(command.Word0.toString(16), 4, "0") + "h";
+// 
+// Service function for checking if param exists, if param does not exist the exception is thrown
+//
 function check_param_exist(instance, opIndex, paramName) {
     if (instance.paramExists(opIndex) == false) {
         throw new Error("Param " + paramName + " is not found.");
     }
     return true;
 }
+// 
+// Service function for checking param range, if param out of range the exception is thrown
+//
 function check_param_range(paramValue, minValue, maxValue, paramName) {
     if (paramValue < minValue ||
         paramValue > maxValue) {
         throw new Error("Param " + paramName + " is out of range, value = " + paramValue +
             ", range = [" + minValue + ", " + maxValue + "].");
     }
+    return true;
+}
+function leftJustified(str, width, fill) {
+    while (str.length < width) {
+        str += fill;
+    }
+    return str;
+}
+function rightJustified(str, width, fill) {
+    while (str.length < width) {
+        str = fill + str;
+    }
+    return str;
+}
+// Command: nop
+// Code: 1
+//
+function parse_nop(device, command) {
+    command.Size = 1; // 1 word
+    command.AsString = command.Caption;
+    return true;
+}
+// Command: wrfbc
+// Code: 10
+//
+function parse_wrfbc(device, command) {
+    command.Size = 3;
+    command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F; // Lowest 6 bit
+    command.AfbInstance = device.getWord(command.Offset + 1) >>> 6; // Highest 10 bits
+    command.AfbPinOpCode = device.getWord(command.Offset + 1) & 63; // Lowest 6 bit
+    command.Word0 = device.getWord(command.Offset + 2); // Word0 - data address
+    // WRFBC OR.0[0], #3
+    command.AsString = leftJustified(command.Caption, CommandWidth, " ") +
+        command.AfbOpCode + "." + command.AfbInstance + "[" + command.AfbPinOpCode + "], #" +
+        rightJustified(command.Word0.toString(16), 4, "0") + "h";
+    return true;
+}
+// Command: appstart
+// Code: 17
+//
+function parse_appstart(device, command) {
+    command.Size = 2; // 2 words
+    command.Word0 = device.getWord(command.Offset + 1); // Word0 keeps ALP phase start address
+    command.AsString = leftJustified(command.Caption, CommandWidth, " ") + rightJustified(command.Word0.toString(16), 4, "0") + "h";
     return true;
 }
 //

@@ -21,6 +21,7 @@ namespace Sim
 		uartType = data.uartType;
 
 		m_frameSize = data.eepromFrameSize;
+		m_framePayloadSize = data.eepromFramePayloadSize;
 		m_frameCount = static_cast<int>(data.frames.size());
 
 		m_data = data.toByteArray();
@@ -55,7 +56,7 @@ namespace Sim
 		return;
 	}
 
-	bool Eeprom::parseAllocationFrame()
+	bool Eeprom::parseAllocationFrame(int maxConfigurationCount)
 	{
 		quint16 cfgMarker = getWord(1, 0);
 		quint16 cfgVersion = getWord(1, 1);
@@ -80,16 +81,15 @@ namespace Sim
 		m_subsystemKey = subsystemKey;
 		m_buildNo = buildNo;
 		m_configrationsCount = configrationsCount;
-		m_configrationsCount
 
-		if (m_configrationsCount > 128)					// Just some reasonable number
+		if (m_configrationsCount > maxConfigurationCount)
 		{
 			return false;
 		}
 
-		m_configFrameIndexes.reserve(m_configrationsCount);
+		m_configFrameIndexes.reserve(maxConfigurationCount);
 
-		for (int i = 0; i < m_configrationsCount; i++)
+		for (int i = 0; i < maxConfigurationCount; i++)
 		{
 			int wordOffset = 8 + i * 3;
 			quint16 startFrameIndex = getWord(1, wordOffset);
@@ -208,15 +208,19 @@ namespace Sim
 		return m_configrationsCount;
 	}
 
-	int Eeprom::configFrameIndex(int configurationNo) const
+	int Eeprom::configFrameIndex(int LmNumber) const
 	{
-		if (configurationNo < 0 ||
-			configurationNo >= static_cast<int>(m_configFrameIndexes.size()))
+		// LmNumber is 1-based
+		//
+		LmNumber--;
+
+		if (LmNumber < 0 ||
+			LmNumber >= static_cast<int>(m_configFrameIndexes.size()))
 		{
 			assert(false);
-			return -1;
+			return 0;		// Configuration cannot start form frame 0
 		}
 
-		return m_configFrameIndexes[configurationNo];
+		return m_configFrameIndexes[LmNumber];
 	}
 }
