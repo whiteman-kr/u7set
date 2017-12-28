@@ -210,6 +210,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0192.sql", "Upgrade to version 192, ArchiveService preset update"},
 	{":/DatabaseUpgrade/Upgrade0193.sql", "Upgrade to version 193, Added afbl simulation script"},
 	{":/DatabaseUpgrade/Upgrade0194.sql", "Upgrade to version 194, LmCommnads are added to LM Description"},
+	{":/DatabaseUpgrade/Upgrade0195.sql", "Upgrade to version 195, Changes in scripts, LMNumberCount calculation has been changed"},
 };
 
 
