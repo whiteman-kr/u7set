@@ -87,10 +87,22 @@ function rightJustified(str: string, width: number, fill: string) : string
 }
 
 //
+//  AfbComponent interface for cpp class Afb::AfbComponent
+//
+interface AfbComponent
+{
+	OpCode: number;
+	Caption: string;
+	MaxInstCount: number;
+}
+
+//
 // Device Emultaor interface for cpp class DeviceEmulator
 //
 interface DeviceEmulator
 {
+	afbComponent(afbOpCode: number) : AfbComponent;
+
 	getWord(offset: number) : number;		// Get word (16 bit) by offset from code memory, offset is word aligned
 	getDword(offset: number) : number;		// Get double word (32 bit) by offset from code memory, offset is word aligned
 }

@@ -1530,6 +1530,10 @@ namespace Sim
 //		return false;
 //	}
 
+	const Afb::AfbComponent* DeviceEmulator::afbComponent(int opCode) const
+	{
+
+	}
 
 	quint16 DeviceEmulator::getWord(int wordOffset) const
 	{

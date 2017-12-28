@@ -177,9 +177,12 @@ namespace Sim
 		// Getting data from m_plainAppLogic
 		//
 	public:
+		Q_INVOKABLE const Afb::AfbComponent* afbComponent(int opCode) const;
+
 		Q_INVOKABLE quint16 getWord(int wordOffset) const;
 		Q_INVOKABLE quint32 getDword(int wordOffset) const;
 
+	private:
 		template <typename TYPE>
 		TYPE getData(int eepromOffset) const;
 
