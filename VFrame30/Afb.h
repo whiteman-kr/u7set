@@ -59,9 +59,9 @@ namespace Afb
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(QString OpCode READ opCode)
+		Q_PROPERTY(int OpCode READ opCode)
 		Q_PROPERTY(QString Caption READ caption)
-		Q_PROPERTY(QString MaxInstCount READ maxInstCount)
+		Q_PROPERTY(int MaxInstCount READ maxInstCount)
 
 	public:
 		AfbComponent();
