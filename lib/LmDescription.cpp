@@ -678,6 +678,8 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	m_tuningUartId = getSectionUintDefaultValue(QLatin1String("TuningUartID"), 0);
 	m_tuningWriteBitstream = getSectionBoolDefaultValue(QLatin1String("TuningWriteBitstream"), false);
 
+	m_maxConfigurationCount = getSectionUintValue(QLatin1String("MaxConfigurationCount"), errorMessage);
+
 	return errorMessage->isEmpty();
 }
 
