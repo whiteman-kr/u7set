@@ -113,6 +113,17 @@ namespace Builder
 								   VFrame30::BusSet* busSet,
 								   int changesetId);
 
+		// Save Logic Modules Descriptions
+		//
+		bool saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
+										 BuildResultWriter* buildResultWriter);
+
+		// Save AFBs simulation scripts
+		//
+		bool saveAfbSimScripts(DbController* db,
+							   const LmDescriptionSet& lmDescriptions,
+							   BuildResultWriter* buildResultWriter);
+
 		// Compile Application Logic
 		//
 		bool compileApplicationLogic(	Hardware::SubsystemStorage* subsystems,
@@ -216,6 +227,10 @@ namespace Builder
 
     public:
 		bool loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName);
+		std::pair<QString, bool> rowFile(QString fileName) const;
+
+	private:
+		std::map<QString, QString> m_rawLmDescriptions;		// Raw data (xml), not parsed file. Required to save to build result
 	};
 
 	// ------------------------------------------------------------------------

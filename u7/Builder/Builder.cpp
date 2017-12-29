@@ -316,6 +316,28 @@ namespace Builder
 			}
 
 			//
+			// Save LogicModule Descriptions
+			//
+			ok = saveLogicModuleDescriptions(lmDescriptions, &buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
+			// Save AFB simulation scripts
+			//
+			ok = saveAfbSimScripts(&db, lmDescriptions, &buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Compile application logic
 			//
 			Tuning::TuningDataStorage tuningDataStorage;
@@ -1080,6 +1102,83 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
+														BuildResultWriter* buildResultWriter)
+	{
+		assert(buildResultWriter);
+
+		LOG_MESSAGE(m_log, "Saving LogicModule's descriptions");
+
+		QStringList lmFiles = lmDescriptions.fileList();
+		for (QString fileName : lmFiles)
+		{
+			auto file = lmDescriptions.rowFile(fileName);
+
+			if (file.second == false)
+			{
+				m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. " __FUNCTION__));
+				return false;
+			}
+
+			BuildFile* buildFile = buildResultWriter->addFile(QLatin1String("LmDescriptions"), fileName, file.first, false);
+			assert(buildFile);
+			Q_UNUSED(buildFile);
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::saveAfbSimScripts(DbController* db,
+											  const LmDescriptionSet& lmDescriptions,
+											  BuildResultWriter* buildResultWriter)
+	{
+		assert(db);
+		assert(buildResultWriter);
+
+		LOG_MESSAGE(m_log, "Saving simulation script(s)");
+
+		QStringList lmFiles = lmDescriptions.fileList();
+		std::set<QString> scriptFileNames;
+
+		for (QString lmFileName : lmFiles)
+		{
+			auto lmDescr = lmDescriptions.get(lmFileName);
+			assert(lmDescr);
+
+			QString simScriptFile = lmDescr->simualtionScriptFile();
+			scriptFileNames.insert(simScriptFile);
+		}
+
+		for (QString simScriptFile : scriptFileNames)
+		{
+			DbFileInfo fileInfo;
+
+			bool ok = db->getFileInfo(db->mcFileId(), simScriptFile, &fileInfo, nullptr);
+			if (ok == false)
+			{
+				m_log->errPDB2002(-1, simScriptFile, db->lastError());
+				return false;
+			}
+
+			std::shared_ptr<DbFile> file;
+			ok = db->getLatestVersion(fileInfo, &file, nullptr);
+
+			if (ok == false)
+			{
+				m_log->errPDB2002(fileInfo.fileId(), simScriptFile, db->lastError());
+				return false;
+			}
+
+			// Save AFBL simualtion script to build result
+			//
+			BuildFile* buildFile = buildResultWriter->addFile(QLatin1String("Simulation"), simScriptFile, file->data(), false);
+			assert(buildFile);
+			Q_UNUSED(buildFile);
+		}
+
+		return true;
+	}
+
 
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
 													const std::vector<Hardware::DeviceModule*>& lmModules,
@@ -1520,7 +1619,20 @@ namespace Builder
 
 		add(fileName, lmd);
 
+		m_rawLmDescriptions[fileName] = file->data();
+
 		return true;
+	}
+
+	std::pair<QString, bool> LmDescriptionSet::rowFile(QString fileName) const
+	{
+		auto it = m_rawLmDescriptions.find(fileName);
+		if (it == m_rawLmDescriptions.end())
+		{
+			return {QString(), false};
+		}
+
+		return {it->second, true};
 	}
 
 
