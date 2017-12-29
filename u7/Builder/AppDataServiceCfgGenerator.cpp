@@ -2,6 +2,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/DataSource.h"
+#include "../lib/WUtils.h"
 
 class DataSource;
 
@@ -32,6 +33,7 @@ namespace Builder
 		result &= writeAppDataSourcesXml();
 		result &= writeAppSignalsXml();
 		result &= addLinkToAppSignalsFile();
+		result &= writeBatFile();
 
 		return result;
 	}
@@ -324,6 +326,41 @@ namespace Builder
 		}
 
 		m_cfgXml->addLinkToFile(buildFile);
+
+		return true;
+	}
+
+	bool AppDataServiceCfgGenerator::writeBatFile()
+	{
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForBat();
+
+		content += "AppDataSrv.exe";
+		content += " -e";
+
+		QString cfgIP1;
+		QString cfgIP2;
+		if (getConfigIp(cfgIP1, cfgIP2) == false)
+		{
+			return false;
+		}
+
+		if (cfgIP1.isEmpty() == false)
+		{
+			content += " -cfgip1=" + cfgIP1;
+		}
+
+		if (cfgIP2.isEmpty() == false && cfgIP1 != cfgIP2)
+		{
+			content += " -cfgip2=" + cfgIP1;
+		}
+
+		content += " -id=" + m_software->equipmentIdTemplate() + "\n";
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::BAT_DIR, m_software->equipmentIdTemplate() + ".bat", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
 
 		return true;
 	}

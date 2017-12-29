@@ -607,7 +607,7 @@ namespace Hardware
 		if (scriptFirmwareData == nullptr)	//maybe setScriptFirmware is not called!
 		{
 			assert(scriptFirmwareData);
-			return false;
+			return QString();
 		}
 
 		//
@@ -630,7 +630,7 @@ namespace Hardware
 		if (scriptFirmwareData == nullptr)	//maybe setScriptFirmware is not called!
 		{
 			assert(scriptFirmwareData);
-			return false;
+			return QString();
 		}
 
 		//

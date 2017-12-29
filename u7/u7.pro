@@ -202,7 +202,8 @@ SOURCES +=\
     CreateSignalDialog.cpp \
     LogicModuleSet.cpp \
     ../lib/LmDescription.cpp \
-    Builder/MemWriteMap.cpp
+    Builder/MemWriteMap.cpp \
+    Builder/ConfigurationServiceCfgGenerator.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -342,7 +343,8 @@ HEADERS  += \
     CreateSignalDialog.h \
     LogicModuleSet.h \
     ../lib/LmDescription.h \
-    Builder/MemWriteMap.h
+    Builder/MemWriteMap.h \
+    Builder/ConfigurationServiceCfgGenerator.h
 
 FORMS    += \
     CreateProjectDialog.ui \
