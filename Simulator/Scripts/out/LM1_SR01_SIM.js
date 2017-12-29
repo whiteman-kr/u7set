@@ -1,4 +1,5 @@
-var CommandWidth = 10; // leftJustified("appstart", CommandWidth, " ") + rightJustified(command.Word0.toString(16), 4, "0") + "h";
+var CommandWidth = 10; // "mov       "
+var CommandWidthToComment = 48; // "mov       ......." Comment
 // 
 // Service function for checking if param exists, if param does not exist the exception is thrown
 //
@@ -37,7 +38,47 @@ function rightJustified(str, width, fill) {
 function parse_nop(device, command) {
     command.Size = 1; // 1 word
     command.AsString = command.Caption;
-    return true;
+    return "";
+}
+// Command: startafb
+// Code: 2
+//
+function parse_startafb(device, command) {
+    command.Size = 2;
+    command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F; // Lowest 6 bit
+    command.AfbInstance = device.getWord(command.Offset + 1) >>> 6; // Highest 10 bits
+    var afb = device.afbComponent(command.AfbOpCode);
+    if (afb == null) {
+        return "Cannot find AfbComponent with OpCode " + command.AfbOpCode;
+    }
+    if (command.AfbInstance >= afb.MaxInstCount) {
+        return "AfbComponent.Instance (" + command.AfbInstance + ") is out of limits " + afb.MaxInstCount;
+    }
+    // startafb LOGIC.0
+    //
+    command.AsString = leftJustified(command.Caption, CommandWidth, " ") + afb.Caption + "." + command.AfbInstance;
+    return "";
+}
+// Command: stop
+// Code: 3
+//
+function parse_stop(device, command) {
+    command.Size = 1; // 1 word
+    command.AsString = command.Caption;
+    return "";
+}
+// Command: movbc
+// Code: 7
+//
+function parse_movbc(device, command) {
+    command.Size = 4;
+    command.Word0 = device.getWord(command.Offset + 1); // Word0 - data address
+    command.Word1 = device.getWord(command.Offset + 2); // Word1 - data
+    command.BitNo0 = device.getWord(command.Offset + 3); // BitNo
+    // MOVBC     B402[0], #0
+    command.AsString = leftJustified(command.Caption, CommandWidth, " ") +
+        rightJustified(command.Word0.toString(16), 4, "0") + "[" + command.BitNo0 + "]" + ", #" + command.Word1;
+    return "";
 }
 // Command: wrfbc
 // Code: 10
@@ -48,11 +89,21 @@ function parse_wrfbc(device, command) {
     command.AfbInstance = device.getWord(command.Offset + 1) >>> 6; // Highest 10 bits
     command.AfbPinOpCode = device.getWord(command.Offset + 1) & 63; // Lowest 6 bit
     command.Word0 = device.getWord(command.Offset + 2); // Word0 - data address
-    // WRFBC OR.0[0], #3
+    var afb = device.afbComponent(command.AfbOpCode);
+    if (afb == null) {
+        return "Cannot find AfbComponent with OpCode " + command.AfbOpCode;
+    }
+    if (command.AfbInstance >= afb.MaxInstCount) {
+        return "AfbComponent.Instance (" + command.AfbInstance + ") is out of limits " + afb.MaxInstCount;
+    }
+    var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+    // wrfbc LOGIC.0[0], #0003h
     command.AsString = leftJustified(command.Caption, CommandWidth, " ") +
-        command.AfbOpCode + "." + command.AfbInstance + "[" + command.AfbPinOpCode + "], #" +
+        afb.Caption + "." + command.AfbInstance + "[" + command.AfbPinOpCode + "], #" +
         rightJustified(command.Word0.toString(16), 4, "0") + "h";
-    return true;
+    command.AsString = leftJustified(command.AsString, CommandWidthToComment, " ") +
+        "-- " + pinCaption + " <= " + rightJustified(command.Word0.toString(16), 4, "0") + "h (" + command.Word0 + ")";
+    return "";
 }
 // Command: appstart
 // Code: 17
@@ -61,7 +112,7 @@ function parse_appstart(device, command) {
     command.Size = 2; // 2 words
     command.Word0 = device.getWord(command.Offset + 1); // Word0 keeps ALP phase start address
     command.AsString = leftJustified(command.Caption, CommandWidth, " ") + rightJustified(command.Word0.toString(16), 4, "0") + "h";
-    return true;
+    return "";
 }
 //
 //	LOGIC, OpCode 1

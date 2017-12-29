@@ -177,7 +177,7 @@ namespace Sim
 		// Getting data from m_plainAppLogic
 		//
 	public:
-		Q_INVOKABLE const Afb::AfbComponent* afbComponent(int opCode) const;
+		Q_INVOKABLE QObject* afbComponent(int opCode);
 
 		Q_INVOKABLE quint16 getWord(int wordOffset) const;
 		Q_INVOKABLE quint32 getDword(int wordOffset) const;
@@ -214,10 +214,7 @@ namespace Sim
 
 		QJSEngine m_jsEngine;
 		QJSValue m_evaluatedJs;
-
-		// Info output
-		//
-		mutable QTextStream* m_output = nullptr;
+		QJSValue m_thisJsValue;
 	};
 }
 

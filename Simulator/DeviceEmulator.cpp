@@ -98,6 +98,9 @@ namespace Sim
 			return false;
 		}
 
+		m_thisJsValue = m_jsEngine.newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
 		// --
 		//
 		ok = initEeprom();
@@ -401,14 +404,13 @@ namespace Sim
 
 		// Set argument list
 		//
-		QJSValue jsDeviceEmulator = m_jsEngine.newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+		assert(m_thisJsValue.isNull() == false);
 
 		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
 		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
 
 		QJSValueList args;
-		args << jsDeviceEmulator;
+		args << m_thisJsValue;
 		args << jsDeviceCommand;
 
 		//--
@@ -418,7 +420,7 @@ namespace Sim
 		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
 			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
 		{
-			writeError(tr("Parse Application Logic Code error, script function %1 not found or is not callable. "
+			writeError(tr("Parse ApplicationLogicCode error, script function %1 not found or is not callable. "
 						  "HasProperty %1: %2, "
 						  "Collable: %3")
 							.arg(parseFunc)
@@ -432,6 +434,14 @@ namespace Sim
 		if (jsResult.isError() == true)
 		{
 			dumpJsError(jsResult);
+			return false;
+		}
+
+		if (jsResult.toString().isEmpty() == false)
+		{
+			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter %2")
+						.arg(jsResult.toString())
+						.arg(programCounter));
 			return false;
 		}
 
@@ -1530,9 +1540,11 @@ namespace Sim
 //		return false;
 //	}
 
-	const Afb::AfbComponent* DeviceEmulator::afbComponent(int opCode) const
+	QObject* DeviceEmulator::afbComponent(int opCode)
 	{
-
+		auto result = m_lmDescription.component(opCode);
+		QQmlEngine::setObjectOwnership(result.get(), QQmlEngine::CppOwnership);
+		return result.get();
 	}
 
 	quint16 DeviceEmulator::getWord(int wordOffset) const
