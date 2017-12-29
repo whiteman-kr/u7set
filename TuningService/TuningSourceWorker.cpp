@@ -1000,6 +1000,10 @@ namespace Tuning
 			}
 			result = false;
 		}
+		else
+		{
+			m_stat.errFotipUniqueID = 0;		// added by Vintenko 26.12.2017
+		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{
@@ -1121,6 +1125,10 @@ namespace Tuning
 		if (flags.setSOR == 1)
 		{
 			m_stat.fotipFlagSetSOR++;
+		}
+		else
+		{
+			m_stat.fotipFlagSetSOR = 0;	// added by Vintenko 22.12.2017
 		}
 
 		return result;
