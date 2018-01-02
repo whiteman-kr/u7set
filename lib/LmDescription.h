@@ -13,7 +13,8 @@ namespace Hardware
 
 struct LmCommand
 {
-	int code = -1;
+	quint16 code = 0;
+	quint16 codeMask = 0;
 	QString caption;
 	QString simulationFunc;
 	QString parseFunc;
@@ -32,6 +33,7 @@ class LmDescription : public QObject
 	Q_PROPERTY(quint32 FlashMemory_ConfigFrameCount READ (m_flashMemory.configFrameCount))
 	Q_PROPERTY(quint32 FlashMemory_ConfigFrameSize	READ (m_flashMemory.configFrameSize))
 	Q_PROPERTY(quint32 FlashMemory_ConfigUartId		READ (m_flashMemory.configUartId))
+	Q_PROPERTY(quint32 FlashMemory_MaxConfigurationCount READ (m_flashMemory.maxConfigurationCount))
 	Q_PROPERTY(quint32 Memory_TxDiagDataSize		READ (m_memory.txDiagDataSize))
 	Q_PROPERTY(quint32 OptoInterface_OptoPortCount	READ (m_optoInterface.optoPortCount))
 
@@ -83,9 +85,13 @@ public:
 		quint32 m_tuningUartId = 0;
 		bool m_tuningWriteBitstream = false;
 
+		quint32 m_maxConfigurationCount = 0;
+
 		quint32 configFrameCount() const { return m_configFrameCount; }
 		quint32 configFrameSize() const { return m_configFrameSize; }
 		quint32 configUartId() const { return m_configUartId; }
+
+		quint32 maxConfigurationCount() const { return m_maxConfigurationCount; }
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};

@@ -35,7 +35,23 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 	}
 	else
 	{
-		code = element.attribute(QLatin1String("Code")).toInt();
+		QString str = element.attribute(QLatin1String("Code"));
+		bool ok = false;
+		code = static_cast<quint16>(str.toInt(&ok, 16));
+	}
+
+	// CodeMask
+	//
+	if (element.hasAttribute(QLatin1String("CodeMask")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute CodeMask.");
+		return false;
+	}
+	else
+	{
+		QString str = element.attribute(QLatin1String("CodeMask"));
+		bool ok = false;
+		codeMask = static_cast<quint16>(str.toInt(&ok, 16));
 	}
 
 	// SimulationFunc
@@ -377,6 +393,8 @@ bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessa
 
 	m_commands.clear();
 
+	// Parse command list
+	//
 	QDomNodeList nodeList = element.elementsByTagName(QLatin1String("Command"));
 	for (int i = 0; i < nodeList.size(); i++)
 	{
@@ -659,6 +677,8 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	m_tuningFrameSize = getSectionUintValue(QLatin1String("TuningFrameSize"), errorMessage);
 	m_tuningUartId = getSectionUintDefaultValue(QLatin1String("TuningUartID"), 0);
 	m_tuningWriteBitstream = getSectionBoolDefaultValue(QLatin1String("TuningWriteBitstream"), false);
+
+	m_maxConfigurationCount = getSectionUintValue(QLatin1String("MaxConfigurationCount"), errorMessage);
 
 	return errorMessage->isEmpty();
 }

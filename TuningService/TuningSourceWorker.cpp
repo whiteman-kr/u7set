@@ -535,6 +535,8 @@ namespace Tuning
 
 		result &= initFotipFrame(request.fotipFrame, tuningCmd);
 
+		request.calcCRC64();
+
 		return result;
 	}
 

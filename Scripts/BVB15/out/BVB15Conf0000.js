@@ -26,7 +26,8 @@ function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, 
 //
 "use strict";
 var FamilyBVB15ID = 0x5600;
-var configScriptVersion = 1;
+//var configScriptVersion: number = 1;
+var configScriptVersion = 2; //Changes in LMNumberCount calculation algorithm
 var LMDescriptionNumber = 0;
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
@@ -34,6 +35,7 @@ function main(builder, root, logicModules, confFirmware, log, signalSet, subsyst
         var subSysID = logicModules[0].jsPropertyString("SubsystemID");
         log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
     }
+    var LMNumberCount = 0;
     for (var i = 0; i < logicModules.length; i++) {
         if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyBVB15ID) {
             continue;
@@ -42,26 +44,25 @@ function main(builder, root, logicModules, confFirmware, log, signalSet, subsyst
         if (result == false) {
             return false;
         }
+        LMNumberCount++;
         if (builder.jsIsInterruptRequested() == true) {
             return true;
         }
     }
-    for (var i = 0; i < logicModules.length; i++) {
-        if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyBVB15ID) {
-            continue;
-        }
-        var result = module_bvb15_1_statistics(builder, logicModules[i], confFirmware, log, subsystemStorage, logicModuleDescription);
-        if (result == false) {
-            return false;
-        }
-        if (builder.jsIsInterruptRequested() == true) {
-            return true;
-        }
+    // LMNumberCount
+    //
+    var frameStorageConfig = 1;
+    var ptr = 14;
+    if (setData16(confFirmware, log, -1, "", frameStorageConfig, ptr, "LMNumberCount", LMNumberCount) == false) {
+        return false;
     }
+    confFirmware.writeLog("Subsystem " + subSysID + ", frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
     return true;
 }
 function setData8(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
-    confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + data.toString(16));
+    if (channel != -1 && equpmentID.length > 0) {
+        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + data.toString(16));
+    }
     if (confFirmware.setData8(frameIndex, offset, data) == false) {
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData8");
         return false;
@@ -69,7 +70,9 @@ function setData8(confFirmware, log, channel, equpmentID, frameIndex, offset, ca
     return true;
 }
 function setData16(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
-    confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + data.toString(16));
+    if (channel != -1 && equpmentID.length > 0) {
+        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + data.toString(16));
+    }
     if (confFirmware.setData16(frameIndex, offset, data) == false) {
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData16");
         return false;
@@ -77,7 +80,9 @@ function setData16(confFirmware, log, channel, equpmentID, frameIndex, offset, c
     return true;
 }
 function setData32(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
-    confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + data.toString(16));
+    if (channel != -1 && equpmentID.length > 0) {
+        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + data.toString(16));
+    }
     if (confFirmware.setData32(frameIndex, offset, data) == false) {
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData32");
         return false;
@@ -147,53 +152,6 @@ function module_bvb15(builder, root, module, confFirmware, log, signalSet, subsy
         // Generate Configuration
         //
         return generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
-    }
-    return false;
-}
-function module_bvb15_1_statistics(builder, module, confFirmware, log, subsystemStorage, logicModuleDescription) {
-    if (module.jsDeviceType() != DeviceObjectType.Module) {
-        return false;
-    }
-    if (module.propertyValue("EquipmentID") == undefined) {
-        log.errCFG3000("EquipmentID", "BVB-15");
-        return false;
-    }
-    var checkProperties = ["ModuleFamily", "SubsystemID"];
-    for (var cp = 0; cp < checkProperties.length; cp++) {
-        if (module.propertyValue(checkProperties[cp]) == undefined) {
-            log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
-            return false;
-        }
-    }
-    if (module.jsPropertyInt("ModuleFamily") == FamilyBVB15ID) {
-        var checkProperties = ["LMNumber"];
-        for (var cp = 0; cp < checkProperties.length; cp++) {
-            if (module.propertyValue(checkProperties[cp]) == undefined) {
-                log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
-                return false;
-            }
-        }
-        // Generate Configuration
-        //
-        // Variables
-        //
-        var subSysID = module.jsPropertyString("SubsystemID");
-        var LMNumber = module.jsPropertyInt("LMNumber");
-        var frameSize = logicModuleDescription.FlashMemory_ConfigFrameSize;
-        var frameCount = logicModuleDescription.FlashMemory_ConfigFrameCount;
-        var ssKeyValue = subsystemStorage.ssKey(subSysID);
-        if (ssKeyValue == -1) {
-            log.errCFG3001(subSysID, module.jsPropertyString("EquipmentID"));
-            return false;
-        }
-        var configStartFrames = 2;
-        var configFrameCount = 19; // number of frames in each configuration
-        var frameStorageConfig = 1;
-        var ptr = 14;
-        var LMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
-        confFirmware.writeLog("---\r\n");
-        confFirmware.writeLog("BVB-15 for subsystem " + subSysID + ", LMNumber " + LMNumber + ": Frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
-        return true;
     }
     return false;
 }
