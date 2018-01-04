@@ -88,19 +88,22 @@ bool TuningController::writeValue(QString appSignalId, double value)
 
 	TuningValue tuningValue;
 
-	tuningValue.type = appSignal.toTuningType();
+	tuningValue.setType(appSignal.toTuningType());
 
-	switch (tuningValue.type)
+	switch (tuningValue.type())
 	{
 	case TuningValueType::Discrete:
-		tuningValue.intValue = static_cast<int>(value);
+		tuningValue.setIntValue(static_cast<qint32>(value));
 		break;
-	case TuningValueType::Float:
-		tuningValue.floatValue = static_cast<float>(value);
-		break;
+
 	case TuningValueType::SignedInteger:
-		tuningValue.intValue = static_cast<qint32>(value);
+		tuningValue.setIntValue(static_cast<qint32>(value));
 		break;
+
+	case TuningValueType::Float:
+		tuningValue.setFloatValue(static_cast<float>(value));
+		break;
+
 	default:
 		assert(false);
 		return false;

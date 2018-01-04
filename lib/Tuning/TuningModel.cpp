@@ -771,7 +771,7 @@ DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, T
 
 		if (sameValue == true)
 		{
-			m_discreteCheck->setChecked(value.intValue != 0);
+			m_discreteCheck->setChecked(value.intValue() != 0);
 			m_discreteCheck->setText(value.toString());
 		}
 		else
@@ -804,7 +804,7 @@ void DialogInputTuningValue::accept()
 
 		double inputValue = text.toDouble(&ok);
 
-		TuningValueType oldType = m_value.type;
+		TuningValueType oldType = m_value.type();
 
 		TuningValue newValue(inputValue, oldType);
 
@@ -832,11 +832,11 @@ void DialogInputTuningValue::accept()
 
 		if (m_discreteCheck->checkState() == Qt::Checked)
 		{
-			m_value.intValue = 1;
+			m_value.setDiscreteValue(1);
 		}
 		else
 		{
-			m_value.intValue = 0;
+			m_value.setDiscreteValue(0);
 		}
 	}
 
@@ -857,7 +857,7 @@ void DialogInputTuningValue::on_m_buttonDefault_clicked()
 	}
 	else
 	{
-		bool defaultState = m_defaultValue.intValue == 0 ? false : true;
+		bool defaultState = m_defaultValue.intValue() == 0 ? false : true;
 
 		m_discreteCheck->setChecked(defaultState);
 

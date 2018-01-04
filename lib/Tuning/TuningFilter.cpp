@@ -57,19 +57,24 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 	if (reader.attributes().hasAttribute("ValueType"))
 	{
 		TuningValue tv;
-		tv.type = static_cast<TuningValueType>(reader.attributes().value("ValueType").toInt());
-		switch (tv.type)
+
+		tv.setType(static_cast<TuningValueType>(reader.attributes().value("ValueType").toInt()));
+
+		switch (tv.type())
 		{
 		case TuningValueType::Discrete:
 		case TuningValueType::SignedInteger:
-			tv.intValue = reader.attributes().value("ValueInt").toInt();
+			tv.setIntValue(reader.attributes().value("ValueInt").toInt());
 			break;
+
 		case TuningValueType::Float:
-			tv.floatValue = reader.attributes().value("ValueFloat").toFloat();
+			tv.setFloatValue(reader.attributes().value("ValueFloat").toFloat());
 			break;
+
 		case TuningValueType::Double:
-			tv.doubleValue = reader.attributes().value("ValueDouble").toDouble();
+			tv.setDoubleValue(reader.attributes().value("ValueDouble").toDouble());
 			break;
+
 		default:
 			assert(false);
 			return false;
@@ -87,20 +92,23 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 	writer.writeAttribute("AppSignalId", m_appSignalId);
 	writer.writeAttribute("UseValue", m_useValue ? "true" : "false");
 
-	writer.writeAttribute("ValueType", QString::number(static_cast<int>(m_value.type)));
+	writer.writeAttribute("ValueType", QString::number(static_cast<int>(m_value.type())));
 
-	switch (m_value.type)
+	switch (m_value.type())
 	{
 	case TuningValueType::Discrete:
 	case TuningValueType::SignedInteger:
-		writer.writeAttribute("ValueInt", QString::number(m_value.intValue));
+		writer.writeAttribute("ValueInt", QString::number(m_value.intValue()));
 		break;
+
 	case TuningValueType::Float:
-		writer.writeAttribute("ValueFloat", QString::number(m_value.floatValue));
+		writer.writeAttribute("ValueFloat", QString::number(m_value.floatValue()));
 		break;
+
 	case TuningValueType::Double:
-		writer.writeAttribute("ValueDouble", QString::number(m_value.doubleValue));
+		writer.writeAttribute("ValueDouble", QString::number(m_value.doubleValue()));
 		break;
+
 	default:
 		assert(false);
 		return false;

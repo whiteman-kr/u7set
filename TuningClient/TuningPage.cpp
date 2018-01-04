@@ -76,7 +76,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 		}
 
 		TuningValue tvDefault(defaultValue(asp));
-		tvDefault.type = asp.toTuningType();
+		tvDefault.setType(asp.toTuningType());
 
 		if (tvDefault != state.value())
 		{
@@ -271,7 +271,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && asp.isDiscrete() == true && state.valid() == true)
 	{
-		return (state.newValue().intValue == 0 ? Qt::Unchecked : Qt::Checked);
+		return (state.newValue().discreteValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
 
 	return TuningModel::data(index, role);
@@ -1148,12 +1148,14 @@ void TuningPage::invertValue()
 		if (asp.isDiscrete() == true)
 		{
 			TuningValue tv;
-			tv.type = TuningValueType::Discrete;
-			tv.intValue = 0;
 
-			if (state.newValue().intValue == 0)
+			tv.setType(TuningValueType::Discrete);
+
+			tv.setDiscreteValue(0);
+
+			if (state.newValue().discreteValue() == 0)
 			{
-				tv.intValue = 1;
+				tv.setDiscreteValue(1);
 			}
 
 			m_tuningSignalManager->setNewValue(hash, tv);
@@ -1244,8 +1246,8 @@ void TuningPage::slot_setAll()
 			if (asp.isDiscrete() == true)
 			{
 				TuningValue tv;
-				tv.type = TuningValueType::Discrete;
-				tv.intValue = 1;
+				tv.setType(TuningValueType::Discrete);
+				tv.setDiscreteValue(1);
 				m_tuningSignalManager->setNewValue(hash, tv);
 			}
 		}
@@ -1275,8 +1277,8 @@ void TuningPage::slot_setAll()
 			if (asp.isDiscrete() == true)
 			{
 				TuningValue tv;
-				tv.type = TuningValueType::Discrete;
-				tv.intValue = 0;
+				tv.setType(TuningValueType::Discrete);
+				tv.setDiscreteValue(0);
 				m_tuningSignalManager->setNewValue(hash, tv);
 			}
 		}

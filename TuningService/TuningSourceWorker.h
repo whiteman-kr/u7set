@@ -123,6 +123,7 @@ namespace Tuning
 			void setState(bool valid, float value);
 			void setReadLowBound(float readLowBound);
 			void setReadHighBound(float readHighBound);
+			void invalidate();
 
 			QString appSignalID() const;
 

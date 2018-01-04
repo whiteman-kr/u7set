@@ -92,7 +92,7 @@ namespace Tuning
 		m_type = getTuningSignalType(s);
 		m_index = index;
 
-		assert(false);
+//		assert(false);
 /*		m_lowBound = s->lowEngeneeringUnits();
 		m_highBoud = s->highEngeneeringUnits();
 		m_defaultValue = s->tuningDefaultValue();*/
@@ -125,6 +125,10 @@ namespace Tuning
 		//m_readHighBound = readHighBound;
 	}
 
+	void TuningSourceWorker::TuningSignal::invalidate()
+	{
+		m_valid = false;
+	}
 
 	QString TuningSourceWorker::TuningSignal::appSignalID() const
 	{
@@ -1164,7 +1168,7 @@ namespace Tuning
 	{
 		for(TuningSignal& s : m_tuningSignals)
 		{
-			s.setState(false, 0);
+			s.invalidate();
 		}
 	}
 

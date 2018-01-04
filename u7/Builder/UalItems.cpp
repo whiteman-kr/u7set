@@ -1329,7 +1329,20 @@ namespace Builder
 
 		if (m_isOptoSignal == true)
 		{
-			return m_autoSignalPtr->ioBufAddr();
+			Signal* s = m_autoSignalPtr;
+
+			if (s == nullptr)
+			{
+				s = signal();
+			}
+
+			if (s == nullptr)
+			{
+				assert(false);
+				return Address16();
+			}
+
+			return s->ioBufAddr();
 		}
 
 		return Address16();
