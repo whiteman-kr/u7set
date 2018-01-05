@@ -176,3 +176,4 @@ DISTFILES += \
 
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG

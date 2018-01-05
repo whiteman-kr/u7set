@@ -18,7 +18,7 @@ class TcpAppDataClient : public Tcp::Client
 private:
 	QHash<quint64, AppDataSource*> m_appDataSources;		// id => AppDataSource
 
-	QVector<Hash> m_signalHahes;
+	QVector<Hash> m_signalHashes;
 	QVector<Signal> m_signalParams;
 	QVector<AppSignalState> m_states;
 	QHash<Hash, int> m_hash2Index;
@@ -27,6 +27,8 @@ private:
 
 	// reused protobuf messages
 	//
+	Network::ServiceClients m_serviceClientsMessage;
+
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
 
 	Network::GetAppDataSourcesStatesReply m_getAppDataSourcesStatesReply;
@@ -55,12 +57,16 @@ private:
 	int m_getParamsCurrentPart = 0;
 	int m_getStatesCurrentPart = 0;
 
+	bool m_clientsIsReady = false;
+
 	//
 
 	void init();
 	void getNextItemsPart();
 	void getNextParamPart();
 	void getNextStatePart();
+
+	void onGetClientList(const char* replyData, quint32 replyDataSize);
 
 	void onGetDataSourcesInfoReply(const char* replyData, quint32 replyDataSize);
 	void onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize);
@@ -80,6 +86,8 @@ private slots:
 	void updateStates();
 
 signals:
+	void clientsLoaded();
+
 	void dataSourcesInfoLoaded();
 	void appSignalListLoaded();
 
@@ -110,4 +118,7 @@ public:
 	QList<AppDataSource*> dataSources() { return m_appDataSources.values(); }
 	const QVector<Signal>& signalParams() { return m_signalParams; }
 	const QVector<AppSignalState>& signalStates() { return m_states; }
+
+	const Network::ServiceClients& clients() { return m_serviceClientsMessage; }
+	bool clientsIsReady() { return m_clientsIsReady; }
 };

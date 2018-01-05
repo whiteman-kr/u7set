@@ -57,15 +57,6 @@ void CfgControlServer::processRequest(quint32 requestID, const char* requestData
 	}
 }
 
-void CfgControlServer::updateClientsInfo(const std::list<Tcp::ConnectionState>& connectionStates)
-{
-	m_statesMutex.lock();
-
-	m_connectionStates = connectionStates;
-
-	m_statesMutex.unlock();
-}
-
 void CfgControlServer::sendServiceState()
 {
 	Network::ConfigurationServiceState message;
@@ -73,43 +64,6 @@ void CfgControlServer::sendServiceState()
 	message.set_currentbuilddirectory(m_rootFolder.toStdString());
 	message.set_checkbuildattemptquantity(m_checkerWorker.checkNewBuildAttemptQuantity());
 	message.set_buildcheckerstate(TO_INT(m_checkerWorker.checkNewBuildStage()));
-
-	sendReply(message);
-}
-
-void CfgControlServer::sendClientList()
-{
-	Network::ConfigurationServiceClients message;
-
-	m_statesMutex.lock();
-
-	for(const Tcp::ConnectionState& state : m_connectionStates)
-	{
-		const SoftwareInfo& si = state.connectedSoftwareInfo;
-
-		if (E::containes<E::SoftwareType>(TO_INT(si.softwareType())) == false)
-		{
-			continue;
-		}
-
-		Network::ConfigurationServiceClientInfo* i = message.add_clients();
-
-		i->set_softwaretype(TO_INT(si.softwareType()));
-
-		i->set_equipmentid(si.equipmentID().toStdString());
-
-		i->set_majorversion(si.majorVersion());
-		i->set_minorversion(si.minorVersion());
-		i->set_commitno(si.commitNo());
-
-		i->set_ip(state.peerAddr.address32());
-
-		i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
-		i->set_isactual(state.isActual);
-		i->set_replyquantity(state.replyCount);
-	}
-
-	m_statesMutex.unlock();
 
 	sendReply(message);
 }

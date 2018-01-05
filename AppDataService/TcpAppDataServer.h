@@ -29,6 +29,8 @@ private:
 
 	// Request processing functions
 	//
+	void onGetState();
+
 	void onGetAppSignalListStartRequest();
 	void onGetAppSignalListNextRequest(const char* requestData, quint32 requestDataSize);
 

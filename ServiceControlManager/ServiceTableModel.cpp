@@ -501,19 +501,20 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 	if (serviceData.statusWidget == nullptr)
 	{
 		E::SoftwareType serviceSoftwareType = static_cast<E::SoftwareType>(serviceData.information.softwareinfo().softwaretype());
+		quint16 udpPort = serviceInfo[index.column()].port;
 
 		switch (serviceSoftwareType)
 		{
 		case E::SoftwareType::AppDataService:
-			serviceData.statusWidget = new AppDataServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, index.column());
+			serviceData.statusWidget = new AppDataServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
 			break;
 
 		case E::SoftwareType::ConfigurationService:
-			serviceData.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, index.column());
+			serviceData.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
 			break;
 
 		default:
-			serviceData.statusWidget = new BaseServiceStateWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, index.column());
+			serviceData.statusWidget = new BaseServiceStateWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
 		}
 	}
 

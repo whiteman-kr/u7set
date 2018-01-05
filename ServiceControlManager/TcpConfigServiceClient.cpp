@@ -112,7 +112,7 @@ void TcpConfigServiceClient::onGetConfigurationServiceState(const char* replyDat
 
 void TcpConfigServiceClient::onGetConfigurationServiceClientList(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_configurationServiceClientsMessage.ParseFromArray(replyData, replyDataSize);
+	bool result = m_serviceClientsMessage.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{

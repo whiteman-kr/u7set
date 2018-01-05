@@ -15,13 +15,15 @@ class BaseServiceStateWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 ip, int portIndex, QWidget *parent = 0);
+	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, qint32 udpPort, QWidget *parent = 0);
 	virtual ~BaseServiceStateWidget();
 
 	int addTab(QWidget* page, const QString& label);
 	QTableView* addTabWithTableView(int defaultSectionSize, const QString& label);
 	void addStateTab();
+	void addClientsTab(bool showStateColumn = true);
 	QStandardItemModel* stateTabModel() { return m_stateTabModel; }
+	QStandardItemModel* clientsTabModel() { return m_clientsTabModel; }
 	void setStateTabMaxRowQuantity(int rowQuantity) { m_stateTabMaxRowQuantity = rowQuantity; }
 	quint32 getWorkingClientRequestIp();
 
@@ -34,6 +36,7 @@ signals:
 
 public slots:
 	void updateServiceState();
+	void updateClientsModel(const Network::ServiceClients& serviceClients);
 	void askServiceState();
 
 	void startService();
@@ -44,10 +47,13 @@ public slots:
 	void serviceNotFound();
 
 protected:
+	virtual void createTcpConnection(quint32 ip, quint16 port) { Q_UNUSED(ip); assert(port > std::numeric_limits<quint16>::lowest() && port < std::numeric_limits<quint16>::max()); }
+	virtual void dropTcpConnection() {}
+
 	UdpSocketThread* m_socketThread = nullptr;
 
-	quint32 m_ip = 0;
-	int m_portIndex = 0;
+	quint32 m_udpIp = 0;
+	int m_udpPort = -1;
 
 	SoftwareInfo m_softwareInfo;
 
@@ -69,8 +75,9 @@ private:
 	QLabel* m_runningStatus = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
 
-	QStandardItemModel* m_stateTabModel = nullptr;
 	int m_stateTabMaxRowQuantity = 5;
+	QStandardItemModel* m_stateTabModel = nullptr;
+	QStandardItemModel* m_clientsTabModel = nullptr;
 };
 
 #endif // BASESERVICESTATEWIDGET_H

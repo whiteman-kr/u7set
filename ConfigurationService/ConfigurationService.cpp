@@ -110,8 +110,6 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 
 	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
 
-	connect(listener, &Tcp::Listener::connectedClientsListChanged, cfgControlServer, &CfgControlServer::updateClientsInfo);
-
 	m_cfgServerThread = new Tcp::ServerThread(listener);
 
 	m_cfgServerThread->start();

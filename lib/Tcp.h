@@ -226,6 +226,8 @@ namespace Tcp
 
 		char* m_protobufBuffer = nullptr;
 
+		QMutex m_statesMutex;
+
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
 
@@ -235,8 +237,17 @@ namespace Tcp
 
 		void onHeaderAndDataReady() final;
 
+	protected:
+		std::list<Tcp::ConnectionState> m_connectionStates;
+
+	signals:
+		void connectedSoftwareInfoChanged();	// Inform listener that some connection state changed
+
 	private slots:
 		void onAutoAckTimer();
+
+	public slots:
+		void updateClientsInfo(const std::list<Tcp::ConnectionState> connectionStates);	// Update connection states of all clients from listener
 
 	public:
 		Server(const SoftwareInfo& sotwareInfo);
@@ -261,6 +272,8 @@ namespace Tcp
 		bool sendReply(const QByteArray& replyData);
 		bool sendReply(google::protobuf::Message& protobufMessage);
 		bool sendReply(const char* replyData, quint32 replyDataSize);
+
+		void sendClientList();
 	};
 
 
@@ -314,11 +327,10 @@ namespace Tcp
 		void startListening();
 		void onNewConnection(qintptr socketDescriptor);
 
-		void updateClientsList();
-
 	private slots:
 		void onPeriodicTimer();
 		void onServerDisconnected(const SocketWorker *server);
+		void updateClientsList();
 
 	private:
 		HostAddressPort m_listenAddressPort;

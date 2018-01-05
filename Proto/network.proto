@@ -155,6 +155,17 @@ message GetUnitsReply
     repeated Unit units = 2;
 }
 
+message AppDataServiceState
+{
+    required bool CfgServiceIsConnected = 1 [default = false];
+	optional string CfgServiceIp = 2;
+	optional int32 CfgServicePort = 3;
+
+    required bool ArchiveServiceIsConnected = 4 [default = false];
+	optional string ArchiveServiceIp = 5;
+	optional int32 ArchiveServicePort = 6;
+}
+
 
 message SoftwareInfo
 {
@@ -201,7 +212,7 @@ message ConfigurationServiceState
     required int32 buildCheckerState = 3;
 }
 
-message ConfigurationServiceClientInfo
+message ServiceClientInfo
 {
     required int32 softwareType = 1;
     required string equipmentId = 2;
@@ -214,9 +225,9 @@ message ConfigurationServiceClientInfo
     required int32 commitNo = 10;
 }
 
-message ConfigurationServiceClients
+message ServiceClients
 {
-    repeated ConfigurationServiceClientInfo clients = 1;
+    repeated ServiceClientInfo clients = 1;
 }
 
 message BuildInfo

@@ -57,7 +57,7 @@ void TcpAppDataClient::onConnection()
 {
 	init();
 
-	sendRequest(ADS_GET_DATA_SOURCES_INFO);
+	sendRequest(RQID_GET_CLIENT_LIST);
 }
 
 
@@ -68,7 +68,7 @@ void TcpAppDataClient::onDisconnection()
 		m_updateStatesTimer->stop();
 	}
 
-	m_signalHahes.clear();
+	m_signalHashes.clear();
 	m_signalParams.clear();
 	m_states.clear();
 	emit disconnected();
@@ -83,7 +83,7 @@ void TcpAppDataClient::onReplyTimeout()
 
 void TcpAppDataClient::init()
 {
-	m_signalHahes.clear();
+	m_signalHashes.clear();
 
 	m_totalItemsCount = 0;
 	m_partCount = 0;
@@ -99,6 +99,10 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 {
 	switch(requestID)
 	{
+	case RQID_GET_CLIENT_LIST:
+		onGetClientList(replyData, replyDataSize);
+		break;
+
 	case ADS_GET_DATA_SOURCES_INFO:
 		onGetDataSourcesInfoReply(replyData, replyDataSize);
 		break;
@@ -231,7 +235,7 @@ void TcpAppDataClient::onGetAppSignalListStartReply(const char* replyData, quint
 	if (m_partCount > 0)
 	{
 		m_hash2Index.clear();
-		m_hash2Index.reserve(m_signalHahes.count() * 1.3);
+		m_hash2Index.reserve(m_signalHashes.count() * 1.3);
 
 		m_currentPart = 0;
 		getNextItemsPart();
@@ -245,7 +249,7 @@ void TcpAppDataClient::getNextItemsPart()
 	{
 		// all hashes received
 		//
-		m_signalParams.resize(m_signalHahes.count());
+		m_signalParams.resize(m_signalHashes.count());
 		m_getParamsCurrentPart = 0;
 		getNextParamPart();
 		return;
@@ -275,9 +279,9 @@ void TcpAppDataClient::onGetAppSignalListNextReply(const char* replyData, quint3
 	{
 		Hash hash = calcHash(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
 
-		m_signalHahes.append(hash);
+		m_signalHashes.append(hash);
 
-		m_hash2Index.insert(hash, m_signalHahes.count() - 1);
+		m_hash2Index.insert(hash, m_signalHashes.count() - 1);
 	}
 
 	m_currentPart++;
@@ -320,7 +324,7 @@ void TcpAppDataClient::getNextParamPart()
 
 	for(int i = 0; i < paramsInPartCount; i++)
 	{
-		m_getSignalsRequest.add_signalhashes(m_signalHahes[startIndex + i]);
+		m_getSignalsRequest.add_signalhashes(m_signalHashes[startIndex + i]);
 	}
 
 	sendRequest(ADS_GET_APP_SIGNAL_PARAM, m_getSignalsRequest);
@@ -388,10 +392,26 @@ void TcpAppDataClient::getNextStatePart()
 
 	for(int i = 0; i < paramsInPartCount; i++)
 	{
-		m_getSignalStateRequest.add_signalhashes(m_signalHahes[startIndex + i]);
+		m_getSignalStateRequest.add_signalhashes(m_signalHashes[startIndex + i]);
 	}
 
 	sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
+}
+
+void TcpAppDataClient::onGetClientList(const char *replyData, quint32 replyDataSize)
+{
+	bool result = m_serviceClientsMessage.ParseFromArray(replyData, replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_clientsIsReady = true;
+	emit clientsLoaded();
+
+	sendRequest(ADS_GET_DATA_SOURCES_INFO);
 }
 
 

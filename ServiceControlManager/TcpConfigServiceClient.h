@@ -41,7 +41,7 @@ public:
 	const Network::ConfigurationServiceState& serviceState() { return m_configurationServiceStateMessage; }
 	bool serviceStateIsReady() { return m_serviceStateIsReady; }
 
-	const Network::ConfigurationServiceClients& clients() { return m_configurationServiceClientsMessage; }
+	const Network::ServiceClients& clients() { return m_serviceClientsMessage; }
 	bool clientsIsReady() { return m_clientsIsReady; }
 
 	bool settingsIsReady() { return m_settingsIsReady; }
@@ -70,7 +70,7 @@ private:
 	QTimer* m_updateStatesTimer = nullptr;
 	Builder::BuildInfo m_buildInfo;
 	Network::ConfigurationServiceState m_configurationServiceStateMessage;
-	Network::ConfigurationServiceClients m_configurationServiceClientsMessage;
+	Network::ServiceClients m_serviceClientsMessage;
 
 	QString m_equipmentID;
 	QString m_autoloadBuildPath;

@@ -163,7 +163,9 @@ int main(int argc, char* argv[])
 	    theSettings.setInstanceStrId(clientID);
 	}
 
+#ifdef Q_DEBUG
 	theSettings.m_simulationMode = parser.isSet(simulationOption);
+#endif
 
 	//
 	//

@@ -5,7 +5,6 @@
 
 namespace Tcp
 {
-
 	void ConnectionState::dump()
 	{
 		if (isConnected == false)
@@ -643,6 +642,8 @@ namespace Tcp
 			m_stateMutex.unlock();
 
 			sendReply(outMessage);
+
+			emit connectedSoftwareInfoChanged();
 		}
 		else
 		{
@@ -661,6 +662,16 @@ namespace Tcp
 		}
 
 		sendAck();
+	}
+
+
+	void Server::updateClientsInfo(const std::list<Tcp::ConnectionState> connectionStates)
+	{
+		m_statesMutex.lock();
+
+		m_connectionStates = connectionStates;
+
+		m_statesMutex.unlock();
 	}
 
 
@@ -803,6 +814,44 @@ namespace Tcp
 	}
 
 
+	void Server::sendClientList()
+	{
+		Network::ServiceClients message;
+
+		m_statesMutex.lock();
+
+		for(const Tcp::ConnectionState& state : m_connectionStates)
+		{
+			const SoftwareInfo& si = state.connectedSoftwareInfo;
+
+			if (E::containes<E::SoftwareType>(TO_INT(si.softwareType())) == false)
+			{
+				continue;
+			}
+
+			Network::ServiceClientInfo* i = message.add_clients();
+
+			i->set_softwaretype(TO_INT(si.softwareType()));
+
+			i->set_equipmentid(si.equipmentID().toStdString());
+
+			i->set_majorversion(si.majorVersion());
+			i->set_minorversion(si.minorVersion());
+			i->set_commitno(si.commitNo());
+
+			i->set_ip(state.peerAddr.address32());
+
+			i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
+			i->set_isactual(state.isActual);
+			i->set_replyquantity(state.replyCount);
+		}
+
+		m_statesMutex.unlock();
+
+		sendReply(message);
+	}
+
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::TcpServer class implementation
@@ -829,8 +878,9 @@ namespace Tcp
 	{
 		assert(m_serverInstance != nullptr);
 
-		m_serverInstance->setParent(this);
+		qRegisterMetaType<std::list<ConnectionState>>("std::list<ConnectionState>");
 
+		m_serverInstance->setParent(this);
 	}
 
 
@@ -874,6 +924,7 @@ namespace Tcp
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
 
 		connect(&m_periodicTimer, &QTimer::timeout, this, &Listener::onPeriodicTimer);
+		connect(&m_periodicTimer, &QTimer::timeout, this, &Listener::updateClientsList);
 
 		m_periodicTimer.start();
 
@@ -923,7 +974,10 @@ namespace Tcp
 		//
 		Server* newServerInstance = m_serverInstance->getNewInstance();
 
+		connect(this, &Listener::connectedClientsListChanged, newServerInstance, &Server::updateClientsInfo);
+
 		connect(newServerInstance, &Server::disconnected, this, &Listener::onServerDisconnected);
+		connect(newServerInstance, &Server::connectedSoftwareInfoChanged, this, &Listener::updateClientsList);
 
 		newServerInstance->setConnectedSocketDescriptor(socketDescriptor);
 

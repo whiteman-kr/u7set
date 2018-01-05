@@ -28,6 +28,11 @@ Tcp::Server* TcpAppDataServer::getNewInstance()
 	return newServer;
 }
 
+void TcpAppDataServer::onGetState()
+{
+
+}
+
 
 void TcpAppDataServer::onServerThreadStarted()
 {
@@ -60,6 +65,14 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 {
 	switch(requestID)
 	{
+	case ADS_GET_STATE:
+		onGetState();
+		break;
+
+	case RQID_GET_CLIENT_LIST:
+		sendClientList();
+		break;
+
 	case ADS_GET_APP_SIGNAL_LIST_START:
 		onGetAppSignalListStartRequest();
 		break;
