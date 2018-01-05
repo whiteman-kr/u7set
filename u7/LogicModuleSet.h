@@ -6,14 +6,17 @@
 class LogicModuleSet : public QObject
 {
 	Q_OBJECT
+
 public:
 	LogicModuleSet();
+	virtual ~LogicModuleSet();
 
 public:
 	bool loadFile(DbController* db, QString fileName, QString* errorString);
 
 	void add(QString fileName, std::shared_ptr<LmDescription> lm);
 	bool has(QString fileName) const;
+	QStringList fileList() const;
 
 	std::shared_ptr<LmDescription> get(QString fileName) const;
 	std::shared_ptr<LmDescription> get(QString fileName);
@@ -26,7 +29,7 @@ public:
 	// Data
 	//
 private:
-	std::map<QString, std::shared_ptr<LmDescription>>	m_lmDescriptions;		// Key is LogicModule description file name
+	std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;		// Key is LogicModule description file name
 };
 
 

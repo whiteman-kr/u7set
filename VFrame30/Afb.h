@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
 
@@ -54,10 +55,17 @@ namespace Afb
 		AfbComponentPinType m_type = AfbComponentPinType::Param;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT AfbComponent
+	class VFRAME30LIBSHARED_EXPORT AfbComponent : public QObject
 	{
+		Q_OBJECT
+
+		Q_PROPERTY(int OpCode READ opCode)
+		Q_PROPERTY(QString Caption READ caption)
+		Q_PROPERTY(int MaxInstCount READ maxInstCount)
+
 	public:
 		AfbComponent();
+		AfbComponent(const AfbComponent& that);
 
 		// Serialization
 		//
@@ -83,7 +91,12 @@ namespace Afb
 		int maxInstCount() const;
 		void setMaxInstCount(int value);
 
+		Q_INVOKABLE bool pinExists(int pinOpIndex) const;
+		Q_INVOKABLE QString pinCaption(int pinOpIndex) const;
+
 	private:
+		// Operator= is present, don't forget to add new fields to it
+		//
 		int m_opCode = -1;
 		QString m_caption;
 		int m_impVersion = -1;
@@ -91,6 +104,8 @@ namespace Afb
 		int m_maxInstCount = 0;
 
 		std::map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
+		// Operator= is present, don't forget to add new fields to it
+		//
 	};
 
 
@@ -141,6 +156,7 @@ namespace Afb
 	public:
 		AfbSignal(void);
 		AfbSignal(const AfbSignal& that);
+		virtual ~AfbSignal();
 		AfbSignal& operator=(const AfbSignal& that) noexcept;
 
 		// Serialization
@@ -424,14 +440,10 @@ private:
 	//
 	//	AfbElementCollection
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
-		public DebugInstCounter<AfbElementCollection>
+	class VFRAME30LIBSHARED_EXPORT AfbElementCollection
 	{
 	public:
 		AfbElementCollection(void);
-		virtual ~AfbElementCollection(void);
-
-		void Init(void);
 
 		// Serialization
 		//

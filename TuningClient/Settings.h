@@ -70,6 +70,14 @@ struct ConfigSettings
 
 	bool filterBySchema = true;
 
+	bool showSOR = true;
+
+	bool loginPerOperation = false;
+
+	int loginSessionLength = 120;
+
+	QStringList usersAccounts;
+
 	QStringList equipmentList;
 
 	std::vector<SchemaSettings> schemas;

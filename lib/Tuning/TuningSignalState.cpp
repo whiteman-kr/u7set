@@ -3,21 +3,21 @@
 
 TuningValue::TuningValue(double value, TuningValueType valueType)
 {
-	type = valueType;
+	m_type = valueType;
 
-	switch (type)
+	switch (m_type)
 	{
 	case TuningValueType::Discrete:
 	case TuningValueType::SignedInteger:
-		intValue = static_cast<int>(value);
+		m_intValue = static_cast<int>(value);
 		break;
 
 	case TuningValueType::Float:
-		floatValue = static_cast<float>(value);
+		m_floatValue = static_cast<float>(value);
 		break;
 
 	case TuningValueType::Double:
-		doubleValue = value;
+		m_doubleValue = value;
 		break;
 
 	default:
@@ -32,21 +32,79 @@ TuningValue::TuningValue(const Network::TuningValue& message)
 	return;
 }
 
+TuningValueType TuningValue::type() const
+{
+	return m_type;
+}
+
+void TuningValue::setType(TuningValueType valueType)
+{
+	m_type = valueType;
+}
+
+qint32 TuningValue::discreteValue() const
+{
+	assert(m_type == TuningValueType::Discrete);
+	return m_intValue;
+}
+
+void TuningValue::setDiscreteValue(qint32 discreteValue)
+{
+	assert(m_type == TuningValueType::Discrete);
+	m_intValue = discreteValue;
+}
+
+qint32 TuningValue::intValue() const
+{
+	assert(m_type == TuningValueType::SignedInteger);
+	return m_intValue;
+}
+
+void TuningValue::setIntValue(qint32 intValue)
+{
+	assert(m_type == TuningValueType::SignedInteger);
+	m_intValue = intValue;
+}
+
+float TuningValue::floatValue() const
+{
+	assert(m_type == TuningValueType::Float);
+	return m_floatValue;
+}
+
+void TuningValue::setFloatValue(float floatValue)
+{
+	assert(m_type == TuningValueType::Float);
+	m_floatValue = floatValue;
+}
+
+double TuningValue::doubleValue() const
+{
+	assert(m_type == TuningValueType::Double);
+	return m_doubleValue;
+}
+
+void TuningValue::setDoubleValue(double doubleValue)
+{
+	assert(m_type == TuningValueType::Double);
+	m_doubleValue = doubleValue;
+}
+
 double TuningValue::toDouble() const
 {
-	switch (type)
+	switch (m_type)
 	{
 	case TuningValueType::Discrete:
-		return intValue;
+		return static_cast<double>(m_intValue);
 
 	case TuningValueType::SignedInteger:
-		return intValue;
+		return static_cast<double>(m_intValue);
 
 	case TuningValueType::Float:
-		return floatValue;
+		return static_cast<double>(m_floatValue);
 
 	case TuningValueType::Double:
-		return doubleValue;
+		return m_doubleValue;
 
 	default:
 		assert(false);
@@ -56,27 +114,27 @@ double TuningValue::toDouble() const
 
 QString TuningValue::toString(int precision) const
 {
-	switch (type)
+	switch (m_type)
 	{
 	case TuningValueType::Discrete:
-		return intValue == 1 ? "1" : "0";
+		return m_intValue == 1 ? "1" : "0";
 
 	case TuningValueType::SignedInteger:
-		return QString::number(intValue);
+		return QString::number(m_intValue);
 
 	case TuningValueType::Float:
 		if (precision < 0)
 		{
 			precision = 6;
 		}
-		return QString::number(floatValue, 'f', precision);
+		return QString::number(m_floatValue, 'f', precision);
 
 	case TuningValueType::Double:
 		if (precision < 0)
 		{
 			precision = 12;
 		}
-		return QString::number(doubleValue, 'f', precision);
+		return QString::number(m_doubleValue, 'f', precision);
 
 	default:
 		assert(false);
@@ -92,39 +150,39 @@ bool TuningValue::save(Network::TuningValue* message) const
 		return false;
 	}
 
-	message->set_type(static_cast<int>(type));
-	message->set_intvalue(intValue);
-	message->set_floatvalue(floatValue);
-	message->set_doublevalue(doubleValue);
+	message->set_type(static_cast<int>(m_type));
+	message->set_intvalue(m_intValue);
+	message->set_floatvalue(m_floatValue);
+	message->set_doublevalue(m_doubleValue);
 
 	return true;
 }
 
 bool TuningValue::load(const Network::TuningValue& message)
 {
-	type = static_cast<TuningValueType>(message.type());
-	intValue = message.intvalue();
-	floatValue = message.floatvalue();
-	doubleValue = message.doublevalue();
+	m_type = static_cast<TuningValueType>(message.type());
+	m_intValue = message.intvalue();
+	m_floatValue = message.floatvalue();
+	m_doubleValue = message.doublevalue();
 
 	return true;
 }
 
 bool operator < (const TuningValue& l, const TuningValue& r)
 {
-	assert(l.type == r.type);
+	assert(l.m_type == r.m_type);
 
-	switch (l.type)
+	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
 	case TuningValueType::SignedInteger:
-		return l.intValue < r.intValue;
+		return l.m_intValue < r.m_intValue;
 
 	case TuningValueType::Float:
-		return l.floatValue < r.floatValue;
+		return l.m_floatValue < r.m_floatValue;
 
 	case TuningValueType::Double:
-		return l.doubleValue < r.doubleValue;
+		return l.m_doubleValue < r.m_doubleValue;
 
 	default:
 		assert(false);
@@ -134,19 +192,19 @@ bool operator < (const TuningValue& l, const TuningValue& r)
 
 bool operator > (const TuningValue& l, const TuningValue& r)
 {
-	assert(l.type == r.type);
+	assert(l.m_type == r.m_type);
 
-	switch (l.type)
+	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
 	case TuningValueType::SignedInteger:
-		return l.intValue > r.intValue;
+		return l.m_intValue > r.m_intValue;
 
 	case TuningValueType::Float:
-		return l.floatValue > r.floatValue;
+		return l.m_floatValue > r.m_floatValue;
 
 	case TuningValueType::Double:
-		return l.doubleValue > r.doubleValue;
+		return l.m_doubleValue > r.m_doubleValue;
 
 	default:
 		assert(false);
@@ -156,21 +214,21 @@ bool operator > (const TuningValue& l, const TuningValue& r)
 
 bool operator == (const TuningValue& l, const TuningValue& r)
 {
-	assert(l.type == r.type);
+	assert(l.m_type == r.m_type);
 
-	switch (l.type)
+	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
 	case TuningValueType::SignedInteger:
-		return l.intValue == r.intValue;
+		return l.m_intValue == r.m_intValue;
 
 	case TuningValueType::Float:
-		return  std::nextafter(l.floatValue, std::numeric_limits<float>::lowest()) <= r.floatValue &&
-				std::nextafter(l.floatValue, std::numeric_limits<float>::max()) >= r.floatValue;
+		return  std::nextafter(l.m_floatValue, std::numeric_limits<float>::lowest()) <= r.m_floatValue &&
+				std::nextafter(l.m_floatValue, std::numeric_limits<float>::max()) >= r.m_floatValue;
 
 	case TuningValueType::Double:
-		return  std::nextafter(l.doubleValue, std::numeric_limits<double>::lowest()) <= r.doubleValue &&
-				std::nextafter(l.doubleValue, std::numeric_limits<double>::max()) >= r.doubleValue;
+		return  std::nextafter(l.m_doubleValue, std::numeric_limits<double>::lowest()) <= r.m_doubleValue &&
+				std::nextafter(l.m_doubleValue, std::numeric_limits<double>::max()) >= r.m_doubleValue;
 
 	default:
 		assert(false);

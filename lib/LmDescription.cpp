@@ -1,10 +1,142 @@
+#include <set>
 #include "LmDescription.h"
 #include "DeviceObject.h"
+
+bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
+{
+	if (errorMessage == nullptr ||
+		element.isNull() == true ||
+		element.tagName() != QLatin1String("Command"))
+	{
+		assert(errorMessage);
+		assert(element.isNull() == false);
+		assert(element.tagName() == QLatin1String("Command"));
+		return false;
+	}
+
+	// Caption
+	//
+	if (element.hasAttribute(QLatin1String("Caption")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute Caption.");
+		return false;
+	}
+	else
+	{
+		caption = element.attribute(QLatin1String("Caption"));
+	}
+
+	// Code
+	//
+	if (element.hasAttribute(QLatin1String("Code")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute Code.");
+		return false;
+	}
+	else
+	{
+		QString str = element.attribute(QLatin1String("Code"));
+		bool ok = false;
+		code = static_cast<quint16>(str.toInt(&ok, 16));
+	}
+
+	// CodeMask
+	//
+	if (element.hasAttribute(QLatin1String("CodeMask")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute CodeMask.");
+		return false;
+	}
+	else
+	{
+		QString str = element.attribute(QLatin1String("CodeMask"));
+		bool ok = false;
+		codeMask = static_cast<quint16>(str.toInt(&ok, 16));
+	}
+
+	// SimulationFunc
+	//
+	if (element.hasAttribute(QLatin1String("SimulationFunc")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute SimulationFunc.");
+		return false;
+	}
+	else
+	{
+		simulationFunc = element.attribute(QLatin1String("SimulationFunc"));
+	}
+
+	// ParseFunc
+	//
+	if (element.hasAttribute(QLatin1String("ParseFunc")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute ParseFunc.");
+		return false;
+	}
+	else
+	{
+		parseFunc = element.attribute(QLatin1String("ParseFunc"));
+	}
+
+	// Description
+	//
+	if (element.hasAttribute(QLatin1String("Description")) == false)
+	{
+		*errorMessage = QObject::tr("Cant find attribute Description.");
+		return false;
+	}
+	else
+	{
+		description = element.attribute(QLatin1String("Description"));
+	}
+
+	return true;
+}
+
 
 LmDescription::LmDescription(QObject *parent)
 	: QObject(parent)
 {
+}
 
+LmDescription::LmDescription(const LmDescription& that)
+{
+	*this = that;
+	return;
+}
+
+LmDescription& LmDescription::operator=(const LmDescription& src)
+{
+	m_descriptionNumber = src.m_descriptionNumber;
+	m_configurationScriptFile = src.m_configurationScriptFile;
+	m_simulationScriptFile = src.m_simulationScriptFile;
+	m_version = src.m_version;
+
+	m_flashMemory = src.m_flashMemory;
+	m_memory = src.m_memory;
+	m_logicUnit = src.m_logicUnit;
+	m_optoInterface = src.m_optoInterface;
+
+	// LmCommands
+	//
+	m_commands = src.m_commands;
+
+	// AFBs
+	//
+	for (const std::pair<int, std::shared_ptr<Afb::AfbComponent>>& p : src.m_afbComponents)
+	{
+		std::shared_ptr<Afb::AfbComponent> afbComponentCopy = std::make_shared<Afb::AfbComponent>(*p.second.get());
+		m_afbComponents.insert({p.first, afbComponentCopy});
+	}
+
+	m_afbs.reserve(src.m_afbs.size());
+	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbs)
+	{
+		std::shared_ptr<Afb::AfbElement> afbCopy = std::make_shared<Afb::AfbElement>(*afb.get());
+		m_afbs.push_back(afbCopy);
+	}
+
+	return *this;
 }
 
 LmDescription::~LmDescription()
@@ -12,15 +144,15 @@ LmDescription::~LmDescription()
 
 }
 
-bool LmDescription::load(const QByteArray& file, QString* errorMessage)
+bool LmDescription::load(const QByteArray& xml, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
-		assert(false);
+		assert(errorMessage);
 		return false;
 	}
 
-	if (file.isEmpty() == true)
+	if (xml.isEmpty() == true)
 	{
 		*errorMessage = tr("Input LogicModule description file is empty.");
 		return false;
@@ -30,7 +162,7 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 	int parseErrorLine = -1;
 	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(file, false, errorMessage, &parseErrorLine, &parseErrorColumn);
+	bool ok = doc.setContent(xml, false, errorMessage, &parseErrorLine, &parseErrorColumn);
 	if (ok == false)
 	{
 		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
@@ -40,15 +172,15 @@ bool LmDescription::load(const QByteArray& file, QString* errorMessage)
 	return load(doc, errorMessage);
 }
 
-bool LmDescription::load(const QString& file, QString* errorMessage)
+bool LmDescription::load(const QString& xml, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
-		assert(false);
+		assert(errorMessage);
 		return false;
 	}
 
-	if (file.isEmpty() == true)
+	if (xml.isEmpty() == true)
 	{
 		*errorMessage = tr("Input LogicModule description file is empty.");
 		return false;
@@ -58,7 +190,7 @@ bool LmDescription::load(const QString& file, QString* errorMessage)
 	int parseErrorLine = -1;
 	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(file, errorMessage, &parseErrorLine, &parseErrorColumn);
+	bool ok = doc.setContent(xml, errorMessage, &parseErrorLine, &parseErrorColumn);
 	if (ok == false)
 	{
 		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
@@ -72,7 +204,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{
-		assert(false);
+		assert(errorMessage);
 		return false;
 	}
 
@@ -95,7 +227,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 
 	// Attribute DescriptionNumber
 	//
-	QString s = logicModuleElement.attribute("DescriptionNumber");
+	QString s = logicModuleElement.attribute(QLatin1String("DescriptionNumber"));
 
 	if (s.isEmpty() == true)
 	{
@@ -114,7 +246,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 
     // Attribute ConfigurationScriptFile
     //
-    m_configurationScriptFile = logicModuleElement.attribute("ConfigurationScriptFile");
+	m_configurationScriptFile = logicModuleElement.attribute(QLatin1String("ConfigurationScriptFile"));
 
     if (m_configurationScriptFile.isEmpty() == true)
     {
@@ -122,9 +254,19 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
         return false;
     }
 
+	// Attribute SimulationScriptFile
+	//
+	m_simulationScriptFile = logicModuleElement.attribute("SimulationScriptFile");
+
+	if (m_simulationScriptFile.isEmpty() == true)
+	{
+		errorMessage->append(tr("Cant't find attribute SimulationScriptFile"));
+		return false;
+	}
+
     // Attribute Version
     //
-    m_version = logicModuleElement.attribute("Version");
+	m_version = logicModuleElement.attribute(QLatin1String("Version"));
 
     if (m_version.isEmpty() == true)
     {
@@ -168,10 +310,32 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 		return false;
 	}
 
+	// <LogicUnitCommnads> -- Loading Application Functional Components
+	//
+	{
+		QDomNodeList commandElementList = logicModuleElement.elementsByTagName(QLatin1String("LogicUnitCommnads"));
+
+		if (commandElementList.size() != 1)
+		{
+			errorMessage->append(tr("Expected one element <LogicUnitCommnads>"));
+			return false;
+		}
+
+		QDomElement element = commandElementList.at(0).toElement();
+
+		ok = loadCommands(element, errorMessage);
+		if (ok == false)
+		{
+			// ErrorMessage is set in loadCommands
+			//
+			return false;
+		}
+	} // </LogicUnitCommnads>
+
 	// <AFBImplementation> -- Loading Application Functional Components
 	//
 	{
-		QDomNodeList afbcElementList = logicModuleElement.elementsByTagName("AFBImplementation");
+		QDomNodeList afbcElementList = logicModuleElement.elementsByTagName(QLatin1String("AFBImplementation"));
 
 		if (afbcElementList.size() != 1)
 		{
@@ -193,7 +357,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	// <AFBL> -- Loading Application Functional Block Library
 	//
 	{
-		QDomNodeList afbsElementList = logicModuleElement.elementsByTagName("AFBL");
+		QDomNodeList afbsElementList = logicModuleElement.elementsByTagName(QLatin1String("AFBL"));
 		if (afbsElementList.size() != 1)
 		{
 			errorMessage->append(tr("Expected one element <AFBL>"));
@@ -217,9 +381,58 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	return true;
 }
 
+bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessage)
+{
+	assert(element.tagName() == QLatin1String("LogicUnitCommnads"));
+
+	if (errorMessage == nullptr)
+	{
+		assert(errorMessage);
+		return false;
+	}
+
+	m_commands.clear();
+
+	// Parse command list
+	//
+	QDomNodeList nodeList = element.elementsByTagName(QLatin1String("Command"));
+	for (int i = 0; i < nodeList.size(); i++)
+	{
+		QDomNode node = nodeList.at(i);
+
+		if (node.isNull() == true ||
+			node.isElement() == false)
+		{
+			*errorMessage = tr("Loading LogicUnitCommnads list error. Some nodes are null or not XML element.");
+			return false;
+		}
+
+		QDomElement commandElement = node.toElement();
+
+		LmCommand lmCommand;
+		bool ok = lmCommand.loadFromXml(commandElement, errorMessage);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Check command code uniquness
+		//
+		if (m_commands.count(lmCommand.code) != 0)
+		{
+			*errorMessage = tr("Loading LM commands error. Duplicate command code %1.").arg(lmCommand.code);
+			return false;
+		}
+
+		m_commands.insert({lmCommand.code, lmCommand});
+	}
+
+	return true;
+}
+
 bool LmDescription::loadAfbComponents(const QDomElement& element, QString* errorMessage)
 {
-	assert(element.tagName() == "AFBImplementation");
+	assert(element.tagName() == QLatin1String("AFBImplementation"));
 
 	if (errorMessage == nullptr)
 	{
@@ -231,7 +444,7 @@ bool LmDescription::loadAfbComponents(const QDomElement& element, QString* error
 	//
 	m_afbComponents.clear();
 
-	QDomNodeList afbNodeList = element.elementsByTagName("AFBComponent");
+	QDomNodeList afbNodeList = element.elementsByTagName(QLatin1String("AFBComponent"));
 
 	for (int i = 0; i < afbNodeList.size(); i++)
 	{
@@ -269,7 +482,7 @@ bool LmDescription::loadAfbComponents(const QDomElement& element, QString* error
 
 bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 {
-	assert(element.tagName() == "AFBL");
+	assert(element.tagName() == QLatin1String("AFBL"));
 
 	if (errorMessage == nullptr)
 	{
@@ -279,7 +492,7 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 
 	// Enumerate <AFB>
 	//
-	QDomNodeList afbNodeList = element.elementsByTagName("AFB");
+	QDomNodeList afbNodeList = element.elementsByTagName(QLatin1String("AFB"));
 
 	m_afbs.clear();
 	m_afbs.reserve(afbNodeList.size());
@@ -465,6 +678,8 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	m_tuningUartId = getSectionUintDefaultValue(QLatin1String("TuningUartID"), 0);
 	m_tuningWriteBitstream = getSectionBoolDefaultValue(QLatin1String("TuningWriteBitstream"), false);
 
+	m_maxConfigurationCount = getSectionUintValue(QLatin1String("MaxConfigurationCount"), errorMessage);
+
 	return errorMessage->isEmpty();
 }
 
@@ -544,6 +759,7 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 
 	m_moduleDataOffset = getSectionUintValue(QLatin1String("ModuleDataOffset"), errorMessage);
 	m_moduleDataSize = getSectionUintValue(QLatin1String("ModuleDataSize"), errorMessage);
+	m_moduleCount = getSectionUintValue(QLatin1String("ModuleCount"), errorMessage);
 
 	m_tuningDataOffset = getSectionUintValue(QLatin1String("TuningDataOffset"), errorMessage);
 	m_tuningDataSize = getSectionUintValue(QLatin1String("TuningDataSize"), errorMessage);
@@ -709,6 +925,11 @@ QString LmDescription::jsConfigurationStringFile() const
 	return m_configurationScriptFile;
 }
 
+QString LmDescription::simualtionScriptFile() const
+{
+	return m_simulationScriptFile;
+}
+
 const QString& LmDescription::version() const
 {
     return m_version;
@@ -756,3 +977,20 @@ const std::map<int, std::shared_ptr<Afb::AfbComponent>>& LmDescription::afbCompo
 	return m_afbComponents;
 }
 
+LmCommand LmDescription::command(int commandCode) const
+{
+	auto it = m_commands.find(commandCode);
+	if (it !=m_commands.end())
+	{
+		return it->second;
+	}
+	else
+	{
+		return LmCommand();
+	}
+}
+
+const std::map<int, LmCommand>& LmDescription::commands() const
+{
+	return m_commands;
+}

@@ -33,6 +33,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
+	theTuningLog = new TuningLog::TuningLog(qAppName());
+
 	createActions();
 	createMenu();
 	createStatusBar();
@@ -98,8 +100,9 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowState = saveState();
 
 	theLogFile->writeMessage(tr("Application finished."));
-
 	delete theLogFile;
+
+	delete theTuningLog;
 }
 
 UserManager* MainWindow::userManager()
@@ -179,6 +182,14 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
+	m_statusBarLmErrors = new QLabel();
+	m_statusBarLmErrors->setAlignment(Qt::AlignHCenter);
+	m_statusBarLmErrors->setMinimumWidth(100);
+
+	m_statusBarSor = new QLabel();
+	m_statusBarSor->setAlignment(Qt::AlignHCenter);
+	m_statusBarSor->setMinimumWidth(100);
+
 	m_statusBarConfigConnection = new QLabel();
 	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
 	m_statusBarConfigConnection->setMinimumWidth(100);
@@ -190,8 +201,24 @@ void MainWindow::createStatusBar()
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addPermanentWidget(m_statusBarLmErrors, 0);
+	statusBar()->addPermanentWidget(m_statusBarSor, 0);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	if (m_tuningWorkspace != nullptr && m_tuningWorkspace->hasPendingChanges() == true)
+	{
+		int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Are you sure you want to exit?"), tr("Yes"), tr("No"));
+
+		if (result == 1)
+		{
+			event->ignore();
+		}
+	}
+
 }
 
 void MainWindow::timerEvent(QTimerEvent* event)
@@ -273,7 +300,43 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		}
 
 		m_statusBarTuningConnection->setText(text);
-		return;
+
+		// Lm Errors tool
+
+		assert(m_statusBarLmErrors);
+
+		int errorsCount = m_tcpClient->getLMErrorsCount();
+		if (errorsCount == 0)
+		{
+			m_statusBarLmErrors->setText(QString());
+			m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarLmErrors->setText(QString("LM Errors: %1").arg(errorsCount));
+			m_statusBarLmErrors->setStyleSheet("color : white; background-color: red");
+		}
+
+		// Sor tool
+
+		assert(m_statusBarSor);
+
+		int sorCount = m_tcpClient->getSORCount();
+		if (sorCount == 0)
+		{
+			m_statusBarSor->setText(QString());
+			m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarSor->setText(QString("SOR: %1").arg(sorCount));
+			m_statusBarSor->setStyleSheet("color : white; background-color: red");
+		}
+
+		if (m_tuningWorkspace != nullptr)
+		{
+			m_tuningWorkspace->onTimer();
+		}
 	}
 
 	if  (event->timerId() == m_mainWindowTimerId_500ms)
@@ -298,6 +361,8 @@ void MainWindow::createWorkspace()
 
 	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theConfigSettings.equipmentList);
 
+
+	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager);
 
 	// Find and possibly remove non-existing signals from the list
 
@@ -572,4 +637,5 @@ void MainWindow::showAbout()
 
 MainWindow* theMainWindow = nullptr;
 Log::LogFile* theLogFile = nullptr;
+TuningLog::TuningLog* theTuningLog = nullptr;
 

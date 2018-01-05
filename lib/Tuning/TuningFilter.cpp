@@ -57,19 +57,24 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 	if (reader.attributes().hasAttribute("ValueType"))
 	{
 		TuningValue tv;
-		tv.type = static_cast<TuningValueType>(reader.attributes().value("ValueType").toInt());
-		switch (tv.type)
+
+		tv.setType(static_cast<TuningValueType>(reader.attributes().value("ValueType").toInt()));
+
+		switch (tv.type())
 		{
 		case TuningValueType::Discrete:
 		case TuningValueType::SignedInteger:
-			tv.intValue = reader.attributes().value("ValueInt").toInt();
+			tv.setIntValue(reader.attributes().value("ValueInt").toInt());
 			break;
+
 		case TuningValueType::Float:
-			tv.floatValue = reader.attributes().value("ValueFloat").toFloat();
+			tv.setFloatValue(reader.attributes().value("ValueFloat").toFloat());
 			break;
+
 		case TuningValueType::Double:
-			tv.doubleValue = reader.attributes().value("ValueDouble").toDouble();
+			tv.setDoubleValue(reader.attributes().value("ValueDouble").toDouble());
 			break;
+
 		default:
 			assert(false);
 			return false;
@@ -87,20 +92,23 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 	writer.writeAttribute("AppSignalId", m_appSignalId);
 	writer.writeAttribute("UseValue", m_useValue ? "true" : "false");
 
-	writer.writeAttribute("ValueType", QString::number(static_cast<int>(m_value.type)));
+	writer.writeAttribute("ValueType", QString::number(static_cast<int>(m_value.type())));
 
-	switch (m_value.type)
+	switch (m_value.type())
 	{
 	case TuningValueType::Discrete:
 	case TuningValueType::SignedInteger:
-		writer.writeAttribute("ValueInt", QString::number(m_value.intValue));
+		writer.writeAttribute("ValueInt", QString::number(m_value.intValue()));
 		break;
+
 	case TuningValueType::Float:
-		writer.writeAttribute("ValueFloat", QString::number(m_value.floatValue));
+		writer.writeAttribute("ValueFloat", QString::number(m_value.floatValue()));
 		break;
+
 	case TuningValueType::Double:
-		writer.writeAttribute("ValueDouble", QString::number(m_value.doubleValue));
+		writer.writeAttribute("ValueDouble", QString::number(m_value.doubleValue()));
 		break;
+
 	default:
 		assert(false);
 		return false;
@@ -1144,6 +1152,26 @@ void TuningFilter::removeNotExistingSignals(const std::vector<Hash>& signalHashe
 	}
 }
 
+const std::vector<QString>& TuningFilter::equipmentHashes() const
+{
+	return m_equipmentHashes;
+}
+
+void TuningFilter::setEquipmentHashes(std::vector<QString> value)
+{
+	m_equipmentHashes = value;
+}
+
+const std::vector<Hash>& TuningFilter::signalsHashes() const
+{
+	return m_signalsHashes;
+}
+
+void TuningFilter::setSignalsHashes(std::vector<Hash> value)
+{
+	m_signalsHashes = value;
+}
+
 //
 // ObjectFilterStorage
 //
@@ -1407,6 +1435,67 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString* er
 
 	return true;
 
+}
+
+void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter)
+{
+	if (objects == nullptr)
+	{
+		assert(objects);
+		return;
+	}
+
+	if (filter == nullptr)
+	{
+		filter = m_root.get();
+	}
+
+	if (filter->isEmpty() == false)
+	{
+		std::vector<Hash> signalsHashes;
+		std::map<QString, int> equipmentHashesMap;
+
+		std::vector<Hash> hashes = objects->signalHashes();
+
+		int count = static_cast<int>(hashes.size());
+		for (int i = 0; i < count; i++)
+		{
+			bool ok = false;
+			AppSignalParam asp = objects->signalParam(hashes[i], &ok);
+			if (ok == false)
+			{
+				assert(false);
+				return;
+			}
+
+			if (filter->match(asp) == false)
+			{
+				continue;
+			}
+
+			signalsHashes.push_back(asp.hash());
+
+			const QString aspEquipmentId = asp.equipmentId();
+
+			equipmentHashesMap[aspEquipmentId] = 1;
+		}
+
+		filter->setSignalsHashes(signalsHashes);
+
+		std::vector<QString> equipmentHashes;
+		for (auto it : equipmentHashesMap)
+		{
+			equipmentHashes.push_back(it.first);
+		}
+
+		filter->setEquipmentHashes(equipmentHashes);
+	}
+
+	int count = filter->childFiltersCount();
+	for (int i = 0; i < count; i++)
+	{
+		createSignalsAndEqipmentHashes(objects, filter->childFilter(i).get());
+	}
 }
 
 void TuningFilterStorage::createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)

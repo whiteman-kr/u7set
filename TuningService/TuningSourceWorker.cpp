@@ -92,7 +92,7 @@ namespace Tuning
 		m_type = getTuningSignalType(s);
 		m_index = index;
 
-		assert(false);
+//		assert(false);
 /*		m_lowBound = s->lowEngeneeringUnits();
 		m_highBoud = s->highEngeneeringUnits();
 		m_defaultValue = s->tuningDefaultValue();*/
@@ -125,6 +125,10 @@ namespace Tuning
 		//m_readHighBound = readHighBound;
 	}
 
+	void TuningSourceWorker::TuningSignal::invalidate()
+	{
+		m_valid = false;
+	}
 
 	QString TuningSourceWorker::TuningSignal::appSignalID() const
 	{
@@ -534,6 +538,8 @@ namespace Tuning
 		result &= initRupHeader(request.rupHeader);
 
 		result &= initFotipFrame(request.fotipFrame, tuningCmd);
+
+		request.calcCRC64();
 
 		return result;
 	}
@@ -1017,6 +1023,10 @@ namespace Tuning
 			}
 			result = false;
 		}
+		else
+		{
+			m_stat.errFotipUniqueID = 0;		// added by Vintenko 26.12.2017
+		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{
@@ -1139,6 +1149,10 @@ namespace Tuning
 		{
 			m_stat.fotipFlagSetSOR++;
 		}
+		else
+		{
+			m_stat.fotipFlagSetSOR = 0;	// added by Vintenko 22.12.2017
+		}
 
 		return result;
 	}
@@ -1154,7 +1168,7 @@ namespace Tuning
 	{
 		for(TuningSignal& s : m_tuningSignals)
 		{
-			s.setState(false, 0);
+			s.invalidate();
 		}
 	}
 

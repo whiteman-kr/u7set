@@ -436,7 +436,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 			precision = asp.precision();
 
 			value = fv.value();
-			value.type = asp.toTuningType();
+			value.setType(asp.toTuningType());
 
 			defaultValue = TuningValue(asp.tuningDefaultValue(), asp.toTuningType());
 
@@ -461,7 +461,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 
 			TuningValue checkDefaultValue(asp.tuningDefaultValue(), asp.toTuningType());
 
-			if (checkDefaultValue.type != defaultValue.type || checkDefaultValue != defaultValue)
+			if (checkDefaultValue.type() != defaultValue.type() || checkDefaultValue != defaultValue)
 			{
 				QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different default value."));
 				return;

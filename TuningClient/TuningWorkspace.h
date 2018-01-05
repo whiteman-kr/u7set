@@ -12,6 +12,11 @@ public:
 	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
 	virtual ~TuningWorkspace();
 
+	bool hasPendingChanges();
+
+public:
+	void onTimer();
+
 private:
 
 	void updateFiltersTree();
@@ -23,6 +28,8 @@ private:
 	QWidget* createTuningPage(std::shared_ptr<TuningFilter> childWorkspaceFilter);
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
+
+	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
 
 private:
 
@@ -50,6 +57,10 @@ private:
 	TuningPage* m_tuningPage = nullptr;
 	QTabWidget* m_tab = nullptr;
 
+	const int columnName = 0;
+	const int columnErrorIndex = 1;
+	const int columnSorIndex = 2;
+
 	//
 
 	std::shared_ptr<TuningFilter> m_treeFilter;	// Currently pressed button filter
@@ -61,8 +72,11 @@ private:
 
 	static int m_instanceCounter;
 
+	QTreeWidgetItem* m_treeItemToSelect = nullptr;
+
+
 private slots:
-	void slot_treeSelectionChanged();
+	void slot_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void slot_maskReturnPressed();
 	void slot_maskApply();
 
@@ -70,6 +84,8 @@ private slots:
 	void slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter);
 	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 
+
+	void slot_selectPreviousTreeItem();
 
 signals:
 	void treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);

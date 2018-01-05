@@ -8,6 +8,7 @@
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "../lib/LogFile.h"
+#include "../lib/Tuning/TuningLog.h"
 #include "UserManager.h"
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
@@ -31,6 +32,8 @@ private:
 	void createActions();
 	void createMenu();
 	void createStatusBar();
+
+	void closeEvent(QCloseEvent *event) override;
 
 
 private:
@@ -93,6 +96,8 @@ private:
 	QAction* m_pAboutAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarLmErrors = nullptr;
+	QLabel* m_statusBarSor = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
 
@@ -104,6 +109,8 @@ private:
 extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
+
+extern TuningLog::TuningLog* theTuningLog;
 
 #endif // MAINWINDOW_H
 

@@ -135,6 +135,19 @@ namespace Afb
 	{
 	}
 
+	AfbComponent::AfbComponent(const AfbComponent& that)
+	{
+		m_opCode = that.m_opCode;
+		m_caption = that.m_caption;
+		m_impVersion = that.m_impVersion;
+		m_versionOpIndex = that.m_versionOpIndex;
+		m_maxInstCount = that.m_maxInstCount;
+
+		m_pins = that.m_pins;
+
+		return;
+	}
+
 	bool AfbComponent::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
@@ -284,6 +297,22 @@ namespace Afb
 		m_maxInstCount = value;
 	}
 
+	bool AfbComponent::pinExists(int pinOpIndex) const
+	{
+		bool result = m_pins.find(pinOpIndex) != m_pins.end();
+		return result;
+	}
+
+	QString AfbComponent::pinCaption(int pinOpIndex) const
+	{
+		auto it = m_pins.find(pinOpIndex);
+		if (it != m_pins.end())
+		{
+			return it->second.caption();
+		}
+
+		return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
+	}
 
 	//
 	//							AfbSignal
@@ -295,6 +324,10 @@ namespace Afb
 	AfbSignal::AfbSignal(const AfbSignal& that)
 	{
 		*this = that;
+	}
+
+	AfbSignal::~AfbSignal()
+	{
 	}
 
 	AfbSignal& AfbSignal::operator=(const AfbSignal& that) noexcept
@@ -1542,8 +1575,8 @@ namespace Afb
 	bool AfbElement::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-				xmlElement.isNull() == true ||
-				xmlElement.tagName() != QLatin1String("AFB"))
+			xmlElement.isNull() == true ||
+			xmlElement.tagName() != QLatin1String("AFB"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -2378,15 +2411,6 @@ namespace Afb
 	//
 
 	AfbElementCollection::AfbElementCollection(void)
-	{
-		Init();
-	}
-
-	AfbElementCollection::~AfbElementCollection(void)
-	{
-	}
-
-	void AfbElementCollection::Init(void)
 	{
 	}
 

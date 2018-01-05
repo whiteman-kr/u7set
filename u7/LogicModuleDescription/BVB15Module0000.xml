@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" Version="1.0002">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0002">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -13,6 +13,7 @@
 		<TuningFrameSize>0</TuningFrameSize>
 		<TuningUartID>0</TuningUartID>
 		<TuningWriteBitstream>false</TuningWriteBitstream>
+		<MaxConfigurationCount>62</MaxConfigurationCount>
 	</FlashMemory>
 	<Memory>
 		<CodeMemorySize>65536</CodeMemorySize>
@@ -25,6 +26,7 @@
 		<AppLogicWordDataSize>3570</AppLogicWordDataSize>;
 		<ModuleDataOffset>0</ModuleDataOffset>
 		<ModuleDataSize>2560</ModuleDataSize>
+		<ModuleCount>14</ModuleCount>
 		<TuningDataOffset>46336</TuningDataOffset>
 		<TuningDataSize>7620</TuningDataSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
@@ -43,6 +45,8 @@
 		<OptoInterfaceDataOffset>35840</OptoInterfaceDataOffset>
 		<OptoPortDataSize>2560</OptoPortDataSize>
 	</OptoInterface>
+
+        <LogicUnitCommnads/>
 	
 	<AFBImplementation/>
 	<AFBL/>

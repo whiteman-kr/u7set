@@ -58,7 +58,7 @@ namespace Builder
 
 		content += " -ip=" + m_software->propertyByCaption("ClientRequestIP")->value().toString() + "\n";
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::BAT_DIR, m_software->equipmentIdTemplate() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::BAT_DIR, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
