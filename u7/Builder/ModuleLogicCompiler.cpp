@@ -9881,11 +9881,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeSignalList(const QVector<UalSignal*>& signalList, QString listName) const
 	{
-		if (signalList.isEmpty() == true)
-		{
-			return true;
-		}
-
 		QStringList strList;
 
 		bool result = true;

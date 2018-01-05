@@ -103,7 +103,10 @@ void UdpClientSocket::onSocketReadyRead()
 {
 	AUTO_LOCK(m_mutex);
 
-	assert(m_state == State::WaitingForAck);
+	if (m_state != State::WaitingForAck)
+	{
+		return;
+	}
 
 	QHostAddress address;
 	quint16 port = 0;
