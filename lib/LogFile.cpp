@@ -18,9 +18,9 @@ namespace Log
 	// LogFileRecord
 	//
 
-	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "TXT"};
+	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "ALERT", "TXT"};
 
-	const char* messageTypeTextLong[] = {"All", "Error", "Warning", "Message", "Text"};
+	const char* messageTypeTextLong[] = {"All", "Error", "Warning", "Message", "Alert", "Text"};
 
 	const int messageTypeCount = sizeof(messageTypeTextShort) / sizeof(messageTypeTextShort[0]);
 
@@ -114,6 +114,13 @@ namespace Log
 				if (s == "MSG")
 				{
 					type = MessageType::Message;
+				}
+				else
+				{
+					if (s == "ALERT")
+					{
+						type = MessageType::Alert;
+					}
 				}
 
 			}
@@ -1089,6 +1096,13 @@ namespace Log
 	bool LogFile::writeMessage(const QString& text)
 	{
 		return m_logFileWorker->write(MessageType::Message, text);
+	}
+
+	bool LogFile::writeAlert(const QString& text)
+	{
+		emit alertArrived(text);
+
+		return m_logFileWorker->write(MessageType::Alert, text);
 	}
 
 	bool LogFile::writeError(const QString& text)

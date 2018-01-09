@@ -121,6 +121,7 @@ protected:
 	void requestWriteTuningSignals();
 	void processWriteTuningSignals(const QByteArray& data);
 
+	virtual void writeLogAlert(const QString& message);
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);
 	virtual void writeLogMessage(const QString& message);
