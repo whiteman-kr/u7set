@@ -8,6 +8,12 @@ TuningClientSignalManager::TuningClientSignalManager(TuningLog::TuningLog* tunin
 
 }
 
+void TuningClientSignalManager::writeLogAlert(const QString& message)
+{
+	assert(theLogFile);
+	theLogFile->writeAlert(message);
+}
+
 void TuningClientSignalManager::writeLogError(const QString& message)
 {
 	assert(theLogFile);

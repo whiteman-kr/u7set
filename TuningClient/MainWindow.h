@@ -13,6 +13,7 @@
 #include "TuningClientSignalManager.h"
 #include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
+#include "DialogAlert.h"
 
 namespace Ui {
 	class MainWindow;
@@ -46,6 +47,8 @@ private:
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
+
+	DialogAlert* m_dialogAlert = nullptr;
 
 	int m_mainWindowTimerId = -1;
 
