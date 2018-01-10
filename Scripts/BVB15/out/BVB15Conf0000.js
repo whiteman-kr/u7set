@@ -12,6 +12,18 @@ var DeviceObjectType;
     DeviceObjectType[DeviceObjectType["Software"] = 7] = "Software";
     DeviceObjectType[DeviceObjectType["Signal"] = 8] = "Signal";
 })(DeviceObjectType || (DeviceObjectType = {}));
+var SoftwareType;
+(function (SoftwareType) {
+    SoftwareType[SoftwareType["Monitor"] = 9000] = "Monitor";
+    SoftwareType[SoftwareType["ConfigurationService"] = 9001] = "ConfigurationService";
+    SoftwareType[SoftwareType["AppDataService"] = 9002] = "AppDataService";
+    SoftwareType[SoftwareType["ArchiveService"] = 9003] = "ArchiveService";
+    SoftwareType[SoftwareType["TuningService"] = 9004] = "TuningService";
+    SoftwareType[SoftwareType["DiagDataService"] = 9005] = "DiagDataService";
+    SoftwareType[SoftwareType["TuningClient"] = 9006] = "TuningClient";
+    SoftwareType[SoftwareType["Metrology"] = 9007] = "Metrology";
+    SoftwareType[SoftwareType["ServiceControlManager"] = 9008] = "ServiceControlManager";
+})(SoftwareType || (SoftwareType = {}));
 function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) {
     //var funcStr = "(function (confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){log.writeMessage(\"Hello\"); return true; })";
     //
@@ -27,7 +39,8 @@ function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, 
 "use strict";
 var FamilyBVB15ID = 0x5600;
 //var configScriptVersion: number = 1;
-var configScriptVersion = 2; //Changes in LMNumberCount calculation algorithm
+//var configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
+var configScriptVersion = 3; //Added software type checking
 var LMDescriptionNumber = 0;
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
@@ -372,6 +385,17 @@ function generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet
                 }
             }
             else {
+                if (service.propertyValue("Type") == undefined) {
+                    log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+                    return false;
+                }
+                var softwareType = service.jsPropertyInt("Type");
+                if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
+                    (s == 1 && softwareType != SoftwareType.DiagDataService)) {
+                    log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+                    return false;
+                }
+                //
                 var serviceDataChannel = service.jsFindChildObjectByMask(serviceID + "_DATACH01");
                 if (serviceDataChannel == null) {
                     log.errCFG3004(serviceID + "_DATACH01", equipmentID);

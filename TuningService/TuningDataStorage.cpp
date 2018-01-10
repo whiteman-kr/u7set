@@ -253,7 +253,6 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-//						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(float);
@@ -289,7 +288,6 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-//						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(qint32);
@@ -333,9 +331,6 @@ namespace  Tuning
 							bitNo = bitNo % SIZE_16BIT;
 						}
 
-						//Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo);
-
-//						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo));
 						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo));
 
 						//
@@ -367,8 +362,8 @@ namespace  Tuning
 					sizeB += m_tuningFrameSizeBytes * 2;
 				}
 
-				metaData.append(QVariant(signal->ualAddr().offset()));
-				metaData.append(QVariant(signal->ualAddr().bit()));
+				metaData.append(QVariant(signal->ioBufAddr().offset()));
+				metaData.append(QVariant(signal->ioBufAddr().bit()));
 
 				m_metadata.push_back(metaData);
 			}
