@@ -214,15 +214,11 @@ message ConfigurationServiceState
 
 message ServiceClientInfo
 {
-    required int32 softwareType = 1;
-    required string equipmentId = 2;
     required int32 ip = 3;
     required int64 uptime = 5;
     required bool isActual = 6;
     required int64 replyQuantity = 7;
-    required int32 majorVersion = 8;
-    required int32 minorVersion = 9;
-    required int32 commitNo = 10;
+    required SoftwareInfo softwareInfo = 11;
 }
 
 message ServiceClients

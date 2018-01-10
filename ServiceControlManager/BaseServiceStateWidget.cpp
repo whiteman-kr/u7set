@@ -115,13 +115,15 @@ void BaseServiceStateWidget::updateServiceState()
 		case Work:
 		case Stops:
 			{
+				const Network::SoftwareInfo& softwareInfo = m_serviceInfo.softwareinfo();
 				setWindowTitle(serviceName +
-							   QString(" v%1.%2.%3 - %4:%5")
-							   .arg(m_serviceInfo.softwareinfo().majorversion())
-							   .arg(m_serviceInfo.softwareinfo().minorversion())
-							   .arg(m_serviceInfo.softwareinfo().commitno())
+							   QString(" v%1.%2.%3 - %4:%5 (%6)")
+							   .arg(softwareInfo.majorversion())
+							   .arg(softwareInfo.minorversion())
+							   .arg(softwareInfo.commitno())
 							   .arg(QHostAddress(m_udpIp).toString())
-							   .arg(m_udpPort));
+							   .arg(m_udpPort)
+							   .arg(QString::fromStdString(softwareInfo.equipmentid())));
 
 				m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
 
@@ -274,17 +276,19 @@ void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& s
 	for (int i = 0; i < serviceClients.clients_size(); i++)
 	{
 		const Network::ServiceClientInfo& ci = serviceClients.clients(i);
+		const Network::SoftwareInfo& si = ci.softwareinfo();
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0),
-								   E::valueToString<E::SoftwareType>(ci.softwaretype()));
+								   E::valueToString<E::SoftwareType>(si.softwaretype()));
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1),
-								   QString("%1.%2.%3")
-								   .arg(ci.majorversion())
-								   .arg(ci.minorversion())
-								   .arg(ci.commitno()));
+								   QString("%1.%2.%3 (%4)")
+								   .arg(si.majorversion())
+								   .arg(si.minorversion())
+								   .arg(si.commitno())
+								   .arg(QString::fromStdString(si.buildbranch())));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(ci.equipmentid()));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(si.equipmentid()));
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QHostAddress(ci.ip()).toString());
 
@@ -299,7 +303,7 @@ void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& s
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QString("(%1d %2:%3:%4)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), ci.isactual() ? "Actual" : "Non actual");
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), si.buildno() == SoftwareInfo::UNDEFINED_BUILD_NO ? "Non actual" : QString::number(si.buildno()));
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), static_cast<qint64>(ci.replyquantity()));
 	}

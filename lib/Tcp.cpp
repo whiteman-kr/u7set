@@ -829,21 +829,19 @@ namespace Tcp
 				continue;
 			}
 
-			Network::ServiceClientInfo* i = message.add_clients();
+			Network::ServiceClientInfo* clientInfo = message.add_clients();
 
-			i->set_softwaretype(TO_INT(si.softwareType()));
+			Network::SoftwareInfo* newSoftwareInfo = new Network::SoftwareInfo();
 
-			i->set_equipmentid(si.equipmentID().toStdString());
+			si.serializeTo(newSoftwareInfo);
 
-			i->set_majorversion(si.majorVersion());
-			i->set_minorversion(si.minorVersion());
-			i->set_commitno(si.commitNo());
+			clientInfo->set_allocated_softwareinfo(newSoftwareInfo);
 
-			i->set_ip(state.peerAddr.address32());
+			clientInfo->set_ip(state.peerAddr.address32());
 
-			i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
-			i->set_isactual(state.isActual);
-			i->set_replyquantity(state.replyCount);
+			clientInfo->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
+			clientInfo->set_isactual(state.isActual);
+			clientInfo->set_replyquantity(state.replyCount);
 		}
 
 		m_statesMutex.unlock();
