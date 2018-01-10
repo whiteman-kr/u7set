@@ -3,12 +3,6 @@
 
 #include <QDateTime>
 
-struct User
-{
-	QString m_name;
-	bool m_admin = false;
-};
-
 enum class LogonMode
 {
 	Permanent = 0,
@@ -50,16 +44,16 @@ public:
 
 	// Operations
 
-	void setConfiguration(const std::vector<User> users, LogonMode logonMode, int sessionMaxLengthSeconds);
+	void setConfiguration(const QStringList& users, LogonMode logonMode, int sessionMaxLengthSeconds);
 
-	bool login(QWidget* parent, bool adminNeeded);
+	bool login(QWidget* parent);
 	void logout();
 
 	// State
 
 	LogonMode logonMode() const;
 
-	std::vector<User> users() const;
+	QStringList users() const;
 
 	bool isLoggedIn() const;
 
@@ -73,13 +67,13 @@ signals:
 	void loggedOut();
 
 private:
-	bool requestPassword(QWidget* parent, bool adminNeeded);
+	bool requestPassword(QWidget* parent);
 
 private:
 	LogonMode m_logonMode = LogonMode::Permanent;
 	int m_sessionMaxLengthSeconds = 120;
 
-	std::vector<User> m_users;
+	QStringList m_users;
 
 	bool m_loggedIn = false;
 	QString m_loggedInUser;

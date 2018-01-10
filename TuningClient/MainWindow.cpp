@@ -528,7 +528,7 @@ void MainWindow::exit()
 
 void MainWindow::runPresetEditor()
 {
-	if (m_userManager.login(this, false) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return;
 	}
@@ -555,7 +555,7 @@ void MainWindow::runPresetEditor()
 
 void MainWindow::showSettings()
 {
-	if (m_userManager.login(this, true) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return;
 	}

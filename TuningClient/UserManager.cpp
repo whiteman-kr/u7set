@@ -53,7 +53,7 @@ void LogonWorkspace::onButtonLogin()
 		return;
 	}
 
-	m_userManager->login(this, false);
+	m_userManager->login(this);
 }
 
 void LogonWorkspace::onButtonLogout()
@@ -102,21 +102,9 @@ void LogonWorkspace::onTimer()
 
 UserManager::UserManager()
 {
-	User user;
-	user.m_admin = true;
-	user.m_name = "Administrator";
-	m_users.push_back(user);
-
-	user.m_admin = true;
-	user.m_name = "bv";
-	m_users.push_back(user);
-
-	user.m_admin = false;
-	user.m_name = "user";
-	m_users.push_back(user);
 }
 
-void UserManager::setConfiguration(const std::vector<User> users, LogonMode logonMode, int sessionMaxLengthSeconds)
+void UserManager::setConfiguration(const QStringList& users, LogonMode logonMode, int sessionMaxLengthSeconds)
 {
 	m_users = users;
 	m_logonMode = logonMode;
@@ -125,29 +113,13 @@ void UserManager::setConfiguration(const std::vector<User> users, LogonMode logo
 	m_loggedIn = false;
 }
 
-bool UserManager::login(QWidget* parent, bool adminNeeded)
+bool UserManager::login(QWidget* parent)
 {
-	// If admin is needed, but currently logged user is not an admin - force logout and ask admin password
-	//
-	if (m_loggedIn == true && adminNeeded == true)
-	{
-		for (const User& u : m_users)
-		{
-			if (u.m_name == m_loggedInUser && u.m_admin == false)
-			{
-				QMessageBox::warning(parent, qAppName(), tr("The requested operation requires administrator rights. Please login as an administrator."));
-
-				logout();
-				break;
-			}
-		}
-	}
-
 	if (m_loggedIn == false)
 	{
 		// Ask the password
 
-		if (requestPassword(parent, adminNeeded) == false)
+		if (requestPassword(parent) == false)
 		{
 			return false;
 		}
@@ -184,7 +156,7 @@ LogonMode UserManager::logonMode() const
 	return m_logonMode;
 }
 
-std::vector<User> UserManager::users() const
+QStringList UserManager::users() const
 {
 	return m_users;
 }
@@ -209,14 +181,14 @@ QDateTime UserManager::logoutPendingTime() const
 	return m_logoutPendingTime;
 }
 
-bool UserManager::requestPassword(QWidget* parent, bool adminNeeded)
+bool UserManager::requestPassword(QWidget* parent)
 {
 	if (m_users.empty() == true)
 	{
 		return true;
 	}
 
-	DialogPassword d(this, adminNeeded, parent);
+	DialogPassword d(this, parent);
 
 	if (d.exec() != QDialog::Accepted)
 	{

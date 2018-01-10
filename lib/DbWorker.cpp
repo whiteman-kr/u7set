@@ -213,6 +213,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0195.sql", "Upgrade to version 195, Changes in scripts, LMNumberCount calculation has been changed"},
 	{":/DatabaseUpgrade/Upgrade0196.sql", "Upgrade to version 196, Added afbl simulation script for platform LM"},
 	{":/DatabaseUpgrade/Upgrade0197.sql", "Upgrade to version 197, Added software type checking in configuration scripts"},
+	{":/DatabaseUpgrade/Upgrade0198.sql", "Upgrade to version 198, TuningClient preset was updated"},
 };
 
 

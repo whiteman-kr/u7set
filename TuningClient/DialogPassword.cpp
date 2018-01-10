@@ -3,7 +3,7 @@
 
 QString DialogPassword::m_lastUser = "";
 
-DialogPassword::DialogPassword(const UserManager* userManager, bool adminNeeded, QWidget* parent) :
+DialogPassword::DialogPassword(const UserManager* userManager, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogPassword),
 	m_userManager(userManager)
@@ -14,20 +14,15 @@ DialogPassword::DialogPassword(const UserManager* userManager, bool adminNeeded,
 
 	int selectedIndex = -1;
 
-	setWindowTitle(adminNeeded ? tr("Enter Administrator Password") : tr("Enter Password"));
+	setWindowTitle(tr("Enter Password"));
 
 	int i = 0;
 
-	for (const User& user : m_userManager->users())
+	for (const QString& user : m_userManager->users())
 	{
-		if (adminNeeded && user.m_admin == false)
-		{
-			continue;
-		}
+		ui->m_userCombo->addItem(user, i);
 
-		ui->m_userCombo->addItem(user.m_name, i);
-
-		if (user.m_name == m_lastUser)
+		if (user == m_lastUser)
 		{
 			selectedIndex = i;
 		}

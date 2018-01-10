@@ -15,7 +15,7 @@ class DialogPassword : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogPassword(const UserManager* userManager, bool adminNeeded, QWidget* parent);
+	explicit DialogPassword(const UserManager* userManager, QWidget* parent);
 	~DialogPassword();
 
 	QString userName();
