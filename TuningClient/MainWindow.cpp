@@ -68,6 +68,11 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
 			Qt::QueuedConnection);
 
+	// DialogAlert
+
+	m_dialogAlert = new DialogAlert(this);
+	connect(theLogFile, &Log::LogFile::alertArrived, m_dialogAlert, &DialogAlert::onAlertArrived);
+
 	// Load user filters
 
 	QString errorCode;

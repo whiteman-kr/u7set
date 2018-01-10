@@ -13,6 +13,7 @@
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
+#include "DialogAlert.h"
 
 namespace Ui {
 	class MainWindow;
@@ -61,6 +62,8 @@ public:
 
 	int m_mainWindowTimerId_250ms = -1;
 	int m_mainWindowTimerId_500ms = -1;
+
+	DialogAlert* m_dialogAlert = nullptr;
 
 private slots:
 	void slot_configurationArrived();
