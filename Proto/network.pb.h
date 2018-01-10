@@ -2803,25 +2803,6 @@ class ServiceClientInfo : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int32 softwareType = 1;
-  inline bool has_softwaretype() const;
-  inline void clear_softwaretype();
-  static const int kSoftwareTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 softwaretype() const;
-  inline void set_softwaretype(::google::protobuf::int32 value);
-
-  // required string equipmentId = 2;
-  inline bool has_equipmentid() const;
-  inline void clear_equipmentid();
-  static const int kEquipmentIdFieldNumber = 2;
-  inline const ::std::string& equipmentid() const;
-  inline void set_equipmentid(const ::std::string& value);
-  inline void set_equipmentid(const char* value);
-  inline void set_equipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_equipmentid();
-  inline ::std::string* release_equipmentid();
-  inline void set_allocated_equipmentid(::std::string* equipmentid);
-
   // required int32 ip = 3;
   inline bool has_ip() const;
   inline void clear_ip();
@@ -2850,33 +2831,17 @@ class ServiceClientInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 replyquantity() const;
   inline void set_replyquantity(::google::protobuf::int64 value);
 
-  // required int32 majorVersion = 8;
-  inline bool has_majorversion() const;
-  inline void clear_majorversion();
-  static const int kMajorVersionFieldNumber = 8;
-  inline ::google::protobuf::int32 majorversion() const;
-  inline void set_majorversion(::google::protobuf::int32 value);
-
-  // required int32 minorVersion = 9;
-  inline bool has_minorversion() const;
-  inline void clear_minorversion();
-  static const int kMinorVersionFieldNumber = 9;
-  inline ::google::protobuf::int32 minorversion() const;
-  inline void set_minorversion(::google::protobuf::int32 value);
-
-  // required int32 commitNo = 10;
-  inline bool has_commitno() const;
-  inline void clear_commitno();
-  static const int kCommitNoFieldNumber = 10;
-  inline ::google::protobuf::int32 commitno() const;
-  inline void set_commitno(::google::protobuf::int32 value);
+  // required .Network.SoftwareInfo softwareInfo = 11;
+  inline bool has_softwareinfo() const;
+  inline void clear_softwareinfo();
+  static const int kSoftwareInfoFieldNumber = 11;
+  inline const ::Network::SoftwareInfo& softwareinfo() const;
+  inline ::Network::SoftwareInfo* mutable_softwareinfo();
+  inline ::Network::SoftwareInfo* release_softwareinfo();
+  inline void set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo);
 
   // @@protoc_insertion_point(class_scope:Network.ServiceClientInfo)
  private:
-  inline void set_has_softwaretype();
-  inline void clear_has_softwaretype();
-  inline void set_has_equipmentid();
-  inline void clear_has_equipmentid();
   inline void set_has_ip();
   inline void clear_has_ip();
   inline void set_has_uptime();
@@ -2885,27 +2850,19 @@ class ServiceClientInfo : public ::google::protobuf::Message {
   inline void clear_has_isactual();
   inline void set_has_replyquantity();
   inline void clear_has_replyquantity();
-  inline void set_has_majorversion();
-  inline void clear_has_majorversion();
-  inline void set_has_minorversion();
-  inline void clear_has_minorversion();
-  inline void set_has_commitno();
-  inline void clear_has_commitno();
+  inline void set_has_softwareinfo();
+  inline void clear_has_softwareinfo();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* equipmentid_;
-  ::google::protobuf::int32 softwaretype_;
-  ::google::protobuf::int32 ip_;
   ::google::protobuf::int64 uptime_;
-  ::google::protobuf::int64 replyquantity_;
+  ::google::protobuf::int32 ip_;
   bool isactual_;
-  ::google::protobuf::int32 majorversion_;
-  ::google::protobuf::int32 minorversion_;
-  ::google::protobuf::int32 commitno_;
+  ::google::protobuf::int64 replyquantity_;
+  ::Network::SoftwareInfo* softwareinfo_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -8618,107 +8575,15 @@ inline void ConfigurationServiceState::set_buildcheckerstate(::google::protobuf:
 
 // ServiceClientInfo
 
-// required int32 softwareType = 1;
-inline bool ServiceClientInfo::has_softwaretype() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void ServiceClientInfo::set_has_softwaretype() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void ServiceClientInfo::clear_has_softwaretype() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void ServiceClientInfo::clear_softwaretype() {
-  softwaretype_ = 0;
-  clear_has_softwaretype();
-}
-inline ::google::protobuf::int32 ServiceClientInfo::softwaretype() const {
-  return softwaretype_;
-}
-inline void ServiceClientInfo::set_softwaretype(::google::protobuf::int32 value) {
-  set_has_softwaretype();
-  softwaretype_ = value;
-}
-
-// required string equipmentId = 2;
-inline bool ServiceClientInfo::has_equipmentid() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void ServiceClientInfo::set_has_equipmentid() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void ServiceClientInfo::clear_has_equipmentid() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void ServiceClientInfo::clear_equipmentid() {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    equipmentid_->clear();
-  }
-  clear_has_equipmentid();
-}
-inline const ::std::string& ServiceClientInfo::equipmentid() const {
-  return *equipmentid_;
-}
-inline void ServiceClientInfo::set_equipmentid(const ::std::string& value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void ServiceClientInfo::set_equipmentid(const char* value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void ServiceClientInfo::set_equipmentid(const char* value, size_t size) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* ServiceClientInfo::mutable_equipmentid() {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  return equipmentid_;
-}
-inline ::std::string* ServiceClientInfo::release_equipmentid() {
-  clear_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = equipmentid_;
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void ServiceClientInfo::set_allocated_equipmentid(::std::string* equipmentid) {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete equipmentid_;
-  }
-  if (equipmentid) {
-    set_has_equipmentid();
-    equipmentid_ = equipmentid;
-  } else {
-    clear_has_equipmentid();
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
 // required int32 ip = 3;
 inline bool ServiceClientInfo::has_ip() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void ServiceClientInfo::set_has_ip() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void ServiceClientInfo::clear_has_ip() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void ServiceClientInfo::clear_ip() {
   ip_ = 0;
@@ -8734,13 +8599,13 @@ inline void ServiceClientInfo::set_ip(::google::protobuf::int32 value) {
 
 // required int64 uptime = 5;
 inline bool ServiceClientInfo::has_uptime() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void ServiceClientInfo::set_has_uptime() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void ServiceClientInfo::clear_has_uptime() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void ServiceClientInfo::clear_uptime() {
   uptime_ = GOOGLE_LONGLONG(0);
@@ -8756,13 +8621,13 @@ inline void ServiceClientInfo::set_uptime(::google::protobuf::int64 value) {
 
 // required bool isActual = 6;
 inline bool ServiceClientInfo::has_isactual() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void ServiceClientInfo::set_has_isactual() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void ServiceClientInfo::clear_has_isactual() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void ServiceClientInfo::clear_isactual() {
   isactual_ = false;
@@ -8778,13 +8643,13 @@ inline void ServiceClientInfo::set_isactual(bool value) {
 
 // required int64 replyQuantity = 7;
 inline bool ServiceClientInfo::has_replyquantity() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void ServiceClientInfo::set_has_replyquantity() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void ServiceClientInfo::clear_has_replyquantity() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void ServiceClientInfo::clear_replyquantity() {
   replyquantity_ = GOOGLE_LONGLONG(0);
@@ -8798,70 +8663,42 @@ inline void ServiceClientInfo::set_replyquantity(::google::protobuf::int64 value
   replyquantity_ = value;
 }
 
-// required int32 majorVersion = 8;
-inline bool ServiceClientInfo::has_majorversion() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+// required .Network.SoftwareInfo softwareInfo = 11;
+inline bool ServiceClientInfo::has_softwareinfo() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void ServiceClientInfo::set_has_majorversion() {
-  _has_bits_[0] |= 0x00000040u;
+inline void ServiceClientInfo::set_has_softwareinfo() {
+  _has_bits_[0] |= 0x00000010u;
 }
-inline void ServiceClientInfo::clear_has_majorversion() {
-  _has_bits_[0] &= ~0x00000040u;
+inline void ServiceClientInfo::clear_has_softwareinfo() {
+  _has_bits_[0] &= ~0x00000010u;
 }
-inline void ServiceClientInfo::clear_majorversion() {
-  majorversion_ = 0;
-  clear_has_majorversion();
+inline void ServiceClientInfo::clear_softwareinfo() {
+  if (softwareinfo_ != NULL) softwareinfo_->::Network::SoftwareInfo::Clear();
+  clear_has_softwareinfo();
 }
-inline ::google::protobuf::int32 ServiceClientInfo::majorversion() const {
-  return majorversion_;
+inline const ::Network::SoftwareInfo& ServiceClientInfo::softwareinfo() const {
+  return softwareinfo_ != NULL ? *softwareinfo_ : *default_instance_->softwareinfo_;
 }
-inline void ServiceClientInfo::set_majorversion(::google::protobuf::int32 value) {
-  set_has_majorversion();
-  majorversion_ = value;
+inline ::Network::SoftwareInfo* ServiceClientInfo::mutable_softwareinfo() {
+  set_has_softwareinfo();
+  if (softwareinfo_ == NULL) softwareinfo_ = new ::Network::SoftwareInfo;
+  return softwareinfo_;
 }
-
-// required int32 minorVersion = 9;
-inline bool ServiceClientInfo::has_minorversion() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+inline ::Network::SoftwareInfo* ServiceClientInfo::release_softwareinfo() {
+  clear_has_softwareinfo();
+  ::Network::SoftwareInfo* temp = softwareinfo_;
+  softwareinfo_ = NULL;
+  return temp;
 }
-inline void ServiceClientInfo::set_has_minorversion() {
-  _has_bits_[0] |= 0x00000080u;
-}
-inline void ServiceClientInfo::clear_has_minorversion() {
-  _has_bits_[0] &= ~0x00000080u;
-}
-inline void ServiceClientInfo::clear_minorversion() {
-  minorversion_ = 0;
-  clear_has_minorversion();
-}
-inline ::google::protobuf::int32 ServiceClientInfo::minorversion() const {
-  return minorversion_;
-}
-inline void ServiceClientInfo::set_minorversion(::google::protobuf::int32 value) {
-  set_has_minorversion();
-  minorversion_ = value;
-}
-
-// required int32 commitNo = 10;
-inline bool ServiceClientInfo::has_commitno() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
-}
-inline void ServiceClientInfo::set_has_commitno() {
-  _has_bits_[0] |= 0x00000100u;
-}
-inline void ServiceClientInfo::clear_has_commitno() {
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline void ServiceClientInfo::clear_commitno() {
-  commitno_ = 0;
-  clear_has_commitno();
-}
-inline ::google::protobuf::int32 ServiceClientInfo::commitno() const {
-  return commitno_;
-}
-inline void ServiceClientInfo::set_commitno(::google::protobuf::int32 value) {
-  set_has_commitno();
-  commitno_ = value;
+inline void ServiceClientInfo::set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo) {
+  delete softwareinfo_;
+  softwareinfo_ = softwareinfo;
+  if (softwareinfo) {
+    set_has_softwareinfo();
+  } else {
+    clear_has_softwareinfo();
+  }
 }
 
 // -------------------------------------------------------------------
