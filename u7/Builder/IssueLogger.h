@@ -132,7 +132,7 @@ namespace Builder
 		void errCFG3014(QString suffix, QString objectID);									// Can't find child object with suffix '%1' in object '%2'
 		void wrnCFG3015(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
 		void wrnCFG3016(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
-        void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to not compatible software ID '%3'.
+		Q_INVOKABLE void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to not compatible software ID '%3'.
 		Q_INVOKABLE void wrnCFG3018(QString propertyName, QString ip, int port, QString controller);
 		void errCFG3019(QString objectID, QString propertyName);							// Property '%1.%2' write error.
 		void errCFG3020(QString objectID, QString propertyName);							// Property '%1.%2' is not found.

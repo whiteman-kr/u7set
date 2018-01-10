@@ -13,6 +13,17 @@ enum DeviceObjectType {
 	Signal
 }
 
+enum SoftwareType {
+	Monitor = 9000,
+	ConfigurationService = 9001,
+	AppDataService = 9002,
+	ArchiveService = 9003,
+	TuningService = 9004,
+	DiagDataService = 9005,
+	TuningClient = 9006,
+	Metrology = 9007,
+	ServiceControlManager = 9008,
+}
 
 interface Builder {
 	jsIsInterruptRequested(): boolean;
@@ -76,6 +87,7 @@ interface IssueLogger {
 	wrnCFG3008(softwareID: string, module: string): void;
 	errCFG3011(addressProperty: string, address: number, controller: string): void;
 	errCFG3012(portProperty: string, port: number, controller: string): void;
+	errCFG3017(objectID: string, propertyName: string, softwareID: string): void;
 	wrnCFG3018(propertyName: string, ip: string, port: number, controller: string): void;
 
 }
@@ -137,7 +149,8 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 var FamilyBVB15ID: number = 0x5600;
 
 //var configScriptVersion: number = 1;
-var configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
+//var configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
+var configScriptVersion: number = 3;	//Added software type checking
 
 var LMDescriptionNumber: number = 0;
 
@@ -589,6 +602,20 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 
 			}
 			else {
+				if (service.propertyValue("Type") == undefined) {
+					log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+					return false;
+				}
+
+				var softwareType: number = service.jsPropertyInt("Type");
+				if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
+					(s == 1 && softwareType != SoftwareType.DiagDataService)){
+					log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+					return false;
+				}
+
+				//
+
 				var serviceDataChannel: DeviceObject = service.jsFindChildObjectByMask(serviceID + "_DATACH01");
 				if (serviceDataChannel == null) {
 					log.errCFG3004(serviceID + "_DATACH01", equipmentID);
