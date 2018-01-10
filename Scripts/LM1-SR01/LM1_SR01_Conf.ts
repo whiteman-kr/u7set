@@ -13,6 +13,19 @@ enum DeviceObjectType {
 	Signal
 }
 
+enum SoftwareType {
+	Monitor = 9000,
+	ConfigurationService = 9001,
+	AppDataService = 9002,
+	ArchiveService = 9003,
+	TuningService = 9004,
+	DiagDataService = 9005,
+	TuningClient = 9006,
+	Metrology = 9007,
+	ServiceControlManager = 9008,
+}
+
+
 
 interface Builder {
 	jsIsInterruptRequested(): boolean;
@@ -78,6 +91,7 @@ interface IssueLogger {
 	wrnCFG3008(softwareID: string, module: string): void;
 	errCFG3011(addressProperty: string, address: number, controller: string): void;
 	errCFG3012(portProperty: string, port: number, controller: string): void;
+	errCFG3017(objectID: string, propertyName: string, softwareID: string): void;
 	wrnCFG3018(propertyName: string, ip: string, port: number, controller: string): void;
 
 }
@@ -173,7 +187,8 @@ var UartID: number = 0;
 //var configScriptVersion: number = 31;		// Add LmDescriptionVersion to Storage Format frame
 //var configScriptVersion: number = 32;		// Removed structure ModuleFirmwareCollection
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
-var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
+//var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
+var configScriptVersion: number = 35;		// Add Software type checking
 
 //
 
@@ -623,6 +638,22 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 			log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
 		}
 		else {
+
+			// Check software type
+
+			if (service.propertyValue("Type") == undefined) {
+				log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+				return false;
+			}
+
+			var softwareType: number = service.jsPropertyInt("Type");
+			if (softwareType != SoftwareType.TuningService){
+				log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+				return false;
+			}
+
+			//
+
 			var checkTuningProperties: string[] = ["TuningDataIP", "TuningDataPort"];
 			for (var cp: number = 0; cp < checkTuningProperties.length; cp++) {
 				if (service.propertyValue(checkTuningProperties[cp]) == undefined) {
@@ -733,6 +764,23 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 
 				}
 				else {
+
+					// Check software type
+
+					if (service.propertyValue("Type") == undefined) {
+						log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+						return false;
+					}
+
+					var softwareType: number = service.jsPropertyInt("Type");
+					if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
+						(s == 1 && softwareType != SoftwareType.DiagDataService)){
+						log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+						return false;
+					}
+
+					//
+
 					var serviceDataChannel: DeviceObject = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
 					if (serviceDataChannel == null) {
 						log.errCFG3004(serviceID + "_DATACH01", equipmentID);

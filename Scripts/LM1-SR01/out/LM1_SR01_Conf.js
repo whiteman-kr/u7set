@@ -12,6 +12,18 @@ var DeviceObjectType;
     DeviceObjectType[DeviceObjectType["Software"] = 7] = "Software";
     DeviceObjectType[DeviceObjectType["Signal"] = 8] = "Signal";
 })(DeviceObjectType || (DeviceObjectType = {}));
+var SoftwareType;
+(function (SoftwareType) {
+    SoftwareType[SoftwareType["Monitor"] = 9000] = "Monitor";
+    SoftwareType[SoftwareType["ConfigurationService"] = 9001] = "ConfigurationService";
+    SoftwareType[SoftwareType["AppDataService"] = 9002] = "AppDataService";
+    SoftwareType[SoftwareType["ArchiveService"] = 9003] = "ArchiveService";
+    SoftwareType[SoftwareType["TuningService"] = 9004] = "TuningService";
+    SoftwareType[SoftwareType["DiagDataService"] = 9005] = "DiagDataService";
+    SoftwareType[SoftwareType["TuningClient"] = 9006] = "TuningClient";
+    SoftwareType[SoftwareType["Metrology"] = 9007] = "Metrology";
+    SoftwareType[SoftwareType["ServiceControlManager"] = 9008] = "ServiceControlManager";
+})(SoftwareType || (SoftwareType = {}));
 function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) {
     //var funcStr = "(function (confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){log.writeMessage(\"Hello\"); return true; })";
     //
@@ -59,7 +71,8 @@ var UartID = 0;
 //var configScriptVersion: number = 31;		// Add LmDescriptionVersion to Storage Format frame
 //var configScriptVersion: number = 32;		// Removed structure ModuleFirmwareCollection
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
-var configScriptVersion = 34; // Changes in LmNumberCount calculation
+//var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
+var configScriptVersion = 35; // Add Software type checking
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -403,6 +416,17 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
             log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
         }
         else {
+            // Check software type
+            if (service.propertyValue("Type") == undefined) {
+                log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+                return false;
+            }
+            var softwareType = service.jsPropertyInt("Type");
+            if (softwareType != SoftwareType.TuningService) {
+                log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+                return false;
+            }
+            //
             var checkTuningProperties = ["TuningDataIP", "TuningDataPort"];
             for (var cp = 0; cp < checkTuningProperties.length; cp++) {
                 if (service.propertyValue(checkTuningProperties[cp]) == undefined) {
@@ -482,6 +506,18 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
                     }
                 }
                 else {
+                    // Check software type
+                    if (service.propertyValue("Type") == undefined) {
+                        log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+                        return false;
+                    }
+                    var softwareType = service.jsPropertyInt("Type");
+                    if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
+                        (s == 1 && softwareType != SoftwareType.DiagDataService)) {
+                        log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+                        return false;
+                    }
+                    //
                     var serviceDataChannel = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
                     if (serviceDataChannel == null) {
                         log.errCFG3004(serviceID + "_DATACH01", equipmentID);
