@@ -52,8 +52,6 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	// Global connections
 
-
-
 	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningSignalManager::slot_serversArrived);
 
 	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
@@ -63,6 +61,12 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
 			Qt::QueuedConnection);
+
+	// DialogAlert
+
+	m_dialogAlert = new DialogAlert(this);
+	connect(theLogFile, &Log::LogFile::alertArrived, m_dialogAlert, &DialogAlert::onAlertArrived);
+
 	// Load user filters
 
 	QString errorCode;

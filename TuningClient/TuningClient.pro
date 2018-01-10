@@ -152,7 +152,8 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalStorage.cpp \
     TuningClientSignalManager.cpp \
     DialogFilterEditor.cpp \
-    ../lib/Tuning/TuningLog.cpp
+    ../lib/Tuning/TuningLog.cpp \
+    DialogAlert.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -206,7 +207,8 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSignalStorage.h \
     TuningClientSignalManager.h \
     DialogFilterEditor.h \
-    ../lib/Tuning/TuningLog.h
+    ../lib/Tuning/TuningLog.h \
+    DialogAlert.h
 
 
 FORMS    += \

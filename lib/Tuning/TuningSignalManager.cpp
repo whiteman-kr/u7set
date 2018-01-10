@@ -602,8 +602,6 @@ void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 		return;
 	}
 
-	QMutexLocker l(&m_statesMutex);
-
 	int readReplyCount = m_readTuningSignalsReply.tuningsignalstate_size();
 
 	for (int i = 0; i < readReplyCount; i++)
@@ -617,6 +615,8 @@ void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 
 			continue;
 		}
+
+		QMutexLocker state_l(&m_statesMutex);
 
 		TuningSignalState* object = statePtrByHash(tss.signalhash());
 		if (object == nullptr)
@@ -632,17 +632,30 @@ void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 
 		object->onReceiveValue(tss.readlowbound(), tss.readhighbound(), tss.valid(), tss.value(), &writingFailed);
 
+		state_l.unlock();
+
 		if (writingFailed == true)
 		{
-			writeLogError(tr("Error writing wignal with hash = %1, value = %2")
-						  .arg(tss.signalhash())
-						  .arg(tss.value())
+			QMutexLocker signal_l(&m_signalsMutex);
+
+			AppSignalParam* param = m_signals.signalPtrByHash(tss.signalhash());
+
+			if (param == nullptr)
+			{
+				assert(param);
+				continue;
+			}
+
+			writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4'")
+						  .arg(QString::number(object->editValue(), 'f', param->precision()))
+						  .arg(param->customSignalId())
+						  .arg(param->caption())
+						  .arg(param->equipmentId())
 						  );
+
+			signal_l.unlock();
 		}
-
 	}
-
-	l.unlock();
 
 	QMutexLocker sl(&m_signalsMutex);
 
@@ -1063,6 +1076,11 @@ QString TuningSignalManager::networkErrorStr(NetworkError error)
 	return "?";
 }
 
+
+void TuningSignalManager::writeLogAlert(const QString& message)
+{
+	Q_UNUSED(message);
+}
 
 void TuningSignalManager::writeLogError(const QString& message)
 {
