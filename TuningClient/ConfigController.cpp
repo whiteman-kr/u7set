@@ -382,7 +382,12 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.filterBySchema != readSettings.filterBySchema ||
 			theConfigSettings.showSchemasList != readSettings.showSchemasList ||
 			theConfigSettings.showSchemas != readSettings.showSchemas ||
-			theConfigSettings.showSignals != readSettings.showSignals)
+			theConfigSettings.showSignals != readSettings.showSignals ||
+			theConfigSettings.showSOR != readSettings.showSOR ||
+			theConfigSettings.loginPerOperation != readSettings.loginPerOperation ||
+			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
+			theConfigSettings.usersAccounts != readSettings.usersAccounts
+			)
 	{
 		apperanceUpdated = true;
 	}
@@ -552,6 +557,16 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
+
+
+			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
+
+			outSetting->loginPerOperation = dasXmlElement.attribute("loginPerOperation") == "true" ? true : false;
+			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();
+
+			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
+			usersAccounts = usersAccounts.replace('\n', ';');
+			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
 
 			outSetting->tuns1 = ConfigConnection(tunsId1, tunsIp1, tunsPort1);
 			outSetting->tuns2= ConfigConnection(tunsId2, tunsIp2, tunsPort2);

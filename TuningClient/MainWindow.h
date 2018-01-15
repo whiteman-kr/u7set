@@ -8,10 +8,12 @@
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "../lib/LogFile.h"
+#include "../lib/Tuning/TuningLog.h"
 #include "UserManager.h"
 #include "TuningClientSignalManager.h"
 #include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
+#include "DialogAlert.h"
 
 namespace Ui {
 	class MainWindow;
@@ -30,6 +32,8 @@ private:
 	void createMenu();
 	void createStatusBar();
 
+	void closeEvent(QCloseEvent *event) override;
+
 
 private:
 	TuningClientSignalManager* m_objectManager = nullptr;
@@ -43,6 +47,8 @@ private:
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
+
+	DialogAlert* m_dialogAlert = nullptr;
 
 	int m_mainWindowTimerId = -1;
 
@@ -76,6 +82,8 @@ private:
 	QAction* m_pAboutAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarLmErrors = nullptr;
+	QLabel* m_statusBarSor = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
 
@@ -87,6 +95,8 @@ private:
 extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
+
+extern TuningLog::TuningLog* theTuningLog;
 
 extern UserManager theUserManager;
 

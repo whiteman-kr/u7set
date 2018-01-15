@@ -12,8 +12,9 @@ TuningSignalManager::TuningSignalManager(E::SoftwareType softwareType,
 										 const QString equipmentID,
 										 int majorVersion,
 										 int minorVersion,
-										 int commitNo)
-	:Tcp::Client(HostAddressPort (QLatin1String("0.0.0.0"), 0), softwareType, equipmentID, majorVersion, minorVersion, commitNo)
+										 int commitNo, TuningLog::TuningLog* tuningLog)
+	:Tcp::Client(HostAddressPort (QLatin1String("0.0.0.0"), 0), softwareType, equipmentID, majorVersion, minorVersion, commitNo),
+	  m_tuningLog(tuningLog)
 {
 }
 
@@ -555,6 +556,20 @@ void TuningSignalManager::processTuningSourcesState(const QByteArray& data)
 
 		TuningSource& ts = it->second;
 
+		// Write SOR to tuning log
+
+		bool oldSor = ts.m_state.fotipflagsetsor() != 0;
+		bool newSor = tss.fotipflagsetsor() != 0;
+
+		if (m_tuningLog != nullptr)
+		{
+			if (oldSor != newSor)
+			{
+
+				m_tuningLog->write(ts.m_info.equipmentid().c_str(), tr("SOR is set"), oldSor, newSor);
+			}
+		}
+
 		ts.m_state = tss;
 	}
 
@@ -587,8 +602,6 @@ void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 		return;
 	}
 
-	QMutexLocker l(&m_statesMutex);
-
 	int readReplyCount = m_readTuningSignalsReply.tuningsignalstate_size();
 
 	for (int i = 0; i < readReplyCount; i++)
@@ -602,6 +615,8 @@ void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 
 			continue;
 		}
+
+		QMutexLocker state_l(&m_statesMutex);
 
 		TuningSignalState* object = statePtrByHash(tss.signalhash());
 		if (object == nullptr)
@@ -617,17 +632,30 @@ void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 
 		object->onReceiveValue(tss.readlowbound(), tss.readhighbound(), tss.valid(), tss.value(), &writingFailed);
 
+		state_l.unlock();
+
 		if (writingFailed == true)
 		{
-			writeLogError(tr("Error writing wignal with hash = %1, value = %2")
-						  .arg(tss.signalhash())
-						  .arg(tss.value())
+			QMutexLocker signal_l(&m_signalsMutex);
+
+			AppSignalParam* param = m_signals.signalPtrByHash(tss.signalhash());
+
+			if (param == nullptr)
+			{
+				assert(param);
+				continue;
+			}
+
+			writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4'")
+						  .arg(QString::number(object->editValue(), 'f', param->precision()))
+						  .arg(param->customSignalId())
+						  .arg(param->caption())
+						  .arg(param->equipmentId())
 						  );
+
+			signal_l.unlock();
 		}
-
 	}
-
-	l.unlock();
 
 	QMutexLocker sl(&m_signalsMutex);
 
@@ -864,13 +892,13 @@ bool TuningSignalManager::tuningSourceInfo(quint64 id, TuningSource* result)
 
 void TuningSignalManager::writeTuningSignals(std::vector<std::pair<Hash, float>>& data)
 {
-
-	QMutexLocker l(&m_statesMutex);
-
 	for (std::pair<Hash, float>& pair: data)
 	{
 		Hash& hash = pair.first;
 		float& value = pair.second;
+		float oldValue = 0;
+
+		QMutexLocker ls(&m_statesMutex);
 
 		TuningSignalState* state = statePtrByHash(hash);
 		if (state == nullptr)
@@ -882,15 +910,35 @@ void TuningSignalManager::writeTuningSignals(std::vector<std::pair<Hash, float>>
 		// set edit value and writing flags to states
 		//
 
+		oldValue = state->value();
+
 		state->onSendValue(value);
+
+		ls.unlock();
+
+		//
+
+		QMutexLocker l(&m_signalsMutex);
+
+		AppSignalParam* param = m_signals.signalPtrByHash(hash);
+		if (param == nullptr)
+		{
+			assert(param);
+			return;
+		}
+
+		l.unlock();
+
+		if (m_tuningLog != nullptr)
+		{
+			m_tuningLog->write(*param, oldValue, value);
+		}
 
 		// push command to the queue
 		//
 		WriteCommand cmd(hash, value);
 		m_writeQueue.push(cmd);
 	}
-
-	l.unlock();
 }
 
 QString TuningSignalManager::getStateToolTip()
@@ -929,6 +977,84 @@ void TuningSignalManager::connectTuningController(TuningController* controller)
 	connect(controller, &TuningController::signal_getState, this, &TuningSignalManager::slot_signalState, Qt::DirectConnection);
 }
 
+int TuningSignalManager::getLMErrorsCount()
+{
+	return getLMErrorsCount(std::vector<QString>());
+
+}
+
+int TuningSignalManager::getLMErrorsCount(const std::vector<QString>& equipmentHashes)
+{
+	int result = 0;
+
+	QMutexLocker l(&m_tuningSourcesMutex);
+
+	for (auto it : m_tuningSources)
+	{
+		const TuningSource& ts = it.second;
+
+		if (equipmentHashes.empty() == false)
+		{
+			// Filter from list
+			//
+			const QString tseid = QString(ts.m_info.equipmentid().c_str());
+			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
+			{
+				continue;
+			}
+		}
+
+		if (ts.m_state.isreply() == true && ts.m_state.errfotipuniqueid() > 0)
+		{
+			result++;
+		}
+
+		// Add here more errors
+	}
+
+	l.unlock();
+
+	return result;
+}
+
+int TuningSignalManager::getSORCount()
+{
+	return getSORCount(std::vector<QString>());
+}
+
+int TuningSignalManager::getSORCount(const std::vector<QString>& equipmentHashes)
+{
+	int result = 0;
+
+	QMutexLocker l(&m_tuningSourcesMutex);
+
+	for (auto it : m_tuningSources)
+	{
+		const TuningSource& ts = it.second;
+
+		if (equipmentHashes.empty() == false)
+		{
+			// Filter from list
+			//
+			const QString tseid = QString(ts.m_info.equipmentid().c_str());
+			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
+			{
+				continue;
+			}
+		}
+
+		if (ts.m_state.isreply() == true && ts.m_state.fotipflagsetsor() > 0)
+		{
+			result++;
+		}
+	}
+
+	l.unlock();
+
+	return result;
+}
+
+
 QString TuningSignalManager::networkErrorStr(NetworkError error)
 {
 	switch (error)
@@ -950,6 +1076,11 @@ QString TuningSignalManager::networkErrorStr(NetworkError error)
 	return "?";
 }
 
+
+void TuningSignalManager::writeLogAlert(const QString& message)
+{
+	Q_UNUSED(message);
+}
 
 void TuningSignalManager::writeLogError(const QString& message)
 {

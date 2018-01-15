@@ -2,10 +2,16 @@
 #include "TuningClientSignalManager.h"
 #include "version.h"
 
-TuningClientSignalManager::TuningClientSignalManager()
-	:TuningSignalManager(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1, USED_SERVER_COMMIT_NUMBER)
+TuningClientSignalManager::TuningClientSignalManager(TuningLog::TuningLog* tuningLog)
+	:TuningSignalManager(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1, USED_SERVER_COMMIT_NUMBER, tuningLog)
 {
 
+}
+
+void TuningClientSignalManager::writeLogAlert(const QString& message)
+{
+	assert(theLogFile);
+	theLogFile->writeAlert(message);
 }
 
 void TuningClientSignalManager::writeLogError(const QString& message)

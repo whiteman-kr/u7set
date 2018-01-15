@@ -15,6 +15,7 @@ namespace Log
 		Error,
 		Warning,
 		Message,
+		Alert,
 		Text
 	};
 
@@ -210,6 +211,7 @@ namespace Log
 		virtual ~LogFile();
 
 		bool writeMessage(const QString& text);
+		bool writeAlert(const QString& text);
 		bool writeError(const QString& text);
 		bool writeWarning(const QString& text);
 		bool writeText(const QString& text);
@@ -217,8 +219,11 @@ namespace Log
 		bool write(MessageType type, const QString& text);
 
 		void view(QWidget* parent);
+
 	signals:
+
 		void writeFailure();
+		void alertArrived(QString text);
 
 	private slots:
 		void onFlushFailure();

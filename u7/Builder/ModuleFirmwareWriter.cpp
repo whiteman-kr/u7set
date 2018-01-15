@@ -929,15 +929,11 @@ static QByteArray err;
 				std::vector<int> channelStartFrame;
 
 				int frame = startDataFrame;
-				int maxChannel = 1;
+				int lmNumberCount = static_cast<int>(channelNumbersAndSize.size());
 
-				for (size_t c = 0; c < channelNumbersAndSize.size(); c++)
+				for (int c = 0; c < lmNumberCount; c++)
 				{
 					int channel = channelNumbersAndSize[c].first;
-					if (channel > maxChannel)
-					{
-						maxChannel = channel;
-					}
 					int size = (quint16)channelNumbersAndSize[c].second;
 
 					if (frame >= firmware.eepromFrameCount(uartId))
@@ -1035,7 +1031,7 @@ static QByteArray err;
 
 				ptr += sizeof(quint32);	//reserved
 
-				*(quint16*)ptr = qToBigEndian((quint16)maxChannel);	// Configuration channels quantity
+				*(quint16*)ptr = qToBigEndian((quint16)lmNumberCount);	// Configuration channels quantity
 				ptr += sizeof(quint16);
 
 				if (channelNumbersAndSize.size() != channelStartFrame.size())
