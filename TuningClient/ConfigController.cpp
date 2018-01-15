@@ -384,7 +384,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.showSchemas != readSettings.showSchemas ||
 			theConfigSettings.showSignals != readSettings.showSignals ||
 			theConfigSettings.showSOR != readSettings.showSOR ||
-			theConfigSettings.loginPerOperation != readSettings.loginPerOperation ||
+			theConfigSettings.logonMode != readSettings.logonMode ||
 			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
 			theConfigSettings.usersAccounts != readSettings.usersAccounts
 			)
@@ -403,19 +403,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	// Modify logon mode
 
-	/*switch (theConfigSettings.logonMode)
-	{
-		case 0:
-			theMainWindow->userManager()->setLogonMode(LogonMode::Permanent);
-		break;
-		case 1:
-			theMainWindow->userManager()->setLogonMode(LogonMode::PerOperation);
-		break;
-	default:
-		assert(false);
-	}
-
-	theMainWindow->userManager()->setUsers(theConfigSettings.users);*/
+	theMainWindow->userManager()->setConfiguration(theConfigSettings.usersAccounts, theConfigSettings.logonMode, theConfigSettings.loginSessionLength);
 
 	// Emit signals to inform everybody about new configuration
 	//
@@ -579,15 +567,14 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			equipmentListString.remove('\r');
 			outSetting->equipmentList = equipmentListString.split(';', QString::SkipEmptyParts);
 
-			/*
 			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
 
-			outSetting->loginPerOperation = dasXmlElement.attribute("loginPerOperation") == "true" ? true : false;
+			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;
 			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();
 
 			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
 			usersAccounts = usersAccounts.replace('\n', ';');
-			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);*/
+			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
 
 			outSetting->tuns1 = ConfigConnection(tunsId1, tunsIp1, tunsPort1);
 			outSetting->tuns2= ConfigConnection(tunsId2, tunsIp2, tunsPort2);

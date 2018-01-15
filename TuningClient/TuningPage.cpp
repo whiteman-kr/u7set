@@ -811,7 +811,7 @@ bool TuningPage::askForSavePendingChanges()
 
 bool TuningPage::write()
 {
-	if (theMainWindow->userManager()->login(this, false) == false)
+	if (theMainWindow->userManager()->login(this) == false)
 	{
 		return false;
 	}

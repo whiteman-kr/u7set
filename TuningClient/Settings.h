@@ -58,8 +58,6 @@ struct ConfigSettings
 
 	LogonMode logonMode = LogonMode::Permanent;
 
-	std::vector<User> users;
-
 	bool showSignals = true;
 
 	bool showSchemas = true;
@@ -71,8 +69,6 @@ struct ConfigSettings
 	bool filterBySchema = true;
 
 	bool showSOR = true;
-
-	bool loginPerOperation = false;
 
 	int loginSessionLength = 120;
 
