@@ -131,6 +131,25 @@ void CfgServer::readBuildXml()
 	qDebug() << C_STR(str);
 }
 
+bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
+{
+	if (m_buildFileInfo.contains(pathFileName) == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString fileMd5 = m_buildFileInfo[pathFileName].md5;
+	QString calculatedMd5 = QCryptographicHash::hash(fileData, QCryptographicHash::Md5).toHex();
+
+	if (fileMd5 != calculatedMd5)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 
 // -------------------------------------------------------------------------------------
 //
@@ -414,7 +433,12 @@ bool CfgLoader::startConfigurationXmlLoading()
 		return true;
 	}
 
-	if (isConnected() == false || m_transferInProgress == true)
+	if (isConnected() == false)
+	{
+		return true;
+	}
+
+	if (m_transferInProgress == true)
 	{
 		return true;
 	}
