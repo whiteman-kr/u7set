@@ -654,7 +654,7 @@ int ServiceStarter::runAsRegularApplication()
 
 	keyReaderThread->start();
 
-	// run service
+		// run service
 	//
 	Service* service = new Service(m_serviceWorker, m_logger);
 

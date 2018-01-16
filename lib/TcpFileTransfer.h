@@ -32,6 +32,7 @@ namespace Tcp
 		FileDataCorrupted,
 		CantWriteLocalFile,
 		LocalFileReadingError,
+		ServerReplyTimeout,
 
 		ConfigurationIsNotReady,		// for CfgLoader class
 
@@ -109,6 +110,7 @@ namespace Tcp
 	protected:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
+		virtual void onReplyTimeout() override;
 
 		QString getErrorStr(FileTransferResult errorCode);
 
@@ -162,6 +164,7 @@ namespace Tcp
 
 	protected:
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
+		virtual bool checkFile(QString& pathFileName, QByteArray& fileData);
 
 	private:
 		void init();
@@ -175,9 +178,10 @@ namespace Tcp
 		std::shared_ptr<CircularLogger> m_logger;
 
 		GetFileReply& m_reply;
-		char* m_fileData = nullptr;
+		QByteArray m_fileData;
 
 		char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
+		char* m_replyFileData = nullptr;
 
 		QTimer m_transmitionFilesTimer;
 	};
