@@ -58,7 +58,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	// Global connections
 
-	connect(&m_configController, &ConfigController::serversArrived, m_tcpClient, &TuningClientTcpClient::slot_serversArrived);
+	connect(&m_configController, &ConfigController::tcpClientConfigurationArrived, m_tcpClient, &TuningClientTcpClient::slot_configurationArrived);
 
 	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::schemasDetailsArrived, this, &MainWindow::slot_schemasDetailsUpdated, Qt::DirectConnection);

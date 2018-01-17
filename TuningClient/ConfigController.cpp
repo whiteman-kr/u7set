@@ -410,7 +410,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (serversUpdated == true)
 	{
-		emit serversArrived(theConfigSettings.tuns1.address(), theConfigSettings.tuns2.address());
+		emit tcpClientConfigurationArrived(theConfigSettings.tuns1.address(), theConfigSettings.tuns2.address(), theConfigSettings.autoApply);
 	}
 
 	if (someFilesUpdated == true || apperanceUpdated == true)

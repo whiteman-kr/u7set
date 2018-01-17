@@ -395,7 +395,7 @@ message TuningSignalsWriteReply
 
 message TuningSignalsApply
 {
-    optional string clientEquipmentID = 1;
+
 }
 
 

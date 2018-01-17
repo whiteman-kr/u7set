@@ -912,6 +912,26 @@ bool TuningPage::write()
 	return true;
 }
 
+bool TuningPage::apply()
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return false;
+	}
+
+	if (QMessageBox::warning(this, qAppName(),
+							 tr("Are you sure you want apply the changes?"),
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return false;
+	}
+
+	m_tuningTcpClient->applyTuningSignals();
+
+	return true;
+}
+
 void TuningPage::undo()
 {
 	slot_undo();

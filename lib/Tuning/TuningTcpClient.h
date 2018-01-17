@@ -68,6 +68,10 @@ public:
 	void writeTuningSignal(const TuningWriteCommand& data);
 	void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
 
+	// Apply states
+	//
+	void applyTuningSignals();
+
 	//
 	// Status and counters
 	//
@@ -110,13 +114,16 @@ protected:
 	void requestWriteTuningSignals();
 	void processWriteTuningSignals(const QByteArray& data);
 
+	void requestApplyTuningSignals();
+	void processApplyTuningSignals(const QByteArray& data);
+
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);
 	virtual void writeLogMessage(const QString& message);
 
 public slots:
 	void slot_signalsUpdated();
-	void slot_serversArrived(HostAddressPort address1, HostAddressPort address2);
+	void slot_configurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply);
 
 signals:
 	void tuningSourcesArrived();
@@ -133,11 +140,15 @@ public:
 	int requestInterval() const;
 	void setRequestInterval(int requestInterval);
 
+	bool autoApply() const;
+	void setAutoApply(bool value);
+
 	// Data
 	//
 private:
 	QString m_instanceId;
 	int m_requestInterval = 10;
+	bool m_autoApply = true;
 
 	TuningSignalManager* m_signals;
 
@@ -148,8 +159,9 @@ private:
 
 	// Processing
 	//
-	mutable QMutex m_writeQueueMutex;					// For access to m_writeQueue
+	mutable QMutex m_writeQueueMutex;					// For access to m_writeQueue and m_writeApply
 	std::queue<TuningWriteCommand> m_writeQueue;
+	bool m_writeApply = false;
 
 	int m_readTuningSignalIndex = 0;
 	int m_readTuningSignalCount = 0;
@@ -174,6 +186,9 @@ private:
 
 	::Network::TuningSignalsWrite m_writeTuningSignals;
 	::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
+
+	::Network::TuningSignalsApply m_applyTuningSignals;
+	::Network::TuningSignalsApplyReply m_applyTuningSignalsReply;
 };
 
 

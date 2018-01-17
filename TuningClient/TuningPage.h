@@ -87,6 +87,8 @@ public:
 
 	bool write();
 
+	bool apply();
+
 	void undo();
 
 private slots:

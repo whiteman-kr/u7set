@@ -138,6 +138,17 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 	return;
 }
 
+// Apply states
+//
+void TuningTcpClient::applyTuningSignals()
+{
+	QMutexLocker l(&m_writeQueueMutex);
+
+	m_writeApply = true;
+
+	return;
+}
+
 int TuningTcpClient::getLMErrorsCount()
 {
 	return getLMErrorsCount(std::vector<QString>());
@@ -334,23 +345,37 @@ void TuningTcpClient::resetToGetTuningSourcesState()
 
 void TuningTcpClient::resetToProcessTuningSignals()
 {
-	// If there is a queued data to write something, write it.
+	// If there is a queued data to write something, write it or apply.
 	//
 	QMutexLocker l(&m_writeQueueMutex);
+
 	bool writeQueueEmpty = m_writeQueue.empty();
+
+	bool writeApply = m_writeApply;
+	m_writeApply = false;
+
 	l.unlock();
 
-	if (writeQueueEmpty == false)
+	if (writeApply == true)
 	{
-		// Write request
+		// Apply request
 		//
-		requestWriteTuningSignals();
+		requestApplyTuningSignals();
 	}
 	else
 	{
-		// Request states
-		//
-		requestReadTuningSignals();
+		if (writeQueueEmpty == false)
+		{
+			// Write request
+			//
+			requestWriteTuningSignals();
+		}
+		else
+		{
+			// Request states
+			//
+			requestReadTuningSignals();
+		}
 	}
 
 	return;
@@ -603,7 +628,7 @@ void TuningTcpClient::requestWriteTuningSignals()
 		//
 		m_writeTuningSignals.Clear();
 
-		m_writeTuningSignals.set_autoapply(true);
+		m_writeTuningSignals.set_autoapply(m_autoApply);
 		m_writeTuningSignals.mutable_commands()->Reserve(writeTuningSignalCount);
 
 		for (int i = 0; i < writeTuningSignalCount; i++)
@@ -669,11 +694,47 @@ void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 	return;
 }
 
-void TuningTcpClient::slot_serversArrived(HostAddressPort address1, HostAddressPort address2)
+void TuningTcpClient::requestApplyTuningSignals()
+{
+	assert(isClearToSendRequest());
+
+	sendRequest(TDS_TUNING_SIGNALS_APPLY, m_applyTuningSignals);
+
+	return;
+}
+
+void TuningTcpClient::processApplyTuningSignals(const QByteArray& data)
+{
+	bool ok = m_applyTuningSignalsReply.ParseFromArray(data.constData(), data.size());
+
+	if (ok == false)
+	{
+		assert(ok);
+		resetToGetTuningSourcesState();
+		return;
+	}
+
+	if (m_applyTuningSignalsReply.error() != 0)
+	{
+		writeLogError(tr("TcpTuningClient::processApplyTuningSignals, error received: %1")
+					  .arg(networkErrorStr(static_cast<NetworkError>(m_applyTuningSignalsReply.error()))));
+
+		resetToGetTuningSourcesState();
+		return;
+	}
+
+	resetToProcessTuningSignals();
+
+	return;
+}
+
+void TuningTcpClient::slot_configurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply)
 {
 	writeLogMessage(tr("TuningTcpClient::slot_configurationArrived"));
 
 	setServers(address1, address2, true);
+
+	setAutoApply(autoApply);
 
 	return;
 }
@@ -869,4 +930,14 @@ int TuningTcpClient::requestInterval() const
 void TuningTcpClient::setRequestInterval(int requestInterval)
 {
 	m_requestInterval = requestInterval;
+}
+
+bool TuningTcpClient::autoApply() const
+{
+	return m_autoApply;
+}
+
+void TuningTcpClient::setAutoApply(bool value)
+{
+	m_autoApply = value;
 }
