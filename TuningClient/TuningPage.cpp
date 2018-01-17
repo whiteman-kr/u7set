@@ -690,22 +690,28 @@ void TuningPage::fillObjectsList()
 			}
 		}
 
-		// Tab Filter
-		//
 
-		if (m_tabFilter != nullptr)
-		{
-			if (m_tabFilter->match(asp) == false)
-			{
-				continue;
-			}
-		}
+		// Button Filter
+		//
 
 		if (m_buttonFilter != nullptr)
 		{
 			if (m_buttonFilter->match(asp) == false)
 			{
 				continue;
+			}
+			else
+			{
+				// Tab Filter
+				//
+
+				if (m_tabFilter != nullptr)
+				{
+					if (m_tabFilter->match(asp) == false)
+					{
+						continue;
+					}
+				}
 			}
 		}
 

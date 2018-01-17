@@ -8,7 +8,7 @@ int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_treeFilter(treeFilter),
+	m_currentTreeFilter(treeFilter),
 	m_workspaceFilter(workspaceFilter),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient)
@@ -45,7 +45,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 
 	//
 
-	updateTabControl();
+	createTabPages();
 
 	//
 
@@ -98,9 +98,65 @@ TuningWorkspace::~TuningWorkspace()
 
 bool TuningWorkspace::hasPendingChanges()
 {
-	if (m_tuningPage != nullptr)
+	for (auto it : m_tuningPagesMap)
 	{
-		return m_tuningPage->hasPendingChanges();
+		TuningPage* tp = it.second;
+
+		if (tp->hasPendingChanges() == true)
+		{
+			return true;
+		}
+	}
+
+	for (auto it : m_tuningWorkspacesMap)
+	{
+		TuningWorkspace* tw = it.second;
+
+		if (tw->hasPendingChanges() == true)
+		{
+			return true;
+		}
+	}
+
+	if (m_singleTuningPage != nullptr)
+	{
+		if (m_singleTuningPage->hasPendingChanges() == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool TuningWorkspace::askForSavePendingChanges()
+{
+	for (auto it : m_tuningPagesMap)
+	{
+		TuningPage* tp = it.second;
+
+		if (tp->askForSavePendingChanges() == false)
+		{
+			return false;
+		}
+	}
+
+	for (auto it : m_tuningWorkspacesMap)
+	{
+		TuningWorkspace* tw = it.second;
+
+		if (tw->askForSavePendingChanges() == false)
+		{
+			return false;
+		}
+	}
+
+	if (m_singleTuningPage != nullptr)
+	{
+		if (m_singleTuningPage->askForSavePendingChanges() == false)
+		{
+			return false;
+		}
 	}
 
 	return true;
@@ -148,7 +204,11 @@ void TuningWorkspace::updateFiltersTree()
 	{
 		m_filterTree = new QTreeWidget();
 		m_filterTree->setSortingEnabled(true);
-		connect(m_filterTree, &QTreeWidget::currentItemChanged, this, &TuningWorkspace::slot_currentItemChanged);
+
+		m_filterTree->viewport()->installEventFilter(this);
+		m_filterTree->installEventFilter(this);
+
+		connect(m_filterTree, &QTreeWidget::currentItemChanged, this, &TuningWorkspace::slot_currentTreeItemChanged);
 
 		QStringList headerLabels;
 		headerLabels << tr("Caption");
@@ -191,12 +251,10 @@ void TuningWorkspace::updateFiltersTree()
 		m_filterTree->clear();
 	}
 
-	m_treeFilter = nullptr;
+	m_currentTreeFilter = nullptr;
 
 	// Fill filters control
 	//
-
-	m_filterTree->blockSignals(true);
 
 	m_filterTree->addTopLevelItem(item);
 
@@ -206,8 +264,6 @@ void TuningWorkspace::updateFiltersTree()
 
 	m_filterTree->sortItems(0, Qt::AscendingOrder);
 
-	m_filterTree->blockSignals(false);
-
 	if (mask.isEmpty() == false)
 	{
 		m_filterTree->expandAll();
@@ -216,10 +272,9 @@ void TuningWorkspace::updateFiltersTree()
 
 void TuningWorkspace::createButtons()
 {
-	std::vector<FilterButton*> buttons;
-
 	// Buttons
 	//
+	m_filterButtons.clear();
 
 	bool firstButton = true;
 
@@ -238,7 +293,9 @@ void TuningWorkspace::createButtons()
 		}
 
 		FilterButton* button = new FilterButton(f, f->caption(), firstButton);
-		buttons.push_back(button);
+		m_filterButtons.push_back(button);
+
+		button->installEventFilter(this);
 
 		if (firstButton)
 		{
@@ -249,7 +306,7 @@ void TuningWorkspace::createButtons()
 
 	}
 
-	if (buttons.empty() == false)
+	if (m_filterButtons.empty() == false)
 	{
 		QButtonGroup* filterButtonGroup = new QButtonGroup();
 
@@ -257,7 +314,7 @@ void TuningWorkspace::createButtons()
 
 		m_buttonsLayout = new QHBoxLayout();
 
-		for (auto b: buttons)
+		for (auto b: m_filterButtons)
 		{
 			filterButtonGroup->addButton(b);
 			m_buttonsLayout->addWidget(b);
@@ -265,11 +322,11 @@ void TuningWorkspace::createButtons()
 
 		m_buttonsLayout->addStretch();
 
-		m_buttonFilter = buttons[0]->filter();
+		m_currentbuttonFilter = m_filterButtons[0]->filter();
 	}
 }
 
-void TuningWorkspace::updateTabControl()
+void TuningWorkspace::createTabPages()
 {
 	// Fill tab pages
 	//
@@ -292,18 +349,18 @@ void TuningWorkspace::updateTabControl()
 			continue;
 		}
 
-		QWidget* tp = createTuningPage(f);
+		QWidget* tp = createTuningPageOrWorkspace(f);
 
 		tuningPages.push_back(std::make_pair(tp, f));
 	}
 
 	// Buttons level tabs
 
-	if (m_buttonFilter != nullptr)
+	if (m_currentbuttonFilter != nullptr)
 	{
-		for (int i = 0; i < m_buttonFilter->childFiltersCount(); i++)
+		for (int i = 0; i < m_currentbuttonFilter->childFiltersCount(); i++)
 		{
-			std::shared_ptr<TuningFilter> f = m_buttonFilter->childFilter(i);
+			std::shared_ptr<TuningFilter> f = m_currentbuttonFilter->childFilter(i);
 			if (f == nullptr)
 			{
 				assert(f);
@@ -315,7 +372,7 @@ void TuningWorkspace::updateTabControl()
 				continue;
 			}
 
-			QWidget* tp = createTuningPage(f);
+			QWidget* tp = createTuningPageOrWorkspace(f);
 
 			tuningPages.push_back(std::make_pair(tp, f));
 		}
@@ -323,8 +380,6 @@ void TuningWorkspace::updateTabControl()
 
 	if (tuningPages.empty() == false)
 	{
-
-
 		// Create tab control and add pages
 		//
 		if (m_tab == nullptr)
@@ -332,6 +387,8 @@ void TuningWorkspace::updateTabControl()
 			m_tab = new QTabWidget();
 
 			m_rightLayout->addWidget(m_tab);
+
+			m_tab->tabBar()->installEventFilter(this);
 
 			m_tab->setVisible(false);
 		}
@@ -342,9 +399,9 @@ void TuningWorkspace::updateTabControl()
 			m_tab->clear();
 		}
 
-		if (m_tuningPage != nullptr)
+		if (m_singleTuningPage != nullptr)
 		{
-			m_tuningPage->setVisible(false);
+			m_singleTuningPage->setVisible(false);
 		}
 
 		for (auto t : tuningPages)
@@ -364,48 +421,44 @@ void TuningWorkspace::updateTabControl()
 
 		// set the active tab
 
-		if (m_buttonFilter == nullptr)
+		if (m_currentbuttonFilter != nullptr)
 		{
-			assert(m_buttonFilter);
-			return;
-		}
-
-		auto it = m_activeTabPagesMap.find(m_buttonFilter->ID());
-		if (it != m_activeTabPagesMap.end())
-		{
-			int index = m_activeTabPagesMap[m_buttonFilter->ID()];
-			m_tab->setCurrentIndex(index);
+			auto it = m_activeTabPagesMap.find(m_currentbuttonFilter->ID());
+			if (it != m_activeTabPagesMap.end())
+			{
+				int index = m_activeTabPagesMap[m_currentbuttonFilter->ID()];
+				m_tab->setCurrentIndex(index);
+			}
 		}
 	}
 	else
 	{
 		// No tab pages, create only one page
 		//
-		if (m_tuningPage == nullptr)
+		if (m_singleTuningPage == nullptr)
 		{
-
 			std::shared_ptr<TuningFilter> emptyFilter = std::make_shared<TuningFilter>();
 
 			QUuid uid = QUuid::createUuid();
 
 			emptyFilter->setID(uid.toString());
 
-			QWidget* tp = createTuningPage(emptyFilter);
+			QWidget* tp = createTuningPageOrWorkspace(emptyFilter);
 
 			m_rightLayout->addWidget(tp);
 
-			m_tuningPage = (TuningPage*)tp;
+			m_singleTuningPage = (TuningPage*)tp;
 		}
 
 		if (m_tab != nullptr)
 		{
 			m_tab->setVisible(false);
 		}
-		m_tuningPage->setVisible(true);
+		m_singleTuningPage->setVisible(true);
 	}
 }
 
-QWidget* TuningWorkspace::createTuningPage(std::shared_ptr<TuningFilter> childWorkspaceFilter)
+QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilter> childWorkspaceFilter)
 {
 	if (childWorkspaceFilter == nullptr)
 	{
@@ -435,14 +488,16 @@ QWidget* TuningWorkspace::createTuningPage(std::shared_ptr<TuningFilter> childWo
 
 	if (createChildWorkspace == true)
 	{
+		// We have to create nested workspace
+		//
 		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningWorkspacesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningWorkspace* tw = new TuningWorkspace(m_currentTreeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 
-			connect(this, &TuningWorkspace::treeFilterSelectionChanged, tw, &TuningWorkspace::slot_treeFilterChanged);
+			connect(this, &TuningWorkspace::treeFilterSelectionChanged, tw, &TuningWorkspace::slot_parentTreeFilterChanged);
 
 			return tw;
 		}
@@ -453,11 +508,12 @@ QWidget* TuningWorkspace::createTuningPage(std::shared_ptr<TuningFilter> childWo
 	}
 	else
 	{
-
+		// We have to create tuning page
+		//
 		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningPagesMap.end())
 		{
-			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_buttonFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningPage* tp = new TuningPage(m_currentTreeFilter, childWorkspaceFilter, m_currentbuttonFilter, m_tuningSignalManager, m_tuningTcpClient);
 
 			m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
@@ -471,7 +527,6 @@ QWidget* TuningWorkspace::createTuningPage(std::shared_ptr<TuningFilter> childWo
 		{
 			return it->second;
 		}
-
 	}
 }
 
@@ -589,23 +644,56 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 	{
 		updateTreeItemsStatus(treeItem->child(i));
 	}
-
 }
 
-
-void TuningWorkspace::slot_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 {
-
-	if (m_tuningPage != nullptr && m_tuningPage->askForSavePendingChanges() == false)
+	if (m_tab != nullptr && object == m_tab->tabBar() &&
+			(event->type() == QEvent::MouseButtonPress ||
+			 event->type() == QEvent::MouseButtonRelease ||
+			 event->type() == QEvent::KeyPress))
 	{
-		m_treeItemToSelect = previous;
-		QTimer::singleShot(10, this, &TuningWorkspace::slot_selectPreviousTreeItem);
-		return;
+		if (askForSavePendingChanges() == false)
+		{
+			return true;
+		}
 	}
+
+	if (m_filterTree != nullptr && (object == m_filterTree || object == m_filterTree->viewport()) &&
+			(event->type() == QEvent::MouseButtonPress ||
+			 event->type() == QEvent::MouseButtonRelease ||
+			 event->type() == QEvent::KeyPress))
+	{
+		if (askForSavePendingChanges() == false)
+		{
+			return true;
+		}
+	}
+
+	for (FilterButton* b : m_filterButtons)
+	{
+		if (object == b &&
+				(event->type() == QEvent::MouseButtonPress ||
+				 event->type() == QEvent::MouseButtonRelease ||
+				 event->type() == QEvent::KeyPress))
+		{
+			if (askForSavePendingChanges() == false)
+			{
+				return true;
+			}
+		}
+	}
+
+	return QWidget::eventFilter(object, event);
+}
+
+void TuningWorkspace::slot_currentTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+{
+	Q_UNUSED(previous);
 
 	if (current == nullptr)
 	{
-		m_treeFilter = nullptr;
+		m_currentTreeFilter = nullptr;
 		emit treeFilterSelectionChanged(nullptr);
 	}
 	else
@@ -625,9 +713,9 @@ void TuningWorkspace::slot_maskApply()
 	updateFiltersTree();
 }
 
-void TuningWorkspace::slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter)
+void TuningWorkspace::slot_parentTreeFilterChanged(std::shared_ptr<TuningFilter> filter)
 {
-	m_treeFilter = filter;
+	m_currentTreeFilter = filter;
 	emit treeFilterSelectionChanged(filter);
 }
 
@@ -639,41 +727,31 @@ void TuningWorkspace::slot_filterButtonClicked(std::shared_ptr<TuningFilter> fil
 		return;
 	}
 
+	if (m_currentbuttonFilter == nullptr)
+	{
+		assert(m_currentbuttonFilter);
+		return;
+	}
+
 	// Remember the tab index for current button
 
 	if (m_tab != nullptr && m_tab->isVisible() == true)
 	{
-		if (m_buttonFilter == nullptr)
-		{
-			assert(m_buttonFilter);
-			return;
-		}
-
 		int index = m_tab->currentIndex();
 
-		m_activeTabPagesMap[m_buttonFilter->ID()] = index;
+		m_activeTabPagesMap[m_currentbuttonFilter->ID()] = index;
 	}
 
 	// Set the new filter
 
-	m_buttonFilter = filter;
+	m_currentbuttonFilter = filter;
 
 	// Update tab
 
-	updateTabControl();
+	createTabPages();
 
 	if (m_tab == nullptr)
 	{
 		emit buttonFilterSelectionChanged(filter);
-	}
-}
-
-void TuningWorkspace::slot_selectPreviousTreeItem()
-{
-	if (m_filterTree != nullptr && m_treeItemToSelect != nullptr)
-	{
-		m_filterTree->blockSignals(true);
-		m_filterTree->setCurrentItem(m_treeItemToSelect);
-		m_filterTree->blockSignals(false);
 	}
 }
