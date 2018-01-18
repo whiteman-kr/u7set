@@ -34,7 +34,7 @@ public:
 	// signals
 	//
 signals:
-	void serversArrived(HostAddressPort address1, HostAddressPort address2);
+	void tcpClientConfigurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply);
 
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);

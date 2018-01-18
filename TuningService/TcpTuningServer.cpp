@@ -321,14 +321,14 @@ namespace Tuning
 	{
 		m_tuningSignalsApplyRequest.ParseFromArray(requestData, requestDataSize);
 
-		QString clientRequestID = QString::fromStdString(m_tuningSignalsApplyRequest.clientequipmentid());
+		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_TUNING_SIGNALS_APPLY request from client %1, %2")).
-					  arg(clientRequestID).
+					  arg(clientEquipmentID).
 					  arg(peerAddr().addressStr()));
 
 		const TuningClientContext* clientContext =
-				m_service.getClientContext(clientRequestID);
+				m_service.getClientContext(clientEquipmentID);
 
 		NetworkError errCode = NetworkError::Success;
 

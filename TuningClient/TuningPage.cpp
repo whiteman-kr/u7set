@@ -690,22 +690,28 @@ void TuningPage::fillObjectsList()
 			}
 		}
 
-		// Tab Filter
-		//
 
-		if (m_tabFilter != nullptr)
-		{
-			if (m_tabFilter->match(asp) == false)
-			{
-				continue;
-			}
-		}
+		// Button Filter
+		//
 
 		if (m_buttonFilter != nullptr)
 		{
 			if (m_buttonFilter->match(asp) == false)
 			{
 				continue;
+			}
+			else
+			{
+				// Tab Filter
+				//
+
+				if (m_tabFilter != nullptr)
+				{
+					if (m_tabFilter->match(asp) == false)
+					{
+						continue;
+					}
+				}
 			}
 		}
 
@@ -908,6 +914,26 @@ bool TuningPage::write()
 	}
 
 	m_tuningTcpClient->writeTuningSignal(commands);
+
+	return true;
+}
+
+bool TuningPage::apply()
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return false;
+	}
+
+	if (QMessageBox::warning(this, qAppName(),
+							 tr("Are you sure you want apply the changes?"),
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return false;
+	}
+
+	m_tuningTcpClient->applyTuningSignals();
 
 	return true;
 }
