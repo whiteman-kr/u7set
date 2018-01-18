@@ -42,7 +42,12 @@ namespace Sim
 		ODT,
 		ST
 	};
+}
 
+Q_DECLARE_METATYPE(Sim::CyclePhase)
+
+namespace Sim
+{
 	struct LogicUnitData
 	{
 		int programCounter = 0;					// current offeset of program memory, in words
@@ -70,9 +75,11 @@ namespace Sim
 
 		Q_PROPERTY(quint16 Word0 MEMBER m_word0)
 		Q_PROPERTY(quint16 Word1 MEMBER m_word1)
+		Q_PROPERTY(quint16 Word2 MEMBER m_word2)
 
 		Q_PROPERTY(quint32 Dword0 MEMBER m_dword0)
 		Q_PROPERTY(quint32 Dword1 MEMBER m_dword1)
+
 	public:
 		DeviceCommand(const LmCommand& command);
 		DeviceCommand(const DeviceCommand& that);
@@ -97,6 +104,7 @@ namespace Sim
 
 		quint16 m_word0 = 0;			// Set in parse script
 		quint16 m_word1 = 0;			// Set in parse script
+		quint16 m_word2 = 0;			// Set in parse script
 
 		quint32 m_dword0 = 0;			// Set in parse script
 		quint32 m_dword1 = 0;			// Set in parse script
@@ -109,6 +117,10 @@ namespace Sim
 	class DeviceEmulator : public QObject, protected Output
 	{
 		Q_OBJECT
+
+		Q_PROPERTY(quint16 AppStartAddress MEMBER (m_logicUnit.appStartAddress))
+		Q_PROPERTY(Sim::CyclePhase Phase MEMBER (m_logicUnit.phase))
+		Q_PROPERTY(quint32 ProgramCounter MEMBER (m_logicUnit.programCounter))
 
 	public:
 		explicit DeviceEmulator(const Output& output);
@@ -141,51 +153,41 @@ namespace Sim
 
 		bool processStartMode();
 		bool processFaultMode();
-//		bool processLoadEeprom();
 		bool processOperate();
 
-//		bool runCommand(LmCommandCode commandCode);
+		bool runCommand(DeviceCommand& deviceCommand);
 
-//		bool command_nop();			// 1
-//		bool command_startafb();	// 2
-//		bool command_stop();		// 3
-//		bool command_mov();			// 4
-//		bool command_movmem();		// 5
-//		bool command_movc();		// 6
-//		bool command_movbc();		// 7
-//		bool command_wrbf();		// 8
-//		bool command_rdbf();		// 9
-//		bool command_wrfbc();		// 10
-//		bool command_wrfbb();		// 11
-//		bool command_rdfbb();		// 12
-//		bool command_rdfbts();		// 13
-//		bool command_setmem();		// 14
-//		bool command_movb();		// 15
-//		bool command_nstart();		// 16
-//		bool command_appstart();	// 17
-//		bool command_mov32();		// 18
-//		bool command_movc32();		// 19
-//		bool command_wrfb32();		// 20
-//		bool command_rdfb32();		// 21
-//		bool command_wrfbc32();		// 22
-//		bool command_rdfbts32();	// 23
-//		bool command_movcf();		// 24
-//		bool command_pmov();		// 25
-//		bool command_pmov32();		// 26
-//		bool command_fillb();		// 27
-
-		// Getting data from m_plainAppLogic
+		// Script functins for AFB instances
 		//
 	public:
 		Q_INVOKABLE QObject* afbComponent(int opCode);
+		Q_INVOKABLE QObject* afbComponentInstance(int opCode, int instanceNo);
 
-		Q_INVOKABLE quint16 getWord(int wordOffset) const;
-		Q_INVOKABLE quint32 getDword(int wordOffset) const;
+		Q_INVOKABLE QObject* createComponentParam();
+		Q_INVOKABLE bool setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param);
+
+		// RAM access
+		//
+		Q_INVOKABLE bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
+		Q_INVOKABLE quint16 readRamBit(quint32 offsetW, quint32 bitNo);
+
+		Q_INVOKABLE bool writeRamWord(quint32 offsetW, quint16 data);
+		Q_INVOKABLE quint16 readRamWord(quint32 offsetW);
+
+		Q_INVOKABLE bool writeRamDword(quint32 offsetW, quint32 data);
+		Q_INVOKABLE quint32 readRamDword(quint32 offsetW);
+
+		// Getting data from m_plainAppLogic
+		//
+		Q_INVOKABLE quint16 getWord(int wordOffset);
+		Q_INVOKABLE quint32 getDword(int wordOffset);
 
 	private:
 		template <typename TYPE>
-		TYPE getData(int eepromOffset) const;
+		TYPE getData(int eepromOffset);
 
+		// Props
+		//
 	public:
 		const Hardware::LogicModuleInfo& logicModuleInfo() const;
 
@@ -209,6 +211,7 @@ namespace Sim
 		LogicUnitData m_logicUnit;
 
 		std::vector<DeviceCommand> m_commands;
+		std::map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands
 
 		AfbComponentSet m_afbComponents;
 

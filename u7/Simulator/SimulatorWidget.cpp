@@ -118,9 +118,9 @@ void SimulatorWidget::showEvent(QShowEvent* e)
 void SimulatorWidget::loadBuild(QString buildPath)
 {
 	qDebug() << "SimulatorWidget: Load build " << buildPath;
+
 	return;
 }
-
 
 SimulatorProjectWidget::SimulatorProjectWidget(DbController* db, QWidget* parent) :
 	QWidget(parent),

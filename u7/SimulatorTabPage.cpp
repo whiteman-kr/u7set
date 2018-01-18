@@ -33,9 +33,8 @@ SimulatorTabPage::SimulatorTabPage(DbController* dbc, QWidget* parent) :
 	// Evidently, project is not opened yet
 	//
 
-	int do_not_forget_to_uncommnet_the_next_line;
-	//this->setEnabled(false);
-
+	//int do_not_forget_to_uncommnet_the_next_line;
+	this->setEnabled(false);
 
 	return;
 }

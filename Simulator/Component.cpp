@@ -11,9 +11,8 @@ namespace Sim
 		*this = that;
 	}
 
-	ComponentParam::ComponentParam(quint16 paramOpIndex, quint32 data) :
-		m_paramOpIndex(paramOpIndex),
-		m_data(data)
+	ComponentParam::ComponentParam(quint16 paramOpIndex) :
+		m_paramOpIndex(paramOpIndex)
 	{
 	}
 
@@ -31,37 +30,53 @@ namespace Sim
 		return m_paramOpIndex;
 	}
 
+	void ComponentParam::setOpIndex(int index)
+	{
+		m_paramOpIndex = index;
+	}
+
 	quint16 ComponentParam::wordValue() const
 	{
-		return m_data & 0xFFFF;
+		return m_data.asWord;
 	}
 
 	void ComponentParam::setWordValue(quint16 value)
 	{
-		m_data = 0;
-		m_data = value;
+		m_data.data = 0;
+		m_data.asWord = value;
 	}
 
 	float ComponentParam::floatValue() const
 	{
-		float fp = *reinterpret_cast<const float*>(&m_data);
-		return static_cast<double>(fp);
+		return m_data.asFloat;
 	}
 
 	void ComponentParam::setFloatValue(float value)
 	{
-		float floatVal = static_cast<float>(value);
-		*reinterpret_cast<float*>(&m_data) = floatVal;
+		m_data.data = 0;
+		m_data.asFloat = value;
+	}
+
+	double ComponentParam::doubleValue() const
+	{
+		return m_data.asDouble;
+	}
+
+	void ComponentParam::setDoubleValue(double value)
+	{
+		m_data.data = 0;
+		m_data.asDouble = value;
 	}
 
 	qint32 ComponentParam::signedIntValue() const
 	{
-		return static_cast<qint32>(m_data);
+		return m_data.asSignedInt;
 	}
 
 	void ComponentParam::setSignedIntValue(qint32 value)
 	{
-		m_data = static_cast<quint32>(value);
+		m_data.data = 0;
+		m_data.asSignedInt = value;
 	}
 
 	void ComponentParam::addSignedInteger(ComponentParam* operand)
@@ -414,7 +429,7 @@ namespace Sim
 		return componentParam;
 	}
 
-	bool ComponentInstance::addOutputParam(int opIndex, ComponentParam* param)
+	bool ComponentInstance::addParam(int opIndex, ComponentParam* param)
 	{
 		if (param == nullptr)
 		{
@@ -426,27 +441,27 @@ namespace Sim
 		return true;
 	}
 
-	bool ComponentInstance::addOutputParamWord(int opIndex, quint16 value)
+	bool ComponentInstance::addParamWord(int opIndex, quint16 value)
 	{
-		ComponentParam param(opIndex, 0);
+		ComponentParam param(opIndex);
 		param.setWordValue(value);
 
 		m_params[opIndex] = param;
 		return true;
 	}
 
-	bool ComponentInstance::addOutputParamFloat(int opIndex, float value)
+	bool ComponentInstance::addParamFloat(int opIndex, float value)
 	{
-		ComponentParam param(opIndex, 0);
+		ComponentParam param(opIndex);
 		param.setFloatValue(value);
 
 		m_params[opIndex] = param;
 		return true;
 	}
 
-	bool ComponentInstance::addOutputParamSignedInt(int opIndex, qint32 value)
+	bool ComponentInstance::addParamSignedInt(int opIndex, qint32 value)
 	{
-		ComponentParam param(opIndex, 0);
+		ComponentParam param(opIndex);
 		param.setSignedIntValue(value);
 
 		m_params[opIndex] = param;
@@ -559,7 +574,7 @@ namespace Sim
 		return ok;
 	}
 
-	ComponentInstance* AfbComponentSet::componentInstance(quint16 componentOpCode, quint16 instance)
+	ComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance)
 	{
 		auto componentIt = m_components.find(componentOpCode);
 		if (componentIt == m_components.end())

@@ -142,6 +142,7 @@ namespace Afb
 		m_impVersion = that.m_impVersion;
 		m_versionOpIndex = that.m_versionOpIndex;
 		m_maxInstCount = that.m_maxInstCount;
+		m_simulationFunc = that.m_simulationFunc;
 
 		m_pins = that.m_pins;
 

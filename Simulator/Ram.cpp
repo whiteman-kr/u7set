@@ -70,7 +70,7 @@ namespace Sim
 		return;
 	}
 
-	bool RamArea::writeBit(quint32 offsetW, quint16 data, quint32 bitNo)
+	bool RamArea::writeBit(quint32 offsetW, quint32 bitNo, quint16 data)
 	{
 		if (contains(RamAccess::Write, offsetW) == false ||
 			bitNo >= 16)
@@ -269,7 +269,7 @@ namespace Sim
 		return *(m_memoryAreas[index].get());
 	}
 
-	bool Ram::writeBit(quint32 offsetW, quint32 data, quint32 bitNo)
+	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data)
 	{
 		RamArea* area = memoryArea(RamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -277,7 +277,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeBit(offsetW, data, bitNo);
+		bool ok = area->writeBit(offsetW, bitNo, data);
 		return ok;
 	}
 

@@ -12,10 +12,11 @@ namespace Sim
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(int OpIndex READ opIndex)
-		Q_PROPERTY(quint16 AsWord READ wordValue)
-		Q_PROPERTY(double AsFloat READ floatValue)
-		Q_PROPERTY(qint32 AsSignedInt READ signedIntValue)
+		Q_PROPERTY(int OpIndex READ opIndex WRITE setOpIndex)
+		Q_PROPERTY(quint16 AsWord READ wordValue WRITE setWordValue)
+		Q_PROPERTY(float AsFloat READ floatValue WRITE setFloatValue)
+		Q_PROPERTY(double AsDouble READ doubleValue WRITE setDoubleValue)
+		Q_PROPERTY(qint32 AsSignedInt READ signedIntValue WRITE setSignedIntValue)
 
 		Q_PROPERTY(bool MathOverflow READ mathOverflow)
 		Q_PROPERTY(bool MathUnderflow READ mathUnderflow)
@@ -26,17 +27,21 @@ namespace Sim
 	public:
 		ComponentParam() = default;
 		ComponentParam(const ComponentParam& that);
-		ComponentParam(quint16 paramOpIndex, quint32 data);
+		ComponentParam(quint16 paramOpIndex);
 		ComponentParam& operator=(const ComponentParam& that);
 
 	public:
 		int opIndex() const;
+		void setOpIndex(int index);
 
 		quint16 wordValue() const;
 		void setWordValue(quint16 value);
 
 		float floatValue() const;
 		void setFloatValue(float value);
+
+		double doubleValue() const;
+		void setDoubleValue(double value);
 
 		qint32 signedIntValue() const;
 		void setSignedIntValue(qint32 value);
@@ -64,7 +69,16 @@ namespace Sim
 		// Warning, class has operator =
 		//
 		quint16 m_paramOpIndex = 0;
-		quint32 m_data = 0;
+
+		union
+		{
+			quint16 asWord;
+			qint32 asSignedInt;
+			float asFloat;
+			double asDouble;
+			quint64 data = 0;
+		} m_data;
+
 
 		// Math operations flags
 		//
@@ -101,10 +115,10 @@ namespace Sim
 	public:	// For access from JavaScript
 		Q_INVOKABLE bool paramExists(int opIndex) const;
 		Q_INVOKABLE QObject* param(int opIndex);
-		Q_INVOKABLE bool addOutputParam(int opIndex, ComponentParam* param);
-		Q_INVOKABLE bool addOutputParamWord(int opIndex, quint16 value);
-		Q_INVOKABLE bool addOutputParamFloat(int opIndex, float value);
-		Q_INVOKABLE bool addOutputParamSignedInt(int opIndex, qint32 value);
+		Q_INVOKABLE bool addParam(int opIndex, ComponentParam* param);
+		Q_INVOKABLE bool addParamWord(int opIndex, quint16 value);
+		Q_INVOKABLE bool addParamFloat(int opIndex, float value);
+		Q_INVOKABLE bool addParamSignedInt(int opIndex, qint32 value);
 
 	private:
 		quint16 m_instanceNo = 0;
@@ -141,7 +155,7 @@ namespace Sim
 		void clear();
 		bool addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const ComponentParam& instParam, QString* errorMessage);
 
-		ComponentInstance* componentInstance(quint16 componentOpCode, quint16 instance);
+		ComponentInstance* componentInstance(int componentOpCode, int instance);
 
 	private:
 		std::map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode

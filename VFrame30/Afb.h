@@ -63,6 +63,7 @@ namespace Afb
 		Q_PROPERTY(int OpCode READ opCode)
 		Q_PROPERTY(QString Caption READ caption)
 		Q_PROPERTY(int MaxInstCount READ maxInstCount)
+		Q_PROPERTY(QString SimulationFunc READ simulationFunc)
 
 	public:
 		AfbComponent();

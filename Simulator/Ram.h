@@ -45,7 +45,7 @@ namespace Sim
 		RamArea(RamAccess access, quint32 offset, quint32 size, QString name);
 
 	public:
-		bool writeBit(quint32 offsetW, quint16 data, quint32 bitNo);
+		bool writeBit(quint32 offsetW, quint32 bitNo, quint16 data);
 		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
 
 		bool writeWord(quint32 offsetW, quint16 data);
@@ -80,7 +80,7 @@ namespace Sim
 		RamAreaInfo memoryAreaInfo(QString name) const;
 		RamAreaInfo memoryAreaInfo(int index) const;
 
-		bool writeBit(quint32 offsetW, quint32 data, quint32 bitNo);
+		bool writeBit(quint32 offsetW, quint32 bitNo, quint32 data);
 		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
 
 		bool writeWord(quint32 offsetW, quint16 data);

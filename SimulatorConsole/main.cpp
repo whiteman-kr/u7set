@@ -47,12 +47,5 @@ int main(int argc, char *argv[])
 
 	getc(stdin);
 
-//	while (lm.isFaultMode() == false || lm.isPowerOn() == true)
-//	{
-//		QApp
-
-//		QThread::yieldCurrentThread();
-//	};
-
 	return 0;
 }

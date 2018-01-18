@@ -6,7 +6,6 @@ namespace Sim
 	DeviceCommand::DeviceCommand(const LmCommand& command) :
 		m_command(command)
 	{
-
 	}
 
 	DeviceCommand::DeviceCommand(const DeviceCommand& that)
@@ -39,6 +38,7 @@ namespace Sim
 
 		m_word0 = that.m_word0;
 		m_word1 = that.m_word1;
+		m_word2 = that.m_word2;
 
 		m_dword0 = that.m_dword0;
 		m_dword1 = that.m_dword1;
@@ -49,6 +49,7 @@ namespace Sim
 	DeviceEmulator::DeviceEmulator(const Output& output) :
 		Output(output, "DeviceEmulator")
 	{
+		//qRegisterMetaType<Sim::CyclePhase>("Sim::CyclePhase");
 		return;
 	}
 
@@ -321,6 +322,9 @@ namespace Sim
 		// Parse AppLogic code:
 		// Parse till commandWord is 0x0000
 		//
+		m_commands.clear();
+		m_offsetToCommand.clear();
+
 		bool ok = true;
 		int programCounter = 0;
 		const std::vector<LmCommand> commands = m_lmDescription.commandsAsVector();
@@ -352,6 +356,7 @@ namespace Sim
 					// Move ProgramCounter
 					//
 					assert(m_commands.empty() == false);
+					assert(m_commands.size() == m_offsetToCommand.size());
 
 					int commandSize = m_commands.back().m_size;
 					if (commandSize == 0)
@@ -439,14 +444,32 @@ namespace Sim
 
 		if (jsResult.toString().isEmpty() == false)
 		{
-			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter %2")
+			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter 0x%2")
 						.arg(jsResult.toString())
-						.arg(programCounter));
+						.arg(programCounter, 4, 16, QChar('0')));
 			return false;
 		}
 
-		// --
+		// Check SimulationFunc
 		//
+		const QString simulationFunc = command.simulationFunc;
+
+		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false ||
+			m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
+		{
+			writeError(tr("Simulation command error, script function %1 not found or is not callable. "
+						  "HasProperty %1: %2, "
+						  "Collable: %3")
+							.arg(simulationFunc)
+							.arg(m_jsEngine.globalObject().hasProperty(simulationFunc))
+							.arg(m_jsEngine.globalObject().property(simulationFunc).isCallable())
+						);
+			return false;
+		}
+
+		// Add command to offsetToCommand map
+		//
+		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
 
 		return true;
 	}
@@ -471,48 +494,60 @@ namespace Sim
 	{
 		// One LogicModule Cycle
 		//
-		//bool result = true;
+		bool result = true;
 
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
 		m_afbComponents.clear();
 
-		return false;
-
 		// Run work cylce
 		//
-//		do
-//		{
-//			quint16 commandWord = getWord(m_logicUnit.programCounter);
+		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
+		{
+			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
+			if (offsetIt == m_offsetToCommand.end())
+			{
+				FAULT("Command not found in current ProgramCounter.");
+				break;
+			}
 
-//			//quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-//			quint16 command = (commandWord & 0x7C0) >> 6;
-//			//quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
+			size_t commandIndex = offsetIt->second;
+			if (commandIndex > m_commands.size())
+			{
+				FAULT("Command not found in current ProgramCounter.");
+				break;
+			}
 
-//			//qDebug() << "DeviceEmulator::processOperate Command " << command << ", N " << funcBlock;
+			DeviceCommand& command = m_commands[commandIndex];
+			assert(m_logicUnit.programCounter == command.m_offset);
 
-//			// Control command processing
-//			//
-//			bool ok = runCommand(static_cast<LmCommandCode>(command));
+			bool ok = runCommand(command);
 
-//			if (ok == false && m_currentMode != DeviceMode::Fault)
-//			{
-//				FAULT("Run command %1 unknown error.");
-//				result = false;
-//				break;
-//			}
+			if (ok == false && m_currentMode != DeviceMode::Fault)
+			{
+				FAULT("Run command %1 unknown error.");
+				result = false;
+				break;
+			}
 
-//			if (m_currentMode == DeviceMode::Fault)
-//			{
-//				result = false;
-//				break;
-//			}
-//		}
-//		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-//			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				result = false;
+				break;
+			}
 
-//		return result;
+			// If ProgramCounter was not changed in runCommand (can be changed in APPSTART), then
+			// incerement ProgramCounter to coommand size
+			//
+			if (m_logicUnit.programCounter == command.m_offset)
+			{
+				m_logicUnit.programCounter += command.m_size;
+			}
+		}
+
+		return result;
 	}
 
 	void DeviceEmulator::start(int cycles)
@@ -749,96 +784,45 @@ namespace Sim
 //		return result;
 //	}
 
-//	bool DeviceEmulator::runCommand(LmCommandCode commandCode)
-//	{
-//		switch (commandCode)
-//		{
-//		case LmCommandCode::NOP:
-//			return command_nop();
+	bool DeviceEmulator::runCommand(DeviceCommand& deviceCommand)
+	{
+		qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
 
-//		case LmCommandCode::START:
-//			return command_startafb();
+		// simulationFunc is checked in parsing command
+		//
+		QString simulationFunc = deviceCommand.m_command.simulationFunc;
 
-//		case LmCommandCode::STOP:
-//			return command_stop();
+		// --
+		//
+		assert(m_thisJsValue.isNull() == false);
 
-//		case LmCommandCode::MOV:
-//			return command_mov();
+		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
+		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
 
-//		case LmCommandCode::MOVMEM:
-//			return command_movmem();
+		QJSValueList args;
+		args << m_thisJsValue;
+		args << jsDeviceCommand;
 
-//		case LmCommandCode::MOVC:
-//			return command_movc();
+		// Run command script
+		//
+		QJSValue jsResult = m_jsEngine.globalObject().property(simulationFunc).call(args);
+		if (jsResult.isError() == true)
+		{
+			dumpJsError(jsResult);
+			return false;
+		}
 
-//		case LmCommandCode::MOVBC:
-//			return command_movbc();
+		if (jsResult.toString().isEmpty() == false)
+		{
+			writeError(tr("Simulation code error: %1, Offset %2h, command \"%3\"")
+						.arg(jsResult.toString())
+						.arg(deviceCommand.m_offset, 4, 16, QChar('0'))
+						.arg(deviceCommand.m_string));
+			return false;
+		}
 
-//		case LmCommandCode::WRFB:
-//			return command_wrbf();
-
-//		case LmCommandCode::RDFB:
-//			return command_rdbf();
-
-//		case LmCommandCode::WRFBC:
-//			return command_wrfbc();
-
-//		case LmCommandCode::WRFBB:
-//			return command_wrfbb();
-
-//		case LmCommandCode::RDFBB:
-//			return command_rdfbb();
-
-//		case LmCommandCode::RDFBTS:
-//			return command_rdfbts();
-
-//		case LmCommandCode::SETMEM:
-//			return command_setmem();
-
-//		case LmCommandCode::MOVB:
-//			return command_movb();
-
-//		case LmCommandCode::NSTART:
-//			return command_nstart();
-
-//		case LmCommandCode::APPSTART:
-//			return command_appstart();
-
-//		case LmCommandCode::MOV32:
-//			return command_mov32();
-
-//		case LmCommandCode::MOVC32:
-//			return command_movc32();
-
-//		case LmCommandCode::WRFB32:
-//			return command_wrfb32();
-
-//		case LmCommandCode::RDFB32:
-//			return command_rdfb32();
-
-//		case LmCommandCode::WRFBC32:
-//			return command_wrfbc32();
-
-//		case LmCommandCode::RDFBTS32:
-//			return command_rdfbts32();
-
-//		case LmCommandCode::MOVCF:
-//			return command_movcf();
-
-//		case LmCommandCode::PMOV:
-//			return command_pmov();
-
-//		case LmCommandCode::PMOV32:
-//			return command_pmov32();
-
-//		case LmCommandCode::FILLB:
-//			return command_fillb();
-
-//		default:
-//			FAULT(QString("Unknown command code %1").arg(static_cast<int>(commandCode)));
-//			return false;
-//		}
-//	}
+		return true;
+	}
 
 //	// OpCode 1
 //	//
@@ -1547,18 +1531,66 @@ namespace Sim
 		return result.get();
 	}
 
-	quint16 DeviceEmulator::getWord(int wordOffset) const
+	QObject* DeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
+	{
+		ComponentInstance* inst = m_afbComponents.componentInstance(opCode, instanceNo);
+		if (inst == nullptr)
+		{
+			return nullptr;
+		}
+
+		QQmlEngine::setObjectOwnership(inst, QQmlEngine::CppOwnership);
+		return inst;
+	}
+
+	QObject* DeviceEmulator::createComponentParam()
+	{
+		QObject* result = new ComponentParam();
+		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::JavaScriptOwnership);
+		return result;
+	}
+
+	bool DeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param)
+	{
+		if (param == nullptr)
+		{
+			FAULT(tr("Input param error, function DeviceEmulator::setAfbParam, param == nullptr"));
+			return false;
+		}
+
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(afbOpCode);
+
+		if (afbComp == nullptr)
+		{
+			FAULT(QString("AFB with OpCode %1 not found").arg(afbOpCode));
+			return false;
+		}
+
+		QString errorMessage;
+		bool ok = m_afbComponents.addInstantiatorParam(afbComp, instanceNo, *param, &errorMessage);
+
+		if (ok == false)
+		{
+			FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
+			return false;
+		}
+
+		return true;
+	}
+
+
+	quint16 DeviceEmulator::getWord(int wordOffset)
 	{
 		return getData<quint16>(wordOffset * 2);
 	}
 
-	quint32 DeviceEmulator::getDword(int wordOffset) const
+	quint32 DeviceEmulator::getDword(int wordOffset)
 	{
 		return getData<quint32>(wordOffset * 2);
 	}
 
 	template <typename TYPE>
-	TYPE DeviceEmulator::getData(int eepromOffset) const
+	TYPE DeviceEmulator::getData(int eepromOffset)
 	{
 		// eepromOffset - in bytes
 		//
@@ -1571,6 +1603,80 @@ namespace Sim
 
 		TYPE result = qFromBigEndian<TYPE>(m_plainAppLogic.constData() + eepromOffset);
 		return result;
+	}
+
+	bool DeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
+	{
+		bool ok = m_ram.writeBit(offsetW, bitNo, data);
+		if (ok == false)
+		{
+			FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return ok;
+	}
+
+	quint16 DeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo)
+	{
+		quint16 data = 0;
+		bool ok = m_ram.readBit(offsetW, bitNo, &data);
+
+		if (ok == false)
+		{
+			FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return data;
+	}
+
+	bool DeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
+	{
+		bool ok = m_ram.writeWord(offsetW, data);
+
+		if (ok == false)
+		{
+			FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	quint16 DeviceEmulator::readRamWord(quint32 offsetW)
+	{
+		quint16 data = 0;
+		bool ok = m_ram.readWord(offsetW, &data);
+
+		if (ok == false)
+		{
+			FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	bool DeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
+	{
+		bool ok = m_ram.writeDword(offsetW, data);
+
+		if (ok == false)
+		{
+			FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	quint32 DeviceEmulator::readRamDword(quint32 offsetW)
+	{
+		quint32 data = 0;
+		bool ok = m_ram.readDword(offsetW, &data);
+
+		if (ok == false)
+		{
+			FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
 	}
 
 	const Hardware::LogicModuleInfo& DeviceEmulator::logicModuleInfo() const
