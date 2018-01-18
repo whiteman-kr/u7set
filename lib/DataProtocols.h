@@ -75,6 +75,7 @@ namespace Rup
 		quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
 
 		void calcCRC64();
+		bool checkCRC64();
 	};
 }
 
@@ -217,6 +218,7 @@ struct RupFotipV2
 	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
 
 	void calcCRC64();
+	bool checkCRC64();
 };
 
 
