@@ -3,6 +3,7 @@
 #include "SimulatorProjectWidget.h"
 #include "SimulatorMemoryWidget.h"
 #include "SimulatorOutputWidget.h"
+#include "SimulatorSelectBuildDialog.h"
 
 
 SimulatorWidget::SimulatorWidget(DbController* db, QWidget* parent)
@@ -37,6 +38,24 @@ void SimulatorWidget::createToolBar()
 {
 	m_toolBar = new SimulatorToolBar("ToolBar");
 	addToolBar(m_toolBar);
+
+	//m_toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+
+	m_openProjectAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this);
+	m_openProjectAction->setShortcut(QKeySequence::Open);
+	connect(m_openProjectAction, &QAction::triggered, this, &SimulatorWidget::openBuild);
+	m_toolBar->addAction(m_openProjectAction);
+
+
+	m_closeProjectAction = new QAction(QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this);
+	m_closeProjectAction->setShortcut(QKeySequence::Close);
+	connect(m_closeProjectAction, &QAction::triggered, this, &SimulatorWidget::closeBuild);
+	m_toolBar->addAction(m_closeProjectAction);
+
+	m_refreshProjectAction = new QAction(QIcon(":/Images/Images/SimRefresh.svg"), tr("Refresh"), this);
+	m_refreshProjectAction->setShortcut(QKeySequence::Refresh);
+	connect(m_refreshProjectAction, &QAction::triggered, this, &SimulatorWidget::refreshBuild);
+	m_toolBar->addAction(m_refreshProjectAction);
 
 	return;
 }
@@ -130,6 +149,31 @@ void SimulatorWidget::showEvent(QShowEvent* e)
 	return;
 }
 
+void SimulatorWidget::openBuild()
+{
+	SimulatorSelectBuildDialog d(this);
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+
+	}
+
+	return;
+}
+
+void SimulatorWidget::closeBuild()
+{
+	assert(false);
+	int to_do;
+}
+
+void SimulatorWidget::refreshBuild()
+{
+	assert(false);
+	int to_do;
+}
+
 void SimulatorWidget::loadBuild(QString buildPath)
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -143,6 +187,8 @@ SimulatorToolBar::SimulatorToolBar(const QString& title, QWidget* parent) :
 {
 	setMovable(false);
 	setObjectName("SimulatorToolBar");
+
+	setIconSize(iconSize() / 1.5);
 
 	toggleViewAction()->setDisabled(true);
 

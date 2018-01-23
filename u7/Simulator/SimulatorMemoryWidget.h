@@ -8,6 +8,7 @@ class MemoryHexView;
 class SimulatorMemoryWidget : public QWidget
 {
 	Q_OBJECT
+
 public:
 	explicit SimulatorMemoryWidget(const Sim::Ram ram, QWidget* parent = nullptr);
 	virtual ~SimulatorMemoryWidget();
@@ -35,6 +36,7 @@ private:
 class MemoryView : public QWidget
 {
 	Q_OBJECT
+
 public:
 	MemoryView();
 
@@ -56,6 +58,7 @@ private:
 class MemoryHexView : public QWidget
 {
 	Q_OBJECT
+
 public:
 	MemoryHexView(Sim::RamAreaInfo* memoryArea, QScrollBar* scroll);
 

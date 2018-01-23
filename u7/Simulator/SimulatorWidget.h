@@ -26,6 +26,10 @@ protected:
 	virtual void showEvent(QShowEvent*) override;
 
 protected slots:
+	void openBuild();
+	void closeBuild();
+	void refreshBuild();
+
 	void loadBuild(QString buildPath);
 
 private:
@@ -34,6 +38,16 @@ private:
 	std::vector<SimulatorMemoryWidget*> m_memoryWidgets;
 
 	Sim::Simulator m_simulator;
+
+	// Actions
+	//
+	QAction* m_openProjectAction = nullptr;
+	QAction* m_closeProjectAction = nullptr;
+	QAction* m_refreshProjectAction = nullptr;
+
+//	QAction* m_runAction = nullptr;
+//	QAction* m_stopAction = nullptr;
+//	QAction* m_pauseAction = nullptr;
 };
 
 

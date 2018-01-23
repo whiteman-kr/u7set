@@ -30,6 +30,9 @@
         <file>Images/SchemaItemValue.svg</file>
         <file>Images/SchemaBusComposer.svg</file>
         <file>Images/SchemaBusExtractor.svg</file>
+        <file>Images/SimOpen.svg</file>
+        <file>Images/SimClose.svg</file>
+        <file>Images/SimRefresh.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

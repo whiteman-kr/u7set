@@ -208,7 +208,8 @@ SOURCES +=\
     Simulator/SimulatorMemoryWidget.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
     Simulator/SimulatorOutputWidget.cpp \
-    Simulator/SimulatorProjectWidget.cpp
+    Simulator/SimulatorProjectWidget.cpp \
+    Simulator/SimulatorSelectBuildDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -354,7 +355,8 @@ HEADERS  += \
     Simulator/SimulatorMemoryWidget.h \
     Builder/ConfigurationServiceCfgGenerator.h \
     Simulator/SimulatorOutputWidget.h \
-    Simulator/SimulatorProjectWidget.h
+    Simulator/SimulatorProjectWidget.h \
+    Simulator/SimulatorSelectBuildDialog.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -378,7 +380,8 @@ FORMS    += \
     Forms/ChangesetDetailsDialog.ui \
     Forms/CompareDialog.ui \
     Forms/ComparePropertyObjectDialog.ui \
-    DialogTuningClients.ui
+    DialogTuningClients.ui \
+    Simulator/SimulatorSelectBuildDialog.ui
 
 RESOURCES += \
     Resources.qrc \
