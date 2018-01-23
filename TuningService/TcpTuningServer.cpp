@@ -273,8 +273,7 @@ namespace Tuning
 					  arg(m_tuningSignalsWriteRequest.commands_size()).
 					  arg(m_tuningSignalsWriteRequest.autoapply() == true ? "TRUE" : "FALSE"));
 
-		const TuningClientContext* clientContext =
-				m_service.getClientContext(clientEquipmentID);
+		const TuningClientContext* clientContext = m_service.getClientContext(clientEquipmentID);
 
 		NetworkError errCode = NetworkError::Success;
 

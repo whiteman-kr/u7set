@@ -99,7 +99,8 @@ namespace Tuning
 			struct
 			{
 				qint32 signalIndex = 0;
-				float value = 0;
+
+				TuningValue tuningValue;
 			} write;
 		};
 
@@ -109,46 +110,53 @@ namespace Tuning
 			void init(const Signal* s, int index, int tuningRomFraeSizeW);
 
 			bool valid() const { return m_valid; }
-			const TuningValue& currentValue() const { return m_currentValue; }
-			const TuningValue& readLowBound() const { return m_readLowBound; }
-			const TuningValue& readHighBound() const { return m_readHighBound; }
 
-			const TuningValue& defaultValue() const { return m_defaultValue; }
+			TuningValueType tuningValueType() const { return m_tuningValueType; }
+
+			TuningValue currentValue() const { return m_currentValue; }
+			TuningValue readLowBound() const { return m_readLowBound; }
+			TuningValue readHighBound() const { return m_readHighBound; }
+
+			TuningValue defaultValue() const { return m_defaultValue; }
+			TuningValue lowBound() const { return m_lowBound; }
+			TuningValue highBound() const { return m_highBound; }
 
 			int offset() const { return m_offset; }
 			int bit() const { return m_bit; }
 			int frameNo() const { return m_frameNo; }
 
-			FotipV2::DataType type() const { return m_type; }
-
-			void setState(bool valid, float value);
-			void setReadLowBound(float readLowBound);
-			void setReadHighBound(float readHighBound);
+			void setCurrentValue(bool valid, const TuningValue& value);
+			void setReadLowBound(const TuningValue& value);
+			void setReadHighBound(const TuningValue& value);
 			void invalidate();
 
 			QString appSignalID() const;
 
 			void setProtoTuningValue(Proto::TuningValue* tuningValue);
 
+			FotipV2::DataType fotipV2DataType();
+
 		private:
 			FotipV2::DataType getTuningSignalType(const Signal* s);
 
+			void updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat);
+
 		private:
-			// static fields
-			//
 			const Signal* m_signal = nullptr;
 			Hash m_signalHash = 0;
-			FotipV2::DataType m_type = FotipV2::DataType::Discrete;
+
 			int m_index = -1;
 
 			int m_offset = -1;
 			int m_bit = -1;
 			int m_frameNo = -1;
 
+			TuningValueType m_tuningValueType = TuningValueType::Discrete;
+
 			// signal properties from RPCT Databse
 			//
 			TuningValue m_lowBound;
-			TuningValue m_highBoud;
+			TuningValue m_highBound;
 			TuningValue m_defaultValue;
 
 			// tuning signal state and bounds from LM
@@ -176,7 +184,7 @@ namespace Tuning
 		void getState(Network::TuningSourceState& tuningSourceState);
 
 		void readSignalState(Network::TuningSignalState& tss);
-		void writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult);
+		void writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult);
 		void applySignalStates();
 
 	signals:

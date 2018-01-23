@@ -50,7 +50,7 @@ qint32 TuningValue::discreteValue() const
 void TuningValue::setDiscreteValue(qint32 discreteValue)
 {
 	assert(m_type == TuningValueType::Discrete);
-	m_intValue = discreteValue;
+	m_intValue = discreteValue == 0 ? 0 : 1;
 }
 
 qint32 TuningValue::intValue() const

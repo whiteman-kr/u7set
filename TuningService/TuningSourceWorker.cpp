@@ -85,45 +85,45 @@ namespace Tuning
 			return;
 		}
 
-		m_valid = false;
-
 		m_signal = s;
 		m_signalHash = ::calcHash(s->appSignalID());
 
-		m_type = getTuningSignalType(s);
 		m_index = index;
-
-//		assert(false);
-/*		m_lowBound = s->lowEngeneeringUnits();
-		m_highBoud = s->highEngeneeringUnits();
-		m_defaultValue = s->tuningDefaultValue();*/
 
 		m_offset = s->tuningAddr().offset();
 		m_bit = s->tuningAddr().bit();
 		m_frameNo = s->tuningAddr().offset() / tuningRomFraeSizeW;
+
+		updateTuningValuesType(s->signalType(), s->analogSignalFormat());
+
+		m_lowBound = s->tuningLowBound();
+		m_highBound = s->tuningHighBound();
+		m_defaultValue = s->tuningDefaultValue();
+
+		m_valid = false;
 	}
 
-
-	void TuningSourceWorker::TuningSignal::setState(bool valid, float value)
+	void TuningSourceWorker::TuningSignal::setCurrentValue(bool valid, const TuningValue& value)
 	{
 		m_valid = valid;
 
-		assert(false);
-		//m_value = value;
+		assert(m_currentValue.type() == value.type());
+
+		m_currentValue = value;
 	}
 
-
-	void TuningSourceWorker::TuningSignal::setReadLowBound(float readLowBound)
+	void TuningSourceWorker::TuningSignal::setReadLowBound(const TuningValue& value)
 	{
-		assert(false);
-		//m_readLowBound = readLowBound;
+		assert(m_readLowBound.type() == value.type());
+
+		m_readLowBound = value;
 	}
 
-
-	void TuningSourceWorker::TuningSignal::setReadHighBound(float readHighBound)
+	void TuningSourceWorker::TuningSignal::setReadHighBound(const TuningValue& value)
 	{
-		assert(false);
-		//m_readHighBound = readHighBound;
+		assert(m_readHighBound.type() == value.type());
+
+		m_readHighBound = value;
 	}
 
 	void TuningSourceWorker::TuningSignal::invalidate()
@@ -152,6 +152,26 @@ namespace Tuning
 		optional float floatValue = 3  [default = 0.0];
 		optional double doubleValue = 4  [default = 0.0];*/
 
+	}
+
+	FotipV2::DataType TuningSourceWorker::TuningSignal::fotipV2DataType()
+	{
+		switch(m_tuningValueType)
+		{
+		case TuningValueType::Discrete:
+			return FotipV2::DataType::Discrete;
+
+		case TuningValueType::Float:
+			return FotipV2::DataType::AnalogFloat;
+
+		case TuningValueType::SignedInteger:
+			return FotipV2::DataType::AnalogSignedInt;
+
+		default:
+			assert(false);
+		}
+
+		return FotipV2::DataType::Discrete;
 	}
 
 	FotipV2::DataType TuningSourceWorker::TuningSignal::getTuningSignalType(const Signal* s)
@@ -190,6 +210,18 @@ namespace Tuning
 		return FotipV2::DataType::Discrete;
 	}
 
+	void TuningSourceWorker::TuningSignal::updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat)
+	{
+		m_tuningValueType = TuningValue::getTuningValueType(signalType, analogFormat);
+
+		m_lowBound.setType(m_tuningValueType);
+		m_highBound.setType(m_tuningValueType);
+		m_defaultValue.setType(m_tuningValueType);
+
+		m_currentValue.setType(m_tuningValueType);
+		m_readLowBound.setType(m_tuningValueType);
+		m_readHighBound.setType(m_tuningValueType);
+	}
 
 	// ----------------------------------------------------------------------------------
 	//
@@ -303,13 +335,15 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult)
+	void TuningSourceWorker::writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
 	{
+		TEST_PTR_RETURN(writeResult);
+
 		int signalIndex = m_hash2SignalIndexMap.value(signalHash, -1);
 
 		if (signalIndex == -1)
 		{
-			writeResult.set_error(TO_INT(NetworkError::UnknownSignalHash));
+			writeResult->set_error(TO_INT(NetworkError::UnknownSignalHash));
 			return;
 		}
 
@@ -326,17 +360,17 @@ namespace Tuning
 		cmd.autoCommand = false;
 
 		cmd.write.signalIndex = signalIndex;
-		cmd.write.value = value;
+		cmd.write.tuningValue = newValue;
 
 		m_tuningCommandQueue.push(&cmd);
 
-		writeResult.set_error(TO_INT(NetworkError::Success));
+		writeResult->set_error(TO_INT(NetworkError::Success));
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Queue write command: source %1 (%2), signal %3, value %4")).
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()).
 					  arg(m_tuningSignals[signalIndex].appSignalID()).
-					  arg(value));
+					  arg(newValue.toString()));
 	}
 
 
@@ -709,21 +743,22 @@ namespace Tuning
 					return false;
 				}
 
-				fotipHeader.dataType = TO_INT(ts.type());
+				fotipHeader.dataType = static_cast<quint16>(ts.fotipV2DataType());
+
 				fotipHeader.startAddressW = m_tuningRomStartAddrW + frameNo * m_tuningRomFrameSizeW;
 				fotipHeader.offsetInFrameW = offsetW - frameNo * m_tuningRomFrameSizeW;
 
 				fotipFrame.write.bitMask = 0;
 				fotipFrame.write.discreteValue = 0;		// zero fotipFrame.write.floatValue also
 
-				switch(ts.type())
+				switch(ts.tuningValueType())
 				{
-				case FotipV2::DataType::AnalogFloat:
-					fotipFrame.write.analogFloatValue = reverseFloat(static_cast<float>(tuningCmd.write.value));
+				case TuningValueType::Float:
+					fotipFrame.write.analogFloatValue = reverseFloat(tuningCmd.write.tuningValue.floatValue());
 					break;
 
 				case FotipV2::DataType::AnalogSignedInt:
-					fotipFrame.write.analogSignedIntValue = reverseInt32(static_cast<qint32>(tuningCmd.write.value));
+					fotipFrame.write.analogSignedIntValue = reverseInt32(tuningCmd.write.tuningValue.intValue());
 					break;
 
 				case FotipV2::DataType::Discrete:
@@ -738,7 +773,7 @@ namespace Tuning
 
 						fotipFrame.write.bitMask = reverseUint32(bitmask);
 
-						quint32 discreteValue = (tuningCmd.write.value == 0.0 ? 0 : 1) << bit;
+						quint32 discreteValue = tuningCmd.write.tuningValue.discreteValue() << bit;
 
 						//quint32 discreteValue = 0;
 
@@ -839,30 +874,35 @@ namespace Tuning
 				continue;		// signal is not in this frame
 			}
 
-			float value = 0;
+			if (static_cast<FotipV2::DataType>(reply.fotipFrame.header.dataType) != ts.fotipV2DataType())
+			{
+				assert(false);
+				DEBUG_LOG_ERR(m_logger, QString("Different types of signal %1 and frame %2 data").arg(ts.appSignalID()).arg(frameNo));
+				continue;
+			}
+
+			TuningValue tuningValue;
+
+			tuningValue.setType(ts.tuningValueType());
 
 			int offsetInFrameB = (ts.offset() - ts.frameNo() * m_tuningRomFrameSizeW) * sizeof(quint16);
 
 			assert(offsetInFrameB < reply.fotipFrame.header.romFrameSizeB);
 
-			switch(ts.type())
+			switch(ts.tuningValueType())
 			{
-			case FotipV2::DataType::AnalogFloat:
-				{
-					value = reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB));
-				}
+			case TuningValueType::Float:
+				tuningValue.setFloatValue(reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB)));
 				break;
 
 			case FotipV2::DataType::AnalogSignedInt:
-				{
-					value = reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB));
-				}
+				tuningValue.setIntValue(reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB)));
 				break;
 
 			case FotipV2::DataType::Discrete:
 				{
 					quint32 word =	reverseUint32(*reinterpret_cast<quint32*>(dataPtr + offsetInFrameB));
-					value = ((word & (1 << ts.bit())) == 0 ? 0 : 1);
+					tuningValue.setDiscreteValue((word & (1 << ts.bit())) == 0 ? 0 : 1);
 				}
 				break;
 
@@ -877,15 +917,15 @@ namespace Tuning
 			switch(frameNo % 3)
 			{
 			case 0:
-				ts.setState(true, value);
+				ts.setCurrentValue(true, tuningValue);
 				break;
 
 			case 1:
-				ts.setReadLowBound(value);
+				ts.setReadLowBound(tuningValue);
 				break;
 
 			case 2:
-				ts.setReadHighBound(value);
+				ts.setReadHighBound(tuningValue);
 				break;
 
 			default:

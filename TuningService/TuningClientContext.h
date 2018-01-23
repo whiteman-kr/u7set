@@ -23,7 +23,7 @@ namespace Tuning
 		void setSourceWorker(TuningSourceWorker* worker);
 
 		void readSignalState(Network::TuningSignalState& tss);
-		void writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult);
+		void writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult);
 		void applySignalStates();
 
 	private:

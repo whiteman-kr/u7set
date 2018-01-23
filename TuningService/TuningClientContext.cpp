@@ -74,16 +74,18 @@ namespace Tuning
 	}
 
 
-	void TuningSourceContext::writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult)
+	void TuningSourceContext::writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
 	{
+		TEST_PTR_RETURN(writeResult);
+
 		if (m_sourceWorker == nullptr)
 		{
 			assert(false);
-			writeResult.set_error(TO_INT(NetworkError::InternalError));
+			writeResult->set_error(TO_INT(NetworkError::InternalError));
 			return;
 		}
 
-		m_sourceWorker->writeSignalState(signalHash, value, writeResult);
+		m_sourceWorker->writeSignalState(signalHash, newValue, writeResult);
 	}
 
 
@@ -277,8 +279,7 @@ namespace Tuning
 				continue;
 			}
 
-			assert(false);
-			//sourceContext->writeSignalState(signalHash, writeCmd.value(), *writeResult);
+			sourceContext->writeSignalState(signalHash, TuningValue(writeCmd.value()), writeResult);
 
 			if (autoApply == true)
 			{
