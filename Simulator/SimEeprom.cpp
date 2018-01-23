@@ -1,4 +1,4 @@
-#include "Eeprom.h"
+#include "SimEeprom.h"
 #include <cassert>
 #include <QJsonDocument>
 #include "../lib/ModuleFirmware.h"

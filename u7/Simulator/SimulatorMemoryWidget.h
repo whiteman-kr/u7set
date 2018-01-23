@@ -1,6 +1,6 @@
 #pragma once
 #include <QtWidgets>
-#include "../Simulator/Ram.h"
+#include "../Simulator/SimRam.h"
 
 class MemoryView;
 class MemoryHexView;

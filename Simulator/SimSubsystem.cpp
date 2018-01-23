@@ -1,4 +1,4 @@
-#include "Subsystem.h"
+#include "SimSubsystem.h"
 #include "../lib/ModuleFirmware.h"
 
 namespace Sim
@@ -6,8 +6,8 @@ namespace Sim
 	//
 	// Subsystem
 	//
-	Subsystem::Subsystem(QString subsystemId, const Output& output) :
-		Output(output, subsystemId),
+	Subsystem::Subsystem(QString subsystemId) :
+		Output(subsystemId),
 		m_susystemId(subsystemId)
 	{
 	}
@@ -90,7 +90,7 @@ namespace Sim
 
 	 std::shared_ptr<LogicModule> Subsystem::addDevice(const Hardware::LogicModuleInfo& lm)
 	 {
-		std::shared_ptr<LogicModule> result = std::make_shared<LogicModule>(static_cast<const Output&>(*this));
+		std::shared_ptr<LogicModule> result = std::make_shared<LogicModule>();
 
 		{
 			auto p = m_devicesByLmNumber.try_emplace(lm.lmNumber, result);

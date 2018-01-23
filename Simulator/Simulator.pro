@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT		 += xml qml
+QT		 += xml qml concurrent
 
 TARGET = Simulator
 TEMPLATE = lib
@@ -54,11 +54,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    LmModel.cpp \
-    Eeprom.cpp \
-    DeviceEmulator.cpp \
-    Component.cpp \
-    Ram.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
@@ -66,17 +61,17 @@ SOURCES += \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
     Simulator.cpp \
-    Output.cpp \
     ../lib/Crc.cpp \
-    Subsystem.cpp
+    SimOutput.cpp \
+    SimRam.cpp \
+    SimLmModel.cpp \
+    SimEeprom.cpp \
+    SimSubsystem.cpp \
+    SimComponent.cpp \
+    SimDeviceEmulator.cpp
 
 HEADERS += \
     Stable.h \
-    LmModel.h \
-    Eeprom.h \
-    DeviceEmulator.h \
-    Component.h \
-    Ram.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
@@ -85,9 +80,14 @@ HEADERS += \
     ../lib/Types.h \
     ../lib/ModuleFirmware.h \
     Simulator.h \
-    Output.h \
     ../lib/Crc.h \
-    Subsystem.h
+    SimOutput.h \
+    SimRam.h \
+    SimLmModel.h \
+    SimEeprom.h \
+    SimSubsystem.h \
+    SimComponent.h \
+    SimDeviceEmulator.h
 
 unix {
     target.path = /usr/lib

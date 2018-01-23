@@ -1,4 +1,4 @@
-#include "DeviceEmulator.h"
+#include "SimDeviceEmulator.h"
 #include <QQmlEngine>
 
 namespace Sim
@@ -46,8 +46,8 @@ namespace Sim
 		return *this;
 	}
 
-	DeviceEmulator::DeviceEmulator(const Output& output) :
-		Output(output, "DeviceEmulator")
+	DeviceEmulator::DeviceEmulator() :
+		Output("DeviceEmulator")
 	{
 		//qRegisterMetaType<Sim::CyclePhase>("Sim::CyclePhase");
 		return;

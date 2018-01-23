@@ -1,4 +1,4 @@
-#include "Component.h"
+#include "SimComponent.h"
 #include <type_traits>
 #include <cfenv>
 #include <QQmlEngine>

@@ -1,33 +1,53 @@
 #include <QCoreApplication>
-#include <QFile>
 #include <QDebug>
 #include "../Simulator/Simulator.h"
 
-//QByteArray readFile(QString fileName)
-//{
-//	QFile file(fileName);
+static QtMessageHandler originalMessageHandler = 0;
 
-//	bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
-//	if (ok == false)
-//	{
-//		return QByteArray();
-//	}
 
-//	return file.readAll();
-//}
+void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
+{
+	if (QString(context.category) == QLatin1String("u7.sim"))
+	{
+		QByteArray localMsg = msg.toLocal8Bit();
+		switch (type)
+		{
+		case QtDebugMsg:
+			fprintf(stderr, "dbg: %s\n", localMsg.constData());
+			break;
+		case QtInfoMsg:
+			fprintf(stderr, "inf: %s\n", localMsg.constData());
+			break;
+		case QtWarningMsg:
+			fprintf(stderr, "wrn: %s\n", localMsg.constData());
+			break;
+		case QtCriticalMsg:
+			fprintf(stderr, "err: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+			break;
+		case QtFatalMsg:
+			fprintf(stderr, "fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+			abort();
+		}
+	}
+	else
+	{
+		originalMessageHandler(type, context, msg);
+	}
+
+	return;
+}
 
 int main(int argc, char *argv[])
 {
-	QCoreApplication a(argc, argv);
+	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
-	bool ok = true;
-	QTextStream textStream(stdout);
+	QCoreApplication a(argc, argv);
 
 	// --
 	//
-	Sim::Simulator simulator(&textStream);
+	Sim::Simulator simulator;
 
-	ok = simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
+	bool ok = simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
 	if (ok == false)
 	{
 		return 1;

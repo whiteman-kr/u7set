@@ -2,9 +2,9 @@
 #define SUBSYSTEM_H
 #include <map>
 #include <memory>
-#include "Output.h"
-#include "Eeprom.h"
-#include "LmModel.h"
+#include "SimOutput.h"
+#include "SimEeprom.h"
+#include "SimLmModel.h"
 
 namespace Hardware
 {
@@ -19,7 +19,7 @@ namespace Sim
 	public:
 		Subsystem() = delete;
 		Subsystem(const Subsystem&) = delete;
-		Subsystem(QString subsystemId, const Output& output);
+		explicit Subsystem(QString subsystemId);
 		Subsystem& operator=(const Subsystem&) = delete;
 
 	public:

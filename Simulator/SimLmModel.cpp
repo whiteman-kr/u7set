@@ -1,11 +1,11 @@
-#include "LmModel.h"
+#include "SimLmModel.h"
 #include "../lib/ModuleFirmware.h"
 
 namespace Sim
 {
 
-	LogicModule::LogicModule(const Output& output) :
-		Output(output, "LogicModule")
+	LogicModule::LogicModule() :
+		Output("LogicModule")
 	{
 	}
 
@@ -75,7 +75,7 @@ namespace Sim
 			assert(m_workerThread.isFinished());
 		}
 
-		m_device = new DeviceEmulator(*this);
+		m_device = new DeviceEmulator();
 
 		bool ok = m_device->init(m_logicModuleInfo,
 								 m_lmDescription,

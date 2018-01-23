@@ -3,27 +3,27 @@
 #include <map>
 #include "../lib/ModuleFirmware.h"
 #include "../lib/LmDescription.h"
-#include "Output.h"
-#include "Subsystem.h"
+#include "SimOutput.h"
+#include "SimSubsystem.h"
 
 class QTextStream;
 
 namespace Sim
 {
+	class LogicModule;
+
 	class Simulator : protected Output
 	{
 	public:
-		// outputStream - stream for console output
-		// to out to stdout: [code]QTextStream textStream(stdout);[/code]
-		// outputStream can be nullptr
-		//
-		explicit Simulator(QTextStream* outputStream = nullptr);
+		Simulator();
 		virtual ~Simulator();
 
 	public:
 		bool load(QString buildPath);
+		void clear();
 
 	private:
+		bool loadFunc(QString buildPath);
 		bool loadFirmwares(QString buildPath);
 		bool loadLmDescriptions(QString buildPath);
 		bool loadSimulationScripts(QString buildPath);

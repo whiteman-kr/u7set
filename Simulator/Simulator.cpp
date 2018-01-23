@@ -2,15 +2,17 @@
 #include <cassert>
 #include <QDebug>
 #include <QDir>
+#include <QtConcurrent>
 #include "../lib/ModuleFirmware.h"
+#include "SimLmModel.h"
 
 namespace Sim
 {
 	//
 	// Simulator
 	//
-	Simulator::Simulator(QTextStream* outputStream) :
-		Output(outputStream)
+	Simulator::Simulator() :
+		Output()
 	{
 		return;
 	}
@@ -21,7 +23,38 @@ namespace Sim
 
 	bool Simulator::load(QString buildPath)
 	{
+		// Run load in separated thread, it'll allow to process messages, like timer events
+		// for displaying output log
+		//
+		QFuture<bool> future = QtConcurrent::run(
+								[buildPath, this]()
+								{
+									return this->loadFunc(buildPath);
+								});
+
+		while (future.isRunning() == true)
+		{
+			QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+			QThread::yieldCurrentThread();
+		}
+
+		return future.result();
+	}
+
+	void Simulator::clear()
+	{
+		m_firmwares.clear();
+		m_lmDescriptions.clear();
+		m_simScript.clear();
 		m_subsystems.clear();
+
+		return;
+	}
+
+	bool Simulator::loadFunc(QString buildPath)
+	{
+		writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
+		clear();
 
 		//--
 		//
@@ -36,6 +69,7 @@ namespace Sim
 		bool ok = loadFirmwares(buildPath);
 		if (ok == false)
 		{
+			clear();
 			return false;
 		}
 
@@ -43,6 +77,7 @@ namespace Sim
 		if (subsystems.isEmpty() == true)
 		{
 			writeError(QObject::tr("Bitstream file does not contain any subsystem."));
+			clear();
 			return false;
 		}
 
@@ -51,6 +86,7 @@ namespace Sim
 		ok = loadLmDescriptions(buildPath);
 		if (ok == false)
 		{
+			clear();
 			return false;
 		}
 
@@ -59,6 +95,7 @@ namespace Sim
 		ok = loadSimulationScripts(buildPath);
 		if (ok == false)
 		{
+			clear();
 			return false;
 		}
 
@@ -72,16 +109,18 @@ namespace Sim
 			if (ok == false)
 			{
 				writeError(QObject::tr("Subsystem %1 in not found in bitstream file.").arg(subsystemId));
+				clear();
+				return false;
 			}
 
 			// Create subsystem
 			//
-			const Output& out = *this;
-			auto res = m_subsystems.try_emplace(subsystemId, subsystemId, out);
+			auto res = m_subsystems.try_emplace(subsystemId, subsystemId);
 
 			if (res.second == false)
 			{
 				writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
+				clear();
 				return false;
 			}
 
@@ -107,6 +146,7 @@ namespace Sim
 			if (simScriptIt == m_simScript.end())
 			{
 				writeError(QObject::tr("Cannot find AFBL simulation script file %1").arg(lmDescription.simualtionScriptFile()));
+				clear();
 				return false;
 			}
 
@@ -119,11 +159,12 @@ namespace Sim
 			{
 				// Error must be reported in Subsystem::load
 				//
+				clear();
 				return false;
 			}
-
 		}
 
+		writeMessage("Project for simulation successfully loaded.");
 		return true;
 	}
 

@@ -4,8 +4,10 @@
 #include <QMainWindow>
 #include <QtWidgets>
 #include "../lib/DbController.h"
+#include "../Simulator/Simulator.h"
 
 class SimulatorProjectWidget;
+class SimulatorOutputWidget;
 class SimulatorMemoryWidget;
 class SimulatorToolBar;
 
@@ -29,49 +31,9 @@ protected slots:
 private:
 	SimulatorToolBar* m_toolBar = nullptr;
 	SimulatorProjectWidget* m_projectWidget = nullptr;
-	//std::vector<SimulatorMemoryWidget*> m_memoryWidgets;
-};
+	std::vector<SimulatorMemoryWidget*> m_memoryWidgets;
 
-
-// Widget for selection build and module
-//
-class SimulatorProjectWidget : public QWidget, HasDbController
-{
-	Q_OBJECT
-
-public:
-	explicit SimulatorProjectWidget(DbController* db, QWidget* parent = nullptr);
-	virtual ~SimulatorProjectWidget();
-
-protected:
-	QString buildsPath();
-
-protected slots:
-	virtual void showEvent(QShowEvent*) override;
-
-	void fillBuildList();
-	void debugReleaseChanged(const QString &);
-	void loadButtonClicked();
-
-	void buildListSelectionChanged(int currentRow);
-	void buildListItemDoubleClicked(QListWidgetItem* item);
-
-signals:
-	void loadBuild(QString buildPath);
-
-private:
-	QComboBox* m_debugReleaseCombo = nullptr;
-
-	QPushButton* m_refreshButton = nullptr;
-	QPushButton* m_loadButton = nullptr;
-
-	QLabel* m_buildLabel = nullptr;
-	QListWidget* m_buildList = nullptr;
-
-	QSplitter* m_splitter = nullptr;
-
-	QLabel* m_equipmentLabel = nullptr;
-	QTreeWidget* m_equipmentTree = nullptr;
+	Sim::Simulator m_simulator;
 };
 
 

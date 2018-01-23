@@ -1,4 +1,4 @@
-#include "Ram.h"
+#include "SimRam.h"
 #include <cassert>
 
 namespace Sim

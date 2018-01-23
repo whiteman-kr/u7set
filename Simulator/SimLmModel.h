@@ -4,9 +4,9 @@
 #include <QTextStream>
 #include <QByteArray>
 #include <QThread>
-#include "Output.h"
-#include "Eeprom.h"
-#include "DeviceEmulator.h"
+#include "SimOutput.h"
+#include "SimEeprom.h"
+#include "SimDeviceEmulator.h"
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
 
@@ -18,7 +18,7 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		explicit LogicModule(const Output& output);
+		LogicModule();
 		virtual ~LogicModule();
 
 	public:

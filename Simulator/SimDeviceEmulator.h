@@ -11,10 +11,10 @@
 #include <QJSEngine>
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
-#include "Output.h"
-#include "Eeprom.h"
-#include "Ram.h"
-#include "Component.h"
+#include "SimOutput.h"
+#include "SimEeprom.h"
+#include "SimRam.h"
+#include "SimComponent.h"
 
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   //WINDOWS
@@ -123,7 +123,7 @@ namespace Sim
 		Q_PROPERTY(quint32 ProgramCounter MEMBER (m_logicUnit.programCounter))
 
 	public:
-		explicit DeviceEmulator(const Output& output);
+		DeviceEmulator();
 		virtual ~DeviceEmulator();
 
 		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,

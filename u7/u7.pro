@@ -206,7 +206,9 @@ SOURCES +=\
     SimulatorTabPage.cpp \
     Simulator/SimulatorWidget.cpp \
     Simulator/SimulatorMemoryWidget.cpp \
-    Builder/ConfigurationServiceCfgGenerator.cpp
+    Builder/ConfigurationServiceCfgGenerator.cpp \
+    Simulator/SimulatorOutputWidget.cpp \
+    Simulator/SimulatorProjectWidget.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -350,7 +352,9 @@ HEADERS  += \
     SimulatorTabPage.h \
     Simulator/SimulatorWidget.h \
     Simulator/SimulatorMemoryWidget.h \
-    Builder/ConfigurationServiceCfgGenerator.h
+    Builder/ConfigurationServiceCfgGenerator.h \
+    Simulator/SimulatorOutputWidget.h \
+    Simulator/SimulatorProjectWidget.h
 
 FORMS    += \
     CreateProjectDialog.ui \
