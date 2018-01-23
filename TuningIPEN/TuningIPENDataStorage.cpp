@@ -134,7 +134,7 @@ namespace  TuningIPEN
 					data.append(QVariant(QString("AnalogFloat")));
 
 					float* defaultValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes);
-					*defaultValuePtr = static_cast<float>(signal->tuningDefaultValue());
+					*defaultValuePtr = signal->tuningDefaultValue().floatValue();
 
 					data.append(QVariant(*defaultValuePtr));
 
@@ -159,7 +159,7 @@ namespace  TuningIPEN
 					data.append(QVariant(QString("AnalogInt")));
 
 					qint32* defaultValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes);
-					*defaultValuePtr = static_cast<qint32>(signal->tuningDefaultValue());
+					*defaultValuePtr = signal->tuningDefaultValue().intValue();
 
 					data.append(QVariant(*defaultValuePtr));
 
@@ -201,11 +201,11 @@ namespace  TuningIPEN
 
 				data.append(QVariant(QString("Discrete")));
 
-				setFramesDataBit(writeOffsetBytes, bit, signal->tuningDefaultValue() == 0.0 ? 0 : 1);
+				setFramesDataBit(writeOffsetBytes, bit, signal->tuningDefaultValue().discreteValue());
 				setFramesDataBit(writeOffsetBytes + m_tuningFrameSizeBytes, bit, 0);					// low bound
 				setFramesDataBit(writeOffsetBytes + m_tuningFrameSizeBytes * 2, bit, 1);				// high bound
 
-				data.append(QVariant(static_cast<int>(signal->tuningDefaultValue() == 0.0 ? 0 : 1)));
+				data.append(QVariant(signal->tuningDefaultValue().discreteValue()));
 				data.append(QVariant(static_cast<int>(0)));
 				data.append(QVariant(static_cast<int>(1)));
 

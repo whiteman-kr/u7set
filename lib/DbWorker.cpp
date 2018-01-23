@@ -4314,9 +4314,9 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setOutputMode(static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt()));
 
 	s.setEnableTuning(q.value(SD_ENABLE_TUNING).toBool());
-	s.setTuningDefaultValue(q.value(SD_TUNING_DEFAULT_VALUE).toFloat());
-	s.setTuningLowBound(q.value(SD_TUNING_LOW_BOUND).toFloat());
-	s.setTuningHighBound(q.value(SD_TUNING_HIGH_BOUND).toFloat());
+	s.setTuningDefaultValue(TuningValue::createFromDouble(s.signalType(), s.analogSignalFormat(), q.value(SD_TUNING_DEFAULT_VALUE).toDouble()));
+	s.setTuningLowBound(TuningValue::createFromDouble(s.signalType(), s.analogSignalFormat(), q.value(SD_TUNING_LOW_BOUND).toDouble()));
+	s.setTuningHighBound(TuningValue::createFromDouble(s.signalType(), s.analogSignalFormat(), q.value(SD_TUNING_HIGH_BOUND).toDouble()));
 
 	s.setAcquire(q.value(SD_ACQUIRE).toBool());
 	s.setDecimalPlaces(q.value(SD_DECIMAL_PLACES).toInt());
@@ -4378,9 +4378,9 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	arg(TO_INT(s.outputMode())).
 
 	arg(toSqlBoolean(s.enableTuning())).
-	arg(s.tuningDefaultValue()).
-	arg(s.tuningLowBound()).
-	arg(s.tuningHighBound()).
+	arg(s.tuningDefaultValue().toDouble()).
+	arg(s.tuningLowBound().toDouble()).
+	arg(s.tuningHighBound().toDouble()).
 
 	arg(toSqlBoolean(s.acquire())).
 	arg(s.decimalPlaces()).

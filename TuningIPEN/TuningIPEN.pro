@@ -53,7 +53,8 @@ SOURCES +=\
     ../TuningService/TuningDataStorage.cpp \
     ../lib/CommandLineParser.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/SoftwareInfo.cpp
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -94,7 +95,8 @@ HEADERS  += TuningMainWindow.h \
     ../TuningService/TuningDataStorage.h \
     ../lib/CommandLineParser.h \
     ../lib/AppSignal.h \
-    ../lib/SoftwareInfo.h
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h
 
 include(../qtservice/src/qtservice.pri)
 

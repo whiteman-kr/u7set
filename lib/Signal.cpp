@@ -20,6 +20,7 @@ QString Signal::BUS_SIGNAL_MACRO_BUSSIGNALCAPTION("$(BUSSIGNALCAPTION)");
 
 Signal::Signal()
 {
+	updateTuningValuesType();
 }
 
 Signal::Signal(const Signal& s)
@@ -51,6 +52,8 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 		m_lowEngeneeringUnits = deviceSignal.appSignalLowEngUnits();
 		m_highEngeneeringUnits = deviceSignal.appSignalHighEngUnits();;
 	}
+
+	updateTuningValuesType();
 
 	if (deviceSignal.isInputSignal() || deviceSignal.isValiditySignal())
 	{
@@ -90,6 +93,12 @@ Signal::~Signal()
 {
 }
 
+void Signal::setSignalType(E::SignalType type)
+{
+	m_signalType = type;
+	updateTuningValuesType();
+}
+
 void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat)
 {
 	switch(signalType)
@@ -124,6 +133,13 @@ void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat data
 void Signal::setDataSizeW(int sizeW)
 {
 	m_dataSize = sizeW * SIZE_16BIT;
+}
+
+void Signal::setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat)
+{
+	m_analogSignalFormat = dataFormat;
+
+	updateTuningValuesType();
 }
 
 E::DataFormat Signal::dataFormat() const
@@ -226,7 +242,6 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busType
 									 E::BigEndian,						// param is not checked for Bus signals
 									 busTypeID);
 }
-
 
 void Signal::resetAddresses()
 {
@@ -567,9 +582,9 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
 
 	xml.writeBoolAttribute("EnableTuning", enableTuning());
-	xml.writeFloatAttribute("TuningDefaultValue", tuningDefaultValue());
-	xml.writeFloatAttribute("TuningLowBound", tuningLowBound());
-	xml.writeFloatAttribute("TuningHighBound", tuningHighBound());
+	xml.writeFloatAttribute("TuningDefaultValue", tuningDefaultValue().toFloat());
+	xml.writeFloatAttribute("TuningLowBound", tuningLowBound().toFloat());
+	xml.writeFloatAttribute("TuningHighBound", tuningHighBound().toFloat());
 
 	xml.writeStringAttribute("BusTypeID", busTypeID());
 	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
@@ -771,9 +786,19 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	m_byteOrder = static_cast<E::ByteOrder>(intValue);
 
 	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
-	result &= xml.readFloatAttribute("TuningDefaultValue", &m_tuningDefaultValue);
-	result &= xml.readFloatAttribute("TuningLowBound", &m_tuningLowBound);
-	result &= xml.readFloatAttribute("TuningHighBound", &m_tuningHighBound);
+
+	updateTuningValuesType();
+
+	float value = 0;
+
+	result &= xml.readFloatAttribute("TuningDefaultValue", &value);
+	m_tuningDefaultValue.fromFloat(value);
+
+	result &= xml.readFloatAttribute("TuningLowBound", &value);
+	m_tuningLowBound.fromFloat(value);
+
+	result &= xml.readFloatAttribute("TuningHighBound", &value);
+	m_tuningHighBound.fromFloat(value);
 
 	result &= xml.readStringAttribute("BusTypeID", &m_busTypeID);
 	result &= xml.readBoolAttribute("AdaptiveAperture", &m_adaptiveAperture);
@@ -863,9 +888,9 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 	// Tuning signal properties
 
 	s->set_enabletuning(m_enableTuning);
-	s->set_tuningdefaultvalue(m_tuningDefaultValue);
-	s->set_tuninglowbound(m_tuningLowBound);
-	s->set_tuninghighbound(m_tuningHighBound);
+	m_tuningDefaultValue.save(s->mutable_tuningdefaultvalue());
+	m_tuningLowBound.save(s->mutable_tuninglowbound());
+	m_tuningHighBound.save(s->mutable_tuninghighbound());
 
 	// Signal properties for MATS
 
@@ -929,7 +954,6 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 		s->mutable_regvalidityaddr()->set_bit(m_regValidityAddr.bit());
 	}
 }
-
 
 void Signal::serializeFrom(const Proto::AppSignal& s)
 {
@@ -1069,6 +1093,15 @@ bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat d
 	return false;
 }
 
+
+void Signal::updateTuningValuesType()
+{
+	TuningValueType tvType = TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat);
+
+	m_tuningDefaultValue.setType(tvType);
+	m_tuningLowBound.setType(tvType);
+	m_tuningHighBound.setType(tvType);
+}
 
 // --------------------------------------------------------------------------------------------------------
 //

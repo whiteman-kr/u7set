@@ -96,7 +96,8 @@ SOURCES += \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
-    ../lib/SoftwareInfo.cpp
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS += \
 	Stable.h \
@@ -146,7 +147,8 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     TcpArchiveClient.h \
     ../lib/TimeStamp.h \
-    ../lib/SoftwareInfo.h
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h
 
 include(../qtservice/src/qtservice.pri)
 

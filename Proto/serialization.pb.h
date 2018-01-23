@@ -99,6 +99,7 @@ class Property;
 class Address16;
 class Unit;
 class UnitSet;
+class TuningValue;
 class AppSignal;
 class AppSignalSet;
 class AppSignalState;
@@ -8536,6 +8537,118 @@ class UnitSet : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class TuningValue : public ::google::protobuf::Message {
+ public:
+  TuningValue();
+  virtual ~TuningValue();
+
+  TuningValue(const TuningValue& from);
+
+  inline TuningValue& operator=(const TuningValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningValue& default_instance();
+
+  void Swap(TuningValue* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningValue* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningValue& from);
+  void MergeFrom(const TuningValue& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional int32 intValue = 2 [default = 0];
+  inline bool has_intvalue() const;
+  inline void clear_intvalue();
+  static const int kIntValueFieldNumber = 2;
+  inline ::google::protobuf::int32 intvalue() const;
+  inline void set_intvalue(::google::protobuf::int32 value);
+
+  // optional float floatValue = 3 [default = 0];
+  inline bool has_floatvalue() const;
+  inline void clear_floatvalue();
+  static const int kFloatValueFieldNumber = 3;
+  inline float floatvalue() const;
+  inline void set_floatvalue(float value);
+
+  // optional double doubleValue = 4 [default = 0];
+  inline bool has_doublevalue() const;
+  inline void clear_doublevalue();
+  static const int kDoubleValueFieldNumber = 4;
+  inline double doublevalue() const;
+  inline void set_doublevalue(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.TuningValue)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_intvalue();
+  inline void clear_has_intvalue();
+  inline void set_has_floatvalue();
+  inline void clear_has_floatvalue();
+  inline void set_has_doublevalue();
+  inline void clear_has_doublevalue();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 intvalue_;
+  double doublevalue_;
+  float floatvalue_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningValue* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class AppSignal : public ::google::protobuf::Message {
  public:
   AppSignal();
@@ -8802,26 +8915,32 @@ class AppSignal : public ::google::protobuf::Message {
   inline bool enabletuning() const;
   inline void set_enabletuning(bool value);
 
-  // optional float tuningDefaultValue = 72 [default = 0];
+  // optional .Proto.TuningValue tuningDefaultValue = 72;
   inline bool has_tuningdefaultvalue() const;
   inline void clear_tuningdefaultvalue();
   static const int kTuningDefaultValueFieldNumber = 72;
-  inline float tuningdefaultvalue() const;
-  inline void set_tuningdefaultvalue(float value);
+  inline const ::Proto::TuningValue& tuningdefaultvalue() const;
+  inline ::Proto::TuningValue* mutable_tuningdefaultvalue();
+  inline ::Proto::TuningValue* release_tuningdefaultvalue();
+  inline void set_allocated_tuningdefaultvalue(::Proto::TuningValue* tuningdefaultvalue);
 
-  // optional float tuningLowBound = 73 [default = 0];
+  // optional .Proto.TuningValue tuningLowBound = 73;
   inline bool has_tuninglowbound() const;
   inline void clear_tuninglowbound();
   static const int kTuningLowBoundFieldNumber = 73;
-  inline float tuninglowbound() const;
-  inline void set_tuninglowbound(float value);
+  inline const ::Proto::TuningValue& tuninglowbound() const;
+  inline ::Proto::TuningValue* mutable_tuninglowbound();
+  inline ::Proto::TuningValue* release_tuninglowbound();
+  inline void set_allocated_tuninglowbound(::Proto::TuningValue* tuninglowbound);
 
-  // optional float tuningHighBound = 74 [default = 0];
+  // optional .Proto.TuningValue tuningHighBound = 74;
   inline bool has_tuninghighbound() const;
   inline void clear_tuninghighbound();
   static const int kTuningHighBoundFieldNumber = 74;
-  inline float tuninghighbound() const;
-  inline void set_tuninghighbound(float value);
+  inline const ::Proto::TuningValue& tuninghighbound() const;
+  inline ::Proto::TuningValue* mutable_tuninghighbound();
+  inline ::Proto::TuningValue* release_tuninghighbound();
+  inline void set_allocated_tuninghighbound(::Proto::TuningValue* tuninghighbound);
 
   // optional bool acquire = 81 [default = false];
   inline bool has_acquire() const;
@@ -9120,25 +9239,26 @@ class AppSignal : public ::google::protobuf::Message {
   double electrichighlimit_;
   ::google::protobuf::int32 electricunit_;
   ::google::protobuf::int32 sensortype_;
+  ::Proto::TuningValue* tuningdefaultvalue_;
   ::google::protobuf::int32 outputmode_;
-  float tuningdefaultvalue_;
-  float tuninglowbound_;
-  float tuninghighbound_;
-  double coarseaperture_;
   ::google::protobuf::int32 decimalplaces_;
+  ::Proto::TuningValue* tuninglowbound_;
+  ::Proto::TuningValue* tuninghighbound_;
+  double coarseaperture_;
   bool enabletuning_;
   bool acquire_;
   bool adaptiveaperture_;
   bool checkedout_;
-  double fineaperture_;
   ::google::protobuf::int32 id_;
+  double fineaperture_;
   ::google::protobuf::int32 signalgroupid_;
   ::google::protobuf::int32 signalinstanceid_;
   ::google::protobuf::int32 changesetid_;
   ::google::protobuf::int32 userid_;
-  bool deleted_;
   ::google::protobuf::int64 created_;
   ::google::protobuf::int64 instancecreated_;
+  bool deleted_;
+  ::google::protobuf::int32 instanceaction_;
   ::google::protobuf::uint64 hash_;
   ::Proto::Address16* iobufaddr_;
   ::Proto::Address16* tuningaddr_;
@@ -9146,7 +9266,6 @@ class AppSignal : public ::google::protobuf::Message {
   ::Proto::Address16* regbufaddr_;
   ::Proto::Address16* regvalueaddr_;
   ::Proto::Address16* regvalidityaddr_;
-  ::google::protobuf::int32 instanceaction_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(51 + 31) / 32];
@@ -21777,6 +21896,98 @@ UnitSet::mutable_unit() {
 
 // -------------------------------------------------------------------
 
+// TuningValue
+
+// optional int32 type = 1;
+inline bool TuningValue::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningValue::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningValue::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningValue::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 TuningValue::type() const {
+  return type_;
+}
+inline void TuningValue::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional int32 intValue = 2 [default = 0];
+inline bool TuningValue::has_intvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TuningValue::set_has_intvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TuningValue::clear_has_intvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TuningValue::clear_intvalue() {
+  intvalue_ = 0;
+  clear_has_intvalue();
+}
+inline ::google::protobuf::int32 TuningValue::intvalue() const {
+  return intvalue_;
+}
+inline void TuningValue::set_intvalue(::google::protobuf::int32 value) {
+  set_has_intvalue();
+  intvalue_ = value;
+}
+
+// optional float floatValue = 3 [default = 0];
+inline bool TuningValue::has_floatvalue() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TuningValue::set_has_floatvalue() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TuningValue::clear_has_floatvalue() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TuningValue::clear_floatvalue() {
+  floatvalue_ = 0;
+  clear_has_floatvalue();
+}
+inline float TuningValue::floatvalue() const {
+  return floatvalue_;
+}
+inline void TuningValue::set_floatvalue(float value) {
+  set_has_floatvalue();
+  floatvalue_ = value;
+}
+
+// optional double doubleValue = 4 [default = 0];
+inline bool TuningValue::has_doublevalue() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void TuningValue::set_has_doublevalue() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void TuningValue::clear_has_doublevalue() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void TuningValue::clear_doublevalue() {
+  doublevalue_ = 0;
+  clear_has_doublevalue();
+}
+inline double TuningValue::doublevalue() const {
+  return doublevalue_;
+}
+inline void TuningValue::set_doublevalue(double value) {
+  set_has_doublevalue();
+  doublevalue_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // AppSignal
 
 // optional string appSignalID = 1;
@@ -22639,7 +22850,7 @@ inline void AppSignal::set_enabletuning(bool value) {
   enabletuning_ = value;
 }
 
-// optional float tuningDefaultValue = 72 [default = 0];
+// optional .Proto.TuningValue tuningDefaultValue = 72;
 inline bool AppSignal::has_tuningdefaultvalue() const {
   return (_has_bits_[0] & 0x04000000u) != 0;
 }
@@ -22650,18 +22861,34 @@ inline void AppSignal::clear_has_tuningdefaultvalue() {
   _has_bits_[0] &= ~0x04000000u;
 }
 inline void AppSignal::clear_tuningdefaultvalue() {
-  tuningdefaultvalue_ = 0;
+  if (tuningdefaultvalue_ != NULL) tuningdefaultvalue_->::Proto::TuningValue::Clear();
   clear_has_tuningdefaultvalue();
 }
-inline float AppSignal::tuningdefaultvalue() const {
+inline const ::Proto::TuningValue& AppSignal::tuningdefaultvalue() const {
+  return tuningdefaultvalue_ != NULL ? *tuningdefaultvalue_ : *default_instance_->tuningdefaultvalue_;
+}
+inline ::Proto::TuningValue* AppSignal::mutable_tuningdefaultvalue() {
+  set_has_tuningdefaultvalue();
+  if (tuningdefaultvalue_ == NULL) tuningdefaultvalue_ = new ::Proto::TuningValue;
   return tuningdefaultvalue_;
 }
-inline void AppSignal::set_tuningdefaultvalue(float value) {
-  set_has_tuningdefaultvalue();
-  tuningdefaultvalue_ = value;
+inline ::Proto::TuningValue* AppSignal::release_tuningdefaultvalue() {
+  clear_has_tuningdefaultvalue();
+  ::Proto::TuningValue* temp = tuningdefaultvalue_;
+  tuningdefaultvalue_ = NULL;
+  return temp;
+}
+inline void AppSignal::set_allocated_tuningdefaultvalue(::Proto::TuningValue* tuningdefaultvalue) {
+  delete tuningdefaultvalue_;
+  tuningdefaultvalue_ = tuningdefaultvalue;
+  if (tuningdefaultvalue) {
+    set_has_tuningdefaultvalue();
+  } else {
+    clear_has_tuningdefaultvalue();
+  }
 }
 
-// optional float tuningLowBound = 73 [default = 0];
+// optional .Proto.TuningValue tuningLowBound = 73;
 inline bool AppSignal::has_tuninglowbound() const {
   return (_has_bits_[0] & 0x08000000u) != 0;
 }
@@ -22672,18 +22899,34 @@ inline void AppSignal::clear_has_tuninglowbound() {
   _has_bits_[0] &= ~0x08000000u;
 }
 inline void AppSignal::clear_tuninglowbound() {
-  tuninglowbound_ = 0;
+  if (tuninglowbound_ != NULL) tuninglowbound_->::Proto::TuningValue::Clear();
   clear_has_tuninglowbound();
 }
-inline float AppSignal::tuninglowbound() const {
+inline const ::Proto::TuningValue& AppSignal::tuninglowbound() const {
+  return tuninglowbound_ != NULL ? *tuninglowbound_ : *default_instance_->tuninglowbound_;
+}
+inline ::Proto::TuningValue* AppSignal::mutable_tuninglowbound() {
+  set_has_tuninglowbound();
+  if (tuninglowbound_ == NULL) tuninglowbound_ = new ::Proto::TuningValue;
   return tuninglowbound_;
 }
-inline void AppSignal::set_tuninglowbound(float value) {
-  set_has_tuninglowbound();
-  tuninglowbound_ = value;
+inline ::Proto::TuningValue* AppSignal::release_tuninglowbound() {
+  clear_has_tuninglowbound();
+  ::Proto::TuningValue* temp = tuninglowbound_;
+  tuninglowbound_ = NULL;
+  return temp;
+}
+inline void AppSignal::set_allocated_tuninglowbound(::Proto::TuningValue* tuninglowbound) {
+  delete tuninglowbound_;
+  tuninglowbound_ = tuninglowbound;
+  if (tuninglowbound) {
+    set_has_tuninglowbound();
+  } else {
+    clear_has_tuninglowbound();
+  }
 }
 
-// optional float tuningHighBound = 74 [default = 0];
+// optional .Proto.TuningValue tuningHighBound = 74;
 inline bool AppSignal::has_tuninghighbound() const {
   return (_has_bits_[0] & 0x10000000u) != 0;
 }
@@ -22694,15 +22937,31 @@ inline void AppSignal::clear_has_tuninghighbound() {
   _has_bits_[0] &= ~0x10000000u;
 }
 inline void AppSignal::clear_tuninghighbound() {
-  tuninghighbound_ = 0;
+  if (tuninghighbound_ != NULL) tuninghighbound_->::Proto::TuningValue::Clear();
   clear_has_tuninghighbound();
 }
-inline float AppSignal::tuninghighbound() const {
+inline const ::Proto::TuningValue& AppSignal::tuninghighbound() const {
+  return tuninghighbound_ != NULL ? *tuninghighbound_ : *default_instance_->tuninghighbound_;
+}
+inline ::Proto::TuningValue* AppSignal::mutable_tuninghighbound() {
+  set_has_tuninghighbound();
+  if (tuninghighbound_ == NULL) tuninghighbound_ = new ::Proto::TuningValue;
   return tuninghighbound_;
 }
-inline void AppSignal::set_tuninghighbound(float value) {
-  set_has_tuninghighbound();
-  tuninghighbound_ = value;
+inline ::Proto::TuningValue* AppSignal::release_tuninghighbound() {
+  clear_has_tuninghighbound();
+  ::Proto::TuningValue* temp = tuninghighbound_;
+  tuninghighbound_ = NULL;
+  return temp;
+}
+inline void AppSignal::set_allocated_tuninghighbound(::Proto::TuningValue* tuninghighbound) {
+  delete tuninghighbound_;
+  tuninghighbound_ = tuninghighbound;
+  if (tuninghighbound) {
+    set_has_tuninghighbound();
+  } else {
+    clear_has_tuninghighbound();
+  }
 }
 
 // optional bool acquire = 81 [default = false];

@@ -80,7 +80,6 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Signal.cpp \
     ../lib/SocketIO.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
@@ -118,7 +117,8 @@ SOURCES += \
     MeasureBase.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/SoftwareInfo.cpp
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -190,7 +190,8 @@ HEADERS  += \
     MeasureBase.h \
     ../lib/CircularLogger.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../lib/SoftwareInfo.h
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h
 #../lib/ExcelHelper.h
 
 FORMS    +=

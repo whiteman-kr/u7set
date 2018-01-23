@@ -86,7 +86,8 @@ SOURCES += MainWindow.cpp \
     AppDataServiceWidget.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/Service.cpp \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -124,7 +125,8 @@ HEADERS  += MainWindow.h \
     ../lib/SoftwareInfo.h \
     ../lib/OrderedHash.h \
     ../lib/Service.h \
-    ../lib/CommandLineParser.h
+    ../lib/CommandLineParser.h \
+    ../lib/TuningValue.h
 
 include(../qtservice/src/qtservice.pri)
 

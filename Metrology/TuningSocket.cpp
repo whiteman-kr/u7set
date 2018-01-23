@@ -386,7 +386,7 @@ void TuningSocket::requestWriteTuningSignals()
 
 		wrCmd->set_signalhash(cmd.signalHash());
 
-		Network::TuningValue* tv = new Network::TuningValue();
+		Proto::TuningValue* tv = new Proto::TuningValue();
 
 		assert(false);		// WM: check code below is needs checking
 

@@ -1,65 +1,8 @@
 #pragma once
 
 #include "../Hash.h"
+#include "../TuningValue.h"
 #include "../../Proto/network.pb.h"
-
-class TuningValue;
-
-extern bool operator < (const TuningValue& l, const TuningValue& r);
-extern bool operator > (const TuningValue& l, const TuningValue& r);
-extern bool operator == (const TuningValue& l, const TuningValue& r);
-extern bool operator != (const TuningValue& l, const TuningValue& r);
-
-enum class TuningValueType
-{
-	Discrete,
-	SignedInteger,
-	Float,
-	Double
-};
-
-class TuningValue
-{
-	Q_GADGET
-
-public:
-	TuningValue() = default;
-	explicit TuningValue(double value, TuningValueType valueType);
-	TuningValue(const Network::TuningValue& message);
-
-	TuningValueType type() const;
-	void setType(TuningValueType valueType);
-
-	qint32 discreteValue() const;
-	void setDiscreteValue(qint32 discreteValue);
-
-	qint32 intValue() const;
-	void setIntValue(qint32 intValue);
-
-	float floatValue() const;
-	void setFloatValue(float floatValue);
-
-	double doubleValue() const;
-	void setDoubleValue(double doubleValue);
-
-	double toDouble() const;
-
-	QString toString(int precision = -1) const;
-
-	bool save(Network::TuningValue* message) const;
-	bool load(const Network::TuningValue& message);
-
-	friend bool operator < (const TuningValue& l, const TuningValue& r);
-	friend bool operator > (const TuningValue& l, const TuningValue& r);
-	friend bool operator == (const TuningValue& l, const TuningValue& r);
-	friend bool operator != (const TuningValue& l, const TuningValue& r);
-
-private:
-	TuningValueType m_type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue
-	qint32 m_intValue = 0;
-	float m_floatValue = 0.0;
-	double m_doubleValue = 0.0;
-};
 
 union TuningSignalStateFlags
 {

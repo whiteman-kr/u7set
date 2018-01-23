@@ -128,7 +128,7 @@ namespace Tuning
 
 			QString appSignalID() const;
 
-			void setProtoTuningValue(Network::TuningValue* tuningValue);
+			void setProtoTuningValue(Proto::TuningValue* tuningValue);
 
 		private:
 			FotipV2::DataType getTuningSignalType(const Signal* s);

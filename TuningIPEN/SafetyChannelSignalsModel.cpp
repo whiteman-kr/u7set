@@ -144,7 +144,7 @@ namespace TuningIPEN
 					break;
 					case DEFAULT_VALUE_COLUMN:
 					{
-						double value = signal.tuningDefaultValue();
+						double value = signal.tuningDefaultValue().toDouble();
 						if (signal.isAnalog())
 						{
 							return value;
@@ -203,7 +203,7 @@ namespace TuningIPEN
 				{
 					return QColor(Qt::red);
 				}
-				if (qAbs(static_cast<float>(state.currentValue) - static_cast<float>(signal.tuningDefaultValue())) > std::numeric_limits<float>::epsilon())
+				if (qAbs(static_cast<float>(state.currentValue) - signal.tuningDefaultValue().toFloat()) > std::numeric_limits<float>::epsilon())
 				//if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString().trimmed() != data(currentIndex).toString().trimmed())
 				{
 					return QColor(Qt::yellow);

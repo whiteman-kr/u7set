@@ -339,22 +339,14 @@ message TuningSignalsRead
     repeated uint64 signalHash = 2;
 }
 
-message TuningValue
-{
-    optional int32 type = 1;
-	optional int32 intValue = 2 [default = 0];
-	optional float floatValue = 3  [default = 0.0];
-	optional double doubleValue = 4  [default = 0.0];
-}
-
 message TuningSignalState
 {
     optional fixed64 signalHash = 1 [default = 0];
     optional int32 error = 2 [default = 0];
     optional bool valid = 3 [default = false];
-	optional TuningValue value = 4;
-	optional TuningValue readLowBound = 5;
-	optional TuningValue readHighBound = 6;
+        optional Proto.TuningValue value = 4;
+	optional Proto.TuningValue readLowBound = 5;
+	optional Proto.TuningValue readHighBound = 6;
 	optional bool writeInProgress = 7 [default = false];
 	optional int32 writeErrorCode = 8 [default = 0];
 	optional fixed64 writeClient = 9 [default = 0];			// Hash code from Clinet's EquipmentID
@@ -371,7 +363,7 @@ message TuningSignalsReadReply
 message TuningWriteCommand
 {
     optional uint64 signalHash = 1 [default = 0];
-	optional TuningValue value = 2;
+        optional Proto.TuningValue value = 2;
 }
 
 message TuningSignalsWrite

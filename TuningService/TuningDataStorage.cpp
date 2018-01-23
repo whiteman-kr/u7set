@@ -232,7 +232,7 @@ namespace  Tuning
 				{
 				case TYPE_ANALOG_FLOAT:
 					{
-						float defaultValue = static_cast<float>(signal->tuningDefaultValue());
+						float defaultValue = signal->tuningDefaultValue().floatValue();
 						float lowBound = static_cast<float>(signal->lowEngeneeringUnits());
 						float highBound = static_cast<float>(signal->highEngeneeringUnits());
 
@@ -267,7 +267,7 @@ namespace  Tuning
 
 				case TYPE_ANALOG_INT:
 					{
-						qint32 defaultValue = static_cast<qint32>(signal->tuningDefaultValue());
+						qint32 defaultValue = signal->tuningDefaultValue().intValue();
 						qint32 lowBound = static_cast<qint32>(signal->lowEngeneeringUnits());
 						qint32 highBound = static_cast<qint32>(signal->highEngeneeringUnits());
 
@@ -302,7 +302,7 @@ namespace  Tuning
 
 				case TYPE_DISCRETE:
 					{
-						quint16 defaultValue = signal->tuningDefaultValue() == 0.0 ? 0 : 1;
+						quint16 defaultValue = signal->tuningDefaultValue().discreteValue();
 
 						int bitNo = discreteCount % SIZE_32BIT;
 
@@ -406,7 +406,7 @@ namespace  Tuning
 			{
 				crc.add(signal->appSignalID());
 				crc.add(signal->equipmentID());
-				crc.add(signal->tuningDefaultValue());
+				crc.add(signal->tuningDefaultValue().toDouble());		// real tuning value type does not matter
 				crc.add(signal->lowEngeneeringUnits());
 				crc.add(signal->highEngeneeringUnits());
 			}

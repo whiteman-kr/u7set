@@ -211,7 +211,8 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_filteringTime = message.filteringtime();
 	m_spreadTolerance = message.spreadtolerance();
 	m_enableTuning = message.enabletuning();
-	m_tuningDefaultValue = message.tuningdefaultvalue();
+
+	m_tuningDefaultValue.load(message.tuningdefaultvalue());
 
 	return true;
 }
@@ -255,7 +256,8 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 	message->set_filteringtime(m_filteringTime);
 	message->set_spreadtolerance(m_spreadTolerance);
 	message->set_enabletuning(m_enableTuning);
-	message->set_tuningdefaultvalue(m_tuningDefaultValue);
+
+	m_tuningDefaultValue.save(message->mutable_tuningdefaultvalue());
 }
 
 Hash AppSignalParam::hash() const
@@ -551,10 +553,15 @@ void AppSignalParam::setEnableTuning(bool value)
 
 double AppSignalParam::tuningDefaultValue() const
 {
-	return m_tuningDefaultValue;
+	int warning_checkNextCode = 1;
+
+	return m_tuningDefaultValue.toDouble();
 }
 
 void AppSignalParam::setTuningDefaultValue(double value)
 {
-	m_tuningDefaultValue = value;
+	int warning_checkNextCode = 1;
+
+	m_tuningDefaultValue.setType(TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat));
+	m_tuningDefaultValue.fromDouble(value);
 }

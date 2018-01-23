@@ -330,7 +330,7 @@ namespace Metrology
 		}
 
 		m_enableTuning = signal.enableTuning();
-		m_tuningDefaultValue = signal.tuningDefaultValue();
+		m_tuningDefaultValue = signal.tuningDefaultValue().toDouble();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

@@ -268,7 +268,7 @@ private:
 	double m_filteringTime = 0.005;
 	double m_spreadTolerance = 2;
 	bool m_enableTuning = false;
-	double m_tuningDefaultValue = 0;
+	TuningValue m_tuningDefaultValue;
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

@@ -105,7 +105,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
-    ../Proto/network.pb.h
+    ../Proto/network.pb.h \
+    ../lib/TuningValue.h
 
 SOURCES += \
     Settings.cpp \
@@ -160,7 +161,8 @@ SOURCES += \
     ../lib/Tuning/TuningSignalState.cpp \
     SchemaItemBus.cpp \
     Bus.cpp \
-    ../Proto/network.pb.cc
+    ../Proto/network.pb.cc \
+    ../lib/TuningValue.cpp
 
 
 DEFINES += VFRAME30LIB_LIBRARY

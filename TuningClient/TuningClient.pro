@@ -154,7 +154,8 @@ SOURCES +=\
     TuningClientTcpClient.cpp \ 
     ../lib/SoftwareInfo.cpp \
     ../lib/Tuning/TuningLog.cpp \
-    DialogAlert.cpp
+    DialogAlert.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -209,7 +210,8 @@ HEADERS  += MainWindow.h \
     TuningClientTcpClient.h \ 
     ../lib/SoftwareInfo.h \
     ../lib/Tuning/TuningLog.h \
-    DialogAlert.h
+    DialogAlert.h \
+    ../lib/TuningValue.h
 
 FORMS    += \
     DialogSettings.ui \

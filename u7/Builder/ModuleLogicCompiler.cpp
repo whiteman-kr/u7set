@@ -9087,7 +9087,7 @@ namespace Builder
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue(),
+								signal->tuningDefaultValue().toFloat(),
 								signal->lowEngeneeringUnits(),
 								signal->highEngeneeringUnits());
 				file.append(str);
@@ -9117,7 +9117,7 @@ namespace Builder
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
-								static_cast<qint32>(signal->tuningDefaultValue()),
+								signal->tuningDefaultValue().intValue(),
 								static_cast<qint32>(signal->lowEngeneeringUnits()),
 								static_cast<qint32>(signal->highEngeneeringUnits()));
 				file.append(str);
@@ -9143,13 +9143,11 @@ namespace Builder
 
 				QString str;
 
-				int defaultValue = (static_cast<int>(signal->tuningDefaultValue()) == 0) ? 0 : 1;
-
 				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
-								defaultValue,
+								signal->tuningDefaultValue().discreteValue(),
 								0,
 								1);
 				file.append(str);

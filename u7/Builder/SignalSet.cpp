@@ -192,8 +192,8 @@ namespace Builder
 				{
 					// limits OK
 					//
-					if (s.tuningDefaultValue() < s.lowEngeneeringUnits() ||
-						s.tuningDefaultValue() > s.highEngeneeringUnits())
+					if (s.tuningDefaultValue().toDouble() < s.lowEngeneeringUnits() ||
+						s.tuningDefaultValue().toDouble() > s.highEngeneeringUnits())
 					{
 						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits toHighEngeneeringUnits.
 						//

@@ -142,7 +142,7 @@ namespace Tuning
 		return m_signal->appSignalID();
 	}
 
-	void TuningSourceWorker::TuningSignal::setProtoTuningValue(Network::TuningValue* tuningValue)
+	void TuningSourceWorker::TuningSignal::setProtoTuningValue(Proto::TuningValue* tuningValue)
 	{
 		TEST_PTR_RETURN(tuningValue);
 

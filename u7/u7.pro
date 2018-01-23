@@ -204,7 +204,8 @@ SOURCES +=\
     LogicModuleSet.cpp \
     ../lib/LmDescription.cpp \
     Builder/MemWriteMap.cpp \
-    Builder/ConfigurationServiceCfgGenerator.cpp
+    Builder/ConfigurationServiceCfgGenerator.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -346,7 +347,8 @@ HEADERS  += \
     LogicModuleSet.h \
     ../lib/LmDescription.h \
     Builder/MemWriteMap.h \
-    Builder/ConfigurationServiceCfgGenerator.h
+    Builder/ConfigurationServiceCfgGenerator.h \
+    ../lib/TuningValue.h
 
 FORMS    += \
     CreateProjectDialog.ui \
