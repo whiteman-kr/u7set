@@ -28,6 +28,7 @@ namespace Tuning
 		tss.set_errpartialsent(errPartialSent);
 		tss.set_errreplysize(errReplySize);
 		tss.set_errnoreply(errNoReply);
+		tss.set_errrupcrc(errRupCRC);
 
 		// errors in reply RupFrameHeader
 		//
@@ -765,10 +766,18 @@ namespace Tuning
 
 	void TuningSourceWorker::processReply(RupFotipV2& reply)
 	{
+		bool result = true;
+
+		result = reply.checkCRC64();
+
+		if (result == false)
+		{
+			m_stat.errRupCRC++;
+			return;
+		}
+
 		reply.rupHeader.reverseBytes();
 		reply.fotipFrame.header.reverseBytes();
-
-		bool result = true;
 
 		result = checkRupHeader(reply.rupHeader);
 

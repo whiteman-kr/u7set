@@ -65,6 +65,8 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errPartialSent"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errReplySize"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errNoReply"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errAnalogLowBoundCheck"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errAnalogHighBoundCheck"));
 
 	ui->treeWidget->addTopLevelItem(stateItem);
 
@@ -78,6 +80,8 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupModuleType"));
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupFramesQuantity"));
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupFrameNumber"));
+	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupCRC"));
+
 
 	ui->treeWidget->addTopLevelItem(errorsRUPItem);
 
@@ -223,6 +227,8 @@ void DialogTuningSourceInfo::updateData()
 
 	item->child(c++)->setText(1, QString::number(ts.state.errrupframesquantity()));
 	item->child(c++)->setText(1, QString::number(ts.state.errrupframenumber()));
+
+	item->child(c++)->setText(1, QString::number(ts.state.errrupcrc()));
 
 	// FotipHeader
 

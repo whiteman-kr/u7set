@@ -322,6 +322,8 @@ message TuningSourceState
 
     optional int64 errAnalogLowBoundCheck = 39 [default = 0];
     optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+
+    optional int64 errRupCRC = 41 [default = 0];
 }
 
 message GetTuningSourcesStatesReply
