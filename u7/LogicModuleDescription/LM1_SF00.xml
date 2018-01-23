@@ -9887,7 +9887,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_filter_v1"     Caption="tctc_filter"     Version="1.0006">
+		<AFB id="#tctc_filter_v1"     Caption="tctc_filter"     Version="1.0007">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, filtering function</Description>
 				<Category>Delay</Category>
@@ -9907,8 +9907,8 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1000</Value>
 					<Default>1000</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>360000</HighLimit>
+					<LowLimit>5</LowLimit>
+					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -9930,7 +9930,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0007">
+		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0008">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, turn off delay function</Description>
 				<Category>Delay</Category>
@@ -9950,8 +9950,8 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1000</Value>
 					<Default>1000</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>360000</HighLimit>
+					<LowLimit>5</LowLimit>
+					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -9973,7 +9973,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_on_v1"         Caption="tctc_on"         Version="1.0006">
+		<AFB id="#tctc_on_v1"         Caption="tctc_on"         Version="1.0007">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, turn on delay function</Description>
 				<Category>Delay</Category>
@@ -9993,8 +9993,8 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1000</Value>
 					<Default>1000</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>360000</HighLimit>
+					<LowLimit>5</LowLimit>
+					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -10016,7 +10016,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_rsv_v1"        Caption="tctc_rsv"        Version="1.0006">
+		<AFB id="#tctc_rsv_v1"        Caption="tctc_rsv"        Version="1.0007">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, delay function</Description>
 				<Category>Delay</Category>
@@ -10036,8 +10036,8 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1000</Value>
 					<Default>1000</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>360000</HighLimit>
+					<LowLimit>5</LowLimit>
+					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -10059,7 +10059,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_vibr_v1"       Caption="tctc_vibr"       Version="1.0006">
+		<AFB id="#tctc_vibr_v1"       Caption="tctc_vibr"       Version="1.0007">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, single vibrator function</Description>
 				<Category>Delay</Category>
@@ -10079,8 +10079,8 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1000</Value>
 					<Default>1000</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>360000</HighLimit>
+					<LowLimit>5</LowLimit>
+					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
