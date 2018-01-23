@@ -7,6 +7,11 @@
 #include <lm.h>
 #endif
 
+#ifdef Q_OS_LINUX
+#include <security/pam_appl.h>
+#include <security/pam_misc.h>
+#endif
+
 //
 // LogonWorkspace
 //
@@ -102,6 +107,8 @@ void LogonWorkspace::onTimer()
 
 UserManager::UserManager()
 {
+    //m_users << "bv";
+    //m_users << "operator";
 }
 
 void UserManager::setConfiguration(const QStringList& users, LogonMode logonMode, int sessionMaxLengthSeconds)
@@ -217,8 +224,31 @@ bool UserManager::requestPassword(QWidget* parent)
 #endif
 
 #ifdef Q_OS_LINUX
-	assert(false);
-	result = true;
+
+    QByteArray userNameData = d.userName().toLocal8Bit();
+    char* userName = userNameData.data();
+
+    conversePassword = d.password();
+
+    pam_handle_t *pamh = nullptr;
+    struct pam_conv pamc = {pamConverse, this};
+
+    int res = pam_start("su", userName, &pamc, &pamh);
+
+    if (res == PAM_SUCCESS)
+    {
+        res = pam_authenticate(pamh, 0);
+    }
+
+    if (res == PAM_SUCCESS)
+    {
+        res = pam_acct_mgmt(pamh, 0);
+    }
+
+    pam_end(pamh, res);
+
+    result = res == PAM_SUCCESS ? true : false;
+
 #endif
 
 	if (result == false)
@@ -230,3 +260,71 @@ bool UserManager::requestPassword(QWidget* parent)
 
 	return result;
 }
+
+#ifdef Q_OS_LINUX
+
+int UserManager::pamConverse(int n, const struct pam_message **msg,
+    struct pam_response **resp, void *data)
+{
+    UserManager* ob = static_cast<UserManager*>(data);
+
+    QString strp = ob->conversePassword;
+    QByteArray ba = strp.toLatin1();
+    char *pcodec = ba.data();
+
+    struct pam_response *aresp;
+    char buf[PAM_MAX_RESP_SIZE];
+    int i;
+
+    aresp = new pam_response;
+
+    if (n <= 0 || n > PAM_MAX_NUM_MSG)
+        return (PAM_CONV_ERR);
+    for (i = 0; i < n; ++i) {
+        aresp[i].resp_retcode = 0;
+        aresp[i].resp = NULL;
+        switch (msg[i]->msg_style) {
+        case PAM_PROMPT_ECHO_OFF:
+            aresp[i].resp = strdup(pcodec);
+            if (aresp[i].resp == NULL)
+                goto fail;
+            break;
+        case PAM_PROMPT_ECHO_ON:
+            fputs(msg[i]->msg, stderr);
+            if (fgets(buf, sizeof buf, stdin) == NULL)
+                goto fail;
+            aresp[i].resp = strdup(buf);
+            if (aresp[i].resp == NULL)
+                goto fail;
+            break;
+        case PAM_ERROR_MSG:
+            fputs(msg[i]->msg, stderr);
+            if (strlen(msg[i]->msg) > 0 &&
+                msg[i]->msg[strlen(msg[i]->msg) - 1] != '\n')
+                fputc('\n', stderr);
+            break;
+        case PAM_TEXT_INFO:
+            fputs(msg[i]->msg, stdout);
+            if (strlen(msg[i]->msg) > 0 &&
+                msg[i]->msg[strlen(msg[i]->msg) - 1] != '\n')
+                fputc('\n', stdout);
+            break;
+        default:
+            goto fail;
+        }
+    }
+    *resp = aresp;
+    return (PAM_SUCCESS);
+ fail:
+        for (i = 0; i < n; ++i) {
+                if (aresp[i].resp != NULL) {
+                        memset(aresp[i].resp, 0, strlen(aresp[i].resp));
+                        free(aresp[i].resp);
+                }
+        }
+        memset(aresp, 0, n * sizeof *aresp);
+    *resp = NULL;
+    return (PAM_CONV_ERR);
+}
+
+#endif

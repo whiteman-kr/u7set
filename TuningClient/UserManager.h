@@ -69,6 +69,11 @@ signals:
 private:
 	bool requestPassword(QWidget* parent);
 
+#ifdef Q_OS_LINUX
+    static int pamConverse(int n, const struct pam_message **msg,
+        struct pam_response **resp, void *data);
+#endif
+
 private:
 	LogonMode m_logonMode = LogonMode::Permanent;
 	int m_sessionMaxLengthSeconds = 120;
@@ -80,6 +85,10 @@ private:
 
 	QDateTime m_logonTime;
 	QDateTime m_logoutPendingTime;
+
+#ifdef Q_OS_LINUX
+    QString conversePassword;
+#endif
 };
 
 #endif // USERMANAGER_H
