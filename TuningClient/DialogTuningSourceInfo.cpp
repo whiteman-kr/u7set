@@ -208,6 +208,8 @@ void DialogTuningSourceInfo::updateData()
 	item->child(c++)->setText(1, QString::number(ts.state.errpartialsent()));
 	item->child(c++)->setText(1, QString::number(ts.state.errreplysize()));
 	item->child(c++)->setText(1, QString::number(ts.state.errnoreply()));
+	item->child(c++)->setText(1, QString::number(ts.state.erranaloglowboundcheck()));
+	item->child(c++)->setText(1, QString::number(ts.state.erranaloghighboundcheck()));
 
 	// RupFrameHeader
 
@@ -280,6 +282,7 @@ void DialogTuningSourceInfo::updateData()
 
 	item->child(c++)->setText(1, QString::number(ts.state.fotipflagapplysuccess()));
 	item->child(c++)->setText(1, QString::number(ts.state.fotipflagsetsor()));
+
 }
 
 
