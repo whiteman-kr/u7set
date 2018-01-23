@@ -28,16 +28,18 @@ unix {
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
 # VFrame30 library
 # $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
 #
 win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
 }
 unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
 }
 
 INCLUDEPATH += ../VFrame30
@@ -50,7 +52,7 @@ win32 {
         INCLUDEPATH += ./../Protobuf
 }
 unix {
-        LIBS += -lprotobuf
+        LIBS += -lprotobuf -lpam -lpam_misc
 }
 
 
