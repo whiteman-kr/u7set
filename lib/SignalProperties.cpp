@@ -48,24 +48,17 @@ void SignalProperties::initProperties()
 	auto enableTuningProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning, m_signal);
 	enableTuningProperty->setCategory(tuningCategory);
 
-	assert(false);
-
-	/*
-	 * Refactoring required! For different types of tuning values.
-
-	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(float, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
+	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
 	m_propertiesDependentOnPrecision.push_back(tuningDefaultValueProperty);
 	tuningDefaultValueProperty->setCategory(tuningCategory);
 
-	auto tuningLowBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(float, tuningLowBoundCaption, true, Signal::tuningLowBound, Signal::setTuningLowBound, m_signal);
+	auto tuningLowBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningLowBoundCaption, true, Signal::tuningLowBound, Signal::setTuningLowBound, m_signal);
 	m_propertiesDependentOnPrecision.push_back(tuningLowBoundProperty);
 	tuningLowBoundProperty->setCategory(tuningCategory);
 
-	auto tuningHighBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(float, tuningHighBoundCaption, true, Signal::tuningHighBound, Signal::setTuningHighBound, m_signal);
+	auto tuningHighBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningHighBoundCaption, true, Signal::tuningHighBound, Signal::setTuningHighBound, m_signal);
 	m_propertiesDependentOnPrecision.push_back(tuningHighBoundProperty);
 	tuningHighBoundProperty->setCategory(tuningCategory);
-
-	*/
 
 	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
 										(std::function<int(void)>)std::bind(&Signal::dataSize, &m_signal),

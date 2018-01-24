@@ -1,4 +1,5 @@
 #include "TuningValue.h"
+#include <cmath>
 
 TuningValue::TuningValue(double value, TuningValueType valueType)
 {
@@ -172,9 +173,11 @@ void TuningValue::fromFloat(float value)
 
 	case TuningValueType::Float:
 		m_floatValue = value;
+		break;
 
 	case TuningValueType::Double:
 		m_doubleValue = static_cast<double>(value);
+		break;
 
 	default:
 		assert(false);
@@ -208,6 +211,31 @@ QString TuningValue::toString(int precision) const
 	default:
 		assert(false);
 		return 0;
+	}
+}
+
+void TuningValue::fromString(QString value, bool* ok)
+{
+	switch (m_type)
+	{
+	case TuningValueType::Discrete:
+		m_intValue = static_cast<qint32>(value.toInt(ok));
+		break;
+
+	case TuningValueType::SignedInteger:
+		m_intValue = static_cast<qint32>(value.toInt(ok));
+		break;
+
+	case TuningValueType::Float:
+		m_floatValue = value.toFloat(ok);
+		break;
+
+	case TuningValueType::Double:
+		m_doubleValue = value.toDouble(ok);
+		break;
+
+	default:
+		assert(false);
 	}
 }
 
@@ -278,6 +306,11 @@ TuningValue TuningValue::createFromDouble(E::SignalType signalType, E::AnalogApp
 	tv.fromDouble(value);
 
 	return tv;
+}
+
+int TuningValue::tuningValueTypeId()
+{
+	return qMetaTypeId<TuningValue>();
 }
 
 bool operator < (const TuningValue& l, const TuningValue& r)
