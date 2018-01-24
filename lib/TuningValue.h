@@ -44,6 +44,7 @@ public:
 	void fromFloat(float value);
 
 	QString toString(int precision = -1) const;
+	void fromString(QString value, bool* ok = nullptr);
 
 	bool save(Proto::TuningValue* message) const;
 	bool load(const Proto::TuningValue& message);
@@ -55,6 +56,8 @@ public:
 	friend bool operator > (const TuningValue& l, const TuningValue& r);
 	friend bool operator == (const TuningValue& l, const TuningValue& r);
 	friend bool operator != (const TuningValue& l, const TuningValue& r);
+
+	static int tuningValueTypeId();
 
 private:
 	TuningValueType m_type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue
