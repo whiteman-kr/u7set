@@ -343,13 +343,20 @@ message TuningSignalState
 {
     optional fixed64 signalHash = 1 [default = 0];
     optional int32 error = 2 [default = 0];
+
     optional bool valid = 3 [default = false];
-        optional Proto.TuningValue value = 4;
-	optional Proto.TuningValue readLowBound = 5;
-	optional Proto.TuningValue readHighBound = 6;
-	optional bool writeInProgress = 7 [default = false];
-	optional int32 writeErrorCode = 8 [default = 0];
-	optional fixed64 writeClient = 9 [default = 0];			// Hash code from Clinet's EquipmentID
+    optional Proto.TuningValue value = 4;
+    optional Proto.TuningValue readLowBound = 5;
+    optional Proto.TuningValue readHighBound = 6;
+
+    optional bool writeInProgress = 7 [default = false];
+    optional int32 writeErrorCode = 8 [default = 0];
+    optional fixed64 writeClient = 9 [default = 0];			// Hash code of Client's EquipmentID
+
+    optional sfixed64 successfulReadTime = 10 [default = 0];		// time of last succesfull signal reading (UTC)
+    optional sfixed64 writeRequestTime = 11 [default = 0];		// time of last write request (UTC)
+    optional sfixed64 successfulWriteTime = 12 [default = 0];		// time of last succesfull signal writing (UTC)
+    optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];		// time of last unsuccesfull signal writing (UTC)
 }
 
 message TuningSignalsReadReply

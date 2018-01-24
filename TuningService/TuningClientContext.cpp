@@ -60,13 +60,15 @@ namespace Tuning
 	}
 
 
-	void TuningSourceContext::readSignalState(Network::TuningSignalState& tss)
+	void TuningSourceContext::readSignalState(Network::TuningSignalState* tss)
 	{
+		TEST_PTR_RETURN(tss);
+
 		if (m_sourceWorker == nullptr)
 		{
 			assert(false);
-			tss.set_valid(false);
-			tss.set_error(TO_INT(NetworkError::InternalError));
+			tss->set_valid(false);
+			tss->set_error(TO_INT(NetworkError::InternalError));
 			return;
 		}
 
@@ -221,17 +223,19 @@ namespace Tuning
 	}
 
 
-	void TuningClientContext::readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply& reply) const
+	void TuningClientContext::readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply* reply) const
 	{
+		TEST_PTR_RETURN(reply);
+
 		int signalCount = request.signalhash_size();
 
 		//reply.mutable_tuningsignalstate()->Reserve(signalCount);
 
-		reply.clear_tuningsignalstate();
+		reply->clear_tuningsignalstate();
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Network::TuningSignalState* tss = reply.add_tuningsignalstate();
+			Network::TuningSignalState* tss = reply->add_tuningsignalstate();
 
 			if (tss == nullptr)
 			{
@@ -242,26 +246,28 @@ namespace Tuning
 
 			tss->set_signalhash(signalHash);
 
-			readSignalState(*tss);
+			readSignalState(tss);
 		}
 
-		reply.set_error(TO_INT(NetworkError::Success));
+		reply->set_error(TO_INT(NetworkError::Success));
 	}
 
 
-	void TuningClientContext::writeSignalStates(const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply& reply) const
+	void TuningClientContext::writeSignalStates(const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply* reply) const
 	{
+		TEST_PTR_RETURN(reply);
+
 		int writeRequestCount = request.commands_size();
 
 		bool autoApply = request.autoapply();
 
-		reply.clear_writeresult();
+		reply->clear_writeresult();
 
 		QHash<TuningSourceContext*, TuningSourceContext*> m_usedSrcContexts;
 
 		for(int i = 0; i < writeRequestCount; i++)
 		{
-			Network::TuningSignalWriteResult* writeResult = reply.add_writeresult();
+			Network::TuningSignalWriteResult* writeResult = reply->add_writeresult();
 
 			TEST_PTR_CONTINUE(writeResult);
 
@@ -299,7 +305,7 @@ namespace Tuning
 			m_usedSrcContexts.clear();
 		}
 
-		reply.set_error(TO_INT(NetworkError::Success));
+		reply->set_error(TO_INT(NetworkError::Success));
 	}
 
 
@@ -347,18 +353,20 @@ namespace Tuning
 	}
 
 
-	void TuningClientContext::readSignalState(Network::TuningSignalState& tss) const
+	void TuningClientContext::readSignalState(Network::TuningSignalState* tss) const
 	{
+		TEST_PTR_RETURN(tss);
+
 		// tss->signalHash is already filled!
 		//
-		Hash signalHash = tss.signalhash();
+		Hash signalHash = tss->signalhash();
 
 		TuningSourceContext* sourceContext = getSourceContextBySignalHash(signalHash);
 
 		if (sourceContext == nullptr)
 		{
-			tss.set_valid(false);
-			tss.set_error(TO_INT(NetworkError::UnknownSignalHash));
+			tss->set_valid(false);
+			tss->set_error(TO_INT(NetworkError::UnknownSignalHash));
 			return;
 		}
 

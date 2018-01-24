@@ -813,7 +813,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsRead));
   TuningSignalState_descriptor_ = file->message_type(34);
-  static const int TuningSignalState_offsets_[9] = {
+  static const int TuningSignalState_offsets_[13] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, signalhash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, valid_),
@@ -823,6 +823,10 @@ void protobuf_AssignDesc_network_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, writeinprogress_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, writeerrorcode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, writeclient_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, successfulreadtime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, writerequesttime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, successfulwritetime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, unsuccessfulwritetime_),
   };
   TuningSignalState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1427,54 +1431,57 @@ void protobuf_AddDesc_network_2eproto() {
     "tTuningSourcesStatesReply\022\020\n\005error\030\001 \001(\005"
     ":\0010\0226\n\022tuningSourcesState\030\002 \003(\0132\032.Networ"
     "k.TuningSourceState\"\'\n\021TuningSignalsRead"
-    "\022\022\n\nsignalHash\030\002 \003(\004\"\235\002\n\021TuningSignalSta"
+    "\022\022\n\nsignalHash\030\002 \003(\004\"\233\003\n\021TuningSignalSta"
     "te\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005"
     ":\0010\022\024\n\005valid\030\003 \001(\010:\005false\022!\n\005value\030\004 \001(\013"
     "2\022.Proto.TuningValue\022(\n\014readLowBound\030\005 \001"
     "(\0132\022.Proto.TuningValue\022)\n\rreadHighBound\030"
     "\006 \001(\0132\022.Proto.TuningValue\022\036\n\017writeInProg"
     "ress\030\007 \001(\010:\005false\022\031\n\016writeErrorCode\030\010 \001("
-    "\005:\0010\022\026\n\013writeClient\030\t \001(\006:\0010\"a\n\026TuningSi"
-    "gnalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuni"
-    "ngSignalState\030\002 \003(\0132\032.Network.TuningSign"
-    "alState\"N\n\022TuningWriteCommand\022\025\n\nsignalH"
-    "ash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132\022.Proto.Tuni"
-    "ngValue\"]\n\022TuningSignalsWrite\022\030\n\tautoApp"
-    "ly\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132\033.Netw"
-    "ork.TuningWriteCommand\"B\n\027TuningSignalWr"
-    "iteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005erro"
-    "r\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply\022\020\n"
-    "\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132 .N"
-    "etwork.TuningSignalWriteResult\"\024\n\022Tuning"
-    "SignalsApply\"+\n\027TuningSignalsApplyReply\022"
-    "\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignalsState"
-    "sToArchiveRequest\022\031\n\021clientEquipmentID\030\001"
-    " \001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.Ap"
-    "pSignalState\"N\n\"SaveAppSignalsStatesToAr"
-    "chiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchErro"
-    "r\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStatesFromA"
-    "rchiveStartRequest\022\031\n\021clientEquipmentID\030"
-    "\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030"
-    "\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHa"
-    "shes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true"
-    "\"~\n\'GetAppSignalStatesFromArchiveStartRe"
+    "\005:\0010\022\026\n\013writeClient\030\t \001(\006:\0010\022\035\n\022successf"
+    "ulReadTime\030\n \001(\020:\0010\022\033\n\020writeRequestTime\030"
+    "\013 \001(\020:\0010\022\036\n\023successfulWriteTime\030\014 \001(\020:\0010"
+    "\022 \n\025unsuccessfulWriteTime\030\r \001(\020:\0010\"a\n\026Tu"
+    "ningSignalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225"
+    "\n\021tuningSignalState\030\002 \003(\0132\032.Network.Tuni"
+    "ngSignalState\"N\n\022TuningWriteCommand\022\025\n\ns"
+    "ignalHash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132\022.Prot"
+    "o.TuningValue\"]\n\022TuningSignalsWrite\022\030\n\ta"
+    "utoApply\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132"
+    "\033.Network.TuningWriteCommand\"B\n\027TuningSi"
+    "gnalWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020"
+    "\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteRe"
+    "ply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003"
+    "(\0132 .Network.TuningSignalWriteResult\"\024\n\022"
+    "TuningSignalsApply\"+\n\027TuningSignalsApply"
+    "Reply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignal"
+    "sStatesToArchiveRequest\022\031\n\021clientEquipme"
+    "ntID\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Pr"
+    "oto.AppSignalState\"N\n\"SaveAppSignalsStat"
+    "esToArchiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tar"
+    "chError\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalState"
+    "sFromArchiveStartRequest\022\031\n\021clientEquipm"
+    "entID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstar"
+    "tTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014si"
+    "gnalHashes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010"
+    ":\004true\"~\n\'GetAppSignalStatesFromArchiveS"
+    "tartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
+    "\030\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequ"
+    "estID\030\003 \001(\r:\0010\"@\n(GetAppSignalStatesFrom"
+    "ArchiveNextRequest\022\024\n\trequestID\030\001 \001(\r:\0010"
+    "\"\271\002\n&GetAppSignalStatesFromArchiveNextRe"
     "ply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005"
-    ":\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030"
-    "\003 \001(\r:\0010\"@\n(GetAppSignalStatesFromArchiv"
-    "eNextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&G"
-    "etAppSignalStatesFromArchiveNextReply\022\020\n"
-    "\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022"
-    "\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001"
-    "(\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020totalSta"
-    "tesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001"
-    "(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\ni"
-    "sLastPart\030\010 \001(\010:\005false\022.\n\017appSignalState"
-    "s\030\t \003(\0132\025.Proto.AppSignalState\"B\n*GetApp"
-    "SignalStatesFromArchiveCancelRequest\022\024\n\t"
-    "requestID\030\001 \001(\r:\0010\"i\n(GetAppSignalStates"
-    "FromArchiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010"
-    "\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030"
-    "\003 \001(\t", 6485);
+    ":\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorStri"
+    "ng\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020to"
+    "talStatesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCou"
+    "nt\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\001"
+    "0\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017appSigna"
+    "lStates\030\t \003(\0132\025.Proto.AppSignalState\"B\n*"
+    "GetAppSignalStatesFromArchiveCancelReque"
+    "st\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAppSignal"
+    "StatesFromArchiveCancelReply\022\020\n\005error\030\001 "
+    "\001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorS"
+    "tring\030\003 \001(\t", 6611);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -13453,6 +13460,10 @@ const int TuningSignalState::kReadHighBoundFieldNumber;
 const int TuningSignalState::kWriteInProgressFieldNumber;
 const int TuningSignalState::kWriteErrorCodeFieldNumber;
 const int TuningSignalState::kWriteClientFieldNumber;
+const int TuningSignalState::kSuccessfulReadTimeFieldNumber;
+const int TuningSignalState::kWriteRequestTimeFieldNumber;
+const int TuningSignalState::kSuccessfulWriteTimeFieldNumber;
+const int TuningSignalState::kUnsuccessfulWriteTimeFieldNumber;
 #endif  // !_MSC_VER
 
 TuningSignalState::TuningSignalState()
@@ -13483,6 +13494,10 @@ void TuningSignalState::SharedCtor() {
   writeinprogress_ = false;
   writeerrorcode_ = 0;
   writeclient_ = GOOGLE_ULONGLONG(0);
+  successfulreadtime_ = GOOGLE_LONGLONG(0);
+  writerequesttime_ = GOOGLE_LONGLONG(0);
+  successfulwritetime_ = GOOGLE_LONGLONG(0);
+  unsuccessfulwritetime_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -13538,6 +13553,10 @@ void TuningSignalState::Clear() {
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     writeclient_ = GOOGLE_ULONGLONG(0);
+    successfulreadtime_ = GOOGLE_LONGLONG(0);
+    writerequesttime_ = GOOGLE_LONGLONG(0);
+    successfulwritetime_ = GOOGLE_LONGLONG(0);
+    unsuccessfulwritetime_ = GOOGLE_LONGLONG(0);
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -13682,6 +13701,70 @@ bool TuningSignalState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(81)) goto parse_successfulReadTime;
+        break;
+      }
+
+      // optional sfixed64 successfulReadTime = 10 [default = 0];
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_successfulReadTime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
+                 input, &successfulreadtime_)));
+          set_has_successfulreadtime();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(89)) goto parse_writeRequestTime;
+        break;
+      }
+
+      // optional sfixed64 writeRequestTime = 11 [default = 0];
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_writeRequestTime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
+                 input, &writerequesttime_)));
+          set_has_writerequesttime();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(97)) goto parse_successfulWriteTime;
+        break;
+      }
+
+      // optional sfixed64 successfulWriteTime = 12 [default = 0];
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_successfulWriteTime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
+                 input, &successfulwritetime_)));
+          set_has_successfulwritetime();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(105)) goto parse_unsuccessfulWriteTime;
+        break;
+      }
+
+      // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+      case 13: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_unsuccessfulWriteTime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
+                 input, &unsuccessfulwritetime_)));
+          set_has_unsuccessfulwritetime();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -13752,6 +13835,26 @@ void TuningSignalState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFixed64(9, this->writeclient(), output);
   }
 
+  // optional sfixed64 successfulReadTime = 10 [default = 0];
+  if (has_successfulreadtime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(10, this->successfulreadtime(), output);
+  }
+
+  // optional sfixed64 writeRequestTime = 11 [default = 0];
+  if (has_writerequesttime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(11, this->writerequesttime(), output);
+  }
+
+  // optional sfixed64 successfulWriteTime = 12 [default = 0];
+  if (has_successfulwritetime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(12, this->successfulwritetime(), output);
+  }
+
+  // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+  if (has_unsuccessfulwritetime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(13, this->unsuccessfulwritetime(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -13809,6 +13912,26 @@ void TuningSignalState::SerializeWithCachedSizes(
   // optional fixed64 writeClient = 9 [default = 0];
   if (has_writeclient()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteFixed64ToArray(9, this->writeclient(), target);
+  }
+
+  // optional sfixed64 successfulReadTime = 10 [default = 0];
+  if (has_successfulreadtime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(10, this->successfulreadtime(), target);
+  }
+
+  // optional sfixed64 writeRequestTime = 11 [default = 0];
+  if (has_writerequesttime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(11, this->writerequesttime(), target);
+  }
+
+  // optional sfixed64 successfulWriteTime = 12 [default = 0];
+  if (has_successfulwritetime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(12, this->successfulwritetime(), target);
+  }
+
+  // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+  if (has_unsuccessfulwritetime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(13, this->unsuccessfulwritetime(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -13879,6 +14002,26 @@ int TuningSignalState::ByteSize() const {
       total_size += 1 + 8;
     }
 
+    // optional sfixed64 successfulReadTime = 10 [default = 0];
+    if (has_successfulreadtime()) {
+      total_size += 1 + 8;
+    }
+
+    // optional sfixed64 writeRequestTime = 11 [default = 0];
+    if (has_writerequesttime()) {
+      total_size += 1 + 8;
+    }
+
+    // optional sfixed64 successfulWriteTime = 12 [default = 0];
+    if (has_successfulwritetime()) {
+      total_size += 1 + 8;
+    }
+
+    // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+    if (has_unsuccessfulwritetime()) {
+      total_size += 1 + 8;
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -13935,6 +14078,18 @@ void TuningSignalState::MergeFrom(const TuningSignalState& from) {
     if (from.has_writeclient()) {
       set_writeclient(from.writeclient());
     }
+    if (from.has_successfulreadtime()) {
+      set_successfulreadtime(from.successfulreadtime());
+    }
+    if (from.has_writerequesttime()) {
+      set_writerequesttime(from.writerequesttime());
+    }
+    if (from.has_successfulwritetime()) {
+      set_successfulwritetime(from.successfulwritetime());
+    }
+    if (from.has_unsuccessfulwritetime()) {
+      set_unsuccessfulwritetime(from.unsuccessfulwritetime());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -13967,6 +14122,10 @@ void TuningSignalState::Swap(TuningSignalState* other) {
     std::swap(writeinprogress_, other->writeinprogress_);
     std::swap(writeerrorcode_, other->writeerrorcode_);
     std::swap(writeclient_, other->writeclient_);
+    std::swap(successfulreadtime_, other->successfulreadtime_);
+    std::swap(writerequesttime_, other->writerequesttime_);
+    std::swap(successfulwritetime_, other->successfulwritetime_);
+    std::swap(unsuccessfulwritetime_, other->unsuccessfulwritetime_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

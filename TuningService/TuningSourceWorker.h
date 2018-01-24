@@ -109,6 +109,8 @@ namespace Tuning
 		public:
 			void init(const Signal* s, int index, int tuningRomFraeSizeW);
 
+			QString appSignalID() const { return m_appSignalID; }
+
 			bool valid() const { return m_valid; }
 
 			TuningValueType tuningValueType() const { return m_tuningValueType; }
@@ -130,19 +132,23 @@ namespace Tuning
 			void setReadHighBound(const TuningValue& value);
 			void invalidate();
 
-			QString appSignalID() const;
+			bool writeInProgress() const { return m_writeInProgress; }
 
-			void setProtoTuningValue(Proto::TuningValue* tuningValue);
+			qint64 successfulReadTime() const { return m_successfulReadTime; }
+			qint64 writeRequestTime() const { return m_writeRequestTime; }
+			qint64 successfulWriteTime() const { return m_successfulWriteTime; }
+			qint64 unsuccessfulWriteTime() const { return m_unsuccessfulWriteTime; }
+
+			Hash writeClient() const { return m_writeClient; }
+			int writeErrorCode() const { return m_writeErrorCode; }
 
 			FotipV2::DataType fotipV2DataType();
 
 		private:
-			FotipV2::DataType getTuningSignalType(const Signal* s);
-
 			void updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat);
 
 		private:
-			const Signal* m_signal = nullptr;
+			QString m_appSignalID;
 			Hash m_signalHash = 0;
 
 			int m_index = -1;
@@ -166,6 +172,16 @@ namespace Tuning
 			TuningValue m_currentValue;
 			TuningValue m_readLowBound;
 			TuningValue m_readHighBound;
+
+			bool m_writeInProgress = false;
+
+			qint64 m_successfulReadTime = 0;		// time of last succesfull signal reading (UTC), in normal should be permanently update
+			qint64 m_writeRequestTime = 0;			// time of last write request (UTC)
+			qint64 m_successfulWriteTime = 0;		// time of last succesfull signal writing (UTC), usually should be near m_writeRequestTime
+			qint64 m_unsuccessfulWriteTime = 0;		// time of last unsuccesfull signal writing (UTC), usually should be near m_writeRequestTime
+
+			Hash m_writeClient = 0;					// last write client's EquipmentID hash
+			int m_writeErrorCode = 0;				// last write error code
 		};
 
 	public:
@@ -183,7 +199,7 @@ namespace Tuning
 
 		void getState(Network::TuningSourceState& tuningSourceState);
 
-		void readSignalState(Network::TuningSignalState& tss);
+		void readSignalState(Network::TuningSignalState* tss);
 		void writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult);
 		void applySignalStates();
 

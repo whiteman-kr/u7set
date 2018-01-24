@@ -4255,6 +4255,34 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline ::google::protobuf::uint64 writeclient() const;
   inline void set_writeclient(::google::protobuf::uint64 value);
 
+  // optional sfixed64 successfulReadTime = 10 [default = 0];
+  inline bool has_successfulreadtime() const;
+  inline void clear_successfulreadtime();
+  static const int kSuccessfulReadTimeFieldNumber = 10;
+  inline ::google::protobuf::int64 successfulreadtime() const;
+  inline void set_successfulreadtime(::google::protobuf::int64 value);
+
+  // optional sfixed64 writeRequestTime = 11 [default = 0];
+  inline bool has_writerequesttime() const;
+  inline void clear_writerequesttime();
+  static const int kWriteRequestTimeFieldNumber = 11;
+  inline ::google::protobuf::int64 writerequesttime() const;
+  inline void set_writerequesttime(::google::protobuf::int64 value);
+
+  // optional sfixed64 successfulWriteTime = 12 [default = 0];
+  inline bool has_successfulwritetime() const;
+  inline void clear_successfulwritetime();
+  static const int kSuccessfulWriteTimeFieldNumber = 12;
+  inline ::google::protobuf::int64 successfulwritetime() const;
+  inline void set_successfulwritetime(::google::protobuf::int64 value);
+
+  // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+  inline bool has_unsuccessfulwritetime() const;
+  inline void clear_unsuccessfulwritetime();
+  static const int kUnsuccessfulWriteTimeFieldNumber = 13;
+  inline ::google::protobuf::int64 unsuccessfulwritetime() const;
+  inline void set_unsuccessfulwritetime(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
   inline void set_has_signalhash();
@@ -4275,6 +4303,14 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline void clear_has_writeerrorcode();
   inline void set_has_writeclient();
   inline void clear_has_writeclient();
+  inline void set_has_successfulreadtime();
+  inline void clear_has_successfulreadtime();
+  inline void set_has_writerequesttime();
+  inline void clear_has_writerequesttime();
+  inline void set_has_successfulwritetime();
+  inline void clear_has_successfulwritetime();
+  inline void set_has_unsuccessfulwritetime();
+  inline void clear_has_unsuccessfulwritetime();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4286,10 +4322,14 @@ class TuningSignalState : public ::google::protobuf::Message {
   ::Proto::TuningValue* readlowbound_;
   ::Proto::TuningValue* readhighbound_;
   ::google::protobuf::uint64 writeclient_;
+  ::google::protobuf::int64 successfulreadtime_;
+  ::google::protobuf::int64 writerequesttime_;
+  ::google::protobuf::int64 successfulwritetime_;
+  ::google::protobuf::int64 unsuccessfulwritetime_;
   ::google::protobuf::int32 writeerrorcode_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -10421,6 +10461,94 @@ inline ::google::protobuf::uint64 TuningSignalState::writeclient() const {
 inline void TuningSignalState::set_writeclient(::google::protobuf::uint64 value) {
   set_has_writeclient();
   writeclient_ = value;
+}
+
+// optional sfixed64 successfulReadTime = 10 [default = 0];
+inline bool TuningSignalState::has_successfulreadtime() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void TuningSignalState::set_has_successfulreadtime() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void TuningSignalState::clear_has_successfulreadtime() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void TuningSignalState::clear_successfulreadtime() {
+  successfulreadtime_ = GOOGLE_LONGLONG(0);
+  clear_has_successfulreadtime();
+}
+inline ::google::protobuf::int64 TuningSignalState::successfulreadtime() const {
+  return successfulreadtime_;
+}
+inline void TuningSignalState::set_successfulreadtime(::google::protobuf::int64 value) {
+  set_has_successfulreadtime();
+  successfulreadtime_ = value;
+}
+
+// optional sfixed64 writeRequestTime = 11 [default = 0];
+inline bool TuningSignalState::has_writerequesttime() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void TuningSignalState::set_has_writerequesttime() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void TuningSignalState::clear_has_writerequesttime() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void TuningSignalState::clear_writerequesttime() {
+  writerequesttime_ = GOOGLE_LONGLONG(0);
+  clear_has_writerequesttime();
+}
+inline ::google::protobuf::int64 TuningSignalState::writerequesttime() const {
+  return writerequesttime_;
+}
+inline void TuningSignalState::set_writerequesttime(::google::protobuf::int64 value) {
+  set_has_writerequesttime();
+  writerequesttime_ = value;
+}
+
+// optional sfixed64 successfulWriteTime = 12 [default = 0];
+inline bool TuningSignalState::has_successfulwritetime() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void TuningSignalState::set_has_successfulwritetime() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void TuningSignalState::clear_has_successfulwritetime() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void TuningSignalState::clear_successfulwritetime() {
+  successfulwritetime_ = GOOGLE_LONGLONG(0);
+  clear_has_successfulwritetime();
+}
+inline ::google::protobuf::int64 TuningSignalState::successfulwritetime() const {
+  return successfulwritetime_;
+}
+inline void TuningSignalState::set_successfulwritetime(::google::protobuf::int64 value) {
+  set_has_successfulwritetime();
+  successfulwritetime_ = value;
+}
+
+// optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+inline bool TuningSignalState::has_unsuccessfulwritetime() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void TuningSignalState::set_has_unsuccessfulwritetime() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void TuningSignalState::clear_has_unsuccessfulwritetime() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void TuningSignalState::clear_unsuccessfulwritetime() {
+  unsuccessfulwritetime_ = GOOGLE_LONGLONG(0);
+  clear_has_unsuccessfulwritetime();
+}
+inline ::google::protobuf::int64 TuningSignalState::unsuccessfulwritetime() const {
+  return unsuccessfulwritetime_;
+}
+inline void TuningSignalState::set_unsuccessfulwritetime(::google::protobuf::int64 value) {
+  set_has_unsuccessfulwritetime();
+  unsuccessfulwritetime_ = value;
 }
 
 // -------------------------------------------------------------------

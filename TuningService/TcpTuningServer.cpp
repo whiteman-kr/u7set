@@ -245,7 +245,7 @@ namespace Tuning
 
 		// m_tuningSignalsReadReply.set_error(???) is set inside clientContext->readSignalStates()
 		//
-		clientContext->readSignalStates(m_tuningSignalsReadRequest, m_tuningSignalsReadReply);
+		clientContext->readSignalStates(m_tuningSignalsReadRequest, &m_tuningSignalsReadReply);
 
 		sendReply(m_tuningSignalsReadReply);
 
@@ -296,7 +296,7 @@ namespace Tuning
 
 		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->writeSignalStates()
 		//
-		clientContext->writeSignalStates(m_tuningSignalsWriteRequest, m_tuningSignalsWriteReply);
+		clientContext->writeSignalStates(m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
 
 		sendReply(m_tuningSignalsWriteReply);
 

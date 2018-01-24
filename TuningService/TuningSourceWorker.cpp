@@ -79,14 +79,11 @@ namespace Tuning
 
 	void TuningSourceWorker::TuningSignal::init(const Signal* s, int index, int tuningRomFraeSizeW)
 	{
-		if (s == nullptr)
-		{
-			assert(false);
-			return;
-		}
+		TEST_PTR_RETURN(s);
 
-		m_signal = s;
-		m_signalHash = ::calcHash(s->appSignalID());
+		m_appSignalID = s->appSignalID();
+
+		m_signalHash = ::calcHash(m_appSignalID);
 
 		m_index = index;
 
@@ -131,29 +128,6 @@ namespace Tuning
 		m_valid = false;
 	}
 
-	QString TuningSourceWorker::TuningSignal::appSignalID() const
-	{
-		if (m_signal == nullptr)
-		{
-			assert(false);
-			return "<Signal pointer == nullptr!>";
-		}
-
-		return m_signal->appSignalID();
-	}
-
-	void TuningSourceWorker::TuningSignal::setProtoTuningValue(Proto::TuningValue* tuningValue)
-	{
-		TEST_PTR_RETURN(tuningValue);
-
-		assert(false);
-		/*tuningValue->set_type(1);
-		optional int32 intValue = 2 [default = 0];
-		optional float floatValue = 3  [default = 0.0];
-		optional double doubleValue = 4  [default = 0.0];*/
-
-	}
-
 	FotipV2::DataType TuningSourceWorker::TuningSignal::fotipV2DataType()
 	{
 		switch(m_tuningValueType)
@@ -171,42 +145,6 @@ namespace Tuning
 			assert(false);
 		}
 
-		return FotipV2::DataType::Discrete;
-	}
-
-	FotipV2::DataType TuningSourceWorker::TuningSignal::getTuningSignalType(const Signal* s)
-	{
-		if (s == nullptr)
-		{
-			assert(false);
-			return FotipV2::DataType::Discrete;
-		}
-
-		if (s->isAnalog() == true)
-		{
-			if (s->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
-			{
-				return FotipV2::DataType::AnalogFloat;
-			}
-			else
-			{
-				if (s->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
-				{
-					return FotipV2::DataType::AnalogSignedInt;
-				}
-			}
-		}
-		else
-		{
-			if (s->isDiscrete() == true)
-			{
-				return FotipV2::DataType::Discrete;
-			}
-		}
-
-		// unknown type of signal
-		//
-		assert(false);
 		return FotipV2::DataType::Discrete;
 	}
 
@@ -306,12 +244,13 @@ namespace Tuning
 		m_stat.get(tuningSourceState);
 	}
 
-
-	void TuningSourceWorker::readSignalState(Network::TuningSignalState& tss)
+	void TuningSourceWorker::readSignalState(Network::TuningSignalState* tss)
 	{
+		TEST_PTR_RETURN(tss);
+
 		// tss.signalhash() is already filled
 		//
-		Hash signalHash = tss.signalhash();
+		Hash signalHash = tss->signalhash();
 
 		int signalIndex = m_hash2SignalIndexMap.value(signalHash, -1);
 
@@ -319,19 +258,39 @@ namespace Tuning
 		{
 			assert(false);			// how all previous checks we pass ???
 
-			tss.set_valid(false);
-			tss.set_error(TO_INT(NetworkError::UnknownSignalHash));
+			tss->set_valid(false);
+			tss->set_error(TO_INT(NetworkError::UnknownSignalHash));
 			return;
 		}
 
-		TuningSignal& signal = m_tuningSignals[signalIndex];
+		TuningSignal& ts = m_tuningSignals[signalIndex];
 
-		assert(false);
-/*		tss.mutable_value()->set_valid(signal.valid());
-		tss.set_value(signal.value());
-		tss.set_readlowbound(signal.readLowBound());
-		tss.set_readhighbound(signal.readHighBound());
-		tss.set_error(TO_INT(NetworkError::Success));*/
+		tss->set_valid(ts.valid());
+
+		bool result = true;
+
+		result &= ts.currentValue().save(tss->mutable_value());
+		result &= ts.readLowBound().save(tss->mutable_readlowbound());
+		result &= ts.readHighBound().save(tss->mutable_readhighbound());
+
+		if (result == false)
+		{
+			tss->set_valid(false);
+			tss->set_error(TO_INT(NetworkError::InternalError));
+			return;
+		}
+
+		tss->set_writeinprogress(ts.writeInProgress());
+
+		tss->set_successfulreadtime(ts.successfulReadTime());
+		tss->set_writerequesttime(ts.writeRequestTime());
+		tss->set_successfulwritetime(ts.successfulWriteTime());
+		tss->set_unsuccessfulwritetime(ts.unsuccessfulWriteTime());
+
+		tss->set_writeclient(ts.writeClient());
+		tss->set_writeerrorcode(ts.writeErrorCode());
+
+		tss->set_error(TO_INT(NetworkError::Success));
 	}
 
 
