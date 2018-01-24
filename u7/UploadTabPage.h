@@ -125,7 +125,6 @@ private:
 	QString m_currentFileName;
 
 	int m_currentBuildIndex = -1;
-	int m_currentSubsystemIndex = -1;
 
 	bool m_uploading = false;
 

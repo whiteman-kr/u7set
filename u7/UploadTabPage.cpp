@@ -362,10 +362,10 @@ void UploadTabPage::subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* it
 		return;
 	}
 
-	QString subsystemId = subsystemItem->data(columnSubsysId, Qt::UserRole).toString();
+	m_currentSubsystem = subsystemItem->data(columnSubsysId, Qt::UserRole).toString();
 
 	bool ok = false;
-	const ModuleFirmware& mf = m_firmware.firmware(subsystemId, &ok);
+	const ModuleFirmware& mf = m_firmware.firmware(m_currentSubsystem, &ok);
 	if (ok == false)
 	{
 		assert(false);
@@ -644,6 +644,7 @@ void UploadTabPage::selectSubsystem(const QString& id)
 void UploadTabPage::clearSubsystemsUartData()
 {
 	m_pSubsystemsListWidget->clear();
+
 	m_pUartListWidget->clear();
 }
 
@@ -679,13 +680,10 @@ void UploadTabPage::loadBinaryFileHeaderComplete()
 		m_pSubsystemsListWidget->addTopLevelItem(subsystemItem);
 	}
 
-	// Better make user to think
-	//
-
-	//if (m_pSubsystemsListWidget->topLevelItemCount() > 0)
-	//{
-		//m_pSubsystemsListWidget->setCurrentItem(m_pSubsystemsListWidget->topLevelItem(0));
-	//}
+	if (m_currentSubsystem.isEmpty() == false)
+	{
+		selectSubsystem(m_currentSubsystem);
+	}
 }
 
 void UploadTabPage::uartOperationStart(int uartID, QString operation)
