@@ -1,35 +1,21 @@
 #include "TuningValue.h"
 #include <cmath>
 
-TuningValue::TuningValue(double value, TuningValueType valueType)
+TuningValue::TuningValue(TuningValueType valueType)
+{
+	m_type = valueType;
+}
+
+TuningValue::TuningValue(TuningValueType valueType, double value)
 {
 	m_type = valueType;
 
-	switch (m_type)
-	{
-	case TuningValueType::Discrete:
-	case TuningValueType::SignedInteger:
-		m_intValue = static_cast<int>(value);
-		break;
-
-	case TuningValueType::Float:
-		m_floatValue = static_cast<float>(value);
-		break;
-
-	case TuningValueType::Double:
-		m_doubleValue = value;
-		break;
-
-	default:
-		assert(false);
-	}
-	return;
+	fromDouble(value);
 }
 
 TuningValue::TuningValue(const Proto::TuningValue& message)
 {
 	load(message);
-	return;
 }
 
 TuningValueType TuningValue::type() const
@@ -90,6 +76,20 @@ void TuningValue::setDoubleValue(double doubleValue)
 	m_doubleValue = doubleValue;
 }
 
+
+void TuningValue::setValue(TuningValueType valueType, qint32 intValue, float floatValue, double doubleValue)
+{
+	m_type = valueType;
+	m_intValue = intValue;
+	m_floatValue = floatValue;
+	m_doubleValue = doubleValue;
+}
+
+void TuningValue::setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint32 intValue, float floatValue, double doubleValue)
+{
+	setValue(getTuningValueType(signalType, analogFormat), intValue, floatValue, doubleValue);
+}
+
 double TuningValue::toDouble() const
 {
 	switch (m_type)
@@ -108,8 +108,9 @@ double TuningValue::toDouble() const
 
 	default:
 		assert(false);
-		return 0;
 	}
+
+	return 0;
 }
 
 void TuningValue::fromDouble(double value)
@@ -117,7 +118,7 @@ void TuningValue::fromDouble(double value)
 	switch (m_type)
 	{
 	case TuningValueType::Discrete:
-		m_intValue = static_cast<qint32>(value);
+		m_intValue = static_cast<qint32>(value) == 0 ? 0 : 1;
 		break;
 
 	case TuningValueType::SignedInteger:
@@ -155,8 +156,9 @@ double TuningValue::toFloat() const
 
 	default:
 		assert(false);
-		return 0;
 	}
+
+	return 0;
 }
 
 void TuningValue::fromFloat(float value)
@@ -189,7 +191,7 @@ QString TuningValue::toString(int precision) const
 	switch (m_type)
 	{
 	case TuningValueType::Discrete:
-		return m_intValue == 1 ? "1" : "0";
+		return m_intValue == 0 ? "0" : "1";
 
 	case TuningValueType::SignedInteger:
 		return QString::number(m_intValue);
@@ -210,8 +212,9 @@ QString TuningValue::toString(int precision) const
 
 	default:
 		assert(false);
-		return 0;
 	}
+
+	return "";
 }
 
 void TuningValue::fromString(QString value, bool* ok)
@@ -219,7 +222,7 @@ void TuningValue::fromString(QString value, bool* ok)
 	switch (m_type)
 	{
 	case TuningValueType::Discrete:
-		m_intValue = static_cast<qint32>(value.toInt(ok));
+		m_intValue = static_cast<qint32>(value.toInt(ok)) == 0 ? 0 : 1;
 		break;
 
 	case TuningValueType::SignedInteger:
@@ -331,8 +334,9 @@ bool operator < (const TuningValue& l, const TuningValue& r)
 
 	default:
 		assert(false);
-		return false;
 	}
+
+	return false;
 }
 
 bool operator > (const TuningValue& l, const TuningValue& r)
@@ -353,8 +357,9 @@ bool operator > (const TuningValue& l, const TuningValue& r)
 
 	default:
 		assert(false);
-		return false;
 	}
+
+	return false;
 }
 
 bool operator == (const TuningValue& l, const TuningValue& r)
@@ -377,8 +382,9 @@ bool operator == (const TuningValue& l, const TuningValue& r)
 
 	default:
 		assert(false);
-		return false;
 	}
+
+	return false;
 }
 
 bool operator != (const TuningValue& l, const TuningValue& r)

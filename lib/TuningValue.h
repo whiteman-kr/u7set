@@ -19,7 +19,8 @@ class TuningValue
 
 public:
 	TuningValue() = default;
-	explicit TuningValue(double value, TuningValueType valueType);
+	TuningValue(TuningValueType valueType);
+	explicit TuningValue(TuningValueType valueType, double value);
 	TuningValue(const Proto::TuningValue& message);
 
 	TuningValueType type() const;
@@ -36,6 +37,9 @@ public:
 
 	double doubleValue() const;
 	void setDoubleValue(double doubleValue);
+
+	void setValue(TuningValueType valueType, qint32 intValue, float floatValue, double doubleValue);
+	void setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint32 intValue, float floatValue, double doubleValue);
 
 	double toDouble() const;
 	void fromDouble(double value);

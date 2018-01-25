@@ -227,7 +227,7 @@ TuningValue TuningModel::defaultValue(const AppSignalParam& asp) const
 		return it->second;
 	}
 
-	TuningValue result(asp.tuningDefaultValue(), asp.toTuningType());
+	TuningValue result(asp.toTuningType(), asp.tuningDefaultValue());
 
 	return result;
 }
@@ -417,8 +417,8 @@ bool TuningModel::limitsUnbalance(const AppSignalParam& asp, const TuningSignalS
 {
 	if (tss.valid() == true && asp.isAnalog() == true)
 	{
-		TuningValue tvHigh(asp.highEngineeringUnits(), asp.toTuningType());
-		TuningValue tvLow(asp.lowEngineeringUnits(), asp.toTuningType());
+		TuningValue tvHigh(asp.toTuningType(), asp.highEngineeringUnits());
+		TuningValue tvLow(asp.toTuningType(), asp.lowEngineeringUnits());
 
 		if (tss.lowBound() != tvLow || tss.highBound() != tvHigh)
 		{
@@ -806,7 +806,7 @@ void DialogInputTuningValue::accept()
 
 		TuningValueType oldType = m_value.type();
 
-		TuningValue newValue(inputValue, oldType);
+		TuningValue newValue(oldType, inputValue);
 
 		m_value = newValue;
 

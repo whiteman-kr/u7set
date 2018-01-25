@@ -296,7 +296,7 @@ namespace Tuning
 
 		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->writeSignalStates()
 		//
-		clientContext->writeSignalStates(m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
+		clientContext->writeSignalStates(clientEquipmentID, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
 
 		sendReply(m_tuningSignalsWriteReply);
 
@@ -316,7 +316,7 @@ namespace Tuning
 	}
 
 
-	void TcpTuningServer::onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize)
+	void TcpTuningServer::onTuningSignalsApplyRequest(const char* requestData, quint32 requestDataSize)
 	{
 		m_tuningSignalsApplyRequest.ParseFromArray(requestData, requestDataSize);
 
@@ -346,7 +346,7 @@ namespace Tuning
 			return;
 		}
 
-		clientContext->applySignalStates();
+		clientContext->applySignalStates(clientEquipmentID);
 
 		errCode = NetworkError::Success;
 

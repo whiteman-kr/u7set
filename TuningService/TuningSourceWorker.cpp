@@ -100,6 +100,16 @@ namespace Tuning
 		m_valid = false;
 	}
 
+	void TuningSourceWorker::TuningSignal::updateCurrentValue(bool valid, const TuningValue& value, qint64 time)
+	{
+		if (valid == true)
+		{
+			m_successfulReadTime = time;
+		}
+
+		setCurrentValue(valid, value);
+	}
+
 	void TuningSourceWorker::TuningSignal::setCurrentValue(bool valid, const TuningValue& value)
 	{
 		m_valid = valid;
@@ -176,7 +186,7 @@ namespace Tuning
 		m_timer(this),
 		m_socket(this),
 		m_replyQueue(this, 10),
-		m_tuningCommandQueue(this, 1000)
+		m_tuningCommandQueue(1000, false)
 	{
 		m_sourceEquipmentID = source.lmEquipmentID();
 		m_sourceIP = source.lmAddressPort();
@@ -294,7 +304,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
+	void TuningSourceWorker::writeSignalState(const QString& clientEquipmentID, Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
 	{
 		TEST_PTR_RETURN(writeResult);
 
@@ -306,14 +316,27 @@ namespace Tuning
 			return;
 		}
 
-		if (signalIndex >= m_tuningSignals.count())
+		if (signalIndex < 0 || signalIndex >= m_tuningSignals.count())
 		{
 			assert(false);
+
 			DEBUG_LOG_ERR(m_logger, "Signal index out of range (TuningSourceWorker::writeSignalState)");
+
+			writeResult->set_error(TO_INT(NetworkError::InternalError));
+			return;
+		}
+
+		TuningSignal& ts = m_tuningSignals[signalIndex];
+
+		if (ts.tuningValueType() != newValue.type())
+		{
+			writeResult->set_error(TO_INT(NetworkError::WrongTuningValueType));
 			return;
 		}
 
 		TuningCommand cmd;
+
+		cmd.clientEquipmentID = clientEquipmentID;
 
 		cmd.opCode = FotipV2::OpCode::Write;
 		cmd.autoCommand = false;
@@ -321,7 +344,7 @@ namespace Tuning
 		cmd.write.signalIndex = signalIndex;
 		cmd.write.tuningValue = newValue;
 
-		m_tuningCommandQueue.push(&cmd);
+		m_tuningCommandQueue.push(cmd);
 
 		writeResult->set_error(TO_INT(NetworkError::Success));
 
@@ -333,13 +356,15 @@ namespace Tuning
 	}
 
 
-	void TuningSourceWorker::applySignalStates()
+	void TuningSourceWorker::applySignalStates(const QString& clientEquipmentID)
 	{
 		TuningCommand cmd;
 
+		cmd.clientEquipmentID = clientEquipmentID;
+
 		cmd.opCode = FotipV2::OpCode::Apply;
 
-		m_tuningCommandQueue.push(&cmd);
+		m_tuningCommandQueue.push(cmd);
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Queue apply command: source %1 (%2)")).
 					  arg(sourceEquipmentID()).
@@ -398,7 +423,7 @@ namespace Tuning
 
 			Hash hash = calcHash(signal->appSignalID());
 
-			if (m_hash2SignalIndexMap.contains(hash))
+			if (m_hash2SignalIndexMap.contains(hash) == true)
 			{
 				assert(false);
 				continue;
@@ -507,7 +532,7 @@ namespace Tuning
 		tuningCmd.read.frame = m_nextFrameToAutoRead;
 		tuningCmd.autoCommand = true;
 
-		m_tuningCommandQueue.push(&tuningCmd);
+		m_tuningCommandQueue.push(tuningCmd);
 
 		m_nextFrameToAutoRead++;
 
@@ -823,6 +848,8 @@ namespace Tuning
 
 		int signalCount = m_tuningSignals.count();
 
+		qint64 updateTime = QDateTime::currentMSecsSinceEpoch();
+
 		for(int i = 0; i < signalCount; i++)
 		{
 			TuningSignal& ts = m_tuningSignals[i];
@@ -833,32 +860,29 @@ namespace Tuning
 				continue;		// signal is not in this frame
 			}
 
-			if (static_cast<FotipV2::DataType>(reply.fotipFrame.header.dataType) != ts.fotipV2DataType())
-			{
-				assert(false);
-				DEBUG_LOG_ERR(m_logger, QString("Different types of signal %1 and frame %2 data").arg(ts.appSignalID()).arg(frameNo));
-				continue;
-			}
+			TuningValueType tyningValueType = ts.tuningValueType();
 
-			TuningValue tuningValue;
-
-			tuningValue.setType(ts.tuningValueType());
+			TuningValue tuningValue(tyningValueType);
 
 			int offsetInFrameB = (ts.offset() - ts.frameNo() * m_tuningRomFrameSizeW) * sizeof(quint16);
 
 			assert(offsetInFrameB < reply.fotipFrame.header.romFrameSizeB);
 
-			switch(ts.tuningValueType())
+			switch(tyningValueType)
 			{
 			case TuningValueType::Float:
 				tuningValue.setFloatValue(reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB)));
 				break;
 
-			case FotipV2::DataType::AnalogSignedInt:
+			case TuningValueType::SignedInteger:
 				tuningValue.setIntValue(reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB)));
 				break;
 
-			case FotipV2::DataType::Discrete:
+			case TuningValueType::Double:
+				assert(false);					// is not implemented
+				break;
+
+			case TuningValueType::Discrete:
 				{
 					quint32 word =	reverseUint32(*reinterpret_cast<quint32*>(dataPtr + offsetInFrameB));
 					tuningValue.setDiscreteValue((word & (1 << ts.bit())) == 0 ? 0 : 1);
@@ -866,7 +890,7 @@ namespace Tuning
 				break;
 
 			default:
-				assert(false);
+				assert(false);					// unknown type
 			}
 
 			// (frameNo % 3) == 0 - tuning signal value
@@ -876,7 +900,7 @@ namespace Tuning
 			switch(frameNo % 3)
 			{
 			case 0:
-				ts.setCurrentValue(true, tuningValue);
+				ts.updateCurrentValue(true, tuningValue, updateTime);
 				break;
 
 			case 1:
@@ -892,7 +916,6 @@ namespace Tuning
 			}
 		}
 	}
-
 
 	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
 	{

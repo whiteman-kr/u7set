@@ -88,6 +88,8 @@ namespace Tuning
 
 		struct TuningCommand
 		{
+			QString clientEquipmentID;
+
 			FotipV2::OpCode opCode = FotipV2::OpCode::Read;
 			bool autoCommand = false;
 
@@ -127,6 +129,8 @@ namespace Tuning
 			int bit() const { return m_bit; }
 			int frameNo() const { return m_frameNo; }
 
+			void updateCurrentValue(bool valid, const TuningValue& value, qint64 time);
+
 			void setCurrentValue(bool valid, const TuningValue& value);
 			void setReadLowBound(const TuningValue& value);
 			void setReadHighBound(const TuningValue& value);
@@ -146,6 +150,7 @@ namespace Tuning
 
 		private:
 			void updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat);
+			void logWriteRequest();
 
 		private:
 			QString m_appSignalID;
@@ -200,8 +205,8 @@ namespace Tuning
 		void getState(Network::TuningSourceState& tuningSourceState);
 
 		void readSignalState(Network::TuningSignalState* tss);
-		void writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult);
-		void applySignalStates();
+		void writeSignalState(const QString& clientEquipmentID, Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult);
+		void applySignalStates(const QString& clientEquipmentID);
 
 	signals:
 		void replyReady();
@@ -289,7 +294,7 @@ namespace Tuning
 
 		Queue<Rup::Frame> m_replyQueue;
 
-		Queue<TuningCommand> m_tuningCommandQueue;
+		QueueOnList<TuningCommand> m_tuningCommandQueue;
 
 		quint16 m_rupNumerator = 0;
 

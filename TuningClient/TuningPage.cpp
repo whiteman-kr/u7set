@@ -313,7 +313,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 			return false;
 		}
 
-		m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(v, asp.toTuningType()));
+		m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), v));
 		return true;
 	}
 
@@ -321,12 +321,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 	{
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
-			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(1, asp.toTuningType()));
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 1));
 			return true;
 		}
 		else
 		{
-			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(0, asp.toTuningType()));
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 0));
 			return true;
 		}
 	}

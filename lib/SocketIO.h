@@ -389,6 +389,7 @@ enum class NetworkError
 	UnknownSignalHash,
 	InternalError,
 	ArchiveError,								// for detail information check archError field
+	WrongTuningValueType
 };
 
 enum class ArchiveError

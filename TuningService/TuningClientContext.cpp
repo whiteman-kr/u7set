@@ -76,7 +76,7 @@ namespace Tuning
 	}
 
 
-	void TuningSourceContext::writeSignalState(Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
+	void TuningSourceContext::writeSignalState(const QString& clientEquipmentID, Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
 	{
 		TEST_PTR_RETURN(writeResult);
 
@@ -87,11 +87,11 @@ namespace Tuning
 			return;
 		}
 
-		m_sourceWorker->writeSignalState(signalHash, newValue, writeResult);
+		m_sourceWorker->writeSignalState(clientEquipmentID, signalHash, newValue, writeResult);
 	}
 
 
-	void TuningSourceContext::applySignalStates()
+	void TuningSourceContext::applySignalStates(const QString& clientEquipmentID)
 	{
 		if (m_sourceWorker == nullptr)
 		{
@@ -99,7 +99,7 @@ namespace Tuning
 			return;
 		}
 
-		m_sourceWorker->applySignalStates();
+		m_sourceWorker->applySignalStates(clientEquipmentID);
 	}
 
 
@@ -253,7 +253,7 @@ namespace Tuning
 	}
 
 
-	void TuningClientContext::writeSignalStates(const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply* reply) const
+	void TuningClientContext::writeSignalStates(const QString& clientEquipmentID, const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply* reply) const
 	{
 		TEST_PTR_RETURN(reply);
 
@@ -285,7 +285,7 @@ namespace Tuning
 				continue;
 			}
 
-			sourceContext->writeSignalState(signalHash, TuningValue(writeCmd.value()), writeResult);
+			sourceContext->writeSignalState(clientEquipmentID, signalHash, TuningValue(writeCmd.value()), writeResult);
 
 			if (autoApply == true)
 			{
@@ -299,7 +299,7 @@ namespace Tuning
 			{
 				TEST_PTR_CONTINUE(usedSrcContext);
 
-				usedSrcContext->applySignalStates();
+				usedSrcContext->applySignalStates(clientEquipmentID);
 			}
 
 			m_usedSrcContexts.clear();
@@ -309,7 +309,7 @@ namespace Tuning
 	}
 
 
-	void TuningClientContext::applySignalStates() const
+	void TuningClientContext::applySignalStates(const QString& clientEquipmentID) const
 	{
 		for(TuningSourceContext* srcContext : m_sourceContextMap)
 		{
@@ -319,7 +319,7 @@ namespace Tuning
 				continue;
 			}
 
-			srcContext->applySignalStates();
+			srcContext->applySignalStates(clientEquipmentID);
 		}
 	}
 
