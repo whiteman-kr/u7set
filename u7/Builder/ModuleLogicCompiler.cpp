@@ -2187,6 +2187,7 @@ namespace Builder
 		result &= createAcquiredDiscreteTuningSignalsList();
 		result &= createAcquiredDiscreteConstSignalsList();
 
+		result &= createNonAcquiredDiscreteInputSignalsList();
 		result &= createNonAcquiredDiscreteStrictOutputSignalsList();
 		result &= createNonAcquiredDiscreteInternalSignalsList();
 
@@ -2228,6 +2229,7 @@ namespace Builder
 		sortSignalList(m_acquiredDiscreteConstSignals);
 		// m_acquiredDiscreteTuningSignals						// Not need to sort!
 
+		sortSignalList(m_nonAcquiredDiscreteInputSignals);
 		sortSignalList(m_nonAcquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
 
@@ -2430,6 +2432,35 @@ namespace Builder
 
 		return true;
 	}
+
+	bool ModuleLogicCompiler::createNonAcquiredDiscreteInputSignalsList()
+	{
+		m_nonAcquiredDiscreteInputSignals.clear();
+
+		//	list include signals that:
+		//
+		//  - const
+		//	- acquired
+		//	+ discrete
+		//	+ input
+		//	+ no matter used in UAL or not
+
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isConst() == false &&
+				s->isAcquired() == false &&
+				s->isDiscrete() == true &&
+				s->isInput() == true)
+			{
+				m_nonAcquiredDiscreteInputSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
 
 	bool ModuleLogicCompiler::createNonAcquiredDiscreteStrictOutputSignalsList()
 	{
@@ -9854,6 +9885,7 @@ namespace Builder
 		result &= writeSignalList(m_acquiredDiscreteConstSignals, "acquiredDiscreteConst");
 		result &= writeSignalList(m_acquiredDiscreteOptoAndBusChildSignals, "acquiredDiscreteOptoAndBusChild");
 
+		result &= writeSignalList(m_nonAcquiredDiscreteInputSignals, "nonAcquiredDiscreteInput");
 		result &= writeSignalList(m_nonAcquiredDiscreteStrictOutputSignals, "nonAcquiredDiscreteStrictOutput");
 		result &= writeSignalList(m_nonAcquiredDiscreteInternalSignals, "nonAcquiredDiscreteInternal");
 		result &= writeSignalList(m_nonAcquiredDiscreteOptoSignals, "nonAcquiredDiscreteOpto");

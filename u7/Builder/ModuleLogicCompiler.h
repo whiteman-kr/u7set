@@ -203,6 +203,7 @@ namespace Builder
 		bool createAcquiredDiscreteTuningSignalsList();
 		bool createAcquiredDiscreteConstSignalsList();
 
+		bool createNonAcquiredDiscreteInputSignalsList();
 		bool createNonAcquiredDiscreteStrictOutputSignalsList();
 		bool createNonAcquiredDiscreteInternalSignalsList();
 
@@ -492,6 +493,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredDiscreteConstSignals;
 		QVector<UalSignal*> m_acquiredDiscreteOptoAndBusChildSignals;
 
+		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteInternalSignals;		// non acquired discrete internal non tuningbale signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL
