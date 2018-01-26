@@ -38,7 +38,7 @@ void CentralWidget::currentChanged(int index)
 	{
 		if (uploadPage->isUploading() == false)
 		{
-			uploadPage->findProjectBuilds();
+			uploadPage->refreshProjectBuilds();
 		}
 	}
 
