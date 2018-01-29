@@ -52,6 +52,10 @@ namespace Sim
 		bool loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom);
 
 	public:
+		QString equipmentId() const;
+		int lmNumber() const;
+		E::Channel channel() const;
+
 		const Hardware::LogicModuleInfo& logicModuleInfo() const;
 
 	private:

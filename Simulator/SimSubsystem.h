@@ -25,16 +25,20 @@ namespace Sim
 	public:
 		bool load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const QString simulationScript);
 
-		std::shared_ptr<LogicModule> logicModule(QString equipmentId);
-
 	private:
 		std::vector<Hardware::LogicModuleInfo> logicModulesInfo() const;
 
 		 std::shared_ptr<LogicModule> addDevice(const Hardware::LogicModuleInfo& lm);
 		 bool removeDevice(QString equipmentId);
 
+	public:
+		 QString subsystemId() const;
+
+		 std::vector<std::shared_ptr<LogicModule>> logicModules();
+		 std::shared_ptr<LogicModule> logicModule(QString equipmentId);
+
 	private:
-		QString m_susystemId;
+		QString m_subsystemId;
 
 		std::map<int, std::shared_ptr<LogicModule>> m_devicesByLmNumber;			// key is LmNumber
 		std::map<QString, std::shared_ptr<LogicModule>> m_devicesByEquipmentId;		// key is EquipmentID

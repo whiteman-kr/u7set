@@ -49,7 +49,6 @@ namespace Sim
 	DeviceEmulator::DeviceEmulator() :
 		Output("DeviceEmulator")
 	{
-		//qRegisterMetaType<Sim::CyclePhase>("Sim::CyclePhase");
 		return;
 	}
 

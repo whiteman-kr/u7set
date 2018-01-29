@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>395</width>
-    <height>354</height>
+    <width>426</width>
+    <height>481</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,26 +27,31 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QRadioButton" name="radioButton_2">
+      <widget class="QRadioButton" name="releaseButton">
        <property name="text">
         <string>Release</string>
        </property>
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QRadioButton" name="radioButton">
+      <widget class="QRadioButton" name="debugButton">
        <property name="text">
         <string>Debug</string>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QListWidget" name="listWidget"/>
+      <widget class="QListWidget" name="buildList"/>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>debugButton</tabstop>
+  <tabstop>releaseButton</tabstop>
+  <tabstop>buildList</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

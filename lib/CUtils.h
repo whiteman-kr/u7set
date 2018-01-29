@@ -531,7 +531,9 @@ public:
 		const char* ptr = clearClassName.c_str();
 
 		while (*ptr)
-			nHash += (nHash<<5) + *ptr++;
+		{
+			nHash += (nHash << 5) + *ptr++;
+		}
 
 		return nHash;
 	}
@@ -625,11 +627,12 @@ public:
         }
 
         quint16 nHash = 0;
-
-        register quint8* p = (quint8*)src;
+		quint8* p = (quint8*)src;
 
         while (l--)
+		{
             nHash += (nHash<<5) + *p++;
+		}
 
         return nHash;
     }
@@ -643,11 +646,12 @@ public:
 		}
 
 		quint64 nHash = 0;
-
-		register quint8* p = (quint8*)src;
+		quint8* p = (quint8*)src;
 
 		while (l--)
+		{
 			nHash += (nHash<<5) + *p++;
+		}
 
 		return nHash;
 

@@ -23,8 +23,10 @@ SimulatorWidget::SimulatorWidget(DbController* db, QWidget* parent)
 	createToolBar();
 	createDocks();
 
+	updateActions();
 	// --
 	//
+
 	return;
 }
 
@@ -73,7 +75,7 @@ void SimulatorWidget::createDocks()
 	projectDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	projectDock->setTitleBarWidget(new QWidget());		// Hides title bar
 
-	m_projectWidget = new SimulatorProjectWidget(db());
+	m_projectWidget = new SimulatorProjectWidget(m_simulator);
 	projectDock->setWidget(m_projectWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, projectDock);
@@ -107,7 +109,6 @@ void SimulatorWidget::createDocks()
 
 	// --
 	//
-	connect(m_projectWidget, &SimulatorProjectWidget::loadBuild, this, &SimulatorWidget::loadBuild);
 
 	return;
 }
@@ -149,36 +150,64 @@ void SimulatorWidget::showEvent(QShowEvent* e)
 	return;
 }
 
+void SimulatorWidget::updateActions()
+{
+	m_openProjectAction->setEnabled(true);
+	m_closeProjectAction->setEnabled(m_simulator.isLoaded());
+	m_refreshProjectAction->setEnabled(m_simulator.isLoaded());
+
+	return;
+}
+
 void SimulatorWidget::openBuild()
 {
-	SimulatorSelectBuildDialog d(this);
+	QSettings settings;
+	SimulatorSelectBuildDialog::BuildType buildType = static_cast<SimulatorSelectBuildDialog::BuildType>(settings.value("SimulatorWidget/BuildType", 0).toInt());
+	static QString lastPath;
+
+	SimulatorSelectBuildDialog d(db()->currentProject().projectName().toLower(),
+								 buildType,
+								 lastPath,
+								 this);
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
 	{
+		settings.setValue("SimulatorWidget/BuildType", static_cast<int>(d.resultBuildType()));
+		lastPath = d.resultBuildPath();
 
+		loadBuild(lastPath);
 	}
 
+	updateActions();
 	return;
 }
 
 void SimulatorWidget::closeBuild()
 {
-	assert(false);
-	int to_do;
+	m_simulator.clear();
+	updateActions();
+	return;
 }
 
 void SimulatorWidget::refreshBuild()
 {
-	assert(false);
-	int to_do;
+	loadBuild(m_simulator.buildPath());
+	updateActions();
+	return;
 }
 
 void SimulatorWidget::loadBuild(QString buildPath)
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-	m_simulator.load(buildPath);
+	bool ok = m_simulator.load(buildPath);
 	QApplication::restoreOverrideCursor();
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simultaion. For details see Output window."));
+	}
+
 	return;
 }
 

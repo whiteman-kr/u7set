@@ -12,6 +12,7 @@ namespace Sim
 	// Simulator
 	//
 	Simulator::Simulator() :
+		QObject(),
 		Output()
 	{
 		return;
@@ -19,10 +20,13 @@ namespace Sim
 
 	Simulator::~Simulator()
 	{
+		return;
 	}
 
 	bool Simulator::load(QString buildPath)
 	{
+		clear();	// Clear must be run in this thread
+
 		// Run load in separated thread, it'll allow to process messages, like timer events
 		// for displaying output log
 		//
@@ -38,11 +42,31 @@ namespace Sim
 			QThread::yieldCurrentThread();
 		}
 
-		return future.result();
+		bool result = future.result();
+
+		if (result == true)
+		{
+			m_buildPath = buildPath;
+		}
+		else
+		{
+			clearImpl();
+		}
+
+		emit projectUpdated();
+		return result;
 	}
 
 	void Simulator::clear()
 	{
+		clearImpl();
+		emit projectUpdated();
+		return;
+	}
+
+	void Simulator::clearImpl()
+	{
+		m_buildPath.clear();
 		m_firmwares.clear();
 		m_lmDescriptions.clear();
 		m_simScript.clear();
@@ -54,7 +78,6 @@ namespace Sim
 	bool Simulator::loadFunc(QString buildPath)
 	{
 		writeMessage(QLatin1String("Load project for simulation from ") + buildPath);
-		clear();
 
 		//--
 		//
@@ -69,7 +92,7 @@ namespace Sim
 		bool ok = loadFirmwares(buildPath);
 		if (ok == false)
 		{
-			clear();
+			clearImpl();
 			return false;
 		}
 
@@ -77,7 +100,7 @@ namespace Sim
 		if (subsystems.isEmpty() == true)
 		{
 			writeError(QObject::tr("Bitstream file does not contain any subsystem."));
-			clear();
+			clearImpl();
 			return false;
 		}
 
@@ -86,7 +109,7 @@ namespace Sim
 		ok = loadLmDescriptions(buildPath);
 		if (ok == false)
 		{
-			clear();
+			clearImpl();
 			return false;
 		}
 
@@ -95,7 +118,7 @@ namespace Sim
 		ok = loadSimulationScripts(buildPath);
 		if (ok == false)
 		{
-			clear();
+			clearImpl();
 			return false;
 		}
 
@@ -109,23 +132,23 @@ namespace Sim
 			if (ok == false)
 			{
 				writeError(QObject::tr("Subsystem %1 in not found in bitstream file.").arg(subsystemId));
-				clear();
+				clearImpl();
 				return false;
 			}
 
 			// Create subsystem
 			//
-			auto res = m_subsystems.try_emplace(subsystemId, subsystemId);
-
-			if (res.second == false)
+			if (m_subsystems.count(subsystemId) > 0)
 			{
 				writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
-				clear();
+				clearImpl();
 				return false;
 			}
 
-			auto it = res.first;
-			Subsystem& ss = it->second;
+			auto subsystem = std::make_shared<Sim::Subsystem>(subsystemId);
+			m_subsystems[subsystemId] = subsystem;
+
+			Subsystem& ss = *subsystem.get();
 
 			// Get LogicMoudelDescription
 			//
@@ -146,7 +169,7 @@ namespace Sim
 			if (simScriptIt == m_simScript.end())
 			{
 				writeError(QObject::tr("Cannot find AFBL simulation script file %1").arg(lmDescription.simualtionScriptFile()));
-				clear();
+				clearImpl();
 				return false;
 			}
 
@@ -159,7 +182,7 @@ namespace Sim
 			{
 				// Error must be reported in Subsystem::load
 				//
-				clear();
+				clearImpl();
 				return false;
 			}
 		}
@@ -316,13 +339,37 @@ namespace Sim
 		return true;
 	}
 
+	bool Simulator::isLoaded() const
+	{
+		return m_buildPath.isEmpty() == false;
+	}
+
+	QString Simulator::buildPath() const
+	{
+		return m_buildPath;
+	}
+
+	std::vector<std::shared_ptr<Subsystem>> Simulator::subsystems() const
+	{
+		std::vector<std::shared_ptr<Subsystem>> result;
+		result.reserve(m_subsystems.size());
+
+		for (const auto&[key, ss] : m_subsystems)
+		{
+			Q_UNUSED(key)
+			result.push_back(ss);
+		}
+
+		return result;
+	}
+
 	std::shared_ptr<LogicModule> Simulator::logicModule(QString equipmentId)
 	{
-		for (auto it = m_subsystems.begin(); it != m_subsystems.end(); ++it)
+		for (const auto&[key, ss] : m_subsystems)
 		{
-			Subsystem& ss = it->second;
+			Q_UNUSED(key);
 
-			std::shared_ptr<LogicModule> lm = ss.logicModule(equipmentId);
+			std::shared_ptr<LogicModule> lm = ss->logicModule(equipmentId);
 			if (lm != nullptr)
 			{
 				return lm;

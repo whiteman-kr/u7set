@@ -25,6 +25,8 @@ protected:
 
 	virtual void showEvent(QShowEvent*) override;
 
+	void updateActions();
+
 protected slots:
 	void openBuild();
 	void closeBuild();

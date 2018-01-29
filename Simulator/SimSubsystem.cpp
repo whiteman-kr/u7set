@@ -8,7 +8,7 @@ namespace Sim
 	//
 	Subsystem::Subsystem(QString subsystemId) :
 		Output(subsystemId),
-		m_susystemId(subsystemId)
+		m_subsystemId(subsystemId)
 	{
 	}
 
@@ -56,20 +56,6 @@ namespace Sim
 		}
 
 		return true;
-	}
-
-	std::shared_ptr<LogicModule> Subsystem::logicModule(QString equipmentId)
-	{
-		auto it = m_devicesByEquipmentId.find(equipmentId);
-
-		if (it == m_devicesByEquipmentId.end())
-		{
-			return std::shared_ptr<LogicModule>();
-		}
-		else
-		{
-			return it->second;
-		}
 	}
 
 	std::vector<Hardware::LogicModuleInfo> Subsystem::logicModulesInfo() const
@@ -137,6 +123,45 @@ namespace Sim
 
 		assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());
 		return true;
+	 }
+
+	 QString Subsystem::subsystemId() const
+	 {
+		 return m_subsystemId;
+	 }
+
+	 std::vector<std::shared_ptr<LogicModule>> Subsystem::logicModules()
+	 {
+		 std::vector<std::shared_ptr<LogicModule>> result;
+		 result.reserve(m_devicesByLmNumber.size());
+
+		 for (auto [key, lm] : m_devicesByEquipmentId)
+		 {
+			 Q_UNUSED(key);
+			 result.push_back(lm);
+		 }
+
+		 std::sort(result.begin(), result.end(),
+				   [](const auto& a, const auto& b)
+				   {
+						return a->equipmentId() < b->equipmentId();
+				   });
+
+		 return result;
+	 }
+
+	 std::shared_ptr<LogicModule> Subsystem::logicModule(QString equipmentId)
+	 {
+		 auto it = m_devicesByEquipmentId.find(equipmentId);
+
+		 if (it == m_devicesByEquipmentId.end())
+		 {
+			 return std::shared_ptr<LogicModule>();
+		 }
+		 else
+		 {
+			 return it->second;
+		 }
 	 }
 
 }

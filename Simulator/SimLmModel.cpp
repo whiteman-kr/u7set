@@ -189,6 +189,21 @@ namespace Sim
 		return true;
 	}
 
+	QString LogicModule::equipmentId() const
+	{
+		return m_logicModuleInfo.equipmentId;
+	}
+
+	int LogicModule::lmNumber() const
+	{
+		return m_logicModuleInfo.lmNumber;
+	}
+
+	E::Channel LogicModule::channel() const
+	{
+		return m_logicModuleInfo.channel;
+	}
+
 	const Hardware::LogicModuleInfo& LogicModule::logicModuleInfo() const
 	{
 		return m_logicModuleInfo;

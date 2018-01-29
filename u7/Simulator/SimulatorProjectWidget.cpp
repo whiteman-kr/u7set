@@ -1,166 +1,179 @@
 #include "SimulatorProjectWidget.h"
 #include <QVBoxLayout>
+#include <QMenu>
 #include "../Settings.h"
 
-SimulatorProjectWidget::SimulatorProjectWidget(DbController* db, QWidget* parent) :
+SimulatorProjectWidget::SimulatorProjectWidget(Sim::Simulator& simulator, QWidget* parent) :
 	QWidget(parent),
-	HasDbController(db)
+	m_simulator(simulator)
 {
 	setBackgroundRole(QPalette::Window);
 	setAutoFillBackground(true);
 
 	QVBoxLayout* layout = new QVBoxLayout;
 
-	m_debugReleaseCombo = new QComboBox;
-	m_debugReleaseCombo->addItem("Debug");
-	m_debugReleaseCombo->addItem("Release");
-	m_debugReleaseCombo->setCurrentText("Debug");
+	m_buildLabel = new QLabel("Build: Not loaded");
+	m_buildLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
+	m_buildLabel->setTextFormat(Qt::RichText);
+	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_buildLabel->setOpenExternalLinks(true);
 
-	m_refreshButton = new QPushButton("Refresh");
-	m_refreshButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-	m_loadButton = new QPushButton("Load Build");
-	m_loadButton->setEnabled(false);
-	m_loadButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-	m_buildLabel = new QLabel("Build");
-	m_buildList = new QListWidget;
-	m_buildList->setSortingEnabled(false);
-	QWidget* buildWidget = new QWidget;
-	QGridLayout* buildWidgetLayout = new QGridLayout;
-	buildWidgetLayout->setMargin(0);
-	buildWidgetLayout->addWidget(m_buildLabel, 0, 0, 1, 1);
-	buildWidgetLayout->addWidget(m_refreshButton, 0, 1, 1, 1);
-	buildWidgetLayout->addWidget(m_buildList, 1, 0, 1, 2);
-	buildWidget->setLayout(buildWidgetLayout);
-
-	m_equipmentLabel = new QLabel("Equipment");
 	m_equipmentTree = new QTreeWidget;
-	QWidget* equipWidget = new QWidget;
-	QGridLayout* equipWidgetLayout = new QGridLayout;
-	equipWidgetLayout->setMargin(0);
-	equipWidgetLayout->addWidget(m_equipmentLabel, 0, 0, 1, 1);
-	equipWidgetLayout->addWidget(m_loadButton, 0, 1, 1, 1);
-	equipWidgetLayout->addWidget(m_equipmentTree, 1, 0, 1, 2);
-	equipWidget->setLayout(equipWidgetLayout);
+	m_equipmentTree->setUniformRowHeights(true);
+	m_equipmentTree->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
-	layout->addWidget(m_debugReleaseCombo);
+	QStringList headerLabels;
+	headerLabels << "ID";
+	headerLabels << "Info";
+	headerLabels << "State";
+	m_equipmentTree->setHeaderLabels(headerLabels);
 
-	m_splitter = new QSplitter(Qt::Vertical);
-	m_splitter->setChildrenCollapsible(false);
+	m_equipmentTree->clear();
 
-	m_splitter->addWidget(buildWidget);
-	m_splitter->addWidget(equipWidget);
-
-	layout->addWidget(m_splitter);
+	layout->addWidget(m_buildLabel);
+	layout->addWidget(m_equipmentTree);
 
 	setLayout(layout);
 
-	m_splitter->restoreState(theSettings.m_simBuildSplitter);
+	// --
+	//
+	createActions();
 
 	// --
 	//
-	connect(m_debugReleaseCombo, &QComboBox::currentTextChanged, this, &SimulatorProjectWidget::debugReleaseChanged);
+	connect(m_equipmentTree, &QTreeWidget::customContextMenuRequested, this, &SimulatorProjectWidget::treeContextMenu);
+	connect(m_equipmentTree, &QTreeWidget::doubleClicked, this, &SimulatorProjectWidget::treeDoubleClicked);
 
-	connect(m_buildList, &QListWidget::currentRowChanged, this, &SimulatorProjectWidget::buildListSelectionChanged);
-	connect(m_buildList, &QListWidget::itemDoubleClicked, this, &SimulatorProjectWidget::buildListItemDoubleClicked);
-
-	connect(m_refreshButton, &QPushButton::clicked, this, &SimulatorProjectWidget::fillBuildList);
-	connect(m_loadButton, &QPushButton::clicked, this, &SimulatorProjectWidget::loadButtonClicked);
+	connect(&m_simulator, &Sim::Simulator::projectUpdated, this, &SimulatorProjectWidget::projectUpdated);
 
 	return;
 }
 
 SimulatorProjectWidget::~SimulatorProjectWidget()
 {
-	theSettings.m_simBuildSplitter = m_splitter->saveState();
-	theSettings.writeUserScope();
 }
 
-QString SimulatorProjectWidget::buildsPath()
+void SimulatorProjectWidget::createActions()
 {
-	QString configurationType = m_debugReleaseCombo->currentText().toLower();
+	m_openLmControlPageAction = new QAction(tr("Control Page..."));
+	connect(m_openLmControlPageAction, &QAction::triggered, this, &SimulatorProjectWidget::openControlTabPage);
 
-	QString projectName = db()->currentProject().projectName().toLower();
-	QString buildSearchPath = QString("%1%2%3-%4")
-							  .arg(theSettings.buildOutputPath())
-							  .arg(QDir::separator())
-							  .arg(projectName)
-							  .arg(configurationType);
-
-	return buildSearchPath;
+	return;
 }
 
-void SimulatorProjectWidget::showEvent(QShowEvent*)
+void SimulatorProjectWidget::projectUpdated()
 {
-	fillBuildList();
-}
+	assert(m_buildLabel);
 
-void SimulatorProjectWidget::fillBuildList()
-{
-	int lastSelectedBuild = -1;
-	if (m_buildList->selectionModel()->hasSelection() == true)
+	if (m_simulator.isLoaded() == false)
 	{
-		lastSelectedBuild = m_buildList->currentRow();
-	}
-
-	if (db()->isProjectOpened() == false)
-	{
-		return;
-	}
-
-	QDir dir(buildsPath());
-	QFileInfoList buildDirsList = dir.entryInfoList(QStringList("build*"), QDir::Dirs | QDir::NoSymLinks, QDir::Name);
-
-	m_buildList->clear();
-
-	for (const QFileInfo& fi : buildDirsList)
-	{
-		QListWidgetItem* item = new QListWidgetItem(fi.fileName(), m_buildList);
-		item->setData(Qt::UserRole, fi.absoluteFilePath());
-	}
-
-	if (lastSelectedBuild != -1)
-	{
-		m_buildList->setCurrentRow(lastSelectedBuild);
+		m_buildLabel->setText(tr("Build: Not loaded"));
 	}
 	else
 	{
-		m_buildList->setCurrentRow(0);
+		QString buildPath = m_simulator.buildPath();
+		m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
 	}
+
+	fillEquipmentTree();
 
 	return;
 }
 
-void SimulatorProjectWidget::debugReleaseChanged(const QString&)
+void SimulatorProjectWidget::treeContextMenu(const QPoint& pos)
 {
-	fillBuildList();
-}
-
-void SimulatorProjectWidget::loadButtonClicked()
-{
-	assert(m_buildList);
-	QList<QListWidgetItem*> selected = m_buildList->selectedItems();
-
-	if (selected.isEmpty() == true)
+	QTreeWidgetItem* currentItem = m_equipmentTree->currentItem();
+	if (currentItem == nullptr)
 	{
 		return;
 	}
 
-	QListWidgetItem* item = selected.front();
-	QString buildPath = item->data(Qt::UserRole).toString();
+	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
+	if (lmEquipmentId.isEmpty() == true)
+	{
+		return;
+	}
 
-	emit loadBuild(buildPath);
+	QMenu menu(m_equipmentTree);
+
+	menu.addAction(m_openLmControlPageAction);
+
+	menu.exec(m_equipmentTree->mapToGlobal(pos));
+	return;
+}
+
+void SimulatorProjectWidget::treeDoubleClicked(const QModelIndex& /*index*/)
+{
+	QTreeWidgetItem* currentItem = m_equipmentTree->currentItem();
+	if (currentItem == nullptr)
+	{
+		return;
+	}
+
+	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
+	if (lmEquipmentId.isEmpty() == true)
+	{
+		return;
+	}
+
+	openControlTabPage();
+	return;
+}
+
+void SimulatorProjectWidget::openControlTabPage()
+{
+	QTreeWidgetItem* currentItem = m_equipmentTree->currentItem();
+	if (currentItem == nullptr)
+	{
+		return;
+	}
+
+	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
+	if (lmEquipmentId.isEmpty() == true)
+	{
+		return;
+	}
+
+
+	qDebug() << Q_FUNC_INFO << " " << lmEquipmentId;
 
 	return;
 }
 
-void SimulatorProjectWidget::buildListSelectionChanged(int currentRow)
+void SimulatorProjectWidget::fillEquipmentTree()
 {
-	m_loadButton->setEnabled(currentRow != -1);
-}
+	assert(m_equipmentTree);
+	m_equipmentTree->clear();
 
-void SimulatorProjectWidget::buildListItemDoubleClicked(QListWidgetItem*)
-{
-	loadButtonClicked();
+	if (m_simulator.isLoaded() == false)
+	{
+		return;
+	}
+
+	auto subsystems = m_simulator.subsystems();
+
+	for (std::shared_ptr<Sim::Subsystem> ss : subsystems)
+	{
+		QStringList sl;
+		sl << ss->subsystemId();
+
+		QTreeWidgetItem* ssItem = new QTreeWidgetItem(m_equipmentTree, sl);
+		m_equipmentTree->addTopLevelItem(ssItem);
+
+		// Add LogicModules
+		//
+		auto logicModules = ss->logicModules();
+		for (std::shared_ptr<Sim::LogicModule> lm : logicModules)
+		{
+			QStringList slm;
+			slm << lm->equipmentId();
+			slm << QString("n: %1, ch: %2").arg(lm->lmNumber()).arg(QChar('A' + static_cast<char>(lm->channel())));
+
+			QTreeWidgetItem* lmItem = new QTreeWidgetItem(ssItem, slm);
+			lmItem->setData(0, Qt::UserRole, QVariant(lm->equipmentId()));
+		}
+	}
+
+	m_equipmentTree->expandAll();
+	return;
 }

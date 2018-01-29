@@ -206,12 +206,11 @@ static const std::vector<quint8> err;
 	void ModuleFirmware::addLogicModuleInfo(
 							const QString& equipmentId,
 							int lmNumber,
-							int channel,
+							E::Channel channel,
 							int moduleFamily,
 							int customModuleFamily,
 							int moduleVersion,
-							int moduleType
-							)
+							int moduleType)
 	{
 		LogicModuleInfo info;
 
@@ -595,7 +594,14 @@ static ModuleFirmware err;
 					*errorCode = "Parse firmware error: cant find field channel";
 					return false;
 				}
-				lmi.channel = jModuleInfo.value(QLatin1String("channel")).toInt();
+
+				bool ok = true;
+				lmi.channel = E::stringToValue<E::Channel>(jModuleInfo.value(QLatin1String("channel")).toString(), &ok);
+				if (ok == false)
+				{
+					*errorCode = "Parse firmware error: Unknown channel %1" + jModuleInfo.value(QLatin1String("channel")).toString();
+					return false;
+				}
 
 				if (jModuleInfo.value(QLatin1String("moduleFamily")).isUndefined() == true)
 				{

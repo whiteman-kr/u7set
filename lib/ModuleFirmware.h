@@ -34,7 +34,7 @@ namespace Hardware
 	{
 		QString equipmentId;
 		int lmNumber = 0;
-		int channel = 0;
+		E::Channel channel = E::Channel::A;
 
 		int moduleFamily = 0;
 		int customModuleFamily = 0;
@@ -75,7 +75,7 @@ namespace Hardware
 
 		void addLogicModuleInfo(const QString& equipmentId,
 								int lmNumber,
-								int channel,
+								E::Channel channel,
 								int moduleFamily,
 								int customModuleFamily,
 								int moduleVersion,

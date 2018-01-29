@@ -1,50 +1,48 @@
 #ifndef SIMULATORPROJECTWIDGET_H
 #define SIMULATORPROJECTWIDGET_H
 #include <QWidget>
-#include <QComboBox>
 #include <QLabel>
-#include <QPushButton>
-#include "../../lib/DbController.h"
+#include <QAction>
+#include <QTreeWidget>
+#include "../Simulator/Simulator.h"
 
 // Widget for selection build and module
 //
-class SimulatorProjectWidget : public QWidget, HasDbController
+class SimulatorProjectWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit SimulatorProjectWidget(DbController* db, QWidget* parent = nullptr);
+	explicit SimulatorProjectWidget(Sim::Simulator& simulator, QWidget* parent = nullptr);
 	virtual ~SimulatorProjectWidget();
 
 protected:
-	QString buildsPath();
+	void createActions();
 
 protected slots:
-	virtual void showEvent(QShowEvent*) override;
+	void projectUpdated();
+	void treeContextMenu(const QPoint& pos);
+	void treeDoubleClicked(const QModelIndex &index);
+	void openControlTabPage();
 
-	void fillBuildList();
-	void debugReleaseChanged(const QString &);
-	void loadButtonClicked();
-
-	void buildListSelectionChanged(int currentRow);
-	void buildListItemDoubleClicked(QListWidgetItem* item);
-
-signals:
-	void loadBuild(QString buildPath);
+protected:
+	void fillEquipmentTree();
 
 private:
-	QComboBox* m_debugReleaseCombo = nullptr;
-
-	QPushButton* m_refreshButton = nullptr;
-	QPushButton* m_loadButton = nullptr;
+	Sim::Simulator& m_simulator;
 
 	QLabel* m_buildLabel = nullptr;
-	QListWidget* m_buildList = nullptr;
-
-	QSplitter* m_splitter = nullptr;
-
-	QLabel* m_equipmentLabel = nullptr;
 	QTreeWidget* m_equipmentTree = nullptr;
+
+	enum EquipmentTreeColumns
+	{
+		EquipmentID,
+		Info,
+		State,
+		Count
+	};
+
+	QAction* m_openLmControlPageAction = nullptr;
 };
 
 

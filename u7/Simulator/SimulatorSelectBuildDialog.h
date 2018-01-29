@@ -19,11 +19,27 @@ public:
 	};
 
 public:
-	SimulatorSelectBuildDialog(BuildType buildType, QString buildPath, QWidget* parent);
+	SimulatorSelectBuildDialog(QString currentProject, BuildType buildType, QString buildPath, QWidget* parent);
 	~SimulatorSelectBuildDialog();
+
+protected:
+	QString buildsPath();
+	void fillBuildList(QString currentBuildPath);
+
+protected slots:
+	void buildListSelectionChanged(int currentRow);
+	void buildListItemDoubleClicked(QListWidgetItem* item);
+
+	virtual void accept() override;
+
+public:
+	BuildType resultBuildType() const;
+	QString resultBuildPath() const;
 
 private:
 	Ui::SimulatorSelectBuildDialog *ui;
+
+	QString m_projectName;
 };
 
 #endif // SIMULATORSELECTBUILDDIALOG_H
