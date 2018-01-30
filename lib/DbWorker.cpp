@@ -214,6 +214,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0196.sql", "Upgrade to version 196, Added afbl simulation script for platform LM"},
 	{":/DatabaseUpgrade/Upgrade0197.sql", "Upgrade to version 197, Added software type checking in configuration scripts"},
 	{":/DatabaseUpgrade/Upgrade0198.sql", "Upgrade to version 198, TuningClient preset was updated"},
+	{":/DatabaseUpgrade/Upgrade0199.sql", "Upgrade to version 199, The range of the Time parameters in the tctc_* blocks has been changed"},
 };
 
 

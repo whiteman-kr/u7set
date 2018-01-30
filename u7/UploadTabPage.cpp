@@ -251,7 +251,7 @@ bool UploadTabPage::isUploading()
 	return m_uploading;
 }
 
-void UploadTabPage::findProjectBuilds()
+void UploadTabPage::refreshProjectBuilds()
 {
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -287,20 +287,35 @@ void UploadTabPage::findProjectBuilds()
 
 	QStringList builds = QDir(m_buildSearchPath).entryList(QStringList("build*"), QDir::Dirs|QDir::NoSymLinks);
 
-	m_pBuildList->clear();
-	m_pBuildList->addItems(builds);
+	// Refresh builds list if it is changed
+	//
 
-	if (m_currentBuildIndex != -1 && m_currentBuildIndex < m_pBuildList->count())
+	if (m_currentBuilds != builds)
 	{
-		m_pBuildList->setCurrentRow(m_currentBuildIndex);
+		m_currentBuilds = builds;
+
+		m_pBuildList->clear();
+		m_pBuildList->addItems(m_currentBuilds);
+
+		m_pBuildList->blockSignals(true);
+		selectBuild(m_currentBuild);
+		m_pBuildList->blockSignals(false);
 	}
+
+	// Refresh binary file
+	//
+
+	refreshBinaryFile();
 }
 
 void UploadTabPage::configurationTypeChanged(const QString& s)
 {
 	Q_UNUSED(s);
 
-	findProjectBuilds();
+	m_currentBuild.clear();
+	m_currentFilePath.clear();
+
+	refreshProjectBuilds();
 }
 
 
@@ -319,35 +334,9 @@ void UploadTabPage::buildChanged(int index)
 		return;
 	}
 
-	clearSubsystemsUartData();
-
-	m_currentFileName.clear();
-
 	m_currentBuild = item->text();
 
-	m_currentBuildIndex = m_pBuildList->currentRow();
-
-	QString buildPath = m_buildSearchPath + QDir::separator() + m_currentBuild;
-
-	QStringList binaryFiles = QDir(buildPath).entryList(QStringList() << "*.bts",
-									 QDir::Files| QDir::NoSymLinks);
-
-	if (binaryFiles.isEmpty() == true)
-	{
-		m_outputLog.writeError(tr("No Output Bitstream files found in %1!").arg(buildPath));
-		return;
-	}
-
-	if (binaryFiles.size() > 1)
-	{
-		m_outputLog.writeError(tr("More than one Output Bitstream file found in %1!").arg(buildPath));
-		return;
-	}
-
-	m_currentFileName = buildPath + QDir::separator() + binaryFiles[0];
-
-	emit loadBinaryFile(m_currentFileName, &m_firmware);
-
+	refreshBinaryFile();
 }
 
 void UploadTabPage::subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2)
@@ -362,10 +351,10 @@ void UploadTabPage::subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* it
 		return;
 	}
 
-	QString subsystemId = subsystemItem->data(columnSubsysId, Qt::UserRole).toString();
+	QString currentSubsystem = subsystemItem->data(columnSubsysId, Qt::UserRole).toString();
 
 	bool ok = false;
-	const ModuleFirmware& mf = m_firmware.firmware(subsystemId, &ok);
+	const ModuleFirmware& mf = m_firmware.firmware(currentSubsystem, &ok);
 	if (ok == false)
 	{
 		assert(false);
@@ -442,12 +431,6 @@ void UploadTabPage::read()
 
 void UploadTabPage::upload()
 {
-	if (m_currentFileName.isEmpty())
-	{
-		QMessageBox::critical(this, qApp->applicationName(), tr("Configuration file was not loaded."));
-		return;
-	}
-
 	QString subsysId = selectedSubsystem();
 
 	if (subsysId.isEmpty())
@@ -620,6 +603,22 @@ QString UploadTabPage::selectedSubsystem()
 	return QString();
 }
 
+void UploadTabPage::selectBuild(const QString& id)
+{
+	m_pBuildList->clearSelection();
+
+	int count = m_pBuildList->count();
+
+	for (int i = 0; i < count; i++)
+	{
+		if (m_pBuildList->item(i)->text() == id)
+		{
+			m_pBuildList->setCurrentRow(i);
+			return;
+		}
+	}
+}
+
 void UploadTabPage::selectSubsystem(const QString& id)
 {
 	m_pSubsystemsListWidget->clearSelection();
@@ -640,10 +639,59 @@ void UploadTabPage::selectSubsystem(const QString& id)
 	}
 }
 
+void UploadTabPage::refreshBinaryFile()
+{
+	QString buildPath = m_buildSearchPath + QDir::separator() + m_currentBuild;
+
+	if (m_buildSearchPath.isEmpty() == true || m_currentBuild.isEmpty() == true || QDir(buildPath).exists() == false)
+	{
+		m_currentFilePath.clear();
+		clearSubsystemsUartData();
+		return;
+	}
+
+	QStringList binaryFiles = QDir(buildPath).entryList(QStringList() << "*.bts",
+									 QDir::Files| QDir::NoSymLinks);
+
+	// Must be only one binary file
+
+	if (binaryFiles.isEmpty() == true)
+	{
+		m_outputLog.writeError(tr("No Output Bitstream files found in %1!").arg(buildPath));
+
+		m_currentFilePath.clear();
+		clearSubsystemsUartData();
+		return;
+	}
+
+	if (binaryFiles.size() > 1)
+	{
+		m_outputLog.writeError(tr("More than one Output Bitstream file found in %1!").arg(buildPath));
+
+		m_currentFilePath.clear();
+		clearSubsystemsUartData();
+		return;
+	}
+
+	QString filePath = buildPath + QDir::separator() + binaryFiles[0];
+
+	if (m_currentFilePath == filePath && m_currentFileModifiedTime == QFileInfo(filePath).lastModified())
+	{
+		return;	// File is the same, do not read it
+	}
+
+	clearSubsystemsUartData();
+
+	m_currentFilePath = filePath;
+	m_currentFileModifiedTime = QFileInfo(m_currentFilePath).lastModified();
+
+	emit loadBinaryFile(m_currentFilePath, &m_firmware);
+}
 
 void UploadTabPage::clearSubsystemsUartData()
 {
 	m_pSubsystemsListWidget->clear();
+
 	m_pUartListWidget->clear();
 }
 
@@ -678,14 +726,6 @@ void UploadTabPage::loadBinaryFileHeaderComplete()
 		m_pSubsystemsListWidget->sortByColumn(columnUartId, Qt::AscendingOrder);
 		m_pSubsystemsListWidget->addTopLevelItem(subsystemItem);
 	}
-
-	// Better make user to think
-	//
-
-	//if (m_pSubsystemsListWidget->topLevelItemCount() > 0)
-	//{
-		//m_pSubsystemsListWidget->setCurrentItem(m_pSubsystemsListWidget->topLevelItem(0));
-	//}
 }
 
 void UploadTabPage::uartOperationStart(int uartID, QString operation)

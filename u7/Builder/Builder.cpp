@@ -1116,7 +1116,7 @@ namespace Builder
 
 			if (file.second == false)
 			{
-				m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. %1").arg(Q_FUNC_INFO));
+				m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. ") + Q_FUNC_INFO);
 				return false;
 			}
 

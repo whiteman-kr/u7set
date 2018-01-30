@@ -730,6 +730,11 @@ namespace Builder
 			result &= res;
 		}
 
+		if (result == false)
+		{
+			return false;
+		}
+
 		for(UalItem* ualItem : m_ualItems)
 		{
 			if (ualItem == nullptr)
@@ -1522,6 +1527,14 @@ namespace Builder
 		if (s == nullptr)
 		{
 			m_log->errALC5000(signalID, signalItem->guid(), signalItem->schemaID());
+			return false;
+		}
+
+		if (s->enableTuning() == true)
+		{
+			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5071(signalItem->schemaID(), s->appSignalID(), signalItem->guid());
 			return false;
 		}
 
