@@ -168,34 +168,29 @@ namespace Builder
 
 			// check tuningable signals properties
 			//
-			if (s.enableTuning() == false)
+			if (s.enableTuning() == true)
 			{
-				continue;
-			}
-
-			if (s.isInternal() == false)
-			{
-				LOG_INTERNAL_ERROR(m_log);				// only Internals can be tuningable
-				return false;
-			}
-
-			if (s.isAnalog() == true)
-			{
-				if (s.lowEngeneeringUnits() >= s.highEngeneeringUnits())
+				if (s.isInternal() == false)
 				{
-					// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+					LOG_INTERNAL_ERROR(m_log);				// only Internals can be tuningable
+					return false;
+				}
+
+				if (s.tuningLowBound() >= s.tuningHighBound())
+				{
+					// TuningHighBound property of tuningable signal '%1' must be greate than TuningLowBound.
 					//
 					m_log->errALC5068(s.appSignalID());
 					result = false;
 				}
 				else
 				{
-					// limits OK
+					// bounds OK, defaultValue checking
 					//
-					if (s.tuningDefaultValue().toDouble() < s.lowEngeneeringUnits() ||
-						s.tuningDefaultValue().toDouble() > s.highEngeneeringUnits())
+					if (s.tuningDefaultValue() < s.tuningLowBound() ||
+						s.tuningDefaultValue() > s.tuningHighBound())
 					{
-						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits toHighEngeneeringUnits.
+						// TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
 						//
 						m_log->errALC5069(s.appSignalID());
 						result = false;

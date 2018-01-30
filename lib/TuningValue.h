@@ -57,7 +57,9 @@ public:
 	static TuningValue createFromDouble(E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, double value);
 
 	friend bool operator < (const TuningValue& l, const TuningValue& r);
+	friend bool operator <= (const TuningValue& l, const TuningValue& r);
 	friend bool operator > (const TuningValue& l, const TuningValue& r);
+	friend bool operator >= (const TuningValue& l, const TuningValue& r);
 	friend bool operator == (const TuningValue& l, const TuningValue& r);
 	friend bool operator != (const TuningValue& l, const TuningValue& r);
 
@@ -71,6 +73,8 @@ private:
 };
 
 extern bool operator < (const TuningValue& l, const TuningValue& r);
+extern bool operator <= (const TuningValue& l, const TuningValue& r);
 extern bool operator > (const TuningValue& l, const TuningValue& r);
+extern bool operator >= (const TuningValue& l, const TuningValue& r);
 extern bool operator == (const TuningValue& l, const TuningValue& r);
 extern bool operator != (const TuningValue& l, const TuningValue& r);

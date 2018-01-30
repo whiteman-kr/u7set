@@ -339,6 +339,29 @@ bool operator < (const TuningValue& l, const TuningValue& r)
 	return false;
 }
 
+bool operator <= (const TuningValue& l, const TuningValue& r)
+{
+	assert(l.m_type == r.m_type);
+
+	switch (l.m_type)
+	{
+	case TuningValueType::Discrete:
+	case TuningValueType::SignedInteger:
+		return l.m_intValue <= r.m_intValue;
+
+	case TuningValueType::Float:
+		return l.m_floatValue <= r.m_floatValue;
+
+	case TuningValueType::Double:
+		return l.m_doubleValue <= r.m_doubleValue;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+
 bool operator > (const TuningValue& l, const TuningValue& r)
 {
 	assert(l.m_type == r.m_type);
@@ -354,6 +377,29 @@ bool operator > (const TuningValue& l, const TuningValue& r)
 
 	case TuningValueType::Double:
 		return l.m_doubleValue > r.m_doubleValue;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+
+bool operator >= (const TuningValue& l, const TuningValue& r)
+{
+	assert(l.m_type == r.m_type);
+
+	switch (l.m_type)
+	{
+	case TuningValueType::Discrete:
+	case TuningValueType::SignedInteger:
+		return l.m_intValue >= r.m_intValue;
+
+	case TuningValueType::Float:
+		return l.m_floatValue >= r.m_floatValue;
+
+	case TuningValueType::Double:
+		return l.m_doubleValue >= r.m_doubleValue;
 
 	default:
 		assert(false);

@@ -3514,20 +3514,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+	/// Title:	   TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		LowEngeneeringUnits property of tuningable signal must be greate than HighEngeneeringUnits.
-	///		Correct signal properties.
+	///		TuningHighBound property of tuningable signal must be greate than TuningLowBound. Check signal properties.
 	///
 	void IssueLogger::errALC5068(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5068,
-				  QString(tr("LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.")).
+				  QString(tr("TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound")).
 					arg(appSignalID));
 	}
 
@@ -3536,20 +3535,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+	/// Title:	   TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningDefaultValue property of tuningable signal must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
-	///		Correct signal TuningDefaultValue property.
+	///		TuningDefaultValue property of tuningable signal must be in range from TuningLowBound to TuningHighBound.
+	///		Check signal's TuningDefaultValue property.
 	///
 	void IssueLogger::errALC5069(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5069,
-				  QString(tr("TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.")).
+				  QString(tr("TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.")).
 					arg(appSignalID));
 	}
 

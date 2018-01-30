@@ -348,10 +348,11 @@ void SignalPropertiesDialog::saveDialogSettings()
 
 void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects)
 {
-	if (m_tryCheckout)
+	if (m_tryCheckout == true)
 	{
 		checkoutSignals(objects);
 	}
+
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(object.get());

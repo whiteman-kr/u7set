@@ -257,8 +257,8 @@ namespace Builder
 		void errALC5065(int address);								// Write address %1 of application memory is out of range 0..65535.
 		void errALC5066(int addrTo, int addrFrom, int sizeW);		// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
 		void errALC5067(int addrTo, int bit, int value);			// Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
-		void errALC5068(QString appSignalID);						// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
-		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+		void errALC5068(QString appSignalID);						// TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound.
+		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
 		void wrnALC5070(QString appSignalID);						// Signal '%1' has Little Endian byte order.
 		void errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid);					// Can't assign value to tuningable signal '%1' (Logic schema '%2').
 		void wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID);	// Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema %3).
