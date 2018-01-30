@@ -134,12 +134,6 @@ namespace Builder
 
 		int opCode = afbl->opCode();
 
-		if (opCode == static_cast<int>(Afb::AfbType::NOT))
-		{
-			int a = 0;
-			a++;
-		}
-
 		if (m_fblInstance.contains(opCode) == false)
 		{
 			// Unknown AFB type (opCode) (Logic schema %1, item %2).

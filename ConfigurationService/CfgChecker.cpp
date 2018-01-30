@@ -373,6 +373,30 @@ void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryPathToLeave)
 }
 
 
+bool CfgCheckerWorker::renameWorkToBackupCorrupted(QString corruptedWorkDirectoryPath)
+{
+	QString corruptedWorkDirectoryName = corruptedWorkDirectoryPath.right(24);	// 24 symbols in directory name work-YYYY-DD-MM-hh-mm-ss
+	QString workStorage = m_workFolder + "/CfgSrvStorage";
+
+	QString fullPath = workStorage + "/" + corruptedWorkDirectoryName;
+	QString date = corruptedWorkDirectoryName.right(19);
+	QString corruptedBackupName = workStorage + "/backup-" + date + "-corrupted";
+
+	QDir workDirectory(workStorage);
+
+	if (workDirectory.rename(fullPath, corruptedBackupName) == false)
+	{
+		DEBUG_LOG_MSG(m_logger, "Could not rename " + fullPath + " to " + corruptedBackupName);
+
+		return false;
+	}
+
+	DEBUG_LOG_MSG(m_logger, "Corrupted " + fullPath + " renamed to " + corruptedBackupName);
+
+	return true;
+}
+
+
 void CfgCheckerWorker::onThreadStarted()
 {
 	if (m_workFolder.isEmpty() == true)
@@ -395,7 +419,7 @@ void CfgCheckerWorker::onThreadStarted()
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_logger, "Autoupdate is working at " + workStorage);
+		DEBUG_LOG_MSG(m_logger, "Autoupdate is working to " + workStorage);
 	}
 
 	QDir storageDirectory(workStorage);
@@ -405,13 +429,32 @@ void CfgCheckerWorker::onThreadStarted()
 
 	if (workBuildDirectoryList.isEmpty() == false)
 	{
-		workBuildPath = workStorage + "/" + workBuildDirectoryList[0];
-		QString workBuildFileName = workBuildPath + "/build.xml";
+		for (QString& workBuildDirectory : workBuildDirectoryList)
+		{
+			workBuildPath = workStorage + "/" + workBuildDirectory;
 
-		QFileInfo buildXmlInfo(workBuildFileName);
+			DEBUG_LOG_MSG(m_logger, "Checking current work directory " + workBuildPath);
 
-		m_lastBuildXmlModifyTime = buildXmlInfo.lastModified();
-		getFileHash(workBuildFileName, m_lastBuildXmlHash);
+			if (checkBuild(workBuildPath) == false)
+			{
+				renameWorkToBackupCorrupted(workBuildPath);
+				continue;
+			}
+
+			QString workBuildXmlFileName = workBuildPath + "/build.xml";
+
+			QFileInfo buildXmlInfo(workBuildXmlFileName);
+
+			m_lastBuildXmlModifyTime = buildXmlInfo.lastModified();
+			if (getFileHash(workBuildXmlFileName, m_lastBuildXmlHash) == false)
+			{
+				renameWorkToBackupCorrupted(workBuildPath);		// ???
+
+				m_lastBuildXmlModifyTime = QDateTime();
+
+				continue;
+			}
+		}
 	}
 
 	if (updateBuildXml() == false)
