@@ -5502,9 +5502,9 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0005">
+		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0006">
 			<Properties>				
-				<Description>Latch Block performs a latching of the input(floating-point) value by one cycle and outputs result in accordance with control signal.</Description>
+				<Description>Latch Block performs a latching of the input(signed integer) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
 				<OpCode>22</OpCode>
 				<HasRam>true</HasRam>
@@ -5512,7 +5512,7 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>28</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="4" Size="32"/>				
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="4" Size="32"/>				
 				<Pin OpName="i_reset" Caption="reset" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
 			</Inputs>
 			<Outputs>
