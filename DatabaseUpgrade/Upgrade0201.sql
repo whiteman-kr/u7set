@@ -1,30 +1,18 @@
 -- Add new columns into signalInstance table
 
-ALTER TABLE public.signalinstance ADD COLUMN tuningdefaultdouble double precision NOT NULL DEFAULT 0;
-ALTER TABLE public.signalinstance ADD COLUMN tuninglowbounddouble double precision NOT NULL DEFAULT 0;
-ALTER TABLE public.signalinstance ADD COLUMN tuninghighbounddouble double precision NOT NULL DEFAULT 0;
+ALTER TABLE public.signalinstance RENAME COLUMN tuningdefaultvalue TO tuningdefaultdouble;
+ALTER TABLE public.signalinstance RENAME COLUMN tuninglowbound TO tuninglowbounddouble;
+ALTER TABLE public.signalinstance RENAME COLUMN tuninghighbound TO tuninghighbounddouble;
 
-ALTER TABLE public.signalinstance ADD COLUMN tuningdefaultfloat real NOT NULL DEFAULT 0;
-ALTER TABLE public.signalinstance ADD COLUMN tuninglowboundfloat real NOT NULL DEFAULT 0;
-ALTER TABLE public.signalinstance ADD COLUMN tuninghighboundfloat real NOT NULL DEFAULT 0;
-
-ALTER TABLE public.signalinstance ADD COLUMN tuningdefaultint64 bigint NOT NULL DEFAULT 0;
-ALTER TABLE public.signalinstance ADD COLUMN tuninglowboundint64 bigint NOT NULL DEFAULT 0;
-ALTER TABLE public.signalinstance ADD COLUMN tuninghighboundint64 bigint NOT NULL DEFAULT 0;
+ALTER TABLE public.signalinstance ADD COLUMN tuningdefaultint bigint NOT NULL DEFAULT 0;
+ALTER TABLE public.signalinstance ADD COLUMN tuninglowboundint bigint NOT NULL DEFAULT 0;
+ALTER TABLE public.signalinstance ADD COLUMN tuninghighboundint bigint NOT NULL DEFAULT 0;
 
 -- Copy values from tuningdefaultvalue, tuninglowbound, tuninghighbound into new columns
 
-UPDATE public.signalinstance SET    tuningdefaultdouble = tuningdefaultvalue,
-                                    tuningdefaultfloat = tuningdefaultvalue,
-				    tuningdefaultint64 = tuningdefaultvalue,
-
-                                    tuninglowbounddouble = tuninglowbound,
-				    tuninglowboundfloat = tuninglowbound,
-				    tuninglowboundint64 = tuninglowbound,
-
-                                    tuninghighbounddouble = tuninghighbound,
-				    tuninghighboundfloat = tuninghighbound,
-				    tuninghighboundint64 = tuninghighbound WHERE signalinstance.enabletuning = TRUE;
+UPDATE public.signalinstance SET    tuningdefaultint = tuningdefaultdouble,
+                                    tuninglowboundint = tuninglowbounddouble,
+				    tuninghighboundint = tuninghighbounddouble WHERE signalinstance.enabletuning = TRUE;
 
 -- Drop unnecessary columns
 

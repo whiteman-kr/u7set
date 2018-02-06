@@ -267,7 +267,7 @@ namespace  Tuning
 
 				case TYPE_ANALOG_INT:
 					{
-						qint32 defaultValue = signal->tuningDefaultValue().intValue();
+						qint32 defaultValue = signal->tuningDefaultValue().int32Value();
 						qint32 lowBound = static_cast<qint32>(signal->lowEngeneeringUnits());
 						qint32 highBound = static_cast<qint32>(signal->highEngeneeringUnits());
 

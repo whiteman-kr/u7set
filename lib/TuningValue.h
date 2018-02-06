@@ -8,7 +8,8 @@
 enum class TuningValueType
 {
 	Discrete,
-	SignedInteger,
+	SignedInt32,
+	SignedInt64,
 	Float,
 	Double
 };
@@ -29,8 +30,11 @@ public:
 	qint32 discreteValue() const;
 	void setDiscreteValue(qint32 discreteValue);
 
-	qint32 intValue() const;
-	void setIntValue(qint32 intValue);
+	qint32 int32Value() const;
+	void setInt32Value(qint32 int32Value);
+
+	qint64 int64Value() const;
+	void setInt64Value(qint64 int32Value);
 
 	float floatValue() const;
 	void setFloatValue(float floatValue);
@@ -38,8 +42,8 @@ public:
 	double doubleValue() const;
 	void setDoubleValue(double doubleValue);
 
-	void setValue(TuningValueType valueType, qint32 intValue, float floatValue, double doubleValue);
-	void setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint32 intValue, float floatValue, double doubleValue);
+	void setValue(TuningValueType valueType, qint64 int32Value, double doubleValue);
+	void setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint64 intValue, double doubleValue);
 
 	double toDouble() const;
 	void fromDouble(double value);
@@ -67,9 +71,8 @@ public:
 
 private:
 	TuningValueType m_type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue
-	qint32 m_intValue = 0;
-	float m_floatValue = 0.0;
-	double m_doubleValue = 0.0;
+	qint64 m_int64 = 0;
+	double m_double = 0.0;
 };
 
 extern bool operator < (const TuningValue& l, const TuningValue& r);

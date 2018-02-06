@@ -159,7 +159,7 @@ namespace  TuningIPEN
 					data.append(QVariant(QString("AnalogInt")));
 
 					qint32* defaultValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes);
-					*defaultValuePtr = signal->tuningDefaultValue().intValue();
+					*defaultValuePtr = signal->tuningDefaultValue().int32Value();
 
 					data.append(QVariant(*defaultValuePtr));
 

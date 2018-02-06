@@ -771,7 +771,7 @@ DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, T
 
 		if (sameValue == true)
 		{
-			m_discreteCheck->setChecked(value.intValue() != 0);
+			m_discreteCheck->setChecked(value.int32Value() != 0);
 			m_discreteCheck->setText(value.toString());
 		}
 		else
@@ -857,7 +857,7 @@ void DialogInputTuningValue::on_m_buttonDefault_clicked()
 	}
 	else
 	{
-		bool defaultState = m_defaultValue.intValue() == 0 ? false : true;
+		bool defaultState = m_defaultValue.int32Value() == 0 ? false : true;
 
 		m_discreteCheck->setChecked(defaultState);
 

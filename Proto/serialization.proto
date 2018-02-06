@@ -986,6 +986,12 @@ message Property
 
 message Address16
 {
+    // Changes in Address16 fields numbering are FORBIDDEN !!!
+    // Only new numbers adding is allowed!
+    //
+    // This protobuf messages already stored in database.
+    //
+
     required int32 offset = 1 [default = -1];
     required int32 bit = 2 [default = -1];
 }
@@ -1003,14 +1009,63 @@ message UnitSet
 
 message TuningValue
 {
+    // Changes in TuningValue fields numbering are FORBIDDEN !!!
+    // Only new numbers adding is allowed!
+    //
+    // This protobuf messages already stored in database.
+    //
+
     optional int32 type = 1;				// enum TuningValueType values
-        optional int32 intValue = 2 [default = 0];
-	optional float floatValue = 3  [default = 0.0];
-	optional double doubleValue = 4  [default = 0.0];
+    optional int64 intValue = 2 [default = 0];
+    optional double doubleValue = 3  [default = 0.0];
+}
+
+
+message AppSignalDbField
+{
+    // Changes in AppSignalDbField fields numbering are FORBIDDEN !!!
+    // Only new numbers adding is allowed!
+    //
+    // This protobuf messages already stored in database.
+    //
+
+    optional int32 ID = 1 [default = -1];
+    optional int32 signalGroupID = 2 [default = -1];
+    optional int32 signalInstanceID = 3 [default = -1];
+    optional int32 changesetID = 4 [default = -1];
+    optional bool checkedOut = 5 [default = false];
+    optional int32 userID = 6 [default = -1];
+    optional int64 created = 7 [default = 0];
+    optional bool deleted = 8 [default = false];
+    optional int64 instanceCreated = 9 [default = 0];
+    optional int32 instanceAction = 10 [default = 0];			// VcsItemActionType::Unknown
+}
+
+message AppSignalCalculatedParam
+{
+    // Changes in AppSignalCalculatedParam fields numbering are FORBIDDEN !!!
+    // Only new numbers adding is allowed!
+    //
+    // This protobuf messages already stored in database.
+    //
+
+    optional uint64 hash = 1 [default = 0];
+    optional Address16 ioBufAddr = 2;
+    optional Address16 tuningAddr = 3;
+    optional Address16 ualAddr = 4;
+    optional Address16 regBufAddr = 5;
+    optional Address16 regValueAddr = 6;
+    optional Address16 regValidityAddr = 7;
 }
 
 message AppSignal
 {
+    // Changes in AppSignal fields numbering are FORBIDDEN !!!
+    // Only new numbers adding is allowed!
+    //
+    // This protobuf messages already stored in database.
+    //
+
     // Signal identificators
 
     optional string appSignalID = 1;
@@ -1068,26 +1123,11 @@ message AppSignal
 
     // Signal fields from database
 
-    optional int32 ID = 101 [default = -1];
-    optional int32 signalGroupID = 102 [default = -1];
-    optional int32 signalInstanceID = 103 [default = -1];
-    optional int32 changesetID = 104 [default = -1];
-    optional bool checkedOut = 105 [default = false];
-    optional int32 userID = 106 [default = -1];
-    optional int64 created = 107 [default = 0];
-    optional bool deleted = 108 [default = false];
-    optional int64 instanceCreated = 109 [default = 0];
-    optional int32 instanceAction = 110 [default = 0];			// VcsItemActionType::Unknown
+    optional AppSignalDbField dbField = 120;
 
     // Signal properties calculated in compile-time
 
-    optional uint64 hash = 116 [default = 0];
-    optional Address16 ioBufAddr = 117;
-    optional Address16 tuningAddr = 118;
-    optional Address16 ualAddr = 119;
-    optional Address16 regBufAddr = 120;
-    optional Address16 regValueAddr = 121;
-    optional Address16 regValidityAddr = 122;
+    optional AppSignalCalculatedParam calcParam = 121;
 }
 
 message AppSignalSet

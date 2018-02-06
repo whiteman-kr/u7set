@@ -180,7 +180,7 @@ AppSignalParam::AppSignalParam()
 
 bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
-	m_hash = message.hash();
+	m_hash = message.calcparam().hash();
 	m_appSignalId = QString::fromStdString(message.appsignalid());
 	m_customSignalId = QString::fromStdString(message.customappsignalid());
 	m_caption = QString::fromStdString(message.caption());
@@ -217,7 +217,7 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	return true;
 }
 
-void AppSignalParam::save(::Proto::AppSignal *message) const
+void AppSignalParam::save(::Proto::AppSignal* message) const
 {
 	if (message == nullptr)
 	{
@@ -225,7 +225,7 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 		return;
 	}
 
-	message->set_hash(m_hash);
+	message->mutable_calcparam()->set_hash(m_hash);
 	message->set_appsignalid(m_appSignalId.toStdString());
 	message->set_customappsignalid(m_customSignalId.toStdString());
 	message->set_caption(m_caption.toStdString());
@@ -376,7 +376,7 @@ TuningValueType AppSignalParam::toTuningType() const
 		case E::AnalogAppSignalFormat::Float32:
 			return TuningValueType::Float;
 		case E::AnalogAppSignalFormat::SignedInt32:
-			return TuningValueType::SignedInteger;
+			return TuningValueType::SignedInt32;
 		default:
 			assert(false);
 			// Unsupported tuning signal type

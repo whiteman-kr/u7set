@@ -148,7 +148,7 @@ namespace Tuning
 		case TuningValueType::Float:
 			return FotipV2::DataType::AnalogFloat;
 
-		case TuningValueType::SignedInteger:
+		case TuningValueType::SignedInt32:
 			return FotipV2::DataType::AnalogSignedInt;
 
 		default:
@@ -742,7 +742,7 @@ namespace Tuning
 					break;
 
 				case FotipV2::DataType::AnalogSignedInt:
-					fotipFrame.write.analogSignedIntValue = reverseInt32(tuningCmd.write.tuningValue.intValue());
+					fotipFrame.write.analogSignedIntValue = reverseInt32(tuningCmd.write.tuningValue.int32Value());
 					break;
 
 				case FotipV2::DataType::Discrete:
@@ -874,8 +874,8 @@ namespace Tuning
 				tuningValue.setFloatValue(reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB)));
 				break;
 
-			case TuningValueType::SignedInteger:
-				tuningValue.setIntValue(reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB)));
+			case TuningValueType::SignedInt32:
+				tuningValue.setInt32Value(reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB)));
 				break;
 
 			case TuningValueType::Double:

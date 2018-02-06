@@ -388,11 +388,11 @@ void TuningSocket::requestWriteTuningSignals()
 
 		Proto::TuningValue* tv = new Proto::TuningValue();
 
-		assert(false);		// WM: check code below is needs checking
+		assert(false);		// WM: code below is needs checking
 
 		tv->set_type(0/* need set value of enum TuningValueType */);
 
-		tv->set_floatvalue(cmd.value());
+		tv->set_doublevalue(cmd.value());
 		// or need tv.set_intvalue(); dependent from TuningValueType
 
 		wrCmd->set_allocated_value(tv);

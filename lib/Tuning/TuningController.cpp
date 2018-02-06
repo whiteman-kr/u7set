@@ -93,11 +93,11 @@ bool TuningController::writeValue(QString appSignalId, double value)
 	switch (tuningValue.type())
 	{
 	case TuningValueType::Discrete:
-		tuningValue.setIntValue(static_cast<qint32>(value));
+		tuningValue.setInt32Value(static_cast<qint32>(value));
 		break;
 
-	case TuningValueType::SignedInteger:
-		tuningValue.setIntValue(static_cast<qint32>(value));
+	case TuningValueType::SignedInt32:
+		tuningValue.setInt32Value(static_cast<qint32>(value));
 		break;
 
 	case TuningValueType::Float:

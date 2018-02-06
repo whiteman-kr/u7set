@@ -9161,7 +9161,7 @@ namespace Builder
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue().intValue(),
+								signal->tuningDefaultValue().int32Value(),
 								static_cast<qint32>(signal->lowEngeneeringUnits()),
 								static_cast<qint32>(signal->highEngeneeringUnits()));
 				file.append(str);

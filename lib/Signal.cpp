@@ -4,6 +4,8 @@
 #include "../lib/DataSource.h"
 #include "../lib/WUtils.h"
 
+#include "../Proto/serialization.pb.h"
+
 // --------------------------------------------------------------------------------------------------------
 //
 // Signal class implementation
@@ -864,10 +866,11 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 
 	s->set_datasize(m_dataSize);
 	s->set_byteorder(TO_INT(m_byteOrder));
-	s->set_analogsignalformat(TO_INT(m_analogSignalFormat));
 
 	// Analog signal properties
 
+	s->set_analogsignalformat(TO_INT(m_analogSignalFormat));
+	s->set_unit(m_unit.toStdString());
 	s->set_lowadc(m_lowADC);
 	s->set_highadc(m_highADC);
 	s->set_lowengeneeringunits(m_lowEngeneeringUnits);
@@ -902,56 +905,129 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 
 	// Signal fields from database
 
-	s->set_id(m_ID);
-	s->set_signalgroupid(m_signalGroupID);
-	s->set_signalinstanceid(m_signalInstanceID);
-	s->set_changesetid(m_changesetID);
-	s->set_checkedout(m_checkedOut);
-	s->set_userid(m_userID);
-	s->set_created(m_created.toMSecsSinceEpoch());
-	s->set_deleted(m_deleted);
-	s->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
-	s->set_instanceaction(m_instanceAction.toInt());
+	Proto::AppSignalDbField* dbField = s->mutable_dbfield();
+
+	if (dbField != nullptr)
+	{
+		dbField->set_id(m_ID);
+		dbField->set_signalgroupid(m_signalGroupID);
+		dbField->set_signalinstanceid(m_signalInstanceID);
+		dbField->set_changesetid(m_changesetID);
+		dbField->set_checkedout(m_checkedOut);
+		dbField->set_userid(m_userID);
+		dbField->set_created(m_created.toMSecsSinceEpoch());
+		dbField->set_deleted(m_deleted);
+		dbField->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
+		dbField->set_instanceaction(m_instanceAction.toInt());
+	}
+	else
+	{
+		assert(false);
+	}
 
 	// Signal properties calculated in compile-time
 
-	s->set_hash(calcHash(m_appSignalID));
-	s->set_unit(m_unit.toStdString());
+	Proto::AppSignalCalculatedParam* calcParam = s->mutable_calcparam();
 
-	if (m_ioBufAddr.isValid() == true)
+	if (calcParam != nullptr)
 	{
-		s->mutable_iobufaddr()->set_offset(m_ioBufAddr.offset());
-		s->mutable_iobufaddr()->set_bit(m_ioBufAddr.bit());
+		calcParam->set_hash(calcHash(m_appSignalID));
+
+		Proto::Address16* addr = nullptr;
+
+		if (m_ioBufAddr.isValid() == true)
+		{
+			addr = calcParam->mutable_iobufaddr();
+
+			if (addr != nullptr)
+			{
+				addr->set_offset(m_ioBufAddr.offset());
+				addr->set_bit(m_ioBufAddr.bit());
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		if (m_tuningAddr.isValid() == true)
+		{
+			addr = calcParam->mutable_tuningaddr();
+
+			if (addr != nullptr)
+			{
+				addr->set_offset(m_tuningAddr.offset());
+				addr->set_bit(m_tuningAddr.bit());
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		if (m_ualAddr.isValid() == true)
+		{
+			addr = calcParam->mutable_ualaddr();
+
+			if (addr != nullptr)
+			{
+				addr->set_offset(m_ualAddr.offset());
+				addr->set_bit(m_ualAddr.bit());
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		if (m_regBufAddr.isValid() == true)
+		{
+			addr = calcParam->mutable_regbufaddr();
+
+			if (addr != nullptr)
+			{
+				addr->set_offset(m_regBufAddr.offset());
+				addr->set_bit(m_regBufAddr.bit());
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		if (m_regValueAddr.isValid() == true)
+		{
+			addr = calcParam->mutable_regvalueaddr();
+
+			if (addr != nullptr)
+			{
+				addr->set_offset(m_regValueAddr.offset());
+				addr->set_bit(m_regValueAddr.bit());
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		if (m_regValidityAddr.isValid() == true)
+		{
+			addr = calcParam->mutable_regvalidityaddr();
+
+			if (addr != nullptr)
+			{
+				addr->set_offset(m_regValidityAddr.offset());
+				addr->set_bit(m_regValidityAddr.bit());
+			}
+			else
+			{
+				assert(false);
+			}
+		}
 	}
-
-	if (m_tuningAddr.isValid() == true)
+	else
 	{
-		s->mutable_tuningaddr()->set_offset(m_tuningAddr.offset());
-		s->mutable_tuningaddr()->set_bit(m_tuningAddr.bit());
-	}
-
-	if (m_ualAddr.isValid() == true)
-	{
-		s->mutable_ualaddr()->set_offset(m_ualAddr.offset());
-		s->mutable_ualaddr()->set_bit(m_ualAddr.bit());
-	}
-
-	if (m_regBufAddr.isValid() == true)
-	{
-		s->mutable_regbufaddr()->set_offset(m_regBufAddr.offset());
-		s->mutable_regbufaddr()->set_bit(m_regBufAddr.bit());
-	}
-
-	if (m_regValueAddr.isValid() == true)
-	{
-		s->mutable_regvalueaddr()->set_offset(m_regValueAddr.offset());
-		s->mutable_regvalueaddr()->set_bit(m_regValueAddr.bit());
-	}
-
-	if (m_regValidityAddr.isValid() == true)
-	{
-		s->mutable_regvalidityaddr()->set_offset(m_regValidityAddr.offset());
-		s->mutable_regvalidityaddr()->set_bit(m_regValidityAddr.bit());
+		assert(false);
 	}
 }
 
@@ -975,10 +1051,11 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 
 	m_dataSize = s.datasize();
 	m_byteOrder = static_cast<E::ByteOrder>(s.byteorder());
-	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s.analogsignalformat());
 
 	// Analog signal properties
 
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s.analogsignalformat());
+	m_unit = QString::fromStdString(s.unit());
 	m_lowADC = s.lowadc();
 	m_highADC = s.highadc();
 	m_lowEngeneeringUnits = s.lowengeneeringunits();
@@ -999,9 +1076,9 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	// Tuning signal properties
 
 	m_enableTuning = s.enabletuning();
-	m_tuningDefaultValue = s.tuningdefaultvalue();
-	m_tuningLowBound = s.tuninglowbound();
-	m_tuningHighBound = s.tuninghighbound();
+	m_tuningDefaultValue.load(s.tuningdefaultvalue());
+	m_tuningLowBound.load(s.tuninglowbound());
+	m_tuningHighBound.load(s.tuninghighbound());
 
 	//	Signal properties for MATS
 
@@ -1013,39 +1090,42 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 
 	// Signal fields from database
 
-	m_ID = s.id();
-	m_signalGroupID = s.signalgroupid();
-	m_signalInstanceID = s.signalinstanceid();
-	m_changesetID = s.changesetid();
-	m_checkedOut = s.checkedout();
-	m_userID = s.userid();
-	m_created.setMSecsSinceEpoch(s.created());
-	m_deleted = s.deleted();
-	m_instanceCreated.setMSecsSinceEpoch(s.instancecreated());
-	m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(s.instanceaction());
+	const Proto::AppSignalDbField& dbFiled = s.dbfield();
+
+	m_ID = dbFiled.id();
+	m_signalGroupID = dbFiled.signalgroupid();
+	m_signalInstanceID = dbFiled.signalinstanceid();
+	m_changesetID = dbFiled.changesetid();
+	m_checkedOut = dbFiled.checkedout();
+	m_userID = dbFiled.userid();
+	m_created.setMSecsSinceEpoch(dbFiled.created());
+	m_deleted = dbFiled.deleted();
+	m_instanceCreated.setMSecsSinceEpoch(dbFiled.instancecreated());
+	m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(dbFiled.instanceaction());
 
 	// Signal properties calculated in compile-time
 
-	m_hash = s.hash();
-	m_unit = QString::fromStdString(s.unit());
+	const Proto::AppSignalCalculatedParam& calcParam = s.calcparam();
 
-	m_ioBufAddr.setOffset(s.iobufaddr().offset());
-	m_ioBufAddr.setBit(s.iobufaddr().bit());
+	m_hash = calcParam.hash();
 
-	m_tuningAddr.setOffset(s.tuningaddr().offset());
-	m_tuningAddr.setBit(s.tuningaddr().bit());
+	m_ioBufAddr.setOffset(calcParam.iobufaddr().offset());
+	m_ioBufAddr.setBit(calcParam.iobufaddr().bit());
 
-	m_ualAddr.setOffset(s.ualaddr().offset());
-	m_ualAddr.setBit(s.ualaddr().bit());
+	m_tuningAddr.setOffset(calcParam.tuningaddr().offset());
+	m_tuningAddr.setBit(calcParam.tuningaddr().bit());
 
-	m_regBufAddr.setOffset(s.regbufaddr().offset());
-	m_regBufAddr.setBit(s.regbufaddr().bit());
+	m_ualAddr.setOffset(calcParam.ualaddr().offset());
+	m_ualAddr.setBit(calcParam.ualaddr().bit());
 
-	m_regValueAddr.setOffset(s.regvalueaddr().offset());
-	m_regValueAddr.setBit(s.regvalueaddr().bit());
+	m_regBufAddr.setOffset(calcParam.regbufaddr().offset());
+	m_regBufAddr.setBit(calcParam.regbufaddr().bit());
 
-	m_regValidityAddr.setOffset(s.regvalidityaddr().offset());
-	m_regValidityAddr.setBit(s.regvalidityaddr().bit());
+	m_regValueAddr.setOffset(calcParam.regvalueaddr().offset());
+	m_regValueAddr.setBit(calcParam.regvalueaddr().bit());
+
+	m_regValidityAddr.setOffset(calcParam.regvalidityaddr().offset());
+	m_regValidityAddr.setBit(calcParam.regvalidityaddr().bit());
 }
 
 void Signal::initCalculatedProperties()
