@@ -258,6 +258,8 @@ message GetTuningSourcesInfoReply
 {
     optional int32 error = 1 [default = 0];
     repeated DataSourceInfo tuningSourceInfo= 2;
+
+    optional bool singleLmControlMode = 3 [default = true];
 }
 
 // Tuning sources states request
@@ -324,12 +326,29 @@ message TuningSourceState
     optional int64 errAnalogHighBoundCheck = 40 [default = 0];
 
     optional int64 errRupCRC = 41 [default = 0];
+
+    optional bool controlIsActive = 42 [default = false];
 }
 
 message GetTuningSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];
     repeated TuningSourceState tuningSourcesState = 2;
+
+    optional bool singleLmControlMode = 3 [default = true];
+}
+
+//
+
+message ChangeConrolledTuningSource
+{
+    optional string controlledTuningSourceEquipmentID = 1;
+}
+
+message ChangeConrolledTuningSourceReply
+{
+    optional int32 error = 1 [default = 0];
+    optional string controlledTuningSourceEquipmentID = 2;	    // if Ok - echo from request
 }
 
 // Tuning signals read request

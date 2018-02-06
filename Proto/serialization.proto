@@ -1009,13 +1009,7 @@ message UnitSet
 
 message TuningValue
 {
-    // Changes in TuningValue fields numbering are FORBIDDEN !!!
-    // Only new numbers adding is allowed!
-    //
-    // This protobuf messages already stored in database.
-    //
-
-    optional int32 type = 1;				// enum TuningValueType values
+    optional int32 type = 1;					// enum TuningValueType values
     optional int64 intValue = 2 [default = 0];
     optional double doubleValue = 3  [default = 0.0];
 }
@@ -1023,12 +1017,6 @@ message TuningValue
 
 message AppSignalDbField
 {
-    // Changes in AppSignalDbField fields numbering are FORBIDDEN !!!
-    // Only new numbers adding is allowed!
-    //
-    // This protobuf messages already stored in database.
-    //
-
     optional int32 ID = 1 [default = -1];
     optional int32 signalGroupID = 2 [default = -1];
     optional int32 signalInstanceID = 3 [default = -1];
@@ -1038,17 +1026,11 @@ message AppSignalDbField
     optional int64 created = 7 [default = 0];
     optional bool deleted = 8 [default = false];
     optional int64 instanceCreated = 9 [default = 0];
-    optional int32 instanceAction = 10 [default = 0];			// VcsItemActionType::Unknown
+    optional int32 instanceAction = 10 [default = 0];		// VcsItemActionType::Unknown
 }
 
 message AppSignalCalculatedParam
 {
-    // Changes in AppSignalCalculatedParam fields numbering are FORBIDDEN !!!
-    // Only new numbers adding is allowed!
-    //
-    // This protobuf messages already stored in database.
-    //
-
     optional uint64 hash = 1 [default = 0];
     optional Address16 ioBufAddr = 2;
     optional Address16 tuningAddr = 3;
@@ -1060,12 +1042,6 @@ message AppSignalCalculatedParam
 
 message AppSignal
 {
-    // Changes in AppSignal fields numbering are FORBIDDEN !!!
-    // Only new numbers adding is allowed!
-    //
-    // This protobuf messages already stored in database.
-    //
-
     // Signal identificators
 
     optional string appSignalID = 1;
@@ -1109,6 +1085,7 @@ message AppSignal
     // Tuning signal properties
 
     optional bool enableTuning = 71 [default = false];
+
     optional TuningValue tuningDefaultValue = 72;
     optional TuningValue tuningLowBound = 73;
     optional TuningValue tuningHighBound = 74;
@@ -1116,10 +1093,12 @@ message AppSignal
     // Signal properties for MATS
 
     optional bool acquire = 81 [default = false];
-    optional int32 decimalPlaces = 82 [default = 2];
-    optional double coarseAperture = 83 [default = 1];
-    optional double fineAperture = 84 [default = 0.5];
-    optional bool adaptiveAperture = 85 [default = false];
+    optional bool archive = 82 [default = false];
+
+    optional int32 decimalPlaces = 83 [default = 2];
+    optional double coarseAperture = 84 [default = 1];
+    optional double fineAperture = 85 [default = 0.5];
+    optional bool adaptiveAperture = 86 [default = false];
 
     // Signal fields from database
 

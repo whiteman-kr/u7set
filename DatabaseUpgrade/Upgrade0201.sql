@@ -6,19 +6,15 @@ ALTER TABLE public.signalinstance RENAME COLUMN tuninghighbound TO tuninghighbou
 
 ALTER TABLE public.signalinstance ADD COLUMN tuningdefaultint bigint NOT NULL DEFAULT 0;
 ALTER TABLE public.signalinstance ADD COLUMN tuninglowboundint bigint NOT NULL DEFAULT 0;
-ALTER TABLE public.signalinstance ADD COLUMN tuninghighboundint bigint NOT NULL DEFAULT 0;
+ALTER TABLE public.signalinstance ADD COLUMN tuninghighboundint bigint NOT NULL DEFAULT 100;
 
--- Copy values from tuningdefaultvalue, tuninglowbound, tuninghighbound into new columns
+ALTER TABLE public.signalinstance ADD COLUMN archive boolean DEFAULT TRUE;
+
+-- Copy values from tuningdefaultdouble, tuninglowbounddouble, tuninghighbounddouble into new columns
 
 UPDATE public.signalinstance SET    tuningdefaultint = tuningdefaultdouble,
                                     tuninglowboundint = tuninglowbounddouble,
 				    tuninghighboundint = tuninghighbounddouble WHERE signalinstance.enabletuning = TRUE;
-
--- Drop unnecessary columns
-
-ALTER TABLE public.signalinstance DROP COLUMN tuningdefaultvalue;
-ALTER TABLE public.signalinstance DROP COLUMN tuninglowbound;
-ALTER TABLE public.signalinstance DROP COLUMN tuninghighbound;
 
 -- Drop all stored procedures dependent from SignalData type
 
@@ -75,15 +71,13 @@ CREATE TYPE public.signaldata AS
     tuninglowbounddouble double precision,
     tuninghighbounddouble double precision,
 
-    tuningdefaultfloat real,
-    tuninglowboundfloat real,
-    tuninghighboundfloat real,
-
-    tuningdefaultint64 bigint,
-    tuninglowboundint64 bigint,
-    tuninghighboundint64 bigint,
+    tuningdefaultint bigint,
+    tuninglowboundint bigint,
+    tuninghighboundint bigint,
 
     acquire boolean,
+    archive boolean,
+
     decimalplaces integer,
     coarseaperture double precision,
     fineaperture double precision,
@@ -177,15 +171,13 @@ BEGIN
 		SI.TuningLowBoundDouble,
 		SI.TuningHighBoundDouble,
 
-                SI.TuningDefaultFloat,
-		SI.TuningLowBoundFloat,
-		SI.TuningHighBoundFloat,
-
-                SI.TuningDefaultInt64,
-		SI.TuningLowBoundInt64,
-		SI.TuningHighBoundInt64,
+                SI.TuningDefaultInt,
+		SI.TuningLowBoundInt,
+		SI.TuningHighBoundInt,
 
                 SI.Acquire,
+		SI.Archive,
+
 		SI.DecimalPlaces,
 		SI.CoarseAperture,
 		SI.FineAperture,
@@ -284,11 +276,18 @@ BEGIN
 			OutputMode = sd.OutputMode,
 
                         EnableTuning = sd.EnableTuning,
-			TuningDefaultValue = sd.TuningDefaultValue,
-			TuningLowBound = sd.TuningLowBound,
-			TuningHighBound = sd.TuningHighBound,
+
+                        TuningDefaultDouble = sd.TuningDefaultDouble,
+			TuningLowBoundDouble = sd.TuningLowBoundDouble,
+			TuningHighBoundDouble = sd.TuningHighBoundDouble,
+
+                        TuningDefaultInt = sd.TuningDefaultInt,
+			TuningLowBoundInt = sd.TuningLowBoundInt,
+			TuningHighBoundInt = sd.TuningHighBoundInt,
 
                         Acquire = sd.Acquire,
+			Archive = sd.Archive,
+
 			DecimalPlaces = sd.DecimalPlaces,
 			CoarseAperture = sd.CoarseAperture,
 			FineAperture = sd.FineAperture,
@@ -376,11 +375,18 @@ BEGIN
 		SI.OutputMode,
 
                 SI.EnableTuning,
-		SI.TuningDefaultValue,
-		SI.TuningLowBound,
-		SI.TuningHighBound,
+
+                SI.TuningDefaultDouble,
+		SI.TuningLowBoundDouble,
+		SI.TuningHighBoundDouble,
+
+                SI.TuningDefaultInt,
+		SI.TuningLowBoundInt,
+		SI.TuningHighBoundInt,
 
                 SI.Acquire,
+		SI.Archive,
+
 		SI.DecimalPlaces,
 		SI.CoarseAperture,
 		SI.FineAperture,
@@ -477,11 +483,18 @@ BEGIN
 		SI.OutputMode,
 
                 SI.EnableTuning,
-		SI.TuningDefaultValue,
-		SI.TuningLowBound,
-		SI.TuningHighBound,
+
+                SI.TuningDefaultDouble,
+		SI.TuningLowBoundDouble,
+		SI.TuningHighBoundDouble,
+
+                SI.TuningDefaultInt,
+		SI.TuningLowBoundInt,
+		SI.TuningHighBoundInt,
 
                 SI.Acquire,
+		SI.Archive,
+
 		SI.DecimalPlaces,
 		SI.CoarseAperture,
 		SI.FineAperture,
@@ -619,11 +632,18 @@ BEGIN
 						OutputMode,
 
                                                 EnableTuning,
-						TuningDefaultValue,
-						TuningLowBound,
-						TuningHighBound,
+
+                                                TuningDefaultDouble,
+						TuningLowBoundDouble,
+						TuningHighBoundDouble,
+
+                                                TuningDefaultInt,
+						TuningLowBoundInt,
+						TuningHighBoundInt,
 
                                                 Acquire,
+						Archive,
+
 						DecimalPlaces,
 						CoarseAperture,
 						FineAperture,
@@ -662,11 +682,18 @@ BEGIN
 						OutputMode,
 
                                                 EnableTuning,
-						TuningDefaultValue,
-						TuningLowBound,
-						TuningHighBound,
+
+                                                TuningDefaultDouble,
+						TuningLowBoundDouble,
+						TuningHighBoundDouble,
+
+                                                TuningDefaultInt,
+						TuningLowBoundInt,
+						TuningHighBoundInt,
 
                                                 Acquire,
+						Archive,
+
 						DecimalPlaces,
 						CoarseAperture,
 						FineAperture,
@@ -759,11 +786,18 @@ BEGIN
 			SI.OutputMode,
 
                         SI.EnableTuning,
-			SI.TuningDefaultValue,
-			SI.TuningLowBound,
-			SI.TuningHighBound,
+
+                        SI.TuningDefaultDouble,
+			SI.TuningLowBoundDouble,
+			SI.TuningHighBoundDouble,
+
+                        SI.TuningDefaultInt,
+			SI.TuningLowBoundInt,
+			SI.TuningHighBoundInt,
 
                         SI.Acquire,
+			SI.Archive,
+
 			SI.DecimalPlaces,
 			SI.CoarseAperture,
 			SI.FineAperture,
@@ -842,11 +876,18 @@ BEGIN
 			SI.OutputMode,
 
                         SI.EnableTuning,
-			SI.TuningDefaultValue,
-			SI.TuningLowBound,
-			SI.TuningHighBound,
+
+                        SI.TuningDefaultDouble,
+			SI.TuningLowBoundDouble,
+			SI.TuningHighBoundDouble,
+
+                        SI.TuningDefaultInt,
+			SI.TuningLowBoundInt,
+			SI.TuningHighBoundInt,
 
                         SI.Acquire,
+			SI.Archive,
+
 			SI.DecimalPlaces,
 			SI.CoarseAperture,
 			SI.FineAperture,

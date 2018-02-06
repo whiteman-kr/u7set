@@ -9267,31 +9267,38 @@ class AppSignal : public ::google::protobuf::Message {
   inline bool acquire() const;
   inline void set_acquire(bool value);
 
-  // optional int32 decimalPlaces = 82 [default = 2];
+  // optional bool archive = 82 [default = false];
+  inline bool has_archive() const;
+  inline void clear_archive();
+  static const int kArchiveFieldNumber = 82;
+  inline bool archive() const;
+  inline void set_archive(bool value);
+
+  // optional int32 decimalPlaces = 83 [default = 2];
   inline bool has_decimalplaces() const;
   inline void clear_decimalplaces();
-  static const int kDecimalPlacesFieldNumber = 82;
+  static const int kDecimalPlacesFieldNumber = 83;
   inline ::google::protobuf::int32 decimalplaces() const;
   inline void set_decimalplaces(::google::protobuf::int32 value);
 
-  // optional double coarseAperture = 83 [default = 1];
+  // optional double coarseAperture = 84 [default = 1];
   inline bool has_coarseaperture() const;
   inline void clear_coarseaperture();
-  static const int kCoarseApertureFieldNumber = 83;
+  static const int kCoarseApertureFieldNumber = 84;
   inline double coarseaperture() const;
   inline void set_coarseaperture(double value);
 
-  // optional double fineAperture = 84 [default = 0.5];
+  // optional double fineAperture = 85 [default = 0.5];
   inline bool has_fineaperture() const;
   inline void clear_fineaperture();
-  static const int kFineApertureFieldNumber = 84;
+  static const int kFineApertureFieldNumber = 85;
   inline double fineaperture() const;
   inline void set_fineaperture(double value);
 
-  // optional bool adaptiveAperture = 85 [default = false];
+  // optional bool adaptiveAperture = 86 [default = false];
   inline bool has_adaptiveaperture() const;
   inline void clear_adaptiveaperture();
-  static const int kAdaptiveApertureFieldNumber = 85;
+  static const int kAdaptiveApertureFieldNumber = 86;
   inline bool adaptiveaperture() const;
   inline void set_adaptiveaperture(bool value);
 
@@ -9375,6 +9382,8 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_tuninghighbound();
   inline void set_has_acquire();
   inline void clear_has_acquire();
+  inline void set_has_archive();
+  inline void clear_has_archive();
   inline void set_has_decimalplaces();
   inline void clear_has_decimalplaces();
   inline void set_has_coarseaperture();
@@ -9416,11 +9425,12 @@ class AppSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 sensortype_;
   ::Proto::TuningValue* tuningdefaultvalue_;
   ::Proto::TuningValue* tuninglowbound_;
+  ::Proto::TuningValue* tuninghighbound_;
   ::google::protobuf::int32 outputmode_;
   bool enabletuning_;
   bool acquire_;
+  bool archive_;
   bool adaptiveaperture_;
-  ::Proto::TuningValue* tuninghighbound_;
   double coarseaperture_;
   double fineaperture_;
   ::Proto::AppSignalDbField* dbfield_;
@@ -9428,7 +9438,7 @@ class AppSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 decimalplaces_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(36 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(37 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -23602,15 +23612,37 @@ inline void AppSignal::set_acquire(bool value) {
   acquire_ = value;
 }
 
-// optional int32 decimalPlaces = 82 [default = 2];
-inline bool AppSignal::has_decimalplaces() const {
+// optional bool archive = 82 [default = false];
+inline bool AppSignal::has_archive() const {
   return (_has_bits_[0] & 0x40000000u) != 0;
 }
-inline void AppSignal::set_has_decimalplaces() {
+inline void AppSignal::set_has_archive() {
   _has_bits_[0] |= 0x40000000u;
 }
-inline void AppSignal::clear_has_decimalplaces() {
+inline void AppSignal::clear_has_archive() {
   _has_bits_[0] &= ~0x40000000u;
+}
+inline void AppSignal::clear_archive() {
+  archive_ = false;
+  clear_has_archive();
+}
+inline bool AppSignal::archive() const {
+  return archive_;
+}
+inline void AppSignal::set_archive(bool value) {
+  set_has_archive();
+  archive_ = value;
+}
+
+// optional int32 decimalPlaces = 83 [default = 2];
+inline bool AppSignal::has_decimalplaces() const {
+  return (_has_bits_[0] & 0x80000000u) != 0;
+}
+inline void AppSignal::set_has_decimalplaces() {
+  _has_bits_[0] |= 0x80000000u;
+}
+inline void AppSignal::clear_has_decimalplaces() {
+  _has_bits_[0] &= ~0x80000000u;
 }
 inline void AppSignal::clear_decimalplaces() {
   decimalplaces_ = 2;
@@ -23624,15 +23656,15 @@ inline void AppSignal::set_decimalplaces(::google::protobuf::int32 value) {
   decimalplaces_ = value;
 }
 
-// optional double coarseAperture = 83 [default = 1];
+// optional double coarseAperture = 84 [default = 1];
 inline bool AppSignal::has_coarseaperture() const {
-  return (_has_bits_[0] & 0x80000000u) != 0;
+  return (_has_bits_[1] & 0x00000001u) != 0;
 }
 inline void AppSignal::set_has_coarseaperture() {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[1] |= 0x00000001u;
 }
 inline void AppSignal::clear_has_coarseaperture() {
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[1] &= ~0x00000001u;
 }
 inline void AppSignal::clear_coarseaperture() {
   coarseaperture_ = 1;
@@ -23646,15 +23678,15 @@ inline void AppSignal::set_coarseaperture(double value) {
   coarseaperture_ = value;
 }
 
-// optional double fineAperture = 84 [default = 0.5];
+// optional double fineAperture = 85 [default = 0.5];
 inline bool AppSignal::has_fineaperture() const {
-  return (_has_bits_[1] & 0x00000001u) != 0;
+  return (_has_bits_[1] & 0x00000002u) != 0;
 }
 inline void AppSignal::set_has_fineaperture() {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[1] |= 0x00000002u;
 }
 inline void AppSignal::clear_has_fineaperture() {
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline void AppSignal::clear_fineaperture() {
   fineaperture_ = 0.5;
@@ -23668,15 +23700,15 @@ inline void AppSignal::set_fineaperture(double value) {
   fineaperture_ = value;
 }
 
-// optional bool adaptiveAperture = 85 [default = false];
+// optional bool adaptiveAperture = 86 [default = false];
 inline bool AppSignal::has_adaptiveaperture() const {
-  return (_has_bits_[1] & 0x00000002u) != 0;
+  return (_has_bits_[1] & 0x00000004u) != 0;
 }
 inline void AppSignal::set_has_adaptiveaperture() {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[1] |= 0x00000004u;
 }
 inline void AppSignal::clear_has_adaptiveaperture() {
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline void AppSignal::clear_adaptiveaperture() {
   adaptiveaperture_ = false;
@@ -23692,13 +23724,13 @@ inline void AppSignal::set_adaptiveaperture(bool value) {
 
 // optional .Proto.AppSignalDbField dbField = 120;
 inline bool AppSignal::has_dbfield() const {
-  return (_has_bits_[1] & 0x00000004u) != 0;
+  return (_has_bits_[1] & 0x00000008u) != 0;
 }
 inline void AppSignal::set_has_dbfield() {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[1] |= 0x00000008u;
 }
 inline void AppSignal::clear_has_dbfield() {
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[1] &= ~0x00000008u;
 }
 inline void AppSignal::clear_dbfield() {
   if (dbfield_ != NULL) dbfield_->::Proto::AppSignalDbField::Clear();
@@ -23730,13 +23762,13 @@ inline void AppSignal::set_allocated_dbfield(::Proto::AppSignalDbField* dbfield)
 
 // optional .Proto.AppSignalCalculatedParam calcParam = 121;
 inline bool AppSignal::has_calcparam() const {
-  return (_has_bits_[1] & 0x00000008u) != 0;
+  return (_has_bits_[1] & 0x00000010u) != 0;
 }
 inline void AppSignal::set_has_calcparam() {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[1] |= 0x00000010u;
 }
 inline void AppSignal::clear_has_calcparam() {
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000010u;
 }
 inline void AppSignal::clear_calcparam() {
   if (calcparam_ != NULL) calcparam_->::Proto::AppSignalCalculatedParam::Clear();

@@ -54,12 +54,16 @@ void TuningValue::setInt32Value(qint32 intValue)
 
 qint64 TuningValue::int64Value() const
 {
+	assert(false);		// remove when tuningable int64 will exists
+
 	assert(m_type == TuningValueType::SignedInt64);
 	return m_int64;
 }
 
 void TuningValue::setInt64Value(qint64 intValue)
 {
+	assert(false);		// remove when tuningable int64 will exists
+
 	assert(m_type == TuningValueType::SignedInt64);
 	m_int64 = intValue;
 }
@@ -78,18 +82,26 @@ void TuningValue::setFloatValue(float floatValue)
 
 double TuningValue::doubleValue() const
 {
+	assert(false);		// remove when tuningable Double will exists
+
 	assert(m_type == TuningValueType::Double);
 	return m_double;
 }
 
 void TuningValue::setDoubleValue(double doubleValue)
 {
+	assert(false);		// remove when tuningable Double will exists
+
 	assert(m_type == TuningValueType::Double);
 	m_double = doubleValue;
 }
 
 void TuningValue::setValue(TuningValueType valueType, qint64 intValue, double doubleValue)
 {
+	assert(valueType == TuningValueType::Discrete ||
+		   valueType == TuningValueType::SignedInt32 ||
+		   valueType == TuningValueType::Float);			// append others types when will exists
+
 	m_type = valueType;
 	m_int64 = intValue;
 	m_double = doubleValue;
@@ -333,6 +345,16 @@ TuningValue TuningValue::createFromDouble(E::SignalType signalType, E::AnalogApp
 int TuningValue::tuningValueTypeId()
 {
 	return qMetaTypeId<TuningValue>();
+}
+
+qint64 TuningValue::rawInt64() const
+{
+	return m_int64;
+}
+
+double TuningValue::rawDouble() const
+{
+	return m_double;
 }
 
 bool operator < (const TuningValue& l, const TuningValue& r)

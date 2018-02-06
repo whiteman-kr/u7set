@@ -898,6 +898,7 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 	// Signal properties for MATS
 
 	s->set_acquire(m_acquire);
+	s->set_archive(m_archive);
 	s->set_decimalplaces(m_decimalPlaces);
 	s->set_coarseaperture(m_coarseAperture);
 	s->set_fineaperture(m_fineAperture);
@@ -1083,6 +1084,7 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	//	Signal properties for MATS
 
 	m_acquire = s.acquire();
+	m_archive = s.archive();
 	m_decimalPlaces = s.decimalplaces();
 	m_coarseAperture = s.coarseaperture();
 	m_fineAperture = s.fineaperture();

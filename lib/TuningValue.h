@@ -70,6 +70,15 @@ public:
 	static int tuningValueTypeId();
 
 private:
+
+	// this functions use only  in DbWorker class to save TunigValue to database
+	//
+	qint64 rawInt64() const;
+	double rawDouble() const;
+
+	friend class DbWorker;
+
+private:
 	TuningValueType m_type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue
 	qint64 m_int64 = 0;
 	double m_double = 0.0;

@@ -216,6 +216,11 @@ public:
 
 	bool isAcquired() const { return m_acquire; }
 
+	bool archive() const { return m_archive; }
+	void setArchive(bool archive) { m_archive = archive; }
+
+	bool isArchived() const { return m_archive; }
+
 	int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
 
@@ -382,6 +387,7 @@ private:
 	// Signal properties for MATS
 	//
 	bool m_acquire = true;
+	bool m_archive = true;
 	int m_decimalPlaces = 2;
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
