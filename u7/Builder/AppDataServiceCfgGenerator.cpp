@@ -346,15 +346,22 @@ namespace Builder
 			return false;
 		}
 
-		if (cfgIP1.isEmpty() == false)
+		if (cfgIP1.isEmpty() && cfgIP2.isEmpty())
 		{
-			content += " -cfgip1=" + cfgIP1;
+			return false;
 		}
 
-		if (cfgIP2.isEmpty() == false && cfgIP1 != cfgIP2)
+		if (cfgIP1.isEmpty())
 		{
-			content += " -cfgip2=" + cfgIP1;
+			cfgIP1 = cfgIP2;
 		}
+
+		if (cfgIP2.isEmpty())
+		{
+			cfgIP2 = cfgIP1;
+		}
+
+		content += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
 
 		content += " -id=" + m_software->equipmentIdTemplate() + "\n";
 
