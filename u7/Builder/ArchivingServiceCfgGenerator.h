@@ -21,8 +21,9 @@ namespace Builder
 	private:
 		bool writeSettings();
 		bool writeArchSignalsFile();
-		bool writeBatFile();
 
+		bool writeBatFile();
+		bool writeShFile();
 	};
 
 }

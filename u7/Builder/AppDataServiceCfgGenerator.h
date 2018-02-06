@@ -21,7 +21,9 @@ namespace Builder
 		bool writeAppDataSourcesXml();
 		bool writeAppSignalsXml();
 		bool addLinkToAppSignalsFile();
+
 		bool writeBatFile();
+		bool writeShFile();
 
 
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);

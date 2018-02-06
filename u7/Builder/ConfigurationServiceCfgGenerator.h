@@ -20,6 +20,7 @@ namespace Builder
 
 	private:
 		bool writeBatFile();
+		bool writeShFile();
 
 	};
 
