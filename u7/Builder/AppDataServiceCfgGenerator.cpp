@@ -340,6 +340,7 @@ namespace Builder
 		content += "AppDataSrv.exe";
 
 		QString parameters;
+
 		if (getServiceParameters(parameters) == false)
 		{
 			return false;
@@ -362,10 +363,12 @@ namespace Builder
 		content += "./AppDataSrv";
 
 		QString parameters;
+
 		if (getServiceParameters(parameters) == false)
 		{
 			return false;
 		}
+
 		content += parameters;
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
