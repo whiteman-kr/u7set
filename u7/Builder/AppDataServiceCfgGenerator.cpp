@@ -34,6 +34,7 @@ namespace Builder
 		result &= writeAppSignalsXml();
 		result &= addLinkToAppSignalsFile();
 		result &= writeBatFile();
+		result &= writeShFile();
 
 		return result;
 	}
@@ -337,28 +338,37 @@ namespace Builder
 		QString content = getBuildInfoCommentsForBat();
 
 		content += "AppDataSrv.exe";
-		content += " -e";
 
-		QString cfgIP1;
-		QString cfgIP2;
-		if (getConfigIp(cfgIP1, cfgIP2) == false)
+		QString parameters;
+		if (getServiceParameters(parameters) == false)
 		{
 			return false;
 		}
+		content += parameters;
 
-		if (cfgIP1.isEmpty() == false)
+		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
+	}
+
+	bool AppDataServiceCfgGenerator::writeShFile()
+	{
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForSh();
+
+		content += "./AppDataSrv";
+
+		QString parameters;
+		if (getServiceParameters(parameters) == false)
 		{
-			content += " -cfgip1=" + cfgIP1;
+			return false;
 		}
+		content += parameters;
 
-		if (cfgIP2.isEmpty() == false && cfgIP1 != cfgIP2)
-		{
-			content += " -cfgip2=" + cfgIP1;
-		}
-
-		content += " -id=" + m_software->equipmentIdTemplate() + "\n";
-
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::BAT_DIR, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

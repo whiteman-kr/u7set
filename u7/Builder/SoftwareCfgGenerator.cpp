@@ -496,6 +496,23 @@ namespace Builder
 		return comments;
 	}
 
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForSh()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "#!/bin/bash\n\n";
+
+		comments += "# Project: " + b.project + "\n";
+		comments += "# BuildNo: " + QString::number(b.id) + "\n";
+		comments += "# Type: " + b.typeStr() + "\n";
+		comments += "# Date: " + b.dateStr() + "\n";
+		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "# User: " + b.user + "\n";
+		comments += "# Workstation: " + b.workstation + "\n\n";
+
+		return comments;
+	}
+
 	bool SoftwareCfgGenerator::getConfigIp(QString& cfgIP1, QString& cfgIP2)
 	{
 		TEST_PTR_RETURN_FALSE(m_equipment);
@@ -563,6 +580,39 @@ namespace Builder
 		result &= ipGetter(2, cfgIP2);
 
 		return result;
+	}
+
+	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
+	{
+		parameters += " -e";
+
+		QString cfgIP1;
+		QString cfgIP2;
+		if (getConfigIp(cfgIP1, cfgIP2) == false)
+		{
+			return false;
+		}
+
+		if (cfgIP1.isEmpty() && cfgIP2.isEmpty())
+		{
+			return false;
+		}
+
+		if (cfgIP1.isEmpty())
+		{
+			cfgIP1 = cfgIP2;
+		}
+
+		if (cfgIP2.isEmpty())
+		{
+			cfgIP2 = cfgIP1;
+		}
+
+		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
+
+		parameters += " -id=" + m_software->equipmentIdTemplate() + "\n";
+
+		return true;
 	}
 
 	// ---------------------------------------------------------------------------------

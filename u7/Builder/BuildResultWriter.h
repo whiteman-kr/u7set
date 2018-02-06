@@ -199,7 +199,7 @@ namespace Builder
 		static const QString COMMON_DIR;
 		static const QString REPORTS_DIR;
 		static const QString OPTO_VHD_DIR;
-		static const QString BAT_DIR;
+		static const QString RUN_SERVICE_SCRIPTS;
 	};
 }
 
