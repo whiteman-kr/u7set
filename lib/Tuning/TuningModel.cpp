@@ -778,7 +778,7 @@ DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, T
 
 		if (sameValue == true)
 		{
-			m_discreteCheck->setChecked(value.intValue() != 0);
+			m_discreteCheck->setChecked(value.discreteValue() != 0);
 			m_discreteCheck->setText(value.toString());
 		}
 		else

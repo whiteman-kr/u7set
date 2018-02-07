@@ -25,11 +25,12 @@ LogonWorkspace::LogonWorkspace(UserManager* userManager, QWidget* parent):
 	m_loginButton = new QPushButton(tr("Login"));
 	connect(m_loginButton, &QPushButton::clicked, this, &LogonWorkspace::onButtonLogin);
 	l->addWidget(m_loginButton);
+	m_loginButton->setEnabled(userManager->isLoggedIn() == false);
 
 	m_logoutButton = new QPushButton(tr("Logout"));
 	connect(m_logoutButton, &QPushButton::clicked, this, &LogonWorkspace::onButtonLogout);
 	l->addWidget(m_logoutButton);
-	m_logoutButton->setEnabled(false);
+	m_logoutButton->setEnabled(userManager->isLoggedIn() == true);
 
 	l->addWidget(new QLabel(tr("User:")));
 

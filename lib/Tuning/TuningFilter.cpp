@@ -63,6 +63,9 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 		switch (tv.type())
 		{
 		case TuningValueType::Discrete:
+			tv.setDiscreteValue(reader.attributes().value("ValueDiscrete").toInt());
+			break;
+
 		case TuningValueType::SignedInteger:
 			tv.setIntValue(reader.attributes().value("ValueInt").toInt());
 			break;
@@ -97,6 +100,9 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 	switch (m_value.type())
 	{
 	case TuningValueType::Discrete:
+		writer.writeAttribute("ValueDiscrete", QString::number(m_value.discreteValue()));
+		break;
+
 	case TuningValueType::SignedInteger:
 		writer.writeAttribute("ValueInt", QString::number(m_value.intValue()));
 		break;

@@ -674,13 +674,20 @@ void DialogChooseTuningSignals::setFilterValueItemText(QTreeWidgetItem* item, co
 
 TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
 									   bool readOnly,
-									   bool setCurrentEnabled, TuningFilter::Source source,
+									   bool setCurrentEnabled,
+									   bool typeTreeEnabled,
+									   bool typeButtonEnabled,
+									   bool typeTabEnabled,
+									   TuningFilter::Source source,
 									   int propertyEditorSplitterPos,
 									   const QByteArray& dialogChooseSignalGeometry):
 	m_filterStorage(filterStorage),
 	m_signalManager(signalManager),
 	m_readOnly(readOnly),
 	m_setCurrentEnabled(setCurrentEnabled),
+	m_typeTreeEnabled(typeTreeEnabled),
+	m_typeButtonEnabled(typeButtonEnabled),
+	m_typeTabEnabled(typeTabEnabled),
 	m_source(source),
 	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
 	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry)
@@ -823,11 +830,11 @@ void TuningFilterEditor::initUserInterface()
 
 	QHBoxLayout* leftGridLayout = new QHBoxLayout();
 
-	m_addPreset = new QPushButton(tr("Add Preset"));
+	m_addPreset = new QPushButton(tr("Add Filter"));
 	connect(m_addPreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_addPreset_clicked);
 	leftGridLayout->addWidget(m_addPreset);
 
-	m_removePreset = new QPushButton(tr("Remove Preset"));
+	m_removePreset = new QPushButton(tr("Remove Filter"));
 	m_removePreset->setEnabled(false);
 	connect(m_removePreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_removePreset_clicked);
 	leftGridLayout->addWidget(m_removePreset);
@@ -845,10 +852,10 @@ void TuningFilterEditor::initUserInterface()
 
 	leftLayout->addLayout(leftGridLayout);
 
-	m_addPresetAction = new QAction(tr("Add Preset"), this);
+	m_addPresetAction = new QAction(tr("Add Filter"), this);
 	connect(m_addPresetAction, &QAction::triggered, this, &TuningFilterEditor::on_m_addPreset_clicked);
 
-	m_removePresetAction = new QAction(tr("Remove Preset"), this);
+	m_removePresetAction = new QAction(tr("Remove Filter"), this);
 	connect(m_removePresetAction, &QAction::triggered, this, &TuningFilterEditor::on_m_removePreset_clicked);
 
 	m_copyPresetAction = new QAction(tr("Copy"), this);
@@ -1064,6 +1071,20 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 		}
 	}
 
+	// Disable menu items for custom editor type
+
+	allowTree &= m_typeTreeEnabled;
+	allowTabs &= m_typeTabEnabled;
+	allowButtons &= m_typeButtonEnabled;
+
+	if (m_typeTabEnabled == false && m_typeButtonEnabled == false && allowTree == true)
+	{
+		// This is made for TuningClient
+
+		addPreset(TuningFilter::InterfaceType::Tree);
+		return;
+	}
+
 	// Create menu
 
 	QMenu menu(this);
@@ -1120,8 +1141,8 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 void TuningFilterEditor::on_m_removePreset_clicked()
 {
-	if (QMessageBox::warning(this, tr("Remove Preset"),
-							 tr("Are you sure you want to remove selected presets?"),
+	if (QMessageBox::warning(this, tr("Remove Filter"),
+							 tr("Are you sure you want to remove selected filters?"),
 							 QMessageBox::Yes | QMessageBox::No,
 							 QMessageBox::No) != QMessageBox::Yes)
 	{

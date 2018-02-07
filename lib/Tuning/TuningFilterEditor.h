@@ -128,6 +128,9 @@ public:
 	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
 								bool readOnly,
 								bool setCurrentEnabled,
+								bool typeTreeEnabled,
+								bool typeButtonEnabled,
+								bool typeTabEnabled,
 								TuningFilter::Source source,
 								int propertyEditorSplitterPos,
 								const QByteArray& dialogChooseSignalGeometry);
@@ -221,6 +224,11 @@ private:
     int m_propertyEditorSplitterPos = -1;
 	bool m_readOnly = false;
 	bool m_setCurrentEnabled = false;
+
+	bool m_typeButtonEnabled = false;
+	bool m_typeTabEnabled = false;
+	bool m_typeTreeEnabled = false;
+
 	TuningFilter::Source m_source = TuningFilter::Source::User;
 };
 
