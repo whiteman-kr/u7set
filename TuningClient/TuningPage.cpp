@@ -65,7 +65,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (state.controlIsEnabled() == false)
 		{
-			QColor color = QColor(Qt::black);
+			QColor color = QColor(Qt::gray);
 			return QBrush(color);
 		}
 

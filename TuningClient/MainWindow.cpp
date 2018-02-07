@@ -313,12 +313,12 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		int errorsCount = 0;
 		int sorCount = 0;
 
-		QStringList sources = m_tcpClient->tuningSourcesEquipmentIds();
+		std::vector<Hash> sources = m_tcpClient->tuningSourcesEquipmentHashes();
 
-		for (QString& s : sources)
+		for (Hash& h : sources)
 		{
 			TuningFilterCounters counters;
-			if (m_tcpClient->tuningSourceCounters(s, &counters) == false)
+			if (m_tcpClient->tuningSourceCounters(h, &counters) == false)
 			{
 				assert(false);
 				continue;

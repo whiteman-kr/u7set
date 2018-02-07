@@ -9,7 +9,7 @@ TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 
 }
 
-bool TuningClientTcpClient::tuningSourceCounters(const QString& equipmentID, TuningFilterCounters* result) const
+bool TuningClientTcpClient::tuningSourceCounters(const Hash& equipmentHash, TuningFilterCounters* result) const
 {
 	if (result == nullptr)
 	{
@@ -20,30 +20,24 @@ bool TuningClientTcpClient::tuningSourceCounters(const QString& equipmentID, Tun
 	result->errorCounter = 0;
 	result->sorCounter = 0;
 
-	QMutexLocker l(&m_tuningSourcesMutex);
+	TuningSource ts;
 
-	for (auto it : m_tuningSources)
+	if (tuningSourceInfo(equipmentHash, &ts) == false)
 	{
-		TuningSource& ts = it.second;
-
-		if (ts.info.equipmentid().c_str() == equipmentID)
-		{
-
-			if (ts.state.isreply() == true && ts.state.fotipflagsetsor() > 0)
-			{
-				result->sorCounter++;
-			}
-
-			if (ts.state.isreply() == true && ts.state.errfotipuniqueid() > 0)
-			{
-				result->errorCounter++;
-			}
-
-			return true;
-		}
+		return false;
 	}
 
-	return false;
+	if (ts.state.isreply() == true && ts.state.fotipflagsetsor() > 0)
+	{
+		result->sorCounter++;
+	}
+
+	if (ts.state.isreply() == true && ts.state.errfotipuniqueid() > 0)
+	{
+		result->errorCounter++;
+	}
+
+	return true;
 }
 
 void TuningClientTcpClient::writeLogError(const QString& message)

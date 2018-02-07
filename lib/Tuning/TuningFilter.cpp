@@ -1160,12 +1160,12 @@ void TuningFilter::removeNotExistingSignals(const std::vector<Hash>& signalHashe
 	}
 }
 
-const std::vector<QString>& TuningFilter::equipmentHashes() const
+const std::vector<Hash>& TuningFilter::equipmentHashes() const
 {
 	return m_equipmentHashes;
 }
 
-void TuningFilter::setEquipmentHashes(std::vector<QString> value)
+void TuningFilter::setEquipmentHashes(std::vector<Hash> value)
 {
 	m_equipmentHashes = value;
 }
@@ -1461,7 +1461,7 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 	if (filter->isEmpty() == false)
 	{
 		std::vector<Hash> signalsHashes;
-		std::map<QString, int> equipmentHashesMap;
+		std::map<Hash, int> equipmentHashesMap;
 
 		std::vector<Hash> hashes = objects->signalHashes();
 
@@ -1483,14 +1483,14 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 
 			signalsHashes.push_back(asp.hash());
 
-			const QString aspEquipmentId = asp.equipmentId();
+			Hash aspEquipmentHash = ::calcHash(asp.equipmentId());
 
-			equipmentHashesMap[aspEquipmentId] = 1;
+			equipmentHashesMap[aspEquipmentHash] = 1;
 		}
 
 		filter->setSignalsHashes(signalsHashes);
 
-		std::vector<QString> equipmentHashes;
+		std::vector<Hash> equipmentHashes;
 		for (auto it : equipmentHashesMap)
 		{
 			equipmentHashes.push_back(it.first);

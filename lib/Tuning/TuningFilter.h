@@ -109,8 +109,8 @@ public:
 
 	void removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter);
 
-	const std::vector<QString>& equipmentHashes() const;
-	void setEquipmentHashes(std::vector<QString> value);
+	const std::vector<Hash>& equipmentHashes() const;
+	void setEquipmentHashes(std::vector<Hash> value);
 
 	const std::vector<Hash>& signalsHashes() const;
 	void setSignalsHashes(std::vector<Hash> value);
@@ -242,7 +242,7 @@ private:
 
 	// Hashes of equipment and filtered signals, used in client applicaton
 
-	std::vector<QString> m_equipmentHashes;
+	std::vector<Hash> m_equipmentHashes;
 	std::vector<Hash> m_signalsHashes;
 
 	// Counters

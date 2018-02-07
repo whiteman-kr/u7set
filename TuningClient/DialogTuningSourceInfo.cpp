@@ -3,9 +3,9 @@
 #include "MainWindow.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, quint64 tuningSourceId) :
+DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, Hash tuningSourceHash) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_tuningSourceId(tuningSourceId),
+	m_tuningSourceHash(tuningSourceHash),
 	ui(new Ui::DialogTuningSourceInfo),
 	m_tcpClient(tcpClient)
 {
@@ -15,7 +15,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 
 	TuningSource ts;
 
-	if (m_tcpClient->tuningSourceInfo(m_tuningSourceId, &ts) == true)
+	if (m_tcpClient->tuningSourceInfo(m_tuningSourceHash, &ts) == true)
 	{
 		setWindowTitle(ts.info.equipmentid().c_str());
 	}
@@ -152,7 +152,7 @@ void DialogTuningSourceInfo::updateData()
 {
 	TuningSource ts;
 
-	if (m_tcpClient->tuningSourceInfo(m_tuningSourceId, &ts) == false)
+	if (m_tcpClient->tuningSourceInfo(m_tuningSourceHash, &ts) == false)
 	{
 		return;
 	}

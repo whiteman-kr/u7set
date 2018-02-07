@@ -45,16 +45,15 @@ void TuningTcpClient::setSimulationMode(bool value)
 }
 #endif
 
-QStringList TuningTcpClient::tuningSourcesEquipmentIds() const
+std::vector<Hash> TuningTcpClient::tuningSourcesEquipmentHashes() const
 {
 	QMutexLocker l(&m_tuningSourcesMutex);
 
-	QStringList result;
+	std::vector<Hash> result;
 
 	for (auto p : m_tuningSources)
 	{
-		QString equipmentId = QString::fromStdString(p.second.info.equipmentid());
-		result.push_back(equipmentId);
+		result.push_back(p.first);
 	}
 
 	return result;
@@ -75,7 +74,7 @@ std::vector<TuningSource> TuningTcpClient::TuningTcpClient::tuningSourcesInfo() 
 	return result;
 }
 
-bool TuningTcpClient::tuningSourceInfo(quint64 id, TuningSource* result) const
+bool TuningTcpClient::tuningSourceInfo(Hash equipmentHash, TuningSource* result) const
 {
 	if (result == nullptr)
 	{
@@ -85,7 +84,7 @@ bool TuningTcpClient::tuningSourceInfo(quint64 id, TuningSource* result) const
 
 	QMutexLocker l(&m_tuningSourcesMutex);
 
-	auto it = m_tuningSources.find(id);
+	auto it = m_tuningSources.find(equipmentHash);
 
 	if (it == m_tuningSources.end())
 	{
@@ -343,9 +342,11 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 			TuningSource ts;
 			ts.info = dsi;
 
-			assert(m_tuningSources.count(ts.id()) == 0);
+			Hash hash = ::calcHash(QString(ts.info.equipmentid().c_str()));
 
-			m_tuningSources[ts.id()] = ts;
+			assert(m_tuningSources.count(hash) == 0);
+
+			m_tuningSources[hash] = ts;
 		}
 	}
 

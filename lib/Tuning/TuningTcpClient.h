@@ -59,9 +59,9 @@ public:
 
 	// Tuning sources
 	//
-	QStringList tuningSourcesEquipmentIds() const;
+	std::vector<Hash> tuningSourcesEquipmentHashes() const;
 	std::vector<TuningSource> tuningSourcesInfo() const;
-	bool tuningSourceInfo(quint64 id, TuningSource* result) const;
+	bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
 
 	// Writing states
 	//
@@ -147,7 +147,7 @@ protected:
 	// Tuning sources
 	//
 	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources
-	std::map<quint64, TuningSource> m_tuningSources;	// Key is ::Proto::DataSourceInfo::id
+	std::map<Hash, TuningSource> m_tuningSources;	// Key is hash of EquipmentID
 
 private:
 	// Processing

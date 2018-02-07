@@ -32,19 +32,23 @@ void TuningClientFilterStorage::checkAndRemoveFilterSignals(const std::vector<Ha
 }
 void TuningClientFilterStorage::updateCounters(const TuningSignalManager* objects, const TuningClientTcpClient* tcpClient, TuningFilter* filter)
 {
+	if (filter == nullptr)
+	{
+		filter = m_root.get();
+	}
+
 	if (filter->isEmpty() == false)
 	{
 		TuningFilterCounters counters;
 
 		// Equipment counters
 
-		std::vector<QString> equipmentHashes = filter->equipmentHashes();
+		std::vector<Hash> equipmentHashes = filter->equipmentHashes();
 
-		for (const QString& equipmentHash : equipmentHashes)
+		for (Hash& equipmentHash : equipmentHashes)
 		{
 			if (tcpClient->tuningSourceCounters(equipmentHash, &counters) == false)
 			{
-				assert(false);
 				continue;
 			}
 		}
@@ -60,7 +64,6 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 			TuningSignalState state = objects->state(appSignalHash, &found);
 			if (found == false)
 			{
-				assert(false);
 				continue;
 			}
 

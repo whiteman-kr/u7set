@@ -545,53 +545,60 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		if (displayIndex == static_cast<int>(Columns::Value))
 		{
 
-			if (tss.valid() == true)
+			if (tss.controlIsEnabled() == false)
 			{
-				if (asp.isAnalog() == false)
-				{
-					QString valueString = tss.value().toString();
-
-					if (tss.userModified() == true)
-					{
-						QString editValueString = tss.newValue().toString();
-						return tr("%1 => %2").arg(valueString).arg(editValueString);
-					}
-
-					if (tss.writeInProgress() == true)
-					{
-						QString editValueString = tss.newValue().toString();
-						return tr("Writing %1").arg(editValueString);
-					}
-
-					return valueString;
-				}
-				else
-				{
-					QString valueString = tss.value().toString(asp.precision());
-
-					if (tss.userModified() == true)
-					{
-						QString editValueString = tss.newValue().toString(asp.precision());
-						return QString("%1 => %2").arg(valueString).arg(editValueString);
-					}
-
-					if (tss.writeInProgress() == true)
-					{
-						QString editValueString = tss.newValue().toString(asp.precision());
-						return tr("Writing %1").arg(editValueString);
-					}
-
-					if (tss.outOfRange() == true)
-					{
-						return tr("RANGE");
-					}
-
-					return valueString;
-				}
+				return tr("Disabled");
 			}
 			else
 			{
-				return "?";
+				if (tss.valid() == true)
+				{
+					if (asp.isAnalog() == false)
+					{
+						QString valueString = tss.value().toString();
+
+						if (tss.userModified() == true)
+						{
+							QString editValueString = tss.newValue().toString();
+							return tr("%1 => %2").arg(valueString).arg(editValueString);
+						}
+
+						if (tss.writeInProgress() == true)
+						{
+							QString editValueString = tss.newValue().toString();
+							return tr("Writing %1").arg(editValueString);
+						}
+
+						return valueString;
+					}
+					else
+					{
+						QString valueString = tss.value().toString(asp.precision());
+
+						if (tss.userModified() == true)
+						{
+							QString editValueString = tss.newValue().toString(asp.precision());
+							return QString("%1 => %2").arg(valueString).arg(editValueString);
+						}
+
+						if (tss.writeInProgress() == true)
+						{
+							QString editValueString = tss.newValue().toString(asp.precision());
+							return tr("Writing %1").arg(editValueString);
+						}
+
+						if (tss.outOfRange() == true)
+						{
+							return tr("RANGE");
+						}
+
+						return valueString;
+					}
+				}
+				else
+				{
+					return "?";
+				}
 			}
 		}
 

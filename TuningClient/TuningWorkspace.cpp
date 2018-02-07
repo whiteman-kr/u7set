@@ -602,49 +602,52 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 		return;
 	}
 
-	TuningFilterCounters counters = filter->counters();
-
-	// Status column
-
-	treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
-
-	if (filter->isSourceEquipment() == true && counters.controlEnabledCounter == 0)
+	if (filter->isEmpty() == false)
 	{
-		treeItem->setText(columnStatusIndex, tr("Disabled"));
-		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
-		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
-	}
-	else
-	{
-		if (counters.errorCounter == 0)
+		TuningFilterCounters counters = filter->counters();
+
+		// Status column
+
+		treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
+
+		if (filter->isSourceEquipment() == true && counters.controlEnabledCounter == 0)
 		{
-			treeItem->setText(columnStatusIndex, QString());
-			treeItem->setBackground(columnStatusIndex, QBrush(Qt::white));
-			treeItem->setForeground(columnStatusIndex, QBrush(Qt::black));
-		}
-		else
-		{
-			treeItem->setText(columnStatusIndex, QString("ERR (%1)").arg(counters.errorCounter));
-			treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
+			treeItem->setText(columnStatusIndex, tr("Disabled"));
+			treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
 			treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
 		}
-	}
-
-	// SOR Column
-
-	if (theConfigSettings.showSOR == true)
-	{
-		if (counters.sorCounter == 0)
-		{
-			treeItem->setText(columnSorIndex, QString());
-			treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
-			treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
-		}
 		else
 		{
-			treeItem->setText(columnSorIndex, QString("SOR (%1)").arg(counters.sorCounter));
-			treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
-			treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
+			if (counters.errorCounter == 0)
+			{
+				treeItem->setText(columnStatusIndex, QString());
+				treeItem->setBackground(columnStatusIndex, QBrush(Qt::white));
+				treeItem->setForeground(columnStatusIndex, QBrush(Qt::black));
+			}
+			else
+			{
+				treeItem->setText(columnStatusIndex, QString("ERR (%1)").arg(counters.errorCounter));
+				treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
+				treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+			}
+		}
+
+		// SOR Column
+
+		if (theConfigSettings.showSOR == true)
+		{
+			if (counters.sorCounter == 0)
+			{
+				treeItem->setText(columnSorIndex, QString());
+				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
+				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
+			}
+			else
+			{
+				treeItem->setText(columnSorIndex, QString("SOR (%1)").arg(counters.sorCounter));
+				treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+				treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
+			}
 		}
 	}
 

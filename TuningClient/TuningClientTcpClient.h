@@ -9,7 +9,7 @@ public:
 	TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 						  TuningSignalManager* signalManager);
 
-	bool tuningSourceCounters(const QString& equipmentID, TuningFilterCounters* result) const;// REWRITE THIS FUNCTION!!!
+	bool tuningSourceCounters(const Hash& equipmentHash, TuningFilterCounters* result) const;// REWRITE THIS FUNCTION!!!
 
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);
