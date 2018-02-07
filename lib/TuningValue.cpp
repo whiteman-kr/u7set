@@ -43,7 +43,7 @@ void TuningValue::setDiscreteValue(qint32 discreteValue)
 qint32 TuningValue::int32Value() const
 {
 	assert(m_type == TuningValueType::SignedInt32);
-	return m_int64;
+	return static_cast<qint32>(m_int64);
 }
 
 void TuningValue::setInt32Value(qint32 intValue)

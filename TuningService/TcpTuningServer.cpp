@@ -71,18 +71,27 @@ namespace Tuning
 			onTuningSignalsApplyRequest(requestData, requestDataSize);
 			break;
 
+		case TDS_CHANGE_CONTROLLED_TUNING_SOURCE:
+			break;
+
 		default:
 			assert(false);
 			break;
 		}
 	}
 
-
 	void TcpTuningServer::onGetTuningSourcesInfoRequest(const char *requestData, quint32 requestDataSize)
 	{
 		m_getTuningSourcesInfoReply.Clear();
 
-		m_getTuningSourcesInfo.ParseFromArray(requestData, requestDataSize);
+		bool result = m_getTuningSourcesInfo.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			sendReply(m_getTuningSourcesInfoReply);
+			return;
+		}
 
 		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
@@ -157,7 +166,14 @@ namespace Tuning
 	{
 		m_getTuningSourcesStatesReply.Clear();
 
-		m_getTuningSourcesStates.ParseFromArray(requestData, requestDataSize);
+		bool result = m_getTuningSourcesStates.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			sendReply(m_getTuningSourcesStatesReply);
+			return;
+		}
 
 		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
@@ -217,7 +233,16 @@ namespace Tuning
 
 	void TcpTuningServer::onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize)
 	{
-		m_tuningSignalsReadRequest.ParseFromArray(requestData, requestDataSize);
+		m_tuningSignalsReadReply.Clear();
+
+		bool result = m_tuningSignalsReadRequest.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			m_tuningSignalsReadReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			sendReply(m_tuningSignalsReadReply);
+			return;
+		}
 
 		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
@@ -230,8 +255,6 @@ namespace Tuning
 		{
 			// unknown clientID
 			//
-			m_tuningSignalsReadReply.Clear();
-
 			errCode = NetworkError::UnknownTuningClientID;
 
 			m_tuningSignalsReadReply.set_error(TO_INT(errCode));
@@ -263,7 +286,16 @@ namespace Tuning
 
 	void TcpTuningServer::onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize)
 	{
-		m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
+		m_tuningSignalsWriteReply.Clear();
+
+		bool result = m_tuningSignalsWriteRequest.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			sendReply(m_tuningSignalsWriteReply);
+			return;
+		}
 
 		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
@@ -281,8 +313,6 @@ namespace Tuning
 		{
 			// unknown clientID
 			//
-			m_tuningSignalsWriteReply.Clear();
-
 			errCode = NetworkError::UnknownTuningClientID;
 
 			m_tuningSignalsWriteReply.set_error(TO_INT(errCode));
@@ -318,7 +348,16 @@ namespace Tuning
 
 	void TcpTuningServer::onTuningSignalsApplyRequest(const char* requestData, quint32 requestDataSize)
 	{
-		m_tuningSignalsApplyRequest.ParseFromArray(requestData, requestDataSize);
+		m_tuningSignalsApplyReply.Clear();
+
+		bool result = m_tuningSignalsApplyRequest.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			m_tuningSignalsApplyReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			sendReply(m_tuningSignalsApplyReply);
+			return;
+		}
 
 		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
@@ -335,8 +374,6 @@ namespace Tuning
 		{
 			// unknown clientID
 			//
-			m_tuningSignalsApplyReply.Clear();
-
 			m_tuningSignalsApplyReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
 
 			sendReply(m_tuningSignalsApplyReply);
@@ -356,6 +393,32 @@ namespace Tuning
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
 					  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+	}
+
+	void TcpTuningServer::onChangeControlledTuningSourceRequest(const char *requestData, quint32 requestDataSize)
+	{
+		m_changeControlledTuningSourceReply.Clear();
+
+		bool result = m_changeControlledTuningSourceRequest.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			m_changeControlledTuningSourceReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			sendReply(m_changeControlledTuningSourceReply);
+			return;
+		}
+
+		QString tuningSourceEquipmentID = QString::fromStdString(m_changeControlledTuningSourceRequest.tuningsourceequipmentid());
+		bool activateControl = m_changeControlledTuningSourceRequest.activatecontrol();
+
+		// ADD REAL PROCESSING!!!!!!
+		// LOG REQUEST
+
+		m_changeControlledTuningSourceReply.set_error(TO_INT(NetworkError::Success));
+		m_changeControlledTuningSourceReply.set_controlledtuningsourceequipmentid(tuningSourceEquipmentID.toStdString());
+		m_changeControlledTuningSourceReply.set_controlisactive(activateControl);
+
+		sendReply(m_changeControlledTuningSourceReply);
 	}
 
 

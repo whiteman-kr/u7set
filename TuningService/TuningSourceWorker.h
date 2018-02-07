@@ -71,6 +71,9 @@ namespace Tuning
 		qint64 errAnalogLowBoundCheck = 0;
 		qint64 errAnalogHighBoundCheck = 0;
 
+		bool controlIsActive = false;
+		bool setSOR = false;
+
 		void get(Network::TuningSourceState& tss);
 	};
 

@@ -348,6 +348,7 @@ const quint32 TDS_GET_TUNING_SOURCES_STATES = 0x1502;
 const quint32 TDS_TUNING_SIGNALS_READ = 0x1503;
 const quint32 TDS_TUNING_SIGNALS_WRITE = 0x1504;
 const quint32 TDS_TUNING_SIGNALS_APPLY = 0x1505;
+const quint32 TDS_CHANGE_CONTROLLED_TUNING_SOURCE = 0x1506;
 
 const int TDS_TUNING_MAX_READ_STATES = 1000;
 const int TDS_TUNING_MAX_WRITE_RECORDS = 1000;
@@ -389,7 +390,8 @@ enum class NetworkError
 	UnknownSignalHash,
 	InternalError,
 	ArchiveError,								// for detail information check archError field
-	WrongTuningValueType
+	WrongTuningValueType,
+	SingleLmControlDisabled
 };
 
 enum class ArchiveError

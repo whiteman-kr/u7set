@@ -69,6 +69,9 @@ namespace Tuning
 
 		tss.set_erranaloglowboundcheck(errAnalogLowBoundCheck);
 		tss.set_erranaloghighboundcheck(errAnalogHighBoundCheck);
+
+		tss.set_controlisactive(controlIsActive);
+		tss.set_setsor(setSOR);
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -1179,10 +1182,12 @@ namespace Tuning
 		if (flags.setSOR == 1)
 		{
 			m_stat.fotipFlagSetSOR++;
+			m_stat.setSOR = true;
 		}
 		else
 		{
-			m_stat.fotipFlagSetSOR = 0;	// added by Vintenko 22.12.2017
+			m_stat.fotipFlagSetSOR = 0;			// added by Vintenko 22.12.2017
+			m_stat.setSOR = false;
 		}
 
 		return result;

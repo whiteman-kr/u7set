@@ -67,7 +67,7 @@ class GetTuningSourcesInfoReply;
 class GetTuningSourcesStates;
 class TuningSourceState;
 class GetTuningSourcesStatesReply;
-class ChangeConrolledTuningSource;
+class ChangeConrolledTuningSourceRequest;
 class ChangeConrolledTuningSourceReply;
 class TuningSignalsRead;
 class TuningSignalState;
@@ -3830,6 +3830,13 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline bool controlisactive() const;
   inline void set_controlisactive(bool value);
 
+  // optional bool setSOR = 43 [default = false];
+  inline bool has_setsor() const;
+  inline void clear_setsor();
+  static const int kSetSORFieldNumber = 43;
+  inline bool setsor() const;
+  inline void set_setsor(bool value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   inline void set_has_sourceid();
@@ -3916,6 +3923,8 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline void clear_has_errrupcrc();
   inline void set_has_controlisactive();
   inline void clear_has_controlisactive();
+  inline void set_has_setsor();
+  inline void clear_has_setsor();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3933,15 +3942,16 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errrupmoduletype_;
   ::google::protobuf::int64 errrupframesquantity_;
   ::google::protobuf::int64 errrupframenumber_;
-  ::google::protobuf::int32 commandqueuesize_;
-  bool isreply_;
-  bool controlisactive_;
   ::google::protobuf::int64 errfotipprotocolversion_;
   ::google::protobuf::int64 errfotipuniqueid_;
   ::google::protobuf::int64 errfotiplmnumber_;
   ::google::protobuf::int64 errfotipsubsystemcode_;
   ::google::protobuf::int64 errfotipoperationcode_;
   ::google::protobuf::int64 errfotipframesize_;
+  ::google::protobuf::int32 commandqueuesize_;
+  bool isreply_;
+  bool controlisactive_;
+  bool setsor_;
   ::google::protobuf::int64 errfotipromsize_;
   ::google::protobuf::int64 errfotipromframesize_;
   ::google::protobuf::int64 fotipflagboundschecksuccess_;
@@ -3963,7 +3973,7 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errrupcrc_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(42 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(43 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -4079,14 +4089,14 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class ChangeConrolledTuningSource : public ::google::protobuf::Message {
+class ChangeConrolledTuningSourceRequest : public ::google::protobuf::Message {
  public:
-  ChangeConrolledTuningSource();
-  virtual ~ChangeConrolledTuningSource();
+  ChangeConrolledTuningSourceRequest();
+  virtual ~ChangeConrolledTuningSourceRequest();
 
-  ChangeConrolledTuningSource(const ChangeConrolledTuningSource& from);
+  ChangeConrolledTuningSourceRequest(const ChangeConrolledTuningSourceRequest& from);
 
-  inline ChangeConrolledTuningSource& operator=(const ChangeConrolledTuningSource& from) {
+  inline ChangeConrolledTuningSourceRequest& operator=(const ChangeConrolledTuningSourceRequest& from) {
     CopyFrom(from);
     return *this;
   }
@@ -4100,17 +4110,17 @@ class ChangeConrolledTuningSource : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ChangeConrolledTuningSource& default_instance();
+  static const ChangeConrolledTuningSourceRequest& default_instance();
 
-  void Swap(ChangeConrolledTuningSource* other);
+  void Swap(ChangeConrolledTuningSourceRequest* other);
 
   // implements Message ----------------------------------------------
 
-  ChangeConrolledTuningSource* New() const;
+  ChangeConrolledTuningSourceRequest* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ChangeConrolledTuningSource& from);
-  void MergeFrom(const ChangeConrolledTuningSource& from);
+  void CopyFrom(const ChangeConrolledTuningSourceRequest& from);
+  void MergeFrom(const ChangeConrolledTuningSourceRequest& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -4133,36 +4143,46 @@ class ChangeConrolledTuningSource : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string controlledTuningSourceEquipmentID = 1;
-  inline bool has_controlledtuningsourceequipmentid() const;
-  inline void clear_controlledtuningsourceequipmentid();
-  static const int kControlledTuningSourceEquipmentIDFieldNumber = 1;
-  inline const ::std::string& controlledtuningsourceequipmentid() const;
-  inline void set_controlledtuningsourceequipmentid(const ::std::string& value);
-  inline void set_controlledtuningsourceequipmentid(const char* value);
-  inline void set_controlledtuningsourceequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_controlledtuningsourceequipmentid();
-  inline ::std::string* release_controlledtuningsourceequipmentid();
-  inline void set_allocated_controlledtuningsourceequipmentid(::std::string* controlledtuningsourceequipmentid);
+  // optional string tuningSourceEquipmentID = 1;
+  inline bool has_tuningsourceequipmentid() const;
+  inline void clear_tuningsourceequipmentid();
+  static const int kTuningSourceEquipmentIDFieldNumber = 1;
+  inline const ::std::string& tuningsourceequipmentid() const;
+  inline void set_tuningsourceequipmentid(const ::std::string& value);
+  inline void set_tuningsourceequipmentid(const char* value);
+  inline void set_tuningsourceequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_tuningsourceequipmentid();
+  inline ::std::string* release_tuningsourceequipmentid();
+  inline void set_allocated_tuningsourceequipmentid(::std::string* tuningsourceequipmentid);
 
-  // @@protoc_insertion_point(class_scope:Network.ChangeConrolledTuningSource)
+  // optional bool activateControl = 2 [default = false];
+  inline bool has_activatecontrol() const;
+  inline void clear_activatecontrol();
+  static const int kActivateControlFieldNumber = 2;
+  inline bool activatecontrol() const;
+  inline void set_activatecontrol(bool value);
+
+  // @@protoc_insertion_point(class_scope:Network.ChangeConrolledTuningSourceRequest)
  private:
-  inline void set_has_controlledtuningsourceequipmentid();
-  inline void clear_has_controlledtuningsourceequipmentid();
+  inline void set_has_tuningsourceequipmentid();
+  inline void clear_has_tuningsourceequipmentid();
+  inline void set_has_activatecontrol();
+  inline void clear_has_activatecontrol();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* controlledtuningsourceequipmentid_;
+  ::std::string* tuningsourceequipmentid_;
+  bool activatecontrol_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static ChangeConrolledTuningSource* default_instance_;
+  static ChangeConrolledTuningSourceRequest* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -4239,20 +4259,30 @@ class ChangeConrolledTuningSourceReply : public ::google::protobuf::Message {
   inline ::std::string* release_controlledtuningsourceequipmentid();
   inline void set_allocated_controlledtuningsourceequipmentid(::std::string* controlledtuningsourceequipmentid);
 
+  // optional bool controlIsActive = 3;
+  inline bool has_controlisactive() const;
+  inline void clear_controlisactive();
+  static const int kControlIsActiveFieldNumber = 3;
+  inline bool controlisactive() const;
+  inline void set_controlisactive(bool value);
+
   // @@protoc_insertion_point(class_scope:Network.ChangeConrolledTuningSourceReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
   inline void set_has_controlledtuningsourceequipmentid();
   inline void clear_has_controlledtuningsourceequipmentid();
+  inline void set_has_controlisactive();
+  inline void clear_has_controlisactive();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* controlledtuningsourceequipmentid_;
   ::google::protobuf::int32 error_;
+  bool controlisactive_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -10393,6 +10423,28 @@ inline void TuningSourceState::set_controlisactive(bool value) {
   controlisactive_ = value;
 }
 
+// optional bool setSOR = 43 [default = false];
+inline bool TuningSourceState::has_setsor() const {
+  return (_has_bits_[1] & 0x00000400u) != 0;
+}
+inline void TuningSourceState::set_has_setsor() {
+  _has_bits_[1] |= 0x00000400u;
+}
+inline void TuningSourceState::clear_has_setsor() {
+  _has_bits_[1] &= ~0x00000400u;
+}
+inline void TuningSourceState::clear_setsor() {
+  setsor_ = false;
+  clear_has_setsor();
+}
+inline bool TuningSourceState::setsor() const {
+  return setsor_;
+}
+inline void TuningSourceState::set_setsor(bool value) {
+  set_has_setsor();
+  setsor_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // GetTuningSourcesStatesReply
@@ -10468,76 +10520,98 @@ inline void GetTuningSourcesStatesReply::set_singlelmcontrolmode(bool value) {
 
 // -------------------------------------------------------------------
 
-// ChangeConrolledTuningSource
+// ChangeConrolledTuningSourceRequest
 
-// optional string controlledTuningSourceEquipmentID = 1;
-inline bool ChangeConrolledTuningSource::has_controlledtuningsourceequipmentid() const {
+// optional string tuningSourceEquipmentID = 1;
+inline bool ChangeConrolledTuningSourceRequest::has_tuningsourceequipmentid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ChangeConrolledTuningSource::set_has_controlledtuningsourceequipmentid() {
+inline void ChangeConrolledTuningSourceRequest::set_has_tuningsourceequipmentid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void ChangeConrolledTuningSource::clear_has_controlledtuningsourceequipmentid() {
+inline void ChangeConrolledTuningSourceRequest::clear_has_tuningsourceequipmentid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void ChangeConrolledTuningSource::clear_controlledtuningsourceequipmentid() {
-  if (controlledtuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    controlledtuningsourceequipmentid_->clear();
+inline void ChangeConrolledTuningSourceRequest::clear_tuningsourceequipmentid() {
+  if (tuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_->clear();
   }
-  clear_has_controlledtuningsourceequipmentid();
+  clear_has_tuningsourceequipmentid();
 }
-inline const ::std::string& ChangeConrolledTuningSource::controlledtuningsourceequipmentid() const {
-  return *controlledtuningsourceequipmentid_;
+inline const ::std::string& ChangeConrolledTuningSourceRequest::tuningsourceequipmentid() const {
+  return *tuningsourceequipmentid_;
 }
-inline void ChangeConrolledTuningSource::set_controlledtuningsourceequipmentid(const ::std::string& value) {
-  set_has_controlledtuningsourceequipmentid();
-  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    controlledtuningsourceequipmentid_ = new ::std::string;
+inline void ChangeConrolledTuningSourceRequest::set_tuningsourceequipmentid(const ::std::string& value) {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
   }
-  controlledtuningsourceequipmentid_->assign(value);
+  tuningsourceequipmentid_->assign(value);
 }
-inline void ChangeConrolledTuningSource::set_controlledtuningsourceequipmentid(const char* value) {
-  set_has_controlledtuningsourceequipmentid();
-  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    controlledtuningsourceequipmentid_ = new ::std::string;
+inline void ChangeConrolledTuningSourceRequest::set_tuningsourceequipmentid(const char* value) {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
   }
-  controlledtuningsourceequipmentid_->assign(value);
+  tuningsourceequipmentid_->assign(value);
 }
-inline void ChangeConrolledTuningSource::set_controlledtuningsourceequipmentid(const char* value, size_t size) {
-  set_has_controlledtuningsourceequipmentid();
-  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    controlledtuningsourceequipmentid_ = new ::std::string;
+inline void ChangeConrolledTuningSourceRequest::set_tuningsourceequipmentid(const char* value, size_t size) {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
   }
-  controlledtuningsourceequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+  tuningsourceequipmentid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* ChangeConrolledTuningSource::mutable_controlledtuningsourceequipmentid() {
-  set_has_controlledtuningsourceequipmentid();
-  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    controlledtuningsourceequipmentid_ = new ::std::string;
+inline ::std::string* ChangeConrolledTuningSourceRequest::mutable_tuningsourceequipmentid() {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
   }
-  return controlledtuningsourceequipmentid_;
+  return tuningsourceequipmentid_;
 }
-inline ::std::string* ChangeConrolledTuningSource::release_controlledtuningsourceequipmentid() {
-  clear_has_controlledtuningsourceequipmentid();
-  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* ChangeConrolledTuningSourceRequest::release_tuningsourceequipmentid() {
+  clear_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = controlledtuningsourceequipmentid_;
-    controlledtuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = tuningsourceequipmentid_;
+    tuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void ChangeConrolledTuningSource::set_allocated_controlledtuningsourceequipmentid(::std::string* controlledtuningsourceequipmentid) {
-  if (controlledtuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete controlledtuningsourceequipmentid_;
+inline void ChangeConrolledTuningSourceRequest::set_allocated_tuningsourceequipmentid(::std::string* tuningsourceequipmentid) {
+  if (tuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete tuningsourceequipmentid_;
   }
-  if (controlledtuningsourceequipmentid) {
-    set_has_controlledtuningsourceequipmentid();
-    controlledtuningsourceequipmentid_ = controlledtuningsourceequipmentid;
+  if (tuningsourceequipmentid) {
+    set_has_tuningsourceequipmentid();
+    tuningsourceequipmentid_ = tuningsourceequipmentid;
   } else {
-    clear_has_controlledtuningsourceequipmentid();
-    controlledtuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_tuningsourceequipmentid();
+    tuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional bool activateControl = 2 [default = false];
+inline bool ChangeConrolledTuningSourceRequest::has_activatecontrol() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ChangeConrolledTuningSourceRequest::set_has_activatecontrol() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_has_activatecontrol() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_activatecontrol() {
+  activatecontrol_ = false;
+  clear_has_activatecontrol();
+}
+inline bool ChangeConrolledTuningSourceRequest::activatecontrol() const {
+  return activatecontrol_;
+}
+inline void ChangeConrolledTuningSourceRequest::set_activatecontrol(bool value) {
+  set_has_activatecontrol();
+  activatecontrol_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -10634,6 +10708,28 @@ inline void ChangeConrolledTuningSourceReply::set_allocated_controlledtuningsour
     clear_has_controlledtuningsourceequipmentid();
     controlledtuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional bool controlIsActive = 3;
+inline bool ChangeConrolledTuningSourceReply::has_controlisactive() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ChangeConrolledTuningSourceReply::set_has_controlisactive() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_has_controlisactive() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_controlisactive() {
+  controlisactive_ = false;
+  clear_has_controlisactive();
+}
+inline bool ChangeConrolledTuningSourceReply::controlisactive() const {
+  return controlisactive_;
+}
+inline void ChangeConrolledTuningSourceReply::set_controlisactive(bool value) {
+  set_has_controlisactive();
+  controlisactive_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -248,8 +248,8 @@ message ConfigurationServiceSettings
 // TuningService requests and replies
 //
 
-// Tuning sources info request
-
+// Tuning sources info request - TDS_GET_TUNING_SOURCES_INFO
+//
 message GetTuningSourcesInfo
 {
 }
@@ -262,8 +262,8 @@ message GetTuningSourcesInfoReply
     optional bool singleLmControlMode = 3 [default = true];
 }
 
-// Tuning sources states request
-
+// Tuning sources states request - TDS_GET_TUNING_SOURCES_STATES
+//
 message GetTuningSourcesStates
 {
 }
@@ -328,6 +328,7 @@ message TuningSourceState
     optional int64 errRupCRC = 41 [default = 0];
 
     optional bool controlIsActive = 42 [default = false];
+    optional bool setSOR = 43 [default = false];
 }
 
 message GetTuningSourcesStatesReply
@@ -338,21 +339,31 @@ message GetTuningSourcesStatesReply
     optional bool singleLmControlMode = 3 [default = true];
 }
 
+//  Change current controlled TuningSource request - TDS_CHANGE_CONTROLLED_TUNING_SOURCE
 //
-
-message ChangeConrolledTuningSource
+//  Allowed only if SingleLMControl mode of TuningService is set to TRUE.
+//  Otherwise reply is returning error NetworkError::SingleLmControlDisabled.
+//
+message ChangeConrolledTuningSourceRequest
 {
-    optional string controlledTuningSourceEquipmentID = 1;
+    optional string tuningSourceEquipmentID = 1;		    // not empty - to change controlled source
+                                                                    // empty - to request current controlled source (activateControl field is ignored)
+
+    optional bool activateControl = 2 [default = false];	    // if tuningSourceEquipmentID is not empty:
+                                                                    //	    true - to activate tuning source control
+								    //	    false - to deactivate tuning source control
 }
 
 message ChangeConrolledTuningSourceReply
 {
     optional int32 error = 1 [default = 0];
-    optional string controlledTuningSourceEquipmentID = 2;	    // if Ok - echo from request
+    optional string controlledTuningSourceEquipmentID = 2;	    // if error == Success - current controlled TuningSource
+                                                                    // else - empty string
+    optional bool controlIsActive = 3;
 }
 
-// Tuning signals read request
-
+// Tuning signals read request - TDS_TUNING_SIGNALS_READ
+//
 message TuningSignalsRead
 {
     repeated uint64 signalHash = 2;
@@ -384,8 +395,8 @@ message TuningSignalsReadReply
     repeated TuningSignalState tuningSignalState = 2;
 }
 
-// Write tuning signals request
-
+// Write tuning signals request - TDS_TUNING_SIGNALS_WRITE
+//
 message TuningWriteCommand
 {
     optional uint64 signalHash = 1 [default = 0];
@@ -411,11 +422,10 @@ message TuningSignalsWriteReply
 }
 
 
-// Apply tuning signals request
-
+// Request to applying tuning signals values - TDS_TUNING_SIGNALS_APPLY
+//
 message TuningSignalsApply
 {
-
 }
 
 
