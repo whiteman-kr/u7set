@@ -77,11 +77,18 @@ private:
 	static QString SF_OUTPUT_MODE;
 
 	static QString SF_ENABLE_TUNING;
-	static QString SF_TUNING_DEFAULT_VALUE;
-	static QString SF_TUNING_LOW_BOUND;
-	static QString SF_TUNING_HIGH_BOUND;
+
+	static QString SF_TUNING_DEFAULT_INT;
+	static QString SF_TUNING_DEFAULT_DOUBLE;
+
+	static QString SF_TUNING_LOW_BOUND_INT;
+	static QString SF_TUNING_LOW_BOUND_DOUBLE;
+
+	static QString SF_TUNING_HIGH_BOUND_INT;
+	static QString SF_TUNING_HIGH_BOUND_DOUBLE;
 
 	static QString SF_ACQUIRE;
+	static QString SF_ARCHIVE;
 	static QString SF_DECIMAL_PLACES;
 	static QString SF_COARSE_APERTURE;
 	static QString SF_FINE_APERTURE;
