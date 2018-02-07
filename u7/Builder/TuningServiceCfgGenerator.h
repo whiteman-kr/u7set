@@ -20,7 +20,9 @@ namespace Builder
 
 		bool writeSettings();
 		bool writeTuningLMs();
+
 		bool writeBatFile();
+		bool writeShFile();
 
 	public:
 		TuningServiceCfgGenerator(	DbController* db,
