@@ -51,6 +51,14 @@ private:
 	QDialogButtonBox* m_buttonBox = nullptr;
 };
 
+struct TuningFilterCounters
+{
+	int sorCounter = 0;
+	int errorCounter = 0;
+	int controlEnabledCounter = 0;
+	int discreteCounter = 0;
+};
+
 class TuningFilter : public PropertyObject
 {
 	Q_OBJECT
@@ -139,7 +147,6 @@ public:
 	QColor textColor() const;
 	void setTextColor(const QColor& value);
 
-
 	// Filters
 	//
 	QString customAppSignalIDMask() const;
@@ -163,9 +170,11 @@ public:
 	void addValue(const TuningFilterValue& value);
 	void removeValue(Hash hash);
 
+	bool value(Hash hash, TuningFilterValue& value);
 	void setValue(const TuningFilterValue& value);
 
-	bool value(Hash hash, TuningFilterValue& value);
+	TuningFilterCounters counters() const;
+	void setCounters(TuningFilterCounters value);
 
 public:
 	// Operations
@@ -213,7 +222,6 @@ private:
 	QColor m_backColor = Qt::GlobalColor::lightGray;
 	QColor m_textColor = Qt::GlobalColor::lightGray;
 
-
 	// Filters
 	//
 	QStringList m_customAppSignalIDMasks;
@@ -229,14 +237,17 @@ private:
 	// Parent and child
 	//
 
+	TuningFilter* m_parentFilter = nullptr;
 	std::vector<std::shared_ptr<TuningFilter>> m_childFilters;
 
-	// Hashes of equipment
+	// Hashes of equipment and filtered signals, used in client applicaton
 
 	std::vector<QString> m_equipmentHashes;
 	std::vector<Hash> m_signalsHashes;
 
-	TuningFilter* m_parentFilter = nullptr;
+	// Counters
+
+	TuningFilterCounters m_counters;
 
 };
 
@@ -277,12 +288,7 @@ public:
 
 	void createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter = nullptr);
 
-	void createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds);
-
-	void removeFilters(TuningFilter::Source sourceType);
-
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
-	void checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget);
 
 protected:
 
@@ -290,12 +296,11 @@ protected:
 	virtual void writeLogWarning(const QString& message);
 	virtual void writeLogMessage(const QString& message);
 
-
 public:
 
 	std::shared_ptr<TuningFilter> m_root = nullptr;
 
-private:
+protected:
 
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 };

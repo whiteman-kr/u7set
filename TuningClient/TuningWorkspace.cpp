@@ -212,6 +212,7 @@ void TuningWorkspace::updateFiltersTree()
 
 		QStringList headerLabels;
 		headerLabels << tr("Caption");
+		headerLabels << tr("Discretes");
 		headerLabels << tr("Status");
 		if (theConfigSettings.showSOR == true)
 		{
@@ -223,7 +224,8 @@ void TuningWorkspace::updateFiltersTree()
 		m_filterTree->setHeaderLabels(headerLabels);
 
 		m_filterTree->setColumnWidth(columnName, 200);
-		m_filterTree->setColumnWidth(columnErrorIndex, 60);
+		m_filterTree->setColumnWidth(columnDiscreteCountIndex, 60);
+		m_filterTree->setColumnWidth(columnStatusIndex, 60);
 		if (theConfigSettings.showSOR == true)
 		{
 			m_filterTree->setColumnWidth(columnSorIndex, 60);
@@ -600,42 +602,49 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 		return;
 	}
 
-	const std::vector<QString>& equipmentHashes = filter->equipmentHashes();
+	TuningFilterCounters counters = filter->counters();
 
-	if (equipmentHashes.empty() == false)
+	// Status column
+
+	treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
+
+	if (filter->isSourceEquipment() == true && counters.controlEnabledCounter == 0)
 	{
-		// Print the data in status and SOR columns
-		//
-
-		int lmErrorsCount = m_tuningTcpClient->getLMErrorsCount(equipmentHashes);
-		if (lmErrorsCount == 0)
+		treeItem->setText(columnStatusIndex, tr("Disabled"));
+		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
+		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+	}
+	else
+	{
+		if (counters.errorCounter == 0)
 		{
-			treeItem->setText(columnErrorIndex, QString());
-			treeItem->setBackground(columnErrorIndex, QBrush(Qt::white));
-			treeItem->setForeground(columnErrorIndex, QBrush(Qt::black));
+			treeItem->setText(columnStatusIndex, QString());
+			treeItem->setBackground(columnStatusIndex, QBrush(Qt::white));
+			treeItem->setForeground(columnStatusIndex, QBrush(Qt::black));
 		}
 		else
 		{
-			treeItem->setText(columnErrorIndex, QString("ERR (%1)").arg(lmErrorsCount));
-			treeItem->setBackground(columnErrorIndex, QBrush(Qt::red));
-			treeItem->setForeground(columnErrorIndex, QBrush(Qt::white));
+			treeItem->setText(columnStatusIndex, QString("ERR (%1)").arg(counters.errorCounter));
+			treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
+			treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
 		}
+	}
 
-		if (theConfigSettings.showSOR == true)
+	// SOR Column
+
+	if (theConfigSettings.showSOR == true)
+	{
+		if (counters.sorCounter == 0)
 		{
-			int sorCount = m_tuningTcpClient->getSORCount(equipmentHashes);
-			if (sorCount == 0)
-			{
-				treeItem->setText(columnSorIndex, QString());
-				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
-				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
-			}
-			else
-			{
-				treeItem->setText(columnSorIndex, QString("SOR (%1)").arg(sorCount));
-				treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
-				treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
-			}
+			treeItem->setText(columnSorIndex, QString());
+			treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
+			treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
+		}
+		else
+		{
+			treeItem->setText(columnSorIndex, QString("SOR (%1)").arg(counters.sorCounter));
+			treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+			treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 		}
 	}
 

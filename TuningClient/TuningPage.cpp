@@ -63,15 +63,21 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (m_blink == true && state.userModified() == true)
+		if (state.controlIsEnabled() == false)
 		{
-			QColor color = QColor(Qt::yellow);
+			QColor color = QColor(Qt::black);
 			return QBrush(color);
 		}
 
 		if (state.valid() == false)
 		{
 			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+
+		if (m_blink == true && state.userModified() == true)
+		{
+			QColor color = QColor(Qt::yellow);
 			return QBrush(color);
 		}
 
@@ -160,15 +166,21 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 	{
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (m_blink == true && state.userModified() == true)
+		if (state.controlIsEnabled() == false)
 		{
-			QColor color = QColor(Qt::black);
+			QColor color = QColor(Qt::white);
 			return QBrush(color);
 		}
 
 		if (state.valid() == false)
 		{
 			QColor color = QColor(Qt::white);
+			return QBrush(color);
+		}
+
+		if (m_blink == true && state.userModified() == true)
+		{
+			QColor color = QColor(Qt::black);
 			return QBrush(color);
 		}
 	}

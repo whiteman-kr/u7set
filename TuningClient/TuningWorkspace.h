@@ -67,8 +67,9 @@ private:
 	QTabWidget* m_tab = nullptr;
 
 	const int columnName = 0;
-	const int columnErrorIndex = 1;
-	const int columnSorIndex = 2;
+	const int columnDiscreteCountIndex = 1;
+	const int columnStatusIndex = 2;
+	const int columnSorIndex = 3;
 
 	//
 

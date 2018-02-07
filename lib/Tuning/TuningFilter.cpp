@@ -695,38 +695,9 @@ void TuningFilter::setValues(const std::vector <TuningFilterValue>& values)
 	}
 }
 
-bool TuningFilter::value(Hash hash, TuningFilterValue& value)
+int TuningFilter::valuesCount() const
 {
-	auto it = m_signalValuesMap.find(hash);
-	if (it == m_signalValuesMap.end())
-	{
-		return false;
-	}
-
-	value = it->second;
-
-	if (value.useValue() == false)
-	{
-		return false;
-	}
-
-	return true;
-
-}
-
-void TuningFilter::setValue(const TuningFilterValue& value)
-{
-	auto it = m_signalValuesMap.find(value.appSignalHash());
-
-	if (it == m_signalValuesMap.end())
-	{
-		assert(false);
-		return;
-	}
-
-	TuningFilterValue& ofv = it->second;
-	ofv.setUseValue(value.useValue());
-	ofv.setValue(value.value());
+	return static_cast<int>(m_signalValuesVec.size());
 }
 
 bool TuningFilter::valueExists(Hash hash) const
@@ -745,11 +716,6 @@ void TuningFilter::addValue(const TuningFilterValue& value)
 
 	m_signalValuesVec.push_back(hash);
 	m_signalValuesMap[hash] = value;
-}
-
-int TuningFilter::valuesCount() const
-{
-	return static_cast<int>(m_signalValuesVec.size());
 }
 
 void TuningFilter::removeValue(Hash hash)
@@ -784,6 +750,49 @@ void TuningFilter::removeValue(Hash hash)
 		assert(false);
 		return;
 	}
+}
+
+bool TuningFilter::value(Hash hash, TuningFilterValue& value)
+{
+	auto it = m_signalValuesMap.find(hash);
+	if (it == m_signalValuesMap.end())
+	{
+		return false;
+	}
+
+	value = it->second;
+
+	if (value.useValue() == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void TuningFilter::setValue(const TuningFilterValue& value)
+{
+	auto it = m_signalValuesMap.find(value.appSignalHash());
+
+	if (it == m_signalValuesMap.end())
+	{
+		assert(false);
+		return;
+	}
+
+	TuningFilterValue& ofv = it->second;
+	ofv.setUseValue(value.useValue());
+	ofv.setValue(value.value());
+}
+
+TuningFilterCounters TuningFilter::counters() const
+{
+	return m_counters;
+}
+
+void TuningFilter::setCounters(TuningFilterCounters value)
+{
+	m_counters = value;
 }
 
 TuningFilter::InterfaceType TuningFilter::interfaceType() const
@@ -958,7 +967,6 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 
 	return m_childFilters[index];
 }
-
 
 bool TuningFilter::match(const AppSignalParam& object) const
 {
@@ -1498,123 +1506,10 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 	}
 }
 
-void TuningFilterStorage::createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
-{
-	if (objects == nullptr)
-	{
-		assert(objects);
-		return;
-	}
-
-	if (bySchemas == true)
-	{
-		m_root->removeChild("%AUTOFILTER%_SCHEMA");
-
-		// Filter for Schema
-		//
-		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-		ofSchema->setID("%AUTOFILTER%_SCHEMA");
-		ofSchema->setCaption(QObject::tr("Schemas"));
-		ofSchema->setSource(TuningFilter::Source::Schema);
-
-		for (const VFrame30::SchemaDetails& schemasDetails : m_schemasDetails)
-		{
-			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-			for (const QString& appSignalID : schemasDetails.m_signals)
-			{
-				// find if this signal is a tuning signal
-				//
-				Hash hash = ::calcHash(appSignalID);
-
-				if (objects->signalExists(hash) == false)
-				{
-					continue;
-				}
-
-				TuningFilterValue ofv;
-				ofv.setAppSignalId(appSignalID);
-				ofTs->addValue(ofv);
-			}
-
-			if (ofTs->valuesCount() == 0)
-			{
-				// Do not add empty filters
-				//
-				continue;
-			}
-
-			ofTs->setID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_schemaId);
-
-			//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
-			ofTs->setCaption(schemasDetails.m_caption);
-			ofTs->setSource(TuningFilter::Source::Schema);
-
-			ofSchema->addChild(ofTs);
-		}
-
-		m_root->addTopChild(ofSchema);
-	}
-
-	if (byEquipment == true)
-	{
-		m_root->removeChild("%AUTOFILTER%_EQUIPMENT");
-
-		// Filter for EquipmentId
-		//
-		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-		ofEquipment->setID("%AUTOFILTER%_EQUIPMENT");
-		ofEquipment->setCaption(QObject::tr("Equipment"));
-		ofEquipment->setSource(TuningFilter::Source::Equipment);
-
-		for (const QString& ts : tuningSourcesEquipmentIds)
-		{
-			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-			ofTs->setEquipmentIDMask(ts);
-			ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
-			ofTs->setCaption(ts);
-			ofTs->setSource(TuningFilter::Source::Equipment);
-
-			ofEquipment->addChild(ofTs);
-		}
-
-		m_root->addTopChild(ofEquipment);
-	}
-}
-
-void TuningFilterStorage::removeFilters(TuningFilter::Source sourceType)
-{
-	m_root->removeChildren(sourceType);
-
-}
 
 void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters)
 {
 	m_root->checkSignals(signalHashes, notFoundSignalsAndFilters);
-}
-
-void TuningFilterStorage::checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget)
-{
-	removedNotFound = false;
-
-	m_root->checkSignals(signalHashes, notFoundSignalsAndFilters);
-
-	if (notFoundSignalsAndFilters.empty() == true)
-	{
-		return;
-	}
-
-	DialogCheckFilterSignals d(notFoundSignalsAndFilters, parentWidget);
-	if (d.exec() == QDialog::Accepted)
-	{
-		int removedCounter = 0;
-
-		m_root->removeNotExistingSignals(signalHashes, removedCounter);
-
-		removedNotFound = true;
-
-		QMessageBox::warning(parentWidget, qApp->applicationName(), QObject::tr("%1 signals have been removed.").arg(removedCounter));
-	}
-
 }
 
 void TuningFilterStorage::writeLogError(const QString& message)

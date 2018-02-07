@@ -149,88 +149,8 @@ void TuningTcpClient::applyTuningSignals()
 	return;
 }
 
-int TuningTcpClient::getLMErrorsCount()
-{
-	return getLMErrorsCount(std::vector<QString>());
 
-}
 
-int TuningTcpClient::getLMErrorsCount(const std::vector<QString>& equipmentHashes)
-{
-	int result = 0;
-
-	QMutexLocker l(&m_tuningSourcesMutex);
-
-	for (auto it : m_tuningSources)
-	{
-		const TuningSource& ts = it.second;
-
-		if (equipmentHashes.empty() == false)
-		{
-			// Filter from list
-			//
-			const QString tseid = QString(ts.info.equipmentid().c_str());
-			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
-			{
-				continue;
-			}
-		}
-
-		if (ts.state.isreply() == false)
-		{
-			result++;
-			continue;
-		}
-
-		if (ts.state.errfotipuniqueid() > 0)
-		{
-			result++;
-		}
-
-		// Add here more errors
-	}
-
-	l.unlock();
-
-	return result;
-}
-
-int TuningTcpClient::getSORCount()
-{
-	return getSORCount(std::vector<QString>());
-}
-
-int TuningTcpClient::getSORCount(const std::vector<QString>& equipmentHashes)
-{
-	int result = 0;
-
-	QMutexLocker l(&m_tuningSourcesMutex);
-
-	for (auto it : m_tuningSources)
-	{
-		const TuningSource& ts = it.second;
-
-		if (equipmentHashes.empty() == false)
-		{
-			// Filter from list
-			//
-			const QString tseid = QString(ts.info.equipmentid().c_str());
-			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
-			{
-				continue;
-			}
-		}
-
-		if (ts.state.isreply() == true && ts.state.fotipflagsetsor() > 0)
-		{
-			result++;
-		}
-	}
-
-	l.unlock();
-
-	return result;
-}
 
 bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
 {
@@ -488,6 +408,21 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 			ts.state = tss;
 		}
 	}
+
+	// Set signals' flags that belong to tuning sources
+
+	bool found = false;
+
+	for (Hash hash : m_signalHashes)
+	{
+		TuningSignalState state = m_signals->state(hash, &found);
+
+		//state.m_flags.controlIsEnabled = true;	// Set real value here!
+
+		m_signals->setState(hash, state);
+	}
+
+	//
 
 	resetToProcessTuningSignals();
 
