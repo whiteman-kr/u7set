@@ -10,6 +10,8 @@ DialogPassword::DialogPassword(const UserManager* userManager, bool adminNeeded,
 {
 	ui->setupUi(this);
 
+	ui->m_passwordEdit->setEchoMode(QLineEdit::Password);
+
 	int selectedIndex = -1;
 
 	setWindowTitle(adminNeeded ? tr("Enter Administrator Password") : tr("Enter Password"));
