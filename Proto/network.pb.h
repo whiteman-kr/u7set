@@ -4259,7 +4259,7 @@ class ChangeConrolledTuningSourceReply : public ::google::protobuf::Message {
   inline ::std::string* release_controlledtuningsourceequipmentid();
   inline void set_allocated_controlledtuningsourceequipmentid(::std::string* controlledtuningsourceequipmentid);
 
-  // optional bool controlIsActive = 3;
+  // optional bool controlIsActive = 3 [default = false];
   inline bool has_controlisactive() const;
   inline void clear_controlisactive();
   static const int kControlIsActiveFieldNumber = 3;
@@ -10710,7 +10710,7 @@ inline void ChangeConrolledTuningSourceReply::set_allocated_controlledtuningsour
   }
 }
 
-// optional bool controlIsActive = 3;
+// optional bool controlIsActive = 3 [default = false];
 inline bool ChangeConrolledTuningSourceReply::has_controlisactive() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }

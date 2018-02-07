@@ -59,9 +59,9 @@ public:
 
 	// Tuning sources
 	//
-	QStringList tuningSourcesEquipmentIds() const;
+	std::vector<Hash> tuningSourcesEquipmentHashes() const;
 	std::vector<TuningSource> tuningSourcesInfo() const;
-	bool tuningSourceInfo(quint64 id, TuningSource* result) const;
+	bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
 
 	// Writing states
 	//
@@ -71,15 +71,6 @@ public:
 	// Apply states
 	//
 	void applyTuningSignals();
-
-	//
-	// Status and counters
-	//
-	int getLMErrorsCount();
-	int getLMErrorsCount(const std::vector<QString>& equipmentHashes);
-
-	int getSORCount();
-	int getSORCount(const std::vector<QString>& equipmentHashes);
 
 	// ITuningTcpClient implementation
 	//
@@ -152,11 +143,13 @@ private:
 
 	TuningSignalManager* m_signals;
 
+protected:
 	// Tuning sources
 	//
 	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources
-	std::map<quint64, TuningSource> m_tuningSources;	// Key is ::Proto::DataSourceInfo::id
+	std::map<Hash, TuningSource> m_tuningSources;	// Key is hash of EquipmentID
 
+private:
 	// Processing
 	//
 	mutable QMutex m_writeQueueMutex;					// For access to m_writeQueue and m_writeApply
@@ -173,7 +166,7 @@ private:
 #endif
 
 private:
-	// Cached protobug messages
+	// Cached protobuf messages
 	//
 	::Network::GetTuningSourcesStates m_getTuningSourcesStates;
 	::Network::GetDataSourcesInfoReply m_tuningDataSourcesInfoReply;

@@ -11,6 +11,7 @@ union TuningSignalStateFlags
 		quint32	valid : 1;
 		quint32	outOfRange : 1;
 		quint32	writeInProgress : 1;
+		quint32 controlIsEnabled: 1;
 
 		quint32 userModified : 1;	// This flag is used by TuningClient's model
 	};
@@ -48,6 +49,7 @@ public:
 	Q_INVOKABLE bool valid() const;
 	Q_INVOKABLE bool outOfRange() const;
 	Q_INVOKABLE bool writeInProgress() const;
+	Q_INVOKABLE bool controlIsEnabled() const;
 
 	Q_INVOKABLE int writeErrorCode() const;
 

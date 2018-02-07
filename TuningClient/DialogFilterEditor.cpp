@@ -11,8 +11,14 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 	assert(tuningSignalManager);
 	assert(filterStorage);
 
-	m_tuningFilterEditor = new TuningFilterEditor(filterStorage, tuningSignalManager,
-												  false, true, TuningFilter::Source::User,
+	m_tuningFilterEditor = new TuningFilterEditor(filterStorage,
+												  tuningSignalManager,
+												  false,	/*readOnly*/
+												  true,		/*setCurrentEnabled*/
+												  true,		/*typeTreeEnabled*/
+												  false,		/*typeButtonEnabled*/
+												  false,		/*typeTabEnabled*/
+												  TuningFilter::Source::User,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
 												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 

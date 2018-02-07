@@ -310,7 +310,24 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 		assert(m_statusBarLmErrors);
 
-		int errorsCount = m_tcpClient->getLMErrorsCount();
+		int errorsCount = 0;
+		int sorCount = 0;
+
+		std::vector<Hash> sources = m_tcpClient->tuningSourcesEquipmentHashes();
+
+		for (Hash& h : sources)
+		{
+			TuningFilterCounters counters;
+			if (m_tcpClient->tuningSourceCounters(h, &counters) == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			errorsCount += counters.errorCounter;
+			sorCount += counters.sorCounter;
+		}
+
 		if (errorsCount == 0)
 		{
 			m_statusBarLmErrors->setText(QString());
@@ -326,7 +343,6 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 		assert(m_statusBarSor);
 
-		int sorCount = m_tcpClient->getSORCount();
 		if (sorCount == 0)
 		{
 			m_statusBarSor->setText(QString());
@@ -346,6 +362,8 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_mainWindowTimerId_500ms)
 	{
+		m_filterStorage.updateCounters(&m_tuningSignalManager, m_tcpClient, nullptr);
+
 		emit timerTick500();
 	}
 
@@ -365,7 +383,6 @@ void MainWindow::createWorkspace()
 	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
 
 	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theConfigSettings.equipmentList);
-
 
 	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager);
 

@@ -68,6 +68,11 @@ bool TuningSignalState::writeInProgress() const
 	return m_flags.writeInProgress;
 }
 
+bool TuningSignalState::controlIsEnabled() const
+{
+	return m_flags.controlIsEnabled;
+}
+
 int TuningSignalState::writeErrorCode() const
 {
 	return m_writeErrorCode;

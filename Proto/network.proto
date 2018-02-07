@@ -359,7 +359,7 @@ message ChangeConrolledTuningSourceReply
     optional int32 error = 1 [default = 0];
     optional string controlledTuningSourceEquipmentID = 2;	    // if error == Success - current controlled TuningSource
                                                                     // else - empty string
-    optional bool controlIsActive = 3;
+    optional bool controlIsActive = 3 [default = false];
 }
 
 // Tuning signals read request - TDS_TUNING_SIGNALS_READ

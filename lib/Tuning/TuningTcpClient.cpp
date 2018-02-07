@@ -45,16 +45,15 @@ void TuningTcpClient::setSimulationMode(bool value)
 }
 #endif
 
-QStringList TuningTcpClient::tuningSourcesEquipmentIds() const
+std::vector<Hash> TuningTcpClient::tuningSourcesEquipmentHashes() const
 {
 	QMutexLocker l(&m_tuningSourcesMutex);
 
-	QStringList result;
+	std::vector<Hash> result;
 
 	for (auto p : m_tuningSources)
 	{
-		QString equipmentId = QString::fromStdString(p.second.info.equipmentid());
-		result.push_back(equipmentId);
+		result.push_back(p.first);
 	}
 
 	return result;
@@ -75,7 +74,7 @@ std::vector<TuningSource> TuningTcpClient::TuningTcpClient::tuningSourcesInfo() 
 	return result;
 }
 
-bool TuningTcpClient::tuningSourceInfo(quint64 id, TuningSource* result) const
+bool TuningTcpClient::tuningSourceInfo(Hash equipmentHash, TuningSource* result) const
 {
 	if (result == nullptr)
 	{
@@ -85,7 +84,7 @@ bool TuningTcpClient::tuningSourceInfo(quint64 id, TuningSource* result) const
 
 	QMutexLocker l(&m_tuningSourcesMutex);
 
-	auto it = m_tuningSources.find(id);
+	auto it = m_tuningSources.find(equipmentHash);
 
 	if (it == m_tuningSources.end())
 	{
@@ -149,88 +148,8 @@ void TuningTcpClient::applyTuningSignals()
 	return;
 }
 
-int TuningTcpClient::getLMErrorsCount()
-{
-	return getLMErrorsCount(std::vector<QString>());
 
-}
 
-int TuningTcpClient::getLMErrorsCount(const std::vector<QString>& equipmentHashes)
-{
-	int result = 0;
-
-	QMutexLocker l(&m_tuningSourcesMutex);
-
-	for (auto it : m_tuningSources)
-	{
-		const TuningSource& ts = it.second;
-
-		if (equipmentHashes.empty() == false)
-		{
-			// Filter from list
-			//
-			const QString tseid = QString(ts.info.equipmentid().c_str());
-			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
-			{
-				continue;
-			}
-		}
-
-		if (ts.state.isreply() == false)
-		{
-			result++;
-			continue;
-		}
-
-		if (ts.state.errfotipuniqueid() > 0)
-		{
-			result++;
-		}
-
-		// Add here more errors
-	}
-
-	l.unlock();
-
-	return result;
-}
-
-int TuningTcpClient::getSORCount()
-{
-	return getSORCount(std::vector<QString>());
-}
-
-int TuningTcpClient::getSORCount(const std::vector<QString>& equipmentHashes)
-{
-	int result = 0;
-
-	QMutexLocker l(&m_tuningSourcesMutex);
-
-	for (auto it : m_tuningSources)
-	{
-		const TuningSource& ts = it.second;
-
-		if (equipmentHashes.empty() == false)
-		{
-			// Filter from list
-			//
-			const QString tseid = QString(ts.info.equipmentid().c_str());
-			if (std::find(equipmentHashes.begin(), equipmentHashes.end(), tseid) == equipmentHashes.end())
-			{
-				continue;
-			}
-		}
-
-		if (ts.state.isreply() == true && ts.state.fotipflagsetsor() > 0)
-		{
-			result++;
-		}
-	}
-
-	l.unlock();
-
-	return result;
-}
 
 bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
 {
@@ -423,9 +342,11 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 			TuningSource ts;
 			ts.info = dsi;
 
-			assert(m_tuningSources.count(ts.id()) == 0);
+			Hash hash = ::calcHash(QString(ts.info.equipmentid().c_str()));
 
-			m_tuningSources[ts.id()] = ts;
+			assert(m_tuningSources.count(hash) == 0);
+
+			m_tuningSources[hash] = ts;
 		}
 	}
 
@@ -488,6 +409,21 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 			ts.state = tss;
 		}
 	}
+
+	// Set signals' flags that belong to tuning sources
+
+	bool found = false;
+
+	for (Hash hash : m_signalHashes)
+	{
+		TuningSignalState state = m_signals->state(hash, &found);
+
+		//state.m_flags.controlIsEnabled = true;	// Set real value here!
+
+		m_signals->setState(hash, state);
+	}
+
+	//
 
 	resetToProcessTuningSignals();
 
