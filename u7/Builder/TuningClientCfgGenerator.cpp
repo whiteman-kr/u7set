@@ -207,6 +207,15 @@ bool TuningClientCfgGenerator::writeSettings()
 		}
 
 		//
+		// showDiscreteCounters
+		//
+		bool showDiscreteCounters = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowDiscreteCounters", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
 		// showSOR
 		//
 		bool showSOR = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSOR", &ok);
@@ -268,6 +277,7 @@ bool TuningClientCfgGenerator::writeSettings()
 			xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 			xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
 			xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
+			xmlWriter.writeAttribute("showDiscreteCounters", (showDiscreteCounters ? "true" : "false"));
 			xmlWriter.writeAttribute("loginPerOperation", (loginPerOperation ? "true" : "false"));
 			xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));
 			xmlWriter.writeAttribute("usersAccounts", usersAccounts);

@@ -1406,6 +1406,6 @@ void TuningPage::slot_Write()
 
 void TuningPage::slot_Apply()
 {
-
+	apply();
 }
 

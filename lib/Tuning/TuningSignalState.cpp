@@ -102,6 +102,12 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 	m_flags.writeInProgress = message.writeinprogress();
 	m_writeErrorCode = message.writeerrorcode();
 
+	//writeClient
+	//successfulReadTime
+	//writeRequestTime
+	//successfulWriteTime
+	//unsuccessfulWriteTime
+
 	return true;
 }
 

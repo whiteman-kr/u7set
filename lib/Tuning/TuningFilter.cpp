@@ -278,6 +278,14 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_interfaceType = That.m_interfaceType;
 	m_signalType = That.m_signalType;
 
+	m_hasDiscreteCounter = That.m_hasDiscreteCounter;
+
+	m_backColor = That.m_backColor;
+	m_textColor = That.m_textColor;
+
+	m_backSelectedColor = That.m_backSelectedColor;
+	m_textSelectedColor = That.m_textSelectedColor;
+
 	for (auto f : That.m_childFilters)
 	{
 		TuningFilter* fi = f.get();

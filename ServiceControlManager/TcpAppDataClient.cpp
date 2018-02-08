@@ -77,11 +77,16 @@ void TcpAppDataClient::onDisconnection()
 	if (m_updateStatesTimer != nullptr)
 	{
 		m_updateStatesTimer->stop();
+
+		delete m_updateStatesTimer;
+
+		m_updateStatesTimer = nullptr;
 	}
 
 	m_signalHashes.clear();
 	m_signalParams.clear();
 	m_states.clear();
+
 	emit disconnected();
 }
 
