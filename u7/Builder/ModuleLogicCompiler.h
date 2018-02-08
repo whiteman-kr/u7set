@@ -442,7 +442,7 @@ namespace Builder
 		//
 		int m_lmCodeMemorySize = 0;
 		int m_lmAppMemorySize = 0;
-		int m_lmAppLogicFrameSize = 0;
+		int m_lmAppLogicFramePayload = 0;
 		int m_lmAppLogicFrameCount = 0;
 
 		int m_lmCycleDuration = 0;

@@ -222,7 +222,7 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
     var moduleId = module.jsPropertyInt("ModuleFamily") + module.jsPropertyInt("ModuleVersion");
     // Constants
     //
-    var frameSize = logicModuleDescription.FlashMemory_ConfigFrameSize;
+    var frameSize = logicModuleDescription.FlashMemory_ConfigFramePayload;
     var frameCount = logicModuleDescription.FlashMemory_ConfigFrameCount;
     if (frameSize < 1016) {
         log.errCFG3002("FlashMemory/ConfigFrameSize", frameSize, 1016, 65535, module.jsPropertyString("EquipmentID"));

@@ -256,7 +256,7 @@ namespace Builder
 		m_lmIDRPhaseTime = m_lmDescription->logicUnit().m_idrPhaseTime;
 		m_lmCycleDuration = m_lmDescription->logicUnit().m_cycleDuration;
 
-		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
+		m_lmAppLogicFramePayload = m_lmDescription->flashMemory().m_appLogicFramePayload;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
@@ -2138,7 +2138,7 @@ namespace Builder
 		assert(m_lmDescription);
 
 		int tuningMemoryStartAddrW = m_lmDescription->memory().m_tuningDataOffset;
-		int tuningFrameSizeBytes = m_lmDescription->flashMemory().m_tuningFrameSize;
+		int tuningFrameSizePayload = m_lmDescription->flashMemory().m_tuningFramePayload;
 		int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
 
 		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
@@ -2152,7 +2152,7 @@ namespace Builder
 		//
 		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
 												tuningMemoryStartAddrW,
-												tuningFrameSizeBytes,
+												tuningFrameSizePayload,
 												tuningFrameCount);
 
 		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
@@ -8953,7 +8953,7 @@ namespace Builder
 														   m_lmDescription->flashMemory().m_appLogicUartId,
 														   m_lm->equipmentIdTemplate(),
 														   m_lmNumber,
-														   m_lmAppLogicFrameSize,
+														   m_lmAppLogicFramePayload,
 														   m_lmAppLogicFrameCount,
 														   uniqueID,
 														   m_lmDescription->lmDescriptionFile(m_lm),

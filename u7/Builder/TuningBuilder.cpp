@@ -80,13 +80,9 @@ namespace Builder
 			QString subsysStrID = m->propertyValue("SubsystemID").toString();
 
 			int channel = m->propertyValue("LMNumber").toInt();
-
-			int frameSize = lmDescription->flashMemory().m_tuningFrameSize;
-
+			int frameSize = lmDescription->flashMemory().m_tuningFramePayload;
 			int frameCount = lmDescription->flashMemory().m_tuningFrameCount;
-
 			int subsysID = m_subsystems->ssKey(subsysStrID);
-
 			int tuningUartId = lmDescription->flashMemory().m_tuningUartId;
 
 			if (subsysID == -1)

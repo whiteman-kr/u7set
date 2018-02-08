@@ -2,14 +2,17 @@
 <LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0002">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
-		<AppLogicFrameSize>1016</AppLogicFrameSize>
+		<AppLogicFramePayload>1016</AppLogicFramePayload>
+		<AppLogicFrameSize>1024</AppLogicFrameSize>
 		<AppLogicUartID>0</AppLogicUartID>
 		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
 		<ConfigFrameCount>256</ConfigFrameCount>
+		<ConfigFramePayload>1016</ConfigFramePayload>
 		<ConfigFrameSize>1016</ConfigFrameSize>
 		<ConfigUartID>5636</ConfigUartID>
 		<ConfigWriteBitstream>true</ConfigWriteBitstream>
 		<TuningFrameCount>0</TuningFrameCount>
+		<TuningFramePayload>0</TuningFramePayload>
 		<TuningFrameSize>0</TuningFrameSize>
 		<TuningUartID>0</TuningUartID>
 		<TuningWriteBitstream>false</TuningWriteBitstream>
