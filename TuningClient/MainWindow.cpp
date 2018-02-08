@@ -399,7 +399,7 @@ void MainWindow::createWorkspace()
 		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
 	}
 
-	m_filterStorage.root()->setHasDiscreteCounter(theConfigSettings.globalDiscreteCounters);
+	m_filterStorage.root()->setHasDiscreteCounter(theConfigSettings.showDiscreteCounters);
 
 	// Update automatic filters
 
@@ -409,7 +409,7 @@ void MainWindow::createWorkspace()
 	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager,
 										   theConfigSettings.filterBySchema,
 										   theConfigSettings.filterByEquipment,
-										   theConfigSettings.globalDiscreteCounters,
+										   theConfigSettings.showDiscreteCounters,
 										   theConfigSettings.equipmentList);
 
 	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager);

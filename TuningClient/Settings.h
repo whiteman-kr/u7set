@@ -70,7 +70,7 @@ struct ConfigSettings
 
 	bool showSOR = true;
 
-	bool globalDiscreteCounters = true;
+	bool showDiscreteCounters = true;
 
 	int loginSessionLength = 120;
 

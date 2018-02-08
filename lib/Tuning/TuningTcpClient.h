@@ -21,8 +21,26 @@ struct TuningSource
 
 struct TuningWriteCommand
 {
+	enum class TuningWriteCommandType
+	{
+		WriteValue,
+		Apply,
+		ActivateLm
+	};
+
+	// Data
+
 	Hash m_hash = 0;
+
+	QString m_equipmentId = 0;
+
 	TuningValue m_value;
+
+	TuningWriteCommandType m_type = TuningWriteCommandType::WriteValue;
+
+	bool m_enableControl = false;
+
+	// Write constructor
 
 	TuningWriteCommand(const QString& appSignalId, const TuningValue& value) :
 		TuningWriteCommand(::calcHash(appSignalId), value)
@@ -31,9 +49,30 @@ struct TuningWriteCommand
 
 	TuningWriteCommand(Hash hash, const TuningValue& value)
 	{
+		m_type = TuningWriteCommandType::WriteValue;
+
 		m_hash = hash;
 		m_value = value;
 	}
+
+	// Apply constructor
+
+	TuningWriteCommand()
+	{
+		m_type = TuningWriteCommandType::Apply;
+	}
+
+	// Activate LM constructor
+
+	TuningWriteCommand(const QString& equipmentId, bool enableControl)
+	{
+		m_type = TuningWriteCommandType::ActivateLm;
+
+		m_equipmentId = equipmentId;
+		m_enableControl = enableControl;
+	}
+
+	// Serializing
 
 	bool save(Network::TuningWriteCommand* message) const;
 	bool load(const Network::TuningWriteCommand& message);
@@ -61,7 +100,10 @@ public:
 	//
 	std::vector<Hash> tuningSourcesEquipmentHashes() const;
 	std::vector<TuningSource> tuningSourcesInfo() const;
-	bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
+	bool tuningSourceInfoById(quint64 id, TuningSource* result) const;
+	bool tuningSourceInfoByHash(Hash equipmentHash, TuningSource* result) const;
+
+	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl);
 
 	// Writing states
 	//
@@ -99,6 +141,9 @@ protected:
 	void requestTuningSourcesState();
 	void processTuningSourcesState(const QByteArray& data);
 
+	void requestActivateTuningSource(const QString& equipmentId, bool enableControl);
+	void processActivateTuningSource(const QByteArray& data);
+
 	void requestReadTuningSignals();
 	void processReadTuningSignals(const QByteArray& data);
 
@@ -134,6 +179,8 @@ public:
 	bool autoApply() const;
 	void setAutoApply(bool value);
 
+	bool singleLmControlMode() const;
+
 	// Data
 	//
 private:
@@ -147,19 +194,22 @@ protected:
 	// Tuning sources
 	//
 	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources
-	std::map<Hash, TuningSource> m_tuningSources;	// Key is hash of EquipmentID
+	std::map<Hash, TuningSource> m_tuningSources;		// Key is hash of EquipmentID
+	std::map<quint64, Hash> m_tuningSourcesIdToHashMap;
+	std::multimap<Hash, Hash> m_equipmentToSignalMap;	// Key is hash of EquipmentID, values are hashes of signals
 
 private:
 	// Processing
 	//
 	mutable QMutex m_writeQueueMutex;					// For access to m_writeQueue and m_writeApply
 	std::queue<TuningWriteCommand> m_writeQueue;
-	bool m_writeApply = false;
 
 	int m_readTuningSignalIndex = 0;
 	int m_readTuningSignalCount = 0;
 
 	std::vector<Hash> m_signalHashes;
+
+	bool m_singleLmControlMode = false;
 
 #ifdef Q_DEBUG
 	bool m_simulationMode = false;
@@ -169,10 +219,13 @@ private:
 	// Cached protobuf messages
 	//
 	::Network::GetTuningSourcesStates m_getTuningSourcesStates;
-	::Network::GetDataSourcesInfoReply m_tuningDataSourcesInfoReply;
+	::Network::GetTuningSourcesStatesReply m_tuningSourcesStatesReply;
 
 	::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
-	::Network::GetTuningSourcesStatesReply m_tuningDataSourcesStatesReply;
+	::Network::GetTuningSourcesInfoReply m_tuningSourcesInfoReply;
+
+	::Network::ChangeConrolledTuningSourceRequest m_activateTuningSource;
+	::Network::ChangeConrolledTuningSourceReply m_activateTuningSourceReply;
 
 	::Network::TuningSignalsRead m_readTuningSignals;
 	::Network::TuningSignalsReadReply m_readTuningSignalsReply;

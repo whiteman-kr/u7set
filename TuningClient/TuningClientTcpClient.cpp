@@ -22,7 +22,7 @@ bool TuningClientTcpClient::tuningSourceCounters(const Hash& equipmentHash, Tuni
 
 	TuningSource ts;
 
-	if (tuningSourceInfo(equipmentHash, &ts) == false)
+	if (tuningSourceInfoByHash(equipmentHash, &ts) == false)
 	{
 		return false;
 	}
