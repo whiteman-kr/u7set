@@ -80,7 +80,10 @@ private:
 
 	//
 
+	void sendNextRequest(quint32 processedRequestID);	// Describes all request sequence
+
 	void clearDataSources();
+	void startStateUpdating();
 
 private slots:
 	void updateStates();
