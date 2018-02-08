@@ -282,13 +282,8 @@ const char* TuningServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort
 const char* TuningServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
 const char* TuningServiceSettings::PROP_TUNING_DATA_IP = "TuningDataIP";
 const char* TuningServiceSettings::PROP_TUNING_DATA_PORT = "TuningDataPort";
-
-const char* TuningServiceSettings::TUNING_MEMORY_SETTINGS_ELEMENT = "TuningMemorySettings";
-const char* TuningServiceSettings::PROP_TUNING_DATA_OFFSET = "TuningDataOffset";
-const char* TuningServiceSettings::PROP_TUNING_DATA_SIZE = "TuningDataSize";
-const char* TuningServiceSettings::PROP_TUNING_ROM_FRAME_COUNT = "TuningROMFrameCount";
-const char* TuningServiceSettings::PROP_TUNING_ROM_FRAME_SIZE = "TuningROMFrameSize";
-const char* TuningServiceSettings::PROP_TUNING_ROM_SIZE = "TuningROMSize";
+const char* TuningServiceSettings::PROP_SINGLE_LM_CONTROL = "SingleLmControl";
+const char* TuningServiceSettings::PROP_DISABLE_MODULES_TYPE_CHECKING = "DisableModulesTypeChecking";
 
 const char* TuningServiceSettings::TUNING_CLIENTS = "TuningClients";
 const char* TuningServiceSettings::TUNING_CLIENT = "TuningClient";
@@ -401,11 +396,8 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 	result &= DeviceHelper::getStrProperty(software, PROP_TUNING_DATA_IP, &tuningDataIPStr, log);
 	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_DATA_PORT, &tuningDataPort, log);
 
-	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_DATA_OFFSET, &tuningDataOffsetW, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_DATA_SIZE, &tuningDataSizeW, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_ROM_FRAME_COUNT, &tuningRomFrameCount, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_ROM_FRAME_SIZE, &tuningRomFrameSizeW, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_ROM_SIZE, &tuningRomSizeW, log);
+	result &= DeviceHelper::getBoolProperty(software, PROP_SINGLE_LM_CONTROL, &singleLmControl, log);
+	result &= DeviceHelper::getBoolProperty(software, PROP_DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
 
 	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
 	clientRequestNetmask.setAddress(clientNetmaskStr);
@@ -426,15 +418,8 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 	xml.writeHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, tuningDataIP);
 
-	xml.writeStartElement(TUNING_MEMORY_SETTINGS_ELEMENT);
-
-	xml.writeIntAttribute(PROP_TUNING_DATA_OFFSET, tuningDataOffsetW);
-	xml.writeIntAttribute(PROP_TUNING_DATA_SIZE, tuningDataSizeW);
-	xml.writeIntAttribute(PROP_TUNING_ROM_FRAME_COUNT, tuningRomFrameCount);
-	xml.writeIntAttribute(PROP_TUNING_ROM_FRAME_SIZE, tuningRomFrameSizeW);
-	xml.writeIntAttribute(PROP_TUNING_ROM_SIZE, tuningRomSizeW);
-
-	xml.writeEndElement();	// </TuningMemorySettings>
+	xml.writeBoolElement(PROP_SINGLE_LM_CONTROL, singleLmControl);
+	xml.writeBoolElement(PROP_DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -487,23 +472,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 	result &= xml.readHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, &tuningDataIP);
 
-	if (result == false)
-	{
-		return false;
-	}
-
-	result = xml.findElement(TUNING_MEMORY_SETTINGS_ELEMENT);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result &= xml.readIntAttribute(PROP_TUNING_DATA_OFFSET, &tuningDataOffsetW);
-	result &= xml.readIntAttribute(PROP_TUNING_DATA_SIZE, &tuningDataSizeW);
-	result &= xml.readIntAttribute(PROP_TUNING_ROM_FRAME_COUNT, &tuningRomFrameCount);
-	result &= xml.readIntAttribute(PROP_TUNING_ROM_FRAME_SIZE, &tuningRomFrameSizeW);
-	result &= xml.readIntAttribute(PROP_TUNING_ROM_SIZE, &tuningRomSizeW);
+	result &= xml.readBoolElement(PROP_SINGLE_LM_CONTROL, &singleLmControl);
+	result &= xml.readBoolElement(PROP_DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking);
 
 	if (result == false)
 	{

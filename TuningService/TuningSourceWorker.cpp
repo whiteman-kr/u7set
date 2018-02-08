@@ -198,10 +198,11 @@ namespace Tuning
 		m_lmModuleType = static_cast<quint16>(source.lmModuleType());
 		m_subsystemCode = static_cast<quint16>(source.lmSubsystemID());
 
-		m_tuningRomStartAddrW = settings.tuningDataOffsetW;
+		assert(false);
+/*		m_tuningRomStartAddrW = settings.tuningDataOffsetW;
 		m_tuningRomFrameCount = settings.tuningRomFrameCount;
 		m_tuningRomFrameSizeW = settings.tuningRomFrameSizeW;
-		m_tuningRomSizeW = settings.tuningRomSizeW;
+		m_tuningRomSizeW = settings.tuningRomSizeW;*/
 
 		m_tuningMem.init(m_tuningRomStartAddrW, m_tuningRomFrameSizeW, m_tuningRomFrameCount);
 
@@ -756,13 +757,9 @@ namespace Tuning
 
 						quint32 bitmask = 1 << bit;
 
-						//quint32 bitmask = ~0;
-
 						fotipFrame.write.bitMask = reverseUint32(bitmask);
 
 						quint32 discreteValue = tuningCmd.write.tuningValue.discreteValue() << bit;
-
-						//quint32 discreteValue = 0;
 
 						fotipFrame.write.discreteValue = reverseUint32(discreteValue);
 					}

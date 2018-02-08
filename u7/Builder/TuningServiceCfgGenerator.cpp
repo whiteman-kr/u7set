@@ -37,10 +37,28 @@ namespace Builder
 
 		bool result = true;
 
-		result &= writeSettings();
-		result &= writeTuningLMs();
-		result &= writeBatFile();
-		result &= writeShFile();
+		result = writeSettings();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = writeTuningLMs();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = writeBatFile();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = writeShFile();
 
 		return result;
 	}

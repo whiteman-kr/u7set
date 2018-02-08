@@ -291,10 +291,11 @@ namespace TuningIPEN
 		sr.uniqueID = source->uniqueID();
 		sr.numerator = source->numerator();
 		sr.operation = FotipOpCode::Write;
-		sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
-		sr.romSizeW = m_tuningSettings.tuningRomSizeW;
 
-		sr.startAddressW += m_tuningSettings.tuningDataOffsetW;		// !!!
+		assert(false);
+		/*sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
+		sr.romSizeW = m_tuningSettings.tuningRomSizeW;
+		sr.startAddressW += m_tuningSettings.tuningDataOffsetW;		// !!!*/
 
 		sr.userRequest = true;
 
@@ -411,10 +412,13 @@ namespace TuningIPEN
 		sr.uniqueID = source->uniqueID();
 		sr.numerator = source->numerator();
 		sr.operation = FotipOpCode::Read;
-		sr.startAddressW = source->frameToRequest() * m_tuningSettings.tuningRomFrameSizeW + m_tuningSettings.tuningDataOffsetW;
+
+		assert(false);
+		/*sr.startAddressW = source->frameToRequest() * m_tuningSettings.tuningRomFrameSizeW + m_tuningSettings.tuningDataOffsetW;
 		sr.frameSizeW = m_tuningSettings.tuningRomFrameSizeW;
+		sr.romSizeW = m_tuningSettings.tuningRomSizeW;*/
+
 		sr.dataType = FotipDataType::Discrete;						//
-		sr.romSizeW = m_tuningSettings.tuningRomSizeW;
 		sr.userRequest = false;
 
 		source->incNumerator();
@@ -459,7 +463,8 @@ namespace TuningIPEN
 			}
 			else
 			{
-				sr.frameNo = (sr.fotipHeader.startAddress - m_tuningSettings.tuningDataOffsetW) / m_tuningSettings.tuningRomFrameSizeW;
+				assert(false);
+				//sr.frameNo = (sr.fotipHeader.startAddress - m_tuningSettings.tuningDataOffsetW) / m_tuningSettings.tuningRomFrameSizeW;
 
 				source->processReply(sr);
 

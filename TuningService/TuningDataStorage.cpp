@@ -88,7 +88,7 @@ namespace  Tuning
 				continue;
 			}
 
-			if (signal->isAnalog())
+			if (signal->isAnalog() == true)
 			{
 				if (signal->dataSize() != SIZE_32BIT)
 				{
@@ -233,8 +233,8 @@ namespace  Tuning
 				case TYPE_ANALOG_FLOAT:
 					{
 						float defaultValue = signal->tuningDefaultValue().floatValue();
-						float lowBound = static_cast<float>(signal->lowEngeneeringUnits());
-						float highBound = static_cast<float>(signal->highEngeneeringUnits());
+						float lowBound = static_cast<float>(signal->tuningLowBound().floatValue());
+						float highBound = static_cast<float>(signal->tuningHighBound().floatValue());
 
 						// in first frame - default value
 						//
@@ -268,8 +268,8 @@ namespace  Tuning
 				case TYPE_ANALOG_INT:
 					{
 						qint32 defaultValue = signal->tuningDefaultValue().int32Value();
-						qint32 lowBound = static_cast<qint32>(signal->lowEngeneeringUnits());
-						qint32 highBound = static_cast<qint32>(signal->highEngeneeringUnits());
+						qint32 lowBound = static_cast<qint32>(signal->tuningLowBound().int32Value());
+						qint32 highBound = static_cast<qint32>(signal->tuningHighBound().int32Value());
 
 						// in first frame - default value
 						//
