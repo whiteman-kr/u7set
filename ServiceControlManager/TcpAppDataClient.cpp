@@ -33,6 +33,17 @@ void TcpAppDataClient::clearDataSources()
 	m_appDataSources.clear();
 }
 
+void TcpAppDataClient::startStateUpdating()
+{
+	if (m_updateStatesTimer == nullptr)
+	{
+		m_updateStatesTimer = new QTimer(this);
+		connect(m_updateStatesTimer, &QTimer::timeout, this, &TcpAppDataClient::updateStates);
+	}
+
+	m_updateStatesTimer->start(200);
+}
+
 
 void TcpAppDataClient::updateStates()
 {
@@ -57,7 +68,7 @@ void TcpAppDataClient::onConnection()
 {
 	init();
 
-	sendRequest(RQID_GET_CLIENT_LIST);
+	sendRequest(ADS_GET_DATA_SOURCES_INFO);
 }
 
 
@@ -97,41 +108,53 @@ void TcpAppDataClient::init()
 
 void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
+	restartWatchdogTimer();
+
 	switch(requestID)
 	{
-	case RQID_GET_CLIENT_LIST:
-		onGetClientList(replyData, replyDataSize);
-		break;
-
+	// Static data
+	//
 	case ADS_GET_DATA_SOURCES_INFO:
 		onGetDataSourcesInfoReply(replyData, replyDataSize);
-		break;
-
-	case ADS_GET_DATA_SOURCES_STATES:
-		onGetDataSourcesStatesReply(replyData, replyDataSize);
-		break;
-
-	case ADS_GET_APP_SIGNAL_LIST_START:
-		onGetAppSignalListStartReply(replyData, replyDataSize);
-		break;
-
-	case ADS_GET_APP_SIGNAL_LIST_NEXT:
-		onGetAppSignalListNextReply(replyData, replyDataSize);
-		break;
-
-	case ADS_GET_APP_SIGNAL:
-		onGetAppSignalReply(replyData, replyDataSize);
-		break;
-
-	case ADS_GET_APP_SIGNAL_STATE:
-		onGetAppSignalStateReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_DATA_SOURCES_INFO);
 		break;
 
 	case ADS_GET_UNITS:
 		onGetUnitsReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_UNITS);
 		break;
 
+	case ADS_GET_APP_SIGNAL_LIST_START:
+		onGetAppSignalListStartReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_APP_SIGNAL_LIST_START);
+		break;
+
+	case ADS_GET_APP_SIGNAL_LIST_NEXT:
+		onGetAppSignalListNextReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_APP_SIGNAL_LIST_NEXT);
+		break;
+
+	case ADS_GET_APP_SIGNAL:
 	case ADS_GET_APP_SIGNAL_PARAM:
+		onGetAppSignalReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_APP_SIGNAL);
+		break;
+
+	// Dynamic data
+	//
+	case ADS_GET_APP_SIGNAL_STATE:
+		onGetAppSignalStateReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_APP_SIGNAL_STATE);
+		break;
+
+	case ADS_GET_DATA_SOURCES_STATES:
+		onGetDataSourcesStatesReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_DATA_SOURCES_STATES);
+		break;
+
+	case RQID_GET_CLIENT_LIST:
+		onGetClientList(replyData, replyDataSize);
+		sendNextRequest(RQID_GET_CLIENT_LIST);
 		break;
 
 	default:
@@ -177,8 +200,6 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 	}
 
 	emit dataSourcesInfoLoaded();
-
-	sendRequest(ADS_GET_UNITS);
 }
 
 
@@ -231,30 +252,11 @@ void TcpAppDataClient::onGetAppSignalListStartReply(const char* replyData, quint
 	m_totalItemsCount = m_getSignalListStartReply.totalitemcount();
 	m_partCount = m_getSignalListStartReply.partcount();
 	m_itemsPerPart = m_getSignalListStartReply.itemsperpart();
-
-	if (m_partCount > 0)
-	{
-		m_hash2Index.clear();
-		m_hash2Index.reserve(m_signalHashes.count() * 1.3);
-
-		m_currentPart = 0;
-		getNextItemsPart();
-	}
 }
 
 
 void TcpAppDataClient::getNextItemsPart()
 {
-	if (m_currentPart >= m_partCount)
-	{
-		// all hashes received
-		//
-		m_signalParams.resize(m_signalHashes.count());
-		m_getParamsCurrentPart = 0;
-		getNextParamPart();
-		return;
-	}
-
 	m_getSignalListNextRequest.Clear();
 
 	m_getSignalListNextRequest.set_part(m_currentPart);
@@ -285,32 +287,11 @@ void TcpAppDataClient::onGetAppSignalListNextReply(const char* replyData, quint3
 	}
 
 	m_currentPart++;
-
-	getNextItemsPart();
 }
 
 
 void TcpAppDataClient::getNextParamPart()
 {
-	int paramsTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_PARAM_MAX +
-							((m_totalItemsCount % ADS_GET_APP_SIGNAL_PARAM_MAX) == 0 ? 0 : 1);
-
-	if (m_getParamsCurrentPart >= paramsTotalParts)
-	{
-		m_states.resize(m_signalParams.count());
-
-		emit appSignalListLoaded();
-
-		if (m_updateStatesTimer == nullptr)
-		{
-			m_updateStatesTimer = new QTimer(this);
-			connect(m_updateStatesTimer, &QTimer::timeout, this, &TcpAppDataClient::updateStates);
-		}
-
-		m_updateStatesTimer->start(200);
-		return;
-	}
-
 	int startIndex = m_getParamsCurrentPart * ADS_GET_APP_SIGNAL_PARAM_MAX;
 
 	int paramsInPartCount = m_totalItemsCount - startIndex;
@@ -359,24 +340,14 @@ void TcpAppDataClient::onGetAppSignalReply(const char* replyData, quint32 replyD
 	}
 
 	m_getParamsCurrentPart++;
-
-	getNextParamPart();
 }
 
 
 void TcpAppDataClient::getNextStatePart()
 {
-	if (isClearToSendRequest() == false)
+	if (isClearToSendRequest() == false)	// New update could be started while current is processing (waiting for reply)
 	{
 		return;
-	}
-
-	int statesTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
-							((m_totalItemsCount % ADS_GET_APP_SIGNAL_STATE_MAX) == 0 ? 0 : 1);
-
-	if (m_getStatesCurrentPart >= statesTotalParts)
-	{
-		m_getStatesCurrentPart = 0;
 	}
 
 	int startIndex = m_getStatesCurrentPart * ADS_GET_APP_SIGNAL_STATE_MAX;
@@ -410,8 +381,6 @@ void TcpAppDataClient::onGetClientList(const char *replyData, quint32 replyDataS
 
 	m_clientsIsReady = true;
 	emit clientsLoaded();
-
-	sendRequest(ADS_GET_DATA_SOURCES_INFO);
 }
 
 
@@ -452,17 +421,7 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 		m_states[index].load(m_getSignalStateReply.appsignalstates(i));
 	}
 
-	m_getParamsCurrentPart++;
-
-	if (startIndex + stateCount >= signalCount)
-	{
-		emit appSignalsStateUpdated();
-
-		sendRequest(ADS_GET_DATA_SOURCES_STATES);
-		return;
-	}
-
-	getNextStatePart();
+	m_getStatesCurrentPart++;
 }
 
 void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataSize)
@@ -474,6 +433,104 @@ void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataS
 		assert(false);
 		return;
 	}
+}
 
-	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
+void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
+{
+	switch(processedRequestID)
+	{
+	// Static data requests
+	//
+	case ADS_GET_DATA_SOURCES_INFO:
+		sendRequest(ADS_GET_UNITS);
+		break;
+
+	case ADS_GET_UNITS:
+		sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
+		break;
+
+	case ADS_GET_APP_SIGNAL_LIST_START:
+		if (m_partCount > 0)
+		{
+			m_hash2Index.clear();
+			m_hash2Index.reserve(m_signalHashes.count() * 1.3);
+
+			m_currentPart = 0;
+			getNextItemsPart();
+		}
+		else
+		{
+			sendRequest(RQID_GET_CLIENT_LIST);
+		}
+		break;
+
+	case ADS_GET_APP_SIGNAL_LIST_NEXT:
+		if (m_currentPart >= m_partCount)
+		{
+			// all hashes received
+			//
+			m_signalParams.resize(m_signalHashes.count());
+			m_getParamsCurrentPart = 0;
+			getNextParamPart();
+		}
+		else
+		{
+			getNextItemsPart();
+		}
+		break;
+
+	case ADS_GET_APP_SIGNAL_PARAM:	// Is same as ADS_GET_APP_SIGNAL
+	case ADS_GET_APP_SIGNAL:
+		{
+			int paramsTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_PARAM_MAX +
+					((m_totalItemsCount % ADS_GET_APP_SIGNAL_PARAM_MAX) == 0 ? 0 : 1);
+
+			if (m_getParamsCurrentPart >= paramsTotalParts)
+			{
+				m_states.resize(m_signalParams.count());
+
+				emit appSignalListLoaded();
+
+				startStateUpdating();
+				updateStates();	// First time update immediately, while waiting for timer
+			}
+			else
+			{
+				getNextParamPart();
+			}
+		}
+		break;
+
+	// Dynamic data requests
+	//
+	case ADS_GET_APP_SIGNAL_STATE:
+		{
+			int statesTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
+					((m_totalItemsCount % ADS_GET_APP_SIGNAL_STATE_MAX) == 0 ? 0 : 1);
+
+			if (m_getStatesCurrentPart >= statesTotalParts)
+			{
+				emit appSignalsStateUpdated();
+
+				m_getStatesCurrentPart = 0;
+				sendRequest(ADS_GET_DATA_SOURCES_STATES);
+			}
+			else
+			{
+				getNextStatePart();
+			}
+		}
+		break;
+
+	case ADS_GET_DATA_SOURCES_STATES:
+		sendRequest(RQID_GET_CLIENT_LIST);
+		break;
+
+	case RQID_GET_CLIENT_LIST:
+		// Last request - do nothing
+		break;
+
+	default:
+		assert(false);
+	}
 }

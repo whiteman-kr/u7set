@@ -442,12 +442,12 @@ void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
 	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "IPv4");
 	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "Connection time");
 	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "Connection uptime");
-	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "State");
+	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Build");
 	m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Packet counter");
 
 	clientsTableView->setColumnWidth(0, 200);
-	clientsTableView->setColumnWidth(1, 100);
-	clientsTableView->setColumnWidth(2, 200);
+	clientsTableView->setColumnWidth(2, 250);
+	clientsTableView->setColumnWidth(6, 100);
 }
 
 quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
