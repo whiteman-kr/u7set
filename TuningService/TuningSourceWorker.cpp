@@ -744,11 +744,11 @@ namespace Tuning
 					fotipFrame.write.analogFloatValue = reverseFloat(tuningCmd.write.tuningValue.floatValue());
 					break;
 
-				case FotipV2::DataType::AnalogSignedInt:
+				case TuningValueType::SignedInt32:
 					fotipFrame.write.analogSignedIntValue = reverseInt32(tuningCmd.write.tuningValue.int32Value());
 					break;
 
-				case FotipV2::DataType::Discrete:
+				case TuningValueType::Discrete:
 					{
 						int bit = ts.bit();
 
