@@ -217,6 +217,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0199.sql", "Upgrade to version 199, The range of the Time parameters in the tctc_* blocks has been changed"},
 	{":/DatabaseUpgrade/Upgrade0200.sql", "Upgrade to version 200, Corrected input type (Float->SignetInt), description (floating-point->signed integer) and Version 1.0005->1.0006 of latch_tm1_si block."},
 	{":/DatabaseUpgrade/Upgrade0201.sql", "Upgrade to version 201, Adding integer tuning params and Archive fields."},
+	{":/DatabaseUpgrade/Upgrade0202.sql", "Upgrade to version 202, Update properties in TuningService and TuningClient preset."},
 };
 
 
