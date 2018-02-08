@@ -31,7 +31,10 @@
 		<ModuleDataSize>2560</ModuleDataSize>
 		<ModuleCount>14</ModuleCount>
 		<TuningDataOffset>46336</TuningDataOffset>
-		<TuningDataSize>7620</TuningDataSize>
+		<TuningDataSize>7620</TuningDataSize>		<!--TuningDataFrameCount * TuningDataFramePayload-->
+		<TuningDataFrameCount>15</TuningDataFrameCount>
+		<TuningDataFramePayload>508</TuningDataFramePayload>
+		<TuningDataFrameSize>512</TuningDataFrameSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
 		<TxDiagDataSize>188</TxDiagDataSize>
 	</Memory>

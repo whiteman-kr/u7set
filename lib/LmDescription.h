@@ -103,17 +103,25 @@ public:
 	{
 		quint32 m_codeMemorySize = 0xFFFFFFFF;
 		quint32 m_appMemorySize = 0xFFFFFFFF;
+
 		quint32 m_appDataOffset = 0xFFFFFFFF;
 		quint32 m_appDataSize = 0xFFFFFFFF;
+
 		quint32 m_appLogicBitDataOffset = 0xFFFFFFFF;
 		quint32 m_appLogicBitDataSize = 0xFFFFFFFF;
 		quint32 m_appLogicWordDataOffset = 0xFFFFFFFF;
 		quint32 m_appLogicWordDataSize = 0xFFFFFFFF;
+
 		quint32 m_moduleDataOffset = 0xFFFFFFFF;
 		quint32 m_moduleDataSize = 0xFFFFFFFF;
 		quint32 m_moduleCount = 14;
+
 		quint32 m_tuningDataOffset = 0xFFFFFFFF;
 		quint32 m_tuningDataSize = 0xFFFFFFFF;
+		quint32 m_tuningDataFrameCount = 0xFFFFFFFF;
+		quint32 m_tuningDataFramePayload = 0xFFFFFFFF;
+		quint32 m_tuningDataFrameSize = 0xFFFFFFFF;
+
 		quint32 m_txDiagDataOffset = 0xFFFFFFFF;
 		quint32 m_txDiagDataSize = 0xFFFFFFFF;
 
