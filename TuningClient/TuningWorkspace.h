@@ -13,9 +13,9 @@ public:
 	virtual ~TuningWorkspace();
 
 	bool hasPendingChanges();
+
 	bool askForSavePendingChanges();
 
-public:
 	void onTimer();
 
 private:
@@ -34,12 +34,17 @@ private:
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
 
+	void updateCounters();
+
 	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
 
 protected:
+
 	bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
+
+	// Data
 
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
@@ -57,11 +62,8 @@ private:
 
 	QSplitter* m_hSplitter = nullptr;
 
-	// Controls
-
-	std::vector<FilterButton*> m_filterButtons;
-
 	QTreeWidget* m_filterTree = nullptr;
+
 	QLineEdit* m_treeMask = nullptr;
 
 	QTabWidget* m_tab = nullptr;
@@ -71,9 +73,16 @@ private:
 	const int columnStatusIndex = 2;
 	const int columnSorIndex = 3;
 
+	// Filters containters
+
+	std::vector<FilterButton*> m_filterButtons;
+
+	std::vector<std::shared_ptr<TuningFilter>> m_tabsFilters;
+
 	//
 
-	std::shared_ptr<TuningFilter> m_currentTreeFilter;		// Currently pressed tree filter
+	std::shared_ptr<TuningFilter> m_treeFilter;				// Currently pressed tree filter
+
 	std::shared_ptr<TuningFilter> m_currentbuttonFilter;	// Currently pressed button filter
 
 	// Tuning controls

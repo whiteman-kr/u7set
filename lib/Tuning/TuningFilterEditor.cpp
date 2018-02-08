@@ -702,9 +702,9 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 	// Add presets to tree
 	//
 
-	for (int i = 0; i < m_filterStorage->m_root->childFiltersCount(); i++)
+	for (int i = 0; i < m_filterStorage->root()->childFiltersCount(); i++)
 	{
-		std::shared_ptr<TuningFilter> f = m_filterStorage->m_root->childFilter(i);
+		std::shared_ptr<TuningFilter> f = m_filterStorage->root()->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -774,7 +774,7 @@ void TuningFilterEditor::addPreset(TuningFilter::InterfaceType interfaceType)
 	{
 		// no item was selected, add top level item
 		//
-		m_filterStorage->m_root->addChild(newFilter);
+		m_filterStorage->root()->addChild(newFilter);
 
 		m_presetsTree->addTopLevelItem(newPresetItem);
 
@@ -1183,7 +1183,7 @@ void TuningFilterEditor::on_m_removePreset_clicked()
 		QTreeWidgetItem* parentItem = item->parent();
 		if (parentItem == nullptr)
 		{
-			m_filterStorage->m_root->removeChild(filter);
+			m_filterStorage->root()->removeChild(filter);
 
 			QTreeWidgetItem* deleteItem = m_presetsTree->takeTopLevelItem(m_presetsTree->indexOfTopLevelItem(item));
 			delete deleteItem;
@@ -1290,7 +1290,7 @@ void TuningFilterEditor::on_m_pastePreset_clicked()
 		{
 			// no item was selected, add top level item
 			//
-			m_filterStorage->m_root->addChild(newFilter);
+			m_filterStorage->root()->addChild(newFilter);
 			m_presetsTree->addTopLevelItem(newPresetItem);
 		}
 		else

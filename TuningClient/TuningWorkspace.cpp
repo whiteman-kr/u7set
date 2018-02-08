@@ -8,12 +8,12 @@ int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_currentTreeFilter(treeFilter),
+	m_treeFilter(treeFilter),
 	m_workspaceFilter(workspaceFilter),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient)
 {
-	qDebug() << "TuningWorkspace::TuningWorkspace m_instanceCounter = " << m_instanceCounter;
+	//qDebug() << "TuningWorkspace::TuningWorkspace m_instanceCounter = " << m_instanceCounter;
 	m_instanceCounter++;
 
 	//assert(m_treeFilter); // Can be nullptr
@@ -164,7 +164,21 @@ bool TuningWorkspace::askForSavePendingChanges()
 
 void TuningWorkspace::onTimer()
 {
+	updateCounters();
 	updateTreeItemsStatus();
+
+	for (auto it : m_tuningWorkspacesMap)
+	{
+		TuningWorkspace* tw = it.second;
+
+		static int dp = 0;
+
+		dp++;
+
+		tw->onTimer();
+
+		dp--;
+	}
 }
 
 void TuningWorkspace::updateFiltersTree()
@@ -253,7 +267,7 @@ void TuningWorkspace::updateFiltersTree()
 		m_filterTree->clear();
 	}
 
-	m_currentTreeFilter = nullptr;
+	m_treeFilter = nullptr;
 
 	// Fill filters control
 	//
@@ -335,6 +349,8 @@ void TuningWorkspace::createTabPages()
 
 	std::vector<std::pair<QWidget*, std::shared_ptr<TuningFilter>>> tuningPages;
 
+	m_tabsFilters.clear();
+
 	// Workspace level tabs
 
 	for (int i = 0; i < m_workspaceFilter->childFiltersCount(); i++)
@@ -354,6 +370,8 @@ void TuningWorkspace::createTabPages()
 		QWidget* tp = createTuningPageOrWorkspace(f);
 
 		tuningPages.push_back(std::make_pair(tp, f));
+
+		m_tabsFilters.push_back(f);
 	}
 
 	// Buttons level tabs
@@ -377,6 +395,8 @@ void TuningWorkspace::createTabPages()
 			QWidget* tp = createTuningPageOrWorkspace(f);
 
 			tuningPages.push_back(std::make_pair(tp, f));
+
+			m_tabsFilters.push_back(f);
 		}
 	}
 
@@ -495,7 +515,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningWorkspacesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_currentTreeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 
@@ -515,7 +535,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningPagesMap.end())
 		{
-			TuningPage* tp = new TuningPage(m_currentTreeFilter, childWorkspaceFilter, m_currentbuttonFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_currentbuttonFilter, m_tuningSignalManager, m_tuningTcpClient);
 
 			m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
@@ -582,8 +602,105 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 	}
 }
 
+void TuningWorkspace::updateCounters()
+{
+	// Tab counters
+
+	if (m_tab != nullptr)
+	{
+		int tabIndex = 0;
+
+		assert(m_tab->count() == static_cast<int>(m_tabsFilters.size()));
+
+		for (std::shared_ptr<TuningFilter> f : m_tabsFilters)
+		{
+			if (f == nullptr)
+			{
+				assert(f);
+				continue;
+			}
+
+			if (f->isTab() == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (f->hasDiscreteCounter() == false)
+			{
+				continue;
+			}
+
+			int discreteCount = f->counters().discreteCounter;
+
+			QString newCaption;
+			if (discreteCount == 0)
+			{
+				newCaption = f->caption();
+			}
+			else
+			{
+				newCaption = QString("%1 [%2]").arg(f->caption()).arg(discreteCount);
+			}
+
+			if (m_tab->tabText(tabIndex) != newCaption)
+			{
+				m_tab->setTabText(tabIndex, newCaption);
+			}
+
+			tabIndex++;
+		}
+	}
+
+	// Buttons counters
+
+	for (FilterButton* button : m_filterButtons)
+	{
+		if (button == nullptr)
+		{
+			assert(button);
+			return;
+		}
+
+		std::shared_ptr<TuningFilter> f = button->filter();
+
+		if (f == nullptr)
+		{
+			assert(f);
+			continue;
+		}
+
+		if (f->hasDiscreteCounter() == false)
+		{
+			continue;
+		}
+
+		int discreteCount = f->counters().discreteCounter;
+
+		QString newCaption;
+		if (discreteCount == 0)
+		{
+			newCaption = button->caption();
+		}
+		else
+		{
+			newCaption = QString("%1 [%2]").arg(button->caption()).arg(discreteCount);
+		}
+
+		if (button->text() != newCaption)
+		{
+			button->setText(newCaption);
+		}
+	}
+}
+
 void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 {
+	if (m_filterTree == nullptr)
+	{
+		return;
+	}
+
 	if (treeItem == nullptr)
 	{
 
@@ -606,9 +723,14 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 	{
 		TuningFilterCounters counters = filter->counters();
 
-		// Status column
+		// Counters column
 
-		treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
+		if (filter->hasDiscreteCounter() == true)
+		{
+			treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
+		}
+
+		// Status column
 
 		if (filter->isSourceEquipment() == true && counters.controlEnabledCounter == 0)
 		{
@@ -705,7 +827,7 @@ void TuningWorkspace::slot_currentTreeItemChanged(QTreeWidgetItem *current, QTre
 
 	if (current == nullptr)
 	{
-		m_currentTreeFilter = nullptr;
+		m_treeFilter = nullptr;
 		emit treeFilterSelectionChanged(nullptr);
 	}
 	else
@@ -727,7 +849,7 @@ void TuningWorkspace::slot_maskApply()
 
 void TuningWorkspace::slot_parentTreeFilterChanged(std::shared_ptr<TuningFilter> filter)
 {
-	m_currentTreeFilter = filter;
+	m_treeFilter = filter;
 	emit treeFilterSelectionChanged(filter);
 }
 

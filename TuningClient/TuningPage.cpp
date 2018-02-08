@@ -368,14 +368,19 @@ FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& 
 	QColor backColor = Qt::lightGray;
 	QColor textColor = Qt::white;
 
-	QColor backCheckedColor = Qt::darkGray;
+	QColor backSelectedColor = Qt::darkGray;
+	QColor textSelectedColor = Qt::white;
 
 	if (filter->backColor().isValid() && filter->textColor().isValid() && filter->backColor() != filter->textColor())
 	{
 		backColor = filter->backColor();
 		textColor = filter->textColor();
+	}
 
-		backCheckedColor = filter->backColor();
+	if (filter->backSelectedColor().isValid() && filter->textSelectedColor().isValid() && filter->backSelectedColor() != filter->textSelectedColor())
+	{
+		backSelectedColor = filter->backSelectedColor();
+		textSelectedColor = filter->textSelectedColor();
 	}
 
 	setStyleSheet(tr("\
@@ -385,9 +390,13 @@ FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& 
 					}   \
 					QPushButton:checked{\
 						background-color: %3;\
+						color: %4;    \
 						border: none;\
 					}\
-					").arg(backColor.name()).arg(textColor.name()).arg(backCheckedColor.name()));
+					").arg(backColor.name())
+					 .arg(textColor.name())
+					 .arg(backSelectedColor.name())
+					 .arg(textSelectedColor.name()));
 
 	update();
 
@@ -398,6 +407,11 @@ FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& 
 std::shared_ptr<TuningFilter> FilterButton::filter()
 {
 	return m_filter;
+}
+
+QString FilterButton::caption() const
+{
+	return m_caption;
 }
 
 void FilterButton::slot_toggled(bool checked)

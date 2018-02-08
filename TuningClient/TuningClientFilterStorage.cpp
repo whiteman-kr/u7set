@@ -6,6 +6,123 @@ TuningClientFilterStorage::TuningClientFilterStorage()
 
 }
 
+bool TuningClientFilterStorage::loadSchemasDetails(const QByteArray& data, QString* errorCode)
+{
+	if (errorCode == nullptr)
+	{
+		assert(errorCode);
+		return false;
+	}
+
+	m_schemasDetails.clear();
+
+	VFrame30::SchemaDetailsSet detailsSet;
+
+	if (detailsSet.Load(data) == false)
+	{
+		*errorCode = QObject::tr("Failed to parse SchemaDetailsSet.");
+		return false;
+	}
+
+	m_schemasDetails = detailsSet.schemasDetails();
+
+	return true;
+
+}
+
+int TuningClientFilterStorage::schemaDetailsCount()
+{
+	return static_cast<int>(m_schemasDetails.size());
+}
+
+VFrame30::SchemaDetails  TuningClientFilterStorage::schemaDetails(int index)
+{
+	if (index < 0 || index >= m_schemasDetails.size())
+	{
+		assert(false);
+		return VFrame30::SchemaDetails();
+	}
+	return m_schemasDetails[index];
+}
+
+void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter)
+{
+	if (objects == nullptr)
+	{
+		assert(objects);
+		return;
+	}
+
+	if (filter == nullptr)
+	{
+		filter = m_root.get();
+	}
+
+	if (filter->isRoot() == true && filter->hasDiscreteCounter() == true)
+	{
+		// All signals ahashes are stored in root filter for discrete counter to work
+
+		std::vector<Hash> signalsHashes;
+
+		std::vector<Hash> hashes = objects->signalHashes();
+
+		int count = static_cast<int>(hashes.size());
+		for (int i = 0; i < count; i++)
+		{
+			signalsHashes.push_back(hashes[i]);
+		}
+
+		filter->setSignalsHashes(signalsHashes);
+	}
+
+	if (filter->isEmpty() == false)
+	{
+		std::vector<Hash> signalsHashes;
+		std::map<Hash, int> equipmentHashesMap;
+
+		std::vector<Hash> hashes = objects->signalHashes();
+
+		int count = static_cast<int>(hashes.size());
+		for (int i = 0; i < count; i++)
+		{
+			bool ok = false;
+			AppSignalParam asp = objects->signalParam(hashes[i], &ok);
+			if (ok == false)
+			{
+				assert(false);
+				return;
+			}
+
+			if (filter->match(asp) == false)
+			{
+				continue;
+			}
+
+			signalsHashes.push_back(asp.hash());
+
+			Hash aspEquipmentHash = ::calcHash(asp.equipmentId());
+
+			equipmentHashesMap[aspEquipmentHash] = 1;
+		}
+
+		filter->setSignalsHashes(signalsHashes);
+
+		std::vector<Hash> equipmentHashes;
+		for (auto it : equipmentHashesMap)
+		{
+			equipmentHashes.push_back(it.first);
+		}
+
+		filter->setEquipmentHashes(equipmentHashes);
+	}
+
+	int count = filter->childFiltersCount();
+	for (int i = 0; i < count; i++)
+	{
+		createSignalsAndEqipmentHashes(objects, filter->childFilter(i).get());
+	}
+}
+
 void TuningClientFilterStorage::checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget)
 {
 	removedNotFound = false;
@@ -37,7 +154,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 		filter = m_root.get();
 	}
 
-	if (filter->isEmpty() == false)
+	if (filter->isEmpty() == false || filter->isRoot() == true)
 	{
 		TuningFilterCounters counters;
 
@@ -72,9 +189,12 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 				counters.controlEnabledCounter++;
 			}
 
-			if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
+			if (filter->hasDiscreteCounter() == true)
 			{
-				counters.discreteCounter++;
+				if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
+				{
+					counters.discreteCounter++;
+				}
 			}
 		}
 
@@ -88,7 +208,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 	}
 }
 
-void TuningClientFilterStorage::createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
+void TuningClientFilterStorage::createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, bool discreteCounters, const QStringList& tuningSourcesEquipmentIds)
 {
 	if (objects == nullptr)
 	{
@@ -138,6 +258,7 @@ void TuningClientFilterStorage::createAutomaticFilters(const TuningSignalManager
 			//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
 			ofTs->setCaption(schemasDetails.m_caption);
 			ofTs->setSource(TuningFilter::Source::Schema);
+			ofTs->setHasDiscreteCounter(discreteCounters);
 
 			ofSchema->addChild(ofTs);
 		}
@@ -163,6 +284,7 @@ void TuningClientFilterStorage::createAutomaticFilters(const TuningSignalManager
 			ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
 			ofTs->setCaption(ts);
 			ofTs->setSource(TuningFilter::Source::Equipment);
+			ofTs->setHasDiscreteCounter(discreteCounters);
 
 			ofEquipment->addChild(ofTs);
 		}

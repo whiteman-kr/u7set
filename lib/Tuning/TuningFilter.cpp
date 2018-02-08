@@ -225,10 +225,19 @@ TuningFilter::TuningFilter()
 	propMask->setCategory("Masks");
 
 	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
-	propBackColor->setCategory("Color");
+	propBackColor->setCategory("Button/Tab Apperance");
 
 	auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
-	propTextColor->setCategory("Color");
+	propTextColor->setCategory("Button Apperance");
+
+	auto propBackSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedBackColor", true, TuningFilter::backSelectedColor, TuningFilter::setBackSelectedColor);
+	propBackSelectedColor->setCategory("Button Apperance");
+
+	auto propTextSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedTextColor", true, TuningFilter::textSelectedColor, TuningFilter::setTextSelectedColor);
+	propTextSelectedColor->setCategory("Button Apperance");
+
+	auto propHasCounter = ADD_PROPERTY_GETTER_SETTER(bool, "HasDiscreteCounter", true, TuningFilter::hasDiscreteCounter, TuningFilter::setHasDiscreteCounter);
+	propHasCounter->setCategory("Apperance");
 
 }
 
@@ -316,6 +325,21 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		if (reader.attributes().hasAttribute("TextColor"))
 		{
 			setTextColor(QColor(reader.attributes().value("TextColor").toString()));
+		}
+
+		if (reader.attributes().hasAttribute("BackSelectedColor"))
+		{
+			setBackSelectedColor(QColor(reader.attributes().value("BackSelectedColor").toString()));
+		}
+
+		if (reader.attributes().hasAttribute("TextSelectedColor"))
+		{
+			setTextSelectedColor(QColor(reader.attributes().value("TextSelectedColor").toString()));
+		}
+
+		if (reader.attributes().hasAttribute("HasDiscreteCounter"))
+		{
+			setHasDiscreteCounter(reader.attributes().value("HasDiscreteCounter").toString() == "true");
 		}
 
 		if (reader.attributes().hasAttribute("CustomAppSignalIDMask"))
@@ -516,6 +540,11 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 
 	writer.writeAttribute("BackColor", backColor().name());
 	writer.writeAttribute("TextColor", textColor().name());
+
+	writer.writeAttribute("BackSelectedColor", backSelectedColor().name());
+	writer.writeAttribute("TextSelectedColor", textSelectedColor().name());
+
+	writer.writeAttribute("HasDiscreteCounter", hasDiscreteCounter() ? "true" : "false");
 
 	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
@@ -839,6 +868,36 @@ QColor TuningFilter::textColor() const
 void TuningFilter::setTextColor(const QColor& value)
 {
 	m_textColor = value;
+}
+
+QColor TuningFilter::backSelectedColor() const
+{
+	return m_backSelectedColor;
+}
+
+void TuningFilter::setBackSelectedColor(const QColor& value)
+{
+	m_backSelectedColor = value;
+}
+
+QColor TuningFilter::textSelectedColor() const
+{
+	return m_textSelectedColor;
+}
+
+void TuningFilter::setTextSelectedColor(const QColor& value)
+{
+	m_textSelectedColor = value;
+}
+
+bool TuningFilter::hasDiscreteCounter() const
+{
+	return m_hasDiscreteCounter;
+}
+
+void TuningFilter::setHasDiscreteCounter(bool value)
+{
+	m_hasDiscreteCounter = value;
 }
 
 TuningFilter* TuningFilter::parentFilter() const
@@ -1231,6 +1290,11 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode)
 
 }
 
+std::shared_ptr<TuningFilter> TuningFilterStorage::root()
+{
+	return m_root;
+}
+
 bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
 {
 	if (errorCode == nullptr)
@@ -1409,109 +1473,6 @@ std::shared_ptr<TuningFilter> TuningFilterStorage::pasteFromClipboard()
 
 	return clipboardStorage.m_root;
 }
-
-
-int TuningFilterStorage::schemaDetailsCount()
-{
-	return static_cast<int>(m_schemasDetails.size());
-}
-
-VFrame30::SchemaDetails  TuningFilterStorage::schemaDetails(int index)
-{
-	if (index < 0 || index >= m_schemasDetails.size())
-	{
-		assert(false);
-		return VFrame30::SchemaDetails();
-	}
-	return m_schemasDetails[index];
-}
-
-
-bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString* errorCode)
-{
-	if (errorCode == nullptr)
-	{
-		assert(errorCode);
-		return false;
-	}
-
-	m_schemasDetails.clear();
-
-	VFrame30::SchemaDetailsSet detailsSet;
-
-	if (detailsSet.Load(data) == false)
-	{
-		*errorCode = QObject::tr("Failed to parse SchemaDetailsSet.");
-		return false;
-	}
-
-	m_schemasDetails = detailsSet.schemasDetails();
-
-	return true;
-
-}
-
-void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter)
-{
-	if (objects == nullptr)
-	{
-		assert(objects);
-		return;
-	}
-
-	if (filter == nullptr)
-	{
-		filter = m_root.get();
-	}
-
-	if (filter->isEmpty() == false)
-	{
-		std::vector<Hash> signalsHashes;
-		std::map<Hash, int> equipmentHashesMap;
-
-		std::vector<Hash> hashes = objects->signalHashes();
-
-		int count = static_cast<int>(hashes.size());
-		for (int i = 0; i < count; i++)
-		{
-			bool ok = false;
-			AppSignalParam asp = objects->signalParam(hashes[i], &ok);
-			if (ok == false)
-			{
-				assert(false);
-				return;
-			}
-
-			if (filter->match(asp) == false)
-			{
-				continue;
-			}
-
-			signalsHashes.push_back(asp.hash());
-
-			Hash aspEquipmentHash = ::calcHash(asp.equipmentId());
-
-			equipmentHashesMap[aspEquipmentHash] = 1;
-		}
-
-		filter->setSignalsHashes(signalsHashes);
-
-		std::vector<Hash> equipmentHashes;
-		for (auto it : equipmentHashesMap)
-		{
-			equipmentHashes.push_back(it.first);
-		}
-
-		filter->setEquipmentHashes(equipmentHashes);
-	}
-
-	int count = filter->childFiltersCount();
-	for (int i = 0; i < count; i++)
-	{
-		createSignalsAndEqipmentHashes(objects, filter->childFilter(i).get());
-	}
-}
-
 
 void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters)
 {

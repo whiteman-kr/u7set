@@ -39,6 +39,8 @@ public:
 
 	std::shared_ptr<TuningFilter> filter();
 
+	QString caption() const;
+
 private:
 	std::shared_ptr<TuningFilter> m_filter;
 	QString m_caption;
@@ -83,6 +85,7 @@ public:
 	void fillObjectsList();
 
 	bool hasPendingChanges();
+
 	bool askForSavePendingChanges();
 
 	bool write();
@@ -106,10 +109,11 @@ private slots:
 public slots:
 
 	void slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+
 	void slot_buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
 
-
 private:
+
 	enum class FilterType
 	{
 		All = 0,
@@ -134,14 +138,10 @@ private:
 private slots:
 
 	void slot_timerTick500();
-
 	void slot_setAll();
-
 	void slot_undo();
 	void slot_Write();
 	void slot_Apply();
-
-
 
 private:
 

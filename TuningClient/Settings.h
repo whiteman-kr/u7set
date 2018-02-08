@@ -70,6 +70,8 @@ struct ConfigSettings
 
 	bool showSOR = true;
 
+	bool globalDiscreteCounters = true;
+
 	int loginSessionLength = 120;
 
 	QStringList usersAccounts;

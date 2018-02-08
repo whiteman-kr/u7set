@@ -147,6 +147,15 @@ public:
 	QColor textColor() const;
 	void setTextColor(const QColor& value);
 
+	QColor backSelectedColor() const;
+	void setBackSelectedColor(const QColor& value);
+
+	QColor textSelectedColor() const;
+	void setTextSelectedColor(const QColor& value);
+
+	bool hasDiscreteCounter() const;
+	void setHasDiscreteCounter(bool value);
+
 	// Filters
 	//
 	QString customAppSignalIDMask() const;
@@ -222,6 +231,11 @@ private:
 	QColor m_backColor = Qt::GlobalColor::lightGray;
 	QColor m_textColor = Qt::GlobalColor::lightGray;
 
+	QColor m_backSelectedColor = Qt::GlobalColor::darkGray;
+	QColor m_textSelectedColor = Qt::GlobalColor::darkGray;
+
+	bool m_hasDiscreteCounter = false;
+
 	// Filters
 	//
 	QStringList m_customAppSignalIDMasks;
@@ -267,6 +281,8 @@ public:
 
 	}
 
+	std::shared_ptr<TuningFilter> root();
+
 	// Serialization
 
 	bool load(const QByteArray& data, QString* errorCode);
@@ -278,15 +294,7 @@ public:
 	bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);
 	std::shared_ptr<TuningFilter> pasteFromClipboard();
 
-	// Schemas loading
-
-	bool loadSchemasDetails(const QByteArray& data, QString* errorCode);
-	int schemaDetailsCount();
-	VFrame30::SchemaDetails schemaDetails(int index);
-
-	// Operations
-
-	void createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter = nullptr);
+	// Operation
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 
@@ -296,11 +304,9 @@ protected:
 	virtual void writeLogWarning(const QString& message);
 	virtual void writeLogMessage(const QString& message);
 
-public:
+protected:
 
 	std::shared_ptr<TuningFilter> m_root = nullptr;
-
-protected:
 
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 };

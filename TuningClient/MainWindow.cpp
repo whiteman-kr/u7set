@@ -187,6 +187,10 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
+	m_statusDiscreteCount = new QLabel();
+	m_statusDiscreteCount->setAlignment(Qt::AlignHCenter);
+	m_statusDiscreteCount->setMinimumWidth(100);
+
 	m_statusBarLmErrors = new QLabel();
 	m_statusBarLmErrors->setAlignment(Qt::AlignHCenter);
 	m_statusBarLmErrors->setMinimumWidth(100);
@@ -206,6 +210,7 @@ void MainWindow::createStatusBar()
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addPermanentWidget(m_statusDiscreteCount, 0);
 	statusBar()->addPermanentWidget(m_statusBarLmErrors, 0);
 	statusBar()->addPermanentWidget(m_statusBarSor, 0);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
@@ -306,6 +311,23 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 		m_statusBarTuningConnection->setText(text);
 
+		// Counters
+
+		assert(m_statusDiscreteCount);
+
+		int discreteCount = m_filterStorage.root()->counters().discreteCounter;
+
+		if (discreteCount == 0)
+		{
+			m_statusDiscreteCount->setText(QString());
+			m_statusDiscreteCount->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusDiscreteCount->setText(QString("Discretes: %1").arg(discreteCount));
+			m_statusDiscreteCount->setStyleSheet("color : white; background-color: blue");
+		}
+
 		// Lm Errors tool
 
 		assert(m_statusBarLmErrors);
@@ -377,12 +399,18 @@ void MainWindow::createWorkspace()
 		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
 	}
 
+	m_filterStorage.root()->setHasDiscreteCounter(theConfigSettings.globalDiscreteCounters);
+
 	// Update automatic filters
 
 	m_filterStorage.removeFilters(TuningFilter::Source::Schema);
 	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
 
-	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theConfigSettings.equipmentList);
+	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager,
+										   theConfigSettings.filterBySchema,
+										   theConfigSettings.filterByEquipment,
+										   theConfigSettings.globalDiscreteCounters,
+										   theConfigSettings.equipmentList);
 
 	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager);
 
@@ -439,7 +467,7 @@ void MainWindow::createWorkspace()
 
 	if (theConfigSettings.showSignals == true)
 	{
-		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.m_root, &m_tuningSignalManager, m_tcpClient, this);
+		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.root(), &m_tuningSignalManager, m_tcpClient, this);
 	}
 
 	// Create login workspace
