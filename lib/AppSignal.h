@@ -228,6 +228,12 @@ public:
 	Q_INVOKABLE double tuningDefaultValue() const;
 	void setTuningDefaultValue(double value);
 
+	Q_INVOKABLE double tuningLowBound() const;
+	void setTuningLowBound(double value);
+
+	Q_INVOKABLE double tuningHighBound() const;
+	void setTuningHighBound(double value);
+
 public:
 	static const int NO_UNIT_ID = 1;
 
@@ -269,6 +275,8 @@ private:
 	double m_spreadTolerance = 2;
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
+	TuningValue m_tuningLowBound;
+	TuningValue m_tuningHighBound;
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

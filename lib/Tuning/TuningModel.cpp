@@ -126,8 +126,8 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == true && asp2.isAnalog() == true)
 		{
-			v1 = asp1.lowEngineeringUnits();
-			v2 = asp2.lowEngineeringUnits();
+			v1 = asp1.tuningLowBound();
+			v2 = asp2.tuningHighBound();
 		}
 		else
 		{
@@ -140,8 +140,8 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == true && asp2.isAnalog() == true)
 		{
-			v1 = asp1.highEngineeringUnits();
-			v2 = asp2.highEngineeringUnits();
+			v1 = asp1.tuningHighBound();
+			v2 = asp2.tuningHighBound();
 		}
 		else
 		{
@@ -417,8 +417,8 @@ bool TuningModel::limitsUnbalance(const AppSignalParam& asp, const TuningSignalS
 {
 	if (tss.valid() == true && asp.isAnalog() == true)
 	{
-		TuningValue tvHigh(asp.toTuningType(), asp.highEngineeringUnits());
-		TuningValue tvLow(asp.toTuningType(), asp.lowEngineeringUnits());
+		TuningValue tvHigh(asp.toTuningType(), asp.tuningHighBound());
+		TuningValue tvLow(asp.toTuningType(), asp.tuningLowBound());
 
 		if (tss.lowBound() != tvLow || tss.highBound() != tvHigh)
 		{
@@ -609,13 +609,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				if (limitsUnbalance(asp, tss))
 				{
 					QString str = tr("Base %1, read %2")
-							.arg(QString::number(asp.lowEngineeringUnits(), 'f', asp.precision()))
+							.arg(QString::number(asp.tuningLowBound(), 'f', asp.precision()))
 							.arg(tss.lowBound().toString(asp.precision()));
 					return str;
 				}
 				else
 				{
-					return QString::number(asp.lowEngineeringUnits(), 'f', asp.precision());
+					return QString::number(asp.tuningLowBound(), 'f', asp.precision());
 				}
 			}
 			else
@@ -631,13 +631,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				if (limitsUnbalance(asp, tss))
 				{
 					QString str = tr("Base %1, read %2")
-							.arg(QString::number(asp.highEngineeringUnits(), 'f', asp.precision()))
+							.arg(QString::number(asp.tuningHighBound(), 'f', asp.precision()))
 							.arg(tss.highBound().toString(asp.precision()));
 					return str;
 				}
 				else
 				{
-					return QString::number(asp.highEngineeringUnits(), 'f', asp.precision());
+					return QString::number(asp.tuningHighBound(), 'f', asp.precision());
 				}
 			}
 			else
@@ -809,13 +809,28 @@ void DialogInputTuningValue::accept()
 
 		bool ok = false;
 
-		double inputValue = text.toDouble(&ok);
+		TuningValue newValue;
+		newValue.setType(m_value.type());
 
-		TuningValueType oldType = m_value.type();
+		switch (m_value.type())
+		{
+		case TuningValueType::SignedInt32:
+			newValue.setInt32Value(text.toInt(&ok));
+			break;
+		case TuningValueType::SignedInt64:
+			newValue.setInt64Value(text.toInt(&ok));
+			break;
+		case TuningValueType::Float:
+			newValue.setFloatValue(text.toInt(&ok));
+			break;
+		case TuningValueType::Double:
+			newValue.setDoubleValue(text.toInt(&ok));
+			break;
+		default:
+			assert(false);
+			return;
 
-		TuningValue newValue(oldType, inputValue);
-
-		m_value = newValue;
+		}
 
 		if (ok == false)
 		{
@@ -823,11 +838,14 @@ void DialogInputTuningValue::accept()
 			return;
 		}
 
-		if (inputValue < m_lowLimit || inputValue > m_highLimit)
+		if (newValue.toDouble() < m_lowLimit || newValue.toDouble() > m_highLimit)
 		{
 			QMessageBox::critical(this, tr("Error"), tr("The value is out of range."));
 			return;
 		}
+
+		m_value = newValue;
+
 	}
 	else
 	{

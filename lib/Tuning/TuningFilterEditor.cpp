@@ -431,8 +431,8 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 		if (first == true)
 		{
 			analog = asp.isAnalog();
-			lowLimit = asp.lowEngineeringUnits();
-			highLimit = asp.highEngineeringUnits();
+			lowLimit = asp.tuningLowBound();
+			highLimit = asp.tuningHighBound();
 			precision = asp.precision();
 
 			value = fv.value();
@@ -452,7 +452,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 
 			if (analog == true)
 			{
-				if (lowLimit != asp.lowEngineeringUnits() || highLimit != asp.highEngineeringUnits())
+				if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
 				{
 					QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
 					return;

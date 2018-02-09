@@ -455,7 +455,7 @@ void MainWindow::createWorkspace()
 	{
 		QString errorMsg;
 
-		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg) == false)
+		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
 		{
 			theLogFile->writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -679,7 +679,7 @@ void MainWindow::runPresetEditor()
 
 		QString errorMsg;
 
-		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg) == false)
+		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
 		{
 			theLogFile->writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);

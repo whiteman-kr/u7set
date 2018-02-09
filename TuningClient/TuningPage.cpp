@@ -128,6 +128,16 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 	if (displayIndex == static_cast<int>(Columns::Default))
 	{
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningValue defaultVal = defaultValue(asp);
+
+		if (defaultVal.toDouble() < asp.tuningLowBound() || defaultVal.toDouble() > asp.tuningHighBound())
+		{
+			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+
 		QColor color = QColor(Qt::gray);
 		return QBrush(color);
 	}
@@ -1030,8 +1040,8 @@ void TuningPage::slot_setValue()
 			analog = asp.isAnalog();
 			value = state.value();
 			defaultValue = m_model->defaultValue(asp);
-			lowLimit = asp.lowEngineeringUnits();
-			highLimit = asp.highEngineeringUnits();
+			lowLimit = asp.tuningLowBound();
+			highLimit = asp.tuningHighBound();
 			first = false;
 		}
 		else
@@ -1044,7 +1054,7 @@ void TuningPage::slot_setValue()
 
 			if (analog == true)
 			{
-				if (lowLimit != asp.lowEngineeringUnits() || highLimit != asp.highEngineeringUnits())
+				if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
 				{
 					QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different input range."));
 					return;
@@ -1362,7 +1372,15 @@ void TuningPage::slot_setAll()
 
 			if (tvDefault != state.value() && ok == true)
 			{
-				m_tuningSignalManager->setNewValue(hash, tvDefault);
+				if(tvDefault.toDouble() < asp.tuningLowBound() || tvDefault.toDouble() > asp.tuningHighBound())
+				{
+					QString message = tr("Invalid default value '%1' in signal %2 [%3]").arg(tvDefault.toString(asp.precision())).arg(asp.appSignalId()).arg(asp.caption());
+					QMessageBox::critical(this, qAppName(), message);
+				}
+				else
+				{
+					m_tuningSignalManager->setNewValue(hash, tvDefault);
+				}
 			}
 		}
 	};

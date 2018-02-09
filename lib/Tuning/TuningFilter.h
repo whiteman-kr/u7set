@@ -101,7 +101,7 @@ public:
 	TuningFilter& operator= (const TuningFilter& That);
 
 	bool load(QXmlStreamReader& reader);
-	bool save(QXmlStreamWriter& writer) const;
+	bool save(QXmlStreamWriter& writer, bool filterByInterfaceType, TuningFilter::Source saveSourceType) const;
 
 	bool match(const AppSignalParam& object) const;
 
@@ -288,8 +288,8 @@ public:
 	bool load(const QByteArray& data, QString* errorCode);
 	bool load(const QString& fileName, QString* errorCode);
 
-    bool save(QByteArray& data);
-	bool save(const QString& fileName, QString* errorMsg);
+	bool save(QByteArray& data, TuningFilter::Source saveSourceType);
+	bool save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType);
 
 	bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);
 	std::shared_ptr<TuningFilter> pasteFromClipboard();

@@ -213,6 +213,8 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_enableTuning = message.enabletuning();
 
 	m_tuningDefaultValue.load(message.tuningdefaultvalue());
+	m_tuningLowBound.load(message.tuninglowbound());
+	m_tuningHighBound.load(message.tuninghighbound());
 
 	return true;
 }
@@ -258,6 +260,8 @@ void AppSignalParam::save(::Proto::AppSignal* message) const
 	message->set_enabletuning(m_enableTuning);
 
 	m_tuningDefaultValue.save(message->mutable_tuningdefaultvalue());
+	m_tuningLowBound.save(message->mutable_tuninglowbound());
+	m_tuningHighBound.save(message->mutable_tuninghighbound());
 }
 
 Hash AppSignalParam::hash() const
@@ -564,4 +568,30 @@ void AppSignalParam::setTuningDefaultValue(double value)
 
 	m_tuningDefaultValue.setType(TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat));
 	m_tuningDefaultValue.fromDouble(value);
+}
+
+double AppSignalParam::tuningLowBound() const
+{
+	int warning_checkNextCode = 1;
+	return m_tuningLowBound.toDouble();
+}
+
+void AppSignalParam::setTuningLowBound(double value)
+{
+	int warning_checkNextCode = 1;
+	m_tuningLowBound.setType(TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat));
+	m_tuningLowBound.fromDouble(value);
+}
+
+double AppSignalParam::tuningHighBound() const
+{
+	int warning_checkNextCode = 1;
+	return m_tuningHighBound.toDouble();
+}
+
+void AppSignalParam::setTuningHighBound(double value)
+{
+	int warning_checkNextCode = 1;
+	m_tuningHighBound.setType(TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat));
+	m_tuningHighBound.fromDouble(value);
 }

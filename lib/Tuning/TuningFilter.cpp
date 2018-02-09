@@ -504,19 +504,30 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 	return true;
 }
 
-bool TuningFilter::save(QXmlStreamWriter& writer) const
+bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Source saveSourceType) const
 {
-	if (isSourceUser() == false && isSourceProject() == false)
-	{
-		return true;
-	}
-
 	if (isRoot() == true)
 	{
 		writer.writeStartElement("Root");
 	}
 	else
 	{
+		if (filterBySourceType == true)
+		{
+			if (saveSourceType != source())
+			{
+				return true;
+			}
+		}
+		else
+		{
+			if (source() == Source::Equipment || source() == Source::Schema)
+			{
+				return true;
+			}
+
+		}
+
 		if (isTree() == true)
 		{
 			writer.writeStartElement("Tree");
@@ -573,7 +584,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 
 	for (auto f : m_childFilters)
 	{
-		f->save(writer);
+		f->save(writer, filterBySourceType, saveSourceType);
 	}
 
 	writer.writeEndElement();
@@ -1368,7 +1379,7 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
     return !reader.hasError();
 }
 
-bool TuningFilterStorage::save(QByteArray& data)
+bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSourceType)
 {
     QXmlStreamWriter writer(&data);
 
@@ -1379,7 +1390,7 @@ bool TuningFilterStorage::save(QByteArray& data)
 
     writer.writeStartElement("ObjectFilterStorage");
 
-    m_root->save(writer);
+	m_root->save(writer, true, saveSourceType);
 
     writer.writeEndElement();
 
@@ -1391,14 +1402,14 @@ bool TuningFilterStorage::save(QByteArray& data)
 
 }
 
-bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg)
+bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType)
 {
 	// save data to XML
 	//
 
     QByteArray data;
 
-    bool ok = save(data);
+	bool ok = save(data, saveSourceType);
 
     if (ok == false)
     {
@@ -1443,7 +1454,7 @@ bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilt
 		root.addChild(filterCopy);
 	}
 
-	root.save(writer);
+	root.save(writer, false, TuningFilter::Source::Project/*Not used!*/);
 
 	writer.writeEndElement();
 
