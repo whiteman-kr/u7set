@@ -33,7 +33,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
-	theTuningLog = new TuningLog::TuningLog(qAppName());
+	m_tuningLog = new TuningLog::TuningLog(qAppName());
 
 	createActions();
 	createMenu();
@@ -45,7 +45,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	// TuningClientTcpClient
 	//
-	m_tcpClient = new TuningClientTcpClient(softwareInfo, &m_tuningSignalManager);
+	m_tcpClient = new TuningClientTcpClient(softwareInfo, &m_tuningSignalManager, theLogFile, m_tuningLog, &m_userManager);
 	m_tcpClient->setInstanceId(theSettings.instanceStrId());
 	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
 
@@ -107,7 +107,7 @@ MainWindow::~MainWindow()
 	theLogFile->writeMessage(tr("Application finished."));
 	delete theLogFile;
 
-	delete theTuningLog;
+	delete m_tuningLog;
 }
 
 UserManager* MainWindow::userManager()
@@ -687,5 +687,4 @@ void MainWindow::showAbout()
 
 MainWindow* theMainWindow = nullptr;
 Log::LogFile* theLogFile = nullptr;
-TuningLog::TuningLog* theTuningLog = nullptr;
 

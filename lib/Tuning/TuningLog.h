@@ -33,16 +33,14 @@ namespace TuningLog
 		TuningLogWorker(const QString& fileName, const QString& path, quint64 sessionHash);
 		virtual ~TuningLogWorker();
 
-		bool write(const AppSignalParam& asp, double oldValue, double newValue);
-		bool write(const QString& equipmentId, const QString& caption, double oldValue, double newValue);
+		bool write(const AppSignalParam& asp, double oldValue, double newValue, const QString& userName);
+		bool write(const QString& equipmentId, const QString& caption, double oldValue, double newValue, const QString& userName);
 
 	protected:
 		virtual void onThreadStarted();
 		virtual void onThreadFinished();
 
 	private:
-
-		QString getCurrentUserName() const;
 
 		QString getLogFileName() const;
 
@@ -79,8 +77,8 @@ namespace TuningLog
 		TuningLog(const QString& logName, const QString& path = QString());
 		virtual ~TuningLog();
 
-		bool write(const AppSignalParam& asp, double oldValue, double newValue);
-		bool write(const QString& equipmentId, const QString& caption, double oldValue, double newValue);
+		bool write(const AppSignalParam& asp, const TuningValue& oldValue, const TuningValue& newValue, const QString& userName);
+		bool write(const QString& equipmentId, const QString& caption, double oldValue, double newValue, const QString& userName);
 
 	signals:
 		void writeFailure();

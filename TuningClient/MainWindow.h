@@ -106,6 +106,9 @@ private:
 	QLabel* m_statusBarTuningConnection = nullptr;
 
 	QString m_globalScript;
+
+	TuningLog::TuningLog* m_tuningLog = nullptr;
+
 };
 
 // Global definitions
@@ -113,8 +116,6 @@ private:
 extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
-
-extern TuningLog::TuningLog* theTuningLog;
 
 #endif // MAINWINDOW_H
 

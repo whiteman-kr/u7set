@@ -3,9 +3,17 @@
 #include "version.h"
 
 TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
-											 TuningSignalManager* signalManager) :
-	TuningTcpClient(softwareInfo, signalManager)
+											 TuningSignalManager* signalManager,
+											 Log::LogFile* log,
+											 TuningLog::TuningLog* tuningLog, UserManager* userManager) :
+	TuningTcpClient(softwareInfo, signalManager),
+	m_log(log),
+	m_tuningLog(tuningLog),
+	m_userManager(userManager)
 {
+	assert(m_log);
+	assert(m_tuningLog);
+	assert(m_userManager);
 
 }
 
@@ -42,19 +50,21 @@ bool TuningClientTcpClient::tuningSourceCounters(const Hash& equipmentHash, Tuni
 
 void TuningClientTcpClient::writeLogError(const QString& message)
 {
-	assert(theLogFile);
-	theLogFile->writeError(message);
+	m_log->writeError(message);
 }
 
 void TuningClientTcpClient::writeLogWarning(const QString& message)
 {
-	assert(theLogFile);
-	theLogFile->writeWarning(message);
+	m_log->writeWarning(message);
 }
 
 void TuningClientTcpClient::writeLogMessage(const QString& message)
 {
-	assert(theLogFile);
-	theLogFile->writeMessage(message);
+	m_log->writeMessage(message);
+}
+
+void TuningClientTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
+{
+	m_tuningLog->write(param, oldValue, newValue, m_userManager->loggedInUser());
 }
 

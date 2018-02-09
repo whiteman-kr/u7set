@@ -146,12 +146,23 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 
 		for (const TuningWriteCommand& cmd : data)
 		{
+			AppSignalParam param =m_signals->signalParam(cmd.m_hash, &ok);
+			if (ok == false)
+			{
+				assert(false);
+				return;
+			}
+
 			TuningSignalState state = m_signals->state(cmd.m_hash, &ok);
 			if (ok == true)
 			{
+				writeLogSignalChange(param, state.value(), cmd.m_value);
+
 				state.m_value = cmd.m_value;
 				m_signals->setState(cmd.m_hash, state);
 			}
+
+
 		}
 
 		return;
@@ -160,8 +171,28 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 
 	QMutexLocker l(&m_writeQueueMutex);
 
+	bool found = false;
+
 	for (const TuningWriteCommand& command : data)
 	{
+		// Write command to log
+
+		AppSignalParam param =m_signals->signalParam(command.m_hash, &found);
+		if (found == false)
+		{
+			assert(false);
+			return;
+		}
+
+		TuningSignalState state = m_signals->state(command.m_hash, &found);
+		if (found == false)
+		{
+			assert(false);
+			return;
+		}
+
+		writeLogSignalChange(param, state.value(), command.m_value);
+
 		// Push command to the queue
 		//
 		m_writeQueue.emplace(command);
@@ -498,6 +529,25 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 			}
 
 			TuningSource& ts = it->second;
+
+			// Write SOR to tuning log
+
+			TuningValue oldSor;
+			oldSor.setType(TuningValueType::Discrete);
+			oldSor.setDiscreteValue(ts.state.setsor() ? 1 : 0);
+
+			TuningValue newSor;
+			newSor.setType(TuningValueType::Discrete);
+			newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
+
+			AppSignalParam param;
+			param.setEquipmentId(ts.info.equipmentid().c_str());
+			param.setCaption(tr("SOR is set"));
+			param.setPrecision(0);
+
+			writeLogSignalChange(param, oldSor, newSor);
+
+			//
 
 			ts.state = tss;
 		}
@@ -1027,6 +1077,13 @@ void TuningTcpClient::writeLogWarning(const QString& message)
 void TuningTcpClient::writeLogMessage(const QString& message)
 {
 	Q_UNUSED(message);
+}
+
+void TuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
+{
+	Q_UNUSED(param);
+	Q_UNUSED(oldValue);
+	Q_UNUSED(newValue);
 }
 
 QString TuningTcpClient::instanceId() const

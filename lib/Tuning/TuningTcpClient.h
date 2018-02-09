@@ -157,6 +157,8 @@ protected:
 	virtual void writeLogWarning(const QString& message);
 	virtual void writeLogMessage(const QString& message);
 
+	virtual void writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue);
+
 public slots:
 	void slot_signalsUpdated();
 	void slot_configurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply);
