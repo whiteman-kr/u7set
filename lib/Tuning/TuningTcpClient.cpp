@@ -719,6 +719,34 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			continue;
 		}
 
+		if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
+		{
+			bool found = false;
+
+			AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
+			if (found == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			TuningSignalState state = m_signals->state(stateMessage.signalhash(), &found);
+			if (found == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
+						  .arg(state.newValue().toString(param.precision()))
+						  .arg(param.customSignalId())
+						  .arg(param.caption())
+						  .arg(param.equipmentId())
+						  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
+						  );
+		}
+
+
 		arrivedStates.emplace_back(stateMessage);
 	}
 
@@ -1044,7 +1072,8 @@ void TuningTcpClient::slot_signalsUpdated()
 
 QString TuningTcpClient::networkErrorStr(NetworkError error)
 {
-	switch (error)
+	return getNetworkErrorStr(error);
+	/*switch (error)
 	{
 	case NetworkError::Success:                         return "NetworkError::Success"; break;
 	case NetworkError::WrongPartNo:                     return "NetworkError::WrongPartNo"; break;
@@ -1060,9 +1089,13 @@ QString TuningTcpClient::networkErrorStr(NetworkError error)
 		assert(false);
 	}
 
-	return "?";
+	return "?";*/
 }
 
+void TuningTcpClient::writeLogAlert(const QString& message)
+{
+	Q_UNUSED(message);
+}
 
 void TuningTcpClient::writeLogError(const QString& message)
 {

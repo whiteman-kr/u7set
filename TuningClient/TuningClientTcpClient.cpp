@@ -48,6 +48,11 @@ bool TuningClientTcpClient::tuningSourceCounters(const Hash& equipmentHash, Tuni
 	return true;
 }
 
+void TuningClientTcpClient::writeLogAlert(const QString& message)
+{
+	m_log->writeAlert(message);
+}
+
 void TuningClientTcpClient::writeLogError(const QString& message)
 {
 	m_log->writeError(message);

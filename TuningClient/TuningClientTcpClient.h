@@ -17,6 +17,7 @@ public:
 
 	bool tuningSourceCounters(const Hash& equipmentHash, TuningFilterCounters* result) const;// REWRITE THIS FUNCTION!!!
 
+	virtual void writeLogAlert(const QString& message) override;
 	virtual void writeLogError(const QString& message) override;
 	virtual void writeLogWarning(const QString& message) override;
 	virtual void writeLogMessage(const QString& message) override;

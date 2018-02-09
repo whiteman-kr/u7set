@@ -190,14 +190,19 @@ void MainWindow::createStatusBar()
 	m_statusDiscreteCount = new QLabel();
 	m_statusDiscreteCount->setAlignment(Qt::AlignHCenter);
 	m_statusDiscreteCount->setMinimumWidth(100);
+	m_statusDiscreteCount->setToolTip(tr("Alerted discretes counter"));
 
 	m_statusBarLmErrors = new QLabel();
 	m_statusBarLmErrors->setAlignment(Qt::AlignHCenter);
 	m_statusBarLmErrors->setMinimumWidth(100);
+	m_statusBarLmErrors->installEventFilter(this);
+	m_statusBarLmErrors->setToolTip(tr("LM errors counter"));
 
 	m_statusBarSor = new QLabel();
 	m_statusBarSor->setAlignment(Qt::AlignHCenter);
 	m_statusBarSor->setMinimumWidth(100);
+	m_statusBarSor->installEventFilter(this);
+	m_statusBarSor->setToolTip(tr("SOR counter"));
 
 	m_statusBarConfigConnection = new QLabel();
 	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
@@ -207,6 +212,12 @@ void MainWindow::createStatusBar()
 	m_statusBarTuningConnection->setAlignment(Qt::AlignHCenter);
 	m_statusBarTuningConnection->setMinimumWidth(100);
 
+	m_statusBarLogAlerts = new QLabel();
+	m_statusBarLogAlerts->setAlignment(Qt::AlignHCenter);
+	m_statusBarLogAlerts->setMinimumWidth(100);
+	m_statusBarLogAlerts->installEventFilter(this);
+	m_statusBarLogAlerts->setToolTip(tr("Error and warning counters in the log window"));
+
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
@@ -215,6 +226,7 @@ void MainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarSor, 0);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
+	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -325,7 +337,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		else
 		{
 			m_statusDiscreteCount->setText(QString("Discretes: %1").arg(discreteCount));
-			m_statusDiscreteCount->setStyleSheet("color : white; background-color: blue");
+			m_statusDiscreteCount->setStyleSheet("QLabel {color : white; background-color: blue}");
 		}
 
 		// Lm Errors tool
@@ -358,7 +370,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		else
 		{
 			m_statusBarLmErrors->setText(QString("LM Errors: %1").arg(errorsCount));
-			m_statusBarLmErrors->setStyleSheet("color : white; background-color: red");
+			m_statusBarLmErrors->setStyleSheet("QLabel {color : white; background-color: red}");
 		}
 
 		// Sor tool
@@ -373,8 +385,25 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		else
 		{
 			m_statusBarSor->setText(QString("SOR: %1").arg(sorCount));
-			m_statusBarSor->setStyleSheet("color : white; background-color: red");
+			m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
 		}
+
+		// Log alerts tool
+
+		assert(m_statusBarLogAlerts);
+
+		if (theLogFile->errorAckCounter() == 0 && theLogFile->warningAckCounter() == 0)
+		{
+			m_statusBarLogAlerts->setText(QString());
+			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarLogAlerts->setText(QString("E: %1 W: %2").arg(theLogFile->errorAckCounter()).arg(theLogFile->warningAckCounter()));
+			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
+		}
+
+		//
 
 		if (m_tuningWorkspace != nullptr)
 		{
@@ -516,7 +545,69 @@ void MainWindow::createWorkspace()
 			}
 		}
 	}
+}
 
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+	/*
+	if (m_tab != nullptr && object == m_tab->tabBar() &&
+			(event->type() == QEvent::MouseButtonPress ||
+			 event->type() == QEvent::MouseButtonRelease ||
+			 event->type() == QEvent::KeyPress))
+	{
+		if (askForSavePendingChanges() == false)
+		{
+			return true;
+		}
+	}
+
+	if (m_filterTree != nullptr && (object == m_filterTree || object == m_filterTree->viewport()) &&
+			(event->type() == QEvent::MouseButtonPress ||
+			 event->type() == QEvent::MouseButtonRelease ||
+			 event->type() == QEvent::KeyPress))
+	{
+		if (askForSavePendingChanges() == false)
+		{
+			return true;
+		}
+	}
+
+	for (FilterButton* b : m_filterButtons)
+	{
+		if (object == b &&
+				(event->type() == QEvent::MouseButtonPress ||
+				 event->type() == QEvent::MouseButtonRelease ||
+				 event->type() == QEvent::KeyPress))
+		{
+			if (askForSavePendingChanges() == false)
+			{
+				return true;
+			}
+		}
+	}*/
+
+	if (object == m_statusBarLmErrors &&
+		m_statusBarLmErrors->text().isEmpty() == false &&
+		event->type() == QEvent::MouseButtonPress)
+	{
+		showTuningSources();
+	}
+
+	if (object == m_statusBarSor &&
+		m_statusBarSor->text().isEmpty() == false &&
+		event->type() == QEvent::MouseButtonPress)
+	{
+		showTuningSources();
+	}
+
+	if (object == m_statusBarLogAlerts &&
+		m_statusBarLogAlerts->text().isEmpty() == false &&
+		event->type() == QEvent::MouseButtonPress)
+	{
+		showLog();
+	}
+
+	return QWidget::eventFilter(object, event);
 }
 
 void MainWindow::slot_configurationArrived()

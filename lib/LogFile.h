@@ -220,6 +220,10 @@ namespace Log
 
 		void view(QWidget* parent);
 
+		int alertAckCounter() const;
+		int errorAckCounter() const;
+		int warningAckCounter() const;
+
 	signals:
 
 		void writeFailure();
@@ -238,6 +242,10 @@ namespace Log
 		LogFileDialog* m_logDialog = nullptr;
 
 		quint64 m_sessionHash;
+
+		int m_alertAckCounter = 0;
+		int m_errorAckCounter = 0;
+		int m_warningAckCounter = 0;
 	};
 }
 
