@@ -1,5 +1,6 @@
 #include "TuningSignalState.h"
 #include <cmath>
+#include "../AppSignal.h"
 
 //
 // TuningSignalState
@@ -114,5 +115,17 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 void TuningSignalState::invalidate()
 {
 	m_flags.valid = false;
+}
+
+bool TuningSignalState::limitsUnbalance(const AppSignalParam& asp) const
+{
+	if (valid() == true && asp.isAnalog() == true)
+	{
+		if (lowBound() != asp.tuningLowBound() || highBound() != asp.tuningHighBound())
+		{
+			return true;
+		}
+	}
+	return false;
 }
 

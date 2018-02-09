@@ -179,7 +179,7 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 	{
 		// Write command to log
 
-		AppSignalParam param =m_signals->signalParam(command.m_hash, &found);
+		AppSignalParam param = m_signals->signalParam(command.m_hash, &found);
 		if (found == false)
 		{
 			assert(false);
@@ -191,6 +191,12 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 		{
 			assert(false);
 			return;
+		}
+
+		if (state.limitsUnbalance(param) == true)
+		{
+			writeLogAlert(tr("There is limits mismatch in signal '%1'. Operation is disabled.").arg(param.customSignalId()));
+			continue;
 		}
 
 		writeLogSignalChange(param, state.value(), command.m_value);
@@ -713,6 +719,8 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 	std::vector<TuningSignalState> arrivedStates;
 	arrivedStates.reserve(stateCount);
 
+	bool found = false;
+
 	for (int i = 0; i < stateCount; i++)
 	{
 		const ::Network::TuningSignalState& stateMessage = m_readTuningSignalsReply.tuningsignalstate(i);
@@ -726,10 +734,11 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			continue;
 		}
 
+
+		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
+
 		if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
 		{
-			bool found = false;
-
 			AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
 			if (found == false)
 			{
@@ -737,15 +746,8 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 				continue;
 			}
 
-			TuningSignalState state = m_signals->state(stateMessage.signalhash(), &found);
-			if (found == false)
-			{
-				assert(false);
-				continue;
-			}
-
 			writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-						  .arg(state.newValue().toString(param.precision()))
+						  .arg(previousState.newValue().toString(param.precision()))
 						  .arg(param.customSignalId())
 						  .arg(param.caption())
 						  .arg(param.equipmentId())
@@ -753,8 +755,25 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 						  );
 		}
 
+		TuningSignalState arrivedState(stateMessage);
 
-		arrivedStates.emplace_back(stateMessage);
+		// When updating states, we have to save some properties unchanged
+
+		arrivedState.m_flags.userModified = previousState.userModified();
+		arrivedState.m_flags.controlIsEnabled = previousState.controlIsEnabled();
+
+		if (previousState.userModified() == false)
+		{
+			arrivedState.m_newValue = arrivedState.value();
+		}
+		else
+		{
+			arrivedState.m_newValue = previousState.newValue();
+		}
+
+		//
+
+		arrivedStates.push_back(stateMessage);
 	}
 
 	m_signals->setState(arrivedStates);

@@ -108,7 +108,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (limitsUnbalance(asp, state) == true)
+		if (state.limitsUnbalance(asp) == true)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -201,7 +201,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (limitsUnbalance(asp, state) == true)
+		if (state.limitsUnbalance(asp) == true)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -1056,7 +1056,7 @@ void TuningPage::slot_setValue()
 
 		if (asp.isAnalog() == true)
 		{
-			if (m_model->limitsUnbalance(asp, state) == true)
+			if (state.limitsUnbalance(asp) == true)
 			{
 				QMessageBox::warning(this, tr("Set Value"), tr("There is limits mismatch in signal '%1'. Value setting is disabled.").arg(asp.customSignalId()));
 				return;
@@ -1340,7 +1340,7 @@ void TuningPage::slot_setAll()
 
 			if (asp.isAnalog() == true)
 			{
-				if (m_model->limitsUnbalance(asp, state) == true)
+				if (state.limitsUnbalance(asp) == true)
 				{
 					QMessageBox::warning(this, tr("Set All"), tr("There is limits mismatch in signal '%1'. Operation is disabled.").arg(asp.customSignalId()));
 					return;

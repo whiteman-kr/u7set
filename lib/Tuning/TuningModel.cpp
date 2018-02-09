@@ -431,19 +431,6 @@ void TuningModel::sort(int column, Qt::SortOrder order)
 	return;
 }
 
-bool TuningModel::limitsUnbalance(const AppSignalParam& asp, const TuningSignalState& tss) const
-{
-	if (tss.valid() == true && asp.isAnalog() == true)
-	{
-		if (tss.lowBound() != asp.tuningLowBound() || tss.highBound() != asp.tuningHighBound())
-		{
-			return true;
-		}
-	}
-	return false;
-
-}
-
 QModelIndex TuningModel::parent(const QModelIndex& index) const
 {
 	Q_UNUSED(index);
@@ -621,7 +608,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		{
 			if (asp.isAnalog())
 			{
-				if (limitsUnbalance(asp, tss))
+				if (tss.limitsUnbalance(asp) == true)
 				{
 					QString str = tr("Base %1, read %2")
 							.arg(asp.tuningLowBound().toString(asp.precision()))
@@ -643,7 +630,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		{
 			if (asp.isAnalog())
 			{
-				if (limitsUnbalance(asp, tss))
+				if (tss.limitsUnbalance(asp) == true)
 				{
 					QString str = tr("Base %1, read %2")
 							.arg(asp.tuningHighBound().toString(asp.precision()))

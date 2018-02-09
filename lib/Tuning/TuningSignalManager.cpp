@@ -281,25 +281,8 @@ void TuningSignalManager::setState(const std::vector<TuningSignalState>& states)
 {
 	QMutexLocker l(&m_statesMutex);
 
-	for (TuningSignalState state : states)
+	for (const TuningSignalState& state : states)
 	{
-		// When updating states, we have to save some properties unchanged
-
-		TuningSignalState oldState = m_states[state.hash()];
-
-		state.m_flags.userModified = oldState.userModified();
-		state.m_flags.controlIsEnabled = oldState.controlIsEnabled();
-
-
-		if (state.m_flags.userModified == false)
-		{
-			state.m_newValue = oldState.value();
-		}
-		else
-		{
-			state.m_newValue = oldState.newValue();
-		}
-
 		m_states[state.hash()] = state;
 	}
 

@@ -87,8 +87,6 @@ public:
 
 	void sort(int column, Qt::SortOrder order) override;
 
-	bool limitsUnbalance(const AppSignalParam& asp, const TuningSignalState& tss) const;
-
 protected:
 	QModelIndex parent(const QModelIndex& index) const override;
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
