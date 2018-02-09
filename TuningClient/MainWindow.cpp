@@ -428,8 +428,6 @@ void MainWindow::createWorkspace()
 		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
 	}
 
-	m_filterStorage.root()->setHasDiscreteCounter(theConfigSettings.showDiscreteCounters);
-
 	// Update automatic filters
 
 	m_filterStorage.removeFilters(TuningFilter::Source::Schema);

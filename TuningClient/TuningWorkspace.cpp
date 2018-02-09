@@ -604,6 +604,11 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 void TuningWorkspace::updateCounters()
 {
+	if (theConfigSettings.showDiscreteCounters == false)
+	{
+		return;
+	}
+
 	// Tab counters
 
 	if (m_tab != nullptr)
@@ -725,7 +730,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		// Counters column
 
-		if (filter->hasDiscreteCounter() == true)
+		if (theConfigSettings.showDiscreteCounters == true && filter->hasDiscreteCounter() == true)
 		{
 			treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
 		}

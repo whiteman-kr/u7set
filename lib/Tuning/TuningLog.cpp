@@ -19,7 +19,9 @@ namespace TuningLog
 
 	QString TuningLogRecord::toString(const QString& sessionHashString)
 	{
-		return QString("%1\t%2\t\t%3\t%4\t%5\t%6 -> %7\r\n")
+		if (message.isEmpty() == true)
+		{
+			return QString("%1\t%2\t\t%3\t%4\t%5\t%6 -> %7\r\n")
 				.arg(sessionHashString)
 				.arg(time.toString(messageTimeFormat))
 				.arg(equipmentId)
@@ -27,6 +29,15 @@ namespace TuningLog
 				.arg(customAppSignalId)
 				.arg(QString::number(oldValue, 'f', precision))
 				.arg(QString::number(newValue, 'f', precision));
+		}
+		else
+		{
+			return QString("%1\t%2\t\t%3\t%4\r\n")
+				.arg(sessionHashString)
+				.arg(time.toString(messageTimeFormat))
+				.arg(userName)
+				.arg(message);
+		}
 	}
 
 	//
@@ -65,12 +76,17 @@ namespace TuningLog
 		r.newValue = newValue;
 		r.precision = asp.precision();
 
+		if (r.userName.isEmpty() == true)
+		{
+			r.userName = tr("Unknown");
+		}
+
 		m_queue.push_back(r);
 
 		return true;
 	}
 
-	bool TuningLogWorker::write(const QString& equipmentId, const QString& caption, double oldValue, double newValue, const QString& userName)
+	bool TuningLogWorker::write(const QString& message, const QString& userName)
 	{
 		QMutexLocker l(&m_queueMutex);
 
@@ -79,11 +95,12 @@ namespace TuningLog
 		r.sessionHash = m_sessionHash;
 		r.time = QDateTime::currentDateTime();
 		r.userName = userName;
-		r.equipmentId = equipmentId;
-		r.customAppSignalId = caption;
-		r.oldValue = oldValue;
-		r.newValue = newValue;
-		r.precision = 0;
+		r.message = message;
+
+		if (r.userName.isEmpty() == true)
+		{
+			r.userName = tr("Unknown");
+		}
 
 		m_queue.push_back(r);
 
@@ -200,9 +217,9 @@ namespace TuningLog
 		return m_logFileWorker->write(asp, oldValue.toDouble(), newValue.toDouble(), userName);
 	}
 
-	bool TuningLog::write(const QString& equipmentId, const QString& caption, double oldValue, double newValue, const QString& userName)
+	bool TuningLog::write(const QString& message, const QString& userName)
 	{
-		return m_logFileWorker->write(equipmentId, caption, oldValue, newValue, userName);
+		return m_logFileWorker->write(message, userName);
 	}
 
 

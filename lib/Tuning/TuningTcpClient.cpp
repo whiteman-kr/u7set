@@ -122,6 +122,8 @@ bool TuningTcpClient::activateTuningSourceControl(const QString& equipmentId, bo
 		return false;
 	}
 
+	writeLogMessage(tr("Tuning Source %1 is %2.").arg(equipmentId).arg(enableControl ? tr("activated") : tr("deactivated")));
+
 	QMutexLocker l(&m_writeQueueMutex);
 
 	m_writeQueue.emplace(TuningWriteCommand(equipmentId, enableControl));
@@ -208,6 +210,8 @@ void TuningTcpClient::applyTuningSignals()
 	QMutexLocker l(&m_writeQueueMutex);
 
 	m_writeQueue.emplace(TuningWriteCommand());
+
+	writeLogSignalChange(tr("Apply command is sent."));
 
 	return;
 }
@@ -540,12 +544,15 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 			newSor.setType(TuningValueType::Discrete);
 			newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
 
-			AppSignalParam param;
-			param.setEquipmentId(ts.info.equipmentid().c_str());
-			param.setCaption(tr("SOR is set"));
-			param.setPrecision(0);
+			if (oldSor != newSor)
+			{
+				AppSignalParam param;
+				param.setEquipmentId(ts.info.equipmentid().c_str());
+				param.setCustomSignalId(tr("SOR is set"));
+				param.setPrecision(0);
 
-			writeLogSignalChange(param, oldSor, newSor);
+				writeLogSignalChange(param, oldSor, newSor);
+			}
 
 			//
 
@@ -1117,6 +1124,11 @@ void TuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const Tu
 	Q_UNUSED(param);
 	Q_UNUSED(oldValue);
 	Q_UNUSED(newValue);
+}
+
+void TuningTcpClient::writeLogSignalChange(const QString& message)
+{
+	Q_UNUSED(message);
 }
 
 QString TuningTcpClient::instanceId() const

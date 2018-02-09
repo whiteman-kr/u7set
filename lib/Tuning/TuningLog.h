@@ -20,6 +20,7 @@ namespace TuningLog
 		double oldValue = 0;
 		double newValue = 0;
 		int precision = 0;
+		QString message;
 
 		QString toString(const QString& sessionHashString);
 
@@ -34,7 +35,7 @@ namespace TuningLog
 		virtual ~TuningLogWorker();
 
 		bool write(const AppSignalParam& asp, double oldValue, double newValue, const QString& userName);
-		bool write(const QString& equipmentId, const QString& caption, double oldValue, double newValue, const QString& userName);
+		bool write(const QString& message, const QString& userName);
 
 	protected:
 		virtual void onThreadStarted();
@@ -78,7 +79,7 @@ namespace TuningLog
 		virtual ~TuningLog();
 
 		bool write(const AppSignalParam& asp, const TuningValue& oldValue, const TuningValue& newValue, const QString& userName);
-		bool write(const QString& equipmentId, const QString& caption, double oldValue, double newValue, const QString& userName);
+		bool write(const QString& message, const QString& userName);
 
 	signals:
 		void writeFailure();

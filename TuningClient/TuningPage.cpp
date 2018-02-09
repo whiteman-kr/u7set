@@ -969,6 +969,34 @@ bool TuningPage::apply()
 		return false;
 	}
 
+	// Get SOR counters
+	int sorCount = 0;
+
+	std::vector<Hash> sources = m_tuningTcpClient->tuningSourcesEquipmentHashes();
+
+	for (Hash& h : sources)
+	{
+		TuningFilterCounters counters;
+		if (m_tuningTcpClient->tuningSourceCounters(h, &counters) == false)
+		{
+			assert(false);
+			continue;
+		}
+
+		sorCount += counters.sorCounter;
+	}
+
+	if (sorCount > 0)
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!!!\r\n\r\nSOR Signal(s) are set in logic modules!\r\n\r\nIf you apply these changes, module can run into RUN SAFE STATE.\r\n\r\nAre you sure you STILL WANT TO APPLY the changes?"),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+	}
+
 	m_tuningTcpClient->applyTuningSignals();
 
 	return true;
@@ -1024,6 +1052,15 @@ void TuningPage::slot_setValue()
 		if (state.valid() == false)
 		{
 			return;
+		}
+
+		if (asp.isAnalog() == true)
+		{
+			if (m_model->limitsUnbalance(asp, state) == true)
+			{
+				QMessageBox::warning(this, tr("Set Value"), tr("There is limits mismatch in signal '%1'. Value setting is disabled.").arg(asp.customSignalId()));
+				return;
+			}
 		}
 
 		if (asp.isAnalog() == true)
@@ -1282,6 +1319,35 @@ void TuningPage::slot_timerTick500()
 void TuningPage::slot_setAll()
 {
 	QMenu menu(this);
+
+
+	// Check all signals to have correct limits
+	{
+		std::vector<Hash> hashes = m_model->hashes();
+
+		bool ok = false;
+
+		for (Hash hash : hashes)
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				continue;
+			}
+
+			if (asp.isAnalog() == true)
+			{
+				if (m_model->limitsUnbalance(asp, state) == true)
+				{
+					QMessageBox::warning(this, tr("Set All"), tr("There is limits mismatch in signal '%1'. Operation is disabled.").arg(asp.customSignalId()));
+					return;
+				}
+			}
+		}
+	}
 
 	// Set All To On
 	QAction* actionAllToOn = new QAction(tr("Set All Discretes To On"), &menu);

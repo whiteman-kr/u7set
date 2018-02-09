@@ -58,7 +58,9 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 		filter = m_root.get();
 	}
 
-	if (filter->isRoot() == true && filter->hasDiscreteCounter() == true)
+	// Root filter
+
+	if (filter->isRoot() == true && theConfigSettings.showDiscreteCounters == true)
 	{
 		// All signals ahashes are stored in root filter for discrete counter to work
 
@@ -74,6 +76,8 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 
 		filter->setSignalsHashes(signalsHashes);
 	}
+
+	// Other filters
 
 	if (filter->isEmpty() == false)
 	{
@@ -154,7 +158,38 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 		filter = m_root.get();
 	}
 
-	if (filter->isEmpty() == false || filter->isRoot() == true)
+	// Root counters
+
+	if (filter->isRoot() == true && theConfigSettings.showDiscreteCounters == true)
+	{
+		TuningFilterCounters counters;
+
+		// Signals counters
+
+		const std::vector<Hash>& appSignalsHashes = filter->signalsHashes();
+
+		bool found = false;
+
+		for (const Hash& appSignalHash : appSignalsHashes)
+		{
+			TuningSignalState state = objects->state(appSignalHash, &found);
+			if (found == false)
+			{
+				continue;
+			}
+
+			if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
+			{
+				counters.discreteCounter++;
+			}
+		}
+
+		filter->setCounters(counters);
+	}
+
+	// Other counters
+
+	if (filter->isEmpty() == false)
 	{
 		TuningFilterCounters counters;
 

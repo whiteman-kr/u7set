@@ -23,6 +23,7 @@ public:
 	virtual void writeLogMessage(const QString& message) override;
 
 	virtual void writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue) override;
+	virtual void writeLogSignalChange(const QString& message) override;
 
 private:
 

@@ -73,3 +73,8 @@ void TuningClientTcpClient::writeLogSignalChange(const AppSignalParam& param, co
 	m_tuningLog->write(param, oldValue, newValue, m_userManager->loggedInUser());
 }
 
+void TuningClientTcpClient::writeLogSignalChange(const QString& message)
+{
+	m_tuningLog->write(message, m_userManager->loggedInUser());
+}
+

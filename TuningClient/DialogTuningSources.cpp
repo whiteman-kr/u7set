@@ -242,7 +242,7 @@ void DialogTuningSources::activateControl(bool enable)
 		return;
 	}
 
-	if (m_tcpClient->activateTuningSourceControl(equipmentId, false) == false)
+	if (m_tcpClient->activateTuningSourceControl(equipmentId, enable) == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("An error has been occured!"));
 	}

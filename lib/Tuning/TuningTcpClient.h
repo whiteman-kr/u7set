@@ -159,6 +159,7 @@ protected:
 	virtual void writeLogMessage(const QString& message);
 
 	virtual void writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue);
+	virtual void writeLogSignalChange(const QString& message);
 
 public slots:
 	void slot_signalsUpdated();
