@@ -132,7 +132,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		TuningValue defaultVal = defaultValue(asp);
 
-		if (defaultVal.toDouble() < asp.tuningLowBound() || defaultVal.toDouble() > asp.tuningHighBound())
+		if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -521,16 +521,16 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
 
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::CustomAppSignalID, 0.15));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::CustomAppSignalID, 0.22));
 	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::EquipmentID, 0.2));
 	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Caption, 0.15));
 	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Units, 0.05));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Type, 0.05));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Type, 0.1));
 
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Value, 0.1));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::LowLimit, 0.1));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::HighLimit, 0.1));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Default, 0.1));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Value, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::LowLimit, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::HighLimit, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Default, 0.07));
 
 	for (auto c : m_columnsArray)
 	{
@@ -1004,13 +1004,12 @@ void TuningPage::slot_setValue()
 	}
 
 	bool first = true;
-	bool analog = false;
 	TuningValue value;
 	TuningValue defaultValue;
 	bool sameValue = true;
 	int precision = 0;
-	double lowLimit = 0;
-	double highLimit = 0;
+	TuningValue lowLimit;
+	TuningValue highLimit;
 
 	for (int i : selectedRows)
 	{
@@ -1037,7 +1036,6 @@ void TuningPage::slot_setValue()
 
 		if (first == true)
 		{
-			analog = asp.isAnalog();
 			value = state.value();
 			defaultValue = m_model->defaultValue(asp);
 			lowLimit = asp.tuningLowBound();
@@ -1046,13 +1044,13 @@ void TuningPage::slot_setValue()
 		}
 		else
 		{
-			if (analog != asp.isAnalog())
+			if (asp.toTuningType() != value.type())
 			{
-				QMessageBox::warning(this, tr("Set Value"), tr("Please select one type of objects: analog or discrete."));
+				QMessageBox::warning(this, tr("Set Value"), tr("Please select objects of the same type."));
 				return;
 			}
 
-			if (analog == true)
+			if (asp.isAnalog() == true)
 			{
 				if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
 				{
@@ -1074,7 +1072,7 @@ void TuningPage::slot_setValue()
 		}
 	}
 
-	DialogInputTuningValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -1372,7 +1370,7 @@ void TuningPage::slot_setAll()
 
 			if (tvDefault != state.value() && ok == true)
 			{
-				if(tvDefault.toDouble() < asp.tuningLowBound() || tvDefault.toDouble() > asp.tuningHighBound())
+				if(tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
 				{
 					QString message = tr("Invalid default value '%1' in signal %2 [%3]").arg(tvDefault.toString(asp.precision())).arg(asp.appSignalId()).arg(asp.caption());
 					QMessageBox::critical(this, qAppName(), message);

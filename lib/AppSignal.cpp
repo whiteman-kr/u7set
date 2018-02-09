@@ -555,43 +555,47 @@ void AppSignalParam::setEnableTuning(bool value)
 	m_enableTuning = value;
 }
 
-double AppSignalParam::tuningDefaultValue() const
+TuningValue AppSignalParam::tuningDefaultValue() const
 {
-	int warning_checkNextCode = 1;
+	return m_tuningDefaultValue;
+}
 
+void AppSignalParam::setTuningDefaultValue(const TuningValue& value)
+{
+	m_tuningDefaultValue = value;
+}
+
+TuningValue AppSignalParam::tuningLowBound() const
+{
+	return m_tuningLowBound;
+}
+
+void AppSignalParam::setTuningLowBound(const TuningValue& value)
+{
+	m_tuningLowBound = value;
+}
+
+TuningValue AppSignalParam::tuningHighBound() const
+{
+	return m_tuningHighBound;
+}
+
+void AppSignalParam::setTuningHighBound(const TuningValue& value)
+{
+	m_tuningHighBound = value;
+}
+
+double AppSignalParam::getTuningDefaultValue() const
+{
 	return m_tuningDefaultValue.toDouble();
 }
 
-void AppSignalParam::setTuningDefaultValue(double value)
+double AppSignalParam::getTuingLowBound() const
 {
-	int warning_checkNextCode = 1;
-
-	m_tuningDefaultValue.setType(TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat));
-	m_tuningDefaultValue.fromDouble(value);
-}
-
-double AppSignalParam::tuningLowBound() const
-{
-	int warning_checkNextCode = 1;
 	return m_tuningLowBound.toDouble();
 }
 
-void AppSignalParam::setTuningLowBound(double value)
+double AppSignalParam::getTuningHighBound() const
 {
-	int warning_checkNextCode = 1;
-	m_tuningLowBound.setType(TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat));
-	m_tuningLowBound.fromDouble(value);
-}
-
-double AppSignalParam::tuningHighBound() const
-{
-	int warning_checkNextCode = 1;
 	return m_tuningHighBound.toDouble();
-}
-
-void AppSignalParam::setTuningHighBound(double value)
-{
-	int warning_checkNextCode = 1;
-	m_tuningHighBound.setType(TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat));
-	m_tuningHighBound.fromDouble(value);
 }

@@ -119,17 +119,17 @@ class DialogInputTuningValue : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogInputTuningValue(bool analog, TuningValue value, TuningValue defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent);
+	explicit DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, int decimalPlaces, QWidget* parent);
 	~DialogInputTuningValue();
 
 private:
 
 	TuningValue m_value;
 	TuningValue m_defaultValue;
-	double m_lowLimit = 0;
-	double m_highLimit = 0;
+	TuningValue m_lowLimit;
+	TuningValue m_highLimit;
+
 	int m_decimalPlaces = 0;
-	bool m_analog = true;
 
 	virtual void accept();
 

@@ -34,23 +34,6 @@ private:
 
 };
 
-class DialogCheckFilterSignals : public QDialog
-{
-	Q_OBJECT
-
-public:
-
-	DialogCheckFilterSignals(std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parent);
-
-private slots:
-
-	void buttonClicked(QAbstractButton* button);
-
-private:
-
-	QDialogButtonBox* m_buttonBox = nullptr;
-};
-
 struct TuningFilterCounters
 {
 	int sorCounter = 0;

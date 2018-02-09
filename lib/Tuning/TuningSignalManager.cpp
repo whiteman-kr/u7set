@@ -233,9 +233,9 @@ void TuningSignalManager::validateStates()
 
 		s.m_flags.valid = true;
 		s.m_flags.controlIsEnabled = true;
-		s.m_value = TuningValue(asp.toTuningType(), asp.tuningDefaultValue());
-		s.m_lowBound = TuningValue(asp.toTuningType(), asp.tuningLowBound());
-		s.m_highBound = TuningValue(asp.toTuningType(), asp.tuningHighBound());
+		s.m_value = asp.tuningDefaultValue();
+		s.m_lowBound = asp.tuningLowBound();
+		s.m_highBound = asp.tuningHighBound();
 
 		setState(hash, s);
 	}

@@ -347,6 +347,21 @@ int TuningValue::tuningValueTypeId()
 	return qMetaTypeId<TuningValue>();
 }
 
+QString TuningValue::tuningValueTypeString() const
+{
+	switch (m_type)
+	{
+	case TuningValueType::Discrete:		return QObject::tr("Discrete");
+	case TuningValueType::SignedInt32:	return QObject::tr("SignedInt32");
+	case TuningValueType::SignedInt64:	return QObject::tr("SignedInt64");
+	case TuningValueType::Float:		return QObject::tr("Float");
+	case TuningValueType::Double:		return QObject::tr("Double");
+	default:
+		assert(false);
+		return "?";
+	}
+}
+
 qint64 TuningValue::rawInt64() const
 {
 	return m_int64;

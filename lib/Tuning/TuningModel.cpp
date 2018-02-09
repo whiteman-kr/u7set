@@ -124,10 +124,20 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		break;
 	case TuningModel::Columns::LowLimit:
 	{
-		if (asp1.isAnalog() == true && asp2.isAnalog() == true)
+		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			v1 = asp1.tuningLowBound();
-			v2 = asp2.tuningHighBound();
+			TuningValue tv1 = asp1.tuningLowBound();
+			TuningValue tv2 = asp2.tuningLowBound();
+
+			if (tv1 == tv2)
+			{
+				return asp1.customSignalId() < asp2.customSignalId();
+			}
+
+			if (order == Qt::AscendingOrder)
+				return tv1 < tv2;
+			else
+				return tv1 > tv2;
 		}
 		else
 		{
@@ -138,10 +148,20 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		break;
 	case TuningModel::Columns::HighLimit:
 	{
-		if (asp1.isAnalog() == true && asp2.isAnalog() == true)
+		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			v1 = asp1.tuningHighBound();
-			v2 = asp2.tuningHighBound();
+			TuningValue tv1 = asp1.tuningHighBound();
+			TuningValue tv2 = asp2.tuningHighBound();
+
+			if (tv1 == tv2)
+			{
+				return asp1.customSignalId() < asp2.customSignalId();
+			}
+
+			if (order == Qt::AscendingOrder)
+				return tv1 < tv2;
+			else
+				return tv1 > tv2;
 		}
 		else
 		{
@@ -227,9 +247,7 @@ TuningValue TuningModel::defaultValue(const AppSignalParam& asp) const
 		return it->second;
 	}
 
-	TuningValue result(asp.toTuningType(), asp.tuningDefaultValue());
-
-	return result;
+	return asp.tuningDefaultValue();
 }
 
 void TuningModel::setDefaultValues(const std::vector<std::pair<Hash, TuningValue>>& values)
@@ -417,10 +435,7 @@ bool TuningModel::limitsUnbalance(const AppSignalParam& asp, const TuningSignalS
 {
 	if (tss.valid() == true && asp.isAnalog() == true)
 	{
-		TuningValue tvHigh(asp.toTuningType(), asp.tuningHighBound());
-		TuningValue tvLow(asp.toTuningType(), asp.tuningLowBound());
-
-		if (tss.lowBound() != tvLow || tss.highBound() != tvHigh)
+		if (tss.lowBound() != asp.tuningLowBound() || tss.highBound() != asp.tuningHighBound())
 		{
 			return true;
 		}
@@ -533,7 +548,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (displayIndex == static_cast<int>(Columns::Type))
 		{
-			return asp.isAnalog() ? tr("A") : tr("D");
+			return asp.tuningDefaultValue().tuningValueTypeString();
 		}
 
 		//
@@ -609,13 +624,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				if (limitsUnbalance(asp, tss))
 				{
 					QString str = tr("Base %1, read %2")
-							.arg(QString::number(asp.tuningLowBound(), 'f', asp.precision()))
+							.arg(asp.tuningLowBound().toString(asp.precision()))
 							.arg(tss.lowBound().toString(asp.precision()));
 					return str;
 				}
 				else
 				{
-					return QString::number(asp.tuningLowBound(), 'f', asp.precision());
+					return asp.tuningLowBound().toString(asp.precision());
 				}
 			}
 			else
@@ -631,13 +646,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				if (limitsUnbalance(asp, tss))
 				{
 					QString str = tr("Base %1, read %2")
-							.arg(QString::number(asp.tuningHighBound(), 'f', asp.precision()))
+							.arg(asp.tuningHighBound().toString(asp.precision()))
 							.arg(tss.highBound().toString(asp.precision()));
 					return str;
 				}
 				else
 				{
-					return QString::number(asp.tuningHighBound(), 'f', asp.precision());
+					return asp.tuningHighBound().toString(asp.precision());
 				}
 			}
 			else
@@ -705,14 +720,13 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 // DialogInputTuningValue
 //
 
-DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, TuningValue defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent) :
+DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, int decimalPlaces, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_value(value),
 	m_defaultValue(defaultValue),
 	m_lowLimit(lowLimit),
 	m_highLimit(highLimit),
-	m_decimalPlaces(decimalPlaces),
-	m_analog(analog)
+	m_decimalPlaces(decimalPlaces)
 {
 
 	m_discreteCheck = new QCheckBox();
@@ -750,29 +764,10 @@ DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, T
 
 	//
 
-	m_discreteCheck->setVisible(analog == false);
-	m_analogEdit->setVisible(analog == true);
+	m_discreteCheck->setVisible(value.type() == TuningValueType::Discrete);
+	m_analogEdit->setVisible(value.type() != TuningValueType::Discrete);
 
-
-
-	if (analog == true)
-	{
-
-		QString str = tr("Enter the value (%1 - %2):")
-				.arg(QString::number(m_lowLimit, 'f', decimalPlaces))
-				.arg(QString::number(m_highLimit, 'f', decimalPlaces));
-
-		setWindowTitle(str);
-
-		if (sameValue == true)
-		{
-			m_analogEdit->setText(value.toString(decimalPlaces));
-			m_analogEdit->selectAll();
-		}
-
-		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString(m_decimalPlaces));
-	}
-	else
+	if (value.type() == TuningValueType::Discrete)
 	{
 		setWindowTitle(tr("Enter the value:"));
 
@@ -790,6 +785,22 @@ DialogInputTuningValue::DialogInputTuningValue(bool analog, TuningValue value, T
 
 		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString());
 	}
+	else
+	{
+		QString str = tr("Enter the value (%1 - %2):")
+				.arg(m_lowLimit.toString(decimalPlaces))
+				.arg(m_highLimit.toString(decimalPlaces));
+
+		setWindowTitle(str);
+
+		if (sameValue == true)
+		{
+			m_analogEdit->setText(value.toString(decimalPlaces));
+			m_analogEdit->selectAll();
+		}
+
+		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString(m_decimalPlaces));
+	}
 }
 
 DialogInputTuningValue::~DialogInputTuningValue()
@@ -798,7 +809,24 @@ DialogInputTuningValue::~DialogInputTuningValue()
 
 void DialogInputTuningValue::accept()
 {
-	if (m_analog == true)
+	if (m_value.type() == TuningValueType::Discrete)
+	{
+		if (m_discreteCheck->checkState() == Qt::PartiallyChecked)
+		{
+			QMessageBox::critical(this, tr("Error"), tr("Please select the value."));
+			return;
+		}
+
+		if (m_discreteCheck->checkState() == Qt::Checked)
+		{
+			m_value.setDiscreteValue(1);
+		}
+		else
+		{
+			m_value.setDiscreteValue(0);
+		}
+	}
+	else
 	{
 		QString text = m_analogEdit->text();
 		if (text.isEmpty() == true)
@@ -821,10 +849,10 @@ void DialogInputTuningValue::accept()
 			newValue.setInt64Value(text.toInt(&ok));
 			break;
 		case TuningValueType::Float:
-			newValue.setFloatValue(text.toInt(&ok));
+			newValue.setFloatValue(text.toFloat(&ok));
 			break;
 		case TuningValueType::Double:
-			newValue.setDoubleValue(text.toInt(&ok));
+			newValue.setDoubleValue(text.toDouble(&ok));
 			break;
 		default:
 			assert(false);
@@ -838,7 +866,7 @@ void DialogInputTuningValue::accept()
 			return;
 		}
 
-		if (newValue.toDouble() < m_lowLimit || newValue.toDouble() > m_highLimit)
+		if (newValue < m_lowLimit || newValue > m_highLimit)
 		{
 			QMessageBox::critical(this, tr("Error"), tr("The value is out of range."));
 			return;
@@ -847,24 +875,6 @@ void DialogInputTuningValue::accept()
 		m_value = newValue;
 
 	}
-	else
-	{
-		if (m_discreteCheck->checkState() == Qt::PartiallyChecked)
-		{
-			QMessageBox::critical(this, tr("Error"), tr("Please select the value."));
-			return;
-		}
-
-		if (m_discreteCheck->checkState() == Qt::Checked)
-		{
-			m_value.setDiscreteValue(1);
-		}
-		else
-		{
-			m_value.setDiscreteValue(0);
-		}
-	}
-
 
 	QDialog::accept();
 }
@@ -876,16 +886,16 @@ void DialogInputTuningValue::on_m_checkBox_clicked(bool checked)
 
 void DialogInputTuningValue::on_m_buttonDefault_clicked()
 {
-	if (m_analog == true)
+	if (m_value.type() == TuningValueType::Discrete)
 	{
-		m_analogEdit->setText(m_defaultValue.toString(m_decimalPlaces));
-	}
-	else
-	{
-		bool defaultState = m_defaultValue.int32Value() == 0 ? false : true;
+		bool defaultState = m_defaultValue.discreteValue() == 0 ? false : true;
 
 		m_discreteCheck->setChecked(defaultState);
 
 		m_discreteCheck->setText(defaultState ? tr("1") : tr("0"));
+	}
+	else
+	{
+		m_analogEdit->setText(m_defaultValue.toString(m_decimalPlaces));
 	}
 }

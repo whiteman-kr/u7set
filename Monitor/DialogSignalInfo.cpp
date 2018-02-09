@@ -253,7 +253,9 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 	itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("EnableTuning")<<(m_signal.enableTuning() ? tr("Yes") : tr("No"))));
 	if (m_signal.enableTuning())
 	{
-		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningDefaultValue")<<QString::number(m_signal.tuningDefaultValue())));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningDefaultValue")<<m_signal.tuningDefaultValue().toString(m_signal.precision())));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningLowBound")<<m_signal.tuningLowBound().toString(m_signal.precision())));
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningHighBound")<<m_signal.tuningHighBound().toString(m_signal.precision())));
 	}
 
 	ui->treeProperties->addTopLevelItem(itemGroup7);

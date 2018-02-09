@@ -225,14 +225,18 @@ public:
 	Q_INVOKABLE bool enableTuning() const;
 	void setEnableTuning(bool value);
 
-	Q_INVOKABLE double tuningDefaultValue() const;
-	void setTuningDefaultValue(double value);
+	TuningValue tuningDefaultValue() const;
+	void setTuningDefaultValue(const TuningValue& value);
 
-	Q_INVOKABLE double tuningLowBound() const;
-	void setTuningLowBound(double value);
+	TuningValue tuningLowBound() const;
+	void setTuningLowBound(const TuningValue& value);
 
-	Q_INVOKABLE double tuningHighBound() const;
-	void setTuningHighBound(double value);
+	TuningValue tuningHighBound() const;
+	void setTuningHighBound(const TuningValue& value);
+
+	Q_INVOKABLE double getTuningDefaultValue() const;
+	Q_INVOKABLE double getTuingLowBound() const;
+	Q_INVOKABLE double getTuningHighBound() const;
 
 public:
 	static const int NO_UNIT_ID = 1;

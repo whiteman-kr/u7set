@@ -399,9 +399,8 @@ void DialogChooseTuningSignals::on_m_remove_clicked()
 void DialogChooseTuningSignals::on_m_setValue_clicked()
 {
 	bool first = true;
-	bool analog = false;
-	float lowLimit = 0.0;
-	float highLimit = 0.0;
+	TuningValue lowLimit;
+	TuningValue highLimit;
 	int precision = 0;
 	TuningValue value;
 	TuningValue defaultValue;
@@ -430,7 +429,6 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 
 		if (first == true)
 		{
-			analog = asp.isAnalog();
 			lowLimit = asp.tuningLowBound();
 			highLimit = asp.tuningHighBound();
 			precision = asp.precision();
@@ -438,19 +436,19 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 			value = fv.value();
 			value.setType(asp.toTuningType());
 
-			defaultValue = TuningValue(asp.toTuningType(), asp.tuningDefaultValue());
+			defaultValue = asp.tuningDefaultValue();
 
 			first = false;
 		}
 		else
 		{
-			if (analog != asp.isAnalog())
+			if (asp.toTuningType() != value.type())
 			{
 				QMessageBox::warning(this, tr("Preset Editor"), tr("Please select signals of same type (analog or discrete)."));
 				return;
 			}
 
-			if (analog == true)
+			if (asp.isAnalog() == true)
 			{
 				if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
 				{
@@ -459,9 +457,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 				}
 			}
 
-			TuningValue checkDefaultValue(asp.toTuningType(), asp.tuningDefaultValue());
-
-			if (checkDefaultValue.type() != defaultValue.type() || checkDefaultValue != defaultValue)
+			if (asp.tuningDefaultValue() != defaultValue)
 			{
 				QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different default value."));
 				return;
@@ -474,7 +470,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 		}
 	}
 
-	DialogInputTuningValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -643,7 +639,7 @@ void DialogChooseTuningSignals::setFilterValueItemText(QTreeWidgetItem* item, co
 	QStringList l;
 	l.push_back(asp.customSignalId());
 	l.push_back(value.appSignalId());
-	l.push_back(asp.isAnalog() ? tr("A") : tr("D"));
+	l.push_back(asp.tuningDefaultValue().tuningValueTypeString());
 	l.push_back(asp.caption());
 	if (value.useValue() == true)
 	{
