@@ -114,6 +114,69 @@ bool TuningTcpClient::tuningSourceInfoByHash(Hash equipmentHash, TuningSource* r
 	return true;
 }
 
+bool TuningTcpClient::tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount) const
+{
+	QString emptyStatus;
+	return tuningSourceStatus(equipmentHash, errorsCount, sorCount, emptyStatus);
+}
+
+bool TuningTcpClient::tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount, QString& status) const
+{
+	errorsCount = 0;
+	sorCount = 0;
+	status.clear();
+
+	TuningSource ts;
+
+	if (tuningSourceInfoByHash(equipmentHash, &ts) == false)
+	{
+		status = tr("???");
+		errorsCount++;
+		return false;
+	}
+
+	if (ts.state.isreply() == false)
+	{
+		status = tr("No Reply");
+
+		if (singleLmControlMode() == true && ts.state.controlisactive() == true)
+		{
+			// If this LM is selected in single control mode and has no reply - this is an error
+
+			errorsCount++;
+		}
+
+		return true;
+	}
+
+	// SOR counter
+
+	if (ts.state.setsor() == true)
+	{
+		sorCount++;
+	}
+
+	// Errors counter
+
+	if (ts.state.errfotipuniqueid() > 0)
+	{
+		errorsCount++;
+	}
+
+	// Add more errors here...
+
+	if (errorsCount > 0)
+	{
+		status = tr("%2").arg(errorsCount);
+	}
+	else
+	{
+		status = tr("OK");
+	}
+
+	return true;
+}
+
 bool TuningTcpClient::activateTuningSourceControl(const QString& equipmentId, bool enableControl)
 {
 	if (m_tuningSources.find(::calcHash(equipmentId)) == m_tuningSources.end())
@@ -542,22 +605,25 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			// Write SOR to tuning log
 
-			TuningValue oldSor;
-			oldSor.setType(TuningValueType::Discrete);
-			oldSor.setDiscreteValue(ts.state.setsor() ? 1 : 0);
-
-			TuningValue newSor;
-			newSor.setType(TuningValueType::Discrete);
-			newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
-
-			if (oldSor != newSor)
+			if (ts.state.isreply() == true)
 			{
-				AppSignalParam param;
-				param.setEquipmentId(ts.info.equipmentid().c_str());
-				param.setCustomSignalId(tr("SOR is set"));
-				param.setPrecision(0);
+				TuningValue oldSor;
+				oldSor.setType(TuningValueType::Discrete);
+				oldSor.setDiscreteValue(ts.state.setsor() ? 1 : 0);
 
-				writeLogSignalChange(param, oldSor, newSor);
+				TuningValue newSor;
+				newSor.setType(TuningValueType::Discrete);
+				newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
+
+				if (oldSor != newSor)
+				{
+					AppSignalParam param;
+					param.setEquipmentId(ts.info.equipmentid().c_str());
+					param.setCustomSignalId(tr("SOR is set"));
+					param.setPrecision(0);
+
+					writeLogSignalChange(param, oldSor, newSor);
+				}
 			}
 
 			//
@@ -662,7 +728,7 @@ void TuningTcpClient::requestReadTuningSignals()
 
 	// Determine the amount of signals needed to be requested
 	//
-	m_readTuningSignalCount = TDS_TUNING_MAX_READ_STATES;
+	m_readTuningSignalCount = 50;//TDS_TUNING_MAX_READ_STATES;
 
 	if (m_readTuningSignalIndex >= signalCount - 1)
 	{
@@ -773,7 +839,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		//
 
-		arrivedStates.push_back(stateMessage);
+		arrivedStates.push_back(arrivedState);
 	}
 
 	m_signals->setState(arrivedStates);

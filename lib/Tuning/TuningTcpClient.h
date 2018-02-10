@@ -103,6 +103,9 @@ public:
 	bool tuningSourceInfoById(quint64 id, TuningSource* result) const;
 	bool tuningSourceInfoByHash(Hash equipmentHash, TuningSource* result) const;
 
+	bool tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount) const;
+	bool tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount, QString& status) const;
+
 	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl);
 
 	// Writing states

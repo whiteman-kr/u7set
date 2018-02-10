@@ -188,35 +188,35 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setIndent(3);
 
 	m_statusDiscreteCount = new QLabel();
-	m_statusDiscreteCount->setAlignment(Qt::AlignHCenter);
+	m_statusDiscreteCount->setAlignment(Qt::AlignLeft);
 	m_statusDiscreteCount->setMinimumWidth(100);
 	m_statusDiscreteCount->setToolTip(tr("Alerted discretes counter"));
 
 	m_statusBarLmErrors = new QLabel();
-	m_statusBarLmErrors->setAlignment(Qt::AlignHCenter);
+	m_statusBarLmErrors->setAlignment(Qt::AlignLeft);
 	m_statusBarLmErrors->setMinimumWidth(100);
 	m_statusBarLmErrors->installEventFilter(this);
-	m_statusBarLmErrors->setToolTip(tr("LM errors counter"));
+	m_statusBarLmErrors->setToolTip(tr("LM Errors (click for details)"));
 
 	m_statusBarSor = new QLabel();
-	m_statusBarSor->setAlignment(Qt::AlignHCenter);
+	m_statusBarSor->setAlignment(Qt::AlignLeft);
 	m_statusBarSor->setMinimumWidth(100);
 	m_statusBarSor->installEventFilter(this);
-	m_statusBarSor->setToolTip(tr("SOR counter"));
+	m_statusBarSor->setToolTip(tr("SOR counter (click for details)"));
 
 	m_statusBarConfigConnection = new QLabel();
-	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarConfigConnection->setAlignment(Qt::AlignLeft);
 	m_statusBarConfigConnection->setMinimumWidth(100);
 
 	m_statusBarTuningConnection = new QLabel();
-	m_statusBarTuningConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarTuningConnection->setAlignment(Qt::AlignLeft);
 	m_statusBarTuningConnection->setMinimumWidth(100);
 
 	m_statusBarLogAlerts = new QLabel();
-	m_statusBarLogAlerts->setAlignment(Qt::AlignHCenter);
+	m_statusBarLogAlerts->setAlignment(Qt::AlignLeft);
 	m_statusBarLogAlerts->setMinimumWidth(100);
 	m_statusBarLogAlerts->installEventFilter(this);
-	m_statusBarLogAlerts->setToolTip(tr("Error and warning counters in the log window"));
+	m_statusBarLogAlerts->setToolTip(tr("Error and warning counters in the log (click to view log)"));
 
 	// --
 	//
@@ -284,124 +284,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 			}
 		}
 
-
-		// Status bar
-		//
-		assert(m_statusBarConfigConnection);
-		assert(m_statusBarTuningConnection);
-
-		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-		Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
-
-
-		// ConfigService
-		//
-		QString text = tr(" ConfigService: ");
-		if (confiConnState.isConnected == false)
-		{
-			text += tr(" no connection");
-		}
-		else
-		{
-			text += tr(" connected, packets: %1").arg(QString::number(confiConnState.replyCount));
-		}
-
-		m_statusBarConfigConnection->setText(text);
-		m_statusBarConfigConnection->setToolTip(m_configController.getStateToolTip());
-
-		// TuningService
-		//
-		text = tr(" TuningService: ");
-		if (tuningConnState.isConnected == false)
-		{
-			text += tr(" no connection");
-		}
-		else
-		{
-			text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
-		}
-
-		m_statusBarTuningConnection->setText(text);
-
-		// Counters
-
-		assert(m_statusDiscreteCount);
-
-		int discreteCount = m_filterStorage.root()->counters().discreteCounter;
-
-		if (discreteCount == 0)
-		{
-			m_statusDiscreteCount->setText(QString());
-			m_statusDiscreteCount->setStyleSheet(m_statusBarInfo->styleSheet());
-		}
-		else
-		{
-			m_statusDiscreteCount->setText(QString("Discretes: %1").arg(discreteCount));
-			m_statusDiscreteCount->setStyleSheet("QLabel {color : white; background-color: blue}");
-		}
-
-		// Lm Errors tool
-
-		assert(m_statusBarLmErrors);
-
-		int errorsCount = 0;
-		int sorCount = 0;
-
-		std::vector<Hash> sources = m_tcpClient->tuningSourcesEquipmentHashes();
-
-		for (Hash& h : sources)
-		{
-			TuningFilterCounters counters;
-			if (m_tcpClient->tuningSourceCounters(h, &counters) == false)
-			{
-				assert(false);
-				continue;
-			}
-
-			errorsCount += counters.errorCounter;
-			sorCount += counters.sorCounter;
-		}
-
-		if (errorsCount == 0)
-		{
-			m_statusBarLmErrors->setText(QString());
-			m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
-		}
-		else
-		{
-			m_statusBarLmErrors->setText(QString("LM Errors: %1").arg(errorsCount));
-			m_statusBarLmErrors->setStyleSheet("QLabel {color : white; background-color: red}");
-		}
-
-		// Sor tool
-
-		assert(m_statusBarSor);
-
-		if (sorCount == 0)
-		{
-			m_statusBarSor->setText(QString());
-			m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
-		}
-		else
-		{
-			m_statusBarSor->setText(QString("SOR: %1").arg(sorCount));
-			m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
-		}
-
-		// Log alerts tool
-
-		assert(m_statusBarLogAlerts);
-
-		if (theLogFile->errorAckCounter() == 0 && theLogFile->warningAckCounter() == 0)
-		{
-			m_statusBarLogAlerts->setText(QString());
-			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
-		}
-		else
-		{
-			m_statusBarLogAlerts->setText(QString("E: %1 W: %2").arg(theLogFile->errorAckCounter()).arg(theLogFile->warningAckCounter()));
-			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
-		}
+		updateStatusBar();
 
 		//
 
@@ -547,43 +430,6 @@ void MainWindow::createWorkspace()
 
 bool MainWindow::eventFilter(QObject *object, QEvent *event)
 {
-	/*
-	if (m_tab != nullptr && object == m_tab->tabBar() &&
-			(event->type() == QEvent::MouseButtonPress ||
-			 event->type() == QEvent::MouseButtonRelease ||
-			 event->type() == QEvent::KeyPress))
-	{
-		if (askForSavePendingChanges() == false)
-		{
-			return true;
-		}
-	}
-
-	if (m_filterTree != nullptr && (object == m_filterTree || object == m_filterTree->viewport()) &&
-			(event->type() == QEvent::MouseButtonPress ||
-			 event->type() == QEvent::MouseButtonRelease ||
-			 event->type() == QEvent::KeyPress))
-	{
-		if (askForSavePendingChanges() == false)
-		{
-			return true;
-		}
-	}
-
-	for (FilterButton* b : m_filterButtons)
-	{
-		if (object == b &&
-				(event->type() == QEvent::MouseButtonPress ||
-				 event->type() == QEvent::MouseButtonRelease ||
-				 event->type() == QEvent::KeyPress))
-		{
-			if (askForSavePendingChanges() == false)
-			{
-				return true;
-			}
-		}
-	}*/
-
 	if (object == m_statusBarLmErrors &&
 		m_statusBarLmErrors->text().isEmpty() == false &&
 		event->type() == QEvent::MouseButtonPress)
@@ -606,6 +452,158 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 	}
 
 	return QWidget::eventFilter(object, event);
+}
+
+void MainWindow::updateStatusBar()
+{
+	// Status bar
+	//
+	assert(m_statusBarConfigConnection);
+	assert(m_statusBarTuningConnection);
+
+	Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+	Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
+
+
+	// ConfigService
+	//
+	QString text = tr(" ConfigService: ");
+	if (confiConnState.isConnected == false)
+	{
+		text += tr(" no connection");
+	}
+	else
+	{
+		text += tr(" connected, packets: %1").arg(QString::number(confiConnState.replyCount));
+	}
+
+	m_statusBarConfigConnection->setText(text);
+	m_statusBarConfigConnection->setToolTip(m_configController.getStateToolTip());
+
+	// TuningService
+	//
+	text = tr(" TuningService: ");
+	if (tuningConnState.isConnected == false)
+	{
+		text += tr(" no connection");
+	}
+	else
+	{
+		text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
+	}
+
+	m_statusBarTuningConnection->setText(text);
+
+	// Counters
+
+	if (theConfigSettings.showDiscreteCounters == true)
+	{
+		assert(m_statusDiscreteCount);
+
+		if (m_discreteCounter != m_filterStorage.root()->counters().discreteCounter)
+		{
+			m_discreteCounter = m_filterStorage.root()->counters().discreteCounter;
+
+			m_statusDiscreteCount->setText(QString("Discretes: %1").arg(m_discreteCounter));
+
+			if (m_discreteCounter == 0)
+			{
+				m_statusDiscreteCount->setStyleSheet(m_statusBarInfo->styleSheet());
+			}
+			else
+			{
+				m_statusDiscreteCount->setStyleSheet("QLabel {color : white; background-color: blue}");
+			}
+		}
+	}
+
+	std::vector<Hash> sources = m_tcpClient->tuningSourcesEquipmentHashes();
+
+	if (sources.empty() == true)
+	{
+		m_statusBarLmErrors->setText(tr(" No LM information"));
+		m_statusBarSor->setText(tr(" No SOR information"));
+	}
+	else
+	{
+		assert(m_statusBarLmErrors);
+
+		// Lm Errors tool
+
+		int totalErrorsCount = 0;
+		int totalSorCount = 0;
+
+		for (Hash& h : sources)
+		{
+			TuningFilterCounters counters;
+
+			if (m_tcpClient->tuningSourceStatus(h, counters.errorCounter, counters.sorCounter) == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			totalErrorsCount += counters.errorCounter;
+			totalSorCount += counters.sorCounter;
+		}
+
+		if (m_lmErrorsCounter != totalErrorsCount)
+		{
+			m_lmErrorsCounter = totalErrorsCount;
+
+			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(totalErrorsCount));
+
+			if (totalErrorsCount == 0)
+			{
+				m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
+			}
+			else
+			{
+				m_statusBarLmErrors->setStyleSheet("QLabel {color : white; background-color: red}");
+			}
+		}
+
+		// Sor tool
+
+		if (m_sorCounter != totalSorCount)
+		{
+			m_sorCounter = totalSorCount;
+
+			assert(m_statusBarSor);
+
+			m_statusBarSor->setText(QString(" SOR: %1").arg(totalSorCount));
+
+			if (totalSorCount == 0)
+			{
+				m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+			}
+			else
+			{
+				m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+			}
+		}
+	}
+
+	// Log alerts tool
+
+	if (m_logErrorsCounter != theLogFile->errorAckCounter() || m_logWarningsCounter != theLogFile->warningAckCounter())
+	{
+		m_logErrorsCounter = theLogFile->errorAckCounter();
+		m_logWarningsCounter = theLogFile->warningAckCounter();
+
+		assert(m_statusBarLogAlerts);
+
+		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+
+		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
+		{
+			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
+		}
+	}
 }
 
 void MainWindow::slot_configurationArrived()

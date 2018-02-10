@@ -3,6 +3,8 @@
 #include "MainWindow.h"
 
 #include <QButtonGroup>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 int TuningWorkspace::m_instanceCounter = 0;
 
@@ -201,14 +203,14 @@ void TuningWorkspace::updateFiltersTree()
 	QStringList l;
 	l << rootFilter->caption();
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(l);
-	item->setData(0, Qt::UserRole, QVariant::fromValue(rootFilter));
+	QTreeWidgetItem* rootItem = new QTreeWidgetItem(l);
+	rootItem->setData(0, Qt::UserRole, QVariant::fromValue(rootFilter));
 
-	addChildTreeObjects(rootFilter, item, mask);
+	addChildTreeObjects(rootFilter, rootItem, mask);
 
-	if (item->childCount() == 0)
+	if (rootItem->childCount() == 0)
 	{
-		delete item;
+		delete rootItem;
 		return;
 	}
 
@@ -222,7 +224,10 @@ void TuningWorkspace::updateFiltersTree()
 		m_filterTree->viewport()->installEventFilter(this);
 		m_filterTree->installEventFilter(this);
 
+		m_filterTree->setContextMenuPolicy(Qt::CustomContextMenu);
+
 		connect(m_filterTree, &QTreeWidget::currentItemChanged, this, &TuningWorkspace::slot_currentTreeItemChanged);
+		connect(m_filterTree, &QWidget::customContextMenuRequested, this, &TuningWorkspace::slot_treeContextMenuRequested);
 
 		QStringList headerLabels;
 		headerLabels << tr("Caption");
@@ -272,11 +277,34 @@ void TuningWorkspace::updateFiltersTree()
 	// Fill filters control
 	//
 
-	m_filterTree->addTopLevelItem(item);
+	m_filterTree->addTopLevelItem(rootItem);
 
-	item->setSelected(true);
+	rootItem->setSelected(true);
 
-	item->setExpanded(true);
+	// Expand root item
+
+	rootItem->setExpanded(true);
+
+	// Expand "Equipment" item
+
+	for (int i = 0; i < rootItem->childCount(); i++)
+	{
+		QTreeWidgetItem* rootChildItem = rootItem->child(i);
+
+		std::shared_ptr<TuningFilter> filter = rootChildItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+		if (filter == nullptr)
+		{
+			assert(filter);
+			return;
+		}
+
+		if (filter->isEmpty() == true && filter->isSourceEquipment())
+		{
+			rootChildItem->setExpanded(true);
+			break;
+		}
+
+	}
 
 	m_filterTree->sortItems(0, Qt::AscendingOrder);
 
@@ -596,6 +624,11 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 
+		if (f->isSourceEquipment() == true)
+		{
+			item->setData(1, Qt::UserRole, ::calcHash(f->caption()));
+		}
+
 		parent->addChild(item);
 
 		addChildTreeObjects(f, item, mask);
@@ -737,11 +770,9 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		// Status column
 
-		if (filter->isSourceEquipment() == true && counters.controlEnabledCounter == 0)
+		if (filter->isSourceEquipment() == true)
 		{
-			treeItem->setText(columnStatusIndex, tr("Disabled"));
-			treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
-			treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+			updateTuningSourceTreeItem(treeItem, filter.get());
 		}
 		else
 		{
@@ -763,15 +794,15 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		if (theConfigSettings.showSOR == true)
 		{
+			treeItem->setText(columnSorIndex, QString("%1").arg(counters.sorCounter));
+
 			if (counters.sorCounter == 0)
 			{
-				treeItem->setText(columnSorIndex, QString());
 				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
 				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
 			}
 			else
 			{
-				treeItem->setText(columnSorIndex, QString("SOR (%1)").arg(counters.sorCounter));
 				treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
 				treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 			}
@@ -783,6 +814,48 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 	{
 		updateTreeItemsStatus(treeItem->child(i));
 	}
+}
+
+void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter)
+{
+
+	QString state;
+	int errorsCount = 0;
+	int sorCount = 0;
+
+	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
+
+	if (m_tuningTcpClient->tuningSourceStatus(hash, errorsCount, sorCount, state) == false)
+	{
+		treeItem->setText(columnStatusIndex, tr("Unknown"));
+		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
+		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+
+		return;
+	}
+
+	if (filter->counters().controlEnabledCounter == 0)
+	{
+		treeItem->setText(columnStatusIndex, tr("Disabled"));
+		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
+		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+	}
+	else
+	{
+		treeItem->setText(columnStatusIndex, state);
+
+		if (errorsCount == 0)
+		{
+			treeItem->setBackground(columnStatusIndex, QBrush(Qt::white));
+			treeItem->setForeground(columnStatusIndex, QBrush(Qt::black));
+		}
+		else
+		{
+			treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
+			treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+		}
+	}
+
 }
 
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
@@ -840,6 +913,91 @@ void TuningWorkspace::slot_currentTreeItemChanged(QTreeWidgetItem *current, QTre
 		std::shared_ptr<TuningFilter> filter = current->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
 		emit treeFilterSelectionChanged(filter);
 	}
+}
+
+void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
+{
+	QTreeWidgetItem* item = m_filterTree->itemAt(pos);
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	std::shared_ptr<TuningFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	if (m_tuningTcpClient->singleLmControlMode() == false)
+	{
+		return;
+	}
+
+	if (filter->isEmpty() == true)
+	{
+		return;
+	}
+
+	if (filter->isSourceEquipment() == false)
+	{
+		return;
+	}
+
+	TuningSource ts;
+
+	if (m_tuningTcpClient->tuningSourceInfoByHash(::calcHash(filter->caption()), &ts) == false)
+	{
+		return;
+	}
+
+	QMenu menu(this);
+
+	// EnableControl
+
+	QAction* actionEnable = new QAction(tr("Activate Control"), &menu);
+
+	auto fEnableControl = [this, filter]() -> void
+	{
+			if (QMessageBox::warning(this, qAppName(),
+									 tr("Are you sure you want to activate the source %1?").arg(filter->caption()),
+									 QMessageBox::Yes | QMessageBox::No,
+									 QMessageBox::No) != QMessageBox::Yes)
+			{
+				return;
+			}
+
+			m_tuningTcpClient->activateTuningSourceControl(filter->caption(), true);
+	};
+	actionEnable->setEnabled(ts.state.controlisactive() == false);
+	connect(actionEnable, &QAction::triggered, this, fEnableControl);
+
+	// Disable Control
+
+	QAction* actionDisable = new QAction(tr("Deactivate Control"), &menu);
+
+	auto fDisableControl = [this, filter]() -> void
+	{
+			if (QMessageBox::warning(this, qAppName(),
+									 tr("Are you sure you want to deactivate the source %1?").arg(filter->caption()),
+									 QMessageBox::Yes | QMessageBox::No,
+									 QMessageBox::No) != QMessageBox::Yes)
+			{
+				return;
+			}
+
+			m_tuningTcpClient->activateTuningSourceControl(filter->caption(), false);
+	};
+	actionDisable->setEnabled(ts.state.controlisactive() == true);
+	connect(actionDisable, &QAction::triggered, this, fDisableControl);
+
+	// Run the menu
+
+	menu.addAction(actionEnable);
+	menu.addAction(actionDisable);
+
+	menu.exec(QCursor::pos());
 }
 
 void TuningWorkspace::slot_maskReturnPressed()

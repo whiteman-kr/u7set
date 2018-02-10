@@ -89,6 +89,8 @@ private:
 private:
 	bool eventFilter(QObject *object, QEvent *event) override;
 
+	void updateStatusBar();
+
 signals:
 	void timerTick500();
 
@@ -112,6 +114,12 @@ private:
 	QString m_globalScript;
 
 	TuningLog::TuningLog* m_tuningLog = nullptr;
+
+	int m_discreteCounter = -1;
+	int m_lmErrorsCounter = -1;
+	int m_sorCounter = -1;
+	int m_logErrorsCounter = -1;
+	int m_logWarningsCounter = -1;
 };
 
 // Global definitions

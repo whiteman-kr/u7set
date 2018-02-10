@@ -970,23 +970,25 @@ bool TuningPage::apply()
 	}
 
 	// Get SOR counters
-	int sorCount = 0;
+	int totalSorCount = 0;
 
 	std::vector<Hash> sources = m_tuningTcpClient->tuningSourcesEquipmentHashes();
 
 	for (Hash& h : sources)
 	{
-		TuningFilterCounters counters;
-		if (m_tuningTcpClient->tuningSourceCounters(h, &counters) == false)
+		int errorCounter = 0;
+		int sorCounter = 0;
+
+		if (m_tuningTcpClient->tuningSourceStatus(h, errorCounter, sorCounter) == false)
 		{
 			assert(false);
 			continue;
 		}
 
-		sorCount += counters.sorCounter;
+		totalSorCount += sorCounter;
 	}
 
-	if (sorCount > 0)
+	if (totalSorCount > 0)
 	{
 		if (QMessageBox::warning(this, qAppName(),
 								 tr("Warning!!!\r\n\r\nSOR Signal(s) are set in logic modules!\r\n\r\nIf you apply these changes, module can run into RUN SAFE STATE.\r\n\r\nAre you sure you STILL WANT TO APPLY the changes?"),
