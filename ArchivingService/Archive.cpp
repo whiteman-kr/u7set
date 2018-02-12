@@ -67,6 +67,8 @@ bool Archive::openDatabase(DbType dbType, QSqlDatabase& destDb)
 
 void Archive::initArchSignals(int count)
 {
+	Q_UNUSED(count);
+
 	m_archSignals.clear();
 	m_signalIDs.clear();
 

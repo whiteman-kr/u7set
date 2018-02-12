@@ -41,6 +41,27 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btnEnableControl">
+         <property name="text">
+          <string>Enable Control</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnDisableControl">
+         <property name="text">
+          <string>Disable Control</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelSingleControlMode">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>

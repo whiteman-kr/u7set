@@ -65,4 +65,6 @@ public:
 	int m_intStatProp = 0;
 	QString m_qstringStatProp;
 	Priority m_priorityStatProp;
+
+	static const int m_testPropertyCount = 4;
 };

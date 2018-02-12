@@ -15,7 +15,6 @@ public:
 
 	DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent);
 
-
 	enum class FilterType
 	{
 		All,
@@ -31,7 +30,6 @@ public:
 		Analog,
 		Discrete
 	};
-
 
 private:
 

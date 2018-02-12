@@ -592,17 +592,20 @@ namespace Hardware
 
 		visible:			[Added in version 3] property is visible
 */
+		QString m_specificPropertiesStructTrimmed = m_specificPropertiesStruct;
 
-		QStringList rows = m_specificPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
+		QStringList rows = m_specificPropertiesStructTrimmed.split(QChar::LineFeed, QString::SkipEmptyParts);
 
-		for (const QString& r : rows)
+		for (QString row : rows)
 		{
-			if (r.isEmpty() == true)
+			row = row.trimmed();
+
+			if (row.isEmpty() == true)
 			{
 				continue;
 			}
 
-			QStringList columns = r.split(';');
+			QStringList columns = row.split(';');
 
 			for (QString& col : columns)
 			{
@@ -616,7 +619,7 @@ namespace Hardware
 
 			if (ok == false)
 			{
-				qDebug() << Q_FUNC_INFO << " SpecificProperties: failed to parse specific prop version filed: " << r;
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: failed to parse specific prop version filed: " << row;
 				continue;
 			}
 
@@ -633,7 +636,7 @@ namespace Hardware
 				break;
 			default:
 				assert(false);
-				qDebug() << "Object " << this->equipmentId() << " has spec prop with unsuported version: " << r;
+				qDebug() << "Object " << this->equipmentId() << " has spec prop with unsuported version: " << row;
 			}
 		}
 

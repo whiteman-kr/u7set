@@ -3,19 +3,21 @@
 #include "MainWindow.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, Hash tuningSourceHash) :
+DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, quint64 tuningSourceId) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_tuningSourceHash(tuningSourceHash),
+	m_tuningSourceId(tuningSourceId),
 	ui(new Ui::DialogTuningSourceInfo),
 	m_tcpClient(tcpClient)
 {
 	assert(tcpClient);
 
+	setAttribute(Qt::WA_DeleteOnClose);
+
 	ui->setupUi(this);
 
 	TuningSource ts;
 
-	if (m_tcpClient->tuningSourceInfo(m_tuningSourceHash, &ts) == true)
+	if (m_tcpClient->tuningSourceInfoById(m_tuningSourceId, &ts) == true)
 	{
 		setWindowTitle(ts.info.equipmentid().c_str());
 	}
@@ -59,6 +61,8 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "requestCount"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "replyCount"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "commandQueueSize"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "controlIsActive"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "setSOR"));
 
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errUntimelyReplay"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errSent"));
@@ -152,7 +156,7 @@ void DialogTuningSourceInfo::updateData()
 {
 	TuningSource ts;
 
-	if (m_tcpClient->tuningSourceInfo(m_tuningSourceHash, &ts) == false)
+	if (m_tcpClient->tuningSourceInfoById(m_tuningSourceId, &ts) == false)
 	{
 		return;
 	}
@@ -202,6 +206,8 @@ void DialogTuningSourceInfo::updateData()
 	item->child(c++)->setText(1, QString::number(ts.state.requestcount()));
 	item->child(c++)->setText(1, QString::number(ts.state.replycount()));
 	item->child(c++)->setText(1, QString::number(ts.state.commandqueuesize()));
+	item->child(c++)->setText(1, ts.state.controlisactive() ? "Yes" : "No");
+	item->child(c++)->setText(1, ts.state.setsor() ? "Yes" : "No");
 
 	item->child(c++)->setText(1, QString::number(ts.state.erruntimelyreplay()));
 	item->child(c++)->setText(1, QString::number(ts.state.errsent()));

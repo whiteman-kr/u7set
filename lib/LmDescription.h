@@ -31,11 +31,11 @@ class LmDescription : public QObject
 	// Properties needed for accessing the data by configuration script
 	//
 	Q_PROPERTY(quint32 FlashMemory_ConfigFrameCount READ (m_flashMemory.configFrameCount))
-	Q_PROPERTY(quint32 FlashMemory_ConfigFrameSize	READ (m_flashMemory.configFrameSize))
-	Q_PROPERTY(quint32 FlashMemory_ConfigUartId		READ (m_flashMemory.configUartId))
+	Q_PROPERTY(quint32 FlashMemory_ConfigFramePayload READ (m_flashMemory.configFramePayload))
+	Q_PROPERTY(quint32 FlashMemory_ConfigUartId READ (m_flashMemory.configUartId))
 	Q_PROPERTY(quint32 FlashMemory_MaxConfigurationCount READ (m_flashMemory.maxConfigurationCount))
-	Q_PROPERTY(quint32 Memory_TxDiagDataSize		READ (m_memory.txDiagDataSize))
-	Q_PROPERTY(quint32 OptoInterface_OptoPortCount	READ (m_optoInterface.optoPortCount))
+	Q_PROPERTY(quint32 Memory_TxDiagDataSize READ (m_memory.txDiagDataSize))
+	Q_PROPERTY(quint32 OptoInterface_OptoPortCount READ (m_optoInterface.optoPortCount))
 
 public:
 	explicit LmDescription(QObject* parent = 0);
@@ -71,16 +71,19 @@ public:
 	struct FlashMemory
 	{
 		quint32 m_appLogicFrameCount = 0xFFFFFFFF;
+		quint32 m_appLogicFramePayload = 0xFFFFFFFF;
 		quint32 m_appLogicFrameSize = 0xFFFFFFFF;
 		quint32 m_appLogicUartId = 0;
 		bool m_appLogicWriteBitstream = false;
 
 		quint32 m_configFrameCount = 0xFFFFFFFF;
+		quint32 m_configFramePayload = 0xFFFFFFFF;
 		quint32 m_configFrameSize = 0xFFFFFFFF;
 		quint32 m_configUartId = 0;
 		bool m_configWriteBitstream = false;
 
 		quint32 m_tuningFrameCount = 0xFFFFFFFF;
+		quint32 m_tuningFramePayload = 0xFFFFFFFF;
 		quint32 m_tuningFrameSize = 0xFFFFFFFF;
 		quint32 m_tuningUartId = 0;
 		bool m_tuningWriteBitstream = false;
@@ -88,7 +91,7 @@ public:
 		quint32 m_maxConfigurationCount = 0;
 
 		quint32 configFrameCount() const { return m_configFrameCount; }
-		quint32 configFrameSize() const { return m_configFrameSize; }
+		quint32 configFramePayload() const { return m_configFramePayload; }
 		quint32 configUartId() const { return m_configUartId; }
 
 		quint32 maxConfigurationCount() const { return m_maxConfigurationCount; }
@@ -100,17 +103,25 @@ public:
 	{
 		quint32 m_codeMemorySize = 0xFFFFFFFF;
 		quint32 m_appMemorySize = 0xFFFFFFFF;
+
 		quint32 m_appDataOffset = 0xFFFFFFFF;
 		quint32 m_appDataSize = 0xFFFFFFFF;
+
 		quint32 m_appLogicBitDataOffset = 0xFFFFFFFF;
 		quint32 m_appLogicBitDataSize = 0xFFFFFFFF;
 		quint32 m_appLogicWordDataOffset = 0xFFFFFFFF;
 		quint32 m_appLogicWordDataSize = 0xFFFFFFFF;
+
 		quint32 m_moduleDataOffset = 0xFFFFFFFF;
 		quint32 m_moduleDataSize = 0xFFFFFFFF;
 		quint32 m_moduleCount = 14;
+
 		quint32 m_tuningDataOffset = 0xFFFFFFFF;
 		quint32 m_tuningDataSize = 0xFFFFFFFF;
+		quint32 m_tuningDataFrameCount = 0xFFFFFFFF;
+		quint32 m_tuningDataFramePayload = 0xFFFFFFFF;
+		quint32 m_tuningDataFrameSize = 0xFFFFFFFF;
+
 		quint32 m_txDiagDataOffset = 0xFFFFFFFF;
 		quint32 m_txDiagDataSize = 0xFFFFFFFF;
 

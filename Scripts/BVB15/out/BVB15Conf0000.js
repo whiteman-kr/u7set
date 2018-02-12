@@ -191,7 +191,7 @@ function generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet
     var LMNumber = module.jsPropertyInt("LMNumber");
     // Constants
     //
-    var frameSize = logicModuleDescription.FlashMemory_ConfigFrameSize;
+    var frameSize = logicModuleDescription.FlashMemory_ConfigFramePayload;
     var frameCount = logicModuleDescription.FlashMemory_ConfigFrameCount;
     if (frameSize < 1016) {
         log.errCFG3002("FlashMemory/ConfigFrameSize", frameSize, 1016, 65535, module.jsPropertyString("EquipmentID"));

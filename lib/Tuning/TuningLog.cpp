@@ -19,7 +19,9 @@ namespace TuningLog
 
 	QString TuningLogRecord::toString(const QString& sessionHashString)
 	{
-		return QString("%1\t%2\t\t%3\t%4\t%5\t%6 -> %7\r\n")
+		if (message.isEmpty() == true)
+		{
+			return QString("%1\t%2\t\t%3\t%4\t%5\t%6 -> %7\r\n")
 				.arg(sessionHashString)
 				.arg(time.toString(messageTimeFormat))
 				.arg(equipmentId)
@@ -27,6 +29,15 @@ namespace TuningLog
 				.arg(customAppSignalId)
 				.arg(QString::number(oldValue, 'f', precision))
 				.arg(QString::number(newValue, 'f', precision));
+		}
+		else
+		{
+			return QString("%1\t%2\t\t%3\t%4\r\n")
+				.arg(sessionHashString)
+				.arg(time.toString(messageTimeFormat))
+				.arg(userName)
+				.arg(message);
+		}
 	}
 
 	//
@@ -50,7 +61,7 @@ namespace TuningLog
 	{
 	}
 
-	bool TuningLogWorker::write(const AppSignalParam& asp, double oldValue, double newValue)
+	bool TuningLogWorker::write(const AppSignalParam& asp, double oldValue, double newValue, const QString& userName)
 	{
 		QMutexLocker l(&m_queueMutex);
 
@@ -58,19 +69,24 @@ namespace TuningLog
 
 		r.sessionHash = m_sessionHash;
 		r.time = QDateTime::currentDateTime();
-		r.userName = getCurrentUserName();
+		r.userName = userName;
 		r.equipmentId = asp.equipmentId();
 		r.customAppSignalId = asp.customSignalId();
 		r.oldValue = oldValue;
 		r.newValue = newValue;
 		r.precision = asp.precision();
 
+		if (r.userName.isEmpty() == true)
+		{
+			r.userName = tr("Unknown");
+		}
+
 		m_queue.push_back(r);
 
 		return true;
 	}
 
-	bool TuningLogWorker::write(const QString& equipmentId, const QString& caption, double oldValue, double newValue)
+	bool TuningLogWorker::write(const QString& message, const QString& userName)
 	{
 		QMutexLocker l(&m_queueMutex);
 
@@ -78,12 +94,13 @@ namespace TuningLog
 
 		r.sessionHash = m_sessionHash;
 		r.time = QDateTime::currentDateTime();
-		r.userName = getCurrentUserName();
-		r.equipmentId = equipmentId;
-		r.customAppSignalId = caption;
-		r.oldValue = oldValue;
-		r.newValue = newValue;
-		r.precision = 0;
+		r.userName = userName;
+		r.message = message;
+
+		if (r.userName.isEmpty() == true)
+		{
+			r.userName = tr("Unknown");
+		}
 
 		m_queue.push_back(r);
 
@@ -111,24 +128,6 @@ namespace TuningLog
 		}
 	}
 
-	QString TuningLogWorker::getCurrentUserName() const
-	{
-		QString userName = qgetenv("USER");									// get the user name in Linux
-
-		if(userName.isEmpty())
-		{
-			userName = qgetenv("USERNAME"); // get the name in Windows
-		}
-
-		if(userName.isEmpty())
-		{
-			userName = "Unknown user";
-		}
-
-		return userName;
-	}
-
-
 	QString TuningLogWorker::getLogFileName() const
 	{
 		QDate tm = QDate::currentDate();
@@ -137,9 +136,9 @@ namespace TuningLog
 				.arg(m_path)
 				.arg(QDir::separator())
 				.arg(m_logName)
-				.arg(QString::number(tm.year()))
-				.arg(QString::number(tm.month()))
-				.arg(QString::number(tm.day()));
+				.arg(QString::number(tm.year()).rightJustified(4, '0'))
+				.arg(QString::number(tm.month()).rightJustified(2, '0'))
+				.arg(QString::number(tm.day()).rightJustified(2, '0'));
 	}
 
 	bool TuningLogWorker::flush()
@@ -213,14 +212,14 @@ namespace TuningLog
 		}
 	}
 
-	bool TuningLog::write(const AppSignalParam& asp, double oldValue, double newValue)
+	bool TuningLog::write(const AppSignalParam& asp, const TuningValue& oldValue, const TuningValue& newValue, const QString& userName)
 	{
-		return m_logFileWorker->write(asp, oldValue, newValue);
+		return m_logFileWorker->write(asp, oldValue.toDouble(), newValue.toDouble(), userName);
 	}
 
-	bool TuningLog::write(const QString& equipmentId, const QString& caption, double oldValue, double newValue)
+	bool TuningLog::write(const QString& message, const QString& userName)
 	{
-		return m_logFileWorker->write(equipmentId, caption, oldValue, newValue);
+		return m_logFileWorker->write(message, userName);
 	}
 
 

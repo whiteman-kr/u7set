@@ -126,7 +126,7 @@ interface OptoModuleStorage {
 interface LogicModule {
 	jsConfigurationStringFile(): string;
 
-	FlashMemory_ConfigFrameSize: number;
+	FlashMemory_ConfigFramePayload: number;
 	FlashMemory_ConfigFrameCount: number;
 	FlashMemory_ConfigUartId: number;
 	Memory_TxDiagDataSize: number;
@@ -382,7 +382,7 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 
 	// Constants
 	//
-	var frameSize: number = logicModuleDescription.FlashMemory_ConfigFrameSize;
+	var frameSize: number = logicModuleDescription.FlashMemory_ConfigFramePayload;
 	var frameCount: number = logicModuleDescription.FlashMemory_ConfigFrameCount;
 
 	if (frameSize < 1016) {

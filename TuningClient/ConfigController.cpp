@@ -384,6 +384,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.showSchemas != readSettings.showSchemas ||
 			theConfigSettings.showSignals != readSettings.showSignals ||
 			theConfigSettings.showSOR != readSettings.showSOR ||
+			theConfigSettings.showDiscreteCounters != readSettings.showDiscreteCounters ||
 			theConfigSettings.logonMode != readSettings.logonMode ||
 			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
 			theConfigSettings.usersAccounts != readSettings.usersAccounts
@@ -568,6 +569,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->equipmentList = equipmentListString.split(';', QString::SkipEmptyParts);
 
 			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
+			outSetting->showDiscreteCounters = dasXmlElement.attribute("showDiscreteCounters") == "true" ? true : false;
 
 			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;
 			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();

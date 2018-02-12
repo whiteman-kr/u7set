@@ -118,7 +118,8 @@ SOURCES += main.cpp \
     SelectSchemaWidget.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Tuning/TuningSourceState.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -170,7 +171,8 @@ HEADERS  += \
     ../lib/Tuning/TuningTcpClient.h \
     SelectSchemaWidget.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/Tuning/TuningSourceState.h
 
 
 FORMS    += \

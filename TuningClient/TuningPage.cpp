@@ -108,7 +108,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (limitsUnbalance(asp, state) == true)
+		if (state.limitsUnbalance(asp) == true)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -128,6 +128,16 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 	if (displayIndex == static_cast<int>(Columns::Default))
 	{
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningValue defaultVal = defaultValue(asp);
+
+		if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
+		{
+			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+
 		QColor color = QColor(Qt::gray);
 		return QBrush(color);
 	}
@@ -191,7 +201,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (limitsUnbalance(asp, state) == true)
+		if (state.limitsUnbalance(asp) == true)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -511,16 +521,16 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
 
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::CustomAppSignalID, 0.15));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::CustomAppSignalID, 0.22));
 	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::EquipmentID, 0.2));
 	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Caption, 0.15));
 	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Units, 0.05));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Type, 0.05));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Type, 0.1));
 
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Value, 0.1));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::LowLimit, 0.1));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::HighLimit, 0.1));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Default, 0.1));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Value, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::LowLimit, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::HighLimit, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Default, 0.07));
 
 	for (auto c : m_columnsArray)
 	{
@@ -959,6 +969,36 @@ bool TuningPage::apply()
 		return false;
 	}
 
+	// Get SOR counters
+	int totalSorCount = 0;
+
+	std::vector<Hash> sources = m_tuningTcpClient->tuningSourcesEquipmentHashes();
+
+	for (Hash& h : sources)
+	{
+		int errorCounter = 0;
+		int sorCounter = 0;
+
+		if (m_tuningTcpClient->tuningSourceCounters(h, errorCounter, sorCounter) == false)
+		{
+			assert(false);
+			continue;
+		}
+
+		totalSorCount += sorCounter;
+	}
+
+	if (totalSorCount > 0)
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!!!\r\n\r\nSOR Signal(s) are set in logic modules!\r\n\r\nIf you apply these changes, module can run into RUN SAFE STATE.\r\n\r\nAre you sure you STILL WANT TO APPLY the changes?"),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+	}
+
 	m_tuningTcpClient->applyTuningSignals();
 
 	return true;
@@ -994,13 +1034,12 @@ void TuningPage::slot_setValue()
 	}
 
 	bool first = true;
-	bool analog = false;
 	TuningValue value;
 	TuningValue defaultValue;
 	bool sameValue = true;
 	int precision = 0;
-	double lowLimit = 0;
-	double highLimit = 0;
+	TuningValue lowLimit;
+	TuningValue highLimit;
 
 	for (int i : selectedRows)
 	{
@@ -1019,6 +1058,15 @@ void TuningPage::slot_setValue()
 
 		if (asp.isAnalog() == true)
 		{
+			if (state.limitsUnbalance(asp) == true)
+			{
+				QMessageBox::warning(this, tr("Set Value"), tr("There is limits mismatch in signal '%1'. Value setting is disabled.").arg(asp.customSignalId()));
+				return;
+			}
+		}
+
+		if (asp.isAnalog() == true)
+		{
 			if (asp.precision() > precision)
 			{
 				precision = asp.precision();
@@ -1027,24 +1075,23 @@ void TuningPage::slot_setValue()
 
 		if (first == true)
 		{
-			analog = asp.isAnalog();
 			value = state.value();
 			defaultValue = m_model->defaultValue(asp);
-			lowLimit = asp.lowEngineeringUnits();
-			highLimit = asp.highEngineeringUnits();
+			lowLimit = asp.tuningLowBound();
+			highLimit = asp.tuningHighBound();
 			first = false;
 		}
 		else
 		{
-			if (analog != asp.isAnalog())
+			if (asp.toTuningType() != value.type())
 			{
-				QMessageBox::warning(this, tr("Set Value"), tr("Please select one type of objects: analog or discrete."));
+				QMessageBox::warning(this, tr("Set Value"), tr("Please select objects of the same type."));
 				return;
 			}
 
-			if (analog == true)
+			if (asp.isAnalog() == true)
 			{
-				if (lowLimit != asp.lowEngineeringUnits() || highLimit != asp.highEngineeringUnits())
+				if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
 				{
 					QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different input range."));
 					return;
@@ -1064,7 +1111,7 @@ void TuningPage::slot_setValue()
 		}
 	}
 
-	DialogInputTuningValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -1275,6 +1322,35 @@ void TuningPage::slot_setAll()
 {
 	QMenu menu(this);
 
+
+	// Check all signals to have correct limits
+	{
+		std::vector<Hash> hashes = m_model->hashes();
+
+		bool ok = false;
+
+		for (Hash hash : hashes)
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				continue;
+			}
+
+			if (asp.isAnalog() == true)
+			{
+				if (state.limitsUnbalance(asp) == true)
+				{
+					QMessageBox::warning(this, tr("Set All"), tr("There is limits mismatch in signal '%1'. Operation is disabled.").arg(asp.customSignalId()));
+					return;
+				}
+			}
+		}
+	}
+
 	// Set All To On
 	QAction* actionAllToOn = new QAction(tr("Set All Discretes To On"), &menu);
 
@@ -1362,7 +1438,15 @@ void TuningPage::slot_setAll()
 
 			if (tvDefault != state.value() && ok == true)
 			{
-				m_tuningSignalManager->setNewValue(hash, tvDefault);
+				if(tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
+				{
+					QString message = tr("Invalid default value '%1' in signal %2 [%3]").arg(tvDefault.toString(asp.precision())).arg(asp.appSignalId()).arg(asp.caption());
+					QMessageBox::critical(this, qAppName(), message);
+				}
+				else
+				{
+					m_tuningSignalManager->setNewValue(hash, tvDefault);
+				}
 			}
 		}
 	};
@@ -1406,6 +1490,6 @@ void TuningPage::slot_Write()
 
 void TuningPage::slot_Apply()
 {
-
+	apply();
 }
 

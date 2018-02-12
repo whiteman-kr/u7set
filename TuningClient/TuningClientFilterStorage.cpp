@@ -58,7 +58,9 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 		filter = m_root.get();
 	}
 
-	if (filter->isRoot() == true && filter->hasDiscreteCounter() == true)
+	// Root filter
+
+	if (filter->isRoot() == true && theConfigSettings.showDiscreteCounters == true)
 	{
 		// All signals ahashes are stored in root filter for discrete counter to work
 
@@ -74,6 +76,8 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 
 		filter->setSignalsHashes(signalsHashes);
 	}
+
+	// Other filters
 
 	if (filter->isEmpty() == false)
 	{
@@ -154,7 +158,38 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 		filter = m_root.get();
 	}
 
-	if (filter->isEmpty() == false || filter->isRoot() == true)
+	// Root counters
+
+	if (filter->isRoot() == true && theConfigSettings.showDiscreteCounters == true)
+	{
+		TuningFilterCounters counters;
+
+		// Signals counters
+
+		const std::vector<Hash>& appSignalsHashes = filter->signalsHashes();
+
+		bool found = false;
+
+		for (const Hash& appSignalHash : appSignalsHashes)
+		{
+			TuningSignalState state = objects->state(appSignalHash, &found);
+			if (found == false)
+			{
+				continue;
+			}
+
+			if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
+			{
+				counters.discreteCounter++;
+			}
+		}
+
+		filter->setCounters(counters);
+	}
+
+	// Other counters
+
+	if (filter->isEmpty() == false)
 	{
 		TuningFilterCounters counters;
 
@@ -164,10 +199,16 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 		for (Hash& equipmentHash : equipmentHashes)
 		{
-			if (tcpClient->tuningSourceCounters(equipmentHash, &counters) == false)
+			int errorCounter = 0;
+			int sorCounter = 0;
+
+			if (tcpClient->tuningSourceCounters(equipmentHash, errorCounter, sorCounter) == false)
 			{
 				continue;
 			}
+
+			counters.errorCounter += errorCounter;
+			counters.sorCounter += sorCounter;
 		}
 
 		// Signals counters
@@ -312,4 +353,77 @@ void TuningClientFilterStorage::writeLogWarning(const QString& message)
 void TuningClientFilterStorage::writeLogMessage(const QString& message)
 {
 	theLogFile->writeMessage(message);
+}
+
+//
+// DialogCheckFilterSignals
+//
+
+DialogCheckFilterSignals::DialogCheckFilterSignals(std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters, QWidget* parent)
+	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+{
+
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+
+	QTextEdit* edit = new QTextEdit();
+
+	QString text = tr("<font size=\"4\">Errors have been occured while loading the database:<br><br>");
+
+	for (const std::pair<QString, QString>& p: notFoundSignalsAndFilters)
+	{
+		QString msg = tr("Signal with AppSignalID <font color=\"red\">'%1'</font> was not found in the preset '%2'.").arg(p.first).arg(p.second);
+
+		text += msg + "<br>";
+	}
+
+	text += tr("<br>Do you wish to remove these signals from presets?</font>");
+
+	edit->setText(text);
+
+	edit->setReadOnly(true);
+
+
+	QPushButton* yesButton = new QPushButton(tr("Yes"));
+	yesButton->setAutoDefault(false);
+
+	QPushButton* noButton = new QPushButton(tr("No"));
+	noButton->setDefault(true);
+
+	m_buttonBox = new QDialogButtonBox();
+
+	m_buttonBox->addButton(yesButton, QDialogButtonBox::YesRole);
+	m_buttonBox->addButton(noButton, QDialogButtonBox::NoRole);
+
+	m_buttonBox->setFocus();
+
+	connect(m_buttonBox, &QDialogButtonBox::clicked, this, &DialogCheckFilterSignals::buttonClicked);
+
+	mainLayout->addWidget(edit);
+	mainLayout->addWidget(m_buttonBox);
+
+	setLayout(mainLayout);
+
+	resize(800, 400);
+}
+
+void DialogCheckFilterSignals::buttonClicked(QAbstractButton* button)
+{
+	if (button == nullptr)
+	{
+		assert(button);
+		return;
+	}
+
+	QDialogButtonBox::ButtonRole role = m_buttonBox->buttonRole(button);
+
+	if (role == QDialogButtonBox::ButtonRole::YesRole)
+	{
+		accept();
+	}
+
+	if (role == QDialogButtonBox::ButtonRole::NoRole)
+	{
+		reject();
+	}
+
 }
