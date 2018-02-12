@@ -158,11 +158,11 @@ message GetUnitsReply
 message AppDataServiceState
 {
     required bool CfgServiceIsConnected = 1 [default = false];
-	optional string CfgServiceIp = 2;
+    optional uint32 CfgServiceIp = 2;
 	optional int32 CfgServicePort = 3;
 
     required bool ArchiveServiceIsConnected = 4 [default = false];
-	optional string ArchiveServiceIp = 5;
+    optional uint32 ArchiveServiceIp = 5;
 	optional int32 ArchiveServicePort = 6;
 }
 
@@ -242,6 +242,13 @@ message ConfigurationServiceSettings
     required string equipmentID = 1;
     required string autoloadBuildPath = 2;
     required string workDirectory = 3;
+}
+
+message ServiceSettings
+{
+    required string equipmentID = 1;
+    required string configIP1 = 2;
+    required string configIP2 = 3;
 }
 
 
