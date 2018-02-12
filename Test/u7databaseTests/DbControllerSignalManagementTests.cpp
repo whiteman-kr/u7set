@@ -11,6 +11,10 @@ DbControllerSignalTests::DbControllerSignalTests()
 	m_databaseName = "dbcontrollersignaltesting";
 	m_databaseUser = "u7";
 	m_adminPassword = "P2ssw0rd";
+
+	m_dbController->setHost(m_databaseHost);
+	m_dbController->setServerUsername(m_databaseUser);
+	m_dbController->setServerPassword(m_adminPassword);
 }
 
 void DbControllerSignalTests::initTestCase()

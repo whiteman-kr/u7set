@@ -144,8 +144,7 @@ bool DbController::getProjectList(std::vector<DbProject>* out, QWidget* parentWi
 bool DbController::createProject(QString projectName, QString administratorPassword, QWidget* parentWidget)
 {
 	// Check parameters
-	//
-	//Qstring administratorPassword = m_adminPassword;
+
 	if (projectName.isEmpty())
 	{
 		assert(projectName.isEmpty() == false);
