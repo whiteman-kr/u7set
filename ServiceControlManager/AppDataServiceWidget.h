@@ -84,6 +84,8 @@ public slots:
 
 	void updateClientsInfo();
 
+	void updateSettings();
+
 	void clearServiceData();
 
 	void changeSourceColumnVisibility(QAction* action);
@@ -95,8 +97,11 @@ protected:
 private:
 	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;
+	QStandardItemModel* m_settingsTabModel = nullptr;
+
 	QTableView* m_dataSourcesView = nullptr;
 	QTableView* m_signalsView = nullptr;
+
 	QActionGroup* m_sourceTableHeadersContextMenuActions = nullptr;
 
 	TcpAppDataClient* m_tcpClientSocket;
