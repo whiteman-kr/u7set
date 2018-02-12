@@ -32,23 +32,23 @@ void CfgControlServer::processRequest(quint32 requestID, const char* requestData
 {
 	switch (requestID)
 	{
-		case RQID_GET_CONFIGURATION_SERVICE_STATE:
+		case CFGS_GET_SERVICE_STATE:
 			sendServiceState();
 			break;
 
-		case RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST:
+		case CFGS_GET_CLIENT_LIST:
 			sendClientList();
 			break;
 
-		case RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO:
+		case CFGS_GET_LOADED_BUILD_INFO:
 			sendLoadedBuildInfo();
 			break;
 
-		case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
+		case CFGS_GET_SETTINGS:
 			sendSettings();
 			break;
 
-		case RQID_GET_CONFIGURATION_SERVICE_LOG:
+		case CFGS_GET_LOG:
 			sendServiceLog();
 			break;
 

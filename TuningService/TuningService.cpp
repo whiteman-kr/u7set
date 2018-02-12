@@ -53,17 +53,13 @@ namespace Tuning
 		CommandLineParser& cp = cmdLineParser();
 
 		cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-//		cp.addSingleValueOption("b", "BuildPath", "Path to RPCT project build.", "");
 		cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
 		cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
-		cp.addSimpleOption("mt", "Skip moduleType checking in RUP protocol ");
 	}
 
 	void TuningServiceWorker::loadSettings()
 	{
 		m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
-
-//		m_buildPath = getStrSetting("BuildPath");
 
 		m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
 
@@ -73,34 +69,26 @@ namespace Tuning
 
 		m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-		m_skipModuleTypeChecking = cmdLineParser().optionIsSet("mt");
-
 		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
-//		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(m_cfgServiceIP1.addressPortStr()));
 		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(m_cfgServiceIP2.addressPortStr()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("Skip moduleType checking in RUP protocol = %1")).arg(m_skipModuleTypeChecking == true ? "Yes" : "No"));
 	}
-
 
 	void TuningServiceWorker::clear()
 	{
 		m_tuningSources.clear();
 	}
 
-
 	const TuningClientContext* TuningServiceWorker::getClientContext(QString clientID) const
 	{
 		return m_clientContextMap.getClientContext(clientID);
 	}
 
-
 	const TuningClientContext* TuningServiceWorker::getClientContext(const std::string& clientID) const
 	{
 		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
 	}
-
 
 	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
 	{
@@ -112,6 +100,21 @@ namespace Tuning
 		}
 	}
 
+	NetworkError TuningServiceWorker::changeControlledTuningSource(const QString& tuningSourceEquipmentID,
+												bool activateControl,
+												QString* controlledTuningSource,
+												bool* controlIsActive)
+	{
+		if (controlledTuningSource == nullptr || controlIsActive == nullptr)
+		{
+			return NetworkError::InternalError;
+		}
+
+		controlledTuningSource = tuningSourceEquipmentID;
+		controlIsActive = activateControl;
+
+		return NetworkError::Success;
+	}
 
 	void TuningServiceWorker::initialize()
 	{
@@ -402,8 +405,7 @@ namespace Tuning
 				continue;
 			}
 
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource,
-																						m_skipModuleTypeChecking, m_logger);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger);
 
 			if (sourceWorkerThread == nullptr)
 			{

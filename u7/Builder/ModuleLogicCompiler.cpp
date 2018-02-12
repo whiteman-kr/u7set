@@ -2151,9 +2151,14 @@ namespace Builder
 		// and comment 3 lines below:
 		//
 		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
-												tuningMemoryStartAddrW,
-												tuningFrameSizePayload,
-												tuningFrameCount);
+																m_lmDescription->flashMemory().m_tuningFrameCount,
+																m_lmDescription->flashMemory().m_tuningFramePayload,
+																m_lmDescription->flashMemory().m_tuningFrameSize,
+																m_lmDescription->memory().m_tuningDataOffset,
+																m_lmDescription->memory().m_tuningDataSize,
+																m_lmDescription->memory().m_tuningDataFrameCount,
+																m_lmDescription->memory().m_tuningDataFramePayload,
+																m_lmDescription->memory().m_tuningDataFrameSize);
 
 		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
 		//

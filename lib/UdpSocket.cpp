@@ -434,26 +434,6 @@ bool UdpRequest::writeData(const QByteArray& data)
 	return writeData(data.constData(), data.size());
 }
 
-
-bool UdpRequest::writeStruct(Serializable* s)
-{
-	if (s == nullptr)
-	{
-		assert(s != nullptr);
-		return false;
-	}
-
-	m_writeDataIndex = s->serializeTo(writeDataPtr()) - data();
-
-	header()->dataSize += s->size();
-	m_rawDataSize += s->size();
-
-	assert(m_rawDataSize <= MAX_DATAGRAM_SIZE);
-
-	return true;
-}
-
-
 bool UdpRequest::writeStruct(const JsonSerializable& s)
 {
 	QByteArray json;
@@ -478,13 +458,6 @@ quint32 UdpRequest::readDword()
 
 	return result;
 }
-
-
-void UdpRequest::readStruct(Serializable* s)
-{
-	m_readDataIndex = s->serializeFrom(readDataPtr()) - data();
-}
-
 
 bool UdpRequest::readStruct(JsonSerializable* s)
 {

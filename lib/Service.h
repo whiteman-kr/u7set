@@ -18,6 +18,16 @@
 #include "../lib/SoftwareInfo.h"
 #include "../Proto/network.pb.h"
 
+enum ServiceState
+{
+	Stopped,
+	Starts,
+	Work,
+	Stops,
+
+	Undefined,			// this states used by 'Service Control Manager' only
+	Unavailable,
+};
 
 struct ServiceInfo
 {

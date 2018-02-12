@@ -34,6 +34,10 @@ namespace Tuning
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
+		NetworkError changeControlledTuningSource(const QString& tuningSourceEquipmentID,
+													bool activateControl,
+													QString* controlledTuningSource,
+													bool* controlIsActive);
 	signals:
 
 	public slots:
@@ -85,8 +89,6 @@ namespace Tuning
 
 		HostAddressPort m_cfgServiceIP1;
 		HostAddressPort m_cfgServiceIP2;
-
-		bool m_skipModuleTypeChecking = false;
 
 		std::shared_ptr<CircularLogger> m_logger;
 

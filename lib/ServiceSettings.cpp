@@ -472,7 +472,22 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 	result &= xml.readHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, &tuningDataIP);
 
+	result = xml.findElement(PROP_SINGLE_LM_CONTROL);
+
+	if (result == false)
+	{
+		return false;
+	}
+
 	result &= xml.readBoolElement(PROP_SINGLE_LM_CONTROL, &singleLmControl);
+
+	result = xml.findElement(PROP_DISABLE_MODULES_TYPE_CHECKING);
+
+	if (result == false)
+	{
+		return false;
+	}
+
 	result &= xml.readBoolElement(PROP_DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking);
 
 	if (result == false)
