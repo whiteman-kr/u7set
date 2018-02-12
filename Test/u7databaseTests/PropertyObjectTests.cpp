@@ -368,7 +368,8 @@ void PropertyObjectTests::testDynamicProperties()
 
 	// Test PropertyObject::setPropertyValue() const
 	//
-	{
+	{2 сек
+
 		PropertyClass p;
 
 		QVariant ival(0x11223344);
@@ -415,8 +416,8 @@ PropertyClass::PropertyClass()
 	boolProp->setCategory("TestCategory");
 	intProp->setDescription("This is static int property");
 
-	/*auto intDynamicProp = */addProperty("DynamicInt", "DynamicCat", true);
-	/*auto prioDynamicProp = */addProperty("DynamicPriority", "DynamicCat", true);
+    /*auto intDynamicProp = addProperty("DynamicInt", "DynamicCat", true); */
+    /*auto prioDynamicProp = addProperty("DynamicPriority", "DynamicCat", true);*/
 }
 
 PropertyClass::~PropertyClass()

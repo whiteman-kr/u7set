@@ -145,6 +145,7 @@ bool DbController::createProject(QString projectName, QString administratorPassw
 {
 	// Check parameters
 	//
+	//Qstring administratorPassword = m_adminPassword;
 	if (projectName.isEmpty())
 	{
 		assert(projectName.isEmpty() == false);

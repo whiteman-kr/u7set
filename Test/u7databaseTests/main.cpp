@@ -1,5 +1,5 @@
 #include <QString>
-#include <QtTest>
+#include <QtTest> //библиотека для тестирования
 #include <QtSql>
 #include <QObject>
 #include "UserTests.h"
@@ -19,7 +19,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 168;
+const int DatabaseProjectVersion = 201;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -462,7 +462,7 @@ int main(int argc, char *argv[])
 
 		if (ok == false)
 		{
-			qDebug() << "Cannot delete database project. Error: " << dbc.lastError();
+			qDebug() << "ERROR!!!:Cannot delete database project. Error: " << dbc.lastError();
 			returnCode = 1;
 		}
 	}
