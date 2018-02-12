@@ -72,6 +72,7 @@ namespace Tuning
 			break;
 
 		case TDS_CHANGE_CONTROLLED_TUNING_SOURCE:
+			onChangeControlledTuningSourceRequest(requestData, requestDataSize);
 			break;
 
 		default:

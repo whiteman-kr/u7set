@@ -225,8 +225,18 @@ public:
 	Q_INVOKABLE bool enableTuning() const;
 	void setEnableTuning(bool value);
 
-	Q_INVOKABLE double tuningDefaultValue() const;
-	void setTuningDefaultValue(double value);
+	TuningValue tuningDefaultValue() const;
+	void setTuningDefaultValue(const TuningValue& value);
+
+	TuningValue tuningLowBound() const;
+	void setTuningLowBound(const TuningValue& value);
+
+	TuningValue tuningHighBound() const;
+	void setTuningHighBound(const TuningValue& value);
+
+	Q_INVOKABLE double getTuningDefaultValue() const;
+	Q_INVOKABLE double getTuingLowBound() const;
+	Q_INVOKABLE double getTuningHighBound() const;
 
 public:
 	static const int NO_UNIT_ID = 1;
@@ -269,6 +279,8 @@ private:
 	double m_spreadTolerance = 2;
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
+	TuningValue m_tuningLowBound;
+	TuningValue m_tuningHighBound;
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

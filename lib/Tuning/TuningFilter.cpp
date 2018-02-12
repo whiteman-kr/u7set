@@ -125,78 +125,7 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 	return true;
 }
 
-//
-// DialogCheckFilterSignals
-//
 
-DialogCheckFilterSignals::DialogCheckFilterSignals(std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters, QWidget* parent)
-	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
-{
-
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-
-	QTextEdit* edit = new QTextEdit();
-
-	QString text = tr("<font size=\"4\">Errors have been occured while loading the database:<br><br>");
-
-	for (const std::pair<QString, QString>& p: notFoundSignalsAndFilters)
-	{
-		QString msg = tr("Signal with AppSignalID <font color=\"red\">'%1'</font> was not found in the preset '%2'.").arg(p.first).arg(p.second);
-
-		text += msg + "<br>";
-	}
-
-	text += tr("<br>Do you wish to remove these signals from presets?</font>");
-
-	edit->setText(text);
-
-	edit->setReadOnly(true);
-
-
-	QPushButton* yesButton = new QPushButton(tr("Yes"));
-	yesButton->setAutoDefault(false);
-
-	QPushButton* noButton = new QPushButton(tr("No"));
-	noButton->setDefault(true);
-
-	m_buttonBox = new QDialogButtonBox();
-
-	m_buttonBox->addButton(yesButton, QDialogButtonBox::YesRole);
-	m_buttonBox->addButton(noButton, QDialogButtonBox::NoRole);
-
-	m_buttonBox->setFocus();
-
-	connect(m_buttonBox, &QDialogButtonBox::clicked, this, &DialogCheckFilterSignals::buttonClicked);
-
-	mainLayout->addWidget(edit);
-	mainLayout->addWidget(m_buttonBox);
-
-	setLayout(mainLayout);
-
-	resize(800, 400);
-}
-
-void DialogCheckFilterSignals::buttonClicked(QAbstractButton* button)
-{
-	if (button == nullptr)
-	{
-		assert(button);
-		return;
-	}
-
-	QDialogButtonBox::ButtonRole role = m_buttonBox->buttonRole(button);
-
-	if (role == QDialogButtonBox::ButtonRole::YesRole)
-	{
-		accept();
-	}
-
-	if (role == QDialogButtonBox::ButtonRole::NoRole)
-	{
-		reject();
-	}
-
-}
 
 //
 // TuningFilter
@@ -277,6 +206,14 @@ void TuningFilter::copy(const TuningFilter& That)
 
 	m_interfaceType = That.m_interfaceType;
 	m_signalType = That.m_signalType;
+
+	m_hasDiscreteCounter = That.m_hasDiscreteCounter;
+
+	m_backColor = That.m_backColor;
+	m_textColor = That.m_textColor;
+
+	m_backSelectedColor = That.m_backSelectedColor;
+	m_textSelectedColor = That.m_textSelectedColor;
 
 	for (auto f : That.m_childFilters)
 	{
@@ -496,19 +433,30 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 	return true;
 }
 
-bool TuningFilter::save(QXmlStreamWriter& writer) const
+bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Source saveSourceType) const
 {
-	if (isSourceUser() == false && isSourceProject() == false)
-	{
-		return true;
-	}
-
 	if (isRoot() == true)
 	{
 		writer.writeStartElement("Root");
 	}
 	else
 	{
+		if (filterBySourceType == true)
+		{
+			if (saveSourceType != source())
+			{
+				return true;
+			}
+		}
+		else
+		{
+			if (source() == Source::Equipment || source() == Source::Schema)
+			{
+				return true;
+			}
+
+		}
+
 		if (isTree() == true)
 		{
 			writer.writeStartElement("Tree");
@@ -565,7 +513,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 
 	for (auto f : m_childFilters)
 	{
-		f->save(writer);
+		f->save(writer, filterBySourceType, saveSourceType);
 	}
 
 	writer.writeEndElement();
@@ -1360,7 +1308,7 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
     return !reader.hasError();
 }
 
-bool TuningFilterStorage::save(QByteArray& data)
+bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSourceType)
 {
     QXmlStreamWriter writer(&data);
 
@@ -1371,7 +1319,7 @@ bool TuningFilterStorage::save(QByteArray& data)
 
     writer.writeStartElement("ObjectFilterStorage");
 
-    m_root->save(writer);
+	m_root->save(writer, true, saveSourceType);
 
     writer.writeEndElement();
 
@@ -1383,14 +1331,14 @@ bool TuningFilterStorage::save(QByteArray& data)
 
 }
 
-bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg)
+bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType)
 {
 	// save data to XML
 	//
 
     QByteArray data;
 
-    bool ok = save(data);
+	bool ok = save(data, saveSourceType);
 
     if (ok == false)
     {
@@ -1435,7 +1383,7 @@ bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilt
 		root.addChild(filterCopy);
 	}
 
-	root.save(writer);
+	root.save(writer, false, TuningFilter::Source::Project/*Not used!*/);
 
 	writer.writeEndElement();
 

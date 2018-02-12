@@ -37,6 +37,7 @@ private:
 	void updateCounters();
 
 	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
+	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
 
 protected:
 
@@ -98,6 +99,8 @@ static int m_instanceCounter;
 private slots:
 
 	void slot_currentTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+	void slot_treeContextMenuRequested(const QPoint& pos);
+
 
 	void slot_maskReturnPressed();
 	void slot_maskApply();

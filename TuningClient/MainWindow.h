@@ -86,6 +86,11 @@ private:
 
 	void createWorkspace();
 
+private:
+	bool eventFilter(QObject *object, QEvent *event) override;
+
+	void updateStatusBar();
+
 signals:
 	void timerTick500();
 
@@ -104,8 +109,17 @@ private:
 	QLabel* m_statusBarSor = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
+	QLabel* m_statusBarLogAlerts = nullptr;
 
 	QString m_globalScript;
+
+	TuningLog::TuningLog* m_tuningLog = nullptr;
+
+	int m_discreteCounter = -1;
+	int m_lmErrorsCounter = -1;
+	int m_sorCounter = -1;
+	int m_logErrorsCounter = -1;
+	int m_logWarningsCounter = -1;
 };
 
 // Global definitions
@@ -113,8 +127,6 @@ private:
 extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
-
-extern TuningLog::TuningLog* theTuningLog;
 
 #endif // MAINWINDOW_H
 

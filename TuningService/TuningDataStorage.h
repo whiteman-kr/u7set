@@ -26,7 +26,7 @@ namespace Tuning
 		TuningData();
 		TuningData(	QString lmID,
 					int tuningMemoryStartAddrW,
-					int tuningFrameSizeBytes,
+					int tuningFramePayloadBytes,
 					int tuningFramesCount);
 
 		virtual ~TuningData();
@@ -74,7 +74,7 @@ namespace Tuning
 		QString m_lmEquipmentID;
 
 		int m_tuningMemoryStartAddrW = 0;
-		int m_tuningFrameSizeBytes = 0;
+		int m_tuningFramePayloadBytes = 0;
 		int m_tuningFramesCount = 0;
 		quint64 m_uniqueID = 0;
 		int m_usedFramesCount = 0;

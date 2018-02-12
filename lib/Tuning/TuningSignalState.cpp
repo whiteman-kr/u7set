@@ -1,5 +1,6 @@
 #include "TuningSignalState.h"
 #include <cmath>
+#include "../AppSignal.h"
 
 //
 // TuningSignalState
@@ -102,11 +103,30 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 	m_flags.writeInProgress = message.writeinprogress();
 	m_writeErrorCode = message.writeerrorcode();
 
+	//writeClient
+	//successfulReadTime
+	//writeRequestTime
+	//successfulWriteTime
+	//unsuccessfulWriteTime
+
 	return true;
 }
 
 void TuningSignalState::invalidate()
 {
 	m_flags.valid = false;
+	m_flags.controlIsEnabled = false;
+}
+
+bool TuningSignalState::limitsUnbalance(const AppSignalParam& asp) const
+{
+	if (valid() == true && asp.isAnalog() == true)
+	{
+		if (lowBound() != asp.tuningLowBound() || highBound() != asp.tuningHighBound())
+		{
+			return true;
+		}
+	}
+	return false;
 }
 

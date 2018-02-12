@@ -4,6 +4,8 @@
 #include "../TuningValue.h"
 #include "../../Proto/network.pb.h"
 
+class AppSignalParam;
+
 union TuningSignalStateFlags
 {
 	struct
@@ -59,6 +61,8 @@ public:
 	bool setState(const ::Network::TuningSignalState& message);
 
 	void invalidate();
+
+	bool limitsUnbalance(const AppSignalParam& asp) const;
 
 public:
 	Hash m_hash = UNDEFINED_HASH;

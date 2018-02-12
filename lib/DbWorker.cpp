@@ -218,6 +218,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0200.sql", "Upgrade to version 200, Corrected input type (Float->SignetInt), description (floating-point->signed integer) and Version 1.0005->1.0006 of latch_tm1_si block."},
 	{":/DatabaseUpgrade/Upgrade0201.sql", "Upgrade to version 201, Adding integer tuning params and Archive fields."},
 	{":/DatabaseUpgrade/Upgrade0202.sql", "Upgrade to version 202, Update properties in TuningService and TuningClient preset."},
+	{":/DatabaseUpgrade/Upgrade0203.sql", "Upgrade to version 203, Update configuration scripts and LM descriptions"},
 };
 
 

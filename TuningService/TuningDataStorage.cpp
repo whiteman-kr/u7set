@@ -34,11 +34,11 @@ namespace  Tuning
 
 
 	TuningData::TuningData(QString lmID, int tuningMemoryStartAddrW,
-							int tuningFrameSizeBytes,
+							int tuningFramePayloadBytes,
 							int tuningFramesCount) :
 		m_lmEquipmentID(lmID),
 		m_tuningMemoryStartAddrW(tuningMemoryStartAddrW),
-		m_tuningFrameSizeBytes(tuningFrameSizeBytes),
+		m_tuningFramePayloadBytes(tuningFramePayloadBytes),
 		m_tuningFramesCount(tuningFramesCount)
 	{
 		for(int& v : m_tuningSignalSizes)
@@ -173,13 +173,13 @@ namespace  Tuning
 
 		// calculate used tuning frames count
 		//
-		if (m_tuningFrameSizeBytes == 0)
+		if (m_tuningFramePayloadBytes == 0)
 		{
 			m_usedFramesCount = 0;
 		}
 		else
 		{
-			m_usedFramesCount = (totalSize / m_tuningFrameSizeBytes + ((totalSize % m_tuningFrameSizeBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
+			m_usedFramesCount = (totalSize / m_tuningFramePayloadBytes + ((totalSize % m_tuningFramePayloadBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
 		}
 
 		return result;
@@ -192,7 +192,7 @@ namespace  Tuning
 		//
 		m_metadata.clear();
 
-		m_tuningDataSize = m_usedFramesCount * m_tuningFrameSizeBytes;
+		m_tuningDataSize = m_usedFramesCount * m_tuningFramePayloadBytes;
 
 		m_tuningData = new quint8 [m_tuningDataSize];
 
@@ -243,12 +243,12 @@ namespace  Tuning
 
 						// in second frame - low bound
 						//
-						*reinterpret_cast<float*>(dataPtr + m_tuningFrameSizeBytes) =
+						*reinterpret_cast<float*>(dataPtr + m_tuningFramePayloadBytes) =
 								reverseFloat(lowBound);
 
 						// in third frame - high bound
 						//
-						*reinterpret_cast<float*>(dataPtr + m_tuningFrameSizeBytes * 2) =
+						*reinterpret_cast<float*>(dataPtr + m_tuningFramePayloadBytes * 2) =
 								reverseFloat(highBound);
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
@@ -278,12 +278,12 @@ namespace  Tuning
 
 						// in second frame - low bound
 						//
-						*reinterpret_cast<qint32*>(dataPtr + m_tuningFrameSizeBytes) =
+						*reinterpret_cast<qint32*>(dataPtr + m_tuningFramePayloadBytes) =
 								reverseInt32(lowBound);
 
 						// in third frame - high bound
 						//
-						*reinterpret_cast<qint32*>(dataPtr + m_tuningFrameSizeBytes * 2) =
+						*reinterpret_cast<qint32*>(dataPtr + m_tuningFramePayloadBytes * 2) =
 								reverseInt32(highBound);
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
@@ -307,8 +307,8 @@ namespace  Tuning
 						int bitNo = discreteCount % SIZE_32BIT;
 
 						writeBigEndianUint32Bit(dataPtr, bitNo, defaultValue);
-						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes, bitNo, 0);
-						writeBigEndianUint32Bit(dataPtr + m_tuningFrameSizeBytes * 2, bitNo, 1);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFramePayloadBytes, bitNo, 0);
+						writeBigEndianUint32Bit(dataPtr + m_tuningFramePayloadBytes * 2, bitNo, 1);
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), bitNo));
 
@@ -354,12 +354,12 @@ namespace  Tuning
 					assert(false);
 				}
 
-				if (testSizeB == true && (sizeB % m_tuningFrameSizeBytes) == 0)
+				if (testSizeB == true && (sizeB % m_tuningFramePayloadBytes) == 0)
 				{
 					// frame full
 					// skip lowBound and highBound frames
 					//
-					sizeB += m_tuningFrameSizeBytes * 2;
+					sizeB += m_tuningFramePayloadBytes * 2;
 				}
 
 				metaData.append(QVariant(signal->ioBufAddr().offset()));
@@ -519,7 +519,7 @@ namespace  Tuning
 
 		xml.writeStringAttribute(LM_ID, m_lmEquipmentID);
 		xml.writeUInt64Attribute(UNIQUE_ID, m_uniqueID, true);
-		xml.writeIntAttribute(TUNING_FRAME_SIZE_BYTES, m_tuningFrameSizeBytes);
+		xml.writeIntAttribute(TUNING_FRAME_SIZE_BYTES, m_tuningFramePayloadBytes);
 		xml.writeIntAttribute(TUNING_FRAMES_COUNT, m_tuningFramesCount);
 		xml.writeIntAttribute(TUNING_USED_FRAMES_COUNT, m_usedFramesCount);
 
@@ -569,7 +569,7 @@ namespace  Tuning
 
 		result &= xml.readStringAttribute(LM_ID, &m_lmEquipmentID);
 		result &= xml.readUInt64Attribute(UNIQUE_ID, &m_uniqueID);
-		result &= xml.readIntAttribute(TUNING_FRAME_SIZE_BYTES, &m_tuningFrameSizeBytes);
+		result &= xml.readIntAttribute(TUNING_FRAME_SIZE_BYTES, &m_tuningFramePayloadBytes);
 		result &= xml.readIntAttribute(TUNING_FRAMES_COUNT, &m_tuningFramesCount);
 		result &= xml.readIntAttribute(TUNING_USED_FRAMES_COUNT, &m_usedFramesCount);
 

@@ -155,7 +155,8 @@ SOURCES +=\
     ../lib/SoftwareInfo.cpp \
     ../lib/Tuning/TuningLog.cpp \
     DialogAlert.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Tuning/TuningSourceState.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -211,7 +212,8 @@ HEADERS  += MainWindow.h \
     ../lib/SoftwareInfo.h \
     ../lib/Tuning/TuningLog.h \
     DialogAlert.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/Tuning/TuningSourceState.h
 
 FORMS    += \
     DialogSettings.ui \

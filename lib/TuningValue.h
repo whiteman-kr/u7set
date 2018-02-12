@@ -68,6 +68,8 @@ public:
 	friend bool operator != (const TuningValue& l, const TuningValue& r);
 
 	static int tuningValueTypeId();
+	QString tuningValueTypeString() const;
+
 
 private:
 

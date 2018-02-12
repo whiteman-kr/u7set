@@ -31,9 +31,14 @@ private slots:
 
 	void on_treeWidget_itemSelectionChanged();
 
+	void on_btnEnableControl_clicked();
+
+	void on_btnDisableControl_clicked();
+
 private:
 	void update(bool refreshOnly);
 
+	void activateControl(bool enable);
 
 	enum class Columns
 	{
@@ -60,7 +65,14 @@ private:
 
 	int m_updateStateTimerId = -1;
 
+	bool m_singleControlMode = true;
+
 	TuningClientTcpClient* m_tcpClient = nullptr;
+
+	QWidget* m_parent = nullptr;
+
+	static const QString m_singleLmControlEnabledString;
+	static const QString m_singleLmControlDisabledString;
 };
 
 extern DialogTuningSources* theDialogTuningSources;

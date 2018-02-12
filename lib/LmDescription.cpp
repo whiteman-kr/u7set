@@ -664,16 +664,19 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	errorMessage->clear();	// Just in case
 
 	m_appLogicFrameCount = getSectionUintValue(QLatin1String("AppLogicFrameCount"), errorMessage);
+	m_appLogicFramePayload = getSectionUintValue(QLatin1String("AppLogicFramePayload"), errorMessage);
 	m_appLogicFrameSize = getSectionUintValue(QLatin1String("AppLogicFrameSize"), errorMessage);
 	m_appLogicUartId = getSectionUintDefaultValue(QLatin1String("AppLogicUartID"), 0);
 	m_appLogicWriteBitstream = getSectionBoolDefaultValue(QLatin1String("AppLogicWriteBitstream"), false);
 
 	m_configFrameCount = getSectionUintValue(QLatin1String("ConfigFrameCount"), errorMessage);
+	m_configFramePayload = getSectionUintValue(QLatin1String("ConfigFramePayload"), errorMessage);
 	m_configFrameSize = getSectionUintValue(QLatin1String("ConfigFrameSize"), errorMessage);
 	m_configUartId = getSectionUintDefaultValue(QLatin1String("ConfigUartID"), 0);
 	m_configWriteBitstream = getSectionBoolDefaultValue(QLatin1String("ConfigWriteBitstream"), false);
 
 	m_tuningFrameCount = getSectionUintValue(QLatin1String("TuningFrameCount"), errorMessage);
+	m_tuningFramePayload = getSectionUintValue(QLatin1String("TuningFramePayload"), errorMessage);
 	m_tuningFrameSize = getSectionUintValue(QLatin1String("TuningFrameSize"), errorMessage);
 	m_tuningUartId = getSectionUintDefaultValue(QLatin1String("TuningUartID"), 0);
 	m_tuningWriteBitstream = getSectionBoolDefaultValue(QLatin1String("TuningWriteBitstream"), false);
@@ -763,6 +766,10 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 
 	m_tuningDataOffset = getSectionUintValue(QLatin1String("TuningDataOffset"), errorMessage);
 	m_tuningDataSize = getSectionUintValue(QLatin1String("TuningDataSize"), errorMessage);
+
+	m_tuningDataFrameCount = getSectionUintValue(QLatin1String("TuningDataFrameCount"), errorMessage);
+	m_tuningDataFramePayload = getSectionUintValue(QLatin1String("TuningDataFramePayload"), errorMessage);
+	m_tuningDataFrameSize = getSectionUintValue(QLatin1String("TuningDataFrameSize"), errorMessage);
 
 	m_txDiagDataOffset = getSectionUintValue(QLatin1String("TxDiagDataOffset"), errorMessage);
 	m_txDiagDataSize = getSectionUintValue(QLatin1String("TxDiagDataSize"), errorMessage);

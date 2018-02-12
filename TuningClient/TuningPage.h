@@ -147,7 +147,7 @@ private:
 
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	TuningTcpClient* m_tuningTcpClient = nullptr;
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
 	TuningTableView* m_objectList = nullptr;
 

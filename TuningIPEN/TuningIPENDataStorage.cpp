@@ -468,7 +468,7 @@ namespace  TuningIPEN
 			TuningFramesData& framesData = m_tuningFramesData[type];
 			const QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
-			framesData.init(m_usedFramesCount, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
+			framesData.init(m_usedFramesCount, m_tuningFramePayloadBytes, signalValueSizeBits(type), tuningSignals.count());
 			framesData.copySignalsData(tuningSignals, m_metadata);
 
 			m_usedFramesCount += framesData.usedFramesCount();
@@ -487,7 +487,7 @@ namespace  TuningIPEN
 			TuningFramesData& framesData = m_tuningFramesData[type];
 			const QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
-			framesData.init(firstFrame, m_tuningFrameSizeBytes, signalValueSizeBits(type), tuningSignals.count());
+			framesData.init(firstFrame, m_tuningFramePayloadBytes, signalValueSizeBits(type), tuningSignals.count());
 
 			firstFrame += framesData.usedFramesCount();
 

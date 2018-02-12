@@ -87,8 +87,6 @@ public:
 
 	void sort(int column, Qt::SortOrder order) override;
 
-	bool limitsUnbalance(const AppSignalParam& asp, const TuningSignalState& tss) const;
-
 protected:
 	QModelIndex parent(const QModelIndex& index) const override;
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -119,17 +117,17 @@ class DialogInputTuningValue : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogInputTuningValue(bool analog, TuningValue value, TuningValue defaultValue, bool sameValue, double lowLimit, double highLimit, int decimalPlaces, QWidget* parent);
+	explicit DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, int decimalPlaces, QWidget* parent);
 	~DialogInputTuningValue();
 
 private:
 
 	TuningValue m_value;
 	TuningValue m_defaultValue;
-	double m_lowLimit = 0;
-	double m_highLimit = 0;
+	TuningValue m_lowLimit;
+	TuningValue m_highLimit;
+
 	int m_decimalPlaces = 0;
-	bool m_analog = true;
 
 	virtual void accept();
 
