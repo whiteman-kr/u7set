@@ -1,5 +1,5 @@
 #include <QString>
-#include <QtTest>
+#include <QtTest> //библиотека для тестирования
 #include <QtSql>
 #include <QObject>
 #include "UserTests.h"
@@ -19,7 +19,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 168;
+const int DatabaseProjectVersion = 203;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -47,18 +47,18 @@ int main(int argc, char *argv[])
 	db.setDatabaseName("postgres");
 
 
-    bool ok = db.open();
-    if (ok == false)
-    {
-        QSqlError error = db.lastError();
+	bool ok = db.open();
+	if (ok == false)
+	{
+		QSqlError error = db.lastError();
 
-        qDebug() << "Database open error: " << error.text();
+		qDebug() << "Database open error: " << error.text();
 
-        return 1;
-    }
+		return 1;
+	}
 
 	QSqlQuery query;
-    ok = query.exec(QString("SELECT datname FROM pg_database WHERE datname = '%1'").arg(QString("u7_") + ProjectName));
+	ok = query.exec(QString("SELECT datname FROM pg_database WHERE datname = '%1'").arg(QString("u7_") + ProjectName));
 
 	assert (ok == true);
 
@@ -462,7 +462,7 @@ int main(int argc, char *argv[])
 
 		if (ok == false)
 		{
-			qDebug() << "Cannot delete database project. Error: " << dbc.lastError();
+			qDebug() << "ERROR!!!:Cannot delete database project. Error: " << dbc.lastError();
 			returnCode = 1;
 		}
 	}

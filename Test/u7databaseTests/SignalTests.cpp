@@ -2,6 +2,7 @@
 
 #include "SignalTests.h"
 
+
 QString SignalTests::SF_APP_SIGNAL_ID("AppSignalID");
 QString SignalTests::SF_CUSTOM_APP_SIGNAL_ID("CustomAppSignalID");
 QString SignalTests::SF_CAPTION("Caption");
@@ -47,7 +48,7 @@ QString SignalTests::SF_TUNING_HIGH_BOUND_INT("TuningHighBoundInt");
 QString SignalTests::SF_TUNING_HIGH_BOUND_DOUBLE("TuningHighBoundDouble");
 
 QString SignalTests::SF_ACQUIRE("Acquire");
-QString SignalTests::SF_ARCHIVE("Archive");
+QString SignalTests::SF_ARCHIVE("Archive"); // дописал проверку для архива
 QString SignalTests::SF_DECIMAL_PLACES("DecimalPlaces");
 QString SignalTests::SF_COARSE_APERTURE("CoarseAperture");
 QString SignalTests::SF_FINE_APERTURE("FineAperture");
@@ -2588,10 +2589,14 @@ bool SignalTests::readSignalFromQuery(const QSqlQuery& q, Signal& s, quint64 exc
 	tv.setValue(s.signalType(), s.analogSignalFormat(), q.value(SF_TUNING_DEFAULT_INT).toInt(), q.value(SF_TUNING_DEFAULT_DOUBLE).toDouble());
 	s.setTuningDefaultValue(tv);
 
-	s.setTuningLowBound(q.value(SF_TUNING_LOW_BOUND).toFloat());			// сдклать так как с SF_TUNING_DEFAULT_INT & SF_TUNING_DEFAULT_DOUBLE
-	s.setTuningHighBound(q.value(SF_TUNING_HIGH_BOUND).toFloat());
+	tv.setValue(s.signalType(), s.analogSignalFormat(), q.value(SF_TUNING_LOW_BOUND_INT).toInt(), q.value(SF_TUNING_LOW_BOUND_DOUBLE).toDouble());
+	s.setTuningLowBound(tv);
+
+	tv.setValue(s.signalType(), s.analogSignalFormat(),q.value(SF_TUNING_HIGH_BOUND_INT).toInt(), q.value(SF_TUNING_HIGH_BOUND_DOUBLE).toDouble());
+	s.setTuningHighBound(tv);
 
 	s.setAcquire(q.value(SF_ACQUIRE).toBool());
+	s.setArchive(q.value(SF_ARCHIVE).toBool());
 	s.setDecimalPlaces(q.value(SF_DECIMAL_PLACES).toInt());
 	s.setCoarseAperture(q.value(SF_COARSE_APERTURE).toDouble());
 	s.setFineAperture(q.value(SF_FINE_APERTURE).toDouble());
@@ -2682,11 +2687,12 @@ void SignalTests::verifyQueryAndSignal(const QSqlQuery& q, Signal& s, quint64 ex
 	QVERIFY2(q.value(SF_OUTPUT_MODE).toInt() == s.outputModeInt(), "Error: outputMode is wrong");
 
 	QVERIFY2(q.value(SF_ENABLE_TUNING).toBool() == s.enableTuning(), "Error: enableTuning is wrong");
-	QVERIFY2(q.value(SF_TUNING_DEFAULT_VALUE).toFloat() == s.tuningDefaultValue(), "Error: tuningDefaultValue is wrong");
-	QVERIFY2(q.value(SF_TUNING_LOW_BOUND).toFloat() == s.tuningLowBound(), "Error: tuningLowBound is wrong");
-	QVERIFY2(q.value(SF_TUNING_HIGH_BOUND).toFloat() == s.tuningHighBound(), "Error: tuningHighBound is wrong");
+	QVERIFY2(q.value(SF_TUNING_DEFAULT_DOUBLE).toFloat() == s.tuningDefaultValue().toFloat(), "Error: tuningDefaultValue is wrong");
+	QVERIFY2(q.value(SF_TUNING_LOW_BOUND_DOUBLE).toFloat() == s.tuningLowBound().toFloat(), "Error: tuningLowBound is wrong");
+	QVERIFY2(q.value(SF_TUNING_HIGH_BOUND_DOUBLE).toFloat() == s.tuningHighBound().toFloat(), "Error: tuningHighBound is wrong");
 
 	QVERIFY2(q.value(SF_ACQUIRE).toBool() == s.acquire(), "Error: acquire is wrong");
+	QVERIFY2(q.value(SF_ARCHIVE).toBool() == s.acquire(), "Error: archive is wrong");
 	QVERIFY2(q.value(SF_DECIMAL_PLACES).toInt() == s.decimalPlaces(), "Error: decimalPlaces is wrong");
 	QVERIFY2(q.value(SF_COARSE_APERTURE).toDouble() == s.coarseAperture(), "Error: coarseAperture is wrong");
 	QVERIFY2(q.value(SF_FINE_APERTURE).toDouble() == s.fineAperture(), "Error: fineAperture is wrong");
