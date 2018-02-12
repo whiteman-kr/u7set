@@ -1468,7 +1468,6 @@ namespace Tuning
 		}
 	}
 
-
 	void TuningSocketListener::pushReplyToTuningSourceWorker(const QHostAddress& tuningSourceIP, const Rup::Frame& reply)
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
@@ -1486,7 +1485,6 @@ namespace Tuning
 
 		sourceWorkerThread->pushReply(reply);
 	}
-
 
 	void TuningSocketListener::incSourceWorkerErrReplySize(const QHostAddress& tuningSourceIP)
 	{

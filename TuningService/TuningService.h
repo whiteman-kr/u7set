@@ -34,6 +34,8 @@ namespace Tuning
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
+		// called from TcpTuningServer thread!!!
+		//
 		NetworkError changeControlledTuningSource(const QString& tuningSourceEquipmentID,
 													bool activateControl,
 													QString* controlledTuningSource,
@@ -57,6 +59,7 @@ namespace Tuning
 
 		void runCfgLoaderThread();
 		void stopCfgLoaderThread();
+
 		void clearConfiguration();
 		void applyNewConfiguration();
 
@@ -66,8 +69,6 @@ namespace Tuning
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
 		bool readTuningDataSources(XmlReadHelper& xml);
-
-		void allocateSignalsAndStates();
 
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();
@@ -107,5 +108,7 @@ namespace Tuning
 		QTimer m_timer;
 
 		TuningClientContextMap m_clientContextMap;
+
+		QMutex m_mainMutex;
 	};
 }

@@ -100,6 +100,8 @@ namespace Tuning
 		}
 	}
 
+	// called from TcpTuningServer thread!!!
+	//
 	NetworkError TuningServiceWorker::changeControlledTuningSource(const QString& tuningSourceEquipmentID,
 												bool activateControl,
 												QString* controlledTuningSource,
@@ -109,6 +111,8 @@ namespace Tuning
 		{
 			return NetworkError::InternalError;
 		}
+
+		AUTO_LOCK(m_mainMutex);
 
 		controlledTuningSource = tuningSourceEquipmentID;
 		controlIsActive = activateControl;
@@ -179,6 +183,8 @@ namespace Tuning
 	{
 		DEBUG_LOG_MSG(m_logger, QString("Clear current configuration"));
 
+		AUTO_LOCK(m_mainMutex);
+
 		stopTcpTuningServerThread();
 		stopTuningSourceWorkers();
 		clearServiceMaps();
@@ -188,6 +194,8 @@ namespace Tuning
 	void TuningServiceWorker::applyNewConfiguration()
 	{
 		DEBUG_LOG_MSG(m_logger, QString("Apply new configuration"));
+
+		AUTO_LOCK(m_mainMutex);
 
 		buildServiceMaps();
 		runTuningSourceWorkers();
@@ -339,85 +347,38 @@ namespace Tuning
 		return result;
 	}
 
-
-	void TuningServiceWorker::allocateSignalsAndStates()
-	{
-		/*QVector<TuningSourceInfo> info;
-
-		m_tuningSources.getTuningDataSourcesInfo(info);*/
-
-/*		// allocate Signals
-		//
-		m_appSignals.clear();
-		m_signal2Source.clear();
-
-		for(const TuningDataSourceInfo& source : info)
-		{
-			for(const Signal& signal : source.tuningSignals)
-			{
-				Signal* appSignal = new Signal();
-
-				*appSignal = signal;
-
-				m_appSignals.insert(appSignal->appSignalID(), appSignal);
-
-				if (m_signal2Source.contains(appSignal->appSignalID()))
-				{
-					assert(false);
-					qDebug() << "Duplicate AppSignalID" << appSignal->appSignalID();
-				}
-				else
-				{
-					m_signal2Source.insert(appSignal->appSignalID(), source.lmEquipmentID);
-				}
-			}
-		}
-
-		int signalCount = m_appSignals.count();
-
-		// allocate Signal states
-		//
-		m_appSignalStates.clear();
-
-		m_appSignalStates.setSize(signalCount);
-
-		for(int i = 0; i < signalCount; i++)
-		{
-			Signal* appSignal = m_appSignals[i];
-			AppSignalStateEx* appSignalState = m_appSignalStates[i];
-
-			appSignalState->setSignalParams(i, appSignal);
-		}*/
-	}
-
-
 	void TuningServiceWorker::runTuningSourceWorkers()
 	{
 		// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 		//
 		assert(m_sourceWorkerThreadMap.size() == 0);
 
-		for(TuningSource* tuningSource : m_tuningSources)
+		if (m_cfgSettings.singleLmControl == false)
 		{
-			if (tuningSource == nullptr)
+			// running TuningSourceWorker at once if SingleLmControl is disabled
+			//
+			for(TuningSource* tuningSource : m_tuningSources)
 			{
-				assert(false);
-				continue;
+				if (tuningSource == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger);
+
+				if (sourceWorkerThread == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				quint32 addr = sourceWorkerThread->sourceIP();
+
+				m_sourceWorkerThreadMap.insert(addr, sourceWorkerThread);
+
+				setWorkerInTuningClientContext(tuningSource->lmEquipmentID(), sourceWorkerThread->worker());
 			}
-
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger);
-
-			if (sourceWorkerThread == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			quint32 addr = sourceWorkerThread->sourceIP();
-
-			m_sourceWorkerThreadMap.insert(addr, sourceWorkerThread);
-
-			setWorkerInTuningClientContext(tuningSource->lmEquipmentID(), sourceWorkerThread->worker());
 		}
 
 		// create and run TuningSocketListenerThread
@@ -479,11 +440,9 @@ namespace Tuning
 		}
 	}
 
-
 	void TuningServiceWorker::onTimer()
 	{
 	}
-
 
 	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 	{
