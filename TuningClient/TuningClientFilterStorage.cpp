@@ -202,7 +202,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 			int errorCounter = 0;
 			int sorCounter = 0;
 
-			if (tcpClient->tuningSourceStatus(equipmentHash, errorCounter, sorCounter) == false)
+			if (tcpClient->tuningSourceCounters(equipmentHash, errorCounter, sorCounter) == false)
 			{
 				continue;
 			}

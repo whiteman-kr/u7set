@@ -149,10 +149,12 @@ int main(int argc, char* argv[])
 	QCommandLineOption idOption("id", "Set the TuningClient ID.", "TuningClient ID");
 	parser.addOption(idOption);
 
+#ifdef Q_DEBUG
 	// A boolean option with simulation (-simulate)
 
 	QCommandLineOption simulationOption("simulate", "Simulate signals values");
 	parser.addOption(simulationOption);
+#endif
 
 	parser.process(*qApp);
 

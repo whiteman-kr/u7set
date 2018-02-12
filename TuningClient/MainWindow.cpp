@@ -50,6 +50,12 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
 
 #ifdef Q_DEBUG
+
+	if (theSettings.m_simulationMode == true)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Warning! TuningClient is running in debugging simulation mode!"));
+	}
+
 	m_tcpClient->setSimulationMode(theSettings.m_simulationMode);	// For debugging
 #endif
 
@@ -537,7 +543,7 @@ void MainWindow::updateStatusBar()
 		{
 			TuningFilterCounters counters;
 
-			if (m_tcpClient->tuningSourceStatus(h, counters.errorCounter, counters.sorCounter) == false)
+			if (m_tcpClient->tuningSourceCounters(h, counters.errorCounter, counters.sorCounter) == false)
 			{
 				assert(false);
 				continue;

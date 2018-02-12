@@ -120,7 +120,7 @@ public:
 
 public:
 
-	int m_requestInterval = 10;
+	int m_requestInterval = 100;
 
 #ifdef Q_DEBUG
 	bool m_simulationMode = false;

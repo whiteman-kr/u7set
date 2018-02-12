@@ -979,7 +979,7 @@ bool TuningPage::apply()
 		int errorCounter = 0;
 		int sorCounter = 0;
 
-		if (m_tuningTcpClient->tuningSourceStatus(h, errorCounter, sorCounter) == false)
+		if (m_tuningTcpClient->tuningSourceCounters(h, errorCounter, sorCounter) == false)
 		{
 			assert(false);
 			continue;

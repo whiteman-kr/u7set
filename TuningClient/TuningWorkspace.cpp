@@ -784,7 +784,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 			}
 			else
 			{
-				treeItem->setText(columnStatusIndex, QString("ERR (%1)").arg(counters.errorCounter));
+				treeItem->setText(columnStatusIndex, QString("%1 errors").arg(counters.errorCounter));
 				treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
 				treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
 			}
@@ -825,7 +825,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
 
-	if (m_tuningTcpClient->tuningSourceStatus(hash, errorsCount, sorCount, state) == false)
+	if (m_tuningTcpClient->tuningSourceStatus(hash, errorsCount, sorCount, &state) == false)
 	{
 		treeItem->setText(columnStatusIndex, tr("Unknown"));
 		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
@@ -855,7 +855,6 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 			treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
 		}
 	}
-
 }
 
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)

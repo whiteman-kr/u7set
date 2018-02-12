@@ -69,6 +69,8 @@ private:
 
 	TuningClientTcpClient* m_tcpClient = nullptr;
 
+	QWidget* m_parent = nullptr;
+
 	static const QString m_singleLmControlEnabledString;
 	static const QString m_singleLmControlDisabledString;
 };

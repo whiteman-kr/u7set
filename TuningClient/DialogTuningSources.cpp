@@ -10,7 +10,8 @@ const QString DialogTuningSources::m_singleLmControlDisabledString("Single LM co
 DialogTuningSources::DialogTuningSources(TuningClientTcpClient* tcpClient, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTuningSources),
-	m_tcpClient(tcpClient)
+	m_tcpClient(tcpClient),
+	m_parent(parent)
 {
 	assert(m_tcpClient);
 
@@ -182,8 +183,8 @@ void DialogTuningSources::on_btnDetails_clicked()
 
 	quint64 id = item->data(0, Qt::UserRole).value<quint64>();
 
-	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tcpClient, this, id);
-	dlg->exec();
+	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tcpClient, m_parent, id);
+	dlg->show();
 }
 
 void DialogTuningSources::on_treeWidget_itemSelectionChanged()

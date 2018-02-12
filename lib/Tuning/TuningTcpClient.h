@@ -4,20 +4,10 @@
 #include <queue>
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/ITuningTcpClient.h"
+#include "../lib/Tuning/TuningSourceState.h"
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../Proto/network.pb.h"
-
-struct TuningSource
-{
-	::Network::DataSourceInfo info;
-	::Network::TuningSourceState state;
-
-	quint64 id() const
-	{
-		return info.id();
-	}
-};
 
 struct TuningWriteCommand
 {
@@ -103,8 +93,8 @@ public:
 	bool tuningSourceInfoById(quint64 id, TuningSource* result) const;
 	bool tuningSourceInfoByHash(Hash equipmentHash, TuningSource* result) const;
 
-	bool tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount) const;
-	bool tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount, QString& status) const;
+	bool tuningSourceCounters(const Hash& equipmentHash, int& errorsCount, int& sorCount) const;
+	bool tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount, QString* status) const;
 
 	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl);
 
@@ -192,23 +182,24 @@ public:
 	//
 private:
 	QString m_instanceId;
-	int m_requestInterval = 10;
+	int m_requestInterval = 100;
 	bool m_autoApply = true;
 
-	TuningSignalManager* m_signals;
+	TuningSignalManager* m_signals = nullptr;
 
 protected:
 	// Tuning sources
 	//
-	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources
+	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources, m_tuningSourcesIdToHashMap, m_equipmentToSignalMap
 	std::map<Hash, TuningSource> m_tuningSources;		// Key is hash of EquipmentID
-	std::map<quint64, Hash> m_tuningSourcesIdToHashMap;
+	std::map<quint64, Hash> m_tuningSourcesIdToHashMap;	// Key is id of TuningSource, value is hash of EquipmentID
+
 	std::multimap<Hash, Hash> m_equipmentToSignalMap;	// Key is hash of EquipmentID, values are hashes of signals
 
 private:
 	// Processing
 	//
-	mutable QMutex m_writeQueueMutex;					// For access to m_writeQueue and m_writeApply
+	mutable QMutex m_writeQueueMutex;					// For access to m_writeQueue
 	std::queue<TuningWriteCommand> m_writeQueue;
 
 	int m_readTuningSignalIndex = 0;
