@@ -382,7 +382,7 @@ namespace Tuning
 
 		restartTimer();
 
-		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 worker is started")).arg(m_sourceIP.addressStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 (%2) worker is started")).arg(m_sourceEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
 
 

@@ -74,19 +74,20 @@ namespace Tuning
 		void stopTcpTuningServerThread();
 
 		void runTuningSourceWorkers();
+		bool runTuningSourceWorker(const QString& tuningSourceEquipmentID);		// if tuningSourceEquipmentID empty - run all sources workers
 		void stopTuningSourceWorkers();
 
-		void setWorkerInTuningClientContext(const QString& sourceID, TuningSourceWorker* worker);
+		void runSourcesListenerThread();
+		void stopSourcesListenerThread();
+
+		void setWorkerInTuningClientContext(TuningSourceWorker* worker);
+		void removeWorkerFromTuningClientContext(TuningSourceWorker* worker);
 
 	private slots:
-		void onTimer();
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	private:
 		QString m_equipmentID;
-		QString m_buildPath;
-		QString m_cfgServiceIP1Str;
-		QString m_cfgServiceIP2Str;
 
 		HostAddressPort m_cfgServiceIP1;
 		HostAddressPort m_cfgServiceIP2;
@@ -104,8 +105,6 @@ namespace Tuning
 		TuningSourceWorkerThreadMap m_sourceWorkerThreadMap;
 
 		TuningSocketListenerThread* m_socketListenerThread = nullptr;
-
-		QTimer m_timer;
 
 		TuningClientContextMap m_clientContextMap;
 
