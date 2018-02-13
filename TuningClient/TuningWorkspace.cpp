@@ -825,7 +825,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
 
-	if (m_tuningTcpClient->tuningSourceStatus(hash, errorsCount, sorCount, &state) == false)
+	if (m_tuningTcpClient->tuningSourceStatus(hash, &errorsCount, &sorCount, &state) == false)
 	{
 		treeItem->setText(columnStatusIndex, tr("Unknown"));
 		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
@@ -946,7 +946,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	TuningSource ts;
 
-	if (m_tuningTcpClient->tuningSourceInfoByHash(::calcHash(filter->caption()), &ts) == false)
+	if (m_tuningTcpClient->tuningSourceInfo(::calcHash(filter->caption()), &ts) == false)
 	{
 		return;
 	}

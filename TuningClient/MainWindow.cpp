@@ -543,7 +543,7 @@ void MainWindow::updateStatusBar()
 		{
 			TuningFilterCounters counters;
 
-			if (m_tcpClient->tuningSourceCounters(h, counters.errorCounter, counters.sorCounter) == false)
+			if (m_tcpClient->tuningSourceCounters(h, &counters.errorCounter, &counters.sorCounter) == false)
 			{
 				assert(false);
 				continue;

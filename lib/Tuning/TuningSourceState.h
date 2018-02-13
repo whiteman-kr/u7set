@@ -9,6 +9,7 @@ public:
 	TuningSource();
 
 	quint64 id() const;
+	QString equipmentId() const;
 
 	void setNewState(const ::Network::TuningSourceState& newState);
 
