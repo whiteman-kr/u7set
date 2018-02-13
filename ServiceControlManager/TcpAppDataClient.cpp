@@ -47,8 +47,10 @@ void TcpAppDataClient::startStateUpdating()
 
 void TcpAppDataClient::updateStates()
 {
-	m_getStatesCurrentPart = 0;
-	getNextStatePart();
+	if (isClearToSendRequest())
+	{
+		sendRequest(ADS_GET_STATE);
+	}
 }
 
 
@@ -83,6 +85,10 @@ void TcpAppDataClient::onDisconnection()
 		m_updateStatesTimer = nullptr;
 	}
 
+	m_clientsIsReady = false;
+	m_settingsIsReady = false;
+	m_stateIsReady = false;
+
 	m_signalHashes.clear();
 	m_signalParams.clear();
 	m_states.clear();
@@ -93,7 +99,7 @@ void TcpAppDataClient::onDisconnection()
 
 void TcpAppDataClient::onReplyTimeout()
 {
-
+	closeConnection();
 }
 
 
@@ -145,8 +151,18 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 		sendNextRequest(ADS_GET_APP_SIGNAL);
 		break;
 
+	case ADS_GET_SETTINGS:
+		onGetServiceSettings(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_SETTINGS);
+		break;
+
 	// Dynamic data
 	//
+	case ADS_GET_STATE:
+		onGetServiceState(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_STATE);
+		break;
+
 	case ADS_GET_APP_SIGNAL_STATE:
 		onGetAppSignalStateReply(replyData, replyDataSize);
 		sendNextRequest(ADS_GET_APP_SIGNAL_STATE);
@@ -165,6 +181,26 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 	default:
 		assert(false);
 	}
+}
+
+QString TcpAppDataClient::configServiceConnectionState()
+{
+	if (m_getAppDataServiceState.cfgserviceisconnected())
+	{
+		QHostAddress addr(m_getAppDataServiceState.cfgserviceip());
+		return addr.toString() + ":" + QString::number(m_getAppDataServiceState.cfgserviceport());
+	}
+	return "No";
+}
+
+QString TcpAppDataClient::archiveServiceConnectionState()
+{
+	if (m_getAppDataServiceState.archiveserviceisconnected())
+	{
+		QHostAddress addr(m_getAppDataServiceState.archiveserviceip());
+		return addr.toString() + ":" + QString::number(m_getAppDataServiceState.archiveserviceport());
+	}
+	return "No";
 }
 
 
@@ -440,6 +476,38 @@ void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataS
 	}
 }
 
+void TcpAppDataClient::onGetServiceState(const char* replyData, quint32 replyDataSize)
+{
+	bool result = m_getAppDataServiceState.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_stateIsReady = true;
+	emit stateLoaded();
+}
+
+void TcpAppDataClient::onGetServiceSettings(const char* replyData, quint32 replyDataSize)
+{
+	bool result = m_getServiceSettings.ParseFromArray(replyData, replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_equipmentID = QString::fromStdString(m_getServiceSettings.equipmentid());
+	m_configIP1 = QString::fromStdString(m_getServiceSettings.configip1());
+	m_configIP2 = QString::fromStdString(m_getServiceSettings.configip2());
+
+	m_settingsIsReady = true;
+	emit settingsLoaded();
+}
+
 void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 {
 	switch(processedRequestID)
@@ -496,8 +564,7 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 
 				emit appSignalListLoaded();
 
-				startStateUpdating();
-				updateStates();	// First time update immediately, while waiting for timer
+				sendRequest(ADS_GET_SETTINGS);
 			}
 			else
 			{
@@ -506,8 +573,18 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 		}
 		break;
 
+	case ADS_GET_SETTINGS:
+		startStateUpdating();
+		updateStates();	// First time update immediately, while waiting for timer
+		break;
+
 	// Dynamic data requests
 	//
+	case ADS_GET_STATE:
+		m_getStatesCurrentPart = 0;
+		getNextStatePart();
+		break;
+
 	case ADS_GET_APP_SIGNAL_STATE:
 		{
 			int statesTotalParts = m_totalItemsCount / ADS_GET_APP_SIGNAL_STATE_MAX +

@@ -73,25 +73,7 @@ std::vector<TuningSource> TuningTcpClient::TuningTcpClient::tuningSourcesInfo() 
 	return result;
 }
 
-bool TuningTcpClient::tuningSourceInfoById(quint64 id, TuningSource* result) const
-{
-	Hash hash = 0;
-
-	{
-		QMutexLocker l(&m_tuningSourcesMutex);
-		auto it = m_tuningSourcesIdToHashMap.find(id);
-		if (it == m_tuningSourcesIdToHashMap.end())
-		{
-			return false;
-		}
-
-		hash = it->second;
-	}
-
-	return tuningSourceInfoByHash(hash, result);
-}
-
-bool TuningTcpClient::tuningSourceInfoByHash(Hash equipmentHash, TuningSource* result) const
+bool TuningTcpClient::tuningSourceInfo(Hash equipmentHash, TuningSource* result) const
 {
 	if (result == nullptr)
 	{
@@ -113,15 +95,22 @@ bool TuningTcpClient::tuningSourceInfoByHash(Hash equipmentHash, TuningSource* r
 	return true;
 }
 
-bool TuningTcpClient::tuningSourceCounters(const Hash& equipmentHash, int& errorsCount, int& sorCount) const
+bool TuningTcpClient::tuningSourceCounters(Hash equipmentHash, int* errorsCount, int* sorCount) const
 {
 	return tuningSourceStatus(equipmentHash, errorsCount, sorCount, nullptr);
 }
 
-bool TuningTcpClient::tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount, QString* status) const
+bool TuningTcpClient::tuningSourceStatus(Hash equipmentHash, int* errorsCount, int* sorCount, QString* status) const
 {
-	errorsCount = 0;
-	sorCount = 0;
+	if (errorsCount == nullptr || sorCount == nullptr)
+	{
+		assert(errorsCount);
+		assert(sorCount);
+		return false;
+	}
+
+	*errorsCount = 0;
+	*sorCount = 0;
 
 	if (status != nullptr)
 	{
@@ -130,7 +119,7 @@ bool TuningTcpClient::tuningSourceStatus(const Hash& equipmentHash, int& errorsC
 
 	TuningSource ts;
 
-	if (tuningSourceInfoByHash(equipmentHash, &ts) == false)
+	if (tuningSourceInfo(equipmentHash, &ts) == false)
 	{
 		if (status != nullptr)
 		{
@@ -150,7 +139,7 @@ bool TuningTcpClient::tuningSourceStatus(const Hash& equipmentHash, int& errorsC
 		{
 			// If this LM is selected in single control mode and has no reply - this is an error
 
-			errorsCount++;
+			(*errorsCount)++;
 		}
 
 		return true;
@@ -160,16 +149,16 @@ bool TuningTcpClient::tuningSourceStatus(const Hash& equipmentHash, int& errorsC
 
 	if (ts.state.setsor() == true)
 	{
-		sorCount++;
+		(*sorCount)++;
 	}
 
-	errorsCount = ts.getErrorsCount();
+	*errorsCount = ts.getErrorsCount();
 
 	if (errorsCount > 0)
 	{
 		if (status != nullptr)
 		{
-			*status = tr("%2 errors").arg(errorsCount);
+			*status = tr("%2 errors").arg(*errorsCount);
 		}
 	}
 	else
@@ -531,7 +520,6 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 		QMutexLocker l(&m_tuningSourcesMutex);
 
 		m_tuningSources.clear();
-		m_tuningSourcesIdToHashMap.clear();
 
 		for (int i = 0; i < m_tuningSourcesInfoReply.tuningsourceinfo_size(); i++)
 		{
@@ -545,7 +533,6 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 			assert(m_tuningSources.count(hash) == 0);
 
 			m_tuningSources[hash] = ts;
-			m_tuningSourcesIdToHashMap[ts.id()] = hash;
 		}
 	}
 
@@ -604,80 +591,75 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			quint64 id = tss.sourceid();
 
-			auto hashIt = m_tuningSourcesIdToHashMap.find(id);
-			if (hashIt == m_tuningSourcesIdToHashMap.end())
+			bool found = false;
+
+			for (auto it : m_tuningSources)
 			{
-				assert(false);
-				continue;
-			}
+				Hash tsHash = it.first;
+				TuningSource& ts = it.second;
 
-			Hash hash = hashIt->second;
-
-			auto it = m_tuningSources.find(hash);
-			if (it == m_tuningSources.end())
-			{
-				assert(false);
-				continue;
-			}
-
-			TuningSource& ts = it->second;
-
-			// Write SOR to tuning log
-
-			if (ts.state.isreply() == true)
-			{
-				TuningValue oldSor;
-				oldSor.setType(TuningValueType::Discrete);
-				oldSor.setDiscreteValue(ts.state.setsor() ? 1 : 0);
-
-				TuningValue newSor;
-				newSor.setType(TuningValueType::Discrete);
-				newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
-
-				if (oldSor != newSor)
+				if (ts.id() == id)
 				{
-					AppSignalParam param;
-					param.setEquipmentId(ts.info.equipmentid().c_str());
-					param.setCustomSignalId(tr("SOR is set"));
-					param.setPrecision(0);
+					// Write SOR change to tuning log
 
-					writeLogSignalChange(param, oldSor, newSor);
-				}
+					if (ts.state.isreply() == true)
+					{
+						TuningValue oldSor;
+						oldSor.setType(TuningValueType::Discrete);
+						oldSor.setDiscreteValue(ts.state.setsor() ? 1 : 0);
+
+						TuningValue newSor;
+						newSor.setType(TuningValueType::Discrete);
+						newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
+
+						if (oldSor != newSor)
+						{
+							AppSignalParam param;
+							param.setEquipmentId(ts.info.equipmentid().c_str());
+							param.setCustomSignalId(tr("SOR is set"));
+							param.setPrecision(0);
+
+							writeLogSignalChange(param, oldSor, newSor);
+						}
+					}
+
+					// Set new source state
+
+					ts.setNewState(tss);
+
+					// Set signals' flags that belong to tuning sources
+
+					std::pair <std::multimap<Hash, Hash>::iterator, std::multimap<Hash,Hash>::iterator> ret = m_equipmentToSignalMap.equal_range(tsHash);
+
+					for (std::multimap<Hash, Hash>::iterator signalIt = ret.first; signalIt != ret.second; ++signalIt)
+					{
+						Hash signalHash = signalIt->second;
+
+						bool found = false;
+
+						TuningSignalState state = m_signals->state(signalHash, &found);
+						if (found == false)
+						{
+							continue;
+						}
+
+						int uncommentToControlIsActive = 1;
+
+						state.m_flags.controlIsEnabled = true;//ts.state.controlisactive();
+
+						m_signals->setState(signalHash, state);
+					}
+
+					//
+
+					found = true;
+
+					break;
+
+				}	//ts.id() == id
 			}
 
-			//
-
-			ts.setNewState(tss);
-		}
-
-		// Set signals' flags that belong to tuning sources
-
-		for (auto sourceIt : m_tuningSources)
-		{
-			Hash tsHash = sourceIt.first;
-
-			const TuningSource& ts = sourceIt.second;
-
-			std::pair <std::multimap<Hash, Hash>::iterator, std::multimap<Hash,Hash>::iterator> ret;
-
-			ret = m_equipmentToSignalMap.equal_range(tsHash);
-
-			for (std::multimap<Hash, Hash>::iterator signalIt = ret.first; signalIt != ret.second; ++signalIt)
-			{
-				Hash signalHash = signalIt->second;
-
-				bool found = false;
-
-				TuningSignalState state = m_signals->state(signalHash, &found);
-				if (found == false)
-				{
-					continue;
-				}
-
-				state.m_flags.controlIsEnabled = true;//ts.state.controlisactive();
-
-				m_signals->setState(signalHash, state);
-			}
+			assert(found == true);
 		}
 	}
 
@@ -832,25 +814,37 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
 
-		if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
-		{
-			AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
-			if (found == false)
-			{
-				assert(false);
-				continue;
-			}
-
-			writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-						  .arg(previousState.newValue().toString(param.precision()))
-						  .arg(param.customSignalId())
-						  .arg(param.caption())
-						  .arg(param.equipmentId())
-						  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
-						  );
-		}
-
 		TuningSignalState arrivedState(stateMessage);
+
+		// Process write error only if writing was performed by current client
+
+		Hash writeClientHash = stateMessage.writeclient();
+
+		if (m_instanceIdHash == writeClientHash)
+		{
+			if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
+			{
+				if (previousState.m_flags.writeFailed == false)
+				{
+					arrivedState.m_flags.writeFailed = true;
+
+					AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
+					if (found == false)
+					{
+						assert(false);
+						continue;
+					}
+
+					writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
+								  .arg(previousState.newValue().toString(param.precision()))
+								  .arg(param.customSignalId())
+								  .arg(param.caption())
+								  .arg(param.equipmentId())
+								  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
+								  );
+				}
+			}
+		}
 
 		// When updating states, we have to save some properties unchanged
 
@@ -1144,6 +1138,7 @@ QString TuningTcpClient::instanceId() const
 void TuningTcpClient::setInstanceId(const QString& instanceId)
 {
 	m_instanceId = instanceId;
+	m_instanceIdHash = ::calcHash(m_instanceId);
 }
 
 int TuningTcpClient::requestInterval() const

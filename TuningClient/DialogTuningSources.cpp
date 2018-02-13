@@ -108,8 +108,8 @@ void DialogTuningSources::update(bool refreshOnly)
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
 
-			item->setData(0, Qt::UserRole, static_cast<quint64>(ts.info.id()));
-			item->setData(1, Qt::UserRole, QString(ts.info.equipmentid().c_str()));
+			item->setData(columnIndex_Hash, Qt::UserRole, ::calcHash(ts.equipmentId()));
+			item->setData(columnIndex_EquipmentId, Qt::UserRole, ts.equipmentId());
 
 			ui->treeWidget->addTopLevelItem(item);
 		}
@@ -143,11 +143,11 @@ void DialogTuningSources::update(bool refreshOnly)
 			continue;
 		}
 
-		quint64 id = item->data(0, Qt::UserRole).value<quint64>();
+		Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
 
 		TuningSource ts;
 
-		if (m_tcpClient->tuningSourceInfoById(id, &ts) == true)
+		if (m_tcpClient->tuningSourceInfo(hash, &ts) == true)
 		{
 			int col = dynamicColumn;
 
@@ -181,9 +181,9 @@ void DialogTuningSources::on_btnDetails_clicked()
 		return;
 	}
 
-	quint64 id = item->data(0, Qt::UserRole).value<quint64>();
+	Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
 
-	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tcpClient, m_parent, id);
+	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tcpClient, m_parent, hash);
 	dlg->show();
 }
 
@@ -231,7 +231,7 @@ void DialogTuningSources::activateControl(bool enable)
 		return;
 	}
 
-	QString equipmentId = item->data(1, Qt::UserRole).value<QString>();
+	QString equipmentId = item->data(columnIndex_EquipmentId, Qt::UserRole).value<QString>();
 
 	QString action = enable ? tr("activate") : tr("deactivate");
 

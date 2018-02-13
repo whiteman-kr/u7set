@@ -14,6 +14,11 @@ quint64 TuningSource::id() const
 	return info.id();
 }
 
+QString TuningSource::equipmentId() const
+{
+	return info.equipmentid().c_str();
+}
+
 void TuningSource::setNewState(const ::Network::TuningSourceState& newState)
 {
 	QDateTime ct = QDateTime::currentDateTime();

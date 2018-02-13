@@ -278,10 +278,23 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 	m_signalsView = addTabWithTableView(250, tr("Signals"));;
 	m_signalsView->setModel(m_signalStateModel);
 
+	// Clients
 	addClientsTab(false);
 
-	addTab(new QTableView(this), tr("Settings"));
+	// Settings
+	QTableView* settingsTableView = addTabWithTableView(250, "Settings");
 
+	m_settingsTabModel = new QStandardItemModel(3, 2, this);
+	settingsTableView->setModel(m_settingsTabModel);
+
+	m_settingsTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Equipment ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Configuration IP 1");
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Configuration IP 2");
+
+	// Log
 	addTab(new QTableView(this), tr("Log"));
 }
 
@@ -292,6 +305,13 @@ AppDataServiceWidget::~AppDataServiceWidget()
 
 void AppDataServiceWidget::updateServiceState()
 {
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
+	{
+		assert(false);
+		return;
+	}
+	stateTabModel()->setData(stateTabModel()->index(6, 1), m_tcpClientSocket->configServiceConnectionState());
+	stateTabModel()->setData(stateTabModel()->index(7, 1), m_tcpClientSocket->archiveServiceConnectionState());
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -303,8 +323,15 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
 		stateTabModel()->setData(stateTabModel()->index(5, 1), clientsTabModel()->rowCount());
-		stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
-		stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
+		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
+		{
+			stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
+			stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
+		}
+		else
+		{
+			updateServiceState();
+		}
 	}
 
 	quint32 ip = m_serviceInfo.clientrequestip();
@@ -406,9 +433,26 @@ void AppDataServiceWidget::updateClientsInfo()
 	updateClientsModel(m_tcpClientSocket->clients());
 }
 
+void AppDataServiceWidget::updateSettings()
+{
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
+	{
+		assert(false);
+		return;
+	}
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->configIP1());
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), m_tcpClientSocket->configIP2());
+}
+
 void AppDataServiceWidget::clearServiceData()
 {
+	stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
+	stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
 
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), "???");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), "???");
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), "???");
 }
 
 void AppDataServiceWidget::saveSourceColumnWidth(int index)
@@ -474,6 +518,10 @@ void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::clientsLoaded, this, &AppDataServiceWidget::updateClientsInfo);
 	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateServiceState);
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateSettings);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, this, &AppDataServiceWidget::clearServiceData);
 

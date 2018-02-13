@@ -14,7 +14,7 @@ class DialogTuningSourceInfo : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, quint64 tuningSourceId);
+	explicit DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, Hash tuningSourceEquipmentId);
 	~DialogTuningSourceInfo();
 
 protected:
@@ -26,7 +26,7 @@ private:
 private:
 	int m_updateStateTimerId = -1;
 
-	quint64 m_tuningSourceId = 0;
+	Hash m_tuningSourceEquipmentId = 0;
 
 private:
 	Ui::DialogTuningSourceInfo* ui;

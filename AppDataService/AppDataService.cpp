@@ -61,6 +61,51 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 }
 
 
+bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return false;
+	}
+
+	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+
+	if (state.isConnected)
+	{
+		ip = state.peerAddr.address32();
+		port = state.peerAddr.port();
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool AppDataServiceWorker::isConnectedToArchiveService(quint32 &ip, quint16 &port) const
+{
+	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		if (m_tcpArchiveClients[channel] == nullptr)
+		{
+			continue;
+		}
+
+		if (m_tcpArchiveClients[channel]->isConnected())
+		{
+			Tcp::ConnectionState&& state = m_tcpArchiveClients[channel]->getConnectionState();
+
+			ip = state.peerAddr.address32();
+			port = state.peerAddr.port();
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 void AppDataServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
@@ -127,6 +172,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 															m_enabledAppDataSources,
 															m_appSignals,
 															m_signalStates,
+															*this,
 															m_logger);
 	m_tcpAppDataServerThread->start();
 }
@@ -154,13 +200,13 @@ void AppDataServiceWorker::runTcpArchiveClientThreads()
 			continue;
 		}
 
-		TcpArchiveClient* client = new TcpArchiveClient(softwareInfo(),
-														channel,
-														m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
-														m_logger,
-														m_signalStatesQueue);
+		m_tcpArchiveClients[channel] = new TcpArchiveClient(softwareInfo(),
+															channel,
+															m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
+															m_logger,
+															m_signalStatesQueue);
 
-		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(client);
+		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(m_tcpArchiveClients[channel]);
 
 		m_tcpArchiveClientThreads[channel]->start();
 	}
@@ -174,6 +220,8 @@ void AppDataServiceWorker::stopTcpArchiveClientThreads()
 		{
 			continue;
 		}
+
+		m_tcpArchiveClients[channel] = nullptr;
 
 		m_tcpArchiveClientThreads[channel]->quitAndWait();
 

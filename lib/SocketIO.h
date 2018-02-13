@@ -228,6 +228,7 @@ const quint32 ADS_GET_UNITS = 0x1500;
 const int ADS_GET_DATA_UNITS_MAX = 1000;
 
 const quint32 ADS_GET_STATE = 0x1600;
+const quint32 ADS_GET_SETTINGS = 0x1800;
 
 enum class NetworkError
 {

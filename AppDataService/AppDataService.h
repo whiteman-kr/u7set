@@ -12,6 +12,8 @@
 #include "AppSignalStateEx.h"
 #include "TcpAppDataServer.h"
 
+class TcpArchiveClient;
+
 class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
@@ -30,6 +32,13 @@ public:
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
+
+	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port) const;
+	bool isConnectedToArchiveService(quint32 &ip, quint16 &port) const;
+
+	QString equipmentID() const { return m_equipmentID; }
+	QString cfgServiceIP1Str() const { return m_cfgServiceIP1Str; }
+	QString cfgServiceIP2Str() const { return m_cfgServiceIP2Str; }
 
 private:
 	virtual void initCmdLineParser() override;
@@ -113,6 +122,7 @@ private:
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
 	Tcp::Thread* m_tcpArchiveClientThreads[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+	TcpArchiveClient* m_tcpArchiveClients[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 
