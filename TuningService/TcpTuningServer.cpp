@@ -154,6 +154,7 @@ namespace Tuning
 
 		errCode = NetworkError::Success;
 
+		m_getTuningSourcesInfoReply.set_singlelmcontrolmode(m_service.singleLmControl());
 		m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
 
 		sendReply(m_getTuningSourcesInfoReply);

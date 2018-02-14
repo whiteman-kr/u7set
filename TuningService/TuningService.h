@@ -34,6 +34,8 @@ namespace Tuning
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
+		bool singleLmControl() const;
+
 		// called from TcpTuningServer thread!!!
 		//
 		NetworkError changeControlledTuningSource(const QString& tuningSourceEquipmentID,

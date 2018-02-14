@@ -33,7 +33,7 @@ namespace  Tuning
 
 	const char* TuningData::TUNING_ALL_SIGNALS_COUNT = "TuningSignalsCount";
 	const char* TuningData::TUNING_ANALOG_FLOAT_SIGNALS = "AnalogFloatSignals";
-	const char* TuningData::TUNING_ANALOG_INT_SIGNALS = "AnalogIntSignals";
+	const char* TuningData::TUNING_ANALOG_INT32_SIGNALS = "AnalogInt32Signals";
 	const char* TuningData::TUNING_DISCRETE_SIGNALS = "DiscreteSignals";
 	const char* TuningData::TUNING_SIGNALS_COUNT = "Count";
 
@@ -145,7 +145,7 @@ namespace  Tuning
 					{
 						if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 						{
-							m_tuningSignals[TYPE_ANALOG_INT].append(signal);
+							m_tuningSignals[TYPE_ANALOG_INT32].append(signal);
 						}
 						else
 						{
@@ -192,7 +192,7 @@ namespace  Tuning
 				m_tuningSignalSizes[t] = signalCount * sizeof(float);
 				break;
 
-			case TYPE_ANALOG_INT:
+			case TYPE_ANALOG_INT32:
 				m_tuningSignalSizes[t] = signalCount * sizeof(qint32);
 				break;
 
@@ -307,7 +307,7 @@ namespace  Tuning
 					}
 					break;
 
-				case TYPE_ANALOG_INT:
+				case TYPE_ANALOG_INT32:
 					{
 						qint32 defaultValue = signal->tuningDefaultValue().int32Value();
 						qint32 lowBound = static_cast<qint32>(signal->tuningLowBound().int32Value());
@@ -492,7 +492,7 @@ namespace  Tuning
 			}
 		}
 
-		for(Signal* s : m_tuningSignals[TYPE_ANALOG_INT])
+		for(Signal* s : m_tuningSignals[TYPE_ANALOG_INT32])
 		{
 			if (s->isAcquired() == true)
 			{
@@ -593,7 +593,7 @@ namespace  Tuning
 		const char* typeSection[TYPES_COUNT] =
 		{
 			TUNING_ANALOG_FLOAT_SIGNALS,
-			TUNING_ANALOG_INT_SIGNALS,
+			TUNING_ANALOG_INT32_SIGNALS,
 			TUNING_DISCRETE_SIGNALS
 		};
 
@@ -669,7 +669,7 @@ namespace  Tuning
 		const char* typeSection[TYPES_COUNT] =
 		{
 			TUNING_ANALOG_FLOAT_SIGNALS,
-			TUNING_ANALOG_INT_SIGNALS,
+			TUNING_ANALOG_INT32_SIGNALS,
 			TUNING_DISCRETE_SIGNALS
 		};
 
@@ -793,7 +793,7 @@ namespace  Tuning
 		case TYPE_ANALOG_FLOAT:
 			return sizeof(float) * SIZE_8BIT;
 
-		case TYPE_ANALOG_INT:
+		case TYPE_ANALOG_INT32:
 			return sizeof(qint32) * SIZE_8BIT;
 
 		case TYPE_DISCRETE:
@@ -816,7 +816,7 @@ namespace  Tuning
 
 		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 		{
-			return TYPE_ANALOG_INT;
+			return TYPE_ANALOG_INT32;
 		}
 
 		if (signal->isDiscrete())

@@ -2137,10 +2137,6 @@ namespace Builder
 		assert(m_tuningData == nullptr);
 		assert(m_lmDescription);
 
-		int tuningMemoryStartAddrW = m_lmDescription->memory().m_tuningDataOffset;
-		int tuningFrameSizePayload = m_lmDescription->flashMemory().m_tuningFramePayload;
-		int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
-
 		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
 		// uncomment next 3 lines:
 		//
@@ -2169,6 +2165,8 @@ namespace Builder
 
 		if (result == true)
 		{
+			int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
+
 			if (tuningData->usedFramesCount() > tuningFrameCount)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,

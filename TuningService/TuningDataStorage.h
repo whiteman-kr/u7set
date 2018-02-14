@@ -64,7 +64,7 @@ namespace Tuning
 		void getSignals(QVector<Signal *>& signalList) const;
 
 		const QVector<Signal*>& getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
-		const QVector<Signal*>& getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT]; }
+		const QVector<Signal*>& getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT32]; }
 		const QVector<Signal*>& getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
 
 		const QVector<Signal*>& getSignals(int type) const;
@@ -81,7 +81,7 @@ namespace Tuning
 		bool readFromXml(XmlReadHelper& xml);
 
 		static const int TYPE_ANALOG_FLOAT = 0;
-		static const int TYPE_ANALOG_INT = 1;
+		static const int TYPE_ANALOG_INT32 = 1;
 		static const int TYPE_DISCRETE = 2;
 
 		static const int TYPES_COUNT = 3;
@@ -147,7 +147,7 @@ namespace Tuning
 
 		static const char* TUNING_ALL_SIGNALS_COUNT;
 		static const char* TUNING_ANALOG_FLOAT_SIGNALS;
-		static const char* TUNING_ANALOG_INT_SIGNALS;
+		static const char* TUNING_ANALOG_INT32_SIGNALS;
 		static const char* TUNING_DISCRETE_SIGNALS;
 		static const char* TUNING_SIGNALS_COUNT;
 

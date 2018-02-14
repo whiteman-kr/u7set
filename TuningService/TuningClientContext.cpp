@@ -33,7 +33,10 @@ namespace Tuning
 	{
 		if (m_sourceWorker == nullptr)
 		{
-			assert(false);
+			tss.set_sourceid(m_sourceInfo.id());
+			tss.set_isreply(false);
+			tss.set_controlisactive(false);
+			tss.set_setsor(false);
 		}
 		else
 		{
@@ -82,9 +85,8 @@ namespace Tuning
 
 		if (m_sourceWorker == nullptr)
 		{
-			assert(false);
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::InternalError));
+			tss->set_error(TO_INT(NetworkError::ControlIsNotActive));
 			return;
 		}
 
@@ -98,8 +100,7 @@ namespace Tuning
 
 		if (m_sourceWorker == nullptr)
 		{
-			assert(false);
-			writeResult->set_error(TO_INT(NetworkError::InternalError));
+			writeResult->set_error(TO_INT(NetworkError::ControlIsNotActive));
 			return;
 		}
 

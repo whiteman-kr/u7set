@@ -148,7 +148,7 @@ namespace TuningIPEN
 
 		m_dataSources.clear();
 
-		result = xml.findElement("TuningLMs");
+		result = xml.findElement("TuningSources");
 
 		if (result == false)
 		{

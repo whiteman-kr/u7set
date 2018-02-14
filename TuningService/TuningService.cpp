@@ -114,6 +114,11 @@ namespace Tuning
 		}
 	}
 
+	bool TuningServiceWorker::singleLmControl() const
+	{
+		return m_cfgSettings.singleLmControl;
+	}
+
 	// called from TcpTuningServer thread!!!
 	//
 	NetworkError TuningServiceWorker::changeControlledTuningSource(const QString& tuningSourceEquipmentID,
@@ -136,8 +141,6 @@ namespace Tuning
 		AUTO_LOCK(m_mainMutex);							// !!!!
 
 		stopSourcesListenerThread();
-
-		assert(m_sourceWorkerThreadMap.size() == 1);
 
 		stopTuningSourceWorkers();
 
@@ -332,7 +335,7 @@ namespace Tuning
 
 		m_tuningSources.clear();
 
-		result = xml.findElement("TuningLMs");
+		result = xml.findElement("TuningSources");
 
 		if (result == false)
 		{
@@ -454,6 +457,11 @@ namespace Tuning
 
 	void TuningServiceWorker::runSourcesListenerThread()
 	{
+		if (m_sourceWorkerThreadMap.size() == 0)
+		{
+			DEBUG_LOG_MSG(m_logger, QString("Tuning sources workers is not running. Listener thread is not run also."));
+			return;
+		}
 
 		// create and run TuningSocketListenerThread
 		//

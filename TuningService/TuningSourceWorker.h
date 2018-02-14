@@ -261,10 +261,12 @@ namespace Tuning
 		quint16 m_lmModuleType = 0;
 		quint16 m_subsystemCode = 0;
 
+		int m_tuningFlashSizeB = 0;
+		int m_tuningFlashFramePayloadB = 0;
+
 		int m_tuningDataOffsetW = 0;
 		int m_tuningDataFrameCount = 0;
 		int m_tuningDataFramePayloadW = 0;
-		int m_tuningFlashSizeB = 0;
 		int m_tuningUsedFramesCount = 0;
 
 		//

@@ -58,7 +58,7 @@ namespace Tuning
 		tss.set_fotipflagopcodeerr(fotipFlagOpCodeErr);
 		tss.set_fotipflagstartaddrerr(fotipFlagStartAddrErr);
 		tss.set_fotipflagromsizeerr(fotipFlagRomSizeErr);
-		tss.set_fotipflagromframesizeerr( fotipFlagRomFrameSizeErr);
+		tss.set_fotipflagromframesizeerr(fotipFlagRomFrameSizeErr);
 		tss.set_fotipflagframesizeerr(fotipFlagFrameSizeErr);
 		tss.set_fotipflagprotocolversionerr(fotipFlagProtocolVersionErr);
 		tss.set_fotipflagsubsystemkeyerr(fotipFlagSubsystemKeyErr);
@@ -202,10 +202,13 @@ namespace Tuning
 
 		if (td != nullptr)
 		{
+			m_tuningFlashSizeB = td->tuningFlashFrameCount() * td->tuningFlashFrameSizeB();
+			m_tuningFlashFramePayloadB = td->tuningFlashFramePayloadB();
+
 			m_tuningDataOffsetW = td->tuningDataOffsetW();
 			m_tuningDataFrameCount = td->tuningDataFrameCount();
 			m_tuningDataFramePayloadW = td->tuningDataFramePayloadW();
-			m_tuningFlashSizeB = td->tuningFlashFrameSizeB();
+
 			m_tuningUsedFramesCount = td->usedFramesCount();
 		}
 		else
@@ -382,13 +385,17 @@ namespace Tuning
 
 		restartTimer();
 
+		m_stat.controlIsActive = true;
+
 		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 (%2) worker is started")).arg(m_sourceEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
 
 
 	void TuningSourceWorker::onThreadFinished()
 	{
-		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 worker is finished")).arg(m_sourceIP.addressStr()));
+		m_stat.controlIsActive = false;
+
+		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 (%2) worker is stopped")).arg(m_sourceEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
 
 
@@ -686,8 +693,8 @@ namespace Tuning
 
 		fotipHeader.fotipFrameSizeB = sizeof(FotipV2::Frame);
 
-		fotipHeader.romSizeB = m_tuningFlashSizeB * sizeof(quint16);										// in bytes
-		fotipHeader.romFrameSizeB = static_cast<quint16>(m_tuningDataFramePayloadW * sizeof(quint16));		// in bytes
+		fotipHeader.romSizeB = static_cast<quint32>(m_tuningFlashSizeB);
+		fotipHeader.romFrameSizeB = static_cast<quint16>(m_tuningFlashFramePayloadB);
 
 		fotipHeader.offsetInFrameW = 0;
 
@@ -1080,13 +1087,13 @@ namespace Tuning
 			result = false;
 		}
 
-		if (fotipHeader.romSizeB !=  m_tuningFlashSizeB * 2)
+		if (fotipHeader.romSizeB !=  m_tuningFlashSizeB)
 		{
 			m_stat.errFotipRomSize++;
 			result = false;
 		}
 
-		if (fotipHeader.romFrameSizeB != m_tuningDataFramePayloadW * 2)
+		if (fotipHeader.romFrameSizeB != m_tuningFlashFramePayloadB)
 		{
 			m_stat.errFotipRomFrameSize++;
 			result = false;

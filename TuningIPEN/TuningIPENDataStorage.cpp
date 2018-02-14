@@ -596,7 +596,7 @@ namespace  TuningIPEN
 			sr->dataType = FotipDataType::AnalogFloat;
 			break;
 
-		case TYPE_ANALOG_INT:
+		case TYPE_ANALOG_INT32:
 			sr->dataType = FotipDataType::AnalogSignedInt;
 			break;
 

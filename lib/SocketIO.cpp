@@ -219,6 +219,18 @@ QString getNetworkErrorStr(NetworkError err)
 	case NetworkError::InternalError:
 		return QString("NetworkError::InternalError");
 
+	case NetworkError::ArchiveError:
+		return QString("NetworkError::ArchiveError");
+
+	case NetworkError::WrongTuningValueType:
+		return QString("NetworkError::WrongTuningValueType");
+
+	case NetworkError::SingleLmControlDisabled:
+		return QString("NetworkError::SingleLmControlDisabled");
+
+	case NetworkError::ControlIsNotActive:
+		return QString("NetworkError::ControlIsNotActive");
+
 	default:
 		assert(false);			// unknown err value
 	}

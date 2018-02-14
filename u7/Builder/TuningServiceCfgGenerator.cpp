@@ -88,7 +88,7 @@ namespace Builder
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
-		xml.writeStartElement("TuningLMs");
+		xml.writeStartElement("TuningSources");
 
 		QList<Hardware::DeviceModule*> tuningLMs;
 
@@ -203,7 +203,7 @@ namespace Builder
 			ds.writeToXml(xml);
 		}
 
-		xml.writeEndElement();				//	</TuningLMs>
+		xml.writeEndElement();				//	</TuningSources>
 
 		return result;
 	}
