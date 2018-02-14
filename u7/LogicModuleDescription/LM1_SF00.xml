@@ -3671,7 +3671,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0011">
+		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0012">
 			<Properties>				
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
@@ -3695,8 +3695,8 @@ function(videoItemFblElement, afbElement)
 			<Params>
 				<Param OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>5</Value>
-					<Default>0</Default>
-					<LowLimit>0</LowLimit>
+					<Default>5</Default>
+					<LowLimit>5</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -3832,7 +3832,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0012">
+		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0013">
 			<Properties>				
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
@@ -3852,8 +3852,8 @@ function(videoItemFblElement, afbElement)
 			<Params>
 				<Param OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>5</Value>
-					<Default>0</Default>
-					<LowLimit>0</LowLimit>
+					<Default>5</Default>
+					<LowLimit>5</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
