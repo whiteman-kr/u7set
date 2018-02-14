@@ -154,6 +154,7 @@ namespace Tuning
 
 		errCode = NetworkError::Success;
 
+		m_getTuningSourcesInfoReply.set_singlelmcontrolmode(m_service.singleLmControl());
 		m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
 
 		sendReply(m_getTuningSourcesInfoReply);
@@ -412,12 +413,17 @@ namespace Tuning
 		QString tuningSourceEquipmentID = QString::fromStdString(m_changeControlledTuningSourceRequest.tuningsourceequipmentid());
 		bool activateControl = m_changeControlledTuningSourceRequest.activatecontrol();
 
-		// ADD REAL PROCESSING!!!!!!
-		// LOG REQUEST
+		QString controlledTuningSource;
+		bool controlIsActive;
 
-		m_changeControlledTuningSourceReply.set_error(TO_INT(NetworkError::Success));
-		m_changeControlledTuningSourceReply.set_controlledtuningsourceequipmentid(tuningSourceEquipmentID.toStdString());
-		m_changeControlledTuningSourceReply.set_controlisactive(activateControl);
+		NetworkError errorCode = m_service.changeControlledTuningSource(tuningSourceEquipmentID,
+																		 activateControl,
+																		 &controlledTuningSource,
+																		 &controlIsActive);
+
+		m_changeControlledTuningSourceReply.set_error(TO_INT(errorCode));
+		m_changeControlledTuningSourceReply.set_controlledtuningsourceequipmentid(controlledTuningSource.toStdString());
+		m_changeControlledTuningSourceReply.set_controlisactive(controlIsActive);
 
 		sendReply(m_changeControlledTuningSourceReply);
 	}

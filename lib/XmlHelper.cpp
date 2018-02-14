@@ -135,6 +135,11 @@ void XmlWriteHelper::writeIntElement(const QString& name, int value)
 	m_xmlWriter->writeTextElement(name, QString::number(value));
 }
 
+void XmlWriteHelper::writeBoolElement(const QString& name, bool value)
+{
+	m_xmlWriter->writeTextElement(name, value == true ? "true" : "false");
+}
+
 void XmlWriteHelper::writeHostAddressPort(const QString& nameIP, const QString& namePort,HostAddressPort& hostAddressPort)
 {
 	writeStringElement(nameIP, hostAddressPort.addressStr());
@@ -372,8 +377,6 @@ bool XmlReadHelper::readStringElement(const QString& elementName, QString* value
 
 	*value = str;
 
-	//skipCurrentElement();
-
 	return true;
 }
 
@@ -392,9 +395,44 @@ bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
 
 	QString str = m_xmlReader->readElementText();
 
-	*value = str.toInt();
+	bool ok = true;
 
-	//skipCurrentElement();
+	*value = str.toInt(&ok);
+
+	return ok;
+}
+
+bool XmlReadHelper::readBoolElement(const QString& elementName, bool* value)
+{
+	if (value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (name() != elementName)
+	{
+		return false;
+	}
+
+	QString str = m_xmlReader->readElementText();
+
+	if (str == "true")
+	{
+		*value = true;
+	}
+	else
+	{
+		if (str == "false")
+		{
+			*value = false;
+		}
+		else
+		{
+			assert(false);
+			return false;
+		}
+	}
 
 	return true;
 }

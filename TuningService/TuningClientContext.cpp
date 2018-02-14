@@ -33,7 +33,10 @@ namespace Tuning
 	{
 		if (m_sourceWorker == nullptr)
 		{
-			assert(false);
+			tss.set_sourceid(m_sourceInfo.id());
+			tss.set_isreply(false);
+			tss.set_controlisactive(false);
+			tss.set_setsor(false);
 		}
 		else
 		{
@@ -44,11 +47,7 @@ namespace Tuning
 
 	void TuningSourceContext::setSourceWorker(TuningSourceWorker* worker)
 	{
-		if (worker == nullptr)
-		{
-			assert(false);
-			return;
-		}
+		TEST_PTR_RETURN(worker);
 
 		if (worker->sourceEquipmentID() != m_sourceID)
 		{
@@ -56,9 +55,29 @@ namespace Tuning
 			return;
 		}
 
+		assert(m_sourceWorker == nullptr);
+
 		m_sourceWorker = worker;
 	}
 
+	void TuningSourceContext::removeSourceWorker(TuningSourceWorker* worker)
+	{
+		TEST_PTR_RETURN(worker);
+
+		if (worker->sourceEquipmentID() != m_sourceID)
+		{
+			assert(false);
+			return;
+		}
+
+		if (m_sourceWorker != worker)
+		{
+			assert(false);
+			return;
+		}
+
+		m_sourceWorker = nullptr;
+	}
 
 	void TuningSourceContext::readSignalState(Network::TuningSignalState* tss)
 	{
@@ -66,9 +85,8 @@ namespace Tuning
 
 		if (m_sourceWorker == nullptr)
 		{
-			assert(false);
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::InternalError));
+			tss->set_error(TO_INT(NetworkError::ControlIsNotActive));
 			return;
 		}
 
@@ -82,8 +100,7 @@ namespace Tuning
 
 		if (m_sourceWorker == nullptr)
 		{
-			assert(false);
-			writeResult->set_error(TO_INT(NetworkError::InternalError));
+			writeResult->set_error(TO_INT(NetworkError::ControlIsNotActive));
 			return;
 		}
 
@@ -324,9 +341,11 @@ namespace Tuning
 	}
 
 
-	void TuningClientContext::setSourceWorker(const QString& sourceID, TuningSourceWorker *worker)
+	void TuningClientContext::setSourceWorker(TuningSourceWorker* worker)
 	{
-		TuningSourceContext* sourceContext = getSourceContext(sourceID);
+		TEST_PTR_RETURN(worker);
+
+		TuningSourceContext* sourceContext = getSourceContext(worker->sourceEquipmentID());
 
 		if (sourceContext == nullptr)
 		{
@@ -336,6 +355,19 @@ namespace Tuning
 		sourceContext->setSourceWorker(worker);
 	}
 
+	void TuningClientContext::removeSourceWorker(TuningSourceWorker* worker)
+	{
+		TEST_PTR_RETURN(worker);
+
+		TuningSourceContext* sourceContext = getSourceContext(worker->sourceEquipmentID());
+
+		if (sourceContext == nullptr)
+		{
+			return;			// its OK
+		}
+
+		sourceContext->removeSourceWorker(worker);
+	}
 
 	TuningSourceContext* TuningClientContext::getSourceContext(const QString& sourceID) const
 	{

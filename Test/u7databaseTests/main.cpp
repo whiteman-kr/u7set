@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 	//bool matchedForDeletion = false;
 
 	db.setHostName(DatabaseHost);
+//	db.setPort(5433);
 	db.setUserName(DatabaseUser);
 	db.setPassword(DatabaseUserPassword);
 	db.setDatabaseName("postgres");

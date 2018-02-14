@@ -58,7 +58,6 @@ SOURCES += \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/JsonSerializable.cpp \
-    ../lib/UdpFileTransfer.cpp \
     ../lib/Service.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/HostAddressPort.cpp \
@@ -76,7 +75,6 @@ HEADERS += \
 	../lib/FscDataFormat.h \
     version.h \
     ../lib/JsonSerializable.h \
-    ../lib/UdpFileTransfer.h \
     ../lib/Service.h \
     ../lib/SimpleThread.h \
     ../lib/HostAddressPort.h \

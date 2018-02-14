@@ -112,7 +112,7 @@ namespace Tuning
 		class TuningSignal
 		{
 		public:
-			void init(const Signal* s, int index, int tuningRomFraeSizeW);
+			void init(const Signal* s, int index, int tuningDataFrameSizeW);
 
 			QString appSignalID() const { return m_appSignalID; }
 
@@ -195,7 +195,6 @@ namespace Tuning
 	public:
 		TuningSourceWorker(const TuningServiceSettings& settings,
 						   const TuningSource& source,
-						   bool skipModuleTypeChecking,
 						   std::shared_ptr<CircularLogger> logger);
 		~TuningSourceWorker();
 
@@ -250,7 +249,7 @@ namespace Tuning
 
 	private:
 		std::shared_ptr<CircularLogger> m_logger;
-		bool m_skipModuleTypeChecking = false;
+		bool m_disableModulesTypeChecking = false;
 
 		// data from tuning source
 		//
@@ -262,10 +261,12 @@ namespace Tuning
 		quint16 m_lmModuleType = 0;
 		quint16 m_subsystemCode = 0;
 
-		int m_tuningRomStartAddrW = 0;
-		int m_tuningRomFrameCount = 0;
-		int m_tuningRomFrameSizeW = 0;
-		int m_tuningRomSizeW = 0;
+		int m_tuningFlashSizeB = 0;
+		int m_tuningFlashFramePayloadB = 0;
+
+		int m_tuningDataOffsetW = 0;
+		int m_tuningDataFrameCount = 0;
+		int m_tuningDataFramePayloadW = 0;
 		int m_tuningUsedFramesCount = 0;
 
 		//
@@ -320,7 +321,6 @@ namespace Tuning
 	public:
 		TuningSourceWorkerThread(const TuningServiceSettings& settings,
 								 const TuningSource& source,
-								 bool skipModuleTypeChecking,
 								 std::shared_ptr<CircularLogger> logger);
 
 		~TuningSourceWorkerThread();

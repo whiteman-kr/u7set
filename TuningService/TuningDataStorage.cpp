@@ -17,12 +17,23 @@ namespace  Tuning
 	const char* TuningData::TUNING_DATA_ELEMENT = "TuningData";
 	const char* TuningData::LM_ID = "LmID";
 	const char* TuningData::UNIQUE_ID = "UniqueID";
-	const char* TuningData::TUNING_FRAME_SIZE_BYTES = "FrameSizeBytes";
-	const char* TuningData::TUNING_FRAMES_COUNT = "FramesCount";
-	const char* TuningData::TUNING_USED_FRAMES_COUNT = "UsedFramesCount";
+
+	const char* TuningData::TUNING_FLASH = "TuningFlashMemory";
+	const char* TuningData::TUNING_FLASH_FRAME_COUNT = "FrameCount";
+	const char* TuningData::TUNING_FLASH_FRAME_PAYLOAD_B = "FramePayloadB";
+	const char* TuningData::TUNING_FLASH_FRAME_SIZE_B = "FrameSizeB";
+
+	const char* TuningData::TUNING_DATA = "TuningDataMemory";
+	const char* TuningData::TUNING_DATA_OFFSET_W = "OffsetW";
+	const char* TuningData::TUNING_DATA_SIZE_W = "SizeW";
+	const char* TuningData::TUNING_DATA_FRAME_COUNT = "FrameCount";
+	const char* TuningData::TUNING_DATA_FRAME_PAYLOAD_W = "FramePayloadW";
+	const char* TuningData::TUNING_DATA_FRAME_SIZE_W = "FrameSizeW";
+	const char* TuningData::TUNING_DATA_USED_FRAMES_COUNT = "UsedFramesCount";
+
 	const char* TuningData::TUNING_ALL_SIGNALS_COUNT = "TuningSignalsCount";
 	const char* TuningData::TUNING_ANALOG_FLOAT_SIGNALS = "AnalogFloatSignals";
-	const char* TuningData::TUNING_ANALOG_INT_SIGNALS = "AnalogIntSignals";
+	const char* TuningData::TUNING_ANALOG_INT32_SIGNALS = "AnalogInt32Signals";
 	const char* TuningData::TUNING_DISCRETE_SIGNALS = "DiscreteSignals";
 	const char* TuningData::TUNING_SIGNALS_COUNT = "Count";
 
@@ -32,14 +43,24 @@ namespace  Tuning
 	{
 	}
 
-
-	TuningData::TuningData(QString lmID, int tuningMemoryStartAddrW,
-							int tuningFramePayloadBytes,
-							int tuningFramesCount) :
+	TuningData::TuningData(const QString& lmID,
+						   int tuningFlashFrameCount,
+						   int tuningFlashFramePayloadB,
+						   int tuningFlashFrameSizeB,
+						   int tuningDataOffsetW,
+						   int tuningDataSizeW,
+						   int tuningDataFrameCount,
+						   int tuningDataFramePayloadW,
+						   int tuningDataFrameSizeW) :
 		m_lmEquipmentID(lmID),
-		m_tuningMemoryStartAddrW(tuningMemoryStartAddrW),
-		m_tuningFramePayloadBytes(tuningFramePayloadBytes),
-		m_tuningFramesCount(tuningFramesCount)
+		m_tuningFlashFrameCount(tuningFlashFrameCount),
+		m_tuningFlashFramePayloadB(tuningFlashFramePayloadB),
+		m_tuningFlashFrameSizeB(tuningFlashFrameSizeB),
+		m_tuningDataOffsetW(tuningDataOffsetW),
+		m_tuningDataSizeW(tuningDataSizeW),
+		m_tuningDataFrameCount(tuningDataFrameCount),
+		m_tuningDataFramePayloadW(tuningDataFramePayloadW),
+		m_tuningDataFrameSizeW(tuningDataFrameSizeW)
 	{
 		for(int& v : m_tuningSignalSizes)
 		{
@@ -47,6 +68,24 @@ namespace  Tuning
 		}
 	}
 
+	// constructor for IPEN tuning only
+	//
+	TuningData::TuningData(const QString& lmID) :
+		m_lmEquipmentID(lmID),
+		m_tuningFlashFrameCount(256),
+		m_tuningFlashFramePayloadB(1016),
+		m_tuningFlashFrameSizeB(1024),
+		m_tuningDataOffsetW(46336),
+		m_tuningDataSizeW(7620),
+		m_tuningDataFrameCount(15),
+		m_tuningDataFramePayloadW(508),
+		m_tuningDataFrameSizeW(512)
+	{
+		for(int& v : m_tuningSignalSizes)
+		{
+			v = 0;
+		}
+	}
 
 	TuningData::~TuningData()
 	{
@@ -71,7 +110,6 @@ namespace  Tuning
 		}
 	}
 
-
 	bool TuningData::buildTuningSignalsLists(HashedVector<QString, Signal *> lmAssociatedSignals, Builder::IssueLogger* log)
 	{
 		bool result = true;
@@ -88,7 +126,7 @@ namespace  Tuning
 				continue;
 			}
 
-			if (signal->isAnalog())
+			if (signal->isAnalog() == true)
 			{
 				if (signal->dataSize() != SIZE_32BIT)
 				{
@@ -107,7 +145,7 @@ namespace  Tuning
 					{
 						if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 						{
-							m_tuningSignals[TYPE_ANALOG_INT].append(signal);
+							m_tuningSignals[TYPE_ANALOG_INT32].append(signal);
 						}
 						else
 						{
@@ -154,7 +192,7 @@ namespace  Tuning
 				m_tuningSignalSizes[t] = signalCount * sizeof(float);
 				break;
 
-			case TYPE_ANALOG_INT:
+			case TYPE_ANALOG_INT32:
 				m_tuningSignalSizes[t] = signalCount * sizeof(qint32);
 				break;
 
@@ -173,13 +211,15 @@ namespace  Tuning
 
 		// calculate used tuning frames count
 		//
-		if (m_tuningFramePayloadBytes == 0)
+		int tuningFramePayloadBytes = m_tuningDataFramePayloadW * WORD_SIZE_IN_BYTES;
+
+		if (tuningFramePayloadBytes == 0)
 		{
-			m_usedFramesCount = 0;
+			m_tuningDataUsedFramesCount = 0;
 		}
 		else
 		{
-			m_usedFramesCount = (totalSize / m_tuningFramePayloadBytes + ((totalSize % m_tuningFramePayloadBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
+			m_tuningDataUsedFramesCount = (totalSize / tuningFramePayloadBytes + ((totalSize % tuningFramePayloadBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
 		}
 
 		return result;
@@ -192,11 +232,13 @@ namespace  Tuning
 		//
 		m_metadata.clear();
 
-		m_tuningDataSize = m_usedFramesCount * m_tuningFramePayloadBytes;
+		int tuningFramePayloadBytes = m_tuningDataFramePayloadW * WORD_SIZE_IN_BYTES;
 
-		m_tuningData = new quint8 [m_tuningDataSize];
+		m_tuningDataSizeB = m_tuningDataUsedFramesCount * tuningFramePayloadBytes;
 
-		memset(m_tuningData, 0, m_tuningDataSize);
+		m_tuningData = new quint8 [m_tuningDataSizeB];
+
+		memset(m_tuningData, 0, m_tuningDataSizeB);
 
 		// copy tuning signals default values and ranges
 		//
@@ -233,8 +275,8 @@ namespace  Tuning
 				case TYPE_ANALOG_FLOAT:
 					{
 						float defaultValue = signal->tuningDefaultValue().floatValue();
-						float lowBound = static_cast<float>(signal->lowEngeneeringUnits());
-						float highBound = static_cast<float>(signal->highEngeneeringUnits());
+						float lowBound = static_cast<float>(signal->tuningLowBound().floatValue());
+						float highBound = static_cast<float>(signal->tuningHighBound().floatValue());
 
 						// in first frame - default value
 						//
@@ -243,17 +285,17 @@ namespace  Tuning
 
 						// in second frame - low bound
 						//
-						*reinterpret_cast<float*>(dataPtr + m_tuningFramePayloadBytes) =
+						*reinterpret_cast<float*>(dataPtr + tuningFramePayloadBytes) =
 								reverseFloat(lowBound);
 
 						// in third frame - high bound
 						//
-						*reinterpret_cast<float*>(dataPtr + m_tuningFramePayloadBytes * 2) =
+						*reinterpret_cast<float*>(dataPtr + tuningFramePayloadBytes * 2) =
 								reverseFloat(highBound);
 
-						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
+						signal->setTuningAddr(Address16(sizeB / WORD_SIZE_IN_BYTES, 0));
 
-						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
+						signal->setIoBufAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES, 0));
 
 						sizeB += sizeof(float);
 						testSizeB = true;
@@ -265,11 +307,11 @@ namespace  Tuning
 					}
 					break;
 
-				case TYPE_ANALOG_INT:
+				case TYPE_ANALOG_INT32:
 					{
 						qint32 defaultValue = signal->tuningDefaultValue().int32Value();
-						qint32 lowBound = static_cast<qint32>(signal->lowEngeneeringUnits());
-						qint32 highBound = static_cast<qint32>(signal->highEngeneeringUnits());
+						qint32 lowBound = static_cast<qint32>(signal->tuningLowBound().int32Value());
+						qint32 highBound = static_cast<qint32>(signal->tuningHighBound().int32Value());
 
 						// in first frame - default value
 						//
@@ -278,17 +320,17 @@ namespace  Tuning
 
 						// in second frame - low bound
 						//
-						*reinterpret_cast<qint32*>(dataPtr + m_tuningFramePayloadBytes) =
+						*reinterpret_cast<qint32*>(dataPtr + tuningFramePayloadBytes) =
 								reverseInt32(lowBound);
 
 						// in third frame - high bound
 						//
-						*reinterpret_cast<qint32*>(dataPtr + m_tuningFramePayloadBytes * 2) =
+						*reinterpret_cast<qint32*>(dataPtr + tuningFramePayloadBytes * 2) =
 								reverseInt32(highBound);
 
-						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
+						signal->setTuningAddr(Address16(sizeB / WORD_SIZE_IN_BYTES, 0));
 
-						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
+						signal->setIoBufAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES, 0));
 
 						sizeB += sizeof(qint32);
 						testSizeB = true;
@@ -307,10 +349,10 @@ namespace  Tuning
 						int bitNo = discreteCount % SIZE_32BIT;
 
 						writeBigEndianUint32Bit(dataPtr, bitNo, defaultValue);
-						writeBigEndianUint32Bit(dataPtr + m_tuningFramePayloadBytes, bitNo, 0);
-						writeBigEndianUint32Bit(dataPtr + m_tuningFramePayloadBytes * 2, bitNo, 1);
+						writeBigEndianUint32Bit(dataPtr + tuningFramePayloadBytes, bitNo, 0);
+						writeBigEndianUint32Bit(dataPtr + tuningFramePayloadBytes * 2, bitNo, 1);
 
-						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), bitNo));
+						signal->setTuningAddr(Address16(sizeB / WORD_SIZE_IN_BYTES, bitNo));
 
 						// tuningable discrete signals pack in 32-bit container that place in LM memory in BigEndian format
 						// but access to this discretes is performeds as word-addressed
@@ -331,7 +373,7 @@ namespace  Tuning
 							bitNo = bitNo % SIZE_16BIT;
 						}
 
-						signal->setIoBufAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo));
+						signal->setIoBufAddr(Address16(m_tuningDataOffsetW + sizeB / WORD_SIZE_IN_BYTES + additionalOffsetToDiscreteW, bitNo));
 
 						//
 
@@ -354,12 +396,12 @@ namespace  Tuning
 					assert(false);
 				}
 
-				if (testSizeB == true && (sizeB % m_tuningFramePayloadBytes) == 0)
+				if (testSizeB == true && (sizeB % tuningFramePayloadBytes) == 0)
 				{
 					// frame full
 					// skip lowBound and highBound frames
 					//
-					sizeB += m_tuningFramePayloadBytes * 2;
+					sizeB += tuningFramePayloadBytes * 2;
 				}
 
 				metaData.append(QVariant(signal->ioBufAddr().offset()));
@@ -369,7 +411,7 @@ namespace  Tuning
 			}
 		}
 
-		assert(sizeB <= m_tuningDataSize);
+		assert(sizeB <= m_tuningDataSizeB);
 
 		return true;
 	}
@@ -390,7 +432,7 @@ namespace  Tuning
 			return;
 		}
 
-		tuningData->append(reinterpret_cast<const char*>(m_tuningData), m_tuningDataSize);
+		tuningData->append(reinterpret_cast<const char*>(m_tuningData), m_tuningDataSizeB);
 	}
 
 
@@ -450,7 +492,7 @@ namespace  Tuning
 			}
 		}
 
-		for(Signal* s : m_tuningSignals[TYPE_ANALOG_INT])
+		for(Signal* s : m_tuningSignals[TYPE_ANALOG_INT32])
 		{
 			if (s->isAcquired() == true)
 			{
@@ -515,13 +557,29 @@ namespace  Tuning
 
 	void TuningData::writeToXml(XmlWriteHelper& xml)
 	{
-		xml.writeStartElement(TUNING_DATA_ELEMENT);
+		xml.writeStartElement(TUNING_FLASH);			// <TuningFlashMemory>
+
+		xml.writeIntAttribute(TUNING_FLASH_FRAME_COUNT, m_tuningFlashFrameCount);
+		xml.writeIntAttribute(TUNING_FLASH_FRAME_PAYLOAD_B, m_tuningFlashFramePayloadB);
+		xml.writeIntAttribute(TUNING_FLASH_FRAME_SIZE_B, m_tuningFlashFrameSizeB);
+
+		xml.writeEndElement();							// </TuningFlashMemory>
+
+		xml.writeStartElement(TUNING_DATA);				// <TuningDataMemory>
+
+		xml.writeIntAttribute(TUNING_DATA_OFFSET_W, m_tuningDataOffsetW);
+		xml.writeIntAttribute(TUNING_DATA_SIZE_W, m_tuningDataSizeW);
+		xml.writeIntAttribute(TUNING_DATA_FRAME_COUNT, m_tuningDataFrameCount);
+		xml.writeIntAttribute(TUNING_DATA_FRAME_PAYLOAD_W, m_tuningDataFramePayloadW);
+		xml.writeIntAttribute(TUNING_DATA_FRAME_SIZE_W, m_tuningDataFrameSizeW);
+		xml.writeIntAttribute(TUNING_DATA_USED_FRAMES_COUNT, m_tuningDataUsedFramesCount);
+
+		xml.writeEndElement();							// </TuningDataMemory>
+
+		xml.writeStartElement(TUNING_DATA_ELEMENT);		// <TuningData>
 
 		xml.writeStringAttribute(LM_ID, m_lmEquipmentID);
 		xml.writeUInt64Attribute(UNIQUE_ID, m_uniqueID, true);
-		xml.writeIntAttribute(TUNING_FRAME_SIZE_BYTES, m_tuningFramePayloadBytes);
-		xml.writeIntAttribute(TUNING_FRAMES_COUNT, m_tuningFramesCount);
-		xml.writeIntAttribute(TUNING_USED_FRAMES_COUNT, m_usedFramesCount);
 
 		int signalCount = 0;
 
@@ -535,7 +593,7 @@ namespace  Tuning
 		const char* typeSection[TYPES_COUNT] =
 		{
 			TUNING_ANALOG_FLOAT_SIGNALS,
-			TUNING_ANALOG_INT_SIGNALS,
+			TUNING_ANALOG_INT32_SIGNALS,
 			TUNING_DISCRETE_SIGNALS
 		};
 
@@ -543,7 +601,8 @@ namespace  Tuning
 		{
 			QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
-			xml.writeStartElement(typeSection[type]);
+			xml.writeStartElement(typeSection[type]);	//	<typeSection[type]>
+
 			xml.writeIntAttribute(TUNING_SIGNALS_COUNT, tuningSignals.count());
 
 			for(Signal* signal : tuningSignals)
@@ -551,16 +610,47 @@ namespace  Tuning
 				signal->writeToXml(xml);
 			}
 
-			xml.writeEndElement();		//	</typeSection[type]>
+			xml.writeEndElement();						//	</typeSection[type]>
 		}
 
-		xml.writeEndElement();		//	</TUNING_DATA_ELEMENT>
+		xml.writeEndElement();							//	</ <TuningData>
 	}
 
 
 	bool TuningData::readFromXml(XmlReadHelper& xml)
 	{
 		bool result = true;
+
+		if (xml.findElement(TUNING_FLASH) == false)
+		{
+			return false;
+		}
+
+		result &= xml.readIntAttribute(TUNING_FLASH_FRAME_COUNT, &m_tuningFlashFrameCount);
+		result &= xml.readIntAttribute(TUNING_FLASH_FRAME_PAYLOAD_B, &m_tuningFlashFramePayloadB);
+		result &= xml.readIntAttribute(TUNING_FLASH_FRAME_SIZE_B, &m_tuningFlashFrameSizeB);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (xml.findElement(TUNING_DATA) == false)
+		{
+			return false;
+		}
+
+		result &= xml.readIntAttribute(TUNING_DATA_OFFSET_W, &m_tuningDataOffsetW);
+		result &= xml.readIntAttribute(TUNING_DATA_SIZE_W, &m_tuningDataSizeW);
+		result &= xml.readIntAttribute(TUNING_DATA_FRAME_COUNT, &m_tuningDataFrameCount);
+		result &= xml.readIntAttribute(TUNING_DATA_FRAME_PAYLOAD_W, &m_tuningDataFramePayloadW);
+		result &= xml.readIntAttribute(TUNING_DATA_FRAME_SIZE_W, &m_tuningDataFrameSizeW);
+		result &= xml.readIntAttribute(TUNING_DATA_USED_FRAMES_COUNT, &m_tuningDataUsedFramesCount);
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		if (xml.findElement(TUNING_DATA_ELEMENT) == false)
 		{
@@ -569,9 +659,6 @@ namespace  Tuning
 
 		result &= xml.readStringAttribute(LM_ID, &m_lmEquipmentID);
 		result &= xml.readUInt64Attribute(UNIQUE_ID, &m_uniqueID);
-		result &= xml.readIntAttribute(TUNING_FRAME_SIZE_BYTES, &m_tuningFramePayloadBytes);
-		result &= xml.readIntAttribute(TUNING_FRAMES_COUNT, &m_tuningFramesCount);
-		result &= xml.readIntAttribute(TUNING_USED_FRAMES_COUNT, &m_usedFramesCount);
 
 		int totalSignalsCount = 0;
 
@@ -582,7 +669,7 @@ namespace  Tuning
 		const char* typeSection[TYPES_COUNT] =
 		{
 			TUNING_ANALOG_FLOAT_SIGNALS,
-			TUNING_ANALOG_INT_SIGNALS,
+			TUNING_ANALOG_INT32_SIGNALS,
 			TUNING_DISCRETE_SIGNALS
 		};
 
@@ -706,7 +793,7 @@ namespace  Tuning
 		case TYPE_ANALOG_FLOAT:
 			return sizeof(float) * SIZE_8BIT;
 
-		case TYPE_ANALOG_INT:
+		case TYPE_ANALOG_INT32:
 			return sizeof(qint32) * SIZE_8BIT;
 
 		case TYPE_DISCRETE:
@@ -729,7 +816,7 @@ namespace  Tuning
 
 		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 		{
-			return TYPE_ANALOG_INT;
+			return TYPE_ANALOG_INT32;
 		}
 
 		if (signal->isDiscrete())

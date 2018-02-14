@@ -12,9 +12,24 @@ ALTER TABLE public.signalinstance ADD COLUMN archive boolean DEFAULT TRUE;
 
 -- Copy values from tuningdefaultdouble, tuninglowbounddouble, tuninghighbounddouble into new columns
 
-UPDATE public.signalinstance SET    tuningdefaultint = tuningdefaultdouble,
-                                    tuninglowboundint = tuninglowbounddouble,
-				    tuninghighboundint = tuninghighbounddouble WHERE signalinstance.enabletuning = TRUE;
+UPDATE public.signalinstance SET  tuningdefaultint = tuningdefaultdouble,
+                                  tuninglowboundint = lowengeneeringunits,
+				  tuninglowbounddouble = lowengeneeringunits,
+				  tuninghighboundint = highengeneeringunits,
+				  tuninghighbounddouble = highengeneeringunits
+				    WHERE signalinstanceid IN
+				        (SELECT signalinstanceid FROM signalinstance, signal WHERE
+					    signalinstance.signalid = signal.signalid AND signal.type = 0); -- E::SignalType::Analog
+
+UPDATE public.signalinstance SET  tuningdefaultint = tuningdefaultdouble,
+                                  tuninglowboundint = 0,
+				  tuninglowbounddouble = 0,
+				  tuninghighboundint = 1,
+				  tuninghighbounddouble = 1
+				    WHERE signalinstanceid IN
+				        (SELECT signalinstanceid FROM signalinstance, signal WHERE
+					    signalinstance.signalid = signal.signalid AND signal.type = 1); -- E::SignalType::Discrete
+
 
 -- Drop all stored procedures dependent from SignalData type
 

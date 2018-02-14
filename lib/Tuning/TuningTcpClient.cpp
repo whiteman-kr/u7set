@@ -645,7 +645,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 						int uncommentToControlIsActive = 1;
 
-						state.m_flags.controlIsEnabled = true;//ts.state.controlisactive();
+						state.m_flags.controlIsEnabled = ts.state.controlisactive();
 
 						m_signals->setState(signalHash, state);
 					}
@@ -804,7 +804,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		if (stateMessage.error() != 0)
 		{
-			assert(false);
+//			assert(false);
 			writeLogError(tr("TuningTcpClient::processReadTuningSignals, TuningSignalState error received: %1")
 						  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.error()))));
 
