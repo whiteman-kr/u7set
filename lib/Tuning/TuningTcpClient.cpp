@@ -591,9 +591,14 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			quint64 id = tss.sourceid();
 
+			if (tss.controlisactive() == true)
+			{
+				qDebug() <<  id;
+			}
+
 			bool found = false;
 
-			for (auto it : m_tuningSources)
+			for (auto& it : m_tuningSources)
 			{
 				Hash tsHash = it.first;
 				TuningSource& ts = it.second;
@@ -642,8 +647,6 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 						{
 							continue;
 						}
-
-						int uncommentToControlIsActive = 1;
 
 						state.m_flags.controlIsEnabled = ts.state.controlisactive();
 
@@ -802,11 +805,13 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 	{
 		const ::Network::TuningSignalState& stateMessage = m_readTuningSignalsReply.tuningsignalstate(i);
 
-		if (stateMessage.error() != 0)
+		NetworkError error = static_cast<NetworkError>(stateMessage.error());
+
+		if (error != NetworkError::Success && error != NetworkError::ControlIsNotActive)
 		{
 //			assert(false);
 			writeLogError(tr("TuningTcpClient::processReadTuningSignals, TuningSignalState error received: %1")
-						  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.error()))));
+						  .arg(networkErrorStr(error)));
 
 			continue;
 		}
