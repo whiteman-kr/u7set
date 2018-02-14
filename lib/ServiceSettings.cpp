@@ -370,7 +370,11 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 
 			result &= DeviceHelper::getStrProperty(tuningClient, "TuningSourceEquipmentID", &sourcesIDs, log);
 
-			tc.sourcesIDs = sourcesIDs.split("\n", QString::SkipEmptyParts);
+			sourcesIDs.replace(' ', ';');
+			sourcesIDs.replace('\n', ';');
+			sourcesIDs.remove('\r');
+
+			tc.sourcesIDs = sourcesIDs.split(";", QString::SkipEmptyParts);
 
 			for (QString& id : tc.sourcesIDs)
 			{

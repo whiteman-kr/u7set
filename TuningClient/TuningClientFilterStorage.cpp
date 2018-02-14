@@ -6,45 +6,6 @@ TuningClientFilterStorage::TuningClientFilterStorage()
 
 }
 
-bool TuningClientFilterStorage::loadSchemasDetails(const QByteArray& data, QString* errorCode)
-{
-	if (errorCode == nullptr)
-	{
-		assert(errorCode);
-		return false;
-	}
-
-	m_schemasDetails.clear();
-
-	VFrame30::SchemaDetailsSet detailsSet;
-
-	if (detailsSet.Load(data) == false)
-	{
-		*errorCode = QObject::tr("Failed to parse SchemaDetailsSet.");
-		return false;
-	}
-
-	m_schemasDetails = detailsSet.schemasDetails();
-
-	return true;
-
-}
-
-int TuningClientFilterStorage::schemaDetailsCount()
-{
-	return static_cast<int>(m_schemasDetails.size());
-}
-
-VFrame30::SchemaDetails  TuningClientFilterStorage::schemaDetails(int index)
-{
-	if (index < 0 || index >= m_schemasDetails.size())
-	{
-		assert(false);
-		return VFrame30::SchemaDetails();
-	}
-	return m_schemasDetails[index];
-}
-
 void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter)
 {
 	if (objects == nullptr)
@@ -249,95 +210,9 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 	}
 }
 
-void TuningClientFilterStorage::createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, bool discreteCounters, const QStringList& tuningSourcesEquipmentIds)
-{
-	if (objects == nullptr)
-	{
-		assert(objects);
-		return;
-	}
-
-	if (bySchemas == true)
-	{
-		m_root->removeChild("%AUTOFILTER%_SCHEMA");
-
-		// Filter for Schema
-		//
-		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-		ofSchema->setID("%AUTOFILTER%_SCHEMA");
-		ofSchema->setCaption(QObject::tr("Schemas"));
-		ofSchema->setSource(TuningFilter::Source::Schema);
-
-		for (const VFrame30::SchemaDetails& schemasDetails : m_schemasDetails)
-		{
-			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-			for (const QString& appSignalID : schemasDetails.m_signals)
-			{
-				// find if this signal is a tuning signal
-				//
-				Hash hash = ::calcHash(appSignalID);
-
-				if (objects->signalExists(hash) == false)
-				{
-					continue;
-				}
-
-				TuningFilterValue ofv;
-				ofv.setAppSignalId(appSignalID);
-				ofTs->addValue(ofv);
-			}
-
-			if (ofTs->valuesCount() == 0)
-			{
-				// Do not add empty filters
-				//
-				continue;
-			}
-
-			ofTs->setID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_schemaId);
-
-			//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
-			ofTs->setCaption(schemasDetails.m_caption);
-			ofTs->setSource(TuningFilter::Source::Schema);
-			ofTs->setHasDiscreteCounter(discreteCounters);
-
-			ofSchema->addChild(ofTs);
-		}
-
-		m_root->addTopChild(ofSchema);
-	}
-
-	if (byEquipment == true)
-	{
-		m_root->removeChild("%AUTOFILTER%_EQUIPMENT");
-
-		// Filter for EquipmentId
-		//
-		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-		ofEquipment->setID("%AUTOFILTER%_EQUIPMENT");
-		ofEquipment->setCaption(QObject::tr("Equipment"));
-		ofEquipment->setSource(TuningFilter::Source::Equipment);
-
-		for (const QString& ts : tuningSourcesEquipmentIds)
-		{
-			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-			ofTs->setEquipmentIDMask(ts);
-			ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
-			ofTs->setCaption(ts);
-			ofTs->setSource(TuningFilter::Source::Equipment);
-			ofTs->setHasDiscreteCounter(discreteCounters);
-
-			ofEquipment->addChild(ofTs);
-		}
-
-		m_root->addTopChild(ofEquipment);
-	}
-}
-
 void TuningClientFilterStorage::removeFilters(TuningFilter::Source sourceType)
 {
 	m_root->removeChildren(sourceType);
-
 }
 
 void TuningClientFilterStorage::writeLogError(const QString& message)

@@ -229,26 +229,62 @@ void TuningWorkspace::updateFiltersTree()
 		connect(m_filterTree, &QTreeWidget::currentItemChanged, this, &TuningWorkspace::slot_currentTreeItemChanged);
 		connect(m_filterTree, &QWidget::customContextMenuRequested, this, &TuningWorkspace::slot_treeContextMenuRequested);
 
+		int columnIndex = columnNameIndex;
+
 		QStringList headerLabels;
+
 		headerLabels << tr("Caption");
-		headerLabels << tr("Discretes");
+		columnIndex++;
+
+		if (theConfigSettings.showDiscreteCounters == true)
+		{
+			headerLabels << tr("Discretes");
+			columnDiscreteCountIndex = columnIndex;
+			columnIndex++;
+		}
+
 		headerLabels << tr("Status");
+		columnStatusIndex = columnIndex;
+		columnIndex++;
+
 		if (theConfigSettings.showSOR == true)
 		{
 			headerLabels << tr("SOR");
+			columnSorIndex = columnIndex;
+			columnIndex++;
 		}
+
 		headerLabels << tr("");
 
 		m_filterTree->setColumnCount(headerLabels.size());
 		m_filterTree->setHeaderLabels(headerLabels);
 
-		m_filterTree->setColumnWidth(columnName, 200);
-		m_filterTree->setColumnWidth(columnDiscreteCountIndex, 60);
-		m_filterTree->setColumnWidth(columnStatusIndex, 60);
-		if (theConfigSettings.showSOR == true)
+		// Set column width
+
+
+		if (columnNameIndex != -1)
+		{
+			m_filterTree->setColumnWidth(columnNameIndex, 200);
+		}
+		if (columnDiscreteCountIndex != -1)
+		{
+			m_filterTree->setColumnWidth(columnDiscreteCountIndex, 60);
+		}
+		if (columnStatusIndex != -1)
+		{
+			m_filterTree->setColumnWidth(columnStatusIndex, 60);
+		}
+		if (columnSorIndex != -1)
 		{
 			m_filterTree->setColumnWidth(columnSorIndex, 60);
 		}
+
+
+		if (theConfigSettings.showSOR == true)
+		{
+		}
+
+		//
 
 		m_treeMask = new QLineEdit();
 		connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
@@ -763,7 +799,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		// Counters column
 
-		if (theConfigSettings.showDiscreteCounters == true && filter->hasDiscreteCounter() == true)
+		if (columnDiscreteCountIndex != -1 && theConfigSettings.showDiscreteCounters == true && filter->hasDiscreteCounter() == true)
 		{
 			treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
 		}
@@ -776,6 +812,8 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 		}
 		else
 		{
+			assert(columnStatusIndex != -1);
+
 			if (counters.errorCounter == 0)
 			{
 				treeItem->setText(columnStatusIndex, QString());
@@ -792,7 +830,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		// SOR Column
 
-		if (theConfigSettings.showSOR == true)
+		if (columnSorIndex != -1 && theConfigSettings.showSOR == true)
 		{
 			treeItem->setText(columnSorIndex, QString("%1").arg(counters.sorCounter));
 
@@ -824,6 +862,8 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	int sorCount = 0;
 
 	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
+
+	assert(columnStatusIndex != -1);
 
 	if (m_tuningTcpClient->tuningSourceStatus(hash, &errorsCount, &sorCount, &state) == false)
 	{

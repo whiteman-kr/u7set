@@ -9,12 +9,6 @@ class TuningClientFilterStorage : public TuningFilterStorage
 public:
 	TuningClientFilterStorage();
 
-	// Schemas loading
-
-	bool loadSchemasDetails(const QByteArray& data, QString* errorCode);
-	int schemaDetailsCount();
-	VFrame30::SchemaDetails schemaDetails(int index);
-
 	// Operations
 
 	void createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter = nullptr);
@@ -22,8 +16,6 @@ public:
 	void checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget);
 
 	void updateCounters(const TuningSignalManager* objects, const TuningClientTcpClient* tcpClient, TuningFilter* filter = nullptr);
-
-	void createAutomaticFilters(const TuningSignalManager* objects, bool bySchemas, bool byEquipment, bool discreteCounters, const QStringList& tuningSourcesEquipmentIds);
 
 	void removeFilters(TuningFilter::Source sourceType);
 

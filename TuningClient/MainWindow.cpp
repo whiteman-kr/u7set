@@ -67,7 +67,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	connect(&m_configController, &ConfigController::tcpClientConfigurationArrived, m_tcpClient, &TuningClientTcpClient::slot_configurationArrived);
 
 	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
-	connect(&m_configController, &ConfigController::schemasDetailsArrived, this, &MainWindow::slot_schemasDetailsUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 
@@ -257,8 +256,6 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	//
 	if  (event->timerId() == m_mainWindowTimerId_250ms)
 	{
-		//theLogFile->writeMessage("Timer");
-
 		if (theSharedMemorySingleApp != nullptr)
 		{
 			bool ok = theSharedMemorySingleApp->lock();
@@ -316,17 +313,6 @@ void MainWindow::createWorkspace()
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
 	}
-
-	// Update automatic filters
-
-	m_filterStorage.removeFilters(TuningFilter::Source::Schema);
-	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
-
-	m_filterStorage.createAutomaticFilters(&m_tuningSignalManager,
-										   theConfigSettings.filterBySchema,
-										   theConfigSettings.filterByEquipment,
-										   theConfigSettings.showDiscreteCounters,
-										   theConfigSettings.equipmentList);
 
 	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager);
 
@@ -504,9 +490,7 @@ void MainWindow::updateStatusBar()
 
 	if (theConfigSettings.showDiscreteCounters == true)
 	{
-		assert(m_statusDiscreteCount);
-
-		if (m_discreteCounter != m_filterStorage.root()->counters().discreteCounter)
+		if (m_discreteCounter != m_filterStorage.root()->counters().discreteCounter || m_statusDiscreteCount->text().isEmpty() == true)
 		{
 			m_discreteCounter = m_filterStorage.root()->counters().discreteCounter;
 
@@ -522,13 +506,17 @@ void MainWindow::updateStatusBar()
 			}
 		}
 	}
+	else
+	{
+		m_statusDiscreteCount->setText(QString());
+	}
 
 	std::vector<Hash> sources = m_tcpClient->tuningSourcesEquipmentHashes();
 
 	if (sources.empty() == true)
 	{
 		m_statusBarLmErrors->setText(tr(" No LM information"));
-		m_statusBarSor->setText(tr(" No SOR information"));
+		m_statusBarSor->setText(QString());
 	}
 	else
 	{
@@ -571,22 +559,29 @@ void MainWindow::updateStatusBar()
 
 		// Sor tool
 
-		if (m_sorCounter != totalSorCount)
+		if (theConfigSettings.showSOR == true)
 		{
-			m_sorCounter = totalSorCount;
-
-			assert(m_statusBarSor);
-
-			m_statusBarSor->setText(QString(" SOR: %1").arg(totalSorCount));
-
-			if (totalSorCount == 0)
+			if (m_sorCounter != totalSorCount || m_statusBarSor->text().isEmpty() == true)
 			{
-				m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+				m_sorCounter = totalSorCount;
+
+				assert(m_statusBarSor);
+
+				m_statusBarSor->setText(QString(" SOR: %1").arg(totalSorCount));
+
+				if (totalSorCount == 0)
+				{
+					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+				}
+				else
+				{
+					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+				}
 			}
-			else
-			{
-				m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
-			}
+		}
+		else
+		{
+			m_statusBarSor->setText(QString());
 		}
 	}
 
@@ -625,6 +620,8 @@ void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 
 
 	m_filterStorage.removeFilters(TuningFilter::Source::Project);
+	m_filterStorage.removeFilters(TuningFilter::Source::Schema);
+	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
 
 	if (m_filterStorage.load(data, &errorStr) == false)
 	{
@@ -632,17 +629,6 @@ void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 		theLogFile->writeError(completeErrorMessage);
 	}
 
-}
-
-void MainWindow::slot_schemasDetailsUpdated(QByteArray data)
-{
-	QString errorStr;
-
-	if (m_filterStorage.loadSchemasDetails(data, &errorStr) == false)
-	{
-		QString completeErrorMessage = QObject::tr("Schemas Details file loading error: %1").arg(errorStr);
-		theLogFile->writeError(completeErrorMessage);
-	}
 }
 
 void MainWindow::slot_signalsUpdated(QByteArray data)

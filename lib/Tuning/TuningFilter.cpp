@@ -448,14 +448,6 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 				return true;
 			}
 		}
-		else
-		{
-			if (source() == Source::Equipment || source() == Source::Schema)
-			{
-				return true;
-			}
-
-		}
 
 		if (isTree() == true)
 		{
@@ -1308,6 +1300,29 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
     return !reader.hasError();
 }
 
+bool TuningFilterStorage::save(QByteArray& data)
+{
+	QXmlStreamWriter writer(&data);
+
+	writer.setCodec("UTF-8");
+
+	writer.setAutoFormatting(true);
+
+	writer.writeStartDocument();
+
+	writer.writeStartElement("ObjectFilterStorage");
+
+	m_root->save(writer, false, TuningFilter::Source::Project/*Not used!*/);
+
+	writer.writeEndElement();
+
+	writer.writeEndElement();	// ObjectFilterStorage
+
+	writer.writeEndDocument();
+
+	return true;
+}
+
 bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSourceType)
 {
     QXmlStreamWriter writer(&data);
@@ -1315,7 +1330,8 @@ bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSource
 	writer.setCodec("UTF-8");
 
     writer.setAutoFormatting(true);
-    writer.writeStartDocument();
+
+	writer.writeStartDocument();
 
     writer.writeStartElement("ObjectFilterStorage");
 
@@ -1328,7 +1344,6 @@ bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSource
     writer.writeEndDocument();
 
     return true;
-
 }
 
 bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType)
@@ -1420,6 +1435,18 @@ std::shared_ptr<TuningFilter> TuningFilterStorage::pasteFromClipboard()
 	}
 
 	return clipboardStorage.m_root;
+}
+
+void TuningFilterStorage::add(std::shared_ptr<TuningFilter> filter, bool moveToTop)
+{
+	if (moveToTop == true)
+	{
+		m_root->addTopChild(filter);
+	}
+	else
+	{
+		m_root->addChild(filter);
+	}
 }
 
 void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters)
