@@ -4944,6 +4944,26 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5136
+	///
+	/// IssueType: Error
+	///
+	/// Title: The input (or output) signal %1 can be bind to Equipment Signal only.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		The signal bind to uncorrect equipment. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5136(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5136,
+				  QString(tr("The input (or output) signal %1 can be bind to Equipment Signal only.").
+						  arg(appSignalID)));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

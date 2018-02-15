@@ -323,6 +323,7 @@ namespace Builder
 		void errALC5133(QString signalEquipmentID, QUuid ualItemUuid, QString itemLabel, QString schemaID);			// Signal with equipmentID %1 is not found (Logic schema %2, item %3).
 		void errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Integer constant value out of range (Logic schema %1, item %2)
 		void errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Float constant value out of range (Logic schema %1, item %2)
+		void errALC5136(QString appSignalID);											// The input (or output) signal %1 can be bind to Equipment Signal only.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
