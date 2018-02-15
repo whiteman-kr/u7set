@@ -32,6 +32,7 @@ public:
 	explicit SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
 
 	bool isEditedSignal(int id) { return m_editedSignalsId.contains(id); }
+	bool hasEditedSignals() { return m_editedSignalsId.isEmpty() == false; }
 
 signals:
 	void signalChanged(int id, bool updateView);
