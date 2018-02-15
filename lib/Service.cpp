@@ -647,7 +647,6 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 	}
 }
 
-
 int ServiceStarter::runAsRegularApplication()
 {
 	KeyReaderThread* keyReaderThread = new KeyReaderThread();
@@ -671,7 +670,6 @@ int ServiceStarter::runAsRegularApplication()
 
 	return result;
 }
-
 
 void ServiceStarter::KeyReaderThread::run()
 {

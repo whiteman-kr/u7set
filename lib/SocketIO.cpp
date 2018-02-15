@@ -122,7 +122,7 @@ quint32 CRC32(quint32 initialValue, int value, bool finishCalc)
 	return CRC32(initialValue, reinterpret_cast<const char*>(&value), sizeof(value), finishCalc);
 }
 
-
+/*
 char* Serializable::serializeVersion(char *buffer, bool write)
 {
 	if (write)
@@ -183,7 +183,7 @@ void Serializable::copyBufferToString(const quint16* buffer, QString &str)
 
 	str = QString(reinterpret_cast<const QChar*>(buffer));
 }
-
+*/
 
 QString getNetworkErrorStr(NetworkError err)
 {
@@ -218,6 +218,18 @@ QString getNetworkErrorStr(NetworkError err)
 
 	case NetworkError::InternalError:
 		return QString("NetworkError::InternalError");
+
+	case NetworkError::ArchiveError:
+		return QString("NetworkError::ArchiveError");
+
+	case NetworkError::WrongTuningValueType:
+		return QString("NetworkError::WrongTuningValueType");
+
+	case NetworkError::SingleLmControlDisabled:
+		return QString("NetworkError::SingleLmControlDisabled");
+
+	case NetworkError::ControlIsNotActive:
+		return QString("NetworkError::ControlIsNotActive");
 
 	default:
 		assert(false);			// unknown err value

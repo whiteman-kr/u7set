@@ -90,11 +90,10 @@ public:
 	//
 	std::vector<Hash> tuningSourcesEquipmentHashes() const;
 	std::vector<TuningSource> tuningSourcesInfo() const;
-	bool tuningSourceInfoById(quint64 id, TuningSource* result) const;
-	bool tuningSourceInfoByHash(Hash equipmentHash, TuningSource* result) const;
+	bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
 
-	bool tuningSourceCounters(const Hash& equipmentHash, int& errorsCount, int& sorCount) const;
-	bool tuningSourceStatus(const Hash& equipmentHash, int& errorsCount, int& sorCount, QString* status) const;
+	bool tuningSourceCounters(Hash equipmentHash, int* errorsCount, int* sorCount) const;
+	bool tuningSourceStatus(Hash equipmentHash, int* errorsCount, int* sorCount, QString* status) const;
 
 	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl);
 
@@ -182,6 +181,7 @@ public:
 	//
 private:
 	QString m_instanceId;
+	Hash m_instanceIdHash;
 	int m_requestInterval = 100;
 	bool m_autoApply = true;
 
@@ -190,9 +190,8 @@ private:
 protected:
 	// Tuning sources
 	//
-	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources, m_tuningSourcesIdToHashMap, m_equipmentToSignalMap
+	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources, m_equipmentToSignalMap
 	std::map<Hash, TuningSource> m_tuningSources;		// Key is hash of EquipmentID
-	std::map<quint64, Hash> m_tuningSourcesIdToHashMap;	// Key is id of TuningSource, value is hash of EquipmentID
 
 	std::multimap<Hash, Hash> m_equipmentToSignalMap;	// Key is hash of EquipmentID, values are hashes of signals
 

@@ -8,11 +8,6 @@ namespace Tuning
 
 	class TuningSource : public DataSource
 	{
-	private:
-		TuningData* m_tuningData = nullptr;
-
-		bool m_deleteTuningData = false;
-
 	public:
 		TuningSource();
 		~TuningSource();
@@ -22,13 +17,16 @@ namespace Tuning
 
 		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
+
+	private:
+		TuningData* m_tuningData = nullptr;
+
+		bool m_deleteTuningData = false;
 	};
 
 
 	class TuningSources : public QHash<QString, TuningSource*>
 	{
-		QHash<quint32, TuningSource*> m_ip2Source;
-
 	public:
 		~TuningSources();
 
@@ -38,6 +36,8 @@ namespace Tuning
 
 		const TuningSource* getSourceByIP(quint32 ip) const;
 		const TuningSource *getSourceByID(const QString& sourceID) const;
-	};
 
+	private:
+		QHash<quint32, TuningSource*> m_ip2Source;
+	};
 }

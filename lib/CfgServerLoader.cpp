@@ -135,7 +135,6 @@ bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
 {
 	if (m_buildFileInfo.contains(pathFileName) == false)
 	{
-		assert(false);
 		return false;
 	}
 

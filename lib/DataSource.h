@@ -26,41 +26,6 @@ struct RupData
 };
 
 
-// RQID_GET_DATA_SOURCES_INFO request data format
-//
-const int DATA_SOURCE_NAME_LEN = 32;
-
-struct DataSourceInfo : public Serializable
-{
-	quint32 ID;
-	quint16 name[DATA_SOURCE_NAME_LEN];
-	quint32 ip;
-	quint32 partCount;
-
-	DataSourceInfo() : Serializable(1) {}
-
-protected:
-	virtual char *serialize(char *buffer, bool write) override;
-};
-
-
-// RQID_GET_DATA_SOURCES_STATISTICS request data format
-//
-struct DataSourceStatistics : public Serializable
-{
-	quint32 ID;
-	quint32 state;
-	quint64 uptime;
-	quint64 receivedDataSize;
-	double dataReceivingRate;
-
-	DataSourceStatistics() : Serializable(1) {}
-
-protected:
-	virtual char *serialize(char *buffer, bool write) override;
-};
-
-
 class DataSource : public QObject
 {
 public:
@@ -168,10 +133,6 @@ public:
 	DataSource();
 	~DataSource();
 
-//	DataSource(quint32 id, QString name, QHostAddress hostAddress, quint32 partCount);
-//	DataSource(const DataSource& ds);
-//	DataSource& operator = (const DataSource& ds);
-
 	int lmChannel() const { return m_lmChannel; }
 	void setLmChannel(int channel) { m_lmChannel = channel; }
 
@@ -247,12 +208,6 @@ public:
 
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
-
-	void getInfo(DataSourceInfo& dsi);
-	void setInfo(const DataSourceInfo& dsi);
-
-	void getStatistics(DataSourceStatistics& dss);
-	void setStatistics(const DataSourceStatistics& dss);
 
 	void stop();
 	void resume();

@@ -407,13 +407,13 @@ message TuningSignalsReadReply
 message TuningWriteCommand
 {
     optional uint64 signalHash = 1 [default = 0];
-        optional Proto.TuningValue value = 2;
+    optional Proto.TuningValue value = 2;
 }
 
 message TuningSignalsWrite
 {
     optional bool autoApply = 2 [default = false];
-	repeated TuningWriteCommand commands = 3;
+    repeated TuningWriteCommand commands = 3;
 }
 
 message TuningSignalWriteResult

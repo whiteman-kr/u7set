@@ -271,6 +271,7 @@ public:
 	bool load(const QByteArray& data, QString* errorCode);
 	bool load(const QString& fileName, QString* errorCode);
 
+	bool save(QByteArray& data);
 	bool save(QByteArray& data, TuningFilter::Source saveSourceType);
 	bool save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType);
 
@@ -278,6 +279,8 @@ public:
 	std::shared_ptr<TuningFilter> pasteFromClipboard();
 
 	// Operation
+
+	void add(std::shared_ptr<TuningFilter> filter, bool moveToTop);
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 

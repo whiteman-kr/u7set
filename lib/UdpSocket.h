@@ -27,6 +27,17 @@ class UdpServerSocket;
 //
 // -------------------------------------------------------------------
 
+struct RequestHeader
+{
+	quint32 id;
+	quint32 clientID;
+	quint32 version;
+	quint32 no;
+	quint32 errorCode;
+	quint32 dataSize;
+};
+
+
 class UdpRequest
 {
 private:
@@ -104,7 +115,6 @@ public:
 	bool writeData(const char* data, quint32 dataSize);
 	bool writeData(const QByteArray& data);
 	bool writeData(google::protobuf::Message& protobufMessage);
-	bool writeStruct(Serializable *s);
 	bool writeStruct(const JsonSerializable& s);
 
 	void initRead()
@@ -113,7 +123,6 @@ public:
 	}
 
 	quint32 readDword();
-	void readStruct(Serializable* s);
 	bool readStruct(JsonSerializable* s);
 };
 

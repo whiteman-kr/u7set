@@ -12,7 +12,6 @@
 
 const int MAX_DATAGRAM_SIZE = 4096;
 
-
 const quint16   PORT_BASE_SERVICE = 13300,
 
 				PORT_CONFIGURATION_SERVICE = 13310,
@@ -39,10 +38,6 @@ const quint16   PORT_BASE_SERVICE = 13300,
 				PORT_DIAG_DATA_SERVICE_DATA = 13352,				// port receiving diagnostics data from LM's
 				PORT_DIAG_DATA_SERVICE_CLIENT_REQUEST = 13353;
 
-
-const quint16	PORT_DATA_AQUISITION = 13400;
-
-
 // All services request IDs
 //
 const quint32   RQID_SERVICE_GET_INFO = 1000,
@@ -53,163 +48,12 @@ const quint32   RQID_SERVICE_GET_INFO = 1000,
 				RQID_SERVICE_STOP = 1101,
 				RQID_SERVICE_RESTART = 1102,
 
-				RQID_SERVICE_GET_SETTINGS = 1103,
-				RQID_SERVICE_SET_SETTINGS = 1104,
-
-				RQID_GET_CLIENT_LIST = 1105,
-
-				RQID_SEND_FILE_START = 1200,
-				RQID_SEND_FILE_NEXT = 1201;
-
-
-// DataAcquisitionService specific request IDs
-//
-const quint32	RQID_GET_DATA_SOURCES_IDS = 1250,
-				RQID_GET_DATA_SOURCES_INFO = 1251,
-				RQID_GET_DATA_SOURCES_STATISTICS = 1252;
-
-
-// ConfigurationService specific request IDs
-//
-const quint32	RQID_GET_CONFIGURATION_SERVICE_STATE = 1300,
-				RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST = 1301,
-				RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO = 1302,
-				RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1303,
-				RQID_GET_CONFIGURATION_SERVICE_LOG = 1304;	// Could be couple diferent queries
-
+				RQID_GET_CLIENT_LIST = 1105;
 
 // Request error codes
 //
 const quint32	RQERROR_OK = 0,
-				RQERROR_UNKNOWN_REQUEST = 1,
-				RQERROR_UNKNOWN_FILE_ID = 2,
-				RQERROR_RECEIVE_FILE = 3,				// file receive error on receiver side
-				RQERROR_TIMEOUT = 4;					// request ack timeout
-
-
-
-#pragma pack(push, 1)
-
-
-struct RequestHeader
-{
-	quint32 id;
-	quint32 clientID;
-	quint32 version;
-	quint32 no;
-	quint32 errorCode;
-	quint32 dataSize;
-};
-
-
-
-struct ServiceSettings
-{
-	quint32 cfgServiceIPAddress;
-	quint32 cfgServicePort;
-	char serviceStrID[256];
-};
-
-/*
-enum class ServiceType
-{
-	BaseService,
-	ConfigurationService,
-	AppDataService,
-	TuningService,
-	ArchivingService,
-	DiagDataService
-};
-*/
-
-enum ServiceState
-{
-	Stopped,
-	Starts,
-	Work,
-	Stops,
-
-	Undefined,			// this states used by 'Service Control Manager' only
-	Unavailable,
-};
-
-
-// RQID_SEND_FILE_START request data format
-//
-struct SendFileStart
-{
-	ushort fileName[64];				// unicode 0-terminated string
-	quint32 fileSize;
-};
-
-
-// RQID_SEND_FILE_NEXT request data format
-//
-const int SEND_FILE_DATA_SIZE = MAX_DATAGRAM_SIZE - sizeof(RequestHeader) - 5 * sizeof(quint32);
-
-const int SEND_FILE_MAX_SIZE = 1024 * 1024 * 10;	// max file - 10 MBytes
-
-
-struct SendFileNext
-{
-	quint32 fileID;
-	quint32 partNo;
-	quint32 partCount;
-	quint32 dataSize;
-	quint32 CRC32;
-
-	char data[SEND_FILE_DATA_SIZE];
-};
-
-
-// Serialization framework
-//
-#define BEGIN_SERIALIZATION() char* _ptr = buffer;
-
-#define SERIALIZE_VAR(variable_type, variable) { if (write) { *((variable_type*)_ptr) = variable; } else { variable = *((variable_type*)_ptr);} _ptr += sizeof(variable_type); }
-
-#define SERIALIZE_ARRAY(variable_type, variable, len) { if (write) { memcpy(_ptr, variable, sizeof(variable_type)*len); } else { memcpy(variable, _ptr, sizeof(variable_type)*len);} _ptr += sizeof(variable_type)*len; }
-
-#define END_SERIALIZATION() if (write) { *(buffer - sizeof(quint16)) = addSize(_ptr - buffer); } else { Q_ASSERT(_ptr - buffer == userDataSize()); _ptr = buffer + userDataSize(); } return _ptr;
-
-
-struct Serializable
-{
-	Serializable(quint16 version) :
-		m_structureVersion(version),
-		m_structureSize(0) {}
-
-	char* serializeTo(char* buffer)
-	{
-		return serialize(serializeVersion(buffer, true), true);
-	}
-
-	char* serializeFrom(char* buffer)
-	{
-		return serialize(serializeVersion(buffer, false), false);
-	}
-
-	quint16 version() { return m_structureVersion; }
-	quint16 size() { return m_structureSize; }
-	quint16 userDataSize() { return m_structureSize - sizeof(quint16) * 2; }
-
-	static void copyStringToBuffer(const QString& str, quint16* buffer, quint32 bufferSize);
-	static void copyBufferToString(const quint16* buffer, QString& str);
-
-private:
-	quint16 m_structureVersion;
-	quint16 m_structureSize;			// full size of structure derived from Serializable,
-										// = sizeof(m_structureVersion & m_structureSize fields) + sizeof(user data)
-
-	char* serializeVersion(char* buffer, bool write);
-
-protected:
-	virtual char* serialize(char* buffer, bool write) = 0;
-	void setSize(quint16 size) { m_structureSize = size; }
-	quint16 addSize(quint16 size) { return (m_structureSize += size); }
-};
-
-#pragma pack(pop)
+				RQERROR_UNKNOWN_REQUEST = 1;
 
 
 // --------------------------- Data structs used for parsing "Radiy" platform packets ------------------------
@@ -317,6 +161,15 @@ quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc);
 
 quint32 CRC32(quint32 initialValue, int value, bool finishCalc);
 
+// ConfigurationService specific request IDs
+//
+const quint32	CFGS_GET_SERVICE_STATE = 0x1100,
+				CFGS_GET_CLIENT_LIST = 0x1101,
+				CFGS_GET_LOADED_BUILD_INFO = 0x1102,
+				CFGS_GET_SETTINGS = 0x1103,
+				CFGS_GET_LOG = 0x1104;						// Could be couple diferent queries
+
+
 // AppSignal Param/State Communication, Port PORT_APP_DATA_SERVICE_CLIENT_REQUEST
 //
 const quint32 ADS_GET_APP_SIGNAL_LIST_START = 0x1200;
@@ -377,7 +230,6 @@ const int ADS_GET_DATA_UNITS_MAX = 1000;
 const quint32 ADS_GET_STATE = 0x1600;
 const quint32 ADS_GET_SETTINGS = 0x1800;
 
-
 enum class NetworkError
 {
 	Success,
@@ -392,7 +244,8 @@ enum class NetworkError
 	InternalError,
 	ArchiveError,								// for detail information check archError field
 	WrongTuningValueType,
-	SingleLmControlDisabled
+	SingleLmControlDisabled,
+	ControlIsNotActive
 };
 
 enum class ArchiveError

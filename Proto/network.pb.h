@@ -62,6 +62,7 @@ class ServiceClientInfo;
 class ServiceClients;
 class BuildInfo;
 class ConfigurationServiceSettings;
+class ServiceSettings;
 class GetTuningSourcesInfo;
 class GetTuningSourcesInfoReply;
 class GetTuningSourcesStates;
@@ -2070,17 +2071,12 @@ class AppDataServiceState : public ::google::protobuf::Message {
   inline bool cfgserviceisconnected() const;
   inline void set_cfgserviceisconnected(bool value);
 
-  // optional string CfgServiceIp = 2;
+  // optional uint32 CfgServiceIp = 2;
   inline bool has_cfgserviceip() const;
   inline void clear_cfgserviceip();
   static const int kCfgServiceIpFieldNumber = 2;
-  inline const ::std::string& cfgserviceip() const;
-  inline void set_cfgserviceip(const ::std::string& value);
-  inline void set_cfgserviceip(const char* value);
-  inline void set_cfgserviceip(const char* value, size_t size);
-  inline ::std::string* mutable_cfgserviceip();
-  inline ::std::string* release_cfgserviceip();
-  inline void set_allocated_cfgserviceip(::std::string* cfgserviceip);
+  inline ::google::protobuf::uint32 cfgserviceip() const;
+  inline void set_cfgserviceip(::google::protobuf::uint32 value);
 
   // optional int32 CfgServicePort = 3;
   inline bool has_cfgserviceport() const;
@@ -2096,17 +2092,12 @@ class AppDataServiceState : public ::google::protobuf::Message {
   inline bool archiveserviceisconnected() const;
   inline void set_archiveserviceisconnected(bool value);
 
-  // optional string ArchiveServiceIp = 5;
+  // optional uint32 ArchiveServiceIp = 5;
   inline bool has_archiveserviceip() const;
   inline void clear_archiveserviceip();
   static const int kArchiveServiceIpFieldNumber = 5;
-  inline const ::std::string& archiveserviceip() const;
-  inline void set_archiveserviceip(const ::std::string& value);
-  inline void set_archiveserviceip(const char* value);
-  inline void set_archiveserviceip(const char* value, size_t size);
-  inline ::std::string* mutable_archiveserviceip();
-  inline ::std::string* release_archiveserviceip();
-  inline void set_allocated_archiveserviceip(::std::string* archiveserviceip);
+  inline ::google::protobuf::uint32 archiveserviceip() const;
+  inline void set_archiveserviceip(::google::protobuf::uint32 value);
 
   // optional int32 ArchiveServicePort = 6;
   inline bool has_archiveserviceport() const;
@@ -2132,11 +2123,11 @@ class AppDataServiceState : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* cfgserviceip_;
+  ::google::protobuf::uint32 cfgserviceip_;
   bool cfgserviceisconnected_;
   bool archiveserviceisconnected_;
   ::google::protobuf::int32 cfgserviceport_;
-  ::std::string* archiveserviceip_;
+  ::google::protobuf::uint32 archiveserviceip_;
   ::google::protobuf::int32 archiveserviceport_;
 
   mutable int _cached_size_;
@@ -3230,6 +3221,123 @@ class ConfigurationServiceSettings : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static ConfigurationServiceSettings* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ServiceSettings : public ::google::protobuf::Message {
+ public:
+  ServiceSettings();
+  virtual ~ServiceSettings();
+
+  ServiceSettings(const ServiceSettings& from);
+
+  inline ServiceSettings& operator=(const ServiceSettings& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ServiceSettings& default_instance();
+
+  void Swap(ServiceSettings* other);
+
+  // implements Message ----------------------------------------------
+
+  ServiceSettings* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ServiceSettings& from);
+  void MergeFrom(const ServiceSettings& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string equipmentID = 1;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIDFieldNumber = 1;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // required string configIP1 = 2;
+  inline bool has_configip1() const;
+  inline void clear_configip1();
+  static const int kConfigIP1FieldNumber = 2;
+  inline const ::std::string& configip1() const;
+  inline void set_configip1(const ::std::string& value);
+  inline void set_configip1(const char* value);
+  inline void set_configip1(const char* value, size_t size);
+  inline ::std::string* mutable_configip1();
+  inline ::std::string* release_configip1();
+  inline void set_allocated_configip1(::std::string* configip1);
+
+  // required string configIP2 = 3;
+  inline bool has_configip2() const;
+  inline void clear_configip2();
+  static const int kConfigIP2FieldNumber = 3;
+  inline const ::std::string& configip2() const;
+  inline void set_configip2(const ::std::string& value);
+  inline void set_configip2(const char* value);
+  inline void set_configip2(const char* value, size_t size);
+  inline ::std::string* mutable_configip2();
+  inline ::std::string* release_configip2();
+  inline void set_allocated_configip2(::std::string* configip2);
+
+  // @@protoc_insertion_point(class_scope:Network.ServiceSettings)
+ private:
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_configip1();
+  inline void clear_has_configip1();
+  inline void set_has_configip2();
+  inline void clear_has_configip2();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* equipmentid_;
+  ::std::string* configip1_;
+  ::std::string* configip2_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ServiceSettings* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -7779,7 +7887,7 @@ inline void AppDataServiceState::set_cfgserviceisconnected(bool value) {
   cfgserviceisconnected_ = value;
 }
 
-// optional string CfgServiceIp = 2;
+// optional uint32 CfgServiceIp = 2;
 inline bool AppDataServiceState::has_cfgserviceip() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -7790,63 +7898,15 @@ inline void AppDataServiceState::clear_has_cfgserviceip() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void AppDataServiceState::clear_cfgserviceip() {
-  if (cfgserviceip_ != &::google::protobuf::internal::kEmptyString) {
-    cfgserviceip_->clear();
-  }
+  cfgserviceip_ = 0u;
   clear_has_cfgserviceip();
 }
-inline const ::std::string& AppDataServiceState::cfgserviceip() const {
-  return *cfgserviceip_;
-}
-inline void AppDataServiceState::set_cfgserviceip(const ::std::string& value) {
-  set_has_cfgserviceip();
-  if (cfgserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    cfgserviceip_ = new ::std::string;
-  }
-  cfgserviceip_->assign(value);
-}
-inline void AppDataServiceState::set_cfgserviceip(const char* value) {
-  set_has_cfgserviceip();
-  if (cfgserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    cfgserviceip_ = new ::std::string;
-  }
-  cfgserviceip_->assign(value);
-}
-inline void AppDataServiceState::set_cfgserviceip(const char* value, size_t size) {
-  set_has_cfgserviceip();
-  if (cfgserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    cfgserviceip_ = new ::std::string;
-  }
-  cfgserviceip_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* AppDataServiceState::mutable_cfgserviceip() {
-  set_has_cfgserviceip();
-  if (cfgserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    cfgserviceip_ = new ::std::string;
-  }
+inline ::google::protobuf::uint32 AppDataServiceState::cfgserviceip() const {
   return cfgserviceip_;
 }
-inline ::std::string* AppDataServiceState::release_cfgserviceip() {
-  clear_has_cfgserviceip();
-  if (cfgserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = cfgserviceip_;
-    cfgserviceip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void AppDataServiceState::set_allocated_cfgserviceip(::std::string* cfgserviceip) {
-  if (cfgserviceip_ != &::google::protobuf::internal::kEmptyString) {
-    delete cfgserviceip_;
-  }
-  if (cfgserviceip) {
-    set_has_cfgserviceip();
-    cfgserviceip_ = cfgserviceip;
-  } else {
-    clear_has_cfgserviceip();
-    cfgserviceip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
+inline void AppDataServiceState::set_cfgserviceip(::google::protobuf::uint32 value) {
+  set_has_cfgserviceip();
+  cfgserviceip_ = value;
 }
 
 // optional int32 CfgServicePort = 3;
@@ -7893,7 +7953,7 @@ inline void AppDataServiceState::set_archiveserviceisconnected(bool value) {
   archiveserviceisconnected_ = value;
 }
 
-// optional string ArchiveServiceIp = 5;
+// optional uint32 ArchiveServiceIp = 5;
 inline bool AppDataServiceState::has_archiveserviceip() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -7904,63 +7964,15 @@ inline void AppDataServiceState::clear_has_archiveserviceip() {
   _has_bits_[0] &= ~0x00000010u;
 }
 inline void AppDataServiceState::clear_archiveserviceip() {
-  if (archiveserviceip_ != &::google::protobuf::internal::kEmptyString) {
-    archiveserviceip_->clear();
-  }
+  archiveserviceip_ = 0u;
   clear_has_archiveserviceip();
 }
-inline const ::std::string& AppDataServiceState::archiveserviceip() const {
-  return *archiveserviceip_;
-}
-inline void AppDataServiceState::set_archiveserviceip(const ::std::string& value) {
-  set_has_archiveserviceip();
-  if (archiveserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    archiveserviceip_ = new ::std::string;
-  }
-  archiveserviceip_->assign(value);
-}
-inline void AppDataServiceState::set_archiveserviceip(const char* value) {
-  set_has_archiveserviceip();
-  if (archiveserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    archiveserviceip_ = new ::std::string;
-  }
-  archiveserviceip_->assign(value);
-}
-inline void AppDataServiceState::set_archiveserviceip(const char* value, size_t size) {
-  set_has_archiveserviceip();
-  if (archiveserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    archiveserviceip_ = new ::std::string;
-  }
-  archiveserviceip_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* AppDataServiceState::mutable_archiveserviceip() {
-  set_has_archiveserviceip();
-  if (archiveserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    archiveserviceip_ = new ::std::string;
-  }
+inline ::google::protobuf::uint32 AppDataServiceState::archiveserviceip() const {
   return archiveserviceip_;
 }
-inline ::std::string* AppDataServiceState::release_archiveserviceip() {
-  clear_has_archiveserviceip();
-  if (archiveserviceip_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = archiveserviceip_;
-    archiveserviceip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void AppDataServiceState::set_allocated_archiveserviceip(::std::string* archiveserviceip) {
-  if (archiveserviceip_ != &::google::protobuf::internal::kEmptyString) {
-    delete archiveserviceip_;
-  }
-  if (archiveserviceip) {
-    set_has_archiveserviceip();
-    archiveserviceip_ = archiveserviceip;
-  } else {
-    clear_has_archiveserviceip();
-    archiveserviceip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
+inline void AppDataServiceState::set_archiveserviceip(::google::protobuf::uint32 value) {
+  set_has_archiveserviceip();
+  archiveserviceip_ = value;
 }
 
 // optional int32 ArchiveServicePort = 6;
@@ -9411,6 +9423,220 @@ inline void ConfigurationServiceSettings::set_allocated_workdirectory(::std::str
   } else {
     clear_has_workdirectory();
     workdirectory_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// ServiceSettings
+
+// required string equipmentID = 1;
+inline bool ServiceSettings::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ServiceSettings::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ServiceSettings::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ServiceSettings::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& ServiceSettings::equipmentid() const {
+  return *equipmentid_;
+}
+inline void ServiceSettings::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void ServiceSettings::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void ServiceSettings::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceSettings::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* ServiceSettings::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceSettings::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string configIP1 = 2;
+inline bool ServiceSettings::has_configip1() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ServiceSettings::set_has_configip1() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ServiceSettings::clear_has_configip1() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ServiceSettings::clear_configip1() {
+  if (configip1_ != &::google::protobuf::internal::kEmptyString) {
+    configip1_->clear();
+  }
+  clear_has_configip1();
+}
+inline const ::std::string& ServiceSettings::configip1() const {
+  return *configip1_;
+}
+inline void ServiceSettings::set_configip1(const ::std::string& value) {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  configip1_->assign(value);
+}
+inline void ServiceSettings::set_configip1(const char* value) {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  configip1_->assign(value);
+}
+inline void ServiceSettings::set_configip1(const char* value, size_t size) {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  configip1_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceSettings::mutable_configip1() {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  return configip1_;
+}
+inline ::std::string* ServiceSettings::release_configip1() {
+  clear_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = configip1_;
+    configip1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceSettings::set_allocated_configip1(::std::string* configip1) {
+  if (configip1_ != &::google::protobuf::internal::kEmptyString) {
+    delete configip1_;
+  }
+  if (configip1) {
+    set_has_configip1();
+    configip1_ = configip1;
+  } else {
+    clear_has_configip1();
+    configip1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string configIP2 = 3;
+inline bool ServiceSettings::has_configip2() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ServiceSettings::set_has_configip2() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ServiceSettings::clear_has_configip2() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ServiceSettings::clear_configip2() {
+  if (configip2_ != &::google::protobuf::internal::kEmptyString) {
+    configip2_->clear();
+  }
+  clear_has_configip2();
+}
+inline const ::std::string& ServiceSettings::configip2() const {
+  return *configip2_;
+}
+inline void ServiceSettings::set_configip2(const ::std::string& value) {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  configip2_->assign(value);
+}
+inline void ServiceSettings::set_configip2(const char* value) {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  configip2_->assign(value);
+}
+inline void ServiceSettings::set_configip2(const char* value, size_t size) {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  configip2_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceSettings::mutable_configip2() {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  return configip2_;
+}
+inline ::std::string* ServiceSettings::release_configip2() {
+  clear_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = configip2_;
+    configip2_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceSettings::set_allocated_configip2(::std::string* configip2) {
+  if (configip2_ != &::google::protobuf::internal::kEmptyString) {
+    delete configip2_;
+  }
+  if (configip2) {
+    set_has_configip2();
+    configip2_ = configip2;
+  } else {
+    clear_has_configip2();
+    configip2_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

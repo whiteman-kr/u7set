@@ -73,6 +73,9 @@ private:
 
 	static const QString m_singleLmControlEnabledString;
 	static const QString m_singleLmControlDisabledString;
+
+	static const int columnIndex_Hash = 0;
+	static const int columnIndex_EquipmentId = 1;
 };
 
 extern DialogTuningSources* theDialogTuningSources;

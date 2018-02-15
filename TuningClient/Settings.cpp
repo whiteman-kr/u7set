@@ -59,6 +59,13 @@ void Settings::StoreSystem()
 
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 
+	QString instanceHistoryString;
+	for (const QString& s : m_instanceHistory)
+	{
+		instanceHistoryString += s + ";";
+	}
+
+	s.setValue("m_instanceHistory", instanceHistoryString);
 	s.setValue("m_instanceStrId", m_instanceStrId);
 
 	s.setValue("m_configuratorIpAddress1", m_configuratorIpAddress1);
@@ -89,6 +96,9 @@ void Settings::RestoreSystem()
 	// read system settings
 	//
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+
+	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
+	m_instanceHistory = instanceHistoryString.split(';', QString::SkipEmptyParts);
 
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
 
@@ -207,6 +217,18 @@ void Settings::RestoreUser()
 	//
 
 	m_language = s.value("MainWindow/language", m_language).toString();
+}
+
+QStringList Settings::instanceHistory()
+{
+	QMutexLocker l(&m);
+	return m_instanceHistory;
+}
+
+void Settings::setInstanceHistory(const QStringList& value)
+{
+	QMutexLocker l(&m);
+	m_instanceHistory = value;
 }
 
 QString Settings::instanceStrId()

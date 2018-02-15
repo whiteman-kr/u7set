@@ -98,6 +98,9 @@ public:
 	void StoreSystem();
 	void RestoreSystem();
 
+	QStringList instanceHistory();
+	void setInstanceHistory(const QStringList& value);
+
 	QString instanceStrId();
 	void setInstanceStrId(const QString& value);
 
@@ -158,6 +161,7 @@ private:
 
 	bool m_admin = false;
 
+	QStringList m_instanceHistory;
 	QString m_instanceStrId;
 
 	QString m_configuratorIpAddress1;

@@ -444,10 +444,8 @@ namespace  TuningIPEN
 	}
 
 
-	TuningData::TuningData(QString lmID,
-							int tuningFrameSizeBytes,
-							int tuningFramesCount) :
-		Tuning::TuningData(lmID, 0, tuningFrameSizeBytes, tuningFramesCount)
+	TuningData::TuningData(QString lmID) :
+		Tuning::TuningData(lmID)
 	{
 	}
 
@@ -459,7 +457,7 @@ namespace  TuningIPEN
 
 	bool TuningData::buildTuningData()
 	{
-		m_usedFramesCount = 0;
+		m_tuningDataUsedFramesCount = 0;
 
 		m_metadata.clear();
 
@@ -468,10 +466,14 @@ namespace  TuningIPEN
 			TuningFramesData& framesData = m_tuningFramesData[type];
 			const QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
-			framesData.init(m_usedFramesCount, m_tuningFramePayloadBytes, signalValueSizeBits(type), tuningSignals.count());
+			framesData.init(m_tuningDataUsedFramesCount,
+							m_tuningDataFramePayloadW * WORD_SIZE_IN_BYTES,
+							signalValueSizeBits(type),
+							tuningSignals.count());
+
 			framesData.copySignalsData(tuningSignals, m_metadata);
 
-			m_usedFramesCount += framesData.usedFramesCount();
+			m_tuningDataUsedFramesCount += framesData.usedFramesCount();
 		}
 
 		return true;
@@ -487,7 +489,7 @@ namespace  TuningIPEN
 			TuningFramesData& framesData = m_tuningFramesData[type];
 			const QVector<Signal*>& tuningSignals = m_tuningSignals[type];
 
-			framesData.init(firstFrame, m_tuningFramePayloadBytes, signalValueSizeBits(type), tuningSignals.count());
+			framesData.init(firstFrame, m_tuningDataFramePayloadW * WORD_SIZE_IN_BYTES, signalValueSizeBits(type), tuningSignals.count());
 
 			firstFrame += framesData.usedFramesCount();
 
@@ -497,7 +499,7 @@ namespace  TuningIPEN
 			}
 		}
 
-		if (firstFrame != m_usedFramesCount)
+		if (firstFrame != m_tuningDataUsedFramesCount)
 		{
 			assert(false);
 		}
@@ -594,7 +596,7 @@ namespace  TuningIPEN
 			sr->dataType = FotipDataType::AnalogFloat;
 			break;
 
-		case TYPE_ANALOG_INT:
+		case TYPE_ANALOG_INT32:
 			sr->dataType = FotipDataType::AnalogSignedInt;
 			break;
 

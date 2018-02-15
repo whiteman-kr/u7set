@@ -39,6 +39,7 @@ public:
 
 	void writeStringElement(const QString& name, const QString& value);
 	void writeIntElement(const QString& name, int value);
+	void writeBoolElement(const QString& name, bool value);
 
 	void writeHostAddressPort(const QString& nameIP, const QString& namePort, HostAddressPort& hostAddressPort);
 	void writeHostAddress(const QString& nameIP, QHostAddress& hostAddress);
@@ -73,6 +74,7 @@ public:
 
 	bool readStringElement(const QString& elementName, QString* value);
 	bool readIntElement(const QString& elementName, int* value);
+	bool readBoolElement(const QString& elementName, bool* value);
 
 	bool readHostAddressPort(const QString& nameIP, const QString &namePort, HostAddressPort *hostAddressPort);
 	bool readHostAddress(const QString& name, QHostAddress *hostAddress);
