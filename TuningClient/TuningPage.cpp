@@ -499,7 +499,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 	m_buttonFilter(buttonFilter)
 {
 
-	qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 	m_instanceNo = m_instanceCounter;
 	m_instanceCounter++;
 
@@ -636,12 +636,69 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 TuningPage::~TuningPage()
 {
 	m_instanceCounter--;
-	qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 }
 
 void TuningPage::fillObjectsList()
 {
-	std::vector<Hash> hashes = m_tuningSignalManager->signalHashes();
+	std::vector<Hash> hashes;
+
+	std::vector<Hash> pageHashes;
+
+	// Button Filter
+	//
+
+	if (m_buttonFilter != nullptr)
+	{
+		pageHashes = m_buttonFilter->signalsHashes();
+	}
+	else
+	{
+		// Tab Filter
+		//
+		if (m_tabFilter != nullptr)
+		{
+			pageHashes = m_tabFilter->signalsHashes();
+		}
+	}
+
+	//qDebug() << "pageHashes.size() = " << pageHashes.size();
+
+	// Tree Filter
+
+	std::vector<Hash> treeHashes;
+
+	if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
+	{
+		if (m_treeFilter->isEmpty() == false)
+		{
+			treeHashes = m_treeFilter->signalsHashes();
+
+			std::sort(treeHashes.begin(), treeHashes.end());
+
+			//qDebug() << "treehashes.size() = " << treeHashes.size();
+
+			hashes.reserve(pageHashes.size());
+
+			// Place in hashes array only items that are found in treeHashes
+
+			for (Hash pageHash : pageHashes)
+			{
+				if (std::binary_search(treeHashes.begin(), treeHashes.end(), pageHash) == true)
+				{
+					hashes.push_back(pageHash);
+				}
+			}
+		}
+	}
+	else
+	{
+		hashes = pageHashes;
+	}
+
+	//qDebug() << "hashes.size() = " << hashes.size();
+
+	//
 
 	std::vector<Hash> filteredHashes;
 	filteredHashes.reserve(hashes.size());
@@ -672,47 +729,9 @@ void TuningPage::fillObjectsList()
 		bool modifyDefaultValue = false;
 		TuningValue modifiedDefaultValue;
 
-		// Tree Filter
-		//
-
-		// If currently selected filter is root - all signals are displayed
-		//
-
-		if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
+		if (treeHashes.empty() == false)
 		{
-
-			TuningFilter* treeFilter = m_treeFilter.get();
-
-			// If currently selected filter is empty - no signals are displayed (a "Folder" filter)
-
-			if (treeFilter->isEmpty() == true)
-			{
-				continue;
-			}
-
-			if (treeFilter->match(asp) == false)
-			{
-				continue;
-			}
-
-			/*
-			while (treeFilter != nullptr)
-			{
-				if (treeFilter->match(asp) == false)
-				{
-					result = false;
-					break;
-				}
-
-				treeFilter = treeFilter->parentFilter();
-			}
-			if (result == false)
-			{
-				continue;
-			}
-			*/
-
-			// Modify the default value from selected filter
+			// Modify the default value from selected tree filter
 			//
 
 			TuningFilterValue filterValue;
@@ -723,31 +742,6 @@ void TuningPage::fillObjectsList()
 			{
 				modifyDefaultValue = true;
 				modifiedDefaultValue = filterValue.value();
-			}
-		}
-
-
-		// Button Filter
-		//
-
-		if (m_buttonFilter != nullptr)
-		{
-			if (m_buttonFilter->match(asp) == false)
-			{
-				continue;
-			}
-			else
-			{
-				// Tab Filter
-				//
-
-				if (m_tabFilter != nullptr)
-				{
-					if (m_tabFilter->match(asp) == false)
-					{
-						continue;
-					}
-				}
 			}
 		}
 

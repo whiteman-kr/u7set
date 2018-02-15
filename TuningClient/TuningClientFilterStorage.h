@@ -11,7 +11,7 @@ public:
 
 	// Operations
 
-	void createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter = nullptr);
+	void createSignalsAndEqipmentHashes(const TuningSignalManager* objects, const std::vector<Hash>& allHashes, TuningFilter* filter);
 
 	void checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget);
 
