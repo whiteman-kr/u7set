@@ -224,6 +224,11 @@ void DialogTuningSources::activateControl(bool enable)
 		return;
 	}
 
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return;
+	}
+
 	QTreeWidgetItem* item = items[0];
 	if (item == nullptr)
 	{

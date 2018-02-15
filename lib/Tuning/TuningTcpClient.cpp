@@ -154,18 +154,18 @@ bool TuningTcpClient::tuningSourceStatus(Hash equipmentHash, int* errorsCount, i
 
 	*errorsCount = ts.getErrorsCount();
 
-	if (errorsCount > 0)
+	if (*errorsCount > 0)
 	{
 		if (status != nullptr)
 		{
-			*status = tr("%2 errors").arg(*errorsCount);
+			*status = tr("E: %1").arg(*errorsCount);
 		}
 	}
 	else
 	{
 		if (status != nullptr)
 		{
-			*status = tr("OK");
+			*status = tr("On [%1 replies]").arg(ts.state.replycount());
 		}
 	}
 

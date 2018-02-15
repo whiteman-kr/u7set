@@ -272,16 +272,11 @@ void TuningWorkspace::updateFiltersTree()
 		}
 		if (columnStatusIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnStatusIndex, 60);
+			m_filterTree->setColumnWidth(columnStatusIndex, 120);
 		}
 		if (columnSorIndex != -1)
 		{
 			m_filterTree->setColumnWidth(columnSorIndex, 60);
-		}
-
-
-		if (theConfigSettings.showSOR == true)
-		{
 		}
 
 		//
@@ -822,7 +817,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 			}
 			else
 			{
-				treeItem->setText(columnStatusIndex, QString("%1 errors").arg(counters.errorCounter));
+				treeItem->setText(columnStatusIndex, QString("E: %1").arg(counters.errorCounter));
 				treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
 				treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
 			}
@@ -832,15 +827,22 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		if (columnSorIndex != -1 && theConfigSettings.showSOR == true)
 		{
-			treeItem->setText(columnSorIndex, QString("%1").arg(counters.sorCounter));
-
 			if (counters.sorCounter == 0)
 			{
+				treeItem->setText(columnSorIndex, tr("No"));
 				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
 				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
 			}
 			else
 			{
+				if (counters.sorCounter == 1)
+				{
+					treeItem->setText(columnSorIndex, tr("Yes"));
+				}
+				else
+				{
+					treeItem->setText(columnSorIndex, QString("Yes [%1]").arg(counters.sorCounter));
+				}
 				treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
 				treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 			}
@@ -999,6 +1001,11 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	auto fEnableControl = [this, filter]() -> void
 	{
+			if (theMainWindow->userManager()->login(this) == false)
+			{
+				return;
+			}
+
 			if (QMessageBox::warning(this, qAppName(),
 									 tr("Are you sure you want to activate the source %1?").arg(filter->caption()),
 									 QMessageBox::Yes | QMessageBox::No,
@@ -1018,6 +1025,11 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	auto fDisableControl = [this, filter]() -> void
 	{
+			if (theMainWindow->userManager()->login(this) == false)
+			{
+				return;
+			}
+
 			if (QMessageBox::warning(this, qAppName(),
 									 tr("Are you sure you want to deactivate the source %1?").arg(filter->caption()),
 									 QMessageBox::Yes | QMessageBox::No,

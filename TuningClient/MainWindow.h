@@ -66,6 +66,7 @@ public:
 	DialogAlert* m_dialogAlert = nullptr;
 
 private slots:
+	void slot_tuningSourcesArrived();
 	void slot_configurationArrived();
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
@@ -114,6 +115,7 @@ private:
 
 	TuningLog::TuningLog* m_tuningLog = nullptr;
 
+	bool m_singleLmControl = false;
 	int m_discreteCounter = -1;
 	int m_lmErrorsCounter = -1;
 	int m_sorCounter = -1;

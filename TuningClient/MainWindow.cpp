@@ -73,6 +73,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
 			Qt::QueuedConnection);
 
+	connect(m_tcpClient, &TuningTcpClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
+
 	// DialogAlert
 
 	m_dialogAlert = new DialogAlert(this);
@@ -450,8 +452,8 @@ void MainWindow::updateStatusBar()
 {
 	// Status bar
 	//
+	assert(m_statusBarInfo);
 	assert(m_statusBarConfigConnection);
-	assert(m_statusBarTuningConnection);
 
 	Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
 	Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
@@ -607,6 +609,16 @@ void MainWindow::updateStatusBar()
 	}
 }
 
+void MainWindow::slot_tuningSourcesArrived()
+{
+	assert(m_statusBarTuningConnection);
+
+	// LM Single/Multi control
+
+	m_statusBarInfo->setText(m_tcpClient->singleLmControlMode() ? tr("Single LM Control Mode") : tr("Multiple LM Control Mode"));
+
+}
+
 void MainWindow::slot_configurationArrived()
 {
 	createWorkspace();
@@ -679,11 +691,6 @@ void MainWindow::runPresetEditor()
 
 void MainWindow::showSettings()
 {
-	if (m_userManager.login(this) == false)
-	{
-		return;
-	}
-
 	DialogSettings* d = new DialogSettings(this);
 
 	d->exec();
