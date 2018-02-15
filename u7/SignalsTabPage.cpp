@@ -1243,8 +1243,11 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		return true;
 	}
 
-	loadSignalSet(ids);	//Signal could be checked out but not changed
-	changeCheckedoutSignalActionsVisibility();
+	if (dlg.hasEditedSignals())
+	{
+		loadSignalSet(ids);	//Signal could be checked out but not changed
+		changeCheckedoutSignalActionsVisibility();
+	}
 	return false;
 }
 
@@ -2088,10 +2091,17 @@ void SignalsTabPage::projectClosed()
 void SignalsTabPage::editSignal()
 {
 	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+
 	if (selection.count() == 0)
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+		return;
 	}
+
+	int currentRow = m_signalsProxyModel->mapToSource(m_signalsView->currentIndex()).row();
+	int currentColumn = m_signalsView->currentIndex().column();
+	int currentId = m_signalsModel->key(currentRow);
+
 	QVector<int> selectedSignalId;
 	for (int i = 0; i < selection.count(); i++)
 	{
@@ -2100,6 +2110,8 @@ void SignalsTabPage::editSignal()
 	}
 
 	m_signalsModel->editSignals(selectedSignalId);
+
+	m_signalsView->scrollTo(m_signalsProxyModel->mapFromSource(m_signalsModel->index(m_signalsModel->keyIndex(currentId), currentColumn)));
 }
 
 void SignalsTabPage::cloneSignal()
@@ -3152,6 +3164,24 @@ bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) co
 		}
 	}
 	return false;
+}
+
+bool SignalsProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
+{
+	QVariant l = m_sourceModel->data(source_left);
+	QVariant r = m_sourceModel->data(source_right);
+
+	if (l == r)
+	{
+		const Signal& sl = m_sourceModel->signal(source_left.row());
+		const Signal& sr = m_sourceModel->signal(source_right.row());
+
+		return sl.appSignalID() < sr.appSignalID();
+	}
+	else
+	{
+		return QSortFilterProxyModel::lessThan(source_left, source_right);
+	}
 }
 
 void SignalsProxyModel::setSignalTypeFilter(int signalType)
