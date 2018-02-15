@@ -223,65 +223,70 @@ namespace Builder
 				// Application signal '%1' is not bound to any device object.
 				//
 				m_log->wrnALC5012(s.appSignalID());
+				continue;
 			}
-			else
+
+			std::shared_ptr<Hardware::DeviceObject> device = equipment->deviceObjectSharedPointer(s.equipmentID());
+
+			if (device == nullptr)
 			{
-				std::shared_ptr<Hardware::DeviceObject> device = equipment->deviceObjectSharedPointer(s.equipmentID());
+				// Application signal '%1' is bound to unknown device object '%2'.
+				//
+				m_log->errALC5013(s.appSignalID(), s.equipmentID());
+				result = false;
+				continue;
+			}
 
-				if (device == nullptr)
+			if ((s.isInput() == true || s.isOutput() == true) && device->deviceType() != Hardware::DeviceType::Signal)
+			{
+				// The input (or output) signal %1 can be bind to Equipment Signal only.
+				m_log->errALC5136(s.appSignalID());
+				result = false;
+			}
+
+			bool deviceOK = false;
+
+			switch(device->deviceType())
+			{
+			case Hardware::DeviceType::Module:
 				{
-					// Application signal '%1' is bound to unknown device object '%2'.
-					//
-					m_log->errALC5013(s.appSignalID(), s.equipmentID());
-					result = false;
-					continue;
-				}
+					std::shared_ptr<Hardware::DeviceModule> module = std::dynamic_pointer_cast<Hardware::DeviceModule>(device);
 
-				bool deviceOK = false;
-
-				switch(device->deviceType())
-				{
-				case Hardware::DeviceType::Module:
+					if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
 					{
-						std::shared_ptr<Hardware::DeviceModule> module = std::dynamic_pointer_cast<Hardware::DeviceModule>(device);
-
-						if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
-						{
-							s.setLm(module);
-							deviceOK = true;
-						}
+						s.setLm(module);
+						deviceOK = true;
 					}
-					break;
-
-				case Hardware::DeviceType::Signal:
-					{
-						Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(device->getParentChassis());
-
-						if (chassis == nullptr)
-						{
-							assert(false);
-							continue;
-						}
-
-						std::shared_ptr<Hardware::DeviceModule> module = chassis->getLogicModuleSharedPointer();
-
-						if (module != nullptr && module->isLogicModule() == true)
-						{
-							s.setLm(module);
-							deviceOK = true;
-						}
-					}
-					break;
 				}
+				break;
 
-				if (deviceOK == false)
+			case Hardware::DeviceType::Signal:
 				{
-					// The signal '%1' can be bind only to Logic Module or Equipment Signal.
-					//
-					m_log->errALC5031(s.appSignalID());
-					result = false;
-					continue;
+					Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(device->getParentChassis());
+
+					if (chassis == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					std::shared_ptr<Hardware::DeviceModule> module = chassis->getLogicModuleSharedPointer();
+
+					if (module != nullptr && module->isLogicModule() == true)
+					{
+						s.setLm(module);
+						deviceOK = true;
+					}
 				}
+				break;
+			}
+
+			if (deviceOK == false)
+			{
+				// The signal '%1' can be bind only to Logic Module or Equipment Signal.
+				//
+				m_log->errALC5031(s.appSignalID());
+				result = false;
 			}
 		}
 
