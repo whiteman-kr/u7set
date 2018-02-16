@@ -1380,7 +1380,7 @@ namespace Builder
 				continue;
 			}
 
-			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
+			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), subsysID, lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
 		}
 	}
 

@@ -188,8 +188,8 @@ static const std::vector<quint8> err;
 		return m_lmDescriptionNumber;
 	}
 
-	void ModuleFirmware::addLogicModuleInfo(
-							const QString& equipmentId,
+	void ModuleFirmware::addLogicModuleInfo(const QString& equipmentId,
+							const QString& subsystemId,
 							int lmNumber,
 							int channel,
 							int moduleFamily,
@@ -201,6 +201,7 @@ static const std::vector<quint8> err;
 		LogicModuleInfo info;
 
 		info.equipmentId = equipmentId;
+		info.subsystemId = subsystemId;
 		info.lmNumber = lmNumber;
 		info.channel = channel;
 		info.moduleFamily = moduleFamily;

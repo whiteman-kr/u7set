@@ -31,6 +31,7 @@ namespace Hardware
 	struct LogicModuleInfo
 	{
 		QString equipmentId;
+		QString subsystemId;
 		int lmNumber;
 		int channel;
 
@@ -72,6 +73,7 @@ namespace Hardware
 		int lmDescriptionNumber() const;
 
 		void addLogicModuleInfo(const QString& equipmentId,
+								const QString& subsystemId,
 								int lmNumber,
 								int channel,
 								int moduleFamily,
