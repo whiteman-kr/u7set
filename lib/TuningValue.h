@@ -70,15 +70,8 @@ public:
 	static int tuningValueTypeId();
 	QString tuningValueTypeString() const;
 
-
-private:
-
-	// this functions use only  in DbWorker class to save TunigValue to database
-	//
 	qint64 rawInt64() const;
 	double rawDouble() const;
-
-	friend class DbWorker;
 
 private:
 	TuningValueType m_type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue

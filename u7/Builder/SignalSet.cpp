@@ -138,6 +138,8 @@ namespace Builder
 					result = false;
 				}
 
+				result &= checkSignalPropertiesRanges(s);
+
 				break;
 
 			case E::SignalType::Bus:
@@ -404,5 +406,112 @@ namespace Builder
 
 		return caption;
 	}
+
+	bool SignalSet::checkSignalPropertiesRanges(const Signal& s)
+	{
+		if (s.isAnalog() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		result &= checkSignalPropertyRanges(s, s.lowEngeneeringUnits(), "LowEngeneeringUnits");
+		result &= checkSignalPropertyRanges(s, s.highEngeneeringUnits(), "HighEngeneeringUnits");
+
+		result &= checkSignalPropertyRanges(s, s.lowValidRange(), "LowValidRange");
+		result &= checkSignalPropertyRanges(s, s.highValidRange(), "HighValidRange");
+
+		result &= checkSignalTuningValuesRanges(s, s.tuningDefaultValue(), "TuningDefaultValue");
+		result &= checkSignalTuningValuesRanges(s, s.tuningLowBound(), "TuningLowBound");
+		result &= checkSignalTuningValuesRanges(s, s.tuningHighBound(), "TuningHighBound");
+
+		return result;
+	}
+
+	bool SignalSet::checkSignalPropertyRanges(const Signal& s, double properyValue, const QString& propertyName)
+	{
+		if (s.isAnalog() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		switch(s.analogSignalFormat())
+		{
+		case E::AnalogAppSignalFormat::SignedInt32:
+
+			if (properyValue > static_cast<double>(std::numeric_limits<qint32>::max()) ||
+				properyValue < static_cast<double>(std::numeric_limits<qint32>::lowest()))
+			{
+				m_log->errALC5137(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		case E::AnalogAppSignalFormat::Float32:
+
+			if (properyValue > static_cast<double>(std::numeric_limits<float>::max()) ||
+				properyValue < static_cast<double>(std::numeric_limits<float>::lowest()))
+			{
+				m_log->errALC5138(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return result;
+	}
+
+	bool SignalSet::checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName)
+	{
+		if (s.isAnalog() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		switch(s.analogSignalFormat())
+		{
+		case E::AnalogAppSignalFormat::SignedInt32:
+
+			assert(tuningValue.type() == TuningValueType::SignedInt32);
+
+			if (tuningValue.rawInt64() > static_cast<qint64>(std::numeric_limits<qint32>::max()) ||
+				tuningValue.rawInt64() < static_cast<qint64>(std::numeric_limits<qint32>::lowest()))
+			{
+				m_log->errALC5137(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		case E::AnalogAppSignalFormat::Float32:
+
+			if (tuningValue.rawDouble() > static_cast<double>(std::numeric_limits<float>::max()) ||
+				tuningValue.rawDouble() < static_cast<double>(std::numeric_limits<float>::lowest()))
+			{
+				m_log->errALC5138(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		default:
+			assert(false);
+		}
+
+
+	}
+
+
+
 
 }

@@ -12,14 +12,29 @@ ALTER TABLE public.signalinstance ADD COLUMN archive boolean DEFAULT TRUE;
 
 -- Copy values from tuningdefaultdouble, tuninglowbounddouble, tuninghighbounddouble into new columns
 
-UPDATE public.signalinstance SET  tuningdefaultint = tuningdefaultdouble,
-                                  tuninglowboundint = lowengeneeringunits,
+-- E::SignalType::Analog AND E::AnalogAppSignalFormat::Float)
+
+UPDATE public.signalinstance SET  tuningdefaultint = 0,
+                                  tuninglowboundint = 0,
 				  tuninglowbounddouble = lowengeneeringunits,
-				  tuninghighboundint = highengeneeringunits,
+				  tuninghighboundint = 0,
 				  tuninghighbounddouble = highengeneeringunits
 				    WHERE signalinstanceid IN
 				        (SELECT signalinstanceid FROM signalinstance, signal WHERE
-					    signalinstance.signalid = signal.signalid AND signal.type = 0); -- E::SignalType::Analog
+					    signalinstance.signalid = signal.signalid AND signal.type = 0 AND signalinstance.analogsignalformat = 2);
+
+-- E::SignalType::Analog AND E::AnalogAppSignalFormat::SignedInt32
+
+UPDATE public.signalinstance SET  tuningdefaultint = CASE WHEN tuningdefaultdouble > 2147483647 THEN 2147483647 ELSE CASE WHEN tuningdefaultdouble < -2147483648 THEN -2147483648 ELSE cast(tuningdefaultdouble as integer) END END,
+                                  tuninglowboundint = CASE WHEN lowengeneeringunits > 2147483647 THEN 2147483647 ELSE CASE WHEN lowengeneeringunits < -2147483648 THEN -2147483648 ELSE cast(lowengeneeringunits as integer) END END,
+				  tuninglowbounddouble = 0,
+				  tuninghighboundint = CASE WHEN highengeneeringunits > 2147483647 THEN 2147483647 ELSE CASE WHEN highengeneeringunits < -2147483648 THEN -2147483648 ELSE cast(highengeneeringunits as integer) END END,
+				  tuninghighbounddouble = 0
+				    WHERE signalinstanceid IN
+				        (SELECT signalinstanceid FROM signalinstance, signal WHERE
+					    signalinstance.signalid = signal.signalid AND signal.type = 0 AND signalinstance.analogsignalformat = 1);
+
+-- E::SignalType::Discrete
 
 UPDATE public.signalinstance SET  tuningdefaultint = tuningdefaultdouble,
                                   tuninglowboundint = 0,
@@ -28,7 +43,7 @@ UPDATE public.signalinstance SET  tuningdefaultint = tuningdefaultdouble,
 				  tuninghighbounddouble = 1
 				    WHERE signalinstanceid IN
 				        (SELECT signalinstanceid FROM signalinstance, signal WHERE
-					    signalinstance.signalid = signal.signalid AND signal.type = 1); -- E::SignalType::Discrete
+					    signalinstance.signalid = signal.signalid AND signal.type = 1);
 
 
 -- Drop all stored procedures dependent from SignalData type

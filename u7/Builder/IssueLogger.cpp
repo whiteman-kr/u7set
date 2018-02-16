@@ -4963,6 +4963,48 @@ namespace Builder
 						  arg(appSignalID)));
 	}
 
+	/// IssueCode: ALC5137
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 property %2 out of SignedInt32 range.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Signal property name
+	///
+	/// Description:
+	///		Specified signal property value is out of SignedInt32 range. Check property value.
+	///
+	void IssueLogger::errALC5137(QString appSignalID, QString property)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5137,
+				  QString(tr("Signal %1 property %2 out of SignedInt32 range.")).
+						  arg(appSignalID).arg(property));
+	}
+
+	/// IssueCode: ALC5138
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 property %2 out of Float32 range.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Signal property name
+	///
+	/// Description:
+	///		Specified signal property value is out of Float32 range. Check property value.
+	///
+	void IssueLogger::errALC5138(QString appSignalID, QString property)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5138,
+				  QString(tr("Signal %1 property %2 out of Float32 range.")).
+						  arg(appSignalID).arg(property));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
