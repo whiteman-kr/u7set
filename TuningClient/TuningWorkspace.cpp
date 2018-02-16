@@ -518,13 +518,17 @@ void TuningWorkspace::createTabPages()
 		//
 		if (m_singleTuningPage == nullptr)
 		{
-			std::shared_ptr<TuningFilter> emptyFilter = std::make_shared<TuningFilter>();
+			std::shared_ptr<TuningFilter> singlePageFilter = std::make_shared<TuningFilter>();
 
 			QUuid uid = QUuid::createUuid();
 
-			emptyFilter->setID(uid.toString());
+			singlePageFilter->setID(uid.toString());
 
-			QWidget* tp = createTuningPageOrWorkspace(emptyFilter);
+			// Copy signals' hashes from parent filter to single page's filter
+
+			singlePageFilter->setSignalsHashes(m_workspaceFilter->signalsHashes());
+
+			QWidget* tp = createTuningPageOrWorkspace(singlePageFilter);
 
 			m_rightLayout->addWidget(tp);
 

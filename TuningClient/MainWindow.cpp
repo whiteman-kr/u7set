@@ -316,7 +316,7 @@ void MainWindow::createWorkspace()
 		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
 	}
 
-	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager);
+	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager, m_tuningSignalManager.signalHashes(), m_filterStorage.root().get());
 
 	// Find and possibly remove non-existing signals from the list
 

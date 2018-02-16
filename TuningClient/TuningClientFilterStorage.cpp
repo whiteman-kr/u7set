@@ -6,7 +6,7 @@ TuningClientFilterStorage::TuningClientFilterStorage()
 
 }
 
-void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects, TuningFilter* filter)
+void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects, const std::vector<Hash>& allHashes, TuningFilter* filter)
 {
 	if (objects == nullptr)
 	{
@@ -16,24 +16,22 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 
 	if (filter == nullptr)
 	{
-		filter = m_root.get();
+		assert(filter);
+		return;
 	}
+
+	int allCount = static_cast<int>(allHashes.size());
+
+	std::vector<Hash> signalsHashes;
+	signalsHashes.reserve(allCount);
 
 	// Root filter
 
-	if (filter->isRoot() == true && theConfigSettings.showDiscreteCounters == true)
+	if (filter->isRoot() == true)
 	{
 		// All signals ahashes are stored in root filter for discrete counter to work
 
-		std::vector<Hash> signalsHashes;
-
-		std::vector<Hash> hashes = objects->signalHashes();
-
-		int count = static_cast<int>(hashes.size());
-		for (int i = 0; i < count; i++)
-		{
-			signalsHashes.push_back(hashes[i]);
-		}
+		signalsHashes = allHashes;
 
 		filter->setSignalsHashes(signalsHashes);
 	}
@@ -42,16 +40,19 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 
 	if (filter->isEmpty() == false)
 	{
-		std::vector<Hash> signalsHashes;
+		if (filter->isSourceEquipment() == true)	// Equipment filters can be processed easier
+		{
+			std::vector<Hash> equipmentHashes;
+			equipmentHashes.push_back(::calcHash(filter->caption()));
+			filter->setEquipmentHashes(equipmentHashes);
+		}
+
 		std::map<Hash, int> equipmentHashesMap;
 
-		std::vector<Hash> hashes = objects->signalHashes();
-
-		int count = static_cast<int>(hashes.size());
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < allCount; i++)
 		{
 			bool ok = false;
-			AppSignalParam asp = objects->signalParam(hashes[i], &ok);
+			AppSignalParam asp = objects->signalParam(allHashes[i], &ok);
 			if (ok == false)
 			{
 				assert(false);
@@ -65,26 +66,34 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 
 			signalsHashes.push_back(asp.hash());
 
-			Hash aspEquipmentHash = ::calcHash(asp.equipmentId());
-
-			equipmentHashesMap[aspEquipmentHash] = 1;
+			if (filter->isSourceEquipment() == false)	// Skip equipment filters
+			{
+				Hash aspEquipmentHash = ::calcHash(asp.equipmentId());
+				equipmentHashesMap[aspEquipmentHash] = 1;
+			}
 		}
 
 		filter->setSignalsHashes(signalsHashes);
 
-		std::vector<Hash> equipmentHashes;
-		for (auto it : equipmentHashesMap)
+		if (filter->isSourceEquipment() == false)	// Skip equipment filters
 		{
-			equipmentHashes.push_back(it.first);
+			std::vector<Hash> equipmentHashes;
+			for (auto it : equipmentHashesMap)
+			{
+				equipmentHashes.push_back(it.first);
+			}
+			filter->setEquipmentHashes(equipmentHashes);
 		}
-
-		filter->setEquipmentHashes(equipmentHashes);
+	}
+	else
+	{
+		signalsHashes = allHashes;
 	}
 
 	int count = filter->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		createSignalsAndEqipmentHashes(objects, filter->childFilter(i).get());
+		createSignalsAndEqipmentHashes(objects, signalsHashes, filter->childFilter(i).get());
 	}
 }
 

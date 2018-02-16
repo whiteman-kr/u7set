@@ -135,9 +135,9 @@ bool TuningTcpClient::tuningSourceStatus(Hash equipmentHash, int* errorsCount, i
 			*status = tr("No Reply");
 		}
 
-		if (singleLmControlMode() == true && ts.state.controlisactive() == true)
+		if (ts.state.controlisactive() == true)
 		{
-			// If this LM is selected in single control mode and has no reply - this is an error
+			// If this LM is selected as active and has no reply - this is an error
 
 			(*errorsCount)++;
 		}
