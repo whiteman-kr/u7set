@@ -66,6 +66,7 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 	{
 		m_socketThread->quitAndWait();
 		delete m_socketThread;
+		m_socketThread = nullptr;
 	}
 
 	QSettings settings;

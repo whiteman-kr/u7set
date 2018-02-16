@@ -534,6 +534,8 @@ void AppDataServiceWidget::dropTcpConnection()
 	m_signalStateModel->setClient(nullptr);
 
 	m_tcpClientThread->quitAndWait();
+	delete m_tcpClientThread;
+	m_tcpClientThread = nullptr;
 
 	m_tcpClientSocket = nullptr;
 }

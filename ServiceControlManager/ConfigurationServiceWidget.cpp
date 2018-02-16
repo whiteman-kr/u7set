@@ -82,7 +82,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 
 		if (m_tcpClientSocket != nullptr)
 		{
-			HostAddressPort&& curAddress = m_tcpClientSocket->serverAddressPort(0);
+			HostAddressPort&& curAddress = m_tcpClientSocket->currentServerAddressPort();
 			if (curAddress.address32() != ip || curAddress.port() != port)
 			{
 				dropTcpConnection();
@@ -208,6 +208,8 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 void ConfigurationServiceWidget::dropTcpConnection()
 {
 	m_tcpClientThread->quitAndWait();
+	delete m_tcpClientThread;
+	m_tcpClientThread = nullptr;
 
 	m_tcpClientSocket = nullptr;
 }

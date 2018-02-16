@@ -87,7 +87,10 @@ SOURCES += MainWindow.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/Service.cpp \
     ../lib/CommandLineParser.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    TuningServiceWidget.cpp \
+    TcpTuningServiceClient.cpp \
+    ../lib/Tuning/TuningSourceState.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -126,7 +129,10 @@ HEADERS  += MainWindow.h \
     ../lib/OrderedHash.h \
     ../lib/Service.h \
     ../lib/CommandLineParser.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    TuningServiceWidget.h \
+    TcpTuningServiceClient.h \
+    ../lib/Tuning/TuningSourceState.h
 
 include(../qtservice/src/qtservice.pri)
 

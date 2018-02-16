@@ -42,6 +42,11 @@ namespace Tuning
 													bool activateControl,
 													QString* controlledTuningSource,
 													bool* controlIsActive);
+
+		QString equipmentID() { return m_equipmentID; }
+		QString cfgServiceIP1() { return m_cfgServiceIP1.addressPortStr(); }
+		QString cfgServiceIP2() { return m_cfgServiceIP2.addressPortStr(); }
+
 	signals:
 
 	public slots:

@@ -28,6 +28,7 @@ protected:
 	void createTcpConnection(quint32 ip, quint16 port) override;
 	void dropTcpConnection() override;
 
+private:
 	QStandardItemModel* m_buildTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;
