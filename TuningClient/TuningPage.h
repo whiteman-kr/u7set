@@ -31,27 +31,6 @@ private:
 
 };
 
-class FilterButton : public QPushButton
-{
-	Q_OBJECT
-public:
-	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent = nullptr);
-
-	std::shared_ptr<TuningFilter> filter();
-
-	QString caption() const;
-
-private:
-	std::shared_ptr<TuningFilter> m_filter;
-	QString m_caption;
-
-private slots:
-	void slot_toggled(bool checked);
-
-signals:
-	void filterButtonClicked(std::shared_ptr<TuningFilter> filter);
-};
-
 class TuningTableView : public QTableView
 {
 
@@ -79,7 +58,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
+	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
 	~TuningPage();
 
 	void fillObjectsList();
@@ -110,7 +89,7 @@ public slots:
 
 	void slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
 
-	void slot_buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter);
 
 private:
 
@@ -175,9 +154,7 @@ private:
 
 	std::shared_ptr<TuningFilter> m_treeFilter = nullptr;
 
-	std::shared_ptr<TuningFilter> m_tabFilter = nullptr;
-
-	std::shared_ptr<TuningFilter> m_buttonFilter = nullptr;
+	std::shared_ptr<TuningFilter> m_pageFilter = nullptr;
 
 	int m_sortColumn = 0;
 

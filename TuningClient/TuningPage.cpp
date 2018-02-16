@@ -357,83 +357,6 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 
 
 //
-// FilterButton
-//
-
-FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent)
-	:QPushButton(caption, parent)
-{
-	m_filter = filter;
-	m_caption = caption;
-
-	setCheckable(true);
-
-	if (check == true)
-	{
-		setChecked(true);
-	}
-
-	setMinimumSize(100, 25);
-
-	QColor backColor = Qt::lightGray;
-	QColor textColor = Qt::white;
-
-	QColor backSelectedColor = Qt::darkGray;
-	QColor textSelectedColor = Qt::white;
-
-	if (filter->backColor().isValid() && filter->textColor().isValid() && filter->backColor() != filter->textColor())
-	{
-		backColor = filter->backColor();
-		textColor = filter->textColor();
-	}
-
-	if (filter->backSelectedColor().isValid() && filter->textSelectedColor().isValid() && filter->backSelectedColor() != filter->textSelectedColor())
-	{
-		backSelectedColor = filter->backSelectedColor();
-		textSelectedColor = filter->textSelectedColor();
-	}
-
-	setStyleSheet(tr("\
-					QPushButton {   \
-						background-color: %1;\
-						color: %2;    \
-					}   \
-					QPushButton:checked{\
-						background-color: %3;\
-						color: %4;    \
-						border: none;\
-					}\
-					").arg(backColor.name())
-					 .arg(textColor.name())
-					 .arg(backSelectedColor.name())
-					 .arg(textSelectedColor.name()));
-
-	update();
-
-
-	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
-}
-
-std::shared_ptr<TuningFilter> FilterButton::filter()
-{
-	return m_filter;
-}
-
-QString FilterButton::caption() const
-{
-	return m_caption;
-}
-
-void FilterButton::slot_toggled(bool checked)
-{
-	if (checked == true)
-	{
-		emit filterButtonClicked(m_filter);
-	}
-
-}
-
-//
 // TuningTableView
 //
 
@@ -490,13 +413,12 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 
 int TuningPage::m_instanceCounter = 0;
 
-TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> tabFilter, std::shared_ptr<TuningFilter> buttonFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
+TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient),
 	m_treeFilter(treeFilter),
-	m_tabFilter(tabFilter),
-	m_buttonFilter(buttonFilter)
+	m_pageFilter(pageFilter),
+	m_tuningSignalManager(tuningSignalManager),
+	m_tuningTcpClient(tuningTcpClient)
 {
 
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
@@ -504,7 +426,6 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 	m_instanceCounter++;
 
 	//assert(m_treeFilter);		They can be nullptr
-	//assert(m_tabFilter);
 	//assert(m_buttonFilter);
 
 	assert(m_tuningSignalManager);
@@ -616,11 +537,11 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 
 	// Color
 
-	if (m_tabFilter->backColor().isValid() && m_tabFilter->textColor().isValid() && m_tabFilter->backColor() != m_tabFilter->textColor())
+	if (m_pageFilter->isTab() == true && m_pageFilter->backColor().isValid() && m_pageFilter->textColor().isValid() && m_pageFilter->backColor() != m_pageFilter->textColor())
 	{
 		QPalette Pal(palette());
 
-		Pal.setColor(QPalette::Background, m_tabFilter->backColor());
+		Pal.setColor(QPalette::Background, m_pageFilter->backColor());
 		setAutoFillBackground(true);
 		setPalette(Pal);
 	}
@@ -645,21 +566,16 @@ void TuningPage::fillObjectsList()
 
 	std::vector<Hash> pageHashes;
 
-	// Button Filter
-	//
+	//qDebug() << "FillObjectsList";
 
-	if (m_buttonFilter != nullptr)
+	//if (m_pageFilter != nullptr)
+	//{
+//		qDebug() << "Button " << m_pageFilter->caption();
+//	}
+
+	if (m_pageFilter != nullptr)
 	{
-		pageHashes = m_buttonFilter->signalsHashes();
-	}
-	else
-	{
-		// Tab Filter
-		//
-		if (m_tabFilter != nullptr)
-		{
-			pageHashes = m_tabFilter->signalsHashes();
-		}
+		pageHashes = m_pageFilter->signalsHashes();
 	}
 
 	//qDebug() << "pageHashes.size() = " << pageHashes.size();
@@ -1145,9 +1061,9 @@ void TuningPage::slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> f
 	fillObjectsList();
 }
 
-void TuningPage::slot_buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter)
+void TuningPage::slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter)
 {
-	m_buttonFilter = filter;
+	m_pageFilter = filter;
 
 	fillObjectsList();
 }
@@ -1284,29 +1200,21 @@ void TuningPage::slot_timerTick500()
 		//
 		for (int row = from; row <= to; row++)
 		{
-			/*TuningSignalState* state = m_model->state(row);
-
-			if (state == nullptr)
-			{
-				assert(state);
-				continue;
-			}*/
-
 			//if (state->needRedraw() == true || state->userModified() == true)
+			//{
+			for (int col = 0; col < m_model->columnCount(); col++)
 			{
-				for (int col = 0; col < m_model->columnCount(); col++)
+				int displayIndex = m_model->columnIndex(col);
+
+				if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
 				{
-					int displayIndex = m_model->columnIndex(col);
+					//QString str = QString("%1:%2").arg(row).arg(col);
+					//qDebug() << str;
 
-					if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
-					{
-						//QString str = QString("%1:%2").arg(row).arg(col);
-						//qDebug() << str;
-
-						m_objectList->update(m_model->index(row, col));
-					}
+					m_objectList->update(m_model->index(row, col));
 				}
 			}
+			//}
 		}
 	}
 
