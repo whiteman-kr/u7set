@@ -3,10 +3,12 @@
 #include <QMenu>
 #include "../Settings.h"
 
-SimulatorProjectWidget::SimulatorProjectWidget(Sim::Simulator& simulator, QWidget* parent) :
+SimulatorProjectWidget::SimulatorProjectWidget(std::shared_ptr<Sim::Simulator> simulator, QWidget* parent) :
 	QWidget(parent),
 	m_simulator(simulator)
 {
+	assert(simulator);
+
 	setBackgroundRole(QPalette::Window);
 	setAutoFillBackground(true);
 
@@ -28,6 +30,9 @@ SimulatorProjectWidget::SimulatorProjectWidget(Sim::Simulator& simulator, QWidge
 	headerLabels << "State";
 	m_equipmentTree->setHeaderLabels(headerLabels);
 
+	QByteArray headerState = QSettings().value("SimulatorProjectWidget/headerState").toByteArray();
+	m_equipmentTree->header()->restoreState(headerState);
+
 	m_equipmentTree->clear();
 
 	layout->addWidget(m_buildLabel);
@@ -39,18 +44,24 @@ SimulatorProjectWidget::SimulatorProjectWidget(Sim::Simulator& simulator, QWidge
 	//
 	createActions();
 
+	projectUpdated();	// Fill controls on start new window
+
 	// --
 	//
 	connect(m_equipmentTree, &QTreeWidget::customContextMenuRequested, this, &SimulatorProjectWidget::treeContextMenu);
 	connect(m_equipmentTree, &QTreeWidget::doubleClicked, this, &SimulatorProjectWidget::treeDoubleClicked);
 
-	connect(&m_simulator, &Sim::Simulator::projectUpdated, this, &SimulatorProjectWidget::projectUpdated);
+	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimulatorProjectWidget::projectUpdated);
 
 	return;
 }
 
 SimulatorProjectWidget::~SimulatorProjectWidget()
 {
+	QByteArray headerState = m_equipmentTree->header()->saveState();
+	QSettings().setValue("SimulatorProjectWidget/headerState", headerState);
+
+	return;
 }
 
 void SimulatorProjectWidget::createActions()
@@ -65,13 +76,13 @@ void SimulatorProjectWidget::projectUpdated()
 {
 	assert(m_buildLabel);
 
-	if (m_simulator.isLoaded() == false)
+	if (m_simulator->isLoaded() == false)
 	{
 		m_buildLabel->setText(tr("Build: Not loaded"));
 	}
 	else
 	{
-		QString buildPath = m_simulator.buildPath();
+		QString buildPath = m_simulator->buildPath();
 		m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
 	}
 
@@ -134,8 +145,9 @@ void SimulatorProjectWidget::openControlTabPage()
 		return;
 	}
 
-
-	qDebug() << Q_FUNC_INFO << " " << lmEquipmentId;
+	// --
+	//
+	emit signal_openControlTabPage(lmEquipmentId);
 
 	return;
 }
@@ -145,12 +157,12 @@ void SimulatorProjectWidget::fillEquipmentTree()
 	assert(m_equipmentTree);
 	m_equipmentTree->clear();
 
-	if (m_simulator.isLoaded() == false)
+	if (m_simulator->isLoaded() == false)
 	{
 		return;
 	}
 
-	auto subsystems = m_simulator.subsystems();
+	auto subsystems = m_simulator->subsystems();
 
 	for (std::shared_ptr<Sim::Subsystem> ss : subsystems)
 	{

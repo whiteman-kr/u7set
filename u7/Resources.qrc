@@ -1,4 +1,4 @@
-<RCC>
+<RCC> 
     <qresource prefix="/Images">
         <file>Images/cross.png</file>
         <file>Images/lock.png</file>
@@ -33,6 +33,7 @@
         <file>Images/SimOpen.svg</file>
         <file>Images/SimClose.svg</file>
         <file>Images/SimRefresh.svg</file>
+        <file>Images/SimAddWindow.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

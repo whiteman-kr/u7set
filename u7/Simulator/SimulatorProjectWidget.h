@@ -13,7 +13,7 @@ class SimulatorProjectWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SimulatorProjectWidget(Sim::Simulator& simulator, QWidget* parent = nullptr);
+	explicit SimulatorProjectWidget(std::shared_ptr<Sim::Simulator> simulator, QWidget* parent = nullptr);
 	virtual ~SimulatorProjectWidget();
 
 protected:
@@ -28,8 +28,11 @@ protected slots:
 protected:
 	void fillEquipmentTree();
 
+signals:
+	void signal_openControlTabPage(QString equipmentID);
+
 private:
-	Sim::Simulator& m_simulator;
+	std::shared_ptr<Sim::Simulator> m_simulator;
 
 	QLabel* m_buildLabel = nullptr;
 	QTreeWidget* m_equipmentTree = nullptr;

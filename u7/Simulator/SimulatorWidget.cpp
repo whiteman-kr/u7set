@@ -4,16 +4,35 @@
 #include "SimulatorMemoryWidget.h"
 #include "SimulatorOutputWidget.h"
 #include "SimulatorSelectBuildDialog.h"
+#include "SimulatorControlPage.h"
+#include "../SimulatorTabPage.h"
 
 
-SimulatorWidget::SimulatorWidget(DbController* db, QWidget* parent)
+SimulatorWidget::SimulatorWidget(std::shared_ptr<Sim::Simulator> simulator,
+								 DbController* db,
+								 QWidget* parent /*= nullptr*/,
+								 Qt::WindowType windowType /*= Qt::Window*/,
+								 bool slaveWindow /*= false*/)
 	: QMainWindow(parent),
-	  HasDbController(db)
+	  HasDbController(db),
+	  m_slaveWindow(slaveWindow),
+	  m_simulator(simulator)
 {
-	setWindowFlags(Qt::Widget);
+	if (m_simulator == nullptr)
+	{
+		m_simulator = std::make_shared<Sim::Simulator>();
+	}
+
+	setWindowFlags(windowType);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
-	setCentralWidget(new QWidget);
+	m_tabWidget = new QTabWidget;
+	m_tabWidget->setTabsClosable(true);
+	m_tabWidget->setMovable(true);
+	m_tabWidget->setDocumentMode(true);
+	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	setCentralWidget(m_tabWidget);
 	centralWidget()->setBackgroundRole(QPalette::Dark);
 	centralWidget()->setAutoFillBackground(true);
 
@@ -24,16 +43,31 @@ SimulatorWidget::SimulatorWidget(DbController* db, QWidget* parent)
 	createDocks();
 
 	updateActions();
+
 	// --
 	//
+	connect(db, &DbController::projectOpened, this, &SimulatorWidget::projectOpened);
+	connect(db, &DbController::projectClosed, this, &SimulatorWidget::closeBuild);
+
+	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimulatorWidget::updateActions);
+
+	connect(m_projectWidget, &SimulatorProjectWidget::signal_openControlTabPage, this, &SimulatorWidget::openControlTabPage);
+
+	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimulatorWidget::tabCloseRequest);
+	connect(m_tabWidget->tabBar(), &QTabWidget::customContextMenuRequested, this, &SimulatorWidget::tabBarContextMenuRequest);
+
+	connect(this, &SimulatorWidget::needUpdateActions, this, &SimulatorWidget::updateActions);
 
 	return;
 }
 
 SimulatorWidget::~SimulatorWidget()
 {
-	theSettings.m_simWigetState = saveState();
-	theSettings.writeUserScope();
+	if (m_slaveWindow == false)
+	{
+		theSettings.m_simWigetState = saveState();
+		theSettings.writeUserScope();
+	}
 }
 
 void SimulatorWidget::createToolBar()
@@ -58,6 +92,11 @@ void SimulatorWidget::createToolBar()
 	m_refreshProjectAction->setShortcut(QKeySequence::Refresh);
 	connect(m_refreshProjectAction, &QAction::triggered, this, &SimulatorWidget::refreshBuild);
 	m_toolBar->addAction(m_refreshProjectAction);
+
+	m_addWindowAction = new QAction(QIcon(":/Images/Images/SimAddWindow.svg"), tr("Add Window"), this);
+	m_addWindowAction->setShortcut(QKeySequence::New);
+	connect(m_addWindowAction, &QAction::triggered, this, &SimulatorWidget::addNewWindow);
+	m_toolBar->addAction(m_addWindowAction);
 
 	return;
 }
@@ -90,12 +129,16 @@ void SimulatorWidget::createDocks()
 
 	// OutputLog dock
 	//
-	QDockWidget* outputDock = new QDockWidget("Output", this, 0);
-	outputDock->setObjectName(watchDock->windowTitle());
-	outputDock->setWidget(new SimulatorOutputWidget());
-	outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+	QDockWidget* outputDock = nullptr;
+	if (m_slaveWindow == false)
+	{
+		outputDock = new QDockWidget("Output", this, 0);
+		outputDock->setObjectName(watchDock->windowTitle());
+		outputDock->setWidget(new SimulatorOutputWidget());
+		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-	addDockWidget(Qt::BottomDockWidgetArea, outputDock);
+		addDockWidget(Qt::BottomDockWidgetArea, outputDock);
+	}
 
 	// Memory Widget - at least one defaullt memory widget
 	//
@@ -103,7 +146,10 @@ void SimulatorWidget::createDocks()
 	QDockWidget* m2 = createMemoryDock("Memory 2");
 	QDockWidget* m3 = createMemoryDock("Memory 3");
 
-	tabifyDockWidget(outputDock, m1);
+	if (outputDock != nullptr)
+	{
+		tabifyDockWidget(outputDock, m1);
+	}
 	tabifyDockWidget(m1, m2);
 	tabifyDockWidget(m2, m3);
 
@@ -145,27 +191,45 @@ void SimulatorWidget::showEvent(QShowEvent* e)
 
 	// Restore docks states only after show event, otherwise the _floated_ docks will be behind main window
 	//
-	restoreState(theSettings.m_simWigetState);
+	if (m_slaveWindow == false)
+	{
+		restoreState(theSettings.m_simWigetState);
+	}
 
 	return;
 }
 
 void SimulatorWidget::updateActions()
 {
+	bool projectIsLoaded = m_simulator->isLoaded();
+
 	m_openProjectAction->setEnabled(true);
-	m_closeProjectAction->setEnabled(m_simulator.isLoaded());
-	m_refreshProjectAction->setEnabled(m_simulator.isLoaded());
+	m_closeProjectAction->setEnabled(projectIsLoaded);
+
+	QString project = db()->currentProject().projectName().toLower();
+	QString lastPath = QSettings().value("SimulatorWidget/ProjectLastPath/" + project).toString();
+	bool lastPathExists = QDir(lastPath).exists() == true && lastPath.isEmpty() == false;
+
+	m_refreshProjectAction->setEnabled(projectIsLoaded || lastPathExists);
+	m_addWindowAction->setEnabled(projectIsLoaded);
 
 	return;
+}
+
+void SimulatorWidget::projectOpened(DbProject)
+{
+	emit needUpdateActions();
 }
 
 void SimulatorWidget::openBuild()
 {
 	QSettings settings;
 	SimulatorSelectBuildDialog::BuildType buildType = static_cast<SimulatorSelectBuildDialog::BuildType>(settings.value("SimulatorWidget/BuildType", 0).toInt());
-	static QString lastPath;
 
-	SimulatorSelectBuildDialog d(db()->currentProject().projectName().toLower(),
+	QString project = db()->currentProject().projectName().toLower();
+	QString lastPath = settings.value("SimulatorWidget/ProjectLastPath/" + project).toString();
+
+	SimulatorSelectBuildDialog d(project,
 								 buildType,
 								 lastPath,
 								 this);
@@ -176,31 +240,50 @@ void SimulatorWidget::openBuild()
 		settings.setValue("SimulatorWidget/BuildType", static_cast<int>(d.resultBuildType()));
 		lastPath = d.resultBuildPath();
 
-		loadBuild(lastPath);
+		bool ok = loadBuild(lastPath);
+
+		if (ok == true)
+		{
+			settings.setValue("SimulatorWidget/ProjectLastPath/" + project, lastPath);
+		}
 	}
 
-	updateActions();
+	emit needUpdateActions();
 	return;
 }
 
 void SimulatorWidget::closeBuild()
 {
-	m_simulator.clear();
-	updateActions();
+	m_simulator->clear();
+	emit needUpdateActions();
+
+	SimulatorBasePage::deleteAllPages();
+
 	return;
 }
 
 void SimulatorWidget::refreshBuild()
 {
-	loadBuild(m_simulator.buildPath());
-	updateActions();
+	QString buildPath = m_simulator->buildPath();
+	if (buildPath.isEmpty() == true)
+	{
+		QString project = db()->currentProject().projectName().toLower();
+		buildPath = QSettings().value("SimulatorWidget/ProjectLastPath/" + project).toString();
+	}
+
+	if (buildPath.isEmpty() == false)
+	{
+		loadBuild(buildPath);
+	}
+
+	emit needUpdateActions();
 	return;
 }
 
-void SimulatorWidget::loadBuild(QString buildPath)
+bool SimulatorWidget::loadBuild(QString buildPath)
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-	bool ok = m_simulator.load(buildPath);
+	bool ok = m_simulator->load(buildPath);
 	QApplication::restoreOverrideCursor();
 
 	if (ok == false)
@@ -208,9 +291,106 @@ void SimulatorWidget::loadBuild(QString buildPath)
 		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simultaion. For details see Output window."));
 	}
 
+	return ok;
+}
+
+void SimulatorWidget::addNewWindow()
+{
+	qDebug() << "SimulatorWidget::addNewWindow()";
+
+	SimulatorWidget* widget = new SimulatorWidget(m_simulator, db(), this->parentWidget(), Qt::Window, true);
+	widget->setWindowTitle(tr("u7 Simulator"));
+
+	widget->show();
+
 	return;
 }
 
+void SimulatorWidget::openControlTabPage(QString lmEquipmentId)
+{
+	if (m_simulator->isLoaded() == false)
+	{
+		return;
+	}
+
+	// Check if such SimulatorControlPage already exists
+	//
+	SimulatorControlPage* cp = SimulatorBasePage::controlPage(lmEquipmentId, m_tabWidget);
+
+	if (cp != nullptr)
+	{
+		int tabIndex = m_tabWidget->indexOf(cp);
+		if (tabIndex != -1)
+		{
+			m_tabWidget->setCurrentIndex(tabIndex);
+		}
+		else
+		{
+			cp->show();
+			cp->activateWindow();
+		}
+
+		return;
+	}
+
+	// Create new SimulatorControlPage
+	//
+	auto logicModule = m_simulator->logicModule(lmEquipmentId);
+	if (logicModule == nullptr)
+	{
+		assert(logicModule);
+		return;
+	}
+	assert(lmEquipmentId == logicModule->equipmentId());
+
+	SimulatorControlPage* controlPage = new SimulatorControlPage(logicModule, m_tabWidget);
+
+	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
+	m_tabWidget->setCurrentIndex(tabIndex);
+
+	return;
+}
+
+void SimulatorWidget::tabCloseRequest(int index)
+{
+	QWidget* w = m_tabWidget->widget(index);
+	assert(w);
+
+	delete w;
+	return;
+}
+
+void SimulatorWidget::tabBarContextMenuRequest(const QPoint& pos)
+{
+	assert(m_tabWidget);
+	QTabBar* tabBar = m_tabWidget->tabBar();
+
+	int tabIndex = tabBar->tabAt(pos);
+	if (tabIndex == -1)
+	{
+		return;
+	}
+
+	SimulatorBasePage* page = qobject_cast<SimulatorBasePage*>(m_tabWidget->widget(tabIndex));
+	if (page == nullptr)
+	{
+		assert(page);
+		return;
+	}
+
+	QMenu menu;
+	menu.addAction(tr("Detach"));
+	menu.addAction(tr("Close"));
+
+	menu.exec(m_tabWidget->tabBar()->mapToGlobal(pos));
+
+	return;
+}
+
+
+//
+//	SimulatorToolBar
+//
 SimulatorToolBar::SimulatorToolBar(const QString& title, QWidget* parent) :
 	QToolBar(title, parent)
 {

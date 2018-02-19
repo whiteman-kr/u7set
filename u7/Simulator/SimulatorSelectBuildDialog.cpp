@@ -81,7 +81,10 @@ void SimulatorSelectBuildDialog::fillBuildList(QString currentBuildPath)
 		QListWidgetItem* item = new QListWidgetItem(fi.fileName(), ui->buildList);
 		item->setData(Qt::UserRole, fi.absoluteFilePath());
 
-		if (fi.fileName() == currentBuildPath)
+		QDir d1(fi.absoluteFilePath());
+		QDir d2(currentBuildPath);
+
+		if (d1 == d2)
 		{
 			currentItem = item;
 		}

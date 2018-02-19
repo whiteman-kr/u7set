@@ -209,7 +209,9 @@ SOURCES +=\
     Builder/ConfigurationServiceCfgGenerator.cpp \
     Simulator/SimulatorOutputWidget.cpp \
     Simulator/SimulatorProjectWidget.cpp \
-    Simulator/SimulatorSelectBuildDialog.cpp
+    Simulator/SimulatorSelectBuildDialog.cpp \
+    Simulator/SimulatorBasePage.cpp \
+    Simulator/SimulatorControlPage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -356,7 +358,9 @@ HEADERS  += \
     Builder/ConfigurationServiceCfgGenerator.h \
     Simulator/SimulatorOutputWidget.h \
     Simulator/SimulatorProjectWidget.h \
-    Simulator/SimulatorSelectBuildDialog.h
+    Simulator/SimulatorSelectBuildDialog.h \
+    Simulator/SimulatorBasePage.h \
+    Simulator/SimulatorControlPage.h
 
 FORMS    += \
     CreateProjectDialog.ui \
