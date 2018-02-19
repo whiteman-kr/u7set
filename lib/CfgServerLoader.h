@@ -58,13 +58,15 @@ public:
 private:
 	void readBuildXml();
 
+	bool checkFile(QString& pathFileName, QByteArray& fileData) override;
+
 private:
 	std::shared_ptr<CircularLogger> m_logger;
 
 	QString m_buildXmlPathFileName;
 
 	Builder::BuildInfo m_buildInfo;
-	HashedVector<QString, Builder::BuildFileInfo> m_buildFileInfo;
+	HashedVector<QString, Builder::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
 
 	ErrorCode m_errorCode = ErrorCode::Ok;
 };

@@ -9,7 +9,6 @@ class DbController;
 class QCheckBox;
 class QComboBox;
 
-
 //
 //
 // UploadTabPage
@@ -28,7 +27,7 @@ public:
 public:
 
 	bool isUploading();
-	void findProjectBuilds();
+	void refreshProjectBuilds();
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
@@ -72,7 +71,11 @@ public slots:
 private:
 	void writeLog(const OutputLogItem& logItem);
 	QString selectedSubsystem();
+
+	void selectBuild(const QString& id);
 	void selectSubsystem(const QString& id);
+
+	void refreshBinaryFile();
 
 private slots:
 
@@ -87,6 +90,8 @@ private slots:
 	// Data
 	//
 private:
+
+	// Interface members
 
 	QSplitter* m_vsplitter = nullptr;
 
@@ -108,25 +113,30 @@ private:
 	QPushButton* m_pClearLogButton = nullptr;
 	QPushButton* m_pCancelButton = nullptr;
 
-	int m_logTimerId = -1;
-
 	Configurator* m_pConfigurator = nullptr;
 	QThread* m_pConfigurationThread = nullptr;
 
+	// Firmware and processing
+
 	Hardware::ModuleFirmwareStorage m_firmware;
+
+	int m_logTimerId = -1;
+
+	bool m_uploading = false;
 
 	Builder::IssueLogger m_outputLog;
 
 	QString m_buildSearchPath;
 
+	// Currently selected build and file info
+
+	QStringList m_currentBuilds;
 	QString m_currentBuild;
-	QString m_currentSubsystem;
-	QString m_currentFileName;
 
-	int m_currentBuildIndex = -1;
-	int m_currentSubsystemIndex = -1;
+	QString m_currentFilePath;
+	QDateTime m_currentFileModifiedTime;
 
-	bool m_uploading = false;
+	// Uart Columns indexes
 
 	const int columnSubsysId = 0;
 	const int columnUartId = 0;
@@ -134,6 +144,3 @@ private:
 	const int columnUploadCount = 2;
 	const int columnUartStatus = 3;
 };
-
-
-

@@ -595,13 +595,31 @@ void ArchWriteThreadWorker::appendToArray(const SimpleAppSignalState& state, QSt
 {
 	qint64 bigintHash = *reinterpret_cast<const qint64*>(&state.hash);
 
+	QString valueStr;
+
+	if (std::isfinite(state.value) == true)
+	{
+		valueStr = QString::number(state.value, 'g', 20);
+	}
+	else
+	{
+		if (std::isinf(state.value) == true)
+		{
+			valueStr = "'Infinity'";
+		}
+		else
+		{
+			valueStr = "'NaN'";
+		}
+	}
+
 	if (arrayStr.isEmpty() == true)
 	{
 		arrayStr = QString(m_format1).
 				arg(bigintHash).
 				arg(state.time.plant.timeStamp).
 				arg(state.time.system.timeStamp).
-				arg(state.value).
+				arg(valueStr).
 				arg(state.flags.all);
 	}
 	else
@@ -610,7 +628,7 @@ void ArchWriteThreadWorker::appendToArray(const SimpleAppSignalState& state, QSt
 				arg(bigintHash).
 				arg(state.time.plant.timeStamp).
 				arg(state.time.system.timeStamp).
-				arg(state.value).
+				arg(valueStr).
 				arg(state.flags.all));
 	}
 }

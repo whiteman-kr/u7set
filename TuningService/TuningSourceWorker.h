@@ -29,6 +29,7 @@ namespace Tuning
 		qint64 errPartialSent = 0;
 		qint64 errReplySize = 0;
 		qint64 errNoReply = 0;
+		qint64 errRupCRC = 0;
 
 		// errors in reply RupFrameHeader
 		//

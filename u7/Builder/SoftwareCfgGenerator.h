@@ -46,7 +46,9 @@ namespace Builder
 		static bool checkLmToSoftwareLinks(IssueLogger* log);
 
 		QString getBuildInfoCommentsForBat();
+		QString getBuildInfoCommentsForSh();
 		bool getConfigIp(QString& cfgIP1, QString& cfgIP2);
+		bool getServiceParameters(QString &parameters);
 
 
 	public:
@@ -67,6 +69,7 @@ namespace Builder
 									 QString subDir,
 									 QString group,
 									 IssueLogger* log);
+		static bool writeAppLogicSchemasDetails(const QList<SchemaFile>& schemaFiles, BuildResultWriter* buildResultWriter, QString dir, IssueLogger* log);
 
 		virtual bool generateConfiguration() = 0;
 

@@ -65,6 +65,8 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningSignalManager* tuningSignal
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errPartialSent"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errReplySize"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errNoReply"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errAnalogLowBoundCheck"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errAnalogHighBoundCheck"));
 
 	ui->treeWidget->addTopLevelItem(stateItem);
 
@@ -78,6 +80,8 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningSignalManager* tuningSignal
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupModuleType"));
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupFramesQuantity"));
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupFrameNumber"));
+	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupCRC"));
+
 
 	ui->treeWidget->addTopLevelItem(errorsRUPItem);
 
@@ -204,6 +208,8 @@ void DialogTuningSourceInfo::updateData()
 	item->child(c++)->setText(1, QString::number(ts.m_state.errpartialsent()));
 	item->child(c++)->setText(1, QString::number(ts.m_state.errreplysize()));
 	item->child(c++)->setText(1, QString::number(ts.m_state.errnoreply()));
+	item->child(c++)->setText(1, QString::number(ts.m_state.erranaloglowboundcheck()));
+	item->child(c++)->setText(1, QString::number(ts.m_state.erranaloghighboundcheck()));
 
 	// RupFrameHeader
 
@@ -223,6 +229,8 @@ void DialogTuningSourceInfo::updateData()
 
 	item->child(c++)->setText(1, QString::number(ts.m_state.errrupframesquantity()));
 	item->child(c++)->setText(1, QString::number(ts.m_state.errrupframenumber()));
+
+	item->child(c++)->setText(1, QString::number(ts.m_state.errrupcrc()));
 
 	// FotipHeader
 
@@ -274,6 +282,7 @@ void DialogTuningSourceInfo::updateData()
 
 	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagapplysuccess()));
 	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagsetsor()));
+
 }
 
 

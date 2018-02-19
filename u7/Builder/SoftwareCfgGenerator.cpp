@@ -148,10 +148,14 @@ namespace Builder
 
 		// Get all Application Logic schemas
 		//
-		m_schemaFileList.clear();
+		m_schemaFileList.clear();	// m_schemaFileList is filled in next two calls of SoftwareCfgGenerator::writeSchemasList
 
 		bool result = true;
 		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), QLatin1String(".") + ::AlFileExtension, "LogicSchemas", "LogicSchema", log);
+
+		// Write LogicSchemas/SchemaDetais.pbuf
+		//
+		result &= writeAppLogicSchemasDetails(m_schemaFileList, buildResultWriter, "LogicSchemas", log);
 
 		// Get all Monitor schemas
 		//
@@ -227,7 +231,7 @@ namespace Builder
 				continue;
 			}
 
-			qDebug() << "Build: schema " << schema->schemaId() << " is loaded";
+			//qDebug() << "Build: schema " << schema->schemaId() << " is loaded";
 
 			// Add file to build result
 			//
@@ -250,6 +254,42 @@ namespace Builder
 		}
 
 		return returnResult;
+	}
+
+	bool SoftwareCfgGenerator::writeAppLogicSchemasDetails(const QList<SchemaFile>& schemaFiles, BuildResultWriter* buildResultWriter, QString dir, IssueLogger* log)
+	{
+		if (buildResultWriter == nullptr ||
+			log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool ok = true;
+		bool result = true;
+
+		VFrame30::SchemaDetailsSet sds;
+		for (const SchemaFile& sf : schemaFiles)
+		{
+			std::shared_ptr<VFrame30::SchemaDetails> details = std::make_shared<VFrame30::SchemaDetails>();
+
+			ok = details->parseDetails(sf.details);
+			result &= ok;
+
+			if (ok == false)
+			{
+				log->errINT1001(tr("Parse schema detais error."), sf.id);
+			}
+
+			sds.add(details);
+		}
+
+		QByteArray fileData;
+		sds.Save(fileData);
+
+		buildResultWriter->addFile(dir, "SchemaDetails.pbuf", fileData, false);
+
+		return result;
 	}
 
 
@@ -496,6 +536,23 @@ namespace Builder
 		return comments;
 	}
 
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForSh()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "#!/bin/bash\n\n";
+
+		comments += "# Project: " + b.project + "\n";
+		comments += "# BuildNo: " + QString::number(b.id) + "\n";
+		comments += "# Type: " + b.typeStr() + "\n";
+		comments += "# Date: " + b.dateStr() + "\n";
+		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "# User: " + b.user + "\n";
+		comments += "# Workstation: " + b.workstation + "\n\n";
+
+		return comments;
+	}
+
 	bool SoftwareCfgGenerator::getConfigIp(QString& cfgIP1, QString& cfgIP2)
 	{
 		TEST_PTR_RETURN_FALSE(m_equipment);
@@ -563,6 +620,39 @@ namespace Builder
 		result &= ipGetter(2, cfgIP2);
 
 		return result;
+	}
+
+	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
+	{
+		parameters += " -e";
+
+		QString cfgIP1;
+		QString cfgIP2;
+		if (getConfigIp(cfgIP1, cfgIP2) == false)
+		{
+			return false;
+		}
+
+		if (cfgIP1.isEmpty() && cfgIP2.isEmpty())
+		{
+			return false;
+		}
+
+		if (cfgIP1.isEmpty())
+		{
+			cfgIP1 = cfgIP2;
+		}
+
+		if (cfgIP2.isEmpty())
+		{
+			cfgIP2 = cfgIP1;
+		}
+
+		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
+
+		parameters += " -id=" + m_software->equipmentIdTemplate() + "\n";
+
+		return true;
 	}
 
 	// ---------------------------------------------------------------------------------
