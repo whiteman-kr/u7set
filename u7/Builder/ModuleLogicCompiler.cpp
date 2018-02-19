@@ -9003,7 +9003,7 @@ namespace Builder
 			result = false;
 		}
 
-		result &= writeTuningInfoFile(m_lmSubsystemID, m_lmNumber);
+		result &= writeTuningInfoFile();
 
 		//
 		// writeLMCodeTestFile();
@@ -9089,7 +9089,7 @@ namespace Builder
 											m_log);
 	}
 
-	bool ModuleLogicCompiler::writeTuningInfoFile(const QString& subsystemID, int lmNumber)
+	bool ModuleLogicCompiler::writeTuningInfoFile()
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -9097,12 +9097,12 @@ namespace Builder
 		}
 
 		QStringList file;
-		QString line = QString("------------------------------------------------------------------------------------------");
+		QString line = QString("----------------------------------------------------------------------------------------------------------");
 
 		file.append(QString("Tuning information file: %1\n").arg(m_lm->equipmentIdTemplate()));
 		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentIdTemplate()));
 		file.append(QString("LM caption: %1").arg(m_lm->caption()));
-		file.append(QString("LM number: %1\n").arg(lmNumber));
+		file.append(QString("LM number: %1\n").arg(m_lmNumber));
 		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
 
 		QString s;
@@ -9117,7 +9117,7 @@ namespace Builder
 		{
 			file.append(QString("\nAnalog signals, type Float (32 bits)"));
 			file.append(line);
-			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : analogFloatSignals)
@@ -9130,7 +9130,9 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%-24s\t%f\t%f\t%f",
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%f\t%f\t%f",
+								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
+								signal->tuningAddr().bit(),
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
@@ -9147,7 +9149,7 @@ namespace Builder
 		{
 			file.append(QString("\nAnalog signals, type Signed Integer (32 bits)"));
 			file.append(line);
-			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : analogIntSignals)
@@ -9160,7 +9162,9 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
+								signal->tuningAddr().bit(),
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
@@ -9177,7 +9181,7 @@ namespace Builder
 		{
 			file.append(QString("\nDiscrete signals (1 bit)"));
 			file.append(line);
-			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : discreteSignals)
@@ -9190,7 +9194,9 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
+								signal->tuningAddr().bit(),
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
@@ -9262,8 +9268,8 @@ namespace Builder
 			}
 		}
 */
-		bool result = m_resultWriter->addFile(subsystemID, QString("%1-%2.tun").
-										 arg(subsystemID.toLower()).arg(lmNumber), file);
+		bool result = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.tun").
+										 arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
 		return result;
 	}
 

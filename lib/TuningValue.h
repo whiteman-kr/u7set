@@ -48,7 +48,7 @@ public:
 	double toDouble() const;
 	void fromDouble(double value);
 
-	double toFloat() const;
+	float toFloat() const;
 	void fromFloat(float value);
 
 	QString toString(int precision = -1) const;

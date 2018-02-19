@@ -336,6 +336,8 @@ message TuningSourceState
 
     optional bool controlIsActive = 42 [default = false];
     optional bool setSOR = 43 [default = false];
+    optional string activeClientID = 44;
+    optional bool hasUnappliedParams = 45 [default = false];
 }
 
 message GetTuningSourcesStatesReply
@@ -353,10 +355,12 @@ message GetTuningSourcesStatesReply
 //
 message ChangeConrolledTuningSourceRequest
 {
-    optional string tuningSourceEquipmentID = 1;		    // not empty - to change controlled source
+    optional bool takeControl = 1;				    // true - to force control to current client
+
+    optional string tuningSourceEquipmentID = 2;		    // not empty - to change controlled source
                                                                     // empty - to request current controlled source (activateControl field is ignored)
 
-    optional bool activateControl = 2 [default = false];	    // if tuningSourceEquipmentID is not empty:
+    optional bool activateControl = 3 [default = false];	    // if tuningSourceEquipmentID is not empty:
                                                                     //	    true - to activate tuning source control
 								    //	    false - to deactivate tuning source control
 }

@@ -588,6 +588,9 @@ namespace Tuning
 											  sizeof(request),
 											  m_sourceIP.address(),
 											  m_sourceIP.port());
+
+		m_stat.requestCount++;
+
 		// revert headers to LittleEndian
 		//
 		request.rupHeader.reverseBytes();
@@ -639,7 +642,6 @@ namespace Tuning
 			assert(false);
 		}
 	}
-
 
 	bool TuningSourceWorker::initRupHeader(Rup::Header& rupHeader)
 	{

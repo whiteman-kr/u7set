@@ -4351,21 +4351,6 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 
 	s.setTuningHighBound(tv);
 
-	if (s.customAppSignalID() == "LM2_ANALOG_SIG005")
-	{
-		float lb = s.tuningLowBound().floatValue();
-		float hb = s.tuningHighBound().floatValue();
-
-		float lb2 = s.tuningLowBound().toFloat();
-
-		float lv = -3.45;
-		float hv = -45.6788;
-
-		int a = 0;
-		a++;
-
-	}
-
 	s.setAcquire(q.value(SD_ACQUIRE).toBool());
 	s.setArchive(q.value(SD_ARCHIVE).toBool());
 
