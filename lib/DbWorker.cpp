@@ -4288,6 +4288,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	//
 	s.setAppSignalID(q.value(SD_APP_SIGNAL_ID).toString());
 	s.setCustomAppSignalID(q.value(SD_CUSTOM_APP_SIGNAL_ID).toString());
+
 	s.setCaption(q.value(SD_CAPTION).toString());
 	s.setEquipmentID(q.value(SD_EQUIPMENT_ID).toString());
 	s.setBusTypeID(q.value(SD_BUS_TYPE_ID).toString());
@@ -4349,6 +4350,21 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 		   q.value(SD_TUNING_HIGH_BOUND_DOUBLE).toDouble());
 
 	s.setTuningHighBound(tv);
+
+	if (s.customAppSignalID() == "LM2_ANALOG_SIG005")
+	{
+		float lb = s.tuningLowBound().floatValue();
+		float hb = s.tuningHighBound().floatValue();
+
+		float lb2 = s.tuningLowBound().toFloat();
+
+		float lv = -3.45;
+		float hv = -45.6788;
+
+		int a = 0;
+		a++;
+
+	}
 
 	s.setAcquire(q.value(SD_ACQUIRE).toBool());
 	s.setArchive(q.value(SD_ARCHIVE).toBool());

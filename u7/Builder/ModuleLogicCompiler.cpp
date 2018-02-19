@@ -9135,8 +9135,8 @@ namespace Builder
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue().toFloat(),
-								signal->lowEngeneeringUnits(),
-								signal->highEngeneeringUnits());
+								signal->tuningLowBound().floatValue(),
+								signal->tuningHighBound().floatValue());
 				file.append(str);
 			}
 		}
@@ -9165,8 +9165,8 @@ namespace Builder
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue().int32Value(),
-								static_cast<qint32>(signal->lowEngeneeringUnits()),
-								static_cast<qint32>(signal->highEngeneeringUnits()));
+								signal->tuningLowBound().int32Value(),
+								signal->tuningHighBound().int32Value());
 				file.append(str);
 			}
 		}

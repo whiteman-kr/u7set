@@ -508,7 +508,7 @@ namespace Builder
 			assert(false);
 		}
 
-
+		return result;
 	}
 
 
