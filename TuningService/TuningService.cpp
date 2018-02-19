@@ -41,7 +41,8 @@ namespace Tuning
 
 	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 	{
-		Q_UNUSED(serviceInfo);
+		serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
+		serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
 	}
 
 	void TuningServiceWorker::initCmdLineParser()

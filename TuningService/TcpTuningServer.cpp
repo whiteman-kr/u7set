@@ -75,6 +75,14 @@ namespace Tuning
 			onChangeControlledTuningSourceRequest(requestData, requestDataSize);
 			break;
 
+		case TDS_GET_TUNING_SERVICE_SETTINGS:
+			onGetTuningServiceSettings(requestData, requestDataSize);
+			break;
+
+		case RQID_GET_CLIENT_LIST:
+			sendClientList();
+			break;
+
 		default:
 			assert(false);
 			break;
@@ -426,6 +434,17 @@ namespace Tuning
 		m_changeControlledTuningSourceReply.set_controlisactive(controlIsActive);
 
 		sendReply(m_changeControlledTuningSourceReply);
+	}
+
+	void TcpTuningServer::onGetTuningServiceSettings(const char *requestData, quint32 requestDataSize)
+	{
+		m_getServiceSettingsReply.Clear();
+
+		m_getServiceSettingsReply.set_equipmentid(m_service.equipmentID().toStdString());
+		m_getServiceSettingsReply.set_configip1(m_service.cfgServiceIP1().toStdString());
+		m_getServiceSettingsReply.set_configip2(m_service.cfgServiceIP2().toStdString());
+
+		sendReply(m_getServiceSettingsReply);
 	}
 
 
