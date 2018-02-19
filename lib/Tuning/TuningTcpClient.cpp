@@ -591,11 +591,6 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			quint64 id = tss.sourceid();
 
-			if (tss.controlisactive() == true)
-			{
-				qDebug() <<  id;
-			}
-
 			bool found = false;
 
 			for (auto& it : m_tuningSources)

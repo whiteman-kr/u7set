@@ -5,6 +5,28 @@
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
 
+class FilterButton : public QPushButton
+{
+	Q_OBJECT
+public:
+	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent = nullptr);
+
+	std::shared_ptr<TuningFilter> filter();
+
+	QString caption() const;
+
+private:
+	std::shared_ptr<TuningFilter> m_filter;
+	QString m_caption;
+
+private slots:
+	void slot_toggled(bool checked);
+
+signals:
+	void filterButtonClicked(std::shared_ptr<TuningFilter> filter);
+};
+
+
 class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
@@ -37,6 +59,7 @@ private:
 	void updateCounters();
 
 	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
+
 	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
 
 protected:

@@ -6,6 +6,87 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
+//
+// FilterButton
+//
+
+FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent)
+	:QPushButton(caption, parent)
+{
+	m_filter = filter;
+	m_caption = caption;
+
+	setCheckable(true);
+
+	if (check == true)
+	{
+		setChecked(true);
+	}
+
+	setMinimumSize(100, 25);
+
+	QColor backColor = Qt::lightGray;
+	QColor textColor = Qt::white;
+
+	QColor backSelectedColor = Qt::darkGray;
+	QColor textSelectedColor = Qt::white;
+
+	if (filter->backColor().isValid() && filter->textColor().isValid() && filter->backColor() != filter->textColor())
+	{
+		backColor = filter->backColor();
+		textColor = filter->textColor();
+	}
+
+	if (filter->backSelectedColor().isValid() && filter->textSelectedColor().isValid() && filter->backSelectedColor() != filter->textSelectedColor())
+	{
+		backSelectedColor = filter->backSelectedColor();
+		textSelectedColor = filter->textSelectedColor();
+	}
+
+	setStyleSheet(tr("\
+					QPushButton {   \
+						background-color: %1;\
+						color: %2;    \
+					}   \
+					QPushButton:checked{\
+						background-color: %3;\
+						color: %4;    \
+						border: none;\
+					}\
+					").arg(backColor.name())
+					 .arg(textColor.name())
+					 .arg(backSelectedColor.name())
+					 .arg(textSelectedColor.name()));
+
+	update();
+
+
+	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
+}
+
+std::shared_ptr<TuningFilter> FilterButton::filter()
+{
+	return m_filter;
+}
+
+QString FilterButton::caption() const
+{
+	return m_caption;
+}
+
+void FilterButton::slot_toggled(bool checked)
+{
+	if (checked == true)
+	{
+		emit filterButtonClicked(m_filter);
+	}
+
+}
+
+//
+// TuningWorkspace
+//
+
 int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
@@ -518,15 +599,30 @@ void TuningWorkspace::createTabPages()
 		//
 		if (m_singleTuningPage == nullptr)
 		{
-			std::shared_ptr<TuningFilter> singlePageFilter = std::make_shared<TuningFilter>();
+			std::shared_ptr<TuningFilter> singlePageFilter = nullptr;
 
-			QUuid uid = QUuid::createUuid();
+			if (m_currentbuttonFilter != nullptr)
+			{
+				// If a button is pressed - set button filter as page filter
 
-			singlePageFilter->setID(uid.toString());
+				singlePageFilter = m_currentbuttonFilter;
+			}
+			else
+			{
+				// Otherwise set workspace filter to page filter
 
-			// Copy signals' hashes from parent filter to single page's filter
+				singlePageFilter = std::make_shared<TuningFilter>();
 
-			singlePageFilter->setSignalsHashes(m_workspaceFilter->signalsHashes());
+				QUuid uid = QUuid::createUuid();
+
+				singlePageFilter->setID(uid.toString());
+
+				singlePageFilter->setCaption(m_workspaceFilter->caption());
+
+				// Copy signals' hashes from parent filter to single page's filter
+
+				singlePageFilter->setSignalsHashes(m_workspaceFilter->signalsHashes());
+			}
 
 			QWidget* tp = createTuningPageOrWorkspace(singlePageFilter);
 
@@ -539,6 +635,7 @@ void TuningWorkspace::createTabPages()
 		{
 			m_tab->setVisible(false);
 		}
+
 		m_singleTuningPage->setVisible(true);
 	}
 }
@@ -598,13 +695,18 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningPagesMap.end())
 		{
-			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_currentbuttonFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
 
 			m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
 			connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
 
-			connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_buttonFilterSelectionChanged);
+			if (childWorkspaceFilter->isButton() == true)
+			{
+				// Connect button filter event only if this tuning page is selected by button, not tab
+
+				connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
+			}
 
 			return tp;
 		}
@@ -679,11 +781,16 @@ void TuningWorkspace::updateCounters()
 
 	// Tab counters
 
-	if (m_tab != nullptr)
+	if (m_tab != nullptr && m_tab->isVisible() == true)
 	{
 		int tabIndex = 0;
 
-		assert(m_tab->count() == static_cast<int>(m_tabsFilters.size()));
+		if (m_tab->count() != static_cast<int>(m_tabsFilters.size()))
+		{
+			qDebug() << m_tab->count();
+			qDebug() << static_cast<int>(m_tabsFilters.size());
+			assert(m_tab->count() == static_cast<int>(m_tabsFilters.size()));
+		}
 
 		for (std::shared_ptr<TuningFilter> f : m_tabsFilters)
 		{
@@ -1102,8 +1209,5 @@ void TuningWorkspace::slot_filterButtonClicked(std::shared_ptr<TuningFilter> fil
 
 	createTabPages();
 
-	if (m_tab == nullptr)
-	{
-		emit buttonFilterSelectionChanged(filter);
-	}
+	emit buttonFilterSelectionChanged(filter);
 }

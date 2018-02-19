@@ -9,6 +9,7 @@
 #include <QBuffer>
 #include "AppDataServiceWidget.h"
 #include "ConfigurationServiceWidget.h"
+#include "TuningServiceWidget.h"
 #include "../lib/Types.h"
 
 HostInfo::HostInfo() : ip(0)
@@ -511,6 +512,10 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 
 		case E::SoftwareType::ConfigurationService:
 			serviceData.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			break;
+
+		case E::SoftwareType::TuningService:
+			serviceData.statusWidget = new TuningServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
 			break;
 
 		default:

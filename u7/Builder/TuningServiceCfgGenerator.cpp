@@ -237,7 +237,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_software);
 
-		QString content = getBuildInfoCommentsForBat();
+		QString content = getBuildInfoCommentsForSh();
 
 		content += "./TuningSrv";
 
