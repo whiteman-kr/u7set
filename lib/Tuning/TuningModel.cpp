@@ -549,7 +549,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 			if (tss.controlIsEnabled() == false)
 			{
-				return tr("Disabled");
+				return tr("-");
 			}
 			else
 			{

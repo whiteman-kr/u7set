@@ -21,14 +21,12 @@ DialogTuningSources::DialogTuningSources(TuningClientTcpClient* tcpClient, QWidg
 	ui->labelSingleControlMode->setText(m_singleLmControlEnabledString);
 
 	QStringList headerLabels;
-	headerLabels << tr("Id");
 	headerLabels << tr("EquipmentId");
 	headerLabels << tr("Caption");
 	headerLabels << tr("Ip");
 	headerLabels << tr("Port");
 	headerLabels << tr("Channel");
 	headerLabels << tr("SubsystemID");
-	headerLabels << tr("Subsystem");
 	headerLabels << tr("LmNumber");
 
 	headerLabels << tr("IsReply");
@@ -93,7 +91,6 @@ void DialogTuningSources::update(bool refreshOnly)
 
 			TuningSource& ts = tsi[i];
 
-			connectionStrings << QString::number(ts.info.id());
 			connectionStrings << ts.info.equipmentid().c_str();
 			connectionStrings << ts.info.caption().c_str();
 			connectionStrings << ts.info.ip().c_str();
@@ -102,7 +99,6 @@ void DialogTuningSources::update(bool refreshOnly)
 			QChar chChannel = 'A' + ts.info.channel();
 			connectionStrings << chChannel;
 
-			connectionStrings << QString::number(ts.info.subsystemid());
 			connectionStrings << ts.info.subsystem().c_str();
 			connectionStrings << QString::number(ts.info.lmnumber());
 
@@ -131,7 +127,7 @@ void DialogTuningSources::update(bool refreshOnly)
 		}
 	}
 
-	const int dynamicColumn = 9;
+	const int dynamicColumn = 7;
 
 	for (int i = 0; i < count; i++)
 	{

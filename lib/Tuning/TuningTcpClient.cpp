@@ -165,7 +165,7 @@ bool TuningTcpClient::tuningSourceStatus(Hash equipmentHash, int* errorsCount, i
 	{
 		if (status != nullptr)
 		{
-			*status = tr("On [%1 replies]").arg(ts.state.replycount());
+			*status = tr("Active [%1 replies]").arg(ts.state.replycount());
 		}
 	}
 

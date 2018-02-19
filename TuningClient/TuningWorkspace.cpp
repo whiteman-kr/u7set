@@ -989,7 +989,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	if (filter->counters().controlEnabledCounter == 0)
 	{
-		treeItem->setText(columnStatusIndex, tr("Disabled"));
+		treeItem->setText(columnStatusIndex, tr("Deactivated"));
 		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
 		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
 	}
