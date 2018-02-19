@@ -291,22 +291,24 @@ void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& s
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(si.equipmentid()));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QHostAddress(ci.ip()).toString());
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QString::fromStdString(si.username()));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QHostAddress(ci.ip()).toString());
 
 		quint64 uptime = ci.uptime();
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
 
 		uptime /= 1000;
 		int s = uptime % 60; uptime /= 60;
 		int m = uptime % 60; uptime /= 60;
 		int h = uptime % 24; uptime /= 24;
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QString("(%1d %2:%3:%4)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), QString("(%1d %2:%3:%4)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), si.buildno() == SoftwareInfo::UNDEFINED_BUILD_NO ? "Non actual" : QString::number(si.buildno()));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), si.buildno() == SoftwareInfo::UNDEFINED_BUILD_NO ? "Non actual" : QString::number(si.buildno()));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), static_cast<qint64>(ci.replyquantity()));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 8), static_cast<qint64>(ci.replyquantity()));
 	}
 }
 
@@ -405,6 +407,7 @@ QTableView* BaseServiceStateWidget::addTabWithTableView(int defaultSectionSize, 
 	newTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	newTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	newTableView->setAlternatingRowColors(true);
+	newTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	addTab(newTableView, label);
 
@@ -440,15 +443,16 @@ void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
 	m_clientsTabModel->setHeaderData(0, Qt::Horizontal, "Software type");
 	m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Version");
 	m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "Equipment ID");
-	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "IPv4");
-	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "Connection time");
-	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "Connection uptime");
-	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Build");
-	m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Packet counter");
+	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "User");
+	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "IPv4");
+	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "Connection time");
+	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Connection uptime");
+	m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Build");
+	m_clientsTabModel->setHeaderData(8, Qt::Horizontal, "Packet counter");
 
 	clientsTableView->setColumnWidth(0, 200);
 	clientsTableView->setColumnWidth(2, 250);
-	clientsTableView->setColumnWidth(6, 100);
+	clientsTableView->setColumnWidth(7, 100);
 }
 
 quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
