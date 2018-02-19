@@ -43,14 +43,14 @@
        <item>
         <widget class="QPushButton" name="btnEnableControl">
          <property name="text">
-          <string>Enable Control</string>
+          <string>Activate Control</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btnDisableControl">
          <property name="text">
-          <string>Disable Control</string>
+          <string>Deactivate Control</string>
          </property>
         </widget>
        </item>
