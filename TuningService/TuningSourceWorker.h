@@ -92,6 +92,7 @@ namespace Tuning
 		struct TuningCommand
 		{
 			QString clientEquipmentID;
+			QString user;
 
 			FotipV2::OpCode opCode = FotipV2::OpCode::Read;
 			bool autoCommand = false;
@@ -105,7 +106,8 @@ namespace Tuning
 			{
 				qint32 signalIndex = 0;
 
-				TuningValue tuningValue;
+				TuningValue newTuningValue;
+				TuningValue currentTuningValue;
 			} write;
 		};
 
@@ -153,7 +155,6 @@ namespace Tuning
 
 		private:
 			void updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat);
-			void logWriteRequest();
 
 		private:
 			QString m_appSignalID;
@@ -207,8 +208,14 @@ namespace Tuning
 		void getState(Network::TuningSourceState& tuningSourceState);
 
 		void readSignalState(Network::TuningSignalState* tss);
-		void writeSignalState(const QString& clientEquipmentID, Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult);
-		void applySignalStates(const QString& clientEquipmentID);
+
+		NetworkError writeSignalState(	const QString& clientEquipmentID,
+										const QString& user,
+										Hash signalHash,
+										const TuningValue& newValue);
+
+		NetworkError applySignalStates(	const QString& clientEquipmentID,
+										const QString& user);
 
 	signals:
 		void replyReady();
@@ -242,6 +249,8 @@ namespace Tuning
 		void restartTimer();
 
 		void invalidateAllSignals();
+
+		void logTuningCommand(const TuningCommand& cmd);
 
 	private slots:
 		void onTimer();
@@ -299,6 +308,8 @@ namespace Tuning
 		Queue<Rup::Frame> m_replyQueue;
 
 		QueueOnList<TuningCommand> m_tuningCommandQueue;
+
+		TuningCommand m_lastProcessedCommand;
 
 		quint16 m_rupNumerator = 0;
 

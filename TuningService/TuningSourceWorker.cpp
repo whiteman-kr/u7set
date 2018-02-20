@@ -223,35 +223,29 @@ namespace Tuning
 		initTuningSignals(source.tuningData());
 	}
 
-
 	TuningSourceWorker::~TuningSourceWorker()
 	{
 	}
-
 
 	quint32 TuningSourceWorker::sourceIP() const
 	{
 		return m_sourceIP.address32();
 	}
 
-
 	QString TuningSourceWorker::sourceEquipmentID() const
 	{
 		return m_sourceEquipmentID;
 	}
-
 
 	void TuningSourceWorker::pushReply(const Rup::Frame& reply)
 	{
 		m_replyQueue.push(&reply);
 	}
 
-
 	void TuningSourceWorker::incErrReplySize()
 	{
 		m_stat.errReplySize++;
 	}
-
 
 	void TuningSourceWorker::getState(Network::TuningSourceState& tuningSourceState)
 	{
@@ -307,17 +301,16 @@ namespace Tuning
 		tss->set_error(TO_INT(NetworkError::Success));
 	}
 
-
-	void TuningSourceWorker::writeSignalState(const QString& clientEquipmentID, Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
+	NetworkError TuningSourceWorker::writeSignalState(	const QString& clientEquipmentID,
+														const QString& user,
+														Hash signalHash,
+														const TuningValue& newValue)
 	{
-		TEST_PTR_RETURN(writeResult);
-
 		int signalIndex = m_hash2SignalIndexMap.value(signalHash, -1);
 
 		if (signalIndex == -1)
 		{
-			writeResult->set_error(TO_INT(NetworkError::UnknownSignalHash));
-			return;
+			return NetworkError::UnknownSignalHash;
 		}
 
 		if (signalIndex < 0 || signalIndex >= m_tuningSignals.count())
@@ -326,61 +319,63 @@ namespace Tuning
 
 			DEBUG_LOG_ERR(m_logger, "Signal index out of range (TuningSourceWorker::writeSignalState)");
 
-			writeResult->set_error(TO_INT(NetworkError::InternalError));
-			return;
+			return NetworkError::InternalError;
 		}
 
 		TuningSignal& ts = m_tuningSignals[signalIndex];
 
 		if (ts.tuningValueType() != newValue.type())
 		{
-			writeResult->set_error(TO_INT(NetworkError::WrongTuningValueType));
-			return;
+			return NetworkError::WrongTuningValueType;
 		}
 
 		if (newValue < ts.lowBound() || newValue > ts.highBound())
 		{
-			writeResult->set_error(TO_INT(NetworkError::TuningValueOutOfRange));
-			return;
+			return NetworkError::TuningValueOutOfRange;
 		}
 
 		TuningCommand cmd;
 
 		cmd.clientEquipmentID = clientEquipmentID;
+		cmd.user = user;
 
 		cmd.opCode = FotipV2::OpCode::Write;
 		cmd.autoCommand = false;
 
 		cmd.write.signalIndex = signalIndex;
-		cmd.write.tuningValue = newValue;
+		cmd.write.newTuningValue = newValue;
+		cmd.write.currentTuningValue = ts.currentValue();
 
 		m_tuningCommandQueue.push(cmd);
-
-		writeResult->set_error(TO_INT(NetworkError::Success));
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Queue write command: source %1 (%2), signal %3, value %4")).
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()).
 					  arg(m_tuningSignals[signalIndex].appSignalID()).
 					  arg(newValue.toString()));
+
+		return NetworkError::Success;
 	}
 
-
-	void TuningSourceWorker::applySignalStates(const QString& clientEquipmentID)
+	NetworkError TuningSourceWorker::applySignalStates(	const QString& clientEquipmentID,
+														const QString& user)
 	{
 		TuningCommand cmd;
 
 		cmd.clientEquipmentID = clientEquipmentID;
+		cmd.user = user;
 
 		cmd.opCode = FotipV2::OpCode::Apply;
+		cmd.autoCommand = false;
 
 		m_tuningCommandQueue.push(cmd);
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Queue apply command: source %1 (%2)")).
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()));
-	}
 
+		return NetworkError::Success;
+	}
 
 	void TuningSourceWorker::onThreadStarted()
 	{
@@ -396,14 +391,12 @@ namespace Tuning
 		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 (%2) worker is started")).arg(m_sourceEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
 
-
 	void TuningSourceWorker::onThreadFinished()
 	{
 		m_stat.controlIsActive = false;
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 (%2) worker is stopped")).arg(m_sourceEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
-
 
 	void TuningSourceWorker::initTuningSignals(const TuningData* td)
 	{
@@ -451,7 +444,6 @@ namespace Tuning
 		}
 	}
 
-
 	bool TuningSourceWorker::processWaitReply()
 	{
 		if (m_waitReply == true)
@@ -498,7 +490,6 @@ namespace Tuning
 		return false;			// switch to next processing
 	}
 
-
 	bool TuningSourceWorker::processCommandQueue()
 	{
 		if (m_waitReply == true)
@@ -514,16 +505,23 @@ namespace Tuning
 		// get command from queue and send FOTIP request
 		//
 
-		TuningCommand tuningCmd;
+		m_tuningCommandQueue.pop(&m_lastProcessedCommand);
 
-		m_tuningCommandQueue.pop(&tuningCmd);
-
-		bool result = prepareFotipRequest(tuningCmd, m_request);
+		bool result = prepareFotipRequest(m_lastProcessedCommand, m_request);
 
 		if (result == false)
 		{
 			return false;
 		}
+
+		if (m_lastProcessedCommand.opCode == FotipV2::OpCode::Write)
+		{
+			const TuningSignal& ts = m_tuningSignals[m_lastProcessedCommand.write.signalIndex];
+
+			m_lastProcessedCommand.write.currentTuningValue = ts.currentValue();
+		}
+
+		logTuningCommand(m_lastProcessedCommand);
 
 		m_retryCount = 0;
 
@@ -531,7 +529,6 @@ namespace Tuning
 
 		return true;
 	}
-
 
 	bool TuningSourceWorker::processIdle()
 	{
@@ -558,11 +555,9 @@ namespace Tuning
 		return false;
 	}
 
-
 	void TuningSourceWorker::onNoReply()
 	{
 	}
-
 
 	bool TuningSourceWorker::prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request)
 	{
@@ -576,7 +571,6 @@ namespace Tuning
 
 		return result;
 	}
-
 
 	void TuningSourceWorker::sendFotipRequest(RupFotipV2& request)
 	{
@@ -682,7 +676,6 @@ namespace Tuning
 		return true;
 	}
 
-
 	bool TuningSourceWorker::initFotipFrame(FotipV2::Frame &fotipFrame, const TuningCommand& tuningCmd)
 	{
 		FotipV2::Header& fotipHeader = fotipFrame.header;
@@ -754,11 +747,11 @@ namespace Tuning
 				switch(ts.tuningValueType())
 				{
 				case TuningValueType::Float:
-					fotipFrame.write.analogFloatValue = reverseFloat(tuningCmd.write.tuningValue.floatValue());
+					fotipFrame.write.analogFloatValue = reverseFloat(tuningCmd.write.newTuningValue.floatValue());
 					break;
 
 				case TuningValueType::SignedInt32:
-					fotipFrame.write.analogSignedIntValue = reverseInt32(tuningCmd.write.tuningValue.int32Value());
+					fotipFrame.write.analogSignedIntValue = reverseInt32(tuningCmd.write.newTuningValue.int32Value());
 					break;
 
 				case TuningValueType::Discrete:
@@ -771,7 +764,7 @@ namespace Tuning
 
 						fotipFrame.write.bitMask = reverseUint32(bitmask);
 
-						quint32 discreteValue = tuningCmd.write.tuningValue.discreteValue() << bit;
+						quint32 discreteValue = tuningCmd.write.newTuningValue.discreteValue() << bit;
 
 						fotipFrame.write.discreteValue = reverseUint32(discreteValue);
 					}
@@ -793,7 +786,6 @@ namespace Tuning
 
 		return true;
 	}
-
 
 	void TuningSourceWorker::processReply(RupFotipV2& reply)
 	{
@@ -844,7 +836,6 @@ namespace Tuning
 			assert(false);
 		}
 	}
-
 
 	void TuningSourceWorker::processReadReply(RupFotipV2& reply)
 	{
@@ -986,14 +977,12 @@ namespace Tuning
 		}
 	}
 
-
 	void TuningSourceWorker::processApplyReply(RupFotipV2&)
 	{
 		DEBUG_LOG_MSG(m_logger, QString(tr("Reply is received from %1 (%2) on RupFotipV2 APPLY request")).
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()));
 	}
-
 
 	bool TuningSourceWorker::checkRupHeader(const Rup::Header& rupHeader)
 	{
@@ -1044,7 +1033,6 @@ namespace Tuning
 
 		return result;
 	}
-
 
 	bool TuningSourceWorker::checkFotipHeader(const FotipV2::Header& fotipHeader)
 	{
@@ -1202,12 +1190,10 @@ namespace Tuning
 		return result;
 	}
 
-
 	void TuningSourceWorker::restartTimer()
 	{
 		m_timer.start(m_timerInterval);
 	}
-
 
 	void TuningSourceWorker::invalidateAllSignals()
 	{
@@ -1217,6 +1203,10 @@ namespace Tuning
 		}
 	}
 
+	void TuningSourceWorker::logTuningCommand(const TuningCommand& cmd)
+	{
+
+	}
 
 	void TuningSourceWorker::onTimer()
 	{
@@ -1232,7 +1222,6 @@ namespace Tuning
 
 		processIdle();
 	}
-
 
 	void TuningSourceWorker::onReplyReady()
 	{
@@ -1289,11 +1278,9 @@ namespace Tuning
 		addWorker(m_sourceWorker);
 	}
 
-
 	TuningSourceWorkerThread::~TuningSourceWorkerThread()
 	{
 	}
-
 
 	quint32 TuningSourceWorkerThread::sourceIP()
 	{
@@ -1312,7 +1299,6 @@ namespace Tuning
 		return m_sourceWorker;
 	}
 
-
 	void TuningSourceWorkerThread::pushReply(const Rup::Frame& reply)
 	{
 		if (m_sourceWorker == nullptr)
@@ -1323,7 +1309,6 @@ namespace Tuning
 
 		m_sourceWorker->pushReply(reply);
 	}
-
 
 	void TuningSourceWorkerThread::incErrReplySize()
 	{
@@ -1353,11 +1338,9 @@ namespace Tuning
 	{
 	}
 
-
 	TuningSocketListener::~TuningSocketListener()
 	{
 	}
-
 
 	void TuningSocketListener::onThreadStarted()
 	{
@@ -1365,13 +1348,11 @@ namespace Tuning
 		startTimer();
 	}
 
-
 	void TuningSocketListener::onThreadFinished()
 	{
 		m_timer.stop();
 		closeSocket();
 	}
-
 
 	void TuningSocketListener::createSocket()
 	{
@@ -1403,7 +1384,6 @@ namespace Tuning
 		}
 	}
 
-
 	void TuningSocketListener::closeSocket()
 	{
 		if (m_socket == nullptr)
@@ -1417,7 +1397,6 @@ namespace Tuning
 		m_socket = nullptr;
 	}
 
-
 	void TuningSocketListener::startTimer()
 	{
 		connect(&m_timer, &QTimer::timeout, this, &TuningSocketListener::onTimer);
@@ -1428,7 +1407,6 @@ namespace Tuning
 		m_timer.start();
 	}
 
-
 	void TuningSocketListener::onTimer()
 	{
 		if (m_socket == nullptr)
@@ -1436,7 +1414,6 @@ namespace Tuning
 			createSocket();
 		}
 	}
-
 
 	void TuningSocketListener::onSocketReadyRead()
 	{

@@ -94,29 +94,29 @@ namespace Tuning
 	}
 
 
-	void TuningSourceContext::writeSignalState(const QString& clientEquipmentID, Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult)
+	NetworkError TuningSourceContext::writeSignalState(	const QString& clientEquipmentID,
+														const QString& user,
+														Hash signalHash,
+														const TuningValue& newValue)
 	{
-		TEST_PTR_RETURN(writeResult);
-
 		if (m_sourceWorker == nullptr)
 		{
-			writeResult->set_error(TO_INT(NetworkError::LmControlIsNotActive));
-			return;
+			return NetworkError::LmControlIsNotActive;
 		}
 
-		m_sourceWorker->writeSignalState(clientEquipmentID, signalHash, newValue, writeResult);
+		return m_sourceWorker->writeSignalState(clientEquipmentID, user, signalHash, newValue);
 	}
 
 
-	void TuningSourceContext::applySignalStates(const QString& clientEquipmentID)
+	NetworkError TuningSourceContext::applySignalStates(const QString& clientEquipmentID,
+														const QString& user)
 	{
 		if (m_sourceWorker == nullptr)
 		{
-			assert(false);
-			return;
+			return NetworkError::LmControlIsNotActive;
 		}
 
-		m_sourceWorker->applySignalStates(clientEquipmentID);
+		return m_sourceWorker->applySignalStates(clientEquipmentID, user);
 	}
 
 
@@ -270,7 +270,10 @@ namespace Tuning
 	}
 
 
-	void TuningClientContext::writeSignalStates(const QString& clientEquipmentID, const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply* reply) const
+	void TuningClientContext::writeSignalStates(const QString& clientEquipmentID,
+												const QString& user,
+												const Network::TuningSignalsWrite& request,
+												Network::TuningSignalsWriteReply* reply) const
 	{
 		TEST_PTR_RETURN(reply);
 
@@ -281,6 +284,8 @@ namespace Tuning
 		reply->clear_writeresult();
 
 		QHash<TuningSourceContext*, TuningSourceContext*> m_usedSrcContexts;
+
+		bool hasErrors = false;
 
 		for(int i = 0; i < writeRequestCount; i++)
 		{
@@ -302,31 +307,45 @@ namespace Tuning
 				continue;
 			}
 
-			sourceContext->writeSignalState(clientEquipmentID, signalHash, TuningValue(writeCmd.value()), writeResult);
+			NetworkError err = sourceContext->writeSignalState(clientEquipmentID, user, signalHash, TuningValue(writeCmd.value()));
 
-			if (autoApply == true)
+			if (err != NetworkError::Success)
 			{
-				m_usedSrcContexts.insert(sourceContext, sourceContext);
+				hasErrors = true;
+			}
+			else
+			{
+				if (autoApply == true)
+				{
+					m_usedSrcContexts.insert(sourceContext, sourceContext);
+				}
 			}
 		}
 
-		if (autoApply == true)
+		if (autoApply == true && hasErrors == false)
 		{
 			for(TuningSourceContext* usedSrcContext : m_usedSrcContexts)
 			{
 				TEST_PTR_CONTINUE(usedSrcContext);
 
-				usedSrcContext->applySignalStates(clientEquipmentID);
+				NetworkError err = usedSrcContext->applySignalStates(clientEquipmentID, user);
+
+				if (err != NetworkError::Success)
+				{
+					hasErrors = true;
+				}
 			}
 
 			m_usedSrcContexts.clear();
 		}
 
-		reply->set_error(TO_INT(NetworkError::Success));
+		NetworkError result = hasErrors == true ? NetworkError::InternalError : NetworkError::Success;
+
+		reply->set_error(TO_INT(result));
 	}
 
 
-	void TuningClientContext::applySignalStates(const QString& clientEquipmentID) const
+	void TuningClientContext::applySignalStates(const QString& clientEquipmentID, const QString& user) const
 	{
 		for(TuningSourceContext* srcContext : m_sourceContextMap)
 		{
@@ -336,7 +355,7 @@ namespace Tuning
 				continue;
 			}
 
-			srcContext->applySignalStates(clientEquipmentID);
+			srcContext->applySignalStates(clientEquipmentID, user);
 		}
 	}
 

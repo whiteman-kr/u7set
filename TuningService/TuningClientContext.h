@@ -24,8 +24,14 @@ namespace Tuning
 		void removeSourceWorker(TuningSourceWorker* worker);
 
 		void readSignalState(Network::TuningSignalState* tss);
-		void writeSignalState(const QString& clientEquipmentID, Hash signalHash, const TuningValue& newValue, Network::TuningSignalWriteResult* writeResult);
-		void applySignalStates(const QString& clientEquipmentID);
+
+		NetworkError writeSignalState(	const QString& clientEquipmentID,
+										const QString& user,
+										Hash signalHash,
+										const TuningValue& newValue);
+
+		NetworkError applySignalStates(	const QString& clientEquipmentID,
+										const QString& user);
 
 	private:
 		QString m_sourceID;			// Tuning source (LM) equipmentID
@@ -52,8 +58,14 @@ namespace Tuning
 		void getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const;
 
 		void readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply* reply) const;
-		void writeSignalStates(const QString& clientEquipmentID, const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply* reply) const;
-		void applySignalStates(const QString& clientEquipmentID) const;
+
+		void writeSignalStates(const QString& clientEquipmentID,
+							   const QString &user,
+							   const Network::TuningSignalsWrite& request,
+							   Network::TuningSignalsWriteReply* reply) const;
+
+		void applySignalStates(const QString& clientEquipmentID,
+							   const QString &user) const;
 
 		void setSourceWorker(TuningSourceWorker* worker);
 		void removeSourceWorker(TuningSourceWorker* worker);

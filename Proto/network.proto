@@ -444,7 +444,6 @@ message TuningSignalsApply
 {
 }
 
-
 message TuningSignalsApplyReply
 {
     optional int32 error = 1 [default = 0];

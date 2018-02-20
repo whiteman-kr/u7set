@@ -348,9 +348,11 @@ namespace Tuning
 			return;
 		}
 
+		QString user = connectedSoftwareInfo().userName();
+
 		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->writeSignalStates()
 		//
-		clientContext->writeSignalStates(clientEquipmentID, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
+		clientContext->writeSignalStates(clientEquipmentID, user, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
 
 		sendReply(m_tuningSignalsWriteReply);
 
@@ -419,7 +421,9 @@ namespace Tuning
 			return;
 		}
 
-		clientContext->applySignalStates(clientEquipmentID);
+		QString user = connectedSoftwareInfo().userName();
+
+		clientContext->applySignalStates(clientEquipmentID, user);
 
 		errCode = NetworkError::Success;
 
