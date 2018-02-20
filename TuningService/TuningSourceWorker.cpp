@@ -338,6 +338,12 @@ namespace Tuning
 			return;
 		}
 
+		if (newValue < ts.lowBound() || newValue > ts.highBound())
+		{
+			writeResult->set_error(TO_INT(NetworkError::TuningValueOutOfRange));
+			return;
+		}
+
 		TuningCommand cmd;
 
 		cmd.clientEquipmentID = clientEquipmentID;

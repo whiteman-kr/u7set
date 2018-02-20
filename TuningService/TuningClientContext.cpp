@@ -86,7 +86,7 @@ namespace Tuning
 		if (m_sourceWorker == nullptr)
 		{
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::ControlIsNotActive));
+			tss->set_error(TO_INT(NetworkError::LmControlIsNotActive));
 			return;
 		}
 
@@ -100,7 +100,7 @@ namespace Tuning
 
 		if (m_sourceWorker == nullptr)
 		{
-			writeResult->set_error(TO_INT(NetworkError::ControlIsNotActive));
+			writeResult->set_error(TO_INT(NetworkError::LmControlIsNotActive));
 			return;
 		}
 

@@ -336,8 +336,8 @@ message TuningSourceState
 
     optional bool controlIsActive = 42 [default = false];
     optional bool setSOR = 43 [default = false];
-    optional string activeClientID = 44;
-    optional bool hasUnappliedParams = 45 [default = false];
+
+    optional bool hasUnappliedParams = 44 [default = false];
 }
 
 message GetTuningSourcesStatesReply
@@ -346,6 +346,8 @@ message GetTuningSourcesStatesReply
     repeated TuningSourceState tuningSourcesState = 2;
 
     optional bool singleLmControlMode = 3 [default = true];
+    optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
+                                                                    // else - empty string
 }
 
 //  Change current controlled TuningSource request - TDS_CHANGE_CONTROLLED_TUNING_SOURCE

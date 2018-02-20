@@ -802,7 +802,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		NetworkError error = static_cast<NetworkError>(stateMessage.error());
 
-		if (error != NetworkError::Success && error != NetworkError::ControlIsNotActive)
+		if (error != NetworkError::Success && error != NetworkError::LmControlIsNotActive)
 		{
 //			assert(false);
 			writeLogError(tr("TuningTcpClient::processReadTuningSignals, TuningSignalState error received: %1")

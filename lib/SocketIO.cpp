@@ -228,7 +228,7 @@ QString getNetworkErrorStr(NetworkError err)
 	case NetworkError::SingleLmControlDisabled:
 		return QString("NetworkError::SingleLmControlDisabled");
 
-	case NetworkError::ControlIsNotActive:
+	case NetworkError::LmControlIsNotActive:
 		return QString("NetworkError::ControlIsNotActive");
 
 	default:

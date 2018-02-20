@@ -754,7 +754,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesStates));
   TuningSourceState_descriptor_ = file->message_type(32);
-  static const int TuningSourceState_offsets_[45] = {
+  static const int TuningSourceState_offsets_[44] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, sourceid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, isreply_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, requestcount_),
@@ -798,7 +798,6 @@ void protobuf_AssignDesc_network_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, errrupcrc_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, controlisactive_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, setsor_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, activeclientid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, hasunappliedparams_),
   };
   TuningSourceState_reflection_ =
@@ -813,10 +812,11 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSourceState));
   GetTuningSourcesStatesReply_descriptor_ = file->message_type(33);
-  static const int GetTuningSourcesStatesReply_offsets_[3] = {
+  static const int GetTuningSourcesStatesReply_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, tuningsourcesstate_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, singlelmcontrolmode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, activeclientid_),
   };
   GetTuningSourcesStatesReply_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1476,7 +1476,7 @@ void protobuf_AddDesc_network_2eproto() {
     "ningSourcesInfoReply\022\020\n\005error\030\001 \001(\005:\0010\0221"
     "\n\020tuningSourceInfo\030\002 \003(\0132\027.Network.DataS"
     "ourceInfo\022!\n\023singleLmControlMode\030\003 \001(\010:\004"
-    "true\"\030\n\026GetTuningSourcesStates\"\355\n\n\021Tunin"
+    "true\"\030\n\026GetTuningSourcesStates\"\325\n\n\021Tunin"
     "gSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007isR"
     "eply\030\002 \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003:"
     "\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020commandQueu"
@@ -1510,12 +1510,12 @@ void protobuf_AddDesc_network_2eproto() {
     "k\030\' \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030( "
     "\001(\003:\0010\022\024\n\terrRupCRC\030) \001(\003:\0010\022\036\n\017controlI"
     "sActive\030* \001(\010:\005false\022\025\n\006setSOR\030+ \001(\010:\005fa"
-    "lse\022\026\n\016activeClientID\030, \001(\t\022!\n\022hasUnappl"
-    "iedParams\030- \001(\010:\005false\"\212\001\n\033GetTuningSour"
-    "cesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuni"
-    "ngSourcesState\030\002 \003(\0132\032.Network.TuningSou"
-    "rceState\022!\n\023singleLmControlMode\030\003 \001(\010:\004t"
-    "rue\"z\n\"ChangeConrolledTuningSourceReques"
+    "lse\022!\n\022hasUnappliedParams\030, \001(\010:\005false\"\242"
+    "\001\n\033GetTuningSourcesStatesReply\022\020\n\005error\030"
+    "\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002 \003(\0132\032.N"
+    "etwork.TuningSourceState\022!\n\023singleLmCont"
+    "rolMode\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 "
+    "\001(\t\"z\n\"ChangeConrolledTuningSourceReques"
     "t\022\023\n\013takeControl\030\001 \001(\010\022\037\n\027tuningSourceEq"
     "uipmentID\030\002 \001(\t\022\036\n\017activateControl\030\003 \001(\010"
     ":\005false\"\177\n ChangeConrolledTuningSourceRe"
@@ -11639,7 +11639,6 @@ const int TuningSourceState::kErrAnalogHighBoundCheckFieldNumber;
 const int TuningSourceState::kErrRupCRCFieldNumber;
 const int TuningSourceState::kControlIsActiveFieldNumber;
 const int TuningSourceState::kSetSORFieldNumber;
-const int TuningSourceState::kActiveClientIDFieldNumber;
 const int TuningSourceState::kHasUnappliedParamsFieldNumber;
 #endif  // !_MSC_VER
 
@@ -11702,7 +11701,6 @@ void TuningSourceState::SharedCtor() {
   errrupcrc_ = GOOGLE_LONGLONG(0);
   controlisactive_ = false;
   setsor_ = false;
-  activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   hasunappliedparams_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -11712,9 +11710,6 @@ TuningSourceState::~TuningSourceState() {
 }
 
 void TuningSourceState::SharedDtor() {
-  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
-    delete activeclientid_;
-  }
   if (this != default_instance_) {
   }
 }
@@ -11795,11 +11790,6 @@ void TuningSourceState::Clear() {
     errrupcrc_ = GOOGLE_LONGLONG(0);
     controlisactive_ = false;
     setsor_ = false;
-    if (has_activeclientid()) {
-      if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
-        activeclientid_->clear();
-      }
-    }
     hasunappliedparams_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -12495,29 +12485,12 @@ bool TuningSourceState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(354)) goto parse_activeClientID;
+        if (input->ExpectTag(352)) goto parse_hasUnappliedParams;
         break;
       }
 
-      // optional string activeClientID = 44;
+      // optional bool hasUnappliedParams = 44 [default = false];
       case 44: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_activeClientID:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_activeclientid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->activeclientid().data(), this->activeclientid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(360)) goto parse_hasUnappliedParams;
-        break;
-      }
-
-      // optional bool hasUnappliedParams = 45 [default = false];
-      case 45: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_hasUnappliedParams:
@@ -12765,18 +12738,9 @@ void TuningSourceState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(43, this->setsor(), output);
   }
 
-  // optional string activeClientID = 44;
-  if (has_activeclientid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->activeclientid().data(), this->activeclientid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      44, this->activeclientid(), output);
-  }
-
-  // optional bool hasUnappliedParams = 45 [default = false];
+  // optional bool hasUnappliedParams = 44 [default = false];
   if (has_hasunappliedparams()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(45, this->hasunappliedparams(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(44, this->hasunappliedparams(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -13002,19 +12966,9 @@ void TuningSourceState::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(43, this->setsor(), target);
   }
 
-  // optional string activeClientID = 44;
-  if (has_activeclientid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->activeclientid().data(), this->activeclientid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        44, this->activeclientid(), target);
-  }
-
-  // optional bool hasUnappliedParams = 45 [default = false];
+  // optional bool hasUnappliedParams = 44 [default = false];
   if (has_hasunappliedparams()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(45, this->hasunappliedparams(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(44, this->hasunappliedparams(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -13333,14 +13287,7 @@ int TuningSourceState::ByteSize() const {
       total_size += 2 + 1;
     }
 
-    // optional string activeClientID = 44;
-    if (has_activeclientid()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->activeclientid());
-    }
-
-    // optional bool hasUnappliedParams = 45 [default = false];
+    // optional bool hasUnappliedParams = 44 [default = false];
     if (has_hasunappliedparams()) {
       total_size += 2 + 1;
     }
@@ -13511,9 +13458,6 @@ void TuningSourceState::MergeFrom(const TuningSourceState& from) {
     if (from.has_setsor()) {
       set_setsor(from.setsor());
     }
-    if (from.has_activeclientid()) {
-      set_activeclientid(from.activeclientid());
-    }
     if (from.has_hasunappliedparams()) {
       set_hasunappliedparams(from.hasunappliedparams());
     }
@@ -13583,7 +13527,6 @@ void TuningSourceState::Swap(TuningSourceState* other) {
     std::swap(errrupcrc_, other->errrupcrc_);
     std::swap(controlisactive_, other->controlisactive_);
     std::swap(setsor_, other->setsor_);
-    std::swap(activeclientid_, other->activeclientid_);
     std::swap(hasunappliedparams_, other->hasunappliedparams_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_has_bits_[1], other->_has_bits_[1]);
@@ -13607,6 +13550,7 @@ void TuningSourceState::Swap(TuningSourceState* other) {
 const int GetTuningSourcesStatesReply::kErrorFieldNumber;
 const int GetTuningSourcesStatesReply::kTuningSourcesStateFieldNumber;
 const int GetTuningSourcesStatesReply::kSingleLmControlModeFieldNumber;
+const int GetTuningSourcesStatesReply::kActiveClientIDFieldNumber;
 #endif  // !_MSC_VER
 
 GetTuningSourcesStatesReply::GetTuningSourcesStatesReply()
@@ -13627,6 +13571,7 @@ void GetTuningSourcesStatesReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
   singlelmcontrolmode_ = true;
+  activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -13635,6 +13580,9 @@ GetTuningSourcesStatesReply::~GetTuningSourcesStatesReply() {
 }
 
 void GetTuningSourcesStatesReply::SharedDtor() {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientid_;
+  }
   if (this != default_instance_) {
   }
 }
@@ -13664,6 +13612,11 @@ void GetTuningSourcesStatesReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
     singlelmcontrolmode_ = true;
+    if (has_activeclientid()) {
+      if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+        activeclientid_->clear();
+      }
+    }
   }
   tuningsourcesstate_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -13718,6 +13671,23 @@ bool GetTuningSourcesStatesReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(34)) goto parse_activeClientID;
+        break;
+      }
+
+      // optional string activeClientID = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_activeClientID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_activeclientid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->activeclientid().data(), this->activeclientid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -13756,6 +13726,15 @@ void GetTuningSourcesStatesReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->singlelmcontrolmode(), output);
   }
 
+  // optional string activeClientID = 4;
+  if (has_activeclientid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->activeclientid().data(), this->activeclientid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->activeclientid(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -13781,6 +13760,16 @@ void GetTuningSourcesStatesReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->singlelmcontrolmode(), target);
   }
 
+  // optional string activeClientID = 4;
+  if (has_activeclientid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->activeclientid().data(), this->activeclientid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->activeclientid(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -13802,6 +13791,13 @@ int GetTuningSourcesStatesReply::ByteSize() const {
     // optional bool singleLmControlMode = 3 [default = true];
     if (has_singlelmcontrolmode()) {
       total_size += 1 + 1;
+    }
+
+    // optional string activeClientID = 4;
+    if (has_activeclientid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->activeclientid());
     }
 
   }
@@ -13846,6 +13842,9 @@ void GetTuningSourcesStatesReply::MergeFrom(const GetTuningSourcesStatesReply& f
     if (from.has_singlelmcontrolmode()) {
       set_singlelmcontrolmode(from.singlelmcontrolmode());
     }
+    if (from.has_activeclientid()) {
+      set_activeclientid(from.activeclientid());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -13872,6 +13871,7 @@ void GetTuningSourcesStatesReply::Swap(GetTuningSourcesStatesReply* other) {
     std::swap(error_, other->error_);
     tuningsourcesstate_.Swap(&other->tuningsourcesstate_);
     std::swap(singlelmcontrolmode_, other->singlelmcontrolmode_);
+    std::swap(activeclientid_, other->activeclientid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
