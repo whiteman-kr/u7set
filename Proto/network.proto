@@ -267,6 +267,9 @@ message GetTuningSourcesInfoReply
     repeated DataSourceInfo tuningSourceInfo= 2;
 
     optional bool singleLmControlMode = 3 [default = true];
+    optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
+                                                                    // else - empty string
+
 }
 
 // Tuning sources states request - TDS_GET_TUNING_SOURCES_STATES

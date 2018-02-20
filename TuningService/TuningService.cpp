@@ -169,6 +169,73 @@ namespace Tuning
 		return NetworkError::Success;
 	}
 
+	bool TuningServiceWorker::clientIsConnected(const SoftwareInfo& softwareInfo)
+	{
+		AUTO_LOCK(m_mainMutex);
+
+		if (m_cfgSettings.singleLmControl == true)
+		{
+			if (m_activeClientInfo.equipmentID().isEmpty() == true)
+			{
+				m_activeClientInfo = softwareInfo;
+			}
+		}
+		else
+		{
+			m_activeClientInfo.clear();
+		}
+
+		return true;
+	}
+
+	bool TuningServiceWorker::clientIsDisconnected(const SoftwareInfo& softwareInfo)
+	{
+		AUTO_LOCK(m_mainMutex);
+
+		if (m_cfgSettings.singleLmControl == true)
+		{
+			if (m_activeClientInfo.equipmentID() == softwareInfo.equipmentID())
+			{
+				m_activeClientInfo.clear();
+			}
+		}
+		else
+		{
+			m_activeClientInfo.clear();
+		}
+
+		return true;
+	}
+
+	bool TuningServiceWorker::setActiveClient(const SoftwareInfo& softwareInfo)
+	{
+		AUTO_LOCK(m_mainMutex);
+
+		if (m_cfgSettings.singleLmControl == true)
+		{
+			m_activeClientInfo = softwareInfo;
+		}
+		else
+		{
+			m_activeClientInfo.clear();
+		}
+
+		return true;
+	}
+
+	QString TuningServiceWorker::activeClientID()
+	{
+		QString clientID;
+
+		m_mainMutex.lock();
+
+		clientID = m_activeClientInfo.equipmentID();
+
+		m_mainMutex.unlock();
+
+		return clientID;
+	}
+
 	void TuningServiceWorker::initialize()
 	{
 		runCfgLoaderThread();

@@ -3493,21 +3493,36 @@ class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
   inline bool singlelmcontrolmode() const;
   inline void set_singlelmcontrolmode(bool value);
 
+  // optional string activeClientID = 4;
+  inline bool has_activeclientid() const;
+  inline void clear_activeclientid();
+  static const int kActiveClientIDFieldNumber = 4;
+  inline const ::std::string& activeclientid() const;
+  inline void set_activeclientid(const ::std::string& value);
+  inline void set_activeclientid(const char* value);
+  inline void set_activeclientid(const char* value, size_t size);
+  inline ::std::string* mutable_activeclientid();
+  inline ::std::string* release_activeclientid();
+  inline void set_allocated_activeclientid(::std::string* activeclientid);
+
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfoReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
   inline void set_has_singlelmcontrolmode();
   inline void clear_has_singlelmcontrolmode();
+  inline void set_has_activeclientid();
+  inline void clear_has_activeclientid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo > tuningsourceinfo_;
   ::google::protobuf::int32 error_;
   bool singlelmcontrolmode_;
+  ::std::string* activeclientid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -9750,6 +9765,76 @@ inline bool GetTuningSourcesInfoReply::singlelmcontrolmode() const {
 inline void GetTuningSourcesInfoReply::set_singlelmcontrolmode(bool value) {
   set_has_singlelmcontrolmode();
   singlelmcontrolmode_ = value;
+}
+
+// optional string activeClientID = 4;
+inline bool GetTuningSourcesInfoReply::has_activeclientid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void GetTuningSourcesInfoReply::set_has_activeclientid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void GetTuningSourcesInfoReply::clear_has_activeclientid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void GetTuningSourcesInfoReply::clear_activeclientid() {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    activeclientid_->clear();
+  }
+  clear_has_activeclientid();
+}
+inline const ::std::string& GetTuningSourcesInfoReply::activeclientid() const {
+  return *activeclientid_;
+}
+inline void GetTuningSourcesInfoReply::set_activeclientid(const ::std::string& value) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
+  }
+  activeclientid_->assign(value);
+}
+inline void GetTuningSourcesInfoReply::set_activeclientid(const char* value) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
+  }
+  activeclientid_->assign(value);
+}
+inline void GetTuningSourcesInfoReply::set_activeclientid(const char* value, size_t size) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
+  }
+  activeclientid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetTuningSourcesInfoReply::mutable_activeclientid() {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
+  }
+  return activeclientid_;
+}
+inline ::std::string* GetTuningSourcesInfoReply::release_activeclientid() {
+  clear_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = activeclientid_;
+    activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetTuningSourcesInfoReply::set_allocated_activeclientid(::std::string* activeclientid) {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientid_;
+  }
+  if (activeclientid) {
+    set_has_activeclientid();
+    activeclientid_ = activeclientid;
+  } else {
+    clear_has_activeclientid();
+    activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

@@ -47,6 +47,12 @@ namespace Tuning
 		QString cfgServiceIP1() { return m_cfgServiceIP1.addressPortStr(); }
 		QString cfgServiceIP2() { return m_cfgServiceIP2.addressPortStr(); }
 
+		bool clientIsConnected(const SoftwareInfo& softwareInfo);
+		bool clientIsDisconnected(const SoftwareInfo& softwareInfo);
+		bool setActiveClient(const SoftwareInfo& softwareInfo);
+
+		QString activeClientID();
+
 	signals:
 
 	public slots:
@@ -109,12 +115,14 @@ namespace Tuning
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
+		QMutex m_mainMutex;
+
 		TuningSourceWorkerThreadMap m_sourceWorkerThreadMap;
 
 		TuningSocketListenerThread* m_socketListenerThread = nullptr;
 
 		TuningClientContextMap m_clientContextMap;
 
-		QMutex m_mainMutex;
+		SoftwareInfo m_activeClientInfo;
 	};
 }

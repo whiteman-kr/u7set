@@ -723,10 +723,11 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesInfo));
   GetTuningSourcesInfoReply_descriptor_ = file->message_type(30);
-  static const int GetTuningSourcesInfoReply_offsets_[3] = {
+  static const int GetTuningSourcesInfoReply_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesInfoReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesInfoReply, tuningsourceinfo_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesInfoReply, singlelmcontrolmode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesInfoReply, activeclientid_),
   };
   GetTuningSourcesInfoReply_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1472,107 +1473,107 @@ void protobuf_AddDesc_network_2eproto() {
     "\n\021autoloadBuildPath\030\002 \002(\t\022\025\n\rworkDirecto"
     "ry\030\003 \002(\t\"L\n\017ServiceSettings\022\023\n\013equipment"
     "ID\030\001 \002(\t\022\021\n\tconfigIP1\030\002 \002(\t\022\021\n\tconfigIP2"
-    "\030\003 \002(\t\"\026\n\024GetTuningSourcesInfo\"\203\001\n\031GetTu"
+    "\030\003 \002(\t\"\026\n\024GetTuningSourcesInfo\"\233\001\n\031GetTu"
     "ningSourcesInfoReply\022\020\n\005error\030\001 \001(\005:\0010\0221"
     "\n\020tuningSourceInfo\030\002 \003(\0132\027.Network.DataS"
     "ourceInfo\022!\n\023singleLmControlMode\030\003 \001(\010:\004"
-    "true\"\030\n\026GetTuningSourcesStates\"\325\n\n\021Tunin"
-    "gSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007isR"
-    "eply\030\002 \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003:"
-    "\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020commandQueu"
-    "eSize\030\005 \001(\005:\0010\022\034\n\021errUntimelyReplay\030\006 \001("
-    "\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016errPartialSe"
-    "nt\030\010 \001(\003:\0010\022\027\n\014errReplySize\030\t \001(\003:\0010\022\025\n\n"
-    "errNoReply\030\n \001(\003:\0010\022 \n\025errRupProtocolVer"
-    "sion\030\013 \001(\003:\0010\022\032\n\017errRupFrameSize\030\014 \001(\003:\001"
-    "0\022\036\n\023errRupNonTuningData\030\r \001(\003:\0010\022\033\n\020err"
-    "RupModuleType\030\016 \001(\003:\0010\022\037\n\024errRupFramesQu"
-    "antity\030\017 \001(\003:\0010\022\034\n\021errRupFrameNumber\030\020 \001"
-    "(\003:\0010\022\"\n\027errFotipProtocolVersion\030\021 \001(\003:\001"
-    "0\022\033\n\020errFotipUniqueID\030\022 \001(\003:\0010\022\033\n\020errFot"
-    "ipLmNumber\030\023 \001(\003:\0010\022 \n\025errFotipSubsystem"
-    "Code\030\024 \001(\003:\0010\022 \n\025errFotipOperationCode\030\025"
-    " \001(\003:\0010\022\034\n\021errFotipFrameSize\030\026 \001(\003:\0010\022\032\n"
-    "\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n\024errFotipRom"
-    "FrameSize\030\030 \001(\003:\0010\022&\n\033fotipFlagBoundsChe"
-    "ckSuccess\030\031 \001(\003:\0010\022 \n\025fotipFlagWriteSucc"
-    "ess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030\033 \001"
-    "(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001(\003:\0010\022 \n\025"
-    "fotipFlagStartAddrErr\030\035 \001(\003:\0010\022\036\n\023fotipF"
-    "lagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fotipFlagRomFr"
-    "ameSizeErr\030\037 \001(\003:\0010\022 \n\025fotipFlagFrameSiz"
-    "eErr\030  \001(\003:\0010\022&\n\033fotipFlagProtocolVersio"
-    "nErr\030! \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyEr"
-    "r\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003:"
-    "\0010\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025fot"
-    "ipFlagApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFlag"
-    "SetSOR\030& \001(\003:\0010\022!\n\026errAnalogLowBoundChec"
-    "k\030\' \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030( "
-    "\001(\003:\0010\022\024\n\terrRupCRC\030) \001(\003:\0010\022\036\n\017controlI"
-    "sActive\030* \001(\010:\005false\022\025\n\006setSOR\030+ \001(\010:\005fa"
-    "lse\022!\n\022hasUnappliedParams\030, \001(\010:\005false\"\242"
-    "\001\n\033GetTuningSourcesStatesReply\022\020\n\005error\030"
-    "\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002 \003(\0132\032.N"
-    "etwork.TuningSourceState\022!\n\023singleLmCont"
-    "rolMode\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 "
-    "\001(\t\"z\n\"ChangeConrolledTuningSourceReques"
-    "t\022\023\n\013takeControl\030\001 \001(\010\022\037\n\027tuningSourceEq"
-    "uipmentID\030\002 \001(\t\022\036\n\017activateControl\030\003 \001(\010"
-    ":\005false\"\177\n ChangeConrolledTuningSourceRe"
-    "ply\022\020\n\005error\030\001 \001(\005:\0010\022)\n!controlledTunin"
-    "gSourceEquipmentID\030\002 \001(\t\022\036\n\017controlIsAct"
-    "ive\030\003 \001(\010:\005false\"\'\n\021TuningSignalsRead\022\022\n"
-    "\nsignalHash\030\002 \003(\004\"\233\003\n\021TuningSignalState\022"
-    "\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010"
-    "\022\024\n\005valid\030\003 \001(\010:\005false\022!\n\005value\030\004 \001(\0132\022."
-    "Proto.TuningValue\022(\n\014readLowBound\030\005 \001(\0132"
-    "\022.Proto.TuningValue\022)\n\rreadHighBound\030\006 \001"
-    "(\0132\022.Proto.TuningValue\022\036\n\017writeInProgres"
-    "s\030\007 \001(\010:\005false\022\031\n\016writeErrorCode\030\010 \001(\005:\001"
-    "0\022\026\n\013writeClient\030\t \001(\006:\0010\022\035\n\022successfulR"
-    "eadTime\030\n \001(\020:\0010\022\033\n\020writeRequestTime\030\013 \001"
-    "(\020:\0010\022\036\n\023successfulWriteTime\030\014 \001(\020:\0010\022 \n"
-    "\025unsuccessfulWriteTime\030\r \001(\020:\0010\"a\n\026Tunin"
-    "gSignalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021t"
-    "uningSignalState\030\002 \003(\0132\032.Network.TuningS"
-    "ignalState\"N\n\022TuningWriteCommand\022\025\n\nsign"
-    "alHash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132\022.Proto.T"
-    "uningValue\"]\n\022TuningSignalsWrite\022\030\n\tauto"
-    "Apply\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132\033.N"
-    "etwork.TuningWriteCommand\"B\n\027TuningSigna"
-    "lWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005e"
-    "rror\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply"
-    "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132"
-    " .Network.TuningSignalWriteResult\"\024\n\022Tun"
-    "ingSignalsApply\"+\n\027TuningSignalsApplyRep"
-    "ly\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignalsSt"
-    "atesToArchiveRequest\022\031\n\021clientEquipmentI"
-    "D\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto"
-    ".AppSignalState\"N\n\"SaveAppSignalsStatesT"
-    "oArchiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchE"
-    "rror\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStatesFr"
-    "omArchiveStartRequest\022\031\n\021clientEquipment"
-    "ID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTi"
-    "me\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signa"
-    "lHashes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004t"
-    "rue\"~\n\'GetAppSignalStatesFromArchiveStar"
-    "tReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 "
-    "\001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequest"
-    "ID\030\003 \001(\r:\0010\"@\n(GetAppSignalStatesFromArc"
-    "hiveNextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002"
-    "\n&GetAppSignalStatesFromArchiveNextReply"
-    "\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\0031"
-    "00\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorString\030"
-    "\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020total"
-    "StatesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030"
-    "\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031"
-    "\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017appSignalSt"
-    "ates\030\t \003(\0132\025.Proto.AppSignalState\"B\n*Get"
-    "AppSignalStatesFromArchiveCancelRequest\022"
-    "\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAppSignalSta"
-    "tesFromArchiveCancelReply\022\020\n\005error\030\001 \001(\005"
-    ":\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorStri"
-    "ng\030\003 \001(\t", 7128);
+    "true\022\026\n\016activeClientID\030\004 \001(\t\"\030\n\026GetTunin"
+    "gSourcesStates\"\325\n\n\021TuningSourceState\022\023\n\010"
+    "sourceID\030\001 \001(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005fals"
+    "e\022\027\n\014requestCount\030\003 \001(\003:\0010\022\025\n\nreplyCount"
+    "\030\004 \001(\003:\0010\022\033\n\020commandQueueSize\030\005 \001(\005:\0010\022\034"
+    "\n\021errUntimelyReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030"
+    "\007 \001(\003:\0010\022\031\n\016errPartialSent\030\010 \001(\003:\0010\022\027\n\014e"
+    "rrReplySize\030\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003"
+    ":\0010\022 \n\025errRupProtocolVersion\030\013 \001(\003:\0010\022\032\n"
+    "\017errRupFrameSize\030\014 \001(\003:\0010\022\036\n\023errRupNonTu"
+    "ningData\030\r \001(\003:\0010\022\033\n\020errRupModuleType\030\016 "
+    "\001(\003:\0010\022\037\n\024errRupFramesQuantity\030\017 \001(\003:\0010\022"
+    "\034\n\021errRupFrameNumber\030\020 \001(\003:\0010\022\"\n\027errFoti"
+    "pProtocolVersion\030\021 \001(\003:\0010\022\033\n\020errFotipUni"
+    "queID\030\022 \001(\003:\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003"
+    ":\0010\022 \n\025errFotipSubsystemCode\030\024 \001(\003:\0010\022 \n"
+    "\025errFotipOperationCode\030\025 \001(\003:\0010\022\034\n\021errFo"
+    "tipFrameSize\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize"
+    "\030\027 \001(\003:\0010\022\037\n\024errFotipRomFrameSize\030\030 \001(\003:"
+    "\0010\022&\n\033fotipFlagBoundsCheckSuccess\030\031 \001(\003:"
+    "\0010\022 \n\025fotipFlagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024"
+    "fotipFlagDataTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFl"
+    "agOpCodeErr\030\034 \001(\003:\0010\022 \n\025fotipFlagStartAd"
+    "drErr\030\035 \001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030\036 "
+    "\001(\003:\0010\022#\n\030fotipFlagRomFrameSizeErr\030\037 \001(\003"
+    ":\0010\022 \n\025fotipFlagFrameSizeErr\030  \001(\003:\0010\022&\n"
+    "\033fotipFlagProtocolVersionErr\030! \001(\003:\0010\022#\n"
+    "\030fotipFlagSubsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fo"
+    "tipFlagUniueIDErr\030# \001(\003:\0010\022\035\n\022fotipFlagO"
+    "ffsetErr\030$ \001(\003:\0010\022 \n\025fotipFlagApplySucce"
+    "ss\030% \001(\003:\0010\022\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022"
+    "!\n\026errAnalogLowBoundCheck\030\' \001(\003:\0010\022\"\n\027er"
+    "rAnalogHighBoundCheck\030( \001(\003:\0010\022\024\n\terrRup"
+    "CRC\030) \001(\003:\0010\022\036\n\017controlIsActive\030* \001(\010:\005f"
+    "alse\022\025\n\006setSOR\030+ \001(\010:\005false\022!\n\022hasUnappl"
+    "iedParams\030, \001(\010:\005false\"\242\001\n\033GetTuningSour"
+    "cesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuni"
+    "ngSourcesState\030\002 \003(\0132\032.Network.TuningSou"
+    "rceState\022!\n\023singleLmControlMode\030\003 \001(\010:\004t"
+    "rue\022\026\n\016activeClientID\030\004 \001(\t\"z\n\"ChangeCon"
+    "rolledTuningSourceRequest\022\023\n\013takeControl"
+    "\030\001 \001(\010\022\037\n\027tuningSourceEquipmentID\030\002 \001(\t\022"
+    "\036\n\017activateControl\030\003 \001(\010:\005false\"\177\n Chang"
+    "eConrolledTuningSourceReply\022\020\n\005error\030\001 \001"
+    "(\005:\0010\022)\n!controlledTuningSourceEquipment"
+    "ID\030\002 \001(\t\022\036\n\017controlIsActive\030\003 \001(\010:\005false"
+    "\"\'\n\021TuningSignalsRead\022\022\n\nsignalHash\030\002 \003("
+    "\004\"\233\003\n\021TuningSignalState\022\025\n\nsignalHash\030\001 "
+    "\001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:"
+    "\005false\022!\n\005value\030\004 \001(\0132\022.Proto.TuningValu"
+    "e\022(\n\014readLowBound\030\005 \001(\0132\022.Proto.TuningVa"
+    "lue\022)\n\rreadHighBound\030\006 \001(\0132\022.Proto.Tunin"
+    "gValue\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031"
+    "\n\016writeErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient"
+    "\030\t \001(\006:\0010\022\035\n\022successfulReadTime\030\n \001(\020:\0010"
+    "\022\033\n\020writeRequestTime\030\013 \001(\020:\0010\022\036\n\023success"
+    "fulWriteTime\030\014 \001(\020:\0010\022 \n\025unsuccessfulWri"
+    "teTime\030\r \001(\020:\0010\"a\n\026TuningSignalsReadRepl"
+    "y\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState"
+    "\030\002 \003(\0132\032.Network.TuningSignalState\"N\n\022Tu"
+    "ningWriteCommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022"
+    "!\n\005value\030\002 \001(\0132\022.Proto.TuningValue\"]\n\022Tu"
+    "ningSignalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005fal"
+    "se\022-\n\010commands\030\003 \003(\0132\033.Network.TuningWri"
+    "teCommand\"B\n\027TuningSignalWriteResult\022\025\n\n"
+    "signalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n"
+    "\027TuningSignalsWriteReply\022\020\n\005error\030\001 \001(\005:"
+    "\0010\0225\n\013writeResult\030\002 \003(\0132 .Network.Tuning"
+    "SignalWriteResult\"\024\n\022TuningSignalsApply\""
+    "+\n\027TuningSignalsApplyReply\022\020\n\005error\030\001 \001("
+    "\005:\0010\"q\n$SaveAppSignalsStatesToArchiveReq"
+    "uest\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n\017appSi"
+    "gnalStates\030\002 \003(\0132\025.Proto.AppSignalState\""
+    "N\n\"SaveAppSignalsStatesToArchiveReply\022\020\n"
+    "\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\""
+    "\271\001\n)GetAppSignalStatesFromArchiveStartRe"
+    "quest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010time"
+    "Type\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007e"
+    "ndTime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n"
+    "\016removePeriodic\030\006 \001(\010:\004true\"~\n\'GetAppSig"
+    "nalStatesFromArchiveStartReply\022\020\n\005error\030"
+    "\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013erro"
+    "rString\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(G"
+    "etAppSignalStatesFromArchiveNextRequest\022"
+    "\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalSt"
+    "atesFromArchiveNextReply\022\020\n\005error\030\001 \001(\005:"
+    "\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030"
+    "\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdataRea"
+    "dy\030\004 \001(\010:\005false\022\033\n\020totalStatesCount\030\005 \001("
+    "\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021stat"
+    "esInPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001"
+    "(\010:\005false\022.\n\017appSignalStates\030\t \003(\0132\025.Pro"
+    "to.AppSignalState\"B\n*GetAppSignalStatesF"
+    "romArchiveCancelRequest\022\024\n\trequestID\030\001 \001"
+    "(\r:\0010\"i\n(GetAppSignalStatesFromArchiveCa"
+    "ncelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
+    "\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001(\t", 7152);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -11157,6 +11158,7 @@ void GetTuningSourcesInfo::Swap(GetTuningSourcesInfo* other) {
 const int GetTuningSourcesInfoReply::kErrorFieldNumber;
 const int GetTuningSourcesInfoReply::kTuningSourceInfoFieldNumber;
 const int GetTuningSourcesInfoReply::kSingleLmControlModeFieldNumber;
+const int GetTuningSourcesInfoReply::kActiveClientIDFieldNumber;
 #endif  // !_MSC_VER
 
 GetTuningSourcesInfoReply::GetTuningSourcesInfoReply()
@@ -11177,6 +11179,7 @@ void GetTuningSourcesInfoReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
   singlelmcontrolmode_ = true;
+  activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -11185,6 +11188,9 @@ GetTuningSourcesInfoReply::~GetTuningSourcesInfoReply() {
 }
 
 void GetTuningSourcesInfoReply::SharedDtor() {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientid_;
+  }
   if (this != default_instance_) {
   }
 }
@@ -11214,6 +11220,11 @@ void GetTuningSourcesInfoReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
     singlelmcontrolmode_ = true;
+    if (has_activeclientid()) {
+      if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+        activeclientid_->clear();
+      }
+    }
   }
   tuningsourceinfo_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -11268,6 +11279,23 @@ bool GetTuningSourcesInfoReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(34)) goto parse_activeClientID;
+        break;
+      }
+
+      // optional string activeClientID = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_activeClientID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_activeclientid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->activeclientid().data(), this->activeclientid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -11306,6 +11334,15 @@ void GetTuningSourcesInfoReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->singlelmcontrolmode(), output);
   }
 
+  // optional string activeClientID = 4;
+  if (has_activeclientid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->activeclientid().data(), this->activeclientid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->activeclientid(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -11331,6 +11368,16 @@ void GetTuningSourcesInfoReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->singlelmcontrolmode(), target);
   }
 
+  // optional string activeClientID = 4;
+  if (has_activeclientid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->activeclientid().data(), this->activeclientid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->activeclientid(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -11352,6 +11399,13 @@ int GetTuningSourcesInfoReply::ByteSize() const {
     // optional bool singleLmControlMode = 3 [default = true];
     if (has_singlelmcontrolmode()) {
       total_size += 1 + 1;
+    }
+
+    // optional string activeClientID = 4;
+    if (has_activeclientid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->activeclientid());
     }
 
   }
@@ -11396,6 +11450,9 @@ void GetTuningSourcesInfoReply::MergeFrom(const GetTuningSourcesInfoReply& from)
     if (from.has_singlelmcontrolmode()) {
       set_singlelmcontrolmode(from.singlelmcontrolmode());
     }
+    if (from.has_activeclientid()) {
+      set_activeclientid(from.activeclientid());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -11422,6 +11479,7 @@ void GetTuningSourcesInfoReply::Swap(GetTuningSourcesInfoReply* other) {
     std::swap(error_, other->error_);
     tuningsourceinfo_.Swap(&other->tuningsourceinfo_);
     std::swap(singlelmcontrolmode_, other->singlelmcontrolmode_);
+    std::swap(activeclientid_, other->activeclientid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
