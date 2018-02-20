@@ -205,3 +205,14 @@ int TuningSource::getErrorsCount()
 
 	return result;
 }
+
+bool TuningSource::valid() const
+{
+	return m_valid;
+}
+
+void TuningSource::invalidate()
+{
+	m_valid = false;
+	state.set_setsor(false);
+}

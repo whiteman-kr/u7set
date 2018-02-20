@@ -526,21 +526,28 @@ void MainWindow::updateStatusBar()
 
 		// Lm Errors tool
 
+		bool valid = false;
 		int totalErrorsCount = 0;
 		int totalSorCount = 0;
 
 		for (Hash& h : sources)
 		{
-			TuningFilterCounters counters;
+			int errorCounter = 0;
+			int sorCounter = 0;
 
-			if (m_tcpClient->tuningSourceCounters(h, &counters.errorCounter, &counters.sorCounter) == false)
+			if (m_tcpClient->tuningSourceCounters(h, &valid, &errorCounter, &sorCounter) == false)
 			{
 				assert(false);
 				continue;
 			}
 
-			totalErrorsCount += counters.errorCounter;
-			totalSorCount += counters.sorCounter;
+			if (valid == false)
+			{
+				continue;
+			}
+
+			totalErrorsCount += errorCounter;
+			totalSorCount += sorCounter;
 		}
 
 		if (m_lmErrorsCounter != totalErrorsCount)

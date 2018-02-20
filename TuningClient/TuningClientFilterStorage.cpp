@@ -169,10 +169,15 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 		for (Hash& equipmentHash : equipmentHashes)
 		{
+			bool valid = false;
 			int errorCounter = 0;
 			int sorCounter = 0;
 
-			if (tcpClient->tuningSourceCounters(equipmentHash, &errorCounter, &sorCounter) == false)
+			if (tcpClient->tuningSourceCounters(equipmentHash, &valid, &errorCounter, &sorCounter) == false)
+			{
+				continue;
+			}
+			if (valid == false)
 			{
 				continue;
 			}
