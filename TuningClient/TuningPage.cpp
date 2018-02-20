@@ -886,12 +886,18 @@ bool TuningPage::apply()
 
 	for (Hash& h : sources)
 	{
+		bool valid = 0;
 		int errorCounter = 0;
 		int sorCounter = 0;
 
-		if (m_tuningTcpClient->tuningSourceCounters(h, &errorCounter, &sorCounter) == false)
+		if (m_tuningTcpClient->tuningSourceCounters(h, &valid, &errorCounter, &sorCounter) == false)
 		{
 			assert(false);
+			continue;
+		}
+
+		if (valid == false)
+		{
 			continue;
 		}
 

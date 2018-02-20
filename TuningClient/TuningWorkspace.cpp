@@ -971,6 +971,8 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 {
 
 	QString state;
+
+	bool valid = false;
 	int errorsCount = 0;
 	int sorCount = 0;
 
@@ -978,7 +980,9 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	assert(columnStatusIndex != -1);
 
-	if (m_tuningTcpClient->tuningSourceStatus(hash, &errorsCount, &sorCount, &state) == false)
+	bool result = m_tuningTcpClient->tuningSourceStatus(hash, &valid, &errorsCount, &sorCount, &state);
+
+	if (result == false || valid == false)
 	{
 		treeItem->setText(columnStatusIndex, tr("Unknown"));
 		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));

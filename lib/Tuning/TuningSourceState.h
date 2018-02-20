@@ -15,12 +15,17 @@ public:
 
 	int getErrorsCount();
 
+	bool valid() const;
+	void invalidate();
+
 public:
 	::Network::DataSourceInfo info;
 	::Network::TuningSourceState state;
 
 private:
 	int m_previousStateUpdatePeriod = 5;
+
+	bool m_valid = true;
 
 	::Network::TuningSourceState m_previousState;	// Previous state is updated every 5 seconds
 

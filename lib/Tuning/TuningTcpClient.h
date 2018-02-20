@@ -92,8 +92,8 @@ public:
 	std::vector<TuningSource> tuningSourcesInfo() const;
 	bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
 
-	bool tuningSourceCounters(Hash equipmentHash, int* errorsCount, int* sorCount) const;
-	bool tuningSourceStatus(Hash equipmentHash, int* errorsCount, int* sorCount, QString* status) const;
+	bool tuningSourceCounters(Hash equipmentHash, bool* valid, int* errorsCount, int* sorCount) const;
+	bool tuningSourceStatus(Hash equipmentHash, bool* valid, int* errorsCount, int* sorCount, QString* status) const;
 
 	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl);
 
