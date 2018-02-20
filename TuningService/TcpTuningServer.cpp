@@ -28,7 +28,6 @@ namespace Tuning
 
 	void TcpTuningServer::onConnection()
 	{
-		m_service.clientIsConnected(connectedSoftwareInfo());
 	}
 
 	void TcpTuningServer::onDisconnection()
@@ -83,6 +82,11 @@ namespace Tuning
 			assert(false);
 			break;
 		}
+	}
+
+	void TcpTuningServer::onConnectedSoftwareInfoChanged()
+	{
+		m_service.clientIsConnected(connectedSoftwareInfo());
 	}
 
 	void TcpTuningServer::onGetTuningSourcesInfoRequest(const char *requestData, quint32 requestDataSize)
@@ -461,9 +465,9 @@ namespace Tuning
 
 		QString activeClientID = m_service.activeClientID();
 
-		if (m_changeControlledTuningSourceRequest.takecontrol() == false)
+		if (clientEquipmentID != activeClientID)
 		{
-			if (clientEquipmentID != activeClientID)
+			if (m_changeControlledTuningSourceRequest.takecontrol() == false)
 			{
 				errCode = NetworkError::ClientIsNotActive;
 
@@ -475,10 +479,10 @@ namespace Tuning
 							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 				return;
 			}
-		}
-		else
-		{
-			m_service.setActiveClient(connectedSoftwareInfo());
+			else
+			{
+				m_service.setActiveClient(connectedSoftwareInfo());
+			}
 		}
 
 		QString tuningSourceEquipmentID = QString::fromStdString(m_changeControlledTuningSourceRequest.tuningsourceequipmentid());

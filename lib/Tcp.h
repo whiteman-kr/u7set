@@ -265,6 +265,8 @@ namespace Tcp
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
 
+		virtual void onConnectedSoftwareInfoChanged();		// called after processing RQID_INTRODUCE_MYSELF
+
 		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
 
 		void sendAck();

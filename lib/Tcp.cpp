@@ -598,6 +598,11 @@ namespace Tcp
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
 	}
 
+	void Server::onConnectedSoftwareInfoChanged()
+	{
+		// called after processing RQID_INTRODUCE_MYSELF
+	}
+
 	void Server::onHeaderAndDataReady()
 	{
 		assert(m_serverState == ServerState::WainigForRequest);
@@ -642,6 +647,8 @@ namespace Tcp
 			m_stateMutex.unlock();
 
 			sendReply(outMessage);
+
+			onConnectedSoftwareInfoChanged();
 
 			emit connectedSoftwareInfoChanged();
 		}
