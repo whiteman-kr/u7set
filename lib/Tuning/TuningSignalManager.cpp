@@ -248,7 +248,7 @@ void TuningSignalManager::invalidateStates()
 {
 	QMutexLocker l(&m_statesMutex);
 
-	for (auto p : m_states)
+	for (auto& p : m_states)
 	{
 		p.second.invalidate();
 	}
