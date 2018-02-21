@@ -459,17 +459,18 @@ void MainWindow::updateStatusBar()
 
 	// LM Control Mode
 
-	if (m_singleLmControlMode != m_tcpClient->singleLmControlMode() || m_activeClientId != m_tcpClient->activeClientId())
+	if (m_singleLmControlMode != m_tcpClient->singleLmControlMode() || m_activeClientId != m_tcpClient->activeClientId() || m_activeClientIp != m_tcpClient->activeClientIp())
 	{
 		m_singleLmControlMode = m_tcpClient->singleLmControlMode();
 
 		m_activeClientId = m_tcpClient->activeClientId();
+		m_activeClientIp = m_tcpClient->activeClientIp();
 
 		QString str = m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText;
 
-		if (m_activeClientId.isEmpty() == false)
+		if (m_activeClientId.isEmpty() == false && m_activeClientIp.isEmpty() == false)
 		{
-			str += QString(", active client is %1").arg(m_activeClientId);
+			str += QString(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
 
 			if (m_tcpClient->clientIsActive() == true)
 			{

@@ -105,7 +105,7 @@ bool TuningTcpClient::activateTuningSourceControl(const QString& equipmentId, bo
 		return false;
 	}
 
-	if (forceTakeControl == true && activeClientId() == instanceId())
+	if (forceTakeControl == true && clientIsActive() == true)
 	{
 		qDebug() << "Do not allow forceTakeControl command if current client is already active";
 		assert(false);
@@ -609,8 +609,11 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 	}
 
 	m_activeClientId = m_tuningSourcesStatesReply.activeclientid().c_str();
+	m_activeClientIp = m_tuningSourcesStatesReply.activeclientip().c_str();
 
-	m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId);
+	QString localAddress = localAddressPort().addressStr();
+
+	m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId && m_activeClientIp == localAddress);
 
 	//
 
@@ -1130,6 +1133,11 @@ bool TuningTcpClient::singleLmControlMode() const
 QString TuningTcpClient::activeClientId() const
 {
 	return m_activeClientId;
+}
+
+QString TuningTcpClient::activeClientIp() const
+{
+	return m_activeClientIp;
 }
 
 int TuningTcpClient::activeTuningSourceCount() const

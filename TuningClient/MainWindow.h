@@ -116,6 +116,7 @@ private:
 
 	bool m_singleLmControlMode = true;
 	QString m_activeClientId;
+	QString m_activeClientIp;
 	int m_discreteCounter = -1;
 	int m_lmErrorsCounter = -1;
 	int m_sorCounter = -1;

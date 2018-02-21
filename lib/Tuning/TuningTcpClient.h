@@ -183,6 +183,7 @@ public:
 	bool clientIsActive() const;
 
 	QString activeClientId() const;
+	QString activeClientIp() const;
 
 	int activeTuningSourceCount() const;
 
@@ -219,6 +220,7 @@ private:
 
 	bool m_singleLmControlMode = false;
 	QString m_activeClientId;
+	QString m_activeClientIp;
 	bool m_currentClientIsActive = false;
 
 #ifdef Q_DEBUG
