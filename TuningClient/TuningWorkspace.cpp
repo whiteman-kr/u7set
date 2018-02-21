@@ -901,7 +901,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 	if (filter->isEmpty() == false)
 	{
-		TuningFilterCounters counters = filter->counters();
+		TuningCounters counters = filter->counters();
 
 		// Counters column
 
@@ -914,7 +914,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		if (filter->isSourceEquipment() == true)
 		{
-			updateTuningSourceTreeItem(treeItem, filter.get());
+			updateTuningSourceTreeItem(treeItem);
 		}
 		else
 		{
@@ -967,51 +967,109 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 	}
 }
 
-void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter)
+void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 {
-
-	QString state;
-
-	bool valid = false;
-	int errorsCount = 0;
-	int sorCount = 0;
-
 	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
 
 	assert(columnStatusIndex != -1);
 
-	bool result = m_tuningTcpClient->tuningSourceStatus(hash, &valid, &errorsCount, &sorCount, &state);
+	int errorCounter = m_tuningTcpClient->sourceErrorCount(hash);
 
-	if (result == false || valid == false)
+	TuningSource ts;
+
+	QString status;
+	bool valid = false;
+	bool controlIsEnabled = false;
+	bool hasUnappliedParams = false;
+
+	if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == false)
 	{
-		treeItem->setText(columnStatusIndex, tr("Unknown"));
-		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
-		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
-
-		return;
-	}
-
-	if (filter->counters().controlEnabledCounter == 0)
-	{
-		treeItem->setText(columnStatusIndex, tr("Deactivated"));
-		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
-		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+		valid = false;
+		status = tr("Unknown");
 	}
 	else
 	{
-		treeItem->setText(columnStatusIndex, state);
+		valid = ts.valid();
+		controlIsEnabled = ts.state.controlisactive();
+		hasUnappliedParams = ts.state.hasunappliedparams();
 
-		if (errorsCount == 0)
+		if (controlIsEnabled == false)
 		{
-			treeItem->setBackground(columnStatusIndex, QBrush(Qt::white));
-			treeItem->setForeground(columnStatusIndex, QBrush(Qt::black));
+			status = tr("Inactive");
 		}
 		else
 		{
-			treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
-			treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+			if (ts.state.isreply() == false)
+			{
+				status = tr("No Reply");
+			}
+			else
+			{
+				if (errorCounter > 0)
+				{
+					status = tr("E: %1").arg(errorCounter);
+				}
+				else
+				{
+					if (hasUnappliedParams == true)
+					{
+						status = tr("Unapplied [%1 replies]").arg(ts.state.replycount());
+					}
+					else
+					{
+						status = tr("Active [%1 replies]").arg(ts.state.replycount());
+					}
+
+				}
+			}
 		}
 	}
+
+	if (treeItem->text(columnStatusIndex) != status)
+	{
+		treeItem->setText(columnStatusIndex, status);
+	}
+
+	QBrush backColor;
+	QBrush textColor;
+
+	if (valid == false)
+	{
+		backColor = QBrush(Qt::white);
+		textColor = QBrush(Qt::darkGray);
+	}
+	else
+	{
+		if (controlIsEnabled == false)
+		{
+			backColor = QBrush(Qt::gray);
+			textColor = QBrush(Qt::white);
+		}
+		else
+		{
+			if (errorCounter > 0)
+			{
+				backColor = QBrush(Qt::red);
+				textColor = QBrush(Qt::white);
+			}
+			else
+			{
+				if (hasUnappliedParams == true)
+				{
+					backColor = QBrush(Qt::yellow);
+					textColor = QBrush(Qt::black);
+				}
+				else
+				{
+					backColor = QBrush(Qt::white);
+					textColor = QBrush(Qt::black);
+				}
+			}
+		}
+	}
+
+	treeItem->setBackground(columnStatusIndex, backColor);
+	treeItem->setForeground(columnStatusIndex, textColor);
 }
 
 void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)

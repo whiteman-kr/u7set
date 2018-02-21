@@ -1,5 +1,5 @@
-#include "../lib/Tuning/TuningTcpClient.h"
 
+#include "../lib/Tuning/TuningTcpClient.h"
 
 //
 // TuningWriteCommand
@@ -95,86 +95,7 @@ bool TuningTcpClient::tuningSourceInfo(Hash equipmentHash, TuningSource* result)
 	return true;
 }
 
-bool TuningTcpClient::tuningSourceCounters(Hash equipmentHash, bool* valid, int* errorsCount, int* sorCount) const
-{
-	return tuningSourceStatus(equipmentHash, valid, errorsCount, sorCount, nullptr);
-}
 
-bool TuningTcpClient::tuningSourceStatus(Hash equipmentHash, bool* valid, int* errorsCount, int* sorCount, QString* status) const
-{
-	if (valid == nullptr || errorsCount == nullptr || sorCount == nullptr)
-	{
-		assert(valid);
-		assert(errorsCount);
-		assert(sorCount);
-		return false;
-	}
-
-	*valid = false;
-	*errorsCount = 0;
-	*sorCount = 0;
-
-	if (status != nullptr)
-	{
-		status->clear();
-	}
-
-	TuningSource ts;
-
-	if (tuningSourceInfo(equipmentHash, &ts) == false)
-	{
-		if (status != nullptr)
-		{
-			*status = tr("???");
-		}
-		return false;
-	}
-
-	*valid = ts.valid();
-
-	if (ts.state.isreply() == false)
-	{
-		if (status != nullptr)
-		{
-			*status = tr("No Reply");
-		}
-
-		if (ts.state.controlisactive() == true)
-		{
-			// If this LM is selected as active and has no reply - this is an error
-
-			(*errorsCount)++;
-		}
-
-		return true;
-	}
-
-	// SOR counter
-
-	if (ts.state.setsor() == true)
-	{
-		(*sorCount)++;
-	}
-
-	*errorsCount = ts.getErrorsCount();
-
-	if (*errorsCount > 0)
-	{
-		if (status != nullptr)
-		{
-			*status = tr("E: %1").arg(*errorsCount);
-		}
-	}
-	else
-	{
-		if (status != nullptr)
-		{
-			*status = tr("Active [%1 replies]").arg(ts.state.replycount());
-		}
-	}
-
-	return true;
-}
 
 bool TuningTcpClient::activateTuningSourceControl(const QString& equipmentId, bool enableControl, bool forceTakeControl)
 {
@@ -422,6 +343,14 @@ void TuningTcpClient::resetToGetTuningSources()
 	return;
 }
 
+void TuningTcpClient::resetToGetTuningSourcesState()
+{
+	QThread::msleep(m_requestInterval);
+
+	requestTuningSourcesState();
+	return;
+}
+
 void TuningTcpClient::resetToProcessTuningSignals()
 {
 	// If there is a queued data to write something, write it or apply.
@@ -536,78 +465,29 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 		return;
 	}
 
-	bool tuningSourcesChanged = false;
+	QMutexLocker l(&m_tuningSourcesMutex);
 
+	m_tuningSources.clear();
+
+	for (int i = 0; i < m_tuningSourcesInfoReply.tuningsourceinfo_size(); i++)
 	{
-		QMutexLocker l(&m_tuningSourcesMutex);
+		const ::Network::DataSourceInfo& dsi = m_tuningSourcesInfoReply.tuningsourceinfo(i);
 
-		// Determine, if tuning sources were changed
+		TuningSource ts;
+		ts.info = dsi;
 
-		if (m_tuningSources.size() != m_tuningSourcesInfoReply.tuningsourceinfo_size())
-		{
-			tuningSourcesChanged = true;
-		}
-		else
-		{
-			for (int i = 0; i < m_tuningSourcesInfoReply.tuningsourceinfo_size(); i++)
-			{
-				const ::Network::DataSourceInfo& dsi = m_tuningSourcesInfoReply.tuningsourceinfo(i);
+		Hash hash = ::calcHash(QString(ts.info.equipmentid().c_str()));
 
-				bool found = false;
+		assert(m_tuningSources.count(hash) == 0);
 
-				for (auto it = m_tuningSources.begin(); it != m_tuningSources.end(); it++)
-				{
-					const TuningSource& ts = it->second;
-
-					if (ts.id() == dsi.id())
-					{
-						found = true;
-						break;
-					}
-				}
-
-				if (found == false)
-				{
-					tuningSourcesChanged = true;
-					break;
-				}
-			}
-		}
-
-		// If tuning sources were changed, refill the list
-
-		if (tuningSourcesChanged == true)
-		{
-			m_tuningSources.clear();
-
-			for (int i = 0; i < m_tuningSourcesInfoReply.tuningsourceinfo_size(); i++)
-			{
-				const ::Network::DataSourceInfo& dsi = m_tuningSourcesInfoReply.tuningsourceinfo(i);
-
-				TuningSource ts;
-				ts.info = dsi;
-
-				Hash hash = ::calcHash(QString(ts.info.equipmentid().c_str()));
-
-				assert(m_tuningSources.count(hash) == 0);
-
-				m_tuningSources[hash] = ts;
-			}
-		}
+		m_tuningSources[hash] = ts;
 	}
 
 	m_singleLmControlMode = m_tuningSourcesInfoReply.singlelmcontrolmode();
 
-	m_activeClientId = m_tuningSourcesInfoReply.activeclientid().c_str();
-
-	m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId);
-
 	requestTuningSourcesState();
 
-	if (tuningSourcesChanged == true)
-	{
-		emit tuningSourcesArrived();
-	}
+	emit tuningSourcesArrived();
 
 	return;
 }
@@ -728,6 +608,10 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 		}
 	}
 
+	m_activeClientId = m_tuningSourcesStatesReply.activeclientid().c_str();
+
+	m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId);
+
 	//
 
 	resetToProcessTuningSignals();
@@ -799,7 +683,7 @@ void TuningTcpClient::requestReadTuningSignals()
 	//
 	if (signalCount == 0)
 	{
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -843,7 +727,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 	if (ok == false)
 	{
 		assert(ok);
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -853,7 +737,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		writeLogError(tr("TuningTcpClient::processReadTuningSignals, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_readTuningSignalsReply.error()))));
 
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -947,7 +831,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		// Start the new loop
 		//
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 	}
 	else
 	{
@@ -1016,7 +900,7 @@ void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 	if (ok == false)
 	{
 		assert(ok);
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -1026,7 +910,7 @@ void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 		writeLogError(tr("TuningTcpClient::processWriteTuningSignals, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_writeTuningSignalsReply.error()))));
 
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -1073,7 +957,7 @@ void TuningTcpClient::processApplyTuningSignals(const QByteArray& data)
 	if (ok == false)
 	{
 		assert(ok);
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -1083,7 +967,7 @@ void TuningTcpClient::processApplyTuningSignals(const QByteArray& data)
 		writeLogError(tr("TuningTcpClient::processApplyTuningSignals, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_applyTuningSignalsReply.error()))));
 
-		resetToGetTuningSources();
+		resetToGetTuningSourcesState();
 		return;
 	}
 
@@ -1156,7 +1040,6 @@ void TuningTcpClient::slot_signalsUpdated()
 		m_signals->validateStates();
 	}
 #endif
-
 
 	return;
 }

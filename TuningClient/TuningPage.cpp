@@ -905,29 +905,8 @@ bool TuningPage::apply()
 	}
 
 	// Get SOR counters
-	int totalSorCount = 0;
 
-	std::vector<Hash> sources = m_tuningTcpClient->tuningSourcesEquipmentHashes();
-
-	for (Hash& h : sources)
-	{
-		bool valid = 0;
-		int errorCounter = 0;
-		int sorCounter = 0;
-
-		if (m_tuningTcpClient->tuningSourceCounters(h, &valid, &errorCounter, &sorCounter) == false)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (valid == false)
-		{
-			continue;
-		}
-
-		totalSorCount += sorCounter;
-	}
+	int totalSorCount = m_tuningTcpClient->sourceSorCount();
 
 	if (totalSorCount > 0)
 	{

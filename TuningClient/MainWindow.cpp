@@ -550,37 +550,15 @@ void MainWindow::updateStatusBar()
 
 		// Lm Errors tool
 
-		bool valid = false;
-		int totalErrorsCount = 0;
-		int totalSorCount = 0;
+		int totalErrorCount = m_tcpClient->sourceErrorCount();
 
-		for (Hash& h : sources)
+		if (m_lmErrorsCounter != totalErrorCount)
 		{
-			int errorCounter = 0;
-			int sorCounter = 0;
+			m_lmErrorsCounter = totalErrorCount;
 
-			if (m_tcpClient->tuningSourceCounters(h, &valid, &errorCounter, &sorCounter) == false)
-			{
-				assert(false);
-				continue;
-			}
+			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(m_lmErrorsCounter));
 
-			if (valid == false)
-			{
-				continue;
-			}
-
-			totalErrorsCount += errorCounter;
-			totalSorCount += sorCounter;
-		}
-
-		if (m_lmErrorsCounter != totalErrorsCount)
-		{
-			m_lmErrorsCounter = totalErrorsCount;
-
-			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(totalErrorsCount));
-
-			if (totalErrorsCount == 0)
+			if (m_lmErrorsCounter == 0)
 			{
 				m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
 			}
@@ -594,15 +572,17 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
+			int totalSorCount = m_tcpClient->sourceSorCount();
+
 			if (m_sorCounter != totalSorCount || m_statusBarSor->text().isEmpty() == true)
 			{
 				m_sorCounter = totalSorCount;
 
 				assert(m_statusBarSor);
 
-				m_statusBarSor->setText(QString(" SOR: %1").arg(totalSorCount));
+				m_statusBarSor->setText(QString(" SOR: %1").arg(m_sorCounter));
 
-				if (totalSorCount == 0)
+				if (m_sorCounter == 0)
 				{
 					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
 				}

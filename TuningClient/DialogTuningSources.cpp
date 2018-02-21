@@ -33,6 +33,7 @@ DialogTuningSources::DialogTuningSources(TuningClientTcpClient* tcpClient, QWidg
 	headerLabels << tr("ControlIsActive");
 	headerLabels << tr("RequestCount");
 	headerLabels << tr("ReplyCount");
+	headerLabels << tr("HasUnapplied");
 
 	ui->treeWidget->setColumnCount(headerLabels.size());
 	ui->treeWidget->setHeaderLabels(headerLabels);
@@ -151,6 +152,7 @@ void DialogTuningSources::update(bool refreshOnly)
 			item->setText(col++, ts.state.controlisactive() ? tr("Yes") : tr("No"));
 			item->setText(col++, QString::number(ts.state.requestcount()));
 			item->setText(col++, QString::number(ts.state.replycount()));
+			item->setText(col++, ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
 		}
 	}
 }
