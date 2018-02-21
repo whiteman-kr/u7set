@@ -282,9 +282,11 @@ void TuningTcpClient::onDisconnection()
 
 void TuningTcpClient::onReplyTimeout()
 {
-	writeLogError(tr("TuningTcpClient: reply timeout."));
-
-	closeConnection();
+	if (isConnected() == true)
+	{
+		writeLogError(tr("TuningTcpClient: reply timeout."));
+		closeConnection();
+	}
 
 	return;
 }
