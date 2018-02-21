@@ -993,33 +993,40 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 		controlIsEnabled = ts.state.controlisactive();
 		hasUnappliedParams = ts.state.hasunappliedparams();
 
-		if (controlIsEnabled == false)
+		if (valid == false)
 		{
-			status = tr("Inactive");
+			status = tr("Unknown");
 		}
 		else
 		{
-			if (ts.state.isreply() == false)
+			if (controlIsEnabled == false)
 			{
-				status = tr("No Reply");
+				status = tr("Inactive");
 			}
 			else
 			{
-				if (errorCounter > 0)
+				if (ts.state.isreply() == false)
 				{
-					status = tr("E: %1").arg(errorCounter);
+					status = tr("No Reply");
 				}
 				else
 				{
-					if (hasUnappliedParams == true)
+					if (errorCounter > 0)
 					{
-						status = tr("Unapplied [%1 replies]").arg(ts.state.replycount());
+						status = tr("E: %1").arg(errorCounter);
 					}
 					else
 					{
-						status = tr("Active [%1 replies]").arg(ts.state.replycount());
-					}
+						if (hasUnappliedParams == true)
+						{
+							status = tr("Unapplied [%1 replies]").arg(ts.state.replycount());
+						}
+						else
+						{
+							status = tr("Active [%1 replies]").arg(ts.state.replycount());
+						}
 
+					}
 				}
 			}
 		}
