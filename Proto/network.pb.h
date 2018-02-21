@@ -3505,6 +3505,18 @@ class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
   inline ::std::string* release_activeclientid();
   inline void set_allocated_activeclientid(::std::string* activeclientid);
 
+  // optional string activeClientIP = 5;
+  inline bool has_activeclientip() const;
+  inline void clear_activeclientip();
+  static const int kActiveClientIPFieldNumber = 5;
+  inline const ::std::string& activeclientip() const;
+  inline void set_activeclientip(const ::std::string& value);
+  inline void set_activeclientip(const char* value);
+  inline void set_activeclientip(const char* value, size_t size);
+  inline ::std::string* mutable_activeclientip();
+  inline ::std::string* release_activeclientip();
+  inline void set_allocated_activeclientip(::std::string* activeclientip);
+
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfoReply)
  private:
   inline void set_has_error();
@@ -3513,6 +3525,8 @@ class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
   inline void clear_has_singlelmcontrolmode();
   inline void set_has_activeclientid();
   inline void clear_has_activeclientid();
+  inline void set_has_activeclientip();
+  inline void clear_has_activeclientip();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3520,9 +3534,10 @@ class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
   ::google::protobuf::int32 error_;
   bool singlelmcontrolmode_;
   ::std::string* activeclientid_;
+  ::std::string* activeclientip_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -4209,6 +4224,18 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
   inline ::std::string* release_activeclientid();
   inline void set_allocated_activeclientid(::std::string* activeclientid);
 
+  // optional string activeClientIP = 5;
+  inline bool has_activeclientip() const;
+  inline void clear_activeclientip();
+  static const int kActiveClientIPFieldNumber = 5;
+  inline const ::std::string& activeclientip() const;
+  inline void set_activeclientip(const ::std::string& value);
+  inline void set_activeclientip(const char* value);
+  inline void set_activeclientip(const char* value, size_t size);
+  inline ::std::string* mutable_activeclientip();
+  inline ::std::string* release_activeclientip();
+  inline void set_allocated_activeclientip(::std::string* activeclientip);
+
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStatesReply)
  private:
   inline void set_has_error();
@@ -4217,6 +4244,8 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
   inline void clear_has_singlelmcontrolmode();
   inline void set_has_activeclientid();
   inline void clear_has_activeclientid();
+  inline void set_has_activeclientip();
+  inline void clear_has_activeclientip();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4224,9 +4253,10 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
   ::google::protobuf::int32 error_;
   bool singlelmcontrolmode_;
   ::std::string* activeclientid_;
+  ::std::string* activeclientip_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -9837,6 +9867,76 @@ inline void GetTuningSourcesInfoReply::set_allocated_activeclientid(::std::strin
   }
 }
 
+// optional string activeClientIP = 5;
+inline bool GetTuningSourcesInfoReply::has_activeclientip() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetTuningSourcesInfoReply::set_has_activeclientip() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetTuningSourcesInfoReply::clear_has_activeclientip() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void GetTuningSourcesInfoReply::clear_activeclientip() {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    activeclientip_->clear();
+  }
+  clear_has_activeclientip();
+}
+inline const ::std::string& GetTuningSourcesInfoReply::activeclientip() const {
+  return *activeclientip_;
+}
+inline void GetTuningSourcesInfoReply::set_activeclientip(const ::std::string& value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesInfoReply::set_activeclientip(const char* value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesInfoReply::set_activeclientip(const char* value, size_t size) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetTuningSourcesInfoReply::mutable_activeclientip() {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  return activeclientip_;
+}
+inline ::std::string* GetTuningSourcesInfoReply::release_activeclientip() {
+  clear_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = activeclientip_;
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetTuningSourcesInfoReply::set_allocated_activeclientip(::std::string* activeclientip) {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientip_;
+  }
+  if (activeclientip) {
+    set_has_activeclientip();
+    activeclientip_ = activeclientip;
+  } else {
+    clear_has_activeclientip();
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // -------------------------------------------------------------------
 
 // GetTuningSourcesStates
@@ -10953,6 +11053,76 @@ inline void GetTuningSourcesStatesReply::set_allocated_activeclientid(::std::str
   } else {
     clear_has_activeclientid();
     activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string activeClientIP = 5;
+inline bool GetTuningSourcesStatesReply::has_activeclientip() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetTuningSourcesStatesReply::set_has_activeclientip() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetTuningSourcesStatesReply::clear_has_activeclientip() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void GetTuningSourcesStatesReply::clear_activeclientip() {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    activeclientip_->clear();
+  }
+  clear_has_activeclientip();
+}
+inline const ::std::string& GetTuningSourcesStatesReply::activeclientip() const {
+  return *activeclientip_;
+}
+inline void GetTuningSourcesStatesReply::set_activeclientip(const ::std::string& value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesStatesReply::set_activeclientip(const char* value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesStatesReply::set_activeclientip(const char* value, size_t size) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetTuningSourcesStatesReply::mutable_activeclientip() {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  return activeclientip_;
+}
+inline ::std::string* GetTuningSourcesStatesReply::release_activeclientip() {
+  clear_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = activeclientip_;
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetTuningSourcesStatesReply::set_allocated_activeclientip(::std::string* activeclientip) {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientip_;
+  }
+  if (activeclientip) {
+    set_has_activeclientip();
+    activeclientip_ = activeclientip;
+  } else {
+    clear_has_activeclientip();
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

@@ -269,7 +269,7 @@ message GetTuningSourcesInfoReply
     optional bool singleLmControlMode = 3 [default = true];
     optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
                                                                     // else - empty string
-
+    optional string activeClientIP = 5;				    // similar to activeClientID
 }
 
 // Tuning sources states request - TDS_GET_TUNING_SOURCES_STATES
@@ -351,6 +351,7 @@ message GetTuningSourcesStatesReply
     optional bool singleLmControlMode = 3 [default = true];
     optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
                                                                     // else - empty string
+    optional string activeClientIP = 5;				    // similar to activeClientID
 }
 
 //  Change current controlled TuningSource request - TDS_CHANGE_CONTROLLED_TUNING_SOURCE

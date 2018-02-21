@@ -178,6 +178,20 @@ namespace Tcp
 		}
 	}
 
+	HostAddressPort SocketWorker::localAddressPort() const
+	{
+		AUTO_LOCK(m_mutex);
+
+		if (m_tcpSocket == nullptr)
+		{
+			return HostAddressPort();
+		}
+
+		QHostAddress locAddr = m_tcpSocket->localAddress();
+		quint16 locPort = m_tcpSocket->localPort();
+
+		return HostAddressPort(locAddr, locPort);
+	}
 
 	void SocketWorker::restartWatchdogTimer()
 	{
@@ -187,7 +201,6 @@ namespace Tcp
 			m_watchdogTimer.start(m_watchdogTimerTimeout);
 		}
 	}
-
 
 	int SocketWorker::readHeader(int bytesAvailable)
 	{

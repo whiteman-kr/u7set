@@ -32,7 +32,7 @@ namespace Tuning
 
 	void TcpTuningServer::onDisconnection()
 	{
-		m_service.clientIsDisconnected(connectedSoftwareInfo());
+		m_service.clientIsDisconnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}
 
 	Tcp::Server* TcpTuningServer::getNewInstance()
@@ -86,7 +86,7 @@ namespace Tuning
 
 	void TcpTuningServer::onConnectedSoftwareInfoChanged()
 	{
-		m_service.clientIsConnected(connectedSoftwareInfo());
+		m_service.clientIsConnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}
 
 	void TcpTuningServer::onGetTuningSourcesInfoRequest(const char *requestData, quint32 requestDataSize)
@@ -164,6 +164,7 @@ namespace Tuning
 
 		m_getTuningSourcesInfoReply.set_singlelmcontrolmode(m_service.singleLmControl());
 		m_getTuningSourcesInfoReply.set_activeclientid(m_service.activeClientID().toStdString());
+		m_getTuningSourcesInfoReply.set_activeclientip(m_service.activeClientIP().toStdString());
 
 		m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
 
@@ -239,6 +240,7 @@ namespace Tuning
 
 		m_getTuningSourcesStatesReply.set_singlelmcontrolmode(m_service.singleLmControl());
 		m_getTuningSourcesStatesReply.set_activeclientid(m_service.activeClientID().toStdString());
+		m_getTuningSourcesStatesReply.set_activeclientip(m_service.activeClientIP().toStdString());
 
 		m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
 
@@ -485,7 +487,7 @@ namespace Tuning
 			}
 			else
 			{
-				m_service.setActiveClient(connectedSoftwareInfo());
+				m_service.setActiveClient(connectedSoftwareInfo(), peerAddr().addressStr());
 			}
 		}
 

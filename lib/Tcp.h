@@ -17,6 +17,7 @@
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
 #include "../lib/SoftwareInfo.h"
+#include "../lib/HostAddressPort.h"
 
 
 namespace Tcp
@@ -180,6 +181,8 @@ namespace Tcp
 		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
 		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
 		void enableWatchdogTimer(bool enable);
+
+		HostAddressPort localAddressPort() const;
 
 		void restartWatchdogTimer();
 
