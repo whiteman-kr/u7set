@@ -10,10 +10,10 @@ const QString DialogTuningSources::m_singleLmControlDisabledString("Single LM co
 DialogTuningSources::DialogTuningSources(TuningClientTcpClient* tcpClient, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTuningSources),
-	m_tcpClient(tcpClient),
+	m_tuningTcpClient(tcpClient),
 	m_parent(parent)
 {
-	assert(m_tcpClient);
+	assert(m_tuningTcpClient);
 
 	setAttribute(Qt::WA_DeleteOnClose);
 	ui->setupUi(this);
@@ -40,12 +40,12 @@ DialogTuningSources::DialogTuningSources(TuningClientTcpClient* tcpClient, QWidg
 	update(false);
 
 	ui->treeWidget->setSortingEnabled(true);
-	ui->treeWidget->sortByColumn(1, Qt::AscendingOrder);// sort by EquipmentID
+	ui->treeWidget->sortByColumn(0, Qt::AscendingOrder);// sort by EquipmentID
 
 	ui->btnEnableControl->setEnabled(false);
 	ui->btnDisableControl->setEnabled(false);
 
-	connect(m_tcpClient, &TuningTcpClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
+	connect(m_tuningTcpClient, &TuningTcpClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
 }
@@ -73,7 +73,7 @@ void DialogTuningSources::slot_tuningSourcesArrived()
 
 void DialogTuningSources::update(bool refreshOnly)
 {
-	std::vector<TuningSource> tsi = m_tcpClient->tuningSourcesInfo();
+	std::vector<TuningSource> tsi = m_tuningTcpClient->tuningSourcesInfo();
 	int count = static_cast<int>(tsi.size());
 
 	if (ui->treeWidget->topLevelItemCount() != count)
@@ -116,9 +116,9 @@ void DialogTuningSources::update(bool refreshOnly)
 		}
 
 		// Single control mode controls
-		if (m_singleControlMode != m_tcpClient->singleLmControlMode())
+		if (m_singleControlMode != m_tuningTcpClient->singleLmControlMode())
 		{
-			m_singleControlMode = m_tcpClient->singleLmControlMode();
+			m_singleControlMode = m_tuningTcpClient->singleLmControlMode();
 
 			ui->labelSingleControlMode->setText(m_singleControlMode == true ? m_singleLmControlEnabledString : m_singleLmControlDisabledString);
 
@@ -143,7 +143,7 @@ void DialogTuningSources::update(bool refreshOnly)
 
 		TuningSource ts;
 
-		if (m_tcpClient->tuningSourceInfo(hash, &ts) == true)
+		if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == true)
 		{
 			int col = dynamicColumn;
 
@@ -179,7 +179,7 @@ void DialogTuningSources::on_btnDetails_clicked()
 
 	Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
 
-	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tcpClient, m_parent, hash);
+	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tuningTcpClient, m_parent, hash);
 	dlg->show();
 }
 
@@ -236,15 +236,32 @@ void DialogTuningSources::activateControl(bool enable)
 
 	QString action = enable ? tr("activate") : tr("deactivate");
 
-	if (QMessageBox::warning(this, qAppName(),
-							 tr("Are you sure you want to %1 the source %2?").arg(action).arg(equipmentId),
-							 QMessageBox::Yes | QMessageBox::No,
-							 QMessageBox::No) != QMessageBox::Yes)
+	bool forceTakeControl = false;
+
+	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
 	{
-		return;
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+
+		forceTakeControl = true;
+	}
+	else
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Are you sure you want to %1 the source %2?").arg(action).arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
 	}
 
-	if (m_tcpClient->activateTuningSourceControl(equipmentId, enable) == false)
+	if (m_tuningTcpClient->activateTuningSourceControl(equipmentId, enable, forceTakeControl) == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("An error has been occured!"));
 	}

@@ -62,6 +62,8 @@ private:
 
 	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
 
+	void activateControl(const QString& equipmentId, bool enable);
+
 protected:
 
 	bool eventFilter(QObject *object, QEvent *event) override;

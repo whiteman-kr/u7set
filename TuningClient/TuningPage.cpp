@@ -768,6 +768,11 @@ bool TuningPage::write()
 		return false;
 	}
 
+	if (takeClientControl() == false)
+	{
+		return false;
+	}
+
 	QString str = tr("New values will be written:") + QString("\r\n\r\n");
 	QString strValue;
 
@@ -783,6 +788,11 @@ bool TuningPage::write()
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		if (state.controlIsEnabled() == false)
 		{
 			continue;
 		}
@@ -805,6 +815,11 @@ bool TuningPage::write()
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		if (state.controlIsEnabled() == false)
 		{
 			continue;
 		}
@@ -850,6 +865,11 @@ bool TuningPage::write()
 			continue;
 		}
 
+		if (state.controlIsEnabled() == false)
+		{
+			continue;
+		}
+
 		state.clearUserModified();
 
 		m_tuningSignalManager->setState(hash, state);
@@ -867,6 +887,11 @@ bool TuningPage::write()
 bool TuningPage::apply()
 {
 	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return false;
+	}
+
+	if (takeClientControl() == false)
 	{
 		return false;
 	}
@@ -1176,6 +1201,33 @@ void TuningPage::invertValue()
 			m_tuningSignalManager->setNewValue(hash, tv);
 		}
 	}
+}
+
+bool TuningPage::takeClientControl()
+{
+	if (m_tuningTcpClient->activeTuningSourceCount() == 0)
+	{
+		QMessageBox::critical(this, qAppName(),	 tr("No tuning sources with control enabled found."));
+
+		return false;
+	}
+
+	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
+	{
+		QString equipmentId = m_tuningTcpClient->singleActiveTuningSource();
+
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+
+		m_tuningTcpClient->activateTuningSourceControl(equipmentId, true, true);
+	}
+
+	return true;
 }
 
 void TuningPage::slot_timerTick500()

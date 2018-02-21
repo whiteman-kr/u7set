@@ -1014,6 +1014,45 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	}
 }
 
+void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return;
+	}
+
+	// Take Control
+
+	QString action = enable ? tr("activate") : tr("deactivate");
+
+	bool forceTakeControl = false;
+
+	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+
+		forceTakeControl = true;
+	}
+	else
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Are you sure you want to %1 the source %2?").arg(action).arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+	}
+
+	m_tuningTcpClient->activateTuningSourceControl(equipmentId, enable, forceTakeControl);
+}
+
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 {
 	if (m_tab != nullptr && object == m_tab->tabBar() &&
@@ -1116,23 +1155,12 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	auto fEnableControl = [this, filter]() -> void
 	{
-			if (theMainWindow->userManager()->login(this) == false)
-			{
-				return;
-			}
-
-			if (QMessageBox::warning(this, qAppName(),
-									 tr("Are you sure you want to activate the source %1?").arg(filter->caption()),
-									 QMessageBox::Yes | QMessageBox::No,
-									 QMessageBox::No) != QMessageBox::Yes)
-			{
-				return;
-			}
-
-			m_tuningTcpClient->activateTuningSourceControl(filter->caption(), true);
+		activateControl(filter->caption(), true);
 	};
 	actionEnable->setEnabled(ts.state.controlisactive() == false);
 	connect(actionEnable, &QAction::triggered, this, fEnableControl);
+
+	menu.addAction(actionEnable);
 
 	// Disable Control
 
@@ -1140,28 +1168,14 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	auto fDisableControl = [this, filter]() -> void
 	{
-			if (theMainWindow->userManager()->login(this) == false)
-			{
-				return;
-			}
-
-			if (QMessageBox::warning(this, qAppName(),
-									 tr("Are you sure you want to deactivate the source %1?").arg(filter->caption()),
-									 QMessageBox::Yes | QMessageBox::No,
-									 QMessageBox::No) != QMessageBox::Yes)
-			{
-				return;
-			}
-
-			m_tuningTcpClient->activateTuningSourceControl(filter->caption(), false);
+		activateControl(filter->caption(), false);
 	};
 	actionDisable->setEnabled(ts.state.controlisactive() == true);
 	connect(actionDisable, &QAction::triggered, this, fDisableControl);
 
-	// Run the menu
-
-	menu.addAction(actionEnable);
 	menu.addAction(actionDisable);
+
+	// Run the menu
 
 	menu.exec(QCursor::pos());
 }
