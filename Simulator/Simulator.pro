@@ -11,12 +11,12 @@ TARGET = Simulator
 TEMPLATE = lib
 
 CONFIG += staticlib
+
 CONFIG += c++17					# C++17 support is enabled.
+win32:QMAKE_CXXFLAGS += /std:c++17
+
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
-win32 {
-    QMAKE_CXXFLAGS += /std:c++17
-}
 
 PRECOMPILED_HEADER = Stable.h
 

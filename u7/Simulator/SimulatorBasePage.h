@@ -5,7 +5,7 @@
 #include <utility>
 #include <QWidget>
 #include <QAction>
-
+#include "SimIdeSimulator.h"
 
 class SimulatorControlPage;
 
@@ -15,7 +15,7 @@ class SimulatorBasePage : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SimulatorBasePage(QWidget* parent = nullptr);
+	explicit SimulatorBasePage(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent = nullptr);
 	virtual ~SimulatorBasePage();
 
 public:
@@ -27,6 +27,9 @@ protected:
 
 private:
 	static std::list<SimulatorBasePage*> m_pages;
+
+protected:
+	std::shared_ptr<SimIdeSimulator> m_simulator;
 };
 
 #endif // SIMULATORBASEPAGE_H

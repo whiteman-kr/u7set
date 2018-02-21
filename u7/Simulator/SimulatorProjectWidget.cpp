@@ -3,7 +3,7 @@
 #include <QMenu>
 #include "../Settings.h"
 
-SimulatorProjectWidget::SimulatorProjectWidget(std::shared_ptr<Sim::Simulator> simulator, QWidget* parent) :
+SimulatorProjectWidget::SimulatorProjectWidget(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent) :
 	QWidget(parent),
 	m_simulator(simulator)
 {

@@ -11,8 +11,10 @@ TEMPLATE = lib
 
 CONFIG += staticlib
 CONFIG += precompile_header
-CONFIG += c++14					# C++14 support is enabled.
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
+
+CONFIG += c++17					# C++14 support is enabled.
+win32:QMAKE_CXXFLAGS += /std:c++17
 
 PRECOMPILED_HEADER = Stable.h
 

@@ -3,9 +3,12 @@
 
 std::list<SimulatorBasePage*> SimulatorBasePage::m_pages;
 
-SimulatorBasePage::SimulatorBasePage(QWidget* parent)
-	: QWidget(parent)
+SimulatorBasePage::SimulatorBasePage(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent)
+	: QWidget(parent),
+	  m_simulator(simulator)
 {
+	assert(m_simulator);
+
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	setAutoFillBackground(true);

@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include <QtWidgets>
 #include "../lib/DbController.h"
-#include "Simulator.h"
+#include "SimIdeSimulator.h"
+
 
 class SimulatorProjectWidget;
 class SimulatorOutputWidget;
@@ -15,7 +16,7 @@ class SimulatorWidget : public QMainWindow, HasDbController
 {
 	Q_OBJECT
 public:
-	SimulatorWidget(std::shared_ptr<Sim::Simulator> simulator,
+	SimulatorWidget(std::shared_ptr<SimIdeSimulator> simulator,
 					DbController* db,
 					QWidget* parent = nullptr,
 					Qt::WindowType windowType = Qt::Window,
@@ -45,6 +46,10 @@ protected slots:
 	void addNewWindow();
 
 	void openControlTabPage(QString lmEquipmentId);
+	void openLogicSchemaTabPage(QString schemaId);
+
+	void openSchemaTabPage(QString fileName);
+
 	void tabCloseRequest(int index);
 	void tabBarContextMenuRequest(const QPoint& pos);
 
@@ -55,7 +60,7 @@ private:
 	SimulatorProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimulatorMemoryWidget*> m_memoryWidgets;
 
-	std::shared_ptr<Sim::Simulator> m_simulator;
+	std::shared_ptr<SimIdeSimulator> m_simulator;
 
 	// Actions
 	//

@@ -5,10 +5,11 @@
 #include "SimulatorOutputWidget.h"
 #include "SimulatorSelectBuildDialog.h"
 #include "SimulatorControlPage.h"
+#include "SimulatorSchemaPage.h"
 #include "../SimulatorTabPage.h"
 
 
-SimulatorWidget::SimulatorWidget(std::shared_ptr<Sim::Simulator> simulator,
+SimulatorWidget::SimulatorWidget(std::shared_ptr<SimIdeSimulator> simulator,
 								 DbController* db,
 								 QWidget* parent /*= nullptr*/,
 								 Qt::WindowType windowType /*= Qt::Window*/,
@@ -20,7 +21,7 @@ SimulatorWidget::SimulatorWidget(std::shared_ptr<Sim::Simulator> simulator,
 {
 	if (m_simulator == nullptr)
 	{
-		m_simulator = std::make_shared<Sim::Simulator>();
+		m_simulator = std::make_shared<SimIdeSimulator>();
 	}
 
 	setWindowFlags(windowType);
@@ -283,7 +284,9 @@ void SimulatorWidget::refreshBuild()
 bool SimulatorWidget::loadBuild(QString buildPath)
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
 	bool ok = m_simulator->load(buildPath);
+
 	QApplication::restoreOverrideCursor();
 
 	if (ok == false)
@@ -343,9 +346,49 @@ void SimulatorWidget::openControlTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimulatorControlPage* controlPage = new SimulatorControlPage(logicModule, m_tabWidget);
+	SimulatorControlPage* controlPage = new SimulatorControlPage(logicModule, m_simulator, m_tabWidget);
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
+	m_tabWidget->setCurrentIndex(tabIndex);
+
+	connect(controlPage, &SimulatorControlPage::openSchemaRequest, this, &SimulatorWidget::openLogicSchemaTabPage);
+
+	return;
+}
+
+void SimulatorWidget::openLogicSchemaTabPage(QString schemaId)
+{
+	QString buildPath = QDir::fromNativeSeparators(m_simulator->buildPath());
+	if (buildPath.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (buildPath.endsWith('/') == false)
+	{
+		buildPath += "/";
+	}
+
+	// Load schema
+	//
+	QString fileName = buildPath + QLatin1String("LogicSchemas/") + schemaId + "." + ::AlFileExtension;
+
+	openSchemaTabPage(fileName);
+	return;
+}
+
+void SimulatorWidget::openSchemaTabPage(QString fileName)
+{
+	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(fileName);
+	if (schema == nullptr)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1").arg(fileName));
+		return;
+	}
+
+	SimulatorSchemaPage* page = new SimulatorSchemaPage(schema, m_simulator, m_tabWidget);
+
+	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
 
 	return;

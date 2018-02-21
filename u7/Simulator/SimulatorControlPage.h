@@ -5,7 +5,7 @@
 #include <QSplitter>
 #include <QLabel>
 #include <QPushButton>
-#include <QTableWidget>
+#include <QTreeWidget>
 #include <QLineEdit>
 #include "SimulatorBasePage.h"
 #include "SimLmModel.h"
@@ -15,10 +15,23 @@ class SimulatorControlPage : public SimulatorBasePage
 	Q_OBJECT
 
 public:
-	explicit SimulatorControlPage(std::shared_ptr<Sim::LogicModule> logicModule, QWidget* parent = nullptr);
+	SimulatorControlPage(std::shared_ptr<Sim::LogicModule> logicModule,
+						 std::shared_ptr<SimIdeSimulator> simulator,
+						 QWidget* parent = nullptr);
 
 protected:
 	void updateLogicModuleInfoInfo();
+	void fillSchemaList();
+
+protected slots:
+	void schemaFilterChanged();
+	void schemaContextMenuRequested(const QPoint& pos);
+	void schemaItemDoubleClicked(QTreeWidgetItem* item, int column);
+
+	void openSelectedSchema();
+
+signals:
+	void openSchemaRequest(QString schemaId);
 
 public:
 	QString equipmnetId() const;
@@ -35,7 +48,7 @@ private:
 	QPushButton* m_codeButton = new QPushButton(tr("Code"), this);
 
 	QLabel* m_schemasLabel = new QLabel(tr("Schemas:"), this);
-	QTableWidget* m_schemasList = new QTableWidget(this);
+	QTreeWidget* m_schemasList = new QTreeWidget(this);
 	QLineEdit* m_schemaFilterEdit = new QLineEdit(this);
 
 	// --

@@ -417,7 +417,6 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 //	actions << m_newTabAction;
 //	actions << m_closeTabAction;
 
-
 	return;
 }
 

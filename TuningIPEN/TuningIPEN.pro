@@ -125,7 +125,7 @@ CONFIG(release, debug|release) {
 #c++11 support for GCC
 #
 unix:QMAKE_CXXFLAGS += -std=c++11
-
+win32:QMAKE_CXXFLAGS += /std:c++17
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

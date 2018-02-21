@@ -198,14 +198,11 @@ CONFIG(debug, debug|release): DEFINES += _DEBUG
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
 
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
-
-
 #c++14 support for GCC
 #
 unix:QMAKE_CXXFLAGS += -std=c++14
+
+win32:QMAKE_CXXFLAGS += /std:c++17
 
 
 # VFrame30 library

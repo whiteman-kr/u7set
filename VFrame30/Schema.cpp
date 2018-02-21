@@ -1066,6 +1066,11 @@ namespace VFrame30
 		parseDetails(details);
 	}
 
+	bool SchemaDetails::operator< (const SchemaDetails& b) const
+	{
+		return this->m_schemaId < b.m_schemaId;
+	}
+
 	QString SchemaDetails::getDetailsString(const Schema* schema)
 	{
 		if (schema == nullptr)
@@ -1437,6 +1442,14 @@ namespace VFrame30
 		return false;
 	}
 
+	bool SchemaDetails::hasEquipmentId(const QString& equipmentId) const
+	{
+		QStringList eqs = m_equipmentId.split(' ', QString::SkipEmptyParts);
+
+		bool result = eqs.contains(equipmentId, Qt::CaseInsensitive);
+		return result;
+	}
+
 	SchemaDetailsSet::SchemaDetailsSet() :
 		Proto::ObjectSerialization<SchemaDetailsSet>(Proto::ProtoCompress::Never)
 	{
@@ -1513,6 +1526,24 @@ namespace VFrame30
 		{
 			SchemaDetails* ptr = schemaPair.second.get();
 			result.push_back(*ptr);
+		}
+
+		return result;
+	}
+
+	std::vector<SchemaDetails> SchemaDetailsSet::schemasDetails(QString equipmentId) const
+	{
+		std::vector<SchemaDetails> result;
+		result.reserve(m_details.size());
+
+		for (auto schemaPair : m_details)
+		{
+			SchemaDetails* ptr = schemaPair.second.get();
+
+			if (ptr->hasEquipmentId(equipmentId) == true)
+			{
+				result.push_back(*ptr);
+			}
 		}
 
 		return result;

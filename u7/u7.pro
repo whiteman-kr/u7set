@@ -211,7 +211,9 @@ SOURCES +=\
     Simulator/SimulatorProjectWidget.cpp \
     Simulator/SimulatorSelectBuildDialog.cpp \
     Simulator/SimulatorBasePage.cpp \
-    Simulator/SimulatorControlPage.cpp
+    Simulator/SimulatorControlPage.cpp \
+    Simulator/SimIdeSimulator.cpp \
+    Simulator/SimulatorSchemaPage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -360,7 +362,9 @@ HEADERS  += \
     Simulator/SimulatorProjectWidget.h \
     Simulator/SimulatorSelectBuildDialog.h \
     Simulator/SimulatorBasePage.h \
-    Simulator/SimulatorControlPage.h
+    Simulator/SimulatorControlPage.h \
+    Simulator/SimIdeSimulator.h \
+    Simulator/SimulatorSchemaPage.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -444,11 +448,7 @@ PRECOMPILED_HEADER = Stable.h
 
 # c++14 support
 #
-win32:QMAKE_CXXFLAGS += -std:c++14
-unix:QMAKE_CXXFLAGS += -std=c++14
-
-#c++14 support for Windows
-#
+win32:QMAKE_CXXFLAGS += /std:c++17
 unix:QMAKE_CXXFLAGS += -std=c++14
 
 #Optimization flags

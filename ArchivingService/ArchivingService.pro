@@ -146,6 +146,7 @@ PRECOMPILED_HEADER = Stable.h
 #c++11 support for GCC
 #
 unix:QMAKE_CXXFLAGS += -std=c++11
+win32:QMAKE_CXXFLAGS += /std:c++17
 
 #protobuf
 #
