@@ -224,6 +224,7 @@ namespace Tuning
 		else
 		{
 			m_activeClientInfo.clear();
+			m_activeClientIP.clear();
 		}
 
 		return true;

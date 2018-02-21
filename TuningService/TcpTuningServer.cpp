@@ -336,8 +336,9 @@ namespace Tuning
 		}
 
 		QString activeClientID = m_service.activeClientID();
+		QString activeClientIP = m_service.activeClientIP();
 
-		if (clientEquipmentID != activeClientID)
+		if (clientEquipmentID != activeClientID || peerAddr().addressStr() != activeClientIP)
 		{
 			errCode = NetworkError::ClientIsNotActive;
 
@@ -409,8 +410,9 @@ namespace Tuning
 		}
 
 		QString activeClientID = m_service.activeClientID();
+		QString activeClientIP = m_service.activeClientIP();
 
-		if (clientEquipmentID != activeClientID)
+		if (clientEquipmentID != activeClientID || peerAddr().addressStr() != activeClientIP)
 		{
 			errCode = NetworkError::ClientIsNotActive;
 
@@ -431,7 +433,7 @@ namespace Tuning
 
 		m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
 
-		sendReply(m_tuningSignalsWriteReply);
+		sendReply(m_tuningSignalsApplyReply);
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
 					  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
@@ -470,8 +472,9 @@ namespace Tuning
 		}
 
 		QString activeClientID = m_service.activeClientID();
+		QString activeClientIP = m_service.activeClientIP();
 
-		if (clientEquipmentID != activeClientID)
+		if (clientEquipmentID != activeClientID || peerAddr().addressStr() != activeClientIP)
 		{
 			if (m_changeControlledTuningSourceRequest.takecontrol() == false)
 			{
