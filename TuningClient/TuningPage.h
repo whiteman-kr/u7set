@@ -114,6 +114,8 @@ private:
 
 	void invertValue();
 
+	bool takeClientControl();
+
 private slots:
 
 	void slot_timerTick500();

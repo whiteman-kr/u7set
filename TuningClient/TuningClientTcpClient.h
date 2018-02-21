@@ -23,6 +23,12 @@ public:
 	virtual void writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue) override;
 	virtual void writeLogSignalChange(const QString& message) override;
 
+	int sourceErrorCount() const;
+	int sourceErrorCount(Hash equipmentHash) const;
+
+	int sourceSorCount() const;
+	int sourceSorCount(Hash equipmentHash) const;
+
 private:
 
 	Log::LogFile* m_log = nullptr;

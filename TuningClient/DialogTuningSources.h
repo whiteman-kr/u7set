@@ -67,7 +67,7 @@ private:
 
 	bool m_singleControlMode = true;
 
-	TuningClientTcpClient* m_tcpClient = nullptr;
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
 	QWidget* m_parent = nullptr;
 

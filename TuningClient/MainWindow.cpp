@@ -10,6 +10,9 @@
 #include "DialogFilterEditor.h"
 #include "version.h"
 
+QString MainWindow::m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
+QString MainWindow::m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
+
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
@@ -72,8 +75,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
 			Qt::QueuedConnection);
-
-	connect(m_tcpClient, &TuningTcpClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
 
 	// DialogAlert
 
@@ -193,6 +194,7 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo = new QLabel();
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
+	m_statusBarInfo->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
 
 	m_statusDiscreteCount = new QLabel();
 	m_statusDiscreteCount->setAlignment(Qt::AlignLeft);
@@ -455,9 +457,31 @@ void MainWindow::updateStatusBar()
 	assert(m_statusBarInfo);
 	assert(m_statusBarConfigConnection);
 
+	// LM Control Mode
+
+	if (m_singleLmControlMode != m_tcpClient->singleLmControlMode() || m_activeClientId != m_tcpClient->activeClientId())
+	{
+		m_singleLmControlMode = m_tcpClient->singleLmControlMode();
+
+		m_activeClientId = m_tcpClient->activeClientId();
+
+		QString str = m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText;
+
+		if (m_activeClientId.isEmpty() == false)
+		{
+			str += QString(", active client is %1").arg(m_activeClientId);
+
+			if (m_tcpClient->clientIsActive() == true)
+			{
+				str += tr(" (current)");
+			}
+		}
+
+		m_statusBarInfo->setText(str);
+	}
+
 	Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
 	Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
-
 
 	// ConfigService
 	//
@@ -526,37 +550,15 @@ void MainWindow::updateStatusBar()
 
 		// Lm Errors tool
 
-		bool valid = false;
-		int totalErrorsCount = 0;
-		int totalSorCount = 0;
+		int totalErrorCount = m_tcpClient->sourceErrorCount();
 
-		for (Hash& h : sources)
+		if (m_lmErrorsCounter != totalErrorCount)
 		{
-			int errorCounter = 0;
-			int sorCounter = 0;
+			m_lmErrorsCounter = totalErrorCount;
 
-			if (m_tcpClient->tuningSourceCounters(h, &valid, &errorCounter, &sorCounter) == false)
-			{
-				assert(false);
-				continue;
-			}
+			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(m_lmErrorsCounter));
 
-			if (valid == false)
-			{
-				continue;
-			}
-
-			totalErrorsCount += errorCounter;
-			totalSorCount += sorCounter;
-		}
-
-		if (m_lmErrorsCounter != totalErrorsCount)
-		{
-			m_lmErrorsCounter = totalErrorsCount;
-
-			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(totalErrorsCount));
-
-			if (totalErrorsCount == 0)
+			if (m_lmErrorsCounter == 0)
 			{
 				m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
 			}
@@ -570,15 +572,17 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
+			int totalSorCount = m_tcpClient->sourceSorCount();
+
 			if (m_sorCounter != totalSorCount || m_statusBarSor->text().isEmpty() == true)
 			{
 				m_sorCounter = totalSorCount;
 
 				assert(m_statusBarSor);
 
-				m_statusBarSor->setText(QString(" SOR: %1").arg(totalSorCount));
+				m_statusBarSor->setText(QString(" SOR: %1").arg(m_sorCounter));
 
-				if (totalSorCount == 0)
+				if (m_sorCounter == 0)
 				{
 					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
 				}
@@ -614,16 +618,6 @@ void MainWindow::updateStatusBar()
 			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
 		}
 	}
-}
-
-void MainWindow::slot_tuningSourcesArrived()
-{
-	assert(m_statusBarTuningConnection);
-
-	// LM Single/Multi control
-
-	m_statusBarInfo->setText(m_tcpClient->singleLmControlMode() ? tr("Single LM Control Mode") : tr("Multiple LM Control Mode"));
-
 }
 
 void MainWindow::slot_configurationArrived()

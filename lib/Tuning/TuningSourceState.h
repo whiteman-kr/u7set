@@ -13,7 +13,7 @@ public:
 
 	void setNewState(const ::Network::TuningSourceState& newState);
 
-	int getErrorsCount();
+	int getErrorsCount() const;
 
 	bool valid() const;
 	void invalidate();

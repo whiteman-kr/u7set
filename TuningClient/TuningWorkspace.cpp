@@ -901,7 +901,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 	if (filter->isEmpty() == false)
 	{
-		TuningFilterCounters counters = filter->counters();
+		TuningCounters counters = filter->counters();
 
 		// Counters column
 
@@ -914,7 +914,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		if (filter->isSourceEquipment() == true)
 		{
-			updateTuningSourceTreeItem(treeItem, filter.get());
+			updateTuningSourceTreeItem(treeItem);
 		}
 		else
 		{
@@ -967,51 +967,148 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 	}
 }
 
-void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter)
+void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 {
-
-	QString state;
-
-	bool valid = false;
-	int errorsCount = 0;
-	int sorCount = 0;
-
 	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
 
 	assert(columnStatusIndex != -1);
 
-	bool result = m_tuningTcpClient->tuningSourceStatus(hash, &valid, &errorsCount, &sorCount, &state);
+	int errorCounter = m_tuningTcpClient->sourceErrorCount(hash);
 
-	if (result == false || valid == false)
+	TuningSource ts;
+
+	QString status;
+	bool valid = false;
+	bool controlIsEnabled = false;
+	bool hasUnappliedParams = false;
+
+	if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == false)
 	{
-		treeItem->setText(columnStatusIndex, tr("Unknown"));
-		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
-		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
-
-		return;
-	}
-
-	if (filter->counters().controlEnabledCounter == 0)
-	{
-		treeItem->setText(columnStatusIndex, tr("Deactivated"));
-		treeItem->setBackground(columnStatusIndex, QBrush(Qt::gray));
-		treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+		valid = false;
+		status = tr("Unknown");
 	}
 	else
 	{
-		treeItem->setText(columnStatusIndex, state);
+		valid = ts.valid();
+		controlIsEnabled = ts.state.controlisactive();
+		hasUnappliedParams = ts.state.hasunappliedparams();
 
-		if (errorsCount == 0)
+		if (controlIsEnabled == false)
 		{
-			treeItem->setBackground(columnStatusIndex, QBrush(Qt::white));
-			treeItem->setForeground(columnStatusIndex, QBrush(Qt::black));
+			status = tr("Inactive");
 		}
 		else
 		{
-			treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
-			treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+			if (ts.state.isreply() == false)
+			{
+				status = tr("No Reply");
+			}
+			else
+			{
+				if (errorCounter > 0)
+				{
+					status = tr("E: %1").arg(errorCounter);
+				}
+				else
+				{
+					if (hasUnappliedParams == true)
+					{
+						status = tr("Unapplied [%1 replies]").arg(ts.state.replycount());
+					}
+					else
+					{
+						status = tr("Active [%1 replies]").arg(ts.state.replycount());
+					}
+
+				}
+			}
 		}
 	}
+
+	if (treeItem->text(columnStatusIndex) != status)
+	{
+		treeItem->setText(columnStatusIndex, status);
+	}
+
+	QBrush backColor;
+	QBrush textColor;
+
+	if (valid == false)
+	{
+		backColor = QBrush(Qt::white);
+		textColor = QBrush(Qt::darkGray);
+	}
+	else
+	{
+		if (controlIsEnabled == false)
+		{
+			backColor = QBrush(Qt::gray);
+			textColor = QBrush(Qt::white);
+		}
+		else
+		{
+			if (errorCounter > 0)
+			{
+				backColor = QBrush(Qt::red);
+				textColor = QBrush(Qt::white);
+			}
+			else
+			{
+				if (hasUnappliedParams == true)
+				{
+					backColor = QBrush(Qt::yellow);
+					textColor = QBrush(Qt::black);
+				}
+				else
+				{
+					backColor = QBrush(Qt::white);
+					textColor = QBrush(Qt::black);
+				}
+			}
+		}
+	}
+
+	treeItem->setBackground(columnStatusIndex, backColor);
+	treeItem->setForeground(columnStatusIndex, textColor);
+}
+
+void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return;
+	}
+
+	// Take Control
+
+	QString action = enable ? tr("activate") : tr("deactivate");
+
+	bool forceTakeControl = false;
+
+	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+
+		forceTakeControl = true;
+	}
+	else
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Are you sure you want to %1 the source %2?").arg(action).arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+	}
+
+	m_tuningTcpClient->activateTuningSourceControl(equipmentId, enable, forceTakeControl);
 }
 
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
@@ -1116,23 +1213,12 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	auto fEnableControl = [this, filter]() -> void
 	{
-			if (theMainWindow->userManager()->login(this) == false)
-			{
-				return;
-			}
-
-			if (QMessageBox::warning(this, qAppName(),
-									 tr("Are you sure you want to activate the source %1?").arg(filter->caption()),
-									 QMessageBox::Yes | QMessageBox::No,
-									 QMessageBox::No) != QMessageBox::Yes)
-			{
-				return;
-			}
-
-			m_tuningTcpClient->activateTuningSourceControl(filter->caption(), true);
+		activateControl(filter->caption(), true);
 	};
 	actionEnable->setEnabled(ts.state.controlisactive() == false);
 	connect(actionEnable, &QAction::triggered, this, fEnableControl);
+
+	menu.addAction(actionEnable);
 
 	// Disable Control
 
@@ -1140,28 +1226,14 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	auto fDisableControl = [this, filter]() -> void
 	{
-			if (theMainWindow->userManager()->login(this) == false)
-			{
-				return;
-			}
-
-			if (QMessageBox::warning(this, qAppName(),
-									 tr("Are you sure you want to deactivate the source %1?").arg(filter->caption()),
-									 QMessageBox::Yes | QMessageBox::No,
-									 QMessageBox::No) != QMessageBox::Yes)
-			{
-				return;
-			}
-
-			m_tuningTcpClient->activateTuningSourceControl(filter->caption(), false);
+		activateControl(filter->caption(), false);
 	};
 	actionDisable->setEnabled(ts.state.controlisactive() == true);
 	connect(actionDisable, &QAction::triggered, this, fDisableControl);
 
-	// Run the menu
-
-	menu.addAction(actionEnable);
 	menu.addAction(actionDisable);
+
+	// Run the menu
 
 	menu.exec(QCursor::pos());
 }
