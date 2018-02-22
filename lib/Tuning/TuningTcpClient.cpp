@@ -981,11 +981,11 @@ void TuningTcpClient::processApplyTuningSignals(const QByteArray& data)
 	return;
 }
 
-void TuningTcpClient::slot_configurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply)
+void TuningTcpClient::slot_configurationArrived(HostAddressPort address, bool autoApply)
 {
 	writeLogMessage(tr("TuningTcpClient::slot_configurationArrived"));
 
-	setServers(address1, address2, true);
+	setServers(address, address, true);
 
 	setAutoApply(autoApply);
 

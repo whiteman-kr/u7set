@@ -219,6 +219,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0201.sql", "Upgrade to version 201, Adding integer tuning params and Archive fields."},
 	{":/DatabaseUpgrade/Upgrade0202.sql", "Upgrade to version 202, Update properties in TuningService and TuningClient preset."},
 	{":/DatabaseUpgrade/Upgrade0203.sql", "Upgrade to version 203, Update configuration scripts and LM descriptions"},
+	{":/DatabaseUpgrade/Upgrade0204.sql", "Upgrade to version 204, TuningClient preset update"},
 };
 
 

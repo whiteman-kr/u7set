@@ -990,6 +990,11 @@ Tcp::ConnectionState CfgLoaderThread::getConnectionState()
 	return m_cfgLoader->getConnectionState();
 }
 
+HostAddressPort CfgLoaderThread::getCurrentServerAddressPort()
+{
+	return m_cfgLoader->currentServerAddressPort();
+}
+
 
 
 

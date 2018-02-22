@@ -338,19 +338,16 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 
 			// sw is TuningClient or Metrology
 			//
-			QString tuningServiceID1;
-			QString tuningServiceID2;
+			QString tuningServiceID;
 
-			result &= DeviceHelper::getStrProperty(tuningClient, "TuningServiceID1", &tuningServiceID1, log);
-			result &= DeviceHelper::getStrProperty(tuningClient, "TuningServiceID2", &tuningServiceID2, log);
+			result &= DeviceHelper::getStrProperty(tuningClient, "TuningServiceID", &tuningServiceID, log);
 
 			if (result == false)
 			{
 				return;
 			}
 
-			if (tuningServiceID1 != software->equipmentIdTemplate() &&
-				tuningServiceID2 != software->equipmentIdTemplate())
+			if (tuningServiceID != software->equipmentIdTemplate())
 			{
 				return;
 			}
