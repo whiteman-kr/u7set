@@ -88,7 +88,7 @@ public:
 	CircularLogger();
 	~CircularLogger();
 
-	bool init(int fileCount, int fileSizeInMB);
+	bool init(QString logName, int fileCount, int fileSizeInMB);
 
 	bool isInitialized() const;
 
@@ -122,7 +122,7 @@ typedef std::shared_ptr<CircularLogger> CircularLoggerShared;
 //
 // #define CIRCULAR_LOGGER_PTR_ASSERTING
 //
-bool circularLoggerInit(std::shared_ptr<CircularLogger> logger, int fileCount, int fileSizeInMB);
+bool circularLoggerInit(std::shared_ptr<CircularLogger> logger, const QString& logName, int fileCount, int fileSizeInMB);
 void circularLoggerShutdown(std::shared_ptr<CircularLogger> logger);
 
 void circularLoggerWriteError(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho);
@@ -140,5 +140,7 @@ void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QS
 #define DEBUG_LOG_MSG(logger, str)	circularLoggerWriteMessage(logger, str, Q_FUNC_INFO, __FILE__, __LINE__, true);
 #define DEBUG_LOG_CALL(logger)		circularLoggerWriteMessage(logger, Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, true);
 
-#define LOGGER_INIT(logger)			circularLoggerInit(logger, 10, 10);
+#define LOGGER_INIT(logger)				circularLoggerInit(logger, QString(), 10, 10);
+#define LOGGER_INIT2(logger, logName)	circularLoggerInit(logger, logName, 10, 10);
+
 #define LOGGER_SHUTDOWN(logger)		circularLoggerShutdown(logger);

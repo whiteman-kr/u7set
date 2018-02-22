@@ -10,23 +10,31 @@ int main(int argc, char *argv[])
 
 	QCoreApplication app(argc, argv);
 
-	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
+	CircularLoggerShared logger = std::make_shared<CircularLogger>();
 
 	LOGGER_INIT(logger);
 
 	logger->setLogCodeInfo(false);
 
+	CircularLoggerShared tuningLog = std::make_shared<CircularLogger>();
+
+	LOGGER_INIT2(tuningLog, QString("Tuning"));
+
+	tuningLog->setLogCodeInfo(false);
+
 	SoftwareInfo si;
 
 	si.init(E::SoftwareType::TuningService, "", 1, 0);
 
-	Tuning::TuningServiceWorker tuningServiceWorker(si, "RPCT Tuning Service", argc, argv, logger);
+	Tuning::TuningServiceWorker tuningServiceWorker(si, "RPCT Tuning Service", argc, argv, logger, tuningLog);
 
 	ServiceStarter serviceStarter(app, tuningServiceWorker, logger);
 
 	int result = serviceStarter.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	LOGGER_SHUTDOWN(tuningLog);
 
 	LOGGER_SHUTDOWN(logger);
 

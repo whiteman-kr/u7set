@@ -72,6 +72,9 @@ namespace Tuning
 
 		tss.set_controlisactive(controlIsActive);
 		tss.set_setsor(setSOR);
+
+		tss.set_hasunappliedparams(hasUnappliedParams);
+
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -182,8 +185,10 @@ namespace Tuning
 
 	TuningSourceWorker::TuningSourceWorker(const TuningServiceSettings& settings,
 										   const TuningSource& source,
-										   std::shared_ptr<CircularLogger> logger) :
+										   CircularLoggerShared logger,
+										   CircularLoggerShared tuningLog) :
 		m_logger(logger),
+		m_tuningLog(tuningLog),
 		m_timer(this),
 		m_socket(this),
 		m_replyQueue(this, 10),
@@ -344,7 +349,6 @@ namespace Tuning
 
 		cmd.write.signalIndex = signalIndex;
 		cmd.write.newTuningValue = newValue;
-		cmd.write.currentTuningValue = ts.currentValue();
 
 		m_tuningCommandQueue.push(cmd);
 
@@ -514,14 +518,7 @@ namespace Tuning
 			return false;
 		}
 
-		if (m_lastProcessedCommand.opCode == FotipV2::OpCode::Write)
-		{
-			const TuningSignal& ts = m_tuningSignals[m_lastProcessedCommand.write.signalIndex];
-
-			m_lastProcessedCommand.write.currentTuningValue = ts.currentValue();
-		}
-
-		logTuningCommand(m_lastProcessedCommand);
+		logTuningRequest(m_lastProcessedCommand);
 
 		m_retryCount = 0;
 
@@ -932,7 +929,7 @@ namespace Tuning
 		case FotipV2::DataType::AnalogFloat:
 		case FotipV2::DataType::AnalogSignedInt:
 			{
-				QString boundCheckStr("No bound check errors");
+				QString boundCheckStr;
 
 				if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 1)
 				{
@@ -948,6 +945,12 @@ namespace Tuning
 
 					boundCheckStr = QString("LowBoundCheckError == 1 ");
 					hasErrors = true;
+				}
+
+				if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 &&
+					reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0)
+				{
+					boundCheckStr = ("No bound check errors");
 				}
 
 				msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request: %3")).
@@ -974,7 +977,11 @@ namespace Tuning
 		else
 		{
 			DEBUG_LOG_MSG(m_logger, msg);
+
+			m_stat.hasUnappliedParams = true;
 		}
+
+		logTuningReply(m_lastProcessedCommand, reply);
 	}
 
 	void TuningSourceWorker::processApplyReply(RupFotipV2&)
@@ -1203,9 +1210,79 @@ namespace Tuning
 		}
 	}
 
-	void TuningSourceWorker::logTuningCommand(const TuningCommand& cmd)
+	void TuningSourceWorker::logTuningRequest(const TuningCommand& cmd)
 	{
+		QString str = QString("LM=%1 Client=%2 User=%3").arg(m_sourceEquipmentID).arg(cmd.clientEquipmentID).arg(cmd.user);
 
+		QString logStr;
+
+		switch(cmd.opCode)
+		{
+		case FotipV2::OpCode::Read:
+			return;
+
+		case FotipV2::OpCode::Write:
+			{
+				const TuningSignal& ts = m_tuningSignals[cmd.write.signalIndex];
+
+				ts.currentValue();
+
+				logStr = QString("WRITE request %1 Signal=%2 Type=%3 CurValue=%4 NewValue=%5 SOR=%6").
+							arg(str).arg(ts.appSignalID()).arg(cmd.write.newTuningValue.typeStr()).
+							arg(ts.currentValue().toString()).arg(cmd.write.newTuningValue.toString()).
+							arg(m_stat.setSOR == true ? 1 : 0);
+			}
+			break;
+
+		case FotipV2::OpCode::Apply:
+			logStr = QString("APPLY request %1 HasUnappliedParams=%2 SOR=%3").
+						arg(str).arg(m_stat.hasUnappliedParams == true ? "Yes" : "No").
+						arg(m_stat.setSOR == true ? 1 : 0);
+			break;
+
+		default:
+			assert(false);
+			return;
+		}
+
+		LOG_MSG(m_tuningLog, logStr);
+	}
+
+	void TuningSourceWorker::logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply)
+	{
+		QString logStr;
+
+		switch(cmd.opCode)
+		{
+		case FotipV2::OpCode::Read:
+			return;
+
+		case FotipV2::OpCode::Write:
+			{
+				const TuningSignal& ts = m_tuningSignals[cmd.write.signalIndex];
+
+				ts.currentValue();
+
+				logStr = QString("WRITE reply Signal=%1 LowBoundCheck=%2 HighBoundCheck=%3 SOR=%4").
+							arg(ts.appSignalID()).
+							arg(reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0 ? "Ok" : "Error").
+							arg(reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 ? "Ok" : "Error").
+							arg(reply.fotipFrame.header.flags.setSOR);
+			}
+			break;
+
+		case FotipV2::OpCode::Apply:
+			/*logStr = QString("APPLY reply %1 HasUnappliedParams=%2 SOR=%3").
+						arg(str).arg(m_stat.hasUnappliedParams == true ? "Yes" : "No").
+						arg(m_stat.setSOR == true ? 1 : 0);*/
+			break;
+
+		default:
+			assert(false);
+			return;
+		}
+
+		LOG_MSG(m_tuningLog, logStr);
 	}
 
 	void TuningSourceWorker::onTimer()
@@ -1271,9 +1348,10 @@ namespace Tuning
 
 	TuningSourceWorkerThread::TuningSourceWorkerThread(const TuningServiceSettings& settings,
 													   const TuningSource& source,
-													   std::shared_ptr<CircularLogger> logger)
+													   CircularLoggerShared logger,
+													   CircularLoggerShared tuningLog)
 	{
-		m_sourceWorker = new TuningSourceWorker(settings, source, logger);
+		m_sourceWorker = new TuningSourceWorker(settings, source, logger, tuningLog);
 
 		addWorker(m_sourceWorker);
 	}

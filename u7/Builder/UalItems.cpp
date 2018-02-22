@@ -2379,6 +2379,12 @@ namespace Builder
 			str.append(ualSignal->isAcquired() == true ? "true" : "false");
 			str += ";";
 
+			str.append(ualSignal->isBusChild() == true ? "true" : "false");
+			str += ";";
+
+			str.append(ualSignal->isTuningable() == true ? "true" : "false");
+			str += ";";
+
 			str.append(QString::number(ualSignal->ualAddr().offset()));
 			str += ";";
 			str.append(QString::number(ualSignal->ualAddr().bit()));

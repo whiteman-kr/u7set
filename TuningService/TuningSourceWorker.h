@@ -73,6 +73,7 @@ namespace Tuning
 
 		bool controlIsActive = false;
 		bool setSOR = false;
+		bool hasUnappliedParams = false;
 
 		void get(Network::TuningSourceState& tss);
 	};
@@ -107,7 +108,6 @@ namespace Tuning
 				qint32 signalIndex = 0;
 
 				TuningValue newTuningValue;
-				TuningValue currentTuningValue;
 			} write;
 		};
 
@@ -196,7 +196,8 @@ namespace Tuning
 	public:
 		TuningSourceWorker(const TuningServiceSettings& settings,
 						   const TuningSource& source,
-						   std::shared_ptr<CircularLogger> logger);
+						   CircularLoggerShared logger,
+						   CircularLoggerShared tuningLog);
 		~TuningSourceWorker();
 
 		quint32 sourceIP() const;
@@ -250,14 +251,17 @@ namespace Tuning
 
 		void invalidateAllSignals();
 
-		void logTuningCommand(const TuningCommand& cmd);
+		void logTuningRequest(const TuningCommand& cmd);
+		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply);
 
 	private slots:
 		void onTimer();
 		void onReplyReady();
 
 	private:
-		std::shared_ptr<CircularLogger> m_logger;
+		CircularLoggerShared m_logger;
+		CircularLoggerShared m_tuningLog;
+
 		bool m_disableModulesTypeChecking = false;
 
 		// data from tuning source
@@ -332,7 +336,8 @@ namespace Tuning
 	public:
 		TuningSourceWorkerThread(const TuningServiceSettings& settings,
 								 const TuningSource& source,
-								 std::shared_ptr<CircularLogger> logger);
+								 CircularLoggerShared logger,
+								 CircularLoggerShared tuningLog);
 
 		~TuningSourceWorkerThread();
 

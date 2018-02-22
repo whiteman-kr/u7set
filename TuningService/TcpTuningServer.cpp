@@ -140,6 +140,8 @@ namespace Tuning
 			clientContexts.append(clntContext);
 		}
 
+		QHash<quint64, quint64> dataSourcesIDs;
+
 		for(const TuningClientContext* clientContext : clientContexts)
 		{
 			QVector<Network::DataSourceInfo> dsiArray;
@@ -148,15 +150,22 @@ namespace Tuning
 
 			for(const Network::DataSourceInfo& dsi : dsiArray)
 			{
-				Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+				quint64 sourceID = dsi.id();
 
-				if (newDsi == nullptr)
+				if (dataSourcesIDs.contains(sourceID) == false)
 				{
-					assert(false);
-					continue;
-				}
+					dataSourcesIDs.insert(sourceID, sourceID);
 
-				*newDsi = dsi;
+					Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+
+					if (newDsi == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					*newDsi = dsi;
+				}
 			}
 		}
 
@@ -218,6 +227,8 @@ namespace Tuning
 			clientContexts.append(clntContext);
 		}
 
+		QHash<quint64, quint64> dataSourcesIDs;
+
 		for(const TuningClientContext* clientContext : clientContexts)
 		{
 			QVector<Network::TuningSourceState> tssArray;
@@ -226,15 +237,22 @@ namespace Tuning
 
 			for(const Network::TuningSourceState& tss : tssArray)
 			{
-				Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
+				quint64 sourceID = tss.sourceid();
 
-				if (newTss == nullptr)
+				if (dataSourcesIDs.contains(sourceID) == false)
 				{
-					assert(false);
-					continue;
-				}
+					dataSourcesIDs.insert(sourceID, sourceID);
 
-				*newTss = tss;
+					Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
+
+					if (newTss == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					*newTss = tss;
+				}
 			}
 		}
 

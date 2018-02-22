@@ -28,6 +28,32 @@ void TuningValue::setType(TuningValueType valueType)
 	m_type = valueType;
 }
 
+QString TuningValue::typeStr() const
+{
+	switch(m_type)
+	{
+	case TuningValueType::Discrete:
+		return "Discrete";
+
+	case TuningValueType::SignedInt32:
+		return "SignedInt32";
+
+	case TuningValueType::SignedInt64:
+		return "SignedInt64";
+
+	case TuningValueType::Float:
+		return "Float";
+
+	case TuningValueType::Double:
+		return "Double";
+
+	default:
+		assert(false);
+	}
+
+	return "???";
+}
+
 qint32 TuningValue::discreteValue() const
 {
 	assert(m_type == TuningValueType::Discrete);

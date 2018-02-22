@@ -19,9 +19,11 @@ namespace Tuning
 											 const QString& serviceName,
 											 int& argc,
 											 char** argv,
-											 std::shared_ptr<CircularLogger> logger) :
+											 CircularLoggerShared logger,
+											 CircularLoggerShared tuningLog) :
 		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-		m_logger(logger)
+		m_logger(logger),
+		m_tuningLog(tuningLog)
 	{
 	}
 
@@ -32,7 +34,7 @@ namespace Tuning
 
 	ServiceWorker* TuningServiceWorker::createInstance() const
 	{
-		TuningServiceWorker* newInstance = new TuningServiceWorker(softwareInfo(),serviceName(), argc(), argv(), m_logger);
+		TuningServiceWorker* newInstance = new TuningServiceWorker(softwareInfo(),serviceName(), argc(), argv(), m_logger, m_tuningLog);
 
 		newInstance->init();
 
@@ -171,6 +173,11 @@ namespace Tuning
 
 	bool TuningServiceWorker::clientIsConnected(const SoftwareInfo& softwareInfo, const QString& clientIP)
 	{
+		if (softwareInfo.softwareType() == E::SoftwareType::ServiceControlManager)
+		{
+			return true;
+		}
+
 		AUTO_LOCK(m_mainMutex);
 
 		if (m_cfgSettings.singleLmControl == true)
@@ -192,6 +199,11 @@ namespace Tuning
 
 	bool TuningServiceWorker::clientIsDisconnected(const SoftwareInfo& softwareInfo, const QString& clientIP)
 	{
+		if (softwareInfo.softwareType() == E::SoftwareType::ServiceControlManager)
+		{
+			return true;
+		}
+
 		AUTO_LOCK(m_mainMutex);
 
 		if (m_cfgSettings.singleLmControl == true)
@@ -214,6 +226,11 @@ namespace Tuning
 
 	bool TuningServiceWorker::setActiveClient(const SoftwareInfo& softwareInfo, const QString& clientIP)
 	{
+		if (softwareInfo.softwareType() == E::SoftwareType::ServiceControlManager)
+		{
+			return true;
+		}
+
 		AUTO_LOCK(m_mainMutex);
 
 		if (m_cfgSettings.singleLmControl == true)
@@ -495,7 +512,7 @@ namespace Tuning
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 			//
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger, m_tuningLog);
 
 			if (sourceWorkerThread == nullptr)
 			{

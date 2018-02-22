@@ -23,7 +23,8 @@ namespace Tuning
 							const QString &serviceName,
 							int &argc,
 							char **argv,
-							std::shared_ptr<CircularLogger> logger);
+							CircularLoggerShared logger,
+							CircularLoggerShared tuningLog);
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
@@ -106,7 +107,8 @@ namespace Tuning
 		HostAddressPort m_cfgServiceIP1;
 		HostAddressPort m_cfgServiceIP2;
 
-		std::shared_ptr<CircularLogger> m_logger;
+		CircularLoggerShared m_logger;
+		CircularLoggerShared m_tuningLog;
 
 		TuningServiceSettings m_cfgSettings;
 

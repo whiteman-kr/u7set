@@ -27,6 +27,8 @@ public:
 	TuningValueType type() const;
 	void setType(TuningValueType valueType);
 
+	QString typeStr() const;
+
 	qint32 discreteValue() const;
 	void setDiscreteValue(qint32 discreteValue);
 
