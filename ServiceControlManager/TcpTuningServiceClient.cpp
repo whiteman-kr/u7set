@@ -198,6 +198,22 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 	{
 		const ::Network::DataSourceInfo& dsi = m_tuningSourcesInfoReply.tuningsourceinfo(i);
 
+		bool isAlreadyExists = false;
+
+		for (const TuningSource& ts : m_tuningSources)
+		{
+			if (ts.id() == dsi.id() && ts.equipmentId() == QString::fromStdString(dsi.equipmentid()))
+			{
+				isAlreadyExists = true;
+				break;
+			}
+		}
+
+		if (isAlreadyExists == true)
+		{
+			continue;
+		}
+
 		TuningSource ts;
 		ts.info = dsi;
 

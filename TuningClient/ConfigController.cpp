@@ -134,38 +134,31 @@ ConfigController::~ConfigController()
 
 Tcp::ConnectionState ConfigController::getConnectionState() const
 {
-	Tcp::ConnectionState result;
-
 	if (m_cfgLoaderThread == nullptr)
 	{
 		assert(m_cfgLoaderThread);
-
-		result.isConnected = false;
-		return result;
+		return Tcp::ConnectionState();
 	}
 
-	result = m_cfgLoaderThread->getConnectionState();
-
-	return result;
+	return m_cfgLoaderThread->getConnectionState();
 }
 
 QString ConfigController::getStateToolTip()
 {
-	Tcp::ConnectionState connectionState = getConnectionState();
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread);
+		return QString();
+	}
+
+	Tcp::ConnectionState connectionState = m_cfgLoaderThread->getConnectionState();
+	HostAddressPort currentConnection = m_cfgLoaderThread->getCurrentServerAddressPort();
 
 	QString result = tr("Configuration Service connection\r\n\r\n");
-	result += tr("IP address (primary): %1\r\n").arg(m_address1.addressPortStr());
-	result += tr("IP address (secondary): %1\r\n").arg(m_address2.addressPortStr());
-	result += tr("Connection: ") + (connectionState.isConnected ? tr("established\r\n") : tr("no connection\r\n"));
-
-	if (m_eventLog.empty() == false)
-	{
-		result += tr("\r\n");
-		for (auto s : m_eventLog)
-		{
-			result += s + "\r\n";
-		}
-	}
+	result += tr("Address (primary): %1\r\n").arg(m_address1.addressPortStr());
+	result += tr("Address (secondary): %1\r\n\r\n").arg(m_address2.addressPortStr());
+	result += tr("Address (current): %1\r\n").arg(currentConnection.addressPortStr());
+	result += tr("Connection: ") + (connectionState.isConnected ? tr("established") : tr("no connection"));
 
 	return result;
 }
@@ -187,9 +180,6 @@ void ConfigController::start()
 void ConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	ConfigSettings readSettings;
-
-	QString message = tr("New configuration arrived");
-	addEventMessage(message);
 
 	// Parse XML
 	//
@@ -254,15 +244,13 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		qDebug() << completeErrorMessage;
 		QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
-		addEventMessage(completeErrorMessage);
 
 	}
 
 	// Trace received params
 	//
 	theLogFile->writeMessage(tr("New configuration arrived"));
-	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.tuns1.equipmentId()).arg(readSettings.tuns1.ip()).arg(readSettings.tuns1.port()));
-	theLogFile->writeMessage(tr("TUNS2 (id, ip, port): %1, %2, %3").arg(readSettings.tuns2.equipmentId()).arg(readSettings.tuns2.ip()).arg(readSettings.tuns2.port()));
+	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.tuningServiceAddress.equipmentId()).arg(readSettings.tuningServiceAddress.ip()).arg(readSettings.tuningServiceAddress.port()));
 
 	bool someFilesUpdated = false;
 
@@ -306,12 +294,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-					addEventMessage(completeErrorMessage);
 				}
 				else
 				{
-					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
-
 					emit filtersArrived(data);
 				}
 
@@ -326,12 +311,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-					addEventMessage(completeErrorMessage);
 				}
 				else
 				{
-					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
-
 					emit schemasDetailsArrived(data);
 				}
 			}
@@ -344,13 +326,10 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				{
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
-					addEventMessage(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
 				else
 				{
-					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
-
 					emit signalsArrived(data);
 				}
 			}
@@ -361,13 +340,10 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				{
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
-					addEventMessage(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
 				else
 				{
-					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
-
 					emit globalScriptArrived(data);
 				}
 			}
@@ -395,7 +371,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool serversUpdated = true;
 
-	if (theConfigSettings.tuns1.address().address() == readSettings.tuns1.address().address() && theConfigSettings.tuns2.address().address() == readSettings.tuns2.address().address())
+	if (theConfigSettings.tuningServiceAddress.address().address() == readSettings.tuningServiceAddress.address().address())
 	{
 		serversUpdated = false;
 	}
@@ -411,7 +387,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (serversUpdated == true)
 	{
-		emit tcpClientConfigurationArrived(theConfigSettings.tuns1.address(), theConfigSettings.tuns2.address(), theConfigSettings.autoApply);
+		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply);
 	}
 
 	if (someFilesUpdated == true || apperanceUpdated == true)
@@ -436,14 +412,6 @@ bool ConfigController::getFileBlocked(const QString& pathFileName, QByteArray* f
 	{
 		QString message = tr("ConfigController::getFileBlocked: Can't get file ") + pathFileName;
 		theLogFile->writeError(message);
-
-		message = tr("Can't receive file: ") + pathFileName;
-		addEventMessage(message);
-	}
-	else
-	{
-		QString message = tr("Received file: ") + pathFileName;
-		addEventMessage(message);
 	}
 
 	return result;
@@ -462,9 +430,6 @@ bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileDat
 	if (result == false)
 	{
 		theLogFile->writeError(tr("ConfigController::getFileBlocked: Can't get file with ID ") + id);
-
-		QString message = tr("Can't receive file by ID: ") + id;
-		addEventMessage(message);
 	}
 
 	return result;
@@ -548,13 +513,9 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 		{
 			QDomElement dasXmlElement = dasNodes.at(0).toElement();
 
-			QString tunsId1 = dasXmlElement.attribute("TuningServiceID1");
-			QString tunsIp1 = dasXmlElement.attribute("ip1");
-			int tunsPort1 = dasXmlElement.attribute("port1").toInt();
-
-			QString tunsId2 = dasXmlElement.attribute("TuningServiceID2");
-			QString tunsIp2 = dasXmlElement.attribute("ip2");
-			int tunsPort2 = dasXmlElement.attribute("port2").toInt();
+			QString tunsId = dasXmlElement.attribute("TuningServiceID1");
+			QString tunsIp = dasXmlElement.attribute("ip1");
+			int tunsPort = dasXmlElement.attribute("port1").toInt();
 
 			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
 			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
@@ -578,8 +539,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			usersAccounts = usersAccounts.replace('\n', ';');
 			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
 
-			outSetting->tuns1 = ConfigConnection(tunsId1, tunsIp1, tunsPort1);
-			outSetting->tuns2= ConfigConnection(tunsId2, tunsIp2, tunsPort2);
+			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
 
 		}
 	}
@@ -641,18 +601,6 @@ bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, const Bui
 		}
 	}
 
-	QString message = tr("Schemas count: %1").arg(outSetting->schemas.size());
-	addEventMessage(message);
-
 	return outSetting->errorMessage.isEmpty();
 }
 
-void ConfigController::addEventMessage(const QString& text)
-{
-	m_eventLog.push_back(text);
-
-	while (m_eventLog.size() > 10)
-	{
-		m_eventLog.removeFirst();
-	}
-}

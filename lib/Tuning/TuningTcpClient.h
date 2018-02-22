@@ -155,7 +155,7 @@ protected:
 
 public slots:
 	void slot_signalsUpdated();
-	void slot_configurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply);
+	void slot_configurationArrived(HostAddressPort address, bool autoApply);
 
 signals:
 	void tuningSourcesArrived();

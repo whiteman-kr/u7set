@@ -29,6 +29,8 @@ public:
 	int sourceSorCount() const;
 	int sourceSorCount(Hash equipmentHash) const;
 
+	QString getStateToolTip() const;
+
 private:
 
 	Log::LogFile* m_log = nullptr;

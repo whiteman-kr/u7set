@@ -34,7 +34,7 @@ public:
 	// signals
 	//
 signals:
-	void tcpClientConfigurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply);
+	void tcpClientConfigurationArrived(HostAddressPort address, bool autoApply);
 
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
@@ -58,8 +58,6 @@ private:
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
 	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting);
 
-	void addEventMessage(const QString& text);
-
 	// Public properties
 public:
 	// Data section
@@ -76,8 +74,6 @@ private:
 
 	HostAddressPort m_address1;
 	HostAddressPort m_address2;
-
-	QStringList m_eventLog;
 };
 
 

@@ -124,3 +124,17 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash) const
 
 	return 0;
 }
+
+QString TuningClientTcpClient::getStateToolTip() const
+{
+	Tcp::ConnectionState connectionState = getConnectionState();
+	HostAddressPort currentConnection = currentServerAddressPort();
+
+	QString result = tr("Tuning Service connection\r\n\r\n");
+	result += tr("Address (primary): %1\r\n").arg(serverAddressPort(0).addressPortStr());
+	result += tr("Address (secondary): %1\r\n\r\n").arg(serverAddressPort(1).addressPortStr());
+	result += tr("Address (current): %1\r\n").arg(currentConnection.addressPortStr());
+	result += tr("Connection: ") + (connectionState.isConnected ? tr("established") : tr("no connection"));
+
+	return result;
+}

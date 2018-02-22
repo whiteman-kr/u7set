@@ -832,7 +832,7 @@ bool TuningPage::write()
 
 		if (asp.isAnalog() == true)
 		{
-			strValue = state.value().toString(asp.precision());
+			strValue = state.newValue().toString(asp.precision());
 		}
 		else
 		{
@@ -1184,11 +1184,16 @@ void TuningPage::invertValue()
 
 bool TuningPage::takeClientControl()
 {
-	if (m_tuningTcpClient->activeTuningSourceCount() == 0)
+#ifdef Q_DEBUG
+	if (theSettings.m_simulationMode == false)
+#endif
 	{
-		QMessageBox::critical(this, qAppName(),	 tr("No tuning sources with control enabled found."));
+		if (m_tuningTcpClient->activeTuningSourceCount() == 0)
+		{
+			QMessageBox::critical(this, qAppName(),	 tr("No tuning sources with control enabled found."));
 
-		return false;
+			return false;
+		}
 	}
 
 	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)

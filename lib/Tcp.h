@@ -453,8 +453,8 @@ namespace Tcp
 
 		QString equipmentID() const;
 
-		HostAddressPort currentServerAddressPort();
-		HostAddressPort serverAddressPort(int serverIndex);
+		HostAddressPort currentServerAddressPort() const;
+		HostAddressPort serverAddressPort(int serverIndex) const;
 		int selectedServerIndex() { return m_selectedServerIndex; }
 
 		bool isAutoSwitchServer() const { return m_autoSwitchServer; }

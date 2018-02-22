@@ -456,6 +456,7 @@ void MainWindow::updateStatusBar()
 	//
 	assert(m_statusBarInfo);
 	assert(m_statusBarConfigConnection);
+	assert(m_tcpClient);
 
 	// LM Control Mode
 
@@ -481,27 +482,38 @@ void MainWindow::updateStatusBar()
 		m_statusBarInfo->setText(str);
 	}
 
-	Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+	Tcp::ConnectionState configConnState =  m_configController.getConnectionState();
 	Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
 
 	// ConfigService
 	//
 	QString text = tr(" ConfigService: ");
-	if (confiConnState.isConnected == false)
+
+	if (configConnState.isConnected == false)
 	{
 		text += tr(" no connection");
 	}
 	else
 	{
-		text += tr(" connected, packets: %1").arg(QString::number(confiConnState.replyCount));
+		text += tr(" connected, packets: %1").arg(QString::number(configConnState.replyCount));
 	}
 
-	m_statusBarConfigConnection->setText(text);
-	m_statusBarConfigConnection->setToolTip(m_configController.getStateToolTip());
+	if (text != m_statusBarConfigConnection->text())
+	{
+		m_statusBarConfigConnection->setText(text);
+	}
+
+	QString tooltip = m_configController.getStateToolTip();
+
+	if (tooltip != m_statusBarConfigConnection->toolTip())
+	{
+		m_statusBarConfigConnection->setToolTip(tooltip);
+	}
 
 	// TuningService
 	//
 	text = tr(" TuningService: ");
+
 	if (tuningConnState.isConnected == false)
 	{
 		text += tr(" no connection");
@@ -511,7 +523,17 @@ void MainWindow::updateStatusBar()
 		text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
 	}
 
-	m_statusBarTuningConnection->setText(text);
+	if (text != m_statusBarTuningConnection->text())
+	{
+		m_statusBarTuningConnection->setText(text);
+	}
+
+	tooltip = m_tcpClient->getStateToolTip();
+
+	if (tooltip != m_statusBarTuningConnection->toolTip())
+	{
+		m_statusBarTuningConnection->setToolTip(tooltip);
+	}
 
 	// Counters
 

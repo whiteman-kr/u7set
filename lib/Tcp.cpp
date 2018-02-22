@@ -1141,12 +1141,12 @@ namespace Tcp
 		return localSoftwareInfo().equipmentID();
 	}
 
-	HostAddressPort Client::currentServerAddressPort()
+	HostAddressPort Client::currentServerAddressPort() const
 	{
 		return m_selectedServer;
 	}
 
-	HostAddressPort Client::serverAddressPort(int serverIndex)
+	HostAddressPort Client::serverAddressPort(int serverIndex) const
 	{
 		if (serverIndex < 0 || serverIndex > 1)
 		{

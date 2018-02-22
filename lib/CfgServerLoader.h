@@ -271,4 +271,5 @@ public:
 	QString getLastErrorStr();
 
 	Tcp::ConnectionState getConnectionState();
+	HostAddressPort getCurrentServerAddressPort();
 };
