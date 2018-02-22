@@ -107,6 +107,8 @@ namespace VFrame30
 	{
 		if (event->buttons().testFlag(Qt::MidButton) == true)
 		{
+			// Scrolling mode
+			//
 			int dx = event->x() - m_mousePos.x();
 			int dy = event->y() - m_mousePos.y();
 

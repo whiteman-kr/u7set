@@ -97,7 +97,6 @@ void MonitorSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 		return;
 	}
 
-
 	// Left button is pressed, is this start of drag and drop
 	//
 	if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())

@@ -131,7 +131,9 @@ void MonitorView::mousePressEvent(QMouseEvent* event)
 		{
 			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
 
-			if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
+			if (item->acceptClick() == true &&
+				item->IsIntersectPoint(x, y) == true &&
+				item->clickScript().isEmpty() == false)
 			{
 				// Remember this item
 				//
