@@ -34,7 +34,7 @@ void TuningSource::setNewState(const ::Network::TuningSourceState& newState)
 	state = newState;
 }
 
-int TuningSource::getErrorsCount()
+int TuningSource::getErrorsCount() const
 {
 	int result = 0;
 
@@ -204,4 +204,15 @@ int TuningSource::getErrorsCount()
 	}
 
 	return result;
+}
+
+bool TuningSource::valid() const
+{
+	return m_valid;
+}
+
+void TuningSource::invalidate()
+{
+	m_valid = false;
+	state.set_setsor(false);
 }

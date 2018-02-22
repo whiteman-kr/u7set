@@ -169,6 +169,93 @@ namespace Tuning
 		return NetworkError::Success;
 	}
 
+	bool TuningServiceWorker::clientIsConnected(const SoftwareInfo& softwareInfo, const QString& clientIP)
+	{
+		AUTO_LOCK(m_mainMutex);
+
+		if (m_cfgSettings.singleLmControl == true)
+		{
+			if (m_activeClientInfo.equipmentID().isEmpty() == true)
+			{
+				m_activeClientInfo = softwareInfo;
+				m_activeClientIP = clientIP;
+			}
+		}
+		else
+		{
+			m_activeClientInfo.clear();
+			m_activeClientIP.clear();
+		}
+
+		return true;
+	}
+
+	bool TuningServiceWorker::clientIsDisconnected(const SoftwareInfo& softwareInfo, const QString& clientIP)
+	{
+		AUTO_LOCK(m_mainMutex);
+
+		if (m_cfgSettings.singleLmControl == true)
+		{
+			if (m_activeClientInfo.equipmentID() == softwareInfo.equipmentID() &&
+				m_activeClientIP == clientIP)
+			{
+				m_activeClientInfo.clear();
+				m_activeClientIP.clear();
+			}
+		}
+		else
+		{
+			m_activeClientInfo.clear();
+			m_activeClientIP.clear();
+		}
+
+		return true;
+	}
+
+	bool TuningServiceWorker::setActiveClient(const SoftwareInfo& softwareInfo, const QString& clientIP)
+	{
+		AUTO_LOCK(m_mainMutex);
+
+		if (m_cfgSettings.singleLmControl == true)
+		{
+			m_activeClientInfo = softwareInfo;
+			m_activeClientIP = clientIP;
+		}
+		else
+		{
+			m_activeClientInfo.clear();
+			m_activeClientIP.clear();
+		}
+
+		return true;
+	}
+
+	QString TuningServiceWorker::activeClientID() const
+	{
+		QString clientID;
+
+		m_mainMutex.lock();
+
+		clientID = m_activeClientInfo.equipmentID();
+
+		m_mainMutex.unlock();
+
+		return clientID;
+	}
+
+	QString TuningServiceWorker::activeClientIP() const
+	{
+		QString clientIP;
+
+		m_mainMutex.lock();
+
+		clientIP = m_activeClientIP;
+
+		m_mainMutex.unlock();
+
+		return clientIP;
+	}
+
 	void TuningServiceWorker::initialize()
 	{
 		runCfgLoaderThread();

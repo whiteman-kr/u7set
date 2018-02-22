@@ -153,7 +153,7 @@ QString HostAddressPort::addressPortStr() const
 
 QString HostAddressPort::addressStr() const
 {
-	return QString("%1").arg(address().toString());
+	return address().toString();
 }
 
 

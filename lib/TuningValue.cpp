@@ -159,7 +159,7 @@ void TuningValue::fromDouble(double value)
 	}
 }
 
-double TuningValue::toFloat() const
+float TuningValue::toFloat() const
 {
 	switch (m_type)
 	{
@@ -211,27 +211,28 @@ QString TuningValue::toString(int precision) const
 	switch (m_type)
 	{
 	case TuningValueType::Discrete:
-		return m_int64 == 0 ? "0" : "1";
+		return discreteValue() == 0 ? "0" : "1";
 
 	case TuningValueType::SignedInt32:
-		return QString::number(static_cast<qint32>(m_int64));
+		return QString::number(int32Value());
 
 	case TuningValueType::SignedInt64:
-		return QString::number(m_int64);
+		return QString::number(int64Value());
 
 	case TuningValueType::Float:
 		if (precision < 0)
 		{
 			precision = 7;
 		}
-		return QString::number(m_double, 'f', precision);
+
+		return QString::number(floatValue(), 'f', precision);
 
 	case TuningValueType::Double:
 		if (precision < 0)
 		{
 			precision = 15;
 		}
-		return QString::number(m_double, 'f', precision);
+		return QString::number(doubleValue(), 'f', precision);
 
 	default:
 		assert(false);
@@ -379,13 +380,19 @@ bool operator < (const TuningValue& l, const TuningValue& r)
 	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
+		return l.discreteValue() < r.discreteValue();
+
 	case TuningValueType::SignedInt32:
+		return l.int32Value() < r.int32Value();
+
 	case TuningValueType::SignedInt64:
-		return l.m_int64 < r.m_int64;
+		return l.int64Value() < r.int64Value();
 
 	case TuningValueType::Float:
+		return l.floatValue() < r.floatValue();
+
 	case TuningValueType::Double:
-		return l.m_double < r.m_double;
+		return l.doubleValue() < r.doubleValue();
 
 	default:
 		assert(false);
@@ -401,13 +408,19 @@ bool operator <= (const TuningValue& l, const TuningValue& r)
 	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
+		return l.discreteValue() <= r.discreteValue();
+
 	case TuningValueType::SignedInt32:
+		return l.int32Value() <= r.int32Value();
+
 	case TuningValueType::SignedInt64:
-		return l.m_int64 <= r.m_int64;
+		return l.int64Value() <= r.int64Value();
 
 	case TuningValueType::Float:
+		return l.floatValue() <= r.floatValue();
+
 	case TuningValueType::Double:
-		return l.m_double <= r.m_double;
+		return l.doubleValue() <= r.doubleValue();
 
 	default:
 		assert(false);
@@ -423,13 +436,19 @@ bool operator > (const TuningValue& l, const TuningValue& r)
 	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
+		return l.discreteValue() > r.discreteValue();
+
 	case TuningValueType::SignedInt32:
+		return l.int32Value() > r.int32Value();
+
 	case TuningValueType::SignedInt64:
-		return l.m_int64 > r.m_int64;
+		return l.int64Value() > r.int64Value();
 
 	case TuningValueType::Float:
+		return l.floatValue() > r.floatValue();
+
 	case TuningValueType::Double:
-		return l.m_double > r.m_double;
+		return l.doubleValue() > r.doubleValue();
 
 	default:
 		assert(false);
@@ -445,13 +464,19 @@ bool operator >= (const TuningValue& l, const TuningValue& r)
 	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
+		return l.discreteValue() >= r.discreteValue();
+
 	case TuningValueType::SignedInt32:
+		return l.int32Value() >= r.int32Value();
+
 	case TuningValueType::SignedInt64:
-		return l.m_int64 >= r.m_int64;
+		return l.int64Value() >= r.int64Value();
 
 	case TuningValueType::Float:
+		return l.floatValue() >= r.floatValue();
+
 	case TuningValueType::Double:
-		return l.m_double >= r.m_double;
+		return l.doubleValue() >= r.doubleValue();
 
 	default:
 		assert(false);
@@ -467,14 +492,31 @@ bool operator == (const TuningValue& l, const TuningValue& r)
 	switch (l.m_type)
 	{
 	case TuningValueType::Discrete:
+		return l.discreteValue() == r.discreteValue();
+
 	case TuningValueType::SignedInt32:
+		return l.int32Value() == r.int32Value();
+
 	case TuningValueType::SignedInt64:
-		return l.m_int64 == r.m_int64;
+		return l.int64Value() == r.int64Value();
 
 	case TuningValueType::Float:
+		{
+			float lFloat = l.floatValue();
+			float rFloat = r.floatValue();
+
+			return std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat &&
+					std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
+		}
+
 	case TuningValueType::Double:
-		return  std::nextafter(l.m_double, std::numeric_limits<double>::lowest()) <= r.m_double &&
-				std::nextafter(l.m_double, std::numeric_limits<double>::max()) >= r.m_double;
+		{
+			double lDouble = l.doubleValue();
+			double rDouble = r.doubleValue();
+
+			return  std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble &&
+					std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
+		}
 
 	default:
 		assert(false);

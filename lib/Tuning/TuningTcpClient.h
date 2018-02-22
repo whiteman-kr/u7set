@@ -29,6 +29,7 @@ struct TuningWriteCommand
 	TuningWriteCommandType m_type = TuningWriteCommandType::WriteValue;
 
 	bool m_enableControl = false;
+	bool m_forceTakeControl = false;
 
 	// Write constructor
 
@@ -47,19 +48,21 @@ struct TuningWriteCommand
 
 	// Apply constructor
 
-	TuningWriteCommand()
+	TuningWriteCommand(bool apply)
 	{
+		Q_UNUSED(apply);
 		m_type = TuningWriteCommandType::Apply;
 	}
 
 	// Activate LM constructor
 
-	TuningWriteCommand(const QString& equipmentId, bool enableControl)
+	TuningWriteCommand(const QString& equipmentId, bool enableControl, bool forceTakeControl)
 	{
 		m_type = TuningWriteCommandType::ActivateLm;
 
 		m_equipmentId = equipmentId;
 		m_enableControl = enableControl;
+		m_forceTakeControl = forceTakeControl;
 	}
 
 	// Serializing
@@ -92,10 +95,7 @@ public:
 	std::vector<TuningSource> tuningSourcesInfo() const;
 	bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
 
-	bool tuningSourceCounters(Hash equipmentHash, int* errorsCount, int* sorCount) const;
-	bool tuningSourceStatus(Hash equipmentHash, int* errorsCount, int* sorCount, QString* status) const;
-
-	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl);
+	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl, bool forceTakeControl);
 
 	// Writing states
 	//
@@ -133,7 +133,7 @@ protected:
 	void requestTuningSourcesState();
 	void processTuningSourcesState(const QByteArray& data);
 
-	void requestActivateTuningSource(const QString& equipmentId, bool enableControl);
+	void requestActivateTuningSource(const QString& equipmentId, bool enableControl, bool forceTakeControl);
 	void processActivateTuningSource(const QByteArray& data);
 
 	void requestReadTuningSignals();
@@ -155,7 +155,7 @@ protected:
 
 public slots:
 	void slot_signalsUpdated();
-	void slot_configurationArrived(HostAddressPort address1, HostAddressPort address2, bool autoApply);
+	void slot_configurationArrived(HostAddressPort address, bool autoApply);
 
 signals:
 	void tuningSourcesArrived();
@@ -163,9 +163,10 @@ signals:
 private:
 	QString networkErrorStr(NetworkError error);
 
+public:
 	// Properties
 	//
-public:
+
 	QString instanceId() const;
 	void setInstanceId(const QString& instanceId);
 
@@ -175,7 +176,18 @@ public:
 	bool autoApply() const;
 	void setAutoApply(bool value);
 
+	// LM Control functions
+
 	bool singleLmControlMode() const;
+
+	bool clientIsActive() const;
+
+	QString activeClientId() const;
+	QString activeClientIp() const;
+
+	int activeTuningSourceCount() const;
+
+	QString singleActiveTuningSource() const;
 
 	// Data
 	//
@@ -207,6 +219,9 @@ private:
 	std::vector<Hash> m_signalHashes;
 
 	bool m_singleLmControlMode = false;
+	QString m_activeClientId;
+	QString m_activeClientIp;
+	bool m_currentClientIsActive = false;
 
 #ifdef Q_DEBUG
 	bool m_simulationMode = false;

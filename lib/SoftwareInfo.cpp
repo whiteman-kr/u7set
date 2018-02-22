@@ -36,6 +36,20 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 #endif
 }
 
+void SoftwareInfo::clear()
+{
+	m_softwareType = E::SoftwareType::Unknown;
+	m_equipmentID.clear();
+	m_majorVersion = 0;
+	m_minorVersion = 0;
+	m_commitNo = 0;
+	m_buildBranch.clear();
+	m_commitSHA.clear();
+	m_userName.clear();
+	m_buildNo = UNDEFINED_BUILD_NO;
+	m_crc = 0;
+}
+
 void SoftwareInfo::init(E::SoftwareType softwareType,
 		  const QString& equipmentID,
 		  int majorVersion,

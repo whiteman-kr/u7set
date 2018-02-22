@@ -120,7 +120,6 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 void TuningSignalState::invalidate()
 {
 	m_flags.valid = false;
-	m_flags.controlIsEnabled = false;
 }
 
 bool TuningSignalState::limitsUnbalance(const AppSignalParam& asp) const

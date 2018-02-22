@@ -245,8 +245,10 @@ enum class NetworkError
 	InternalError,
 	ArchiveError,								// for detail information check archError field
 	WrongTuningValueType,
+	TuningValueOutOfRange,
 	SingleLmControlDisabled,
-	ControlIsNotActive
+	LmControlIsNotActive,
+	ClientIsNotActive
 };
 
 enum class ArchiveError

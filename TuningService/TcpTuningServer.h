@@ -34,6 +34,8 @@ namespace Tuning
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
+		virtual void onConnectedSoftwareInfoChanged() override;
+
 		void onGetTuningSourcesInfoRequest(const char* requestData, quint32 requestDataSize);
 		void onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize);
 		void onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize);

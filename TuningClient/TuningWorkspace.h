@@ -60,7 +60,9 @@ private:
 
 	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
 
-	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
+	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem);
+
+	void activateControl(const QString& equipmentId, bool enable);
 
 protected:
 

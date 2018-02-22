@@ -376,7 +376,7 @@ namespace Builder
 
 		bool writeResult();
 		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
-		bool writeTuningInfoFile(const QString& subsystemID, int lmNumber);
+		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
 		void writeLMCodeTestFile();
 

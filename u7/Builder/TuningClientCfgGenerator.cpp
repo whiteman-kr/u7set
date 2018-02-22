@@ -267,72 +267,39 @@ namespace Builder
 			bool ok = true;
 
 			//
-			// TuningServiceID1(2)
+			// TuningServiceID
 			//
-			QString tuningServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID1", &ok).trimmed();
+			QString tuningServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID", &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
 			}
 
-			if (tuningServiceId1.isEmpty() == true)
+			if (tuningServiceId.isEmpty() == true)
 			{
-				m_log->errCFG3022(m_software->equipmentId(), "TuningServiceID1");
+				m_log->errCFG3022(m_software->equipmentId(), "TuningServiceID");
 
-				QString errorStr = tr("TuningClient configuration error %1, property TuningServiceID1 is invalid")
+				QString errorStr = tr("TuningClient configuration error %1, property TuningServiceID is invalid")
 						.arg(m_software->equipmentIdTemplate());
 
 				writeErrorSection(xmlWriter, errorStr);
 				return false;
 			}
 
-			QString tuningServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID2", &ok).trimmed();
-			if (ok == false)
+			Hardware::Software* tunsObject = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId));
+
+			if (tunsObject == nullptr)
 			{
-				return false;
-			}
+				m_log->errCFG3021(m_software->equipmentIdTemplate(), "TuningServiceID", tuningServiceId);
 
-			//
-			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
-			//
-
-			Hardware::Software* tunsObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId1));
-
-			if (tunsObject1 == nullptr)
-			{
-				m_log->errCFG3021(m_software->equipmentIdTemplate(), "TuningServiceID1", tuningServiceId1);
-
-				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId1);
+				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId);
 
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 				return false;
 			}
 
-			Hardware::Software* tunsObject2 = nullptr;
-
-			if (tuningServiceId2.isEmpty() == false)    // tuningServiceId2 is optional
-			{
-				tunsObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
-
-				if (tunsObject2 == nullptr)
-				{
-					m_log->errCFG3021(m_software->equipmentIdTemplate(), "TuningServiceID2", tuningServiceId2);
-
-					QString errorStr = tr("Object %1 is not found").arg(tuningServiceId2);
-
-					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-					return false;
-				}
-			}
-
-			TuningServiceSettings tunsSettings1;
-			tunsSettings1.readFromDevice(tunsObject1, m_log);
-
-			TuningServiceSettings tunsSettings2;
-			if (tunsObject2 != nullptr)
-			{
-				tunsSettings2.readFromDevice(tunsObject2, m_log);
-			}
+			TuningServiceSettings tunsSettings;
+			tunsSettings.readFromDevice(tunsObject, m_log);
 
 			//
 			// AutoApply
@@ -444,13 +411,10 @@ namespace Builder
 
 				// --
 				//
-				xmlWriter.writeAttribute("TuningServiceID1", tuningServiceId1);
-				xmlWriter.writeAttribute("TuningServiceID2", tuningServiceId2);
+				xmlWriter.writeAttribute("TuningServiceID1", tuningServiceId);
 
-				xmlWriter.writeAttribute("ip1", tunsSettings1.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port1", QString::number(tunsSettings1.clientRequestIP.port()));
-				xmlWriter.writeAttribute("ip2", tunsSettings2.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port2", QString::number(tunsSettings2.clientRequestIP.port()));
+				xmlWriter.writeAttribute("ip1", tunsSettings.clientRequestIP.address().toString());
+				xmlWriter.writeAttribute("port1", QString::number(tunsSettings.clientRequestIP.port()));
 
 				xmlWriter.writeAttribute("autoApply", (autoApply ? "true" : "false"));
 				xmlWriter.writeAttribute("showSignals", (showSignals ? "true" : "false"));

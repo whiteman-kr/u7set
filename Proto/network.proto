@@ -267,6 +267,9 @@ message GetTuningSourcesInfoReply
     repeated DataSourceInfo tuningSourceInfo= 2;
 
     optional bool singleLmControlMode = 3 [default = true];
+    optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
+                                                                    // else - empty string
+    optional string activeClientIP = 5;				    // similar to activeClientID
 }
 
 // Tuning sources states request - TDS_GET_TUNING_SOURCES_STATES
@@ -336,6 +339,8 @@ message TuningSourceState
 
     optional bool controlIsActive = 42 [default = false];
     optional bool setSOR = 43 [default = false];
+
+    optional bool hasUnappliedParams = 44 [default = false];
 }
 
 message GetTuningSourcesStatesReply
@@ -344,6 +349,9 @@ message GetTuningSourcesStatesReply
     repeated TuningSourceState tuningSourcesState = 2;
 
     optional bool singleLmControlMode = 3 [default = true];
+    optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
+                                                                    // else - empty string
+    optional string activeClientIP = 5;				    // similar to activeClientID
 }
 
 //  Change current controlled TuningSource request - TDS_CHANGE_CONTROLLED_TUNING_SOURCE
@@ -353,10 +361,12 @@ message GetTuningSourcesStatesReply
 //
 message ChangeConrolledTuningSourceRequest
 {
-    optional string tuningSourceEquipmentID = 1;		    // not empty - to change controlled source
+    optional bool takeControl = 1;				    // true - to force control to current client
+
+    optional string tuningSourceEquipmentID = 2;		    // not empty - to change controlled source
                                                                     // empty - to request current controlled source (activateControl field is ignored)
 
-    optional bool activateControl = 2 [default = false];	    // if tuningSourceEquipmentID is not empty:
+    optional bool activateControl = 3 [default = false];	    // if tuningSourceEquipmentID is not empty:
                                                                     //	    true - to activate tuning source control
 								    //	    false - to deactivate tuning source control
 }
@@ -434,7 +444,6 @@ message TuningSignalsWriteReply
 message TuningSignalsApply
 {
 }
-
 
 message TuningSignalsApplyReply
 {

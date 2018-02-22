@@ -760,12 +760,12 @@ void TuningFilter::setValue(const TuningFilterValue& value)
 	ofv.setValue(value.value());
 }
 
-TuningFilterCounters TuningFilter::counters() const
+TuningCounters TuningFilter::counters() const
 {
 	return m_counters;
 }
 
-void TuningFilter::setCounters(TuningFilterCounters value)
+void TuningFilter::setCounters(TuningCounters value)
 {
 	m_counters = value;
 }

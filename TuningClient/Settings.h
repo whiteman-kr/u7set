@@ -51,8 +51,7 @@ struct SchemaSettings
 
 struct ConfigSettings
 {
-	ConfigConnection tuns1;				// Tuning Service connection params
-	ConfigConnection tuns2;				// Tuning Service connection params
+	ConfigConnection tuningServiceAddress;				// Tuning Service connection params
 
 	bool autoApply = true;
 

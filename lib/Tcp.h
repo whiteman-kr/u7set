@@ -17,6 +17,7 @@
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
 #include "../lib/SoftwareInfo.h"
+#include "../lib/HostAddressPort.h"
 
 
 namespace Tcp
@@ -181,6 +182,8 @@ namespace Tcp
 		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
 		void enableWatchdogTimer(bool enable);
 
+		HostAddressPort localAddressPort() const;
+
 		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState() const;
@@ -264,6 +267,8 @@ namespace Tcp
 		virtual void onServerThreadFinished() {}
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
+
+		virtual void onConnectedSoftwareInfoChanged();		// called after processing RQID_INTRODUCE_MYSELF
 
 		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
 
@@ -448,8 +453,8 @@ namespace Tcp
 
 		QString equipmentID() const;
 
-		HostAddressPort currentServerAddressPort();
-		HostAddressPort serverAddressPort(int serverIndex);
+		HostAddressPort currentServerAddressPort() const;
+		HostAddressPort serverAddressPort(int serverIndex) const;
 		int selectedServerIndex() { return m_selectedServerIndex; }
 
 		bool isAutoSwitchServer() const { return m_autoSwitchServer; }

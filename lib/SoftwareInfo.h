@@ -11,6 +11,8 @@ public:
 	SoftwareInfo();
 	SoftwareInfo(const SoftwareInfo& si);
 
+	void clear();
+
 	void init(E::SoftwareType softwareType,
 			  const QString& equipmentID,
 			  int majorVersion,

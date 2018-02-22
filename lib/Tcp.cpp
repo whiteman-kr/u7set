@@ -178,6 +178,20 @@ namespace Tcp
 		}
 	}
 
+	HostAddressPort SocketWorker::localAddressPort() const
+	{
+		AUTO_LOCK(m_mutex);
+
+		if (m_tcpSocket == nullptr)
+		{
+			return HostAddressPort();
+		}
+
+		QHostAddress locAddr = m_tcpSocket->localAddress();
+		quint16 locPort = m_tcpSocket->localPort();
+
+		return HostAddressPort(locAddr, locPort);
+	}
 
 	void SocketWorker::restartWatchdogTimer()
 	{
@@ -187,7 +201,6 @@ namespace Tcp
 			m_watchdogTimer.start(m_watchdogTimerTimeout);
 		}
 	}
-
 
 	int SocketWorker::readHeader(int bytesAvailable)
 	{
@@ -598,6 +611,11 @@ namespace Tcp
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
 	}
 
+	void Server::onConnectedSoftwareInfoChanged()
+	{
+		// called after processing RQID_INTRODUCE_MYSELF
+	}
+
 	void Server::onHeaderAndDataReady()
 	{
 		assert(m_serverState == ServerState::WainigForRequest);
@@ -642,6 +660,8 @@ namespace Tcp
 			m_stateMutex.unlock();
 
 			sendReply(outMessage);
+
+			onConnectedSoftwareInfoChanged();
 
 			emit connectedSoftwareInfoChanged();
 		}
@@ -1121,12 +1141,12 @@ namespace Tcp
 		return localSoftwareInfo().equipmentID();
 	}
 
-	HostAddressPort Client::currentServerAddressPort()
+	HostAddressPort Client::currentServerAddressPort() const
 	{
 		return m_selectedServer;
 	}
 
-	HostAddressPort Client::serverAddressPort(int serverIndex)
+	HostAddressPort Client::serverAddressPort(int serverIndex) const
 	{
 		if (serverIndex < 0 || serverIndex > 1)
 		{

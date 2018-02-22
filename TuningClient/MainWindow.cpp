@@ -10,6 +10,9 @@
 #include "DialogFilterEditor.h"
 #include "version.h"
 
+QString MainWindow::m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
+QString MainWindow::m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
+
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
@@ -72,8 +75,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
 			Qt::QueuedConnection);
-
-	connect(m_tcpClient, &TuningTcpClient::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
 
 	// DialogAlert
 
@@ -193,6 +194,7 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo = new QLabel();
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
+	m_statusBarInfo->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
 
 	m_statusDiscreteCount = new QLabel();
 	m_statusDiscreteCount->setAlignment(Qt::AlignLeft);
@@ -454,29 +456,64 @@ void MainWindow::updateStatusBar()
 	//
 	assert(m_statusBarInfo);
 	assert(m_statusBarConfigConnection);
+	assert(m_tcpClient);
 
-	Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+	// LM Control Mode
+
+	if (m_singleLmControlMode != m_tcpClient->singleLmControlMode() || m_activeClientId != m_tcpClient->activeClientId() || m_activeClientIp != m_tcpClient->activeClientIp())
+	{
+		m_singleLmControlMode = m_tcpClient->singleLmControlMode();
+
+		m_activeClientId = m_tcpClient->activeClientId();
+		m_activeClientIp = m_tcpClient->activeClientIp();
+
+		QString str = m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText;
+
+		if (m_activeClientId.isEmpty() == false && m_activeClientIp.isEmpty() == false)
+		{
+			str += QString(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
+
+			if (m_tcpClient->clientIsActive() == true)
+			{
+				str += tr(" (current)");
+			}
+		}
+
+		m_statusBarInfo->setText(str);
+	}
+
+	Tcp::ConnectionState configConnState =  m_configController.getConnectionState();
 	Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
-
 
 	// ConfigService
 	//
 	QString text = tr(" ConfigService: ");
-	if (confiConnState.isConnected == false)
+
+	if (configConnState.isConnected == false)
 	{
 		text += tr(" no connection");
 	}
 	else
 	{
-		text += tr(" connected, packets: %1").arg(QString::number(confiConnState.replyCount));
+		text += tr(" connected, packets: %1").arg(QString::number(configConnState.replyCount));
 	}
 
-	m_statusBarConfigConnection->setText(text);
-	m_statusBarConfigConnection->setToolTip(m_configController.getStateToolTip());
+	if (text != m_statusBarConfigConnection->text())
+	{
+		m_statusBarConfigConnection->setText(text);
+	}
+
+	QString tooltip = m_configController.getStateToolTip();
+
+	if (tooltip != m_statusBarConfigConnection->toolTip())
+	{
+		m_statusBarConfigConnection->setToolTip(tooltip);
+	}
 
 	// TuningService
 	//
 	text = tr(" TuningService: ");
+
 	if (tuningConnState.isConnected == false)
 	{
 		text += tr(" no connection");
@@ -486,7 +523,17 @@ void MainWindow::updateStatusBar()
 		text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
 	}
 
-	m_statusBarTuningConnection->setText(text);
+	if (text != m_statusBarTuningConnection->text())
+	{
+		m_statusBarTuningConnection->setText(text);
+	}
+
+	tooltip = m_tcpClient->getStateToolTip();
+
+	if (tooltip != m_statusBarTuningConnection->toolTip())
+	{
+		m_statusBarTuningConnection->setToolTip(tooltip);
+	}
 
 	// Counters
 
@@ -526,30 +573,15 @@ void MainWindow::updateStatusBar()
 
 		// Lm Errors tool
 
-		int totalErrorsCount = 0;
-		int totalSorCount = 0;
+		int totalErrorCount = m_tcpClient->sourceErrorCount();
 
-		for (Hash& h : sources)
+		if (m_lmErrorsCounter != totalErrorCount)
 		{
-			TuningFilterCounters counters;
+			m_lmErrorsCounter = totalErrorCount;
 
-			if (m_tcpClient->tuningSourceCounters(h, &counters.errorCounter, &counters.sorCounter) == false)
-			{
-				assert(false);
-				continue;
-			}
+			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(m_lmErrorsCounter));
 
-			totalErrorsCount += counters.errorCounter;
-			totalSorCount += counters.sorCounter;
-		}
-
-		if (m_lmErrorsCounter != totalErrorsCount)
-		{
-			m_lmErrorsCounter = totalErrorsCount;
-
-			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(totalErrorsCount));
-
-			if (totalErrorsCount == 0)
+			if (m_lmErrorsCounter == 0)
 			{
 				m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
 			}
@@ -563,15 +595,17 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
+			int totalSorCount = m_tcpClient->sourceSorCount();
+
 			if (m_sorCounter != totalSorCount || m_statusBarSor->text().isEmpty() == true)
 			{
 				m_sorCounter = totalSorCount;
 
 				assert(m_statusBarSor);
 
-				m_statusBarSor->setText(QString(" SOR: %1").arg(totalSorCount));
+				m_statusBarSor->setText(QString(" SOR: %1").arg(m_sorCounter));
 
-				if (totalSorCount == 0)
+				if (m_sorCounter == 0)
 				{
 					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
 				}
@@ -607,16 +641,6 @@ void MainWindow::updateStatusBar()
 			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
 		}
 	}
-}
-
-void MainWindow::slot_tuningSourcesArrived()
-{
-	assert(m_statusBarTuningConnection);
-
-	// LM Single/Multi control
-
-	m_statusBarInfo->setText(m_tcpClient->singleLmControlMode() ? tr("Single LM Control Mode") : tr("Multiple LM Control Mode"));
-
 }
 
 void MainWindow::slot_configurationArrived()

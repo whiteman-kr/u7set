@@ -219,6 +219,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0201.sql", "Upgrade to version 201, Adding integer tuning params and Archive fields."},
 	{":/DatabaseUpgrade/Upgrade0202.sql", "Upgrade to version 202, Update properties in TuningService and TuningClient preset."},
 	{":/DatabaseUpgrade/Upgrade0203.sql", "Upgrade to version 203, Update configuration scripts and LM descriptions"},
+	{":/DatabaseUpgrade/Upgrade0204.sql", "Upgrade to version 204, TuningClient preset update"},
 };
 
 
@@ -4350,21 +4351,6 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 		   q.value(SD_TUNING_HIGH_BOUND_DOUBLE).toDouble());
 
 	s.setTuningHighBound(tv);
-
-	if (s.customAppSignalID() == "LM2_ANALOG_SIG005")
-	{
-		float lb = s.tuningLowBound().floatValue();
-		float hb = s.tuningHighBound().floatValue();
-
-		float lb2 = s.tuningLowBound().toFloat();
-
-		float lv = -3.45;
-		float hv = -45.6788;
-
-		int a = 0;
-		a++;
-
-	}
 
 	s.setAcquire(q.value(SD_ACQUIRE).toBool());
 	s.setArchive(q.value(SD_ARCHIVE).toBool());

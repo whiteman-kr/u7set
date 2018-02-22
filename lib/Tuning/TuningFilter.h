@@ -5,6 +5,24 @@
 #include "../lib/Hash.h"
 #include "../VFrame30/Schema.h"
 
+struct TuningCounters
+{
+	int errorCounter = 0;
+	int sorCounter = 0;
+	int controlEnabledCounter = 0;
+	int discreteCounter = 0;
+
+	TuningCounters& operator += (const TuningCounters& That)
+	{
+		this->errorCounter += That.errorCounter;
+		this->sorCounter += That.sorCounter;
+		this->controlEnabledCounter += That.controlEnabledCounter;
+		this->discreteCounter += That.discreteCounter;
+
+		return *this;
+	}
+};
+
 class TuningFilterValue
 {
 public:
@@ -32,14 +50,6 @@ private:
 	bool m_useValue = false;
 	TuningValue m_value;
 
-};
-
-struct TuningFilterCounters
-{
-	int sorCounter = 0;
-	int errorCounter = 0;
-	int controlEnabledCounter = 0;
-	int discreteCounter = 0;
 };
 
 class TuningFilter : public PropertyObject
@@ -165,8 +175,8 @@ public:
 	bool value(Hash hash, TuningFilterValue& value);
 	void setValue(const TuningFilterValue& value);
 
-	TuningFilterCounters counters() const;
-	void setCounters(TuningFilterCounters value);
+	TuningCounters counters() const;
+	void setCounters(TuningCounters value);
 
 public:
 	// Operations
@@ -244,7 +254,7 @@ private:
 
 	// Counters
 
-	TuningFilterCounters m_counters;
+	TuningCounters m_counters;
 
 };
 

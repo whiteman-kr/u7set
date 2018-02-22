@@ -13,7 +13,10 @@ public:
 
 	void setNewState(const ::Network::TuningSourceState& newState);
 
-	int getErrorsCount();
+	int getErrorsCount() const;
+
+	bool valid() const;
+	void invalidate();
 
 public:
 	::Network::DataSourceInfo info;
@@ -21,6 +24,8 @@ public:
 
 private:
 	int m_previousStateUpdatePeriod = 5;
+
+	bool m_valid = true;
 
 	::Network::TuningSourceState m_previousState;	// Previous state is updated every 5 seconds
 

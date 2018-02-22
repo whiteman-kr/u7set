@@ -132,7 +132,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 	if (filter->isRoot() == true && theConfigSettings.showDiscreteCounters == true)
 	{
-		TuningFilterCounters counters;
+		TuningCounters counters;
 
 		// Signals counters
 
@@ -161,7 +161,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 	if (filter->isEmpty() == false)
 	{
-		TuningFilterCounters counters;
+		TuningCounters totalCounters;
 
 		// Equipment counters
 
@@ -169,16 +169,8 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 		for (Hash& equipmentHash : equipmentHashes)
 		{
-			int errorCounter = 0;
-			int sorCounter = 0;
-
-			if (tcpClient->tuningSourceCounters(equipmentHash, &errorCounter, &sorCounter) == false)
-			{
-				continue;
-			}
-
-			counters.errorCounter += errorCounter;
-			counters.sorCounter += sorCounter;
+			totalCounters.errorCounter += tcpClient->sourceSorCount(equipmentHash);
+			totalCounters.sorCounter += tcpClient->sourceSorCount(equipmentHash);
 		}
 
 		// Signals counters
@@ -197,19 +189,19 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 			if (state.controlIsEnabled() == true)
 			{
-				counters.controlEnabledCounter++;
+				totalCounters.controlEnabledCounter++;
 			}
 
 			if (filter->hasDiscreteCounter() == true)
 			{
 				if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
 				{
-					counters.discreteCounter++;
+					totalCounters.discreteCounter++;
 				}
 			}
 		}
 
-		filter->setCounters(counters);
+		filter->setCounters(totalCounters);
 	}
 
 	int count = filter->childFiltersCount();
