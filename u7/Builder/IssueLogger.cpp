@@ -973,7 +973,6 @@ namespace Builder
 	///
 	void IssueLogger::errCFG3020(QString objectID, QString propertyName)
 	{
-		assert(false);
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3020,
 				  tr("Property '%1.%2' is not found.").arg(objectID).arg(propertyName));
