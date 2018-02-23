@@ -1238,7 +1238,7 @@ namespace Builder
 		bool result = true;
 
 		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("OMS and Tuning software configuration generation...")))
+		LOG_MESSAGE(m_log, QString(tr("MATS configuration generation...")))
 		LOG_EMPTY_LINE(m_log);
 
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
@@ -1380,7 +1380,7 @@ namespace Builder
 				continue;
 			}
 
-			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
+			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), subsysID, lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
 		}
 	}
 

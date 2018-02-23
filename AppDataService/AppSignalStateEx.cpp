@@ -100,7 +100,7 @@ bool AppSignalStateEx::setState(Times time, quint32 validity, double value, int 
 					//
 					if (m_adaptiveAperture == true)
 					{
-						double absAperture = (fabs(m_current.value - m_stored.value) * 100) / m_stored.value;
+						double absAperture = fabs((fabs(m_current.value - m_stored.value) * 100) / m_stored.value);
 
 						if (absAperture > m_smoothAperture)
 						{

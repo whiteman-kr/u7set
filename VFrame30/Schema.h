@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include "SchemaLayer.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/TypesAndEnums.h"

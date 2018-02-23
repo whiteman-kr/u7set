@@ -156,6 +156,7 @@ namespace Hardware
 				QJsonObject jModuleInfo;
 
 				jModuleInfo.insert(QLatin1String("equipmentId"), info.equipmentId);
+				jModuleInfo.insert(QLatin1String("subsystemId"), info.subsystemId);
 				jModuleInfo.insert(QLatin1String("lmNumber"), info.lmNumber);
 				jModuleInfo.insert(QLatin1String("channel"), E::valueToString<E::Channel>(info.channel));
 				jModuleInfo.insert(QLatin1String("moduleFamily"), info.moduleFamily);
