@@ -519,8 +519,6 @@ namespace Tuning
 
 		result &= initFotipFrame(request.fotipFrame, tuningCmd);
 
-		request.calcCRC64();
-
 		return result;
 	}
 
@@ -536,6 +534,8 @@ namespace Tuning
 		//
 		request.rupHeader.reverseBytes();
 		request.fotipFrame.header.reverseBytes();
+
+		request.calcCRC64();
 
 		quint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&request),
 											  sizeof(request),
@@ -628,7 +628,7 @@ namespace Tuning
 	}
 
 
-	bool TuningSourceWorker::initFotipFrame(FotipV2::Frame &fotipFrame, const TuningCommand& tuningCmd)
+	bool TuningSourceWorker::initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd)
 	{
 		FotipV2::Header& fotipHeader = fotipFrame.header;
 
@@ -651,13 +651,20 @@ namespace Tuning
 
 		fotipHeader.offsetInFrameW = 0;
 
-		memset(fotipHeader.reserve, 0, sizeof(fotipHeader.reserve));
+		memset(fotipHeader.reserv, 0, sizeof(fotipHeader.reserv));
+
+		memset(fotipFrame.data, 0, sizeof(fotipFrame.data));
+
+		memset(&fotipFrame.analogCmpErrors, 0, sizeof(fotipFrame.analogCmpErrors));
+
+		memset(fotipFrame.reserv, 0, sizeof(fotipFrame.reserv));
+
+		//
 
 		fotipHeader.operationCode = TO_INT(tuningCmd.opCode);
 
 		// operation-specific initialization
 		//
-
 		switch(tuningCmd.opCode)
 		{
 		case FotipV2::OpCode::Read:
@@ -741,7 +748,6 @@ namespace Tuning
 
 		return true;
 	}
-
 
 	void TuningSourceWorker::processReply(RupFotipV2& reply)
 	{
