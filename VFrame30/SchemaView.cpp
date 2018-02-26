@@ -104,7 +104,7 @@ namespace VFrame30
 		}
 	}
 
-	std::shared_ptr<Schema>& SchemaView::schema()
+	std::shared_ptr<Schema> SchemaView::schema()
 	{
 		return m_schema;
 	}
@@ -114,7 +114,7 @@ namespace VFrame30
 		return m_schema;
 	}
 
-	void SchemaView::setSchema(std::shared_ptr<Schema>& schema, bool repaint)
+	void SchemaView::setSchema(std::shared_ptr<Schema> schema, bool repaint)
 	{
 		assert(schema.get() != nullptr);
 		m_schema = schema;

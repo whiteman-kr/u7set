@@ -2,7 +2,7 @@
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaWidget.h"
 #include "MonitorView.h"
-#include "SchemaManager.h"
+#include "MonitorSchemaManager.h"
 #include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemConnection.h"
@@ -14,12 +14,9 @@
 //
 //
 
-MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaManager* schemaManager) :
-	BaseSchemaWidget(schema, new MonitorView(schemaManager)),
-	m_schemaManager(schemaManager)
+MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, MonitorSchemaManager* schemaManager) :
+	VFrame30::ClientSchemaWidget(new MonitorView(schemaManager), schema, schemaManager)
 {
-	assert(m_schemaManager);
-
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
 
@@ -27,18 +24,18 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	// --
 	//
-	connect(schemaView(), &VFrame30::SchemaView::signal_schemaChanged, this, [this](VFrame30::Schema* schema)
-		{
-			emit this->signal_schemaChanged(this, schema);
-		});
+//	connect(schemaView(), &VFrame30::SchemaView::signal_schemaChanged, this, [this](VFrame30::Schema* schema)
+//		{
+//			emit this->signal_schemaChanged(this, schema);
+//		});
 
 	// --
 	//
 	connect(monitorSchemaView(), &MonitorView::signal_setSchema, this, &MonitorSchemaWidget::slot_setSchema);
 
-	// Init history
-	//
-	m_backHistory.push_back(currentHistoryState());
+//	// Init history
+//	//
+//	m_backHistory.push_back(currentHistoryState());
 
 	return;
 }
@@ -76,300 +73,300 @@ void MonitorSchemaWidget::createActions()
 
 }
 
-void MonitorSchemaWidget::mousePressEvent(QMouseEvent* event)
-{
-	if (event->buttons().testFlag(Qt::LeftButton) == true)
-	{
-		m_dragStartPosition = event->pos();
-		VFrame30::BaseSchemaWidget::mousePressEvent(event);
-	}
-	else
-	{
-		VFrame30::BaseSchemaWidget::mousePressEvent(event);
-	}
-}
-
-void MonitorSchemaWidget::mouseMoveEvent(QMouseEvent* event)
-{
-	if (event->buttons().testFlag(Qt::LeftButton) == false)
-	{
-		VFrame30::BaseSchemaWidget::mouseMoveEvent(event);
-		return;
-	}
-
-	// Left button is pressed, is this start of drag and drop
-	//
-	if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
-	{
-		VFrame30::BaseSchemaWidget::mouseMoveEvent(event);
-		return;
-	}
-
-	// Try to start drag and drop
-	//
-	QPointF docPos = widgetPointToDocument(m_dragStartPosition);
-
-	std::shared_ptr<VFrame30::SchemaItem> schemaItem;
-
-	for (auto layer : schema()->Layers)
-	{
-		if (layer->compile() == false)
-		{
-			continue;
-		}
-
-		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemInput"));
-		if (schemaItem != nullptr)
-		{
-			break;
-		}
-
-		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemOutput"));
-		if (schemaItem != nullptr)
-		{
-			break;
-		}
-
-		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemInOut"));
-		break;
-	}
-
-	if (schemaItem == nullptr)
-	{
-		return;
-	}
-
-	std::shared_ptr<VFrame30::SchemaItemSignal> schemaItemSignal = std::dynamic_pointer_cast<VFrame30::SchemaItemSignal>(schemaItem);
-	if (schemaItemSignal == nullptr)
-	{
-		assert(schemaItemSignal);
-		return;
-	}
-
-	// Save signals to protobufer
-	//
-	::Proto::AppSignalSet protoSetMessage;
-	QStringList appSignalIds = schemaItemSignal->appSignalIdList();
-
-	for (QString id : appSignalIds)
-	{
-		bool ok = false;
-		AppSignalParam signalParam = theSignals.signalParam(id, &ok);
-		if (ok == false)
-		{
-			continue;
-		}
-
-		assert(signalParam.appSignalId() == id);
-
-		::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-		signalParam.save(protoSignalMessage);
-	}
-
-	if (protoSetMessage.appsignal_size() == 0)
-	{
-		return;
-	}
-
-	QByteArray data;
-	data.resize(protoSetMessage.ByteSize());
-
-	protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
-
-	// --
-	//
-	if (data.isEmpty() == false)
-	{
-		QDrag* drag = new QDrag(this);
-		QMimeData* mimeData = new QMimeData;
+//void MonitorSchemaWidget::mousePressEvent(QMouseEvent* event)
+//{
+//	if (event->buttons().testFlag(Qt::LeftButton) == true)
+//	{
+//		m_dragStartPosition = event->pos();
+//		VFrame30::BaseSchemaWidget::mousePressEvent(event);
+//	}
+//	else
+//	{
+//		VFrame30::BaseSchemaWidget::mousePressEvent(event);
+//	}
+//}
+
+//void MonitorSchemaWidget::mouseMoveEvent(QMouseEvent* event)
+//{
+//	if (event->buttons().testFlag(Qt::LeftButton) == false)
+//	{
+//		VFrame30::BaseSchemaWidget::mouseMoveEvent(event);
+//		return;
+//	}
+
+//	// Left button is pressed, is this start of drag and drop
+//	//
+//	if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+//	{
+//		VFrame30::BaseSchemaWidget::mouseMoveEvent(event);
+//		return;
+//	}
+
+//	// Try to start drag and drop
+//	//
+//	QPointF docPos = widgetPointToDocument(m_dragStartPosition);
+
+//	std::shared_ptr<VFrame30::SchemaItem> schemaItem;
+
+//	for (auto layer : schema()->Layers)
+//	{
+//		if (layer->compile() == false)
+//		{
+//			continue;
+//		}
+
+//		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemInput"));
+//		if (schemaItem != nullptr)
+//		{
+//			break;
+//		}
+
+//		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemOutput"));
+//		if (schemaItem != nullptr)
+//		{
+//			break;
+//		}
+
+//		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemInOut"));
+//		break;
+//	}
+
+//	if (schemaItem == nullptr)
+//	{
+//		return;
+//	}
+
+//	std::shared_ptr<VFrame30::SchemaItemSignal> schemaItemSignal = std::dynamic_pointer_cast<VFrame30::SchemaItemSignal>(schemaItem);
+//	if (schemaItemSignal == nullptr)
+//	{
+//		assert(schemaItemSignal);
+//		return;
+//	}
+
+//	// Save signals to protobufer
+//	//
+//	::Proto::AppSignalSet protoSetMessage;
+//	QStringList appSignalIds = schemaItemSignal->appSignalIdList();
+
+//	for (QString id : appSignalIds)
+//	{
+//		bool ok = false;
+//		AppSignalParam signalParam = theSignals.signalParam(id, &ok);
+//		if (ok == false)
+//		{
+//			continue;
+//		}
+
+//		assert(signalParam.appSignalId() == id);
+
+//		::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
+//		signalParam.save(protoSignalMessage);
+//	}
+
+//	if (protoSetMessage.appsignal_size() == 0)
+//	{
+//		return;
+//	}
+
+//	QByteArray data;
+//	data.resize(protoSetMessage.ByteSize());
+
+//	protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
+
+//	// --
+//	//
+//	if (data.isEmpty() == false)
+//	{
+//		QDrag* drag = new QDrag(this);
+//		QMimeData* mimeData = new QMimeData;
 
-		mimeData->setData(AppSignalParamMimeType::value, data);
-		drag->setMimeData(mimeData);
-
-		drag->exec(Qt::CopyAction);
+//		mimeData->setData(AppSignalParamMimeType::value, data);
+//		drag->setMimeData(mimeData);
+
+//		drag->exec(Qt::CopyAction);
 
-		qDebug() << "Start drag for " << appSignalIds;
-		qDebug() << "Drag and drop data buffer size " << data.size();
-	}
-
-	return;
-}
-
-
-std::vector<std::shared_ptr<VFrame30::SchemaItem>> MonitorSchemaWidget::itemsUnderCursor(const QPoint& pos)
-{
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> result;
-	result.reserve(8);
+//		qDebug() << "Start drag for " << appSignalIds;
+//		qDebug() << "Drag and drop data buffer size " << data.size();
+//	}
+
+//	return;
+//}
+
+
+//std::vector<std::shared_ptr<VFrame30::SchemaItem>> MonitorSchemaWidget::itemsUnderCursor(const QPoint& pos)
+//{
+//	std::vector<std::shared_ptr<VFrame30::SchemaItem>> result;
+//	result.reserve(8);
 
-	QPointF docPoint;
+//	QPointF docPoint;
 
-	bool convertResult = MousePosToDocPoint(pos, &docPoint);
-	if (convertResult == false)
-	{
-		return result;
-	}
+//	bool convertResult = MousePosToDocPoint(pos, &docPoint);
+//	if (convertResult == false)
+//	{
+//		return result;
+//	}
 
-	double x = docPoint.x();
-	double y = docPoint.y();
+//	double x = docPoint.x();
+//	double y = docPoint.y();
 
-	for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
-	{
-		const VFrame30::SchemaLayer* pLayer = layer->get();
+//	for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+//	{
+//		const VFrame30::SchemaLayer* pLayer = layer->get();
 
-		if (pLayer->show() == false)
-		{
-			continue;
-		}
+//		if (pLayer->show() == false)
+//		{
+//			continue;
+//		}
 
-		for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
-		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+//		for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+//		{
+//			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
 
-			if (item->IsIntersectPoint(x, y) == true)
-			{
-				result.push_back(item);
-			}
-		}
-	}
+//			if (item->IsIntersectPoint(x, y) == true)
+//			{
+//				result.push_back(item);
+//			}
+//		}
+//	}
 
-	return result;
-}
+//	return result;
+//}
 
-bool MonitorSchemaWidget::canBackHistory() const
-{
-	bool enableBack = m_backHistory.size() > 1;
-	return enableBack;
-}
+//bool MonitorSchemaWidget::canBackHistory() const
+//{
+//	bool enableBack = m_backHistory.size() > 1;
+//	return enableBack;
+//}
 
-bool MonitorSchemaWidget::canForwardHistory() const
-{
-	bool enableForward = !m_forwardHistory.empty();
-	return enableForward;
-}
+//bool MonitorSchemaWidget::canForwardHistory() const
+//{
+//	bool enableForward = !m_forwardHistory.empty();
+//	return enableForward;
+//}
 
-void MonitorSchemaWidget::historyBack()
-{
-	qDebug() << "MonitorSchemaWidget::historyBack()";
+//void MonitorSchemaWidget::historyBack()
+//{
+//	qDebug() << "MonitorSchemaWidget::historyBack()";
 
-	if (m_backHistory.empty() == true)
-	{
-		return;
-	}
+//	if (m_backHistory.empty() == true)
+//	{
+//		return;
+//	}
 
-	SchemaHistoryItem currentView = m_backHistory.back();
-	m_backHistory.pop_back();
+//	SchemaHistoryItem currentView = m_backHistory.back();
+//	m_backHistory.pop_back();
 
-	assert(currentView.m_schemaId == schemaId());	// Save current state
-	currentView = currentHistoryState();
+//	assert(currentView.m_schemaId == schemaId());	// Save current state
+//	currentView = currentHistoryState();
 
-	m_forwardHistory.push_front(currentView);
+//	m_forwardHistory.push_front(currentView);
 
-	if (m_backHistory.empty() == true)
-	{
-		return;
-	}
+//	if (m_backHistory.empty() == true)
+//	{
+//		return;
+//	}
 
-	SchemaHistoryItem& restoreItem = m_backHistory.back();
-	restoreState(restoreItem);
+//	SchemaHistoryItem& restoreItem = m_backHistory.back();
+//	restoreState(restoreItem);
 
-	emitHistoryChanged();
+//	emitHistoryChanged();
 
-	return;
-}
+//	return;
+//}
 
-void MonitorSchemaWidget::historyForward()
-{
-	qDebug() << "MonitorSchemaWidget::historyForward()";
+//void MonitorSchemaWidget::historyForward()
+//{
+//	qDebug() << "MonitorSchemaWidget::historyForward()";
 
-	if (m_forwardHistory.empty() == true)
-	{
-		return;
-	}
+//	if (m_forwardHistory.empty() == true)
+//	{
+//		return;
+//	}
 
-	// save current state
-	//
-	SchemaHistoryItem& currentView = m_backHistory.back();
-	assert(currentView.m_schemaId == schemaId());
-	currentView = currentHistoryState();
+//	// save current state
+//	//
+//	SchemaHistoryItem& currentView = m_backHistory.back();
+//	assert(currentView.m_schemaId == schemaId());
+//	currentView = currentHistoryState();
 
-	// switch history
-	//
-	SchemaHistoryItem hi = m_forwardHistory.front();
-	m_forwardHistory.pop_front();
+//	// switch history
+//	//
+//	SchemaHistoryItem hi = m_forwardHistory.front();
+//	m_forwardHistory.pop_front();
 
-	m_backHistory.push_back(hi);
+//	m_backHistory.push_back(hi);
 
-	restoreState(hi);
+//	restoreState(hi);
 
-	emitHistoryChanged();
+//	emitHistoryChanged();
 
-	return;
-}
+//	return;
+//}
 
-void MonitorSchemaWidget::resetHistory()
-{
-	qDebug() << "MonitorSchemaWidget::resetHistory()";
+//void MonitorSchemaWidget::resetHistory()
+//{
+//	qDebug() << "MonitorSchemaWidget::resetHistory()";
 
-	m_backHistory.clear();
-	m_backHistory.push_back(currentHistoryState());
+//	m_backHistory.clear();
+//	m_backHistory.push_back(currentHistoryState());
 
-	m_forwardHistory.clear();
+//	m_forwardHistory.clear();
 
-	emitHistoryChanged();
+//	emitHistoryChanged();
 
-	return;
-}
+//	return;
+//}
 
-void MonitorSchemaWidget::restoreState(const SchemaHistoryItem& historyState)
-{
-	if (m_schemaManager == nullptr)
-	{
-		assert(m_schemaManager);
-		return;
-	}
+//void MonitorSchemaWidget::restoreState(const SchemaHistoryItem& historyState)
+//{
+//	if (m_schemaManager == nullptr)
+//	{
+//		assert(m_schemaManager);
+//		return;
+//	}
 
-	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(historyState.m_schemaId);
+//	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(historyState.m_schemaId);
 
-	if (schema == nullptr)
-	{
-		// and there is no startSchemaId (((
-		// Just create an empty schema
-		//
-		schema = std::make_shared<VFrame30::MonitorSchema>();
-		schema->setSchemaId(historyState.m_schemaId);
-		schema->setCaption(historyState.m_schemaId + " not found");
-	}
+//	if (schema == nullptr)
+//	{
+//		// and there is no startSchemaId (((
+//		// Just create an empty schema
+//		//
+//		schema = std::make_shared<VFrame30::MonitorSchema>();
+//		schema->setSchemaId(historyState.m_schemaId);
+//		schema->setCaption(historyState.m_schemaId + " not found");
+//	}
 
-	// --
-	//
-	setSchema(schema, false);
-	setZoom(historyState.m_zoom, false);
+//	// --
+//	//
+//	setSchema(schema, false);
+//	setZoom(historyState.m_zoom, false);
 
-	horizontalScrollBar()->setValue(historyState.m_horzScrollValue);
-	verticalScrollBar()->setValue(historyState.m_vertScrollValue);
+//	horizontalScrollBar()->setValue(historyState.m_horzScrollValue);
+//	verticalScrollBar()->setValue(historyState.m_vertScrollValue);
 
-	schemaView()->repaint();
+//	schemaView()->repaint();
 
-	return;
-}
+//	return;
+//}
 
-SchemaHistoryItem MonitorSchemaWidget::currentHistoryState() const
-{
-	SchemaHistoryItem hi;
+//SchemaHistoryItem MonitorSchemaWidget::currentHistoryState() const
+//{
+//	SchemaHistoryItem hi;
 
-	hi.m_schemaId = schemaId();
-	hi.m_zoom = zoom();
-	hi.m_horzScrollValue = horizontalScrollBar()->value();
-	hi.m_vertScrollValue = verticalScrollBar()->value();
+//	hi.m_schemaId = schemaId();
+//	hi.m_zoom = zoom();
+//	hi.m_horzScrollValue = horizontalScrollBar()->value();
+//	hi.m_vertScrollValue = verticalScrollBar()->value();
 
-	return hi;
-}
+//	return hi;
+//}
 
-void MonitorSchemaWidget::emitHistoryChanged()
-{
-	emit signal_historyChanged(canBackHistory(), canForwardHistory());
-	return;
-}
+//void MonitorSchemaWidget::emitHistoryChanged()
+//{
+//	emit signal_historyChanged(canBackHistory(), canForwardHistory());
+//	return;
+//}
 
 void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
@@ -474,22 +471,19 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 
 void MonitorSchemaWidget::slot_setSchema(QString schemaId)
 {
-	if (m_schemaManager == nullptr)
+	if (schemaManager() == nullptr)
 	{
-		assert(m_schemaManager);
+		assert(schemaManager());
 		return;
 	}
 
-	// --
+	// Save current state to the history
 	//
-	m_forwardHistory.clear();
+	resetForwardHistory();
 
-	// save current state to the history
-	//
-	if (m_backHistory.empty() == false)
+	if (canBackHistory() == false)
 	{
-		SchemaHistoryItem& currentHistoryItem = m_backHistory.back();
-
+		VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();
 		assert(currentHistoryItem.m_schemaId == this->schemaId());
 
 		currentHistoryItem = currentHistoryState();
@@ -497,7 +491,7 @@ void MonitorSchemaWidget::slot_setSchema(QString schemaId)
 
 	// --
 	//
-	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
+	std::shared_ptr<VFrame30::Schema> schema = schemaManager()->schema(schemaId);
 
 	if (schema == nullptr)
 	{
@@ -516,7 +510,7 @@ void MonitorSchemaWidget::slot_setSchema(QString schemaId)
 
 	// --
 	//
-	SchemaHistoryItem hi = currentHistoryState();
+	VFrame30::SchemaHistoryItem hi = currentHistoryState();
 	m_backHistory.push_back(hi);
 
 	// --
@@ -526,25 +520,25 @@ void MonitorSchemaWidget::slot_setSchema(QString schemaId)
 	return;
 }
 
-QString MonitorSchemaWidget::schemaId() const
-{
-	if (schema() == nullptr)
-	{
-		return QString();
-	}
+//QString MonitorSchemaWidget::schemaId() const
+//{
+//	if (schema() == nullptr)
+//	{
+//		return QString();
+//	}
 
-	return schema()->schemaId();
-}
+//	return schema()->schemaId();
+//}
 
-QString MonitorSchemaWidget::caption() const
-{
-	if (schema() == nullptr)
-	{
-		return QString();
-	}
+//QString MonitorSchemaWidget::caption() const
+//{
+//	if (schema() == nullptr)
+//	{
+//		return QString();
+//	}
 
-	return schema()->caption();
-}
+//	return schema()->caption();
+//}
 
 MonitorView* MonitorSchemaWidget::monitorSchemaView()
 {

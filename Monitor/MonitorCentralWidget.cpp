@@ -1,9 +1,9 @@
 #include "MonitorCentralWidget.h"
-#include "SchemaManager.h"
+#include "MonitorSchemaManager.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/LogicSchema.h"
 
-MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
+MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager) :
 	m_schemaManager(schemaManager)
 {
 	assert(m_schemaManager);
@@ -26,7 +26,7 @@ MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
 	connect(this->tabBar(), &QTabBar::tabCloseRequested, this, &MonitorCentralWidget::slot_tabCloseRequested);
 	connect(this, &MonitorCentralWidget::currentChanged, this, &MonitorCentralWidget::slot_tabPageChanged);
 
-	connect(m_schemaManager, &SchemaManager::resetSchema, this, &MonitorCentralWidget::slot_resetSchema);
+	connect(m_schemaManager, &VFrame30::SchemaManager::schemasWereReseted, this, &MonitorCentralWidget::slot_resetSchema);
 
 	return;
 }
@@ -225,7 +225,7 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 	return;
 }
 
-void MonitorCentralWidget::slot_resetSchema(QString startSchemaId)
+void MonitorCentralWidget::slot_resetSchema()
 {
 	// All schemas must be refreshed, apparently the new configuration has arrived
 	// if there is no schema with prev SchemaID, load startSchemaId
@@ -301,7 +301,7 @@ void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
 	return;
 }
 
-void MonitorCentralWidget::slot_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema)
+void MonitorCentralWidget::slot_schemaChanged(VFrame30::ClientSchemaWidget* tabWidget, VFrame30::Schema* schema)
 {
 	if (tabWidget == nullptr ||
 		schema == nullptr)

@@ -3,6 +3,7 @@
 #include <QJSEngine>
 #include "Session.h"
 #include "../lib/Tuning/TuningController.h"
+#include "VFrame30Lib_global.h"
 
 
 namespace VFrame30
@@ -16,8 +17,8 @@ namespace VFrame30
 		Q_OBJECT
 
 	public:
-		explicit SchemaView(QWidget *parent = 0);
-		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget *parent = 0);
+		explicit SchemaView(QWidget* parent = 0);
+		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget* parent = 0);
 
 	protected:
 		void updateControlWidgets(bool editMode);
@@ -37,10 +38,10 @@ namespace VFrame30
 	public:
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
-		std::shared_ptr<Schema>& schema();
+		std::shared_ptr<Schema> schema();
 		std::shared_ptr<Schema> schema() const;
 
-		void setSchema(std::shared_ptr<Schema>& schema, bool repaint);
+		void setSchema(std::shared_ptr<Schema> schema, bool repaint);
 
 		Q_INVOKABLE void jsDebugOutput(QString str);
 		

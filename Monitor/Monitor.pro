@@ -84,7 +84,6 @@ SOURCES += main.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
-    SchemaManager.cpp \
     ../Proto/network.pb.cc \
     TcpSignalClient.cpp \
     ../Proto/serialization.pb.cc \
@@ -113,7 +112,8 @@ SOURCES += main.cpp \
     ArchiveModelView.cpp \
     ArchiveData.cpp \
     TcpSignalRecents.cpp \
-    SelectSchemaWidget.cpp
+    SelectSchemaWidget.cpp \
+    MonitorSchemaManager.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -130,7 +130,6 @@ HEADERS  += \
     MonitorSchemaWidget.h \
     ../lib/Types.h \
     MonitorConfigController.h \
-    SchemaManager.h \
     ../Proto/network.pb.h \
     TcpSignalClient.h \
     ../lib/Hash.h \
@@ -161,7 +160,8 @@ HEADERS  += \
     ArchiveModelView.h \
     ArchiveData.h \
     TcpSignalRecents.h \
-    SelectSchemaWidget.h
+    SelectSchemaWidget.h \
+    MonitorSchemaManager.h
 
 FORMS    += \
     DialogSettings.ui \

@@ -102,7 +102,10 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/DbStruct.h \
     ../lib/Tuning/TuningSignalState.h \
     SchemaItemBus.h \
-    Bus.h
+    Bus.h \
+    ClientSchemaWidget.h \
+    SchemaManager.h \
+    ClientSchemaView.h
 
 SOURCES += \
     Settings.cpp \
@@ -156,7 +159,10 @@ SOURCES += \
     ../lib/DbStruct.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     SchemaItemBus.cpp \
-    Bus.cpp
+    Bus.cpp \
+    ClientSchemaWidget.cpp \
+    SchemaManager.cpp \
+    ClientSchemaView.cpp
 
 
 DEFINES += VFRAME30LIB_LIBRARY

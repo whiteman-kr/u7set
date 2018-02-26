@@ -2,7 +2,7 @@
 #define MONITORMAINWINDOW_H
 
 #include "MonitorConfigController.h"
-#include "SchemaManager.h"
+#include "MonitorSchemaManager.h"
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
 #include "SelectSchemaWidget.h"
@@ -104,7 +104,7 @@ private:
 	QTimer* m_instanceTimer = nullptr;
 
 	MonitorConfigController m_configController;
-	SchemaManager m_schemaManager;
+	MonitorSchemaManager m_schemaManager;
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
