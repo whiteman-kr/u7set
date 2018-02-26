@@ -53,7 +53,7 @@ namespace TuningIPEN
 	}
 
 
-	TuningMainWindow::TuningMainWindow(int& argc, char** argv, std::shared_ptr<CircularLogger> logger, QWidget* parent) :
+	TuningMainWindow::TuningMainWindow(const SoftwareInfo& softwareInfo, int& argc, char** argv, std::shared_ptr<CircularLogger> logger, QWidget* parent) :
 		QMainWindow(parent),
 		m_logger(logger),
 		m_updateTimer(new QTimer(this))
@@ -72,13 +72,7 @@ namespace TuningIPEN
 
 		// run Tuning Service
 		//
-		VersionInfo v;
-
-		v.majorVersion = 1;
-		v.minorVersion = 0;
-		v.commitNo = 0;
-
-		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning IPEN Service", argc, argv, v, m_logger);
+		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker(softwareInfo, "Tuning IPEN Service", argc, argv, m_logger);
 
 		worker->initAndProcessCmdLineSettings();
 

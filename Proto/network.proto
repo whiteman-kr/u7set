@@ -75,7 +75,7 @@ message GetAppSignalStateReply
 
 message DataSourceInfo
 {
-    optional uint64 id = 1;		    // unique id
+    optional uint64 id = 1;				// unique id
     optional string equipmentID = 2;
     optional string caption = 3;
     optional int32 dataType = 4;
@@ -155,29 +155,48 @@ message GetUnitsReply
     repeated Unit units = 2;
 }
 
+message AppDataServiceState
+{
+    required bool CfgServiceIsConnected = 1 [default = false];
+    optional uint32 CfgServiceIp = 2;
+	optional int32 CfgServicePort = 3;
+
+    required bool ArchiveServiceIsConnected = 4 [default = false];
+    optional uint32 ArchiveServiceIp = 5;
+	optional int32 ArchiveServicePort = 6;
+}
+
+
+message SoftwareInfo
+{
+    required int32 softwareType = 1 [default = 8000];		// E::SoftwareType::Unknown = 8000
+    required string equipmentId = 2;
+    required int32 majorVersion = 3 [default = 0];
+    required int32 minorVersion = 4 [default = 0];
+    required int32 commitNo = 5 [default = 0];
+    required string buildBranch = 6;
+    required string commitSHA = 7;
+    required string userName = 8;
+    required int32 buildNo = 9 [default = 0];
+    required uint32 crc = 10 [default = 0];
+}
+
 // Get Service Info
 //
-
 message GetServiceInfoRequest
 {
 }
 
 message ServiceInfo
 {
-    optional int32 type = 1 [default = 0];	    // ServiceType::BaseService
-    optional int32 majorVersion = 2 [default = 0];
-    optional int32 minorVersion = 3 [default = 0];
-    optional int32 commitNo = 4 [default = 0];
-    optional uint32 crc = 5 [default = 0];
-    optional int64 uptime = 6 [default = 0];
-    optional int32 serviceState = 7 [default = 0];    // ServiceState::Undefined;
-    optional int64 serviceUptime = 8 [default = 0];
+    required SoftwareInfo softwareInfo = 1;
 
-    optional uint32 clientRequestIP = 9 [default = 0];
-    optional int32 clientRequestPort = 10 [default = 0];
+    optional int64 uptime = 2 [default = 0];
+    optional int32 serviceState = 3 [default = 0];		// ServiceState::Undefined;
+    optional int64 serviceUptime = 4 [default = 0];
 
-    optional string buildBranch = 11;
-    optional string commitSHA = 12;
+    optional uint32 clientRequestIP = 5 [default = 0];
+    optional int32 clientRequestPort = 6 [default = 0];
 }
 
 message GetServiceInfoReply
@@ -186,17 +205,6 @@ message GetServiceInfoReply
     required ServiceInfo serviceInfo = 2;
 }
 
-
-message TcpClientIntroduceMyself
-{
-    required int32 softwareType = 1;
-    required string equipmentId = 2;
-    required int32 majorVersion = 3;
-    required int32 minorVersion = 4;
-    required int32 commitNo = 5;
-}
-
-
 message ConfigurationServiceState
 {
     required string currentBuildDirectory = 1;
@@ -204,22 +212,18 @@ message ConfigurationServiceState
     required int32 buildCheckerState = 3;
 }
 
-message ConfigurationServiceClientInfo
+message ServiceClientInfo
 {
-    required int32 softwareType = 1;
-    required string equipmentId = 2;
     required int32 ip = 3;
     required int64 uptime = 5;
     required bool isActual = 6;
     required int64 replyQuantity = 7;
-    required int32 majorVersion = 8;
-    required int32 minorVersion = 9;
-    required int32 commitNo = 10;
+    required SoftwareInfo softwareInfo = 11;
 }
 
-message ConfigurationServiceClients
+message ServiceClients
 {
-    repeated ConfigurationServiceClientInfo clients = 1;
+    repeated ServiceClientInfo clients = 1;
 }
 
 message BuildInfo
@@ -240,28 +244,38 @@ message ConfigurationServiceSettings
     required string workDirectory = 3;
 }
 
+message ServiceSettings
+{
+    required string equipmentID = 1;
+    required string configIP1 = 2;
+    required string configIP2 = 3;
+}
+
 
 // TuningService requests and replies
 //
 
-// Tuning sources info request
-
+// Tuning sources info request - TDS_GET_TUNING_SOURCES_INFO
+//
 message GetTuningSourcesInfo
 {
-    optional string clientEquipmentID = 1;
 }
 
 message GetTuningSourcesInfoReply
 {
     optional int32 error = 1 [default = 0];
     repeated DataSourceInfo tuningSourceInfo= 2;
+
+    optional bool singleLmControlMode = 3 [default = true];
+    optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
+                                                                    // else - empty string
+    optional string activeClientIP = 5;				    // similar to activeClientID
 }
 
-// Tuning sources states request
-
+// Tuning sources states request - TDS_GET_TUNING_SOURCES_STATES
+//
 message GetTuningSourcesStates
 {
-    optional string clientEquipmentID = 1;
 }
 
 message TuningSourceState
@@ -322,30 +336,74 @@ message TuningSourceState
     optional int64 errAnalogHighBoundCheck = 40 [default = 0];
 
     optional int64 errRupCRC = 41 [default = 0];
+
+    optional bool controlIsActive = 42 [default = false];
+    optional bool setSOR = 43 [default = false];
+
+    optional bool hasUnappliedParams = 44 [default = false];
 }
 
 message GetTuningSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];
     repeated TuningSourceState tuningSourcesState = 2;
+
+    optional bool singleLmControlMode = 3 [default = true];
+    optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
+                                                                    // else - empty string
+    optional string activeClientIP = 5;				    // similar to activeClientID
 }
 
-// Tuning signals read request
+//  Change current controlled TuningSource request - TDS_CHANGE_CONTROLLED_TUNING_SOURCE
+//
+//  Allowed only if SingleLMControl mode of TuningService is set to TRUE.
+//  Otherwise reply is returning error NetworkError::SingleLmControlDisabled.
+//
+message ChangeConrolledTuningSourceRequest
+{
+    optional bool takeControl = 1;				    // true - to force control to current client
 
+    optional string tuningSourceEquipmentID = 2;		    // not empty - to change controlled source
+                                                                    // empty - to request current controlled source (activateControl field is ignored)
+
+    optional bool activateControl = 3 [default = false];	    // if tuningSourceEquipmentID is not empty:
+                                                                    //	    true - to activate tuning source control
+								    //	    false - to deactivate tuning source control
+}
+
+message ChangeConrolledTuningSourceReply
+{
+    optional int32 error = 1 [default = 0];
+    optional string controlledTuningSourceEquipmentID = 2;	    // if error == Success - current controlled TuningSource
+                                                                    // else - empty string
+    optional bool controlIsActive = 3 [default = false];
+}
+
+// Tuning signals read request - TDS_TUNING_SIGNALS_READ
+//
 message TuningSignalsRead
 {
-    optional string clientEquipmentID = 1;
     repeated uint64 signalHash = 2;
 }
 
 message TuningSignalState
 {
-    optional uint64 signalHash = 1 [default = 0];
+    optional fixed64 signalHash = 1 [default = 0];
     optional int32 error = 2 [default = 0];
+
     optional bool valid = 3 [default = false];
-    optional float value = 4 [default = 0.0];
-    optional float readLowBound = 5 [default = 0.0];
-    optional float readHighBound = 6 [default = 0.0];
+    optional Proto.TuningValue value = 4;
+    optional Proto.TuningValue readLowBound = 5;
+    optional Proto.TuningValue readHighBound = 6;
+
+    optional bool writeInProgress = 7 [default = false];
+    optional int32 writeErrorCode = 8 [default = 0];
+    optional fixed64 writeClient = 9 [default = 0];			// Hash code of Client's EquipmentID
+
+    optional sfixed64 successfulReadTime = 10 [default = 0];		// time of last succesfull signal reading (UTC)
+    optional sfixed64 writeRequestTime = 11 [default = 0];		// time of last write request (UTC)
+    optional sfixed64 successfulWriteTime = 12 [default = 0];		// time of last succesfull signal writing (UTC)
+    optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];		// time of last unsuccesfull signal writing (UTC)
 }
 
 message TuningSignalsReadReply
@@ -354,19 +412,18 @@ message TuningSignalsReadReply
     repeated TuningSignalState tuningSignalState = 2;
 }
 
-// Write tuning signals request
-
-message TuningSignalWrite
+// Write tuning signals request - TDS_TUNING_SIGNALS_WRITE
+//
+message TuningWriteCommand
 {
     optional uint64 signalHash = 1 [default = 0];
-    optional float value = 2 [default = 0.0];
+    optional Proto.TuningValue value = 2;
 }
 
 message TuningSignalsWrite
 {
-    optional string clientEquipmentID = 1;
     optional bool autoApply = 2 [default = false];
-    repeated TuningSignalWrite tuningSignalWrite = 3;
+    repeated TuningWriteCommand commands = 3;
 }
 
 message TuningSignalWriteResult
@@ -382,13 +439,11 @@ message TuningSignalsWriteReply
 }
 
 
-// Apply tuning signals request
-
+// Request to applying tuning signals values - TDS_TUNING_SIGNALS_APPLY
+//
 message TuningSignalsApply
 {
-    optional string clientEquipmentID = 1;
 }
-
 
 message TuningSignalsApplyReply
 {

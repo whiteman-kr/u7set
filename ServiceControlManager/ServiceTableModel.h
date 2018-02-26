@@ -6,6 +6,7 @@
 #include "../lib/UdpSocket.h"
 #include "../lib/Service.h"
 #include "../lib/Types.h"
+#include "../lib/Tcp.h"
 
 
 // For QueuedConnection (scan network)
@@ -26,24 +27,17 @@ struct ServiceData
 
 struct HostInfo
 {
-	quint32 ip;
-	ServiceData servicesData[SERVICE_TYPE_COUNT];
+	QVector<ServiceData> servicesData;
+	quint32 ip = 0;
 
-	HostInfo() :
-		ip(0)
-	{
-		for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
-		{
-			servicesData[i].information.set_type(TO_INT(serviceInfo[i].serviceType));
-		}
-	}
+	HostInfo();
 };
 
 class ServiceTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit ServiceTableModel(QObject *parent = 0);
+	explicit ServiceTableModel(const SoftwareInfo& softwareInfo, QObject* parent = 0);
 	~ServiceTableModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
@@ -64,10 +58,11 @@ public slots:
 	void removeHost(int row);
 	void openServiceStatusWidget(const QModelIndex& index);
 
-	void setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo serviceInfo);
+	void setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo sInfo);
 
 private:
 	QVector<HostInfo> m_hostsInfo;
+	SoftwareInfo m_softwareInfo;
 	bool m_freezeUpdate;
 
 	QTimer m_timer;

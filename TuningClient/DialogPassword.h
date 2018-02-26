@@ -15,8 +15,11 @@ class DialogPassword : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogPassword(const UserManager* userManager, bool adminNeeded, QWidget* parent);
+	explicit DialogPassword(const UserManager* userManager, QWidget* parent);
 	~DialogPassword();
+
+	QString userName();
+	QString password();
 
 private:
 
@@ -28,6 +31,8 @@ private:
 	static QString m_lastUser;
 
 	const UserManager* m_userManager = nullptr;
+
+	QString m_password;
 };
 
 #endif // DIALOGPASSWORD_H

@@ -7,13 +7,9 @@
 class TcpArchiveClient : public Tcp::Client
 {
 public:
-	TcpArchiveClient(int channel,
+	TcpArchiveClient(const SoftwareInfo& softwareInfo,
+					 int channel,
 					 const HostAddressPort& serverAddressPort,
-					 E::SoftwareType softwareType,
-					 const QString equipmentID,
-					 int majorVersion,
-					 int minorVersion,
-					 int commitNo,
 					 CircularLoggerShared logger,
 					 AppSignalStatesQueue& signalStatesQueue);
 

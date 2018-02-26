@@ -106,8 +106,8 @@ public:
 	Q_INVOKABLE E::ByteOrder byteOrder() const { return m_signal.byteOrder(); }
 	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_signal.byteOrder()); }
 	Q_INVOKABLE bool enableTuning() const { return m_signal.enableTuning(); }
-	Q_INVOKABLE float tuningDefaultValue() const { return m_signal.tuningDefaultValue(); }
-	Q_INVOKABLE float tuningLowBound() const { return m_signal.tuningLowBound(); }
-	Q_INVOKABLE float tuningHighBound() const { return m_signal.tuningHighBound(); }
+	Q_INVOKABLE float tuningDefaultValue() const { return m_signal.tuningDefaultValue().toFloat(); }
+	Q_INVOKABLE float tuningLowBound() const { return m_signal.tuningLowBound().toFloat(); }
+	Q_INVOKABLE float tuningHighBound() const { return m_signal.tuningHighBound().toFloat(); }
 };
 

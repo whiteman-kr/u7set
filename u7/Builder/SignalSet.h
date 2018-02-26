@@ -37,6 +37,10 @@ namespace Builder
 	private:
 		QString buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal);
 
+		bool checkSignalPropertiesRanges(const Signal& s);
+		bool checkSignalPropertyRanges(const Signal& s, double properyValue, const QString& propertyName);
+		bool checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName);
+
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;

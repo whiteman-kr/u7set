@@ -1,5 +1,7 @@
 #pragma once
 #include <QtCore>
+#include <type_traits>
+#include <cassert>
 
 
 class QueueBase : public QObject
@@ -84,7 +86,12 @@ class Queue : public QueueBase
 {
 public:
 	Queue(QObject* parent, int queueSize) :
-		QueueBase(parent, sizeof(TYPE), queueSize) 	{}
+		QueueBase(parent, sizeof(TYPE), queueSize)
+	{
+		// checking, that memcpy can be used to copy queue items of type TYPE
+		//
+		assert(std::is_trivially_copyable<TYPE>::value == true);
+	}
 
 	Queue(int queueSize) :
 		QueueBase(nullptr, sizeof(TYPE), queueSize) 	{}
@@ -94,4 +101,137 @@ public:
 
 	TYPE* beginPush() { return reinterpret_cast<TYPE*>(QueueBase::beginPush()); }
 };
+
+
+class QueueSignals : public QObject
+{
+	Q_OBJECT
+
+signals:
+	void notEmpty();
+	void full();
+	void empty();
+};
+
+
+template <typename TYPE>
+class QueueOnList : public QueueSignals
+{
+public:
+	QueueOnList(int maxSize, bool enableOverwrite);
+
+	bool push(const TYPE& item);
+	bool pop(TYPE* item);
+
+	bool isEmpty();
+
+	int size();
+
+private:
+	int m_maxSize = 0;
+	bool m_enableOverwrite = false;
+
+	QMutex m_mutex;
+
+	QList<TYPE>	m_list;
+};
+
+template <typename TYPE>
+QueueOnList<TYPE>::QueueOnList(int maxSize, bool enableOverwrite) :
+	m_maxSize(maxSize),
+	m_enableOverwrite(enableOverwrite)
+{
+	assert(m_maxSize > 0);
+}
+
+template <typename TYPE>
+bool QueueOnList<TYPE>::push(const TYPE& item)
+{
+	bool result = true;
+
+	m_mutex.lock();
+
+	if (m_list.size() == m_maxSize)
+	{
+		if (m_enableOverwrite == true)
+		{
+			m_list.removeFirst();
+			m_list.append(item);
+		}
+		else
+		{
+			result = false;
+		}
+
+		emit notEmpty();
+		emit full();
+	}
+	else
+	{
+		m_list.append(item);
+
+		emit notEmpty();
+
+		if (m_list.size() == m_maxSize)
+		{
+			emit full();
+		}
+	}
+
+	m_mutex.unlock();
+
+	return result;
+}
+
+
+template <typename TYPE>
+bool QueueOnList<TYPE>::pop(TYPE* item)
+{
+	if (item == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool result = true;
+
+	m_mutex.lock();
+
+	if (m_list.size() == 0)
+	{
+		result = false;
+		emit empty();
+	}
+	else
+	{
+		*item = m_list.takeFirst();
+
+		if (m_list.size() == 0)
+		{
+			emit empty();
+		}
+		else
+		{
+			emit notEmpty();
+		}
+	}
+
+	m_mutex.unlock();
+
+	return result;
+}
+
+template <typename TYPE>
+bool QueueOnList<TYPE>::isEmpty()
+{
+	m_mutex.lock();
+
+	bool empty = m_list.size() == 0;
+
+	m_mutex.unlock();
+
+	return empty;
+}
+
+
 

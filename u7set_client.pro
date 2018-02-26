@@ -11,6 +11,7 @@ SUBDIRS += qtpropertybrowser \
 	u7 \
 	Monitor \
 	mconf \
-    TuningClient
+	TuningClient
+
 
 

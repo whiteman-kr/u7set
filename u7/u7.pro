@@ -184,7 +184,6 @@ SOURCES +=\
     ../lib/Tuning/TuningModel.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
-    ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
     ../lib/CsvFile.cpp \
     DialogBusEditor.cpp \
@@ -200,20 +199,23 @@ SOURCES +=\
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
     CreateSignalDialog.cpp \
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../Proto/network.pb.cc \
     LogicModuleSet.cpp \
     ../lib/LmDescription.cpp \
     Builder/MemWriteMap.cpp \
     SimulatorTabPage.cpp \
     Simulator/SimulatorWidget.cpp \
     Simulator/SimulatorMemoryWidget.cpp \
-    Builder/ConfigurationServiceCfgGenerator.cpp \
     Simulator/SimulatorOutputWidget.cpp \
     Simulator/SimulatorProjectWidget.cpp \
     Simulator/SimulatorSelectBuildDialog.cpp \
     Simulator/SimulatorBasePage.cpp \
     Simulator/SimulatorControlPage.cpp \
     Simulator/SimIdeSimulator.cpp \
-    Simulator/SimulatorSchemaPage.cpp
+    Simulator/SimulatorSchemaPage.cpp \
+    Builder/ConfigurationServiceCfgGenerator.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -335,7 +337,6 @@ HEADERS  += \
     ../lib/Tuning/TuningModel.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
-    ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
@@ -351,6 +352,8 @@ HEADERS  += \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
     CreateSignalDialog.h \
+    ../lib/Tuning/TuningSignalManager.h \
+    ../Proto/network.pb.h \
     LogicModuleSet.h \
     ../lib/LmDescription.h \
     Builder/MemWriteMap.h \
@@ -364,7 +367,8 @@ HEADERS  += \
     Simulator/SimulatorBasePage.h \
     Simulator/SimulatorControlPage.h \
     Simulator/SimIdeSimulator.h \
-    Simulator/SimulatorSchemaPage.h
+    Simulator/SimulatorSchemaPage.h \
+    ../lib/TuningValue.h
 
 FORMS    += \
     CreateProjectDialog.ui \

@@ -1,4 +1,5 @@
 #include "TcpAppDataServer.h"
+#include "AppDataService.h"
 
 
 // -------------------------------------------------------------------------------
@@ -7,7 +8,8 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer()
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo) :
+	Tcp::Server(softwareInfo)
 {
 
 }
@@ -20,11 +22,42 @@ TcpAppDataServer::~TcpAppDataServer()
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	TcpAppDataServer* newServer =  new TcpAppDataServer();
+	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo());
 
 	newServer->setThread(m_thread);
 
 	return newServer;
+}
+
+void TcpAppDataServer::onGetState()
+{
+	if (m_thread == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	quint32 ip = 0;
+	quint16 port = 0;
+	bool connected = m_thread->isConnectedToConfigurationService(ip, port);
+
+	m_getAppDataServiceState.set_cfgserviceisconnected(connected);
+	if (connected)
+	{
+		m_getAppDataServiceState.set_cfgserviceip(ip);
+		m_getAppDataServiceState.set_cfgserviceport(port);
+	}
+
+	connected = m_thread->isConnectedToArchiveService(ip, port);
+
+	m_getAppDataServiceState.set_archiveserviceisconnected(connected);
+	if (connected)
+	{
+		m_getAppDataServiceState.set_archiveserviceip(ip);
+		m_getAppDataServiceState.set_archiveserviceport(port);
+	}
+
+	sendReply(m_getAppDataServiceState);
 }
 
 
@@ -59,6 +92,14 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 {
 	switch(requestID)
 	{
+	case ADS_GET_STATE:
+		onGetState();
+		break;
+
+	case RQID_GET_CLIENT_LIST:
+		sendClientList();
+		break;
+
 	case ADS_GET_APP_SIGNAL_LIST_START:
 		onGetAppSignalListStartRequest();
 		break;
@@ -89,6 +130,10 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 
 	case ADS_GET_UNITS:
 		onGetUnitsRequest();
+		break;
+
+	case ADS_GET_SETTINGS:
+		onGetSettings();
 		break;
 
 	default:
@@ -370,6 +415,16 @@ void TcpAppDataServer::onGetUnitsRequest()
 }
 
 
+void TcpAppDataServer::onGetSettings()
+{
+	m_getServiceSettings.set_equipmentid(m_thread->equipmentID().toStdString());
+	m_getServiceSettings.set_configip1(m_thread->cfgServiceIP1Str().toStdString());
+	m_getServiceSettings.set_configip2(m_thread->cfgServiceIP2Str().toStdString());
+
+	sendReply(m_getServiceSettings);
+}
+
+
 // -------------------------------------------------------------------------------
 //
 // TcpAppDataServerThread class implementation
@@ -381,11 +436,13 @@ TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddr
 												const AppDataSourcesIP& appDataSources,
 												const AppSignals& appSignals,
 												const AppSignalStates& appSignalStates,
+												const AppDataServiceWorker &appDataServiceWorker,
 												std::shared_ptr<CircularLogger> logger) :
 	Tcp::ServerThread(listenAddressPort, server, logger),
 	m_appDataSources(appDataSources),
 	m_appSignals(appSignals),
-	m_appSignalStates(appSignalStates)
+	m_appSignalStates(appSignalStates),
+	m_appDataServiceWorker(appDataServiceWorker)
 {
 	server->setThread(this);
 	buildAppSignalIDs();
@@ -412,4 +469,29 @@ void TcpAppDataServerThread::buildAppSignalIDs()
 bool TcpAppDataServerThread::getAppSignalState(Hash hash, AppSignalState& state)
 {
 	return m_appSignalStates.getCurrentState(hash, state);
+}
+
+bool TcpAppDataServerThread::isConnectedToConfigurationService(quint32& ip, quint16& port)
+{
+	return m_appDataServiceWorker.isConnectedToConfigurationService(ip, port);
+}
+
+bool TcpAppDataServerThread::isConnectedToArchiveService(quint32& ip, quint16& port)
+{
+	return m_appDataServiceWorker.isConnectedToArchiveService(ip, port);
+}
+
+QString TcpAppDataServerThread::equipmentID() const
+{
+	return m_appDataServiceWorker.equipmentID();
+}
+
+QString TcpAppDataServerThread::cfgServiceIP1Str() const
+{
+	return m_appDataServiceWorker.cfgServiceIP1Str();
+}
+
+QString TcpAppDataServerThread::cfgServiceIP2Str() const
+{
+	return m_appDataServiceWorker.cfgServiceIP2Str();
 }

@@ -75,7 +75,8 @@ SOURCES += \
     CfgServiceMain.cpp \
     ../lib/XmlHelper.cpp \
     CfgChecker.cpp \
-    CfgControlServer.cpp
+    CfgControlServer.cpp \
+    ../lib/SoftwareInfo.cpp
 
 HEADERS += \
     version.h \
@@ -97,7 +98,8 @@ HEADERS += \
     ../lib/XmlHelper.h \
     CfgChecker.h \
     CfgControlServer.h \
-    ../lib/Types.h
+    ../lib/Types.h \
+    ../lib/SoftwareInfo.h
 
 include(../qtservice/src/qtservice.pri)
 

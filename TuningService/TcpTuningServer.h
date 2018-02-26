@@ -34,11 +34,15 @@ namespace Tuning
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
+		virtual void onConnectedSoftwareInfoChanged() override;
+
 		void onGetTuningSourcesInfoRequest(const char* requestData, quint32 requestDataSize);
 		void onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize);
 		void onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize);
 		void onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize);
 		void onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize);
+		void onChangeControlledTuningSourceRequest(const char *requestData, quint32 requestDataSize);
+		void onGetTuningServiceSettings(const char *requestData, quint32 requestDataSize);
 
 	private:
 		static const char* SCM_CLIENT_ID;
@@ -61,6 +65,11 @@ namespace Tuning
 
 		Network::TuningSignalsApply m_tuningSignalsApplyRequest;
 		Network::TuningSignalsApplyReply m_tuningSignalsApplyReply;
+
+		Network::ChangeConrolledTuningSourceRequest m_changeControlledTuningSourceRequest;
+		Network::ChangeConrolledTuningSourceReply m_changeControlledTuningSourceReply;
+
+		Network::ServiceSettings m_getServiceSettingsReply;
 	};
 
 

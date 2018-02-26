@@ -69,10 +69,10 @@ namespace TuningIPEN
 		void onSetSignalState(QString appSignalID, double value);
 
 	public:
-		TuningIPENServiceWorker(const QString& serviceName,
+		TuningIPENServiceWorker(const SoftwareInfo& softwareInfo,
+								const QString& serviceName,
 								int& argc,
 								char** argv,
-								const VersionInfo& versionInfo,
 								std::shared_ptr<CircularLogger> logger);
 		virtual ~TuningIPENServiceWorker();
 

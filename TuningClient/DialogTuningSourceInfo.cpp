@@ -3,21 +3,23 @@
 #include "MainWindow.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(TuningSignalManager* tuningSignalManager, QWidget* parent, quint64 tuningSourceId) :
+DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, Hash tuningSourceEquipmentId) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_tuningSourceId(tuningSourceId),
+	m_tuningSourceEquipmentId(tuningSourceEquipmentId),
 	ui(new Ui::DialogTuningSourceInfo),
-	m_tuningSignalManager(tuningSignalManager)
+	m_tcpClient(tcpClient)
 {
-	assert(tuningSignalManager);
+	assert(tcpClient);
+
+	setAttribute(Qt::WA_DeleteOnClose);
 
 	ui->setupUi(this);
 
 	TuningSource ts;
 
-	if (m_tuningSignalManager->tuningSourceInfo(m_tuningSourceId, &ts) == true)
+	if (m_tcpClient->tuningSourceInfo(m_tuningSourceEquipmentId, &ts) == true)
 	{
-		setWindowTitle(ts.m_info.equipmentid().c_str());
+		setWindowTitle(ts.info.equipmentid().c_str());
 	}
 	else
 	{
@@ -59,6 +61,8 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningSignalManager* tuningSignal
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "requestCount"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "replyCount"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "commandQueueSize"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "controlIsActive"));
+	stateItem->addChild(new QTreeWidgetItem(QStringList() << "setSOR"));
 
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errUntimelyReplay"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errSent"));
@@ -152,7 +156,7 @@ void DialogTuningSourceInfo::updateData()
 {
 	TuningSource ts;
 
-	if (m_tuningSignalManager->tuningSourceInfo(m_tuningSourceId, &ts) == false)
+	if (m_tcpClient->tuningSourceInfo(m_tuningSourceEquipmentId, &ts) == false)
 	{
 		return;
 	}
@@ -168,24 +172,24 @@ void DialogTuningSourceInfo::updateData()
 
 	int c = 0;
 
-	item->child(c++)->setText(1, QString::number(ts.m_info.id()));
-	item->child(c++)->setText(1, ts.m_info.equipmentid().c_str());
-	item->child(c++)->setText(1, ts.m_info.caption().c_str());
-	item->child(c++)->setText(1, QString::number(ts.m_info.datatype()));
-	item->child(c++)->setText(1, ts.m_info.ip().c_str());
-	item->child(c++)->setText(1, QString::number(ts.m_info.port()));
+	item->child(c++)->setText(1, QString::number(ts.info.id()));
+	item->child(c++)->setText(1, ts.info.equipmentid().c_str());
+	item->child(c++)->setText(1, ts.info.caption().c_str());
+	item->child(c++)->setText(1, QString::number(ts.info.datatype()));
+	item->child(c++)->setText(1, ts.info.ip().c_str());
+	item->child(c++)->setText(1, QString::number(ts.info.port()));
 
-	QChar chChannel = 'A' + ts.m_info.channel();
+	QChar chChannel = 'A' + ts.info.channel();
 
 	item->child(c++)->setText(1, chChannel);
-	item->child(c++)->setText(1, QString::number(ts.m_info.subsystemid()));
-	item->child(c++)->setText(1, ts.m_info.subsystem().c_str());
+	item->child(c++)->setText(1, QString::number(ts.info.subsystemid()));
+	item->child(c++)->setText(1, ts.info.subsystem().c_str());
 
-	item->child(c++)->setText(1, QString::number(ts.m_info.lmnumber()));
-	item->child(c++)->setText(1, QString::number(ts.m_info.lmmoduletype()));
-	item->child(c++)->setText(1, ts.m_info.lmadapterid().c_str());
-	item->child(c++)->setText(1, QString::number(ts.m_info.lmdataenable()));
-	item->child(c++)->setText(1, QString::number(ts.m_info.lmdataid()));
+	item->child(c++)->setText(1, QString::number(ts.info.lmnumber()));
+	item->child(c++)->setText(1, QString::number(ts.info.lmmoduletype()));
+	item->child(c++)->setText(1, ts.info.lmadapterid().c_str());
+	item->child(c++)->setText(1, QString::number(ts.info.lmdataenable()));
+	item->child(c++)->setText(1, QString::number(ts.info.lmdataid()));
 
 	// state
 
@@ -198,18 +202,20 @@ void DialogTuningSourceInfo::updateData()
 
 	c = 0;
 
-	item->child(c++)->setText(1, ts.m_state.isreply() ? "Yes" : "No");
-	item->child(c++)->setText(1, QString::number(ts.m_state.requestcount()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.replycount()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.commandqueuesize()));
+	item->child(c++)->setText(1, ts.state.isreply() ? "Yes" : "No");
+	item->child(c++)->setText(1, QString::number(ts.state.requestcount()));
+	item->child(c++)->setText(1, QString::number(ts.state.replycount()));
+	item->child(c++)->setText(1, QString::number(ts.state.commandqueuesize()));
+	item->child(c++)->setText(1, ts.state.controlisactive() ? "Yes" : "No");
+	item->child(c++)->setText(1, ts.state.setsor() ? "Yes" : "No");
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.erruntimelyreplay()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errsent()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errpartialsent()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errreplysize()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errnoreply()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.erranaloglowboundcheck()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.erranaloghighboundcheck()));
+	item->child(c++)->setText(1, QString::number(ts.state.erruntimelyreplay()));
+	item->child(c++)->setText(1, QString::number(ts.state.errsent()));
+	item->child(c++)->setText(1, QString::number(ts.state.errpartialsent()));
+	item->child(c++)->setText(1, QString::number(ts.state.errreplysize()));
+	item->child(c++)->setText(1, QString::number(ts.state.errnoreply()));
+	item->child(c++)->setText(1, QString::number(ts.state.erranaloglowboundcheck()));
+	item->child(c++)->setText(1, QString::number(ts.state.erranaloghighboundcheck()));
 
 	// RupFrameHeader
 
@@ -222,15 +228,15 @@ void DialogTuningSourceInfo::updateData()
 
 	c = 0;
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.errrupprotocolversion()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errrupframesize()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errrupnontuningdata()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errrupmoduletype()));
+	item->child(c++)->setText(1, QString::number(ts.state.errrupprotocolversion()));
+	item->child(c++)->setText(1, QString::number(ts.state.errrupframesize()));
+	item->child(c++)->setText(1, QString::number(ts.state.errrupnontuningdata()));
+	item->child(c++)->setText(1, QString::number(ts.state.errrupmoduletype()));
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.errrupframesquantity()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errrupframenumber()));
+	item->child(c++)->setText(1, QString::number(ts.state.errrupframesquantity()));
+	item->child(c++)->setText(1, QString::number(ts.state.errrupframenumber()));
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.errrupcrc()));
+	item->child(c++)->setText(1, QString::number(ts.state.errrupcrc()));
 
 	// FotipHeader
 
@@ -243,15 +249,15 @@ void DialogTuningSourceInfo::updateData()
 
 	c = 0;
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotipprotocolversion()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotipuniqueid()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotiplmnumber()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotipsubsystemcode()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotipprotocolversion()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotipuniqueid()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotiplmnumber()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotipsubsystemcode()));
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotipoperationcode()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotipframesize()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotipromsize()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.errfotipromframesize()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotipoperationcode()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotipframesize()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotipromsize()));
+	item->child(c++)->setText(1, QString::number(ts.state.errfotipromframesize()));
 
 	// FotipFlags
 
@@ -265,23 +271,23 @@ void DialogTuningSourceInfo::updateData()
 	c = 0;
 
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagboundschecksuccess()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagwritesuccess()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagdatatypeerr()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagopcodeerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagboundschecksuccess()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagwritesuccess()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagdatatypeerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagopcodeerr()));
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagstartaddrerr()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagromsizeerr()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagromframesizeerr()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagframesizeerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagstartaddrerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagromsizeerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagromframesizeerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagframesizeerr()));
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagprotocolversionerr()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagsubsystemkeyerr()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflaguniueiderr()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagoffseterr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagprotocolversionerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagsubsystemkeyerr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflaguniueiderr()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagoffseterr()));
 
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagapplysuccess()));
-	item->child(c++)->setText(1, QString::number(ts.m_state.fotipflagsetsor()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagapplysuccess()));
+	item->child(c++)->setText(1, QString::number(ts.state.fotipflagsetsor()));
 
 }
 

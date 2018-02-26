@@ -986,6 +986,12 @@ message Property
 
 message Address16
 {
+    // Changes in Address16 fields numbering are FORBIDDEN !!!
+    // Only new numbers adding is allowed!
+    //
+    // This protobuf messages already stored in database.
+    //
+
     required int32 offset = 1 [default = -1];
     required int32 bit = 2 [default = -1];
 }
@@ -999,6 +1005,39 @@ message Unit
 message UnitSet
 {
     repeated Unit unit = 1;
+}
+
+message TuningValue
+{
+    optional int32 type = 1;					// enum TuningValueType values
+    optional int64 intValue = 2 [default = 0];
+    optional double doubleValue = 3  [default = 0.0];
+}
+
+
+message AppSignalDbField
+{
+    optional int32 ID = 1 [default = -1];
+    optional int32 signalGroupID = 2 [default = -1];
+    optional int32 signalInstanceID = 3 [default = -1];
+    optional int32 changesetID = 4 [default = -1];
+    optional bool checkedOut = 5 [default = false];
+    optional int32 userID = 6 [default = -1];
+    optional int64 created = 7 [default = 0];
+    optional bool deleted = 8 [default = false];
+    optional int64 instanceCreated = 9 [default = 0];
+    optional int32 instanceAction = 10 [default = 0];		// VcsItemActionType::Unknown
+}
+
+message AppSignalCalculatedParam
+{
+    optional uint64 hash = 1 [default = 0];
+    optional Address16 ioBufAddr = 2;
+    optional Address16 tuningAddr = 3;
+    optional Address16 ualAddr = 4;
+    optional Address16 regBufAddr = 5;
+    optional Address16 regValueAddr = 6;
+    optional Address16 regValidityAddr = 7;
 }
 
 message AppSignal
@@ -1046,40 +1085,28 @@ message AppSignal
     // Tuning signal properties
 
     optional bool enableTuning = 71 [default = false];
-    optional float tuningDefaultValue = 72 [default = 0];
-    optional float tuningLowBound = 73 [default = 0];
-    optional float tuningHighBound = 74 [default = 0];
+
+    optional TuningValue tuningDefaultValue = 72;
+    optional TuningValue tuningLowBound = 73;
+    optional TuningValue tuningHighBound = 74;
 
     // Signal properties for MATS
 
     optional bool acquire = 81 [default = false];
-    optional int32 decimalPlaces = 82 [default = 2];
-    optional double coarseAperture = 83 [default = 1];
-    optional double fineAperture = 84 [default = 0.5];
-    optional bool adaptiveAperture = 85 [default = false];
+    optional bool archive = 82 [default = false];
+
+    optional int32 decimalPlaces = 83 [default = 2];
+    optional double coarseAperture = 84 [default = 1];
+    optional double fineAperture = 85 [default = 0.5];
+    optional bool adaptiveAperture = 86 [default = false];
 
     // Signal fields from database
 
-    optional int32 ID = 101 [default = -1];
-    optional int32 signalGroupID = 102 [default = -1];
-    optional int32 signalInstanceID = 103 [default = -1];
-    optional int32 changesetID = 104 [default = -1];
-    optional bool checkedOut = 105 [default = false];
-    optional int32 userID = 106 [default = -1];
-    optional int64 created = 107 [default = 0];
-    optional bool deleted = 108 [default = false];
-    optional int64 instanceCreated = 109 [default = 0];
-    optional int32 instanceAction = 110 [default = 0];			// VcsItemActionType::Unknown
+    optional AppSignalDbField dbField = 120;
 
     // Signal properties calculated in compile-time
 
-    optional uint64 hash = 116 [default = 0];
-    optional Address16 ioBufAddr = 117;
-    optional Address16 tuningAddr = 118;
-    optional Address16 ualAddr = 119;
-    optional Address16 regBufAddr = 120;
-    optional Address16 regValueAddr = 121;
-    optional Address16 regValidityAddr = 122;
+    optional AppSignalCalculatedParam calcParam = 121;
 }
 
 message AppSignalSet
@@ -1100,56 +1127,6 @@ message AppSignalState
     optional sfixed64 plantTime = 6 [default = 0];
     optional sfixed64 archiveId = 7 [default = -1];
 }
-
-/*
-message AppSignalParam
-{
-    //optional int32 reserved = 1 [default = 0];		// reserved for future use (can be version)
-	optional uint64 hash = 2 [default = 0];
-	optional string appSignalId = 3 [default = ""];
-	optional string customSignalId = 4 [default = ""];
-	optional string caption = 5 [default = ""];
-	optional string equipmentId = 6 [default = ""];
-
-    optional int32 channel = 10 [default = 0];				// E::Channel:			A = 0, B = 1, C = 2, D = 3
-	optional int32 inOutType = 11 [default = 2];			// E::SignalInOutType:	Input = 0, Output = 1, Internal = 2
-	optional int32 signalType = 12 [default = 0];			// E::SignalType:		Analog = 0, Discrete = 1, Bus = 2
-	optional int32 analogSignalFormat = 13 [default = 2];	// E::AnalogAppSignalFormat:	SignedInt32 = 1, Float32 = 2
-	optional int32 byteOrder = 14 [default = 2];			// E::ByteOrder:		LittleEndian = 0, BigEndian = 1
-
-    optional int32 unitId = 15 [default = 1];				// 1 = No unit
-	optional string unit = 16 [default = ""];				//
-
-    optional double lowValidRange = 20 [default = 0];
-	optional double highValidRange = 21 [default = 0];
-	optional double lowEngeneeringUnits = 22 [default = 0];
-	optional double highEngeneeringUnits = 23 [default = 0];
-
-    optional double inputLowLimit = 30 [default = 0];			// low electric value for input range
-	optional double inputHighLimit = 31 [default = 0];			// high electric value for input range
-	optional int32 inputUnitId = 32 [default = 1];				// electric unit for input range E::InputUnit, (NoInputUnit = 1, mA = 15, mV = 11, Ohm = 20, V = 12)
-	optional int32 inputSensorType = 33 [default = 0];			// electric sensor type for input range E::SensorType (was created for m_inputUnitID)
-
-    optional double outputLowLimit = 40 [default = 0];			// low physical value for output range
-	optional double outputHighLimit = 41 [default = 0];			// high physical value for output range
-	optional int32 outputUnitId = 42 [default = 1];				// physical unit for output range (kg, mm, Pa ...)
-	optional int32 outputMode = 43 [default = 0];				// output electric range E::OutputMode (Plus0_Plus5_V = 0, Plus4_Plus20_mA = 1, Minus10_Plus10_V = 2, Plus0_Plus5_mA = 3,
-	optional int32 outputSensorType = 44 [default = 0];			// electric sensor type for output range E::SensorType (NoSensorType = 0)
-
-    optional int32 precision = 50 [default = 2];
-	optional double aperture = 51 [default = 1];
-	optional double filteringTime = 52 [default = 0.005];
-	optional double spreadTolerance = 53 [default = 2];
-	optional bool enableTuning = 54 [default = false];
-	optional double tuningDefaultValue = 55 [default = 0];
-}
-
-message AppSignalParamSet
-{                       
-    repeated AppSignalParam items = 1;
-}
-
-*/
 
 message Connection
 {

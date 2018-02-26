@@ -377,10 +377,12 @@ void TuningSignalBase::setState(const Network::TuningSignalState& state)
 			if (index >= 0 && index < m_signalList.count())
 			{
 				Metrology::Signal* pSignal = m_signalList[index];
+
 				if (pSignal != nullptr)
 				{
 					pSignal->state().setValid(state.valid());
-					pSignal->state().setValue(state.value());
+
+					pSignal->state().setValue(TuningSignalState(state).valueToDouble());
 				}
 			}
 		}

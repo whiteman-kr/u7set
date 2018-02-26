@@ -124,8 +124,8 @@ public:
 private:
     TuningFilterEditor* m_tuningFilterEditor = nullptr;
 
-    TuningSignalStorage m_signalStorage;
-    TuningFilterStorage m_filterStorage;
+	TuningSignalManager m_signals;
+	TuningFilterStorage m_filters;
 
 	DbController* m_dbController = nullptr;
 

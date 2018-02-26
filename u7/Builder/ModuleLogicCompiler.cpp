@@ -147,7 +147,7 @@ namespace Builder
 		{
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
-//			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
+			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
 			PROC_TO_CALL(ModuleLogicCompiler::initAfbs),
 			PROC_TO_CALL(ModuleLogicCompiler::startAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
@@ -256,7 +256,7 @@ namespace Builder
 		m_lmIDRPhaseTime = m_lmDescription->logicUnit().m_idrPhaseTime;
 		m_lmCycleDuration = m_lmDescription->logicUnit().m_cycleDuration;
 
-		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
+		m_lmAppLogicFramePayload = m_lmDescription->flashMemory().m_appLogicFramePayload;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
@@ -2137,10 +2137,6 @@ namespace Builder
 		assert(m_tuningData == nullptr);
 		assert(m_lmDescription);
 
-		int tuningMemoryStartAddrW = m_lmDescription->memory().m_tuningDataOffset;
-		int tuningFrameSizeBytes = m_lmDescription->flashMemory().m_tuningFrameSize;
-		int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
-
 		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
 		// uncomment next 3 lines:
 		//
@@ -2151,9 +2147,14 @@ namespace Builder
 		// and comment 3 lines below:
 		//
 		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
-												tuningMemoryStartAddrW,
-												tuningFrameSizeBytes,
-												tuningFrameCount);
+																m_lmDescription->flashMemory().m_tuningFrameCount,
+																m_lmDescription->flashMemory().m_tuningFramePayload,
+																m_lmDescription->flashMemory().m_tuningFrameSize,
+																m_lmDescription->memory().m_tuningDataOffset,
+																m_lmDescription->memory().m_tuningDataSize,
+																m_lmDescription->memory().m_tuningDataFrameCount,
+																m_lmDescription->memory().m_tuningDataFramePayload,
+																m_lmDescription->memory().m_tuningDataFrameSize);
 
 		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
 		//
@@ -2164,6 +2165,8 @@ namespace Builder
 
 		if (result == true)
 		{
+			int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
+
 			if (tuningData->usedFramesCount() > tuningFrameCount)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
@@ -2200,6 +2203,7 @@ namespace Builder
 		result &= createAcquiredDiscreteTuningSignalsList();
 		result &= createAcquiredDiscreteConstSignalsList();
 
+		result &= createNonAcquiredDiscreteInputSignalsList();
 		result &= createNonAcquiredDiscreteStrictOutputSignalsList();
 		result &= createNonAcquiredDiscreteInternalSignalsList();
 
@@ -2241,6 +2245,7 @@ namespace Builder
 		sortSignalList(m_acquiredDiscreteConstSignals);
 		// m_acquiredDiscreteTuningSignals						// Not need to sort!
 
+		sortSignalList(m_nonAcquiredDiscreteInputSignals);
 		sortSignalList(m_nonAcquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
 
@@ -2443,6 +2448,35 @@ namespace Builder
 
 		return true;
 	}
+
+	bool ModuleLogicCompiler::createNonAcquiredDiscreteInputSignalsList()
+	{
+		m_nonAcquiredDiscreteInputSignals.clear();
+
+		//	list include signals that:
+		//
+		//  - const
+		//	- acquired
+		//	+ discrete
+		//	+ input
+		//	+ no matter used in UAL or not
+
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isConst() == false &&
+				s->isAcquired() == false &&
+				s->isDiscrete() == true &&
+				s->isInput() == true)
+			{
+				m_nonAcquiredDiscreteInputSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
 
 	bool ModuleLogicCompiler::createNonAcquiredDiscreteStrictOutputSignalsList()
 	{
@@ -8922,7 +8956,7 @@ namespace Builder
 														   m_lmDescription->flashMemory().m_appLogicUartId,
 														   m_lm->equipmentIdTemplate(),
 														   m_lmNumber,
-														   m_lmAppLogicFrameSize,
+														   m_lmAppLogicFramePayload,
 														   m_lmAppLogicFrameCount,
 														   uniqueID,
 														   m_lmDescription->lmDescriptionFile(m_lm),
@@ -8969,7 +9003,7 @@ namespace Builder
 			result = false;
 		}
 
-		result &= writeTuningInfoFile(m_lmSubsystemID, m_lmNumber);
+		result &= writeTuningInfoFile();
 
 		//
 		// writeLMCodeTestFile();
@@ -9055,7 +9089,7 @@ namespace Builder
 											m_log);
 	}
 
-	bool ModuleLogicCompiler::writeTuningInfoFile(const QString& subsystemID, int lmNumber)
+	bool ModuleLogicCompiler::writeTuningInfoFile()
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -9063,12 +9097,12 @@ namespace Builder
 		}
 
 		QStringList file;
-		QString line = QString("------------------------------------------------------------------------------------------");
+		QString line = QString("----------------------------------------------------------------------------------------------------------");
 
 		file.append(QString("Tuning information file: %1\n").arg(m_lm->equipmentIdTemplate()));
 		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentIdTemplate()));
 		file.append(QString("LM caption: %1").arg(m_lm->caption()));
-		file.append(QString("LM number: %1\n").arg(lmNumber));
+		file.append(QString("LM number: %1\n").arg(m_lmNumber));
 		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
 
 		QString s;
@@ -9083,7 +9117,7 @@ namespace Builder
 		{
 			file.append(QString("\nAnalog signals, type Float (32 bits)"));
 			file.append(line);
-			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : analogFloatSignals)
@@ -9096,13 +9130,15 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%-24s\t%f\t%f\t%f",
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%f\t%f\t%f",
+								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
+								signal->tuningAddr().bit(),
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
-								signal->tuningDefaultValue(),
-								signal->lowEngeneeringUnits(),
-								signal->highEngeneeringUnits());
+								signal->tuningDefaultValue().toFloat(),
+								signal->tuningLowBound().floatValue(),
+								signal->tuningHighBound().floatValue());
 				file.append(str);
 			}
 		}
@@ -9113,7 +9149,7 @@ namespace Builder
 		{
 			file.append(QString("\nAnalog signals, type Signed Integer (32 bits)"));
 			file.append(line);
-			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : analogIntSignals)
@@ -9126,13 +9162,15 @@ namespace Builder
 
 				QString str;
 
-				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
+								signal->tuningAddr().bit(),
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
-								static_cast<qint32>(signal->tuningDefaultValue()),
-								static_cast<qint32>(signal->lowEngeneeringUnits()),
-								static_cast<qint32>(signal->highEngeneeringUnits()));
+								signal->tuningDefaultValue().int32Value(),
+								signal->tuningLowBound().int32Value(),
+								signal->tuningHighBound().int32Value());
 				file.append(str);
 			}
 		}
@@ -9143,7 +9181,7 @@ namespace Builder
 		{
 			file.append(QString("\nDiscrete signals (1 bit)"));
 			file.append(line);
-			file.append(QString("Address\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
 			for(Signal* signal : discreteSignals)
@@ -9156,13 +9194,13 @@ namespace Builder
 
 				QString str;
 
-				int defaultValue = (static_cast<int>(signal->tuningDefaultValue()) == 0) ? 0 : 1;
-
-				str.sprintf("%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
+								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
+								signal->tuningAddr().bit(),
 								signal->tuningAddr().offset(),
 								signal->tuningAddr().bit(),
 								C_STR(signal->appSignalID()),
-								defaultValue,
+								signal->tuningDefaultValue().discreteValue(),
 								0,
 								1);
 				file.append(str);
@@ -9230,8 +9268,8 @@ namespace Builder
 			}
 		}
 */
-		bool result = m_resultWriter->addFile(subsystemID, QString("%1-%2.tun").
-										 arg(subsystemID.toLower()).arg(lmNumber), file);
+		bool result = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.tun").
+										 arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
 		return result;
 	}
 
@@ -9869,6 +9907,7 @@ namespace Builder
 		result &= writeSignalList(m_acquiredDiscreteConstSignals, "acquiredDiscreteConst");
 		result &= writeSignalList(m_acquiredDiscreteOptoAndBusChildSignals, "acquiredDiscreteOptoAndBusChild");
 
+		result &= writeSignalList(m_nonAcquiredDiscreteInputSignals, "nonAcquiredDiscreteInput");
 		result &= writeSignalList(m_nonAcquiredDiscreteStrictOutputSignals, "nonAcquiredDiscreteStrictOutput");
 		result &= writeSignalList(m_nonAcquiredDiscreteInternalSignals, "nonAcquiredDiscreteInternal");
 		result &= writeSignalList(m_nonAcquiredDiscreteOptoSignals, "nonAcquiredDiscreteOpto");
@@ -9894,11 +9933,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeSignalList(const QVector<UalSignal*>& signalList, QString listName) const
 	{
-		if (signalList.isEmpty() == true)
-		{
-			return true;
-		}
-
 		QStringList strList;
 
 		bool result = true;

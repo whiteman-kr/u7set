@@ -99,6 +99,9 @@ class Property;
 class Address16;
 class Unit;
 class UnitSet;
+class TuningValue;
+class AppSignalDbField;
+class AppSignalCalculatedParam;
 class AppSignal;
 class AppSignalSet;
 class AppSignalState;
@@ -8536,6 +8539,434 @@ class UnitSet : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class TuningValue : public ::google::protobuf::Message {
+ public:
+  TuningValue();
+  virtual ~TuningValue();
+
+  TuningValue(const TuningValue& from);
+
+  inline TuningValue& operator=(const TuningValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningValue& default_instance();
+
+  void Swap(TuningValue* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningValue* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningValue& from);
+  void MergeFrom(const TuningValue& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional int64 intValue = 2 [default = 0];
+  inline bool has_intvalue() const;
+  inline void clear_intvalue();
+  static const int kIntValueFieldNumber = 2;
+  inline ::google::protobuf::int64 intvalue() const;
+  inline void set_intvalue(::google::protobuf::int64 value);
+
+  // optional double doubleValue = 3 [default = 0];
+  inline bool has_doublevalue() const;
+  inline void clear_doublevalue();
+  static const int kDoubleValueFieldNumber = 3;
+  inline double doublevalue() const;
+  inline void set_doublevalue(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.TuningValue)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_intvalue();
+  inline void clear_has_intvalue();
+  inline void set_has_doublevalue();
+  inline void clear_has_doublevalue();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int64 intvalue_;
+  double doublevalue_;
+  ::google::protobuf::int32 type_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningValue* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class AppSignalDbField : public ::google::protobuf::Message {
+ public:
+  AppSignalDbField();
+  virtual ~AppSignalDbField();
+
+  AppSignalDbField(const AppSignalDbField& from);
+
+  inline AppSignalDbField& operator=(const AppSignalDbField& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AppSignalDbField& default_instance();
+
+  void Swap(AppSignalDbField* other);
+
+  // implements Message ----------------------------------------------
+
+  AppSignalDbField* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AppSignalDbField& from);
+  void MergeFrom(const AppSignalDbField& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 ID = 1 [default = -1];
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIDFieldNumber = 1;
+  inline ::google::protobuf::int32 id() const;
+  inline void set_id(::google::protobuf::int32 value);
+
+  // optional int32 signalGroupID = 2 [default = -1];
+  inline bool has_signalgroupid() const;
+  inline void clear_signalgroupid();
+  static const int kSignalGroupIDFieldNumber = 2;
+  inline ::google::protobuf::int32 signalgroupid() const;
+  inline void set_signalgroupid(::google::protobuf::int32 value);
+
+  // optional int32 signalInstanceID = 3 [default = -1];
+  inline bool has_signalinstanceid() const;
+  inline void clear_signalinstanceid();
+  static const int kSignalInstanceIDFieldNumber = 3;
+  inline ::google::protobuf::int32 signalinstanceid() const;
+  inline void set_signalinstanceid(::google::protobuf::int32 value);
+
+  // optional int32 changesetID = 4 [default = -1];
+  inline bool has_changesetid() const;
+  inline void clear_changesetid();
+  static const int kChangesetIDFieldNumber = 4;
+  inline ::google::protobuf::int32 changesetid() const;
+  inline void set_changesetid(::google::protobuf::int32 value);
+
+  // optional bool checkedOut = 5 [default = false];
+  inline bool has_checkedout() const;
+  inline void clear_checkedout();
+  static const int kCheckedOutFieldNumber = 5;
+  inline bool checkedout() const;
+  inline void set_checkedout(bool value);
+
+  // optional int32 userID = 6 [default = -1];
+  inline bool has_userid() const;
+  inline void clear_userid();
+  static const int kUserIDFieldNumber = 6;
+  inline ::google::protobuf::int32 userid() const;
+  inline void set_userid(::google::protobuf::int32 value);
+
+  // optional int64 created = 7 [default = 0];
+  inline bool has_created() const;
+  inline void clear_created();
+  static const int kCreatedFieldNumber = 7;
+  inline ::google::protobuf::int64 created() const;
+  inline void set_created(::google::protobuf::int64 value);
+
+  // optional bool deleted = 8 [default = false];
+  inline bool has_deleted() const;
+  inline void clear_deleted();
+  static const int kDeletedFieldNumber = 8;
+  inline bool deleted() const;
+  inline void set_deleted(bool value);
+
+  // optional int64 instanceCreated = 9 [default = 0];
+  inline bool has_instancecreated() const;
+  inline void clear_instancecreated();
+  static const int kInstanceCreatedFieldNumber = 9;
+  inline ::google::protobuf::int64 instancecreated() const;
+  inline void set_instancecreated(::google::protobuf::int64 value);
+
+  // optional int32 instanceAction = 10 [default = 0];
+  inline bool has_instanceaction() const;
+  inline void clear_instanceaction();
+  static const int kInstanceActionFieldNumber = 10;
+  inline ::google::protobuf::int32 instanceaction() const;
+  inline void set_instanceaction(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.AppSignalDbField)
+ private:
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_signalgroupid();
+  inline void clear_has_signalgroupid();
+  inline void set_has_signalinstanceid();
+  inline void clear_has_signalinstanceid();
+  inline void set_has_changesetid();
+  inline void clear_has_changesetid();
+  inline void set_has_checkedout();
+  inline void clear_has_checkedout();
+  inline void set_has_userid();
+  inline void clear_has_userid();
+  inline void set_has_created();
+  inline void clear_has_created();
+  inline void set_has_deleted();
+  inline void clear_has_deleted();
+  inline void set_has_instancecreated();
+  inline void clear_has_instancecreated();
+  inline void set_has_instanceaction();
+  inline void clear_has_instanceaction();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 id_;
+  ::google::protobuf::int32 signalgroupid_;
+  ::google::protobuf::int32 signalinstanceid_;
+  ::google::protobuf::int32 changesetid_;
+  ::google::protobuf::int32 userid_;
+  bool checkedout_;
+  bool deleted_;
+  ::google::protobuf::int64 created_;
+  ::google::protobuf::int64 instancecreated_;
+  ::google::protobuf::int32 instanceaction_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static AppSignalDbField* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class AppSignalCalculatedParam : public ::google::protobuf::Message {
+ public:
+  AppSignalCalculatedParam();
+  virtual ~AppSignalCalculatedParam();
+
+  AppSignalCalculatedParam(const AppSignalCalculatedParam& from);
+
+  inline AppSignalCalculatedParam& operator=(const AppSignalCalculatedParam& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AppSignalCalculatedParam& default_instance();
+
+  void Swap(AppSignalCalculatedParam* other);
+
+  // implements Message ----------------------------------------------
+
+  AppSignalCalculatedParam* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AppSignalCalculatedParam& from);
+  void MergeFrom(const AppSignalCalculatedParam& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint64 hash = 1 [default = 0];
+  inline bool has_hash() const;
+  inline void clear_hash();
+  static const int kHashFieldNumber = 1;
+  inline ::google::protobuf::uint64 hash() const;
+  inline void set_hash(::google::protobuf::uint64 value);
+
+  // optional .Proto.Address16 ioBufAddr = 2;
+  inline bool has_iobufaddr() const;
+  inline void clear_iobufaddr();
+  static const int kIoBufAddrFieldNumber = 2;
+  inline const ::Proto::Address16& iobufaddr() const;
+  inline ::Proto::Address16* mutable_iobufaddr();
+  inline ::Proto::Address16* release_iobufaddr();
+  inline void set_allocated_iobufaddr(::Proto::Address16* iobufaddr);
+
+  // optional .Proto.Address16 tuningAddr = 3;
+  inline bool has_tuningaddr() const;
+  inline void clear_tuningaddr();
+  static const int kTuningAddrFieldNumber = 3;
+  inline const ::Proto::Address16& tuningaddr() const;
+  inline ::Proto::Address16* mutable_tuningaddr();
+  inline ::Proto::Address16* release_tuningaddr();
+  inline void set_allocated_tuningaddr(::Proto::Address16* tuningaddr);
+
+  // optional .Proto.Address16 ualAddr = 4;
+  inline bool has_ualaddr() const;
+  inline void clear_ualaddr();
+  static const int kUalAddrFieldNumber = 4;
+  inline const ::Proto::Address16& ualaddr() const;
+  inline ::Proto::Address16* mutable_ualaddr();
+  inline ::Proto::Address16* release_ualaddr();
+  inline void set_allocated_ualaddr(::Proto::Address16* ualaddr);
+
+  // optional .Proto.Address16 regBufAddr = 5;
+  inline bool has_regbufaddr() const;
+  inline void clear_regbufaddr();
+  static const int kRegBufAddrFieldNumber = 5;
+  inline const ::Proto::Address16& regbufaddr() const;
+  inline ::Proto::Address16* mutable_regbufaddr();
+  inline ::Proto::Address16* release_regbufaddr();
+  inline void set_allocated_regbufaddr(::Proto::Address16* regbufaddr);
+
+  // optional .Proto.Address16 regValueAddr = 6;
+  inline bool has_regvalueaddr() const;
+  inline void clear_regvalueaddr();
+  static const int kRegValueAddrFieldNumber = 6;
+  inline const ::Proto::Address16& regvalueaddr() const;
+  inline ::Proto::Address16* mutable_regvalueaddr();
+  inline ::Proto::Address16* release_regvalueaddr();
+  inline void set_allocated_regvalueaddr(::Proto::Address16* regvalueaddr);
+
+  // optional .Proto.Address16 regValidityAddr = 7;
+  inline bool has_regvalidityaddr() const;
+  inline void clear_regvalidityaddr();
+  static const int kRegValidityAddrFieldNumber = 7;
+  inline const ::Proto::Address16& regvalidityaddr() const;
+  inline ::Proto::Address16* mutable_regvalidityaddr();
+  inline ::Proto::Address16* release_regvalidityaddr();
+  inline void set_allocated_regvalidityaddr(::Proto::Address16* regvalidityaddr);
+
+  // @@protoc_insertion_point(class_scope:Proto.AppSignalCalculatedParam)
+ private:
+  inline void set_has_hash();
+  inline void clear_has_hash();
+  inline void set_has_iobufaddr();
+  inline void clear_has_iobufaddr();
+  inline void set_has_tuningaddr();
+  inline void clear_has_tuningaddr();
+  inline void set_has_ualaddr();
+  inline void clear_has_ualaddr();
+  inline void set_has_regbufaddr();
+  inline void clear_has_regbufaddr();
+  inline void set_has_regvalueaddr();
+  inline void clear_has_regvalueaddr();
+  inline void set_has_regvalidityaddr();
+  inline void clear_has_regvalidityaddr();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 hash_;
+  ::Proto::Address16* iobufaddr_;
+  ::Proto::Address16* tuningaddr_;
+  ::Proto::Address16* ualaddr_;
+  ::Proto::Address16* regbufaddr_;
+  ::Proto::Address16* regvalueaddr_;
+  ::Proto::Address16* regvalidityaddr_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static AppSignalCalculatedParam* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class AppSignal : public ::google::protobuf::Message {
  public:
   AppSignal();
@@ -8802,26 +9233,32 @@ class AppSignal : public ::google::protobuf::Message {
   inline bool enabletuning() const;
   inline void set_enabletuning(bool value);
 
-  // optional float tuningDefaultValue = 72 [default = 0];
+  // optional .Proto.TuningValue tuningDefaultValue = 72;
   inline bool has_tuningdefaultvalue() const;
   inline void clear_tuningdefaultvalue();
   static const int kTuningDefaultValueFieldNumber = 72;
-  inline float tuningdefaultvalue() const;
-  inline void set_tuningdefaultvalue(float value);
+  inline const ::Proto::TuningValue& tuningdefaultvalue() const;
+  inline ::Proto::TuningValue* mutable_tuningdefaultvalue();
+  inline ::Proto::TuningValue* release_tuningdefaultvalue();
+  inline void set_allocated_tuningdefaultvalue(::Proto::TuningValue* tuningdefaultvalue);
 
-  // optional float tuningLowBound = 73 [default = 0];
+  // optional .Proto.TuningValue tuningLowBound = 73;
   inline bool has_tuninglowbound() const;
   inline void clear_tuninglowbound();
   static const int kTuningLowBoundFieldNumber = 73;
-  inline float tuninglowbound() const;
-  inline void set_tuninglowbound(float value);
+  inline const ::Proto::TuningValue& tuninglowbound() const;
+  inline ::Proto::TuningValue* mutable_tuninglowbound();
+  inline ::Proto::TuningValue* release_tuninglowbound();
+  inline void set_allocated_tuninglowbound(::Proto::TuningValue* tuninglowbound);
 
-  // optional float tuningHighBound = 74 [default = 0];
+  // optional .Proto.TuningValue tuningHighBound = 74;
   inline bool has_tuninghighbound() const;
   inline void clear_tuninghighbound();
   static const int kTuningHighBoundFieldNumber = 74;
-  inline float tuninghighbound() const;
-  inline void set_tuninghighbound(float value);
+  inline const ::Proto::TuningValue& tuninghighbound() const;
+  inline ::Proto::TuningValue* mutable_tuninghighbound();
+  inline ::Proto::TuningValue* release_tuninghighbound();
+  inline void set_allocated_tuninghighbound(::Proto::TuningValue* tuninghighbound);
 
   // optional bool acquire = 81 [default = false];
   inline bool has_acquire() const;
@@ -8830,164 +9267,58 @@ class AppSignal : public ::google::protobuf::Message {
   inline bool acquire() const;
   inline void set_acquire(bool value);
 
-  // optional int32 decimalPlaces = 82 [default = 2];
+  // optional bool archive = 82 [default = false];
+  inline bool has_archive() const;
+  inline void clear_archive();
+  static const int kArchiveFieldNumber = 82;
+  inline bool archive() const;
+  inline void set_archive(bool value);
+
+  // optional int32 decimalPlaces = 83 [default = 2];
   inline bool has_decimalplaces() const;
   inline void clear_decimalplaces();
-  static const int kDecimalPlacesFieldNumber = 82;
+  static const int kDecimalPlacesFieldNumber = 83;
   inline ::google::protobuf::int32 decimalplaces() const;
   inline void set_decimalplaces(::google::protobuf::int32 value);
 
-  // optional double coarseAperture = 83 [default = 1];
+  // optional double coarseAperture = 84 [default = 1];
   inline bool has_coarseaperture() const;
   inline void clear_coarseaperture();
-  static const int kCoarseApertureFieldNumber = 83;
+  static const int kCoarseApertureFieldNumber = 84;
   inline double coarseaperture() const;
   inline void set_coarseaperture(double value);
 
-  // optional double fineAperture = 84 [default = 0.5];
+  // optional double fineAperture = 85 [default = 0.5];
   inline bool has_fineaperture() const;
   inline void clear_fineaperture();
-  static const int kFineApertureFieldNumber = 84;
+  static const int kFineApertureFieldNumber = 85;
   inline double fineaperture() const;
   inline void set_fineaperture(double value);
 
-  // optional bool adaptiveAperture = 85 [default = false];
+  // optional bool adaptiveAperture = 86 [default = false];
   inline bool has_adaptiveaperture() const;
   inline void clear_adaptiveaperture();
-  static const int kAdaptiveApertureFieldNumber = 85;
+  static const int kAdaptiveApertureFieldNumber = 86;
   inline bool adaptiveaperture() const;
   inline void set_adaptiveaperture(bool value);
 
-  // optional int32 ID = 101 [default = -1];
-  inline bool has_id() const;
-  inline void clear_id();
-  static const int kIDFieldNumber = 101;
-  inline ::google::protobuf::int32 id() const;
-  inline void set_id(::google::protobuf::int32 value);
+  // optional .Proto.AppSignalDbField dbField = 120;
+  inline bool has_dbfield() const;
+  inline void clear_dbfield();
+  static const int kDbFieldFieldNumber = 120;
+  inline const ::Proto::AppSignalDbField& dbfield() const;
+  inline ::Proto::AppSignalDbField* mutable_dbfield();
+  inline ::Proto::AppSignalDbField* release_dbfield();
+  inline void set_allocated_dbfield(::Proto::AppSignalDbField* dbfield);
 
-  // optional int32 signalGroupID = 102 [default = -1];
-  inline bool has_signalgroupid() const;
-  inline void clear_signalgroupid();
-  static const int kSignalGroupIDFieldNumber = 102;
-  inline ::google::protobuf::int32 signalgroupid() const;
-  inline void set_signalgroupid(::google::protobuf::int32 value);
-
-  // optional int32 signalInstanceID = 103 [default = -1];
-  inline bool has_signalinstanceid() const;
-  inline void clear_signalinstanceid();
-  static const int kSignalInstanceIDFieldNumber = 103;
-  inline ::google::protobuf::int32 signalinstanceid() const;
-  inline void set_signalinstanceid(::google::protobuf::int32 value);
-
-  // optional int32 changesetID = 104 [default = -1];
-  inline bool has_changesetid() const;
-  inline void clear_changesetid();
-  static const int kChangesetIDFieldNumber = 104;
-  inline ::google::protobuf::int32 changesetid() const;
-  inline void set_changesetid(::google::protobuf::int32 value);
-
-  // optional bool checkedOut = 105 [default = false];
-  inline bool has_checkedout() const;
-  inline void clear_checkedout();
-  static const int kCheckedOutFieldNumber = 105;
-  inline bool checkedout() const;
-  inline void set_checkedout(bool value);
-
-  // optional int32 userID = 106 [default = -1];
-  inline bool has_userid() const;
-  inline void clear_userid();
-  static const int kUserIDFieldNumber = 106;
-  inline ::google::protobuf::int32 userid() const;
-  inline void set_userid(::google::protobuf::int32 value);
-
-  // optional int64 created = 107 [default = 0];
-  inline bool has_created() const;
-  inline void clear_created();
-  static const int kCreatedFieldNumber = 107;
-  inline ::google::protobuf::int64 created() const;
-  inline void set_created(::google::protobuf::int64 value);
-
-  // optional bool deleted = 108 [default = false];
-  inline bool has_deleted() const;
-  inline void clear_deleted();
-  static const int kDeletedFieldNumber = 108;
-  inline bool deleted() const;
-  inline void set_deleted(bool value);
-
-  // optional int64 instanceCreated = 109 [default = 0];
-  inline bool has_instancecreated() const;
-  inline void clear_instancecreated();
-  static const int kInstanceCreatedFieldNumber = 109;
-  inline ::google::protobuf::int64 instancecreated() const;
-  inline void set_instancecreated(::google::protobuf::int64 value);
-
-  // optional int32 instanceAction = 110 [default = 0];
-  inline bool has_instanceaction() const;
-  inline void clear_instanceaction();
-  static const int kInstanceActionFieldNumber = 110;
-  inline ::google::protobuf::int32 instanceaction() const;
-  inline void set_instanceaction(::google::protobuf::int32 value);
-
-  // optional uint64 hash = 116 [default = 0];
-  inline bool has_hash() const;
-  inline void clear_hash();
-  static const int kHashFieldNumber = 116;
-  inline ::google::protobuf::uint64 hash() const;
-  inline void set_hash(::google::protobuf::uint64 value);
-
-  // optional .Proto.Address16 ioBufAddr = 117;
-  inline bool has_iobufaddr() const;
-  inline void clear_iobufaddr();
-  static const int kIoBufAddrFieldNumber = 117;
-  inline const ::Proto::Address16& iobufaddr() const;
-  inline ::Proto::Address16* mutable_iobufaddr();
-  inline ::Proto::Address16* release_iobufaddr();
-  inline void set_allocated_iobufaddr(::Proto::Address16* iobufaddr);
-
-  // optional .Proto.Address16 tuningAddr = 118;
-  inline bool has_tuningaddr() const;
-  inline void clear_tuningaddr();
-  static const int kTuningAddrFieldNumber = 118;
-  inline const ::Proto::Address16& tuningaddr() const;
-  inline ::Proto::Address16* mutable_tuningaddr();
-  inline ::Proto::Address16* release_tuningaddr();
-  inline void set_allocated_tuningaddr(::Proto::Address16* tuningaddr);
-
-  // optional .Proto.Address16 ualAddr = 119;
-  inline bool has_ualaddr() const;
-  inline void clear_ualaddr();
-  static const int kUalAddrFieldNumber = 119;
-  inline const ::Proto::Address16& ualaddr() const;
-  inline ::Proto::Address16* mutable_ualaddr();
-  inline ::Proto::Address16* release_ualaddr();
-  inline void set_allocated_ualaddr(::Proto::Address16* ualaddr);
-
-  // optional .Proto.Address16 regBufAddr = 120;
-  inline bool has_regbufaddr() const;
-  inline void clear_regbufaddr();
-  static const int kRegBufAddrFieldNumber = 120;
-  inline const ::Proto::Address16& regbufaddr() const;
-  inline ::Proto::Address16* mutable_regbufaddr();
-  inline ::Proto::Address16* release_regbufaddr();
-  inline void set_allocated_regbufaddr(::Proto::Address16* regbufaddr);
-
-  // optional .Proto.Address16 regValueAddr = 121;
-  inline bool has_regvalueaddr() const;
-  inline void clear_regvalueaddr();
-  static const int kRegValueAddrFieldNumber = 121;
-  inline const ::Proto::Address16& regvalueaddr() const;
-  inline ::Proto::Address16* mutable_regvalueaddr();
-  inline ::Proto::Address16* release_regvalueaddr();
-  inline void set_allocated_regvalueaddr(::Proto::Address16* regvalueaddr);
-
-  // optional .Proto.Address16 regValidityAddr = 122;
-  inline bool has_regvalidityaddr() const;
-  inline void clear_regvalidityaddr();
-  static const int kRegValidityAddrFieldNumber = 122;
-  inline const ::Proto::Address16& regvalidityaddr() const;
-  inline ::Proto::Address16* mutable_regvalidityaddr();
-  inline ::Proto::Address16* release_regvalidityaddr();
-  inline void set_allocated_regvalidityaddr(::Proto::Address16* regvalidityaddr);
+  // optional .Proto.AppSignalCalculatedParam calcParam = 121;
+  inline bool has_calcparam() const;
+  inline void clear_calcparam();
+  static const int kCalcParamFieldNumber = 121;
+  inline const ::Proto::AppSignalCalculatedParam& calcparam() const;
+  inline ::Proto::AppSignalCalculatedParam* mutable_calcparam();
+  inline ::Proto::AppSignalCalculatedParam* release_calcparam();
+  inline void set_allocated_calcparam(::Proto::AppSignalCalculatedParam* calcparam);
 
   // @@protoc_insertion_point(class_scope:Proto.AppSignal)
  private:
@@ -9051,6 +9382,8 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_tuninghighbound();
   inline void set_has_acquire();
   inline void clear_has_acquire();
+  inline void set_has_archive();
+  inline void clear_has_archive();
   inline void set_has_decimalplaces();
   inline void clear_has_decimalplaces();
   inline void set_has_coarseaperture();
@@ -9059,40 +9392,10 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_fineaperture();
   inline void set_has_adaptiveaperture();
   inline void clear_has_adaptiveaperture();
-  inline void set_has_id();
-  inline void clear_has_id();
-  inline void set_has_signalgroupid();
-  inline void clear_has_signalgroupid();
-  inline void set_has_signalinstanceid();
-  inline void clear_has_signalinstanceid();
-  inline void set_has_changesetid();
-  inline void clear_has_changesetid();
-  inline void set_has_checkedout();
-  inline void clear_has_checkedout();
-  inline void set_has_userid();
-  inline void clear_has_userid();
-  inline void set_has_created();
-  inline void clear_has_created();
-  inline void set_has_deleted();
-  inline void clear_has_deleted();
-  inline void set_has_instancecreated();
-  inline void clear_has_instancecreated();
-  inline void set_has_instanceaction();
-  inline void clear_has_instanceaction();
-  inline void set_has_hash();
-  inline void clear_has_hash();
-  inline void set_has_iobufaddr();
-  inline void clear_has_iobufaddr();
-  inline void set_has_tuningaddr();
-  inline void clear_has_tuningaddr();
-  inline void set_has_ualaddr();
-  inline void clear_has_ualaddr();
-  inline void set_has_regbufaddr();
-  inline void clear_has_regbufaddr();
-  inline void set_has_regvalueaddr();
-  inline void clear_has_regvalueaddr();
-  inline void set_has_regvalidityaddr();
-  inline void clear_has_regvalidityaddr();
+  inline void set_has_dbfield();
+  inline void clear_has_dbfield();
+  inline void set_has_calcparam();
+  inline void clear_has_calcparam();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -9120,36 +9423,22 @@ class AppSignal : public ::google::protobuf::Message {
   double electrichighlimit_;
   ::google::protobuf::int32 electricunit_;
   ::google::protobuf::int32 sensortype_;
+  ::Proto::TuningValue* tuningdefaultvalue_;
+  ::Proto::TuningValue* tuninglowbound_;
+  ::Proto::TuningValue* tuninghighbound_;
   ::google::protobuf::int32 outputmode_;
-  float tuningdefaultvalue_;
-  float tuninglowbound_;
-  float tuninghighbound_;
-  double coarseaperture_;
-  ::google::protobuf::int32 decimalplaces_;
   bool enabletuning_;
   bool acquire_;
+  bool archive_;
   bool adaptiveaperture_;
-  bool checkedout_;
+  double coarseaperture_;
   double fineaperture_;
-  ::google::protobuf::int32 id_;
-  ::google::protobuf::int32 signalgroupid_;
-  ::google::protobuf::int32 signalinstanceid_;
-  ::google::protobuf::int32 changesetid_;
-  ::google::protobuf::int32 userid_;
-  bool deleted_;
-  ::google::protobuf::int64 created_;
-  ::google::protobuf::int64 instancecreated_;
-  ::google::protobuf::uint64 hash_;
-  ::Proto::Address16* iobufaddr_;
-  ::Proto::Address16* tuningaddr_;
-  ::Proto::Address16* ualaddr_;
-  ::Proto::Address16* regbufaddr_;
-  ::Proto::Address16* regvalueaddr_;
-  ::Proto::Address16* regvalidityaddr_;
-  ::google::protobuf::int32 instanceaction_;
+  ::Proto::AppSignalDbField* dbfield_;
+  ::Proto::AppSignalCalculatedParam* calcparam_;
+  ::google::protobuf::int32 decimalplaces_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(51 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(37 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -21777,6 +22066,554 @@ UnitSet::mutable_unit() {
 
 // -------------------------------------------------------------------
 
+// TuningValue
+
+// optional int32 type = 1;
+inline bool TuningValue::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningValue::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningValue::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningValue::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 TuningValue::type() const {
+  return type_;
+}
+inline void TuningValue::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional int64 intValue = 2 [default = 0];
+inline bool TuningValue::has_intvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TuningValue::set_has_intvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TuningValue::clear_has_intvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TuningValue::clear_intvalue() {
+  intvalue_ = GOOGLE_LONGLONG(0);
+  clear_has_intvalue();
+}
+inline ::google::protobuf::int64 TuningValue::intvalue() const {
+  return intvalue_;
+}
+inline void TuningValue::set_intvalue(::google::protobuf::int64 value) {
+  set_has_intvalue();
+  intvalue_ = value;
+}
+
+// optional double doubleValue = 3 [default = 0];
+inline bool TuningValue::has_doublevalue() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TuningValue::set_has_doublevalue() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TuningValue::clear_has_doublevalue() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TuningValue::clear_doublevalue() {
+  doublevalue_ = 0;
+  clear_has_doublevalue();
+}
+inline double TuningValue::doublevalue() const {
+  return doublevalue_;
+}
+inline void TuningValue::set_doublevalue(double value) {
+  set_has_doublevalue();
+  doublevalue_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// AppSignalDbField
+
+// optional int32 ID = 1 [default = -1];
+inline bool AppSignalDbField::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void AppSignalDbField::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void AppSignalDbField::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void AppSignalDbField::clear_id() {
+  id_ = -1;
+  clear_has_id();
+}
+inline ::google::protobuf::int32 AppSignalDbField::id() const {
+  return id_;
+}
+inline void AppSignalDbField::set_id(::google::protobuf::int32 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// optional int32 signalGroupID = 2 [default = -1];
+inline bool AppSignalDbField::has_signalgroupid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void AppSignalDbField::set_has_signalgroupid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void AppSignalDbField::clear_has_signalgroupid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void AppSignalDbField::clear_signalgroupid() {
+  signalgroupid_ = -1;
+  clear_has_signalgroupid();
+}
+inline ::google::protobuf::int32 AppSignalDbField::signalgroupid() const {
+  return signalgroupid_;
+}
+inline void AppSignalDbField::set_signalgroupid(::google::protobuf::int32 value) {
+  set_has_signalgroupid();
+  signalgroupid_ = value;
+}
+
+// optional int32 signalInstanceID = 3 [default = -1];
+inline bool AppSignalDbField::has_signalinstanceid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void AppSignalDbField::set_has_signalinstanceid() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void AppSignalDbField::clear_has_signalinstanceid() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void AppSignalDbField::clear_signalinstanceid() {
+  signalinstanceid_ = -1;
+  clear_has_signalinstanceid();
+}
+inline ::google::protobuf::int32 AppSignalDbField::signalinstanceid() const {
+  return signalinstanceid_;
+}
+inline void AppSignalDbField::set_signalinstanceid(::google::protobuf::int32 value) {
+  set_has_signalinstanceid();
+  signalinstanceid_ = value;
+}
+
+// optional int32 changesetID = 4 [default = -1];
+inline bool AppSignalDbField::has_changesetid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void AppSignalDbField::set_has_changesetid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void AppSignalDbField::clear_has_changesetid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void AppSignalDbField::clear_changesetid() {
+  changesetid_ = -1;
+  clear_has_changesetid();
+}
+inline ::google::protobuf::int32 AppSignalDbField::changesetid() const {
+  return changesetid_;
+}
+inline void AppSignalDbField::set_changesetid(::google::protobuf::int32 value) {
+  set_has_changesetid();
+  changesetid_ = value;
+}
+
+// optional bool checkedOut = 5 [default = false];
+inline bool AppSignalDbField::has_checkedout() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void AppSignalDbField::set_has_checkedout() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void AppSignalDbField::clear_has_checkedout() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void AppSignalDbField::clear_checkedout() {
+  checkedout_ = false;
+  clear_has_checkedout();
+}
+inline bool AppSignalDbField::checkedout() const {
+  return checkedout_;
+}
+inline void AppSignalDbField::set_checkedout(bool value) {
+  set_has_checkedout();
+  checkedout_ = value;
+}
+
+// optional int32 userID = 6 [default = -1];
+inline bool AppSignalDbField::has_userid() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void AppSignalDbField::set_has_userid() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void AppSignalDbField::clear_has_userid() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void AppSignalDbField::clear_userid() {
+  userid_ = -1;
+  clear_has_userid();
+}
+inline ::google::protobuf::int32 AppSignalDbField::userid() const {
+  return userid_;
+}
+inline void AppSignalDbField::set_userid(::google::protobuf::int32 value) {
+  set_has_userid();
+  userid_ = value;
+}
+
+// optional int64 created = 7 [default = 0];
+inline bool AppSignalDbField::has_created() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void AppSignalDbField::set_has_created() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void AppSignalDbField::clear_has_created() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void AppSignalDbField::clear_created() {
+  created_ = GOOGLE_LONGLONG(0);
+  clear_has_created();
+}
+inline ::google::protobuf::int64 AppSignalDbField::created() const {
+  return created_;
+}
+inline void AppSignalDbField::set_created(::google::protobuf::int64 value) {
+  set_has_created();
+  created_ = value;
+}
+
+// optional bool deleted = 8 [default = false];
+inline bool AppSignalDbField::has_deleted() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void AppSignalDbField::set_has_deleted() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void AppSignalDbField::clear_has_deleted() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void AppSignalDbField::clear_deleted() {
+  deleted_ = false;
+  clear_has_deleted();
+}
+inline bool AppSignalDbField::deleted() const {
+  return deleted_;
+}
+inline void AppSignalDbField::set_deleted(bool value) {
+  set_has_deleted();
+  deleted_ = value;
+}
+
+// optional int64 instanceCreated = 9 [default = 0];
+inline bool AppSignalDbField::has_instancecreated() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void AppSignalDbField::set_has_instancecreated() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void AppSignalDbField::clear_has_instancecreated() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void AppSignalDbField::clear_instancecreated() {
+  instancecreated_ = GOOGLE_LONGLONG(0);
+  clear_has_instancecreated();
+}
+inline ::google::protobuf::int64 AppSignalDbField::instancecreated() const {
+  return instancecreated_;
+}
+inline void AppSignalDbField::set_instancecreated(::google::protobuf::int64 value) {
+  set_has_instancecreated();
+  instancecreated_ = value;
+}
+
+// optional int32 instanceAction = 10 [default = 0];
+inline bool AppSignalDbField::has_instanceaction() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void AppSignalDbField::set_has_instanceaction() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void AppSignalDbField::clear_has_instanceaction() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void AppSignalDbField::clear_instanceaction() {
+  instanceaction_ = 0;
+  clear_has_instanceaction();
+}
+inline ::google::protobuf::int32 AppSignalDbField::instanceaction() const {
+  return instanceaction_;
+}
+inline void AppSignalDbField::set_instanceaction(::google::protobuf::int32 value) {
+  set_has_instanceaction();
+  instanceaction_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// AppSignalCalculatedParam
+
+// optional uint64 hash = 1 [default = 0];
+inline bool AppSignalCalculatedParam::has_hash() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_hash() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void AppSignalCalculatedParam::clear_has_hash() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void AppSignalCalculatedParam::clear_hash() {
+  hash_ = GOOGLE_ULONGLONG(0);
+  clear_has_hash();
+}
+inline ::google::protobuf::uint64 AppSignalCalculatedParam::hash() const {
+  return hash_;
+}
+inline void AppSignalCalculatedParam::set_hash(::google::protobuf::uint64 value) {
+  set_has_hash();
+  hash_ = value;
+}
+
+// optional .Proto.Address16 ioBufAddr = 2;
+inline bool AppSignalCalculatedParam::has_iobufaddr() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_iobufaddr() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void AppSignalCalculatedParam::clear_has_iobufaddr() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void AppSignalCalculatedParam::clear_iobufaddr() {
+  if (iobufaddr_ != NULL) iobufaddr_->::Proto::Address16::Clear();
+  clear_has_iobufaddr();
+}
+inline const ::Proto::Address16& AppSignalCalculatedParam::iobufaddr() const {
+  return iobufaddr_ != NULL ? *iobufaddr_ : *default_instance_->iobufaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::mutable_iobufaddr() {
+  set_has_iobufaddr();
+  if (iobufaddr_ == NULL) iobufaddr_ = new ::Proto::Address16;
+  return iobufaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::release_iobufaddr() {
+  clear_has_iobufaddr();
+  ::Proto::Address16* temp = iobufaddr_;
+  iobufaddr_ = NULL;
+  return temp;
+}
+inline void AppSignalCalculatedParam::set_allocated_iobufaddr(::Proto::Address16* iobufaddr) {
+  delete iobufaddr_;
+  iobufaddr_ = iobufaddr;
+  if (iobufaddr) {
+    set_has_iobufaddr();
+  } else {
+    clear_has_iobufaddr();
+  }
+}
+
+// optional .Proto.Address16 tuningAddr = 3;
+inline bool AppSignalCalculatedParam::has_tuningaddr() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_tuningaddr() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void AppSignalCalculatedParam::clear_has_tuningaddr() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void AppSignalCalculatedParam::clear_tuningaddr() {
+  if (tuningaddr_ != NULL) tuningaddr_->::Proto::Address16::Clear();
+  clear_has_tuningaddr();
+}
+inline const ::Proto::Address16& AppSignalCalculatedParam::tuningaddr() const {
+  return tuningaddr_ != NULL ? *tuningaddr_ : *default_instance_->tuningaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::mutable_tuningaddr() {
+  set_has_tuningaddr();
+  if (tuningaddr_ == NULL) tuningaddr_ = new ::Proto::Address16;
+  return tuningaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::release_tuningaddr() {
+  clear_has_tuningaddr();
+  ::Proto::Address16* temp = tuningaddr_;
+  tuningaddr_ = NULL;
+  return temp;
+}
+inline void AppSignalCalculatedParam::set_allocated_tuningaddr(::Proto::Address16* tuningaddr) {
+  delete tuningaddr_;
+  tuningaddr_ = tuningaddr;
+  if (tuningaddr) {
+    set_has_tuningaddr();
+  } else {
+    clear_has_tuningaddr();
+  }
+}
+
+// optional .Proto.Address16 ualAddr = 4;
+inline bool AppSignalCalculatedParam::has_ualaddr() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_ualaddr() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void AppSignalCalculatedParam::clear_has_ualaddr() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void AppSignalCalculatedParam::clear_ualaddr() {
+  if (ualaddr_ != NULL) ualaddr_->::Proto::Address16::Clear();
+  clear_has_ualaddr();
+}
+inline const ::Proto::Address16& AppSignalCalculatedParam::ualaddr() const {
+  return ualaddr_ != NULL ? *ualaddr_ : *default_instance_->ualaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::mutable_ualaddr() {
+  set_has_ualaddr();
+  if (ualaddr_ == NULL) ualaddr_ = new ::Proto::Address16;
+  return ualaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::release_ualaddr() {
+  clear_has_ualaddr();
+  ::Proto::Address16* temp = ualaddr_;
+  ualaddr_ = NULL;
+  return temp;
+}
+inline void AppSignalCalculatedParam::set_allocated_ualaddr(::Proto::Address16* ualaddr) {
+  delete ualaddr_;
+  ualaddr_ = ualaddr;
+  if (ualaddr) {
+    set_has_ualaddr();
+  } else {
+    clear_has_ualaddr();
+  }
+}
+
+// optional .Proto.Address16 regBufAddr = 5;
+inline bool AppSignalCalculatedParam::has_regbufaddr() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_regbufaddr() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void AppSignalCalculatedParam::clear_has_regbufaddr() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void AppSignalCalculatedParam::clear_regbufaddr() {
+  if (regbufaddr_ != NULL) regbufaddr_->::Proto::Address16::Clear();
+  clear_has_regbufaddr();
+}
+inline const ::Proto::Address16& AppSignalCalculatedParam::regbufaddr() const {
+  return regbufaddr_ != NULL ? *regbufaddr_ : *default_instance_->regbufaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::mutable_regbufaddr() {
+  set_has_regbufaddr();
+  if (regbufaddr_ == NULL) regbufaddr_ = new ::Proto::Address16;
+  return regbufaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::release_regbufaddr() {
+  clear_has_regbufaddr();
+  ::Proto::Address16* temp = regbufaddr_;
+  regbufaddr_ = NULL;
+  return temp;
+}
+inline void AppSignalCalculatedParam::set_allocated_regbufaddr(::Proto::Address16* regbufaddr) {
+  delete regbufaddr_;
+  regbufaddr_ = regbufaddr;
+  if (regbufaddr) {
+    set_has_regbufaddr();
+  } else {
+    clear_has_regbufaddr();
+  }
+}
+
+// optional .Proto.Address16 regValueAddr = 6;
+inline bool AppSignalCalculatedParam::has_regvalueaddr() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_regvalueaddr() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void AppSignalCalculatedParam::clear_has_regvalueaddr() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void AppSignalCalculatedParam::clear_regvalueaddr() {
+  if (regvalueaddr_ != NULL) regvalueaddr_->::Proto::Address16::Clear();
+  clear_has_regvalueaddr();
+}
+inline const ::Proto::Address16& AppSignalCalculatedParam::regvalueaddr() const {
+  return regvalueaddr_ != NULL ? *regvalueaddr_ : *default_instance_->regvalueaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::mutable_regvalueaddr() {
+  set_has_regvalueaddr();
+  if (regvalueaddr_ == NULL) regvalueaddr_ = new ::Proto::Address16;
+  return regvalueaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::release_regvalueaddr() {
+  clear_has_regvalueaddr();
+  ::Proto::Address16* temp = regvalueaddr_;
+  regvalueaddr_ = NULL;
+  return temp;
+}
+inline void AppSignalCalculatedParam::set_allocated_regvalueaddr(::Proto::Address16* regvalueaddr) {
+  delete regvalueaddr_;
+  regvalueaddr_ = regvalueaddr;
+  if (regvalueaddr) {
+    set_has_regvalueaddr();
+  } else {
+    clear_has_regvalueaddr();
+  }
+}
+
+// optional .Proto.Address16 regValidityAddr = 7;
+inline bool AppSignalCalculatedParam::has_regvalidityaddr() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_regvalidityaddr() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void AppSignalCalculatedParam::clear_has_regvalidityaddr() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void AppSignalCalculatedParam::clear_regvalidityaddr() {
+  if (regvalidityaddr_ != NULL) regvalidityaddr_->::Proto::Address16::Clear();
+  clear_has_regvalidityaddr();
+}
+inline const ::Proto::Address16& AppSignalCalculatedParam::regvalidityaddr() const {
+  return regvalidityaddr_ != NULL ? *regvalidityaddr_ : *default_instance_->regvalidityaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::mutable_regvalidityaddr() {
+  set_has_regvalidityaddr();
+  if (regvalidityaddr_ == NULL) regvalidityaddr_ = new ::Proto::Address16;
+  return regvalidityaddr_;
+}
+inline ::Proto::Address16* AppSignalCalculatedParam::release_regvalidityaddr() {
+  clear_has_regvalidityaddr();
+  ::Proto::Address16* temp = regvalidityaddr_;
+  regvalidityaddr_ = NULL;
+  return temp;
+}
+inline void AppSignalCalculatedParam::set_allocated_regvalidityaddr(::Proto::Address16* regvalidityaddr) {
+  delete regvalidityaddr_;
+  regvalidityaddr_ = regvalidityaddr;
+  if (regvalidityaddr) {
+    set_has_regvalidityaddr();
+  } else {
+    clear_has_regvalidityaddr();
+  }
+}
+
+// -------------------------------------------------------------------
+
 // AppSignal
 
 // optional string appSignalID = 1;
@@ -22639,7 +23476,7 @@ inline void AppSignal::set_enabletuning(bool value) {
   enabletuning_ = value;
 }
 
-// optional float tuningDefaultValue = 72 [default = 0];
+// optional .Proto.TuningValue tuningDefaultValue = 72;
 inline bool AppSignal::has_tuningdefaultvalue() const {
   return (_has_bits_[0] & 0x04000000u) != 0;
 }
@@ -22650,18 +23487,34 @@ inline void AppSignal::clear_has_tuningdefaultvalue() {
   _has_bits_[0] &= ~0x04000000u;
 }
 inline void AppSignal::clear_tuningdefaultvalue() {
-  tuningdefaultvalue_ = 0;
+  if (tuningdefaultvalue_ != NULL) tuningdefaultvalue_->::Proto::TuningValue::Clear();
   clear_has_tuningdefaultvalue();
 }
-inline float AppSignal::tuningdefaultvalue() const {
+inline const ::Proto::TuningValue& AppSignal::tuningdefaultvalue() const {
+  return tuningdefaultvalue_ != NULL ? *tuningdefaultvalue_ : *default_instance_->tuningdefaultvalue_;
+}
+inline ::Proto::TuningValue* AppSignal::mutable_tuningdefaultvalue() {
+  set_has_tuningdefaultvalue();
+  if (tuningdefaultvalue_ == NULL) tuningdefaultvalue_ = new ::Proto::TuningValue;
   return tuningdefaultvalue_;
 }
-inline void AppSignal::set_tuningdefaultvalue(float value) {
-  set_has_tuningdefaultvalue();
-  tuningdefaultvalue_ = value;
+inline ::Proto::TuningValue* AppSignal::release_tuningdefaultvalue() {
+  clear_has_tuningdefaultvalue();
+  ::Proto::TuningValue* temp = tuningdefaultvalue_;
+  tuningdefaultvalue_ = NULL;
+  return temp;
+}
+inline void AppSignal::set_allocated_tuningdefaultvalue(::Proto::TuningValue* tuningdefaultvalue) {
+  delete tuningdefaultvalue_;
+  tuningdefaultvalue_ = tuningdefaultvalue;
+  if (tuningdefaultvalue) {
+    set_has_tuningdefaultvalue();
+  } else {
+    clear_has_tuningdefaultvalue();
+  }
 }
 
-// optional float tuningLowBound = 73 [default = 0];
+// optional .Proto.TuningValue tuningLowBound = 73;
 inline bool AppSignal::has_tuninglowbound() const {
   return (_has_bits_[0] & 0x08000000u) != 0;
 }
@@ -22672,18 +23525,34 @@ inline void AppSignal::clear_has_tuninglowbound() {
   _has_bits_[0] &= ~0x08000000u;
 }
 inline void AppSignal::clear_tuninglowbound() {
-  tuninglowbound_ = 0;
+  if (tuninglowbound_ != NULL) tuninglowbound_->::Proto::TuningValue::Clear();
   clear_has_tuninglowbound();
 }
-inline float AppSignal::tuninglowbound() const {
+inline const ::Proto::TuningValue& AppSignal::tuninglowbound() const {
+  return tuninglowbound_ != NULL ? *tuninglowbound_ : *default_instance_->tuninglowbound_;
+}
+inline ::Proto::TuningValue* AppSignal::mutable_tuninglowbound() {
+  set_has_tuninglowbound();
+  if (tuninglowbound_ == NULL) tuninglowbound_ = new ::Proto::TuningValue;
   return tuninglowbound_;
 }
-inline void AppSignal::set_tuninglowbound(float value) {
-  set_has_tuninglowbound();
-  tuninglowbound_ = value;
+inline ::Proto::TuningValue* AppSignal::release_tuninglowbound() {
+  clear_has_tuninglowbound();
+  ::Proto::TuningValue* temp = tuninglowbound_;
+  tuninglowbound_ = NULL;
+  return temp;
+}
+inline void AppSignal::set_allocated_tuninglowbound(::Proto::TuningValue* tuninglowbound) {
+  delete tuninglowbound_;
+  tuninglowbound_ = tuninglowbound;
+  if (tuninglowbound) {
+    set_has_tuninglowbound();
+  } else {
+    clear_has_tuninglowbound();
+  }
 }
 
-// optional float tuningHighBound = 74 [default = 0];
+// optional .Proto.TuningValue tuningHighBound = 74;
 inline bool AppSignal::has_tuninghighbound() const {
   return (_has_bits_[0] & 0x10000000u) != 0;
 }
@@ -22694,15 +23563,31 @@ inline void AppSignal::clear_has_tuninghighbound() {
   _has_bits_[0] &= ~0x10000000u;
 }
 inline void AppSignal::clear_tuninghighbound() {
-  tuninghighbound_ = 0;
+  if (tuninghighbound_ != NULL) tuninghighbound_->::Proto::TuningValue::Clear();
   clear_has_tuninghighbound();
 }
-inline float AppSignal::tuninghighbound() const {
+inline const ::Proto::TuningValue& AppSignal::tuninghighbound() const {
+  return tuninghighbound_ != NULL ? *tuninghighbound_ : *default_instance_->tuninghighbound_;
+}
+inline ::Proto::TuningValue* AppSignal::mutable_tuninghighbound() {
+  set_has_tuninghighbound();
+  if (tuninghighbound_ == NULL) tuninghighbound_ = new ::Proto::TuningValue;
   return tuninghighbound_;
 }
-inline void AppSignal::set_tuninghighbound(float value) {
-  set_has_tuninghighbound();
-  tuninghighbound_ = value;
+inline ::Proto::TuningValue* AppSignal::release_tuninghighbound() {
+  clear_has_tuninghighbound();
+  ::Proto::TuningValue* temp = tuninghighbound_;
+  tuninghighbound_ = NULL;
+  return temp;
+}
+inline void AppSignal::set_allocated_tuninghighbound(::Proto::TuningValue* tuninghighbound) {
+  delete tuninghighbound_;
+  tuninghighbound_ = tuninghighbound;
+  if (tuninghighbound) {
+    set_has_tuninghighbound();
+  } else {
+    clear_has_tuninghighbound();
+  }
 }
 
 // optional bool acquire = 81 [default = false];
@@ -22727,15 +23612,37 @@ inline void AppSignal::set_acquire(bool value) {
   acquire_ = value;
 }
 
-// optional int32 decimalPlaces = 82 [default = 2];
-inline bool AppSignal::has_decimalplaces() const {
+// optional bool archive = 82 [default = false];
+inline bool AppSignal::has_archive() const {
   return (_has_bits_[0] & 0x40000000u) != 0;
 }
-inline void AppSignal::set_has_decimalplaces() {
+inline void AppSignal::set_has_archive() {
   _has_bits_[0] |= 0x40000000u;
 }
-inline void AppSignal::clear_has_decimalplaces() {
+inline void AppSignal::clear_has_archive() {
   _has_bits_[0] &= ~0x40000000u;
+}
+inline void AppSignal::clear_archive() {
+  archive_ = false;
+  clear_has_archive();
+}
+inline bool AppSignal::archive() const {
+  return archive_;
+}
+inline void AppSignal::set_archive(bool value) {
+  set_has_archive();
+  archive_ = value;
+}
+
+// optional int32 decimalPlaces = 83 [default = 2];
+inline bool AppSignal::has_decimalplaces() const {
+  return (_has_bits_[0] & 0x80000000u) != 0;
+}
+inline void AppSignal::set_has_decimalplaces() {
+  _has_bits_[0] |= 0x80000000u;
+}
+inline void AppSignal::clear_has_decimalplaces() {
+  _has_bits_[0] &= ~0x80000000u;
 }
 inline void AppSignal::clear_decimalplaces() {
   decimalplaces_ = 2;
@@ -22749,15 +23656,15 @@ inline void AppSignal::set_decimalplaces(::google::protobuf::int32 value) {
   decimalplaces_ = value;
 }
 
-// optional double coarseAperture = 83 [default = 1];
+// optional double coarseAperture = 84 [default = 1];
 inline bool AppSignal::has_coarseaperture() const {
-  return (_has_bits_[0] & 0x80000000u) != 0;
+  return (_has_bits_[1] & 0x00000001u) != 0;
 }
 inline void AppSignal::set_has_coarseaperture() {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[1] |= 0x00000001u;
 }
 inline void AppSignal::clear_has_coarseaperture() {
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[1] &= ~0x00000001u;
 }
 inline void AppSignal::clear_coarseaperture() {
   coarseaperture_ = 1;
@@ -22771,15 +23678,15 @@ inline void AppSignal::set_coarseaperture(double value) {
   coarseaperture_ = value;
 }
 
-// optional double fineAperture = 84 [default = 0.5];
+// optional double fineAperture = 85 [default = 0.5];
 inline bool AppSignal::has_fineaperture() const {
-  return (_has_bits_[1] & 0x00000001u) != 0;
+  return (_has_bits_[1] & 0x00000002u) != 0;
 }
 inline void AppSignal::set_has_fineaperture() {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[1] |= 0x00000002u;
 }
 inline void AppSignal::clear_has_fineaperture() {
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline void AppSignal::clear_fineaperture() {
   fineaperture_ = 0.5;
@@ -22793,15 +23700,15 @@ inline void AppSignal::set_fineaperture(double value) {
   fineaperture_ = value;
 }
 
-// optional bool adaptiveAperture = 85 [default = false];
+// optional bool adaptiveAperture = 86 [default = false];
 inline bool AppSignal::has_adaptiveaperture() const {
-  return (_has_bits_[1] & 0x00000002u) != 0;
+  return (_has_bits_[1] & 0x00000004u) != 0;
 }
 inline void AppSignal::set_has_adaptiveaperture() {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[1] |= 0x00000004u;
 }
 inline void AppSignal::clear_has_adaptiveaperture() {
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline void AppSignal::clear_adaptiveaperture() {
   adaptiveaperture_ = false;
@@ -22815,473 +23722,79 @@ inline void AppSignal::set_adaptiveaperture(bool value) {
   adaptiveaperture_ = value;
 }
 
-// optional int32 ID = 101 [default = -1];
-inline bool AppSignal::has_id() const {
-  return (_has_bits_[1] & 0x00000004u) != 0;
-}
-inline void AppSignal::set_has_id() {
-  _has_bits_[1] |= 0x00000004u;
-}
-inline void AppSignal::clear_has_id() {
-  _has_bits_[1] &= ~0x00000004u;
-}
-inline void AppSignal::clear_id() {
-  id_ = -1;
-  clear_has_id();
-}
-inline ::google::protobuf::int32 AppSignal::id() const {
-  return id_;
-}
-inline void AppSignal::set_id(::google::protobuf::int32 value) {
-  set_has_id();
-  id_ = value;
-}
-
-// optional int32 signalGroupID = 102 [default = -1];
-inline bool AppSignal::has_signalgroupid() const {
+// optional .Proto.AppSignalDbField dbField = 120;
+inline bool AppSignal::has_dbfield() const {
   return (_has_bits_[1] & 0x00000008u) != 0;
 }
-inline void AppSignal::set_has_signalgroupid() {
+inline void AppSignal::set_has_dbfield() {
   _has_bits_[1] |= 0x00000008u;
 }
-inline void AppSignal::clear_has_signalgroupid() {
+inline void AppSignal::clear_has_dbfield() {
   _has_bits_[1] &= ~0x00000008u;
 }
-inline void AppSignal::clear_signalgroupid() {
-  signalgroupid_ = -1;
-  clear_has_signalgroupid();
+inline void AppSignal::clear_dbfield() {
+  if (dbfield_ != NULL) dbfield_->::Proto::AppSignalDbField::Clear();
+  clear_has_dbfield();
 }
-inline ::google::protobuf::int32 AppSignal::signalgroupid() const {
-  return signalgroupid_;
+inline const ::Proto::AppSignalDbField& AppSignal::dbfield() const {
+  return dbfield_ != NULL ? *dbfield_ : *default_instance_->dbfield_;
 }
-inline void AppSignal::set_signalgroupid(::google::protobuf::int32 value) {
-  set_has_signalgroupid();
-  signalgroupid_ = value;
+inline ::Proto::AppSignalDbField* AppSignal::mutable_dbfield() {
+  set_has_dbfield();
+  if (dbfield_ == NULL) dbfield_ = new ::Proto::AppSignalDbField;
+  return dbfield_;
+}
+inline ::Proto::AppSignalDbField* AppSignal::release_dbfield() {
+  clear_has_dbfield();
+  ::Proto::AppSignalDbField* temp = dbfield_;
+  dbfield_ = NULL;
+  return temp;
+}
+inline void AppSignal::set_allocated_dbfield(::Proto::AppSignalDbField* dbfield) {
+  delete dbfield_;
+  dbfield_ = dbfield;
+  if (dbfield) {
+    set_has_dbfield();
+  } else {
+    clear_has_dbfield();
+  }
 }
 
-// optional int32 signalInstanceID = 103 [default = -1];
-inline bool AppSignal::has_signalinstanceid() const {
+// optional .Proto.AppSignalCalculatedParam calcParam = 121;
+inline bool AppSignal::has_calcparam() const {
   return (_has_bits_[1] & 0x00000010u) != 0;
 }
-inline void AppSignal::set_has_signalinstanceid() {
+inline void AppSignal::set_has_calcparam() {
   _has_bits_[1] |= 0x00000010u;
 }
-inline void AppSignal::clear_has_signalinstanceid() {
+inline void AppSignal::clear_has_calcparam() {
   _has_bits_[1] &= ~0x00000010u;
 }
-inline void AppSignal::clear_signalinstanceid() {
-  signalinstanceid_ = -1;
-  clear_has_signalinstanceid();
+inline void AppSignal::clear_calcparam() {
+  if (calcparam_ != NULL) calcparam_->::Proto::AppSignalCalculatedParam::Clear();
+  clear_has_calcparam();
 }
-inline ::google::protobuf::int32 AppSignal::signalinstanceid() const {
-  return signalinstanceid_;
+inline const ::Proto::AppSignalCalculatedParam& AppSignal::calcparam() const {
+  return calcparam_ != NULL ? *calcparam_ : *default_instance_->calcparam_;
 }
-inline void AppSignal::set_signalinstanceid(::google::protobuf::int32 value) {
-  set_has_signalinstanceid();
-  signalinstanceid_ = value;
+inline ::Proto::AppSignalCalculatedParam* AppSignal::mutable_calcparam() {
+  set_has_calcparam();
+  if (calcparam_ == NULL) calcparam_ = new ::Proto::AppSignalCalculatedParam;
+  return calcparam_;
 }
-
-// optional int32 changesetID = 104 [default = -1];
-inline bool AppSignal::has_changesetid() const {
-  return (_has_bits_[1] & 0x00000020u) != 0;
-}
-inline void AppSignal::set_has_changesetid() {
-  _has_bits_[1] |= 0x00000020u;
-}
-inline void AppSignal::clear_has_changesetid() {
-  _has_bits_[1] &= ~0x00000020u;
-}
-inline void AppSignal::clear_changesetid() {
-  changesetid_ = -1;
-  clear_has_changesetid();
-}
-inline ::google::protobuf::int32 AppSignal::changesetid() const {
-  return changesetid_;
-}
-inline void AppSignal::set_changesetid(::google::protobuf::int32 value) {
-  set_has_changesetid();
-  changesetid_ = value;
-}
-
-// optional bool checkedOut = 105 [default = false];
-inline bool AppSignal::has_checkedout() const {
-  return (_has_bits_[1] & 0x00000040u) != 0;
-}
-inline void AppSignal::set_has_checkedout() {
-  _has_bits_[1] |= 0x00000040u;
-}
-inline void AppSignal::clear_has_checkedout() {
-  _has_bits_[1] &= ~0x00000040u;
-}
-inline void AppSignal::clear_checkedout() {
-  checkedout_ = false;
-  clear_has_checkedout();
-}
-inline bool AppSignal::checkedout() const {
-  return checkedout_;
-}
-inline void AppSignal::set_checkedout(bool value) {
-  set_has_checkedout();
-  checkedout_ = value;
-}
-
-// optional int32 userID = 106 [default = -1];
-inline bool AppSignal::has_userid() const {
-  return (_has_bits_[1] & 0x00000080u) != 0;
-}
-inline void AppSignal::set_has_userid() {
-  _has_bits_[1] |= 0x00000080u;
-}
-inline void AppSignal::clear_has_userid() {
-  _has_bits_[1] &= ~0x00000080u;
-}
-inline void AppSignal::clear_userid() {
-  userid_ = -1;
-  clear_has_userid();
-}
-inline ::google::protobuf::int32 AppSignal::userid() const {
-  return userid_;
-}
-inline void AppSignal::set_userid(::google::protobuf::int32 value) {
-  set_has_userid();
-  userid_ = value;
-}
-
-// optional int64 created = 107 [default = 0];
-inline bool AppSignal::has_created() const {
-  return (_has_bits_[1] & 0x00000100u) != 0;
-}
-inline void AppSignal::set_has_created() {
-  _has_bits_[1] |= 0x00000100u;
-}
-inline void AppSignal::clear_has_created() {
-  _has_bits_[1] &= ~0x00000100u;
-}
-inline void AppSignal::clear_created() {
-  created_ = GOOGLE_LONGLONG(0);
-  clear_has_created();
-}
-inline ::google::protobuf::int64 AppSignal::created() const {
-  return created_;
-}
-inline void AppSignal::set_created(::google::protobuf::int64 value) {
-  set_has_created();
-  created_ = value;
-}
-
-// optional bool deleted = 108 [default = false];
-inline bool AppSignal::has_deleted() const {
-  return (_has_bits_[1] & 0x00000200u) != 0;
-}
-inline void AppSignal::set_has_deleted() {
-  _has_bits_[1] |= 0x00000200u;
-}
-inline void AppSignal::clear_has_deleted() {
-  _has_bits_[1] &= ~0x00000200u;
-}
-inline void AppSignal::clear_deleted() {
-  deleted_ = false;
-  clear_has_deleted();
-}
-inline bool AppSignal::deleted() const {
-  return deleted_;
-}
-inline void AppSignal::set_deleted(bool value) {
-  set_has_deleted();
-  deleted_ = value;
-}
-
-// optional int64 instanceCreated = 109 [default = 0];
-inline bool AppSignal::has_instancecreated() const {
-  return (_has_bits_[1] & 0x00000400u) != 0;
-}
-inline void AppSignal::set_has_instancecreated() {
-  _has_bits_[1] |= 0x00000400u;
-}
-inline void AppSignal::clear_has_instancecreated() {
-  _has_bits_[1] &= ~0x00000400u;
-}
-inline void AppSignal::clear_instancecreated() {
-  instancecreated_ = GOOGLE_LONGLONG(0);
-  clear_has_instancecreated();
-}
-inline ::google::protobuf::int64 AppSignal::instancecreated() const {
-  return instancecreated_;
-}
-inline void AppSignal::set_instancecreated(::google::protobuf::int64 value) {
-  set_has_instancecreated();
-  instancecreated_ = value;
-}
-
-// optional int32 instanceAction = 110 [default = 0];
-inline bool AppSignal::has_instanceaction() const {
-  return (_has_bits_[1] & 0x00000800u) != 0;
-}
-inline void AppSignal::set_has_instanceaction() {
-  _has_bits_[1] |= 0x00000800u;
-}
-inline void AppSignal::clear_has_instanceaction() {
-  _has_bits_[1] &= ~0x00000800u;
-}
-inline void AppSignal::clear_instanceaction() {
-  instanceaction_ = 0;
-  clear_has_instanceaction();
-}
-inline ::google::protobuf::int32 AppSignal::instanceaction() const {
-  return instanceaction_;
-}
-inline void AppSignal::set_instanceaction(::google::protobuf::int32 value) {
-  set_has_instanceaction();
-  instanceaction_ = value;
-}
-
-// optional uint64 hash = 116 [default = 0];
-inline bool AppSignal::has_hash() const {
-  return (_has_bits_[1] & 0x00001000u) != 0;
-}
-inline void AppSignal::set_has_hash() {
-  _has_bits_[1] |= 0x00001000u;
-}
-inline void AppSignal::clear_has_hash() {
-  _has_bits_[1] &= ~0x00001000u;
-}
-inline void AppSignal::clear_hash() {
-  hash_ = GOOGLE_ULONGLONG(0);
-  clear_has_hash();
-}
-inline ::google::protobuf::uint64 AppSignal::hash() const {
-  return hash_;
-}
-inline void AppSignal::set_hash(::google::protobuf::uint64 value) {
-  set_has_hash();
-  hash_ = value;
-}
-
-// optional .Proto.Address16 ioBufAddr = 117;
-inline bool AppSignal::has_iobufaddr() const {
-  return (_has_bits_[1] & 0x00002000u) != 0;
-}
-inline void AppSignal::set_has_iobufaddr() {
-  _has_bits_[1] |= 0x00002000u;
-}
-inline void AppSignal::clear_has_iobufaddr() {
-  _has_bits_[1] &= ~0x00002000u;
-}
-inline void AppSignal::clear_iobufaddr() {
-  if (iobufaddr_ != NULL) iobufaddr_->::Proto::Address16::Clear();
-  clear_has_iobufaddr();
-}
-inline const ::Proto::Address16& AppSignal::iobufaddr() const {
-  return iobufaddr_ != NULL ? *iobufaddr_ : *default_instance_->iobufaddr_;
-}
-inline ::Proto::Address16* AppSignal::mutable_iobufaddr() {
-  set_has_iobufaddr();
-  if (iobufaddr_ == NULL) iobufaddr_ = new ::Proto::Address16;
-  return iobufaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_iobufaddr() {
-  clear_has_iobufaddr();
-  ::Proto::Address16* temp = iobufaddr_;
-  iobufaddr_ = NULL;
+inline ::Proto::AppSignalCalculatedParam* AppSignal::release_calcparam() {
+  clear_has_calcparam();
+  ::Proto::AppSignalCalculatedParam* temp = calcparam_;
+  calcparam_ = NULL;
   return temp;
 }
-inline void AppSignal::set_allocated_iobufaddr(::Proto::Address16* iobufaddr) {
-  delete iobufaddr_;
-  iobufaddr_ = iobufaddr;
-  if (iobufaddr) {
-    set_has_iobufaddr();
+inline void AppSignal::set_allocated_calcparam(::Proto::AppSignalCalculatedParam* calcparam) {
+  delete calcparam_;
+  calcparam_ = calcparam;
+  if (calcparam) {
+    set_has_calcparam();
   } else {
-    clear_has_iobufaddr();
-  }
-}
-
-// optional .Proto.Address16 tuningAddr = 118;
-inline bool AppSignal::has_tuningaddr() const {
-  return (_has_bits_[1] & 0x00004000u) != 0;
-}
-inline void AppSignal::set_has_tuningaddr() {
-  _has_bits_[1] |= 0x00004000u;
-}
-inline void AppSignal::clear_has_tuningaddr() {
-  _has_bits_[1] &= ~0x00004000u;
-}
-inline void AppSignal::clear_tuningaddr() {
-  if (tuningaddr_ != NULL) tuningaddr_->::Proto::Address16::Clear();
-  clear_has_tuningaddr();
-}
-inline const ::Proto::Address16& AppSignal::tuningaddr() const {
-  return tuningaddr_ != NULL ? *tuningaddr_ : *default_instance_->tuningaddr_;
-}
-inline ::Proto::Address16* AppSignal::mutable_tuningaddr() {
-  set_has_tuningaddr();
-  if (tuningaddr_ == NULL) tuningaddr_ = new ::Proto::Address16;
-  return tuningaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_tuningaddr() {
-  clear_has_tuningaddr();
-  ::Proto::Address16* temp = tuningaddr_;
-  tuningaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_tuningaddr(::Proto::Address16* tuningaddr) {
-  delete tuningaddr_;
-  tuningaddr_ = tuningaddr;
-  if (tuningaddr) {
-    set_has_tuningaddr();
-  } else {
-    clear_has_tuningaddr();
-  }
-}
-
-// optional .Proto.Address16 ualAddr = 119;
-inline bool AppSignal::has_ualaddr() const {
-  return (_has_bits_[1] & 0x00008000u) != 0;
-}
-inline void AppSignal::set_has_ualaddr() {
-  _has_bits_[1] |= 0x00008000u;
-}
-inline void AppSignal::clear_has_ualaddr() {
-  _has_bits_[1] &= ~0x00008000u;
-}
-inline void AppSignal::clear_ualaddr() {
-  if (ualaddr_ != NULL) ualaddr_->::Proto::Address16::Clear();
-  clear_has_ualaddr();
-}
-inline const ::Proto::Address16& AppSignal::ualaddr() const {
-  return ualaddr_ != NULL ? *ualaddr_ : *default_instance_->ualaddr_;
-}
-inline ::Proto::Address16* AppSignal::mutable_ualaddr() {
-  set_has_ualaddr();
-  if (ualaddr_ == NULL) ualaddr_ = new ::Proto::Address16;
-  return ualaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_ualaddr() {
-  clear_has_ualaddr();
-  ::Proto::Address16* temp = ualaddr_;
-  ualaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_ualaddr(::Proto::Address16* ualaddr) {
-  delete ualaddr_;
-  ualaddr_ = ualaddr;
-  if (ualaddr) {
-    set_has_ualaddr();
-  } else {
-    clear_has_ualaddr();
-  }
-}
-
-// optional .Proto.Address16 regBufAddr = 120;
-inline bool AppSignal::has_regbufaddr() const {
-  return (_has_bits_[1] & 0x00010000u) != 0;
-}
-inline void AppSignal::set_has_regbufaddr() {
-  _has_bits_[1] |= 0x00010000u;
-}
-inline void AppSignal::clear_has_regbufaddr() {
-  _has_bits_[1] &= ~0x00010000u;
-}
-inline void AppSignal::clear_regbufaddr() {
-  if (regbufaddr_ != NULL) regbufaddr_->::Proto::Address16::Clear();
-  clear_has_regbufaddr();
-}
-inline const ::Proto::Address16& AppSignal::regbufaddr() const {
-  return regbufaddr_ != NULL ? *regbufaddr_ : *default_instance_->regbufaddr_;
-}
-inline ::Proto::Address16* AppSignal::mutable_regbufaddr() {
-  set_has_regbufaddr();
-  if (regbufaddr_ == NULL) regbufaddr_ = new ::Proto::Address16;
-  return regbufaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_regbufaddr() {
-  clear_has_regbufaddr();
-  ::Proto::Address16* temp = regbufaddr_;
-  regbufaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_regbufaddr(::Proto::Address16* regbufaddr) {
-  delete regbufaddr_;
-  regbufaddr_ = regbufaddr;
-  if (regbufaddr) {
-    set_has_regbufaddr();
-  } else {
-    clear_has_regbufaddr();
-  }
-}
-
-// optional .Proto.Address16 regValueAddr = 121;
-inline bool AppSignal::has_regvalueaddr() const {
-  return (_has_bits_[1] & 0x00020000u) != 0;
-}
-inline void AppSignal::set_has_regvalueaddr() {
-  _has_bits_[1] |= 0x00020000u;
-}
-inline void AppSignal::clear_has_regvalueaddr() {
-  _has_bits_[1] &= ~0x00020000u;
-}
-inline void AppSignal::clear_regvalueaddr() {
-  if (regvalueaddr_ != NULL) regvalueaddr_->::Proto::Address16::Clear();
-  clear_has_regvalueaddr();
-}
-inline const ::Proto::Address16& AppSignal::regvalueaddr() const {
-  return regvalueaddr_ != NULL ? *regvalueaddr_ : *default_instance_->regvalueaddr_;
-}
-inline ::Proto::Address16* AppSignal::mutable_regvalueaddr() {
-  set_has_regvalueaddr();
-  if (regvalueaddr_ == NULL) regvalueaddr_ = new ::Proto::Address16;
-  return regvalueaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_regvalueaddr() {
-  clear_has_regvalueaddr();
-  ::Proto::Address16* temp = regvalueaddr_;
-  regvalueaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_regvalueaddr(::Proto::Address16* regvalueaddr) {
-  delete regvalueaddr_;
-  regvalueaddr_ = regvalueaddr;
-  if (regvalueaddr) {
-    set_has_regvalueaddr();
-  } else {
-    clear_has_regvalueaddr();
-  }
-}
-
-// optional .Proto.Address16 regValidityAddr = 122;
-inline bool AppSignal::has_regvalidityaddr() const {
-  return (_has_bits_[1] & 0x00040000u) != 0;
-}
-inline void AppSignal::set_has_regvalidityaddr() {
-  _has_bits_[1] |= 0x00040000u;
-}
-inline void AppSignal::clear_has_regvalidityaddr() {
-  _has_bits_[1] &= ~0x00040000u;
-}
-inline void AppSignal::clear_regvalidityaddr() {
-  if (regvalidityaddr_ != NULL) regvalidityaddr_->::Proto::Address16::Clear();
-  clear_has_regvalidityaddr();
-}
-inline const ::Proto::Address16& AppSignal::regvalidityaddr() const {
-  return regvalidityaddr_ != NULL ? *regvalidityaddr_ : *default_instance_->regvalidityaddr_;
-}
-inline ::Proto::Address16* AppSignal::mutable_regvalidityaddr() {
-  set_has_regvalidityaddr();
-  if (regvalidityaddr_ == NULL) regvalidityaddr_ = new ::Proto::Address16;
-  return regvalidityaddr_;
-}
-inline ::Proto::Address16* AppSignal::release_regvalidityaddr() {
-  clear_has_regvalidityaddr();
-  ::Proto::Address16* temp = regvalidityaddr_;
-  regvalidityaddr_ = NULL;
-  return temp;
-}
-inline void AppSignal::set_allocated_regvalidityaddr(::Proto::Address16* regvalidityaddr) {
-  delete regvalidityaddr_;
-  regvalidityaddr_ = regvalidityaddr;
-  if (regvalidityaddr) {
-    set_has_regvalidityaddr();
-  } else {
-    clear_has_regvalidityaddr();
+    clear_has_calcparam();
   }
 }
 

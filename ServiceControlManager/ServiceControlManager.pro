@@ -83,7 +83,14 @@ SOURCES += MainWindow.cpp \
     ../lib/AppDataSource.cpp \
     ../lib/CircularLogger.cpp \
     TcpConfigServiceClient.cpp \
-    AppDataServiceWidget.cpp
+    AppDataServiceWidget.cpp \
+    ../lib/SoftwareInfo.cpp \
+    ../lib/Service.cpp \
+    ../lib/CommandLineParser.cpp \
+    ../lib/TuningValue.cpp \
+    TuningServiceWidget.cpp \
+    TcpTuningServiceClient.cpp \
+    ../lib/Tuning/TuningSourceState.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -117,7 +124,17 @@ HEADERS  += MainWindow.h \
     ../lib/CircularLogger.h \
     TcpConfigServiceClient.h \
     ../lib/WidgetUtils.h \
-    AppDataServiceWidget.h
+    AppDataServiceWidget.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/OrderedHash.h \
+    ../lib/Service.h \
+    ../lib/CommandLineParser.h \
+    ../lib/TuningValue.h \
+    TuningServiceWidget.h \
+    TcpTuningServiceClient.h \
+    ../lib/Tuning/TuningSourceState.h
+
+include(../qtservice/src/qtservice.pri)
 
 FORMS    +=
 

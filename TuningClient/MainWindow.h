@@ -10,7 +10,7 @@
 #include "../lib/LogFile.h"
 #include "../lib/Tuning/TuningLog.h"
 #include "UserManager.h"
-#include "TuningClientSignalManager.h"
+#include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
 #include "DialogAlert.h"
@@ -24,8 +24,10 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget* parent = 0);
+	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~MainWindow();
+
+	UserManager* userManager();
 
 private:
 	void createActions();
@@ -36,7 +38,10 @@ private:
 
 
 private:
-	TuningClientSignalManager* m_objectManager = nullptr;
+
+	TuningSignalManager m_tuningSignalManager;
+
+	TuningClientTcpClient* m_tcpClient = nullptr;
 
 	SimpleThread* m_tcpClientThread = nullptr;
 
@@ -44,24 +49,31 @@ private:
 
 	ConfigController m_configController;
 
+	QVBoxLayout* m_mainLayout = nullptr;
+
+	LogonWorkspace* m_logonWorkspace = nullptr;
+
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
-	DialogAlert* m_dialogAlert = nullptr;
+	UserManager m_userManager;
+public:
 
-	int m_mainWindowTimerId = -1;
+	int m_mainWindowTimerId_250ms = -1;
+	int m_mainWindowTimerId_500ms = -1;
+
+	DialogAlert* m_dialogAlert = nullptr;
 
 private slots:
 	void slot_configurationArrived();
 	void slot_projectFiltersUpdated(QByteArray data);
-	void slot_schemasDetailsUpdated(QByteArray data);
+	void slot_signalsUpdated(QByteArray data);
 	void slot_schemasGlobalScriptArrived(QByteArray data);
 
 public slots:
 	void exit();
 	void runPresetEditor();
-	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
 	void showLog();
@@ -71,23 +83,48 @@ private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
-	void createWorkspace(const TuningSignalStorage* objects);
+	void createWorkspace();
+
+private:
+	bool eventFilter(QObject *object, QEvent *event) override;
+
+	void updateStatusBar();
+
+signals:
+	void timerTick500();
+
+private:
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
-	QAction* m_pUsersAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusDiscreteCount = nullptr;
 	QLabel* m_statusBarLmErrors = nullptr;
 	QLabel* m_statusBarSor = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
+	QLabel* m_statusBarLogAlerts = nullptr;
 
 	QString m_globalScript;
+
+	TuningLog::TuningLog* m_tuningLog = nullptr;
+
+	bool m_singleLmControlMode = true;
+	QString m_activeClientId;
+	QString m_activeClientIp;
+	int m_discreteCounter = -1;
+	int m_lmErrorsCounter = -1;
+	int m_sorCounter = -1;
+	int m_logErrorsCounter = -1;
+	int m_logWarningsCounter = -1;
+
+	static QString m_singleLmControlModeText;
+	static QString m_multipleLmControlModeText;
 };
 
 // Global definitions
@@ -95,10 +132,6 @@ private:
 extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
-
-extern TuningLog::TuningLog* theTuningLog;
-
-extern UserManager theUserManager;
 
 #endif // MAINWINDOW_H
 

@@ -2,6 +2,7 @@
 #define SETTINGS_H
 
 #include "../lib/HostAddressPort.h"
+#include "UserManager.h"
 
 //
 // ConfigConnection
@@ -50,10 +51,11 @@ struct SchemaSettings
 
 struct ConfigSettings
 {
-	ConfigConnection tuns1;				// Tuning Service connection params
-	ConfigConnection tuns2;				// Tuning Service connection params
+	ConfigConnection tuningServiceAddress;				// Tuning Service connection params
 
 	bool autoApply = true;
+
+	LogonMode logonMode = LogonMode::Permanent;
 
 	bool showSignals = true;
 
@@ -67,28 +69,17 @@ struct ConfigSettings
 
 	bool showSOR = true;
 
-	bool loginPerOperation = false;
+	bool showDiscreteCounters = true;
 
 	int loginSessionLength = 120;
 
 	QStringList usersAccounts;
 
+	QStringList equipmentList;
+
 	std::vector<SchemaSettings> schemas;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
-};
-
-//
-// TuningPageSettings
-//
-
-
-class TuningPageSettings
-{
-public:
-	int m_columnCount = 0;
-	std::vector<int> m_columnsIndexes;
-	std::vector<int> m_columnsWidth;
 };
 
 //
@@ -106,8 +97,11 @@ public:
 	void StoreSystem();
 	void RestoreSystem();
 
+	QStringList instanceHistory();
+	void setInstanceHistory(const QStringList& value);
+
 	QString instanceStrId();
-	void setInstanceId(const QString& value);
+	void setInstanceStrId(const QString& value);
 
 	void setConfiguratorAddress1(const QString& address, int port);
 	HostAddressPort configuratorAddress1();
@@ -120,8 +114,6 @@ public:
 
 	bool admin() const;
 
-	TuningPageSettings* tuningPageSettings(int index);
-
 	QString globalAppDataPath();
 
 	QString localAppDataPath();
@@ -130,7 +122,11 @@ public:
 
 public:
 
-	int m_requestInterval = 10;
+	int m_requestInterval = 100;
+
+#ifdef Q_DEBUG
+	bool m_simulationMode = false;
+#endif
 
 	//
 
@@ -162,12 +158,9 @@ public:
 
 private:
 
-	// Tuning pages settings
-	//
-	std::vector<TuningPageSettings> m_tuningPageSettings;
-
 	bool m_admin = false;
 
+	QStringList m_instanceHistory;
 	QString m_instanceStrId;
 
 	QString m_configuratorIpAddress1;

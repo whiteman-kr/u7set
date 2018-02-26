@@ -95,7 +95,9 @@ SOURCES += \
     ../u7/Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
-    TcpArchiveClient.cpp
+    TcpArchiveClient.cpp \
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS += \
 	Stable.h \
@@ -144,7 +146,9 @@ HEADERS += \
     ../u7/Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     TcpArchiveClient.h \
-    ../lib/TimeStamp.h
+    ../lib/TimeStamp.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -176,3 +180,4 @@ DISTFILES += \
 
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG

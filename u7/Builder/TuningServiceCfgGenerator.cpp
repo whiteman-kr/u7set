@@ -37,10 +37,28 @@ namespace Builder
 
 		bool result = true;
 
-		result &= writeSettings();
-		result &= writeTuningLMs();
-		result &= writeBatFile();
-		result &= writeShFile();
+		result = writeSettings();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = writeTuningLMs();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = writeBatFile();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = writeShFile();
 
 		return result;
 	}
@@ -70,7 +88,7 @@ namespace Builder
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
-		xml.writeStartElement("TuningLMs");
+		xml.writeStartElement("TuningSources");
 
 		QList<Hardware::DeviceModule*> tuningLMs;
 
@@ -185,7 +203,7 @@ namespace Builder
 			ds.writeToXml(xml);
 		}
 
-		xml.writeEndElement();				//	</TuningLMs>
+		xml.writeEndElement();				//	</TuningSources>
 
 		return result;
 	}
@@ -219,7 +237,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_software);
 
-		QString content = getBuildInfoCommentsForBat();
+		QString content = getBuildInfoCommentsForSh();
 
 		content += "./TuningSrv";
 

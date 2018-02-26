@@ -5,31 +5,15 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 
-ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
-	BaseServiceStateWidget(ip, portIndex, parent)
+ConfigurationServiceWidget::ConfigurationServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, udpIp, udpPort, parent)
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &ConfigurationServiceWidget::updateStateInfo);
 
 	setStateTabMaxRowQuantity(9);
 
 	//----------------------------------------------------------------------------------------------------
-	QTableView* clientsTableView = addTabWithTableView(150, "Clients");
-
-	m_clientsTabModel = new QStandardItemModel(0, 8, this);
-	clientsTableView->setModel(m_clientsTabModel);
-
-	m_clientsTabModel->setHeaderData(0, Qt::Horizontal, "Software type");
-	m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Version");
-	m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "Equipment ID");
-	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "IPv4");
-	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "Connection time");
-	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "Connection uptime");
-	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "State");
-	m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Packet counter");
-
-	clientsTableView->setColumnWidth(0, 200);
-	clientsTableView->setColumnWidth(1, 100);
-	clientsTableView->setColumnWidth(2, 200);
+	addClientsTab();
 
 	//----------------------------------------------------------------------------------------------------
 	QTableView* buildInfoTableView = addTabWithTableView(250, "Build Info");
@@ -83,7 +67,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 			stateTabModel()->setData(stateTabModel()->index(8, 1), "???");
 		}
 
-		stateTabModel()->setData(stateTabModel()->index(8, 1), m_clientsTabModel->rowCount());
+		stateTabModel()->setData(stateTabModel()->index(8, 1), clientsTabModel()->rowCount());
 
 		quint32 ip = m_serviceInfo.clientrequestip();
 		quint16 port = m_serviceInfo.clientrequestport();
@@ -98,7 +82,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 
 		if (m_tcpClientSocket != nullptr)
 		{
-			HostAddressPort&& curAddress = m_tcpClientSocket->serverAddressPort(0);
+			HostAddressPort&& curAddress = m_tcpClientSocket->currentServerAddressPort();
 			if (curAddress.address32() != ip || curAddress.port() != port)
 			{
 				dropTcpConnection();
@@ -129,50 +113,15 @@ void ConfigurationServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(7, 1), E::valueToString<E::ConfigCheckerState>(s.buildcheckerstate()));
 }
 
-void ConfigurationServiceWidget::updateClients()
+void ConfigurationServiceWidget::updateClientsInfo()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)
 	{
-		m_clientsTabModel->setRowCount(0);
+		clientsTabModel()->setRowCount(0);
+		return;
 	}
 
-	const Network::ConfigurationServiceClients& cs = m_tcpClientSocket->clients();
-
-	m_clientsTabModel->setRowCount(cs.clients_size());
-	stateTabModel()->setData(stateTabModel()->index(8, 1), cs.clients_size());
-
-	for (int i = 0; i < cs.clients_size(); i++)
-	{
-		const Network::ConfigurationServiceClientInfo& ci = cs.clients(i);
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0),
-								   E::valueToString<E::SoftwareType>(ci.softwaretype()));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1),
-								   QString("%1.%2.%3")
-								   .arg(ci.majorversion())
-								   .arg(ci.minorversion())
-								   .arg(ci.commitno()));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(ci.equipmentid()));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QHostAddress(ci.ip()).toString());
-
-		quint64 uptime = ci.uptime();
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
-
-		uptime /= 1000;
-		int s = uptime % 60; uptime /= 60;
-		int m = uptime % 60; uptime /= 60;
-		int h = uptime % 24; uptime /= 24;
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QString("(%1d %2:%3:%4)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), ci.isactual() ? "Actual" : "Non actual");
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), static_cast<qint64>(ci.replyquantity()));
-	}
+	updateClientsModel(m_tcpClientSocket->clients());
 }
 
 void ConfigurationServiceWidget::updateBuildInfo()
@@ -233,7 +182,7 @@ void ConfigurationServiceWidget::clearServiceData()
 	m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Not loaded");
 	m_buildTabModel->setRowCount(1);
 
-	m_clientsTabModel->setRowCount(0);
+	clientsTabModel()->setRowCount(0);
 
 	for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
 	{
@@ -243,11 +192,11 @@ void ConfigurationServiceWidget::clearServiceData()
 
 void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
-	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, port));
+	m_tcpClientSocket = new TcpConfigServiceClient(softwareInfo(), HostAddressPort(ip, port));
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
 
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &ConfigurationServiceWidget::updateServiceState);
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &ConfigurationServiceWidget::updateClients);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &ConfigurationServiceWidget::updateClientsInfo);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &ConfigurationServiceWidget::updateServiceSettings);
 
@@ -259,6 +208,8 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 void ConfigurationServiceWidget::dropTcpConnection()
 {
 	m_tcpClientThread->quitAndWait();
+	delete m_tcpClientThread;
+	m_tcpClientThread = nullptr;
 
 	m_tcpClientSocket = nullptr;
 }

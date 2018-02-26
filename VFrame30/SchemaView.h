@@ -79,8 +79,9 @@ namespace VFrame30
 		const Session& session() const;
 		Session& session();
 
-		const TuningController& tuningController() const;
-		TuningController& tuningController();
+		TuningController* tuningController();
+		const TuningController* tuningController() const;
+		void setTuningController(TuningController*value);
 
 		virtual QJSEngine* jsEngine();
 
@@ -94,7 +95,7 @@ namespace VFrame30
 		double m_zoom = 100.0;
 
 		Session m_session;
-		TuningController m_tuningController;
+		TuningController* m_tuningController = nullptr;
 
 	protected:
 		bool m_jsEngineGlobalsWereCreated = false;

@@ -592,17 +592,20 @@ namespace Hardware
 
 		visible:			[Added in version 3] property is visible
 */
+		QString m_specificPropertiesStructTrimmed = m_specificPropertiesStruct;
 
-		QStringList rows = m_specificPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
+		QStringList rows = m_specificPropertiesStructTrimmed.split(QChar::LineFeed, QString::SkipEmptyParts);
 
-		for (const QString& r : rows)
+		for (QString row : rows)
 		{
-			if (r.isEmpty() == true)
+			row = row.trimmed();
+
+			if (row.isEmpty() == true)
 			{
 				continue;
 			}
 
-			QStringList columns = r.split(';');
+			QStringList columns = row.split(';');
 
 			for (QString& col : columns)
 			{
@@ -616,7 +619,7 @@ namespace Hardware
 
 			if (ok == false)
 			{
-				qDebug() << Q_FUNC_INFO << " SpecificProperties: failed to parse specific prop version filed: " << r;
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: failed to parse specific prop version filed: " << row;
 				continue;
 			}
 
@@ -633,13 +636,25 @@ namespace Hardware
 				break;
 			default:
 				assert(false);
-				qDebug() << "Object " << this->equipmentId() << " has spec prop with unsuported version: " << r;
+				qDebug() << "Object " << this->equipmentId() << " has spec prop with unsuported version: " << row;
+			}
+		}
+
+		std::vector<std::shared_ptr<Property>> newProperties = properties();
+
+		// Set Specific editors to properties
+		//
+
+		for (std::shared_ptr<Property> p : newProperties)
+		{
+			if (p->caption() == "Filters" && p->description() == "Tuning signal filters description in XML format")
+			{
+				p->setSpecificEditor(PropertySpecificEditor::TuningFilter);
 			}
 		}
 
 		// Set to parsed properties old value
 		//
-		std::vector<std::shared_ptr<Property>> newProperties = properties();
 
 		for (std::shared_ptr<Property> p : oldProperties)
 		{
@@ -3266,7 +3281,7 @@ R"DELIM({
 
 			m_validitySignalId.replace(QLatin1String("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
 
-			qDebug() << m_validitySignalId;
+			// qDebug() << m_validitySignalId;
 		}
 
 		DeviceObject::expandEquipmentId();

@@ -17,9 +17,11 @@ int main(int argc, char *argv[])
 
 	logger->setLogCodeInfo(false);
 
-	VersionInfo vi = VERSION_INFO(1, 0);
+	SoftwareInfo si;
 
-	DiagDataServiceWorker diagDataServiceWorker("RPCT Diag Data Service", argc, argv, vi, logger);
+	si.init(E::SoftwareType::DiagDataService, "", 0, 0);
+
+	DiagDataServiceWorker diagDataServiceWorker(si, "RPCT Diag Data Service", argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, diagDataServiceWorker, logger);
 

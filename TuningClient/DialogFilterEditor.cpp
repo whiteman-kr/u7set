@@ -2,21 +2,27 @@
 #include "MainWindow.h"
 
 
-DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
+DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage,
                                                    QWidget* parent):
     QDialog(parent),
-	m_tuningSignalManager(tuningSignalManager)
+	m_tuningSignalManager(tuningSignalManager),
+	m_tuningClientTcpClient(tuningTcpClient)
 {
 	assert(tuningSignalManager);
 	assert(filterStorage);
-	assert(objects);
 
-    m_tuningFilterEditor = new TuningFilterEditor(filterStorage, objects,
-												  false, true, TuningFilter::Source::User,
+	m_tuningFilterEditor = new TuningFilterEditor(filterStorage,
+												  tuningSignalManager,
+												  false,	/*readOnly*/
+												  true,		/*setCurrentEnabled*/
+												  true,		/*typeTreeEnabled*/
+												  false,		/*typeButtonEnabled*/
+												  false,		/*typeTabEnabled*/
+												  TuningFilter::Source::User,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
 												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 
-	//connect(m_tuningFilterEditor, &TuningFilterEditor::getCurrentSignalValue, this, &DialogFilterEditor::onGetCurrentSignalValue, Qt::DirectConnection);
+	connect(m_tuningFilterEditor, &TuningFilterEditor::getCurrentSignalValue, this, &DialogFilterEditor::onGetCurrentSignalValue, Qt::DirectConnection);
 
 	m_okButton = new QPushButton(tr("OK"));
 	connect(m_okButton, &QPushButton::clicked, this, &DialogFilterEditor::accept);
@@ -53,30 +59,22 @@ DialogFilterEditor::~DialogFilterEditor()
 
 }
 
-void DialogFilterEditor::onGetCurrentSignalValue(Hash appSignalHash, float* value, bool* ok)
+void DialogFilterEditor::onGetCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok)
 {
     *ok = true;
 
-	QMutexLocker lsignal(&m_tuningSignalManager->m_signalsMutex);
+	TuningSignalState tss = m_tuningSignalManager->state(appSignalHash, ok);
 
-	if (m_tuningSignalManager->signalExists(appSignalHash) == false)
+	if (*ok == false)
+	{
+		return;
+	}
+
+	if (tss.valid() == false)
 	{
         *ok = false;
         return;
 	}
 
-	lsignal.unlock();
-
-	QMutexLocker lstate(&m_tuningSignalManager->m_statesMutex);
-
-    TuningSignalState state = m_tuningSignalManager->stateByHash(appSignalHash);
-
-	if (state.valid() == false)
-	{
-        *ok = false;
-        return;
-	}
-
-    *value = state.value();
-
+	*value = tss.value();
 }

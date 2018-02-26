@@ -16,8 +16,13 @@ class TcpConfigServiceClient : public Tcp::Client
 	Q_OBJECT
 
 public:
-	TcpConfigServiceClient(const HostAddressPort& serverAddressPort);
-	TcpConfigServiceClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort);
+
+	TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2);
+
 	virtual ~TcpConfigServiceClient();
 
 	virtual void onClientThreadStarted() override;
@@ -36,7 +41,7 @@ public:
 	const Network::ConfigurationServiceState& serviceState() { return m_configurationServiceStateMessage; }
 	bool serviceStateIsReady() { return m_serviceStateIsReady; }
 
-	const Network::ConfigurationServiceClients& clients() { return m_configurationServiceClientsMessage; }
+	const Network::ServiceClients& clients() { return m_serviceClientsMessage; }
 	bool clientsIsReady() { return m_clientsIsReady; }
 
 	bool settingsIsReady() { return m_settingsIsReady; }
@@ -65,7 +70,7 @@ private:
 	QTimer* m_updateStatesTimer = nullptr;
 	Builder::BuildInfo m_buildInfo;
 	Network::ConfigurationServiceState m_configurationServiceStateMessage;
-	Network::ConfigurationServiceClients m_configurationServiceClientsMessage;
+	Network::ServiceClients m_serviceClientsMessage;
 
 	QString m_equipmentID;
 	QString m_autoloadBuildPath;

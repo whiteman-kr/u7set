@@ -42,7 +42,8 @@ SOURCES += main.cpp\
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -64,7 +65,8 @@ HEADERS  += SourceListWidget.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/Crc.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../lib/TuningValue.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

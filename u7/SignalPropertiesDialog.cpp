@@ -174,8 +174,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		signalProperties->propertyByCaption(inOutTypeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(dataSizeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(byteOrderCaption)->setReadOnly(true);
-		signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
-		signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
 
 		auto& s = signalProperties->signal();
 		if (s.signalType() == E::SignalType::Bus)
@@ -197,6 +195,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		{
 			signalProperties->propertyByCaption(enableTuningCaption)->setVisible(false);
 			signalProperties->propertyByCaption(tuningDefaultValueCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
 		}
 
 		if (s.isAnalog())
@@ -348,10 +348,11 @@ void SignalPropertiesDialog::saveDialogSettings()
 
 void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects)
 {
-	if (m_tryCheckout)
+	if (m_tryCheckout == true)
 	{
 		checkoutSignals(objects);
 	}
+
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(object.get());

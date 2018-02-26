@@ -359,7 +359,7 @@ namespace Builder
 			jsLogicModules.setProperty(i, module);
 		}
 
-		int frameSize = lmDescription->flashMemory().m_configFrameSize;
+		int frameSize = lmDescription->flashMemory().m_configFramePayload;
 
 		int frameCount = lmDescription->flashMemory().m_configFrameCount;
 

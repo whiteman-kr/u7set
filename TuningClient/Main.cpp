@@ -9,6 +9,10 @@
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 _CRT_REPORT_HOOK prevHook = nullptr;
 
 #define FALSE   0
@@ -107,10 +111,11 @@ void loadLanguage(const QString& rLanguage)
 
 int main(int argc, char* argv[])
 {
+
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 	// To see all memory leaks, not only in the own code, comment the next line
-	//prevHook = _CrtSetReportHook(reportingHook);
+	prevHook = _CrtSetReportHook(reportingHook);
 #endif
 
 	int result = 0;
@@ -122,20 +127,34 @@ int main(int argc, char* argv[])
 
 	a.setApplicationVersion(QString("0.1.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
 
+	//int* x = new int[100];
+
 	VFrame30::VFrame30Library::Init();
 
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
-	theUserManager.Restore();
 
 	loadLanguage(theSettings.language());
 
 	// Parse the command line
 	//
+
 	QCommandLineParser parser;
+
+	parser.addHelpOption();
+	parser.addVersionOption();
+
+	// A string option with id (-id)
 
 	QCommandLineOption idOption("id", "Set the TuningClient ID.", "TuningClient ID");
 	parser.addOption(idOption);
+
+#ifdef Q_DEBUG
+	// A boolean option with simulation (-simulate)
+
+	QCommandLineOption simulationOption("simulate", "Simulate signals values");
+	parser.addOption(simulationOption);
+#endif
 
 	parser.process(*qApp);
 
@@ -143,8 +162,19 @@ int main(int argc, char* argv[])
 
 	if (clientID.isEmpty() == false)
 	{
-		theSettings.setInstanceId(clientID);
+	    theSettings.setInstanceStrId(clientID);
 	}
+
+#ifdef Q_DEBUG
+	theSettings.m_simulationMode = parser.isSet(simulationOption);
+#endif
+
+	//
+	//
+
+	SoftwareInfo softwareInfo;
+
+	softwareInfo.init(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1);
 
 	// Check to run the application in one instance
 	//
@@ -182,7 +212,7 @@ int main(int argc, char* argv[])
 
 			// Run the application
 			//
-			theMainWindow = new MainWindow();
+			theMainWindow = new MainWindow(softwareInfo);
 			theMainWindow->show();
 
 			result = a.exec();
@@ -225,6 +255,10 @@ int main(int argc, char* argv[])
 
 	VFrame30::VFrame30Library::Shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
+
+#if defined (Q_OS_WIN)
+	_CrtDumpMemoryLeaks();
+#endif
 
 	return result;
 }

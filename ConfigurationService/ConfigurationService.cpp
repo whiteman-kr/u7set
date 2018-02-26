@@ -16,11 +16,11 @@ const char* const ConfigurationServiceWorker::SETTING_CLIENT_REQUEST_IP = "Clien
 const char* const ConfigurationServiceWorker::SETTING_WORK_DIRECTORY = "WorkDirectory";
 
 
-ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceName,
+ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
+													   const QString& serviceName,
 													   int& argc, char** argv,
-													   const VersionInfo& versionInfo,
 													   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::ConfigurationService, serviceName, argc, argv, versionInfo, logger),
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_logger(logger)
 {
 }
@@ -28,7 +28,7 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceNam
 
 ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
-	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
 
 	newInstance->init();
 
@@ -101,11 +101,14 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-	CfgControlServer* cfgControlServer = new CfgControlServer(m_equipmentID, m_autoloadBuildPath, m_workDirectory, buildPath, *m_cfgCheckerWorker, m_logger);
+	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
+															  m_autoloadBuildPath,
+															  m_workDirectory,
+															  buildPath,
+															  *m_cfgCheckerWorker,
+															  m_logger);
 
 	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
-
-	connect(listener, &Tcp::Listener::connectedClientsListChanged, cfgControlServer, &CfgControlServer::updateClientsInfo);
 
 	m_cfgServerThread = new Tcp::ServerThread(listener);
 

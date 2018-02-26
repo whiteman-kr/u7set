@@ -180,7 +180,7 @@ AppSignalParam::AppSignalParam()
 
 bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
-	m_hash = message.hash();
+	m_hash = message.calcparam().hash();
 	m_appSignalId = QString::fromStdString(message.appsignalid());
 	m_customSignalId = QString::fromStdString(message.customappsignalid());
 	m_caption = QString::fromStdString(message.caption());
@@ -211,12 +211,15 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_filteringTime = message.filteringtime();
 	m_spreadTolerance = message.spreadtolerance();
 	m_enableTuning = message.enabletuning();
-	m_tuningDefaultValue = message.tuningdefaultvalue();
+
+	m_tuningDefaultValue.load(message.tuningdefaultvalue());
+	m_tuningLowBound.load(message.tuninglowbound());
+	m_tuningHighBound.load(message.tuninghighbound());
 
 	return true;
 }
 
-void AppSignalParam::save(::Proto::AppSignal *message) const
+void AppSignalParam::save(::Proto::AppSignal* message) const
 {
 	if (message == nullptr)
 	{
@@ -224,7 +227,7 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 		return;
 	}
 
-	message->set_hash(m_hash);
+	message->mutable_calcparam()->set_hash(m_hash);
 	message->set_appsignalid(m_appSignalId.toStdString());
 	message->set_customappsignalid(m_customSignalId.toStdString());
 	message->set_caption(m_caption.toStdString());
@@ -255,7 +258,10 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 	message->set_filteringtime(m_filteringTime);
 	message->set_spreadtolerance(m_spreadTolerance);
 	message->set_enabletuning(m_enableTuning);
-	message->set_tuningdefaultvalue(m_tuningDefaultValue);
+
+	m_tuningDefaultValue.save(message->mutable_tuningdefaultvalue());
+	m_tuningLowBound.save(message->mutable_tuninglowbound());
+	m_tuningHighBound.save(message->mutable_tuninghighbound());
 }
 
 Hash AppSignalParam::hash() const
@@ -362,6 +368,36 @@ E::SignalType AppSignalParam::type() const
 void AppSignalParam::setType(E::SignalType value)
 {
 	m_signalType = value;
+}
+
+TuningValueType AppSignalParam::toTuningType() const
+{
+	switch (m_signalType)
+	{
+	case E::Analog:
+		switch (m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			return TuningValueType::Float;
+		case E::AnalogAppSignalFormat::SignedInt32:
+			return TuningValueType::SignedInt32;
+		default:
+			assert(false);
+			// Unsupported tuning signal type
+			//
+		}
+		return TuningValueType::Discrete;
+
+	case E::Discrete:
+		return TuningValueType::Discrete;
+
+	default:
+		// Unsupported tuning signal type
+		//
+		assert(false);
+	}
+
+	return TuningValueType::Discrete;
 }
 
 E::AnalogAppSignalFormat AppSignalParam::analogSignalFormat() const
@@ -519,12 +555,47 @@ void AppSignalParam::setEnableTuning(bool value)
 	m_enableTuning = value;
 }
 
-double AppSignalParam::tuningDefaultValue() const
+TuningValue AppSignalParam::tuningDefaultValue() const
 {
 	return m_tuningDefaultValue;
 }
 
-void AppSignalParam::setTuningDefaultValue(double value)
+void AppSignalParam::setTuningDefaultValue(const TuningValue& value)
 {
 	m_tuningDefaultValue = value;
+}
+
+TuningValue AppSignalParam::tuningLowBound() const
+{
+	return m_tuningLowBound;
+}
+
+void AppSignalParam::setTuningLowBound(const TuningValue& value)
+{
+	m_tuningLowBound = value;
+}
+
+TuningValue AppSignalParam::tuningHighBound() const
+{
+	return m_tuningHighBound;
+}
+
+void AppSignalParam::setTuningHighBound(const TuningValue& value)
+{
+	m_tuningHighBound = value;
+}
+
+double AppSignalParam::getTuningDefaultValue() const
+{
+	return m_tuningDefaultValue.toDouble();
+}
+
+double AppSignalParam::getTuingLowBound() const
+{
+	return m_tuningLowBound.toDouble();
+}
+
+double AppSignalParam::getTuningHighBound() const
+{
+	return m_tuningHighBound.toDouble();
 }

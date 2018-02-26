@@ -51,9 +51,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="m_instanceID"/>
-          </item>
           <item row="3" column="1">
            <widget class="QLineEdit" name="m_IP2"/>
           </item>
@@ -86,6 +83,13 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="m_instanceCombo">
+            <property name="editable">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -155,6 +159,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_instanceCombo</tabstop>
+  <tabstop>m_IP1</tabstop>
+  <tabstop>m_port1</tabstop>
+  <tabstop>m_IP2</tabstop>
+  <tabstop>m_port2</tabstop>
+  <tabstop>m_languageCombo</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -164,8 +176,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>605</x>
+     <y>273</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -180,8 +192,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>673</x>
+     <y>273</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

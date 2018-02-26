@@ -95,7 +95,9 @@ SOURCES += \
     ArchRequestThread.cpp \
     TcpArchRequestsServer.cpp \
     Archive.cpp \
-    TimeFilter.cpp
+    TimeFilter.cpp \
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS += \
     version.h \
@@ -136,7 +138,10 @@ HEADERS += \
     TcpArchRequestsServer.h \
     Archive.h \
     ../lib/TimeStamp.h \
-    TimeFilter.h
+    TimeFilter.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h \
+    ../lib/Signal.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -2,9 +2,9 @@
 #include "Settings.h"
 
 TrendTcpClient::TrendTcpClient(MonitorConfigController* configController) :
-	Tcp::Client(configController->configuration().archiveService1.address(),
-				configController->configuration().archiveService2.address(),
-				E::SoftwareType::Monitor, theSettings.instanceStrId(), -1, -1, -1),
+	Tcp::Client(configController->softwareInfo(),
+				configController->configuration().archiveService1.address(),
+				configController->configuration().archiveService2.address()),
 	m_cfgController(configController)
 {
 	qDebug() << "TrendTcpClient::TrendTcpClient(...)";

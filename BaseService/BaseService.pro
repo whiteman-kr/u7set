@@ -58,7 +58,6 @@ SOURCES += \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/JsonSerializable.cpp \
-    ../lib/UdpFileTransfer.cpp \
     ../lib/Service.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/HostAddressPort.cpp \
@@ -66,7 +65,8 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
     ../lib/WUtils.cpp \
-    BaseServiceMain.cpp
+    BaseServiceMain.cpp \
+    ../lib/SoftwareInfo.cpp
 
 HEADERS += \
     ../lib/SocketIO.h \
@@ -75,14 +75,15 @@ HEADERS += \
 	../lib/FscDataFormat.h \
     version.h \
     ../lib/JsonSerializable.h \
-    ../lib/UdpFileTransfer.h \
     ../lib/Service.h \
     ../lib/SimpleThread.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     ../lib/CommandLineParser.h \
-    ../lib/WUtils.h
+    ../lib/WUtils.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/OrderedHash.h
 
 include(../qtservice/src/qtservice.pri)
 

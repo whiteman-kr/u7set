@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 
+#include "../lib/Tcp.h"
+
 class ServiceTableModel;
 class QTableView;
 
@@ -12,7 +14,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
     ~MainWindow();
 
 private:

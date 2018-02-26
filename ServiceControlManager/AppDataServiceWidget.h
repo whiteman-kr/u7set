@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include "../lib/OrderedHash.h"
 #include "../lib/AppDataSource.h"
+#include "../lib/Tcp.h"
 #include "BaseServiceStateWidget.h"
 
 
@@ -16,7 +17,7 @@ class DataSourcesStateModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit DataSourcesStateModel(TcpAppDataClient* clientSocket, QObject *parent = 0);
+	explicit DataSourcesStateModel(QObject *parent = 0);
 	~DataSourcesStateModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -26,6 +27,8 @@ public:
 
 	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
 	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+	void setClient(TcpAppDataClient* clientSocket) { m_clientSocket = clientSocket; }
 
 public slots:
 	void invalidateData();
@@ -40,7 +43,7 @@ class SignalStateModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit SignalStateModel(TcpAppDataClient* clientSocket, QObject *parent = 0);
+	explicit SignalStateModel(QObject *parent = 0);
 	~SignalStateModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -50,6 +53,8 @@ public:
 
 	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
 	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+	void setClient(TcpAppDataClient* clientSocket) { m_clientSocket = clientSocket; }
 
 public slots:
 	void invalidateData();
@@ -63,7 +68,7 @@ class AppDataServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	AppDataServiceWidget(quint32 ip, int portIndex, QWidget *parent = 0);
+	AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent = 0);
 	~AppDataServiceWidget();
 
 public slots:
@@ -77,19 +82,30 @@ public slots:
 	void updateSignalInfo();
 	void updateSignalStateColumns();
 
-	void checkVisibility();
+	void updateClientsInfo();
+
+	void updateSettings();
+
+	void clearServiceData();
 
 	void changeSourceColumnVisibility(QAction* action);
+
+protected:
+	void createTcpConnection(quint32 ip, quint16 port) override;
+	void dropTcpConnection() override;
 
 private:
 	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;
+	QStandardItemModel* m_settingsTabModel = nullptr;
+
 	QTableView* m_dataSourcesView = nullptr;
 	QTableView* m_signalsView = nullptr;
+
 	QActionGroup* m_sourceTableHeadersContextMenuActions = nullptr;
 
 	TcpAppDataClient* m_tcpClientSocket;
-	SimpleThread* m_appDataClientTread;
+	SimpleThread *m_tcpClientThread;
 
 	void saveSourceColumnVisibility(int index, bool visible);
 

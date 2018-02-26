@@ -21,10 +21,17 @@ namespace Tuning
 		void getSourceState(Network::TuningSourceState& tss) const;
 
 		void setSourceWorker(TuningSourceWorker* worker);
+		void removeSourceWorker(TuningSourceWorker* worker);
 
-		void readSignalState(Network::TuningSignalState& tss);
-		void writeSignalState(Hash signalHash, float value, Network::TuningSignalWriteResult& writeResult);
-		void applySignalStates();
+		void readSignalState(Network::TuningSignalState* tss);
+
+		NetworkError writeSignalState(	const QString& clientEquipmentID,
+										const QString& user,
+										Hash signalHash,
+										const TuningValue& newValue);
+
+		NetworkError applySignalStates(	const QString& clientEquipmentID,
+										const QString& user);
 
 	private:
 		QString m_sourceID;			// Tuning source (LM) equipmentID
@@ -50,17 +57,24 @@ namespace Tuning
 		void getSourcesInfo(QVector<Network::DataSourceInfo>& dataSourcesInfo) const;
 		void getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const;
 
-		void readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply& reply) const;
-		void writeSignalStates(const Network::TuningSignalsWrite& request, Network::TuningSignalsWriteReply& reply) const;
-		void applySignalStates() const;
+		void readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply* reply) const;
 
-		void setSourceWorker(const QString& sourceID, TuningSourceWorker* worker);
+		void writeSignalStates(const QString& clientEquipmentID,
+							   const QString &user,
+							   const Network::TuningSignalsWrite& request,
+							   Network::TuningSignalsWriteReply* reply) const;
+
+		void applySignalStates(const QString& clientEquipmentID,
+							   const QString &user) const;
+
+		void setSourceWorker(TuningSourceWorker* worker);
+		void removeSourceWorker(TuningSourceWorker* worker);
 
 	private:
 		TuningSourceContext* getSourceContext(const QString& sourceID) const;
 		TuningSourceContext* getSourceContextBySignalHash(Hash signalHash) const;
 
-		void readSignalState(Network::TuningSignalState& tss) const;
+		void readSignalState(Network::TuningSignalState* tss) const;
 
 		void clear();
 

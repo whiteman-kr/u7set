@@ -1,6 +1,45 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
 
+
+//QHash<E::SoftwareType, ServiceInfo> serviceInfoMap = initServiceInfoMap();
+
+ServiceInfo::ServiceInfo()
+{
+}
+
+ServiceInfo::ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _name, QString _shortName) :
+	softwareType(_softwareType),
+	port(_port),
+	name(_name),
+	shortName(_shortName)
+{
+}
+
+
+HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo()
+{
+	HashedVector<E::SoftwareType, ServiceInfo> sInfoMap;
+
+	const ServiceInfo serviceInfo[] =
+	{
+		ServiceInfo(E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv"),
+		ServiceInfo(E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv"),
+		ServiceInfo(E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv"),
+		ServiceInfo(E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv"),
+		ServiceInfo(E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv"),
+		ServiceInfo(E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv"),
+	};
+
+	for(const ServiceInfo& sInfo : serviceInfo)
+	{
+		sInfoMap.insert(sInfo.softwareType, sInfo);
+	}
+
+	return sInfoMap;
+}
+
+
 // -------------------------------------------------------------------------------------
 //
 // ServiceWorker class implementation
@@ -9,17 +48,15 @@
 
 int ServiceWorker::m_instanceNo = 0;
 
-ServiceWorker::ServiceWorker(ServiceType serviceType,
+ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 const QString& serviceName,
 							 int& argc,
 							 char** argv,
-							 const VersionInfo& versionInfo,
 							 std::shared_ptr<CircularLogger> logger) :
-	m_serviceType(serviceType),
 	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
-	m_versionInfo(versionInfo),
+	m_softwareInfo(softwareInfo),
 	m_logger(logger),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
 	m_cmdLineParser(argc, argv)
@@ -85,23 +122,22 @@ QString ServiceWorker::cmdLine() const
 	return cl.trimmed();
 }
 
-
-ServiceType ServiceWorker::serviceType() const
-{
-	return m_serviceType;
-}
-
-
 QString ServiceWorker::serviceName() const
 {
 	return m_serviceName;
 }
 
 
-const VersionInfo& ServiceWorker::versionInfo() const
+const SoftwareInfo& ServiceWorker::softwareInfo() const
 {
-	return m_versionInfo;
+	return m_softwareInfo;
 }
+
+const E::SoftwareType ServiceWorker::softwareType() const
+{
+	return m_softwareInfo.softwareType();
+}
+
 
 void ServiceWorker::initAndProcessCmdLineSettings()
 {
@@ -114,6 +150,11 @@ void ServiceWorker::initAndProcessCmdLineSettings()
 	init();
 
 	processCmdLineSettings();
+
+	if (m_cmdLineParser.optionIsSet("id") == true)
+	{
+		m_softwareInfo.setEquipmentID(m_cmdLineParser.optionValue("id"));
+	}
 }
 
 void ServiceWorker::setService(Service* service)
@@ -349,7 +390,9 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, serviceInfo[TO_INT(m_serviceWorkerFactory.serviceType())].port, m_logger);
+	ServiceInfo sInfo = serviceInfo.value(m_serviceWorkerFactory.softwareType());
+
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.port, m_logger);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
@@ -378,17 +421,11 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	QMutexLocker locker(&m_mutex);
 
-	const VersionInfo& vi = serviceWorker->versionInfo();
+	Network::SoftwareInfo* si = new Network::SoftwareInfo();
 
-	serviceInfo.set_type(TO_INT(serviceWorker->serviceType()));
+	serviceWorker->softwareInfo().serializeTo(si);
 
-	serviceInfo.set_majorversion(vi.majorVersion);
-	serviceInfo.set_minorversion(vi.minorVersion);
-	serviceInfo.set_commitno(vi.commitNo);
-	serviceInfo.set_buildbranch(C_STR(vi.buildBranch));
-	serviceInfo.set_commitsha(C_STR(vi.commitSHA));
-
-	serviceInfo.set_crc(m_crc);
+	serviceInfo.set_allocated_softwareinfo(si);
 	serviceInfo.set_uptime((QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000);
 
 	serviceInfo.set_servicestate(TO_INT(m_state));
@@ -563,16 +600,16 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 	//
 	if (cmdLineParser.optionIsSet("v") == true)
 	{
-		const VersionInfo& vi = m_serviceWorker.versionInfo();
+		const SoftwareInfo& si = m_serviceWorker.softwareInfo();
 
 		QString versionInfo =
 			QString("\nApplication:\t%1\nVersion:\t%2.%3.%4 (%5)\nCommit SHA:\t%6\n").
 				arg(m_serviceWorker.serviceName()).
-				arg(vi.majorVersion).
-				arg(vi.minorVersion).
-				arg(vi.commitNo).
-				arg(vi.buildBranch).
-				arg(vi.commitSHA);
+				arg(si.majorVersion()).
+				arg(si.minorVersion()).
+				arg(si.commitNo()).
+				arg(si.buildBranch()).
+				arg(si.commitSHA());
 
 		std::cout << C_STR(versionInfo);
 
@@ -610,7 +647,6 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 	}
 }
 
-
 int ServiceStarter::runAsRegularApplication()
 {
 	KeyReaderThread* keyReaderThread = new KeyReaderThread();
@@ -634,7 +670,6 @@ int ServiceStarter::runAsRegularApplication()
 
 	return result;
 }
-
 
 void ServiceStarter::KeyReaderThread::run()
 {

@@ -18,7 +18,12 @@ int main(int argc, char *argv[])
 
     theOptions.load();
 
-    MainWindow w;
+	SoftwareInfo si;
+
+	assert(false);			// WM: chek equipmentID in next code!!!!
+	si.init(E::SoftwareType::Metrology, "???", 1, 0);
+
+	MainWindow w(si);
     w.show();
 
     int result = a.exec();

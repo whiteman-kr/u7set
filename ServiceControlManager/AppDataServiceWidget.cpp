@@ -96,9 +96,9 @@ const int SIGNAL_COLUMN_COUNT = sizeof(signalColumnStr) / sizeof(signalColumnStr
 
 
 
-DataSourcesStateModel::DataSourcesStateModel(TcpAppDataClient* clientSocket, QObject* parent) :
+DataSourcesStateModel::DataSourcesStateModel(QObject* parent) :
 	QAbstractTableModel(parent),
-	m_clientSocket(clientSocket)
+	m_clientSocket(nullptr)
 {
 	static_assert(DSC_COUNT == DATA_SOURCE_COLUMN_COUNT, "Data source column count error");
 }
@@ -218,30 +218,30 @@ void DataSourcesStateModel::invalidateData()
 void DataSourcesStateModel::reloadList()
 {
 	beginResetModel();
-	m_dataSource = m_clientSocket->dataSources();
-	qSort(m_dataSource.begin(), m_dataSource.end(), [](const DataSource* ds1, const DataSource* ds2) {
-		return ds1->lmAddress32() < ds2->lmAddress32();
-	});
+	if (m_clientSocket != nullptr)
+	{
+		m_dataSource = m_clientSocket->dataSources();
+		qSort(m_dataSource.begin(), m_dataSource.end(), [](const DataSource* ds1, const DataSource* ds2) {
+			return ds1->lmAddress32() < ds2->lmAddress32();
+		});
+	}
 	endResetModel();
 }
 
 
-AppDataServiceWidget::AppDataServiceWidget(quint32 ip, int portIndex, QWidget *parent) :
-	BaseServiceStateWidget(ip, portIndex, parent)
+AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, udpIp, udpPort, parent),
+	m_tcpClientSocket(nullptr),
+	m_tcpClientThread(nullptr)
 {
+	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &AppDataServiceWidget::updateStateInfo);
+
 	setStateTabMaxRowQuantity(8);
 
-	m_tcpClientSocket = new TcpAppDataClient(HostAddressPort(getWorkingClientRequestIp(), PORT_APP_DATA_SERVICE_CLIENT_REQUEST));
-	m_appDataClientTread = new SimpleThread(m_tcpClientSocket);
-
 	// Data Sources
-	m_dataSourcesStateModel = new DataSourcesStateModel(m_tcpClientSocket, this);
+	m_dataSourcesStateModel = new DataSourcesStateModel(this);
 	m_dataSourcesView = addTabWithTableView(100, tr("AppData Sources"));;
 	m_dataSourcesView->setModel(m_dataSourcesStateModel);
-
-	connect(m_tcpClientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, m_dataSourcesStateModel, &DataSourcesStateModel::reloadList);
-	connect(m_tcpClientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &AppDataServiceWidget::updateSourceStateColumns);
-	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
 
 	QSettings settings;
 	QHeaderView* horizontalHeader = m_dataSourcesView->horizontalHeader();
@@ -274,30 +274,44 @@ AppDataServiceWidget::AppDataServiceWidget(quint32 ip, int portIndex, QWidget *p
 	connect(horizontalHeader, &QHeaderView::sectionResized, this, &AppDataServiceWidget::saveSourceColumnWidth);
 
 	// Signals
-	m_signalStateModel = new SignalStateModel(m_tcpClientSocket, this);
+	m_signalStateModel = new SignalStateModel(this);
 	m_signalsView = addTabWithTableView(250, tr("Signals"));;
 	m_signalsView->setModel(m_signalStateModel);
 
-	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
-	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalsStateUpdated, this, &AppDataServiceWidget::updateSignalStateColumns);
-	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_signalStateModel, &SignalStateModel::invalidateData);
+	// Clients
+	addClientsTab(false);
 
-	addTab(new QTableView(this), tr("Clients"));
+	// Settings
+	QTableView* settingsTableView = addTabWithTableView(250, "Settings");
 
-	addTab(new QTableView(this), tr("Settings"));
+	m_settingsTabModel = new QStandardItemModel(3, 2, this);
+	settingsTableView->setModel(m_settingsTabModel);
 
+	m_settingsTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Equipment ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Configuration IP 1");
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Configuration IP 2");
+
+	// Log
 	addTab(new QTableView(this), tr("Log"));
-
-	m_appDataClientTread->start();
 }
 
 AppDataServiceWidget::~AppDataServiceWidget()
 {
-	m_appDataClientTread->quitAndWait();
+	dropTcpConnection();
 }
 
 void AppDataServiceWidget::updateServiceState()
 {
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
+	{
+		assert(false);
+		return;
+	}
+	stateTabModel()->setData(stateTabModel()->index(6, 1), m_tcpClientSocket->configServiceConnectionState());
+	stateTabModel()->setData(stateTabModel()->index(7, 1), m_tcpClientSocket->archiveServiceConnectionState());
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -308,9 +322,39 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
-		stateTabModel()->setData(stateTabModel()->index(5, 1), "???");
-		stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
-		stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
+		stateTabModel()->setData(stateTabModel()->index(5, 1), clientsTabModel()->rowCount());
+		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
+		{
+			stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
+			stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
+		}
+		else
+		{
+			updateServiceState();
+		}
+	}
+
+	quint32 ip = m_serviceInfo.clientrequestip();
+	quint16 port = m_serviceInfo.clientrequestport();
+	QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
+
+	if (ip != getWorkingClientRequestIp())
+	{
+		address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(getWorkingClientRequestIp()).toString() + QString(":%1").arg(port);
+	}
+
+	if (m_tcpClientSocket != nullptr)
+	{
+		HostAddressPort&& curAddress = m_tcpClientSocket->serverAddressPort(0);
+		if (curAddress.address32() != ip || curAddress.port() != port)
+		{
+			dropTcpConnection();
+		}
+	}
+
+	if (m_tcpClientSocket == nullptr)
+	{
+		createTcpConnection(getWorkingClientRequestIp(), port);
 	}
 }
 
@@ -378,17 +422,37 @@ void AppDataServiceWidget::updateSignalStateColumns()
 								   lastColumn);
 }
 
-void AppDataServiceWidget::checkVisibility()
+void AppDataServiceWidget::updateClientsInfo()
 {
-	/*if (isVisible() && !m_dataSourcesStateModel->isActive())
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)
 	{
-		m_dataSourcesStateModel->setActive(true);
+		clientsTabModel()->setRowCount(0);
+		return;
 	}
 
-	if (!isVisible() && m_dataSourcesStateModel->isActive())
+	updateClientsModel(m_tcpClientSocket->clients());
+}
+
+void AppDataServiceWidget::updateSettings()
+{
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
 	{
-		m_dataSourcesStateModel->setActive(false);
-	}*/
+		assert(false);
+		return;
+	}
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->configIP1());
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), m_tcpClientSocket->configIP2());
+}
+
+void AppDataServiceWidget::clearServiceData()
+{
+	stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
+	stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), "???");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), "???");
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), "???");
 }
 
 void AppDataServiceWidget::saveSourceColumnWidth(int index)
@@ -436,9 +500,49 @@ void AppDataServiceWidget::changeSourceColumnVisibility(QAction* action)
 	}
 }
 
-SignalStateModel::SignalStateModel(TcpAppDataClient* clientSocket, QObject* parent) :
+void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
+{
+	m_tcpClientSocket = new TcpAppDataClient(softwareInfo(), HostAddressPort(ip, port));
+	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
+
+	m_dataSourcesStateModel->setClient(m_tcpClientSocket);
+	m_signalStateModel->setClient(m_tcpClientSocket);
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, m_dataSourcesStateModel, &DataSourcesStateModel::reloadList);
+	connect(m_tcpClientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &AppDataServiceWidget::updateSourceStateColumns);
+	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
+	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalsStateUpdated, this, &AppDataServiceWidget::updateSignalStateColumns);
+	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_signalStateModel, &SignalStateModel::invalidateData);
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::clientsLoaded, this, &AppDataServiceWidget::updateClientsInfo);
+	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateServiceState);
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateSettings);
+
+	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, this, &AppDataServiceWidget::clearServiceData);
+
+	m_tcpClientThread->start();
+}
+
+void AppDataServiceWidget::dropTcpConnection()
+{
+	m_dataSourcesStateModel->setClient(nullptr);
+	m_signalStateModel->setClient(nullptr);
+
+	m_tcpClientThread->quitAndWait();
+	delete m_tcpClientThread;
+	m_tcpClientThread = nullptr;
+
+	m_tcpClientSocket = nullptr;
+}
+
+SignalStateModel::SignalStateModel(QObject* parent) :
 	QAbstractTableModel(parent),
-	m_clientSocket(clientSocket)
+	m_clientSocket(nullptr)
 {
 }
 
@@ -448,6 +552,10 @@ SignalStateModel::~SignalStateModel()
 
 int SignalStateModel::rowCount(const QModelIndex&) const
 {
+	if (m_clientSocket == nullptr)
+	{
+		return 0;
+	}
 	return m_clientSocket->signalParams().count();
 }
 
@@ -458,6 +566,10 @@ int SignalStateModel::columnCount(const QModelIndex&) const
 
 QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 {
+	if (m_clientSocket == nullptr)
+	{
+		return QVariant();
+	}
 	int row = index.row();
 	if (row < 0 || row > m_clientSocket->signalParams().count())
 	{
@@ -472,7 +584,7 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 			case SC_CAPTION: return s.caption();
 			case SC_VALUE:
 			{
-				if (row < 0 || row > m_clientSocket->signalStates().count())
+				if (row < 0 || row >= m_clientSocket->signalStates().count())
 				{
 					return QVariant();
 				}
@@ -481,7 +593,7 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 			}
 			case SC_VALID:
 			{
-				if (row < 0 || row > m_clientSocket->signalStates().count())
+				if (row < 0 || row >= m_clientSocket->signalStates().count())
 				{
 					return QVariant();
 				}

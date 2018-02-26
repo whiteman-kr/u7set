@@ -6,14 +6,15 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(AppSignalStatesQueue& saveStatesQueue) :
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, AppSignalStatesQueue& saveStatesQueue) :
+	Tcp::Server(softwareInfo),
 	m_saveStatesQueue(saveStatesQueue)
 {
 }
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	return new TcpAppDataServer(m_saveStatesQueue);
+	return new TcpAppDataServer(localSoftwareInfo(), m_saveStatesQueue);
 }
 
 void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

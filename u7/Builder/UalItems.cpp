@@ -1323,7 +1323,20 @@ namespace Builder
 
 		if (m_isOptoSignal == true)
 		{
-			return m_autoSignalPtr->ioBufAddr();
+			Signal* s = m_autoSignalPtr;
+
+			if (s == nullptr)
+			{
+				s = signal();
+			}
+
+			if (s == nullptr)
+			{
+				assert(false);
+				return Address16();
+			}
+
+			return s->ioBufAddr();
 		}
 
 		return Address16();
@@ -2364,6 +2377,12 @@ namespace Builder
 			str += ";";
 
 			str.append(ualSignal->isAcquired() == true ? "true" : "false");
+			str += ";";
+
+			str.append(ualSignal->isBusChild() == true ? "true" : "false");
+			str += ";";
+
+			str.append(ualSignal->isTuningable() == true ? "true" : "false");
 			str += ";";
 
 			str.append(QString::number(ualSignal->ualAddr().offset()));

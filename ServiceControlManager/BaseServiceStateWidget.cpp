@@ -13,15 +13,16 @@
 #include "../lib/WidgetUtils.h"
 
 
-BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidget *parent) :
+BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, qint32 udpPort, QWidget *parent) :
 	QMainWindow(parent),
-	m_ip(ip),
-	m_portIndex(portIndex)
+	m_udpIp(udpIp),
+	m_udpPort(udpPort),
+	m_softwareInfo(softwareInfo)
 {
 	m_tabWidget = new QTabWidget(this);
 	setCentralWidget(m_tabWidget);
 
-	m_serviceInfo.set_type(portIndex);
+	m_serviceInfo.mutable_softwareinfo()->set_softwaretype(softwareInfo.softwareType());
 	m_serviceInfo.set_servicestate(TO_INT(ServiceState::Undefined));
 
 	QToolBar* toolBar = addToolBar("Service actions");
@@ -39,7 +40,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 
 	m_socketThread = new UdpSocketThread();
 
-	m_baseClientSocket = new UdpClientSocket(QHostAddress(ip), serviceInfo[portIndex].port);
+	m_baseClientSocket = new UdpClientSocket(QHostAddress(udpIp), udpPort);
 	connect(m_baseClientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceStateWidget::serviceNotFound);
 	connect(m_baseClientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceStateWidget::serviceAckReceived);
 
@@ -50,7 +51,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	connect(m_timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
 	m_timer->start(500);
 
-	setWindowPosition(this, QString("Service_%1_%2/geometry").arg(QHostAddress(ip).toString()).arg(serviceInfo[portIndex].port));
+	setWindowPosition(this, QString("Service_%1_%2/geometry").arg(QHostAddress(udpIp).toString()).arg(udpPort));
 
 	addStateTab();
 
@@ -65,10 +66,11 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 	{
 		m_socketThread->quitAndWait();
 		delete m_socketThread;
+		m_socketThread = nullptr;
 	}
 
 	QSettings settings;
-	QString settingName = QString("Service_%1_%2/geometry").arg(QHostAddress(m_ip).toString()).arg(serviceInfo[m_portIndex].port);
+	QString settingName = QString("Service_%1_%2/geometry").arg(QHostAddress(m_udpIp).toString()).arg(m_udpPort);
 	settings.setValue(settingName, geometry());
 }
 
@@ -94,9 +96,10 @@ void BaseServiceStateWidget::updateServiceState()
 
 	QString serviceName = "Unknown Service";
 	QString serviceShortName = "???";
-	for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+
+	for (int i = 0; i < serviceInfo.count(); i++)
 	{
-		if (static_cast<ServiceType>(m_serviceInfo.type()) == serviceInfo[i].serviceType)
+		if (static_cast<E::SoftwareType>(m_serviceInfo.softwareinfo().softwaretype()) == serviceInfo[i].softwareType)
 		{
 			serviceName = serviceInfo[i].name;
 			serviceShortName = serviceInfo[i].shortName;
@@ -113,13 +116,15 @@ void BaseServiceStateWidget::updateServiceState()
 		case Work:
 		case Stops:
 			{
+				const Network::SoftwareInfo& softwareInfo = m_serviceInfo.softwareinfo();
 				setWindowTitle(serviceName +
-							   QString(" v%1.%2.%3 - %4:%5")
-							   .arg(m_serviceInfo.majorversion())
-							   .arg(m_serviceInfo.minorversion())
-							   .arg(m_serviceInfo.commitno())
-							   .arg(QHostAddress(m_ip).toString())
-							   .arg(serviceInfo[m_portIndex].port));
+							   QString(" v%1.%2.%3 - %4:%5 (%6)")
+							   .arg(softwareInfo.majorversion())
+							   .arg(softwareInfo.minorversion())
+							   .arg(softwareInfo.commitno())
+							   .arg(QHostAddress(m_udpIp).toString())
+							   .arg(m_udpPort)
+							   .arg(QString::fromStdString(softwareInfo.equipmentid())));
 
 				m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
 
@@ -264,6 +269,49 @@ void BaseServiceStateWidget::updateServiceState()
 	emit connectionStatisticChanged();
 }
 
+void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& serviceClients)
+{
+	m_clientsTabModel->setRowCount(serviceClients.clients_size());
+	stateTabModel()->setData(stateTabModel()->index(8, 1), serviceClients.clients_size());
+
+	for (int i = 0; i < serviceClients.clients_size(); i++)
+	{
+		const Network::ServiceClientInfo& ci = serviceClients.clients(i);
+		const Network::SoftwareInfo& si = ci.softwareinfo();
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0),
+								   E::valueToString<E::SoftwareType>(si.softwaretype()));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1),
+								   QString("%1.%2.%3 (%4)")
+								   .arg(si.majorversion())
+								   .arg(si.minorversion())
+								   .arg(si.commitno())
+								   .arg(QString::fromStdString(si.buildbranch())));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(si.equipmentid()));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QString::fromStdString(si.username()));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QHostAddress(ci.ip()).toString());
+
+		quint64 uptime = ci.uptime();
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
+
+		uptime /= 1000;
+		int s = uptime % 60; uptime /= 60;
+		int m = uptime % 60; uptime /= 60;
+		int h = uptime % 24; uptime /= 24;
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), QString("(%1d %2:%3:%4)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), si.buildno() == SoftwareInfo::UNDEFINED_BUILD_NO ? "Non actual" : QString::number(si.buildno()));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 8), static_cast<qint64>(ci.replyquantity()));
+	}
+}
+
 void BaseServiceStateWidget::askServiceState()
 {
 	if (!m_baseClientSocket->isWaitingForAck())
@@ -359,6 +407,7 @@ QTableView* BaseServiceStateWidget::addTabWithTableView(int defaultSectionSize, 
 	newTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	newTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	newTableView->setAlternatingRowColors(true);
+	newTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	addTab(newTableView, label);
 
@@ -379,13 +428,40 @@ void BaseServiceStateWidget::addStateTab()
 	m_stateTabModel->setData(m_stateTabModel->index(0, 1), "No");
 }
 
+void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
+{
+	QTableView* clientsTableView = addTabWithTableView(150, "Clients");
+
+	m_clientsTabModel = new QStandardItemModel(0, 8, this);
+	clientsTableView->setModel(m_clientsTabModel);
+
+	if (showStateColumn == false)
+	{
+		clientsTableView->hideColumn(6);
+	}
+
+	m_clientsTabModel->setHeaderData(0, Qt::Horizontal, "Software type");
+	m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Version");
+	m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "Equipment ID");
+	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "User");
+	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "IPv4");
+	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "Connection time");
+	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Connection uptime");
+	m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Build");
+	m_clientsTabModel->setHeaderData(8, Qt::Horizontal, "Packet counter");
+
+	clientsTableView->setColumnWidth(0, 200);
+	clientsTableView->setColumnWidth(2, 250);
+	clientsTableView->setColumnWidth(7, 100);
+}
+
 quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
 {
 	QHostAddress address(m_serviceInfo.clientrequestip());
 
 	if (address == QHostAddress::AnyIPv4)
 	{
-		address.setAddress(m_ip);
+		address.setAddress(m_udpIp);
 	}
 
 	return address.toIPv4Address();

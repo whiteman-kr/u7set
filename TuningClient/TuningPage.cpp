@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 #include "TuningPage.h"
 #include <QKeyEvent>
+#include <QPushButton>
 #include "../VFrame30/DrawParam.h"
 
 using namespace std;
@@ -11,173 +12,27 @@ using namespace std;
 //
 
 
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent):
-	TuningModel(parent),
-	m_tuningSignalManager(tuningSignalManager)
+TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent):
+	TuningModel(tuningSignalManager, parent)
 {
-
-	assert(m_tuningSignalManager);
-
-	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
-	if (pageSettings == nullptr)
-	{
-		assert(pageSettings);
-		return;
-	}
-
-	if (pageSettings->m_columnCount == 0)
-	{
-		addColumn(Columns::CustomAppSignalID);
-		addColumn(Columns::EquipmentID);
-		addColumn(Columns::Caption);
-		addColumn(Columns::Units);
-		addColumn(Columns::Type);
-
-		addColumn(Columns::Value);
-		addColumn(Columns::LowLimit);
-		addColumn(Columns::HighLimit);
-		addColumn(Columns::Default);
-		//addColumn(Columns::Valid);
-		addColumn(Columns::Underflow);
-		addColumn(Columns::Overflow);
-	}
-	else
-	{
-		m_columnsIndexes  = pageSettings->m_columnsIndexes;
-		removeColumn(Columns::Valid);
-		removeColumn(Columns::Underflow);
-		removeColumn(Columns::Overflow);
-	}
 }
 
-void TuningModelClient::setValue(const std::vector<int>& selectedRows)
+void TuningModelClient::blink()
 {
-	bool first = true;
-	bool analog = false;
-	float value = 0.0;
-	float defaultValue = 0.0;
-	bool sameValue = true;
-	int precision = 0;
-	float lowLimit = 0;
-	float highLimit = 0;
-
-	for (int i : selectedRows)
-	{
-		const TuningModelRecord& o = m_items[i];
-
-		if (o.state.valid() == false)
-		{
-			return;
-		}
-
-		if (o.param.isAnalog() == true)
-		{
-			if (o.param.precision() > precision)
-			{
-				precision = o.param.precision();
-			}
-		}
-
-		if (first == true)
-		{
-			analog = o.param.isAnalog();
-			value = o.state.value();
-			defaultValue = o.param.tuningDefaultValue();
-			lowLimit = o.param.lowEngineeringUnits();
-			highLimit = o.param.highEngineeringUnits();
-			first = false;
-		}
-		else
-		{
-			if (analog != o.param.isAnalog())
-			{
-				QMessageBox::warning(m_parent, tr("Set Value"), tr("Please select one type of objects: analog or discrete."));
-				return;
-			}
-
-			if (analog == true)
-			{
-				if (lowLimit != o.param.lowEngineeringUnits() || highLimit != o.param.highEngineeringUnits())
-				{
-					QMessageBox::warning(m_parent, tr("Set Value"), tr("Selected objects have different input range."));
-					return;
-				}
-			}
-
-			if (defaultValue != o.param.tuningDefaultValue())
-			{
-				QMessageBox::warning(m_parent, tr("Set Value"), tr("Selected objects have different default values."));
-				return;
-			}
-
-			if (value != o.state.value())
-			{
-				sameValue = false;
-			}
-		}
-	}
-
-	DialogInputTuningValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, precision, m_parent);
-	if (d.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	float newValue = d.value();
-
-	for (int i : selectedRows)
-	{
-		TuningModelRecord& o = m_items[i];
-		o.state.onEditValue(newValue);
-	}
-}
-
-void TuningModelClient::invertValue(const std::vector<int>& selectedRows)
-{
-	for (int i : selectedRows)
-	{
-		TuningModelRecord& o = m_items[i];
-
-		if (o.state.valid() == false)
-		{
-			return;
-		}
-
-		if (o.param.isAnalog() == false)
-		{
-			if (o.state.editValue() == 0)
-			{
-				o.state.onEditValue(1);
-			}
-			else
-			{
-				o.state.onEditValue(0);
-			}
-		}
-	}
-}
-
-
-void TuningModelClient::updateStates()
-{
-	static int counter = 0;
-
-	if (counter++ >= 2)
-	{
-		counter = 0;
-		m_blink = !m_blink;
-	}
-
-	m_tuningSignalManager->updateStates(m_items);
-
-	return;
+	m_blink = !m_blink;
 }
 
 bool TuningModelClient::hasPendingChanges()
 {
-	for (TuningModelRecord& rec : m_items)
+	for (int row = 0; row < static_cast<int>(m_hashes.size()); row++)
 	{
-		if (rec.state.userModified() == true)
+		Hash hash = m_hashes[row];
+
+		bool ok = false;
+
+		const TuningSignalState tss = m_tuningSignalManager->state(hash, &ok);
+
+		if (tss.userModified() == true)
 		{
 			return true;
 		}
@@ -186,122 +41,50 @@ bool TuningModelClient::hasPendingChanges()
 	return false;
 }
 
-bool TuningModelClient::write()
-{
-	if (theUserManager.requestPassword(m_parent, false) == false)
-	{
-		return false;
-	}
-
-	QString str = tr("New values will be written:") + QString("\r\n\r\n");
-	QString strValue;
-
-	bool modifiedFound = false;
-	int modifiedCount = 0;
-
-	for (TuningModelRecord& o : m_items)
-	{
-		if (o.state.userModified() == false)
-		{
-			continue;
-		}
-
-		modifiedFound = true;
-		modifiedCount++;
-	}
-
-	if (modifiedFound == false)
-	{
-		return false;
-	}
-
-	int listCount = 0;
-
-	std::vector<std::pair<Hash, float>> writeData;
-
-	for (TuningModelRecord& o : m_items)
-	{
-		if (o.state.userModified() == false)
-		{
-			continue;
-		}
-
-		if (listCount >= 10)
-		{
-			str += tr("and %1 more values.").arg(modifiedCount - listCount);
-			break;
-		}
-
-		if (o.param.isAnalog() == true)
-		{
-			strValue = QString::number(o.state.editValue(), 'f', o.param.precision());
-		}
-		else
-		{
-			strValue = o.state.editValue() == 0 ? tr("0") : tr("1");
-		}
-
-		str += tr("%1 (%2) = %3\r\n").arg(o.param.appSignalId()).arg(o.param.caption()).arg(strValue);
-
-		listCount++;
-	}
-
-	str += QString("\r\n") + tr("Are you sure you want to continue?");
-
-	if (QMessageBox::warning(m_parent, tr("Write Changes"),
-							 str,
-							 QMessageBox::Yes | QMessageBox::No,
-							 QMessageBox::No) != QMessageBox::Yes)
-	{
-		return false;
-	}
-
-	for (TuningModelRecord& o : m_items)
-	{
-		if (o.state.userModified() == false)
-		{
-			continue;
-		}
-
-		o.state.clearUserModified();
-
-		writeData.push_back(std::pair<Hash, float>(o.param.hash(), o.state.editValue()));
-	}
-
-	m_tuningSignalManager->writeTuningSignals(writeData);
-
-	return true;
-}
-
 QBrush TuningModelClient::backColor(const QModelIndex& index) const
 {
 	int col = index.column();
 	int displayIndex = m_columnsIndexes[col];
 
 	int row = index.row();
-	if (row >= m_items.size())
+	if (row >= m_hashes.size())
 	{
 		assert(false);
 		return QBrush();
 	}
 
+	Hash hash = m_hashes[row];
+
+	bool ok = false;
+
 	if (displayIndex == static_cast<int>(Columns::Value))
 	{
-		const TuningModelRecord& o = m_items[row];
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-		if (m_blink == true && o.state.userModified() == true)
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.controlIsEnabled() == false)
 		{
-			QColor color = QColor(Qt::yellow);
+			QColor color = QColor(Qt::gray);
 			return QBrush(color);
 		}
 
-		if (o.state.valid() == false)
+		if (state.valid() == false)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
 		}
 
-		if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.value()) == false)
+		if (m_blink == true && state.userModified() == true)
+		{
+			QColor color = QColor(Qt::yellow);
+			return QBrush(color);
+		}
+
+		TuningValue tvDefault(defaultValue(asp));
+		tvDefault.setType(asp.toTuningType());
+
+		if (tvDefault != state.value())
 		{
 			QColor color = QColor(Qt::gray);
 			return QBrush(color);
@@ -310,9 +93,9 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 	if (displayIndex == static_cast<int>(Columns::Valid))
 	{
-		const TuningModelRecord& o = m_items[row];
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (o.state.valid() == false)
+		if (state.valid() == false)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -321,31 +104,22 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 	if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
 	{
-		const TuningModelRecord& o = m_items[row];
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-		if (o.limitsUnbalance() == true)
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.limitsUnbalance(asp) == true)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
 		}
 	}
 
-	if (displayIndex == static_cast<int>(Columns::Underflow))
+	if (displayIndex == static_cast<int>(Columns::OutOfRange))
 	{
-		const TuningModelRecord& o = m_items[row];
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (o.state.underflow() == true)
-		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-	}
-
-	if (displayIndex == static_cast<int>(Columns::Overflow))
-	{
-		const TuningModelRecord& o = m_items[row];
-
-		if (o.state.overflow() == true)
+		if (state.outOfRange() == true)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -354,6 +128,16 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 	if (displayIndex == static_cast<int>(Columns::Default))
 	{
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningValue defaultVal = defaultValue(asp);
+
+		if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
+		{
+			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+
 		QColor color = QColor(Qt::gray);
 		return QBrush(color);
 	}
@@ -367,17 +151,21 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 	int displayIndex = m_columnsIndexes[col];
 
 	int row = index.row();
-	if (row >= m_items.size())
+	if (row >= m_hashes.size())
 	{
 		assert(false);
 		return QBrush();
 	}
 
+	Hash hash = m_hashes[row];
+
+	bool ok = false;
+
 	if (displayIndex == static_cast<int>(Columns::Valid))
 	{
-		const TuningModelRecord& o = m_items[row];
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (o.state.valid() == false)
+		if (state.valid() == false)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -386,48 +174,45 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 	if (displayIndex == static_cast<int>(Columns::Value))
 	{
-		const TuningModelRecord& o = m_items[row];
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (m_blink == true && o.state.userModified() == true)
+		if (state.controlIsEnabled() == false)
 		{
-			QColor color = QColor(Qt::black);
+			QColor color = QColor(Qt::white);
 			return QBrush(color);
 		}
 
-		if (o.state.valid() == false)
+		if (state.valid() == false)
 		{
 			QColor color = QColor(Qt::white);
+			return QBrush(color);
+		}
+
+		if (m_blink == true && state.userModified() == true)
+		{
+			QColor color = QColor(Qt::black);
 			return QBrush(color);
 		}
 	}
 
 	if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
 	{
-		const TuningModelRecord& o = m_items[row];
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-		if (o.limitsUnbalance() == true)
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.limitsUnbalance(asp) == true)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
 		}
 	}
 
-	if (displayIndex == static_cast<int>(Columns::Underflow))
+	if (displayIndex == static_cast<int>(Columns::OutOfRange))
 	{
-		const TuningModelRecord& o = m_items[row];
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (o.state.underflow() == true)
-		{
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
-		}
-	}
-
-	if (displayIndex == static_cast<int>(Columns:: Overflow))
-	{
-		const TuningModelRecord& o = m_items[row];
-
-		if (o.state.overflow() == true)
+		if (state.outOfRange() == true)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -453,20 +238,25 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 	int displayIndex = m_columnsIndexes[col];
 
 	int row = index.row();
-	if (row >= m_items.size())
+	if (row >= m_hashes.size())
 	{
 		assert(false);
 		return f;
 	}
 
+	Hash hash = m_hashes[row];
+
+	bool ok = false;
 
 	if (displayIndex == static_cast<int>(Columns::Value))
 	{
-		const TuningModelRecord& o = m_items[row];
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-		if (o.state.valid() == true)
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.valid() == true)
 		{
-			if (o.param.isAnalog() == false)
+			if (asp.isAnalog() == false)
 			{
 				f |= Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 			}
@@ -487,17 +277,23 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 	int displayIndex = m_columnsIndexes[col];
 
 	int row = index.row();
-	if (row >= m_items.size())
+	if (row >= m_hashes.size())
 	{
 		assert(false);
 		return QVariant();
 	}
 
-	const TuningModelRecord& o = m_items[row];
+	Hash hash = m_hashes[row];
 
-	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && o.param.isAnalog() == false && o.state.valid() == true)
+	bool ok = false;
+
+	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+	TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && asp.isDiscrete() == true && state.valid() == true)
 	{
-		return (o.state.editValue() == 0 ? Qt::Unchecked : Qt::Checked);
+		return (state.newValue().discreteValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
 
 	return TuningModel::data(index, role);
@@ -514,171 +310,54 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 	int displayIndex = m_columnsIndexes[col];
 
 	int row = index.row();
-	if (row >= m_items.size())
+	if (row >= m_hashes.size())
 	{
 		assert(false);
 		return false;
 	}
 
+	Hash hash = m_hashes[row];
+
+	bool ok = false;
+
+	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+	TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+
+
 	if (role == Qt::EditRole && displayIndex == static_cast<int>(TuningModel::Columns::Value))
 	{
-		TuningModelRecord& o = m_items[row];
-
 		bool ok = false;
-		float v = value.toFloat(&ok);
+		double v = value.toDouble(&ok);
 		if (ok == false)
 		{
 			return false;
 		}
 
-		o.state.onEditValue(v);
+		m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), v));
 		return true;
 	}
 
 	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(TuningModel::Columns::Value))
 	{
-		TuningModelRecord& o = m_items[row];
-
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
-			o.state.onEditValue(1.0);
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 1));
 			return true;
 		}
 		else
 		{
-			o.state.onEditValue(0.0);
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 0));
 			return true;
 		}
 	}
 	return false;
 }
 
-void TuningModelClient::slot_setAll()
-{
-	QMenu menu(m_parent);
-
-	// Set All To On
-	QAction* actionAllToOn = new QAction(tr("Set All Discretes To On"), &menu);
-
-	auto fAllToOn = [this]() -> void
-	{
-			for (TuningModelRecord& o : m_items)
-	{
-			if (o.state.valid() == false)
-	{
-			continue;
-}
-
-			if (o.param.isAnalog() == false)
-	{
-			o.state.onEditValue(1);
-}
-}
-};
-	connect(actionAllToOn, &QAction::triggered, this, fAllToOn);
-
-	// Set All To Onff
-	QAction* actionAllToOff = new QAction(tr("Set All Discretes To Off"), &menu);
-
-	auto fAllToOff = [this]() -> void
-	{
-			for (TuningModelRecord& o : m_items)
-	{
-			if (o.state.valid() == false)
-	{
-			continue;
-}
-
-			if (o.param.isAnalog() == false)
-	{
-			o.state.onEditValue(0);
-}
-}
-};
-
-	connect(actionAllToOff, &QAction::triggered, this, fAllToOff);
-
-	// Set All To Defaults
-	QAction* actionAllToDefault = new QAction(tr("Set All To Defaults"), &menu);
-
-	auto fAllToDefault = [this]() -> void
-	{
-		for (TuningModelRecord& o : m_items)
-		{
-			if (o.state.valid() == false)
-			{
-				continue;
-			}
-			if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.editValue()) == false)
-			{
-				o.state.onEditValue(o.param.tuningDefaultValue());
-			}
-		}
-
-	};
-
-	connect(actionAllToDefault, &QAction::triggered, this, fAllToDefault);
-
-	// Run the menu
-
-	menu.addAction(actionAllToOn);
-	menu.addAction(actionAllToOff);
-	menu.addSeparator();
-	menu.addAction(actionAllToDefault);
-
-	menu.exec(QCursor::pos());
-}
-
-
-void TuningModelClient::slot_undo()
-{
-	for (TuningModelRecord& o : m_items)
-	{
-		o.state.onEditValue(o.state.value());
-	}
-}
-
-void TuningModelClient::slot_Write()
-{
-	write();
-}
-
-void TuningModelClient::slot_Apply()
-{
-
-}
-
 
 //
-// TuningPage
-//
-FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, QWidget* parent)
-	:QPushButton(caption, parent)
-{
-	m_filter = filter;
-	m_caption = caption;
-
-	setCheckable(true);
-
-	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
-}
-
-std::shared_ptr<TuningFilter> FilterButton::filter()
-{
-	return m_filter;
-}
-
-void FilterButton::slot_toggled(bool checked)
-{
-	if (checked == true)
-	{
-		emit filterButtonClicked(m_filter);
-	}
-
-}
-
-//
-// TuningPage
+// TuningTableView
 //
 
 bool TuningTableView::editorActive()
@@ -700,16 +379,15 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 
 		int row = index.row();
 
+		Hash hash = m_model->hashByIndex(row);
+
+		bool ok = false;
+
 		if (row >= 0)
 		{
-			AppSignalParam* param = m_model->param(row);
-			if (param == nullptr)
-			{
-				assert(param);
-				return false;
-			}
+			AppSignalParam asp = m_model->tuningSignalManager()->signalParam(hash, &ok);
 
-			if (param->isAnalog() == true)
+			if (asp.isAnalog() == true)
 			{
 				m_editorActive = true;
 			}
@@ -733,95 +411,24 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 // TuningPage
 //
 
+int TuningPage::m_instanceCounter = 0;
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent) :
+TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_objects(objects),
+	m_treeFilter(treeFilter),
+	m_pageFilter(pageFilter),
 	m_tuningSignalManager(tuningSignalManager),
-	m_filterStorage(filterStorage),
-	m_tabFilter(tabFilter),
-	m_tuningPageIndex(tuningPageIndex)
+	m_tuningTcpClient(tuningTcpClient)
 {
 
+	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+	m_instanceNo = m_instanceCounter;
+	m_instanceCounter++;
+
+	//assert(m_treeFilter);		They can be nullptr
+	//assert(m_buttonFilter);
+
 	assert(m_tuningSignalManager);
-	assert(m_filterStorage);
-	assert(m_objects);
-
-	std::vector<FilterButton*> buttons;
-
-	// Top buttons
-	//
-	int count = m_filterStorage->m_root->childFiltersCount();
-	for (int i = 0; i < count; i++)
-	{
-		std::shared_ptr<TuningFilter> f = m_filterStorage->m_root->childFilter(i);
-		if (f == nullptr)
-		{
-			assert(f);
-			continue;
-		}
-
-		if (f->isButton() == false)
-		{
-			continue;
-		}
-
-		FilterButton* button = new FilterButton(f, f->caption());
-		buttons.push_back(button);
-
-		connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
-	}
-
-	// Child buttons
-	//
-	if (tabFilter != nullptr)
-	{
-		for (int i = 0; i < tabFilter->childFiltersCount(); i++)
-		{
-			std::shared_ptr<TuningFilter> f = tabFilter->childFilter(i);
-			if (f == nullptr)
-			{
-				assert(f);
-				continue;
-			}
-
-			if (f->isButton() == false)
-			{
-				continue;
-			}
-
-			FilterButton* button = new FilterButton(f, f->caption());
-			buttons.push_back(button);
-
-			connect(button, &FilterButton::filterButtonClicked, this, &TuningPage::slot_filterButtonClicked);
-
-		}
-	}
-
-	if (buttons.empty() == false)
-	{
-		m_filterButtonGroup = new QButtonGroup(this);
-
-		m_filterButtonGroup->setExclusive(true);
-
-		m_buttonsLayout = new QHBoxLayout();
-
-		for (auto b: buttons)
-		{
-			m_filterButtonGroup->addButton(b);
-			m_buttonsLayout->addWidget(b);
-		}
-
-		m_buttonsLayout->addStretch();
-
-		// Set the first button checked
-		//
-		buttons[0]->blockSignals(true);
-		buttons[0]->setChecked(true);
-		m_buttonFilter = buttons[0]->filter();
-		buttons[0]->blockSignals(false);
-
-	}
 
 	// Object List
 	//
@@ -831,9 +438,25 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	// Models and data
 	//
-	m_model = new TuningModelClient(m_tuningSignalManager, m_tuningPageIndex, this);
+	m_model = new TuningModelClient(m_tuningSignalManager, this);
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
+
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::CustomAppSignalID, 0.22));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::EquipmentID, 0.2));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Caption, 0.15));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Units, 0.05));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Type, 0.1));
+
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Value, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::LowLimit, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::HighLimit, 0.07));
+	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Default, 0.07));
+
+	for (auto c : m_columnsArray)
+	{
+		m_model->addColumn(c.first);
+	}
 
 	// Filter controls
 	//
@@ -861,13 +484,13 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	connect(m_setValueButton, &QPushButton::clicked, this, &TuningPage::slot_setValue);
 
 	m_setAllButton = new QPushButton(tr("Set All"));
-	connect(m_setAllButton, &QPushButton::clicked, m_model, &TuningModelClient::slot_setAll);
+	connect(m_setAllButton, &QPushButton::clicked, this, &TuningPage::slot_setAll);
 
 	m_writeButton = new QPushButton(tr("Write"));
-	connect(m_writeButton, &QPushButton::clicked, m_model, &TuningModelClient::slot_Write);
+	connect(m_writeButton, &QPushButton::clicked, this, &TuningPage::slot_Write);
 
 	m_undoButton = new QPushButton(tr("Undo"));
-	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningModelClient::slot_undo);
+	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
 
 
 	m_bottomLayout = new QHBoxLayout();
@@ -885,16 +508,11 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	if (theConfigSettings.autoApply == false)
 	{
 		m_applyButton = new QPushButton(tr("Apply"));
-		connect(m_applyButton, &QPushButton::clicked, m_model, &TuningModelClient::slot_Apply);
+		connect(m_applyButton, &QPushButton::clicked, this, &TuningPage::slot_Apply);
 		m_bottomLayout->addWidget(m_applyButton);
 	}
 
 	m_mainLayout = new QVBoxLayout(this);
-
-	if (m_buttonsLayout != nullptr)
-	{
-		m_mainLayout->addLayout(m_buttonsLayout);
-	}
 
 	m_mainLayout->addWidget(m_objectList);
 	m_mainLayout->addLayout(m_bottomLayout);
@@ -917,62 +535,91 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	fillObjectsList();
 
-	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
-	if (pageSettings == nullptr)
-	{
-		assert(pageSettings);
-		return;
-	}
+	// Color
 
-	if (pageSettings->m_columnCount == 0)
+	if (m_pageFilter->isTab() == true && m_pageFilter->backColor().isValid() && m_pageFilter->textColor().isValid() && m_pageFilter->backColor() != m_pageFilter->textColor())
 	{
-		m_objectList->resizeColumnsToContents();
+		QPalette Pal(palette());
+
+		Pal.setColor(QPalette::Background, m_pageFilter->backColor());
+		setAutoFillBackground(true);
+		setPalette(Pal);
 	}
 	else
 	{
-		for (int i = 0; i < pageSettings->m_columnCount; i++)
-		{
-			int width = pageSettings->m_columnsWidth[i];
-			if (width < 20)
-			{
-				width = 20;
-			}
-
-			m_objectList->setColumnWidth(i, width);
-		}
+		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 	}
 
-	m_updateStateTimerId = startTimer(250);
+	connect(theMainWindow, &MainWindow::timerTick500, this, &TuningPage::slot_timerTick500);
 
 }
 
 TuningPage::~TuningPage()
 {
-	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(m_tuningPageIndex);
-	if (pageSettings == nullptr)
-	{
-		assert(pageSettings);
-		return;
-	}
-
-	if (m_model != nullptr && m_objectList != nullptr)
-	{
-		pageSettings->m_columnsIndexes = m_model->columnsIndexes();
-
-		pageSettings->m_columnCount = static_cast<int>(pageSettings->m_columnsIndexes.size());
-
-		pageSettings->m_columnsWidth.resize(pageSettings->m_columnCount);
-
-		for (int i = 0; i < pageSettings->m_columnCount; i++)
-		{
-			pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
-		}
-	}
+	m_instanceCounter--;
+	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 }
 
 void TuningPage::fillObjectsList()
 {
-	std::vector<TuningModelRecord> filteredObjects;
+	std::vector<Hash> hashes;
+
+	std::vector<Hash> pageHashes;
+
+	//qDebug() << "FillObjectsList";
+
+	//if (m_pageFilter != nullptr)
+	//{
+//		qDebug() << "Button " << m_pageFilter->caption();
+//	}
+
+	if (m_pageFilter != nullptr)
+	{
+		pageHashes = m_pageFilter->signalsHashes();
+	}
+
+	//qDebug() << "pageHashes.size() = " << pageHashes.size();
+
+	// Tree Filter
+
+	std::vector<Hash> treeHashes;
+
+	if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
+	{
+		if (m_treeFilter->isEmpty() == false)
+		{
+			treeHashes = m_treeFilter->signalsHashes();
+
+			std::sort(treeHashes.begin(), treeHashes.end());
+
+			//qDebug() << "treehashes.size() = " << treeHashes.size();
+
+			hashes.reserve(pageHashes.size());
+
+			// Place in hashes array only items that are found in treeHashes
+
+			for (Hash pageHash : pageHashes)
+			{
+				if (std::binary_search(treeHashes.begin(), treeHashes.end(), pageHash) == true)
+				{
+					hashes.push_back(pageHash);
+				}
+			}
+		}
+	}
+	else
+	{
+		hashes = pageHashes;
+	}
+
+	//qDebug() << "hashes.size() = " << hashes.size();
+
+	//
+
+	std::vector<Hash> filteredHashes;
+	filteredHashes.reserve(hashes.size());
+
+	std::vector<std::pair<Hash, TuningValue>> defaultValues;
 
 	QString filter = m_filterEdit->text();
 
@@ -983,91 +630,34 @@ void TuningPage::fillObjectsList()
 		filterType = static_cast<FilterType>(data.toInt());
 	}
 
-	for (int i = 0; i < m_objects->signalsCount(); i++)
+	bool ok = false;
+
+	for (Hash hash : hashes)
 	{
-		const AppSignalParam* signal = m_objects->signalPtrByIndex(i);
-		if (signal == nullptr)
+		const AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		if (ok == false)
 		{
-			assert(signal);
+			assert(ok);
 			continue;
 		}
 
 		bool modifyDefaultValue = false;
-		float modifiedDefaultValue = 0;
+		TuningValue modifiedDefaultValue;
 
-		// Tree Filter
-		//
-
-		// If currently selected filter is root - all signals are displayed
-		//
-
-		if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
+		if (treeHashes.empty() == false)
 		{
-			bool result = true;
-
-			TuningFilter* treeFilter = m_treeFilter.get();
-
-			// If currently selected filter is empty - no signals are displayed (a "Folder" filter)
-
-			if (treeFilter->isEmpty() == true)
-			{
-				continue;
-			}
-
-			// Otherwise, check parent filters. Values are checked ONLY for selected filter, not child filters!!!
-
-			bool checkValues = true;
-
-			while (treeFilter != nullptr)
-			{
-				if (treeFilter->match(*signal, checkValues) == false)
-				{
-					result = false;
-					break;
-				}
-
-				checkValues = false;
-
-				treeFilter = treeFilter->parentFilter();
-			}
-			if (result == false)
-			{
-				continue;
-			}
-
-			// Modify the default value from selected filter
+			// Modify the default value from selected tree filter
 			//
 
 			TuningFilterValue filterValue;
 
-			bool hasValue = m_treeFilter->value(signal->hash(), filterValue);
+			bool hasValue = m_treeFilter->value(hash, filterValue);
 
 			if (hasValue == true)
 			{
 				modifyDefaultValue = true;
 				modifiedDefaultValue = filterValue.value();
-			}
-		}
-
-		// Tab Filter
-		//
-
-		if (m_tabFilter != nullptr)
-		{
-			if (m_tabFilter->match(*signal, false) == false)
-			{
-				continue;
-			}
-		}
-
-		// Button Filter
-		//
-
-		if (m_buttonFilter != nullptr)
-		{
-			if (m_buttonFilter->match(*signal, false) == false)
-			{
-				continue;
 			}
 		}
 
@@ -1081,34 +671,34 @@ void TuningPage::fillObjectsList()
 			switch (filterType)
 			{
 			case FilterType::All:
-				if (signal->appSignalId().contains(filter, Qt::CaseInsensitive) == true
-						|| signal->customSignalId().contains(filter, Qt::CaseInsensitive) == true
-						|| signal->equipmentId().contains(filter, Qt::CaseInsensitive) == true
-						|| signal->caption().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.appSignalId().contains(filter, Qt::CaseInsensitive) == true
+						|| asp.customSignalId().contains(filter, Qt::CaseInsensitive) == true
+						|| asp.equipmentId().contains(filter, Qt::CaseInsensitive) == true
+						|| asp.caption().contains(filter, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::AppSignalID:
-				if (signal->appSignalId().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.appSignalId().contains(filter, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::CustomAppSignalID:
-				if (signal->customSignalId().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.customSignalId().contains(filter, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::EquipmentID:
-				if (signal->equipmentId().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.equipmentId().contains(filter, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
 				break;
 			case FilterType::Caption:
-				if (signal->caption().contains(filter, Qt::CaseInsensitive) == true)
+				if (asp.caption().contains(filter, Qt::CaseInsensitive) == true)
 				{
 					filterMatch = true;
 				}
@@ -1122,42 +712,19 @@ void TuningPage::fillObjectsList()
 		}
 
 
-		TuningModelRecord item;
-		item.param =* signal;
-
-		filteredObjects.push_back(item);
+		filteredHashes.push_back(hash);
 
 		if (modifyDefaultValue == true)
 		{
-			filteredObjects[filteredObjects.size() - 1].param.setTuningDefaultValue(modifiedDefaultValue);
+			defaultValues.push_back(std::make_pair(hash, modifiedDefaultValue));
 		}
 	}
 
-	m_tuningSignalManager->updateStates(filteredObjects);
+	m_model->setHashes(filteredHashes);
 
-	m_model->setItems(filteredObjects);
+	m_model->setDefaultValues(defaultValues);
 
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
-}
-
-QColor TuningPage::backColor()
-{
-	if (m_tabFilter != nullptr)
-	{
-		return m_tabFilter->backColor();
-	}
-
-	return QColor();
-}
-
-QColor TuningPage::textColor()
-{
-	if (m_tabFilter != nullptr)
-	{
-		return m_tabFilter->textColor();
-	}
-
-	return QColor();
 }
 
 bool TuningPage::hasPendingChanges()
@@ -1196,25 +763,170 @@ bool TuningPage::askForSavePendingChanges()
 
 bool TuningPage::write()
 {
-	return m_model->write();
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return false;
+	}
+
+	if (takeClientControl() == false)
+	{
+		return false;
+	}
+
+	QString str = tr("New values will be written:") + QString("\r\n\r\n");
+	QString strValue;
+
+	bool modifiedFound = false;
+	int modifiedCount = 0;
+
+	std::vector<Hash> hashes = m_model->hashes();
+
+	bool ok = false;
+
+	for (Hash hash : hashes)
+	{
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		if (state.controlIsEnabled() == false)
+		{
+			continue;
+		}
+
+		modifiedFound = true;
+		modifiedCount++;
+	}
+
+	if (modifiedFound == false)
+	{
+		return false;
+	}
+
+	int listCount = 0;
+
+	for (Hash hash : hashes)
+	{
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		if (state.controlIsEnabled() == false)
+		{
+			continue;
+		}
+
+		if (listCount >= 10)
+		{
+			str += tr("and %1 more values.").arg(modifiedCount - listCount);
+			break;
+		}
+
+		if (asp.isAnalog() == true)
+		{
+			strValue = state.newValue().toString(asp.precision());
+		}
+		else
+		{
+			strValue = state.newValue().toString();
+		}
+
+		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
+
+		listCount++;
+	}
+
+	str += QString("\r\n") + tr("Are you sure you want to continue?");
+
+	if (QMessageBox::warning(this, tr("Write Changes"),
+							 str,
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return false;
+	}
+
+	std::vector<TuningWriteCommand> commands;
+
+	for (Hash hash : hashes)
+	{
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.userModified() == false)
+		{
+			continue;
+		}
+
+		if (state.controlIsEnabled() == false)
+		{
+			continue;
+		}
+
+		state.clearUserModified();
+
+		m_tuningSignalManager->setState(hash, state);
+
+		TuningWriteCommand cmd(hash, state.newValue());
+
+		commands.push_back(cmd);
+	}
+
+	m_tuningTcpClient->writeTuningSignal(commands);
+
+	return true;
+}
+
+bool TuningPage::apply()
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return false;
+	}
+
+	if (takeClientControl() == false)
+	{
+		return false;
+	}
+
+	if (QMessageBox::warning(this, qAppName(),
+							 tr("Are you sure you want apply the changes?"),
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return false;
+	}
+
+	// Get SOR counters
+
+	int totalSorCount = m_tuningTcpClient->sourceSorCount();
+
+	if (totalSorCount > 0)
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!!!\r\n\r\nSOR Signal(s) are set in logic modules!\r\n\r\nIf you apply these changes, module can run into RUN SAFE STATE.\r\n\r\nAre you sure you STILL WANT TO APPLY the changes?"),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+	}
+
+	m_tuningTcpClient->applyTuningSignals();
+
+	return true;
 }
 
 void TuningPage::undo()
 {
-	m_model->slot_undo();
-}
-
-void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
-{
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	m_buttonFilter = filter;
-
-	fillObjectsList();
+	slot_undo();
 }
 
 void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
@@ -1236,10 +948,189 @@ void TuningPage::slot_setValue()
 		selectedRows.push_back(i.row());
 	}
 
-	if (selectedRows.empty() == false)
+	if (selectedRows.empty() == true)
 	{
-		m_model->setValue(selectedRows);
+		return;
 	}
+
+	bool first = true;
+	TuningValue value;
+	TuningValue defaultValue;
+	bool sameValue = true;
+	int precision = 0;
+	TuningValue lowLimit;
+	TuningValue highLimit;
+
+	for (int i : selectedRows)
+	{
+		Hash hash = m_model->hashByIndex(i);
+
+		bool ok = false;
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.valid() == false)
+		{
+			return;
+		}
+
+		if (asp.isAnalog() == true)
+		{
+			if (state.limitsUnbalance(asp) == true)
+			{
+				QMessageBox::warning(this, tr("Set Value"), tr("There is limits mismatch in signal '%1'. Value setting is disabled.").arg(asp.customSignalId()));
+				return;
+			}
+		}
+
+		if (asp.isAnalog() == true)
+		{
+			if (asp.precision() > precision)
+			{
+				precision = asp.precision();
+			}
+		}
+
+		if (first == true)
+		{
+			value = state.value();
+			defaultValue = m_model->defaultValue(asp);
+			lowLimit = asp.tuningLowBound();
+			highLimit = asp.tuningHighBound();
+			first = false;
+		}
+		else
+		{
+			if (asp.toTuningType() != value.type())
+			{
+				QMessageBox::warning(this, tr("Set Value"), tr("Please select objects of the same type."));
+				return;
+			}
+
+			if (asp.isAnalog() == true)
+			{
+				if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
+				{
+					QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different input range."));
+					return;
+				}
+			}
+
+			if (defaultValue != m_model->defaultValue(asp))
+			{
+				QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different default values."));
+				return;
+			}
+
+			if (value != state.value())
+			{
+				sameValue = false;
+			}
+		}
+	}
+
+	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	TuningValue newValue = d.value();
+
+	for (int i : selectedRows)
+	{
+		Hash hash = m_model->hashByIndex(i);
+
+		m_tuningSignalManager->setNewValue(hash, newValue);
+	}
+}
+
+void TuningPage::slot_tableDoubleClicked(const QModelIndex& index)
+{
+	Q_UNUSED(index);
+	slot_setValue();
+}
+
+void TuningPage::slot_FilterTypeIndexChanged(int index)
+{
+	Q_UNUSED(index);
+	fillObjectsList();
+}
+
+void TuningPage::slot_ApplyFilter()
+{
+	fillObjectsList();
+}
+
+void TuningPage::slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter)
+{
+	m_treeFilter = filter;
+
+	fillObjectsList();
+}
+
+void TuningPage::slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter)
+{
+	m_pageFilter = filter;
+
+	fillObjectsList();
+}
+
+bool TuningPage::eventFilter(QObject* object, QEvent* event)
+{
+	if (object == m_objectList && event->type()==QEvent::KeyPress)
+	{
+		QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
+		if(pKeyEvent->key() == Qt::Key_Return)
+		{
+			if (m_objectList->editorActive() == false)
+			{
+				slot_Write();
+				return true;
+			}
+			return true;
+		}
+
+		if(pKeyEvent->key() == Qt::Key_Space)
+		{
+			invertValue();
+			return true;
+		}
+	}
+
+	return QWidget::eventFilter(object, event);
+}
+
+void TuningPage::resizeEvent(QResizeEvent *event)
+{
+
+	Q_UNUSED(event);
+
+	if (m_objectList == nullptr)
+	{
+		return;
+	}
+
+	QSize s = m_objectList->size();
+
+	double totalWidth = s.width() - 25;
+
+	for (int c = 0; c < m_columnsArray.size(); c++)
+	{
+		auto columnInfo = m_columnsArray[c];
+
+		int columnWidth = totalWidth * columnInfo.second;
+
+		if (columnWidth >= s.width())
+		{
+			columnWidth = 100;
+		}
+
+		m_objectList->setColumnWidth(c, columnWidth);
+	}
+
 }
 
 void TuningPage::invertValue()
@@ -1253,62 +1144,85 @@ void TuningPage::invertValue()
 		selectedRows.push_back(i.row());
 	}
 
-	if (selectedRows.empty() == false)
-	{
-		m_model->invertValue(selectedRows);
-	}
-}
-
-void TuningPage::slot_tableDoubleClicked(const QModelIndex& index)
-{
-	Q_UNUSED(index);
-	slot_setValue();
-}
-
-void TuningPage::slot_FilterTypeIndexChanged(int index)
-{
-	Q_UNUSED(index);
-
-	if (askForSavePendingChanges() == false)
+	if (selectedRows.empty() == true)
 	{
 		return;
 	}
 
-	fillObjectsList();
+	bool ok = false;
+
+	for (int i : selectedRows)
+	{
+		Hash hash = m_model->hashByIndex(i);
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.valid() == false)
+		{
+			return;
+		}
+
+		if (asp.isDiscrete() == true)
+		{
+			TuningValue tv;
+
+			tv.setType(TuningValueType::Discrete);
+
+			tv.setDiscreteValue(0);
+
+			if (state.newValue().discreteValue() == 0)
+			{
+				tv.setDiscreteValue(1);
+			}
+
+			m_tuningSignalManager->setNewValue(hash, tv);
+		}
+	}
 }
 
-void TuningPage::slot_ApplyFilter()
+bool TuningPage::takeClientControl()
 {
-	if (askForSavePendingChanges() == false)
+#ifdef Q_DEBUG
+	if (theSettings.m_simulationMode == false)
+#endif
 	{
-		return;
+		if (m_tuningTcpClient->activeTuningSourceCount() == 0)
+		{
+			QMessageBox::critical(this, qAppName(),	 tr("No tuning sources with control enabled found."));
+
+			return false;
+		}
 	}
 
-	fillObjectsList();
+	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
+	{
+		QString equipmentId = m_tuningTcpClient->singleActiveTuningSource();
+
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+
+		m_tuningTcpClient->activateTuningSourceControl(equipmentId, true, true);
+	}
+
+	return true;
 }
 
-void TuningPage::slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter)
+void TuningPage::slot_timerTick500()
 {
-	if (filter == nullptr)
+	if  (isVisible() == true && m_model->rowCount() > 0)
 	{
-		//qDebug() << "Filter tree removed.";
-	}
-	else
-	{
-		//qDebug() << "Filter tree clicked: " << filter->caption();
-	}
 
-	m_treeFilter = filter;
+		//qDebug() << m_instanceNo;
 
-	fillObjectsList();
-}
+		m_model->blink();
 
-void TuningPage::timerEvent(QTimerEvent* event)
-{
-	assert(event);
-
-	if  (event->timerId() == m_updateStateTimerId && m_model->rowCount() > 0 && isVisible() == true)
-	{
 		// Update only visible dynamic items
 		//
 		int from = m_objectList->rowAt(0);
@@ -1324,62 +1238,202 @@ void TuningPage::timerEvent(QTimerEvent* event)
 			to = m_model->rowCount() - 1;
 		}
 
-		// Update signal states
-		//
-		m_model->updateStates();
-
 		// Redraw visible table items
 		//
 		for (int row = from; row <= to; row++)
 		{
-			TuningSignalState* state = m_model->state(row);
-
-			if (state == nullptr)
+			//if (state->needRedraw() == true || state->userModified() == true)
+			//{
+			for (int col = 0; col < m_model->columnCount(); col++)
 			{
-				assert(state);
+				int displayIndex = m_model->columnIndex(col);
+
+				if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
+				{
+					//QString str = QString("%1:%2").arg(row).arg(col);
+					//qDebug() << str;
+
+					m_objectList->update(m_model->index(row, col));
+				}
+			}
+			//}
+		}
+	}
+
+}
+
+void TuningPage::slot_setAll()
+{
+	QMenu menu(this);
+
+
+	// Check all signals to have correct limits
+	{
+		std::vector<Hash> hashes = m_model->hashes();
+
+		bool ok = false;
+
+		for (Hash hash : hashes)
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
 				continue;
 			}
 
-			if (state->needRedraw() == true || state->userModified() == true)
+			if (asp.isAnalog() == true)
 			{
-				for (int col = 0; col < m_model->columnCount(); col++)
+				if (state.limitsUnbalance(asp) == true)
 				{
-					int displayIndex = m_model->columnIndex(col);
-
-					if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
-					{
-						//QString str = QString("%1:%2").arg(row).arg(col);
-						//qDebug() << str;
-
-						m_objectList->update(m_model->index(row, col));
-					}
+					QMessageBox::warning(this, tr("Set All"), tr("There is limits mismatch in signal '%1'. Operation is disabled.").arg(asp.customSignalId()));
+					return;
 				}
 			}
 		}
 	}
-}
 
-bool TuningPage::eventFilter(QObject* object, QEvent* event)
-{
-	if (object == m_objectList && event->type()==QEvent::KeyPress)
+	// Set All To On
+	QAction* actionAllToOn = new QAction(tr("Set All Discretes To On"), &menu);
+
+	auto fAllToOn = [this]() -> void
 	{
-		QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
-		if(pKeyEvent->key() == Qt::Key_Return)
+		std::vector<Hash> hashes = m_model->hashes();
+
+		bool ok = false;
+
+		for (Hash hash : hashes)
 		{
-			if (m_objectList->editorActive() == false)
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
 			{
-				m_model->slot_Write();
-				return true;
+				continue;
 			}
-			return true;
-		}
 
-		if(pKeyEvent->key() == Qt::Key_Space)
+			if (asp.isDiscrete() == true)
+			{
+				TuningValue tv;
+				tv.setType(TuningValueType::Discrete);
+				tv.setDiscreteValue(1);
+				m_tuningSignalManager->setNewValue(hash, tv);
+			}
+		}
+	};
+	connect(actionAllToOn, &QAction::triggered, this, fAllToOn);
+
+	// Set All To Onff
+	QAction* actionAllToOff = new QAction(tr("Set All Discretes To Off"), &menu);
+
+	auto fAllToOff = [this]() -> void
+	{
+		std::vector<Hash> hashes = m_model->hashes();
+
+		bool ok = false;
+
+		for (Hash hash : hashes)
 		{
-			invertValue();
-			return true;
-		}
-	}
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-	return QWidget::eventFilter(object, event);
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				continue;
+			}
+
+			if (asp.isDiscrete() == true)
+			{
+				TuningValue tv;
+				tv.setType(TuningValueType::Discrete);
+				tv.setDiscreteValue(0);
+				m_tuningSignalManager->setNewValue(hash, tv);
+			}
+		}
+	};
+
+	connect(actionAllToOff, &QAction::triggered, this, fAllToOff);
+
+	// Set All To Defaults
+	QAction* actionAllToDefault = new QAction(tr("Set All To Defaults"), &menu);
+
+	auto fAllToDefault = [this]() -> void
+	{
+		std::vector<Hash> hashes = m_model->hashes();
+
+		bool ok = false;
+
+		for (Hash hash : hashes)
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				continue;
+			}
+
+			TuningValue tvDefault = m_model->defaultValue(asp);
+
+			if (tvDefault != state.value() && ok == true)
+			{
+				if(tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
+				{
+					QString message = tr("Invalid default value '%1' in signal %2 [%3]").arg(tvDefault.toString(asp.precision())).arg(asp.appSignalId()).arg(asp.caption());
+					QMessageBox::critical(this, qAppName(), message);
+				}
+				else
+				{
+					m_tuningSignalManager->setNewValue(hash, tvDefault);
+				}
+			}
+		}
+	};
+
+	connect(actionAllToDefault, &QAction::triggered, this, fAllToDefault);
+
+	// Run the menu
+
+	menu.addAction(actionAllToOn);
+	menu.addAction(actionAllToOff);
+	menu.addSeparator();
+	menu.addAction(actionAllToDefault);
+
+	menu.exec(QCursor::pos());
 }
+
+
+void TuningPage::slot_undo()
+{
+	std::vector<Hash> hashes = m_model->hashes();
+
+	bool ok = false;
+
+	for (Hash hash : hashes)
+	{
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (state.valid() == false)
+		{
+			continue;
+		}
+
+		m_tuningSignalManager->setNewValue(hash, state.value());
+	}
+}
+
+void TuningPage::slot_Write()
+{
+	write();
+}
+
+void TuningPage::slot_Apply()
+{
+	apply();
+}
+

@@ -1,210 +1,136 @@
 #include "TuningSignalState.h"
-
-#include <memory>
+#include <cmath>
+#include "../AppSignal.h"
 
 //
 // TuningSignalState
 //
+TuningSignalState::TuningSignalState(const ::Network::TuningSignalState& message)
+{
+	setState(message);
+}
 
-float TuningSignalState::value() const
+Hash TuningSignalState::hash() const
+{
+	return m_hash;
+}
+
+TuningValue TuningSignalState::value() const
 {
 	return m_value;
 }
 
-float TuningSignalState::readLowLimit() const
+double TuningSignalState::valueToDouble() const
 {
-	return m_readLowLimit;
+	return m_value.toDouble();
 }
 
-float TuningSignalState::readHighLimit() const
+TuningValue TuningSignalState::newValue() const
 {
-	return m_readHighLimit;
+	return m_newValue;
 }
 
-bool TuningSignalState::underflow() const
+void TuningSignalState::setNewValue(const TuningValue& value)
 {
-	return m_flags.m_underflow;
+	m_newValue = value;
+
+	if (m_value == m_newValue)
+	{
+		m_flags.userModified = false;
+	}
+	else
+	{
+		m_flags.userModified = true;
+	}
 }
 
-bool TuningSignalState::overflow() const
+TuningValue TuningSignalState::lowBound() const
 {
-	return m_flags.m_overflow;
+	return m_lowBound;
+}
+
+TuningValue TuningSignalState::highBound() const
+{
+	return m_highBound;
 }
 
 bool TuningSignalState::valid() const
 {
-	//return true;
-	return m_flags.m_valid;
+	return m_flags.valid;
 }
 
-bool TuningSignalState::writing() const
+bool TuningSignalState::outOfRange() const
 {
-	return m_flags.m_writing;
+	return m_flags.outOfRange;
 }
 
-float TuningSignalState::editValue() const
+bool TuningSignalState::writeInProgress() const
 {
-	return m_editValue;
+	return m_flags.writeInProgress;
 }
 
-void TuningSignalState::onEditValue(float value)
+bool TuningSignalState::writeFailed() const
 {
-	m_editValue = value;
-
-	if (m_value == m_editValue)
-	{
-		m_flags.m_userModified = false;
-	}
-	else
-	{
-		m_flags.m_userModified = true;
-	}
-
-	m_flags.m_needRedraw = true;
+	return m_flags.writeFailed;
 }
 
-bool TuningSignalState::needRedraw()
+bool TuningSignalState::controlIsEnabled() const
 {
-	bool result = m_flags.m_needRedraw;
+	return m_flags.controlIsEnabled;
+}
 
-	m_flags.m_needRedraw = false;
-
-	return result;
+int TuningSignalState::writeErrorCode() const
+{
+	return m_writeErrorCode;
 }
 
 bool TuningSignalState::userModified() const
 {
-	return m_flags.m_userModified;
+	return m_flags.userModified;
 }
 
 void TuningSignalState::clearUserModified()
 {
-	m_flags.m_userModified = false;
+	m_flags.userModified = false;
 }
 
-// Copy function that updates the redraw flag
-//
-void TuningSignalState::copy(const TuningSignalState& source)
+bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 {
-	if (m_readHighLimit != source.readHighLimit())
-	{
-		m_flags.m_needRedraw = true;
-		m_readHighLimit = source.readHighLimit();
-	}
+	m_hash = message.signalhash();
+	m_flags.valid = message.valid();
 
-	if (m_readLowLimit != source.readLowLimit())
-	{
-		m_flags.m_needRedraw = true;
-		m_readLowLimit = source.readLowLimit();
-	}
+	m_value.load(message.value());
+	m_lowBound.load(message.readlowbound());
+	m_highBound.load(message.readhighbound());
 
-	if (m_value != source.value())
-	{
-		m_flags.m_needRedraw = true;
+	m_flags.outOfRange = m_value < m_lowBound || m_value > m_highBound;
 
-		m_value = source.value();
-	}
+	m_flags.writeInProgress = message.writeinprogress();
+	m_writeErrorCode = message.writeerrorcode();
 
-	if (userModified() == false)
-	{
-		if (m_editValue != m_value)
-		{
-			m_flags.m_needRedraw = true;
+	//writeClient
+	//successfulReadTime
+	//writeRequestTime
+	//successfulWriteTime
+	//unsuccessfulWriteTime
 
-			m_editValue = m_value;
-		}
-	}
-
-	m_flags.m_underflow = m_value < m_readLowLimit;
-	m_flags.m_overflow = m_value > m_readHighLimit;
-
-	if (m_flags.m_valid != source.valid())
-	{
-		m_flags.m_needRedraw = true;
-		m_flags.m_valid = source.valid();
-	}
-
-	if (m_flags.m_writing != source.writing())
-	{
-		m_flags.m_needRedraw = true;
-		m_flags.m_writing = source.writing();
-		m_writingCounter = 0;
-	}
-}
-
-void TuningSignalState::onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool* writingFailed)
-{
-	m_readLowLimit = readLowLimit;
-	m_readHighLimit = readHighLimit;
-	m_value = value;
-
-	m_flags.m_valid = valid;
-	m_flags.m_underflow = m_value < m_readLowLimit;
-	m_flags.m_overflow = m_value > m_readHighLimit;
-
-	if (writingFailed != nullptr)
-	{
-		*writingFailed = false;
-	}
-
-	if (m_flags.m_writing == true)
-	{
-		if (value == m_editValue)
-		{
-			// Reset the writing flag
-			//
-			m_flags.m_writing = false;
-
-			m_writingCounter = 0;
-
-			m_flags.m_needRedraw = true;
-		}
-		else
-		{
-			const int MAX_TRY_WRITE_COUNT = 10;
-
-			// Increase the writing counter and reset it if value is wrong in MAX_TRY_WRITE_COUNT tries
-			//
-			m_writingCounter++;
-
-			if (m_writingCounter > MAX_TRY_WRITE_COUNT)
-			{
-				m_flags.m_needRedraw = true;
-
-				m_flags.m_writing = false;
-
-				m_writingCounter = 0;
-
-				if (writingFailed != nullptr)
-				{
-					*writingFailed = true;
-				}
-			}
-		}
-	}
-}
-
-
-void TuningSignalState::onSendValue(float value)
-{
-	m_editValue = value;
-
-	m_flags.m_writing = true;
+	return true;
 }
 
 void TuningSignalState::invalidate()
 {
-	m_flags.m_valid = false;
+	m_flags.valid = false;
 }
 
-bool TuningSignalState::floatsEqual(float x, float y)
+bool TuningSignalState::limitsUnbalance(const AppSignalParam& asp) const
 {
-	float epsilon = std::numeric_limits<float>::epsilon();
-
-	if (std::fabs(x - y) >= epsilon)
+	if (valid() == true && asp.isAnalog() == true)
 	{
-		return false;
+		if (lowBound() != asp.tuningLowBound() || highBound() != asp.tuningHighBound())
+		{
+			return true;
+		}
 	}
-
-	return true;
+	return false;
 }
+

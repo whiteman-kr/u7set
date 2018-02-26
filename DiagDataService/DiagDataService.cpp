@@ -10,12 +10,12 @@
 //
 // -------------------------------------------------------------------------------
 
-DiagDataServiceWorker::DiagDataServiceWorker(const QString& serviceName,
+DiagDataServiceWorker::DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
+											 const QString& serviceName,
 											 int& argc,
 											 char** argv,
-											 const VersionInfo& versionInfo,
 											 std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::DiagDataService, serviceName, argc, argv, versionInfo, logger),
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_logger(logger)
 {
 }
@@ -28,7 +28,7 @@ DiagDataServiceWorker::~DiagDataServiceWorker()
 
 ServiceWorker* DiagDataServiceWorker::createInstance() const
 {
-	DiagDataServiceWorker* diagDataServiceWorker = new DiagDataServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+	DiagDataServiceWorker* diagDataServiceWorker = new DiagDataServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
 
 	return diagDataServiceWorker;
 }

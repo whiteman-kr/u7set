@@ -43,7 +43,7 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 	Q_OBJECT
 
 public:
-	CfgServer(const QString& buildFolder, std::shared_ptr<CircularLogger> logger);
+	CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolder, std::shared_ptr<CircularLogger> logger);
 
 	virtual CfgServer* getNewInstance() override;
 
@@ -195,16 +195,12 @@ private slots:
 	void slot_getFile(QString fileName, QByteArray *fileData);
 
 public:
-	CfgLoader(const QString& appEquipmentID,
+	CfgLoader(const SoftwareInfo& softwareInfo,
 				int appInstance,
 				const HostAddressPort& serverAddressPort1,
 				const HostAddressPort& serverAddressPort2,
 				bool enableDownloadCfg,
-				std::shared_ptr<CircularLogger> logger,
-				E::SoftwareType softwareType,
-				int majorVersion,
-				int minorVersion,
-				int commitNo);
+				std::shared_ptr<CircularLogger> logger);
 
 	virtual void onClientThreadStarted() override;
 
@@ -251,16 +247,12 @@ signals:
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
-	CfgLoaderThread(const QString& appStrID,
+	CfgLoaderThread(const SoftwareInfo& softwareInfo,
 					int appInstance,
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
 					bool enableDownloadCfg,
-					std::shared_ptr<CircularLogger> logger,
-					E::SoftwareType softwareType,
-					int majorVersion,
-					int minorVersion,
-					int commitNo);
+					std::shared_ptr<CircularLogger> logger);
 
 	CfgLoaderThread(CfgLoader* cfgLoader);
 
@@ -279,4 +271,5 @@ public:
 	QString getLastErrorStr();
 
 	Tcp::ConnectionState getConnectionState();
+	HostAddressPort getCurrentServerAddressPort();
 };

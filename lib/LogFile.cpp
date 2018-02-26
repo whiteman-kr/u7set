@@ -1100,6 +1100,8 @@ namespace Log
 
 	bool LogFile::writeAlert(const QString& text)
 	{
+		m_alertAckCounter++;
+
 		emit alertArrived(text);
 
 		return m_logFileWorker->write(MessageType::Alert, text);
@@ -1107,11 +1109,15 @@ namespace Log
 
 	bool LogFile::writeError(const QString& text)
 	{
+		m_errorAckCounter++;
+
 		return m_logFileWorker->write(MessageType::Error, text);
 	}
 
 	bool LogFile::writeWarning(const QString& text)
 	{
+		m_warningAckCounter++;
+
 		return m_logFileWorker->write(MessageType::Warning, text);
 	}
 
@@ -1127,6 +1133,10 @@ namespace Log
 
 	void LogFile::view(QWidget* parent)
 	{
+		m_alertAckCounter = 0;
+		m_errorAckCounter = 0;
+		m_warningAckCounter = 0;
+
 		if (m_logDialog != nullptr)
 		{
 			m_logDialog->activateWindow();
@@ -1142,6 +1152,21 @@ namespace Log
 
 		return;
 
+	}
+
+	int LogFile::alertAckCounter() const
+	{
+		return m_alertAckCounter;
+	}
+
+	int LogFile::errorAckCounter() const
+	{
+		return m_errorAckCounter;
+	}
+
+	int LogFile::warningAckCounter() const
+	{
+		return m_warningAckCounter;
 	}
 
 	void LogFile::onFlushFailure()

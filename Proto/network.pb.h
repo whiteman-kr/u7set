@@ -52,24 +52,28 @@ class GetAppDataSourcesStatesReply;
 class GetUnitsRequest;
 class Unit;
 class GetUnitsReply;
+class AppDataServiceState;
+class SoftwareInfo;
 class GetServiceInfoRequest;
 class ServiceInfo;
 class GetServiceInfoReply;
-class TcpClientIntroduceMyself;
 class ConfigurationServiceState;
-class ConfigurationServiceClientInfo;
-class ConfigurationServiceClients;
+class ServiceClientInfo;
+class ServiceClients;
 class BuildInfo;
 class ConfigurationServiceSettings;
+class ServiceSettings;
 class GetTuningSourcesInfo;
 class GetTuningSourcesInfoReply;
 class GetTuningSourcesStates;
 class TuningSourceState;
 class GetTuningSourcesStatesReply;
+class ChangeConrolledTuningSourceRequest;
+class ChangeConrolledTuningSourceReply;
 class TuningSignalsRead;
 class TuningSignalState;
 class TuningSignalsReadReply;
-class TuningSignalWrite;
+class TuningWriteCommand;
 class TuningSignalsWrite;
 class TuningSignalWriteResult;
 class TuningSignalsWriteReply;
@@ -2006,6 +2010,330 @@ class GetUnitsReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class AppDataServiceState : public ::google::protobuf::Message {
+ public:
+  AppDataServiceState();
+  virtual ~AppDataServiceState();
+
+  AppDataServiceState(const AppDataServiceState& from);
+
+  inline AppDataServiceState& operator=(const AppDataServiceState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AppDataServiceState& default_instance();
+
+  void Swap(AppDataServiceState* other);
+
+  // implements Message ----------------------------------------------
+
+  AppDataServiceState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AppDataServiceState& from);
+  void MergeFrom(const AppDataServiceState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required bool CfgServiceIsConnected = 1 [default = false];
+  inline bool has_cfgserviceisconnected() const;
+  inline void clear_cfgserviceisconnected();
+  static const int kCfgServiceIsConnectedFieldNumber = 1;
+  inline bool cfgserviceisconnected() const;
+  inline void set_cfgserviceisconnected(bool value);
+
+  // optional uint32 CfgServiceIp = 2;
+  inline bool has_cfgserviceip() const;
+  inline void clear_cfgserviceip();
+  static const int kCfgServiceIpFieldNumber = 2;
+  inline ::google::protobuf::uint32 cfgserviceip() const;
+  inline void set_cfgserviceip(::google::protobuf::uint32 value);
+
+  // optional int32 CfgServicePort = 3;
+  inline bool has_cfgserviceport() const;
+  inline void clear_cfgserviceport();
+  static const int kCfgServicePortFieldNumber = 3;
+  inline ::google::protobuf::int32 cfgserviceport() const;
+  inline void set_cfgserviceport(::google::protobuf::int32 value);
+
+  // required bool ArchiveServiceIsConnected = 4 [default = false];
+  inline bool has_archiveserviceisconnected() const;
+  inline void clear_archiveserviceisconnected();
+  static const int kArchiveServiceIsConnectedFieldNumber = 4;
+  inline bool archiveserviceisconnected() const;
+  inline void set_archiveserviceisconnected(bool value);
+
+  // optional uint32 ArchiveServiceIp = 5;
+  inline bool has_archiveserviceip() const;
+  inline void clear_archiveserviceip();
+  static const int kArchiveServiceIpFieldNumber = 5;
+  inline ::google::protobuf::uint32 archiveserviceip() const;
+  inline void set_archiveserviceip(::google::protobuf::uint32 value);
+
+  // optional int32 ArchiveServicePort = 6;
+  inline bool has_archiveserviceport() const;
+  inline void clear_archiveserviceport();
+  static const int kArchiveServicePortFieldNumber = 6;
+  inline ::google::protobuf::int32 archiveserviceport() const;
+  inline void set_archiveserviceport(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.AppDataServiceState)
+ private:
+  inline void set_has_cfgserviceisconnected();
+  inline void clear_has_cfgserviceisconnected();
+  inline void set_has_cfgserviceip();
+  inline void clear_has_cfgserviceip();
+  inline void set_has_cfgserviceport();
+  inline void clear_has_cfgserviceport();
+  inline void set_has_archiveserviceisconnected();
+  inline void clear_has_archiveserviceisconnected();
+  inline void set_has_archiveserviceip();
+  inline void clear_has_archiveserviceip();
+  inline void set_has_archiveserviceport();
+  inline void clear_has_archiveserviceport();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 cfgserviceip_;
+  bool cfgserviceisconnected_;
+  bool archiveserviceisconnected_;
+  ::google::protobuf::int32 cfgserviceport_;
+  ::google::protobuf::uint32 archiveserviceip_;
+  ::google::protobuf::int32 archiveserviceport_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static AppDataServiceState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SoftwareInfo : public ::google::protobuf::Message {
+ public:
+  SoftwareInfo();
+  virtual ~SoftwareInfo();
+
+  SoftwareInfo(const SoftwareInfo& from);
+
+  inline SoftwareInfo& operator=(const SoftwareInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SoftwareInfo& default_instance();
+
+  void Swap(SoftwareInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  SoftwareInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SoftwareInfo& from);
+  void MergeFrom(const SoftwareInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 softwareType = 1 [default = 8000];
+  inline bool has_softwaretype() const;
+  inline void clear_softwaretype();
+  static const int kSoftwareTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 softwaretype() const;
+  inline void set_softwaretype(::google::protobuf::int32 value);
+
+  // required string equipmentId = 2;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIdFieldNumber = 2;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // required int32 majorVersion = 3 [default = 0];
+  inline bool has_majorversion() const;
+  inline void clear_majorversion();
+  static const int kMajorVersionFieldNumber = 3;
+  inline ::google::protobuf::int32 majorversion() const;
+  inline void set_majorversion(::google::protobuf::int32 value);
+
+  // required int32 minorVersion = 4 [default = 0];
+  inline bool has_minorversion() const;
+  inline void clear_minorversion();
+  static const int kMinorVersionFieldNumber = 4;
+  inline ::google::protobuf::int32 minorversion() const;
+  inline void set_minorversion(::google::protobuf::int32 value);
+
+  // required int32 commitNo = 5 [default = 0];
+  inline bool has_commitno() const;
+  inline void clear_commitno();
+  static const int kCommitNoFieldNumber = 5;
+  inline ::google::protobuf::int32 commitno() const;
+  inline void set_commitno(::google::protobuf::int32 value);
+
+  // required string buildBranch = 6;
+  inline bool has_buildbranch() const;
+  inline void clear_buildbranch();
+  static const int kBuildBranchFieldNumber = 6;
+  inline const ::std::string& buildbranch() const;
+  inline void set_buildbranch(const ::std::string& value);
+  inline void set_buildbranch(const char* value);
+  inline void set_buildbranch(const char* value, size_t size);
+  inline ::std::string* mutable_buildbranch();
+  inline ::std::string* release_buildbranch();
+  inline void set_allocated_buildbranch(::std::string* buildbranch);
+
+  // required string commitSHA = 7;
+  inline bool has_commitsha() const;
+  inline void clear_commitsha();
+  static const int kCommitSHAFieldNumber = 7;
+  inline const ::std::string& commitsha() const;
+  inline void set_commitsha(const ::std::string& value);
+  inline void set_commitsha(const char* value);
+  inline void set_commitsha(const char* value, size_t size);
+  inline ::std::string* mutable_commitsha();
+  inline ::std::string* release_commitsha();
+  inline void set_allocated_commitsha(::std::string* commitsha);
+
+  // required string userName = 8;
+  inline bool has_username() const;
+  inline void clear_username();
+  static const int kUserNameFieldNumber = 8;
+  inline const ::std::string& username() const;
+  inline void set_username(const ::std::string& value);
+  inline void set_username(const char* value);
+  inline void set_username(const char* value, size_t size);
+  inline ::std::string* mutable_username();
+  inline ::std::string* release_username();
+  inline void set_allocated_username(::std::string* username);
+
+  // required int32 buildNo = 9 [default = 0];
+  inline bool has_buildno() const;
+  inline void clear_buildno();
+  static const int kBuildNoFieldNumber = 9;
+  inline ::google::protobuf::int32 buildno() const;
+  inline void set_buildno(::google::protobuf::int32 value);
+
+  // required uint32 crc = 10 [default = 0];
+  inline bool has_crc() const;
+  inline void clear_crc();
+  static const int kCrcFieldNumber = 10;
+  inline ::google::protobuf::uint32 crc() const;
+  inline void set_crc(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.SoftwareInfo)
+ private:
+  inline void set_has_softwaretype();
+  inline void clear_has_softwaretype();
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_majorversion();
+  inline void clear_has_majorversion();
+  inline void set_has_minorversion();
+  inline void clear_has_minorversion();
+  inline void set_has_commitno();
+  inline void clear_has_commitno();
+  inline void set_has_buildbranch();
+  inline void clear_has_buildbranch();
+  inline void set_has_commitsha();
+  inline void clear_has_commitsha();
+  inline void set_has_username();
+  inline void clear_has_username();
+  inline void set_has_buildno();
+  inline void clear_has_buildno();
+  inline void set_has_crc();
+  inline void clear_has_crc();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* equipmentid_;
+  ::google::protobuf::int32 softwaretype_;
+  ::google::protobuf::int32 majorversion_;
+  ::google::protobuf::int32 minorversion_;
+  ::google::protobuf::int32 commitno_;
+  ::std::string* buildbranch_;
+  ::std::string* commitsha_;
+  ::std::string* username_;
+  ::google::protobuf::int32 buildno_;
+  ::google::protobuf::uint32 crc_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static SoftwareInfo* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class GetServiceInfoRequest : public ::google::protobuf::Message {
  public:
   GetServiceInfoRequest();
@@ -2132,112 +2460,54 @@ class ServiceInfo : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 type = 1 [default = 0];
-  inline bool has_type() const;
-  inline void clear_type();
-  static const int kTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 type() const;
-  inline void set_type(::google::protobuf::int32 value);
+  // required .Network.SoftwareInfo softwareInfo = 1;
+  inline bool has_softwareinfo() const;
+  inline void clear_softwareinfo();
+  static const int kSoftwareInfoFieldNumber = 1;
+  inline const ::Network::SoftwareInfo& softwareinfo() const;
+  inline ::Network::SoftwareInfo* mutable_softwareinfo();
+  inline ::Network::SoftwareInfo* release_softwareinfo();
+  inline void set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo);
 
-  // optional int32 majorVersion = 2 [default = 0];
-  inline bool has_majorversion() const;
-  inline void clear_majorversion();
-  static const int kMajorVersionFieldNumber = 2;
-  inline ::google::protobuf::int32 majorversion() const;
-  inline void set_majorversion(::google::protobuf::int32 value);
-
-  // optional int32 minorVersion = 3 [default = 0];
-  inline bool has_minorversion() const;
-  inline void clear_minorversion();
-  static const int kMinorVersionFieldNumber = 3;
-  inline ::google::protobuf::int32 minorversion() const;
-  inline void set_minorversion(::google::protobuf::int32 value);
-
-  // optional int32 commitNo = 4 [default = 0];
-  inline bool has_commitno() const;
-  inline void clear_commitno();
-  static const int kCommitNoFieldNumber = 4;
-  inline ::google::protobuf::int32 commitno() const;
-  inline void set_commitno(::google::protobuf::int32 value);
-
-  // optional uint32 crc = 5 [default = 0];
-  inline bool has_crc() const;
-  inline void clear_crc();
-  static const int kCrcFieldNumber = 5;
-  inline ::google::protobuf::uint32 crc() const;
-  inline void set_crc(::google::protobuf::uint32 value);
-
-  // optional int64 uptime = 6 [default = 0];
+  // optional int64 uptime = 2 [default = 0];
   inline bool has_uptime() const;
   inline void clear_uptime();
-  static const int kUptimeFieldNumber = 6;
+  static const int kUptimeFieldNumber = 2;
   inline ::google::protobuf::int64 uptime() const;
   inline void set_uptime(::google::protobuf::int64 value);
 
-  // optional int32 serviceState = 7 [default = 0];
+  // optional int32 serviceState = 3 [default = 0];
   inline bool has_servicestate() const;
   inline void clear_servicestate();
-  static const int kServiceStateFieldNumber = 7;
+  static const int kServiceStateFieldNumber = 3;
   inline ::google::protobuf::int32 servicestate() const;
   inline void set_servicestate(::google::protobuf::int32 value);
 
-  // optional int64 serviceUptime = 8 [default = 0];
+  // optional int64 serviceUptime = 4 [default = 0];
   inline bool has_serviceuptime() const;
   inline void clear_serviceuptime();
-  static const int kServiceUptimeFieldNumber = 8;
+  static const int kServiceUptimeFieldNumber = 4;
   inline ::google::protobuf::int64 serviceuptime() const;
   inline void set_serviceuptime(::google::protobuf::int64 value);
 
-  // optional uint32 clientRequestIP = 9 [default = 0];
+  // optional uint32 clientRequestIP = 5 [default = 0];
   inline bool has_clientrequestip() const;
   inline void clear_clientrequestip();
-  static const int kClientRequestIPFieldNumber = 9;
+  static const int kClientRequestIPFieldNumber = 5;
   inline ::google::protobuf::uint32 clientrequestip() const;
   inline void set_clientrequestip(::google::protobuf::uint32 value);
 
-  // optional int32 clientRequestPort = 10 [default = 0];
+  // optional int32 clientRequestPort = 6 [default = 0];
   inline bool has_clientrequestport() const;
   inline void clear_clientrequestport();
-  static const int kClientRequestPortFieldNumber = 10;
+  static const int kClientRequestPortFieldNumber = 6;
   inline ::google::protobuf::int32 clientrequestport() const;
   inline void set_clientrequestport(::google::protobuf::int32 value);
 
-  // optional string buildBranch = 11;
-  inline bool has_buildbranch() const;
-  inline void clear_buildbranch();
-  static const int kBuildBranchFieldNumber = 11;
-  inline const ::std::string& buildbranch() const;
-  inline void set_buildbranch(const ::std::string& value);
-  inline void set_buildbranch(const char* value);
-  inline void set_buildbranch(const char* value, size_t size);
-  inline ::std::string* mutable_buildbranch();
-  inline ::std::string* release_buildbranch();
-  inline void set_allocated_buildbranch(::std::string* buildbranch);
-
-  // optional string commitSHA = 12;
-  inline bool has_commitsha() const;
-  inline void clear_commitsha();
-  static const int kCommitSHAFieldNumber = 12;
-  inline const ::std::string& commitsha() const;
-  inline void set_commitsha(const ::std::string& value);
-  inline void set_commitsha(const char* value);
-  inline void set_commitsha(const char* value, size_t size);
-  inline ::std::string* mutable_commitsha();
-  inline ::std::string* release_commitsha();
-  inline void set_allocated_commitsha(::std::string* commitsha);
-
   // @@protoc_insertion_point(class_scope:Network.ServiceInfo)
  private:
-  inline void set_has_type();
-  inline void clear_has_type();
-  inline void set_has_majorversion();
-  inline void clear_has_majorversion();
-  inline void set_has_minorversion();
-  inline void clear_has_minorversion();
-  inline void set_has_commitno();
-  inline void clear_has_commitno();
-  inline void set_has_crc();
-  inline void clear_has_crc();
+  inline void set_has_softwareinfo();
+  inline void clear_has_softwareinfo();
   inline void set_has_uptime();
   inline void clear_has_uptime();
   inline void set_has_servicestate();
@@ -2248,28 +2518,18 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline void clear_has_clientrequestip();
   inline void set_has_clientrequestport();
   inline void clear_has_clientrequestport();
-  inline void set_has_buildbranch();
-  inline void clear_has_buildbranch();
-  inline void set_has_commitsha();
-  inline void clear_has_commitsha();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 type_;
-  ::google::protobuf::int32 majorversion_;
-  ::google::protobuf::int32 minorversion_;
-  ::google::protobuf::int32 commitno_;
+  ::Network::SoftwareInfo* softwareinfo_;
   ::google::protobuf::int64 uptime_;
-  ::google::protobuf::uint32 crc_;
-  ::google::protobuf::int32 servicestate_;
   ::google::protobuf::int64 serviceuptime_;
+  ::google::protobuf::int32 servicestate_;
   ::google::protobuf::uint32 clientrequestip_;
   ::google::protobuf::int32 clientrequestport_;
-  ::std::string* buildbranch_;
-  ::std::string* commitsha_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -2371,133 +2631,6 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static GetServiceInfoReply* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class TcpClientIntroduceMyself : public ::google::protobuf::Message {
- public:
-  TcpClientIntroduceMyself();
-  virtual ~TcpClientIntroduceMyself();
-
-  TcpClientIntroduceMyself(const TcpClientIntroduceMyself& from);
-
-  inline TcpClientIntroduceMyself& operator=(const TcpClientIntroduceMyself& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const TcpClientIntroduceMyself& default_instance();
-
-  void Swap(TcpClientIntroduceMyself* other);
-
-  // implements Message ----------------------------------------------
-
-  TcpClientIntroduceMyself* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TcpClientIntroduceMyself& from);
-  void MergeFrom(const TcpClientIntroduceMyself& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 softwareType = 1;
-  inline bool has_softwaretype() const;
-  inline void clear_softwaretype();
-  static const int kSoftwareTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 softwaretype() const;
-  inline void set_softwaretype(::google::protobuf::int32 value);
-
-  // required string equipmentId = 2;
-  inline bool has_equipmentid() const;
-  inline void clear_equipmentid();
-  static const int kEquipmentIdFieldNumber = 2;
-  inline const ::std::string& equipmentid() const;
-  inline void set_equipmentid(const ::std::string& value);
-  inline void set_equipmentid(const char* value);
-  inline void set_equipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_equipmentid();
-  inline ::std::string* release_equipmentid();
-  inline void set_allocated_equipmentid(::std::string* equipmentid);
-
-  // required int32 majorVersion = 3;
-  inline bool has_majorversion() const;
-  inline void clear_majorversion();
-  static const int kMajorVersionFieldNumber = 3;
-  inline ::google::protobuf::int32 majorversion() const;
-  inline void set_majorversion(::google::protobuf::int32 value);
-
-  // required int32 minorVersion = 4;
-  inline bool has_minorversion() const;
-  inline void clear_minorversion();
-  static const int kMinorVersionFieldNumber = 4;
-  inline ::google::protobuf::int32 minorversion() const;
-  inline void set_minorversion(::google::protobuf::int32 value);
-
-  // required int32 commitNo = 5;
-  inline bool has_commitno() const;
-  inline void clear_commitno();
-  static const int kCommitNoFieldNumber = 5;
-  inline ::google::protobuf::int32 commitno() const;
-  inline void set_commitno(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:Network.TcpClientIntroduceMyself)
- private:
-  inline void set_has_softwaretype();
-  inline void clear_has_softwaretype();
-  inline void set_has_equipmentid();
-  inline void clear_has_equipmentid();
-  inline void set_has_majorversion();
-  inline void clear_has_majorversion();
-  inline void set_has_minorversion();
-  inline void clear_has_minorversion();
-  inline void set_has_commitno();
-  inline void clear_has_commitno();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::std::string* equipmentid_;
-  ::google::protobuf::int32 softwaretype_;
-  ::google::protobuf::int32 majorversion_;
-  ::google::protobuf::int32 minorversion_;
-  ::google::protobuf::int32 commitno_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
-
-  friend void  protobuf_AddDesc_network_2eproto();
-  friend void protobuf_AssignDesc_network_2eproto();
-  friend void protobuf_ShutdownFile_network_2eproto();
-
-  void InitAsDefaultInstance();
-  static TcpClientIntroduceMyself* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2608,14 +2741,14 @@ class ConfigurationServiceState : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
+class ServiceClientInfo : public ::google::protobuf::Message {
  public:
-  ConfigurationServiceClientInfo();
-  virtual ~ConfigurationServiceClientInfo();
+  ServiceClientInfo();
+  virtual ~ServiceClientInfo();
 
-  ConfigurationServiceClientInfo(const ConfigurationServiceClientInfo& from);
+  ServiceClientInfo(const ServiceClientInfo& from);
 
-  inline ConfigurationServiceClientInfo& operator=(const ConfigurationServiceClientInfo& from) {
+  inline ServiceClientInfo& operator=(const ServiceClientInfo& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2629,17 +2762,17 @@ class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ConfigurationServiceClientInfo& default_instance();
+  static const ServiceClientInfo& default_instance();
 
-  void Swap(ConfigurationServiceClientInfo* other);
+  void Swap(ServiceClientInfo* other);
 
   // implements Message ----------------------------------------------
 
-  ConfigurationServiceClientInfo* New() const;
+  ServiceClientInfo* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ConfigurationServiceClientInfo& from);
-  void MergeFrom(const ConfigurationServiceClientInfo& from);
+  void CopyFrom(const ServiceClientInfo& from);
+  void MergeFrom(const ServiceClientInfo& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2661,25 +2794,6 @@ class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
   // nested types ----------------------------------------------------
 
   // accessors -------------------------------------------------------
-
-  // required int32 softwareType = 1;
-  inline bool has_softwaretype() const;
-  inline void clear_softwaretype();
-  static const int kSoftwareTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 softwaretype() const;
-  inline void set_softwaretype(::google::protobuf::int32 value);
-
-  // required string equipmentId = 2;
-  inline bool has_equipmentid() const;
-  inline void clear_equipmentid();
-  static const int kEquipmentIdFieldNumber = 2;
-  inline const ::std::string& equipmentid() const;
-  inline void set_equipmentid(const ::std::string& value);
-  inline void set_equipmentid(const char* value);
-  inline void set_equipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_equipmentid();
-  inline ::std::string* release_equipmentid();
-  inline void set_allocated_equipmentid(::std::string* equipmentid);
 
   // required int32 ip = 3;
   inline bool has_ip() const;
@@ -2709,33 +2823,17 @@ class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 replyquantity() const;
   inline void set_replyquantity(::google::protobuf::int64 value);
 
-  // required int32 majorVersion = 8;
-  inline bool has_majorversion() const;
-  inline void clear_majorversion();
-  static const int kMajorVersionFieldNumber = 8;
-  inline ::google::protobuf::int32 majorversion() const;
-  inline void set_majorversion(::google::protobuf::int32 value);
+  // required .Network.SoftwareInfo softwareInfo = 11;
+  inline bool has_softwareinfo() const;
+  inline void clear_softwareinfo();
+  static const int kSoftwareInfoFieldNumber = 11;
+  inline const ::Network::SoftwareInfo& softwareinfo() const;
+  inline ::Network::SoftwareInfo* mutable_softwareinfo();
+  inline ::Network::SoftwareInfo* release_softwareinfo();
+  inline void set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo);
 
-  // required int32 minorVersion = 9;
-  inline bool has_minorversion() const;
-  inline void clear_minorversion();
-  static const int kMinorVersionFieldNumber = 9;
-  inline ::google::protobuf::int32 minorversion() const;
-  inline void set_minorversion(::google::protobuf::int32 value);
-
-  // required int32 commitNo = 10;
-  inline bool has_commitno() const;
-  inline void clear_commitno();
-  static const int kCommitNoFieldNumber = 10;
-  inline ::google::protobuf::int32 commitno() const;
-  inline void set_commitno(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:Network.ConfigurationServiceClientInfo)
+  // @@protoc_insertion_point(class_scope:Network.ServiceClientInfo)
  private:
-  inline void set_has_softwaretype();
-  inline void clear_has_softwaretype();
-  inline void set_has_equipmentid();
-  inline void clear_has_equipmentid();
   inline void set_has_ip();
   inline void clear_has_ip();
   inline void set_has_uptime();
@@ -2744,45 +2842,37 @@ class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
   inline void clear_has_isactual();
   inline void set_has_replyquantity();
   inline void clear_has_replyquantity();
-  inline void set_has_majorversion();
-  inline void clear_has_majorversion();
-  inline void set_has_minorversion();
-  inline void clear_has_minorversion();
-  inline void set_has_commitno();
-  inline void clear_has_commitno();
+  inline void set_has_softwareinfo();
+  inline void clear_has_softwareinfo();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* equipmentid_;
-  ::google::protobuf::int32 softwaretype_;
-  ::google::protobuf::int32 ip_;
   ::google::protobuf::int64 uptime_;
-  ::google::protobuf::int64 replyquantity_;
+  ::google::protobuf::int32 ip_;
   bool isactual_;
-  ::google::protobuf::int32 majorversion_;
-  ::google::protobuf::int32 minorversion_;
-  ::google::protobuf::int32 commitno_;
+  ::google::protobuf::int64 replyquantity_;
+  ::Network::SoftwareInfo* softwareinfo_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static ConfigurationServiceClientInfo* default_instance_;
+  static ServiceClientInfo* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class ConfigurationServiceClients : public ::google::protobuf::Message {
+class ServiceClients : public ::google::protobuf::Message {
  public:
-  ConfigurationServiceClients();
-  virtual ~ConfigurationServiceClients();
+  ServiceClients();
+  virtual ~ServiceClients();
 
-  ConfigurationServiceClients(const ConfigurationServiceClients& from);
+  ServiceClients(const ServiceClients& from);
 
-  inline ConfigurationServiceClients& operator=(const ConfigurationServiceClients& from) {
+  inline ServiceClients& operator=(const ServiceClients& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2796,17 +2886,17 @@ class ConfigurationServiceClients : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const ConfigurationServiceClients& default_instance();
+  static const ServiceClients& default_instance();
 
-  void Swap(ConfigurationServiceClients* other);
+  void Swap(ServiceClients* other);
 
   // implements Message ----------------------------------------------
 
-  ConfigurationServiceClients* New() const;
+  ServiceClients* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ConfigurationServiceClients& from);
-  void MergeFrom(const ConfigurationServiceClients& from);
+  void CopyFrom(const ServiceClients& from);
+  void MergeFrom(const ServiceClients& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2829,24 +2919,24 @@ class ConfigurationServiceClients : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Network.ConfigurationServiceClientInfo clients = 1;
+  // repeated .Network.ServiceClientInfo clients = 1;
   inline int clients_size() const;
   inline void clear_clients();
   static const int kClientsFieldNumber = 1;
-  inline const ::Network::ConfigurationServiceClientInfo& clients(int index) const;
-  inline ::Network::ConfigurationServiceClientInfo* mutable_clients(int index);
-  inline ::Network::ConfigurationServiceClientInfo* add_clients();
-  inline const ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >&
+  inline const ::Network::ServiceClientInfo& clients(int index) const;
+  inline ::Network::ServiceClientInfo* mutable_clients(int index);
+  inline ::Network::ServiceClientInfo* add_clients();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::ServiceClientInfo >&
       clients() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >*
+  inline ::google::protobuf::RepeatedPtrField< ::Network::ServiceClientInfo >*
       mutable_clients();
 
-  // @@protoc_insertion_point(class_scope:Network.ConfigurationServiceClients)
+  // @@protoc_insertion_point(class_scope:Network.ServiceClients)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo > clients_;
+  ::google::protobuf::RepeatedPtrField< ::Network::ServiceClientInfo > clients_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -2856,7 +2946,7 @@ class ConfigurationServiceClients : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static ConfigurationServiceClients* default_instance_;
+  static ServiceClients* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -3134,6 +3224,123 @@ class ConfigurationServiceSettings : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class ServiceSettings : public ::google::protobuf::Message {
+ public:
+  ServiceSettings();
+  virtual ~ServiceSettings();
+
+  ServiceSettings(const ServiceSettings& from);
+
+  inline ServiceSettings& operator=(const ServiceSettings& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ServiceSettings& default_instance();
+
+  void Swap(ServiceSettings* other);
+
+  // implements Message ----------------------------------------------
+
+  ServiceSettings* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ServiceSettings& from);
+  void MergeFrom(const ServiceSettings& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string equipmentID = 1;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIDFieldNumber = 1;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // required string configIP1 = 2;
+  inline bool has_configip1() const;
+  inline void clear_configip1();
+  static const int kConfigIP1FieldNumber = 2;
+  inline const ::std::string& configip1() const;
+  inline void set_configip1(const ::std::string& value);
+  inline void set_configip1(const char* value);
+  inline void set_configip1(const char* value, size_t size);
+  inline ::std::string* mutable_configip1();
+  inline ::std::string* release_configip1();
+  inline void set_allocated_configip1(::std::string* configip1);
+
+  // required string configIP2 = 3;
+  inline bool has_configip2() const;
+  inline void clear_configip2();
+  static const int kConfigIP2FieldNumber = 3;
+  inline const ::std::string& configip2() const;
+  inline void set_configip2(const ::std::string& value);
+  inline void set_configip2(const char* value);
+  inline void set_configip2(const char* value, size_t size);
+  inline ::std::string* mutable_configip2();
+  inline ::std::string* release_configip2();
+  inline void set_allocated_configip2(::std::string* configip2);
+
+  // @@protoc_insertion_point(class_scope:Network.ServiceSettings)
+ private:
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_configip1();
+  inline void clear_has_configip1();
+  inline void set_has_configip2();
+  inline void clear_has_configip2();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* equipmentid_;
+  ::std::string* configip1_;
+  ::std::string* configip2_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ServiceSettings* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class GetTuningSourcesInfo : public ::google::protobuf::Message {
  public:
   GetTuningSourcesInfo();
@@ -3188,29 +3395,14 @@ class GetTuningSourcesInfo : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfo)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[1];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -3294,18 +3486,58 @@ class GetTuningSourcesInfoReply : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo >*
       mutable_tuningsourceinfo();
 
+  // optional bool singleLmControlMode = 3 [default = true];
+  inline bool has_singlelmcontrolmode() const;
+  inline void clear_singlelmcontrolmode();
+  static const int kSingleLmControlModeFieldNumber = 3;
+  inline bool singlelmcontrolmode() const;
+  inline void set_singlelmcontrolmode(bool value);
+
+  // optional string activeClientID = 4;
+  inline bool has_activeclientid() const;
+  inline void clear_activeclientid();
+  static const int kActiveClientIDFieldNumber = 4;
+  inline const ::std::string& activeclientid() const;
+  inline void set_activeclientid(const ::std::string& value);
+  inline void set_activeclientid(const char* value);
+  inline void set_activeclientid(const char* value, size_t size);
+  inline ::std::string* mutable_activeclientid();
+  inline ::std::string* release_activeclientid();
+  inline void set_allocated_activeclientid(::std::string* activeclientid);
+
+  // optional string activeClientIP = 5;
+  inline bool has_activeclientip() const;
+  inline void clear_activeclientip();
+  static const int kActiveClientIPFieldNumber = 5;
+  inline const ::std::string& activeclientip() const;
+  inline void set_activeclientip(const ::std::string& value);
+  inline void set_activeclientip(const char* value);
+  inline void set_activeclientip(const char* value, size_t size);
+  inline ::std::string* mutable_activeclientip();
+  inline ::std::string* release_activeclientip();
+  inline void set_allocated_activeclientip(::std::string* activeclientip);
+
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesInfoReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
+  inline void set_has_singlelmcontrolmode();
+  inline void clear_has_singlelmcontrolmode();
+  inline void set_has_activeclientid();
+  inline void clear_has_activeclientid();
+  inline void set_has_activeclientip();
+  inline void clear_has_activeclientip();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Network::DataSourceInfo > tuningsourceinfo_;
   ::google::protobuf::int32 error_;
+  bool singlelmcontrolmode_;
+  ::std::string* activeclientid_;
+  ::std::string* activeclientip_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -3370,29 +3602,14 @@ class GetTuningSourcesStates : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStates)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[1];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -3744,6 +3961,27 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 errrupcrc() const;
   inline void set_errrupcrc(::google::protobuf::int64 value);
 
+  // optional bool controlIsActive = 42 [default = false];
+  inline bool has_controlisactive() const;
+  inline void clear_controlisactive();
+  static const int kControlIsActiveFieldNumber = 42;
+  inline bool controlisactive() const;
+  inline void set_controlisactive(bool value);
+
+  // optional bool setSOR = 43 [default = false];
+  inline bool has_setsor() const;
+  inline void clear_setsor();
+  static const int kSetSORFieldNumber = 43;
+  inline bool setsor() const;
+  inline void set_setsor(bool value);
+
+  // optional bool hasUnappliedParams = 44 [default = false];
+  inline bool has_hasunappliedparams() const;
+  inline void clear_hasunappliedparams();
+  static const int kHasUnappliedParamsFieldNumber = 44;
+  inline bool hasunappliedparams() const;
+  inline void set_hasunappliedparams(bool value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   inline void set_has_sourceid();
@@ -3828,13 +4066,17 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline void clear_has_erranaloghighboundcheck();
   inline void set_has_errrupcrc();
   inline void clear_has_errrupcrc();
+  inline void set_has_controlisactive();
+  inline void clear_has_controlisactive();
+  inline void set_has_setsor();
+  inline void clear_has_setsor();
+  inline void set_has_hasunappliedparams();
+  inline void clear_has_hasunappliedparams();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 sourceid_;
   ::google::protobuf::int64 requestcount_;
-  bool isreply_;
-  ::google::protobuf::int32 commandqueuesize_;
   ::google::protobuf::int64 replycount_;
   ::google::protobuf::int64 erruntimelyreplay_;
   ::google::protobuf::int64 errsent_;
@@ -3858,6 +4100,11 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 fotipflagboundschecksuccess_;
   ::google::protobuf::int64 fotipflagwritesuccess_;
   ::google::protobuf::int64 fotipflagdatatypeerr_;
+  ::google::protobuf::int32 commandqueuesize_;
+  bool isreply_;
+  bool controlisactive_;
+  bool setsor_;
+  bool hasunappliedparams_;
   ::google::protobuf::int64 fotipflagopcodeerr_;
   ::google::protobuf::int64 fotipflagstartaddrerr_;
   ::google::protobuf::int64 fotipflagromsizeerr_;
@@ -3874,7 +4121,7 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errrupcrc_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(41 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(44 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -3958,18 +4205,58 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState >*
       mutable_tuningsourcesstate();
 
+  // optional bool singleLmControlMode = 3 [default = true];
+  inline bool has_singlelmcontrolmode() const;
+  inline void clear_singlelmcontrolmode();
+  static const int kSingleLmControlModeFieldNumber = 3;
+  inline bool singlelmcontrolmode() const;
+  inline void set_singlelmcontrolmode(bool value);
+
+  // optional string activeClientID = 4;
+  inline bool has_activeclientid() const;
+  inline void clear_activeclientid();
+  static const int kActiveClientIDFieldNumber = 4;
+  inline const ::std::string& activeclientid() const;
+  inline void set_activeclientid(const ::std::string& value);
+  inline void set_activeclientid(const char* value);
+  inline void set_activeclientid(const char* value, size_t size);
+  inline ::std::string* mutable_activeclientid();
+  inline ::std::string* release_activeclientid();
+  inline void set_allocated_activeclientid(::std::string* activeclientid);
+
+  // optional string activeClientIP = 5;
+  inline bool has_activeclientip() const;
+  inline void clear_activeclientip();
+  static const int kActiveClientIPFieldNumber = 5;
+  inline const ::std::string& activeclientip() const;
+  inline void set_activeclientip(const ::std::string& value);
+  inline void set_activeclientip(const char* value);
+  inline void set_activeclientip(const char* value, size_t size);
+  inline ::std::string* mutable_activeclientip();
+  inline ::std::string* release_activeclientip();
+  inline void set_allocated_activeclientip(::std::string* activeclientip);
+
   // @@protoc_insertion_point(class_scope:Network.GetTuningSourcesStatesReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
+  inline void set_has_singlelmcontrolmode();
+  inline void clear_has_singlelmcontrolmode();
+  inline void set_has_activeclientid();
+  inline void clear_has_activeclientid();
+  inline void set_has_activeclientip();
+  inline void clear_has_activeclientip();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Network::TuningSourceState > tuningsourcesstate_;
   ::google::protobuf::int32 error_;
+  bool singlelmcontrolmode_;
+  ::std::string* activeclientid_;
+  ::std::string* activeclientip_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -3977,6 +4264,220 @@ class GetTuningSourcesStatesReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static GetTuningSourcesStatesReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ChangeConrolledTuningSourceRequest : public ::google::protobuf::Message {
+ public:
+  ChangeConrolledTuningSourceRequest();
+  virtual ~ChangeConrolledTuningSourceRequest();
+
+  ChangeConrolledTuningSourceRequest(const ChangeConrolledTuningSourceRequest& from);
+
+  inline ChangeConrolledTuningSourceRequest& operator=(const ChangeConrolledTuningSourceRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ChangeConrolledTuningSourceRequest& default_instance();
+
+  void Swap(ChangeConrolledTuningSourceRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  ChangeConrolledTuningSourceRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ChangeConrolledTuningSourceRequest& from);
+  void MergeFrom(const ChangeConrolledTuningSourceRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional bool takeControl = 1;
+  inline bool has_takecontrol() const;
+  inline void clear_takecontrol();
+  static const int kTakeControlFieldNumber = 1;
+  inline bool takecontrol() const;
+  inline void set_takecontrol(bool value);
+
+  // optional string tuningSourceEquipmentID = 2;
+  inline bool has_tuningsourceequipmentid() const;
+  inline void clear_tuningsourceequipmentid();
+  static const int kTuningSourceEquipmentIDFieldNumber = 2;
+  inline const ::std::string& tuningsourceequipmentid() const;
+  inline void set_tuningsourceequipmentid(const ::std::string& value);
+  inline void set_tuningsourceequipmentid(const char* value);
+  inline void set_tuningsourceequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_tuningsourceequipmentid();
+  inline ::std::string* release_tuningsourceequipmentid();
+  inline void set_allocated_tuningsourceequipmentid(::std::string* tuningsourceequipmentid);
+
+  // optional bool activateControl = 3 [default = false];
+  inline bool has_activatecontrol() const;
+  inline void clear_activatecontrol();
+  static const int kActivateControlFieldNumber = 3;
+  inline bool activatecontrol() const;
+  inline void set_activatecontrol(bool value);
+
+  // @@protoc_insertion_point(class_scope:Network.ChangeConrolledTuningSourceRequest)
+ private:
+  inline void set_has_takecontrol();
+  inline void clear_has_takecontrol();
+  inline void set_has_tuningsourceequipmentid();
+  inline void clear_has_tuningsourceequipmentid();
+  inline void set_has_activatecontrol();
+  inline void clear_has_activatecontrol();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* tuningsourceequipmentid_;
+  bool takecontrol_;
+  bool activatecontrol_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ChangeConrolledTuningSourceRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ChangeConrolledTuningSourceReply : public ::google::protobuf::Message {
+ public:
+  ChangeConrolledTuningSourceReply();
+  virtual ~ChangeConrolledTuningSourceReply();
+
+  ChangeConrolledTuningSourceReply(const ChangeConrolledTuningSourceReply& from);
+
+  inline ChangeConrolledTuningSourceReply& operator=(const ChangeConrolledTuningSourceReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ChangeConrolledTuningSourceReply& default_instance();
+
+  void Swap(ChangeConrolledTuningSourceReply* other);
+
+  // implements Message ----------------------------------------------
+
+  ChangeConrolledTuningSourceReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ChangeConrolledTuningSourceReply& from);
+  void MergeFrom(const ChangeConrolledTuningSourceReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // optional string controlledTuningSourceEquipmentID = 2;
+  inline bool has_controlledtuningsourceequipmentid() const;
+  inline void clear_controlledtuningsourceequipmentid();
+  static const int kControlledTuningSourceEquipmentIDFieldNumber = 2;
+  inline const ::std::string& controlledtuningsourceequipmentid() const;
+  inline void set_controlledtuningsourceequipmentid(const ::std::string& value);
+  inline void set_controlledtuningsourceequipmentid(const char* value);
+  inline void set_controlledtuningsourceequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_controlledtuningsourceequipmentid();
+  inline ::std::string* release_controlledtuningsourceequipmentid();
+  inline void set_allocated_controlledtuningsourceequipmentid(::std::string* controlledtuningsourceequipmentid);
+
+  // optional bool controlIsActive = 3 [default = false];
+  inline bool has_controlisactive() const;
+  inline void clear_controlisactive();
+  static const int kControlIsActiveFieldNumber = 3;
+  inline bool controlisactive() const;
+  inline void set_controlisactive(bool value);
+
+  // @@protoc_insertion_point(class_scope:Network.ChangeConrolledTuningSourceReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+  inline void set_has_controlledtuningsourceequipmentid();
+  inline void clear_has_controlledtuningsourceequipmentid();
+  inline void set_has_controlisactive();
+  inline void clear_has_controlisactive();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* controlledtuningsourceequipmentid_;
+  ::google::protobuf::int32 error_;
+  bool controlisactive_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ChangeConrolledTuningSourceReply* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -4034,18 +4535,6 @@ class TuningSignalsRead : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // repeated uint64 signalHash = 2;
   inline int signalhash_size() const;
   inline void clear_signalhash();
@@ -4060,16 +4549,13 @@ class TuningSignalsRead : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Network.TuningSignalsRead)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
   ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhash_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -4134,7 +4620,7 @@ class TuningSignalState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 signalHash = 1 [default = 0];
+  // optional fixed64 signalHash = 1 [default = 0];
   inline bool has_signalhash() const;
   inline void clear_signalhash();
   static const int kSignalHashFieldNumber = 1;
@@ -4155,26 +4641,81 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline bool valid() const;
   inline void set_valid(bool value);
 
-  // optional float value = 4 [default = 0];
+  // optional .Proto.TuningValue value = 4;
   inline bool has_value() const;
   inline void clear_value();
   static const int kValueFieldNumber = 4;
-  inline float value() const;
-  inline void set_value(float value);
+  inline const ::Proto::TuningValue& value() const;
+  inline ::Proto::TuningValue* mutable_value();
+  inline ::Proto::TuningValue* release_value();
+  inline void set_allocated_value(::Proto::TuningValue* value);
 
-  // optional float readLowBound = 5 [default = 0];
+  // optional .Proto.TuningValue readLowBound = 5;
   inline bool has_readlowbound() const;
   inline void clear_readlowbound();
   static const int kReadLowBoundFieldNumber = 5;
-  inline float readlowbound() const;
-  inline void set_readlowbound(float value);
+  inline const ::Proto::TuningValue& readlowbound() const;
+  inline ::Proto::TuningValue* mutable_readlowbound();
+  inline ::Proto::TuningValue* release_readlowbound();
+  inline void set_allocated_readlowbound(::Proto::TuningValue* readlowbound);
 
-  // optional float readHighBound = 6 [default = 0];
+  // optional .Proto.TuningValue readHighBound = 6;
   inline bool has_readhighbound() const;
   inline void clear_readhighbound();
   static const int kReadHighBoundFieldNumber = 6;
-  inline float readhighbound() const;
-  inline void set_readhighbound(float value);
+  inline const ::Proto::TuningValue& readhighbound() const;
+  inline ::Proto::TuningValue* mutable_readhighbound();
+  inline ::Proto::TuningValue* release_readhighbound();
+  inline void set_allocated_readhighbound(::Proto::TuningValue* readhighbound);
+
+  // optional bool writeInProgress = 7 [default = false];
+  inline bool has_writeinprogress() const;
+  inline void clear_writeinprogress();
+  static const int kWriteInProgressFieldNumber = 7;
+  inline bool writeinprogress() const;
+  inline void set_writeinprogress(bool value);
+
+  // optional int32 writeErrorCode = 8 [default = 0];
+  inline bool has_writeerrorcode() const;
+  inline void clear_writeerrorcode();
+  static const int kWriteErrorCodeFieldNumber = 8;
+  inline ::google::protobuf::int32 writeerrorcode() const;
+  inline void set_writeerrorcode(::google::protobuf::int32 value);
+
+  // optional fixed64 writeClient = 9 [default = 0];
+  inline bool has_writeclient() const;
+  inline void clear_writeclient();
+  static const int kWriteClientFieldNumber = 9;
+  inline ::google::protobuf::uint64 writeclient() const;
+  inline void set_writeclient(::google::protobuf::uint64 value);
+
+  // optional sfixed64 successfulReadTime = 10 [default = 0];
+  inline bool has_successfulreadtime() const;
+  inline void clear_successfulreadtime();
+  static const int kSuccessfulReadTimeFieldNumber = 10;
+  inline ::google::protobuf::int64 successfulreadtime() const;
+  inline void set_successfulreadtime(::google::protobuf::int64 value);
+
+  // optional sfixed64 writeRequestTime = 11 [default = 0];
+  inline bool has_writerequesttime() const;
+  inline void clear_writerequesttime();
+  static const int kWriteRequestTimeFieldNumber = 11;
+  inline ::google::protobuf::int64 writerequesttime() const;
+  inline void set_writerequesttime(::google::protobuf::int64 value);
+
+  // optional sfixed64 successfulWriteTime = 12 [default = 0];
+  inline bool has_successfulwritetime() const;
+  inline void clear_successfulwritetime();
+  static const int kSuccessfulWriteTimeFieldNumber = 12;
+  inline ::google::protobuf::int64 successfulwritetime() const;
+  inline void set_successfulwritetime(::google::protobuf::int64 value);
+
+  // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+  inline bool has_unsuccessfulwritetime() const;
+  inline void clear_unsuccessfulwritetime();
+  static const int kUnsuccessfulWriteTimeFieldNumber = 13;
+  inline ::google::protobuf::int64 unsuccessfulwritetime() const;
+  inline void set_unsuccessfulwritetime(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
@@ -4190,18 +4731,39 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline void clear_has_readlowbound();
   inline void set_has_readhighbound();
   inline void clear_has_readhighbound();
+  inline void set_has_writeinprogress();
+  inline void clear_has_writeinprogress();
+  inline void set_has_writeerrorcode();
+  inline void clear_has_writeerrorcode();
+  inline void set_has_writeclient();
+  inline void clear_has_writeclient();
+  inline void set_has_successfulreadtime();
+  inline void clear_has_successfulreadtime();
+  inline void set_has_writerequesttime();
+  inline void clear_has_writerequesttime();
+  inline void set_has_successfulwritetime();
+  inline void clear_has_successfulwritetime();
+  inline void set_has_unsuccessfulwritetime();
+  inline void clear_has_unsuccessfulwritetime();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 signalhash_;
+  ::Proto::TuningValue* value_;
   ::google::protobuf::int32 error_;
   bool valid_;
-  float value_;
-  float readlowbound_;
-  float readhighbound_;
+  bool writeinprogress_;
+  ::Proto::TuningValue* readlowbound_;
+  ::Proto::TuningValue* readhighbound_;
+  ::google::protobuf::uint64 writeclient_;
+  ::google::protobuf::int64 successfulreadtime_;
+  ::google::protobuf::int64 writerequesttime_;
+  ::google::protobuf::int64 successfulwritetime_;
+  ::google::protobuf::int64 unsuccessfulwritetime_;
+  ::google::protobuf::int32 writeerrorcode_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -4307,14 +4869,14 @@ class TuningSignalsReadReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TuningSignalWrite : public ::google::protobuf::Message {
+class TuningWriteCommand : public ::google::protobuf::Message {
  public:
-  TuningSignalWrite();
-  virtual ~TuningSignalWrite();
+  TuningWriteCommand();
+  virtual ~TuningWriteCommand();
 
-  TuningSignalWrite(const TuningSignalWrite& from);
+  TuningWriteCommand(const TuningWriteCommand& from);
 
-  inline TuningSignalWrite& operator=(const TuningSignalWrite& from) {
+  inline TuningWriteCommand& operator=(const TuningWriteCommand& from) {
     CopyFrom(from);
     return *this;
   }
@@ -4328,17 +4890,17 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TuningSignalWrite& default_instance();
+  static const TuningWriteCommand& default_instance();
 
-  void Swap(TuningSignalWrite* other);
+  void Swap(TuningWriteCommand* other);
 
   // implements Message ----------------------------------------------
 
-  TuningSignalWrite* New() const;
+  TuningWriteCommand* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TuningSignalWrite& from);
-  void MergeFrom(const TuningSignalWrite& from);
+  void CopyFrom(const TuningWriteCommand& from);
+  void MergeFrom(const TuningWriteCommand& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -4368,14 +4930,16 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   inline ::google::protobuf::uint64 signalhash() const;
   inline void set_signalhash(::google::protobuf::uint64 value);
 
-  // optional float value = 2 [default = 0];
+  // optional .Proto.TuningValue value = 2;
   inline bool has_value() const;
   inline void clear_value();
   static const int kValueFieldNumber = 2;
-  inline float value() const;
-  inline void set_value(float value);
+  inline const ::Proto::TuningValue& value() const;
+  inline ::Proto::TuningValue* mutable_value();
+  inline ::Proto::TuningValue* release_value();
+  inline void set_allocated_value(::Proto::TuningValue* value);
 
-  // @@protoc_insertion_point(class_scope:Network.TuningSignalWrite)
+  // @@protoc_insertion_point(class_scope:Network.TuningWriteCommand)
  private:
   inline void set_has_signalhash();
   inline void clear_has_signalhash();
@@ -4385,7 +4949,7 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 signalhash_;
-  float value_;
+  ::Proto::TuningValue* value_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
@@ -4395,7 +4959,7 @@ class TuningSignalWrite : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static TuningSignalWrite* default_instance_;
+  static TuningWriteCommand* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -4453,18 +5017,6 @@ class TuningSignalsWrite : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // optional bool autoApply = 2 [default = false];
   inline bool has_autoapply() const;
   inline void clear_autoapply();
@@ -4472,33 +5024,30 @@ class TuningSignalsWrite : public ::google::protobuf::Message {
   inline bool autoapply() const;
   inline void set_autoapply(bool value);
 
-  // repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
-  inline int tuningsignalwrite_size() const;
-  inline void clear_tuningsignalwrite();
-  static const int kTuningSignalWriteFieldNumber = 3;
-  inline const ::Network::TuningSignalWrite& tuningsignalwrite(int index) const;
-  inline ::Network::TuningSignalWrite* mutable_tuningsignalwrite(int index);
-  inline ::Network::TuningSignalWrite* add_tuningsignalwrite();
-  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >&
-      tuningsignalwrite() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >*
-      mutable_tuningsignalwrite();
+  // repeated .Network.TuningWriteCommand commands = 3;
+  inline int commands_size() const;
+  inline void clear_commands();
+  static const int kCommandsFieldNumber = 3;
+  inline const ::Network::TuningWriteCommand& commands(int index) const;
+  inline ::Network::TuningWriteCommand* mutable_commands(int index);
+  inline ::Network::TuningWriteCommand* add_commands();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >&
+      commands() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >*
+      mutable_commands();
 
   // @@protoc_insertion_point(class_scope:Network.TuningSignalsWrite)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
   inline void set_has_autoapply();
   inline void clear_has_autoapply();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
-  ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite > tuningsignalwrite_;
+  ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand > commands_;
   bool autoapply_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -4750,29 +5299,14 @@ class TuningSignalsApply : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string clientEquipmentID = 1;
-  inline bool has_clientequipmentid() const;
-  inline void clear_clientequipmentid();
-  static const int kClientEquipmentIDFieldNumber = 1;
-  inline const ::std::string& clientequipmentid() const;
-  inline void set_clientequipmentid(const ::std::string& value);
-  inline void set_clientequipmentid(const char* value);
-  inline void set_clientequipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_clientequipmentid();
-  inline ::std::string* release_clientequipmentid();
-  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
-
   // @@protoc_insertion_point(class_scope:Network.TuningSignalsApply)
  private:
-  inline void set_has_clientequipmentid();
-  inline void clear_has_clientequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* clientequipmentid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[1];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -7409,131 +7943,611 @@ GetUnitsReply::mutable_units() {
 
 // -------------------------------------------------------------------
 
+// AppDataServiceState
+
+// required bool CfgServiceIsConnected = 1 [default = false];
+inline bool AppDataServiceState::has_cfgserviceisconnected() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void AppDataServiceState::set_has_cfgserviceisconnected() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void AppDataServiceState::clear_has_cfgserviceisconnected() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void AppDataServiceState::clear_cfgserviceisconnected() {
+  cfgserviceisconnected_ = false;
+  clear_has_cfgserviceisconnected();
+}
+inline bool AppDataServiceState::cfgserviceisconnected() const {
+  return cfgserviceisconnected_;
+}
+inline void AppDataServiceState::set_cfgserviceisconnected(bool value) {
+  set_has_cfgserviceisconnected();
+  cfgserviceisconnected_ = value;
+}
+
+// optional uint32 CfgServiceIp = 2;
+inline bool AppDataServiceState::has_cfgserviceip() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void AppDataServiceState::set_has_cfgserviceip() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void AppDataServiceState::clear_has_cfgserviceip() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void AppDataServiceState::clear_cfgserviceip() {
+  cfgserviceip_ = 0u;
+  clear_has_cfgserviceip();
+}
+inline ::google::protobuf::uint32 AppDataServiceState::cfgserviceip() const {
+  return cfgserviceip_;
+}
+inline void AppDataServiceState::set_cfgserviceip(::google::protobuf::uint32 value) {
+  set_has_cfgserviceip();
+  cfgserviceip_ = value;
+}
+
+// optional int32 CfgServicePort = 3;
+inline bool AppDataServiceState::has_cfgserviceport() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void AppDataServiceState::set_has_cfgserviceport() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void AppDataServiceState::clear_has_cfgserviceport() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void AppDataServiceState::clear_cfgserviceport() {
+  cfgserviceport_ = 0;
+  clear_has_cfgserviceport();
+}
+inline ::google::protobuf::int32 AppDataServiceState::cfgserviceport() const {
+  return cfgserviceport_;
+}
+inline void AppDataServiceState::set_cfgserviceport(::google::protobuf::int32 value) {
+  set_has_cfgserviceport();
+  cfgserviceport_ = value;
+}
+
+// required bool ArchiveServiceIsConnected = 4 [default = false];
+inline bool AppDataServiceState::has_archiveserviceisconnected() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void AppDataServiceState::set_has_archiveserviceisconnected() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void AppDataServiceState::clear_has_archiveserviceisconnected() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void AppDataServiceState::clear_archiveserviceisconnected() {
+  archiveserviceisconnected_ = false;
+  clear_has_archiveserviceisconnected();
+}
+inline bool AppDataServiceState::archiveserviceisconnected() const {
+  return archiveserviceisconnected_;
+}
+inline void AppDataServiceState::set_archiveserviceisconnected(bool value) {
+  set_has_archiveserviceisconnected();
+  archiveserviceisconnected_ = value;
+}
+
+// optional uint32 ArchiveServiceIp = 5;
+inline bool AppDataServiceState::has_archiveserviceip() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void AppDataServiceState::set_has_archiveserviceip() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void AppDataServiceState::clear_has_archiveserviceip() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void AppDataServiceState::clear_archiveserviceip() {
+  archiveserviceip_ = 0u;
+  clear_has_archiveserviceip();
+}
+inline ::google::protobuf::uint32 AppDataServiceState::archiveserviceip() const {
+  return archiveserviceip_;
+}
+inline void AppDataServiceState::set_archiveserviceip(::google::protobuf::uint32 value) {
+  set_has_archiveserviceip();
+  archiveserviceip_ = value;
+}
+
+// optional int32 ArchiveServicePort = 6;
+inline bool AppDataServiceState::has_archiveserviceport() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void AppDataServiceState::set_has_archiveserviceport() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void AppDataServiceState::clear_has_archiveserviceport() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void AppDataServiceState::clear_archiveserviceport() {
+  archiveserviceport_ = 0;
+  clear_has_archiveserviceport();
+}
+inline ::google::protobuf::int32 AppDataServiceState::archiveserviceport() const {
+  return archiveserviceport_;
+}
+inline void AppDataServiceState::set_archiveserviceport(::google::protobuf::int32 value) {
+  set_has_archiveserviceport();
+  archiveserviceport_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// SoftwareInfo
+
+// required int32 softwareType = 1 [default = 8000];
+inline bool SoftwareInfo::has_softwaretype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SoftwareInfo::set_has_softwaretype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SoftwareInfo::clear_has_softwaretype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SoftwareInfo::clear_softwaretype() {
+  softwaretype_ = 8000;
+  clear_has_softwaretype();
+}
+inline ::google::protobuf::int32 SoftwareInfo::softwaretype() const {
+  return softwaretype_;
+}
+inline void SoftwareInfo::set_softwaretype(::google::protobuf::int32 value) {
+  set_has_softwaretype();
+  softwaretype_ = value;
+}
+
+// required string equipmentId = 2;
+inline bool SoftwareInfo::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SoftwareInfo::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SoftwareInfo::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SoftwareInfo::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& SoftwareInfo::equipmentid() const {
+  return *equipmentid_;
+}
+inline void SoftwareInfo::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void SoftwareInfo::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void SoftwareInfo::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* SoftwareInfo::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 majorVersion = 3 [default = 0];
+inline bool SoftwareInfo::has_majorversion() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SoftwareInfo::set_has_majorversion() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SoftwareInfo::clear_has_majorversion() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SoftwareInfo::clear_majorversion() {
+  majorversion_ = 0;
+  clear_has_majorversion();
+}
+inline ::google::protobuf::int32 SoftwareInfo::majorversion() const {
+  return majorversion_;
+}
+inline void SoftwareInfo::set_majorversion(::google::protobuf::int32 value) {
+  set_has_majorversion();
+  majorversion_ = value;
+}
+
+// required int32 minorVersion = 4 [default = 0];
+inline bool SoftwareInfo::has_minorversion() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SoftwareInfo::set_has_minorversion() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SoftwareInfo::clear_has_minorversion() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SoftwareInfo::clear_minorversion() {
+  minorversion_ = 0;
+  clear_has_minorversion();
+}
+inline ::google::protobuf::int32 SoftwareInfo::minorversion() const {
+  return minorversion_;
+}
+inline void SoftwareInfo::set_minorversion(::google::protobuf::int32 value) {
+  set_has_minorversion();
+  minorversion_ = value;
+}
+
+// required int32 commitNo = 5 [default = 0];
+inline bool SoftwareInfo::has_commitno() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SoftwareInfo::set_has_commitno() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SoftwareInfo::clear_has_commitno() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SoftwareInfo::clear_commitno() {
+  commitno_ = 0;
+  clear_has_commitno();
+}
+inline ::google::protobuf::int32 SoftwareInfo::commitno() const {
+  return commitno_;
+}
+inline void SoftwareInfo::set_commitno(::google::protobuf::int32 value) {
+  set_has_commitno();
+  commitno_ = value;
+}
+
+// required string buildBranch = 6;
+inline bool SoftwareInfo::has_buildbranch() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SoftwareInfo::set_has_buildbranch() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SoftwareInfo::clear_has_buildbranch() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SoftwareInfo::clear_buildbranch() {
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    buildbranch_->clear();
+  }
+  clear_has_buildbranch();
+}
+inline const ::std::string& SoftwareInfo::buildbranch() const {
+  return *buildbranch_;
+}
+inline void SoftwareInfo::set_buildbranch(const ::std::string& value) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(value);
+}
+inline void SoftwareInfo::set_buildbranch(const char* value) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(value);
+}
+inline void SoftwareInfo::set_buildbranch(const char* value, size_t size) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_buildbranch() {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  return buildbranch_;
+}
+inline ::std::string* SoftwareInfo::release_buildbranch() {
+  clear_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = buildbranch_;
+    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_buildbranch(::std::string* buildbranch) {
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    delete buildbranch_;
+  }
+  if (buildbranch) {
+    set_has_buildbranch();
+    buildbranch_ = buildbranch;
+  } else {
+    clear_has_buildbranch();
+    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string commitSHA = 7;
+inline bool SoftwareInfo::has_commitsha() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SoftwareInfo::set_has_commitsha() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SoftwareInfo::clear_has_commitsha() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SoftwareInfo::clear_commitsha() {
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    commitsha_->clear();
+  }
+  clear_has_commitsha();
+}
+inline const ::std::string& SoftwareInfo::commitsha() const {
+  return *commitsha_;
+}
+inline void SoftwareInfo::set_commitsha(const ::std::string& value) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(value);
+}
+inline void SoftwareInfo::set_commitsha(const char* value) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(value);
+}
+inline void SoftwareInfo::set_commitsha(const char* value, size_t size) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_commitsha() {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  return commitsha_;
+}
+inline ::std::string* SoftwareInfo::release_commitsha() {
+  clear_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = commitsha_;
+    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_commitsha(::std::string* commitsha) {
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    delete commitsha_;
+  }
+  if (commitsha) {
+    set_has_commitsha();
+    commitsha_ = commitsha;
+  } else {
+    clear_has_commitsha();
+    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string userName = 8;
+inline bool SoftwareInfo::has_username() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SoftwareInfo::set_has_username() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SoftwareInfo::clear_has_username() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SoftwareInfo::clear_username() {
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    username_->clear();
+  }
+  clear_has_username();
+}
+inline const ::std::string& SoftwareInfo::username() const {
+  return *username_;
+}
+inline void SoftwareInfo::set_username(const ::std::string& value) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(value);
+}
+inline void SoftwareInfo::set_username(const char* value) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(value);
+}
+inline void SoftwareInfo::set_username(const char* value, size_t size) {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  username_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_username() {
+  set_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    username_ = new ::std::string;
+  }
+  return username_;
+}
+inline ::std::string* SoftwareInfo::release_username() {
+  clear_has_username();
+  if (username_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = username_;
+    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_username(::std::string* username) {
+  if (username_ != &::google::protobuf::internal::kEmptyString) {
+    delete username_;
+  }
+  if (username) {
+    set_has_username();
+    username_ = username;
+  } else {
+    clear_has_username();
+    username_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 buildNo = 9 [default = 0];
+inline bool SoftwareInfo::has_buildno() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void SoftwareInfo::set_has_buildno() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void SoftwareInfo::clear_has_buildno() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void SoftwareInfo::clear_buildno() {
+  buildno_ = 0;
+  clear_has_buildno();
+}
+inline ::google::protobuf::int32 SoftwareInfo::buildno() const {
+  return buildno_;
+}
+inline void SoftwareInfo::set_buildno(::google::protobuf::int32 value) {
+  set_has_buildno();
+  buildno_ = value;
+}
+
+// required uint32 crc = 10 [default = 0];
+inline bool SoftwareInfo::has_crc() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SoftwareInfo::set_has_crc() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SoftwareInfo::clear_has_crc() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void SoftwareInfo::clear_crc() {
+  crc_ = 0u;
+  clear_has_crc();
+}
+inline ::google::protobuf::uint32 SoftwareInfo::crc() const {
+  return crc_;
+}
+inline void SoftwareInfo::set_crc(::google::protobuf::uint32 value) {
+  set_has_crc();
+  crc_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // GetServiceInfoRequest
 
 // -------------------------------------------------------------------
 
 // ServiceInfo
 
-// optional int32 type = 1 [default = 0];
-inline bool ServiceInfo::has_type() const {
+// required .Network.SoftwareInfo softwareInfo = 1;
+inline bool ServiceInfo::has_softwareinfo() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ServiceInfo::set_has_type() {
+inline void ServiceInfo::set_has_softwareinfo() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void ServiceInfo::clear_has_type() {
+inline void ServiceInfo::clear_has_softwareinfo() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void ServiceInfo::clear_type() {
-  type_ = 0;
-  clear_has_type();
+inline void ServiceInfo::clear_softwareinfo() {
+  if (softwareinfo_ != NULL) softwareinfo_->::Network::SoftwareInfo::Clear();
+  clear_has_softwareinfo();
 }
-inline ::google::protobuf::int32 ServiceInfo::type() const {
-  return type_;
+inline const ::Network::SoftwareInfo& ServiceInfo::softwareinfo() const {
+  return softwareinfo_ != NULL ? *softwareinfo_ : *default_instance_->softwareinfo_;
 }
-inline void ServiceInfo::set_type(::google::protobuf::int32 value) {
-  set_has_type();
-  type_ = value;
+inline ::Network::SoftwareInfo* ServiceInfo::mutable_softwareinfo() {
+  set_has_softwareinfo();
+  if (softwareinfo_ == NULL) softwareinfo_ = new ::Network::SoftwareInfo;
+  return softwareinfo_;
+}
+inline ::Network::SoftwareInfo* ServiceInfo::release_softwareinfo() {
+  clear_has_softwareinfo();
+  ::Network::SoftwareInfo* temp = softwareinfo_;
+  softwareinfo_ = NULL;
+  return temp;
+}
+inline void ServiceInfo::set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo) {
+  delete softwareinfo_;
+  softwareinfo_ = softwareinfo;
+  if (softwareinfo) {
+    set_has_softwareinfo();
+  } else {
+    clear_has_softwareinfo();
+  }
 }
 
-// optional int32 majorVersion = 2 [default = 0];
-inline bool ServiceInfo::has_majorversion() const {
+// optional int64 uptime = 2 [default = 0];
+inline bool ServiceInfo::has_uptime() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void ServiceInfo::set_has_majorversion() {
+inline void ServiceInfo::set_has_uptime() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void ServiceInfo::clear_has_majorversion() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void ServiceInfo::clear_majorversion() {
-  majorversion_ = 0;
-  clear_has_majorversion();
-}
-inline ::google::protobuf::int32 ServiceInfo::majorversion() const {
-  return majorversion_;
-}
-inline void ServiceInfo::set_majorversion(::google::protobuf::int32 value) {
-  set_has_majorversion();
-  majorversion_ = value;
-}
-
-// optional int32 minorVersion = 3 [default = 0];
-inline bool ServiceInfo::has_minorversion() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void ServiceInfo::set_has_minorversion() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void ServiceInfo::clear_has_minorversion() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void ServiceInfo::clear_minorversion() {
-  minorversion_ = 0;
-  clear_has_minorversion();
-}
-inline ::google::protobuf::int32 ServiceInfo::minorversion() const {
-  return minorversion_;
-}
-inline void ServiceInfo::set_minorversion(::google::protobuf::int32 value) {
-  set_has_minorversion();
-  minorversion_ = value;
-}
-
-// optional int32 commitNo = 4 [default = 0];
-inline bool ServiceInfo::has_commitno() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void ServiceInfo::set_has_commitno() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void ServiceInfo::clear_has_commitno() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void ServiceInfo::clear_commitno() {
-  commitno_ = 0;
-  clear_has_commitno();
-}
-inline ::google::protobuf::int32 ServiceInfo::commitno() const {
-  return commitno_;
-}
-inline void ServiceInfo::set_commitno(::google::protobuf::int32 value) {
-  set_has_commitno();
-  commitno_ = value;
-}
-
-// optional uint32 crc = 5 [default = 0];
-inline bool ServiceInfo::has_crc() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void ServiceInfo::set_has_crc() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void ServiceInfo::clear_has_crc() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void ServiceInfo::clear_crc() {
-  crc_ = 0u;
-  clear_has_crc();
-}
-inline ::google::protobuf::uint32 ServiceInfo::crc() const {
-  return crc_;
-}
-inline void ServiceInfo::set_crc(::google::protobuf::uint32 value) {
-  set_has_crc();
-  crc_ = value;
-}
-
-// optional int64 uptime = 6 [default = 0];
-inline bool ServiceInfo::has_uptime() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void ServiceInfo::set_has_uptime() {
-  _has_bits_[0] |= 0x00000020u;
-}
 inline void ServiceInfo::clear_has_uptime() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void ServiceInfo::clear_uptime() {
   uptime_ = GOOGLE_LONGLONG(0);
@@ -7547,15 +8561,15 @@ inline void ServiceInfo::set_uptime(::google::protobuf::int64 value) {
   uptime_ = value;
 }
 
-// optional int32 serviceState = 7 [default = 0];
+// optional int32 serviceState = 3 [default = 0];
 inline bool ServiceInfo::has_servicestate() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void ServiceInfo::set_has_servicestate() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void ServiceInfo::clear_has_servicestate() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void ServiceInfo::clear_servicestate() {
   servicestate_ = 0;
@@ -7569,15 +8583,15 @@ inline void ServiceInfo::set_servicestate(::google::protobuf::int32 value) {
   servicestate_ = value;
 }
 
-// optional int64 serviceUptime = 8 [default = 0];
+// optional int64 serviceUptime = 4 [default = 0];
 inline bool ServiceInfo::has_serviceuptime() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void ServiceInfo::set_has_serviceuptime() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void ServiceInfo::clear_has_serviceuptime() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void ServiceInfo::clear_serviceuptime() {
   serviceuptime_ = GOOGLE_LONGLONG(0);
@@ -7591,15 +8605,15 @@ inline void ServiceInfo::set_serviceuptime(::google::protobuf::int64 value) {
   serviceuptime_ = value;
 }
 
-// optional uint32 clientRequestIP = 9 [default = 0];
+// optional uint32 clientRequestIP = 5 [default = 0];
 inline bool ServiceInfo::has_clientrequestip() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void ServiceInfo::set_has_clientrequestip() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void ServiceInfo::clear_has_clientrequestip() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void ServiceInfo::clear_clientrequestip() {
   clientrequestip_ = 0u;
@@ -7613,15 +8627,15 @@ inline void ServiceInfo::set_clientrequestip(::google::protobuf::uint32 value) {
   clientrequestip_ = value;
 }
 
-// optional int32 clientRequestPort = 10 [default = 0];
+// optional int32 clientRequestPort = 6 [default = 0];
 inline bool ServiceInfo::has_clientrequestport() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void ServiceInfo::set_has_clientrequestport() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void ServiceInfo::clear_has_clientrequestport() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void ServiceInfo::clear_clientrequestport() {
   clientrequestport_ = 0;
@@ -7633,146 +8647,6 @@ inline ::google::protobuf::int32 ServiceInfo::clientrequestport() const {
 inline void ServiceInfo::set_clientrequestport(::google::protobuf::int32 value) {
   set_has_clientrequestport();
   clientrequestport_ = value;
-}
-
-// optional string buildBranch = 11;
-inline bool ServiceInfo::has_buildbranch() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
-}
-inline void ServiceInfo::set_has_buildbranch() {
-  _has_bits_[0] |= 0x00000400u;
-}
-inline void ServiceInfo::clear_has_buildbranch() {
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline void ServiceInfo::clear_buildbranch() {
-  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
-    buildbranch_->clear();
-  }
-  clear_has_buildbranch();
-}
-inline const ::std::string& ServiceInfo::buildbranch() const {
-  return *buildbranch_;
-}
-inline void ServiceInfo::set_buildbranch(const ::std::string& value) {
-  set_has_buildbranch();
-  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
-    buildbranch_ = new ::std::string;
-  }
-  buildbranch_->assign(value);
-}
-inline void ServiceInfo::set_buildbranch(const char* value) {
-  set_has_buildbranch();
-  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
-    buildbranch_ = new ::std::string;
-  }
-  buildbranch_->assign(value);
-}
-inline void ServiceInfo::set_buildbranch(const char* value, size_t size) {
-  set_has_buildbranch();
-  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
-    buildbranch_ = new ::std::string;
-  }
-  buildbranch_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* ServiceInfo::mutable_buildbranch() {
-  set_has_buildbranch();
-  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
-    buildbranch_ = new ::std::string;
-  }
-  return buildbranch_;
-}
-inline ::std::string* ServiceInfo::release_buildbranch() {
-  clear_has_buildbranch();
-  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = buildbranch_;
-    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void ServiceInfo::set_allocated_buildbranch(::std::string* buildbranch) {
-  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
-    delete buildbranch_;
-  }
-  if (buildbranch) {
-    set_has_buildbranch();
-    buildbranch_ = buildbranch;
-  } else {
-    clear_has_buildbranch();
-    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// optional string commitSHA = 12;
-inline bool ServiceInfo::has_commitsha() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
-}
-inline void ServiceInfo::set_has_commitsha() {
-  _has_bits_[0] |= 0x00000800u;
-}
-inline void ServiceInfo::clear_has_commitsha() {
-  _has_bits_[0] &= ~0x00000800u;
-}
-inline void ServiceInfo::clear_commitsha() {
-  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
-    commitsha_->clear();
-  }
-  clear_has_commitsha();
-}
-inline const ::std::string& ServiceInfo::commitsha() const {
-  return *commitsha_;
-}
-inline void ServiceInfo::set_commitsha(const ::std::string& value) {
-  set_has_commitsha();
-  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
-    commitsha_ = new ::std::string;
-  }
-  commitsha_->assign(value);
-}
-inline void ServiceInfo::set_commitsha(const char* value) {
-  set_has_commitsha();
-  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
-    commitsha_ = new ::std::string;
-  }
-  commitsha_->assign(value);
-}
-inline void ServiceInfo::set_commitsha(const char* value, size_t size) {
-  set_has_commitsha();
-  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
-    commitsha_ = new ::std::string;
-  }
-  commitsha_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* ServiceInfo::mutable_commitsha() {
-  set_has_commitsha();
-  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
-    commitsha_ = new ::std::string;
-  }
-  return commitsha_;
-}
-inline ::std::string* ServiceInfo::release_commitsha() {
-  clear_has_commitsha();
-  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = commitsha_;
-    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void ServiceInfo::set_allocated_commitsha(::std::string* commitsha) {
-  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
-    delete commitsha_;
-  }
-  if (commitsha) {
-    set_has_commitsha();
-    commitsha_ = commitsha;
-  } else {
-    clear_has_commitsha();
-    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
 }
 
 // -------------------------------------------------------------------
@@ -7837,168 +8711,6 @@ inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInf
   } else {
     clear_has_serviceinfo();
   }
-}
-
-// -------------------------------------------------------------------
-
-// TcpClientIntroduceMyself
-
-// required int32 softwareType = 1;
-inline bool TcpClientIntroduceMyself::has_softwaretype() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void TcpClientIntroduceMyself::set_has_softwaretype() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void TcpClientIntroduceMyself::clear_has_softwaretype() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void TcpClientIntroduceMyself::clear_softwaretype() {
-  softwaretype_ = 0;
-  clear_has_softwaretype();
-}
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::softwaretype() const {
-  return softwaretype_;
-}
-inline void TcpClientIntroduceMyself::set_softwaretype(::google::protobuf::int32 value) {
-  set_has_softwaretype();
-  softwaretype_ = value;
-}
-
-// required string equipmentId = 2;
-inline bool TcpClientIntroduceMyself::has_equipmentid() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void TcpClientIntroduceMyself::set_has_equipmentid() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void TcpClientIntroduceMyself::clear_has_equipmentid() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void TcpClientIntroduceMyself::clear_equipmentid() {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    equipmentid_->clear();
-  }
-  clear_has_equipmentid();
-}
-inline const ::std::string& TcpClientIntroduceMyself::equipmentid() const {
-  return *equipmentid_;
-}
-inline void TcpClientIntroduceMyself::set_equipmentid(const ::std::string& value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void TcpClientIntroduceMyself::set_equipmentid(const char* value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void TcpClientIntroduceMyself::set_equipmentid(const char* value, size_t size) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TcpClientIntroduceMyself::mutable_equipmentid() {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  return equipmentid_;
-}
-inline ::std::string* TcpClientIntroduceMyself::release_equipmentid() {
-  clear_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = equipmentid_;
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TcpClientIntroduceMyself::set_allocated_equipmentid(::std::string* equipmentid) {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete equipmentid_;
-  }
-  if (equipmentid) {
-    set_has_equipmentid();
-    equipmentid_ = equipmentid;
-  } else {
-    clear_has_equipmentid();
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// required int32 majorVersion = 3;
-inline bool TcpClientIntroduceMyself::has_majorversion() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void TcpClientIntroduceMyself::set_has_majorversion() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void TcpClientIntroduceMyself::clear_has_majorversion() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void TcpClientIntroduceMyself::clear_majorversion() {
-  majorversion_ = 0;
-  clear_has_majorversion();
-}
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::majorversion() const {
-  return majorversion_;
-}
-inline void TcpClientIntroduceMyself::set_majorversion(::google::protobuf::int32 value) {
-  set_has_majorversion();
-  majorversion_ = value;
-}
-
-// required int32 minorVersion = 4;
-inline bool TcpClientIntroduceMyself::has_minorversion() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void TcpClientIntroduceMyself::set_has_minorversion() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void TcpClientIntroduceMyself::clear_has_minorversion() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void TcpClientIntroduceMyself::clear_minorversion() {
-  minorversion_ = 0;
-  clear_has_minorversion();
-}
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::minorversion() const {
-  return minorversion_;
-}
-inline void TcpClientIntroduceMyself::set_minorversion(::google::protobuf::int32 value) {
-  set_has_minorversion();
-  minorversion_ = value;
-}
-
-// required int32 commitNo = 5;
-inline bool TcpClientIntroduceMyself::has_commitno() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void TcpClientIntroduceMyself::set_has_commitno() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void TcpClientIntroduceMyself::clear_has_commitno() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void TcpClientIntroduceMyself::clear_commitno() {
-  commitno_ = 0;
-  clear_has_commitno();
-}
-inline ::google::protobuf::int32 TcpClientIntroduceMyself::commitno() const {
-  return commitno_;
-}
-inline void TcpClientIntroduceMyself::set_commitno(::google::protobuf::int32 value) {
-  set_has_commitno();
-  commitno_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -8121,280 +8833,160 @@ inline void ConfigurationServiceState::set_buildcheckerstate(::google::protobuf:
 
 // -------------------------------------------------------------------
 
-// ConfigurationServiceClientInfo
-
-// required int32 softwareType = 1;
-inline bool ConfigurationServiceClientInfo::has_softwaretype() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void ConfigurationServiceClientInfo::set_has_softwaretype() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void ConfigurationServiceClientInfo::clear_has_softwaretype() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void ConfigurationServiceClientInfo::clear_softwaretype() {
-  softwaretype_ = 0;
-  clear_has_softwaretype();
-}
-inline ::google::protobuf::int32 ConfigurationServiceClientInfo::softwaretype() const {
-  return softwaretype_;
-}
-inline void ConfigurationServiceClientInfo::set_softwaretype(::google::protobuf::int32 value) {
-  set_has_softwaretype();
-  softwaretype_ = value;
-}
-
-// required string equipmentId = 2;
-inline bool ConfigurationServiceClientInfo::has_equipmentid() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void ConfigurationServiceClientInfo::set_has_equipmentid() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void ConfigurationServiceClientInfo::clear_has_equipmentid() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void ConfigurationServiceClientInfo::clear_equipmentid() {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    equipmentid_->clear();
-  }
-  clear_has_equipmentid();
-}
-inline const ::std::string& ConfigurationServiceClientInfo::equipmentid() const {
-  return *equipmentid_;
-}
-inline void ConfigurationServiceClientInfo::set_equipmentid(const ::std::string& value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void ConfigurationServiceClientInfo::set_equipmentid(const char* value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(value);
-}
-inline void ConfigurationServiceClientInfo::set_equipmentid(const char* value, size_t size) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* ConfigurationServiceClientInfo::mutable_equipmentid() {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
-  }
-  return equipmentid_;
-}
-inline ::std::string* ConfigurationServiceClientInfo::release_equipmentid() {
-  clear_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = equipmentid_;
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void ConfigurationServiceClientInfo::set_allocated_equipmentid(::std::string* equipmentid) {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete equipmentid_;
-  }
-  if (equipmentid) {
-    set_has_equipmentid();
-    equipmentid_ = equipmentid;
-  } else {
-    clear_has_equipmentid();
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
+// ServiceClientInfo
 
 // required int32 ip = 3;
-inline bool ConfigurationServiceClientInfo::has_ip() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+inline bool ServiceClientInfo::has_ip() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ConfigurationServiceClientInfo::set_has_ip() {
-  _has_bits_[0] |= 0x00000004u;
+inline void ServiceClientInfo::set_has_ip() {
+  _has_bits_[0] |= 0x00000001u;
 }
-inline void ConfigurationServiceClientInfo::clear_has_ip() {
-  _has_bits_[0] &= ~0x00000004u;
+inline void ServiceClientInfo::clear_has_ip() {
+  _has_bits_[0] &= ~0x00000001u;
 }
-inline void ConfigurationServiceClientInfo::clear_ip() {
+inline void ServiceClientInfo::clear_ip() {
   ip_ = 0;
   clear_has_ip();
 }
-inline ::google::protobuf::int32 ConfigurationServiceClientInfo::ip() const {
+inline ::google::protobuf::int32 ServiceClientInfo::ip() const {
   return ip_;
 }
-inline void ConfigurationServiceClientInfo::set_ip(::google::protobuf::int32 value) {
+inline void ServiceClientInfo::set_ip(::google::protobuf::int32 value) {
   set_has_ip();
   ip_ = value;
 }
 
 // required int64 uptime = 5;
-inline bool ConfigurationServiceClientInfo::has_uptime() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+inline bool ServiceClientInfo::has_uptime() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void ConfigurationServiceClientInfo::set_has_uptime() {
-  _has_bits_[0] |= 0x00000008u;
+inline void ServiceClientInfo::set_has_uptime() {
+  _has_bits_[0] |= 0x00000002u;
 }
-inline void ConfigurationServiceClientInfo::clear_has_uptime() {
-  _has_bits_[0] &= ~0x00000008u;
+inline void ServiceClientInfo::clear_has_uptime() {
+  _has_bits_[0] &= ~0x00000002u;
 }
-inline void ConfigurationServiceClientInfo::clear_uptime() {
+inline void ServiceClientInfo::clear_uptime() {
   uptime_ = GOOGLE_LONGLONG(0);
   clear_has_uptime();
 }
-inline ::google::protobuf::int64 ConfigurationServiceClientInfo::uptime() const {
+inline ::google::protobuf::int64 ServiceClientInfo::uptime() const {
   return uptime_;
 }
-inline void ConfigurationServiceClientInfo::set_uptime(::google::protobuf::int64 value) {
+inline void ServiceClientInfo::set_uptime(::google::protobuf::int64 value) {
   set_has_uptime();
   uptime_ = value;
 }
 
 // required bool isActual = 6;
-inline bool ConfigurationServiceClientInfo::has_isactual() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+inline bool ServiceClientInfo::has_isactual() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void ConfigurationServiceClientInfo::set_has_isactual() {
-  _has_bits_[0] |= 0x00000010u;
+inline void ServiceClientInfo::set_has_isactual() {
+  _has_bits_[0] |= 0x00000004u;
 }
-inline void ConfigurationServiceClientInfo::clear_has_isactual() {
-  _has_bits_[0] &= ~0x00000010u;
+inline void ServiceClientInfo::clear_has_isactual() {
+  _has_bits_[0] &= ~0x00000004u;
 }
-inline void ConfigurationServiceClientInfo::clear_isactual() {
+inline void ServiceClientInfo::clear_isactual() {
   isactual_ = false;
   clear_has_isactual();
 }
-inline bool ConfigurationServiceClientInfo::isactual() const {
+inline bool ServiceClientInfo::isactual() const {
   return isactual_;
 }
-inline void ConfigurationServiceClientInfo::set_isactual(bool value) {
+inline void ServiceClientInfo::set_isactual(bool value) {
   set_has_isactual();
   isactual_ = value;
 }
 
 // required int64 replyQuantity = 7;
-inline bool ConfigurationServiceClientInfo::has_replyquantity() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+inline bool ServiceClientInfo::has_replyquantity() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void ConfigurationServiceClientInfo::set_has_replyquantity() {
-  _has_bits_[0] |= 0x00000020u;
+inline void ServiceClientInfo::set_has_replyquantity() {
+  _has_bits_[0] |= 0x00000008u;
 }
-inline void ConfigurationServiceClientInfo::clear_has_replyquantity() {
-  _has_bits_[0] &= ~0x00000020u;
+inline void ServiceClientInfo::clear_has_replyquantity() {
+  _has_bits_[0] &= ~0x00000008u;
 }
-inline void ConfigurationServiceClientInfo::clear_replyquantity() {
+inline void ServiceClientInfo::clear_replyquantity() {
   replyquantity_ = GOOGLE_LONGLONG(0);
   clear_has_replyquantity();
 }
-inline ::google::protobuf::int64 ConfigurationServiceClientInfo::replyquantity() const {
+inline ::google::protobuf::int64 ServiceClientInfo::replyquantity() const {
   return replyquantity_;
 }
-inline void ConfigurationServiceClientInfo::set_replyquantity(::google::protobuf::int64 value) {
+inline void ServiceClientInfo::set_replyquantity(::google::protobuf::int64 value) {
   set_has_replyquantity();
   replyquantity_ = value;
 }
 
-// required int32 majorVersion = 8;
-inline bool ConfigurationServiceClientInfo::has_majorversion() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+// required .Network.SoftwareInfo softwareInfo = 11;
+inline bool ServiceClientInfo::has_softwareinfo() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void ConfigurationServiceClientInfo::set_has_majorversion() {
-  _has_bits_[0] |= 0x00000040u;
+inline void ServiceClientInfo::set_has_softwareinfo() {
+  _has_bits_[0] |= 0x00000010u;
 }
-inline void ConfigurationServiceClientInfo::clear_has_majorversion() {
-  _has_bits_[0] &= ~0x00000040u;
+inline void ServiceClientInfo::clear_has_softwareinfo() {
+  _has_bits_[0] &= ~0x00000010u;
 }
-inline void ConfigurationServiceClientInfo::clear_majorversion() {
-  majorversion_ = 0;
-  clear_has_majorversion();
+inline void ServiceClientInfo::clear_softwareinfo() {
+  if (softwareinfo_ != NULL) softwareinfo_->::Network::SoftwareInfo::Clear();
+  clear_has_softwareinfo();
 }
-inline ::google::protobuf::int32 ConfigurationServiceClientInfo::majorversion() const {
-  return majorversion_;
+inline const ::Network::SoftwareInfo& ServiceClientInfo::softwareinfo() const {
+  return softwareinfo_ != NULL ? *softwareinfo_ : *default_instance_->softwareinfo_;
 }
-inline void ConfigurationServiceClientInfo::set_majorversion(::google::protobuf::int32 value) {
-  set_has_majorversion();
-  majorversion_ = value;
+inline ::Network::SoftwareInfo* ServiceClientInfo::mutable_softwareinfo() {
+  set_has_softwareinfo();
+  if (softwareinfo_ == NULL) softwareinfo_ = new ::Network::SoftwareInfo;
+  return softwareinfo_;
 }
-
-// required int32 minorVersion = 9;
-inline bool ConfigurationServiceClientInfo::has_minorversion() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+inline ::Network::SoftwareInfo* ServiceClientInfo::release_softwareinfo() {
+  clear_has_softwareinfo();
+  ::Network::SoftwareInfo* temp = softwareinfo_;
+  softwareinfo_ = NULL;
+  return temp;
 }
-inline void ConfigurationServiceClientInfo::set_has_minorversion() {
-  _has_bits_[0] |= 0x00000080u;
-}
-inline void ConfigurationServiceClientInfo::clear_has_minorversion() {
-  _has_bits_[0] &= ~0x00000080u;
-}
-inline void ConfigurationServiceClientInfo::clear_minorversion() {
-  minorversion_ = 0;
-  clear_has_minorversion();
-}
-inline ::google::protobuf::int32 ConfigurationServiceClientInfo::minorversion() const {
-  return minorversion_;
-}
-inline void ConfigurationServiceClientInfo::set_minorversion(::google::protobuf::int32 value) {
-  set_has_minorversion();
-  minorversion_ = value;
-}
-
-// required int32 commitNo = 10;
-inline bool ConfigurationServiceClientInfo::has_commitno() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
-}
-inline void ConfigurationServiceClientInfo::set_has_commitno() {
-  _has_bits_[0] |= 0x00000100u;
-}
-inline void ConfigurationServiceClientInfo::clear_has_commitno() {
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline void ConfigurationServiceClientInfo::clear_commitno() {
-  commitno_ = 0;
-  clear_has_commitno();
-}
-inline ::google::protobuf::int32 ConfigurationServiceClientInfo::commitno() const {
-  return commitno_;
-}
-inline void ConfigurationServiceClientInfo::set_commitno(::google::protobuf::int32 value) {
-  set_has_commitno();
-  commitno_ = value;
+inline void ServiceClientInfo::set_allocated_softwareinfo(::Network::SoftwareInfo* softwareinfo) {
+  delete softwareinfo_;
+  softwareinfo_ = softwareinfo;
+  if (softwareinfo) {
+    set_has_softwareinfo();
+  } else {
+    clear_has_softwareinfo();
+  }
 }
 
 // -------------------------------------------------------------------
 
-// ConfigurationServiceClients
+// ServiceClients
 
-// repeated .Network.ConfigurationServiceClientInfo clients = 1;
-inline int ConfigurationServiceClients::clients_size() const {
+// repeated .Network.ServiceClientInfo clients = 1;
+inline int ServiceClients::clients_size() const {
   return clients_.size();
 }
-inline void ConfigurationServiceClients::clear_clients() {
+inline void ServiceClients::clear_clients() {
   clients_.Clear();
 }
-inline const ::Network::ConfigurationServiceClientInfo& ConfigurationServiceClients::clients(int index) const {
+inline const ::Network::ServiceClientInfo& ServiceClients::clients(int index) const {
   return clients_.Get(index);
 }
-inline ::Network::ConfigurationServiceClientInfo* ConfigurationServiceClients::mutable_clients(int index) {
+inline ::Network::ServiceClientInfo* ServiceClients::mutable_clients(int index) {
   return clients_.Mutable(index);
 }
-inline ::Network::ConfigurationServiceClientInfo* ConfigurationServiceClients::add_clients() {
+inline ::Network::ServiceClientInfo* ServiceClients::add_clients() {
   return clients_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >&
-ConfigurationServiceClients::clients() const {
+inline const ::google::protobuf::RepeatedPtrField< ::Network::ServiceClientInfo >&
+ServiceClients::clients() const {
   return clients_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >*
-ConfigurationServiceClients::mutable_clients() {
+inline ::google::protobuf::RepeatedPtrField< ::Network::ServiceClientInfo >*
+ServiceClients::mutable_clients() {
   return &clients_;
 }
 
@@ -8916,77 +9508,221 @@ inline void ConfigurationServiceSettings::set_allocated_workdirectory(::std::str
 
 // -------------------------------------------------------------------
 
-// GetTuningSourcesInfo
+// ServiceSettings
 
-// optional string clientEquipmentID = 1;
-inline bool GetTuningSourcesInfo::has_clientequipmentid() const {
+// required string equipmentID = 1;
+inline bool ServiceSettings::has_equipmentid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GetTuningSourcesInfo::set_has_clientequipmentid() {
+inline void ServiceSettings::set_has_equipmentid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GetTuningSourcesInfo::clear_has_clientequipmentid() {
+inline void ServiceSettings::clear_has_equipmentid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GetTuningSourcesInfo::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
+inline void ServiceSettings::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
   }
-  clear_has_clientequipmentid();
+  clear_has_equipmentid();
 }
-inline const ::std::string& GetTuningSourcesInfo::clientequipmentid() const {
-  return *clientequipmentid_;
+inline const ::std::string& ServiceSettings::equipmentid() const {
+  return *equipmentid_;
 }
-inline void GetTuningSourcesInfo::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void ServiceSettings::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
   }
-  clientequipmentid_->assign(value);
+  equipmentid_->assign(value);
 }
-inline void GetTuningSourcesInfo::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void ServiceSettings::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
   }
-  clientequipmentid_->assign(value);
+  equipmentid_->assign(value);
 }
-inline void GetTuningSourcesInfo::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void ServiceSettings::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
   }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* GetTuningSourcesInfo::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline ::std::string* ServiceSettings::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
   }
-  return clientequipmentid_;
+  return equipmentid_;
 }
-inline ::std::string* GetTuningSourcesInfo::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* ServiceSettings::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void GetTuningSourcesInfo::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
+inline void ServiceSettings::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
   }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
   } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
+
+// required string configIP1 = 2;
+inline bool ServiceSettings::has_configip1() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ServiceSettings::set_has_configip1() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ServiceSettings::clear_has_configip1() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ServiceSettings::clear_configip1() {
+  if (configip1_ != &::google::protobuf::internal::kEmptyString) {
+    configip1_->clear();
+  }
+  clear_has_configip1();
+}
+inline const ::std::string& ServiceSettings::configip1() const {
+  return *configip1_;
+}
+inline void ServiceSettings::set_configip1(const ::std::string& value) {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  configip1_->assign(value);
+}
+inline void ServiceSettings::set_configip1(const char* value) {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  configip1_->assign(value);
+}
+inline void ServiceSettings::set_configip1(const char* value, size_t size) {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  configip1_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceSettings::mutable_configip1() {
+  set_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    configip1_ = new ::std::string;
+  }
+  return configip1_;
+}
+inline ::std::string* ServiceSettings::release_configip1() {
+  clear_has_configip1();
+  if (configip1_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = configip1_;
+    configip1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceSettings::set_allocated_configip1(::std::string* configip1) {
+  if (configip1_ != &::google::protobuf::internal::kEmptyString) {
+    delete configip1_;
+  }
+  if (configip1) {
+    set_has_configip1();
+    configip1_ = configip1;
+  } else {
+    clear_has_configip1();
+    configip1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string configIP2 = 3;
+inline bool ServiceSettings::has_configip2() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ServiceSettings::set_has_configip2() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ServiceSettings::clear_has_configip2() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ServiceSettings::clear_configip2() {
+  if (configip2_ != &::google::protobuf::internal::kEmptyString) {
+    configip2_->clear();
+  }
+  clear_has_configip2();
+}
+inline const ::std::string& ServiceSettings::configip2() const {
+  return *configip2_;
+}
+inline void ServiceSettings::set_configip2(const ::std::string& value) {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  configip2_->assign(value);
+}
+inline void ServiceSettings::set_configip2(const char* value) {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  configip2_->assign(value);
+}
+inline void ServiceSettings::set_configip2(const char* value, size_t size) {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  configip2_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceSettings::mutable_configip2() {
+  set_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    configip2_ = new ::std::string;
+  }
+  return configip2_;
+}
+inline ::std::string* ServiceSettings::release_configip2() {
+  clear_has_configip2();
+  if (configip2_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = configip2_;
+    configip2_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceSettings::set_allocated_configip2(::std::string* configip2) {
+  if (configip2_ != &::google::protobuf::internal::kEmptyString) {
+    delete configip2_;
+  }
+  if (configip2) {
+    set_has_configip2();
+    configip2_ = configip2;
+  } else {
+    clear_has_configip2();
+    configip2_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// GetTuningSourcesInfo
 
 // -------------------------------------------------------------------
 
@@ -9039,79 +9775,171 @@ GetTuningSourcesInfoReply::mutable_tuningsourceinfo() {
   return &tuningsourceinfo_;
 }
 
-// -------------------------------------------------------------------
+// optional bool singleLmControlMode = 3 [default = true];
+inline bool GetTuningSourcesInfoReply::has_singlelmcontrolmode() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GetTuningSourcesInfoReply::set_has_singlelmcontrolmode() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GetTuningSourcesInfoReply::clear_has_singlelmcontrolmode() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GetTuningSourcesInfoReply::clear_singlelmcontrolmode() {
+  singlelmcontrolmode_ = true;
+  clear_has_singlelmcontrolmode();
+}
+inline bool GetTuningSourcesInfoReply::singlelmcontrolmode() const {
+  return singlelmcontrolmode_;
+}
+inline void GetTuningSourcesInfoReply::set_singlelmcontrolmode(bool value) {
+  set_has_singlelmcontrolmode();
+  singlelmcontrolmode_ = value;
+}
 
-// GetTuningSourcesStates
-
-// optional string clientEquipmentID = 1;
-inline bool GetTuningSourcesStates::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+// optional string activeClientID = 4;
+inline bool GetTuningSourcesInfoReply::has_activeclientid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void GetTuningSourcesStates::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
+inline void GetTuningSourcesInfoReply::set_has_activeclientid() {
+  _has_bits_[0] |= 0x00000008u;
 }
-inline void GetTuningSourcesStates::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
+inline void GetTuningSourcesInfoReply::clear_has_activeclientid() {
+  _has_bits_[0] &= ~0x00000008u;
 }
-inline void GetTuningSourcesStates::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
+inline void GetTuningSourcesInfoReply::clear_activeclientid() {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    activeclientid_->clear();
   }
-  clear_has_clientequipmentid();
+  clear_has_activeclientid();
 }
-inline const ::std::string& GetTuningSourcesStates::clientequipmentid() const {
-  return *clientequipmentid_;
+inline const ::std::string& GetTuningSourcesInfoReply::activeclientid() const {
+  return *activeclientid_;
 }
-inline void GetTuningSourcesStates::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void GetTuningSourcesInfoReply::set_activeclientid(const ::std::string& value) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  clientequipmentid_->assign(value);
+  activeclientid_->assign(value);
 }
-inline void GetTuningSourcesStates::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void GetTuningSourcesInfoReply::set_activeclientid(const char* value) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  clientequipmentid_->assign(value);
+  activeclientid_->assign(value);
 }
-inline void GetTuningSourcesStates::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void GetTuningSourcesInfoReply::set_activeclientid(const char* value, size_t size) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+  activeclientid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* GetTuningSourcesStates::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline ::std::string* GetTuningSourcesInfoReply::mutable_activeclientid() {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  return clientequipmentid_;
+  return activeclientid_;
 }
-inline ::std::string* GetTuningSourcesStates::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* GetTuningSourcesInfoReply::release_activeclientid() {
+  clear_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = activeclientid_;
+    activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void GetTuningSourcesStates::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
+inline void GetTuningSourcesInfoReply::set_allocated_activeclientid(::std::string* activeclientid) {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientid_;
   }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
+  if (activeclientid) {
+    set_has_activeclientid();
+    activeclientid_ = activeclientid;
   } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_activeclientid();
+    activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
+
+// optional string activeClientIP = 5;
+inline bool GetTuningSourcesInfoReply::has_activeclientip() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetTuningSourcesInfoReply::set_has_activeclientip() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetTuningSourcesInfoReply::clear_has_activeclientip() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void GetTuningSourcesInfoReply::clear_activeclientip() {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    activeclientip_->clear();
+  }
+  clear_has_activeclientip();
+}
+inline const ::std::string& GetTuningSourcesInfoReply::activeclientip() const {
+  return *activeclientip_;
+}
+inline void GetTuningSourcesInfoReply::set_activeclientip(const ::std::string& value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesInfoReply::set_activeclientip(const char* value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesInfoReply::set_activeclientip(const char* value, size_t size) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetTuningSourcesInfoReply::mutable_activeclientip() {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  return activeclientip_;
+}
+inline ::std::string* GetTuningSourcesInfoReply::release_activeclientip() {
+  clear_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = activeclientip_;
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetTuningSourcesInfoReply::set_allocated_activeclientip(::std::string* activeclientip) {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientip_;
+  }
+  if (activeclientip) {
+    set_has_activeclientip();
+    activeclientip_ = activeclientip;
+  } else {
+    clear_has_activeclientip();
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// GetTuningSourcesStates
 
 // -------------------------------------------------------------------
 
@@ -10019,6 +10847,72 @@ inline void TuningSourceState::set_errrupcrc(::google::protobuf::int64 value) {
   errrupcrc_ = value;
 }
 
+// optional bool controlIsActive = 42 [default = false];
+inline bool TuningSourceState::has_controlisactive() const {
+  return (_has_bits_[1] & 0x00000200u) != 0;
+}
+inline void TuningSourceState::set_has_controlisactive() {
+  _has_bits_[1] |= 0x00000200u;
+}
+inline void TuningSourceState::clear_has_controlisactive() {
+  _has_bits_[1] &= ~0x00000200u;
+}
+inline void TuningSourceState::clear_controlisactive() {
+  controlisactive_ = false;
+  clear_has_controlisactive();
+}
+inline bool TuningSourceState::controlisactive() const {
+  return controlisactive_;
+}
+inline void TuningSourceState::set_controlisactive(bool value) {
+  set_has_controlisactive();
+  controlisactive_ = value;
+}
+
+// optional bool setSOR = 43 [default = false];
+inline bool TuningSourceState::has_setsor() const {
+  return (_has_bits_[1] & 0x00000400u) != 0;
+}
+inline void TuningSourceState::set_has_setsor() {
+  _has_bits_[1] |= 0x00000400u;
+}
+inline void TuningSourceState::clear_has_setsor() {
+  _has_bits_[1] &= ~0x00000400u;
+}
+inline void TuningSourceState::clear_setsor() {
+  setsor_ = false;
+  clear_has_setsor();
+}
+inline bool TuningSourceState::setsor() const {
+  return setsor_;
+}
+inline void TuningSourceState::set_setsor(bool value) {
+  set_has_setsor();
+  setsor_ = value;
+}
+
+// optional bool hasUnappliedParams = 44 [default = false];
+inline bool TuningSourceState::has_hasunappliedparams() const {
+  return (_has_bits_[1] & 0x00000800u) != 0;
+}
+inline void TuningSourceState::set_has_hasunappliedparams() {
+  _has_bits_[1] |= 0x00000800u;
+}
+inline void TuningSourceState::clear_has_hasunappliedparams() {
+  _has_bits_[1] &= ~0x00000800u;
+}
+inline void TuningSourceState::clear_hasunappliedparams() {
+  hasunappliedparams_ = false;
+  clear_has_hasunappliedparams();
+}
+inline bool TuningSourceState::hasunappliedparams() const {
+  return hasunappliedparams_;
+}
+inline void TuningSourceState::set_hasunappliedparams(bool value) {
+  set_has_hasunappliedparams();
+  hasunappliedparams_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // GetTuningSourcesStatesReply
@@ -10070,79 +10964,407 @@ GetTuningSourcesStatesReply::mutable_tuningsourcesstate() {
   return &tuningsourcesstate_;
 }
 
-// -------------------------------------------------------------------
+// optional bool singleLmControlMode = 3 [default = true];
+inline bool GetTuningSourcesStatesReply::has_singlelmcontrolmode() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GetTuningSourcesStatesReply::set_has_singlelmcontrolmode() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GetTuningSourcesStatesReply::clear_has_singlelmcontrolmode() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GetTuningSourcesStatesReply::clear_singlelmcontrolmode() {
+  singlelmcontrolmode_ = true;
+  clear_has_singlelmcontrolmode();
+}
+inline bool GetTuningSourcesStatesReply::singlelmcontrolmode() const {
+  return singlelmcontrolmode_;
+}
+inline void GetTuningSourcesStatesReply::set_singlelmcontrolmode(bool value) {
+  set_has_singlelmcontrolmode();
+  singlelmcontrolmode_ = value;
+}
 
-// TuningSignalsRead
-
-// optional string clientEquipmentID = 1;
-inline bool TuningSignalsRead::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+// optional string activeClientID = 4;
+inline bool GetTuningSourcesStatesReply::has_activeclientid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void TuningSignalsRead::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
+inline void GetTuningSourcesStatesReply::set_has_activeclientid() {
+  _has_bits_[0] |= 0x00000008u;
 }
-inline void TuningSignalsRead::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
+inline void GetTuningSourcesStatesReply::clear_has_activeclientid() {
+  _has_bits_[0] &= ~0x00000008u;
 }
-inline void TuningSignalsRead::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
+inline void GetTuningSourcesStatesReply::clear_activeclientid() {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    activeclientid_->clear();
   }
-  clear_has_clientequipmentid();
+  clear_has_activeclientid();
 }
-inline const ::std::string& TuningSignalsRead::clientequipmentid() const {
-  return *clientequipmentid_;
+inline const ::std::string& GetTuningSourcesStatesReply::activeclientid() const {
+  return *activeclientid_;
 }
-inline void TuningSignalsRead::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void GetTuningSourcesStatesReply::set_activeclientid(const ::std::string& value) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  clientequipmentid_->assign(value);
+  activeclientid_->assign(value);
 }
-inline void TuningSignalsRead::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void GetTuningSourcesStatesReply::set_activeclientid(const char* value) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  clientequipmentid_->assign(value);
+  activeclientid_->assign(value);
 }
-inline void TuningSignalsRead::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline void GetTuningSourcesStatesReply::set_activeclientid(const char* value, size_t size) {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+  activeclientid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* TuningSignalsRead::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
+inline ::std::string* GetTuningSourcesStatesReply::mutable_activeclientid() {
+  set_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientid_ = new ::std::string;
   }
-  return clientequipmentid_;
+  return activeclientid_;
 }
-inline ::std::string* TuningSignalsRead::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* GetTuningSourcesStatesReply::release_activeclientid() {
+  clear_has_activeclientid();
+  if (activeclientid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = activeclientid_;
+    activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void TuningSignalsRead::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
+inline void GetTuningSourcesStatesReply::set_allocated_activeclientid(::std::string* activeclientid) {
+  if (activeclientid_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientid_;
   }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
+  if (activeclientid) {
+    set_has_activeclientid();
+    activeclientid_ = activeclientid;
   } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_activeclientid();
+    activeclientid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
+
+// optional string activeClientIP = 5;
+inline bool GetTuningSourcesStatesReply::has_activeclientip() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetTuningSourcesStatesReply::set_has_activeclientip() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetTuningSourcesStatesReply::clear_has_activeclientip() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void GetTuningSourcesStatesReply::clear_activeclientip() {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    activeclientip_->clear();
+  }
+  clear_has_activeclientip();
+}
+inline const ::std::string& GetTuningSourcesStatesReply::activeclientip() const {
+  return *activeclientip_;
+}
+inline void GetTuningSourcesStatesReply::set_activeclientip(const ::std::string& value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesStatesReply::set_activeclientip(const char* value) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(value);
+}
+inline void GetTuningSourcesStatesReply::set_activeclientip(const char* value, size_t size) {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  activeclientip_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetTuningSourcesStatesReply::mutable_activeclientip() {
+  set_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    activeclientip_ = new ::std::string;
+  }
+  return activeclientip_;
+}
+inline ::std::string* GetTuningSourcesStatesReply::release_activeclientip() {
+  clear_has_activeclientip();
+  if (activeclientip_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = activeclientip_;
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetTuningSourcesStatesReply::set_allocated_activeclientip(::std::string* activeclientip) {
+  if (activeclientip_ != &::google::protobuf::internal::kEmptyString) {
+    delete activeclientip_;
+  }
+  if (activeclientip) {
+    set_has_activeclientip();
+    activeclientip_ = activeclientip;
+  } else {
+    clear_has_activeclientip();
+    activeclientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// ChangeConrolledTuningSourceRequest
+
+// optional bool takeControl = 1;
+inline bool ChangeConrolledTuningSourceRequest::has_takecontrol() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ChangeConrolledTuningSourceRequest::set_has_takecontrol() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_has_takecontrol() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_takecontrol() {
+  takecontrol_ = false;
+  clear_has_takecontrol();
+}
+inline bool ChangeConrolledTuningSourceRequest::takecontrol() const {
+  return takecontrol_;
+}
+inline void ChangeConrolledTuningSourceRequest::set_takecontrol(bool value) {
+  set_has_takecontrol();
+  takecontrol_ = value;
+}
+
+// optional string tuningSourceEquipmentID = 2;
+inline bool ChangeConrolledTuningSourceRequest::has_tuningsourceequipmentid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ChangeConrolledTuningSourceRequest::set_has_tuningsourceequipmentid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_has_tuningsourceequipmentid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_tuningsourceequipmentid() {
+  if (tuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_->clear();
+  }
+  clear_has_tuningsourceequipmentid();
+}
+inline const ::std::string& ChangeConrolledTuningSourceRequest::tuningsourceequipmentid() const {
+  return *tuningsourceequipmentid_;
+}
+inline void ChangeConrolledTuningSourceRequest::set_tuningsourceequipmentid(const ::std::string& value) {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
+  }
+  tuningsourceequipmentid_->assign(value);
+}
+inline void ChangeConrolledTuningSourceRequest::set_tuningsourceequipmentid(const char* value) {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
+  }
+  tuningsourceequipmentid_->assign(value);
+}
+inline void ChangeConrolledTuningSourceRequest::set_tuningsourceequipmentid(const char* value, size_t size) {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
+  }
+  tuningsourceequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ChangeConrolledTuningSourceRequest::mutable_tuningsourceequipmentid() {
+  set_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    tuningsourceequipmentid_ = new ::std::string;
+  }
+  return tuningsourceequipmentid_;
+}
+inline ::std::string* ChangeConrolledTuningSourceRequest::release_tuningsourceequipmentid() {
+  clear_has_tuningsourceequipmentid();
+  if (tuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tuningsourceequipmentid_;
+    tuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ChangeConrolledTuningSourceRequest::set_allocated_tuningsourceequipmentid(::std::string* tuningsourceequipmentid) {
+  if (tuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete tuningsourceequipmentid_;
+  }
+  if (tuningsourceequipmentid) {
+    set_has_tuningsourceequipmentid();
+    tuningsourceequipmentid_ = tuningsourceequipmentid;
+  } else {
+    clear_has_tuningsourceequipmentid();
+    tuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool activateControl = 3 [default = false];
+inline bool ChangeConrolledTuningSourceRequest::has_activatecontrol() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ChangeConrolledTuningSourceRequest::set_has_activatecontrol() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_has_activatecontrol() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ChangeConrolledTuningSourceRequest::clear_activatecontrol() {
+  activatecontrol_ = false;
+  clear_has_activatecontrol();
+}
+inline bool ChangeConrolledTuningSourceRequest::activatecontrol() const {
+  return activatecontrol_;
+}
+inline void ChangeConrolledTuningSourceRequest::set_activatecontrol(bool value) {
+  set_has_activatecontrol();
+  activatecontrol_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ChangeConrolledTuningSourceReply
+
+// optional int32 error = 1 [default = 0];
+inline bool ChangeConrolledTuningSourceReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ChangeConrolledTuningSourceReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 ChangeConrolledTuningSourceReply::error() const {
+  return error_;
+}
+inline void ChangeConrolledTuningSourceReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// optional string controlledTuningSourceEquipmentID = 2;
+inline bool ChangeConrolledTuningSourceReply::has_controlledtuningsourceequipmentid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ChangeConrolledTuningSourceReply::set_has_controlledtuningsourceequipmentid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_has_controlledtuningsourceequipmentid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_controlledtuningsourceequipmentid() {
+  if (controlledtuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    controlledtuningsourceequipmentid_->clear();
+  }
+  clear_has_controlledtuningsourceequipmentid();
+}
+inline const ::std::string& ChangeConrolledTuningSourceReply::controlledtuningsourceequipmentid() const {
+  return *controlledtuningsourceequipmentid_;
+}
+inline void ChangeConrolledTuningSourceReply::set_controlledtuningsourceequipmentid(const ::std::string& value) {
+  set_has_controlledtuningsourceequipmentid();
+  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    controlledtuningsourceequipmentid_ = new ::std::string;
+  }
+  controlledtuningsourceequipmentid_->assign(value);
+}
+inline void ChangeConrolledTuningSourceReply::set_controlledtuningsourceequipmentid(const char* value) {
+  set_has_controlledtuningsourceequipmentid();
+  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    controlledtuningsourceequipmentid_ = new ::std::string;
+  }
+  controlledtuningsourceequipmentid_->assign(value);
+}
+inline void ChangeConrolledTuningSourceReply::set_controlledtuningsourceequipmentid(const char* value, size_t size) {
+  set_has_controlledtuningsourceequipmentid();
+  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    controlledtuningsourceequipmentid_ = new ::std::string;
+  }
+  controlledtuningsourceequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ChangeConrolledTuningSourceReply::mutable_controlledtuningsourceequipmentid() {
+  set_has_controlledtuningsourceequipmentid();
+  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    controlledtuningsourceequipmentid_ = new ::std::string;
+  }
+  return controlledtuningsourceequipmentid_;
+}
+inline ::std::string* ChangeConrolledTuningSourceReply::release_controlledtuningsourceequipmentid() {
+  clear_has_controlledtuningsourceequipmentid();
+  if (controlledtuningsourceequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = controlledtuningsourceequipmentid_;
+    controlledtuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ChangeConrolledTuningSourceReply::set_allocated_controlledtuningsourceequipmentid(::std::string* controlledtuningsourceequipmentid) {
+  if (controlledtuningsourceequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete controlledtuningsourceequipmentid_;
+  }
+  if (controlledtuningsourceequipmentid) {
+    set_has_controlledtuningsourceequipmentid();
+    controlledtuningsourceequipmentid_ = controlledtuningsourceequipmentid;
+  } else {
+    clear_has_controlledtuningsourceequipmentid();
+    controlledtuningsourceequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool controlIsActive = 3 [default = false];
+inline bool ChangeConrolledTuningSourceReply::has_controlisactive() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ChangeConrolledTuningSourceReply::set_has_controlisactive() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_has_controlisactive() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ChangeConrolledTuningSourceReply::clear_controlisactive() {
+  controlisactive_ = false;
+  clear_has_controlisactive();
+}
+inline bool ChangeConrolledTuningSourceReply::controlisactive() const {
+  return controlisactive_;
+}
+inline void ChangeConrolledTuningSourceReply::set_controlisactive(bool value) {
+  set_has_controlisactive();
+  controlisactive_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// TuningSignalsRead
 
 // repeated uint64 signalHash = 2;
 inline int TuningSignalsRead::signalhash_size() const {
@@ -10173,7 +11395,7 @@ TuningSignalsRead::mutable_signalhash() {
 
 // TuningSignalState
 
-// optional uint64 signalHash = 1 [default = 0];
+// optional fixed64 signalHash = 1 [default = 0];
 inline bool TuningSignalState::has_signalhash() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -10239,7 +11461,7 @@ inline void TuningSignalState::set_valid(bool value) {
   valid_ = value;
 }
 
-// optional float value = 4 [default = 0];
+// optional .Proto.TuningValue value = 4;
 inline bool TuningSignalState::has_value() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -10250,18 +11472,34 @@ inline void TuningSignalState::clear_has_value() {
   _has_bits_[0] &= ~0x00000008u;
 }
 inline void TuningSignalState::clear_value() {
-  value_ = 0;
+  if (value_ != NULL) value_->::Proto::TuningValue::Clear();
   clear_has_value();
 }
-inline float TuningSignalState::value() const {
+inline const ::Proto::TuningValue& TuningSignalState::value() const {
+  return value_ != NULL ? *value_ : *default_instance_->value_;
+}
+inline ::Proto::TuningValue* TuningSignalState::mutable_value() {
+  set_has_value();
+  if (value_ == NULL) value_ = new ::Proto::TuningValue;
   return value_;
 }
-inline void TuningSignalState::set_value(float value) {
-  set_has_value();
+inline ::Proto::TuningValue* TuningSignalState::release_value() {
+  clear_has_value();
+  ::Proto::TuningValue* temp = value_;
+  value_ = NULL;
+  return temp;
+}
+inline void TuningSignalState::set_allocated_value(::Proto::TuningValue* value) {
+  delete value_;
   value_ = value;
+  if (value) {
+    set_has_value();
+  } else {
+    clear_has_value();
+  }
 }
 
-// optional float readLowBound = 5 [default = 0];
+// optional .Proto.TuningValue readLowBound = 5;
 inline bool TuningSignalState::has_readlowbound() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -10272,18 +11510,34 @@ inline void TuningSignalState::clear_has_readlowbound() {
   _has_bits_[0] &= ~0x00000010u;
 }
 inline void TuningSignalState::clear_readlowbound() {
-  readlowbound_ = 0;
+  if (readlowbound_ != NULL) readlowbound_->::Proto::TuningValue::Clear();
   clear_has_readlowbound();
 }
-inline float TuningSignalState::readlowbound() const {
+inline const ::Proto::TuningValue& TuningSignalState::readlowbound() const {
+  return readlowbound_ != NULL ? *readlowbound_ : *default_instance_->readlowbound_;
+}
+inline ::Proto::TuningValue* TuningSignalState::mutable_readlowbound() {
+  set_has_readlowbound();
+  if (readlowbound_ == NULL) readlowbound_ = new ::Proto::TuningValue;
   return readlowbound_;
 }
-inline void TuningSignalState::set_readlowbound(float value) {
-  set_has_readlowbound();
-  readlowbound_ = value;
+inline ::Proto::TuningValue* TuningSignalState::release_readlowbound() {
+  clear_has_readlowbound();
+  ::Proto::TuningValue* temp = readlowbound_;
+  readlowbound_ = NULL;
+  return temp;
+}
+inline void TuningSignalState::set_allocated_readlowbound(::Proto::TuningValue* readlowbound) {
+  delete readlowbound_;
+  readlowbound_ = readlowbound;
+  if (readlowbound) {
+    set_has_readlowbound();
+  } else {
+    clear_has_readlowbound();
+  }
 }
 
-// optional float readHighBound = 6 [default = 0];
+// optional .Proto.TuningValue readHighBound = 6;
 inline bool TuningSignalState::has_readhighbound() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -10294,15 +11548,185 @@ inline void TuningSignalState::clear_has_readhighbound() {
   _has_bits_[0] &= ~0x00000020u;
 }
 inline void TuningSignalState::clear_readhighbound() {
-  readhighbound_ = 0;
+  if (readhighbound_ != NULL) readhighbound_->::Proto::TuningValue::Clear();
   clear_has_readhighbound();
 }
-inline float TuningSignalState::readhighbound() const {
+inline const ::Proto::TuningValue& TuningSignalState::readhighbound() const {
+  return readhighbound_ != NULL ? *readhighbound_ : *default_instance_->readhighbound_;
+}
+inline ::Proto::TuningValue* TuningSignalState::mutable_readhighbound() {
+  set_has_readhighbound();
+  if (readhighbound_ == NULL) readhighbound_ = new ::Proto::TuningValue;
   return readhighbound_;
 }
-inline void TuningSignalState::set_readhighbound(float value) {
-  set_has_readhighbound();
-  readhighbound_ = value;
+inline ::Proto::TuningValue* TuningSignalState::release_readhighbound() {
+  clear_has_readhighbound();
+  ::Proto::TuningValue* temp = readhighbound_;
+  readhighbound_ = NULL;
+  return temp;
+}
+inline void TuningSignalState::set_allocated_readhighbound(::Proto::TuningValue* readhighbound) {
+  delete readhighbound_;
+  readhighbound_ = readhighbound;
+  if (readhighbound) {
+    set_has_readhighbound();
+  } else {
+    clear_has_readhighbound();
+  }
+}
+
+// optional bool writeInProgress = 7 [default = false];
+inline bool TuningSignalState::has_writeinprogress() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void TuningSignalState::set_has_writeinprogress() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void TuningSignalState::clear_has_writeinprogress() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void TuningSignalState::clear_writeinprogress() {
+  writeinprogress_ = false;
+  clear_has_writeinprogress();
+}
+inline bool TuningSignalState::writeinprogress() const {
+  return writeinprogress_;
+}
+inline void TuningSignalState::set_writeinprogress(bool value) {
+  set_has_writeinprogress();
+  writeinprogress_ = value;
+}
+
+// optional int32 writeErrorCode = 8 [default = 0];
+inline bool TuningSignalState::has_writeerrorcode() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void TuningSignalState::set_has_writeerrorcode() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void TuningSignalState::clear_has_writeerrorcode() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void TuningSignalState::clear_writeerrorcode() {
+  writeerrorcode_ = 0;
+  clear_has_writeerrorcode();
+}
+inline ::google::protobuf::int32 TuningSignalState::writeerrorcode() const {
+  return writeerrorcode_;
+}
+inline void TuningSignalState::set_writeerrorcode(::google::protobuf::int32 value) {
+  set_has_writeerrorcode();
+  writeerrorcode_ = value;
+}
+
+// optional fixed64 writeClient = 9 [default = 0];
+inline bool TuningSignalState::has_writeclient() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void TuningSignalState::set_has_writeclient() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void TuningSignalState::clear_has_writeclient() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void TuningSignalState::clear_writeclient() {
+  writeclient_ = GOOGLE_ULONGLONG(0);
+  clear_has_writeclient();
+}
+inline ::google::protobuf::uint64 TuningSignalState::writeclient() const {
+  return writeclient_;
+}
+inline void TuningSignalState::set_writeclient(::google::protobuf::uint64 value) {
+  set_has_writeclient();
+  writeclient_ = value;
+}
+
+// optional sfixed64 successfulReadTime = 10 [default = 0];
+inline bool TuningSignalState::has_successfulreadtime() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void TuningSignalState::set_has_successfulreadtime() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void TuningSignalState::clear_has_successfulreadtime() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void TuningSignalState::clear_successfulreadtime() {
+  successfulreadtime_ = GOOGLE_LONGLONG(0);
+  clear_has_successfulreadtime();
+}
+inline ::google::protobuf::int64 TuningSignalState::successfulreadtime() const {
+  return successfulreadtime_;
+}
+inline void TuningSignalState::set_successfulreadtime(::google::protobuf::int64 value) {
+  set_has_successfulreadtime();
+  successfulreadtime_ = value;
+}
+
+// optional sfixed64 writeRequestTime = 11 [default = 0];
+inline bool TuningSignalState::has_writerequesttime() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void TuningSignalState::set_has_writerequesttime() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void TuningSignalState::clear_has_writerequesttime() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void TuningSignalState::clear_writerequesttime() {
+  writerequesttime_ = GOOGLE_LONGLONG(0);
+  clear_has_writerequesttime();
+}
+inline ::google::protobuf::int64 TuningSignalState::writerequesttime() const {
+  return writerequesttime_;
+}
+inline void TuningSignalState::set_writerequesttime(::google::protobuf::int64 value) {
+  set_has_writerequesttime();
+  writerequesttime_ = value;
+}
+
+// optional sfixed64 successfulWriteTime = 12 [default = 0];
+inline bool TuningSignalState::has_successfulwritetime() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void TuningSignalState::set_has_successfulwritetime() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void TuningSignalState::clear_has_successfulwritetime() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void TuningSignalState::clear_successfulwritetime() {
+  successfulwritetime_ = GOOGLE_LONGLONG(0);
+  clear_has_successfulwritetime();
+}
+inline ::google::protobuf::int64 TuningSignalState::successfulwritetime() const {
+  return successfulwritetime_;
+}
+inline void TuningSignalState::set_successfulwritetime(::google::protobuf::int64 value) {
+  set_has_successfulwritetime();
+  successfulwritetime_ = value;
+}
+
+// optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+inline bool TuningSignalState::has_unsuccessfulwritetime() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void TuningSignalState::set_has_unsuccessfulwritetime() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void TuningSignalState::clear_has_unsuccessfulwritetime() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void TuningSignalState::clear_unsuccessfulwritetime() {
+  unsuccessfulwritetime_ = GOOGLE_LONGLONG(0);
+  clear_has_unsuccessfulwritetime();
+}
+inline ::google::protobuf::int64 TuningSignalState::unsuccessfulwritetime() const {
+  return unsuccessfulwritetime_;
+}
+inline void TuningSignalState::set_unsuccessfulwritetime(::google::protobuf::int64 value) {
+  set_has_unsuccessfulwritetime();
+  unsuccessfulwritetime_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -10358,135 +11782,81 @@ TuningSignalsReadReply::mutable_tuningsignalstate() {
 
 // -------------------------------------------------------------------
 
-// TuningSignalWrite
+// TuningWriteCommand
 
 // optional uint64 signalHash = 1 [default = 0];
-inline bool TuningSignalWrite::has_signalhash() const {
+inline bool TuningWriteCommand::has_signalhash() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TuningSignalWrite::set_has_signalhash() {
+inline void TuningWriteCommand::set_has_signalhash() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TuningSignalWrite::clear_has_signalhash() {
+inline void TuningWriteCommand::clear_has_signalhash() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TuningSignalWrite::clear_signalhash() {
+inline void TuningWriteCommand::clear_signalhash() {
   signalhash_ = GOOGLE_ULONGLONG(0);
   clear_has_signalhash();
 }
-inline ::google::protobuf::uint64 TuningSignalWrite::signalhash() const {
+inline ::google::protobuf::uint64 TuningWriteCommand::signalhash() const {
   return signalhash_;
 }
-inline void TuningSignalWrite::set_signalhash(::google::protobuf::uint64 value) {
+inline void TuningWriteCommand::set_signalhash(::google::protobuf::uint64 value) {
   set_has_signalhash();
   signalhash_ = value;
 }
 
-// optional float value = 2 [default = 0];
-inline bool TuningSignalWrite::has_value() const {
+// optional .Proto.TuningValue value = 2;
+inline bool TuningWriteCommand::has_value() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TuningSignalWrite::set_has_value() {
+inline void TuningWriteCommand::set_has_value() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TuningSignalWrite::clear_has_value() {
+inline void TuningWriteCommand::clear_has_value() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TuningSignalWrite::clear_value() {
-  value_ = 0;
+inline void TuningWriteCommand::clear_value() {
+  if (value_ != NULL) value_->::Proto::TuningValue::Clear();
   clear_has_value();
 }
-inline float TuningSignalWrite::value() const {
+inline const ::Proto::TuningValue& TuningWriteCommand::value() const {
+  return value_ != NULL ? *value_ : *default_instance_->value_;
+}
+inline ::Proto::TuningValue* TuningWriteCommand::mutable_value() {
+  set_has_value();
+  if (value_ == NULL) value_ = new ::Proto::TuningValue;
   return value_;
 }
-inline void TuningSignalWrite::set_value(float value) {
-  set_has_value();
+inline ::Proto::TuningValue* TuningWriteCommand::release_value() {
+  clear_has_value();
+  ::Proto::TuningValue* temp = value_;
+  value_ = NULL;
+  return temp;
+}
+inline void TuningWriteCommand::set_allocated_value(::Proto::TuningValue* value) {
+  delete value_;
   value_ = value;
+  if (value) {
+    set_has_value();
+  } else {
+    clear_has_value();
+  }
 }
 
 // -------------------------------------------------------------------
 
 // TuningSignalsWrite
 
-// optional string clientEquipmentID = 1;
-inline bool TuningSignalsWrite::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void TuningSignalsWrite::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void TuningSignalsWrite::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void TuningSignalsWrite::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
-  }
-  clear_has_clientequipmentid();
-}
-inline const ::std::string& TuningSignalsWrite::clientequipmentid() const {
-  return *clientequipmentid_;
-}
-inline void TuningSignalsWrite::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsWrite::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsWrite::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TuningSignalsWrite::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  return clientequipmentid_;
-}
-inline ::std::string* TuningSignalsWrite::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TuningSignalsWrite::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
-  } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
 // optional bool autoApply = 2 [default = false];
 inline bool TuningSignalsWrite::has_autoapply() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void TuningSignalsWrite::set_has_autoapply() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void TuningSignalsWrite::clear_has_autoapply() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void TuningSignalsWrite::clear_autoapply() {
   autoapply_ = false;
@@ -10500,29 +11870,29 @@ inline void TuningSignalsWrite::set_autoapply(bool value) {
   autoapply_ = value;
 }
 
-// repeated .Network.TuningSignalWrite tuningSignalWrite = 3;
-inline int TuningSignalsWrite::tuningsignalwrite_size() const {
-  return tuningsignalwrite_.size();
+// repeated .Network.TuningWriteCommand commands = 3;
+inline int TuningSignalsWrite::commands_size() const {
+  return commands_.size();
 }
-inline void TuningSignalsWrite::clear_tuningsignalwrite() {
-  tuningsignalwrite_.Clear();
+inline void TuningSignalsWrite::clear_commands() {
+  commands_.Clear();
 }
-inline const ::Network::TuningSignalWrite& TuningSignalsWrite::tuningsignalwrite(int index) const {
-  return tuningsignalwrite_.Get(index);
+inline const ::Network::TuningWriteCommand& TuningSignalsWrite::commands(int index) const {
+  return commands_.Get(index);
 }
-inline ::Network::TuningSignalWrite* TuningSignalsWrite::mutable_tuningsignalwrite(int index) {
-  return tuningsignalwrite_.Mutable(index);
+inline ::Network::TuningWriteCommand* TuningSignalsWrite::mutable_commands(int index) {
+  return commands_.Mutable(index);
 }
-inline ::Network::TuningSignalWrite* TuningSignalsWrite::add_tuningsignalwrite() {
-  return tuningsignalwrite_.Add();
+inline ::Network::TuningWriteCommand* TuningSignalsWrite::add_commands() {
+  return commands_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >&
-TuningSignalsWrite::tuningsignalwrite() const {
-  return tuningsignalwrite_;
+inline const ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >&
+TuningSignalsWrite::commands() const {
+  return commands_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Network::TuningSignalWrite >*
-TuningSignalsWrite::mutable_tuningsignalwrite() {
-  return &tuningsignalwrite_;
+inline ::google::protobuf::RepeatedPtrField< ::Network::TuningWriteCommand >*
+TuningSignalsWrite::mutable_commands() {
+  return &commands_;
 }
 
 // -------------------------------------------------------------------
@@ -10627,76 +11997,6 @@ TuningSignalsWriteReply::mutable_writeresult() {
 // -------------------------------------------------------------------
 
 // TuningSignalsApply
-
-// optional string clientEquipmentID = 1;
-inline bool TuningSignalsApply::has_clientequipmentid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void TuningSignalsApply::set_has_clientequipmentid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void TuningSignalsApply::clear_has_clientequipmentid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void TuningSignalsApply::clear_clientequipmentid() {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_->clear();
-  }
-  clear_has_clientequipmentid();
-}
-inline const ::std::string& TuningSignalsApply::clientequipmentid() const {
-  return *clientequipmentid_;
-}
-inline void TuningSignalsApply::set_clientequipmentid(const ::std::string& value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsApply::set_clientequipmentid(const char* value) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(value);
-}
-inline void TuningSignalsApply::set_clientequipmentid(const char* value, size_t size) {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TuningSignalsApply::mutable_clientequipmentid() {
-  set_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    clientequipmentid_ = new ::std::string;
-  }
-  return clientequipmentid_;
-}
-inline ::std::string* TuningSignalsApply::release_clientequipmentid() {
-  clear_has_clientequipmentid();
-  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = clientequipmentid_;
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TuningSignalsApply::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
-  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete clientequipmentid_;
-  }
-  if (clientequipmentid) {
-    set_has_clientequipmentid();
-    clientequipmentid_ = clientequipmentid;
-  } else {
-    clear_has_clientequipmentid();
-    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
 
 // -------------------------------------------------------------------
 

@@ -10,11 +10,14 @@
 #include <cassert>
 
 #include "../Proto/serialization.pb.h"
+#include "../Proto/network.pb.h"
 
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
+#include "../lib/SoftwareInfo.h"
+#include "../lib/HostAddressPort.h"
 
 
 namespace Tcp
@@ -41,11 +44,8 @@ namespace Tcp
 		qint64 requestCount = 0;
 		qint64 replyCount = 0;
 
-		E::SoftwareType softwareType;
-		QString equipmentID;
-		int majorVersion;
-		int minorVersion;
-		int commitNo;
+		SoftwareInfo connectedSoftwareInfo;
+		SoftwareInfo localSoftwareInfo;
 
 		bool isActual = false;
 
@@ -99,7 +99,7 @@ namespace Tcp
 
 		QTcpSocket* m_tcpSocket = nullptr;
 
-		std::shared_ptr<ConnectionState> m_state;
+		ConnectionState m_state;
 
 		mutable QMutex m_stateMutex;
 		mutable QMutex m_mutex;
@@ -165,7 +165,8 @@ namespace Tcp
 		void disconnected(const SocketWorker* socketWorker);
 
 	public:
-		SocketWorker();
+		SocketWorker(const SoftwareInfo& softwareInfo);
+
 		virtual ~SocketWorker();
 
 		bool isConnected() const;
@@ -181,10 +182,14 @@ namespace Tcp
 		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
 		void enableWatchdogTimer(bool enable);
 
+		HostAddressPort localAddressPort() const;
+
 		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState() const;
-		std::shared_ptr<const ConnectionState> getConnectionStatePtr() const;
+
+		SoftwareInfo localSoftwareInfo() const;
+		SoftwareInfo connectedSoftwareInfo() const;
 
 		HostAddressPort peerAddr() const;
 	};
@@ -224,6 +229,8 @@ namespace Tcp
 
 		char* m_protobufBuffer = nullptr;
 
+		QMutex m_statesMutex;
+
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
 
@@ -233,11 +240,20 @@ namespace Tcp
 
 		void onHeaderAndDataReady() final;
 
+	protected:
+		std::list<Tcp::ConnectionState> m_connectionStates;
+
+	signals:
+		void connectedSoftwareInfoChanged();	// Inform listener that some connection state changed
+
 	private slots:
 		void onAutoAckTimer();
 
+	public slots:
+		void updateClientsInfo(const std::list<Tcp::ConnectionState> connectionStates);	// Update connection states of all clients from listener
+
 	public:
-		Server();
+		Server(const SoftwareInfo& sotwareInfo);
 		virtual ~Server();
 
 		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
@@ -252,6 +268,8 @@ namespace Tcp
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
 
+		virtual void onConnectedSoftwareInfoChanged();		// called after processing RQID_INTRODUCE_MYSELF
+
 		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
 
 		void sendAck();
@@ -259,6 +277,8 @@ namespace Tcp
 		bool sendReply(const QByteArray& replyData);
 		bool sendReply(google::protobuf::Message& protobufMessage);
 		bool sendReply(const char* replyData, quint32 replyDataSize);
+
+		void sendClientList();
 	};
 
 
@@ -303,7 +323,7 @@ namespace Tcp
 		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
 
 	signals:
-		void connectedClientsListChanged(std::list<std::shared_ptr<const ConnectionState>> listOfClientStates);
+		void connectedClientsListChanged(std::list<ConnectionState> listOfClientStates);
 
 	private:
 		virtual void onThreadStarted() override;
@@ -312,11 +332,10 @@ namespace Tcp
 		void startListening();
 		void onNewConnection(qintptr socketDescriptor);
 
-		void updateClientsList();
-
 	private slots:
 		void onPeriodicTimer();
 		void onServerDisconnected(const SocketWorker *server);
+		void updateClientsList();
 
 	private:
 		HostAddressPort m_listenAddressPort;
@@ -391,12 +410,6 @@ namespace Tcp
 
 		char* m_protobufBuffer = nullptr;
 
-		E::SoftwareType m_softwareType;
-		const QString m_equipmentID;
-		int m_majorVersion;
-		int m_minorVersion;
-		int m_commitNo;
-
 	private:
 		void autoSwitchServer();
 		void selectServer(int serverIndex, bool reconnect);
@@ -423,19 +436,12 @@ namespace Tcp
 		virtual void onWatchdogTimerTimeout() override;
 
 	public:
-		Client(const HostAddressPort& serverAddressPort,
-			   E::SoftwareType softwareType,
-			   const QString equipmentID,
-			   int majorVersion,
-			   int minorVersion,
-			   int commitNo);
+		Client(const SoftwareInfo& softwareInfo,
+			   const HostAddressPort& serverAddressPort);
 
-		Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2,
-			   E::SoftwareType softwareType,
-			   const QString equipmentID,
-			   int majorVersion,
-			   int minorVersion,
-			   int commitNo);
+		Client(const SoftwareInfo& softwareInfo,
+			   const HostAddressPort& serverAddressPort1,
+			   const HostAddressPort& serverAddressPort2);
 
 		virtual ~Client();
 
@@ -445,10 +451,10 @@ namespace Tcp
 		void selectServer1(bool reconnect) { selectServer(0, reconnect); }
 		void selectServer2(bool reconnect) { selectServer(1, reconnect); }
 
-		QString equipmentID() const { return m_equipmentID; }
+		QString equipmentID() const;
 
-		HostAddressPort currentServerAddressPort();
-		HostAddressPort serverAddressPort(int serverIndex);
+		HostAddressPort currentServerAddressPort() const;
+		HostAddressPort serverAddressPort(int serverIndex) const;
 		int selectedServerIndex() { return m_selectedServerIndex; }
 
 		bool isAutoSwitchServer() const { return m_autoSwitchServer; }

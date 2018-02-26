@@ -203,6 +203,7 @@ namespace Builder
 		bool createAcquiredDiscreteTuningSignalsList();
 		bool createAcquiredDiscreteConstSignalsList();
 
+		bool createNonAcquiredDiscreteInputSignalsList();
 		bool createNonAcquiredDiscreteStrictOutputSignalsList();
 		bool createNonAcquiredDiscreteInternalSignalsList();
 
@@ -375,7 +376,7 @@ namespace Builder
 
 		bool writeResult();
 		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
-		bool writeTuningInfoFile(const QString& subsystemID, int lmNumber);
+		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
 		void writeLMCodeTestFile();
 
@@ -441,7 +442,7 @@ namespace Builder
 		//
 		int m_lmCodeMemorySize = 0;
 		int m_lmAppMemorySize = 0;
-		int m_lmAppLogicFrameSize = 0;
+		int m_lmAppLogicFramePayload = 0;
 		int m_lmAppLogicFrameCount = 0;
 
 		int m_lmCycleDuration = 0;
@@ -492,6 +493,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredDiscreteConstSignals;
 		QVector<UalSignal*> m_acquiredDiscreteOptoAndBusChildSignals;
 
+		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteInternalSignals;		// non acquired discrete internal non tuningbale signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL

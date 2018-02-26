@@ -4,29 +4,31 @@
 class QStandardItemModel;
 class TcpConfigServiceClient;
 
+#include "../lib/Tcp.h"
 #include "BaseServiceStateWidget.h"
+
 
 class ConfigurationServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	ConfigurationServiceWidget(quint32 ip, int portIndex, QWidget *parent = 0);
+	ConfigurationServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent = 0);
 	~ConfigurationServiceWidget();
 
 public slots:
 	void updateStateInfo();
 	void updateServiceState();
-	void updateClients();
+	void updateClientsInfo();
 	void updateBuildInfo();
 	void updateServiceSettings();
 
 	void clearServiceData();
 
-private:
-	void createTcpConnection(quint32 ip, quint16 port);
-	void dropTcpConnection();
+protected:
+	void createTcpConnection(quint32 ip, quint16 port) override;
+	void dropTcpConnection() override;
 
-	QStandardItemModel* m_clientsTabModel = nullptr;
+private:
 	QStandardItemModel* m_buildTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;

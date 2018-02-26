@@ -67,44 +67,25 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileClient::FileClient(const QString& rootFolder,
-						   const HostAddressPort &serverAddressPort,
-						   E::SoftwareType softwareType,
-						   const QString equipmentID,
-						   int majorVersion,
-						   int minorVersion,
-						   int commitNo) :
-		Client(serverAddressPort,
-			   softwareType,
-			   equipmentID,
-			   majorVersion,
-			   minorVersion,
-			   commitNo)
+	FileClient::FileClient(const SoftwareInfo& softwareInfo, const QString& rootFolder,
+						   const HostAddressPort &serverAddressPort) :
+		Client(softwareInfo, serverAddressPort)
 	{
 		m_rootFolder = rootFolder;
+
 		m_file.setParent(this);
 
 		init();
 	}
 
-
-	FileClient::FileClient(const QString &rootFolder,
+	FileClient::FileClient(const SoftwareInfo& softwareInfo,
+						   const QString &rootFolder,
 						   const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2,
-						   E::SoftwareType softwareType,
-						   const QString equipmentID,
-						   int majorVersion,
-						   int minorVersion,
-						   int commitNo) :
-		Client(serverAddressPort1,
-			   serverAddressPort2,
-			   softwareType,
-			   equipmentID,
-			   majorVersion,
-			   minorVersion,
-			   commitNo)
+						   const HostAddressPort& serverAddressPort2) :
+		Client(softwareInfo, serverAddressPort1, serverAddressPort2)
 	{
 		m_rootFolder = rootFolder;
+
 		m_file.setParent(this);
 
 		init();
@@ -415,7 +396,8 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileServer::FileServer(const QString& rootFolder, std::shared_ptr<CircularLogger> logger) :
+	FileServer::FileServer(const QString& rootFolder, const SoftwareInfo& softwareInfo, std::shared_ptr<CircularLogger> logger) :
+		Server(softwareInfo),
 		m_logger(logger),
 		m_reply(*reinterpret_cast<GetFileReply*>(m_replyData)),
 		m_replyFileData(m_replyData + sizeof(GetFileReply)),
@@ -426,13 +408,13 @@ namespace Tcp
 
 		m_reply.clear();
 
-		connect(&m_transmitionFilesTimer, &QTimer::timeout, [this]{ m_state->isActual = true; });
+		connect(&m_transmitionFilesTimer, &QTimer::timeout, [this]{ m_state.isActual = true; });
 	}
 
 
 	Server* FileServer::getNewInstance()
 	{
-		return new FileServer(m_rootFolder, m_logger);
+		return new FileServer(m_rootFolder, localSoftwareInfo(), m_logger);
 	}
 
 
@@ -606,7 +588,7 @@ namespace Tcp
 
 	void FileServer::restartTransmitionFilesTimer()
 	{
-		m_state->isActual = false;
+		m_state.isActual = false;
 
 		m_transmitionFilesTimer.stop();
 

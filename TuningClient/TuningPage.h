@@ -5,21 +5,17 @@
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
+#include "TuningClientTcpClient.h"
 
 class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent);
+	TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent);
 
-	void setValue(const std::vector<int>& selectedRows);
-	void invertValue(const std::vector<int>& selectedRows);
-
-	void updateStates();
+	void blink();
 
 	bool hasPendingChanges();
-
-	bool write();
 
 protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
@@ -30,38 +26,9 @@ protected:
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-public slots:
-
-	void slot_setAll();
-
-	void slot_undo();
-	void slot_Write();
-	void slot_Apply();
-
-
 private:
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	bool m_blink = false;
 
-
-};
-
-class FilterButton : public QPushButton
-{
-	Q_OBJECT
-public:
-	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, QWidget* parent = nullptr);
-
-	std::shared_ptr<TuningFilter> filter();
-
-private:
-	std::shared_ptr<TuningFilter> m_filter;
-	QString m_caption;
-
-private slots:
-	void slot_toggled(bool checked);
-
-signals:
-	void filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 };
 
 class TuningTableView : public QTableView
@@ -91,25 +58,22 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent = 0);
-
+	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
 	~TuningPage();
 
 	void fillObjectsList();
 
-	QColor textColor();
-
-	QColor backColor();
-
 	bool hasPendingChanges();
+
 	bool askForSavePendingChanges();
 
 	bool write();
 
+	bool apply();
+
 	void undo();
 
 private slots:
-	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
 
@@ -123,16 +87,11 @@ private slots:
 
 public slots:
 
-	void slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
 
+	void slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter);
 
 private:
-
-	const TuningSignalStorage* m_objects = nullptr;
-
-	TuningSignalManager* m_tuningSignalManager = nullptr;
-
-	TuningFilterStorage* m_filterStorage = nullptr;
 
 	enum class FilterType
 	{
@@ -143,19 +102,37 @@ private:
 		Caption
 	};
 
-	void invertValue();
-
-	virtual void timerEvent(QTimerEvent* event) override;
+private:
 
 	bool eventFilter(QObject* object, QEvent* event);
 
+	virtual void resizeEvent(QResizeEvent *event);
+
+	// Signals processing
+
+	void setValue();
+
+	void invertValue();
+
+	bool takeClientControl();
+
+private slots:
+
+	void slot_timerTick500();
+	void slot_setAll();
+	void slot_undo();
+	void slot_Write();
+	void slot_Apply();
+
+private:
+
+	TuningSignalManager* m_tuningSignalManager = nullptr;
+
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+
 	TuningTableView* m_objectList = nullptr;
 
-	QButtonGroup* m_filterButtonGroup = nullptr;
-
 	QVBoxLayout* m_mainLayout = nullptr;
-
-	QHBoxLayout* m_buttonsLayout = nullptr;
 
 	QHBoxLayout* m_bottomLayout = nullptr;
 
@@ -179,18 +156,17 @@ private:
 
 	std::shared_ptr<TuningFilter> m_treeFilter = nullptr;
 
-	std::shared_ptr<TuningFilter> m_tabFilter = nullptr;
-
-	std::shared_ptr<TuningFilter> m_buttonFilter = nullptr;
-
-	int m_tuningPageIndex = 0;
-
-	int m_updateStateTimerId = -1;
+	std::shared_ptr<TuningFilter> m_pageFilter = nullptr;
 
 	int m_sortColumn = 0;
 
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 
+	static int m_instanceCounter;
+
+	int m_instanceNo = -1;
+
+	std::vector<std::pair<TuningModel::Columns, double>> m_columnsArray;
 
 };
 

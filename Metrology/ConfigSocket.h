@@ -20,8 +20,13 @@ class ConfigSocket : public QObject
 
 public:
 
-	ConfigSocket(const HostAddressPort& serverAddressPort);
-	ConfigSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	ConfigSocket(const HostAddressPort& serverAddressPort,
+				 const SoftwareInfo& softwareInfo);
+
+	ConfigSocket(const HostAddressPort& serverAddressPort1,
+				 const HostAddressPort& serverAddressPort2,
+				 const SoftwareInfo& softwareInfo);
+
 	virtual ~ConfigSocket();
 
 private:

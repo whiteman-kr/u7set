@@ -616,6 +616,7 @@ namespace Builder
 		};
 
 		bool result = true;
+
 		result &= ipGetter(1, cfgIP1);
 		result &= ipGetter(2, cfgIP2);
 
@@ -628,6 +629,7 @@ namespace Builder
 
 		QString cfgIP1;
 		QString cfgIP2;
+		
 		if (getConfigIp(cfgIP1, cfgIP2) == false)
 		{
 			return false;

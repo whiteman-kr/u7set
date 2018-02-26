@@ -3514,20 +3514,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+	/// Title:	   TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		LowEngeneeringUnits property of tuningable signal must be greate than HighEngeneeringUnits.
-	///		Correct signal properties.
+	///		TuningHighBound property of tuningable signal must be greate than TuningLowBound. Check signal properties.
 	///
 	void IssueLogger::errALC5068(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5068,
-				  QString(tr("LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.")).
+				  QString(tr("TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound")).
 					arg(appSignalID));
 	}
 
@@ -3536,20 +3535,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+	/// Title:	   TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningDefaultValue property of tuningable signal must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
-	///		Correct signal TuningDefaultValue property.
+	///		TuningDefaultValue property of tuningable signal must be in range from TuningLowBound to TuningHighBound.
+	///		Check signal's TuningDefaultValue property.
 	///
 	void IssueLogger::errALC5069(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5069,
-				  QString(tr("TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.")).
+				  QString(tr("TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.")).
 					arg(appSignalID));
 	}
 
@@ -4962,6 +4961,48 @@ namespace Builder
 				  5136,
 				  QString(tr("The input (or output) signal %1 can be bind to Equipment Signal only.").
 						  arg(appSignalID)));
+	}
+
+	/// IssueCode: ALC5137
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 property %2 out of SignedInt32 range.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Signal property name
+	///
+	/// Description:
+	///		Specified signal property value is out of SignedInt32 range. Check property value.
+	///
+	void IssueLogger::errALC5137(QString appSignalID, QString property)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5137,
+				  QString(tr("Signal %1 property %2 out of SignedInt32 range.")).
+						  arg(appSignalID).arg(property));
+	}
+
+	/// IssueCode: ALC5138
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 property %2 out of Float32 range.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Signal property name
+	///
+	/// Description:
+	///		Specified signal property value is out of Float32 range. Check property value.
+	///
+	void IssueLogger::errALC5138(QString appSignalID, QString property)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5138,
+				  QString(tr("Signal %1 property %2 out of Float32 range.")).
+						  arg(appSignalID).arg(property));
 	}
 
 	//

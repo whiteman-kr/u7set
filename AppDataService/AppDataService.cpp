@@ -21,12 +21,12 @@ const char* const AppDataServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
 const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
 const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
 
-AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName,
+AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
+										   const QString& serviceName,
 										   int& argc,
 										   char** argv,
-										   const VersionInfo &versionInfo,
 										   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_logger(logger),
 	m_timer(this),
 	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
@@ -46,7 +46,7 @@ AppDataServiceWorker::~AppDataServiceWorker()
 
 ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	AppDataServiceWorker* newInstance = new AppDataServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
 
 	newInstance->init();
 
@@ -58,6 +58,51 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 {
 	serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
 	serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
+}
+
+
+bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return false;
+	}
+
+	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+
+	if (state.isConnected)
+	{
+		ip = state.peerAddr.address32();
+		port = state.peerAddr.port();
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool AppDataServiceWorker::isConnectedToArchiveService(quint32 &ip, quint16 &port) const
+{
+	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		if (m_tcpArchiveClients[channel] == nullptr)
+		{
+			continue;
+		}
+
+		if (m_tcpArchiveClients[channel]->isConnected())
+		{
+			Tcp::ConnectionState&& state = m_tcpArchiveClients[channel]->getConnectionState();
+
+			ip = state.peerAddr.address32();
+			port = state.peerAddr.port();
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -91,7 +136,7 @@ void AppDataServiceWorker::loadSettings()
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger, E::SoftwareType::AppDataService, 0, 1, USED_SERVER_COMMIT_NUMBER);
+	CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
 
 	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
@@ -120,13 +165,14 @@ void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo());
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_cfgSettings.clientRequestIP,
 															tcpAppDataSever,
 															m_enabledAppDataSources,
 															m_appSignals,
 															m_signalStates,
+															*this,
 															m_logger);
 	m_tcpAppDataServerThread->start();
 }
@@ -154,17 +200,13 @@ void AppDataServiceWorker::runTcpArchiveClientThreads()
 			continue;
 		}
 
-		TcpArchiveClient* client = new TcpArchiveClient(channel,
-														m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
-														E::SoftwareType::AppDataService,
-														m_equipmentID,
-														m_majorVersion,
-														m_minorVersion,
-														USED_SERVER_COMMIT_NUMBER,
-														m_logger,
-														m_signalStatesQueue);
+		m_tcpArchiveClients[channel] = new TcpArchiveClient(softwareInfo(),
+															channel,
+															m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
+															m_logger,
+															m_signalStatesQueue);
 
-		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(client);
+		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(m_tcpArchiveClients[channel]);
 
 		m_tcpArchiveClientThreads[channel]->start();
 	}
@@ -178,6 +220,8 @@ void AppDataServiceWorker::stopTcpArchiveClientThreads()
 		{
 			continue;
 		}
+
+		m_tcpArchiveClients[channel] = nullptr;
 
 		m_tcpArchiveClientThreads[channel]->quitAndWait();
 

@@ -8,6 +8,7 @@
 
 
 class TcpAppDataServerThread;
+class AppDataServiceWorker;
 
 // -------------------------------------------------------------------------------
 //
@@ -29,6 +30,8 @@ private:
 
 	// Request processing functions
 	//
+	void onGetState();
+
 	void onGetAppSignalListStartRequest();
 	void onGetAppSignalListNextRequest(const char* requestData, quint32 requestDataSize);
 
@@ -42,8 +45,12 @@ private:
 
 	void onGetUnitsRequest();
 
+	void onGetSettings();
+
 	// reused protobuf messages
 	//
+	Network::AppDataServiceState m_getAppDataServiceState;
+
 	Network::GetSignalListStartReply m_getSignalListStartReply;
 
 	Network::GetSignalListNextRequest m_getSignalListNextRequest;
@@ -65,6 +72,8 @@ private:
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
 	Network::GetAppDataSourcesStatesReply m_getAppDataSourcesStatesReply;
 
+	Network::ServiceSettings m_getServiceSettings;
+
 	// helper functions
 	//
 	int getSignalListPartCount(int signalCount);
@@ -77,7 +86,7 @@ private:
 	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 public:
-	TcpAppDataServer();
+	TcpAppDataServer(const SoftwareInfo& softwareInfo);
 	virtual ~TcpAppDataServer();
 
 	virtual void onServerThreadStarted() override;
@@ -105,6 +114,7 @@ private:
 	const AppDataSourcesIP& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const AppSignalStates& m_appSignalStates;
+	const AppDataServiceWorker& m_appDataServiceWorker;
 
 	void buildAppSignalIDs();
 
@@ -114,6 +124,7 @@ public:
 							const AppDataSourcesIP& appDataSources,
 							const AppSignals& appSignals,
 							const AppSignalStates& appSignalStates,
+							const AppDataServiceWorker& appDataServiceWorker,
 							std::shared_ptr<CircularLogger> logger);
 
 	const QVector<QString>& appSignalIDs() const { return m_appSignalIDs; }
@@ -123,5 +134,12 @@ public:
 	const AppDataSourcesIP& appDataSources() const { return  m_appDataSources; }
 
 	bool getAppSignalState(Hash hash, AppSignalState& state);
+
+	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port);
+	bool isConnectedToArchiveService(quint32& ip, quint16& port);
+
+	QString equipmentID() const;
+	QString cfgServiceIP1Str() const;
+	QString cfgServiceIP2Str() const;
 };
 

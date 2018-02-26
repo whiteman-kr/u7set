@@ -9,26 +9,18 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSocket::TuningSocket(const HostAddressPort& serverAddressPort) :
-	Tcp::Client(serverAddressPort,
-				E::SoftwareType::Metrology,
-				theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY),
-				0,
-				1,
-				USED_SERVER_COMMIT_NUMBER)
+TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort) :
+	Tcp::Client(softwareInfo, serverAddressPort)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSocket::TuningSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1,
-				serverAddressPort2,
-				E::SoftwareType::Metrology,
-				theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY),
-				0,
-				1,
-				USED_SERVER_COMMIT_NUMBER)
+TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2) :
+	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2)
 {
 }
 
@@ -127,8 +119,6 @@ void TuningSocket::requestTuningSourcesInfo()
 		return;
 	}
 
-	m_getTuningSourcesInfo.set_clientequipmentid(equipmentID.toUtf8());
-
 	sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_getTuningSourcesInfo);
 }
 
@@ -201,8 +191,6 @@ void TuningSocket::requestTuningSourcesState()
 		return;
 	}
 
-	m_getTuningSourcesStates.set_clientequipmentid(equipmentID.toUtf8());
-
 	sendRequest(TDS_GET_TUNING_SOURCES_STATES, m_getTuningSourcesStates);
 }
 
@@ -272,8 +260,6 @@ void TuningSocket::requestReadTuningSignals()
 		requestTuningSourcesState();
 		return;
 	}
-
-	m_readTuningSignals.set_clientequipmentid(equipmentID.toUtf8());
 
 	m_readTuningSignals.mutable_signalhash()->Reserve(signalForReadCount);
 
@@ -375,32 +361,43 @@ void TuningSocket::requestWriteTuningSignals()
 		return;
 	}
 
-	m_writeTuningSignals.set_clientequipmentid(equipmentID.toUtf8());
 	m_writeTuningSignals.set_autoapply(true);
 
-	m_writeTuningSignals.mutable_tuningsignalwrite()->Reserve(cmdCount);
+	m_writeTuningSignals.mutable_commands()->Reserve(cmdCount);
 
-	m_writeTuningSignals.mutable_tuningsignalwrite()->Clear();
+	m_writeTuningSignals.mutable_commands()->Clear();
 
 	for (int i = 0; i < cmdCount && i < TUNING_SOCKET_MAX_WRITE_CMD; i++)
 	{
 		TuningWriteCmd cmd = theSignalBase.tuning().cmdFowWrite(i);
+
 		if (cmd.signalHash() == 0)
 		{
 			assert(cmd.signalHash() != 0);
 			continue;
 		}
 
-		Network::TuningSignalWrite* wrCmd = new Network::TuningSignalWrite();
+		Network::TuningWriteCommand* wrCmd = new Network::TuningWriteCommand();
+
 		if (wrCmd == nullptr)
 		{
 			continue;
 		}
 
-		wrCmd->set_value(cmd.value());
 		wrCmd->set_signalhash(cmd.signalHash());
 
-		m_writeTuningSignals.mutable_tuningsignalwrite()->AddAllocated(wrCmd);
+		Proto::TuningValue* tv = new Proto::TuningValue();
+
+		assert(false);		// WM: code below is needs checking
+
+		tv->set_type(0/* need set value of enum TuningValueType */);
+
+		tv->set_doublevalue(cmd.value());
+		// or need tv.set_intvalue(); dependent from TuningValueType
+
+		wrCmd->set_allocated_value(tv);
+
+		m_writeTuningSignals.mutable_commands()->AddAllocated(wrCmd);
 	}
 
 	sendRequest(TDS_TUNING_SIGNALS_WRITE, m_writeTuningSignals);

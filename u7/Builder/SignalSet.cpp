@@ -138,6 +138,8 @@ namespace Builder
 					result = false;
 				}
 
+				result &= checkSignalPropertiesRanges(s);
+
 				break;
 
 			case E::SignalType::Bus:
@@ -168,34 +170,29 @@ namespace Builder
 
 			// check tuningable signals properties
 			//
-			if (s.enableTuning() == false)
+			if (s.enableTuning() == true)
 			{
-				continue;
-			}
-
-			if (s.isInternal() == false)
-			{
-				LOG_INTERNAL_ERROR(m_log);				// only Internals can be tuningable
-				return false;
-			}
-
-			if (s.isAnalog() == true)
-			{
-				if (s.lowEngeneeringUnits() >= s.highEngeneeringUnits())
+				if (s.isInternal() == false)
 				{
-					// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+					LOG_INTERNAL_ERROR(m_log);				// only Internals can be tuningable
+					return false;
+				}
+
+				if (s.tuningLowBound() >= s.tuningHighBound())
+				{
+					// TuningHighBound property of tuningable signal '%1' must be greate than TuningLowBound.
 					//
 					m_log->errALC5068(s.appSignalID());
 					result = false;
 				}
 				else
 				{
-					// limits OK
+					// bounds OK, defaultValue checking
 					//
-					if (s.tuningDefaultValue() < s.lowEngeneeringUnits() ||
-						s.tuningDefaultValue() > s.highEngeneeringUnits())
+					if (s.tuningDefaultValue() < s.tuningLowBound() ||
+						s.tuningDefaultValue() > s.tuningHighBound())
 					{
-						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits toHighEngeneeringUnits.
+						// TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
 						//
 						m_log->errALC5069(s.appSignalID());
 						result = false;
@@ -409,5 +406,112 @@ namespace Builder
 
 		return caption;
 	}
+
+	bool SignalSet::checkSignalPropertiesRanges(const Signal& s)
+	{
+		if (s.isAnalog() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		result &= checkSignalPropertyRanges(s, s.lowEngeneeringUnits(), "LowEngeneeringUnits");
+		result &= checkSignalPropertyRanges(s, s.highEngeneeringUnits(), "HighEngeneeringUnits");
+
+		result &= checkSignalPropertyRanges(s, s.lowValidRange(), "LowValidRange");
+		result &= checkSignalPropertyRanges(s, s.highValidRange(), "HighValidRange");
+
+		result &= checkSignalTuningValuesRanges(s, s.tuningDefaultValue(), "TuningDefaultValue");
+		result &= checkSignalTuningValuesRanges(s, s.tuningLowBound(), "TuningLowBound");
+		result &= checkSignalTuningValuesRanges(s, s.tuningHighBound(), "TuningHighBound");
+
+		return result;
+	}
+
+	bool SignalSet::checkSignalPropertyRanges(const Signal& s, double properyValue, const QString& propertyName)
+	{
+		if (s.isAnalog() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		switch(s.analogSignalFormat())
+		{
+		case E::AnalogAppSignalFormat::SignedInt32:
+
+			if (properyValue > static_cast<double>(std::numeric_limits<qint32>::max()) ||
+				properyValue < static_cast<double>(std::numeric_limits<qint32>::lowest()))
+			{
+				m_log->errALC5137(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		case E::AnalogAppSignalFormat::Float32:
+
+			if (properyValue > static_cast<double>(std::numeric_limits<float>::max()) ||
+				properyValue < static_cast<double>(std::numeric_limits<float>::lowest()))
+			{
+				m_log->errALC5138(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return result;
+	}
+
+	bool SignalSet::checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName)
+	{
+		if (s.isAnalog() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		switch(s.analogSignalFormat())
+		{
+		case E::AnalogAppSignalFormat::SignedInt32:
+
+			assert(tuningValue.type() == TuningValueType::SignedInt32);
+
+			if (tuningValue.rawInt64() > static_cast<qint64>(std::numeric_limits<qint32>::max()) ||
+				tuningValue.rawInt64() < static_cast<qint64>(std::numeric_limits<qint32>::lowest()))
+			{
+				m_log->errALC5137(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		case E::AnalogAppSignalFormat::Float32:
+
+			if (tuningValue.rawDouble() > static_cast<double>(std::numeric_limits<float>::max()) ||
+				tuningValue.rawDouble() < static_cast<double>(std::numeric_limits<float>::lowest()))
+			{
+				m_log->errALC5138(s.appSignalID(), propertyName);
+				result = false;
+			}
+
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return result;
+	}
+
+
+
 
 }

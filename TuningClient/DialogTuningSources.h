@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "TuningClientTcpClient.h"
 
 namespace Ui {
 	class DialogTuningSources;
@@ -14,7 +14,7 @@ class DialogTuningSources : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSources(TuningSignalManager* tuningSignalManager, QWidget* parent = 0);
+	explicit DialogTuningSources(TuningClientTcpClient* tcpClient, QWidget* parent = 0);
 	~DialogTuningSources();
 
 protected:
@@ -31,9 +31,14 @@ private slots:
 
 	void on_treeWidget_itemSelectionChanged();
 
+	void on_btnEnableControl_clicked();
+
+	void on_btnDisableControl_clicked();
+
 private:
 	void update(bool refreshOnly);
 
+	void activateControl(bool enable);
 
 	enum class Columns
 	{
@@ -60,7 +65,17 @@ private:
 
 	int m_updateStateTimerId = -1;
 
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	bool m_singleControlMode = true;
+
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+
+	QWidget* m_parent = nullptr;
+
+	static const QString m_singleLmControlEnabledString;
+	static const QString m_singleLmControlDisabledString;
+
+	static const int columnIndex_Hash = 0;
+	static const int columnIndex_EquipmentId = 1;
 };
 
 extern DialogTuningSources* theDialogTuningSources;

@@ -168,6 +168,8 @@ public:
 	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = 0);
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+	bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
+
 	void setSignalTypeFilter(int signalType);
 	void setSignalIdFilter(QStringList strIds);
 	void setIdFilterField(int field);

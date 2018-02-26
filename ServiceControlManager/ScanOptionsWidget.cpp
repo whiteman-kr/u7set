@@ -183,11 +183,13 @@ void SubnetChecker::checkNextHost()
 	{
 		readAck();
 	}
-	for (uint i = 0; i < SERVICE_TYPE_COUNT; i++)
+
+	for (const ServiceInfo& sInfo : serviceInfo)
 	{
 		QHostAddress ip(m_ip);
+
 		qint64 sent = m_socket->writeDatagram((char*)&m_requestHeader, sizeof(m_requestHeader),
-											  ip, serviceInfo[i].port);
+											  ip, sInfo.port);
 		if (sent == -1)
 		{
 			if (m_socket->error() == QAbstractSocket::NetworkError)
@@ -199,6 +201,7 @@ void SubnetChecker::checkNextHost()
 			qDebug() << "Socket error " << m_socket->error() << "(ip=" << ip.toString() << "): " << m_socket->errorString();
 		}
 	}
+
 	//Select next ip
 	//
 	m_ip++;

@@ -59,6 +59,13 @@ void Settings::StoreSystem()
 
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 
+	QString instanceHistoryString;
+	for (const QString& s : m_instanceHistory)
+	{
+		instanceHistoryString += s + ";";
+	}
+
+	s.setValue("m_instanceHistory", instanceHistoryString);
 	s.setValue("m_instanceStrId", m_instanceStrId);
 
 	s.setValue("m_configuratorIpAddress1", m_configuratorIpAddress1);
@@ -89,6 +96,9 @@ void Settings::RestoreSystem()
 	// read system settings
 	//
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+
+	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
+	m_instanceHistory = instanceHistoryString.split(';', QString::SkipEmptyParts);
 
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
 
@@ -153,17 +163,6 @@ void Settings::StoreUser()
 	s.setValue("TuningWorkspace/Splitter/state", m_tuningWorkspaceSplitterState);
 	s.setValue("SchemasWorkspace/Splitter/state", m_schemasWorkspaceSplitterState);
 
-	s.setValue("TuningPage/Count", static_cast<uint>(m_tuningPageSettings.size()));
-	for (int i = 0; i < m_tuningPageSettings.size(); i++)
-	{
-		s.setValue(QString("TuningPage/Settings%1/columnCount").arg(i), m_tuningPageSettings[i].m_columnCount);
-		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
-		{
-			s.setValue(QString("TuningPage/Settings%1/columnWidth/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsWidth[c]);
-			s.setValue(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsIndexes[c]);
-		}
-	}
-
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 
@@ -198,21 +197,6 @@ void Settings::RestoreUser()
 	m_tuningWorkspaceSplitterState = s.value("TuningWorkspace/Splitter/state").toByteArray();
 	m_schemasWorkspaceSplitterState = s.value("SchemasWorkspace/Splitter/state").toByteArray();
 
-	int tuningPageSettingsCount = s.value("TuningPage/Count", 0).toInt();
-	m_tuningPageSettings.resize(tuningPageSettingsCount);
-
-	for (int i = 0; i < tuningPageSettingsCount; i++)
-	{
-		m_tuningPageSettings[i].m_columnCount = s.value(QString("TuningPage/Settings%1/columnCount").arg(i), 0).toInt();
-		m_tuningPageSettings[i].m_columnsWidth.resize(m_tuningPageSettings[i].m_columnCount);
-		m_tuningPageSettings[i].m_columnsIndexes.resize(m_tuningPageSettings[i].m_columnCount);
-		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
-		{
-			m_tuningPageSettings[i].m_columnsWidth[c] = s.value(QString("TuningPage/Settings%1/columnWidth/%2").arg(i).arg(c), 100).toInt();
-			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
-		}
-	}
-
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
@@ -235,13 +219,25 @@ void Settings::RestoreUser()
 	m_language = s.value("MainWindow/language", m_language).toString();
 }
 
+QStringList Settings::instanceHistory()
+{
+	QMutexLocker l(&m);
+	return m_instanceHistory;
+}
+
+void Settings::setInstanceHistory(const QStringList& value)
+{
+	QMutexLocker l(&m);
+	m_instanceHistory = value;
+}
+
 QString Settings::instanceStrId()
 {
 	QMutexLocker l(&m);
 	return m_instanceStrId;
 }
 
-void Settings::setInstanceId(const QString& value)
+void Settings::setInstanceStrId(const QString& value)
 {
 	QMutexLocker l(&m);
 	m_instanceStrId = value;
@@ -287,29 +283,6 @@ bool Settings::admin() const
 	return m_admin;
 }
 
-TuningPageSettings* Settings::tuningPageSettings(int index)
-{
-	// Reserve place for tuning page settings and copy existing
-	//
-	if (index >= m_tuningPageSettings.size())
-	{
-		std::vector<TuningPageSettings> m_tuningPageSettings2 = m_tuningPageSettings;
-
-		m_tuningPageSettings.resize(index + 1);
-		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
-		{
-			m_tuningPageSettings[i] = m_tuningPageSettings2[i];
-		}
-	}
-
-	if (index >= m_tuningPageSettings.size())
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return& m_tuningPageSettings[index];
-}
 
 QString Settings::globalAppDataPath()
 {

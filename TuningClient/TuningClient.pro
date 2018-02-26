@@ -30,30 +30,31 @@ unix {
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
 # VFrame30 library
 # $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
 #
 win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
 }
 unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
 }
 
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-#protobuf
+#libs
 #
 win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
-
+        LIBS += -L$$DESTDIR -lprotobuf -lKernel32 -lAdvapi32
         INCLUDEPATH += ./../Protobuf
 }
 unix {
-        LIBS += -lprotobuf
+        LIBS += -lprotobuf -lpam -lpam_misc
 }
 
 
@@ -128,7 +129,6 @@ SOURCES +=\
     ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     UserManager.cpp \
-    DialogUsers.cpp \
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
     DialogPassword.cpp \
@@ -151,11 +151,14 @@ SOURCES +=\
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/Tuning/TuningSignalStorage.cpp \
-    TuningClientSignalManager.cpp \
     DialogFilterEditor.cpp \
+    ../lib/Tuning/TuningTcpClient.cpp \
+    TuningClientTcpClient.cpp \ 
+    ../lib/SoftwareInfo.cpp \
     ../lib/Tuning/TuningLog.cpp \
-    DialogAlert.cpp
+    DialogAlert.cpp \
+    ../lib/TuningValue.cpp \
+    ../lib/Tuning/TuningSourceState.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -183,7 +186,6 @@ HEADERS  += MainWindow.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     UserManager.h \
-    DialogUsers.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
     DialogPassword.h \
@@ -206,17 +208,18 @@ HEADERS  += MainWindow.h \
     ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../lib/Tuning/TuningSignalStorage.h \
-    TuningClientSignalManager.h \
     DialogFilterEditor.h \
+    ../lib/Tuning/TuningTcpClient.h \
+    TuningClientTcpClient.h \ 
+    ../lib/SoftwareInfo.h \
     ../lib/Tuning/TuningLog.h \
-    DialogAlert.h
-
+    DialogAlert.h \
+    ../lib/TuningValue.h \
+    ../lib/Tuning/TuningSourceState.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
-    DialogUsers.ui \
     DialogTuningSourceInfo.ui \
     DialogPassword.ui
 

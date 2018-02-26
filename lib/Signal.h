@@ -10,6 +10,7 @@
 #include "../VFrame30/Afb.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
+#include "../lib/TuningValue.h"
 
 
 class QXmlStreamAttributes;
@@ -107,7 +108,7 @@ public:
 
 	E::SignalType signalType() const { return m_signalType; }
 	int signalTypeInt() const { return TO_INT(m_signalType); }
-	void setSignalType(E::SignalType type) { m_signalType = type; }
+	void setSignalType(E::SignalType type);
 
 	bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 	bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
@@ -136,7 +137,7 @@ public:
 
 	E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
 	int analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
-	void setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat) { m_analogSignalFormat = dataFormat; }
+	void setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat);
 
 	E::DataFormat dataFormat() const;
 
@@ -199,14 +200,14 @@ public:
 	bool enableTuning() const { return m_enableTuning; }
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
-	float tuningDefaultValue() const { return m_tuningDefaultValue; }
-	void setTuningDefaultValue(float value) { m_tuningDefaultValue = value; }
+	TuningValue tuningDefaultValue() const { return m_tuningDefaultValue; }
+	void setTuningDefaultValue(const TuningValue& value) { m_tuningDefaultValue = value; }
 
-	float tuningLowBound() const { return m_tuningLowBound; }
-	void setTuningLowBound(float value) { m_tuningLowBound = value; }
+	TuningValue tuningLowBound() const { return m_tuningLowBound; }
+	void setTuningLowBound(const TuningValue& value) { m_tuningLowBound = value; }
 
-	float tuningHighBound() const { return m_tuningHighBound; }
-	void setTuningHighBound(float value) { m_tuningHighBound = value; }
+	TuningValue tuningHighBound() const { return m_tuningHighBound; }
+	void setTuningHighBound(const TuningValue& value) { m_tuningHighBound = value; }
 
 	// Signal properties for MATS
 
@@ -214,6 +215,11 @@ public:
 	void setAcquire(bool acquire) { m_acquire = acquire; }
 
 	bool isAcquired() const { return m_acquire; }
+
+	bool archive() const { return m_archive; }
+	void setArchive(bool archive) { m_archive = archive; }
+
+	bool isArchived() const { return m_archive; }
 
 	int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
@@ -320,6 +326,8 @@ private:
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
+
+	void updateTuningValuesType();
 	//
 
 private:
@@ -372,13 +380,14 @@ private:
 	// Tuning signal properties
 	//
 	bool m_enableTuning = false;
-	float m_tuningDefaultValue = 0;
-	float m_tuningLowBound = 0;
-	float m_tuningHighBound = 100;
+	TuningValue m_tuningDefaultValue;
+	TuningValue m_tuningLowBound;
+	TuningValue m_tuningHighBound;
 
 	// Signal properties for MATS
 	//
 	bool m_acquire = true;
+	bool m_archive = true;
 	int m_decimalPlaces = 2;
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;

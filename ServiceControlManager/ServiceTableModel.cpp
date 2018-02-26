@@ -9,20 +9,30 @@
 #include <QBuffer>
 #include "AppDataServiceWidget.h"
 #include "ConfigurationServiceWidget.h"
+#include "TuningServiceWidget.h"
 #include "../lib/Types.h"
 
+HostInfo::HostInfo() : ip(0)
+{
+	servicesData.resize(serviceInfo.count());
+
+	for (int i = 0; i < serviceInfo.count(); i++)
+	{
+		servicesData[i].information.mutable_softwareinfo()->set_softwaretype(serviceInfo[i].softwareType);
+	}
+}
 
 ServiceData::ServiceData() :
 	clientSocket(nullptr),
 	statusWidget(nullptr)
 {
-	information.set_type(TO_INT(ServiceType::BaseService));
+	information.mutable_softwareinfo()->set_softwaretype(E::SoftwareType::BaseService);
 	information.set_servicestate(TO_INT(ServiceState::Undefined));
 }
 
-
-ServiceTableModel::ServiceTableModel(QObject *parent) :
+ServiceTableModel::ServiceTableModel(const SoftwareInfo& softwareInfo, QObject* parent) :
 	QAbstractTableModel(parent),
+	m_softwareInfo(softwareInfo),
 	m_freezeUpdate(false),
 	m_timer(parent)
 {
@@ -55,7 +65,8 @@ ServiceTableModel::~ServiceTableModel()
 	{
 		settings.setArrayIndex(i);
 		settings.setValue("IP", m_hostsInfo[i].ip);
-		for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
+
+		for (int j = 0; j < serviceInfo.count(); j++)
 		{
 			if (m_hostsInfo[i].servicesData[j].statusWidget != nullptr)
 			{
@@ -80,7 +91,7 @@ void ServiceTableModel::startUdpSocketThread()
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
-		for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
+		for (int j = 0; j < serviceInfo.count(); j++)
 		{
 			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
 
@@ -117,7 +128,7 @@ void ServiceTableModel::finishtUdpSocketThread()
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
-		for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
+		for (int j = 0; j < serviceInfo.count(); j++)
 		{
 			m_hostsInfo[i].servicesData[j].clientSocket = nullptr;
 		}
@@ -139,7 +150,7 @@ int ServiceTableModel::rowCount(const QModelIndex&) const
 
 int ServiceTableModel::columnCount(const QModelIndex&) const
 {
-	return SERVICE_TYPE_COUNT;
+	return serviceInfo.count();
 }
 
 QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
@@ -158,9 +169,9 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			QString str;
 			bool serviceFound = false;
 
-			for (uint i = 0; i < SERVICE_TYPE_COUNT; i++)
+			for (int i = 0; i < serviceInfo.count(); i++)
 			{
-				if (serviceInfo[i].serviceType == static_cast<ServiceType>(si.type()))
+				if (serviceInfo[i].softwareType == static_cast<E::SoftwareType>(si.softwareinfo().softwaretype()))
 				{
 					str = serviceInfo[i].name;
 					serviceFound = true;
@@ -169,8 +180,10 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			}
 			if (serviceFound)
 			{
-				str += QString(" v%1.%2.%3(0x%4)\n").arg(si.majorversion()).arg(si.minorversion()).
-													arg(si.commitno()).arg(si.crc(), 0, 16, QChar('0'));
+				str += QString(" v%1.%2.%3(0x%4)\n").arg(si.softwareinfo().majorversion()).
+													 arg(si.softwareinfo().minorversion()).
+													 arg(si.softwareinfo().commitno()).
+													 arg(si.softwareinfo().crc(), 0, 16, QChar('0'));
 			}
 
 			if (serviceState != ServiceState::Undefined &&
@@ -232,7 +245,7 @@ QVariant ServiceTableModel::headerData(int section, Qt::Orientation orientation,
 	{
 		if (orientation == Qt::Horizontal)
 		{
-			return tr(serviceInfo[section].name);
+			return serviceInfo[section].name;
 		}
 		if (orientation == Qt::Vertical)
 		{
@@ -245,7 +258,8 @@ QVariant ServiceTableModel::headerData(int section, Qt::Orientation orientation,
 void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState state)
 {
 	int portIndex = -1;
-	for (uint i = 0; i < SERVICE_TYPE_COUNT; i++)
+
+	for (int i = 0; i < serviceInfo.count(); i++)
 	{
 		if (serviceInfo[i].port == port)
 		{
@@ -292,7 +306,8 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState s
 QPair<int,int> ServiceTableModel::getServiceState(quint32 ip, quint16 port)
 {
 	int portIndex = -1;
-	for (uint i = 0; i < SERVICE_TYPE_COUNT; i++)
+
+	for (int i = 0; i < serviceInfo.count(); i++)
 	{
 		if (serviceInfo[i].port == port)
 		{
@@ -444,7 +459,7 @@ void ServiceTableModel::checkServiceStates()
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
-		for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
+		for (int j = 0; j < serviceInfo.count(); j++)
 		{
 			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
 
@@ -466,7 +481,8 @@ void ServiceTableModel::checkServiceStates()
 void ServiceTableModel::removeHost(int row)
 {
 	beginRemoveRows(QModelIndex(), row, row);
-	for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
+
+	for (int j = 0; j < serviceInfo.count(); j++)
 	{
 		if (m_hostsInfo[row].servicesData[j].statusWidget != nullptr)
 		{
@@ -485,23 +501,25 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 
 	if (serviceData.statusWidget == nullptr)
 	{
-		quint32 serviceType = TO_INT(serviceData.information.type());
+		E::SoftwareType serviceSoftwareType = static_cast<E::SoftwareType>(serviceData.information.softwareinfo().softwaretype());
+		quint16 udpPort = serviceInfo[index.column()].port;
 
-		if (serviceType >= SERVICE_TYPE_COUNT)
+		switch (serviceSoftwareType)
 		{
-			serviceType = index.column();
-		}
-		switch (static_cast<ServiceType>(serviceType))
-		{
-			case ServiceType::AppDataService:
-				serviceData.statusWidget = new AppDataServiceWidget(m_hostsInfo[index.row()].ip, index.column());
-				break;
-			case ServiceType::ConfigurationService:
-				serviceData.statusWidget = new ConfigurationServiceWidget(m_hostsInfo[index.row()].ip, index.column());
-				break;
-			default:
-				serviceData.statusWidget = new BaseServiceStateWidget(m_hostsInfo[index.row()].ip, index.column());
-				break;
+		case E::SoftwareType::AppDataService:
+			serviceData.statusWidget = new AppDataServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			break;
+
+		case E::SoftwareType::ConfigurationService:
+			serviceData.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			break;
+
+		case E::SoftwareType::TuningService:
+			serviceData.statusWidget = new TuningServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			break;
+
+		default:
+			serviceData.statusWidget = new BaseServiceStateWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
 		}
 	}
 
@@ -510,11 +528,11 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 	serviceData.statusWidget->activateWindow();
 }
 
-void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo serviceInfo)
+void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo sInfo)
 {
 	QPair<int, int> place = getServiceState(ip, port);
 
-	if (place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= (int)SERVICE_TYPE_COUNT)
+	if (place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= serviceInfo.count())
 	{
 		return;
 	}
@@ -523,7 +541,7 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 	{
 		HostInfo hi;
 		hi.ip = ip;
-		hi.servicesData[place.second].information = serviceInfo;
+		hi.servicesData[place.second].information = sInfo;
 		beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
 		m_hostsInfo.append(hi);
 		endInsertRows();
@@ -534,14 +552,14 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 	{
 		Network::ServiceInfo& info = m_hostsInfo[place.first].servicesData[place.second].information;
 
-		if (info.servicestate() != serviceInfo.servicestate())
+		if (info.servicestate() != sInfo.servicestate())
 		{
-			info = serviceInfo;
+			info = sInfo;
 			emit serviceStateChanged(place.first);
 		}
 		else
 		{
-			info = serviceInfo;
+			info = sInfo;
 		}
 		QModelIndex changedIndex = index(place.first, place.second);
 		emit dataChanged(changedIndex, changedIndex);
