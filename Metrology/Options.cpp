@@ -316,20 +316,12 @@ bool SocketClientOption::readOptionsFromXml(const QByteArray& fileData)
 				break;
 			}
 
-			result &= xml.readBoolAttribute("PropertyIsValid1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
+			result &= xml.readBoolAttribute("PropertyIsValid", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
 			if (m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv == true)
 			{
-				result &= xml.readStringAttribute("SoftwareMetrologyID1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
-				result &= xml.readStringAttribute("ip1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
-				result &= xml.readIntAttribute("port1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
-			}
-
-			result &= xml.readBoolAttribute("PropertyIsValid2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("SoftwareMetrologyID2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].equipmentID);
-				result &= xml.readStringAttribute("ip2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverIP);
-				result &= xml.readIntAttribute("port2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverPort);
+				result &= xml.readStringAttribute("SoftwareMetrologyID", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
+				result &= xml.readStringAttribute("ip", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
+				result &= xml.readIntAttribute("port", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
 			}
 
 			if (result == false)

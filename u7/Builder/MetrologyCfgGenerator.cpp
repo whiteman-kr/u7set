@@ -150,68 +150,42 @@ namespace Builder
 			// TuningService
 			//
 
-			QString tuningServiceId1;
-			QString tuningServiceId2;
+			QString tuningServiceId;
 
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningServiceID1" , &tuningServiceId1, m_log);
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningServiceID2" , &tuningServiceId2, m_log);
+			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningServiceID" , &tuningServiceId, m_log);
 
 			if (result == false)
 			{
 				return false;
 			}
 
-			bool tuningPropertyIsValid1 = false;
-			bool tuningPropertyIsValid2 = false;
+			bool tuningPropertyIsValid = false;
 
-			TuningServiceSettings tuningSettings1;
-			TuningServiceSettings tuningSettings2;
+			TuningServiceSettings tuningSettings;
 
-			if (tuningServiceId1.isEmpty() == false)
+			if (tuningServiceId.isEmpty() == false)
 			{
-				Hardware::Software* tuningObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId1));
+				Hardware::Software* tuningObject = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId));
 
-				if (tuningObject1 == nullptr)
+				if (tuningObject == nullptr)
 				{
 					// Property '%1.%2' is linked to undefined software ID '%3'.
 					//
-					m_log->wrnCFG3015(m_software->equipmentId(), "TuningServiceID1", tuningServiceId1);
+					m_log->wrnCFG3015(m_software->equipmentId(), "TuningServiceID", tuningServiceId);
 				}
 				else
 				{
-					tuningSettings1.readFromDevice(tuningObject1, m_log);
-					tuningPropertyIsValid1 = true;
-				}
-			}
-
-			if (tuningServiceId2.isEmpty() == false)
-			{
-				Hardware::Software* tuningObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
-
-				if (tuningObject2 == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->wrnCFG3015(m_software->equipmentId(), "TuningServiceID2", tuningServiceId2);
-				}
-				else
-				{
-					tuningSettings2.readFromDevice(tuningObject2, m_log);
-					tuningPropertyIsValid2 = true;
+					tuningSettings.readFromDevice(tuningObject, m_log);
+					tuningPropertyIsValid = true;
 				}
 			}
 
 			xmlWriter.writeStartElement("TuningService");
 			{
-				xmlWriter.writeAttribute("PropertyIsValid1", tuningPropertyIsValid1 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("SoftwareMetrologyID1", m_software->equipmentId());
-				xmlWriter.writeAttribute("ip1", tuningSettings1.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port1", QString::number(tuningSettings1.clientRequestIP.port()));
-
-				xmlWriter.writeAttribute("PropertyIsValid2", tuningPropertyIsValid2 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("SoftwareMetrologyID2", m_software->equipmentId());
-				xmlWriter.writeAttribute("ip2", tuningSettings2.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port2", QString::number(tuningSettings2.clientRequestIP.port()));
+				xmlWriter.writeAttribute("PropertyIsValid", tuningPropertyIsValid == true ? tr("true") : tr("false"));
+				xmlWriter.writeAttribute("SoftwareMetrologyID", m_software->equipmentId());
+				xmlWriter.writeAttribute("ip", tuningSettings.clientRequestIP.address().toString());
+				xmlWriter.writeAttribute("port", QString::number(tuningSettings.clientRequestIP.port()));
 			}
 			xmlWriter.writeEndElement(); // </TuningService>
 		} // </Settings>

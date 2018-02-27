@@ -361,7 +361,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(serverGroup1);
-				editor->addProperty(serverGroup2);
+
+				if (socketType != SOCKET_TYPE_TUNING)
+				{
+					editor->addProperty(serverGroup2);
+				}
 
 			}
 			break;

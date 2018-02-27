@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
 
 	SoftwareInfo si;
 
-	assert(false);			// WM: chek equipmentID in next code!!!!
-	si.init(E::SoftwareType::Metrology, "???", 1, 0);
+	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
+	si.init(E::SoftwareType::Metrology, equipmentID, 1, 0);
 
 	MainWindow w(si);
     w.show();
