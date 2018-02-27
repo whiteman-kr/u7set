@@ -120,6 +120,8 @@ namespace Tuning
 
 			bool valid() const { return m_valid; }
 
+			E::SignalType signalType() const { return m_signalType; }
+
 			TuningValueType tuningValueType() const { return m_tuningValueType; }
 
 			TuningValue currentValue() const { return m_currentValue; }
@@ -159,6 +161,8 @@ namespace Tuning
 		private:
 			QString m_appSignalID;
 			Hash m_signalHash = 0;
+			E::SignalType m_signalType = E::SignalType::Discrete;
+			E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::SignedInt32;
 
 			int m_index = -1;
 
@@ -242,7 +246,9 @@ namespace Tuning
 		void processReply(RupFotipV2& reply);
 		void processReadReply(RupFotipV2& reply);
 		void processWriteReply(RupFotipV2& reply);
-		void processApplyReply(RupFotipV2&);
+		void processApplyReply(RupFotipV2& reply);
+
+		void updateFrameSignalsState(RupFotipV2& reply);
 
 		bool checkRupHeader(const Rup::Header& rupHeader);
 		bool checkFotipHeader(const FotipV2::Header& fotipHeader);
@@ -286,6 +292,7 @@ namespace Tuning
 
 		QVector<TuningSignal> m_tuningSignals;
 		QHash<Hash, int> m_hash2SignalIndexMap;
+		QVector<QVector<int>> m_frameSignals;
 
 		//
 
