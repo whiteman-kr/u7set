@@ -89,6 +89,9 @@ namespace Tuning
 
 		m_appSignalID = s->appSignalID();
 
+		m_signalType = s->signalType();
+		m_analogFormat = s->analogSignalFormat();
+
 		m_signalHash = ::calcHash(m_appSignalID);
 
 		m_index = index;
@@ -406,6 +409,7 @@ namespace Tuning
 	{
 		m_tuningSignals.clear();
 		m_hash2SignalIndexMap.clear();
+		m_frameSignals.clear();
 
 		if (td == nullptr)
 		{
@@ -445,6 +449,17 @@ namespace Tuning
 			TuningSignal& ts = m_tuningSignals[i];
 
 			ts.init(signal, i, m_tuningDataFramePayloadW);
+
+			int arrayIndex = ts.frameNo() / 3;
+
+			assert(arrayIndex <= m_tuningDataFrameCount / 3);
+
+			while (arrayIndex >= m_frameSignals.count())			// appends new arrays if need
+			{
+				m_frameSignals.append(QVector<int>());
+			}
+
+			m_frameSignals[arrayIndex].append(i);
 		}
 	}
 
@@ -564,8 +579,6 @@ namespace Tuning
 
 		result &= initFotipFrame(request.fotipFrame, tuningCmd);
 
-		request.calcCRC64();
-
 		return result;
 	}
 
@@ -580,6 +593,8 @@ namespace Tuning
 		//
 		request.rupHeader.reverseBytes();
 		request.fotipFrame.header.reverseBytes();
+
+		request.calcCRC64();
 
 		quint64 sent = m_socket.writeDatagram(reinterpret_cast<char*>(&request),
 											  sizeof(request),
@@ -673,7 +688,7 @@ namespace Tuning
 		return true;
 	}
 
-	bool TuningSourceWorker::initFotipFrame(FotipV2::Frame &fotipFrame, const TuningCommand& tuningCmd)
+	bool TuningSourceWorker::initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd)
 	{
 		FotipV2::Header& fotipHeader = fotipFrame.header;
 
@@ -696,13 +711,20 @@ namespace Tuning
 
 		fotipHeader.offsetInFrameW = 0;
 
-		memset(fotipHeader.reserve, 0, sizeof(fotipHeader.reserve));
+		memset(fotipHeader.reserv, 0, sizeof(fotipHeader.reserv));
+
+		memset(fotipFrame.data, 0, sizeof(fotipFrame.data));
+
+		memset(&fotipFrame.analogCmpErrors, 0, sizeof(fotipFrame.analogCmpErrors));
+
+		memset(fotipFrame.reserv, 0, sizeof(fotipFrame.reserv));
+
+		//
 
 		fotipHeader.operationCode = TO_INT(tuningCmd.opCode);
 
 		// operation-specific initialization
 		//
-
 		switch(tuningCmd.opCode)
 		{
 		case FotipV2::OpCode::Read:
@@ -836,89 +858,13 @@ namespace Tuning
 
 	void TuningSourceWorker::processReadReply(RupFotipV2& reply)
 	{
-		m_tuningMem.updateFrame(reply.fotipFrame.header.startAddressW,
-								reply.fotipFrame.header.romFrameSizeB,
-								reply.fotipFrame.data);
-
-		// parse signals values and bounds
-		//
-		int frameNo = (reply.fotipFrame.header.startAddressW - m_tuningDataOffsetW) / m_tuningDataFramePayloadW;
-
-		quint8* dataPtr = reply.fotipFrame.data;
-
-		int signalCount = m_tuningSignals.count();
-
-		qint64 updateTime = QDateTime::currentMSecsSinceEpoch();
-
-		for(int i = 0; i < signalCount; i++)
-		{
-			TuningSignal& ts = m_tuningSignals[i];
-
-			if (frameNo < ts.frameNo() ||
-				frameNo > ts.frameNo() + 2)
-			{
-				continue;		// signal is not in this frame
-			}
-
-			TuningValueType tyningValueType = ts.tuningValueType();
-
-			TuningValue tuningValue(tyningValueType);
-
-			int offsetInFrameB = (ts.offset() - ts.frameNo() * m_tuningDataFramePayloadW) * sizeof(quint16);
-
-			assert(offsetInFrameB < reply.fotipFrame.header.romFrameSizeB);
-
-			switch(tyningValueType)
-			{
-			case TuningValueType::Float:
-				tuningValue.setFloatValue(reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB)));
-				break;
-
-			case TuningValueType::SignedInt32:
-				tuningValue.setInt32Value(reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB)));
-				break;
-
-			case TuningValueType::Double:
-				assert(false);					// is not implemented
-				break;
-
-			case TuningValueType::Discrete:
-				{
-					quint32 word =	reverseUint32(*reinterpret_cast<quint32*>(dataPtr + offsetInFrameB));
-					tuningValue.setDiscreteValue((word & (1 << ts.bit())) == 0 ? 0 : 1);
-				}
-				break;
-
-			default:
-				assert(false);					// unknown type
-			}
-
-			// (frameNo % 3) == 0 - tuning signal value
-			// (frameNo % 3) == 1 - tuning signal read low bound
-			// (frameNo % 3) == 2 - tuning signal read high bound
-
-			switch(frameNo % 3)
-			{
-			case 0:
-				ts.updateCurrentValue(true, tuningValue, updateTime);
-				break;
-
-			case 1:
-				ts.setReadLowBound(tuningValue);
-				break;
-
-			case 2:
-				ts.setReadHighBound(tuningValue);
-				break;
-
-			default:
-				assert(false);
-			}
-		}
+		updateFrameSignalsState(reply);
 	}
 
 	void TuningSourceWorker::processWriteReply(RupFotipV2& reply)
 	{
+		updateFrameSignalsState(reply);
+
 		reply.fotipFrame.analogCmpErrors.all = reverseUint16(reply.fotipFrame.analogCmpErrors.all);
 
 		QString msg;
@@ -976,7 +922,7 @@ namespace Tuning
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_logger, msg);
+//			DEBUG_LOG_MSG(m_logger, msg);
 
 			m_stat.hasUnappliedParams = true;
 		}
@@ -984,11 +930,119 @@ namespace Tuning
 		logTuningReply(m_lastProcessedCommand, reply);
 	}
 
-	void TuningSourceWorker::processApplyReply(RupFotipV2&)
+	void TuningSourceWorker::processApplyReply(RupFotipV2& reply)
 	{
-		DEBUG_LOG_MSG(m_logger, QString(tr("Reply is received from %1 (%2) on RupFotipV2 APPLY request")).
+		QString result;
+
+		if (reply.fotipFrame.header.flags.succesfulApply == 1)
+		{
+			result = "Success";
+
+			m_stat.hasUnappliedParams = false;
+		}
+		{
+			result = "Fail";
+		}
+
+		DEBUG_LOG_MSG(m_logger, QString(tr("Reply is received from %1 (%2) on RupFotipV2 APPLY request: %3")).
 					  arg(sourceEquipmentID()).
-					  arg(m_sourceIP.addressStr()));
+					  arg(m_sourceIP.addressStr()).
+					  arg(result));
+
+		logTuningReply(m_lastProcessedCommand, reply);
+	}
+
+	void TuningSourceWorker::updateFrameSignalsState(RupFotipV2& reply)
+	{
+		m_tuningMem.updateFrame(reply.fotipFrame.header.startAddressW,
+								reply.fotipFrame.header.romFrameSizeB,
+								reply.fotipFrame.data);
+
+		// parse signals values and bounds
+		//
+		int frameNo = (reply.fotipFrame.header.startAddressW - m_tuningDataOffsetW) / m_tuningDataFramePayloadW;
+
+		int arrayIndex = frameNo / 3;
+
+		if (arrayIndex < 0 || arrayIndex >= m_frameSignals.count())
+		{
+			assert(false);
+			return;
+		}
+
+		const QVector<int>& frameSignals = m_frameSignals[arrayIndex];
+
+		quint8* dataPtr = reply.fotipFrame.data;
+
+		qint64 updateTime = QDateTime::currentMSecsSinceEpoch();
+
+		int tuningSignalsCount = m_tuningSignals.count();
+
+		for(int signalIndex : frameSignals)
+		{
+			if (signalIndex < 0 || signalIndex >= tuningSignalsCount)
+			{
+				assert(false);
+				continue;
+			}
+
+			TuningSignal& ts = m_tuningSignals[signalIndex];
+
+			TuningValueType tyningValueType = ts.tuningValueType();
+
+			TuningValue tuningValue(tyningValueType);
+
+			int offsetInFrameB = (ts.offset() - ts.frameNo() * m_tuningDataFramePayloadW) * sizeof(quint16);
+
+			assert(offsetInFrameB < reply.fotipFrame.header.romFrameSizeB);
+
+			switch(tyningValueType)
+			{
+			case TuningValueType::Float:
+				tuningValue.setFloatValue(reverseFloat(*reinterpret_cast<float*>(dataPtr + offsetInFrameB)));
+				break;
+
+			case TuningValueType::SignedInt32:
+				tuningValue.setInt32Value(reverseInt32(*reinterpret_cast<qint32*>(dataPtr + offsetInFrameB)));
+				break;
+
+			case TuningValueType::Double:
+				assert(false);					// is not implemented
+				break;
+
+			case TuningValueType::Discrete:
+				{
+					quint32 word =	reverseUint32(*reinterpret_cast<quint32*>(dataPtr + offsetInFrameB));
+					tuningValue.setDiscreteValue((word & (1 << ts.bit())) == 0 ? 0 : 1);
+				}
+				break;
+
+			default:
+				assert(false);					// unknown type
+			}
+
+			// (frameNo % 3) == 0 - tuning signal value
+			// (frameNo % 3) == 1 - tuning signal read low bound
+			// (frameNo % 3) == 2 - tuning signal read high bound
+
+			switch(frameNo % 3)
+			{
+			case 0:
+				ts.updateCurrentValue(true, tuningValue, updateTime);
+				break;
+
+			case 1:
+				ts.setReadLowBound(tuningValue);
+				break;
+
+			case 2:
+				ts.setReadHighBound(tuningValue);
+				break;
+
+			default:
+				assert(false);
+			}
+		}
 	}
 
 	bool TuningSourceWorker::checkRupHeader(const Rup::Header& rupHeader)
@@ -1235,9 +1289,7 @@ namespace Tuning
 			break;
 
 		case FotipV2::OpCode::Apply:
-			logStr = QString("APPLY request %1 HasUnappliedParams=%2 SOR=%3").
-						arg(str).arg(m_stat.hasUnappliedParams == true ? "Yes" : "No").
-						arg(m_stat.setSOR == true ? 1 : 0);
+			logStr = QString("APPLY request %1 SOR=%2").arg(str).arg(m_stat.setSOR == true ? 1 : 0);
 			break;
 
 		default:
@@ -1263,18 +1315,29 @@ namespace Tuning
 
 				ts.currentValue();
 
-				logStr = QString("WRITE reply Signal=%1 LowBoundCheck=%2 HighBoundCheck=%3 SOR=%4").
+				QString checkResultStr;
+
+				if (ts.signalType() == E::SignalType::Analog)
+				{
+					checkResultStr = QString("LowBoundCheck=%1 HighBoundCheck=%2 ").
+							arg(reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0 ? "Success" : "Fail").
+							arg(reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 ? "Success" : "Fail");
+				}
+
+				logStr = QString("WRITE reply&nbsp;&nbsp;&nbsp;LM=%1 Signal=%2 CurValue=%3 %4SOR=%5").
+							arg(m_sourceEquipmentID).
 							arg(ts.appSignalID()).
-							arg(reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0 ? "Ok" : "Error").
-							arg(reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 ? "Ok" : "Error").
+							arg(ts.currentValue().toString()).
+							arg(checkResultStr).
 							arg(reply.fotipFrame.header.flags.setSOR);
 			}
 			break;
 
 		case FotipV2::OpCode::Apply:
-			/*logStr = QString("APPLY reply %1 HasUnappliedParams=%2 SOR=%3").
-						arg(str).arg(m_stat.hasUnappliedParams == true ? "Yes" : "No").
-						arg(m_stat.setSOR == true ? 1 : 0);*/
+			logStr = QString("APPLY reply&nbsp;&nbsp;&nbsp;LM=%1 Result=%2 SOR=%3").
+						arg(m_sourceEquipmentID).
+						arg(reply.fotipFrame.header.flags.succesfulApply == 1 ? "Success" : "Fail").
+						arg(m_stat.setSOR == true ? 1 : 0);
 			break;
 
 		default:
