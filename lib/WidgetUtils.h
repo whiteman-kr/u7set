@@ -1,6 +1,10 @@
 #ifndef WIDGETUTILS_H
 #define WIDGETUTILS_H
 
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QSettings>
+
 static void setWindowPosition(QWidget* window, QString savedGeometryKey)
 {
 	if (window == nullptr)

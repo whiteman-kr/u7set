@@ -75,7 +75,7 @@ public:
 	QString serviceName() const;
 
 	const SoftwareInfo& softwareInfo() const;
-	const E::SoftwareType softwareType() const;
+	E::SoftwareType softwareType() const;
 
 	void initAndProcessCmdLineSettings();
 

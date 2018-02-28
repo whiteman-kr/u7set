@@ -53,10 +53,10 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 int& argc,
 							 char** argv,
 							 std::shared_ptr<CircularLogger> logger) :
+	m_softwareInfo(softwareInfo),
 	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
-	m_softwareInfo(softwareInfo),
 	m_logger(logger),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
 	m_cmdLineParser(argc, argv)
@@ -133,7 +133,7 @@ const SoftwareInfo& ServiceWorker::softwareInfo() const
 	return m_softwareInfo;
 }
 
-const E::SoftwareType ServiceWorker::softwareType() const
+E::SoftwareType ServiceWorker::softwareType() const
 {
 	return m_softwareInfo.softwareType();
 }
