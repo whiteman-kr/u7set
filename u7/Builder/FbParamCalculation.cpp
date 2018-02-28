@@ -1466,6 +1466,13 @@ namespace Builder
 
 					return false;
 				}
+
+				if (i_lim_min.signedIntValue() == i_lim_max.signedIntValue())
+				{
+					// Values of parameters %1.%2 and %1.%3 are equal.
+					//
+					m_log->wrnALC5139(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
+				}
 			}
 
 			break;
@@ -1488,6 +1495,13 @@ namespace Builder
 					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 
 					return false;
+				}
+
+				if (static_cast<float>(i_lim_min.floatValue()) == static_cast<float>(i_lim_max.floatValue()))
+				{
+					// Values of parameters %1.%2 and %1.%3 are equal.
+					//
+					m_log->wrnALC5139(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 				}
 			}
 

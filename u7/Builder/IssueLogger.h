@@ -326,6 +326,7 @@ namespace Builder
 		void errALC5136(QString appSignalID);											// The input (or output) signal %1 can be bind to Equipment Signal only.
 		void errALC5137(QString appSignalID, QString property);							// Signal %1 property %2 out of SignedInt32 range.
 		void errALC5138(QString appSignalID, QString property);							// Signal %1 property %2 out of Float range.
+		void wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Values of parameters %1.%2 and %1.%3 are equal.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
