@@ -3,8 +3,12 @@
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/LogicSchema.h"
 
-MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager) :
-	m_schemaManager(schemaManager)
+MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
+										   VFrame30::AppSignalController* appSignalController,
+										   VFrame30::TuningController* tuningController) :
+	m_schemaManager(schemaManager),
+	m_appSignalController(appSignalController),
+	m_tuningController(tuningController)
 {
 	assert(m_schemaManager);
 
@@ -52,7 +56,10 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 		tabSchema->setCaption("Empty Schema");
 	}
 
-	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema, m_schemaManager);
+	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema,
+																m_schemaManager,
+																m_appSignalController,
+																m_tuningController);
 
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
 	connect(schemaWidget, &MonitorSchemaWidget::signal_historyChanged, this, &MonitorCentralWidget::signal_historyChanged);
@@ -186,7 +193,7 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 		return;
 	}
 
-	tab->slot_setSchema(schemaId);
+	tab->setSchema(schemaId);
 
 	tab->emitHistoryChanged();
 
@@ -240,7 +247,7 @@ void MonitorCentralWidget::slot_resetSchema()
 			continue;
 		}
 
-		tabPage->slot_setSchema(tabPage->schemaId());
+		tabPage->setSchema(tabPage->schemaId());
 		tabPage->resetHistory();
 
 		if (i == currentIndex())

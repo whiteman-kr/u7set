@@ -2,7 +2,7 @@
 #include "LogicSchema.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
-#include "../lib/AppSignalManager.h"
+#include "AppSignalController.h"
 
 namespace VFrame30
 {
@@ -163,9 +163,9 @@ namespace VFrame30
 
 		if (drawParam->isMonitorMode() == true)
 		{
-			if (drawParam->appSignalManager() ==  nullptr)
+			if (drawParam->appSignalController() ==  nullptr)
 			{
-				assert(drawParam->appSignalManager() != nullptr);
+				assert(drawParam->appSignalController() != nullptr);
 				return;
 			}
 		}
@@ -360,7 +360,7 @@ namespace VFrame30
 			if (drawParam->isMonitorMode() == true)
 			{
 				bool stateOk;
-				AppSignalState signalState = drawParam->appSignalManager()->signalState(text, &stateOk);
+				AppSignalState signalState = drawParam->appSignalController()->signalState(text, &stateOk);
 
 				if (signalState.m_flags.valid == false)
 				{
@@ -417,11 +417,11 @@ namespace VFrame30
 			{
 				// Get signal description
 				//
-				appSignals[signalIndex] = drawParam->appSignalManager()->signalParam(id, &signalFound);
+				appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, &signalFound);
 
 				// Get signal state
 				//
-				appSignalStates[signalIndex] = drawParam->appSignalManager()->signalState(id, nullptr);
+				appSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
 			}
 
 			signalIndex ++;
@@ -627,8 +627,8 @@ namespace VFrame30
 
 		if (drawParam->isMonitorMode() == true)
 		{
-			signal = drawParam->appSignalManager()->signalParam(appSignalId, &signalFound);
-			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
+			signal = drawParam->appSignalController()->signalParam(appSignalId, &signalFound);
+			signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
 		}
 
 		for (size_t i = 0; i < m_columns.size(); i++)

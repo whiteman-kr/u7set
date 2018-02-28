@@ -3,8 +3,9 @@
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include "TuningController.h"
+#include "AppSignalController.h"
 #include "../lib/AppSignal.h"
-#include "../lib/AppSignalManager.h"
 #include "../lib/Tuning/TuningSignalState.h"
 
 
@@ -302,13 +303,13 @@ namespace VFrame30
 			switch (signalSource())
 			{
 			case E::SignalSource::AppDataService:
-				if (drawParam->appSignalManager() == nullptr)
+				if (drawParam->appSignalController() == nullptr)
 				{
 				}
 				else
 				{
-					signalParam = drawParam->appSignalManager()->signalParam(signalId(), &ok);
-					signalState = drawParam->appSignalManager()->signalState(signalId(), nullptr);
+					signalParam = drawParam->appSignalController()->signalParam(signalId(), &ok);
+					signalState = drawParam->appSignalController()->signalState(signalId(), nullptr);
 				}
 				break;
 

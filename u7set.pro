@@ -26,3 +26,6 @@ SUBDIRS += qtservice \
     TuningIPEN \
     mconf
 
+HEADERS += \
+    lib/IAppSignalManager.h
+

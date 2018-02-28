@@ -6,6 +6,9 @@
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
 #include "SelectSchemaWidget.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/TuningController.h"
+#include "../Lib/Tuning/TuningTcpClient.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -106,11 +109,16 @@ private:
 	MonitorConfigController m_configController;
 	MonitorSchemaManager m_schemaManager;
 
+	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
+	std::unique_ptr<VFrame30::TuningController> m_tuningController;
+
 	TcpSignalClient* m_tcpSignalClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 
 	TcpSignalRecents* m_tcpSignalRecents = nullptr;
 	SimpleThread* m_tcpRecentsThread = nullptr;
+
+	TuningTcpClient* m_tuningTcpClient = nullptr;
 
 	// File menu
 	//

@@ -2,7 +2,6 @@
 
 #include <QJSEngine>
 #include "Session.h"
-#include "../lib/Tuning/TuningController.h"
 #include "VFrame30Lib_global.h"
 
 
@@ -35,6 +34,7 @@ namespace VFrame30
 		void exportToPdf(QString fileName, const Session& session, bool infoMode) const;
 
 		// Methods
+		//
 	public:
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
@@ -43,8 +43,6 @@ namespace VFrame30
 
 		void setSchema(std::shared_ptr<Schema> schema, bool repaint);
 
-		Q_INVOKABLE void jsDebugOutput(QString str);
-		
 		// Events
 		//
 	protected:
@@ -55,21 +53,6 @@ namespace VFrame30
 	signals:
 		void signal_schemaChanged(Schema* schema);
 
-		// Public slots which are part of Script API
-		//
-	public slots:
-		virtual void setSchema(QString schemaId);
-
-		QObject* findSchemaItem(QString objectName);
-		QObject* findWidget(QString objectName);
-
-		// Message Box functions
-		//
-		Q_INVOKABLE void warningMessageBox(QString text);
-		Q_INVOKABLE void errorMessageBox(QString text);
-		Q_INVOKABLE void infoMessageBox(QString text);
-		Q_INVOKABLE bool questionMessageBox(QString text);
-
 		// Properties
 		//
 	public:
@@ -79,15 +62,6 @@ namespace VFrame30
 		const Session& session() const;
 		Session& session();
 
-		TuningController* tuningController();
-		const TuningController* tuningController() const;
-		void setTuningController(TuningController*value);
-
-		virtual QJSEngine* jsEngine();
-
-		virtual QString globalScript() const;
-		void setGlobalScript(QString value);
-
 		// Data
 		//
 	private:
@@ -95,13 +69,6 @@ namespace VFrame30
 		double m_zoom = 100.0;
 
 		Session m_session;
-		TuningController* m_tuningController = nullptr;
-
-	protected:
-		bool m_jsEngineGlobalsWereCreated = false;
-		QJSEngine m_jsEngine;
-
-		QString m_globasScript;
 	};
 }
 

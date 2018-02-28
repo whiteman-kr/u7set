@@ -1,28 +1,27 @@
 #ifndef TUNINGSCHEMAWIDGET_H
 #define TUNINGSCHEMAWIDGET_H
 
-#include "../VFrame30/BaseSchemaWidget.h"
+#include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/SchemaView.h"
 #include "TuningSchemaView.h"
-#include "SchemaStorage.h"
+#include "TuningSchemaManager.h"
 
-class TuningSchemaWidget : public VFrame30::BaseSchemaWidget
+class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 {
 	Q_OBJECT
 
 	TuningSchemaWidget() = delete;
 public:
 
-	TuningSchemaWidget(TuningSignalManager* tuningSignalManager, TuningController* tuningController, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage, const QString& globalScript);
+	TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
+					   VFrame30::TuningController* tuningController,
+					   std::shared_ptr<VFrame30::Schema> schema,
+					   TuningSchemaManager* schemaManager);
 	~TuningSchemaWidget();
 
-	bool slot_setSchema(QString schemaId);
-
-	TuningSchemaView* tuningSchemaView();
+	//TuningSchemaView* tuningSchemaView();
 
 private:
-	SchemaStorage* m_schemaStorage = nullptr;
-
 };
 
 #endif // TUNINGSCHEMAWIDGET_H

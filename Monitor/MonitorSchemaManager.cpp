@@ -11,7 +11,7 @@ MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController* configContro
 	return;
 }
 
-std::shared_ptr<VFrame30::Schema>  MonitorSchemaManager::loadSchema(QString schemaId)
+std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schemaId)
 {
 	QByteArray data;
 	QString errorString;
@@ -23,10 +23,6 @@ std::shared_ptr<VFrame30::Schema>  MonitorSchemaManager::loadSchema(QString sche
 	}
 
 	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(data);
-	if (schema == nullptr)
-	{
-		return schema;
-	}
 
 	return schema;
 }

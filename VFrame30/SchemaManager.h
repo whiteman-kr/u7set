@@ -37,6 +37,8 @@ namespace VFrame30
 		void schemasWereReseted();
 
 	public:
+		// User must provide GlobalScript
+		//
 		const QString& globalScript() const;
 		void setGlobalScript(const QString& value);
 

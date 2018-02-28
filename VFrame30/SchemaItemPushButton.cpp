@@ -1,6 +1,6 @@
 #include "SchemaItemPushButton.h"
-#include "SchemaView.h"
-#include "../lib/Tuning/TuningController.h"
+#include "ClientSchemaView.h"
+#include "TuningController.h"
 
 namespace VFrame30
 {
@@ -413,9 +413,9 @@ namespace VFrame30
 			return;
 		}
 
-		// Suppose that parent of sender is SchemaView
+		// Suppose that parent of sender is ClientSchemaView, if not, then this is EditMode?
 		//
-		SchemaView* schemaView = dynamic_cast<SchemaView*>(buttonWidget->parentWidget());
+		ClientSchemaView* schemaView = dynamic_cast<ClientSchemaView*>(buttonWidget->parentWidget());
 		if (schemaView == nullptr)
 		{
 			assert(schemaView);

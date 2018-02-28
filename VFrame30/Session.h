@@ -34,6 +34,8 @@ namespace VFrame30
 		QString m_project;
 		QString m_username;
 		QString m_host;
+		// !!! Pay Attention to operator = !!!
+		//
 	};
 
 }

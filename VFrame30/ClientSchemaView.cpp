@@ -1,11 +1,126 @@
 #include "ClientSchemaView.h"
 #include <QPainter>
+#include <QQmlEngine>
+#include <QMessageBox>
 #include "DrawParam.h"
+#include "PropertyNames.h"
 #include "../lib/TimeStamp.h"
 
 namespace VFrame30
 {
+	//
+	// ScriptSchemaView
+	//
+	ScriptSchemaView::ScriptSchemaView(ClientSchemaView* clientSchemaView, QObject* parent) :
+		QObject(parent),
+		m_clientSchemaView(clientSchemaView)
+	{
+		assert(m_clientSchemaView);
+		return;
+	}
 
+	void ScriptSchemaView::debugOutput(QString str)
+	{
+		qDebug() << str;
+	}
+
+	void ScriptSchemaView::setSchema(QString schemaId)
+	{
+		if (m_clientSchemaView == nullptr)
+		{
+			return;
+		}
+
+		// We can't change schema here, because we need to save history, so emit signal and change schema
+		// in ClientSchemaWidget
+		//
+		m_clientSchemaView->setSchema(schemaId);
+		return;
+	}
+
+	QObject* ScriptSchemaView::findSchemaItem(QString objectName)
+	{
+		if (m_clientSchemaView == nullptr)
+		{
+			return nullptr;
+		}
+
+		auto schema = m_clientSchemaView->schema();
+		if (schema == nullptr)
+		{
+			return nullptr;
+		}
+
+		for (auto layer : schema->Layers)
+		{
+			for (auto item : layer->Items)
+			{
+				if (item->objectName() == objectName)
+				{
+					QQmlEngine::setObjectOwnership(item.get(), QQmlEngine::ObjectOwnership::CppOwnership);
+					return item.get();
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
+	QObject* ScriptSchemaView::findWidget(QString objectName)
+	{
+		if (objectName.trimmed().isEmpty() == true)
+		{
+			return nullptr;
+		}
+
+		QObject* itemObject = findSchemaItem(objectName);
+		if (itemObject == nullptr)
+		{
+			return nullptr;
+		}
+
+		SchemaItem* schemaItem = dynamic_cast<SchemaItem*>(itemObject);
+		if (schemaItem == nullptr)
+		{
+			assert(schemaItem);
+			return nullptr;
+		}
+
+		QWidget* widget = findChild<QWidget*>(schemaItem->guid().toString());
+		assert(widget);
+
+		QQmlEngine::setObjectOwnership(widget, QQmlEngine::ObjectOwnership::CppOwnership);
+
+		return widget;
+	}
+
+	void ScriptSchemaView::warningMessageBox(QString text)
+	{
+		QMessageBox::warning(m_clientSchemaView, qAppName(), text);
+		return;
+	}
+
+	void ScriptSchemaView::errorMessageBox(QString text)
+	{
+		QMessageBox::critical(m_clientSchemaView, qAppName(), text);
+		return;
+	}
+
+	void ScriptSchemaView::infoMessageBox(QString text)
+	{
+		QMessageBox::information(m_clientSchemaView, qAppName(), text);
+		return;
+	}
+
+	bool ScriptSchemaView::questionMessageBox(QString text)
+	{
+		int result = QMessageBox::question(m_clientSchemaView, qAppName(), text);
+		return result == QMessageBox::Yes;
+	}
+
+	//
+	// ClientSchemaView
+	//
 	ClientSchemaView::ClientSchemaView(VFrame30::SchemaManager* schemaManager, QWidget* parent) :
 		VFrame30::SchemaView(parent),
 		m_schemaManager(schemaManager)
@@ -35,9 +150,9 @@ namespace VFrame30
 
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setEditMode(false);
-bool what_to_do_with_theSignals_in_next_two_lines;
-		//drawParam.setAppSignalManager(&theSignals);
-		//drawParam.setInfoMode(theSettings.showItemsLabels());
+
+		drawParam.setAppSignalController(m_appSignalController);
+		drawParam.setInfoMode(m_infoMode);
 
 		// Draw schema
 		//
@@ -232,39 +347,77 @@ bool what_to_do_with_theSignals_in_next_two_lines;
 		return;
 	}
 
-
-	QString ClientSchemaView::globalScript() const
+	bool ClientSchemaView::infoMode() const
 	{
-		if (m_schemaManager == nullptr)
-		{
-			assert(m_schemaManager);
-			return QString();
-		}
+		return m_infoMode;
+	}
 
-		return m_schemaManager->globalScript();
+	void ClientSchemaView::setInfoMode(bool value)
+	{
+		m_infoMode = value;
+	}
+
+	TuningController* ClientSchemaView::tuningController()
+	{
+		return m_tuningController;
+	}
+
+	const TuningController* ClientSchemaView::tuningController() const
+	{
+		return m_tuningController;
+	}
+
+	void ClientSchemaView::setTuningController(TuningController* value)
+	{
+		m_tuningController = value;
+		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
+
+		return;
+	}
+
+	AppSignalController* ClientSchemaView::appSignalController()
+	{
+		return m_appSignalController;
+	}
+
+	const AppSignalController* ClientSchemaView::appSignalController() const
+	{
+		return m_appSignalController;
+	}
+
+	void ClientSchemaView::setAppSignalController(AppSignalController* value)
+	{
+		m_appSignalController = value;
+		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
+
+		return;
 	}
 
 	QJSEngine* ClientSchemaView::jsEngine()
 	{
-		bool addSignalManager = false;
 		if (m_jsEngineGlobalsWereCreated == false)
 		{
-			addSignalManager = true;
+			ScriptSchemaView* schemaViewObject = new ScriptSchemaView(this);	// Auto ownership, no delete
+			QJSValue jsSchemaView = m_jsEngine.newQObject(schemaViewObject);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+
+			QJSValue jsTuning = m_jsEngine.newQObject(m_tuningController);
+			QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+
+			QJSValue jsSignals = m_jsEngine.newQObject(m_appSignalController);
+			QQmlEngine::setObjectOwnership(m_appSignalController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
+
+			m_jsEngineGlobalsWereCreated = true;
 		}
 
-		QJSEngine* result = VFrame30::SchemaView::jsEngine();
+		return &m_jsEngine;
+	}
 
-bool what_to_do_with_ScriptSignalManager;
-bool i_do_not_like_that_jsEngine_is_virtual_here;
-//		if (addSignalManager == true)
-//		{
-//			ScriptSignalManager* signalManager = new ScriptSignalManager(&theSignals);
-//			QJSValue jsValue = m_jsEngine.newQObject(signalManager);
-
-//			result->globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsValue);
-//		}
-
-		return result;
+	QString ClientSchemaView::globalScript() const
+	{
+		return m_schemaManager->globalScript();
 	}
 
 }

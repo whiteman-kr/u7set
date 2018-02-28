@@ -3,7 +3,7 @@
 #include "UfbSchema.h"
 #include "MonitorSchema.h"
 #include "DiagSchema.h"
-#include "SchemaView.h"
+#include "ClientSchemaView.h"
 #include "FblItem.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemUfb.h"
@@ -226,7 +226,7 @@ namespace VFrame30
 				{
 					if (drawParam->isMonitorMode() == true)
 					{
-						SchemaView* view = drawParam->schemaView();
+						ClientSchemaView* view = drawParam->clientSchemaView();
 						assert(view);
 
 						item->preDrawEvent(view->globalScript(), view->jsEngine());

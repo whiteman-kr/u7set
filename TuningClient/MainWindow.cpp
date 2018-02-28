@@ -368,7 +368,7 @@ void MainWindow::createWorkspace()
 
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
-		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, m_globalScript, this);
+		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, this);
 	}
 
 	if (theConfigSettings.showSignals == true)

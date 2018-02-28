@@ -117,27 +117,26 @@ namespace VFrame30
 		::Proto::AppSignalSet protoSetMessage;
 		QStringList appSignalIds = schemaItemSignal->appSignalIdList();
 
+		AppSignalController* appSignalController = clientSchemaView()->appSignalController();
+		if (appSignalController == nullptr)
+		{
+			assert(appSignalController);
+			return;
+		}
+
 		for (QString id : appSignalIds)
 		{
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			bool ok = false;
+			AppSignalParam signalParam = appSignalController->signalParam(id, &ok);
+			if (ok == false)
+			{
+				continue;
+			}
 
-			bool need_something_to_do_with_this_theSignals;
+			assert(signalParam.appSignalId() == id);
 
-//			bool ok = false;
-//			AppSignalParam signalParam = theSignals.signalParam(id, &ok);
-//			if (ok == false)
-//			{
-//				continue;
-//			}
-
-//			assert(signalParam.appSignalId() == id);
-
-//			::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-//			signalParam.save(protoSignalMessage);
+			::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
+			signalParam.save(protoSignalMessage);
 		}
 
 		if (protoSetMessage.appsignal_size() == 0)
@@ -317,7 +316,7 @@ namespace VFrame30
 
 		// --
 		//
-		setSchema(schema, false);
+		BaseSchemaWidget::setSchema(schema, false);
 		setZoom(historyState.m_zoom, false);
 
 		horizontalScrollBar()->setValue(historyState.m_horzScrollValue);
@@ -337,6 +336,57 @@ namespace VFrame30
 	void ClientSchemaWidget::emitHistoryChanged()
 	{
 		emit signal_historyChanged(canBackHistory(), canForwardHistory());
+		return;
+	}
+
+	void ClientSchemaWidget::setSchema(QString schemaId)
+	{
+		if (schemaManager() == nullptr)
+		{
+			assert(schemaManager());
+			return;
+		}
+
+		// Save current state to the history
+		//
+		resetForwardHistory();
+
+		if (canBackHistory() == false)
+		{
+			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();
+			assert(currentHistoryItem.m_schemaId == this->schemaId());
+
+			currentHistoryItem = currentHistoryState();
+		}
+
+		// --
+		//
+		std::shared_ptr<VFrame30::Schema> schema = schemaManager()->schema(schemaId);
+
+		if (schema == nullptr)
+		{
+			// and there is no startSchemaId (((
+			// Just create an empty schema
+			//
+			schema = std::make_shared<VFrame30::LogicSchema>();
+			schema->setSchemaId("EMPTYSCHEMA");
+			schema->setCaption("Empty Schema");
+		}
+
+		// --
+		//
+		BaseSchemaWidget::setSchema(schema, false);
+		setZoom(100.0, true);
+
+		// --
+		//
+		VFrame30::SchemaHistoryItem hi = currentHistoryState();
+		m_backHistory.push_back(hi);
+
+		// --
+		//
+		emitHistoryChanged();
+
 		return;
 	}
 
@@ -363,6 +413,20 @@ namespace VFrame30
 	VFrame30::SchemaManager* ClientSchemaWidget::schemaManager()
 	{
 		return m_schemaManager;
+	}
+
+	ClientSchemaView* ClientSchemaWidget::clientSchemaView()
+	{
+		ClientSchemaView* v = dynamic_cast<ClientSchemaView*>(schemaView());
+		assert(v);
+		return v;
+	}
+
+	const ClientSchemaView* ClientSchemaWidget::clientSchemaView() const
+	{
+		const ClientSchemaView* v = dynamic_cast<const ClientSchemaView*>(schemaView());
+		assert(v);
+		return v;
 	}
 
 }

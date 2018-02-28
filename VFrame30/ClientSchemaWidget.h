@@ -4,7 +4,7 @@
 #include <memory>
 #include "VFrame30Lib_global.h"
 #include "BaseSchemaWidget.h"
-#include "SchemaView.h"
+#include "ClientSchemaView.h"
 #include "Schema.h"
 #include "SchemaManager.h"
 
@@ -59,6 +59,9 @@ namespace VFrame30
 
 		void emitHistoryChanged();
 
+	public slots:
+		void setSchema(QString schemaId);
+
 		// Signals
 		//
 	signals:
@@ -72,6 +75,9 @@ namespace VFrame30
 		QString caption() const;
 
 		VFrame30::SchemaManager* schemaManager();
+
+		ClientSchemaView* clientSchemaView();
+		const ClientSchemaView* clientSchemaView() const;
 
 		// Data
 		//

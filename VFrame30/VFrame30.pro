@@ -97,7 +97,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/AppSignalManager.h \
     ../lib/HostAddressPort.h \
     ../lib/Factory.h \
-    ../lib/Tuning/TuningController.h \
     ../lib/AppSignal.h \
     ../lib/DbStruct.h \
     SchemaItemBus.h \
@@ -109,7 +108,9 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
     ../Proto/network.pb.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    TuningController.h \
+    AppSignalController.h
 
 SOURCES += \
     Settings.cpp \
@@ -158,7 +159,6 @@ SOURCES += \
     ../lib/Types.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/Tuning/TuningController.cpp \
     ../lib/AppSignal.cpp \
     ../lib/DbStruct.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
@@ -168,7 +168,9 @@ SOURCES += \
     SchemaManager.cpp \
     ClientSchemaView.cpp \
     ../Proto/network.pb.cc \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    TuningController.cpp \
+    AppSignalController.cpp
 
 
 DEFINES += VFRAME30LIB_LIBRARY

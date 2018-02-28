@@ -4,6 +4,8 @@
 #include "QTabWidget"
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaManager.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/TuningController.h"
 
 
 class MonitorCentralWidget : public QTabWidget
@@ -11,7 +13,9 @@ class MonitorCentralWidget : public QTabWidget
 	Q_OBJECT
 
 public:
-	MonitorCentralWidget(MonitorSchemaManager* schemaManager);
+	MonitorCentralWidget(MonitorSchemaManager* schemaManager,
+						 VFrame30::AppSignalController* appSignalController,
+						 VFrame30::TuningController* tuningController);
 	~MonitorCentralWidget();
 
 public:
@@ -56,6 +60,9 @@ protected slots:
 	//
 private:
 	MonitorSchemaManager* m_schemaManager = nullptr;
+
+	VFrame30::AppSignalController* m_appSignalController = nullptr;
+	VFrame30::TuningController* m_tuningController = nullptr;
 };
 
 #endif // MONITORCENTRALWIDGET_H

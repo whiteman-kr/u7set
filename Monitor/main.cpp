@@ -1,14 +1,17 @@
 #include "Stable.h"
-#include "MonitorMainWindow.h"
-#include "Settings.h"
 #include <QMessageBox>
-#include "../VFrame30/VFrame30Library.h"
-#include "MonitorConfigController.h"
+
 #include "../lib/SimpleThread.h"
+#include "../lib/Tuning/TuningSignalManager.h"
+#include "../VFrame30/VFrame30Library.h"
+#include "Settings.h"
+#include "MonitorMainWindow.h"
+#include "MonitorConfigController.h"
 #include "TcpSignalClient.h"
 
-
 AppSignalManager theSignals;
+TuningSignalManager theTuningSignals;
+
 MonitorMainWindow* theMonitorMainWindow = nullptr;
 
 

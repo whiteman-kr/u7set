@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../VFrame30/ClientSchemaWidget.h"
 #include "MonitorSchemaManager.h"
+#include "../VFrame30/ClientSchemaWidget.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/TuningController.h"
 
 class MonitorView;
 struct SchemaHistoryItem;
@@ -24,42 +26,23 @@ private:
 	MonitorSchemaWidget() = delete;
 
 public:
-	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, MonitorSchemaManager* schemaManager);
+	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
+						MonitorSchemaManager* schemaManager,
+						VFrame30::AppSignalController* appSignalController,
+						VFrame30::TuningController* tuningController);
 	virtual ~MonitorSchemaWidget();
 
 protected:
 	void createActions();
 
-//	virtual void mousePressEvent(QMouseEvent* event) override;
-//	virtual void mouseMoveEvent(QMouseEvent* event) override;
-
-//	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsUnderCursor(const QPoint& pos);
-
 	// Methods
 	//
 public:
-
-//	// History functions
-//	//
-//public:
-//	bool canBackHistory() const;
-//	bool canForwardHistory() const;
-
-//	void historyBack();
-//	void historyForward();
-
-//	void resetHistory();
-
-//	void restoreState(const SchemaHistoryItem& historyState);
-//	VFrame30::SchemaHistoryItem currentHistoryState() const;
-
-//	void emitHistoryChanged();
 
 	// --
 	//
 protected:
 
-private:
 
 	// Signals
 	//
@@ -80,42 +63,19 @@ public slots:
 
 	void signalInfo(QString appSignalId);
 
-	void slot_setSchema(QString schemaId);
-
 	// Properties
 	//
 public:
-//	QString schemaId() const;
-//	QString caption() const;
-
 	MonitorView* monitorSchemaView();
 	const MonitorView* monitorSchemaView() const;
 
 	// Data
 	//
 private:
-	//SchemaManager* m_schemaManager = nullptr;
 
 	// Actions
 	//
-private:
 	QAction* m_newTabAction = nullptr;
 	QAction* m_closeTabAction = nullptr;
-
-//	std::list<SchemaHistoryItem> m_backHistory;
-//	std::list<SchemaHistoryItem> m_forwardHistory;
-
-//	QPoint m_dragStartPosition;							// For drag and drop
 };
-
-
-//struct SchemaHistoryItem
-//{
-//	//SchemaHistoryItem(QString schemaId, double zoom, int horzScrollValue, int vertScrollValue);
-
-//	QString m_schemaId;
-//	double m_zoom = 100.0;
-//	int m_horzScrollValue = 0;
-//	int m_vertScrollValue = 0;
-//};
 

@@ -1,6 +1,6 @@
 #include "DrawParam.h"
 #include "Schema.h"
-#include "SchemaView.h"
+#include "ClientSchemaView.h"
 #include <QFont>
 
 namespace VFrame30
@@ -59,6 +59,18 @@ namespace VFrame30
 	SchemaView* CDrawParam::schemaView()
 	{
 		return const_cast<SchemaView*>(m_schemaView);
+	}
+
+	const ClientSchemaView* CDrawParam::clientSchemaView() const
+	{
+		assert(isMonitorMode());
+		return dynamic_cast<const ClientSchemaView*>(m_schemaView);
+	}
+
+	ClientSchemaView* CDrawParam::clientSchemaView()
+	{
+		auto ptr = dynamic_cast<const ClientSchemaView*>(m_schemaView);
+		return const_cast<ClientSchemaView*>(ptr);
 	}
 
 	double CDrawParam::controlBarSize() const
@@ -285,14 +297,14 @@ namespace VFrame30
 		m_blinkPhase = value;
 	}
 
-	AppSignalManager* CDrawParam::appSignalManager()
+	AppSignalController* CDrawParam::appSignalController()
 	{
-		return m_appSignalmanager;
+		return m_appSignalController;
 	}
 
-	void CDrawParam::setAppSignalManager(AppSignalManager* value)
+	void CDrawParam::setAppSignalController(AppSignalController* value)
 	{
-		m_appSignalmanager = value;
+		m_appSignalController = value;
 	}
 
 	TuningController* CDrawParam::tuningController()

@@ -1,6 +1,6 @@
 #include "SchemaItemControl.h"
 #include "PropertyNames.h"
-#include "SchemaView.h"
+#include "ClientSchemaView.h"
 
 namespace VFrame30
 {
@@ -182,7 +182,7 @@ namespace VFrame30
 
 		// Suppose that parent of sender is SchemaView
 		//
-		SchemaView* schemaView = dynamic_cast<SchemaView*>(controlWidget->parentWidget());
+		ClientSchemaView* schemaView = dynamic_cast<ClientSchemaView*>(controlWidget->parentWidget());
 		if (schemaView == nullptr)
 		{
 			assert(schemaView);

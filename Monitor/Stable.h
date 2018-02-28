@@ -31,10 +31,6 @@
 // Other stable includes
 //
 #include "../VFrame30/VFrame30Lib_global.h"
-//#include "../lib/Factory.h"
-//#include "../lib/TypesAndEnums.h"
-//#include "../lib/CUtils.h"
-
 #include "../lib/Types.h"
 
 // Disable some warnings
@@ -62,8 +58,10 @@
 
 
 #include "../lib/AppSignalManager.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 
 extern AppSignalManager theSignals;
+extern TuningSignalManager theTuningSignals;
 
 
 #endif // MONITOR_STABLE_H

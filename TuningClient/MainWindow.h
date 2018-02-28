@@ -12,7 +12,7 @@
 #include "UserManager.h"
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
-#include "SchemaStorage.h"
+#include "TuningSchemaManager.h"
 #include "DialogAlert.h"
 
 namespace Ui {

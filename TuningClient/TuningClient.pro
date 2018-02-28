@@ -136,9 +136,7 @@ SOURCES +=\
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    ../lib/Tuning/TuningController.cpp \
     TuningClientFilterStorage.cpp \
-    SchemaStorage.cpp \
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
@@ -158,7 +156,8 @@ SOURCES +=\
     ../lib/Tuning/TuningLog.cpp \
     DialogAlert.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/Tuning/TuningSourceState.cpp
+    ../lib/Tuning/TuningSourceState.cpp \
+    TuningSchemaManager.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -193,12 +192,10 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
-    ../lib/Tuning/TuningController.h \
     TuningClientFilterStorage.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
-    SchemaStorage.h \
     ../lib/CircularLogger.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/DeviceObject.h \
@@ -215,7 +212,8 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningLog.h \
     DialogAlert.h \
     ../lib/TuningValue.h \
-    ../lib/Tuning/TuningSourceState.h
+    ../lib/Tuning/TuningSourceState.h \
+    TuningSchemaManager.h
 
 FORMS    += \
     DialogSettings.ui \

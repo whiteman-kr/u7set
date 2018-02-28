@@ -13,13 +13,14 @@
 class QPainter;
 class QPaintDevice;
 class QPixmap;
-class AppSignalManager;
-class TuningController;
 
 namespace VFrame30
 {
 	class Schema;
 	class SchemaView;
+	class ClientSchemaView;
+	class AppSignalController;
+	class TuningController;
 
 	class VFRAME30LIBSHARED_EXPORT CDrawParam
 	{
@@ -36,6 +37,9 @@ namespace VFrame30
 
 		const SchemaView* schemaView() const;
 		SchemaView* schemaView();
+
+		const ClientSchemaView* clientSchemaView() const;	// Can be used only in Client mode (Monitor/Tuning/...)
+		ClientSchemaView* clientSchemaView();
 
 		// Params for drawing
 		//
@@ -74,8 +78,8 @@ namespace VFrame30
 		bool blinkPhase() const;
 		void setBlinkPhase(bool value);
 
-		AppSignalManager* appSignalManager();
-		void setAppSignalManager(AppSignalManager* value);
+		AppSignalController* appSignalController();
+		void setAppSignalController(AppSignalController* value);
 
 		TuningController* tuningController();
 		void setTuningController(TuningController* value);
@@ -88,7 +92,7 @@ namespace VFrame30
 		Schema* m_schema = nullptr;
 		const SchemaView* m_schemaView = nullptr;
 
-		AppSignalManager* m_appSignalmanager = nullptr;
+		AppSignalController* m_appSignalController = nullptr;
 		TuningController* m_tuningController = nullptr;
 
 		Session m_session;
