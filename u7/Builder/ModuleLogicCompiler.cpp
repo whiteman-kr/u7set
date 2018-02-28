@@ -143,6 +143,8 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, msg);
 
+		m_code.setMemoryMap(&m_memoryMap, m_log);
+
 		ProcsToCallArray procs =
 		{
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
@@ -239,8 +241,6 @@ namespace Builder
 						 appLogicBitData,
 						 tuningData,
 						 appLogicWordData);
-
-		m_code.setMemoryMap(&m_memoryMap, m_log);
 
 		m_lmCodeMemorySize = m_lmDescription->memory().m_codeMemorySize;
 		m_lmAppMemorySize = m_lmDescription->memory().m_appMemorySize;
@@ -9010,6 +9010,23 @@ namespace Builder
 		//
 
 		result &= writeOcmRsSignalsXml();
+
+		//
+
+/*		int startAddr = m_memoryMap.regBufStartAddr();
+		int endAddr = startAddr + m_memoryMap.regBufSizeW();
+
+		for(int addr = startAddr ; addr < endAddr; addr++)
+		{
+			int wrCount = m_memoryMap.getMemoryWriteCount(addr);
+
+			if (wrCount == 0)
+			{
+				assert(false);
+			}
+
+			qDebug() << "[" << addr << "] wrCount =" << wrCount;
+		} */
 
 		return result;
 	}

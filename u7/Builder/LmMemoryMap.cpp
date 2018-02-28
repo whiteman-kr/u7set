@@ -302,13 +302,6 @@ namespace Builder
 		return m_modules.module[place - 1].startAddress();;
 	}
 
-
-	int LmMemoryMap::getRegBufStartAddr() const
-	{
-		return m_appWordAdressed.memory.startAddress();
-	}
-
-
 	void LmMemoryMap::getFile(QStringList& memFile)
 	{
 		memFile.append(QString(" LM's memory map"));
@@ -887,7 +880,7 @@ namespace Builder
 
 	int LmMemoryMap::regBufSizeW() const
 	{
-		return m_appWordAdressed.acquiredDiscreteTuningSignals.nextAddress() - m_appWordAdressed.acquiredRawData.startAddress();
+		return m_appWordAdressed.nonAcquiredAnalogInputSignals.startAddress() - m_appWordAdressed.acquiredRawData.startAddress();
 	}
 
 	bool LmMemoryMap::read16(int address)
