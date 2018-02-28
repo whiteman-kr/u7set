@@ -141,6 +141,7 @@ void TuningSourceWidget::updateStateFields()
 		// Lost widgets tuning source ?
 		close();
 		deleteLater();
+		return;
 	}
 
 	for (int i = 0; i < fieldList.count(); i++)
