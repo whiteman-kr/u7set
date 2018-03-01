@@ -246,19 +246,19 @@ namespace VFrame30
 
 	void BaseSchemaWidget::zoomIn()
 	{
-		setZoom(zoom() + 10, true);
+		setZoom(zoom() + 20, false);
 		return;
 	}
 
 	void BaseSchemaWidget::zoomOut()
 	{
-		setZoom(zoom() - 10, true);
+		setZoom(zoom() - 20, false);
 		return;
 	}
 
 	void BaseSchemaWidget::zoom100()
 	{
-		setZoom(100, true);
+		setZoom(100, false);
 		return;
 	}
 

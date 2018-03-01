@@ -1,9 +1,12 @@
 #pragma once
+#include <memory>
+#include <QScrollArea>
+#include "VFrame30Lib_global.h"
 
 namespace VFrame30
 {
-	class SchemaView;
 	class Schema;
+	class SchemaView;
 
 	class VFRAME30LIBSHARED_EXPORT BaseSchemaWidget : public QScrollArea
 	{
