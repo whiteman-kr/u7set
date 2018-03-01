@@ -52,12 +52,16 @@ Settings::Settings():
 
 void Settings::StoreSystem()
 {
+#ifdef USE_ADMIN_REGISTRY_AREA
 	if (admin() == false)
 	{
 		return;
 	}
 
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+#else
+	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+#endif
 
 	QString instanceHistoryString;
 	for (const QString& s : m_instanceHistory)
@@ -79,6 +83,7 @@ void Settings::RestoreSystem()
 {
 	// determine if is running as administrator
 	//
+#ifdef USE_ADMIN_REGISTRY_AREA
 	QSettings adminSettings(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 	adminSettings.setValue("ApplicationName", qApp->applicationName());
 
@@ -92,10 +97,15 @@ void Settings::RestoreSystem()
 	{
 		m_admin = true;
 	}
+#endif
 
 	// read system settings
 	//
+#ifdef USE_ADMIN_REGISTRY_AREA
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+#else
+	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+#endif
 
 	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
 	m_instanceHistory = instanceHistoryString.split(';', QString::SkipEmptyParts);
@@ -107,30 +117,6 @@ void Settings::RestoreSystem()
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
 	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
-
-	// Determine the Global settings folder
-
-	QSettings qs(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-
-	QString m_globalAppDataPath = QDir::toNativeSeparators(qs.fileName());
-
-	int ptPos = m_globalAppDataPath.indexOf('.');
-	if (ptPos != -1)
-	{
-		m_globalAppDataPath = m_globalAppDataPath.left(ptPos);
-	}
-
-	qDebug() << m_globalAppDataPath;
-
-	if (m_admin == true)
-	{
-		QDir dir(m_globalAppDataPath);
-
-		if (dir.exists() == false)
-		{
-			dir.mkpath(m_globalAppDataPath);
-		}
-	}
 
 	// Determine the Local settings folder
 
@@ -278,16 +264,12 @@ void Settings::setLanguage(const QString& value)
 	m_language = value;
 }
 
+#ifdef USE_ADMIN_REGISTRY_AREA
 bool Settings::admin() const
 {
 	return m_admin;
 }
-
-
-QString Settings::globalAppDataPath()
-{
-	return m_globalAppDataPath;
-}
+#endif
 
 QString Settings::localAppDataPath()
 {

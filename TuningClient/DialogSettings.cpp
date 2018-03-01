@@ -18,6 +18,7 @@ DialogSettings::DialogSettings(QWidget* parent) :
 	ui->m_IP2->setText(theSettings.configuratorAddress2().addressStr());
 	ui->m_port2->setText(QString::number(theSettings.configuratorAddress2().port()));
 
+#ifdef USE_ADMIN_REGISTRY_AREA
 	if (theSettings.admin() == false)
 	{
 		ui->m_instanceCombo->setEnabled(false);
@@ -27,6 +28,7 @@ DialogSettings::DialogSettings(QWidget* parent) :
 		ui->m_port2->setEnabled(false);
 
 	}
+#endif
 
 	createLanguagesList();
 }
@@ -120,8 +122,13 @@ void DialogSettings::on_DialogSettings_accepted()
 
 	//
 
+#ifdef USE_ADMIN_REGISTRY_AREA
 	if (theSettings.admin() == true)
 	{
 		theSettings.StoreSystem();
 	}
+#else
+	theSettings.StoreSystem();
+#endif
+
 }
