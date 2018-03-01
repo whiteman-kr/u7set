@@ -98,7 +98,10 @@ int TuningClientTcpClient::sourceSorCount() const
 	for (const auto& it : m_tuningSources)
 	{
 		const TuningSource& ts = it.second;
-		if (ts.state.setsor() == true)
+
+		if (ts.state.controlisactive() == true &&
+				ts.state.isreply() == true &&
+				ts.state.setsor() == true)
 		{
 			result++;
 		}
@@ -117,7 +120,10 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash) const
 	}
 
 	const TuningSource& ts = m_tuningSources.at(equipmentHash);
-	if (ts.state.setsor() == true)
+
+	if (ts.state.controlisactive() == true &&
+			ts.state.isreply() == true &&
+			ts.state.setsor() == true)
 	{
 		return 1;
 	}
