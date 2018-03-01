@@ -1578,7 +1578,7 @@ namespace Builder
 
 		if (outputs.size() > 1)
 		{
-			LOG_INTERNAL_ERROR(m_log);				// signal connot have more then 1 output
+			LOG_INTERNAL_ERROR(m_log);				// signal cannot have more then 1 output
 			return false;
 		}
 

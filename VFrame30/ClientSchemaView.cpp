@@ -87,7 +87,12 @@ namespace VFrame30
 		}
 
 		QWidget* widget = findChild<QWidget*>(schemaItem->guid().toString());
-		assert(widget);
+		if (widget == nullptr)
+		{
+			qDebug() << "Can't find widget with UUID = " << schemaItem->guid().toString();
+			//assert(widget);
+			return nullptr;
+		}
 
 		QQmlEngine::setObjectOwnership(widget, QQmlEngine::ObjectOwnership::CppOwnership);
 
@@ -152,6 +157,7 @@ namespace VFrame30
 		drawParam.setEditMode(false);
 
 		drawParam.setAppSignalController(m_appSignalController);
+		drawParam.setTuningController(m_tuningController);
 		drawParam.setInfoMode(m_infoMode);
 
 		// Draw schema

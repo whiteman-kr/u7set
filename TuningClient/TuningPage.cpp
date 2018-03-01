@@ -293,7 +293,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && asp.isDiscrete() == true && state.valid() == true)
 	{
-		return (state.newValue().discreteValue() == 0 ? Qt::Unchecked : Qt::Checked);
+		return (state.modifiedValue().discreteValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
 
 	return TuningModel::data(index, role);
@@ -832,11 +832,11 @@ bool TuningPage::write()
 
 		if (asp.isAnalog() == true)
 		{
-			strValue = state.newValue().toString(asp.precision());
+			strValue = state.modifiedValue().toString(asp.precision());
 		}
 		else
 		{
-			strValue = state.newValue().toString();
+			strValue = state.modifiedValue().toString();
 		}
 
 		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
@@ -874,7 +874,7 @@ bool TuningPage::write()
 
 		m_tuningSignalManager->setState(hash, state);
 
-		TuningWriteCommand cmd(hash, state.newValue());
+		TuningWriteCommand cmd(hash, state.modifiedValue());
 
 		commands.push_back(cmd);
 	}
@@ -1172,7 +1172,7 @@ void TuningPage::invertValue()
 
 			tv.setDiscreteValue(0);
 
-			if (state.newValue().discreteValue() == 0)
+			if (state.modifiedValue().discreteValue() == 0)
 			{
 				tv.setDiscreteValue(1);
 			}

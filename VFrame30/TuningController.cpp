@@ -19,11 +19,9 @@ namespace VFrame30
 
 	AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok)
 	{
-		if (m_signalManager == nullptr ||
-			ok == nullptr)
+		if (m_signalManager == nullptr)
 		{
 			assert(m_signalManager);
-			assert(ok);
 			return AppSignalParam();
 		}
 
@@ -32,11 +30,9 @@ namespace VFrame30
 
 	TuningSignalState TuningController::signalState(const QString& appSignalId, bool* ok)
 	{
-		if (m_signalManager == nullptr ||
-			ok == nullptr)
+		if (m_signalManager == nullptr)
 		{
 			assert(m_signalManager);
-			assert(ok);
 			return TuningSignalState();
 		}
 

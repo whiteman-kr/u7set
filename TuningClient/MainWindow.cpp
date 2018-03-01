@@ -73,9 +73,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	connect(&m_configController, &ConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 
-	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
-			Qt::QueuedConnection);
-
 	// DialogAlert
 
 	m_dialogAlert = new DialogAlert(this);
@@ -340,6 +337,7 @@ void MainWindow::createWorkspace()
 	}
 
 	// Create workspaces
+
 	if (m_mainLayout == nullptr)
 	{
 		QWidget* w = new QWidget(this);
@@ -364,6 +362,12 @@ void MainWindow::createWorkspace()
 	{
 		delete m_schemasWorkspace;
 		m_schemasWorkspace = nullptr;
+	}
+
+	if (m_tabWidget != nullptr)
+	{
+		delete m_tabWidget;
+		m_tabWidget = nullptr;
 	}
 
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
@@ -410,11 +414,11 @@ void MainWindow::createWorkspace()
 				// Show both Workspaces
 				//
 
-				QTabWidget* tab = new QTabWidget();
-				tab->addTab(m_schemasWorkspace, tr("Schemas"));
-				tab->addTab(m_tuningWorkspace, tr("Signals"));
+				m_tabWidget = new QTabWidget();
+				m_tabWidget->addTab(m_schemasWorkspace, tr("Schemas"));
+				m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));
 
-				m_mainLayout->addWidget(tab, 2);
+				m_mainLayout->addWidget(m_tabWidget, 2);
 			}
 			else
 			{
@@ -674,11 +678,6 @@ void MainWindow::slot_signalsUpdated(QByteArray data)
 		QString completeErrorMessage = QObject::tr("Tuning signals file loading error.");
 		theLogFile->writeError(completeErrorMessage);
 	}
-}
-
-void MainWindow::slot_schemasGlobalScriptArrived(QByteArray data)
-{
-	m_globalScript = data.toStdString().c_str();
 }
 
 void MainWindow::exit()

@@ -51,6 +51,8 @@ private:
 
 	QVBoxLayout* m_mainLayout = nullptr;
 
+	QTabWidget* m_tabWidget = nullptr;
+
 	LogonWorkspace* m_logonWorkspace = nullptr;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
@@ -69,7 +71,6 @@ private slots:
 	void slot_configurationArrived();
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
-	void slot_schemasGlobalScriptArrived(QByteArray data);
 
 public slots:
 	void exit();
@@ -109,8 +110,6 @@ private:
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
 	QLabel* m_statusBarLogAlerts = nullptr;
-
-	QString m_globalScript;
 
 	TuningLog::TuningLog* m_tuningLog = nullptr;
 

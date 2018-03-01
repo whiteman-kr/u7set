@@ -235,7 +235,7 @@ public:
 	void setTuningHighBound(const TuningValue& value);
 
 	Q_INVOKABLE double getTuningDefaultValue() const;
-	Q_INVOKABLE double getTuingLowBound() const;
+	Q_INVOKABLE double getTuningLowBound() const;
 	Q_INVOKABLE double getTuningHighBound() const;
 
 public:

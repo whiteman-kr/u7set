@@ -254,7 +254,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool someFilesUpdated = false;
 
-
 	QByteArray data;
 	QString errorStr;
 
@@ -302,22 +301,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			}
 
-			// Details
-
-			if (f.ID == CFG_FILE_ID_TUNING_SCHEMAS_DETAILS)
-			{
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
-				{
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
-					theLogFile->writeError(completeErrorMessage);
-					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-				}
-				else
-				{
-					emit schemasDetailsArrived(data);
-				}
-			}
-
 			// Signals
 
 			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
@@ -336,15 +319,13 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			if (f.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
 			{
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				if (getFileBlockedById(f.ID, &m_globalScriptData, &errorStr) == false)
 				{
+					m_globalScriptData.clear();
+
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-				}
-				else
-				{
-					emit globalScriptArrived(data);
 				}
 			}
 		}
@@ -393,6 +374,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	if (someFilesUpdated == true || apperanceUpdated == true)
 	{
 		emit configurationArrived();
+	}
+
+	if (m_globalScriptData.isEmpty() == false)
+	{
+		emit globalScriptArrived(m_globalScriptData);
 	}
 
 	return;
