@@ -86,11 +86,11 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QWidget* widget = findChild<QWidget*>(schemaItem->guid().toString());
+		QWidget* widget = m_clientSchemaView->findChild<QWidget*>(schemaItem->guid().toString());
 		if (widget == nullptr)
 		{
 			qDebug() << "Can't find widget with UUID = " << schemaItem->guid().toString();
-			//assert(widget);
+			assert(widget);
 			return nullptr;
 		}
 

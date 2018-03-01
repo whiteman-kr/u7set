@@ -202,8 +202,8 @@ namespace VFrame30
 			m_jsClickScript = evaluateScript(m_clickScript, globalScript, engine, parentWidget);
 		}
 
-		if (m_jsClickScript .isError() == true ||
-			m_jsClickScript .isNull() == true)
+		if (m_jsClickScript.isError() == true ||
+			m_jsClickScript.isNull() == true)
 		{
 			return;
 		}
