@@ -5005,6 +5005,31 @@ namespace Builder
 						  arg(appSignalID).arg(property));
 	}
 
+	/// IssueCode: ALC5139
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Values of parameters %1.%2 and %1.%3 are equal.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///
+	/// Description:
+	///		Values of parameters are equal. Check params values.
+	///
+	void IssueLogger::wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
+	{
+		addItemsIssues(OutputMessageLevel::Warning0, itemUuid, schemaID);
+
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5139,
+				  QString(tr("Values of parameters %1.%2 and %1.%3 are equal (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
+	}
+
+
 	//
 
 	/// IssueCode: ALC5186

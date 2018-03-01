@@ -64,10 +64,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 
 	// init config socket thread
 	//
-	HostAddressPort configSocketAddress1 = theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY);
-	HostAddressPort configSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_RESERVE);;
-	m_pConfigSocket = new ConfigSocket(configSocketAddress1, configSocketAddress2, softwareInfo);
-
+	HostAddressPort configSocketAddress = theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY);
+	m_pConfigSocket = new ConfigSocket(configSocketAddress, softwareInfo);
 
 	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
@@ -93,10 +91,9 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 
 	// init tuning socket thread
 	//
-	HostAddressPort tuningSocketAddress1 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
-	HostAddressPort tuningSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_RESERVE);
+	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
 
-	m_pTuningSocket = new TuningSocket(softwareInfo, tuningSocketAddress1, tuningSocketAddress2);
+	m_pTuningSocket = new TuningSocket(softwareInfo, tuningSocketAddress);
 	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
 
 	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);

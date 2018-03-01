@@ -170,7 +170,7 @@ namespace FotipV2
 		quint16 dataType;							// enum FotipV2::DataType values
 		quint32 offsetInFrameW;
 
-		quint8 reserve[HEADER_RESERVE_SIZE];
+		quint8 reserv[HEADER_RESERVE_SIZE];
 
 		void reverseBytes();
 	};
