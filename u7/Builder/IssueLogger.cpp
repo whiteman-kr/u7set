@@ -996,7 +996,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3021,
-                  tr("Property '%1.%2' is linked to undefined software ID '%3'.")
+				  tr("Property %1.%2 is linked to undefined software ID '%3'.")
                   .arg(objectID)
                   .arg(propertyName)
                   .arg(softwareID));
@@ -1019,7 +1019,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3022,
-                  tr("Property '%1.%2' is empty.")
+				  tr("Property %1.%2 is empty.")
                   .arg(objectID)
                   .arg(propertyName));
     }
@@ -1041,7 +1041,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3023,
-				  tr("Property '%1.%2' conversion error.").arg(objectID).arg(propertyName));
+				  tr("Property %1.%2 conversion error.").arg(objectID).arg(propertyName));
 	}
 
 	/// IssueCode: CFG3024
@@ -1087,6 +1087,27 @@ namespace Builder
 				  .arg(suffix)
 				  .arg(objectID));
 	}
+
+	/// IssueCode: CFG3026
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of property %1.%2 is not valid IPv4 address.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Value of property is not valid IPv4 address. Check property value.
+	///
+	void IssueLogger::errCFG3026(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3026,
+				  tr("Value of property %1.%2 is not valid IPv4 address.").arg(objectID).arg(propertyName));
+	}
+
 
 	// ALP			Application Logic Parsing				4000-4999
 	//
@@ -5029,6 +5050,24 @@ namespace Builder
 					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
+	/// IssueCode: ALC5140
+	///
+	/// IssueType: Error
+	///
+	/// Title: Undefined ConfigurationService IP-address for software %1.
+	///
+	/// Parameters:
+	///		%1 Software EquipmentID
+	///
+	/// Description:
+	///		ConfigurationService IP-address for software is undefined. Check ConfigurationService ClientrequestIP property.
+	///
+	void IssueLogger::errALC5140(QString softwareID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5140,
+				  QString(tr("Undefined ConfigurationService IP-address for software %1.")).arg(softwareID));
+	}
 
 	//
 

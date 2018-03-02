@@ -141,6 +141,7 @@ namespace Builder
 		void errCFG3023(QString objectID, QString propertyName);							// Property '%1.%2' conversion error.
 		void wrnCFG3024(QString appDataServiceID, QString archServiceID);					// Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
 		void errCFG3025(QString suffix, QString objectID);									// Can't find child controller with suffix '%1' in object '%2'
+		void errCFG3026(QString objectID, QString propertyName);							// Value of property %1.%2 is not valid IPv4 address.
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
@@ -327,6 +328,7 @@ namespace Builder
 		void errALC5137(QString appSignalID, QString property);							// Signal %1 property %2 out of SignedInt32 range.
 		void errALC5138(QString appSignalID, QString property);							// Signal %1 property %2 out of Float range.
 		void wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Values of parameters %1.%2 and %1.%3 are equal.
+		void errALC5140(QString softwareID);											// Undefined ConfigurationService IP-address for software %1.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

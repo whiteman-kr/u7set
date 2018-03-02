@@ -637,6 +637,7 @@ namespace Builder
 
 		if (cfgIP1.isEmpty() && cfgIP2.isEmpty())
 		{
+			m_log->errALC5140(m_software->equipmentIdTemplate());
 			return false;
 		}
 
