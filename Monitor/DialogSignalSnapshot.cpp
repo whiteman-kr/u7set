@@ -166,8 +166,8 @@ SignalSnapshotModel::SignalSnapshotModel(QObject* parent)
 	m_columnsNames << tr("Units");
 	m_columnsNames << tr("Type");
 
-	m_columnsNames << tr("System Time");
-	m_columnsNames << tr("Local Time");
+	m_columnsNames << tr("Server Time UTC%100").arg(QChar(0x00B1));
+	m_columnsNames << tr("Server Time");
 	m_columnsNames << tr("Plant Time");
 	m_columnsNames << tr("Value");
 	m_columnsNames << tr("Valid");

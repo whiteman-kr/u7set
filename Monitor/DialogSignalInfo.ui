@@ -294,7 +294,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>System Time</string>
+          <string>Server Time</string>
          </property>
         </widget>
         <widget class="QLabel" name="plantTimeLabel">
