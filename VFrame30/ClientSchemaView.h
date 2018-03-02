@@ -35,6 +35,8 @@ namespace VFrame30
 		QObject* findSchemaItem(QString objectName);	// Find SchemaItem by ObjectName
 		QObject* findWidget(QString objectName);		// Find Widget associated with SchemaItem
 
+		void update();									// Update (redraw) schema view
+
 		// Message Box functions
 		//
 		void warningMessageBox(QString text);
@@ -94,7 +96,6 @@ namespace VFrame30
 		// --
 		//
 		QJSEngine* jsEngine();
-
 		QString globalScript() const;
 
 	private:
@@ -102,8 +103,6 @@ namespace VFrame30
 
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;
-
-		QJSEngine m_jsEngine;
 
 		bool m_infoMode = false;			// Show some aditional info like labels
 

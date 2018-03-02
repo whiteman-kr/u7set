@@ -73,4 +73,9 @@ namespace VFrame30
 		m_globalScript = value;
 	}
 
+	QJSEngine* SchemaManager::jsEngine()
+	{
+		return &m_jsEngine;
+	}
+
 }

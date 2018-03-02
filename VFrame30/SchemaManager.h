@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <QObject>
+#include <QJSEngine>
 #include "Schema.h"
 #include "VFrame30Lib_global.h"
 
@@ -42,9 +43,13 @@ namespace VFrame30
 		const QString& globalScript() const;
 		void setGlobalScript(const QString& value);
 
+		QJSEngine* jsEngine();
+
 	private:
 		std::map<QString, std::shared_ptr<VFrame30::Schema>> m_schemas;		// Loaded schemas, map by SchemaID
+
 		QString m_globalScript;
+		QJSEngine m_jsEngine;
 	};
 
 }
