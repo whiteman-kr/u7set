@@ -940,7 +940,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 		{
 			if (counters.sorCounter == 0)
 			{
-				treeItem->setText(columnSorIndex, tr("No"));
+				treeItem->setText(columnSorIndex, QString());
 				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
 				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
 			}

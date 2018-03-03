@@ -590,7 +590,7 @@ double AppSignalParam::getTuningDefaultValue() const
 	return m_tuningDefaultValue.toDouble();
 }
 
-double AppSignalParam::getTuingLowBound() const
+double AppSignalParam::getTuningLowBound() const
 {
 	return m_tuningLowBound.toDouble();
 }
