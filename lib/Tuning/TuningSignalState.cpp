@@ -20,17 +20,17 @@ TuningValue TuningSignalState::value() const
 	return m_value;
 }
 
-double TuningSignalState::valueToDouble() const
+double TuningSignalState::toDouble() const
 {
 	return m_value.toDouble();
 }
 
-TuningValue TuningSignalState::newValue() const
+TuningValue TuningSignalState::modifiedValue() const
 {
 	return m_newValue;
 }
 
-void TuningSignalState::setNewValue(const TuningValue& value)
+void TuningSignalState::setModifiedValue(const TuningValue& value)
 {
 	m_newValue = value;
 
