@@ -214,9 +214,14 @@ void TuningTcpClient::applyTuningSignals()
 
 bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
 {
-	if (isConnected() == false)
+#ifdef Q_DEBUG
+	if (m_simulationMode == false)
+#endif
 	{
-		return false;
+		if (isConnected() == false)
+		{
+			return false;
+		}
 	}
 
 	TuningWriteCommand command(appSignalId, value);
@@ -793,7 +798,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 					}
 
 					writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-								  .arg(previousState.newValue().toString(param.precision()))
+								  .arg(previousState.modifiedValue().toString(param.precision()))
 								  .arg(param.customSignalId())
 								  .arg(param.caption())
 								  .arg(param.equipmentId())
@@ -814,7 +819,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		}
 		else
 		{
-			arrivedState.m_newValue = previousState.newValue();
+			arrivedState.m_newValue = previousState.modifiedValue();
 		}
 
 		//

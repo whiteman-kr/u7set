@@ -60,8 +60,7 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 	return true;
 }
 
-
-bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger *log)
+bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger* log)
 {
 	if (device == nullptr ||
 		value == nullptr ||
@@ -84,6 +83,28 @@ bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QS
 	return true;
 }
 
+bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)
+{
+	if (device == nullptr ||
+		value == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QVariant val = device->propertyValue(name);
+
+	if (val.isValid() == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	*value = val.toBool();
+
+	return true;
+}
 
 bool DeviceHelper::getIPv4Property(const Hardware::DeviceObject* device, const QString& name, QString* value, bool emptyAllowed, Builder::IssueLogger *log)
 {
@@ -117,29 +138,22 @@ bool DeviceHelper::getIPv4Property(const Hardware::DeviceObject* device, const Q
 	return true;
 }
 
-
-bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)
+bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger* log)
 {
-	if (device == nullptr ||
-		value == nullptr ||
-		log == nullptr)
+	if (getIntProperty(device, name, value, log) == false)
 	{
-		assert(false);
 		return false;
 	}
 
-	QVariant val = device->propertyValue(name);
-
-	if (val.isValid() == false)
+	if (*value < 1 || *value > 65535)
 	{
-		logPropertyNotFoundError(device, name, log);
+		log->errCFG3027(device->equipmentIdTemplate(), name);
 		return false;
 	}
-
-	*value = val.toBool();
 
 	return true;
 }
+
 
 
 bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log)

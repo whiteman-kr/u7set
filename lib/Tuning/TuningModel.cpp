@@ -561,13 +561,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 						if (tss.userModified() == true)
 						{
-							QString editValueString = tss.newValue().toString();
+							QString editValueString = tss.modifiedValue().toString();
 							return tr("%1 => %2").arg(valueString).arg(editValueString);
 						}
 
 						if (tss.writeInProgress() == true)
 						{
-							QString editValueString = tss.newValue().toString();
+							QString editValueString = tss.modifiedValue().toString();
 							return tr("Writing %1").arg(editValueString);
 						}
 
@@ -579,13 +579,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 						if (tss.userModified() == true)
 						{
-							QString editValueString = tss.newValue().toString(asp.precision());
+							QString editValueString = tss.modifiedValue().toString(asp.precision());
 							return QString("%1 => %2").arg(valueString).arg(editValueString);
 						}
 
 						if (tss.writeInProgress() == true)
 						{
-							QString editValueString = tss.newValue().toString(asp.precision());
+							QString editValueString = tss.modifiedValue().toString(asp.precision());
 							return tr("Writing %1").arg(editValueString);
 						}
 

@@ -306,7 +306,7 @@ void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
 		return;
 	}
 
-	it->second.setNewValue(value);
+	it->second.setModifiedValue(value);
 
 	return;
 

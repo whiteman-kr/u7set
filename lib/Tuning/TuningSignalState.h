@@ -39,15 +39,15 @@ public:
 
 	Q_INVOKABLE Hash hash() const;
 
-	Q_INVOKABLE TuningValue value() const;
+	TuningValue value() const;
 
-	double valueToDouble() const;
+	Q_INVOKABLE double toDouble() const;
 
-	TuningValue newValue() const;
-	void setNewValue(const TuningValue& value);
+	TuningValue modifiedValue() const;
+	void setModifiedValue(const TuningValue& value);
 
-	Q_INVOKABLE TuningValue lowBound() const;
-	Q_INVOKABLE TuningValue highBound() const;
+	TuningValue lowBound() const;
+	TuningValue highBound() const;
 
 	Q_INVOKABLE bool valid() const;
 	Q_INVOKABLE bool outOfRange() const;
