@@ -215,7 +215,12 @@ SOURCES +=\
     Simulator/SimIdeSimulator.cpp \
     Simulator/SimulatorSchemaPage.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    Simulator/SimSchemaWidget.cpp \
+    Simulator/SimSchemaManager.cpp \
+    Simulator/SimSchemaView.cpp \
+    Simulator/SimTuningTcpClient.cpp \
+    ../lib/AppSignalManager.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -368,7 +373,12 @@ HEADERS  += \
     Simulator/SimulatorControlPage.h \
     Simulator/SimIdeSimulator.h \
     Simulator/SimulatorSchemaPage.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    Simulator/SimSchemaWidget.h \
+    Simulator/SimSchemaManager.h \
+    Simulator/SimSchemaView.h \
+    Simulator/SimTuningTcpClient.h \
+    ../lib/AppSignalManager.h
 
 FORMS    += \
     CreateProjectDialog.ui \

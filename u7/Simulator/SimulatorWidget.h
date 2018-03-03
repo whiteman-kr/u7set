@@ -5,12 +5,19 @@
 #include <QtWidgets>
 #include "../lib/DbController.h"
 #include "SimIdeSimulator.h"
+#include "SimSchemaManager.h"
+#include "SimTuningTcpClient.h"
+#include "../../lib/AppSignalManager.h"
+#include "../../lib/Tuning/TuningSignalManager.h"
+#include "../../VFrame30/AppSignalController.h"
+#include "../../VFrame30/TuningController.h"
 
 
 class SimulatorProjectWidget;
 class SimulatorOutputWidget;
 class SimulatorMemoryWidget;
 class SimulatorToolBar;
+
 
 class SimulatorWidget : public QMainWindow, HasDbController
 {
@@ -61,6 +68,17 @@ private:
 	std::vector<SimulatorMemoryWidget*> m_memoryWidgets;
 
 	std::shared_ptr<SimIdeSimulator> m_simulator;
+
+	// --
+	//
+	SimSchemaManager m_schemaManage;
+
+	AppSignalManager m_appSignalManager;
+	TuningSignalManager m_tuningSignalManager;
+	SimTuningTcpClient m_tuningTcpClient;
+
+	VFrame30::AppSignalController* m_appSignalController = nullptr;
+	VFrame30::TuningController* m_tuningController = nullptr;
 
 	// Actions
 	//

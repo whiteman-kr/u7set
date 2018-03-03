@@ -24,6 +24,13 @@ SimulatorWidget::SimulatorWidget(std::shared_ptr<SimIdeSimulator> simulator,
 		m_simulator = std::make_shared<SimIdeSimulator>();
 	}
 
+	// --
+	//
+	m_appSignalController = new VFrame30::AppSignalController(&m_appSignalManager, this);
+	m_tuningController = new VFrame30::TuningController(&m_tuningSignalManager, &m_tuningTcpClient, this);
+
+	// --
+	//
 	setWindowFlags(windowType);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
@@ -386,7 +393,12 @@ void SimulatorWidget::openSchemaTabPage(QString fileName)
 		return;
 	}
 
-	SimulatorSchemaPage* page = new SimulatorSchemaPage(schema, m_simulator, m_tabWidget);
+	SimulatorSchemaPage* page = new SimulatorSchemaPage(schema,
+														m_simulator,
+														&m_schemaManage,
+														m_appSignalController,
+														m_tuningController,
+														m_tabWidget);
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
