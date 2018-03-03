@@ -119,7 +119,7 @@ private:
 	QString m_activeClientIp;
 	int m_discreteCounter = -1;
 	int m_lmErrorsCounter = -1;
-	int m_sorCounter = -1;
+	QString m_sorStatus;
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
