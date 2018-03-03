@@ -353,20 +353,23 @@ namespace Tuning
 			return;
 		}
 
-		QString activeClientID = m_service.activeClientID();
-		QString activeClientIP = m_service.activeClientIP();
-
-		if (clientEquipmentID != activeClientID || peerAddr().addressStr() != activeClientIP)
+		if (m_service.singleLmControl() == true)
 		{
-			errCode = NetworkError::ClientIsNotActive;
+			QString activeClientID = m_service.activeClientID();
+			QString activeClientIP = m_service.activeClientIP();
 
-			m_tuningSignalsWriteReply.set_error(TO_INT(errCode));
+			if (clientEquipmentID != activeClientID || peerAddr().addressStr() != activeClientIP)
+			{
+				errCode = NetworkError::ClientIsNotActive;
 
-			sendReply(m_tuningSignalsWriteReply);
+				m_tuningSignalsWriteReply.set_error(TO_INT(errCode));
 
-			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
-						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
-			return;
+				sendReply(m_tuningSignalsWriteReply);
+
+				DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
+							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+				return;
+			}
 		}
 
 		QString user = connectedSoftwareInfo().userName();
@@ -427,20 +430,23 @@ namespace Tuning
 			return;
 		}
 
-		QString activeClientID = m_service.activeClientID();
-		QString activeClientIP = m_service.activeClientIP();
-
-		if (clientEquipmentID != activeClientID || peerAddr().addressStr() != activeClientIP)
+		if (m_service.singleLmControl() == true)
 		{
-			errCode = NetworkError::ClientIsNotActive;
+			QString activeClientID = m_service.activeClientID();
+			QString activeClientIP = m_service.activeClientIP();
 
-			m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
+			if (clientEquipmentID != activeClientID || peerAddr().addressStr() != activeClientIP)
+			{
+				errCode = NetworkError::ClientIsNotActive;
 
-			sendReply(m_tuningSignalsApplyReply);
+				m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
 
-			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
-						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
-			return;
+				sendReply(m_tuningSignalsApplyReply);
+
+				DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+				return;
+			}
 		}
 
 		QString user = connectedSoftwareInfo().userName();
@@ -479,6 +485,19 @@ namespace Tuning
 		if (clientContext == nullptr)
 		{
 			errCode = NetworkError::UnknownTuningClientID;
+
+			m_changeControlledTuningSourceReply.set_error(TO_INT(errCode));
+
+			sendReply(m_changeControlledTuningSourceReply);
+
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_CHANGE_CONTROLLED_TUNING_SOURCE to %2")).
+						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+			return;
+		}
+
+		if (m_service.singleLmControl() == false)
+		{
+			errCode = NetworkError::SingleLmControlDisabled;
 
 			m_changeControlledTuningSourceReply.set_error(TO_INT(errCode));
 

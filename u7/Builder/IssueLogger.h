@@ -142,6 +142,7 @@ namespace Builder
 		void wrnCFG3024(QString appDataServiceID, QString archServiceID);					// Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
 		void errCFG3025(QString suffix, QString objectID);									// Can't find child controller with suffix '%1' in object '%2'
 		void errCFG3026(QString objectID, QString propertyName);							// Value of property %1.%2 is not valid IPv4 address.
+		void errCFG3027(QString objectID, QString propertyName);							// Ethernet port number property %1.%2 should be in range 1..65535.
 
 		// ALP			Application Logic Parsing				4000-4999
 		//

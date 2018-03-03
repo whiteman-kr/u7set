@@ -1108,6 +1108,25 @@ namespace Builder
 				  tr("Value of property %1.%2 is not valid IPv4 address.").arg(objectID).arg(propertyName));
 	}
 
+	/// IssueCode: CFG3027
+	///
+	/// IssueType: Error
+	///
+	/// Title: Ethernet port number property %1.%2 should be in range 1..65535.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Ethernet port number should in range 1..65535.. Check property value.
+	///
+	void IssueLogger::errCFG3027(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3027,
+				  tr("Ethernet port number property %1.%2 should be in range 1..65535.").arg(objectID).arg(propertyName));
+	}
 
 	// ALP			Application Logic Parsing				4000-4999
 	//
