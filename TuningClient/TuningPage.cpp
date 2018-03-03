@@ -906,7 +906,9 @@ bool TuningPage::apply()
 
 	// Get SOR counters
 
-	int totalSorCount = m_tuningTcpClient->sourceSorCount();
+	bool sorValid = false;
+
+	int totalSorCount = m_tuningTcpClient->sourceSorCount(&sorValid);
 
 	if (totalSorCount > 0)
 	{

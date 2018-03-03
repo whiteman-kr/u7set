@@ -78,7 +78,13 @@ namespace Builder
 
 		content += " -b=" + appDataPath + "/" + buildDir;
 
-		content += " -ip=" + m_software->propertyByCaption(CfgServiceSettings::PROP_CLIENT_REQUEST_IP)->value().toString() + "\n";
+		QString clientRequestIP;
+		if (DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, m_log) == false)
+		{
+			return false;
+		}
+
+		content += " -ip=" + clientRequestIP + "\n";
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
