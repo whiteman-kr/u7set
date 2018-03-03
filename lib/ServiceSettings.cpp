@@ -4,6 +4,10 @@
 #include "../lib/WUtils.h"
 
 
+const char* CfgServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
+const char* CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+const char* CfgServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
+
 // -------------------------------------------------------------------------------------
 //
 // AppDataServiceChannel class implementation

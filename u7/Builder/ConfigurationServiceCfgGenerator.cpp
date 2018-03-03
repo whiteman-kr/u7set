@@ -23,14 +23,35 @@ namespace Builder
 
 	bool ConfigurationServiceCfgGenerator::generateConfiguration()
 	{
-		bool result = true;
+		bool result = false;
 
-		result &= writeBatFile();
-		result &= writeShFile();
+		do
+		{
+			if (checkProperties() == false) break;
+			if (writeBatFile() == false) break;
+			if (writeShFile() == false) break;
+
+			result = true;
+		}
+		while(false);
 
 		return result;
 	}
 
+	bool ConfigurationServiceCfgGenerator::checkProperties()
+	{
+		QString clientRequestIP;
+		QString clientRequestNetmask;
+		int clientRequestPort = 0;
+
+		bool result = true;
+
+		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, m_log);
+		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, m_log);
+		result &= DeviceHelper::getIntProperty(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_PORT, &clientRequestPort, m_log);
+
+		return result;
+	}
 
 	bool ConfigurationServiceCfgGenerator::writeBatFile()
 	{
@@ -57,7 +78,7 @@ namespace Builder
 
 		content += " -b=" + appDataPath + "/" + buildDir;
 
-		content += " -ip=" + m_software->propertyByCaption("ClientRequestIP")->value().toString() + "\n";
+		content += " -ip=" + m_software->propertyByCaption(CfgServiceSettings::PROP_CLIENT_REQUEST_IP)->value().toString() + "\n";
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 

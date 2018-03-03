@@ -37,6 +37,7 @@ public:
 	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger* log);
 	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, Builder::IssueLogger* log);
 	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger* log);
+	static bool getIPv4Property(const Hardware::DeviceObject* device, const QString& name, QString* value, bool emptyAllowed, Builder::IssueLogger *log);
 
 	template<typename T>
 	static bool getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log);

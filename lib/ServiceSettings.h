@@ -17,6 +17,14 @@ const char* const CFG_FILE_ID_TUNING_GLOBALSCRIPT = "TUNING_GLOBALSCRIPT";
 
 const char* const CFG_FILE_ID_METROLOGY_SIGNALS = "METROLOGY_SIGNALS";
 
+class CfgServiceSettings
+{
+public:
+	static const char* PROP_CLIENT_REQUEST_IP;
+	static const char* PROP_CLIENT_REQUEST_NETMASK;
+	static const char* PROP_CLIENT_REQUEST_PORT;
+};
+
 class AppDataServiceChannel
 {
 private:
