@@ -376,10 +376,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		emit configurationArrived();
 	}
 
-	if (m_globalScriptData.isEmpty() == false)
-	{
-		emit globalScriptArrived(m_globalScriptData);
-	}
+	emit globalScriptArrived(m_globalScriptData);
 
 	return;
 }
