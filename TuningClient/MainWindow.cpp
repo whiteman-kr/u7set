@@ -601,27 +601,40 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
+			bool totalSorActive = false;
+
 			bool totalSorValid = false;
 
-			int totalSorCount = m_tcpClient->sourceSorCount(&totalSorValid);
+			int totalSorCount = m_tcpClient->sourceSorCount(&totalSorActive, &totalSorValid);
 
 			QString sorStatus;
 
-			if (totalSorValid == true)
+			if (totalSorActive == false)
 			{
-				if (totalSorCount == 0)
+				sorStatus = tr(" SOR: ");
+			}
+			else
+			{
+				if (totalSorValid == false)
 				{
-					sorStatus = tr("SOR: No");
+					sorStatus = tr(" SOR: ?");
 				}
 				else
 				{
-					if (totalSorCount == 1)
+					if (totalSorCount == 0)
 					{
-						sorStatus = tr("SOR: Yes");
+						sorStatus = tr(" SOR: No");
 					}
 					else
 					{
-						sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+						if (totalSorCount == 1)
+						{
+							sorStatus = tr(" SOR: Yes");
+						}
+						else
+						{
+							sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+						}
 					}
 				}
 			}
@@ -634,13 +647,14 @@ void MainWindow::updateStatusBar()
 
 				m_statusBarSor->setText(sorStatus);
 
-				if (totalSorCount == 0)
+				if ((totalSorActive == true && totalSorValid == false) || totalSorCount > 0)
 				{
-					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+
 				}
 				else
 				{
-					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
 				}
 			}
 		}
