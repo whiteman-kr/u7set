@@ -57,6 +57,8 @@ private:
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
+	QTabWidget* m_tabWidget = nullptr;
+
 	UserManager m_userManager;
 public:
 

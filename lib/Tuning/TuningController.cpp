@@ -16,11 +16,9 @@ TuningController::TuningController(ITuningSignalManager* signalManager, ITuningT
 
 AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok)
 {
-	if (m_signalManager == nullptr ||
-		ok == nullptr)
+	if (m_signalManager == nullptr)
 	{
 		assert(m_signalManager);
-		assert(ok);
 		return AppSignalParam();
 	}
 
@@ -29,11 +27,9 @@ AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* o
 
 TuningSignalState TuningController::signalState(const QString& appSignalId, bool* ok)
 {
-	if (m_signalManager == nullptr ||
-		ok == nullptr)
+	if (m_signalManager == nullptr)
 	{
 		assert(m_signalManager);
-		assert(ok);
 		return TuningSignalState();
 	}
 
@@ -68,7 +64,7 @@ QVariant TuningController::signalState(const QString& appSignalId)
 	return result;
 }
 
-bool TuningController::writeValue(QString appSignalId, double value)
+bool TuningController::writeValue(QString appSignalId, QVariant value)
 {
 	if (m_tcpClient == nullptr)
 	{
@@ -86,28 +82,66 @@ bool TuningController::writeValue(QString appSignalId, double value)
 		return false;
 	}
 
-	TuningValue tuningValue;
-
-	tuningValue.setType(appSignal.toTuningType());
-
-	switch (tuningValue.type())
+	switch (value.type())
 	{
-	case TuningValueType::Discrete:
-		tuningValue.setInt32Value(static_cast<qint32>(value));
+	case QVariant::Bool:
+	{
+		if (appSignal.toTuningType() != TuningValueType::Discrete)
+		{
+			assert(false);	// Bool is allowed only for discrete signals
+			return false;
+		}
 		break;
+	}
 
-	case TuningValueType::SignedInt32:
-		tuningValue.setInt32Value(static_cast<qint32>(value));
+	case QVariant::Int:
+	{
+		if (appSignal.toTuningType() == TuningValueType::Discrete)
+		{
+			value = value.toInt() == 0 ? false : true;	// Discrete signals can be set by 0 or 1
+		}
 		break;
+	}
 
-	case TuningValueType::Float:
-		tuningValue.setFloatValue(static_cast<float>(value));
-		break;
-
-	default:
-		assert(false);
+	case QVariant::LongLong:
+	{
+		assert(false);	// Must not arrive from script
 		return false;
 	}
+
+	case QMetaType::Float:
+	{
+		assert(false);	// Must not arrive from script
+		return false;
+	}
+
+	case QVariant::Double:
+	{
+		if (appSignal.toTuningType() == TuningValueType::Discrete)
+		{
+			value = value.toBool();	// Discrete signals can be set by 0.0 or 1.0
+		}
+
+		if (appSignal.toTuningType() == TuningValueType::SignedInt32)
+		{
+			value = value.toInt();
+		}
+
+		if (appSignal.toTuningType() == TuningValueType::Float)
+		{
+			value = value.toFloat();
+		}
+		break;
+	}
+
+	default:
+	{
+		assert(false);	// Some unknown type arrived from script
+		return false;
+	}
+	}
+
+	TuningValue tuningValue(value);
 
 	ok = m_tcpClient->writeTuningSignal(appSignalId, tuningValue);
 

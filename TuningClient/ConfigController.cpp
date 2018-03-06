@@ -371,12 +371,14 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply);
 	}
 
+	emit globalScriptArrived(m_globalScriptData);	// for develop
+
 	if (someFilesUpdated == true || apperanceUpdated == true)
 	{
 		emit configurationArrived();
 	}
 
-	emit globalScriptArrived(m_globalScriptData);
+	//emit globalScriptArrived(m_globalScriptData);	for rpct-1867
 
 	return;
 }
@@ -489,7 +491,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 
 		if (dasNodes.isEmpty() == true)
 		{
-			outSetting->errorMessage += tr("Cannot find TuningService tag %1\n");
+			outSetting->errorMessage += tr("Cannot find TuningService tag\n");
 			return false;
 		}
 		else

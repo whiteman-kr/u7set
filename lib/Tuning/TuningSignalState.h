@@ -27,35 +27,43 @@ class TuningSignalState
 	Q_GADGET
 
 	Q_PROPERTY(Hash Hash READ hash)
-	Q_PROPERTY(TuningValue Value READ value)
-	Q_PROPERTY(TuningValue LowBound READ lowBound)
-	Q_PROPERTY(TuningValue HighBound READ highBound)
+	Q_PROPERTY(QVariant Value READ toVariant)
+	Q_PROPERTY(QVariant LowBound READ lowBoundToVariant)
+	Q_PROPERTY(QVariant HighBound READ highBoundToVariant)
+
 	Q_PROPERTY(bool Valid READ valid)
 	Q_PROPERTY(bool OutOfRange READ outOfRange)
+	Q_PROPERTY(bool WriteInProgress READ writeInProgress)
+	Q_PROPERTY(bool WriteFailed READ writeFailed)
+	Q_PROPERTY(bool ControlIsEnabled READ controlIsEnabled)
 
 public:
 	TuningSignalState() = default;
 	TuningSignalState(const ::Network::TuningSignalState& message);
 
-	Q_INVOKABLE Hash hash() const;
+	Hash hash() const;
 
 	TuningValue value() const;
 
-	Q_INVOKABLE double toDouble() const;
+	QVariant toVariant() const;
+	double toDouble() const;
 
 	TuningValue modifiedValue() const;
 	void setModifiedValue(const TuningValue& value);
 
 	TuningValue lowBound() const;
+	QVariant lowBoundToVariant() const;
+
 	TuningValue highBound() const;
+	QVariant highBoundToVariant() const;
 
-	Q_INVOKABLE bool valid() const;
-	Q_INVOKABLE bool outOfRange() const;
-	Q_INVOKABLE bool writeInProgress() const;
-	Q_INVOKABLE bool writeFailed() const;
-	Q_INVOKABLE bool controlIsEnabled() const;
+	bool valid() const;
+	bool outOfRange() const;
+	bool writeInProgress() const;
+	bool writeFailed() const;
+	bool controlIsEnabled() const;
 
-	Q_INVOKABLE int writeErrorCode() const;
+	int writeErrorCode() const;
 
 	bool userModified() const;
 	void clearUserModified();

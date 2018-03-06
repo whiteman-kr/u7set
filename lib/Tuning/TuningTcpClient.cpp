@@ -152,6 +152,7 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 
 				state.m_value = cmd.m_value;
 				m_signals->setState(cmd.m_hash, state);
+				m_signals->setNewValue(cmd.m_hash, cmd.m_value);
 			}
 
 

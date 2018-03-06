@@ -366,6 +366,12 @@ void MainWindow::createWorkspace()
 		m_schemasWorkspace = nullptr;
 	}
 
+	if (m_tabWidget != nullptr)
+	{
+		delete m_tabWidget;
+		m_tabWidget = nullptr;
+	}
+
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
 		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, m_globalScript, this);
@@ -410,11 +416,11 @@ void MainWindow::createWorkspace()
 				// Show both Workspaces
 				//
 
-				QTabWidget* tab = new QTabWidget();
-				tab->addTab(m_schemasWorkspace, tr("Schemas"));
-				tab->addTab(m_tuningWorkspace, tr("Signals"));
+				m_tabWidget = new QTabWidget();
+				m_tabWidget->addTab(m_schemasWorkspace, tr("Schemas"));
+				m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));
 
-				m_mainLayout->addWidget(tab, 2);
+				m_mainLayout->addWidget(m_tabWidget, 2);
 			}
 			else
 			{
