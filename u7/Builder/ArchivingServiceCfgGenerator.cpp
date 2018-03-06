@@ -22,11 +22,17 @@ namespace Builder
 
 	bool ArchivingServiceCfgGenerator::generateConfiguration()
 	{
-		bool result = true;
+		bool result = false;
 
-		result &= writeSettings();
-		result &= writeBatFile();
-		result &= writeShFile();
+		do
+		{
+			if (writeSettings() == false) break;
+			if (writeBatFile() == false) break;
+			if (writeShFile() == false) break;
+
+			result = true;
+		}
+		while(false);
 
 		return result;
 	}

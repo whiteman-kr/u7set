@@ -9,18 +9,9 @@ struct TuningCounters
 {
 	int errorCounter = 0;
 	int sorCounter = 0;
+	bool sorValid = false;
 	int controlEnabledCounter = 0;
 	int discreteCounter = 0;
-
-	TuningCounters& operator += (const TuningCounters& That)
-	{
-		this->errorCounter += That.errorCounter;
-		this->sorCounter += That.sorCounter;
-		this->controlEnabledCounter += That.controlEnabledCounter;
-		this->discreteCounter += That.discreteCounter;
-
-		return *this;
-	}
 };
 
 class TuningFilterValue

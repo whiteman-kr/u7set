@@ -599,17 +599,40 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
-			int totalSorCount = m_tcpClient->sourceSorCount();
+			bool totalSorValid = false;
 
-			if (m_sorCounter != totalSorCount || m_statusBarSor->text().isEmpty() == true)
+			int totalSorCount = m_tcpClient->sourceSorCount(&totalSorValid);
+
+			QString sorStatus;
+
+			if (totalSorValid == true)
 			{
-				m_sorCounter = totalSorCount;
+				if (totalSorCount == 0)
+				{
+					sorStatus = tr("SOR: No");
+				}
+				else
+				{
+					if (totalSorCount == 1)
+					{
+						sorStatus = tr("SOR: Yes");
+					}
+					else
+					{
+						sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+					}
+				}
+			}
+
+			if (m_sorStatus != sorStatus)
+			{
+				m_sorStatus = sorStatus;
 
 				assert(m_statusBarSor);
 
-				m_statusBarSor->setText(QString(" SOR: %1").arg(m_sorCounter));
+				m_statusBarSor->setText(sorStatus);
 
-				if (m_sorCounter == 0)
+				if (totalSorCount == 0)
 				{
 					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
 				}

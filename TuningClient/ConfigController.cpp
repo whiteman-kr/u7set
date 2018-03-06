@@ -489,7 +489,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 
 		if (dasNodes.isEmpty() == true)
 		{
-			outSetting->errorMessage += tr("Cannot find TuningService tag %1\n");
+			outSetting->errorMessage += tr("Cannot find TuningService tag\n");
 			return false;
 		}
 		else

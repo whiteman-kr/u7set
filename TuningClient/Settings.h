@@ -4,6 +4,9 @@
 #include "../lib/HostAddressPort.h"
 #include "UserManager.h"
 
+// Enable the next line to access the admin functions
+//#define USE_ADMIN_REGISTRY_AREA
+
 //
 // ConfigConnection
 //
@@ -112,9 +115,9 @@ public:
 	QString language() const;
 	void setLanguage(const QString& value);
 
+#ifdef USE_ADMIN_REGISTRY_AREA
 	bool admin() const;
-
-	QString globalAppDataPath();
+#endif
 
 	QString localAppDataPath();
 
@@ -158,7 +161,9 @@ public:
 
 private:
 
+#ifdef USE_ADMIN_REGISTRY_AREA
 	bool m_admin = false;
+#endif
 
 	QStringList m_instanceHistory;
 	QString m_instanceStrId;
@@ -171,7 +176,6 @@ private:
 
 	QString m_language = "en";
 
-	QString m_globalAppDataPath;
 	QString m_localAppDataPath;
 
 	QString m_userFiltersFile;
