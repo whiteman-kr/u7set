@@ -775,21 +775,22 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		}
 
 
-		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
-
 		TuningSignalState arrivedState(stateMessage);
 
-		// Process write error only if writing was performed by current client
+		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
 
-		Hash writeClientHash = stateMessage.writeclient();
-
-		if (m_instanceIdHash == writeClientHash)
+		if (found == true)
 		{
-			if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
+			// Process write error only if writing was performed by current client
+
+			Hash writeClientHash = stateMessage.writeclient();
+
+			if (m_instanceIdHash == writeClientHash &&
+				static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
 			{
 				if (previousState.m_flags.writeFailed == false)
 				{
-					arrivedState.m_flags.writeFailed = true;
+					previousState.m_flags.writeFailed = true;
 
 					AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
 					if (found == false)
@@ -813,6 +814,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		arrivedState.m_flags.userModified = previousState.userModified();
 		arrivedState.m_flags.controlIsEnabled = previousState.controlIsEnabled();
+		arrivedState.m_flags.writeFailed = previousState.m_flags.writeFailed;
 
 		if (previousState.userModified() == false)
 		{
