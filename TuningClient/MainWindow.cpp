@@ -10,13 +10,13 @@
 #include "DialogFilterEditor.h"
 #include "version.h"
 
-QString MainWindow::m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
-QString MainWindow::m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
-
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
 {
+	m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
+	m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
+
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
 		move(theSettings.m_mainWindowPos);
@@ -477,7 +477,7 @@ void MainWindow::updateStatusBar()
 
 		if (m_activeClientId.isEmpty() == false && m_activeClientIp.isEmpty() == false)
 		{
-			str += QString(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
+			str += tr(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
 
 			if (m_tcpClient->clientIsActive() == true)
 			{

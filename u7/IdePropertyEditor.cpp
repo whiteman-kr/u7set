@@ -423,7 +423,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 	QString errorCode;
 
-	QByteArray rawData = text.toLocal8Bit();
+	QByteArray rawData = text.toUtf8();
 
 	bool ok = m_filters.load(rawData, &errorCode);
 
@@ -459,7 +459,7 @@ QString IdeTuningFiltersEditor::text()
 
     if (ok == true)
     {
-		QString s = QString::fromLocal8Bit(data);
+		QString s = QString::fromUtf8(data);
 
 		return s;
 
