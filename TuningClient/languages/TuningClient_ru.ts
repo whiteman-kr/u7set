@@ -2009,17 +2009,17 @@ Are you sure you want to take control and %1 the source %2?</source>
     <message>
         <location filename="../../lib/DeviceObject.cpp" line="2000"/>
         <source>Childer device level must be lower that perents.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../../lib/DeviceObject.cpp" line="2038"/>
         <source>Script error:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../../lib/DeviceObject.cpp" line="2045"/>
         <source>DeviceObject is not allowed.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -2268,6 +2268,11 @@ Are you sure you want to take control and %1 the source %2?</source>
         <translation>Нет</translation>
     </message>
     <message>
+        <location filename="../MainWindow.cpp" line="480"/>
+        <source>, active client is %1, %2</source>
+        <translation>, активный клиент %1, %2</translation>
+    </message>
+    <message>
         <location filename="../MainWindow.cpp" line="484"/>
         <source> (current)</source>
         <translation> (текущий)</translation>
@@ -2403,7 +2408,7 @@ Are you sure you want to take control and %1 the source %2?</source>
     <message>
         <location filename="../../lib/OutputLog.h" line="30"/>
         <source>Null pointer occurred! File: %1 Line: %2 Function: %3</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="227"/>
@@ -2416,12 +2421,12 @@ Are you sure you want to take control and %1 the source %2?</source>
         <translation>Приложение уже запущено!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="13"/>
+        <location filename="../MainWindow.cpp" line="17"/>
         <source>Single LM Control Mode</source>
         <translation>Режим управления одним LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="14"/>
+        <location filename="../MainWindow.cpp" line="18"/>
         <source>Multiple LM Control Mode</source>
         <translation>Режим управления несколькими ЛМ</translation>
     </message>
@@ -3039,35 +3044,31 @@ Are you sure you want to take control and %1 the source %2?</source>
 <context>
     <name>TuningClientTcpClient</name>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="177"/>
         <source>Tuning Service connection
 
 </source>
-        <translation>Соедниение с Tuning Service
+        <translation type="vanished">Соедниение с Tuning Service
 
 </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="178"/>
         <source>Address (primary): %1
 </source>
-        <translation>Адрес (основной): %1
+        <translation type="vanished">Адрес (основной): %1
 </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="179"/>
         <source>Address (secondary): %1
 
 </source>
-        <translation>Адрес (резервный): %1
+        <translation type="vanished">Адрес (резервный): %1
 
 </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="180"/>
         <source>Address (current): %1
 </source>
-        <translation>Адрес (текущий): %1
+        <translation type="vanished">Адрес (текущий): %1
 </translation>
     </message>
     <message>
@@ -3674,7 +3675,7 @@ Are you sure you want to take control and %1 the source %2?</source>
 
 Текущий клиент не является активным.
 
-Вы уверены, что хотите взять управление и %1 источник %2?</translation>
+Вы хотите взять управление и %1 источник %2?</translation>
     </message>
     <message>
         <location filename="../TuningWorkspace.cpp" line="1128"/>

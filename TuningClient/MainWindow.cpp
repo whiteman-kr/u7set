@@ -477,7 +477,7 @@ void MainWindow::updateStatusBar()
 
 		if (m_activeClientId.isEmpty() == false && m_activeClientIp.isEmpty() == false)
 		{
-			str += QString(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
+			str += tr(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
 
 			if (m_tcpClient->clientIsActive() == true)
 			{
