@@ -246,4 +246,12 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 	m_tuningSourceWidgetList.append(newWidget);
 
 	connect(this, &TuningServiceWidget::newTcpClientSocket, newWidget, &TuningSourceWidget::setClientSocket);
+	connect(newWidget, &TuningSourceWidget::forgetMe, this, &TuningServiceWidget::forgetWidget);
+}
+
+void TuningServiceWidget::forgetWidget()
+{
+	TuningSourceWidget *widget = dynamic_cast<TuningSourceWidget*>(sender());
+	TEST_PTR_RETURN(widget);
+	m_tuningSourceWidgetList.removeAll(widget);
 }

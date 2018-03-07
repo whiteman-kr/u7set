@@ -50,6 +50,8 @@ public slots:
 
 	void onTuningSourceDoubleClicked(const QModelIndex &index);
 
+	void forgetWidget();
+
 protected:
 	void createTcpConnection(quint32 ip, quint16 port) override;
 	void dropTcpConnection() override;
