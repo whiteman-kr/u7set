@@ -113,6 +113,8 @@ void TuningServiceWidget::dropTcpConnection()
 	m_tcpClientThread = nullptr;
 
 	m_tcpClientSocket = nullptr;	// Should be deleted on m_tcpClientThread->quitAndWait();
+
+	emit clearTcpClientSocket();
 }
 
 void TuningServiceWidget::updateClientsInfo()
@@ -246,6 +248,8 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 	m_tuningSourceWidgetList.append(newWidget);
 
 	connect(this, &TuningServiceWidget::newTcpClientSocket, newWidget, &TuningSourceWidget::setClientSocket);
+	connect(this, &TuningServiceWidget::clearTcpClientSocket, newWidget, &TuningSourceWidget::unsetClientSocket);
+
 	connect(newWidget, &TuningSourceWidget::forgetMe, this, &TuningServiceWidget::forgetWidget);
 }
 
