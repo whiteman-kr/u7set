@@ -194,7 +194,6 @@ void TuningSourceWidget::setClientSocket(TcpTuningServiceClient *tcpClientSocket
 	m_tcpClientSocket = tcpClientSocket;
 
 	connect(tcpClientSocket, &TcpTuningServiceClient::tuningSoursesStateUpdated, this, &TuningSourceWidget::updateStateFields);
-	connect(tcpClientSocket, &TcpTuningServiceClient::disconnected, this, &TuningSourceWidget::unsetClientSocket);
 
 	const Network::DataSourceInfo* pInfo = nullptr;
 
