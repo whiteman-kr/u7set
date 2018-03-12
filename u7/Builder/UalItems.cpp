@@ -2385,6 +2385,9 @@ namespace Builder
 			str.append(ualSignal->isTuningable() == true ? "true" : "false");
 			str += ";";
 
+			str.append(ualSignal->isOptoSignal() == true ? "true" : "false");
+			str += ";";
+
 			str.append(QString::number(ualSignal->ualAddr().offset()));
 			str += ";";
 			str.append(QString::number(ualSignal->ualAddr().bit()));
