@@ -837,11 +837,11 @@ namespace Builder
 	///
 	void IssueLogger::errCFG3014(QString suffix, QString objectID)
 	{
+		QString msg = "Can't find child object with suffix " + suffix + " in object " + objectID + ".";
+
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3014,
-				  tr("Can't find child object with suffix '%1' in object '%2'.")
-				  .arg(suffix)
-				  .arg(objectID));
+				  msg);
 	}
 
 	/// IssueCode: CFG3015

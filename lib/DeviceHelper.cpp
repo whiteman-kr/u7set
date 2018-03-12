@@ -145,7 +145,7 @@ bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device, const Q
 		return false;
 	}
 
-	if (*value < 1 || *value > 65535)
+	if (*value < 0 || *value > 65535)
 	{
 		log->errCFG3027(device->equipmentIdTemplate(), name);
 		return false;

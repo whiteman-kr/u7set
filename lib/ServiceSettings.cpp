@@ -10,155 +10,33 @@ const char* CfgServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
 
 // -------------------------------------------------------------------------------------
 //
-// AppDataServiceChannel class implementation
-//
-// -------------------------------------------------------------------------------------
-
-const char* AppDataServiceChannel::PROP_APP_DATA_NETMASK = "AppDataNetmask";
-const char* AppDataServiceChannel::PROP_APP_DATA_RECEIVING_IP = "AppDataReceivingIP";
-const char* AppDataServiceChannel::PROP_APP_DATA_RECEIVING_PORT = "AppDataReceivingPort";
-
-const char* AppDataServiceChannel::PROP_ARCH_SERVICE_ID = "ArchiveServiceID";
-const char* AppDataServiceChannel::PROP_ARCH_SERVICE_IP = "ArchiveServiceIP";
-const char* AppDataServiceChannel::PROP_ARCH_SERVICE_PORT = "ArchiveServicePort";
-
-const char* AppDataServiceChannel::PROP_CFG_SERVICE_ID = "ConfigurationServiceID";
-
-const char* AppDataServiceChannel::SECTION_FORMAT_STR = "DataChannel%1";
-
-
-bool AppDataServiceChannel::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::DeviceController* controller, Builder::IssueLogger* log)
-{
-	TEST_PTR_RETURN_FALSE(equipment);
-	TEST_PTR_RETURN_FALSE(controller);
-	TEST_PTR_RETURN_FALSE(log);
-
-	bool result = true;
-
-	QString appDataNetmaskStr;
-	QString appDataReceivingIPStr;
-	int appDataReceivingPort = 0;
-
-	result &= DeviceHelper::getStrProperty(controller, PROP_APP_DATA_NETMASK, &appDataNetmaskStr, log);
-	result &= DeviceHelper::getStrProperty(controller, PROP_APP_DATA_RECEIVING_IP, &appDataReceivingIPStr, log);
-	result &= DeviceHelper::getIntProperty(controller, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingPort, log);
-
-	result &= DeviceHelper::getStrProperty(controller, PROP_ARCH_SERVICE_ID, &archServiceStrID, log);
-
-	if (archServiceStrID.isEmpty() == false)
-	{
-		Hardware::DeviceObject* deviceObject = equipment->deviceObject(archServiceStrID);
-
-		if (deviceObject == nullptr || deviceObject->isSoftware() == false)
-		{
-			// Property '%1.%2' is linked to undefined software ID '%3'.
-			//
-			log->errCFG3021(controller->equipmentIdTemplate(), PROP_ARCH_SERVICE_ID, archServiceStrID);
-			return false;
-		}
-
-		const Hardware::Software* software = deviceObject->toSoftware();
-
-		if (software == nullptr)
-		{
-			LOG_INTERNAL_ERROR(log);
-			return false;
-		}
-
-		QString ipStr;
-		int port = 0;
-
-		result &= DeviceHelper::getStrProperty(software, ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_IP, &ipStr, log);
-		result &= DeviceHelper::getIntProperty(software, ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_PORT, &port, log);
-
-		if (result == true)
-		{
-			archServiceIP.setAddress(ipStr);
-			archServiceIP.setPort(port);
-		}
-	}
-
-	result &= DeviceHelper::getStrProperty(controller, PROP_CFG_SERVICE_ID, &cfgServiceStrID, log);
-
-	if (result == true)
-	{
-		appDataNetmask.setAddress(appDataNetmaskStr);
-		appDataReceivingIP = HostAddressPort(appDataReceivingIPStr, appDataReceivingPort);
-	}
-
-	return result;
-}
-
-
-QString AppDataServiceChannel::sectionName(int channel)
-{
-	return QString(SECTION_FORMAT_STR).arg(channel + 1);
-}
-
-
-bool AppDataServiceChannel::writeToXml(XmlWriteHelper& xml, int channel)
-{
-	xml.writeStartElement(sectionName(channel));
-
-	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataReceivingIP);
-	xml.writeHostAddress(PROP_APP_DATA_NETMASK, appDataNetmask);
-
-	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceStrID);
-	xml.writeHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, archServiceIP);
-
-	xml.writeStringElement(PROP_CFG_SERVICE_ID, cfgServiceStrID);
-
-	xml.writeEndElement();		//	</DataChannelN>
-
-	return true;
-}
-
-
-bool AppDataServiceChannel::readFromXml(XmlReadHelper& xml, int channel)
-{
-	if (xml.findElement(sectionName(channel)) == false)
-	{
-		return false;
-	}
-
-	bool result = true;
-
-	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
-	result &= xml.readHostAddress(PROP_APP_DATA_NETMASK, &appDataNetmask);
-
-	if (xml.findElement(PROP_ARCH_SERVICE_ID) == false)
-	{
-		return false;
-	}
-
-	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceStrID);
-
-	result &= xml.readHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, &archServiceIP);
-
-	if (xml.findElement(PROP_CFG_SERVICE_ID) == false)
-	{
-		return false;
-	}
-
-	result &= xml.readStringElement(PROP_CFG_SERVICE_ID, &cfgServiceStrID);
-
-	return result;
-}
-
-
-// -------------------------------------------------------------------------------------
-//
 // AppDataServiceSettings class implementation
 //
 // -------------------------------------------------------------------------------------
 
-const char* AppDataServiceSettings::DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR = "_DATACH0%1";
 const char* AppDataServiceSettings::SECTION_NAME = "Settings";
+
+const char* AppDataServiceSettings::PROP_APP_DATA_NETMASK = "AppDataNetmask";
+const char* AppDataServiceSettings::PROP_APP_DATA_RECEIVING_IP = "AppDataReceivingIP";
+const char* AppDataServiceSettings::PROP_APP_DATA_RECEIVING_PORT = "AppDataReceivingPort";
+
+const char* AppDataServiceSettings::PROP_AUTO_ARCHIVE_INTERVAL = "AutoArchiveInterval";
+
 const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
 const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
-const char* AppDataServiceSettings::PROP_AUTO_ARCHIVE_INTERVAL = "AutoArchiveInterval";
 
+const char* AppDataServiceSettings::PROP_ARCH_SERVICE_ID = "ArchiveServiceID";
+const char* AppDataServiceSettings::PROP_ARCH_SERVICE_IP = "ArchiveServiceIP";
+const char* AppDataServiceSettings::PROP_ARCH_SERVICE_PORT = "ArchiveServicePort";
+
+const char* AppDataServiceSettings::PROP_CFG_SERVICE_ID1 = "ConfigurationServiceID1";
+const char* AppDataServiceSettings::PROP_CFG_SERVICE_IP1 = "ConfigurationServiceIP1";
+const char* AppDataServiceSettings::PROP_CFG_SERVICE_PORT1 = "ConfigurationServicePort1";
+
+const char* AppDataServiceSettings::PROP_CFG_SERVICE_ID2 = "ConfigurationServiceID2";
+const char* AppDataServiceSettings::PROP_CFG_SERVICE_IP2 = "ConfigurationServiceIP3";
+const char* AppDataServiceSettings::PROP_CFG_SERVICE_PORT2 = "ConfigurationServicePort4";
 
 bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
@@ -168,53 +46,64 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 
 	bool result = true;
 
-	QString clientRequestIPStr;
-	int clientRequestPort = 0;
-	QString clientNetmaskStr;
+	QString netmaskStr;
+	QString ipStr;
+	int port = 0;
 
-	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_IP, &clientRequestIPStr, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_CLIENT_REQUEST_PORT, &clientRequestPort, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientNetmaskStr, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_RECEIVING_IP, &ipStr, false, log);
+	result &= DeviceHelper::getPortProperty(software, PROP_APP_DATA_RECEIVING_PORT, &port, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_NETMASK, &netmaskStr, false, log);
 
-	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
-	clientRequestNetmask.setAddress(clientNetmaskStr);
-
-	QString archServiceID[DATA_CHANNEL_COUNT];
-
-	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
-	{
-		Hardware::DeviceController* ethernet =
-				DeviceHelper::getChildControllerBySuffix(software,
-					QString(DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR).arg(channel + 1), log);
-
-		if (ethernet == nullptr)
-		{
-			// Can't find child object wuith suffix '%1' in object '%2'
-			//
-			log->errCFG3014(DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR, software->equipmentIdTemplate());
-
-			result = false;
-			continue;
-		}
-
-		result &= appDataServiceChannel[channel].readFromDevice(equipment, ethernet, log);
-
-		if (result == false)
-		{
-			continue;
-		}
-
-		archServiceID[channel] = appDataServiceChannel[channel].archServiceStrID;
-	}
-
-	if (archServiceID[DATA_CHANNEL_1].isEmpty() == false && archServiceID[DATA_CHANNEL_1] == archServiceID[DATA_CHANNEL_2])
-	{
-		log->wrnCFG3024(software->equipmentIdTemplate(), archServiceID[DATA_CHANNEL_1]);
-	}
-
-	//
+	appDataReceivingIP.setAddressPort(ipStr, port);
+	appDataNetmask.setAddress(netmaskStr);
 
 	result &= DeviceHelper::getIntProperty(software, PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, log);
+
+	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_IP, &ipStr, false, log);
+	result &= DeviceHelper::getPortProperty(software, PROP_CLIENT_REQUEST_PORT, &port, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_NETMASK, &netmaskStr, false, log);
+
+	clientRequestIP.setAddressPort(ipStr, port);
+	clientRequestNetmask.setAddress(netmaskStr);
+
+	result &= DeviceHelper::getStrProperty(software, PROP_ARCH_SERVICE_ID, &archServiceID, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_ARCH_SERVICE_IP, &ipStr, false, log);
+	result &= DeviceHelper::getPortProperty(software, PROP_ARCH_SERVICE_PORT, &port, log);
+
+	archServiceIP.setAddressPort(ipStr, port);
+
+	if (archServiceID.isEmpty() == true)
+	{
+		//  Property '%1.%2' is empty.
+		//
+		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_ARCH_SERVICE_ID);
+	}
+
+	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &cfgServiceID1, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_CFG_SERVICE_IP1, &ipStr, false, log);
+	result &= DeviceHelper::getPortProperty(software, PROP_CFG_SERVICE_PORT1, &port, log);
+
+	cfgServiceIP1.setAddressPort(ipStr, port);
+
+	if (cfgServiceID1.isEmpty() == true)
+	{
+		//  Property '%1.%2' is empty.
+		//
+		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1);
+	}
+
+	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &cfgServiceID2, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_CFG_SERVICE_IP2, &ipStr, false, log);
+	result &= DeviceHelper::getPortProperty(software, PROP_CFG_SERVICE_PORT2, &port, log);
+
+	cfgServiceIP2.setAddressPort(ipStr, port);
+
+	if (cfgServiceID2.isEmpty() == true)
+	{
+		//  Property '%1.%2' is empty.
+		//
+		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID2);
+	}
 
 	return result;
 }
@@ -226,15 +115,22 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeStartElement(SECTION_NAME);
 
+	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataReceivingIP);
+	xml.writeHostAddress(PROP_APP_DATA_NETMASK, appDataNetmask);
+
+	xml.writeIntElement(PROP_AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
+
 	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
-	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
-	{
-		appDataServiceChannel[channel].writeToXml(xml, channel);
-	}
+	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceID);
+	xml.writeHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, archServiceIP);
 
-	xml.writeIntElement(PROP_AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
+	xml.writeStringElement(PROP_CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(PROP_CFG_SERVICE_IP1, PROP_CFG_SERVICE_PORT1, cfgServiceIP1);
+
+	xml.writeStringElement(PROP_CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(PROP_CFG_SERVICE_IP2, PROP_CFG_SERVICE_PORT2, cfgServiceIP2);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -255,11 +151,6 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
 
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
-
-	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
-	{
-		result &= appDataServiceChannel[channel].readFromXml(xml, channel);
-	}
 
 	result &= xml.findElement(PROP_AUTO_ARCHIVE_INTERVAL);
 
