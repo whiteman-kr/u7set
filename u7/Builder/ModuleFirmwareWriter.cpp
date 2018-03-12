@@ -1,6 +1,7 @@
 #include "../Builder/ModuleFirmwareWriter.h"
 #include "../lib/CsvFile.h"
 #include "../lib/Crc.h"
+#include "../lib/WUtils.h"
 #include <QtEndian>
 #include "version.h"
 
@@ -494,6 +495,31 @@ namespace Hardware
 		return true;
 	}
 
+	bool ModuleFirmwareWriter::setDataFloat(int frameIndex, int offset, float data)
+	{
+		if (scriptFirmwareData == nullptr)	//maybe setScriptFirmware is not called!
+		{
+			assert(scriptFirmwareData);
+			return false;
+		}
+
+		//
+
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->eepromFramePayloadSize - sizeof(data)))
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		float dataBE = reverseFloat(data);
+
+		float* ptr = reinterpret_cast<float*>(scriptFirmwareData->frames[frameIndex].data() + offset);
+		*ptr = dataBE;
+
+		return true;
+	}
+
 	bool ModuleFirmwareWriter::setData64(int frameIndex, int offset, quint64 data)
 	{
 		if (scriptFirmwareData == nullptr)	//maybe setScriptFirmware is not called!
@@ -585,6 +611,29 @@ namespace Hardware
 
 		quint32 data = *(reinterpret_cast<quint32*>(frameData.data() + offset));
 		return qFromBigEndian(data);
+	}
+
+	float ModuleFirmwareWriter::dataFloat(int frameIndex, int offset)
+	{
+		if (scriptFirmwareData == nullptr)	//maybe setScriptFirmware is not called!
+		{
+			assert(scriptFirmwareData);
+			return false;
+		}
+
+		//
+
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) ||
+				offset > (int)(scriptFirmwareData->eepromFramePayloadSize - sizeof(float)))
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return 0;
+		}
+
+		std::vector<quint8>& frameData = scriptFirmwareData->frames[frameIndex];
+
+		float data = *(reinterpret_cast<float*>(frameData.data() + offset));
+		return reverseFloat(data);
 	}
 
 	JsVariantList* ModuleFirmwareWriter::calcHash64(QString dataString)
