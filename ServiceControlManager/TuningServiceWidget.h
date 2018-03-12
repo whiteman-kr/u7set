@@ -38,6 +38,7 @@ public:
 
 signals:
 	void newTcpClientSocket(TcpTuningServiceClient* tcpClientSocket);
+	void clearTcpClientSocket();
 
 public slots:
 	void updateStateInfo();

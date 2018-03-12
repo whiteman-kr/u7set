@@ -145,13 +145,22 @@ namespace Tuning
 
 			bool writeInProgress() const { return m_writeInProgress; }
 
+			void setWriteClient(const QString& clientEquipmentID) { m_writeClient = calcHash(clientEquipmentID); }
+			void setWriteInProgress(bool inProgress) { m_writeInProgress = inProgress; }
+			void setWriteRequestTime(qint64 writeRequestTime) { m_writeRequestTime = writeRequestTime; }
+			void setSuccessfulWriteTime(qint64 writeTime) { m_successfulWriteTime = writeTime; }
+			void setUnsuccessfulWriteTime(qint64 writeTime) { m_unsuccessfulWriteTime = writeTime; }
+
 			qint64 successfulReadTime() const { return m_successfulReadTime; }
 			qint64 writeRequestTime() const { return m_writeRequestTime; }
 			qint64 successfulWriteTime() const { return m_successfulWriteTime; }
 			qint64 unsuccessfulWriteTime() const { return m_unsuccessfulWriteTime; }
 
 			Hash writeClient() const { return m_writeClient; }
-			int writeErrorCode() const { return m_writeErrorCode; }
+
+			NetworkError writeErrorCode() const { return m_writeErrorCode; }
+			void setWriteErrorCode(NetworkError errCode) { m_writeErrorCode = errCode; }
+			void resetWriteErrorCode() { setWriteErrorCode(NetworkError::Success); }
 
 			FotipV2::DataType fotipV2DataType();
 
@@ -193,8 +202,8 @@ namespace Tuning
 			qint64 m_successfulWriteTime = 0;		// time of last succesfull signal writing (UTC), usually should be near m_writeRequestTime
 			qint64 m_unsuccessfulWriteTime = 0;		// time of last unsuccesfull signal writing (UTC), usually should be near m_writeRequestTime
 
-			Hash m_writeClient = 0;					// last write client's EquipmentID hash
-			int m_writeErrorCode = 0;				// last write error code
+			Hash m_writeClient = 0;									// last write client's EquipmentID hash
+			NetworkError m_writeErrorCode = NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
 		};
 
 	public:
@@ -249,6 +258,7 @@ namespace Tuning
 		void processApplyReply(RupFotipV2& reply);
 
 		void updateFrameSignalsState(RupFotipV2& reply);
+		void finalizeWriting(NetworkError errCode);
 
 		bool checkRupHeader(const Rup::Header& rupHeader);
 		bool checkFotipHeader(const FotipV2::Header& fotipHeader);

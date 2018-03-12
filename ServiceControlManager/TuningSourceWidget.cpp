@@ -22,7 +22,6 @@ struct dynamicPropertyFieldDefinition
 };
 
 static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
-	{ QStringLiteral("SourceID"), [](const Network::DataSourceInfo& info) { return QString("0x%1").arg(info.id(), sizeof(info.id()) * 2, 16, QChar('0')); } },
 	{ QStringLiteral("EquipmentID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.equipmentid()); } },
 	{ QStringLiteral("Caption"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.caption()); } },
 	{ QStringLiteral("DataType"), [](const Network::DataSourceInfo& info) { return QString::number(info.datatype()); } },
@@ -37,11 +36,11 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
 	{ QStringLiteral("LmAdapterID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmadapterid()); } },
 	{ QStringLiteral("LmDataEnable"), [](const Network::DataSourceInfo& info) { return info.lmdataenable() ? "Yes" : "No"; } },
 	{ QStringLiteral("LmDataID"), [](const Network::DataSourceInfo& info) { return QString("0x%1").arg(info.lmdataid(), sizeof(info.lmdataid()) * 2, 16, QChar('0')); } },
+
+	{ QStringLiteral("SourceID"), [](const Network::DataSourceInfo& info) { return "0x" + QString("%1").arg(info.id(), sizeof(info.id()) * 2, 16, QChar('0')).toUpper(); } },
 };
 
 static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
-	{ QStringLiteral("SourceID"), [](const Network::TuningSourceState& state) { return QString("0x%1").arg(state.sourceid(), sizeof(state.sourceid()) * 2, 16, QChar('0')); } },
-
 	{ QStringLiteral("IsReply"), [](const Network::TuningSourceState& state) { return state.isreply() ? "Yes" : "No"; } },
 
 	{ QStringLiteral("ControlIsActive"), [](const Network::TuningSourceState& state) { return state.controlisactive() ? "Yes" : "No"; } },
@@ -195,7 +194,6 @@ void TuningSourceWidget::setClientSocket(TcpTuningServiceClient *tcpClientSocket
 	m_tcpClientSocket = tcpClientSocket;
 
 	connect(tcpClientSocket, &TcpTuningServiceClient::tuningSoursesStateUpdated, this, &TuningSourceWidget::updateStateFields);
-	connect(tcpClientSocket, &TcpTuningServiceClient::disconnected, this, &TuningSourceWidget::unsetClientSocket);
 
 	const Network::DataSourceInfo* pInfo = nullptr;
 
