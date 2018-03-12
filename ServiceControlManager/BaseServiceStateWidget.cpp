@@ -19,6 +19,8 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	m_udpPort(udpPort),
 	m_softwareInfo(softwareInfo)
 {
+	setWindowFlag(Qt::Dialog, true);
+
 	m_tabWidget = new QTabWidget(this);
 	setCentralWidget(m_tabWidget);
 
