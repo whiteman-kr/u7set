@@ -108,11 +108,14 @@ void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 void TuningServiceWidget::dropTcpConnection()
 {
-	m_tcpClientThread->quitAndWait();
-	delete m_tcpClientThread;
-	m_tcpClientThread = nullptr;
+	if (m_tcpClientThread != nullptr)
+	{
+		m_tcpClientThread->quitAndWait();
+		delete m_tcpClientThread;
+		m_tcpClientThread = nullptr;
 
-	m_tcpClientSocket = nullptr;	// Should be deleted on m_tcpClientThread->quitAndWait();
+		m_tcpClientSocket = nullptr;	// Should be deleted on m_tcpClientThread->quitAndWait();
+	}
 
 	emit clearTcpClientSocket();
 }
@@ -238,7 +241,7 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 		}
 	}
 
-	TuningSourceWidget* newWidget = new TuningSourceWidget(ts.id(), ts.equipmentId());
+	TuningSourceWidget* newWidget = new TuningSourceWidget(ts.id(), ts.equipmentId(), this);
 	newWidget->setClientSocket(m_tcpClientSocket);
 
 	newWidget->show();

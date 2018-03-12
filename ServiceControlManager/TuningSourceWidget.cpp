@@ -107,6 +107,8 @@ TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, QWidget 
 	m_id(id),
 	m_equipmentId(equipmentId)
 {
+	setWindowFlag(Qt::Dialog, true);
+
 	setAttribute(Qt::WA_DeleteOnClose);
 	QHBoxLayout* hl = new QHBoxLayout();
 	m_splitter = new QSplitter(this);
