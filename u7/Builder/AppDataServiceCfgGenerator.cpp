@@ -91,16 +91,11 @@ namespace Builder
 				continue;
 			}
 
-			for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+			int connectedAdaptersCount = 0;
+
+			for(int adapter = LM_ETHERNET_ADAPTER2; adapter <= LM_ETHERNET_ADAPTER3; adapter++)
 			{
 				LmEthernetAdapterNetworkProperties lmNetProperties;
-
-				int adapter = LM_ETHERNET_ADAPTER2;
-
-				if (channel == 1)
-				{
-					adapter = LM_ETHERNET_ADAPTER3;
-				}
 
 				result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, m_log);
 
@@ -124,43 +119,56 @@ namespace Builder
 					break;
 				}
 
-				if (lmNetProperties.appDataServiceID == m_software->equipmentIdTemplate())
+				if (lmNetProperties.appDataServiceID != m_software->equipmentIdTemplate())
 				{
-					int lmSubsystemID = 0;
-
-					int subsystemsCount = m_subsystems->count();
-
-					for(int i = 0; i < subsystemsCount; i++)
-					{
-						std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
-
-						if (subsystem->subsystemId() == lmSubsystem)
-						{
-							lmSubsystemID = subsystem->key();
-							break;
-						}
-					}
-
-					DataSource ds;
-
-					ds.setLmChannel(channel);
-					ds.setLmSubsystem(lmSubsystem);
-					ds.setLmSubsystemID(lmSubsystemID);
-					ds.setLmNumber(lmNumber);
-					ds.setLmDataType(DataSource::DataType::App);
-					ds.setLmEquipmentID(lm->equipmentIdTemplate());
-					ds.setLmModuleType(lm->moduleType());
-					ds.setLmCaption(lm->caption());
-					ds.setLmDataID(lmAppLANDataUID);
-					ds.setLmAdapterID(lmNetProperties.adapterID);
-					ds.setLmDataEnable(lmNetProperties.appDataEnable);
-					ds.setLmAddressStr(lmNetProperties.appDataIP);
-					ds.setLmPort(lmNetProperties.appDataPort);
-
-					result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
-
-					ds.writeToXml(xml);
+					continue;
 				}
+
+				if (connectedAdaptersCount > 0)
+				{
+					// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+					//
+					m_log->errCFG3028(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
+					result = false;
+					break;
+				}
+
+				connectedAdaptersCount++;
+
+				int lmSubsystemID = 0;
+
+				int subsystemsCount = m_subsystems->count();
+
+				for(int i = 0; i < subsystemsCount; i++)
+				{
+					std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+
+					if (subsystem->subsystemId() == lmSubsystem)
+					{
+						lmSubsystemID = subsystem->key();
+						break;
+					}
+				}
+
+				DataSource ds;
+
+//				ds.setLmChannel(channel);
+				ds.setLmSubsystem(lmSubsystem);
+				ds.setLmSubsystemID(lmSubsystemID);
+				ds.setLmNumber(lmNumber);
+				ds.setLmDataType(DataSource::DataType::App);
+				ds.setLmEquipmentID(lm->equipmentIdTemplate());
+				ds.setLmModuleType(lm->moduleType());
+				ds.setLmCaption(lm->caption());
+				ds.setLmDataID(lmAppLANDataUID);
+				ds.setLmAdapterID(lmNetProperties.adapterID);
+				ds.setLmDataEnable(lmNetProperties.appDataEnable);
+				ds.setLmAddressStr(lmNetProperties.appDataIP);
+				ds.setLmPort(lmNetProperties.appDataPort);
+
+				result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
+
+				ds.writeToXml(xml);
 			}
 
 			if (result == false)

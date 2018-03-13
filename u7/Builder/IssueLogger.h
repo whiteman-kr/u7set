@@ -143,6 +143,7 @@ namespace Builder
 		void errCFG3025(QString suffix, QString objectID);									// Can't find child controller with suffix '%1' in object '%2'
 		void errCFG3026(QString objectID, QString propertyName);							// Value of property %1.%2 is not valid IPv4 address.
 		void errCFG3027(QString objectID, QString propertyName);							// Ethernet port number property %1.%2 should be in range 1..65535.
+		void errCFG3028(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
 
 		// ALP			Application Logic Parsing				4000-4999
 		//

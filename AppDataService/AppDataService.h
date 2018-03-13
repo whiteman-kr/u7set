@@ -117,12 +117,12 @@ private:
 
 	AppSignalStates m_signalStates;
 
-	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+	AppDataChannelThread* m_appDataChannelThread = nullptr;
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
-	Tcp::Thread* m_tcpArchiveClientThreads[AppDataServiceSettings::DATA_CHANNEL_COUNT];
-	TcpArchiveClient* m_tcpArchiveClients[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+	Tcp::Thread* m_tcpArchiveClientThread = nullptr;
+	TcpArchiveClient* m_tcpArchiveClient = nullptr;
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 

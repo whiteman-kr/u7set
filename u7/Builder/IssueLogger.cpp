@@ -1128,6 +1128,27 @@ namespace Builder
 				  tr("Ethernet port number property %1.%2 should be in range 1..65535.").arg(objectID).arg(propertyName));
 	}
 
+	/// IssueCode: CFG3028
+	///
+	/// IssueType: Error
+	///
+	/// Title: Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+	///
+	/// Parameters:
+	///			%1 LM equipmentID
+	///         %2 AppDataService equipmentID
+	///
+	/// Description:
+	///			Two LM's etehrnet adapters can't be connected to same AppDataService. Check LM's ethernet adapters settings.
+	///
+	void IssueLogger::errCFG3028(QString lmID, QString appDataServiceID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3028,
+				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
+						arg(lmID).arg(appDataServiceID));
+	}
+
 	// ALP			Application Logic Parsing				4000-4999
 	//
 
