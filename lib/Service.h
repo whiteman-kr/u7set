@@ -95,6 +95,11 @@ public:
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
 
+	QString equipmentID() const { return m_equipmentID; }
+
+	HostAddressPort cfgServiceIP1() const { return m_cfgServiceIP1; }
+	HostAddressPort cfgServiceIP2() const { return m_cfgServiceIP2; }
+
 	bool clearSettings();								// clear all service settings
 
 signals:
@@ -117,7 +122,20 @@ private:
 	void onThreadStarted() final;
 	void onThreadFinished() final;
 
+protected:
+	static const char* const SETTING_EQUIPMENT_ID;
+	static const char* const SETTING_CFG_SERVICE_IP1;
+	static const char* const SETTING_CFG_SERVICE_IP2;
+
 private:
+	QString m_equipmentID;
+
+	QString m_cfgServiceIP1Str;
+	HostAddressPort m_cfgServiceIP1;
+
+	QString m_cfgServiceIP2Str;
+	HostAddressPort m_cfgServiceIP2;
+
 	SoftwareInfo m_softwareInfo;
 	QString m_serviceName;
 	int& m_argc;

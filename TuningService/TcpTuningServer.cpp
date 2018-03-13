@@ -557,8 +557,8 @@ namespace Tuning
 		m_getServiceSettingsReply.Clear();
 
 		m_getServiceSettingsReply.set_equipmentid(m_service.equipmentID().toStdString());
-		m_getServiceSettingsReply.set_configip1(m_service.cfgServiceIP1().toStdString());
-		m_getServiceSettingsReply.set_configip2(m_service.cfgServiceIP2().toStdString());
+		m_getServiceSettingsReply.set_configip1(m_service.cfgServiceIP1().addressPortStr().toStdString());
+		m_getServiceSettingsReply.set_configip2(m_service.cfgServiceIP2().addressPortStr().toStdString());
 
 		sendReply(m_getServiceSettingsReply);
 	}
