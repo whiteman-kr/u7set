@@ -1,17 +1,17 @@
-#include "SimulatorControlPage.h"
+#include "SimControlPage.h"
 #include <QGridLayout>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QMenu>
 
-SimulatorControlPage::SimulatorControlPage(std::shared_ptr<Sim::LogicModule> logicModule,
-										   std::shared_ptr<SimIdeSimulator> simulator,
-										   QWidget* parent)
-	: SimulatorBasePage(simulator, parent),
-	m_logicModule(logicModule)
+SimControlPage::SimControlPage(SimIdeSimulator* simulator,
+							   QString equipmentId,
+							   QWidget* parent)
+	: SimBasePage(simulator, parent),
+	m_lmEquipmentId(equipmentId)
 {
 	assert(m_simulator);
-	assert(m_logicModule);
+	assert(m_lmEquipmentId.isEmpty() == false);
 
 	// --
 	//
@@ -87,27 +87,30 @@ SimulatorControlPage::SimulatorControlPage(std::shared_ptr<Sim::LogicModule> log
 
 	// --
 	//
-	connect(m_schemaFilterEdit, &QLineEdit::textChanged, this, &SimulatorControlPage::schemaFilterChanged);
+	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimControlPage::projectUpdated);
 
-	connect(m_schemasList, &QTreeWidget::customContextMenuRequested, this, &SimulatorControlPage::schemaContextMenuRequested);
-	connect(m_schemasList, &QTreeWidget::itemDoubleClicked, this, &SimulatorControlPage::schemaItemDoubleClicked);
+	connect(m_codeButton, &QPushButton::clicked, this, &SimControlPage::codeButtonClicked);
+
+	connect(m_schemaFilterEdit, &QLineEdit::textChanged, this, &SimControlPage::schemaFilterChanged);
+
+	connect(m_schemasList, &QTreeWidget::customContextMenuRequested, this, &SimControlPage::schemaContextMenuRequested);
+	connect(m_schemasList, &QTreeWidget::itemDoubleClicked, this, &SimControlPage::schemaItemDoubleClicked);
 
 	return;
 }
 
-void SimulatorControlPage::updateLogicModuleInfoInfo()
+void SimControlPage::updateLogicModuleInfoInfo()
 {
-	if (m_logicModule == nullptr)
+	auto lm = logicModule();
+	if (lm == nullptr)
 	{
 		return;
 	}
 
-	const Hardware::LogicModuleInfo& lmInfo = m_logicModule->logicModuleInfo();
+	const Hardware::LogicModuleInfo& lmInfo = lm->logicModuleInfo();
 
 	m_subsystemIdLabel->setText(QString("Subsystem: %1").arg("TODO"));
-
 	m_equipmentIdLabel->setText(QString("EquipmnetID: %1").arg(lmInfo.equipmentId));
-
 	m_channelLabel->setText(QString("LmNumber: %1, Channel: %2")
 								.arg(lmInfo.lmNumber)
 								.arg(QChar('A' + static_cast<char>(lmInfo.channel))));
@@ -119,7 +122,7 @@ void SimulatorControlPage::updateLogicModuleInfoInfo()
 	return;
 }
 
-void SimulatorControlPage::fillSchemaList()
+void SimControlPage::fillSchemaList()
 {
 	assert(m_schemasList);
 	m_schemasList->clear();
@@ -161,12 +164,24 @@ void SimulatorControlPage::fillSchemaList()
 	return;
 }
 
-void SimulatorControlPage::schemaFilterChanged()
+void SimControlPage::projectUpdated()
+{
+	updateLogicModuleInfoInfo();
+	return;
+}
+
+void SimControlPage::codeButtonClicked()
+{
+	emit openCodePageRequest(equipmnetId());
+	return;
+}
+
+void SimControlPage::schemaFilterChanged()
 {
 	fillSchemaList();
 }
 
-void SimulatorControlPage::schemaContextMenuRequested(const QPoint& pos)
+void SimControlPage::schemaContextMenuRequested(const QPoint& pos)
 {
 	assert(m_schemasList);
 
@@ -189,7 +204,7 @@ void SimulatorControlPage::schemaContextMenuRequested(const QPoint& pos)
 	return;
 }
 
-void SimulatorControlPage::schemaItemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
+void SimControlPage::schemaItemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
 {
 	if (item == nullptr)
 	{
@@ -200,7 +215,7 @@ void SimulatorControlPage::schemaItemDoubleClicked(QTreeWidgetItem* item, int /*
 	return;
 }
 
-void SimulatorControlPage::openSelectedSchema()
+void SimControlPage::openSelectedSchema()
 {
 	assert(m_schemasList);
 
@@ -223,13 +238,17 @@ void SimulatorControlPage::openSelectedSchema()
 	return;
 }
 
-QString SimulatorControlPage::equipmnetId() const
+QString SimControlPage::equipmnetId() const
 {
-	if (m_logicModule == nullptr)
-	{
-		assert(m_logicModule);
-		return QString();
-	}
+	return m_lmEquipmentId;
+}
 
-	return m_logicModule->equipmentId();
+std::shared_ptr<Sim::LogicModule> SimControlPage::logicModule()
+{
+	return m_simulator->logicModule(m_lmEquipmentId);
+}
+
+std::shared_ptr<Sim::LogicModule> SimControlPage::logicModule() const
+{
+	return m_simulator->logicModule(m_lmEquipmentId);
 }

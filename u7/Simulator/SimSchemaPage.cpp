@@ -1,16 +1,16 @@
-#include "SimulatorSchemaPage.h"
+#include "SimSchemaPage.h"
 #include <QGridLayout>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QMenu>
 
-SimulatorSchemaPage::SimulatorSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
-										 std::shared_ptr<SimIdeSimulator> simulator,
-										 SimSchemaManager* schemaManager,
-										 VFrame30::AppSignalController* appSignalController,
-										 VFrame30::TuningController* tuningController,
-										 QWidget* parent)
-	: SimulatorBasePage(simulator, parent)
+SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
+							 SimIdeSimulator* simulator,
+							 SimSchemaManager* schemaManager,
+							 VFrame30::AppSignalController* appSignalController,
+							 VFrame30::TuningController* tuningController,
+							 QWidget* parent)
+	: SimBasePage(simulator, parent)
 {
 	assert(schema);
 	assert(schemaManager);
@@ -32,7 +32,7 @@ SimulatorSchemaPage::SimulatorSchemaPage(std::shared_ptr<VFrame30::Schema> schem
 	return;
 }
 
-QString SimulatorSchemaPage::schemaId() const
+QString SimSchemaPage::schemaId() const
 {
 	return m_schemaWidget->schemaId();
 }

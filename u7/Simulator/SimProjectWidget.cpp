@@ -1,9 +1,9 @@
-#include "SimulatorProjectWidget.h"
+#include "SimProjectWidget.h"
 #include <QVBoxLayout>
 #include <QMenu>
 #include "../Settings.h"
 
-SimulatorProjectWidget::SimulatorProjectWidget(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent) :
+SimProjectWidget::SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent) :
 	QWidget(parent),
 	m_simulator(simulator)
 {
@@ -48,15 +48,15 @@ SimulatorProjectWidget::SimulatorProjectWidget(std::shared_ptr<SimIdeSimulator> 
 
 	// --
 	//
-	connect(m_equipmentTree, &QTreeWidget::customContextMenuRequested, this, &SimulatorProjectWidget::treeContextMenu);
-	connect(m_equipmentTree, &QTreeWidget::doubleClicked, this, &SimulatorProjectWidget::treeDoubleClicked);
+	connect(m_equipmentTree, &QTreeWidget::customContextMenuRequested, this, &SimProjectWidget::treeContextMenu);
+	connect(m_equipmentTree, &QTreeWidget::doubleClicked, this, &SimProjectWidget::treeDoubleClicked);
 
-	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimulatorProjectWidget::projectUpdated);
+	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimProjectWidget::projectUpdated);
 
 	return;
 }
 
-SimulatorProjectWidget::~SimulatorProjectWidget()
+SimProjectWidget::~SimProjectWidget()
 {
 	QByteArray headerState = m_equipmentTree->header()->saveState();
 	QSettings().setValue("SimulatorProjectWidget/headerState", headerState);
@@ -64,15 +64,18 @@ SimulatorProjectWidget::~SimulatorProjectWidget()
 	return;
 }
 
-void SimulatorProjectWidget::createActions()
+void SimProjectWidget::createActions()
 {
 	m_openLmControlPageAction = new QAction(tr("Control Page..."));
-	connect(m_openLmControlPageAction, &QAction::triggered, this, &SimulatorProjectWidget::openControlTabPage);
+	connect(m_openLmControlPageAction, &QAction::triggered, this, &SimProjectWidget::openControlTabPage);
+
+	m_openLmCodePageAction = new QAction(tr("App Code..."));
+	connect(m_openLmCodePageAction, &QAction::triggered, this, &SimProjectWidget::openCodeTabPage);
 
 	return;
 }
 
-void SimulatorProjectWidget::projectUpdated()
+void SimProjectWidget::projectUpdated()
 {
 	assert(m_buildLabel);
 
@@ -91,7 +94,7 @@ void SimulatorProjectWidget::projectUpdated()
 	return;
 }
 
-void SimulatorProjectWidget::treeContextMenu(const QPoint& pos)
+void SimProjectWidget::treeContextMenu(const QPoint& pos)
 {
 	QTreeWidgetItem* currentItem = m_equipmentTree->currentItem();
 	if (currentItem == nullptr)
@@ -108,12 +111,13 @@ void SimulatorProjectWidget::treeContextMenu(const QPoint& pos)
 	QMenu menu(m_equipmentTree);
 
 	menu.addAction(m_openLmControlPageAction);
+	menu.addAction(m_openLmCodePageAction);
 
 	menu.exec(m_equipmentTree->mapToGlobal(pos));
 	return;
 }
 
-void SimulatorProjectWidget::treeDoubleClicked(const QModelIndex& /*index*/)
+void SimProjectWidget::treeDoubleClicked(const QModelIndex& /*index*/)
 {
 	QTreeWidgetItem* currentItem = m_equipmentTree->currentItem();
 	if (currentItem == nullptr)
@@ -131,7 +135,7 @@ void SimulatorProjectWidget::treeDoubleClicked(const QModelIndex& /*index*/)
 	return;
 }
 
-void SimulatorProjectWidget::openControlTabPage()
+void SimProjectWidget::openControlTabPage()
 {
 	QTreeWidgetItem* currentItem = m_equipmentTree->currentItem();
 	if (currentItem == nullptr)
@@ -152,7 +156,28 @@ void SimulatorProjectWidget::openControlTabPage()
 	return;
 }
 
-void SimulatorProjectWidget::fillEquipmentTree()
+void SimProjectWidget::openCodeTabPage()
+{
+	QTreeWidgetItem* currentItem = m_equipmentTree->currentItem();
+	if (currentItem == nullptr)
+	{
+		return;
+	}
+
+	QString lmEquipmentId = currentItem->data(0, Qt::UserRole).toString();
+	if (lmEquipmentId.isEmpty() == true)
+	{
+		return;
+	}
+
+	// --
+	//
+	emit signal_openCodeTabPage(lmEquipmentId);
+
+	return;
+}
+
+void SimProjectWidget::fillEquipmentTree()
 {
 	assert(m_equipmentTree);
 	m_equipmentTree->clear();

@@ -26,6 +26,7 @@ Q_DECLARE_METATYPE(ArchiveColumns);
 class ArchiveModel : public QAbstractTableModel
 {
 	Q_OBJECT
+
 public:
 	explicit ArchiveModel(QObject* parent = nullptr);
 

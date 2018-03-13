@@ -5,11 +5,11 @@
 #include <QTextEdit>
 #include <QMutex>
 
-class SimulatorOutputWidget : public QTextEdit
+class SimOutputWidget : public QTextEdit
 {
 	Q_OBJECT
 public:
-	explicit SimulatorOutputWidget(QWidget* parent = nullptr);
+	explicit SimOutputWidget(QWidget* parent = nullptr);
 
 public:
 	static void simulatorOutputHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);

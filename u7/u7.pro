@@ -205,22 +205,24 @@ SOURCES +=\
     ../lib/LmDescription.cpp \
     Builder/MemWriteMap.cpp \
     SimulatorTabPage.cpp \
-    Simulator/SimulatorWidget.cpp \
-    Simulator/SimulatorMemoryWidget.cpp \
-    Simulator/SimulatorOutputWidget.cpp \
-    Simulator/SimulatorProjectWidget.cpp \
-    Simulator/SimulatorSelectBuildDialog.cpp \
-    Simulator/SimulatorBasePage.cpp \
-    Simulator/SimulatorControlPage.cpp \
     Simulator/SimIdeSimulator.cpp \
-    Simulator/SimulatorSchemaPage.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
     ../lib/TuningValue.cpp \
     Simulator/SimSchemaWidget.cpp \
     Simulator/SimSchemaManager.cpp \
     Simulator/SimSchemaView.cpp \
     Simulator/SimTuningTcpClient.cpp \
-    ../lib/AppSignalManager.cpp
+    ../lib/AppSignalManager.cpp \
+    Simulator/SimCodePage.cpp \
+    Simulator/SimWidget.cpp \
+    Simulator/SimSelectBuildDialog.cpp \
+    Simulator/SimSchemaPage.cpp \
+    Simulator/SimProjectWidget.cpp \
+    Simulator/SimOutputWidget.cpp \
+    Simulator/SimMemoryWidget.cpp \
+    Simulator/SimControlPage.cpp \
+    Simulator/SimBasePage.cpp \
+    Simulator/SimAppSignalManager.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -363,22 +365,24 @@ HEADERS  += \
     ../lib/LmDescription.h \
     Builder/MemWriteMap.h \
     SimulatorTabPage.h \
-    Simulator/SimulatorWidget.h \
-    Simulator/SimulatorMemoryWidget.h \
     Builder/ConfigurationServiceCfgGenerator.h \
-    Simulator/SimulatorOutputWidget.h \
-    Simulator/SimulatorProjectWidget.h \
-    Simulator/SimulatorSelectBuildDialog.h \
-    Simulator/SimulatorBasePage.h \
-    Simulator/SimulatorControlPage.h \
     Simulator/SimIdeSimulator.h \
-    Simulator/SimulatorSchemaPage.h \
     ../lib/TuningValue.h \
     Simulator/SimSchemaWidget.h \
     Simulator/SimSchemaManager.h \
     Simulator/SimSchemaView.h \
     Simulator/SimTuningTcpClient.h \
-    ../lib/AppSignalManager.h
+    ../lib/AppSignalManager.h \
+    Simulator/SimCodePage.h \
+    Simulator/SimWidget.h \
+    Simulator/SimSelectBuildDialog.h \
+    Simulator/SimSchemaPage.h \
+    Simulator/SimBasePage.h \
+    Simulator/SimControlPage.h \
+    Simulator/SimMemoryWidget.h \
+    Simulator/SimOutputWidget.h \
+    Simulator/SimProjectWidget.h \
+    Simulator/SimAppSignalManager.h
 
 FORMS    += \
     CreateProjectDialog.ui \

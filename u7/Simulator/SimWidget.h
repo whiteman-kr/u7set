@@ -6,29 +6,28 @@
 #include "../lib/DbController.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
+#include "SimAppSignalManager.h"
 #include "SimTuningTcpClient.h"
-#include "../../lib/AppSignalManager.h"
-#include "../../lib/Tuning/TuningSignalManager.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
 
 
-class SimulatorProjectWidget;
-class SimulatorOutputWidget;
-class SimulatorMemoryWidget;
-class SimulatorToolBar;
+class SimProjectWidget;
+class SimOutputWidget;
+class SimMemoryWidget;
+class SimToolBar;
 
 
-class SimulatorWidget : public QMainWindow, HasDbController
+class SimWidget : public QMainWindow, HasDbController
 {
 	Q_OBJECT
 public:
-	SimulatorWidget(std::shared_ptr<SimIdeSimulator> simulator,
-					DbController* db,
-					QWidget* parent = nullptr,
-					Qt::WindowType windowType = Qt::Window,
-					bool slaveWindow = false);		// Cannot have output pane, do not stores its state
-	virtual ~SimulatorWidget();
+	SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
+			  DbController* db,
+			  QWidget* parent = nullptr,
+			  Qt::WindowType windowType = Qt::Window,
+			  bool slaveWindow = false);		// Cannot have output pane, do not stores its state
+	virtual ~SimWidget();
 
 protected:
 	void createToolBar();
@@ -56,6 +55,7 @@ protected slots:
 	void openLogicSchemaTabPage(QString schemaId);
 
 	void openSchemaTabPage(QString fileName);
+	void openCodeTabPage(QString lmEquipmentId);
 
 	void tabCloseRequest(int index);
 	void tabBarContextMenuRequest(const QPoint& pos);
@@ -63,21 +63,19 @@ protected slots:
 private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
 	QTabWidget* m_tabWidget = nullptr;
-	SimulatorToolBar* m_toolBar = nullptr;
-	SimulatorProjectWidget* m_projectWidget = nullptr;
-	std::vector<SimulatorMemoryWidget*> m_memoryWidgets;
+	SimToolBar* m_toolBar = nullptr;
+	SimProjectWidget* m_projectWidget = nullptr;
+	std::vector<SimMemoryWidget*> m_memoryWidgets;
 
 	std::shared_ptr<SimIdeSimulator> m_simulator;
 
 	// --
 	//
-	SimSchemaManager m_schemaManage;
-
-	AppSignalManager m_appSignalManager;
-	TuningSignalManager m_tuningSignalManager;
-	SimTuningTcpClient m_tuningTcpClient;
+	SimSchemaManager m_schemaManager;
 
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
+
+	SimTuningTcpClient m_tuningTcpClient;
 	VFrame30::TuningController* m_tuningController = nullptr;
 
 	// Actions
@@ -94,12 +92,12 @@ private:
 };
 
 
-class SimulatorToolBar : public QToolBar
+class SimToolBar : public QToolBar
 {
 	Q_OBJECT
 public:
-	explicit SimulatorToolBar(const QString& title, QWidget* parent = nullptr);
-	virtual ~SimulatorToolBar();
+	explicit SimToolBar(const QString& title, QWidget* parent = nullptr);
+	virtual ~SimToolBar();
 
 private:
 };

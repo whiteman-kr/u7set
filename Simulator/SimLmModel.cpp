@@ -7,6 +7,15 @@ namespace Sim
 	LogicModule::LogicModule() :
 		Output("LogicModule")
 	{
+		m_device.moveToThread(&m_workerThread);
+
+		connect(&m_device, &DeviceEmulator::appCodeParsed, this, &LogicModule::slot_appCodeParsed);
+		connect(&m_device, &DeviceEmulator::faulted, this, &LogicModule::faulted);
+
+		connect(this, &LogicModule::signal_pause, &m_device, &DeviceEmulator::pause, Qt::QueuedConnection);
+		connect(this, &LogicModule::signal_start, &m_device, &DeviceEmulator::start, Qt::QueuedConnection);
+
+		return;
 	}
 
 	LogicModule::~LogicModule()
@@ -14,7 +23,6 @@ namespace Sim
 		powerOff();
 		return;
 	}
-
 
 	bool LogicModule::load(const Hardware::LogicModuleInfo& lmInfo,
 						   const LmDescription& lmDescription,
@@ -46,6 +54,15 @@ namespace Sim
 			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
 		}
 
+		// Init DeviceEmulator
+		//
+		ok &= m_device.init(m_logicModuleInfo,
+							m_lmDescription,
+							m_tuningEeprom,
+							m_confEeprom,
+							m_appLogicEeprom,
+							m_simulationScript);
+
 		return ok;
 	}
 
@@ -75,28 +92,7 @@ namespace Sim
 			assert(m_workerThread.isFinished());
 		}
 
-		m_device = new DeviceEmulator();
-
-		bool ok = m_device->init(m_logicModuleInfo,
-								 m_lmDescription,
-								 m_tuningEeprom,
-								 m_confEeprom,
-								 m_appLogicEeprom,
-								 m_simulationScript);
-
-		if (ok == false)
-		{
-			delete m_device;
-			m_device = nullptr;
-			return false;
-		}
-
-		m_device->moveToThread(&m_workerThread);
-
-		connect(&m_workerThread, &QThread::finished, m_device, &QObject::deleteLater);
-
-		connect(this, &LogicModule::signal_pause, m_device, &DeviceEmulator::pause, Qt::QueuedConnection);
-		connect(this, &LogicModule::signal_start, m_device, &DeviceEmulator::start, Qt::QueuedConnection);
+		m_device.reset();	// Worker thread is stopped, it's safe to call reset
 
 		m_workerThread.start();
 
@@ -189,6 +185,22 @@ namespace Sim
 		return true;
 	}
 
+	void LogicModule::slot_appCodeParsed(bool ok)
+	{
+		if (ok == true)
+		{
+			m_commands = m_device.commands();
+			m_offsetToCommand = m_device.offsetToCommands();
+		}
+		else
+		{
+			m_commands.clear();
+			m_offsetToCommand.clear();
+		}
+
+		return;
+	}
+
 	QString LogicModule::equipmentId() const
 	{
 		return m_logicModuleInfo.equipmentId;
@@ -208,4 +220,30 @@ namespace Sim
 	{
 		return m_logicModuleInfo;
 	}
+
+	const std::vector<DeviceCommand>& LogicModule::appCommands() const
+	{
+		return m_commands;
+	}
+
+	std::map<int, size_t> LogicModule::offsetToCommand() const
+	{
+		return m_offsetToCommand;
+	}
+
+	const DeviceCommand& LogicModule::offsetToCommand(int offset) const
+	{
+		auto it = m_offsetToCommand.find(offset);
+
+		if (it == m_offsetToCommand.end())
+		{
+			static LmCommand fakeLmCommand;
+			static DeviceCommand fakeCommand(fakeLmCommand);
+			return fakeCommand;
+		}
+
+		size_t index = it->second;
+		return m_commands[index];
+	}
+
 }

@@ -31,7 +31,6 @@ namespace Sim
 
 		// Running LM
 		//
-	public:
 		bool powerOn(bool autoStart);
 		bool powerOff();
 
@@ -42,14 +41,22 @@ namespace Sim
 		bool isPowerOn() const;
 		bool isFaultMode() const;
 
+		// Signals
+		//
 	signals:
-		void signal_pause();
-		void signal_start(int cycles);
+		void signal_pause();				// Internal class signal, command to DeviceEmulator
+		void signal_start(int cycles);		// Internal class signal, command to DeviceEmulator
+
+	signals:
+		void faulted(QString message);		// Public signal, translated from DeviceEmulator
 
 		// --
 		//
 	protected:
 		bool loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom);
+
+	protected slots:
+		void slot_appCodeParsed(bool ok);
 
 	public:
 		QString equipmentId() const;
@@ -57,6 +64,11 @@ namespace Sim
 		E::Channel channel() const;
 
 		const Hardware::LogicModuleInfo& logicModuleInfo() const;
+
+		const std::vector<DeviceCommand>& appCommands() const;
+
+		std::map<int, size_t> offsetToCommand() const;
+		const DeviceCommand& offsetToCommand(int offset) const;
 
 	private:
 		// Loaded LM data
@@ -73,7 +85,12 @@ namespace Sim
 		// Running Emulation
 		//
 		QThread m_workerThread;
-		DeviceEmulator* m_device = nullptr;
+		DeviceEmulator m_device;
+
+		// --
+		//
+		std::vector<DeviceCommand> m_commands;
+		std::map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands
 	};
 
 }

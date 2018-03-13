@@ -1,9 +1,9 @@
-#include "SimulatorBasePage.h"
-#include "SimulatorControlPage.h"
+#include "SimBasePage.h"
+#include "SimControlPage.h"
 
-std::list<SimulatorBasePage*> SimulatorBasePage::m_pages;
+std::list<SimBasePage*> SimBasePage::m_pages;
 
-SimulatorBasePage::SimulatorBasePage(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent)
+SimBasePage::SimBasePage(SimIdeSimulator* simulator, QWidget* parent)
 	: QWidget(parent),
 	  m_simulator(simulator)
 {
@@ -16,7 +16,7 @@ SimulatorBasePage::SimulatorBasePage(std::shared_ptr<SimIdeSimulator> simulator,
 
 	m_closeAction = new QAction(tr("Close"), this);
 	m_closeAction->setShortcut(Qt::CTRL + Qt::Key_W);	// QKeySequence::Close leads to CTRL+F4 somehow (((
-	connect(m_closeAction, &QAction::triggered, this, &SimulatorBasePage::deleteLater);
+	connect(m_closeAction, &QAction::triggered, this, &SimBasePage::deleteLater);
 	addAction(m_closeAction);
 
 	m_pages.push_back(this);
@@ -25,16 +25,16 @@ SimulatorBasePage::SimulatorBasePage(std::shared_ptr<SimIdeSimulator> simulator,
 	return;
 }
 
-SimulatorBasePage::~SimulatorBasePage()
+SimBasePage::~SimBasePage()
 {
 	qDebug() << "SimulatorBasePage::~SimulatorBasePage()";
 	m_pages.remove(this);
 }
 
-void SimulatorBasePage::deleteAllPages()
+void SimBasePage::deleteAllPages()
 {
 	auto listCopy = m_pages;		// m_pages is changed in destruct, so we need a copy
-	for (SimulatorBasePage* page : listCopy)
+	for (SimBasePage* page : listCopy)
 	{
 		delete page;
 	}
@@ -43,13 +43,13 @@ void SimulatorBasePage::deleteAllPages()
 	return;
 }
 
-SimulatorControlPage* SimulatorBasePage::controlPage(QString lmEquipmnetId, QWidget* parent)
+SimControlPage* SimBasePage::controlPage(QString lmEquipmnetId, QWidget* parent)
 {
 	QVariant parentValue =  QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(parent));
 
-	for (SimulatorBasePage* page : m_pages)
+	for (SimBasePage* page : m_pages)
 	{
-		SimulatorControlPage* cp = dynamic_cast<SimulatorControlPage*>(page);
+		SimControlPage* cp = dynamic_cast<SimControlPage*>(page);
 
 		if (cp != nullptr &&
 			cp->equipmnetId() == lmEquipmnetId &&

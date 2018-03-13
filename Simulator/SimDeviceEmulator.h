@@ -6,7 +6,7 @@
 #include <map>
 #include <vector>
 #include <QObject>
-#include <QTextStream>
+#include <QMutex>
 #include <QTimerEvent>
 #include <QJSEngine>
 #include "../lib/LmDescription.h"
@@ -114,24 +114,71 @@ namespace Sim
 	};
 
 
-	class DeviceEmulator : public QObject, protected Output
+	//
+	// class DeviceEmulator script wrapper
+	//
+	class DeviceEmulator;
+
+	class ScriptDeviceEmulator : public QObject
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(quint16 AppStartAddress MEMBER (m_logicUnit.appStartAddress))
-		Q_PROPERTY(Sim::CyclePhase Phase MEMBER (m_logicUnit.phase))
-		Q_PROPERTY(quint32 ProgramCounter MEMBER (m_logicUnit.programCounter))
+		Q_PROPERTY(quint16 AppStartAddress MEMBER (m_device->m_logicUnit.appStartAddress))
+		Q_PROPERTY(Sim::CyclePhase Phase MEMBER (m_device->m_logicUnit.phase))
+		Q_PROPERTY(quint32 ProgramCounter MEMBER (m_device->m_logicUnit.programCounter))
+
+	public:
+		explicit ScriptDeviceEmulator(DeviceEmulator* device, QObject* parent = nullptr);
+
+		// Script functins for AFB instances
+		//
+	public slots:
+		QObject* afbComponent(int opCode);
+		QObject* afbComponentInstance(int opCode, int instanceNo);
+
+		QObject* createComponentParam();
+		bool setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param);
+
+		// RAM access
+		//
+		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
+		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
+
+		bool writeRamWord(quint32 offsetW, quint16 data);
+		quint16 readRamWord(quint32 offsetW);
+
+		bool writeRamDword(quint32 offsetW, quint32 data);
+		quint32 readRamDword(quint32 offsetW);
+
+		// Getting data from m_plainAppLogic
+		//
+		quint16 getWord(int wordOffset);
+		quint32 getDword(int wordOffset);
+
+	private:
+		DeviceEmulator* m_device = nullptr;
+	};
+
+
+	//
+	// DeviceEmulator
+	//
+	class DeviceEmulator : public QObject, protected Output
+	{
+		Q_OBJECT
 
 	public:
 		DeviceEmulator();
 		virtual ~DeviceEmulator();
 
-		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,
+		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
 				  const LmDescription& lmDescription,
 				  const Eeprom& tuningEeprom,
 				  const Eeprom& confEeprom,
 				  const Eeprom& appLogicEeprom,
 				  const QString& simulationScript);
+
+		bool reset();		// Run from UI thread, only if worker thread is stopped
 
 	private:
 		bool initMemory();
@@ -148,7 +195,6 @@ namespace Sim
 	private:
 		void fault(QString reasone, QString func);
 
-	private:
 		virtual void timerEvent(QTimerEvent* event) override;
 
 		bool processStartMode();
@@ -157,41 +203,31 @@ namespace Sim
 
 		bool runCommand(DeviceCommand& deviceCommand);
 
-		// Script functins for AFB instances
-		//
-	public:
-		Q_INVOKABLE QObject* afbComponent(int opCode);
-		Q_INVOKABLE QObject* afbComponentInstance(int opCode, int instanceNo);
-
-		Q_INVOKABLE QObject* createComponentParam();
-		Q_INVOKABLE bool setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param);
-
-		// RAM access
-		//
-		Q_INVOKABLE bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
-		Q_INVOKABLE quint16 readRamBit(quint32 offsetW, quint32 bitNo);
-
-		Q_INVOKABLE bool writeRamWord(quint32 offsetW, quint16 data);
-		Q_INVOKABLE quint16 readRamWord(quint32 offsetW);
-
-		Q_INVOKABLE bool writeRamDword(quint32 offsetW, quint32 data);
-		Q_INVOKABLE quint32 readRamDword(quint32 offsetW);
-
+	private:
 		// Getting data from m_plainAppLogic
 		//
-		Q_INVOKABLE quint16 getWord(int wordOffset);
-		Q_INVOKABLE quint32 getDword(int wordOffset);
+		quint16 getWord(int wordOffset);
+		quint32 getDword(int wordOffset);
 
-	private:
 		template <typename TYPE>
 		TYPE getData(int eepromOffset);
+
+	signals:
+		void appCodeParsed(bool ok);
+		void faulted(QString message);
 
 		// Props
 		//
 	public:
-		const Hardware::LogicModuleInfo& logicModuleInfo() const;
+		Hardware::LogicModuleInfo logicModuleInfo() const;
+		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);
+
+		std::vector<DeviceCommand> commands() const;
+		std::map<int, size_t> offsetToCommands() const;
 
 	private:
+		friend class ScriptDeviceEmulator;
+
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 		QString m_simulationScript;
@@ -205,7 +241,7 @@ namespace Sim
 		// Current state
 		//
 		DeviceMode m_currentMode = DeviceMode::Start;
-		mutable int m_timerId = -1;
+		std::atomic<int> m_timerId = -1;
 
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
@@ -215,9 +251,20 @@ namespace Sim
 
 		AfbComponentSet m_afbComponents;
 
+		// JS
+		//
 		QJSEngine m_jsEngine;
 		QJSValue m_evaluatedJs;
 		QJSValue m_thisJsValue;
+
+		// Cached state
+		//
+		mutable QMutex m_cacheMutex;
+
+		Hardware::LogicModuleInfo m_cachedLogicModuleInfo;
+
+		std::vector<DeviceCommand> m_cachedCommands;
+		std::map<int, size_t> m_cachedOffsetToCommand;		// key: command offset, value: index in m_commands
 	};
 }
 

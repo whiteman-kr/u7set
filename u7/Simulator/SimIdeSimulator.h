@@ -2,7 +2,11 @@
 #define SIMIDESIMULATOR_H
 
 #include "../../Simulator/Simulator.h"
+#include "../../lib/AppSignalManager.h"
+#include "../../lib/Tuning/TuningSignalManager.h"
 #include "../VFrame30/Schema.h"
+#include "SimAppSignalManager.h"
+
 
 class SimIdeSimulator : public Sim::Simulator
 {
@@ -19,9 +23,20 @@ public:
 
 protected:
 	bool loadSchemaDetails(QString buildPath);
+	bool loadAppSignals(QString buildPath);
+
+public:
+	SimAppSignalManager& appSignalManager();
+	const SimAppSignalManager& appSignalManager() const;
+
+	TuningSignalManager& tuningSignalManager();
+	const TuningSignalManager& tuningSignalManager() const;
 
 private:
 	VFrame30::SchemaDetailsSet m_schemaDetails;
+
+	SimAppSignalManager m_appSignalManager;
+	TuningSignalManager m_tuningSignalManager;
 };
 
 #endif // SIMIDESIMULATOR_H

@@ -141,7 +141,7 @@ class AppSignalParam
 public:
 	AppSignalParam();
 
-	bool load(const Proto::AppSignal &message);
+	bool load(const Proto::AppSignal& message);
 	void save(::Proto::AppSignal* message) const;
 
 	// Properties

@@ -46,6 +46,162 @@ namespace Sim
 		return *this;
 	}
 
+
+	//
+	// class DeviceEmulator script wrapper
+	//
+	ScriptDeviceEmulator::ScriptDeviceEmulator(DeviceEmulator* device, QObject* parent) :
+		QObject(parent),
+		m_device(device)
+	{
+		assert(m_device);
+	}
+
+	QObject* ScriptDeviceEmulator::afbComponent(int opCode)
+	{
+		auto result = m_device->m_lmDescription.component(opCode);
+		QQmlEngine::setObjectOwnership(result.get(), QQmlEngine::CppOwnership);
+		return result.get();
+	}
+
+	QObject* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
+	{
+		ComponentInstance* inst = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
+		if (Q_UNLIKELY(inst == nullptr))
+		{
+			return nullptr;
+		}
+
+		QQmlEngine::setObjectOwnership(inst, QQmlEngine::CppOwnership);
+		return inst;
+	}
+
+	QObject* ScriptDeviceEmulator::createComponentParam()
+	{
+		QObject* result = new ComponentParam();
+		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::JavaScriptOwnership);
+		return result;
+	}
+
+	bool ScriptDeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param)
+	{
+		if (Q_UNLIKELY(param == nullptr))
+		{
+			m_device->FAULT(tr("Input param error, function DeviceEmulator::setAfbParam, param == nullptr"));
+			return false;
+		}
+
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_device->m_lmDescription.component(afbOpCode);
+
+		if (Q_UNLIKELY(afbComp == nullptr))
+		{
+			m_device->FAULT(QString("AFB with OpCode %1 not found").arg(afbOpCode));
+			return false;
+		}
+
+		QString errorMessage;
+		bool ok = m_device->m_afbComponents.addInstantiatorParam(afbComp, instanceNo, *param, &errorMessage);
+
+		if (Q_UNLIKELY(ok == false))
+		{
+			m_device->FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
+			return false;
+		}
+
+		return true;
+	}
+
+	// RAM access
+	//
+	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
+	{
+		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data);
+		if (Q_UNLIKELY(ok == false))
+		{
+			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return ok;
+	}
+
+	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo)
+	{
+		quint16 data = 0;
+		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data);
+
+		if (Q_UNLIKELY(ok == false))
+		{
+			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+		}
+
+		return data;
+	}
+
+	bool ScriptDeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
+	{
+		bool ok = m_device->m_ram.writeWord(offsetW, data);
+
+		if (Q_UNLIKELY(ok == false))
+		{
+			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	quint16 ScriptDeviceEmulator::readRamWord(quint32 offsetW)
+	{
+		quint16 data = 0;
+		bool ok = m_device->m_ram.readWord(offsetW, &data);
+
+		if (Q_UNLIKELY(ok == false))
+		{
+			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	bool ScriptDeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
+	{
+		bool ok = m_device->m_ram.writeDword(offsetW, data);
+
+		if (Q_UNLIKELY(ok == false))
+		{
+			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return ok;
+	}
+
+	quint32 ScriptDeviceEmulator::readRamDword(quint32 offsetW)
+	{
+		quint32 data = 0;
+		bool ok = m_device->m_ram.readDword(offsetW, &data);
+
+		if (Q_UNLIKELY(ok == false))
+		{
+			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+		}
+
+		return data;
+	}
+
+	// Getting data from m_plainAppLogic
+	//
+	quint16 ScriptDeviceEmulator::getWord(int wordOffset)
+	{
+		return m_device->getWord(wordOffset);
+	}
+
+	quint32 ScriptDeviceEmulator::getDword(int wordOffset)
+	{
+		return m_device->getDword(wordOffset);
+	}
+
+	//
+	// DeviceEmulator
+	//
 	DeviceEmulator::DeviceEmulator() :
 		Output("DeviceEmulator")
 	{
@@ -54,6 +210,7 @@ namespace Sim
 
 	DeviceEmulator::~DeviceEmulator()
 	{
+		Output("~DeviceEmulator");
 	}
 
 	bool DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
@@ -66,19 +223,13 @@ namespace Sim
 		setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
 		writeMessage(tr("Init device."));
 
-		m_logicModuleInfo = logicModuleInfo;
+		setLogicModuleInfo(logicModuleInfo);
+
 		m_lmDescription = lmDescription;
 		m_simulationScript = simulationScript;
 		m_tuningEeprom = tuningEeprom;
 		m_confEeprom = confEeprom;
 		m_appLogicEeprom = appLogicEeprom;
-
-		bool ok = initMemory();
-		if (ok == false)
-		{
-			writeError(tr("Init memory error."));
-			return false;
-		}
 
 		// Evaluate simulation script
 		//
@@ -98,12 +249,12 @@ namespace Sim
 			return false;
 		}
 
-		m_thisJsValue = m_jsEngine.newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+		ScriptDeviceEmulator* scriptDevice =  new ScriptDeviceEmulator(this);
+		m_thisJsValue = m_jsEngine.newQObject(scriptDevice);
 
 		// --
 		//
-		ok = initEeprom();
+		bool ok = initEeprom();
 		if (ok == false)
 		{
 			return false;
@@ -118,6 +269,22 @@ namespace Sim
 		}
 
 		return ok;
+	}
+
+	bool DeviceEmulator::reset()
+	{
+		writeMessage(tr("Reset"));
+
+		m_currentMode = DeviceMode::Start;
+
+		bool ok = initMemory();
+		if (ok == false)
+		{
+			writeError(tr("Init memory error."));
+			return false;
+		}
+
+		return true;
 	}
 
 	bool DeviceEmulator::initMemory()
@@ -324,6 +491,13 @@ namespace Sim
 		m_commands.clear();
 		m_offsetToCommand.clear();
 
+		{
+			m_cacheMutex.lock();
+			m_cachedCommands.clear();
+			m_cachedOffsetToCommand.clear();
+			m_cacheMutex.unlock();
+		}
+
 		bool ok = true;
 		int programCounter = 0;
 		const std::vector<LmCommand> commands = m_lmDescription.commandsAsVector();
@@ -349,6 +523,7 @@ namespace Sim
 					ok = parseCommand(c, programCounter);
 					if (ok == false)
 					{
+						emit appCodeParsed(false);
 						return false;
 					}
 
@@ -364,13 +539,13 @@ namespace Sim
 											.arg(c.caption)
 											.arg(programCounter);
 						writeError(str);
+						emit appCodeParsed(false);
 						return false;
 					}
 
 					programCounter += commandSize;
 
-					qDebug() << m_commands.back().m_string;
-
+					//qDebug() << m_commands.back().m_string;
 					break;
 				}
 			}
@@ -380,11 +555,22 @@ namespace Sim
 				QString str = tr("Parse command error, command cannot be found for word 0x%1\n")
 									.arg(commandWord, 4, 16, QChar('0'));
 				writeError(str);
+
+				emit appCodeParsed(false);
 				return false;
 			}
 
 		}
 		while (programCounter < m_plainAppLogic.size());
+
+		{
+			m_cacheMutex.lock();
+			m_cachedCommands = m_commands;
+			m_cachedOffsetToCommand = m_offsetToCommand;
+			m_cacheMutex.unlock();
+		}
+
+		emit appCodeParsed(true);
 
 		return true;
 	}
@@ -586,6 +772,8 @@ namespace Sim
 		writeError(str3);
 
 		m_currentMode = DeviceMode::Fault;
+
+		emit faulted(str1 + "\n" + str2 + "\n" + str3);
 
 		return;
 	}
@@ -1523,61 +1711,8 @@ namespace Sim
 //		return false;
 //	}
 
-	QObject* DeviceEmulator::afbComponent(int opCode)
-	{
-		auto result = m_lmDescription.component(opCode);
-		QQmlEngine::setObjectOwnership(result.get(), QQmlEngine::CppOwnership);
-		return result.get();
-	}
-
-	QObject* DeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
-	{
-		ComponentInstance* inst = m_afbComponents.componentInstance(opCode, instanceNo);
-		if (inst == nullptr)
-		{
-			return nullptr;
-		}
-
-		QQmlEngine::setObjectOwnership(inst, QQmlEngine::CppOwnership);
-		return inst;
-	}
-
-	QObject* DeviceEmulator::createComponentParam()
-	{
-		QObject* result = new ComponentParam();
-		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::JavaScriptOwnership);
-		return result;
-	}
-
-	bool DeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param)
-	{
-		if (param == nullptr)
-		{
-			FAULT(tr("Input param error, function DeviceEmulator::setAfbParam, param == nullptr"));
-			return false;
-		}
-
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription.component(afbOpCode);
-
-		if (afbComp == nullptr)
-		{
-			FAULT(QString("AFB with OpCode %1 not found").arg(afbOpCode));
-			return false;
-		}
-
-		QString errorMessage;
-		bool ok = m_afbComponents.addInstantiatorParam(afbComp, instanceNo, *param, &errorMessage);
-
-		if (ok == false)
-		{
-			FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
-			return false;
-		}
-
-		return true;
-	}
-
-
+	// Getting data from m_plainAppLogic
+	//
 	quint16 DeviceEmulator::getWord(int wordOffset)
 	{
 		return getData<quint16>(wordOffset * 2);
@@ -1593,7 +1728,7 @@ namespace Sim
 	{
 		// eepromOffset - in bytes
 		//
-		if (eepromOffset < 0 || eepromOffset > m_plainAppLogic.size() - sizeof(TYPE))
+		if (Q_UNLIKELY(eepromOffset < 0 || eepromOffset > m_plainAppLogic.size() - sizeof(TYPE)))
 		{
 			assert(eepromOffset >= 0 &&
 				   eepromOffset - sizeof(TYPE) <= m_plainAppLogic.size());
@@ -1604,83 +1739,39 @@ namespace Sim
 		return result;
 	}
 
-	bool DeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
+	Hardware::LogicModuleInfo DeviceEmulator::logicModuleInfo() const
 	{
-		bool ok = m_ram.writeBit(offsetW, bitNo, data);
-		if (ok == false)
-		{
-			FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
-		}
+		m_cacheMutex.lock();
+		Hardware::LogicModuleInfo result = m_cachedLogicModuleInfo;
+		m_cacheMutex.unlock();
 
-		return ok;
+		return result;
 	}
 
-	quint16 DeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo)
+	void DeviceEmulator::setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo)
 	{
-		quint16 data = 0;
-		bool ok = m_ram.readBit(offsetW, bitNo, &data);
+		m_logicModuleInfo = lmInfo;
 
-		if (ok == false)
-		{
-			FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
-		}
+		m_cacheMutex.lock();
+		m_cachedLogicModuleInfo = lmInfo;
+		m_cacheMutex.unlock();
 
-		return data;
+		return;
 	}
 
-	bool DeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
+	std::vector<DeviceCommand> DeviceEmulator::commands() const
 	{
-		bool ok = m_ram.writeWord(offsetW, data);
-
-		if (ok == false)
-		{
-			FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return ok;
+		QMutexLocker ml(&m_cacheMutex);
+		assert(m_commands.size() == m_cachedCommands.size());
+		return m_cachedCommands;
 	}
 
-	quint16 DeviceEmulator::readRamWord(quint32 offsetW)
+	std::map<int, size_t> DeviceEmulator::offsetToCommands() const
 	{
-		quint16 data = 0;
-		bool ok = m_ram.readWord(offsetW, &data);
-
-		if (ok == false)
-		{
-			FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return data;
+		QMutexLocker ml(&m_cacheMutex);
+		assert(m_cachedOffsetToCommand.size() == m_cachedOffsetToCommand.size());
+		return m_cachedOffsetToCommand;
 	}
 
-	bool DeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
-	{
-		bool ok = m_ram.writeDword(offsetW, data);
-
-		if (ok == false)
-		{
-			FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return ok;
-	}
-
-	quint32 DeviceEmulator::readRamDword(quint32 offsetW)
-	{
-		quint32 data = 0;
-		bool ok = m_ram.readDword(offsetW, &data);
-
-		if (ok == false)
-		{
-			FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
-		}
-
-		return data;
-	}
-
-	const Hardware::LogicModuleInfo& DeviceEmulator::logicModuleInfo() const
-	{
-		return m_logicModuleInfo;
-	}
 
 }

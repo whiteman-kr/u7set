@@ -1,6 +1,6 @@
 #pragma once
 #include "MainTabPage.h"
-#include "./Simulator/SimulatorWidget.h"
+#include "./Simulator/SimWidget.h"
 
 //
 //
@@ -31,7 +31,7 @@ public slots:
 	// Data
 	//
 private:
-	SimulatorWidget* m_simultorWidget = nullptr;
+	SimWidget* m_simultorWidget = nullptr;
 };
 
 

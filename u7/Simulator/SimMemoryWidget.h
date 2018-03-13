@@ -5,13 +5,13 @@
 class MemoryView;
 class MemoryHexView;
 
-class SimulatorMemoryWidget : public QWidget
+class SimMemoryWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit SimulatorMemoryWidget(const Sim::Ram ram, QWidget* parent = nullptr);
-	virtual ~SimulatorMemoryWidget();
+	explicit SimMemoryWidget(const Sim::Ram ram, QWidget* parent = nullptr);
+	virtual ~SimMemoryWidget();
 
 protected:
 	void updateAreaCombo();

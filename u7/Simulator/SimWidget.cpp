@@ -1,15 +1,16 @@
-#include "SimulatorWidget.h"
+#include "SimWidget.h"
 #include "Settings.h"
-#include "SimulatorProjectWidget.h"
-#include "SimulatorMemoryWidget.h"
-#include "SimulatorOutputWidget.h"
-#include "SimulatorSelectBuildDialog.h"
-#include "SimulatorControlPage.h"
-#include "SimulatorSchemaPage.h"
+#include "SimProjectWidget.h"
+#include "SimMemoryWidget.h"
+#include "SimOutputWidget.h"
+#include "SimSelectBuildDialog.h"
+#include "SimControlPage.h"
+#include "SimSchemaPage.h"
+#include "SimCodePage.h"
 #include "../SimulatorTabPage.h"
 
 
-SimulatorWidget::SimulatorWidget(std::shared_ptr<SimIdeSimulator> simulator,
+SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 								 DbController* db,
 								 QWidget* parent /*= nullptr*/,
 								 Qt::WindowType windowType /*= Qt::Window*/,
@@ -26,8 +27,8 @@ SimulatorWidget::SimulatorWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	// --
 	//
-	m_appSignalController = new VFrame30::AppSignalController(&m_appSignalManager, this);
-	m_tuningController = new VFrame30::TuningController(&m_tuningSignalManager, &m_tuningTcpClient, this);
+	m_appSignalController = new VFrame30::AppSignalController(&m_simulator->appSignalManager(), this);
+	m_tuningController = new VFrame30::TuningController(&m_simulator->tuningSignalManager(), &m_tuningTcpClient, this);
 
 	// --
 	//
@@ -54,22 +55,23 @@ SimulatorWidget::SimulatorWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	// --
 	//
-	connect(db, &DbController::projectOpened, this, &SimulatorWidget::projectOpened);
-	connect(db, &DbController::projectClosed, this, &SimulatorWidget::closeBuild);
+	connect(db, &DbController::projectOpened, this, &SimWidget::projectOpened);
+	connect(db, &DbController::projectClosed, this, &SimWidget::closeBuild);
 
-	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimulatorWidget::updateActions);
+	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
 
-	connect(m_projectWidget, &SimulatorProjectWidget::signal_openControlTabPage, this, &SimulatorWidget::openControlTabPage);
+	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openControlTabPage);
+	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
 
-	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimulatorWidget::tabCloseRequest);
-	connect(m_tabWidget->tabBar(), &QTabWidget::customContextMenuRequested, this, &SimulatorWidget::tabBarContextMenuRequest);
+	connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &SimWidget::tabCloseRequest);
+	connect(m_tabWidget->tabBar(), &QTabWidget::customContextMenuRequested, this, &SimWidget::tabBarContextMenuRequest);
 
-	connect(this, &SimulatorWidget::needUpdateActions, this, &SimulatorWidget::updateActions);
+	connect(this, &SimWidget::needUpdateActions, this, &SimWidget::updateActions);
 
 	return;
 }
 
-SimulatorWidget::~SimulatorWidget()
+SimWidget::~SimWidget()
 {
 	if (m_slaveWindow == false)
 	{
@@ -78,38 +80,38 @@ SimulatorWidget::~SimulatorWidget()
 	}
 }
 
-void SimulatorWidget::createToolBar()
+void SimWidget::createToolBar()
 {
-	m_toolBar = new SimulatorToolBar("ToolBar");
+	m_toolBar = new SimToolBar("ToolBar");
 	addToolBar(m_toolBar);
 
 	//m_toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
 	m_openProjectAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this);
 	m_openProjectAction->setShortcut(QKeySequence::Open);
-	connect(m_openProjectAction, &QAction::triggered, this, &SimulatorWidget::openBuild);
+	connect(m_openProjectAction, &QAction::triggered, this, &SimWidget::openBuild);
 	m_toolBar->addAction(m_openProjectAction);
 
 
 	m_closeProjectAction = new QAction(QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this);
 	m_closeProjectAction->setShortcut(QKeySequence::Close);
-	connect(m_closeProjectAction, &QAction::triggered, this, &SimulatorWidget::closeBuild);
+	connect(m_closeProjectAction, &QAction::triggered, this, &SimWidget::closeBuild);
 	m_toolBar->addAction(m_closeProjectAction);
 
 	m_refreshProjectAction = new QAction(QIcon(":/Images/Images/SimRefresh.svg"), tr("Refresh"), this);
 	m_refreshProjectAction->setShortcut(QKeySequence::Refresh);
-	connect(m_refreshProjectAction, &QAction::triggered, this, &SimulatorWidget::refreshBuild);
+	connect(m_refreshProjectAction, &QAction::triggered, this, &SimWidget::refreshBuild);
 	m_toolBar->addAction(m_refreshProjectAction);
 
 	m_addWindowAction = new QAction(QIcon(":/Images/Images/SimAddWindow.svg"), tr("Add Window"), this);
 	m_addWindowAction->setShortcut(QKeySequence::New);
-	connect(m_addWindowAction, &QAction::triggered, this, &SimulatorWidget::addNewWindow);
+	connect(m_addWindowAction, &QAction::triggered, this, &SimWidget::addNewWindow);
 	m_toolBar->addAction(m_addWindowAction);
 
 	return;
 }
 
-void SimulatorWidget::createDocks()
+void SimWidget::createDocks()
 {
 	setCorner(Qt::Corner::BottomLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
 	setCorner(Qt::Corner::BottomRightCorner, Qt::DockWidgetArea::BottomDockWidgetArea);
@@ -122,7 +124,7 @@ void SimulatorWidget::createDocks()
 	projectDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	projectDock->setTitleBarWidget(new QWidget());		// Hides title bar
 
-	m_projectWidget = new SimulatorProjectWidget(m_simulator);
+	m_projectWidget = new SimProjectWidget(m_simulator.get());
 	projectDock->setWidget(m_projectWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, projectDock);
@@ -142,7 +144,7 @@ void SimulatorWidget::createDocks()
 	{
 		outputDock = new QDockWidget("Output", this, 0);
 		outputDock->setObjectName(watchDock->windowTitle());
-		outputDock->setWidget(new SimulatorOutputWidget());
+		outputDock->setWidget(new SimOutputWidget());
 		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
 		addDockWidget(Qt::BottomDockWidgetArea, outputDock);
@@ -167,7 +169,7 @@ void SimulatorWidget::createDocks()
 	return;
 }
 
-QDockWidget* SimulatorWidget::createMemoryDock(QString caption)
+QDockWidget* SimWidget::createMemoryDock(QString caption)
 {
 	// -----------------
 static Sim::Ram ram;
@@ -185,7 +187,7 @@ static Sim::Ram ram;
 	dock->setObjectName("SimDock-" + caption);
 	dock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-	SimulatorMemoryWidget* memoryWidget = new SimulatorMemoryWidget(ram);
+	SimMemoryWidget* memoryWidget = new SimMemoryWidget(ram);
 	dock->setWidget(memoryWidget);
 
 	addDockWidget(Qt::BottomDockWidgetArea, dock);
@@ -193,21 +195,27 @@ static Sim::Ram ram;
 	return dock;
 }
 
-void SimulatorWidget::showEvent(QShowEvent* e)
+void SimWidget::showEvent(QShowEvent* e)
 {
 	QMainWindow::showEvent(e);
 
-	// Restore docks states only after show event, otherwise the _floated_ docks will be behind main window
-	//
-	if (m_slaveWindow == false)
-	{
-		restoreState(theSettings.m_simWigetState);
-	}
+static bool firstEvent = true;
 
+	if (firstEvent == true)
+	{
+		// Restore docks states only after show event, otherwise the _floated_ docks will be behind main window
+		//
+		if (m_slaveWindow == false)
+		{
+			restoreState(theSettings.m_simWigetState);
+		}
+
+		firstEvent = false;
+	}
 	return;
 }
 
-void SimulatorWidget::updateActions()
+void SimWidget::updateActions()
 {
 	bool projectIsLoaded = m_simulator->isLoaded();
 
@@ -224,20 +232,20 @@ void SimulatorWidget::updateActions()
 	return;
 }
 
-void SimulatorWidget::projectOpened(DbProject)
+void SimWidget::projectOpened(DbProject)
 {
 	emit needUpdateActions();
 }
 
-void SimulatorWidget::openBuild()
+void SimWidget::openBuild()
 {
 	QSettings settings;
-	SimulatorSelectBuildDialog::BuildType buildType = static_cast<SimulatorSelectBuildDialog::BuildType>(settings.value("SimulatorWidget/BuildType", 0).toInt());
+	SimSelectBuildDialog::BuildType buildType = static_cast<SimSelectBuildDialog::BuildType>(settings.value("SimulatorWidget/BuildType", 0).toInt());
 
 	QString project = db()->currentProject().projectName().toLower();
 	QString lastPath = settings.value("SimulatorWidget/ProjectLastPath/" + project).toString();
 
-	SimulatorSelectBuildDialog d(project,
+	SimSelectBuildDialog d(project,
 								 buildType,
 								 lastPath,
 								 this);
@@ -260,17 +268,17 @@ void SimulatorWidget::openBuild()
 	return;
 }
 
-void SimulatorWidget::closeBuild()
+void SimWidget::closeBuild()
 {
 	m_simulator->clear();
 	emit needUpdateActions();
 
-	SimulatorBasePage::deleteAllPages();
+	SimBasePage::deleteAllPages();
 
 	return;
 }
 
-void SimulatorWidget::refreshBuild()
+void SimWidget::refreshBuild()
 {
 	QString buildPath = m_simulator->buildPath();
 	if (buildPath.isEmpty() == true)
@@ -288,7 +296,7 @@ void SimulatorWidget::refreshBuild()
 	return;
 }
 
-bool SimulatorWidget::loadBuild(QString buildPath)
+bool SimWidget::loadBuild(QString buildPath)
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -304,11 +312,11 @@ bool SimulatorWidget::loadBuild(QString buildPath)
 	return ok;
 }
 
-void SimulatorWidget::addNewWindow()
+void SimWidget::addNewWindow()
 {
 	qDebug() << "SimulatorWidget::addNewWindow()";
 
-	SimulatorWidget* widget = new SimulatorWidget(m_simulator, db(), this->parentWidget(), Qt::Window, true);
+	SimWidget* widget = new SimWidget(m_simulator, db(), this->parentWidget(), Qt::Window, true);
 	widget->setWindowTitle(tr("u7 Simulator"));
 
 	widget->show();
@@ -316,7 +324,7 @@ void SimulatorWidget::addNewWindow()
 	return;
 }
 
-void SimulatorWidget::openControlTabPage(QString lmEquipmentId)
+void SimWidget::openControlTabPage(QString lmEquipmentId)
 {
 	if (m_simulator->isLoaded() == false)
 	{
@@ -325,7 +333,7 @@ void SimulatorWidget::openControlTabPage(QString lmEquipmentId)
 
 	// Check if such SimulatorControlPage already exists
 	//
-	SimulatorControlPage* cp = SimulatorBasePage::controlPage(lmEquipmentId, m_tabWidget);
+	SimControlPage* cp = SimBasePage::controlPage(lmEquipmentId, m_tabWidget);
 
 	if (cp != nullptr)
 	{
@@ -353,17 +361,18 @@ void SimulatorWidget::openControlTabPage(QString lmEquipmentId)
 	}
 	assert(lmEquipmentId == logicModule->equipmentId());
 
-	SimulatorControlPage* controlPage = new SimulatorControlPage(logicModule, m_simulator, m_tabWidget);
+	SimControlPage* controlPage = new SimControlPage(m_simulator.get(), lmEquipmentId, m_tabWidget);
 
 	int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
 	m_tabWidget->setCurrentIndex(tabIndex);
 
-	connect(controlPage, &SimulatorControlPage::openSchemaRequest, this, &SimulatorWidget::openLogicSchemaTabPage);
+	connect(controlPage, &SimControlPage::openSchemaRequest, this, &SimWidget::openLogicSchemaTabPage);
+	connect(controlPage, &SimControlPage::openCodePageRequest, this, &SimWidget::openCodeTabPage);
 
 	return;
 }
 
-void SimulatorWidget::openLogicSchemaTabPage(QString schemaId)
+void SimWidget::openLogicSchemaTabPage(QString schemaId)
 {
 	QString buildPath = QDir::fromNativeSeparators(m_simulator->buildPath());
 	if (buildPath.isEmpty() == true)
@@ -384,7 +393,7 @@ void SimulatorWidget::openLogicSchemaTabPage(QString schemaId)
 	return;
 }
 
-void SimulatorWidget::openSchemaTabPage(QString fileName)
+void SimWidget::openSchemaTabPage(QString fileName)
 {
 	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(fileName);
 	if (schema == nullptr)
@@ -393,12 +402,12 @@ void SimulatorWidget::openSchemaTabPage(QString fileName)
 		return;
 	}
 
-	SimulatorSchemaPage* page = new SimulatorSchemaPage(schema,
-														m_simulator,
-														&m_schemaManage,
-														m_appSignalController,
-														m_tuningController,
-														m_tabWidget);
+	SimSchemaPage* page = new SimSchemaPage(schema,
+											m_simulator.get(),
+											&m_schemaManager,
+											m_appSignalController,
+											m_tuningController,
+											m_tabWidget);
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
@@ -406,7 +415,24 @@ void SimulatorWidget::openSchemaTabPage(QString fileName)
 	return;
 }
 
-void SimulatorWidget::tabCloseRequest(int index)
+void SimWidget::openCodeTabPage(QString lmEquipmentId)
+{
+	auto lm = m_simulator->logicModule(lmEquipmentId);
+	if (lm == nullptr)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot find LogicModuel %1").arg(lmEquipmentId));
+		return;
+	}
+
+	SimCodePage* page = new SimCodePage(m_simulator.get(), lmEquipmentId, m_tabWidget);
+
+	int tabIndex = m_tabWidget->addTab(page, lmEquipmentId);
+	m_tabWidget->setCurrentIndex(tabIndex);
+
+	return;
+}
+
+void SimWidget::tabCloseRequest(int index)
 {
 	QWidget* w = m_tabWidget->widget(index);
 	assert(w);
@@ -415,7 +441,7 @@ void SimulatorWidget::tabCloseRequest(int index)
 	return;
 }
 
-void SimulatorWidget::tabBarContextMenuRequest(const QPoint& pos)
+void SimWidget::tabBarContextMenuRequest(const QPoint& pos)
 {
 	assert(m_tabWidget);
 	QTabBar* tabBar = m_tabWidget->tabBar();
@@ -426,7 +452,7 @@ void SimulatorWidget::tabBarContextMenuRequest(const QPoint& pos)
 		return;
 	}
 
-	SimulatorBasePage* page = qobject_cast<SimulatorBasePage*>(m_tabWidget->widget(tabIndex));
+	SimBasePage* page = qobject_cast<SimBasePage*>(m_tabWidget->widget(tabIndex));
 	if (page == nullptr)
 	{
 		assert(page);
@@ -446,7 +472,7 @@ void SimulatorWidget::tabBarContextMenuRequest(const QPoint& pos)
 //
 //	SimulatorToolBar
 //
-SimulatorToolBar::SimulatorToolBar(const QString& title, QWidget* parent) :
+SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 	QToolBar(title, parent)
 {
 	setMovable(false);
@@ -459,6 +485,6 @@ SimulatorToolBar::SimulatorToolBar(const QString& title, QWidget* parent) :
 	return;
 }
 
-SimulatorToolBar::~SimulatorToolBar()
+SimToolBar::~SimToolBar()
 {
 }

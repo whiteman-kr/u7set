@@ -7,7 +7,7 @@ namespace Ui {
 	class SimulatorSelectBuildDialog;
 }
 
-class SimulatorSelectBuildDialog : public QDialog
+class SimSelectBuildDialog : public QDialog
 {
 	Q_OBJECT
 
@@ -19,8 +19,8 @@ public:
 	};
 
 public:
-	SimulatorSelectBuildDialog(QString currentProject, BuildType buildType, QString buildPath, QWidget* parent);
-	~SimulatorSelectBuildDialog();
+	SimSelectBuildDialog(QString currentProject, BuildType buildType, QString buildPath, QWidget* parent);
+	~SimSelectBuildDialog();
 
 protected:
 	QString buildsPath();

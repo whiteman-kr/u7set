@@ -1,6 +1,6 @@
-#include "SimulatorMemoryWidget.h"
+#include "SimMemoryWidget.h"
 
-SimulatorMemoryWidget::SimulatorMemoryWidget(const Sim::Ram ram, QWidget* parent) :
+SimMemoryWidget::SimMemoryWidget(const Sim::Ram ram, QWidget* parent) :
 	QWidget(parent),
 	m_ram(ram)
 {
@@ -38,7 +38,7 @@ SimulatorMemoryWidget::SimulatorMemoryWidget(const Sim::Ram ram, QWidget* parent
 
 	// --
 	//
-	connect(m_ramAreaCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SimulatorMemoryWidget::currentAreaChanged);
+	connect(m_ramAreaCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SimMemoryWidget::currentAreaChanged);
 
 	// --
 	//
@@ -48,11 +48,11 @@ SimulatorMemoryWidget::SimulatorMemoryWidget(const Sim::Ram ram, QWidget* parent
 	return;
 }
 
-SimulatorMemoryWidget::~SimulatorMemoryWidget()
+SimMemoryWidget::~SimMemoryWidget()
 {
 }
 
-void SimulatorMemoryWidget::updateAreaCombo()
+void SimMemoryWidget::updateAreaCombo()
 {
 	assert(m_ramAreaCombo);
 	m_ramAreaCombo->clear();
@@ -75,7 +75,7 @@ void SimulatorMemoryWidget::updateAreaCombo()
 	return;
 }
 
-void SimulatorMemoryWidget::updateAreaInfo()
+void SimMemoryWidget::updateAreaInfo()
 {
 	assert(m_areaInfoLabel);
 
@@ -101,7 +101,7 @@ void SimulatorMemoryWidget::updateAreaInfo()
 	return;
 }
 
-void SimulatorMemoryWidget::updateQuickWatch()
+void SimMemoryWidget::updateQuickWatch()
 {
 	assert(m_quickWatchLabel);
 
@@ -118,7 +118,7 @@ void SimulatorMemoryWidget::updateQuickWatch()
 	return;
 }
 
-void SimulatorMemoryWidget::currentAreaChanged(int index)
+void SimMemoryWidget::currentAreaChanged(int index)
 {
 	m_memoryWidget->setAreaInfo(m_ram.memoryAreaInfo(index));
 	updateAreaInfo();

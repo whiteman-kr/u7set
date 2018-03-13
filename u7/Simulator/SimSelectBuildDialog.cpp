@@ -1,9 +1,9 @@
-#include "SimulatorSelectBuildDialog.h"
+#include "SimSelectBuildDialog.h"
 #include "ui_SimulatorSelectBuildDialog.h"
 #include <QDir>
 #include "../Settings.h"
 
-SimulatorSelectBuildDialog::SimulatorSelectBuildDialog(QString currentProject,
+SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject,
 													   BuildType buildType,
 													   QString buildPath,
 													   QWidget* parent) :
@@ -32,8 +32,8 @@ SimulatorSelectBuildDialog::SimulatorSelectBuildDialog(QString currentProject,
 
 	// --
 	//
-	connect(ui->buildList, &QListWidget::currentRowChanged, this, &SimulatorSelectBuildDialog::buildListSelectionChanged);
-	connect(ui->buildList, &QListWidget::itemDoubleClicked, this, &SimulatorSelectBuildDialog::buildListItemDoubleClicked);
+	connect(ui->buildList, &QListWidget::currentRowChanged, this, &SimSelectBuildDialog::buildListSelectionChanged);
+	connect(ui->buildList, &QListWidget::itemDoubleClicked, this, &SimSelectBuildDialog::buildListItemDoubleClicked);
 
 	connect(ui->debugButton, &QRadioButton::toggled, this, [this](bool)	{fillBuildList("");});
 
@@ -44,12 +44,12 @@ SimulatorSelectBuildDialog::SimulatorSelectBuildDialog(QString currentProject,
 	return;
 }
 
-SimulatorSelectBuildDialog::~SimulatorSelectBuildDialog()
+SimSelectBuildDialog::~SimSelectBuildDialog()
 {
 	delete ui;
 }
 
-QString SimulatorSelectBuildDialog::buildsPath()
+QString SimSelectBuildDialog::buildsPath()
 {
 	QString configurationType = ui->debugButton->isChecked() ? QLatin1String("debug") : QLatin1String("release");
 
@@ -62,7 +62,7 @@ QString SimulatorSelectBuildDialog::buildsPath()
 	return buildSearchPath;
 }
 
-void SimulatorSelectBuildDialog::fillBuildList(QString currentBuildPath)
+void SimSelectBuildDialog::fillBuildList(QString currentBuildPath)
 {
 	ui->buildList->clear();
 
@@ -105,7 +105,7 @@ void SimulatorSelectBuildDialog::fillBuildList(QString currentBuildPath)
 	return;
 }
 
-void SimulatorSelectBuildDialog::buildListSelectionChanged(int currentRow)
+void SimSelectBuildDialog::buildListSelectionChanged(int currentRow)
 {
 	QPushButton* okButton = ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok);
 	assert(okButton);
@@ -115,7 +115,7 @@ void SimulatorSelectBuildDialog::buildListSelectionChanged(int currentRow)
 	return;
 }
 
-void SimulatorSelectBuildDialog::buildListItemDoubleClicked(QListWidgetItem*)
+void SimSelectBuildDialog::buildListItemDoubleClicked(QListWidgetItem*)
 {
 	assert(ui->buildList);
 	QList<QListWidgetItem*> selected = ui->buildList->selectedItems();
@@ -129,18 +129,18 @@ void SimulatorSelectBuildDialog::buildListItemDoubleClicked(QListWidgetItem*)
 	return;
 }
 
-void SimulatorSelectBuildDialog::accept()
+void SimSelectBuildDialog::accept()
 {
 	QDialog::accept();
 	return;
 }
 
-SimulatorSelectBuildDialog::BuildType SimulatorSelectBuildDialog::resultBuildType() const
+SimSelectBuildDialog::BuildType SimSelectBuildDialog::resultBuildType() const
 {
 	return ui->debugButton->isChecked() ? BuildType::Debug : BuildType::Release;
 }
 
-QString SimulatorSelectBuildDialog::resultBuildPath() const
+QString SimSelectBuildDialog::resultBuildPath() const
 {
 	assert(ui->buildList);
 	QList<QListWidgetItem*> selected = ui->buildList->selectedItems();

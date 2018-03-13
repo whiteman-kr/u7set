@@ -9,13 +9,13 @@
 
 // Widget for selection build and module
 //
-class SimulatorProjectWidget : public QWidget
+class SimProjectWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit SimulatorProjectWidget(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent = nullptr);
-	virtual ~SimulatorProjectWidget();
+	explicit SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent = nullptr);
+	virtual ~SimProjectWidget();
 
 protected:
 	void createActions();
@@ -24,16 +24,19 @@ protected slots:
 	void projectUpdated();
 	void treeContextMenu(const QPoint& pos);
 	void treeDoubleClicked(const QModelIndex &index);
+
 	void openControlTabPage();
+	void openCodeTabPage();
 
 protected:
 	void fillEquipmentTree();
 
 signals:
 	void signal_openControlTabPage(QString equipmentID);
+	void signal_openCodeTabPage(QString equipmentID);
 
 private:
-	std::shared_ptr<SimIdeSimulator> m_simulator;
+	SimIdeSimulator* m_simulator = nullptr;
 
 	QLabel* m_buildLabel = nullptr;
 	QTreeWidget* m_equipmentTree = nullptr;
@@ -47,6 +50,7 @@ private:
 	};
 
 	QAction* m_openLmControlPageAction = nullptr;
+	QAction* m_openLmCodePageAction = nullptr;
 };
 
 

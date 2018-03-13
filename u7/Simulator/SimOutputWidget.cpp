@@ -1,13 +1,13 @@
-#include "SimulatorOutputWidget.h"
+#include "SimOutputWidget.h"
 #include <QMenu>
 #include <QAction>
 
-QtMessageHandler SimulatorOutputWidget::simOriginalMessageHandler = 0;
-QMutex SimulatorOutputWidget::m_mutex;
-QStringList SimulatorOutputWidget::m_data;
+QtMessageHandler SimOutputWidget::simOriginalMessageHandler = 0;
+QMutex SimOutputWidget::m_mutex;
+QStringList SimOutputWidget::m_data;
 
 
-SimulatorOutputWidget::SimulatorOutputWidget(QWidget* parent) :
+SimOutputWidget::SimOutputWidget(QWidget* parent) :
 	QTextEdit(parent)
 {
 	if (simOriginalMessageHandler == nullptr)
@@ -27,7 +27,7 @@ SimulatorOutputWidget::SimulatorOutputWidget(QWidget* parent) :
 	return;
 }
 
-void SimulatorOutputWidget::simulatorOutputHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
+void SimOutputWidget::simulatorOutputHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
 	if (QString(context.category) == QLatin1String("u7.sim"))
 	{
@@ -75,7 +75,7 @@ void SimulatorOutputWidget::simulatorOutputHandler(QtMsgType type, const QMessag
 	return;
 }
 
-void SimulatorOutputWidget::timerEvent(QTimerEvent*)
+void SimOutputWidget::timerEvent(QTimerEvent*)
 {
 	QStringList data;
 	{
@@ -105,7 +105,7 @@ void SimulatorOutputWidget::timerEvent(QTimerEvent*)
 	return;
 }
 
-void SimulatorOutputWidget::contextMenuEvent(QContextMenuEvent* event)
+void SimOutputWidget::contextMenuEvent(QContextMenuEvent* event)
 {
 	QMenu* menu = createStandardContextMenu();
 	menu->addSeparator();
@@ -123,7 +123,7 @@ void SimulatorOutputWidget::contextMenuEvent(QContextMenuEvent* event)
 	return;
 }
 
-void SimulatorOutputWidget::keyPressEvent(QKeyEvent* e)
+void SimOutputWidget::keyPressEvent(QKeyEvent* e)
 {
 	if (e->matches(QKeySequence::Delete) == true)
 	{
