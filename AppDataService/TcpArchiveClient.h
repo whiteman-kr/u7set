@@ -8,7 +8,6 @@ class TcpArchiveClient : public Tcp::Client
 {
 public:
 	TcpArchiveClient(const SoftwareInfo& softwareInfo,
-					 int channel,
 					 const HostAddressPort& serverAddressPort,
 					 CircularLoggerShared logger,
 					 AppSignalStatesQueue& signalStatesQueue);
@@ -29,8 +28,6 @@ private slots:
 	void onSignalStatesQueueIsNotEmpty();
 
 private:
-	int m_channel = -1;
-
 	CircularLoggerShared m_logger;
 
 	AppSignalStatesQueue& m_signalStatesQueue;
@@ -42,3 +39,19 @@ private:
 	qint64 m_saveAppSignalsStateErrorReplyCount = 0;
 };
 
+
+class TcpArchiveClientThread : public SimpleThread
+{
+public:
+	TcpArchiveClientThread(TcpArchiveClient* tcpArchiveClient);
+
+	Tcp::ConnectionState getConnectionState();
+
+private:
+
+	virtual void beforeQuit() override;
+
+private:
+	TcpArchiveClient* m_tcpArchiveClient = nullptr;
+	Tcp::ConnectionState m_dummyState;
+};

@@ -27,11 +27,6 @@ AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 	m_timer(this),
 	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
 {
-	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
-	{
-		m_appDataChannelThread[channel] = nullptr;
-		m_tcpArchiveClientThread[channel] = nullptr;
-	}
 }
 
 
@@ -80,22 +75,19 @@ bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint1
 
 bool AppDataServiceWorker::isConnectedToArchiveService(quint32 &ip, quint16 &port) const
 {
-	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	if (m_tcpArchiveClientThread == nullptr)
 	{
-		if (m_tcpArchiveClient[channel] == nullptr)
-		{
-			continue;
-		}
+		return false;
+	}
 
-		if (m_tcpArchiveClient[channel]->isConnected())
-		{
-			Tcp::ConnectionState&& state = m_tcpArchiveClient[channel]->getConnectionState();
+	Tcp::ConnectionState&& state = m_tcpArchiveClientThread->getConnectionState();
 
-			ip = state.peerAddr.address32();
-			port = state.peerAddr.port();
+	if (state.isConnected == true)
+	{
+		ip = state.peerAddr.address32();
+		port = state.peerAddr.port();
 
-			return true;
-		}
+		return true;
 	}
 
 	return false;
@@ -176,45 +168,35 @@ void AppDataServiceWorker::stopTcpAppDataServer()
 
 void AppDataServiceWorker::runTcpArchiveClientThreads()
 {
-	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	assert(m_tcpArchiveClientThread == nullptr);
+
+	if (m_cfgSettings.archServiceID.isEmpty() == true)
 	{
-		assert(m_tcpArchiveClientThread[channel] == nullptr);
-
-		if (m_cfgSettings.appDataServiceChannel[channel].archServiceStrID.isEmpty() == true)
-		{
-			m_tcpArchiveClientThread[channel] = nullptr;
-			continue;
-		}
-
-		m_tcpArchiveClient[channel] = new TcpArchiveClient(softwareInfo(),
-															channel,
-															m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
-															m_logger,
-															m_signalStatesQueue);
-
-		m_tcpArchiveClientThread[channel] = new Tcp::Thread(m_tcpArchiveClient[channel]);
-
-		m_tcpArchiveClientThread[channel]->start();
+		return;
 	}
+
+	TcpArchiveClient* tcpArchiveClient = new TcpArchiveClient(softwareInfo(),
+												m_cfgSettings.archServiceIP,
+												m_logger,
+												m_signalStatesQueue);
+
+	m_tcpArchiveClientThread = new TcpArchiveClientThread(tcpArchiveClient);
+
+	m_tcpArchiveClientThread->start();
 }
 
 void AppDataServiceWorker::stopTcpArchiveClientThreads()
 {
-	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	if (m_tcpArchiveClientThread == nullptr)
 	{
-		if (m_tcpArchiveClientThread[channel] == nullptr)
-		{
-			continue;
-		}
-
-		m_tcpArchiveClient[channel] = nullptr;
-
-		m_tcpArchiveClientThread[channel]->quitAndWait();
-
-		delete m_tcpArchiveClientThread[channel];
-
-		m_tcpArchiveClientThread[channel] = nullptr;
+		return;
 	}
+
+	m_tcpArchiveClientThread->quitAndWait();
+
+	delete m_tcpArchiveClientThread;
+
+	m_tcpArchiveClientThread = nullptr;
 }
 
 void AppDataServiceWorker::runTimer()

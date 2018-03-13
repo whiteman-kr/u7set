@@ -11,6 +11,7 @@
 #include "AppDataChannel.h"
 #include "AppSignalStateEx.h"
 #include "TcpAppDataServer.h"
+#include "TcpArchiveClient.h"
 
 class TcpArchiveClient;
 
@@ -106,8 +107,7 @@ private:
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
-	Tcp::Thread* m_tcpArchiveClientThread = nullptr;
-	TcpArchiveClient* m_tcpArchiveClient = nullptr;
+	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 

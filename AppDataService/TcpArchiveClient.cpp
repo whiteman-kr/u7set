@@ -1,12 +1,10 @@
 #include "TcpArchiveClient.h"
 
 TcpArchiveClient::TcpArchiveClient(const SoftwareInfo& softwareInfo,
-								   int channel,
 								   const HostAddressPort& serverAddressPort,
 								   CircularLoggerShared logger,
 								   AppSignalStatesQueue& signalStatesQueue) :
 	Tcp::Client(softwareInfo, serverAddressPort),
-	m_channel(channel),
 	m_logger(logger),
 	m_signalStatesQueue(signalStatesQueue),
 	m_timer(this)
@@ -31,8 +29,8 @@ void TcpArchiveClient::processReply(quint32 requestID, const char* replyData, qu
 
 void TcpArchiveClient::onClientThreadStarted()
 {
-	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread started (channel %1, archive server %2)").
-								arg(m_channel + 1).arg(serverAddressPort(0).addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread started, archive server %1)").
+								arg(serverAddressPort(0).addressPortStr()));
 
 	connect(&m_timer, &QTimer::timeout, this, &TcpArchiveClient::onTimer);
 	connect(&m_signalStatesQueue, &AppSignalStatesQueue::queueNotEmpty, this, &TcpArchiveClient::onSignalStatesQueueIsNotEmpty);
@@ -45,8 +43,8 @@ void TcpArchiveClient::onClientThreadStarted()
 
 void TcpArchiveClient::onClientThreadFinished()
 {
-	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread finished (channel %1, archive server %2)").
-								arg(m_channel + 1).arg(serverAddressPort(0).addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread finished, archive server %1)").
+								arg(serverAddressPort(0).addressPortStr()));
 }
 
 void TcpArchiveClient::onConnection()
@@ -173,5 +171,27 @@ void TcpArchiveClient::onSignalStatesQueueIsNotEmpty()
 	sendSignalStatesToArchiveRequest(false);
 }
 
+
+
+TcpArchiveClientThread::TcpArchiveClientThread(TcpArchiveClient* tcpArchiveClient) :
+	SimpleThread(tcpArchiveClient),
+	m_tcpArchiveClient(tcpArchiveClient)
+{
+}
+
+Tcp::ConnectionState TcpArchiveClientThread::getConnectionState()
+{
+	if (m_tcpArchiveClient != nullptr)
+	{
+		return m_tcpArchiveClient->getConnectionState();
+	}
+
+	return m_dummyState;
+}
+
+void TcpArchiveClientThread::beforeQuit()
+{
+	m_tcpArchiveClient = nullptr;
+}
 
 
