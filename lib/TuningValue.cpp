@@ -6,6 +6,11 @@ TuningValue::TuningValue(TuningValueType valueType)
 	m_type = valueType;
 }
 
+TuningValue::TuningValue(QVariant value)
+{
+	fromVariant(value);
+}
+
 TuningValue::TuningValue(TuningValueType valueType, double value)
 {
 	m_type = valueType;
@@ -136,6 +141,86 @@ void TuningValue::setValue(TuningValueType valueType, qint64 intValue, double do
 void TuningValue::setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint64 intValue, double doubleValue)
 {
 	setValue(getTuningValueType(signalType, analogFormat), intValue, doubleValue);
+}
+
+QVariant TuningValue::toVariant() const
+{
+	switch (m_type)
+	{
+	case TuningValueType::Discrete:
+
+		return QVariant(discreteValue());
+
+	case TuningValueType::SignedInt32:
+
+		return QVariant(int32Value());
+
+	case TuningValueType::SignedInt64:
+
+		assert(false);		// remove when tuningable int64 will exist
+		return QVariant(int64Value());
+
+	case TuningValueType::Float:
+
+		return QVariant(floatValue());
+
+	case TuningValueType::Double:
+
+		assert(false);		// remove when tuningable double will exist
+		return QVariant(doubleValue());
+
+	default:
+		assert(false);
+	}
+
+	return QVariant();
+}
+
+void TuningValue::fromVariant(QVariant value)
+{
+	switch (value.type())
+	{
+	case QVariant::Bool:
+
+		m_type = TuningValueType::Discrete;
+		m_int64 = value.toBool() == true ? 1 : 0;
+
+		break;
+
+	case QVariant::Int:
+
+		m_type = TuningValueType::SignedInt32;
+		m_int64 = value.toInt();
+
+		break;
+
+	case QVariant::LongLong:
+
+		assert(false);		// remove when tuningable int64 will exist
+		m_type = TuningValueType::SignedInt64;
+		m_int64 = value.toLongLong();
+
+		break;
+
+	case QMetaType::Float:
+
+		m_type = TuningValueType::Float;
+		m_double = value.toFloat();
+
+		break;
+
+	case QVariant::Double:
+
+		assert(false);		// remove when tuningable double will exist
+		m_type = TuningValueType::Double;
+		m_double = value.toDouble();
+
+		break;
+
+	default:
+		assert(false);
+	}
+
 }
 
 double TuningValue::toDouble() const

@@ -2774,6 +2774,31 @@ namespace Builder
 			}
 		}
 
+		// sort array be appSignalID
+
+		int count = m_analogOutputSignalsToConversion.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				Signal* si = m_analogOutputSignalsToConversion[i];
+				Signal* sk = m_analogOutputSignalsToConversion[k];
+
+				if (si == nullptr || sk == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				if (si->appSignalID() > sk->appSignalID())
+				{
+					m_analogOutputSignalsToConversion[i] = sk;
+					m_analogOutputSignalsToConversion[k] = si;
+				}
+			}
+		}
+
 		return true;
 	}
 

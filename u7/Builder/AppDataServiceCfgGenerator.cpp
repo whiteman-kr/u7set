@@ -27,14 +27,20 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::generateConfiguration()
 	{
-		bool result = true;
+		bool result = false;
 
-		result &= writeSettings();
-		result &= writeAppDataSourcesXml();
-		result &= writeAppSignalsXml();
-		result &= addLinkToAppSignalsFile();
-		result &= writeBatFile();
-		result &= writeShFile();
+		do
+		{
+			if (writeSettings() == false) break;
+			if (writeAppDataSourcesXml() == false) break;
+			if (writeAppSignalsXml() == false) break;
+			if (addLinkToAppSignalsFile() == false) break;
+			if (writeBatFile() == false) break;
+			if (writeShFile() == false) break;
+
+			result = true;
+		}
+		while(false);
 
 		return result;
 	}

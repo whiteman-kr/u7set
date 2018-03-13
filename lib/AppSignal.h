@@ -69,6 +69,7 @@ class AppSignalState
 
 	Q_PROPERTY(Hash Hash READ hash)
 	Q_PROPERTY(double Value READ value)
+	Q_PROPERTY(bool Valid READ isValid)
 
 public:
 	AppSignalState() = default;
@@ -83,12 +84,12 @@ public:
 	static const quint32 VALID = 1;
 	static const quint32 INVALID = 0;
 
-	Q_INVOKABLE Hash hash() const;
+	Hash hash() const;
 	const Times& time() const;
 	const TimeStamp& time(E::TimeType timeType) const;
-	Q_INVOKABLE double value() const;
+	double value() const;
 
-	Q_INVOKABLE bool isValid() const;
+	bool isValid() const;
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
@@ -125,11 +126,20 @@ class AppSignalParam
 
 	Q_PROPERTY(Hash Hash READ hash)
 	Q_PROPERTY(QString AppSignalID READ appSignalId)
-	Q_PROPERTY(QString CustimSignalID READ customSignalId)
+	Q_PROPERTY(QString CustomSignalID READ customSignalId)
 	Q_PROPERTY(QString Caption READ caption)
 	Q_PROPERTY(QString EquipmentID READ equipmentId)
 
+	Q_PROPERTY(QString Unit READ unit)
+	Q_PROPERTY(int Precision READ precision)
+
 	Q_PROPERTY(E::Channel Channel READ channel)
+
+	Q_PROPERTY(bool EnableTuning READ enableTuning)
+
+	Q_PROPERTY(QVariant TuningDefaultValue READ tuningDefaultValueToVariant)
+	Q_PROPERTY(QVariant TuningLowBound READ tuningLowBoundToVariant)
+	Q_PROPERTY(QVariant TuningHighBound READ tuningHighBoundToVariant)
 
 	Q_PROPERTY(bool IsInput READ isInput)
 	Q_PROPERTY(bool IsOutput READ isOutput)
@@ -150,16 +160,16 @@ public:
 	Hash hash() const;
 	void setHash(Hash value);
 
-	Q_INVOKABLE QString appSignalId() const;
+	QString appSignalId() const;
 	void setAppSignalId(const QString& value);
 
-	Q_INVOKABLE QString customSignalId() const;
+	QString customSignalId() const;
 	void setCustomSignalId(const QString& value);
 
-	Q_INVOKABLE QString caption() const;
+	QString caption() const;
 	void setCaption(const QString& value);
 
-	Q_INVOKABLE QString equipmentId() const;
+	QString equipmentId() const;
 	void setEquipmentId(const QString& value);
 
 	E::Channel channel() const;
@@ -171,8 +181,8 @@ public:
 	E::SignalInOutType inOutType() const;
 	void setInOutType(E::SignalInOutType value);
 
-	Q_INVOKABLE bool isAnalog() const;
-	Q_INVOKABLE bool isDiscrete() const;
+	bool isAnalog() const;
+	bool isDiscrete() const;
 	E::SignalType type() const;
 	void setType(E::SignalType value);
 
@@ -187,16 +197,16 @@ public:
 	int unitId() const;
 	void setUnitId(int value);
 
-	Q_INVOKABLE QString unit() const;
+	QString unit() const;
 	void setUnit(QString value);
 
-	Q_INVOKABLE double lowValidRange() const;
-	Q_INVOKABLE double highValidRange() const;
+	double lowValidRange() const;
+	double highValidRange() const;
 
-	Q_INVOKABLE double lowEngineeringUnits() const;
+	double lowEngineeringUnits() const;
 	void setLowEngineeringUnits(double value);
 
-	Q_INVOKABLE double highEngineeringUnits() const;
+	double highEngineeringUnits() const;
 	void setHighEngineeringUnits(double value);
 
 	double inputLowLimit() const;
@@ -210,7 +220,7 @@ public:
 	E::OutputMode outputMode() const;
 	E::SensorType outputSensorType() const;
 
-	Q_INVOKABLE int precision() const;
+	int precision() const;
 	void setPrecision(int value);
 
 	double aperture();
@@ -222,21 +232,20 @@ public:
 	double spreadTolerance();
 	void setSpreadTolerance(double value);
 
-	Q_INVOKABLE bool enableTuning() const;
+	bool enableTuning() const;
 	void setEnableTuning(bool value);
 
 	TuningValue tuningDefaultValue() const;
+	QVariant tuningDefaultValueToVariant() const;
 	void setTuningDefaultValue(const TuningValue& value);
 
 	TuningValue tuningLowBound() const;
+	QVariant tuningLowBoundToVariant() const;
 	void setTuningLowBound(const TuningValue& value);
 
 	TuningValue tuningHighBound() const;
+	QVariant tuningHighBoundToVariant() const;
 	void setTuningHighBound(const TuningValue& value);
-
-	Q_INVOKABLE double getTuningDefaultValue() const;
-	Q_INVOKABLE double getTuningLowBound() const;
-	Q_INVOKABLE double getTuningHighBound() const;
 
 public:
 	static const int NO_UNIT_ID = 1;

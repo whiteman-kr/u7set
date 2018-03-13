@@ -25,7 +25,6 @@ namespace Builder
 	{
 	}
 
-
 	bool TuningServiceCfgGenerator::generateConfiguration()
 	{
 		if (m_tuningDataStorage == nullptr ||
@@ -35,34 +34,21 @@ namespace Builder
 			return false;
 		}
 
-		bool result = true;
+		bool result = false;
 
-		result = writeSettings();
-
-		if (result == false)
+		do
 		{
-			return false;
+			if (writeSettings() == false) break;
+			if (writeTuningLMs() == false) break;
+			if (writeBatFile() == false) break;
+			if (writeShFile() == false) break;
+
+			result = true;
 		}
-
-		result = writeTuningLMs();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result = writeBatFile();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result = writeShFile();
+		while(false);
 
 		return result;
 	}
-
 
 	bool TuningServiceCfgGenerator::writeSettings()
 	{
