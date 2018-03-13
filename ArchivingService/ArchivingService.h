@@ -63,13 +63,6 @@ private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
-	QString m_equipmentID;
-	QString m_cfgServiceIP1Str;
-	QString m_cfgServiceIP2Str;
-
-	HostAddressPort m_cfgServiceIP1;
-	HostAddressPort m_cfgServiceIP2;
-
 	std::shared_ptr<CircularLogger> m_logger;
 
 	QSettings m_settings;

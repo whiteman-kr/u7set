@@ -89,16 +89,18 @@ int TuningClientTcpClient::sourceErrorCount(Hash equipmentHash) const
 	return ts.getErrorsCount();
 }
 
-int TuningClientTcpClient::sourceSorCount(bool* sorValid) const
+int TuningClientTcpClient::sourceSorCount(bool* sorActive, bool* sorValid) const
 {
-	if (sorValid == nullptr)
+	if (sorValid == nullptr || sorActive == nullptr)
 	{
 		assert(sorValid);
+		assert(sorActive);
 		return 0;
 	}
 
 	int result = 0;
 
+	*sorActive = false;
 	*sorValid = false;
 
 	QMutexLocker l(&m_tuningSourcesMutex);
@@ -107,13 +109,18 @@ int TuningClientTcpClient::sourceSorCount(bool* sorValid) const
 	{
 		const TuningSource& ts = it.second;
 
-		if (ts.state.controlisactive() == true && ts.state.isreply() == true)
+		if (ts.state.controlisactive() == true)
 		{
-			*sorValid = true;
+			*sorActive = true;
 
-			if (ts.state.setsor() == true)
+			if (ts.state.isreply() == true)
 			{
-				result++;
+				*sorValid = true;
+
+				if (ts.state.setsor() == true)
+				{
+					result++;
+				}
 			}
 		}
 	}
@@ -121,14 +128,16 @@ int TuningClientTcpClient::sourceSorCount(bool* sorValid) const
 	return result;
 }
 
-int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorValid) const
+int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorActive, bool* sorValid) const
 {
-	if (sorValid == nullptr)
+	if (sorValid == nullptr || sorActive == nullptr)
 	{
 		assert(sorValid);
+		assert(sorActive);
 		return 0;
 	}
 
+	*sorActive = false;
 	*sorValid = false;
 
 	int result = 0;
@@ -142,13 +151,18 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorValid) co
 
 	const TuningSource& ts = m_tuningSources.at(equipmentHash);
 
-	if (ts.state.controlisactive() == true && ts.state.isreply() == true)
+	if (ts.state.controlisactive() == true)
 	{
-		*sorValid = true;
+		*sorActive = true;
 
-		if (ts.state.setsor() == true)
+		if (ts.state.isreply() == true)
 		{
-			result = 1;
+			*sorValid = true;
+
+			if (ts.state.setsor() == true)
+			{
+				result = 1;
+			}
 		}
 	}
 

@@ -938,32 +938,41 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		if (columnSorIndex != -1 && theConfigSettings.showSOR == true)
 		{
-			if (counters.sorValid == false)
+			if (counters.sorActive == false)
 			{
-				treeItem->setText(columnSorIndex, QString());
+				treeItem->setText(columnSorIndex, QString());	// Inactive
 				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
 				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
 			}
 			else
 			{
-				if (counters.sorCounter == 0)
+				if (counters.sorValid == false)
 				{
-					treeItem->setText(columnSorIndex, tr("No"));
-					treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
-					treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
+					treeItem->setText(columnSorIndex, "?");
+					treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+					treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 				}
 				else
 				{
-					if (counters.sorCounter == 1)
+					if (counters.sorCounter == 0)
 					{
-						treeItem->setText(columnSorIndex, tr("Yes"));
+						treeItem->setText(columnSorIndex, QString());	// Sor NO
+						treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
+						treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
 					}
 					else
 					{
-						treeItem->setText(columnSorIndex, QString("Yes [%1]").arg(counters.sorCounter));
+						if (counters.sorCounter == 1)
+						{
+							treeItem->setText(columnSorIndex, tr("SOR"));
+						}
+						else
+						{
+							treeItem->setText(columnSorIndex, QString("SOR [%1]").arg(counters.sorCounter));
+						}
+						treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+						treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 					}
-					treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
-					treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 				}
 			}
 		}

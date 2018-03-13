@@ -20,6 +20,11 @@ TuningValue TuningSignalState::value() const
 	return m_value;
 }
 
+QVariant TuningSignalState::toVariant() const
+{
+	return m_value.toVariant();
+}
+
 double TuningSignalState::toDouble() const
 {
 	return m_value.toDouble();
@@ -49,9 +54,19 @@ TuningValue TuningSignalState::lowBound() const
 	return m_lowBound;
 }
 
+QVariant TuningSignalState::lowBoundToVariant() const
+{
+	return m_lowBound.toVariant();
+}
+
 TuningValue TuningSignalState::highBound() const
 {
 	return m_highBound;
+}
+
+QVariant TuningSignalState::highBoundToVariant() const
+{
+	return m_highBound.toVariant();
 }
 
 bool TuningSignalState::valid() const

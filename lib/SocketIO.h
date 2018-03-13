@@ -248,7 +248,8 @@ enum class NetworkError
 	TuningValueOutOfRange,
 	SingleLmControlDisabled,
 	LmControlIsNotActive,
-	ClientIsNotActive
+	ClientIsNotActive,
+	TuningNoReply
 };
 
 enum class ArchiveError

@@ -38,6 +38,7 @@ public:
 
 signals:
 	void newTcpClientSocket(TcpTuningServiceClient* tcpClientSocket);
+	void clearTcpClientSocket();
 
 public slots:
 	void updateStateInfo();
@@ -49,6 +50,8 @@ public slots:
 	void clearServiceData();
 
 	void onTuningSourceDoubleClicked(const QModelIndex &index);
+
+	void forgetWidget();
 
 protected:
 	void createTcpConnection(quint32 ip, quint16 port) override;

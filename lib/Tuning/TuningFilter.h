@@ -9,6 +9,7 @@ struct TuningCounters
 {
 	int errorCounter = 0;
 	int sorCounter = 0;
+	bool sorActive = false;
 	bool sorValid = false;
 	int controlEnabledCounter = 0;
 	int discreteCounter = 0;

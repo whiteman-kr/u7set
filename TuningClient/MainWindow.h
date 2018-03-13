@@ -57,6 +57,8 @@ private:
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
+	QTabWidget* m_tabWidget = nullptr;
+
 	UserManager m_userManager;
 public:
 
@@ -123,8 +125,8 @@ private:
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
-	static QString m_singleLmControlModeText;
-	static QString m_multipleLmControlModeText;
+	QString m_singleLmControlModeText;
+	QString m_multipleLmControlModeText;
 };
 
 // Global definitions

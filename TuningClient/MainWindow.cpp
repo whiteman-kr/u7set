@@ -10,13 +10,13 @@
 #include "DialogFilterEditor.h"
 #include "version.h"
 
-QString MainWindow::m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
-QString MainWindow::m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
-
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
 {
+	m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
+	m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
+
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
 		move(theSettings.m_mainWindowPos);
@@ -366,6 +366,12 @@ void MainWindow::createWorkspace()
 		m_schemasWorkspace = nullptr;
 	}
 
+	if (m_tabWidget != nullptr)
+	{
+		delete m_tabWidget;
+		m_tabWidget = nullptr;
+	}
+
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
 		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, m_globalScript, this);
@@ -410,11 +416,11 @@ void MainWindow::createWorkspace()
 				// Show both Workspaces
 				//
 
-				QTabWidget* tab = new QTabWidget();
-				tab->addTab(m_schemasWorkspace, tr("Schemas"));
-				tab->addTab(m_tuningWorkspace, tr("Signals"));
+				m_tabWidget = new QTabWidget();
+				m_tabWidget->addTab(m_schemasWorkspace, tr("Schemas"));
+				m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));
 
-				m_mainLayout->addWidget(tab, 2);
+				m_mainLayout->addWidget(m_tabWidget, 2);
 			}
 			else
 			{
@@ -471,7 +477,7 @@ void MainWindow::updateStatusBar()
 
 		if (m_activeClientId.isEmpty() == false && m_activeClientIp.isEmpty() == false)
 		{
-			str += QString(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
+			str += tr(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
 
 			if (m_tcpClient->clientIsActive() == true)
 			{
@@ -595,27 +601,40 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
+			bool totalSorActive = false;
+
 			bool totalSorValid = false;
 
-			int totalSorCount = m_tcpClient->sourceSorCount(&totalSorValid);
+			int totalSorCount = m_tcpClient->sourceSorCount(&totalSorActive, &totalSorValid);
 
 			QString sorStatus;
 
-			if (totalSorValid == true)
+			if (totalSorActive == false)
 			{
-				if (totalSorCount == 0)
+				sorStatus = tr(" SOR: ");
+			}
+			else
+			{
+				if (totalSorValid == false)
 				{
-					sorStatus = tr("SOR: No");
+					sorStatus = tr(" SOR: ?");
 				}
 				else
 				{
-					if (totalSorCount == 1)
+					if (totalSorCount == 0)
 					{
-						sorStatus = tr("SOR: Yes");
+						sorStatus = tr(" SOR: No");
 					}
 					else
 					{
-						sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+						if (totalSorCount == 1)
+						{
+							sorStatus = tr(" SOR: Yes");
+						}
+						else
+						{
+							sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+						}
 					}
 				}
 			}
@@ -628,13 +647,14 @@ void MainWindow::updateStatusBar()
 
 				m_statusBarSor->setText(sorStatus);
 
-				if (totalSorCount == 0)
+				if ((totalSorActive == true && totalSorValid == false) || totalSorCount > 0)
 				{
-					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+
 				}
 				else
 				{
-					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
 				}
 			}
 		}

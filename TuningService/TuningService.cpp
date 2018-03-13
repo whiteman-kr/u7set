@@ -11,10 +11,6 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	const char* const TuningServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
-	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
-	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
-
 	TuningServiceWorker::TuningServiceWorker(const SoftwareInfo& softwareInfo,
 											 const QString& serviceName,
 											 int& argc,
@@ -58,38 +54,10 @@ namespace Tuning
 
 	void TuningServiceWorker::loadSettings()
 	{
-		m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
-
-		//
-
-		QString addressPortStr = getStrSetting(SETTING_CFG_SERVICE_IP1);
-
-		if (addressPortStr.isEmpty() == false)
-		{
-			if (m_cfgServiceIP1.setAddressPort(addressPortStr, PORT_CONFIGURATION_SERVICE_REQUEST) == false)
-			{
-				DEBUG_LOG_WRN(m_logger, QString("Invalid value of %1 setting - %2").arg(SETTING_CFG_SERVICE_IP1).arg(addressPortStr));
-			}
-		}
-
-		//
-
-		addressPortStr = getStrSetting(SETTING_CFG_SERVICE_IP2);
-
-		if (addressPortStr.isEmpty() == false)
-		{
-			if (m_cfgServiceIP2.setAddressPort(addressPortStr, PORT_CONFIGURATION_SERVICE_REQUEST) == false)
-			{
-				DEBUG_LOG_WRN(m_logger, QString("Invalid value of %1 setting - %2").arg(SETTING_CFG_SERVICE_IP2).arg(addressPortStr));
-			}
-		}
-
-		//
-
 		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(m_cfgServiceIP1.addressPortStr()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(m_cfgServiceIP2.addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
 	}
 
 	void TuningServiceWorker::clear()
@@ -286,7 +254,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
+		CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, m_logger);
 
 		m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 

@@ -560,6 +560,11 @@ TuningValue AppSignalParam::tuningDefaultValue() const
 	return m_tuningDefaultValue;
 }
 
+QVariant AppSignalParam::tuningDefaultValueToVariant() const
+{
+	return m_tuningDefaultValue.toVariant();
+}
+
 void AppSignalParam::setTuningDefaultValue(const TuningValue& value)
 {
 	m_tuningDefaultValue = value;
@@ -568,6 +573,11 @@ void AppSignalParam::setTuningDefaultValue(const TuningValue& value)
 TuningValue AppSignalParam::tuningLowBound() const
 {
 	return m_tuningLowBound;
+}
+
+QVariant AppSignalParam::tuningLowBoundToVariant() const
+{
+	return m_tuningLowBound.toVariant();
 }
 
 void AppSignalParam::setTuningLowBound(const TuningValue& value)
@@ -580,22 +590,13 @@ TuningValue AppSignalParam::tuningHighBound() const
 	return m_tuningHighBound;
 }
 
+QVariant AppSignalParam::tuningHighBoundToVariant() const
+{
+	return m_tuningHighBound.toVariant();
+}
+
 void AppSignalParam::setTuningHighBound(const TuningValue& value)
 {
 	m_tuningHighBound = value;
 }
 
-double AppSignalParam::getTuningDefaultValue() const
-{
-	return m_tuningDefaultValue.toDouble();
-}
-
-double AppSignalParam::getTuningLowBound() const
-{
-	return m_tuningLowBound.toDouble();
-}
-
-double AppSignalParam::getTuningHighBound() const
-{
-	return m_tuningHighBound.toDouble();
-}

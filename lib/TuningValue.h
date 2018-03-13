@@ -20,9 +20,10 @@ class TuningValue
 
 public:
 	TuningValue() = default;
-	TuningValue(TuningValueType valueType);
+	explicit TuningValue(TuningValueType valueType);
+	explicit TuningValue(QVariant value);
 	explicit TuningValue(TuningValueType valueType, double value);
-	TuningValue(const Proto::TuningValue& message);
+	explicit TuningValue(const Proto::TuningValue& message);
 
 	TuningValueType type() const;
 	void setType(TuningValueType valueType);
@@ -46,6 +47,9 @@ public:
 
 	void setValue(TuningValueType valueType, qint64 int32Value, double doubleValue);
 	void setValue(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, qint64 intValue, double doubleValue);
+
+	QVariant toVariant() const;
+	void fromVariant(QVariant value);
 
 	double toDouble() const;
 	void fromDouble(double value);
@@ -80,6 +84,8 @@ private:
 	qint64 m_int64 = 0;
 	double m_double = 0.0;
 };
+
+Q_DECLARE_METATYPE(TuningValue)
 
 extern bool operator < (const TuningValue& l, const TuningValue& r);
 extern bool operator <= (const TuningValue& l, const TuningValue& r);

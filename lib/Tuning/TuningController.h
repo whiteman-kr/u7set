@@ -22,7 +22,7 @@ public:
 	Q_INVOKABLE QVariant signalParam(const QString& appSignalId);	// If no signal with specified appSignalID found, QVariant is undefined
 	Q_INVOKABLE QVariant signalState(const QString& appSignalId);	// If no signal with specified appSignalID found, QVariant is undefined
 
-	Q_INVOKABLE bool writeValue(QString appSignalId, double value);
+	Q_INVOKABLE bool writeValue(QString appSignalId, QVariant value);
 
 private:
 	ITuningSignalManager* m_signalManager = nullptr;

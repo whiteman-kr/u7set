@@ -36,10 +36,6 @@ public:
 	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port) const;
 	bool isConnectedToArchiveService(quint32 &ip, quint16 &port) const;
 
-	QString equipmentID() const { return m_equipmentID; }
-	QString cfgServiceIP1Str() const { return m_cfgServiceIP1Str; }
-	QString cfgServiceIP2Str() const { return m_cfgServiceIP2Str; }
-
 private:
 	virtual void initCmdLineParser() override;
 	virtual void loadSettings() override;
@@ -91,17 +87,6 @@ private:
 	void resizeAppSignalEventsQueue();
 
 private:
-	static const char* const SETTING_EQUIPMENT_ID;
-	static const char* const SETTING_CFG_SERVICE_IP1;
-	static const char* const SETTING_CFG_SERVICE_IP2;
-
-	QString m_equipmentID;
-	QString m_cfgServiceIP1Str;
-	QString m_cfgServiceIP2Str;
-
-	HostAddressPort m_cfgServiceIP1;
-	HostAddressPort m_cfgServiceIP2;
-
 	std::shared_ptr<CircularLogger> m_logger;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
