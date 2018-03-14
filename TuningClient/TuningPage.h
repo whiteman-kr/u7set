@@ -85,6 +85,8 @@ private slots:
 
 	void slot_FilterTypeIndexChanged(int index);
 
+	void slot_listContextMenuRequested(const QPoint& pos);
+
 public slots:
 
 	void slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);

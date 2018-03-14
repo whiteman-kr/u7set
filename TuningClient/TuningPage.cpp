@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QPushButton>
 #include "../VFrame30/DrawParam.h"
+#include "DialogSignalInfo.h"
 
 using namespace std;
 
@@ -525,6 +526,10 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 	m_objectList->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_objectList->setSortingEnabled(true);
 	m_objectList->setEditTriggers(QAbstractItemView::EditKeyPressed);
+
+	m_objectList->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(m_objectList, &QWidget::customContextMenuRequested, this, &TuningPage::slot_listContextMenuRequested);
 
 	connect(m_objectList->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &TuningPage::sortIndicatorChanged);
 
@@ -1060,6 +1065,49 @@ void TuningPage::slot_FilterTypeIndexChanged(int index)
 {
 	Q_UNUSED(index);
 	fillObjectsList();
+}
+
+void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
+{
+	QModelIndex index =	m_objectList->indexAt(pos);
+	if (index.isValid() == false)
+	{
+		return;
+	}
+
+	Hash hash = m_model->hashByIndex(index.row());
+	if (hash == UNDEFINED_HASH)
+	{
+		assert(false);
+		return;
+	}
+
+	QMenu menu(this);
+
+	bool found = false;
+
+	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
+
+	if (found == false)
+	{
+		assert(false);
+		return;
+	}
+
+	QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
+
+	auto f = [this, hash]() -> void
+	{
+		DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningSignalManager, this);
+		d->show();
+	};
+
+	connect(a, &QAction::triggered, this, f);
+
+	menu.addAction(a);
+
+	menu.exec(QCursor::pos());
+
 }
 
 void TuningPage::slot_ApplyFilter()

@@ -64,6 +64,12 @@ public:
 	bool controlIsEnabled() const;
 
 	int writeErrorCode() const;
+	Hash writeClient() const;
+
+	QDateTime successfulReadTime() const;
+	QDateTime writeRequestTime() const;
+	QDateTime successfulWriteTime() const;
+	QDateTime unsuccessfulWriteTime() const;
 
 	bool userModified() const;
 	void clearUserModified();
@@ -87,6 +93,11 @@ public:
 
 	int m_writeErrorCode = 0;
 	Hash m_writeClient = 0;
+
+	qint64 m_successfulReadTime = 0;
+	qint64 m_writeRequestTime = 0;
+	qint64 m_successfulWriteTime = 0;
+	qint64 m_unsuccessfulWriteTime = 0;
 };
 
 Q_DECLARE_METATYPE(TuningSignalState)
