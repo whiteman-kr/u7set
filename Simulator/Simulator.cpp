@@ -11,8 +11,8 @@ namespace Sim
 	//
 	// Simulator
 	//
-	Simulator::Simulator() :
-		QObject(),
+	Simulator::Simulator(QObject* parent) :
+		QObject(parent),
 		Output()
 	{
 		return;

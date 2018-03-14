@@ -3,7 +3,8 @@
 
 SimIdeSimulator::SimIdeSimulator() :
 	Sim::Simulator(),
-	m_appSignalManager(this)
+	m_appSignalManager(this),
+	m_controlThread(this)
 {
 }
 

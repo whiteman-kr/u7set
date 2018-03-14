@@ -19,7 +19,7 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		Simulator();
+		explicit Simulator(QObject* parent = nullptr);
 		virtual ~Simulator();
 
 	public:
@@ -49,7 +49,7 @@ namespace Sim
 
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
 		std::map<QString, QString> m_simScript;								// Key is filename, value is afbl simulation script
-		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;							// Key is SubsystemID
+		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
 	};
 }
 
