@@ -249,7 +249,8 @@ enum class NetworkError
 	SingleLmControlDisabled,
 	LmControlIsNotActive,
 	ClientIsNotActive,
-	TuningNoReply
+	TuningNoReply,
+	TuningValueCurrupted,
 };
 
 enum class ArchiveError
