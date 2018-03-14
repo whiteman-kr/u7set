@@ -875,10 +875,6 @@ bool TuningPage::write()
 			continue;
 		}
 
-		state.clearUserModified();
-
-		m_tuningSignalManager->setState(hash, state);
-
 		TuningWriteCommand cmd(hash, state.modifiedValue());
 
 		commands.push_back(cmd);

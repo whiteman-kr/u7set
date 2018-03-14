@@ -767,7 +767,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		if (error != NetworkError::Success && error != NetworkError::LmControlIsNotActive)
 		{
-//			assert(false);
 			writeLogError(tr("TuningTcpClient::processReadTuningSignals, TuningSignalState error received: %1")
 						  .arg(networkErrorStr(error)));
 
@@ -779,8 +778,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
 
-		bool writeFailed = false;
-
 		if (found == true)
 		{
 			// Process write error only if writing was performed by current client
@@ -789,12 +786,19 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 			if (m_instanceIdHash == writeClientHash)
 			{
-				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
+				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) == NetworkError::Success)
 				{
-					writeFailed = true;
-
+					if (arrivedState.successfulWriteTime() > previousState.successfulWriteTime())
+					{
+						previousState.m_flags.userModified = false;
+					}
+				}
+				else
+				{
 					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
 					{
+						previousState.m_flags.userModified = false;
+
 						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
 						if (found == false)
 						{
@@ -811,10 +815,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 									  );
 					}
 				}
-				else
-				{
-					writeFailed = false;
-				}
 			}
 		}
 
@@ -822,7 +822,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		arrivedState.m_flags.userModified = previousState.userModified();
 		arrivedState.m_flags.controlIsEnabled = previousState.controlIsEnabled();
-		arrivedState.m_flags.writeFailed = writeFailed;
 
 		if (previousState.userModified() == false)
 		{

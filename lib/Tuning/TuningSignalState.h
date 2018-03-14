@@ -13,7 +13,6 @@ union TuningSignalStateFlags
 		quint32	valid : 1;
 		quint32	outOfRange : 1;
 		quint32	writeInProgress : 1;
-		quint32 writeFailed: 1;
 		quint32 controlIsEnabled: 1;
 
 		quint32 userModified : 1;	// This flag is used by TuningClient's model
@@ -34,7 +33,6 @@ class TuningSignalState
 	Q_PROPERTY(bool Valid READ valid)
 	Q_PROPERTY(bool OutOfRange READ outOfRange)
 	Q_PROPERTY(bool WriteInProgress READ writeInProgress)
-	Q_PROPERTY(bool WriteFailed READ writeFailed)
 	Q_PROPERTY(bool ControlIsEnabled READ controlIsEnabled)
 
 public:
@@ -60,7 +58,6 @@ public:
 	bool valid() const;
 	bool outOfRange() const;
 	bool writeInProgress() const;
-	bool writeFailed() const;
 	bool controlIsEnabled() const;
 
 	int writeErrorCode() const;
@@ -72,7 +69,6 @@ public:
 	QDateTime unsuccessfulWriteTime() const;
 
 	bool userModified() const;
-	void clearUserModified();
 
 	bool setState(const ::Network::TuningSignalState& message);
 

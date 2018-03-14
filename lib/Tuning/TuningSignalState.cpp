@@ -84,11 +84,6 @@ bool TuningSignalState::writeInProgress() const
 	return m_flags.writeInProgress;
 }
 
-bool TuningSignalState::writeFailed() const
-{
-	return m_flags.writeFailed;
-}
-
 bool TuningSignalState::controlIsEnabled() const
 {
 	return m_flags.controlIsEnabled;
@@ -127,11 +122,6 @@ QDateTime TuningSignalState::unsuccessfulWriteTime() const
 bool TuningSignalState::userModified() const
 {
 	return m_flags.userModified;
-}
-
-void TuningSignalState::clearUserModified()
-{
-	m_flags.userModified = false;
 }
 
 bool TuningSignalState::setState(const ::Network::TuningSignalState& message)

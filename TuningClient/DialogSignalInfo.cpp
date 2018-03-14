@@ -113,7 +113,6 @@ void DialogSignalInfo::updateInfo()
 	text += tr("Valid:\t\t%1\r\n").arg(state.valid() == true ? tr("Yes") : tr("No"));
 	text += tr("OutOfRange:\t\t%1\r\n").arg(state.outOfRange() == true ? tr("Yes") : tr("No"));
 	text += tr("WriteInProgress:\t%1\r\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
-	text += tr("WriteFailed:\t\t%1\r\n").arg(state.writeFailed() == true ? tr("Yes") : tr("No"));
 	text += tr("ControlIsEnabled:\t%1\r\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 	text += tr("UserModified:\t\t%1\r\n").arg(state.userModified() == true ? tr("Yes") : tr("No"));
 
