@@ -69,8 +69,8 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		break;
 	case TuningModel::Columns::Type:
 	{
-		v1 = asp1.isAnalog();
-		v2 = asp2.isAnalog();
+		v1 = static_cast<int>(asp1.toTuningType());
+		v2 = static_cast<int>(asp2.toTuningType());
 	}
 		break;
 
@@ -78,8 +78,8 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			TuningValue tv1 = m_model->defaultValue(asp1);
-			TuningValue tv2 = m_model->defaultValue(asp2);
+			double tv1 = m_model->defaultValue(asp1).toDouble();
+			double tv2 = m_model->defaultValue(asp2).toDouble();
 
 			if (tv1 == tv2)
 			{
@@ -102,8 +102,8 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			TuningValue tv1 = tss1.value();
-			TuningValue tv2 = tss2.value();
+			double tv1 = tss1.value().toDouble();
+			double tv2 = tss1.value().toDouble();
 
 			if (tv1 == tv2)
 			{
@@ -126,8 +126,8 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			TuningValue tv1 = asp1.tuningLowBound();
-			TuningValue tv2 = asp2.tuningLowBound();
+			double tv1 = asp1.tuningLowBound().toDouble();
+			double tv2 = asp2.tuningLowBound().toDouble();
 
 			if (tv1 == tv2)
 			{
@@ -150,8 +150,8 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			TuningValue tv1 = asp1.tuningHighBound();
-			TuningValue tv2 = asp2.tuningHighBound();
+			double tv1 = asp1.tuningHighBound().toDouble();
+			double tv2 = asp2.tuningHighBound().toDouble();
 
 			if (tv1 == tv2)
 			{

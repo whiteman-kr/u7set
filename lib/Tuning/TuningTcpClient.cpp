@@ -550,7 +550,6 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			for (auto& it : m_tuningSources)
 			{
-				Hash tsHash = it.first;
 				TuningSource& ts = it.second;
 
 				if (ts.id() == id)
@@ -581,27 +580,6 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 					// Set new source state
 
 					ts.setNewState(tss);
-
-					// Set signals' flags that belong to tuning sources
-
-					std::pair <std::multimap<Hash, Hash>::iterator, std::multimap<Hash,Hash>::iterator> ret = m_equipmentToSignalMap.equal_range(tsHash);
-
-					for (std::multimap<Hash, Hash>::iterator signalIt = ret.first; signalIt != ret.second; ++signalIt)
-					{
-						Hash signalHash = signalIt->second;
-
-						bool found = false;
-
-						TuningSignalState state = m_signals->state(signalHash, &found);
-						if (found == false)
-						{
-							continue;
-						}
-
-						state.m_flags.controlIsEnabled = ts.state.controlisactive();
-
-						m_signals->setState(signalHash, state);
-					}
 
 					//
 
@@ -818,10 +796,11 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			}
 		}
 
-		// When updating states, we have to save some properties unchanged
+		// When updating states, we have to set some properties locally
 
 		arrivedState.m_flags.userModified = previousState.userModified();
-		arrivedState.m_flags.controlIsEnabled = previousState.controlIsEnabled();
+
+		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
 
 		if (previousState.userModified() == false)
 		{
