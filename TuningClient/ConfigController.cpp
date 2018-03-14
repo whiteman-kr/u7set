@@ -522,6 +522,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 
 			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
 			usersAccounts = usersAccounts.replace('\n', ';');
+			equipmentListString.remove('\r');
 			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
 
 			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
