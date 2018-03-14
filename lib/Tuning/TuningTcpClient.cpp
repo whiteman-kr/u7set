@@ -779,33 +779,41 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
 
+		bool writeFailed = false;
+
 		if (found == true)
 		{
 			// Process write error only if writing was performed by current client
 
 			Hash writeClientHash = stateMessage.writeclient();
 
-			if (m_instanceIdHash == writeClientHash &&
-				static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
+			if (m_instanceIdHash == writeClientHash)
 			{
-				if (previousState.m_flags.writeFailed == false)
+				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
 				{
-					previousState.m_flags.writeFailed = true;
+					writeFailed = true;
 
-					AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
-					if (found == false)
+					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
 					{
-						assert(false);
-						continue;
-					}
+						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
+						if (found == false)
+						{
+							assert(false);
+							continue;
+						}
 
-					writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-								  .arg(previousState.modifiedValue().toString(param.precision()))
-								  .arg(param.customSignalId())
-								  .arg(param.caption())
-								  .arg(param.equipmentId())
-								  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
-								  );
+						writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
+									  .arg(previousState.modifiedValue().toString(param.precision()))
+									  .arg(param.customSignalId())
+									  .arg(param.caption())
+									  .arg(param.equipmentId())
+									  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
+									  );
+					}
+				}
+				else
+				{
+					writeFailed = false;
 				}
 			}
 		}
@@ -814,7 +822,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		arrivedState.m_flags.userModified = previousState.userModified();
 		arrivedState.m_flags.controlIsEnabled = previousState.controlIsEnabled();
-		arrivedState.m_flags.writeFailed = previousState.m_flags.writeFailed;
+		arrivedState.m_flags.writeFailed = writeFailed;
 
 		if (previousState.userModified() == false)
 		{

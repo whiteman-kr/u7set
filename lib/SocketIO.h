@@ -250,8 +250,12 @@ enum class NetworkError
 	LmControlIsNotActive,
 	ClientIsNotActive,
 	TuningNoReply,
-	TuningValueCurrupted,
+	TuningValueCorrupted,
+
+	// update getNetworkErrorStr function after adding new error types!
 };
+
+
 
 enum class ArchiveError
 {

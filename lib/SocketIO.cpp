@@ -225,6 +225,9 @@ QString getNetworkErrorStr(NetworkError err)
 	case NetworkError::WrongTuningValueType:
 		return QString("NetworkError::WrongTuningValueType");
 
+	case NetworkError::TuningValueOutOfRange:
+		return QString("NetworkError::TuningValueOutOfRange");
+
 	case NetworkError::SingleLmControlDisabled:
 		return QString("NetworkError::SingleLmControlDisabled");
 
@@ -233,6 +236,12 @@ QString getNetworkErrorStr(NetworkError err)
 
 	case NetworkError::ClientIsNotActive:
 		return QString("NetworkError::ClientIsNotActive");
+
+	case NetworkError::TuningNoReply:
+		return QString("NetworkError::TuningNoReply");
+
+	case NetworkError::TuningValueCorrupted:
+		return QString("NetworkError::TuningValueCorrupted");
 
 	default:
 		assert(false);			// unknown err value

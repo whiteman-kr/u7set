@@ -935,7 +935,7 @@ namespace Tuning
 
 		if (newTuningValue != currentValue)
 		{
-			errCode = NetworkError::TuningValueCurrupted;
+			errCode = NetworkError::TuningValueCorrupted;
 
 			msg +=  QString("Tuning value corrupted");
 
