@@ -139,6 +139,31 @@ void AppDataServiceWorker::stopCfgLoaderThread()
 	delete m_cfgLoaderThread;
 }
 
+void AppDataServiceWorker::runAppDataReceiverThread()
+{
+	if (m_appDataReceiverThread != nullptr)
+	{
+		assert(false);
+	}
+
+	m_appDataReceiverThread = new AppDataReceiverlThread(m_cfgSettings.appDataReceivingIP);
+
+	m_appDataReceiverThread->start();
+}
+
+void AppDataServiceWorker::stopAppDataReceiverlThread()
+{
+	if (m_appDataReceiverThread == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_appDataReceiverThread->quitAndWait();
+	delete m_appDataReceiverThread;
+	m_appDataReceiverThread = nullptr;
+}
+
 void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
@@ -357,16 +382,6 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 			continue;
 		}
 
-		int channel = dataSource->lmChannel();
-
-		if (channel < 0 || channel >= AppDataServiceSettings::DATA_CHANNEL_COUNT)
-		{
-			assert(false);
-			qDebug() << "DataSource wrong channel";
-			delete dataSource;
-			continue;
-		}
-
 		// dataSource->lmAdapterID() is unique for all data sources
 		//
 		m_appDataSources.insert(dataSource->lmAdapterID(), dataSource);
@@ -462,7 +477,7 @@ void AppDataServiceWorker::clearConfiguration()
 	// free all resources allocated in onConfigurationReady
 	//
 	stopTcpAppDataServer();
-	stopDataChannelThreads();
+	stopAppDataReceiverlThread();
 	stopTcpArchiveClientThreads();
 
 	m_appSignals.clear();
@@ -512,7 +527,7 @@ void AppDataServiceWorker::initDataChannelThreads()
 	{
 		// create AppDataChannelThread
 		//
-		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
+		m_appDataReceiverThread[channel] = new AppDataReceiverlThread(channel,
 						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP,
 						m_signalStatesQueue,
 						m_autoArchivingGroupsCount);
@@ -524,43 +539,15 @@ void AppDataServiceWorker::initDataChannelThreads()
 			if (appDataSource->lmDataType() == DataSource::DataType::App &&
 				appDataSource->lmChannel() == channel)
 			{
-				m_appDataChannelThread[channel]->addDataSource(appDataSource);
+				m_appDataReceiverThread[channel]->addDataSource(appDataSource);
 			}
 		}
 
 		// build required data structures inside AppDataChannel
 		//
-		m_appDataChannelThread[channel]->prepare(m_appSignals, &m_signalStates);
+		m_appDataReceiverThread[channel]->prepare(m_appSignals, &m_signalStates);
 	}
 }
 
 
-void AppDataServiceWorker::runDataChannelThreads()
-{
-	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
-	{
-		if (m_appDataChannelThread[channel] != nullptr)
-		{
-			m_appDataChannelThread[channel]->start();
-		}
-		else
-		{
-			assert(false);
-		}
-	}
-}
-
-
-void AppDataServiceWorker::stopDataChannelThreads()
-{
-	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
-	{
-		if (m_appDataChannelThread[channel] != nullptr)
-		{
-			m_appDataChannelThread[channel]->quitAndWait();
-			delete m_appDataChannelThread[channel];
-			m_appDataChannelThread[channel] = nullptr;
-		}
-	}
-}
 

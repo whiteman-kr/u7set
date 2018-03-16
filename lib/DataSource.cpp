@@ -159,7 +159,6 @@ void DataSource::writeToXml(XmlWriteHelper& xml)
 	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
 	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
 	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
-	xml.writeIntAttribute(PROP_CHANNEL, m_lmChannel);
 
 	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
 	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterID);
@@ -217,7 +216,6 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
 	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_ID, &m_lmSubsystemID);
 	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
-	result &= xml.readIntAttribute(PROP_CHANNEL, &m_lmChannel);
 
 	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
 	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
@@ -406,7 +404,6 @@ bool DataSource::getInfo(Network::DataSourceInfo* protoInfo) const
 	protoInfo->set_datatype(TO_INT(m_lmDataType));
 	protoInfo->set_ip(m_lmAddressPort.addressStr().toStdString());
 	protoInfo->set_port(m_lmAddressPort.port());
-	protoInfo->set_channel(m_lmChannel);
 	protoInfo->set_subsystemid(m_lmSubsystemID);
 	protoInfo->set_subsystem(m_lmSubsystem.toStdString());
 	protoInfo->set_lmnumber(m_lmNumber);
@@ -427,7 +424,6 @@ bool DataSource::setInfo(const Network::DataSourceInfo& protoInfo)
 	m_lmDataType = static_cast<DataType>(protoInfo.datatype());
 	m_lmAddressPort.setAddress(QString::fromStdString(protoInfo.ip()));
 	m_lmAddressPort.setPort(protoInfo.port());
-	m_lmChannel = protoInfo.channel();
 	m_lmSubsystemID = protoInfo.subsystemid();
 	m_lmSubsystem = QString::fromStdString(protoInfo.subsystem());
 	m_lmNumber = protoInfo.lmnumber();

@@ -8,7 +8,7 @@
 #include "../lib/Queue.h"
 #include "../lib/DataChannel.h"
 
-#include "AppDataChannel.h"
+#include "AppDataReceiver.h"
 #include "AppSignalStateEx.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
@@ -51,8 +51,8 @@ private:
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
-	void runFscDataReceivingThreads();
-	void stopFscDataReceivingThreads();
+	void runAppDataReceiverThread();
+	void stopAppDataReceiverlThread();
 
 	void runTcpAppDataServer();
 	void stopTcpAppDataServer();
@@ -78,10 +78,6 @@ private:
 	void buildAppSignalID2IndexMap(bool signalsLoadResult);
 	void createAndInitSignalStates();
 
-	void stopDataChannelThreads();
-	void initDataChannelThreads();
-	void runDataChannelThreads();
-
 	void clearConfiguration();
 	void applyNewConfiguration();
 
@@ -103,7 +99,7 @@ private:
 
 	AppSignalStates m_signalStates;
 
-	AppDataChannelThread* m_appDataChannelThread = nullptr;
+	AppDataReceiverlThread* m_appDataReceiverThread = nullptr;
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 

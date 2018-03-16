@@ -78,7 +78,6 @@ SOURCES += \
     AppDataService.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
-    AppDataChannel.cpp \
     AppDataServiceTypes.cpp \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
@@ -97,7 +96,8 @@ SOURCES += \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    AppDataReceiver.cpp
 
 HEADERS += \
 	Stable.h \
@@ -128,7 +128,6 @@ HEADERS += \
     AppDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    AppDataChannel.h \
     ../lib/OrderedHash.h \
     AppDataServiceTypes.h \
     AppDataProcessingThread.h \
@@ -148,7 +147,8 @@ HEADERS += \
     TcpArchiveClient.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    AppDataReceiver.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -6,18 +6,15 @@
 #include "AppDataProcessingThread.h"
 
 //
-// AppDataChannel receive and merge RUP datagramms
-// and send data to signal states processing threads
+// AppDataChannel receive RUP datagramms
+// and send
 //
 
-class AppDataChannel : public SimpleThreadWorker
+class AppDataReceiver : public SimpleThreadWorker
 {
 public:
-	AppDataChannel(int channel,
-				   const HostAddressPort& dataReceivingIP,
-				   AppSignalStatesQueue& signalStatesQueue,
-				   int autoArchivingGroupsCount);
-	virtual ~AppDataChannel();
+	AppDataReceiver(const HostAddressPort& dataReceivingIP);
+	virtual ~AppDataReceiver();
 
 	void prepare(AppSignals& appSignals, AppSignalStates* signalStates);
 	void addDataSource(AppDataSource* appDataSource);
@@ -41,8 +38,6 @@ private slots:
 private:
 	// AppDataChannel settings
 	//
-	DataSource::DataType m_dataType;
-	int m_channel = 0;
 	HostAddressPort m_dataReceivingIP;
 	HashedVector<quint32, AppDataSource*> m_appDataSources;			// allocated and freed in AppDataService
 	HashedVector<quint32, quint32> m_unknownDataSources;
@@ -70,16 +65,10 @@ private:
 
 // This thread need to read UDP datagramms (inside DataChannel) and push it to the m_rupDataQueue
 //
-class AppDataChannelThread : public SimpleThread
+class AppDataReceiverlThread : public SimpleThread
 {
-private:
-	AppDataChannel* m_appDataChannel = nullptr;
-
 public:
-	AppDataChannelThread(int channel,
-						 const HostAddressPort& dataRecievingIP,
-						 AppSignalStatesQueue& signalStatesQueue,
-						 int autoArchivingGroupsCount);
+	AppDataReceiverlThread(	const HostAddressPort& dataRecievingIP);
 
 	void prepare(AppSignals &appSignals, AppSignalStates *signalStates);
 	void addDataSource(AppDataSource* appDataSource);

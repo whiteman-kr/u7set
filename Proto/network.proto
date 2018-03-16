@@ -81,7 +81,6 @@ message DataSourceInfo
     optional int32 dataType = 4;
     optional string ip = 5;
     optional int32 port = 6;
-    optional int32 channel = 7;
     optional int32 subsystemID = 8;
     optional string subsystem = 9;
 

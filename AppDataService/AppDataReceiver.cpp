@@ -1,4 +1,4 @@
-#include "AppDataChannel.h"
+#include "AppDataReceiver.h"
 #include "../lib/AppSignal.h"
 #include "../lib/WUtils.h"
 
@@ -9,28 +9,20 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannel::AppDataChannel(int channel,
-							   const HostAddressPort& dataReceivingIP,
-							   AppSignalStatesQueue& signalStatesQueue,
-							   int autoArchivingGroupsCount) :
-	m_channel(channel),
+AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP) :
 	m_dataReceivingIP(dataReceivingIP),
-	m_signalStatesQueue(signalStatesQueue),
-	m_autoArchivingGroupsCount(autoArchivingGroupsCount),
-	m_dataType(DataSource::DataType::App),
-	m_rupDataQueue(500),
 	m_timer1s(this)
 {
 }
 
 
-AppDataChannel::~AppDataChannel()
+AppDataReceiver::~AppDataReceiver()
 {
 	clear();
 }
 
 
-void AppDataChannel::prepare(AppSignals& appSignals, AppSignalStates* signalStates)
+void AppDataReceiver::prepare(AppSignals& appSignals, AppSignalStates* signalStates)
 {
 	m_signalStates = signalStates;
 
@@ -87,8 +79,7 @@ void AppDataChannel::prepare(AppSignals& appSignals, AppSignalStates* signalStat
 	}
 }
 
-
-void AppDataChannel::addDataSource(AppDataSource* appDataSource)
+void AppDataReceiver::addDataSource(AppDataSource* appDataSource)
 {
 	if (appDataSource == nullptr)
 	{
@@ -96,8 +87,7 @@ void AppDataChannel::addDataSource(AppDataSource* appDataSource)
 		return;
 	}
 
-	if (appDataSource->lmDataType() != m_dataType ||
-		appDataSource->lmChannel() != m_channel)
+	if (appDataSource->lmDataType() != m_dataType)
 	{
 		assert(false);
 		return;
@@ -113,14 +103,14 @@ void AppDataChannel::addDataSource(AppDataSource* appDataSource)
 }
 
 
-void AppDataChannel::onThreadStarted()
+void AppDataReceiver::onThreadStarted()
 {
 	m_processingThreadsPool.createProcessingThreads(1, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates, m_signalStatesQueue);
 
 //	m_processingThreadsPool.createProcessingThreads(4, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
 	m_processingThreadsPool.startProcessingThreads();
 	
-	connect(&m_timer1s, &QTimer::timeout, this, &AppDataChannel::onTimer1s);
+	connect(&m_timer1s, &QTimer::timeout, this, &AppDataReceiver::onTimer1s);
 	
 	m_timer1s.setInterval(1000);
 	m_timer1s.start();
@@ -129,7 +119,7 @@ void AppDataChannel::onThreadStarted()
 }
 
 
-void AppDataChannel::onThreadFinished()
+void AppDataReceiver::onThreadFinished()
 {
 	m_timer1s.stop();
 	closeSocket();
@@ -138,7 +128,7 @@ void AppDataChannel::onThreadFinished()
 }
 
 
-void AppDataChannel::createAndBindSocket()
+void AppDataReceiver::createAndBindSocket()
 {
 	if (m_socket == nullptr)
 	{
@@ -146,7 +136,7 @@ void AppDataChannel::createAndBindSocket()
 
 		qDebug() << "DataChannel: listening socket created";
 
-		connect(m_socket, &QUdpSocket::readyRead, this, &AppDataChannel::onSocketReadyRead);
+		connect(m_socket, &QUdpSocket::readyRead, this, &AppDataReceiver::onSocketReadyRead);
 	}
 
 	if (m_socketBound == false)
@@ -162,7 +152,7 @@ void AppDataChannel::createAndBindSocket()
 }
 
 
-void AppDataChannel::closeSocket()
+void AppDataReceiver::closeSocket()
 {
 	if (m_socket != nullptr)
 	{
@@ -175,7 +165,7 @@ void AppDataChannel::closeSocket()
 }
 
 
-void AppDataChannel::checkDataSourcesDataReceiving()
+void AppDataReceiver::checkDataSourcesDataReceiving()
 {
 	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -198,7 +188,7 @@ void AppDataChannel::checkDataSourcesDataReceiving()
 }
 
 
-void AppDataChannel::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 currentTime)
+void AppDataReceiver::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 currentTime)
 {
 	SourceSignalsParseInfo* sourceParseInfo = m_sourceParseInfoMap.value(dataSourceIP, nullptr);
 
@@ -229,14 +219,14 @@ void AppDataChannel::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 cu
 }
 
 
-void AppDataChannel::clear()
+void AppDataReceiver::clear()
 {
 	m_processingThreadsPool.stopAndClearProcessingThreads();
 	m_sourceParseInfoMap.clear();
 }
 
 
-void AppDataChannel::onTimer1s()
+void AppDataReceiver::onTimer1s()
 {
 	createAndBindSocket();
 	checkDataSourcesDataReceiving();
@@ -250,7 +240,7 @@ void AppDataChannel::onTimer1s()
 }
 
 
-void AppDataChannel::onSocketReadyRead()
+void AppDataReceiver::onSocketReadyRead()
 {
 	if (m_socket == nullptr)
 	{
@@ -313,17 +303,17 @@ void AppDataChannel::onSocketReadyRead()
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannelThread::AppDataChannelThread(int channel,
+AppDataReceiverlThread::AppDataReceiverlThread(int channel,
 										   const HostAddressPort& dataRecievingIP,
 										   AppSignalStatesQueue& signalStatesQueue,
 										   int autoArchivingGroupsCount)
 {
-	m_appDataChannel = new AppDataChannel(channel, dataRecievingIP, signalStatesQueue, autoArchivingGroupsCount);
+	m_appDataChannel = new AppDataReceiver(channel, dataRecievingIP, signalStatesQueue, autoArchivingGroupsCount);
 	addWorker(m_appDataChannel);
 }
 
 
-void AppDataChannelThread::prepare(AppSignals& appSignals, AppSignalStates* signalStates)
+void AppDataReceiverlThread::prepare(AppSignals& appSignals, AppSignalStates* signalStates)
 {
 	if (m_appDataChannel == nullptr)
 	{
@@ -336,7 +326,7 @@ void AppDataChannelThread::prepare(AppSignals& appSignals, AppSignalStates* sign
 
 
 
-void AppDataChannelThread::addDataSource(AppDataSource* appDataSource)
+void AppDataReceiverlThread::addDataSource(AppDataSource* appDataSource)
 {
 	if (m_appDataChannel != nullptr)
 	{

@@ -13,9 +13,10 @@ public:
 	bool setState(const Network::AppDataSourceState& protoState);
 };
 
+typedef std::shared_ptr<AppDataSource> AppDataSourceShared;
 
 
-class AppDataSources : public HashedVector<QString, AppDataSource*>
+class AppDataSources : public HashedVector<QString, AppDataSourceShared>
 {
 public:
 	~AppDataSources();
@@ -24,7 +25,7 @@ public:
 };
 
 
-class AppDataSourcesIP : public HashedVector<quint32, AppDataSource*>
+class AppDataSourcesIP : public HashedVector<quint32, AppDataSourceShared>
 {
 public:
 };

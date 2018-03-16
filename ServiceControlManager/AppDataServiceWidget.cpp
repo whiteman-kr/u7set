@@ -137,7 +137,6 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_IP: return d.lmAddressStr();
 				case DSC_PORT: return d.lmPort();
 				case DSC_PART_COUNT: return d.partCount();
-				case DSC_CHANNEL: return d.lmChannel();
 				case DSC_DATA_TYPE: return d.lmDataTypeStr();
 				case DSC_EQUIPMENT_ID: return d.lmEquipmentID();
 				case DSC_MODULE_NUMBER: return d.lmNumber();

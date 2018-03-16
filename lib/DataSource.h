@@ -66,7 +66,6 @@ protected:
 
 	// Properties from LM
 	//
-	int m_lmChannel = 0;
 	DataType m_lmDataType = DataType::App;
 	QString m_lmEquipmentID;
 	int m_lmNumber = 0;
@@ -127,14 +126,11 @@ protected:
 
 	//
 
-	RupFramesQueue m_rupFramesQueue;
+	RupFramesQueue m_rupFramesQueue;				// fast non-blocking queue filled by AppDataReceiver
 
 public:
 	DataSource();
 	~DataSource();
-
-	int lmChannel() const { return m_lmChannel; }
-	void setLmChannel(int channel) { m_lmChannel = channel; }
 
 	DataType lmDataType() const { return m_lmDataType; }
 	QString lmDataTypeStr() const { return dataTypeToString(m_lmDataType); }

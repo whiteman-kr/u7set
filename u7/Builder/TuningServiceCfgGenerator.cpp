@@ -155,7 +155,6 @@ namespace Builder
 
 			Tuning::TuningSource ds;
 
-			ds.setLmChannel(lmChannel);
 			ds.setLmDataType(DataSource::DataType::Tuning);
 			ds.setLmEquipmentID(lm->equipmentId());
 			ds.setLmNumber(lmNumber);
