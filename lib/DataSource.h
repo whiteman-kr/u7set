@@ -8,22 +8,7 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/AppSignal.h"
 #include "../Proto/network.pb.h"
-
-
-typedef Queue<Rup::Frame> RupFramesQueue;
-
-
-struct RupData
-{
-	quint32 sourceIP;
-
-	Times time;
-
-	int dataSize;
-	char data[Rup::FRAME_DATA_SIZE * Rup::MAX_FRAME_COUNT];
-
-	void dump();
-};
+#include "../lib/SimpleThread.h"
 
 
 class DataSource : public QObject
@@ -64,69 +49,40 @@ protected:
 	static const char* PROP_COUNT;
 	static const char* SIGNAL_ID_ELEMENT;
 
-	// Properties from LM
-	//
-	DataType m_lmDataType = DataType::App;
-	QString m_lmEquipmentID;
-	int m_lmNumber = 0;
-	int m_lmModuleType = 0;
-	int m_lmSubsystemID = 0;
-	QString m_lmSubsystem;
-	QString m_lmCaption;
-	QString m_lmAdapterID;
-	bool m_lmDataEnable = false;
-	HostAddressPort m_lmAddressPort;
-	quint32 m_lmDataID = 0;
-	quint64 m_uniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+private:
+	struct RupFrameTime
+	{
+		qint64 serverTime;
 
-	QStringList m_associatedSignals;
+		Rup::Frame rupFrame;
 
-	// static information
-	//
-	quint64 m_id = 0;
-	QHostAddress m_hostAddress;
-	QString m_name;
-	quint32 m_partCount = 1;
-	QVector<int> m_relatedSignalIndexes;
+		void dump();
+	};
 
-	quint64 generateID() const;
+	class RupFramesCollector
+	{
+	public:
+		bool collect(const RupFrameTime& rupFrameTime);
 
-	// dynamic state information
-	//
-	E::DataSourceState m_state = E::DataSourceState::NoData;
-	qint64 m_uptime = 0;
-	qint64 m_receivedDataSize = 0;
-	qint64 m_receivedFramesCount = 0;
-	qint64 m_receivedPacketCount = 0;
-	double m_dataReceivingRate = 0;
-	bool m_dataReceived = false;
+		bool getData(Times* times, const char** rupData, quint32* rupDataSize);
 
-	qint64 m_errorProtocolVersion = 0;
-	qint64 m_errorFramesQuantity = 0;
-	qint64 m_errorFrameNo = 0;
-	qint64 m_lostedFramesCount = 0;
-	qint64 m_errorDataID = 0;
-	qint64 m_errorBadFrameSize = 0;
+	private:
+		bool reallocate(quint32 framesQuantity);
 
-	bool m_hasErrors = false;
+	private:
+		quint32 m_framesQuantityAllocated = 0;
+		Rup::Header* m_rupFramesHeaders = nullptr;
+		Rup::Data* m_rupFramesData = nullptr;
 
-	bool m_dataProcessingEnabled = true;
+		qint64 m_firstFrameServerTime = 0;
 
-	qint64 m_lastPacketTime = 0;
+		// result variables
 
-	//
+		bool m_rupDataReady = false;
 
-	bool m_firstRupFrame = true;
-	quint16 m_rupFrameNumerator = 0;
-
-	//
-
-	Rup::Frame m_rupFrames[Rup::MAX_FRAME_COUNT];
-	char m_framesData[Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE];
-
-	//
-
-	RupFramesQueue m_rupFramesQueue;				// fast non-blocking queue filled by AppDataReceiver
+		Times m_rupDataTimes;
+		quint32 m_rupDataSize = 0;
+	};
 
 public:
 	DataSource();
@@ -217,8 +173,6 @@ public:
 	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&);
 	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
 
-	void processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>& rupDataQueue);
-
 	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
 	void clearAssociatedSignals() { m_associatedSignals.clear(); }
 
@@ -230,7 +184,86 @@ public:
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
 	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
 
-	void pushRupFrame(const Rup::Frame& rupFrame);
+	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame);
 
 	void incBadFrameSizeError() { m_errorBadFrameSize++; }
+
+	// DataProcessing functions
+
+	bool seizeProcessingOwnership(const SimpleThreadWorker* processingWorker);
+	bool releaseProcessingOwnership(const SimpleThreadWorker* processingWorker);
+
+	bool processRupFrameTimeQueue();
+
+private:
+	// Properties from LM
+	//
+	DataType m_lmDataType = DataType::App;
+	QString m_lmEquipmentID;
+	int m_lmNumber = 0;
+	int m_lmModuleType = 0;
+	int m_lmSubsystemID = 0;
+	QString m_lmChannel = 0;
+	QString m_lmSubsystem;
+	QString m_lmCaption;
+	QString m_lmAdapterID;
+	bool m_lmDataEnable = false;
+	HostAddressPort m_lmAddressPort;
+	quint32 m_lmDataID = 0;
+	quint64 m_uniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+
+	QStringList m_associatedSignals;
+
+	// static information
+	//
+	quint64 m_id = 0;
+	QHostAddress m_hostAddress;
+	QString m_name;
+	quint32 m_partCount = 1;
+	QVector<int> m_relatedSignalIndexes;
+
+	quint64 generateID() const;
+
+	// dynamic state information
+	//
+	E::DataSourceState m_state = E::DataSourceState::NoData;
+	qint64 m_uptime = 0;
+	qint64 m_receivedDataSize = 0;
+	qint64 m_receivedFramesCount = 0;
+	qint64 m_receivedPacketCount = 0;
+	double m_dataReceivingRate = 0;
+	bool m_dataReceived = false;
+
+	qint64 m_errorProtocolVersion = 0;
+	qint64 m_errorFramesQuantity = 0;
+	qint64 m_errorFrameNo = 0;
+	qint64 m_lostedFramesCount = 0;
+	qint64 m_errorDataID = 0;
+	qint64 m_errorBadFrameSize = 0;
+
+	bool m_hasErrors = false;
+
+	bool m_dataProcessingEnabled = true;
+
+	qint64 m_lastPacketTime = 0;
+
+	//
+
+	bool m_firstRupFrame = true;
+	quint16 m_rupFrameNumerator = 0;
+
+	//
+
+	Rup::Frame m_rupFrames[Rup::MAX_FRAME_COUNT];
+	char m_framesData[Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE];
+
+	//
+
+	Queue<RupFrameTime> m_rupFrameTimeQueue;				// fast non-blocking queue filled by AppDataReceiver
+
+	//
+
+	std::atomic<const SimpleThreadWorker*> m_processingOwner = nullptr;
+
+	RupFramesCollector m_rupFramesCollector;
 };

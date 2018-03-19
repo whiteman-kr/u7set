@@ -4,38 +4,35 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/DataChannel.h"
 #include "AppSignalStateEx.h"
+#include "AppDataReceiver.h"
 
 
 class AppDataProcessingWorker : public SimpleThreadWorker
 {
 public:
 	AppDataProcessingWorker(int number,
-							RupDataQueue& rupDataQueue,
-							const SourceParseInfoMap& sourceParseInfoMap,
-							AppSignalStates& signalStates,
-							AppSignalStatesQueue& signalStatesQueue);
+							const AppDataSourcesIP& appDataSources,
+							AppDataReceiver& appDataReceiver,
+							CircularLoggerShared log);
 
-public slots:
-	void slot_rupDataQueueIsNotEmpty();
+	void connectToReceiver(AppDataReceiver& appDataReceiver);
 
 private:
 	virtual void onThreadStarted() override;
 	virtual void onThreadFinished() override;
 
-	void initAutoArchiving();
-
 	void parseRupData();
 	bool getDoubleValue(const SignalParseInfo& parseInfo, double& value);
 	bool getValidity(const SignalParseInfo& parseInfo, quint32& validity);
 
+public slots:
+	void onAppDataSourceReceiveRupFrame(quint32 appDataSourceIP);
+
 private:
 	int m_number = 0;
-	RupDataQueue& m_rupDataQueue;
-	const SourceParseInfoMap& m_sourceParseInfoMap;
-	AppSignalStates& m_signalStates;
-	AppSignalStatesQueue& m_signalStatesQueue;
-
-	RupData m_rupData;					// parsing buffer
+	const AppDataSourcesIP& m_appDataSourcesIP;
+	const AppDataReceiver& m_appDataReceiver;
+	CircularLoggerShared m_log;
 
 	// parsing statistics
 	//
@@ -50,21 +47,16 @@ private:
 class AppDataProcessingThread : public SimpleThread
 {
 public:
- AppDataProcessingThread(	int number,
-							RupDataQueue& rupDataQueue,
-							const SourceParseInfoMap& sourceParseInfoMap,
-							AppSignalStates& signalStates,
-							AppSignalStatesQueue& signalStatesQueue);
+	AppDataProcessingThread(int number, const AppDataSources& appDataSources, AppDataReceiver& appDataReceiver);
 };
 
 
 class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread*>
 {
 public:
-	void createProcessingThreads(int poolSize, RupDataQueue& rupDataQueue,
-				const SourceParseInfoMap& sourceParseInfoMap,
-				AppSignalStates& signalStates,
-				AppSignalStatesQueue& signalStatesQueue);
+	void createProcessingThreads(int poolSize,
+								 const AppDataSourcesIP& appDataSourcesIP,
+								 const AppDataReceiver& appDataReceiver);
 
 	void startProcessingThreads();
 

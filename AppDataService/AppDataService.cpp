@@ -146,7 +146,7 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 		assert(false);
 	}
 
-	m_appDataReceiverThread = new AppDataReceiverlThread(m_cfgSettings.appDataReceivingIP);
+	m_appDataReceiverThread = new AppDataReceiverThread(m_cfgSettings.appDataReceivingIP);
 
 	m_appDataReceiverThread->start();
 }
@@ -527,7 +527,7 @@ void AppDataServiceWorker::initDataChannelThreads()
 	{
 		// create AppDataChannelThread
 		//
-		m_appDataReceiverThread[channel] = new AppDataReceiverlThread(channel,
+		m_appDataReceiverThread[channel] = new AppDataReceiverThread(channel,
 						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP,
 						m_signalStatesQueue,
 						m_autoArchivingGroupsCount);
