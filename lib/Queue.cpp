@@ -118,7 +118,6 @@ char* QueueBase::beginPush()
 	return m_buffer + m_writeIndex() * m_itemSize;
 }
 
-
 bool QueueBase::completePush()
 {
 	m_writeIndex++;
@@ -129,6 +128,35 @@ bool QueueBase::completePush()
 	if (m_size == m_queueSize)
 	{
 		emit queueFull();
+	}
+
+	m_mutex.unlock();
+
+	return true;
+}
+
+char* QueueBase::beginPop()
+{
+	m_mutex.lock();
+
+	if (m_size == 0)
+	{
+		m_mutex.unlock();
+
+		return nullptr;
+	}
+
+	return m_buffer + m_readIndex() * m_itemSize;
+}
+
+bool QueueBase::completePop()
+{
+	m_readIndex++;
+	m_size--;
+
+	if (m_size == 0)
+	{
+		emit queueEmpty();
 	}
 
 	m_mutex.unlock();

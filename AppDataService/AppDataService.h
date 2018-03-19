@@ -99,7 +99,7 @@ private:
 
 	AppSignalStates m_signalStates;
 
-	AppDataReceiverlThread* m_appDataReceiverThread = nullptr;
+	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 

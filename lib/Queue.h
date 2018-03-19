@@ -77,6 +77,9 @@ public:
 	char* beginPush();
 	bool completePush();
 
+	char* beginPop();
+	bool completePop();
+
 	void resize(int newQueueSize);
 };
 
@@ -100,6 +103,7 @@ public:
 	virtual bool pop(TYPE* ptr) { return QueueBase::pop(reinterpret_cast<char*>(ptr)); }
 
 	TYPE* beginPush() { return reinterpret_cast<TYPE*>(QueueBase::beginPush()); }
+	TYPE* beginPop() { return reinterpret_cast<TYPE*>(QueueBase::beginPop()); }
 };
 
 

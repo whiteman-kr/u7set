@@ -43,6 +43,38 @@ namespace Rup
 
 		return CRC64 == calculatedCRC;
 	}
+
+	void Frame::dumpData()
+	{
+		QString s;
+
+		for(quint16 i = 0; i < dataSize; i++)
+		{
+			QString v;
+
+			if ((i % 16) == 0)
+			{
+				v.sprintf("%04X  ", static_cast<unsigned int>(i));
+				s += v;
+			}
+
+			v.sprintf("%02X ", static_cast<unsigned int>(data[i]));
+
+			s += v;
+
+			if (i > 0 && (i % 7) == 0)
+			{
+				s += " ";
+			}
+
+			if (i > 0 && (i % 15) == 0)
+			{
+				qDebug() << s;
+
+				s.clear();
+			}
+		}
+	}
 }
 
 

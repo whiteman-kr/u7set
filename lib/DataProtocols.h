@@ -76,6 +76,8 @@ namespace Rup
 
 		void calcCRC64();
 		bool checkCRC64();
+
+		void dumpData();
 	};
 }
 

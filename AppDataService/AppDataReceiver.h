@@ -1,23 +1,26 @@
 #pragma once
 
-#include "../lib/DataChannel.h"
-#include "AppSignalStateEx.h"
-#include "AppDataServiceTypes.h"
-#include "AppDataProcessingThread.h"
+//#include "../lib/DataChannel.h"
+
+#include "../lib/SimpleThread.h"
+#include "../lib/AppDataSource.h"
+#include "../lib/CircularLogger.h"
 
 //
-// AppDataChannel receive RUP datagramms
-// and send
+// AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
 //
 
 class AppDataReceiver : public SimpleThreadWorker
 {
 public:
-	AppDataReceiver(const HostAddressPort& dataReceivingIP);
+	AppDataReceiver(const HostAddressPort& dataReceivingIP,
+					const AppDataSourcesIP& appDataSourcesIP,
+					CircularLoggerShared log);
+
 	virtual ~AppDataReceiver();
 
-	void prepare(AppSignals& appSignals, AppSignalStates* signalStates);
-	void addDataSource(AppDataSource* appDataSource);
+signals:
+	void rupFrameIsReceived(quint32 appDataSourceIP);
 
 private:
 	virtual void onThreadStarted() override;
@@ -25,52 +28,34 @@ private:
 
 	void createAndBindSocket();
 	void closeSocket();
-	
-	void checkDataSourcesDataReceiving();
-	void invalidateDataSourceSignals(quint32 dataSourceIP, qint64 currentTime);
-
-	void clear();
 
 private slots:	
 	void onTimer1s();
 	void onSocketReadyRead();
 
 private:
-	// AppDataChannel settings
-	//
 	HostAddressPort m_dataReceivingIP;
-	HashedVector<quint32, AppDataSource*> m_appDataSources;			// allocated and freed in AppDataService
-	HashedVector<quint32, quint32> m_unknownDataSources;
-	int m_autoArchivingGroupsCount = 0;
+	const AppDataSourcesIP& m_appDataSourcesIP;
+	CircularLoggerShared m_log;
 
-	// AppDataChannel sockets
 	//
-	const int PACKET_TIMEOUT = 1000;							// 1000 ms == 1 second
-	QUdpSocket* m_socket = nullptr;
-	bool m_socketBound = false;
-	Rup::Frame m_rupFrame;
-	RupDataQueue m_rupDataQueue;
+
 	QTimer m_timer1s;
 
-	int m_receivedFramesCount = 0;
+	QUdpSocket* m_socket = nullptr;
+	bool m_socketBound = false;
 
-	// AppDataChannel parsing
-	//
-	SourceParseInfoMap m_sourceParseInfoMap;		// source ip => QVector<SignalParseInfo> map
-	AppSignalStates* m_signalStates = nullptr;		// allocated and freed in AppDataService
-	AppDataProcessingThreadsPool m_processingThreadsPool;
-	AppSignalStatesQueue& m_signalStatesQueue;
+	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
+
+	int m_receivedFramesCount = 0;
 };
 
 
-// This thread need to read UDP datagramms (inside DataChannel) and push it to the m_rupDataQueue
-//
-class AppDataReceiverlThread : public SimpleThread
+class AppDataReceiverThread : public SimpleThread
 {
 public:
-	AppDataReceiverlThread(	const HostAddressPort& dataRecievingIP);
-
-	void prepare(AppSignals &appSignals, AppSignalStates *signalStates);
-	void addDataSource(AppDataSource* appDataSource);
+	AppDataReceiverThread(const HostAddressPort& dataRecievingIP,
+						  const AppDataSourcesIP& appDataSourcesIP,
+						  CircularLoggerShared log);
 };
 
