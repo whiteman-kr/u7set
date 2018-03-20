@@ -6,7 +6,6 @@
 #include "../lib/Queue.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/Tuning/TuningSignalState.h"
-#include "Types.cpp"
 #include "Types.h"
 
 

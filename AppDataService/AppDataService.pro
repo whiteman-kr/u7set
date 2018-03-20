@@ -78,7 +78,6 @@ SOURCES += \
     AppDataService.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
-    AppDataServiceTypes.cpp \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
     TcpAppDataServer.cpp \
@@ -129,7 +128,6 @@ HEADERS += \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/OrderedHash.h \
-    AppDataServiceTypes.h \
     AppDataProcessingThread.h \
     TcpAppDataServer.h \
     ../Proto/network.pb.h \

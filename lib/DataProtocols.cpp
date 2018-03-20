@@ -48,7 +48,7 @@ namespace Rup
 	{
 		QString s;
 
-		for(quint16 i = 0; i < dataSize; i++)
+		for(quint16 i = 0; i < sizeof(data); i++)
 		{
 			QString v;
 

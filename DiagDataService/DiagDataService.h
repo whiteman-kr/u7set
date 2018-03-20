@@ -5,7 +5,6 @@
 #include "../lib/Signal.h"
 #include "../lib/CfgServerLoader.h"
 #include "../lib/ServiceSettings.h"
-#include "../lib/DataChannel.h"
 
 
 class DiagDataServiceWorker : public ServiceWorker

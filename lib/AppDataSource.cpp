@@ -1,5 +1,25 @@
 #include "AppDataSource.h"
 
+// -------------------------------------------------------------------------------
+//
+// SignalParseInfo struct implementation
+//
+// -------------------------------------------------------------------------------
+
+void AppDataSource::SignalParseInfo::setSignalParams(int i, const Signal& s)
+{
+	appSignalID = s.appSignalID();
+
+	index = i;
+
+	valueAddr = s.regValueAddr();
+	validityAddr = s.regValidityAddr();
+
+	type = s.signalType();
+	analogSignalFormat = s.analogSignalFormat();
+	byteOrder = s.byteOrder();
+	dataSize = s.dataSize();
+}
 
 // -------------------------------------------------------------------------------
 //
@@ -7,10 +27,66 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataSource::AppDataSource()
+AppDataSource::AppDataSource(AppSignalStates& signalStates, AppSignalStatesQueue& signalStatesQueue) :
+	m_signalStates(signalStates),
+	m_signalStatesQueue(signalStatesQueue)
 {
 }
 
+void AppDataSource::prepare(const AppSignals& appSignals)
+{
+	m_signalsParseInfo.clear();
+
+	const QStringList& sourceAssociatedSignals = associatedSignals();
+
+	for(const QString& signalID : sourceAssociatedSignals)
+	{
+		if (appSignals.contains(signalID) == false)
+		{
+			assert(false);
+			continue;
+		}
+
+		Signal* signal = appSignals.value(signalID, nullptr);
+
+		if (signal == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		int index = appSignals.indexOf(signalID);
+
+		if (index == -1)
+		{
+			assert(false);
+			continue;
+		}
+
+		SignalParseInfo parceInfo;
+
+		parceInfo.setSignalParams(index, *signal);
+
+		m_signalsParseInfo.append(parceInfo);
+	}
+}
+
+
+bool AppDataSource::parsePacket()
+{
+	Times times;
+	char* data;
+	int dataSize;
+
+	bool result = getDataToParsing(&times, &data, &dataSize);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	return true;
+}
 
 bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
 {
@@ -20,19 +96,19 @@ bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
 		return false;
 	}
 
-	protoState->set_id(m_id);
-	protoState->set_uptime(m_uptime);
-	protoState->set_receiveddatasize(m_receivedDataSize);
-	protoState->set_datareceivingrate(m_dataReceivingRate);
-	protoState->set_receivedframescount(m_receivedFramesCount);
-	protoState->set_processingenabled(m_dataProcessingEnabled);
-	protoState->set_processedpacketcount(m_receivedPacketCount);
-	protoState->set_errorprotocolversion(m_errorProtocolVersion);
-	protoState->set_errorframesquantity(m_errorFramesQuantity);
-	protoState->set_errorframeno(m_errorFrameNo);
-	protoState->set_lostedpackets(m_lostedFramesCount);
-	protoState->set_errorbadframesize(m_errorBadFrameSize);
-	protoState->set_haserrors(m_hasErrors);
+	protoState->set_id(ID());
+	protoState->set_uptime(uptime());
+	protoState->set_receiveddatasize(receivedDataSize());
+	protoState->set_datareceivingrate(dataReceivingRate());
+	protoState->set_receivedframescount(receivedFramesCount());
+	protoState->set_processingenabled(dataProcessingEnabled());
+	protoState->set_processedpacketcount(receivedPacketCount());
+	protoState->set_errorprotocolversion(errorProtocolVersion());
+	protoState->set_errorframesquantity(errorFramesQuantity());
+	protoState->set_errorframeno(errorFrameNo());
+	protoState->set_lostedpackets(lostedFramesCount());
+	protoState->set_errorbadframesize(errorBadFrameSize());
+	protoState->set_haserrors(hasErrors());
 
 	return true;
 }
@@ -40,8 +116,8 @@ bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
 
 bool AppDataSource::setState(const Network::AppDataSourceState& protoState)
 {
-	m_id = protoState.id();
-	m_uptime = protoState.uptime();
+	setID(protoState.id());
+	setUptime(protoState.uptime());
 	m_receivedDataSize = protoState.receiveddatasize();
 	m_dataReceivingRate = protoState.datareceivingrate();
 	m_receivedFramesCount = protoState.receivedframescount();
@@ -58,62 +134,6 @@ bool AppDataSource::setState(const Network::AppDataSourceState& protoState)
 }
 
 
-void AppDataReceiver::prepare(AppSignals& appSignals, AppSignalStates* signalStates)
-{
-	m_signalStates = signalStates;
-
-	m_sourceParseInfoMap.clear();
-
-	// scan DataSources
-	//
-	for(DataSource* dataSource : m_appDataSources)
-	{
-		if (dataSource == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		quint32 dataSourceIP = dataSource->lmAddress32();
-
-		if (m_sourceParseInfoMap.contains(dataSourceIP) == true)
-		{
-			qDebug() <<	"Duplicate DataSource IP " << dataSource->lmAddressStr();
-			assert(false);
-			continue;
-		}
-
-		SourceSignalsParseInfo* sourceParseInfo = new SourceSignalsParseInfo(m_autoArchivingGroupsCount);
-
-		// scan signals associated with DataSource
-		//
-		for(const QString& assocSignalID : dataSource->associatedSignals())
-		{
-			if (appSignals.contains(assocSignalID) == false)
-			{
-				qDebug() << "Not found associated signal " << assocSignalID;
-				continue;
-			}
-
-			Signal* signal = appSignals[assocSignalID];
-			int index = appSignals.indexOf(assocSignalID);
-
-			if (signal == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			SignalParseInfo parceInfo;
-
-			parceInfo.setSignalParams(index, *signal);
-
-			sourceParseInfo->append(parceInfo);
-		}
-
-		m_sourceParseInfoMap.insert(dataSourceIP, sourceParseInfo);
-	}
-}
 
 void AppDataReceiver::checkDataSourcesDataReceiving()
 {
@@ -406,3 +426,66 @@ bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, quin
 	return true;
 }
 */
+
+
+
+
+
+// -------------------------------------------------------------------------------
+//
+// SourceSignalsParseInfo class implementation
+//
+// -------------------------------------------------------------------------------
+
+
+int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
+{
+	if (m_lastAutoArchivingTime == 0)
+	{
+		m_lastAutoArchivingTime = (currentSysTime / TIME_1S) * TIME_1S;		// rounds time to seconds
+		m_lastAutoArchivingGroup = 0;
+
+		return NO_AUTOARCHIVING_GROUP;
+	}
+
+	if (abs(currentSysTime - m_lastAutoArchivingTime) < TIME_1S)
+	{
+		return NO_AUTOARCHIVING_GROUP;
+	}
+
+	m_lastAutoArchivingTime = (currentSysTime / TIME_1S) * TIME_1S;		// rounds time to seconds
+
+	int retGroup = m_lastAutoArchivingGroup;
+
+	m_lastAutoArchivingGroup++;
+
+	if (m_lastAutoArchivingGroup >= m_autoArchivingGroupsCount)
+	{
+		m_lastAutoArchivingGroup = 0;
+	}
+
+	return retGroup;
+}
+
+// -------------------------------------------------------------------------------
+//
+// SourceParseInfoMap class implementation
+//
+// -------------------------------------------------------------------------------
+
+SourceParseInfoMap::~SourceParseInfoMap()
+{
+	clear();
+}
+
+
+void SourceParseInfoMap::clear()
+{
+	for(SourceSignalsParseInfo* sourceSignalsParseInfo : *this)
+	{
+		delete sourceSignalsParseInfo;
+	}
+
+	QHash<quint32, SourceSignalsParseInfo*>::clear();
+}
+

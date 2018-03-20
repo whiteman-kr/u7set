@@ -6,7 +6,6 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/Queue.h"
-#include "../lib/DataChannel.h"
 
 #include "AppDataReceiver.h"
 #include "AppSignalStateEx.h"
@@ -28,7 +27,7 @@ public:
 						 const QString& serviceName,
 						 int& argc,
 						 char** argv,
-						 std::shared_ptr<CircularLogger> logger);
+						 CircularLoggerShared log);
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -84,7 +83,7 @@ private:
 	void resizeAppSignalEventsQueue();
 
 private:
-	std::shared_ptr<CircularLogger> m_logger;
+	CircularLoggerShared m_log;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
@@ -95,7 +94,7 @@ private:
 	AppSignals m_appSignals;
 
 	AppDataSources m_appDataSources;				// all data sources
-	AppDataSourcesIP m_enabledAppDataSources;		// only enabled data sources
+	AppDataSourcesIP m_appDataSourcesIP;
 
 	AppSignalStates m_signalStates;
 

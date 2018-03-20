@@ -64,7 +64,7 @@ private:
 	public:
 		bool collect(const RupFrameTime& rupFrameTime);
 
-		bool getData(Times* times, const char** rupData, quint32* rupDataSize);
+		bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
 
 	private:
 		bool reallocate(quint32 framesQuantity);
@@ -78,7 +78,7 @@ private:
 
 		// result variables
 
-		bool m_rupDataReady = false;
+		bool m_dataReadyToParsing = false;
 
 		Times m_rupDataTimes;
 		quint32 m_rupDataSize = 0;
@@ -88,6 +88,8 @@ public:
 	DataSource();
 	~DataSource();
 
+	// LM's properties
+	//
 	DataType lmDataType() const { return m_lmDataType; }
 	QString lmDataTypeStr() const { return dataTypeToString(m_lmDataType); }
 	void setLmDataType(DataType dataType) { m_lmDataType = dataType; }
@@ -133,30 +135,20 @@ public:
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
 
+	//
+
 	quint64 ID() const { return m_id; }
+	void setID(quint32 id) { m_id = id; }
+
 	QHostAddress hostAddress() const { return m_hostAddress; }
+	void setHostAddress(QHostAddress hostAddress) { m_hostAddress = hostAddress; }
+
 	quint32 partCount() const { return m_partCount; }
+	void setPartCount(quint32 partCount) { m_partCount = partCount; }
+
 	QString name() const { return m_name; }
 
-	E::DataSourceState state() const { return m_state; }
-	quint64 uptime() const { return m_uptime; }
-	quint64 receivedDataSize() const { return m_receivedDataSize; }
-	double dataReceivingRate() const { return m_dataReceivingRate; }
 
-	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
-	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
-	qint64 errorFrameNo() const { return m_errorFrameNo; }
-	qint64 lostedFramesCount() const { return m_lostedFramesCount; }
-	qint64 errorDataID() const { return m_errorDataID; }
-	qint64 errorBadFrameSize() const { return m_errorBadFrameSize; }
-
-	bool hasErrors() const { return m_hasErrors; }
-
-	void setID(quint32 id) { m_id = id; }
-	void setHostAddress(QHostAddress hostAddress) { m_hostAddress = hostAddress; }
-	void partCount(quint32 partCount) { m_partCount = partCount; }
-
-	void setState(E::DataSourceState state) { m_state = state; }
 
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
@@ -181,19 +173,45 @@ public:
 	bool getInfo(Network::DataSourceInfo* protoInfo) const;
 	bool setInfo(const Network::DataSourceInfo& protoInfo);
 
-	qint64 lastPacketTime() const { return m_lastPacketTime; }
-	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
-
+	// Functions used by receiver thread
+	//
 	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame);
-
 	void incBadFrameSizeError() { m_errorBadFrameSize++; }
 
-	// DataProcessing functions
-
+	// Function used by data processing thread
+	//
 	bool seizeProcessingOwnership(const SimpleThreadWorker* processingWorker);
 	bool releaseProcessingOwnership(const SimpleThreadWorker* processingWorker);
 
 	bool processRupFrameTimeQueue();
+
+	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
+
+
+	//
+
+	E::DataSourceState state() const { return m_state; }
+	void setState(E::DataSourceState state) { m_state = state; }
+
+	quint64 uptime() const { return m_uptime; }
+	quint64 receivedDataSize() const { return m_receivedDataSize; }
+	double dataReceivingRate() const { return m_dataReceivingRate; }
+
+	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
+	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
+	qint64 errorFrameNo() const { return m_errorFrameNo; }
+	qint64 lostedFramesCount() const { return m_lostedFramesCount; }
+	qint64 errorDataID() const { return m_errorDataID; }
+	qint64 errorBadFrameSize() const { return m_errorBadFrameSize; }
+
+	bool hasErrors() const { return m_hasErrors; }
+
+	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
+	qint64 receivedFramesCount() const { return m_receivedFramesCount; }
+	qint64 receivedPacketCount() const { return m_receivedPacketCount; }
+
+	qint64 lastPacketTime() const { return m_lastPacketTime; }
+	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
 
 private:
 	// Properties from LM

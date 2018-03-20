@@ -58,7 +58,7 @@ bool DataSource::RupFramesCollector::collect(const RupFrameTime& rupFrameTime)
 
 	if (dataReady == false)
 	{
-		m_rupDataReady = false;
+		m_dataReadyToParsing = false;
 		return false;
 	}
 
@@ -75,14 +75,14 @@ bool DataSource::RupFramesCollector::collect(const RupFrameTime& rupFrameTime)
 
 	m_rupDataSize = framesQuantity * sizeof(Rup::Data);
 
-	m_rupDataReady = true;
+	m_dataReadyToParsing = true;
 
 	return true;
 }
 
-bool DataSource::RupFramesCollector::getData(Times* times, const char** rupData, quint32* rupDataSize)
+bool DataSource::RupFramesCollector::getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize)
 {
-	if (m_rupDataReady == false)
+	if (m_dataReadyToParsing == false)
 	{
 		assert(false);
 		return false;
@@ -98,12 +98,14 @@ bool DataSource::RupFramesCollector::getData(Times* times, const char** rupData,
 	*rupData = reinterpret_cast<const char*>(m_rupFramesData);
 	*rupDataSize = m_rupDataSize;
 
+	m_dataReadyToParsing = false;
+
 	return true;
 }
 
 bool DataSource::RupFramesCollector::reallocate(quint32 framesQuantity)
 {
-	m_rupDataReady = false;					// !!!  m_rupFramesData will be freed
+	m_dataReadyToParsing = false;					// !!!  m_rupFramesData will be freed
 
 	if (m_rupFramesHeaders != nullptr)
 	{
@@ -586,6 +588,12 @@ bool DataSource::processRupFrameTimeQueue()
 
 	return result;
 }
+
+bool DataSource::getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize)
+{
+	return m_rupFramesCollector.getDataToParsing(times, rupData, rupDataSize);
+}
+
 
 
 

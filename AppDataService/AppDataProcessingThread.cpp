@@ -10,7 +10,7 @@
 
 AppDataProcessingWorker::AppDataProcessingWorker(int number,
 												 const AppDataSourcesIP& appDataSourcesIP,
-												 AppDataReceiver& appDataReceiver,
+												 const AppDataReceiver& appDataReceiver,
 												 CircularLoggerShared log) :
 	m_number(number),
 	m_appDataSourcesIP(appDataSourcesIP),
@@ -19,7 +19,6 @@ AppDataProcessingWorker::AppDataProcessingWorker(int number,
 {
 }
 
-
 void AppDataProcessingWorker::onThreadStarted()
 {
 	connect(&m_appDataReceiver, &AppDataReceiver::rupFrameIsReceived, this, &AppDataProcessingWorker::onAppDataSourceReceiveRupFrame);
@@ -27,13 +26,10 @@ void AppDataProcessingWorker::onThreadStarted()
 	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is started").arg(m_number));
 }
 
-
 void AppDataProcessingWorker::onThreadFinished()
 {
 	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is finished").arg(m_number));
 }
-
-
 
 void AppDataProcessingWorker::onAppDataSourceReceiveRupFrame(quint32 appDataSourceIP)
 {
@@ -43,8 +39,27 @@ void AppDataProcessingWorker::onAppDataSourceReceiveRupFrame(quint32 appDataSour
 
 	if (result == false)
 	{
+		m_failOwnership++;
 		return;
 	}
+
+	m_successOwnership++;
+
+	while(quitRequested() == false)
+	{
+		result = appDataSource->processRupFrameTimeQueue();
+
+		if (result == false)
+		{
+			break;
+		}
+
+		appDataSource->parsePacket();
+
+		m_parsedRupPacketCount++;
+	}
+
+	appDataSource->releaseProcessingOwnership(this);
 }
 
 // -------------------------------------------------------------------------------
@@ -53,8 +68,11 @@ void AppDataProcessingWorker::onAppDataSourceReceiveRupFrame(quint32 appDataSour
 //
 // -------------------------------------------------------------------------------
 
-AppDataProcessingThread::AppDataProcessingThread(int number, const AppDataSources& appDataSources) :
-	SimpleThread(new AppDataProcessingWorker(number, appDataSources))
+AppDataProcessingThread::AppDataProcessingThread(int number,
+												 const AppDataSourcesIP& appDataSourcesIP,
+												 const AppDataReceiver& appDataReceiver,
+												 CircularLoggerShared log) :
+	SimpleThread(new AppDataProcessingWorker(number, appDataSourcesIP, appDataReceiver, log))
 {
 }
 
@@ -67,7 +85,8 @@ AppDataProcessingThread::AppDataProcessingThread(int number, const AppDataSource
 
 void AppDataProcessingThreadsPool::createProcessingThreads(int poolSize,
 														   const AppDataSourcesIP& appDataSourcesIP,
-														   const AppDataReceiver& appDataReceiver)
+														   const AppDataReceiver& appDataReceiver,
+														   CircularLoggerShared log)
 {
 	if (count() > 0)
 	{
@@ -88,7 +107,7 @@ void AppDataProcessingThreadsPool::createProcessingThreads(int poolSize,
 
 	for(int i = 0; i < poolSize; i++)
 	{
-		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i + 1, appDataSourcesIP, appDataReceiver);
+		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i + 1, appDataSourcesIP, appDataReceiver, log);
 
 		append(processingThread);
 	}

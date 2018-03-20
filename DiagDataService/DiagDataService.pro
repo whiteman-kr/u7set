@@ -76,7 +76,6 @@ SOURCES += \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
     DiagDataService.cpp \
-    ../lib/DataChannel.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
@@ -118,7 +117,6 @@ HEADERS += \
     ../lib/XmlHelper.h \
     ../lib/DataProtocols.h \
     DiagDataService.h \
-    ../lib/DataChannel.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../u7/Builder/IssueLogger.h \
