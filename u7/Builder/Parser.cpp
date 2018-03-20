@@ -2428,7 +2428,6 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, tr("Parsing User Functional Blocks..."));
 
-			bool result = true;
 			for (std::shared_ptr<VFrame30::UfbSchema> ufbSchema : ufbs)
 			{
 				if (QThread::currentThread()->isInterruptionRequested() == true)

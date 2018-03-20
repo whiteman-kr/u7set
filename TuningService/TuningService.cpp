@@ -588,7 +588,7 @@ namespace Tuning
 		}
 	}
 
-	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
 	{
 		if (m_cfgLoaderThread == nullptr)
 		{

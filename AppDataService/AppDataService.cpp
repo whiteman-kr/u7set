@@ -24,8 +24,8 @@ AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   std::shared_ptr<CircularLogger> logger) :
 	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_logger(logger),
-	m_timer(this),
-	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
+	m_signalStatesQueue(1),			// shoud be resized after cfg loading according to signals count
+	m_timer(this)
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{

@@ -58,6 +58,7 @@ namespace Builder
 											   const std::vector<Hardware::DeviceModule*>& fscModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
 											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
 											   Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
+		m_firmwareWriter(firmwareWriter),
 		m_buildWorkerThread(buildWorkerThread),
 		m_jsEngine(jsEngine),
 		m_db(db),
@@ -67,8 +68,7 @@ namespace Builder
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
 		m_opticModuleStorage(opticModuleStorage),
-		m_log(log),
-		m_firmwareWriter(firmwareWriter)
+		m_log(log)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);

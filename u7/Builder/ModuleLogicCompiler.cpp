@@ -8910,7 +8910,7 @@ namespace Builder
 			m_code.newLine();
 		}
 
-		return true;
+		return result;
 
 	}
 

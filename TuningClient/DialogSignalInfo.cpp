@@ -7,10 +7,10 @@
 #include "TuningClientTcpClient.h"
 
 DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, TuningSignalManager* signalManager, QWidget *parent) :
-	m_appSignalHash(appSignalHash),
-	m_signalManager(signalManager),
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::DialogSignalInfo)
+	ui(new Ui::DialogSignalInfo),
+	m_appSignalHash(appSignalHash),
+	m_signalManager(signalManager)
 {
 	ui->setupUi(this);
 

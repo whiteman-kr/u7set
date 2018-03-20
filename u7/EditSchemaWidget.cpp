@@ -9255,7 +9255,7 @@ void SchemaFindDialog::updateCompleter()
 
 void SchemaFindDialog::updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
 											  const std::list<std::pair<QString, QString>>& foundProps,
-											  QString searchText,
+											  QString /*searchText*/,
 											  Qt::CaseSensitivity /*cs*/)
 {
 

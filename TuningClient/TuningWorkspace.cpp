@@ -91,10 +91,10 @@ int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_treeFilter(treeFilter),
-	m_workspaceFilter(workspaceFilter),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient)
+	m_tuningTcpClient(tuningTcpClient),
+	m_workspaceFilter(workspaceFilter),
+	m_treeFilter(treeFilter)
 {
 	//qDebug() << "TuningWorkspace::TuningWorkspace m_instanceCounter = " << m_instanceCounter;
 	m_instanceCounter++;
