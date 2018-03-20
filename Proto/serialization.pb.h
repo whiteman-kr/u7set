@@ -7719,6 +7719,18 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::std::string* release_validitysignalid();
   inline void set_allocated_validitysignalid(::std::string* validitysignalid);
 
+  // optional string signalSpecPropsStruc = 40;
+  inline bool has_signalspecpropsstruc() const;
+  inline void clear_signalspecpropsstruc();
+  static const int kSignalSpecPropsStrucFieldNumber = 40;
+  inline const ::std::string& signalspecpropsstruc() const;
+  inline void set_signalspecpropsstruc(const ::std::string& value);
+  inline void set_signalspecpropsstruc(const char* value);
+  inline void set_signalspecpropsstruc(const char* value, size_t size);
+  inline ::std::string* mutable_signalspecpropsstruc();
+  inline ::std::string* release_signalspecpropsstruc();
+  inline void set_allocated_signalspecpropsstruc(::std::string* signalspecpropsstruc);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
   inline void set_has_obsoletetype();
@@ -7751,6 +7763,8 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline void clear_has_appsignaldataformat();
   inline void set_has_validitysignalid();
   inline void clear_has_validitysignalid();
+  inline void set_has_signalspecpropsstruc();
+  inline void clear_has_signalspecpropsstruc();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -7769,9 +7783,10 @@ class DeviceSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 appsignaldataformat_;
   double appsignalhighengunits_;
   ::std::string* validitysignalid_;
+  ::std::string* signalspecpropsstruc_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(15 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(16 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -21379,6 +21394,76 @@ inline void DeviceSignal::set_allocated_validitysignalid(::std::string* validity
   } else {
     clear_has_validitysignalid();
     validitysignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string signalSpecPropsStruc = 40;
+inline bool DeviceSignal::has_signalspecpropsstruc() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void DeviceSignal::set_has_signalspecpropsstruc() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void DeviceSignal::clear_has_signalspecpropsstruc() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void DeviceSignal::clear_signalspecpropsstruc() {
+  if (signalspecpropsstruc_ != &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruc_->clear();
+  }
+  clear_has_signalspecpropsstruc();
+}
+inline const ::std::string& DeviceSignal::signalspecpropsstruc() const {
+  return *signalspecpropsstruc_;
+}
+inline void DeviceSignal::set_signalspecpropsstruc(const ::std::string& value) {
+  set_has_signalspecpropsstruc();
+  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruc_ = new ::std::string;
+  }
+  signalspecpropsstruc_->assign(value);
+}
+inline void DeviceSignal::set_signalspecpropsstruc(const char* value) {
+  set_has_signalspecpropsstruc();
+  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruc_ = new ::std::string;
+  }
+  signalspecpropsstruc_->assign(value);
+}
+inline void DeviceSignal::set_signalspecpropsstruc(const char* value, size_t size) {
+  set_has_signalspecpropsstruc();
+  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruc_ = new ::std::string;
+  }
+  signalspecpropsstruc_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DeviceSignal::mutable_signalspecpropsstruc() {
+  set_has_signalspecpropsstruc();
+  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruc_ = new ::std::string;
+  }
+  return signalspecpropsstruc_;
+}
+inline ::std::string* DeviceSignal::release_signalspecpropsstruc() {
+  clear_has_signalspecpropsstruc();
+  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = signalspecpropsstruc_;
+    signalspecpropsstruc_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DeviceSignal::set_allocated_signalspecpropsstruc(::std::string* signalspecpropsstruc) {
+  if (signalspecpropsstruc_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalspecpropsstruc_;
+  }
+  if (signalspecpropsstruc) {
+    set_has_signalspecpropsstruc();
+    signalspecpropsstruc_ = signalspecpropsstruc;
+  } else {
+    clear_has_signalspecpropsstruc();
+    signalspecpropsstruc_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

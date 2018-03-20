@@ -8,6 +8,7 @@
 class E : public QObject
 {
 	Q_OBJECT
+
 public:
 	E() = delete;
 
@@ -279,6 +280,18 @@ public:
 	};
 	Q_ENUM(TimeType)
 
+	// Property editor type
+	//
+	enum class PropertySpecificEditor : qint16
+	{
+		None = 0,
+		Password,
+		Script,
+		TuningFilter,
+		SpecificPropertyStruct
+	};
+	Q_ENUM(PropertySpecificEditor)
+
 public:
 	// Convert enum value (not index) to QString
 	//
@@ -333,7 +346,16 @@ public:
 	// Convert QString to enum value (not index)
 	//
 	template <typename ENUM_TYPE>
-	static ENUM_TYPE stringToValue(const QString& str, bool* ok = nullptr)
+	static std::pair<ENUM_TYPE, bool> stringToValue(const QString& str)
+	{
+		bool ok = false;
+		auto resultVal = stringToValue<ENUM_TYPE>(str, &ok);
+
+		return {resultVal, ok};
+	}
+
+	template <typename ENUM_TYPE>
+	static ENUM_TYPE stringToValue(const QString& str, bool* ok)
 	{
 		assert(std::is_enum<ENUM_TYPE>::value);
 
@@ -397,7 +419,6 @@ public:
 		return result;
 	}
 
-
 	// Get list of enum keys converted to QString
 	//
 	template <typename ENUM_TYPE>
@@ -425,11 +446,10 @@ public:
 		return result;
 	}
 
-
 	// Check if enum containes value
 	//
 	template <typename ENUM_TYPE>
-	static bool containes(int value)
+	static bool contains(int value)
 	{
 		assert(std::is_enum<ENUM_TYPE>::value);
 

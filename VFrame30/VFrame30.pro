@@ -12,6 +12,11 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -162,7 +167,8 @@ SOURCES += \
     SchemaItemBus.cpp \
     Bus.cpp \
     ../Proto/network.pb.cc \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Types.cpp
 
 
 DEFINES += VFRAME30LIB_LIBRARY
@@ -170,10 +176,6 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-#c++14 support
-#
-CONFIG += c++14
 
 #Warning level
 #

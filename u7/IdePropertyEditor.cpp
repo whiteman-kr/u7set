@@ -47,7 +47,7 @@ void IdePropertyEditor::saveSettings()
 ExtWidgets::PropertyTextEditor* IdePropertyEditor::createCodeEditor(Property *property, QWidget* parent)
 {
 
-	if (property->specificEditor() == PropertySpecificEditor::TuningFilter)
+	if (property->specificEditor() == E::PropertySpecificEditor::TuningFilter)
     {
         // This is Filters Editor for TuningClient
         //

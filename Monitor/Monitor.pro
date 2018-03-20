@@ -11,6 +11,11 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -208,16 +213,6 @@ CONFIG(debug, debug|release): DEFINES += _DEBUG
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
-
-
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
-
-
-#c++14 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++14
 
 
 # VFrame30 library

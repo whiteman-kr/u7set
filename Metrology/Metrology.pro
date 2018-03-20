@@ -12,6 +12,11 @@ TEMPLATE = app
 
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -205,12 +210,6 @@ TRANSLATIONS = translations/Metrology_ru.ts \
 OTHER_FILES += \
     translations/Metrology_ru.ts \
     translations/Metrology_uk.ts
-
-
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
-
 
 # Q_DEBUG define
 #

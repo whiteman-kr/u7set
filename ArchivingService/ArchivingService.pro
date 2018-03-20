@@ -18,6 +18,10 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 #
@@ -148,9 +152,6 @@ include(../qtservice/src/qtservice.pri)
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 #protobuf
 #

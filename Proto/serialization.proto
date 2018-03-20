@@ -930,9 +930,11 @@ message DeviceSignal
 	optional int32 appSignalHighAdc = 13 [default = 65535];
 	optional double appSignalLowEngUnits = 14 [default = 0];
 	optional double appSignalHighEngUnits = 15 [default = 100];
-	optional int32 appSignalDataFormat = 16 [default = 2];		// E::DataFormat::Float = 2
+	optional int32 appSignalDataFormat = 16 [default = 2];	// E::DataFormat::Float = 2
 
     optional string validitySignalId = 20;					// RPCT-1660
+
+    optional string signalSpecPropsStruc = 40;
 }
 
 message Workstation

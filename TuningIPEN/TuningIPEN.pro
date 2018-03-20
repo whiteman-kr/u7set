@@ -12,6 +12,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = TuningIPEN
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 
 SOURCES +=\
 	TuningMainWindow.cpp \

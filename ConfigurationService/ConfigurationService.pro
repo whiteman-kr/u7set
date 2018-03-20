@@ -25,6 +25,10 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # Force prebuild version control info
 #
@@ -104,10 +108,6 @@ HEADERS += \
 include(../qtservice/src/qtservice.pri)
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 #protobuf
 #

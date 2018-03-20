@@ -372,7 +372,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		return;
 	}
 
-	(this->*setter)(E::stringToValue<E::ElectricUnit>(QString(strValue.constData())));
+	(this->*setter)(E::stringToValue<E::ElectricUnit>(QString(strValue.constData()), nullptr));
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType))
@@ -385,7 +385,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		return;
 	}
 
-	(this->*setter)(E::stringToValue<E::SensorType>(QString(strValue.constData())));
+	(this->*setter)(E::stringToValue<E::SensorType>(QString(strValue.constData()), nullptr));
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType))
@@ -398,7 +398,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		return;
 	}
 
-	(this->*setter)(E::stringToValue<E::SignalInOutType>(QString(strValue.constData())));
+	(this->*setter)(E::stringToValue<E::SignalInOutType>(QString(strValue.constData()), nullptr));
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder))
@@ -446,7 +446,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		return;
 	}
 
-	(this->*setter)(E::stringToValue<E::AnalogAppSignalFormat>(QString(strValue.constData())));
+	(this->*setter)(E::stringToValue<E::AnalogAppSignalFormat>(QString(strValue.constData()), nullptr));
 }
 
 void Signal::serializeFields(const QXmlStreamAttributes& attr)

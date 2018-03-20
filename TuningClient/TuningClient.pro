@@ -12,6 +12,11 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
 #

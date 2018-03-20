@@ -164,7 +164,7 @@ namespace Proto
 
 		if (property->isEnum() == true)
 		{
-			valueStr = value.toString();
+			valueStr = property->enumValue().toString();
 		}
 		else
 		{

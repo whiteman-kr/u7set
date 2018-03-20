@@ -4,13 +4,16 @@ QT += network
 QT += qml
 QT += xml
 
-CONFIG += c++11
-
 TARGET = TuningSrv
 CONFIG += console
 CONFIG -= app_bundle
 
 TEMPLATE = app
+
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 #
@@ -148,8 +151,6 @@ HEADERS += \
 include(../qtservice/src/qtservice.pri)
 
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

@@ -21,59 +21,53 @@
 #include <QDebug>
 
 #include "../lib/OrderedHash.h"
+#include "../lib/Types.h"
 
 class PropertyObject;
 
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, this));
+	(std::function<TYPE(void)>)std::bind(&GETTER, this));
 
 #define ADD_PROPERTY_GETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, OWNER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
+	(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
 
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-			std::bind(&SETTER, this, std::placeholders::_1));
+	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
+	std::bind(&SETTER, this, std::placeholders::_1));
 
 #define ADD_PROPERTY_GETTER_SETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, SETTER, OWNER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER), \
-			std::bind(&SETTER, &OWNER, std::placeholders::_1));
+	(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER), \
+	std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
 // Add property which has getter, setter and category
 //
 #define ADD_PROPERTY_GET_SET_CAT(TYPE, NAME, CATEGORY, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(\
-			NAME, \
-			CATEGORY,\
-			VISIBLE,\
-			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-			std::bind(&SETTER, this, std::placeholders::_1));
+	NAME, \
+	CATEGORY,\
+	VISIBLE,\
+	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
+	std::bind(&SETTER, this, std::placeholders::_1));
 
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_DYNAMIC_ENUM(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER) \
 	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
-			(std::function<int(void)>)std::bind(&GETTER, this), \
-			std::bind(&SETTER, this, std::placeholders::_1));
+	(std::function<int(void)>)std::bind(&GETTER, this), \
+	std::bind(&SETTER, this, std::placeholders::_1));
 
 #define ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER, OWNER) \
 	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
-			(std::function<int(void)>)std::bind(&GETTER, &OWNER), \
-			std::bind(&SETTER, &OWNER, std::placeholders::_1));
+	(std::function<int(void)>)std::bind(&GETTER, &OWNER), \
+	std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
 
-enum class PropertySpecificEditor : qint16
-{
-	None = 0,
-	Password,
-	Script,
-	TuningFilter
-};
 
 //
 //
@@ -94,6 +88,9 @@ public:
 public:
 	virtual bool isEnum() const = 0;
 	virtual std::list<std::pair<int, QString>> enumValues() const = 0;
+
+	virtual QVariant enumValue() const = 0;		// if is enum, returns QVariant with TYPE or QVariant::string if type
+												// cannot be get (dynamic enum properties)
 
 public:
 	QString caption() const
@@ -177,36 +174,36 @@ public:
 		m_expert = value;
 	}
 
-	PropertySpecificEditor specificEditor()
+	E::PropertySpecificEditor specificEditor()
 	{
 		return m_specificEditor;
 	}
 
-	void setSpecificEditor(PropertySpecificEditor value)
+	void setSpecificEditor(E::PropertySpecificEditor value)
 	{
 		m_specificEditor = value;
 	}
 
-    bool password() const
-    {
-		return m_specificEditor == PropertySpecificEditor::Password;
-    }
-    void setPassword(bool value)
-    {
-		m_specificEditor = value ? PropertySpecificEditor::Password : PropertySpecificEditor::None;
+	bool password() const
+	{
+		return m_specificEditor == E::PropertySpecificEditor::Password;
+	}
+	void setPassword(bool value)
+	{
+		m_specificEditor = value ? E::PropertySpecificEditor::Password : E::PropertySpecificEditor::None;
 	}
 
 	bool isScript() const
 	{
-		return m_specificEditor == PropertySpecificEditor::Script ||
+		return m_specificEditor == E::PropertySpecificEditor::Script ||
 				caption().contains("Script") == true;
 	}
 	void setIsScript(bool value)
 	{
-		m_specificEditor = value ? PropertySpecificEditor::Script : PropertySpecificEditor::None;
+		m_specificEditor = value ? E::PropertySpecificEditor::Script : E::PropertySpecificEditor::None;
 	}
 
-    int precision() const
+	int precision() const
 	{
 		return m_precision;
 	}
@@ -278,7 +275,7 @@ private:
 		uint32_t m_flags;
 	};
 
-	PropertySpecificEditor m_specificEditor = PropertySpecificEditor::None;
+	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
 
 	int m_precision = 2;
 };
@@ -292,25 +289,13 @@ template <typename TYPE>
 class PropertyValue : public Property
 {
 public:
-	PropertyValue()
-	{
-	}
-
-	virtual ~PropertyValue()
-	{
-	}
+	PropertyValue() = default;
 
 public:
-	virtual bool isEnum() const override
+	virtual bool isEnum() const override final
 	{
-		if (std::is_enum<TYPE>::value)
-		{
-			return true;
-		}
-
-		return false;
+		return std::is_enum<TYPE>::value;
 	}
-
 
 	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
 	// Example is in question:
@@ -338,7 +323,7 @@ private:
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		assert(std::is_enum<TYPE>::value);
 
 		std::list<std::pair<int, QString>> result;
 
@@ -356,6 +341,17 @@ public:
 		}
 
 		return result;
+	}
+
+	virtual QVariant enumValue() const override final
+	{
+		if (std::is_enum<TYPE>::value == false)
+		{
+			assert(isEnum());
+			return QVariant();
+		}
+
+		return value();
 	}
 
 public:
@@ -383,7 +379,7 @@ public:
 		}
 	}
 
-	void setValue(const QVariant& value) override	// Overriden from class Propery
+	void setValue(const QVariant& value) override		// Overriden from class Propery
 	{
 		if (!m_setter)
 		{
@@ -397,7 +393,7 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) override	// Overriden from class Propery
+	virtual void setEnumValue(int value) override			// Overriden from class Propery
 	{
 		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
@@ -451,7 +447,7 @@ public:
 		// Limits must be checked in getter/setter
 		//
 		assert(false);
-static QVariant staticQVariant;
+		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setLowLimit(const QVariant&) override
@@ -465,7 +461,7 @@ static QVariant staticQVariant;
 		// Limits must be checked in getter/setter
 		//
 		assert(false);
-static QVariant staticQVariant;
+		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setHighLimit(const QVariant&) override
@@ -583,6 +579,19 @@ public:
 		{
 			return true;
 		}
+	}
+
+	virtual QVariant enumValue() const override final
+	{
+#ifdef _DEBUG
+		if (isEnum() == false)		// Commented for perfomance reasone
+		{
+			assert(isEnum());
+			return QVariant();
+		}
+#endif
+
+		return value();
 	}
 
 public:
@@ -828,11 +837,9 @@ private:
 };
 
 
-//
 //			Dynamic Enum Property
 //			Class PropertyValue specialization for OrderedHash<int, QString>,
 //			class behaves like enum
-//
 //
 template <>
 class PropertyValue<OrderedHash<int, QString>> : public Property
@@ -866,6 +873,11 @@ public:
 		}
 
 		return result;
+	}
+
+	virtual QVariant enumValue() const override final
+	{
+		return value();
 	}
 
 public:
@@ -940,7 +952,7 @@ public:
 
 	const QVariant& lowLimit() const
 	{
-static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
 	void setLowLimit(const QVariant& value)
@@ -950,7 +962,7 @@ static const QVariant dummy;			//	for return from lowLimt, hughLimt
 
 	const QVariant& highLimit() const
 	{
-static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
 	void setHighLimit(const QVariant& value)
@@ -997,6 +1009,211 @@ private:
 	std::function<void(int)> m_setter;
 };
 
+
+//			Dynamic Enum Property based on std::vector, it's slower then PropertyValue<OrderedHash> but consumes
+//			less memory and in plain way.
+//			class behaves like enum
+//
+template <>
+class PropertyValue<std::vector<std::pair<QString, int>>> : public Property
+{
+public:
+	PropertyValue(const std::vector<std::pair<QString, int>>& enumValues) :
+		m_enumValues(enumValues)
+	{
+		if (m_enumValues.empty() == false)
+		{
+			m_value = m_enumValues.front().second;
+		}
+		else
+		{
+			assert(m_enumValues.empty() == false);
+			m_value = 0;
+		}
+
+		return;
+	}
+
+public:
+	virtual bool isEnum() const override final
+	{
+		return true;	// This is dynamic enumeration
+	}
+
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	{
+		std::list<std::pair<int, QString>> result;
+
+		for (auto[str, key] : m_enumValues)
+		{
+			result.push_back({key, str});
+		}
+
+		return result;
+	}
+
+	virtual QVariant enumValue() const override final
+	{
+		for (auto[str, key] : m_enumValues)
+		{
+			if (key == m_value)
+			{
+				return QVariant(str);
+			}
+		}
+
+		assert(false);
+		return QVariant();
+	}
+
+public:
+	virtual QVariant value() const override final
+	{
+		if (m_getter)
+		{
+			QVariant result(QVariant::fromValue(m_getter()));
+			return result;
+		}
+		else
+		{
+			return QVariant(m_value);
+		}
+	}
+
+	virtual void setValue(const QVariant& value) override final		// Overriden from class Propery
+	{
+		if (value.type() == QVariant::Int)
+		{
+			setEnumValue(value.value<int>());
+			return;
+		}
+
+		if (value.type() == QVariant::String)
+		{
+			setEnumValue(value.toString().toStdString().data());
+			return;
+		}
+
+		assert(false);
+		return;
+	}
+
+	virtual void setEnumValue(int value) override final				// Overriden from class Propery
+	{
+		if (m_setter)
+		{
+			m_setter(value);
+		}
+		else
+		{
+			m_value = value;
+		}
+	}
+
+	virtual void setEnumValue(const char* value) override final		// Overriden from class Propery
+	{
+		QString strvalue(value);
+
+		for (auto[str, key] : m_enumValues)
+		{
+			if (strvalue == str)
+			{
+				setEnumValue(key);
+				return;
+			}
+		}
+
+		// Str not found
+		//
+		assert(false);
+		return;
+	}
+
+private:
+	void checkLimits()
+	{
+	}
+
+public:
+	void setLimits(const QVariant& low, const QVariant& high)
+	{
+		Q_UNUSED(low);
+		Q_UNUSED(high);
+	}
+
+	const QVariant& lowLimit() const
+	{
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		return dummy;
+	}
+	void setLowLimit(const QVariant& value)
+	{
+		Q_UNUSED(value);
+	}
+
+	const QVariant& highLimit() const
+	{
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		return dummy;
+	}
+	void setHighLimit(const QVariant& value)
+	{
+		Q_UNUSED(value);
+	}
+
+	void setGetter(std::function<int(void)> getter)
+	{
+		m_getter = getter;
+	}
+	void setSetter(std::function<void(int)> setter)
+	{
+		m_setter = setter;
+	}
+
+	virtual bool isTheSameType(Property* property) override final
+	{
+		return dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(property) != nullptr;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	{
+		if (presetProperty == nullptr ||
+			isTheSameType(presetProperty) == false)
+		{
+			assert(presetProperty != nullptr);
+			assert(isTheSameType(presetProperty) == true);
+			return;
+		}
+
+		Property::copy(presetProperty);	// Copy data from the base class
+		auto source = dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(presetProperty);
+
+		if (source == nullptr)
+		{
+			assert(source);
+			return;
+		}
+
+		if (updateValue == true)
+		{
+			setValue(presetProperty->value());
+		}
+
+		// Do not copy m_getter/m_setter, because they are binded to their own object instances
+		//
+		return;
+	}
+
+private:
+	// WARNING!!! If you add a field, do not forget to add it to updateFromPreset();
+	//
+	std::vector<std::pair<QString, int>> m_enumValues;
+
+	int m_value = 0;	// m_value is not index is a value from m_enumValues
+
+	std::function<int(void)> m_getter;
+	std::function<void(int)> m_setter;
+};
 
 
 //
@@ -1123,6 +1340,29 @@ public:
 		{
 			property->setReadOnly(true);
 		}
+
+		m_properties[hash] = property;
+
+		emit propertyListChanged();
+
+		return property.get();
+	}
+
+	PropertyValue<std::vector<std::pair<QString, int>>>* addDynamicEnumProperty(
+			const QString& caption,
+			const std::vector<std::pair<QString, int>>& enumValues,
+			bool visible = false,
+			std::function<int(void)> getter = std::function<int(void)>(),
+			std::function<void(int)> setter = std::function<void(int)>())
+	{
+		uint hash = qHash(caption);
+
+		auto property = std::make_shared<PropertyValue<std::vector<std::pair<QString, int>>>>(enumValues);
+
+		property->setCaption(caption);
+		property->setVisible(visible);
+		property->setGetter(getter);
+		property->setSetter(setter);
 
 		m_properties[hash] = property;
 
@@ -1390,6 +1630,715 @@ public:
 
 		return result;
 	}
+
+	// Specific properties
+	//
+	std::pair<bool, QString> parseSpecificPropertiesStruct(const QString& specificProperties)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		// Save all specific properties values
+		//
+		std::vector<std::shared_ptr<Property>> oldProperties = this->properties();
+
+		oldProperties.erase(std::remove_if(oldProperties.begin(), oldProperties.end(),
+										   [](std::shared_ptr<Property> p)
+		{
+								return p->specific() == false;
+							}), oldProperties.end());
+
+		// Delete all previous object's specific properties
+		//
+		removeSpecificProperties();
+
+		// Parse struct (rows, divided by semicolon) and create new properties
+		//
+
+		/*
+		Example:
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset
+		1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
+		1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description
+		2;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible
+		3;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor
+		4;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None
+
+		version:            record version
+		name:               property name
+		category:           category name
+
+		type:               property type, can by one of:
+							qint32  (4 bytes signed integral),
+							quint32 (4 bytes unsigned integer)
+							bool (true, false),
+							double,
+							E::Channel,
+							string,
+							DynamicEnum [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
+
+		min:                property minimum value (ignored for bool, string)
+		max:                property maximim value (ignored for bool, string)
+		default:            can be any value of the specified type
+		precision:          property precision
+		updateFromPreset:   property will be updated from preset
+
+		expert:				[Added in version 2] expert property
+		description:		[Added in version 2] property description
+
+		visible:			[Added in version 3] property is visible
+
+		Editor				[Added in version 4] Property specific editor (emun E::PropertySpecificEditor )
+							can have values: None, Password, Script, TuningFilter, SpecificProperties
+		*/
+		QString m_specificPropertiesStructTrimmed = specificProperties;
+
+		QStringList rows = m_specificPropertiesStructTrimmed.split(QChar::LineFeed, QString::SkipEmptyParts);
+
+		for (QString row : rows)
+		{
+			row = row.trimmed();
+			if (row.isEmpty() == true)
+			{
+				continue;
+			}
+
+			QStringList columns = row.split(';');
+
+			for (QString& col : columns)
+			{
+				col = col.trimmed();
+			}
+
+			QString strVersion(columns[0]);
+			bool ok = false;
+			int version = strVersion.toInt(&ok);
+
+			if (ok == false)
+			{
+				result.first = false;
+				result.second += "SpecificProperties: failed to parse specific prop version filed: " + row;
+				continue;
+			}
+
+			switch (version)
+			{
+			case 1:
+				{
+					auto parseResult = parseSpecificPropertiesStructV1(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 2:
+				{
+					auto parseResult = parseSpecificPropertiesStructV2(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 3:
+				{
+					auto parseResult = parseSpecificPropertiesStructV3(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 4:
+				{
+					auto parseResult = parseSpecificPropertiesStructV4(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			default:
+				result.first = false;
+				result.second += "SpecificProperties: Unsupported version: " + version;
+
+				assert(false);
+				qDebug() << "Object has spec prop with unsuported version: " << row;
+			}
+		}
+
+		std::vector<std::shared_ptr<Property>> newProperties = properties();
+
+		// Set Specific editors to properties
+		//
+		bool ETO_UDLALIT_NADO_perenesti_tip_redaktora_v_structuru_spec_props;
+		for (std::shared_ptr<Property> p : newProperties)
+		{
+			if (p->caption() == "Filters" && p->description() == "Tuning signal filters description in XML format")
+			{
+				p->setSpecificEditor(E::PropertySpecificEditor::TuningFilter);
+			}
+		}
+
+		// Set to parsed properties old value
+		//
+		for (const std::shared_ptr<Property>& p : oldProperties)
+		{
+			auto it = std::find_if(newProperties.begin(), newProperties.end(),
+								   [p](const std::shared_ptr<Property>& np)
+			{
+				return np->caption() == p->caption();
+			});
+
+			if (it != newProperties.end() &&
+				(*it)->value().type() == p->value().type() &&
+				p != (*it))
+			{
+				setPropertyValue(p->caption(), p->value());
+			}
+			else
+			{
+				// Default value already was set
+				//
+				continue;
+			}
+		}
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV1(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 9)
+		{
+			result.first = false;
+			result.second += " Wrong proprty struct version 1! Expected: version;name;category;type;min;max;default;precision;updateFromPreset\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 1!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+
+		result = parseSpecificPropertiesCreate(1,
+											   name,
+											   category,
+											   QString(),
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   QLatin1String("false"),
+											   QLatin1String("true"),
+											   QLatin1String("None"));
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV2(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 11)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 2!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 2!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString strDescription(columns[10]);
+
+		result = parseSpecificPropertiesCreate(2,
+											   name,
+											   category,
+											   strDescription,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   QLatin1String("true"),
+											   QLatin1String("None"));
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV3(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 12)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 3!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString strDescription(columns[10]);
+		QString strVisible(columns[11]);
+
+		result = parseSpecificPropertiesCreate(3,
+											   name,
+											   category,
+											   strDescription,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   strVisible,
+											   QLatin1String("None"));
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV4(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 13)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 4!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString description(columns[10]);
+		QString strVisible(columns[11]);
+		QString strEditor(columns[12]);
+
+		result = parseSpecificPropertiesCreate(4,
+											   name,
+											   category,
+											   description,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   strVisible,
+											   strEditor);
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesCreate(int version,
+														   const QString& name,
+														   const QString& category,
+														   const QString& description,
+														   const QString& strType,
+														   QStringRef strMin,
+														   QStringRef strMax,
+														   QStringRef strDefaultValue,
+														   QStringRef strPrecision,
+														   const QString& strUpdateFromPreset,
+														   const QString& strExpert,
+														   const QString& strVisible,
+														   const QString& strEditor)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (version < 0 || version > 4)
+		{
+			assert(false);
+
+			result.first = false;
+			result.second += "SpecificProperties: Unsupported version: " + version;
+			return result;
+		}
+
+		int precision = strPrecision.toInt();
+		bool updateFromPreset = strUpdateFromPreset.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		bool expert = strExpert.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		bool visible = strVisible.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+
+		if (name.isEmpty() == true || name.size() > 1024)
+		{
+			result.first = false;
+			result.second = "SpecificProperties: filed name must have size  from 1 to 1024, name: " + name + "\n";
+
+			qDebug() << Q_FUNC_INFO << " SpecificProperties: filed name must have size  from 1 to 1024, name: " << name;
+			return result;
+		}
+
+		// Get E::PropertySpecificEditor value
+		//
+		auto[editorType, editorOk] = E::stringToValue<E::PropertySpecificEditor>(strEditor);
+
+		if (editorOk == false)
+		{
+			result.first = false;
+			result.second = "SpecificProperties: Specific propertye editor is not recognized: " + strEditor + "\n";
+
+			qDebug() << Q_FUNC_INFO << "SpecificProperties: Specific propertye editor is not recognized: " << strEditor;
+			return result;
+		}
+
+		// Type
+		//
+		enum PropType
+		{
+			pt_int32,
+			pt_uint32,
+			pt_double,
+			pt_bool,
+			pt_e_channel,
+			pt_string,
+		};
+
+		static std::map<uint, PropType> typeMap;
+		if (typeMap.empty() == true)	// One time init
+		{
+			typeMap[qHash(QString("qint32"))] = pt_int32;
+			typeMap[qHash(QString("signed int"))] = pt_int32;
+			typeMap[qHash(QString("int32"))] = pt_int32;
+			typeMap[qHash(QString("int"))] = pt_int32;
+			typeMap[qHash(QString("int32_t"))] = pt_int32;
+
+			typeMap[qHash(QString("quint32"))] = pt_uint32;
+			typeMap[qHash(QString("unsigned int"))] = pt_uint32;
+			typeMap[qHash(QString("uint32"))] = pt_uint32;
+			typeMap[qHash(QString("uint"))] = pt_uint32;
+			typeMap[qHash(QString("uint32_t"))] = pt_uint32;
+
+			typeMap[qHash(QString("double"))] = pt_double;
+			typeMap[qHash(QString("Double"))] = pt_double;
+
+			typeMap[qHash(QString("bool"))] = pt_bool;
+			typeMap[qHash(QString("Bool"))] = pt_bool;
+			typeMap[qHash(QString("boolean"))] = pt_bool;
+			typeMap[qHash(QString("Boolean"))] = pt_bool;
+
+			typeMap[qHash(QString("E::Channel"))] = pt_e_channel;
+			typeMap[qHash(QString("e::channel"))] = pt_e_channel;
+			typeMap[qHash(QString("channel"))] = pt_e_channel;
+
+			typeMap[qHash(QString("string"))] = pt_string;
+			typeMap[qHash(QString("String"))] = pt_string;
+			typeMap[qHash(QString("QString"))] = pt_string;
+		}
+
+		// Check if strType is like
+		// DynamicEnum [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
+		//
+		Property* addedProperty = nullptr;
+
+		if (bool startedFromDynamicEnum = strType.trimmed().startsWith(QLatin1String("DynamicEnum"), Qt::CaseInsensitive);
+			startedFromDynamicEnum == true)
+		{
+			try
+			{
+				// Parse String - Key pairs:
+				// [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
+				//
+				int openBrace = strType.indexOf('[');
+				int closeBrace = strType.lastIndexOf(']');
+
+				if (openBrace == -1 || closeBrace == -1 || openBrace >= closeBrace)
+				{
+					throw strType;
+				}
+
+				QString valuesString = strType.mid(openBrace + 1, closeBrace - openBrace - 1);
+				valuesString.remove(' ');
+
+				QStringList valueStringList = valuesString.split(',', QString::SkipEmptyParts);	// split value pairs
+				if (valueStringList.empty() == true)
+				{
+					throw strType;
+				}
+
+				std::vector<std::pair<QString, int>> enumValues;
+				enumValues.reserve(valueStringList.size());
+
+				for (QString str : valueStringList)
+				{
+					// str is like:
+					// EnumValue = 1
+					//
+					QStringList str2intList = str.split('=', QString::SkipEmptyParts);
+					if (str2intList.size() != 2)
+					{
+						throw strType;
+					}
+
+					QString enumStr = str2intList.at(0);
+					bool conversionOk = false;
+					int enumVal = str2intList.at(1).toInt(&conversionOk);
+
+					if (conversionOk == false)
+					{
+						throw strType;
+					}
+
+					// Pair is good
+					//
+					enumValues.push_back({enumStr, enumVal});
+				}
+
+				// Add property with default value
+				//
+				auto p = addDynamicEnumProperty(name, enumValues, true);
+				p->setCategory(category);
+				p->setValue(strDefaultValue.toString());
+
+				addedProperty = p;
+			}
+			catch (QString str)
+			{
+				// Error, unknown type
+				//
+				result.first = false;
+				result.second = " SpecificProperties: wrong type: " + str + "\n";
+
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong type: " << str;
+				return result;
+			}
+		}
+		else
+		{
+			// Check for one of standard types from typeMap
+			//
+			auto typeIt = typeMap.find(qHash(strType));
+			if (typeIt == typeMap.end())
+			{
+				// Error, unknown type
+				//
+				result.first = false;
+				result.second = " SpecificProperties: wrong type: " + strType + "\n";
+
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong type: " << strType;
+				return result;
+			}
+
+			PropType pt = typeIt->second;
+
+			switch (pt)
+			{
+			case PropType::pt_int32:
+				{
+					// Min
+					//
+					bool ok = false;
+					qint32 minInt = strMin.toInt(&ok);
+					if (ok == false)
+					{
+						minInt = std::numeric_limits<qint32>::lowest();
+					}
+
+					// Max
+					//
+					qint32 maxInt = strMax.toInt(&ok);
+					if (ok == false)
+					{
+						maxInt = std::numeric_limits<qint32>::max();
+					}
+
+					// Default Value
+					//
+					qint32 defaultInt = strDefaultValue.toInt();
+
+					auto p = addProperty(name, category, true, QVariant(defaultInt));
+					addedProperty = p;
+
+					p->setLimits(QVariant(minInt), QVariant(maxInt));
+				}
+				break;
+			case PropType::pt_uint32:
+				{
+					// Min
+					//
+					bool ok = false;
+					quint32 minUInt = strMin.toUInt(&ok);
+					if (ok == false)
+					{
+						minUInt = std::numeric_limits<quint32>::lowest();
+					}
+
+					// Max
+					//
+					quint32 maxUInt = strMax.toUInt(&ok);
+					if (ok == false)
+					{
+						maxUInt = std::numeric_limits<quint32>::max();
+					}
+
+					// Default Value
+					//
+					quint32 defaultUInt = strDefaultValue.toUInt();
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(defaultUInt));
+					addedProperty = p;
+
+					p->setLimits(QVariant(minUInt), QVariant(maxUInt));
+				}
+				break;
+			case PropType::pt_double:
+				{
+					// Min
+					//
+					bool ok = false;
+					double minDouble = strMin.toDouble(&ok);
+					if (ok == false)
+					{
+						minDouble = std::numeric_limits<double>::lowest();
+					}
+
+					// Max
+					//
+					double maxDouble = strMax.toDouble(&ok);
+					if (ok == false)
+					{
+						maxDouble = std::numeric_limits<double>::max();
+					}
+
+					// Default Value
+					//
+					double defaultDouble = strDefaultValue.toDouble();
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(defaultDouble));
+					addedProperty = p;
+
+					p->setLimits(QVariant(minDouble), QVariant(maxDouble));
+				}
+				break;
+			case PropType::pt_bool:
+				{
+					// Default Value
+					//
+					bool defaultBool = strDefaultValue.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(defaultBool));
+					addedProperty = p;
+				}
+				break;
+			case PropType::pt_e_channel:
+				{
+					// Default Value
+					//
+					QString defaultString = strDefaultValue.toString();
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant::fromValue(E::Channel::A));
+					addedProperty = p;
+
+					p->setValue(defaultString.toStdString().c_str());
+				}
+				break;
+			case PropType::pt_string:
+				{
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(strDefaultValue.toString()));
+					addedProperty = p;
+				}
+				break;
+
+			default:
+				assert(false);
+
+				// Error, unknown type
+				//
+				result.first = false;
+				result.second = " SpecificProperties: wrong type: " + strType + "\n";
+
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong type: " << strType;
+				return result;
+			}
+		}
+
+		// Set common for all properties
+		//
+		if (addedProperty == nullptr)
+		{
+			assert(addedProperty);
+
+			result.first = false;
+			result.second = " Property was not created: " + strType + "\n";
+			return result;
+		}
+
+		// Set command properties
+		//
+		addedProperty->setSpecific(true);
+		addedProperty->setReadOnly(false);
+		addedProperty->setPrecision(precision);
+		addedProperty->setUpdateFromPreset(updateFromPreset);
+		addedProperty->setExpert(expert);
+		addedProperty->setDescription(description);
+		addedProperty->setVisible(visible);
+		addedProperty->setSpecificEditor(editorType);
+
+		return result;
+	}
+
 
 signals:
 	void propertyListChanged();		// One or more properties were added or deleted

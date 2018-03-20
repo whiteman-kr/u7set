@@ -7,6 +7,7 @@
 
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
+#include "../lib/Types.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
 
 //

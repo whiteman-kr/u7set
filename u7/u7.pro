@@ -13,6 +13,10 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
@@ -428,15 +432,6 @@ win32 {
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-# c++14 support
-#
-win32:QMAKE_CXXFLAGS += -std:c++14
-unix:QMAKE_CXXFLAGS += -std=c++14
-
-#c++14 support for Windows
-#
-unix:QMAKE_CXXFLAGS += -std=c++14
 
 #Optimization flags
 #
