@@ -148,8 +148,6 @@ public:
 
 	QString name() const { return m_name; }
 
-
-
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
@@ -194,21 +192,42 @@ public:
 	void setState(E::DataSourceState state) { m_state = state; }
 
 	quint64 uptime() const { return m_uptime; }
+	void setUptime(quint64 uptime) { m_uptime = uptime; }
+
 	quint64 receivedDataSize() const { return m_receivedDataSize; }
+	void setReceivedDataSize(quint64 dataSize) { m_receivedDataSize = dataSize; }
+
 	double dataReceivingRate() const { return m_dataReceivingRate; }
+	void setDataReceivingRate(double rate) { m_dataReceivingRate = rate; }
 
 	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
+	void setErrorProtocolVersion(qint64 err) { m_errorProtocolVersion = err; }
+
 	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
+	void setErrorFramesQuantity(qint64 err) { m_errorFramesQuantity = err; }
+
 	qint64 errorFrameNo() const { return m_errorFrameNo; }
+	void setErrorFrameNo(qint64 errFrameNo) { m_errorFrameNo = errFrameNo; }
+
 	qint64 lostedFramesCount() const { return m_lostedFramesCount; }
+	void setLostedFramesCount(qint64 lostedCount) { m_lostedFramesCount = lostedCount; }
+
 	qint64 errorDataID() const { return m_errorDataID; }
+
 	qint64 errorBadFrameSize() const { return m_errorBadFrameSize; }
+	void setErrorBadFrameSize(qint64 errBadFrame) { m_errorBadFrameSize = errBadFrame; }
 
 	bool hasErrors() const { return m_hasErrors; }
+	void setHasErrors(bool hasErrors) { m_hasErrors = hasErrors; }
 
 	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
+	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
+
 	qint64 receivedFramesCount() const { return m_receivedFramesCount; }
+	void setReceivedFramesCount(qint64 framesCount) { m_receivedFramesCount = framesCount; }
+
 	qint64 receivedPacketCount() const { return m_receivedPacketCount; }
+	void setReceivedPacketCount(qint64 packetCount) { m_receivedPacketCount = packetCount; }
 
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
 	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }

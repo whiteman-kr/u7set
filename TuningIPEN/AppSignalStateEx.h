@@ -7,33 +7,6 @@
 
 struct AppSignalStateEx
 {
-private:
-	SimpleAppSignalState m_current;
-	SimpleAppSignalState m_stored;
-
-	// paramters needed to update state
-	//
-	bool m_initialized = false;
-	bool m_isDiscreteSignal = false;
-
-	bool m_adaptiveAperture = false;
-
-	double m_roughAperture = 0;
-	double m_smoothAperture = 0;
-
-	double m_lowLimit = 0;
-	double m_highLimit = 0;
-
-	//
-
-	double m_absRoughAperture = 0;
-	double m_absSmoothAperture = 0;
-
-	int m_autoArchivingGroup = -2;
-
-	Signal* m_signal = nullptr;
-	int m_index = 0;
-
 public:
 	AppSignalStateEx();
 
@@ -52,6 +25,33 @@ public:
 	const SimpleAppSignalState& stored() const { return m_stored; }
 
 	void setAutoArchivingGroup(int groupsCount);
+
+private:
+	SimpleAppSignalState m_current;
+	SimpleAppSignalState m_stored;
+
+	// paramters needed to update state
+	//
+	bool m_initialized = false;
+	bool m_isDiscreteSignal = false;
+
+	bool m_adaptiveAperture = false;
+
+	double m_coarseAperture = 0;
+	double m_fineAperture = 0;
+
+	double m_lowLimit = 0;
+	double m_highLimit = 0;
+
+	//
+
+	double m_absRoughAperture = 0;
+	double m_absSmoothAperture = 0;
+
+	int m_autoArchivingGroup = -2;
+
+	Signal* m_signal = nullptr;
+	int m_index = 0;
 };
 
 

@@ -4,8 +4,6 @@
 #include "../lib/AppDataSource.h"
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
-#include "AppSignalStateEx.h"
-
 
 class TcpAppDataServerThread;
 class AppDataServiceWorker;

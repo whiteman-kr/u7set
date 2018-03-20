@@ -12,6 +12,8 @@
 
 class AppDataReceiver : public SimpleThreadWorker
 {
+	Q_OBJECT
+
 public:
 	AppDataReceiver(const HostAddressPort& dataReceivingIP,
 					const AppDataSourcesIP& appDataSourcesIP,

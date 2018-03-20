@@ -26,8 +26,8 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 
 	m_isDiscreteSignal = signal->isDiscrete();
 
-	m_roughAperture = signal->coarseAperture();
-	m_smoothAperture = signal->fineAperture();
+	m_coarseAperture = signal->coarseAperture();
+	m_fineAperture = signal->fineAperture();
 
 	m_lowLimit = signal->lowEngeneeringUnits();
 	m_highLimit = signal->highEngeneeringUnits();
@@ -35,14 +35,11 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 
 	if (m_adaptiveAperture == false)
 	{
-		m_absRoughAperture = fabs(m_highLimit - m_lowLimit) * (m_roughAperture / 100.0);
-		m_absSmoothAperture = fabs(m_highLimit - m_lowLimit) * (m_smoothAperture / 100.0);
+		m_absRoughAperture = fabs(m_highLimit - m_lowLimit) * (m_coarseAperture / 100.0);
+		m_absSmoothAperture = fabs(m_highLimit - m_lowLimit) * (m_fineAperture / 100.0);
 	}
 
-	Hash hash = calcHash(signal->appSignalID());
-
-	m_current.hash = hash;
-	m_stored.hash = hash;
+	m_current.hash = m_stored.hash = calcHash(signal->appSignalID());
 }
 
 
@@ -102,12 +99,12 @@ bool AppSignalStateEx::setState(Times time, quint32 validity, double value, int 
 					{
 						double absAperture = fabs((fabs(m_current.value - m_stored.value) * 100) / m_stored.value);
 
-						if (absAperture > m_smoothAperture)
+						if (absAperture > m_fineAperture)
 						{
 							m_current.flags.smoothAperture = 1;
 						}
 
-						if (absAperture > m_roughAperture)
+						if (absAperture > m_coarseAperture)
 						{
 							m_current.flags.roughAperture = 1;
 						}

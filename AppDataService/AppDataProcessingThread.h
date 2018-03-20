@@ -1,9 +1,7 @@
 #pragma once
 
-#include "AppDataServiceTypes.h"
 #include "../lib/SimpleThread.h"
 #include "AppDataReceiver.h"
-
 
 class AppDataProcessingWorker : public SimpleThreadWorker
 {

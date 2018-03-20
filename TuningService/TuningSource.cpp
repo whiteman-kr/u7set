@@ -12,7 +12,7 @@ namespace Tuning
 
 	TuningSource::TuningSource()
 	{
-		m_lmDataType = DataSource::DataType::Tuning;
+		setLmDataType(DataSource::DataType::Tuning);
 	}
 
 	TuningSource::~TuningSource()

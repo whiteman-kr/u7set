@@ -8,9 +8,10 @@
 #include "../lib/Queue.h"
 
 #include "AppDataReceiver.h"
-#include "AppSignalStateEx.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
+#include "AppDataProcessingThread.h"
+
 
 class TcpArchiveClient;
 
@@ -97,6 +98,8 @@ private:
 	AppDataSourcesIP m_appDataSourcesIP;
 
 	AppSignalStates m_signalStates;
+
+	AppDataProcessingThreadsPool m_appDtaProcessingThreadsPool;
 
 	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
 

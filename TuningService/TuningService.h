@@ -3,7 +3,6 @@
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/CfgServerLoader.h"
-#include "../AppDataService/AppSignalStateEx.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceWorker.h"

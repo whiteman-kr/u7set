@@ -77,7 +77,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/Signal.cpp \
-    ../AppDataService/AppSignalStateEx.cpp \
     ../lib/Crc.cpp \
     ../lib/WUtils.cpp \
     TuningDataStorage.cpp \
