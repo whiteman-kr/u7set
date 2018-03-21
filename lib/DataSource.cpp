@@ -356,8 +356,11 @@ void DataSource::processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>&
 
 		int framesQuantity = m_rupFrames[0].header.framesQuantity;		// we have at least one m_rupFrame
 
-		QDateTime plantTime;
 		Rup::TimeStamp timeStamp = m_rupFrames[0].header.timeStamp;
+
+		QDateTime plantTime;
+
+		plantTime.setTimeSpec(Qt::UTC);	// don't delete this to prevent plantTime conversion from Local to UTC time!!!
 
 		plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 		plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
