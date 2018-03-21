@@ -6,6 +6,7 @@
 #include <QSqlRecord>
 #include <QDebug>
 #include <QHostInfo>
+#include <QElapsedTimer>
 
 #include "../lib/DbWorker.h"
 #include "../lib/DeviceObject.h"
@@ -2707,28 +2708,28 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	out->clear();
 	out->reserve(q.size());
 
-//	qint64 memoryAllocationEllpased = 0;
-//	qint64 updateFileEllpased = 0;
-//	qint64 pushBackEllpased = 0;
+	//qint64 memoryAllocationEllpased = 0;
+	qint64 updateFileEllpased = 0;
+	//qint64 pushBackEllpased = 0;
 
 	while (q.next())
 	{
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		//QElapsedTimer updateFileTimer;
-		//updateFileTimer.start();
+		QElapsedTimer updateFileTimer;
+		updateFileTimer.start();
 
 		db_updateFile(q, file.get());
 
-		//updateFileEllpased += updateFileTimer.nsecsElapsed();
+		updateFileEllpased += updateFileTimer.nsecsElapsed();
 
 		out->push_back(file);
 	}
 
 	qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
-//	qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
-//	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
-//	qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
+	//qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
+	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
+	//qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
 
 	return;
 }

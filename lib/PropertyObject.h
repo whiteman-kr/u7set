@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <functional>
+#include <algorithm>
 #include <map>
 #include <unordered_map>
 #include <list>
@@ -77,9 +78,11 @@ class PropertyObject;
 class Property
 {
 public:
-	Property() : m_flags(0)
-	{
-	}
+	Property() = default;
+	Property(const Property&) = default;
+	Property(Property&&) = default;
+	Property& operator=(const Property&) = default;
+	Property& operator=(Property&&) = default;
 
 	virtual ~Property()
 	{
@@ -209,13 +212,7 @@ public:
 	}
 	void setPrecision(int value)
 	{
-		if (value < 0)
-		{
-			assert(value >= 0);
-			value = 0;
-		}
-
-		m_precision = value;
+		m_precision = std::clamp<qint16>(static_cast<qint16>(value), 0, 128);
 	}
 
 	virtual QVariant value() const = 0;
@@ -272,12 +269,11 @@ private:
 			bool m_visible : 1;
 			bool m_expert : 1;
 		};
-		uint32_t m_flags;
+		uint16_t m_flags = 0;
 	};
 
 	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
-
-	int m_precision = 2;
+	qint16 m_precision = 2;
 };
 
 //
@@ -290,6 +286,10 @@ class PropertyValue : public Property
 {
 public:
 	PropertyValue() = default;
+	PropertyValue(const PropertyValue&) = default;
+	PropertyValue(PropertyValue&&) = default;
+	PropertyValue& operator=(const PropertyValue&) = default;
+	PropertyValue& operator=(PropertyValue&&) = default;
 
 public:
 	virtual bool isEnum() const override final
@@ -321,7 +321,7 @@ private:
 	}
 
 public:
-	virtual std::list<std::pair<int, QString>> enumValues() const override
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
 		assert(std::is_enum<TYPE>::value);
 
@@ -355,7 +355,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override
+	virtual QVariant value() const override final
 	{
 		if (m_getter)
 		{
@@ -379,7 +379,7 @@ public:
 		}
 	}
 
-	void setValue(const QVariant& value) override		// Overriden from class Propery
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
 	{
 		if (!m_setter)
 		{
@@ -393,11 +393,11 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) override			// Overriden from class Propery
+	virtual void setEnumValue(int value) override final			// Overriden from class Propery
 	{
 		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
-	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
 	{
 		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
@@ -442,7 +442,7 @@ private:
 	}
 
 public:
-	virtual const QVariant& lowLimit() const override
+	virtual const QVariant& lowLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -450,13 +450,13 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setLowLimit(const QVariant&) override
+	virtual void setLowLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
 		assert(false);
 	}
 
-	virtual const QVariant& highLimit() const override
+	virtual const QVariant& highLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -464,7 +464,7 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setHighLimit(const QVariant&) override
+	virtual void setHighLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
 		assert(false);
@@ -479,7 +479,7 @@ public:
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) override
+	virtual bool isTheSameType(Property* property) override final
 	{
 		if (dynamic_cast<PropertyValue<TYPE>*>(property) == nullptr)
 		{
@@ -489,7 +489,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -535,16 +535,18 @@ private:
 class PropertyValueNoGetterSetter : public Property
 {
 public:
-	PropertyValueNoGetterSetter()
-	{
-	}
+	PropertyValueNoGetterSetter() = default;
+	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) = default;
+	PropertyValueNoGetterSetter(PropertyValueNoGetterSetter&&) = default;
+	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) = default;
+	PropertyValueNoGetterSetter& operator=(PropertyValueNoGetterSetter&&) = default;
 
 	virtual ~PropertyValueNoGetterSetter()
 	{
 	}
 
 public:
-	virtual bool isEnum() const override
+	virtual bool isEnum() const override final
 	{
 		if (m_value.isValid() == false)
 		{
@@ -595,7 +597,7 @@ public:
 	}
 
 public:
-	virtual std::list<std::pair<int, QString>> enumValues() const override
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
 		std::list<std::pair<int, QString>> result;
 
@@ -649,12 +651,12 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override
+	virtual QVariant value() const override final
 	{
 		return m_value;
 	}
 
-	void setValue(const QVariant& value) override	// Overriden from class Propery
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
 	{
 		if (m_value.isValid() == false)
 		{
@@ -707,7 +709,7 @@ public:
 		}
 	};
 
-	virtual void setEnumValue(int value) override	// Overriden from class Propery
+	virtual void setEnumValue(int value) override final	// Overriden from class Propery
 	{
 		// cannot implement it now, but it's possible
 		// The problem is, I dont see the way QVariant with enum inside can be set from integer and keep that enum type
@@ -719,7 +721,7 @@ public:
 		return;
 	}
 
-	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
 	{
 		QVariant v(value);
 
@@ -770,25 +772,25 @@ public:
 		m_highLimit = high;
 	}
 
-	const QVariant& lowLimit() const
+	virtual const QVariant& lowLimit() const override final
 	{
 		return m_lowLimit;
 	}
-	void setLowLimit(const QVariant& value)
+	virtual void setLowLimit(const QVariant& value) override final
 	{
 		m_lowLimit = value;
 	}
 
-	const QVariant& highLimit() const
+	virtual const QVariant& highLimit() const override final
 	{
 		return m_highLimit;
 	}
-	void setHighLimit(const QVariant& value)
+	virtual void setHighLimit(const QVariant& value) override final
 	{
 		m_highLimit = value;
 	}
 
-	virtual bool isTheSameType(Property* property) override
+	virtual bool isTheSameType(Property* property) override final
 	{
 		if (dynamic_cast<PropertyValueNoGetterSetter*>(property) == nullptr)
 		{
@@ -798,7 +800,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -856,12 +858,12 @@ public:
 	}
 
 public:
-	virtual bool isEnum() const override
+	virtual bool isEnum() const override final
 	{
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::list<std::pair<int, QString>> enumValues() const override
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
 		std::list<std::pair<int, QString>> result;
 
@@ -881,7 +883,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override
+	virtual QVariant value() const override final
 	{
 		if (m_getter)
 		{
@@ -902,7 +904,7 @@ public:
 		return;
 	}
 
-	void setValue(const QVariant& value) override		// Overriden from class Propery
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
 	{
 		if (value.type() == QVariant::Int)
 		{
@@ -920,7 +922,7 @@ public:
 		assert(false);
 	}
 
-	virtual void setEnumValue(int value) override			// Overriden from class Propery
+	virtual void setEnumValue(int value) override final	// Overriden from class Propery
 	{
 		if (m_setter)
 		{
@@ -932,7 +934,7 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
 	{
 		int key = m_enumValues->key(QString(value));
 		setEnumValue(key);
@@ -950,22 +952,22 @@ public:
 		Q_UNUSED(high);
 	}
 
-	const QVariant& lowLimit() const
+	virtual const QVariant& lowLimit() const override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	void setLowLimit(const QVariant& value)
+	virtual void setLowLimit(const QVariant& value) override final
 	{
 		Q_UNUSED(value);
 	}
 
-	const QVariant& highLimit() const
+	virtual const QVariant& highLimit() const override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	void setHighLimit(const QVariant& value)
+	virtual void setHighLimit(const QVariant& value) override final
 	{
 		Q_UNUSED(value);
 	}
@@ -979,7 +981,7 @@ public:
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) override
+	virtual bool isTheSameType(Property* property) override final
 	{
 		if (dynamic_cast<PropertyValue<OrderedHash<int, QString>>*>(property) == nullptr)
 		{
@@ -989,7 +991,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
 	{
 		// Implementation is not requiered yet
 		// To do if requeired
@@ -1141,22 +1143,22 @@ public:
 		Q_UNUSED(high);
 	}
 
-	const QVariant& lowLimit() const
+	virtual const QVariant& lowLimit() const override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	void setLowLimit(const QVariant& value)
+	virtual void setLowLimit(const QVariant& value) override final
 	{
 		Q_UNUSED(value);
 	}
 
-	const QVariant& highLimit() const
+	virtual const QVariant& highLimit() const override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	void setHighLimit(const QVariant& value)
+	virtual void setHighLimit(const QVariant& value) override final
 	{
 		Q_UNUSED(value);
 	}
@@ -1264,7 +1266,6 @@ public:
 			return nullptr;
 		}
 
-		//std::shared_ptr<PropertyValue<TYPE>> property = thePropertyObjectHeap.alloc<PropertyValue<TYPE>>();
 		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
 		uint hash = qHash(caption);
@@ -1292,7 +1293,6 @@ public:
 											 bool visible,
 											 const QVariant& value)
 	{
-		//std::shared_ptr<PropertyValueNoGetterSetter> property = thePropertyObjectHeap.alloc<PropertyValueNoGetterSetter>();
 		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
 
 		uint hash = qHash(caption);
