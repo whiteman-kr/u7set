@@ -99,19 +99,16 @@ void AppDataReceiver::onSocketReadyRead()
 	}
 
 	QHostAddress from;
+	Rup::Frame rupFrame;
 
-	qint64 serverTime = 0;
-
-	for(int i = 16; i <= 1024; i++)					// start from 16 to init serverTime on first loop below
+	do
 	{
 		qint64 size = m_socket->pendingDatagramSize();
 
 		if (size == -1)
 		{
-			break;
+			break;				// exit from loop if no pending datagram exists
 		}
-
-		Rup::Frame rupFrame;
 
 		qint64 result = m_socket->readDatagram(reinterpret_cast<char*>(&rupFrame), sizeof(rupFrame), &from);
 
@@ -126,6 +123,8 @@ void AppDataReceiver::onSocketReadyRead()
 		}
 
 		m_receivedFramesCount++;
+
+		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
 
 		quint32 ip = from.toIPv4Address();
 
@@ -147,15 +146,11 @@ void AppDataReceiver::onSocketReadyRead()
 			continue;
 		}
 
-		if ((i & 16) != 0)				// update serverTime on first and each next 16 loops
-		{
-			serverTime = QDateTime::currentMSecsSinceEpoch();
-		}
-
 		dataSource->pushRupFrame(serverTime, rupFrame);
 
 		emit rupFrameIsReceived(ip);
 	}
+	while(quitRequested() == false);
 }
 
 
