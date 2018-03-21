@@ -397,14 +397,17 @@ AppDataSource::AppDataSource()
 {
 }
 
-AppDataSource::AppDataSource(AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue) :
-	m_signalStates(signalStates),
-	m_signalStatesQueue(signalStatesQueue)
+void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue)
 {
-}
+	if (signalStates == nullptr || signalStatesQueue == nullptr)
+	{
+		assert(false);
+		return;
+	}
 
-void AppDataSource::prepare(const AppSignals& appSignals)
-{
+	m_signalStates = signalStates;
+	m_signalStatesQueue = signalStatesQueue;
+
 	m_signalsParseInfo.clear();
 
 	const QStringList& sourceAssociatedSignals = associatedSignals();

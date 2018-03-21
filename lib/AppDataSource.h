@@ -127,9 +127,8 @@ private:
 
 public:
 	AppDataSource();
-	AppDataSource(AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue);
 
-	void prepare(const AppSignals& appSignals);
+	void prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue);
 
 	bool parsePacket();
 
