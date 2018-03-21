@@ -2,6 +2,7 @@
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "IssueLogger.h"
 #include "../lib/DeviceHelper.h"
+#include "../lib/ServiceSettings.h"
 #include "../VFrame30/LogicSchema.h"
 
 
@@ -603,7 +604,9 @@ namespace Builder
 				return false;
 			}
 
-			if (DeviceHelper::getIPv4Property(configurationServiceObject, "ClientRequestIP", &ip, false, m_log) == false)
+			if (DeviceHelper::getIPv4Property(configurationServiceObject,
+											  ServiceSettings::PROP_CLIENT_REQUEST_IP,
+											  &ip, false, "", m_log) == false)
 			{
 				return false;
 			}

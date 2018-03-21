@@ -457,6 +457,8 @@ bool AppDataSource::parsePacket()
 		return false;
 	}
 
+	// plantTime.setTimeSpec(Qt::UTC);	// don't delete this to prevent plantTime conversion from Local to UTC time!!!
+
 	return true;
 }
 

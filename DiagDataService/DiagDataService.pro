@@ -65,7 +65,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
-    ../lib/JsonSerializable.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
@@ -105,7 +104,6 @@ HEADERS += \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../lib/JsonSerializable.h \
     ../lib/CfgServerLoader.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \

@@ -233,11 +233,11 @@ void ServiceWorker::onThreadStarted()
 
 	m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
 
-	m_cfgServiceIP1.setAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+	m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
 	m_cfgServiceIP2Str = getStrSetting(SETTING_CFG_SERVICE_IP2);
 
-	m_cfgServiceIP2.setAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+	m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
 	//
 

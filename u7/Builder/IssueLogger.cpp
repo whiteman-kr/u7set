@@ -1112,7 +1112,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Ethernet port number property %1.%2 should be in range 1..65535.
+	/// Title: Ethernet port number property %1.%2 should be in range 0..65535.
 	///
 	/// Parameters:
 	///			%1 Object equipmentID
@@ -1125,7 +1125,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3027,
-				  tr("Ethernet port number property %1.%2 should be in range 1..65535.").arg(objectID).arg(propertyName));
+				  tr("Ethernet port number property %1.%2 should be in range 0..65535.").arg(objectID).arg(propertyName));
 	}
 
 	/// IssueCode: CFG3028
@@ -1148,6 +1148,26 @@ namespace Builder
 				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
 						arg(lmID).arg(appDataServiceID));
 	}
+
+	/// IssueCode: CFG3029
+	///
+	/// IssueType: Error
+	///
+	/// Title: Software %1 is not linked to ConfigurationService.
+	///
+	/// Parameters:
+	///			%1 software equipmentID
+	///
+	/// Description:
+	///			Software should be linked to ConfigurationService. Check ConfigurationServiceID1 and ConfigurationServiceID2 properties.
+	///
+	void IssueLogger::errCFG3029(QString softwareID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3029,
+				  QString(tr("Software %1 is not linked to ConfigurationService.")).arg(softwareID));
+	}
+
 
 	// ALP			Application Logic Parsing				4000-4999
 	//

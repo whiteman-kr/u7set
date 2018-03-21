@@ -46,9 +46,9 @@ namespace Builder
 
 		bool result = true;
 
-		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, m_log);
-		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, m_log);
-		result &= DeviceHelper::getPortProperty(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_PORT, &clientRequestPort, m_log);
+		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, "", m_log);
+		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", m_log);
+		result &= DeviceHelper::getPortProperty(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_PORT, &clientRequestPort, false, 0, m_log);
 
 		return result;
 	}
@@ -79,7 +79,8 @@ namespace Builder
 		content += " -b=" + appDataPath + "/" + buildDir;
 
 		QString clientRequestIP;
-		if (DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, m_log) == false)
+
+		if (DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, "", m_log) == false)
 		{
 			return false;
 		}

@@ -32,7 +32,6 @@ SOURCES +=\
 	../lib/UdpSocket.cpp \
 	../lib/CircularLogger.cpp \
 	../lib/Queue.cpp \
-	../lib/JsonSerializable.cpp \
 	MainIPEN.cpp \
 	../lib/Signal.cpp \
 	SafetyChannelSignalsModel.cpp \
@@ -75,7 +74,6 @@ HEADERS  += TuningMainWindow.h \
 	../lib/UdpSocket.h \
 	../lib/CircularLogger.h \
 	../lib/Queue.h \
-	../lib/JsonSerializable.h \
 	../lib/Signal.h \
 	SafetyChannelSignalsModel.h \
 	../lib/Crc.h \

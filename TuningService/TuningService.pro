@@ -64,7 +64,6 @@ SOURCES += \
     ../lib/SimpleThread.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/Tcp.cpp \
-    ../lib/JsonSerializable.cpp \
     TuningService.cpp \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \

@@ -3,10 +3,129 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/WUtils.h"
 
+// -------------------------------------------------------------------------------------
+//
+// ServiceSettings class implementation
+//
+// -------------------------------------------------------------------------------------
 
-const char* CfgServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
-const char* CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
-const char* CfgServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
+const char* ServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
+const char* ServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+const char* ServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
+
+const char* ServiceSettings::PROP_CFG_SERVICE_ID1 = "ConfigurationServiceID1";
+const char* ServiceSettings::PROP_CFG_SERVICE_IP1 = "ConfigurationServiceIP1";
+const char* ServiceSettings::PROP_CFG_SERVICE_PORT1 = "ConfigurationServicePort1";
+
+const char* ServiceSettings::PROP_CFG_SERVICE_ID2 = "ConfigurationServiceID2";
+const char* ServiceSettings::PROP_CFG_SERVICE_IP2 = "ConfigurationServiceIP2";
+const char* ServiceSettings::PROP_CFG_SERVICE_PORT2 = "ConfigurationServicePort2";
+
+bool ServiceSettings::getCfgServiceConnectionSettings(	Hardware::EquipmentSet* equipment,
+														const Hardware::Software* software,
+														QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
+														QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
+														Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+	TEST_PTR_LOG_RETURN_FALSE(cfgServiceID1, log);
+	TEST_PTR_LOG_RETURN_FALSE(cfgServiceAddrPort1, log);
+	TEST_PTR_LOG_RETURN_FALSE(cfgServiceID2, log);
+	TEST_PTR_LOG_RETURN_FALSE(cfgServiceAddrPort2, log);
+
+	bool result = true;
+
+	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, cfgServiceID1, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, cfgServiceID2, log);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	if (cfgServiceID1->isEmpty() == true && cfgServiceID2->isEmpty() == true)
+	{
+		// Software %1 is not linked to ConfigurationService.
+		//
+		log->errCFG3029(software->equipmentIdTemplate());
+		return false;
+	}
+
+	QString ipStr;
+	int port = 0;
+
+	if (cfgServiceID1->isEmpty() == true)
+	{
+		ipStr = Socket::IP_NULL;
+		port = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;
+
+		cfgServiceAddrPort1->setAddressPort(ipStr, port);
+
+		// Property '%1.%2' is empty.
+		//
+		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1);
+
+		result = false;
+	}
+	else
+	{
+		const Hardware::Software* cfgService1 = DeviceHelper::getSoftware(equipment, *cfgServiceID1);
+
+		if (cfgService1 == nullptr)
+		{
+			// Property '%1.%2' is linked to undefined software ID '%3'.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1, *cfgServiceID1);
+			result = false;
+		}
+		else
+		{
+			result &= DeviceHelper::getIpPortProperty(cfgService1,
+													  PROP_CLIENT_REQUEST_IP,
+													  PROP_CLIENT_REQUEST_PORT,
+													  cfgServiceAddrPort1, false, "", 0, log);
+		}
+	}
+
+	if (cfgServiceID2->isEmpty() == true)
+	{
+		ipStr = Socket::IP_NULL;
+		port = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;
+
+		cfgServiceAddrPort2->setAddressPort(ipStr, port);
+
+		// Property '%1.%2' is empty.
+		//
+		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID2);
+
+		result = false;
+	}
+	else
+	{
+		const Hardware::Software* cfgService2 = DeviceHelper::getSoftware(equipment, *cfgServiceID2);
+
+		if (cfgService2 == nullptr)
+		{
+			// Property '%1.%2' is linked to undefined software ID '%3'.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID2, *cfgServiceID2);
+			result = false;
+		}
+		else
+		{
+			result &= DeviceHelper::getIpPortProperty(cfgService2,
+													  PROP_CLIENT_REQUEST_IP,
+													  PROP_CLIENT_REQUEST_PORT,
+													  cfgServiceAddrPort2, false, "", 0, log);
+		}
+	}
+
+	return result;
+}
+
 
 // -------------------------------------------------------------------------------------
 //
@@ -22,21 +141,9 @@ const char* AppDataServiceSettings::PROP_APP_DATA_RECEIVING_PORT = "AppDataRecei
 
 const char* AppDataServiceSettings::PROP_AUTO_ARCHIVE_INTERVAL = "AutoArchiveInterval";
 
-const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
-const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
-const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
-
 const char* AppDataServiceSettings::PROP_ARCH_SERVICE_ID = "ArchiveServiceID";
 const char* AppDataServiceSettings::PROP_ARCH_SERVICE_IP = "ArchiveServiceIP";
 const char* AppDataServiceSettings::PROP_ARCH_SERVICE_PORT = "ArchiveServicePort";
-
-const char* AppDataServiceSettings::PROP_CFG_SERVICE_ID1 = "ConfigurationServiceID1";
-const char* AppDataServiceSettings::PROP_CFG_SERVICE_IP1 = "ConfigurationServiceIP1";
-const char* AppDataServiceSettings::PROP_CFG_SERVICE_PORT1 = "ConfigurationServicePort1";
-
-const char* AppDataServiceSettings::PROP_CFG_SERVICE_ID2 = "ConfigurationServiceID2";
-const char* AppDataServiceSettings::PROP_CFG_SERVICE_IP2 = "ConfigurationServiceIP3";
-const char* AppDataServiceSettings::PROP_CFG_SERVICE_PORT2 = "ConfigurationServicePort4";
 
 bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
@@ -50,60 +157,92 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 	QString ipStr;
 	int port = 0;
 
-	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_RECEIVING_IP, &ipStr, false, log);
-	result &= DeviceHelper::getPortProperty(software, PROP_APP_DATA_RECEIVING_PORT, &port, log);
-	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_NETMASK, &netmaskStr, false, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_RECEIVING_IP, &ipStr, false, "", log);
+	result &= DeviceHelper::getPortProperty(software, PROP_APP_DATA_RECEIVING_PORT, &port, false, 0, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_NETMASK, &netmaskStr, false, "", log);
 
 	appDataReceivingIP.setAddressPort(ipStr, port);
 	appDataNetmask.setAddress(netmaskStr);
 
 	result &= DeviceHelper::getIntProperty(software, PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, log);
 
-	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_IP, &ipStr, false, log);
-	result &= DeviceHelper::getPortProperty(software, PROP_CLIENT_REQUEST_PORT, &port, log);
-	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_NETMASK, &netmaskStr, false, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_IP, &ipStr, true, Socket::IP_LOCALHOST, log);
+	result &= DeviceHelper::getPortProperty(software, PROP_CLIENT_REQUEST_PORT, &port, true, PORT_APP_DATA_SERVICE_DATA, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_NETMASK, &netmaskStr, true, Socket::NETMASK_DEFAULT, log);
 
 	clientRequestIP.setAddressPort(ipStr, port);
 	clientRequestNetmask.setAddress(netmaskStr);
 
 	result &= DeviceHelper::getStrProperty(software, PROP_ARCH_SERVICE_ID, &archServiceID, log);
-	result &= DeviceHelper::getIPv4Property(software, PROP_ARCH_SERVICE_IP, &ipStr, false, log);
-	result &= DeviceHelper::getPortProperty(software, PROP_ARCH_SERVICE_PORT, &port, log);
-
-	archServiceIP.setAddressPort(ipStr, port);
 
 	if (archServiceID.isEmpty() == true)
 	{
 		//  Property '%1.%2' is empty.
 		//
 		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_ARCH_SERVICE_ID);
+
+		ipStr = Socket::IP_NULL;
+		port = PORT_ARCHIVING_SERVICE_APP_DATA;
+
+		archServiceIP.setAddressPort(ipStr, port);
+	}
+	else
+	{
+		const Hardware::Software* archService = DeviceHelper::getSoftware(equipment, archServiceID);
+
+		if (archService == nullptr)
+		{
+			// Property '%1.%2' is linked to undefined software ID '%3'.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), PROP_ARCH_SERVICE_ID, archServiceID);
+			result = false;
+		}
+		else
+		{
+			result &= DeviceHelper::getIpPortProperty(archService,
+													  ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_IP,
+													  ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_PORT,
+													  &archServiceIP, false, "", 0, log);
+		}
 	}
 
 	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &cfgServiceID1, log);
-	result &= DeviceHelper::getIPv4Property(software, PROP_CFG_SERVICE_IP1, &ipStr, false, log);
-	result &= DeviceHelper::getPortProperty(software, PROP_CFG_SERVICE_PORT1, &port, log);
-
-	cfgServiceIP1.setAddressPort(ipStr, port);
 
 	if (cfgServiceID1.isEmpty() == true)
 	{
-		//  Property '%1.%2' is empty.
+		ipStr = Socket::IP_NULL;
+		port = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;
+
+		cfgServiceIP1.setAddressPort(ipStr, port);
+
+		// Property '%1.%2' is empty.
 		//
-		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1);
+		log->errCFG3022(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1);
+
+		result = false;
 	}
+	else
+	{
+		const Hardware::Software* cfgService1 = DeviceHelper::getSoftware(equipment, cfgServiceID1);
+
+		if (cfgService1 == nullptr)
+		{
+			// Property '%1.%2' is linked to undefined software ID '%3'.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1, cfgServiceID1);
+			result = false;
+		}
+		else
+		{
+			result &= DeviceHelper::getIpPortProperty(cfgService1,
+													  PROP_CLIENT_REQUEST_IP,
+													  PROP_CLIENT_REQUEST_PORT,
+													  &cfgServiceIP1, false, "", 0, log);
+		}
+	}
+
 
 	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &cfgServiceID2, log);
-	result &= DeviceHelper::getIPv4Property(software, PROP_CFG_SERVICE_IP2, &ipStr, false, log);
-	result &= DeviceHelper::getPortProperty(software, PROP_CFG_SERVICE_PORT2, &port, log);
-
-	cfgServiceIP2.setAddressPort(ipStr, port);
-
-	if (cfgServiceID2.isEmpty() == true)
-	{
-		//  Property '%1.%2' is empty.
-		//
-		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID2);
-	}
 
 	return result;
 }
@@ -172,9 +311,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 // -------------------------------------------------------------------------------------
 
 const char* TuningServiceSettings::SECTION_NAME = "Settings";
-const char* TuningServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
-const char* TuningServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
-const char* TuningServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+
 const char* TuningServiceSettings::PROP_TUNING_DATA_IP = "TuningDataIP";
 const char* TuningServiceSettings::PROP_TUNING_DATA_PORT = "TuningDataPort";
 const char* TuningServiceSettings::PROP_SINGLE_LM_CONTROL = "SingleLmControl";
@@ -487,10 +624,6 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 // -------------------------------------------------------------------------------------
 
 const char* ArchivingServiceSettings::SECTION_NAME = "Settings";
-
-const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
-const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
-const char* ArchivingServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
 
 const char* ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_IP = "AppDataServiceRequestIP";
 const char* ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_PORT = "AppDataServiceRequestPort";

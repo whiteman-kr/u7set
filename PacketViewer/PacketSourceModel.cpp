@@ -475,8 +475,8 @@ void Listener::readPendingDatagrams()
 	{
 		QHostAddress senderAddress;
 		quint16 senderPort;
-		char* buffer = new char[ENTIRE_UDP_SIZE];
-		quint64 readBytes = m_socket->readDatagram(buffer, ENTIRE_UDP_SIZE, &senderAddress, &senderPort);
+		char* buffer = new char[Socket::ENTIRE_UDP_SIZE];
+		quint64 readBytes = m_socket->readDatagram(buffer, Socket::ENTIRE_UDP_SIZE, &senderAddress, &senderPort);
 		quint32 senderIp4 = senderAddress.toIPv4Address();
 
 		int sourceIndex = getSourceIndex(senderIp4, senderPort);
@@ -539,11 +539,11 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 	RpPacket& packet = *reinterpret_cast<RpPacket*>(buffer);
 	quint16 version = packet.Header.protocolVersion;
 	bool needSwap = false;
-	if (packet.Header.packetSize > ENTIRE_UDP_SIZE)
+	if (packet.Header.packetSize > Socket::ENTIRE_UDP_SIZE)
 	{
 		quint16 swapedPacketSize = packet.Header.packetSize;
 		swapBytes(swapedPacketSize);
-		if (swapedPacketSize == ENTIRE_UDP_SIZE)
+		if (swapedPacketSize == Socket::ENTIRE_UDP_SIZE)
 		{
 			needSwap = true;
 			swapBytes(version);
@@ -581,7 +581,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 		incrementPartialFrameCount();
 	}
 
-	if (header.partCount > Rup::MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > ENTIRE_UDP_SIZE)
+	if (header.partCount > Rup::MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > Socket::ENTIRE_UDP_SIZE)
 	{
 		incrementFormatErrorCount();
 		delete [] buffer;

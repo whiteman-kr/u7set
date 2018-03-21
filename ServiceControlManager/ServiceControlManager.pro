@@ -60,7 +60,6 @@ SOURCES += MainWindow.cpp \
     ../lib/SocketIO.cpp \
     ../lib/DataSource.cpp \
     main.cpp \
-    ../lib/JsonSerializable.cpp \
     BaseServiceStateWidget.cpp \
     ConfigurationServiceWidget.cpp \
     ../lib/SimpleThread.cpp \
@@ -100,7 +99,6 @@ HEADERS  += MainWindow.h \
     ../lib/SocketIO.h \
     ../lib/DataSource.h \
     version.h \
-    ../lib/JsonSerializable.h \
     BaseServiceStateWidget.h \
     ConfigurationServiceWidget.h \
     ../lib/SimpleThread.h \

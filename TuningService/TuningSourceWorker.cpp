@@ -585,8 +585,8 @@ namespace Tuning
 
 	void TuningSourceWorker::sendFotipRequest(RupFotipV2& request)
 	{
-		assert(sizeof(Rup::Frame) == ENTIRE_UDP_SIZE);
-		assert(sizeof(RupFotipV2) == ENTIRE_UDP_SIZE);
+		assert(sizeof(Rup::Frame) == Socket::ENTIRE_UDP_SIZE);
+		assert(sizeof(RupFotipV2) == Socket::ENTIRE_UDP_SIZE);
 		assert(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
 		assert(sizeof(FotipV2::Header) == 128);
 
@@ -658,7 +658,7 @@ namespace Tuning
 
 	bool TuningSourceWorker::initRupHeader(Rup::Header& rupHeader)
 	{
-		rupHeader.frameSize = ENTIRE_UDP_SIZE;
+		rupHeader.frameSize = Socket::ENTIRE_UDP_SIZE;
 		rupHeader.protocolVersion = Rup::VERSION;
 
 		rupHeader.flags.all = 0;
@@ -1102,7 +1102,7 @@ namespace Tuning
 			result &= false;
 		}
 
-		if (rupHeader.frameSize != ENTIRE_UDP_SIZE)
+		if (rupHeader.frameSize != Socket::ENTIRE_UDP_SIZE)
 		{
 			m_stat.errRupFrameSize++;
 			result &= false;

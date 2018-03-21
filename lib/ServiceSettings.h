@@ -17,15 +17,37 @@ const char* const CFG_FILE_ID_TUNING_GLOBALSCRIPT = "TUNING_GLOBALSCRIPT";
 
 const char* const CFG_FILE_ID_METROLOGY_SIGNALS = "METROLOGY_SIGNALS";
 
-class CfgServiceSettings
+class ServiceSettings
 {
 public:
+	// common properties of services
+	//
 	static const char* PROP_CLIENT_REQUEST_IP;
 	static const char* PROP_CLIENT_REQUEST_NETMASK;
 	static const char* PROP_CLIENT_REQUEST_PORT;
+
+	static const char* PROP_CFG_SERVICE_ID1;
+	static const char* PROP_CFG_SERVICE_IP1;
+	static const char* PROP_CFG_SERVICE_PORT1;
+
+	static const char* PROP_CFG_SERVICE_ID2;
+	static const char* PROP_CFG_SERVICE_IP2;
+	static const char* PROP_CFG_SERVICE_PORT2;
+
+protected:
+	bool getCfgServiceConnectionSettings(	Hardware::EquipmentSet* equipment,
+											const Hardware::Software* software,
+											QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
+											QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
+											Builder::IssueLogger* log);
 };
 
-class AppDataServiceSettings
+class CfgServiceSettings : public ServiceSettings
+{
+public:
+};
+
+class AppDataServiceSettings : public ServiceSettings
 {
 private:
 	static const char* SECTION_NAME;
@@ -36,21 +58,9 @@ private:
 
 	static const char* PROP_AUTO_ARCHIVE_INTERVAL;
 
-	static const char* PROP_CLIENT_REQUEST_IP;
-	static const char* PROP_CLIENT_REQUEST_PORT;
-	static const char* PROP_CLIENT_REQUEST_NETMASK;
-
 	static const char* PROP_ARCH_SERVICE_ID;
 	static const char* PROP_ARCH_SERVICE_IP;
 	static const char* PROP_ARCH_SERVICE_PORT;
-
-	static const char* PROP_CFG_SERVICE_ID1;
-	static const char* PROP_CFG_SERVICE_IP1;
-	static const char* PROP_CFG_SERVICE_PORT1;
-
-	static const char* PROP_CFG_SERVICE_ID2;
-	static const char* PROP_CFG_SERVICE_IP2;
-	static const char* PROP_CFG_SERVICE_PORT2;
 
 public:
 	HostAddressPort appDataReceivingIP;
@@ -76,15 +86,14 @@ public:
 };
 
 
-class TuningServiceSettings
+class TuningServiceSettings : public ServiceSettings
 {
 private:
 	static const char* SECTION_NAME;
-	static const char* PROP_CLIENT_REQUEST_IP;
-	static const char* PROP_CLIENT_REQUEST_PORT;
-	static const char* PROP_CLIENT_REQUEST_NETMASK;
+
 	static const char* PROP_TUNING_DATA_IP;
 	static const char* PROP_TUNING_DATA_PORT;
+
 	static const char* PROP_SINGLE_LM_CONTROL;
 	static const char* PROP_DISABLE_MODULES_TYPE_CHECKING;
 
@@ -120,14 +129,10 @@ public:
 };
 
 
-class ArchivingServiceSettings
+class ArchivingServiceSettings : public ServiceSettings
 {
 public:
 	static const char* SECTION_NAME;
-
-	static const char* PROP_CLIENT_REQUEST_IP;
-	static const char* PROP_CLIENT_REQUEST_PORT;
-	static const char* PROP_CLIENT_REQUEST_NETMASK;
 
 	static const char* PROP_APP_DATA_SERVICE_REQUEST_IP;
 	static const char* PROP_APP_DATA_SERVICE_REQUEST_PORT;

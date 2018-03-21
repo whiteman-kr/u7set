@@ -1,6 +1,7 @@
 #include <QtEndian>
-#include "../lib/DataProtocols.h"
-#include "../lib/WUtils.h"
+
+#include "DataProtocols.h"
+#include "WUtils.h"
 
 namespace Rup
 {
@@ -34,12 +35,12 @@ namespace Rup
 
 	void Frame::calcCRC64()
 	{
-		CRC64 = reverseUint64(Crc::crc64(&header, ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
+		CRC64 = reverseUint64(Crc::crc64(&header, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 	}
 
 	bool Frame::checkCRC64()
 	{
-		quint64 calculatedCRC = reverseUint64(Crc::crc64(&header, ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
+		quint64 calculatedCRC = reverseUint64(Crc::crc64(&header, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 
 		return CRC64 == calculatedCRC;
 	}
@@ -151,12 +152,12 @@ namespace FotipV2
 
 void RupFotipV2::calcCRC64()
 {
-	CRC64 = reverseUint64(Crc::crc64(&rupHeader, ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
+	CRC64 = reverseUint64(Crc::crc64(&rupHeader, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 }
 
 bool RupFotipV2::checkCRC64()
 {
-	quint64 calculatedCRC = reverseUint64(Crc::crc64(&rupHeader, ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
+	quint64 calculatedCRC = reverseUint64(Crc::crc64(&rupHeader, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 
 	return CRC64 == calculatedCRC;
 }
