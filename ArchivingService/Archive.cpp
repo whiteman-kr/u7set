@@ -11,9 +11,9 @@ const char* Archive::FIELD_FLAGS = "flags";
 
 
 Archive::Archive(const QString& projectID, const HostAddressPort& dbHost, CircularLoggerShared logger) :
-	m_projectID(projectID),
 	m_dbHost(dbHost),
-	m_logger(logger)
+	m_logger(logger),
+	m_projectID(projectID)
 {
 	m_dbUser = "u7arch";
 	m_dbPassword =  "arch876436";

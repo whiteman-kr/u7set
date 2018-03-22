@@ -42,9 +42,9 @@ namespace Builder
 		m_appLogicData(appLogicData),
 		m_tuningDataStorage(tuningDataStorage),
 		m_cmpStorage(comparatorStorage),
+		m_busSet(busSet),
 		m_resultWriter(buildResultWriter),
-		m_connections(connections),
-		m_busSet(busSet)
+		m_connections(connections)
 	{
 		if (m_log == nullptr)
 		{

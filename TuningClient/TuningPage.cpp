@@ -416,10 +416,10 @@ int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_treeFilter(treeFilter),
-	m_pageFilter(pageFilter),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient)
+	m_tuningTcpClient(tuningTcpClient),
+	m_treeFilter(treeFilter),
+	m_pageFilter(pageFilter)
 {
 
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;

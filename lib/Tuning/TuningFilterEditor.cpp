@@ -679,14 +679,14 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 									   const QByteArray& dialogChooseSignalGeometry):
 	m_filterStorage(filterStorage),
 	m_signalManager(signalManager),
+	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry),
+	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
 	m_readOnly(readOnly),
 	m_setCurrentEnabled(setCurrentEnabled),
-	m_typeTreeEnabled(typeTreeEnabled),
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
-	m_source(source),
-	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
-	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry)
+	m_typeTreeEnabled(typeTreeEnabled),
+	m_source(source)
 {
 
 	assert(filterStorage);

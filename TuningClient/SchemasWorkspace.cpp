@@ -5,9 +5,9 @@
 
 SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, const QString& globalScript, QWidget* parent):
 	QWidget(parent),
+	m_tuningController(tuningSignalManager, tuningTcpClient),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuninTcpClient(tuningTcpClient),
-	m_tuningController(tuningSignalManager, tuningTcpClient)
+	m_tuninTcpClient(tuningTcpClient)
 {
 	m_schemaStorage = new SchemaStorage(configController);
 

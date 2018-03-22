@@ -5,8 +5,8 @@
 DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage,
                                                    QWidget* parent):
     QDialog(parent),
-	m_tuningSignalManager(tuningSignalManager),
-	m_tuningClientTcpClient(tuningTcpClient)
+	m_tuningClientTcpClient(tuningTcpClient),
+	m_tuningSignalManager(tuningSignalManager)
 {
 	assert(tuningSignalManager);
 	assert(filterStorage);
