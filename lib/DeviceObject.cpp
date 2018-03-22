@@ -2240,34 +2240,51 @@ R"DELIM({
 	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, PropertyNames::type, true, DeviceSignal::type, DeviceSignal::setType)
-		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, PropertyNames::function, true, DeviceSignal::function, DeviceSignal::setFunction)
-		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, PropertyNames::byteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
-		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, PropertyNames::format, true, DeviceSignal::format, DeviceSignal::setFormat)
-		auto memoryAreaProp = ADD_PROPERTY_GETTER_SETTER(E::MemoryArea, PropertyNames::memoryArea, true, DeviceSignal::memoryArea, DeviceSignal::setMemoryArea)
+		auto typeProp = addProperty<E::SignalType, DeviceSignal, &DeviceSignal::type, &DeviceSignal::setType>(PropertyNames::type, QLatin1String(), true);
+		auto functionProp = addProperty<E::SignalFunction, DeviceSignal, &DeviceSignal::function, &DeviceSignal::setFunction>(PropertyNames::function, QLatin1String(), true);
+		auto byteOrderProp = addProperty<E::ByteOrder, DeviceSignal, &DeviceSignal::byteOrder, &DeviceSignal::setByteOrder>(PropertyNames::byteOrder, QLatin1String(), true);
+		auto formatProp = addProperty<E::DataFormat, DeviceSignal, &DeviceSignal::format, &DeviceSignal::setFormat>(PropertyNames::format, QLatin1String(), true);
+		auto memoryAreaProp = addProperty<E::MemoryArea, DeviceSignal, &DeviceSignal::memoryArea, &DeviceSignal::setMemoryArea>(PropertyNames::memoryArea, QLatin1String(), true);
 
-		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::size, true, DeviceSignal::size, DeviceSignal::setSize)
+		auto sizeProp = addProperty<int, DeviceSignal, &DeviceSignal::size, &DeviceSignal::setSize>(PropertyNames::size, QLatin1String(), true);
 
-		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
-		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+		auto valueOffsetProp = addProperty<int, DeviceSignal, &DeviceSignal::valueOffset, &DeviceSignal::setValueOffset>(PropertyNames::valueOffset, QLatin1String(), true);
+		auto valueBitProp = addProperty<int, DeviceSignal, &DeviceSignal::valueBit, &DeviceSignal::setValueBit>(PropertyNames::valueBit, QLatin1String(), true);
 
-		auto validitySignalId = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::validitySignalId, true, DeviceSignal::validitySignalId, DeviceSignal::setValiditySignalId)
+		auto validitySignalId = addProperty<QString, DeviceSignal, &DeviceSignal::validitySignalId, &DeviceSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
 
-		auto appSignalLowAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalLowAdc, true, DeviceSignal::appSignalLowAdc, DeviceSignal::setAppSignalLowAdc)
-		auto appSignalHighAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalHighAdc, true, DeviceSignal::appSignalHighAdc, DeviceSignal::setAppSignalHighAdc)
+		auto appSignalLowAdcProp = addProperty<int, DeviceSignal, &DeviceSignal::appSignalLowAdc, &DeviceSignal::setAppSignalLowAdc>(PropertyNames::appSignalLowAdc, PropertyNames::categoryAnalogAppSignal, true);
+		auto appSignalHighAdcProp = addProperty<int, DeviceSignal, &DeviceSignal::appSignalHighAdc, &DeviceSignal::setAppSignalHighAdc>(PropertyNames::appSignalHighAdc, PropertyNames::categoryAnalogAppSignal, true);
 
-		auto appSignalLowEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalLowEngUnits, true, DeviceSignal::appSignalLowEngUnits, DeviceSignal::setAppSignalLowEngUnits)
-		auto appSignalHighEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalHighEngUnits, true, DeviceSignal::appSignalHighEngUnits, DeviceSignal::setAppSignalHighEngUnits)
+		auto appSignalLowEngUnitsProp = addProperty<double, DeviceSignal, &DeviceSignal::appSignalLowEngUnits, &DeviceSignal::setAppSignalLowEngUnits>(PropertyNames::appSignalLowEngUnits, PropertyNames::categoryAnalogAppSignal, true);
+		auto appSignalHighEngUnitsProp = addProperty<double, DeviceSignal, &DeviceSignal::appSignalHighEngUnits, &DeviceSignal::setAppSignalHighEngUnits>(PropertyNames::appSignalHighEngUnits, PropertyNames::categoryAnalogAppSignal, true);
 
-		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
+		auto appSignalDataFormatProp = addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, QLatin1String(), true);
 
-		auto signalSpecPropsStrucProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::signalSpecificProperties, true, DeviceSignal::signalSpecPropsStruc, DeviceSignal::setSignalSpecPropsStruc)
+		auto signalSpecPropsStrucProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruc, &DeviceSignal::setSignalSpecPropsStruc>(PropertyNames::signalSpecificProperties, QLatin1String(), true);
 
-		appSignalLowAdcProp->setCategory(PropertyNames::categoryAnalogAppSignal);
-		appSignalHighAdcProp->setCategory(PropertyNames::categoryAnalogAppSignal);
-		appSignalLowEngUnitsProp->setCategory(PropertyNames::categoryAnalogAppSignal);
-		appSignalHighEngUnitsProp->setCategory(PropertyNames::categoryAnalogAppSignal);
-		appSignalDataFormatProp->setCategory(PropertyNames::categoryAnalogAppSignal);
+//		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, PropertyNames::type, true, DeviceSignal::type, DeviceSignal::setType)
+//		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, PropertyNames::function, true, DeviceSignal::function, DeviceSignal::setFunction)
+//		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, PropertyNames::byteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
+//		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, PropertyNames::format, true, DeviceSignal::format, DeviceSignal::setFormat)
+//		auto memoryAreaProp = ADD_PROPERTY_GETTER_SETTER(E::MemoryArea, PropertyNames::memoryArea, true, DeviceSignal::memoryArea, DeviceSignal::setMemoryArea)
+
+//		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::size, true, DeviceSignal::size, DeviceSignal::setSize)
+
+//		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
+//		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+
+//		auto validitySignalId = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::validitySignalId, true, DeviceSignal::validitySignalId, DeviceSignal::setValiditySignalId)
+
+//		auto appSignalLowAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalLowAdc, true, DeviceSignal::appSignalLowAdc, DeviceSignal::setAppSignalLowAdc)
+//		auto appSignalHighAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalHighAdc, true, DeviceSignal::appSignalHighAdc, DeviceSignal::setAppSignalHighAdc)
+
+//		auto appSignalLowEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalLowEngUnits, true, DeviceSignal::appSignalLowEngUnits, DeviceSignal::setAppSignalLowEngUnits)
+//		auto appSignalHighEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalHighEngUnits, true, DeviceSignal::appSignalHighEngUnits, DeviceSignal::setAppSignalHighEngUnits)
+
+//		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
+
+//		auto signalSpecPropsStrucProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::signalSpecificProperties, true, DeviceSignal::signalSpecPropsStruc, DeviceSignal::setSignalSpecPropsStruc)
 
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(preset);
@@ -2557,7 +2574,7 @@ R"DELIM({
 		return static_cast<int>(type());
 	}
 
-	void DeviceSignal::setType(E::SignalType value)
+	void DeviceSignal::setType(const E::SignalType& value)
 	{
 		m_type = value;
 
@@ -2608,7 +2625,7 @@ R"DELIM({
 		return static_cast<int>(function());
 	}
 
-	void DeviceSignal::setFunction(E::SignalFunction value)
+	void DeviceSignal::setFunction(const E::SignalFunction& value)
 	{
 		m_function = value;
 	}
@@ -2618,7 +2635,7 @@ R"DELIM({
 		return m_byteOrder;
 	}
 
-	void DeviceSignal::setByteOrder(E::ByteOrder value)
+	void DeviceSignal::setByteOrder(const E::ByteOrder& value)
 	{
 		m_byteOrder = value;
 	}
@@ -2628,7 +2645,7 @@ R"DELIM({
 		return m_format;
 	}
 
-	void DeviceSignal::setFormat(E::DataFormat value)
+	void DeviceSignal::setFormat(const E::DataFormat& value)
 	{
 		m_format = value;
 	}
@@ -2638,7 +2655,7 @@ R"DELIM({
 		return m_memoryArea;
 	}
 
-	void DeviceSignal::setMemoryArea(E::MemoryArea value)
+	void DeviceSignal::setMemoryArea(const E::MemoryArea& value)
 	{
 		m_memoryArea = value;
 	}
@@ -2648,7 +2665,7 @@ R"DELIM({
 		return m_size;
 	}
 
-	void DeviceSignal::setSize(int value)
+	void DeviceSignal::setSize(const int& value)
 	{
 		m_size = value;
 	}
@@ -2658,7 +2675,7 @@ R"DELIM({
 		return m_valueOffset;
 	}
 
-	void DeviceSignal::setValueOffset(int value)
+	void DeviceSignal::setValueOffset(const int& value)
 	{
 		m_valueOffset = value;
 	}
@@ -2668,7 +2685,7 @@ R"DELIM({
 		return m_valueBit;
 	}
 
-	void DeviceSignal::setValueBit(int value)
+	void DeviceSignal::setValueBit(const int& value)
 	{
 		m_valueBit = value;
 	}
@@ -2718,7 +2735,7 @@ R"DELIM({
 		return m_appSignalLowAdc;
 	}
 
-	void DeviceSignal::setAppSignalLowAdc(int value)
+	void DeviceSignal::setAppSignalLowAdc(const int& value)
 	{
 		m_appSignalLowAdc = value;
 	}
@@ -2728,7 +2745,7 @@ R"DELIM({
 		return m_appSignalHighAdc;
 	}
 
-	void DeviceSignal::setAppSignalHighAdc(int value)
+	void DeviceSignal::setAppSignalHighAdc(const int& value)
 	{
 		m_appSignalHighAdc = value;
 	}
@@ -2738,7 +2755,7 @@ R"DELIM({
 		return m_appSignalLowEngUnits;
 	}
 
-	void DeviceSignal::setAppSignalLowEngUnits(double value)
+	void DeviceSignal::setAppSignalLowEngUnits(const double& value)
 	{
 		m_appSignalLowEngUnits = value;
 	}
@@ -2748,7 +2765,7 @@ R"DELIM({
 		return m_appSignalHighEngUnits;
 	}
 
-	void DeviceSignal::setAppSignalHighEngUnits(double value)
+	void DeviceSignal::setAppSignalHighEngUnits(const double& value)
 	{
 		m_appSignalHighEngUnits = value;
 	}
@@ -2758,7 +2775,7 @@ R"DELIM({
 		return m_appSignalDataFormat;
 	}
 
-	void DeviceSignal::setAppSignalDataFormat(E::AnalogAppSignalFormat value)
+	void DeviceSignal::setAppSignalDataFormat(const E::AnalogAppSignalFormat& value)
 	{
 		m_appSignalDataFormat = value;
 	}

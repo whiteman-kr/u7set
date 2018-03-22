@@ -278,6 +278,250 @@ private:
 
 //
 //
+//			Class PropertyValueThin
+//
+//
+template <typename TYPE,
+		  typename CLASS,
+		  TYPE(CLASS::*get)() const,
+		  void(CLASS::*set)(const TYPE&)>
+class PropertyTypedValue : public Property
+{
+public:
+	PropertyTypedValue() = delete;
+	PropertyTypedValue(CLASS* object) :
+		Property(),
+		m_object(object)
+	{
+		assert(object);
+	}
+
+	PropertyTypedValue(const PropertyTypedValue&) = default;
+	PropertyTypedValue(PropertyTypedValue&&) = default;
+	PropertyTypedValue& operator=(const PropertyTypedValue&) = default;
+	PropertyTypedValue& operator=(PropertyTypedValue&&) = default;
+
+public:
+	virtual bool isEnum() const override final
+	{
+		return std::is_enum<TYPE>::value;
+	}
+
+	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
+	// Example is in question:
+	// http://stackoverflow.com/questions/6917079/tag-dispatch-versus-static-methods-on-partially-specialised-classes
+	//
+private:
+	template <bool> struct enumness {};
+	typedef enumness<true> enum_tag;
+	typedef enumness<false> non_enum_tag;
+
+	template <typename ENUM>
+	const QMetaEnum metaEnum(enum_tag) const
+	{
+		QMetaEnum me = QMetaEnum::fromType<ENUM>();		// static_assert is here, that is why tag dispatch is used
+		return me;
+	}
+
+	template <typename NOT_ENUM>
+	const QMetaEnum metaEnum(non_enum_tag) const
+	{
+		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
+		return QMetaEnum();
+	}
+
+public:
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	{
+		assert(std::is_enum<TYPE>::value);
+
+		std::list<std::pair<int, QString>> result;
+
+		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return result;
+		}
+
+		int keyCount = me.keyCount();
+		for (int i = 0; i < keyCount; i++)
+		{
+			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+		}
+
+		return result;
+	}
+
+	virtual QVariant enumValue() const override final
+	{
+		if (std::is_enum<TYPE>::value == false)
+		{
+			assert(isEnum());
+			return QVariant();
+		}
+
+		return value();
+	}
+
+public:
+	virtual QVariant value() const override final
+	{
+		QVariant result(QVariant::fromValue((m_object->*get)()));
+		return result;
+	}
+
+	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
+	{
+		static_assert(set != nullptr);
+
+		if (set != nullptr)
+		{
+			(m_object->*set)(value);
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
+	{
+		if (set == nullptr)
+		{
+			qDebug() << "Set property value for property without Setter: " << caption();
+		}
+		else
+		{
+			assert(value.canConvert<TYPE>());
+			(m_object->*set)(value.value<TYPE>());
+		}
+	}
+
+	virtual void setEnumValue(int value) override final			// Overriden from class Propery
+	{
+		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
+	}
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
+	{
+		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
+	}
+
+private:
+	template <typename ENUM>
+	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
+	{
+		static_assert(set);
+		static_assert(std::is_enum<TYPE>::value);
+
+		(m_object->*set)(static_cast<TYPE>(value));
+	}
+	template <typename NON_ENUM>
+	void setEnumValueInternal(int value, non_enum_tag)
+	{
+		Q_UNUSED(value)
+		assert(false);
+	}
+
+	template <typename ENUM>
+	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
+	{
+		assert(std::is_enum<TYPE>::value == true);
+
+		QVariant v(value);
+		setValue(v);
+
+		return;
+	}
+	template <typename NON_ENUM>
+	void setEnumValueInternal(const char* value, non_enum_tag)
+	{
+		Q_UNUSED(value)
+		assert(false);
+	}
+
+public:
+	virtual const QVariant& lowLimit() const override final
+	{
+		// Limits must be checked in getter/setter
+		//
+		assert(false);
+		static QVariant staticQVariant;
+		return staticQVariant;
+	}
+	virtual void setLowLimit(const QVariant&) override final
+	{
+		// Limits must be checked in getter/setter
+		assert(false);
+	}
+
+	virtual const QVariant& highLimit() const override final
+	{
+		// Limits must be checked in getter/setter
+		//
+		assert(false);
+		static QVariant staticQVariant;
+		return staticQVariant;
+	}
+	virtual void setHighLimit(const QVariant&) override final
+	{
+		// Limits must be checked in getter/setter
+		assert(false);
+	}
+
+	void setGetter(const std::function<TYPE(void)>& getter)
+	{
+		m_getter = getter;
+	}
+	void setSetter(const std::function<void(TYPE)>& setter)
+	{
+		m_setter = setter;
+	}
+
+	virtual bool isTheSameType(Property* property) override final
+	{
+		if (dynamic_cast<decltype(this)>(property) == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	{
+		if (presetProperty == nullptr ||
+			isTheSameType(presetProperty) == false)
+		{
+			assert(presetProperty != nullptr);
+			assert(isTheSameType(presetProperty) == true);
+			return;
+		}
+
+		Property::copy(presetProperty);	// Copy data from the base class
+
+		if (auto source = dynamic_cast<decltype(this)>(presetProperty);
+			source == nullptr)
+		{
+			assert(source);
+			return;
+		}
+
+		if (updateValue == true)
+		{
+			setValue(presetProperty->value());
+		}
+
+		return;
+	}
+
+private:
+	CLASS* const m_object = nullptr;		// Cannot change m_object pointer
+};
+
+
+//
+//
 //			Class PropertyValue
 //
 //
@@ -1245,9 +1489,69 @@ public:
 	{
 	}
 
-public:
+protected:
+	// Override in child to postpone property creation
+	//
+	virtual void propertyDemand(const QString& prop)
+	{
+		Q_UNUSED(prop);
+	}
 
+	void demandAllProperties()
+	{
+		if (m_allPropsAlreadyDemanded == false)
+		{
+			propertyDemand(QString());
+			m_allPropsAlreadyDemanded = true;
+		}
+
+		return;
+	}
+
+	void demandAllProperties() const
+	{
+		if (m_allPropsAlreadyDemanded == false)
+		{
+			const_cast<PropertyObject*>(this)->propertyDemand(QString());
+			m_allPropsAlreadyDemanded = true;
+		}
+
+		return;
+	}
+
+
+public:
 	// Add new property
+	//
+	template <typename TYPE,
+			  typename CLASS,
+			  TYPE(CLASS::*get)() const,
+			  void(CLASS::*set)(const TYPE&)>
+	auto addProperty(const QString& caption, const QString& category, bool visible)
+	{
+		static_assert(get != nullptr);
+
+		auto property = std::make_shared<PropertyTypedValue<TYPE, CLASS, get, set>>(dynamic_cast<CLASS*>(this));
+
+		uint hash = qHash(caption);
+
+		property->setCaption(caption);
+		property->setCategory(category);
+		property->setVisible(visible);
+
+		if (set == nullptr)
+		{
+			property->setReadOnly(true);
+		}
+
+		m_properties[hash] = std::dynamic_pointer_cast<Property>(property);
+
+		emit propertyListChanged();
+
+		return property.get();
+	}
+
+
 	// Defines can be used:
 	//		ADD_PROPERTY_QVARIANT(int, varint);
 	//		ADD_PROPERTY_GETTER(int, varintgetter, TestProp::someProp);
@@ -1375,6 +1679,8 @@ public:
 	//
 	std::vector<std::shared_ptr<Property>> properties() const
 	{
+		demandAllProperties();
+
 		std::vector<std::shared_ptr<Property>> result;
 		result.reserve(m_properties.size());
 
@@ -1388,14 +1694,13 @@ public:
 
 	Q_INVOKABLE bool propertyExists(const QString& caption) const
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-		return it != m_properties.end();
+		return propertyByCaption(caption) != nullptr;
 	}
 
 	void removeAllProperties()
 	{
 		m_properties.clear();
+		m_allPropsAlreadyDemanded = false;
 
 		emit propertyListChanged();
 	}
@@ -1482,43 +1787,61 @@ public:
 	//
 	std::shared_ptr<Property> propertyByCaption(const QString& caption)
 	{
-		std::shared_ptr<Property> result = nullptr;
-
 		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
 
-		if (it != m_properties.end())
+		if (auto it = m_properties.find(hash);
+			it == m_properties.end())
 		{
-			result = it->second;
-		}
+			propertyDemand(caption);
 
-		return result;
+			if (auto itt = m_properties.find(hash);
+				itt == m_properties.end())
+			{
+				return std::shared_ptr<Property>();
+			}
+			else
+			{
+				return itt->second;
+			}
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 
 	const std::shared_ptr<Property> propertyByCaption(const QString& caption) const
 	{
-		std::shared_ptr<Property> result = nullptr;
-
 		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
 
-		if (it != m_properties.end())
+		if (auto it = m_properties.find(hash);
+			it == m_properties.end())
 		{
-			result = it->second;
-		}
+			const_cast<PropertyObject*>(this)->propertyDemand(caption);
 
-		return result;
+			if (auto itt = m_properties.find(hash);
+				itt == m_properties.end())
+			{
+				return std::shared_ptr<Property>();
+			}
+			else
+			{
+				return itt->second;
+			}
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 
 	Q_INVOKABLE QVariant propertyValue(const QString& caption) const
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
+		auto prop = propertyByCaption(caption);
 
-		if (it != m_properties.end())
+		if (prop != nullptr)
 		{
-			QVariant result(it->second->value());
-			return result;
+			return prop->value();
 		}
 		else
 		{
@@ -1530,15 +1853,13 @@ public:
 	template <typename TYPE>
 	bool setPropertyValue(const QString& caption, const TYPE& value)
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-
-		if (it == m_properties.end())
+		auto prop = propertyByCaption(caption);
+		if (prop == nullptr)
 		{
 			return false;
 		}
 
-		Property* property = it->second.get();
+		Property* property = prop.get();
 
 		if (property->isEnum() == true)
 		{
@@ -1549,9 +1870,8 @@ public:
 		}
 		else
 		{
-			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
-
-			if (propertyValue != nullptr)
+			if (PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
+				propertyValue != nullptr)
 			{
 				propertyValue->setValueDirect(value);
 			}
@@ -1568,15 +1888,11 @@ public:
 
 	bool setPropertyValue(const QString& caption, const char* value)
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-
-		if (it == m_properties.end())
+		auto property = propertyByCaption(caption);
+		if (property == nullptr)
 		{
 			return false;
 		}
-
-		std::shared_ptr<Property> property = it->second;
 
 		if (property->isEnum() == true)
 		{
@@ -1585,17 +1901,17 @@ public:
 		}
 		else
 		{
-			PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
-
-			if (propertyValue == nullptr)
+			if (PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
+				propertyValue != nullptr)
 			{
-				assert(propertyValue);
-				return false;
+				propertyValue->setValueDirect(QString(value));
+				return true;
 			}
-
-			propertyValue->setValueDirect(QString(value));
-
-			return true;
+			else
+			{
+				property->setValue(QVariant::fromValue(QString(value)));	// Try to get luck
+				return true;
+			}
 		}
 
 		return false;
@@ -1603,30 +1919,28 @@ public:
 
 	Q_INVOKABLE bool setPropertyValue(const QString& caption, const QVariant& value)
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-
-		if (it == m_properties.end())
+		auto property = propertyByCaption(caption);
+		if (property == nullptr)
 		{
 			return false;
 		}
 
-		it->second->setValue(value);
+		property->setValue(value);
 
 		return true;
 	}
 
-	std::list<std::pair<int, QString>> enumValues(const QString& property)
+	std::list<std::pair<int, QString>> enumValues(const QString& caption)
 	{
 		std::list<std::pair<int, QString>> result;
 
-		uint hash = qHash(property);
-		auto it = m_properties.find(hash);
-
-		if (it != m_properties.end())
+		auto property = propertyByCaption(caption);
+		if (property == nullptr)
 		{
-			result = it->second->enumValues();
+			return result;
 		}
+
+		result = property->enumValues();
 
 		return result;
 	}
@@ -2345,6 +2659,7 @@ signals:
 
 private:
 	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)
+	mutable bool m_allPropsAlreadyDemanded = false;
 };
 
 

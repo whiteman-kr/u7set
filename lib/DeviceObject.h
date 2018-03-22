@@ -597,29 +597,29 @@ namespace Hardware
 	public:
 		E::SignalType type() const;
 		Q_INVOKABLE int jsType() const;
-		void setType(E::SignalType value);
+		void setType(const E::SignalType& value);
 
 		E::SignalFunction function() const;
 		Q_INVOKABLE int jsFunction() const;
-		void setFunction(E::SignalFunction value);
+		void setFunction(const E::SignalFunction& value);
 
 		E::ByteOrder byteOrder() const;
-		void setByteOrder(E::ByteOrder value);
+		void setByteOrder(const E::ByteOrder& value);
 
 		E::DataFormat format() const;
-		void setFormat(E::DataFormat value);
+		void setFormat(const E::DataFormat& value);
 
 		E::MemoryArea memoryArea() const;
-		void setMemoryArea(E::MemoryArea value);
+		void setMemoryArea(const E::MemoryArea& value);
 
 		int size() const;
-		void setSize(int value);
+		void setSize(const int& value);
 
 		int valueOffset() const;
-		void setValueOffset(int value);
+		void setValueOffset(const int& value);
 
 		int valueBit() const;
-		void setValueBit(int value);
+		void setValueBit(const int& value);
 
 		QString validitySignalId() const;
 		void setValiditySignalId(const QString& value);
@@ -633,19 +633,19 @@ namespace Hardware
 		bool isDiscreteSignal() const;
 
 		int appSignalLowAdc() const;
-		void setAppSignalLowAdc(int value);
+		void setAppSignalLowAdc(const int& value);
 
 		int appSignalHighAdc() const;
-		void setAppSignalHighAdc(int value);
+		void setAppSignalHighAdc(const int& value);
 
 		double appSignalLowEngUnits() const;
-		void setAppSignalLowEngUnits(double value);
+		void setAppSignalLowEngUnits(const double& value);
 
 		double appSignalHighEngUnits() const;
-		void setAppSignalHighEngUnits(double value);
+		void setAppSignalHighEngUnits(const double& value);
 
 		E::AnalogAppSignalFormat appSignalDataFormat() const;
-		void setAppSignalDataFormat(E::AnalogAppSignalFormat value);
+		void setAppSignalDataFormat(const E::AnalogAppSignalFormat& value);
 
 		QString signalSpecPropsStruc() const;
 		void setSignalSpecPropsStruc(const QString& value);
