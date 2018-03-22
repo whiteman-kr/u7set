@@ -65,7 +65,7 @@ namespace TuningIPEN
 
 		void setTuningData(TuningData* tuningData);
 
-		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
+		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
 
 		void getTuningDataSourceInfo(TuningSourceInfo& info);

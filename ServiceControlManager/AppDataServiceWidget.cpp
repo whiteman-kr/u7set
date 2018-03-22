@@ -126,7 +126,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	const DataSource& d = *m_dataSource[row];
+	const DataSourceOnline& d = *m_dataSource[row];
 
 	switch (role)
 	{

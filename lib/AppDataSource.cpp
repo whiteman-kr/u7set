@@ -397,6 +397,12 @@ AppDataSource::AppDataSource()
 {
 }
 
+AppDataSource::AppDataSource(const DataSource& dataSource)
+{
+	*(reinterpret_cast<DataSource*>(this)) = dataSource;
+}
+
+
 void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue)
 {
 	if (signalStates == nullptr || signalStatesQueue == nullptr)

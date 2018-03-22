@@ -144,6 +144,7 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 	if (m_appDataReceiverThread != nullptr)
 	{
 		assert(false);
+		return;
 	}
 
 	m_appDataReceiverThread = new AppDataReceiverThread(m_cfgSettings.appDataReceivingIP, m_appDataSourcesIP, m_log);
@@ -153,15 +154,12 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 
 void AppDataServiceWorker::stopAppDataReceiverlThread()
 {
-	if (m_appDataReceiverThread == nullptr)
+	if (m_appDataReceiverThread != nullptr)
 	{
-		assert(false);
-		return;
+		m_appDataReceiverThread->quitAndWait();
+		delete m_appDataReceiverThread;
+		m_appDataReceiverThread = nullptr;
 	}
-
-	m_appDataReceiverThread->quitAndWait();
-	delete m_appDataReceiverThread;
-	m_appDataReceiverThread = nullptr;
 }
 
 void AppDataServiceWorker::runTcpAppDataServer()
@@ -352,33 +350,24 @@ bool AppDataServiceWorker::readConfiguration(const QByteArray& fileData)
 }
 
 
-bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
+bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 {
-	XmlReadHelper xml(fileData);
-
-	bool result = true;
-
 	m_appDataSources.clear();
 	m_appDataSourcesIP.clear();
 
-	while (1)
+	QVector<DataSource> dataSources;
+
+	bool result = DataSourcesXML::readFromXml(fileData, &dataSources);
+
+	if (result == false)
 	{
-		bool find = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
+		DEBUG_LOG_ERR(m_log, QString("Error reading AppDataSources from XML-file"));
+		return false;
+	}
 
-		if (find == false)
-		{
-			break;
-		}
-
-		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>();
-
-		result &= appDataSource->readFromXml(xml);
-
-		if (result == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Error reading AppDataSources from XML-file"));
-			continue;
-		}
+	for(int i = 0; i < dataSources.count(); i++)
+	{
+		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>(dataSources[i]);
 
 		if (m_appDataSources.contains(appDataSource->lmAdapterID()) == true)
 		{
@@ -394,15 +383,15 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 		m_appDataSources.insert(appDataSource->lmAdapterID(), appDataSource);
 		m_appDataSourcesIP.insert(appDataSource->lmAddress32(), appDataSource);
-
-		DEBUG_LOG_MSG(m_log, QString("AppDataSource %1 loading Ok").arg(appDataSource->lmAdapterID()));
 	}
 
-	return result;
+	DEBUG_LOG_MSG(m_log, QString("AppDataSources successfully loaded"));
+
+	return true;
 }
 
 
-bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
+bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
 

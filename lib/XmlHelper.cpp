@@ -1,4 +1,5 @@
-#include "../lib/XmlHelper.h"
+#include "XmlHelper.h"
+#include "WUtils.h"
 
 
 // -------------------------------------------------------------------------------------
@@ -360,15 +361,19 @@ bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
 	return true;
 }
 
-bool XmlReadHelper::readStringElement(const QString& elementName, QString* value)
+bool XmlReadHelper::readStringElement(const QString& elementName, QString* value, bool find)
 {
-	if (value == nullptr)
+	TEST_PTR_RETURN_FALSE(value);
+
+	if (find == true)
 	{
-		assert(false);
-		return false;
+		if (findElement(elementName) == false)
+		{
+			return false;
+		}
 	}
 
-	if (name() != elementName)
+	if (checkElement(elementName) == false)
 	{
 		return false;
 	}
@@ -380,15 +385,19 @@ bool XmlReadHelper::readStringElement(const QString& elementName, QString* value
 	return true;
 }
 
-bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
+bool XmlReadHelper::readIntElement(const QString& elementName, int* value, bool find)
 {
-	if (value == nullptr)
+	TEST_PTR_RETURN_FALSE(value);
+
+	if (find == true)
 	{
-		assert(false);
-		return false;
+		if (findElement(elementName) == false)
+		{
+			return false;
+		}
 	}
 
-	if (name() != elementName)
+	if (checkElement(elementName) == false)
 	{
 		return false;
 	}
@@ -402,15 +411,19 @@ bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
 	return ok;
 }
 
-bool XmlReadHelper::readBoolElement(const QString& elementName, bool* value)
+bool XmlReadHelper::readBoolElement(const QString& elementName, bool* value, bool find)
 {
-	if (value == nullptr)
+	TEST_PTR_RETURN_FALSE(value);
+
+	if (find == true)
 	{
-		assert(false);
-		return false;
+		if (findElement(elementName) == false)
+		{
+			return false;
+		}
 	}
 
-	if (name() != elementName)
+	if (checkElement(elementName) == false)
 	{
 		return false;
 	}
@@ -450,19 +463,9 @@ bool XmlReadHelper::readHostAddressPort(const QString& nameIP, const QString& na
 
 	bool result = true;
 
-	if (findElement(nameIP) == false)
-	{
-		return false;
-	}
+	result &= readStringElement(nameIP, &addressStr, true);
 
-	result &= readStringElement(nameIP, &addressStr);
-
-	if (findElement(namePort) == false)
-	{
-		return false;
-	}
-
-	result &= readIntElement(namePort, &port);
+	result &= readIntElement(namePort, &port, true);
 
 	if (result == true)
 	{
@@ -483,12 +486,7 @@ bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress *hostAdd
 
 	QString addressStr;
 
-	if (findElement(nameIP) == false)
-	{
-		return false;
-	}
-
-	bool result = readStringElement(nameIP, &addressStr);
+	bool result = readStringElement(nameIP, &addressStr, true);
 
 	if (result == true)
 	{
@@ -513,5 +511,23 @@ bool XmlReadHelper::findElement(const QString& elementName)
 		}
 	}
 
+	qDebug() << "XmlReadHelper: element is not found -" << elementName;
+
+	assert(false);
+
 	return false;
 }
+
+bool XmlReadHelper::checkElement(const QString& elementName)
+{
+	if (name() == elementName)
+	{
+		return true;
+	}
+
+	assert(false);
+	qDebug() << "XmlReadHelper: element does not match. Current - " << name() << ", required -" << elementName;
+
+	return false;
+}
+

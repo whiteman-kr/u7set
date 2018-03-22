@@ -2,6 +2,7 @@
 #define SIGNALTABLEMODEL_H
 
 #include <QAbstractTableModel>
+#include "../lib/DataSource.h"
 
 class SignalSet;
 class DataSource;
@@ -20,7 +21,7 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 	void updateFrame(int frameNo);
-	void addDataSource(const DataSource *dataSource);
+	void addDataSource(const DataSourceOnline* dataSource);
 	void beginReloadProject();
 	void endReloadProject();
 

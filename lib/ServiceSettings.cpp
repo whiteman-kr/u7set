@@ -19,6 +19,10 @@ const char* ServiceSettings::PROP_DIAG_DATA_RECEIVING_NETMASK = "DiagDataReceivi
 const char* ServiceSettings::PROP_DIAG_DATA_RECEIVING_IP = "DiagDataReceivingIP";
 const char* ServiceSettings::PROP_DIAG_DATA_RECEIVING_PORT = "DiagDataReceivingPort";
 
+const char* ServiceSettings::PROP_TUNING_DATA_NETMASK = "TuningDataNetmask";
+const char* ServiceSettings::PROP_TUNING_DATA_IP = "TuningDataIP";
+const char* ServiceSettings::PROP_TUNING_DATA_PORT = "TuningDataPort";
+
 const char* ServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* ServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
 const char* ServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
@@ -99,9 +103,6 @@ bool ServiceSettings::getSoftwareConnection(const Hardware::EquipmentSet* equipm
 			//
 			log->wrnCFG3016(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID);
 
-			ipStr = Socket::IP_NULL;
-			port = PORT_ARCHIVING_SERVICE_APP_DATA;
-
 			connectedSoftwareIP->setAddressPort(defaultIP, defaultPort);
 
 			return true;
@@ -127,9 +128,8 @@ bool ServiceSettings::getSoftwareConnection(const Hardware::EquipmentSet* equipm
 	result = DeviceHelper::getIpPortProperty(	connectedSoftware,
 												propConnectedSoftwareIP,
 												propConnectedSoftwarePort,
-												&connectedSoftwareIP,
+												connectedSoftwareIP,
 												emptyAllowed, defaultIP, defaultPort, log);
-
 	return result;
 }
 
@@ -182,99 +182,7 @@ bool ServiceSettings::getCfgServiceConnection(	const Hardware::EquipmentSet *equ
 	}
 
 	return result;
-
-
-
-
-
-/*	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, cfgServiceID1, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, cfgServiceID2, log);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	if (cfgServiceID1->isEmpty() == true && cfgServiceID2->isEmpty() == true)
-	{
-		// Software %1 is not linked to ConfigurationService.
-		//
-		log->errCFG3029(software->equipmentIdTemplate());
-		return false;
-	}
-
-	QString ipStr;
-	int port = 0;
-
-	if (cfgServiceID1->isEmpty() == true)
-	{
-		ipStr = Socket::IP_NULL;
-		port = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;
-
-		cfgServiceAddrPort1->setAddressPort(ipStr, port);
-
-		// Property '%1.%2' is empty.
-		//
-		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1);
-
-		result = false;
-	}
-	else
-	{
-		const Hardware::Software* cfgService1 = DeviceHelper::getSoftware(equipment, *cfgServiceID1);
-
-		if (cfgService1 == nullptr)
-		{
-			// Property '%1.%2' is linked to undefined software ID '%3'.
-			//
-			log->errCFG3021(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1, *cfgServiceID1);
-			result = false;
-		}
-		else
-		{
-			result &= DeviceHelper::getIpPortProperty(cfgService1,
-													  PROP_CLIENT_REQUEST_IP,
-													  PROP_CLIENT_REQUEST_PORT,
-													  cfgServiceAddrPort1, false, "", 0, log);
-		}
-	}
-
-	if (cfgServiceID2->isEmpty() == true)
-	{
-		ipStr = Socket::IP_NULL;
-		port = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;
-
-		cfgServiceAddrPort2->setAddressPort(ipStr, port);
-
-		// Property '%1.%2' is empty.
-		//
-		log->wrnCFG3016(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID2);
-
-		result = false;
-	}
-	else
-	{
-		const Hardware::Software* cfgService2 = DeviceHelper::getSoftware(equipment, *cfgServiceID2);
-
-		if (cfgService2 == nullptr)
-		{
-			// Property '%1.%2' is linked to undefined software ID '%3'.
-			//
-			log->errCFG3021(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID2, *cfgServiceID2);
-			result = false;
-		}
-		else
-		{
-			result &= DeviceHelper::getIpPortProperty(cfgService2,
-													  PROP_CLIENT_REQUEST_IP,
-													  PROP_CLIENT_REQUEST_PORT,
-													  cfgServiceAddrPort2, false, "", 0, log);
-		}
-	}*/
-
-//	return result;
 }
-
 
 
 // -------------------------------------------------------------------------------------
@@ -288,9 +196,10 @@ const char* AppDataServiceSettings::PROP_AUTO_ARCHIVE_INTERVAL = "AutoArchiveInt
 
 bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
-	TEST_PTR_RETURN_FALSE(equipment);
-	TEST_PTR_RETURN_FALSE(software);
 	TEST_PTR_RETURN_FALSE(log);
+
+	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
 
 	bool result = true;
 
@@ -300,9 +209,7 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 											  &appDataReceivingIP,
 											  false, "", 0, log);
 
-	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_NETMASK, &appDataNetmask, false, "", log);
-
-	result &= DeviceHelper::getIntProperty(software, PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, log);
+	result &= DeviceHelper::getIPv4Property(software, PROP_APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask, false, "", log);
 
 	result &= DeviceHelper::getIpPortProperty(software,
 											  PROP_CLIENT_REQUEST_IP,
@@ -321,6 +228,8 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 
 	result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1, &cfgServiceID2, &cfgServiceIP2, log);
 
+	result &= DeviceHelper::getIntProperty(software, PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, log);
+
 	return result;
 }
 
@@ -329,24 +238,24 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;
 
-	xml.writeStartElement(SECTION_NAME);
-
-	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataReceivingIP);
-	xml.writeHostAddress(PROP_APP_DATA_NETMASK, appDataNetmask);
-
-	xml.writeIntElement(PROP_AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
-
-	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
-
-	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceID);
-	xml.writeHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, archServiceIP);
+	xml.writeStartElement(SETTINGS_SECTION);
 
 	xml.writeStringElement(PROP_CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(PROP_CFG_SERVICE_IP1, PROP_CFG_SERVICE_PORT1, cfgServiceIP1);
 
 	xml.writeStringElement(PROP_CFG_SERVICE_ID2, cfgServiceID2);
 	xml.writeHostAddressPort(PROP_CFG_SERVICE_IP2, PROP_CFG_SERVICE_PORT2, cfgServiceIP2);
+
+	xml.writeHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, appDataReceivingIP);
+	xml.writeHostAddress(PROP_APP_DATA_RECEIVING_NETMASK, appDataReceivingNetmask);
+
+	xml.writeIntElement(PROP_AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
+
+	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceID);
+	xml.writeHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, archServiceIP);
+
+	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -357,25 +266,29 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = xml.findElement(SECTION_NAME);
+	result = xml.findElement(SETTINGS_SECTION);
 
 	if (result == false)
 	{
 		return false;
 	}
+
+	result &= xml.readStringElement(PROP_CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(PROP_CFG_SERVICE_IP1, PROP_CFG_SERVICE_PORT1, &cfgServiceIP1);
+
+	result &= xml.readStringElement(PROP_CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(PROP_CFG_SERVICE_IP2, PROP_CFG_SERVICE_PORT2, &cfgServiceIP2);
+
+	result &= xml.readHostAddressPort(PROP_APP_DATA_RECEIVING_IP, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingIP);
+	result &= xml.readHostAddress(PROP_APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask);
+
+	result &= xml.readIntElement(PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, true);
+
+	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceID, true);
+	result &= xml.readHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, &archServiceIP);
 
 	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
-
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
-
-	result &= xml.findElement(PROP_AUTO_ARCHIVE_INTERVAL);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result &= xml.readIntElement(PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval);
 
 	return result;
 }
@@ -387,10 +300,6 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-const char* TuningServiceSettings::SECTION_NAME = "Settings";
-
-const char* TuningServiceSettings::PROP_TUNING_DATA_IP = "TuningDataIP";
-const char* TuningServiceSettings::PROP_TUNING_DATA_PORT = "TuningDataPort";
 const char* TuningServiceSettings::PROP_SINGLE_LM_CONTROL = "SingleLmControl";
 const char* TuningServiceSettings::PROP_DISABLE_MODULES_TYPE_CHECKING = "DisableModulesTypeChecking";
 
@@ -522,7 +431,7 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 
 bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement(SECTION_NAME);
+	xml.writeStartElement(SETTINGS_SECTION);
 
 	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
@@ -571,7 +480,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = xml.findElement(SECTION_NAME);
+	result = xml.findElement(SETTINGS_SECTION);
 
 	if (result == false)
 	{
@@ -700,19 +609,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-const char* ArchivingServiceSettings::SECTION_NAME = "Settings";
-
-const char* ArchivingServiceSettings::PROP_APP_DATA_RECEIVING_IP = "AppDataServiceRequestIP";
-const char* ArchivingServiceSettings::PROP_APP_DATA_RECEIVING_PORT = "AppDataServiceRequestPort";
-const char* ArchivingServiceSettings::PROP_APP_DATA_RECEIVING_NETMASK = "AppDataServiceRequestNetmask";
-
-const char* ArchivingServiceSettings::PROP_DIAG_DATA_RECEIVING_IP = "DiagDataServiceRequestIP";
-const char* ArchivingServiceSettings::PROP_DIAG_DATA_RECEIVING_PORT = "DiagDataServiceRequestPort";
-const char* ArchivingServiceSettings::PROP_DIAG_DATA_RECEIVING_NETMASK = "DiagDataServiceRequestNetmask";
-
 const char* ArchivingServiceSettings::PROP_ARCHIVE_DB_HOST_IP = "ArchiveDatabaseHostIP";
 const char* ArchivingServiceSettings::PROP_ARCHIVE_DB_HOST_PORT = "ArchiveDatabaseHostPort";
-
 
 bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
@@ -773,7 +671,7 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;
 
-	xml.writeStartElement(SECTION_NAME);
+	xml.writeStartElement(SETTINGS_SECTION);
 
 	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
@@ -796,7 +694,7 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
 
-	result = xml.findElement(SECTION_NAME);
+	result = xml.findElement(SETTINGS_SECTION);
 
 	if (result == false)
 	{

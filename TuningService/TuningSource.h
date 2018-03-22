@@ -15,7 +15,7 @@ namespace Tuning
 		void setTuningData(TuningData* tuningData);
 		const TuningData* tuningData() const;
 
-		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
+		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
 
 	private:

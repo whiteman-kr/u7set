@@ -11,7 +11,7 @@
 #include "../lib/SimpleThread.h"
 
 
-class DataSource : public QObject
+class DataSource /*: public QObject*/
 {
 public:
 	enum class DataType
@@ -50,40 +50,6 @@ protected:
 	static const char* SIGNAL_ID_ELEMENT;
 
 private:
-	struct RupFrameTime
-	{
-		qint64 serverTime;
-
-		Rup::Frame rupFrame;
-
-		void dump();
-	};
-
-	class RupFramesCollector
-	{
-	public:
-		bool collect(const RupFrameTime& rupFrameTime);
-
-		bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
-
-	private:
-		bool reallocate(quint32 framesQuantity);
-
-	private:
-		quint32 m_framesQuantityAllocated = 0;
-		Rup::Header* m_rupFramesHeaders = nullptr;
-		Rup::Data* m_rupFramesData = nullptr;
-
-		qint64 m_firstFrameServerTime = 0;
-
-		// result variables
-
-		bool m_dataReadyToParsing = false;
-
-		Times m_rupDataTimes;
-		quint32 m_rupDataSize = 0;
-	};
-
 public:
 	DataSource();
 	~DataSource();
@@ -135,10 +101,82 @@ public:
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
 
-	//
-
 	quint64 ID() const { return m_id; }
 	void setID(quint32 id) { m_id = id; }
+
+
+	QString dataTypeToString(DataType lmDataType) const;
+	DataType stringToDataType(const QString& dataTypeStr);
+
+	void writeToXml(XmlWriteHelper& xml) const;
+	bool readFromXml(XmlReadHelper& xml);
+
+	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&) const;
+	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
+
+	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
+	void clearAssociatedSignals() { m_associatedSignals.clear(); }
+
+	const QStringList& associatedSignals() const { return m_associatedSignals; }
+
+	bool getInfo(Network::DataSourceInfo* protoInfo) const;
+	bool setInfo(const Network::DataSourceInfo& protoInfo);
+
+private:
+	quint64 generateID() const;
+
+private:
+	// Properties from LM
+	//
+	DataType m_lmDataType = DataType::App;
+	QString m_lmEquipmentID;
+	int m_lmNumber = 0;
+	int m_lmModuleType = 0;
+	int m_lmSubsystemID = 0;
+	QString m_lmChannel = 0;
+	QString m_lmSubsystem;
+	QString m_lmCaption;
+	QString m_lmAdapterID;
+	bool m_lmDataEnable = false;
+	HostAddressPort m_lmAddressPort;
+	quint32 m_lmDataID = 0;
+	quint64 m_uniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+
+	QStringList m_associatedSignals;
+
+	quint64 m_id = 0;
+};
+
+
+class DataSourcesXML
+{
+public:
+	static bool writeToXml(const QVector<DataSource>& dataSources, QByteArray* fileData);
+	static bool readFromXml(const QByteArray& fileData, QVector<DataSource>* dataSources);
+};
+
+class DataSourceOnline : public DataSource
+{
+private:
+	struct RupFrameTime
+	{
+		qint64 serverTime;
+
+		Rup::Frame rupFrame;
+
+		void dump();
+	};
+
+public:
+	DataSourceOnline();
+	~DataSourceOnline();
+
+	bool init();
+
+	void stop();
+	void resume();
+
+	//
 
 	QHostAddress hostAddress() const { return m_hostAddress; }
 	void setHostAddress(QHostAddress hostAddress) { m_hostAddress = hostAddress; }
@@ -151,42 +189,6 @@ public:
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
-	void stop();
-	void resume();
-
-	QString dataTypeToString(DataType lmDataType) const;
-	DataType stringToDataType(const QString& dataTypeStr);
-
-	void writeToXml(XmlWriteHelper& xml);
-	bool readFromXml(XmlReadHelper& xml);
-
-	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&);
-	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
-
-	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
-	void clearAssociatedSignals() { m_associatedSignals.clear(); }
-
-	const QStringList& associatedSignals() const { return m_associatedSignals; }
-
-	bool getInfo(Network::DataSourceInfo* protoInfo) const;
-	bool setInfo(const Network::DataSourceInfo& protoInfo);
-
-	// Functions used by receiver thread
-	//
-	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame);
-	void incBadFrameSizeError() { m_errorBadFrameSize++; }
-
-	// Function used by data processing thread
-	//
-	bool seizeProcessingOwnership(const SimpleThreadWorker* processingWorker);
-	bool releaseProcessingOwnership(const SimpleThreadWorker* processingWorker);
-
-	bool processRupFrameTimeQueue();
-
-	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
-
-
-	//
 
 	E::DataSourceState state() const { return m_state; }
 	void setState(E::DataSourceState state) { m_state = state; }
@@ -232,34 +234,30 @@ public:
 	qint64 lastPacketTime() const { return m_lastPacketTime; }
 	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
 
-private:
-	// Properties from LM
+	// Functions used by receiver thread
 	//
-	DataType m_lmDataType = DataType::App;
-	QString m_lmEquipmentID;
-	int m_lmNumber = 0;
-	int m_lmModuleType = 0;
-	int m_lmSubsystemID = 0;
-	QString m_lmChannel = 0;
-	QString m_lmSubsystem;
-	QString m_lmCaption;
-	QString m_lmAdapterID;
-	bool m_lmDataEnable = false;
-	HostAddressPort m_lmAddressPort;
-	quint32 m_lmDataID = 0;
-	quint64 m_uniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame);
+	void incBadFrameSizeError() { m_errorBadFrameSize++; }
 
-	QStringList m_associatedSignals;
+	// Functions used by data processing thread
+	//
+	bool seizeProcessingOwnership(const SimpleThreadWorker* processingWorker);
+	bool releaseProcessingOwnership(const SimpleThreadWorker* processingWorker);
 
+	bool processRupFrameTimeQueue();
+	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
+
+private:
+	bool collect(const RupFrameTime& rupFrameTime);
+	bool reallocate(quint32 framesQuantity);
+
+private:
 	// static information
 	//
-	quint64 m_id = 0;
 	QHostAddress m_hostAddress;
 	QString m_name;
 	quint32 m_partCount = 1;
 	QVector<int> m_relatedSignalIndexes;
-
-	quint64 generateID() const;
 
 	// dynamic state information
 	//
@@ -284,15 +282,8 @@ private:
 
 	qint64 m_lastPacketTime = 0;
 
-	//
-
 	bool m_firstRupFrame = true;
 	quint16 m_rupFrameNumerator = 0;
-
-	//
-
-	Rup::Frame m_rupFrames[Rup::MAX_FRAME_COUNT];
-	char m_framesData[Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE];
 
 	//
 
@@ -302,5 +293,18 @@ private:
 
 	std::atomic<const SimpleThreadWorker*> m_processingOwner = nullptr;
 
-	RupFramesCollector m_rupFramesCollector;
+	//
+
+	quint32 m_framesQuantityAllocated = 0;
+	Rup::Header* m_rupFramesHeaders = nullptr;
+	Rup::Data* m_rupFramesData = nullptr;
+
+	qint64 m_firstFrameServerTime = 0;
+
+	// result variables
+
+	bool m_dataReadyToParsing = false;
+
+	Times m_rupDataTimes;
+	quint32 m_rupDataSize = 0;
 };

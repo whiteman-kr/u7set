@@ -39,7 +39,7 @@ namespace TuningIPEN
 	}
 
 
-	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
+	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml) const
 	{
 		if (m_tuningData == nullptr)
 		{

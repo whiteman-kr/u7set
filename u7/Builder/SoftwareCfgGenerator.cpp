@@ -554,72 +554,46 @@ namespace Builder
 		return comments;
 	}
 
-	bool SoftwareCfgGenerator::getConfigIp(QString& cfgIP1, QString& cfgIP2)
+	bool SoftwareCfgGenerator::getConfigIp(QString* cfgIP1, QString* cfgIP2)
 	{
-		TEST_PTR_RETURN_FALSE(m_equipment);
-		TEST_PTR_RETURN_FALSE(m_software);
+		TEST_PTR_RETURN_FALSE(m_log);
 
-		auto ipGetter = [=](int channel, QString& ip) -> bool
-		{
-			QString configurationServiceIdPropertyCaption = QString("ConfigurationServiceID%1").arg(channel);
-			auto configurationServiceIdProperty = m_software->propertyByCaption(configurationServiceIdPropertyCaption);
+		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP1, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP2, m_log);
 
-			QString objectName = m_software->equipmentIdTemplate();
-			QString propertyName = configurationServiceIdPropertyCaption;
+		cfgIP1->clear();
+		cfgIP2->clear();
 
-			if (configurationServiceIdProperty == nullptr)
-			{
-				QString channelIdSuffix = QString("_DATACH0%1").arg(channel);
-				auto channelObject = m_equipment->deviceObject(m_software->equipmentIdTemplate() + channelIdSuffix);
+		QString cfgServiceID1;
+		QString cfgServiceID2;
 
-				if (channelObject == nullptr)
-				{
-					TEST_PTR_RETURN_FALSE(m_log);
-
-					m_log->errCFG3020(objectName, propertyName);
-					m_log->errCFG3014(channelIdSuffix, m_software->equipmentIdTemplate());
-
-					return false;
-				}
-
-				objectName = m_software->equipmentIdTemplate() + channelIdSuffix;
-				propertyName = "ConfigurationServiceID";
-
-				configurationServiceIdProperty = channelObject->propertyByCaption(propertyName);
-				if (configurationServiceIdProperty == nullptr)
-				{
-					TEST_PTR_RETURN_FALSE(m_log);
-					m_log->errCFG3020(objectName, propertyName);
-					return false;
-				}
-			}
-
-			QString configurationID = configurationServiceIdProperty->value().toString();
-
-			auto* configurationServiceObject = m_equipment->deviceObject(configurationID);
-			if (configurationServiceObject == nullptr)
-			{
-				TEST_PTR_RETURN_FALSE(m_log);
-				m_log->errCFG3021(objectName, propertyName, configurationID);
-				return false;
-			}
-
-			if (DeviceHelper::getIPv4Property(configurationServiceObject,
-											  ServiceSettings::PROP_CLIENT_REQUEST_IP,
-											  &ip, false, "", m_log) == false)
-			{
-				return false;
-			}
-
-			return true;
-		};
+		HostAddressPort cfgServiceIP1;
+		HostAddressPort cfgServiceIP2;
 
 		bool result = true;
 
-		result &= ipGetter(1, cfgIP1);
-		result &= ipGetter(2, cfgIP2);
+		result = ServiceSettings::getCfgServiceConnection(m_equipment, m_software,
+														   &cfgServiceID1, &cfgServiceIP1,
+														   &cfgServiceID2, &cfgServiceIP2,
+														   m_log);
+		if (result == false)
+		{
+			return false;
+		}
 
-		return result;
+		if (cfgServiceID1.isEmpty() == false)
+		{
+			*cfgIP1 = cfgServiceIP1.addressPortStr();
+		}
+
+		if (cfgServiceID2.isEmpty() == false)
+		{
+			*cfgIP2 = cfgServiceIP2.addressPortStr();
+		}
+
+		return true;
 	}
 
 	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
@@ -629,23 +603,23 @@ namespace Builder
 		QString cfgIP1;
 		QString cfgIP2;
 		
-		if (getConfigIp(cfgIP1, cfgIP2) == false)
+		if (getConfigIp(&cfgIP1, &cfgIP2) == false)
 		{
 			return false;
 		}
 
-		if (cfgIP1.isEmpty() && cfgIP2.isEmpty())
+		if (cfgIP1.isEmpty() == true && cfgIP2.isEmpty() == true)
 		{
 			m_log->errALC5140(m_software->equipmentIdTemplate());
 			return false;
 		}
 
-		if (cfgIP1.isEmpty())
+		if (cfgIP1.isEmpty() == true)
 		{
 			cfgIP1 = cfgIP2;
 		}
 
-		if (cfgIP2.isEmpty())
+		if (cfgIP2.isEmpty() == true)
 		{
 			cfgIP2 = cfgIP1;
 		}

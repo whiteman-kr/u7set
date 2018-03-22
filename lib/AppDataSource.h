@@ -98,7 +98,7 @@ public:
 };
 
 
-class AppDataSource : public DataSource
+class AppDataSource : public DataSourceOnline
 {
 public:
 	static const int NO_INDEX = -1;
@@ -127,6 +127,7 @@ private:
 
 public:
 	AppDataSource();
+	AppDataSource(const DataSource& dataSource);
 
 	void prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue);
 

@@ -47,7 +47,7 @@ namespace Builder
 
 		QString getBuildInfoCommentsForBat();
 		QString getBuildInfoCommentsForSh();
-		bool getConfigIp(QString& cfgIP1, QString& cfgIP2);
+		bool getConfigIp(QString* cfgIP1, QString* cfgIP2);
 		bool getServiceParameters(QString &parameters);
 
 

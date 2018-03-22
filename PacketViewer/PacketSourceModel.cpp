@@ -273,7 +273,7 @@ void PacketSourceModel::loadProject(const QString& projectPath)
 	}
 	m_dataSources.clear();
 
-	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
+	initDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
 
 	for (auto listener : m_listeners)
 	{
@@ -501,7 +501,8 @@ void Listener::checkListeningState()
 }
 
 
-Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Statistic* parent) :
+Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32,
+			   std::shared_ptr<DataSourceOnline>>& dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
 	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this)),
@@ -662,7 +663,7 @@ void Source::removeDependentWidget(QObject* object)
 void Source::reloadProject()
 {
 	m_signalTableModel->beginReloadProject();
-	QHashIterator<quint32, std::shared_ptr<DataSource>> iterator(*m_dataSources);
+	QHashIterator<quint32, std::shared_ptr<DataSourceOnline>> iterator(*m_dataSources);
 
 	while (iterator.hasNext())
 	{
@@ -715,7 +716,7 @@ void swapHeader(Rup::Header& header)
 	swapBytes(header.timeStamp.year);
 }
 
-void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
+void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourceOnline> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
 {
 	dataSources.clear();
 
@@ -753,7 +754,7 @@ void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSourc
 				QHostAddress ha(ipStr);
 				quint32 ip = ha.toIPv4Address();
 
-				std::shared_ptr<DataSource> ds = std::make_shared<DataSource>();
+				std::shared_ptr<DataSourceOnline> ds = std::make_shared<DataSourceOnline>();
 				ds->setID(ip);
 				ds->setLmCaption(QString("Data Source %1").arg(key));
 				ds->setLmAddressStr(ha.toString());

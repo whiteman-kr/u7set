@@ -159,7 +159,7 @@ void SignalTableModel::updateFrame(int frameNo)
 	}
 }
 
-void SignalTableModel::addDataSource(const DataSource* dataSource)
+void SignalTableModel::addDataSource(const DataSourceOnline* dataSource)
 {
 	m_relatedSignalIndexes += dataSource->signalIndexes();
 

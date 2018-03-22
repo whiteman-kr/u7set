@@ -72,13 +72,14 @@ public:
 	bool readUInt64Attribute(const QString& name, qulonglong* value);
 	bool readUInt32Attribute(const QString& name, quint32 *value);
 
-	bool readStringElement(const QString& elementName, QString* value);
-	bool readIntElement(const QString& elementName, int* value);
-	bool readBoolElement(const QString& elementName, bool* value);
+	bool readStringElement(const QString& elementName, QString* value, bool find = false);
+	bool readIntElement(const QString& elementName, int* value, bool find = false);
+	bool readBoolElement(const QString& elementName, bool* value, bool find = false);
 
 	bool readHostAddressPort(const QString& nameIP, const QString &namePort, HostAddressPort *hostAddressPort);
 	bool readHostAddress(const QString& name, QHostAddress *hostAddress);
 
 	bool findElement(const QString& elementName);
+	bool checkElement(const QString& elementName);
 };
 

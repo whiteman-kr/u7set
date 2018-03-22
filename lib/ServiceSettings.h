@@ -32,6 +32,10 @@ public:
 	static const char* PROP_DIAG_DATA_RECEIVING_IP;
 	static const char* PROP_DIAG_DATA_RECEIVING_PORT;
 
+	static const char* PROP_TUNING_DATA_NETMASK;
+	static const char* PROP_TUNING_DATA_IP;
+	static const char* PROP_TUNING_DATA_PORT;
+
 	static const char* PROP_CLIENT_REQUEST_IP;
 	static const char* PROP_CLIENT_REQUEST_NETMASK;
 	static const char* PROP_CLIENT_REQUEST_PORT;
@@ -60,23 +64,22 @@ public:
 	static const char* PROP_CFG_SERVICE_IP2;
 	static const char* PROP_CFG_SERVICE_PORT2;
 
-protected:
-	bool getSoftwareConnection(	const Hardware::EquipmentSet* equipment,
-								const Hardware::Software* thisSoftware,
-								const QString& propConnectedSoftwareID,
-								const QString& propConnectedSoftwareIP,
-								const QString& propConnectedSoftwarePort,
-								QString* connectedSoftwareID,
-								HostAddressPort* connectedSoftwareIP,
-								bool emptyAllowed, const QString &defaultIP, int defaultPort,
-								Builder::IssueLogger* log);
+public:
+	static bool getSoftwareConnection(	const Hardware::EquipmentSet* equipment,
+										const Hardware::Software* thisSoftware,
+										const QString& propConnectedSoftwareID,
+										const QString& propConnectedSoftwareIP,
+										const QString& propConnectedSoftwarePort,
+										QString* connectedSoftwareID,
+										HostAddressPort* connectedSoftwareIP,
+										bool emptyAllowed, const QString &defaultIP, int defaultPort,
+										Builder::IssueLogger* log);
 
-	bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
-								 const Hardware::Software* software,
-								 QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
-								 QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
-								 Builder::IssueLogger* log);
-
+	static bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
+										const Hardware::Software* software,
+										QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
+										QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
+										Builder::IssueLogger* log);
 };
 
 class CfgServiceSettings : public ServiceSettings
@@ -87,35 +90,25 @@ public:
 class AppDataServiceSettings : public ServiceSettings
 {
 private:
-	static const char* SECTION_NAME;
-
-	static const char* PROP_APP_DATA_NETMASK;
-	static const char* PROP_APP_DATA_RECEIVING_IP;
-	static const char* PROP_APP_DATA_RECEIVING_PORT;
-
 	static const char* PROP_AUTO_ARCHIVE_INTERVAL;
 
-	static const char* PROP_ARCH_SERVICE_ID;
-	static const char* PROP_ARCH_SERVICE_IP;
-	static const char* PROP_ARCH_SERVICE_PORT;
-
 public:
-	HostAddressPort appDataReceivingIP;
-	QHostAddress appDataNetmask;
-
-	int autoArchiveInterval = 5;
-
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
-
-	QString archServiceID;
-	HostAddressPort archServiceIP;
-
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
 
 	QString cfgServiceID2;
 	HostAddressPort cfgServiceIP2;
+
+	HostAddressPort appDataReceivingIP;
+	QHostAddress appDataReceivingNetmask;
+
+	int autoArchiveInterval = 5;
+
+	QString archServiceID;
+	HostAddressPort archServiceIP;
+
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
 
 	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
@@ -126,11 +119,6 @@ public:
 class TuningServiceSettings : public ServiceSettings
 {
 private:
-	static const char* SECTION_NAME;
-
-	static const char* PROP_TUNING_DATA_IP;
-	static const char* PROP_TUNING_DATA_PORT;
-
 	static const char* PROP_SINGLE_LM_CONTROL;
 	static const char* PROP_DISABLE_MODULES_TYPE_CHECKING;
 
@@ -169,16 +157,6 @@ public:
 class ArchivingServiceSettings : public ServiceSettings
 {
 public:
-	static const char* SECTION_NAME;
-
-	static const char* PROP_APP_DATA_RECEIVING_IP;
-	static const char* PROP_APP_DATA_RECEIVING_PORT;
-	static const char* PROP_APP_DATA_RECEIVING_NETMASK;
-
-	static const char* PROP_DIAG_DATA_RECEIVING_IP;
-	static const char* PROP_DIAG_DATA_RECEIVING_PORT;
-	static const char* PROP_DIAG_DATA_RECEIVING_NETMASK;
-
 	static const char* PROP_ARCHIVE_DB_HOST_IP;
 	static const char* PROP_ARCHIVE_DB_HOST_PORT;
 

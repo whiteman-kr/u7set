@@ -72,8 +72,8 @@ private:
 	void onTimer();
 
 	bool readConfiguration(const QByteArray& fileData);
-	bool readDataSources(QByteArray& fileData);
-	bool readAppSignals(QByteArray& fileData);
+	bool readDataSources(const QByteArray& fileData);
+	bool readAppSignals(const QByteArray& fileData);
 
 	void buildAppSignalID2IndexMap(bool signalsLoadResult);
 	void createAndInitSignalStates();

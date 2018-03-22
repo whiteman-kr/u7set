@@ -70,16 +70,9 @@ namespace Builder
 	{
 		bool result = true;
 
-		QByteArray data;
-		QXmlStreamWriter xmlWriter(&data);
-
-		XmlWriteHelper xml(xmlWriter);
-
-		xml.setAutoFormatting(true);
-		xml.writeStartDocument();
-		xml.writeStartElement("AppDataSources");
-
 		m_associatedAppSignals.clear();
+
+		QVector<DataSource> dataSources;
 
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
@@ -119,7 +112,8 @@ namespace Builder
 					break;
 				}
 
-				if (lmNetProperties.appDataServiceID != m_software->equipmentIdTemplate())
+				if (lmNetProperties.appDataEnable == false ||
+					lmNetProperties.appDataServiceID != m_software->equipmentIdTemplate())
 				{
 					continue;
 				}
@@ -150,7 +144,9 @@ namespace Builder
 					}
 				}
 
-				DataSource ds;
+				dataSources.append(DataSource());
+
+				DataSource& ds = dataSources[dataSources.count()-1];
 
 //				ds.setLmChannel(channel);
 				ds.setLmSubsystem(lmSubsystem);
@@ -167,8 +163,6 @@ namespace Builder
 				ds.setLmPort(lmNetProperties.appDataPort);
 
 				result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
-
-				ds.writeToXml(xml);
 			}
 
 			if (result == false)
@@ -177,10 +171,14 @@ namespace Builder
 			}
 		}
 
-		xml.writeEndElement();	// </AppDataSources>
-		xml.writeEndDocument();
+		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppDataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", data);
+		QByteArray fileData;
+		DataSourcesXML::writeToXml(dataSources, &fileData);
+
+		//
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppDataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -205,19 +203,6 @@ namespace Builder
 		// Writing units
 		xml.writeStartElement("Units");
 		xml.writeIntAttribute("Count", 0);
-
-/*		int unitsCount = unitInfo.count();
-
-		for (int i = 0; i < unitsCount; i++)
-		{
-			xml.writeStartElement("Unit");
-
-			xml.writeIntAttribute("ID", unitInfo.keyAt(i));
-			xml.writeStringAttribute("Caption", unitInfo[i]);
-
-			xml.writeEndElement();
-		}*/
-
 		xml.writeEndElement();				// Units
 
 		QVector<Signal*> signalsToWrite;
@@ -235,53 +220,11 @@ namespace Builder
 
 			bool hasWrongField = false;
 
-/*			if (!dataFormatInfo.contains(signal.dataFormatInt()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}*/
-
-/*			if (!unitInfo.contains(signal.unitID()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (!unitInfo.contains(signal.inputUnitID()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (!unitInfo.contains(signal.outputUnitID()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (signal.inputSensorType() < 0 || signal.inputSensorType() >= SENSOR_TYPE_COUNT)
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (signal.outputSensorType() < 0 || signal.outputSensorType() >= SENSOR_TYPE_COUNT)
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}*/
-
 			if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
-
-/*			if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}*/
 
 			switch (static_cast<E::ByteOrder>(signal.byteOrderInt()))
 			{
@@ -323,8 +266,6 @@ namespace Builder
 		{
 			return false;
 		}
-
-		//m_cfgXml->addLinkToFile(buildFile);
 
 		return true;
 	}
