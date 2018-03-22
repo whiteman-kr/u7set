@@ -3791,6 +3791,21 @@ R"DELIM({
 		}
 	}
 
+	const DeviceObject* EquipmentSet::deviceObject(const QString& equipmentId) const
+	{
+		auto it = m_deviceTable.find(equipmentId);
+
+		if (it != m_deviceTable.end())
+		{
+			return it.value().get();
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+
 	std::shared_ptr<DeviceObject> EquipmentSet::deviceObjectSharedPointer(const QString& equipmentId)
 	{
 		auto it = m_deviceTable.find(equipmentId);

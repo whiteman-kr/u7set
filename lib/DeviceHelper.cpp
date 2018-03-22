@@ -120,7 +120,6 @@ bool DeviceHelper::getIPv4Property(const Hardware::DeviceObject* device,
 
 	bool res = true;
 
-
 	if (emptyAllowed == true)
 	{
 		// defaultIp checking
@@ -141,7 +140,6 @@ bool DeviceHelper::getIPv4Property(const Hardware::DeviceObject* device,
 	{
 		return false;
 	}
-
 
 	if (value->isEmpty() == true)
 	{
@@ -207,13 +205,16 @@ bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device,
 {
 	TEST_PTR_RETURN_FALSE(log);
 
-	// defaultPort checking
-	//
-	if (defaultPort < Socket::PORT_LOWEST || defaultPort > Socket::PORT_HIGHEST)
+	if (emptyAllowed == true)
 	{
-		assert(false);
-		LOG_INTERNAL_ERROR(log);
-		return false;
+		// defaultPort checking
+		//
+		if (defaultPort < Socket::PORT_LOWEST || defaultPort > Socket::PORT_HIGHEST)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
 	}
 
 	QString portStr;
@@ -234,6 +235,20 @@ bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device,
 		}
 
 		*value = defaultPort;
+	}
+	else
+	{
+		bool ok = false;
+
+		*value = portStr.toInt(&ok);
+
+		if (ok == false)
+		{
+			// Property '%1.%2' conversion error.
+			//
+			log->errCFG3023(device->equipmentIdTemplate(), name);
+			return false;
+		}
 	}
 
 	if (*value < Socket::PORT_LOWEST || *value > Socket::PORT_HIGHEST)
@@ -287,7 +302,6 @@ bool DeviceHelper:: getIpPortProperty(const Hardware::DeviceObject* device,
 
 	return result;
 }
-
 
 bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log)
 {
@@ -607,7 +621,7 @@ const Hardware::DeviceModule* DeviceHelper::getAssociatedLmOrBvb(const Hardware:
 	return getLmOrBvb(chassis);
 }
 
-const Hardware::Software* DeviceHelper::getSoftware(Hardware::EquipmentSet* equipment, const QString& softwareID)
+const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID)
 {
 	if (equipment == nullptr)
 	{

@@ -91,7 +91,7 @@ public:
 	static const Hardware::DeviceModule* getAssociatedLm(const Hardware::DeviceObject* object);
 	static const Hardware::DeviceModule* getAssociatedLmOrBvb(const Hardware::DeviceObject* object);
 
-	static const Hardware::Software* getSoftware(Hardware::EquipmentSet* equipment, const QString& softwareID);
+	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
 
 	static int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
 	static int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);

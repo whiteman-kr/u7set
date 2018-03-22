@@ -22,9 +22,35 @@ class ServiceSettings
 public:
 	// common properties of services
 	//
+	static const char* SETTINGS_SECTION;
+
+	static const char* PROP_APP_DATA_RECEIVING_NETMASK;
+	static const char* PROP_APP_DATA_RECEIVING_IP;
+	static const char* PROP_APP_DATA_RECEIVING_PORT;
+
+	static const char* PROP_DIAG_DATA_RECEIVING_NETMASK;
+	static const char* PROP_DIAG_DATA_RECEIVING_IP;
+	static const char* PROP_DIAG_DATA_RECEIVING_PORT;
+
 	static const char* PROP_CLIENT_REQUEST_IP;
 	static const char* PROP_CLIENT_REQUEST_NETMASK;
 	static const char* PROP_CLIENT_REQUEST_PORT;
+
+	static const char* PROP_APP_DATA_SERVICE_ID;
+	static const char* PROP_APP_DATA_SERVICE_IP;
+	static const char* PROP_APP_DATA_SERVICE_PORT;
+
+	static const char* PROP_DIAG_DATA_SERVICE_ID;
+	static const char* PROP_DIAG_DATA_SERVICE_IP;
+	static const char* PROP_DIAG_DATA_SERVICE_PORT;
+
+	static const char* PROP_ARCH_SERVICE_ID;
+	static const char* PROP_ARCH_SERVICE_IP;
+	static const char* PROP_ARCH_SERVICE_PORT;
+
+	static const char* PROP_TUNING_SERVICE_ID;
+	static const char* PROP_TUNING_SERVICE_IP;
+	static const char* PROP_TUNING_SERVICE_PORT;
 
 	static const char* PROP_CFG_SERVICE_ID1;
 	static const char* PROP_CFG_SERVICE_IP1;
@@ -35,11 +61,22 @@ public:
 	static const char* PROP_CFG_SERVICE_PORT2;
 
 protected:
-	bool getCfgServiceConnectionSettings(	Hardware::EquipmentSet* equipment,
-											const Hardware::Software* software,
-											QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
-											QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
-											Builder::IssueLogger* log);
+	bool getSoftwareConnection(	const Hardware::EquipmentSet* equipment,
+								const Hardware::Software* thisSoftware,
+								const QString& propConnectedSoftwareID,
+								const QString& propConnectedSoftwareIP,
+								const QString& propConnectedSoftwarePort,
+								QString* connectedSoftwareID,
+								HostAddressPort* connectedSoftwareIP,
+								bool emptyAllowed, const QString &defaultIP, int defaultPort,
+								Builder::IssueLogger* log);
+
+	bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
+								 const Hardware::Software* software,
+								 QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
+								 QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
+								 Builder::IssueLogger* log);
+
 };
 
 class CfgServiceSettings : public ServiceSettings
@@ -134,13 +171,13 @@ class ArchivingServiceSettings : public ServiceSettings
 public:
 	static const char* SECTION_NAME;
 
-	static const char* PROP_APP_DATA_SERVICE_REQUEST_IP;
-	static const char* PROP_APP_DATA_SERVICE_REQUEST_PORT;
-	static const char* PROP_APP_DATA_SERVICE_REQUEST_NETMASK;
+	static const char* PROP_APP_DATA_RECEIVING_IP;
+	static const char* PROP_APP_DATA_RECEIVING_PORT;
+	static const char* PROP_APP_DATA_RECEIVING_NETMASK;
 
-	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_IP;
-	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_PORT;
-	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK;
+	static const char* PROP_DIAG_DATA_RECEIVING_IP;
+	static const char* PROP_DIAG_DATA_RECEIVING_PORT;
+	static const char* PROP_DIAG_DATA_RECEIVING_NETMASK;
 
 	static const char* PROP_ARCHIVE_DB_HOST_IP;
 	static const char* PROP_ARCHIVE_DB_HOST_PORT;
