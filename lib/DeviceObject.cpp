@@ -327,7 +327,7 @@ namespace Hardware
 
 		// Load specific properties' values. They are already exists after calling parseSpecificPropertiesStruct()
 		//
-		std::vector<std::shared_ptr<Property>> specificProps = this->properties();
+		std::vector<std::shared_ptr<Property>> specificProps = PropertyObject::specificProperties();
 
 		for (const ::Proto::Property& p :  deviceobject.properties())
 		{
@@ -361,7 +361,7 @@ namespace Hardware
 		{
 			m_preset = deviceobject.preset();
 
-			if (m_preset == true && propertyExists(QLatin1String("PresetName")) == false)
+			if (m_preset == true)
 			{
 				auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 				presetNameProp->setExpert(true);
@@ -1024,6 +1024,13 @@ namespace Hardware
 
 	void DeviceObject::setExpertToProperty(const QString& property, bool expert)
 	{
+		// If property is not created yet, do not set expert to it
+		//
+		if (propertyExists(property, false) == false)
+		{
+			return;
+		}
+
 		std::shared_ptr<Property> prop = propertyByCaption(property);
 
 		if (prop != nullptr)
@@ -2240,19 +2247,10 @@ R"DELIM({
 	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = addProperty<E::SignalType, DeviceSignal, &DeviceSignal::type, &DeviceSignal::setType>(PropertyNames::type, QLatin1String(), true);
-		auto functionProp = addProperty<E::SignalFunction, DeviceSignal, &DeviceSignal::function, &DeviceSignal::setFunction>(PropertyNames::function, QLatin1String(), true);
-		auto byteOrderProp = addProperty<E::ByteOrder, DeviceSignal, &DeviceSignal::byteOrder, &DeviceSignal::setByteOrder>(PropertyNames::byteOrder, QLatin1String(), true);
-		auto formatProp = addProperty<E::DataFormat, DeviceSignal, &DeviceSignal::format, &DeviceSignal::setFormat>(PropertyNames::format, QLatin1String(), true);
-		auto memoryAreaProp = addProperty<E::MemoryArea, DeviceSignal, &DeviceSignal::memoryArea, &DeviceSignal::setMemoryArea>(PropertyNames::memoryArea, QLatin1String(), true);
 
-		auto sizeProp = addProperty<int, DeviceSignal, &DeviceSignal::size, &DeviceSignal::setSize>(PropertyNames::size, QLatin1String(), true);
-
-		auto valueOffsetProp = addProperty<int, DeviceSignal, &DeviceSignal::valueOffset, &DeviceSignal::setValueOffset>(PropertyNames::valueOffset, QLatin1String(), true);
-		auto valueBitProp = addProperty<int, DeviceSignal, &DeviceSignal::valueBit, &DeviceSignal::setValueBit>(PropertyNames::valueBit, QLatin1String(), true);
-
-		auto validitySignalId = addProperty<QString, DeviceSignal, &DeviceSignal::validitySignalId, &DeviceSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
-
+		// These properties are used in setType()
+		// So they don take part in PropertyOnDemand
+		//
 		auto appSignalLowAdcProp = addProperty<int, DeviceSignal, &DeviceSignal::appSignalLowAdc, &DeviceSignal::setAppSignalLowAdc>(PropertyNames::appSignalLowAdc, PropertyNames::categoryAnalogAppSignal, true);
 		auto appSignalHighAdcProp = addProperty<int, DeviceSignal, &DeviceSignal::appSignalHighAdc, &DeviceSignal::setAppSignalHighAdc>(PropertyNames::appSignalHighAdc, PropertyNames::categoryAnalogAppSignal, true);
 
@@ -2260,8 +2258,6 @@ R"DELIM({
 		auto appSignalHighEngUnitsProp = addProperty<double, DeviceSignal, &DeviceSignal::appSignalHighEngUnits, &DeviceSignal::setAppSignalHighEngUnits>(PropertyNames::appSignalHighEngUnits, PropertyNames::categoryAnalogAppSignal, true);
 
 		auto appSignalDataFormatProp = addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, QLatin1String(), true);
-
-		auto signalSpecPropsStrucProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruc, &DeviceSignal::setSignalSpecPropsStruc>(PropertyNames::signalSpecificProperties, QLatin1String(), true);
 
 //		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, PropertyNames::type, true, DeviceSignal::type, DeviceSignal::setType)
 //		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, PropertyNames::function, true, DeviceSignal::function, DeviceSignal::setFunction)
@@ -2286,33 +2282,6 @@ R"DELIM({
 
 //		auto signalSpecPropsStrucProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::signalSpecificProperties, true, DeviceSignal::signalSpecPropsStruc, DeviceSignal::setSignalSpecPropsStruc)
 
-		typeProp->setUpdateFromPreset(true);
-		typeProp->setExpert(preset);
-
-		functionProp->setUpdateFromPreset(true);
-		functionProp->setExpert(preset);
-
-		byteOrderProp->setUpdateFromPreset(true);
-		byteOrderProp->setExpert(preset);
-
-		formatProp->setUpdateFromPreset(true);
-		formatProp->setExpert(preset);
-
-		memoryAreaProp->setUpdateFromPreset(true);
-		memoryAreaProp->setExpert(preset);
-
-		sizeProp->setUpdateFromPreset(true);
-		sizeProp->setExpert(preset);
-
-		validitySignalId->setUpdateFromPreset(true);
-		validitySignalId->setExpert(preset);
-
-		valueOffsetProp->setUpdateFromPreset(true);
-		valueOffsetProp->setExpert(preset);
-
-		valueBitProp->setUpdateFromPreset(true);
-		valueBitProp->setExpert(preset);
-
 		appSignalLowAdcProp->setUpdateFromPreset(true);
 		appSignalLowAdcProp->setExpert(preset);
 
@@ -2328,9 +2297,6 @@ R"DELIM({
 		appSignalDataFormatProp->setUpdateFromPreset(true);
 		appSignalDataFormatProp->setExpert(preset);
 
-		signalSpecPropsStrucProp->setUpdateFromPreset(true);
-		signalSpecPropsStrucProp->setExpert(preset);
-
 		// Show/Hide analog signal properties
 		//
 		setType(type());
@@ -2340,6 +2306,59 @@ R"DELIM({
 
 	DeviceSignal::~DeviceSignal()
 	{
+
+	}
+
+	void DeviceSignal::propertyDemand(const QString& prop)
+	{
+		DeviceObject::propertyDemand(prop);
+
+		auto typeProp = addProperty<E::SignalType, DeviceSignal, &DeviceSignal::type, &DeviceSignal::setType>(PropertyNames::type, QLatin1String(), true);
+		auto functionProp = addProperty<E::SignalFunction, DeviceSignal, &DeviceSignal::function, &DeviceSignal::setFunction>(PropertyNames::function, QLatin1String(), true);
+		auto byteOrderProp = addProperty<E::ByteOrder, DeviceSignal, &DeviceSignal::byteOrder, &DeviceSignal::setByteOrder>(PropertyNames::byteOrder, QLatin1String(), true);
+		auto formatProp = addProperty<E::DataFormat, DeviceSignal, &DeviceSignal::format, &DeviceSignal::setFormat>(PropertyNames::format, QLatin1String(), true);
+		auto memoryAreaProp = addProperty<E::MemoryArea, DeviceSignal, &DeviceSignal::memoryArea, &DeviceSignal::setMemoryArea>(PropertyNames::memoryArea, QLatin1String(), true);
+
+		auto sizeProp = addProperty<int, DeviceSignal, &DeviceSignal::size, &DeviceSignal::setSize>(PropertyNames::size, QLatin1String(), true);
+
+		auto valueOffsetProp = addProperty<int, DeviceSignal, &DeviceSignal::valueOffset, &DeviceSignal::setValueOffset>(PropertyNames::valueOffset, QLatin1String(), true);
+		auto valueBitProp = addProperty<int, DeviceSignal, &DeviceSignal::valueBit, &DeviceSignal::setValueBit>(PropertyNames::valueBit, QLatin1String(), true);
+
+		auto validitySignalId = addProperty<QString, DeviceSignal, &DeviceSignal::validitySignalId, &DeviceSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
+
+		auto signalSpecPropsStrucProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruc, &DeviceSignal::setSignalSpecPropsStruc>(PropertyNames::signalSpecificProperties, QLatin1String(), true);
+
+		typeProp->setUpdateFromPreset(true);
+		typeProp->setExpert(m_preset);
+
+		functionProp->setUpdateFromPreset(true);
+		functionProp->setExpert(m_preset);
+
+		byteOrderProp->setUpdateFromPreset(true);
+		byteOrderProp->setExpert(m_preset);
+
+		formatProp->setUpdateFromPreset(true);
+		formatProp->setExpert(m_preset);
+
+		memoryAreaProp->setUpdateFromPreset(true);
+		memoryAreaProp->setExpert(m_preset);
+
+		sizeProp->setUpdateFromPreset(true);
+		sizeProp->setExpert(m_preset);
+
+		validitySignalId->setUpdateFromPreset(true);
+		validitySignalId->setExpert(m_preset);
+
+		valueOffsetProp->setUpdateFromPreset(true);
+		valueOffsetProp->setExpert(m_preset);
+
+		valueBitProp->setUpdateFromPreset(true);
+		valueBitProp->setExpert(m_preset);
+
+		signalSpecPropsStrucProp->setUpdateFromPreset(true);
+		signalSpecPropsStrucProp->setExpert(m_preset);
+
+		return;
 	}
 
 	bool DeviceSignal::SaveData(Proto::Envelope* message, bool saveTree) const

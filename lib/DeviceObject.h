@@ -576,6 +576,9 @@ namespace Hardware
 		explicit DeviceSignal(bool preset = false);
 		virtual ~DeviceSignal();
 
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
+
 		// Serialization
 		//
 	protected:

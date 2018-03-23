@@ -1692,6 +1692,42 @@ public:
 		return result;
 	}
 
+	std::vector<std::shared_ptr<Property>> specificProperties() const
+	{
+		// Specific properties cannot be demanded,
+		// they are not in propertyDemand
+		//
+
+		std::vector<std::shared_ptr<Property>> result;
+		result.reserve(m_properties.size());
+
+		for (const auto[key, prop] : m_properties)
+		{
+			Q_UNUSED(key);
+
+			if (prop->specific() == true)
+			{
+				result.push_back(prop);
+			}
+		}
+
+		return result;
+	}
+
+	Q_INVOKABLE bool propertyExists(const QString& caption, bool demandIfNotExists) const
+	{
+		uint hash = qHash(caption);
+
+		if (demandIfNotExists == false)
+		{
+			return m_properties.find(hash) != m_properties.end();
+		}
+		else
+		{
+			return propertyByCaption(caption) != nullptr;
+		}
+	}
+
 	Q_INVOKABLE bool propertyExists(const QString& caption) const
 	{
 		return propertyByCaption(caption) != nullptr;
@@ -1953,13 +1989,7 @@ public:
 
 		// Save all specific properties values
 		//
-		std::vector<std::shared_ptr<Property>> oldProperties = this->properties();
-
-		oldProperties.erase(std::remove_if(oldProperties.begin(), oldProperties.end(),
-										   [](std::shared_ptr<Property> p)
-		{
-								return p->specific() == false;
-							}), oldProperties.end());
+		std::vector<std::shared_ptr<Property>> oldProperties = this->specificProperties();
 
 		// Delete all previous object's specific properties
 		//
@@ -2084,7 +2114,7 @@ public:
 			}
 		}
 
-		std::vector<std::shared_ptr<Property>> newProperties = properties();
+		std::vector<std::shared_ptr<Property>> newProperties = this->specificProperties();
 
 		// Set Specific editors to properties
 		//
