@@ -8,7 +8,7 @@ class AppDataProcessingWorker : public SimpleThreadWorker
 public:
 	AppDataProcessingWorker(int number,
 							const AppDataSourcesIP& appDataSourcesIP,
-							const AppDataReceiver& appDataReceiver,
+							const AppDataReceiver* appDataReceiver,
 							CircularLoggerShared log);
 
 	void connectToReceiver(AppDataReceiver& appDataReceiver);
@@ -23,7 +23,7 @@ public slots:
 private:
 	int m_number = 0;
 	const AppDataSourcesIP& m_appDataSourcesIP;
-	const AppDataReceiver& m_appDataReceiver;
+	const AppDataReceiver* m_appDataReceiver;
 	CircularLoggerShared m_log;
 
 	// parsing statistics
@@ -39,7 +39,7 @@ class AppDataProcessingThread : public SimpleThread
 public:
 	AppDataProcessingThread(int number,
 							const AppDataSourcesIP& appDataSourcesIP,
-							const AppDataReceiver& appDataReceiver,
+							const AppDataReceiver* appDataReceiver,
 							CircularLoggerShared log);
 };
 
@@ -47,13 +47,14 @@ public:
 class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread*>
 {
 public:
-	void createProcessingThreads(int poolSize,
-								 const AppDataSourcesIP& appDataSourcesIP,
-								 const AppDataReceiver& appDataReceiver,
-								 CircularLoggerShared log);
+	static const int IDEAL_THREADS_COUNT = -1;
 
-	void startProcessingThreads();
+public:
+	void startProcessingThreads(int poolSize,
+								const AppDataSourcesIP& appDataSourcesIP,
+								const AppDataReceiver* appDataReceiver,
+								CircularLoggerShared log);
 
-	void stopAndClearProcessingThreads();
+	void stopProcessingThreads();
 };
 

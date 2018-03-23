@@ -164,6 +164,7 @@ AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataRecievin
 											 const AppDataSourcesIP& appDataSourcesIP,
 											 CircularLoggerShared log)
 {
-	AppDataReceiver* appDataReceiver = new AppDataReceiver(dataRecievingIP, appDataSourcesIP, log);
-	addWorker(appDataReceiver);
+	m_appDataReceiver = new AppDataReceiver(dataRecievingIP, appDataSourcesIP, log);
+
+	addWorker(m_appDataReceiver);
 }

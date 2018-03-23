@@ -410,6 +410,8 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 
 	QDateTime plantTime;
 
+	plantTime.setTimeSpec(Qt::UTC);	// don't delete this to prevent plantTime conversion from Local to UTC time!!!
+
 	plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 	plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
 
@@ -505,7 +507,7 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 	}
 	else
 	{
-		assert(false);
+		// is not an error - queue is full
 	}
 
 	m_rupFrameTimeQueue.completePush();
@@ -535,7 +537,7 @@ bool DataSourceOnline::releaseProcessingOwnership(const SimpleThreadWorker* proc
 
 bool DataSourceOnline::processRupFrameTimeQueue()
 {
-	bool result = false;
+	bool dataReady = false;
 
 	int count = 0;
 
@@ -543,116 +545,117 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 	{
 		RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPop();
 
-		if (rupFrameTime == nullptr)
+		if (rupFrameTime != nullptr)
 		{
-			break;	// has no frames to processing, exit from processRupFrameTimeQueue, return FALSE
-					// m_rupFrameTimeQueue.completePop() is not required!!!
-		}
+			m_lastPacketTime = QDateTime::currentMSecsSinceEpoch();
+			m_state = E::DataSourceState::ReceiveData;
 
-		count++;
-
-		do
-		{
-			m_dataReceived = true;
-			m_receivedFramesCount++;
-			m_receivedDataSize += sizeof(Rup::Frame);
-
-			if (m_dataProcessingEnabled == false)
+			do
 			{
-				break;
-			}
+				m_dataReceived = true;
+				m_receivedFramesCount++;
+				m_receivedDataSize += sizeof(Rup::Frame);
 
-			Rup::Header& rupFrameHeader = rupFrameTime->rupFrame.header;
-
-			rupFrameHeader.reverseBytes();
-
-			// rupFrame's protocol version checking
-			//
-			if (rupFrameHeader.protocolVersion != 5)
-			{
-				m_errorProtocolVersion++;
-				break;
-			}
-
-			// rupFrame's numerator tracking
-			//
-			quint16 numerator = rupFrameHeader.numerator;
-
-			if (m_firstRupFrame == true)
-			{
-				m_rupFrameNumerator = numerator;
-				m_firstRupFrame = false;
-			}
-			else
-			{
-				if (m_rupFrameNumerator != numerator)
+				if (m_dataProcessingEnabled == false)
 				{
-					if (m_rupFrameNumerator < numerator)
+					break;
+				}
+
+				Rup::Header& rupFrameHeader = rupFrameTime->rupFrame.header;
+
+				rupFrameHeader.reverseBytes();
+
+				// rupFrame's protocol version checking
+				//
+				if (rupFrameHeader.protocolVersion != 5)
+				{
+					m_errorProtocolVersion++;
+					break;
+				}
+
+				// rupFrame's data ID checking
+				//
+				if (rupFrameHeader.dataId != lmDataID())
+				{
+					m_errorDataID++;
+
+					if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
 					{
-						m_lostedFramesCount += numerator - m_rupFrameNumerator;
+						QString msg = QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
+								arg(lmAddressPort().addressStr()).
+								arg(rupFrameHeader.dataId).
+								arg(lmDataID());
+
+						qDebug() << C_STR(msg);
+					}
+
+					break;
+				}
+
+				// RupFrame's framesQuantity and frameNo checkng
+				//
+				if (rupFrameHeader.framesQuantity > Rup::MAX_FRAME_COUNT)
+				{
+					m_errorFramesQuantity++;
+					break;
+				}
+
+				if (rupFrameHeader.frameNumber >= rupFrameHeader.framesQuantity)
+				{
+					m_errorFrameNo++;
+					break;
+				}
+
+				// collect rupFrames
+				//
+				dataReady = collect(*rupFrameTime);
+
+				if (dataReady == true)
+				{
+					// rupFrame's numerator tracking
+					//
+					quint16 numerator = rupFrameHeader.numerator;
+
+					if (m_firstRupFrame == true)
+					{
+						m_rupFrameNumerator = numerator;
+						m_firstRupFrame = false;
 					}
 					else
 					{
-						m_lostedFramesCount += 0xFFFF - m_rupFrameNumerator + numerator;
+						if (m_rupFrameNumerator != numerator)
+						{
+							if (m_rupFrameNumerator < numerator)
+							{
+								m_lostedFramesCount += numerator - m_rupFrameNumerator;
+							}
+							else
+							{
+								m_lostedFramesCount += 0xFFFF - m_rupFrameNumerator + numerator;
+							}
+
+							m_rupFrameNumerator = numerator;
+						}
 					}
 
-					m_rupFrameNumerator = numerator;
-				}
-			}
-
-			m_rupFrameNumerator++;
-
-			// rupFrame's data ID checking
-			//
-			if (rupFrameHeader.dataId != lmDataID())
-			{
-				m_errorDataID++;
-
-				if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
-				{
-					QString msg = QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
-							arg(lmAddressPort().addressStr()).
-							arg(rupFrameHeader.dataId).
-							arg(lmDataID());
-
-					qDebug() << C_STR(msg);
+					m_rupFrameNumerator++;
 				}
 
 				break;
 			}
+			while(1);
 
-			// RupFrame's framesQuantity and frameNo checkng
-			//
-			if (rupFrameHeader.framesQuantity > Rup::MAX_FRAME_COUNT)
-			{
-				m_errorFramesQuantity++;
-				break;
-			}
-
-			if (rupFrameHeader.frameNumber >= rupFrameHeader.framesQuantity)
-			{
-				m_errorFrameNo++;
-				break;
-			}
-
-			// collect rupFrames
-			//
-			result = collect(*rupFrameTime);
-
-			if (result == true)
-			{
-				m_lastPacketTime = QDateTime::currentMSecsSinceEpoch();
-				m_state = E::DataSourceState::ReceiveData;
-			}
-
-			break;
+			m_rupFrameTimeQueue.completePop();
 		}
-		while(1);
+		else
+		{
+			break;	// has no frames to processing, exit from processRupFrameTimeQueue, return FALSE
+		}
 
-		m_rupFrameTimeQueue.completePop();
+		count++;
 	}
-	while(count < 100 && result == false);
+	while(dataReady == false && count < 100);
 
-	return result;
+	return dataReady;
 }
 

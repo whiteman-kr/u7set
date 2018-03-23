@@ -59,5 +59,10 @@ public:
 	AppDataReceiverThread(const HostAddressPort& dataRecievingIP,
 						  const AppDataSourcesIP& appDataSourcesIP,
 						  CircularLoggerShared log);
+
+	AppDataReceiver* appDataReceiver() { return m_appDataReceiver; }
+
+private:
+	AppDataReceiver* m_appDataReceiver = nullptr;
 };
 

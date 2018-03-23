@@ -10,18 +10,19 @@
 
 AppDataProcessingWorker::AppDataProcessingWorker(int number,
 												 const AppDataSourcesIP& appDataSourcesIP,
-												 const AppDataReceiver& appDataReceiver,
+												 const AppDataReceiver* appDataReceiver,
 												 CircularLoggerShared log) :
 	m_number(number),
 	m_appDataSourcesIP(appDataSourcesIP),
 	m_appDataReceiver(appDataReceiver),
 	m_log(log)
 {
+	assert(appDataReceiver != nullptr);
 }
 
 void AppDataProcessingWorker::onThreadStarted()
 {
-	connect(&m_appDataReceiver, &AppDataReceiver::rupFrameIsReceived, this, &AppDataProcessingWorker::onAppDataSourceReceiveRupFrame);
+	connect(m_appDataReceiver, &AppDataReceiver::rupFrameIsReceived, this, &AppDataProcessingWorker::onAppDataSourceReceiveRupFrame);
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is started").arg(m_number));
 }
@@ -57,6 +58,11 @@ void AppDataProcessingWorker::onAppDataSourceReceiveRupFrame(quint32 appDataSour
 		appDataSource->parsePacket();
 
 		m_parsedRupPacketCount++;
+
+		if ((m_parsedRupPacketCount % 100) == 0)
+		{
+			qDebug() << " tread " << m_number << "parsed " << m_parsedRupPacketCount << " ----- success" << m_successOwnership << "/" << m_failOwnership;
+		}
 	}
 
 	appDataSource->releaseProcessingOwnership(this);
@@ -70,7 +76,7 @@ void AppDataProcessingWorker::onAppDataSourceReceiveRupFrame(quint32 appDataSour
 
 AppDataProcessingThread::AppDataProcessingThread(int number,
 												 const AppDataSourcesIP& appDataSourcesIP,
-												 const AppDataReceiver& appDataReceiver,
+												 const AppDataReceiver* appDataReceiver,
 												 CircularLoggerShared log) :
 	SimpleThread(new AppDataProcessingWorker(number, appDataSourcesIP, appDataReceiver, log))
 {
@@ -83,26 +89,20 @@ AppDataProcessingThread::AppDataProcessingThread(int number,
 //
 // -------------------------------------------------------------------------------
 
-void AppDataProcessingThreadsPool::createProcessingThreads(int poolSize,
-														   const AppDataSourcesIP& appDataSourcesIP,
-														   const AppDataReceiver& appDataReceiver,
-														   CircularLoggerShared log)
+void AppDataProcessingThreadsPool::startProcessingThreads(int poolSizeFromSettings,
+														  const AppDataSourcesIP& appDataSourcesIP,
+														  const AppDataReceiver* appDataReceiver,
+														  CircularLoggerShared log)
 {
-	if (count() > 0)
-	{
-		stopAndClearProcessingThreads();
-	}
+	assert(count() == 0);
 
-	if (poolSize > 32)
+	int poolSize = poolSizeFromSettings;
+
+	int idealThreadCount = QThread::idealThreadCount();
+
+	if (poolSize <= 0 || poolSize > idealThreadCount)
 	{
-		poolSize = 32;
-	}
-	else
-	{
-		if (poolSize <= 0)
-		{
-			poolSize = QThread::idealThreadCount();
-		}
+		poolSize = idealThreadCount;
 	}
 
 	for(int i = 0; i < poolSize; i++)
@@ -110,26 +110,15 @@ void AppDataProcessingThreadsPool::createProcessingThreads(int poolSize,
 		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i + 1, appDataSourcesIP, appDataReceiver, log);
 
 		append(processingThread);
-	}
-}
-
-
-void AppDataProcessingThreadsPool::startProcessingThreads()
-{
-	for(AppDataProcessingThread* processingThread : *this)
-	{
-		if (processingThread == nullptr)
-		{
-			assert(false);
-			continue;
-		}
 
 		processingThread->start();
 	}
+
+	DEBUG_LOG_MSG(log, QString("AppDataProcessingThreadsPool started. Running threads count %1%2 (count from settings %3)").
+							arg(poolSize).arg(poolSize == idealThreadCount ? " (ideal)" : "").arg(poolSizeFromSettings));
 }
 
-
-void AppDataProcessingThreadsPool::stopAndClearProcessingThreads()
+void AppDataProcessingThreadsPool::stopProcessingThreads()
 {
 	for(AppDataProcessingThread* processingThread : *this)
 	{

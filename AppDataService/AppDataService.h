@@ -28,7 +28,7 @@ public:
 						 const QString& serviceName,
 						 int& argc,
 						 char** argv,
-						 CircularLoggerShared log);
+						 CircularLoggerShared logger);
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -46,13 +46,26 @@ private:
 
 	//
 
-	void readConfigurationFiles();
-
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
+	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
+	bool readConfigurationSettings(const QByteArray& fileData);
+	bool readDataSources(const QByteArray& fileData);
+	bool readAppSignals(const QByteArray& fileData);
+
+	void buildAppSignalID2IndexMap(bool signalsLoadResult);
+	void createAndInitSignalStates();
+
+	void applyNewConfiguration();
+	void clearConfiguration();
+
 	void runAppDataReceiverThread();
 	void stopAppDataReceiverlThread();
+
+	void runAppDataProcessingThreads();
+	void stopAppDataProcessingThreads();
 
 	void runTcpAppDataServer();
 	void stopTcpAppDataServer();
@@ -67,28 +80,15 @@ private:
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
-	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void resizeAppSignalEventsQueue();
 
 	void onTimer();
 
-	bool readConfiguration(const QByteArray& fileData);
-	bool readDataSources(const QByteArray& fileData);
-	bool readAppSignals(const QByteArray& fileData);
-
-	void buildAppSignalID2IndexMap(bool signalsLoadResult);
-	void createAndInitSignalStates();
-
-	void clearConfiguration();
-	void applyNewConfiguration();
-
-	void resizeAppSignalEventsQueue();
-
 private:
-	CircularLoggerShared m_log;
-
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	AppDataServiceSettings m_cfgSettings;
+	int m_appDataProcessingThreadCount = 0;
 
 	int m_autoArchivingGroupsCount = 0;
 
@@ -99,7 +99,7 @@ private:
 
 	AppSignalStates m_signalStates;
 
-	AppDataProcessingThreadsPool m_appDtaProcessingThreadsPool;
+	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
 
 	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
 
