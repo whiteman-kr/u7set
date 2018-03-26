@@ -21,6 +21,7 @@ public slots:
 	void onAppDataSourceReceiveRupFrame(quint32 appDataSourceIP);
 
 private:
+	const QThread* m_thisThread = nullptr;
 	int m_number = 0;
 	const AppDataSourcesIP& m_appDataSourcesIP;
 	const AppDataReceiver* m_appDataReceiver;
@@ -43,8 +44,37 @@ public:
 							CircularLoggerShared log);
 };
 
+class AppDataProcessingThread2 : public QThread
+{
+public:
+	AppDataProcessingThread2(int number,
+							const AppDataSourcesIP& appDataSourcesIP,
+							const AppDataReceiver* appDataReceiver,
+							CircularLoggerShared log);
 
-class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread*>
+	void run() override;
+
+	void quit() { m_quitRequested = true; }
+
+	void quitAndWait();
+
+private:
+	bool m_quitRequested = false;
+	int m_number = 0;
+	const AppDataSourcesIP& m_appDataSourcesIP;
+	const AppDataReceiver* m_appDataReceiver;
+	CircularLoggerShared m_log;
+
+	// parsing statistics
+	//
+	quint64 m_parsedRupPacketCount = 0;
+	quint64 m_successOwnership = 0;
+	quint64 m_failOwnership = 0;
+};
+
+
+
+class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread2*>
 {
 public:
 	static const int IDEAL_THREADS_COUNT = -1;

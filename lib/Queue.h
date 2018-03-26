@@ -3,68 +3,51 @@
 #include <type_traits>
 #include <cassert>
 
+class QueueIndex
+{
+private:
+	int m_index = 0;
+	int m_maxValue = 0;
+
+public:
+	QueueIndex(int maxValue) :
+		m_maxValue(maxValue) {}
+
+	int operator ++ (int)
+	{
+		m_index++;
+
+		if (m_index == m_maxValue)
+		{
+			m_index = 0;
+		}
+
+		return m_index;
+	}
+
+	int operator () () const { return m_index; }
+
+	void reset() { m_index = 0; }
+
+	void setMaxValue(int maxValue) { m_maxValue = maxValue; }
+};
 
 class QueueBase : public QObject
 {
 	Q_OBJECT
 
-	class QueueIndex
-	{
-	private:
-		int m_index = 0;
-		int m_maxValue = 0;
-
-	public:
-		QueueIndex(int maxValue) :
-			m_maxValue(maxValue) {}
-
-		int operator ++ (int)
-		{
-			m_index++;
-
-			if (m_index == m_maxValue)
-			{
-				m_index = 0;
-			}
-
-			return m_index;
-		}
-
-		int operator () () const { return m_index; }
-
-		void reset() { m_index = 0; }
-
-		void setMaxValue(int maxValue) { m_maxValue = maxValue; }
-	};
-
-signals:
-	void queueNotEmpty();
-	void queueFull();
-	void queueEmpty();
-
-protected:
-	QMutex m_mutex;
-	char* m_buffer = nullptr;
-
-	int m_itemSize = 0;
-	int m_queueSize = 0;
-
-	int m_size = 0;								// current queue size
-
-	QueueIndex m_writeIndex;
-	QueueIndex m_readIndex;
-
-	int m_lostCount = 0;
-
 public:
 	QueueBase(QObject* parent, int itemSize, int queueSize);
 	virtual ~QueueBase();
 
-	int size() { return m_size; }
+	int size() const { return m_size; }
+	int maxSize() const { return m_maxSize; }
 
-	bool isEmpty() { return m_size == 0; }
+	bool isEmpty() const { return m_size == 0; }
 
-	bool isNotEmpty() { return m_size > 0; }
+	bool isNotEmpty() const { return m_size > 0; }
+
+	bool isFull() const { return m_size == m_queueSize; }
 
 	bool push(const char* item);
 	bool pop(char* item);
@@ -81,6 +64,65 @@ public:
 	bool completePop();
 
 	void resize(int newQueueSize);
+
+signals:
+	void queueNotEmpty();
+	void queueFull();
+	void queueEmpty();
+
+protected:
+	QMutex m_mutex;
+	char* m_buffer = nullptr;
+
+	int m_itemSize = 0;
+	int m_queueSize = 0;
+
+	int m_size = 0;								// current queue size
+
+	int m_maxSize = 0;
+
+	QueueIndex m_writeIndex;
+	QueueIndex m_readIndex;
+
+	int m_lostCount = 0;
+};
+
+
+class LockFreeQueueBase
+{
+	//
+	// One Writer - One Reader using only!!!
+	//
+public:
+	LockFreeQueueBase(QObject* parent, int itemSize, int queueSize);
+
+	bool push(const char* item);
+	bool pop(char* item);
+
+	char* beginPush();
+	bool completePush();
+
+	char* beginPop();
+	bool completePop();
+
+private:
+	char* m_buffer = nullptr;
+
+	int m_itemSize = 0;
+	int m_queueSize = 0;
+
+	// vars modified by Writer only
+
+	QueueIndex m_writeIndex;
+	int m_maxSize = 0;
+
+	// var modified by Reader only
+
+	QueueIndex m_readIndex;
+
+	// var modified by Writer and Reader
+
+	std::atomic<int> m_size = 0;								// current queue size
 };
 
 

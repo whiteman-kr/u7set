@@ -148,7 +148,9 @@ void AppDataReceiver::onSocketReadyRead()
 
 		dataSource->pushRupFrame(serverTime, rupFrame);
 
-		emit rupFrameIsReceived(ip);
+		//	emit rupFrameIsReceived(ip);			uncomment if using AppDataProcessingThread class to process data
+		//
+		//											for AppDataProcessingThread2 class this imit is not requred!
 	}
 	while(quitRequested() == false);
 }

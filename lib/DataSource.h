@@ -241,11 +241,14 @@ public:
 
 	// Functions used by data processing thread
 	//
-	bool seizeProcessingOwnership(const SimpleThreadWorker* processingWorker);
-	bool releaseProcessingOwnership(const SimpleThreadWorker* processingWorker);
+	bool seizeProcessingOwnership(const QThread* processingThread);
+	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	bool processRupFrameTimeQueue();
 	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
+
+	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(); }
+	int rupFramesQueueMaxSize() const { return m_rupFrameTimeQueue.maxSize(); }
 
 private:
 	bool collect(const RupFrameTime& rupFrameTime);
@@ -291,7 +294,7 @@ private:
 
 	//
 
-	std::atomic<const SimpleThreadWorker*> m_processingOwner = nullptr;
+	std::atomic<const QThread*> m_processingOwner = nullptr;
 
 	//
 

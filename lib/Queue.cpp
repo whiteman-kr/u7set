@@ -53,6 +53,11 @@ bool QueueBase::push(const char* item)
 	m_writeIndex++;
 	m_size++;
 
+	if (m_size > m_maxSize)
+	{
+		m_maxSize = m_size;
+	}
+
 	emit queueNotEmpty();
 
 	if (m_size == m_queueSize)
@@ -122,6 +127,11 @@ bool QueueBase::completePush()
 {
 	m_writeIndex++;
 	m_size++;
+
+	if (m_size > m_maxSize)
+	{
+		m_maxSize = m_size;
+	}
 
 	emit queueNotEmpty();
 

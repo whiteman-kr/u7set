@@ -23,6 +23,3 @@ SUBDIRS += qtservice \
     TuningClient \
     TuningIPEN \
     mconf
-
-HEADERS += \
-    lib/socket.h
