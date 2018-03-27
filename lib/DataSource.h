@@ -290,7 +290,7 @@ private:
 
 	//
 
-	Queue<RupFrameTime> m_rupFrameTimeQueue;				// fast non-blocking queue filled by AppDataReceiver
+	LockFreeQueue<RupFrameTime> m_rupFrameTimeQueue;				// fast non-blocking queue filled by AppDataReceiver
 
 	//
 

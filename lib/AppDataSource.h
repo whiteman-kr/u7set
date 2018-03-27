@@ -6,32 +6,47 @@
 struct AppSignalStateEx
 {
 public:
+	static const int NO_INDEX = -1;
+	static const int NO_AUTOARCHIVING_GROUP = -1;
+	static const int NOT_INITIALIZED_AUTOARCHIVING_GROUP = -2;
+
+public:
 	AppSignalStateEx();
 
 	void setSignalParams(int index, Signal* signal);
-	bool setState(Times time, quint32 validity, double value, int autoArchivingGroup);
 
-	void invalidate() { m_current.flags.all = 0; }
+	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup);
+	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = m_stored.flags.all = 0; }
 
 	Hash hash() const;
+
+	bool archive() const { return m_archive; }
 
 	QString appSignalID() const;
 
 	friend class AppSignalStates;
 
-	const SimpleAppSignalState& current() const { return m_current; }
+	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
 	const SimpleAppSignalState& stored() const { return m_stored; }
 
-	void setAutoArchivingGroup(int groupsCount);
+	int autoArchiningGroup() const { return m_autoArchivingGroup; }
+	void setAutoArchivingGroup(int archivingGroup);
 
 private:
-	SimpleAppSignalState m_current;
+	void setNewCurState(const SimpleAppSignalState& newCurState);
+
+private:
+	SimpleAppSignalState m_current[2];
 	SimpleAppSignalState m_stored;
+
+	std::atomic<int> m_curStateIndex = 0;
 
 	// paramters needed to update state
 	//
 	bool m_initialized = false;
 	bool m_isDiscreteSignal = false;
+
+	bool m_archive = false;
 
 	bool m_adaptiveAperture = false;
 
@@ -46,7 +61,7 @@ private:
 	double m_absRoughAperture = 0;
 	double m_absSmoothAperture = 0;
 
-	int m_autoArchivingGroup = -2;
+	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
 	Signal* m_signal = nullptr;
 	int m_index = 0;
@@ -100,11 +115,6 @@ public:
 
 class AppDataSource : public DataSourceOnline
 {
-public:
-	static const int NO_INDEX = -1;
-	static const int NO_AUTOARCHIVING_GROUP = -1;
-	static const int NOT_INITIALIZED_AUTOARCHIVING_GROUP = -2;
-
 private:
 	struct SignalParseInfo
 	{
@@ -118,7 +128,7 @@ private:
 
 		int dataSize = 1;
 
-		int index = NO_INDEX;		// index of signal in AppSignals and AddSignalStates
+		int index = AppSignalStateEx::NO_INDEX;		// index of signal in AppSignals and AppSignalStates
 
 		QString appSignalID;
 
@@ -129,7 +139,7 @@ public:
 	AppDataSource();
 	AppDataSource(const DataSource& dataSource);
 
-	void prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue);
+	void prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue, int autoArchivingGroupsCount);
 
 	bool parsePacket();
 
@@ -139,13 +149,18 @@ public:
 private:
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
+	bool getDoubleValue(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, double& value);
+	bool getValidity(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, quint32& validity);
+
 private:
-	AppSignalStatesQueue* m_signalStatesQueue = nullptr;
+//	AppSignalStatesQueue* m_signalStatesQueue = nullptr;
 	AppSignalStates* m_signalStates = nullptr;
 
 	AppSignals* m_appSignals = nullptr;
 
 	QVector<SignalParseInfo> m_signalsParseInfo;
+
+	LockFreeQueue<SimpleAppSignalState> m_signalStatesQueue;
 
 	// app data parsing
 	//
@@ -158,7 +173,7 @@ private:
 
 	int m_autoArchivingGroupsCount = 0;
 	qint64 m_lastAutoArchivingTime = 0;
-	int m_lastAutoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
+	int m_lastAutoArchivingGroup = AppSignalStateEx::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
 };
 

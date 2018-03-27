@@ -57,6 +57,7 @@ private:
 
 	void buildAppSignalID2IndexMap(bool signalsLoadResult);
 	void createAndInitSignalStates();
+	void prepareAppDataSources();
 
 	void applyNewConfiguration();
 	void clearConfiguration();

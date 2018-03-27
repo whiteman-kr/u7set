@@ -37,6 +37,9 @@ class QueueBase : public QObject
 	Q_OBJECT
 
 public:
+	static const int MAX_QUEUE_MEMORY_SIZE = 50 * 1024 * 1024;			// 50 MBytes
+
+public:
 	QueueBase(QObject* parent, int itemSize, int queueSize);
 	virtual ~QueueBase();
 
@@ -94,7 +97,10 @@ class LockFreeQueueBase
 	// One Writer - One Reader using only!!!
 	//
 public:
-	LockFreeQueueBase(QObject* parent, int itemSize, int queueSize);
+	static const int MAX_QUEUE_MEMORY_SIZE = 50 * 1024 * 1024;			// 50 MBytes
+
+public:
+	LockFreeQueueBase(int itemSize, int queueSize);
 
 	bool push(const char* item);
 	bool pop(char* item);
@@ -105,7 +111,18 @@ public:
 	char* beginPop();
 	bool completePop();
 
+	void resize(int newQueueSize);					// not thread-safe operation!!!!
+
+	bool isEmpty() const { return m_size.load() == SAFE_SIZE; }
+	bool isNotEmpty() const { return m_size.load() > SAFE_SIZE; }
+	bool isFull() const { return m_size.load() == m_queueSize; }
+
+	int size() const { return m_size.load(); }
+	int maxSize() const { return m_maxSize; }
+
 private:
+	static const int SAFE_SIZE = 1;
+
 	char* m_buffer = nullptr;
 
 	int m_itemSize = 0;
@@ -115,12 +132,13 @@ private:
 
 	QueueIndex m_writeIndex;
 	int m_maxSize = 0;
+	int m_lostedCount = 0;
 
 	// var modified by Reader only
 
 	QueueIndex m_readIndex;
 
-	// var modified by Writer and Reader
+	// var modified both by Writer and Reader
 
 	std::atomic<int> m_size = 0;								// current queue size
 };
@@ -278,6 +296,27 @@ bool QueueOnList<TYPE>::isEmpty()
 
 	return empty;
 }
+
+
+template <typename TYPE>
+class LockFreeQueue : public LockFreeQueueBase
+{
+public:
+	LockFreeQueue(int queueSize) :
+		LockFreeQueueBase(sizeof(TYPE), queueSize)
+	{
+		// checking, that memcpy can be used to copy queue items of type TYPE
+		//
+		assert(std::is_trivially_copyable<TYPE>::value == true);
+	}
+
+	virtual bool push(const TYPE* ptr) { return LockFreeQueueBase::push(reinterpret_cast<const char*>(ptr)); }
+	virtual bool pop(TYPE* ptr) { return LockFreeQueueBase::pop(reinterpret_cast<char*>(ptr)); }
+
+	TYPE* beginPush() { return reinterpret_cast<TYPE*>(LockFreeQueueBase::beginPush()); }
+	TYPE* beginPop() { return reinterpret_cast<TYPE*>(LockFreeQueueBase::beginPop()); }
+};
+
 
 
 

@@ -462,6 +462,14 @@ void AppDataServiceWorker::createAndInitSignalStates()
 	m_signalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
 }
 
+void AppDataServiceWorker::prepareAppDataSources()
+{
+	for(AppDataSourceShared appDataSource : m_appDataSources)
+	{
+		appDataSource->prepare(m_appSignals, &m_signalStates, &m_signalStatesQueue, m_autoArchivingGroupsCount);
+	}
+}
+
 void AppDataServiceWorker::applyNewConfiguration()
 {
 	m_autoArchivingGroupsCount = m_cfgSettings.autoArchiveInterval * 60;
@@ -469,6 +477,8 @@ void AppDataServiceWorker::applyNewConfiguration()
 	resizeAppSignalEventsQueue();
 
 	createAndInitSignalStates();
+
+	prepareAppDataSources();
 
 	runTcpArchiveClientThreads();
 	runTcpAppDataServer();

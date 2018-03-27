@@ -132,33 +132,30 @@ void AppDataProcessingThread2::run()
 
 			m_successOwnership++;
 
-			if (appDataSource->rupFramesQueueIsEmpty() == false)
+			do
 			{
-				do
+				result = appDataSource->processRupFrameTimeQueue();
+
+				if (result == false)
 				{
-					result = appDataSource->processRupFrameTimeQueue();
-
-					if (result == false)
-					{
-						break;
-					}
-
-					hasNoDataToProcessing = false;
-
-					appDataSource->parsePacket();
-
-					m_parsedRupPacketCount++;
-
-					if ((m_parsedRupPacketCount % 100) == 0)
-					{
-						qDebug() << " tread " << m_number << "parsed " << m_parsedRupPacketCount <<
-									" ----- success" << m_successOwnership << "/" << m_failOwnership <<
-									"queue max size" << appDataSource->rupFramesQueueMaxSize() <<
-									"losted" << appDataSource->lostedFramesCount();
-					}
+					break;
 				}
-				while(m_quitRequested == false);
+
+				hasNoDataToProcessing = false;
+
+				appDataSource->parsePacket();
+
+				m_parsedRupPacketCount++;
+
+				if ((m_parsedRupPacketCount % 100) == 0)
+				{
+					qDebug() << " tread " << m_number << "parsed " << m_parsedRupPacketCount <<
+								" ----- success" << m_successOwnership << "/" << m_failOwnership <<
+								"queue max size" << appDataSource->rupFramesQueueMaxSize() <<
+								"losted" << appDataSource->lostedFramesCount();
+				}
 			}
+			while(m_quitRequested == false);
 
 			appDataSource->releaseProcessingOwnership(thisThread);
 		}
@@ -177,7 +174,6 @@ void AppDataProcessingThread2::quitAndWait()
 	quit();
 	wait();
 }
-
 
 
 // -------------------------------------------------------------------------------
