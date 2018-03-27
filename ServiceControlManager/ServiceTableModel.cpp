@@ -30,10 +30,11 @@ ServiceData::ServiceData() :
 	information.set_servicestate(TO_INT(ServiceState::Undefined));
 }
 
-ServiceTableModel::ServiceTableModel(const SoftwareInfo& softwareInfo, QObject* parent) :
+ServiceTableModel::ServiceTableModel(const SoftwareInfo& softwareInfo, QWidget *parent) :
 	QAbstractTableModel(parent),
 	m_softwareInfo(softwareInfo),
 	m_freezeUpdate(false),
+	m_parrentWidget(parent),
 	m_timer(parent)
 {
 	QSettings settings;
@@ -507,19 +508,19 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 		switch (serviceSoftwareType)
 		{
 		case E::SoftwareType::AppDataService:
-			serviceData.statusWidget = new AppDataServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			serviceData.statusWidget = new AppDataServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort, m_parrentWidget);
 			break;
 
 		case E::SoftwareType::ConfigurationService:
-			serviceData.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			serviceData.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort, m_parrentWidget);
 			break;
 
 		case E::SoftwareType::TuningService:
-			serviceData.statusWidget = new TuningServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			serviceData.statusWidget = new TuningServiceWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort, m_parrentWidget);
 			break;
 
 		default:
-			serviceData.statusWidget = new BaseServiceStateWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort);
+			serviceData.statusWidget = new BaseServiceStateWidget(m_softwareInfo, m_hostsInfo[index.row()].ip, udpPort, m_parrentWidget);
 		}
 	}
 

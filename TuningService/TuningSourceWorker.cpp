@@ -304,7 +304,7 @@ namespace Tuning
 		tss->set_unsuccessfulwritetime(ts.unsuccessfulWriteTime());
 
 		tss->set_writeclient(ts.writeClient());
-		tss->set_writeerrorcode(ts.writeErrorCode());
+		tss->set_writeerrorcode(TO_INT(ts.writeErrorCode()));
 
 		tss->set_error(TO_INT(NetworkError::Success));
 	}
@@ -569,6 +569,7 @@ namespace Tuning
 
 	void TuningSourceWorker::onNoReply()
 	{
+		finalizeWriting(NetworkError::TuningNoReply);
 	}
 
 	bool TuningSourceWorker::prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request)
@@ -792,6 +793,11 @@ namespace Tuning
 				default:
 					assert(false);
 				}
+
+				ts.setWriteRequestTime(QDateTime::currentMSecsSinceEpoch());
+				ts.setWriteClient(tuningCmd.clientEquipmentID);
+				ts.resetWriteErrorCode();
+				ts.setWriteInProgress(true);
 			}
 			break;
 
@@ -814,6 +820,7 @@ namespace Tuning
 
 		if (result == false)
 		{
+			finalizeWriting(NetworkError::TuningNoReply);
 			m_stat.errRupCRC++;
 			return;
 		}
@@ -825,6 +832,7 @@ namespace Tuning
 
 		if (result == false)
 		{
+			finalizeWriting(NetworkError::TuningNoReply);
 			return;
 		}
 
@@ -834,6 +842,7 @@ namespace Tuning
 
 		if (result == false)
 		{
+			finalizeWriting(NetworkError::TuningNoReply);
 			return;
 		}
 
@@ -870,6 +879,8 @@ namespace Tuning
 		QString msg;
 		bool hasErrors = false;
 
+		NetworkError errCode = NetworkError::Success;
+
 		switch(static_cast<FotipV2::DataType>(reply.fotipFrame.header.dataType))
 		{
 		case FotipV2::DataType::AnalogFloat:
@@ -882,6 +893,7 @@ namespace Tuning
 					m_stat.errAnalogHighBoundCheck++;
 
 					boundCheckStr = QString("HighBoundCheckError == 1 ");
+					errCode = NetworkError::TuningValueOutOfRange;
 					hasErrors = true;
 				}
 
@@ -890,13 +902,14 @@ namespace Tuning
 					m_stat.errAnalogLowBoundCheck++;
 
 					boundCheckStr = QString("LowBoundCheckError == 1 ");
+					errCode = NetworkError::TuningValueOutOfRange;
 					hasErrors = true;
 				}
 
 				if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 &&
 					reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0)
 				{
-					boundCheckStr = ("No bound check errors");
+					boundCheckStr = ("No bound check errors ");
 				}
 
 				msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request: %3")).
@@ -907,7 +920,7 @@ namespace Tuning
 			break;
 
 		case FotipV2::DataType::Discrete:
-			msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request")).
+			msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request. ")).
 							arg(sourceEquipmentID()).
 							arg(m_sourceIP.addressStr());
 			break;
@@ -916,14 +929,27 @@ namespace Tuning
 			assert(false);
 		}
 
+		TuningValue& newTuningValue = m_lastProcessedCommand.write.newTuningValue;
+
+		TuningValue currentValue = m_tuningSignals[m_lastProcessedCommand.write.signalIndex].currentValue();
+
+		if (newTuningValue != currentValue)
+		{
+			errCode = NetworkError::TuningValueCorrupted;
+
+			msg +=  QString("Tuning value corrupted");
+
+			hasErrors = true;
+		}
+
+		finalizeWriting(errCode);
+
 		if (hasErrors == true)
 		{
 			DEBUG_LOG_ERR(m_logger, msg);
 		}
 		else
 		{
-//			DEBUG_LOG_MSG(m_logger, msg);
-
 			m_stat.hasUnappliedParams = true;
 		}
 
@@ -1043,6 +1069,40 @@ namespace Tuning
 				assert(false);
 			}
 		}
+	}
+
+	void TuningSourceWorker::finalizeWriting(NetworkError errCode)
+	{
+		if (m_lastProcessedCommand.opCode != FotipV2::OpCode::Write)
+		{
+			return;
+		}
+
+		int index = m_lastProcessedCommand.write.signalIndex;
+
+		if (index < 0 || index >= m_tuningSignals.count())
+		{
+			assert(false);
+			return;
+		}
+
+		TuningSignal& ts = m_tuningSignals[index];
+
+		qint64 time = QDateTime::currentMSecsSinceEpoch();
+
+		if (errCode == NetworkError::Success)
+		{
+			ts.setSuccessfulWriteTime(time);
+			ts.setUnsuccessfulWriteTime(0);
+		}
+		else
+		{
+			ts.setSuccessfulWriteTime(0);
+			ts.setUnsuccessfulWriteTime(time);
+		}
+
+		ts.setWriteErrorCode(errCode);
+		ts.setWriteInProgress(false);
 	}
 
 	bool TuningSourceWorker::checkRupHeader(const Rup::Header& rupHeader)

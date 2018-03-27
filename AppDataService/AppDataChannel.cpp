@@ -13,13 +13,13 @@ AppDataChannel::AppDataChannel(int channel,
 							   const HostAddressPort& dataReceivingIP,
 							   AppSignalStatesQueue& signalStatesQueue,
 							   int autoArchivingGroupsCount) :
+	m_dataType(DataSource::DataType::App),
 	m_channel(channel),
 	m_dataReceivingIP(dataReceivingIP),
-	m_signalStatesQueue(signalStatesQueue),
 	m_autoArchivingGroupsCount(autoArchivingGroupsCount),
-	m_dataType(DataSource::DataType::App),
 	m_rupDataQueue(500),
-	m_timer1s(this)
+	m_timer1s(this),
+	m_signalStatesQueue(signalStatesQueue)
 {
 }
 

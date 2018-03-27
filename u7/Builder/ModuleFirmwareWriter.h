@@ -71,11 +71,14 @@ namespace Hardware
 		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
 		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
 		Q_INVOKABLE bool setData32(int frameIndex, int offset, quint32 data);
+		Q_INVOKABLE bool setDataFloat(int frameIndex, int offset, float data);
+
 		bool setData64(int frameIndex, int offset, quint64 data);
 
 		Q_INVOKABLE quint8 data8(int frameIndex, int offset);
 		Q_INVOKABLE quint16 data16(int frameIndex, int offset);
 		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
+		Q_INVOKABLE float dataFloat(int frameIndex, int offset);
 
 		Q_INVOKABLE JsVariantList* calcHash64(QString dataString);
 		Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);

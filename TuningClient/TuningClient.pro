@@ -157,7 +157,8 @@ SOURCES +=\
     DialogAlert.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    TuningSchemaManager.cpp
+    TuningSchemaManager.cpp \
+    DialogSignalInfo.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -213,13 +214,15 @@ HEADERS  += MainWindow.h \
     DialogAlert.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
-    TuningSchemaManager.h
+    TuningSchemaManager.h \
+    DialogSignalInfo.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
     DialogTuningSourceInfo.ui \
-    DialogPassword.ui
+    DialogPassword.ui \
+    DialogSignalInfo.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -228,4 +231,4 @@ PRECOMPILED_HEADER = Stable.h
 #
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
-TRANSLATIONS = languages/TuningClient_en.ts languages/TuningClient_ru.ts
+TRANSLATIONS = languages/TuningClient_ru.ts

@@ -46,6 +46,10 @@ HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo()
 //
 // -------------------------------------------------------------------------------------
 
+const char* const ServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
+const char* const ServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
+const char* const ServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
+
 int ServiceWorker::m_instanceNo = 0;
 
 ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
@@ -150,11 +154,6 @@ void ServiceWorker::initAndProcessCmdLineSettings()
 	init();
 
 	processCmdLineSettings();
-
-	if (m_cmdLineParser.optionIsSet("id") == true)
-	{
-		m_softwareInfo.setEquipmentID(m_cmdLineParser.optionValue("id"));
-	}
 }
 
 void ServiceWorker::setService(Service* service)
@@ -226,6 +225,22 @@ QString ServiceWorker::getStrSetting(const QString& settingName)
 
 void ServiceWorker::onThreadStarted()
 {
+	// loading common settings of services
+
+	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
+
+	m_softwareInfo.setEquipmentID(m_equipmentID);		// !
+
+	m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
+
+	m_cfgServiceIP1.setAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+
+	m_cfgServiceIP2Str = getStrSetting(SETTING_CFG_SERVICE_IP2);
+
+	m_cfgServiceIP2.setAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+
+	//
+
 	loadSettings();
 
 	initialize();

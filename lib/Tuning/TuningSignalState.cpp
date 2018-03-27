@@ -84,11 +84,6 @@ bool TuningSignalState::writeInProgress() const
 	return m_flags.writeInProgress;
 }
 
-bool TuningSignalState::writeFailed() const
-{
-	return m_flags.writeFailed;
-}
-
 bool TuningSignalState::controlIsEnabled() const
 {
 	return m_flags.controlIsEnabled;
@@ -99,14 +94,34 @@ int TuningSignalState::writeErrorCode() const
 	return m_writeErrorCode;
 }
 
+Hash TuningSignalState::writeClient() const
+{
+	return m_writeClient;
+}
+
+QDateTime TuningSignalState::successfulReadTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_successfulReadTime);
+}
+
+QDateTime TuningSignalState::writeRequestTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_writeRequestTime);
+}
+
+QDateTime TuningSignalState::successfulWriteTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_successfulWriteTime);
+}
+
+QDateTime TuningSignalState::unsuccessfulWriteTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_unsuccessfulWriteTime);
+}
+
 bool TuningSignalState::userModified() const
 {
 	return m_flags.userModified;
-}
-
-void TuningSignalState::clearUserModified()
-{
-	m_flags.userModified = false;
 }
 
 bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
@@ -123,11 +138,12 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 	m_flags.writeInProgress = message.writeinprogress();
 	m_writeErrorCode = message.writeerrorcode();
 
-	//writeClient
-	//successfulReadTime
-	//writeRequestTime
-	//successfulWriteTime
-	//unsuccessfulWriteTime
+	m_writeClient = message.writeclient();
+
+	m_successfulReadTime = message.successfulreadtime();
+	m_writeRequestTime = message.writerequesttime();
+	m_successfulWriteTime = message.successfulwritetime();
+	m_unsuccessfulWriteTime = message.unsuccessfulwritetime();
 
 	return true;
 }

@@ -44,10 +44,6 @@ namespace Tuning
 													QString* controlledTuningSource,
 													bool* controlIsActive);
 
-		QString equipmentID() { return m_equipmentID; }
-		QString cfgServiceIP1() { return m_cfgServiceIP1.addressPortStr(); }
-		QString cfgServiceIP2() { return m_cfgServiceIP2.addressPortStr(); }
-
 		bool clientIsConnected(const SoftwareInfo& softwareInfo, const QString& clientIP);
 		bool clientIsDisconnected(const SoftwareInfo& softwareInfo, const QString& clientIP);
 		bool setActiveClient(const SoftwareInfo& softwareInfo, const QString& clientIP);
@@ -60,10 +56,6 @@ namespace Tuning
 	public slots:
 
 	private:
-		static const char* const SETTING_EQUIPMENT_ID;
-		static const char* const SETTING_CFG_SERVICE_IP1;
-		static const char* const SETTING_CFG_SERVICE_IP2;
-
 		virtual void initCmdLineParser() override;
 		virtual void loadSettings() override;
 
@@ -102,11 +94,6 @@ namespace Tuning
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	private:
-		QString m_equipmentID;
-
-		HostAddressPort m_cfgServiceIP1;
-		HostAddressPort m_cfgServiceIP2;
-
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 

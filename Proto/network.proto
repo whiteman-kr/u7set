@@ -397,7 +397,7 @@ message TuningSignalState
     optional Proto.TuningValue readHighBound = 6;
 
     optional bool writeInProgress = 7 [default = false];
-    optional int32 writeErrorCode = 8 [default = 0];
+    optional int32 writeErrorCode = 8 [default = 0];			// NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
     optional fixed64 writeClient = 9 [default = 0];			// Hash code of Client's EquipmentID
 
     optional sfixed64 successfulReadTime = 10 [default = 0];		// time of last succesfull signal reading (UTC)

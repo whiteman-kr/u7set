@@ -2377,8 +2377,6 @@ namespace Hardware
 
 	bool OptoModule::calculateRxBufAddresses()
 	{
-		bool result = true;
-
 		if (isLmOrBvb() == true)
 		{
 			// calculate rx addresses for ports of LM module
@@ -2423,8 +2421,7 @@ namespace Hardware
 						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
 						m_log->errALC5035(linkedPort->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
-						result = false;
-						break;
+						return false;
 					}
 				}
 				else
@@ -2511,8 +2508,7 @@ namespace Hardware
 						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
 						m_log->errALC5035(rxDataSizeW, port->equipmentID(), equipmentID(), optoPortAppDataSize());
-						result = false;
-						break;
+						return false;
 					}
 				}
 				else

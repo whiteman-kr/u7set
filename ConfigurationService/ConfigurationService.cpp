@@ -10,7 +10,6 @@
 //
 // ------------------------------------------------------------------------------------
 
-const char* const ConfigurationServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
 const char* const ConfigurationServiceWorker::SETTING_AUTOLOAD_BUILD_PATH = "AutoloadBuildPath";
 const char* const ConfigurationServiceWorker::SETTING_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* const ConfigurationServiceWorker::SETTING_WORK_DIRECTORY = "WorkDirectory";
@@ -52,8 +51,6 @@ void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
 	startCfgServerThread(newBuildPath);
 }
 
-
-
 void ConfigurationServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
@@ -66,15 +63,14 @@ void ConfigurationServiceWorker::initCmdLineParser()
 
 void ConfigurationServiceWorker::loadSettings()
 {
-	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
 	m_autoloadBuildPath = getStrSetting(SETTING_AUTOLOAD_BUILD_PATH);
 	m_clientIPStr = getStrSetting(SETTING_CLIENT_REQUEST_IP);
 	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
 
-	m_clientIP = HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
+	m_clientIP.setAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
 
 	DEBUG_LOG_MSG(m_logger, QString("Load settings:"));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_WORK_DIRECTORY).arg(m_workDirectory));

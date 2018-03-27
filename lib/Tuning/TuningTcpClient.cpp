@@ -550,7 +550,6 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			for (auto& it : m_tuningSources)
 			{
-				Hash tsHash = it.first;
 				TuningSource& ts = it.second;
 
 				if (ts.id() == id)
@@ -581,27 +580,6 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 					// Set new source state
 
 					ts.setNewState(tss);
-
-					// Set signals' flags that belong to tuning sources
-
-					std::pair <std::multimap<Hash, Hash>::iterator, std::multimap<Hash,Hash>::iterator> ret = m_equipmentToSignalMap.equal_range(tsHash);
-
-					for (std::multimap<Hash, Hash>::iterator signalIt = ret.first; signalIt != ret.second; ++signalIt)
-					{
-						Hash signalHash = signalIt->second;
-
-						bool found = false;
-
-						TuningSignalState state = m_signals->state(signalHash, &found);
-						if (found == false)
-						{
-							continue;
-						}
-
-						state.m_flags.controlIsEnabled = ts.state.controlisactive();
-
-						m_signals->setState(signalHash, state);
-					}
 
 					//
 
@@ -767,7 +745,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		if (error != NetworkError::Success && error != NetworkError::LmControlIsNotActive)
 		{
-//			assert(false);
 			writeLogError(tr("TuningTcpClient::processReadTuningSignals, TuningSignalState error received: %1")
 						  .arg(networkErrorStr(error)));
 
@@ -775,44 +752,55 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		}
 
 
-		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
-
 		TuningSignalState arrivedState(stateMessage);
 
-		// Process write error only if writing was performed by current client
+		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
 
-		Hash writeClientHash = stateMessage.writeclient();
-
-		if (m_instanceIdHash == writeClientHash)
+		if (found == true)
 		{
-			if (static_cast<NetworkError>(stateMessage.writeerrorcode()) != NetworkError::Success)
+			// Process write error only if writing was performed by current client
+
+			Hash writeClientHash = stateMessage.writeclient();
+
+			if (m_instanceIdHash == writeClientHash)
 			{
-				if (previousState.m_flags.writeFailed == false)
+				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) == NetworkError::Success)
 				{
-					arrivedState.m_flags.writeFailed = true;
-
-					AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
-					if (found == false)
+					if (arrivedState.successfulWriteTime() > previousState.successfulWriteTime())
 					{
-						assert(false);
-						continue;
+						previousState.m_flags.userModified = false;
 					}
+				}
+				else
+				{
+					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
+					{
+						previousState.m_flags.userModified = false;
 
-					writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-								  .arg(previousState.modifiedValue().toString(param.precision()))
-								  .arg(param.customSignalId())
-								  .arg(param.caption())
-								  .arg(param.equipmentId())
-								  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
-								  );
+						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
+						if (found == false)
+						{
+							assert(false);
+							continue;
+						}
+
+						writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
+									  .arg(previousState.modifiedValue().toString(param.precision()))
+									  .arg(param.customSignalId())
+									  .arg(param.caption())
+									  .arg(param.equipmentId())
+									  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
+									  );
+					}
 				}
 			}
 		}
 
-		// When updating states, we have to save some properties unchanged
+		// When updating states, we have to set some properties locally
 
 		arrivedState.m_flags.userModified = previousState.userModified();
-		arrivedState.m_flags.controlIsEnabled = previousState.controlIsEnabled();
+
+		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
 
 		if (previousState.userModified() == false)
 		{
@@ -1101,6 +1089,11 @@ void TuningTcpClient::setInstanceId(const QString& instanceId)
 {
 	m_instanceId = instanceId;
 	m_instanceIdHash = ::calcHash(m_instanceId);
+}
+
+Hash TuningTcpClient::instanceIdHash() const
+{
+	return m_instanceIdHash;
 }
 
 int TuningTcpClient::requestInterval() const

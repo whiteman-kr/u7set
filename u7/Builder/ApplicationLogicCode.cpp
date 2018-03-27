@@ -1740,7 +1740,7 @@ namespace Builder
 	{
 		QString str;
 
-		return str.sprintf("%.2f%", static_cast<float>(m_codePercent));
+		return str.sprintf("%.2f%%", static_cast<float>(m_codePercent));
 	}
 
 	// ---------------------------------------------------------------------------------------
