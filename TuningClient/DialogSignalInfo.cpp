@@ -6,13 +6,16 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningClientTcpClient.h"
 
-DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, TuningSignalManager* signalManager, QWidget *parent) :
+DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
 	m_appSignalHash(appSignalHash),
+	m_instanceIdHash(instanceIdHash),
 	m_signalManager(signalManager)
 {
 	ui->setupUi(this);
+
+	ui->m_textEdit->setReadOnly(true);
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
@@ -118,7 +121,14 @@ void DialogSignalInfo::updateInfo()
 
 	text += "\r\n";
 
-	text += tr("WriteClientHash:\t%1\r\n").arg(state.writeClient());
+	QString hashString = QString("%1h").arg(QString::number(state.writeClient(), 16));
+
+	if (state.writeClient() == m_instanceIdHash)
+	{
+		hashString += tr(" (this client)");
+	}
+
+	text += tr("WriteClientHash:\t%1\r\n").arg(hashString);
 	text += tr("WriteErrorCode:\t\t%1\r\n").arg(getNetworkErrorStr(static_cast<NetworkError>(state.writeErrorCode())));
 
 	text += "\r\n";
@@ -128,8 +138,10 @@ void DialogSignalInfo::updateInfo()
 	text += tr("SuccessfulWriteTime:\t%1\r\n").arg(state.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	text += tr("UnsuccessfulWriteTime:\t%1\r\n").arg(state.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));;
 
-	if (ui->m_textEdit->toPlainText() != text)
+	if (m_textEditText != text)
 	{
+		m_textEditText = text;
+
 		ui->m_textEdit->setPlainText(text);
 	}
 }

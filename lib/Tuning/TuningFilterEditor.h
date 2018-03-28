@@ -31,6 +31,9 @@ public:
 		Discrete
 	};
 
+signals:
+	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok); 	// Qt::DirectConnection!
+
 private:
 
 	void fillBaseSignalsList();
@@ -140,7 +143,7 @@ public:
 
 signals:
 
-	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);
+	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);	// Qt::DirectConnection!
 
 private slots:
 
@@ -159,6 +162,9 @@ private slots:
 	void presetPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	void on_m_presetsSignals_clicked();
+
+	void slot_getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);
+
 private:
 
 	void addPreset(TuningFilter::InterfaceType interfaceType);

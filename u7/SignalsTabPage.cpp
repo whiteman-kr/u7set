@@ -53,7 +53,9 @@ SC_SPREAD_TOLERANCE = 22,
 SC_BYTE_ORDER = 23,
 SC_ENABLE_TUNING = 24,
 SC_TUNING_DEFAULT_VALUE = 25,
-SC_LAST_CHANGE_USER = 26;
+SC_TUNING_LOW_BOUND = 26,
+SC_TUNING_HIGH_BOUND = 27,
+SC_LAST_CHANGE_USER = 28;
 
 
 const char* Columns[] =
@@ -84,6 +86,8 @@ const char* Columns[] =
 	"Byte order",
 	"Enable\ntuning",
 	"Tuning\ndefault value",
+	"Tuning\nlow bound",
+	"Tuning\nhigh bound",
 	"Last change user",
 };
 
@@ -187,8 +191,19 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_APERTURE:
 		case SC_FILTERING_TIME:
 		case SC_SPREAD_TOLERANCE:
-		case SC_TUNING_DEFAULT_VALUE:
 		{
+			QLineEdit* le = new QLineEdit(parent);
+			le->setValidator(new QDoubleValidator(le));
+			return le;
+		}
+		case SC_TUNING_DEFAULT_VALUE:
+		case SC_TUNING_LOW_BOUND:
+		case SC_TUNING_HIGH_BOUND:
+		{
+			if (s.signalType() == E::SignalType::Bus || s.isInternal() == false)
+			{
+				return nullptr;
+			}
 			QLineEdit* le = new QLineEdit(parent);
 			le->setValidator(new QDoubleValidator(le));
 			return le;
@@ -287,7 +302,9 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.coarseAperture())); break;
 		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
 		case SC_SPREAD_TOLERANCE: if (le) le->setText(QString("%1").arg(s.spreadTolerance())); break;
-		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue().toDouble())); break;
+		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(s.tuningDefaultValue().toString()); break;
+		case SC_TUNING_LOW_BOUND: if (le) le->setText(s.tuningLowBound().toString()); break;
+		case SC_TUNING_HIGH_BOUND: if (le) le->setText(s.tuningHighBound().toString()); break;
 		// ComboBox
 		//
 		case SC_ANALOG_SIGNAL_FORMAT: assert(false);/* WhiteMan if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt()));*/ break;
@@ -375,7 +392,48 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_APERTURE: if (le) s.setCoarseAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
 		case SC_SPREAD_TOLERANCE: if (le) s.setSpreadTolerance(le->text().toDouble()); break;
-		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(TuningValue::createFromDouble(s.signalType(), s.analogSignalFormat(), le->text().toDouble())); break;
+		case SC_TUNING_DEFAULT_VALUE:
+		{
+			auto value = s.tuningDefaultValue();
+			if (le)
+			{
+				bool ok = false;
+				value.fromString(le->text(), &ok);
+				if (ok)
+				{
+					s.setTuningDefaultValue(value);
+				}
+			}
+			break;
+		}
+		case SC_TUNING_LOW_BOUND:
+		{
+			auto value = s.tuningLowBound();
+			if (le)
+			{
+				bool ok = false;
+				value.fromString(le->text(), &ok);
+				if (ok)
+				{
+					s.setTuningLowBound(value);
+				}
+			}
+			break;
+		}
+		case SC_TUNING_HIGH_BOUND:
+		{
+			auto value = s.tuningHighBound();
+			if (le)
+			{
+				bool ok = false;
+				value.fromString(le->text(), &ok);
+				if (ok)
+				{
+					s.setTuningHighBound(value);
+				}
+			}
+			break;
+		}
 		// ComboBox
 		//
 		case SC_ANALOG_SIGNAL_FORMAT: assert(false); /* WhiteMan if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex())));*/ break;
@@ -731,13 +789,44 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
 
 					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
-					case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 
 					case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 					case SC_APERTURE: return signal.coarseAperture();
 					case SC_FILTERING_TIME: return signal.filteringTime();
 					case SC_SPREAD_TOLERANCE: return signal.spreadTolerance();
-					case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue().toDouble();
+
+					case SC_ENABLE_TUNING:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.enableTuning() ? tr("True") : tr("False");
+					}
+					case SC_TUNING_DEFAULT_VALUE:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.tuningDefaultValue().toString(signal.decimalPlaces());
+					}
+					case SC_TUNING_LOW_BOUND:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.tuningLowBound().toString(signal.decimalPlaces());
+					}
+					case SC_TUNING_HIGH_BOUND:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.tuningHighBound().toString(signal.decimalPlaces());
+					}
 
 					case SC_IN_OUT_TYPE: return E::valueToString<E::SignalInOutType>(signal.inOutType());
 
@@ -765,8 +854,40 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 					case SC_DATA_SIZE: return signal.dataSize();
 					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
-					case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
-					case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue().toDouble();
+
+					case SC_ENABLE_TUNING:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.enableTuning() ? tr("True") : tr("False");
+					}
+					case SC_TUNING_DEFAULT_VALUE:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.tuningDefaultValue().toString(signal.decimalPlaces());
+					}
+					case SC_TUNING_LOW_BOUND:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.tuningLowBound().toString(signal.decimalPlaces());
+					}
+					case SC_TUNING_HIGH_BOUND:
+					{
+						if (signal.signalType() == E::SignalType::Bus || signal.isInternal() == false)
+						{
+							return QVariant();
+						}
+						return signal.tuningHighBound().toString(signal.decimalPlaces());
+					}
+
 					case SC_IN_OUT_TYPE: return E::valueToString<E::SignalInOutType>(signal.inOutType());
 					case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 					case SC_DEVICE_STR_ID: return signal.equipmentID();
@@ -875,7 +996,27 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_APERTURE: s.setCoarseAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: s.setFilteringTime(value.toDouble()); break;
 			case SC_SPREAD_TOLERANCE: s.setSpreadTolerance(value.toDouble()); break;
-			case SC_TUNING_DEFAULT_VALUE: s.setTuningDefaultValue(TuningValue::createFromDouble(s.signalType(), s.analogSignalFormat(), value.toDouble())); break;
+			case SC_TUNING_DEFAULT_VALUE:
+			{
+				auto tuningValue = s.tuningDefaultValue();
+				tuningValue.fromVariant(value);
+				s.setTuningDefaultValue(tuningValue);
+				break;
+			}
+			case SC_TUNING_LOW_BOUND:
+			{
+				auto tuningValue = s.tuningLowBound();
+				tuningValue.fromVariant(value);
+				s.setTuningLowBound(tuningValue);
+				break;
+			}
+			case SC_TUNING_HIGH_BOUND:
+			{
+				auto tuningValue = s.tuningHighBound();
+				tuningValue.fromVariant(value);
+				s.setTuningHighBound(tuningValue);
+				break;
+			}
 			case SC_BYTE_ORDER: s.setByteOrder(E::ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: s.setEquipmentID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
