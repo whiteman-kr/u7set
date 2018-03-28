@@ -6,7 +6,7 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, AppSignalStatesQueue& saveStatesQueue) :
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, Queue<SimpleAppSignalState>& saveStatesQueue) :
 	Tcp::Server(softwareInfo),
 	m_saveStatesQueue(saveStatesQueue)
 {

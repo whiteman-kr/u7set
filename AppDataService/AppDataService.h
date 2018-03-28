@@ -11,6 +11,7 @@
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "AppDataProcessingThread.h"
+#include "SignalStatesProcessingThread.h"
 
 
 class TcpArchiveClient;
@@ -65,14 +66,17 @@ private:
 	void runAppDataReceiverThread();
 	void stopAppDataReceiverlThread();
 
+	void runSignalStatesProcessingThread();
+	void stopSignalStatesProcessingThread();
+
 	void runAppDataProcessingThreads();
 	void stopAppDataProcessingThreads();
 
 	void runTcpAppDataServer();
 	void stopTcpAppDataServer();
 
-	void runTcpArchiveClientThreads();
-	void stopTcpArchiveClientThreads();
+	void runTcpArchiveClientThread();
+	void stopTcpArchiveClientThread();
 
 	void runTimer();
 	void stopTimer();
@@ -80,8 +84,6 @@ private:
 	void onGetDataSourcesIDs(UdpRequest& request);
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
-
-	void resizeAppSignalEventsQueue();
 
 	void onTimer();
 
@@ -104,13 +106,13 @@ private:
 
 	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
 
+	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
+
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
-
-	AppSignalStatesQueue m_signalStatesQueue;
 
 	QTimer m_timer;
 };

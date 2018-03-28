@@ -2,10 +2,13 @@
 
 #include <QtGlobal>
 #include <QDateTime>
+#include <memory>
+
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/Tuning/TuningSignalState.h"
+
 #include "Types.h"
 
 
@@ -116,7 +119,9 @@ struct SimpleAppSignalState
 	Hash load(const Proto::AppSignalState& protoState);
 };
 
-typedef Queue<SimpleAppSignalState> AppSignalStatesQueue;
+
+typedef LockFreeQueue<SimpleAppSignalState> AppSignalStatesQueue;
+typedef std::shared_ptr<AppSignalStatesQueue> AppSignalStatesQueueShared;
 
 
 class AppSignalParam

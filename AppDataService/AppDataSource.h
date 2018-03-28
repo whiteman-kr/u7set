@@ -139,12 +139,14 @@ public:
 	AppDataSource();
 	AppDataSource(const DataSource& dataSource);
 
-	void prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue, int autoArchivingGroupsCount);
+	void prepare(const AppSignals& appSignals, AppSignalStates* signalStates, int autoArchivingGroupsCount);
 
 	bool parsePacket();
 
 	bool getState(Network::AppDataSourceState* protoState) const;
 	bool setState(const Network::AppDataSourceState& protoState);
+
+	bool getSignalState(SimpleAppSignalState* state);
 
 private:
 	int getAutoArchivingGroup(qint64 currentSysTime);
@@ -153,14 +155,13 @@ private:
 	bool getValidity(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, quint32& validity);
 
 private:
-//	AppSignalStatesQueue* m_signalStatesQueue = nullptr;
 	AppSignalStates* m_signalStates = nullptr;
 
 	AppSignals* m_appSignals = nullptr;
 
 	QVector<SignalParseInfo> m_signalsParseInfo;
 
-	LockFreeQueue<SimpleAppSignalState> m_signalStatesQueue;
+	AppSignalStatesQueue m_signalStatesQueue;
 
 	// app data parsing
 	//

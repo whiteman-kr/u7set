@@ -3,7 +3,7 @@
 #include <QUdpSocket>
 
 #include "../lib/SimpleThread.h"
-#include "../lib/AppDataSource.h"
+#include "AppDataSource.h"
 #include "../lib/CircularLogger.h"
 
 //

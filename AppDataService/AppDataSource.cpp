@@ -1,4 +1,4 @@
-#include "WUtils.h"
+#include "../lib/WUtils.h"
 
 #include "AppDataSource.h"
 
@@ -12,6 +12,7 @@ AppSignalStateEx::AppSignalStateEx()
 {
 	m_current[0].flags.all = 0;
 	m_current[1].flags.all = 0;
+	m_stored.flags.all = 0;
 }
 
 
@@ -138,7 +139,7 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 	{
 		curState.flags.autoPoint = 1;
 
-		qDebug() << "Auto " << m_signal->appSignalID();
+//		qDebug() << "Auto " << m_signal->appSignalID();
 	}
 
 	bool hasArchivingReason = curState.flags.hasArchivingReason();
@@ -425,16 +426,15 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 }
 
 
-void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signalStates, AppSignalStatesQueue* signalStatesQueue, int autoArchivingGroupsCount)
+void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signalStates, int autoArchivingGroupsCount)
 {
-	if (signalStates == nullptr || signalStatesQueue == nullptr)
+	if (signalStates == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
 	m_signalStates = signalStates;
-	//m_signalStatesQueue = signalStatesQueue;
 
 	m_autoArchivingGroupsCount = autoArchivingGroupsCount;
 
@@ -622,6 +622,14 @@ bool AppDataSource::setState(const Network::AppDataSourceState& protoState)
 
 	return true;
 }
+
+bool AppDataSource::getSignalState(SimpleAppSignalState* state)
+{
+	TEST_PTR_RETURN_FALSE(state);
+
+	return m_signalStatesQueue.pop(state);
+}
+
 
 /*
 

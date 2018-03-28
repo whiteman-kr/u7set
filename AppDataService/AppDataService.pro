@@ -87,14 +87,15 @@ SOURCES += \
     TcpAppDataClient.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/AppDataSource.cpp \
+    AppDataSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
-    AppDataReceiver.cpp
+    AppDataReceiver.cpp \
+    SignalStatesProcessingThread.cpp
 
 HEADERS += \
 	Stable.h \
@@ -135,7 +136,7 @@ HEADERS += \
     TcpAppDataClient.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
-    ../lib/AppDataSource.h \
+    AppDataSource.h \
     ../u7/Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     TcpArchiveClient.h \
@@ -143,7 +144,8 @@ HEADERS += \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     AppDataReceiver.h \
-    ../lib/Socket.h
+    ../lib/Socket.h \
+    SignalStatesProcessingThread.h
 
 include(../qtservice/src/qtservice.pri)
 

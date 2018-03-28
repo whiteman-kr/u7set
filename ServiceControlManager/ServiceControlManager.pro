@@ -79,7 +79,7 @@ SOURCES += MainWindow.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/AppDataSource.cpp \
+    ../AppDataService/AppDataSource.cpp \
     ../lib/CircularLogger.cpp \
     TcpConfigServiceClient.cpp \
     AppDataServiceWidget.cpp \
@@ -119,7 +119,7 @@ HEADERS  += MainWindow.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \
     ../lib/HostAddressPort.h \
-    ../lib/AppDataSource.h \
+    ../AppDataService/AppDataSource.h \
     ../lib/CircularLogger.h \
     TcpConfigServiceClient.h \
     ../lib/WidgetUtils.h \

@@ -185,7 +185,7 @@ private:
 class ArchRequestThread : public SimpleThread
 {
 public:
-	ArchRequestThread(ArchiveShared archive, CircularLoggerShared& logger);
+	ArchRequestThread(ArchiveShared archive, CircularLoggerShared logger);
 
 	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime& startTime);
 	void finalizeRequest(quint32 requestID);

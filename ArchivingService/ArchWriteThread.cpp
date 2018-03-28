@@ -15,7 +15,7 @@ QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5)::AppSignalState")
 
 ArchWriteThreadWorker::ArchWriteThreadWorker(const HostAddressPort& dbHost,
 											 ArchiveShared archive,
-											 AppSignalStatesQueue& saveStatesQueue,
+											 Queue<SimpleAppSignalState>& saveStatesQueue,
 											 CircularLoggerShared logger) :
 	m_dbHost(dbHost),
 	m_archive(archive),
@@ -30,7 +30,7 @@ void ArchWriteThreadWorker::onThreadStarted()
 	DEBUG_LOG_MSG(m_logger, "ArchWriteThread is started");
 
 	connect(&m_timer, &QTimer::timeout, this, &ArchWriteThreadWorker::onTimer);
-	connect(&m_saveStatesQueue, &AppSignalStatesQueue::queueNotEmpty, this, &ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty);
+	connect(&m_saveStatesQueue, &Queue<SimpleAppSignalState>::queueNotEmpty, this, &ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty);
 
 	m_timer.setInterval(1000);
 	m_timer.start();
@@ -763,7 +763,7 @@ void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 
 ArchWriteThread::ArchWriteThread(const HostAddressPort& dbHost,
 								 ArchiveShared archive,
-								 AppSignalStatesQueue& saveStatesQueue,
+								 Queue<SimpleAppSignalState>& saveStatesQueue,
 								 CircularLoggerShared logger)
 {
 	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(dbHost,

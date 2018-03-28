@@ -1,9 +1,12 @@
 #pragma once
 
-#include "../lib/Tcp.h"
-#include "../lib/AppDataSource.h"
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
+
+#include "../lib/Tcp.h"
+
+#include "AppDataSource.h"
+
 
 class TcpAppDataServerThread;
 class AppDataServiceWorker;

@@ -44,7 +44,7 @@ public:
 							CircularLoggerShared log);
 };
 
-class AppDataProcessingThread2 : public QThread
+class AppDataProcessingThread2 : public RunOverrideThread
 {
 public:
 	AppDataProcessingThread2(int number,
@@ -54,12 +54,7 @@ public:
 
 	void run() override;
 
-	void quit() { m_quitRequested = true; }
-
-	void quitAndWait();
-
 private:
-	bool m_quitRequested = false;
 	int m_number = 0;
 	const AppDataSourcesIP& m_appDataSourcesIP;
 	const AppDataReceiver* m_appDataReceiver;

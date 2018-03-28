@@ -57,6 +57,22 @@ public:
 };
 
 
+class RunOverrideThread : public QThread
+{
+public:
+	bool isQuitRequested() const { return m_quitRequested.load(); }
+
+	bool quitAndWait(unsigned long time = ULONG_MAX)
+	{
+		m_quitRequested.store(true);
+		return wait(time);
+	}
+
+private:
+	std::atomic<bool> m_quitRequested = false;
+};
+
+
 class WaitForSignalHelper : public QObject
 {
 	Q_OBJECT

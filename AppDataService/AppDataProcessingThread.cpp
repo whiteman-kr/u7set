@@ -110,7 +110,7 @@ void AppDataProcessingThread2::run()
 
 	QThread* thisThread = currentThread();
 
-	while(m_quitRequested == false)
+	while(isQuitRequested() == false)
 	{
 		bool hasNoDataToProcessing = true;
 
@@ -155,7 +155,7 @@ void AppDataProcessingThread2::run()
 								"losted" << appDataSource->lostedFramesCount();
 				}
 			}
-			while(m_quitRequested == false);
+			while(isQuitRequested() == false);
 
 			appDataSource->releaseProcessingOwnership(thisThread);
 		}
@@ -168,13 +168,6 @@ void AppDataProcessingThread2::run()
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is finished").arg(m_number));
 }
-
-void AppDataProcessingThread2::quitAndWait()
-{
-	quit();
-	wait();
-}
-
 
 // -------------------------------------------------------------------------------
 //

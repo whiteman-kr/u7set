@@ -23,8 +23,7 @@ AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   char** argv,
 										   CircularLoggerShared logger) :
 	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-	m_timer(this),
-	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
+	m_timer(this)
 {
 }
 
@@ -132,6 +131,29 @@ void AppDataServiceWorker::stopAppDataReceiverlThread()
 	}
 }
 
+void AppDataServiceWorker::runSignalStatesProcessingThread()
+{
+	if (m_signalStatesProcessingThread != nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_signalStatesProcessingThread = new SignalStatesProcessingThread(m_appDataSources, logger());
+
+	m_signalStatesProcessingThread->start();
+}
+
+void AppDataServiceWorker::stopSignalStatesProcessingThread()
+{
+	if (m_signalStatesProcessingThread != nullptr)
+	{
+		m_signalStatesProcessingThread->quitAndWait();
+		delete m_signalStatesProcessingThread;
+		m_signalStatesProcessingThread = nullptr;
+	}
+}
+
 void AppDataServiceWorker::runAppDataProcessingThreads()
 {
 	assert(m_appDataReceiverThread != nullptr);
@@ -174,26 +196,27 @@ void AppDataServiceWorker::stopTcpAppDataServer()
 	}
 }
 
-void AppDataServiceWorker::runTcpArchiveClientThreads()
+void AppDataServiceWorker::runTcpArchiveClientThread()
 {
 	assert(m_tcpArchiveClientThread == nullptr);
 
 	if (m_cfgSettings.archServiceID.isEmpty() == true)
 	{
+		DEBUG_LOG_WRN(logger(), "ArchiveService is not assigned");
 		return;
 	}
 
 	TcpArchiveClient* tcpArchiveClient = new TcpArchiveClient(softwareInfo(),
 												m_cfgSettings.archServiceIP,
-												logger(),
-												m_signalStatesQueue);
+												m_signalStatesProcessingThread,
+												logger());
 
 	m_tcpArchiveClientThread = new TcpArchiveClientThread(tcpArchiveClient);
 
 	m_tcpArchiveClientThread->start();
 }
 
-void AppDataServiceWorker::stopTcpArchiveClientThreads()
+void AppDataServiceWorker::stopTcpArchiveClientThread()
 {
 	if (m_tcpArchiveClientThread == nullptr)
 	{
@@ -466,7 +489,7 @@ void AppDataServiceWorker::prepareAppDataSources()
 {
 	for(AppDataSourceShared appDataSource : m_appDataSources)
 	{
-		appDataSource->prepare(m_appSignals, &m_signalStates, &m_signalStatesQueue, m_autoArchivingGroupsCount);
+		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount);
 	}
 }
 
@@ -474,13 +497,12 @@ void AppDataServiceWorker::applyNewConfiguration()
 {
 	m_autoArchivingGroupsCount = m_cfgSettings.autoArchiveInterval * 60;
 
-	resizeAppSignalEventsQueue();
-
 	createAndInitSignalStates();
 
 	prepareAppDataSources();
 
-	runTcpArchiveClientThreads();
+	runSignalStatesProcessingThread();
+	runTcpArchiveClientThread();
 	runTcpAppDataServer();
 	runAppDataReceiverThread();
 	runAppDataProcessingThreads();
@@ -493,30 +515,12 @@ void AppDataServiceWorker::clearConfiguration()
 	stopAppDataProcessingThreads();
 	stopAppDataReceiverlThread();
 	stopTcpAppDataServer();
-	stopTcpArchiveClientThreads();
+	stopTcpArchiveClientThread();
+	stopSignalStatesProcessingThread();
 
 	m_appSignals.clear();
 	m_appDataSources.clear();
 	m_appDataSourcesIP.clear();
 	m_signalStates.clear();
-}
-
-void AppDataServiceWorker::resizeAppSignalEventsQueue()
-{
-	int queueSize = m_appSignals.count() * 2;
-
-	if (queueSize == 0)
-	{
-		queueSize = 100;
-	}
-
-	if (queueSize > APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE)
-	{
-		DEBUG_LOG_WRN(logger(),"AppSignalEvents queue is reached max size");
-
-		queueSize = APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE;
-	}
-
-	m_signalStatesQueue.resize(queueSize);
 }
 
