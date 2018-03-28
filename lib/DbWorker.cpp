@@ -221,7 +221,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0203.sql", "Upgrade to version 203, Update configuration scripts and LM descriptions"},
 	{":/DatabaseUpgrade/Upgrade0204.sql", "Upgrade to version 204, TuningClient preset update"},
 	{":/DatabaseUpgrade/Upgrade0205.sql", "Upgrade to version 205, Metrology preset update"},
-	{":/DatabaseUpgrade/Upgrade0206.sql", "Upgrade to version 206, Services and LM scripts presets update"},
+	{":/DatabaseUpgrade/Upgrade0207.sql", "Upgrade to version 207, Services and LM scripts presets update"},
 };
 
 
