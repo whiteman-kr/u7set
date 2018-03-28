@@ -156,7 +156,8 @@ SOURCES +=\
     ../lib/Tuning/TuningLog.cpp \
     DialogAlert.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/Tuning/TuningSourceState.cpp
+    ../lib/Tuning/TuningSourceState.cpp \
+    DialogSignalInfo.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -213,13 +214,15 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningLog.h \
     DialogAlert.h \
     ../lib/TuningValue.h \
-    ../lib/Tuning/TuningSourceState.h
+    ../lib/Tuning/TuningSourceState.h \
+    DialogSignalInfo.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
     DialogTuningSourceInfo.ui \
-    DialogPassword.ui
+    DialogPassword.ui \
+    DialogSignalInfo.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

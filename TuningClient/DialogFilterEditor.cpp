@@ -4,12 +4,14 @@
 
 DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage,
                                                    QWidget* parent):
-    QDialog(parent),
-	m_tuningSignalManager(tuningSignalManager),
-	m_tuningClientTcpClient(tuningTcpClient)
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	m_tuningClientTcpClient(tuningTcpClient),
+	m_tuningSignalManager(tuningSignalManager)
 {
 	assert(tuningSignalManager);
 	assert(filterStorage);
+
+	setWindowTitle(tr("Filters"));
 
 	m_tuningFilterEditor = new TuningFilterEditor(filterStorage,
 												  tuningSignalManager,

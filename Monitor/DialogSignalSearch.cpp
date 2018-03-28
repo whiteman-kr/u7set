@@ -6,9 +6,9 @@
 #include "Settings.h"
 
 SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn, Qt::SortOrder sortOrder):
-	m_appSignalParamVec(appSignalParamVec),
 	m_sortColumn(sortColumn),
-	m_sortOrder(sortOrder)
+	m_sortOrder(sortOrder),
+	m_appSignalParamVec(appSignalParamVec)
 {
 	if (appSignalParamVec == nullptr)
 	{

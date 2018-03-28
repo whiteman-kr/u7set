@@ -225,7 +225,7 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 	return;
 }
 
-void MonitorCentralWidget::slot_resetSchema(QString startSchemaId)
+void MonitorCentralWidget::slot_resetSchema(QString /*startSchemaId*/)
 {
 	// All schemas must be refreshed, apparently the new configuration has arrived
 	// if there is no schema with prev SchemaID, load startSchemaId

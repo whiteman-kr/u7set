@@ -510,6 +510,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
 
 			QString equipmentListString = dasXmlElement.attribute("equipmentList");
+			equipmentListString.replace(' ', ';');
 			equipmentListString.replace('\n', ';');
 			equipmentListString.remove('\r');
 			outSetting->equipmentList = equipmentListString.split(';', QString::SkipEmptyParts);
@@ -521,7 +522,9 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();
 
 			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
-			usersAccounts = usersAccounts.replace('\n', ';');
+			usersAccounts.replace(' ', ';');
+			usersAccounts.replace('\n', ';');
+			usersAccounts.remove('\r');
 			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
 
 			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);

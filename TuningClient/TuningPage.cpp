@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QPushButton>
 #include "../VFrame30/DrawParam.h"
+#include "DialogSignalInfo.h"
 
 using namespace std;
 
@@ -415,10 +416,10 @@ int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_treeFilter(treeFilter),
-	m_pageFilter(pageFilter),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient)
+	m_tuningTcpClient(tuningTcpClient),
+	m_treeFilter(treeFilter),
+	m_pageFilter(pageFilter)
 {
 
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
@@ -525,6 +526,10 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 	m_objectList->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_objectList->setSortingEnabled(true);
 	m_objectList->setEditTriggers(QAbstractItemView::EditKeyPressed);
+
+	m_objectList->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(m_objectList, &QWidget::customContextMenuRequested, this, &TuningPage::slot_listContextMenuRequested);
 
 	connect(m_objectList->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &TuningPage::sortIndicatorChanged);
 
@@ -658,6 +663,24 @@ void TuningPage::fillObjectsList()
 			{
 				modifyDefaultValue = true;
 				modifiedDefaultValue = filterValue.value();
+			}
+		}
+		else
+		{
+			if (m_pageFilter != nullptr)
+			{
+				// Modify the default value from page filter
+				//
+
+				TuningFilterValue filterValue;
+
+				bool hasValue = m_pageFilter->value(hash, filterValue);
+
+				if (hasValue == true)
+				{
+					modifyDefaultValue = true;
+					modifiedDefaultValue = filterValue.value();
+				}
 			}
 		}
 
@@ -870,10 +893,6 @@ bool TuningPage::write()
 			continue;
 		}
 
-		state.clearUserModified();
-
-		m_tuningSignalManager->setState(hash, state);
-
 		TuningWriteCommand cmd(hash, state.modifiedValue());
 
 		commands.push_back(cmd);
@@ -1060,6 +1079,49 @@ void TuningPage::slot_FilterTypeIndexChanged(int index)
 {
 	Q_UNUSED(index);
 	fillObjectsList();
+}
+
+void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
+{
+	QModelIndex index =	m_objectList->indexAt(pos);
+	if (index.isValid() == false)
+	{
+		return;
+	}
+
+	Hash hash = m_model->hashByIndex(index.row());
+	if (hash == UNDEFINED_HASH)
+	{
+		assert(false);
+		return;
+	}
+
+	QMenu menu(this);
+
+	bool found = false;
+
+	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
+
+	if (found == false)
+	{
+		assert(false);
+		return;
+	}
+
+	QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
+
+	auto f = [this, hash]() -> void
+	{
+		DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
+		d->show();
+	};
+
+	connect(a, &QAction::triggered, this, f);
+
+	menu.addAction(a);
+
+	menu.exec(QCursor::pos());
+
 }
 
 void TuningPage::slot_ApplyFilter()

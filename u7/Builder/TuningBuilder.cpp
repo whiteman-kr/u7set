@@ -11,15 +11,15 @@ namespace Builder
 	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 								 Tuning::TuningDataStorage *tuningDataStorage, const std::vector<Hardware::DeviceModule *> lmModules,
 								 const LmDescriptionSet* lmDescriptionSet, Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
+		m_firmwareWriter(firmwareWriter),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
 		m_subsystems(subsystems),
 		m_tuningDataStorage(tuningDataStorage),
+		m_log(log),
         m_lmModules(lmModules),
-		m_lmDescriptionSet(lmDescriptionSet),
-		m_firmwareWriter(firmwareWriter),
-		m_log(log)
+		m_lmDescriptionSet(lmDescriptionSet)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);

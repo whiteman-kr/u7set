@@ -246,8 +246,13 @@ enum class NetworkError
 	SingleLmControlDisabled,
 	LmControlIsNotActive,
 	ClientIsNotActive,
-	TuningNoReply
+	TuningNoReply,
+	TuningValueCorrupted,
+
+	// update getNetworkErrorStr function after adding new error types!
 };
+
+
 
 enum class ArchiveError
 {

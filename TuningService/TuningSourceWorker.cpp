@@ -909,7 +909,7 @@ namespace Tuning
 				if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 &&
 					reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0)
 				{
-					boundCheckStr = ("No bound check errors");
+					boundCheckStr = ("No bound check errors ");
 				}
 
 				msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request: %3")).
@@ -920,13 +920,26 @@ namespace Tuning
 			break;
 
 		case FotipV2::DataType::Discrete:
-			msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request")).
+			msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request. ")).
 							arg(sourceEquipmentID()).
 							arg(m_sourceIP.addressStr());
 			break;
 
 		default:
 			assert(false);
+		}
+
+		TuningValue& newTuningValue = m_lastProcessedCommand.write.newTuningValue;
+
+		TuningValue currentValue = m_tuningSignals[m_lastProcessedCommand.write.signalIndex].currentValue();
+
+		if (newTuningValue != currentValue)
+		{
+			errCode = NetworkError::TuningValueCorrupted;
+
+			msg +=  QString("Tuning value corrupted");
+
+			hasErrors = true;
 		}
 
 		finalizeWriting(errCode);
