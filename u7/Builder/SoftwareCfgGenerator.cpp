@@ -603,15 +603,11 @@ namespace Builder
 				return false;
 			}
 
-			auto configurationIpProperty = configurationServiceObject->propertyByCaption("ClientRequestIP");
-			if (configurationIpProperty== nullptr)
+			if (DeviceHelper::getIPv4Property(configurationServiceObject, "ClientRequestIP", &ip, false, m_log) == false)
 			{
-				TEST_PTR_RETURN_FALSE(m_log);
-				m_log->errCFG3020(configurationID, "ClientRequestIP");
 				return false;
 			}
 
-			ip = configurationIpProperty->value().toString();
 			return true;
 		};
 
@@ -637,6 +633,7 @@ namespace Builder
 
 		if (cfgIP1.isEmpty() && cfgIP2.isEmpty())
 		{
+			m_log->errALC5140(m_software->equipmentIdTemplate());
 			return false;
 		}
 

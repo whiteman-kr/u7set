@@ -91,10 +91,10 @@ int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
 	QWidget(parent),
-	m_treeFilter(treeFilter),
-	m_workspaceFilter(workspaceFilter),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient)
+	m_tuningTcpClient(tuningTcpClient),
+	m_workspaceFilter(workspaceFilter),
+	m_treeFilter(treeFilter)
 {
 	//qDebug() << "TuningWorkspace::TuningWorkspace m_instanceCounter = " << m_instanceCounter;
 	m_instanceCounter++;
@@ -171,7 +171,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 TuningWorkspace::~TuningWorkspace()
 {
 	m_instanceCounter--;
-	qDebug() << "TuningWorkspace::~TuningWorkspace m_instanceCounter = " << m_instanceCounter;
+	//qDebug() << "TuningWorkspace::~TuningWorkspace m_instanceCounter = " << m_instanceCounter;
 
 	if (m_hSplitter != nullptr)
 	{
@@ -353,7 +353,7 @@ void TuningWorkspace::updateFiltersTree()
 		}
 		if (columnStatusIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnStatusIndex, 120);
+			m_filterTree->setColumnWidth(columnStatusIndex, 150);
 		}
 		if (columnSorIndex != -1)
 		{
@@ -787,8 +787,8 @@ void TuningWorkspace::updateCounters()
 
 		if (m_tab->count() != static_cast<int>(m_tabsFilters.size()))
 		{
-			qDebug() << m_tab->count();
-			qDebug() << static_cast<int>(m_tabsFilters.size());
+			//qDebug() << m_tab->count();
+			//qDebug() << static_cast<int>(m_tabsFilters.size());
 			assert(m_tab->count() == static_cast<int>(m_tabsFilters.size()));
 		}
 
@@ -938,24 +938,42 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		if (columnSorIndex != -1 && theConfigSettings.showSOR == true)
 		{
-			if (counters.sorCounter == 0)
+			if (counters.sorActive == false)
 			{
-				treeItem->setText(columnSorIndex, tr("No"));
+				treeItem->setText(columnSorIndex, QString());	// Inactive
 				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
 				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
 			}
 			else
 			{
-				if (counters.sorCounter == 1)
+				if (counters.sorValid == false)
 				{
-					treeItem->setText(columnSorIndex, tr("Yes"));
+					treeItem->setText(columnSorIndex, "?");
+					treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+					treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 				}
 				else
 				{
-					treeItem->setText(columnSorIndex, QString("Yes [%1]").arg(counters.sorCounter));
+					if (counters.sorCounter == 0)
+					{
+						treeItem->setText(columnSorIndex, QString());	// Sor NO
+						treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
+						treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
+					}
+					else
+					{
+						if (counters.sorCounter == 1)
+						{
+							treeItem->setText(columnSorIndex, tr("SOR"));
+						}
+						else
+						{
+							treeItem->setText(columnSorIndex, QString("SOR [%1]").arg(counters.sorCounter));
+						}
+						treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+						treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
+					}
 				}
-				treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
-				treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 			}
 		}
 	}
@@ -1171,6 +1189,7 @@ void TuningWorkspace::slot_currentTreeItemChanged(QTreeWidgetItem *current, QTre
 	else
 	{
 		std::shared_ptr<TuningFilter> filter = current->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+		m_treeFilter = filter;
 		emit treeFilterSelectionChanged(filter);
 	}
 }

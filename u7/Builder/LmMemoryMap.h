@@ -237,8 +237,6 @@ namespace Builder
 		int getModuleDataOffset(int place) const;
 		int getModuleRegDataOffset(int place) const;
 
-		int getRegBufStartAddr() const;
-
 		void getFile(QStringList& memFile);
 
 		bool appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);

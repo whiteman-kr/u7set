@@ -254,7 +254,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool someFilesUpdated = false;
 
-
 	QByteArray data;
 	QString errorStr;
 
@@ -302,22 +301,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			}
 
-			// Details
-
-			if (f.ID == CFG_FILE_ID_TUNING_SCHEMAS_DETAILS)
-			{
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
-				{
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
-					theLogFile->writeError(completeErrorMessage);
-					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-				}
-				else
-				{
-					emit schemasDetailsArrived(data);
-				}
-			}
-
 			// Signals
 
 			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
@@ -336,15 +319,13 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			if (f.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
 			{
-				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				if (getFileBlockedById(f.ID, &m_globalScriptData, &errorStr) == false)
 				{
+					m_globalScriptData.clear();
+
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-				}
-				else
-				{
-					emit globalScriptArrived(data);
 				}
 			}
 		}
@@ -390,10 +371,14 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply);
 	}
 
+	emit globalScriptArrived(m_globalScriptData);	// for develop
+
 	if (someFilesUpdated == true || apperanceUpdated == true)
 	{
 		emit configurationArrived();
 	}
+
+	//emit globalScriptArrived(m_globalScriptData);	for rpct-1867
 
 	return;
 }
@@ -506,7 +491,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 
 		if (dasNodes.isEmpty() == true)
 		{
-			outSetting->errorMessage += tr("Cannot find TuningService tag %1\n");
+			outSetting->errorMessage += tr("Cannot find TuningService tag\n");
 			return false;
 		}
 		else
@@ -525,6 +510,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
 
 			QString equipmentListString = dasXmlElement.attribute("equipmentList");
+			equipmentListString.replace(' ', ';');
 			equipmentListString.replace('\n', ';');
 			equipmentListString.remove('\r');
 			outSetting->equipmentList = equipmentListString.split(';', QString::SkipEmptyParts);
@@ -536,7 +522,9 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();
 
 			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
-			usersAccounts = usersAccounts.replace('\n', ';');
+			usersAccounts.replace(' ', ';');
+			usersAccounts.replace('\n', ';');
+			usersAccounts.remove('\r');
 			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
 
 			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);

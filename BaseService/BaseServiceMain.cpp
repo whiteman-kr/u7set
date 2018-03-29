@@ -41,9 +41,7 @@ public:
 
 	void loadSettings() override
 	{
-		m_serviceEquipmentID = getStrSetting("id");
-
-		LOG_MSG(m_logger, QString("%1 = %2").arg("id").arg(m_serviceEquipmentID));
+		LOG_MSG(m_logger, QString("%1 = %2").arg("id").arg(equipmentID()));
 	}
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override
@@ -52,7 +50,6 @@ public:
 	}
 
 private:
-	QString m_serviceEquipmentID;
 	std::shared_ptr<CircularLogger> m_logger;
 };
 

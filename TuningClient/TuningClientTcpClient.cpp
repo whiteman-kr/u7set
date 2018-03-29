@@ -89,40 +89,84 @@ int TuningClientTcpClient::sourceErrorCount(Hash equipmentHash) const
 	return ts.getErrorsCount();
 }
 
-int TuningClientTcpClient::sourceSorCount() const
+int TuningClientTcpClient::sourceSorCount(bool* sorActive, bool* sorValid) const
 {
-	QMutexLocker l(&m_tuningSourcesMutex);
+	if (sorValid == nullptr || sorActive == nullptr)
+	{
+		assert(sorValid);
+		assert(sorActive);
+		return 0;
+	}
 
 	int result = 0;
+
+	*sorActive = false;
+	*sorValid = false;
+
+	QMutexLocker l(&m_tuningSourcesMutex);
 
 	for (const auto& it : m_tuningSources)
 	{
 		const TuningSource& ts = it.second;
-		if (ts.state.setsor() == true)
+
+		if (ts.state.controlisactive() == true)
 		{
-			result++;
+			*sorActive = true;
+
+			if (ts.state.isreply() == true)
+			{
+				*sorValid = true;
+
+				if (ts.state.setsor() == true)
+				{
+					result++;
+				}
+			}
 		}
 	}
 
 	return result;
 }
 
-int TuningClientTcpClient::sourceSorCount(Hash equipmentHash) const
+int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorActive, bool* sorValid) const
 {
+	if (sorValid == nullptr || sorActive == nullptr)
+	{
+		assert(sorValid);
+		assert(sorActive);
+		return 0;
+	}
+
+	*sorActive = false;
+	*sorValid = false;
+
+	int result = 0;
+
 	QMutexLocker l(&m_tuningSourcesMutex);
 
 	if (m_tuningSources.find(equipmentHash) == m_tuningSources.end())
 	{
-		return 0;
+		return result;
 	}
 
 	const TuningSource& ts = m_tuningSources.at(equipmentHash);
-	if (ts.state.setsor() == true)
+
+	if (ts.state.controlisactive() == true)
 	{
-		return 1;
+		*sorActive = true;
+
+		if (ts.state.isreply() == true)
+		{
+			*sorValid = true;
+
+			if (ts.state.setsor() == true)
+			{
+				result = 1;
+			}
+		}
 	}
 
-	return 0;
+	return result;
 }
 
 QString TuningClientTcpClient::getStateToolTip() const

@@ -1,5 +1,6 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/LmLimits.h"
+#include <QHostAddress>
 
 
 QHash<QString, ModuleRawDataDescription*> DeviceHelper::m_modulesRawDataDescription;
@@ -44,13 +45,22 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 		return false;
 	}
 
-	*value = val.toInt();
+	bool ok = false;
+
+	*value = val.toInt(&ok);
+
+	if (ok == false)
+	{
+		// Property '%1.%2' conversion error.
+		//
+		log->errCFG3023(device->equipmentIdTemplate(), name);
+		return false;
+	}
 
 	return true;
 }
 
-
-bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger *log)
+bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger* log)
 {
 	if (device == nullptr ||
 		value == nullptr ||
@@ -72,7 +82,6 @@ bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QS
 
 	return true;
 }
-
 
 bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)
 {
@@ -96,6 +105,55 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 
 	return true;
 }
+
+bool DeviceHelper::getIPv4Property(const Hardware::DeviceObject* device, const QString& name, QString* value, bool emptyAllowed, Builder::IssueLogger *log)
+{
+	bool res = getStrProperty(device, name, value, log);
+
+	if (res == false)
+	{
+		return false;
+	}
+
+	if (value->isEmpty() == true && emptyAllowed == false)
+	{
+		// Property '%1.%2' is empty.
+		//
+		log->errCFG3022(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	QHostAddress addr;
+
+	res = addr.setAddress(*value);
+
+	if (res == false)
+	{
+		// Value of property %1.%2 is not valid IPv4 address.
+		//
+		log->errCFG3026(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger* log)
+{
+	if (getIntProperty(device, name, value, log) == false)
+	{
+		return false;
+	}
+
+	if (*value < 1 || *value > 65535)
+	{
+		log->errCFG3027(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
 
 
 bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log)

@@ -267,9 +267,52 @@ namespace Builder
 			bool ok = true;
 
 			//
+			// ConfigurationServiceID1,2
+			//
+
+			QStringList configServiceIdProperties;
+			configServiceIdProperties << "ConfigurationServiceID1";
+			configServiceIdProperties << "ConfigurationServiceID2";
+
+			for (const QString& cfgsProperty : configServiceIdProperties)
+			{
+				QString configurationServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), cfgsProperty, &ok).trimmed();
+				if (ok == false)
+				{
+					return false;
+				}
+
+				if (configurationServiceId.isEmpty() == true)
+				{
+					m_log->errCFG3022(m_software->equipmentId(), cfgsProperty);
+
+					QString errorStr = tr("TuningClient configuration error %1, property %2 is invalid")
+							.arg(m_software->equipmentIdTemplate()).arg(cfgsProperty);
+
+					writeErrorSection(xmlWriter, errorStr);
+					return false;
+				}
+
+				Hardware::Software* cfgs = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(configurationServiceId));
+
+				if (cfgs == nullptr)
+				{
+					m_log->errCFG3021(m_software->equipmentIdTemplate(), cfgsProperty, configurationServiceId);
+
+					QString errorStr = tr("Object %1 is not found").arg(configurationServiceId);
+
+					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+					return false;
+				}
+			}
+
+			//
 			// TuningServiceID
 			//
-			QString tuningServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID", &ok).trimmed();
+
+			QString tunsProperty = "TuningServiceID";
+
+			QString tuningServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), tunsProperty, &ok).trimmed();
 			if (ok == false)
 			{
 				return false;
@@ -277,10 +320,10 @@ namespace Builder
 
 			if (tuningServiceId.isEmpty() == true)
 			{
-				m_log->errCFG3022(m_software->equipmentId(), "TuningServiceID");
+				m_log->errCFG3022(m_software->equipmentId(), tunsProperty);
 
-				QString errorStr = tr("TuningClient configuration error %1, property TuningServiceID is invalid")
-						.arg(m_software->equipmentIdTemplate());
+				QString errorStr = tr("TuningClient configuration error %1, property %2 is invalid")
+						.arg(m_software->equipmentIdTemplate()).arg(tunsProperty);
 
 				writeErrorSection(xmlWriter, errorStr);
 				return false;
@@ -290,7 +333,7 @@ namespace Builder
 
 			if (tunsObject == nullptr)
 			{
-				m_log->errCFG3021(m_software->equipmentIdTemplate(), "TuningServiceID", tuningServiceId);
+				m_log->errCFG3021(m_software->equipmentIdTemplate(), tunsProperty, tuningServiceId);
 
 				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId);
 

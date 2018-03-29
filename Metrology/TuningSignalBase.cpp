@@ -382,7 +382,7 @@ void TuningSignalBase::setState(const Network::TuningSignalState& state)
 				{
 					pSignal->state().setValid(state.valid());
 
-					pSignal->state().setValue(TuningSignalState(state).valueToDouble());
+					pSignal->state().setValue(TuningSignalState(state).toDouble());
 				}
 			}
 		}

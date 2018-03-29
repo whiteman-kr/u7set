@@ -400,12 +400,14 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		return;
 	}
 
+	QString msg = message.simplified();
+
+	msg.replace("&nbsp;", " ");
+
 	if (debugEcho == true)
 	{
-		qDebug() << C_STR(message);
+		qDebug() << C_STR(msg);
 	}
-
-	QString msg = message;
 
 	QString record;
 
@@ -414,7 +416,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		record = QString("%1 %2  %3  ###%4###%5:%6###").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
-							arg(msg.simplified()).
+							arg(msg).
 							arg(function).
 							arg(file).
 							arg(line);
@@ -424,7 +426,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		record = QString("%1 %2  %3").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
-							arg(msg.simplified());
+							arg(msg);
 	}
 
 

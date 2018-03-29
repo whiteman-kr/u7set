@@ -488,10 +488,10 @@ QString TcpAppDataServerThread::equipmentID() const
 
 QString TcpAppDataServerThread::cfgServiceIP1Str() const
 {
-	return m_appDataServiceWorker.cfgServiceIP1Str();
+	return m_appDataServiceWorker.cfgServiceIP1().addressPortStr();
 }
 
 QString TcpAppDataServerThread::cfgServiceIP2Str() const
 {
-	return m_appDataServiceWorker.cfgServiceIP2Str();
+	return m_appDataServiceWorker.cfgServiceIP2().addressPortStr();
 }

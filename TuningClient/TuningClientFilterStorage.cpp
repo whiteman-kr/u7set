@@ -169,8 +169,21 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 		for (Hash& equipmentHash : equipmentHashes)
 		{
-			totalCounters.errorCounter += tcpClient->sourceSorCount(equipmentHash);
-			totalCounters.sorCounter += tcpClient->sourceSorCount(equipmentHash);
+			bool sorIsActive = false;
+			bool sorIsValid = false;
+
+
+			totalCounters.errorCounter += tcpClient->sourceErrorCount(equipmentHash);
+			totalCounters.sorCounter += tcpClient->sourceSorCount(equipmentHash, &sorIsActive, &sorIsValid);
+
+			if (sorIsActive == true)
+			{
+				totalCounters.sorActive = true;
+			}
+			if (sorIsValid == true)
+			{
+				totalCounters.sorValid = true;
+			}
 		}
 
 		// Signals counters

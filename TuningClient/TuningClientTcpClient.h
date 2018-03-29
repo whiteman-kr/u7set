@@ -26,8 +26,8 @@ public:
 	int sourceErrorCount() const;
 	int sourceErrorCount(Hash equipmentHash) const;
 
-	int sourceSorCount() const;
-	int sourceSorCount(Hash equipmentHash) const;
+	int sourceSorCount(bool* sorActive, bool* sorValid) const;
+	int sourceSorCount(Hash equipmentHash, bool* sorActive, bool* sorValid) const;
 
 	QString getStateToolTip() const;
 

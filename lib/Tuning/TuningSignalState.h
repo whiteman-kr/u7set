@@ -13,7 +13,6 @@ union TuningSignalStateFlags
 		quint32	valid : 1;
 		quint32	outOfRange : 1;
 		quint32	writeInProgress : 1;
-		quint32 writeFailed: 1;
 		quint32 controlIsEnabled: 1;
 
 		quint32 userModified : 1;	// This flag is used by TuningClient's model
@@ -27,38 +26,49 @@ class TuningSignalState
 	Q_GADGET
 
 	Q_PROPERTY(Hash Hash READ hash)
-	Q_PROPERTY(TuningValue Value READ value)
-	Q_PROPERTY(TuningValue LowBound READ lowBound)
-	Q_PROPERTY(TuningValue HighBound READ highBound)
+	Q_PROPERTY(QVariant Value READ toVariant)
+	Q_PROPERTY(QVariant LowBound READ lowBoundToVariant)
+	Q_PROPERTY(QVariant HighBound READ highBoundToVariant)
+
 	Q_PROPERTY(bool Valid READ valid)
 	Q_PROPERTY(bool OutOfRange READ outOfRange)
+	Q_PROPERTY(bool WriteInProgress READ writeInProgress)
+	Q_PROPERTY(bool ControlIsEnabled READ controlIsEnabled)
 
 public:
 	TuningSignalState() = default;
 	TuningSignalState(const ::Network::TuningSignalState& message);
 
-	Q_INVOKABLE Hash hash() const;
+	Hash hash() const;
 
-	Q_INVOKABLE TuningValue value() const;
+	TuningValue value() const;
 
-	double valueToDouble() const;
+	QVariant toVariant() const;
+	double toDouble() const;
 
-	TuningValue newValue() const;
-	void setNewValue(const TuningValue& value);
+	TuningValue modifiedValue() const;
+	void setModifiedValue(const TuningValue& value);
 
-	Q_INVOKABLE TuningValue lowBound() const;
-	Q_INVOKABLE TuningValue highBound() const;
+	TuningValue lowBound() const;
+	QVariant lowBoundToVariant() const;
 
-	Q_INVOKABLE bool valid() const;
-	Q_INVOKABLE bool outOfRange() const;
-	Q_INVOKABLE bool writeInProgress() const;
-	Q_INVOKABLE bool writeFailed() const;
-	Q_INVOKABLE bool controlIsEnabled() const;
+	TuningValue highBound() const;
+	QVariant highBoundToVariant() const;
 
-	Q_INVOKABLE int writeErrorCode() const;
+	bool valid() const;
+	bool outOfRange() const;
+	bool writeInProgress() const;
+	bool controlIsEnabled() const;
+
+	int writeErrorCode() const;
+	Hash writeClient() const;
+
+	QDateTime successfulReadTime() const;
+	QDateTime writeRequestTime() const;
+	QDateTime successfulWriteTime() const;
+	QDateTime unsuccessfulWriteTime() const;
 
 	bool userModified() const;
-	void clearUserModified();
 
 	bool setState(const ::Network::TuningSignalState& message);
 
@@ -79,6 +89,11 @@ public:
 
 	int m_writeErrorCode = 0;
 	Hash m_writeClient = 0;
+
+	qint64 m_successfulReadTime = 0;
+	qint64 m_writeRequestTime = 0;
+	qint64 m_successfulWriteTime = 0;
+	qint64 m_unsuccessfulWriteTime = 0;
 };
 
 Q_DECLARE_METATYPE(TuningSignalState)

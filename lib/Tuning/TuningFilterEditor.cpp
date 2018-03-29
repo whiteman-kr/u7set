@@ -15,6 +15,8 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 		m_filter(filter)
 {
 
+	setWindowTitle(tr("Filter Signals"));
+
 	m_filterValues = m_filter->getValues();
 
 	// Left part
@@ -129,7 +131,6 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	if (setCurrentEnabled == true)
 	{
 		m_setCurrent = new QPushButton(tr("Set Current"));
-		m_setCurrent->setEnabled(false);
 		connect(m_setCurrent, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_setCurrent_clicked);
 		rightGridLayout->addWidget(m_setCurrent);
 	}
@@ -492,6 +493,42 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 
 void DialogChooseTuningSignals::on_m_setCurrent_clicked()
 {
+	QModelIndexList selectedRows = m_filterValuesTree->selectionModel()->selectedRows();
+
+	for (int i = 0; i < selectedRows.size(); i++)
+	{
+		int index = selectedRows[i].row();
+
+		TuningFilterValue& fv = m_filterValues[index];
+
+		AppSignalParam asp;
+		if (m_signalManager->signalParam(fv.appSignalHash(), &asp) == false)
+		{
+			QMessageBox::warning(this, tr("Filter Editor"), tr("Can't find signal %1!").arg(fv.appSignalId()));
+			return;
+		}
+
+		TuningValue currentValue;
+		bool ok = false;
+
+		emit getCurrentSignalValue(fv.appSignalHash(), &currentValue, &ok);
+
+		if (ok == true)
+		{
+			fv.setUseValue(true);
+			fv.setValue(currentValue);
+		}
+		else
+		{
+			QMessageBox::warning(this, tr("Filter Editor"), tr("Can't get current value of signal %1!").arg(asp.customSignalId()));
+		}
+
+		QTreeWidgetItem* item = m_filterValuesTree->topLevelItem(index);
+		setFilterValueItemText(item, fv);
+	}
+
+
+
 	/*QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
 
 	for (auto item : selectedItems)
@@ -679,14 +716,14 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 									   const QByteArray& dialogChooseSignalGeometry):
 	m_filterStorage(filterStorage),
 	m_signalManager(signalManager),
+	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry),
+	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
 	m_readOnly(readOnly),
 	m_setCurrentEnabled(setCurrentEnabled),
-	m_typeTreeEnabled(typeTreeEnabled),
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
-	m_source(source),
-	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
-	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry)
+	m_typeTreeEnabled(typeTreeEnabled),
+	m_source(source)
 {
 
 	assert(filterStorage);
@@ -1388,6 +1425,8 @@ void TuningFilterEditor::on_m_presetsSignals_clicked()
 
 	DialogChooseTuningSignals d(m_signalManager, selectedFilter, m_setCurrentEnabled, this);
 
+	connect(&d, &DialogChooseTuningSignals::getCurrentSignalValue, this, &TuningFilterEditor::slot_getCurrentSignalValue, Qt::DirectConnection);
+
 	if (m_dialogChooseSignalGeometry.isEmpty() == false)
 	{
 		d.restoreGeometry(m_dialogChooseSignalGeometry);
@@ -1395,13 +1434,17 @@ void TuningFilterEditor::on_m_presetsSignals_clicked()
 
 	if (d.exec() == QDialog::Accepted)
 	{
-
+		m_modified = true;
 	}
 
 	m_dialogChooseSignalGeometry = d.saveGeometry();
 
 }
 
+void TuningFilterEditor::slot_getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok)
+{
+	emit getCurrentSignalValue(appSignalHash, value, ok);
+}
 
 void TuningFilterEditor::on_m_presetsTree_contextMenu(const QPoint& pos)
 {

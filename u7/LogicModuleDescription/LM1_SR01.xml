@@ -11813,13 +11813,13 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0003">
+		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0004">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
-				<InternalUse>false</InternalUse>
+				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
 			<Inputs>
@@ -11847,13 +11847,13 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0003">
+		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0004">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
-				<InternalUse>false</InternalUse>
+				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
 			<Inputs>
@@ -11881,13 +11881,13 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0003">
+		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0004">
 			<Properties>
 				<Description>Converts big-endian to liggle-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
-				<InternalUse>false</InternalUse>
+				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
 			<Inputs>
@@ -11915,13 +11915,13 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0003">
+		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0004">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
 				<Category>Converter</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
-				<InternalUse>false</InternalUse>
+				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
 			<Inputs>

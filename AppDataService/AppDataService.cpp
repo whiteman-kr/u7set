@@ -17,10 +17,6 @@
 //
 // -------------------------------------------------------------------------------
 
-const char* const AppDataServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
-const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
-const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
-
 AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
 										   int& argc,
@@ -28,8 +24,8 @@ AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   std::shared_ptr<CircularLogger> logger) :
 	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_logger(logger),
-	m_timer(this),
-	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
+	m_signalStatesQueue(1),			// shoud be resized after cfg loading according to signals count
+	m_timer(this)
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
@@ -117,26 +113,16 @@ void AppDataServiceWorker::initCmdLineParser()
 
 void AppDataServiceWorker::loadSettings()
 {
-	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
-
-	m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
-
-	m_cfgServiceIP1 = HostAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
-
-	m_cfgServiceIP2Str = getStrSetting(SETTING_CFG_SERVICE_IP2);
-
-	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
-
 	DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(m_cfgServiceIP1.addressPortStr()));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(m_cfgServiceIP2.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
 }
 
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
+	CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, m_logger);
 
 	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 

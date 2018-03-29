@@ -996,7 +996,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3021,
-                  tr("Property '%1.%2' is linked to undefined software ID '%3'.")
+				  tr("Property %1.%2 is linked to undefined software ID '%3'.")
                   .arg(objectID)
                   .arg(propertyName)
                   .arg(softwareID));
@@ -1019,7 +1019,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3022,
-                  tr("Property '%1.%2' is empty.")
+				  tr("Property %1.%2 is empty.")
                   .arg(objectID)
                   .arg(propertyName));
     }
@@ -1041,7 +1041,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3023,
-				  tr("Property '%1.%2' conversion error.").arg(objectID).arg(propertyName));
+				  tr("Property %1.%2 conversion error.").arg(objectID).arg(propertyName));
 	}
 
 	/// IssueCode: CFG3024
@@ -1086,6 +1086,46 @@ namespace Builder
 				  tr("Can't find child controller with suffix '%1' in object '%2'.")
 				  .arg(suffix)
 				  .arg(objectID));
+	}
+
+	/// IssueCode: CFG3026
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of property %1.%2 is not valid IPv4 address.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Value of property is not valid IPv4 address. Check property value.
+	///
+	void IssueLogger::errCFG3026(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3026,
+				  tr("Value of property %1.%2 is not valid IPv4 address.").arg(objectID).arg(propertyName));
+	}
+
+	/// IssueCode: CFG3027
+	///
+	/// IssueType: Error
+	///
+	/// Title: Ethernet port number property %1.%2 should be in range 1..65535.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Ethernet port number should in range 1..65535.. Check property value.
+	///
+	void IssueLogger::errCFG3027(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3027,
+				  tr("Ethernet port number property %1.%2 should be in range 1..65535.").arg(objectID).arg(propertyName));
 	}
 
 	// ALP			Application Logic Parsing				4000-4999
@@ -5003,6 +5043,49 @@ namespace Builder
 				  5138,
 				  QString(tr("Signal %1 property %2 out of Float32 range.")).
 						  arg(appSignalID).arg(property));
+	}
+
+	/// IssueCode: ALC5139
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Values of parameters %1.%2 and %1.%3 are equal.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///
+	/// Description:
+	///		Values of parameters are equal. Check params values.
+	///
+	void IssueLogger::wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
+	{
+		addItemsIssues(OutputMessageLevel::Warning0, itemUuid, schemaID);
+
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5139,
+				  QString(tr("Values of parameters %1.%2 and %1.%3 are equal (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5140
+	///
+	/// IssueType: Error
+	///
+	/// Title: Undefined ConfigurationService IP-address for software %1.
+	///
+	/// Parameters:
+	///		%1 Software EquipmentID
+	///
+	/// Description:
+	///		ConfigurationService IP-address for software is undefined. Check ConfigurationService ClientrequestIP property.
+	///
+	void IssueLogger::errALC5140(QString softwareID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5140,
+				  QString(tr("Undefined ConfigurationService IP-address for software %1.")).arg(softwareID));
 	}
 
 	//

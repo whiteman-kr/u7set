@@ -19,9 +19,9 @@ namespace Builder
 		virtual bool generateConfiguration() override;
 
 	private:
+		bool checkProperties();
 		bool writeBatFile();
 		bool writeShFile();
-
 	};
 
 }

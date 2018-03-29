@@ -10,13 +10,13 @@
 #include "DialogFilterEditor.h"
 #include "version.h"
 
-QString MainWindow::m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
-QString MainWindow::m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
-
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
 {
+	m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
+	m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
+
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
 		move(theSettings.m_mainWindowPos);
@@ -134,8 +134,8 @@ void MainWindow::createActions()
 	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);
 
 
-	m_pPresetEditorAction = new QAction(tr("Preset Editor..."), this);
-	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
+	m_pPresetEditorAction = new QAction(tr("Filter Editor..."), this);
+	m_pPresetEditorAction->setStatusTip(tr("Edit user filters"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
 	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
@@ -366,6 +366,12 @@ void MainWindow::createWorkspace()
 		m_schemasWorkspace = nullptr;
 	}
 
+	if (m_tabWidget != nullptr)
+	{
+		delete m_tabWidget;
+		m_tabWidget = nullptr;
+	}
+
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
 		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, m_globalScript, this);
@@ -410,11 +416,11 @@ void MainWindow::createWorkspace()
 				// Show both Workspaces
 				//
 
-				QTabWidget* tab = new QTabWidget();
-				tab->addTab(m_schemasWorkspace, tr("Schemas"));
-				tab->addTab(m_tuningWorkspace, tr("Signals"));
+				m_tabWidget = new QTabWidget();
+				m_tabWidget->addTab(m_schemasWorkspace, tr("Schemas"));
+				m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));
 
-				m_mainLayout->addWidget(tab, 2);
+				m_mainLayout->addWidget(m_tabWidget, 2);
 			}
 			else
 			{
@@ -471,7 +477,7 @@ void MainWindow::updateStatusBar()
 
 		if (m_activeClientId.isEmpty() == false && m_activeClientIp.isEmpty() == false)
 		{
-			str += QString(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
+			str += tr(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
 
 			if (m_tcpClient->clientIsActive() == true)
 			{
@@ -595,23 +601,60 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
-			int totalSorCount = m_tcpClient->sourceSorCount();
+			bool totalSorActive = false;
 
-			if (m_sorCounter != totalSorCount || m_statusBarSor->text().isEmpty() == true)
+			bool totalSorValid = false;
+
+			int totalSorCount = m_tcpClient->sourceSorCount(&totalSorActive, &totalSorValid);
+
+			QString sorStatus;
+
+			if (totalSorActive == false)
 			{
-				m_sorCounter = totalSorCount;
-
-				assert(m_statusBarSor);
-
-				m_statusBarSor->setText(QString(" SOR: %1").arg(m_sorCounter));
-
-				if (m_sorCounter == 0)
+				sorStatus = tr(" SOR: ");
+			}
+			else
+			{
+				if (totalSorValid == false)
 				{
-					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+					sorStatus = tr(" SOR: ?");
 				}
 				else
 				{
+					if (totalSorCount == 0)
+					{
+						sorStatus = tr(" SOR: No");
+					}
+					else
+					{
+						if (totalSorCount == 1)
+						{
+							sorStatus = tr(" SOR: Yes");
+						}
+						else
+						{
+							sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+						}
+					}
+				}
+			}
+
+			if (m_sorStatus != sorStatus)
+			{
+				m_sorStatus = sorStatus;
+
+				assert(m_statusBarSor);
+
+				m_statusBarSor->setText(sorStatus);
+
+				if ((totalSorActive == true && totalSorValid == false) || totalSorCount > 0)
+				{
 					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+
+				}
+				else
+				{
+					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
 				}
 			}
 		}
