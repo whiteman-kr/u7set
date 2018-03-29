@@ -84,7 +84,7 @@ namespace TuningIPEN
 		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
 		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
 
-		quint64 uniqueID();
+		quint64 lmUniqueID();
 
 		TuningSourceState getState();
 

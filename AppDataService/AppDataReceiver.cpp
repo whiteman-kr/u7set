@@ -15,7 +15,8 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 	m_dataReceivingIP(dataReceivingIP),
 	m_appDataSourcesIP(appDataSourcesIP),
 	m_log(log),
-	m_timer1s(this)
+	m_timer1s(this),
+	m_shortTimer(this)
 {
 }
 
@@ -26,9 +27,13 @@ AppDataReceiver::~AppDataReceiver()
 void AppDataReceiver::onThreadStarted()
 {
 	connect(&m_timer1s, &QTimer::timeout, this, &AppDataReceiver::onTimer1s);
+	connect(&m_shortTimer, &QTimer::timeout, this, &AppDataReceiver::onSocketReadyRead);
 	
 	m_timer1s.setInterval(1000);
 	m_timer1s.start();
+
+	m_shortTimer.setInterval(5);
+	m_shortTimer.start();
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
 }
@@ -94,7 +99,6 @@ void AppDataReceiver::onSocketReadyRead()
 {
 	if (m_socket == nullptr)
 	{
-		assert(false);
 		return;
 	}
 

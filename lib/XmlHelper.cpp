@@ -74,36 +74,34 @@ void XmlWriteHelper::writeBoolAttribute(const QString& name, bool value)
 
 void XmlWriteHelper::writeUInt64Attribute(const QString& name, quint64 value, bool hex)
 {
+	QString valueStr;
+
 	if (hex == true)
 	{
-		QString str;
-
-		str.sprintf("0x%016llX", value);
-
-		writeStringAttribute(name, str);
+		valueStr = "0x" + QString::number(static_cast<qulonglong>(value), 16).toUpper();
 	}
 	else
 	{
-		QString valueStr = QString::number(static_cast<qulonglong>(value));
-		m_xmlWriter->writeAttribute(name, valueStr);
+		valueStr = QString::number(static_cast<qulonglong>(value));
 	}
+
+	m_xmlWriter->writeAttribute(name, valueStr);
 }
 
 void XmlWriteHelper::writeUInt32Attribute(const QString& name, quint32 value, bool hex)
 {
+	QString valueStr;
+
 	if (hex == true)
 	{
-		QString str;
-
-		str.sprintf("0x%08uX", value);
-
-		writeStringAttribute(name, str);
+		valueStr = "0x" + QString::number(static_cast<ulong>(value), 16).toUpper();
 	}
 	else
 	{
-		QString valueStr = QString::number(static_cast<ulong>(value));
-		m_xmlWriter->writeAttribute(name, valueStr);
+		valueStr = QString::number(static_cast<ulong>(value));
 	}
+
+	m_xmlWriter->writeAttribute(name, valueStr);
 }
 
 void XmlWriteHelper::writeDoubleAttribute(const QString& name, double value)

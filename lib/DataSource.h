@@ -36,6 +36,7 @@ protected:
 	static const char* PROP_CHANNEL;
 	static const char* PROP_LM_ID;
 	static const char* PROP_LM_NUMBER;
+	static const char* PROP_LM_CHANNEL;
 	static const char* PROP_LM_SUBSYSTEM_ID;
 	static const char* PROP_LM_SUBSYSTEM;
 	static const char* PROP_LM_MODULE_TYPE;
@@ -44,6 +45,7 @@ protected:
 	static const char* PROP_LM_DATA_ENABLE;
 	static const char* PROP_LM_DATA_IP;
 	static const char* PROP_LM_DATA_PORT;
+	static const char* PROP_LM_RUP_FRAMES_QUANTITY;
 	static const char* PROP_LM_DATA_ID;
 	static const char* PROP_LM_UNIQUE_ID;
 	static const char* PROP_COUNT;
@@ -65,6 +67,9 @@ public:
 
 	int lmNumber() const { return m_lmNumber; }
 	void setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }
+
+	QString lmSubsystemChannel() const { return m_lmSubsystemChannel; }
+	void setLmSubsystemChannel(const QString& lmChannel) { m_lmSubsystemChannel = lmChannel; }
 
 	int lmSubsystemID() const { return m_lmSubsystemID; }
 	void setLmSubsystemID(int subsystemID) { m_lmSubsystemID = subsystemID; }
@@ -95,15 +100,17 @@ public:
 	int lmPort() const { return m_lmAddressPort.port(); }
 	void setLmPort(int port) { m_lmAddressPort.setPort(port); }
 
-	quint64 uniqueID() const { return m_uniqueID; }
-	void setUniqueID(quint64 uniqueID) { m_uniqueID = uniqueID; }
+	int lmRupFramesQuantity() const { return m_lmRupFramesQuantity; }
+	void setLmRupFramesQuantity(int lmRupFramesQuantity) { m_lmRupFramesQuantity = lmRupFramesQuantity; }
+
+	quint64 lmUniqueID() const { return m_lmUniqueID; }
+	void setLmUniqueID(quint64 uniqueID) { m_lmUniqueID = uniqueID; }
 
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
 
 	quint64 ID() const { return m_id; }
 	void setID(quint32 id) { m_id = id; }
-
 
 	QString dataTypeToString(DataType lmDataType) const;
 	DataType stringToDataType(const QString& dataTypeStr);
@@ -120,7 +127,7 @@ public:
 	const QStringList& associatedSignals() const { return m_associatedSignals; }
 
 	bool getInfo(Network::DataSourceInfo* protoInfo) const;
-	bool setInfo(const Network::DataSourceInfo& protoInfo);
+	bool setInfo(const Network::DataSourceInfo& proto);
 
 private:
 	quint64 generateID() const;
@@ -133,18 +140,21 @@ private:
 	int m_lmNumber = 0;
 	int m_lmModuleType = 0;
 	int m_lmSubsystemID = 0;
-	QString m_lmChannel = 0;
+	QString m_lmSubsystemChannel;				// A, B, C...
 	QString m_lmSubsystem;
 	QString m_lmCaption;
 	QString m_lmAdapterID;
 	bool m_lmDataEnable = false;
 	HostAddressPort m_lmAddressPort;
 	quint32 m_lmDataID = 0;
-	quint64 m_uniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+	quint64 m_lmUniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+	int m_lmRupFramesQuantity = 0;
 
 	QStringList m_associatedSignals;
 
-	quint64 m_id = 0;
+	//
+
+	quint64 m_id = 0;					// generate by DataSource::generateID() after readFromXml
 };
 
 
@@ -178,23 +188,20 @@ public:
 
 	//
 
-	QHostAddress hostAddress() const { return m_hostAddress; }
-	void setHostAddress(QHostAddress hostAddress) { m_hostAddress = hostAddress; }
+	bool dataReceives() const { return m_dataReceives; }
+	void setDataReceives(bool receives) { return m_dataReceives = receives; }
 
-	quint32 partCount() const { return m_partCount; }
-	void setPartCount(quint32 partCount) { m_partCount = partCount; }
-
-	QString name() const { return m_name; }
+	quint64 receivedDataID() const { return m_receivedDataID; }
+	void setReceivedDataID(quint64 dataID) { m_receivedDataID = dataID; }
 
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
-
 	E::DataSourceState state() const { return m_state; }
 	void setState(E::DataSourceState state) { m_state = state; }
 
-	quint64 uptime() const { return m_uptime; }
-	void setUptime(quint64 uptime) { m_uptime = uptime; }
+	qint64 uptime() const { return m_uptime; }
+	void setUptime(qint64 uptime) { m_uptime = uptime; }
 
 	quint64 receivedDataSize() const { return m_receivedDataSize; }
 	void setReceivedDataSize(quint64 dataSize) { m_receivedDataSize = dataSize; }
@@ -211,16 +218,13 @@ public:
 	qint64 errorFrameNo() const { return m_errorFrameNo; }
 	void setErrorFrameNo(qint64 errFrameNo) { m_errorFrameNo = errFrameNo; }
 
-	qint64 lostedFramesCount() const { return m_lostedFramesCount; }
-	void setLostedFramesCount(qint64 lostedCount) { m_lostedFramesCount = lostedCount; }
+	qint64 lostedFramesCount() const { return m_lostedPacketCount; }
+	void setLostedFramesCount(qint64 lostedCount) { m_lostedPacketCount = lostedCount; }
 
 	qint64 errorDataID() const { return m_errorDataID; }
 
 	qint64 errorBadFrameSize() const { return m_errorBadFrameSize; }
 	void setErrorBadFrameSize(qint64 errBadFrame) { m_errorBadFrameSize = errBadFrame; }
-
-	bool hasErrors() const { return m_hasErrors; }
-	void setHasErrors(bool hasErrors) { m_hasErrors = hasErrors; }
 
 	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
 	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
@@ -231,8 +235,20 @@ public:
 	qint64 receivedPacketCount() const { return m_receivedPacketCount; }
 	void setReceivedPacketCount(qint64 packetCount) { m_receivedPacketCount = packetCount; }
 
-	qint64 lastPacketTime() const { return m_lastPacketTime; }
-	void setLastPacketTime(qint64 time) { m_lastPacketTime = time; }
+	qint64 lostedPacketCount() const { return m_lostedPacketCount; }
+	void setLostedPacketCount(qint64 packetCount) { m_lostedPacketCount = packetCount; }
+
+	qint64 processedPacketCount() const { return m_processedPacketCount; }
+	void setProcessedPacketCount(qint64 packetCount) { m_processedPacketCount = packetCount; }
+
+	qint64 lastPacketSystemTime() const { return m_lastPacketSystemTime; }
+	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketSystemTime = sysTime; }
+
+	qint64 errorDuplicatePlantTime() const { return m_errorDuplicatePlantTime; }
+	void setErrorDuplicatePlantTime(qint64 err) { m_errorDuplicatePlantTime = err; }
+
+	qint64 errorNonmonotonicPlantTime() const { return m_errorNonmonotonicPlantTime; }
+	void setErrorNonmonotonicPlantTime(qint64 err) { m_errorNonmonotonicPlantTime = err; }
 
 	// Functions used by receiver thread
 	//
@@ -248,6 +264,7 @@ public:
 	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
 
 	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(); }
+	int rupFramesQueueSize() const { return m_rupFrameTimeQueue.size(); }
 	int rupFramesQueueMaxSize() const { return m_rupFrameTimeQueue.maxSize(); }
 
 private:
@@ -257,34 +274,40 @@ private:
 private:
 	// static information
 	//
-	QHostAddress m_hostAddress;
-	QString m_name;
-	quint32 m_partCount = 1;
 	QVector<int> m_relatedSignalIndexes;
 
 	// dynamic state information
 	//
 	E::DataSourceState m_state = E::DataSourceState::NoData;
 	qint64 m_uptime = 0;
+	quint64 m_receivedDataID = 0;
+
+	qint32 m_rupFramesQueueSize = 0;
+	qint32 m_rupFramesQueueMax = 0;
+
+	bool m_dataReceives = false;
+	double m_dataReceivingRate = 0;
 	qint64 m_receivedDataSize = 0;
 	qint64 m_receivedFramesCount = 0;
 	qint64 m_receivedPacketCount = 0;
-	double m_dataReceivingRate = 0;
-	bool m_dataReceived = false;
+	qint64 m_lostedPacketCount = 0;
+	qint64 m_processedPacketCount = 0;
+
+	//
 
 	qint64 m_errorProtocolVersion = 0;
 	qint64 m_errorFramesQuantity = 0;
 	qint64 m_errorFrameNo = 0;
-	qint64 m_lostedFramesCount = 0;
 	qint64 m_errorDataID = 0;
 	qint64 m_errorBadFrameSize = 0;
-
-	bool m_hasErrors = false;
+	qint64 m_errorDuplicatePlantTime = 0;
+	qint64 m_errorNonmonotonicPlantTime = 0;
 
 	bool m_dataProcessingEnabled = true;
 
-	qint64 m_lastPacketTime = 0;
+	//
 
+	qint64 m_lastPacketSystemTime = 0;
 	bool m_firstRupFrame = true;
 	quint16 m_rupFrameNumerator = 0;
 

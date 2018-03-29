@@ -43,6 +43,7 @@ private:
 	//
 
 	QTimer m_timer1s;
+	QTimer m_shortTimer;
 
 	QUdpSocket* m_socket = nullptr;
 	bool m_socketBound = false;

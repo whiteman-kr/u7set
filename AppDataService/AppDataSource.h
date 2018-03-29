@@ -143,8 +143,8 @@ public:
 
 	bool parsePacket();
 
-	bool getState(Network::AppDataSourceState* protoState) const;
-	bool setState(const Network::AppDataSourceState& protoState);
+	bool getState(Network::AppDataSourceState* proto) const;
+	bool setState(const Network::AppDataSourceState& proto);
 
 	bool getSignalState(SimpleAppSignalState* state);
 

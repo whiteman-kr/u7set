@@ -167,13 +167,15 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 					assert(false);
 				return QVariant();
 			}
-		break;
+			break;
+
 		case Qt::BackgroundRole:
-			if (d.hasErrors())
-			{
-				return QBrush(QColor(0xff,0xee,0xee));
-			}
-		break;
+//			if (d.hasErrors())
+//			{
+//				return QBrush(QColor(0xff,0xee,0xee));
+//			}
+			break;
+
 		default:
 			return QVariant();
 	}

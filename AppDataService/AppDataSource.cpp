@@ -579,46 +579,68 @@ bool AppDataSource::parsePacket()
 	return true;
 }
 
-bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
+bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 {
-	if (protoState == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(proto);
 
-	protoState->set_id(ID());
-	protoState->set_uptime(uptime());
-	protoState->set_receiveddatasize(receivedDataSize());
-	protoState->set_datareceivingrate(dataReceivingRate());
-	protoState->set_receivedframescount(receivedFramesCount());
-	protoState->set_processingenabled(dataProcessingEnabled());
-	protoState->set_processedpacketcount(receivedPacketCount());
-	protoState->set_errorprotocolversion(errorProtocolVersion());
-	protoState->set_errorframesquantity(errorFramesQuantity());
-	protoState->set_errorframeno(errorFrameNo());
-	protoState->set_lostedpackets(lostedFramesCount());
-	protoState->set_errorbadframesize(errorBadFrameSize());
-	protoState->set_haserrors(hasErrors());
+	proto->set_id(ID());
+	proto->set_dataReceives(dataReceives());
+	proto->set_uptime(uptime());
+	proto->set_receiveddataid(receivedDataID());
+	proto->set_rupframesqueuesize(rupFramesQueueSize());
+	proto->set_rupframesqueuemaxsize(rupFramesQueueMaxSize());
+	proto->set_datareceivingrate(dataReceivingRate());
+	proto->set_receiveddatasize(receivedDataSize());
+	proto->set_receivedframescount(receivedFramesCount());
+	proto->set_receivedpacketcount(receivedPacketCount());
+	proto->set_lostedpacketcount(lostedPacketCount());
+	proto->set_processingenabled(dataProcessingEnabled());
+	proto->set_processedpacketcount(processedPacketCount());
+	proto->set_lastpacketsystemtime(lastPacketSystemTime());
+	proto->set_rupframeplanttime(rupFramePlantTime());
+
+	proto->set_errorprotocolversion(errorProtocolVersion());
+	proto->set_errorframesquantity(errorFramesQuantity());
+	proto->set_errorframeno(errorFrameNo());
+
+	proto->set_errorbadframesize(errorBadFrameSize());
+
+
+	optional int64 rupFramePlantTime = 15 [default = 0];
+	optional uint64 rupFrameNumerator = 16 [default = 0];
+
+	optional int32 signalStatesQueueSize = 17 [default = 0];
+	optional int32 signalStatesQueueMax = 18 [default = 0];
+
+	optional int32 aquiredSignalsCount = 19 [default = 0];
+
+	optional int64 errorProtocolVersion = 20 [default = 0];
+	optional int64 errorFramesQuantity = 21 [default = 0];
+	optional int64 errorFrameNo = 22 [default = 0];
+	optional int64 errorDataID = 23 [default = 0];
+	optional int64 errorBadFrameSize = 24 [default = 0];
+	optional int64 errorDuplicatePlantTime = 25 [default = 0];
+	optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
+
+
 
 	return true;
 }
 
-bool AppDataSource::setState(const Network::AppDataSourceState& protoState)
+bool AppDataSource::setState(const Network::AppDataSourceState& proto)
 {
-	setID(protoState.id());
-	setUptime(protoState.uptime());
-	setReceivedDataSize(protoState.receiveddatasize());
-	setDataReceivingRate(protoState.datareceivingrate());
-	setReceivedFramesCount(protoState.receivedframescount());
-	setDataProcessingEnabled(protoState.processingenabled());
-	setReceivedPacketCount(protoState.processedpacketcount());
-	setErrorProtocolVersion(protoState.errorprotocolversion());
-	setErrorFramesQuantity(protoState.errorframesquantity());
-	setErrorFrameNo(protoState.errorframeno());
-	setLostedFramesCount(protoState.lostedpackets());
-	setErrorBadFrameSize(protoState.errorbadframesize());
-	setHasErrors(protoState.haserrors());
+	setID(proto.id());
+	setUptime(proto.uptime());
+	setReceivedDataSize(proto.receiveddatasize());
+	setDataReceivingRate(proto.datareceivingrate());
+	setReceivedFramesCount(proto.receivedframescount());
+	setDataProcessingEnabled(proto.processingenabled());
+	setReceivedPacketCount(proto.processedpacketcount());
+	setErrorProtocolVersion(proto.errorprotocolversion());
+	setErrorFramesQuantity(proto.errorframesquantity());
+	setErrorFrameNo(proto.errorframeno());
+	setLostedFramesCount(proto.lostedpackets());
+	setErrorBadFrameSize(proto.errorbadframesize());
 
 	return true;
 }

@@ -10,7 +10,23 @@ namespace Builder
 {
 	class AppDataServiceCfgGenerator : public SoftwareCfgGenerator
 	{
+	public:
+		AppDataServiceCfgGenerator(	DbController* db,
+									Hardware::SubsystemStorage* subsystems,
+									Hardware::Software* software,
+									SignalSet* signalSet,
+									Hardware::EquipmentSet* equipment,
+									const QHash<QString, quint64>& lmUniqueIdMap,
+									BuildResultWriter* buildResultWriter);
+		~AppDataServiceCfgGenerator();
+
+		virtual bool generateConfiguration() override;
+
 	private:
+		const QHash<QString, quint64>& m_lmUniqueIdMap;
+
+		//
+
 		QStringList m_associatedLMs;
 		QHash<QString, bool> m_associatedAppSignals;
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
@@ -27,16 +43,5 @@ namespace Builder
 
 
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
-
-	public:
-		AppDataServiceCfgGenerator(	DbController* db,
-									Hardware::SubsystemStorage* subsystems,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									BuildResultWriter* buildResultWriter);
-		~AppDataServiceCfgGenerator();
-
-		virtual bool generateConfiguration() override;
 	};
 }

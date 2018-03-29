@@ -170,7 +170,7 @@ namespace Builder
 
 			ds.setLmDataID(0);			// !!! ???
 
-			ds.setUniqueID(uniqueID);
+			ds.setLmUniqueID(uniqueID);
 
 			Tuning::TuningData* tuningData = m_tuningDataStorage->value(lm->equipmentId(), nullptr);
 
