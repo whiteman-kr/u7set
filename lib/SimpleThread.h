@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QEventLoop>
 #include <memory>
+#include <atomic>
 
 
 class SimpleThreadWorker : public QObject
