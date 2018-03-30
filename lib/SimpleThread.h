@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QEventLoop>
+#include <memory>
 
 
 class SimpleThreadWorker : public QObject
