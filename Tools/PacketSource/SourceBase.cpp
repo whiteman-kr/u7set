@@ -177,7 +177,7 @@ int SourceBase::readFromXml()
 		return 0;
 	}
 
-	QByteArray& fileData = fileXml.readAll();
+	QByteArray&& fileData = fileXml.readAll();
 
 	fileXml.close();
 

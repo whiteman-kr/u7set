@@ -51,7 +51,7 @@ void SourceWorker::process()
 			// header
 			//
 			Rup::Header& header = m_psFrame.rupFrame.header;
-			header.frameSize = ENTIRE_UDP_SIZE;
+			header.frameSize = Socket::ENTIRE_UDP_SIZE;
 			header.protocolVersion = 5; //
 			header.flags.appData = 1;
 			header.dataId = 0;
