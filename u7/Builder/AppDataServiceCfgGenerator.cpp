@@ -187,7 +187,7 @@ namespace Builder
 		//
 
 		QByteArray fileData;
-		DataSourcesXML::writeToXml(dataSources, &fileData);
+		DataSourcesXML<DataSource>::writeToXml(dataSources, &fileData);
 
 		//
 

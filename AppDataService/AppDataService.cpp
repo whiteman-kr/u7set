@@ -380,7 +380,7 @@ bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 
 	QVector<DataSource> dataSources;
 
-	bool result = DataSourcesXML::readFromXml(fileData, &dataSources);
+	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
 
 	if (result == false)
 	{

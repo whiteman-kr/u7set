@@ -1,17 +1,20 @@
 #pragma once
 
 #include <QObject>
-#include "../lib/SocketIO.h"
-#include "../lib/Queue.h"
-#include "../lib/XmlHelper.h"
-#include "../lib/DataProtocols.h"
-#include "../lib/DeviceObject.h"
-#include "../lib/AppSignal.h"
+
 #include "../Proto/network.pb.h"
-#include "../lib/SimpleThread.h"
+
+#include "SocketIO.h"
+#include "Queue.h"
+#include "XmlHelper.h"
+#include "DataProtocols.h"
+#include "DeviceObject.h"
+#include "AppSignal.h"
+#include "SimpleThread.h"
+#include "WUtils.h"
 
 
-class DataSource /*: public QObject*/
+class DataSource
 {
 public:
 	enum class DataType
@@ -157,13 +160,6 @@ private:
 	quint64 m_id = 0;					// generate by DataSource::generateID() after readFromXml
 };
 
-
-class DataSourcesXML
-{
-public:
-	static bool writeToXml(const QVector<DataSource>& dataSources, QByteArray* fileData);
-	static bool readFromXml(const QByteArray& fileData, QVector<DataSource>* dataSources);
-};
 
 class DataSourceOnline : public DataSource
 {
@@ -345,3 +341,81 @@ private:
 	Times m_rupDataTimes;
 	quint32 m_rupDataSize = 0;
 };
+
+
+template <typename TYPE>				// TYPE should be DataSource-derived class
+class DataSourcesXML
+{
+public:
+	static bool writeToXml(const QVector<TYPE>& dataSources, QByteArray* fileData);
+	static bool readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources);
+};
+
+
+// -----------------------------------------------------------------------------
+//
+// DataSourcesXML class implementation
+//
+// -----------------------------------------------------------------------------
+
+template <typename TYPE>
+bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, QByteArray* fileData)
+{
+	TEST_PTR_RETURN_FALSE(fileData);
+
+	fileData->clear();
+
+	QXmlStreamWriter xmlWriter(fileData);
+	XmlWriteHelper xml(xmlWriter);
+
+	xml.setAutoFormatting(true);
+	xml.writeStartDocument();
+
+	xml.writeStartElement("DataSources");
+	xml.writeIntAttribute("Count", dataSources.count());
+
+	for(const TYPE& ds : dataSources)
+	{
+		ds.writeToXml(xml);
+	}
+
+	xml.writeEndElement();	// </DataSources>
+	xml.writeEndDocument();
+
+	return true;
+}
+
+template <typename TYPE>
+bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE> *dataSources)
+{
+	TEST_PTR_RETURN_FALSE(dataSources);
+
+	XmlReadHelper xml(fileData);
+
+	dataSources->clear();
+
+	bool result = true;
+
+	if (xml.findElement("DataSources") == false)
+	{
+		return false;
+	}
+
+	int count = 0;
+
+	if (xml.readIntAttribute("Count", &count) == false)
+	{
+		return false;
+	}
+
+	dataSources->resize(count);
+
+	for(int i = 0; i < count; i++)
+	{
+		result &= (*dataSources)[i].readFromXml(xml);
+	}
+
+	return result;
+}
+
+
