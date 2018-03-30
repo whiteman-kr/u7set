@@ -1,5 +1,6 @@
 #include "../lib/ServiceSettings.h"
 #include "../u7/Subsystem.h"
+#include "../TuningService/TuningSource.h"
 #include "TuningServiceCfgGenerator.h"
 
 
@@ -72,10 +73,6 @@ namespace Builder
 
 		bool result = true;
 
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		xml.writeStartElement("TuningSources");
-
 		QList<Hardware::DeviceModule*> tuningLMs;
 
 		for(Hardware::DeviceModule* lm : m_lmList)
@@ -108,7 +105,12 @@ namespace Builder
 			}
 		}
 
-		xml.writeIntAttribute("Count", tuningLMs.count());
+		QByteArray fileData;
+		XmlWriteHelper xml(&fileData);
+
+		QVector<Tuning::TuningSource> tuningSources;
+
+		tuningSources.resize(tuningLMs);
 
 		for(Hardware::DeviceModule* lm : tuningLMs)
 		{
@@ -120,6 +122,15 @@ namespace Builder
 			int lmChannel = 0;
 			QString lmSubsystem;
 
+
+			sd'lf,;sld,f; s,ldfs; ,ls;df sdfs
+					fsdf
+					sd fksdmfkl msdflkm
+					sdf s
+					df
+					sdf
+					 s
+					d
 			result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
 			result &= DeviceHelper::getIntProperty(lm, "SubsystemChannel", &lmChannel, m_log);
 			result &= DeviceHelper::getStrProperty(lm, "SubsystemID", &lmSubsystem, m_log);
