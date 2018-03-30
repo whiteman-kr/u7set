@@ -1565,12 +1565,12 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 lostedpacketcount() const;
   inline void set_lostedpacketcount(::google::protobuf::int64 value);
 
-  // optional bool processingEnabled = 12 [default = false];
-  inline bool has_processingenabled() const;
-  inline void clear_processingenabled();
-  static const int kProcessingEnabledFieldNumber = 12;
-  inline bool processingenabled() const;
-  inline void set_processingenabled(bool value);
+  // optional bool dataProcessingEnabled = 12 [default = false];
+  inline bool has_dataprocessingenabled() const;
+  inline void clear_dataprocessingenabled();
+  static const int kDataProcessingEnabledFieldNumber = 12;
+  inline bool dataprocessingenabled() const;
+  inline void set_dataprocessingenabled(bool value);
 
   // optional int64 processedPacketCount = 13 [default = 0];
   inline bool has_processedpacketcount() const;
@@ -1593,12 +1593,12 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 rupframeplanttime() const;
   inline void set_rupframeplanttime(::google::protobuf::int64 value);
 
-  // optional uint64 rupFrameNumerator = 16 [default = 0];
+  // optional int32 rupFrameNumerator = 16 [default = 0];
   inline bool has_rupframenumerator() const;
   inline void clear_rupframenumerator();
   static const int kRupFrameNumeratorFieldNumber = 16;
-  inline ::google::protobuf::uint64 rupframenumerator() const;
-  inline void set_rupframenumerator(::google::protobuf::uint64 value);
+  inline ::google::protobuf::int32 rupframenumerator() const;
+  inline void set_rupframenumerator(::google::protobuf::int32 value);
 
   // optional int32 signalStatesQueueSize = 17 [default = 0];
   inline bool has_signalstatesqueuesize() const;
@@ -1607,19 +1607,19 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 signalstatesqueuesize() const;
   inline void set_signalstatesqueuesize(::google::protobuf::int32 value);
 
-  // optional int32 signalStatesQueueMax = 18 [default = 0];
-  inline bool has_signalstatesqueuemax() const;
-  inline void clear_signalstatesqueuemax();
-  static const int kSignalStatesQueueMaxFieldNumber = 18;
-  inline ::google::protobuf::int32 signalstatesqueuemax() const;
-  inline void set_signalstatesqueuemax(::google::protobuf::int32 value);
+  // optional int32 signalStatesQueueMaxSize = 18 [default = 0];
+  inline bool has_signalstatesqueuemaxsize() const;
+  inline void clear_signalstatesqueuemaxsize();
+  static const int kSignalStatesQueueMaxSizeFieldNumber = 18;
+  inline ::google::protobuf::int32 signalstatesqueuemaxsize() const;
+  inline void set_signalstatesqueuemaxsize(::google::protobuf::int32 value);
 
-  // optional int32 aquiredSignalsCount = 19 [default = 0];
-  inline bool has_aquiredsignalscount() const;
-  inline void clear_aquiredsignalscount();
-  static const int kAquiredSignalsCountFieldNumber = 19;
-  inline ::google::protobuf::int32 aquiredsignalscount() const;
-  inline void set_aquiredsignalscount(::google::protobuf::int32 value);
+  // optional int32 acquiredSignalsCount = 19 [default = 0];
+  inline bool has_acquiredsignalscount() const;
+  inline void clear_acquiredsignalscount();
+  static const int kAcquiredSignalsCountFieldNumber = 19;
+  inline ::google::protobuf::int32 acquiredsignalscount() const;
+  inline void set_acquiredsignalscount(::google::protobuf::int32 value);
 
   // optional int64 errorProtocolVersion = 20 [default = 0];
   inline bool has_errorprotocolversion() const;
@@ -1649,12 +1649,12 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 errordataid() const;
   inline void set_errordataid(::google::protobuf::int64 value);
 
-  // optional int64 errorBadFrameSize = 24 [default = 0];
-  inline bool has_errorbadframesize() const;
-  inline void clear_errorbadframesize();
-  static const int kErrorBadFrameSizeFieldNumber = 24;
-  inline ::google::protobuf::int64 errorbadframesize() const;
-  inline void set_errorbadframesize(::google::protobuf::int64 value);
+  // optional int64 errorFrameSize = 24 [default = 0];
+  inline bool has_errorframesize() const;
+  inline void clear_errorframesize();
+  static const int kErrorFrameSizeFieldNumber = 24;
+  inline ::google::protobuf::int64 errorframesize() const;
+  inline void set_errorframesize(::google::protobuf::int64 value);
 
   // optional int64 errorDuplicatePlantTime = 25 [default = 0];
   inline bool has_errorduplicateplanttime() const;
@@ -1694,8 +1694,8 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_receivedpacketcount();
   inline void set_has_lostedpacketcount();
   inline void clear_has_lostedpacketcount();
-  inline void set_has_processingenabled();
-  inline void clear_has_processingenabled();
+  inline void set_has_dataprocessingenabled();
+  inline void clear_has_dataprocessingenabled();
   inline void set_has_processedpacketcount();
   inline void clear_has_processedpacketcount();
   inline void set_has_lastpacketsystemtime();
@@ -1706,10 +1706,10 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_rupframenumerator();
   inline void set_has_signalstatesqueuesize();
   inline void clear_has_signalstatesqueuesize();
-  inline void set_has_signalstatesqueuemax();
-  inline void clear_has_signalstatesqueuemax();
-  inline void set_has_aquiredsignalscount();
-  inline void clear_has_aquiredsignalscount();
+  inline void set_has_signalstatesqueuemaxsize();
+  inline void clear_has_signalstatesqueuemaxsize();
+  inline void set_has_acquiredsignalscount();
+  inline void clear_has_acquiredsignalscount();
   inline void set_has_errorprotocolversion();
   inline void clear_has_errorprotocolversion();
   inline void set_has_errorframesquantity();
@@ -1718,8 +1718,8 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_errorframeno();
   inline void set_has_errordataid();
   inline void clear_has_errordataid();
-  inline void set_has_errorbadframesize();
-  inline void clear_has_errorbadframesize();
+  inline void set_has_errorframesize();
+  inline void clear_has_errorframesize();
   inline void set_has_errorduplicateplanttime();
   inline void clear_has_errorduplicateplanttime();
   inline void set_has_errornonmonotonicplanttime();
@@ -1737,22 +1737,22 @@ class AppDataSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 receivedframescount_;
   ::google::protobuf::int64 receivedpacketcount_;
   bool datareceives_;
-  bool processingenabled_;
-  ::google::protobuf::int32 signalstatesqueuesize_;
+  bool dataprocessingenabled_;
+  ::google::protobuf::int32 rupframenumerator_;
   ::google::protobuf::int64 lostedpacketcount_;
   ::google::protobuf::int64 processedpacketcount_;
   ::google::protobuf::int64 lastpacketsystemtime_;
   ::google::protobuf::int64 rupframeplanttime_;
-  ::google::protobuf::uint64 rupframenumerator_;
-  ::google::protobuf::int32 signalstatesqueuemax_;
-  ::google::protobuf::int32 aquiredsignalscount_;
+  ::google::protobuf::int32 signalstatesqueuesize_;
+  ::google::protobuf::int32 signalstatesqueuemaxsize_;
   ::google::protobuf::int64 errorprotocolversion_;
   ::google::protobuf::int64 errorframesquantity_;
   ::google::protobuf::int64 errorframeno_;
   ::google::protobuf::int64 errordataid_;
-  ::google::protobuf::int64 errorbadframesize_;
+  ::google::protobuf::int64 errorframesize_;
   ::google::protobuf::int64 errorduplicateplanttime_;
   ::google::protobuf::int64 errornonmonotonicplanttime_;
+  ::google::protobuf::int32 acquiredsignalscount_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(26 + 31) / 32];
@@ -7814,26 +7814,26 @@ inline void AppDataSourceState::set_lostedpacketcount(::google::protobuf::int64 
   lostedpacketcount_ = value;
 }
 
-// optional bool processingEnabled = 12 [default = false];
-inline bool AppDataSourceState::has_processingenabled() const {
+// optional bool dataProcessingEnabled = 12 [default = false];
+inline bool AppDataSourceState::has_dataprocessingenabled() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
-inline void AppDataSourceState::set_has_processingenabled() {
+inline void AppDataSourceState::set_has_dataprocessingenabled() {
   _has_bits_[0] |= 0x00000800u;
 }
-inline void AppDataSourceState::clear_has_processingenabled() {
+inline void AppDataSourceState::clear_has_dataprocessingenabled() {
   _has_bits_[0] &= ~0x00000800u;
 }
-inline void AppDataSourceState::clear_processingenabled() {
-  processingenabled_ = false;
-  clear_has_processingenabled();
+inline void AppDataSourceState::clear_dataprocessingenabled() {
+  dataprocessingenabled_ = false;
+  clear_has_dataprocessingenabled();
 }
-inline bool AppDataSourceState::processingenabled() const {
-  return processingenabled_;
+inline bool AppDataSourceState::dataprocessingenabled() const {
+  return dataprocessingenabled_;
 }
-inline void AppDataSourceState::set_processingenabled(bool value) {
-  set_has_processingenabled();
-  processingenabled_ = value;
+inline void AppDataSourceState::set_dataprocessingenabled(bool value) {
+  set_has_dataprocessingenabled();
+  dataprocessingenabled_ = value;
 }
 
 // optional int64 processedPacketCount = 13 [default = 0];
@@ -7902,7 +7902,7 @@ inline void AppDataSourceState::set_rupframeplanttime(::google::protobuf::int64 
   rupframeplanttime_ = value;
 }
 
-// optional uint64 rupFrameNumerator = 16 [default = 0];
+// optional int32 rupFrameNumerator = 16 [default = 0];
 inline bool AppDataSourceState::has_rupframenumerator() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
@@ -7913,13 +7913,13 @@ inline void AppDataSourceState::clear_has_rupframenumerator() {
   _has_bits_[0] &= ~0x00008000u;
 }
 inline void AppDataSourceState::clear_rupframenumerator() {
-  rupframenumerator_ = GOOGLE_ULONGLONG(0);
+  rupframenumerator_ = 0;
   clear_has_rupframenumerator();
 }
-inline ::google::protobuf::uint64 AppDataSourceState::rupframenumerator() const {
+inline ::google::protobuf::int32 AppDataSourceState::rupframenumerator() const {
   return rupframenumerator_;
 }
-inline void AppDataSourceState::set_rupframenumerator(::google::protobuf::uint64 value) {
+inline void AppDataSourceState::set_rupframenumerator(::google::protobuf::int32 value) {
   set_has_rupframenumerator();
   rupframenumerator_ = value;
 }
@@ -7946,48 +7946,48 @@ inline void AppDataSourceState::set_signalstatesqueuesize(::google::protobuf::in
   signalstatesqueuesize_ = value;
 }
 
-// optional int32 signalStatesQueueMax = 18 [default = 0];
-inline bool AppDataSourceState::has_signalstatesqueuemax() const {
+// optional int32 signalStatesQueueMaxSize = 18 [default = 0];
+inline bool AppDataSourceState::has_signalstatesqueuemaxsize() const {
   return (_has_bits_[0] & 0x00020000u) != 0;
 }
-inline void AppDataSourceState::set_has_signalstatesqueuemax() {
+inline void AppDataSourceState::set_has_signalstatesqueuemaxsize() {
   _has_bits_[0] |= 0x00020000u;
 }
-inline void AppDataSourceState::clear_has_signalstatesqueuemax() {
+inline void AppDataSourceState::clear_has_signalstatesqueuemaxsize() {
   _has_bits_[0] &= ~0x00020000u;
 }
-inline void AppDataSourceState::clear_signalstatesqueuemax() {
-  signalstatesqueuemax_ = 0;
-  clear_has_signalstatesqueuemax();
+inline void AppDataSourceState::clear_signalstatesqueuemaxsize() {
+  signalstatesqueuemaxsize_ = 0;
+  clear_has_signalstatesqueuemaxsize();
 }
-inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuemax() const {
-  return signalstatesqueuemax_;
+inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuemaxsize() const {
+  return signalstatesqueuemaxsize_;
 }
-inline void AppDataSourceState::set_signalstatesqueuemax(::google::protobuf::int32 value) {
-  set_has_signalstatesqueuemax();
-  signalstatesqueuemax_ = value;
+inline void AppDataSourceState::set_signalstatesqueuemaxsize(::google::protobuf::int32 value) {
+  set_has_signalstatesqueuemaxsize();
+  signalstatesqueuemaxsize_ = value;
 }
 
-// optional int32 aquiredSignalsCount = 19 [default = 0];
-inline bool AppDataSourceState::has_aquiredsignalscount() const {
+// optional int32 acquiredSignalsCount = 19 [default = 0];
+inline bool AppDataSourceState::has_acquiredsignalscount() const {
   return (_has_bits_[0] & 0x00040000u) != 0;
 }
-inline void AppDataSourceState::set_has_aquiredsignalscount() {
+inline void AppDataSourceState::set_has_acquiredsignalscount() {
   _has_bits_[0] |= 0x00040000u;
 }
-inline void AppDataSourceState::clear_has_aquiredsignalscount() {
+inline void AppDataSourceState::clear_has_acquiredsignalscount() {
   _has_bits_[0] &= ~0x00040000u;
 }
-inline void AppDataSourceState::clear_aquiredsignalscount() {
-  aquiredsignalscount_ = 0;
-  clear_has_aquiredsignalscount();
+inline void AppDataSourceState::clear_acquiredsignalscount() {
+  acquiredsignalscount_ = 0;
+  clear_has_acquiredsignalscount();
 }
-inline ::google::protobuf::int32 AppDataSourceState::aquiredsignalscount() const {
-  return aquiredsignalscount_;
+inline ::google::protobuf::int32 AppDataSourceState::acquiredsignalscount() const {
+  return acquiredsignalscount_;
 }
-inline void AppDataSourceState::set_aquiredsignalscount(::google::protobuf::int32 value) {
-  set_has_aquiredsignalscount();
-  aquiredsignalscount_ = value;
+inline void AppDataSourceState::set_acquiredsignalscount(::google::protobuf::int32 value) {
+  set_has_acquiredsignalscount();
+  acquiredsignalscount_ = value;
 }
 
 // optional int64 errorProtocolVersion = 20 [default = 0];
@@ -8078,26 +8078,26 @@ inline void AppDataSourceState::set_errordataid(::google::protobuf::int64 value)
   errordataid_ = value;
 }
 
-// optional int64 errorBadFrameSize = 24 [default = 0];
-inline bool AppDataSourceState::has_errorbadframesize() const {
+// optional int64 errorFrameSize = 24 [default = 0];
+inline bool AppDataSourceState::has_errorframesize() const {
   return (_has_bits_[0] & 0x00800000u) != 0;
 }
-inline void AppDataSourceState::set_has_errorbadframesize() {
+inline void AppDataSourceState::set_has_errorframesize() {
   _has_bits_[0] |= 0x00800000u;
 }
-inline void AppDataSourceState::clear_has_errorbadframesize() {
+inline void AppDataSourceState::clear_has_errorframesize() {
   _has_bits_[0] &= ~0x00800000u;
 }
-inline void AppDataSourceState::clear_errorbadframesize() {
-  errorbadframesize_ = GOOGLE_LONGLONG(0);
-  clear_has_errorbadframesize();
+inline void AppDataSourceState::clear_errorframesize() {
+  errorframesize_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframesize();
 }
-inline ::google::protobuf::int64 AppDataSourceState::errorbadframesize() const {
-  return errorbadframesize_;
+inline ::google::protobuf::int64 AppDataSourceState::errorframesize() const {
+  return errorframesize_;
 }
-inline void AppDataSourceState::set_errorbadframesize(::google::protobuf::int64 value) {
-  set_has_errorbadframesize();
-  errorbadframesize_ = value;
+inline void AppDataSourceState::set_errorframesize(::google::protobuf::int64 value) {
+  set_has_errorframesize();
+  errorframesize_ = value;
 }
 
 // optional int64 errorDuplicatePlantTime = 25 [default = 0];

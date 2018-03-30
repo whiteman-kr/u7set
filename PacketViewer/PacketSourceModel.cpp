@@ -758,7 +758,7 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 				ds->setID(ip);
 				ds->setLmCaption(QString("Data Source %1").arg(key));
 				ds->setLmAddressStr(ha.toString());
-				ds->setPartCount(1);
+				ds->setLmRupFramesQuantity(1);
 
 				QString signalPrefix = currentModule->parent()->equipmentId();
 				int signalPrefixLength = signalPrefix.length();

@@ -112,39 +112,29 @@ message GetDataSourcesInfoReply
 message AppDataSourceState
 {
     optional uint64 id = 1 [default = 0];			    // unique id
-
     optional bool dataReceives = 2 [default = false];
     optional int64 uptime = 3 [default = 0];			    // time from start of data receiving
-
     optional uint64 receivedDataID = 4 [default = 0];
-
     optional int32 rupFramesQueueSize = 5 [default = 0];
     optional int32 rupFramesQueueMaxSize = 6 [default = 0];
-
     optional double dataReceivingRate = 7 [default = 0];	    // bytes/sec
     optional int64 receivedDataSize = 8 [default = 0];	    //
-
     optional int64 receivedFramesCount = 9 [default = 0];
     optional int64 receivedPacketCount = 10 [default = 0];
     optional int64 lostedPacketCount = 11 [default = 0];
-
-    optional bool processingEnabled = 12 [default = false];
+    optional bool dataProcessingEnabled = 12 [default = false];
     optional int64 processedPacketCount = 13 [default = 0];
-
     optional int64 lastPacketSystemTime = 14 [default = 0];
     optional int64 rupFramePlantTime = 15 [default = 0];
-    optional uint64 rupFrameNumerator = 16 [default = 0];
-
+    optional int32 rupFrameNumerator = 16 [default = 0];
     optional int32 signalStatesQueueSize = 17 [default = 0];
-    optional int32 signalStatesQueueMax = 18 [default = 0];
-
-    optional int32 aquiredSignalsCount = 19 [default = 0];
-
+    optional int32 signalStatesQueueMaxSize = 18 [default = 0];
+    optional int32 acquiredSignalsCount = 19 [default = 0];
     optional int64 errorProtocolVersion = 20 [default = 0];
     optional int64 errorFramesQuantity = 21 [default = 0];
     optional int64 errorFrameNo = 22 [default = 0];
     optional int64 errorDataID = 23 [default = 0];
-    optional int64 errorBadFrameSize = 24 [default = 0];
+    optional int64 errorFrameSize = 24 [default = 0];
     optional int64 errorDuplicatePlantTime = 25 [default = 0];
     optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
 }

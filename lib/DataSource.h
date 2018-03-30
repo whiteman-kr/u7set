@@ -183,19 +183,10 @@ public:
 
 	bool init();
 
-	void stop();
-	void resume();
+//	void stop();
+//	void resume();
 
 	//
-
-	bool dataReceives() const { return m_dataReceives; }
-	void setDataReceives(bool receives) { return m_dataReceives = receives; }
-
-	quint64 receivedDataID() const { return m_receivedDataID; }
-	void setReceivedDataID(quint64 dataID) { m_receivedDataID = dataID; }
-
-	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
-	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
 	E::DataSourceState state() const { return m_state; }
 	void setState(E::DataSourceState state) { m_state = state; }
@@ -203,31 +194,29 @@ public:
 	qint64 uptime() const { return m_uptime; }
 	void setUptime(qint64 uptime) { m_uptime = uptime; }
 
-	quint64 receivedDataSize() const { return m_receivedDataSize; }
-	void setReceivedDataSize(quint64 dataSize) { m_receivedDataSize = dataSize; }
+	quint64 receivedDataID() const { return m_receivedDataID; }
+	void setReceivedDataID(quint64 dataID) { m_receivedDataID = dataID; }
+
+	int rupFramesQueueSize() const { return m_rupFramesQueueSize; }
+	void setRupFramesQueueSize(int size) { m_rupFramesQueueSize = size; }
+
+	int rupFramesQueueMaxSize() const { return m_rupFramesQueueMaxSize; }
+	void setRupFramesQueueMaxSize(int size) { m_rupFramesQueueMaxSize = size; }
+
+	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
+	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
+
+	qint32 rupFrameNumerator() const { return m_rupFrameNumerator; }
+	void setRupFrameNumerator(qint32 num) { m_rupFrameNumerator = num; }
+
+	bool dataReceives() const { return m_dataReceives; }
+	void setDataReceives(bool receives) { m_dataReceives = receives; }
 
 	double dataReceivingRate() const { return m_dataReceivingRate; }
 	void setDataReceivingRate(double rate) { m_dataReceivingRate = rate; }
 
-	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
-	void setErrorProtocolVersion(qint64 err) { m_errorProtocolVersion = err; }
-
-	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
-	void setErrorFramesQuantity(qint64 err) { m_errorFramesQuantity = err; }
-
-	qint64 errorFrameNo() const { return m_errorFrameNo; }
-	void setErrorFrameNo(qint64 errFrameNo) { m_errorFrameNo = errFrameNo; }
-
-	qint64 lostedFramesCount() const { return m_lostedPacketCount; }
-	void setLostedFramesCount(qint64 lostedCount) { m_lostedPacketCount = lostedCount; }
-
-	qint64 errorDataID() const { return m_errorDataID; }
-
-	qint64 errorBadFrameSize() const { return m_errorBadFrameSize; }
-	void setErrorBadFrameSize(qint64 errBadFrame) { m_errorBadFrameSize = errBadFrame; }
-
-	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
-	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
+	quint64 receivedDataSize() const { return m_receivedDataSize; }
+	void setReceivedDataSize(quint64 dataSize) { m_receivedDataSize = dataSize; }
 
 	qint64 receivedFramesCount() const { return m_receivedFramesCount; }
 	void setReceivedFramesCount(qint64 framesCount) { m_receivedFramesCount = framesCount; }
@@ -241,8 +230,20 @@ public:
 	qint64 processedPacketCount() const { return m_processedPacketCount; }
 	void setProcessedPacketCount(qint64 packetCount) { m_processedPacketCount = packetCount; }
 
-	qint64 lastPacketSystemTime() const { return m_lastPacketSystemTime; }
-	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketSystemTime = sysTime; }
+	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
+	void setErrorProtocolVersion(qint64 err) { m_errorProtocolVersion = err; }
+
+	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
+	void setErrorFramesQuantity(qint64 err) { m_errorFramesQuantity = err; }
+
+	qint64 errorFrameNo() const { return m_errorFrameNo; }
+	void setErrorFrameNo(qint64 errFrameNo) { m_errorFrameNo = errFrameNo; }
+
+	qint64 errorDataID() const { return m_errorDataID; }
+	void setErrorDataID(qint64 err) { m_errorDataID = err; }
+
+	qint64 errorFrameSize() const { return m_errorFrameSize; }
+	void setErrorFrameSize(qint64 errFrameSize) { m_errorFrameSize = errFrameSize; }
 
 	qint64 errorDuplicatePlantTime() const { return m_errorDuplicatePlantTime; }
 	void setErrorDuplicatePlantTime(qint64 err) { m_errorDuplicatePlantTime = err; }
@@ -250,10 +251,16 @@ public:
 	qint64 errorNonmonotonicPlantTime() const { return m_errorNonmonotonicPlantTime; }
 	void setErrorNonmonotonicPlantTime(qint64 err) { m_errorNonmonotonicPlantTime = err; }
 
+	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
+	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
+
+	qint64 lastPacketSystemTime() const { return m_lastPacketSystemTime; }
+	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketSystemTime = sysTime; }
+
 	// Functions used by receiver thread
 	//
 	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame);
-	void incBadFrameSizeError() { m_errorBadFrameSize++; }
+	void incFrameSizeError() { m_errorFrameSize++; }
 
 	// Functions used by data processing thread
 	//
@@ -264,8 +271,11 @@ public:
 	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize);
 
 	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(); }
-	int rupFramesQueueSize() const { return m_rupFrameTimeQueue.size(); }
-	int rupFramesQueueMaxSize() const { return m_rupFrameTimeQueue.maxSize(); }
+
+	// Used by PacketViewer
+	//
+	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
+	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
 private:
 	bool collect(const RupFrameTime& rupFrameTime);
@@ -283,8 +293,10 @@ private:
 	quint64 m_receivedDataID = 0;
 
 	qint32 m_rupFramesQueueSize = 0;
-	qint32 m_rupFramesQueueMax = 0;
+	qint32 m_rupFramesQueueMaxSize = 0;
 
+	qint32 m_rupFramePlantTime = 0;
+	quint16 m_rupFrameNumerator = 0;
 	bool m_dataReceives = false;
 	double m_dataReceivingRate = 0;
 	qint64 m_receivedDataSize = 0;
@@ -299,7 +311,7 @@ private:
 	qint64 m_errorFramesQuantity = 0;
 	qint64 m_errorFrameNo = 0;
 	qint64 m_errorDataID = 0;
-	qint64 m_errorBadFrameSize = 0;
+	qint64 m_errorFrameSize = 0;
 	qint64 m_errorDuplicatePlantTime = 0;
 	qint64 m_errorNonmonotonicPlantTime = 0;
 
@@ -309,7 +321,6 @@ private:
 
 	qint64 m_lastPacketSystemTime = 0;
 	bool m_firstRupFrame = true;
-	quint16 m_rupFrameNumerator = 0;
 
 	//
 

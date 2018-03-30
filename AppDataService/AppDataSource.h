@@ -144,7 +144,7 @@ public:
 	bool parsePacket();
 
 	bool getState(Network::AppDataSourceState* proto) const;
-	bool setState(const Network::AppDataSourceState& proto);
+	void setState(const Network::AppDataSourceState& proto);
 
 	bool getSignalState(SimpleAppSignalState* state);
 
@@ -154,6 +154,15 @@ private:
 	bool getDoubleValue(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, double& value);
 	bool getValidity(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, quint32& validity);
 
+	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
+	void setAcquiredSignalsCount(int count) { m_acquiredSignalsCount = count; }
+
+	int signalStatesQueueSize() const { return m_signalStatesQueueSize; }
+	void setSignalStatesQueueSize(int size) { m_signalStatesQueueSize = size; }
+
+	int signalStatesQueueMaxSize() const { return m_signalStatesQueueMaxSize; }
+	void setSignalStatesQueueMaxSize(int size) { m_signalStatesQueueMaxSize = size; }
+
 private:
 	AppSignalStates* m_signalStates = nullptr;
 
@@ -161,7 +170,12 @@ private:
 
 	QVector<SignalParseInfo> m_signalsParseInfo;
 
+	int m_acquiredSignalsCount = 0;
+
 	AppSignalStatesQueue m_signalStatesQueue;
+
+	int m_signalStatesQueueSize = 0;
+	int m_signalStatesQueueMaxSize = 0;
 
 	// app data parsing
 	//
@@ -169,13 +183,11 @@ private:
 	quint64 m_validityParsingErrorCount = 0;
 	quint64 m_badSignalStateIndexCount = 0;
 
-private:
 	static const int TIME_1S = 1000;
 
 	int m_autoArchivingGroupsCount = 0;
 	qint64 m_lastAutoArchivingTime = 0;
 	int m_lastAutoArchivingGroup = AppSignalStateEx::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
-
 };
 
 typedef std::shared_ptr<AppDataSource> AppDataSourceShared;

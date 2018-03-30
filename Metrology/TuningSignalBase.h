@@ -65,7 +65,7 @@ private:
 	QString					m_serverIP;
 	int						m_serverPort = 0;
 
-	int						m_channel = -1;
+	QString					m_channel;
 
 	QString					m_subSystem;
 
@@ -90,8 +90,8 @@ public:
 	int						serverPort() const { return m_serverPort; }
 	void					setServerPort(int port) { m_serverPort = port; }
 
-	int						channel() const { return m_channel; }
-	void					setChannel(int channel) { m_channel = channel; }
+	QString					channel() const { return m_channel; }
+	void					setChannel(const QString& channel) { m_channel = channel; }
 
 	QString					subSystem() const { return m_subSystem; }
 	void					setSubSystem(const QString& subSystem) { m_subSystem = subSystem; }

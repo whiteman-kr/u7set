@@ -498,7 +498,7 @@ bool DataSourceOnline::reallocate(quint32 framesQuantity)
 	return true;
 }
 
-
+/*
 void DataSourceOnline::stop()
 {
 	setState(E::DataSourceState::Stopped);
@@ -510,7 +510,7 @@ void DataSourceOnline::stop()
 void DataSourceOnline::resume()
 {
 	setState(E::DataSourceState::NoData);
-}
+}*/
 
 
 void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame)
@@ -530,6 +530,9 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 	}
 
 	m_rupFrameTimeQueue.completePush();
+
+	m_rupFramesQueueSize = m_rupFrameTimeQueue.size();
+	m_rupFramesQueueMaxSize = m_rupFrameTimeQueue.maxSize();
 }
 
 bool DataSourceOnline::seizeProcessingOwnership(const QThread* processingThread)

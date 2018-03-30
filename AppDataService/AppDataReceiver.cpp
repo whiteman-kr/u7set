@@ -146,7 +146,7 @@ void AppDataReceiver::onSocketReadyRead()
 
 		if (size != sizeof(rupFrame))
 		{
-			dataSource->incBadFrameSizeError();
+			dataSource->incFrameSizeError();
 			continue;
 		}
 

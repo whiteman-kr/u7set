@@ -152,7 +152,7 @@ void AppDataProcessingThread2::run()
 					qDebug() << " tread " << m_number << "parsed " << m_parsedRupPacketCount <<
 								" ----- success" << m_successOwnership << "/" << m_failOwnership <<
 								"queue max size" << appDataSource->rupFramesQueueMaxSize() <<
-								"losted" << appDataSource->lostedFramesCount();
+								"losted" << appDataSource->lostedPacketCount();
 				}
 			}
 			while(isQuitRequested() == false);

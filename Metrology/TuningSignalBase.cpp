@@ -14,12 +14,12 @@ TuningSource::TuningSource()
 
 TuningSource::TuningSource(const Network::DataSourceInfo& info) :
 	m_sourceID (info.id()),
-	m_equipmentID (info.equipmentid().c_str()),
-	m_caption (info.caption().c_str()),
-	m_serverIP (info.ip().c_str()),
-	m_serverPort (info.port()),
-	m_channel (info.channel()),
-	m_subSystem (info.subsystem().c_str()),
+	m_equipmentID (QString::fromStdString(info.lmequipmentid())),
+	m_caption (QString::fromStdString(info.lmcaption())),
+	m_serverIP (QString::fromStdString(info.lmip())),
+	m_serverPort (info.lmport()),
+	m_channel (QString::fromStdString(info.lmsubsystemchannel())),
+	m_subSystem (QString::fromStdString(info.lmsubsystem())),
 	m_lmNumber (info.lmnumber())
 {
 
