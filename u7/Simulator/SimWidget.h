@@ -47,6 +47,10 @@ protected slots:
 	void closeBuild();
 	void refreshBuild();
 
+	void runSimulation();
+	void pauseSimulation();
+	void stopSimulation();
+
 	bool loadBuild(QString buildPath);
 
 	void addNewWindow();
@@ -86,9 +90,9 @@ private:
 
 	QAction* m_addWindowAction = nullptr;
 
-//	QAction* m_runAction = nullptr;
-//	QAction* m_stopAction = nullptr;
-//	QAction* m_pauseAction = nullptr;
+	QAction* m_runAction = nullptr;
+	QAction* m_pauseAction = nullptr;
+	QAction* m_stopAction = nullptr;
 };
 
 

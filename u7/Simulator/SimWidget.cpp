@@ -59,6 +59,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	connect(db, &DbController::projectClosed, this, &SimWidget::closeBuild);
 
 	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
+	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::updateActions);
 
 	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openControlTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
@@ -90,23 +91,46 @@ void SimWidget::createToolBar()
 	m_openProjectAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this);
 	m_openProjectAction->setShortcut(QKeySequence::Open);
 	connect(m_openProjectAction, &QAction::triggered, this, &SimWidget::openBuild);
-	m_toolBar->addAction(m_openProjectAction);
 
 
 	m_closeProjectAction = new QAction(QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this);
 	m_closeProjectAction->setShortcut(QKeySequence::Close);
 	connect(m_closeProjectAction, &QAction::triggered, this, &SimWidget::closeBuild);
-	m_toolBar->addAction(m_closeProjectAction);
 
 	m_refreshProjectAction = new QAction(QIcon(":/Images/Images/SimRefresh.svg"), tr("Refresh"), this);
 	m_refreshProjectAction->setShortcut(QKeySequence::Refresh);
 	connect(m_refreshProjectAction, &QAction::triggered, this, &SimWidget::refreshBuild);
-	m_toolBar->addAction(m_refreshProjectAction);
 
 	m_addWindowAction = new QAction(QIcon(":/Images/Images/SimAddWindow.svg"), tr("Add Window"), this);
 	m_addWindowAction->setShortcut(QKeySequence::New);
 	connect(m_addWindowAction, &QAction::triggered, this, &SimWidget::addNewWindow);
 	m_toolBar->addAction(m_addWindowAction);
+
+	m_runAction = new QAction(QIcon(":/Images/Images/SimRun.svg"), tr("Run simulation for complete project"), this);
+	QList<QKeySequence> runsKeys;
+	runsKeys << Qt::CTRL + Qt::Key_R;
+	runsKeys << Qt::CTRL + Qt::Key_F5;
+	m_runAction->setShortcuts(runsKeys);
+	connect(m_runAction, &QAction::triggered, this, &SimWidget::runSimulation);
+
+	m_pauseAction = new QAction(QIcon(":/Images/Images/SimPause.svg"), tr("Pause current simulation"), this);
+	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
+
+	m_stopAction = new QAction(QIcon(":/Images/Images/SimStop.svg"), tr("Stop current simulation"), this);
+	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
+	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
+
+	// --
+	//
+	m_toolBar->addAction(m_openProjectAction);
+	m_toolBar->addAction(m_closeProjectAction);
+	m_toolBar->addAction(m_refreshProjectAction);
+	m_toolBar->addAction(m_addWindowAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_runAction);
+	m_toolBar->addAction(m_pauseAction);
+	m_toolBar->addAction(m_stopAction);
 
 	return;
 }
@@ -229,6 +253,12 @@ void SimWidget::updateActions()
 	m_refreshProjectAction->setEnabled(projectIsLoaded || lastPathExists);
 	m_addWindowAction->setEnabled(projectIsLoaded);
 
+	// Run, Pause, Stop
+	//
+	m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
+	m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
+	m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+
 	return;
 }
 
@@ -293,6 +323,102 @@ void SimWidget::refreshBuild()
 	}
 
 	emit needUpdateActions();
+	return;
+}
+
+void SimWidget::runSimulation()
+{
+	qDebug() << "SimWidget::runSimulation()";
+
+	if (m_simulator->isLoaded() == false)
+	{
+		return;
+	}
+
+	if (m_simulator->isRunning() == true)
+	{
+		return;
+	}
+
+	Sim::Control& control = m_simulator->control();
+
+	if (m_simulator->isPaused() == true)
+	{
+		// Continue running what was simualted before
+		//
+		int cycles = control.leftCycles();
+		control.start(cycles);
+	}
+	else
+	{
+		// Star simulation for all project
+		//
+		control.reset();
+
+		// Get all modules to simulation
+		//
+		QStringList equipmentIds;
+		auto lms = m_simulator->logicModules();
+
+		for (const auto& lm : lms)
+		{
+			equipmentIds << lm->equipmentId();
+		}
+
+		if (equipmentIds.isEmpty() == true)
+		{
+			// Nothing to simulate
+			//
+			return;
+		}
+
+		// Start simulation
+		//
+		control.addToRunList(equipmentIds);
+		control.start();
+	}
+
+	return;
+}
+
+void SimWidget::pauseSimulation()
+{
+	qDebug() << "SimWidget::pauseSimulation()";
+
+	if (m_simulator->isLoaded() == false)
+	{
+		return;
+	}
+
+	if (m_simulator->isRunning() == false)
+	{
+		return;
+	}
+
+	Sim::Control& control = m_simulator->control();
+	control.pause();
+
+	return;
+}
+
+void SimWidget::stopSimulation()
+{
+	qDebug() << "SimWidget::stopSimulation()";
+
+	if (m_simulator->isLoaded() == false)
+	{
+		return;
+	}
+
+	if (m_simulator->isRunning() == false &&
+		m_simulator->isPaused() == false)
+	{
+		return;
+	}
+
+	Sim::Control& control = m_simulator->control();
+	control.stop();
+
 	return;
 }
 

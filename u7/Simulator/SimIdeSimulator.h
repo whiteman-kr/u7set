@@ -6,7 +6,7 @@
 #include "../../lib/Tuning/TuningSignalManager.h"
 #include "../VFrame30/Schema.h"
 #include "SimAppSignalManager.h"
-#include "SimControlThread.h"
+
 
 class SimIdeSimulator : public Sim::Simulator
 {
@@ -37,10 +37,6 @@ private:
 
 	SimAppSignalManager m_appSignalManager;
 	TuningSignalManager m_tuningSignalManager;
-
-	// Control thread
-	//
-	SimControlThread m_controlThread;
 };
 
 #endif // SIMIDESIMULATOR_H

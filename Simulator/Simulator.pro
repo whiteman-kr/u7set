@@ -72,7 +72,9 @@ SOURCES += \
     SimEeprom.cpp \
     SimSubsystem.cpp \
     SimComponent.cpp \
-    SimDeviceEmulator.cpp
+    SimDeviceEmulator.cpp \
+    SimControl.cpp \
+    SimTimeController.cpp
 
 HEADERS += \
     Stable.h \
@@ -91,7 +93,9 @@ HEADERS += \
     SimEeprom.h \
     SimSubsystem.h \
     SimComponent.h \
-    SimDeviceEmulator.h
+    SimDeviceEmulator.h \
+    SimControl.h \
+    SimTimeController.h
 
 unix {
     target.path = /usr/lib

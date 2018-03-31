@@ -1,5 +1,6 @@
 #include "SimDeviceEmulator.h"
 #include <QQmlEngine>
+#include <QtEndian>
 
 namespace Sim
 {

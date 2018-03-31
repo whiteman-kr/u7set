@@ -2,6 +2,7 @@
 #define EEPROM_H
 #include <vector>
 #include <QByteArray>
+#include <QString>
 
 namespace Hardware
 {

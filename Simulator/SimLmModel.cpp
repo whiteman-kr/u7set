@@ -221,6 +221,21 @@ namespace Sim
 		return m_logicModuleInfo;
 	}
 
+	LmDescription& LogicModule::lmDescription()
+	{
+		return m_lmDescription;
+	}
+
+	const LmDescription& LogicModule::lmDescription() const
+	{
+		return m_lmDescription;
+	}
+
+	int LogicModule::cycleDuration() const
+	{
+		return m_lmDescription.logicUnit().m_cycleDuration;
+	}
+
 	const std::vector<DeviceCommand>& LogicModule::appCommands() const
 	{
 		return m_commands;

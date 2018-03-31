@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <QMenu>
 #include "SimSchemaWidget.h"
 #include "SimSchemaView.h"
 #include "SimSchemaManager.h"

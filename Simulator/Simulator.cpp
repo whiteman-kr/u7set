@@ -64,6 +64,21 @@ namespace Sim
 		return;
 	}
 
+	bool Simulator::isRunning() const
+	{
+		return m_control.state() == SimControlState::Run;
+	}
+
+	bool Simulator::isPaused() const
+	{
+		return m_control.state() == SimControlState::Pause;
+	}
+
+	bool Simulator::isStopped() const
+	{
+		return m_control.state() == SimControlState::Stop;
+	}
+
 	void Simulator::clearImpl()
 	{
 		m_buildPath.clear();
@@ -377,6 +392,32 @@ namespace Sim
 		}
 
 		return std::shared_ptr<LogicModule>();
+	}
+
+	std::vector<std::shared_ptr<LogicModule>> Simulator::logicModules()
+	{
+		std::vector<std::shared_ptr<LogicModule>> result;
+		result.reserve(m_subsystems.size() * 10);			// Just some number
+
+		for (const auto&[key, ss] : m_subsystems)
+		{
+			Q_UNUSED(key);
+
+			std::vector<std::shared_ptr<LogicModule>> subsystemModules = ss->logicModules();
+			result.insert(result.end(), subsystemModules.begin(), subsystemModules.end());
+		}
+
+		return result;
+	}
+
+	Sim::Control& Simulator::control()
+	{
+		return m_control;
+	}
+
+	const Sim::Control& Simulator::control() const
+	{
+		return m_control;
 	}
 
 }

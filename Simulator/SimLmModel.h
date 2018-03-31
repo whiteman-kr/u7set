@@ -65,6 +65,11 @@ namespace Sim
 
 		const Hardware::LogicModuleInfo& logicModuleInfo() const;
 
+		LmDescription& lmDescription();
+		const LmDescription& lmDescription() const;
+
+		int cycleDuration() const;
+
 		const std::vector<DeviceCommand>& appCommands() const;
 
 		std::map<int, size_t> offsetToCommand() const;

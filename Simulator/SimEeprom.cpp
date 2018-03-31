@@ -1,6 +1,7 @@
 #include "SimEeprom.h"
 #include <cassert>
 #include <QJsonDocument>
+#include <QtEndian>
 #include "../lib/ModuleFirmware.h"
 
 namespace Sim
