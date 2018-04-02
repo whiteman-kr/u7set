@@ -2,6 +2,7 @@
 #include <QtCore>
 #include <type_traits>
 #include <cassert>
+#include <atomic>
 
 class QueueIndex
 {

@@ -5,8 +5,9 @@
 #include <QColor>
 
 #include "Options.h"
-
 #include "SourceWorker.h"
+
+#include "../../lib/HostAddressPort.h"
 
 // ==============================================================================================
 
@@ -19,25 +20,32 @@ public:
 		clear();
 	}
 
-	QString		m_dataType;
-	QString		m_equipmentID;
-	int			m_moduleType = 0;
-	QString		m_subSystem;
-	QString		m_caption;
-	QString		m_ip;
-	int			m_port = 0;
-	int			m_frameCount = 0;
+	QString			caption;
+	QString			equipmentID;
+
+	QString			dataType;
+	int				moduleType = 0;
+	QString			subSystem;
+	int				frameCount = 0;
+	quint32			dataID = 0;
+
+	HostAddressPort	lmAddress;
+	HostAddressPort	serverAddress;
 
 	void clear()
 	{
-		m_dataType.clear();
-		m_equipmentID.clear();
-		m_moduleType = 0;
-		m_subSystem.clear();
-		m_caption.clear();
-		m_ip.clear();
-		m_port = 0;
-		m_frameCount = 0;
+
+		caption.clear();
+		equipmentID.clear();
+
+		dataType.clear();
+		moduleType = 0;
+		subSystem.clear();
+		frameCount = 0;
+		dataID = 0;
+
+		lmAddress.clear();
+		serverAddress.clear();
 	}
 };
 
@@ -65,29 +73,32 @@ public:
 
 	void			clear();
 
-	QString			dataType() const { return m_si.m_dataType; }
-	void			setDataType(const QString& type) { m_si.m_dataType = type; }
+	QString			caption() const { return m_si.caption; }
+	void			setCaption(const QString& caption) { m_si.caption = caption; }
 
-	QString			equipmentID() const { return m_si.m_equipmentID; }
-	void			setEquipmentID(const QString& equipmentID) { m_si.m_equipmentID = equipmentID; }
+	QString			equipmentID() const { return m_si.equipmentID; }
+	void			setEquipmentID(const QString& equipmentID) { m_si.equipmentID = equipmentID; }
 
-	int				moduleType() const { return m_si.m_moduleType; }
-	void			setModuleType(int type) { m_si.m_moduleType= type; }
+	QString			dataType() const { return m_si.dataType; }
+	void			setDataType(const QString& type) { m_si.dataType = type; }
 
-	QString			subSystem() const { return m_si.m_subSystem; }
-	void			setSubSystem(const QString& subSystem) { m_si.m_subSystem = subSystem; }
+	int				moduleType() const { return m_si.moduleType; }
+	void			setModuleType(int type) { m_si.moduleType= type; }
 
-	QString			caption() const { return m_si.m_caption; }
-	void			setCaption(const QString& caption) { m_si.m_caption = caption; }
+	QString			subSystem() const { return m_si.subSystem; }
+	void			setSubSystem(const QString& subSystem) { m_si.subSystem = subSystem; }
 
-	QString			ip() const { return m_si.m_ip; }
-	void			setIP(const QString& ip) { m_si.m_ip = ip; }
+	int				frameCount() const { return m_si.frameCount; }
+	void			setFrameCount(int count) { m_si.frameCount = count; }
 
-	int				port() const { return m_si.m_port; }
-	void			setPort(int port) { m_si.m_port = port; }
+	quint32			dataID() const { return m_si.dataID; }
+	void			setDataID(quint32 id) { m_si.dataID = id; }
 
-	int				frameCount() const { return m_si.m_frameCount; }
-	void			setFrameCount(int count) { m_si.m_frameCount = count; }
+	HostAddressPort	lmAddress() const { return m_si.lmAddress; }
+	void			setLmAddress(const HostAddressPort& address) { m_si.lmAddress = address; }
+
+	HostAddressPort	serverAddress() const { return m_si.serverAddress; }
+	void			setServerAddress(const HostAddressPort& address) { m_si.serverAddress = address; }
 
 	bool			run();
 	bool			stop();
@@ -134,6 +145,10 @@ public:
 
 	SourceBase&				operator=(const SourceBase& from);
 
+	//
+	//
+	void					setServerAddress(const HostAddressPort& address);
+
 	// run stop send udp trhread
 	//
 	void					runSourece(int index);
@@ -163,24 +178,26 @@ const int					LIST_COLUMN_WITDH					= 200;
 
 const char* const			SourceListColumn[] =
 {
-							QT_TRANSLATE_NOOP("SourceList.h", "Data type"),
+							QT_TRANSLATE_NOOP("SourceList.h", "Caption"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Equipment ID"),
+							QT_TRANSLATE_NOOP("SourceList.h", "Data type"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Module type"),
 							QT_TRANSLATE_NOOP("SourceList.h", "SubSystem"),
-							QT_TRANSLATE_NOOP("SourceList.h", "Caption"),
-							QT_TRANSLATE_NOOP("SourceList.h", "IP"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Frame count"),
+							QT_TRANSLATE_NOOP("SourceList.h", "IP (LM)"),
+							QT_TRANSLATE_NOOP("SourceList.h", "IP (AppDataSrv)"),
 };
 
 const int					SOURCE_LIST_COLUMN_COUNT			= sizeof(SourceListColumn)/sizeof(SourceListColumn[0]);
 
-const int					SOURCE_LIST_COLUMN_DATA_TYPE		= 0,
+const int					SOURCE_LIST_COLUMN_CAPTION			= 0,
 							SOURCE_LIST_COLUMN_EQUIPMENT_ID		= 1,
-							SOURCE_LIST_COLUMN_MODULE_TYPE		= 2,
-							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 3,
-							SOURCE_LIST_COLUMN_CAPTION			= 4,
-							SOURCE_LIST_COLUMN_IP				= 5,
-							SOURCE_LIST_COLUMN_FRAME_COUNT		= 6;
+							SOURCE_LIST_COLUMN_DATA_TYPE		= 2,
+							SOURCE_LIST_COLUMN_MODULE_TYPE		= 3,
+							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 4,
+							SOURCE_LIST_COLUMN_FRAME_COUNT		= 5,
+							SOURCE_LIST_COLUMN_LM_IP			= 6,
+							SOURCE_LIST_COLUMN_SERVER_IP		= 7;
 
 // ==============================================================================================
 

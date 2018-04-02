@@ -3,9 +3,11 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QDebug>
+#include <QClipboard>
 #include <QCloseEvent>
 
 #include "SourceOptionDialog.h"
+#include "version.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +30,7 @@ MainWindow::~MainWindow()
 bool MainWindow::createInterface()
 {
 	setWindowIcon(QIcon(":/icons/PacketSource.png"));
-	setWindowTitle(tr("Packet source 1.0"));
+	setWindowTitle(tr("Packet Source"));
 	resize(700, 750);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
@@ -39,6 +41,11 @@ bool MainWindow::createInterface()
 	createContextMenu();
 	createHeaderContexMenu();
 	createStatusBar();
+
+	if (Rup::VERSION != PS::SUPPORT_VERSION)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Attention!\n%1 transmits RUP packages of version %2\nLast version of RUP packages is %3").arg(windowTitle()).arg(PS::SUPPORT_VERSION).arg(Rup::VERSION));
+	}
 
 	return true;
 }
@@ -197,8 +204,8 @@ void MainWindow::createHeaderContexMenu()
 	hideColumn(SOURCE_LIST_COLUMN_DATA_TYPE, true);
 	hideColumn(SOURCE_LIST_COLUMN_MODULE_TYPE, true);
 	hideColumn(SOURCE_LIST_COLUMN_SUB_SYSTEM, true);
-	hideColumn(SOURCE_LIST_COLUMN_CAPTION, true);
 	hideColumn(SOURCE_LIST_COLUMN_FRAME_COUNT, true);
+	hideColumn(SOURCE_LIST_COLUMN_SERVER_IP, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -212,8 +219,8 @@ void MainWindow::createStatusBar()
 	}
 
 	m_statusEmpty = new QLabel(m_statusBar);
-	m_statusSourceCount = new QLabel(m_statusBar);
-	m_statusBar->addWidget(m_statusSourceCount);
+	m_statusServer = new QLabel(m_statusBar);
+	m_statusBar->addWidget(m_statusServer);
 	m_statusBar->addWidget(m_statusEmpty);
 
 	m_statusBar->setLayoutDirection(Qt::RightToLeft);
@@ -304,13 +311,16 @@ void MainWindow::optionSource()
 
 	stopSource();
 
+	m_sourceTable.clear();
+
 	int sourceCount = theSourceBase.readFromXml();
 	if (sourceCount == 0)
 	{
-		QMessageBox::information(this, windowTitle(), tr("This file does not contain any sources!"));
+		QMessageBox::information(this, windowTitle(), tr("Sources is not loaded!"));
+		return;
 	}
 
-	m_statusSourceCount->setText(tr(" Sources count: %1  ").arg(sourceCount));
+	m_statusServer->setText(tr(""));
 
 	QVector<SourceItem*> ptrSourceList;
 	for(int i = 0; i < sourceCount; i++)
@@ -318,7 +328,7 @@ void MainWindow::optionSource()
 		ptrSourceList.append(theSourceBase.sourcePtr(i));
 	}
 
-	m_sourceTable.clear();
+
 	m_sourceTable.set(ptrSourceList);
 }
 
@@ -366,19 +376,48 @@ void MainWindow::onColumnAction(QAction* action)
 void MainWindow::aboutApp()
 {
 	QDialog aboutDialog(this);
-	aboutDialog.setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	aboutDialog.setFixedSize(200, 50);
-	aboutDialog.setWindowIcon(QIcon(":/icons/About.png"));
-	aboutDialog.setWindowTitle(tr("Packet Source"));
 
-		QVBoxLayout *mainLayout = new QVBoxLayout;
+	QHBoxLayout* hl = new QHBoxLayout;
 
-		QLabel* versionLabel = new QLabel(tr("Version 1.0"), &aboutDialog);
-		versionLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	QLabel* logo = new QLabel(&aboutDialog);
+	logo->setPixmap(QPixmap(":/icons/Logo.png"));
 
-		mainLayout->addWidget(versionLabel);
+	hl->addWidget(logo);
 
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
+
+	QString text = "<h3>" + qApp->applicationName() + ": version " + qApp->applicationVersion() + "</h3>";
+#ifndef Q_DEBUG
+	text += "Build: Release";
+#else
+	text += "Build: Debug";
+#endif
+	text += "<br>Commit date: " LAST_SERVER_COMMIT_DATE;
+	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+	text += "<br>Qt version: " QT_VERSION_STR;
+
+	QLabel* label = new QLabel(text, &aboutDialog);
+	label->setIndent(10);
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	vl->addWidget(label);
+
+	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
+		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+	});
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+	buttonBox->addButton(QDialogButtonBox::Ok);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+	mainLayout->addLayout(hl);
+	mainLayout->addWidget(buttonBox);
 	aboutDialog.setLayout(mainLayout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
+
 	aboutDialog.exec();
 }
 

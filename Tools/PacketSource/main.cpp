@@ -2,7 +2,7 @@
 
 #include "MainWindow.h"
 #include "Options.h"
-//#include "version.h"
+#include "version.h"
 //#include <vld.h>
 
 int main(int argc, char *argv[])
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 
-	//a.setApplicationVersion(QString("1.0.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
+	a.setApplicationVersion(QString("1.0.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
 
 	theOptions.load();
 

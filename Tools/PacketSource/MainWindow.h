@@ -55,7 +55,7 @@ private:
 	// Elements of interface - StatusBar
 	//
 	QLabel*					m_statusEmpty = nullptr;
-	QLabel*					m_statusSourceCount = nullptr;
+	QLabel*					m_statusServer = nullptr;
 
 private:
 

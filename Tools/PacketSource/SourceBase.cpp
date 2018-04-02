@@ -5,6 +5,7 @@
 #include <QFile>
 
 #include "../../lib/XmlHelper.h"
+#include "../../u7/Builder/CfgFiles.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -157,49 +158,102 @@ int SourceBase::readFromXml()
 {
 	clear();
 
-	QString path = theOptions.source().path();
-	if (path.isEmpty() == true)
+	if (theOptions.source().path().isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, "Loading sources", tr("Please, input path to sources file!"));
 		return 0;
 	}
 
-	QFile fileXml(path);
-	if (fileXml.exists() == false)
+	QString msgTitle = tr("Loading sources");
+
+	// read Server IP and Server Port
+	//
+
+	QString fileCfg = theOptions.source().path() + "/" + Builder::FILE_CONFIGURATION_XML;
+
+	QFile fileCfgXml(fileCfg);
+	if (fileCfgXml.exists() == false)
 	{
-		QMessageBox::information(nullptr, "Loading sources", tr("File of sources is not found!"));
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not found!").arg(Builder::FILE_CONFIGURATION_XML));
 		return 0;
 	}
 
-	if (fileXml.open(QIODevice::ReadOnly) == false)
+	if (fileCfgXml.open(QIODevice::ReadOnly) == false)
 	{
-		QMessageBox::information(nullptr, "Loading sources", tr("File of sources is not opened!"));
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not opened!").arg(Builder::FILE_CONFIGURATION_XML));
 		return 0;
 	}
 
-	QByteArray&& fileData = fileXml.readAll();
+	QByteArray&& cfgData = fileCfgXml.readAll();
 
-	fileXml.close();
+	fileCfgXml.close();
 
+	XmlReadHelper xmlCfg(cfgData);
 
+	HostAddressPort serverAddress;
 
-	XmlReadHelper xml(fileData);
-
-	while(xml.findElement("DataSource") == true)
+	if (xmlCfg.readHostAddressPort("AppDataReceivingIP", "AppDataReceivingPort", &serverAddress) == false)
 	{
-		SourceInfo si;
+		QMessageBox::information(nullptr, msgTitle, tr("IP-address of AppDataSrv is not found in file %1!").arg(Builder::FILE_CONFIGURATION_XML));
+		return 0;
+	}
 
-		xml.readStringAttribute("LmDataType", &si.m_dataType);
-		xml.readStringAttribute("LmEquipmentID", &si.m_equipmentID);
-		xml.readIntAttribute("LmModuleType", &si.m_moduleType);
-		xml.readStringAttribute("LmSubsystem", &si.m_subSystem);
-		xml.readStringAttribute("LmCaption", &si.m_caption);
-		xml.readStringAttribute("LmDataIP", &si.m_ip);
-		xml.readIntAttribute("LmDataPort", &si.m_port);
+	// read Data Sources
+	//
 
-		si.m_frameCount = 1;
+	QString fileSource = theOptions.source().path() + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
 
-		append(si);
+	QFile fileSourceXml(fileSource);
+	if (fileSourceXml.exists() == false)
+	{
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not found!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
+		return 0;
+	}
+
+	if (fileSourceXml.open(QIODevice::ReadOnly) == false)
+	{
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not opened!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
+		return 0;
+	}
+
+	QByteArray&& sourceData = fileSourceXml.readAll();
+
+	fileSourceXml.close();
+
+	XmlReadHelper xmlSource(sourceData);
+
+	while(xmlSource.atEnd() == false)
+	{
+		if (xmlSource.readNextStartElement() == false)
+		{
+			continue;
+		}
+
+		if (xmlSource.name() == "DataSource")
+		{
+			SourceInfo si;
+
+			QString ip;
+			int port = 0;
+			QString dataID;
+
+			xmlSource.readStringAttribute("LmDataType", &si.dataType);
+			xmlSource.readStringAttribute("LmEquipmentID", &si.equipmentID);
+			xmlSource.readIntAttribute("LmModuleType", &si.moduleType);
+			xmlSource.readStringAttribute("LmSubsystem", &si.subSystem);
+			xmlSource.readStringAttribute("LmCaption", &si.caption);
+			xmlSource.readStringAttribute("LmDataIP", &ip);
+			xmlSource.readIntAttribute("LmDataPort", &port);
+			xmlSource.readIntAttribute("LmRupFramesQuantity", &si.frameCount);
+			xmlSource.readStringAttribute("LmDataID", &dataID);
+
+			si.dataID = dataID.toInt(nullptr, 16);
+
+			si.lmAddress.setAddressPort(ip, port);
+			si.serverAddress.setAddressPort(serverAddress.addressStr(), serverAddress.port());
+
+			append(si);
+		}
 	}
 
 	return count();
@@ -296,6 +350,21 @@ SourceBase& SourceBase::operator=(const SourceBase& from)
 	m_sourceMutex.unlock();
 
 	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SourceBase::setServerAddress(const HostAddressPort& address)
+{
+	m_sourceMutex.lock();
+
+		int count = m_sourceList.count();
+		for(int i = 0; i < count; i++)
+		{
+			m_sourceList[i].setServerAddress(address);
+		}
+
+	m_sourceMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -513,13 +582,14 @@ QString SourceTable::text(int row, int column, SourceItem* pSource) const
 
 	switch (column)
 	{
-		case SOURCE_LIST_COLUMN_DATA_TYPE:		result = pSource->dataType();												break;
+		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->caption();												break;
 		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->equipmentID();											break;
+		case SOURCE_LIST_COLUMN_DATA_TYPE:		result = pSource->dataType();												break;
 		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->moduleType());							break;
 		case SOURCE_LIST_COLUMN_SUB_SYSTEM:		result = pSource->subSystem();												break;
-		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->caption();												break;
-		case SOURCE_LIST_COLUMN_IP:				result = pSource->ip() + " (" + QString::number(pSource->port()) + ")";		break;
 		case SOURCE_LIST_COLUMN_FRAME_COUNT:	result = QString::number(pSource->frameCount());							break;
+		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->lmAddress().addressStr() + " (" + QString::number(pSource->lmAddress().port()) + ")";	break;
+		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->serverAddress().addressStr() + " (" + QString::number(pSource->serverAddress().port()) + ")";	break;
 		default:								assert(0);
 	}
 
