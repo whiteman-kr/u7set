@@ -199,7 +199,7 @@ namespace Tuning
 	{
 		m_sourceEquipmentID = source.lmEquipmentID();
 		m_sourceIP = source.lmAddressPort();
-		m_sourceUniqueID = source.uniqueID();
+		m_sourceUniqueID = source.lmUniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_lmModuleType = static_cast<quint16>(source.lmModuleType());
 		m_subsystemCode = static_cast<quint16>(source.lmSubsystemID());

@@ -2,6 +2,7 @@
 #include <QtCore>
 #include <type_traits>
 #include <cassert>
+#include <atomic>
 
 class QueueIndex
 {
@@ -118,7 +119,7 @@ public:
 	bool isFull() const { return m_size.load() == m_queueSize; }
 
 	int size() const { return m_size.load(); }
-	int maxSize() const { return m_maxSize; }
+	int maxSize() const { return m_maxSize.load(); }
 
 private:
 	static const int SAFE_SIZE = 1;
@@ -131,7 +132,7 @@ private:
 	// vars modified by Writer only
 
 	QueueIndex m_writeIndex;
-	int m_maxSize = 0;
+	std::atomic<int> m_maxSize = 0;								// can be read from another thread
 	int m_lostedCount = 0;
 
 	// var modified by Reader only

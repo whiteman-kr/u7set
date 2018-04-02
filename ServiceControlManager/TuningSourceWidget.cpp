@@ -22,14 +22,14 @@ struct dynamicPropertyFieldDefinition
 };
 
 static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
-	{ QStringLiteral("EquipmentID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.equipmentid()); } },
-	{ QStringLiteral("Caption"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.caption()); } },
-	{ QStringLiteral("DataType"), [](const Network::DataSourceInfo& info) { return QString::number(info.datatype()); } },
-	{ QStringLiteral("IP"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.ip()); } },
-	{ QStringLiteral("Port"), [](const Network::DataSourceInfo& info) { return QString::number(info.port()); } },
-	{ QStringLiteral("Channel"), [](const Network::DataSourceInfo& info) { return QString::number(info.channel()); } },
-	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info) { return QString::number(info.subsystemid()); } },
-	{ QStringLiteral("Subsystem"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.subsystem()); } },
+	{ QStringLiteral("EquipmentID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmequipmentid()); } },
+	{ QStringLiteral("Caption"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmcaption()); } },
+	{ QStringLiteral("DataType"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmdatatype()); } },
+	{ QStringLiteral("IP"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmip()); } },
+	{ QStringLiteral("Port"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmport()); } },
+	{ QStringLiteral("Channel"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmsubsystemchannel()); } },
+	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmsubsystemid()); } },
+	{ QStringLiteral("Subsystem"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmsubsystem()); } },
 
 	{ QStringLiteral("LmNumber"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmnumber()); } },
 	{ QStringLiteral("LmModuleType"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmmoduletype()); } },

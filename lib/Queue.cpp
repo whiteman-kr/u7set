@@ -249,7 +249,7 @@ bool LockFreeQueueBase::push(const char* item)
 
 	if (prevSize + 1 > m_maxSize)
 	{
-		m_maxSize = prevSize + 1;
+		m_maxSize.store(prevSize + 1);
 	}
 
 	return true;
@@ -312,7 +312,7 @@ bool LockFreeQueueBase::completePush()
 
 	if (prevSize + 1 > m_maxSize)
 	{
-		m_maxSize = prevSize + 1;
+		m_maxSize.store(prevSize + 1);
 	}
 
 	return true;

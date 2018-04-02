@@ -9940,6 +9940,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeSignalLists()
 	{
+		if (theSettings.isExpertMode() == false)
+		{
+			return true;
+		}
+
 		bool result = true;
 
 		result &= writeSignalList(m_acquiredDiscreteInputSignals, "acquiredDiscreteInput");

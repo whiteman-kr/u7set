@@ -3,6 +3,7 @@
 #include "../lib/ProtobufHelper.h"
 #include "../lib/DataSource.h"
 #include "../lib/WUtils.h"
+#include "Builder.h"
 
 class DataSource;
 
@@ -13,17 +14,17 @@ namespace Builder
 															Hardware::Software* software,
 															SignalSet* signalSet,
 															Hardware::EquipmentSet* equipment,
+															const QHash<QString, quint64>& lmUniqueIdMap,
 															BuildResultWriter* buildResultWriter) :
 		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
+		m_lmUniqueIdMap(lmUniqueIdMap),
 		m_subsystems(subsystems)
 	{
 	}
 
-
 	AppDataServiceCfgGenerator::~AppDataServiceCfgGenerator()
 	{
 	}
-
 
 	bool AppDataServiceCfgGenerator::generateConfiguration()
 	{
@@ -44,7 +45,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
@@ -93,12 +93,14 @@ namespace Builder
 				result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, m_log);
 
 				int lmNumber = 0;
-				int lmChannel = 0;
+				QString lmChannel = 0;
 				QString lmSubsystem;
 				quint32 lmAppLANDataUID = 0;
+				int lmRupFramesQuantity = 0;
+				quint64 lmUniqueID = 0;
 
 				result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
-				result &= DeviceHelper::getIntProperty(lm, "SubsystemChannel", &lmChannel, m_log);
+				result &= DeviceHelper::getStrProperty(lm, "SubsystemChannel", &lmChannel, m_log);
 				result &= DeviceHelper::getStrProperty(lm, "SubsystemID", &lmSubsystem, m_log);
 
 				int dataUID = 0;
@@ -107,10 +109,19 @@ namespace Builder
 
 				lmAppLANDataUID = dataUID;
 
+				int lmAppLanDataSize = 0;
+
+				result &= DeviceHelper::getIntProperty(lm, "AppLANDataSize", &lmAppLanDataSize, m_log);
+
+				lmRupFramesQuantity = lmAppLanDataSize / sizeof(Rup::Frame::data) +
+						((lmAppLanDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
+
 				if (result == false)
 				{
 					break;
 				}
+
+				lmUniqueID = m_lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0);
 
 				if (lmNetProperties.appDataEnable == false ||
 					lmNetProperties.appDataServiceID != m_software->equipmentIdTemplate())
@@ -148,19 +159,21 @@ namespace Builder
 
 				DataSource& ds = dataSources[dataSources.count()-1];
 
-//				ds.setLmChannel(channel);
 				ds.setLmSubsystem(lmSubsystem);
 				ds.setLmSubsystemID(lmSubsystemID);
 				ds.setLmNumber(lmNumber);
+				ds.setLmSubsystemChannel(lmChannel);
 				ds.setLmDataType(DataSource::DataType::App);
 				ds.setLmEquipmentID(lm->equipmentIdTemplate());
 				ds.setLmModuleType(lm->moduleType());
 				ds.setLmCaption(lm->caption());
 				ds.setLmDataID(lmAppLANDataUID);
+				ds.setLmUniqueID(lmUniqueID);
 				ds.setLmAdapterID(lmNetProperties.adapterID);
 				ds.setLmDataEnable(lmNetProperties.appDataEnable);
 				ds.setLmAddressStr(lmNetProperties.appDataIP);
 				ds.setLmPort(lmNetProperties.appDataPort);
+				ds.setLmRupFramesQuantity(lmRupFramesQuantity);
 
 				result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
 			}
@@ -178,7 +191,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppDataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_APP_DATA_SOURCES_XML, CFG_FILE_ID_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -302,7 +315,7 @@ namespace Builder
 		}
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -326,7 +339,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

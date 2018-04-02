@@ -1059,97 +1059,102 @@ class DataSourceInfo : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 id = 1;
+  // optional uint64 id = 1 [default = 0];
   inline bool has_id() const;
   inline void clear_id();
   static const int kIdFieldNumber = 1;
   inline ::google::protobuf::uint64 id() const;
   inline void set_id(::google::protobuf::uint64 value);
 
-  // optional string equipmentID = 2;
-  inline bool has_equipmentid() const;
-  inline void clear_equipmentid();
-  static const int kEquipmentIDFieldNumber = 2;
-  inline const ::std::string& equipmentid() const;
-  inline void set_equipmentid(const ::std::string& value);
-  inline void set_equipmentid(const char* value);
-  inline void set_equipmentid(const char* value, size_t size);
-  inline ::std::string* mutable_equipmentid();
-  inline ::std::string* release_equipmentid();
-  inline void set_allocated_equipmentid(::std::string* equipmentid);
+  // optional string lmEquipmentID = 2;
+  inline bool has_lmequipmentid() const;
+  inline void clear_lmequipmentid();
+  static const int kLmEquipmentIDFieldNumber = 2;
+  inline const ::std::string& lmequipmentid() const;
+  inline void set_lmequipmentid(const ::std::string& value);
+  inline void set_lmequipmentid(const char* value);
+  inline void set_lmequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_lmequipmentid();
+  inline ::std::string* release_lmequipmentid();
+  inline void set_allocated_lmequipmentid(::std::string* lmequipmentid);
 
-  // optional string caption = 3;
-  inline bool has_caption() const;
-  inline void clear_caption();
-  static const int kCaptionFieldNumber = 3;
-  inline const ::std::string& caption() const;
-  inline void set_caption(const ::std::string& value);
-  inline void set_caption(const char* value);
-  inline void set_caption(const char* value, size_t size);
-  inline ::std::string* mutable_caption();
-  inline ::std::string* release_caption();
-  inline void set_allocated_caption(::std::string* caption);
+  // optional string lmCaption = 3;
+  inline bool has_lmcaption() const;
+  inline void clear_lmcaption();
+  static const int kLmCaptionFieldNumber = 3;
+  inline const ::std::string& lmcaption() const;
+  inline void set_lmcaption(const ::std::string& value);
+  inline void set_lmcaption(const char* value);
+  inline void set_lmcaption(const char* value, size_t size);
+  inline ::std::string* mutable_lmcaption();
+  inline ::std::string* release_lmcaption();
+  inline void set_allocated_lmcaption(::std::string* lmcaption);
 
-  // optional int32 dataType = 4;
-  inline bool has_datatype() const;
-  inline void clear_datatype();
-  static const int kDataTypeFieldNumber = 4;
-  inline ::google::protobuf::int32 datatype() const;
-  inline void set_datatype(::google::protobuf::int32 value);
+  // optional int32 lmDataType = 4 [default = 0];
+  inline bool has_lmdatatype() const;
+  inline void clear_lmdatatype();
+  static const int kLmDataTypeFieldNumber = 4;
+  inline ::google::protobuf::int32 lmdatatype() const;
+  inline void set_lmdatatype(::google::protobuf::int32 value);
 
-  // optional string ip = 5;
-  inline bool has_ip() const;
-  inline void clear_ip();
-  static const int kIpFieldNumber = 5;
-  inline const ::std::string& ip() const;
-  inline void set_ip(const ::std::string& value);
-  inline void set_ip(const char* value);
-  inline void set_ip(const char* value, size_t size);
-  inline ::std::string* mutable_ip();
-  inline ::std::string* release_ip();
-  inline void set_allocated_ip(::std::string* ip);
+  // optional string lmIP = 5;
+  inline bool has_lmip() const;
+  inline void clear_lmip();
+  static const int kLmIPFieldNumber = 5;
+  inline const ::std::string& lmip() const;
+  inline void set_lmip(const ::std::string& value);
+  inline void set_lmip(const char* value);
+  inline void set_lmip(const char* value, size_t size);
+  inline ::std::string* mutable_lmip();
+  inline ::std::string* release_lmip();
+  inline void set_allocated_lmip(::std::string* lmip);
 
-  // optional int32 port = 6;
-  inline bool has_port() const;
-  inline void clear_port();
-  static const int kPortFieldNumber = 6;
-  inline ::google::protobuf::int32 port() const;
-  inline void set_port(::google::protobuf::int32 value);
+  // optional int32 lmPort = 6 [default = 0];
+  inline bool has_lmport() const;
+  inline void clear_lmport();
+  static const int kLmPortFieldNumber = 6;
+  inline ::google::protobuf::int32 lmport() const;
+  inline void set_lmport(::google::protobuf::int32 value);
 
-  // optional int32 channel = 7;
-  inline bool has_channel() const;
-  inline void clear_channel();
-  static const int kChannelFieldNumber = 7;
-  inline ::google::protobuf::int32 channel() const;
-  inline void set_channel(::google::protobuf::int32 value);
+  // optional int32 lmSubsystemID = 7 [default = 0];
+  inline bool has_lmsubsystemid() const;
+  inline void clear_lmsubsystemid();
+  static const int kLmSubsystemIDFieldNumber = 7;
+  inline ::google::protobuf::int32 lmsubsystemid() const;
+  inline void set_lmsubsystemid(::google::protobuf::int32 value);
 
-  // optional int32 subsystemID = 8;
-  inline bool has_subsystemid() const;
-  inline void clear_subsystemid();
-  static const int kSubsystemIDFieldNumber = 8;
-  inline ::google::protobuf::int32 subsystemid() const;
-  inline void set_subsystemid(::google::protobuf::int32 value);
+  // optional string lmSubsystem = 8;
+  inline bool has_lmsubsystem() const;
+  inline void clear_lmsubsystem();
+  static const int kLmSubsystemFieldNumber = 8;
+  inline const ::std::string& lmsubsystem() const;
+  inline void set_lmsubsystem(const ::std::string& value);
+  inline void set_lmsubsystem(const char* value);
+  inline void set_lmsubsystem(const char* value, size_t size);
+  inline ::std::string* mutable_lmsubsystem();
+  inline ::std::string* release_lmsubsystem();
+  inline void set_allocated_lmsubsystem(::std::string* lmsubsystem);
 
-  // optional string subsystem = 9;
-  inline bool has_subsystem() const;
-  inline void clear_subsystem();
-  static const int kSubsystemFieldNumber = 9;
-  inline const ::std::string& subsystem() const;
-  inline void set_subsystem(const ::std::string& value);
-  inline void set_subsystem(const char* value);
-  inline void set_subsystem(const char* value, size_t size);
-  inline ::std::string* mutable_subsystem();
-  inline ::std::string* release_subsystem();
-  inline void set_allocated_subsystem(::std::string* subsystem);
+  // optional string lmSubsystemChannel = 9;
+  inline bool has_lmsubsystemchannel() const;
+  inline void clear_lmsubsystemchannel();
+  static const int kLmSubsystemChannelFieldNumber = 9;
+  inline const ::std::string& lmsubsystemchannel() const;
+  inline void set_lmsubsystemchannel(const ::std::string& value);
+  inline void set_lmsubsystemchannel(const char* value);
+  inline void set_lmsubsystemchannel(const char* value, size_t size);
+  inline ::std::string* mutable_lmsubsystemchannel();
+  inline ::std::string* release_lmsubsystemchannel();
+  inline void set_allocated_lmsubsystemchannel(::std::string* lmsubsystemchannel);
 
-  // optional int32 lmNumber = 10;
+  // optional int32 lmNumber = 10 [default = 0];
   inline bool has_lmnumber() const;
   inline void clear_lmnumber();
   static const int kLmNumberFieldNumber = 10;
   inline ::google::protobuf::int32 lmnumber() const;
   inline void set_lmnumber(::google::protobuf::int32 value);
 
-  // optional int32 lmModuleType = 11;
+  // optional int32 lmModuleType = 11 [default = 0];
   inline bool has_lmmoduletype() const;
   inline void clear_lmmoduletype();
   static const int kLmModuleTypeFieldNumber = 11;
@@ -1168,40 +1173,54 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline ::std::string* release_lmadapterid();
   inline void set_allocated_lmadapterid(::std::string* lmadapterid);
 
-  // optional bool lmDataEnable = 13;
+  // optional bool lmDataEnable = 13 [default = false];
   inline bool has_lmdataenable() const;
   inline void clear_lmdataenable();
   static const int kLmDataEnableFieldNumber = 13;
   inline bool lmdataenable() const;
   inline void set_lmdataenable(bool value);
 
-  // optional uint64 lmDataID = 14;
+  // optional uint64 lmDataID = 14 [default = 0];
   inline bool has_lmdataid() const;
   inline void clear_lmdataid();
   static const int kLmDataIDFieldNumber = 14;
   inline ::google::protobuf::uint64 lmdataid() const;
   inline void set_lmdataid(::google::protobuf::uint64 value);
 
+  // optional uint64 lmUniqueID = 15 [default = 0];
+  inline bool has_lmuniqueid() const;
+  inline void clear_lmuniqueid();
+  static const int kLmUniqueIDFieldNumber = 15;
+  inline ::google::protobuf::uint64 lmuniqueid() const;
+  inline void set_lmuniqueid(::google::protobuf::uint64 value);
+
+  // optional int32 lmRupFramesQuantity = 16 [default = 0];
+  inline bool has_lmrupframesquantity() const;
+  inline void clear_lmrupframesquantity();
+  static const int kLmRupFramesQuantityFieldNumber = 16;
+  inline ::google::protobuf::int32 lmrupframesquantity() const;
+  inline void set_lmrupframesquantity(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Network.DataSourceInfo)
  private:
   inline void set_has_id();
   inline void clear_has_id();
-  inline void set_has_equipmentid();
-  inline void clear_has_equipmentid();
-  inline void set_has_caption();
-  inline void clear_has_caption();
-  inline void set_has_datatype();
-  inline void clear_has_datatype();
-  inline void set_has_ip();
-  inline void clear_has_ip();
-  inline void set_has_port();
-  inline void clear_has_port();
-  inline void set_has_channel();
-  inline void clear_has_channel();
-  inline void set_has_subsystemid();
-  inline void clear_has_subsystemid();
-  inline void set_has_subsystem();
-  inline void clear_has_subsystem();
+  inline void set_has_lmequipmentid();
+  inline void clear_has_lmequipmentid();
+  inline void set_has_lmcaption();
+  inline void clear_has_lmcaption();
+  inline void set_has_lmdatatype();
+  inline void clear_has_lmdatatype();
+  inline void set_has_lmip();
+  inline void clear_has_lmip();
+  inline void set_has_lmport();
+  inline void clear_has_lmport();
+  inline void set_has_lmsubsystemid();
+  inline void clear_has_lmsubsystemid();
+  inline void set_has_lmsubsystem();
+  inline void clear_has_lmsubsystem();
+  inline void set_has_lmsubsystemchannel();
+  inline void clear_has_lmsubsystemchannel();
   inline void set_has_lmnumber();
   inline void clear_has_lmnumber();
   inline void set_has_lmmoduletype();
@@ -1212,26 +1231,32 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline void clear_has_lmdataenable();
   inline void set_has_lmdataid();
   inline void clear_has_lmdataid();
+  inline void set_has_lmuniqueid();
+  inline void clear_has_lmuniqueid();
+  inline void set_has_lmrupframesquantity();
+  inline void clear_has_lmrupframesquantity();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 id_;
-  ::std::string* equipmentid_;
-  ::std::string* caption_;
-  ::std::string* ip_;
-  ::google::protobuf::int32 datatype_;
-  ::google::protobuf::int32 port_;
-  ::google::protobuf::int32 channel_;
-  ::google::protobuf::int32 subsystemid_;
-  ::std::string* subsystem_;
+  ::std::string* lmequipmentid_;
+  ::std::string* lmcaption_;
+  ::std::string* lmip_;
+  ::google::protobuf::int32 lmdatatype_;
+  ::google::protobuf::int32 lmport_;
+  ::std::string* lmsubsystem_;
+  ::google::protobuf::int32 lmsubsystemid_;
   ::google::protobuf::int32 lmnumber_;
-  ::google::protobuf::int32 lmmoduletype_;
+  ::std::string* lmsubsystemchannel_;
   ::std::string* lmadapterid_;
-  ::google::protobuf::uint64 lmdataid_;
+  ::google::protobuf::int32 lmmoduletype_;
   bool lmdataenable_;
+  ::google::protobuf::uint64 lmdataid_;
+  ::google::protobuf::uint64 lmuniqueid_;
+  ::google::protobuf::int32 lmrupframesquantity_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(16 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -1463,184 +1488,274 @@ class AppDataSourceState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 id = 1;
+  // optional uint64 id = 1 [default = 0];
   inline bool has_id() const;
   inline void clear_id();
   static const int kIdFieldNumber = 1;
   inline ::google::protobuf::uint64 id() const;
   inline void set_id(::google::protobuf::uint64 value);
 
-  // optional int64 uptime = 2;
+  // optional bool dataReceives = 2 [default = false];
+  inline bool has_datareceives() const;
+  inline void clear_datareceives();
+  static const int kDataReceivesFieldNumber = 2;
+  inline bool datareceives() const;
+  inline void set_datareceives(bool value);
+
+  // optional int64 uptime = 3 [default = 0];
   inline bool has_uptime() const;
   inline void clear_uptime();
-  static const int kUptimeFieldNumber = 2;
+  static const int kUptimeFieldNumber = 3;
   inline ::google::protobuf::int64 uptime() const;
   inline void set_uptime(::google::protobuf::int64 value);
 
-  // optional int64 receivedDataSize = 3;
-  inline bool has_receiveddatasize() const;
-  inline void clear_receiveddatasize();
-  static const int kReceivedDataSizeFieldNumber = 3;
-  inline ::google::protobuf::int64 receiveddatasize() const;
-  inline void set_receiveddatasize(::google::protobuf::int64 value);
-
-  // optional double dataReceivingRate = 4;
-  inline bool has_datareceivingrate() const;
-  inline void clear_datareceivingrate();
-  static const int kDataReceivingRateFieldNumber = 4;
-  inline double datareceivingrate() const;
-  inline void set_datareceivingrate(double value);
-
-  // optional int64 receivedFramesCount = 5;
-  inline bool has_receivedframescount() const;
-  inline void clear_receivedframescount();
-  static const int kReceivedFramesCountFieldNumber = 5;
-  inline ::google::protobuf::int64 receivedframescount() const;
-  inline void set_receivedframescount(::google::protobuf::int64 value);
-
-  // optional bool processingEnabled = 6;
-  inline bool has_processingenabled() const;
-  inline void clear_processingenabled();
-  static const int kProcessingEnabledFieldNumber = 6;
-  inline bool processingenabled() const;
-  inline void set_processingenabled(bool value);
-
-  // optional int64 processedPacketCount = 7;
-  inline bool has_processedpacketcount() const;
-  inline void clear_processedpacketcount();
-  static const int kProcessedPacketCountFieldNumber = 7;
-  inline ::google::protobuf::int64 processedpacketcount() const;
-  inline void set_processedpacketcount(::google::protobuf::int64 value);
-
-  // optional int64 errorProtocolVersion = 8;
-  inline bool has_errorprotocolversion() const;
-  inline void clear_errorprotocolversion();
-  static const int kErrorProtocolVersionFieldNumber = 8;
-  inline ::google::protobuf::int64 errorprotocolversion() const;
-  inline void set_errorprotocolversion(::google::protobuf::int64 value);
-
-  // optional int64 errorFramesQuantity = 9;
-  inline bool has_errorframesquantity() const;
-  inline void clear_errorframesquantity();
-  static const int kErrorFramesQuantityFieldNumber = 9;
-  inline ::google::protobuf::int64 errorframesquantity() const;
-  inline void set_errorframesquantity(::google::protobuf::int64 value);
-
-  // optional int64 errorFrameNo = 10;
-  inline bool has_errorframeno() const;
-  inline void clear_errorframeno();
-  static const int kErrorFrameNoFieldNumber = 10;
-  inline ::google::protobuf::int64 errorframeno() const;
-  inline void set_errorframeno(::google::protobuf::int64 value);
-
-  // optional int64 lostedPackets = 11;
-  inline bool has_lostedpackets() const;
-  inline void clear_lostedpackets();
-  static const int kLostedPacketsFieldNumber = 11;
-  inline ::google::protobuf::int64 lostedpackets() const;
-  inline void set_lostedpackets(::google::protobuf::int64 value);
-
-  // optional int64 errorDataID = 12;
-  inline bool has_errordataid() const;
-  inline void clear_errordataid();
-  static const int kErrorDataIDFieldNumber = 12;
-  inline ::google::protobuf::int64 errordataid() const;
-  inline void set_errordataid(::google::protobuf::int64 value);
-
-  // optional uint64 receivedDataID = 13;
+  // optional uint64 receivedDataID = 4 [default = 0];
   inline bool has_receiveddataid() const;
   inline void clear_receiveddataid();
-  static const int kReceivedDataIDFieldNumber = 13;
+  static const int kReceivedDataIDFieldNumber = 4;
   inline ::google::protobuf::uint64 receiveddataid() const;
   inline void set_receiveddataid(::google::protobuf::uint64 value);
 
-  // optional bool processingSkiped = 14;
-  inline bool has_processingskiped() const;
-  inline void clear_processingskiped();
-  static const int kProcessingSkipedFieldNumber = 14;
-  inline bool processingskiped() const;
-  inline void set_processingskiped(bool value);
+  // optional int32 rupFramesQueueSize = 5 [default = 0];
+  inline bool has_rupframesqueuesize() const;
+  inline void clear_rupframesqueuesize();
+  static const int kRupFramesQueueSizeFieldNumber = 5;
+  inline ::google::protobuf::int32 rupframesqueuesize() const;
+  inline void set_rupframesqueuesize(::google::protobuf::int32 value);
 
-  // optional int32 state = 15;
-  inline bool has_state() const;
-  inline void clear_state();
-  static const int kStateFieldNumber = 15;
-  inline ::google::protobuf::int32 state() const;
-  inline void set_state(::google::protobuf::int32 value);
+  // optional int32 rupFramesQueueMaxSize = 6 [default = 0];
+  inline bool has_rupframesqueuemaxsize() const;
+  inline void clear_rupframesqueuemaxsize();
+  static const int kRupFramesQueueMaxSizeFieldNumber = 6;
+  inline ::google::protobuf::int32 rupframesqueuemaxsize() const;
+  inline void set_rupframesqueuemaxsize(::google::protobuf::int32 value);
 
-  // optional int64 errorBadFrameSize = 16;
-  inline bool has_errorbadframesize() const;
-  inline void clear_errorbadframesize();
-  static const int kErrorBadFrameSizeFieldNumber = 16;
-  inline ::google::protobuf::int64 errorbadframesize() const;
-  inline void set_errorbadframesize(::google::protobuf::int64 value);
+  // optional double dataReceivingRate = 7 [default = 0];
+  inline bool has_datareceivingrate() const;
+  inline void clear_datareceivingrate();
+  static const int kDataReceivingRateFieldNumber = 7;
+  inline double datareceivingrate() const;
+  inline void set_datareceivingrate(double value);
 
-  // optional bool hasErrors = 17;
-  inline bool has_haserrors() const;
-  inline void clear_haserrors();
-  static const int kHasErrorsFieldNumber = 17;
-  inline bool haserrors() const;
-  inline void set_haserrors(bool value);
+  // optional int64 receivedDataSize = 8 [default = 0];
+  inline bool has_receiveddatasize() const;
+  inline void clear_receiveddatasize();
+  static const int kReceivedDataSizeFieldNumber = 8;
+  inline ::google::protobuf::int64 receiveddatasize() const;
+  inline void set_receiveddatasize(::google::protobuf::int64 value);
+
+  // optional int64 receivedFramesCount = 9 [default = 0];
+  inline bool has_receivedframescount() const;
+  inline void clear_receivedframescount();
+  static const int kReceivedFramesCountFieldNumber = 9;
+  inline ::google::protobuf::int64 receivedframescount() const;
+  inline void set_receivedframescount(::google::protobuf::int64 value);
+
+  // optional int64 receivedPacketCount = 10 [default = 0];
+  inline bool has_receivedpacketcount() const;
+  inline void clear_receivedpacketcount();
+  static const int kReceivedPacketCountFieldNumber = 10;
+  inline ::google::protobuf::int64 receivedpacketcount() const;
+  inline void set_receivedpacketcount(::google::protobuf::int64 value);
+
+  // optional int64 lostedPacketCount = 11 [default = 0];
+  inline bool has_lostedpacketcount() const;
+  inline void clear_lostedpacketcount();
+  static const int kLostedPacketCountFieldNumber = 11;
+  inline ::google::protobuf::int64 lostedpacketcount() const;
+  inline void set_lostedpacketcount(::google::protobuf::int64 value);
+
+  // optional bool dataProcessingEnabled = 12 [default = false];
+  inline bool has_dataprocessingenabled() const;
+  inline void clear_dataprocessingenabled();
+  static const int kDataProcessingEnabledFieldNumber = 12;
+  inline bool dataprocessingenabled() const;
+  inline void set_dataprocessingenabled(bool value);
+
+  // optional int64 processedPacketCount = 13 [default = 0];
+  inline bool has_processedpacketcount() const;
+  inline void clear_processedpacketcount();
+  static const int kProcessedPacketCountFieldNumber = 13;
+  inline ::google::protobuf::int64 processedpacketcount() const;
+  inline void set_processedpacketcount(::google::protobuf::int64 value);
+
+  // optional int64 lastPacketSystemTime = 14 [default = 0];
+  inline bool has_lastpacketsystemtime() const;
+  inline void clear_lastpacketsystemtime();
+  static const int kLastPacketSystemTimeFieldNumber = 14;
+  inline ::google::protobuf::int64 lastpacketsystemtime() const;
+  inline void set_lastpacketsystemtime(::google::protobuf::int64 value);
+
+  // optional int64 rupFramePlantTime = 15 [default = 0];
+  inline bool has_rupframeplanttime() const;
+  inline void clear_rupframeplanttime();
+  static const int kRupFramePlantTimeFieldNumber = 15;
+  inline ::google::protobuf::int64 rupframeplanttime() const;
+  inline void set_rupframeplanttime(::google::protobuf::int64 value);
+
+  // optional int32 rupFrameNumerator = 16 [default = 0];
+  inline bool has_rupframenumerator() const;
+  inline void clear_rupframenumerator();
+  static const int kRupFrameNumeratorFieldNumber = 16;
+  inline ::google::protobuf::int32 rupframenumerator() const;
+  inline void set_rupframenumerator(::google::protobuf::int32 value);
+
+  // optional int32 signalStatesQueueSize = 17 [default = 0];
+  inline bool has_signalstatesqueuesize() const;
+  inline void clear_signalstatesqueuesize();
+  static const int kSignalStatesQueueSizeFieldNumber = 17;
+  inline ::google::protobuf::int32 signalstatesqueuesize() const;
+  inline void set_signalstatesqueuesize(::google::protobuf::int32 value);
+
+  // optional int32 signalStatesQueueMaxSize = 18 [default = 0];
+  inline bool has_signalstatesqueuemaxsize() const;
+  inline void clear_signalstatesqueuemaxsize();
+  static const int kSignalStatesQueueMaxSizeFieldNumber = 18;
+  inline ::google::protobuf::int32 signalstatesqueuemaxsize() const;
+  inline void set_signalstatesqueuemaxsize(::google::protobuf::int32 value);
+
+  // optional int32 acquiredSignalsCount = 19 [default = 0];
+  inline bool has_acquiredsignalscount() const;
+  inline void clear_acquiredsignalscount();
+  static const int kAcquiredSignalsCountFieldNumber = 19;
+  inline ::google::protobuf::int32 acquiredsignalscount() const;
+  inline void set_acquiredsignalscount(::google::protobuf::int32 value);
+
+  // optional int64 errorProtocolVersion = 20 [default = 0];
+  inline bool has_errorprotocolversion() const;
+  inline void clear_errorprotocolversion();
+  static const int kErrorProtocolVersionFieldNumber = 20;
+  inline ::google::protobuf::int64 errorprotocolversion() const;
+  inline void set_errorprotocolversion(::google::protobuf::int64 value);
+
+  // optional int64 errorFramesQuantity = 21 [default = 0];
+  inline bool has_errorframesquantity() const;
+  inline void clear_errorframesquantity();
+  static const int kErrorFramesQuantityFieldNumber = 21;
+  inline ::google::protobuf::int64 errorframesquantity() const;
+  inline void set_errorframesquantity(::google::protobuf::int64 value);
+
+  // optional int64 errorFrameNo = 22 [default = 0];
+  inline bool has_errorframeno() const;
+  inline void clear_errorframeno();
+  static const int kErrorFrameNoFieldNumber = 22;
+  inline ::google::protobuf::int64 errorframeno() const;
+  inline void set_errorframeno(::google::protobuf::int64 value);
+
+  // optional int64 errorDataID = 23 [default = 0];
+  inline bool has_errordataid() const;
+  inline void clear_errordataid();
+  static const int kErrorDataIDFieldNumber = 23;
+  inline ::google::protobuf::int64 errordataid() const;
+  inline void set_errordataid(::google::protobuf::int64 value);
+
+  // optional int64 errorFrameSize = 24 [default = 0];
+  inline bool has_errorframesize() const;
+  inline void clear_errorframesize();
+  static const int kErrorFrameSizeFieldNumber = 24;
+  inline ::google::protobuf::int64 errorframesize() const;
+  inline void set_errorframesize(::google::protobuf::int64 value);
+
+  // optional int64 errorDuplicatePlantTime = 25 [default = 0];
+  inline bool has_errorduplicateplanttime() const;
+  inline void clear_errorduplicateplanttime();
+  static const int kErrorDuplicatePlantTimeFieldNumber = 25;
+  inline ::google::protobuf::int64 errorduplicateplanttime() const;
+  inline void set_errorduplicateplanttime(::google::protobuf::int64 value);
+
+  // optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
+  inline bool has_errornonmonotonicplanttime() const;
+  inline void clear_errornonmonotonicplanttime();
+  static const int kErrorNonmonotonicPlantTimeFieldNumber = 26;
+  inline ::google::protobuf::int64 errornonmonotonicplanttime() const;
+  inline void set_errornonmonotonicplanttime(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
  private:
   inline void set_has_id();
   inline void clear_has_id();
+  inline void set_has_datareceives();
+  inline void clear_has_datareceives();
   inline void set_has_uptime();
   inline void clear_has_uptime();
-  inline void set_has_receiveddatasize();
-  inline void clear_has_receiveddatasize();
+  inline void set_has_receiveddataid();
+  inline void clear_has_receiveddataid();
+  inline void set_has_rupframesqueuesize();
+  inline void clear_has_rupframesqueuesize();
+  inline void set_has_rupframesqueuemaxsize();
+  inline void clear_has_rupframesqueuemaxsize();
   inline void set_has_datareceivingrate();
   inline void clear_has_datareceivingrate();
+  inline void set_has_receiveddatasize();
+  inline void clear_has_receiveddatasize();
   inline void set_has_receivedframescount();
   inline void clear_has_receivedframescount();
-  inline void set_has_processingenabled();
-  inline void clear_has_processingenabled();
+  inline void set_has_receivedpacketcount();
+  inline void clear_has_receivedpacketcount();
+  inline void set_has_lostedpacketcount();
+  inline void clear_has_lostedpacketcount();
+  inline void set_has_dataprocessingenabled();
+  inline void clear_has_dataprocessingenabled();
   inline void set_has_processedpacketcount();
   inline void clear_has_processedpacketcount();
+  inline void set_has_lastpacketsystemtime();
+  inline void clear_has_lastpacketsystemtime();
+  inline void set_has_rupframeplanttime();
+  inline void clear_has_rupframeplanttime();
+  inline void set_has_rupframenumerator();
+  inline void clear_has_rupframenumerator();
+  inline void set_has_signalstatesqueuesize();
+  inline void clear_has_signalstatesqueuesize();
+  inline void set_has_signalstatesqueuemaxsize();
+  inline void clear_has_signalstatesqueuemaxsize();
+  inline void set_has_acquiredsignalscount();
+  inline void clear_has_acquiredsignalscount();
   inline void set_has_errorprotocolversion();
   inline void clear_has_errorprotocolversion();
   inline void set_has_errorframesquantity();
   inline void clear_has_errorframesquantity();
   inline void set_has_errorframeno();
   inline void clear_has_errorframeno();
-  inline void set_has_lostedpackets();
-  inline void clear_has_lostedpackets();
   inline void set_has_errordataid();
   inline void clear_has_errordataid();
-  inline void set_has_receiveddataid();
-  inline void clear_has_receiveddataid();
-  inline void set_has_processingskiped();
-  inline void clear_has_processingskiped();
-  inline void set_has_state();
-  inline void clear_has_state();
-  inline void set_has_errorbadframesize();
-  inline void clear_has_errorbadframesize();
-  inline void set_has_haserrors();
-  inline void clear_has_haserrors();
+  inline void set_has_errorframesize();
+  inline void clear_has_errorframesize();
+  inline void set_has_errorduplicateplanttime();
+  inline void clear_has_errorduplicateplanttime();
+  inline void set_has_errornonmonotonicplanttime();
+  inline void clear_has_errornonmonotonicplanttime();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 id_;
   ::google::protobuf::int64 uptime_;
-  ::google::protobuf::int64 receiveddatasize_;
+  ::google::protobuf::uint64 receiveddataid_;
+  ::google::protobuf::int32 rupframesqueuesize_;
+  ::google::protobuf::int32 rupframesqueuemaxsize_;
   double datareceivingrate_;
+  ::google::protobuf::int64 receiveddatasize_;
   ::google::protobuf::int64 receivedframescount_;
+  ::google::protobuf::int64 receivedpacketcount_;
+  bool datareceives_;
+  bool dataprocessingenabled_;
+  ::google::protobuf::int32 rupframenumerator_;
+  ::google::protobuf::int64 lostedpacketcount_;
   ::google::protobuf::int64 processedpacketcount_;
+  ::google::protobuf::int64 lastpacketsystemtime_;
+  ::google::protobuf::int64 rupframeplanttime_;
+  ::google::protobuf::int32 signalstatesqueuesize_;
+  ::google::protobuf::int32 signalstatesqueuemaxsize_;
   ::google::protobuf::int64 errorprotocolversion_;
   ::google::protobuf::int64 errorframesquantity_;
   ::google::protobuf::int64 errorframeno_;
-  ::google::protobuf::int64 lostedpackets_;
   ::google::protobuf::int64 errordataid_;
-  ::google::protobuf::uint64 receiveddataid_;
-  bool processingenabled_;
-  bool processingskiped_;
-  bool haserrors_;
-  ::google::protobuf::int32 state_;
-  ::google::protobuf::int64 errorbadframesize_;
+  ::google::protobuf::int64 errorframesize_;
+  ::google::protobuf::int64 errorduplicateplanttime_;
+  ::google::protobuf::int64 errornonmonotonicplanttime_;
+  ::google::protobuf::int32 acquiredsignalscount_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(26 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -6758,7 +6873,7 @@ GetAppSignalStateReply::mutable_appsignalstates() {
 
 // DataSourceInfo
 
-// optional uint64 id = 1;
+// optional uint64 id = 1 [default = 0];
 inline bool DataSourceInfo::has_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -6780,375 +6895,423 @@ inline void DataSourceInfo::set_id(::google::protobuf::uint64 value) {
   id_ = value;
 }
 
-// optional string equipmentID = 2;
-inline bool DataSourceInfo::has_equipmentid() const {
+// optional string lmEquipmentID = 2;
+inline bool DataSourceInfo::has_lmequipmentid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void DataSourceInfo::set_has_equipmentid() {
+inline void DataSourceInfo::set_has_lmequipmentid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void DataSourceInfo::clear_has_equipmentid() {
+inline void DataSourceInfo::clear_has_lmequipmentid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void DataSourceInfo::clear_equipmentid() {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    equipmentid_->clear();
+inline void DataSourceInfo::clear_lmequipmentid() {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_->clear();
   }
-  clear_has_equipmentid();
+  clear_has_lmequipmentid();
 }
-inline const ::std::string& DataSourceInfo::equipmentid() const {
-  return *equipmentid_;
+inline const ::std::string& DataSourceInfo::lmequipmentid() const {
+  return *lmequipmentid_;
 }
-inline void DataSourceInfo::set_equipmentid(const ::std::string& value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
+inline void DataSourceInfo::set_lmequipmentid(const ::std::string& value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
   }
-  equipmentid_->assign(value);
+  lmequipmentid_->assign(value);
 }
-inline void DataSourceInfo::set_equipmentid(const char* value) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
+inline void DataSourceInfo::set_lmequipmentid(const char* value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
   }
-  equipmentid_->assign(value);
+  lmequipmentid_->assign(value);
 }
-inline void DataSourceInfo::set_equipmentid(const char* value, size_t size) {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
+inline void DataSourceInfo::set_lmequipmentid(const char* value, size_t size) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
   }
-  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+  lmequipmentid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DataSourceInfo::mutable_equipmentid() {
-  set_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
-    equipmentid_ = new ::std::string;
+inline ::std::string* DataSourceInfo::mutable_lmequipmentid() {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
   }
-  return equipmentid_;
+  return lmequipmentid_;
 }
-inline ::std::string* DataSourceInfo::release_equipmentid() {
-  clear_has_equipmentid();
-  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DataSourceInfo::release_lmequipmentid() {
+  clear_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = equipmentid_;
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = lmequipmentid_;
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DataSourceInfo::set_allocated_equipmentid(::std::string* equipmentid) {
-  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
-    delete equipmentid_;
+inline void DataSourceInfo::set_allocated_lmequipmentid(::std::string* lmequipmentid) {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmequipmentid_;
   }
-  if (equipmentid) {
-    set_has_equipmentid();
-    equipmentid_ = equipmentid;
+  if (lmequipmentid) {
+    set_has_lmequipmentid();
+    lmequipmentid_ = lmequipmentid;
   } else {
-    clear_has_equipmentid();
-    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_lmequipmentid();
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
-// optional string caption = 3;
-inline bool DataSourceInfo::has_caption() const {
+// optional string lmCaption = 3;
+inline bool DataSourceInfo::has_lmcaption() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void DataSourceInfo::set_has_caption() {
+inline void DataSourceInfo::set_has_lmcaption() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void DataSourceInfo::clear_has_caption() {
+inline void DataSourceInfo::clear_has_lmcaption() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void DataSourceInfo::clear_caption() {
-  if (caption_ != &::google::protobuf::internal::kEmptyString) {
-    caption_->clear();
+inline void DataSourceInfo::clear_lmcaption() {
+  if (lmcaption_ != &::google::protobuf::internal::kEmptyString) {
+    lmcaption_->clear();
   }
-  clear_has_caption();
+  clear_has_lmcaption();
 }
-inline const ::std::string& DataSourceInfo::caption() const {
-  return *caption_;
+inline const ::std::string& DataSourceInfo::lmcaption() const {
+  return *lmcaption_;
 }
-inline void DataSourceInfo::set_caption(const ::std::string& value) {
-  set_has_caption();
-  if (caption_ == &::google::protobuf::internal::kEmptyString) {
-    caption_ = new ::std::string;
+inline void DataSourceInfo::set_lmcaption(const ::std::string& value) {
+  set_has_lmcaption();
+  if (lmcaption_ == &::google::protobuf::internal::kEmptyString) {
+    lmcaption_ = new ::std::string;
   }
-  caption_->assign(value);
+  lmcaption_->assign(value);
 }
-inline void DataSourceInfo::set_caption(const char* value) {
-  set_has_caption();
-  if (caption_ == &::google::protobuf::internal::kEmptyString) {
-    caption_ = new ::std::string;
+inline void DataSourceInfo::set_lmcaption(const char* value) {
+  set_has_lmcaption();
+  if (lmcaption_ == &::google::protobuf::internal::kEmptyString) {
+    lmcaption_ = new ::std::string;
   }
-  caption_->assign(value);
+  lmcaption_->assign(value);
 }
-inline void DataSourceInfo::set_caption(const char* value, size_t size) {
-  set_has_caption();
-  if (caption_ == &::google::protobuf::internal::kEmptyString) {
-    caption_ = new ::std::string;
+inline void DataSourceInfo::set_lmcaption(const char* value, size_t size) {
+  set_has_lmcaption();
+  if (lmcaption_ == &::google::protobuf::internal::kEmptyString) {
+    lmcaption_ = new ::std::string;
   }
-  caption_->assign(reinterpret_cast<const char*>(value), size);
+  lmcaption_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DataSourceInfo::mutable_caption() {
-  set_has_caption();
-  if (caption_ == &::google::protobuf::internal::kEmptyString) {
-    caption_ = new ::std::string;
+inline ::std::string* DataSourceInfo::mutable_lmcaption() {
+  set_has_lmcaption();
+  if (lmcaption_ == &::google::protobuf::internal::kEmptyString) {
+    lmcaption_ = new ::std::string;
   }
-  return caption_;
+  return lmcaption_;
 }
-inline ::std::string* DataSourceInfo::release_caption() {
-  clear_has_caption();
-  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DataSourceInfo::release_lmcaption() {
+  clear_has_lmcaption();
+  if (lmcaption_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = caption_;
-    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = lmcaption_;
+    lmcaption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DataSourceInfo::set_allocated_caption(::std::string* caption) {
-  if (caption_ != &::google::protobuf::internal::kEmptyString) {
-    delete caption_;
+inline void DataSourceInfo::set_allocated_lmcaption(::std::string* lmcaption) {
+  if (lmcaption_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmcaption_;
   }
-  if (caption) {
-    set_has_caption();
-    caption_ = caption;
+  if (lmcaption) {
+    set_has_lmcaption();
+    lmcaption_ = lmcaption;
   } else {
-    clear_has_caption();
-    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_lmcaption();
+    lmcaption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
-// optional int32 dataType = 4;
-inline bool DataSourceInfo::has_datatype() const {
+// optional int32 lmDataType = 4 [default = 0];
+inline bool DataSourceInfo::has_lmdatatype() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void DataSourceInfo::set_has_datatype() {
+inline void DataSourceInfo::set_has_lmdatatype() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void DataSourceInfo::clear_has_datatype() {
+inline void DataSourceInfo::clear_has_lmdatatype() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void DataSourceInfo::clear_datatype() {
-  datatype_ = 0;
-  clear_has_datatype();
+inline void DataSourceInfo::clear_lmdatatype() {
+  lmdatatype_ = 0;
+  clear_has_lmdatatype();
 }
-inline ::google::protobuf::int32 DataSourceInfo::datatype() const {
-  return datatype_;
+inline ::google::protobuf::int32 DataSourceInfo::lmdatatype() const {
+  return lmdatatype_;
 }
-inline void DataSourceInfo::set_datatype(::google::protobuf::int32 value) {
-  set_has_datatype();
-  datatype_ = value;
+inline void DataSourceInfo::set_lmdatatype(::google::protobuf::int32 value) {
+  set_has_lmdatatype();
+  lmdatatype_ = value;
 }
 
-// optional string ip = 5;
-inline bool DataSourceInfo::has_ip() const {
+// optional string lmIP = 5;
+inline bool DataSourceInfo::has_lmip() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void DataSourceInfo::set_has_ip() {
+inline void DataSourceInfo::set_has_lmip() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void DataSourceInfo::clear_has_ip() {
+inline void DataSourceInfo::clear_has_lmip() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void DataSourceInfo::clear_ip() {
-  if (ip_ != &::google::protobuf::internal::kEmptyString) {
-    ip_->clear();
+inline void DataSourceInfo::clear_lmip() {
+  if (lmip_ != &::google::protobuf::internal::kEmptyString) {
+    lmip_->clear();
   }
-  clear_has_ip();
+  clear_has_lmip();
 }
-inline const ::std::string& DataSourceInfo::ip() const {
-  return *ip_;
+inline const ::std::string& DataSourceInfo::lmip() const {
+  return *lmip_;
 }
-inline void DataSourceInfo::set_ip(const ::std::string& value) {
-  set_has_ip();
-  if (ip_ == &::google::protobuf::internal::kEmptyString) {
-    ip_ = new ::std::string;
+inline void DataSourceInfo::set_lmip(const ::std::string& value) {
+  set_has_lmip();
+  if (lmip_ == &::google::protobuf::internal::kEmptyString) {
+    lmip_ = new ::std::string;
   }
-  ip_->assign(value);
+  lmip_->assign(value);
 }
-inline void DataSourceInfo::set_ip(const char* value) {
-  set_has_ip();
-  if (ip_ == &::google::protobuf::internal::kEmptyString) {
-    ip_ = new ::std::string;
+inline void DataSourceInfo::set_lmip(const char* value) {
+  set_has_lmip();
+  if (lmip_ == &::google::protobuf::internal::kEmptyString) {
+    lmip_ = new ::std::string;
   }
-  ip_->assign(value);
+  lmip_->assign(value);
 }
-inline void DataSourceInfo::set_ip(const char* value, size_t size) {
-  set_has_ip();
-  if (ip_ == &::google::protobuf::internal::kEmptyString) {
-    ip_ = new ::std::string;
+inline void DataSourceInfo::set_lmip(const char* value, size_t size) {
+  set_has_lmip();
+  if (lmip_ == &::google::protobuf::internal::kEmptyString) {
+    lmip_ = new ::std::string;
   }
-  ip_->assign(reinterpret_cast<const char*>(value), size);
+  lmip_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DataSourceInfo::mutable_ip() {
-  set_has_ip();
-  if (ip_ == &::google::protobuf::internal::kEmptyString) {
-    ip_ = new ::std::string;
+inline ::std::string* DataSourceInfo::mutable_lmip() {
+  set_has_lmip();
+  if (lmip_ == &::google::protobuf::internal::kEmptyString) {
+    lmip_ = new ::std::string;
   }
-  return ip_;
+  return lmip_;
 }
-inline ::std::string* DataSourceInfo::release_ip() {
-  clear_has_ip();
-  if (ip_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DataSourceInfo::release_lmip() {
+  clear_has_lmip();
+  if (lmip_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = ip_;
-    ip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = lmip_;
+    lmip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DataSourceInfo::set_allocated_ip(::std::string* ip) {
-  if (ip_ != &::google::protobuf::internal::kEmptyString) {
-    delete ip_;
+inline void DataSourceInfo::set_allocated_lmip(::std::string* lmip) {
+  if (lmip_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmip_;
   }
-  if (ip) {
-    set_has_ip();
-    ip_ = ip;
+  if (lmip) {
+    set_has_lmip();
+    lmip_ = lmip;
   } else {
-    clear_has_ip();
-    ip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_lmip();
+    lmip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
-// optional int32 port = 6;
-inline bool DataSourceInfo::has_port() const {
+// optional int32 lmPort = 6 [default = 0];
+inline bool DataSourceInfo::has_lmport() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void DataSourceInfo::set_has_port() {
+inline void DataSourceInfo::set_has_lmport() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void DataSourceInfo::clear_has_port() {
+inline void DataSourceInfo::clear_has_lmport() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void DataSourceInfo::clear_port() {
-  port_ = 0;
-  clear_has_port();
+inline void DataSourceInfo::clear_lmport() {
+  lmport_ = 0;
+  clear_has_lmport();
 }
-inline ::google::protobuf::int32 DataSourceInfo::port() const {
-  return port_;
+inline ::google::protobuf::int32 DataSourceInfo::lmport() const {
+  return lmport_;
 }
-inline void DataSourceInfo::set_port(::google::protobuf::int32 value) {
-  set_has_port();
-  port_ = value;
+inline void DataSourceInfo::set_lmport(::google::protobuf::int32 value) {
+  set_has_lmport();
+  lmport_ = value;
 }
 
-// optional int32 channel = 7;
-inline bool DataSourceInfo::has_channel() const {
+// optional int32 lmSubsystemID = 7 [default = 0];
+inline bool DataSourceInfo::has_lmsubsystemid() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void DataSourceInfo::set_has_channel() {
+inline void DataSourceInfo::set_has_lmsubsystemid() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void DataSourceInfo::clear_has_channel() {
+inline void DataSourceInfo::clear_has_lmsubsystemid() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void DataSourceInfo::clear_channel() {
-  channel_ = 0;
-  clear_has_channel();
+inline void DataSourceInfo::clear_lmsubsystemid() {
+  lmsubsystemid_ = 0;
+  clear_has_lmsubsystemid();
 }
-inline ::google::protobuf::int32 DataSourceInfo::channel() const {
-  return channel_;
+inline ::google::protobuf::int32 DataSourceInfo::lmsubsystemid() const {
+  return lmsubsystemid_;
 }
-inline void DataSourceInfo::set_channel(::google::protobuf::int32 value) {
-  set_has_channel();
-  channel_ = value;
+inline void DataSourceInfo::set_lmsubsystemid(::google::protobuf::int32 value) {
+  set_has_lmsubsystemid();
+  lmsubsystemid_ = value;
 }
 
-// optional int32 subsystemID = 8;
-inline bool DataSourceInfo::has_subsystemid() const {
+// optional string lmSubsystem = 8;
+inline bool DataSourceInfo::has_lmsubsystem() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void DataSourceInfo::set_has_subsystemid() {
+inline void DataSourceInfo::set_has_lmsubsystem() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void DataSourceInfo::clear_has_subsystemid() {
+inline void DataSourceInfo::clear_has_lmsubsystem() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void DataSourceInfo::clear_subsystemid() {
-  subsystemid_ = 0;
-  clear_has_subsystemid();
-}
-inline ::google::protobuf::int32 DataSourceInfo::subsystemid() const {
-  return subsystemid_;
-}
-inline void DataSourceInfo::set_subsystemid(::google::protobuf::int32 value) {
-  set_has_subsystemid();
-  subsystemid_ = value;
-}
-
-// optional string subsystem = 9;
-inline bool DataSourceInfo::has_subsystem() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
-}
-inline void DataSourceInfo::set_has_subsystem() {
-  _has_bits_[0] |= 0x00000100u;
-}
-inline void DataSourceInfo::clear_has_subsystem() {
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline void DataSourceInfo::clear_subsystem() {
-  if (subsystem_ != &::google::protobuf::internal::kEmptyString) {
-    subsystem_->clear();
+inline void DataSourceInfo::clear_lmsubsystem() {
+  if (lmsubsystem_ != &::google::protobuf::internal::kEmptyString) {
+    lmsubsystem_->clear();
   }
-  clear_has_subsystem();
+  clear_has_lmsubsystem();
 }
-inline const ::std::string& DataSourceInfo::subsystem() const {
-  return *subsystem_;
+inline const ::std::string& DataSourceInfo::lmsubsystem() const {
+  return *lmsubsystem_;
 }
-inline void DataSourceInfo::set_subsystem(const ::std::string& value) {
-  set_has_subsystem();
-  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
-    subsystem_ = new ::std::string;
+inline void DataSourceInfo::set_lmsubsystem(const ::std::string& value) {
+  set_has_lmsubsystem();
+  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystem_ = new ::std::string;
   }
-  subsystem_->assign(value);
+  lmsubsystem_->assign(value);
 }
-inline void DataSourceInfo::set_subsystem(const char* value) {
-  set_has_subsystem();
-  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
-    subsystem_ = new ::std::string;
+inline void DataSourceInfo::set_lmsubsystem(const char* value) {
+  set_has_lmsubsystem();
+  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystem_ = new ::std::string;
   }
-  subsystem_->assign(value);
+  lmsubsystem_->assign(value);
 }
-inline void DataSourceInfo::set_subsystem(const char* value, size_t size) {
-  set_has_subsystem();
-  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
-    subsystem_ = new ::std::string;
+inline void DataSourceInfo::set_lmsubsystem(const char* value, size_t size) {
+  set_has_lmsubsystem();
+  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystem_ = new ::std::string;
   }
-  subsystem_->assign(reinterpret_cast<const char*>(value), size);
+  lmsubsystem_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DataSourceInfo::mutable_subsystem() {
-  set_has_subsystem();
-  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
-    subsystem_ = new ::std::string;
+inline ::std::string* DataSourceInfo::mutable_lmsubsystem() {
+  set_has_lmsubsystem();
+  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystem_ = new ::std::string;
   }
-  return subsystem_;
+  return lmsubsystem_;
 }
-inline ::std::string* DataSourceInfo::release_subsystem() {
-  clear_has_subsystem();
-  if (subsystem_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DataSourceInfo::release_lmsubsystem() {
+  clear_has_lmsubsystem();
+  if (lmsubsystem_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = subsystem_;
-    subsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = lmsubsystem_;
+    lmsubsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DataSourceInfo::set_allocated_subsystem(::std::string* subsystem) {
-  if (subsystem_ != &::google::protobuf::internal::kEmptyString) {
-    delete subsystem_;
+inline void DataSourceInfo::set_allocated_lmsubsystem(::std::string* lmsubsystem) {
+  if (lmsubsystem_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmsubsystem_;
   }
-  if (subsystem) {
-    set_has_subsystem();
-    subsystem_ = subsystem;
+  if (lmsubsystem) {
+    set_has_lmsubsystem();
+    lmsubsystem_ = lmsubsystem;
   } else {
-    clear_has_subsystem();
-    subsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_lmsubsystem();
+    lmsubsystem_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
-// optional int32 lmNumber = 10;
+// optional string lmSubsystemChannel = 9;
+inline bool DataSourceInfo::has_lmsubsystemchannel() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void DataSourceInfo::set_has_lmsubsystemchannel() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void DataSourceInfo::clear_has_lmsubsystemchannel() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void DataSourceInfo::clear_lmsubsystemchannel() {
+  if (lmsubsystemchannel_ != &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemchannel_->clear();
+  }
+  clear_has_lmsubsystemchannel();
+}
+inline const ::std::string& DataSourceInfo::lmsubsystemchannel() const {
+  return *lmsubsystemchannel_;
+}
+inline void DataSourceInfo::set_lmsubsystemchannel(const ::std::string& value) {
+  set_has_lmsubsystemchannel();
+  if (lmsubsystemchannel_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemchannel_ = new ::std::string;
+  }
+  lmsubsystemchannel_->assign(value);
+}
+inline void DataSourceInfo::set_lmsubsystemchannel(const char* value) {
+  set_has_lmsubsystemchannel();
+  if (lmsubsystemchannel_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemchannel_ = new ::std::string;
+  }
+  lmsubsystemchannel_->assign(value);
+}
+inline void DataSourceInfo::set_lmsubsystemchannel(const char* value, size_t size) {
+  set_has_lmsubsystemchannel();
+  if (lmsubsystemchannel_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemchannel_ = new ::std::string;
+  }
+  lmsubsystemchannel_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceInfo::mutable_lmsubsystemchannel() {
+  set_has_lmsubsystemchannel();
+  if (lmsubsystemchannel_ == &::google::protobuf::internal::kEmptyString) {
+    lmsubsystemchannel_ = new ::std::string;
+  }
+  return lmsubsystemchannel_;
+}
+inline ::std::string* DataSourceInfo::release_lmsubsystemchannel() {
+  clear_has_lmsubsystemchannel();
+  if (lmsubsystemchannel_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmsubsystemchannel_;
+    lmsubsystemchannel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceInfo::set_allocated_lmsubsystemchannel(::std::string* lmsubsystemchannel) {
+  if (lmsubsystemchannel_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmsubsystemchannel_;
+  }
+  if (lmsubsystemchannel) {
+    set_has_lmsubsystemchannel();
+    lmsubsystemchannel_ = lmsubsystemchannel;
+  } else {
+    clear_has_lmsubsystemchannel();
+    lmsubsystemchannel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 lmNumber = 10 [default = 0];
 inline bool DataSourceInfo::has_lmnumber() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
@@ -7170,7 +7333,7 @@ inline void DataSourceInfo::set_lmnumber(::google::protobuf::int32 value) {
   lmnumber_ = value;
 }
 
-// optional int32 lmModuleType = 11;
+// optional int32 lmModuleType = 11 [default = 0];
 inline bool DataSourceInfo::has_lmmoduletype() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
@@ -7262,7 +7425,7 @@ inline void DataSourceInfo::set_allocated_lmadapterid(::std::string* lmadapterid
   }
 }
 
-// optional bool lmDataEnable = 13;
+// optional bool lmDataEnable = 13 [default = false];
 inline bool DataSourceInfo::has_lmdataenable() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
@@ -7284,7 +7447,7 @@ inline void DataSourceInfo::set_lmdataenable(bool value) {
   lmdataenable_ = value;
 }
 
-// optional uint64 lmDataID = 14;
+// optional uint64 lmDataID = 14 [default = 0];
 inline bool DataSourceInfo::has_lmdataid() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
@@ -7304,6 +7467,50 @@ inline ::google::protobuf::uint64 DataSourceInfo::lmdataid() const {
 inline void DataSourceInfo::set_lmdataid(::google::protobuf::uint64 value) {
   set_has_lmdataid();
   lmdataid_ = value;
+}
+
+// optional uint64 lmUniqueID = 15 [default = 0];
+inline bool DataSourceInfo::has_lmuniqueid() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void DataSourceInfo::set_has_lmuniqueid() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void DataSourceInfo::clear_has_lmuniqueid() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void DataSourceInfo::clear_lmuniqueid() {
+  lmuniqueid_ = GOOGLE_ULONGLONG(0);
+  clear_has_lmuniqueid();
+}
+inline ::google::protobuf::uint64 DataSourceInfo::lmuniqueid() const {
+  return lmuniqueid_;
+}
+inline void DataSourceInfo::set_lmuniqueid(::google::protobuf::uint64 value) {
+  set_has_lmuniqueid();
+  lmuniqueid_ = value;
+}
+
+// optional int32 lmRupFramesQuantity = 16 [default = 0];
+inline bool DataSourceInfo::has_lmrupframesquantity() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void DataSourceInfo::set_has_lmrupframesquantity() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void DataSourceInfo::clear_has_lmrupframesquantity() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void DataSourceInfo::clear_lmrupframesquantity() {
+  lmrupframesquantity_ = 0;
+  clear_has_lmrupframesquantity();
+}
+inline ::google::protobuf::int32 DataSourceInfo::lmrupframesquantity() const {
+  return lmrupframesquantity_;
+}
+inline void DataSourceInfo::set_lmrupframesquantity(::google::protobuf::int32 value) {
+  set_has_lmrupframesquantity();
+  lmrupframesquantity_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -7365,7 +7572,7 @@ GetDataSourcesInfoReply::mutable_datasourceinfo() {
 
 // AppDataSourceState
 
-// optional uint64 id = 1;
+// optional uint64 id = 1 [default = 0];
 inline bool AppDataSourceState::has_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -7387,15 +7594,37 @@ inline void AppDataSourceState::set_id(::google::protobuf::uint64 value) {
   id_ = value;
 }
 
-// optional int64 uptime = 2;
-inline bool AppDataSourceState::has_uptime() const {
+// optional bool dataReceives = 2 [default = false];
+inline bool AppDataSourceState::has_datareceives() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void AppDataSourceState::set_has_uptime() {
+inline void AppDataSourceState::set_has_datareceives() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void AppDataSourceState::clear_has_uptime() {
+inline void AppDataSourceState::clear_has_datareceives() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void AppDataSourceState::clear_datareceives() {
+  datareceives_ = false;
+  clear_has_datareceives();
+}
+inline bool AppDataSourceState::datareceives() const {
+  return datareceives_;
+}
+inline void AppDataSourceState::set_datareceives(bool value) {
+  set_has_datareceives();
+  datareceives_ = value;
+}
+
+// optional int64 uptime = 3 [default = 0];
+inline bool AppDataSourceState::has_uptime() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void AppDataSourceState::set_has_uptime() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void AppDataSourceState::clear_has_uptime() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void AppDataSourceState::clear_uptime() {
   uptime_ = GOOGLE_LONGLONG(0);
@@ -7409,235 +7638,15 @@ inline void AppDataSourceState::set_uptime(::google::protobuf::int64 value) {
   uptime_ = value;
 }
 
-// optional int64 receivedDataSize = 3;
-inline bool AppDataSourceState::has_receiveddatasize() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void AppDataSourceState::set_has_receiveddatasize() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void AppDataSourceState::clear_has_receiveddatasize() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void AppDataSourceState::clear_receiveddatasize() {
-  receiveddatasize_ = GOOGLE_LONGLONG(0);
-  clear_has_receiveddatasize();
-}
-inline ::google::protobuf::int64 AppDataSourceState::receiveddatasize() const {
-  return receiveddatasize_;
-}
-inline void AppDataSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
-  set_has_receiveddatasize();
-  receiveddatasize_ = value;
-}
-
-// optional double dataReceivingRate = 4;
-inline bool AppDataSourceState::has_datareceivingrate() const {
+// optional uint64 receivedDataID = 4 [default = 0];
+inline bool AppDataSourceState::has_receiveddataid() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void AppDataSourceState::set_has_datareceivingrate() {
+inline void AppDataSourceState::set_has_receiveddataid() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void AppDataSourceState::clear_has_datareceivingrate() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void AppDataSourceState::clear_datareceivingrate() {
-  datareceivingrate_ = 0;
-  clear_has_datareceivingrate();
-}
-inline double AppDataSourceState::datareceivingrate() const {
-  return datareceivingrate_;
-}
-inline void AppDataSourceState::set_datareceivingrate(double value) {
-  set_has_datareceivingrate();
-  datareceivingrate_ = value;
-}
-
-// optional int64 receivedFramesCount = 5;
-inline bool AppDataSourceState::has_receivedframescount() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void AppDataSourceState::set_has_receivedframescount() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void AppDataSourceState::clear_has_receivedframescount() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void AppDataSourceState::clear_receivedframescount() {
-  receivedframescount_ = GOOGLE_LONGLONG(0);
-  clear_has_receivedframescount();
-}
-inline ::google::protobuf::int64 AppDataSourceState::receivedframescount() const {
-  return receivedframescount_;
-}
-inline void AppDataSourceState::set_receivedframescount(::google::protobuf::int64 value) {
-  set_has_receivedframescount();
-  receivedframescount_ = value;
-}
-
-// optional bool processingEnabled = 6;
-inline bool AppDataSourceState::has_processingenabled() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void AppDataSourceState::set_has_processingenabled() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void AppDataSourceState::clear_has_processingenabled() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void AppDataSourceState::clear_processingenabled() {
-  processingenabled_ = false;
-  clear_has_processingenabled();
-}
-inline bool AppDataSourceState::processingenabled() const {
-  return processingenabled_;
-}
-inline void AppDataSourceState::set_processingenabled(bool value) {
-  set_has_processingenabled();
-  processingenabled_ = value;
-}
-
-// optional int64 processedPacketCount = 7;
-inline bool AppDataSourceState::has_processedpacketcount() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
-}
-inline void AppDataSourceState::set_has_processedpacketcount() {
-  _has_bits_[0] |= 0x00000040u;
-}
-inline void AppDataSourceState::clear_has_processedpacketcount() {
-  _has_bits_[0] &= ~0x00000040u;
-}
-inline void AppDataSourceState::clear_processedpacketcount() {
-  processedpacketcount_ = GOOGLE_LONGLONG(0);
-  clear_has_processedpacketcount();
-}
-inline ::google::protobuf::int64 AppDataSourceState::processedpacketcount() const {
-  return processedpacketcount_;
-}
-inline void AppDataSourceState::set_processedpacketcount(::google::protobuf::int64 value) {
-  set_has_processedpacketcount();
-  processedpacketcount_ = value;
-}
-
-// optional int64 errorProtocolVersion = 8;
-inline bool AppDataSourceState::has_errorprotocolversion() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
-}
-inline void AppDataSourceState::set_has_errorprotocolversion() {
-  _has_bits_[0] |= 0x00000080u;
-}
-inline void AppDataSourceState::clear_has_errorprotocolversion() {
-  _has_bits_[0] &= ~0x00000080u;
-}
-inline void AppDataSourceState::clear_errorprotocolversion() {
-  errorprotocolversion_ = GOOGLE_LONGLONG(0);
-  clear_has_errorprotocolversion();
-}
-inline ::google::protobuf::int64 AppDataSourceState::errorprotocolversion() const {
-  return errorprotocolversion_;
-}
-inline void AppDataSourceState::set_errorprotocolversion(::google::protobuf::int64 value) {
-  set_has_errorprotocolversion();
-  errorprotocolversion_ = value;
-}
-
-// optional int64 errorFramesQuantity = 9;
-inline bool AppDataSourceState::has_errorframesquantity() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
-}
-inline void AppDataSourceState::set_has_errorframesquantity() {
-  _has_bits_[0] |= 0x00000100u;
-}
-inline void AppDataSourceState::clear_has_errorframesquantity() {
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline void AppDataSourceState::clear_errorframesquantity() {
-  errorframesquantity_ = GOOGLE_LONGLONG(0);
-  clear_has_errorframesquantity();
-}
-inline ::google::protobuf::int64 AppDataSourceState::errorframesquantity() const {
-  return errorframesquantity_;
-}
-inline void AppDataSourceState::set_errorframesquantity(::google::protobuf::int64 value) {
-  set_has_errorframesquantity();
-  errorframesquantity_ = value;
-}
-
-// optional int64 errorFrameNo = 10;
-inline bool AppDataSourceState::has_errorframeno() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
-}
-inline void AppDataSourceState::set_has_errorframeno() {
-  _has_bits_[0] |= 0x00000200u;
-}
-inline void AppDataSourceState::clear_has_errorframeno() {
-  _has_bits_[0] &= ~0x00000200u;
-}
-inline void AppDataSourceState::clear_errorframeno() {
-  errorframeno_ = GOOGLE_LONGLONG(0);
-  clear_has_errorframeno();
-}
-inline ::google::protobuf::int64 AppDataSourceState::errorframeno() const {
-  return errorframeno_;
-}
-inline void AppDataSourceState::set_errorframeno(::google::protobuf::int64 value) {
-  set_has_errorframeno();
-  errorframeno_ = value;
-}
-
-// optional int64 lostedPackets = 11;
-inline bool AppDataSourceState::has_lostedpackets() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
-}
-inline void AppDataSourceState::set_has_lostedpackets() {
-  _has_bits_[0] |= 0x00000400u;
-}
-inline void AppDataSourceState::clear_has_lostedpackets() {
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline void AppDataSourceState::clear_lostedpackets() {
-  lostedpackets_ = GOOGLE_LONGLONG(0);
-  clear_has_lostedpackets();
-}
-inline ::google::protobuf::int64 AppDataSourceState::lostedpackets() const {
-  return lostedpackets_;
-}
-inline void AppDataSourceState::set_lostedpackets(::google::protobuf::int64 value) {
-  set_has_lostedpackets();
-  lostedpackets_ = value;
-}
-
-// optional int64 errorDataID = 12;
-inline bool AppDataSourceState::has_errordataid() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
-}
-inline void AppDataSourceState::set_has_errordataid() {
-  _has_bits_[0] |= 0x00000800u;
-}
-inline void AppDataSourceState::clear_has_errordataid() {
-  _has_bits_[0] &= ~0x00000800u;
-}
-inline void AppDataSourceState::clear_errordataid() {
-  errordataid_ = GOOGLE_LONGLONG(0);
-  clear_has_errordataid();
-}
-inline ::google::protobuf::int64 AppDataSourceState::errordataid() const {
-  return errordataid_;
-}
-inline void AppDataSourceState::set_errordataid(::google::protobuf::int64 value) {
-  set_has_errordataid();
-  errordataid_ = value;
-}
-
-// optional uint64 receivedDataID = 13;
-inline bool AppDataSourceState::has_receiveddataid() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
-}
-inline void AppDataSourceState::set_has_receiveddataid() {
-  _has_bits_[0] |= 0x00001000u;
-}
 inline void AppDataSourceState::clear_has_receiveddataid() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void AppDataSourceState::clear_receiveddataid() {
   receiveddataid_ = GOOGLE_ULONGLONG(0);
@@ -7651,92 +7660,488 @@ inline void AppDataSourceState::set_receiveddataid(::google::protobuf::uint64 va
   receiveddataid_ = value;
 }
 
-// optional bool processingSkiped = 14;
-inline bool AppDataSourceState::has_processingskiped() const {
+// optional int32 rupFramesQueueSize = 5 [default = 0];
+inline bool AppDataSourceState::has_rupframesqueuesize() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void AppDataSourceState::set_has_rupframesqueuesize() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void AppDataSourceState::clear_has_rupframesqueuesize() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void AppDataSourceState::clear_rupframesqueuesize() {
+  rupframesqueuesize_ = 0;
+  clear_has_rupframesqueuesize();
+}
+inline ::google::protobuf::int32 AppDataSourceState::rupframesqueuesize() const {
+  return rupframesqueuesize_;
+}
+inline void AppDataSourceState::set_rupframesqueuesize(::google::protobuf::int32 value) {
+  set_has_rupframesqueuesize();
+  rupframesqueuesize_ = value;
+}
+
+// optional int32 rupFramesQueueMaxSize = 6 [default = 0];
+inline bool AppDataSourceState::has_rupframesqueuemaxsize() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void AppDataSourceState::set_has_rupframesqueuemaxsize() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void AppDataSourceState::clear_has_rupframesqueuemaxsize() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void AppDataSourceState::clear_rupframesqueuemaxsize() {
+  rupframesqueuemaxsize_ = 0;
+  clear_has_rupframesqueuemaxsize();
+}
+inline ::google::protobuf::int32 AppDataSourceState::rupframesqueuemaxsize() const {
+  return rupframesqueuemaxsize_;
+}
+inline void AppDataSourceState::set_rupframesqueuemaxsize(::google::protobuf::int32 value) {
+  set_has_rupframesqueuemaxsize();
+  rupframesqueuemaxsize_ = value;
+}
+
+// optional double dataReceivingRate = 7 [default = 0];
+inline bool AppDataSourceState::has_datareceivingrate() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void AppDataSourceState::set_has_datareceivingrate() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void AppDataSourceState::clear_has_datareceivingrate() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void AppDataSourceState::clear_datareceivingrate() {
+  datareceivingrate_ = 0;
+  clear_has_datareceivingrate();
+}
+inline double AppDataSourceState::datareceivingrate() const {
+  return datareceivingrate_;
+}
+inline void AppDataSourceState::set_datareceivingrate(double value) {
+  set_has_datareceivingrate();
+  datareceivingrate_ = value;
+}
+
+// optional int64 receivedDataSize = 8 [default = 0];
+inline bool AppDataSourceState::has_receiveddatasize() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void AppDataSourceState::set_has_receiveddatasize() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void AppDataSourceState::clear_has_receiveddatasize() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void AppDataSourceState::clear_receiveddatasize() {
+  receiveddatasize_ = GOOGLE_LONGLONG(0);
+  clear_has_receiveddatasize();
+}
+inline ::google::protobuf::int64 AppDataSourceState::receiveddatasize() const {
+  return receiveddatasize_;
+}
+inline void AppDataSourceState::set_receiveddatasize(::google::protobuf::int64 value) {
+  set_has_receiveddatasize();
+  receiveddatasize_ = value;
+}
+
+// optional int64 receivedFramesCount = 9 [default = 0];
+inline bool AppDataSourceState::has_receivedframescount() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void AppDataSourceState::set_has_receivedframescount() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void AppDataSourceState::clear_has_receivedframescount() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void AppDataSourceState::clear_receivedframescount() {
+  receivedframescount_ = GOOGLE_LONGLONG(0);
+  clear_has_receivedframescount();
+}
+inline ::google::protobuf::int64 AppDataSourceState::receivedframescount() const {
+  return receivedframescount_;
+}
+inline void AppDataSourceState::set_receivedframescount(::google::protobuf::int64 value) {
+  set_has_receivedframescount();
+  receivedframescount_ = value;
+}
+
+// optional int64 receivedPacketCount = 10 [default = 0];
+inline bool AppDataSourceState::has_receivedpacketcount() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void AppDataSourceState::set_has_receivedpacketcount() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void AppDataSourceState::clear_has_receivedpacketcount() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void AppDataSourceState::clear_receivedpacketcount() {
+  receivedpacketcount_ = GOOGLE_LONGLONG(0);
+  clear_has_receivedpacketcount();
+}
+inline ::google::protobuf::int64 AppDataSourceState::receivedpacketcount() const {
+  return receivedpacketcount_;
+}
+inline void AppDataSourceState::set_receivedpacketcount(::google::protobuf::int64 value) {
+  set_has_receivedpacketcount();
+  receivedpacketcount_ = value;
+}
+
+// optional int64 lostedPacketCount = 11 [default = 0];
+inline bool AppDataSourceState::has_lostedpacketcount() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void AppDataSourceState::set_has_lostedpacketcount() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void AppDataSourceState::clear_has_lostedpacketcount() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void AppDataSourceState::clear_lostedpacketcount() {
+  lostedpacketcount_ = GOOGLE_LONGLONG(0);
+  clear_has_lostedpacketcount();
+}
+inline ::google::protobuf::int64 AppDataSourceState::lostedpacketcount() const {
+  return lostedpacketcount_;
+}
+inline void AppDataSourceState::set_lostedpacketcount(::google::protobuf::int64 value) {
+  set_has_lostedpacketcount();
+  lostedpacketcount_ = value;
+}
+
+// optional bool dataProcessingEnabled = 12 [default = false];
+inline bool AppDataSourceState::has_dataprocessingenabled() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void AppDataSourceState::set_has_dataprocessingenabled() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void AppDataSourceState::clear_has_dataprocessingenabled() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void AppDataSourceState::clear_dataprocessingenabled() {
+  dataprocessingenabled_ = false;
+  clear_has_dataprocessingenabled();
+}
+inline bool AppDataSourceState::dataprocessingenabled() const {
+  return dataprocessingenabled_;
+}
+inline void AppDataSourceState::set_dataprocessingenabled(bool value) {
+  set_has_dataprocessingenabled();
+  dataprocessingenabled_ = value;
+}
+
+// optional int64 processedPacketCount = 13 [default = 0];
+inline bool AppDataSourceState::has_processedpacketcount() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void AppDataSourceState::set_has_processedpacketcount() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void AppDataSourceState::clear_has_processedpacketcount() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void AppDataSourceState::clear_processedpacketcount() {
+  processedpacketcount_ = GOOGLE_LONGLONG(0);
+  clear_has_processedpacketcount();
+}
+inline ::google::protobuf::int64 AppDataSourceState::processedpacketcount() const {
+  return processedpacketcount_;
+}
+inline void AppDataSourceState::set_processedpacketcount(::google::protobuf::int64 value) {
+  set_has_processedpacketcount();
+  processedpacketcount_ = value;
+}
+
+// optional int64 lastPacketSystemTime = 14 [default = 0];
+inline bool AppDataSourceState::has_lastpacketsystemtime() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
-inline void AppDataSourceState::set_has_processingskiped() {
+inline void AppDataSourceState::set_has_lastpacketsystemtime() {
   _has_bits_[0] |= 0x00002000u;
 }
-inline void AppDataSourceState::clear_has_processingskiped() {
+inline void AppDataSourceState::clear_has_lastpacketsystemtime() {
   _has_bits_[0] &= ~0x00002000u;
 }
-inline void AppDataSourceState::clear_processingskiped() {
-  processingskiped_ = false;
-  clear_has_processingskiped();
+inline void AppDataSourceState::clear_lastpacketsystemtime() {
+  lastpacketsystemtime_ = GOOGLE_LONGLONG(0);
+  clear_has_lastpacketsystemtime();
 }
-inline bool AppDataSourceState::processingskiped() const {
-  return processingskiped_;
+inline ::google::protobuf::int64 AppDataSourceState::lastpacketsystemtime() const {
+  return lastpacketsystemtime_;
 }
-inline void AppDataSourceState::set_processingskiped(bool value) {
-  set_has_processingskiped();
-  processingskiped_ = value;
+inline void AppDataSourceState::set_lastpacketsystemtime(::google::protobuf::int64 value) {
+  set_has_lastpacketsystemtime();
+  lastpacketsystemtime_ = value;
 }
 
-// optional int32 state = 15;
-inline bool AppDataSourceState::has_state() const {
+// optional int64 rupFramePlantTime = 15 [default = 0];
+inline bool AppDataSourceState::has_rupframeplanttime() const {
   return (_has_bits_[0] & 0x00004000u) != 0;
 }
-inline void AppDataSourceState::set_has_state() {
+inline void AppDataSourceState::set_has_rupframeplanttime() {
   _has_bits_[0] |= 0x00004000u;
 }
-inline void AppDataSourceState::clear_has_state() {
+inline void AppDataSourceState::clear_has_rupframeplanttime() {
   _has_bits_[0] &= ~0x00004000u;
 }
-inline void AppDataSourceState::clear_state() {
-  state_ = 0;
-  clear_has_state();
+inline void AppDataSourceState::clear_rupframeplanttime() {
+  rupframeplanttime_ = GOOGLE_LONGLONG(0);
+  clear_has_rupframeplanttime();
 }
-inline ::google::protobuf::int32 AppDataSourceState::state() const {
-  return state_;
+inline ::google::protobuf::int64 AppDataSourceState::rupframeplanttime() const {
+  return rupframeplanttime_;
 }
-inline void AppDataSourceState::set_state(::google::protobuf::int32 value) {
-  set_has_state();
-  state_ = value;
+inline void AppDataSourceState::set_rupframeplanttime(::google::protobuf::int64 value) {
+  set_has_rupframeplanttime();
+  rupframeplanttime_ = value;
 }
 
-// optional int64 errorBadFrameSize = 16;
-inline bool AppDataSourceState::has_errorbadframesize() const {
+// optional int32 rupFrameNumerator = 16 [default = 0];
+inline bool AppDataSourceState::has_rupframenumerator() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
-inline void AppDataSourceState::set_has_errorbadframesize() {
+inline void AppDataSourceState::set_has_rupframenumerator() {
   _has_bits_[0] |= 0x00008000u;
 }
-inline void AppDataSourceState::clear_has_errorbadframesize() {
+inline void AppDataSourceState::clear_has_rupframenumerator() {
   _has_bits_[0] &= ~0x00008000u;
 }
-inline void AppDataSourceState::clear_errorbadframesize() {
-  errorbadframesize_ = GOOGLE_LONGLONG(0);
-  clear_has_errorbadframesize();
+inline void AppDataSourceState::clear_rupframenumerator() {
+  rupframenumerator_ = 0;
+  clear_has_rupframenumerator();
 }
-inline ::google::protobuf::int64 AppDataSourceState::errorbadframesize() const {
-  return errorbadframesize_;
+inline ::google::protobuf::int32 AppDataSourceState::rupframenumerator() const {
+  return rupframenumerator_;
 }
-inline void AppDataSourceState::set_errorbadframesize(::google::protobuf::int64 value) {
-  set_has_errorbadframesize();
-  errorbadframesize_ = value;
+inline void AppDataSourceState::set_rupframenumerator(::google::protobuf::int32 value) {
+  set_has_rupframenumerator();
+  rupframenumerator_ = value;
 }
 
-// optional bool hasErrors = 17;
-inline bool AppDataSourceState::has_haserrors() const {
+// optional int32 signalStatesQueueSize = 17 [default = 0];
+inline bool AppDataSourceState::has_signalstatesqueuesize() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
-inline void AppDataSourceState::set_has_haserrors() {
+inline void AppDataSourceState::set_has_signalstatesqueuesize() {
   _has_bits_[0] |= 0x00010000u;
 }
-inline void AppDataSourceState::clear_has_haserrors() {
+inline void AppDataSourceState::clear_has_signalstatesqueuesize() {
   _has_bits_[0] &= ~0x00010000u;
 }
-inline void AppDataSourceState::clear_haserrors() {
-  haserrors_ = false;
-  clear_has_haserrors();
+inline void AppDataSourceState::clear_signalstatesqueuesize() {
+  signalstatesqueuesize_ = 0;
+  clear_has_signalstatesqueuesize();
 }
-inline bool AppDataSourceState::haserrors() const {
-  return haserrors_;
+inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuesize() const {
+  return signalstatesqueuesize_;
 }
-inline void AppDataSourceState::set_haserrors(bool value) {
-  set_has_haserrors();
-  haserrors_ = value;
+inline void AppDataSourceState::set_signalstatesqueuesize(::google::protobuf::int32 value) {
+  set_has_signalstatesqueuesize();
+  signalstatesqueuesize_ = value;
+}
+
+// optional int32 signalStatesQueueMaxSize = 18 [default = 0];
+inline bool AppDataSourceState::has_signalstatesqueuemaxsize() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void AppDataSourceState::set_has_signalstatesqueuemaxsize() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void AppDataSourceState::clear_has_signalstatesqueuemaxsize() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void AppDataSourceState::clear_signalstatesqueuemaxsize() {
+  signalstatesqueuemaxsize_ = 0;
+  clear_has_signalstatesqueuemaxsize();
+}
+inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuemaxsize() const {
+  return signalstatesqueuemaxsize_;
+}
+inline void AppDataSourceState::set_signalstatesqueuemaxsize(::google::protobuf::int32 value) {
+  set_has_signalstatesqueuemaxsize();
+  signalstatesqueuemaxsize_ = value;
+}
+
+// optional int32 acquiredSignalsCount = 19 [default = 0];
+inline bool AppDataSourceState::has_acquiredsignalscount() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void AppDataSourceState::set_has_acquiredsignalscount() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void AppDataSourceState::clear_has_acquiredsignalscount() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void AppDataSourceState::clear_acquiredsignalscount() {
+  acquiredsignalscount_ = 0;
+  clear_has_acquiredsignalscount();
+}
+inline ::google::protobuf::int32 AppDataSourceState::acquiredsignalscount() const {
+  return acquiredsignalscount_;
+}
+inline void AppDataSourceState::set_acquiredsignalscount(::google::protobuf::int32 value) {
+  set_has_acquiredsignalscount();
+  acquiredsignalscount_ = value;
+}
+
+// optional int64 errorProtocolVersion = 20 [default = 0];
+inline bool AppDataSourceState::has_errorprotocolversion() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void AppDataSourceState::set_has_errorprotocolversion() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void AppDataSourceState::clear_has_errorprotocolversion() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void AppDataSourceState::clear_errorprotocolversion() {
+  errorprotocolversion_ = GOOGLE_LONGLONG(0);
+  clear_has_errorprotocolversion();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errorprotocolversion() const {
+  return errorprotocolversion_;
+}
+inline void AppDataSourceState::set_errorprotocolversion(::google::protobuf::int64 value) {
+  set_has_errorprotocolversion();
+  errorprotocolversion_ = value;
+}
+
+// optional int64 errorFramesQuantity = 21 [default = 0];
+inline bool AppDataSourceState::has_errorframesquantity() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void AppDataSourceState::set_has_errorframesquantity() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void AppDataSourceState::clear_has_errorframesquantity() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void AppDataSourceState::clear_errorframesquantity() {
+  errorframesquantity_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframesquantity();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errorframesquantity() const {
+  return errorframesquantity_;
+}
+inline void AppDataSourceState::set_errorframesquantity(::google::protobuf::int64 value) {
+  set_has_errorframesquantity();
+  errorframesquantity_ = value;
+}
+
+// optional int64 errorFrameNo = 22 [default = 0];
+inline bool AppDataSourceState::has_errorframeno() const {
+  return (_has_bits_[0] & 0x00200000u) != 0;
+}
+inline void AppDataSourceState::set_has_errorframeno() {
+  _has_bits_[0] |= 0x00200000u;
+}
+inline void AppDataSourceState::clear_has_errorframeno() {
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline void AppDataSourceState::clear_errorframeno() {
+  errorframeno_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframeno();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errorframeno() const {
+  return errorframeno_;
+}
+inline void AppDataSourceState::set_errorframeno(::google::protobuf::int64 value) {
+  set_has_errorframeno();
+  errorframeno_ = value;
+}
+
+// optional int64 errorDataID = 23 [default = 0];
+inline bool AppDataSourceState::has_errordataid() const {
+  return (_has_bits_[0] & 0x00400000u) != 0;
+}
+inline void AppDataSourceState::set_has_errordataid() {
+  _has_bits_[0] |= 0x00400000u;
+}
+inline void AppDataSourceState::clear_has_errordataid() {
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline void AppDataSourceState::clear_errordataid() {
+  errordataid_ = GOOGLE_LONGLONG(0);
+  clear_has_errordataid();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errordataid() const {
+  return errordataid_;
+}
+inline void AppDataSourceState::set_errordataid(::google::protobuf::int64 value) {
+  set_has_errordataid();
+  errordataid_ = value;
+}
+
+// optional int64 errorFrameSize = 24 [default = 0];
+inline bool AppDataSourceState::has_errorframesize() const {
+  return (_has_bits_[0] & 0x00800000u) != 0;
+}
+inline void AppDataSourceState::set_has_errorframesize() {
+  _has_bits_[0] |= 0x00800000u;
+}
+inline void AppDataSourceState::clear_has_errorframesize() {
+  _has_bits_[0] &= ~0x00800000u;
+}
+inline void AppDataSourceState::clear_errorframesize() {
+  errorframesize_ = GOOGLE_LONGLONG(0);
+  clear_has_errorframesize();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errorframesize() const {
+  return errorframesize_;
+}
+inline void AppDataSourceState::set_errorframesize(::google::protobuf::int64 value) {
+  set_has_errorframesize();
+  errorframesize_ = value;
+}
+
+// optional int64 errorDuplicatePlantTime = 25 [default = 0];
+inline bool AppDataSourceState::has_errorduplicateplanttime() const {
+  return (_has_bits_[0] & 0x01000000u) != 0;
+}
+inline void AppDataSourceState::set_has_errorduplicateplanttime() {
+  _has_bits_[0] |= 0x01000000u;
+}
+inline void AppDataSourceState::clear_has_errorduplicateplanttime() {
+  _has_bits_[0] &= ~0x01000000u;
+}
+inline void AppDataSourceState::clear_errorduplicateplanttime() {
+  errorduplicateplanttime_ = GOOGLE_LONGLONG(0);
+  clear_has_errorduplicateplanttime();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errorduplicateplanttime() const {
+  return errorduplicateplanttime_;
+}
+inline void AppDataSourceState::set_errorduplicateplanttime(::google::protobuf::int64 value) {
+  set_has_errorduplicateplanttime();
+  errorduplicateplanttime_ = value;
+}
+
+// optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
+inline bool AppDataSourceState::has_errornonmonotonicplanttime() const {
+  return (_has_bits_[0] & 0x02000000u) != 0;
+}
+inline void AppDataSourceState::set_has_errornonmonotonicplanttime() {
+  _has_bits_[0] |= 0x02000000u;
+}
+inline void AppDataSourceState::clear_has_errornonmonotonicplanttime() {
+  _has_bits_[0] &= ~0x02000000u;
+}
+inline void AppDataSourceState::clear_errornonmonotonicplanttime() {
+  errornonmonotonicplanttime_ = GOOGLE_LONGLONG(0);
+  clear_has_errornonmonotonicplanttime();
+}
+inline ::google::protobuf::int64 AppDataSourceState::errornonmonotonicplanttime() const {
+  return errornonmonotonicplanttime_;
+}
+inline void AppDataSourceState::set_errornonmonotonicplanttime(::google::protobuf::int64 value) {
+  set_has_errornonmonotonicplanttime();
+  errornonmonotonicplanttime_ = value;
 }
 
 // -------------------------------------------------------------------

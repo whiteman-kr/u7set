@@ -92,15 +92,14 @@ void DialogTuningSources::update(bool refreshOnly)
 
 			TuningSource& ts = tsi[i];
 
-			connectionStrings << ts.info.equipmentid().c_str();
-			connectionStrings << ts.info.caption().c_str();
-			connectionStrings << ts.info.ip().c_str();
-			connectionStrings << QString::number(ts.info.port());
+			connectionStrings << ts.info.lmequipmentid().c_str();
+			connectionStrings << ts.info.lmcaption().c_str();
+			connectionStrings << ts.info.lmip().c_str();
+			connectionStrings << QString::number(ts.info.lmport());
 
-			QChar chChannel = 'A' + ts.info.channel();
-			connectionStrings << chChannel;
+			connectionStrings << ts.info.lmsubsystemchannel().c_str();
 
-			connectionStrings << ts.info.subsystem().c_str();
+			connectionStrings << ts.info.lmsubsystem().c_str();
 			connectionStrings << QString::number(ts.info.lmnumber());
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);

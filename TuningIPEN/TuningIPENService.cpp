@@ -288,7 +288,7 @@ namespace TuningIPEN
 		sr.lmPort = source->lmPort();
 		sr.lmNumber = source->lmNumber();
 		sr.lmSubsystemID = source->lmSubsystemID();
-		sr.uniqueID = source->uniqueID();
+		sr.uniqueID = source->lmUniqueID();
 		sr.numerator = source->numerator();
 		sr.operation = FotipOpCode::Write;
 
@@ -409,7 +409,7 @@ namespace TuningIPEN
 		sr.lmPort = source->lmPort();
 		sr.lmNumber = source->lmNumber();
 		sr.lmSubsystemID = source->lmSubsystemID();
-		sr.uniqueID = source->uniqueID();
+		sr.uniqueID = source->lmUniqueID();
 		sr.numerator = source->numerator();
 		sr.operation = FotipOpCode::Read;
 

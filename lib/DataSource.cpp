@@ -16,9 +16,9 @@ const char* DataSource::DATA_TYPE_DIAG = "Diag";
 const char* DataSource::DATA_TYPE_TUNING = "Tuning";
 
 const char* DataSource::PROP_DATA_TYPE = "LmDataType";
-const char* DataSource::PROP_CHANNEL = "LmChannel";
 const char* DataSource::PROP_LM_ID = "LmEquipmentID";
 const char* DataSource::PROP_LM_NUMBER = "LmNumber";
+const char* DataSource::PROP_LM_CHANNEL = "LmChannel";
 const char* DataSource::PROP_LM_SUBSYSTEM_ID = "LmSubsystemID";
 const char* DataSource::PROP_LM_SUBSYSTEM = "LmSubsystem";
 const char* DataSource::PROP_LM_MODULE_TYPE = "LmModuleType";
@@ -27,6 +27,7 @@ const char* DataSource::PROP_LM_ADAPTER_ID = "LmAdapterID";
 const char* DataSource::PROP_LM_DATA_ENABLE = "LmDataEnable";
 const char* DataSource::PROP_LM_DATA_IP = "LmDataIP";
 const char* DataSource::PROP_LM_DATA_PORT = "LmDataPort";
+const char* DataSource::PROP_LM_RUP_FRAMES_QUANTITY = "LmRupFramesQuantity";
 const char* DataSource::PROP_LM_DATA_ID = "LmDataID";
 const char* DataSource::PROP_LM_UNIQUE_ID = "LmUniqueID";
 const char* DataSource::PROP_COUNT = "Count";
@@ -94,14 +95,17 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
 	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
 	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
+	xml.writeStringAttribute(PROP_LM_CHANNEL, m_lmSubsystemChannel);
 
 	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
 	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterID);
 	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
 	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
-	xml.writeUInt32Attribute(PROP_LM_DATA_ID, m_lmDataID, false);
-	xml.writeUInt64Attribute(PROP_LM_UNIQUE_ID, m_uniqueID, true);
+	xml.writeIntAttribute(PROP_LM_RUP_FRAMES_QUANTITY, m_lmRupFramesQuantity);
+
+	xml.writeUInt32Attribute(PROP_LM_DATA_ID, m_lmDataID, true);
+	xml.writeUInt64Attribute(PROP_LM_UNIQUE_ID, m_lmUniqueID, true);
 
 	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
@@ -128,7 +132,6 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	QString str;
 
 	result &= xml.readStringAttribute(PROP_DATA_TYPE, &str);
-
 	m_lmDataType = stringToDataType(str);
 
 	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
@@ -137,6 +140,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
 	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_ID, &m_lmSubsystemID);
 	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
+	result &= xml.readStringAttribute(PROP_LM_CHANNEL,&m_lmSubsystemChannel);
 
 	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
 	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
@@ -151,8 +155,10 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	m_lmAddressPort.setAddress(ipStr);
 	m_lmAddressPort.setPort(port);
 
+	result &= xml.readIntAttribute(PROP_LM_RUP_FRAMES_QUANTITY, &m_lmRupFramesQuantity);
+
 	result &= xml.readUInt32Attribute(PROP_LM_DATA_ID, &m_lmDataID);
-	result &= xml.readUInt64Attribute(PROP_LM_UNIQUE_ID, &m_uniqueID);
+	result &= xml.readUInt64Attribute(PROP_LM_UNIQUE_ID, &m_lmUniqueID);
 
 	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
 	{
@@ -191,47 +197,52 @@ bool DataSource::readAdditionalSectionsFromXml(XmlReadHelper&)
 	return true;
 }
 
-bool DataSource::getInfo(Network::DataSourceInfo* protoInfo) const
+bool DataSource::getInfo(Network::DataSourceInfo* proto) const
 {
-	if (protoInfo == nullptr)
+	if (proto == nullptr)
 	{
 		assert(false);
 		return false;
 	}
 
-	protoInfo->set_id(m_id);
-	protoInfo->set_equipmentid(m_lmEquipmentID.toStdString());
-	protoInfo->set_caption(m_lmCaption.toStdString());
-	protoInfo->set_datatype(TO_INT(m_lmDataType));
-	protoInfo->set_ip(m_lmAddressPort.addressStr().toStdString());
-	protoInfo->set_port(m_lmAddressPort.port());
-	protoInfo->set_subsystemid(m_lmSubsystemID);
-	protoInfo->set_subsystem(m_lmSubsystem.toStdString());
-	protoInfo->set_lmnumber(m_lmNumber);
-	protoInfo->set_lmmoduletype(m_lmModuleType);
-	protoInfo->set_lmadapterid(m_lmAdapterID.toStdString());
-	protoInfo->set_lmdataenable(m_lmDataEnable);
-	protoInfo->set_lmdataid(m_lmDataID);
+	proto->set_id(m_id);
+	proto->set_lmequipmentid(m_lmEquipmentID.toStdString());
+	proto->set_lmcaption(m_lmCaption.toStdString());
+	proto->set_lmdatatype(TO_INT(m_lmDataType));
+	proto->set_lmip(m_lmAddressPort.addressStr().toStdString());
+	proto->set_lmport(m_lmAddressPort.port());
+	proto->set_lmsubsystemid(m_lmSubsystemID);
+	proto->set_lmsubsystem(m_lmSubsystem.toStdString());
+	proto->set_lmsubsystemchannel(m_lmSubsystemChannel.toStdString());
+	proto->set_lmnumber(m_lmNumber);
+	proto->set_lmmoduletype(m_lmModuleType);
+	proto->set_lmadapterid(m_lmAdapterID.toStdString());
+	proto->set_lmdataenable(m_lmDataEnable);
+	proto->set_lmdataid(m_lmDataID);
+	proto->set_lmuniqueid(m_lmUniqueID);
+	proto->set_lmrupframesquantity(m_lmRupFramesQuantity);
 
 	return true;
 }
 
 
-bool DataSource::setInfo(const Network::DataSourceInfo& protoInfo)
+bool DataSource::setInfo(const Network::DataSourceInfo& proto)
 {
-	m_id = protoInfo.id();
-	m_lmEquipmentID = QString::fromStdString(protoInfo.equipmentid());
-	m_lmCaption = QString::fromStdString(protoInfo.caption());
-	m_lmDataType = static_cast<DataType>(protoInfo.datatype());
-	m_lmAddressPort.setAddress(QString::fromStdString(protoInfo.ip()));
-	m_lmAddressPort.setPort(protoInfo.port());
-	m_lmSubsystemID = protoInfo.subsystemid();
-	m_lmSubsystem = QString::fromStdString(protoInfo.subsystem());
-	m_lmNumber = protoInfo.lmnumber();
-	m_lmModuleType = protoInfo.lmmoduletype();
-	m_lmAdapterID = QString::fromStdString(protoInfo.lmadapterid());
-	m_lmDataEnable = protoInfo.lmdataenable();
-	m_lmDataID = protoInfo.lmdataid();
+	m_id = proto.id();
+	m_lmEquipmentID = QString::fromStdString(proto.lmequipmentid());
+	m_lmCaption = QString::fromStdString(proto.lmcaption());
+	m_lmDataType = static_cast<DataType>(proto.lmdatatype());
+	m_lmAddressPort.setAddressPort(QString::fromStdString(proto.lmip()), proto.lmport());
+	m_lmSubsystemID = proto.lmsubsystemid();
+	m_lmSubsystem = QString::fromStdString(proto.lmsubsystem());
+	m_lmSubsystemChannel = QString::fromStdString(proto.lmsubsystemchannel());
+	m_lmNumber = proto.lmnumber();
+	m_lmModuleType = proto.lmmoduletype();
+	m_lmAdapterID = QString::fromStdString(proto.lmadapterid());
+	m_lmDataEnable = proto.lmdataenable();
+	m_lmDataID = proto.lmdataid();
+	m_lmUniqueID = proto.lmuniqueid();
+	m_lmRupFramesQuantity = proto.lmrupframesquantity();
 
 	return true;
 }
@@ -347,7 +358,7 @@ DataSourceOnline::~DataSourceOnline()
 
 bool DataSourceOnline::init()
 {
-	m_rupFrameTimeQueue.resize(m_partCount * 400);			// 2 seconds queue
+	m_rupFrameTimeQueue.resize(lmRupFramesQuantity() * 200 * 3);			// 3 seconds queue
 
 	return true;
 }
@@ -487,7 +498,7 @@ bool DataSourceOnline::reallocate(quint32 framesQuantity)
 	return true;
 }
 
-
+/*
 void DataSourceOnline::stop()
 {
 	setState(E::DataSourceState::Stopped);
@@ -499,7 +510,7 @@ void DataSourceOnline::stop()
 void DataSourceOnline::resume()
 {
 	setState(E::DataSourceState::NoData);
-}
+}*/
 
 
 void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame)
@@ -519,6 +530,9 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 	}
 
 	m_rupFrameTimeQueue.completePush();
+
+	m_rupFramesQueueSize = m_rupFrameTimeQueue.size();
+	m_rupFramesQueueMaxSize = m_rupFrameTimeQueue.maxSize();
 }
 
 bool DataSourceOnline::seizeProcessingOwnership(const QThread* processingThread)
@@ -560,10 +574,10 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 					// m_rupFrameTimeQueue.completePop is not required
 		}
 
-		m_lastPacketTime = QDateTime::currentMSecsSinceEpoch();
+		m_lastPacketSystemTime = QDateTime::currentMSecsSinceEpoch();
 		m_state = E::DataSourceState::ReceiveData;
 
-		m_dataReceived = true;
+		m_dataReceives = true;
 		m_receivedFramesCount++;
 		m_receivedDataSize += sizeof(Rup::Frame);
 
@@ -640,11 +654,11 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 					{
 						if (m_rupFrameNumerator < numerator)
 						{
-							m_lostedFramesCount += numerator - m_rupFrameNumerator;
+							m_lostedPacketCount += numerator - m_rupFrameNumerator;
 						}
 						else
 						{
-							m_lostedFramesCount += 0xFFFF - m_rupFrameNumerator + numerator;
+							m_lostedPacketCount += 0xFFFF - m_rupFrameNumerator + numerator;
 						}
 
 						m_rupFrameNumerator = numerator;
@@ -666,4 +680,5 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 
 	return dataReady;
 }
+
 

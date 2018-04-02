@@ -503,6 +503,8 @@ void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signa
 		archivingGroupsSignalsCount.insert(group, groupSignalsCount);
 	}
 
+	m_acquiredSignalsCount = m_signalsParseInfo.count();
+
 	int maxCount = 0;
 
 	for(int count : archivingGroupsSignalsCount)
@@ -573,61 +575,88 @@ bool AppDataSource::parsePacket()
 		if (hasArchivingReason == true)
 		{
 			m_signalStatesQueue.push(&signalState->stored());
+
+			m_signalStatesQueueSize = m_signalStatesQueue.size();
+			m_signalStatesQueueMaxSize = m_signalStatesQueue.maxSize();
 		}
 	}
 
 	return true;
 }
 
-bool AppDataSource::getState(Network::AppDataSourceState* protoState) const
+bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 {
-	if (protoState == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(proto);
 
-	protoState->set_id(ID());
-	protoState->set_uptime(uptime());
-	protoState->set_receiveddatasize(receivedDataSize());
-	protoState->set_datareceivingrate(dataReceivingRate());
-	protoState->set_receivedframescount(receivedFramesCount());
-	protoState->set_processingenabled(dataProcessingEnabled());
-	protoState->set_processedpacketcount(receivedPacketCount());
-	protoState->set_errorprotocolversion(errorProtocolVersion());
-	protoState->set_errorframesquantity(errorFramesQuantity());
-	protoState->set_errorframeno(errorFrameNo());
-	protoState->set_lostedpackets(lostedFramesCount());
-	protoState->set_errorbadframesize(errorBadFrameSize());
-	protoState->set_haserrors(hasErrors());
+	proto->set_id(ID());
+	proto->set_datareceives(dataReceives());
+	proto->set_uptime(uptime());
+	proto->set_receiveddataid(receivedDataID());
+	proto->set_rupframesqueuesize(rupFramesQueueSize());
+	proto->set_rupframesqueuemaxsize(rupFramesQueueMaxSize());
+	proto->set_datareceivingrate(dataReceivingRate());
+	proto->set_receiveddatasize(receivedDataSize());
+	proto->set_receivedframescount(receivedFramesCount());
+	proto->set_receivedpacketcount(receivedPacketCount());
+	proto->set_lostedpacketcount(lostedPacketCount());
+	proto->set_dataprocessingenabled(dataProcessingEnabled());
+	proto->set_processedpacketcount(processedPacketCount());
+	proto->set_lastpacketsystemtime(lastPacketSystemTime());
+	proto->set_rupframeplanttime(rupFramePlantTime());
+	proto->set_rupframenumerator(rupFrameNumerator());
+	proto->set_signalstatesqueuesize(signalStatesQueueSize());
+	proto->set_signalstatesqueuemaxsize(signalStatesQueueMaxSize());
+	proto->set_acquiredsignalscount(acquiredSignalsCount());
+	proto->set_errorprotocolversion(errorProtocolVersion());
+	proto->set_errorframesquantity(errorFramesQuantity());
+	proto->set_errorframeno(errorFrameNo());
+	proto->set_errordataid(errorDataID());
+	proto->set_errorframesize(errorFrameSize());
+	proto->set_errorduplicateplanttime(errorDuplicatePlantTime());
+	proto->set_errornonmonotonicplanttime(errorDuplicatePlantTime());
 
 	return true;
 }
 
-bool AppDataSource::setState(const Network::AppDataSourceState& protoState)
+void AppDataSource::setState(const Network::AppDataSourceState& proto)
 {
-	setID(protoState.id());
-	setUptime(protoState.uptime());
-	setReceivedDataSize(protoState.receiveddatasize());
-	setDataReceivingRate(protoState.datareceivingrate());
-	setReceivedFramesCount(protoState.receivedframescount());
-	setDataProcessingEnabled(protoState.processingenabled());
-	setReceivedPacketCount(protoState.processedpacketcount());
-	setErrorProtocolVersion(protoState.errorprotocolversion());
-	setErrorFramesQuantity(protoState.errorframesquantity());
-	setErrorFrameNo(protoState.errorframeno());
-	setLostedFramesCount(protoState.lostedpackets());
-	setErrorBadFrameSize(protoState.errorbadframesize());
-	setHasErrors(protoState.haserrors());
-
-	return true;
+	setID(proto.id());
+	setDataReceives(proto.datareceives());
+	setUptime(proto.uptime());
+	setReceivedDataID(proto.receiveddataid());
+	setRupFramesQueueSize(proto.rupframesqueuesize());
+	setRupFramesQueueMaxSize(proto.rupframesqueuemaxsize());
+	setDataReceivingRate(proto.datareceivingrate());
+	setReceivedDataSize(proto.receiveddatasize());
+	setReceivedFramesCount(proto.receivedframescount());
+	setReceivedPacketCount(proto.receivedpacketcount());
+	setLostedPacketCount(proto.lostedpacketcount());
+	setDataProcessingEnabled(proto.dataprocessingenabled());
+	setProcessedPacketCount(proto.processedpacketcount());
+	setLastPacketSystemTime(proto.lastpacketsystemtime());
+	setRupFramePlantTime(proto.rupframeplanttime());
+	setRupFrameNumerator(proto.rupframenumerator());
+	setSignalStatesQueueSize(proto.signalstatesqueuesize());
+	setSignalStatesQueueMaxSize(proto.signalstatesqueuemaxsize());
+	setAcquiredSignalsCount(proto.acquiredsignalscount());
+	setErrorProtocolVersion(proto.errorprotocolversion());
+	setErrorFramesQuantity(proto.errorframesquantity());
+	setErrorFrameNo(proto.errorframeno());
+	setErrorDataID(proto.errordataid());
+	setErrorFrameSize(proto.errorframesize());
+	setErrorDuplicatePlantTime(proto.errorduplicateplanttime());
+	setErrorNonmonotonicPlantTime(proto.errornonmonotonicplanttime());
 }
 
 bool AppDataSource::getSignalState(SimpleAppSignalState* state)
 {
 	TEST_PTR_RETURN_FALSE(state);
 
-	return m_signalStatesQueue.pop(state);
+	bool result = m_signalStatesQueue.pop(state);
+
+	m_signalStatesQueueSize = m_signalStatesQueue.size();
+
+	return result;
 }
 
 

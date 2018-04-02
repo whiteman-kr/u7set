@@ -348,7 +348,8 @@ HEADERS  += \
     ../lib/LmDescription.h \
     Builder/MemWriteMap.h \
     Builder/ConfigurationServiceCfgGenerator.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    Builder/CfgFiles.h
 
 FORMS    += \
     CreateProjectDialog.ui \

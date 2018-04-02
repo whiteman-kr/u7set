@@ -268,7 +268,7 @@ namespace TuningIPEN
 	}
 
 
-	quint64 TuningSource::uniqueID()
+	quint64 TuningSource::lmUniqueID()
 	{
 		if (m_tuningData == nullptr)
 		{

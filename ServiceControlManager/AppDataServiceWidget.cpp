@@ -149,7 +149,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_CAPTION: return d.lmCaption();
 				case DSC_IP: return d.lmAddressStr();
 				case DSC_PORT: return d.lmPort();
-				case DSC_PART_COUNT: return d.partCount();
+				case DSC_PART_COUNT: return d.lmRupFramesQuantity();
 				case DSC_DATA_TYPE: return d.lmDataTypeStr();
 				case DSC_EQUIPMENT_ID: return d.lmEquipmentID();
 				case DSC_MODULE_NUMBER: return d.lmNumber();
@@ -173,20 +173,22 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_ERROR_PROTOCOL_VERSION: return d.errorProtocolVersion();
 				case DSC_ERROR_FRAMES_QUANTITY: return d.errorFramesQuantity();
 				case DSC_ERROR_FRAME_NOMBER: return d.errorFrameNo();
-				case DSC_LOSTED_FRAMES_COUNT: return d.lostedFramesCount();
+				case DSC_LOSTED_FRAMES_COUNT: return d.lostedPacketCount();
 				case DSC_ERROR_DATA_ID: return d.errorDataID();
-				case DSC_ERROR_BAD_FRAME_SIZE: return d.errorBadFrameSize();
+				case DSC_ERROR_BAD_FRAME_SIZE: return d.errorFrameSize();
 				default:
 					assert(false);
 				return QVariant();
 			}
-		break;
+			break;
+
 		case Qt::BackgroundRole:
-			if (d.hasErrors())
-			{
-				return QBrush(QColor(0xff,0xee,0xee));
-			}
-		break;
+//			if (d.hasErrors())
+//			{
+//				return QBrush(QColor(0xff,0xee,0xee));
+//			}
+			break;
+
 		default:
 			return QVariant();
 	}
