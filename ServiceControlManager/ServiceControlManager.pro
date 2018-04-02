@@ -90,7 +90,11 @@ SOURCES += MainWindow.cpp \
     TuningServiceWidget.cpp \
     TcpTuningServiceClient.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    TuningSourceWidget.cpp
+    TuningSourceWidget.cpp \
+    ../lib/OutputLog.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../u7/Builder/ModulesRawData.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -132,7 +136,11 @@ HEADERS  += MainWindow.h \
     TuningServiceWidget.h \
     TcpTuningServiceClient.h \
     ../lib/Tuning/TuningSourceState.h \
-    TuningSourceWidget.h
+    TuningSourceWidget.h \
+    ../lib/OutputLog.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/DeviceHelper.h \
+    ../u7/Builder/ModulesRawData.h
 
 include(../qtservice/src/qtservice.pri)
 

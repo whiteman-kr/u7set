@@ -1,7 +1,6 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/ProtobufHelper.h"
-#include "../lib/DataSource.h"
 #include "../lib/WUtils.h"
 #include "Builder.h"
 
@@ -10,16 +9,16 @@ class DataSource;
 namespace Builder
 {
 	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(	DbController* db,
-															Hardware::SubsystemStorage *subsystems,
+															const Hardware::SubsystemStorage* subsystems,
 															Hardware::Software* software,
 															SignalSet* signalSet,
 															Hardware::EquipmentSet* equipment,
 															const QHash<QString, quint64>& lmUniqueIdMap,
 															BuildResultWriter* buildResultWriter) :
 		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
-		m_lmUniqueIdMap(lmUniqueIdMap),
-		m_subsystems(subsystems)
+		m_lmUniqueIdMap(lmUniqueIdMap)
 	{
+		initSubsystemKeyMap(&m_subsystemKeyMap, subsystems);
 	}
 
 	AppDataServiceCfgGenerator::~AppDataServiceCfgGenerator()
@@ -79,52 +78,19 @@ namespace Builder
 			if (lm == nullptr)
 			{
 				LOG_INTERNAL_ERROR(m_log);
-				assert(false);
 				result = false;
 				continue;
 			}
 
 			int connectedAdaptersCount = 0;
 
-			for(int adapter = LM_ETHERNET_ADAPTER2; adapter <= LM_ETHERNET_ADAPTER3; adapter++)
+			for(int adapter = DataSource::LM_ETHERNET_ADAPTER2; adapter <= DataSource::LM_ETHERNET_ADAPTER3; adapter++)
 			{
-				LmEthernetAdapterNetworkProperties lmNetProperties;
+				DataSource ds;
 
-				result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, m_log);
+				result &= ds.getLmPropertiesFromDevice(lm, DataSource::DataType::App, adapter, m_subsystemKeyMap, m_lmUniqueIdMap, m_log);
 
-				int lmNumber = 0;
-				QString lmChannel = 0;
-				QString lmSubsystem;
-				quint32 lmAppLANDataUID = 0;
-				int lmRupFramesQuantity = 0;
-				quint64 lmUniqueID = 0;
-
-				result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
-				result &= DeviceHelper::getStrProperty(lm, "SubsystemChannel", &lmChannel, m_log);
-				result &= DeviceHelper::getStrProperty(lm, "SubsystemID", &lmSubsystem, m_log);
-
-				int dataUID = 0;
-
-				result &= DeviceHelper::getIntProperty(lm, "AppLANDataUID", &dataUID, m_log);
-
-				lmAppLANDataUID = dataUID;
-
-				int lmAppLanDataSize = 0;
-
-				result &= DeviceHelper::getIntProperty(lm, "AppLANDataSize", &lmAppLanDataSize, m_log);
-
-				lmRupFramesQuantity = lmAppLanDataSize / sizeof(Rup::Frame::data) +
-						((lmAppLanDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
-
-				if (result == false)
-				{
-					break;
-				}
-
-				lmUniqueID = m_lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0);
-
-				if (lmNetProperties.appDataEnable == false ||
-					lmNetProperties.appDataServiceID != m_software->equipmentIdTemplate())
+				if (ds.lmDataEnable() == false || ds.serviceID() != m_software->equipmentIdTemplate())
 				{
 					continue;
 				}
@@ -140,58 +106,30 @@ namespace Builder
 
 				connectedAdaptersCount++;
 
-				int lmSubsystemID = 0;
-
-				int subsystemsCount = m_subsystems->count();
-
-				for(int i = 0; i < subsystemsCount; i++)
-				{
-					std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
-
-					if (subsystem->subsystemId() == lmSubsystem)
-					{
-						lmSubsystemID = subsystem->key();
-						break;
-					}
-				}
-
-				dataSources.append(DataSource());
-
-				DataSource& ds = dataSources[dataSources.count()-1];
-
-				ds.setLmSubsystem(lmSubsystem);
-				ds.setLmSubsystemID(lmSubsystemID);
-				ds.setLmNumber(lmNumber);
-				ds.setLmSubsystemChannel(lmChannel);
-				ds.setLmDataType(DataSource::DataType::App);
-				ds.setLmEquipmentID(lm->equipmentIdTemplate());
-				ds.setLmModuleType(lm->moduleType());
-				ds.setLmCaption(lm->caption());
-				ds.setLmDataID(lmAppLANDataUID);
-				ds.setLmUniqueID(lmUniqueID);
-				ds.setLmAdapterID(lmNetProperties.adapterID);
-				ds.setLmDataEnable(lmNetProperties.appDataEnable);
-				ds.setLmAddressStr(lmNetProperties.appDataIP);
-				ds.setLmPort(lmNetProperties.appDataPort);
-				ds.setLmRupFramesQuantity(lmRupFramesQuantity);
-
 				result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
-			}
 
-			if (result == false)
-			{
-				break;
+				dataSources.append(ds);
 			}
+		}
+
+		if (result == false)
+		{
+			return false;
 		}
 
 		//
 
 		QByteArray fileData;
-		DataSourcesXML::writeToXml(dataSources, &fileData);
+		result &= DataSourcesXML<DataSource>::writeToXml(dataSources, &fileData);
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_APP_DATA_SOURCES_XML, CFG_FILE_ID_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_APP_DATA_SOURCES_XML, CFG_FILE_ID_APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{

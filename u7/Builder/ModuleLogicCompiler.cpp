@@ -1,9 +1,11 @@
 #include "../Builder/ModuleLogicCompiler.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
+#include "../lib/DataSource.h"
 #include "../lib/Crc.h"
 #include "../TuningIPEN/TuningIPENDataStorage.h"
 
+#include "SoftwareCfgGenerator.h"
 #include "Connection.h"
 #include "Parser.h"
 #include "Builder.h"
@@ -8938,7 +8940,7 @@ namespace Builder
 		}
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											"AppLANDataSize",
+											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_SIZE,
 											m_memoryMap.regBufSizeW(),
 											m_log);
 	}
@@ -9126,7 +9128,7 @@ namespace Builder
 		uniqueID = crc.result();
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											"AppLANDataUID",
+											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_UID,
 											crc.result32(),
 											m_log);
 	}

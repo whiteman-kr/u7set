@@ -1,17 +1,22 @@
 #pragma once
 
 #include <QObject>
-#include "../lib/SocketIO.h"
-#include "../lib/Queue.h"
-#include "../lib/XmlHelper.h"
-#include "../lib/DataProtocols.h"
-#include "../lib/DeviceObject.h"
-#include "../lib/AppSignal.h"
+
 #include "../Proto/network.pb.h"
-#include "../lib/SimpleThread.h"
+
+#include "SocketIO.h"
+#include "Queue.h"
+#include "XmlHelper.h"
+#include "DataProtocols.h"
+#include "DeviceObject.h"
+#include "AppSignal.h"
+#include "SimpleThread.h"
+#include "CommonTypes.h"
+
+#include "../u7/Builder/IssueLogger.h"
 
 
-class DataSource /*: public QObject*/
+class DataSource
 {
 public:
 	enum class DataType
@@ -21,10 +26,74 @@ public:
 		Tuning,
 	};
 
+	static const int LM_ETHERNET_ADAPTERS_COUNT = 3;
+	static const int LM_ETHERNET_ADAPTER1 = 1;
+	static const int LM_ETHERNET_ADAPTER2 = 2;
+	static const int LM_ETHERNET_ADAPTER3 = 3;
+
+	struct LmEthernetAdapterProperties
+	{
+		static const char* PROP_TUNING_ENABLE;
+		static const char* PROP_TUNING_IP;
+		static const char* PROP_TUNING_PORT;
+		static const char* PROP_TUNING_SERVICE_ID;
+
+		static const char* PROP_APP_DATA_ENABLE;
+		static const char* PROP_APP_DATA_IP;
+		static const char* PROP_APP_DATA_PORT;
+		static const char* PROP_APP_DATA_SERVICE_ID;
+		static const char* PROP_LM_APP_DATA_UID;
+		static const char* PROP_LM_APP_DATA_SIZE;
+
+		static const char* PROP_DIAG_DATA_ENABLE;
+		static const char* PROP_DIAG_DATA_IP;
+		static const char* PROP_DIAG_DATA_PORT;
+		static const char* PROP_DIAG_DATA_SERVICE_ID;
+		static const char* PROP_LM_DIAG_DATA_UID;
+		static const char* PROP_LM_DIAG_DATA_SIZE;
+
+		static const char* LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
+
+		int adapterNo;		// LM_ETHERNET_ADAPTER* values
+		QString adapterID;
+
+		// only for adapterNo == LM_ETHERNET_ADAPTER1
+		//
+		bool tuningEnable = true;
+		QString tuningIP;
+		int tuningPort = 0;
+		QString tuningServiceID;
+
+		// only for adapterNo == LM_ETHERNET_ADAPTER2 or adapterNo == LM_ETHERNET_ADAPTER3
+		//
+		bool appDataEnable = true;
+		QString appDataIP;
+		int appDataPort = 0;
+		QString appDataServiceID;
+		quint64 appDataUID = 0;
+		int appDataSize = 0;
+		int appDataFramesQuantity = 0;
+
+		bool diagDataEnable = true;
+		QString diagDataIP;
+		int diagDataPort = 0;
+		QString diagDataServiceID;
+		quint64 diagDataUID = 0;
+		int diagDataSize = 0;
+		int diagDataFramesQuantity = 0;
+
+		bool getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm, int adapterNo, Builder::IssueLogger* log);
+	};
+
+	static const char* const ELEMENT_DATA_SOURCES;
 	static const char* const ELEMENT_DATA_SOURCE;
 	static const char* const ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS;
 
-protected:
+	// LM device properties
+
+	static const char* PROP_DEVICE_LM_NUMBER;
+	static const char* PROP_DEVICE_SUBSYSTEM_CHANNEL;
+	static const char* PROP_DEVICE_SUBSYSTEM_ID;
 
 	// XML-serializable members
 	//
@@ -32,12 +101,11 @@ protected:
 	static const char* DATA_TYPE_DIAG;
 	static const char* DATA_TYPE_TUNING;
 
-	static const char* PROP_DATA_TYPE;
-	static const char* PROP_CHANNEL;
+	static const char* PROP_LM_DATA_TYPE;
 	static const char* PROP_LM_ID;
 	static const char* PROP_LM_NUMBER;
 	static const char* PROP_LM_CHANNEL;
-	static const char* PROP_LM_SUBSYSTEM_ID;
+	static const char* PROP_LM_SUBSYSTEM_KEY;
 	static const char* PROP_LM_SUBSYSTEM;
 	static const char* PROP_LM_MODULE_TYPE;
 	static const char* PROP_LM_CAPTION;
@@ -45,16 +113,24 @@ protected:
 	static const char* PROP_LM_DATA_ENABLE;
 	static const char* PROP_LM_DATA_IP;
 	static const char* PROP_LM_DATA_PORT;
+	static const char* PROP_LM_DATA_SIZE;
 	static const char* PROP_LM_RUP_FRAMES_QUANTITY;
 	static const char* PROP_LM_DATA_ID;
 	static const char* PROP_LM_UNIQUE_ID;
+	static const char* PROP_SERVICE_ID;
 	static const char* PROP_COUNT;
-	static const char* SIGNAL_ID_ELEMENT;
 
 private:
 public:
 	DataSource();
 	~DataSource();
+
+	bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
+								   DataType dataType,
+								   int adapterNo,
+								   const SubsystemKeyMap& subsystemKeyMap,
+								   const QHash<QString, quint64>& lmUniqueIdMap,
+								   Builder::IssueLogger* log);
 
 	// LM's properties
 	//
@@ -71,8 +147,8 @@ public:
 	QString lmSubsystemChannel() const { return m_lmSubsystemChannel; }
 	void setLmSubsystemChannel(const QString& lmChannel) { m_lmSubsystemChannel = lmChannel; }
 
-	int lmSubsystemID() const { return m_lmSubsystemID; }
-	void setLmSubsystemID(int subsystemID) { m_lmSubsystemID = subsystemID; }
+	int lmSubsystemKey() const { return m_lmSubsystemKey; }
+	void setLmSubsystemKey(int subsystemKey) { m_lmSubsystemKey = subsystemKey; }
 
 	int lmModuleType() const { return m_lmModuleType; }
 	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
@@ -109,11 +185,16 @@ public:
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
 
+	QString serviceID()	 const { return m_serviceID; }
+	void setServiceID(const QString& serviceID) { m_serviceID = serviceID; }
+
 	quint64 ID() const { return m_id; }
 	void setID(quint32 id) { m_id = id; }
 
-	QString dataTypeToString(DataType lmDataType) const;
-	DataType stringToDataType(const QString& dataTypeStr);
+	//
+
+	static QString dataTypeToString(DataType lmDataType);
+	static DataType stringToDataType(const QString& dataTypeStr);
 
 	void writeToXml(XmlWriteHelper& xml) const;
 	bool readFromXml(XmlReadHelper& xml);
@@ -139,7 +220,7 @@ private:
 	QString m_lmEquipmentID;
 	int m_lmNumber = 0;
 	int m_lmModuleType = 0;
-	int m_lmSubsystemID = 0;
+	int m_lmSubsystemKey = 0;
 	QString m_lmSubsystemChannel;				// A, B, C...
 	QString m_lmSubsystem;
 	QString m_lmCaption;
@@ -148,7 +229,10 @@ private:
 	HostAddressPort m_lmAddressPort;
 	quint32 m_lmDataID = 0;
 	quint64 m_lmUniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+	int m_lmDataSize = 0;
 	int m_lmRupFramesQuantity = 0;
+
+	QString m_serviceID;
 
 	QStringList m_associatedSignals;
 
@@ -157,13 +241,6 @@ private:
 	quint64 m_id = 0;					// generate by DataSource::generateID() after readFromXml
 };
 
-
-class DataSourcesXML
-{
-public:
-	static bool writeToXml(const QVector<DataSource>& dataSources, QByteArray* fileData);
-	static bool readFromXml(const QByteArray& fileData, QVector<DataSource>* dataSources);
-};
 
 class DataSourceOnline : public DataSource
 {
@@ -345,3 +422,85 @@ private:
 	Times m_rupDataTimes;
 	quint32 m_rupDataSize = 0;
 };
+
+
+template <typename TYPE>				// TYPE should be DataSource-derived class
+class DataSourcesXML
+{
+public:
+	static bool writeToXml(const QVector<TYPE>& dataSources, QByteArray* fileData);
+	static bool readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources);
+};
+
+
+// -----------------------------------------------------------------------------
+//
+// DataSourcesXML class implementation
+//
+// -----------------------------------------------------------------------------
+
+template <typename TYPE>
+bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, QByteArray* fileData)
+{
+	if (fileData == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	fileData->clear();
+
+	QXmlStreamWriter xmlWriter(fileData);
+	XmlWriteHelper xml(xmlWriter);
+
+	xml.setAutoFormatting(true);
+	xml.writeStartDocument();
+
+	xml.writeStartElement(DataSource::ELEMENT_DATA_SOURCES);
+	xml.writeIntAttribute(DataSource::PROP_COUNT, dataSources.count());
+
+	for(const TYPE& ds : dataSources)
+	{
+		ds.writeToXml(xml);
+	}
+
+	xml.writeEndElement();	// </DataSources>
+	xml.writeEndDocument();
+
+	return true;
+}
+
+template <typename TYPE>
+bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE> *dataSources)
+{
+	TEST_PTR_RETURN_FALSE(dataSources);
+
+	XmlReadHelper xml(fileData);
+
+	dataSources->clear();
+
+	bool result = true;
+
+	if (xml.findElement(DataSource::ELEMENT_DATA_SOURCES) == false)
+	{
+		return false;
+	}
+
+	int count = 0;
+
+	if (xml.readIntAttribute(DataSource::PROP_COUNT, &count) == false)
+	{
+		return false;
+	}
+
+	dataSources->resize(count);
+
+	for(int i = 0; i < count; i++)
+	{
+		result &= (*dataSources)[i].readFromXml(xml);
+	}
+
+	return result;
+}
+
+
