@@ -140,7 +140,7 @@ private:
 
 	// var modified both by Writer and Reader
 
-	std::atomic<int> m_size = 0;								// current queue size
+	std::atomic<int> m_size = { 0 };								// current queue size
 };
 
 

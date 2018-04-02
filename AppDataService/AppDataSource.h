@@ -39,7 +39,7 @@ private:
 	SimpleAppSignalState m_current[2];
 	SimpleAppSignalState m_stored;
 
-	std::atomic<int> m_curStateIndex = 0;
+	std::atomic<int> m_curStateIndex = {0};
 
 	// paramters needed to update state
 	//
