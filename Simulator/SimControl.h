@@ -4,6 +4,7 @@
 #include <set>
 #include <atomic>
 #include <QThread>
+#include <QtConcurrent>
 #include <QMutex>
 #include <SimOutput.h>
 #include <SimTimeController.h>
@@ -24,7 +25,7 @@ namespace Sim
 	{
 		std::set<QString> m_equipmentIds;
 
-		int m_leftCycles = -1;
+		std::chrono::microseconds m_leftTime{0};
 		SimControlState m_state = SimControlState::Stop;
 	};
 
@@ -39,7 +40,11 @@ namespace Sim
 
 	public:
 		void reset();
+
+		void addToRunList(const QString& equipmentId);
 		void addToRunList(const QStringList& equipmentIds);
+
+		void removeFromRunList(const QString& equipmentId);
 		void removeFromRunList(const QStringList& equipmentIds);
 
 		bool start(int cycles = -1);
@@ -71,6 +76,8 @@ namespace Sim
 		ControlData m_controlData;
 		// End of Access only with mutex
 		//
+
+		std::map<QString, QFuture<bool>> m_lmTasks;	// use only in run()
 	};
 
 }

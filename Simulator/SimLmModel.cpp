@@ -7,20 +7,20 @@ namespace Sim
 	LogicModule::LogicModule() :
 		Output("LogicModule")
 	{
-		m_device.moveToThread(&m_workerThread);
+		//m_device.moveToThread(&m_workerThread);
 
 		connect(&m_device, &DeviceEmulator::appCodeParsed, this, &LogicModule::slot_appCodeParsed);
 		connect(&m_device, &DeviceEmulator::faulted, this, &LogicModule::faulted);
 
-		connect(this, &LogicModule::signal_pause, &m_device, &DeviceEmulator::pause, Qt::QueuedConnection);
-		connect(this, &LogicModule::signal_start, &m_device, &DeviceEmulator::start, Qt::QueuedConnection);
+		//connect(this, &LogicModule::signal_pause, &m_device, &DeviceEmulator::pause, Qt::QueuedConnection);
+		//connect(this, &LogicModule::signal_start, &m_device, &DeviceEmulator::start, Qt::QueuedConnection);
 
 		return;
 	}
 
 	LogicModule::~LogicModule()
 	{
-		powerOff();
+		//powerOff();
 		return;
 	}
 
@@ -81,82 +81,82 @@ namespace Sim
 		return;
 	}
 
-	bool LogicModule::powerOn(bool autoStart)
-	{
-		writeMessage(tr("PowerOn, autoStart = %1").arg(autoStart));
+//	bool LogicModule::powerOn(bool autoStart)
+//	{
+//		writeMessage(tr("PowerOn, autoStart = %1").arg(autoStart));
 
-		if (m_workerThread.isRunning() == true)
-		{
-			writeWaning(tr("PowerOn, previous device emulation is in progress, device will be stopped and new emulation will start."));
-			powerOff();
-			assert(m_workerThread.isFinished());
-		}
+//		if (m_workerThread.isRunning() == true)
+//		{
+//			writeWaning(tr("PowerOn, previous device emulation is in progress, device will be stopped and new emulation will start."));
+//			powerOff();
+//			assert(m_workerThread.isFinished());
+//		}
 
-		m_device.reset();	// Worker thread is stopped, it's safe to call reset
+//		m_device.reset();	// Worker thread is stopped, it's safe to call reset
 
-		m_workerThread.start();
+//		m_workerThread.start();
 
-		if (autoStart == true)
-		{
-			start();
-		}
+//		if (autoStart == true)
+//		{
+//			start();
+//		}
 
-		return true;
-	}
+//		return true;
+//	}
 
-	bool LogicModule::powerOff()
-	{
-		m_workerThread.quit();
-		m_workerThread.wait();
+//	bool LogicModule::powerOff()
+//	{
+//		m_workerThread.quit();
+//		m_workerThread.wait();
 
-		return true;
-	}
+//		return true;
+//	}
 
-	bool LogicModule::pause()
-	{
-		if (m_workerThread.isRunning() == true)
-		{
-			return false;
-		}
+//	bool LogicModule::pause()
+//	{
+//		if (m_workerThread.isRunning() == true)
+//		{
+//			return false;
+//		}
 
-		emit signal_pause();
-		return true;
-	}
+//		emit signal_pause();
+//		return true;
+//	}
 
-	bool LogicModule::start(int cycles /*= -1*/)
-	{
-		if (m_workerThread.isRunning() == false)
-		{
-			return false;
-		}
+//	bool LogicModule::start(int cycles /*= -1*/)
+//	{
+//		if (m_workerThread.isRunning() == false)
+//		{
+//			return false;
+//		}
 
-		emit signal_start(cycles);
-		return true;
-	}
+//		emit signal_start(cycles);
+//		return true;
+//	}
 
-	bool LogicModule::step()
-	{
-		return start(1);
-	}
+//	bool LogicModule::step()
+//	{
+//		return start(1);
+//	}
 
-	bool LogicModule::isPowerOn() const
-	{
-		return m_workerThread.isRunning();
-	}
+//	bool LogicModule::isPowerOn() const
+//	{
+//		return m_workerThread.isRunning();
+//	}
 
-	bool LogicModule::isFaultMode() const
-	{
-		if (isPowerOn() == false)
-		{
-			return true;
-		}
+//	bool LogicModule::isFaultMode() const
+//	{
+//		if (isPowerOn() == false)
+//		{
+//			return true;
+//		}
 
-		// To do
-		//
-		int ToDo = 0;
+//		// To do
+//		//
+//		int ToDo = 0;
 
-		return false;
-	}
+//		return false;
+//	}
 
 	bool LogicModule::loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom)
 	{

@@ -288,9 +288,38 @@ namespace Sim
 		return true;
 	}
 
+	bool DeviceEmulator::run(int cycles)
+	{
+		if (m_currentMode == DeviceMode::Start)
+		{
+			bool ok = processStartMode();
+			if (ok == false)
+			{
+				return false;
+			}
+		}
+
+		bool ok = true;
+
+		for (int i = 0; i < cycles; i++)
+		{
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				ok &= processFaultMode();
+				break;
+			}
+
+			ok &= processOperate();
+		}
+
+		return ok;
+	}
+
 	bool DeviceEmulator::initMemory()
 	{
 		bool ok = true;
+
+		m_ram.reset();
 
 		// RAM - I/O modules
 		//
@@ -373,18 +402,18 @@ namespace Sim
 		return ok;
 	}
 
-	void DeviceEmulator::pause()
-	{
-		writeMessage(tr("Pause"));
+//	void DeviceEmulator::pause()
+//	{
+//		writeMessage(tr("Pause"));
 
-		if (m_timerId != -1)
-		{
-			killTimer(m_timerId);
-			m_timerId = -1;
-		}
+//		if (m_timerId != -1)
+//		{
+//			killTimer(m_timerId);
+//			m_timerId = -1;
+//		}
 
-		return;
-	}
+//		return;
+//	}
 
 	bool DeviceEmulator::initEeprom()
 	{
@@ -736,15 +765,15 @@ namespace Sim
 		return result;
 	}
 
-	void DeviceEmulator::start(int cycles)
-	{
-		writeMessage(tr("Start, cycles = %1").arg(cycles));
+//	void DeviceEmulator::start(int cycles)
+//	{
+//		writeMessage(tr("Start, cycles = %1").arg(cycles));
 
-		if (m_timerId == -1)
-		{
-			m_timerId = startTimer(5, Qt::PreciseTimer);
-		}
-	}
+//		if (m_timerId == -1)
+//		{
+//			m_timerId = startTimer(5, Qt::PreciseTimer);
+//		}
+//	}
 
 	void DeviceEmulator::fault(QString reasone, QString func)
 	{
@@ -779,29 +808,29 @@ namespace Sim
 		return;
 	}
 
-	void DeviceEmulator::timerEvent(QTimerEvent* event)
-	{
-		if (event->timerId() == m_timerId)
-		{
-			switch (m_currentMode)
-			{
-			case DeviceMode::Start:
-				processStartMode();
-				break;
-			case DeviceMode::Fault:
-				processFaultMode();
-				break;
-			case DeviceMode::Operate:
-				processOperate();
-				break;
-			default:
-				assert(false);
-				writeError(tr("Unknown device mode: %1").arg(static_cast<int>(m_currentMode)));
-			}
-		}
+//	void DeviceEmulator::timerEvent(QTimerEvent* event)
+//	{
+//		if (event->timerId() == m_timerId)
+//		{
+//			switch (m_currentMode)
+//			{
+//			case DeviceMode::Start:
+//				processStartMode();
+//				break;
+//			case DeviceMode::Fault:
+//				processFaultMode();
+//				break;
+//			case DeviceMode::Operate:
+//				processOperate();
+//				break;
+//			default:
+//				assert(false);
+//				writeError(tr("Unknown device mode: %1").arg(static_cast<int>(m_currentMode)));
+//			}
+//		}
 
-		return;
-	}
+//		return;
+//	}
 
 	bool DeviceEmulator::processStartMode()
 	{

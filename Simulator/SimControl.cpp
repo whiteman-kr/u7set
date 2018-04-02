@@ -41,9 +41,17 @@ namespace Sim
 		return;
 	}
 
+	void Control::addToRunList(const QString& equipmentId)
+	{
+		QStringList l;
+		l << equipmentId;
+
+		return addToRunList(l);
+	}
+
 	void Control::addToRunList(const QStringList& equipmentIds)
 	{
-		writeMessage(tr("Add to RunList %1 modules.").arg(equipmentIds.size()));
+		writeMessage(tr("Add to RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
 		bool ok = true;
 
@@ -76,8 +84,18 @@ namespace Sim
 		return;
 	}
 
+	void Control::removeFromRunList(const QString& equipmentId)
+	{
+		QStringList l;
+		l << equipmentId;
+
+		return removeFromRunList(l);
+	}
+
 	void Control::removeFromRunList(const QStringList& equipmentIds)
 	{
+		writeMessage(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
+
 		QMutexLocker l(&m_mutex);
 
 		for (QString id : equipmentIds)
@@ -258,7 +276,32 @@ namespace Sim
 			return result;
 		}
 
-		// --
+		// Check previous tasks
+		//
+		for (auto it = m_lmTasks.begin(); it != m_lmTasks.end(); ++it)
+		{
+			const QString& lmId = it->first;
+			QFuture<bool>& task = it->second;
+
+
+		}
+
+		// Detect which modules must run now, depending on work cycle duariond and TimeController
+		//
+//		auto ct = m_timeController.currentTime();
+//		if (ct > std::chrono::system_clock::now())
+//		{
+//			// Current simulation process is ahead of real time, skip this cycle
+//			//
+//			return true;
+//		}
+
+
+		// Run 1 cycle of simulation
+		//
+		//device.processOperate()
+
+		// Set new value to TimeController
 		//
 
 		return result;

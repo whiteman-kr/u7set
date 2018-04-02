@@ -178,7 +178,8 @@ namespace Sim
 				  const Eeprom& appLogicEeprom,
 				  const QString& simulationScript);
 
-		bool reset();		// Run from UI thread, only if worker thread is stopped
+		bool reset();
+		bool run(int cycles = -1);
 
 	private:
 		bool initMemory();
@@ -189,13 +190,13 @@ namespace Sim
 		void dumpJsError(const QJSValue& value);
 
 	public slots:
-		void pause();
-		void start(int cycles);
+		//void pause();
+		//void start(int cycles);
 
 	private:
 		void fault(QString reasone, QString func);
 
-		virtual void timerEvent(QTimerEvent* event) override;
+		//virtual void timerEvent(QTimerEvent* event) override;
 
 		bool processStartMode();
 		bool processFaultMode();
@@ -254,6 +255,7 @@ namespace Sim
 		// JS
 		//
 		QJSEngine m_jsEngine;
+
 		QJSValue m_evaluatedJs;
 		QJSValue m_thisJsValue;
 

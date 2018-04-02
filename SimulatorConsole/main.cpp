@@ -53,17 +53,20 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	std::shared_ptr<Sim::LogicModule> logicModule = simulator.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
-	if (logicModule == nullptr)
-	{
-		return 2;
-	}
+	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC01_MD00");
+	simulator.control().start(3);
 
-	ok = logicModule->powerOn(true);
-	if (ok == false)
-	{
-		return 3;
-	}
+//	std::shared_ptr<Sim::LogicModule> logicModule = simulator.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
+//	if (logicModule == nullptr)
+//	{
+//		return 2;
+//	}
+
+//	ok = logicModule->powerOn(true);
+//	if (ok == false)
+//	{
+//		return 3;
+//	}
 
 	getc(stdin);
 

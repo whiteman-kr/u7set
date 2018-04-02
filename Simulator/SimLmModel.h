@@ -31,21 +31,21 @@ namespace Sim
 
 		// Running LM
 		//
-		bool powerOn(bool autoStart);
-		bool powerOff();
+		//bool powerOn(bool autoStart);
+		//bool powerOff();
 
-		bool pause();
-		bool start(int cycles = -1);
-		bool step();
+		//bool pause();
+		//bool start(int cycles = -1);
+		//bool step();
 
-		bool isPowerOn() const;
-		bool isFaultMode() const;
+		//bool isPowerOn() const;
+		//bool isFaultMode() const;
 
 		// Signals
 		//
-	signals:
-		void signal_pause();				// Internal class signal, command to DeviceEmulator
-		void signal_start(int cycles);		// Internal class signal, command to DeviceEmulator
+//	signals:
+//		void signal_pause();				// Internal class signal, command to DeviceEmulator
+//		void signal_start(int cycles);		// Internal class signal, command to DeviceEmulator
 
 	signals:
 		void faulted(QString message);		// Public signal, translated from DeviceEmulator
@@ -89,7 +89,7 @@ namespace Sim
 
 		// Running Emulation
 		//
-		QThread m_workerThread;
+		//QThread m_workerThread;
 		DeviceEmulator m_device;
 
 		// --
