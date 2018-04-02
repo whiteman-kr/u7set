@@ -5,11 +5,12 @@
 #include "../u7/Builder/IssueLogger.h"
 
 
-const char* const CFG_FILE_ID_DATA_SOURCES = "APP_DATA_SOURCES";
+const char* const CFG_FILE_ID_APP_DATA_SOURCES = "APP_DATA_SOURCES";
 const char* const CFG_FILE_ID_APP_SIGNALS = "APP_SIGNALS";
 const char* const CFG_FILE_ID_APP_SIGNAL_SET = "APP_SIGNAL_SET";
 const char* const CFG_FILE_ID_UNIT_SET = "UNIT_SET";
 
+const char* const CFG_FILE_ID_TUNING_SOURCES = "TUNING_SOURCES";
 const char* const CFG_FILE_ID_TUNING_SIGNALS = "TUNING_SIGNALS";
 const char* const CFG_FILE_ID_TUNING_SCHEMAS_DETAILS = "TUNING_SCHEMAS_DETAILS";
 const char* const CFG_FILE_ID_TUNING_FILTERS = "TUNING_FILTERS";

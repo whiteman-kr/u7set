@@ -1,12 +1,11 @@
 #include "../lib/DeviceHelper.h"
+#include "../lib/LmDescription.h"
+#include "../lib/DataSource.h"
+#include "../lib/ServiceSettings.h"
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
 #include "BdfFile.h"
-#include "../lib/LmDescription.h"
-
-#include "../lib/ServiceSettings.h"
-
 
 namespace Builder
 {
@@ -204,17 +203,17 @@ namespace Builder
 				continue;
 			}
 
-			for(int i = 0; i < SoftwareCfgGenerator::LM_ETHERNET_ADAPTERS_COUNT; i++)
+			for(int i = 0; i < DataSource::LM_ETHERNET_ADAPTERS_COUNT; i++)
 			{
-				SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties lmNetProperties;
+				DataSource::LmEthernetAdapterProperties lmNetProperties;
 
-				int ethernetAdapterNo = SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1 + i;
+				int ethernetAdapterNo = DataSource::LM_ETHERNET_ADAPTER1 + i;
 
 				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, m_log);
 
 				switch(ethernetAdapterNo)
 				{
-				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1:
+				case DataSource::LM_ETHERNET_ADAPTER1:
 					// tuning data adapter
 					//
 					if (lmNetProperties.tuningEnable == true)
@@ -236,8 +235,8 @@ namespace Builder
 					}
 					break;
 
-				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER2:
-				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER3:
+				case DataSource::LM_ETHERNET_ADAPTER2:
+				case DataSource::LM_ETHERNET_ADAPTER3:
 					// appllication and diagnostics data adapters
 					//
 					if (lmNetProperties.appDataEnable == true)

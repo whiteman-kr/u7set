@@ -202,7 +202,7 @@ namespace Tuning
 		m_sourceUniqueID = source.lmUniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_lmModuleType = static_cast<quint16>(source.lmModuleType());
-		m_subsystemCode = static_cast<quint16>(source.lmSubsystemID());
+		m_subsystemCode = static_cast<quint16>(source.lmSubsystemKey());
 
 		m_disableModulesTypeChecking = settings.disableModulesTypeChecking;
 

@@ -317,12 +317,13 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		if (errStr.isEmpty() == false)
 		{
 			qDebug() << errStr;
+			result = false;
 			continue;
 		}
 
 		result = true;
 
-		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
+		if (bfi.ID == CFG_FILE_ID_APP_DATA_SOURCES)
 		{
 			result &= readDataSources(fileData);			// fill m_appDataSources
 		}

@@ -141,7 +141,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_EQUIPMENT_ID: return d.lmEquipmentID();
 				case DSC_MODULE_NUMBER: return d.lmNumber();
 				case DSC_MODULE_TYPE: return d.lmModuleType();
-				case DSC_SUBSYSTEM_ID: return d.lmSubsystemID();
+				case DSC_SUBSYSTEM_ID: return d.lmSubsystemKey();
 				case DSC_SUBSYSTEM_CAPTION: return d.lmSubsystem();
 				case DSC_ADAPTER_ID: return d.lmAdapterID();
 				case DSC_ENABLE_DATA: return d.lmDataEnable();

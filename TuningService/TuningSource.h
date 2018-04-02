@@ -25,19 +25,20 @@ namespace Tuning
 	};
 
 
-	class TuningSources : public QHash<QString, TuningSource*>
+	class TuningSources : public QVector<TuningSource>
 	{
 	public:
 		~TuningSources();
 
 		void clear();
 
-		void buildIP2DataSourceMap();
+		void buildMaps();
 
 		const TuningSource* getSourceByIP(quint32 ip) const;
-		const TuningSource *getSourceByID(const QString& sourceID) const;
+		const TuningSource* getSourceByID(const QString& sourceID) const;
 
 	private:
-		QHash<quint32, TuningSource*> m_ip2Source;
+		QHash<quint32, int> m_ip2Source;
+		QHash<QString, int> m_id2Source;
 	};
 }

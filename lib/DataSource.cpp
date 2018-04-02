@@ -1,6 +1,136 @@
-#include "../lib/DataSource.h"
-#include "../lib/WUtils.h"
-#include "../lib/Crc.h"
+#include "DataSource.h"
+#include "WUtils.h"
+#include "Crc.h"
+#include "DeviceHelper.h"
+
+// ---------------------------------------------------------------------------------
+//
+//	DataSource::LmEthernetAdapterProperties class implementation
+//
+// ---------------------------------------------------------------------------------
+
+const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE = "TuningEnable";
+const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_IP = "TuningIP";
+const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_PORT = "TuningPort";
+const char* DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID = "TuningServiceID";
+
+const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_ENABLE = "AppDataEnable";
+const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_IP = "AppDataIP";
+const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_PORT = "AppDataPort";
+const char* DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID = "AppDataServiceID";
+const char* DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_UID = "AppLANDataUID";
+const char* DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_SIZE = "AppLANDataSize";
+
+const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_ENABLE = "DiagDataEnable";
+const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_IP = "DiagDataIP";
+const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_PORT = "DiagDataPort";
+const char* DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID = "DiagDataServiceID";
+const char* DataSource::LmEthernetAdapterProperties::PROP_LM_DIAG_DATA_UID = "DiagLANDataUID";
+const char* DataSource::LmEthernetAdapterProperties::PROP_LM_DIAG_DATA_SIZE= "DiagLANDataSize";
+
+const char* DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR = "_ETHERNET0%1";
+
+bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm, int adptrNo, Builder::IssueLogger* log)
+{
+	if (log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (lm == nullptr)
+	{
+		LOG_INTERNAL_ERROR(log);
+		assert(false);
+		return false;
+	}
+
+	if (adptrNo < LM_ETHERNET_ADAPTER1 ||
+		adptrNo > LM_ETHERNET_ADAPTER3)
+	{
+		LOG_INTERNAL_ERROR(log);
+		assert(false);
+		return false;
+	}
+
+	adapterNo = adptrNo;
+
+	QString suffix = QString(LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).arg(adapterNo);
+
+	Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(lm, suffix, log);
+
+	if (adapter == nullptr)
+	{
+		return false;
+	}
+
+	adapterID = adapter->equipmentIdTemplate();
+
+	bool result = true;
+
+	if (adptrNo == LM_ETHERNET_ADAPTER1)
+	{
+		// tunig adapter
+		//
+		result &= DeviceHelper::getBoolProperty(adapter, PROP_TUNING_ENABLE, &tuningEnable, log);
+		result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_IP, &tuningIP, log);
+		result &= DeviceHelper::getIntProperty(adapter, PROP_TUNING_PORT, &tuningPort, log);
+		result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_SERVICE_ID, &tuningServiceID, log);
+		return result;
+	}
+
+	if (adptrNo == LM_ETHERNET_ADAPTER2 ||
+		adptrNo == LM_ETHERNET_ADAPTER3)
+	{
+		int dataUID = 0;
+
+		// application data adapter
+		//
+		result &= DeviceHelper::getBoolProperty(adapter, PROP_APP_DATA_ENABLE, &appDataEnable, log);
+		result &= DeviceHelper::getStrProperty(adapter, PROP_APP_DATA_IP, &appDataIP, log);
+		result &= DeviceHelper::getIntProperty(adapter, PROP_APP_DATA_PORT, &appDataPort, log);
+		result &= DeviceHelper::getStrProperty(adapter, PROP_APP_DATA_SERVICE_ID, &appDataServiceID, log);
+
+		result &= DeviceHelper::getIntProperty(lm, PROP_LM_APP_DATA_UID, &dataUID, log);
+
+		appDataUID = dataUID;
+
+		result &= DeviceHelper::getIntProperty(lm, PROP_LM_APP_DATA_SIZE, &appDataSize, log);
+
+		appDataFramesQuantity = appDataSize / sizeof(Rup::Frame::data) +
+				((appDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
+
+		// diagnostics data adapter
+		//
+		result &= DeviceHelper::getBoolProperty(adapter, PROP_DIAG_DATA_ENABLE, &diagDataEnable, log);
+		result &= DeviceHelper::getStrProperty(adapter, PROP_DIAG_DATA_IP, &diagDataIP, log);
+		result &= DeviceHelper::getIntProperty(adapter, PROP_DIAG_DATA_PORT, &diagDataPort, log);
+		result &= DeviceHelper::getStrProperty(adapter, PROP_DIAG_DATA_SERVICE_ID, &diagDataServiceID, log);
+
+		diagDataUID = 0;
+		diagDataSize = 0;
+		diagDataFramesQuantity = 0;
+
+/*		UNCOMMENT when LM will have PROP_LM_DIAG_DATA_UID and PROP_LM_DIAG_DATA_SIZE properties  !!!
+ *
+ * 		result &= DeviceHelper::getIntProperty(lm, PROP_LM_DIAG_DATA_UID, &dataUID, log);
+
+		diagDataUID = dataUID;
+
+		result &= DeviceHelper::getIntProperty(lm, PROP_LM_DIAG_DATA_SIZE, &diagDataSize, log);
+
+		diagDataFramesQuantity = diagDataSize / sizeof(Rup::Frame::data) +
+				((diagDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
+*/
+
+		return result;
+	}
+
+	assert(false);
+	return false;
+}
+
+
 
 // -----------------------------------------------------------------------------
 //
@@ -8,6 +138,7 @@
 //
 // -----------------------------------------------------------------------------
 
+const char* const DataSource::ELEMENT_DATA_SOURCES = "DataSources";
 const char* const DataSource::ELEMENT_DATA_SOURCE = "DataSource";
 const char* const DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
 
@@ -15,11 +146,15 @@ const char* DataSource::DATA_TYPE_APP = "App";
 const char* DataSource::DATA_TYPE_DIAG = "Diag";
 const char* DataSource::DATA_TYPE_TUNING = "Tuning";
 
-const char* DataSource::PROP_DATA_TYPE = "LmDataType";
+const char* DataSource::PROP_DEVICE_LM_NUMBER = "LMNumber";
+const char* DataSource::PROP_DEVICE_SUBSYSTEM_CHANNEL = "SubsystemChannel";
+const char* DataSource::PROP_DEVICE_SUBSYSTEM_ID = "SubsystemID";
+
+const char* DataSource::PROP_LM_DATA_TYPE = "LmDataType";
 const char* DataSource::PROP_LM_ID = "LmEquipmentID";
 const char* DataSource::PROP_LM_NUMBER = "LmNumber";
 const char* DataSource::PROP_LM_CHANNEL = "LmChannel";
-const char* DataSource::PROP_LM_SUBSYSTEM_ID = "LmSubsystemID";
+const char* DataSource::PROP_LM_SUBSYSTEM_KEY = "LmSubsystemKey";
 const char* DataSource::PROP_LM_SUBSYSTEM = "LmSubsystem";
 const char* DataSource::PROP_LM_MODULE_TYPE = "LmModuleType";
 const char* DataSource::PROP_LM_CAPTION = "LmCaption";
@@ -27,11 +162,12 @@ const char* DataSource::PROP_LM_ADAPTER_ID = "LmAdapterID";
 const char* DataSource::PROP_LM_DATA_ENABLE = "LmDataEnable";
 const char* DataSource::PROP_LM_DATA_IP = "LmDataIP";
 const char* DataSource::PROP_LM_DATA_PORT = "LmDataPort";
+const char* DataSource::PROP_LM_DATA_SIZE = "LmDataSize";
 const char* DataSource::PROP_LM_RUP_FRAMES_QUANTITY = "LmRupFramesQuantity";
 const char* DataSource::PROP_LM_DATA_ID = "LmDataID";
 const char* DataSource::PROP_LM_UNIQUE_ID = "LmUniqueID";
+const char* DataSource::PROP_SERVICE_ID = "ServiceID";
 const char* DataSource::PROP_COUNT = "Count";
-const char* DataSource::SIGNAL_ID_ELEMENT = "SignalID";
 
 
 DataSource::DataSource()
@@ -42,7 +178,81 @@ DataSource::~DataSource()
 {
 }
 
-QString DataSource::dataTypeToString(DataType dataType) const
+bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
+										   DataType dataType,
+										   int adapterNo,
+										   const SubsystemKeyMap& subsystemKeyMap,
+										   const QHash<QString, quint64>& lmUniqueIdMap,
+										   Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(lm, log);
+
+	m_lmDataType = dataType;
+	m_lmEquipmentID = lm->equipmentIdTemplate();
+	m_lmModuleType = lm->moduleType();
+	m_lmCaption = lm->caption();
+
+	bool result = true;
+
+	result &= DeviceHelper::getIntProperty(lm, PROP_DEVICE_LM_NUMBER, &m_lmNumber, log);
+	result &= DeviceHelper::getStrProperty(lm, PROP_DEVICE_SUBSYSTEM_CHANNEL, &m_lmSubsystemChannel, log);
+	result &= DeviceHelper::getStrProperty(lm, PROP_DEVICE_SUBSYSTEM_ID, &m_lmSubsystem, log);
+
+	if (subsystemKeyMap.contains(m_lmSubsystem) == false)
+	{
+		// Subsystem '%1' is not found in subsystem set (Logic Module '%2')
+		//
+		log->errCFG3001(m_lmSubsystem, lm->equipmentIdTemplate());
+		return false;
+	}
+
+	m_lmSubsystemKey = subsystemKeyMap.value(m_lmSubsystem);
+	m_lmUniqueID = lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0);
+
+	LmEthernetAdapterProperties adapterProp;
+
+	result &= adapterProp.getLmEthernetAdapterNetworkProperties(lm, adapterNo, log);
+
+	m_lmAdapterID = adapterProp.adapterID;
+
+	switch(m_lmDataType)
+	{
+	case DataType::App:
+		m_lmDataEnable = adapterProp.appDataEnable;
+		m_lmAddressPort.setAddressPort(adapterProp.appDataIP, adapterProp.appDataPort);
+		m_lmDataID = adapterProp.appDataUID;
+		m_lmDataSize = adapterProp.appDataSize;
+		m_lmRupFramesQuantity = adapterProp.appDataFramesQuantity;
+		m_serviceID = adapterProp.appDataServiceID;
+		break;
+
+	case DataType::Diag:
+		m_lmDataEnable = adapterProp.diagDataEnable;
+		m_lmAddressPort.setAddressPort(adapterProp.diagDataIP, adapterProp.diagDataPort);
+		m_lmDataID = adapterProp.diagDataUID;
+		m_lmDataSize = adapterProp.diagDataSize;
+		m_lmRupFramesQuantity = adapterProp.diagDataFramesQuantity;
+		m_serviceID = adapterProp.diagDataServiceID;
+		break;
+
+	case DataType::Tuning:
+		m_lmDataEnable = adapterProp.tuningEnable;
+		m_lmAddressPort.setAddressPort(adapterProp.tuningIP, adapterProp.tuningPort);
+		m_lmDataID = 0;
+		m_lmDataSize = 0;
+		m_lmRupFramesQuantity = 0;
+		m_serviceID = adapterProp.tuningServiceID;
+		break;
+
+	default:
+		assert(false);
+	}
+
+	return result;
+}
+
+QString DataSource::dataTypeToString(DataType dataType)
 {
 	switch(dataType)
 	{
@@ -88,12 +298,12 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(ELEMENT_DATA_SOURCE);
 
-	xml.writeStringAttribute(PROP_DATA_TYPE, dataTypeToString(m_lmDataType));
+	xml.writeStringAttribute(PROP_LM_DATA_TYPE, dataTypeToString(m_lmDataType));
 	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
 
 	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType);
 	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
-	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
+	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_KEY, m_lmSubsystemKey);
 	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
 	xml.writeStringAttribute(PROP_LM_CHANNEL, m_lmSubsystemChannel);
 
@@ -102,10 +312,12 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
 	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
 	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
+	xml.writeIntAttribute(PROP_LM_DATA_SIZE, m_lmDataSize);
 	xml.writeIntAttribute(PROP_LM_RUP_FRAMES_QUANTITY, m_lmRupFramesQuantity);
-
 	xml.writeUInt32Attribute(PROP_LM_DATA_ID, m_lmDataID, true);
 	xml.writeUInt64Attribute(PROP_LM_UNIQUE_ID, m_lmUniqueID, true);
+
+	xml.writeStringAttribute(PROP_SERVICE_ID, m_serviceID);
 
 	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
 
@@ -131,18 +343,18 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	QString str;
 
-	result &= xml.readStringAttribute(PROP_DATA_TYPE, &str);
+	result &= xml.readStringAttribute(PROP_LM_DATA_TYPE, &str);
 	m_lmDataType = stringToDataType(str);
 
 	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
 
 	result &= xml.readIntAttribute(PROP_LM_MODULE_TYPE, &m_lmModuleType);
 	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
-	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_ID, &m_lmSubsystemID);
+	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_KEY, &m_lmSubsystemKey);
 	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
 	result &= xml.readStringAttribute(PROP_LM_CHANNEL,&m_lmSubsystemChannel);
 
-	result &= xml.readStringAttribute(PROP_LM_CAPTION,&m_lmCaption);
+	result &= xml.readStringAttribute(PROP_LM_CAPTION, &m_lmCaption);
 	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
 	result &= xml.readBoolAttribute(PROP_LM_DATA_ENABLE, &m_lmDataEnable);
 
@@ -155,10 +367,13 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	m_lmAddressPort.setAddress(ipStr);
 	m_lmAddressPort.setPort(port);
 
+	result &= xml.readIntAttribute(PROP_LM_DATA_SIZE, &m_lmDataSize);
 	result &= xml.readIntAttribute(PROP_LM_RUP_FRAMES_QUANTITY, &m_lmRupFramesQuantity);
 
 	result &= xml.readUInt32Attribute(PROP_LM_DATA_ID, &m_lmDataID);
 	result &= xml.readUInt64Attribute(PROP_LM_UNIQUE_ID, &m_lmUniqueID);
+
+	result &= xml.readStringAttribute(PROP_SERVICE_ID, &m_lmCaption);
 
 	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
 	{
@@ -211,7 +426,7 @@ bool DataSource::getInfo(Network::DataSourceInfo* proto) const
 	proto->set_lmdatatype(TO_INT(m_lmDataType));
 	proto->set_lmip(m_lmAddressPort.addressStr().toStdString());
 	proto->set_lmport(m_lmAddressPort.port());
-	proto->set_lmsubsystemid(m_lmSubsystemID);
+	proto->set_lmsubsystemid(m_lmSubsystemKey);
 	proto->set_lmsubsystem(m_lmSubsystem.toStdString());
 	proto->set_lmsubsystemchannel(m_lmSubsystemChannel.toStdString());
 	proto->set_lmnumber(m_lmNumber);
@@ -233,7 +448,7 @@ bool DataSource::setInfo(const Network::DataSourceInfo& proto)
 	m_lmCaption = QString::fromStdString(proto.lmcaption());
 	m_lmDataType = static_cast<DataType>(proto.lmdatatype());
 	m_lmAddressPort.setAddressPort(QString::fromStdString(proto.lmip()), proto.lmport());
-	m_lmSubsystemID = proto.lmsubsystemid();
+	m_lmSubsystemKey = proto.lmsubsystemid();
 	m_lmSubsystem = QString::fromStdString(proto.lmsubsystem());
 	m_lmSubsystemChannel = QString::fromStdString(proto.lmsubsystemchannel());
 	m_lmNumber = proto.lmnumber();
