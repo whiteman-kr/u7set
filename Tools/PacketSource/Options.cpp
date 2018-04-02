@@ -13,8 +13,6 @@ Options theOptions;
 SourceOption::SourceOption(QObject *parent) :
 	QObject(parent)
 {
-	m_serverIP.clear();
-	m_serverPort = 0;
 	m_path.clear();
 }
 
@@ -38,8 +36,6 @@ void SourceOption::load()
 {
 	QSettings s;
 
-	m_serverIP = s.value(QString("%1ServerIP").arg(SOURCE_REG_KEY), tr("127.0.0.1")).toString();
-	m_serverPort = s.value(QString("%1ServerPort").arg(SOURCE_REG_KEY), 0).toInt();
 	m_path = s.value(QString("%1Path").arg(SOURCE_REG_KEY), QString()).toString();
 }
 
@@ -49,8 +45,6 @@ void SourceOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1ServerIP").arg(SOURCE_REG_KEY), m_serverIP);
-	s.setValue(QString("%1ServerPort").arg(SOURCE_REG_KEY), m_serverPort);
 	s.setValue(QString("%1Path").arg(SOURCE_REG_KEY), m_path);
 }
 
@@ -58,8 +52,6 @@ void SourceOption::save()
 
 SourceOption& SourceOption::operator=(const SourceOption& from)
 {
-	m_serverIP = from.m_serverIP;
-	m_serverPort = from.m_serverPort;
 	m_path = from.m_path;
 
 	return *this;

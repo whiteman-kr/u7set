@@ -10,8 +10,6 @@
 #include "../../lib/WUtils.h"
 
 // -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
 
 SourceWorker::SourceWorker(QObject* pSource) :
 	m_pSource(pSource),
@@ -42,23 +40,23 @@ void SourceWorker::process()
 		return;
 	}
 
-	pSocket->bind(QHostAddress::LocalHost, PS_PORT);
+	pSocket->bind(QHostAddress::LocalHost, PS::UDP_PORT);
 
 	while(m_finishThread == false)
 	{
-		for (int fn = 0; fn < pSource->frameCount(); fn++)
+		for (int frameNumber = 0; frameNumber < pSource->frameCount(); frameNumber++)
 		{
-			// header
+			// header RupFrame
 			//
 			Rup::Header& header = m_psFrame.rupFrame.header;
 			header.frameSize = Socket::ENTIRE_UDP_SIZE;
-			header.protocolVersion = 5; //
+			header.protocolVersion = PS::SUPPORT_VERSION;
 			header.flags.appData = 1;
-			header.dataId = 0;
+			header.dataId = pSource->dataID();
 			header.moduleType = pSource->moduleType();
 			header.numerator = m_numerator;
 			header.framesQuantity = pSource->frameCount();
-			header.frameNumber = fn;
+			header.frameNumber = frameNumber;
 
 			QDateTime&& time = QDateTime::currentDateTime();
 			Rup::TimeStamp& timeStamp = header.timeStamp;
@@ -71,25 +69,26 @@ void SourceWorker::process()
 			timeStamp.second = time.time().second();
 			timeStamp.millisecond = time.time().msec();
 
-			// data
+			// data RupFrame
 			//
 			m_psFrame.rupFrame.data;
 
-			// crc64
+			// crc64 RupFrame
 			//
 			m_psFrame.rupFrame.calcCRC64();
 
-			// version and IP
+			// version and IP of psFrame
 			//
-			m_psFrame.version = reverseUint16(PS_FRAME_VERSION);
-			m_psFrame.destIP = reverseUint32(QHostAddress(pSource->ip()).toIPv4Address());
+			m_psFrame.version = reverseUint16(PS::FrameVersion);
+			m_psFrame.lmIP = reverseUint32(pSource->lmAddress().address32());
 
 			// send udp
 			//
-			pSocket->writeDatagram(reinterpret_cast<char*>(&m_psFrame), sizeof(m_psFrame), QHostAddress(theOptions.source().serverIP()), theOptions.source().serverPort());
-			//pSocket->writeDatagram(reinterpret_cast<char*>(&m_psFrame.rupFrame), sizeof(m_psFrame.rupFrame), QHostAddress(theOptions.source().serverIP()), theOptions.source().serverPort());
+			pSocket->writeDatagram(reinterpret_cast<char*>(&m_psFrame), sizeof(m_psFrame), pSource->serverAddress().address(), pSource->serverAddress().port());
 
-			QThread::msleep(PS_SEND_FRAME_TIMEOUT);
+			// timeout
+			//
+			QThread::msleep(PS::SendFrameTimeout);
 		}
 
 		m_numerator++;
@@ -102,5 +101,4 @@ void SourceWorker::process()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
+

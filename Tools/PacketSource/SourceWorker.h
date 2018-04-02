@@ -7,29 +7,26 @@
 
 // ==============================================================================================
 
-const int PS_SEND_FRAME_TIMEOUT = 5; // 5 ms
-
-// ==============================================================================================
-
-const int PS_FRAME_VERSION = 1;
-
-// ==============================================================================================
-
-const int PS_PORT = 65432;
-
-// ==============================================================================================
-
 #pragma pack(push, 1)
 
-struct PsFrame
+namespace PS
 {
-	Rup::Frame	rupFrame;
+	const int SUPPORT_VERSION = 5; // last version of Rup::VERSION
 
-	quint16		version;
-	quint32		destIP;
-};
+	const int FrameVersion = 1;
 
-const int PsFrameSize = sizeof(PsFrame);
+	struct Frame
+	{
+		Rup::Frame	rupFrame;
+
+		quint16		version = FrameVersion;
+		quint32		lmIP = 0;
+	};
+
+	const int UDP_PORT = 65432;
+
+	const int SendFrameTimeout = 5; // 5 ms
+}
 
 #pragma pack(pop)
 
@@ -50,7 +47,7 @@ private:
 
 	bool				m_finishThread = false;
 
-	PsFrame				m_psFrame;
+	PS::Frame			m_psFrame;
 
 	int					m_numerator = 0;
 

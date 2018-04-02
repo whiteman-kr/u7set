@@ -28,12 +28,6 @@ private:
 
 	SourceOption			m_sourceOption;
 
-	QLabel*					m_serverIPLabel = nullptr;
-	QLineEdit*				m_serverIPEdit = nullptr;
-
-	QLabel*					m_serverPortLabel = nullptr;
-	QLineEdit*				m_serverPortEdit = nullptr;
-
 	QLineEdit*				m_pathEdit = nullptr;
 	QPushButton*			m_selectPathBtn = nullptr;
 
