@@ -5,25 +5,24 @@
 #include <QHeaderView>
 #include <QStandardItemModel>
 
-const int DSC_CAPTION = 0,
-DSC_IP = 1,
-DSC_PORT = 2,
-DSC_PART_COUNT = 3,
-DSC_CHANNEL = 4,
-DSC_DATA_TYPE = 5,
-DSC_EQUIPMENT_ID = 6,
-DSC_MODULE_NUMBER = 7,
-DSC_MODULE_TYPE = 8,
-DSC_SUBSYSTEM_ID = 9,
-DSC_SUBSYSTEM_CAPTION = 10,
-DSC_ADAPTER_ID = 11,
-DSC_ENABLE_DATA = 12,
-DSC_DATA_ID = 13,
-DSC_FIRST_STATE_COLUMN = 14,
-DSC_STATE = 14,
-DSC_UPTIME = 15,
-DSC_RECEIVED = 16,
-DSC_SPEED = 17,
+const int DSC_EQUIPMENT_ID = 0,
+DSC_DATA_ID = 1,
+DSC_IP = 2,
+DSC_ENABLE_DATA = 3,
+DSC_STATE = 4,
+DSC_UPTIME = 5,
+DSC_RECEIVED = 6,
+DSC_SPEED = 7,
+DSC_CAPTION = 8,
+DSC_PORT = 9,
+DSC_PART_COUNT = 10,
+DSC_CHANNEL = 11,
+DSC_DATA_TYPE = 12,
+DSC_MODULE_NUMBER = 13,
+DSC_MODULE_TYPE = 14,
+DSC_SUBSYSTEM_ID = 15,
+DSC_SUBSYSTEM_CAPTION = 16,
+DSC_ADAPTER_ID = 17,
 DSC_ERROR_PROTOCOL_VERSION = 18,
 DSC_ERROR_FRAMES_QUANTITY = 19,
 DSC_ERROR_FRAME_NOMBER = 20,
@@ -32,26 +31,40 @@ DSC_ERROR_DATA_ID = 22,
 DSC_ERROR_BAD_FRAME_SIZE = 23,
 DSC_COUNT = 24;
 
+const int dataSourceStateColumn[] =
+{
+	DSC_STATE,
+	DSC_UPTIME,
+	DSC_RECEIVED,
+	DSC_SPEED,
+	DSC_ERROR_PROTOCOL_VERSION,
+	DSC_ERROR_FRAMES_QUANTITY,
+	DSC_ERROR_FRAME_NOMBER,
+	DSC_LOSTED_FRAMES_COUNT,
+};
+
+const int DATA_SOURCE_STATE_COLUMN_COUNT = sizeof(dataSourceStateColumn) / sizeof(dataSourceStateColumn[0]);
+
 const char* const dataSourceColumnStr[] =
 {
-	"Caption",
+	"Equipment ID",
+	"Data ID",
 	"IP",
+	"Enable data",
+	"State",
+	"Uptime",
+	"Received",
+	"Speed",
+	"Caption",
 	"Port",
 	"Part count",
 	"Channel",
 	"Data type",
-	"Equipment ID",
 	"Module number",
 	"Module type",
 	"Subsystem ID",
 	"Subsystem caption",
 	"Adapter ID",
-	"Enable data",
-	"Data ID",
-	"State",
-	"Uptime",
-	"Received",
-	"Speed",
 	"Error Protocol version",
 	"Error Frames quantity",
 	"Error Frame nomber",
@@ -145,7 +158,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_SUBSYSTEM_CAPTION: return d.lmSubsystem();
 				case DSC_ADAPTER_ID: return d.lmAdapterID();
 				case DSC_ENABLE_DATA: return d.lmDataEnable();
-				case DSC_DATA_ID: return d.lmDataID();
+				case DSC_DATA_ID: return "0x" + QString("%1").arg(d.lmDataID(), sizeof(d.lmDataID()) * 2, 16, QChar('0')).toUpper();
 				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(d.state()));
 				case DSC_UPTIME:
 				{
@@ -371,28 +384,31 @@ void AppDataServiceWidget::updateSignalInfo()
 
 void AppDataServiceWidget::updateSourceStateColumns()
 {
-	int firstRow = m_dataSourcesView->rowAt(0);
-	int lastRow = m_dataSourcesView->rowAt(m_signalsView->height());
-	if (lastRow == -1)
+	int firstVisibleRow = m_dataSourcesView->rowAt(0);
+	int lastVisibleRow = m_dataSourcesView->rowAt(m_signalsView->height());
+	if (lastVisibleRow == -1)
 	{
-		lastRow = m_dataSourcesStateModel->rowCount() - 1;
+		lastVisibleRow = m_dataSourcesStateModel->rowCount() - 1;
 	}
 
-	int firstColumn = m_dataSourcesView->columnAt(0);
-	int lastColumn = m_dataSourcesView->columnAt(m_dataSourcesView->width());
-	if (lastColumn == -1)
+	int firstVisibleColumn = m_dataSourcesView->columnAt(0);
+	int lastVisibleColumn = m_dataSourcesView->columnAt(m_dataSourcesView->width());
+	if (lastVisibleColumn == -1)
 	{
-		lastColumn = m_dataSourcesStateModel->columnCount() - 1;
-	}
-	if (lastColumn < DSC_FIRST_STATE_COLUMN)
-	{
-		return;
+		lastVisibleColumn = m_dataSourcesStateModel->columnCount() - 1;
 	}
 
-	m_dataSourcesStateModel->updateData(firstRow,
-										lastRow,
-										std::max(firstColumn, DSC_FIRST_STATE_COLUMN),
-										lastColumn);
+	for (int i = 0; i < DATA_SOURCE_STATE_COLUMN_COUNT; i++)
+	{
+		int currentColumn = dataSourceStateColumn[i];
+		if (currentColumn >= firstVisibleColumn && currentColumn <= lastVisibleColumn)
+		{
+			m_dataSourcesStateModel->updateData(firstVisibleRow,
+												lastVisibleRow,
+												currentColumn,
+												currentColumn);
+		}
+	}
 }
 
 void AppDataServiceWidget::updateSignalStateColumns()
