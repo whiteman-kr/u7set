@@ -209,7 +209,8 @@ SOURCES +=\
     ../lib/LmDescription.cpp \
     Builder/MemWriteMap.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    SpecificPropertiesEditor.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -352,7 +353,8 @@ HEADERS  += \
     ../lib/LmDescription.h \
     Builder/MemWriteMap.h \
     Builder/ConfigurationServiceCfgGenerator.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    SpecificPropertiesEditor.h
 
 FORMS    += \
     CreateProjectDialog.ui \

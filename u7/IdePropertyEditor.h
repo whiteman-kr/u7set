@@ -22,7 +22,7 @@ public:
 
     virtual void saveSettings();
 
-    virtual ExtWidgets::PropertyTextEditor* createCodeEditor(Property *property, QWidget* parent) override;
+	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent) override;
 
 private:
 

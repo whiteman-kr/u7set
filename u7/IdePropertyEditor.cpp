@@ -1,6 +1,7 @@
 
-#include "IdePropertyEditor.h"
 #include "Settings.h"
+#include "IdePropertyEditor.h"
+#include "SpecificPropertiesEditor.h"
 
 #include <QMessageBox>
 #include <QHBoxLayout>
@@ -44,7 +45,7 @@ void IdePropertyEditor::saveSettings()
     theSettings.m_scriptHelpWindowGeometry = scriptHelpWindowGeometry();
 }
 
-ExtWidgets::PropertyTextEditor* IdePropertyEditor::createCodeEditor(Property *property, QWidget* parent)
+ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Property *property, QWidget* parent)
 {
 
 	if (property->specificEditor() == E::PropertySpecificEditor::TuningFilter)
@@ -56,7 +57,16 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createCodeEditor(Property *pr
         return editor;
     }
 
-    CodeType codeType = property->isScript() ? CodeType::Cpp : CodeType::Unknown;
+	if (property->specificEditor() == E::PropertySpecificEditor::SpecificPropertyStruct)
+	{
+		// This is Specific Properties
+		//
+
+		SpecificPropertiesEditor* editor = new SpecificPropertiesEditor(parent);
+		return editor;
+	}
+
+	CodeType codeType = property->isScript() ? CodeType::Cpp : CodeType::Unknown;
     return new IdeCodeEditor(codeType, parent);
 }
 
@@ -164,6 +174,7 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     m_textEdit->installEventFilter(this);
 
     QHBoxLayout* l = new QHBoxLayout(this);
+	l->setContentsMargins(0, 0, 0, 0);
     l->addWidget(m_textEdit);
 
     // Set up default font

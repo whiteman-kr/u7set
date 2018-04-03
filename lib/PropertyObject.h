@@ -1981,6 +1981,40 @@ public:
 		return result;
 	}
 
+	static const int m_lastSpecificPropertiesVersion = 4;
+
+	static QString createSpecificPropertyStruct(const QString& name,
+										   const QString& category,
+										   const QString& description,
+										   const QString& strType,
+										   QStringRef strMin,
+										   QStringRef strMax,
+										   QStringRef strDefaultValue,
+										   int precision,
+										   bool updateFromPreset,
+										   bool expert,
+										   bool visible,
+										   const E::PropertySpecificEditor editor)
+	{
+		QString result = QString("%1;").arg(m_lastSpecificPropertiesVersion);
+
+		result += name + ";";
+		result += category + ";";
+		result += strType + ";";
+		result += strMin + ";";
+		result += strMax + ";";
+		result += strDefaultValue + ";";
+		result += QString("%1;").arg(precision),
+		result += updateFromPreset ? "true;" : "false;";
+		result += expert ? "true;" : "false;";
+		result += description + ";";
+		result += visible ? "true;" : "false;";
+		result += E::valueToString<E::PropertySpecificEditor>(editor);
+
+		return result;
+
+	}
+
 	// Specific properties
 	//
 	std::pair<bool, QString> parseSpecificPropertiesStruct(const QString& specificProperties)
@@ -2127,6 +2161,8 @@ public:
 			}
 		}
 
+		bool someValuesWereRestored = false;
+
 		// Set to parsed properties old value
 		//
 		for (const std::shared_ptr<Property>& p : oldProperties)
@@ -2141,6 +2177,8 @@ public:
 				(*it)->value().type() == p->value().type() &&
 				p != (*it))
 			{
+				someValuesWereRestored = true;
+
 				setPropertyValue(p->caption(), p->value());
 			}
 			else
@@ -2149,6 +2187,11 @@ public:
 				//
 				continue;
 			}
+		}
+
+		if (someValuesWereRestored == true)
+		{
+			emit propertyListChanged();
 		}
 
 		return result;
@@ -2342,7 +2385,7 @@ public:
 	{
 		std::pair<bool, QString> result = std::make_pair(true, "");
 
-		if (version < 0 || version > 4)
+		if (version < 0 || version > m_lastSpecificPropertiesVersion)
 		{
 			assert(false);
 
@@ -2380,47 +2423,6 @@ public:
 
 		// Type
 		//
-		enum PropType
-		{
-			pt_int32,
-			pt_uint32,
-			pt_double,
-			pt_bool,
-			pt_e_channel,
-			pt_string,
-		};
-
-		static std::map<uint, PropType> typeMap;
-		if (typeMap.empty() == true)	// One time init
-		{
-			typeMap[qHash(QString("qint32"))] = pt_int32;
-			typeMap[qHash(QString("signed int"))] = pt_int32;
-			typeMap[qHash(QString("int32"))] = pt_int32;
-			typeMap[qHash(QString("int"))] = pt_int32;
-			typeMap[qHash(QString("int32_t"))] = pt_int32;
-
-			typeMap[qHash(QString("quint32"))] = pt_uint32;
-			typeMap[qHash(QString("unsigned int"))] = pt_uint32;
-			typeMap[qHash(QString("uint32"))] = pt_uint32;
-			typeMap[qHash(QString("uint"))] = pt_uint32;
-			typeMap[qHash(QString("uint32_t"))] = pt_uint32;
-
-			typeMap[qHash(QString("double"))] = pt_double;
-			typeMap[qHash(QString("Double"))] = pt_double;
-
-			typeMap[qHash(QString("bool"))] = pt_bool;
-			typeMap[qHash(QString("Bool"))] = pt_bool;
-			typeMap[qHash(QString("boolean"))] = pt_bool;
-			typeMap[qHash(QString("Boolean"))] = pt_bool;
-
-			typeMap[qHash(QString("E::Channel"))] = pt_e_channel;
-			typeMap[qHash(QString("e::channel"))] = pt_e_channel;
-			typeMap[qHash(QString("channel"))] = pt_e_channel;
-
-			typeMap[qHash(QString("string"))] = pt_string;
-			typeMap[qHash(QString("String"))] = pt_string;
-			typeMap[qHash(QString("QString"))] = pt_string;
-		}
 
 		// Check if strType is like
 		// DynamicEnum [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
@@ -2501,10 +2503,8 @@ public:
 		}
 		else
 		{
-			// Check for one of standard types from typeMap
-			//
-			auto typeIt = typeMap.find(qHash(strType));
-			if (typeIt == typeMap.end())
+			auto [pt, propertyOk] = PropertyObject::parseSpecificPropertyType(strType);
+			if (propertyOk == false)
 			{
 				// Error, unknown type
 				//
@@ -2515,11 +2515,9 @@ public:
 				return result;
 			}
 
-			PropType pt = typeIt->second;
-
 			switch (pt)
 			{
-			case PropType::pt_int32:
+			case E::SpecificPropertyType::pt_int32:
 				{
 					// Min
 					//
@@ -2548,7 +2546,7 @@ public:
 					p->setLimits(QVariant(minInt), QVariant(maxInt));
 				}
 				break;
-			case PropType::pt_uint32:
+			case E::SpecificPropertyType::pt_uint32:
 				{
 					// Min
 					//
@@ -2579,7 +2577,7 @@ public:
 					p->setLimits(QVariant(minUInt), QVariant(maxUInt));
 				}
 				break;
-			case PropType::pt_double:
+			case E::SpecificPropertyType::pt_double:
 				{
 					// Min
 					//
@@ -2610,7 +2608,7 @@ public:
 					p->setLimits(QVariant(minDouble), QVariant(maxDouble));
 				}
 				break;
-			case PropType::pt_bool:
+			case E::SpecificPropertyType::pt_bool:
 				{
 					// Default Value
 					//
@@ -2622,7 +2620,7 @@ public:
 					addedProperty = p;
 				}
 				break;
-			case PropType::pt_e_channel:
+			case E::SpecificPropertyType::pt_e_channel:
 				{
 					// Default Value
 					//
@@ -2636,7 +2634,7 @@ public:
 					p->setValue(defaultString.toStdString().c_str());
 				}
 				break;
-			case PropType::pt_string:
+			case E::SpecificPropertyType::pt_string:
 				{
 					// Add property with default value
 					//
@@ -2683,6 +2681,50 @@ public:
 		return result;
 	}
 
+	static std::pair<E::SpecificPropertyType, bool> parseSpecificPropertyType(const QString& strType)
+	{
+		static std::map<uint, E::SpecificPropertyType> typeMap;
+		if (typeMap.empty() == true)	// One time init
+		{
+			typeMap[qHash(QString("qint32"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("signed int"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("int32"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("int"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("int32_t"))] = E::SpecificPropertyType::pt_int32;
+
+			typeMap[qHash(QString("quint32"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("unsigned int"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("uint32"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("uint"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("uint32_t"))] = E::SpecificPropertyType::pt_uint32;
+
+			typeMap[qHash(QString("double"))] = E::SpecificPropertyType::pt_double;
+			typeMap[qHash(QString("Double"))] = E::SpecificPropertyType::pt_double;
+
+			typeMap[qHash(QString("bool"))] = E::SpecificPropertyType::pt_bool;
+			typeMap[qHash(QString("Bool"))] = E::SpecificPropertyType::pt_bool;
+			typeMap[qHash(QString("boolean"))] = E::SpecificPropertyType::pt_bool;
+			typeMap[qHash(QString("Boolean"))] = E::SpecificPropertyType::pt_bool;
+
+			typeMap[qHash(QString("E::Channel"))] = E::SpecificPropertyType::pt_e_channel;
+			typeMap[qHash(QString("e::channel"))] = E::SpecificPropertyType::pt_e_channel;
+			typeMap[qHash(QString("channel"))] = E::SpecificPropertyType::pt_e_channel;
+
+			typeMap[qHash(QString("string"))] = E::SpecificPropertyType::pt_string;
+			typeMap[qHash(QString("String"))] = E::SpecificPropertyType::pt_string;
+			typeMap[qHash(QString("QString"))] = E::SpecificPropertyType::pt_string;
+		}
+
+		// Check for one of standard types from typeMap
+		//
+		auto typeIt = typeMap.find(qHash(strType));
+		if (typeIt == typeMap.end())
+		{
+			return {E::SpecificPropertyType::pt_int32, false};
+		}
+
+		return {typeIt->second, true};
+	}
 
 signals:
 	void propertyListChanged();		// One or more properties were added or deleted

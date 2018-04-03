@@ -156,6 +156,7 @@ namespace Hardware
 
 		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
 		specificProp->setExpert(true);
+		specificProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
 		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::preset);
 		presetProp->setExpert(true);

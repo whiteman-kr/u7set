@@ -292,6 +292,18 @@ public:
 	};
 	Q_ENUM(PropertySpecificEditor)
 
+	enum class SpecificPropertyType
+	{
+		pt_int32,
+		pt_uint32,
+		pt_double,
+		pt_bool,
+		pt_e_channel,
+		pt_string,
+		pt_dynamicEnum,
+	};
+	Q_ENUM(SpecificPropertyType)
+
 public:
 	// Convert enum value (not index) to QString
 	//

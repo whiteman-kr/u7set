@@ -95,9 +95,24 @@ namespace ExtWidgets
 		return m_modified;
 	}
 
+	bool PropertyTextEditor::hasOkCancelButtons()
+	{
+		return m_hasOkCancelButtons;
+	}
+
 	void PropertyTextEditor::textChanged()
 	{
 		m_modified = true;
+	}
+
+	void PropertyTextEditor::okButtonPressed()
+	{
+		emit okPressed();
+	}
+
+	void PropertyTextEditor::cancelButtonPressed()
+	{
+		emit cancelPressed();
 	}
 
 	//
@@ -511,7 +526,7 @@ namespace ExtWidgets
 
 		// Create Editor
 
-        m_editor = m_propertyEditor->createCodeEditor(m_property.get(), this);
+		m_editor = m_propertyEditor->createPropertyTextEditor(m_property.get(), this);
 
 		m_editor->setText(text);
 
@@ -519,13 +534,24 @@ namespace ExtWidgets
 
 		// Buttons
 
-		QPushButton* okButton = new QPushButton(tr("OK"), this);
-		QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
+		QPushButton* okButton = nullptr;
+		QPushButton* cancelButton = nullptr;
 
-		okButton->setDefault(true);
+		if (m_editor->hasOkCancelButtons() == true)
+		{
+			okButton = new QPushButton(tr("OK"), this);
+			cancelButton = new QPushButton(tr("Cancel"), this);
 
-		connect(okButton, &QPushButton::clicked, this, &MultiLineEdit::accept);
-		connect(cancelButton, &QPushButton::clicked, this, &MultiLineEdit::reject);
+			okButton->setDefault(true);
+
+			connect(okButton, &QPushButton::clicked, this, &MultiLineEdit::accept);
+			connect(cancelButton, &QPushButton::clicked, this, &MultiLineEdit::reject);
+		}
+		else
+		{
+			connect(m_editor, &PropertyTextEditor::okPressed, this, &MultiLineEdit::accept);
+			connect(m_editor, &PropertyTextEditor::cancelPressed, this, &MultiLineEdit::reject);
+		}
 
 		connect(this, &QDialog::finished, this, &MultiLineEdit::finished);
 
@@ -593,8 +619,14 @@ namespace ExtWidgets
 		}
 
 		hl->addStretch();
-		hl->addWidget(okButton);
-		hl->addWidget(cancelButton);
+		if (okButton != nullptr)
+		{
+			hl->addWidget(okButton);
+		}
+		if (cancelButton != nullptr)
+		{
+			hl->addWidget(cancelButton);
+		}
 
 
 		vl->addWidget(m_editor);
@@ -1167,6 +1199,7 @@ namespace ExtWidgets
 						case QVariant::Bool:
 							{
 								QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
+
 								editor = m_editor;
 
 								connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
@@ -1207,7 +1240,11 @@ namespace ExtWidgets
 								QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
 
 								editor = m_editor;
-								m_editor->setValue(p, m_property->isEnabled() == false);
+
+								if (manager->sameValue(property) == true)
+								{
+									m_editor->setValue(p, m_property->isEnabled() == false);
+								}
 
 								connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 								connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1217,8 +1254,13 @@ namespace ExtWidgets
 						case QVariant::Color:
 							{
 								QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
+
 								editor = m_editor;
-								m_editor->setValue(p, m_property->isEnabled() == false);
+
+								if (manager->sameValue(property) == true)
+								{
+									m_editor->setValue(p, m_property->isEnabled() == false);
+								}
 
 								connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 								connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1228,8 +1270,14 @@ namespace ExtWidgets
 						case QVariant::Uuid:
 							{
 								QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
+
 								editor = m_editor;
-								m_editor->setValue(p, m_property->isEnabled() == false);
+
+								if (manager->sameValue(property) == true)
+								{
+									m_editor->setValue(p, m_property->isEnabled() == false);
+								}
+
 
 								connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 								connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -2219,7 +2267,7 @@ namespace ExtWidgets
 		return;
 	}
 
-    PropertyTextEditor* PropertyEditor::createCodeEditor(Property* property, QWidget* parent)
+	PropertyTextEditor* PropertyEditor::createPropertyTextEditor(Property* property, QWidget* parent)
 	{
         Q_UNUSED(property);
 		return new PropertyPlainTextEditor(parent);
