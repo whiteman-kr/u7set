@@ -170,6 +170,8 @@ public:
 	QString instanceId() const;
 	void setInstanceId(const QString& instanceId);
 
+	Hash instanceIdHash() const;
+
 	int requestInterval() const;
 	void setRequestInterval(int requestInterval);
 

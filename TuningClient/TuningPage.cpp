@@ -665,6 +665,24 @@ void TuningPage::fillObjectsList()
 				modifiedDefaultValue = filterValue.value();
 			}
 		}
+		else
+		{
+			if (m_pageFilter != nullptr)
+			{
+				// Modify the default value from page filter
+				//
+
+				TuningFilterValue filterValue;
+
+				bool hasValue = m_pageFilter->value(hash, filterValue);
+
+				if (hasValue == true)
+				{
+					modifyDefaultValue = true;
+					modifiedDefaultValue = filterValue.value();
+				}
+			}
+		}
 
 		// Text filter
 		//
@@ -1094,7 +1112,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 	auto f = [this, hash]() -> void
 	{
-		DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningSignalManager, this);
+		DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
 		d->show();
 	};
 

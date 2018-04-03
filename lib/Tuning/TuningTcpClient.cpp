@@ -1091,6 +1091,11 @@ void TuningTcpClient::setInstanceId(const QString& instanceId)
 	m_instanceIdHash = ::calcHash(m_instanceId);
 }
 
+Hash TuningTcpClient::instanceIdHash() const
+{
+	return m_instanceIdHash;
+}
+
 int TuningTcpClient::requestInterval() const
 {
 	return m_requestInterval;
