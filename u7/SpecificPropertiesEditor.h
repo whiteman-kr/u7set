@@ -63,7 +63,7 @@ private:
 	int m_precision = 0;
 	bool m_updateFromPreset = false;
 	bool m_expert = false;
-	bool m_visible = false;
+	bool m_visible = true;
 	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
 };
 
