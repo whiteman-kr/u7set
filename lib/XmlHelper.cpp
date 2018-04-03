@@ -511,8 +511,6 @@ bool XmlReadHelper::findElement(const QString& elementName)
 
 	qDebug() << "XmlReadHelper: element is not found -" << elementName;
 
-	assert(false);
-
 	return false;
 }
 
@@ -523,7 +521,6 @@ bool XmlReadHelper::checkElement(const QString& elementName)
 		return true;
 	}
 
-	assert(false);
 	qDebug() << "XmlReadHelper: element does not match. Current - " << name() << ", required -" << elementName;
 
 	return false;

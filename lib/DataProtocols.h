@@ -79,6 +79,14 @@ namespace Rup
 
 		void dumpData();
 	};
+
+	struct SimFrame
+	{
+		Rup::Frame rupFrame;
+
+		quint16 simVersion;
+		quint32 sourceIP;
+	};
 }
 
 // ----------------------------------------------------------------------------

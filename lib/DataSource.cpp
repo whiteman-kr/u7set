@@ -717,6 +717,19 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 
 		if (rupFrameTime == nullptr)
 		{
+/*			if (m_dataReceives == true)
+			{
+				// check m_lastPacketSystemTime
+				//
+				qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+				if (now - m_lastPacketSystemTime > APP_DATA_SOURCE_TIMEOUT)
+				{
+
+				}
+			}*/
+
+
 			break;	// has no frames to processing, exit from processRupFrameTimeQueue, return FALSE
 					//
 					// m_rupFrameTimeQueue.completePop is not required

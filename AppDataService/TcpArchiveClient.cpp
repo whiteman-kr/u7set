@@ -118,7 +118,7 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 
 	m_connectionKeepAliveCounter = 0;
 
-	qDebug() << "Send SaveSignalsToArchive count = " << count;
+//	qDebug() << "Send SaveSignalsToArchive count = " << count;
 
 	return true;
 }

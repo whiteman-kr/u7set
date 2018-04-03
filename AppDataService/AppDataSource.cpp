@@ -473,6 +473,12 @@ void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signa
 			continue;
 		}
 
+		if (signal->acquire() == false ||
+			signal->signalType() == E::SignalType::Bus)
+		{
+			continue;
+		}
+
 		SignalParseInfo parceInfo;
 
 		parceInfo.setSignalParams(index, *signal);
@@ -876,7 +882,7 @@ bool AppDataSource::getDoubleValue(const char* rupData, int rupDataSize, const S
 		break;
 
 	default:
-		qDebug() << "Signal index (" << parseInfo.index << ") has unknown E::SignalType " << parseInfo.dataSize;
+		qDebug() << "Signal index (" << parseInfo.index << ") has unknown E::SignalType " << parseInfo.type;
 		return false;
 	}
 

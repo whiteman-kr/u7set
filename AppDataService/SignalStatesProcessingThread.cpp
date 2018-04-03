@@ -58,55 +58,55 @@ void SignalStatesProcessingThread::run()
 
     do
     {
-	bool hasNoStatesToProcessing = true;
+		bool hasNoStatesToProcessing = true;
 
-	for(AppDataSourceShared appDataSource : m_appDataSources)
-	{
-	    TEST_PTR_CONTINUE(appDataSource);
-
-	    int processedStatesCount = 0;
-
-	    do
-	    {
-		SimpleAppSignalState state;
-
-		bool result = appDataSource->getSignalState(&state);
-
-		if (result == false)
+		for(AppDataSourceShared appDataSource : m_appDataSources)
 		{
-		    break;		    // appDataSource has no states to processing, go to next source
+			TEST_PTR_CONTINUE(appDataSource);
+
+			int processedStatesCount = 0;
+
+			do
+			{
+				SimpleAppSignalState state;
+
+				bool result = appDataSource->getSignalState(&state);
+
+				if (result == false)
+				{
+					break;		    // appDataSource has no states to processing, go to next source
+				}
+
+				hasNoStatesToProcessing = false;
+
+				m_queueMapMutex.lock();
+
+				for(AppSignalStatesQueueShared destQueue : m_queueMap)
+				{
+					destQueue->push(&state);
+				}
+
+				m_queueMapMutex.unlock();
+
+				processedStatesCount++;
+			}
+			while(processedStatesCount < 200);
+
+			if (isQuitRequested() == true)
+			{
+				break;
+			}
 		}
 
-		hasNoStatesToProcessing = false;
-
-		m_queueMapMutex.lock();
-
-		for(AppSignalStatesQueueShared destQueue : m_queueMap)
+		if (isQuitRequested() == true)
 		{
-		    destQueue->push(&state);
+			break;
 		}
 
-		m_queueMapMutex.unlock();
-
-		processedStatesCount++;
-	    }
-	    while(processedStatesCount < 200);
-
-	    if (isQuitRequested() == true)
-	    {
-		break;
-	    }
-	}
-
-	if (isQuitRequested() == true)
-	{
-	    break;
-	}
-
-	if (hasNoStatesToProcessing == true)
-	{
-	    usleep(500);
-	}
+		if (hasNoStatesToProcessing == true)
+		{
+			usleep(500);
+		}
     }
     while(isQuitRequested() == false);
 

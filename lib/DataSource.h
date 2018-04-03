@@ -254,6 +254,8 @@ private:
 		void dump();
 	};
 
+	static const int APP_DATA_SOURCE_TIMEOUT = 1000;
+
 public:
 	DataSourceOnline();
 	~DataSourceOnline();
