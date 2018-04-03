@@ -71,7 +71,7 @@ public:
 	}
 
 private:
-	std::atomic<bool> m_quitRequested = false;
+	std::atomic<bool> m_quitRequested = { false };
 };
 
 

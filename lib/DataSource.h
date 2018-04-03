@@ -407,7 +407,7 @@ private:
 
 	//
 
-	std::atomic<const QThread*> m_processingOwner = nullptr;
+	std::atomic<const QThread*> m_processingOwner = { nullptr };
 
 	//
 

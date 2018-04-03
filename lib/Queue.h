@@ -132,7 +132,7 @@ private:
 	// vars modified by Writer only
 
 	QueueIndex m_writeIndex;
-	std::atomic<int> m_maxSize = 0;								// can be read from another thread
+	std::atomic<int> m_maxSize = { 0 };								// can be read from another thread
 	int m_lostedCount = 0;
 
 	// var modified by Reader only
@@ -141,7 +141,7 @@ private:
 
 	// var modified both by Writer and Reader
 
-	std::atomic<int> m_size = 0;								// current queue size
+	std::atomic<int> m_size = { 0 };								// current queue size
 };
 
 
