@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     ../lib/DeviceHelper.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
-    ../u7/Builder/ModulesRawData.cpp
+    ../u7/Builder/ModulesRawData.cpp \
+    ../lib/Times.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -76,7 +77,8 @@ HEADERS  += SourceListWidget.h \
     ../lib/DeviceHelper.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
-    ../u7/Builder/ModulesRawData.h
+    ../u7/Builder/ModulesRawData.h \
+    ../lib/Times.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

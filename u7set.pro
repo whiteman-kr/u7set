@@ -25,4 +25,8 @@ SUBDIRS += qtservice \
     mconf
 
 HEADERS += \
-    lib/CommonTypes.h
+    lib/CommonTypes.h \
+    lib/Times.h
+
+SOURCES += \
+    lib/Times.cpp

@@ -3,22 +3,6 @@
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet
 
-
-QDateTime Times::systemToDateTime() const
-{
-	return system.toDateTime();
-}
-
-QDateTime Times::localToDateTime() const
-{
-	return local.toDateTime();
-}
-
-QDateTime Times::plantToDateTime() const
-{
-	return plant.toDateTime();
-}
-
 void AppSignalStateFlags::clear()
 {
 	all = 0;

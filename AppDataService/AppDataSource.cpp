@@ -58,77 +58,63 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 	// check time to set !!!!
 	//
 	curState.flags.clearReasonsFlags();
-
 	curState.time = time;
-
 	curState.value = value;
 
-	if (m_initialized == false)
+	// state already initialized
+	// check validity changes
+	//
+	if (validity != curState.flags.valid)
 	{
-		// initialize state
+		// validity has been changed
 		//
-		m_initialized = true;
-
 		curState.flags.valid = validity;
 		curState.flags.validityChange = 1;
 	}
 	else
 	{
-		// state already initialized
-		// check validity changes
+		// no validity changes, check value if new state is valid
 		//
-		if (validity != curState.flags.valid)
+		if (validity == AppSignalState::VALID)
 		{
-			// validity has been changed
-			//
-			curState.flags.valid = validity;
-			curState.flags.validityChange = 1;
-		}
-		else
-		{
-			// no validity changes, check value if new state is valid
-			//
-			if (validity == AppSignalState::VALID)
+			if (m_isDiscreteSignal == true)
 			{
-				if (m_isDiscreteSignal == true)
+				if (curState.value != m_stored.value)
 				{
-					if (curState.value != m_stored.value)
+					curState.flags.smoothAperture = 0;		// its important!
+					curState.flags.roughAperture = 1;		//
+				}
+			}
+			else
+			{
+				// is analog signal, check aperture changes
+				//
+				if (m_adaptiveAperture == true)
+				{
+					double absAperture = fabs((fabs(curState.value - m_stored.value) * 100) / m_stored.value);
+
+					if (absAperture > m_fineAperture)
 					{
-						curState.flags.smoothAperture = 0;		// its important!
-						curState.flags.roughAperture = 1;		//
+						curState.flags.smoothAperture = 1;
+					}
+
+					if (absAperture > m_coarseAperture)
+					{
+						curState.flags.roughAperture = 1;
 					}
 				}
 				else
 				{
-					// is analog signal, check aperture changes
-					//
-					if (m_adaptiveAperture == true)
+					double absValueChange = fabs(m_stored.value - curState.value);
+
+					if (absValueChange > m_absSmoothAperture)
 					{
-						double absAperture = fabs((fabs(curState.value - m_stored.value) * 100) / m_stored.value);
-
-						if (absAperture > m_fineAperture)
-						{
-							curState.flags.smoothAperture = 1;
-						}
-
-						if (absAperture > m_coarseAperture)
-						{
-							curState.flags.roughAperture = 1;
-						}
+						curState.flags.smoothAperture = 1;
 					}
-					else
+
+					if (absValueChange > m_absRoughAperture)
 					{
-						double absValueChange = fabs(m_stored.value - curState.value);
-
-						if (absValueChange > m_absSmoothAperture)
-						{
-							curState.flags.smoothAperture = 1;
-						}
-
-						if (absValueChange > m_absRoughAperture)
-						{
-							curState.flags.roughAperture = 1;
-						}
+						curState.flags.roughAperture = 1;
 					}
 				}
 			}
@@ -442,8 +428,6 @@ void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signa
 
 	const QStringList& sourceAssociatedSignals = associatedSignals();
 
-	QHash<int, int> archivingGroupsSignalsCount;
-
 	for(const QString& signalID : sourceAssociatedSignals)
 	{
 		if (appSignals.contains(signalID) == false)
@@ -484,49 +468,18 @@ void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signa
 		parceInfo.setSignalParams(index, *signal);
 
 		m_signalsParseInfo.append(parceInfo);
-
-		// count signals of each autoArchiving group
-
-		AppSignalStateEx* state = (*signalStates)[index];
-
-		if (state == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		int group = state->autoArchiningGroup();
-
-		if (group < 0)
-		{
-			continue;
-		}
-
-		int groupSignalsCount = archivingGroupsSignalsCount.value(group, 0);
-
-		groupSignalsCount++;
-
-		archivingGroupsSignalsCount.insert(group, groupSignalsCount);
 	}
 
 	m_acquiredSignalsCount = m_signalsParseInfo.count();
 
-	int maxCount = 0;
+	int queueSize = m_acquiredSignalsCount * 3;
 
-	for(int count : archivingGroupsSignalsCount)
+	if (queueSize < 200)
 	{
-		if (count > maxCount)
-		{
-			maxCount = count;
-		}
+		queueSize = 200;
 	}
 
-	if (maxCount < 100)
-	{
-		maxCount = 100;
-	}
-
-	m_signalStatesQueue.resize(maxCount * 3);
+	m_signalStatesQueue.resize(queueSize);
 }
 
 bool AppDataSource::parsePacket()
@@ -534,8 +487,9 @@ bool AppDataSource::parsePacket()
 	Times times;
 	const char* rupData = nullptr;
 	quint32 rupDataSize = 0;
+	bool dataReceivingTimeout = false;
 
-	bool result = getDataToParsing(&times, &rupData, &rupDataSize);
+	bool result = getDataToParsing(&times, &rupData, &rupDataSize, &dataReceivingTimeout);
 
 	if (result == false)
 	{
@@ -550,21 +504,8 @@ bool AppDataSource::parsePacket()
 
 	for(const SignalParseInfo& parseInfo : m_signalsParseInfo)
 	{
-		assert(parseInfo.valueAddr.isValid() == true);
-
-		result = getDoubleValue(rupData, rupDataSize, parseInfo, value);
-
-		if (result == false)
+		if (parseInfo.appSignalID != "#TEST_R01_CH01_MD07_CTRLIN_INH01A")
 		{
-			m_valueParsingErrorCount++;
-			continue;
-		}
-
-		result = getValidity(rupData, rupDataSize, parseInfo, validity);
-
-		if (result == false)
-		{
-			m_validityParsingErrorCount++;
 			continue;
 		}
 
@@ -574,6 +515,39 @@ bool AppDataSource::parsePacket()
 		{
 			m_badSignalStateIndexCount++;
 			continue;
+		}
+
+		if (dataReceivingTimeout == true)
+		{
+			SimpleAppSignalState currentState = signalState->current();
+
+			if (currentState.isValid() == true)
+			{
+				// archive last valid point before data receiving timeout
+				//
+				m_signalStatesQueue.push(&currentState);
+			}
+
+			value = 0;
+			validity = 0;
+		}
+		else
+		{
+			result = getDoubleValue(rupData, rupDataSize, parseInfo, value);
+
+			if (result == false)
+			{
+				m_valueParsingErrorCount++;
+				continue;
+			}
+
+			result = getValidity(rupData, rupDataSize, parseInfo, validity);
+
+			if (result == false)
+			{
+				m_validityParsingErrorCount++;
+				continue;
+			}
 		}
 
 		bool hasArchivingReason = signalState->setState(times, validity, value, autoArchivingGroup);
@@ -664,125 +638,6 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state)
 
 	return result;
 }
-
-
-/*
-
-void AppDataReceiver::checkDataSourcesDataReceiving()
-{
-	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
-
-	for(const AppDataSourceShared dataSource : m_appDataSourcesIP)
-	{
-		if (dataSource == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (dataSource->state() == E::DataSourceState::ReceiveData && (currentTime - dataSource->lastPacketTime()) > PACKET_TIMEOUT)
-		{
-			dataSource->setState(E::DataSourceState::NoData);
-
-			invalidateDataSourceSignals(dataSource->lmAddress32(), currentTime);
-		}
-	}
-
-}
-
-
-void AppDataReceiver::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 currentTime)
-{
-	SourceSignalsParseInfo* sourceParseInfo = m_sourceParseInfoMap.value(dataSourceIP, nullptr);
-
-	if (sourceParseInfo == nullptr)
-	{
-		return;
-	}
-
-	Times time;
-
-	time.system.timeStamp = currentTime;
-
-	for(const SignalParseInfo& parseInfo : *sourceParseInfo)
-	{
-		AppSignalStateEx* signalState = (*m_signalStates)[parseInfo.index];
-
-		if (signalState == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		signalState->setState(time, AppSignalState::INVALID, 0, NO_AUTOARCHIVING_GROUP);
-	}
-
-	HostAddressPort addr(dataSourceIP, 0);
-	qDebug() << "Invalidate signals of source" << addr.addressStr();
-}
-*/
-
-
-/*
- *
- *
-
-	qDebug() << "Ideal thread count:" << QThread::idealThreadCount();
-
-
-void AppDataReceiver::checkDataSourcesDataReceiving()
-{
-	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
-
-	for(const AppDataSourceShared dataSource : m_appDataSourcesIP)
-	{
-		if (dataSource == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (dataSource->state() == E::DataSourceState::ReceiveData && (currentTime - dataSource->lastPacketTime()) > PACKET_TIMEOUT)
-		{
-			dataSource->setState(E::DataSourceState::NoData);
-
-			invalidateDataSourceSignals(dataSource->lmAddress32(), currentTime);
-		}
-	}
-
-}
-
-
-void AppDataReceiver::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 currentTime)
-{
-	SourceSignalsParseInfo* sourceParseInfo = m_sourceParseInfoMap.value(dataSourceIP, nullptr);
-
-	if (sourceParseInfo == nullptr)
-	{
-		return;
-	}
-
-	Times time;
-
-	time.system.timeStamp = currentTime;
-
-	for(const SignalParseInfo& parseInfo : *sourceParseInfo)
-	{
-		AppSignalStateEx* signalState = (*m_signalStates)[parseInfo.index];
-
-		if (signalState == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		signalState->setState(time, AppSignalState::INVALID, 0, NO_AUTOARCHIVING_GROUP);
-	}
-
-	HostAddressPort addr(dataSourceIP, 0);
-	qDebug() << "Invalidate signals of source" << addr.addressStr();
-}*/
-
 
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 {
