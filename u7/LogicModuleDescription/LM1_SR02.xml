@@ -514,6 +514,15 @@
 			<Pin OpName="o_tconv_edi"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
 		</AFBComponent>
+		<AFBComponent Caption="INDICATION" OpCode="29" ImpVersion="0" VersionOpIndex="13" MaxInstCount="256" SimulationFunc="afb_indication">
+		    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+			<Pin OpName="i_input"		OpIndex ="4"	PinType = "Input"/>
+			<Pin OpName="i_ack"			OpIndex ="5"	PinType = "Input"/>
+			<Pin OpName="i_test"		OpIndex ="6"	PinType = "Input"/>
+			<Pin OpName="i_sync"		OpIndex ="7"	PinType = "Input"/>
+			<Pin OpName="o_result"		OpIndex ="8"	PinType = "Output"/>
+			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
+		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
         <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0001">
@@ -12089,6 +12098,150 @@ function(videoItemFblElement, afbElement)
 	return createOutputSignals(videoItemFblElement, afbElement);
 }
 				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+        <AFB id="#indic_stless_v1" Caption="indic_stless" Version="1.0001">
+		    <Properties>
+			    <Description>Non-latching indication block</Description>
+				<Category>Indication</Category>
+				<OpCode>29</OpCode>
+				<HasRam>true</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>22</MinWidth>
+				<MinHeight>8</MinHeight>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_input" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
+				<Pin OpName="i_ack" Caption="ack" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
+				<Pin OpName="i_test" Caption="test" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+				<Pin OpName="i_sync" Caption="sync" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+			</Outputs>
+			<Params>
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+					    <Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
+        <AFB id="#indic_latch_v1" Caption="indic_latch" Version="1.0001">
+		    <Properties>
+			    <Description>Latching indication block</Description>
+				<Category>Indication</Category>
+				<OpCode>29</OpCode>
+				<HasRam>true</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>22</MinWidth>
+				<MinHeight>8</MinHeight>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_input" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
+				<Pin OpName="i_ack" Caption="ack" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
+				<Pin OpName="i_test" Caption="test" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+				<Pin OpName="i_sync" Caption="sync" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+			</Outputs>
+			<Params>
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+					    <Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
+        <AFB id="#bus_indic_stless_v1" Caption="bus_indic_stless" Version="1.0001">
+		    <Properties>
+			    <Description>Non-latching indication block</Description>
+				<Category>Indication</Category>
+				<OpCode>29</OpCode>
+				<HasRam>true</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>28</MinWidth>
+				<MinHeight>8</MinHeight>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_input" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="4" Size="16" BusDataFormat="Discrete"/>
+				<Pin OpName="i_ack" Caption="ack" Type="Bus" ByteOrder="BigEndian" OpIndex="5" Size="16" BusDataFormat="Discrete"/>
+				<Pin OpName="i_test" Caption="test" Type="Bus" ByteOrder="BigEndian" OpIndex="6" Size="16" BusDataFormat="Discrete"/>
+				<Pin OpName="i_sync" Caption="sync" Type="Bus" ByteOrder="BigEndian" OpIndex="7" Size="16" BusDataFormat="Discrete"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="8" Size="16" BusDataFormat="Discrete"/>
+			</Outputs>
+			<Params>
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+					    <Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
+        <AFB id="#bus_indic_latch_v1" Caption="bus_indic_latch" Version="1.0001">
+		    <Properties>
+			    <Description>Latching indication block</Description>
+				<Category>Indication</Category>
+				<OpCode>29</OpCode>
+				<HasRam>true</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>28</MinWidth>
+				<MinHeight>8</MinHeight>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_input" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="4" Size="16" BusDataFormat="Discrete"/>
+				<Pin OpName="i_ack" Caption="ack" Type="Bus" ByteOrder="BigEndian" OpIndex="5" Size="16" BusDataFormat="Discrete"/>
+				<Pin OpName="i_test" Caption="test" Type="Bus" ByteOrder="BigEndian" OpIndex="6" Size="16" BusDataFormat="Discrete"/>
+				<Pin OpName="i_sync" Caption="sync" Type="Bus" ByteOrder="BigEndian" OpIndex="7" Size="16" BusDataFormat="Discrete"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="8" Size="16" BusDataFormat="Discrete"/>
+			</Outputs>
+			<Params>
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+					    <Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
 
