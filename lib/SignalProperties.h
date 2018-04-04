@@ -68,6 +68,8 @@ class SignalProperties : public PropertyObject
 
 private:
 	Signal m_signal;
+	static std::shared_ptr<OrderedHash<int, QString>> m_sensorTypeHash;
+	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
 
 	std::vector<Property*> m_propertiesDependentOnPrecision;
 
