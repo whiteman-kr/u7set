@@ -4,11 +4,11 @@
 #include <QDateTime>
 #include <memory>
 
-#include "../lib/Hash.h"
-#include "../lib/Queue.h"
-#include "../lib/TimeStamp.h"
-#include "../lib/Tuning/TuningSignalState.h"
-
+#include "Hash.h"
+#include "Queue.h"
+#include "TimeStamp.h"
+#include "Tuning/TuningSignalState.h"
+#include "Times.h"
 #include "Types.h"
 
 
@@ -24,18 +24,6 @@ namespace Proto
 	class AppSignal;
 	class AppSignalSet;
 }
-
-
-struct Times
-{
-	TimeStamp system;
-	TimeStamp local;
-	TimeStamp plant;
-
-	QDateTime systemToDateTime() const;
-	QDateTime localToDateTime() const;
-	QDateTime plantToDateTime() const;
-};
 
 
 union AppSignalStateFlags
@@ -114,6 +102,8 @@ struct SimpleAppSignalState
 	Times time;
 	AppSignalStateFlags flags;
 	double value = 0;
+
+	bool isValid() const { return flags.valid == 1; }
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);

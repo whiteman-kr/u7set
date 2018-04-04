@@ -158,6 +158,13 @@ void AppDataReceiver::onSocketReadyRead()
 			}
 		}
 
+		//
+
+		Rup::Header h = simFrame.rupFrame.header;
+
+		h.reverseBytes();
+
+		//
 		m_receivedFramesCount++;
 
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();

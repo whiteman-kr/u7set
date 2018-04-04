@@ -95,7 +95,8 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     AppDataReceiver.cpp \
-    SignalStatesProcessingThread.cpp
+    SignalStatesProcessingThread.cpp \
+    ../lib/Times.cpp
 
 HEADERS += \
 	Stable.h \
@@ -145,7 +146,8 @@ HEADERS += \
     ../lib/TuningValue.h \
     AppDataReceiver.h \
     ../lib/Socket.h \
-    SignalStatesProcessingThread.h
+    SignalStatesProcessingThread.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 
