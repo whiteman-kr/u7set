@@ -49,7 +49,7 @@ bool QueueBase::push(const char* item)
 	{
 		m_readIndex++;				// lost last item in queue
 		m_size--;
-		m_lostCount++;
+		m_lostedCount++;
 	}
 
 	memcpy(m_buffer + m_writeIndex() * m_itemSize, item, m_itemSize);
@@ -121,7 +121,7 @@ char* QueueBase::beginPush()
 	{
 		m_readIndex++;				// lost last item in queue
 		m_size--;
-		m_lostCount++;
+		m_lostedCount++;
 	}
 
 	return m_buffer + m_writeIndex() * m_itemSize;
@@ -187,7 +187,9 @@ void QueueBase::resize(int newQueueSize)
 	delete [] m_buffer;
 
 	m_size = 0;
+	m_maxSize = 0;
 	m_queueSize = newQueueSize;
+	m_lostedCount = 0;
 
 	m_buffer = new char [m_itemSize * m_queueSize];
 
@@ -214,13 +216,10 @@ LockFreeQueueBase::LockFreeQueueBase(int itemSize, int queueSize) :
 	m_readIndex(queueSize)
 {
 	assert(itemSize > 0);
-	assert(queueSize > 1);
+	assert(queueSize >= 1);
 	assert(itemSize * queueSize < MAX_QUEUE_MEMORY_SIZE);		// limit to 50 Mb
 
 	m_buffer = new char [itemSize * queueSize];
-
-	m_writeIndex++;			// make memory buffer between m_readIndex and m_writeIndex on 1 item
-	m_size.store(SAFE_SIZE);
 }
 
 bool LockFreeQueueBase::push(const char* item)
@@ -265,13 +264,7 @@ bool LockFreeQueueBase::pop(char* item)
 
 	int curSize = m_size.load();
 
-	if (curSize < SAFE_SIZE)
-	{
-		assert(false);						// WTF?
-		return false;
-	}
-
-	if (curSize == SAFE_SIZE)				// no items to pop
+	if (curSize == 0)				// no items to pop
 	{
 		return false;
 	}
@@ -280,9 +273,7 @@ bool LockFreeQueueBase::pop(char* item)
 
 	m_readIndex++;
 
-	int prevSize = m_size.fetch_sub(1);		// m_size decremented by Reader only!
-
-	assert(prevSize > SAFE_SIZE);
+	m_size.fetch_sub(1);		// m_size decremented by Reader only!
 
 	return true;
 }
@@ -322,13 +313,7 @@ char* LockFreeQueueBase::beginPop()
 {
 	int curSize = m_size.load();
 
-	if (curSize < SAFE_SIZE)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	if (curSize == SAFE_SIZE)				// "safety memory buffer" can't be popped
+	if (curSize == 0)
 	{
 		return nullptr;
 	}
@@ -340,9 +325,7 @@ bool LockFreeQueueBase::completePop()
 {
 	m_readIndex++;
 
-	int prevSize = m_size.fetch_sub(1);		// m_size decremented by Reader only!
-
-	assert(prevSize > SAFE_SIZE);
+	m_size.fetch_sub(1);		// m_size decremented by Reader only!
 
 	return true;
 }
@@ -363,8 +346,8 @@ void LockFreeQueueBase::resize(int newQueueSize)		// not thread-safe operation!!
 	m_writeIndex.reset();
 	m_writeIndex.setMaxValue(newQueueSize);
 
-	m_writeIndex++;
-	m_size.store(SAFE_SIZE);
+	m_size.store(0);
+	m_maxSize.store(0);
 }
 
 

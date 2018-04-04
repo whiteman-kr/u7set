@@ -107,6 +107,8 @@ struct SimpleAppSignalState
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
+
+	void print() const;
 };
 
 

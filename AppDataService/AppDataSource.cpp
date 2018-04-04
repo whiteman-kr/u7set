@@ -48,38 +48,76 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 }
 
 
-bool AppSignalStateEx::setState(const Times& time, quint32 validity, double value, int autoArchivingGroup)
+bool AppSignalStateEx::setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, AppSignalStatesQueue& statesQueue)
 {
-	// update current state
-	//
-
-	SimpleAppSignalState curState = current();			// curState is a COPY of current()!
+	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
+	SimpleAppSignalState curState = prevState;
+	SimpleAppSignalState autoPointState;
 
 	// check time to set !!!!
 	//
-	curState.flags.clearReasonsFlags();
+
+	// curState's time and value should be updated always
+	//
 	curState.time = time;
 	curState.value = value;
 
-	// state already initialized
-	// check validity changes
-	//
-	if (validity != curState.flags.valid)
+	curState.flags.clearReasonsFlags();
+
+	if (validity == 0)
 	{
-		// validity has been changed
+		// new state is invalid
 		//
-		curState.flags.valid = validity;
-		curState.flags.validityChange = 1;
+		if (prevState.flags.valid == 1)
+		{
+			// prevState is valid, archive it
+			//
+			очередь состояний сделать классом а не тайпдефом
+			добавить пуш автопоитн в класс очереди
+
+			autoPointState = prevState;
+
+			autoPointState.flags.autoPoint = 1;
+
+			statesQueue.push(&autoPointState);
+
+//			logState(prevState);
+
+			curState.flags.valid = 0;
+			curState.flags.validityChange = 1;
+		}
+		else
+		{
+			// validity is not changed, nothing to do
+		}
 	}
 	else
 	{
-		// no validity changes, check value if new state is valid
+		// new state is valid
 		//
-		if (validity == AppSignalState::VALID)
+		if (prevState.flags.valid == 0)
 		{
+			// prevState is invalid, archive invalid autopoint
+			//
+			autoPointState = curState;
+			autoPointState.time += -1;		// current time offset back on 1 ms
+			autoPointState.flags.autoPoint = 1;
+			autoPointState.flags.valid = 0;
+
+			statesQueue.push(&autoPointState);
+
+//			logState(autoPointState);
+
+			curState.flags.valid = 1;
+			curState.flags.validityChange = 1;
+		}
+		else
+		{
+			//  prevState also is valid, check signal's value
+			//
 			if (m_isDiscreteSignal == true)
 			{
-				if (curState.value != m_stored.value)
+				if (curState.value != prevState.value)
 				{
 					curState.flags.smoothAperture = 0;		// its important!
 					curState.flags.roughAperture = 1;		//
@@ -119,6 +157,7 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 				}
 			}
 		}
+
 	}
 
 	if (m_autoArchivingGroup == autoArchivingGroup)
@@ -135,8 +174,14 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 		// update stored state
 		//
 		m_stored = curState;
+
+		statesQueue.push(&m_stored);
+
+//		logState(m_stored);
 	}
 
+	// curState should be update always
+	//
 	setNewCurState(curState);
 
 	return hasArchivingReason;
@@ -519,15 +564,6 @@ bool AppDataSource::parsePacket()
 
 		if (dataReceivingTimeout == true)
 		{
-			SimpleAppSignalState currentState = signalState->current();
-
-			if (currentState.isValid() == true)
-			{
-				// archive last valid point before data receiving timeout
-				//
-				m_signalStatesQueue.push(&currentState);
-			}
-
 			value = 0;
 			validity = 0;
 		}
@@ -550,16 +586,11 @@ bool AppDataSource::parsePacket()
 			}
 		}
 
-		bool hasArchivingReason = signalState->setState(times, validity, value, autoArchivingGroup);
-
-		if (hasArchivingReason == true)
-		{
-			m_signalStatesQueue.push(&signalState->stored());
-
-			m_signalStatesQueueSize = m_signalStatesQueue.size();
-			m_signalStatesQueueMaxSize = m_signalStatesQueue.maxSize();
-		}
+		signalState->setState(times, validity, value, autoArchivingGroup, m_signalStatesQueue);
 	}
+
+	m_signalStatesQueueSize = m_signalStatesQueue.size();
+	m_signalStatesQueueMaxSize = m_signalStatesQueue.maxSize();
 
 	return true;
 }

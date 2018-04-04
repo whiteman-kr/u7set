@@ -77,6 +77,8 @@ void SignalStatesProcessingThread::run()
 					break;		    // appDataSource has no states to processing, go to next source
 				}
 
+				state.print();
+
 				hasNoStatesToProcessing = false;
 
 				m_queueMapMutex.lock();

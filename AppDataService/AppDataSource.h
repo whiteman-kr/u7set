@@ -15,7 +15,7 @@ public:
 
 	void setSignalParams(int index, Signal* signal);
 
-	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup);
+	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, AppSignalStatesQueue& statesQueue);
 	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = m_stored.flags.all = 0; }
 
 	Hash hash() const;
@@ -34,6 +34,7 @@ public:
 
 private:
 	void setNewCurState(const SimpleAppSignalState& newCurState);
+	void logState(const SimpleAppSignalState& state);
 
 private:
 	SimpleAppSignalState m_current[2];

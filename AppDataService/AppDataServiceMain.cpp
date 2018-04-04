@@ -1,6 +1,8 @@
 #include "AppDataService.h"
 #include "version.h"
 
+#include "../lib/Queue.h"
+
 
 int main(int argc, char *argv[])
 {

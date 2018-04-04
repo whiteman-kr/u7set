@@ -158,6 +158,14 @@ Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
 	return hash;
 }
 
+void SimpleAppSignalState::print() const
+{
+	qDebug() << "state" << QDateTime::fromMSecsSinceEpoch(time.system.timeStamp) <<
+				"validity =" << flags.valid <<
+				"value =" << value <<
+				(flags.autoPoint == 1 ? " auto" : "");
+}
+
 AppSignalParam::AppSignalParam()
 {
 }
