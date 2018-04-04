@@ -222,6 +222,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0204.sql", "Upgrade to version 204, TuningClient preset update"},
 	{":/DatabaseUpgrade/Upgrade0205.sql", "Upgrade to version 205, Metrology preset update"},
 	{":/DatabaseUpgrade/Upgrade0206.sql", "Upgrade to version 206, api.get_latest_file_tree_version optimization"},
+	{":/DatabaseUpgrade/Upgrade0207.sql", "Upgrade to version 207, Added module LM1-SR02"},
 };
 
 
