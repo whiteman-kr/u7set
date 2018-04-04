@@ -2430,80 +2430,38 @@ public:
 		Property* addedProperty = nullptr;
 
 		if (bool startedFromDynamicEnum = strType.trimmed().startsWith(QLatin1String("DynamicEnum"), Qt::CaseInsensitive);
-			startedFromDynamicEnum == true)
+				startedFromDynamicEnum == true)
 		{
-			try
-			{
-				// Parse String - Key pairs:
-				// [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
-				//
-				int openBrace = strType.indexOf('[');
-				int closeBrace = strType.lastIndexOf(']');
+			// Parse String - Key pairs:
+			// [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
+			//
+			bool propertyOk = false;
 
-				if (openBrace == -1 || closeBrace == -1 || openBrace >= closeBrace)
-				{
-					throw strType;
-				}
+			auto enumValues = PropertyObject::parseSpecificPropertyTypeDynamicEnum(strType, &propertyOk);
 
-				QString valuesString = strType.mid(openBrace + 1, closeBrace - openBrace - 1);
-				valuesString.remove(' ');
-
-				QStringList valueStringList = valuesString.split(',', QString::SkipEmptyParts);	// split value pairs
-				if (valueStringList.empty() == true)
-				{
-					throw strType;
-				}
-
-				std::vector<std::pair<QString, int>> enumValues;
-				enumValues.reserve(valueStringList.size());
-
-				for (QString str : valueStringList)
-				{
-					// str is like:
-					// EnumValue = 1
-					//
-					QStringList str2intList = str.split('=', QString::SkipEmptyParts);
-					if (str2intList.size() != 2)
-					{
-						throw strType;
-					}
-
-					QString enumStr = str2intList.at(0);
-					bool conversionOk = false;
-					int enumVal = str2intList.at(1).toInt(&conversionOk);
-
-					if (conversionOk == false)
-					{
-						throw strType;
-					}
-
-					// Pair is good
-					//
-					enumValues.push_back({enumStr, enumVal});
-				}
-
-				// Add property with default value
-				//
-				auto p = addDynamicEnumProperty(name, enumValues, true);
-				p->setCategory(category);
-				p->setValue(strDefaultValue.toString());
-
-				addedProperty = p;
-			}
-			catch (QString str)
+			if (propertyOk == false)
 			{
 				// Error, unknown type
 				//
 				result.first = false;
-				result.second = " SpecificProperties: wrong type: " + str + "\n";
+				result.second = " SpecificProperties: dynamic enum parsing error: " + strType + "\n";
 
-				qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong type: " << str;
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: dynamic enum parsing error: " << strType;
 				return result;
 			}
+
+
+			// Add property with default value
+			//
+			auto p = addDynamicEnumProperty(name, enumValues, true);
+			p->setCategory(category);
+			p->setValue(strDefaultValue.toString());
+
+			addedProperty = p;
 		}
 		else
 		{
-			auto [pt, propertyOk] = PropertyObject::parseSpecificPropertyType(strType);
+			auto [pt, propertyOk] = parseSpecificPropertyType(strType);
 			if (propertyOk == false)
 			{
 				// Error, unknown type
@@ -2724,6 +2682,69 @@ public:
 		}
 
 		return {typeIt->second, true};
+	}
+
+	static std::vector<std::pair<QString, int>> parseSpecificPropertyTypeDynamicEnum(const QString& strType, bool* ok)
+	{
+		std::vector<std::pair<QString, int>> enumValues;
+
+		if (ok == nullptr)
+		{
+			assert(false);
+			return enumValues;
+		}
+
+		int openBrace = strType.indexOf('[');
+		int closeBrace = strType.lastIndexOf(']');
+
+		if (openBrace == -1 || closeBrace == -1 || openBrace >= closeBrace)
+		{
+			*ok = false;
+			return enumValues;
+		}
+
+		QString valuesString = strType.mid(openBrace + 1, closeBrace - openBrace - 1);
+		valuesString.remove(' ');
+
+		QStringList valueStringList = valuesString.split(',', QString::SkipEmptyParts);	// split value pairs
+		if (valueStringList.empty() == true)
+		{
+			*ok = false;
+			return enumValues;
+		}
+
+		enumValues.reserve(valueStringList.size());
+
+		for (QString str : valueStringList)
+		{
+			// str is like:
+			// EnumValue = 1
+			//
+			QStringList str2intList = str.split('=', QString::SkipEmptyParts);
+			if (str2intList.size() != 2)
+			{
+				*ok = false;
+				return enumValues;
+			}
+
+			QString enumStr = str2intList.at(0);
+			bool conversionOk = false;
+			int enumVal = str2intList.at(1).toInt(&conversionOk);
+
+			if (conversionOk == false)
+			{
+				*ok = false;
+				return enumValues;
+			}
+
+			// Pair is good
+			//
+			enumValues.push_back({enumStr, enumVal});
+		}
+
+		*ok = true;
+
+		return enumValues;
 	}
 
 signals:

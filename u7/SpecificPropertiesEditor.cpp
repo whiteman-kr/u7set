@@ -171,7 +171,7 @@ void SpecificPropertyDescription::setSpecificEditor(E::PropertySpecificEditor va
 	m_specificEditor = value;
 }
 
-void SpecificPropertyDescription::updateDynamicEnumType()
+void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
 {
 	// Show/hide dynamic enum property
 
@@ -183,19 +183,37 @@ void SpecificPropertyDescription::updateDynamicEnumType()
 	}
 
 	bool dynamicEnumVisible = type() == E::SpecificPropertyType::pt_dynamicEnum;
+
 	if (p->visible() != dynamicEnumVisible)
 	{
-		// Create an example
-
 		if (dynamicEnumVisible == true && typeDynamicEnum().isEmpty() == true)
 		{
-			setTypeDynamicEnum("DynamicEnum [A=1, B=2]");
+			// Create an example on showing
+
+			setTypeDynamicEnum("A=1, B=2");
 			setDefaultValue("A");
 		}
 
 		p->setVisible(dynamicEnumVisible);
 
 		emit propertyListChanged();
+	}
+
+	// Validate TypeDynamicEnum property
+
+	if (dynamicEnumVisible == true)
+	{
+		bool propertyOk = false;
+
+		QString strType = tr("DynamicEnum [%1]").arg(typeDynamicEnum());
+
+		PropertyObject::parseSpecificPropertyTypeDynamicEnum(strType, &propertyOk);
+
+		if (propertyOk == false)
+		{
+			QString message = tr("SpecificProperties: Dynamic enum property error: %1").arg(strType);
+			QMessageBox::critical(parent, qAppName(), message);
+		}
 	}
 }
 
@@ -281,6 +299,9 @@ SpecificPropertiesEditor::~SpecificPropertiesEditor()
 
 void SpecificPropertiesEditor::setText(const QString& text)
 {
+
+	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 4);	// Editor must be reviewed if version is raised
+
 	m_propertiesList->clear();
 	m_propertyDescriptionsMap.clear();
 
@@ -325,20 +346,32 @@ void SpecificPropertiesEditor::setText(const QString& text)
 				return;
 			}
 
-			QString propertyTypeString = columns[3];
+			QString strType = columns[3];
 
-			if (bool startedFromDynamicEnum = propertyTypeString.trimmed().startsWith(QLatin1String("DynamicEnum"), Qt::CaseInsensitive);
-				startedFromDynamicEnum == true)
+			//
+
+			bool startedFromDynamicEnum = strType.trimmed().startsWith(QLatin1String("DynamicEnum"), Qt::CaseInsensitive);
+			int openBrace = strType.indexOf('[');
+			int closeBrace = strType.lastIndexOf(']');
+
+			if (openBrace != -1 &&
+					closeBrace != -1 &&
+					openBrace < closeBrace &&
+					startedFromDynamicEnum == true)
 			{
+				QString valuesString = strType.mid(openBrace + 1, closeBrace - openBrace - 1);
+				valuesString.remove(' ');
+
+				spd->setTypeDynamicEnum(valuesString);
 				spd->setType(E::SpecificPropertyType::pt_dynamicEnum);
-				spd->setTypeDynamicEnum(propertyTypeString);
 			}
 			else
 			{
-				auto[propertyType, propertyOk] = PropertyObject::parseSpecificPropertyType(propertyTypeString);
+				auto [propertyType, propertyOk] = PropertyObject::parseSpecificPropertyType(strType);
+
 				if (propertyOk == false)
 				{
-					QString message = tr("SpecificProperties: Specific property type is not recognized: %1").arg(propertyTypeString);
+					QString message = tr("SpecificProperties: Specific property type is not recognized: %1").arg(strType);
 					QMessageBox::critical(this, qAppName(), message);
 					return;
 				}
@@ -401,7 +434,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 
 		// Show/hide dynamic enum property
 
-		spd->updateDynamicEnumType();
+		spd->validateDynamicEnumType(this);
 
 		// Add the tree item
 
@@ -428,38 +461,40 @@ QString SpecificPropertiesEditor::text()
 		if (item == nullptr)
 		{
 			assert(false);
-			return QString();
+			continue;
 		}
 
 		if (m_propertyDescriptionsMap.find(item) == m_propertyDescriptionsMap.end())
 		{
 			assert(false);
-			return QString();
+			continue;
 		}
 
 		const std::shared_ptr<SpecificPropertyDescription>& spd = m_propertyDescriptionsMap[item];
 
-		QString typeString;
+		QString strType;
 
 		switch (spd->type())
 		{
-		case E::SpecificPropertyType::pt_int32:			typeString = "int32";					break;
-		case E::SpecificPropertyType::pt_uint32:		typeString = "uint32";					break;
-		case E::SpecificPropertyType::pt_double:		typeString = "double";					break;
-		case E::SpecificPropertyType::pt_string:		typeString = "string";					break;
-		case E::SpecificPropertyType::pt_bool:			typeString = "bool";					break;
-		case E::SpecificPropertyType::pt_e_channel:		typeString = "E::Channel";				break;
-		case E::SpecificPropertyType::pt_dynamicEnum:	typeString = spd->typeDynamicEnum();	break;
+		case E::SpecificPropertyType::pt_int32:			strType = "int32";					break;
+		case E::SpecificPropertyType::pt_uint32:		strType = "uint32";					break;
+		case E::SpecificPropertyType::pt_double:		strType = "double";					break;
+		case E::SpecificPropertyType::pt_string:		strType = "string";					break;
+		case E::SpecificPropertyType::pt_bool:			strType = "bool";					break;
+		case E::SpecificPropertyType::pt_e_channel:		strType = "E::Channel";				break;
+		case E::SpecificPropertyType::pt_dynamicEnum:
+		{
+			strType = tr("DynamicEnum [%1]").arg(spd->typeDynamicEnum());
+			break;
+		}
 		default:
 			assert(false);
-			return QString();
-
 		}
 
 		result += PropertyObject::createSpecificPropertyStruct(spd->caption(),
 														spd->category(),
 														spd->description(),
-														typeString,
+														strType,
 														&spd->lowLimit(),
 														&spd->highLimit(),
 														&spd->defaultValue(),
@@ -542,7 +577,7 @@ void SpecificPropertiesEditor::onPropertiesChanged(QList<std::shared_ptr<Propert
 			return;
 		}
 
-		spd->updateDynamicEnumType();
+		spd->validateDynamicEnumType(this);
 
 		updatePropetyListItem(item, spd.get());
 	}

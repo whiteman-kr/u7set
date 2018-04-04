@@ -49,7 +49,7 @@ public:
 	E::PropertySpecificEditor specificEditor() const;
 	void setSpecificEditor(E::PropertySpecificEditor value);
 
-	void updateDynamicEnumType();
+	void validateDynamicEnumType(QWidget* parent);
 
 private:
 	QString m_caption;
