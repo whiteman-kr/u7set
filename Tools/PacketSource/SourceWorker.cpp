@@ -13,8 +13,9 @@
 
 SourceWorker::SourceWorker(QObject* pSource) :
 	m_pSource(pSource),
-	m_finishThread(false),
-	m_numerator(0)
+	m_numerator(0),
+	m_sentFrames(0),
+	m_finishThread(false)
 {
 }
 
@@ -28,34 +29,43 @@ SourceWorker::~SourceWorker()
 
 void SourceWorker::process()
 {
-	SourceItem* pSource = (SourceItem*) m_pSource;
+	PS::Source* pSource = (PS::Source*) m_pSource;
 	if (pSource == nullptr)
 	{
+		emit finished();
 		return;
 	}
 
-	QUdpSocket* pSocket = new QUdpSocket();
+	QUdpSocket* pSocket = new QUdpSocket(this);
 	if (pSocket == nullptr)
 	{
+		emit finished();
 		return;
 	}
 
-	pSocket->bind(QHostAddress::LocalHost, PS::UDP_PORT);
+	if (pSocket->bind(QHostAddress::LocalHost, PS::UDP_PORT + pSource->info().index) == false)
+	{
+		pSocket->close();
+		delete pSocket;
+
+		emit finished();
+		return;
+	}
 
 	while(m_finishThread == false)
 	{
-		for (int frameNumber = 0; frameNumber < pSource->frameCount(); frameNumber++)
+		for (int frameNumber = 0; frameNumber < pSource->info().frameCount; frameNumber++)
 		{
 			// header RupFrame
 			//
-			Rup::Header& header = m_psFrame.rupFrame.header;
+			Rup::Header& header = m_simFrame.rupFrame.header;
 			header.frameSize = Socket::ENTIRE_UDP_SIZE;
 			header.protocolVersion = PS::SUPPORT_VERSION;
 			header.flags.appData = 1;
-			header.dataId = pSource->dataID();
-			header.moduleType = pSource->moduleType();
+			header.dataId = pSource->info().dataID;
+			header.moduleType = pSource->info().moduleType;
 			header.numerator = m_numerator;
-			header.framesQuantity = pSource->frameCount();
+			header.framesQuantity = pSource->info().frameCount;
 			header.frameNumber = frameNumber;
 
 			QDateTime&& time = QDateTime::currentDateTime();
@@ -71,24 +81,26 @@ void SourceWorker::process()
 
 			// data RupFrame
 			//
-			m_psFrame.rupFrame.data;
+			m_simFrame.rupFrame.data;
 
 			// crc64 RupFrame
 			//
-			m_psFrame.rupFrame.calcCRC64();
+			m_simFrame.rupFrame.calcCRC64();
 
-			// version and IP of psFrame
+			// version and IP of simFrame
 			//
-			m_psFrame.version = reverseUint16(PS::FrameVersion);
-			m_psFrame.lmIP = reverseUint32(pSource->lmAddress().address32());
+			m_simFrame.simVersion = reverseUint16(PS::SIM_FRAME_VERSION);
+			m_simFrame.sourceIP = reverseUint32(pSource->info().lmAddress.address32());
 
 			// send udp
 			//
-			pSocket->writeDatagram(reinterpret_cast<char*>(&m_psFrame), sizeof(m_psFrame), pSource->serverAddress().address(), pSource->serverAddress().port());
+			pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), pSource->info().serverAddress.address(), pSource->info().serverAddress.port());
 
 			// timeout
 			//
-			QThread::msleep(PS::SendFrameTimeout);
+			QThread::msleep(PS::SEND_TIMEOUT);
+
+			m_sentFrames++;
 		}
 
 		m_numerator++;

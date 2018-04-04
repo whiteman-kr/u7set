@@ -42,6 +42,7 @@ private:
 							//
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
+	QAction*				m_sourceSelectAllAction = nullptr;
 	QAction*				m_sourceOptionAction = nullptr;
 
 							// menu - ?
@@ -70,6 +71,7 @@ private:
 	void					createContextMenu();
 	void					createHeaderContexMenu();
 	void					createStatusBar();
+	void					loadSources();
 
 	// update lists
 	//
@@ -100,6 +102,7 @@ private slots:
 							//
 	void					startSource();
 	void					stopSource();
+	void					selectAllSource();
 	void					optionSource();
 
 							// ContextMenu
@@ -111,6 +114,10 @@ private slots:
 							// menu - ?
 							//
 	void					aboutApp();
+
+	// slot for update lists
+	//
+	void					updateSourceState();
 };
 
 // ==============================================================================================
