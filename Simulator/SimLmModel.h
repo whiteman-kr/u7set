@@ -4,9 +4,11 @@
 #include <QTextStream>
 #include <QByteArray>
 #include <QThread>
+#include <QtConcurrent>
 #include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimDeviceEmulator.h"
+#include "SimTimeController.h"
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
 
@@ -31,6 +33,8 @@ namespace Sim
 
 		// Running LM
 		//
+		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime);				// Start running one cycle
+
 		//bool powerOn(bool autoStart);
 		//bool powerOff();
 
@@ -68,7 +72,7 @@ namespace Sim
 		LmDescription& lmDescription();
 		const LmDescription& lmDescription() const;
 
-		int cycleDuration() const;
+		std::chrono::microseconds cycleDuration() const;
 
 		const std::vector<DeviceCommand>& appCommands() const;
 

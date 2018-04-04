@@ -3,15 +3,20 @@
 
 #include <set>
 #include <atomic>
+#include <memory>
 #include <QThread>
 #include <QtConcurrent>
 #include <QMutex>
 #include <SimOutput.h>
+#include <SimLmModel.h>
 #include <SimTimeController.h>
 
 namespace Sim
 {
+	using namespace std::literals::chrono_literals;
+
 	class Simulator;
+	struct SimControlRunStruct;
 
 	enum class SimControlState
 	{
@@ -20,13 +25,54 @@ namespace Sim
 		Pause
 	};
 
+	// Internal struct must not be used anywhere in code except Sim::Control
+	//
+	struct SimControlRunStruct
+	{
+		SimControlRunStruct(std::shared_ptr<LogicModule> lm) :
+			m_lm(lm)
+		{
+		}
+
+		QFuture<bool> start(std::chrono::microseconds time)
+		{
+			m_lastStartTime = time;
+			m_possibleToAdvanceTo = time;
+			m_cylcesCounter ++;
+			return m_lm->asyncRunCycle(time);
+		}
+
+		QString equipmentId() const
+		{
+			return m_lm->equipmentId();
+		}
+
+		LogicModule* operator->()
+		{
+			return m_lm.get();
+		}
+
+		std::shared_ptr<LogicModule> m_lm;
+		std::chrono::microseconds m_lastStartTime{0};
+		std::chrono::microseconds m_possibleToAdvanceTo{0};
+		int m_cylcesCounter = 0;
+	};
+
 
 	struct ControlData
 	{
-		std::set<QString> m_equipmentIds;
-
-		std::chrono::microseconds m_leftTime{0};
+		// Keep this struct simple, it should copy fast enough
+		//
+		std::vector<SimControlRunStruct> m_lms;			// LMs added to simulation
 		SimControlState m_state = SimControlState::Stop;
+
+		std::chrono::microseconds m_startTime = 0us;	// When simulation was started, it's computer time
+		std::chrono::microseconds m_currentTime = 0us;	// Current time in simulation
+
+		std::chrono::microseconds m_duration{0};		// Simulation is started for this time
+														// if time < 0 then no time limit
+														// if time == 0 then run one cycle
+														// if time > 0 then run this time
 	};
 
 
@@ -41,22 +87,23 @@ namespace Sim
 	public:
 		void reset();
 
-		void addToRunList(const QString& equipmentId);
-		void addToRunList(const QStringList& equipmentIds);
+		bool addToRunList(const QString& equipmentId);
+		bool addToRunList(const QStringList& equipmentIds);
 
 		void removeFromRunList(const QString& equipmentId);
 		void removeFromRunList(const QStringList& equipmentIds);
 
-		bool start(int cycles = -1);
+		bool start(std::chrono::microseconds time = -1us);
 		void pause();
 		void stop();
 
 		ControlData controlData() const;
+		void setControlDataTime();
 
 		SimControlState state() const;
 		bool isRunning() const;
 
-		int leftCycles() const;
+		std::chrono::microseconds leftTime() const;
 
 	signals:
 		void stateChanged();
@@ -68,16 +115,14 @@ namespace Sim
 
 	private:
 		Simulator* m_simualtor = nullptr;
-		TimeController m_timeController;
 
 		// Start of access only with mutex
 		//
 		mutable QMutex m_mutex{QMutex::Recursive};
 		ControlData m_controlData;
+
 		// End of Access only with mutex
 		//
-
-		std::map<QString, QFuture<bool>> m_lmTasks;	// use only in run()
 	};
 
 }

@@ -41,10 +41,10 @@ namespace Sim
 		return m_baseTime;
 	}
 
-	std::chrono::system_clock::time_point TimeController::currentTime() const
+	std::chrono::microseconds TimeController::currentTime() const
 	{
 		QMutexLocker guard(&m_mutex);
-		return m_baseTime + m_duration;
+		return std::chrono::duration_cast<std::chrono::microseconds>(m_baseTime.time_since_epoch()) + m_duration;
 	}
 
 }

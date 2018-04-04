@@ -23,7 +23,7 @@ namespace Sim
 
 		std::chrono::microseconds duration() const;
 		std::chrono::system_clock::time_point baseTime() const;
-		std::chrono::system_clock::time_point currentTime() const;			// return BaseTime + Duration
+		std::chrono::microseconds currentTime() const;			// return BaseTime + Duration
 
 	private:
 		mutable QMutex m_mutex;

@@ -81,6 +81,12 @@ namespace Sim
 		return;
 	}
 
+	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime)
+	{
+		auto result = QtConcurrent::run<bool>(&m_device, &DeviceEmulator::run, 1);
+		return result;
+	}
+
 //	bool LogicModule::powerOn(bool autoStart)
 //	{
 //		writeMessage(tr("PowerOn, autoStart = %1").arg(autoStart));
@@ -231,9 +237,9 @@ namespace Sim
 		return m_lmDescription;
 	}
 
-	int LogicModule::cycleDuration() const
+	std::chrono::microseconds LogicModule::cycleDuration() const
 	{
-		return m_lmDescription.logicUnit().m_cycleDuration;
+		return std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration};
 	}
 
 	const std::vector<DeviceCommand>& LogicModule::appCommands() const

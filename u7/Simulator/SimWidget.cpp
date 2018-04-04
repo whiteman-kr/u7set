@@ -346,7 +346,7 @@ void SimWidget::runSimulation()
 	{
 		// Continue running what was simualted before
 		//
-		int cycles = control.leftCycles();
+		int cycles = control.leftTime();
 		control.start(cycles);
 	}
 	else
