@@ -64,7 +64,17 @@ bool SourceOptionDialog::createInterface()
 
 void SourceOptionDialog::onSelectPath()
 {
-	QString path = QFileDialog::getExistingDirectory(this, tr("Select directory"), QDir::currentPath());
+	QString defaultDir = QDir::currentPath();
+
+	if (theOptions.source().path().isEmpty() == false)
+	{
+		if (QFile::exists(theOptions.source().path()) == true)
+		{
+			defaultDir = theOptions.source().path();
+		}
+	}
+
+	QString path = QFileDialog::getExistingDirectory(this, tr("Select directory"), defaultDir);
 	if (path.isEmpty() == true)
 	{
 		return;

@@ -7,31 +7,6 @@
 
 // ==============================================================================================
 
-#pragma pack(push, 1)
-
-namespace PS
-{
-	const int SUPPORT_VERSION = 5; // last version of Rup::VERSION
-
-	const int FrameVersion = 1;
-
-	struct Frame
-	{
-		Rup::Frame	rupFrame;
-
-		quint16		version = FrameVersion;
-		quint32		lmIP = 0;
-	};
-
-	const int UDP_PORT = 65432;
-
-	const int SendFrameTimeout = 5; // 5 ms
-}
-
-#pragma pack(pop)
-
-// ==============================================================================================
-
 class SourceWorker : public QObject
 {
 	Q_OBJECT
@@ -44,22 +19,21 @@ public:
 private:
 
 	QObject*			m_pSource = nullptr;
+	Rup::SimFrame		m_simFrame;
+
+	int					m_numerator = 0;
+	int					m_sentFrames = 0;
 
 	bool				m_finishThread = false;
 
-	PS::Frame			m_psFrame;
-
-	int					m_numerator = 0;
-
 public:
 
+	bool				isRunnig() { return !m_finishThread; }
+	int					sentFrames() { return m_sentFrames; }
 
 signals:
 
 	void				finished();
-
-private slots:
-
 
 public slots:
 
