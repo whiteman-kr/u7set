@@ -40,8 +40,8 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 
 	if (m_adaptiveAperture == false)
 	{
-		m_absRoughAperture = fabs(m_highLimit - m_lowLimit) * (m_coarseAperture / 100.0);
-		m_absSmoothAperture = fabs(m_highLimit - m_lowLimit) * (m_fineAperture / 100.0);
+		m_absCoarseAperture = fabs(m_highLimit - m_lowLimit) * (m_coarseAperture / 100.0);
+		m_absFineAperture = fabs(m_highLimit - m_lowLimit) * (m_fineAperture / 100.0);
 	}
 
 	m_current[0].hash = m_current[1].hash = m_stored.hash = calcHash(signal->appSignalID());
@@ -52,7 +52,6 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState = prevState;
-	SimpleAppSignalState autoPointState;
 
 	// check time to set !!!!
 	//
@@ -70,18 +69,17 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 		//
 		if (prevState.flags.valid == 1)
 		{
-			// prevState is valid, archive it
+			// prevState is valid and not stored, archive it
 			//
-			очередь состояний сделать классом а не тайпдефом
-			добавить пуш автопоитн в класс очереди
 
-			autoPointState = prevState;
+			if (m_prevStateIsStored == false)
+			{
+				statesQueue.pushAutoPoint(&prevState);
 
-			autoPointState.flags.autoPoint = 1;
+				m_prevStateIsStored = true;
+			}
 
-			statesQueue.push(&autoPointState);
-
-//			logState(prevState);
+			//			logState(prevState);
 
 			curState.flags.valid = 0;
 			curState.flags.validityChange = 1;
@@ -99,12 +97,13 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 		{
 			// prevState is invalid, archive invalid autopoint
 			//
-			autoPointState = curState;
-			autoPointState.time += -1;		// current time offset back on 1 ms
-			autoPointState.flags.autoPoint = 1;
-			autoPointState.flags.valid = 0;
+			SimpleAppSignalState tmpState = curState;
 
-			statesQueue.push(&autoPointState);
+			tmpState.time += -1;		// current time offset back on 1 ms
+			tmpState.flags.valid = 0;
+			tmpState.value = 0;
+
+			statesQueue.pushAutoPoint(tmpState);
 
 //			logState(autoPointState);
 
@@ -119,8 +118,8 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 			{
 				if (curState.value != prevState.value)
 				{
-					curState.flags.smoothAperture = 0;		// its important!
-					curState.flags.roughAperture = 1;		//
+					curState.flags.fineAperture = 0;		// its important!
+					curState.flags.coarseAperture = 1;		//
 				}
 			}
 			else
@@ -133,26 +132,26 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 
 					if (absAperture > m_fineAperture)
 					{
-						curState.flags.smoothAperture = 1;
+						curState.flags.fineAperture = 1;
 					}
 
 					if (absAperture > m_coarseAperture)
 					{
-						curState.flags.roughAperture = 1;
+						curState.flags.coarseAperture = 1;
 					}
 				}
 				else
 				{
 					double absValueChange = fabs(m_stored.value - curState.value);
 
-					if (absValueChange > m_absSmoothAperture)
+					if (absValueChange > m_absFineAperture)
 					{
-						curState.flags.smoothAperture = 1;
+						curState.flags.fineAperture = 1;
 					}
 
-					if (absValueChange > m_absRoughAperture)
+					if (absValueChange > m_absCoarseAperture)
 					{
-						curState.flags.roughAperture = 1;
+						curState.flags.coarseAperture = 1;
 					}
 				}
 			}
@@ -177,7 +176,13 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 
 		statesQueue.push(&m_stored);
 
+		m_prevStateIsStored = true;
+
 //		logState(m_stored);
+	}
+	else
+	{
+		m_prevStateIsStored = false;
 	}
 
 	// curState should be update always

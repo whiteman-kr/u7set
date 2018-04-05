@@ -44,7 +44,7 @@ private:
 
 	// paramters needed to update state
 	//
-	bool m_initialized = false;
+	bool m_prevStateIsStored = false;
 	bool m_isDiscreteSignal = false;
 
 	bool m_archive = false;
@@ -59,8 +59,8 @@ private:
 
 	//
 
-	double m_absRoughAperture = 0;
-	double m_absSmoothAperture = 0;
+	double m_absCoarseAperture = 0;
+	double m_absFineAperture = 0;
 
 	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 

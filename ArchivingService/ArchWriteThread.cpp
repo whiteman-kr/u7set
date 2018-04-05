@@ -527,10 +527,10 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 			continue;
 		}
 
-		if (archSignal.isAnalog == false && state.flags.smoothAperture == 1)
+		if (archSignal.isAnalog == false && state.flags.fineAperture == 1)
 		{
 			assert(false);
-			state.flags.smoothAperture = 0;		// hard reset state.flags.smoothAperture for discrete signals
+			state.flags.fineAperture = 0;		// hard reset state.flags.smoothAperture for discrete signals
 		}
 
 		m_timeFilter.setTimes(state.time);

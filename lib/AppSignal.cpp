@@ -12,24 +12,24 @@ void AppSignalStateFlags::clearReasonsFlags()
 {
 	validityChange = 0;
 	autoPoint = 0;
-	roughAperture = 0;
-	smoothAperture = 0;
+	coarseAperture = 0;
+	fineAperture = 0;
 }
 
 bool AppSignalStateFlags::hasArchivingReason() const
 {
 	return	validityChange == 1 ||
 			autoPoint == 1 ||
-			roughAperture == 1 ||
-			smoothAperture == 1;
+			coarseAperture == 1 ||
+			fineAperture == 1;
 }
 
 bool AppSignalStateFlags::hasShortTermArchivingReasonOnly() const
 {
 	return	validityChange == 0 &&
 			autoPoint == 0 &&
-			roughAperture == 0 &&
-			smoothAperture == 1;
+			coarseAperture == 0 &&
+			fineAperture == 1;
 }
 
 AppSignalState::AppSignalState(const Proto::AppSignalState& protoState)
@@ -165,6 +165,27 @@ void SimpleAppSignalState::print() const
 				"value =" << value <<
 				(flags.autoPoint == 1 ? " auto" : "");
 }
+
+// -------------------------------------------------------------------------------------------------
+//
+// AppSignalStatesQueue class implementation
+//
+// -------------------------------------------------------------------------------------------------
+
+bool AppSignalStatesQueue::pushAutoPoint(SimpleAppSignalState state)
+{
+	// state is a copy!
+	//
+	state.flags.autoPoint = 1;
+
+	return push(&state);
+}
+
+// -------------------------------------------------------------------------------------------------
+//
+// AppSignalParam class implementation
+//
+// -------------------------------------------------------------------------------------------------
 
 AppSignalParam::AppSignalParam()
 {

@@ -34,8 +34,8 @@ union AppSignalStateFlags
 
 		// reasons to archiving
 		//
-		quint32 smoothAperture : 1;
-		quint32 roughAperture : 1;
+		quint32 fineAperture : 1;
+		quint32 coarseAperture : 1;
 		quint32 autoPoint : 1;
 		quint32 validityChange : 1;
 	};
@@ -112,7 +112,12 @@ struct SimpleAppSignalState
 };
 
 
-typedef LockFreeQueue<SimpleAppSignalState> AppSignalStatesQueue;
+class AppSignalStatesQueue : public LockFreeQueue<SimpleAppSignalState>
+{
+public:
+	bool pushAutoPoint(SimpleAppSignalState state);
+};
+
 typedef std::shared_ptr<AppSignalStatesQueue> AppSignalStatesQueueShared;
 
 
