@@ -32,7 +32,7 @@ void TcpArchiveClient::onClientThreadStarted()
 	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread started, archive server %1)").
 								arg(serverAddressPort(0).addressPortStr()));
 
-	m_signalStatesQueue = std::make_shared<AppSignalStatesQueue>(10000);
+	m_signalStatesQueue = std::make_shared<SimpleAppSignalStatesQueue>(10000);
 
 	if (m_signalStatesProcessingThread != nullptr)
 	{

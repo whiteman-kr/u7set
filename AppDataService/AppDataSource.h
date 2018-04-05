@@ -3,6 +3,18 @@
 #include "../lib/Signal.h"
 #include "../lib/DataSource.h"
 
+
+class SimpleAppSignalStatesQueue : public LockFreeQueue<SimpleAppSignalState>
+{
+public:
+	SimpleAppSignalStatesQueue(int queueSize);
+
+	bool pushAutoPoint(SimpleAppSignalState state);
+};
+
+typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
+
+
 struct AppSignalStateEx
 {
 public:
@@ -15,7 +27,7 @@ public:
 
 	void setSignalParams(int index, Signal* signal);
 
-	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, AppSignalStatesQueue& statesQueue);
+	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, SimpleAppSignalStatesQueue& statesQueue);
 	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = m_stored.flags.all = 0; }
 
 	Hash hash() const;
@@ -173,7 +185,7 @@ private:
 
 	int m_acquiredSignalsCount = 0;
 
-	AppSignalStatesQueue m_signalStatesQueue;
+	SimpleAppSignalStatesQueue m_signalStatesQueue;
 
 	int m_signalStatesQueueSize = 0;
 	int m_signalStatesQueueMaxSize = 0;

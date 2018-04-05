@@ -10,11 +10,11 @@ SignalStatesProcessingThread::SignalStatesProcessingThread(const AppDataSources&
 
 }
 
-void SignalStatesProcessingThread::registerDestSignalStatesQueue(AppSignalStatesQueueShared destQueue, const QString& description)
+void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description)
 {
     TEST_PTR_RETURN(destQueue);
 
-    AppSignalStatesQueue* destQueuePtr = destQueue.get();
+    SimpleAppSignalStatesQueue* destQueuePtr = destQueue.get();
 
     m_queueMapMutex.lock();
 
@@ -31,11 +31,11 @@ void SignalStatesProcessingThread::registerDestSignalStatesQueue(AppSignalStates
     DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: register queue '%1'").arg(description));
 }
 
-void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(AppSignalStatesQueueShared destQueue, const QString& description)
+void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description)
 {
     TEST_PTR_RETURN(destQueue);
 
-    AppSignalStatesQueue* destQueuePtr = destQueue.get();
+    SimpleAppSignalStatesQueue* destQueuePtr = destQueue.get();
 
     m_queueMapMutex.lock();
 
@@ -77,13 +77,13 @@ void SignalStatesProcessingThread::run()
 					break;		    // appDataSource has no states to processing, go to next source
 				}
 
-				state.print();
+				// state.print();
 
 				hasNoStatesToProcessing = false;
 
 				m_queueMapMutex.lock();
 
-				for(AppSignalStatesQueueShared destQueue : m_queueMap)
+				for(SimpleAppSignalStatesQueueShared destQueue : m_queueMap)
 				{
 					destQueue->push(&state);
 				}

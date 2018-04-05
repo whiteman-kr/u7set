@@ -2,6 +2,26 @@
 
 #include "AppDataSource.h"
 
+// -------------------------------------------------------------------------------------------------
+//
+// AppSignalStatesQueue class implementation
+//
+// -------------------------------------------------------------------------------------------------
+
+SimpleAppSignalStatesQueue::SimpleAppSignalStatesQueue(int queueSize) :
+	LockFreeQueue<SimpleAppSignalState>(queueSize)
+{
+}
+
+bool SimpleAppSignalStatesQueue::pushAutoPoint(SimpleAppSignalState state)
+{
+	// state is a copy!
+	//
+	state.flags.autoPoint = 1;
+
+	return push(&state);
+}
+
 // -------------------------------------------------------------------------------
 //
 // AppSignalState class implementation
@@ -48,7 +68,7 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 }
 
 
-bool AppSignalStateEx::setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, AppSignalStatesQueue& statesQueue)
+bool AppSignalStateEx::setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, SimpleAppSignalStatesQueue& statesQueue)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState = prevState;
@@ -74,7 +94,7 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 
 			if (m_prevStateIsStored == false)
 			{
-				statesQueue.pushAutoPoint(&prevState);
+				statesQueue.pushAutoPoint(prevState);
 
 				m_prevStateIsStored = true;
 			}
@@ -554,10 +574,10 @@ bool AppDataSource::parsePacket()
 
 	for(const SignalParseInfo& parseInfo : m_signalsParseInfo)
 	{
-		if (parseInfo.appSignalID != "#TEST_R01_CH01_MD07_CTRLIN_INH01A")
+		/*if (parseInfo.appSignalID != "#TEST_R01_CH01_MD07_CTRLIN_INH01A")
 		{
 			continue;
-		}
+		}*/
 
 		AppSignalStateEx* signalState = (*m_signalStates)[parseInfo.index];
 

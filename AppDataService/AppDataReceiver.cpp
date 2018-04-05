@@ -107,8 +107,6 @@ void AppDataReceiver::onSocketReadyRead()
 
 	do
 	{
-		bool isSimFrame = false;
-
 		qint64 size = m_socket->pendingDatagramSize();
 
 		if (size == -1 || size > sizeof(simFrame))

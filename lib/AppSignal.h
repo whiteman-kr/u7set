@@ -25,7 +25,6 @@ namespace Proto
 	class AppSignalSet;
 }
 
-
 union AppSignalStateFlags
 {
 	struct
@@ -51,7 +50,23 @@ union AppSignalStateFlags
 };
 
 
-struct SimpleAppSignalState;
+struct SimpleAppSignalState
+{
+	// light version of AppSignalState to use in queues and other AppDataService data structs
+	//
+	Hash hash = 0;					// == calcHash(AppSignalID)
+	Times time;
+	AppSignalStateFlags flags;
+	double value = 0;
+
+	bool isValid() const { return flags.valid == 1; }
+
+	void save(Proto::AppSignalState* protoState);
+	Hash load(const Proto::AppSignalState& protoState);
+
+	void print() const;
+};
+
 
 class AppSignalState
 {
@@ -92,33 +107,6 @@ public:
 };
 
 Q_DECLARE_METATYPE(AppSignalState)
-
-
-struct SimpleAppSignalState
-{
-	// light version of AppSignalState to use in queues and other AppDataService data structs
-	//
-	Hash hash = 0;					// == calcHash(AppSignalID)
-	Times time;
-	AppSignalStateFlags flags;
-	double value = 0;
-
-	bool isValid() const { return flags.valid == 1; }
-
-	void save(Proto::AppSignalState* protoState);
-	Hash load(const Proto::AppSignalState& protoState);
-
-	void print() const;
-};
-
-
-class AppSignalStatesQueue : public LockFreeQueue<SimpleAppSignalState>
-{
-public:
-	bool pushAutoPoint(SimpleAppSignalState state);
-};
-
-typedef std::shared_ptr<AppSignalStatesQueue> AppSignalStatesQueueShared;
 
 
 class AppSignalParam

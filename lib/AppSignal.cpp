@@ -160,25 +160,10 @@ Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
 
 void SimpleAppSignalState::print() const
 {
-	qDebug() << "state" << QDateTime::fromMSecsSinceEpoch(time.system.timeStamp) <<
+	qDebug() << "state" << QDateTime::fromMSecsSinceEpoch(time.system.timeStamp).toString("dd.MM.yyyy HH:mm:ss.zzz") <<
 				"validity =" << flags.valid <<
 				"value =" << value <<
 				(flags.autoPoint == 1 ? " auto" : "");
-}
-
-// -------------------------------------------------------------------------------------------------
-//
-// AppSignalStatesQueue class implementation
-//
-// -------------------------------------------------------------------------------------------------
-
-bool AppSignalStatesQueue::pushAutoPoint(SimpleAppSignalState state)
-{
-	// state is a copy!
-	//
-	state.flags.autoPoint = 1;
-
-	return push(&state);
 }
 
 // -------------------------------------------------------------------------------------------------
