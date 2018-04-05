@@ -449,7 +449,8 @@ DISTFILES += \
     LogicModuleDescription/LM1_SR01.xml \
     LogicModuleDescription/LM1_SF00.xml \
     LogicModuleDescription/LM1_SR01.xml \
-    LogicModuleDescription/BVB15Module0000.xml
+    LogicModuleDescription/BVB15Module0000.xml \
+    LogicModuleDescription/LM1_SR02.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

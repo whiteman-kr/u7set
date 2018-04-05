@@ -121,7 +121,7 @@ public:
 	bool editSignals(QVector<int> ids);
 	static void trimSignalTextFields(Signal& signal);
 	void saveSignal(Signal& signal);
-	QList<int> cloneSignals(const QSet<int>& signalIDs);
+	QVector<int> cloneSignals(const QSet<int>& signalIDs);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignals(const QSet<int>& signalIDs);
 	void deleteSignal(int signalID);
@@ -289,7 +289,7 @@ public slots:
 	void editColumnsVisibilityAndOrder();
 	void changeSignalActionsVisibility();
 
-	void setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
+	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
 
@@ -317,7 +317,7 @@ private:
 	int m_lastHorizontalScrollPosition = -1;
 	bool m_changingSelectionManualy = false;
 
-	QList<int> m_selectedRowsSignalID;
+	QVector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;
 	int m_focusedCellColumn = -1;
 
