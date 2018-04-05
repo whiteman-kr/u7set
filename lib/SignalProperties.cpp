@@ -1,6 +1,10 @@
 #include "SignalProperties.h"
 
 
+std::shared_ptr<OrderedHash<int, QString>> SignalProperties::m_sensorTypeHash = generateOrderedHashFromStringArray(SensorTypeStr, SENSOR_TYPE_COUNT);
+std::shared_ptr<OrderedHash<int, QString>> SignalProperties::m_outputModeHash = generateOrderedHashFromStringArray(OutputModeStr, OUTPUT_MODE_COUNT);
+
+
 SignalProperties::SignalProperties(Signal& signal) :
 	m_signal(signal)
 {
@@ -126,12 +130,10 @@ void SignalProperties::initProperties()
 		auto electricUnitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::ElectricUnit, electricUnitCaption, true, Signal::electricUnit, Signal::setElectricUnit, m_signal);
 		electricUnitProperty->setCategory(electricParametersCategory);
 
-		std::shared_ptr<OrderedHash<int, QString>> sensorTypeHash = generateOrderedHashFromStringArray(SensorTypeStr, SENSOR_TYPE_COUNT);
-		auto sensorTypeProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(sensorTypeCaption, true, sensorTypeHash, Signal::sensorType, Signal::setSensorTypeInt, m_signal);
+		auto sensorTypeProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(sensorTypeCaption, true, m_sensorTypeHash, Signal::sensorType, Signal::setSensorTypeInt, m_signal);
 		sensorTypeProperty->setCategory(electricParametersCategory);
 
-		std::shared_ptr<OrderedHash<int, QString>> outputModeHash = generateOrderedHashFromStringArray(OutputModeStr, OUTPUT_MODE_COUNT);
-		auto outputModePropetry = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(outputModeCaption, true, outputModeHash, Signal::outputMode, Signal::setOutputModeInt, m_signal);
+		auto outputModePropetry = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(outputModeCaption, true, m_outputModeHash, Signal::outputMode, Signal::setOutputModeInt, m_signal);
 		outputModePropetry->setCategory(electricParametersCategory);
 
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
