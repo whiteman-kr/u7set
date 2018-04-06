@@ -303,7 +303,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(PROP_LM_DATA_TYPE, dataTypeToString(m_lmDataType));
 	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
 
-	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType);
+	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType, true);
 	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
 	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_KEY, m_lmSubsystemKey);
 	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
