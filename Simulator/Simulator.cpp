@@ -2,7 +2,7 @@
 #include <cassert>
 #include <QDebug>
 #include <QDir>
-#include <QtConcurrent>
+#include <QtConcurrent/QtConcurrent>
 #include "../lib/ModuleFirmware.h"
 #include "SimLmModel.h"
 

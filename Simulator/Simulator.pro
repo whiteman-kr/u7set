@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT		 += xml qml concurrent
+QT		 += xml qml core concurrent
 
 TARGET = Simulator
 TEMPLATE = lib

@@ -5,7 +5,7 @@
 #include <atomic>
 #include <memory>
 #include <QThread>
-#include <QtConcurrent>
+#include <QtConcurrent/QtConcurrent>
 #include <QMutex>
 #include <SimOutput.h>
 #include <SimLmModel.h>
@@ -36,10 +36,12 @@ namespace Sim
 
 		QFuture<bool> start(std::chrono::microseconds time)
 		{
+			bool reset = m_lastStartTime == 0us;
+
 			m_lastStartTime = time;
 			m_possibleToAdvanceTo = time;
 			m_cylcesCounter ++;
-			return m_lm->asyncRunCycle(time);
+			return m_lm->asyncRunCycle(time, reset);
 		}
 
 		QString equipmentId() const
@@ -73,6 +75,12 @@ namespace Sim
 														// if time < 0 then no time limit
 														// if time == 0 then run one cycle
 														// if time > 0 then run this time
+
+		QDateTime currentTime() const
+		{
+			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_currentTime);
+			return QDateTime::fromMSecsSinceEpoch(ms.count(), Qt::UTC);
+		}
 	};
 
 
@@ -93,16 +101,17 @@ namespace Sim
 		void removeFromRunList(const QString& equipmentId);
 		void removeFromRunList(const QStringList& equipmentIds);
 
-		bool start(std::chrono::microseconds time = -1us);
+		bool startSimulation(std::chrono::microseconds duration = -1us);
 		void pause();
 		void stop();
 
 		ControlData controlData() const;
-		void setControlDataTime();
+		void updateControlDataTime(std::chrono::microseconds currentTime);
 
 		SimControlState state() const;
 		bool isRunning() const;
 
+		std::chrono::microseconds duration() const;
 		std::chrono::microseconds leftTime() const;
 
 	signals:

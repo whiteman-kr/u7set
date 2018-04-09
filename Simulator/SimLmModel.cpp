@@ -81,8 +81,13 @@ namespace Sim
 		return;
 	}
 
-	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime)
+	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime, bool reset)
 	{
+		if (reset == true)
+		{
+			m_device.reset();
+		}
+
 		auto result = QtConcurrent::run<bool>(&m_device, &DeviceEmulator::run, 1);
 		return result;
 	}

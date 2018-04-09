@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	}
 
 	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC01_MD00");
-	simulator.control().start(3);
+	simulator.control().startSimulation(std::chrono::microseconds{-1});
 
 //	std::shared_ptr<Sim::LogicModule> logicModule = simulator.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
 //	if (logicModule == nullptr)

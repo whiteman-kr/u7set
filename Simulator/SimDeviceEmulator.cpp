@@ -292,8 +292,8 @@ namespace Sim
 	{
 		if (m_currentMode == DeviceMode::Start)
 		{
-			bool ok = processStartMode();
-			if (ok == false)
+			if (bool ok = processStartMode();
+				ok == false)
 			{
 				return false;
 			}
@@ -1003,7 +1003,7 @@ namespace Sim
 
 	bool DeviceEmulator::runCommand(DeviceCommand& deviceCommand)
 	{
-		qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
+		//qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
 
 		// simulationFunc is checked in parsing command
 		//
