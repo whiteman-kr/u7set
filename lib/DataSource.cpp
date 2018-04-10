@@ -97,6 +97,8 @@ bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkPropert
 
 		result &= DeviceHelper::getIntProperty(lm, PROP_LM_APP_DATA_SIZE, &appDataSize, log);
 
+		appDataSize *= sizeof(quint16);		// size in words convert to size in bytes
+
 		appDataFramesQuantity = appDataSize / sizeof(Rup::Frame::data) +
 				((appDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
 
@@ -301,7 +303,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(PROP_LM_DATA_TYPE, dataTypeToString(m_lmDataType));
 	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
 
-	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType);
+	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType, true);
 	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
 	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_KEY, m_lmSubsystemKey);
 	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
@@ -567,7 +569,6 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 
 	if (dataReady == false)
 	{
-		m_dataReadyToParsing = false;
 		return false;
 	}
 
@@ -586,12 +587,12 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 
 	m_rupDataSize = framesQuantity * sizeof(Rup::Data);
 
-	m_dataReadyToParsing = true;
+	m_lastRupDataTimes = m_rupDataTimes;
 
 	return true;
 }
 
-bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize)
+bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout)
 {
 	if (m_dataReadyToParsing == false)
 	{
@@ -599,15 +600,20 @@ bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quin
 		return false;
 	}
 
-	if (times == nullptr || rupData == nullptr || rupDataSize == nullptr)
+#ifdef QT_DEBUG
+
+	if (times == nullptr || rupData == nullptr || rupDataSize == nullptr || dataReceivingTimeout == nullptr)
 	{
 		assert(false);
 		return false;
 	}
 
+#endif
+
 	*times = m_rupDataTimes;
 	*rupData = reinterpret_cast<const char*>(m_rupFramesData);
 	*rupDataSize = m_rupDataSize;
+	*dataReceivingTimeout = m_dataRecevingTimeout;
 
 	m_dataReadyToParsing = false;
 
@@ -707,8 +713,6 @@ bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThrea
 
 bool DataSourceOnline::processRupFrameTimeQueue()
 {
-	bool dataReady = false;
-
 	int count = 0;
 
 	do
@@ -717,6 +721,23 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 
 		if (rupFrameTime == nullptr)
 		{
+			if (m_dataReceives == true)
+			{
+				// check m_lastPacketSystemTime
+				//
+				qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+				if (now - m_lastPacketSystemTime > APP_DATA_SOURCE_TIMEOUT)
+				{
+					m_rupDataTimes = m_lastRupDataTimes;
+					m_rupDataTimes += APP_DATA_SOURCE_TIMEOUT;
+
+					m_dataRecevingTimeout = true;
+					m_dataReceives = false;
+					m_dataReadyToParsing = true;
+				}
+			}
+
 			break;	// has no frames to processing, exit from processRupFrameTimeQueue, return FALSE
 					//
 					// m_rupFrameTimeQueue.completePop is not required
@@ -725,6 +746,7 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 		m_lastPacketSystemTime = QDateTime::currentMSecsSinceEpoch();
 		m_state = E::DataSourceState::ReceiveData;
 
+		m_dataRecevingTimeout = false;
 		m_dataReceives = true;
 		m_receivedFramesCount++;
 		m_receivedDataSize += sizeof(Rup::Frame);
@@ -783,9 +805,9 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 
 			// collect rupFrames
 			//
-			dataReady = collect(*rupFrameTime);
+			m_dataReadyToParsing = collect(*rupFrameTime);
 
-			if (dataReady == true)
+			if (m_dataReadyToParsing == true)
 			{
 				// rupFrame's numerator tracking
 				//
@@ -824,9 +846,9 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 
 		count++;
 	}
-	while(dataReady == false && count < 100);
+	while(m_dataReadyToParsing == false && count < 100);
 
-	return dataReady;
+	return m_dataReadyToParsing;
 }
 
 

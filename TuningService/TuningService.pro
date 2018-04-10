@@ -95,7 +95,8 @@ SOURCES += \
     TuningServiceMain.cpp \
     ../lib/AppSignal.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Times.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -141,7 +142,8 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     ../lib/AppSignal.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

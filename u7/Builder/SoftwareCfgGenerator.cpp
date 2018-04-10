@@ -446,14 +446,18 @@ namespace Builder
 					{
 						if (adapterProperties.tuningServiceID.isEmpty() == true)
 						{
-							log->wrnCFG3016(adapterProperties.adapterID,
+							// Property '%1.%2' is empty.
+							//
+							log->errCFG3022(adapterProperties.adapterID,
 											DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID);
 						}
 						else
 						{
 							if (m_softwareList.contains(adapterProperties.tuningServiceID) == false)
 							{
-								log->wrnCFG3015(adapterProperties.adapterID,
+								// Property '%1.%2' is linked to undefined software ID '%3'.
+								//
+								log->errCFG3021(adapterProperties.adapterID,
 												DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID,
 												adapterProperties.tuningServiceID);
 							}
@@ -463,6 +467,8 @@ namespace Builder
 
 								if (software->type() != E::SoftwareType::TuningService)
 								{
+									// Property '%1.%2' is linked to not compatible software '%3'.
+									//
 									log->errCFG3017(adapterProperties.adapterID,
 													DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID,
 													adapterProperties.tuningServiceID);
@@ -482,14 +488,18 @@ namespace Builder
 					{
 						if (adapterProperties.appDataServiceID.isEmpty() == true)
 						{
-							log->wrnCFG3016(adapterProperties.adapterID,
+							// Property '%1.%2' is empty.
+							//
+							log->errCFG3022(adapterProperties.adapterID,
 											DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID);
 						}
 						else
 						{
 							if (m_softwareList.contains(adapterProperties.appDataServiceID) == false)
 							{
-								log->wrnCFG3015(adapterProperties.adapterID,
+								// Property '%1.%2' is linked to undefined software ID '%3'.
+								//
+								log->errCFG3021(adapterProperties.adapterID,
 												DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID,
 												adapterProperties.appDataServiceID);
 							}
@@ -499,6 +509,8 @@ namespace Builder
 
 								if (software->type() != E::SoftwareType::AppDataService)
 								{
+									// Property '%1.%2' is linked to not compatible software '%3'.
+									//
 									log->errCFG3017(adapterProperties.adapterID,
 													DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID,
 													adapterProperties.appDataServiceID);
@@ -514,14 +526,18 @@ namespace Builder
 					{
 						if (adapterProperties.diagDataServiceID.isEmpty() == true)
 						{
-							log->wrnCFG3016(adapterProperties.adapterID,
+							// Property '%1.%2' is empty.
+							//
+							log->errCFG3022(adapterProperties.adapterID,
 											DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID);
 						}
 						else
 						{
 							if (m_softwareList.contains(adapterProperties.diagDataServiceID) == false)
 							{
-								log->wrnCFG3015(adapterProperties.adapterID,
+								// Property '%1.%2' is linked to undefined software ID '%3'.
+								//
+								log->errCFG3021(adapterProperties.adapterID,
 												DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID,
 												adapterProperties.diagDataServiceID);
 							}
@@ -531,6 +547,8 @@ namespace Builder
 
 								if (software->type() != E::SoftwareType::DiagDataService)
 								{
+									// Property '%1.%2' is linked to not compatible software '%3'.
+									//
 									log->errCFG3017(adapterProperties.adapterID,
 													DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID,
 													adapterProperties.diagDataServiceID);

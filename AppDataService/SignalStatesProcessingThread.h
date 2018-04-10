@@ -10,8 +10,8 @@ class SignalStatesProcessingThread : public RunOverrideThread
 public:
 	SignalStatesProcessingThread(const AppDataSources& appDataSources, CircularLoggerShared log);
 
-	void registerDestSignalStatesQueue(AppSignalStatesQueueShared destQueue, const QString& description);
-	void unregisterDestSignalStatesQueue(AppSignalStatesQueueShared destQueue, const QString& description);
+	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description);
+	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description);
 
 	void run() override;
 
@@ -23,5 +23,5 @@ private:
 
 	QMutex m_queueMapMutex;
 
-	QHash<AppSignalStatesQueue*, AppSignalStatesQueueShared> m_queueMap;
+	QHash<SimpleAppSignalStatesQueue*, SimpleAppSignalStatesQueueShared> m_queueMap;
 };

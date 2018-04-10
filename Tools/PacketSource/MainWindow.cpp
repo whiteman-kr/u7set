@@ -31,7 +31,7 @@ bool MainWindow::createInterface()
 {
 	setWindowIcon(QIcon(":/icons/PacketSource.png"));
 	setWindowTitle(tr("Packet Source"));
-	resize(700, 750);
+	resize(550, 750);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
 	createActions();
@@ -41,6 +41,7 @@ bool MainWindow::createInterface()
 	createContextMenu();
 	createHeaderContexMenu();
 	createStatusBar();
+	loadSources();
 
 	if (Rup::VERSION != PS::SUPPORT_VERSION)
 	{
@@ -57,15 +58,23 @@ void MainWindow::createActions()
 	// Sources
 	//
 	m_sourceStartAction = new QAction(tr("Start"), this);
+	m_sourceStartAction->setShortcut(Qt::Key_F5);
 	m_sourceStartAction->setIcon(QIcon(":/icons/Start.png"));
 	m_sourceStartAction->setToolTip(tr("Start all sources"));
 	connect(m_sourceStartAction, &QAction::triggered, this, &MainWindow::startSource);
 
 	m_sourceStopAction = new QAction(tr("Stop"), this);
+	m_sourceStopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	m_sourceStopAction->setIcon(QIcon(":/icons/Stop.png"));
 	m_sourceStopAction->setToolTip(tr("Stop all sources"));
-	m_sourceStopAction->setEnabled(false);
+	//m_sourceStopAction->setEnabled(false);
 	connect(m_sourceStopAction, &QAction::triggered, this, &MainWindow::stopSource);
+
+	m_sourceSelectAllAction = new QAction(tr("Select all"), this);
+	m_sourceSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
+	m_sourceSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
+	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSource);
 
 	m_sourceOptionAction = new QAction(tr("&Options"), this);
 	m_sourceOptionAction->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -97,6 +106,8 @@ void MainWindow::createMenu()
 
 	m_sourceMenu->addAction(m_sourceStartAction);
 	m_sourceMenu->addAction(m_sourceStopAction);
+	m_sourceMenu->addSeparator();
+	m_sourceMenu->addAction(m_sourceSelectAllAction);
 	m_sourceMenu->addSeparator();
 	m_sourceMenu->addAction(m_sourceOptionAction);
 
@@ -145,7 +156,7 @@ void MainWindow::createViews()
 
 	for(int column = 0; column < SOURCE_LIST_COLUMN_COUNT; column++)
 	{
-		m_pSourceView->setColumnWidth(column, LIST_COLUMN_WITDH);
+		m_pSourceView->setColumnWidth(column, SourceListColumnWidth[column]);
 	}
 
 	m_pSourceView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -201,7 +212,6 @@ void MainWindow::createHeaderContexMenu()
 		}
 	}
 
-	hideColumn(SOURCE_LIST_COLUMN_DATA_TYPE, true);
 	hideColumn(SOURCE_LIST_COLUMN_MODULE_TYPE, true);
 	hideColumn(SOURCE_LIST_COLUMN_SUB_SYSTEM, true);
 	hideColumn(SOURCE_LIST_COLUMN_FRAME_COUNT, true);
@@ -226,6 +236,24 @@ void MainWindow::createStatusBar()
 	m_statusBar->setLayoutDirection(Qt::RightToLeft);
 
 	m_statusEmpty->setText(QString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::loadSources()
+{
+	QVector<PS::Source*> ptrSourceList;
+
+	int sourceCount = theSourceBase.readFromXml();
+	for(int i = 0; i < sourceCount; i++)
+	{
+		ptrSourceList.append(theSourceBase.sourcePtr(i));
+	}
+
+	m_sourceTable.clear();
+	m_sourceTable.set(ptrSourceList);
+
+	m_statusServer->setText(tr(""));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -256,10 +284,10 @@ void MainWindow::startUpdateSourceListTimer()
 	if (m_updateSourceListTimer == nullptr)
 	{
 		m_updateSourceListTimer = new QTimer(this);
-		//connect(m_updateSourceListTimer, &QTimer::timeout, this, &MainWindow::updateSource);
+		connect(m_updateSourceListTimer, &QTimer::timeout, this, &MainWindow::updateSourceState);
 	}
 
-	m_updateSourceListTimer->start(UPDATE_SOURCE_TIMEOUT);
+	m_updateSourceListTimer->start(UPDATE_SOURCE_STATE_TIMEOUT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -283,20 +311,47 @@ void MainWindow::startSource()
 		return;
 	}
 
-	m_sourceStartAction->setEnabled(false);
-	m_sourceStopAction->setEnabled(true);
+//	m_sourceStartAction->setEnabled(false);
+//	m_sourceStopAction->setEnabled(true);
 
-	theSourceBase.runAllSoureces();
+	int count = m_pSourceView->selectionModel()->selectedRows().count();
+	if (count == 0)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select source!"));
+		return;
+	}
+
+	for( int i = 0; i < count; i++)
+	{
+		theSourceBase.runSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::stopSource()
 {
-	m_sourceStartAction->setEnabled(true);
-	m_sourceStopAction->setEnabled(false);
+//	m_sourceStartAction->setEnabled(true);
+//	m_sourceStopAction->setEnabled(false);
 
-	theSourceBase.stopAllSoureces();
+	int count = m_pSourceView->selectionModel()->selectedRows().count();
+	if (count == 0)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select source!"));
+		return;
+	}
+
+	for( int i = 0; i < count; i++)
+	{
+		theSourceBase.stopSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::selectAllSource()
+{
+	m_pSourceView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -309,27 +364,9 @@ void MainWindow::optionSource()
 		return;
 	}
 
-	stopSource();
+	theSourceBase.stopAllSoureces();
 
-	m_sourceTable.clear();
-
-	int sourceCount = theSourceBase.readFromXml();
-	if (sourceCount == 0)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Sources is not loaded!"));
-		return;
-	}
-
-	m_statusServer->setText(tr(""));
-
-	QVector<SourceItem*> ptrSourceList;
-	for(int i = 0; i < sourceCount; i++)
-	{
-		ptrSourceList.append(theSourceBase.sourcePtr(i));
-	}
-
-
-	m_sourceTable.set(ptrSourceList);
+	loadSources();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -423,17 +460,18 @@ void MainWindow::aboutApp()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::updateSourceState()
+{
+	m_sourceTable.updateColumn(SOURCE_LIST_COLUMN_STATE);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-
-	if (theSourceBase.sourcesIsRunning() == true)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Please, stop all sources!"));
-		e->ignore();
-		return;
-	}
-
 	stopUpdateSourceListTimer();
+
+	theSourceBase.stopAllSoureces();
 
 	QMainWindow::closeEvent(e);
 }

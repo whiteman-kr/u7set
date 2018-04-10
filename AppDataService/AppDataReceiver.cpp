@@ -103,20 +103,21 @@ void AppDataReceiver::onSocketReadyRead()
 	}
 
 	QHostAddress from;
-	Rup::Frame rupFrame;
+	Rup::SimFrame simFrame;
 
 	do
 	{
 		qint64 size = m_socket->pendingDatagramSize();
 
-		if (size == -1)
+		if (size == -1 || size > sizeof(simFrame))
 		{
 			break;				// exit from loop if no pending datagram exists
+								// or datagram size is exceede sizeof(simFrame)
 		}
 
-		qint64 result = m_socket->readDatagram(reinterpret_cast<char*>(&rupFrame), sizeof(rupFrame), &from);
+		size = m_socket->readDatagram(reinterpret_cast<char*>(&simFrame), size, &from);
 
-		if (result == -1)
+		if (size == -1)
 		{
 			DEBUG_LOG_ERR(m_log, QString("AppDataReceiver %1 read socket error %2").
 								arg(m_dataReceivingIP.addressPortStr()).arg(m_socket->error()));
@@ -126,11 +127,45 @@ void AppDataReceiver::onSocketReadyRead()
 			return;
 		}
 
+		quint32 ip = 0;
+
+		if (size == sizeof(Rup::Frame))
+		{
+			ip = from.toIPv4Address();
+		}
+		else
+		{
+			if (size == sizeof(Rup::SimFrame))
+			{
+				quint16 simVersion = reverseUint16(simFrame.simVersion);
+
+				if (simVersion != 1)
+				{
+					m_errSimVersion++;
+					continue;
+				}
+
+				ip = reverseUint32(simFrame.sourceIP);
+
+				m_simFrameCount++;
+			}
+			else
+			{
+				m_errDatagramSize++;
+				continue;
+			}
+		}
+
+		//
+
+		Rup::Header h = simFrame.rupFrame.header;
+
+		h.reverseBytes();
+
+		//
 		m_receivedFramesCount++;
 
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
-
-		quint32 ip = from.toIPv4Address();
 
 		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
 
@@ -144,13 +179,7 @@ void AppDataReceiver::onSocketReadyRead()
 			continue;
 		}
 
-		if (size != sizeof(rupFrame))
-		{
-			dataSource->incFrameSizeError();
-			continue;
-		}
-
-		dataSource->pushRupFrame(serverTime, rupFrame);
+		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
 
 		//	emit rupFrameIsReceived(ip);			uncomment if using AppDataProcessingThread class to process data
 		//

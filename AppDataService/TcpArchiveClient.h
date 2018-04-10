@@ -33,7 +33,7 @@ private:
 	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
 	CircularLoggerShared m_logger;
 
-	AppSignalStatesQueueShared m_signalStatesQueue;
+	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
 
 	QTimer m_timer;
 

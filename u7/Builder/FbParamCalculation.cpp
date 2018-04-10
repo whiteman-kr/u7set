@@ -142,6 +142,10 @@ namespace Builder
 			result = calculate_TCONV_paramValues();
 			break;
 
+		case Afb::AfbType::INDICATION:		// opcode 29
+			result = calculate_INDICATION_paramValues();
+			break;
+
 		default:
 			// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 			//
@@ -151,7 +155,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool UalAfb::calculate_LOGIC_paramValues()
 	{
@@ -184,13 +187,11 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_NOT_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
-
 
 	bool UalAfb::calculate_TCT_paramValues()
 	{
@@ -225,7 +226,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_FLIP_FLOP_paramValues()
 	{
 		QStringList requiredParams;
@@ -259,7 +259,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_CTUD_paramValues()
 	{
@@ -319,20 +318,17 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_BCOD_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
 
-
 	bool UalAfb::calculate_BDEC_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
-
 
 	bool UalAfb::calculate_BCOMP_paramValues()
 	{
@@ -471,7 +467,6 @@ namespace Builder
 		return false;
 	}
 
-
 	bool UalAfb::calculate_DAMPER_paramValues()
 	{
 		QStringList requiredParams;
@@ -520,7 +515,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_MEM_paramValues()
 	{
 		m_runTime = 0;
@@ -554,7 +548,14 @@ namespace Builder
 			{
 				int siTiming[] = { 4, 17, 23, 30, 38, 47 };		// exec time for signed int inputs
 
-				m_runTime = siTiming[index] + 4;
+				if (index < 0 || index >= sizeof(siTiming) / sizeof(int) )
+				{
+					assert(false);
+				}
+				else
+				{
+					m_runTime = siTiming[index] + 4;
+				}
 			}
 			break;
 
@@ -562,7 +563,14 @@ namespace Builder
 			{
 				int fpTiming[] = { 21, 36, 44, 49, 57, 66 };	// exec time for float inputs
 
-				m_runTime = fpTiming[index] + 4;
+				if (index < 0 || index >= sizeof(fpTiming) / sizeof(int) )
+				{
+					assert(false);
+				}
+				else
+				{
+					m_runTime = fpTiming[index] + 4;
+				}
 			}
 			break;
 
@@ -575,7 +583,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_MATH_paramValues()
 	{
@@ -616,7 +623,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_SCALE_paramValues()
 	{
@@ -875,7 +881,6 @@ namespace Builder
 
 		return false;
 	}
-
 
 	bool UalAfb::calculate_SCALE_P_paramValues()
 	{
@@ -1153,7 +1158,6 @@ namespace Builder
 		return false;
 	}
 
-
 	bool UalAfb::calculate_FUNC_paramValues()
 	{
 		QStringList requiredParams;
@@ -1211,7 +1215,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_INT_paramValues()
 	{
@@ -1272,7 +1275,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_DPCOMP_paramValues()
 	{
@@ -1381,14 +1383,12 @@ namespace Builder
 		return false;
 	}
 
-
 	bool UalAfb::calculate_MUX_paramValues()
 	{
 		m_runTime = 3 + 4;
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_LATCH_paramValues()
 	{
@@ -1421,7 +1421,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_LIM_paramValues()
 	{
@@ -1518,7 +1517,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_DEAD_ZONE_paramValues()
 	{
 		QStringList requiredParams;
@@ -1578,7 +1576,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_POL_paramValues()
 	{
 		m_runTime = 24 + 4;
@@ -1626,7 +1623,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_DER_paramValues()
 	{
@@ -1687,7 +1683,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_MISMATCH_paramValues()
 	{
@@ -1855,7 +1850,7 @@ namespace Builder
 		// i_conf must have value from 1 to 4
 		//
 
-		quint32  i_conf_value = i_conf.unsignedIntValue();
+		quint32 i_conf_value = i_conf.unsignedIntValue();
 
 		switch(i_conf_value)
 		{
@@ -1872,11 +1867,37 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf_value, i_conf.caption(), caption(), guid());
 			return false;
 		}
 
 		return true;
 	}
 
+	bool UalAfb::calculate_INDICATION_paramValues()
+	{
+		m_runTime = 3 + 34;
+
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+
+		// i_conf must have value 1 or 2
+		//
+		quint32 i_conf_value = i_conf.unsignedIntValue();
+
+		if (i_conf_value != 1 && i_conf_value != 2)
+		{
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf_value, i_conf.caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
 }

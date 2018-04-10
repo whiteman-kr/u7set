@@ -11,105 +11,90 @@
 
 // ==============================================================================================
 
-struct SourceInfo
+namespace PS
 {
-public:
+	//
+	//
 
-	SourceInfo::SourceInfo()
+	const int SUPPORT_VERSION		= 5;		// last version of Rup::VERSION
+
+	const int SIM_FRAME_VERSION		= 1;		// last version of SimFrame
+
+	const int UDP_PORT				= 10000;
+
+	const int SEND_TIMEOUT			= 5;		// 5 ms
+
+	//
+	//
+
+	struct SourceInfo
 	{
-		clear();
-	}
+	public:
 
-	QString			caption;
-	QString			equipmentID;
+		SourceInfo::SourceInfo();
 
-	QString			dataType;
-	int				moduleType = 0;
-	QString			subSystem;
-	int				frameCount = 0;
-	quint32			dataID = 0;
+		void				clear();
 
-	HostAddressPort	lmAddress;
-	HostAddressPort	serverAddress;
+		int					index = -1;
 
-	void clear()
+		QString				caption;
+		QString				equipmentID;
+
+		int					moduleType = 0;
+		QString				subSystem;
+		int					frameCount = 0;
+		quint32				dataID = 0;
+
+		HostAddressPort		lmAddress;
+		HostAddressPort		serverAddress;
+	};
+
+	//
+	//
+
+	class Source : public QObject
 	{
+		Q_OBJECT
 
-		caption.clear();
-		equipmentID.clear();
+	public:
 
-		dataType.clear();
-		moduleType = 0;
-		subSystem.clear();
-		frameCount = 0;
-		dataID = 0;
+		Source();
+		Source(const Source& from);
+		Source(const PS::SourceInfo& si);
+		virtual ~Source();
 
-		lmAddress.clear();
-		serverAddress.clear();
-	}
-};
+	private:
 
-// ==============================================================================================
+		mutable QMutex		m_sourceMutex;
 
-class SourceItem : public QObject
-{
+		QThread*			m_pThread = nullptr;
+		SourceWorker*		m_pWorker = nullptr;
 
-public:
+		PS::SourceInfo		m_si;
 
-	SourceItem();
-	SourceItem(const SourceItem& from);
-	SourceItem(const SourceInfo& si);
-	virtual ~SourceItem();
+	public:
 
-private:
+		void				clear();
 
-	mutable QMutex	m_sourceMutex;
+		PS::SourceInfo&		info() { return m_si; }
 
-	SourceWorker*	m_pWorker = nullptr;
+		bool				run();
+		bool				stop();
 
-	SourceInfo		m_si;
+		bool				isRunning();
+		int					sentFrames();
 
-public:
+		Source&				operator=(const Source& from);
 
-	void			clear();
+	signals:
 
-	QString			caption() const { return m_si.caption; }
-	void			setCaption(const QString& caption) { m_si.caption = caption; }
+	public slots:
 
-	QString			equipmentID() const { return m_si.equipmentID; }
-	void			setEquipmentID(const QString& equipmentID) { m_si.equipmentID = equipmentID; }
+		bool				createWorker();
+		void				deleteWorker();
 
-	QString			dataType() const { return m_si.dataType; }
-	void			setDataType(const QString& type) { m_si.dataType = type; }
-
-	int				moduleType() const { return m_si.moduleType; }
-	void			setModuleType(int type) { m_si.moduleType= type; }
-
-	QString			subSystem() const { return m_si.subSystem; }
-	void			setSubSystem(const QString& subSystem) { m_si.subSystem = subSystem; }
-
-	int				frameCount() const { return m_si.frameCount; }
-	void			setFrameCount(int count) { m_si.frameCount = count; }
-
-	quint32			dataID() const { return m_si.dataID; }
-	void			setDataID(quint32 id) { m_si.dataID = id; }
-
-	HostAddressPort	lmAddress() const { return m_si.lmAddress; }
-	void			setLmAddress(const HostAddressPort& address) { m_si.lmAddress = address; }
-
-	HostAddressPort	serverAddress() const { return m_si.serverAddress; }
-	void			setServerAddress(const HostAddressPort& address) { m_si.serverAddress = address; }
-
-	bool			run();
-	bool			stop();
-
-	SourceItem&		operator=(const SourceItem& from);
-
-signals:
-
-public slots:
-
-};
+	};
+}
 
 // ==============================================================================================
 
@@ -120,14 +105,12 @@ class SourceBase : public QObject
 public:
 
 	explicit SourceBase(QObject *parent = 0);
-	virtual ~SourceBase() {}
+	virtual ~SourceBase();
 
 private:
 
 	mutable QMutex			m_sourceMutex;
-	QVector<SourceItem>		m_sourceList;
-
-	bool					m_sourcesIsRunning = false;
+	QVector<PS::Source>		m_sourceList;
 
 public:
 
@@ -136,18 +119,14 @@ public:
 
 	int						readFromXml();
 
-	int						append(const SourceItem &source);
+	int						append(const PS::Source &source);
 	void					remove(int index);
 
-	SourceItem				source(int index) const;
-	SourceItem*				sourcePtr(int index);
-	void					setSource(int index, const SourceItem& source);
+	PS::Source				source(int index) const;
+	PS::Source*				sourcePtr(int index);
+	void					setSource(int index, const PS::Source& source);
 
 	SourceBase&				operator=(const SourceBase& from);
-
-	//
-	//
-	void					setServerAddress(const HostAddressPort& address);
 
 	// run stop send udp trhread
 	//
@@ -157,14 +136,11 @@ public:
 	void					runAllSoureces();
 	void					stopAllSoureces();
 
-	bool					sourcesIsRunning() { return m_sourcesIsRunning; }
-
 signals:
 
 public slots:
 
 };
-
 
 // ----------------------------------------------------------------------------------------------
 
@@ -172,36 +148,44 @@ extern SourceBase theSourceBase;
 
 // ==============================================================================================
 
-const int					LIST_COLUMN_WITDH					= 200;
-
-// ----------------------------------------------------------------------------------------------
-
 const char* const			SourceListColumn[] =
 {
 							QT_TRANSLATE_NOOP("SourceList.h", "Caption"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Equipment ID"),
-							QT_TRANSLATE_NOOP("SourceList.h", "Data type"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Module type"),
 							QT_TRANSLATE_NOOP("SourceList.h", "SubSystem"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Frame count"),
 							QT_TRANSLATE_NOOP("SourceList.h", "IP (LM)"),
 							QT_TRANSLATE_NOOP("SourceList.h", "IP (AppDataSrv)"),
+							QT_TRANSLATE_NOOP("SourceList.h", "State"),
 };
 
 const int					SOURCE_LIST_COLUMN_COUNT			= sizeof(SourceListColumn)/sizeof(SourceListColumn[0]);
 
 const int					SOURCE_LIST_COLUMN_CAPTION			= 0,
 							SOURCE_LIST_COLUMN_EQUIPMENT_ID		= 1,
-							SOURCE_LIST_COLUMN_DATA_TYPE		= 2,
-							SOURCE_LIST_COLUMN_MODULE_TYPE		= 3,
-							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 4,
-							SOURCE_LIST_COLUMN_FRAME_COUNT		= 5,
-							SOURCE_LIST_COLUMN_LM_IP			= 6,
-							SOURCE_LIST_COLUMN_SERVER_IP		= 7;
+							SOURCE_LIST_COLUMN_MODULE_TYPE		= 2,
+							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 3,
+							SOURCE_LIST_COLUMN_FRAME_COUNT		= 4,
+							SOURCE_LIST_COLUMN_LM_IP			= 5,
+							SOURCE_LIST_COLUMN_SERVER_IP		= 6,
+							SOURCE_LIST_COLUMN_STATE			= 7;
+
+const int					SourceListColumnWidth[SOURCE_LIST_COLUMN_COUNT] =
+{
+							100, // SOURCE_LIST_COLUMN_CAPTION
+							150, // SOURCE_LIST_COLUMN_EQUIPMENT_ID
+							100, // SOURCE_LIST_COLUMN_MODULE_TYPE
+							100, // SOURCE_LIST_COLUMN_SUB_SYSTEM
+							100, // SOURCE_LIST_COLUMN_FRAME_COUNT
+							120, // SOURCE_LIST_COLUMN_LM_IP
+							120, // SOURCE_LIST_COLUMN_SERVER_IP
+							100, // SOURCE_LIST_COLUMN_STATE
+};
 
 // ==============================================================================================
 
-const int					UPDATE_SOURCE_TIMEOUT		= 250; // 250 ms
+const int					UPDATE_SOURCE_STATE_TIMEOUT		= 250; // 250 ms
 
 // ==============================================================================================
 
@@ -217,7 +201,7 @@ public:
 private:
 
 	mutable QMutex			m_sourceMutex;
-	QVector<SourceItem*>	m_sourceList;
+	QVector<PS::Source*>	m_sourceList;
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -228,11 +212,11 @@ private:
 public:
 
 	int						sourceCount() const;
-	SourceItem*				sourceAt(int index) const;
-	void					set(const QVector<SourceItem *> list_add);
+	PS::Source*				sourceAt(int index) const;
+	void					set(const QVector<PS::Source *> list_add);
 	void					clear();
 
-	QString					text(int row, int column, SourceItem *pSource) const;
+	QString					text(int row, int column, PS::Source *pSource) const;
 
 	void					updateColumn(int column);
 };

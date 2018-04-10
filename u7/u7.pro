@@ -205,7 +205,8 @@ SOURCES +=\
     ../lib/LmDescription.cpp \
     Builder/MemWriteMap.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Times.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -350,7 +351,8 @@ HEADERS  += \
     Builder/ConfigurationServiceCfgGenerator.h \
     ../lib/TuningValue.h \
     Builder/CfgFiles.h \
-    ../lib/CommonTypes.h
+    ../lib/CommonTypes.h \
+    ../lib/Times.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -416,7 +418,8 @@ DISTFILES += \
     LogicModuleDescription/LM1_SR01.xml \
     LogicModuleDescription/LM1_SF00.xml \
     LogicModuleDescription/LM1_SR01.xml \
-    LogicModuleDescription/BVB15Module0000.xml
+    LogicModuleDescription/BVB15Module0000.xml \
+    LogicModuleDescription/LM1_SR02.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

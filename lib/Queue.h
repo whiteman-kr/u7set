@@ -82,13 +82,12 @@ protected:
 	int m_queueSize = 0;
 
 	int m_size = 0;								// current queue size
-
 	int m_maxSize = 0;
 
 	QueueIndex m_writeIndex;
 	QueueIndex m_readIndex;
 
-	int m_lostCount = 0;
+	int m_lostedCount = 0;
 };
 
 
@@ -114,16 +113,14 @@ public:
 
 	void resize(int newQueueSize);					// not thread-safe operation!!!!
 
-	bool isEmpty() const { return m_size.load() == SAFE_SIZE; }
-	bool isNotEmpty() const { return m_size.load() > SAFE_SIZE; }
+	bool isEmpty() const { return m_size.load() == 0; }
+	bool isNotEmpty() const { return m_size.load() > 0; }
 	bool isFull() const { return m_size.load() == m_queueSize; }
 
 	int size() const { return m_size.load(); }
 	int maxSize() const { return m_maxSize.load(); }
 
 private:
-	static const int SAFE_SIZE = 1;
-
 	char* m_buffer = nullptr;
 
 	int m_itemSize = 0;

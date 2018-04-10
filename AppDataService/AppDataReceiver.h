@@ -51,6 +51,14 @@ private:
 	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
 
 	int m_receivedFramesCount = 0;
+
+	//
+
+	qint64 m_simFrameCount = 0;
+
+	qint64 m_errDatagramSize = 0;
+	qint64 m_errSimVersion = 0;
+	qint64 m_errUnknownAppDataSourceIP = 0;
 };
 
 

@@ -95,7 +95,8 @@ SOURCES += MainWindow.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/DeviceHelper.cpp \
     ../u7/Builder/ModulesRawData.cpp \
-    AppDataSourceWidget.cpp
+    AppDataSourceWidget.cpp \
+    ../lib/Times.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -142,7 +143,8 @@ HEADERS  += MainWindow.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/DeviceHelper.h \
     ../u7/Builder/ModulesRawData.h \
-    AppDataSourceWidget.h
+    AppDataSourceWidget.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

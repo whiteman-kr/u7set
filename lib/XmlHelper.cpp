@@ -62,9 +62,16 @@ void XmlWriteHelper::writeStringAttribute(const QString& name, const QString& va
 	m_xmlWriter->writeAttribute(name, value);
 }
 
-void XmlWriteHelper::writeIntAttribute(const QString& name, int value)
+void XmlWriteHelper::writeIntAttribute(const QString& name, int value, bool hex)
 {
-	m_xmlWriter->writeAttribute(name, QString::number(value));
+	if (hex == true)
+	{
+		m_xmlWriter->writeAttribute(name, "0x" + QString::number(value, 16).toUpper());
+	}
+	else
+	{
+		m_xmlWriter->writeAttribute(name, QString::number(value));
+	}
 }
 
 void XmlWriteHelper::writeBoolAttribute(const QString& name, bool value)
@@ -211,7 +218,9 @@ bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 
 	bool result = false;
 
-	*value = m_xmlReader->attributes().value(name).toInt(&result);
+	QString str = m_xmlReader->attributes().value(name).toString();
+
+	*value = str.toInt(&result, 0);
 
 	return result;
 }
@@ -511,8 +520,6 @@ bool XmlReadHelper::findElement(const QString& elementName)
 
 	qDebug() << "XmlReadHelper: element is not found -" << elementName;
 
-	assert(false);
-
 	return false;
 }
 
@@ -523,7 +530,6 @@ bool XmlReadHelper::checkElement(const QString& elementName)
 		return true;
 	}
 
-	assert(false);
 	qDebug() << "XmlReadHelper: element does not match. Current - " << name() << ", required -" << elementName;
 
 	return false;

@@ -1417,9 +1417,9 @@ void SignalsModel::saveSignal(Signal& signal)
 	emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1));
 }
 
-QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
+QVector<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 {
-	QList<int> resultSignalIDs;
+	QVector<int> resultSignalIDs;
 	m_signalSet.buildID2IndexMap();
 
 	QSet<int> clonedSignalIDs;
@@ -1476,7 +1476,7 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 		if (suffixNumerator >= 1000)
 		{
 			assert(false);
-			return QList<int>();
+			return QVector<int>();
 		}
 
 		QVector<Signal> groupSignals(groupSignalIDs.count());
@@ -1491,9 +1491,13 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 		}
 
 		dbController()->addSignal(type, &groupSignals, m_parentWindow);
+
+		int prevSize = resultSignalIDs.size();
+		resultSignalIDs.resize(prevSize + groupSignals.count());
+
 		for (int i = 0; i < groupSignals.count(); i++)
 		{
-			resultSignalIDs.push_back(groupSignals[i].ID());
+			resultSignalIDs[prevSize + i] = groupSignals[i].ID();
 		}
 	}
 	loadSignals();
@@ -2127,15 +2131,16 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 	SignalsModel* model = SignalsModel::instance();
 	model->loadSignals();
 
-	QList<int> selectIdList;
+	QVector<int> selectIdVector(signalVector.size());
+	int currentIdIndex = 0;
 	QStringList result;
 	for (Signal& signal : signalVector)
 	{
 		result << signal.appSignalID();
-		selectIdList << signal.ID();
+		selectIdVector[currentIdIndex++] = signal.ID();
 	}
 
-	model->parentWindow()->setSelection(selectIdList);
+	model->parentWindow()->setSelection(selectIdVector);
 
 	return result;
 }
@@ -2488,17 +2493,10 @@ void SignalsTabPage::changeSignalActionsVisibility()
 	}
 	else
 	{
-		QModelIndexList&& selection = m_signalsView->selectionModel()->selectedIndexes();
-		QSet<int> checkedRows;
+		QModelIndexList&& selection = m_signalsView->selectionModel()->selectedRows();
 		for (int i = 0; i < selection.count(); i++)
 		{
-			int row = selection[i].row();
-			if (checkedRows.contains(row))
-			{
-				continue;
-			}
-			checkedRows.insert(row);
-			row = m_signalsProxyModel->mapToSource(selection[i]).row();
+			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 			if (m_signalsModel->isEditableSignal(row))
 			{
 				emit setSignalActionsVisibility(true);
@@ -2509,7 +2507,7 @@ void SignalsTabPage::changeSignalActionsVisibility()
 	}
 }
 
-void SignalsTabPage::setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID)
+void SignalsTabPage::setSelection(const QVector<int>& selectedRowsSignalID, int focusedCellSignalID)
 {
 	if (selectedRowsSignalID.isEmpty())
 	{
@@ -2535,10 +2533,12 @@ void SignalsTabPage::saveSelection()
 	//
 	m_selectedRowsSignalID.clear();
 	QModelIndexList selectedList = m_signalsView->selectionModel()->selectedRows(0);
+	m_selectedRowsSignalID.resize(selectedList.size());
+	int currentIdIndex = 0;
 	foreach (const QModelIndex& index, selectedList)
 	{
 		int row = m_signalsProxyModel->mapToSource(index).row();
-		m_selectedRowsSignalID.append(m_signalsModel->key(row));
+		m_selectedRowsSignalID[currentIdIndex++] = m_signalsModel->key(row);
 	}
 	QModelIndex index = m_signalsView->currentIndex();
 	if (index.isValid())

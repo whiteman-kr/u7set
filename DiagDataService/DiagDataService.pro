@@ -87,7 +87,8 @@ SOURCES += \
     ../lib/CommandLineParser.cpp \
     DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Times.cpp
 
 HEADERS += \
 	Stable.h \
@@ -125,7 +126,8 @@ HEADERS += \
     ../u7/Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

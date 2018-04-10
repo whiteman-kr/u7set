@@ -28,7 +28,7 @@ public:
 	void writeEndElement();
 
 	void writeStringAttribute(const QString& name, const QString& value);
-	void writeIntAttribute(const QString& name, int value);
+	void writeIntAttribute(const QString& name, int value, bool hex = false);
 	void writeBoolAttribute(const QString& name, bool value);
 	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);

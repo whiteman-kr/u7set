@@ -61,10 +61,10 @@ void AppDataProcessingWorker::onAppDataSourceReceiveRupFrame(quint32 appDataSour
 
 		m_parsedRupPacketCount++;
 
-		if ((m_parsedRupPacketCount % 100) == 0)
+/*		if ((m_parsedRupPacketCount % 100) == 0)
 		{
 			qDebug() << " tread " << m_number << "parsed " << m_parsedRupPacketCount << " ----- success" << m_successOwnership << "/" << m_failOwnership;
-		}
+		}*/
 	}
 
 	appDataSource->releaseProcessingOwnership(m_thisThread);
@@ -147,13 +147,13 @@ void AppDataProcessingThread2::run()
 
 				m_parsedRupPacketCount++;
 
-				if ((m_parsedRupPacketCount % 100) == 0)
+/*				if ((m_parsedRupPacketCount % 100) == 0)
 				{
 					qDebug() << " tread " << m_number << "parsed " << m_parsedRupPacketCount <<
 								" ----- success" << m_successOwnership << "/" << m_failOwnership <<
 								"queue max size" << appDataSource->rupFramesQueueMaxSize() <<
 								"losted" << appDataSource->lostedPacketCount();
-				}
+				}*/
 			}
 			while(isQuitRequested() == false);
 
