@@ -46,7 +46,6 @@ SOURCES += main.cpp\
     ../lib/TuningValue.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/DeviceHelper.cpp \
-    ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     ../u7/Builder/ModulesRawData.cpp
 
@@ -74,7 +73,6 @@ HEADERS  += SourceListWidget.h \
     ../lib/TuningValue.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/DeviceHelper.h \
-    ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     ../u7/Builder/ModulesRawData.h
 
