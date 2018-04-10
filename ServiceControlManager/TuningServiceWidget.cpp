@@ -108,6 +108,8 @@ void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 void TuningServiceWidget::dropTcpConnection()
 {
+	emit clearTcpClientSocket();
+
 	if (m_tcpClientThread != nullptr)
 	{
 		m_tcpClientThread->quitAndWait();
@@ -116,8 +118,6 @@ void TuningServiceWidget::dropTcpConnection()
 
 		m_tcpClientSocket = nullptr;	// Should be deleted on m_tcpClientThread->quitAndWait();
 	}
-
-	emit clearTcpClientSocket();
 }
 
 void TuningServiceWidget::updateClientsInfo()

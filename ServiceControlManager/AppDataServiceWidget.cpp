@@ -1,5 +1,6 @@
 #include "AppDataServiceWidget.h"
 #include "TcpAppDataClient.h"
+#include "AppDataSourceWidget.h"
 #include <QTableView>
 #include <QAction>
 #include <QHeaderView>
@@ -16,20 +17,19 @@ DSC_SPEED = 7,
 DSC_CAPTION = 8,
 DSC_PORT = 9,
 DSC_PART_COUNT = 10,
-DSC_CHANNEL = 11,
-DSC_DATA_TYPE = 12,
-DSC_MODULE_NUMBER = 13,
-DSC_MODULE_TYPE = 14,
-DSC_SUBSYSTEM_ID = 15,
-DSC_SUBSYSTEM_CAPTION = 16,
-DSC_ADAPTER_ID = 17,
-DSC_ERROR_PROTOCOL_VERSION = 18,
-DSC_ERROR_FRAMES_QUANTITY = 19,
-DSC_ERROR_FRAME_NOMBER = 20,
-DSC_LOSTED_FRAMES_COUNT = 21,
-DSC_ERROR_DATA_ID = 22,
-DSC_ERROR_BAD_FRAME_SIZE = 23,
-DSC_COUNT = 24;
+DSC_DATA_TYPE = 11,
+DSC_MODULE_NUMBER = 12,
+DSC_MODULE_TYPE = 13,
+DSC_SUBSYSTEM_ID = 14,
+DSC_SUBSYSTEM_CAPTION = 15,
+DSC_ADAPTER_ID = 16,
+DSC_ERROR_PROTOCOL_VERSION = 17,
+DSC_ERROR_FRAMES_QUANTITY = 18,
+DSC_ERROR_FRAME_NOMBER = 19,
+DSC_LOSTED_FRAMES_COUNT = 20,
+DSC_ERROR_DATA_ID = 21,
+DSC_ERROR_BAD_FRAME_SIZE = 22,
+DSC_COUNT = 23;
 
 const int dataSourceStateColumn[] =
 {
@@ -58,7 +58,6 @@ const char* const dataSourceColumnStr[] =
 	"Caption",
 	"Port",
 	"Part count",
-	"Channel",
 	"Data type",
 	"Module number",
 	"Module type",
@@ -265,6 +264,8 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 															m_dataSourcesView->columnWidth(i)).toInt());
 	}
 
+	connect(m_dataSourcesView, &QTableView::doubleClicked, this, &AppDataServiceWidget::onAppDataSourceDoubleClicked);
+
 	// Data Source columns actions
 	m_sourceTableHeadersContextMenuActions = new QActionGroup(this);
 	m_sourceTableHeadersContextMenuActions->setExclusive(false);
@@ -314,6 +315,11 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 
 AppDataServiceWidget::~AppDataServiceWidget()
 {
+	for (auto* widget : m_appDataSourceWidgetList)
+	{
+		widget->deleteLater();
+	}
+	m_appDataSourceWidgetList.clear();
 	dropTcpConnection();
 }
 
@@ -517,6 +523,50 @@ void AppDataServiceWidget::changeSourceColumnVisibility(QAction* action)
 	}
 }
 
+void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index)
+{
+	TEST_PTR_RETURN(m_tcpClientSocket);
+
+	int row = index.row();
+	const AppDataSource* ads = m_tcpClientSocket->dataSources()[row];
+
+	TEST_PTR_RETURN(ads);
+
+	for (auto& sourceWidget : m_appDataSourceWidgetList)
+	{
+		TEST_PTR_CONTINUE(sourceWidget);
+		if (sourceWidget->id() == ads->lmUniqueID() && sourceWidget->equipmentId() == ads->lmEquipmentID())
+		{
+			sourceWidget->show();
+			sourceWidget->raise();
+			sourceWidget->activateWindow();
+
+			return;
+		}
+	}
+
+	AppDataSourceWidget* newWidget = new AppDataSourceWidget(ads->lmUniqueID(), ads->lmEquipmentID(), this);
+	newWidget->setClientSocket(m_tcpClientSocket);
+
+	newWidget->show();
+	newWidget->raise();
+	newWidget->activateWindow();
+
+	m_appDataSourceWidgetList.append(newWidget);
+
+	connect(this, &AppDataServiceWidget::newTcpClientSocket, newWidget, &AppDataSourceWidget::setClientSocket);
+	connect(this, &AppDataServiceWidget::clearTcpClientSocket, newWidget, &AppDataSourceWidget::unsetClientSocket);
+
+	connect(newWidget, &AppDataSourceWidget::forgetMe, this, &AppDataServiceWidget::forgetWidget);
+}
+
+void AppDataServiceWidget::forgetWidget()
+{
+	AppDataSourceWidget *widget = dynamic_cast<AppDataSourceWidget*>(sender());
+	TEST_PTR_RETURN(widget);
+	m_appDataSourceWidgetList.removeAll(widget);
+}
+
 void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
 	m_tcpClientSocket = new TcpAppDataClient(softwareInfo(), HostAddressPort(ip, port));
@@ -543,10 +593,14 @@ void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, this, &AppDataServiceWidget::clearServiceData);
 
 	m_tcpClientThread->start();
+
+	emit newTcpClientSocket(m_tcpClientSocket);
 }
 
 void AppDataServiceWidget::dropTcpConnection()
 {
+	emit clearTcpClientSocket();
+
 	m_dataSourcesStateModel->setClient(nullptr);
 	m_signalStateModel->setClient(nullptr);
 
