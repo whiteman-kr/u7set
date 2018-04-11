@@ -14,6 +14,7 @@ namespace Sim
 
 		Q_PROPERTY(int OpIndex READ opIndex WRITE setOpIndex)
 		Q_PROPERTY(quint16 AsWord READ wordValue WRITE setWordValue)
+		Q_PROPERTY(quint32 AsDword READ dwordValue WRITE setDwordValue)
 		Q_PROPERTY(float AsFloat READ floatValue WRITE setFloatValue)
 		Q_PROPERTY(double AsDouble READ doubleValue WRITE setDoubleValue)
 		Q_PROPERTY(qint32 AsSignedInt READ signedIntValue WRITE setSignedIntValue)
@@ -36,6 +37,9 @@ namespace Sim
 
 		quint16 wordValue() const;
 		void setWordValue(quint16 value);
+
+		quint32 dwordValue() const;
+		void setDwordValue(quint32 value);
 
 		float floatValue() const;
 		void setFloatValue(float value);
@@ -73,6 +77,7 @@ namespace Sim
 		union
 		{
 			quint16 asWord;
+			quint32 asDword;
 			qint32 asSignedInt;
 			float asFloat;
 			double asDouble;

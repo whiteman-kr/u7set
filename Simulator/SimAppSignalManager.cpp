@@ -207,12 +207,77 @@ static const AppSignalParam dummy;
 			switch (type)
 			{
 			case E::SignalType::Analog:
-				assert(false);	// To do
+				{
+					//E::ByteOrder byteOrder{};
+					//E::DataFormat analogDataFormat{};
+					//int dataSize{};
+
+					switch (analogDataFormat)
+					{
+					case E::DataFormat::Float:
+						{
+							switch (dataSize)
+							{
+							case 32:
+								{
+									float data = 0;
+									if (bool ok = ram.readFloat(ualAddress.offset(), &data, byteOrder);
+										ok == false)
+									{
+										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
+												   .arg(appSignalId)
+												   .arg(logicModuleId));
+									}
+									else
+									{
+										state.m_flags.valid = true;
+										state.m_value = data;
+									}
+								}
+								break;
+							default:
+								assert(false);
+							}
+						}
+						break;
+					case E::DataFormat::SignedInt:
+						{
+							switch (dataSize)
+							{
+							case 32:
+								{
+									qint32 data = 0;
+									if (bool ok = ram.readSignedInt(ualAddress.offset(), &data, byteOrder);
+										ok == false)
+									{
+										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
+												   .arg(appSignalId)
+												   .arg(logicModuleId));
+									}
+									else
+									{
+										state.m_flags.valid = true;
+										state.m_value = data;
+									}
+								}
+								break;
+							default:
+								assert(false);
+							}
+						}
+						break;
+					case E::DataFormat::UnsignedInt:
+						assert(false);
+						break;
+					default:
+						assert(false);
+					}
+				}
 				break;
 			case E::SignalType::Discrete:
 				{
 					quint16 data = 0;
-					bool ok = ram.readBit(ualAddress.offset(), ualAddress.bit(), &data);
+					bool ok = ram.readBit(ualAddress.offset(), ualAddress.bit(), &data, byteOrder);
 
 					if (ok == false)
 					{

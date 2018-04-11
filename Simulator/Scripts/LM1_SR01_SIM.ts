@@ -16,6 +16,7 @@ interface ComponentParam
 {
 	OpIndex: number;
 	AsWord: number;
+	AsDword: number;
 	AsFloat: number;
 	AsSignedInt: number;
 
@@ -67,6 +68,22 @@ function check_param_exist(instance: ComponentInstance, opIndex: number, paramNa
 // 
 // Service function for checking param range, if param out of range the exception is thrown
 //
+function check_afb(device: DeviceEmulator, afbOpCode: number, afbInstance: number) : AfbComponent
+{
+	var afb = device.afbComponent(afbOpCode);
+	if (afb == null)
+	{
+		throw new Error("Cannot find AfbComponent with OpCode " + afbOpCode);
+	}
+	
+	if (afbInstance >= afb.MaxInstCount)
+	{
+		throw new Error("AfbComponent.Instance (" + afbInstance + ") is out of limits " + afb.MaxInstCount);
+	}
+
+	return afb;
+}
+
 function check_param_range(paramValue: number, minValue: number, maxValue: number, paramName: string) : boolean
 {
 	if (paramValue < minValue ||
@@ -99,7 +116,12 @@ function rightJustified(str: string, width: number, fill: string) : string
 
 function hex(value: number, width: number) : string
 {
-	return rightJustified(value.toString(16), width, "0") + "h";
+	var result = rightJustified(value.toString(16), width, "0") + "h";
+	if (result.charAt(0) < '0' || result.charAt(0) > '9')
+	{
+		result = "0" + result;
+	}
+	return result;
 }
 
 //
@@ -207,20 +229,10 @@ function parse_startafb(device: DeviceEmulator, command: Command) : string
 	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
 	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
 
-	var afb = device.afbComponent(command.AfbOpCode);
-	if (afb == null)
-	{
-		return "Cannot find AfbComponent with OpCode " + command.AfbOpCode;
-	}
-
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
 	if (afb.SimulationFunc.length == 0)
 	{
 		return "Simultaion function is not found";
-	}
-
-	if (command.AfbInstance >= afb.MaxInstCount)
-	{
-		return "AfbComponent.Instance (" + command.AfbInstance + ") is out of limits " + afb.MaxInstCount;
 	}
 
 	// startafb LOGIC.0
@@ -228,11 +240,6 @@ function parse_startafb(device: DeviceEmulator, command: Command) : string
 	command.AsString = leftJustified(command.Caption, CommandWidth, " ") +  afb.Caption + "."  + command.AfbInstance;
 
 	return "";
-}
-
-function asdf(paramm: string)
-{
-	return "ASDFTF" + paramm;
 }
 
 function command_startafb(device: DeviceEmulator, command: Command) : string
@@ -374,6 +381,56 @@ function command_movbc(device: DeviceEmulator, command: Command) : string
 	return "";
 }
 
+// Command: wrfb
+// Code: 8
+// Description: Read 16bit data from RAM and write to FunctionalBlock input
+//
+function parse_wrfb(device: DeviceEmulator, command: Command) : string
+{
+	command.Size = 3;
+	
+	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
+	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
+	command.AfbPinOpCode = device.getWord(command.Offset + 1) & 0b111111;	// Lowest 6 bit
+
+	command.Word0 = device.getWord(command.Offset + 2);						// Word0 - data address
+
+	// Checks
+	//
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
+	
+	// String representation
+	//
+	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+
+	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
+						afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "], " +
+						hex(command.Word0, 4);
+							
+
+	command.AsString =  leftJustified(command.AsString, CommandWidthToComment, " ") +  
+						"-- " + 
+						afb.Caption + "."  + command.AfbInstance + "[" + pinCaption + "] <=" +
+						hex(command.Word0, 4);
+	return "";
+}
+
+function command_wrfb(device: DeviceEmulator, command: Command) : string
+{
+	var param : ComponentParam = device.createComponentParam();
+	param.OpIndex = command.AfbPinOpCode;
+	param.AsWord = device.readRamWord(command.Word0);
+
+	var ok = device.setAfbParam(command.AfbOpCode, command.AfbInstance, param);
+	if (ok == false)
+	{
+		return "setAfbParam error";
+	}
+
+	return "";
+}
+
+
 // Command: wrfbc
 // Code: 10
 //
@@ -387,20 +444,13 @@ function parse_wrfbc(device: DeviceEmulator, command: Command) : string
 
 	command.Word0 = device.getWord(command.Offset + 2);						// Word0 - data address
 
-	var afb = device.afbComponent(command.AfbOpCode);
-	if (afb == null)
-	{
-		return "Cannot find AfbComponent with OpCode " + command.AfbOpCode;
-	}
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
 
-	if (command.AfbInstance >= afb.MaxInstCount)
-	{
-		return "AfbComponent.Instance (" + command.AfbInstance + ") is out of limits " + afb.MaxInstCount;
-	}
-
-	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
-	
+	// String representation
 	// wrfbc LOGIC.0[0], #0003h
+	//
+	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+
 	command.AsString = leftJustified(command.Caption, CommandWidth, " ") +  
 							afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "], #" +
 							hex(command.Word0, 4);
@@ -441,22 +491,14 @@ function parse_wrfbb(device: DeviceEmulator, command: Command) : string
 
 	// Checks
 	//
-	var afb = device.afbComponent(command.AfbOpCode);
-	if (afb == null)
-	{
-		return "Cannot find AfbComponent with OpCode " + command.AfbOpCode;
-	}
-
-	if (command.AfbInstance >= afb.MaxInstCount)
-	{
-		return "AfbComponent.Instance (" + command.AfbInstance + ") is out of limits " + afb.MaxInstCount;
-	}
-
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
 	check_param_range(command.BitNo0, 0, 15, "BitNo");
 
-	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
-	
+	// String representation
 	// wrfbb LOGIC.0[20], 46083[0]
+	//
+	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+
 	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
 						afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "], " +
 						hex(command.Word0, 4) + "[" + command.BitNo0 + "]";
@@ -500,22 +542,14 @@ function parse_rdfbb(device: DeviceEmulator, command: Command) : string
 
 	// Checks
 	//
-	var afb = device.afbComponent(command.AfbOpCode);
-	if (afb == null)
-	{
-		return "Cannot find AfbComponent with OpCode " + command.AfbOpCode;
-	}
-
-	if (command.AfbInstance >= afb.MaxInstCount)
-	{
-		return "AfbComponent.Instance (" + command.AfbInstance + ") is out of limits " + afb.MaxInstCount;
-	}
-
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
 	check_param_range(command.BitNo0, 0, 15, "BitNo");
 
-	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
-	
+	// String representation
 	// rdfbb 46083[0], LOGIC.0[20]
+	//
+	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+
 	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
 						hex(command.Word0, 4) + "[" + command.BitNo0 + "], " +
 						afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "]";
@@ -547,6 +581,41 @@ function command_rdfbb(device: DeviceEmulator, command: Command) : string
 	return "";
 }
 
+// Command: movb
+// Code: 15
+// Description: Move 1 bit from RAM to RAM
+//
+function parse_movb(device: DeviceEmulator, command: Command) : string
+{
+	command.Size = 3;
+	
+	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
+	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
+	command.AfbPinOpCode = device.getWord(command.Offset + 1) & 0b111111;	// Lowest 6 bit
+
+	command.Word0 = device.getWord(command.Offset + 2);						// source address (ADR1)
+	command.BitNo0 = device.getWord(command.Offset + 3) & 0b1111;			// 
+
+	command.Word1 = device.getWord(command.Offset + 1);						// destionation address	(ADR2)
+	command.BitNo1 = (device.getWord(command.Offset + 3) >>> 8) & 0b1111;	// 
+
+	// String representation
+	//
+	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
+						hex(command.Word0, 4) + "[" + command.BitNo0 +"], " +
+						hex(command.Word1, 4) + "[" + command.BitNo1 +"], ";
+
+	return "";
+}
+
+function command_movb(device: DeviceEmulator, command: Command) : string
+{
+	var data = device.readRamBit(command.Word0, command.Word0);
+	device.writeRamBit(command.Word1, command.Word1, data);
+
+	return "";
+}
+
 // Command: appstart
 // Code: 17
 //
@@ -563,6 +632,160 @@ function command_appstart(device: DeviceEmulator, command: Command) : string
 	device.AppStartAddress = command.Word0;
 	return "";
 }
+
+// Command: wrfb32
+// Code: 20
+// Description: Read 32bit data from RAM and write it to FunctionalBlock input
+//
+function parse_wrfb32(device: DeviceEmulator, command: Command) : string
+{
+	command.Size = 3;
+	
+	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
+	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
+	command.AfbPinOpCode = device.getWord(command.Offset + 1) & 0b111111;	// Lowest 6 bit
+
+	command.Word0 = device.getWord(command.Offset + 2);						// Word0 - data address
+
+	// Checks
+	//
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
+	
+	// String representation
+	//
+	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+
+	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
+						afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "], " +
+						hex(command.Word0, 4);
+							
+
+	command.AsString =  leftJustified(command.AsString, CommandWidthToComment, " ") +  
+						"-- " + 
+						afb.Caption + "."  + command.AfbInstance + "[" + pinCaption + "] <=" +
+						hex(command.Word0, 4);
+	return "";
+}
+
+function command_wrfb32(device: DeviceEmulator, command: Command) : string
+{
+	var param : ComponentParam = device.createComponentParam();
+	param.OpIndex = command.AfbPinOpCode;
+	param.AsDword = device.readRamDword(command.Word0);
+
+	var ok = device.setAfbParam(command.AfbOpCode, command.AfbInstance, param);
+	if (ok == false)
+	{
+		return "setAfbParam error";
+	}
+
+	return "";
+}
+
+// Command: rdfb32
+// Code: 21
+// Description: Read 32bit data from AFB output and write it to RAM
+//
+function parse_rdfb32(device: DeviceEmulator, command: Command) : string
+{
+	command.Size = 3;
+	
+	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
+	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
+	command.AfbPinOpCode = device.getWord(command.Offset + 1) & 0b111111;	// Lowest 6 bit
+
+	command.Word0 = device.getWord(command.Offset + 2);						// Word0 - data address
+
+	// Checks
+	//
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
+
+	// String representation
+	// rdfbb 46083[0], LOGIC.0[20]
+	//
+	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+
+	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
+						hex(command.Word0, 4) + "[" + command.BitNo0 + "], " +
+						afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "]";
+							
+
+	command.AsString =  leftJustified(command.AsString, CommandWidthToComment, " ") +  
+						"-- " + 
+						hex(command.Word0, 4) + "[" + command.BitNo0 + "] <= " +
+						afb.Caption + "."  + command.AfbInstance + "[" + pinCaption + "]";
+	return "";
+}
+
+function command_rdfb32(device: DeviceEmulator, command: Command) : string
+{
+	var afbInstance: ComponentInstance = device.afbComponentInstance(command.AfbOpCode, command.AfbInstance);
+	if (afbInstance == null)
+	{
+		return "Cannot find afbInstance with OpCode " + command.AfbOpCode + ", InstanceNo " + command.AfbInstance;
+	}
+
+	if (afbInstance.paramExists(command.AfbPinOpCode) == false)
+	{
+		return "Param is not exist, AfbPinOpIndex " + command.AfbPinOpCode;
+	}
+
+	var param : ComponentParam = afbInstance.param(command.AfbPinOpCode);
+	device.writeRamDword(command.Word0, param.AsDword);
+
+	return "";
+}
+
+
+// Command: wrfbc32
+// Code: 22
+// Description: Write 32bit constant to FunctionalBlock input
+//
+function parse_wrfbc32(device: DeviceEmulator, command: Command) : string
+{
+	command.Size = 4;
+	
+	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
+	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
+	command.AfbPinOpCode = device.getWord(command.Offset + 1) & 0b111111;	// Lowest 6 bit
+
+	command.Dword0 = device.getDword(command.Offset + 2);					// Dword0 - data
+
+	// Checks
+	//
+	var afb = check_afb(device, command.AfbOpCode, command.AfbInstance);
+	
+	// String representation
+	//
+	var pinCaption = afb.pinCaption(command.AfbPinOpCode);
+
+	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
+						afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "], #" +
+						hex(command.Dword0, 8);
+							
+
+	command.AsString =  leftJustified(command.AsString, CommandWidthToComment, " ") +  
+						"-- " + 
+						afb.Caption + "."  + command.AfbInstance + "[" + pinCaption + "] <= #" +
+						hex(command.Dword0, 8);
+	return "";
+}
+
+function command_wrfbc32(device: DeviceEmulator, command: Command) : string
+{
+	var param : ComponentParam = device.createComponentParam();
+	param.OpIndex = command.AfbPinOpCode;
+	param.AsDword = command.Dword0;
+
+	var ok = device.setAfbParam(command.AfbOpCode, command.AfbInstance, param);
+	if (ok == false)
+	{
+		return "setAfbParam error";
+	}
+
+	return "";
+}
+
 
 //
 // AFB's simultaion code

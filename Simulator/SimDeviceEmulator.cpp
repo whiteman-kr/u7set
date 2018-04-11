@@ -116,7 +116,7 @@ namespace Sim
 	//
 	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
 	{
-		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data);
+		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
 		if (Q_UNLIKELY(ok == false))
 		{
 			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
@@ -128,7 +128,7 @@ namespace Sim
 	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo)
 	{
 		quint16 data = 0;
-		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data);
+		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
 
 		if (Q_UNLIKELY(ok == false))
 		{
@@ -140,7 +140,7 @@ namespace Sim
 
 	bool ScriptDeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
 	{
-		bool ok = m_device->m_ram.writeWord(offsetW, data);
+		bool ok = m_device->m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian);
 
 		if (Q_UNLIKELY(ok == false))
 		{
@@ -153,7 +153,7 @@ namespace Sim
 	quint16 ScriptDeviceEmulator::readRamWord(quint32 offsetW)
 	{
 		quint16 data = 0;
-		bool ok = m_device->m_ram.readWord(offsetW, &data);
+		bool ok = m_device->m_ram.readWord(offsetW, &data, E::ByteOrder::BigEndian);
 
 		if (Q_UNLIKELY(ok == false))
 		{
@@ -165,7 +165,7 @@ namespace Sim
 
 	bool ScriptDeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
 	{
-		bool ok = m_device->m_ram.writeDword(offsetW, data);
+		bool ok = m_device->m_ram.writeDword(offsetW, data, E::ByteOrder::BigEndian);
 
 		if (Q_UNLIKELY(ok == false))
 		{
@@ -178,7 +178,7 @@ namespace Sim
 	quint32 ScriptDeviceEmulator::readRamDword(quint32 offsetW)
 	{
 		quint32 data = 0;
-		bool ok = m_device->m_ram.readDword(offsetW, &data);
+		bool ok = m_device->m_ram.readDword(offsetW, &data, E::ByteOrder::BigEndian);
 
 		if (Q_UNLIKELY(ok == false))
 		{
@@ -640,12 +640,14 @@ namespace Sim
 		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
 			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
 		{
-			writeError(tr("Parse ApplicationLogicCode error, script function %1 not found or is not callable. "
+			writeError(tr("Parse ApplicationLogicCode error, script function %1 (code %4, masked %5) not found or is not callable. "
 						  "HasProperty %1: %2, "
 						  "Collable: %3")
 							.arg(parseFunc)
 							.arg(m_jsEngine.globalObject().hasProperty(parseFunc))
 							.arg(m_jsEngine.globalObject().property(parseFunc).isCallable())
+							.arg(command.code)
+							.arg((command.code >> 6) & 0b11111)
 						);
 			return false;
 		}

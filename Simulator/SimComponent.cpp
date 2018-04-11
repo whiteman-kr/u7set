@@ -46,6 +46,17 @@ namespace Sim
 		m_data.asWord = value;
 	}
 
+	quint32 ComponentParam::dwordValue() const
+	{
+		return m_data.asDword;
+	}
+
+	void ComponentParam::setDwordValue(quint32 value)
+	{
+		m_data.data = 0;
+		m_data.asDword = value;
+	}
+
 	float ComponentParam::floatValue() const
 	{
 		return m_data.asFloat;

@@ -1,5 +1,6 @@
 #include "SimRam.h"
 #include <cassert>
+#include <QtEndian>
 
 namespace Sim
 {
@@ -70,7 +71,7 @@ namespace Sim
 		return;
 	}
 
-	bool RamArea::writeBit(quint32 offsetW, quint32 bitNo, quint16 data)
+	bool RamArea::writeBit(quint32 offsetW, quint32 bitNo, quint16 data, E::ByteOrder byteOrder)
 	{
 		if (contains(RamAccess::Write, offsetW) == false ||
 			bitNo >= 16)
@@ -87,17 +88,33 @@ namespace Sim
 			return false;
 		}
 
-		quint16 word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+		quint16 word = 0;
+
+		if (byteOrder == E::ByteOrder::BigEndian)
+		{
+			word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+		}
+		else
+		{
+			word = qFromLittleEndian<quint16>(m_data.constData() + byteOffset);
+		}
 
 		word &= ~(0x01 << bitNo);
 		word |= (data << bitNo);
 
-		qToBigEndian<quint16>(word, m_data.data() + byteOffset);
+		if (byteOrder == E::ByteOrder::BigEndian)
+		{
+			qToBigEndian<quint16>(word, m_data.data() + byteOffset);
+		}
+		else
+		{
+			qToLittleEndian<quint16>(word, m_data.data() + byteOffset);
+		}
 
 		return true;
 	}
 
-	bool RamArea::readBit(quint32 offsetW, quint32 bitNo, quint16* data) const
+	bool RamArea::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
 	{
 		if (contains(RamAccess::Read, offsetW) == false ||
 			bitNo >= 16 ||
@@ -113,7 +130,16 @@ namespace Sim
 			return false;
 		}
 
-		quint16 word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+		quint16 word = 0;
+
+		if (byteOrder == E::ByteOrder::BigEndian)
+		{
+			word = qFromBigEndian<quint16>(m_data.constData() + byteOffset);
+		}
+		else
+		{
+			word = qFromLittleEndian<quint16>(m_data.constData() + byteOffset);
+		}
 
 		word >>=  bitNo;
 		word &= 0x01;
@@ -123,38 +149,38 @@ namespace Sim
 		return true;
 	}
 
-	bool RamArea::writeWord(quint32 offsetW, quint16 data)
+	bool RamArea::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
 	{
-		return writeData<quint16>(offsetW, data);
+		return writeData<quint16>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readWord(quint32 offsetW, quint16* data) const
+	bool RamArea::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
 	{
-		return readData<quint16>(offsetW, data);
+		return readData<quint16>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::writeDword(quint32 offsetW, quint32 data)
+	bool RamArea::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder)
 	{
-		return writeData<quint32>(offsetW, data);
+		return writeData<quint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readDword(quint32 offsetW, quint32* data) const
+	bool RamArea::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const
 	{
-		return readData<quint32>(offsetW, data);
+		return readData<quint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data)
+	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder)
 	{
-		return writeData<qint32>(offsetW, data);
+		return writeData<qint32>(offsetW, data, byteOrder);
 	}
 
-	bool RamArea::readSignedInt(quint32 offsetW, qint32* data) const
+	bool RamArea::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const
 	{
-		return readData<qint32>(offsetW, data);
+		return readData<qint32>(offsetW, data, byteOrder);
 	}
 
 	template<typename TYPE>
-	bool RamArea::writeData(quint32 offsetW, TYPE data)
+	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder)
 	{
 		int byteOffset = (offsetW - offset()) * 2;
 		if (byteOffset < 0 ||
@@ -165,12 +191,20 @@ namespace Sim
 			return false;
 		}
 
-		qToBigEndian<TYPE>(data, m_data.data() + byteOffset);
+		if (byteOrder == E::BigEndian)
+		{
+			qToBigEndian<TYPE>(data, m_data.data() + byteOffset);
+		}
+		else
+		{
+			qToLittleEndian<TYPE>(data, m_data.data() + byteOffset);
+		}
+
 		return true;
 	}
 
 	template<typename TYPE>
-	bool RamArea::readData(quint32 offsetW, TYPE* data) const
+	bool RamArea::readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const
 	{
 		if (data == nullptr)
 		{
@@ -187,7 +221,14 @@ namespace Sim
 			return false;
 		}
 
-		*data = qFromBigEndian<TYPE>(m_data.constData() + byteOffset);
+		if (byteOrder == E::BigEndian)
+		{
+			*data = qFromBigEndian<TYPE>(m_data.constData() + byteOffset);
+		}
+		else
+		{
+			*data = qFromLittleEndian<TYPE>(m_data.constData() + byteOffset);
+		}
 		return true;
 	}
 
@@ -279,7 +320,7 @@ namespace Sim
 		return *(m_memoryAreas[index].get());
 	}
 
-	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data)
+	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder)
 	{
 		RamArea* area = memoryArea(RamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -287,11 +328,11 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeBit(offsetW, bitNo, data);
+		bool ok = area->writeBit(offsetW, bitNo, data, byteOrder);
 		return ok;
 	}
 
-	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data) const
+	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
 	{
 		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -299,11 +340,11 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readBit(offsetW, bitNo, data);
+		bool ok = area->readBit(offsetW, bitNo, data, byteOrder);
 		return ok;
 	}
 
-	bool Ram::writeWord(quint32 offsetW, quint16 data)
+	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
 	{
 		RamArea* area = memoryArea(RamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -311,11 +352,11 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeWord(offsetW, data);
+		bool ok = area->writeWord(offsetW, data, byteOrder);
 		return ok;
 	}
 
-	bool Ram::readWord(quint32 offsetW, quint16* data) const
+	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
 	{
 		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -323,11 +364,11 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readWord(offsetW, data);
+		bool ok = area->readWord(offsetW, data, byteOrder);
 		return ok;
 	}
 
-	bool Ram::writeDword(quint32 offsetW, quint32 data)
+	bool Ram::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder)
 	{
 		RamArea* area = memoryArea(RamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -335,11 +376,11 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeDword(offsetW, data);
+		bool ok = area->writeDword(offsetW, data, byteOrder);
 		return ok;
 	}
 
-	bool Ram::readDword(quint32 offsetW, quint32* data) const
+	bool Ram::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const
 	{
 		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -347,11 +388,21 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readDword(offsetW, data);
+		bool ok = area->readDword(offsetW, data, byteOrder);
 		return ok;
 	}
 
-	bool Ram::writeSignedInt(quint32 offsetW, qint32 data)
+	bool Ram::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder)
+	{
+		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder);
+	}
+
+	bool Ram::readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder) const
+	{
+		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder);
+	}
+
+	bool Ram::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder)
 	{
 		RamArea* area = memoryArea(RamAccess::Write, offsetW);
 		if (area == nullptr)
@@ -359,11 +410,11 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->writeSignedInt(offsetW, data);
+		bool ok = area->writeSignedInt(offsetW, data, byteOrder);
 		return ok;
 	}
 
-	bool Ram::readSignedInt(quint32 offsetW, qint32* data) const
+	bool Ram::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const
 	{
 		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
 		if (area == nullptr)
@@ -371,7 +422,7 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = area->readSignedInt(offsetW, data);
+		bool ok = area->readSignedInt(offsetW, data, byteOrder);
 		return ok;
 	}
 

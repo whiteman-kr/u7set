@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include "../lib/Types.h"
 
 namespace Sim
 {
@@ -49,21 +50,21 @@ namespace Sim
 		RamArea(RamAccess access, quint32 offset, quint32 size, QString name);
 
 	public:
-		bool writeBit(quint32 offsetW, quint32 bitNo, quint16 data);
-		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
+		bool writeBit(quint32 offsetW, quint32 bitNo, quint16 data, E::ByteOrder byteOrder);
+		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const;
 
-		bool writeWord(quint32 offsetW, quint16 data);
-		bool readWord(quint32 offsetW, quint16* data) const;
+		bool writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder);
+		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const;
 
-		bool writeDword(quint32 offsetW, quint32 data);
-		bool readDword(quint32 offsetW, quint32* data) const;
+		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder);
+		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const;
 
-		bool writeSignedInt(quint32 offsetW, qint32 data);
-		bool readSignedInt(quint32 offsetW, qint32* data) const;
+		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder);
+		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const;
 
 	private:
-		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data);
-		template<typename TYPE> bool readData(quint32 offsetW, TYPE* data) const;
+		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder);
+		template<typename TYPE> bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const;
 
 	private:
 		QByteArray m_data;
@@ -85,17 +86,20 @@ namespace Sim
 		RamAreaInfo memoryAreaInfo(QString name) const;
 		RamAreaInfo memoryAreaInfo(int index) const;
 
-		bool writeBit(quint32 offsetW, quint32 bitNo, quint32 data);
-		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data) const;
+		bool writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder);
+		bool readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const;
 
-		bool writeWord(quint32 offsetW, quint16 data);
-		bool readWord(quint32 offsetW, quint16* data) const;
+		bool writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder);
+		bool readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const;
 
-		bool writeDword(quint32 offsetW, quint32 data);
-		bool readDword(quint32 offsetW, quint32* data) const;
+		bool writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder);
+		bool readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const;
 
-		bool writeSignedInt(quint32 offsetW, qint32 data);
-		bool readSignedInt(quint32 offsetW, qint32* data) const;
+		bool writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder);
+		bool readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder) const;
+
+		bool writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder);
+		bool readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const;
 
 	private:
 		RamArea* memoryArea(RamAccess access, quint32 offsetW);
