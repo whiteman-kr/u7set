@@ -81,7 +81,7 @@ namespace Sim
 		return;
 	}
 
-	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime, bool reset)
+	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds /*currentTime*/, bool reset)
 	{
 		if (reset == true)
 		{
@@ -270,6 +270,11 @@ namespace Sim
 
 		size_t index = it->second;
 		return m_commands[index];
+	}
+
+	const Ram& LogicModule::ram() const
+	{
+		return m_device.ram();
 	}
 
 }

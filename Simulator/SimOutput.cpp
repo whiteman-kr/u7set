@@ -40,6 +40,11 @@ namespace Sim
 		return;
 	}
 
+	void Output::writeMessage(const QString& text) const
+	{
+		return const_cast<Output*>(this)->writeMessage(text);
+	}
+
 	void Output::writeWaning(const QString& text)
 	{
 		if (m_scope.isEmpty() == true)
@@ -53,6 +58,11 @@ namespace Sim
 		return;
 	}
 
+	void Output::writeWaning(const QString& text) const
+	{
+		return const_cast<Output*>(this)->writeWaning(text);
+	}
+
 	void Output::writeError(const QString& text)
 	{
 		if (m_scope.isEmpty() == true)
@@ -64,6 +74,11 @@ namespace Sim
 			qCCritical(u7sim).noquote() << m_scope << text;
 		}
 		return;
+	}
+
+	void Output::writeError(const QString& text) const
+	{
+		return const_cast<Output*>(this)->writeError(text);
 	}
 
 	const QString& Output::outputScope() const

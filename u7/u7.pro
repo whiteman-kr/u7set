@@ -221,8 +221,7 @@ SOURCES +=\
     Simulator/SimOutputWidget.cpp \
     Simulator/SimMemoryWidget.cpp \
     Simulator/SimControlPage.cpp \
-    Simulator/SimBasePage.cpp \
-    Simulator/SimAppSignalManager.cpp
+    Simulator/SimBasePage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -381,8 +380,7 @@ HEADERS  += \
     Simulator/SimControlPage.h \
     Simulator/SimMemoryWidget.h \
     Simulator/SimOutputWidget.h \
-    Simulator/SimProjectWidget.h \
-    Simulator/SimAppSignalManager.h
+    Simulator/SimProjectWidget.h
 
 FORMS    += \
     CreateProjectDialog.ui \

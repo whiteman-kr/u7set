@@ -14,8 +14,13 @@ namespace Sim
 
 	protected:
 		void writeMessage(const QString& text);
+		void writeMessage(const QString& text) const;
+
 		void writeWaning(const QString& text);
+		void writeWaning(const QString& text) const;
+
 		void writeError(const QString& text);
+		void writeError(const QString& text) const;
 
 		const QString& outputScope() const;
 		void setOutputScope(QString value);

@@ -226,6 +226,8 @@ namespace Sim
 		std::vector<DeviceCommand> commands() const;
 		std::map<int, size_t> offsetToCommands() const;
 
+		const Ram& ram() const;
+
 	private:
 		friend class ScriptDeviceEmulator;
 

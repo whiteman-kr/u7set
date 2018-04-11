@@ -3,7 +3,8 @@
 //
 //TuningSignalManager
 //
-TuningSignalManager::TuningSignalManager()
+TuningSignalManager::TuningSignalManager(QObject* parent) :
+	QObject(parent)
 {
 }
 

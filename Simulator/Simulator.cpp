@@ -86,6 +86,7 @@ namespace Sim
 		m_lmDescriptions.clear();
 		m_simScript.clear();
 		m_subsystems.clear();
+		m_appSignalManager.reset();
 
 		return;
 	}
@@ -200,6 +201,15 @@ namespace Sim
 				clearImpl();
 				return false;
 			}
+		}
+
+		// Load appilcation signals
+		//
+		ok = loadAppSignals(buildPath);
+		if (ok == false)
+		{
+			clearImpl();
+			return false;
 		}
 
 		writeMessage("Project for simulation successfully loaded.");
@@ -354,6 +364,27 @@ namespace Sim
 		return true;
 	}
 
+	bool Simulator::loadAppSignals(QString buildPath)
+	{
+		QString fileName = QDir::fromNativeSeparators(buildPath);
+		if (fileName.endsWith(QChar('/')) == false)
+		{
+			fileName.append(QChar('/'));
+		}
+
+		fileName += "Common/AppSignals.asgs";
+
+		writeMessage(tr("Loading AppSignals.asgs").arg(fileName));
+
+		bool ok = m_appSignalManager.load(fileName);
+		if (ok == false)
+		{
+			writeError(tr("File loading error, file name %1.").arg(fileName));
+		}
+
+		return ok;
+	}
+
 	bool Simulator::isLoaded() const
 	{
 		return m_buildPath.isEmpty() == false;
@@ -408,6 +439,26 @@ namespace Sim
 		}
 
 		return result;
+	}
+
+	Sim::AppSignalManager& Simulator::appSignalManager()
+	{
+		return m_appSignalManager;
+	}
+
+	const Sim::AppSignalManager& Simulator::appSignalManager() const
+	{
+		return m_appSignalManager;
+	}
+
+	Sim::TuningSignalManager& Simulator::tuningSignalManager()
+	{
+		return m_tuningSignalManager;
+	}
+
+	const Sim::TuningSignalManager& Simulator::tuningSignalManager() const
+	{
+		return m_tuningSignalManager;
 	}
 
 	Sim::Control& Simulator::control()

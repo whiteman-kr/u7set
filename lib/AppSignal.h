@@ -50,7 +50,7 @@ union AppSignalStateFlags
 		quint32 validityChange : 1;
 	};
 
-	quint32 all;
+	quint32 all = 0;
 
 	void clear();
 

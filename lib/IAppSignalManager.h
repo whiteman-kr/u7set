@@ -1,6 +1,7 @@
 #ifndef IAPPSIGNALMANAGER_H
 #define IAPPSIGNALMANAGER_H
 
+#include <vector>
 #include "AppSignal.h"
 
 class IAppSignalManager

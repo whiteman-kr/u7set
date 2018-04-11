@@ -6,7 +6,7 @@
 #include "../lib/DbController.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
-#include "SimAppSignalManager.h"
+#include "../Simulator/SimAppSignalManager.h"
 #include "SimTuningTcpClient.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"

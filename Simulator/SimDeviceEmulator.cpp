@@ -1803,5 +1803,10 @@ namespace Sim
 		return m_cachedOffsetToCommand;
 	}
 
+	const Ram& DeviceEmulator::ram() const
+	{
+		return m_ram;
+	}
+
 
 }

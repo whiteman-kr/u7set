@@ -2,8 +2,7 @@
 #include <QDir>
 
 SimIdeSimulator::SimIdeSimulator() :
-	Sim::Simulator(),
-	m_appSignalManager(this)
+	Sim::Simulator()
 {
 }
 
@@ -17,7 +16,6 @@ bool SimIdeSimulator::load(QString buildPath)
 
 	ok &= Sim::Simulator::load(buildPath);
 	ok &= loadSchemaDetails(buildPath);
-	ok &= loadAppSignals(buildPath);
 
 	return ok;
 }
@@ -48,43 +46,3 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 	return ok;
 }
 
-bool SimIdeSimulator::loadAppSignals(QString buildPath)
-{
-	QString fileName = QDir::fromNativeSeparators(buildPath);
-	if (fileName.endsWith(QChar('/')) == false)
-	{
-		fileName.append(QChar('/'));
-	}
-
-	fileName += "Common/AppSignals.asgs";
-
-	writeMessage(tr("Loading AppSignals.asgs").arg(fileName));
-
-	bool ok = m_appSignalManager.load(fileName);
-	if (ok == false)
-	{
-		writeError(tr("File loading error, file name %1.").arg(fileName));
-	}
-
-	return ok;
-}
-
-SimAppSignalManager& SimIdeSimulator::appSignalManager()
-{
-	return m_appSignalManager;
-}
-
-const SimAppSignalManager& SimIdeSimulator::appSignalManager() const
-{
-	return m_appSignalManager;
-}
-
-TuningSignalManager& SimIdeSimulator::tuningSignalManager()
-{
-	return m_tuningSignalManager;
-}
-
-const TuningSignalManager& SimIdeSimulator::tuningSignalManager() const
-{
-	return m_tuningSignalManager;
-}

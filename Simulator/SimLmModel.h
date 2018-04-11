@@ -79,6 +79,10 @@ namespace Sim
 		std::map<int, size_t> offsetToCommand() const;
 		const DeviceCommand& offsetToCommand(int offset) const;
 
+		// Simtime
+		//
+		const Ram& ram() const;
+
 	private:
 		// Loaded LM data
 		//

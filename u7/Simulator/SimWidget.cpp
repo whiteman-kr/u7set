@@ -269,6 +269,8 @@ void SimWidget::projectOpened(DbProject)
 
 void SimWidget::openBuild()
 {
+	m_simulator->control().stop();
+
 	QSettings settings;
 	SimSelectBuildDialog::BuildType buildType = static_cast<SimSelectBuildDialog::BuildType>(settings.value("SimulatorWidget/BuildType", 0).toInt());
 
@@ -300,6 +302,8 @@ void SimWidget::openBuild()
 
 void SimWidget::closeBuild()
 {
+	m_simulator->control().stop();
+
 	m_simulator->clear();
 	emit needUpdateActions();
 
@@ -310,6 +314,8 @@ void SimWidget::closeBuild()
 
 void SimWidget::refreshBuild()
 {
+	m_simulator->control().stop();
+
 	QString buildPath = m_simulator->buildPath();
 	if (buildPath.isEmpty() == true)
 	{
@@ -374,7 +380,7 @@ void SimWidget::runSimulation()
 		// Start simulation
 		//
 		control.addToRunList(equipmentIds);
-		control.start();
+		control.startSimulation();
 	}
 
 	return;

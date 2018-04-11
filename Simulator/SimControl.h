@@ -4,12 +4,15 @@
 #include <set>
 #include <atomic>
 #include <memory>
+#include <vector>
+#include <optional>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
 #include <QMutex>
 #include <SimOutput.h>
 #include <SimLmModel.h>
 #include <SimTimeController.h>
+#include <SimAppSignalManager.h>
 
 namespace Sim
 {
@@ -44,6 +47,16 @@ namespace Sim
 			return m_lm->asyncRunCycle(time, reset);
 		}
 
+		bool afterWorkCycleTask(AppSignalManager& appSignalManager)
+		{
+			// Set LogicModule's RAM to Sim::AppSignalManager
+			//
+			appSignalManager.setData(equipmentId(), m_lm->ram());
+
+			return true;
+		}
+
+
 		QString equipmentId() const
 		{
 			return m_lm->equipmentId();
@@ -58,6 +71,8 @@ namespace Sim
 		std::chrono::microseconds m_lastStartTime{0};
 		std::chrono::microseconds m_possibleToAdvanceTo{0};
 		int m_cylcesCounter = 0;
+
+		std::optional<QFuture<bool>> m_task;
 	};
 
 
@@ -123,11 +138,12 @@ namespace Sim
 		bool processRun();
 
 	private:
-		Simulator* m_simualtor = nullptr;
+		Simulator* m_simulator = nullptr;
 
 		// Start of access only with mutex
 		//
-		mutable QMutex m_mutex{QMutex::Recursive};
+		mutable QReadWriteLock m_controlDataLock{QReadWriteLock::Recursive};
+
 		ControlData m_controlData;
 
 		// End of Access only with mutex

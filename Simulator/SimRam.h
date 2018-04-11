@@ -42,6 +42,10 @@ namespace Sim
 	class RamArea : public RamAreaInfo
 	{
 	public:
+		RamArea() = default;
+		RamArea(const RamArea&) = default;
+		RamArea& operator=(const RamArea&) = default;
+
 		RamArea(RamAccess access, quint32 offset, quint32 size, QString name);
 
 	public:
@@ -71,6 +75,7 @@ namespace Sim
 	public:
 		Ram();
 		Ram(const Ram& that);
+		Ram& operator=(const Ram& that);
 
 	public:
 		void reset();
@@ -97,7 +102,7 @@ namespace Sim
 		const RamArea* memoryArea(RamAccess access, quint32 offsetW) const;
 
 	private:
-		// Pay attention to the copy constructr
+		// Pay attention to copy operator
 		//
 		std::vector<std::shared_ptr<RamArea>> m_memoryAreas;
 	};

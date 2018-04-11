@@ -8,6 +8,8 @@
 #include "SimOutput.h"
 #include "SimSubsystem.h"
 #include "SimControl.h"
+#include "SimAppSignalManager.h"
+#include "SimTuningSignalManager.h"
 
 class QTextStream;
 
@@ -37,6 +39,7 @@ namespace Sim
 		bool loadFirmwares(QString buildPath);
 		bool loadLmDescriptions(QString buildPath);
 		bool loadSimulationScripts(QString buildPath);
+		bool loadAppSignals(QString buildPath);
 
 	signals:
 		void projectUpdated();	// Project was loaded or cleared
@@ -49,6 +52,12 @@ namespace Sim
 		std::shared_ptr<LogicModule> logicModule(QString equipmentId);
 		std::vector<std::shared_ptr<LogicModule>> logicModules();
 
+		Sim::AppSignalManager& appSignalManager();
+		const Sim::AppSignalManager& appSignalManager() const;
+
+		Sim::TuningSignalManager& tuningSignalManager();
+		const Sim::TuningSignalManager& tuningSignalManager() const;
+
 		Sim::Control& control();
 		const Sim::Control& control() const;
 
@@ -59,6 +68,11 @@ namespace Sim
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
 		std::map<QString, QString> m_simScript;								// Key is filename, value is afbl simulation script
 		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
+
+		// Signals Management
+		//
+		Sim::AppSignalManager m_appSignalManager{this};
+		Sim::TuningSignalManager m_tuningSignalManager;
 
 		// Control thread
 		//

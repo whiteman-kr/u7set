@@ -1,5 +1,5 @@
-#ifndef OBJECTMANAGER_H
-#define OBJECTMANAGER_H
+#ifndef TUNINGSIGNALMANAGER_H
+#define TUNINGSIGNALMANAGER_H
 
 #include <unordered_map>
 #include <QMutex>
@@ -11,7 +11,7 @@ class TuningSignalManager : public QObject, public ITuningSignalManager
 	Q_OBJECT
 
 public:
-	TuningSignalManager();
+	explicit TuningSignalManager(QObject* parent = nullptr);
 	virtual ~TuningSignalManager();
 
 public:
@@ -77,4 +77,4 @@ private:
 };
 
 
-#endif // OBJECTMANAGER_H
+#endif // TUNINGSIGNALMANAGER_H

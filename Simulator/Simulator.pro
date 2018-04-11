@@ -74,7 +74,18 @@ SOURCES += \
     SimComponent.cpp \
     SimDeviceEmulator.cpp \
     SimControl.cpp \
-    SimTimeController.cpp
+    SimTimeController.cpp \
+    SimAppSignalManager.cpp \
+    SimTuningSignalManager.cpp \
+    ../lib/AppSignalManager.cpp \
+    ../lib/Signal.cpp \
+    ../lib/AppSignal.cpp \
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../lib/Tuning/TuningSignalState.cpp \
+    ../lib/TuningValue.cpp \
+    ../lib/XmlHelper.cpp \
+    ../lib/HostAddressPort.cpp \
+    ../Proto/network.pb.cc
 
 HEADERS += \
     Stable.h \
@@ -95,7 +106,20 @@ HEADERS += \
     SimComponent.h \
     SimDeviceEmulator.h \
     SimControl.h \
-    SimTimeController.h
+    SimTimeController.h \
+    SimAppSignalManager.h \
+    SimTuningSignalManager.h \
+    ../lib/AppSignalManager.h \
+    ../lib/Signal.h \
+    ../lib/AppSignal.h \
+    ../lib/IAppSignalManager.h \
+    ../lib/Tuning/ITuningSignalManager.h \
+    ../lib/Tuning/TuningSignalManager.h \
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/TuningValue.h \
+    ../lib/XmlHelper.h \
+    ../lib/HostAddressPort.h \
+    ../Proto/network.pb.h
 
 unix {
     target.path = /usr/lib

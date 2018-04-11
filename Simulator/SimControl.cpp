@@ -7,9 +7,9 @@ namespace Sim
 	Control::Control(Simulator* simualtor, QObject* parent) :
 		QThread(parent),
 		Output("Controller"),
-		m_simualtor(simualtor)
+		m_simulator(simualtor)
 	{
-		assert(m_simualtor);
+		assert(m_simulator);
 
 		QThread::start();
 
@@ -35,7 +35,7 @@ namespace Sim
 	{
 		writeMessage(tr("Reset"));
 
-		QMutexLocker l(&m_mutex);
+		QWriteLocker wl(&m_controlDataLock);
 		m_controlData = ControlData();
 
 		return;
@@ -64,7 +64,7 @@ namespace Sim
 
 		for (QString id : equipmentIds)
 		{
-			std::shared_ptr<LogicModule> lm = m_simualtor->logicModule(id);
+			std::shared_ptr<LogicModule> lm = m_simulator->logicModule(id);
 			if (lm == nullptr)
 			{
 				writeError(QString("Module %1 not found.").arg(id));
@@ -84,7 +84,7 @@ namespace Sim
 		// Add to list
 		//
 		{
-			QMutexLocker l(&m_mutex);
+			QWriteLocker wl(&m_controlDataLock);
 
 			for (SimControlRunStruct& scrs : lms)
 			{
@@ -118,7 +118,7 @@ namespace Sim
 	{
 		writeMessage(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
-		QMutexLocker l(&m_mutex);
+		QWriteLocker wl(&m_controlDataLock);
 
 		for (QString id : equipmentIds)
 		{
@@ -137,7 +137,7 @@ namespace Sim
 		writeMessage(tr("Start"));
 
 		{
-			QMutexLocker l(&m_mutex);
+			QWriteLocker wl(&m_controlDataLock);
 
 			if (m_controlData.m_lms.empty() == true)
 			{
@@ -147,7 +147,7 @@ namespace Sim
 
 				m_controlData.m_state = SimControlState::Stop;
 
-				l.unlock();		// Unlock before emitting signal, just in case
+				wl.unlock();		// Unlock before emitting signal, just in case
 
 				emit stateChanged();
 				return false;
@@ -184,7 +184,7 @@ namespace Sim
 				assert(false);
 			}
 
-			l.unlock();		// Unlock before emitting signal, just in case
+			wl.unlock();		// Unlock before emitting signal, just in case
 
 			emit stateChanged();
 		}
@@ -197,7 +197,7 @@ namespace Sim
 		std::chrono::microseconds leftTime{0};
 
 		{
-			QMutexLocker l(&m_mutex);
+			QWriteLocker wl(&m_controlDataLock);
 			m_controlData.m_state = SimControlState::Pause;
 
 			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
@@ -214,7 +214,7 @@ namespace Sim
 		std::chrono::microseconds leftTime{0};
 
 		{
-			QMutexLocker l(&m_mutex);
+			QWriteLocker wl(&m_controlDataLock);
 			m_controlData.m_state = SimControlState::Stop;
 
 			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
@@ -228,46 +228,46 @@ namespace Sim
 
 	ControlData Control::controlData() const
 	{
-		QMutexLocker l(&m_mutex);
+		QReadLocker rl(&m_controlDataLock);
 		return m_controlData;
 	}
 
 	void Control::updateControlDataTime(std::chrono::microseconds currentTime)
 	{
-		QMutexLocker l(&m_mutex);
+		QWriteLocker wl(&m_controlDataLock);
 		m_controlData.m_currentTime = currentTime;
 		return;
 	}
 
 	SimControlState Control::state() const
 	{
-		QMutexLocker l(&m_mutex);
+		QReadLocker rl(&m_controlDataLock);
 		return m_controlData.m_state;
 	}
 
 	bool Control::isRunning() const
 	{
-		QMutexLocker l(&m_mutex);
+		QReadLocker rl(&m_controlDataLock);
 		return m_controlData.m_state == SimControlState::Run;
 	}
 
 	std::chrono::microseconds Control::duration() const
 	{
-		QMutexLocker l(&m_mutex);
+		QReadLocker rl(&m_controlDataLock);
 		return m_controlData.m_duration;
 	}
 
 	std::chrono::microseconds Control::leftTime() const
 	{
-		QMutexLocker l(&m_mutex);
+		QReadLocker rl(&m_controlDataLock);
 		return (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 	}
 
 	void Control::run()
 	{
-		if (m_simualtor == nullptr)
+		if (m_simulator == nullptr)
 		{
-			assert(m_simualtor);
+			assert(m_simulator);
 			return;
 		}
 
@@ -278,7 +278,9 @@ namespace Sim
 			case SimControlState::Stop:
 				// Have some rest
 				//
-				int If_required_reset_all_LMs_here_questionmark;	//?
+				{
+
+				}
 
 				msleep(200);
 				break;
@@ -314,6 +316,8 @@ namespace Sim
 
 	bool Control::processRun()
 	{
+		using namespace std::chrono;
+
 		bool result = true;
 		ControlData cd = controlData();
 
@@ -330,7 +334,7 @@ namespace Sim
 
 		for (const SimControlRunStruct& lm : lms)
 		{
-			auto simLm = m_simualtor->logicModule(lm.equipmentId());
+			auto simLm = m_simulator->logicModule(lm.equipmentId());
 
 			if (simLm == nullptr)
 			{
@@ -348,12 +352,10 @@ namespace Sim
 
 		// --
 		//
-		std::map<QString, QFuture<bool>> tasks;				// Key is LM's equipmentId
-
 		QTime perfmanceTimer;
 		perfmanceTimer.start();
 
-		std::chrono::microseconds perfmonaceStartedAt = cd.m_currentTime;
+		microseconds perfmonaceStartedAt = cd.m_currentTime;
 
 		auto finishTime = cd.m_startTime + cd.m_duration;
 		do
@@ -365,25 +367,23 @@ namespace Sim
 
 			for (SimControlRunStruct& lm : lms)
 			{
-				auto taskIt = tasks.find(lm.equipmentId());
-
-				if (taskIt != tasks.end())
+				if (lm.m_task.has_value() == true)
 				{
-					QFuture<bool>& f = taskIt->second;
+					QFuture<bool>& f = lm.m_task.value();
 
 					if (f.isFinished() == true)
 					{
 						lm.m_possibleToAdvanceTo = lm.m_lastStartTime + lm->cycleDuration();
-						tasks.erase(taskIt);
+						lm.m_task.reset();
+
+						lm.afterWorkCycleTask(m_simulator->appSignalManager());
 
 						//qDebug() << "Finished LM " << lm.equipmentId() << " , count = " << lm.m_cylcesCounter;
-						continue;	// To for (LM& lm : lms)
 					}
 					else
 					{
 						// This task has not been finished yet
 						//
-						continue;
 					}
 				}
 				else
@@ -394,31 +394,29 @@ namespace Sim
 					{
 						// Task can be start again
 						//
-						tasks[lm.equipmentId()] = lm.start(cd.m_currentTime);
-						continue;
+						lm.m_task = lm.start(cd.m_currentTime);
 					}
-
-					continue;	// To for (LM& lm : lms)
 				}
-
-				assert(false);
 			}	// for (SimControlRunStruct& lm : lms)
 
-			std::chrono::microseconds minPossibleTime = lms.front().m_possibleToAdvanceTo;
-			for (auto& lm : lms)
+
+			microseconds minPossibleTime = lms.front().m_possibleToAdvanceTo;
+			for (const SimControlRunStruct& lm : lms)
 			{
-				std::chrono::microseconds lmpt = lm.m_possibleToAdvanceTo;
-				minPossibleTime = qMin(minPossibleTime, lmpt);
+				microseconds lmpt = lm.m_possibleToAdvanceTo;
+
+				if (lmpt.count() < minPossibleTime.count())	// using count() makes it faster, no need to convert to different ratio
+				{
+					minPossibleTime = lmpt;
+				}
 			}
 
 			if (minPossibleTime > cd.m_currentTime)
 			{
-				auto ahead = minPossibleTime -
-							 std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-							// Eto p@#$c tovarischi, c++
-							//
-
-				if (ahead > 0us)
+				// If current simulation is ahead of physical time, pause it a little bit
+				//
+				if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
+					ahead > 0us)
 				{
 					QThread::usleep(ahead.count());
 				}
@@ -427,11 +425,27 @@ namespace Sim
 				//
 				cd.m_currentTime = minPossibleTime;
 
-				QDateTime t = cd.currentTime();
-				qDebug() << "CurrentTime changed to: " << t.toString("dd/MM/yyyy HH:mm:ss:zzz");
+//				QDateTime t = cd.currentTime();
+//				qDebug() << "CurrentTime changed to: " << t.toString("dd/MM/yyyy HH:mm:ss:zzz");
 			}
 
-			QThread::yieldCurrentThread();	// Give some time for tasks
+			if (state() != SimControlState::Run)
+			{
+				break;
+			}
+
+			// QThread::yieldCurrentThread();	// Give some time for tasks
+			// This code is instead of QThread::yieldCurrentThread,
+			// It's not tested for several LMs, subject to examine perfomnace
+			//
+			for (SimControlRunStruct& lm : lms)
+			{
+				if (lm.m_task.has_value() == true)
+				{
+					lm.m_task->waitForFinished();
+					break;
+				}
+			}
 		}
 		while (cd.m_duration < 0us ||			// Run always till state is triggered to STOP or PAUSE
 			   cd.m_duration != 0us ||			// Run one cycle only (==0)
@@ -439,10 +453,18 @@ namespace Sim
 
 		// Wait everything to finish
 		//
-		for (auto [id, future] : tasks)
+		for (SimControlRunStruct& lm : lms)
 		{
-			Q_UNUSED(id);
-			future.waitForFinished();
+			if (lm.m_task.has_value() == true)
+			{
+				QFuture<bool>& future = lm.m_task.value();
+
+				future.waitForFinished();
+
+				// Perform post run cycle actions
+				//
+				lm.afterWorkCycleTask(m_simulator->appSignalManager());
+			}
 		}
 
 		// Update time in m_controlData
@@ -451,20 +473,20 @@ namespace Sim
 
 		// Some debug info
 		//
-		std::chrono::microseconds elapsedUsecs{perfmanceTimer.elapsed() * 1000};
+		microseconds elapsedUsecs{perfmanceTimer.elapsed() * 1000};
 
-		std::chrono::microseconds perfmonaceFinishedAt = cd.m_currentTime;
-		std::chrono::microseconds simulatedDiff = perfmonaceFinishedAt - perfmonaceStartedAt;
+		microseconds perfmonaceFinishedAt = cd.m_currentTime;
+		microseconds simulatedDiff = perfmonaceFinishedAt - perfmonaceStartedAt;
 
-		double perfRation = static_cast<double>(elapsedUsecs.count()) /
-							static_cast<double>(simulatedDiff.count());
+		double perfRation = static_cast<double>(simulatedDiff.count()) /
+							static_cast<double>(elapsedUsecs.count());
 
 		QString logMessage = tr("Simulation time for %1ms, is %2ms physical time, ratio is %3")
 								.arg(simulatedDiff.count() / 1000)
 								.arg(elapsedUsecs.count() / 1000)
 								.arg(perfRation);
 
-		qDebug() << logMessage;
+		//qDebug() << logMessage;
 		writeMessage(logMessage);
 
 		return result;

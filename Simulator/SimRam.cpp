@@ -197,6 +197,14 @@ namespace Sim
 
 	Ram::Ram(const Ram& that)
 	{
+		*this = that;
+	}
+
+	Ram& Ram::operator=(const Ram& that)
+	{
+		// Deep copy
+		//
+		m_memoryAreas.clear();
 		m_memoryAreas.reserve(that.m_memoryAreas.size());
 
 		for (std::shared_ptr<RamArea> thatArea : that.m_memoryAreas)
@@ -204,6 +212,8 @@ namespace Sim
 			std::shared_ptr<RamArea> area = std::make_shared<RamArea>(*thatArea.get());
 			m_memoryAreas.push_back(area);
 		}
+
+		return *this;
 	}
 
 	void Ram::reset()

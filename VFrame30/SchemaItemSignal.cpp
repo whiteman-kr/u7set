@@ -625,7 +625,8 @@ namespace VFrame30
 
 		bool signalFound = false;
 
-		if (drawParam->isMonitorMode() == true)
+		if (drawParam->isMonitorMode() == true &&
+			this->isCommented() == false)
 		{
 			signal = drawParam->appSignalController()->signalParam(appSignalId, &signalFound);
 			signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);

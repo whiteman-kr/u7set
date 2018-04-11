@@ -379,19 +379,10 @@ namespace Sim
 
 	bool ComponentInstance::addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage)
 	{
-		assert(errorMessage);
-		assert(afbComp);
-
-		if (m_params.count(param.opIndex()) != 0)
-		{
-			// This parameter already has been initialized
-			//
-			*errorMessage = QString("Pin with opIndex %1 already has been initialized, InstanceNo %2, AfbComponent %2")
-								.arg(param.opIndex())
-								.arg(m_instanceNo)
-								.arg(afbComp->caption());
-			return false;
-		}
+		Q_UNUSED(errorMessage);
+		Q_UNUSED(afbComp);
+		//assert(errorMessage);
+		//assert(afbComp);
 
 		m_params[param.opIndex()] = param;
 
