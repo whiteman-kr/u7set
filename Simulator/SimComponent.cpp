@@ -221,6 +221,34 @@ namespace Sim
 		return;
 	}
 
+	void ComponentParam::addSignedIntegerNumber(qint32 operand)
+	{
+		ComponentParam cp(*this);
+		cp.setSignedIntValue(operand);
+		return addSignedInteger(&cp);
+	}
+
+	void ComponentParam::subSignedIntegerNumber(qint32 operand)
+	{
+		ComponentParam cp(*this);
+		cp.setSignedIntValue(operand);
+		return subSignedInteger(&cp);
+	}
+
+	void ComponentParam::mulSignedIntegerNumber(qint32 operand)
+	{
+		ComponentParam cp(*this);
+		cp.setSignedIntValue(operand);
+		return mulSignedInteger(&cp);
+	}
+
+	void ComponentParam::divSignedIntegerNumber(qint32 operand)
+	{
+		ComponentParam cp(*this);
+		cp.setSignedIntValue(operand);
+		return divSignedInteger(&cp);
+	}
+
 	void ComponentParam::addFloatingPoint(ComponentParam* operand)
 	{
 		if (operand == nullptr)
@@ -349,6 +377,26 @@ namespace Sim
 													// Some compilers can optimize it!
 
 		setFloatValue(result);
+
+		return;
+	}
+
+	void ComponentParam::convertWordToFloat()
+	{
+		resetMathFlags();
+
+		float data = static_cast<float>(m_data.asWord);
+		setFloatValue(data);
+
+		return;
+	}
+
+	void ComponentParam::convertWordToSignedInt()
+	{
+		resetMathFlags();
+
+		qint32 data = static_cast<qint32>(m_data.asWord);
+		setSignedIntValue(data);
 
 		return;
 	}

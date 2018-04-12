@@ -56,10 +56,18 @@ namespace Sim
 		void mulSignedInteger(ComponentParam* operand);
 		void divSignedInteger(ComponentParam* operand);
 
+		void addSignedIntegerNumber(qint32 operand);
+		void subSignedIntegerNumber(qint32 operand);
+		void mulSignedIntegerNumber(qint32 operand);
+		void divSignedIntegerNumber(qint32 operand);
+
 		void addFloatingPoint(ComponentParam* operand);
 		void subFloatingPoint(ComponentParam* operand);
 		void mulFloatingPoint(ComponentParam* operand);
 		void divFloatingPoint(ComponentParam* operand);
+
+		void convertWordToFloat();
+		void convertWordToSignedInt();
 
 	private:
 		void resetMathFlags();

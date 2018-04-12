@@ -34,11 +34,20 @@ interface ComponentParam
 	subSignedInteger(operand: ComponentParam) : void;	// -=
 	mulSignedInteger(operand: ComponentParam) : void;	// *=
 	divSignedInteger(operand: ComponentParam) : void;	// /=
+	addSignedIntegerNumber(operand: number) : void;		// +=	
+	subSignedIntegerNumber(operand: number) : void;		// -=	
+	mulSignedIntegerNumber(operand: number) : void;		// *=	
+	divSignedIntegerNumber(operand: number) : void;		// /=
 
 	addFloatingPoint(operand: ComponentParam) : void;	// +=
 	subFloatingPoint(operand: ComponentParam) : void;	// -=
 	mulFloatingPoint(operand: ComponentParam) : void;	// *=
 	divFloatingPoint(operand: ComponentParam) : void;	// /=	
+
+	// Cocert this from one type to another
+	//
+	convertWordToFloat() : void;						// Word -> Float
+	convertWordToSignedInt() : void;					// Word -> SignedInt
 }
 
 interface ComponentInstance 
@@ -290,6 +299,34 @@ function command_stop(device: DeviceEmulator, command: Command) : string
 	}
 
 	return "Command stop is cannot be run in phase " + device.Phase.toString;
+}
+
+// Command: mov
+// Code: 4
+// Description: Move 16 bit word from RAM to RAM
+//
+function parse_mov(device: DeviceEmulator, command: Command) : string
+{
+	command.Size = 3;
+	
+	command.Word0 = device.getWord(command.Offset + 2);						// source address (ADR1)
+	command.Word1 = device.getWord(command.Offset + 1);						// destionation address	(ADR2)
+
+	// String representation
+	//
+	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
+						hex(command.Word0, 4) + ", " +
+						hex(command.Word1, 4);
+
+	return "";
+}
+
+function command_mov(device: DeviceEmulator, command: Command) : string
+{
+	var data = device.readRamWord(command.Word0);
+	device.writeRamWord(command.Word1, data);
+
+	return "";
 }
 
 // Command: movmem
@@ -587,12 +624,8 @@ function command_rdfbb(device: DeviceEmulator, command: Command) : string
 //
 function parse_movb(device: DeviceEmulator, command: Command) : string
 {
-	command.Size = 3;
+	command.Size = 4;
 	
-	command.AfbOpCode = device.getWord(command.Offset + 0) & 0x003F;		// Lowest 6 bit
-	command.AfbInstance = device.getWord(command.Offset + 1) >>> 6;			// Highest 10 bits
-	command.AfbPinOpCode = device.getWord(command.Offset + 1) & 0b111111;	// Lowest 6 bit
-
 	command.Word0 = device.getWord(command.Offset + 2);						// source address (ADR1)
 	command.BitNo0 = device.getWord(command.Offset + 3) & 0b1111;			// 
 
@@ -603,15 +636,15 @@ function parse_movb(device: DeviceEmulator, command: Command) : string
 	//
 	command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
 						hex(command.Word0, 4) + "[" + command.BitNo0 +"], " +
-						hex(command.Word1, 4) + "[" + command.BitNo1 +"], ";
+						hex(command.Word1, 4) + "[" + command.BitNo1 +"]";
 
 	return "";
 }
 
 function command_movb(device: DeviceEmulator, command: Command) : string
 {
-	var data = device.readRamBit(command.Word0, command.Word0);
-	device.writeRamBit(command.Word1, command.Word1, data);
+	var data = device.readRamBit(command.Word0, command.BitNo0);
+	device.writeRamBit(command.Word1, command.BitNo1, data);
 
 	return "";
 }
@@ -954,6 +987,121 @@ function afb_math(instance: ComponentInstance) : string
 	instance.addParamWord(o_zero, operand1.MathZero ? 0x0001 : 0x0000);
 	instance.addParamWord(o_nan, operand1.MathNan ? 0x0001 : 0x0000);
 	instance.addParamWord(o_div_by_zero, operand1.MathDivByZero ? 0x0001 : 0x0000);
+
+	return "";
+}
+
+//
+//	MATH, OpCode 14
+//
+function afb_scale(instance: ComponentInstance) : string
+{
+	// Define input opIndexes
+	//
+	const i_conf = 0;
+	const i_scal_k1_coef = 1;
+	const i_scal_k2_coef = 3;
+	const i_ui_data = 5;		// 16 bit data, unsigned integer input
+	const i_si_fp_data = 6;		// 32 bit data, signed integer or float input
+
+	const o_ui_result = 8;		// 16 bit data, unsigned integer output
+	const o_si_fp_result = 9;	// 32 bit data, signed integer or float output
+	const o_scal_edi = 11;		// error
+	const o_overflow = 12;
+	const o_underflow = 13;
+	const o_zero = 14;
+	const o_nan = 15;
+	
+	// Get params,  check_param throws exception in case of error
+	//
+	check_param_exist(instance, i_conf, "i_conf");
+	check_param_exist(instance, i_scal_k1_coef, "i_scal_k1_coef");
+	check_param_exist(instance, i_scal_k2_coef, "i_scal_k2_coef");
+	
+	let conf: ComponentParam = instance.param(i_conf);
+	let k1: ComponentParam = instance.param(i_scal_k1_coef);	// for  1, 2, 3, 4 -- k1/k2 SignedInteger
+	let k2: ComponentParam = instance.param(i_scal_k2_coef);	//      5, 6, 7, 8, 9 -- k1/k2 float
+	let result: ComponentParam;
+
+	// Scale, conf:  1-16(UI)/16(UI); 2-16(UI)/32(SI); 3-32(SI)/16(UI); 4-32(SI)/32(SI); 5-32(SI)/32(FP); 6-32(FP)/32(FP); 7-32(FP)/16(UI); 8-32(FP)/32(SI); 9-16(UI)/32(FP);
+	//
+	switch (conf.AsWord)
+	{
+		case 1: // 16(UI)/16(UI)
+			throw new Error("Scale configuration: " + conf.AsWord + " is not implemented yet.");
+			//break;
+		 case 2: // 16(UI)/32(SI)
+			{
+				check_param_exist(instance, i_ui_data, "i_ui_data");
+				result = instance.param(i_ui_data);
+
+				result.convertWordToSignedInt();
+
+				result.mulSignedInteger(k1);
+				result.divSignedIntegerNumber(32768);
+				result.addSignedInteger(k2);
+
+				// Save result
+				//
+				instance.addParam(o_si_fp_result, result);
+			}
+			break;
+		case 3: // 32(SI)/16(UI)
+			throw new Error("Scale configuration: " + conf.AsWord + " is not implemented yet.");
+			//break;
+		case 4: // 32(SI)/32(SI)
+			throw new Error("Scale configuration: " + conf.AsWord + " is not implemented yet.");
+			//break;
+		case 5: // 32(SI)/32(FP)
+			throw new Error("Scale configuration: " + conf.AsWord + " is not implemented yet.");
+			//break;
+		case 6: // 32(FP)/32(FP)
+			{
+				check_param_exist(instance, i_si_fp_data, "i_si_fp_data");
+
+
+				result = instance.param(i_si_fp_data);
+
+				result.mulFloatingPoint(k1);
+				result.addFloatingPoint(k2);
+
+				// Save result
+				//
+				instance.addParam(o_si_fp_result, result);
+			}
+			break;		
+		case 7: // 32(FP)/16(UI)
+			throw new Error("Scale configuration: " + conf.AsWord + " is not implemented yet.");
+			//break;
+		case 8: // 32(FP)/32(SI)
+			throw new Error("Scale configuration: " + conf.AsWord + " is not implemented yet.");
+			//break;
+		case 9: // 16(UI)/32(FP)
+			{
+				check_param_exist(instance, i_ui_data, "i_ui_data");
+				result = instance.param(i_ui_data);
+				result.convertWordToFloat();
+
+				result.mulFloatingPoint(k1);
+				result.addFloatingPoint(k2);
+
+				// Save result
+				//
+				instance.addParam(o_si_fp_result, result);
+			}
+			break;			
+		default:
+			instance.addParamWord(o_scal_edi, 0x0001);
+			throw new Error("Unknown AFB configuration: " + conf.AsSignedInt + ", or this configuration is not implemented yet.");
+	}
+
+	// Save result
+	//	
+	instance.addParamWord(o_scal_edi, 0x0000);	
+	instance.addParamWord(o_overflow, result.MathOverflow ? 0x0001 : 0x0000);	
+	instance.addParamWord(o_underflow, result.MathUnderflow ? 0x0001 : 0x0000);
+	instance.addParamWord(o_zero, result.MathZero ? 0x0001 : 0x0000);
+	instance.addParamWord(o_nan, result.MathNan ? 0x0001 : 0x0000);
 
 	return "";
 }
