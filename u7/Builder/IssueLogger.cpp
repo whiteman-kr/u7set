@@ -670,7 +670,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.
+	/// Title: Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
@@ -684,7 +684,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3'. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.")
+				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3'.")
 				  .arg(signalID1)
 				  .arg(signalID2)
 				  .arg(module));
@@ -1126,6 +1126,32 @@ namespace Builder
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3027,
 				  tr("Ethernet port number property %1.%2 should be in range 1..65535.").arg(objectID).arg(propertyName));
+	}
+
+	/// IssueCode: CFG3028
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%4' must have same value in signals %1 and %2, module '%3'.
+	///
+	/// Parameters:
+	///         %1 Signal 1 StrID
+	///         %2 Signal 2 StrID
+	///         %3 Module StrID
+	///         %4 Property Name
+	///
+	/// Description:
+	///			Property values should be equal in specified signals of the module.
+	///
+	void IssueLogger::errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3028,
+				  tr("Property '%4' must have same value in signals %1 and %2, module '%3'.")
+				  .arg(signalID1)
+				  .arg(signalID2)
+				  .arg(module)
+				  .arg(propertyName));
 	}
 
 	// ALP			Application Logic Parsing				4000-4999

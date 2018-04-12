@@ -103,22 +103,22 @@ namespace Builder
 
 		// CFG			FSC configuration						3000-3999
 		//
-		Q_INVOKABLE void errCFG3000(QString propertyName, QString object);              // general errors
-		Q_INVOKABLE void errCFG3001(QString subSysID, QString module);
-		Q_INVOKABLE void errCFG3002(QString name, int value, int min, int max, QString module);
-		Q_INVOKABLE void errCFG3003(int LMNumber, QString module);
-		Q_INVOKABLE void errCFG3004(QString controllerID, QString module);
+		Q_INVOKABLE void errCFG3000(QString propertyName, QString object);						// Property '%1' does not exist in object '%2'.
+		Q_INVOKABLE void errCFG3001(QString subSysID, QString module);							// Subsystem '%1' is not found in subsystem set (Logic Module '%2').
+		Q_INVOKABLE void errCFG3002(QString name, int value, int min, int max, QString module); // Property '%1' has wrong value (%2), valid range is %3..%4 (module '%5').
+		Q_INVOKABLE void errCFG3003(int LMNumber, QString module);								// Property System\\LMNumber (%1) is not unique in Logic Module '%2'.
+		Q_INVOKABLE void errCFG3004(QString controllerID, QString module);						// Controller '%1' is not found in module '%2'.
 
-		Q_INVOKABLE void wrnCFG3005(QString signalID, QString controllerID);
-		Q_INVOKABLE void wrnCFG3006(int place, QString controllerID);
-		Q_INVOKABLE void wrnCFG3007(QString signalID);
-		Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);      // software errors
+		Q_INVOKABLE void wrnCFG3005(QString signalID, QString controllerID);					// Signal '%1' is not found in controller '%2'.
+		Q_INVOKABLE void wrnCFG3006(int place, QString controllerID);							// Signal with place %1 is not found in controller '%2'.
+		Q_INVOKABLE void wrnCFG3007(QString signalID);											// Signal '%1' is not found in Application Signals.
+		Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);						// Software '%1' is not found (Logic Module '%2').
 
-		Q_INVOKABLE void errCFG3009(QString signalID1, QString signalID2, QString module);
-		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);
+		Q_INVOKABLE void errCFG3009(QString signalID1, QString signalID2, QString module);		//Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3.
+		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);	// Property '%1' has wrong value (%2), valid range is %3..%4 [precision %5](signal '%6').
 
-		Q_INVOKABLE void errCFG3011(QString addressProperty, uint address, QString controller);
-		Q_INVOKABLE void errCFG3012(QString portProperty, uint port, QString controller);
+		Q_INVOKABLE void errCFG3011(QString addressProperty, uint address, QString controller);	// IP address in property '%1' has undefined value (%2) in controller '%3'.
+		Q_INVOKABLE void errCFG3012(QString portProperty, uint port, QString controller);		// Port in property '%1' has undefined value (%2) in controller '%3'.
 
 		enum IssueCompareMode
 		{
@@ -126,14 +126,13 @@ namespace Builder
 			Less = 1,
 			More = 2
 		};
-
-		Q_INVOKABLE void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);
+		Q_INVOKABLE void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);	//Property '%1' (%2) is %3 property '%4' (%5) in signal '%6'.
 
 		void errCFG3014(QString suffix, QString objectID);									// Can't find child object with suffix '%1' in object '%2'
 		void wrnCFG3015(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
 		void wrnCFG3016(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
 		Q_INVOKABLE void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to not compatible software ID '%3'.
-		Q_INVOKABLE void wrnCFG3018(QString propertyName, QString ip, int port, QString controller);
+		Q_INVOKABLE void wrnCFG3018(QString propertyName, QString ip, int port, QString controller);	// Default '%1' IP address %2:%3 is used in controller %4.
 		void errCFG3019(QString objectID, QString propertyName);							// Property '%1.%2' write error.
 		void errCFG3020(QString objectID, QString propertyName);							// Property '%1.%2' is not found.
         void errCFG3021(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
@@ -143,6 +142,7 @@ namespace Builder
 		void errCFG3025(QString suffix, QString objectID);									// Can't find child controller with suffix '%1' in object '%2'
 		void errCFG3026(QString objectID, QString propertyName);							// Value of property %1.%2 is not valid IPv4 address.
 		void errCFG3027(QString objectID, QString propertyName);							// Ethernet port number property %1.%2 should be in range 1..65535.
+		Q_INVOKABLE void errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName);
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
