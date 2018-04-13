@@ -2150,17 +2150,6 @@ public:
 
 		std::vector<std::shared_ptr<Property>> newProperties = this->specificProperties();
 
-		// Set Specific editors to properties
-		//
-		//bool ETO_UDLALIT_NADO_perenesti_tip_redaktora_v_structuru_spec_props;
-		for (std::shared_ptr<Property> p : newProperties)
-		{
-			if (p->caption() == "Filters" && p->description() == "Tuning signal filters description in XML format")
-			{
-				p->setSpecificEditor(E::PropertySpecificEditor::TuningFilter);
-			}
-		}
-
 		bool someValuesWereRestored = false;
 
 		// Set to parsed properties old value
