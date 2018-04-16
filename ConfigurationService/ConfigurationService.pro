@@ -71,7 +71,6 @@ SOURCES += \
 	../lib/Service.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/JsonSerializable.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
@@ -94,7 +93,6 @@ HEADERS += \
 	../lib/Service.h \
     ../lib/UdpSocket.h \
     ../lib/CircularLogger.h \
-    ../lib/JsonSerializable.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \

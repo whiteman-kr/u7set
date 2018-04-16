@@ -65,7 +65,6 @@ SOURCES += MainWindow.cpp \
     ../lib/SocketIO.cpp \
     ../lib/DataSource.cpp \
     main.cpp \
-    ../lib/JsonSerializable.cpp \
     BaseServiceStateWidget.cpp \
     ConfigurationServiceWidget.cpp \
     ../lib/SimpleThread.cpp \
@@ -85,7 +84,7 @@ SOURCES += MainWindow.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/AppDataSource.cpp \
+    ../AppDataService/AppDataSource.cpp \
     ../lib/CircularLogger.cpp \
     TcpConfigServiceClient.cpp \
     AppDataServiceWidget.cpp \
@@ -97,7 +96,13 @@ SOURCES += MainWindow.cpp \
     TcpTuningServiceClient.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSourceWidget.cpp \
-    ../lib/PropertyObject.cpp
+    ../lib/PropertyObject.cpp \
+    ../lib/OutputLog.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../u7/Builder/ModulesRawData.cpp \
+    AppDataSourceWidget.cpp \
+    ../lib/Times.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -106,7 +111,6 @@ HEADERS  += MainWindow.h \
     ../lib/SocketIO.h \
     ../lib/DataSource.h \
     version.h \
-    ../lib/JsonSerializable.h \
     BaseServiceStateWidget.h \
     ConfigurationServiceWidget.h \
     ../lib/SimpleThread.h \
@@ -127,7 +131,7 @@ HEADERS  += MainWindow.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \
     ../lib/HostAddressPort.h \
-    ../lib/AppDataSource.h \
+    ../AppDataService/AppDataSource.h \
     ../lib/CircularLogger.h \
     TcpConfigServiceClient.h \
     ../lib/WidgetUtils.h \
@@ -140,7 +144,13 @@ HEADERS  += MainWindow.h \
     TuningServiceWidget.h \
     TcpTuningServiceClient.h \
     ../lib/Tuning/TuningSourceState.h \
-    TuningSourceWidget.h
+    TuningSourceWidget.h \
+    ../lib/OutputLog.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/DeviceHelper.h \
+    ../u7/Builder/ModulesRawData.h \
+    AppDataSourceWidget.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -63,8 +63,6 @@ private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
-	std::shared_ptr<CircularLogger> m_logger;
-
 	QSettings m_settings;
 
 	ArchivingServiceSettings m_cfgSettings;
@@ -80,7 +78,7 @@ private:
 	ArchWriteThread* m_archWriteThread = nullptr;
 	ArchRequestThread* m_archRequestThread = nullptr;
 
-	AppSignalStatesQueue m_saveStatesQueue;
+	Queue<SimpleAppSignalState> m_saveStatesQueue;
 
 	ArchiveShared m_archive;
 };

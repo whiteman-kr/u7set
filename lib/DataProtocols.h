@@ -60,7 +60,7 @@ namespace Rup
 		void reverseBytes();
 	};
 
-	const int FRAME_DATA_SIZE = ENTIRE_UDP_SIZE - sizeof(Rup::Header) - sizeof(quint64 /*CRC64*/ );
+	const int FRAME_DATA_SIZE = Socket::ENTIRE_UDP_SIZE - sizeof(Rup::Header) - sizeof(quint64 /*CRC64*/ );
 	const int MAX_FRAME_COUNT = 10;
 	const int BUFFER_SIZE = MAX_FRAME_COUNT * FRAME_DATA_SIZE;
 
@@ -76,6 +76,16 @@ namespace Rup
 
 		void calcCRC64();
 		bool checkCRC64();
+
+		void dumpData();
+	};
+
+	struct SimFrame
+	{
+		Rup::Frame rupFrame;
+
+		quint16 simVersion;
+		quint32 sourceIP;
 	};
 }
 

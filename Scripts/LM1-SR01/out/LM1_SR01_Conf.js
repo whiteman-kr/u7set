@@ -73,8 +73,12 @@ var UartID = 0;
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
 //var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
 //var configScriptVersion: number = 35;		// Add Software type checking
+<<<<<<< HEAD
 //var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
 var configScriptVersion = 37; // Add setDataFloat function
+=======
+var configScriptVersion = 36; // Changes in App/DiagDataService processing
+>>>>>>> develop
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -529,21 +533,15 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
                         log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
                         return false;
                     }
-                    //
-                    var serviceDataChannel = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
-                    if (serviceDataChannel == null) {
-                        log.errCFG3004(serviceID + "_DATACH01", equipmentID);
-                        return false;
-                    }
                     var checkProperties = ["DataReceivingIP", "DataReceivingPort"];
                     for (var cp = 0; cp < checkProperties.length; cp++) {
-                        if (serviceDataChannel.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
-                            log.errCFG3000(servicesName[s] + checkProperties[cp], serviceDataChannel.jsPropertyString("EquipmentID"));
+                        if (service.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
+                            log.errCFG3000(servicesName[s] + checkProperties[cp], service.jsPropertyString("EquipmentID"));
                             return false;
                         }
                     }
-                    serviceIP[s] = serviceDataChannel.jsPropertyIP(servicesName[s] + "DataReceivingIP");
-                    servicePort[s] = serviceDataChannel.jsPropertyInt(servicesName[s] + "DataReceivingPort");
+                    serviceIP[s] = service.jsPropertyIP(servicesName[s] + "DataReceivingIP");
+                    servicePort[s] = service.jsPropertyInt(servicesName[s] + "DataReceivingPort");
                 }
             }
         }

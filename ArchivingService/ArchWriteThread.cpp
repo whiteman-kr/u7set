@@ -15,7 +15,7 @@ QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5)::AppSignalState")
 
 ArchWriteThreadWorker::ArchWriteThreadWorker(const HostAddressPort& dbHost,
 											 ArchiveShared archive,
-											 AppSignalStatesQueue& saveStatesQueue,
+											 Queue<SimpleAppSignalState>& saveStatesQueue,
 											 CircularLoggerShared logger) :
 	m_dbHost(dbHost),
 	m_archive(archive),
@@ -30,7 +30,7 @@ void ArchWriteThreadWorker::onThreadStarted()
 	DEBUG_LOG_MSG(m_logger, "ArchWriteThread is started");
 
 	connect(&m_timer, &QTimer::timeout, this, &ArchWriteThreadWorker::onTimer);
-	connect(&m_saveStatesQueue, &AppSignalStatesQueue::queueNotEmpty, this, &ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty);
+	connect(&m_saveStatesQueue, &Queue<SimpleAppSignalState>::queueNotEmpty, this, &ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty);
 
 	m_timer.setInterval(1000);
 	m_timer.start();
@@ -527,10 +527,10 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 			continue;
 		}
 
-		if (archSignal.isAnalog == false && state.flags.smoothAperture == 1)
+		if (archSignal.isAnalog == false && state.flags.fineAperture == 1)
 		{
 			assert(false);
-			state.flags.smoothAperture = 0;		// hard reset state.flags.smoothAperture for discrete signals
+			state.flags.fineAperture = 0;		// hard reset state.flags.smoothAperture for discrete signals
 		}
 
 		m_timeFilter.setTimes(state.time);
@@ -763,7 +763,7 @@ void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 
 ArchWriteThread::ArchWriteThread(const HostAddressPort& dbHost,
 								 ArchiveShared archive,
-								 AppSignalStatesQueue& saveStatesQueue,
+								 Queue<SimpleAppSignalState>& saveStatesQueue,
 								 CircularLoggerShared logger)
 {
 	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(dbHost,

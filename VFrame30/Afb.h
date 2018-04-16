@@ -142,8 +142,10 @@ namespace Afb
 		DER = 26,
 		MISMATCH = 27,
 		TCONV = 28,
+		INDICATION = 29,
+
 		First = LOGIC,
-		Last = TCONV,
+		Last = INDICATION,				// update on adding new AFBs !!!
 	};
 
 	//

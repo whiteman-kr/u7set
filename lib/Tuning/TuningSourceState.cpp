@@ -16,7 +16,7 @@ quint64 TuningSource::id() const
 
 QString TuningSource::equipmentId() const
 {
-	return info.equipmentid().c_str();
+	return info.lmequipmentid().c_str();
 }
 
 void TuningSource::setNewState(const ::Network::TuningSourceState& newState)

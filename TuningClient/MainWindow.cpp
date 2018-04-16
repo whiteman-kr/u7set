@@ -134,8 +134,8 @@ void MainWindow::createActions()
 	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);
 
 
-	m_pPresetEditorAction = new QAction(tr("Preset Editor..."), this);
-	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
+	m_pPresetEditorAction = new QAction(tr("Filter Editor..."), this);
+	m_pPresetEditorAction->setStatusTip(tr("Edit user filters"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
 	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);

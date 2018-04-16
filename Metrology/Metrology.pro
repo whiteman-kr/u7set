@@ -196,7 +196,8 @@ HEADERS  += \
     ../lib/CircularLogger.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../u7/Builder/CfgFiles.h
 #../lib/ExcelHelper.h
 
 FORMS    +=

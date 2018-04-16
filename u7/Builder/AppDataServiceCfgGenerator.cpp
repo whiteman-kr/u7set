@@ -1,29 +1,29 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/ProtobufHelper.h"
-#include "../lib/DataSource.h"
 #include "../lib/WUtils.h"
+#include "Builder.h"
 
 class DataSource;
 
 namespace Builder
 {
 	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(	DbController* db,
-															Hardware::SubsystemStorage *subsystems,
+															const Hardware::SubsystemStorage* subsystems,
 															Hardware::Software* software,
 															SignalSet* signalSet,
 															Hardware::EquipmentSet* equipment,
+															const QHash<QString, quint64>& lmUniqueIdMap,
 															BuildResultWriter* buildResultWriter) :
 		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
-		m_subsystems(subsystems)
+		m_lmUniqueIdMap(lmUniqueIdMap)
 	{
+		initSubsystemKeyMap(&m_subsystemKeyMap, subsystems);
 	}
-
 
 	AppDataServiceCfgGenerator::~AppDataServiceCfgGenerator()
 	{
 	}
-
 
 	bool AppDataServiceCfgGenerator::generateConfiguration()
 	{
@@ -44,7 +44,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
@@ -70,109 +69,67 @@ namespace Builder
 	{
 		bool result = true;
 
-		QByteArray data;
-		QXmlStreamWriter xmlWriter(&data);
-
-		XmlWriteHelper xml(xmlWriter);
-
-		xml.setAutoFormatting(true);
-		xml.writeStartDocument();
-		xml.writeStartElement("AppDataSources");
-
 		m_associatedAppSignals.clear();
+
+		QVector<DataSource> dataSources;
 
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
 			if (lm == nullptr)
 			{
 				LOG_INTERNAL_ERROR(m_log);
-				assert(false);
 				result = false;
 				continue;
 			}
 
-			for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+			int connectedAdaptersCount = 0;
+
+			for(int adapter = DataSource::LM_ETHERNET_ADAPTER2; adapter <= DataSource::LM_ETHERNET_ADAPTER3; adapter++)
 			{
-				LmEthernetAdapterNetworkProperties lmNetProperties;
+				DataSource ds;
 
-				int adapter = LM_ETHERNET_ADAPTER2;
+				result &= ds.getLmPropertiesFromDevice(lm, DataSource::DataType::App, adapter, m_subsystemKeyMap, m_lmUniqueIdMap, m_log);
 
-				if (channel == 1)
+				if (ds.lmDataEnable() == false || ds.serviceID() != m_software->equipmentIdTemplate())
 				{
-					adapter = LM_ETHERNET_ADAPTER3;
+					continue;
 				}
 
-				result &= lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, m_log);
-
-				int lmNumber = 0;
-				int lmChannel = 0;
-				QString lmSubsystem;
-				quint32 lmAppLANDataUID = 0;
-
-				result &= DeviceHelper::getIntProperty(lm, "LMNumber", &lmNumber, m_log);
-				result &= DeviceHelper::getIntProperty(lm, "SubsystemChannel", &lmChannel, m_log);
-				result &= DeviceHelper::getStrProperty(lm, "SubsystemID", &lmSubsystem, m_log);
-
-				int dataUID = 0;
-
-				result &= DeviceHelper::getIntProperty(lm, "AppLANDataUID", &dataUID, m_log);
-
-				lmAppLANDataUID = dataUID;
-
-				if (result == false)
+				if (connectedAdaptersCount > 0)
 				{
+					// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+					//
+					m_log->errCFG3030(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
+					result = false;
 					break;
 				}
 
-				if (lmNetProperties.appDataServiceID == m_software->equipmentIdTemplate())
-				{
-					int lmSubsystemID = 0;
+				connectedAdaptersCount++;
 
-					int subsystemsCount = m_subsystems->count();
+				result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
 
-					for(int i = 0; i < subsystemsCount; i++)
-					{
-						std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
-
-						if (subsystem->subsystemId() == lmSubsystem)
-						{
-							lmSubsystemID = subsystem->key();
-							break;
-						}
-					}
-
-					DataSource ds;
-
-					ds.setLmChannel(channel);
-					ds.setLmSubsystem(lmSubsystem);
-					ds.setLmSubsystemID(lmSubsystemID);
-					ds.setLmNumber(lmNumber);
-					ds.setLmDataType(DataSource::DataType::App);
-					ds.setLmEquipmentID(lm->equipmentIdTemplate());
-					ds.setLmModuleType(lm->moduleType());
-					ds.setLmCaption(lm->caption());
-					ds.setLmDataID(lmAppLANDataUID);
-					ds.setLmAdapterID(lmNetProperties.adapterID);
-					ds.setLmDataEnable(lmNetProperties.appDataEnable);
-					ds.setLmAddressStr(lmNetProperties.appDataIP);
-					ds.setLmPort(lmNetProperties.appDataPort);
-
-					result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
-
-					ds.writeToXml(xml);
-				}
-			}
-
-			if (result == false)
-			{
-				break;
+				dataSources.append(ds);
 			}
 		}
 
-		xml.writeEndElement();	// </AppDataSources>
-		xml.writeEndDocument();
+		if (result == false)
+		{
+			return false;
+		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppDataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", data);
+		//
+
+		QByteArray fileData;
+		result &= DataSourcesXML<DataSource>::writeToXml(dataSources, &fileData);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		//
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_APP_DATA_SOURCES_XML, CFG_FILE_ID_APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -197,19 +154,6 @@ namespace Builder
 		// Writing units
 		xml.writeStartElement("Units");
 		xml.writeIntAttribute("Count", 0);
-
-/*		int unitsCount = unitInfo.count();
-
-		for (int i = 0; i < unitsCount; i++)
-		{
-			xml.writeStartElement("Unit");
-
-			xml.writeIntAttribute("ID", unitInfo.keyAt(i));
-			xml.writeStringAttribute("Caption", unitInfo[i]);
-
-			xml.writeEndElement();
-		}*/
-
 		xml.writeEndElement();				// Units
 
 		QVector<Signal*> signalsToWrite;
@@ -227,53 +171,11 @@ namespace Builder
 
 			bool hasWrongField = false;
 
-/*			if (!dataFormatInfo.contains(signal.dataFormatInt()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}*/
-
-/*			if (!unitInfo.contains(signal.unitID()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (!unitInfo.contains(signal.inputUnitID()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (!unitInfo.contains(signal.outputUnitID()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (signal.inputSensorType() < 0 || signal.inputSensorType() >= SENSOR_TYPE_COUNT)
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			if (signal.outputSensorType() < 0 || signal.outputSensorType() >= SENSOR_TYPE_COUNT)
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}*/
-
 			if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
-
-/*			if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}*/
 
 			switch (static_cast<E::ByteOrder>(signal.byteOrderInt()))
 			{
@@ -316,8 +218,6 @@ namespace Builder
 			return false;
 		}
 
-		//m_cfgXml->addLinkToFile(buildFile);
-
 		return true;
 	}
 
@@ -353,7 +253,7 @@ namespace Builder
 		}
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -377,7 +277,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

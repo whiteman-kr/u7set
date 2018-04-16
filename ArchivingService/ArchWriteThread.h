@@ -17,7 +17,7 @@ class ArchWriteThreadWorker : public SimpleThreadWorker
 public:
 	ArchWriteThreadWorker(const HostAddressPort& dbHost,
 						  ArchiveShared archive,
-						  AppSignalStatesQueue& saveStatesQueue,
+						  Queue<SimpleAppSignalState>& saveStatesQueue,
 						  CircularLoggerShared logger);
 
 private:
@@ -58,7 +58,7 @@ private:
 	HostAddressPort m_dbHost;
 
 	ArchiveShared m_archive;
-	AppSignalStatesQueue& m_saveStatesQueue;
+	Queue<SimpleAppSignalState>& m_saveStatesQueue;
 	CircularLoggerShared m_logger;
 
 	static QString m_format1;
@@ -91,7 +91,7 @@ class ArchWriteThread : public SimpleThread
 public:
 	ArchWriteThread(const HostAddressPort& dbHost,
 					ArchiveShared archive,
-					AppSignalStatesQueue& saveStatesQueue,
+					Queue<SimpleAppSignalState>& saveStatesQueue,
 					CircularLoggerShared logger);
 };
 

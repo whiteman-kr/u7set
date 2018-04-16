@@ -115,7 +115,6 @@ public:
 	bool writeData(const char* data, quint32 dataSize);
 	bool writeData(const QByteArray& data);
 	bool writeData(google::protobuf::Message& protobufMessage);
-	bool writeStruct(const JsonSerializable& s);
 
 	void initRead()
 	{
@@ -123,7 +122,6 @@ public:
 	}
 
 	quint32 readDword();
-	bool readStruct(JsonSerializable* s);
 };
 
 

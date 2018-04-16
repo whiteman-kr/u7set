@@ -47,7 +47,12 @@ SOURCES += main.cpp\
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../lib/OutputLog.cpp \
+    ../u7/Builder/ModulesRawData.cpp \
+    ../lib/Times.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -70,7 +75,12 @@ HEADERS  += SourceListWidget.h \
     ../lib/WUtils.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/DeviceHelper.h \
+    ../lib/OutputLog.h \
+    ../u7/Builder/ModulesRawData.h \
+    ../lib/Times.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

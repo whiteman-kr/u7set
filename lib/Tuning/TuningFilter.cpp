@@ -154,19 +154,19 @@ TuningFilter::TuningFilter()
 	propMask->setCategory("Masks");
 
 	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
-	propBackColor->setCategory("Button/Tab Apperance");
+	propBackColor->setCategory("Button/Tab Appearance");
 
 	auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
-	propTextColor->setCategory("Button Apperance");
+	propTextColor->setCategory("Button Appearance");
 
 	auto propBackSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedBackColor", true, TuningFilter::backSelectedColor, TuningFilter::setBackSelectedColor);
-	propBackSelectedColor->setCategory("Button Apperance");
+	propBackSelectedColor->setCategory("Button Appearance");
 
 	auto propTextSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedTextColor", true, TuningFilter::textSelectedColor, TuningFilter::setTextSelectedColor);
-	propTextSelectedColor->setCategory("Button Apperance");
+	propTextSelectedColor->setCategory("Button Appearance");
 
 	auto propHasCounter = ADD_PROPERTY_GETTER_SETTER(bool, "HasDiscreteCounter", true, TuningFilter::hasDiscreteCounter, TuningFilter::setHasDiscreteCounter);
-	propHasCounter->setCategory("Apperance");
+	propHasCounter->setCategory("Appearance");
 
 }
 

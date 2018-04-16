@@ -3,7 +3,6 @@
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/CfgServerLoader.h"
-#include "../AppDataService/AppSignalStateEx.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceWorker.h"
@@ -75,7 +74,7 @@ namespace Tuning
 
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
-		bool readTuningDataSources(XmlReadHelper& xml);
+		bool readTuningDataSources(const QByteArray& fileData);
 
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();

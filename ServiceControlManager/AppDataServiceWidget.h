@@ -3,7 +3,7 @@
 
 #include <QAbstractTableModel>
 #include "../lib/OrderedHash.h"
-#include "../lib/AppDataSource.h"
+#include "../AppDataService/AppDataSource.h"
 #include "../lib/Tcp.h"
 #include "BaseServiceStateWidget.h"
 
@@ -12,6 +12,7 @@ class QTableView;
 class TcpAppDataClient;
 class SimpleThread;
 class QActionGroup;
+class AppDataSourceWidget;
 
 class DataSourcesStateModel : public QAbstractTableModel
 {
@@ -71,6 +72,10 @@ public:
 	AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent = 0);
 	~AppDataServiceWidget();
 
+signals:
+	void newTcpClientSocket(TcpAppDataClient* tcpClientSocket);
+	void clearTcpClientSocket();
+
 public slots:
 	void updateServiceState();
 
@@ -90,6 +95,10 @@ public slots:
 
 	void changeSourceColumnVisibility(QAction* action);
 
+	void onAppDataSourceDoubleClicked(const QModelIndex &index);
+
+	void forgetWidget();
+
 protected:
 	void createTcpConnection(quint32 ip, quint16 port) override;
 	void dropTcpConnection() override;
@@ -106,6 +115,8 @@ private:
 
 	TcpAppDataClient* m_tcpClientSocket;
 	SimpleThread *m_tcpClientThread;
+
+	QList<AppDataSourceWidget*> m_appDataSourceWidgetList;
 
 	void saveSourceColumnVisibility(int index, bool visible);
 

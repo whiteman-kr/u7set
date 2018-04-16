@@ -2,40 +2,72 @@
 #include <QtCore>
 #include <type_traits>
 #include <cassert>
+#include <atomic>
 
+class QueueIndex
+{
+private:
+	int m_index = 0;
+	int m_maxValue = 0;
+
+public:
+	QueueIndex(int maxValue) :
+		m_maxValue(maxValue) {}
+
+	int operator ++ (int)
+	{
+		m_index++;
+
+		if (m_index == m_maxValue)
+		{
+			m_index = 0;
+		}
+
+		return m_index;
+	}
+
+	int operator () () const { return m_index; }
+
+	void reset() { m_index = 0; }
+
+	void setMaxValue(int maxValue) { m_maxValue = maxValue; }
+};
 
 class QueueBase : public QObject
 {
 	Q_OBJECT
 
-	class QueueIndex
-	{
-	private:
-		int m_index = 0;
-		int m_maxValue = 0;
+public:
+	static const int MAX_QUEUE_MEMORY_SIZE = 50 * 1024 * 1024;			// 50 MBytes
 
-	public:
-		QueueIndex(int maxValue) :
-			m_maxValue(maxValue) {}
+public:
+	QueueBase(QObject* parent, int itemSize, int queueSize);
+	virtual ~QueueBase();
 
-		int operator ++ (int)
-		{
-			m_index++;
+	int size() const { return m_size; }
+	int maxSize() const { return m_maxSize; }
 
-			if (m_index == m_maxValue)
-			{
-				m_index = 0;
-			}
+	bool isEmpty() const { return m_size == 0; }
 
-			return m_index;
-		}
+	bool isNotEmpty() const { return m_size > 0; }
 
-		int operator () () const { return m_index; }
+	bool isFull() const { return m_size == m_queueSize; }
 
-		void reset() { m_index = 0; }
+	bool push(const char* item);
+	bool pop(char* item);
 
-		void setMaxValue(int maxValue) { m_maxValue = maxValue; }
-	};
+	void clear();
+
+	void lock() { m_mutex.lock(); }
+	void unlock() { m_mutex.unlock(); }
+
+	char* beginPush();
+	bool completePush();
+
+	char* beginPop();
+	bool completePop();
+
+	void resize(int newQueueSize);
 
 signals:
 	void queueNotEmpty();
@@ -50,34 +82,63 @@ protected:
 	int m_queueSize = 0;
 
 	int m_size = 0;								// current queue size
+	int m_maxSize = 0;
 
 	QueueIndex m_writeIndex;
 	QueueIndex m_readIndex;
 
-	int m_lostCount = 0;
+	int m_lostedCount = 0;
+};
+
+
+class LockFreeQueueBase
+{
+	//
+	// One Writer - One Reader using only!!!
+	//
+public:
+	static const int MAX_QUEUE_MEMORY_SIZE = 50 * 1024 * 1024;			// 50 MBytes
 
 public:
-	QueueBase(QObject* parent, int itemSize, int queueSize);
-	virtual ~QueueBase();
-
-	int size() { return m_size; }
-
-	bool isEmpty() { return m_size == 0; }
-
-	bool isNotEmpty() { return m_size > 0; }
+	LockFreeQueueBase(int itemSize, int queueSize);
 
 	bool push(const char* item);
 	bool pop(char* item);
 
-	void clear();
-
-	void lock() { m_mutex.lock(); }
-	void unlock() { m_mutex.unlock(); }
-
 	char* beginPush();
 	bool completePush();
 
-	void resize(int newQueueSize);
+	char* beginPop();
+	bool completePop();
+
+	void resize(int newQueueSize);					// not thread-safe operation!!!!
+
+	bool isEmpty() const { return m_size.load() == 0; }
+	bool isNotEmpty() const { return m_size.load() > 0; }
+	bool isFull() const { return m_size.load() == m_queueSize; }
+
+	int size() const { return m_size.load(); }
+	int maxSize() const { return m_maxSize.load(); }
+
+private:
+	char* m_buffer = nullptr;
+
+	int m_itemSize = 0;
+	int m_queueSize = 0;
+
+	// vars modified by Writer only
+
+	QueueIndex m_writeIndex;
+	std::atomic<int> m_maxSize = { 0 };								// can be read from another thread
+	int m_lostedCount = 0;
+
+	// var modified by Reader only
+
+	QueueIndex m_readIndex;
+
+	// var modified both by Writer and Reader
+
+	std::atomic<int> m_size = { 0 };								// current queue size
 };
 
 
@@ -100,6 +161,7 @@ public:
 	virtual bool pop(TYPE* ptr) { return QueueBase::pop(reinterpret_cast<char*>(ptr)); }
 
 	TYPE* beginPush() { return reinterpret_cast<TYPE*>(QueueBase::beginPush()); }
+	TYPE* beginPop() { return reinterpret_cast<TYPE*>(QueueBase::beginPop()); }
 };
 
 
@@ -232,6 +294,27 @@ bool QueueOnList<TYPE>::isEmpty()
 
 	return empty;
 }
+
+
+template <typename TYPE>
+class LockFreeQueue : public LockFreeQueueBase
+{
+public:
+	LockFreeQueue(int queueSize) :
+		LockFreeQueueBase(sizeof(TYPE), queueSize)
+	{
+		// checking, that memcpy can be used to copy queue items of type TYPE
+		//
+		assert(std::is_trivially_copyable<TYPE>::value == true);
+	}
+
+	virtual bool push(const TYPE* ptr) { return LockFreeQueueBase::push(reinterpret_cast<const char*>(ptr)); }
+	virtual bool pop(TYPE* ptr) { return LockFreeQueueBase::pop(reinterpret_cast<char*>(ptr)); }
+
+	TYPE* beginPush() { return reinterpret_cast<TYPE*>(LockFreeQueueBase::beginPush()); }
+	TYPE* beginPop() { return reinterpret_cast<TYPE*>(LockFreeQueueBase::beginPop()); }
+};
+
 
 
 

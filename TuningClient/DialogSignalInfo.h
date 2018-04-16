@@ -16,7 +16,7 @@ class DialogSignalInfo : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogSignalInfo(Hash appSignalHash, TuningSignalManager* signalManager, QWidget *parent = 0);
+	explicit DialogSignalInfo(Hash appSignalHash, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent = 0);
 	~DialogSignalInfo();
 
 private:
@@ -31,7 +31,11 @@ private:
 
 	Hash m_appSignalHash;
 
+	Hash m_instanceIdHash;
+
 	TuningSignalManager* m_signalManager = nullptr;
+
+	QString m_textEditText;
 };
 
 #endif // DIALOGSIGNALINFO_H

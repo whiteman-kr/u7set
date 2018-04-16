@@ -9,24 +9,9 @@ namespace Builder
 {
 	class TuningServiceCfgGenerator : public SoftwareCfgGenerator
 	{
-	private:
-		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
-		Hardware::SubsystemStorage* m_subsystems = nullptr;
-
-		HashedVector<QString, Hardware::DeviceModule*> m_tuningLMs;
-		QVector<Signal*> m_tuningSignals;
-
-		LmsUniqueIdMap m_lmsUniqueIdMap;
-
-		bool writeSettings();
-		bool writeTuningLMs();
-
-		bool writeBatFile();
-		bool writeShFile();
-
 	public:
-		TuningServiceCfgGenerator(	DbController* db,
-									Hardware::SubsystemStorage* subsystems,
+		TuningServiceCfgGenerator(DbController* db,
+									const Hardware::SubsystemStorage* subsystems,
 									Hardware::Software* software,
 									SignalSet* signalSet,
 									Hardware::EquipmentSet* equipment,
@@ -37,6 +22,20 @@ namespace Builder
 		~TuningServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
+
+	private:
+		const LmsUniqueIdMap m_lmsUniqueIdMap;
+		SubsystemKeyMap m_subsystemKeyMap;
+
+		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
+
+		QVector<Signal*> m_tuningSignals;
+
+		bool writeSettings();
+		bool writeTuningSources();
+
+		bool writeBatFile();
+		bool writeShFile();
 	};
 
 }
