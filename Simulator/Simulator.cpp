@@ -337,7 +337,7 @@ namespace Sim
 			return false;
 		}
 
-		QStringList sjFilter = {"*.js"};
+		QStringList sjFilter = {"*.js", "*.lua"};
 		QFileInfoList jsFiles = dir.entryInfoList(sjFilter, QDir::Files);
 
 		for (QFileInfo& fi : jsFiles)

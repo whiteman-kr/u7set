@@ -552,5 +552,18 @@ unix {
     LIBS += -lSimulator
 }
 
-STATECHARTS +=
+# LuaLib
+#
+DEPENDPATH += $$PWD/../Lua
+
+win32 {
+    LIBS += -L$$DESTDIR -lLua
+    INCLUDEPATH += ./../Lua
+}
+unix {
+    #LIBS += -lLua
+    LIBS += -L$$DESTDIR -lLua
+    INCLUDEPATH += ./../Lua
+}
+
 

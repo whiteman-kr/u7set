@@ -1,6 +1,7 @@
 #include "SimDeviceEmulator.h"
 #include <QQmlEngine>
 #include <QtEndian>
+#include "../LuaIntf/LuaIntf.h"
 
 namespace Sim
 {
@@ -20,8 +21,6 @@ namespace Sim
 		{
 			return *this;
 		}
-
-		this->setParent(that.parent());
 
 		m_command = that.m_command;
 
@@ -45,6 +44,16 @@ namespace Sim
 		m_dword1 = that.m_dword1;
 
 		return *this;
+	}
+
+	void DeviceCommand::registerLuaClass(lua_State* L)
+	{
+		using namespace LuaIntf;
+
+		LuaBinding(L).beginClass<DeviceCommand>("DeviceCommand")
+			.addVariable("caption", &DeviceCommand::LmCommand::caption)
+			.addVariable("code", &DeviceCommand::LmCommand::code)
+			.endClass();
 	}
 
 
@@ -206,12 +215,19 @@ namespace Sim
 	DeviceEmulator::DeviceEmulator() :
 		Output("DeviceEmulator")
 	{
+		m_luaState = luaL_newstate();
+		luaL_openlibs(m_luaState);
+
 		return;
 	}
 
 	DeviceEmulator::~DeviceEmulator()
 	{
 		Output("~DeviceEmulator");
+
+		lua_close(m_luaState);
+
+		return;
 	}
 
 	bool DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
@@ -232,26 +248,47 @@ namespace Sim
 		m_confEeprom = confEeprom;
 		m_appLogicEeprom = appLogicEeprom;
 
-		// Evaluate simulation script
+		// Lua luaL_dostring = (luaL_loadstring(L, str) || lua_pcall(L, 0, LUA_MULTRET, 0))
+		// Made separate call to get errors from pasing and run
 		//
-		m_evaluatedJs = m_jsEngine.evaluate(m_simulationScript);
-
-		if (m_evaluatedJs.isError() == true)
+		if (int luaResult = luaL_loadstring(m_luaState, m_simulationScript.toStdString().c_str());
+			luaResult != LUA_OK)
 		{
-			QString str = QString("Evaluate simulation script error:\n"
-								  "\tLine %1\n"
-								  "\tStack: %2\n"
-								  "\tMessage: %3")
-						  .arg(m_evaluatedJs.property("lineNumber").toInt())
-						  .arg(m_evaluatedJs.property("stack").toString())
-						  .arg(m_evaluatedJs.toString());
-
-			writeError(str);
+			QString errMsg = QString("Load Lua script error, error code: %1")
+								.arg(luaResult);
+			writeError(errMsg);
 			return false;
 		}
 
-		ScriptDeviceEmulator* scriptDevice =  new ScriptDeviceEmulator(this);
-		m_thisJsValue = m_jsEngine.newQObject(scriptDevice);
+		if (int luaResult = lua_pcall(m_luaState, 0, LUA_MULTRET, 0);
+			luaResult != LUA_OK)
+		{
+			QString errMsg = QString("Load Lua script error, fucntion lua_pcall, error code: %1")
+								.arg(luaResult);
+			writeError(errMsg);
+			return false;
+		}
+
+		// Evaluate simulation script
+		//
+//		m_evaluatedJs = m_jsEngine.evaluate(m_simulationScript);
+
+//		if (m_evaluatedJs.isError() == true)
+//		{
+//			QString str = QString("Evaluate simulation script error:\n"
+//								  "\tLine %1\n"
+//								  "\tStack: %2\n"
+//								  "\tMessage: %3")
+//						  .arg(m_evaluatedJs.property("lineNumber").toInt())
+//						  .arg(m_evaluatedJs.property("stack").toString())
+//						  .arg(m_evaluatedJs.toString());
+
+//			writeError(str);
+//			return false;
+//		}
+
+//		ScriptDeviceEmulator* scriptDevice =  new ScriptDeviceEmulator(this);
+//		m_thisJsValue = m_jsEngine.newQObject(scriptDevice);
 
 		// --
 		//
@@ -622,71 +659,188 @@ namespace Sim
 
 		deviceCommand.m_offset = programCounter;
 
+		// --
+		//
+		LuaIntf::LuaRef func(m_luaState, command.parseFunc.toStdString().c_str());
+		func(&deviceCommand);
+
+//		if (int luaResult = lua_getglobal(m_luaState, command.parseFunc.toStdString().c_str());
+//			luaResult != 6)
+//		{
+//			writeError(QString("lua_getglobal error, expected %1 to be function(6). Result %3")
+//						.arg(command.parseFunc)
+//						.arg(luaResult));
+//			return false;
+//		}
+
+		// Push DeviceEmulator
+		//
+
+		// Push Command
+		//
+		//using namespace LuaIntf;
+		//LuaTypeMapping<DeviceCommand>
+		//LuaIntf::Lua::push(m_luaState, deviceCommand);
+
+		//lua_pushlightuserdata(m_luaState, &deviceCommand);
+
+		// Run script
+		//
+//		if (int luaResult = lua_pcall(m_luaState, 1, LUA_MULTRET, 0);
+//			luaResult != LUA_OK)
+//		{
+//			dumpLuaError(luaResult, command.parseFunc);
+//			return false;
+//		}
+
+
 		// Set argument list
 		//
-		assert(m_thisJsValue.isNull() == false);
+		//		assert(m_thisJsValue.isNull() == false);
 
-		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
-		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
+		//		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
+		//		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
 
-		QJSValueList args;
-		args << m_thisJsValue;
-		args << jsDeviceCommand;
+		//		QJSValueList args;
+		//		args << m_thisJsValue;
+		//		args << jsDeviceCommand;
 
-		//--
-		//
-		const QString parseFunc = command.parseFunc;
+		//		//--
+		//		//
+		//		const QString parseFunc = command.parseFunc;
 
-		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
-			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
-		{
-			writeError(tr("Parse ApplicationLogicCode error, script function %1 (code %4, masked %5) not found or is not callable. "
-						  "HasProperty %1: %2, "
-						  "Collable: %3")
-							.arg(parseFunc)
-							.arg(m_jsEngine.globalObject().hasProperty(parseFunc))
-							.arg(m_jsEngine.globalObject().property(parseFunc).isCallable())
-							.arg(command.code)
-							.arg((command.code >> 6) & 0b11111)
-						);
-			return false;
-		}
+		//		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
+		//			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
+		//		{
+		//			writeError(tr("Parse ApplicationLogicCode error, script function %1 (code %4, masked %5) not found or is not callable. "
+		//						  "HasProperty %1: %2, "
+		//						  "Collable: %3")
+		//							.arg(parseFunc)
+		//							.arg(m_jsEngine.globalObject().hasProperty(parseFunc))
+		//							.arg(m_jsEngine.globalObject().property(parseFunc).isCallable())
+		//							.arg(command.code)
+		//							.arg((command.code >> 6) & 0b11111)
+		//						);
+		//			return false;
+		//		}
 
-		QJSValue jsResult = m_jsEngine.globalObject().property(parseFunc).call(args);
-		if (jsResult.isError() == true)
-		{
-			dumpJsError(jsResult);
-			return false;
-		}
+		//		QJSValue jsResult = m_jsEngine.globalObject().property(parseFunc).call(args);
+		//		if (jsResult.isError() == true)
+		//		{
+		//			dumpJsError(jsResult);
+		//			return false;
+		//		}
 
-		if (jsResult.toString().isEmpty() == false)
-		{
-			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter 0x%2")
-						.arg(jsResult.toString())
-						.arg(programCounter, 4, 16, QChar('0')));
-			return false;
-		}
+		//		if (jsResult.toString().isEmpty() == false)
+		//		{
+		//			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter 0x%2")
+		//						.arg(jsResult.toString())
+		//						.arg(programCounter, 4, 16, QChar('0')));
+		//			return false;
+		//		}
 
-		// Check SimulationFunc
-		//
-		const QString simulationFunc = command.simulationFunc;
+		//		// Check SimulationFunc
+		//		//
+		//		const QString simulationFunc = command.simulationFunc;
 
-		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false ||
-			m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
-		{
-			writeError(tr("Simulation command error, script function %1 not found or is not callable. "
-						  "HasProperty %1: %2, "
-						  "Collable: %3")
-							.arg(simulationFunc)
-							.arg(m_jsEngine.globalObject().hasProperty(simulationFunc))
-							.arg(m_jsEngine.globalObject().property(simulationFunc).isCallable())
-						);
-			return false;
-		}
+		//		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false ||
+		//			m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
+		//		{
+		//			writeError(tr("Simulation command error, script function %1 not found or is not callable. "
+		//						  "HasProperty %1: %2, "
+		//						  "Collable: %3")
+		//							.arg(simulationFunc)
+		//							.arg(m_jsEngine.globalObject().hasProperty(simulationFunc))
+		//							.arg(m_jsEngine.globalObject().property(simulationFunc).isCallable())
+		//						);
+		//			return false;
+		//		}
 
-		// Add command to offsetToCommand map
-		//
-		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
+		//		// Add command to offsetToCommand map
+		//		//
+		//		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
+
+
+//		quint16 commandWord = getWord(programCounter);
+//		quint16 commandCode = (commandWord & command.codeMask);
+//		if (commandCode != command.code)
+//		{
+//			assert(commandCode == command.code);
+//			return false;
+//		}
+
+//		// --
+//		//
+//		m_commands.emplace_back(command);
+//		DeviceCommand& deviceCommand = m_commands.back();
+
+//		deviceCommand.m_offset = programCounter;
+
+//		// Set argument list
+//		//
+//		assert(m_thisJsValue.isNull() == false);
+
+//		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
+//		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
+
+//		QJSValueList args;
+//		args << m_thisJsValue;
+//		args << jsDeviceCommand;
+
+//		//--
+//		//
+//		const QString parseFunc = command.parseFunc;
+
+//		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
+//			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
+//		{
+//			writeError(tr("Parse ApplicationLogicCode error, script function %1 (code %4, masked %5) not found or is not callable. "
+//						  "HasProperty %1: %2, "
+//						  "Collable: %3")
+//							.arg(parseFunc)
+//							.arg(m_jsEngine.globalObject().hasProperty(parseFunc))
+//							.arg(m_jsEngine.globalObject().property(parseFunc).isCallable())
+//							.arg(command.code)
+//							.arg((command.code >> 6) & 0b11111)
+//						);
+//			return false;
+//		}
+
+//		QJSValue jsResult = m_jsEngine.globalObject().property(parseFunc).call(args);
+//		if (jsResult.isError() == true)
+//		{
+//			dumpJsError(jsResult);
+//			return false;
+//		}
+
+//		if (jsResult.toString().isEmpty() == false)
+//		{
+//			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter 0x%2")
+//						.arg(jsResult.toString())
+//						.arg(programCounter, 4, 16, QChar('0')));
+//			return false;
+//		}
+
+//		// Check SimulationFunc
+//		//
+//		const QString simulationFunc = command.simulationFunc;
+
+//		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false ||
+//			m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
+//		{
+//			writeError(tr("Simulation command error, script function %1 not found or is not callable. "
+//						  "HasProperty %1: %2, "
+//						  "Collable: %3")
+//							.arg(simulationFunc)
+//							.arg(m_jsEngine.globalObject().hasProperty(simulationFunc))
+//							.arg(m_jsEngine.globalObject().property(simulationFunc).isCallable())
+//						);
+//			return false;
+//		}
+
+//		// Add command to offsetToCommand map
+//		//
+//		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
 
 		return true;
 	}
@@ -695,12 +849,32 @@ namespace Sim
 	{
 		if (value.isError() == true)
 		{
+
 			QString str = QString("Script running uncaught exception at line %1\n"
 								  "\tStack: %2\n"
 								  "\tMessage: %3\n")
 							.arg(value.property("lineNumber").toInt())
 							.arg(value.property("stack").toString())
 							.arg(value.toString());
+			writeError(str);
+		}
+
+		return;
+	}
+
+	void DeviceEmulator::dumpLuaError(int result, QString function)
+	{
+		if (result != LUA_OK)
+		{
+			QString str = QString("Lua script runtime error\n"
+								  "\tCode: %1\n"
+								  "\tFunction: %2\n"
+								  "\tMessage: %3\n\t")
+							.arg(result)
+							.arg(function)
+							.arg(lua_tostring(m_luaState, -1));
+			lua_pop(m_luaState, 1);
+
 			writeError(str);
 		}
 
@@ -1015,30 +1189,30 @@ namespace Sim
 		//
 		assert(m_thisJsValue.isNull() == false);
 
-		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
-		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
+//		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
+//		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
 
-		QJSValueList args;
-		args << m_thisJsValue;
-		args << jsDeviceCommand;
+//		QJSValueList args;
+//		args << m_thisJsValue;
+//		args << jsDeviceCommand;
 
-		// Run command script
-		//
-		QJSValue jsResult = m_jsEngine.globalObject().property(simulationFunc).call(args);
-		if (jsResult.isError() == true)
-		{
-			dumpJsError(jsResult);
-			return false;
-		}
+//		// Run command script
+//		//
+//		QJSValue jsResult = m_jsEngine.globalObject().property(simulationFunc).call(args);
+//		if (jsResult.isError() == true)
+//		{
+//			dumpJsError(jsResult);
+//			return false;
+//		}
 
-		if (jsResult.toString().isEmpty() == false)
-		{
-			writeError(tr("Simulation code error: %1, Offset %2h, command \"%3\"")
-						.arg(jsResult.toString())
-						.arg(deviceCommand.m_offset, 4, 16, QChar('0'))
-						.arg(deviceCommand.m_string));
-			return false;
-		}
+//		if (jsResult.toString().isEmpty() == false)
+//		{
+//			writeError(tr("Simulation code error: %1, Offset %2h, command \"%3\"")
+//						.arg(jsResult.toString())
+//						.arg(deviceCommand.m_offset, 4, 16, QChar('0'))
+//						.arg(deviceCommand.m_string));
+//			return false;
+//		}
 
 		return true;
 	}

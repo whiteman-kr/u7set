@@ -10,6 +10,7 @@ SUBDIRS += qtservice \
     Metrology \
     TrendView \
 	VFrame30 \
+    Lua \
     Simulator \
     SimulatorConsole \
     QScintilla \

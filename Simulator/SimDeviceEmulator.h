@@ -16,6 +16,13 @@
 #include "SimRam.h"
 #include "SimComponent.h"
 
+extern "C" {
+	#include "../Lua/lua.h"
+	#include "../Lua/lauxlib.h"
+	#include "../Lua/lualib.h"
+}
+
+
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   //WINDOWS
 		#define __FUNCTION_NAME__   __FUNCTION__
@@ -56,34 +63,36 @@ namespace Sim
 	};
 
 
-	class DeviceCommand : public QObject, public LmCommand
+	class DeviceCommand : public LmCommand
 	{
-		Q_OBJECT
+//		Q_OBJECT
 
-		Q_PROPERTY(QString Caption MEMBER (m_command.caption) CONSTANT)
+//		Q_PROPERTY(QString Caption MEMBER (m_command.caption) CONSTANT)
 
-		Q_PROPERTY(int Offset MEMBER m_offset)
-		Q_PROPERTY(int Size MEMBER m_size)
-		Q_PROPERTY(QString AsString MEMBER m_string)
+//		Q_PROPERTY(int Offset MEMBER m_offset)
+//		Q_PROPERTY(int Size MEMBER m_size)
+//		Q_PROPERTY(QString AsString MEMBER m_string)
 
-		Q_PROPERTY(quint16 AfbOpCode MEMBER m_afbOpCode)
-		Q_PROPERTY(quint16 AfbInstance MEMBER m_afbInstance)
-		Q_PROPERTY(quint16 AfbPinOpCode MEMBER m_afbPinOpCode)
+//		Q_PROPERTY(quint16 AfbOpCode MEMBER m_afbOpCode)
+//		Q_PROPERTY(quint16 AfbInstance MEMBER m_afbInstance)
+//		Q_PROPERTY(quint16 AfbPinOpCode MEMBER m_afbPinOpCode)
 
-		Q_PROPERTY(quint16 BitNo0 MEMBER m_bitNo0)
-		Q_PROPERTY(quint16 BitNo1 MEMBER m_bitNo1)
+//		Q_PROPERTY(quint16 BitNo0 MEMBER m_bitNo0)
+//		Q_PROPERTY(quint16 BitNo1 MEMBER m_bitNo1)
 
-		Q_PROPERTY(quint16 Word0 MEMBER m_word0)
-		Q_PROPERTY(quint16 Word1 MEMBER m_word1)
-		Q_PROPERTY(quint16 Word2 MEMBER m_word2)
+//		Q_PROPERTY(quint16 Word0 MEMBER m_word0)
+//		Q_PROPERTY(quint16 Word1 MEMBER m_word1)
+//		Q_PROPERTY(quint16 Word2 MEMBER m_word2)
 
-		Q_PROPERTY(quint32 Dword0 MEMBER m_dword0)
-		Q_PROPERTY(quint32 Dword1 MEMBER m_dword1)
+//		Q_PROPERTY(quint32 Dword0 MEMBER m_dword0)
+//		Q_PROPERTY(quint32 Dword1 MEMBER m_dword1)
 
 	public:
 		DeviceCommand(const LmCommand& command);
 		DeviceCommand(const DeviceCommand& that);
 		DeviceCommand& operator=(const DeviceCommand& that);
+
+		static void registerLuaClass(lua_State* L);
 
 	public:
 		// WARNING: Copy constructor is defined, do not forget to add there new members
@@ -188,6 +197,7 @@ namespace Sim
 		bool parseCommand(const LmCommand& command, int programCounter);
 
 		void dumpJsError(const QJSValue& value);
+		void dumpLuaError(int result, QString function);
 
 	public slots:
 		//void pause();
@@ -260,6 +270,10 @@ namespace Sim
 
 		QJSValue m_evaluatedJs;
 		QJSValue m_thisJsValue;
+
+		// Lua
+		//
+		lua_State* m_luaState = nullptr;
 
 		// Cached state
 		//
