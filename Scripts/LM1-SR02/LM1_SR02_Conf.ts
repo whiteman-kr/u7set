@@ -188,7 +188,8 @@ var UartID: number = 0;
 //var configScriptVersion: number = 32;		// Removed structure ModuleFirmwareCollection
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
 //var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
-var configScriptVersion: number = 35;		// Add Software type checking
+//var configScriptVersion: number = 35;		// Add Software type checking
+var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
 
 //
 
@@ -779,24 +780,16 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 						return false;
 					}
 
-					//
-
-					var serviceDataChannel: DeviceObject = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
-					if (serviceDataChannel == null) {
-						log.errCFG3004(serviceID + "_DATACH01", equipmentID);
-						return false;
-					}
-
 					var checkProperties: string[] = ["DataReceivingIP", "DataReceivingPort"];
 					for (var cp: number = 0; cp < checkProperties.length; cp++) {
-						if (serviceDataChannel.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
-							log.errCFG3000(servicesName[s] + checkProperties[cp], serviceDataChannel.jsPropertyString("EquipmentID"));
+						if (service.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
+							log.errCFG3000(servicesName[s] + checkProperties[cp], service.jsPropertyString("EquipmentID"));
 							return false;
 						}
 					}
 
-					serviceIP[s] = serviceDataChannel.jsPropertyIP(servicesName[s] + "DataReceivingIP");
-					servicePort[s] = serviceDataChannel.jsPropertyInt(servicesName[s] + "DataReceivingPort");
+					serviceIP[s] = service.jsPropertyIP(servicesName[s] + "DataReceivingIP");
+					servicePort[s] = service.jsPropertyInt(servicesName[s] + "DataReceivingPort");
 				}
 			}
 		}
