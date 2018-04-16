@@ -73,12 +73,7 @@ var UartID = 0;
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
 //var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
 //var configScriptVersion: number = 35;		// Add Software type checking
-<<<<<<< HEAD
-//var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
-var configScriptVersion = 37; // Add setDataFloat function
-=======
 var configScriptVersion = 36; // Changes in App/DiagDataService processing
->>>>>>> develop
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -135,16 +130,6 @@ function setData32(confFirmware, log, channel, equpmentID, frameIndex, offset, c
     }
     if (confFirmware.setData32(frameIndex, offset, data) == false) {
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData32");
-        return false;
-    }
-    return true;
-}
-function setDataFloat(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
-    if (channel != -1 && equpmentID.length > 0) {
-        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";" + data);
-    }
-    if (confFirmware.setDataFloat(frameIndex, offset, data) == false) {
-        log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setDataFloat");
         return false;
     }
     return true;

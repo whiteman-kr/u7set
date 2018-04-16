@@ -73,12 +73,8 @@ var UartID = 0;
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
 //var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
 //var configScriptVersion: number = 35;		// Add Software type checking
-<<<<<<< HEAD
 //var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
 var configScriptVersion = 37; // Add setDataFloat function
-=======
-var configScriptVersion = 36; // Changes in App/DiagDataService processing
->>>>>>> develop
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
