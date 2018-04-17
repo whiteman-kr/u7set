@@ -339,6 +339,9 @@ private:
 	bool createSpecProps();
 	bool updateSpecProps();
 
+	bool parseSpecPropValues(::Proto::PropertyValues* propValues);
+	QVariant getSpecPropertyValue(const QString& propName);
+
 private:
 	// Signal identificators
 	//

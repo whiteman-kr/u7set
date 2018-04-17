@@ -96,7 +96,8 @@ class Software;
 class ModuleConfiguration;
 class ModuleConfigurationValue;
 class Property;
-class PropertyValues;
+class TypedPropertyValue;
+class TypedPropertyValues;
 class Address16;
 class Unit;
 class UnitSet;
@@ -191,6 +192,32 @@ inline bool FblDataFormat_Parse(
     const ::std::string& name, FblDataFormat* value) {
   return ::google::protobuf::internal::ParseNamedEnum<FblDataFormat>(
     FblDataFormat_descriptor(), name, value);
+}
+enum TypedPropertyValueType {
+  _Invalid = 0,
+  _Int32 = 1,
+  _UInt32 = 2,
+  _Int64 = 3,
+  _UInt64 = 4,
+  _Double = 5,
+  _Bool = 6,
+  _String = 7,
+  _Enum = 8
+};
+bool TypedPropertyValueType_IsValid(int value);
+const TypedPropertyValueType TypedPropertyValueType_MIN = _Invalid;
+const TypedPropertyValueType TypedPropertyValueType_MAX = _Enum;
+const int TypedPropertyValueType_ARRAYSIZE = TypedPropertyValueType_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* TypedPropertyValueType_descriptor();
+inline const ::std::string& TypedPropertyValueType_Name(TypedPropertyValueType value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    TypedPropertyValueType_descriptor(), value);
+}
+inline bool TypedPropertyValueType_Parse(
+    const ::std::string& name, TypedPropertyValueType* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<TypedPropertyValueType>(
+    TypedPropertyValueType_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -8281,14 +8308,14 @@ class Property : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class PropertyValues : public ::google::protobuf::Message {
+class TypedPropertyValue : public ::google::protobuf::Message {
  public:
-  PropertyValues();
-  virtual ~PropertyValues();
+  TypedPropertyValue();
+  virtual ~TypedPropertyValue();
 
-  PropertyValues(const PropertyValues& from);
+  TypedPropertyValue(const TypedPropertyValue& from);
 
-  inline PropertyValues& operator=(const PropertyValues& from) {
+  inline TypedPropertyValue& operator=(const TypedPropertyValue& from) {
     CopyFrom(from);
     return *this;
   }
@@ -8302,17 +8329,17 @@ class PropertyValues : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const PropertyValues& default_instance();
+  static const TypedPropertyValue& default_instance();
 
-  void Swap(PropertyValues* other);
+  void Swap(TypedPropertyValue* other);
 
   // implements Message ----------------------------------------------
 
-  PropertyValues* New() const;
+  TypedPropertyValue* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const PropertyValues& from);
-  void MergeFrom(const PropertyValues& from);
+  void CopyFrom(const TypedPropertyValue& from);
+  void MergeFrom(const TypedPropertyValue& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -8335,24 +8362,226 @@ class PropertyValues : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.Property propertyValue = 1;
-  inline int propertyvalue_size() const;
-  inline void clear_propertyvalue();
-  static const int kPropertyValueFieldNumber = 1;
-  inline const ::Proto::Property& propertyvalue(int index) const;
-  inline ::Proto::Property* mutable_propertyvalue(int index);
-  inline ::Proto::Property* add_propertyvalue();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Property >&
-      propertyvalue() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::Property >*
-      mutable_propertyvalue();
+  // required string name = 1;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 1;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
 
-  // @@protoc_insertion_point(class_scope:Proto.PropertyValues)
+  // required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 2;
+  inline ::Proto::TypedPropertyValueType type() const;
+  inline void set_type(::Proto::TypedPropertyValueType value);
+
+  // optional int32 valueInt32 = 11;
+  inline bool has_valueint32() const;
+  inline void clear_valueint32();
+  static const int kValueInt32FieldNumber = 11;
+  inline ::google::protobuf::int32 valueint32() const;
+  inline void set_valueint32(::google::protobuf::int32 value);
+
+  // optional uint32 valueUInt32 = 12;
+  inline bool has_valueuint32() const;
+  inline void clear_valueuint32();
+  static const int kValueUInt32FieldNumber = 12;
+  inline ::google::protobuf::uint32 valueuint32() const;
+  inline void set_valueuint32(::google::protobuf::uint32 value);
+
+  // optional int64 valueInt64 = 13;
+  inline bool has_valueint64() const;
+  inline void clear_valueint64();
+  static const int kValueInt64FieldNumber = 13;
+  inline ::google::protobuf::int64 valueint64() const;
+  inline void set_valueint64(::google::protobuf::int64 value);
+
+  // optional uint64 valueUInt64 = 14;
+  inline bool has_valueuint64() const;
+  inline void clear_valueuint64();
+  static const int kValueUInt64FieldNumber = 14;
+  inline ::google::protobuf::uint64 valueuint64() const;
+  inline void set_valueuint64(::google::protobuf::uint64 value);
+
+  // optional double valueDouble = 15;
+  inline bool has_valuedouble() const;
+  inline void clear_valuedouble();
+  static const int kValueDoubleFieldNumber = 15;
+  inline double valuedouble() const;
+  inline void set_valuedouble(double value);
+
+  // optional bool valueBool = 16;
+  inline bool has_valuebool() const;
+  inline void clear_valuebool();
+  static const int kValueBoolFieldNumber = 16;
+  inline bool valuebool() const;
+  inline void set_valuebool(bool value);
+
+  // optional string valueString = 17;
+  inline bool has_valuestring() const;
+  inline void clear_valuestring();
+  static const int kValueStringFieldNumber = 17;
+  inline const ::std::string& valuestring() const;
+  inline void set_valuestring(const ::std::string& value);
+  inline void set_valuestring(const char* value);
+  inline void set_valuestring(const char* value, size_t size);
+  inline ::std::string* mutable_valuestring();
+  inline ::std::string* release_valuestring();
+  inline void set_allocated_valuestring(::std::string* valuestring);
+
+  // optional string enumName = 18;
+  inline bool has_enumname() const;
+  inline void clear_enumname();
+  static const int kEnumNameFieldNumber = 18;
+  inline const ::std::string& enumname() const;
+  inline void set_enumname(const ::std::string& value);
+  inline void set_enumname(const char* value);
+  inline void set_enumname(const char* value, size_t size);
+  inline ::std::string* mutable_enumname();
+  inline ::std::string* release_enumname();
+  inline void set_allocated_enumname(::std::string* enumname);
+
+  // optional string enumValue = 19;
+  inline bool has_enumvalue() const;
+  inline void clear_enumvalue();
+  static const int kEnumValueFieldNumber = 19;
+  inline const ::std::string& enumvalue() const;
+  inline void set_enumvalue(const ::std::string& value);
+  inline void set_enumvalue(const char* value);
+  inline void set_enumvalue(const char* value, size_t size);
+  inline ::std::string* mutable_enumvalue();
+  inline ::std::string* release_enumvalue();
+  inline void set_allocated_enumvalue(::std::string* enumvalue);
+
+  // @@protoc_insertion_point(class_scope:Proto.TypedPropertyValue)
+ private:
+  inline void set_has_name();
+  inline void clear_has_name();
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_valueint32();
+  inline void clear_has_valueint32();
+  inline void set_has_valueuint32();
+  inline void clear_has_valueuint32();
+  inline void set_has_valueint64();
+  inline void clear_has_valueint64();
+  inline void set_has_valueuint64();
+  inline void clear_has_valueuint64();
+  inline void set_has_valuedouble();
+  inline void clear_has_valuedouble();
+  inline void set_has_valuebool();
+  inline void clear_has_valuebool();
+  inline void set_has_valuestring();
+  inline void clear_has_valuestring();
+  inline void set_has_enumname();
+  inline void clear_has_enumname();
+  inline void set_has_enumvalue();
+  inline void clear_has_enumvalue();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* name_;
+  int type_;
+  ::google::protobuf::int32 valueint32_;
+  ::google::protobuf::int64 valueint64_;
+  ::google::protobuf::uint64 valueuint64_;
+  ::google::protobuf::uint32 valueuint32_;
+  bool valuebool_;
+  double valuedouble_;
+  ::std::string* valuestring_;
+  ::std::string* enumname_;
+  ::std::string* enumvalue_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static TypedPropertyValue* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class TypedPropertyValues : public ::google::protobuf::Message {
+ public:
+  TypedPropertyValues();
+  virtual ~TypedPropertyValues();
+
+  TypedPropertyValues(const TypedPropertyValues& from);
+
+  inline TypedPropertyValues& operator=(const TypedPropertyValues& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TypedPropertyValues& default_instance();
+
+  void Swap(TypedPropertyValues* other);
+
+  // implements Message ----------------------------------------------
+
+  TypedPropertyValues* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TypedPropertyValues& from);
+  void MergeFrom(const TypedPropertyValues& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.TypedPropertyValue value = 1;
+  inline int value_size() const;
+  inline void clear_value();
+  static const int kValueFieldNumber = 1;
+  inline const ::Proto::TypedPropertyValue& value(int index) const;
+  inline ::Proto::TypedPropertyValue* mutable_value(int index);
+  inline ::Proto::TypedPropertyValue* add_value();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >&
+      value() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >*
+      mutable_value();
+
+  // @@protoc_insertion_point(class_scope:Proto.TypedPropertyValues)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::Property > propertyvalue_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue > value_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -8362,7 +8591,7 @@ class PropertyValues : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static PropertyValues* default_instance_;
+  static TypedPropertyValues* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -22064,31 +22293,470 @@ inline void Property::set_allocated_value(::std::string* value) {
 
 // -------------------------------------------------------------------
 
-// PropertyValues
+// TypedPropertyValue
 
-// repeated .Proto.Property propertyValue = 1;
-inline int PropertyValues::propertyvalue_size() const {
-  return propertyvalue_.size();
+// required string name = 1;
+inline bool TypedPropertyValue::has_name() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void PropertyValues::clear_propertyvalue() {
-  propertyvalue_.Clear();
+inline void TypedPropertyValue::set_has_name() {
+  _has_bits_[0] |= 0x00000001u;
 }
-inline const ::Proto::Property& PropertyValues::propertyvalue(int index) const {
-  return propertyvalue_.Get(index);
+inline void TypedPropertyValue::clear_has_name() {
+  _has_bits_[0] &= ~0x00000001u;
 }
-inline ::Proto::Property* PropertyValues::mutable_propertyvalue(int index) {
-  return propertyvalue_.Mutable(index);
+inline void TypedPropertyValue::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
 }
-inline ::Proto::Property* PropertyValues::add_propertyvalue() {
-  return propertyvalue_.Add();
+inline const ::std::string& TypedPropertyValue::name() const {
+  return *name_;
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::Property >&
-PropertyValues::propertyvalue() const {
-  return propertyvalue_;
+inline void TypedPropertyValue::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::Property >*
-PropertyValues::mutable_propertyvalue() {
-  return &propertyvalue_;
+inline void TypedPropertyValue::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void TypedPropertyValue::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TypedPropertyValue::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* TypedPropertyValue::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TypedPropertyValue::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
+inline bool TypedPropertyValue::has_type() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TypedPropertyValue::set_has_type() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TypedPropertyValue::clear_has_type() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TypedPropertyValue::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::Proto::TypedPropertyValueType TypedPropertyValue::type() const {
+  return static_cast< ::Proto::TypedPropertyValueType >(type_);
+}
+inline void TypedPropertyValue::set_type(::Proto::TypedPropertyValueType value) {
+  assert(::Proto::TypedPropertyValueType_IsValid(value));
+  set_has_type();
+  type_ = value;
+}
+
+// optional int32 valueInt32 = 11;
+inline bool TypedPropertyValue::has_valueint32() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TypedPropertyValue::set_has_valueint32() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TypedPropertyValue::clear_has_valueint32() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TypedPropertyValue::clear_valueint32() {
+  valueint32_ = 0;
+  clear_has_valueint32();
+}
+inline ::google::protobuf::int32 TypedPropertyValue::valueint32() const {
+  return valueint32_;
+}
+inline void TypedPropertyValue::set_valueint32(::google::protobuf::int32 value) {
+  set_has_valueint32();
+  valueint32_ = value;
+}
+
+// optional uint32 valueUInt32 = 12;
+inline bool TypedPropertyValue::has_valueuint32() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void TypedPropertyValue::set_has_valueuint32() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void TypedPropertyValue::clear_has_valueuint32() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void TypedPropertyValue::clear_valueuint32() {
+  valueuint32_ = 0u;
+  clear_has_valueuint32();
+}
+inline ::google::protobuf::uint32 TypedPropertyValue::valueuint32() const {
+  return valueuint32_;
+}
+inline void TypedPropertyValue::set_valueuint32(::google::protobuf::uint32 value) {
+  set_has_valueuint32();
+  valueuint32_ = value;
+}
+
+// optional int64 valueInt64 = 13;
+inline bool TypedPropertyValue::has_valueint64() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void TypedPropertyValue::set_has_valueint64() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void TypedPropertyValue::clear_has_valueint64() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void TypedPropertyValue::clear_valueint64() {
+  valueint64_ = GOOGLE_LONGLONG(0);
+  clear_has_valueint64();
+}
+inline ::google::protobuf::int64 TypedPropertyValue::valueint64() const {
+  return valueint64_;
+}
+inline void TypedPropertyValue::set_valueint64(::google::protobuf::int64 value) {
+  set_has_valueint64();
+  valueint64_ = value;
+}
+
+// optional uint64 valueUInt64 = 14;
+inline bool TypedPropertyValue::has_valueuint64() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void TypedPropertyValue::set_has_valueuint64() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void TypedPropertyValue::clear_has_valueuint64() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void TypedPropertyValue::clear_valueuint64() {
+  valueuint64_ = GOOGLE_ULONGLONG(0);
+  clear_has_valueuint64();
+}
+inline ::google::protobuf::uint64 TypedPropertyValue::valueuint64() const {
+  return valueuint64_;
+}
+inline void TypedPropertyValue::set_valueuint64(::google::protobuf::uint64 value) {
+  set_has_valueuint64();
+  valueuint64_ = value;
+}
+
+// optional double valueDouble = 15;
+inline bool TypedPropertyValue::has_valuedouble() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void TypedPropertyValue::set_has_valuedouble() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void TypedPropertyValue::clear_has_valuedouble() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void TypedPropertyValue::clear_valuedouble() {
+  valuedouble_ = 0;
+  clear_has_valuedouble();
+}
+inline double TypedPropertyValue::valuedouble() const {
+  return valuedouble_;
+}
+inline void TypedPropertyValue::set_valuedouble(double value) {
+  set_has_valuedouble();
+  valuedouble_ = value;
+}
+
+// optional bool valueBool = 16;
+inline bool TypedPropertyValue::has_valuebool() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void TypedPropertyValue::set_has_valuebool() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void TypedPropertyValue::clear_has_valuebool() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void TypedPropertyValue::clear_valuebool() {
+  valuebool_ = false;
+  clear_has_valuebool();
+}
+inline bool TypedPropertyValue::valuebool() const {
+  return valuebool_;
+}
+inline void TypedPropertyValue::set_valuebool(bool value) {
+  set_has_valuebool();
+  valuebool_ = value;
+}
+
+// optional string valueString = 17;
+inline bool TypedPropertyValue::has_valuestring() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void TypedPropertyValue::set_has_valuestring() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void TypedPropertyValue::clear_has_valuestring() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void TypedPropertyValue::clear_valuestring() {
+  if (valuestring_ != &::google::protobuf::internal::kEmptyString) {
+    valuestring_->clear();
+  }
+  clear_has_valuestring();
+}
+inline const ::std::string& TypedPropertyValue::valuestring() const {
+  return *valuestring_;
+}
+inline void TypedPropertyValue::set_valuestring(const ::std::string& value) {
+  set_has_valuestring();
+  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
+    valuestring_ = new ::std::string;
+  }
+  valuestring_->assign(value);
+}
+inline void TypedPropertyValue::set_valuestring(const char* value) {
+  set_has_valuestring();
+  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
+    valuestring_ = new ::std::string;
+  }
+  valuestring_->assign(value);
+}
+inline void TypedPropertyValue::set_valuestring(const char* value, size_t size) {
+  set_has_valuestring();
+  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
+    valuestring_ = new ::std::string;
+  }
+  valuestring_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TypedPropertyValue::mutable_valuestring() {
+  set_has_valuestring();
+  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
+    valuestring_ = new ::std::string;
+  }
+  return valuestring_;
+}
+inline ::std::string* TypedPropertyValue::release_valuestring() {
+  clear_has_valuestring();
+  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = valuestring_;
+    valuestring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TypedPropertyValue::set_allocated_valuestring(::std::string* valuestring) {
+  if (valuestring_ != &::google::protobuf::internal::kEmptyString) {
+    delete valuestring_;
+  }
+  if (valuestring) {
+    set_has_valuestring();
+    valuestring_ = valuestring;
+  } else {
+    clear_has_valuestring();
+    valuestring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string enumName = 18;
+inline bool TypedPropertyValue::has_enumname() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void TypedPropertyValue::set_has_enumname() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void TypedPropertyValue::clear_has_enumname() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void TypedPropertyValue::clear_enumname() {
+  if (enumname_ != &::google::protobuf::internal::kEmptyString) {
+    enumname_->clear();
+  }
+  clear_has_enumname();
+}
+inline const ::std::string& TypedPropertyValue::enumname() const {
+  return *enumname_;
+}
+inline void TypedPropertyValue::set_enumname(const ::std::string& value) {
+  set_has_enumname();
+  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
+    enumname_ = new ::std::string;
+  }
+  enumname_->assign(value);
+}
+inline void TypedPropertyValue::set_enumname(const char* value) {
+  set_has_enumname();
+  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
+    enumname_ = new ::std::string;
+  }
+  enumname_->assign(value);
+}
+inline void TypedPropertyValue::set_enumname(const char* value, size_t size) {
+  set_has_enumname();
+  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
+    enumname_ = new ::std::string;
+  }
+  enumname_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TypedPropertyValue::mutable_enumname() {
+  set_has_enumname();
+  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
+    enumname_ = new ::std::string;
+  }
+  return enumname_;
+}
+inline ::std::string* TypedPropertyValue::release_enumname() {
+  clear_has_enumname();
+  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = enumname_;
+    enumname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TypedPropertyValue::set_allocated_enumname(::std::string* enumname) {
+  if (enumname_ != &::google::protobuf::internal::kEmptyString) {
+    delete enumname_;
+  }
+  if (enumname) {
+    set_has_enumname();
+    enumname_ = enumname;
+  } else {
+    clear_has_enumname();
+    enumname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string enumValue = 19;
+inline bool TypedPropertyValue::has_enumvalue() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void TypedPropertyValue::set_has_enumvalue() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void TypedPropertyValue::clear_has_enumvalue() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void TypedPropertyValue::clear_enumvalue() {
+  if (enumvalue_ != &::google::protobuf::internal::kEmptyString) {
+    enumvalue_->clear();
+  }
+  clear_has_enumvalue();
+}
+inline const ::std::string& TypedPropertyValue::enumvalue() const {
+  return *enumvalue_;
+}
+inline void TypedPropertyValue::set_enumvalue(const ::std::string& value) {
+  set_has_enumvalue();
+  if (enumvalue_ == &::google::protobuf::internal::kEmptyString) {
+    enumvalue_ = new ::std::string;
+  }
+  enumvalue_->assign(value);
+}
+inline void TypedPropertyValue::set_enumvalue(const char* value) {
+  set_has_enumvalue();
+  if (enumvalue_ == &::google::protobuf::internal::kEmptyString) {
+    enumvalue_ = new ::std::string;
+  }
+  enumvalue_->assign(value);
+}
+inline void TypedPropertyValue::set_enumvalue(const char* value, size_t size) {
+  set_has_enumvalue();
+  if (enumvalue_ == &::google::protobuf::internal::kEmptyString) {
+    enumvalue_ = new ::std::string;
+  }
+  enumvalue_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TypedPropertyValue::mutable_enumvalue() {
+  set_has_enumvalue();
+  if (enumvalue_ == &::google::protobuf::internal::kEmptyString) {
+    enumvalue_ = new ::std::string;
+  }
+  return enumvalue_;
+}
+inline ::std::string* TypedPropertyValue::release_enumvalue() {
+  clear_has_enumvalue();
+  if (enumvalue_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = enumvalue_;
+    enumvalue_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TypedPropertyValue::set_allocated_enumvalue(::std::string* enumvalue) {
+  if (enumvalue_ != &::google::protobuf::internal::kEmptyString) {
+    delete enumvalue_;
+  }
+  if (enumvalue) {
+    set_has_enumvalue();
+    enumvalue_ = enumvalue;
+  } else {
+    clear_has_enumvalue();
+    enumvalue_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// TypedPropertyValues
+
+// repeated .Proto.TypedPropertyValue value = 1;
+inline int TypedPropertyValues::value_size() const {
+  return value_.size();
+}
+inline void TypedPropertyValues::clear_value() {
+  value_.Clear();
+}
+inline const ::Proto::TypedPropertyValue& TypedPropertyValues::value(int index) const {
+  return value_.Get(index);
+}
+inline ::Proto::TypedPropertyValue* TypedPropertyValues::mutable_value(int index) {
+  return value_.Mutable(index);
+}
+inline ::Proto::TypedPropertyValue* TypedPropertyValues::add_value() {
+  return value_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >&
+TypedPropertyValues::value() const {
+  return value_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >*
+TypedPropertyValues::mutable_value() {
+  return &value_;
 }
 
 // -------------------------------------------------------------------
@@ -26475,6 +27143,10 @@ inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblSignalType>() {
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblDataFormat>() {
   return ::Proto::FblDataFormat_descriptor();
+}
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Proto::TypedPropertyValueType>() {
+  return ::Proto::TypedPropertyValueType_descriptor();
 }
 
 }  // namespace google

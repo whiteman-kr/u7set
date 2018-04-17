@@ -278,7 +278,7 @@ private:
 
 //
 //
-//			Class PropertyValueThin
+//			Class PropertyTypedValue
 //
 //
 template <typename TYPE,
@@ -398,18 +398,18 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) override final			// Overriden from class Propery
+	virtual void setEnumValue(int value) override final			// Overriden from class Property
 	{
 		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
-	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Property
 	{
 		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
 
 private:
 	template <typename ENUM>
-	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
+	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Property
 	{
 		static_assert(set);
 		static_assert(std::is_enum<TYPE>::value);
@@ -424,7 +424,7 @@ private:
 	}
 
 	template <typename ENUM>
-	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
+	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Property
 	{
 		assert(std::is_enum<TYPE>::value == true);
 
@@ -773,7 +773,7 @@ private:
 
 //
 //
-//			Class PropertyValue
+//			Class PropertyValueNoGetterSetter
 //
 //
 class PropertyValueNoGetterSetter : public Property

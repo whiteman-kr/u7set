@@ -1,6 +1,7 @@
 #include "QUuid"
 
 #include "../lib/ProtoSerialization.h"
+#include "WUtils.h"
 #include "PropertyObject.h"
 
 #ifdef Q_OS_WIN
@@ -263,6 +264,75 @@ namespace Proto
 
 		return ok;
 	}
+
+	bool savePropertyValue(const QString& name, const QVariant& value, ::Proto::PropertyValue* propertyValue)
+	{
+		TEST_PTR_RETURN_FALSE(propertyValue);
+
+		propertyValue->Clear();
+
+		propertyValue->set_name(name.toStdString());
+
+		switch(value.type())
+		{
+		case QVariant::Invalid:
+			assert(false);
+			propertyValue->set_type(::Proto::PropertyValueType::_Invalid);
+			return true;
+
+		case QVariant::Int:
+			propertyValue->set_type(::Proto::PropertyValueType::_Int32);
+			propertyValue->set_valueint32(value.toInt());
+			return true;
+
+		case QVariant::UInt:
+			propertyValue->set_type(::Proto::PropertyValueType::_UInt32);
+			propertyValue->set_valueuint32(value.toUInt());
+			return true;
+
+		case QVariant::LongLong:
+			propertyValue->set_type(::Proto::PropertyValueType::_Int64);
+			propertyValue->set_valueint64(value.toLongLong());
+			return true;
+
+		case QVariant::ULongLong:
+			propertyValue->set_type(::Proto::PropertyValueType::_UInt64);
+			propertyValue->set_valueuint64(value.toULongLong());
+			return true;
+
+		case QVariant::Double:
+			propertyValue->set_type(::Proto::PropertyValueType::_Double);
+			propertyValue->set_valuedouble(value.toDouble());
+			return true;
+
+		case QVariant::Bool:
+			propertyValue->set_type(::Proto::PropertyValueType::_Bool);
+			propertyValue->set_valuebool(value.toBool());
+			return true;
+
+		case QVariant::String:
+			propertyValue->set_type(::Proto::PropertyValueType::_String);
+			propertyValue->set_valuestring(value.toString().toStdString());
+			return true;
+
+		default:
+			assert(false);
+		}
+
+		return false;
+	}
+
+	bool loadPropertyValue(const ::Proto::PropertyValue& propertyValue, const QString* name, QVariant* value)
+	{
+		TEST_PTR_RETURN_FALSE(name);
+		TEST_PTR_RETURN_FALSE(value);
+
+		name = propertyValue.name();
+
+		return false;
+	}
+
+
 }
 
 

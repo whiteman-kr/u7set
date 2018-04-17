@@ -26,7 +26,9 @@ SUBDIRS += qtservice \
 
 HEADERS += \
     lib/CommonTypes.h \
-    lib/Times.h
+    lib/Times.h \
+    lib/TypedPropertyValue.h
 
 SOURCES += \
-    lib/Times.cpp
+    lib/Times.cpp \
+    lib/TypedPropertyValue.cpp

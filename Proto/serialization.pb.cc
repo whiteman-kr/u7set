@@ -217,9 +217,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* Property_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Property_reflection_ = NULL;
-const ::google::protobuf::Descriptor* PropertyValues_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* TypedPropertyValue_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  PropertyValues_reflection_ = NULL;
+  TypedPropertyValue_reflection_ = NULL;
+const ::google::protobuf::Descriptor* TypedPropertyValues_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  TypedPropertyValues_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Address16_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Address16_reflection_ = NULL;
@@ -272,6 +275,7 @@ const ::google::protobuf::EnumDescriptor* SchemaUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblDataFormat_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* TypedPropertyValueType_descriptor_ = NULL;
 
 }  // namespace
 
@@ -1463,22 +1467,47 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Property));
-  PropertyValues_descriptor_ = file->message_type(62);
-  static const int PropertyValues_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PropertyValues, propertyvalue_),
+  TypedPropertyValue_descriptor_ = file->message_type(62);
+  static const int TypedPropertyValue_offsets_[11] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, valueint32_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, valueuint32_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, valueint64_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, valueuint64_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, valuedouble_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, valuebool_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, valuestring_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, enumname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, enumvalue_),
   };
-  PropertyValues_reflection_ =
+  TypedPropertyValue_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      PropertyValues_descriptor_,
-      PropertyValues::default_instance_,
-      PropertyValues_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PropertyValues, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PropertyValues, _unknown_fields_),
+      TypedPropertyValue_descriptor_,
+      TypedPropertyValue::default_instance_,
+      TypedPropertyValue_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValue, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(PropertyValues));
-  Address16_descriptor_ = file->message_type(63);
+      sizeof(TypedPropertyValue));
+  TypedPropertyValues_descriptor_ = file->message_type(63);
+  static const int TypedPropertyValues_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValues, value_),
+  };
+  TypedPropertyValues_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      TypedPropertyValues_descriptor_,
+      TypedPropertyValues::default_instance_,
+      TypedPropertyValues_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValues, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TypedPropertyValues, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(TypedPropertyValues));
+  Address16_descriptor_ = file->message_type(64);
   static const int Address16_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, offset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, bit_),
@@ -1494,7 +1523,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Address16));
-  Unit_descriptor_ = file->message_type(64);
+  Unit_descriptor_ = file->message_type(65);
   static const int Unit_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, caption_),
@@ -1510,7 +1539,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Unit));
-  UnitSet_descriptor_ = file->message_type(65);
+  UnitSet_descriptor_ = file->message_type(66);
   static const int UnitSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UnitSet, unit_),
   };
@@ -1525,7 +1554,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(UnitSet));
-  TuningValue_descriptor_ = file->message_type(66);
+  TuningValue_descriptor_ = file->message_type(67);
   static const int TuningValue_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningValue, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningValue, intvalue_),
@@ -1542,7 +1571,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningValue));
-  AppSignalDbField_descriptor_ = file->message_type(67);
+  AppSignalDbField_descriptor_ = file->message_type(68);
   static const int AppSignalDbField_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalDbField, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalDbField, signalgroupid_),
@@ -1566,7 +1595,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalDbField));
-  AppSignalCalculatedParam_descriptor_ = file->message_type(68);
+  AppSignalCalculatedParam_descriptor_ = file->message_type(69);
   static const int AppSignalCalculatedParam_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, iobufaddr_),
@@ -1587,7 +1616,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalCalculatedParam));
-  AppSignal_descriptor_ = file->message_type(69);
+  AppSignal_descriptor_ = file->message_type(70);
   static const int AppSignal_offsets_[37] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, appsignalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, customappsignalid_),
@@ -1638,7 +1667,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignal));
-  AppSignalSet_descriptor_ = file->message_type(70);
+  AppSignalSet_descriptor_ = file->message_type(71);
   static const int AppSignalSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalSet, appsignal_),
   };
@@ -1653,7 +1682,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalSet));
-  AppSignalState_descriptor_ = file->message_type(71);
+  AppSignalState_descriptor_ = file->message_type(72);
   static const int AppSignalState_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, value_),
@@ -1674,7 +1703,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalState));
-  Connection_descriptor_ = file->message_type(72);
+  Connection_descriptor_ = file->message_type(73);
   static const int Connection_offsets_[25] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
@@ -1713,7 +1742,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Connection));
-  SchemaDetailsSet_descriptor_ = file->message_type(73);
+  SchemaDetailsSet_descriptor_ = file->message_type(74);
   static const int SchemaDetailsSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetailsSet, schemasdetails_),
   };
@@ -1728,7 +1757,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetailsSet));
-  SchemaDetails_descriptor_ = file->message_type(74);
+  SchemaDetails_descriptor_ = file->message_type(75);
   static const int SchemaDetails_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, version_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, schemaid_),
@@ -1752,7 +1781,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetails));
-  ArchSignal_descriptor_ = file->message_type(75);
+  ArchSignal_descriptor_ = file->message_type(76);
   static const int ArchSignal_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, isanalog_),
@@ -1769,7 +1798,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignal));
-  ArchSignals_descriptor_ = file->message_type(76);
+  ArchSignals_descriptor_ = file->message_type(77);
   static const int ArchSignals_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignals, archsignals_),
   };
@@ -1784,7 +1813,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignals));
-  BusSignal_descriptor_ = file->message_type(77);
+  BusSignal_descriptor_ = file->message_type(78);
   static const int BusSignal_offsets_[19] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, signalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, caption_),
@@ -1817,7 +1846,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BusSignal));
-  Bus_descriptor_ = file->message_type(78);
+  Bus_descriptor_ = file->message_type(79);
   static const int Bus_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, bustypeid_),
@@ -1840,6 +1869,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
   FblDataFormat_descriptor_ = file->enum_type(3);
+  TypedPropertyValueType_descriptor_ = file->enum_type(4);
 }
 
 namespace {
@@ -1977,7 +2007,9 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Property_descriptor_, &Property::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    PropertyValues_descriptor_, &PropertyValues::default_instance());
+    TypedPropertyValue_descriptor_, &TypedPropertyValue::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    TypedPropertyValues_descriptor_, &TypedPropertyValues::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Address16_descriptor_, &Address16::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -2141,8 +2173,10 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete ModuleConfigurationValue_reflection_;
   delete Property::default_instance_;
   delete Property_reflection_;
-  delete PropertyValues::default_instance_;
-  delete PropertyValues_reflection_;
+  delete TypedPropertyValue::default_instance_;
+  delete TypedPropertyValue_reflection_;
+  delete TypedPropertyValues::default_instance_;
+  delete TypedPropertyValues_reflection_;
   delete Address16::default_instance_;
   delete Address16_reflection_;
   delete Unit::default_instance_;
@@ -2431,109 +2465,119 @@ void protobuf_AddDesc_serialization_2eproto() {
     "figurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030Modul"
     "eConfigurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005val"
     "ue\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005va"
-    "lue\030\002 \002(\t\"8\n\016PropertyValues\022&\n\rpropertyV"
-    "alue\030\001 \003(\0132\017.Proto.Property\"0\n\tAddress16"
-    "\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"&\n"
-    "\004Unit\022\r\n\002id\030\001 \002(\005:\0010\022\017\n\007caption\030\002 \002(\t\"$\n"
-    "\007UnitSet\022\031\n\004unit\030\001 \003(\0132\013.Proto.Unit\"H\n\013T"
-    "uningValue\022\014\n\004type\030\001 \001(\005\022\023\n\010intValue\030\002 \001"
-    "(\003:\0010\022\026\n\013doubleValue\030\003 \001(\001:\0010\"\206\002\n\020AppSig"
-    "nalDbField\022\016\n\002ID\030\001 \001(\005:\002-1\022\031\n\rsignalGrou"
-    "pID\030\002 \001(\005:\002-1\022\034\n\020signalInstanceID\030\003 \001(\005:"
-    "\002-1\022\027\n\013changesetID\030\004 \001(\005:\002-1\022\031\n\ncheckedO"
-    "ut\030\005 \001(\010:\005false\022\022\n\006userID\030\006 \001(\005:\002-1\022\022\n\007c"
-    "reated\030\007 \001(\003:\0010\022\026\n\007deleted\030\010 \001(\010:\005false\022"
-    "\032\n\017instanceCreated\030\t \001(\003:\0010\022\031\n\016instanceA"
-    "ction\030\n \001(\005:\0010\"\222\002\n\030AppSignalCalculatedPa"
-    "ram\022\017\n\004hash\030\001 \001(\004:\0010\022#\n\tioBufAddr\030\002 \001(\0132"
-    "\020.Proto.Address16\022$\n\ntuningAddr\030\003 \001(\0132\020."
-    "Proto.Address16\022!\n\007ualAddr\030\004 \001(\0132\020.Proto"
-    ".Address16\022$\n\nregBufAddr\030\005 \001(\0132\020.Proto.A"
-    "ddress16\022&\n\014regValueAddr\030\006 \001(\0132\020.Proto.A"
-    "ddress16\022)\n\017regValidityAddr\030\007 \001(\0132\020.Prot"
-    "o.Address16\"\207\010\n\tAppSignal\022\023\n\013appSignalID"
-    "\030\001 \001(\t\022\031\n\021customAppSignalID\030\002 \001(\t\022\017\n\007cap"
-    "tion\030\003 \001(\t\022\023\n\013equipmentID\030\004 \001(\t\022\021\n\tbusTy"
-    "peID\030\005 \001(\t\022\022\n\007channel\030\006 \001(\005:\0010\022\025\n\nsignal"
-    "Type\030\020 \001(\005:\0011\022\024\n\tinOutType\030\021 \001(\005:\0012\022\023\n\010d"
-    "ataSize\030\025 \001(\005:\0010\022\024\n\tbyteOrder\030\026 \001(\005:\0011\022\035"
-    "\n\022analogSignalFormat\030\032 \001(\005:\0011\022\014\n\004unit\030\033 "
-    "\001(\t\022\021\n\006lowADC\030\034 \001(\005:\0010\022\022\n\007highADC\030\035 \001(\005:"
-    "\0010\022\036\n\023lowEngeneeringUnits\030\036 \001(\001:\0010\022\037\n\024hi"
-    "ghEngeneeringUnits\030\037 \001(\001:\0010\022\030\n\rlowValidR"
-    "ange\030  \001(\001:\0010\022\031\n\016highValidRange\030! \001(\001:\0010"
-    "\022\030\n\rfilteringTime\030\" \001(\001:\0010\022\032\n\017spreadTole"
-    "rance\030# \001(\001:\0010\022\033\n\020electricLowLimit\0303 \001(\001"
-    ":\0010\022\034\n\021electricHighLimit\0304 \001(\001:\0010\022\027\n\014ele"
-    "ctricUnit\0305 \001(\005:\0011\022\025\n\nsensorType\0306 \001(\005:\001"
-    "0\022\025\n\noutputMode\0307 \001(\005:\0010\022\033\n\014enableTuning"
-    "\030G \001(\010:\005false\022.\n\022tuningDefaultValue\030H \001("
-    "\0132\022.Proto.TuningValue\022*\n\016tuningLowBound\030"
-    "I \001(\0132\022.Proto.TuningValue\022+\n\017tuningHighB"
-    "ound\030J \001(\0132\022.Proto.TuningValue\022\026\n\007acquir"
-    "e\030Q \001(\010:\005false\022\026\n\007archive\030R \001(\010:\005false\022\030"
-    "\n\rdecimalPlaces\030S \001(\005:\0012\022\031\n\016coarseApertu"
-    "re\030T \001(\001:\0011\022\031\n\014fineAperture\030U \001(\001:\0030.5\022\037"
-    "\n\020adaptiveAperture\030V \001(\010:\005false\022(\n\007dbFie"
-    "ld\030x \001(\0132\027.Proto.AppSignalDbField\0222\n\tcal"
-    "cParam\030y \001(\0132\037.Proto.AppSignalCalculated"
-    "Param\"3\n\014AppSignalSet\022#\n\tappSignal\030\001 \003(\013"
-    "2\020.Proto.AppSignal\"\237\001\n\016AppSignalState\022\017\n"
-    "\004hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flag"
-    "s\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\020:\0010\022\024\n\tloc"
-    "alTime\030\005 \001(\020:\0010\022\024\n\tplantTime\030\006 \001(\020:\0010\022\025\n"
-    "\tarchiveId\030\007 \001(\020:\002-1\"\224\006\n\nConnection\022\026\n\014C"
-    "onnectionID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030"
-    "\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027P"
-    "ort1RawDataDescription\030\005 \001(\t:\000\022!\n\027Port2R"
-    "awDataDescription\030\006 \001(\t:\000\022\035\n\016ManualSetti"
-    "ngs\030\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:"
-    "\005false\022\036\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036"
-    "\n\023Port1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port1T"
-    "xWordsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxWord"
-    "sQuantity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddr"
-    "ess\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001"
-    "(\005:\003479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:\0034"
-    "79\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1En"
-    "ableSerial\030\025 \001(\010:\005false\022\032\n\017Port1SerialMo"
-    "de\030\026 \001(\005:\0010\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005"
-    "false\022 \n\021Port2EnableSerial\030\030 \001(\010:\005false\022"
-    "\032\n\017Port2SerialMode\030\031 \001(\005:\0010\022 \n\021Port2Enab"
-    "leDuplex\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027"
-    "\n\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSeria"
-    "lMode\030\007 \001(\005:\0010\022#\n\024ObsoleteEnableDuplex\030\n"
-    " \001(\010:\005false\"@\n\020SchemaDetailsSet\022,\n\016schem"
-    "asDetails\030\002 \003(\0132\024.Proto.SchemaDetails\"\342\001"
-    "\n\rSchemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010sche"
-    "maId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedf"
-    "romBuild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021l"
-    "mDescriptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003("
-    "\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032"
-    "\n\005guids\030\027 \003(\0132\013.Proto.Uuid\"A\n\nArchSignal"
-    "\022\014\n\004hash\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appS"
-    "ignalID\030\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSign"
-    "als\030\001 \003(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSign"
-    "al\022\020\n\010signalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n"
-    "\004type\030\003 \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogForm"
-    "at\030\n \001(\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarse"
-    "Aperture\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:"
-    "\0030.5\022\037\n\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n"
-    "\tbusTypeId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n"
-    "\022inbusDiscreteBitNo\030( \001(\005\022\027\n\017inbusAnalog"
-    "Size\0302 \001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n"
-    "\024inbusAnalogByteOrder\0304 \001(\005\022\031\n\021busAnalog"
-    "LowLimit\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001"
-    "(\001\022\033\n\023inbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbus"
-    "AnalogHighLimit\0308 \001(\001\"\226\001\n\003Bus\022\031\n\004uuid\030\001 "
-    "\001(\0132\013.Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nb"
-    "usSignals\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023aut"
-    "oSignalPlacement\030\n \001(\010:\004true\022\030\n\rmanualBu"
-    "sSize\030\013 \001(\005:\0010*3\n\nSchemaUnit\022\013\n\007Display\020"
-    "\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connectio"
-    "nDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFb"
-    "lSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n"
-    "\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSigne"
-    "dInt\020\001\022\t\n\005Float\020\002", 13977);
+    "lue\030\002 \002(\t\"\215\002\n\022TypedPropertyValue\022\014\n\004name"
+    "\030\001 \002(\t\0225\n\004type\030\002 \002(\0162\035.Proto.TypedProper"
+    "tyValueType:\010_Invalid\022\022\n\nvalueInt32\030\013 \001("
+    "\005\022\023\n\013valueUInt32\030\014 \001(\r\022\022\n\nvalueInt64\030\r \001"
+    "(\003\022\023\n\013valueUInt64\030\016 \001(\004\022\023\n\013valueDouble\030\017"
+    " \001(\001\022\021\n\tvalueBool\030\020 \001(\010\022\023\n\013valueString\030\021"
+    " \001(\t\022\020\n\010enumName\030\022 \001(\t\022\021\n\tenumValue\030\023 \001("
+    "\t\"\?\n\023TypedPropertyValues\022(\n\005value\030\001 \003(\0132"
+    "\031.Proto.TypedPropertyValue\"0\n\tAddress16\022"
+    "\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"&\n\004"
+    "Unit\022\r\n\002id\030\001 \002(\005:\0010\022\017\n\007caption\030\002 \002(\t\"$\n\007"
+    "UnitSet\022\031\n\004unit\030\001 \003(\0132\013.Proto.Unit\"H\n\013Tu"
+    "ningValue\022\014\n\004type\030\001 \001(\005\022\023\n\010intValue\030\002 \001("
+    "\003:\0010\022\026\n\013doubleValue\030\003 \001(\001:\0010\"\206\002\n\020AppSign"
+    "alDbField\022\016\n\002ID\030\001 \001(\005:\002-1\022\031\n\rsignalGroup"
+    "ID\030\002 \001(\005:\002-1\022\034\n\020signalInstanceID\030\003 \001(\005:\002"
+    "-1\022\027\n\013changesetID\030\004 \001(\005:\002-1\022\031\n\ncheckedOu"
+    "t\030\005 \001(\010:\005false\022\022\n\006userID\030\006 \001(\005:\002-1\022\022\n\007cr"
+    "eated\030\007 \001(\003:\0010\022\026\n\007deleted\030\010 \001(\010:\005false\022\032"
+    "\n\017instanceCreated\030\t \001(\003:\0010\022\031\n\016instanceAc"
+    "tion\030\n \001(\005:\0010\"\222\002\n\030AppSignalCalculatedPar"
+    "am\022\017\n\004hash\030\001 \001(\004:\0010\022#\n\tioBufAddr\030\002 \001(\0132\020"
+    ".Proto.Address16\022$\n\ntuningAddr\030\003 \001(\0132\020.P"
+    "roto.Address16\022!\n\007ualAddr\030\004 \001(\0132\020.Proto."
+    "Address16\022$\n\nregBufAddr\030\005 \001(\0132\020.Proto.Ad"
+    "dress16\022&\n\014regValueAddr\030\006 \001(\0132\020.Proto.Ad"
+    "dress16\022)\n\017regValidityAddr\030\007 \001(\0132\020.Proto"
+    ".Address16\"\207\010\n\tAppSignal\022\023\n\013appSignalID\030"
+    "\001 \001(\t\022\031\n\021customAppSignalID\030\002 \001(\t\022\017\n\007capt"
+    "ion\030\003 \001(\t\022\023\n\013equipmentID\030\004 \001(\t\022\021\n\tbusTyp"
+    "eID\030\005 \001(\t\022\022\n\007channel\030\006 \001(\005:\0010\022\025\n\nsignalT"
+    "ype\030\020 \001(\005:\0011\022\024\n\tinOutType\030\021 \001(\005:\0012\022\023\n\010da"
+    "taSize\030\025 \001(\005:\0010\022\024\n\tbyteOrder\030\026 \001(\005:\0011\022\035\n"
+    "\022analogSignalFormat\030\032 \001(\005:\0011\022\014\n\004unit\030\033 \001"
+    "(\t\022\021\n\006lowADC\030\034 \001(\005:\0010\022\022\n\007highADC\030\035 \001(\005:\001"
+    "0\022\036\n\023lowEngeneeringUnits\030\036 \001(\001:\0010\022\037\n\024hig"
+    "hEngeneeringUnits\030\037 \001(\001:\0010\022\030\n\rlowValidRa"
+    "nge\030  \001(\001:\0010\022\031\n\016highValidRange\030! \001(\001:\0010\022"
+    "\030\n\rfilteringTime\030\" \001(\001:\0010\022\032\n\017spreadToler"
+    "ance\030# \001(\001:\0010\022\033\n\020electricLowLimit\0303 \001(\001:"
+    "\0010\022\034\n\021electricHighLimit\0304 \001(\001:\0010\022\027\n\014elec"
+    "tricUnit\0305 \001(\005:\0011\022\025\n\nsensorType\0306 \001(\005:\0010"
+    "\022\025\n\noutputMode\0307 \001(\005:\0010\022\033\n\014enableTuning\030"
+    "G \001(\010:\005false\022.\n\022tuningDefaultValue\030H \001(\013"
+    "2\022.Proto.TuningValue\022*\n\016tuningLowBound\030I"
+    " \001(\0132\022.Proto.TuningValue\022+\n\017tuningHighBo"
+    "und\030J \001(\0132\022.Proto.TuningValue\022\026\n\007acquire"
+    "\030Q \001(\010:\005false\022\026\n\007archive\030R \001(\010:\005false\022\030\n"
+    "\rdecimalPlaces\030S \001(\005:\0012\022\031\n\016coarseApertur"
+    "e\030T \001(\001:\0011\022\031\n\014fineAperture\030U \001(\001:\0030.5\022\037\n"
+    "\020adaptiveAperture\030V \001(\010:\005false\022(\n\007dbFiel"
+    "d\030x \001(\0132\027.Proto.AppSignalDbField\0222\n\tcalc"
+    "Param\030y \001(\0132\037.Proto.AppSignalCalculatedP"
+    "aram\"3\n\014AppSignalSet\022#\n\tappSignal\030\001 \003(\0132"
+    "\020.Proto.AppSignal\"\237\001\n\016AppSignalState\022\017\n\004"
+    "hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags"
+    "\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\020:\0010\022\024\n\tloca"
+    "lTime\030\005 \001(\020:\0010\022\024\n\tplantTime\030\006 \001(\020:\0010\022\025\n\t"
+    "archiveId\030\007 \001(\020:\002-1\"\224\006\n\nConnection\022\026\n\014Co"
+    "nnectionID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003"
+    " \001(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Po"
+    "rt1RawDataDescription\030\005 \001(\t:\000\022!\n\027Port2Ra"
+    "wDataDescription\030\006 \001(\t:\000\022\035\n\016ManualSettin"
+    "gs\030\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005"
+    "false\022\036\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036\n"
+    "\023Port1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port1Tx"
+    "WordsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxWords"
+    "Quantity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddre"
+    "ss\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001("
+    "\005:\003479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:\00347"
+    "9\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1Ena"
+    "bleSerial\030\025 \001(\010:\005false\022\032\n\017Port1SerialMod"
+    "e\030\026 \001(\005:\0010\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005f"
+    "alse\022 \n\021Port2EnableSerial\030\030 \001(\010:\005false\022\032"
+    "\n\017Port2SerialMode\030\031 \001(\005:\0010\022 \n\021Port2Enabl"
+    "eDuplex\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n"
+    "\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerial"
+    "Mode\030\007 \001(\005:\0010\022#\n\024ObsoleteEnableDuplex\030\n "
+    "\001(\010:\005false\"@\n\020SchemaDetailsSet\022,\n\016schema"
+    "sDetails\030\002 \003(\0132\024.Proto.SchemaDetails\"\342\001\n"
+    "\rSchemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schem"
+    "aId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfr"
+    "omBuild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lm"
+    "DescriptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t"
+    "\022\016\n\006labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n"
+    "\005guids\030\027 \003(\0132\013.Proto.Uuid\"A\n\nArchSignal\022"
+    "\014\n\004hash\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSi"
+    "gnalID\030\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSigna"
+    "ls\030\001 \003(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSigna"
+    "l\022\020\n\010signalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004"
+    "type\030\003 \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogForma"
+    "t\030\n \001(\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseA"
+    "perture\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\003"
+    "0.5\022\037\n\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n\t"
+    "busTypeId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022"
+    "inbusDiscreteBitNo\030( \001(\005\022\027\n\017inbusAnalogS"
+    "ize\0302 \001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024"
+    "inbusAnalogByteOrder\0304 \001(\005\022\031\n\021busAnalogL"
+    "owLimit\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001("
+    "\001\022\033\n\023inbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbusA"
+    "nalogHighLimit\0308 \001(\001\"\226\001\n\003Bus\022\031\n\004uuid\030\001 \001"
+    "(\0132\013.Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbu"
+    "sSignals\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023auto"
+    "SignalPlacement\030\n \001(\010:\004true\022\030\n\rmanualBus"
+    "Size\030\013 \001(\005:\0010*3\n\nSchemaUnit\022\013\n\007Display\020\000"
+    "\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connection"
+    "Dirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFbl"
+    "SignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\r"
+    "FblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSigned"
+    "Int\020\001\022\t\n\005Float\020\002*\210\001\n\026TypedPropertyValueT"
+    "ype\022\014\n\010_Invalid\020\000\022\n\n\006_Int32\020\001\022\013\n\007_UInt32"
+    "\020\002\022\n\n\006_Int64\020\003\022\013\n\007_UInt64\020\004\022\013\n\007_Double\020\005"
+    "\022\t\n\005_Bool\020\006\022\013\n\007_String\020\007\022\t\n\005_Enum\020\010", 14395);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -2602,7 +2646,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   ModuleConfiguration::default_instance_ = new ModuleConfiguration();
   ModuleConfigurationValue::default_instance_ = new ModuleConfigurationValue();
   Property::default_instance_ = new Property();
-  PropertyValues::default_instance_ = new PropertyValues();
+  TypedPropertyValue::default_instance_ = new TypedPropertyValue();
+  TypedPropertyValues::default_instance_ = new TypedPropertyValues();
   Address16::default_instance_ = new Address16();
   Unit::default_instance_ = new Unit();
   UnitSet::default_instance_ = new UnitSet();
@@ -2681,7 +2726,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   ModuleConfiguration::default_instance_->InitAsDefaultInstance();
   ModuleConfigurationValue::default_instance_->InitAsDefaultInstance();
   Property::default_instance_->InitAsDefaultInstance();
-  PropertyValues::default_instance_->InitAsDefaultInstance();
+  TypedPropertyValue::default_instance_->InitAsDefaultInstance();
+  TypedPropertyValues::default_instance_->InitAsDefaultInstance();
   Address16::default_instance_->InitAsDefaultInstance();
   Unit::default_instance_->InitAsDefaultInstance();
   UnitSet::default_instance_->InitAsDefaultInstance();
@@ -2759,6 +2805,27 @@ bool FblDataFormat_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::google::protobuf::EnumDescriptor* TypedPropertyValueType_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return TypedPropertyValueType_descriptor_;
+}
+bool TypedPropertyValueType_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
       return true;
     default:
       return false;
@@ -27143,81 +27210,313 @@ void Property::Swap(Property* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int PropertyValues::kPropertyValueFieldNumber;
+const int TypedPropertyValue::kNameFieldNumber;
+const int TypedPropertyValue::kTypeFieldNumber;
+const int TypedPropertyValue::kValueInt32FieldNumber;
+const int TypedPropertyValue::kValueUInt32FieldNumber;
+const int TypedPropertyValue::kValueInt64FieldNumber;
+const int TypedPropertyValue::kValueUInt64FieldNumber;
+const int TypedPropertyValue::kValueDoubleFieldNumber;
+const int TypedPropertyValue::kValueBoolFieldNumber;
+const int TypedPropertyValue::kValueStringFieldNumber;
+const int TypedPropertyValue::kEnumNameFieldNumber;
+const int TypedPropertyValue::kEnumValueFieldNumber;
 #endif  // !_MSC_VER
 
-PropertyValues::PropertyValues()
+TypedPropertyValue::TypedPropertyValue()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void PropertyValues::InitAsDefaultInstance() {
+void TypedPropertyValue::InitAsDefaultInstance() {
 }
 
-PropertyValues::PropertyValues(const PropertyValues& from)
+TypedPropertyValue::TypedPropertyValue(const TypedPropertyValue& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void PropertyValues::SharedCtor() {
+void TypedPropertyValue::SharedCtor() {
   _cached_size_ = 0;
+  name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  type_ = 0;
+  valueint32_ = 0;
+  valueuint32_ = 0u;
+  valueint64_ = GOOGLE_LONGLONG(0);
+  valueuint64_ = GOOGLE_ULONGLONG(0);
+  valuedouble_ = 0;
+  valuebool_ = false;
+  valuestring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  enumname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  enumvalue_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-PropertyValues::~PropertyValues() {
+TypedPropertyValue::~TypedPropertyValue() {
   SharedDtor();
 }
 
-void PropertyValues::SharedDtor() {
+void TypedPropertyValue::SharedDtor() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (valuestring_ != &::google::protobuf::internal::kEmptyString) {
+    delete valuestring_;
+  }
+  if (enumname_ != &::google::protobuf::internal::kEmptyString) {
+    delete enumname_;
+  }
+  if (enumvalue_ != &::google::protobuf::internal::kEmptyString) {
+    delete enumvalue_;
+  }
   if (this != default_instance_) {
   }
 }
 
-void PropertyValues::SetCachedSize(int size) const {
+void TypedPropertyValue::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* PropertyValues::descriptor() {
+const ::google::protobuf::Descriptor* TypedPropertyValue::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return PropertyValues_descriptor_;
+  return TypedPropertyValue_descriptor_;
 }
 
-const PropertyValues& PropertyValues::default_instance() {
+const TypedPropertyValue& TypedPropertyValue::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
   return *default_instance_;
 }
 
-PropertyValues* PropertyValues::default_instance_ = NULL;
+TypedPropertyValue* TypedPropertyValue::default_instance_ = NULL;
 
-PropertyValues* PropertyValues::New() const {
-  return new PropertyValues;
+TypedPropertyValue* TypedPropertyValue::New() const {
+  return new TypedPropertyValue;
 }
 
-void PropertyValues::Clear() {
-  propertyvalue_.Clear();
+void TypedPropertyValue::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_name()) {
+      if (name_ != &::google::protobuf::internal::kEmptyString) {
+        name_->clear();
+      }
+    }
+    type_ = 0;
+    valueint32_ = 0;
+    valueuint32_ = 0u;
+    valueint64_ = GOOGLE_LONGLONG(0);
+    valueuint64_ = GOOGLE_ULONGLONG(0);
+    valuedouble_ = 0;
+    valuebool_ = false;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (has_valuestring()) {
+      if (valuestring_ != &::google::protobuf::internal::kEmptyString) {
+        valuestring_->clear();
+      }
+    }
+    if (has_enumname()) {
+      if (enumname_ != &::google::protobuf::internal::kEmptyString) {
+        enumname_->clear();
+      }
+    }
+    if (has_enumvalue()) {
+      if (enumvalue_ != &::google::protobuf::internal::kEmptyString) {
+        enumvalue_->clear();
+      }
+    }
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
-bool PropertyValues::MergePartialFromCodedStream(
+bool TypedPropertyValue::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.Property propertyValue = 1;
+      // required string name = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_propertyValue:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_propertyvalue()));
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_name()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->name().data(), this->name().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_propertyValue;
+        if (input->ExpectTag(16)) goto parse_type;
+        break;
+      }
+
+      // required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_type:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::Proto::TypedPropertyValueType_IsValid(value)) {
+            set_type(static_cast< ::Proto::TypedPropertyValueType >(value));
+          } else {
+            mutable_unknown_fields()->AddVarint(2, value);
+          }
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(88)) goto parse_valueInt32;
+        break;
+      }
+
+      // optional int32 valueInt32 = 11;
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_valueInt32:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &valueint32_)));
+          set_has_valueint32();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(96)) goto parse_valueUInt32;
+        break;
+      }
+
+      // optional uint32 valueUInt32 = 12;
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_valueUInt32:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &valueuint32_)));
+          set_has_valueuint32();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(104)) goto parse_valueInt64;
+        break;
+      }
+
+      // optional int64 valueInt64 = 13;
+      case 13: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_valueInt64:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &valueint64_)));
+          set_has_valueint64();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(112)) goto parse_valueUInt64;
+        break;
+      }
+
+      // optional uint64 valueUInt64 = 14;
+      case 14: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_valueUInt64:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &valueuint64_)));
+          set_has_valueuint64();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(121)) goto parse_valueDouble;
+        break;
+      }
+
+      // optional double valueDouble = 15;
+      case 15: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_valueDouble:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &valuedouble_)));
+          set_has_valuedouble();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(128)) goto parse_valueBool;
+        break;
+      }
+
+      // optional bool valueBool = 16;
+      case 16: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_valueBool:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &valuebool_)));
+          set_has_valuebool();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(138)) goto parse_valueString;
+        break;
+      }
+
+      // optional string valueString = 17;
+      case 17: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_valueString:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_valuestring()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->valuestring().data(), this->valuestring().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(146)) goto parse_enumName;
+        break;
+      }
+
+      // optional string enumName = 18;
+      case 18: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_enumName:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_enumname()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->enumname().data(), this->enumname().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(154)) goto parse_enumValue;
+        break;
+      }
+
+      // optional string enumValue = 19;
+      case 19: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_enumValue:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_enumvalue()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->enumvalue().data(), this->enumvalue().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -27238,12 +27537,78 @@ bool PropertyValues::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void PropertyValues::SerializeWithCachedSizes(
+void TypedPropertyValue::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.Property propertyValue = 1;
-  for (int i = 0; i < this->propertyvalue_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->propertyvalue(i), output);
+  // required string name = 1;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->name(), output);
+  }
+
+  // required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      2, this->type(), output);
+  }
+
+  // optional int32 valueInt32 = 11;
+  if (has_valueint32()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->valueint32(), output);
+  }
+
+  // optional uint32 valueUInt32 = 12;
+  if (has_valueuint32()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(12, this->valueuint32(), output);
+  }
+
+  // optional int64 valueInt64 = 13;
+  if (has_valueint64()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(13, this->valueint64(), output);
+  }
+
+  // optional uint64 valueUInt64 = 14;
+  if (has_valueuint64()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(14, this->valueuint64(), output);
+  }
+
+  // optional double valueDouble = 15;
+  if (has_valuedouble()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(15, this->valuedouble(), output);
+  }
+
+  // optional bool valueBool = 16;
+  if (has_valuebool()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(16, this->valuebool(), output);
+  }
+
+  // optional string valueString = 17;
+  if (has_valuestring()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->valuestring().data(), this->valuestring().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      17, this->valuestring(), output);
+  }
+
+  // optional string enumName = 18;
+  if (has_enumname()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->enumname().data(), this->enumname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      18, this->enumname(), output);
+  }
+
+  // optional string enumValue = 19;
+  if (has_enumvalue()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->enumvalue().data(), this->enumvalue().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      19, this->enumvalue(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -27252,13 +27617,82 @@ void PropertyValues::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* PropertyValues::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* TypedPropertyValue::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.Property propertyValue = 1;
-  for (int i = 0; i < this->propertyvalue_size(); i++) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        1, this->propertyvalue(i), target);
+  // required string name = 1;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->name(), target);
+  }
+
+  // required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      2, this->type(), target);
+  }
+
+  // optional int32 valueInt32 = 11;
+  if (has_valueint32()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->valueint32(), target);
+  }
+
+  // optional uint32 valueUInt32 = 12;
+  if (has_valueuint32()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(12, this->valueuint32(), target);
+  }
+
+  // optional int64 valueInt64 = 13;
+  if (has_valueint64()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(13, this->valueint64(), target);
+  }
+
+  // optional uint64 valueUInt64 = 14;
+  if (has_valueuint64()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(14, this->valueuint64(), target);
+  }
+
+  // optional double valueDouble = 15;
+  if (has_valuedouble()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(15, this->valuedouble(), target);
+  }
+
+  // optional bool valueBool = 16;
+  if (has_valuebool()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(16, this->valuebool(), target);
+  }
+
+  // optional string valueString = 17;
+  if (has_valuestring()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->valuestring().data(), this->valuestring().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        17, this->valuestring(), target);
+  }
+
+  // optional string enumName = 18;
+  if (has_enumname()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->enumname().data(), this->enumname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        18, this->enumname(), target);
+  }
+
+  // optional string enumValue = 19;
+  if (has_enumvalue()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->enumvalue().data(), this->enumvalue().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        19, this->enumvalue(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -27268,15 +27702,333 @@ void PropertyValues::SerializeWithCachedSizes(
   return target;
 }
 
-int PropertyValues::ByteSize() const {
+int TypedPropertyValue::ByteSize() const {
   int total_size = 0;
 
-  // repeated .Proto.Property propertyValue = 1;
-  total_size += 1 * this->propertyvalue_size();
-  for (int i = 0; i < this->propertyvalue_size(); i++) {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required string name = 1;
+    if (has_name()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->name());
+    }
+
+    // required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
+    if (has_type()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
+    }
+
+    // optional int32 valueInt32 = 11;
+    if (has_valueint32()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->valueint32());
+    }
+
+    // optional uint32 valueUInt32 = 12;
+    if (has_valueuint32()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->valueuint32());
+    }
+
+    // optional int64 valueInt64 = 13;
+    if (has_valueint64()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->valueint64());
+    }
+
+    // optional uint64 valueUInt64 = 14;
+    if (has_valueuint64()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->valueuint64());
+    }
+
+    // optional double valueDouble = 15;
+    if (has_valuedouble()) {
+      total_size += 1 + 8;
+    }
+
+    // optional bool valueBool = 16;
+    if (has_valuebool()) {
+      total_size += 2 + 1;
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional string valueString = 17;
+    if (has_valuestring()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->valuestring());
+    }
+
+    // optional string enumName = 18;
+    if (has_enumname()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->enumname());
+    }
+
+    // optional string enumValue = 19;
+    if (has_enumvalue()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->enumvalue());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void TypedPropertyValue::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const TypedPropertyValue* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TypedPropertyValue*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void TypedPropertyValue::MergeFrom(const TypedPropertyValue& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_name()) {
+      set_name(from.name());
+    }
+    if (from.has_type()) {
+      set_type(from.type());
+    }
+    if (from.has_valueint32()) {
+      set_valueint32(from.valueint32());
+    }
+    if (from.has_valueuint32()) {
+      set_valueuint32(from.valueuint32());
+    }
+    if (from.has_valueint64()) {
+      set_valueint64(from.valueint64());
+    }
+    if (from.has_valueuint64()) {
+      set_valueuint64(from.valueuint64());
+    }
+    if (from.has_valuedouble()) {
+      set_valuedouble(from.valuedouble());
+    }
+    if (from.has_valuebool()) {
+      set_valuebool(from.valuebool());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_valuestring()) {
+      set_valuestring(from.valuestring());
+    }
+    if (from.has_enumname()) {
+      set_enumname(from.enumname());
+    }
+    if (from.has_enumvalue()) {
+      set_enumvalue(from.enumvalue());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void TypedPropertyValue::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void TypedPropertyValue::CopyFrom(const TypedPropertyValue& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool TypedPropertyValue::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+
+  return true;
+}
+
+void TypedPropertyValue::Swap(TypedPropertyValue* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    std::swap(type_, other->type_);
+    std::swap(valueint32_, other->valueint32_);
+    std::swap(valueuint32_, other->valueuint32_);
+    std::swap(valueint64_, other->valueint64_);
+    std::swap(valueuint64_, other->valueuint64_);
+    std::swap(valuedouble_, other->valuedouble_);
+    std::swap(valuebool_, other->valuebool_);
+    std::swap(valuestring_, other->valuestring_);
+    std::swap(enumname_, other->enumname_);
+    std::swap(enumvalue_, other->enumvalue_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata TypedPropertyValue::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = TypedPropertyValue_descriptor_;
+  metadata.reflection = TypedPropertyValue_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int TypedPropertyValues::kValueFieldNumber;
+#endif  // !_MSC_VER
+
+TypedPropertyValues::TypedPropertyValues()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void TypedPropertyValues::InitAsDefaultInstance() {
+}
+
+TypedPropertyValues::TypedPropertyValues(const TypedPropertyValues& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void TypedPropertyValues::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+TypedPropertyValues::~TypedPropertyValues() {
+  SharedDtor();
+}
+
+void TypedPropertyValues::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void TypedPropertyValues::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* TypedPropertyValues::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return TypedPropertyValues_descriptor_;
+}
+
+const TypedPropertyValues& TypedPropertyValues::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+TypedPropertyValues* TypedPropertyValues::default_instance_ = NULL;
+
+TypedPropertyValues* TypedPropertyValues::New() const {
+  return new TypedPropertyValues;
+}
+
+void TypedPropertyValues::Clear() {
+  value_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool TypedPropertyValues::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated .Proto.TypedPropertyValue value = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_value:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_value()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(10)) goto parse_value;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void TypedPropertyValues::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // repeated .Proto.TypedPropertyValue value = 1;
+  for (int i = 0; i < this->value_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->value(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* TypedPropertyValues::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // repeated .Proto.TypedPropertyValue value = 1;
+  for (int i = 0; i < this->value_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->value(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int TypedPropertyValues::ByteSize() const {
+  int total_size = 0;
+
+  // repeated .Proto.TypedPropertyValue value = 1;
+  total_size += 1 * this->value_size();
+  for (int i = 0; i < this->value_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->propertyvalue(i));
+        this->value(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -27290,10 +28042,10 @@ int PropertyValues::ByteSize() const {
   return total_size;
 }
 
-void PropertyValues::MergeFrom(const ::google::protobuf::Message& from) {
+void TypedPropertyValues::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const PropertyValues* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const PropertyValues*>(
+  const TypedPropertyValues* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TypedPropertyValues*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -27302,46 +28054,46 @@ void PropertyValues::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void PropertyValues::MergeFrom(const PropertyValues& from) {
+void TypedPropertyValues::MergeFrom(const TypedPropertyValues& from) {
   GOOGLE_CHECK_NE(&from, this);
-  propertyvalue_.MergeFrom(from.propertyvalue_);
+  value_.MergeFrom(from.value_);
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void PropertyValues::CopyFrom(const ::google::protobuf::Message& from) {
+void TypedPropertyValues::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void PropertyValues::CopyFrom(const PropertyValues& from) {
+void TypedPropertyValues::CopyFrom(const TypedPropertyValues& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool PropertyValues::IsInitialized() const {
+bool TypedPropertyValues::IsInitialized() const {
 
-  for (int i = 0; i < propertyvalue_size(); i++) {
-    if (!this->propertyvalue(i).IsInitialized()) return false;
+  for (int i = 0; i < value_size(); i++) {
+    if (!this->value(i).IsInitialized()) return false;
   }
   return true;
 }
 
-void PropertyValues::Swap(PropertyValues* other) {
+void TypedPropertyValues::Swap(TypedPropertyValues* other) {
   if (other != this) {
-    propertyvalue_.Swap(&other->propertyvalue_);
+    value_.Swap(&other->value_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
 }
 
-::google::protobuf::Metadata PropertyValues::GetMetadata() const {
+::google::protobuf::Metadata TypedPropertyValues::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = PropertyValues_descriptor_;
-  metadata.reflection = PropertyValues_reflection_;
+  metadata.descriptor = TypedPropertyValues_descriptor_;
+  metadata.reflection = TypedPropertyValues_reflection_;
   return metadata;
 }
 

@@ -969,9 +969,40 @@ message Property
 	required string value = 2;
 }
 
-message PropertyValues
+enum TypedPropertyValueType
 {
-    repeated Property propertyValue = 1;
+    _Invalid = 0;
+
+    _Int32 = 1;
+    _UInt32 = 2;
+    _Int64 = 3;
+    _UInt64 = 4;
+    _Double = 5;
+    _Bool = 6;
+    _String = 7;
+    _Enum = 8;
+}
+
+message TypedPropertyValue
+{
+    required string name = 1;
+    required TypedPropertyValueType type = 2 [default = _Invalid];
+
+    optional int32 valueInt32 = 11;
+    optional uint32 valueUInt32 = 12;
+    optional int64 valueInt64 = 13;
+    optional uint64 valueUInt64 = 14;
+    optional double valueDouble = 15;
+    optional bool valueBool = 16;
+    optional string valueString = 17;
+
+    optional string enumName = 18;
+    optional string enumValue = 19;
+}
+
+message TypedPropertyValues
+{
+    repeated TypedPropertyValue value = 1;
 }
 
 //------------------------------------------------------------------------------------------

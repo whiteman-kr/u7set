@@ -1245,6 +1245,65 @@ bool Signal::createSpecProps()
 	return true;
 }
 
+bool Signal::updateSpecProps()
+{
+	assert(false);			// should be implemented
+	return false;
+}
+
+bool Signal::parseSpecPropValues(::Proto::PropertyValues* propValues)
+{
+	TEST_PTR_RETURN_FALSE(propValues);
+
+	if (m_specPropsValues.isEmpty() == true)
+	{
+		return false;
+	}
+
+	return propValues->ParseFromArray(m_specPropsValues.constData(), m_specPropsValues.size());
+}
+
+QVariant Signal::getSpecPropertyValue(const QString& propName)
+{
+	QVariant invalidValue;
+
+	::Proto::PropertyValues propValues;
+
+	bool res = parseSpecPropValues(&propValues);
+
+	if (res == false)
+	{
+		assert(false);
+		return invalidValue;
+	}
+
+	int propCount = propValues.propertyvalue_size();
+
+	std::string stdPropName(propName.toStdString());
+
+	for(int i = 0; i < propCount; i++)
+	{
+		const ::Proto::Property& propValue = propValues.propertyvalue(i);
+
+		if (propValue.name() == stdPropName)
+		{
+			::Property prop;
+
+			res = ::Proto::loadProperty(propValue, &prop);
+
+			if (res == false)
+			{
+				return invalidValue;
+			}
+
+			return prop.value();
+		}
+	}
+
+	assert(false);
+	return invalidValue;
+}
+
 
 // --------------------------------------------------------------------------------------------------------
 //
