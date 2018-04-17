@@ -420,6 +420,11 @@ namespace Hardware
         // range 1..999
         //
 
+		if (disableDataId() == true)
+		{
+			return 999;					// resolve issue RPCT-2048
+		}
+
 		QString sourceStr = port1EquipmentID() + port2EquipmentID();
 
         quint16 hash = CUtils::calcHash16(C_STR(sourceStr), sourceStr.length());
