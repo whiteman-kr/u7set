@@ -78,8 +78,6 @@ struct ConfigSettings
 
 	QStringList usersAccounts;
 
-	QStringList equipmentList;
-
 	std::vector<SchemaSettings> schemas;
 
 	QString errorMessage;				// Parsing error message, empty if no errors

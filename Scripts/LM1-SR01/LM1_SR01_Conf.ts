@@ -191,12 +191,8 @@ var UartID: number = 0;
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
 //var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
 //var configScriptVersion: number = 35;		// Add Software type checking
-<<<<<<< HEAD
 //var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
 var configScriptVersion: number = 37;		// Add setDataFloat function
-=======
-var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
->>>>>>> develop
 
 //
 
