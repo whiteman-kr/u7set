@@ -222,6 +222,20 @@ public:
 		mV_K_TXA = 11,
 		mV_L_TXK = 12,
 		mV_N_THH = 13,
+
+        //
+
+        mV_Type_B = 14,
+        mV_Type_E = 15,
+        mV_Type_J = 16,
+        mV_Type_K = 17,
+        mV_Type_N = 18,
+        mV_Type_R = 19,
+        mV_Type_S = 20,
+        mV_Type_T = 21,
+
+        mV_Raw_Mul_8 = 22,
+        mV_Raw_Mul_32 = 23,
 	};
 	Q_ENUM(SensorType)
 
@@ -535,3 +549,4 @@ const int	SIZE_32BIT = 32;
 const int	SIZE_1WORD = 1;
 const int	SIZE_2WORD = 2;
 
+typedef QByteArray ProtoData;

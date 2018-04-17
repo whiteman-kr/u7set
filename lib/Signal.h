@@ -233,6 +233,11 @@ public:
 	bool adaptiveAperture() const { return m_adaptiveAperture; }
 	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
 
+	// Specific properties
+
+	QString specPropsStruct() const { return m_specPropsStruct; }
+	bool setSpecPropsStruct(const QString& specPropsStruct, bool updateExistsValues);
+
 	// Signal fields from database
 
 	int ID() const { return m_ID; }
@@ -328,7 +333,11 @@ private:
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
+
 	//
+
+	bool createSpecProps();
+	bool updateSpecProps();
 
 private:
 	// Signal identificators
@@ -392,6 +401,12 @@ private:
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
 	bool m_adaptiveAperture = false;
+
+	// Signal specific properties
+	//
+
+	QString m_specPropsStruct;
+	ProtoData m_specPropsValues;					// serialized protobuf message Proto::PropertyValues
 
 	// Signal fields from database
 	//

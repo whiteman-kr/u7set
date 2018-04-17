@@ -96,6 +96,7 @@ class Software;
 class ModuleConfiguration;
 class ModuleConfigurationValue;
 class Property;
+class PropertyValues;
 class Address16;
 class Unit;
 class UnitSet;
@@ -8277,6 +8278,91 @@ class Property : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Property* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class PropertyValues : public ::google::protobuf::Message {
+ public:
+  PropertyValues();
+  virtual ~PropertyValues();
+
+  PropertyValues(const PropertyValues& from);
+
+  inline PropertyValues& operator=(const PropertyValues& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const PropertyValues& default_instance();
+
+  void Swap(PropertyValues* other);
+
+  // implements Message ----------------------------------------------
+
+  PropertyValues* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const PropertyValues& from);
+  void MergeFrom(const PropertyValues& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.Property propertyValue = 1;
+  inline int propertyvalue_size() const;
+  inline void clear_propertyvalue();
+  static const int kPropertyValueFieldNumber = 1;
+  inline const ::Proto::Property& propertyvalue(int index) const;
+  inline ::Proto::Property* mutable_propertyvalue(int index);
+  inline ::Proto::Property* add_propertyvalue();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Property >&
+      propertyvalue() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Property >*
+      mutable_propertyvalue();
+
+  // @@protoc_insertion_point(class_scope:Proto.PropertyValues)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::Property > propertyvalue_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static PropertyValues* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -21974,6 +22060,35 @@ inline void Property::set_allocated_value(::std::string* value) {
     clear_has_value();
     value_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// -------------------------------------------------------------------
+
+// PropertyValues
+
+// repeated .Proto.Property propertyValue = 1;
+inline int PropertyValues::propertyvalue_size() const {
+  return propertyvalue_.size();
+}
+inline void PropertyValues::clear_propertyvalue() {
+  propertyvalue_.Clear();
+}
+inline const ::Proto::Property& PropertyValues::propertyvalue(int index) const {
+  return propertyvalue_.Get(index);
+}
+inline ::Proto::Property* PropertyValues::mutable_propertyvalue(int index) {
+  return propertyvalue_.Mutable(index);
+}
+inline ::Proto::Property* PropertyValues::add_propertyvalue() {
+  return propertyvalue_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Property >&
+PropertyValues::propertyvalue() const {
+  return propertyvalue_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Property >*
+PropertyValues::mutable_propertyvalue() {
+  return &propertyvalue_;
 }
 
 // -------------------------------------------------------------------

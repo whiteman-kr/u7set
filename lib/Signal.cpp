@@ -1,8 +1,10 @@
 #include <QXmlStreamAttributes>
 #include <QFile>
-#include "../lib/Signal.h"
-#include "../lib/DataSource.h"
-#include "../lib/WUtils.h"
+#include <utility>
+
+#include "Signal.h"
+#include "DataSource.h"
+#include "WUtils.h"
 
 #include "../Proto/serialization.pb.h"
 
@@ -89,6 +91,12 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	m_equipmentID = deviceSignal.equipmentIdTemplate();
 
 	setDataSize(m_signalType, m_analogSignalFormat);
+
+	// specific properties processing
+	//
+	m_specPropsStruct = deviceSignal.signalSpecPropsStruc();
+
+	createSpecProps();
 }
 
 Signal::~Signal()
@@ -243,6 +251,19 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busType
 									 SIZE_1BIT,							// param is not checked for Bus signals
 									 E::BigEndian,						// param is not checked for Bus signals
 									 busTypeID);
+}
+
+
+bool Signal::setSpecPropsStruct(const QString& specPropsStruct, bool updateExistsValues)
+{
+	m_specPropsStruct = specPropsStruct;
+
+	if (updateExistsValues == true)
+	{
+		return updateSpecProps();
+	}
+
+	return createSpecProps();
 }
 
 void Signal::resetAddresses()
@@ -1184,6 +1205,46 @@ void Signal::updateTuningValuesType()
 	m_tuningLowBound.setType(tvType);
 	m_tuningHighBound.setType(tvType);
 }
+
+bool Signal::createSpecProps()
+{
+	m_specPropsValues.clear();
+
+	if (m_specPropsStruct.isEmpty() == true)
+	{
+		return true;
+	}
+
+	PropertyObject pob;
+
+	std::pair<bool, QString> result = pob.parseSpecificPropertiesStruct(m_specPropsStruct);
+
+	if (result.first == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	std::vector<std::shared_ptr<Property>> properties = pob.properties();
+
+	::Proto::PropertyValues propValues;
+
+	for(std::shared_ptr<Property> property : properties)
+	{
+		::Proto::Property* protoProperty = propValues.add_propertyvalue();
+
+		::Proto::saveProperty(protoProperty, property);
+	}
+
+	int size = propValues.ByteSize();
+
+	m_specPropsValues.resize(size);
+
+	propValues.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(m_specPropsValues.data()));
+
+	return true;
+}
+
 
 // --------------------------------------------------------------------------------------------------------
 //

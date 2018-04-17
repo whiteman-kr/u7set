@@ -969,6 +969,11 @@ message Property
 	required string value = 2;
 }
 
+message PropertyValues
+{
+    repeated Property propertyValue = 1;
+}
+
 //------------------------------------------------------------------------------------------
 //
 //
