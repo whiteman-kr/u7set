@@ -66,6 +66,8 @@ class ServiceSettings;
 class GetTuningSourcesInfo;
 class GetTuningSourcesInfoReply;
 class GetTuningSourcesStates;
+class SignalsAssociatedToTuningSource;
+class TuningSourceFilling;
 class TuningSourceState;
 class GetTuningSourcesStatesReply;
 class ChangeConrolledTuningSourceRequest;
@@ -3732,6 +3734,196 @@ class GetTuningSourcesStates : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static GetTuningSourcesStates* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SignalsAssociatedToTuningSource : public ::google::protobuf::Message {
+ public:
+  SignalsAssociatedToTuningSource();
+  virtual ~SignalsAssociatedToTuningSource();
+
+  SignalsAssociatedToTuningSource(const SignalsAssociatedToTuningSource& from);
+
+  inline SignalsAssociatedToTuningSource& operator=(const SignalsAssociatedToTuningSource& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SignalsAssociatedToTuningSource& default_instance();
+
+  void Swap(SignalsAssociatedToTuningSource* other);
+
+  // implements Message ----------------------------------------------
+
+  SignalsAssociatedToTuningSource* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SignalsAssociatedToTuningSource& from);
+  void MergeFrom(const SignalsAssociatedToTuningSource& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required uint64 sourceID = 1;
+  inline bool has_sourceid() const;
+  inline void clear_sourceid();
+  static const int kSourceIDFieldNumber = 1;
+  inline ::google::protobuf::uint64 sourceid() const;
+  inline void set_sourceid(::google::protobuf::uint64 value);
+
+  // repeated uint64 signalHash = 2;
+  inline int signalhash_size() const;
+  inline void clear_signalhash();
+  static const int kSignalHashFieldNumber = 2;
+  inline ::google::protobuf::uint64 signalhash(int index) const;
+  inline void set_signalhash(int index, ::google::protobuf::uint64 value);
+  inline void add_signalhash(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      signalhash() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_signalhash();
+
+  // @@protoc_insertion_point(class_scope:Network.SignalsAssociatedToTuningSource)
+ private:
+  inline void set_has_sourceid();
+  inline void clear_has_sourceid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 sourceid_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhash_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static SignalsAssociatedToTuningSource* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class TuningSourceFilling : public ::google::protobuf::Message {
+ public:
+  TuningSourceFilling();
+  virtual ~TuningSourceFilling();
+
+  TuningSourceFilling(const TuningSourceFilling& from);
+
+  inline TuningSourceFilling& operator=(const TuningSourceFilling& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningSourceFilling& default_instance();
+
+  void Swap(TuningSourceFilling* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningSourceFilling* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningSourceFilling& from);
+  void MergeFrom(const TuningSourceFilling& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required uint64 signalCount = 1;
+  inline bool has_signalcount() const;
+  inline void clear_signalcount();
+  static const int kSignalCountFieldNumber = 1;
+  inline ::google::protobuf::uint64 signalcount() const;
+  inline void set_signalcount(::google::protobuf::uint64 value);
+
+  // repeated .Network.SignalsAssociatedToTuningSource signalsPerSource = 2;
+  inline int signalspersource_size() const;
+  inline void clear_signalspersource();
+  static const int kSignalsPerSourceFieldNumber = 2;
+  inline const ::Network::SignalsAssociatedToTuningSource& signalspersource(int index) const;
+  inline ::Network::SignalsAssociatedToTuningSource* mutable_signalspersource(int index);
+  inline ::Network::SignalsAssociatedToTuningSource* add_signalspersource();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::SignalsAssociatedToTuningSource >&
+      signalspersource() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::SignalsAssociatedToTuningSource >*
+      mutable_signalspersource();
+
+  // @@protoc_insertion_point(class_scope:Network.TuningSourceFilling)
+ private:
+  inline void set_has_signalcount();
+  inline void clear_has_signalcount();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 signalcount_;
+  ::google::protobuf::RepeatedPtrField< ::Network::SignalsAssociatedToTuningSource > signalspersource_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningSourceFilling* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -10345,6 +10537,108 @@ inline void GetTuningSourcesInfoReply::set_allocated_activeclientip(::std::strin
 // -------------------------------------------------------------------
 
 // GetTuningSourcesStates
+
+// -------------------------------------------------------------------
+
+// SignalsAssociatedToTuningSource
+
+// required uint64 sourceID = 1;
+inline bool SignalsAssociatedToTuningSource::has_sourceid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SignalsAssociatedToTuningSource::set_has_sourceid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SignalsAssociatedToTuningSource::clear_has_sourceid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SignalsAssociatedToTuningSource::clear_sourceid() {
+  sourceid_ = GOOGLE_ULONGLONG(0);
+  clear_has_sourceid();
+}
+inline ::google::protobuf::uint64 SignalsAssociatedToTuningSource::sourceid() const {
+  return sourceid_;
+}
+inline void SignalsAssociatedToTuningSource::set_sourceid(::google::protobuf::uint64 value) {
+  set_has_sourceid();
+  sourceid_ = value;
+}
+
+// repeated uint64 signalHash = 2;
+inline int SignalsAssociatedToTuningSource::signalhash_size() const {
+  return signalhash_.size();
+}
+inline void SignalsAssociatedToTuningSource::clear_signalhash() {
+  signalhash_.Clear();
+}
+inline ::google::protobuf::uint64 SignalsAssociatedToTuningSource::signalhash(int index) const {
+  return signalhash_.Get(index);
+}
+inline void SignalsAssociatedToTuningSource::set_signalhash(int index, ::google::protobuf::uint64 value) {
+  signalhash_.Set(index, value);
+}
+inline void SignalsAssociatedToTuningSource::add_signalhash(::google::protobuf::uint64 value) {
+  signalhash_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+SignalsAssociatedToTuningSource::signalhash() const {
+  return signalhash_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+SignalsAssociatedToTuningSource::mutable_signalhash() {
+  return &signalhash_;
+}
+
+// -------------------------------------------------------------------
+
+// TuningSourceFilling
+
+// required uint64 signalCount = 1;
+inline bool TuningSourceFilling::has_signalcount() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningSourceFilling::set_has_signalcount() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningSourceFilling::clear_has_signalcount() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningSourceFilling::clear_signalcount() {
+  signalcount_ = GOOGLE_ULONGLONG(0);
+  clear_has_signalcount();
+}
+inline ::google::protobuf::uint64 TuningSourceFilling::signalcount() const {
+  return signalcount_;
+}
+inline void TuningSourceFilling::set_signalcount(::google::protobuf::uint64 value) {
+  set_has_signalcount();
+  signalcount_ = value;
+}
+
+// repeated .Network.SignalsAssociatedToTuningSource signalsPerSource = 2;
+inline int TuningSourceFilling::signalspersource_size() const {
+  return signalspersource_.size();
+}
+inline void TuningSourceFilling::clear_signalspersource() {
+  signalspersource_.Clear();
+}
+inline const ::Network::SignalsAssociatedToTuningSource& TuningSourceFilling::signalspersource(int index) const {
+  return signalspersource_.Get(index);
+}
+inline ::Network::SignalsAssociatedToTuningSource* TuningSourceFilling::mutable_signalspersource(int index) {
+  return signalspersource_.Mutable(index);
+}
+inline ::Network::SignalsAssociatedToTuningSource* TuningSourceFilling::add_signalspersource() {
+  return signalspersource_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::SignalsAssociatedToTuningSource >&
+TuningSourceFilling::signalspersource() const {
+  return signalspersource_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::SignalsAssociatedToTuningSource >*
+TuningSourceFilling::mutable_signalspersource() {
+  return &signalspersource_;
+}
 
 // -------------------------------------------------------------------
 
