@@ -23,3 +23,10 @@ SUBDIRS += qtservice \
     TuningClient \
     TuningIPEN \
     mconf
+
+HEADERS += \
+    lib/CommonTypes.h \
+    lib/Times.h
+
+SOURCES += \
+    lib/Times.cpp

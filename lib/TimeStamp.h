@@ -1,6 +1,8 @@
 #ifndef TIMESTAMP_H
 #define TIMESTAMP_H
 
+#include <QtGlobal>
+#include <QMetaType>
 #include <QDateTime>
 
 
@@ -38,7 +40,6 @@ struct TimeStamp
 		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).time();
 	}
 
-
 	bool operator> (const TimeStamp& value) const
 	{
 		return this->timeStamp > value.timeStamp;
@@ -67,6 +68,13 @@ struct TimeStamp
 	bool operator!= (const TimeStamp& value) const
 	{
 		return this->timeStamp != value.timeStamp;
+	}
+
+	TimeStamp& operator += (qint64 timeSpan)
+	{
+		timeStamp += timeSpan;
+
+		return *this;
 	}
 };
 

@@ -67,7 +67,7 @@ void ConfigurationServiceWorker::loadSettings()
 	m_clientIPStr = getStrSetting(SETTING_CLIENT_REQUEST_IP);
 	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
 
-	m_clientIP.setAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
+	m_clientIP.setAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
 	DEBUG_LOG_MSG(m_logger, QString("Load settings:"));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));

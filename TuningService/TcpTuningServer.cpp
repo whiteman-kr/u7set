@@ -684,15 +684,14 @@ namespace Tuning
 
 	void TcpTuningServer::prepareSignalGetter()
 	{
-		for (TuningSource* tuningSource : m_tuningSources)
+		for (TuningSource& tuningSource : m_tuningSources)
 		{
-			TEST_PTR_CONTINUE(tuningSource);
-			TEST_PTR_CONTINUE(tuningSource->tuningData());
+			TEST_PTR_CONTINUE(tuningSource.tuningData());
 
 			QVector<Signal*> signalList;
-			tuningSource->tuningData()->getSignals(signalList);
+			tuningSource.tuningData()->getSignals(signalList);
 
-			quint32 ip = tuningSource->lmAddress32();
+			quint32 ip = tuningSource.lmAddress32();
 
 			if (signalList.isEmpty())
 			{
@@ -708,7 +707,7 @@ namespace Tuning
 
 				m_signalHash2SignalPtr.insert(signalHash, signal);
 				m_signalHash2SourceIP.insert(signalHash, ip);
-				m_sourceId2SignalHash.insert(tuningSource->ID(), signalHash);
+				m_sourceId2SignalHash.insert(tuningSource.ID(), signalHash);
 			}
 		}
 	}

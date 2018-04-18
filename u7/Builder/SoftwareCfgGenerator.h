@@ -3,6 +3,8 @@
 #include "../lib/DbController.h"
 #include "../lib/Signal.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/DataSource.h"
+
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "Subsystem.h"
@@ -15,20 +17,7 @@ namespace Builder
 	{
 		Q_OBJECT
 
-	protected:
-		DbController* m_dbController = nullptr;
-		Hardware::Software* m_software = nullptr;
-		SignalSet* m_signalSet = nullptr;
-		Hardware::EquipmentSet* m_equipment = nullptr;
-		BuildResultWriter* m_buildResultWriter = nullptr;
-		IssueLogger* m_log = nullptr;
-		ConfigurationXmlFile* m_cfgXml = nullptr;
-		QString m_subDir;
-
-		static HashedVector<QString, Hardware::DeviceModule*> m_lmList;
-
-		static HashedVector<QString, Hardware::Software*> m_softwareList;
-
+	public:
 		struct SchemaFile
 		{
 			QString id;
@@ -37,19 +26,6 @@ namespace Builder
 			QString group;
 			QString details;
 		};
-		static QList<SchemaFile> m_schemaFileList;
-
-		Hardware::DeviceRoot* m_deviceRoot = nullptr;
-
-		static bool buildLmList(Hardware::EquipmentSet *equipment, IssueLogger* log);
-		static bool buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log);
-		static bool checkLmToSoftwareLinks(IssueLogger* log);
-
-		QString getBuildInfoCommentsForBat();
-		QString getBuildInfoCommentsForSh();
-		bool getConfigIp(QString& cfgIP1, QString& cfgIP2);
-		bool getServiceParameters(QString &parameters);
-
 
 	public:
 		SoftwareCfgGenerator(	DbController* db,
@@ -69,57 +45,40 @@ namespace Builder
 									 QString subDir,
 									 QString group,
 									 IssueLogger* log);
+
 		static bool writeAppLogicSchemasDetails(const QList<SchemaFile>& schemaFiles, BuildResultWriter* buildResultWriter, QString dir, IssueLogger* log);
 
 		virtual bool generateConfiguration() = 0;
 
-		static const int LM_ETHERNET_ADAPTERS_COUNT = 3;
-		static const int LM_ETHERNET_ADAPTER1 = 1;
-		static const int LM_ETHERNET_ADAPTER2 = 2;
-		static const int LM_ETHERNET_ADAPTER3 = 3;
+		void initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems);
 
-		struct LmEthernetAdapterNetworkProperties
-		{
-			static const char* PROP_TUNING_ENABLE;
-			static const char* PROP_TUNING_IP;
-			static const char* PROP_TUNING_PORT;
-			static const char* PROP_TUNING_SERVICE_ID;
+	protected:
+		static bool buildLmList(Hardware::EquipmentSet *equipment, IssueLogger* log);
+		static bool buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log);
+		static bool checkLmToSoftwareLinks(IssueLogger* log);
 
-			static const char* PROP_APP_DATA_ENABLE;
-			static const char* PROP_APP_DATA_IP;
-			static const char* PROP_APP_DATA_PORT;
-			static const char* PROP_APP_DATA_SERVICE_ID;
+	protected:
+		DbController* m_dbController = nullptr;
+		Hardware::Software* m_software = nullptr;
+		SignalSet* m_signalSet = nullptr;
+		Hardware::EquipmentSet* m_equipment = nullptr;
+		BuildResultWriter* m_buildResultWriter = nullptr;
+		IssueLogger* m_log = nullptr;
+		ConfigurationXmlFile* m_cfgXml = nullptr;
+		QString m_subDir;
 
-			static const char* PROP_DIAG_DATA_ENABLE;
-			static const char* PROP_DIAG_DATA_IP;
-			static const char* PROP_DIAG_DATA_PORT;
-			static const char* PROP_DIAG_DATA_SERVICE_ID;
+		static HashedVector<QString, Hardware::DeviceModule*> m_lmList;
 
-			static const char* LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR;
+		static HashedVector<QString, Hardware::Software*> m_softwareList;
 
-			int adapterNo;		// LM_ETHERNET_ADAPTER* values
-			QString adapterID;
+		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 
-			// only for adapterNo == LM_ETHERNET_ADAPTER1
-			//
-			bool tuningEnable = true;
-			QString tuningIP;
-			int tuningPort = 0;
-			QString tuningServiceID;
+		static QList<SchemaFile> m_schemaFileList;
 
-			// only for adapterNo == LM_ETHERNET_ADAPTER2 or adapterNo == LM_ETHERNET_ADAPTER3
-			//
-			bool appDataEnable = true;
-			QString appDataIP;
-			int appDataPort = 0;
-			QString appDataServiceID;
 
-			bool diagDataEnable = true;
-			QString diagDataIP;
-			int diagDataPort = 0;
-			QString diagDataServiceID;
-
-			bool getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm, int adapterNo, IssueLogger* log);
-		};
+		QString getBuildInfoCommentsForBat();
+		QString getBuildInfoCommentsForSh();
+		bool getConfigIp(QString* cfgIP1, QString* cfgIP2);
+		bool getServiceParameters(QString &parameters);
 	};
 }

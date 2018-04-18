@@ -226,7 +226,7 @@ void SendTuningFrameWidget::sendPacket()
 		// in big endian format
 		//
 		Rup::Header& header = frame.header;
-		writeBigEndian(header.frameSize, ENTIRE_UDP_SIZE);
+		writeBigEndian(header.frameSize, Socket::ENTIRE_UDP_SIZE);
 		writeBigEndian(header.protocolVersion, 4);
 		header.flags.tuningData = 1;
 		writeBigEndian(header.flags.all, header.flags.all);
@@ -304,7 +304,7 @@ void SendTuningFrameWidget::sendPacket()
 		// in little endian format
 		//
 		Rup::Header& header = frame.header;
-		header.frameSize = ENTIRE_UDP_SIZE;
+		header.frameSize = Socket::ENTIRE_UDP_SIZE;
 		header.protocolVersion = 4;
 		header.flags.tuningData = 1;
 		header.moduleType = m_moduleIdEdit->text().toUInt();

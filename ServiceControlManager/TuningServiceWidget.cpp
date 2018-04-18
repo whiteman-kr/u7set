@@ -141,6 +141,8 @@ void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 void TuningServiceWidget::dropTcpConnection()
 {
+	emit clearTcpClientSocket();
+
 	if (m_tcpClientThread != nullptr)
 	{
 		m_tcpClientThread->quitAndWait();
@@ -149,8 +151,6 @@ void TuningServiceWidget::dropTcpConnection()
 
 		m_tcpClientSocket = nullptr;	// Should be deleted on m_tcpClientThread->quitAndWait();
 	}
-
-	emit clearTcpClientSocket();
 }
 
 void TuningServiceWidget::updateClientsInfo()
@@ -197,12 +197,12 @@ void TuningServiceWidget::reloadTuningSourcesList()
 	for (const TuningSource& ts : tsList)
 	{
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 0), ts.equipmentId());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(ts.info.caption()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.ip()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.port());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), ts.info.channel());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.subsystemid());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.subsystem()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(ts.info.lmcaption()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.lmip()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.lmport());
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), QString::fromStdString(ts.info.lmsubsystemchannel()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.lmsubsystemid());
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.lmsubsystem()));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 7), ts.info.lmnumber());
 
 		for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)

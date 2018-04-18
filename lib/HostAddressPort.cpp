@@ -1,5 +1,8 @@
-#include "HostAddressPort.h"
 #include <cassert>
+
+#include "HostAddressPort.h"
+#include "Socket.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -110,7 +113,24 @@ void HostAddressPort::setPort(quint16 port)
 	m_port = port;
 }
 
-bool HostAddressPort::setAddressPort(const QString& addressPortStr, quint16 defaultPort)
+bool HostAddressPort::setAddressPort(const QString& addressStr, quint16 port)
+{
+	bool result = setAddress(addressStr);
+
+	if (port < Socket::PORT_LOWEST || port > Socket::PORT_HIGHEST)
+	{
+		assert(false);
+		result = false;
+	}
+	else
+	{
+		setPort(port);
+	}
+
+	return result;
+}
+
+bool HostAddressPort::setAddressPortStr(const QString& addressPortStr, quint16 defaultPort)
 {
 	QString addrStr;
 	quint16 port = 0;
@@ -127,6 +147,7 @@ bool HostAddressPort::setAddressPort(const QString& addressPortStr, quint16 defa
 
 	return true;
 }
+
 
 quint32 HostAddressPort::address32() const
 {

@@ -174,7 +174,7 @@ const char* const		SocketDefaultID[SOCKET_TYPE_COUNT] =
 
 const int				SocketDefaultPort[SOCKET_TYPE_COUNT] =
 {
-						PORT_CONFIGURATION_SERVICE_REQUEST,				// ConfigSocket
+						PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,				// ConfigSocket
 						PORT_APP_DATA_SERVICE_CLIENT_REQUEST,			// SignalSocket
 						PORT_TUNING_SERVICE_CLIENT_REQUEST,				// TuningSocket
 };

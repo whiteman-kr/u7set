@@ -12,7 +12,7 @@ namespace Tuning
 
 	TuningSource::TuningSource()
 	{
-		m_lmDataType = DataSource::DataType::Tuning;
+		setLmDataType(DataSource::DataType::Tuning);
 	}
 
 	TuningSource::~TuningSource()
@@ -39,7 +39,7 @@ namespace Tuning
 		return m_tuningData;
 	}
 
-	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
+	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml) const
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -78,30 +78,46 @@ namespace Tuning
 
 	void TuningSources::clear()
 	{
-		for(TuningSource* ds : *this)
-		{
-			delete ds;
-		}
-
-		QHash<QString, TuningSource*>::clear();
 		m_ip2Source.clear();
+		m_id2Source.clear();
+
+		QVector<TuningSource>::clear();
 	}
 
-	void TuningSources::buildIP2DataSourceMap()
+	void TuningSources::buildMaps()
 	{
-		for(TuningSource* source : *this)
+		int index = 0;
+
+		for(const TuningSource& source : *this)
 		{
-			m_ip2Source.insert(source->lmAddress32(), source);
+			m_ip2Source.insert(source.lmAddress32(), index);
+			m_id2Source.insert(source.lmEquipmentID(), index);
+
+			index++;
 		}
 	}
 
 	const TuningSource* TuningSources::getSourceByIP(quint32 ip) const
 	{
-		return m_ip2Source.value(ip, nullptr);
+		int index = m_ip2Source.value(ip, -1);
+
+		if (index >= 0)
+		{
+			return &(*this)[index];
+		}
+
+		return nullptr;
 	}
 
 	const TuningSource* TuningSources::getSourceByID(const QString& sourceID) const
 	{
-		return value(sourceID, nullptr);
+		int index = m_id2Source.value(sourceID, -1);
+
+		if (index >= 0)
+		{
+			return &(*this)[index];
+		}
+
+		return nullptr;
 	}
 }

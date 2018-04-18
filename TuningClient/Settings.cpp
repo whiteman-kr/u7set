@@ -42,9 +42,9 @@ HostAddressPort ConfigConnection::address() const
 Settings::Settings():
 	m_instanceStrId("SYSTEMID_WS00_TUN"),
 	m_configuratorIpAddress1("127.0.0.1"),
-	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_REQUEST),
+	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
 	m_configuratorIpAddress2("127.0.0.1"),
-	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST),
+	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
 	m_language("en")
 {
     qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
@@ -113,10 +113,10 @@ void Settings::RestoreSystem()
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
 
 	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
-	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
-	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
 	// Determine the Local settings folder
 

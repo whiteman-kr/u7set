@@ -396,20 +396,15 @@ function generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet
                     return false;
                 }
                 //
-                var serviceDataChannel = service.jsFindChildObjectByMask(serviceID + "_DATACH01");
-                if (serviceDataChannel == null) {
-                    log.errCFG3004(serviceID + "_DATACH01", equipmentID);
-                    return false;
-                }
                 var checkProperties = ["DataReceivingIP", "DataReceivingPort"];
                 for (var cp = 0; cp < checkProperties.length; cp++) {
-                    if (serviceDataChannel.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
-                        log.errCFG3000(servicesName[s] + checkProperties[cp], serviceDataChannel.jsPropertyString("EquipmentID"));
+                    if (service.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
+                        log.errCFG3000(servicesName[s] + checkProperties[cp], service.jsPropertyString("EquipmentID"));
                         return false;
                     }
                 }
-                serviceIP[s] = serviceDataChannel.jsPropertyIP(servicesName[s] + "DataReceivingIP");
-                servicePort[s] = serviceDataChannel.jsPropertyInt(servicesName[s] + "DataReceivingPort");
+                serviceIP[s] = service.jsPropertyIP(servicesName[s] + "DataReceivingIP");
+                servicePort[s] = service.jsPropertyInt(servicesName[s] + "DataReceivingPort");
             }
         }
     }

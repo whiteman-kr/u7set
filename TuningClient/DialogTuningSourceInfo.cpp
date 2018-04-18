@@ -19,7 +19,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 
 	if (m_tcpClient->tuningSourceInfo(m_tuningSourceEquipmentId, &ts) == true)
 	{
-		setWindowTitle(ts.info.equipmentid().c_str());
+		setWindowTitle(ts.info.lmequipmentid().c_str());
 	}
 	else
 	{
@@ -173,17 +173,14 @@ void DialogTuningSourceInfo::updateData()
 	int c = 0;
 
 	item->child(c++)->setText(1, QString::number(ts.info.id()));
-	item->child(c++)->setText(1, ts.info.equipmentid().c_str());
-	item->child(c++)->setText(1, ts.info.caption().c_str());
-	item->child(c++)->setText(1, QString::number(ts.info.datatype()));
-	item->child(c++)->setText(1, ts.info.ip().c_str());
-	item->child(c++)->setText(1, QString::number(ts.info.port()));
-
-	QChar chChannel = 'A' + ts.info.channel();
-
-	item->child(c++)->setText(1, chChannel);
-	item->child(c++)->setText(1, QString::number(ts.info.subsystemid()));
-	item->child(c++)->setText(1, ts.info.subsystem().c_str());
+	item->child(c++)->setText(1, ts.info.lmequipmentid().c_str());
+	item->child(c++)->setText(1, ts.info.lmcaption().c_str());
+	item->child(c++)->setText(1, QString::number(ts.info.lmdatatype()));
+	item->child(c++)->setText(1, ts.info.lmip().c_str());
+	item->child(c++)->setText(1, QString::number(ts.info.lmport()));
+	item->child(c++)->setText(1, ts.info.lmsubsystemchannel().c_str());
+	item->child(c++)->setText(1, QString::number(ts.info.lmsubsystemid()));
+	item->child(c++)->setText(1, ts.info.lmsubsystem().c_str());
 
 	item->child(c++)->setText(1, QString::number(ts.info.lmnumber()));
 	item->child(c++)->setText(1, QString::number(ts.info.lmmoduletype()));

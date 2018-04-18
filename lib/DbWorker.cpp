@@ -224,6 +224,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0206.sql", "Upgrade to version 206, api.get_latest_file_tree_version optimization"},
 	{":/DatabaseUpgrade/Upgrade0207.sql", "Upgrade to version 207, Added module LM1-SR02"},
 	{":/DatabaseUpgrade/Upgrade0208.sql", "Upgrade to version 208, To LM1-SR02 added: indic_latch, indic_stless, bus_indic_latch, bus_indic_stless"},
+	{":/DatabaseUpgrade/Upgrade0209.sql", "Upgrade to version 209, Services and LM scripts presets update"},
+	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
 };
 
 

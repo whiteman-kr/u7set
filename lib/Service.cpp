@@ -49,6 +49,8 @@ HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo()
 const char* const ServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
 const char* const ServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
 const char* const ServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
+const char* const ServiceWorker::SETTING_PROCESSING_THREADS_COUNT = "ProcessingThreadsCount";
+
 
 int ServiceWorker::m_instanceNo = 0;
 
@@ -56,7 +58,7 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 const QString& serviceName,
 							 int& argc,
 							 char** argv,
-							 std::shared_ptr<CircularLogger> logger) :
+							 CircularLoggerShared logger) :
 	m_softwareInfo(softwareInfo),
 	m_serviceName(serviceName),
 	m_argc(argc),
@@ -233,11 +235,11 @@ void ServiceWorker::onThreadStarted()
 
 	m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
 
-	m_cfgServiceIP1.setAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+	m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
 	m_cfgServiceIP2Str = getStrSetting(SETTING_CFG_SERVICE_IP2);
 
-	m_cfgServiceIP2.setAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+	m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
 	//
 

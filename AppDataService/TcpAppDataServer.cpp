@@ -377,7 +377,7 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 
 	const AppDataSourcesIP& dataSources = appDataSources();
 
-	for(const DataSource* source : dataSources)
+	for(const AppDataSourceShared source : dataSources)
 	{
 		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
 		source->getInfo(protoInfo);
@@ -395,7 +395,7 @@ void TcpAppDataServer::onGetDataSourcesStatesRequest()
 
 	const AppDataSourcesIP& dataSources = appDataSources();
 
-	for (const AppDataSource* source : dataSources)
+	for (const AppDataSourceShared source : dataSources)
 	{
 		Network::AppDataSourceState* state = m_getAppDataSourcesStatesReply.add_appdatasourcesstates();
 		source->getState(state);

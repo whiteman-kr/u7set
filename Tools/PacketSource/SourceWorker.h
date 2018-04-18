@@ -7,34 +7,6 @@
 
 // ==============================================================================================
 
-const int PS_SEND_FRAME_TIMEOUT = 5; // 5 ms
-
-// ==============================================================================================
-
-const int PS_FRAME_VERSION = 1;
-
-// ==============================================================================================
-
-const int PS_PORT = 65432;
-
-// ==============================================================================================
-
-#pragma pack(push, 1)
-
-struct PsFrame
-{
-	Rup::Frame	rupFrame;
-
-	quint16		version;
-	quint32		destIP;
-};
-
-const int PsFrameSize = sizeof(PsFrame);
-
-#pragma pack(pop)
-
-// ==============================================================================================
-
 class SourceWorker : public QObject
 {
 	Q_OBJECT
@@ -47,22 +19,21 @@ public:
 private:
 
 	QObject*			m_pSource = nullptr;
+	Rup::SimFrame		m_simFrame;
+
+	int					m_numerator = 0;
+	int					m_sentFrames = 0;
 
 	bool				m_finishThread = false;
 
-	PsFrame				m_psFrame;
-
-	int					m_numerator = 0;
-
 public:
 
+	bool				isRunnig() { return !m_finishThread; }
+	int					sentFrames() { return m_sentFrames; }
 
 signals:
 
 	void				finished();
-
-private slots:
-
 
 public slots:
 

@@ -58,10 +58,12 @@ interface ModuleFirmware {
 	setData8(frameIndex: number, offset: number, data: number): boolean;
 	setData16(frameIndex: number, offset: number, data: number): boolean;
 	setData32(frameIndex: number, offset: number, data: number): boolean;
+	setDataFloat(frameIndex: number, offset: number, data: number): boolean;
 
 	data8(frameIndex: number, offset: number): number;
 	data16(frameIndex: number, offset: number): number;
 	data32(frameIndex: number, offset: number): number;
+	dataFloat(frameIndex: number, offset: number): number;
 
 	storeCrc64(frameIndex: number, start: number, count: number, offset: number): string;
 	storeHash64(frameIndex: number, offset: number, dataString: string): string;
@@ -188,7 +190,9 @@ var UartID: number = 0;
 //var configScriptVersion: number = 32;		// Removed structure ModuleFirmwareCollection
 //var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
 //var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
-var configScriptVersion: number = 35;		// Add Software type checking
+//var configScriptVersion: number = 35;		// Add Software type checking
+//var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
+var configScriptVersion: number = 37;		// Add setDataFloat function
 
 //
 
@@ -264,6 +268,18 @@ function setData32(confFirmware: ModuleFirmware, log: IssueLogger, channel: numb
 
 	if (confFirmware.setData32(frameIndex, offset, data) == false) {
 		log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData32");
+		return false;
+	}
+	return true;
+}
+
+function setDataFloat(confFirmware: ModuleFirmware, log: IssueLogger, channel: number, equpmentID: string, frameIndex: number, offset: number, caption: string, data: number): boolean {
+	if (channel != -1 && equpmentID.length > 0) {
+		confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";" + data);
+	}
+
+	if (confFirmware.setDataFloat(frameIndex, offset, data) == false) {
+		log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setDataFloat");
 		return false;
 	}
 	return true;
@@ -779,24 +795,16 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 						return false;
 					}
 
-					//
-
-					var serviceDataChannel: DeviceObject = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
-					if (serviceDataChannel == null) {
-						log.errCFG3004(serviceID + "_DATACH01", equipmentID);
-						return false;
-					}
-
 					var checkProperties: string[] = ["DataReceivingIP", "DataReceivingPort"];
 					for (var cp: number = 0; cp < checkProperties.length; cp++) {
-						if (serviceDataChannel.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
-							log.errCFG3000(servicesName[s] + checkProperties[cp], serviceDataChannel.jsPropertyString("EquipmentID"));
+						if (service.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
+							log.errCFG3000(servicesName[s] + checkProperties[cp], service.jsPropertyString("EquipmentID"));
 							return false;
 						}
 					}
 
-					serviceIP[s] = serviceDataChannel.jsPropertyIP(servicesName[s] + "DataReceivingIP");
-					servicePort[s] = serviceDataChannel.jsPropertyInt(servicesName[s] + "DataReceivingPort");
+					serviceIP[s] = service.jsPropertyIP(servicesName[s] + "DataReceivingIP");
+					servicePort[s] = service.jsPropertyInt(servicesName[s] + "DataReceivingPort");
 				}
 			}
 		}

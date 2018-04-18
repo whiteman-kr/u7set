@@ -65,7 +65,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
-    ../lib/JsonSerializable.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
@@ -78,26 +77,26 @@ SOURCES += \
     AppDataService.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
-    AppDataChannel.cpp \
-    AppDataServiceTypes.cpp \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
     TcpAppDataServer.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    AppSignalStateEx.cpp \
     ../lib/AppSignal.cpp \
     ../u7/Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/AppDataSource.cpp \
+    AppDataSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    AppDataReceiver.cpp \
+    SignalStatesProcessingThread.cpp \
+    ../lib/Times.cpp
 
 HEADERS += \
 	Stable.h \
@@ -114,7 +113,6 @@ HEADERS += \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../lib/JsonSerializable.h \
     ../lib/CfgServerLoader.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \
@@ -128,27 +126,28 @@ HEADERS += \
     AppDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    AppDataChannel.h \
     ../lib/OrderedHash.h \
-    AppDataServiceTypes.h \
     AppDataProcessingThread.h \
     TcpAppDataServer.h \
     ../Proto/network.pb.h \
     ../lib/Hash.h \
     ../Proto/serialization.pb.h \
     ../lib/AppSignal.h \
-    AppSignalStateEx.h \
     ../u7/Builder/IssueLogger.h \
     TcpAppDataClient.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
-    ../lib/AppDataSource.h \
+    AppDataSource.h \
     ../u7/Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     TcpArchiveClient.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    AppDataReceiver.h \
+    ../lib/Socket.h \
+    SignalStatesProcessingThread.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -6,11 +6,13 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/Queue.h"
-#include "../lib/DataChannel.h"
 
-#include "AppDataChannel.h"
-#include "AppSignalStateEx.h"
+#include "AppDataReceiver.h"
 #include "TcpAppDataServer.h"
+#include "TcpArchiveClient.h"
+#include "AppDataProcessingThread.h"
+#include "SignalStatesProcessingThread.h"
+
 
 class TcpArchiveClient;
 
@@ -27,7 +29,7 @@ public:
 						 const QString& serviceName,
 						 int& argc,
 						 char** argv,
-						 std::shared_ptr<CircularLogger> logger);
+						 CircularLoggerShared logger);
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -45,19 +47,36 @@ private:
 
 	//
 
-	void readConfigurationFiles();
-
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
-	void runFscDataReceivingThreads();
-	void stopFscDataReceivingThreads();
+	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
+	bool readConfigurationSettings(const QByteArray& fileData);
+	bool readDataSources(const QByteArray& fileData);
+	bool readAppSignals(const QByteArray& fileData);
+
+	void buildAppSignalID2IndexMap(bool signalsLoadResult);
+	void createAndInitSignalStates();
+	void prepareAppDataSources();
+
+	void applyNewConfiguration();
+	void clearConfiguration();
+
+	void runAppDataReceiverThread();
+	void stopAppDataReceiverlThread();
+
+	void runSignalStatesProcessingThread();
+	void stopSignalStatesProcessingThread();
+
+	void runAppDataProcessingThreads();
+	void stopAppDataProcessingThreads();
 
 	void runTcpAppDataServer();
 	void stopTcpAppDataServer();
 
-	void runTcpArchiveClientThreads();
-	void stopTcpArchiveClientThreads();
+	void runTcpArchiveClientThread();
+	void stopTcpArchiveClientThread();
 
 	void runTimer();
 	void stopTimer();
@@ -66,52 +85,34 @@ private:
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
-	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-
 	void onTimer();
 
-	bool readConfiguration(const QByteArray& fileData);
-	bool readDataSources(QByteArray& fileData);
-	bool readAppSignals(QByteArray& fileData);
-
-	void buildAppSignalID2IndexMap(bool signalsLoadResult);
-	void createAndInitSignalStates();
-
-	void stopDataChannelThreads();
-	void initDataChannelThreads();
-	void runDataChannelThreads();
-
-	void clearConfiguration();
-	void applyNewConfiguration();
-
-	void resizeAppSignalEventsQueue();
-
 private:
-	std::shared_ptr<CircularLogger> m_logger;
-
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	AppDataServiceSettings m_cfgSettings;
+	int m_appDataProcessingThreadCount = 0;
 
 	int m_autoArchivingGroupsCount = 0;
 
 	AppSignals m_appSignals;
 
 	AppDataSources m_appDataSources;				// all data sources
-	AppDataSourcesIP m_enabledAppDataSources;		// only enabled data sources
+	AppDataSourcesIP m_appDataSourcesIP;
 
 	AppSignalStates m_signalStates;
 
-	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
+
+	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
+
+	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
-	Tcp::Thread* m_tcpArchiveClientThreads[AppDataServiceSettings::DATA_CHANNEL_COUNT];
-	TcpArchiveClient* m_tcpArchiveClients[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
-
-	AppSignalStatesQueue m_signalStatesQueue;
 
 	QTimer m_timer;
 };

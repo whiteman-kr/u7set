@@ -502,19 +502,31 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			QString tunsIp = dasXmlElement.attribute("ip1");
 			int tunsPort = dasXmlElement.attribute("port1").toInt();
 
+			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
+
+		}
+	}
+
+	// Get TuningService data
+	//
+	{
+		QDomNodeList dasNodes = settingsElement.elementsByTagName("Appearance");
+
+		if (dasNodes.isEmpty() == true)
+		{
+			outSetting->errorMessage += tr("Cannot find Appearance tag\n");
+			return false;
+		}
+		else
+		{
+			QDomElement dasXmlElement = dasNodes.at(0).toElement();
+
 			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
 			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
 			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
 			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
-
-			QString equipmentListString = dasXmlElement.attribute("equipmentList");
-			equipmentListString.replace(' ', ';');
-			equipmentListString.replace('\n', ';');
-			equipmentListString.remove('\r');
-			outSetting->equipmentList = equipmentListString.split(';', QString::SkipEmptyParts);
-
 			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
 			outSetting->showDiscreteCounters = dasXmlElement.attribute("showDiscreteCounters") == "true" ? true : false;
 
@@ -526,9 +538,6 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			usersAccounts.replace('\n', ';');
 			usersAccounts.remove('\r');
 			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
-
-			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
-
 		}
 	}
 

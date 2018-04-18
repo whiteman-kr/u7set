@@ -353,7 +353,7 @@ namespace Builder
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, CFG_FILE_NAME_METROLOGY_SIGNALS, CFG_FILE_ID_METROLOGY_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNALS_XML, CFG_FILE_ID_METROLOGY_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{

@@ -65,7 +65,7 @@ namespace TuningIPEN
 
 		void setTuningData(TuningData* tuningData);
 
-		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) override;
+		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
 
 		void getTuningDataSourceInfo(TuningSourceInfo& info);
@@ -84,7 +84,7 @@ namespace TuningIPEN
 		bool getSignalState(const QString& appSignalID, TuningSignalState* tss);
 		bool setSignalState(const QString& appSignalID, double value, SocketRequest* sr);
 
-		quint64 uniqueID();
+		quint64 lmUniqueID();
 
 		TuningSourceState getState();
 

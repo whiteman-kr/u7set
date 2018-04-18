@@ -22,7 +22,7 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort, const Softw
 		return;
 	}
 
-	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_REQUEST);
+	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
 	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
 											1,

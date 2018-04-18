@@ -777,6 +777,8 @@ namespace Hardware
 		void set(std::shared_ptr<DeviceObject> root);
 
 		DeviceObject* deviceObject(const QString& equipmentId);
+		const DeviceObject* deviceObject(const QString& equipmentId) const;
+
 		std::shared_ptr<DeviceObject> deviceObjectSharedPointer(const QString& equipmentId);
 
 		DeviceRoot* root();

@@ -672,7 +672,7 @@ void ArchRequestThreadWorker::onFinalizeRequest(quint32 requestID)
 //
 // ---------------------------------------------------------------------------------------------
 
-ArchRequestThread::ArchRequestThread(ArchiveShared archive, CircularLoggerShared& logger)
+ArchRequestThread::ArchRequestThread(ArchiveShared archive, CircularLoggerShared logger)
 {
 	m_worker = new ArchRequestThreadWorker(archive, logger);
 

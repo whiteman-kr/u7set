@@ -3,9 +3,11 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QDebug>
+#include <QClipboard>
 #include <QCloseEvent>
 
 #include "SourceOptionDialog.h"
+#include "version.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -28,8 +30,8 @@ MainWindow::~MainWindow()
 bool MainWindow::createInterface()
 {
 	setWindowIcon(QIcon(":/icons/PacketSource.png"));
-	setWindowTitle(tr("Packet source 1.0"));
-	resize(700, 750);
+	setWindowTitle(tr("Packet Source"));
+	resize(550, 750);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
 	createActions();
@@ -39,6 +41,12 @@ bool MainWindow::createInterface()
 	createContextMenu();
 	createHeaderContexMenu();
 	createStatusBar();
+	loadSources();
+
+	if (Rup::VERSION != PS::SUPPORT_VERSION)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Attention!\n%1 transmits RUP packages of version %2\nLast version of RUP packages is %3").arg(windowTitle()).arg(PS::SUPPORT_VERSION).arg(Rup::VERSION));
+	}
 
 	return true;
 }
@@ -50,15 +58,23 @@ void MainWindow::createActions()
 	// Sources
 	//
 	m_sourceStartAction = new QAction(tr("Start"), this);
+	m_sourceStartAction->setShortcut(Qt::Key_F5);
 	m_sourceStartAction->setIcon(QIcon(":/icons/Start.png"));
 	m_sourceStartAction->setToolTip(tr("Start all sources"));
 	connect(m_sourceStartAction, &QAction::triggered, this, &MainWindow::startSource);
 
 	m_sourceStopAction = new QAction(tr("Stop"), this);
+	m_sourceStopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	m_sourceStopAction->setIcon(QIcon(":/icons/Stop.png"));
 	m_sourceStopAction->setToolTip(tr("Stop all sources"));
-	m_sourceStopAction->setEnabled(false);
+	//m_sourceStopAction->setEnabled(false);
 	connect(m_sourceStopAction, &QAction::triggered, this, &MainWindow::stopSource);
+
+	m_sourceSelectAllAction = new QAction(tr("Select all"), this);
+	m_sourceSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
+	m_sourceSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
+	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSource);
 
 	m_sourceOptionAction = new QAction(tr("&Options"), this);
 	m_sourceOptionAction->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -90,6 +106,8 @@ void MainWindow::createMenu()
 
 	m_sourceMenu->addAction(m_sourceStartAction);
 	m_sourceMenu->addAction(m_sourceStopAction);
+	m_sourceMenu->addSeparator();
+	m_sourceMenu->addAction(m_sourceSelectAllAction);
 	m_sourceMenu->addSeparator();
 	m_sourceMenu->addAction(m_sourceOptionAction);
 
@@ -138,7 +156,7 @@ void MainWindow::createViews()
 
 	for(int column = 0; column < SOURCE_LIST_COLUMN_COUNT; column++)
 	{
-		m_pSourceView->setColumnWidth(column, LIST_COLUMN_WITDH);
+		m_pSourceView->setColumnWidth(column, SourceListColumnWidth[column]);
 	}
 
 	m_pSourceView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -194,11 +212,10 @@ void MainWindow::createHeaderContexMenu()
 		}
 	}
 
-	hideColumn(SOURCE_LIST_COLUMN_DATA_TYPE, true);
 	hideColumn(SOURCE_LIST_COLUMN_MODULE_TYPE, true);
 	hideColumn(SOURCE_LIST_COLUMN_SUB_SYSTEM, true);
-	hideColumn(SOURCE_LIST_COLUMN_CAPTION, true);
 	hideColumn(SOURCE_LIST_COLUMN_FRAME_COUNT, true);
+	hideColumn(SOURCE_LIST_COLUMN_SERVER_IP, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -212,13 +229,31 @@ void MainWindow::createStatusBar()
 	}
 
 	m_statusEmpty = new QLabel(m_statusBar);
-	m_statusSourceCount = new QLabel(m_statusBar);
-	m_statusBar->addWidget(m_statusSourceCount);
+	m_statusServer = new QLabel(m_statusBar);
+	m_statusBar->addWidget(m_statusServer);
 	m_statusBar->addWidget(m_statusEmpty);
 
 	m_statusBar->setLayoutDirection(Qt::RightToLeft);
 
 	m_statusEmpty->setText(QString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::loadSources()
+{
+	QVector<PS::Source*> ptrSourceList;
+
+	int sourceCount = theSourceBase.readFromXml();
+	for(int i = 0; i < sourceCount; i++)
+	{
+		ptrSourceList.append(theSourceBase.sourcePtr(i));
+	}
+
+	m_sourceTable.clear();
+	m_sourceTable.set(ptrSourceList);
+
+	m_statusServer->setText(tr(""));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -249,10 +284,10 @@ void MainWindow::startUpdateSourceListTimer()
 	if (m_updateSourceListTimer == nullptr)
 	{
 		m_updateSourceListTimer = new QTimer(this);
-		//connect(m_updateSourceListTimer, &QTimer::timeout, this, &MainWindow::updateSource);
+		connect(m_updateSourceListTimer, &QTimer::timeout, this, &MainWindow::updateSourceState);
 	}
 
-	m_updateSourceListTimer->start(UPDATE_SOURCE_TIMEOUT);
+	m_updateSourceListTimer->start(UPDATE_SOURCE_STATE_TIMEOUT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -276,20 +311,47 @@ void MainWindow::startSource()
 		return;
 	}
 
-	m_sourceStartAction->setEnabled(false);
-	m_sourceStopAction->setEnabled(true);
+//	m_sourceStartAction->setEnabled(false);
+//	m_sourceStopAction->setEnabled(true);
 
-	theSourceBase.runAllSoureces();
+	int count = m_pSourceView->selectionModel()->selectedRows().count();
+	if (count == 0)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select source!"));
+		return;
+	}
+
+	for( int i = 0; i < count; i++)
+	{
+		theSourceBase.runSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::stopSource()
 {
-	m_sourceStartAction->setEnabled(true);
-	m_sourceStopAction->setEnabled(false);
+//	m_sourceStartAction->setEnabled(true);
+//	m_sourceStopAction->setEnabled(false);
 
-	theSourceBase.stopAllSoureces();
+	int count = m_pSourceView->selectionModel()->selectedRows().count();
+	if (count == 0)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, select source!"));
+		return;
+	}
+
+	for( int i = 0; i < count; i++)
+	{
+		theSourceBase.stopSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::selectAllSource()
+{
+	m_pSourceView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -302,24 +364,9 @@ void MainWindow::optionSource()
 		return;
 	}
 
-	stopSource();
+	theSourceBase.stopAllSoureces();
 
-	int sourceCount = theSourceBase.readFromXml();
-	if (sourceCount == 0)
-	{
-		QMessageBox::information(this, windowTitle(), tr("This file does not contain any sources!"));
-	}
-
-	m_statusSourceCount->setText(tr(" Sources count: %1  ").arg(sourceCount));
-
-	QVector<SourceItem*> ptrSourceList;
-	for(int i = 0; i < sourceCount; i++)
-	{
-		ptrSourceList.append(theSourceBase.sourcePtr(i));
-	}
-
-	m_sourceTable.clear();
-	m_sourceTable.set(ptrSourceList);
+	loadSources();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -366,35 +413,65 @@ void MainWindow::onColumnAction(QAction* action)
 void MainWindow::aboutApp()
 {
 	QDialog aboutDialog(this);
-	aboutDialog.setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	aboutDialog.setFixedSize(200, 50);
-	aboutDialog.setWindowIcon(QIcon(":/icons/About.png"));
-	aboutDialog.setWindowTitle(tr("Packet Source"));
 
-		QVBoxLayout *mainLayout = new QVBoxLayout;
+	QHBoxLayout* hl = new QHBoxLayout;
 
-		QLabel* versionLabel = new QLabel(tr("Version 1.0"), &aboutDialog);
-		versionLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	QLabel* logo = new QLabel(&aboutDialog);
+	logo->setPixmap(QPixmap(":/icons/Logo.png"));
 
-		mainLayout->addWidget(versionLabel);
+	hl->addWidget(logo);
 
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
+
+	QString text = "<h3>" + qApp->applicationName() + ": version " + qApp->applicationVersion() + "</h3>";
+#ifndef Q_DEBUG
+	text += "Build: Release";
+#else
+	text += "Build: Debug";
+#endif
+	text += "<br>Commit date: " LAST_SERVER_COMMIT_DATE;
+	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+	text += "<br>Qt version: " QT_VERSION_STR;
+
+	QLabel* label = new QLabel(text, &aboutDialog);
+	label->setIndent(10);
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	vl->addWidget(label);
+
+	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
+		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+	});
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+	buttonBox->addButton(QDialogButtonBox::Ok);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+	mainLayout->addLayout(hl);
+	mainLayout->addWidget(buttonBox);
 	aboutDialog.setLayout(mainLayout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
+
 	aboutDialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateSourceState()
+{
+	m_sourceTable.updateColumn(SOURCE_LIST_COLUMN_STATE);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-
-	if (theSourceBase.sourcesIsRunning() == true)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Please, stop all sources!"));
-		e->ignore();
-		return;
-	}
-
 	stopUpdateSourceListTimer();
+
+	theSourceBase.stopAllSoureces();
 
 	QMainWindow::closeEvent(e);
 }

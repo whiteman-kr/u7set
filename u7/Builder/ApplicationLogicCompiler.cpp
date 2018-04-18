@@ -1,12 +1,11 @@
 #include "../lib/DeviceHelper.h"
+#include "../lib/LmDescription.h"
+#include "../lib/DataSource.h"
+#include "../lib/ServiceSettings.h"
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
 #include "BdfFile.h"
-#include "../lib/LmDescription.h"
-
-#include "../lib/ServiceSettings.h"
-
 
 namespace Builder
 {
@@ -204,17 +203,17 @@ namespace Builder
 				continue;
 			}
 
-			for(int i = 0; i < SoftwareCfgGenerator::LM_ETHERNET_ADAPTERS_COUNT; i++)
+			for(int i = 0; i < DataSource::LM_ETHERNET_ADAPTERS_COUNT; i++)
 			{
-				SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties lmNetProperties;
+				DataSource::LmEthernetAdapterProperties lmNetProperties;
 
-				int ethernetAdapterNo = SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1 + i;
+				int ethernetAdapterNo = DataSource::LM_ETHERNET_ADAPTER1 + i;
 
 				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, m_log);
 
 				switch(ethernetAdapterNo)
 				{
-				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER1:
+				case DataSource::LM_ETHERNET_ADAPTER1:
 					// tuning data adapter
 					//
 					if (lmNetProperties.tuningEnable == true)
@@ -236,8 +235,8 @@ namespace Builder
 					}
 					break;
 
-				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER2:
-				case SoftwareCfgGenerator::LM_ETHERNET_ADAPTER3:
+				case DataSource::LM_ETHERNET_ADAPTER2:
+				case DataSource::LM_ETHERNET_ADAPTER3:
 					// appllication and diagnostics data adapters
 					//
 					if (lmNetProperties.appDataEnable == true)
@@ -573,7 +572,7 @@ namespace Builder
 		fileContentStringList.append("");
 		fileContentStringList.append(afbsUsage);
 
-		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Resources.txt", fileContentStringList);
+		m_resultWriter->addFile(Builder::DIR_REPORTS, "Resources.txt", fileContentStringList);
 
 		return result;
 	}
@@ -734,7 +733,7 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Connections.txt", "", "", list);
+		m_resultWriter->addFile(Builder::DIR_REPORTS, "Connections.txt", "", "", list);
 
 		return true;
 	}
@@ -966,9 +965,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, vhdFileName, list);
+		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
 
-		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, bdfFileName, bdfFile.stringList());
+		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1148,9 +1147,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, vhdFileName, list);
+		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
 
-		m_resultWriter->addFile(BuildResultWriter::OPTO_VHD_DIR, bdfFileName, bdfFile.stringList());
+		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1218,7 +1217,7 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile(BuildResultWriter::REPORTS_DIR, "Opto-modules.txt", "", "", list);
+		m_resultWriter->addFile(Builder::DIR_REPORTS, "Opto-modules.txt", "", "", list);
 
 		return true;
 	}
@@ -1254,7 +1253,7 @@ namespace Builder
 
 		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* appSignalSetFile = m_resultWriter->addFile(BuildResultWriter::COMMON_DIR, QString("AppSignals.asgs"), CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
+		BuildFile* appSignalSetFile = m_resultWriter->addFile(Builder::DIR_COMMON, QString("AppSignals.asgs"), CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
 	}
@@ -1400,7 +1399,7 @@ namespace Builder
 		xml.writeEndElement(); // </Subsystems>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_resultWriter->addFile(BuildResultWriter::COMMON_DIR, "Subsystems.xml", "", "",  data);
+		BuildFile* buildFile = m_resultWriter->addFile(Builder::DIR_COMMON, "Subsystems.xml", "", "",  data);
 
 		if (buildFile == nullptr)
 		{
