@@ -28,27 +28,51 @@ TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, quint
 	//----------------------------------------------------------------------------------------------------
 	QTableView* tuningSourcesTableView = addTabWithTableView(125, "Tuning Sources");
 
-	QStringList headerLabels;
+	QStringList tuningSourceHeaderLabels;
 
-	for (const QString& headerLabel : staticFieldsHeaderLabels)
+	for (const QString& headerLabel : tuningSourceStaticFieldsHeaderLabels)
 	{
-		headerLabels << tr(qPrintable(headerLabel));
+		tuningSourceHeaderLabels << tr(qPrintable(headerLabel));
 	}
 
-	for (const QString& headerLabel : dynamicFieldsHeaderLabels)
+	for (const QString& headerLabel : tuningSourceDynamicFieldsHeaderLabels)
 	{
-		headerLabels << tr(qPrintable(headerLabel));
+		tuningSourceHeaderLabels << tr(qPrintable(headerLabel));
 	}
 
-	m_tuningSourcesTabModel = new QStandardItemModel(0, headerLabels.size(), this);
+	m_tuningSourcesTabModel = new QStandardItemModel(0, tuningSourceHeaderLabels.size(), this);
 	tuningSourcesTableView->setModel(m_tuningSourcesTabModel);
 
-	m_tuningSourcesTabModel->setHorizontalHeaderLabels(headerLabels);
+	m_tuningSourcesTabModel->setHorizontalHeaderLabels(tuningSourceHeaderLabels);
 
 	tuningSourcesTableView->setColumnWidth(0, 175);
 	tuningSourcesTableView->setColumnWidth(1, 250);
 
 	connect(tuningSourcesTableView, &QTableView::doubleClicked, this, &TuningServiceWidget::onTuningSourceDoubleClicked);
+
+	//----------------------------------------------------------------------------------------------------
+	QTableView* tuningSignalsTableView = addTabWithTableView(125, "Tuning Signals");
+
+	QStringList tuningSignalsHeaderLabels;
+
+	for (const QString& headerLabel : tuningSignalsStaticFieldsHeaderLabels)
+	{
+		tuningSignalsHeaderLabels << tr(qPrintable(headerLabel));
+	}
+
+	for (const QString& headerLabel : tuningSignalsDynamicFieldsHeaderLabels)
+	{
+		tuningSignalsHeaderLabels << tr(qPrintable(headerLabel));
+	}
+
+	m_tuningSignalsTabModel = new QStandardItemModel(0, tuningSignalsHeaderLabels.size(), this);
+	tuningSignalsTableView->setModel(m_tuningSignalsTabModel);
+
+	tuningSignalsTableView->setColumnWidth(0, 175);
+	tuningSignalsTableView->setColumnWidth(1, 250);
+
+	m_tuningSignalsTabModel->setHorizontalHeaderLabels(tuningSignalsHeaderLabels);
+
 
 	//----------------------------------------------------------------------------------------------------
 	addTabWithTableView(250, "Log");
@@ -71,7 +95,14 @@ void TuningServiceWidget::updateStateInfo()
 	{
 		quint32 ip = m_serviceInfo.clientrequestip();
 		quint16 port = m_serviceInfo.clientrequestport();
-		QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
+
+		quint32 workingIp = getWorkingClientRequestIp();
+
+		if (ip != workingIp)
+		{
+			//address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(workingIp).toString() + QString(":%1").arg(port);
+			ip = workingIp;
+		}
 
 		if (m_tcpClientSocket != nullptr)
 		{
@@ -98,6 +129,8 @@ void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::settingsLoaded, this, &TuningServiceWidget::updateServiceSettings);
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSourcesInfoLoaded, this, &TuningServiceWidget::reloadTuningSourcesList);
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSoursesStateUpdated, this, &TuningServiceWidget::updateTuningSourcesState);
+	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSignalsInfoLoaded, this, &TuningServiceWidget::reloadTuningSignalsList);
+	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSignalsStateUpdated, this, &TuningServiceWidget::updateTuningSignalsState);
 
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::disconnected, this, &TuningServiceWidget::clearServiceData);
 
@@ -161,7 +194,7 @@ void TuningServiceWidget::reloadTuningSourcesList()
 	m_tuningSourcesTabModel->setRowCount(tsList.count());
 	int row = 0;
 
-	for (const TuningSource& ts : m_tcpClientSocket->tuningSources())
+	for (const TuningSource& ts : tsList)
 	{
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 0), ts.equipmentId());
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(ts.info.caption()));
@@ -172,7 +205,7 @@ void TuningServiceWidget::reloadTuningSourcesList()
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.subsystem()));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 7), ts.info.lmnumber());
 
-		for (int j = staticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
+		for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
 		{
 			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, j), "???");
 		}
@@ -183,11 +216,11 @@ void TuningServiceWidget::reloadTuningSourcesList()
 
 void TuningServiceWidget::updateTuningSourcesState()
 {
-	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->tuningSourcesInfoIsReady() == false)
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->tuningSourcesStateIsReady() == false)
 	{
 		for (int i = 0; i < m_tuningSourcesTabModel->rowCount(); i++)
 		{
-			for (int j = staticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
+			for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
 			{
 				m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(i, j), "???");
 			}
@@ -195,7 +228,7 @@ void TuningServiceWidget::updateTuningSourcesState()
 		return;
 	}
 
-	int firstColumn = staticFieldsHeaderLabels.count();
+	int firstColumn = tuningSourceStaticFieldsHeaderLabels.count();
 	int row = 0;
 
 	for (const TuningSource& ts : m_tcpClientSocket->tuningSources())
@@ -205,6 +238,71 @@ void TuningServiceWidget::updateTuningSourcesState()
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 2), ts.state.setsor() ? tr("Yes") : tr("No"));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 3), static_cast<qint64>(ts.state.requestcount()));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 4), static_cast<qint64>(ts.state.replycount()));
+
+		row++;
+	}
+}
+
+void TuningServiceWidget::reloadTuningSignalsList()
+{
+	m_tuningSignalsTabModel->setRowCount(0);
+
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->tuningSignalsInfoIsReady() == false)
+	{
+		return;
+	}
+
+	const QVector<Signal>& tspVector = m_tcpClientSocket->tuningSignalParams();
+
+	m_tuningSignalsTabModel->setRowCount(tspVector.count());
+	int row = 0;
+
+	for (const Signal& tsp : tspVector)
+	{
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 0), tsp.customAppSignalID());
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 1), tsp.equipmentID());
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 2), tsp.appSignalID());
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 3), tsp.caption());
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 4), tsp.unit());
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 5), E::valueToString<E::SignalType>(tsp.signalType()));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 6), tsp.tuningDefaultValue().toString(tsp.decimalPlaces()));
+
+		for (int j = tuningSignalsStaticFieldsHeaderLabels.count(); j < m_tuningSignalsTabModel->columnCount(); j++)
+		{
+			m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, j), "???");
+		}
+
+		row++;
+	}
+}
+
+void TuningServiceWidget::updateTuningSignalsState()
+{
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->tuningSignalsStateIsReady() == false)
+	{
+		for (int i = 0; i < m_tuningSignalsTabModel->rowCount(); i++)
+		{
+			for (int j = tuningSignalsStaticFieldsHeaderLabels.count(); j < m_tuningSignalsTabModel->columnCount(); j++)
+			{
+				m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(i, j), "???");
+			}
+		}
+		return;
+	}
+
+	int firstColumn = tuningSignalsStaticFieldsHeaderLabels.count();
+	int row = 0;
+
+	for (const TuningSignalState& tss : m_tcpClientSocket->tuningSignalStates())
+	{
+		int precision = m_tcpClientSocket->tuningSignalParams()[row].decimalPlaces();
+
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 0), tss.value().toString(precision));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 1), tss.lowBound().toString(precision));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 2), tss.highBound().toString(precision));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 3), tss.valid() ? tr("Yes") : tr("No"));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 4), (tss.outOfRange() && tss.value() < tss.lowBound())  ? tr("Yes") : tr("No"));
+		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, firstColumn + 5), (tss.outOfRange() && tss.value() > tss.highBound())  ? tr("Yes") : tr("No"));
 
 		row++;
 	}
@@ -220,6 +318,7 @@ void TuningServiceWidget::clearServiceData()
 	}
 
 	m_tuningSourcesTabModel->setRowCount(0);
+	m_tuningSignalsTabModel->setRowCount(0);
 }
 
 void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)

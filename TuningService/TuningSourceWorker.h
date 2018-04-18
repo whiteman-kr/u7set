@@ -221,7 +221,7 @@ namespace Tuning
 
 		void getState(Network::TuningSourceState& tuningSourceState);
 
-		void readSignalState(Network::TuningSignalState* tss);
+		void readSignalState(Network::TuningSignalState* tss) const;
 
 		NetworkError writeSignalState(	const QString& clientEquipmentID,
 										const QString& user,

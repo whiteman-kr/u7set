@@ -91,7 +91,8 @@ SOURCES += MainWindow.cpp \
     TuningServiceWidget.cpp \
     TcpTuningServiceClient.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    TuningSourceWidget.cpp
+    TuningSourceWidget.cpp \
+    ../lib/Tuning/TuningSignalState.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -134,7 +135,8 @@ HEADERS  += MainWindow.h \
     TuningServiceWidget.h \
     TcpTuningServiceClient.h \
     ../lib/Tuning/TuningSourceState.h \
-    TuningSourceWidget.h
+    TuningSourceWidget.h \
+    ../lib/Tuning/TuningSignalState.h
 
 include(../qtservice/src/qtservice.pri)
 

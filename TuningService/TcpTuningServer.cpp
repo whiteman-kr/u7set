@@ -11,11 +11,13 @@ namespace Tuning
 
 	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
 
-	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service, std::shared_ptr<CircularLogger> logger) :
+	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service, TuningSources &tuningSources, std::shared_ptr<CircularLogger> logger) :
 		Tcp::Server(service.softwareInfo()),
 		m_service(service),
+		m_tuningSources(tuningSources),
 		m_logger(logger)
 	{
+		prepareSignalGetter();
 	}
 
 	void TcpTuningServer::onServerThreadStarted()
@@ -37,7 +39,7 @@ namespace Tuning
 
 	Tcp::Server* TcpTuningServer::getNewInstance()
 	{
-		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_logger);
+		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources, m_logger);
 
 		return newServer;
 	}
@@ -52,6 +54,14 @@ namespace Tuning
 
 		case TDS_GET_TUNING_SOURCES_STATES:
 			onGetTuningSourcesStateRequest(requestData, requestDataSize);
+			break;
+
+		case TDS_GET_TUNING_SOURCE_FILLING:
+			onGetTuningSourceFilling(requestData, requestDataSize);
+			break;
+
+		case TDS_GET_TUNING_SIGNAL_PARAM:
+			onGetTuningSignalParam(requestData, requestDataSize);
 			break;
 
 		case TDS_TUNING_SIGNALS_READ:
@@ -280,29 +290,63 @@ namespace Tuning
 
 		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
-		const TuningClientContext* clientContext =
-				m_service.getClientContext(clientEquipmentID);
-
 		NetworkError errCode = NetworkError::Success;
 
-		if (clientContext == nullptr)
-		{
-			errCode = NetworkError::UnknownTuningClientID;
+		QVector<const TuningClientContext*> clientContexts;
 
-			m_tuningSignalsReadReply.set_error(TO_INT(errCode));
+		if (clientEquipmentID == SCM_CLIENT_ID)
+		{
+			int signalQuantity = m_tuningSignalsReadRequest.signalhash_size();
+
+			m_tuningSignalsReadReply.clear_tuningsignalstate();
+
+			for(int i = 0; i < signalQuantity; i++)
+			{
+				Network::TuningSignalState* tss = m_tuningSignalsReadReply.add_tuningsignalstate();
+
+				if (tss == nullptr)
+				{
+					continue;
+				}
+
+				Hash signalHash = m_tuningSignalsReadRequest.signalhash(i);
+				quint32 ip = m_signalHash2SourceIP.value(signalHash);
+				const TuningSourceWorker* worker = m_service.getSourceWorker(ip);
+
+				TEST_PTR_CONTINUE(worker);
+
+				tss->set_signalhash(signalHash);
+				worker->readSignalState(tss);
+			}
+
+			m_tuningSignalsReadReply.set_error(TO_INT(NetworkError::Success));
 
 			sendReply(m_tuningSignalsReadReply);
-
-			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
-						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
-			return;
 		}
+		else
+		{
+			const TuningClientContext* clientContext =
+					m_service.getClientContext(clientEquipmentID);
 
-		// m_tuningSignalsReadReply.set_error(???) is set inside clientContext->readSignalStates()
-		//
-		clientContext->readSignalStates(m_tuningSignalsReadRequest, &m_tuningSignalsReadReply);
+			if (clientContext == nullptr)
+			{
+				errCode = NetworkError::UnknownTuningClientID;
 
-		sendReply(m_tuningSignalsReadReply);
+				m_tuningSignalsReadReply.set_error(TO_INT(errCode));
+
+				sendReply(m_tuningSignalsReadReply);
+
+				DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
+							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+				return;
+			}
+
+			// m_tuningSignalsReadReply.set_error(???) is set inside clientContext->readSignalStates()
+			//
+			clientContext->readSignalStates(m_tuningSignalsReadRequest, &m_tuningSignalsReadReply);
+
+			sendReply(m_tuningSignalsReadReply);
+		}
 
 		errCode = static_cast<NetworkError>(m_tuningSignalsReadReply.error());
 
@@ -561,6 +605,112 @@ namespace Tuning
 		m_getServiceSettingsReply.set_configip2(m_service.cfgServiceIP2().addressPortStr().toStdString());
 
 		sendReply(m_getServiceSettingsReply);
+	}
+
+	void TcpTuningServer::onGetTuningSourceFilling(const char* requestData, quint32 requestDataSize)
+	{
+		Q_UNUSED(requestData)
+		Q_UNUSED(requestDataSize)
+
+		m_getTuningSourceFillingReply.Clear();
+
+		QList<quint64> sourceIDs = m_sourceId2SignalHash.uniqueKeys();
+
+		m_getTuningSourceFillingReply.set_signalcount(m_sourceId2SignalHash.count());
+
+		for (quint64 sourceID : sourceIDs)
+		{
+			Network::SignalsAssociatedToTuningSource* sourceMessage = m_getTuningSourceFillingReply.add_signalspersource();
+
+			sourceMessage->set_sourceid(sourceID);
+
+			for(const Hash signalHash : m_sourceId2SignalHash.values(sourceID))
+			{
+				sourceMessage->add_signalhash(signalHash);
+			}
+		}
+
+		sendReply(m_getTuningSourceFillingReply);
+	}
+
+	void TcpTuningServer::onGetTuningSignalParam(const char *requestData, quint32 requestDataSize)
+	{
+		m_getAppSignalParamReply.Clear();
+
+		bool result = m_getAppSignalParamRequest.ParseFromArray(requestData, requestDataSize);
+
+		if (result == false)
+		{
+			m_getAppSignalParamReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			sendReply(m_changeControlledTuningSourceReply);
+			return;
+		}
+
+		int hashesCount = m_getAppSignalParamRequest.signalhashes_size();
+
+		if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
+		{
+			m_getAppSignalParamReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+			sendReply(m_getAppSignalParamReply);
+			return;
+		}
+
+		for (int i = 0; i < hashesCount; i++)
+		{
+			Hash signalHash = m_getAppSignalParamRequest.signalhashes(i);
+			if (m_signalHash2SignalPtr.contains(signalHash) == false)
+			{
+				m_getAppSignalParamReply.set_error(TO_INT(NetworkError::UnknownSignalHash));
+				sendReply(m_getAppSignalParamReply);
+				return;
+			}
+
+			const Signal* signal = m_signalHash2SignalPtr.value(signalHash);
+
+			if (signal == nullptr)
+			{
+				m_getAppSignalParamReply.set_error(TO_INT(NetworkError::UnknownSignalHash));
+				sendReply(m_getAppSignalParamReply);
+				return;
+			}
+
+			Proto::AppSignal* appSignalParam = m_getAppSignalParamReply.add_appsignals();
+
+			signal->serializeTo(appSignalParam);
+		}
+
+		sendReply(m_getAppSignalParamReply);
+	}
+
+	void TcpTuningServer::prepareSignalGetter()
+	{
+		for (TuningSource* tuningSource : m_tuningSources)
+		{
+			TEST_PTR_CONTINUE(tuningSource);
+			TEST_PTR_CONTINUE(tuningSource->tuningData());
+
+			QVector<Signal*> signalList;
+			tuningSource->tuningData()->getSignals(signalList);
+
+			quint32 ip = tuningSource->lmAddress32();
+
+			if (signalList.isEmpty())
+			{
+				assert(false);
+				continue;
+			}
+
+			for(const Signal* signal : signalList)
+			{
+				TEST_PTR_CONTINUE(signal);
+
+				Hash signalHash = calcHash(signal->appSignalID());
+
+				m_signalHash2SignalPtr.insert(signalHash, signal);
+				m_signalHash2SourceIP.insert(signalHash, ip);
+				m_sourceId2SignalHash.insert(tuningSource->ID(), signalHash);
+			}
+		}
 	}
 
 

@@ -19,7 +19,7 @@ namespace Tuning
 	class TcpTuningServer  : public Tcp::Server
 	{
 	public:
-		TcpTuningServer(TuningServiceWorker& service, std::shared_ptr<CircularLogger> logger);
+		TcpTuningServer(TuningServiceWorker& service, TuningSources& tuningSources, std::shared_ptr<CircularLogger> logger);
 
 //		void setThread(TcpTuningServerThread* thread);
 
@@ -44,10 +44,21 @@ namespace Tuning
 		void onChangeControlledTuningSourceRequest(const char *requestData, quint32 requestDataSize);
 		void onGetTuningServiceSettings(const char *requestData, quint32 requestDataSize);
 
+		void onGetTuningSourceFilling(const char *requestData, quint32 requestDataSize);
+		void onGetTuningSignalParam(const char *requestData, quint32 requestDataSize);
+
+		void prepareSignalGetter();
+
 	private:
 		static const char* SCM_CLIENT_ID;
 
 		TuningServiceWorker& m_service;
+
+		TuningSources& m_tuningSources;
+
+		QHash<Hash, const Signal*> m_signalHash2SignalPtr;
+		QHash<Hash, quint32> m_signalHash2SourceIP;
+		QMultiHash<quint64, Hash> m_sourceId2SignalHash;
 
 		std::shared_ptr<CircularLogger> m_logger;
 
@@ -68,6 +79,11 @@ namespace Tuning
 
 		Network::ChangeConrolledTuningSourceRequest m_changeControlledTuningSourceRequest;
 		Network::ChangeConrolledTuningSourceReply m_changeControlledTuningSourceReply;
+
+		Network::TuningSourceFilling m_getTuningSourceFillingReply;
+
+		Network::GetAppSignalParamRequest m_getAppSignalParamRequest;
+		Network::GetAppSignalParamReply m_getAppSignalParamReply;
 
 		Network::ServiceSettings m_getServiceSettingsReply;
 	};

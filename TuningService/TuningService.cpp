@@ -75,6 +75,18 @@ namespace Tuning
 		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
 	}
 
+	const TuningSourceWorker* TuningServiceWorker::getSourceWorker(quint32 sourceIP) const
+	{
+		TuningSourceWorkerThread* thread = m_sourceWorkerThreadMap.value(sourceIP);
+		if (thread == nullptr)
+		{
+			DEBUG_LOG_MSG(m_logger, QString(tr("IP: %1, source quantity: %2").arg(QHostAddress(sourceIP).toString()).arg(m_sourceWorkerThreadMap.size())));
+			assert(false);
+			return nullptr;
+		}
+		return thread->worker();
+	}
+
 	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
 	{
 		clientContexts.clear();
@@ -320,7 +332,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_logger);
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_cfgSettings.clientRequestIP,
 															tcpTuningSever,
