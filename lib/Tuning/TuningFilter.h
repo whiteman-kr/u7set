@@ -198,6 +198,8 @@ public:
 private:
 	void copy(const TuningFilter& That);
 
+	bool processMaskList(const QString& s, const QStringList& masks) const;
+
 private:
 
 	// Properties
