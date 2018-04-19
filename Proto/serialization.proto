@@ -969,44 +969,25 @@ message Property
 	required string value = 2;
 }
 
-enum TypedPropertyValueType
-{
-    _Invalid = 0;
+// Signal specific properties values messages
 
-    _Int32 = 1;
-    _UInt32 = 2;
-    _Int64 = 3;
-    _UInt64 = 4;
-    _Double = 5;
-    _Float = 6;
-    _Bool = 7;
-    _String = 8;
-    _Enum = 9;
-}
-
-message TypedPropertyValue
+message SignalSpecPropValue
 {
     required string name = 1;
-    required TypedPropertyValueType type = 2 [default = _Invalid];
+    required int32 type = 2 [default = 0 /* QVariant::Invalid */];	// values of QVariant::Type enum
 
-    optional int32 valueInt32 = 10;
-    optional uint32 valueUInt32 = 20;
-    optional int64 valueInt64 = 30;
-    optional uint64 valueUInt64 = 40;
-    optional double valueDouble = 50;
-    optional float valueFloat = 60;
-    optional bool valueBool = 70;
-
-    optional string valueString = 80;
-
-    optional string enumName = 90;
-    optional string enumItemName = 91;
-    optional int32 enumItemValue = 92;
+    optional int32  int32Val = 10;
+    optional uint32 uint32Val = 11;
+    optional int64  int64Val = 12;
+    optional uint64 uint64Val = 13;
+    optional double doubleVal = 14;
+    optional bool   boolVal = 15;
+    optional string stringVal = 16;
 }
 
-message TypedPropertyValues
+message SignalSpecPropValues
 {
-    repeated TypedPropertyValue value = 1;
+    repeated SignalSpecPropValue value = 1;
 }
 
 //------------------------------------------------------------------------------------------

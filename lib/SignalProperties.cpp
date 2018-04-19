@@ -1,8 +1,11 @@
 #include "SignalProperties.h"
+#include "WUtils.h"
 
-
-std::shared_ptr<OrderedHash<int, QString>> SignalProperties::m_sensorTypeHash = generateOrderedHashFromStringArray(SensorTypeStr, SENSOR_TYPE_COUNT);
-std::shared_ptr<OrderedHash<int, QString>> SignalProperties::m_outputModeHash = generateOrderedHashFromStringArray(OutputModeStr, OUTPUT_MODE_COUNT);
+// -------------------------------------------------------------------------------------------------------------
+//
+// SignalSpecPropValue class implementation
+//
+// -------------------------------------------------------------------------------------------------------------
 
 const QString SignalProperties::idCaption("ID");										// Optimization, to share one string among all Signal instances
 const QString SignalProperties::signalGroupIDCaption("SignalGroupID");
@@ -62,12 +65,15 @@ const QString SignalProperties::categoryTuning("7 Tuning");
 
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
+std::shared_ptr<OrderedHash<int, QString>> SignalProperties::m_sensorTypeHash = generateOrderedHashFromStringArray(SensorTypeStr, SENSOR_TYPE_COUNT);
+std::shared_ptr<OrderedHash<int, QString>> SignalProperties::m_outputModeHash = generateOrderedHashFromStringArray(OutputModeStr, OUTPUT_MODE_COUNT);
+
+
 SignalProperties::SignalProperties(Signal& signal) :
 	m_signal(signal)
 {
 	initProperties();
 }
-
 
 void SignalProperties::initProperties()
 {
@@ -255,3 +261,125 @@ std::shared_ptr<OrderedHash<int, QString> > SignalProperties::generateOrderedHas
 	}
 	return result;
 }
+
+// -------------------------------------------------------------------------------------------------------------
+//
+// SignalSpecPropValue class implementation
+//
+// -------------------------------------------------------------------------------------------------------------
+
+SignalSpecPropValue::SignalSpecPropValue()
+{
+}
+
+SignalSpecPropValue::SignalSpecPropValue(const QString& name, const QVariant& value)
+{
+	m_name = name;
+	m_value = value;
+}
+
+SignalSpecPropValue::SignalSpecPropValue(std::shared_ptr<Property> prop)
+{
+}
+
+SignalSpecPropValue::SignalSpecPropValue(const Property* prop)
+{
+}
+
+bool SignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
+{
+	TEST_PTR_RETURN_FALSE(protoValue);
+
+	protoValue->Clear();
+
+	protoValue->set_name(m_name.toStdString());
+	protoValue->set_type(static_cast<int>(m_value.type()));
+
+	switch(m_value.type())
+	{
+	case QVariant::Invalid:
+		assert(false);
+		return true;
+
+	case QVariant::Int:
+		protoValue->set_int32val(m_value.toInt());
+		return true;
+
+	case QVariant::UInt:
+		protoValue->set_uint32val(m_value.toUInt());
+		return true;
+
+	case QVariant::LongLong:
+		protoValue->set_int64val(m_value.toLongLong());
+		return true;
+
+	case QVariant::ULongLong:
+		protoValue->set_uint64val(m_value.toULongLong());
+		return true;
+
+	case QVariant::Double:
+		protoValue->set_doubleval(m_value.toDouble());
+		return true;
+
+	case QVariant::Bool:
+		protoValue->set_boolval(m_value.toBool());
+		return true;
+
+	case QVariant::String:
+		protoValue->set_stringval(m_value.toString().toStdString());
+		return true;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+
+bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
+{
+	m_name = QString::fromStdString(protoValue.name());
+
+	QVariant::Type type = static_cast<QVariant::Type>(protoValue.type());
+
+	switch(type)
+	{
+	case QVariant::Invalid:
+		m_value = QVariant();
+		return true;
+
+	case QVariant::Int:
+		m_value.setValue(protoValue.int32val());
+		return true;
+
+	case QVariant::UInt:
+		m_value.setValue(protoValue.uint32val());
+		return true;
+
+	case QVariant::LongLong:
+		m_value.setValue(protoValue.int64val());
+		return true;
+
+	case QVariant::ULongLong:
+		m_value.setValue(protoValue.uint64val());
+		return true;
+
+	case QVariant::Double:
+		m_value.setValue(protoValue.doubleval());
+		return true;
+
+	case QVariant::Bool:
+		m_value.setValue(protoValue.boolval());
+		return true;
+
+	case QVariant::String:
+		m_value.setValue(QString::fromStdString(protoValue.stringval()));
+		return true;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+

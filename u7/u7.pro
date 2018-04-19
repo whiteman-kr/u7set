@@ -211,8 +211,7 @@ SOURCES +=\
     Builder/ConfigurationServiceCfgGenerator.cpp \
     ../lib/TuningValue.cpp \
     SpecificPropertiesEditor.cpp \
-    ../lib/Times.cpp \
-    ../lib/TypedPropertyValue.cpp
+    ../lib/Times.cpp
 
 
 HEADERS  += \
@@ -360,8 +359,7 @@ HEADERS  += \
     SpecificPropertiesEditor.h \
     Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
-    ../lib/Times.h \
-    ../lib/TypedPropertyValue.h
+    ../lib/Times.h
 
 
 FORMS    += \

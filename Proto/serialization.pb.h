@@ -96,8 +96,8 @@ class Software;
 class ModuleConfiguration;
 class ModuleConfigurationValue;
 class Property;
-class TypedPropertyValue;
-class TypedPropertyValues;
+class SignalSpecPropValue;
+class SignalSpecPropValues;
 class Address16;
 class Unit;
 class UnitSet;
@@ -192,33 +192,6 @@ inline bool FblDataFormat_Parse(
     const ::std::string& name, FblDataFormat* value) {
   return ::google::protobuf::internal::ParseNamedEnum<FblDataFormat>(
     FblDataFormat_descriptor(), name, value);
-}
-enum TypedPropertyValueType {
-  _Invalid = 0,
-  _Int32 = 1,
-  _UInt32 = 2,
-  _Int64 = 3,
-  _UInt64 = 4,
-  _Double = 5,
-  _Float = 6,
-  _Bool = 7,
-  _String = 8,
-  _Enum = 9
-};
-bool TypedPropertyValueType_IsValid(int value);
-const TypedPropertyValueType TypedPropertyValueType_MIN = _Invalid;
-const TypedPropertyValueType TypedPropertyValueType_MAX = _Enum;
-const int TypedPropertyValueType_ARRAYSIZE = TypedPropertyValueType_MAX + 1;
-
-const ::google::protobuf::EnumDescriptor* TypedPropertyValueType_descriptor();
-inline const ::std::string& TypedPropertyValueType_Name(TypedPropertyValueType value) {
-  return ::google::protobuf::internal::NameOfEnum(
-    TypedPropertyValueType_descriptor(), value);
-}
-inline bool TypedPropertyValueType_Parse(
-    const ::std::string& name, TypedPropertyValueType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<TypedPropertyValueType>(
-    TypedPropertyValueType_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -8309,14 +8282,14 @@ class Property : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TypedPropertyValue : public ::google::protobuf::Message {
+class SignalSpecPropValue : public ::google::protobuf::Message {
  public:
-  TypedPropertyValue();
-  virtual ~TypedPropertyValue();
+  SignalSpecPropValue();
+  virtual ~SignalSpecPropValue();
 
-  TypedPropertyValue(const TypedPropertyValue& from);
+  SignalSpecPropValue(const SignalSpecPropValue& from);
 
-  inline TypedPropertyValue& operator=(const TypedPropertyValue& from) {
+  inline SignalSpecPropValue& operator=(const SignalSpecPropValue& from) {
     CopyFrom(from);
     return *this;
   }
@@ -8330,17 +8303,17 @@ class TypedPropertyValue : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TypedPropertyValue& default_instance();
+  static const SignalSpecPropValue& default_instance();
 
-  void Swap(TypedPropertyValue* other);
+  void Swap(SignalSpecPropValue* other);
 
   // implements Message ----------------------------------------------
 
-  TypedPropertyValue* New() const;
+  SignalSpecPropValue* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TypedPropertyValue& from);
-  void MergeFrom(const TypedPropertyValue& from);
+  void CopyFrom(const SignalSpecPropValue& from);
+  void MergeFrom(const SignalSpecPropValue& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -8375,170 +8348,120 @@ class TypedPropertyValue : public ::google::protobuf::Message {
   inline ::std::string* release_name();
   inline void set_allocated_name(::std::string* name);
 
-  // required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
+  // required int32 type = 2 [default = 0];
   inline bool has_type() const;
   inline void clear_type();
   static const int kTypeFieldNumber = 2;
-  inline ::Proto::TypedPropertyValueType type() const;
-  inline void set_type(::Proto::TypedPropertyValueType value);
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
 
-  // optional int32 valueInt32 = 10;
-  inline bool has_valueint32() const;
-  inline void clear_valueint32();
-  static const int kValueInt32FieldNumber = 10;
-  inline ::google::protobuf::int32 valueint32() const;
-  inline void set_valueint32(::google::protobuf::int32 value);
+  // optional int32 int32Val = 10;
+  inline bool has_int32val() const;
+  inline void clear_int32val();
+  static const int kInt32ValFieldNumber = 10;
+  inline ::google::protobuf::int32 int32val() const;
+  inline void set_int32val(::google::protobuf::int32 value);
 
-  // optional uint32 valueUInt32 = 20;
-  inline bool has_valueuint32() const;
-  inline void clear_valueuint32();
-  static const int kValueUInt32FieldNumber = 20;
-  inline ::google::protobuf::uint32 valueuint32() const;
-  inline void set_valueuint32(::google::protobuf::uint32 value);
+  // optional uint32 uint32Val = 11;
+  inline bool has_uint32val() const;
+  inline void clear_uint32val();
+  static const int kUint32ValFieldNumber = 11;
+  inline ::google::protobuf::uint32 uint32val() const;
+  inline void set_uint32val(::google::protobuf::uint32 value);
 
-  // optional int64 valueInt64 = 30;
-  inline bool has_valueint64() const;
-  inline void clear_valueint64();
-  static const int kValueInt64FieldNumber = 30;
-  inline ::google::protobuf::int64 valueint64() const;
-  inline void set_valueint64(::google::protobuf::int64 value);
+  // optional int64 int64Val = 12;
+  inline bool has_int64val() const;
+  inline void clear_int64val();
+  static const int kInt64ValFieldNumber = 12;
+  inline ::google::protobuf::int64 int64val() const;
+  inline void set_int64val(::google::protobuf::int64 value);
 
-  // optional uint64 valueUInt64 = 40;
-  inline bool has_valueuint64() const;
-  inline void clear_valueuint64();
-  static const int kValueUInt64FieldNumber = 40;
-  inline ::google::protobuf::uint64 valueuint64() const;
-  inline void set_valueuint64(::google::protobuf::uint64 value);
+  // optional uint64 uint64Val = 13;
+  inline bool has_uint64val() const;
+  inline void clear_uint64val();
+  static const int kUint64ValFieldNumber = 13;
+  inline ::google::protobuf::uint64 uint64val() const;
+  inline void set_uint64val(::google::protobuf::uint64 value);
 
-  // optional double valueDouble = 50;
-  inline bool has_valuedouble() const;
-  inline void clear_valuedouble();
-  static const int kValueDoubleFieldNumber = 50;
-  inline double valuedouble() const;
-  inline void set_valuedouble(double value);
+  // optional double doubleVal = 14;
+  inline bool has_doubleval() const;
+  inline void clear_doubleval();
+  static const int kDoubleValFieldNumber = 14;
+  inline double doubleval() const;
+  inline void set_doubleval(double value);
 
-  // optional float valueFloat = 60;
-  inline bool has_valuefloat() const;
-  inline void clear_valuefloat();
-  static const int kValueFloatFieldNumber = 60;
-  inline float valuefloat() const;
-  inline void set_valuefloat(float value);
+  // optional bool boolVal = 15;
+  inline bool has_boolval() const;
+  inline void clear_boolval();
+  static const int kBoolValFieldNumber = 15;
+  inline bool boolval() const;
+  inline void set_boolval(bool value);
 
-  // optional bool valueBool = 70;
-  inline bool has_valuebool() const;
-  inline void clear_valuebool();
-  static const int kValueBoolFieldNumber = 70;
-  inline bool valuebool() const;
-  inline void set_valuebool(bool value);
+  // optional string stringVal = 16;
+  inline bool has_stringval() const;
+  inline void clear_stringval();
+  static const int kStringValFieldNumber = 16;
+  inline const ::std::string& stringval() const;
+  inline void set_stringval(const ::std::string& value);
+  inline void set_stringval(const char* value);
+  inline void set_stringval(const char* value, size_t size);
+  inline ::std::string* mutable_stringval();
+  inline ::std::string* release_stringval();
+  inline void set_allocated_stringval(::std::string* stringval);
 
-  // optional string valueString = 80;
-  inline bool has_valuestring() const;
-  inline void clear_valuestring();
-  static const int kValueStringFieldNumber = 80;
-  inline const ::std::string& valuestring() const;
-  inline void set_valuestring(const ::std::string& value);
-  inline void set_valuestring(const char* value);
-  inline void set_valuestring(const char* value, size_t size);
-  inline ::std::string* mutable_valuestring();
-  inline ::std::string* release_valuestring();
-  inline void set_allocated_valuestring(::std::string* valuestring);
-
-  // optional string enumName = 90;
-  inline bool has_enumname() const;
-  inline void clear_enumname();
-  static const int kEnumNameFieldNumber = 90;
-  inline const ::std::string& enumname() const;
-  inline void set_enumname(const ::std::string& value);
-  inline void set_enumname(const char* value);
-  inline void set_enumname(const char* value, size_t size);
-  inline ::std::string* mutable_enumname();
-  inline ::std::string* release_enumname();
-  inline void set_allocated_enumname(::std::string* enumname);
-
-  // optional string enumItemName = 91;
-  inline bool has_enumitemname() const;
-  inline void clear_enumitemname();
-  static const int kEnumItemNameFieldNumber = 91;
-  inline const ::std::string& enumitemname() const;
-  inline void set_enumitemname(const ::std::string& value);
-  inline void set_enumitemname(const char* value);
-  inline void set_enumitemname(const char* value, size_t size);
-  inline ::std::string* mutable_enumitemname();
-  inline ::std::string* release_enumitemname();
-  inline void set_allocated_enumitemname(::std::string* enumitemname);
-
-  // optional int32 enumItemValue = 92;
-  inline bool has_enumitemvalue() const;
-  inline void clear_enumitemvalue();
-  static const int kEnumItemValueFieldNumber = 92;
-  inline ::google::protobuf::int32 enumitemvalue() const;
-  inline void set_enumitemvalue(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:Proto.TypedPropertyValue)
+  // @@protoc_insertion_point(class_scope:Proto.SignalSpecPropValue)
  private:
   inline void set_has_name();
   inline void clear_has_name();
   inline void set_has_type();
   inline void clear_has_type();
-  inline void set_has_valueint32();
-  inline void clear_has_valueint32();
-  inline void set_has_valueuint32();
-  inline void clear_has_valueuint32();
-  inline void set_has_valueint64();
-  inline void clear_has_valueint64();
-  inline void set_has_valueuint64();
-  inline void clear_has_valueuint64();
-  inline void set_has_valuedouble();
-  inline void clear_has_valuedouble();
-  inline void set_has_valuefloat();
-  inline void clear_has_valuefloat();
-  inline void set_has_valuebool();
-  inline void clear_has_valuebool();
-  inline void set_has_valuestring();
-  inline void clear_has_valuestring();
-  inline void set_has_enumname();
-  inline void clear_has_enumname();
-  inline void set_has_enumitemname();
-  inline void clear_has_enumitemname();
-  inline void set_has_enumitemvalue();
-  inline void clear_has_enumitemvalue();
+  inline void set_has_int32val();
+  inline void clear_has_int32val();
+  inline void set_has_uint32val();
+  inline void clear_has_uint32val();
+  inline void set_has_int64val();
+  inline void clear_has_int64val();
+  inline void set_has_uint64val();
+  inline void clear_has_uint64val();
+  inline void set_has_doubleval();
+  inline void clear_has_doubleval();
+  inline void set_has_boolval();
+  inline void clear_has_boolval();
+  inline void set_has_stringval();
+  inline void clear_has_stringval();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* name_;
-  int type_;
-  ::google::protobuf::int32 valueint32_;
-  ::google::protobuf::int64 valueint64_;
-  ::google::protobuf::uint64 valueuint64_;
-  ::google::protobuf::uint32 valueuint32_;
-  float valuefloat_;
-  double valuedouble_;
-  ::std::string* valuestring_;
-  ::std::string* enumname_;
-  bool valuebool_;
-  ::google::protobuf::int32 enumitemvalue_;
-  ::std::string* enumitemname_;
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 int32val_;
+  ::google::protobuf::int64 int64val_;
+  ::google::protobuf::uint64 uint64val_;
+  ::google::protobuf::uint32 uint32val_;
+  bool boolval_;
+  double doubleval_;
+  ::std::string* stringval_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static TypedPropertyValue* default_instance_;
+  static SignalSpecPropValue* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class TypedPropertyValues : public ::google::protobuf::Message {
+class SignalSpecPropValues : public ::google::protobuf::Message {
  public:
-  TypedPropertyValues();
-  virtual ~TypedPropertyValues();
+  SignalSpecPropValues();
+  virtual ~SignalSpecPropValues();
 
-  TypedPropertyValues(const TypedPropertyValues& from);
+  SignalSpecPropValues(const SignalSpecPropValues& from);
 
-  inline TypedPropertyValues& operator=(const TypedPropertyValues& from) {
+  inline SignalSpecPropValues& operator=(const SignalSpecPropValues& from) {
     CopyFrom(from);
     return *this;
   }
@@ -8552,17 +8475,17 @@ class TypedPropertyValues : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TypedPropertyValues& default_instance();
+  static const SignalSpecPropValues& default_instance();
 
-  void Swap(TypedPropertyValues* other);
+  void Swap(SignalSpecPropValues* other);
 
   // implements Message ----------------------------------------------
 
-  TypedPropertyValues* New() const;
+  SignalSpecPropValues* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TypedPropertyValues& from);
-  void MergeFrom(const TypedPropertyValues& from);
+  void CopyFrom(const SignalSpecPropValues& from);
+  void MergeFrom(const SignalSpecPropValues& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -8585,24 +8508,24 @@ class TypedPropertyValues : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.TypedPropertyValue value = 1;
+  // repeated .Proto.SignalSpecPropValue value = 1;
   inline int value_size() const;
   inline void clear_value();
   static const int kValueFieldNumber = 1;
-  inline const ::Proto::TypedPropertyValue& value(int index) const;
-  inline ::Proto::TypedPropertyValue* mutable_value(int index);
-  inline ::Proto::TypedPropertyValue* add_value();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >&
+  inline const ::Proto::SignalSpecPropValue& value(int index) const;
+  inline ::Proto::SignalSpecPropValue* mutable_value(int index);
+  inline ::Proto::SignalSpecPropValue* add_value();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::SignalSpecPropValue >&
       value() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::SignalSpecPropValue >*
       mutable_value();
 
-  // @@protoc_insertion_point(class_scope:Proto.TypedPropertyValues)
+  // @@protoc_insertion_point(class_scope:Proto.SignalSpecPropValues)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue > value_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::SignalSpecPropValue > value_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -8612,7 +8535,7 @@ class TypedPropertyValues : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static TypedPropertyValues* default_instance_;
+  static SignalSpecPropValues* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -22314,56 +22237,56 @@ inline void Property::set_allocated_value(::std::string* value) {
 
 // -------------------------------------------------------------------
 
-// TypedPropertyValue
+// SignalSpecPropValue
 
 // required string name = 1;
-inline bool TypedPropertyValue::has_name() const {
+inline bool SignalSpecPropValue::has_name() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TypedPropertyValue::set_has_name() {
+inline void SignalSpecPropValue::set_has_name() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TypedPropertyValue::clear_has_name() {
+inline void SignalSpecPropValue::clear_has_name() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TypedPropertyValue::clear_name() {
+inline void SignalSpecPropValue::clear_name() {
   if (name_ != &::google::protobuf::internal::kEmptyString) {
     name_->clear();
   }
   clear_has_name();
 }
-inline const ::std::string& TypedPropertyValue::name() const {
+inline const ::std::string& SignalSpecPropValue::name() const {
   return *name_;
 }
-inline void TypedPropertyValue::set_name(const ::std::string& value) {
+inline void SignalSpecPropValue::set_name(const ::std::string& value) {
   set_has_name();
   if (name_ == &::google::protobuf::internal::kEmptyString) {
     name_ = new ::std::string;
   }
   name_->assign(value);
 }
-inline void TypedPropertyValue::set_name(const char* value) {
+inline void SignalSpecPropValue::set_name(const char* value) {
   set_has_name();
   if (name_ == &::google::protobuf::internal::kEmptyString) {
     name_ = new ::std::string;
   }
   name_->assign(value);
 }
-inline void TypedPropertyValue::set_name(const char* value, size_t size) {
+inline void SignalSpecPropValue::set_name(const char* value, size_t size) {
   set_has_name();
   if (name_ == &::google::protobuf::internal::kEmptyString) {
     name_ = new ::std::string;
   }
   name_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* TypedPropertyValue::mutable_name() {
+inline ::std::string* SignalSpecPropValue::mutable_name() {
   set_has_name();
   if (name_ == &::google::protobuf::internal::kEmptyString) {
     name_ = new ::std::string;
   }
   return name_;
 }
-inline ::std::string* TypedPropertyValue::release_name() {
+inline ::std::string* SignalSpecPropValue::release_name() {
   clear_has_name();
   if (name_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -22373,7 +22296,7 @@ inline ::std::string* TypedPropertyValue::release_name() {
     return temp;
   }
 }
-inline void TypedPropertyValue::set_allocated_name(::std::string* name) {
+inline void SignalSpecPropValue::set_allocated_name(::std::string* name) {
   if (name_ != &::google::protobuf::internal::kEmptyString) {
     delete name_;
   }
@@ -22386,441 +22309,256 @@ inline void TypedPropertyValue::set_allocated_name(::std::string* name) {
   }
 }
 
-// required .Proto.TypedPropertyValueType type = 2 [default = _Invalid];
-inline bool TypedPropertyValue::has_type() const {
+// required int32 type = 2 [default = 0];
+inline bool SignalSpecPropValue::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TypedPropertyValue::set_has_type() {
+inline void SignalSpecPropValue::set_has_type() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TypedPropertyValue::clear_has_type() {
+inline void SignalSpecPropValue::clear_has_type() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TypedPropertyValue::clear_type() {
+inline void SignalSpecPropValue::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::Proto::TypedPropertyValueType TypedPropertyValue::type() const {
-  return static_cast< ::Proto::TypedPropertyValueType >(type_);
+inline ::google::protobuf::int32 SignalSpecPropValue::type() const {
+  return type_;
 }
-inline void TypedPropertyValue::set_type(::Proto::TypedPropertyValueType value) {
-  assert(::Proto::TypedPropertyValueType_IsValid(value));
+inline void SignalSpecPropValue::set_type(::google::protobuf::int32 value) {
   set_has_type();
   type_ = value;
 }
 
-// optional int32 valueInt32 = 10;
-inline bool TypedPropertyValue::has_valueint32() const {
+// optional int32 int32Val = 10;
+inline bool SignalSpecPropValue::has_int32val() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void TypedPropertyValue::set_has_valueint32() {
+inline void SignalSpecPropValue::set_has_int32val() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void TypedPropertyValue::clear_has_valueint32() {
+inline void SignalSpecPropValue::clear_has_int32val() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void TypedPropertyValue::clear_valueint32() {
-  valueint32_ = 0;
-  clear_has_valueint32();
+inline void SignalSpecPropValue::clear_int32val() {
+  int32val_ = 0;
+  clear_has_int32val();
 }
-inline ::google::protobuf::int32 TypedPropertyValue::valueint32() const {
-  return valueint32_;
+inline ::google::protobuf::int32 SignalSpecPropValue::int32val() const {
+  return int32val_;
 }
-inline void TypedPropertyValue::set_valueint32(::google::protobuf::int32 value) {
-  set_has_valueint32();
-  valueint32_ = value;
+inline void SignalSpecPropValue::set_int32val(::google::protobuf::int32 value) {
+  set_has_int32val();
+  int32val_ = value;
 }
 
-// optional uint32 valueUInt32 = 20;
-inline bool TypedPropertyValue::has_valueuint32() const {
+// optional uint32 uint32Val = 11;
+inline bool SignalSpecPropValue::has_uint32val() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void TypedPropertyValue::set_has_valueuint32() {
+inline void SignalSpecPropValue::set_has_uint32val() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void TypedPropertyValue::clear_has_valueuint32() {
+inline void SignalSpecPropValue::clear_has_uint32val() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void TypedPropertyValue::clear_valueuint32() {
-  valueuint32_ = 0u;
-  clear_has_valueuint32();
+inline void SignalSpecPropValue::clear_uint32val() {
+  uint32val_ = 0u;
+  clear_has_uint32val();
 }
-inline ::google::protobuf::uint32 TypedPropertyValue::valueuint32() const {
-  return valueuint32_;
+inline ::google::protobuf::uint32 SignalSpecPropValue::uint32val() const {
+  return uint32val_;
 }
-inline void TypedPropertyValue::set_valueuint32(::google::protobuf::uint32 value) {
-  set_has_valueuint32();
-  valueuint32_ = value;
+inline void SignalSpecPropValue::set_uint32val(::google::protobuf::uint32 value) {
+  set_has_uint32val();
+  uint32val_ = value;
 }
 
-// optional int64 valueInt64 = 30;
-inline bool TypedPropertyValue::has_valueint64() const {
+// optional int64 int64Val = 12;
+inline bool SignalSpecPropValue::has_int64val() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void TypedPropertyValue::set_has_valueint64() {
+inline void SignalSpecPropValue::set_has_int64val() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void TypedPropertyValue::clear_has_valueint64() {
+inline void SignalSpecPropValue::clear_has_int64val() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void TypedPropertyValue::clear_valueint64() {
-  valueint64_ = GOOGLE_LONGLONG(0);
-  clear_has_valueint64();
+inline void SignalSpecPropValue::clear_int64val() {
+  int64val_ = GOOGLE_LONGLONG(0);
+  clear_has_int64val();
 }
-inline ::google::protobuf::int64 TypedPropertyValue::valueint64() const {
-  return valueint64_;
+inline ::google::protobuf::int64 SignalSpecPropValue::int64val() const {
+  return int64val_;
 }
-inline void TypedPropertyValue::set_valueint64(::google::protobuf::int64 value) {
-  set_has_valueint64();
-  valueint64_ = value;
+inline void SignalSpecPropValue::set_int64val(::google::protobuf::int64 value) {
+  set_has_int64val();
+  int64val_ = value;
 }
 
-// optional uint64 valueUInt64 = 40;
-inline bool TypedPropertyValue::has_valueuint64() const {
+// optional uint64 uint64Val = 13;
+inline bool SignalSpecPropValue::has_uint64val() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void TypedPropertyValue::set_has_valueuint64() {
+inline void SignalSpecPropValue::set_has_uint64val() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void TypedPropertyValue::clear_has_valueuint64() {
+inline void SignalSpecPropValue::clear_has_uint64val() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void TypedPropertyValue::clear_valueuint64() {
-  valueuint64_ = GOOGLE_ULONGLONG(0);
-  clear_has_valueuint64();
+inline void SignalSpecPropValue::clear_uint64val() {
+  uint64val_ = GOOGLE_ULONGLONG(0);
+  clear_has_uint64val();
 }
-inline ::google::protobuf::uint64 TypedPropertyValue::valueuint64() const {
-  return valueuint64_;
+inline ::google::protobuf::uint64 SignalSpecPropValue::uint64val() const {
+  return uint64val_;
 }
-inline void TypedPropertyValue::set_valueuint64(::google::protobuf::uint64 value) {
-  set_has_valueuint64();
-  valueuint64_ = value;
+inline void SignalSpecPropValue::set_uint64val(::google::protobuf::uint64 value) {
+  set_has_uint64val();
+  uint64val_ = value;
 }
 
-// optional double valueDouble = 50;
-inline bool TypedPropertyValue::has_valuedouble() const {
+// optional double doubleVal = 14;
+inline bool SignalSpecPropValue::has_doubleval() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void TypedPropertyValue::set_has_valuedouble() {
+inline void SignalSpecPropValue::set_has_doubleval() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void TypedPropertyValue::clear_has_valuedouble() {
+inline void SignalSpecPropValue::clear_has_doubleval() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void TypedPropertyValue::clear_valuedouble() {
-  valuedouble_ = 0;
-  clear_has_valuedouble();
+inline void SignalSpecPropValue::clear_doubleval() {
+  doubleval_ = 0;
+  clear_has_doubleval();
 }
-inline double TypedPropertyValue::valuedouble() const {
-  return valuedouble_;
+inline double SignalSpecPropValue::doubleval() const {
+  return doubleval_;
 }
-inline void TypedPropertyValue::set_valuedouble(double value) {
-  set_has_valuedouble();
-  valuedouble_ = value;
+inline void SignalSpecPropValue::set_doubleval(double value) {
+  set_has_doubleval();
+  doubleval_ = value;
 }
 
-// optional float valueFloat = 60;
-inline bool TypedPropertyValue::has_valuefloat() const {
+// optional bool boolVal = 15;
+inline bool SignalSpecPropValue::has_boolval() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void TypedPropertyValue::set_has_valuefloat() {
+inline void SignalSpecPropValue::set_has_boolval() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void TypedPropertyValue::clear_has_valuefloat() {
+inline void SignalSpecPropValue::clear_has_boolval() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void TypedPropertyValue::clear_valuefloat() {
-  valuefloat_ = 0;
-  clear_has_valuefloat();
+inline void SignalSpecPropValue::clear_boolval() {
+  boolval_ = false;
+  clear_has_boolval();
 }
-inline float TypedPropertyValue::valuefloat() const {
-  return valuefloat_;
+inline bool SignalSpecPropValue::boolval() const {
+  return boolval_;
 }
-inline void TypedPropertyValue::set_valuefloat(float value) {
-  set_has_valuefloat();
-  valuefloat_ = value;
+inline void SignalSpecPropValue::set_boolval(bool value) {
+  set_has_boolval();
+  boolval_ = value;
 }
 
-// optional bool valueBool = 70;
-inline bool TypedPropertyValue::has_valuebool() const {
+// optional string stringVal = 16;
+inline bool SignalSpecPropValue::has_stringval() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void TypedPropertyValue::set_has_valuebool() {
+inline void SignalSpecPropValue::set_has_stringval() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void TypedPropertyValue::clear_has_valuebool() {
+inline void SignalSpecPropValue::clear_has_stringval() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void TypedPropertyValue::clear_valuebool() {
-  valuebool_ = false;
-  clear_has_valuebool();
-}
-inline bool TypedPropertyValue::valuebool() const {
-  return valuebool_;
-}
-inline void TypedPropertyValue::set_valuebool(bool value) {
-  set_has_valuebool();
-  valuebool_ = value;
-}
-
-// optional string valueString = 80;
-inline bool TypedPropertyValue::has_valuestring() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
-}
-inline void TypedPropertyValue::set_has_valuestring() {
-  _has_bits_[0] |= 0x00000200u;
-}
-inline void TypedPropertyValue::clear_has_valuestring() {
-  _has_bits_[0] &= ~0x00000200u;
-}
-inline void TypedPropertyValue::clear_valuestring() {
-  if (valuestring_ != &::google::protobuf::internal::kEmptyString) {
-    valuestring_->clear();
+inline void SignalSpecPropValue::clear_stringval() {
+  if (stringval_ != &::google::protobuf::internal::kEmptyString) {
+    stringval_->clear();
   }
-  clear_has_valuestring();
+  clear_has_stringval();
 }
-inline const ::std::string& TypedPropertyValue::valuestring() const {
-  return *valuestring_;
+inline const ::std::string& SignalSpecPropValue::stringval() const {
+  return *stringval_;
 }
-inline void TypedPropertyValue::set_valuestring(const ::std::string& value) {
-  set_has_valuestring();
-  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
-    valuestring_ = new ::std::string;
+inline void SignalSpecPropValue::set_stringval(const ::std::string& value) {
+  set_has_stringval();
+  if (stringval_ == &::google::protobuf::internal::kEmptyString) {
+    stringval_ = new ::std::string;
   }
-  valuestring_->assign(value);
+  stringval_->assign(value);
 }
-inline void TypedPropertyValue::set_valuestring(const char* value) {
-  set_has_valuestring();
-  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
-    valuestring_ = new ::std::string;
+inline void SignalSpecPropValue::set_stringval(const char* value) {
+  set_has_stringval();
+  if (stringval_ == &::google::protobuf::internal::kEmptyString) {
+    stringval_ = new ::std::string;
   }
-  valuestring_->assign(value);
+  stringval_->assign(value);
 }
-inline void TypedPropertyValue::set_valuestring(const char* value, size_t size) {
-  set_has_valuestring();
-  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
-    valuestring_ = new ::std::string;
+inline void SignalSpecPropValue::set_stringval(const char* value, size_t size) {
+  set_has_stringval();
+  if (stringval_ == &::google::protobuf::internal::kEmptyString) {
+    stringval_ = new ::std::string;
   }
-  valuestring_->assign(reinterpret_cast<const char*>(value), size);
+  stringval_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* TypedPropertyValue::mutable_valuestring() {
-  set_has_valuestring();
-  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
-    valuestring_ = new ::std::string;
+inline ::std::string* SignalSpecPropValue::mutable_stringval() {
+  set_has_stringval();
+  if (stringval_ == &::google::protobuf::internal::kEmptyString) {
+    stringval_ = new ::std::string;
   }
-  return valuestring_;
+  return stringval_;
 }
-inline ::std::string* TypedPropertyValue::release_valuestring() {
-  clear_has_valuestring();
-  if (valuestring_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* SignalSpecPropValue::release_stringval() {
+  clear_has_stringval();
+  if (stringval_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = valuestring_;
-    valuestring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = stringval_;
+    stringval_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void TypedPropertyValue::set_allocated_valuestring(::std::string* valuestring) {
-  if (valuestring_ != &::google::protobuf::internal::kEmptyString) {
-    delete valuestring_;
+inline void SignalSpecPropValue::set_allocated_stringval(::std::string* stringval) {
+  if (stringval_ != &::google::protobuf::internal::kEmptyString) {
+    delete stringval_;
   }
-  if (valuestring) {
-    set_has_valuestring();
-    valuestring_ = valuestring;
+  if (stringval) {
+    set_has_stringval();
+    stringval_ = stringval;
   } else {
-    clear_has_valuestring();
-    valuestring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_stringval();
+    stringval_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
-}
-
-// optional string enumName = 90;
-inline bool TypedPropertyValue::has_enumname() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
-}
-inline void TypedPropertyValue::set_has_enumname() {
-  _has_bits_[0] |= 0x00000400u;
-}
-inline void TypedPropertyValue::clear_has_enumname() {
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline void TypedPropertyValue::clear_enumname() {
-  if (enumname_ != &::google::protobuf::internal::kEmptyString) {
-    enumname_->clear();
-  }
-  clear_has_enumname();
-}
-inline const ::std::string& TypedPropertyValue::enumname() const {
-  return *enumname_;
-}
-inline void TypedPropertyValue::set_enumname(const ::std::string& value) {
-  set_has_enumname();
-  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
-    enumname_ = new ::std::string;
-  }
-  enumname_->assign(value);
-}
-inline void TypedPropertyValue::set_enumname(const char* value) {
-  set_has_enumname();
-  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
-    enumname_ = new ::std::string;
-  }
-  enumname_->assign(value);
-}
-inline void TypedPropertyValue::set_enumname(const char* value, size_t size) {
-  set_has_enumname();
-  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
-    enumname_ = new ::std::string;
-  }
-  enumname_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TypedPropertyValue::mutable_enumname() {
-  set_has_enumname();
-  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
-    enumname_ = new ::std::string;
-  }
-  return enumname_;
-}
-inline ::std::string* TypedPropertyValue::release_enumname() {
-  clear_has_enumname();
-  if (enumname_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = enumname_;
-    enumname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TypedPropertyValue::set_allocated_enumname(::std::string* enumname) {
-  if (enumname_ != &::google::protobuf::internal::kEmptyString) {
-    delete enumname_;
-  }
-  if (enumname) {
-    set_has_enumname();
-    enumname_ = enumname;
-  } else {
-    clear_has_enumname();
-    enumname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// optional string enumItemName = 91;
-inline bool TypedPropertyValue::has_enumitemname() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
-}
-inline void TypedPropertyValue::set_has_enumitemname() {
-  _has_bits_[0] |= 0x00000800u;
-}
-inline void TypedPropertyValue::clear_has_enumitemname() {
-  _has_bits_[0] &= ~0x00000800u;
-}
-inline void TypedPropertyValue::clear_enumitemname() {
-  if (enumitemname_ != &::google::protobuf::internal::kEmptyString) {
-    enumitemname_->clear();
-  }
-  clear_has_enumitemname();
-}
-inline const ::std::string& TypedPropertyValue::enumitemname() const {
-  return *enumitemname_;
-}
-inline void TypedPropertyValue::set_enumitemname(const ::std::string& value) {
-  set_has_enumitemname();
-  if (enumitemname_ == &::google::protobuf::internal::kEmptyString) {
-    enumitemname_ = new ::std::string;
-  }
-  enumitemname_->assign(value);
-}
-inline void TypedPropertyValue::set_enumitemname(const char* value) {
-  set_has_enumitemname();
-  if (enumitemname_ == &::google::protobuf::internal::kEmptyString) {
-    enumitemname_ = new ::std::string;
-  }
-  enumitemname_->assign(value);
-}
-inline void TypedPropertyValue::set_enumitemname(const char* value, size_t size) {
-  set_has_enumitemname();
-  if (enumitemname_ == &::google::protobuf::internal::kEmptyString) {
-    enumitemname_ = new ::std::string;
-  }
-  enumitemname_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* TypedPropertyValue::mutable_enumitemname() {
-  set_has_enumitemname();
-  if (enumitemname_ == &::google::protobuf::internal::kEmptyString) {
-    enumitemname_ = new ::std::string;
-  }
-  return enumitemname_;
-}
-inline ::std::string* TypedPropertyValue::release_enumitemname() {
-  clear_has_enumitemname();
-  if (enumitemname_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = enumitemname_;
-    enumitemname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void TypedPropertyValue::set_allocated_enumitemname(::std::string* enumitemname) {
-  if (enumitemname_ != &::google::protobuf::internal::kEmptyString) {
-    delete enumitemname_;
-  }
-  if (enumitemname) {
-    set_has_enumitemname();
-    enumitemname_ = enumitemname;
-  } else {
-    clear_has_enumitemname();
-    enumitemname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// optional int32 enumItemValue = 92;
-inline bool TypedPropertyValue::has_enumitemvalue() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
-}
-inline void TypedPropertyValue::set_has_enumitemvalue() {
-  _has_bits_[0] |= 0x00001000u;
-}
-inline void TypedPropertyValue::clear_has_enumitemvalue() {
-  _has_bits_[0] &= ~0x00001000u;
-}
-inline void TypedPropertyValue::clear_enumitemvalue() {
-  enumitemvalue_ = 0;
-  clear_has_enumitemvalue();
-}
-inline ::google::protobuf::int32 TypedPropertyValue::enumitemvalue() const {
-  return enumitemvalue_;
-}
-inline void TypedPropertyValue::set_enumitemvalue(::google::protobuf::int32 value) {
-  set_has_enumitemvalue();
-  enumitemvalue_ = value;
 }
 
 // -------------------------------------------------------------------
 
-// TypedPropertyValues
+// SignalSpecPropValues
 
-// repeated .Proto.TypedPropertyValue value = 1;
-inline int TypedPropertyValues::value_size() const {
+// repeated .Proto.SignalSpecPropValue value = 1;
+inline int SignalSpecPropValues::value_size() const {
   return value_.size();
 }
-inline void TypedPropertyValues::clear_value() {
+inline void SignalSpecPropValues::clear_value() {
   value_.Clear();
 }
-inline const ::Proto::TypedPropertyValue& TypedPropertyValues::value(int index) const {
+inline const ::Proto::SignalSpecPropValue& SignalSpecPropValues::value(int index) const {
   return value_.Get(index);
 }
-inline ::Proto::TypedPropertyValue* TypedPropertyValues::mutable_value(int index) {
+inline ::Proto::SignalSpecPropValue* SignalSpecPropValues::mutable_value(int index) {
   return value_.Mutable(index);
 }
-inline ::Proto::TypedPropertyValue* TypedPropertyValues::add_value() {
+inline ::Proto::SignalSpecPropValue* SignalSpecPropValues::add_value() {
   return value_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >&
-TypedPropertyValues::value() const {
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::SignalSpecPropValue >&
+SignalSpecPropValues::value() const {
   return value_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::TypedPropertyValue >*
-TypedPropertyValues::mutable_value() {
+inline ::google::protobuf::RepeatedPtrField< ::Proto::SignalSpecPropValue >*
+SignalSpecPropValues::mutable_value() {
   return &value_;
 }
 
@@ -27208,10 +26946,6 @@ inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblSignalType>() {
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblDataFormat>() {
   return ::Proto::FblDataFormat_descriptor();
-}
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::Proto::TypedPropertyValueType>() {
-  return ::Proto::TypedPropertyValueType_descriptor();
 }
 
 }  // namespace google

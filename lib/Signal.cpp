@@ -64,7 +64,8 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 		m_inOutType = E::SignalInOutType::Input;
 	}
 	else
-	{
+    {
+
 		if (deviceSignal.isOutputSignal())
 		{
 			m_inOutType = E::SignalInOutType::Output;
