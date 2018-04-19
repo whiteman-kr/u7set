@@ -104,7 +104,8 @@ private:
 	QAction* m_pLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 
-	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarBuildInfo = nullptr;
+	QLabel* m_statusBarLmControlMode = nullptr;
 	QLabel* m_statusDiscreteCount = nullptr;
 	QLabel* m_statusBarLmErrors = nullptr;
 	QLabel* m_statusBarSor = nullptr;

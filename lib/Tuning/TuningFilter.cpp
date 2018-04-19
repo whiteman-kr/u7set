@@ -182,52 +182,16 @@ TuningFilter::TuningFilter(InterfaceType interfaceType)
 	m_interfaceType = interfaceType;
 }
 
+TuningFilter::~TuningFilter()
+{
+
+}
+
 TuningFilter& TuningFilter::operator=(const TuningFilter& That)
 {
 	copy(That);
 
 	return* this;
-}
-
-void TuningFilter::copy(const TuningFilter& That)
-{
-	m_ID = That.m_ID;
-	m_customID = That.m_customID;
-	m_caption = That.m_caption;
-
-	m_source = That.m_source;
-
-	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
-	m_equipmentIDMasks = That.m_equipmentIDMasks;
-	m_appSignalIDMasks = That.m_appSignalIDMasks;
-
-	m_signalValuesMap = That.m_signalValuesMap;
-	m_signalValuesVec = That.m_signalValuesVec;
-
-	m_interfaceType = That.m_interfaceType;
-	m_signalType = That.m_signalType;
-
-	m_hasDiscreteCounter = That.m_hasDiscreteCounter;
-
-	m_backColor = That.m_backColor;
-	m_textColor = That.m_textColor;
-
-	m_backSelectedColor = That.m_backSelectedColor;
-	m_textSelectedColor = That.m_textSelectedColor;
-
-	for (auto f : That.m_childFilters)
-	{
-		TuningFilter* fi = f.get();
-
-		std::shared_ptr<TuningFilter> fiCopy = std::make_shared<TuningFilter>(*fi);
-
-		addChild(fiCopy);
-	}
-}
-
-TuningFilter::~TuningFilter()
-{
-
 }
 
 bool TuningFilter::load(QXmlStreamReader& reader)
@@ -512,6 +476,145 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	return true;
 }
 
+bool TuningFilter::match(const AppSignalParam& object) const
+{
+	if (isEmpty() == true)
+	{
+		return true;
+	}
+
+	if (signalType() == TuningFilter::SignalType::Analog && object.isAnalog() == false)
+	{
+		return false;
+	}
+	if (signalType() == TuningFilter::SignalType::Discrete && object.isAnalog() == true)
+	{
+		return false;
+	}
+
+	// List of appSignalId
+	//
+	if (m_signalValuesVec.empty() == false)
+	{
+		if (valueExists(object.hash()) == false)
+		{
+			return false;
+		}
+	}
+
+	if (processMaskList(object.equipmentId(), m_equipmentIDMasks) == false)
+	{
+		return false;
+	}
+
+	if (processMaskList(object.appSignalId(), m_appSignalIDMasks) == false)
+	{
+		return false;
+	}
+
+	if (processMaskList(object.customSignalId(), m_customAppSignalIDMasks) == false)
+	{
+		return false;
+	}
+
+	TuningFilter* parent = parentFilter();
+
+	if (parent != nullptr)
+	{
+		return parent->match(object);
+	}
+	else
+	{
+		return true;
+	}
+}
+
+void TuningFilter::checkSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters)
+{
+	for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
+	{
+		const Hash& hash = it->first;
+		const TuningFilterValue& value = it->second;
+
+		if (find(signalHashes.begin(), signalHashes.end(), hash) == signalHashes.end())
+		{
+			notFoundSignalsAndFilters.push_back(std::make_pair<QString, QString>(value.appSignalId(), caption()));
+		}
+	}
+
+	int childCount = static_cast<int>(m_childFilters.size());
+	for (int i = 0; i < childCount; i++)
+	{
+		m_childFilters[i]->checkSignals(signalHashes, notFoundSignalsAndFilters);
+	}
+}
+
+void TuningFilter::removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter)
+{
+	std::vector<Hash> valuesToDelete;
+
+	for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
+	{
+		const Hash& hash = it->first;
+
+		if (find(signalHashes.begin(), signalHashes.end(), hash) == signalHashes.end())
+		{
+			removedCounter++;
+			valuesToDelete.push_back(hash);
+		}
+	}
+
+	for (Hash hash : valuesToDelete)
+	{
+		auto itm = m_signalValuesMap.find(hash);
+		if (itm != m_signalValuesMap.end())
+		{
+			m_signalValuesMap.erase(itm);
+		}
+		else
+		{
+			assert(false);
+		}
+
+		auto itv = std::find (m_signalValuesVec.begin(), m_signalValuesVec.end(), hash);
+		if (itv != m_signalValuesVec.end())
+		{
+			m_signalValuesVec.erase(itv);
+		}
+		else
+		{
+			assert(false);
+		}
+
+	}
+
+	int childCount = static_cast<int>(m_childFilters.size());
+	for (int i = 0; i < childCount; i++)
+	{
+		m_childFilters[i]->removeNotExistingSignals(signalHashes, removedCounter);
+	}
+}
+
+const std::vector<Hash>& TuningFilter::equipmentHashes() const
+{
+	return m_equipmentHashes;
+}
+
+void TuningFilter::setEquipmentHashes(std::vector<Hash> value)
+{
+	m_equipmentHashes = value;
+}
+
+const std::vector<Hash>& TuningFilter::signalsHashes() const
+{
+	return m_signalsHashes;
+}
+
+void TuningFilter::setSignalsHashes(std::vector<Hash> value)
+{
+	m_signalsHashes = value;
+}
+
 QString TuningFilter::ID() const
 {
 	return m_ID;
@@ -567,10 +670,79 @@ TuningFilter::Source TuningFilter::source() const
 	return m_source;
 }
 
-
 void TuningFilter::setSource(Source value)
 {
 	m_source = value;
+}
+
+TuningFilter::InterfaceType TuningFilter::interfaceType() const
+{
+	return m_interfaceType;
+}
+
+void TuningFilter::setInterfaceType(InterfaceType value)
+{
+	m_interfaceType = value;
+}
+
+TuningFilter::SignalType TuningFilter::signalType() const
+{
+	return m_signalType;
+}
+
+void TuningFilter::setSignalType(SignalType value)
+{
+	m_signalType = value;
+}
+
+QColor TuningFilter::backColor() const
+{
+	return m_backColor;
+}
+
+void TuningFilter::setBackColor(const QColor& value)
+{
+	m_backColor = value;
+}
+
+QColor TuningFilter::textColor() const
+{
+	return m_textColor;
+}
+
+void TuningFilter::setTextColor(const QColor& value)
+{
+	m_textColor = value;
+}
+
+QColor TuningFilter::backSelectedColor() const
+{
+	return m_backSelectedColor;
+}
+
+void TuningFilter::setBackSelectedColor(const QColor& value)
+{
+	m_backSelectedColor = value;
+}
+
+QColor TuningFilter::textSelectedColor() const
+{
+	return m_textSelectedColor;
+}
+
+void TuningFilter::setTextSelectedColor(const QColor& value)
+{
+	m_textSelectedColor = value;
+}
+
+bool TuningFilter::hasDiscreteCounter() const
+{
+	return m_hasDiscreteCounter;
+}
+
+void TuningFilter::setHasDiscreteCounter(bool value)
+{
+	m_hasDiscreteCounter = value;
 }
 
 QString TuningFilter::customAppSignalIDMask() const
@@ -770,75 +942,6 @@ void TuningFilter::setCounters(TuningCounters value)
 	m_counters = value;
 }
 
-TuningFilter::InterfaceType TuningFilter::interfaceType() const
-{
-	return m_interfaceType;
-}
-
-void TuningFilter::setInterfaceType(InterfaceType value)
-{
-	m_interfaceType = value;
-}
-
-TuningFilter::SignalType TuningFilter::signalType() const
-{
-	return m_signalType;
-}
-
-void TuningFilter::setSignalType(SignalType value)
-{
-	m_signalType = value;
-}
-
-QColor TuningFilter::backColor() const
-{
-	return m_backColor;
-}
-
-void TuningFilter::setBackColor(const QColor& value)
-{
-	m_backColor = value;
-}
-
-QColor TuningFilter::textColor() const
-{
-	return m_textColor;
-}
-
-void TuningFilter::setTextColor(const QColor& value)
-{
-	m_textColor = value;
-}
-
-QColor TuningFilter::backSelectedColor() const
-{
-	return m_backSelectedColor;
-}
-
-void TuningFilter::setBackSelectedColor(const QColor& value)
-{
-	m_backSelectedColor = value;
-}
-
-QColor TuningFilter::textSelectedColor() const
-{
-	return m_textSelectedColor;
-}
-
-void TuningFilter::setTextSelectedColor(const QColor& value)
-{
-	m_textSelectedColor = value;
-}
-
-bool TuningFilter::hasDiscreteCounter() const
-{
-	return m_hasDiscreteCounter;
-}
-
-void TuningFilter::setHasDiscreteCounter(bool value)
-{
-	m_hasDiscreteCounter = value;
-}
 
 TuningFilter* TuningFilter::parentFilter() const
 {
@@ -973,218 +1076,103 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 	return m_childFilters[index];
 }
 
-bool TuningFilter::match(const AppSignalParam& object) const
+void TuningFilter::copy(const TuningFilter& That)
 {
-	if (isEmpty() == true)
+	m_ID = That.m_ID;
+	m_customID = That.m_customID;
+	m_caption = That.m_caption;
+
+	m_source = That.m_source;
+
+	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
+	m_equipmentIDMasks = That.m_equipmentIDMasks;
+	m_appSignalIDMasks = That.m_appSignalIDMasks;
+
+	m_signalValuesMap = That.m_signalValuesMap;
+	m_signalValuesVec = That.m_signalValuesVec;
+
+	m_interfaceType = That.m_interfaceType;
+	m_signalType = That.m_signalType;
+
+	m_hasDiscreteCounter = That.m_hasDiscreteCounter;
+
+	m_backColor = That.m_backColor;
+	m_textColor = That.m_textColor;
+
+	m_backSelectedColor = That.m_backSelectedColor;
+	m_textSelectedColor = That.m_textSelectedColor;
+
+	for (auto f : That.m_childFilters)
+	{
+		TuningFilter* fi = f.get();
+
+		std::shared_ptr<TuningFilter> fiCopy = std::make_shared<TuningFilter>(*fi);
+
+		addChild(fiCopy);
+	}
+}
+
+bool TuningFilter::processMaskList(const QString& s, const QStringList& masks) const
+{
+	if (masks.isEmpty() == true)
 	{
 		return true;
 	}
 
-	if (signalType() == TuningFilter::SignalType::Analog && object.isAnalog() == false)
-	{
-		return false;
-	}
-	if (signalType() == TuningFilter::SignalType::Discrete && object.isAnalog() == true)
-	{
-		return false;
-	}
+	int directCount = 0;
+	int directMatch = 0;
+	int invertedCount = 0;
+	int invertedMatch = 0;
 
-	// List of appSignalId
-	//
-	if (m_signalValuesVec.empty() == false)
+	for (QString m : masks)
 	{
-		if (valueExists(object.hash()) == false)
+		if (m.isEmpty() == true)
 		{
-			return false;
+			continue;
 		}
-	}
-	// Mask for equipmentID
-	//
 
-	if (m_equipmentIDMasks.isEmpty() == false)
-	{
+		bool invertMask = m.contains('!');
+		m.remove('!');
 
-		QString s = object.equipmentId();
+		QRegExp rx(m.trimmed());
+		rx.setPatternSyntax(QRegExp::Wildcard);
 
-		bool result = false;
-
-		for (const QString& m : m_equipmentIDMasks)
+		if (invertMask == false)
 		{
-			if (m.isEmpty() == true)
+			directCount++;
+
+			if (rx.exactMatch(s) == true)
 			{
-				continue;
-			}
-			QRegExp rx(m.trimmed());
-			rx.setPatternSyntax(QRegExp::Wildcard);
-			if (rx.exactMatch(s))
-			{
-				result = true;
-				break;
+				directMatch++;
 			}
 		}
-		if (result == false)
+
+		if (invertMask == true)
 		{
-			return false;
-		}
-	}
+			invertedCount++;
 
-	// Mask for appSignalId
-	//
-
-	if (m_appSignalIDMasks.isEmpty() == false)
-	{
-
-		QString s = object.appSignalId();
-
-		bool result = false;
-
-		for (const QString& m : m_appSignalIDMasks)
-		{
-			if (m.isEmpty() == true)
+			if (rx.exactMatch(s) == false)
 			{
-				continue;
-			}
-			QRegExp rx(m.trimmed());
-			rx.setPatternSyntax(QRegExp::Wildcard);
-			if (rx.exactMatch(s))
-			{
-				result = true;
-				break;
+				invertedMatch++;
 			}
 		}
-		if (result == false)
-		{
-			return false;
-		}
 	}
 
-	// Mask for customAppSignalID
-	//
+	bool result = true;
 
-	if (m_customAppSignalIDMasks.isEmpty() == false)
+	if (directCount != 0 && directMatch == 0)
 	{
-		QString s = object.customSignalId();
-
-		bool result = false;
-
-		for (const QString& m : m_customAppSignalIDMasks)
-		{
-			if (m.isEmpty() == true)
-			{
-				continue;
-			}
-			QRegExp rx(m.trimmed());
-			rx.setPatternSyntax(QRegExp::Wildcard);
-			if (rx.exactMatch(s))
-			{
-				result = true;
-				break;
-			}
-		}
-		if (result == false)
-		{
-			return false;
-		}
+		result = false;
 	}
 
-	TuningFilter* parent = parentFilter();
-
-	if (parent != nullptr)
+	if (invertedCount != 0 && invertedCount != invertedMatch)
 	{
-		return parent->match(object);
+		result = false;
 	}
-	else
-	{
-		return true;
-	}
+
+	return result;
+
 }
-
-void TuningFilter::checkSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters)
-{
-	for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
-	{
-		const Hash& hash = it->first;
-		const TuningFilterValue& value = it->second;
-
-		if (find(signalHashes.begin(), signalHashes.end(), hash) == signalHashes.end())
-		{
-			notFoundSignalsAndFilters.push_back(std::make_pair<QString, QString>(value.appSignalId(), caption()));
-		}
-	}
-
-	int childCount = static_cast<int>(m_childFilters.size());
-	for (int i = 0; i < childCount; i++)
-	{
-		m_childFilters[i]->checkSignals(signalHashes, notFoundSignalsAndFilters);
-	}
-}
-
-void TuningFilter::removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter)
-{
-	std::vector<Hash> valuesToDelete;
-
-	for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
-	{
-		const Hash& hash = it->first;
-
-		if (find(signalHashes.begin(), signalHashes.end(), hash) == signalHashes.end())
-		{
-			removedCounter++;
-			valuesToDelete.push_back(hash);
-		}
-	}
-
-	for (Hash hash : valuesToDelete)
-	{
-		auto itm = m_signalValuesMap.find(hash);
-		if (itm != m_signalValuesMap.end())
-		{
-			m_signalValuesMap.erase(itm);
-		}
-		else
-		{
-			assert(false);
-		}
-
-		auto itv = std::find (m_signalValuesVec.begin(), m_signalValuesVec.end(), hash);
-		if (itv != m_signalValuesVec.end())
-		{
-			m_signalValuesVec.erase(itv);
-		}
-		else
-		{
-			assert(false);
-		}
-
-	}
-
-	int childCount = static_cast<int>(m_childFilters.size());
-	for (int i = 0; i < childCount; i++)
-	{
-		m_childFilters[i]->removeNotExistingSignals(signalHashes, removedCounter);
-	}
-}
-
-const std::vector<Hash>& TuningFilter::equipmentHashes() const
-{
-	return m_equipmentHashes;
-}
-
-void TuningFilter::setEquipmentHashes(std::vector<Hash> value)
-{
-	m_equipmentHashes = value;
-}
-
-const std::vector<Hash>& TuningFilter::signalsHashes() const
-{
-	return m_signalsHashes;
-}
-
-void TuningFilter::setSignalsHashes(std::vector<Hash> value)
-{
-	m_signalsHashes = value;
-}
-
 //
 // ObjectFilterStorage
 //

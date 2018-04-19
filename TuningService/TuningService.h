@@ -32,6 +32,8 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
+		const TuningSourceWorker* getSourceWorker(quint32 sourceIP) const;
+
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
 		bool singleLmControl() const;

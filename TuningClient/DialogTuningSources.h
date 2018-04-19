@@ -40,22 +40,21 @@ private:
 
 	void activateControl(bool enable);
 
-	enum class Columns
+	enum Columns
 	{
-		Id,
 		EquipmentId,
 		Caption,
 		Ip,
 		Port,
 		Channel,
 		SubsystemID,
-		Subsystem,
 		LmNumber,
 
-		IsReply,
+		State,
+		IsActive,
+		HasUnappliedParams,
 		RequestCount,
 		ReplyCount,
-		CommandQueueSize,
 
 		ColumnCount
 	};

@@ -288,6 +288,18 @@ message GetTuningSourcesStates
 {
 }
 
+message SignalsAssociatedToTuningSource
+{
+    required uint64 sourceID = 1;
+    repeated uint64 signalHash = 2;
+}
+
+message TuningSourceFilling
+{
+    required uint64 signalCount = 1;
+    repeated SignalsAssociatedToTuningSource signalsPerSource = 2;
+}
+
 message TuningSourceState
 {
     optional uint64 sourceID = 1 [default = 0];

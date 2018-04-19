@@ -356,11 +356,12 @@ void AppDataServiceWidget::updateStateInfo()
 
 	quint32 ip = m_serviceInfo.clientrequestip();
 	quint16 port = m_serviceInfo.clientrequestport();
-	QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
 
-	if (ip != getWorkingClientRequestIp())
+	quint32 workingIp = getWorkingClientRequestIp();
+
+	if (ip != workingIp)
 	{
-		address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(getWorkingClientRequestIp()).toString() + QString(":%1").arg(port);
+		ip = workingIp;
 	}
 
 	if (m_tcpClientSocket != nullptr)

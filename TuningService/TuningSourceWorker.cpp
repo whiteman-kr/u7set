@@ -260,7 +260,7 @@ namespace Tuning
 		m_stat.get(tuningSourceState);
 	}
 
-	void TuningSourceWorker::readSignalState(Network::TuningSignalState* tss)
+	void TuningSourceWorker::readSignalState(Network::TuningSignalState* tss) const
 	{
 		TEST_PTR_RETURN(tss);
 
@@ -279,7 +279,7 @@ namespace Tuning
 			return;
 		}
 
-		TuningSignal& ts = m_tuningSignals[signalIndex];
+		const TuningSignal& ts = m_tuningSignals[signalIndex];
 
 		tss->set_valid(ts.valid());
 

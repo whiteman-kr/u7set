@@ -33,6 +33,22 @@ protected:
 };
 
 //
+// BuildInfo
+//
+struct BuildInfo
+{
+	QString projectName;
+	int buildNo = -1;
+	QString configuration;
+	QString date;
+	int changeset = -1;
+	QString user;
+	QString workstation;
+
+};
+
+
+//
 // SchemaSettings
 //
 
@@ -79,6 +95,8 @@ struct ConfigSettings
 	QStringList usersAccounts;
 
 	std::vector<SchemaSettings> schemas;
+
+	BuildInfo buildInfo;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };

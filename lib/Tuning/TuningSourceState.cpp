@@ -216,3 +216,8 @@ void TuningSource::invalidate()
 	m_valid = false;
 	state.set_setsor(false);
 }
+
+const ::Network::TuningSourceState& TuningSource::previousState() const
+{
+	return m_previousState;
+}
