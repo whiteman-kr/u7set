@@ -23,6 +23,13 @@ protected:
 private:
 	void updateData();
 
+	void setChildText(QTreeWidgetItem* item, int childIndex, quint64 number, quint64 previousNumber);
+	void setChildText(QTreeWidgetItem* item, int childIndex, quint64 number);
+	void setChildText(QTreeWidgetItem* item, int childIndex, const QString& text);
+
+	void updateParentItemState(QTreeWidgetItem* item);
+
+
 private:
 	int m_updateStateTimerId = -1;
 
