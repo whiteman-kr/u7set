@@ -211,7 +211,9 @@ SOURCES +=\
     Builder/ConfigurationServiceCfgGenerator.cpp \
     ../lib/TuningValue.cpp \
     SpecificPropertiesEditor.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    ../lib/TypedPropertyValue.cpp
+
 
 HEADERS  += \
     CentralWidget.h \
@@ -358,7 +360,9 @@ HEADERS  += \
     SpecificPropertiesEditor.h \
     Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    ../lib/TypedPropertyValue.h
+
 
 FORMS    += \
     CreateProjectDialog.ui \

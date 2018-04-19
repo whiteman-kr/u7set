@@ -461,10 +461,6 @@ namespace Proto
 
 	bool loadProperty(const ::Proto::Property& protoProperty, const std::shared_ptr<::Property>& property);
 	bool loadProperty(const ::Proto::Property& protoProperty, ::Property* property);
-
-	bool savePropertyValue(const QString& name, const QVariant& value, ::Proto::PropertyValue* propertyValue);
-	bool loadPropertyValue(const ::Proto::PropertyValue& propertyValue, const QString* name, QVariant* value);
-
 }
 
 

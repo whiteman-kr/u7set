@@ -978,9 +978,10 @@ enum TypedPropertyValueType
     _Int64 = 3;
     _UInt64 = 4;
     _Double = 5;
-    _Bool = 6;
-    _String = 7;
-    _Enum = 8;
+    _Float = 6;
+    _Bool = 7;
+    _String = 8;
+    _Enum = 9;
 }
 
 message TypedPropertyValue
@@ -988,16 +989,19 @@ message TypedPropertyValue
     required string name = 1;
     required TypedPropertyValueType type = 2 [default = _Invalid];
 
-    optional int32 valueInt32 = 11;
-    optional uint32 valueUInt32 = 12;
-    optional int64 valueInt64 = 13;
-    optional uint64 valueUInt64 = 14;
-    optional double valueDouble = 15;
-    optional bool valueBool = 16;
-    optional string valueString = 17;
+    optional int32 valueInt32 = 10;
+    optional uint32 valueUInt32 = 20;
+    optional int64 valueInt64 = 30;
+    optional uint64 valueUInt64 = 40;
+    optional double valueDouble = 50;
+    optional float valueFloat = 60;
+    optional bool valueBool = 70;
 
-    optional string enumName = 18;
-    optional string enumValue = 19;
+    optional string valueString = 80;
+
+    optional string enumName = 90;
+    optional string enumItemName = 91;
+    optional int32 enumItemValue = 92;
 }
 
 message TypedPropertyValues
