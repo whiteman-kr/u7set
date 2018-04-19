@@ -2135,6 +2135,9 @@ R"DELIM({
 
 		return	family == FamilyType::AIM ||
 				family == FamilyType::DIM ||
+				family == FamilyType::WAIM ||
+				family == FamilyType::TIM ||
+				family == FamilyType::RIM ||
 				family == FamilyType::AIFM ||
 				family == FamilyType::MPS17;
 	}
@@ -2358,6 +2361,7 @@ R"DELIM({
 
 		signalSpecPropsStrucProp->setUpdateFromPreset(true);
 		signalSpecPropsStrucProp->setExpert(m_preset);
+		signalSpecPropsStrucProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
 		return;
 	}

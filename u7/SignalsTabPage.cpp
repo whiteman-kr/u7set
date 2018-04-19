@@ -1236,29 +1236,29 @@ void SignalsModel::addSignal()
 
 	auto loader = [&settings](const QString& name)
 	{
-		return settings.value(lastEditedSignalFieldValuePlace + name);
+		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name);
 	};
 
-	signal.setLowADC(loader(lowADCCaption).toInt());
-	signal.setHighADC(loader(highADCCaption).toInt());
-	signal.setLowEngeneeringUnits(loader(lowEngeneeringUnitsCaption).toDouble());
-	signal.setHighEngeneeringUnits(loader(highEngeneeringUnitsCaption).toDouble());
-	signal.setUnit(loader(unitCaption).toString());
-	signal.setLowValidRange(loader(lowValidRangeCaption).toDouble());
-	signal.setHighValidRange(loader(highValidRangeCaption).toDouble());
+	signal.setLowADC(loader(SignalProperties::lowADCCaption).toInt());
+	signal.setHighADC(loader(SignalProperties::highADCCaption).toInt());
+	signal.setLowEngeneeringUnits(loader(SignalProperties::lowEngeneeringUnitsCaption).toDouble());
+	signal.setHighEngeneeringUnits(loader(SignalProperties::highEngeneeringUnitsCaption).toDouble());
+	signal.setUnit(loader(SignalProperties::unitCaption).toString());
+	signal.setLowValidRange(loader(SignalProperties::lowValidRangeCaption).toDouble());
+	signal.setHighValidRange(loader(SignalProperties::highValidRangeCaption).toDouble());
 
-	signal.setElectricLowLimit(loader(electricLowLimitCaption).toDouble());
-	signal.setElectricHighLimit(loader(electricHighLimitCaption).toDouble());
-	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(electricUnitCaption).toInt()));
-	signal.setSensorType(static_cast<E::SensorType>(loader(sensorTypeCaption).toInt()));
-	signal.setOutputMode(static_cast<E::OutputMode>(loader(outputModeCaption).toInt()));
+	signal.setElectricLowLimit(loader(SignalProperties::electricLowLimitCaption).toDouble());
+	signal.setElectricHighLimit(loader(SignalProperties::electricHighLimitCaption).toDouble());
+	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(SignalProperties::electricUnitCaption).toInt()));
+	signal.setSensorType(static_cast<E::SensorType>(loader(SignalProperties::sensorTypeCaption).toInt()));
+	signal.setOutputMode(static_cast<E::OutputMode>(loader(SignalProperties::outputModeCaption).toInt()));
 
-	signal.setAcquire(loader(acquireCaption).toBool());
-	signal.setDecimalPlaces(loader(decimalPlacesCaption).toInt());
-	signal.setCoarseAperture(loader(coarseApertureCaption).toDouble());
-	signal.setFineAperture(loader(fineApertureCaption).toDouble());
-	signal.setFilteringTime(loader(filteringTimeCaption).toDouble());
-	signal.setSpreadTolerance(loader(spreadToleranceCaption).toDouble());
+	signal.setAcquire(loader(SignalProperties::acquireCaption).toBool());
+	signal.setDecimalPlaces(loader(SignalProperties::decimalPlacesCaption).toInt());
+	signal.setCoarseAperture(loader(SignalProperties::coarseApertureCaption).toDouble());
+	signal.setFineAperture(loader(SignalProperties::fineApertureCaption).toDouble());
+	signal.setFilteringTime(loader(SignalProperties::filteringTimeCaption).toDouble());
+	signal.setSpreadTolerance(loader(SignalProperties::spreadToleranceCaption).toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder::BigEndian);
 
@@ -1861,7 +1861,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 
 	QComboBox* busTypeIdComboBox = new QComboBox(&signalCreationSettingsDialog);
 	busTypeIdComboBox->setEditable(true);
-	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdComboBox));
+	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), busTypeIdComboBox));
 	busTypeIdComboBox->setVisible(false);
 
 	BusStorage busStorage(dbc);

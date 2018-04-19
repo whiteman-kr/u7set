@@ -40,6 +40,8 @@
 										return; \
 									}
 
+#define DEBUG_STOP					{ int a = 0; a++; }
+
 
 #define AUTO_LOCK(mutex) QMutexLocker m(&mutex);
 

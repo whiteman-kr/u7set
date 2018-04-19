@@ -94,9 +94,9 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	// specific properties processing
 	//
-	m_specPropsStruct = deviceSignal.signalSpecPropsStruc();
+	m_specPropStruct = deviceSignal.signalSpecPropsStruc();
 
-	createSpecProps();
+//	createSpecPropValues();
 }
 
 Signal::~Signal()
@@ -256,14 +256,16 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busType
 
 bool Signal::setSpecPropsStruct(const QString& specPropsStruct, bool updateExistsValues)
 {
-	m_specPropsStruct = specPropsStruct;
+	m_specPropStruct = specPropsStruct;
 
 	if (updateExistsValues == true)
 	{
-		return updateSpecProps();
+//		return updateSpecPropValues();
 	}
 
-	return createSpecProps();
+	//return createSpecPropValues();
+
+	return true;
 }
 
 void Signal::resetAddresses()
@@ -1205,19 +1207,19 @@ void Signal::updateTuningValuesType()
 	m_tuningLowBound.setType(tvType);
 	m_tuningHighBound.setType(tvType);
 }
-
-bool Signal::createSpecProps()
+/*
+bool Signal::createSpecPropValues()
 {
-	m_specPropsValues.clear();
+	m_specPropValues.clear();
 
-	if (m_specPropsStruct.isEmpty() == true)
+	if (m_specPropStruct.isEmpty() == true)
 	{
 		return true;
 	}
 
 	PropertyObject pob;
 
-	std::pair<bool, QString> result = pob.parseSpecificPropertiesStruct(m_specPropsStruct);
+	std::pair<bool, QString> result = pob.parseSpecificPropertiesStruct(m_specPropStruct);
 
 	if (result.first == false)
 	{
@@ -1227,40 +1229,42 @@ bool Signal::createSpecProps()
 
 	std::vector<std::shared_ptr<Property>> properties = pob.properties();
 
-	::Proto::PropertyValues propValues;
+	Proto::TypedPropertyValues protoTypedValues;
 
 	for(std::shared_ptr<Property> property : properties)
 	{
-		::Proto::Property* protoProperty = propValues.add_propertyvalue();
+		TypedPropertyValue typedValue(property);
 
-		::Proto::saveProperty(protoProperty, property);
+		Proto::TypedPropertyValue* protoTypedValue = protoTypedValues.add_value();
+
+		typedValue.save(protoTypedValue);
 	}
 
-	int size = propValues.ByteSize();
+	int size = protoTypedValues.ByteSize();
 
-	m_specPropsValues.resize(size);
+	m_specPropValues.resize(size);
 
-	propValues.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(m_specPropsValues.data()));
+	protoTypedValues.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(m_specPropValues.data()));
 
 	return true;
 }
 
-bool Signal::updateSpecProps()
+bool Signal::updateSpecPropValues()
 {
 	assert(false);			// should be implemented
 	return false;
 }
 
-bool Signal::parseSpecPropValues(::Proto::PropertyValues* propValues)
+bool Signal::parseSpecPropValues(::Proto::TypedPropertyValues* propValues)
 {
 	TEST_PTR_RETURN_FALSE(propValues);
 
-	if (m_specPropsValues.isEmpty() == true)
+	if (m_specPropValues.isEmpty() == true)
 	{
 		return false;
 	}
 
-	return propValues->ParseFromArray(m_specPropsValues.constData(), m_specPropsValues.size());
+	return propValues->ParseFromArray(m_specPropValues.constData(), m_specPropValues.size());
 }
 
 QVariant Signal::getSpecPropertyValue(const QString& propName)
@@ -1304,7 +1308,7 @@ QVariant Signal::getSpecPropertyValue(const QString& propName)
 	return invalidValue;
 }
 
-
+*/
 // --------------------------------------------------------------------------------------------------------
 //
 // SignalSet class implementation

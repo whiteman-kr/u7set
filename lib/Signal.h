@@ -2,15 +2,17 @@
 
 #include <QString>
 #include <QMultiHash>
-#include "../lib/Types.h"
-#include "../lib/DbStruct.h"
-#include "../lib/OrderedHash.h"
-#include "../lib/DeviceObject.h"
-#include "../lib/Address16.h"
+
+#include "Types.h"
+#include "DbStruct.h"
+#include "OrderedHash.h"
+#include "DeviceObject.h"
+#include "Address16.h"
 #include "../VFrame30/Afb.h"
-#include "../lib/ProtobufHelper.h"
-#include "../lib/Hash.h"
-#include "../lib/TuningValue.h"
+#include "ProtobufHelper.h"
+#include "Hash.h"
+#include "TuningValue.h"
+//#include "TypedPropertyValue.h"
 
 
 class QXmlStreamAttributes;
@@ -235,7 +237,7 @@ public:
 
 	// Specific properties
 
-	QString specPropsStruct() const { return m_specPropsStruct; }
+	QString specPropsStruct() const { return m_specPropStruct; }
 	bool setSpecPropsStruct(const QString& specPropsStruct, bool updateExistsValues);
 
 	// Signal fields from database
@@ -336,11 +338,11 @@ private:
 
 	//
 
-	bool createSpecProps();
-	bool updateSpecProps();
+	bool createSpecPropValues();
+	bool updateSpecPropValues();
 
-	bool parseSpecPropValues(::Proto::PropertyValues* propValues);
-	QVariant getSpecPropertyValue(const QString& propName);
+//	bool parseSpecPropValues(Proto::TypedPropertyValues* propValues);
+//	QVariant getSpecPropertyValue(const QString& propName);
 
 private:
 	// Signal identificators
@@ -408,8 +410,8 @@ private:
 	// Signal specific properties
 	//
 
-	QString m_specPropsStruct;
-	ProtoData m_specPropsValues;					// serialized protobuf message Proto::PropertyValues
+	QString m_specPropStruct;
+	ProtoData m_specPropValues;					// serialized protobuf message Proto::PropertyValues
 
 	// Signal fields from database
 	//

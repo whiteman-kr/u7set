@@ -4,77 +4,127 @@
 #include "PropertyObject.h"
 
 
-static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
-static const QString signalGroupIDCaption("SignalGroupID");
-static const QString signalInstanceIDCaption("SignalInstanceID");
-static const QString changesetIDCaption("ChangesetID");
-static const QString checkedOutCaption("CheckedOut");
-static const QString userIdCaption("UserID");
-static const QString channelCaption("Channel");
-static const QString createdCaption("Created");
-static const QString deletedCaption("Deleted");
-static const QString instanceCreatedCaption("InstanceCreated");
-static const QString typeCaption("Type");
-static const QString inOutTypeCaption("InOutType");
-static const QString cacheValidator("^[#]?[A-Za-z\\d_]*$");
-static const QString appSignalIDCaption("AppSignalID");
-static const QString customSignalIDCaption("CustomAppSignalID");
-static const QString busTypeIDCaption("BusTypeID");
-static const QString captionCaption("Caption");
-static const QString captionValidator("^.+$");
-static const QString analogSignalFormatCaption("AnalogSignalFormat");
-static const QString dataSizeCaption("DataSize");
-static const QString lowADCCaption("LowADC");
-static const QString highADCCaption("HighADC");
-static const QString lowDACCaption("LowDAC");
-static const QString highDACCaption("HighDAC");
-static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
-static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
-static const QString unitCaption("Unit");
-static const QString lowValidRangeCaption("LowValidRange");
-static const QString highValidRangeCaption("HighValidRange");
-static const QString electricLowLimitCaption("ElectricLowLimit");
-static const QString electricHighLimitCaption("ElectricHighLimit");
-static const QString electricUnitCaption("ElectricUnit");
-static const QString sensorTypeCaption("SensorType");
-static const QString outputModeCaption("OutputMode");
-static const QString acquireCaption("Acquire");
-static const QString decimalPlacesCaption("DecimalPlaces");
-static const QString coarseApertureCaption("CoarseAperture");
-static const QString fineApertureCaption("FineAperture");
-static const QString adaptiveApertureCaption("AdaptiveAperture");
-static const QString filteringTimeCaption("FilteringTime");
-static const QString spreadToleranceCaption("SpreadTolerance");
-static const QString byteOrderCaption("ByteOrder");
-static const QString equipmentIDCaption("EquipmentID");
-static const QString enableTuningCaption("EnableTuning");
-static const QString tuningDefaultValueCaption("TuningDefaultValue");
-static const QString tuningLowBoundCaption("TuningLowBound");
-static const QString tuningHighBoundCaption("TuningHighBound");
-static const QString identificationCategory("1 Identification");
-static const QString signalTypeCategory("2 Signal type");
-static const QString dataFormatCategory("3 Data Format");
-static const QString signalProcessingCategory("4 Signal processing");
-static const QString electricParametersCategory("5 Electric parameters");
-static const QString onlineMonitoringSystemCategory("6 Online Monitoring System");
-static const QString tuningCategory("7 Tuning");
+//static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
+//static const QString signalGroupIDCaption("SignalGroupID");
+//static const QString signalInstanceIDCaption("SignalInstanceID");
+//static const QString changesetIDCaption("ChangesetID");
+//static const QString checkedOutCaption("CheckedOut");
+//static const QString userIdCaption("UserID");
+//static const QString channelCaption("Channel");
+//static const QString createdCaption("Created");
+//static const QString deletedCaption("Deleted");
+//static const QString instanceCreatedCaption("InstanceCreated");
+//static const QString typeCaption("Type");
+//static const QString inOutTypeCaption("InOutType");
+//static const QString cacheValidator("^[#]?[A-Za-z\\d_]*$");
+//static const QString appSignalIDCaption("AppSignalID");
+//static const QString customSignalIDCaption("CustomAppSignalID");
+//static const QString busTypeIDCaption("BusTypeID");
+//static const QString captionCaption("Caption");
+//static const QString captionValidator("^.+$");
+//static const QString analogSignalFormatCaption("AnalogSignalFormat");
+//static const QString dataSizeCaption("DataSize");
+//static const QString lowADCCaption("LowADC");
+//static const QString highADCCaption("HighADC");
+//static const QString lowDACCaption("LowDAC");
+//static const QString highDACCaption("HighDAC");
+//static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
+//static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
+//static const QString unitCaption("Unit");
+//static const QString lowValidRangeCaption("LowValidRange");
+//static const QString highValidRangeCaption("HighValidRange");
+//static const QString electricLowLimitCaption("ElectricLowLimit");
+//static const QString electricHighLimitCaption("ElectricHighLimit");
+//static const QString electricUnitCaption("ElectricUnit");
+//static const QString sensorTypeCaption("SensorType");
+//static const QString outputModeCaption("OutputMode");
+//static const QString acquireCaption("Acquire");
+//static const QString decimalPlacesCaption("DecimalPlaces");
+//static const QString coarseApertureCaption("CoarseAperture");
+//static const QString fineApertureCaption("FineAperture");
+//static const QString adaptiveApertureCaption("AdaptiveAperture");
+//static const QString filteringTimeCaption("FilteringTime");
+//static const QString spreadToleranceCaption("SpreadTolerance");
+//static const QString byteOrderCaption("ByteOrder");
+//static const QString equipmentIDCaption("EquipmentID");
+//static const QString enableTuningCaption("EnableTuning");
+//static const QString tuningDefaultValueCaption("TuningDefaultValue");
+//static const QString tuningLowBoundCaption("TuningLowBound");
+//static const QString tuningHighBoundCaption("TuningHighBound");
 
-static const QString lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
+//static const QString categoryIdentification("1 Identification");
+//static const QString categorySignalType("2 Signal type");
+//static const QString categoryDataFormat("3 Data Format");
+//static const QString categorySignalProcessing("4 Signal processing");
+//static const QString categoryElectricParameters("5 Electric parameters");
+//static const QString categoryOnlineMonitoringSystem("6 Online Monitoring System");
+//static const QString categoryTuning("7 Tuning");
+
+//static const QString lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
 class SignalProperties : public PropertyObject
 {
 	Q_OBJECT
 
-private:
-	Signal m_signal;
-	static std::shared_ptr<OrderedHash<int, QString>> m_sensorTypeHash;
-	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
+public:
+	static const QString idCaption;
+	static const QString signalGroupIDCaption;
+	static const QString signalInstanceIDCaption;
+	static const QString changesetIDCaption;
+	static const QString checkedOutCaption;
+	static const QString userIdCaption;
+	static const QString channelCaption;
+	static const QString createdCaption;
+	static const QString deletedCaption;
+	static const QString instanceCreatedCaption;
+	static const QString typeCaption;
+	static const QString inOutTypeCaption;
+	static const QString cacheValidator;
+	static const QString appSignalIDCaption;
+	static const QString customSignalIDCaption;
+	static const QString busTypeIDCaption;
+	static const QString captionCaption;
+	static const QString captionValidator;
+	static const QString analogSignalFormatCaption;
+	static const QString dataSizeCaption;
+	static const QString lowADCCaption;
+	static const QString highADCCaption;
+	static const QString lowDACCaption;
+	static const QString highDACCaption;
+	static const QString lowEngeneeringUnitsCaption;
+	static const QString highEngeneeringUnitsCaption;
+	static const QString unitCaption;
+	static const QString lowValidRangeCaption;
+	static const QString highValidRangeCaption;
+	static const QString electricLowLimitCaption;
+	static const QString electricHighLimitCaption;
+	static const QString electricUnitCaption;
+	static const QString sensorTypeCaption;
+	static const QString outputModeCaption;
+	static const QString acquireCaption;
+	static const QString decimalPlacesCaption;
+	static const QString coarseApertureCaption;
+	static const QString fineApertureCaption;
+	static const QString adaptiveApertureCaption;
+	static const QString filteringTimeCaption;
+	static const QString spreadToleranceCaption;
+	static const QString byteOrderCaption;
+	static const QString equipmentIDCaption;
+	static const QString enableTuningCaption;
+	static const QString tuningDefaultValueCaption;
+	static const QString tuningLowBoundCaption;
+	static const QString tuningHighBoundCaption;
 
-	std::vector<Property*> m_propertiesDependentOnPrecision;
+	static const QString categoryIdentification;
+	static const QString categorySignalType;
+	static const QString categoryDataFormat;
+	static const QString categorySignalProcessing;
+	static const QString categoryElectricParameters;
+	static const QString categoryOnlineMonitoringSystem;
+	static const QString categoryTuning;
 
-	void initProperties();
-	static std::shared_ptr<OrderedHash<int, QString>> generateOrderedHashFromStringArray(const char* const* array, size_t size);
+	static const QString lastEditedSignalFieldValuePlace;
 
 public:
 	explicit SignalProperties(Signal& signal);
@@ -111,5 +161,15 @@ public:
 	Q_INVOKABLE float tuningDefaultValue() const { return m_signal.tuningDefaultValue().toFloat(); }
 	Q_INVOKABLE float tuningLowBound() const { return m_signal.tuningLowBound().toFloat(); }
 	Q_INVOKABLE float tuningHighBound() const { return m_signal.tuningHighBound().toFloat(); }
+
+private:
+	Signal m_signal;
+	static std::shared_ptr<OrderedHash<int, QString>> m_sensorTypeHash;
+	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
+
+	std::vector<Property*> m_propertiesDependentOnPrecision;
+
+	void initProperties();
+	static std::shared_ptr<OrderedHash<int, QString>> generateOrderedHashFromStringArray(const char* const* array, size_t size);
 };
 

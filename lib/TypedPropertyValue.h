@@ -1,6 +1,9 @@
 #pragma once
 
 #include <QtCore>
+#include <memory>
+
+#include "PropertyObject.h"
 #include "../Proto/serialization.pb.h"
 
 class TypedPropertyValue
@@ -29,6 +32,8 @@ private:
 public:
 	TypedPropertyValue();
 	TypedPropertyValue(const QVariant& qVarValue);
+	TypedPropertyValue(std::shared_ptr<Property> prop);
+	TypedPropertyValue(const Property* prop);
 
 	QString name() const { return m_name; }
 	Proto::TypedPropertyValueType type() const { return m_type; }

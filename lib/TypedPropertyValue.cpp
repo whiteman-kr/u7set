@@ -10,8 +10,16 @@ TypedPropertyValue::TypedPropertyValue()
 
 TypedPropertyValue::TypedPropertyValue(const QVariant& qVarValue)
 {
-
 }
+
+TypedPropertyValue::TypedPropertyValue(std::shared_ptr<Property> prop)
+{
+}
+
+TypedPropertyValue::TypedPropertyValue(const Property* prop)
+{
+}
+
 
 
 bool TypedPropertyValue::save(Proto::TypedPropertyValue* protoValue)
