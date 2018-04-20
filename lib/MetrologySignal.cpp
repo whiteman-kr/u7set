@@ -305,7 +305,7 @@ namespace Metrology
 				m_electricHighLimit = 0;
 				m_electricUnitID = E::ElectricUnit::NoUnit;
 
-				m_electricSensorType = E::SensorType::NoSensorType;
+				m_electricSensorType = E::SensorType::NoSensor;
 				m_electricPrecision = 0;
 
 				break;

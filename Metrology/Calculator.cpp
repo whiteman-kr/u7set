@@ -209,7 +209,7 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		if (pair.sensorType == E::SensorType::NoSensorType)
+		if (pair.sensorType == E::SensorType::NoSensor)
 		{
 			continue;
 		}
@@ -246,7 +246,7 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		if (pair.sensorType == E::SensorType::NoSensorType)
+		if (pair.sensorType == E::SensorType::NoSensor)
 		{
 			continue;
 		}
@@ -310,7 +310,7 @@ void Calculator::conversionTr()
 		return;
 	}
 
-	if (sensorType == E::SensorType::NoSensorType)
+	if (sensorType == E::SensorType::NoSensor)
 	{
 		return;
 	}
@@ -352,7 +352,7 @@ void Calculator::conversionTc()
 		return;
 	}
 
-	if (sensorType == E::SensorType::NoSensorType)
+	if (sensorType == E::SensorType::NoSensor)
 	{
 		return;
 	}

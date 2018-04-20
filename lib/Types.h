@@ -204,7 +204,7 @@ public:
 	//
 	enum SensorType
 	{
-		NoSensorType = 0,
+		NoSensor = 0,
 
 		Ohm_Pt50_W1391 = 1,
 		Ohm_Pt100_W1391 = 2,
