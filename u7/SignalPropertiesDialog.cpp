@@ -176,6 +176,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		signalProperties->propertyByCaption(SignalProperties::byteOrderCaption)->setReadOnly(true);
 
 		auto& s = signalProperties->signal();
+
 		if (s.signalType() == E::SignalType::Bus)
 		{
 			signalProperties->propertyByCaption(SignalProperties::dataSizeCaption)->setVisible(false);
@@ -199,7 +200,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			signalProperties->propertyByCaption(SignalProperties::tuningHighBoundCaption)->setVisible(false);
 		}
 
-		if (s.isAnalog())
+		if (s.isAnalog() == true)
 		{
 			if (s.isInput() == false)
 			{
@@ -214,13 +215,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				signalProperties->propertyByCaption(SignalProperties::sensorTypeCaption)->setVisible(false);
 			}
 
-			if (s.isInternal())
+			if (s.isInternal() == true)
 			{
 				signalProperties->propertyByCaption(SignalProperties::lowADCCaption)->setVisible(false);
 				signalProperties->propertyByCaption(SignalProperties::highADCCaption)->setVisible(false);
 			}
 
-			if (s.isOutput())
+			if (s.isOutput() == true)
 			{
 				signalProperties->propertyByCaption(SignalProperties::lowADCCaption)->setVisible(false);
 				signalProperties->propertyByCaption(SignalProperties::highADCCaption)->setVisible(false);
