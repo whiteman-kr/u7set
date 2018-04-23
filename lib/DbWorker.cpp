@@ -227,6 +227,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0208.sql", "Upgrade to version 208, To LM1-SR02 added: indic_latch, indic_stless, bus_indic_latch, bus_indic_stless"},
 	{":/DatabaseUpgrade/Upgrade0209.sql", "Upgrade to version 209, Services and LM scripts presets update"},
 	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
+	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, Appends specfic properties and potobuf fields to app signals"},
 };
 
 
@@ -1659,9 +1660,30 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 				QString upgradeScript = upgradeFile.readAll();
 
+				int newVersion = i + 1;			// 'i' is index of update file, +1 to get project version
+
+				// Before update processing
+				//
+				{
+					QString errorMessage;
+
+					result = processingBeforeDatabaseUpgrade(db, newVersion, &errorMessage);
+
+					if (result == false)
+					{
+						if (errorMessage.isEmpty() == true)
+						{
+							errorMessage = QString("Processing error before database has been upgraded to version %1 !").arg(newVersion);
+						}
+
+						emitError(QSqlDatabase(), errorMessage, false);
+						break;
+					}
+				}
+
 				// Set Session key
 				//
-				if (i + 1 > 124)		// 'i' is index of update file, +1 to get project version
+				if (newVersion > 124)
 				{
 					assert(m_sessionKey.isEmpty() == false);
 
@@ -1709,6 +1731,25 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 					if (result == false)
 					{
 						emitError(QSqlDatabase(), versionQuery.lastError(), false);
+						break;
+					}
+				}
+
+				// After update processing
+				//
+				{
+					QString errorMessage;
+
+					result = processingAfterDatabaseUpgrade(db, newVersion, &errorMessage);
+
+					if (result == false)
+					{
+						if (errorMessage.isEmpty() == true)
+						{
+							errorMessage = QString("Processing error after database has been upgraded to version %1 !").arg(newVersion);
+						}
+
+						emitError(QSqlDatabase(), errorMessage, false);
 						break;
 					}
 				}
@@ -4228,6 +4269,159 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 }
 
 
+void DbWorker::getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s)
+{
+	// indexes of SignalData's fields
+	//
+	const int SD_APP_SIGNAL_ID = 0;
+	const int SD_CUSTOM_APP_SIGNAL_ID = 1;
+	const int SD_CAPTION = 2;
+	const int SD_EQUIPMENT_ID = 3;
+	const int SD_BUS_TYPE_ID = 4;
+	const int SD_CHANNEL = 5;
+
+	const int SD_SIGNAL_TYPE = 6;
+	const int SD_IN_OUT_TYPE = 7;
+
+	const int SD_DATA_SIZE = 8;
+	const int SD_BYTE_ORDER = 9;
+
+	const int SD_ANALOG_SIGNAL_FORMAT = 10;
+	const int SD_UNIT = 11;
+
+	const int SD_LOW_ADC = 12;
+	const int SD_HIGH_ADC = 13;
+	const int SD_LOW_ENGENEERING_UNITS = 14;
+	const int SD_HIGH_ENGENEERING_UNITS = 15;
+	const int SD_LOW_VALID_RANGE = 16;
+	const int SD_HIGH_VALID_RANGE = 17;
+	const int SD_FILTERING_TIME = 18;
+	const int SD_SPREADTOLERANCE = 19;
+
+	const int SD_ELECTRIC_LOW_LIMIT = 20;
+	const int SD_ELECTRIC_HIGH_LIMIT = 21;
+	const int SD_ELECTRIC_UNIT = 22;
+	const int SD_SENSOR_TYPE = 23;
+	const int SD_OUTPUT_MODE = 24;
+
+	const int SD_ENABLE_TUNING = 25;
+
+	const int SD_TUNING_DEFAULT_DOUBLE = 26;
+	const int SD_TUNING_LOW_BOUND_DOUBLE = 27;
+	const int SD_TUNING_HIGH_BOUND_DOUBLE = 28;
+
+	const int SD_TUNING_DEFAULT_INT = 29;
+	const int SD_TUNING_LOW_BOUND_INT = 30;
+	const int SD_TUNING_HIGH_BOUND_INT = 31;
+
+	const int SD_ACQUIRE = 32;
+	const int SD_ARCHIVE = 33;
+
+	const int SD_DECIMAL_PLACES = 34;
+	const int SD_COARSE_APERTURE = 35;
+	const int SD_FINE_APERTURE = 36;
+	const int SD_ADAPTIVE_APERTURE = 37;
+
+	const int SD_SIGNAL_ID = 38;
+	const int SD_SIGNAL_GROUP_ID = 39;
+	const int SD_SIGNAL_INSTANCE_ID = 40;
+	const int SD_CHANGESET_ID = 41;
+	const int SD_CHECKEDOUT = 42;
+	const int SD_USER_ID = 43;
+	const int SD_CREATED = 44;
+	const int SD_DELETED = 45;
+	const int SD_INSTANCE_CREATED = 46;
+	const int SD_INSTANCE_ACTION = 47;
+
+	// read fields
+	//
+	s.setAppSignalID(q.value(SD_APP_SIGNAL_ID).toString());
+	s.setCustomAppSignalID(q.value(SD_CUSTOM_APP_SIGNAL_ID).toString());
+
+	s.setCaption(q.value(SD_CAPTION).toString());
+	s.setEquipmentID(q.value(SD_EQUIPMENT_ID).toString());
+	s.setBusTypeID(q.value(SD_BUS_TYPE_ID).toString());
+	s.setChannel(static_cast<E::Channel>(q.value(SD_CHANNEL).toInt()));
+
+	s.setSignalType(static_cast<E::SignalType>(q.value(SD_SIGNAL_TYPE).toInt()));
+	s.setInOutType(static_cast<E::SignalInOutType>(q.value(SD_IN_OUT_TYPE).toInt()));
+
+	s.setDataSize(q.value(SD_DATA_SIZE).toInt());
+	s.setByteOrder(static_cast<E::ByteOrder>(q.value(SD_BYTE_ORDER).toInt()));
+
+	int f = q.value(SD_ANALOG_SIGNAL_FORMAT).toInt();
+
+	if (f == TO_INT(E::DataFormat::UnsignedInt))
+	{
+		// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
+		//
+		f = TO_INT(E::AnalogAppSignalFormat::SignedInt32);
+	}
+	s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
+	s.setUnit(q.value(SD_UNIT).toString());
+
+	s.setLowADC(q.value(SD_LOW_ADC).toInt());
+	s.setHighADC(q.value(SD_HIGH_ADC).toInt());
+	s.setLowEngeneeringUnits(q.value(SD_LOW_ENGENEERING_UNITS).toDouble());
+	s.setHighEngeneeringUnits(q.value(SD_HIGH_ENGENEERING_UNITS).toDouble());
+	s.setLowValidRange(q.value(SD_LOW_VALID_RANGE).toDouble());
+	s.setHighValidRange(q.value(SD_HIGH_VALID_RANGE).toDouble());
+	s.setFilteringTime(q.value(SD_FILTERING_TIME).toDouble());
+	s.setSpreadTolerance(q.value(SD_SPREADTOLERANCE).toDouble());
+
+	s.setElectricLowLimit(q.value(SD_ELECTRIC_LOW_LIMIT).toDouble());
+	s.setElectricHighLimit(q.value(SD_ELECTRIC_HIGH_LIMIT).toDouble());
+	s.setElectricUnit(static_cast<E::ElectricUnit>(q.value(SD_ELECTRIC_UNIT).toInt()));
+	s.setSensorType(static_cast<E::SensorType>(q.value(SD_SENSOR_TYPE).toInt()));
+	s.setOutputMode(static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt()));
+
+	s.setEnableTuning(q.value(SD_ENABLE_TUNING).toBool());
+
+	TuningValue tv;
+
+	tv.setValue(s.signalType(),
+		   s.analogSignalFormat(),
+		   q.value(SD_TUNING_DEFAULT_INT).toLongLong(),
+		   q.value(SD_TUNING_DEFAULT_DOUBLE).toDouble());
+
+	s.setTuningDefaultValue(tv);
+
+	tv.setValue(s.signalType(),
+		   s.analogSignalFormat(),
+		   q.value(SD_TUNING_LOW_BOUND_INT).toLongLong(),
+		   q.value(SD_TUNING_LOW_BOUND_DOUBLE).toDouble());
+
+	s.setTuningLowBound(tv);
+
+	tv.setValue(s.signalType(),
+		   s.analogSignalFormat(),
+		   q.value(SD_TUNING_HIGH_BOUND_INT).toLongLong(),
+		   q.value(SD_TUNING_HIGH_BOUND_DOUBLE).toDouble());
+
+	s.setTuningHighBound(tv);
+
+	s.setAcquire(q.value(SD_ACQUIRE).toBool());
+	s.setArchive(q.value(SD_ARCHIVE).toBool());
+
+	s.setDecimalPlaces(q.value(SD_DECIMAL_PLACES).toInt());
+	s.setCoarseAperture(q.value(SD_COARSE_APERTURE).toDouble());
+	s.setFineAperture(q.value(SD_FINE_APERTURE).toDouble());
+	s.setAdaptiveAperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
+
+	s.setID(q.value(SD_SIGNAL_ID).toInt());
+	s.setSignalGroupID(q.value(SD_SIGNAL_GROUP_ID).toInt());
+	s.setSignalInstanceID(q.value(SD_SIGNAL_INSTANCE_ID).toInt());
+	s.setChangesetID(q.value(SD_CHANGESET_ID).toInt());
+	s.setCheckedOut(q.value(SD_CHECKEDOUT).toBool());
+	s.setUserID(q.value(SD_USER_ID).toInt());
+	s.setCreated(q.value(SD_CREATED).toDateTime());
+	s.setDeleted(q.value(SD_DELETED).toBool());
+	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
+	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(SD_INSTANCE_ACTION).toInt()));
+}
+
+
+
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {
 	// indexes of SignalData's fields
@@ -6155,3 +6349,79 @@ void DbWorker::setSessionKey(QString value)
 {
 	m_sessionKey = value;
 }
+
+bool DbWorker::processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage)
+{
+	if (errorMessage == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	switch(newVersion)
+	{
+	case 211:
+		return processingBeforeDatabaseUpgrade0211(db, errorMessage);
+	}
+
+	return true;
+}
+
+
+bool DbWorker::processingBeforeDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage)
+{
+	QSqlQuery q(db);
+
+	if (q.exec("SELECT * FROM Checkout WHERE SignalID IS NOT NULL") == false)
+	{
+		*errorMessage = q.lastError().text();
+		return false;
+	}
+
+	while(q.next() == true)
+	{
+		int checkedOutFilesCount = q.value(0).toInt();
+
+		if (checkedOutFilesCount != 0)
+		{
+			*errorMessage = "All app signals should be Checked In before database can be upgraded to version 211";
+			return false;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage)
+{
+	if (errorMessage == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	switch(currentVersion)
+	{
+	case 211:
+		return processingAfterDatabaseUpgrade0211(db, errorMessage);
+	}
+
+	return true;
+}
+
+bool DbWorker::processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage)
+{
+
+}
+
+
+
+
+
+
+
+
+

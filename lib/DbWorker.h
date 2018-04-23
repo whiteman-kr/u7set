@@ -231,6 +231,14 @@ private:
 	const QString& sessionKey() const;
 	void setSessionKey(QString value);
 
+	bool processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage);
+	bool processingBeforeDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage);
+
+	bool processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage);
+	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
+
+
 private:
     mutable QMutex m_mutex;
 

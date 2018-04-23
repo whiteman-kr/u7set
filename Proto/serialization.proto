@@ -1123,6 +1123,11 @@ message AppSignal
     optional double fineAperture = 85 [default = 0.5];
     optional bool adaptiveAperture = 86 [default = false];
 
+    // Signal specific properties
+
+    optional string specPropStruct = 90;
+    optional bytes specPropValues = 91;				// serialized message Proto::SignalSpecPropValues
+
     // Signal fields from database
 
     optional AppSignalDbField dbField = 120;
