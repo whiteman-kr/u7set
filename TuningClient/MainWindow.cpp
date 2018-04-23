@@ -31,12 +31,12 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	//
 	//
 
-	theLogFile = new Log::LogFile(qAppName());
+	theLogFile = new Log::LogFile("TuningClient");
 
 	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
-	m_tuningLog = new TuningLog::TuningLog(qAppName());
+	m_tuningLog = new TuningLog::TuningLog("TuningClientSignals");
 
 	createActions();
 	createMenu();
@@ -152,9 +152,13 @@ void MainWindow::createActions()
 	m_pTuningSourcesAction->setEnabled(true);
 	connect(m_pTuningSourcesAction, &QAction::triggered, this, &MainWindow::showTuningSources);
 
-	m_pLogAction = new QAction(tr("Log..."), this);
-	m_pLogAction->setStatusTip(tr("Show application log"));
-	connect(m_pLogAction, &QAction::triggered, this, &MainWindow::showLog);
+	m_pAppLogAction = new QAction(tr("Application Log..."), this);
+	m_pAppLogAction->setStatusTip(tr("Show application log"));
+	connect(m_pAppLogAction, &QAction::triggered, this, &MainWindow::showAppLog);
+
+	m_pSignalLogAction = new QAction(tr("Signals Log..."), this);
+	m_pSignalLogAction->setStatusTip(tr("Show signals log"));
+	connect(m_pSignalLogAction, &QAction::triggered, this, &MainWindow::showSignalsLog);
 
 	m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
@@ -185,7 +189,9 @@ void MainWindow::createMenu()
 	//
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
-	pHelpMenu->addAction(m_pLogAction);
+	pHelpMenu->addAction(m_pAppLogAction);
+	pHelpMenu->addAction(m_pSignalLogAction);
+	pHelpMenu->addSeparator();
 	pHelpMenu->addAction(m_pAboutAction);
 }
 
@@ -458,7 +464,7 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 		m_statusBarLogAlerts->text().isEmpty() == false &&
 		event->type() == QEvent::MouseButtonPress)
 	{
-		showLog();
+		showAppLog();
 	}
 
 	return QWidget::eventFilter(object, event);
@@ -796,11 +802,19 @@ void MainWindow::showTuningSources()
 	}
 }
 
-void MainWindow::showLog()
+void MainWindow::showAppLog()
 {
 	if (theLogFile != nullptr)
 	{
 		theLogFile->view(this);
+	}
+}
+
+void MainWindow::showSignalsLog()
+{
+	if (m_tuningLog != nullptr)
+	{
+		m_tuningLog->viewSignalsLog(this);
 	}
 }
 
