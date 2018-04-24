@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "Signal.h"
 #include "PropertyObject.h"
 
@@ -120,13 +122,16 @@ class SignalSpecPropValue
 {
 public:
 	SignalSpecPropValue();
-	SignalSpecPropValue(const QString& name, const QVariant& value);
-	SignalSpecPropValue(std::shared_ptr<Property> prop);
-	SignalSpecPropValue(const Property* prop);
+
+	bool create(std::shared_ptr<Property> prop);
+	bool create(const QString& name, const QVariant& value, bool isEnum);
+
+	bool setValue(const QString& name, const QVariant& value, bool isEnum);
 
 	QString name() const { return m_name; }
 	QVariant::Type type() const { return m_value.type(); }
 	QVariant value() const { return m_value; }
+	bool isEnum() const {return m_isEnum; }
 
 	bool save(Proto::SignalSpecPropValue* protoValue) const;
 	bool load(const Proto::SignalSpecPropValue& protoValue);
@@ -134,10 +139,50 @@ public:
 private:
 	QString m_name;
 	QVariant m_value;
+	bool m_isEnum = false;
 };
 
-class SignalSpecPropValues : public QVector<SignalSpecPropValue>
+class SignalSpecPropValues
 {
 public:
-//	save
+	SignalSpecPropValues();
+
+	bool createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap = true);
+	void buildPropNamesMap();
+
+	bool setValue(const QString& name, const QVariant& value);
+
+	template<typename ENUM_TYPE>
+	bool setEnumValue(const QString& name, ENUM_TYPE enumItemValue);
+
+	bool setValue(const SignalSpecPropValue& propValue);
+
+	bool serializeToArray(QByteArray* protoData) const;
+	bool parseFromArray(const QByteArray& protoData);
+
+	bool save(Proto::SignalSpecPropValues* protoValues) const;
+
+private:
+	bool setValue(const QString& name, const QVariant& value, bool isEnum);
+
+	int getPropertyIndex(const QString& name);
+
+private:
+	QVector<SignalSpecPropValue> m_specPropValues;
+	QHash<QString, int> m_propNamesMap;					// prop name => index in m_propSpecValues
+
 };
+
+
+template<typename ENUM_TYPE>
+bool SignalSpecPropValues::setEnumValue(const QString& name, ENUM_TYPE enumItemValue)
+{
+	if (std::is_enum<ENUM_TYPE>::value == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	return setValue(name, static_cast<int>(enumItemValue), true);
+}
+

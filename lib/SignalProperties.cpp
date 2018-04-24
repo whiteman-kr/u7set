@@ -272,19 +272,51 @@ SignalSpecPropValue::SignalSpecPropValue()
 {
 }
 
-SignalSpecPropValue::SignalSpecPropValue(const QString& name, const QVariant& value)
+bool SignalSpecPropValue::create(std::shared_ptr<Property> prop)
+{
+	if (prop == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	return create(prop->caption(), prop->value(), prop->isEnum());
+}
+
+bool SignalSpecPropValue::create(const QString& name, const QVariant& value, bool isEnum)
 {
 	m_name = name;
 	m_value = value;
+	m_isEnum = isEnum;
+
+	return true;
 }
 
-SignalSpecPropValue::SignalSpecPropValue(std::shared_ptr<Property> prop)
+bool SignalSpecPropValue::setValue(const QString& name, const QVariant& value, bool isEnum)
 {
+	if (name != m_name)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_value.type() != value.type())
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_isEnum != isEnum)
+	{
+		assert(false);
+		return false;
+	}
+
+	m_value = value;
+
+	return true;
 }
 
-SignalSpecPropValue::SignalSpecPropValue(const Property* prop)
-{
-}
 
 bool SignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
 {
@@ -294,6 +326,7 @@ bool SignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
 
 	protoValue->set_name(m_name.toStdString());
 	protoValue->set_type(static_cast<int>(m_value.type()));
+	protoValue->set_isenum(m_isEnum);
 
 	switch(m_value.type())
 	{
@@ -342,6 +375,17 @@ bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 
 	QVariant::Type type = static_cast<QVariant::Type>(protoValue.type());
 
+	m_isEnum = protoValue.isenum();
+
+#ifdef Q_DEBUG
+
+	if (m_isEnum == true && type != QVariant::Int)
+	{
+		assert(false);
+	}
+
+#endif
+
 	switch(type)
 	{
 	case QVariant::Invalid:
@@ -349,30 +393,37 @@ bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 		return true;
 
 	case QVariant::Int:
+		assert(protoValue.has_int32val());
 		m_value.setValue(protoValue.int32val());
 		return true;
 
 	case QVariant::UInt:
+		assert(protoValue.has_uint32val());
 		m_value.setValue(protoValue.uint32val());
 		return true;
 
 	case QVariant::LongLong:
+		assert(protoValue.has_int64val());
 		m_value.setValue(protoValue.int64val());
 		return true;
 
 	case QVariant::ULongLong:
+		assert(protoValue.has_uint64val());
 		m_value.setValue(protoValue.uint64val());
 		return true;
 
 	case QVariant::Double:
+		assert(protoValue.has_doubleval());
 		m_value.setValue(protoValue.doubleval());
 		return true;
 
 	case QVariant::Bool:
+		assert(protoValue.has_boolval());
 		m_value.setValue(protoValue.boolval());
 		return true;
 
 	case QVariant::String:
+		assert(protoValue.has_stringval());
 		m_value.setValue(QString::fromStdString(protoValue.stringval()));
 		return true;
 
@@ -382,4 +433,174 @@ bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 
 	return false;
 }
+
+
+// ----------------------------------------------------------------------------------------------------------
+//
+// SignalSpecPropValues class implementation
+//
+// ----------------------------------------------------------------------------------------------------------
+
+SignalSpecPropValues::SignalSpecPropValues()
+{
+}
+
+bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap)
+{
+	m_specPropValues.clear();
+	m_propNamesMap.clear();
+
+	if (specPropStruct.isEmpty() == true)
+	{
+		return true;
+	}
+
+	PropertyObject pob;
+
+	std::pair<bool, QString> result = pob.parseSpecificPropertiesStruct(specPropStruct);
+
+	if (result.first == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	std::vector<std::shared_ptr<Property>> properties = pob.properties();
+
+	for(std::shared_ptr<Property> property : properties)
+	{
+		SignalSpecPropValue specPropValue;
+
+		bool result = specPropValue.create(property);
+
+		if (result == false)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_specPropValues.append(specPropValue);
+	}
+
+	if (buildNamesMap == true)
+	{
+		buildPropNamesMap();
+	}
+
+	return true;
+}
+
+void SignalSpecPropValues::buildPropNamesMap()
+{
+	m_propNamesMap.clear();
+
+	int index = 0;
+
+	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
+	{
+		if (m_propNamesMap.contains(specPropValue.name()) == false)
+		{
+			m_propNamesMap.insert(specPropValue.name(), index);
+		}
+		else
+		{
+			assert(false);			// duplicate property name
+		}
+
+		index++;
+	}
+}
+
+bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value)
+{
+	return setValue(name, value, false);
+}
+
+bool SignalSpecPropValues::setValue(const SignalSpecPropValue& propValue)
+{
+	return setValue(propValue.name(), propValue.value(), propValue.isEnum());
+}
+
+
+bool SignalSpecPropValues::	serializeToArray(QByteArray* protoData) const
+{
+	Proto::SignalSpecPropValues protoValues;
+
+	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
+	{
+		Proto::SignalSpecPropValue* protoValue = protoValues.add_value();
+		specPropValue.save(protoValue);
+	}
+
+	int size = protoValues.ByteSize();
+
+	protoData->resize(size);
+
+	protoValues.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(protoData->data()));
+
+	return true;
+}
+
+bool SignalSpecPropValues::parseFromArray(const QByteArray& protoData)
+{
+	Proto::SignalSpecPropValues protoValues;
+
+	bool result = protoValues.ParseFromArray(protoData.constData(), protoData.size());
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	int count = protoValues.value_size();
+
+	for(int i = 0; i < count; i++)
+	{
+		SignalSpecPropValue specPropValue;
+
+		specPropValue.load(protoValues.value(i));
+
+		setValue(specPropValue);
+	}
+
+	return true;
+}
+
+
+bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value, bool isEnum)
+{
+	int index = getPropertyIndex(name);
+
+	if (index == -1)
+	{
+		return false;
+	}
+
+	return m_specPropValues[index].setValue(name, value, isEnum);
+}
+
+int SignalSpecPropValues::getPropertyIndex(const QString& name)
+{
+	if (m_propNamesMap.isEmpty() == false)
+	{
+		return m_propNamesMap.value(name, -1);
+	}
+
+	int index = 0;
+
+	for(SignalSpecPropValue& propValue : m_specPropValues)
+	{
+		if (propValue.name() == name)
+		{
+			return index;
+		}
+
+		index++;
+	}
+
+	return -1;
+}
+
+
+
 

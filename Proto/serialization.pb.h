@@ -8355,6 +8355,13 @@ class SignalSpecPropValue : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
+  // required bool isEnum = 3 [default = false];
+  inline bool has_isenum() const;
+  inline void clear_isenum();
+  static const int kIsEnumFieldNumber = 3;
+  inline bool isenum() const;
+  inline void set_isenum(bool value);
+
   // optional int32 int32Val = 10;
   inline bool has_int32val() const;
   inline void clear_int32val();
@@ -8415,6 +8422,8 @@ class SignalSpecPropValue : public ::google::protobuf::Message {
   inline void clear_has_name();
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_isenum();
+  inline void clear_has_isenum();
   inline void set_has_int32val();
   inline void clear_has_int32val();
   inline void set_has_uint32val();
@@ -8435,15 +8444,16 @@ class SignalSpecPropValue : public ::google::protobuf::Message {
   ::std::string* name_;
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 int32val_;
+  ::google::protobuf::uint32 uint32val_;
+  bool isenum_;
+  bool boolval_;
   ::google::protobuf::int64 int64val_;
   ::google::protobuf::uint64 uint64val_;
-  ::google::protobuf::uint32 uint32val_;
-  bool boolval_;
   double doubleval_;
   ::std::string* stringval_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9576,6 +9586,30 @@ class AppSignal : public ::google::protobuf::Message {
   inline bool adaptiveaperture() const;
   inline void set_adaptiveaperture(bool value);
 
+  // optional string specPropStruct = 90;
+  inline bool has_specpropstruct() const;
+  inline void clear_specpropstruct();
+  static const int kSpecPropStructFieldNumber = 90;
+  inline const ::std::string& specpropstruct() const;
+  inline void set_specpropstruct(const ::std::string& value);
+  inline void set_specpropstruct(const char* value);
+  inline void set_specpropstruct(const char* value, size_t size);
+  inline ::std::string* mutable_specpropstruct();
+  inline ::std::string* release_specpropstruct();
+  inline void set_allocated_specpropstruct(::std::string* specpropstruct);
+
+  // optional bytes specPropValues = 91;
+  inline bool has_specpropvalues() const;
+  inline void clear_specpropvalues();
+  static const int kSpecPropValuesFieldNumber = 91;
+  inline const ::std::string& specpropvalues() const;
+  inline void set_specpropvalues(const ::std::string& value);
+  inline void set_specpropvalues(const char* value);
+  inline void set_specpropvalues(const void* value, size_t size);
+  inline ::std::string* mutable_specpropvalues();
+  inline ::std::string* release_specpropvalues();
+  inline void set_allocated_specpropvalues(::std::string* specpropvalues);
+
   // optional .Proto.AppSignalDbField dbField = 120;
   inline bool has_dbfield() const;
   inline void clear_dbfield();
@@ -9666,6 +9700,10 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_fineaperture();
   inline void set_has_adaptiveaperture();
   inline void clear_has_adaptiveaperture();
+  inline void set_has_specpropstruct();
+  inline void clear_has_specpropstruct();
+  inline void set_has_specpropvalues();
+  inline void clear_has_specpropvalues();
   inline void set_has_dbfield();
   inline void clear_has_dbfield();
   inline void set_has_calcparam();
@@ -9707,12 +9745,14 @@ class AppSignal : public ::google::protobuf::Message {
   bool adaptiveaperture_;
   double coarseaperture_;
   double fineaperture_;
+  ::std::string* specpropstruct_;
+  ::std::string* specpropvalues_;
   ::Proto::AppSignalDbField* dbfield_;
   ::Proto::AppSignalCalculatedParam* calcparam_;
   ::google::protobuf::int32 decimalplaces_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(37 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(39 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -22331,15 +22371,37 @@ inline void SignalSpecPropValue::set_type(::google::protobuf::int32 value) {
   type_ = value;
 }
 
-// optional int32 int32Val = 10;
-inline bool SignalSpecPropValue::has_int32val() const {
+// required bool isEnum = 3 [default = false];
+inline bool SignalSpecPropValue::has_isenum() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void SignalSpecPropValue::set_has_int32val() {
+inline void SignalSpecPropValue::set_has_isenum() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void SignalSpecPropValue::clear_has_int32val() {
+inline void SignalSpecPropValue::clear_has_isenum() {
   _has_bits_[0] &= ~0x00000004u;
+}
+inline void SignalSpecPropValue::clear_isenum() {
+  isenum_ = false;
+  clear_has_isenum();
+}
+inline bool SignalSpecPropValue::isenum() const {
+  return isenum_;
+}
+inline void SignalSpecPropValue::set_isenum(bool value) {
+  set_has_isenum();
+  isenum_ = value;
+}
+
+// optional int32 int32Val = 10;
+inline bool SignalSpecPropValue::has_int32val() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SignalSpecPropValue::set_has_int32val() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SignalSpecPropValue::clear_has_int32val() {
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void SignalSpecPropValue::clear_int32val() {
   int32val_ = 0;
@@ -22355,13 +22417,13 @@ inline void SignalSpecPropValue::set_int32val(::google::protobuf::int32 value) {
 
 // optional uint32 uint32Val = 11;
 inline bool SignalSpecPropValue::has_uint32val() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void SignalSpecPropValue::set_has_uint32val() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void SignalSpecPropValue::clear_has_uint32val() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void SignalSpecPropValue::clear_uint32val() {
   uint32val_ = 0u;
@@ -22377,13 +22439,13 @@ inline void SignalSpecPropValue::set_uint32val(::google::protobuf::uint32 value)
 
 // optional int64 int64Val = 12;
 inline bool SignalSpecPropValue::has_int64val() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void SignalSpecPropValue::set_has_int64val() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void SignalSpecPropValue::clear_has_int64val() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void SignalSpecPropValue::clear_int64val() {
   int64val_ = GOOGLE_LONGLONG(0);
@@ -22399,13 +22461,13 @@ inline void SignalSpecPropValue::set_int64val(::google::protobuf::int64 value) {
 
 // optional uint64 uint64Val = 13;
 inline bool SignalSpecPropValue::has_uint64val() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void SignalSpecPropValue::set_has_uint64val() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void SignalSpecPropValue::clear_has_uint64val() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void SignalSpecPropValue::clear_uint64val() {
   uint64val_ = GOOGLE_ULONGLONG(0);
@@ -22421,13 +22483,13 @@ inline void SignalSpecPropValue::set_uint64val(::google::protobuf::uint64 value)
 
 // optional double doubleVal = 14;
 inline bool SignalSpecPropValue::has_doubleval() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void SignalSpecPropValue::set_has_doubleval() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void SignalSpecPropValue::clear_has_doubleval() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void SignalSpecPropValue::clear_doubleval() {
   doubleval_ = 0;
@@ -22443,13 +22505,13 @@ inline void SignalSpecPropValue::set_doubleval(double value) {
 
 // optional bool boolVal = 15;
 inline bool SignalSpecPropValue::has_boolval() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void SignalSpecPropValue::set_has_boolval() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void SignalSpecPropValue::clear_has_boolval() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void SignalSpecPropValue::clear_boolval() {
   boolval_ = false;
@@ -22465,13 +22527,13 @@ inline void SignalSpecPropValue::set_boolval(bool value) {
 
 // optional string stringVal = 16;
 inline bool SignalSpecPropValue::has_stringval() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void SignalSpecPropValue::set_has_stringval() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void SignalSpecPropValue::clear_has_stringval() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void SignalSpecPropValue::clear_stringval() {
   if (stringval_ != &::google::protobuf::internal::kEmptyString) {
@@ -24393,15 +24455,155 @@ inline void AppSignal::set_adaptiveaperture(bool value) {
   adaptiveaperture_ = value;
 }
 
-// optional .Proto.AppSignalDbField dbField = 120;
-inline bool AppSignal::has_dbfield() const {
+// optional string specPropStruct = 90;
+inline bool AppSignal::has_specpropstruct() const {
   return (_has_bits_[1] & 0x00000008u) != 0;
 }
-inline void AppSignal::set_has_dbfield() {
+inline void AppSignal::set_has_specpropstruct() {
   _has_bits_[1] |= 0x00000008u;
 }
-inline void AppSignal::clear_has_dbfield() {
+inline void AppSignal::clear_has_specpropstruct() {
   _has_bits_[1] &= ~0x00000008u;
+}
+inline void AppSignal::clear_specpropstruct() {
+  if (specpropstruct_ != &::google::protobuf::internal::kEmptyString) {
+    specpropstruct_->clear();
+  }
+  clear_has_specpropstruct();
+}
+inline const ::std::string& AppSignal::specpropstruct() const {
+  return *specpropstruct_;
+}
+inline void AppSignal::set_specpropstruct(const ::std::string& value) {
+  set_has_specpropstruct();
+  if (specpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    specpropstruct_ = new ::std::string;
+  }
+  specpropstruct_->assign(value);
+}
+inline void AppSignal::set_specpropstruct(const char* value) {
+  set_has_specpropstruct();
+  if (specpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    specpropstruct_ = new ::std::string;
+  }
+  specpropstruct_->assign(value);
+}
+inline void AppSignal::set_specpropstruct(const char* value, size_t size) {
+  set_has_specpropstruct();
+  if (specpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    specpropstruct_ = new ::std::string;
+  }
+  specpropstruct_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AppSignal::mutable_specpropstruct() {
+  set_has_specpropstruct();
+  if (specpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    specpropstruct_ = new ::std::string;
+  }
+  return specpropstruct_;
+}
+inline ::std::string* AppSignal::release_specpropstruct() {
+  clear_has_specpropstruct();
+  if (specpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = specpropstruct_;
+    specpropstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void AppSignal::set_allocated_specpropstruct(::std::string* specpropstruct) {
+  if (specpropstruct_ != &::google::protobuf::internal::kEmptyString) {
+    delete specpropstruct_;
+  }
+  if (specpropstruct) {
+    set_has_specpropstruct();
+    specpropstruct_ = specpropstruct;
+  } else {
+    clear_has_specpropstruct();
+    specpropstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bytes specPropValues = 91;
+inline bool AppSignal::has_specpropvalues() const {
+  return (_has_bits_[1] & 0x00000010u) != 0;
+}
+inline void AppSignal::set_has_specpropvalues() {
+  _has_bits_[1] |= 0x00000010u;
+}
+inline void AppSignal::clear_has_specpropvalues() {
+  _has_bits_[1] &= ~0x00000010u;
+}
+inline void AppSignal::clear_specpropvalues() {
+  if (specpropvalues_ != &::google::protobuf::internal::kEmptyString) {
+    specpropvalues_->clear();
+  }
+  clear_has_specpropvalues();
+}
+inline const ::std::string& AppSignal::specpropvalues() const {
+  return *specpropvalues_;
+}
+inline void AppSignal::set_specpropvalues(const ::std::string& value) {
+  set_has_specpropvalues();
+  if (specpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    specpropvalues_ = new ::std::string;
+  }
+  specpropvalues_->assign(value);
+}
+inline void AppSignal::set_specpropvalues(const char* value) {
+  set_has_specpropvalues();
+  if (specpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    specpropvalues_ = new ::std::string;
+  }
+  specpropvalues_->assign(value);
+}
+inline void AppSignal::set_specpropvalues(const void* value, size_t size) {
+  set_has_specpropvalues();
+  if (specpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    specpropvalues_ = new ::std::string;
+  }
+  specpropvalues_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AppSignal::mutable_specpropvalues() {
+  set_has_specpropvalues();
+  if (specpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    specpropvalues_ = new ::std::string;
+  }
+  return specpropvalues_;
+}
+inline ::std::string* AppSignal::release_specpropvalues() {
+  clear_has_specpropvalues();
+  if (specpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = specpropvalues_;
+    specpropvalues_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void AppSignal::set_allocated_specpropvalues(::std::string* specpropvalues) {
+  if (specpropvalues_ != &::google::protobuf::internal::kEmptyString) {
+    delete specpropvalues_;
+  }
+  if (specpropvalues) {
+    set_has_specpropvalues();
+    specpropvalues_ = specpropvalues;
+  } else {
+    clear_has_specpropvalues();
+    specpropvalues_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional .Proto.AppSignalDbField dbField = 120;
+inline bool AppSignal::has_dbfield() const {
+  return (_has_bits_[1] & 0x00000020u) != 0;
+}
+inline void AppSignal::set_has_dbfield() {
+  _has_bits_[1] |= 0x00000020u;
+}
+inline void AppSignal::clear_has_dbfield() {
+  _has_bits_[1] &= ~0x00000020u;
 }
 inline void AppSignal::clear_dbfield() {
   if (dbfield_ != NULL) dbfield_->::Proto::AppSignalDbField::Clear();
@@ -24433,13 +24635,13 @@ inline void AppSignal::set_allocated_dbfield(::Proto::AppSignalDbField* dbfield)
 
 // optional .Proto.AppSignalCalculatedParam calcParam = 121;
 inline bool AppSignal::has_calcparam() const {
-  return (_has_bits_[1] & 0x00000010u) != 0;
+  return (_has_bits_[1] & 0x00000040u) != 0;
 }
 inline void AppSignal::set_has_calcparam() {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[1] |= 0x00000040u;
 }
 inline void AppSignal::clear_has_calcparam() {
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000040u;
 }
 inline void AppSignal::clear_calcparam() {
   if (calcparam_ != NULL) calcparam_->::Proto::AppSignalCalculatedParam::Clear();

@@ -411,7 +411,7 @@ private:
 	//
 
 	QString m_specPropStruct;
-	ProtoData m_specPropValues;					// serialized protobuf message Proto::PropertyValues
+	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
 
 	// Signal fields from database
 	//

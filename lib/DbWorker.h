@@ -31,6 +31,8 @@ public:
 	static void getSignalData(QSqlQuery& q, Signal &s);
 	static QString getSignalDataStr(const Signal& s);
 
+	static QString getSqlByteaString(const QByteArray& binData);
+
 protected:
 	QString postgresConnectionName() const;
     QString projectConnectionName() const;
@@ -230,6 +232,8 @@ public:
 private:
 	const QString& sessionKey() const;
 	void setSessionKey(QString value);
+
+	//
 
 	bool processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage);
 	bool processingBeforeDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage);

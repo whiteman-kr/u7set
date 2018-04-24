@@ -10,6 +10,7 @@
 
 #include "../lib/DbWorker.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/SignalProperties.h"
 #include "../lib/DbProgress.h"
 
 
@@ -4643,6 +4644,10 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	return str;
 }
 
+QString DbWorker::getSqlByteaString(const QByteArray& binData)
+{
+	return QString("E'\\\\x%1'").arg(QString(binData.toHex().constData()));
+}
 
 void DbWorker::getObjectState(QSqlQuery& q, ObjectState& os)
 {
@@ -4654,15 +4659,12 @@ void DbWorker::getObjectState(QSqlQuery& q, ObjectState& os)
 	os.errCode = q.value("errCode").toInt();
 }
 
-
-
 void DbWorker::slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
 	AUTO_COMPLETE
 
 	addSignal(signalType, newSignal);
 }
-
 
 bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
@@ -6372,7 +6374,7 @@ bool DbWorker::processingBeforeDatabaseUpgrade0211(QSqlDatabase& db, QString* er
 {
 	QSqlQuery q(db);
 
-	if (q.exec("SELECT * FROM Checkout WHERE SignalID IS NOT NULL") == false)
+	if (q.exec("SELECT count(*) FROM Checkout WHERE SignalID IS NOT NULL") == false)
 	{
 		*errorMessage = q.lastError().text();
 		return false;
@@ -6384,7 +6386,8 @@ bool DbWorker::processingBeforeDatabaseUpgrade0211(QSqlDatabase& db, QString* er
 
 		if (checkedOutFilesCount != 0)
 		{
-			*errorMessage = "All app signals should be Checked In before database can be upgraded to version 211";
+			*errorMessage = "All app signals should be Checked In before database can be upgraded to new version!\n\n"
+							"Use previous version of U7 to Check In app signals and retry upgrade.";
 			return false;
 		}
 
@@ -6414,7 +6417,171 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 
 bool DbWorker::processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage)
 {
+	bool result = true;
 
+	// indexes of some SignalData's fields BEFORE database upgrade 0212
+	//
+	const int SD_SIGNAL_TYPE = 6;
+	const int SD_IN_OUT_TYPE = 7;
+
+	const int SD_LOW_ADC = 12;
+	const int SD_HIGH_ADC = 13;
+	const int SD_LOW_ENGENEERING_UNITS = 14;
+	const int SD_HIGH_ENGENEERING_UNITS = 15;
+	const int SD_LOW_VALID_RANGE = 16;
+	const int SD_HIGH_VALID_RANGE = 17;
+	const int SD_FILTERING_TIME = 18;
+	const int SD_SPREADTOLERANCE = 19;
+
+	const int SD_ELECTRIC_LOW_LIMIT = 20;
+	const int SD_ELECTRIC_HIGH_LIMIT = 21;
+	const int SD_ELECTRIC_UNIT = 22;
+	const int SD_SENSOR_TYPE = 23;
+	const int SD_OUTPUT_MODE = 24;
+
+	const int SD_SIGNAL_INSTANCE_ID = 40;
+
+	QString defaultSpecPropStruct(
+		"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;true;false;Electric high limit of input signal;true;None\n"
+		"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;true;false;Electric low limit of input signal;true;None\n"
+		"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;true;false;;true;None\n"
+		"4;FilteringTime;4 Signal processing;double;;;0.005;5;true;false;Signal filtering time in seconds;true;None\n"
+		"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;true;false;High ADC value;true;None\n"
+		"4;HighDAC;4 Signal processing;uint32;0;65535;65535;0;true;false;High DAC value;true;None\n"
+		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;true;false;High engeneering units;true;None\n"
+		"4;HighValidRange;4 Signal processing;double;;;100;10;true;false;High valid range of signal;true;None\n"
+		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;true;false;Low ADC value;true;None\n"
+		"4;LowDAC;4 Signal processing;uint32;0;65535;0;0;true;false;Low DAC value;true;None\n"
+		"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;true;false;Low engeneering units;true;None\n"
+		"4;LowValidRange;4 Signal processing;double;;;0;10;true;false;Low valid range of signal;true;None\n"
+		"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;true;false;;true;None\n"
+		"4;SensorType;5 Electric parameters;DynamicEnum [NoSensor=0,Ohm_Pt50_W1391=1,Ohm_Pt100_W1391=2,Ohm_Pt50_W1385=3,Ohm_Pt100_W1385=4,Ohm_Cu_50_W1428=5,Ohm_Cu_100_W1428=6,Ohm_Cu_50_W1426=7,Ohm_Cu_100_W1426=8,Ohm_Pt21=9,Ohm_Cu23=10,mV_K_TXA=11,mV_L_TXK=12,mV_N_THH=13];;;NoSensor;0;true;false;;true;None\n"
+		"4;SpreadTolerance;4 Signal processing;double;;;2;5;true;false;Spread tolerance of signal measurement channels in percents;true;None");
+
+	SignalSpecPropValues specPropValues;
+
+	result = specPropValues.createFromSpecPropStruct(defaultSpecPropStruct);
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't create SignalSpecPropValues"));
+		return false;
+	}
+
+	QSqlQuery q(db);
+
+	result = q.exec(QString("SELECT * FROM get_latest_signals_all(%1)").arg(1));
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't get_latest_signals_all! Error: ")) + q.lastError().text();
+		return false;
+	}
+
+	while(q.next() != false)
+	{
+		// get some signal fields in order before database update 0212
+		//
+		E::SignalType signalType = static_cast<E::SignalType>(q.value(SD_SIGNAL_TYPE).toInt());
+
+		if (signalType != E::SignalType::Analog)
+		{
+			continue;
+		}
+
+		E::SignalInOutType signalInOutType = static_cast<E::SignalInOutType>(q.value(SD_IN_OUT_TYPE).toInt());
+
+		if (signalInOutType != E::SignalInOutType::Input &&
+			signalInOutType != E::SignalInOutType::Output)
+		{
+			continue;
+		}
+
+		uint lowADC = q.value(SD_LOW_ADC).toUInt();
+		uint highADC = q.value(SD_HIGH_ADC).toUInt();
+		double lowEngeneeringUnits = q.value(SD_LOW_ENGENEERING_UNITS).toDouble();
+		double highEngeneeringUnits = q.value(SD_HIGH_ENGENEERING_UNITS).toDouble();
+		double lowValidRange = q.value(SD_LOW_VALID_RANGE).toDouble();
+		double highValidRange = q.value(SD_HIGH_VALID_RANGE).toDouble();
+		double filteringTime = q.value(SD_FILTERING_TIME).toDouble();
+		double spreadTolerance = q.value(SD_SPREADTOLERANCE).toDouble();
+		double electricLowLimit = q.value(SD_ELECTRIC_LOW_LIMIT).toDouble();
+		double electricHighLimit = q.value(SD_ELECTRIC_HIGH_LIMIT).toDouble();
+
+		E::ElectricUnit electricUnit = static_cast<E::ElectricUnit>(q.value(SD_ELECTRIC_UNIT).toInt());
+		E::SensorType sensorType = static_cast<E::SensorType>(q.value(SD_SENSOR_TYPE).toInt());
+		E::OutputMode outputMode = static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt());
+
+		//
+
+		result &= specPropValues.setValue(SignalProperties::lowADCCaption, lowADC);
+		result &= specPropValues.setValue(SignalProperties::lowDACCaption, lowADC);
+		result &= specPropValues.setValue(SignalProperties::highADCCaption, highADC);
+		result &= specPropValues.setValue(SignalProperties::highDACCaption, highADC);
+
+		result &= specPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
+		result &= specPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+
+		result &= specPropValues.setValue(SignalProperties::lowValidRangeCaption, lowValidRange);
+		result &= specPropValues.setValue(SignalProperties::highValidRangeCaption, highValidRange);
+
+		result &= specPropValues.setValue(SignalProperties::filteringTimeCaption, filteringTime);
+		result &= specPropValues.setValue(SignalProperties::spreadToleranceCaption, spreadTolerance);
+
+		result &= specPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
+		result &= specPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+
+		result &= specPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
+		result &= specPropValues.setEnumValue<E::SensorType>(SignalProperties::sensorTypeCaption, sensorType);
+		result &= specPropValues.setEnumValue<E::OutputMode>(SignalProperties::outputModeCaption, outputMode);
+
+		if (result == false)
+		{
+			*errorMessage = tr("Signal specific properties value setting error!");
+			return false;
+		}
+
+		int latestSignalInstanceID = q.value(SD_SIGNAL_INSTANCE_ID).toInt();
+
+		QByteArray protoData;
+
+		specPropValues.serializeToArray(&protoData);
+
+		QString sqlByteaString = getSqlByteaString(protoData);
+
+		QSqlQuery updateQuery(db);
+
+		result = updateQuery.exec(QString("UPDATE SignalInstance SET specpropstruct='%1', specpropvalues=%2 WHERE SignalInstanceID=%3").
+							arg(defaultSpecPropStruct).arg(sqlByteaString).arg(latestSignalInstanceID));
+
+		if (result == false)
+		{
+			*errorMessage = QString(tr("Can't set signal's spec prop values! Error: ")) + q.lastError().text();
+			return false;
+		}
+	}
+
+	result = q.exec("SELECT specpropstruct, specpropvalues::bytea, signalinstanceid FROM SignalInstance WHERE specpropvalues IS NOT NULL");
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	while (q.next() != false)
+	{
+		QString specPropStruct = q.value(0).toString();
+
+		QByteArray protoSpecPropValues = q.value(1).toByteArray();
+
+		SignalSpecPropValues specPropValues;
+
+		result = specPropValues.createFromSpecPropStruct(specPropStruct);
+
+		result &= specPropValues.parseFromArray(protoSpecPropValues);
+	}
+
+	return result;
 }
 
 

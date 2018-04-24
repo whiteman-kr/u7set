@@ -974,7 +974,8 @@ message Property
 message SignalSpecPropValue
 {
     required string name = 1;
-    required int32 type = 2 [default = 0 /* QVariant::Invalid */];	// values of QVariant::Type enum
+    required int32 type = 2 [default = 0 /* QVariant::Invalid */];	// values of enum QVariant::Type
+    required bool isEnum = 3 [default = false];
 
     optional int32  int32Val = 10;
     optional uint32 uint32Val = 11;
