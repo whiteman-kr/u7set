@@ -55,7 +55,7 @@ namespace VFrame30
 
 	void SchemaItem::propertyDemand(const QString& /*prop*/)
 	{
-		auto guidProp = addProperty<QUuid, SchemaItem, &SchemaItem::guid, 0>(PropertyNames::guid, PropertyNames::functionalCategory, true);
+		auto guidProp = addProperty<QUuid, SchemaItem, &SchemaItem::guid, nullptr>(PropertyNames::guid, PropertyNames::functionalCategory, true);
 		guidProp->setExpert(true);
 
 		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented, PropertyNames::functionalCategory, true);

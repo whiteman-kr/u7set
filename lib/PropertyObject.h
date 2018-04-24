@@ -469,15 +469,6 @@ public:
 		assert(false);
 	}
 
-	void setGetter(const std::function<TYPE(void)>& getter)
-	{
-		m_getter = getter;
-	}
-	void setSetter(const std::function<void(TYPE)>& setter)
-	{
-		m_setter = setter;
-	}
-
 	virtual bool isTheSameType(Property* property) override final
 	{
 		if (dynamic_cast<decltype(this)>(property) == nullptr)
@@ -1987,9 +1978,9 @@ public:
 										   const QString& category,
 										   const QString& description,
 										   const QString& strType,
-										   QStringRef strMin,
-										   QStringRef strMax,
-										   QStringRef strDefaultValue,
+										   const QString&& strMin,
+										   const QString&& strMax,
+										   const QString&& strDefaultValue,
 										   int precision,
 										   bool updateFromPreset,
 										   bool expert,
