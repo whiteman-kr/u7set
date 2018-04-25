@@ -31,8 +31,6 @@ public:
 	static void getSignalData(QSqlQuery& q, Signal &s);
 	static QString getSignalDataStr(const Signal& s);
 
-	static QString getSqlByteaString(const QByteArray& binData);
-
 protected:
 	QString postgresConnectionName() const;
     QString projectConnectionName() const;
@@ -68,8 +66,9 @@ public:
 
     std::vector<DbFileInfo> systemFiles() const;
 
-	static QString toSqlStr(QString str);
+	static QString toSqlStr(const QString& str);
 	static QString toSqlBoolean(bool value);
+	static QString toSqlByteaStr(const QByteArray& binData);
 
     //
     // Operations

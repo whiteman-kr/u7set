@@ -1035,7 +1035,7 @@ message TuningValue
 {
     optional int32 type = 1;					// enum TuningValueType values
     optional int64 intValue = 2 [default = 0];
-    optional double doubleValue = 3  [default = 0.0];
+    optional double doubleValue = 3 [default = 0.0];
 }
 
 
@@ -1141,6 +1141,35 @@ message AppSignal
 message AppSignalSet
 {
     repeated AppSignal appSignal = 1;
+}
+
+
+// Fields of AppSignal serialized and saved in field ProtoData of table SignalInstance
+//
+//  After adding or removing fields - check Signal::saveProtoData, Signal::loadProtoData !!!
+//
+message ProtoAppSignalData							
+{
+	optional string busTypeID = 1;
+	optional string caption = 2;
+	optional int32 channel = 3 [default = 0 /* E::Channel::A */];
+
+	optional int32 dataSize = 4 [default = 32];
+	optional int32 byteOrder = 5 [default = 1 /* E::ByteOrder::BigEndian */];
+	optional int32 analogSignalFormat = 6 [default = 2 /* E::AnalogAppSignalFormat::Float32 */];
+	optional string unit = 7;
+	
+	optional bool enableTuning = 8 [default = false];
+    optional TuningValue tuningDefaultValue = 9;
+    optional TuningValue tuningLowBound = 10;
+    optional TuningValue tuningHighBound = 11;
+	
+	optional bool acquire = 12 [default = true];
+	optional bool archive = 13 [default = true];
+	optional int32 decimalPlaces = 14 [default = 2];
+	optional double coarseAperture = 15 [default = 1.0];
+	optional double fineAperture = 16 [default = 0.5];
+	optional bool adaptiveAperture = 17 [default = false];
 }
 
 

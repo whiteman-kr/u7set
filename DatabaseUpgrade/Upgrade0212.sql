@@ -18,52 +18,10 @@ CREATE TYPE public.signaldata AS
 (
     appsignalid text,
     customappsignalid text,
-    caption text,
     equipmentid text,
-    bustypeid text,
-    channel integer,
 
     signaltype integer,
     inouttype integer,
-
-    datasize integer,
-    byteorder integer,
-
-    analogsignalformat integer,
-    unit text,
-
-    lowadc integer,
-    highadc integer,
-    lowengeneeringunits double precision,
-    highengeneeringunits double precision,
-    lowvalidrange double precision,
-    highvalidrange double precision,
-    filteringtime double precision,
-    spreadtolerance double precision,
-
-    electriclowlimit double precision,
-    electrichighlimit double precision,
-    electricunit integer,
-    sensortype integer,
-    outputmode integer,
-
-    enabletuning boolean,
-
-    tuningdefaultdouble double precision,
-    tuninglowbounddouble double precision,
-    tuninghighbounddouble double precision,
-
-    tuningdefaultint bigint,
-    tuninglowboundint bigint,
-    tuninghighboundint bigint,
-
-    acquire boolean,
-    archive boolean,
-
-    decimalplaces integer,
-    coarseaperture double precision,
-    fineaperture double precision,
-    adaptiveaperture boolean,
 
     specpropstruct text,
     specpropvalues bytea,
@@ -122,52 +80,10 @@ BEGIN
 	RETURN QUERY SELECT
 		SI.AppSignalID,
 		SI.CustomAppSignalID,
-		SI.Caption,
 		SI.EquipmentID,
-		SI.BusTypeID,
-		S.Channel,
 
 		S.Type,
 		SI.InOutType,
-
-		SI.DataSize,
-		SI.ByteOrder,
-
-		SI.AnalogSignalFormat,
-		SI.Unit,
-
-		SI.LowADC,
-		SI.HighADC,
-		SI.LowengEneeringUnits,
-		SI.HighEngeneeringUnits,
-		SI.LowValidRange,
-		SI.HighValidRange,
-		SI.FilteringTime,
-		SI.SpreadTolerance,
-
-		SI.ElectricLowLimit,
-		SI.ElectricHighLimit,
-		SI.ElectricUnit,
-		SI.SensorType,
-		SI.OutputMode,
-
-		SI.EnableTuning,
-
-		SI.TuningDefaultDouble,
-		SI.TuningLowBoundDouble,
-		SI.TuningHighBoundDouble,
-
-		SI.TuningDefaultInt,
-		SI.TuningLowBoundInt,
-		SI.TuningHighBoundInt,
-
-		SI.Acquire,
-		SI.Archive,
-
-		SI.DecimalPlaces,
-		SI.CoarseAperture,
-		SI.FineAperture,
-		SI.AdaptiveAperture,
 
 		SI.SpecPropStruct,
 		SI.SpecPropValues,
@@ -236,52 +152,11 @@ BEGIN
 		UPDATE SignalInstance SET
 			AppSignalID = sd.AppSignalID,
 			CustomAppSignalID = sd.CustomAppSignalID,
-			Caption = sd.Caption,
 			EquipmentID = sd.EquipmentID,
-			BusTypeID = sd.BusTypeID,
 			-- Channel is not updatable
 
 			-- SignalType is not updatable
 			InOutType = sd.InOutType,
-
-			DataSize = sd.DataSize,
-			ByteOrder = sd.ByteOrder,
-
-			AnalogSignalFormat = sd.AnalogSignalFormat,
-			Unit = sd.Unit,
-
-			LowADC = sd.LowADC,
-			HighADC = sd.HighADC,
-			LowEngeneeringUnits = sd.LowEngeneeringUnits,
-			HighEngeneeringUnits = sd.HighEngeneeringUnits,
-			LowValidRange = sd.LowValidRange,
-			HighValidRange = sd.HighValidRange,
-			FilteringTime = sd.FilteringTime,
-			SpreadTolerance = sd.SpreadTolerance,
-
-			ElectricLowLimit = sd.ElectricLowLimit,
-			ElectricHighLimit = sd.ElectricHighLimit,
-			ElectricUnit = sd.ElectricUnit,
-			SensorType = sd.SensorType,
-			OutputMode = sd.OutputMode,
-
-			EnableTuning = sd.EnableTuning,
-
-			TuningDefaultDouble = sd.TuningDefaultDouble,
-			TuningLowBoundDouble = sd.TuningLowBoundDouble,
-			TuningHighBoundDouble = sd.TuningHighBoundDouble,
-
-			TuningDefaultInt = sd.TuningDefaultInt,
-			TuningLowBoundInt = sd.TuningLowBoundInt,
-			TuningHighBoundInt = sd.TuningHighBoundInt,
-
-			Acquire = sd.Acquire,
-			Archive = sd.Archive,
-
-			DecimalPlaces = sd.DecimalPlaces,
-			CoarseAperture = sd.CoarseAperture,
-			FineAperture = sd.FineAperture,
-			AdaptiveAperture = sd.AdaptiveAperture,
 
 			SpecPropStruct = sd.SpecPropStruct,
 			SpecPropValues = sd.SpecPropValues,
@@ -339,52 +214,10 @@ BEGIN
 	RETURN QUERY SELECT
 		SI.AppSignalID,
 		SI.CustomAppSignalID,
-		SI.Caption,
 		SI.EquipmentID,
-		SI.BusTypeID,
-		S.Channel,
 
 		S.Type,
 		SI.InOutType,
-
-		SI.DataSize,
-		SI.ByteOrder,
-
-		SI.AnalogSignalFormat,
-		SI.Unit,
-
-		SI.LowADC,
-		SI.HighADC,
-		SI.LowengEneeringUnits,
-		SI.HighEngeneeringUnits,
-		SI.LowValidRange,
-		SI.HighValidRange,
-		SI.FilteringTime,
-		SI.SpreadTolerance,
-
-		SI.ElectricLowLimit,
-		SI.ElectricHighLimit,
-		SI.ElectricUnit,
-		SI.SensorType,
-		SI.OutputMode,
-
-		SI.EnableTuning,
-
-		SI.TuningDefaultDouble,
-		SI.TuningLowBoundDouble,
-		SI.TuningHighBoundDouble,
-
-		SI.TuningDefaultInt,
-		SI.TuningLowBoundInt,
-		SI.TuningHighBoundInt,
-
-		SI.Acquire,
-		SI.Archive,
-
-		SI.DecimalPlaces,
-		SI.CoarseAperture,
-		SI.FineAperture,
-		SI.AdaptiveAperture,
 
 		SI.SpecPropStruct,
 		SI.SpecPropValues,
@@ -451,52 +284,10 @@ BEGIN
 	RETURN QUERY SELECT
 		SI.AppSignalID,
 		SI.CustomAppSignalID,
-		SI.Caption,
 		SI.EquipmentID,
-		SI.BusTypeID,
-		S.Channel,
 
 		S.Type,
 		SI.InOutType,
-
-		SI.DataSize,
-		SI.ByteOrder,
-
-		SI.AnalogSignalFormat,
-		SI.Unit,
-
-		SI.LowADC,
-		SI.HighADC,
-		SI.LowengEneeringUnits,
-		SI.HighEngeneeringUnits,
-		SI.LowValidRange,
-		SI.HighValidRange,
-		SI.FilteringTime,
-		SI.SpreadTolerance,
-
-		SI.ElectricLowLimit,
-		SI.ElectricHighLimit,
-		SI.ElectricUnit,
-		SI.SensorType,
-		SI.OutputMode,
-
-		SI.EnableTuning,
-
-		SI.TuningDefaultDouble,
-		SI.TuningLowBoundDouble,
-		SI.TuningHighBoundDouble,
-
-		SI.TuningDefaultInt,
-		SI.TuningLowBoundInt,
-		SI.TuningHighBoundInt,
-
-		SI.Acquire,
-		SI.Archive,
-
-		SI.DecimalPlaces,
-		SI.CoarseAperture,
-		SI.FineAperture,
-		SI.AdaptiveAperture,
 
 		SI.SpecPropStruct,
 		SI.SpecPropValues,
@@ -606,50 +397,9 @@ BEGIN
 					SignalInstance (
 						AppSignalID,
 						CustomAppSignalID,
-						Caption,
 						EquipmentID,
-						BusTypeID,
 
 						InOutType,
-
-						DataSize,
-						ByteOrder,
-
-						AnalogSignalFormat,
-						Unit,
-
-						LowADC,
-						HighADC,
-						LowengEneeringUnits,
-						HighEngeneeringUnits,
-						LowValidRange,
-						HighValidRange,
-						FilteringTime,
-						SpreadTolerance,
-
-						ElectricLowLimit,
-						ElectricHighLimit,
-						ElectricUnit,
-						SensorType,
-						OutputMode,
-
-						EnableTuning,
-
-						TuningDefaultDouble,
-						TuningLowBoundDouble,
-						TuningHighBoundDouble,
-
-						TuningDefaultInt,
-						TuningLowBoundInt,
-						TuningHighBoundInt,
-
-						Acquire,
-						Archive,
-
-						DecimalPlaces,
-						CoarseAperture,
-						FineAperture,
-						AdaptiveAperture,
 
 						SpecPropStruct,
 						SpecPropValues,
@@ -660,50 +410,9 @@ BEGIN
 					SELECT
 						AppSignalID,
 						CustomAppSignalID,
-						Caption,
 						EquipmentID,
-						BusTypeID,
 
 						InOutType,
-
-						DataSize,
-						ByteOrder,
-
-						AnalogSignalFormat,
-						Unit,
-
-						LowADC,
-						HighADC,
-						LowengEneeringUnits,
-						HighEngeneeringUnits,
-						LowValidRange,
-						HighValidRange,
-						FilteringTime,
-						SpreadTolerance,
-
-						ElectricLowLimit,
-						ElectricHighLimit,
-						ElectricUnit,
-						SensorType,
-						OutputMode,
-
-						EnableTuning,
-
-						TuningDefaultDouble,
-						TuningLowBoundDouble,
-						TuningHighBoundDouble,
-
-						TuningDefaultInt,
-						TuningLowBoundInt,
-						TuningHighBoundInt,
-
-						Acquire,
-						Archive,
-
-						DecimalPlaces,
-						CoarseAperture,
-						FineAperture,
-						AdaptiveAperture,
 
 						SpecPropStruct,
 						SpecPropValues,
@@ -766,52 +475,10 @@ BEGIN
 	SELECT
 			SI.AppSignalID,
 			SI.CustomAppSignalID,
-			SI.Caption,
 			SI.EquipmentID,
-			SI.BusTypeID,
-			S.Channel,
 
 			S.Type,
 			SI.InOutType,
-
-			SI.DataSize,
-			SI.ByteOrder,
-
-			SI.AnalogSignalFormat,
-			SI.Unit,
-
-			SI.LowADC,
-			SI.HighADC,
-			SI.LowengEneeringUnits,
-			SI.HighEngeneeringUnits,
-			SI.LowValidRange,
-			SI.HighValidRange,
-			SI.FilteringTime,
-			SI.SpreadTolerance,
-
-			SI.ElectricLowLimit,
-			SI.ElectricHighLimit,
-			SI.ElectricUnit,
-			SI.SensorType,
-			SI.OutputMode,
-
-			SI.EnableTuning,
-
-			SI.TuningDefaultDouble,
-			SI.TuningLowBoundDouble,
-			SI.TuningHighBoundDouble,
-
-			SI.TuningDefaultInt,
-			SI.TuningLowBoundInt,
-			SI.TuningHighBoundInt,
-
-			SI.Acquire,
-			SI.Archive,
-
-			SI.DecimalPlaces,
-			SI.CoarseAperture,
-			SI.FineAperture,
-			SI.AdaptiveAperture,
 
 			SI.SpecPropStruct,
 			SI.SpecPropValues,
@@ -860,52 +527,10 @@ BEGIN
 	RETURN QUERY SELECT
 			SI.AppSignalID,
 			SI.CustomAppSignalID,
-			SI.Caption,
 			SI.EquipmentID,
-			SI.BusTypeID,
-			S.Channel,
 
 			S.Type,
 			SI.InOutType,
-
-			SI.DataSize,
-			SI.ByteOrder,
-
-			SI.AnalogSignalFormat,
-			SI.Unit,
-
-			SI.LowADC,
-			SI.HighADC,
-			SI.LowengEneeringUnits,
-			SI.HighEngeneeringUnits,
-			SI.LowValidRange,
-			SI.HighValidRange,
-			SI.FilteringTime,
-			SI.SpreadTolerance,
-
-			SI.ElectricLowLimit,
-			SI.ElectricHighLimit,
-			SI.ElectricUnit,
-			SI.SensorType,
-			SI.OutputMode,
-
-			SI.EnableTuning,
-
-			SI.TuningDefaultDouble,
-			SI.TuningLowBoundDouble,
-			SI.TuningHighBoundDouble,
-
-			SI.TuningDefaultInt,
-			SI.TuningLowBoundInt,
-			SI.TuningHighBoundInt,
-
-			SI.Acquire,
-			SI.Archive,
-
-			SI.DecimalPlaces,
-			SI.CoarseAperture,
-			SI.FineAperture,
-			SI.AdaptiveAperture,
 
 			SI.SpecPropStruct,
 			SI.SpecPropValues,

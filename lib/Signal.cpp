@@ -254,19 +254,96 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busType
 									 busTypeID);
 }
 
-
-bool Signal::setSpecPropsStruct(const QString& specPropsStruct, bool updateExistsValues)
+void Signal::saveProtoData(QByteArray* protoDataArray) const
 {
-	m_specPropStruct = specPropsStruct;
+	TEST_PTR_RETURN(protoDataArray);
 
-	if (updateExistsValues == true)
+	Proto::ProtoAppSignalData protoData;
+
+	saveProtoData(&protoData);
+
+	int size = protoData.ByteSize();
+
+	protoDataArray->resize(size);
+
+	protoData.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(protoDataArray->data()));
+}
+
+void Signal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
+{
+	TEST_PTR_RETURN(protoData);
+
+	protoData->Clear();
+
+	protoData->set_bustypeid(m_busTypeID.toStdString());
+	protoData->set_caption(m_caption.toStdString());
+	protoData->set_channel(static_cast<int>(m_channel));
+
+	protoData->set_datasize(m_dataSize);
+	protoData->set_byteorder(static_cast<int>(m_byteOrder));
+	protoData->set_analogsignalformat(static_cast<int>(m_analogSignalFormat));
+	protoData->set_unit(m_unit.toStdString());
+
+	protoData->set_enabletuning(m_enableTuning);
+	m_tuningDefaultValue.save(protoData->mutable_tuningdefaultvalue());
+	m_tuningLowBound.save(protoData->mutable_tuninglowbound());
+	m_tuningHighBound.save(protoData->mutable_tuninghighbound());
+
+	protoData->set_acquire(m_acquire);
+	protoData->set_archive(m_archive);
+	protoData->set_decimalplaces(m_decimalPlaces);
+	protoData->set_coarseaperture(m_coarseAperture);
+	protoData->set_fineaperture(m_fineAperture);
+	protoData->set_adaptiveaperture(m_adaptiveAperture);
+}
+
+
+void Signal::loadProtoData(const QByteArray& protoDataArray)
+{
+	Proto::ProtoAppSignalData protoData;
+
+	bool res = protoData.ParseFromArray(protoDataArray.constData(), protoDataArray.size());
+
+	assert(res == true);
+
+	loadProtoData(protoData);
+}
+
+void Signal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
+{
+	m_busTypeID = QString::fromStdString(protoData.bustypeid());
+	m_caption = QString::fromStdString(protoData.caption());
+	m_channel = static_cast<E::Channel>(protoData.channel());
+
+	m_dataSize = protoData.datasize();
+	m_byteOrder = static_cast<E::ByteOrder>(protoData.byteorder());
+
+	// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
+	//
+	int f = protoData.analogsignalformat();
+
+	if (f == static_cast<int>(E::DataFormat::UnsignedInt))
 	{
-//		return updateSpecPropValues();
+		f = TO_INT(E::AnalogAppSignalFormat::SignedInt32);
 	}
 
-	//return createSpecPropValues();
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(f);
 
-	return true;
+	//
+
+	m_unit = QString::fromStdString(protoData.unit());
+
+	m_enableTuning = protoData.enabletuning();
+	m_tuningDefaultValue.load(protoData.tuningdefaultvalue());
+	m_tuningLowBound.load(protoData.tuninglowbound());
+	m_tuningHighBound.load(protoData.tuninghighbound());
+
+	m_acquire = protoData.acquire();
+	m_archive = protoData.archive();
+	m_decimalPlaces = protoData.decimalplaces();
+	m_coarseAperture = protoData.coarseaperture();
+	m_fineAperture = protoData.fineaperture();
+	m_adaptiveAperture = protoData.adaptiveaperture();
 }
 
 void Signal::resetAddresses()

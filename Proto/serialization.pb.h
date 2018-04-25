@@ -106,6 +106,7 @@ class AppSignalDbField;
 class AppSignalCalculatedParam;
 class AppSignal;
 class AppSignalSet;
+class ProtoAppSignalData;
 class AppSignalState;
 class Connection;
 class SchemaDetailsSet;
@@ -9845,6 +9846,269 @@ class AppSignalSet : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static AppSignalSet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ProtoAppSignalData : public ::google::protobuf::Message {
+ public:
+  ProtoAppSignalData();
+  virtual ~ProtoAppSignalData();
+
+  ProtoAppSignalData(const ProtoAppSignalData& from);
+
+  inline ProtoAppSignalData& operator=(const ProtoAppSignalData& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ProtoAppSignalData& default_instance();
+
+  void Swap(ProtoAppSignalData* other);
+
+  // implements Message ----------------------------------------------
+
+  ProtoAppSignalData* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ProtoAppSignalData& from);
+  void MergeFrom(const ProtoAppSignalData& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string busTypeID = 1;
+  inline bool has_bustypeid() const;
+  inline void clear_bustypeid();
+  static const int kBusTypeIDFieldNumber = 1;
+  inline const ::std::string& bustypeid() const;
+  inline void set_bustypeid(const ::std::string& value);
+  inline void set_bustypeid(const char* value);
+  inline void set_bustypeid(const char* value, size_t size);
+  inline ::std::string* mutable_bustypeid();
+  inline ::std::string* release_bustypeid();
+  inline void set_allocated_bustypeid(::std::string* bustypeid);
+
+  // optional string caption = 2;
+  inline bool has_caption() const;
+  inline void clear_caption();
+  static const int kCaptionFieldNumber = 2;
+  inline const ::std::string& caption() const;
+  inline void set_caption(const ::std::string& value);
+  inline void set_caption(const char* value);
+  inline void set_caption(const char* value, size_t size);
+  inline ::std::string* mutable_caption();
+  inline ::std::string* release_caption();
+  inline void set_allocated_caption(::std::string* caption);
+
+  // optional int32 channel = 3 [default = 0];
+  inline bool has_channel() const;
+  inline void clear_channel();
+  static const int kChannelFieldNumber = 3;
+  inline ::google::protobuf::int32 channel() const;
+  inline void set_channel(::google::protobuf::int32 value);
+
+  // optional int32 dataSize = 4 [default = 32];
+  inline bool has_datasize() const;
+  inline void clear_datasize();
+  static const int kDataSizeFieldNumber = 4;
+  inline ::google::protobuf::int32 datasize() const;
+  inline void set_datasize(::google::protobuf::int32 value);
+
+  // optional int32 byteOrder = 5 [default = 1];
+  inline bool has_byteorder() const;
+  inline void clear_byteorder();
+  static const int kByteOrderFieldNumber = 5;
+  inline ::google::protobuf::int32 byteorder() const;
+  inline void set_byteorder(::google::protobuf::int32 value);
+
+  // optional int32 analogSignalFormat = 6 [default = 2];
+  inline bool has_analogsignalformat() const;
+  inline void clear_analogsignalformat();
+  static const int kAnalogSignalFormatFieldNumber = 6;
+  inline ::google::protobuf::int32 analogsignalformat() const;
+  inline void set_analogsignalformat(::google::protobuf::int32 value);
+
+  // optional string unit = 7;
+  inline bool has_unit() const;
+  inline void clear_unit();
+  static const int kUnitFieldNumber = 7;
+  inline const ::std::string& unit() const;
+  inline void set_unit(const ::std::string& value);
+  inline void set_unit(const char* value);
+  inline void set_unit(const char* value, size_t size);
+  inline ::std::string* mutable_unit();
+  inline ::std::string* release_unit();
+  inline void set_allocated_unit(::std::string* unit);
+
+  // optional bool enableTuning = 8 [default = false];
+  inline bool has_enabletuning() const;
+  inline void clear_enabletuning();
+  static const int kEnableTuningFieldNumber = 8;
+  inline bool enabletuning() const;
+  inline void set_enabletuning(bool value);
+
+  // optional .Proto.TuningValue tuningDefaultValue = 9;
+  inline bool has_tuningdefaultvalue() const;
+  inline void clear_tuningdefaultvalue();
+  static const int kTuningDefaultValueFieldNumber = 9;
+  inline const ::Proto::TuningValue& tuningdefaultvalue() const;
+  inline ::Proto::TuningValue* mutable_tuningdefaultvalue();
+  inline ::Proto::TuningValue* release_tuningdefaultvalue();
+  inline void set_allocated_tuningdefaultvalue(::Proto::TuningValue* tuningdefaultvalue);
+
+  // optional .Proto.TuningValue tuningLowBound = 10;
+  inline bool has_tuninglowbound() const;
+  inline void clear_tuninglowbound();
+  static const int kTuningLowBoundFieldNumber = 10;
+  inline const ::Proto::TuningValue& tuninglowbound() const;
+  inline ::Proto::TuningValue* mutable_tuninglowbound();
+  inline ::Proto::TuningValue* release_tuninglowbound();
+  inline void set_allocated_tuninglowbound(::Proto::TuningValue* tuninglowbound);
+
+  // optional .Proto.TuningValue tuningHighBound = 11;
+  inline bool has_tuninghighbound() const;
+  inline void clear_tuninghighbound();
+  static const int kTuningHighBoundFieldNumber = 11;
+  inline const ::Proto::TuningValue& tuninghighbound() const;
+  inline ::Proto::TuningValue* mutable_tuninghighbound();
+  inline ::Proto::TuningValue* release_tuninghighbound();
+  inline void set_allocated_tuninghighbound(::Proto::TuningValue* tuninghighbound);
+
+  // optional bool acquire = 12 [default = true];
+  inline bool has_acquire() const;
+  inline void clear_acquire();
+  static const int kAcquireFieldNumber = 12;
+  inline bool acquire() const;
+  inline void set_acquire(bool value);
+
+  // optional bool archive = 13 [default = true];
+  inline bool has_archive() const;
+  inline void clear_archive();
+  static const int kArchiveFieldNumber = 13;
+  inline bool archive() const;
+  inline void set_archive(bool value);
+
+  // optional int32 decimalPlaces = 14 [default = 2];
+  inline bool has_decimalplaces() const;
+  inline void clear_decimalplaces();
+  static const int kDecimalPlacesFieldNumber = 14;
+  inline ::google::protobuf::int32 decimalplaces() const;
+  inline void set_decimalplaces(::google::protobuf::int32 value);
+
+  // optional double coarseAperture = 15 [default = 1];
+  inline bool has_coarseaperture() const;
+  inline void clear_coarseaperture();
+  static const int kCoarseApertureFieldNumber = 15;
+  inline double coarseaperture() const;
+  inline void set_coarseaperture(double value);
+
+  // optional double fineAperture = 16 [default = 0.5];
+  inline bool has_fineaperture() const;
+  inline void clear_fineaperture();
+  static const int kFineApertureFieldNumber = 16;
+  inline double fineaperture() const;
+  inline void set_fineaperture(double value);
+
+  // optional bool adaptiveAperture = 17 [default = false];
+  inline bool has_adaptiveaperture() const;
+  inline void clear_adaptiveaperture();
+  static const int kAdaptiveApertureFieldNumber = 17;
+  inline bool adaptiveaperture() const;
+  inline void set_adaptiveaperture(bool value);
+
+  // @@protoc_insertion_point(class_scope:Proto.ProtoAppSignalData)
+ private:
+  inline void set_has_bustypeid();
+  inline void clear_has_bustypeid();
+  inline void set_has_caption();
+  inline void clear_has_caption();
+  inline void set_has_channel();
+  inline void clear_has_channel();
+  inline void set_has_datasize();
+  inline void clear_has_datasize();
+  inline void set_has_byteorder();
+  inline void clear_has_byteorder();
+  inline void set_has_analogsignalformat();
+  inline void clear_has_analogsignalformat();
+  inline void set_has_unit();
+  inline void clear_has_unit();
+  inline void set_has_enabletuning();
+  inline void clear_has_enabletuning();
+  inline void set_has_tuningdefaultvalue();
+  inline void clear_has_tuningdefaultvalue();
+  inline void set_has_tuninglowbound();
+  inline void clear_has_tuninglowbound();
+  inline void set_has_tuninghighbound();
+  inline void clear_has_tuninghighbound();
+  inline void set_has_acquire();
+  inline void clear_has_acquire();
+  inline void set_has_archive();
+  inline void clear_has_archive();
+  inline void set_has_decimalplaces();
+  inline void clear_has_decimalplaces();
+  inline void set_has_coarseaperture();
+  inline void clear_has_coarseaperture();
+  inline void set_has_fineaperture();
+  inline void clear_has_fineaperture();
+  inline void set_has_adaptiveaperture();
+  inline void clear_has_adaptiveaperture();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* bustypeid_;
+  ::std::string* caption_;
+  ::google::protobuf::int32 channel_;
+  ::google::protobuf::int32 datasize_;
+  ::google::protobuf::int32 byteorder_;
+  ::google::protobuf::int32 analogsignalformat_;
+  ::std::string* unit_;
+  ::Proto::TuningValue* tuningdefaultvalue_;
+  ::Proto::TuningValue* tuninglowbound_;
+  ::Proto::TuningValue* tuninghighbound_;
+  bool enabletuning_;
+  bool acquire_;
+  bool archive_;
+  bool adaptiveaperture_;
+  ::google::protobuf::int32 decimalplaces_;
+  double coarseaperture_;
+  double fineaperture_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ProtoAppSignalData* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -24698,6 +24962,576 @@ AppSignalSet::appsignal() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >*
 AppSignalSet::mutable_appsignal() {
   return &appsignal_;
+}
+
+// -------------------------------------------------------------------
+
+// ProtoAppSignalData
+
+// optional string busTypeID = 1;
+inline bool ProtoAppSignalData::has_bustypeid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ProtoAppSignalData::set_has_bustypeid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ProtoAppSignalData::clear_has_bustypeid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ProtoAppSignalData::clear_bustypeid() {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    bustypeid_->clear();
+  }
+  clear_has_bustypeid();
+}
+inline const ::std::string& ProtoAppSignalData::bustypeid() const {
+  return *bustypeid_;
+}
+inline void ProtoAppSignalData::set_bustypeid(const ::std::string& value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void ProtoAppSignalData::set_bustypeid(const char* value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void ProtoAppSignalData::set_bustypeid(const char* value, size_t size) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_bustypeid() {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  return bustypeid_;
+}
+inline ::std::string* ProtoAppSignalData::release_bustypeid() {
+  clear_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = bustypeid_;
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_bustypeid(::std::string* bustypeid) {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    delete bustypeid_;
+  }
+  if (bustypeid) {
+    set_has_bustypeid();
+    bustypeid_ = bustypeid;
+  } else {
+    clear_has_bustypeid();
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string caption = 2;
+inline bool ProtoAppSignalData::has_caption() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ProtoAppSignalData::set_has_caption() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ProtoAppSignalData::clear_has_caption() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ProtoAppSignalData::clear_caption() {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    caption_->clear();
+  }
+  clear_has_caption();
+}
+inline const ::std::string& ProtoAppSignalData::caption() const {
+  return *caption_;
+}
+inline void ProtoAppSignalData::set_caption(const ::std::string& value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void ProtoAppSignalData::set_caption(const char* value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void ProtoAppSignalData::set_caption(const char* value, size_t size) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_caption() {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  return caption_;
+}
+inline ::std::string* ProtoAppSignalData::release_caption() {
+  clear_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = caption_;
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_caption(::std::string* caption) {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    delete caption_;
+  }
+  if (caption) {
+    set_has_caption();
+    caption_ = caption;
+  } else {
+    clear_has_caption();
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 channel = 3 [default = 0];
+inline bool ProtoAppSignalData::has_channel() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ProtoAppSignalData::set_has_channel() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ProtoAppSignalData::clear_has_channel() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ProtoAppSignalData::clear_channel() {
+  channel_ = 0;
+  clear_has_channel();
+}
+inline ::google::protobuf::int32 ProtoAppSignalData::channel() const {
+  return channel_;
+}
+inline void ProtoAppSignalData::set_channel(::google::protobuf::int32 value) {
+  set_has_channel();
+  channel_ = value;
+}
+
+// optional int32 dataSize = 4 [default = 32];
+inline bool ProtoAppSignalData::has_datasize() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ProtoAppSignalData::set_has_datasize() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ProtoAppSignalData::clear_has_datasize() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ProtoAppSignalData::clear_datasize() {
+  datasize_ = 32;
+  clear_has_datasize();
+}
+inline ::google::protobuf::int32 ProtoAppSignalData::datasize() const {
+  return datasize_;
+}
+inline void ProtoAppSignalData::set_datasize(::google::protobuf::int32 value) {
+  set_has_datasize();
+  datasize_ = value;
+}
+
+// optional int32 byteOrder = 5 [default = 1];
+inline bool ProtoAppSignalData::has_byteorder() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void ProtoAppSignalData::set_has_byteorder() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void ProtoAppSignalData::clear_has_byteorder() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void ProtoAppSignalData::clear_byteorder() {
+  byteorder_ = 1;
+  clear_has_byteorder();
+}
+inline ::google::protobuf::int32 ProtoAppSignalData::byteorder() const {
+  return byteorder_;
+}
+inline void ProtoAppSignalData::set_byteorder(::google::protobuf::int32 value) {
+  set_has_byteorder();
+  byteorder_ = value;
+}
+
+// optional int32 analogSignalFormat = 6 [default = 2];
+inline bool ProtoAppSignalData::has_analogsignalformat() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void ProtoAppSignalData::set_has_analogsignalformat() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void ProtoAppSignalData::clear_has_analogsignalformat() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void ProtoAppSignalData::clear_analogsignalformat() {
+  analogsignalformat_ = 2;
+  clear_has_analogsignalformat();
+}
+inline ::google::protobuf::int32 ProtoAppSignalData::analogsignalformat() const {
+  return analogsignalformat_;
+}
+inline void ProtoAppSignalData::set_analogsignalformat(::google::protobuf::int32 value) {
+  set_has_analogsignalformat();
+  analogsignalformat_ = value;
+}
+
+// optional string unit = 7;
+inline bool ProtoAppSignalData::has_unit() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void ProtoAppSignalData::set_has_unit() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void ProtoAppSignalData::clear_has_unit() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void ProtoAppSignalData::clear_unit() {
+  if (unit_ != &::google::protobuf::internal::kEmptyString) {
+    unit_->clear();
+  }
+  clear_has_unit();
+}
+inline const ::std::string& ProtoAppSignalData::unit() const {
+  return *unit_;
+}
+inline void ProtoAppSignalData::set_unit(const ::std::string& value) {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  unit_->assign(value);
+}
+inline void ProtoAppSignalData::set_unit(const char* value) {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  unit_->assign(value);
+}
+inline void ProtoAppSignalData::set_unit(const char* value, size_t size) {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  unit_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_unit() {
+  set_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    unit_ = new ::std::string;
+  }
+  return unit_;
+}
+inline ::std::string* ProtoAppSignalData::release_unit() {
+  clear_has_unit();
+  if (unit_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = unit_;
+    unit_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_unit(::std::string* unit) {
+  if (unit_ != &::google::protobuf::internal::kEmptyString) {
+    delete unit_;
+  }
+  if (unit) {
+    set_has_unit();
+    unit_ = unit;
+  } else {
+    clear_has_unit();
+    unit_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool enableTuning = 8 [default = false];
+inline bool ProtoAppSignalData::has_enabletuning() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void ProtoAppSignalData::set_has_enabletuning() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void ProtoAppSignalData::clear_has_enabletuning() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void ProtoAppSignalData::clear_enabletuning() {
+  enabletuning_ = false;
+  clear_has_enabletuning();
+}
+inline bool ProtoAppSignalData::enabletuning() const {
+  return enabletuning_;
+}
+inline void ProtoAppSignalData::set_enabletuning(bool value) {
+  set_has_enabletuning();
+  enabletuning_ = value;
+}
+
+// optional .Proto.TuningValue tuningDefaultValue = 9;
+inline bool ProtoAppSignalData::has_tuningdefaultvalue() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void ProtoAppSignalData::set_has_tuningdefaultvalue() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void ProtoAppSignalData::clear_has_tuningdefaultvalue() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void ProtoAppSignalData::clear_tuningdefaultvalue() {
+  if (tuningdefaultvalue_ != NULL) tuningdefaultvalue_->::Proto::TuningValue::Clear();
+  clear_has_tuningdefaultvalue();
+}
+inline const ::Proto::TuningValue& ProtoAppSignalData::tuningdefaultvalue() const {
+  return tuningdefaultvalue_ != NULL ? *tuningdefaultvalue_ : *default_instance_->tuningdefaultvalue_;
+}
+inline ::Proto::TuningValue* ProtoAppSignalData::mutable_tuningdefaultvalue() {
+  set_has_tuningdefaultvalue();
+  if (tuningdefaultvalue_ == NULL) tuningdefaultvalue_ = new ::Proto::TuningValue;
+  return tuningdefaultvalue_;
+}
+inline ::Proto::TuningValue* ProtoAppSignalData::release_tuningdefaultvalue() {
+  clear_has_tuningdefaultvalue();
+  ::Proto::TuningValue* temp = tuningdefaultvalue_;
+  tuningdefaultvalue_ = NULL;
+  return temp;
+}
+inline void ProtoAppSignalData::set_allocated_tuningdefaultvalue(::Proto::TuningValue* tuningdefaultvalue) {
+  delete tuningdefaultvalue_;
+  tuningdefaultvalue_ = tuningdefaultvalue;
+  if (tuningdefaultvalue) {
+    set_has_tuningdefaultvalue();
+  } else {
+    clear_has_tuningdefaultvalue();
+  }
+}
+
+// optional .Proto.TuningValue tuningLowBound = 10;
+inline bool ProtoAppSignalData::has_tuninglowbound() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void ProtoAppSignalData::set_has_tuninglowbound() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void ProtoAppSignalData::clear_has_tuninglowbound() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void ProtoAppSignalData::clear_tuninglowbound() {
+  if (tuninglowbound_ != NULL) tuninglowbound_->::Proto::TuningValue::Clear();
+  clear_has_tuninglowbound();
+}
+inline const ::Proto::TuningValue& ProtoAppSignalData::tuninglowbound() const {
+  return tuninglowbound_ != NULL ? *tuninglowbound_ : *default_instance_->tuninglowbound_;
+}
+inline ::Proto::TuningValue* ProtoAppSignalData::mutable_tuninglowbound() {
+  set_has_tuninglowbound();
+  if (tuninglowbound_ == NULL) tuninglowbound_ = new ::Proto::TuningValue;
+  return tuninglowbound_;
+}
+inline ::Proto::TuningValue* ProtoAppSignalData::release_tuninglowbound() {
+  clear_has_tuninglowbound();
+  ::Proto::TuningValue* temp = tuninglowbound_;
+  tuninglowbound_ = NULL;
+  return temp;
+}
+inline void ProtoAppSignalData::set_allocated_tuninglowbound(::Proto::TuningValue* tuninglowbound) {
+  delete tuninglowbound_;
+  tuninglowbound_ = tuninglowbound;
+  if (tuninglowbound) {
+    set_has_tuninglowbound();
+  } else {
+    clear_has_tuninglowbound();
+  }
+}
+
+// optional .Proto.TuningValue tuningHighBound = 11;
+inline bool ProtoAppSignalData::has_tuninghighbound() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void ProtoAppSignalData::set_has_tuninghighbound() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void ProtoAppSignalData::clear_has_tuninghighbound() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void ProtoAppSignalData::clear_tuninghighbound() {
+  if (tuninghighbound_ != NULL) tuninghighbound_->::Proto::TuningValue::Clear();
+  clear_has_tuninghighbound();
+}
+inline const ::Proto::TuningValue& ProtoAppSignalData::tuninghighbound() const {
+  return tuninghighbound_ != NULL ? *tuninghighbound_ : *default_instance_->tuninghighbound_;
+}
+inline ::Proto::TuningValue* ProtoAppSignalData::mutable_tuninghighbound() {
+  set_has_tuninghighbound();
+  if (tuninghighbound_ == NULL) tuninghighbound_ = new ::Proto::TuningValue;
+  return tuninghighbound_;
+}
+inline ::Proto::TuningValue* ProtoAppSignalData::release_tuninghighbound() {
+  clear_has_tuninghighbound();
+  ::Proto::TuningValue* temp = tuninghighbound_;
+  tuninghighbound_ = NULL;
+  return temp;
+}
+inline void ProtoAppSignalData::set_allocated_tuninghighbound(::Proto::TuningValue* tuninghighbound) {
+  delete tuninghighbound_;
+  tuninghighbound_ = tuninghighbound;
+  if (tuninghighbound) {
+    set_has_tuninghighbound();
+  } else {
+    clear_has_tuninghighbound();
+  }
+}
+
+// optional bool acquire = 12 [default = true];
+inline bool ProtoAppSignalData::has_acquire() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void ProtoAppSignalData::set_has_acquire() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void ProtoAppSignalData::clear_has_acquire() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void ProtoAppSignalData::clear_acquire() {
+  acquire_ = true;
+  clear_has_acquire();
+}
+inline bool ProtoAppSignalData::acquire() const {
+  return acquire_;
+}
+inline void ProtoAppSignalData::set_acquire(bool value) {
+  set_has_acquire();
+  acquire_ = value;
+}
+
+// optional bool archive = 13 [default = true];
+inline bool ProtoAppSignalData::has_archive() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_archive() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void ProtoAppSignalData::clear_has_archive() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void ProtoAppSignalData::clear_archive() {
+  archive_ = true;
+  clear_has_archive();
+}
+inline bool ProtoAppSignalData::archive() const {
+  return archive_;
+}
+inline void ProtoAppSignalData::set_archive(bool value) {
+  set_has_archive();
+  archive_ = value;
+}
+
+// optional int32 decimalPlaces = 14 [default = 2];
+inline bool ProtoAppSignalData::has_decimalplaces() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_decimalplaces() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void ProtoAppSignalData::clear_has_decimalplaces() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void ProtoAppSignalData::clear_decimalplaces() {
+  decimalplaces_ = 2;
+  clear_has_decimalplaces();
+}
+inline ::google::protobuf::int32 ProtoAppSignalData::decimalplaces() const {
+  return decimalplaces_;
+}
+inline void ProtoAppSignalData::set_decimalplaces(::google::protobuf::int32 value) {
+  set_has_decimalplaces();
+  decimalplaces_ = value;
+}
+
+// optional double coarseAperture = 15 [default = 1];
+inline bool ProtoAppSignalData::has_coarseaperture() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_coarseaperture() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void ProtoAppSignalData::clear_has_coarseaperture() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void ProtoAppSignalData::clear_coarseaperture() {
+  coarseaperture_ = 1;
+  clear_has_coarseaperture();
+}
+inline double ProtoAppSignalData::coarseaperture() const {
+  return coarseaperture_;
+}
+inline void ProtoAppSignalData::set_coarseaperture(double value) {
+  set_has_coarseaperture();
+  coarseaperture_ = value;
+}
+
+// optional double fineAperture = 16 [default = 0.5];
+inline bool ProtoAppSignalData::has_fineaperture() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_fineaperture() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void ProtoAppSignalData::clear_has_fineaperture() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void ProtoAppSignalData::clear_fineaperture() {
+  fineaperture_ = 0.5;
+  clear_has_fineaperture();
+}
+inline double ProtoAppSignalData::fineaperture() const {
+  return fineaperture_;
+}
+inline void ProtoAppSignalData::set_fineaperture(double value) {
+  set_has_fineaperture();
+  fineaperture_ = value;
+}
+
+// optional bool adaptiveAperture = 17 [default = false];
+inline bool ProtoAppSignalData::has_adaptiveaperture() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_adaptiveaperture() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void ProtoAppSignalData::clear_has_adaptiveaperture() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void ProtoAppSignalData::clear_adaptiveaperture() {
+  adaptiveaperture_ = false;
+  clear_has_adaptiveaperture();
+}
+inline bool ProtoAppSignalData::adaptiveaperture() const {
+  return adaptiveaperture_;
+}
+inline void ProtoAppSignalData::set_adaptiveaperture(bool value) {
+  set_has_adaptiveaperture();
+  adaptiveaperture_ = value;
 }
 
 // -------------------------------------------------------------------

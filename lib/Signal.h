@@ -237,8 +237,18 @@ public:
 
 	// Specific properties
 
-	QString specPropsStruct() const { return m_specPropStruct; }
-	bool setSpecPropsStruct(const QString& specPropsStruct, bool updateExistsValues);
+	QString specPropStruct() const { return m_specPropStruct; }
+	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
+
+	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
+	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
+
+	void saveProtoData(QByteArray* protoDataArray) const;
+	void saveProtoData(Proto::ProtoAppSignalData* protoData) const;
+
+	void loadProtoData(const QByteArray& protoDataArray);
+	void loadProtoData(const Proto::ProtoAppSignalData& protoData);
+
 
 	// Signal fields from database
 
