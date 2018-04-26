@@ -57,7 +57,7 @@ namespace VFrame30
 		addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold, PropertyNames::appearanceCategory, true);
 		addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic, PropertyNames::appearanceCategory, true);
 
-		addProperty<QString, FblItemRect, &FblItemRect::label, 0>(PropertyNames::label, PropertyNames::functionalCategory, true);
+		addProperty<QString, FblItemRect, &FblItemRect::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
 
 		addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText, PropertyNames::textCategory, true);
 		addProperty<E::UserTextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos, PropertyNames::textCategory, true);

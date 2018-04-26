@@ -31,6 +31,23 @@ SpecificPropertyDescription::SpecificPropertyDescription()
 	propSpecific->setCategory(tr("Miscellaneous"));
 }
 
+SpecificPropertyDescription::SpecificPropertyDescription(const SpecificPropertyDescription& source) : SpecificPropertyDescription()
+{
+	m_caption = source.m_caption;
+	m_category = source.m_category;
+	m_description = source.m_description;
+	m_type = source.m_type;
+	m_typeDynamicEnum = source.m_typeDynamicEnum;
+	m_lowLimit = source.m_lowLimit;
+	m_highLimit = source.m_highLimit;
+	m_defaultValue = source.m_defaultValue;
+	m_precision = source.m_precision;
+	m_updateFromPreset = source.m_updateFromPreset;
+	m_expert = source.m_expert;
+	m_visible = source.m_visible;
+	m_specificEditor = source.m_specificEditor;
+}
+
 
 QString SpecificPropertyDescription::caption() const
 {
@@ -260,6 +277,11 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	m_addButton = new QPushButton(tr("Add Property"));
 	connect(m_addButton, &QPushButton::clicked, this, &SpecificPropertiesEditor::onAddProperty);
 	buttonLayout->addWidget(m_addButton);
+
+	m_cloneButton = new QPushButton(tr("Clone Property"));
+	m_cloneButton->setEnabled(false);
+	connect(m_cloneButton, &QPushButton::clicked, this, &SpecificPropertiesEditor::onCloneProperty);
+	buttonLayout->addWidget(m_cloneButton);
 
 	m_removeButton = new QPushButton(tr("Remove Property"));
 	m_removeButton->setEnabled(false);
@@ -495,9 +517,9 @@ QString SpecificPropertiesEditor::text()
 														spd->category(),
 														spd->description(),
 														strType,
-														&spd->lowLimit(),
-														&spd->highLimit(),
-														&spd->defaultValue(),
+														spd->lowLimit(),
+														spd->highLimit(),
+														spd->defaultValue(),
 														spd->precision(),
 														spd->updateFromPreset(),
 														spd->expert(),
@@ -517,11 +539,13 @@ void SpecificPropertiesEditor::setReadOnly(bool value)
 
 void SpecificPropertiesEditor::onTreeSelectionChanged()
 {
-	bool buttonsEnabled = m_propertiesList->selectedItems().size() > 0;
+	bool cloneEnabled = m_propertiesList->selectedItems().size() == 1;
+	bool removeEnabled = m_propertiesList->selectedItems().size() > 0;
 
 	if (m_propertyEditor->readOnly() == false)
 	{
-		m_removeButton->setEnabled(buttonsEnabled);
+		m_cloneButton->setEnabled(cloneEnabled);
+		m_removeButton->setEnabled(removeEnabled);
 	}
 
 	//
@@ -595,6 +619,56 @@ void SpecificPropertiesEditor::onAddProperty()
 	spd->setCaption(tr("New Property"));
 	spd->setType(E::SpecificPropertyType::pt_uint32);
 	spd->setVisible(true);
+
+	// Add the tree item
+
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+
+	updatePropetyListItem(item, spd.get());
+
+	m_propertyDescriptionsMap[item] = spd;
+
+	m_propertiesList->addTopLevelItem(item);
+
+	m_propertiesList->clearSelection();
+
+	m_propertiesList->setCurrentItem(item);
+}
+
+void SpecificPropertiesEditor::onCloneProperty()
+{
+	QList<QTreeWidgetItem*> selected = m_propertiesList->selectedItems();
+
+	if (selected.size() != 1)
+	{
+		return;
+	}
+
+	QTreeWidgetItem* sourceItem = selected[0];
+
+	auto it = m_propertyDescriptionsMap.find(sourceItem);
+
+	if (it == m_propertyDescriptionsMap.end())
+	{
+		assert(false);
+		return;
+	}
+
+	std::shared_ptr<SpecificPropertyDescription> sourceSpd = it->second;
+	if (sourceSpd == nullptr)
+	{
+		assert(sourceSpd);
+		return;
+	}
+
+	std::shared_ptr<SpecificPropertyDescription> spd = std::make_shared<SpecificPropertyDescription>(*sourceSpd);
+	if (spd == nullptr)
+	{
+		assert(spd);
+		return;
+	}
+
+	spd->setCaption(spd->caption() + tr(" - clone"));
 
 	// Add the tree item
 

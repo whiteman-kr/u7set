@@ -9,6 +9,7 @@ class SpecificPropertyDescription : public PropertyObject
 	Q_OBJECT
 public:
 	SpecificPropertyDescription();
+	explicit SpecificPropertyDescription(const SpecificPropertyDescription& source);
 
 	QString caption() const;
 	void setCaption(const QString& value);
@@ -52,6 +53,11 @@ public:
 	void validateDynamicEnumType(QWidget* parent);
 
 private:
+
+	//
+	// Warning! Be sure to add new fields to the copy constructor!
+	//
+
 	QString m_caption;
 	QString m_category;
 	QString m_description;
@@ -65,6 +71,8 @@ private:
 	bool m_expert = false;
 	bool m_visible = true;
 	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
+
+
 };
 
 class SpecificPropertiesEditor : public ExtWidgets::PropertyTextEditor
@@ -86,6 +94,7 @@ private slots:
 
 
 	void onAddProperty();
+	void onCloneProperty();
 	void onRemoveProperties();
 
 	void onOkClicked();
@@ -99,6 +108,7 @@ private:
 	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
 
 	QPushButton* m_addButton = nullptr;
+	QPushButton* m_cloneButton = nullptr;
 	QPushButton* m_removeButton = nullptr;
 
 	std::map<QTreeWidgetItem*, std::shared_ptr<SpecificPropertyDescription>> m_propertyDescriptionsMap;
