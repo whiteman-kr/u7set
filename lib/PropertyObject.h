@@ -11,7 +11,9 @@
 #include <utility>
 #include <cassert>
 #include <memory>
+#include <algorithm>
 
+#include <QtGlobal>
 #include <QObject>
 #include <QString>
 #include <QVariant>

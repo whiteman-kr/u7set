@@ -19,7 +19,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 203;
+const int DatabaseProjectVersion = 212;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -221,6 +221,18 @@ int main(int argc, char *argv[])
 		// Database User functions
 		//
 		int testResult = 0;
+
+		// Database Signal functions
+		//
+		testResult |= QTest::qExec(&signalTests, argc, argv);
+		if (testResult != 0)
+		{
+//			qDebug() << testResult << " signal test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
+		}
+
+		throw 0;
 
 		testResult |= QTest::qExec(&userTests, argc, argv);
 		if (testResult != 0)
