@@ -7,6 +7,9 @@
 #include <QAbstractItemModel>
 #include <QComboBox>
 #include <QUuid>
+#include <QTableView>
+#include <QFileDialog>
+#include <QHeaderView>
 #include "Hash.h"
 
 
@@ -18,11 +21,13 @@ namespace Log
 	// LogFileRecord
 	//
 
-	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "ALERT", "TXT"};
+	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "ALERT", "TXT", "DATA"};
 
-	const char* messageTypeTextLong[] = {"All", "Error", "Warning", "Message", "Alert", "Text"};
+	const char* messageTypeTextLong[] = {"All", "Error", "Warning", "Message", "Alert", "Text", "DataInvisible"};
 
 	const int messageTypeCount = sizeof(messageTypeTextShort) / sizeof(messageTypeTextShort[0]);
+
+	const int messageTypeLongCount = sizeof(messageTypeTextLong) / sizeof(messageTypeTextLong[0]);
 
 	const char* messageTimeFormat = {"dd.MM.yyyy hh:mm:ss.zzz"};
 
@@ -40,11 +45,19 @@ namespace Log
 			return QString();
 		}
 
-		return QString("%1\t%2\t\t%3\t%4\r\n").arg(sessionHashString).arg(time.toString(messageTimeFormat)).arg(messageTypeTextShort[intType]).arg(text);
+		if (type == MessageType::Data)
+		{
+			return QString("%1\t%2\t\t%3\t%4\r\n").arg(sessionHashString).arg(time.toString(messageTimeFormat)).arg(messageTypeTextShort[intType]).arg(textArray.join('\t'));
+		}
+		else
+		{
+			return QString("%1\t%2\t\t%3\t%4\r\n").arg(sessionHashString).arg(time.toString(messageTimeFormat)).arg(messageTypeTextShort[intType]).arg(text);
+		}
 	}
 
 	bool LogFileRecord::loadFromString(const QString& source, quint64 currentSessionHash)
 	{
+
 		QString str = source;
 
 		// Session Hash
@@ -99,36 +112,57 @@ namespace Log
 		str.remove(0, tabPos + 1);
 		str = str.trimmed();
 
-		if (s == "ERR")
+		if (s == messageTypeTextShort[static_cast<int>(MessageType::Error)])
 		{
 			type = MessageType::Error;
 		}
 		else
 		{
-			if (s == "WRN")
+			if (s == messageTypeTextShort[static_cast<int>(MessageType::Warning)])
 			{
 				type = MessageType::Warning;
 			}
 			else
 			{
-				if (s == "MSG")
+				if (s == messageTypeTextShort[static_cast<int>(MessageType::Message)])
 				{
 					type = MessageType::Message;
 				}
 				else
 				{
-					if (s == "ALERT")
+					if (s == messageTypeTextShort[static_cast<int>(MessageType::Alert)])
 					{
 						type = MessageType::Alert;
 					}
+					else
+					{
+						if (s == messageTypeTextShort[static_cast<int>(MessageType::Data)])
+						{
+							type = MessageType::Data;
+						}
+						else
+						{
+							assert(false);
+							type = MessageType::Text;
+							text = QObject::tr("UNKNOWN TYPE %1, %2").arg(s).arg(str);
+							return true;
+						}
+					}
 				}
-
 			}
 		}
 
 		// Text
 
-		text = str;
+		if (type == MessageType::Data)
+		{
+			textArray = str.split('\t');
+		}
+		else
+		{
+			text = str;
+		}
+
 		return true;
 	}
 
@@ -144,17 +178,16 @@ namespace Log
 		  m_sessionHash(sessionHash),
 		  m_sessionHashString(QString::number(sessionHash).leftJustified(21, ' '))
 	{
+		assert(messageTypeCount == static_cast<int>(MessageType::Count));
+		assert(messageTypeLongCount == static_cast<int>(MessageType::Count));
+
 		if (m_path.isEmpty() == true)
 		{
 			QString localAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 			m_path = QDir::toNativeSeparators(localAppDataPath);
 		}
 
-
-
-
 		qDebug() << "Log path : " << m_path;
-
 	}
 
 	LogFileWorker::~LogFileWorker()
@@ -179,6 +212,24 @@ namespace Log
 		return true;
 	}
 
+	bool LogFileWorker::writeArray(const QStringList& textArray)
+	{
+		QMutexLocker l(&m_queueMutex);
+
+		LogFileRecord r;
+
+		r.time = QDateTime::currentDateTime();
+		r.type = MessageType::Data;
+		r.sessionHash = m_sessionHash;
+		r.textArray = textArray;
+
+		emit recordArrived(r);
+
+		m_queue.push_back(r);
+
+		return true;
+	}
+
 	void LogFileWorker::read(bool currentSessionOnly)
 	{
 		emit readStart(currentSessionOnly);
@@ -188,6 +239,11 @@ namespace Log
 	{
 		QMutexLocker l(&m_readMutex);
 		result->swap(m_readResult);
+	}
+
+	QString LogFileWorker::logName() const
+	{
+		return m_logName;
 	}
 
 	void LogFileWorker::onThreadStarted()
@@ -205,7 +261,7 @@ namespace Log
 
 		QStringList filters;
 
-		filters << QString("%1_????.log").arg(qAppName());
+		filters << QString("%1_????.log").arg(m_logName);
 
 		QStringList existingFiles = dir.entryList(filters, QDir::Files, QDir::Name);
 
@@ -215,7 +271,7 @@ namespace Log
 		{
 			QString lastFile = existingFiles.last();
 
-			lastFile.remove(qAppName());
+			lastFile.remove(m_logName);
 			lastFile.remove('_');
 			lastFile.remove(".log");
 
@@ -633,15 +689,48 @@ namespace Log
 	//
 	// LogRecordModel
 	//
-	LogRecordModel::LogRecordModel()
+	LogRecordModel::LogRecordModel(bool showTypeColumn, std::vector<std::pair<QString, double> > headerTitles):
+		m_showTypeColumn(showTypeColumn)
 	{
-		m_columnsNames << tr("Time");
-		m_columnsNames << tr("Type");
-		m_columnsNames << tr("Message");
+		int c = 0;
 
+		double usedWidth = 0;
+
+		m_columnsNames << tr("Time");
 		m_columnsWidthPercent.push_back(0.15);
-		m_columnsWidthPercent.push_back(0.05);
-		m_columnsWidthPercent.push_back(0.8);
+		usedWidth += 0.15;
+		m_columnTime = c++;
+
+		if (m_showTypeColumn == true)
+		{
+			m_columnsNames << tr("Type");
+			m_columnsWidthPercent.push_back(0.05);
+			usedWidth += 0.05;
+			m_columnType = c++;
+		}
+
+		if (headerTitles.size() == 0)
+		{
+			m_columnsNames << tr("Message");
+			m_columnsWidthPercent.push_back(1 - usedWidth);
+			m_columnText = c++;
+		}
+		else
+		{
+			int count = static_cast<int>(headerTitles.size());
+
+			double totalWidth = (1 - usedWidth);
+
+			for (int i = 0; i < count; i++)
+			{
+				const QString& s = headerTitles[i].first;
+
+				m_columnsNames << s;
+				m_columnsWidthPercent.push_back(totalWidth * headerTitles[i].second);
+			}
+
+			m_columnText = c++;
+		}
 	}
 
 	LogRecordModel::~LogRecordModel()
@@ -741,9 +830,19 @@ namespace Log
 
 		if (m_filterText.isEmpty() == false)
 		{
-			if (record.text.contains(m_filterText) == false)
+			if (record.type == MessageType::Data)
 			{
-				return false;
+				if (record.textArray.join(';').contains(m_filterText) == false)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (record.text.contains(m_filterText) == false)
+				{
+					return false;
+				}
 			}
 		}
 
@@ -811,12 +910,12 @@ namespace Log
 
 			int displayIndex = col;
 
-			if (displayIndex == static_cast<int>(Columns::Time))
+			if (displayIndex == m_columnTime)
 			{
 				return rec.time.toString(messageTimeFormat);
 			}
 
-			if (displayIndex == static_cast<int>(Columns::Type))
+			if (displayIndex == m_columnType)
 			{
 				int intType = static_cast<int>(rec.type);
 				if (intType < 0 || intType >= messageTypeCount)
@@ -828,9 +927,27 @@ namespace Log
 				return messageTypeTextShort[intType];
 			}
 
-			if (displayIndex == static_cast<int>(Columns::Text))
+			if (displayIndex >= m_columnText)
 			{
-				return rec.text;
+				if (rec.type == MessageType::Data)
+				{
+					int textColumnNo = displayIndex - m_columnText;
+
+					if (textColumnNo < 0)
+					{
+						assert(false);
+						return QVariant();
+					}
+
+					if (textColumnNo < rec.textArray.size())
+					{
+						return rec.textArray[textColumnNo];
+					}
+				}
+				else
+				{
+					return rec.text;
+				}
 			}
 		}
 		return QVariant();
@@ -856,11 +973,14 @@ namespace Log
 	// LogFileDialog
 	//
 
-	LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent)
+	LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles)
 		:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-		  m_worker(worker)
+		  m_worker(worker),
+		  m_model(showType, headerTitles)
 	{
 		setAttribute(Qt::WA_DeleteOnClose);
+
+		setWindowTitle(tr("Log View - %1").arg(worker->logName()));
 
 		QVBoxLayout* mainLayout = new QVBoxLayout();
 		setLayout(mainLayout);
@@ -870,30 +990,35 @@ namespace Log
 
 		//
 
-		topLayout->addWidget(new QLabel("Type:"));
-
-		//
-
-		m_typeCombo = new QComboBox();
-
-		m_typeCombo->blockSignals(true);
-
-		connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &LogFileDialog::onTypeComboIndexChanged);
-
-		for (int i = 0; i < messageTypeCount; i++)
+		if (showType == true)
 		{
-			m_typeCombo->addItem(messageTypeTextLong[i]);
+			topLayout->addWidget(new QLabel("Type:"));
+
+			//
+
+			m_typeCombo = new QComboBox();
+
+			m_typeCombo->blockSignals(true);
+
+			connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &LogFileDialog::onTypeComboIndexChanged);
+
+			for (int i = 0; i < messageTypeCount; i++)
+			{
+				if (QString(messageTypeTextLong[i]).contains("Invisible") == false)
+				{
+					m_typeCombo->addItem(messageTypeTextLong[i]);
+				}
+			}
+			m_typeCombo->setCurrentIndex(0);
+
+			m_typeCombo->blockSignals(false);
+
+			topLayout->addWidget(m_typeCombo);
+
+			//
+
+			topLayout->addStretch();
 		}
-		m_typeCombo->setCurrentIndex(0);
-
-		m_typeCombo->blockSignals(false);
-
-		topLayout->addWidget(m_typeCombo);
-
-		//
-
-
-		topLayout->addStretch();
 
 		//
 
@@ -943,7 +1068,16 @@ namespace Log
 		//
 
 		m_counterLabel = new QLabel();
-		mainLayout->addWidget(m_counterLabel);
+
+		m_export = new QPushButton(tr("Export"));
+		connect(m_export, &QPushButton::clicked, this, &LogFileDialog::onExport);
+
+		QHBoxLayout* bottomLayout = new QHBoxLayout();
+		bottomLayout->addWidget(m_counterLabel);
+		bottomLayout->addStretch();
+		bottomLayout->addWidget(m_export);
+
+		mainLayout->addLayout(bottomLayout);
 
 		setMinimumSize(1024, 600);
 
@@ -993,7 +1127,11 @@ namespace Log
 
 	void LogFileDialog::enableControls(bool enable)
 	{
-		m_typeCombo->setEnabled(enable);
+		if (m_typeCombo != nullptr)
+		{
+			m_typeCombo->setEnabled(enable);
+		}
+
 		m_filterLineEdit->setEnabled(enable);
 		m_allSessions->setEnabled(enable);
 		m_autoScroll->setEnabled(enable);
@@ -1007,15 +1145,20 @@ namespace Log
 
 	void LogFileDialog::onFilter()
 	{
-		int typeComboIndex = m_typeCombo->currentIndex();
+		MessageType filterMessageType = MessageType::All;
 
-		if (typeComboIndex < 0 || typeComboIndex >= messageTypeCount)
+		if (m_typeCombo != nullptr)
 		{
-			assert(false);
-			return;
-		}
+			int typeComboIndex = m_typeCombo->currentIndex();
 
-		MessageType filterMessageType = static_cast<MessageType>(typeComboIndex);
+			if (typeComboIndex < 0 || typeComboIndex >= messageTypeCount)
+			{
+				assert(false);
+				return;
+			}
+
+			filterMessageType = static_cast<MessageType>(typeComboIndex);
+		}
 
 		QString filterText = m_filterLineEdit->text();
 
@@ -1064,6 +1207,59 @@ namespace Log
 		}
 	}
 
+	void LogFileDialog::onExport()
+	{
+		QString fileName = QFileDialog::getSaveFileName(this,
+														tr("Save File"),
+														"untitled.csv",
+														tr("CSV Files, semicolon separated (*.csv)"));
+
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+
+		QFile data(fileName);
+		if (data.open(QFile::WriteOnly | QFile::Truncate) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("File creation error!"));
+			return;
+		}
+
+		QTextStream out(&data);
+
+		QAbstractItemModel* model = m_table->model();
+
+		int colCount = model->columnCount();
+		int rowCount = model->rowCount();
+
+		for (int c = 0; c < colCount; c++)
+		{
+			QString s = model->headerData(c, Qt::Horizontal).toString();
+
+			out << s;
+			if (c != colCount - 1)
+			{
+				out << ";";
+			}
+		}
+		out << endl;
+
+		for (int r = 0; r < rowCount; r++)
+		{
+			for (int c = 0; c < colCount; c++)
+			{
+				QString s = model->data(model->index(r, c)).toString();
+				out << s;
+				if (c != colCount - 1)
+				{
+					out << ";";
+				}
+			}
+			out << endl;
+		}
+	}
+
 	//
 	// LogFile
 	//
@@ -1095,7 +1291,7 @@ namespace Log
 
 	bool LogFile::writeMessage(const QString& text)
 	{
-		return m_logFileWorker->write(MessageType::Message, text);
+		return write(MessageType::Message, text);
 	}
 
 	bool LogFile::writeAlert(const QString& text)
@@ -1104,26 +1300,31 @@ namespace Log
 
 		emit alertArrived(text);
 
-		return m_logFileWorker->write(MessageType::Alert, text);
+		return write(MessageType::Alert, text);
 	}
 
 	bool LogFile::writeError(const QString& text)
 	{
 		m_errorAckCounter++;
 
-		return m_logFileWorker->write(MessageType::Error, text);
+		return write(MessageType::Error, text);
 	}
 
 	bool LogFile::writeWarning(const QString& text)
 	{
 		m_warningAckCounter++;
 
-		return m_logFileWorker->write(MessageType::Warning, text);
+		return write(MessageType::Warning, text);
 	}
 
 	bool LogFile::writeText(const QString& text)
 	{
-		return m_logFileWorker->write(MessageType::Text, text);
+		return write(MessageType::Text, text);
+	}
+
+	bool LogFile::writeArray(const QStringList& textArray)
+	{
+		return m_logFileWorker->writeArray(textArray);
 	}
 
 	bool LogFile::write(MessageType type, const QString& text)
@@ -1131,7 +1332,8 @@ namespace Log
 		return m_logFileWorker->write(type, text);
 	}
 
-	void LogFile::view(QWidget* parent)
+
+	void LogFile::view(QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles)
 	{
 		m_alertAckCounter = 0;
 		m_errorAckCounter = 0;
@@ -1144,7 +1346,7 @@ namespace Log
 			return;
 		}
 
-		m_logDialog = new LogFileDialog(m_logFileWorker, parent);
+		m_logDialog = new LogFileDialog(m_logFileWorker, parent, showType, headerTitles);
 
 		connect(m_logDialog, &QDialog::finished, this, &LogFile::onDialogFinished);
 
@@ -1182,5 +1384,6 @@ namespace Log
 
 		m_logDialog = nullptr;
 	}
+
 }
 
