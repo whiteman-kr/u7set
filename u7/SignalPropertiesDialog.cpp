@@ -217,12 +217,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 		}
 
-		signalProperties->propertyByCaption(SignalProperties::typeCaption)->setReadOnly(true);
+		auto& s = signalProperties->signal();
+/*		signalProperties->propertyByCaption(SignalProperties::typeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(SignalProperties::inOutTypeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(SignalProperties::dataSizeCaption)->setReadOnly(true);
 		signalProperties->propertyByCaption(SignalProperties::byteOrderCaption)->setReadOnly(true);
 
-		auto& s = signalProperties->signal();
+		*/
 
 /*		if (s.signalType() == E::SignalType::Bus)
 		{
