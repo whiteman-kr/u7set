@@ -72,7 +72,12 @@ SOURCES += main.cpp \
     ../../lib/HostAddressPort.cpp \
     DbControllerBuildManagementTests.cpp \
     DbControllerVersionControlTests.cpp \
-    ../../lib/TuningValue.cpp
+    ../../lib/TuningValue.cpp \
+    ../../lib/Times.cpp \
+    ../../lib/OutputLog.cpp \
+    ../../u7/Builder/IssueLogger.cpp \
+    ../../lib/DeviceHelper.cpp \
+    ../../u7/Builder/ModulesRawData.cpp
 
 HEADERS += \
     UserTests.h \
@@ -111,7 +116,12 @@ HEADERS += \
     ../../lib/HostAddressPort.h \
     DbControllerBuildManagementTests.h \
     DbControllerVersionControlTests.h \
-    ../../lib/TuningValue.h
+    ../../lib/TuningValue.h \
+    ../../lib/Times.h \
+    ../../lib/OutputLog.h \
+    ../../u7/Builder/IssueLogger.h \
+    ../../lib/DeviceHelper.h \
+    ../../u7/Builder/ModulesRawData.h
 
 #c++11 support for GCC
 #
