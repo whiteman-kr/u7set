@@ -21,6 +21,7 @@ extern "C" {
 	#include "../Lua/lauxlib.h"
 	#include "../Lua/lualib.h"
 }
+#include "../LuaIntf/LuaIntf.h"
 
 
 #ifndef __FUNCTION_NAME__
@@ -94,13 +95,27 @@ namespace Sim
 
 		static void registerLuaClass(lua_State* L);
 
+		void dump() const;
+
+		std::string scriptTest(std::string inputParam)
+		{
+			//return QString("ScriptTest" + inputParam).toStdString();
+			return "ScriptTest" + inputParam;
+		}
+
+		// Properties for Lua
+	public:
+		std::string caption() const;
+
+		std::string asString() const;
+		void setAsString(const std::string& value);
+
 	public:
 		// WARNING: Copy constructor is defined, do not forget to add there new members
 		//
 		LmCommand m_command;
 
 		int m_offset = 0;				// Offset in Code Memory, words
-
 		int m_size = 0;					// Command size in words. Set in parse script
 		QString m_string;				// Set in parse script
 
@@ -128,36 +143,38 @@ namespace Sim
 	//
 	class DeviceEmulator;
 
-	class ScriptDeviceEmulator : public QObject
+	class ScriptDeviceEmulator /*: public QObject*/
 	{
-		Q_OBJECT
+//		Q_OBJECT
 
-		Q_PROPERTY(quint16 AppStartAddress MEMBER (m_device->m_logicUnit.appStartAddress))
-		Q_PROPERTY(Sim::CyclePhase Phase MEMBER (m_device->m_logicUnit.phase))
-		Q_PROPERTY(quint32 ProgramCounter MEMBER (m_device->m_logicUnit.programCounter))
+//		Q_PROPERTY(quint16 AppStartAddress MEMBER (m_device->m_logicUnit.appStartAddress))
+//		Q_PROPERTY(Sim::CyclePhase Phase MEMBER (m_device->m_logicUnit.phase))
+//		Q_PROPERTY(quint32 ProgramCounter MEMBER (m_device->m_logicUnit.programCounter))
 
 	public:
-		explicit ScriptDeviceEmulator(DeviceEmulator* device, QObject* parent = nullptr);
+		explicit ScriptDeviceEmulator(DeviceEmulator* device);
+
+		static void registerLuaClass(lua_State* L);
 
 		// Script functins for AFB instances
 		//
-	public slots:
-		QObject* afbComponent(int opCode);
-		QObject* afbComponentInstance(int opCode, int instanceNo);
+//	public slots:
+//		QObject* afbComponent(int opCode);
+//		QObject* afbComponentInstance(int opCode, int instanceNo);
 
-		QObject* createComponentParam();
-		bool setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param);
+//		QObject* createComponentParam();
+//		bool setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param);
 
-		// RAM access
-		//
-		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
-		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
+//		// RAM access
+//		//
+//		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
+//		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
 
-		bool writeRamWord(quint32 offsetW, quint16 data);
-		quint16 readRamWord(quint32 offsetW);
+//		bool writeRamWord(quint32 offsetW, quint16 data);
+//		quint16 readRamWord(quint32 offsetW);
 
-		bool writeRamDword(quint32 offsetW, quint32 data);
-		quint32 readRamDword(quint32 offsetW);
+//		bool writeRamDword(quint32 offsetW, quint32 data);
+//		quint32 readRamDword(quint32 offsetW);
 
 		// Getting data from m_plainAppLogic
 		//

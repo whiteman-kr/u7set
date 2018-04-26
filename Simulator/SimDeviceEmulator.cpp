@@ -1,7 +1,6 @@
 #include "SimDeviceEmulator.h"
 #include <QQmlEngine>
 #include <QtEndian>
-#include "../LuaIntf/LuaIntf.h"
 
 namespace Sim
 {
@@ -51,151 +50,253 @@ namespace Sim
 		using namespace LuaIntf;
 
 		LuaBinding(L).beginClass<DeviceCommand>("DeviceCommand")
-			.addVariable("caption", &DeviceCommand::LmCommand::caption)
-			.addVariable("code", &DeviceCommand::LmCommand::code)
+			.addPropertyReadOnly("caption", &DeviceCommand::caption)
+
+			.addVariable("offset", &DeviceCommand::m_offset)
+			.addVariable("size", &DeviceCommand::m_size)
+			.addProperty("asString", &DeviceCommand::asString, &DeviceCommand::setAsString)
+
+			.addVariable("afbOpCode", &DeviceCommand::m_afbOpCode)
+			.addVariable("afbInstance", &DeviceCommand::m_afbInstance)
+			.addVariable("afbPinOpCode", &DeviceCommand::m_afbPinOpCode)
+
+			.addVariable("bitNo0", &DeviceCommand::m_bitNo0)
+			.addVariable("bitNo1", &DeviceCommand::m_bitNo1)
+
+			.addVariable("word0", &DeviceCommand::m_word0)
+			.addVariable("word1", &DeviceCommand::m_word1)
+			.addVariable("word2", &DeviceCommand::m_word2)
+
+			.addVariable("dword0", &DeviceCommand::m_dword0)
+			.addVariable("dword1", &DeviceCommand::m_word1)
+
+			.addFunction("scriptTest", &DeviceCommand::scriptTest, LUA_ARGS(_opt<std::string>))
 			.endClass();
+
+		return;
 	}
 
+	void DeviceCommand::dump() const
+	{
+		QString str0 = QString("\tcode = %1 (0x%2), codeMask = %3 (0x%4)")
+						.arg(m_command.code)
+						.arg(m_command.code, 4, 16, QChar('0'))
+						.arg(m_command.codeMask)
+						.arg(m_command.codeMask, 4, 16, QChar('0'));
+
+		QString str1 = QString("\tcaption = %1").arg(m_command.caption);
+		QString str2 = QString("\tsimFunct = %1, parseFunc = %2")
+						.arg(m_command.simulationFunc)
+						.arg(m_command.parseFunc);
+
+		QString str3 = QString("\toffest = %1 (0x%2), size = %3")
+						.arg(m_offset)
+						.arg(m_offset, 4, 16, QChar('0'))
+						.arg(m_size);
+
+		QString str4 = QString("\tstring = %1").arg(m_string);
+
+		QString str5 = QString("\tafbOpCode = %1, instance = %2, pinOpCode = %3")
+						.arg(m_afbOpCode)
+						.arg(m_afbInstance)
+						.arg(m_afbPinOpCode);
+
+		QString str6 = QString("\tbitNo0 = %1, bitNo1 = %2")
+						.arg(m_bitNo0)
+						.arg(m_bitNo1);
+
+		QString str7 = QString("\tword0 = %1 (0x%2), word1 = %3 (0x%4), word2 = %5 (0x%6)")
+						.arg(m_word0)
+						.arg(m_word0, 4, 16, QChar('0'))
+						.arg(m_word1)
+						.arg(m_word1, 4, 16, QChar('0'))
+						.arg(m_word2)
+						.arg(m_word2, 4, 16, QChar('0'));
+
+		QString str8 = QString("\tdword0 = %1 (0x%2), dword1 = %3 (0x%4)")
+						.arg(m_dword0)
+						.arg(m_dword0, 8, 16, QChar('0'))
+						.arg(m_dword1)
+						.arg(m_dword1, 8, 16, QChar('0'));
+
+		qDebug() << "DeviceCommand:";
+		qDebug() << str0;
+		qDebug() << str1;
+		qDebug() << str2;
+		qDebug() << str3;
+		qDebug() << str4;
+		qDebug() << str5;
+		qDebug() << str6;
+		qDebug() << str7;
+		qDebug() << str8;
+
+		return;
+
+	}
+
+	std::string DeviceCommand::caption() const
+	{
+		return m_command.caption.toStdString();
+	}
+
+	std::string DeviceCommand::asString() const
+	{
+		return m_string.toStdString();
+	}
+
+	void DeviceCommand::setAsString(const std::string& value)
+	{
+		m_string = QString::fromStdString(value);
+	}
 
 	//
 	// class DeviceEmulator script wrapper
 	//
-	ScriptDeviceEmulator::ScriptDeviceEmulator(DeviceEmulator* device, QObject* parent) :
-		QObject(parent),
+	ScriptDeviceEmulator::ScriptDeviceEmulator(DeviceEmulator* device) :
 		m_device(device)
 	{
 		assert(m_device);
 	}
 
-	QObject* ScriptDeviceEmulator::afbComponent(int opCode)
+	void ScriptDeviceEmulator::registerLuaClass(lua_State* L)
 	{
-		auto result = m_device->m_lmDescription.component(opCode);
-		QQmlEngine::setObjectOwnership(result.get(), QQmlEngine::CppOwnership);
-		return result.get();
+		using namespace LuaIntf;
+
+		LuaBinding(L).beginClass<ScriptDeviceEmulator>("DeviceEmulator")
+				.addFunction("getWord", &ScriptDeviceEmulator::getWord, LUA_ARGS(_opt<int>))
+				.addFunction("getDword", &ScriptDeviceEmulator::getDword, LUA_ARGS(_opt<int>))
+				.endClass();
 	}
 
-	QObject* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
-	{
-		ComponentInstance* inst = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
-		if (Q_UNLIKELY(inst == nullptr))
-		{
-			return nullptr;
-		}
+//	QObject* ScriptDeviceEmulator::afbComponent(int opCode)
+//	{
+//		auto result = m_device->m_lmDescription.component(opCode);
+//		QQmlEngine::setObjectOwnership(result.get(), QQmlEngine::CppOwnership);
+//		return result.get();
+//	}
 
-		QQmlEngine::setObjectOwnership(inst, QQmlEngine::CppOwnership);
-		return inst;
-	}
+//	QObject* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
+//	{
+//		ComponentInstance* inst = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
+//		if (Q_UNLIKELY(inst == nullptr))
+//		{
+//			return nullptr;
+//		}
 
-	QObject* ScriptDeviceEmulator::createComponentParam()
-	{
-		QObject* result = new ComponentParam();
-		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::JavaScriptOwnership);
-		return result;
-	}
+//		QQmlEngine::setObjectOwnership(inst, QQmlEngine::CppOwnership);
+//		return inst;
+//	}
 
-	bool ScriptDeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param)
-	{
-		if (Q_UNLIKELY(param == nullptr))
-		{
-			m_device->FAULT(tr("Input param error, function DeviceEmulator::setAfbParam, param == nullptr"));
-			return false;
-		}
+//	QObject* ScriptDeviceEmulator::createComponentParam()
+//	{
+//		QObject* result = new ComponentParam();
+//		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::JavaScriptOwnership);
+//		return result;
+//	}
 
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_device->m_lmDescription.component(afbOpCode);
+//	bool ScriptDeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param)
+//	{
+//		if (Q_UNLIKELY(param == nullptr))
+//		{
+//			m_device->FAULT(tr("Input param error, function DeviceEmulator::setAfbParam, param == nullptr"));
+//			return false;
+//		}
 
-		if (Q_UNLIKELY(afbComp == nullptr))
-		{
-			m_device->FAULT(QString("AFB with OpCode %1 not found").arg(afbOpCode));
-			return false;
-		}
+//		std::shared_ptr<Afb::AfbComponent> afbComp = m_device->m_lmDescription.component(afbOpCode);
 
-		QString errorMessage;
-		bool ok = m_device->m_afbComponents.addInstantiatorParam(afbComp, instanceNo, *param, &errorMessage);
+//		if (Q_UNLIKELY(afbComp == nullptr))
+//		{
+//			m_device->FAULT(QString("AFB with OpCode %1 not found").arg(afbOpCode));
+//			return false;
+//		}
 
-		if (Q_UNLIKELY(ok == false))
-		{
-			m_device->FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
-			return false;
-		}
+//		QString errorMessage;
+//		bool ok = m_device->m_afbComponents.addInstantiatorParam(afbComp, instanceNo, *param, &errorMessage);
 
-		return true;
-	}
+//		if (Q_UNLIKELY(ok == false))
+//		{
+//			m_device->FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
+//			return false;
+//		}
+
+//		return true;
+//	}
 
 	// RAM access
 	//
-	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
-	{
-		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
-		if (Q_UNLIKELY(ok == false))
-		{
-			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
-		}
+//	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
+//	{
+//		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
+//		if (Q_UNLIKELY(ok == false))
+//		{
+//			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+//		}
 
-		return ok;
-	}
+//		return ok;
+//	}
 
-	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo)
-	{
-		quint16 data = 0;
-		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
+//	quint16 ScriptDeviceEmulator::readRamBit(quint32 offsetW, quint32 bitNo)
+//	{
+//		quint16 data = 0;
+//		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
-		{
-			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
-		}
+//		if (Q_UNLIKELY(ok == false))
+//		{
+//			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
+//		}
 
-		return data;
-	}
+//		return data;
+//	}
 
-	bool ScriptDeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
-	{
-		bool ok = m_device->m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian);
+//	bool ScriptDeviceEmulator::writeRamWord(quint32 offsetW, quint16 data)
+//	{
+//		bool ok = m_device->m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
-		{
-			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
-		}
+//		if (Q_UNLIKELY(ok == false))
+//		{
+//			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+//		}
 
-		return ok;
-	}
+//		return ok;
+//	}
 
-	quint16 ScriptDeviceEmulator::readRamWord(quint32 offsetW)
-	{
-		quint16 data = 0;
-		bool ok = m_device->m_ram.readWord(offsetW, &data, E::ByteOrder::BigEndian);
+//	quint16 ScriptDeviceEmulator::readRamWord(quint32 offsetW)
+//	{
+//		quint16 data = 0;
+//		bool ok = m_device->m_ram.readWord(offsetW, &data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
-		{
-			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
-		}
+//		if (Q_UNLIKELY(ok == false))
+//		{
+//			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+//		}
 
-		return data;
-	}
+//		return data;
+//	}
 
-	bool ScriptDeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
-	{
-		bool ok = m_device->m_ram.writeDword(offsetW, data, E::ByteOrder::BigEndian);
+//	bool ScriptDeviceEmulator::writeRamDword(quint32 offsetW, quint32 data)
+//	{
+//		bool ok = m_device->m_ram.writeDword(offsetW, data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
-		{
-			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
-		}
+//		if (Q_UNLIKELY(ok == false))
+//		{
+//			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
+//		}
 
-		return ok;
-	}
+//		return ok;
+//	}
 
-	quint32 ScriptDeviceEmulator::readRamDword(quint32 offsetW)
-	{
-		quint32 data = 0;
-		bool ok = m_device->m_ram.readDword(offsetW, &data, E::ByteOrder::BigEndian);
+//	quint32 ScriptDeviceEmulator::readRamDword(quint32 offsetW)
+//	{
+//		quint32 data = 0;
+//		bool ok = m_device->m_ram.readDword(offsetW, &data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
-		{
-			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
-		}
+//		if (Q_UNLIKELY(ok == false))
+//		{
+//			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
+//		}
 
-		return data;
-	}
+//		return data;
+//	}
 
 	// Getting data from m_plainAppLogic
 	//
@@ -217,6 +318,9 @@ namespace Sim
 	{
 		m_luaState = luaL_newstate();
 		luaL_openlibs(m_luaState);
+
+		ScriptDeviceEmulator::registerLuaClass(m_luaState);
+		DeviceCommand::registerLuaClass(m_luaState);
 
 		return;
 	}
@@ -662,7 +766,29 @@ namespace Sim
 		// --
 		//
 		LuaIntf::LuaRef func(m_luaState, command.parseFunc.toStdString().c_str());
-		func(&deviceCommand);
+
+		if (func.isValid() == false || func.isFunction() == false)
+		{
+			writeError(QString("Lua: %1 not found or is not function.")
+				.arg(command.parseFunc));
+
+			return false;
+		}
+		try
+		{
+			func(ScriptDeviceEmulator(this), &deviceCommand);
+		}
+		catch (const LuaIntf::LuaException& e)
+		{
+			writeError(QString("Call function %1 LuaException: %2.")
+				.arg(command.parseFunc)
+				.arg(e.what()));
+		}
+
+		// !!!!!!!!!!!!!!!!!!! debug
+		//
+		deviceCommand.dump();
+
 
 //		if (int luaResult = lua_getglobal(m_luaState, command.parseFunc.toStdString().c_str());
 //			luaResult != 6)
@@ -756,9 +882,9 @@ namespace Sim
 		//			return false;
 		//		}
 
-		//		// Add command to offsetToCommand map
-		//		//
-		//		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
+		// Add command to offsetToCommand map
+		//
+		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
 
 
 //		quint16 commandWord = getWord(programCounter);
