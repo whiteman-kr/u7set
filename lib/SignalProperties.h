@@ -15,6 +15,7 @@ public:
 	bool create(const QString& name, const QVariant& value, bool isEnum);
 
 	bool setValue(const QString& name, const QVariant& value, bool isEnum);
+	bool setAnyValue(const QString& name, const QVariant& value);
 
 	QString name() const { return m_name; }
 	QVariant::Type type() const { return m_value.type(); }
@@ -40,12 +41,14 @@ public:
 	bool createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap = true);
 	bool setValue(const QString& name, const QVariant& value);
 
+	bool setAnyValue(const QString& name, const QVariant& value);		// setter without isEnum checking
+
 	template<typename ENUM_TYPE>
 	bool setEnumValue(const QString& name, ENUM_TYPE enumItemValue);
 
 	bool setValue(const SignalSpecPropValue& propValue);
 
-	bool getValue(const QString& name, QVariant* qv);
+	bool getValue(const QString& name, QVariant* qv) const;
 
 	bool serializeValuesToArray(QByteArray* protoData) const;
 	bool parseValuesFromArray(const QByteArray& protoData);
@@ -57,11 +60,11 @@ private:
 
 	bool setValue(const QString& name, const QVariant& value, bool isEnum);
 
-	int getPropertyIndex(const QString& name);
+	int getPropertyIndex(const QString& name) const;
 
 private:
 	QVector<SignalSpecPropValue> m_specPropValues;
-	QHash<QString, int> m_propNamesMap;					// prop name => index in m_propSpecValues
+	QHash<QString, int> m_propNamesMap;									// prop name => index in m_propSpecValues
 
 };
 

@@ -322,6 +322,10 @@ bool SignalSpecPropValue::setValue(const QString& name, const QVariant& value, b
 	return true;
 }
 
+bool SignalSpecPropValue::setAnyValue(const QString& name, const QVariant& value)
+{
+	return setValue(name, value, m_isEnum);
+}
 
 bool SignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
 {
@@ -512,12 +516,25 @@ bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value)
 	return setValue(name, value, false);
 }
 
+bool SignalSpecPropValues::setAnyValue(const QString& name, const QVariant& value)
+{
+	int index = getPropertyIndex(name);
+
+	if (index == -1)
+	{
+		return false;
+	}
+
+	return m_specPropValues[index].setAnyValue(name, value);
+}
+
+
 bool SignalSpecPropValues::setValue(const SignalSpecPropValue& propValue)
 {
 	return setValue(propValue.name(), propValue.value(), propValue.isEnum());
 }
 
-bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv)
+bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv) const
 {
 	TEST_PTR_RETURN_FALSE(qv);
 
@@ -612,7 +629,7 @@ bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value, 
 	return m_specPropValues[index].setValue(name, value, isEnum);
 }
 
-int SignalSpecPropValues::getPropertyIndex(const QString& name)
+int SignalSpecPropValues::getPropertyIndex(const QString& name) const
 {
 	if (m_propNamesMap.isEmpty() == false)
 	{
@@ -621,7 +638,7 @@ int SignalSpecPropValues::getPropertyIndex(const QString& name)
 
 	int index = 0;
 
-	for(SignalSpecPropValue& propValue : m_specPropValues)
+	for(const SignalSpecPropValue& propValue : m_specPropValues)
 	{
 		if (propValue.name() == name)
 		{
@@ -633,7 +650,3 @@ int SignalSpecPropValues::getPropertyIndex(const QString& name)
 
 	return -1;
 }
-
-
-
-
