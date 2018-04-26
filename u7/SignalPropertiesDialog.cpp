@@ -10,6 +10,21 @@
 #include "../lib/WidgetUtils.h"
 #include "Stable.h"
 
+const std::vector<std::pair<E::SignalType, E::SignalInOutType>> signalTypeSequence =
+{
+	{E::Analog, E::SignalInOutType::Input},
+	{E::Analog, E::SignalInOutType::Output},
+	{E::Analog, E::SignalInOutType::Internal},
+
+	{E::Discrete, E::SignalInOutType::Input},
+	{E::Discrete, E::SignalInOutType::Output},
+	{E::Discrete, E::SignalInOutType::Internal},
+
+	{E::Bus, E::SignalInOutType::Input},
+	{E::Bus, E::SignalInOutType::Output},
+	{E::Bus, E::SignalInOutType::Internal},
+};
+
 // Returns vector of pairs,
 //	first: previous AppSignalID
 //  second: new AppSignalID
@@ -148,6 +163,38 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
 	}
 
+	DbFileInfo mcInfo = dbController->systemFileInfo("MC");
+	DbFileInfo propertyBehaviorFile;
+	dbController->getFileInfo(mcInfo.fileId(), QString("PropertyBehavior.csv"), &propertyBehaviorFile, parent);
+
+	std::shared_ptr<DbFile> file;
+	bool result = dbController->getLatestVersion(propertyBehaviorFile, &file, parent);
+	QVector<QStringList> fileFields;
+	if (result == true)
+	{
+		QString fileText = file->data();
+		QStringList rows = fileText.split("\n", QString::SkipEmptyParts);
+
+		for (QString row : rows)
+		{
+			QStringList&& fields = row.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+			for (int i = fields.size() - 1; i >= 0; i--)
+			{
+				if (fields[i].length() <= 1)
+				{
+					fields.removeAt(i);
+				}
+			}
+
+			assert(static_cast<size_t>(fields.size()) == signalTypeSequence.size() + 1);
+			fileFields.push_back(fields);
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
 
 	for (int i = 0; i < signalVector.count(); i++)
@@ -232,6 +279,46 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				signalProperties->propertyByCaption(SignalProperties::highDACCaption)->setVisible(false);
 
 				signalProperties->propertyByCaption(SignalProperties::outputModeCaption)->setVisible(false);
+			}
+		}
+
+		for (const QStringList& propertyDescription : fileFields)
+		{
+			for (auto property : signalProperties->properties())
+			{
+				if ((property->caption() == propertyDescription[0]) == false)
+				{
+					continue;
+				}
+
+				bool descriptionFound = false;
+				for (size_t i = 0; i < signalTypeSequence.size(); i++)
+				{
+					if ((s.signalType() == signalTypeSequence[i].first &&
+						 s.inOutType() == signalTypeSequence[i].second) == false)
+					{
+						continue;
+					}
+
+					descriptionFound = true;
+					const QString& propertyState = propertyDescription[i + 1].toLower();
+
+					if (propertyState.indexOf("hide") >= 0)
+					{
+						property->setVisible(false);
+						break;
+					}
+
+					if (propertyState.indexOf("read") >= 0)
+					{
+						property->setReadOnly(true);
+						break;
+					}
+
+					assert(propertyState.indexOf("write") >= 0);
+				}
+
+				assert(descriptionFound == true);
 			}
 		}
 
