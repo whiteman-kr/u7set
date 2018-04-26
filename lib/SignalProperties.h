@@ -5,6 +5,79 @@
 #include "Signal.h"
 #include "PropertyObject.h"
 
+
+class SignalSpecPropValue
+{
+public:
+	SignalSpecPropValue();
+
+	bool create(std::shared_ptr<Property> prop);
+	bool create(const QString& name, const QVariant& value, bool isEnum);
+
+	bool setValue(const QString& name, const QVariant& value, bool isEnum);
+
+	QString name() const { return m_name; }
+	QVariant::Type type() const { return m_value.type(); }
+	QVariant value() const { return m_value; }
+	bool isEnum() const {return m_isEnum; }
+
+	bool save(Proto::SignalSpecPropValue* protoValue) const;
+	bool load(const Proto::SignalSpecPropValue& protoValue);
+
+private:
+	QString m_name;
+	QVariant m_value;
+	bool m_isEnum = false;
+};
+
+class SignalSpecPropValues
+{
+public:
+	SignalSpecPropValues();
+
+	bool create(const Signal& s);
+
+	bool createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap = true);
+	bool setValue(const QString& name, const QVariant& value);
+
+	template<typename ENUM_TYPE>
+	bool setEnumValue(const QString& name, ENUM_TYPE enumItemValue);
+
+	bool setValue(const SignalSpecPropValue& propValue);
+
+	bool getValue(const QString& name, QVariant* qv);
+
+	bool serializeValuesToArray(QByteArray* protoData) const;
+	bool parseValuesFromArray(const QByteArray& protoData);
+
+	bool save(Proto::SignalSpecPropValues* protoValues) const;
+
+private:
+	void buildPropNamesMap();
+
+	bool setValue(const QString& name, const QVariant& value, bool isEnum);
+
+	int getPropertyIndex(const QString& name);
+
+private:
+	QVector<SignalSpecPropValue> m_specPropValues;
+	QHash<QString, int> m_propNamesMap;					// prop name => index in m_propSpecValues
+
+};
+
+template<typename ENUM_TYPE>
+bool SignalSpecPropValues::setEnumValue(const QString& name, ENUM_TYPE enumItemValue)
+{
+	if (std::is_enum<ENUM_TYPE>::value == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	return setValue(name, static_cast<int>(enumItemValue), true);
+}
+
+
 class SignalProperties : public PropertyObject
 {
 	Q_OBJECT
@@ -110,6 +183,7 @@ private:
 
 private:
 	Signal m_signal;
+	SignalSpecPropValues m_specPropValues;
 
 	static std::shared_ptr<OrderedHash<int, QString>> m_sensorTypeHash;
 	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
@@ -118,71 +192,4 @@ private:
 };
 
 
-class SignalSpecPropValue
-{
-public:
-	SignalSpecPropValue();
-
-	bool create(std::shared_ptr<Property> prop);
-	bool create(const QString& name, const QVariant& value, bool isEnum);
-
-	bool setValue(const QString& name, const QVariant& value, bool isEnum);
-
-	QString name() const { return m_name; }
-	QVariant::Type type() const { return m_value.type(); }
-	QVariant value() const { return m_value; }
-	bool isEnum() const {return m_isEnum; }
-
-	bool save(Proto::SignalSpecPropValue* protoValue) const;
-	bool load(const Proto::SignalSpecPropValue& protoValue);
-
-private:
-	QString m_name;
-	QVariant m_value;
-	bool m_isEnum = false;
-};
-
-class SignalSpecPropValues
-{
-public:
-	SignalSpecPropValues();
-
-	bool createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap = true);
-	void buildPropNamesMap();
-
-	bool setValue(const QString& name, const QVariant& value);
-
-	template<typename ENUM_TYPE>
-	bool setEnumValue(const QString& name, ENUM_TYPE enumItemValue);
-
-	bool setValue(const SignalSpecPropValue& propValue);
-
-	bool serializeToArray(QByteArray* protoData) const;
-	bool parseFromArray(const QByteArray& protoData);
-
-	bool save(Proto::SignalSpecPropValues* protoValues) const;
-
-private:
-	bool setValue(const QString& name, const QVariant& value, bool isEnum);
-
-	int getPropertyIndex(const QString& name);
-
-private:
-	QVector<SignalSpecPropValue> m_specPropValues;
-	QHash<QString, int> m_propNamesMap;					// prop name => index in m_propSpecValues
-
-};
-
-
-template<typename ENUM_TYPE>
-bool SignalSpecPropValues::setEnumValue(const QString& name, ENUM_TYPE enumItemValue)
-{
-	if (std::is_enum<ENUM_TYPE>::value == false)
-	{
-		assert(false);
-		return false;
-	}
-
-	return setValue(name, static_cast<int>(enumItemValue), true);
-}
 

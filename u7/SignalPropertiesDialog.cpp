@@ -177,7 +177,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		auto& s = signalProperties->signal();
 
-		if (s.signalType() == E::SignalType::Bus)
+/*		if (s.signalType() == E::SignalType::Bus)
 		{
 			signalProperties->propertyByCaption(SignalProperties::dataSizeCaption)->setVisible(false);
 			signalProperties->propertyByCaption(SignalProperties::byteOrderCaption)->setVisible(false);
@@ -233,7 +233,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 				signalProperties->propertyByCaption(SignalProperties::outputModeCaption)->setVisible(false);
 			}
-		}
+		}*/
 
 		m_objList.push_back(signalProperties);
 	}

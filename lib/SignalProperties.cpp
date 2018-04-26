@@ -151,7 +151,7 @@ void SignalProperties::initProperties()
 
 		analogSignalFormatProperty->setCategory(categoryDataFormat);
 
-		auto lowADCProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC, m_signal);
+/*		auto lowADCProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC, m_signal);
 		lowADCProperty->setCategory(categorySignalProcessing);
 
 		auto highADCProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, highADCCaption, true, Signal::highADC, Signal::setHighADC, m_signal);
@@ -177,12 +177,12 @@ void SignalProperties::initProperties()
 
 		auto highValidRangeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, highValidRangeCaption, true, Signal::highValidRange, Signal::setHighValidRange, m_signal);
 		m_propertiesDependentOnPrecision.push_back(highValidRangeProperty);
-		highValidRangeProperty->setCategory(categorySignalProcessing);
+		highValidRangeProperty->setCategory(categorySignalProcessing); */
 
 		auto unitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, unitCaption, true, Signal::unit, Signal::setUnit, m_signal);
 		unitProperty->setCategory(categorySignalProcessing);
 
-		auto electricLowLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, electricLowLimitCaption, true, Signal::electricLowLimit, Signal::setElectricLowLimit, m_signal);
+/*		auto electricLowLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, electricLowLimitCaption, true, Signal::electricLowLimit, Signal::setElectricLowLimit, m_signal);
 		electricLowLimitProperty->setPrecision(3);
 		electricLowLimitProperty->setCategory(categoryElectricParameters);
 
@@ -197,7 +197,7 @@ void SignalProperties::initProperties()
 		sensorTypeProperty->setCategory(categoryElectricParameters);
 
 		auto outputModePropetry = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(outputModeCaption, true, m_outputModeHash, Signal::outputMode, Signal::setOutputModeInt, m_signal);
-		outputModePropetry->setCategory(categoryElectricParameters);
+		outputModePropetry->setCategory(categoryElectricParameters); */
 
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(categoryOnlineMonitoringSystem);
@@ -211,13 +211,13 @@ void SignalProperties::initProperties()
 		auto adaptiveApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);
 		adaptiveApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-		auto spreadToleranceProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, spreadToleranceCaption, true, Signal::spreadTolerance, Signal::setSpreadTolerance, m_signal);
+/*		auto spreadToleranceProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, spreadToleranceCaption, true, Signal::spreadTolerance, Signal::setSpreadTolerance, m_signal);
 		m_propertiesDependentOnPrecision.push_back(spreadToleranceProperty);
 		spreadToleranceProperty->setCategory(categorySignalProcessing);
 
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime, m_signal);
 		filteringTimePropetry->setPrecision(6);
-		filteringTimePropetry->setCategory(categorySignalProcessing);
+		filteringTimePropetry->setCategory(categorySignalProcessing); */
 	}
 
 	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire, m_signal);
@@ -228,9 +228,12 @@ void SignalProperties::initProperties()
 
 	// append signal specific properties
 	//
+
+	m_specPropValues.create(m_signal);
+
 	PropertyObject propObject;
 
-	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(QString("4;SensorType2;5 Electric parameters;DynamicEnum [mV_Type_B=14,mV_Type_E=15,mV_Type_J=16,mV_Type_K=17,mV_Type_N=18,mV_Type_R=19,mV_Type_S=20,mV_Type_T=21,mV_Raw_Mul_8=22,mV_Raw_Mul_32=23];;;mV_Type_B;0;false;false;;true;None"));
+	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(m_signal.specPropStruct());
 
 	if (result.first == false)
 	{
@@ -242,9 +245,11 @@ void SignalProperties::initProperties()
 
 	for(std::shared_ptr<Property> specificProperty : specificProperties)
 	{
-		// set value of property
+		QVariant qv;
 
-		QVariant qv(23);
+		bool result = m_specPropValues.getValue(specificProperty->caption(), &qv);
+
+		assert(result == true);
 
 		specificProperty->setValue(qv);
 
@@ -445,6 +450,18 @@ SignalSpecPropValues::SignalSpecPropValues()
 {
 }
 
+
+bool SignalSpecPropValues::create(const Signal& s)
+{
+	bool result = true;
+
+	result &= createFromSpecPropStruct(s.specPropStruct());
+	result &= parseValuesFromArray(s.protoSpecPropValues());
+
+	return result;
+}
+
+
 bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap)
 {
 	m_specPropValues.clear();
@@ -490,27 +507,6 @@ bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruc
 	return true;
 }
 
-void SignalSpecPropValues::buildPropNamesMap()
-{
-	m_propNamesMap.clear();
-
-	int index = 0;
-
-	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
-	{
-		if (m_propNamesMap.contains(specPropValue.name()) == false)
-		{
-			m_propNamesMap.insert(specPropValue.name(), index);
-		}
-		else
-		{
-			assert(false);			// duplicate property name
-		}
-
-		index++;
-	}
-}
-
 bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value)
 {
 	return setValue(name, value, false);
@@ -521,8 +517,25 @@ bool SignalSpecPropValues::setValue(const SignalSpecPropValue& propValue)
 	return setValue(propValue.name(), propValue.value(), propValue.isEnum());
 }
 
+bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv)
+{
+	TEST_PTR_RETURN_FALSE(qv);
 
-bool SignalSpecPropValues::	serializeToArray(QByteArray* protoData) const
+	int index = getPropertyIndex(name);
+
+	if (index == -1)
+	{
+		assert(false);
+		return false;
+	}
+
+	*qv = m_specPropValues[index].value();
+
+	return true;
+}
+
+
+bool SignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
 {
 	Proto::SignalSpecPropValues protoValues;
 
@@ -541,7 +554,7 @@ bool SignalSpecPropValues::	serializeToArray(QByteArray* protoData) const
 	return true;
 }
 
-bool SignalSpecPropValues::parseFromArray(const QByteArray& protoData)
+bool SignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 {
 	Proto::SignalSpecPropValues protoValues;
 
@@ -566,6 +579,26 @@ bool SignalSpecPropValues::parseFromArray(const QByteArray& protoData)
 	return true;
 }
 
+void SignalSpecPropValues::buildPropNamesMap()
+{
+	m_propNamesMap.clear();
+
+	int index = 0;
+
+	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
+	{
+		if (m_propNamesMap.contains(specPropValue.name()) == false)
+		{
+			m_propNamesMap.insert(specPropValue.name(), index);
+		}
+		else
+		{
+			assert(false);			// duplicate property name
+		}
+
+		index++;
+	}
+}
 
 bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value, bool isEnum)
 {

@@ -6379,7 +6379,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* err
 			result &= inputSpecPropValues.setEnumValue<E::SensorType>(SignalProperties::sensorTypeCaption, sensorType);
 
 			specPropStruct = inputSpecPropStruct;
-			inputSpecPropValues.serializeToArray(&protoDataArray);
+			inputSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
 
@@ -6394,7 +6394,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* err
 			result &= outputSpecPropValues.setEnumValue<E::OutputMode>(SignalProperties::outputModeCaption, outputMode);
 
 			specPropStruct = outputSpecPropStruct;
-			outputSpecPropValues.serializeToArray(&protoDataArray);
+			outputSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
 
@@ -6404,7 +6404,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* err
 			result &= internalSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
 
 			specPropStruct = internalSpecPropStruct;
-			internalSpecPropValues.serializeToArray(&protoDataArray);
+			internalSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
 
