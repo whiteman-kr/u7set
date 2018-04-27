@@ -170,7 +170,6 @@ public slots:
 
 	void slot_hasCheckedOutSignals(bool* hasCheckedOut);
 
-
 	// Units management
 	//
 /*	void slot_getUnits(UnitList* units);
@@ -238,10 +237,10 @@ private:
 	//
 
 	bool processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage);
-	bool processingBeforeDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage);
+	bool processingBeforeDatabaseUpgrade0213(QString* errorMessage);
 
 	bool processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage);
-	bool processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0213(QSqlDatabase& db, QString* errorMessage);
 	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
 
 

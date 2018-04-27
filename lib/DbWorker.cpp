@@ -229,6 +229,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0209.sql", "Upgrade to version 209, Services and LM scripts presets update"},
 	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
 	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, To LM1-SR02 added: pulse_gen, pulse_gen_sync"},
+	{":/DatabaseUpgrade/Upgrade0212.sql", "Upgrade to version 212, HasCheckedOutSignals function creation"},
 	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, Appends specfic properties and potobuf fields to app signals"},
 	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, Changes in SignalData type and dependent stored procedures"},
 };
@@ -1781,6 +1782,11 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				}
 
 				//qDebug() << "End upgrade item";
+			}
+
+			if (result == false)
+			{
+				return;
 			}
 
 			// The table FileInstance has details field which is JSONB, details for some files
@@ -6122,41 +6128,32 @@ bool DbWorker::processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion,
 		return false;
 	}
 
+	Q_UNUSED(db);
+
 	switch(newVersion)
 	{
-	case 211:
-		return processingBeforeDatabaseUpgrade0211(db, errorMessage);
+	case 213:
+		return processingBeforeDatabaseUpgrade0213(errorMessage);
 	}
 
 	return true;
 }
 
 
-bool DbWorker::processingBeforeDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage)
+bool DbWorker::processingBeforeDatabaseUpgrade0213(QString* errorMessage)
 {
-	QSqlQuery q(db);
+	bool hasCheckedOutSignals = true;
 
-	if (q.exec("SELECT count(*) FROM Checkout WHERE SignalID IS NOT NULL") == false)
+	slot_hasCheckedOutSignals(&hasCheckedOutSignals);
+
+	if (hasCheckedOutSignals == true)
 	{
-		*errorMessage = q.lastError().text();
+		*errorMessage = "All app signals should be Checked In before database can be upgraded to new version!\n\n"
+						"Use previous version of U7 to Check In app signals and retry upgrade.";
 		return false;
 	}
 
-	while(q.next() == true)
-	{
-		int checkedOutFilesCount = q.value(0).toInt();
-
-		if (checkedOutFilesCount != 0)
-		{
-			*errorMessage = "All app signals should be Checked In before database can be upgraded to new version!\n\n"
-							"Use previous version of U7 to Check In app signals and retry upgrade.";
-			return false;
-		}
-
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 
@@ -6170,14 +6167,14 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 
 	switch(currentVersion)
 	{
-	case 211:
-		return processingAfterDatabaseUpgrade0211(db, errorMessage);
+	case 213:
+		return processingAfterDatabaseUpgrade0213(db, errorMessage);
 	}
 
 	return true;
 }
 
-bool DbWorker::processingAfterDatabaseUpgrade0211(QSqlDatabase& db, QString* errorMessage)
+bool DbWorker::processingAfterDatabaseUpgrade0213(QSqlDatabase& db, QString* errorMessage)
 {
 	bool result = true;
 
