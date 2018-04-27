@@ -7712,6 +7712,7 @@ namespace Builder
 
 		result &= copyOptoPortTxDiscreteSignals(port);
 
+/*
 		// rest of manually configured buffer fills by 0
 		//
 		if (port->manualSettings() == true && port->txUsedDataSizeW() < port->txDataSizeW())
@@ -7724,7 +7725,7 @@ namespace Builder
 
 			m_code.append(cmd);
 			m_code.newLine();
-		}
+		}*/
 
 		return result;
 	}
@@ -7808,7 +7809,7 @@ namespace Builder
 
 		result &= copyOptoPortRawTxBusSignals(port, memWriteMap);
 
-		MemWriteMap::AreaList nonWrittenAreas;
+/*		MemWriteMap::AreaList nonWrittenAreas;
 
 		memWriteMap.getNonWrittenAreas(&nonWrittenAreas);
 
@@ -7830,7 +7831,7 @@ namespace Builder
 		if (first == false)
 		{
 			m_code.newLine();
-		}
+		}*/
 
 		return result;
 	}
