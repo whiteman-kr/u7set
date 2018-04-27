@@ -92,6 +92,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getSignalHistory, m_worker, &DbWorker::slot_getSignalHistory);
 	connect(this, &DbController::signal_getSpecificSignals, m_worker, &DbWorker::slot_getSpecificSignals);
+	connect(this, &DbController::signal_hasCheckedOutSignals, m_worker, &DbWorker::slot_hasCheckedOutSignals);
 
 	connect(this, &DbController::signal_buildStart, m_worker, &DbWorker::slot_buildStart);
 	connect(this, &DbController::signal_buildFinish, m_worker, &DbWorker::slot_buildFinish);
@@ -1954,6 +1955,36 @@ bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int cha
 	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
 
 	return true;
+}
+
+
+bool DbController::hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (hasCheckedOut == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_hasCheckedOutSignals(hasCheckedOut);
+
+	ok = waitForComplete(parentWidget, tr("HasCheckedOutSignals checking"));
+
+	return true;
+
 }
 
 

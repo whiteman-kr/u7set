@@ -5244,6 +5244,54 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 }
 
 
+void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (hasCheckedOut == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	*hasCheckedOut = true;
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec("SELECT hasCheckedOutSignals();");
+
+	if (result == false)
+	{
+		emitError(db, tr("Error calling hasCheckedOutSignals(): ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == false)
+	{
+		emitError(db, tr("Error hasCheckedOutSignals() result fetching"));
+		return;
+	}
+
+	*hasCheckedOut = q.value(0).toBool();
+
+	return;
+}
+
+
+
 // Build management
 //
 

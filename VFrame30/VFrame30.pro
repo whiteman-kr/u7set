@@ -158,7 +158,6 @@ SOURCES += \
     MacrosExpander.cpp \
     Session.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Types.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/Tuning/TuningController.cpp \

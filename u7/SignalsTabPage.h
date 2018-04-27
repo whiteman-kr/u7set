@@ -261,6 +261,7 @@ public:
 	virtual ~SignalsTabPage();
 
 	static QStringList createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent);
+	static bool updateSignalsSpecProps(DbController* dbc, QVector<Hardware::DeviceSignal*> deviceSignalsToUpdate);
 
 protected:
 	void CreateActions(QToolBar* toolBar);

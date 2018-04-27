@@ -2145,6 +2145,12 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 	return result;
 }
 
+
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, QVector<Hardware::DeviceSignal*> deviceSignalsToUpdate)
+{
+	return true;
+}
+
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
 {
 	QAction* action = new QAction(QIcon(":/Images/Images/update.png"), tr("Refresh signal list"), this);
