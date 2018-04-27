@@ -7,7 +7,6 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/Address16.h"
-#include "../VFrame30/Afb.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
 #include "../lib/TuningValue.h"

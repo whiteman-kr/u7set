@@ -78,34 +78,34 @@ namespace Sim
 
 	void DeviceCommand::dump() const
 	{
-		QString str0 = QString("\tcode = %1 (0x%2), codeMask = %3 (0x%4)")
+		QString str0 = QString("code = %1 (0x%2), codeMask = %3 (0x%4)")
 						.arg(m_command.code)
 						.arg(m_command.code, 4, 16, QChar('0'))
 						.arg(m_command.codeMask)
 						.arg(m_command.codeMask, 4, 16, QChar('0'));
 
-		QString str1 = QString("\tcaption = %1").arg(m_command.caption);
-		QString str2 = QString("\tsimFunct = %1, parseFunc = %2")
+		QString str1 = QString("caption = %1").arg(m_command.caption);
+		QString str2 = QString("simFunct = %1, parseFunc = %2")
 						.arg(m_command.simulationFunc)
 						.arg(m_command.parseFunc);
 
-		QString str3 = QString("\toffest = %1 (0x%2), size = %3")
+		QString str3 = QString("offest = %1 (0x%2), size = %3")
 						.arg(m_offset)
 						.arg(m_offset, 4, 16, QChar('0'))
 						.arg(m_size);
 
-		QString str4 = QString("\tstring = %1").arg(m_string);
+		QString str4 = QString("string = %1").arg(m_string);
 
-		QString str5 = QString("\tafbOpCode = %1, instance = %2, pinOpCode = %3")
+		QString str5 = QString("afbOpCode = %1, instance = %2, pinOpCode = %3")
 						.arg(m_afbOpCode)
 						.arg(m_afbInstance)
 						.arg(m_afbPinOpCode);
 
-		QString str6 = QString("\tbitNo0 = %1, bitNo1 = %2")
+		QString str6 = QString("bitNo0 = %1, bitNo1 = %2")
 						.arg(m_bitNo0)
 						.arg(m_bitNo1);
 
-		QString str7 = QString("\tword0 = %1 (0x%2), word1 = %3 (0x%4), word2 = %5 (0x%6)")
+		QString str7 = QString("word0 = %1 (0x%2), word1 = %3 (0x%4), word2 = %5 (0x%6)")
 						.arg(m_word0)
 						.arg(m_word0, 4, 16, QChar('0'))
 						.arg(m_word1)
@@ -113,22 +113,22 @@ namespace Sim
 						.arg(m_word2)
 						.arg(m_word2, 4, 16, QChar('0'));
 
-		QString str8 = QString("\tdword0 = %1 (0x%2), dword1 = %3 (0x%4)")
+		QString str8 = QString("dword0 = %1 (0x%2), dword1 = %3 (0x%4)")
 						.arg(m_dword0)
 						.arg(m_dword0, 8, 16, QChar('0'))
 						.arg(m_dword1)
 						.arg(m_dword1, 8, 16, QChar('0'));
 
-		qDebug() << "DeviceCommand:";
-		qDebug() << str0;
-		qDebug() << str1;
-		qDebug() << str2;
-		qDebug() << str3;
-		qDebug() << str4;
-		qDebug() << str5;
-		qDebug() << str6;
-		qDebug() << str7;
-		qDebug() << str8;
+		qDebug() << "DeviceCommand: " << m_string;
+		qDebug() << "\t" << str0;
+		qDebug() << "\t" << str1;
+		qDebug() << "\t" << str2;
+		qDebug() << "\t" << str3;
+		qDebug() << "\t" << str4;
+		qDebug() << "\t" << str5;
+		qDebug() << "\t" << str6;
+		qDebug() << "\t" << str7;
+		qDebug() << "\t" << str8;
 
 		return;
 
@@ -163,9 +163,23 @@ namespace Sim
 		using namespace LuaIntf;
 
 		LuaBinding(L).beginClass<ScriptDeviceEmulator>("DeviceEmulator")
+				.addFunction("afbComponent", &ScriptDeviceEmulator::afbComponent, LUA_ARGS(_opt<int>))
+				.addFunction("afbComponentInstance", &ScriptDeviceEmulator::afbComponentInstance, LUA_ARGS(_opt<int>, _opt<int>))
 				.addFunction("getWord", &ScriptDeviceEmulator::getWord, LUA_ARGS(_opt<int>))
 				.addFunction("getDword", &ScriptDeviceEmulator::getDword, LUA_ARGS(_opt<int>))
 				.endClass();
+	}
+
+	Afb::AfbComponent* ScriptDeviceEmulator::afbComponent(int opCode)
+	{
+		auto result = m_device->m_lmDescription.component(opCode);
+		return result.get();
+	}
+
+	AfbComponentInstance* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
+	{
+		AfbComponentInstance* result = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
+		return result;
 	}
 
 //	QObject* ScriptDeviceEmulator::afbComponent(int opCode)
@@ -319,8 +333,10 @@ namespace Sim
 		m_luaState = luaL_newstate();
 		luaL_openlibs(m_luaState);
 
+		AfbComponent::registerLuaClass(m_luaState);
 		ScriptDeviceEmulator::registerLuaClass(m_luaState);
 		DeviceCommand::registerLuaClass(m_luaState);
+		AfbComponentInstance::registerLuaClass(m_luaState);
 
 		return;
 	}
@@ -734,6 +750,8 @@ namespace Sim
 		}
 		while (programCounter < m_plainAppLogic.size());
 
+		// This block is related to Mutex, it;s nit about pre do-while loop
+		//
 		{
 			m_cacheMutex.lock();
 			m_cachedCommands = m_commands;
@@ -783,6 +801,15 @@ namespace Sim
 			writeError(QString("Call function %1 LuaException: %2.")
 				.arg(command.parseFunc)
 				.arg(e.what()));
+
+			return false;
+		}
+		catch (...)
+		{
+			writeError(QString("Call function %1 LuaException")
+				.arg(command.parseFunc));
+
+			return false;
 		}
 
 		// !!!!!!!!!!!!!!!!!!! debug

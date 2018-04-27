@@ -3,8 +3,29 @@
 #include <cfenv>
 #include <QQmlEngine>
 
+extern "C" {
+	#include "../Lua/lua.h"
+	#include "../Lua/lauxlib.h"
+	#include "../Lua/lualib.h"
+}
+#include "../LuaIntf/LuaIntf.h"
+
 namespace Sim
 {
+
+	void AfbComponent::registerLuaClass(lua_State* L)
+	{
+		using namespace LuaIntf;
+
+		LuaBinding(L).beginClass<AfbComponent>("AfbComponent")
+				//.addFunction("afbComponent", &ScriptDeviceEmulator::afbComponent, LUA_ARGS(_opt<int>))
+				//.addFunction("afbComponentInstance", &ScriptDeviceEmulator::afbComponentInstance, LUA_ARGS(_opt<int>, _opt<int>))
+//				.addFunction("getWord", &ScriptDeviceEmulator::getWord, LUA_ARGS(_opt<int>))
+//				.addFunction("getDword", &ScriptDeviceEmulator::getDword, LUA_ARGS(_opt<int>))
+				.endClass();
+
+		return;
+	}
 
 	ComponentParam::ComponentParam(const ComponentParam& that)
 	{
@@ -431,12 +452,20 @@ namespace Sim
 		return m_mathFlags.divByZero;
 	}
 
-	ComponentInstance::ComponentInstance(quint16 instanceNo) :
+	AfbComponentInstance::AfbComponentInstance(quint16 instanceNo) :
 		m_instanceNo(instanceNo)
 	{
 	}
 
-	bool ComponentInstance::addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage)
+	void AfbComponentInstance::registerLuaClass(lua_State* L)
+	{
+		using namespace LuaIntf;
+
+		LuaBinding(L).beginClass<AfbComponentInstance>("AfbComponentInstance")
+			.endClass();
+	}
+
+	bool AfbComponentInstance::addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage)
 	{
 		Q_UNUSED(errorMessage);
 		Q_UNUSED(afbComp);
@@ -448,7 +477,7 @@ namespace Sim
 		return true;
 	}
 
-	const ComponentParam* ComponentInstance::param(int opIndex) const
+	const ComponentParam* AfbComponentInstance::param(int opIndex) const
 	{
 		auto it = m_params.find(opIndex);
 		if (it == m_params.end())
@@ -460,12 +489,12 @@ namespace Sim
 		return componentParam;
 	}
 
-	bool ComponentInstance::paramExists(int opIndex) const
+	bool AfbComponentInstance::paramExists(int opIndex) const
 	{
 		return m_params.count(opIndex) > 0;
 	}
 
-	QObject* ComponentInstance::param(int opIndex)
+	QObject* AfbComponentInstance::param(int opIndex)
 	{
 		auto it = m_params.find(opIndex);
 		if (it == m_params.end())
@@ -479,7 +508,7 @@ namespace Sim
 		return componentParam;
 	}
 
-	bool ComponentInstance::addParam(int opIndex, ComponentParam* param)
+	bool AfbComponentInstance::addParam(int opIndex, ComponentParam* param)
 	{
 		if (param == nullptr)
 		{
@@ -491,7 +520,7 @@ namespace Sim
 		return true;
 	}
 
-	bool ComponentInstance::addParamWord(int opIndex, quint16 value)
+	bool AfbComponentInstance::addParamWord(int opIndex, quint16 value)
 	{
 		ComponentParam param(opIndex);
 		param.setWordValue(value);
@@ -500,7 +529,7 @@ namespace Sim
 		return true;
 	}
 
-	bool ComponentInstance::addParamFloat(int opIndex, float value)
+	bool AfbComponentInstance::addParamFloat(int opIndex, float value)
 	{
 		ComponentParam param(opIndex);
 		param.setFloatValue(value);
@@ -509,7 +538,7 @@ namespace Sim
 		return true;
 	}
 
-	bool ComponentInstance::addParamSignedInt(int opIndex, qint32 value)
+	bool AfbComponentInstance::addParamSignedInt(int opIndex, qint32 value)
 	{
 		ComponentParam param(opIndex);
 		param.setSignedIntValue(value);
@@ -560,14 +589,14 @@ namespace Sim
 			compInstIt = m_instances.emplace(instanceNo, instanceNo).first;		// Insert new item and update iterator
 		}
 
-		ComponentInstance& compInst = compInstIt->second;
+		AfbComponentInstance& compInst = compInstIt->second;
 
 		bool ok = compInst.addParam(m_afbComp, instParam, errorMessage);
 
 		return ok;
 	}
 
-	ComponentInstance* ModelComponent::instance(quint16 instance)
+	AfbComponentInstance* ModelComponent::instance(quint16 instance)
 	{
 		auto isntanceIt = m_instances.find(instance);
 		if (isntanceIt == m_instances.end())
@@ -575,7 +604,7 @@ namespace Sim
 			return nullptr;
 		}
 
-		ComponentInstance* result = &isntanceIt->second;
+		AfbComponentInstance* result = &isntanceIt->second;
 		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::CppOwnership);
 
 		return result;
@@ -624,7 +653,7 @@ namespace Sim
 		return ok;
 	}
 
-	ComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance)
+	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance)
 	{
 		auto componentIt = m_components.find(componentOpCode);
 		if (componentIt == m_components.end())
@@ -634,7 +663,7 @@ namespace Sim
 
 		std::shared_ptr<ModelComponent>	component = componentIt->second;
 
-		ComponentInstance* result = component->instance(instance);
+		AfbComponentInstance* result = component->instance(instance);
 		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::CppOwnership);
 
 		return result;

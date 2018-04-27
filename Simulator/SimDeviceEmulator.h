@@ -158,6 +158,10 @@ namespace Sim
 
 		// Script functins for AFB instances
 		//
+public:
+		Afb::AfbComponent* afbComponent(int opCode);
+		AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
+
 //	public slots:
 //		QObject* afbComponent(int opCode);
 //		QObject* afbComponentInstance(int opCode, int instanceNo);

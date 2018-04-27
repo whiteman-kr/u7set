@@ -2,6 +2,7 @@
 #include <QDomElement>
 #include <QXmlStreamReader>
 
+
 namespace Afb
 {
 
@@ -148,6 +149,7 @@ namespace Afb
 
 		return;
 	}
+
 
 	bool AfbComponent::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{

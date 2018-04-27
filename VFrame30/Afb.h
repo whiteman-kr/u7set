@@ -2,7 +2,6 @@
 #include <memory>
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
-#include <memory>
 
 class QDomElement;
 class QXmlStreamReader;

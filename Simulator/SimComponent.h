@@ -5,8 +5,16 @@
 #include <QObject>
 #include "../VFrame30/Afb.h"
 
+struct lua_State;
+
 namespace Sim
 {
+	class AfbComponent : public Afb::AfbComponent
+	{
+	public:
+		static void registerLuaClass(lua_State* L);
+	};
+
 
 	class ComponentParam : public QObject
 	{
@@ -114,12 +122,14 @@ namespace Sim
 
 	// AfbComponentInstance, contains a set of params (InstantiatorParam) for this instance
 	//
-	class ComponentInstance : public QObject
+	class AfbComponentInstance : public QObject
 	{
 		Q_OBJECT
 
 	public:
-		ComponentInstance(quint16 instanceNo);
+		AfbComponentInstance(quint16 instanceNo);
+
+		static void registerLuaClass(lua_State* L);
 
 	public:
 		bool addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage);
@@ -151,10 +161,10 @@ namespace Sim
 
 	public:
 		Q_INVOKABLE bool addParam(int instanceNo, const ComponentParam& instParam, QString* errorMessage);
-		Q_INVOKABLE ComponentInstance* instance(quint16 instance);
+		Q_INVOKABLE AfbComponentInstance* instance(quint16 instance);
 
 	private:
-		std::map<quint16, ComponentInstance> m_instances;			// Key is instNo
+		std::map<quint16, AfbComponentInstance> m_instances;			// Key is instNo
 		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
 	};
 
@@ -168,7 +178,7 @@ namespace Sim
 		void clear();
 		bool addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const ComponentParam& instParam, QString* errorMessage);
 
-		ComponentInstance* componentInstance(int componentOpCode, int instance);
+		AfbComponentInstance* componentInstance(int componentOpCode, int instance);
 
 	private:
 		std::map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode
