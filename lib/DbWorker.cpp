@@ -228,7 +228,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0208.sql", "Upgrade to version 208, To LM1-SR02 added: indic_latch, indic_stless, bus_indic_latch, bus_indic_stless"},
 	{":/DatabaseUpgrade/Upgrade0209.sql", "Upgrade to version 209, Services and LM scripts presets update"},
 	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
-
+	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, To LM1-SR02 added: pulse_gen, pulse_gen_sync"},
 	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, Appends specfic properties and potobuf fields to app signals"},
 	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, Changes in SignalData type and dependent stored procedures"},
 };
