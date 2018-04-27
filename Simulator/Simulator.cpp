@@ -374,7 +374,7 @@ namespace Sim
 
 		fileName += "Common/AppSignals.asgs";
 
-		writeMessage(tr("Loading AppSignals.asgs").arg(fileName));
+		writeMessage(tr("Loading %1").arg(fileName));
 
 		bool ok = m_appSignalManager.load(fileName);
 		if (ok == false)

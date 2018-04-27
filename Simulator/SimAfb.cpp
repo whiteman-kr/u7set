@@ -1,4 +1,4 @@
-#include "SimComponent.h"
+#include "SimAfb.h"
 #include <type_traits>
 #include <cfenv>
 #include <QQmlEngine>
@@ -13,19 +13,94 @@ extern "C" {
 namespace Sim
 {
 
+	AfbComponent::AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent) :
+		m_afbComponent(afbComponent)
+	{
+		// assert(m_afbComponent);	Actually m_afbComponent can be nullptr, script should call isNull to detect it
+	}
+
 	void AfbComponent::registerLuaClass(lua_State* L)
 	{
 		using namespace LuaIntf;
 
-		LuaBinding(L).beginClass<AfbComponent>("AfbComponent")
-				//.addFunction("afbComponent", &ScriptDeviceEmulator::afbComponent, LUA_ARGS(_opt<int>))
-				//.addFunction("afbComponentInstance", &ScriptDeviceEmulator::afbComponentInstance, LUA_ARGS(_opt<int>, _opt<int>))
-//				.addFunction("getWord", &ScriptDeviceEmulator::getWord, LUA_ARGS(_opt<int>))
-//				.addFunction("getDword", &ScriptDeviceEmulator::getDword, LUA_ARGS(_opt<int>))
+		LuaBinding(L).beginClass<Sim::AfbComponent>("AfbComponent")
+				.addFunction("isNull", &Sim::AfbComponent::isNull)
+				.addPropertyReadOnly("opCode", &Sim::AfbComponent::opCode)
+				.addPropertyReadOnly("caption", &Sim::AfbComponent::caption)
+				.addPropertyReadOnly("maxInstCount", &Sim::AfbComponent::maxInstCount)
+				.addPropertyReadOnly("simulationFunc", &Sim::AfbComponent::simulationFunc)
+				.addFunction("pinExists", &Sim::AfbComponent::pinExists, LUA_ARGS(_opt<int>))
+				.addFunction("pinCaption", &Sim::AfbComponent::pinCaption, LUA_ARGS(_opt<int>))
 				.endClass();
 
 		return;
 	}
+
+	bool AfbComponent::isNull() const
+	{
+		return m_afbComponent.get() == nullptr;
+	}
+
+	int AfbComponent::opCode() const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return -1;
+		}
+
+		return m_afbComponent->opCode();
+	}
+
+	std::string AfbComponent::caption() const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return std::string();
+		}
+
+		return m_afbComponent->caption().toStdString();
+	}
+
+	int AfbComponent::maxInstCount() const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return -1;
+		}
+
+		return m_afbComponent->maxInstCount();
+	}
+
+	std::string AfbComponent::simulationFunc() const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return std::string();
+		}
+
+		return m_afbComponent->simulationFunc().toStdString();
+	}
+
+	bool AfbComponent::pinExists(int pinOpIndex) const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return false;
+		}
+
+		return m_afbComponent->pinExists(pinOpIndex);
+	}
+
+	std::string AfbComponent::pinCaption(int pinOpIndex) const
+	{
+		if (m_afbComponent == nullptr)
+		{
+			return std::string();
+		}
+
+		return m_afbComponent->pinCaption(pinOpIndex).toStdString();
+	}
+
 
 	ComponentParam::ComponentParam(const ComponentParam& that)
 	{

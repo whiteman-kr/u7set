@@ -29,15 +29,15 @@ function check_afb(device, afbOpCode, afbInstance)
 
 	local afb = device:afbComponent(afbOpCode);
 	
-	--if (afb == null)
-	--{
-	--	throw new Error("Cannot find AfbComponent with OpCode " + afbOpCode);
-	--}
-	--	
-	--if (afbInstance >= afb.MaxInstCount)
-	--{
-	--	throw new Error("AfbComponent.Instance (" + afbInstance + ") is out of limits " + afb.MaxInstCount);
-	--}
+	if (afb:isNull() == true)
+	then
+		error("Cannot find AfbComponent with OpCode " .. afbOpCode);
+	end
+
+	if (afbInstance >= afb.maxInstCount)
+	then
+		error("AfbComponent.Instance (" .. afbInstance .. ") is out of limits " .. afb.maxInstCount);
+	end
 	
 	return afb;
 end
@@ -58,12 +58,62 @@ end
 -- Logic Unit command pasring and simylation functions
 --
 
--- Command: stop
+-- Command: startafb
 -- Code: 2
+--
+function parse_startafb(device, command)
+	command.size = 2;
+	
+	command.afbOpCode = device:getWord(command.offset + 0) & 0x003F;		-- Lowest 6 bit
+	command.afbInstance = device:getWord(command.offset + 1) >> 6;			-- Highest 10 bits
+
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+	
+	if (afb.simulationFunc:len() == 0)
+	then
+		error("Simultaion function is not found");
+	end
+
+	-- startafb   LOGIC.0
+	--
+	command.asString = string.format("%-010s %s.%d", command.caption, afb.caption, command.afbInstance);
+end
+
+-- Command: stop
+-- Code: 3
 --
 function parse_stop(device, command)
     command.size = 1;
 	command.asString = command.caption;
+end
+
+-- Command: movmem
+-- Code: 5
+--
+function parse_movmem(device, command)
+	command.size = 4;
+	
+	command.word0 = device:getWord(command.offset + 1);		-- word0 - adderess2
+	command.word1 = device:getWord(command.offset + 2);		-- word1 - adderess1
+	command.word2 = device:getWord(command.offset + 3);		-- word2 - words to move
+
+	-- movmem     0b402h, 0dd02h, #0002h
+	--
+	command.asString = string.format("%-010s%s, %s, %s", command.caption, word2hex(command.word0), word2hex(command.word1), word2hex(command.word2));
+end
+
+-- Command: movc
+-- Code: 6
+--
+function parse_movc(device, command)
+	command.size = 3;
+	
+	command.word0 = device:getWord(command.offset + 1);		-- word0 - address
+	command.word1 = device:getWord(command.offset + 2);		-- word1 - data
+
+	-- movc     0b402h, #0
+	--
+	command.asString = string.format("%-010s%s, #%s", command.caption, word2hex(command.word0), word2hex(command.word1));
 end
 
 -- Command: movbc
@@ -99,22 +149,38 @@ function parse_wrfbb(device, command)
 	-- Checks
 	--
 	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
-	--check_param_range(command.bitNo0, 0, 15, "BitNo");
+	check_param_range(command.bitNo0, 0, 15, "BitNo");
 
 	-- String representation
 	-- wrfbb LOGIC.0[20], 46083h[0]
 	--
-	--local pinCaption = afb:pinCaption(command.afbPinOpCode);
+	local pinCaption = afb:pinCaption(command.afbPinOpCode);
+	command.asString = string.format("%-010s%s.%d[%s], %s[%d]", command.caption, afb.caption, command.afbInstance, pinCaption, word2hex(command.word0), command.bitNo0);
+end
 
-	--command.AsString =	leftJustified(command.Caption, CommandWidth, " ") +  
-	--					afb.Caption + "."  + command.AfbInstance + "[" + command.AfbPinOpCode + "], " +
-	--					hex(command.Word0, 4) + "[" + command.BitNo0 + "]";
-							
+-- Command: rdfbb
+-- Code: 12
+--
+function parse_rdfbb(device, command)
+	command.size = 4;
+	
+	command.afbOpCode = device:getWord(command.offset + 0) & 0x003F;		-- Lowest 6 bit
+	command.afbInstance = device:getWord(command.offset + 1) >> 6;			-- Highest 10 bits
+	command.afbPinOpCode = device:getWord(command.offset + 1) & 0x003F;		-- Lowest 6 bit
 
-	--command.AsString =  leftJustified(command.AsString, CommandWidthToComment, " ") +  
-	--					"-- " + 
-	--					afb.Caption + "."  + command.AfbInstance + "[" + pinCaption + "] <=" +
-	--					hex(command.Word0, 4) + "[" + command.BitNo0 + "]";
+	command.word0 = device:getWord(command.offset + 2);						-- Word0 - data address
+	command.bitNo0 = device:getWord(command.offset + 3);					-- BitNo
+
+	-- Checks
+	--
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+	check_param_range(command.bitNo0, 0, 15, "BitNo");
+
+	-- String representation
+	-- rdfbb 46083h[0], LOGIC.0[20]
+	--
+	local pinCaption = afb:pinCaption(command.afbPinOpCode);
+	command.asString = string.format("%-010s%s[%d], %s.%d[%s]", command.caption, word2hex(command.word0), command.bitNo0, afb.caption, command.afbInstance, pinCaption);
 end
 
 -- Command: appstart

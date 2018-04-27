@@ -170,15 +170,16 @@ namespace Sim
 				.endClass();
 	}
 
-	Afb::AfbComponent* ScriptDeviceEmulator::afbComponent(int opCode)
+	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode)
 	{
-		auto result = m_device->m_lmDescription.component(opCode);
-		return result.get();
+		auto afbc = m_device->m_lmDescription.component(opCode);
+		AfbComponent result(afbc);
+		return result;
 	}
 
-	AfbComponentInstance* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
+	Sim::AfbComponentInstance* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
 	{
-		AfbComponentInstance* result = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
+		Sim::AfbComponentInstance* result = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
 		return result;
 	}
 
@@ -333,9 +334,9 @@ namespace Sim
 		m_luaState = luaL_newstate();
 		luaL_openlibs(m_luaState);
 
-		AfbComponent::registerLuaClass(m_luaState);
 		ScriptDeviceEmulator::registerLuaClass(m_luaState);
 		DeviceCommand::registerLuaClass(m_luaState);
+		AfbComponent::registerLuaClass(m_luaState);
 		AfbComponentInstance::registerLuaClass(m_luaState);
 
 		return;

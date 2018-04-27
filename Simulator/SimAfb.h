@@ -9,10 +9,33 @@ struct lua_State;
 
 namespace Sim
 {
-	class AfbComponent : public Afb::AfbComponent
+	class AfbComponent
 	{
 	public:
+		AfbComponent() = delete;
+		AfbComponent(const AfbComponent&) = default;
+		AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent);
+
+		~AfbComponent()
+		{
+			qDebug() << "~AfbComponent";
+		}
+
 		static void registerLuaClass(lua_State* L);
+
+	public:
+		bool isNull() const;
+
+		int opCode() const;
+		std::string caption() const;
+		int maxInstCount() const;
+		std::string simulationFunc() const;
+
+		bool pinExists(int pinOpIndex) const;
+		std::string pinCaption(int pinOpIndex) const;
+
+	private:
+		std::shared_ptr<Afb::AfbComponent> m_afbComponent;
 	};
 
 

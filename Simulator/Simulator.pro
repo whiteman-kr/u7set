@@ -71,7 +71,6 @@ SOURCES += \
     SimLmModel.cpp \
     SimEeprom.cpp \
     SimSubsystem.cpp \
-    SimComponent.cpp \
     SimDeviceEmulator.cpp \
     SimControl.cpp \
     SimTimeController.cpp \
@@ -85,7 +84,8 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc
+    ../Proto/network.pb.cc \
+    SimAfb.cpp
 
 HEADERS += \
     Stable.h \
@@ -103,7 +103,6 @@ HEADERS += \
     SimLmModel.h \
     SimEeprom.h \
     SimSubsystem.h \
-    SimComponent.h \
     SimDeviceEmulator.h \
     SimControl.h \
     SimTimeController.h \
@@ -119,7 +118,8 @@ HEADERS += \
     ../lib/TuningValue.h \
     ../lib/XmlHelper.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h
+    ../Proto/network.pb.h \
+    SimAfb.h
 
 unix {
     target.path = /usr/lib

@@ -59,11 +59,6 @@ namespace Afb
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(int OpCode READ opCode)
-		Q_PROPERTY(QString Caption READ caption)
-		Q_PROPERTY(int MaxInstCount READ maxInstCount)
-		Q_PROPERTY(QString SimulationFunc READ simulationFunc)
-
 	public:
 		AfbComponent();
 		AfbComponent(const AfbComponent& that);
@@ -97,8 +92,8 @@ namespace Afb
 
 		const std::map<int, AfbComponentPin>& pins() const;
 
-		Q_INVOKABLE bool pinExists(int pinOpIndex) const;
-		Q_INVOKABLE QString pinCaption(int pinOpIndex) const;
+		bool pinExists(int pinOpIndex) const;
+		QString pinCaption(int pinOpIndex) const;
 
 	private:
 		// Operator= is present, don't forget to add new fields to it

@@ -14,7 +14,7 @@
 #include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
-#include "SimComponent.h"
+#include "SimAfb.h"
 
 extern "C" {
 	#include "../Lua/lua.h"
@@ -159,8 +159,8 @@ namespace Sim
 		// Script functins for AFB instances
 		//
 public:
-		Afb::AfbComponent* afbComponent(int opCode);
-		AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
+		AfbComponent afbComponent(int opCode);
+		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
 
 //	public slots:
 //		QObject* afbComponent(int opCode);
