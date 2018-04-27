@@ -5275,8 +5275,20 @@ void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
 		return;
 	}
 
+	hasCheckedOutSignals(db, hasCheckedOut);
+
+	return;
+}
+
+void DbWorker::hasCheckedOutSignals(QSqlDatabase& db, bool* hasCheckedOut)
+{
+	if (hasCheckedOut == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
 	QSqlQuery q(db);
-	q.setForwardOnly(true);
 
 	bool result = q.exec("SELECT hasCheckedOutSignals();");
 
@@ -5296,8 +5308,6 @@ void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
 
 	return;
 }
-
-
 
 // Build management
 //
@@ -6133,20 +6143,19 @@ bool DbWorker::processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion,
 	switch(newVersion)
 	{
 	case 213:
-		return processingBeforeDatabaseUpgrade0213(errorMessage);
+		return processingBeforeDatabaseUpgrade0213(db, errorMessage);
 	}
 
 	return true;
 }
 
-
-bool DbWorker::processingBeforeDatabaseUpgrade0213(QString* errorMessage)
+bool DbWorker::processingBeforeDatabaseUpgrade0213(QSqlDatabase& db, QString* errorMessage)
 {
-	bool hasCheckedOutSignals = true;
+	bool hasCheckedOut = true;
 
-	slot_hasCheckedOutSignals(&hasCheckedOutSignals);
+	hasCheckedOutSignals(db, &hasCheckedOut);
 
-	if (hasCheckedOutSignals == true)
+	if (hasCheckedOut == true)
 	{
 		*errorMessage = "All app signals should be Checked In before database can be upgraded to new version!\n\n"
 						"Use previous version of U7 to Check In app signals and retry upgrade.";
@@ -6155,7 +6164,6 @@ bool DbWorker::processingBeforeDatabaseUpgrade0213(QString* errorMessage)
 
 	return true;
 }
-
 
 bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage)
 {
@@ -6241,18 +6249,18 @@ bool DbWorker::processingAfterDatabaseUpgrade0213(QSqlDatabase& db, QString* err
 //	const int SD_INSTANCE_ACTION = 47;
 
 	QString inputSpecPropStruct(
-		"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;true;false;Electric high limit of input signal;true;None\n"
-		"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;true;false;Electric low limit of input signal;true;None\n"
-		"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;true;false;;true;None\n"
-		"4;FilteringTime;4 Signal processing;double;;;0.005;5;true;false;Signal filtering time in seconds;true;None\n"
-		"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;true;false;High ADC value;true;None\n"
-		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;true;false;High engeneering units;true;None\n"
-		"4;HighValidRange;4 Signal processing;double;;;100;10;true;false;High valid range of signal;true;None\n"
-		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;true;false;Low ADC value;true;None\n"
-		"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;true;false;Low engeneering units;true;None\n"
-		"4;LowValidRange;4 Signal processing;double;;;0;10;true;false;Low valid range of signal;true;None\n"
-		"4;SensorType;5 Electric parameters;DynamicEnum [NoSensor=0,Ohm_Pt50_W1391=1,Ohm_Pt100_W1391=2,Ohm_Pt50_W1385=3,Ohm_Pt100_W1385=4,Ohm_Cu_50_W1428=5,Ohm_Cu_100_W1428=6,Ohm_Cu_50_W1426=7,Ohm_Cu_100_W1426=8,Ohm_Pt21=9,Ohm_Cu23=10,mV_K_TXA=11,mV_L_TXK=12,mV_N_THH=13];;;NoSensor;0;true;false;;true;None\n"
-		"4;SpreadTolerance;4 Signal processing;double;;;2;5;true;false;Spread tolerance of signal measurement channels in percents;true;None");
+		"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;false;false;Electric high limit of input signal;true;None\n"
+		"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;false;false;Electric low limit of input signal;true;None\n"
+		"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;false;false;;true;None\n"
+		"4;FilteringTime;4 Signal processing;double;;;0.005;5;false;false;Signal filtering time in seconds;true;None\n"
+		"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;false;false;High ADC value;true;None\n"
+		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;false;false;High engeneering units;true;None\n"
+		"4;HighValidRange;4 Signal processing;double;;;100;10;false;false;High valid range of signal;true;None\n"
+		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
+		"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;false;false;Low engeneering units;true;None\n"
+		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n"
+		"4;SensorType;5 Electric parameters;DynamicEnum [NoSensor=0,Ohm_Pt50_W1391=1,Ohm_Pt100_W1391=2,Ohm_Pt50_W1385=3,Ohm_Pt100_W1385=4,Ohm_Cu_50_W1428=5,Ohm_Cu_100_W1428=6,Ohm_Cu_50_W1426=7,Ohm_Cu_100_W1426=8,Ohm_Pt21=9,Ohm_Cu23=10,mV_K_TXA=11,mV_L_TXK=12,mV_N_THH=13];;;NoSensor;0;false;false;;true;None\n"
+		"4;SpreadTolerance;4 Signal processing;double;;;2;5;false;false;Spread tolerance of signal measurement channels in percents;true;None");
 
 	SignalSpecPropValues inputSpecPropValues;
 
@@ -6265,11 +6273,11 @@ bool DbWorker::processingAfterDatabaseUpgrade0213(QSqlDatabase& db, QString* err
 	}
 
 	QString outputSpecPropStruct(
-		"4;HighDAC;4 Signal processing;uint32;0;65535;65535;0;true;false;High DAC value;true;None\n"
-		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;true;false;High engeneering units;true;None\n"
-		"4;LowDAC;4 Signal processing;uint32;0;65535;0;0;true;false;Low DAC value;true;None\n"
-		"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;true;false;Low engeneering units;true;None\n"
-		"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;true;false;;true;None\n");
+		"4;HighDAC;4 Signal processing;uint32;0;65535;65535;0;false;false;High DAC value;true;None\n"
+		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;false;false;High engeneering units;true;None\n"
+		"4;LowDAC;4 Signal processing;uint32;0;65535;0;0;false;false;Low DAC value;true;None\n"
+		"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;false;false;Low engeneering units;true;None\n"
+		"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;false;false;;true;None\n");
 
 	SignalSpecPropValues outputSpecPropValues;
 
@@ -6282,8 +6290,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0213(QSqlDatabase& db, QString* err
 	}
 
 	QString internalSpecPropStruct(
-		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;true;false;High engeneering units;true;None\n"
-		"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;true;false;Low engeneering units;true;None\n");
+		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;false;false;High engeneering units;true;None\n"
+		"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;false;false;Low engeneering units;true;None\n");
 
 	SignalSpecPropValues internalSpecPropValues;
 
