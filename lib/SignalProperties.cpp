@@ -75,6 +75,31 @@ SignalProperties::SignalProperties(Signal& signal) :
 	initProperties();
 }
 
+void SignalProperties::updatePropertiesInSignal()
+{
+	for (std::shared_ptr<Property> property : properties())
+	{
+		m_specPropValues.setAnyValue(property->caption(), property->value());
+	}
+
+	QByteArray valuesData;
+	m_specPropValues.serializeValuesToArray(&valuesData);
+	m_signal.setProtoSpecPropValues(valuesData);
+}
+
+void SignalProperties::addPropertyDependentOnPrecision(Property* dependentProperty)
+{
+	for (Property* currentProperty : m_propertiesDependentOnPrecision)
+	{
+		if (currentProperty == dependentProperty)
+		{
+			return;
+		}
+	}
+
+	m_propertiesDependentOnPrecision.push_back(dependentProperty);
+}
+
 void SignalProperties::initProperties()
 {
 	ADD_PROPERTY_GETTER_INDIRECT(int, idCaption, false, Signal::ID, m_signal);

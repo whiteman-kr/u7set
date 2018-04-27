@@ -148,8 +148,10 @@ public:
 	explicit SignalProperties(Signal& signal);
 
 	Signal& signal() { return m_signal; }
+	void updatePropertiesInSignal();
 
 	const std::vector<Property*>& propertiesDependentOnPrecision() { return m_propertiesDependentOnPrecision; }
+	void addPropertyDependentOnPrecision(Property* dependentProperty);
 
 	Q_INVOKABLE QString appSignalID() const { return m_signal.appSignalID(); }
 	Q_INVOKABLE QString customAppSignalID() const { return m_signal.customAppSignalID(); }

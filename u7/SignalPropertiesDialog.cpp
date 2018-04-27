@@ -165,7 +165,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 	DbFileInfo mcInfo = dbController->systemFileInfo("MC");
 	DbFileInfo propertyBehaviorFile;
-	dbController->getFileInfo(mcInfo.fileId(), QString("PropertyBehavior.csv"), &propertyBehaviorFile, parent);
+	dbController->getFileInfo(mcInfo.fileId(), QString("SignalPropertyBehavior.csv"), &propertyBehaviorFile, parent);
 
 	std::shared_ptr<DbFile> file;
 	bool result = dbController->getLatestVersion(propertyBehaviorFile, &file, parent);
@@ -186,7 +186,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				}
 			}
 
-			assert(static_cast<size_t>(fields.size()) == signalTypeSequence.size() + 1);
+			assert(static_cast<size_t>(fields.size()) == signalTypeSequence.size() + 2);
 			fileFields.push_back(fields);
 		}
 	}
@@ -201,13 +201,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	{
 		//std::shared_ptr<SharedIdSignalProperties> signalProperties = std::make_shared<SharedIdSignalProperties>(signalVector, i);
 		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
-
-		int precision = signalVector[i]->isAnalog() ? signalVector[i]->decimalPlaces() : 0;
-
-		for (auto property : signalProperties->propertiesDependentOnPrecision())
-		{
-			property->setPrecision(precision);
-		}
 
 		if (readOnly)
 		{
@@ -292,6 +285,27 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 					continue;
 				}
 
+				if (propertyDescription[1].toLower().indexOf("true") >= 0)
+				{
+					std::shared_ptr<Property> precisionProperty = signalProperties->propertyByCaption(SignalProperties::decimalPlacesCaption);
+
+					if ((precisionProperty == nullptr) == false)
+					{
+						bool ok = false;
+						int precision = signalVector[i]->isAnalog() ? precisionProperty->value().toInt(&ok) : 0;
+
+						if (ok == true)
+						{
+							property->setPrecision(precision);
+							signalProperties->addPropertyDependentOnPrecision(property.get());
+						}
+					}
+					else
+					{
+						assert(false);
+					}
+				}
+
 				bool descriptionFound = false;
 				for (size_t i = 0; i < signalTypeSequence.size(); i++)
 				{
@@ -302,7 +316,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 					}
 
 					descriptionFound = true;
-					const QString& propertyState = propertyDescription[i + 1].toLower();
+					const QString& propertyState = propertyDescription[i + 2].toLower();
 
 					if (propertyState.indexOf("hide") >= 0)
 					{
@@ -360,6 +374,11 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	for (auto object : m_objList)
 	{
 		auto signalProperties = dynamic_cast<SignalProperties*>(object.get());
+		if (signalProperties == nullptr)
+		{
+			assert(false);
+			continue;
+		}
 		Signal& signal = signalProperties->signal();
 		if (signal.appSignalID().trimmed().isEmpty())
 		{
@@ -376,7 +395,15 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	{
 		Signal& signal = *m_signalVector[i];
 
-		signal = dynamic_cast<SignalProperties*>(m_objList[i].get())->signal();
+		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(m_objList[i].get());
+		if (signalProperties == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+		signalProperties->updatePropertiesInSignal();
+
+		signal = signalProperties->signal();
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
 		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
@@ -453,12 +480,27 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 
 		Signal& signal = signalProperties->signal();
 
-		int precision = signal.isAnalog() ? signal.decimalPlaces() : 0;
+		std::shared_ptr<Property> precisionProperty = signalProperties->propertyByCaption(SignalProperties::decimalPlacesCaption);
 
-		for (auto property : signalProperties->propertiesDependentOnPrecision())
+		if ((precisionProperty == nullptr) == false)
 		{
-			property->setPrecision(precision);
-			m_propertyEditor->updatePropertyValues(property->caption());
+			bool ok = false;
+			int precision = signal.isAnalog() ? precisionProperty->value().toInt(&ok) : 0;
+
+			if (ok == false)
+			{
+				continue;
+			}
+
+			for (auto property : signalProperties->propertiesDependentOnPrecision())
+			{
+				property->setPrecision(precision);
+				m_propertyEditor->updatePropertyValues(property->caption());
+			}
+		}
+		else
+		{
+			assert(false);
 		}
 	}
 }
