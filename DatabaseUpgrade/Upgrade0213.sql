@@ -1,6 +1,13 @@
--- Add new columns into signalInstance table
+CREATE OR REPLACE FUNCTION hascheckedoutsignals()
+  RETURNS boolean AS
+$BODY$
+DECLARE
+    checkedOutSignalsCount integer;
+BEGIN
+    SELECT count(*) INTO checkedOutSignalsCount FROM Checkout WHERE SignalID IS NOT NULL;
 
-ALTER TABLE public.signalinstance ADD COLUMN specpropstruct text;
-ALTER TABLE public.signalinstance ADD COLUMN specpropvalues bytea;
-ALTER TABLE public.signalinstance ADD COLUMN protodata bytea;
-
+    RETURN checkedOutSignalsCount <> 0;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
