@@ -313,7 +313,7 @@ namespace Builder
 
 	int AfblsMap::getUsedInstances(int opCode) const
 	{
-		return m_fblInstance.value(opCode, 0);
+		return m_fblInstance.value(opCode, -1) + 1;
 	}
 
 	// ---------------------------------------------------------------------------------------
