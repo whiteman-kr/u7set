@@ -211,6 +211,7 @@
         <file>Upgrade0209.sql</file>
         <file>Upgrade0210.sql</file>
         <file>Upgrade0211.sql</file>
+	<file>Upgrade0212.sql</file>
         <file>Upgrade0213.sql</file>
         <file>Upgrade0214.sql</file>
         <file>Upgrade0215.sql</file>

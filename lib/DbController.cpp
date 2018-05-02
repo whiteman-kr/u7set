@@ -2324,6 +2324,11 @@ int DbController::busTypesFileId() const
 	return m_worker->busTypesFileId();
 }
 
+int DbController::etcFileId() const
+{
+	return m_worker->etcFileId();
+}
+
 std::vector<DbFileInfo> DbController::systemFiles() const
 {
 	return m_worker->systemFiles();

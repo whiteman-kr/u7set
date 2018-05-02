@@ -229,6 +229,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0209.sql", "Upgrade to version 209, Services and LM scripts presets update"},
 	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
 	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, To LM1-SR02 added: pulse_gen, pulse_gen_sync"},
+	{":/DatabaseUpgrade/Upgrade0212.sql", "Upgrade to version 212, Add ETC system folder"},
 	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, HasCheckedOutSignals function creation"},
 	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, Appends specfic properties and potobuf fields to app signals"},
 	{":/DatabaseUpgrade/Upgrade0215.sql", "Upgrade to version 215, Changes in SignalData type and dependent stored procedures"},
@@ -425,6 +426,12 @@ int DbWorker::busTypesFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_busTypesFileId;
+}
+
+int DbWorker::etcFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_etcFileId;
 }
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
@@ -975,6 +982,8 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_mcFileId = -1;
 	m_connectionsFileId = -1;
 	m_busTypesFileId = -1;
+	m_etcFileId = -1;
+
 	m_systemFiles.clear();
 	m_mutex.unlock();
 
@@ -1070,6 +1079,14 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			m_systemFiles.push_back(fi);
 			continue;
 		}
+
+		if (fi.fileName() == ::EtcFileName)
+		{
+			QMutexLocker locker(&m_mutex);
+			m_etcFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
 	}
 
 
@@ -1084,6 +1101,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result &= m_mcFileId != -1;
 	result &= m_connectionsFileId != -1;
 	result &= m_busTypesFileId != -1;
+	result &= m_etcFileId != -1;
 	m_mutex.unlock();
 
 	if (result == false)
@@ -6142,14 +6160,14 @@ bool DbWorker::processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion,
 
 	switch(newVersion)
 	{
-	case 213:
-		return processingBeforeDatabaseUpgrade0213(db, errorMessage);
+	case 214:
+		return processingBeforeDatabaseUpgrade0214(db, errorMessage);
 	}
 
 	return true;
 }
 
-bool DbWorker::processingBeforeDatabaseUpgrade0213(QSqlDatabase& db, QString* errorMessage)
+bool DbWorker::processingBeforeDatabaseUpgrade0214(QSqlDatabase& db, QString* errorMessage)
 {
 	bool hasCheckedOut = true;
 
@@ -6175,18 +6193,18 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 
 	switch(currentVersion)
 	{
-	case 213:
-		return processingAfterDatabaseUpgrade0213(db, errorMessage);
+	case 214:
+		return processingAfterDatabaseUpgrade0214(db, errorMessage);
 	}
 
 	return true;
 }
 
-bool DbWorker::processingAfterDatabaseUpgrade0213(QSqlDatabase& db, QString* errorMessage)
+bool DbWorker::processingAfterDatabaseUpgrade0214(QSqlDatabase& db, QString* errorMessage)
 {
 	bool result = true;
 
-	// indexes of db struct SignalData fields BEFORE database upgrade 0212
+	// indexes of db struct SignalData fields BEFORE database upgrade 0215
 	//
 //	const int SD_APP_SIGNAL_ID = 0;
 //	const int SD_CUSTOM_APP_SIGNAL_ID = 1;

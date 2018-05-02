@@ -31,8 +31,10 @@ class SignalPropertiesDialog : public QDialog
 public:
 	explicit SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
 
-	bool isEditedSignal(int id) { return m_editedSignalsId.contains(id); }
-	bool hasEditedSignals() { return m_editedSignalsId.isEmpty() == false; }
+	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
+	bool hasEditedSignals() const { return m_editedSignalsId.isEmpty() == false; }
+
+	bool isValid() const { return m_isValid; }
 
 signals:
 	void signalChanged(int id, bool updateView);
@@ -58,6 +60,8 @@ private:
 	bool m_tryCheckout;
 	QWidget* m_parent;
 	ExtWidgets::PropertyEditor* m_propertyEditor;
+
+	bool m_isValid = false;
 
 	bool checkoutSignal(Signal& s, QString& message);
 	QString errorMessage(const ObjectState& state) const;

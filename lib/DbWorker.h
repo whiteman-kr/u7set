@@ -63,6 +63,7 @@ public:
     int mcFileId() const;
 	int connectionsFileId() const;
 	int busTypesFileId() const;
+	int etcFileId() const;
 
     std::vector<DbFileInfo> systemFiles() const;
 
@@ -239,10 +240,10 @@ private:
 	//
 
 	bool processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage);
-	bool processingBeforeDatabaseUpgrade0213(QSqlDatabase& db,QString* errorMessage);
+	bool processingBeforeDatabaseUpgrade0214(QSqlDatabase& db,QString* errorMessage);
 
 	bool processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage);
-	bool processingAfterDatabaseUpgrade0213(QSqlDatabase& db, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0214(QSqlDatabase& db, QString* errorMessage);
 	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
 
 
@@ -269,6 +270,7 @@ private:
 	int m_mcFileId = -1;			// Module Configuration Template
 	int m_connectionsFileId = -1;	// Connections
 	int m_busTypesFileId = -1;		// BusTypes
+	int m_etcFileId = -1;			//
 
     std::vector<DbFileInfo> m_systemFiles;		// All system files
 

@@ -1364,6 +1364,11 @@ bool SignalsModel::editSignals(QVector<int> ids)
 
 	SignalPropertiesDialog dlg(dbController(), signalVector, readOnly, true, m_parentWindow);
 
+	if (dlg.isValid() == false)
+	{
+		return false;
+	}
+
 	if (dlg.exec() == QDialog::Accepted)
 	{
 		QVector<ObjectState> states;

@@ -75,7 +75,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		}
 	}
 
-	if (signalPtrVector.isEmpty())
+	if (signalPtrVector.isEmpty() == true)
 	{
 		if (signalId.count() > 1)
 		{
@@ -91,6 +91,11 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 	result.resize(signalPtrVector.count());
 
 	SignalPropertiesDialog dlg(dbController, signalPtrVector, readOnly, true, parent);
+
+	if(dlg.isValid() == false)
+	{
+		return result;
+	}
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -158,14 +163,28 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 {
 	QVBoxLayout* vl = new QVBoxLayout;
 	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
+
 	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
 	{
 		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
 	}
 
-	DbFileInfo mcInfo = dbController->systemFileInfo("MC");
+	DbFileInfo mcInfo = dbController->systemFileInfo(EtcFileName);
+
+	if (mcInfo.isNull() == true)
+	{
+		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(EtcFileName));
+		return;
+	}
+
 	DbFileInfo propertyBehaviorFile;
-	dbController->getFileInfo(mcInfo.fileId(), QString("SignalPropertyBehavior.csv"), &propertyBehaviorFile, parent);
+	dbController->getFileInfo(mcInfo.fileId(), QString(SignalPropertyBehaviorFileName), &propertyBehaviorFile, parent);
+
+	if (propertyBehaviorFile.isNull() == true)
+	{
+		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(SignalPropertyBehaviorFileName));
+		return;
+	}
 
 	std::shared_ptr<DbFile> file;
 	bool result = dbController->getLatestVersion(propertyBehaviorFile, &file, parent);
@@ -364,6 +383,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	setLayout(vl);
 
 	setWindowPosition(this, "SignalPropertiesDialog/geometry");
+
+	m_isValid = true;
 }
 
 
