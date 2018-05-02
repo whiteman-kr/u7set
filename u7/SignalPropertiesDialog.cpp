@@ -217,10 +217,9 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
-		//std::shared_ptr<SharedIdSignalProperties> signalProperties = std::make_shared<SharedIdSignalProperties>(signalVector, i);
 		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
 
-		if (readOnly)
+		if (readOnly == true)
 		{
 			for (auto property : signalProperties->properties())
 			{
@@ -229,70 +228,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		}
 
 		auto& s = signalProperties->signal();
-/*		signalProperties->propertyByCaption(SignalProperties::typeCaption)->setReadOnly(true);
-		signalProperties->propertyByCaption(SignalProperties::inOutTypeCaption)->setReadOnly(true);
-		signalProperties->propertyByCaption(SignalProperties::dataSizeCaption)->setReadOnly(true);
-		signalProperties->propertyByCaption(SignalProperties::byteOrderCaption)->setReadOnly(true);
-
-		*/
-
-/*		if (s.signalType() == E::SignalType::Bus)
-		{
-			signalProperties->propertyByCaption(SignalProperties::dataSizeCaption)->setVisible(false);
-			signalProperties->propertyByCaption(SignalProperties::byteOrderCaption)->setVisible(false);
-
-			signalProperties->propertyByCaption(SignalProperties::enableTuningCaption)->setVisible(false);
-			signalProperties->propertyByCaption(SignalProperties::tuningDefaultValueCaption)->setVisible(false);
-			signalProperties->propertyByCaption(SignalProperties::tuningLowBoundCaption)->setVisible(false);
-			signalProperties->propertyByCaption(SignalProperties::tuningHighBoundCaption)->setVisible(false);
-		}
-		else
-		{
-			signalProperties->propertyByCaption(SignalProperties::busTypeIDCaption)->setVisible(false);
-		}
-
-		if (s.isInternal() == false)
-		{
-			signalProperties->propertyByCaption(SignalProperties::enableTuningCaption)->setVisible(false);
-			signalProperties->propertyByCaption(SignalProperties::tuningDefaultValueCaption)->setVisible(false);
-			signalProperties->propertyByCaption(SignalProperties::tuningLowBoundCaption)->setVisible(false);
-			signalProperties->propertyByCaption(SignalProperties::tuningHighBoundCaption)->setVisible(false);
-		}
-
-		if (s.isAnalog() == true)
-		{
-			if (s.isInput() == false)
-			{
-				signalProperties->propertyByCaption(SignalProperties::lowValidRangeCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::highValidRangeCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::filteringTimeCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::spreadToleranceCaption)->setVisible(false);
-
-				signalProperties->propertyByCaption(SignalProperties::electricLowLimitCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::electricHighLimitCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::electricUnitCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::sensorTypeCaption)->setVisible(false);
-			}
-
-			if (s.isInternal() == true)
-			{
-				signalProperties->propertyByCaption(SignalProperties::lowADCCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::highADCCaption)->setVisible(false);
-			}
-
-			if (s.isOutput() == true)
-			{
-				signalProperties->propertyByCaption(SignalProperties::lowADCCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::highADCCaption)->setVisible(false);
-			}
-			else
-			{
-				signalProperties->propertyByCaption(SignalProperties::lowDACCaption)->setVisible(false);
-				signalProperties->propertyByCaption(SignalProperties::highDACCaption)->setVisible(false);
-
-				signalProperties->propertyByCaption(SignalProperties::outputModeCaption)->setVisible(false);
-			}
-		}*/
 
 		for (const QStringList& propertyDescription : fileFields)
 		{
@@ -325,6 +260,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				}
 
 				bool descriptionFound = false;
+
 				for (size_t i = 0; i < signalTypeSequence.size(); i++)
 				{
 					if ((s.signalType() == signalTypeSequence[i].first &&
@@ -334,6 +270,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 					}
 
 					descriptionFound = true;
+
 					const QString& propertyState = propertyDescription[i + 2].toLower();
 
 					if (propertyState == "hide")
