@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <QObject>
+#include "../lib/LmDescription.h"
 #include "../VFrame30/Afb.h"
 
 struct lua_State;
@@ -164,20 +165,20 @@ namespace Sim
 
 	// Model Component with a set of Instances
 	//
-	class ModelComponent : public Afb::AfbComponent
+	class ModelComponent
 	{
-		Q_GADGET
-
 	public:
 		ModelComponent() = delete;
 		ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp);
 
 	public:
-		Q_INVOKABLE bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
-		Q_INVOKABLE AfbComponentInstance* instance(quint16 instance);
+		bool init();	// Create a number of instances
+
+		bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
+		AfbComponentInstance* instance(quint16 instance);
 
 	private:
-		std::map<quint16, AfbComponentInstance> m_instances;			// Key is instNo
+		std::vector<AfbComponentInstance> m_instances;			// Key is instNo
 		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
 	};
 
@@ -188,8 +189,8 @@ namespace Sim
 		AfbComponentSet();
 
 	public:
-		void clear();
-		bool addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
+		bool init(const LmDescription& lmDescription);
+		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
 
 		AfbComponentInstance* componentInstance(int componentOpCode, int instance);
 

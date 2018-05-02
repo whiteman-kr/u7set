@@ -170,6 +170,7 @@ struct CppDispatchClassConstructor <T, TUPLE, 0, INDEX...>
 
     static T* call(void* mem, TUPLE& args)
     {
+		(void)args;	// disable warning of unesed var
         return ::new (mem) T(std::get<INDEX>(args).value()...);
     }
 };
@@ -201,6 +202,7 @@ struct CppDispatchClassMethod <T, false, FN, R, TUPLE, 0, INDEX...>
 {
     static R call(T* t, const FN& fn, TUPLE& args)
     {
+		(void)args;	// disable warning of unesed var
         return (t->*fn)(std::get<INDEX>(args).value()...);
     }
 };

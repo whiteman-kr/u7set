@@ -2,6 +2,12 @@
 #include <QQmlEngine>
 #include <QtEndian>
 
+
+namespace LuaIntf
+{
+	LUA_USING_LIST_TYPE(std::vector)
+}
+
 namespace Sim
 {
 	DeviceCommand::DeviceCommand(const LmCommand& command) :
@@ -16,23 +22,23 @@ namespace Sim
 		LuaBinding(L).beginClass<DeviceCommand>("DeviceCommand")
 			.addPropertyReadOnly("caption", &DeviceCommand::caption)
 
-			.addVariable("offset", &DeviceCommand::m_offset)
-			.addVariable("size", &DeviceCommand::m_size)
+			.addVariableRef("offset", &DeviceCommand::m_offset)
+			.addVariableRef("size", &DeviceCommand::m_size)
 			.addProperty("asString", &DeviceCommand::asString, &DeviceCommand::setAsString)
 
-			.addVariable("afbOpCode", &DeviceCommand::m_afbOpCode)
-			.addVariable("afbInstance", &DeviceCommand::m_afbInstance)
-			.addVariable("afbPinOpCode", &DeviceCommand::m_afbPinOpCode)
+			.addVariableRef("afbOpCode", &DeviceCommand::m_afbOpCode)
+			.addVariableRef("afbInstance", &DeviceCommand::m_afbInstance)
+			.addVariableRef("afbPinOpCode", &DeviceCommand::m_afbPinOpCode)
 
-			.addVariable("bitNo0", &DeviceCommand::m_bitNo0)
-			.addVariable("bitNo1", &DeviceCommand::m_bitNo1)
+			.addVariableRef("bitNo0", &DeviceCommand::m_bitNo0)
+			.addVariableRef("bitNo1", &DeviceCommand::m_bitNo1)
 
-			.addVariable("word0", &DeviceCommand::m_word0)
-			.addVariable("word1", &DeviceCommand::m_word1)
-			.addVariable("word2", &DeviceCommand::m_word2)
+			.addVariableRef("word0", &DeviceCommand::m_word0)
+			.addVariableRef("word1", &DeviceCommand::m_word1)
+			.addVariableRef("word2", &DeviceCommand::m_word2)
 
-			.addVariable("dword0", &DeviceCommand::m_dword0)
-			.addVariable("dword1", &DeviceCommand::m_word1)
+			.addVariableRef("dword0", &DeviceCommand::m_dword0)
+			.addVariableRef("dword1", &DeviceCommand::m_word1)
 
 			.endClass();
 
@@ -126,28 +132,42 @@ namespace Sim
 		using namespace LuaIntf;
 
 		LuaBinding(L).beginClass<ScriptDeviceEmulator>("DeviceEmulator")
+				.addFunction("commandByIndex", &ScriptDeviceEmulator::commandByIndex, LUA_ARGS(_opt<int>))
+
 				.addProperty("appStartAddress", &ScriptDeviceEmulator::appStartAddress, &ScriptDeviceEmulator::setAppStartAddress)
 				.addProperty("phase", &ScriptDeviceEmulator::phase, &ScriptDeviceEmulator::setPhase)
 				.addProperty("programCounter", &ScriptDeviceEmulator::programCounter, &ScriptDeviceEmulator::setProgramCounter)
-				.addFunction("afbComponent", &ScriptDeviceEmulator::afbComponent, LUA_ARGS(_opt<int>))
-				.addFunction("afbComponentInstance", &ScriptDeviceEmulator::afbComponentInstance, LUA_ARGS(_opt<int>, _opt<int>))
-				.addFunction("setAfbParam", &ScriptDeviceEmulator::setAfbParam, LUA_ARGS(_opt<int>, _opt<int>, _opt<const AfbComponentParam&>))
 
-				.addFunction("movRamMem", &ScriptDeviceEmulator::movRamMem, LUA_ARGS(_opt<quint32>, _opt<quint32>, _opt<quint32>))
+				.addFunction("afbComponent", &ScriptDeviceEmulator::afbComponent, LUA_ARGS(int))
+				.addFunction("afbComponentInstance", &ScriptDeviceEmulator::afbComponentInstance, LUA_ARGS(int, int))
+				.addFunction("setAfbParam", &ScriptDeviceEmulator::setAfbParam, LUA_ARGS(int, int, const AfbComponentParam&))
 
-				.addFunction("writeRamBit", &ScriptDeviceEmulator::writeRamBit, LUA_ARGS(_opt<quint32>, _opt<quint32>, _opt<quint32>))
-				.addFunction("readRamBit", &ScriptDeviceEmulator::readRamBit, LUA_ARGS(_opt<quint32>, _opt<quint32>))
+				.addFunction("movRamMem", &ScriptDeviceEmulator::movRamMem, LUA_ARGS(quint32, quint32, quint32))
 
-				.addFunction("writeRamWord", &ScriptDeviceEmulator::writeRamWord, LUA_ARGS(_opt<quint32>, _opt<quint16>))
-				.addFunction("readRamWord", &ScriptDeviceEmulator::readRamWord, LUA_ARGS(_opt<quint32>))
+				.addFunction("writeRamBit", &ScriptDeviceEmulator::writeRamBit, LUA_ARGS(quint32, quint32, quint32))
+				.addFunction("readRamBit", &ScriptDeviceEmulator::readRamBit, LUA_ARGS(quint32, quint32))
 
-				.addFunction("writeRamDword", &ScriptDeviceEmulator::writeRamDword, LUA_ARGS(_opt<quint32>, _opt<quint32>))
-				.addFunction("readRamDword", &ScriptDeviceEmulator::readRamDword, LUA_ARGS(_opt<quint32>))
+				.addFunction("writeRamWord", &ScriptDeviceEmulator::writeRamWord, LUA_ARGS(quint32, quint16))
+				.addFunction("readRamWord", &ScriptDeviceEmulator::readRamWord, LUA_ARGS(quint32))
 
-				.addFunction("getWord", &ScriptDeviceEmulator::getWord, LUA_ARGS(_opt<int>))
-				.addFunction("getDword", &ScriptDeviceEmulator::getDword, LUA_ARGS(_opt<int>))
+				.addFunction("writeRamDword", &ScriptDeviceEmulator::writeRamDword, LUA_ARGS(quint32, quint32))
+				.addFunction("readRamDword", &ScriptDeviceEmulator::readRamDword, LUA_ARGS(quint32))
+
+				.addFunction("getWord", &ScriptDeviceEmulator::getWord, LUA_ARGS(int))
+				.addFunction("getDword", &ScriptDeviceEmulator::getDword, LUA_ARGS(int))
 
 				.endClass();
+	}
+
+	DeviceCommand* ScriptDeviceEmulator::commandByIndex(int index)
+	{
+		if (index >= m_device->m_commands.size())
+		{
+			m_device->fault(QString("Index of m_commands is out of range"), "ScriptDeviceEmulator::command(int index)");
+			return nullptr;
+		}
+
+		return &(m_device->m_commands[index]);
 	}
 
 	quint16 ScriptDeviceEmulator::appStartAddress() const
@@ -221,16 +241,8 @@ namespace Sim
 
 	bool ScriptDeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param)
 	{
-		std::shared_ptr<Afb::AfbComponent> afbComp = m_device->m_lmDescription.component(afbOpCode);
-
-		if (Q_UNLIKELY(afbComp == nullptr))
-		{
-			m_device->FAULT(QString("AFB with OpCode %1 not found").arg(afbOpCode));
-			return false;
-		}
-
 		QString errorMessage;
-		bool ok = m_device->m_afbComponents.addInstantiatorParam(afbComp, instanceNo, param, &errorMessage);
+		bool ok = m_device->m_afbComponents.addInstantiatorParam(afbOpCode, instanceNo, param, &errorMessage);
 
 		if (Q_UNLIKELY(ok == false))
 		{
@@ -408,44 +420,70 @@ namespace Sim
 			return false;
 		}
 
-		// Evaluate simulation script
+		//--
 		//
-//		m_evaluatedJs = m_jsEngine.evaluate(m_simulationScript);
-
-//		if (m_evaluatedJs.isError() == true)
-//		{
-//			QString str = QString("Evaluate simulation script error:\n"
-//								  "\tLine %1\n"
-//								  "\tStack: %2\n"
-//								  "\tMessage: %3")
-//						  .arg(m_evaluatedJs.property("lineNumber").toInt())
-//						  .arg(m_evaluatedJs.property("stack").toString())
-//						  .arg(m_evaluatedJs.toString());
-
-//			writeError(str);
-//			return false;
-//		}
-
-//		ScriptDeviceEmulator* scriptDevice =  new ScriptDeviceEmulator(this);
-//		m_thisJsValue = m_jsEngine.newQObject(scriptDevice);
-
-		// --
-		//
-		bool ok = initEeprom();
-		if (ok == false)
+		if (bool ok = m_afbComponents.init(m_lmDescription);
+			ok == false)
 		{
 			return false;
 		}
 
 		// --
 		//
-		ok = parseAppLogicCode();
-		if (ok == false)
+		if (bool ok = initEeprom();
+			ok == false)
 		{
 			return false;
 		}
 
-		return ok;
+		// --
+		//
+		if (bool ok = parseAppLogicCode();
+			ok == false)
+		{
+			return false;
+		}
+
+		// Generate Lua opeartion script
+		//
+		QString generatedScript;
+		generatedScript.append("\nfunction operateCycle(device)\n");
+
+		for (int i = 0; i < m_commands.size(); i++)
+		{
+			const DeviceCommand& cmd = m_commands[i];
+			generatedScript.append(QString("%1(device, device:commandByIndex(%2));\n")
+										.arg(cmd.m_command.simulationFunc)
+										.arg(i));
+		}
+
+		generatedScript.append("end\n");
+
+		//qDebug() << generatedScript;
+
+		// Reload script
+		//
+		QString newScript = m_simulationScript + generatedScript;
+
+		if (int luaResult = luaL_loadstring(m_luaState, newScript.toStdString().c_str());
+			luaResult != LUA_OK)
+		{
+			QString errMsg = QString("Load Lua generated script error, error code: %1")
+								.arg(luaResult);
+			writeError(errMsg);
+			return false;
+		}
+
+		if (int luaResult = lua_pcall(m_luaState, 0, LUA_MULTRET, 0);
+			luaResult != LUA_OK)
+		{
+			QString errMsg = QString("Load Lua script error, fucntion lua_pcall, error code: %1")
+								.arg(luaResult);
+			writeError(errMsg);
+			return false;
+		}
+
+		return true;
 	}
 
 	bool DeviceEmulator::reset()
@@ -835,184 +873,9 @@ namespace Sim
 		//
 		deviceCommand.dump();
 
-
-//		if (int luaResult = lua_getglobal(m_luaState, command.parseFunc.toStdString().c_str());
-//			luaResult != 6)
-//		{
-//			writeError(QString("lua_getglobal error, expected %1 to be function(6). Result %3")
-//						.arg(command.parseFunc)
-//						.arg(luaResult));
-//			return false;
-//		}
-
-		// Push DeviceEmulator
-		//
-
-		// Push Command
-		//
-		//using namespace LuaIntf;
-		//LuaTypeMapping<DeviceCommand>
-		//LuaIntf::Lua::push(m_luaState, deviceCommand);
-
-		//lua_pushlightuserdata(m_luaState, &deviceCommand);
-
-		// Run script
-		//
-//		if (int luaResult = lua_pcall(m_luaState, 1, LUA_MULTRET, 0);
-//			luaResult != LUA_OK)
-//		{
-//			dumpLuaError(luaResult, command.parseFunc);
-//			return false;
-//		}
-
-
-		// Set argument list
-		//
-		//		assert(m_thisJsValue.isNull() == false);
-
-		//		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
-		//		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
-
-		//		QJSValueList args;
-		//		args << m_thisJsValue;
-		//		args << jsDeviceCommand;
-
-		//		//--
-		//		//
-		//		const QString parseFunc = command.parseFunc;
-
-		//		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
-		//			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
-		//		{
-		//			writeError(tr("Parse ApplicationLogicCode error, script function %1 (code %4, masked %5) not found or is not callable. "
-		//						  "HasProperty %1: %2, "
-		//						  "Collable: %3")
-		//							.arg(parseFunc)
-		//							.arg(m_jsEngine.globalObject().hasProperty(parseFunc))
-		//							.arg(m_jsEngine.globalObject().property(parseFunc).isCallable())
-		//							.arg(command.code)
-		//							.arg((command.code >> 6) & 0b11111)
-		//						);
-		//			return false;
-		//		}
-
-		//		QJSValue jsResult = m_jsEngine.globalObject().property(parseFunc).call(args);
-		//		if (jsResult.isError() == true)
-		//		{
-		//			dumpJsError(jsResult);
-		//			return false;
-		//		}
-
-		//		if (jsResult.toString().isEmpty() == false)
-		//		{
-		//			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter 0x%2")
-		//						.arg(jsResult.toString())
-		//						.arg(programCounter, 4, 16, QChar('0')));
-		//			return false;
-		//		}
-
-		//		// Check SimulationFunc
-		//		//
-		//		const QString simulationFunc = command.simulationFunc;
-
-		//		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false ||
-		//			m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
-		//		{
-		//			writeError(tr("Simulation command error, script function %1 not found or is not callable. "
-		//						  "HasProperty %1: %2, "
-		//						  "Collable: %3")
-		//							.arg(simulationFunc)
-		//							.arg(m_jsEngine.globalObject().hasProperty(simulationFunc))
-		//							.arg(m_jsEngine.globalObject().property(simulationFunc).isCallable())
-		//						);
-		//			return false;
-		//		}
-
 		// Add command to offsetToCommand map
 		//
 		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
-
-
-//		quint16 commandWord = getWord(programCounter);
-//		quint16 commandCode = (commandWord & command.codeMask);
-//		if (commandCode != command.code)
-//		{
-//			assert(commandCode == command.code);
-//			return false;
-//		}
-
-//		// --
-//		//
-//		m_commands.emplace_back(command);
-//		DeviceCommand& deviceCommand = m_commands.back();
-
-//		deviceCommand.m_offset = programCounter;
-
-//		// Set argument list
-//		//
-//		assert(m_thisJsValue.isNull() == false);
-
-//		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
-//		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
-
-//		QJSValueList args;
-//		args << m_thisJsValue;
-//		args << jsDeviceCommand;
-
-//		//--
-//		//
-//		const QString parseFunc = command.parseFunc;
-
-//		if (m_jsEngine.globalObject().hasProperty(parseFunc) == false ||
-//			m_jsEngine.globalObject().property(parseFunc).isCallable() == false)
-//		{
-//			writeError(tr("Parse ApplicationLogicCode error, script function %1 (code %4, masked %5) not found or is not callable. "
-//						  "HasProperty %1: %2, "
-//						  "Collable: %3")
-//							.arg(parseFunc)
-//							.arg(m_jsEngine.globalObject().hasProperty(parseFunc))
-//							.arg(m_jsEngine.globalObject().property(parseFunc).isCallable())
-//							.arg(command.code)
-//							.arg((command.code >> 6) & 0b11111)
-//						);
-//			return false;
-//		}
-
-//		QJSValue jsResult = m_jsEngine.globalObject().property(parseFunc).call(args);
-//		if (jsResult.isError() == true)
-//		{
-//			dumpJsError(jsResult);
-//			return false;
-//		}
-
-//		if (jsResult.toString().isEmpty() == false)
-//		{
-//			writeError(tr("Parse ApplicationLogicCode error: %1, ProgramCounter 0x%2")
-//						.arg(jsResult.toString())
-//						.arg(programCounter, 4, 16, QChar('0')));
-//			return false;
-//		}
-
-//		// Check SimulationFunc
-//		//
-//		const QString simulationFunc = command.simulationFunc;
-
-//		if (m_jsEngine.globalObject().hasProperty(simulationFunc) == false ||
-//			m_jsEngine.globalObject().property(simulationFunc).isCallable() == false)
-//		{
-//			writeError(tr("Simulation command error, script function %1 not found or is not callable. "
-//						  "HasProperty %1: %2, "
-//						  "Collable: %3")
-//							.arg(simulationFunc)
-//							.arg(m_jsEngine.globalObject().hasProperty(simulationFunc))
-//							.arg(m_jsEngine.globalObject().property(simulationFunc).isCallable())
-//						);
-//			return false;
-//		}
-
-//		// Add command to offsetToCommand map
-//		//
-//		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
 
 		return true;
 	}
@@ -1062,68 +925,93 @@ namespace Sim
 		// Initialization before work cycle
 		//
 		m_logicUnit = LogicUnitData();
-		m_afbComponents.clear();
+
+		// Run work cycle
+		//
+		std::string luaFuncName = "operateCycle";
+
+		LuaIntf::LuaRef func(m_luaState, "operateCycle");
+
+		if (func.isValid() == false || func.isFunction() == false)
+		{
+			writeError(QString("Lua: %1 not found or is not function.")
+				.arg(QString::fromStdString(luaFuncName)));
+
+			return false;
+		}
+		try
+		{
+			func(ScriptDeviceEmulator(this));
+		}
+		catch (const LuaIntf::LuaException& e)
+		{
+			QString error = QString("Call function %1 LuaException: %2.")
+							.arg(QString::fromStdString(luaFuncName))
+							.arg(e.what());
+			FAULT(error);
+			return false;
+		}
+		catch (...)
+		{
+			QString error = QString("Call function %1 LuaException")
+								.arg(QString::fromStdString(luaFuncName));
+			FAULT(error);
+			return false;
+		}
 
 		// Run work cylce
 		//
-		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
+//		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+//			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
+//		{
+//			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
+//			if (offsetIt == m_offsetToCommand.end())
+//			{
+//				FAULT("Command not found in current ProgramCounter.");
+//				break;
+//			}
+
+//			size_t commandIndex = offsetIt->second;
+//			if (commandIndex > m_commands.size())
+//			{
+//				FAULT("Command not found in current ProgramCounter.");
+//				break;
+//			}
+
+//			DeviceCommand& command = m_commands[commandIndex];
+//			assert(m_logicUnit.programCounter == command.m_offset);
+
+//			bool ok = runCommand(command);
+
+//			if (ok == false && m_currentMode != DeviceMode::Fault)
+//			{
+//				FAULT("Run command %1 unknown error.");
+//				result = false;
+//				break;
+//			}
+
+//			if (m_currentMode == DeviceMode::Fault)
+//			{
+//				result = false;
+//				break;
+//			}
+
+//			// If ProgramCounter was not changed in runCommand (can be changed in APPSTART), then
+//			// incerement ProgramCounter to coommand size
+//			//
+//			if (m_logicUnit.programCounter == command.m_offset)
+//			{
+//				m_logicUnit.programCounter += command.m_size;
+//			}
+//		}
+
+		if (m_gcCounter++ % 100 == 0)		// It's more efficient to collect garbage not every work cycle
 		{
-			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
-			if (offsetIt == m_offsetToCommand.end())
-			{
-				FAULT("Command not found in current ProgramCounter.");
-				break;
-			}
-
-			size_t commandIndex = offsetIt->second;
-			if (commandIndex > m_commands.size())
-			{
-				FAULT("Command not found in current ProgramCounter.");
-				break;
-			}
-
-			DeviceCommand& command = m_commands[commandIndex];
-			assert(m_logicUnit.programCounter == command.m_offset);
-
-			bool ok = runCommand(command);
-
-			if (ok == false && m_currentMode != DeviceMode::Fault)
-			{
-				FAULT("Run command %1 unknown error.");
-				result = false;
-				break;
-			}
-
-			if (m_currentMode == DeviceMode::Fault)
-			{
-				result = false;
-				break;
-			}
-
-			// If ProgramCounter was not changed in runCommand (can be changed in APPSTART), then
-			// incerement ProgramCounter to coommand size
-			//
-			if (m_logicUnit.programCounter == command.m_offset)
-			{
-				m_logicUnit.programCounter += command.m_size;
-			}
+			lua_gc(m_luaState, LUA_GCCOLLECT, 0);
 		}
-
-		lua_gc(m_luaState, LUA_GCCOLLECT, 0);
 
 		return result;
 	}
-
-//	void DeviceEmulator::start(int cycles)
-//	{
-//		writeMessage(tr("Start, cycles = %1").arg(cycles));
-
-//		if (m_timerId == -1)
-//		{
-//			m_timerId = startTimer(5, Qt::PreciseTimer);
-//		}
-//	}
 
 	void DeviceEmulator::fault(QString reasone, QString func)
 	{
@@ -1158,30 +1046,6 @@ namespace Sim
 		return;
 	}
 
-//	void DeviceEmulator::timerEvent(QTimerEvent* event)
-//	{
-//		if (event->timerId() == m_timerId)
-//		{
-//			switch (m_currentMode)
-//			{
-//			case DeviceMode::Start:
-//				processStartMode();
-//				break;
-//			case DeviceMode::Fault:
-//				processFaultMode();
-//				break;
-//			case DeviceMode::Operate:
-//				processOperate();
-//				break;
-//			default:
-//				assert(false);
-//				writeError(tr("Unknown device mode: %1").arg(static_cast<int>(m_currentMode)));
-//			}
-//		}
-
-//		return;
-//	}
-
 	bool DeviceEmulator::processStartMode()
 	{
 		assert(m_currentMode == DeviceMode::Start);
@@ -1198,158 +1062,6 @@ namespace Sim
 		//
 		return true;
 	}
-
-//	bool DeviceEmulator::processLoadEeprom()
-//	{
-//		assert(m_currentMode == DeviceMode::LoadEeprom);
-//		writeMessage(tr("LoadEeprom mode"));
-
-//		bool result = true;
-//		bool ok = true;
-
-//		ok = m_tuningEeprom.parseAllocationFrame();
-//		if (ok == false)
-//		{
-//			writeError(tr("Parse tuning EEPROM allocation frame error."));
-//			result = false;
-//		}
-
-//		ok = m_confEeprom.parseAllocationFrame();
-//		if (ok == false)
-//		{
-//			writeError(tr("Parse configuration EEPROM allocation frame error."));
-//			result = false;
-//		}
-
-//		ok = m_appLogicEeprom.parseAllocationFrame();
-//		if (ok == false)
-//		{
-//			writeError(tr("Parse application logic EEPROM allocation frame error."));
-//			result = false;
-//		}
-
-//		if (m_tuningEeprom.subsystemKey() != m_confEeprom.subsystemKey() ||
-//			m_tuningEeprom.subsystemKey() != m_appLogicEeprom.subsystemKey())
-//		{
-//			QString str = tr("EEPROMs have different subsystemKeys: \n"
-//						  "\ttuningEeprom.subsystemKey: %1\n"
-//						  "\tconfEeprom.subsystemKey: %2\n"
-//						  "\tappLogicEeprom.subsystemKey: %3")
-//							.arg(m_tuningEeprom.subsystemKey())
-//							.arg(m_confEeprom.subsystemKey())
-//							.arg(m_appLogicEeprom.subsystemKey());
-//			writeError(str);
-
-//			result = false;
-//		}
-
-//		if (m_tuningEeprom.buildNo() != m_confEeprom.buildNo() ||
-//			m_tuningEeprom.buildNo() != m_appLogicEeprom.buildNo())
-//		{
-//			QString str = tr("EEPROMs have different buildNo: \n"
-//						  "\ttuningEeprom.buildNo: %1\n"
-//						  "\tconfEeprom.buildNo: %2\n"
-//						  "\tappLogicEeprom.buildNo: %3")
-//							.arg(m_tuningEeprom.buildNo())
-//							.arg(m_confEeprom.buildNo())
-//							.arg(m_appLogicEeprom.buildNo());
-//			writeError(str);
-
-//			result = false;
-//		}
-
-//		if (m_tuningEeprom.configrationsCount() != m_confEeprom.configrationsCount() ||
-//			m_tuningEeprom.configrationsCount() != m_appLogicEeprom.configrationsCount())
-//		{
-//			QString str = tr("EEPROMs EEPROMs have different configrationsCount: \n"
-//						  "\ttuningEeprom.configrationsCount: %1\n"
-//						  "\tconfEeprom.configrationsCount: %2\n"
-//						  "\tappLogicEeprom.configrationsCount: %3")
-//							.arg(m_tuningEeprom.configrationsCount())
-//							.arg(m_confEeprom.configrationsCount())
-//							.arg(m_appLogicEeprom.configrationsCount());
-//			writeError(str);
-//			result = false;
-//		}
-
-//		if (result == false)
-//		{
-//			fault("Loading configuration error", "processLoadEeprom()");
-//			return false;
-//		}
-
-//		// Get plain application logic data for specific m_logicModuleNumber
-//		//
-//		m_plainAppLogic.clear();
-//		m_plainAppLogic.reserve(1024 * 1024);
-
-//		int startFrame = m_appLogicEeprom.configFrameIndex(m_logicModuleInfo.lmNumber);
-//		if (startFrame == -1)
-//		{
-//			FAULT(QString("Can't get start frame for logic number %1").arg(m_logicModuleInfo.lmNumber));
-//			return false;
-//		}
-
-//		for (int i = startFrame + 1; i < m_appLogicEeprom.frameCount(); i++)	// 1st frame is service information  [D8.21.19, 3.1.1.2.2.1]
-//		{
-//			for (int f = 0; f < m_appLogicEeprom.framePayloadSize(); f++)
-//			{
-//				m_plainAppLogic.push_back(m_appLogicEeprom.getByte(i, f));
-//			}
-//		}
-
-//		// --
-//		//
-//		m_currentMode = DeviceMode::Operate;
-
-//		return result;
-//	}
-
-//	bool DeviceEmulator::processOperate()
-//	{
-//		// One LogicModule Cycle
-//		//
-//		bool result = true;
-
-//		// Initialization before work cycle
-//		//
-//		m_logicUnit = LogicUnitData();
-//		m_afbComponents.clear();
-
-//		// Run work cylce
-//		//
-//		do
-//		{
-//			quint16 commandWord = getWord(m_logicUnit.programCounter);
-
-//			//quint16 crc5 = (commandWord & 0xF800) >> 11;		Q_UNUSED(crc5);
-//			quint16 command = (commandWord & 0x7C0) >> 6;
-//			//quint16 funcBlock = commandWord & 0x01F;			Q_UNUSED(funcBlock);
-
-//			//qDebug() << "DeviceEmulator::processOperate Command " << command << ", N " << funcBlock;
-
-//			// Control command processing
-//			//
-//			bool ok = runCommand(static_cast<LmCommandCode>(command));
-
-//			if (ok == false && m_currentMode != DeviceMode::Fault)
-//			{
-//				FAULT("Run command %1 unknown error.");
-//				result = false;
-//				break;
-//			}
-
-//			if (m_currentMode == DeviceMode::Fault)
-//			{
-//				result = false;
-//				break;
-//			}
-//		}
-//		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-//			   (m_logicUnit.phase == CyclePhase::IdrPhase ||  m_logicUnit.phase == CyclePhase::AlpPhase));
-
-//		return result;
-//	}
 
 	bool DeviceEmulator::runCommand(DeviceCommand& deviceCommand)
 	{
@@ -1372,7 +1084,16 @@ namespace Sim
 		}
 		try
 		{
-			func(ScriptDeviceEmulator(this), &deviceCommand);
+//			if (simulationFunc == "command_stop")
+//			{
+//				func(ScriptDeviceEmulator(this), &deviceCommand, m_commands);
+//				qDebug() << QString::fromStdString(m_commands[0].asString());
+//				qDebug() << QString::fromStdString(m_commands[1].asString());
+//			}
+//			else
+//			{
+				func(ScriptDeviceEmulator(this), &deviceCommand);
+//			}
 		}
 		catch (const LuaIntf::LuaException& e)
 		{
@@ -1389,35 +1110,6 @@ namespace Sim
 
 			return false;
 		}
-
-
-		//------------------------------
-//		assert(m_thisJsValue.isNull() == false);
-
-//		QJSValue jsDeviceCommand = m_jsEngine.newQObject(&deviceCommand);
-//		QQmlEngine::setObjectOwnership(&deviceCommand, QQmlEngine::CppOwnership);
-
-//		QJSValueList args;
-//		args << m_thisJsValue;
-//		args << jsDeviceCommand;
-
-//		// Run command script
-//		//
-//		QJSValue jsResult = m_jsEngine.globalObject().property(simulationFunc).call(args);
-//		if (jsResult.isError() == true)
-//		{
-//			dumpJsError(jsResult);
-//			return false;
-//		}
-
-//		if (jsResult.toString().isEmpty() == false)
-//		{
-//			writeError(tr("Simulation code error: %1, Offset %2h, command \"%3\"")
-//						.arg(jsResult.toString())
-//						.arg(deviceCommand.m_offset, 4, 16, QChar('0'))
-//						.arg(deviceCommand.m_string));
-//			return false;
-//		}
 
 		return true;
 	}

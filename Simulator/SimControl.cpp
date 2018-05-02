@@ -392,14 +392,15 @@ namespace Sim
 					//
 					if (lm.m_possibleToAdvanceTo <= cd.m_currentTime)
 					{
-						// Task can be start again
+						// Task can be START again
 						//
 						lm.m_task = lm.start(cd.m_currentTime);
 					}
 				}
 			}	// for (SimControlRunStruct& lm : lms)
 
-
+			// Calculate minimum possible time
+			//
 			microseconds minPossibleTime = lms.front().m_possibleToAdvanceTo;
 			for (const SimControlRunStruct& lm : lms)
 			{
@@ -411,6 +412,8 @@ namespace Sim
 				}
 			}
 
+			// Shift current time if requored
+			//
 			if (minPossibleTime > cd.m_currentTime)
 			{
 				// If current simulation is ahead of physical time, pause it a little bit

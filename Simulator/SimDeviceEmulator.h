@@ -108,7 +108,6 @@ namespace Sim
 		quint32 m_dword1 = 0;			// Set in parse script
 	};
 
-
 	//
 	// class DeviceEmulator script wrapper
 	//
@@ -124,6 +123,8 @@ namespace Sim
 		// Script functins for AFB instances
 		//
 public:
+		DeviceCommand* commandByIndex(int index);
+
 		quint16 appStartAddress() const;
 		void setAppStartAddress(quint16 value);
 
@@ -202,6 +203,7 @@ public:
 
 		bool processStartMode();
 		bool processFaultMode();
+
 		bool processOperate();
 
 		bool runCommand(DeviceCommand& deviceCommand);
@@ -256,16 +258,10 @@ public:
 
 		AfbComponentSet m_afbComponents;
 
-		// JS
-		//
-		QJSEngine m_jsEngine;
-
-		QJSValue m_evaluatedJs;
-		QJSValue m_thisJsValue;
-
 		// Lua
 		//
 		lua_State* m_luaState = nullptr;
+		int m_gcCounter = 0;
 
 		// Cached state
 		//

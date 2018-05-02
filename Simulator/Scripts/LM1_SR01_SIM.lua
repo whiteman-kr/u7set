@@ -405,7 +405,6 @@ function afb_logic(instance)
 	error("Unknown AFB LOGIC configuration: " .. conf.asWord);
 end
 
-
 --
 --	NOT, OpCode 2
 --

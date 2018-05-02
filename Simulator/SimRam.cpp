@@ -248,7 +248,7 @@ namespace Sim
 		m_memoryAreas.clear();
 		m_memoryAreas.reserve(that.m_memoryAreas.size());
 
-		for (std::shared_ptr<RamArea> thatArea : that.m_memoryAreas)
+		for (const std::shared_ptr<RamArea>& thatArea : that.m_memoryAreas)
 		{
 			std::shared_ptr<RamArea> area = std::make_shared<RamArea>(*thatArea.get());
 			m_memoryAreas.push_back(area);

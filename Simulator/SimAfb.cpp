@@ -29,8 +29,8 @@ namespace Sim
 				.addPropertyReadOnly("caption", &Sim::AfbComponent::caption)
 				.addPropertyReadOnly("maxInstCount", &Sim::AfbComponent::maxInstCount)
 				.addPropertyReadOnly("simulationFunc", &Sim::AfbComponent::simulationFunc)
-				.addFunction("pinExists", &Sim::AfbComponent::pinExists, LUA_ARGS(_opt<int>))
-				.addFunction("pinCaption", &Sim::AfbComponent::pinCaption, LUA_ARGS(_opt<int>))
+				.addFunction("pinExists", &Sim::AfbComponent::pinExists, LUA_ARGS(int))
+				.addFunction("pinCaption", &Sim::AfbComponent::pinCaption, LUA_ARGS(int))
 				.endClass();
 
 		return;
@@ -113,9 +113,10 @@ namespace Sim
 
 		LuaBinding(L).beginClass<Sim::AfbComponentParam>("AfbComponentParam")
 				.addConstructor(LUA_ARGS())
-				.addConstructor(LUA_ARGS(_opt<quint16>))
+				.addConstructor(LUA_ARGS(quint16))
 
-				.addProperty("opIndex", &AfbComponentParam::opIndex, &AfbComponentParam::setOpIndex)
+				.addVariableRef("opIndex", &AfbComponentParam::m_paramOpIndex)
+
 				.addProperty("asWord", &AfbComponentParam::wordValue, &AfbComponentParam::setWordValue)
 				.addProperty("asDword", &AfbComponentParam::dwordValue, &AfbComponentParam::setDwordValue)
 				.addProperty("asFloat", &AfbComponentParam::floatValue, &AfbComponentParam::setFloatValue)
@@ -543,13 +544,13 @@ namespace Sim
 		using namespace LuaIntf;
 
 		LuaBinding(L).beginClass<AfbComponentInstance>("AfbComponentInstance")
-			.addFunction("addParam", &Sim::AfbComponentInstance::addParam, LUA_ARGS(_opt<const Sim::AfbComponentParam&>))
-			.addFunction("param", &Sim::AfbComponentInstance::param, LUA_ARGS(_opt<int>))
-			.addFunction("paramExists", &Sim::AfbComponentInstance::paramExists, LUA_ARGS(_opt<int>))
+			.addFunction("addParam", &Sim::AfbComponentInstance::addParam, LUA_ARGS(const Sim::AfbComponentParam&))
+			.addFunction("param", &Sim::AfbComponentInstance::param, LUA_ARGS(int))
+			.addFunction("paramExists", &Sim::AfbComponentInstance::paramExists, LUA_ARGS(int))
 
-			.addFunction("addParamWord", &Sim::AfbComponentInstance::addParamWord, LUA_ARGS(_opt<int>, _opt<quint16>))
-			.addFunction("addParamFloat", &Sim::AfbComponentInstance::addParamFloat, LUA_ARGS(_opt<int>, _opt<float>))
-			.addFunction("addParamSignedInt", &Sim::AfbComponentInstance::addParamSignedInt, LUA_ARGS(_opt<int>, _opt<qint32>))
+			.addFunction("addParamWord", &Sim::AfbComponentInstance::addParamWord, LUA_ARGS(int, quint16))
+			.addFunction("addParamFloat", &Sim::AfbComponentInstance::addParamFloat, LUA_ARGS(int, float))
+			.addFunction("addParamSignedInt", &Sim::AfbComponentInstance::addParamSignedInt, LUA_ARGS(int, qint32))
 
 			.endClass();
 	}
@@ -574,7 +575,7 @@ namespace Sim
 
 	bool AfbComponentInstance::paramExists(int opIndex) const
 	{
-		return m_params.count(opIndex) > 0;
+		return m_params.find(opIndex) != m_params.end();
 	}
 
 	bool AfbComponentInstance::addParamWord(int opIndex, quint16 value)
@@ -582,7 +583,7 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setWordValue(value);
 
-		m_params[opIndex] = param;
+		m_params[opIndex] = std::move(param);
 		return true;
 	}
 
@@ -591,7 +592,7 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setFloatValue(value);
 
-		m_params[opIndex] = param;
+		m_params[opIndex] = std::move(param);
 		return true;
 	}
 
@@ -600,7 +601,7 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
 
-		m_params[opIndex] = param;
+		m_params[opIndex] = std::move(param);
 		return true;
 	}
 
@@ -611,9 +612,35 @@ namespace Sim
 		return;
 	}
 
+	bool ModelComponent::init()
+	{
+		if (m_afbComp == nullptr)
+		{
+			assert(m_afbComp);
+			return false;
+		}
+
+		if (m_afbComp->maxInstCount() > 2048)
+		{
+			assert(m_afbComp->maxInstCount() <= 2048);	// It seems something wrong here, the nyumber is too big?
+			return false;
+		}
+
+		m_instances.clear();
+		m_instances.reserve(m_afbComp->maxInstCount());
+
+		for (int i = 0; i < m_afbComp->maxInstCount(); i++)
+		{
+			m_instances.emplace_back(i);		// AfbComponentInstance::AfbComponentInstance(quint16 instanceNo);
+		}
+
+		return true;
+	}
+
 	bool ModelComponent::addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
-		if (static_cast<int>(instanceNo) >= m_afbComp->maxInstCount())
+		if (instanceNo >= m_afbComp->maxInstCount() ||
+			instanceNo >= m_instances.size())
 		{
 			// Maximum of instatiator is reached
 			//
@@ -626,9 +653,7 @@ namespace Sim
 
 		// Check if instParam.implParamOpIndex really exists in AfbComponent
 		//
-		const auto& compIns = m_afbComp->pins();
-
-		if (compIns.count(instParam.opIndex()) != 1)
+		if (m_afbComp->pinExists(instParam.opIndex()) == false)
 		{
 			// Can't find such pin in AfbComponent
 			//
@@ -640,29 +665,19 @@ namespace Sim
 
 		// Get or add instance and set new param
 		//
-		auto compInstIt = m_instances.find(instanceNo);
-		if (compInstIt == m_instances.end())
-		{
-			compInstIt = m_instances.emplace(instanceNo, instanceNo).first;		// Insert new item and update iterator
-		}
-
-		AfbComponentInstance& compInst = compInstIt->second;
-
-		bool ok = compInst.addParam(instParam);
+		bool ok = m_instances[instanceNo].addParam(instParam);
 
 		return ok;
 	}
 
 	AfbComponentInstance* ModelComponent::instance(quint16 instance)
 	{
-		auto isntanceIt = m_instances.find(instance);
-		if (isntanceIt == m_instances.end())
+		if (instance > m_instances.size())
 		{
 			return nullptr;
 		}
 
-		AfbComponentInstance* result = &isntanceIt->second;
-
+		AfbComponentInstance* result = &m_instances[instance];
 		return result;
 	}
 
@@ -670,42 +685,46 @@ namespace Sim
 	{
 	}
 
-	void AfbComponentSet::clear()
+	bool AfbComponentSet::init(const LmDescription& lmDescription)
 	{
 		m_components.clear();
-		return;
+
+		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbs = lmDescription.afbComponents();
+		for (auto[key, afbComp] : afbs)
+		{
+			assert(key == afbComp->opCode());
+
+			std::shared_ptr<ModelComponent> mc = std::make_shared<ModelComponent>(afbComp);
+
+			if (bool ok = mc->init();
+				ok == false)
+			{
+				return false;
+			}
+
+			m_components[key] = mc;
+		}
+
+		return true;
 	}
 
-	bool AfbComponentSet::addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
+	bool AfbComponentSet::addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
 		assert(errorMessage);
 
-		if (afbComp == nullptr)
+		auto foundIt = m_components.find(afbOpCode);
+		if (Q_UNLIKELY(foundIt == m_components.end()))
 		{
-			assert(afbComp);
-			*errorMessage = "Input param afbComp is null";
+			// Component should be created in init();
+			//
+			*errorMessage = QString("AFB with opcode %1 is not found in AfbComponentSet").arg(afbOpCode);
 			return false;
 		}
 
-		std::shared_ptr<ModelComponent> modelComponent;
-
-		auto foundIt = m_components.find(afbComp->opCode());
-		if (foundIt == m_components.end())
-		{
-			modelComponent = std::make_shared<ModelComponent>(afbComp);
-			m_components[afbComp->opCode()] = modelComponent;
-		}
-		else
-		{
-			modelComponent = foundIt->second;
-		}
-
+		std::shared_ptr<ModelComponent>& modelComponent = foundIt->second;
 		assert(modelComponent);
 
-		// --
-		//
 		bool ok = modelComponent->addParam(instanceNo, instParam, errorMessage);
-
 		return ok;
 	}
 
