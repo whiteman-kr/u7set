@@ -15,11 +15,7 @@ namespace Sim
 		AfbComponent() = delete;
 		AfbComponent(const AfbComponent&) = default;
 		AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent);
-
-		~AfbComponent()
-		{
-			qDebug() << "~AfbComponent";
-		}
+		~AfbComponent() = default;
 
 		static void registerLuaClass(lua_State* L);
 
@@ -39,28 +35,30 @@ namespace Sim
 	};
 
 
-	class ComponentParam : public QObject
+	class AfbComponentParam
 	{
-		Q_OBJECT
+//		Q_PROPERTY(int OpIndex READ opIndex WRITE setOpIndex)
+//		Q_PROPERTY(quint16 AsWord READ wordValue WRITE setWordValue)
+//		Q_PROPERTY(quint32 AsDword READ dwordValue WRITE setDwordValue)
+//		Q_PROPERTY(float AsFloat READ floatValue WRITE setFloatValue)
+//		Q_PROPERTY(double AsDouble READ doubleValue WRITE setDoubleValue)
+//		Q_PROPERTY(qint32 AsSignedInt READ signedIntValue WRITE setSignedIntValue)
 
-		Q_PROPERTY(int OpIndex READ opIndex WRITE setOpIndex)
-		Q_PROPERTY(quint16 AsWord READ wordValue WRITE setWordValue)
-		Q_PROPERTY(quint32 AsDword READ dwordValue WRITE setDwordValue)
-		Q_PROPERTY(float AsFloat READ floatValue WRITE setFloatValue)
-		Q_PROPERTY(double AsDouble READ doubleValue WRITE setDoubleValue)
-		Q_PROPERTY(qint32 AsSignedInt READ signedIntValue WRITE setSignedIntValue)
-
-		Q_PROPERTY(bool MathOverflow READ mathOverflow)
-		Q_PROPERTY(bool MathUnderflow READ mathUnderflow)
-		Q_PROPERTY(bool MathZero READ mathZero)
-		Q_PROPERTY(bool MathNan READ mathNan)
-		Q_PROPERTY(bool MathDivByZero READ mathDivByZero)
+//		Q_PROPERTY(bool MathOverflow READ mathOverflow)
+//		Q_PROPERTY(bool MathUnderflow READ mathUnderflow)
+//		Q_PROPERTY(bool MathZero READ mathZero)
+//		Q_PROPERTY(bool MathNan READ mathNan)
+//		Q_PROPERTY(bool MathDivByZero READ mathDivByZero)
 
 	public:
-		ComponentParam() = default;
-		ComponentParam(const ComponentParam& that);
-		ComponentParam(quint16 paramOpIndex);
-		ComponentParam& operator=(const ComponentParam& that);
+		AfbComponentParam() = default;
+		AfbComponentParam(const AfbComponentParam& that) = default;
+		AfbComponentParam(AfbComponentParam&&) = default;
+		AfbComponentParam(quint16 paramOpIndex);
+		AfbComponentParam& operator=(const AfbComponentParam& that) = default;
+		AfbComponentParam& operator=(AfbComponentParam&&) = default;
+
+		static void registerLuaClass(lua_State* L);
 
 	public:
 		int opIndex() const;
@@ -81,21 +79,22 @@ namespace Sim
 		qint32 signedIntValue() const;
 		void setSignedIntValue(qint32 value);
 
-	public slots:
-		void addSignedInteger(ComponentParam* operand);
-		void subSignedInteger(ComponentParam* operand);
-		void mulSignedInteger(ComponentParam* operand);
-		void divSignedInteger(ComponentParam* operand);
+		// --
+		//
+		void addSignedInteger(AfbComponentParam* operand);
+		void subSignedInteger(AfbComponentParam* operand);
+		void mulSignedInteger(AfbComponentParam* operand);
+		void divSignedInteger(AfbComponentParam* operand);
 
 		void addSignedIntegerNumber(qint32 operand);
 		void subSignedIntegerNumber(qint32 operand);
 		void mulSignedIntegerNumber(qint32 operand);
 		void divSignedIntegerNumber(qint32 operand);
 
-		void addFloatingPoint(ComponentParam* operand);
-		void subFloatingPoint(ComponentParam* operand);
-		void mulFloatingPoint(ComponentParam* operand);
-		void divFloatingPoint(ComponentParam* operand);
+		void addFloatingPoint(AfbComponentParam* operand);
+		void subFloatingPoint(AfbComponentParam* operand);
+		void mulFloatingPoint(AfbComponentParam* operand);
+		void divFloatingPoint(AfbComponentParam* operand);
 
 		void convertWordToFloat();
 		void convertWordToSignedInt();
@@ -109,8 +108,6 @@ namespace Sim
 		bool mathDivByZero() const;
 
 	private:
-		// Warning, class has operator =
-		//
 		quint16 m_paramOpIndex = 0;
 
 		union
@@ -122,7 +119,6 @@ namespace Sim
 			double asDouble;
 			quint64 data = 0;
 		} m_data;
-
 
 		// Math operations flags
 		//
@@ -138,37 +134,31 @@ namespace Sim
 			};
 			quint32 data = 0;
 		} m_mathFlags;
-		// Warning, class has operator =
-		//
 	};
 
 
 	// AfbComponentInstance, contains a set of params (InstantiatorParam) for this instance
 	//
-	class AfbComponentInstance : public QObject
+	class AfbComponentInstance
 	{
-		Q_OBJECT
-
 	public:
 		AfbComponentInstance(quint16 instanceNo);
 
 		static void registerLuaClass(lua_State* L);
 
 	public:
-		bool addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage);
-		const ComponentParam* param(int opIndex) const;
+		bool addParam(const AfbComponentParam& param);
+		AfbComponentParam* param(int opIndex);
 
-	public:	// For access from JavaScript
-		Q_INVOKABLE bool paramExists(int opIndex) const;
-		Q_INVOKABLE QObject* param(int opIndex);
-		Q_INVOKABLE bool addParam(int opIndex, ComponentParam* param);
-		Q_INVOKABLE bool addParamWord(int opIndex, quint16 value);
-		Q_INVOKABLE bool addParamFloat(int opIndex, float value);
-		Q_INVOKABLE bool addParamSignedInt(int opIndex, qint32 value);
+		bool paramExists(int opIndex) const;
+
+		bool addParamWord(int opIndex, quint16 value);
+		bool addParamFloat(int opIndex, float value);
+		bool addParamSignedInt(int opIndex, qint32 value);
 
 	private:
 		quint16 m_instanceNo = 0;
-		std::map<quint16, ComponentParam> m_params;		// Key is ComponentParam.opIndex()
+		std::map<quint16, AfbComponentParam> m_params;		// Key is AfbComponentParam.opIndex()
 	};
 
 
@@ -183,7 +173,7 @@ namespace Sim
 		ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp);
 
 	public:
-		Q_INVOKABLE bool addParam(int instanceNo, const ComponentParam& instParam, QString* errorMessage);
+		Q_INVOKABLE bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
 		Q_INVOKABLE AfbComponentInstance* instance(quint16 instance);
 
 	private:
@@ -199,7 +189,7 @@ namespace Sim
 
 	public:
 		void clear();
-		bool addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const ComponentParam& instParam, QString* errorMessage);
+		bool addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
 
 		AfbComponentInstance* componentInstance(int componentOpCode, int instance);
 

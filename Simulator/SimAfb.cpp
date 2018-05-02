@@ -102,91 +102,97 @@ namespace Sim
 	}
 
 
-	ComponentParam::ComponentParam(const ComponentParam& that)
-	{
-		*this = that;
-	}
-
-	ComponentParam::ComponentParam(quint16 paramOpIndex) :
+	AfbComponentParam::AfbComponentParam(quint16 paramOpIndex) :
 		m_paramOpIndex(paramOpIndex)
 	{
 	}
 
-	ComponentParam& ComponentParam::operator=(const ComponentParam& that)
+	void AfbComponentParam::registerLuaClass(lua_State* L)
 	{
-		m_paramOpIndex = that.m_paramOpIndex;
-		m_data = that.m_data;
-		m_mathFlags.data = that.m_mathFlags.data;
+		using namespace LuaIntf;
 
-		return *this;
+		LuaBinding(L).beginClass<Sim::AfbComponentParam>("AfbComponentParam")
+				.addConstructor(LUA_ARGS())
+				.addConstructor(LUA_ARGS(_opt<quint16>))
+
+				.addProperty("opIndex", &AfbComponentParam::opIndex, &AfbComponentParam::setOpIndex)
+				.addProperty("asWord", &AfbComponentParam::wordValue, &AfbComponentParam::setWordValue)
+				.addProperty("asDword", &AfbComponentParam::dwordValue, &AfbComponentParam::setDwordValue)
+				.addProperty("asFloat", &AfbComponentParam::floatValue, &AfbComponentParam::setFloatValue)
+				.addProperty("asDouble", &AfbComponentParam::doubleValue, &AfbComponentParam::setDoubleValue)
+				.addProperty("asSignedInt", &AfbComponentParam::signedIntValue, &AfbComponentParam::setSignedIntValue)
+
+//				.addFunction("isNull", &Sim::AfbComponent::isNull)
+//				.addFunction("pinCaption", &Sim::AfbComponent::pinCaption, LUA_ARGS(_opt<int>))
+				.endClass();
 	}
 
-	int ComponentParam::opIndex() const
+	int AfbComponentParam::opIndex() const
 	{
 		return m_paramOpIndex;
 	}
 
-	void ComponentParam::setOpIndex(int index)
+	void AfbComponentParam::setOpIndex(int index)
 	{
 		m_paramOpIndex = index;
 	}
 
-	quint16 ComponentParam::wordValue() const
+	quint16 AfbComponentParam::wordValue() const
 	{
 		return m_data.asWord;
 	}
 
-	void ComponentParam::setWordValue(quint16 value)
+	void AfbComponentParam::setWordValue(quint16 value)
 	{
 		m_data.data = 0;
 		m_data.asWord = value;
 	}
 
-	quint32 ComponentParam::dwordValue() const
+	quint32 AfbComponentParam::dwordValue() const
 	{
 		return m_data.asDword;
 	}
 
-	void ComponentParam::setDwordValue(quint32 value)
+	void AfbComponentParam::setDwordValue(quint32 value)
 	{
 		m_data.data = 0;
 		m_data.asDword = value;
 	}
 
-	float ComponentParam::floatValue() const
+	float AfbComponentParam::floatValue() const
 	{
 		return m_data.asFloat;
 	}
 
-	void ComponentParam::setFloatValue(float value)
+	void AfbComponentParam::setFloatValue(float value)
 	{
 		m_data.data = 0;
 		m_data.asFloat = value;
 	}
 
-	double ComponentParam::doubleValue() const
+	double AfbComponentParam::doubleValue() const
 	{
 		return m_data.asDouble;
 	}
 
-	void ComponentParam::setDoubleValue(double value)
+	void AfbComponentParam::setDoubleValue(double value)
 	{
 		m_data.data = 0;
 		m_data.asDouble = value;
 	}
 
-	qint32 ComponentParam::signedIntValue() const
+	qint32 AfbComponentParam::signedIntValue() const
 	{
 		return m_data.asSignedInt;
 	}
 
-	void ComponentParam::setSignedIntValue(qint32 value)
+	void AfbComponentParam::setSignedIntValue(qint32 value)
 	{
 		m_data.data = 0;
 		m_data.asSignedInt = value;
 	}
 
-	void ComponentParam::addSignedInteger(ComponentParam* operand)
+	void AfbComponentParam::addSignedInteger(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
 		{
@@ -217,15 +223,15 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::subSignedInteger(ComponentParam* operand)
+	void AfbComponentParam::subSignedInteger(AfbComponentParam* operand)
 	{
-		ComponentParam negativeParam = *operand;
+		AfbComponentParam negativeParam = *operand;
 		negativeParam.setSignedIntValue(negativeParam.signedIntValue() * (-1));
 
 		return addSignedInteger(&negativeParam);
 	}
 
-	void ComponentParam::mulSignedInteger(ComponentParam* operand)
+	void AfbComponentParam::mulSignedInteger(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
 		{
@@ -256,7 +262,7 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::divSignedInteger(ComponentParam* operand)
+	void AfbComponentParam::divSignedInteger(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
 		{
@@ -317,35 +323,35 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::addSignedIntegerNumber(qint32 operand)
+	void AfbComponentParam::addSignedIntegerNumber(qint32 operand)
 	{
-		ComponentParam cp(*this);
+		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
 		return addSignedInteger(&cp);
 	}
 
-	void ComponentParam::subSignedIntegerNumber(qint32 operand)
+	void AfbComponentParam::subSignedIntegerNumber(qint32 operand)
 	{
-		ComponentParam cp(*this);
+		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
 		return subSignedInteger(&cp);
 	}
 
-	void ComponentParam::mulSignedIntegerNumber(qint32 operand)
+	void AfbComponentParam::mulSignedIntegerNumber(qint32 operand)
 	{
-		ComponentParam cp(*this);
+		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
 		return mulSignedInteger(&cp);
 	}
 
-	void ComponentParam::divSignedIntegerNumber(qint32 operand)
+	void AfbComponentParam::divSignedIntegerNumber(qint32 operand)
 	{
-		ComponentParam cp(*this);
+		AfbComponentParam cp(*this);
 		cp.setSignedIntValue(operand);
 		return divSignedInteger(&cp);
 	}
 
-	void ComponentParam::addFloatingPoint(ComponentParam* operand)
+	void AfbComponentParam::addFloatingPoint(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
 		{
@@ -378,7 +384,7 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::subFloatingPoint(ComponentParam* operand)
+	void AfbComponentParam::subFloatingPoint(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
 		{
@@ -411,7 +417,7 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::mulFloatingPoint(ComponentParam* operand)
+	void AfbComponentParam::mulFloatingPoint(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
 		{
@@ -444,7 +450,7 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::divFloatingPoint(ComponentParam* operand)
+	void AfbComponentParam::divFloatingPoint(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
 		{
@@ -477,7 +483,7 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::convertWordToFloat()
+	void AfbComponentParam::convertWordToFloat()
 	{
 		resetMathFlags();
 
@@ -487,7 +493,7 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::convertWordToSignedInt()
+	void AfbComponentParam::convertWordToSignedInt()
 	{
 		resetMathFlags();
 
@@ -497,32 +503,32 @@ namespace Sim
 		return;
 	}
 
-	void ComponentParam::resetMathFlags()
+	void AfbComponentParam::resetMathFlags()
 	{
 		m_mathFlags.data = 0;
 	}
 
-	bool ComponentParam::mathOverflow() const
+	bool AfbComponentParam::mathOverflow() const
 	{
 		return m_mathFlags.overflow;
 	}
 
-	bool ComponentParam::mathUnderflow() const
+	bool AfbComponentParam::mathUnderflow() const
 	{
 		return m_mathFlags.underflow;
 	}
 
-	bool ComponentParam::mathZero() const
+	bool AfbComponentParam::mathZero() const
 	{
 		return m_mathFlags.zero;
 	}
 
-	bool ComponentParam::mathNan() const
+	bool AfbComponentParam::mathNan() const
 	{
 		return m_mathFlags.nan;
 	}
 
-	bool ComponentParam::mathDivByZero() const
+	bool AfbComponentParam::mathDivByZero() const
 	{
 		return m_mathFlags.divByZero;
 	}
@@ -537,22 +543,24 @@ namespace Sim
 		using namespace LuaIntf;
 
 		LuaBinding(L).beginClass<AfbComponentInstance>("AfbComponentInstance")
+			.addFunction("addParam", &Sim::AfbComponentInstance::addParam, LUA_ARGS(_opt<const Sim::AfbComponentParam&>))
+			.addFunction("param", &Sim::AfbComponentInstance::param, LUA_ARGS(_opt<int>))
+			.addFunction("paramExists", &Sim::AfbComponentInstance::paramExists, LUA_ARGS(_opt<int>))
+
+			.addFunction("addParamWord", &Sim::AfbComponentInstance::addParamWord, LUA_ARGS(_opt<int>, _opt<quint16>))
+			.addFunction("addParamFloat", &Sim::AfbComponentInstance::addParamFloat, LUA_ARGS(_opt<int>, _opt<float>))
+			.addFunction("addParamSignedInt", &Sim::AfbComponentInstance::addParamSignedInt, LUA_ARGS(_opt<int>, _opt<qint32>))
+
 			.endClass();
 	}
 
-	bool AfbComponentInstance::addParam(std::shared_ptr<const Afb::AfbComponent> afbComp, const ComponentParam& param, QString* errorMessage)
+	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
-		Q_UNUSED(errorMessage);
-		Q_UNUSED(afbComp);
-		//assert(errorMessage);
-		//assert(afbComp);
-
 		m_params[param.opIndex()] = param;
-
 		return true;
 	}
 
-	const ComponentParam* AfbComponentInstance::param(int opIndex) const
+	AfbComponentParam* AfbComponentInstance::param(int opIndex)
 	{
 		auto it = m_params.find(opIndex);
 		if (it == m_params.end())
@@ -560,7 +568,7 @@ namespace Sim
 			return nullptr;
 		}
 
-		const ComponentParam* componentParam = &it->second;
+		AfbComponentParam* componentParam = &it->second;
 		return componentParam;
 	}
 
@@ -569,35 +577,9 @@ namespace Sim
 		return m_params.count(opIndex) > 0;
 	}
 
-	QObject* AfbComponentInstance::param(int opIndex)
-	{
-		auto it = m_params.find(opIndex);
-		if (it == m_params.end())
-		{
-			return nullptr;
-		}
-
-		ComponentParam* componentParam = &it->second;
-		QQmlEngine::setObjectOwnership(componentParam, QQmlEngine::ObjectOwnership::CppOwnership);
-
-		return componentParam;
-	}
-
-	bool AfbComponentInstance::addParam(int opIndex, ComponentParam* param)
-	{
-		if (param == nullptr)
-		{
-			assert(param);
-			return false;
-		}
-
-		m_params[opIndex] = *param;
-		return true;
-	}
-
 	bool AfbComponentInstance::addParamWord(int opIndex, quint16 value)
 	{
-		ComponentParam param(opIndex);
+		AfbComponentParam param(opIndex);
 		param.setWordValue(value);
 
 		m_params[opIndex] = param;
@@ -606,7 +588,7 @@ namespace Sim
 
 	bool AfbComponentInstance::addParamFloat(int opIndex, float value)
 	{
-		ComponentParam param(opIndex);
+		AfbComponentParam param(opIndex);
 		param.setFloatValue(value);
 
 		m_params[opIndex] = param;
@@ -615,7 +597,7 @@ namespace Sim
 
 	bool AfbComponentInstance::addParamSignedInt(int opIndex, qint32 value)
 	{
-		ComponentParam param(opIndex);
+		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
 
 		m_params[opIndex] = param;
@@ -629,7 +611,7 @@ namespace Sim
 		return;
 	}
 
-	bool ModelComponent::addParam(int instanceNo, const ComponentParam& instParam, QString* errorMessage)
+	bool ModelComponent::addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
 		if (static_cast<int>(instanceNo) >= m_afbComp->maxInstCount())
 		{
@@ -666,7 +648,7 @@ namespace Sim
 
 		AfbComponentInstance& compInst = compInstIt->second;
 
-		bool ok = compInst.addParam(m_afbComp, instParam, errorMessage);
+		bool ok = compInst.addParam(instParam);
 
 		return ok;
 	}
@@ -680,7 +662,6 @@ namespace Sim
 		}
 
 		AfbComponentInstance* result = &isntanceIt->second;
-		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::CppOwnership);
 
 		return result;
 	}
@@ -695,7 +676,7 @@ namespace Sim
 		return;
 	}
 
-	bool AfbComponentSet::addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const ComponentParam& instParam, QString* errorMessage)
+	bool AfbComponentSet::addInstantiatorParam(std::shared_ptr<const Afb::AfbComponent> afbComp, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage)
 	{
 		assert(errorMessage);
 
@@ -739,7 +720,6 @@ namespace Sim
 		std::shared_ptr<ModelComponent>	component = componentIt->second;
 
 		AfbComponentInstance* result = component->instance(instance);
-		QQmlEngine::setObjectOwnership(result, QQmlEngine::ObjectOwnership::CppOwnership);
 
 		return result;
 	}

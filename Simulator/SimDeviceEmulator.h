@@ -64,46 +64,22 @@ namespace Sim
 	};
 
 
-	class DeviceCommand : public LmCommand
+	class DeviceCommand
 	{
-//		Q_OBJECT
-
-//		Q_PROPERTY(QString Caption MEMBER (m_command.caption) CONSTANT)
-
-//		Q_PROPERTY(int Offset MEMBER m_offset)
-//		Q_PROPERTY(int Size MEMBER m_size)
-//		Q_PROPERTY(QString AsString MEMBER m_string)
-
-//		Q_PROPERTY(quint16 AfbOpCode MEMBER m_afbOpCode)
-//		Q_PROPERTY(quint16 AfbInstance MEMBER m_afbInstance)
-//		Q_PROPERTY(quint16 AfbPinOpCode MEMBER m_afbPinOpCode)
-
-//		Q_PROPERTY(quint16 BitNo0 MEMBER m_bitNo0)
-//		Q_PROPERTY(quint16 BitNo1 MEMBER m_bitNo1)
-
-//		Q_PROPERTY(quint16 Word0 MEMBER m_word0)
-//		Q_PROPERTY(quint16 Word1 MEMBER m_word1)
-//		Q_PROPERTY(quint16 Word2 MEMBER m_word2)
-
-//		Q_PROPERTY(quint32 Dword0 MEMBER m_dword0)
-//		Q_PROPERTY(quint32 Dword1 MEMBER m_dword1)
-
 	public:
+		DeviceCommand() = delete;
 		DeviceCommand(const LmCommand& command);
-		DeviceCommand(const DeviceCommand& that);
-		DeviceCommand& operator=(const DeviceCommand& that);
+		DeviceCommand(const DeviceCommand& that) = default;
+		DeviceCommand& operator=(const DeviceCommand& that) = default;
+		DeviceCommand(DeviceCommand&&) = default;
+		DeviceCommand& operator=(DeviceCommand&&) = default;
 
 		static void registerLuaClass(lua_State* L);
 
 		void dump() const;
 
-		std::string scriptTest(std::string inputParam)
-		{
-			//return QString("ScriptTest" + inputParam).toStdString();
-			return "ScriptTest" + inputParam;
-		}
-
 		// Properties for Lua
+		//
 	public:
 		std::string caption() const;
 
@@ -111,8 +87,6 @@ namespace Sim
 		void setAsString(const std::string& value);
 
 	public:
-		// WARNING: Copy constructor is defined, do not forget to add there new members
-		//
 		LmCommand m_command;
 
 		int m_offset = 0;				// Offset in Code Memory, words
@@ -132,9 +106,6 @@ namespace Sim
 
 		quint32 m_dword0 = 0;			// Set in parse script
 		quint32 m_dword1 = 0;			// Set in parse script
-
-		// WARNING: Copy constructor is defined, do not forget to add there new members
-		//
 	};
 
 
@@ -143,14 +114,8 @@ namespace Sim
 	//
 	class DeviceEmulator;
 
-	class ScriptDeviceEmulator /*: public QObject*/
+	class ScriptDeviceEmulator
 	{
-//		Q_OBJECT
-
-//		Q_PROPERTY(quint16 AppStartAddress MEMBER (m_device->m_logicUnit.appStartAddress))
-//		Q_PROPERTY(Sim::CyclePhase Phase MEMBER (m_device->m_logicUnit.phase))
-//		Q_PROPERTY(quint32 ProgramCounter MEMBER (m_device->m_logicUnit.programCounter))
-
 	public:
 		explicit ScriptDeviceEmulator(DeviceEmulator* device);
 
@@ -159,26 +124,32 @@ namespace Sim
 		// Script functins for AFB instances
 		//
 public:
+		quint16 appStartAddress() const;
+		void setAppStartAddress(quint16 value);
+
+		Sim::CyclePhase phase() const;
+		void setPhase(Sim::CyclePhase value);
+
+		quint32 programCounter() const;
+		void setProgramCounter(quint32 value);
+
 		AfbComponent afbComponent(int opCode);
 		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
 
-//	public slots:
-//		QObject* afbComponent(int opCode);
-//		QObject* afbComponentInstance(int opCode, int instanceNo);
+		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
 
-//		QObject* createComponentParam();
-//		bool setAfbParam(int afbOpCode, int instanceNo, ComponentParam* param);
+		// RAM access
+		//
+		bool movRamMem(quint32 src, quint32 dst, quint32 size);
 
-//		// RAM access
-//		//
-//		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
-//		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
+		bool writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data);
+		quint16 readRamBit(quint32 offsetW, quint32 bitNo);
 
-//		bool writeRamWord(quint32 offsetW, quint16 data);
-//		quint16 readRamWord(quint32 offsetW);
+		bool writeRamWord(quint32 offsetW, quint16 data);
+		quint16 readRamWord(quint32 offsetW);
 
-//		bool writeRamDword(quint32 offsetW, quint32 data);
-//		quint32 readRamDword(quint32 offsetW);
+		bool writeRamDword(quint32 offsetW, quint32 data);
+		quint32 readRamDword(quint32 offsetW);
 
 		// Getting data from m_plainAppLogic
 		//
