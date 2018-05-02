@@ -196,16 +196,15 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		for (QString row : rows)
 		{
-			QStringList&& fields = row.split(QRegExp("\\s+"), QString::SkipEmptyParts);
-			for (int i = fields.size() - 1; i >= 0; i--)
+			QStringList&& fields = row.split(';', QString::KeepEmptyParts);
+
+			for (QString& field : fields)
 			{
-				if (fields[i].length() <= 1)
-				{
-					fields.removeAt(i);
-				}
+				field = field.trimmed();
+				assert(field.length() > 0);
 			}
 
-			assert(static_cast<size_t>(fields.size()) == signalTypeSequence.size() + 2);
+			assert(static_cast<size_t>(fields.size()) >= signalTypeSequence.size() + 2);
 			fileFields.push_back(fields);
 		}
 	}
@@ -299,16 +298,16 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		{
 			for (auto property : signalProperties->properties())
 			{
-				if ((property->caption() == propertyDescription[0]) == false)
+				if (property->caption() != propertyDescription[0])
 				{
 					continue;
 				}
 
-				if (propertyDescription[1].toLower().indexOf("true") >= 0)
+				if (propertyDescription[1].toLower() == "true")
 				{
 					std::shared_ptr<Property> precisionProperty = signalProperties->propertyByCaption(SignalProperties::decimalPlacesCaption);
 
-					if ((precisionProperty == nullptr) == false)
+					if (precisionProperty != nullptr)
 					{
 						bool ok = false;
 						int precision = signalVector[i]->isAnalog() ? precisionProperty->value().toInt(&ok) : 0;
@@ -337,19 +336,19 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 					descriptionFound = true;
 					const QString& propertyState = propertyDescription[i + 2].toLower();
 
-					if (propertyState.indexOf("hide") >= 0)
+					if (propertyState == "hide")
 					{
 						property->setVisible(false);
 						break;
 					}
 
-					if (propertyState.indexOf("read") >= 0)
+					if (propertyState == "read")
 					{
 						property->setReadOnly(true);
 						break;
 					}
 
-					assert(propertyState.indexOf("write") >= 0);
+					assert(propertyState == "write");
 				}
 
 				assert(descriptionFound == true);
@@ -503,7 +502,7 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 
 		std::shared_ptr<Property> precisionProperty = signalProperties->propertyByCaption(SignalProperties::decimalPlacesCaption);
 
-		if ((precisionProperty == nullptr) == false)
+		if (precisionProperty != nullptr)
 		{
 			bool ok = false;
 			int precision = signal.isAnalog() ? precisionProperty->value().toInt(&ok) : 0;
