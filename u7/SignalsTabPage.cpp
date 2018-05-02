@@ -26,6 +26,7 @@
 #include "SignalPropertiesDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include "BusStorage.h"
+#include "../lib/WUtils.h"
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -2153,6 +2154,39 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 
 bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, QVector<Hardware::DeviceSignal*> deviceSignalsToUpdate)
 {
+	TEST_PTR_RETURN_FALSE(dbc);
+
+	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	{
+		TEST_PTR_CONTINUE(deviceSignal);
+
+		QString signalEquipmentID = deviceSignal->equipmentIdTemplate();
+
+		QVector<int> signalIDs;
+
+		bool result = dbc->getSignalsIDsWithEquipmentID(signalEquipmentID, &signalIDs, nullptr);
+
+		if (result == false || signalIDs.isEmpty() == true)
+		{
+			continue;
+		}
+
+		Signal s;
+
+		for(int signalID : signalIDs)
+		{
+			result = dbc->getLatestSignal(signalID, &s, nullptr);
+
+			if (result == false)
+			{
+				continue;
+			}
+
+//			dbc->setSignalWorkcopy()
+		}
+
+		QString signalSpecPropStruct = deviceSignal->signalSpecPropsStruc();
+	}
 	return true;
 }
 
