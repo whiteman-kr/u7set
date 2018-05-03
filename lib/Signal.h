@@ -240,6 +240,8 @@ public:
 	QString specPropStruct() const { return m_specPropStruct; }
 	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
 
+	bool updateSpecProps(const QString& specPropStruct, bool* signalChanged);
+
 	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
 	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
 
@@ -248,6 +250,7 @@ public:
 
 	void loadProtoData(const QByteArray& protoDataArray);
 	void loadProtoData(const Proto::ProtoAppSignalData& protoData);
+
 
 
 	// Signal fields from database

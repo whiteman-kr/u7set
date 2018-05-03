@@ -9,18 +9,6 @@
 
 class Signal;
 
-// signal management error codes
-// returns in ObjectState.errCode field
-//
-
-const int	ERR_SIGNAL_OK = 0,
-			ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1,
-			ERR_SIGNAL_ALREADY_CHECKED_OUT = 2,
-			ERR_SIGNAL_DELETED = 3,
-			ERR_SIGNAL_NOT_FOUND = 4,
-
-			ERR_SIGNAL_EXISTS = 100;
-
 // System files names
 //
 extern const char* const rootFileName;			// root file name
@@ -117,6 +105,17 @@ private:
 };
 
 
+// signal management error codes
+// returns in ObjectState.errCode field
+//
+const int	ERR_SIGNAL_OK = 0,
+			ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1,
+			ERR_SIGNAL_ALREADY_CHECKED_OUT = 2,
+			ERR_SIGNAL_DELETED = 3,
+			ERR_SIGNAL_NOT_FOUND = 4,
+
+			ERR_SIGNAL_EXISTS = 100;
+
 struct ObjectState
 {
 	int id;
@@ -126,7 +125,6 @@ struct ObjectState
 	int userId;
 	int errCode;
 };
-
 
 //
 //

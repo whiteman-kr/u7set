@@ -2156,6 +2156,10 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, QVector<Hardware:
 {
 	TEST_PTR_RETURN_FALSE(dbc);
 
+	bool result = true;
+
+	bool res = true;
+
 	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
 	{
 		TEST_PTR_CONTINUE(deviceSignal);
@@ -2164,17 +2168,28 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, QVector<Hardware:
 
 		QVector<int> signalIDs;
 
-		bool result = dbc->getSignalsIDsWithEquipmentID(signalEquipmentID, &signalIDs, nullptr);
+		res = dbc->getSignalsIDsWithEquipmentID(signalEquipmentID, &signalIDs, nullptr);
 
-		if (result == false || signalIDs.isEmpty() == true)
+		if (res == false)
+		{
+			assert(false);
+			result = false;
+			continue;
+		}
+
+		if (signalIDs.isEmpty() == true)
 		{
 			continue;
 		}
 
-		Signal s;
+		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruc();
 
 		for(int signalID : signalIDs)
 		{
+			bool signalChanged = false;
+
+			Signal s;
+
 			result = dbc->getLatestSignal(signalID, &s, nullptr);
 
 			if (result == false)
@@ -2182,12 +2197,98 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, QVector<Hardware:
 				continue;
 			}
 
-//			dbc->setSignalWorkcopy()
-		}
+			if (s.specPropStruct() != deviceSignalSpecPropStruct)
+			{
+				signalChanged = true;
+			}
 
-		QString signalSpecPropStruct = deviceSignal->signalSpecPropsStruc();
+			SignalSpecPropValues specPropValues;
+
+			res = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
+
+			if (res == false)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			res = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
+
+			if (res == false)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			QByteArray newValues;
+
+			res = specPropValues.serializeValuesToArray(&newValues);
+
+			if (res == false)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			if (newValues != s.protoSpecPropValues())		// compare proto-data arrays
+			{
+				signalChanged = true;
+			}
+
+			if (signalChanged == false)
+			{
+				continue;
+			}
+
+			s.setSpecPropStruct(deviceSignalSpecPropStruct);
+			s.setProtoSpecPropValues(newValues);
+
+			QVector<int> checkoutSignalIDs;
+
+			checkoutSignalIDs.append(signalID);
+
+			QVector<ObjectState> objStates;
+
+			res = dbc->checkoutSignals(&checkoutSignalIDs, &objStates, nullptr);
+
+			if (res == false)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			if (objStates.size() != 1)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			if (objStates[0].checkedOut == false || objStates[0].errCode != ERR_SIGNAL_OK)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			ObjectState objState;
+
+			res = dbc->setSignalWorkcopy(&s, &objState, nullptr);
+
+			if (res == false)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+		}
 	}
-	return true;
+
+	return result;
 }
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)

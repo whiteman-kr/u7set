@@ -39,6 +39,10 @@ public:
 	bool create(const Signal& s);
 
 	bool createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap = true);
+	bool updateFromSpecPropStruct(const QString& specPropStruct);
+
+	bool isExists(const QString& name) const { return m_propNamesMap.contains(name); }
+
 	bool setValue(const QString& name, const QVariant& value);
 
 	bool setAnyValue(const QString& name, const QVariant& value);		// setter without isEnum checking
@@ -54,6 +58,8 @@ public:
 	bool parseValuesFromArray(const QByteArray& protoData);
 
 	bool save(Proto::SignalSpecPropValues* protoValues) const;
+
+	const QVector<SignalSpecPropValue>& values() const { return m_specPropValues; }
 
 private:
 	void buildPropNamesMap();
@@ -133,6 +139,7 @@ public:
 	static const QString tuningDefaultValueCaption;
 	static const QString tuningLowBoundCaption;
 	static const QString tuningHighBoundCaption;
+	static const QString specificPropertiesStructCaption;
 
 	static const QString categoryIdentification;
 	static const QString categorySignalType;
@@ -141,6 +148,7 @@ public:
 	static const QString categoryElectricParameters;
 	static const QString categoryOnlineMonitoringSystem;
 	static const QString categoryTuning;
+	static const QString categoryExpertProperties;
 
 	static const QString lastEditedSignalFieldValuePlace;
 
@@ -152,6 +160,9 @@ public:
 
 	const std::vector<Property*>& propertiesDependentOnPrecision() { return m_propertiesDependentOnPrecision; }
 	void addPropertyDependentOnPrecision(Property* dependentProperty);
+
+	QString specPropStruct() const { return m_signal.specPropStruct(); }
+	void setSpecPropStruct(const QString & specPropStruct);
 
 	Q_INVOKABLE QString appSignalID() const { return m_signal.appSignalID(); }
 	Q_INVOKABLE QString customAppSignalID() const { return m_signal.customAppSignalID(); }
@@ -184,6 +195,10 @@ public:
 
 private:
 	void initProperties();
+
+	void createSpecificProperties(const QString& specPropStruct, bool removeOld);
+	void deleteSpecificProperties();
+
 	static std::shared_ptr<OrderedHash<int, QString>> generateOrderedHashFromStringArray(const char* const* array, size_t size);
 
 private:

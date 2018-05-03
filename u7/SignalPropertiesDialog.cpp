@@ -162,7 +162,10 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	m_parent(parent)
 {
 	QVBoxLayout* vl = new QVBoxLayout;
-	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
+
+	m_propertyEditor = new IdePropertyEditor(this);
+
+	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
 
 	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
 	{

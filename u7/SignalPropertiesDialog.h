@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMap>
 #include "../lib/Signal.h"
+#include "IdePropertyEditor.h"
 
 class QtProperty;
 class QtStringPropertyManager;
@@ -59,7 +60,7 @@ private:
 	QList<std::shared_ptr<PropertyObject>> m_objList;
 	bool m_tryCheckout;
 	QWidget* m_parent;
-	ExtWidgets::PropertyEditor* m_propertyEditor;
+	IdePropertyEditor* m_propertyEditor;
 
 	bool m_isValid = false;
 
