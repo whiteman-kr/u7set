@@ -132,7 +132,7 @@ namespace Sim
 		using namespace LuaIntf;
 
 		LuaBinding(L).beginClass<ScriptDeviceEmulator>("DeviceEmulator")
-				.addFunction("commandByIndex", &ScriptDeviceEmulator::commandByIndex, LUA_ARGS(_opt<int>))
+				.addFunction("command", &ScriptDeviceEmulator::command, LUA_ARGS(int))
 
 				.addProperty("appStartAddress", &ScriptDeviceEmulator::appStartAddress, &ScriptDeviceEmulator::setAppStartAddress)
 				.addProperty("phase", &ScriptDeviceEmulator::phase, &ScriptDeviceEmulator::setPhase)
@@ -159,7 +159,7 @@ namespace Sim
 				.endClass();
 	}
 
-	DeviceCommand* ScriptDeviceEmulator::commandByIndex(int index)
+	DeviceCommand* ScriptDeviceEmulator::command(int index)
 	{
 		if (index >= m_device->m_commands.size())
 		{
@@ -461,7 +461,7 @@ namespace Sim
 		for (int i = 0; i < m_commands.size(); i++)
 		{
 			const DeviceCommand& cmd = m_commands[i];
-			generatedScript.append(QString("%1(device, device:commandByIndex(%2));\n")
+			generatedScript.append(QString("%1(device, device:command(%2));\n")
 										.arg(cmd.m_command.simulationFunc)
 										.arg(i));
 		}

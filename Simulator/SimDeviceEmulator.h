@@ -123,7 +123,7 @@ namespace Sim
 		// Script functins for AFB instances
 		//
 public:
-		DeviceCommand* commandByIndex(int index);
+		DeviceCommand* command(int index);
 
 		quint16 appStartAddress() const;
 		void setAppStartAddress(quint16 value);

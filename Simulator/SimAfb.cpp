@@ -220,7 +220,7 @@ namespace Sim
 			return;
 		}
 
-		// Ûigned integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
+		// Signed integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
 		qint32 op2 = operand->signedIntValue();

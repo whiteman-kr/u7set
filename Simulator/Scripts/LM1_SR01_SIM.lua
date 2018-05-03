@@ -43,22 +43,6 @@ end
 
 -- Get AFB, if such item is not exist then terminate
 --
-function check_afb(device, afbOpCode, afbInstance)
-	local afb = device:afbComponent(afbOpCode);
-	if (afb:isNull() == true)
-	then
-		error("Cannot find AfbComponent with OpCode " .. afbOpCode);
-	end
-
-	if (afbInstance < 0 or 
-		afbInstance >= afb.maxInstCount)
-	then
-		error("AfbComponent.Instance (" .. afbInstance .. ") is out of limits " .. afb.maxInstCount);
-	end
-	
-	return afb;
-end
-
 function check_afb(device, afbOpCode, afbInstance, pinOpCode)
 	local afb = device:afbComponent(afbOpCode);
 	if (afb:isNull() == true)
@@ -547,17 +531,21 @@ function afb_math(afbInstance)
 
 	-- Logic	conf: 1'-'+' (SI),  '2'-'-' (SI),  '3'-'*' (SI),  '4'-'/' (SI), '5'-'+' (FP),  '6'-'-' (FP),  '7'-'*' (FP),  '8'-'/' (FP)   
 	--
-
 	mathFuncTable = 
 	{
-		[1] = -- SI +
-			function(x)
-				operand1:addSignedInteger(x);
+		[1] = -- SI + SI
+			function()
+				operand1:addSignedInteger(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);				
 			end,
 	};
 
-	mathFuncTable[conf.asWord](operand2);
-
+	mathFuncTable[conf.asWord]();
 
 --[[	
 	
@@ -594,12 +582,12 @@ function afb_math(afbInstance)
 
 	-- Save result
 	--	
-	operand1.opIndex = o_result;
-	afbInstance:addParam(operand1);
+	--operand1.opIndex = o_result;
+	--afbInstance:addParam(operand1);
 
-	afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
-	afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
-	afbInstance:addParamWord(o_zero, operand1.mathZero);
-	afbInstance:addParamWord(o_nan, operand1.mathNan);
-	afbInstance:addParamWord(o_div_by_zero, operand1.mathDivByZero);
+	--afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+	--afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
+	--afbInstance:addParamWord(o_zero, operand1.mathZero);
+	--afbInstance:addParamWord(o_nan, operand1.mathNan);
+	--afbInstance:addParamWord(o_div_by_zero, operand1.mathDivByZero);
 end
