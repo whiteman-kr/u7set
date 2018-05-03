@@ -1,6 +1,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 #include <map>
+#include <unordered_map>
 #include <memory>
 #include <QObject>
 #include "../lib/LmDescription.h"
@@ -38,12 +39,6 @@ namespace Sim
 
 	class AfbComponentParam
 	{
-//		Q_PROPERTY(bool MathOverflow READ mathOverflow)
-//		Q_PROPERTY(bool MathUnderflow READ mathUnderflow)
-//		Q_PROPERTY(bool MathZero READ mathZero)
-//		Q_PROPERTY(bool MathNan READ mathNan)
-//		Q_PROPERTY(bool MathDivByZero READ mathDivByZero)
-
 	public:
 		AfbComponentParam() = default;
 		AfbComponentParam(const AfbComponentParam& that) = default;
@@ -153,7 +148,7 @@ namespace Sim
 
 	private:
 		quint16 m_instanceNo = 0;
-		std::map<quint16, AfbComponentParam> m_params;		// Key is AfbComponentParam.opIndex()
+		std::unordered_map<quint16, AfbComponentParam> m_params;		// Key is AfbComponentParam.opIndex()
 	};
 
 
@@ -189,7 +184,7 @@ namespace Sim
 		AfbComponentInstance* componentInstance(int componentOpCode, int instance);
 
 	private:
-		std::map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode
+		std::unordered_map<quint16, std::shared_ptr<ModelComponent>> m_components;		// Key is component opcode
 	};
 }
 

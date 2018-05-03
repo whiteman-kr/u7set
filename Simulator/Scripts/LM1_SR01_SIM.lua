@@ -59,6 +59,28 @@ function check_afb(device, afbOpCode, afbInstance)
 	return afb;
 end
 
+function check_afb(device, afbOpCode, afbInstance, pinOpCode)
+	local afb = device:afbComponent(afbOpCode);
+	if (afb:isNull() == true)
+	then
+		error("Cannot find AfbComponent with OpCode " .. afbOpCode);
+	end
+
+	if (afbInstance < 0 or 
+		afbInstance >= afb.maxInstCount)
+	then
+		error("AfbComponent.Instance (" .. afbInstance .. ") is out of limits " .. afb.maxInstCount);
+	end
+
+	if (pinOpCode ~= nill and
+		afb:pinExists(pinOpCode) == false)
+	then
+		error("AfbComponent does not have pin" .. pinOpCode);
+	end
+	
+	return afb;
+end
+
 -- Check value range, if value out of range terminate script
 --
 function check_param_range(paramValue, minValue, maxValue, paramName)
@@ -233,7 +255,7 @@ function parse_wrfbc(device, command)
 
 	command.word0 = device:getWord(command.offset + 2);						-- word0 - data address
 
-	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance, command.afbPinOpCode);
 
 	-- String representation
 	-- wrfbc LOGIC.0[i_oprd_15], #0003h
@@ -264,7 +286,7 @@ function parse_wrfbb(device, command)
 
 	-- Checks
 	--
-	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance, command.afbPinOpCode);
 	check_param_range(command.bitNo0, 0, 15, "BitNo");
 
 	-- String representation
@@ -296,7 +318,7 @@ function parse_rdfbb(device, command)
 
 	-- Checks
 	--
-	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance, command.afbPinOpCode);
 	check_param_range(command.bitNo0, 0, 15, "BitNo");
 
 	-- String representation
@@ -343,7 +365,7 @@ function parse_rdfb32(device, command)
 
 	-- Checks
 	--
-	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance, command.afbPinOpCode);
 
 	-- String representation
 	-- rdfb32 0478h, LOGIC.0[i_2_oprd]
@@ -376,7 +398,7 @@ function parse_wrfbc32(device, command)
 
 	-- Checks
 	--
-	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance, command.afbPinOpCode);
 
 	-- String representation
 	-- wrfbc32 MATH.0[i_oprd_1], #0423445h

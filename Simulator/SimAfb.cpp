@@ -220,7 +220,7 @@ namespace Sim
 			return;
 		}
 
-		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		// Ûigned integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
 		qint32 op2 = operand->signedIntValue();
@@ -672,15 +672,18 @@ namespace Sim
 
 		// Check if instParam.implParamOpIndex really exists in AfbComponent
 		//
-		if (m_afbComp->pinExists(instParam.opIndex()) == false)
-		{
-			// Can't find such pin in AfbComponent
-			//
-			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
-								.arg(instParam.opIndex())
-								.arg(m_afbComp->caption());
-			return false;
-		}
+
+		// This check is moved to Lua script on parsing stage, commented for better perfomance
+		//
+//		if (m_afbComp->pinExists(instParam.opIndex()) == false)
+//		{
+//			// Can't find such pin in AfbComponent
+//			//
+//			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
+//								.arg(instParam.opIndex())
+//								.arg(m_afbComp->caption());
+//			return false;
+//		}
 
 		// Get or add instance and set new param
 		//
