@@ -38,13 +38,6 @@ namespace Sim
 
 	class AfbComponentParam
 	{
-//		Q_PROPERTY(int OpIndex READ opIndex WRITE setOpIndex)
-//		Q_PROPERTY(quint16 AsWord READ wordValue WRITE setWordValue)
-//		Q_PROPERTY(quint32 AsDword READ dwordValue WRITE setDwordValue)
-//		Q_PROPERTY(float AsFloat READ floatValue WRITE setFloatValue)
-//		Q_PROPERTY(double AsDouble READ doubleValue WRITE setDoubleValue)
-//		Q_PROPERTY(qint32 AsSignedInt READ signedIntValue WRITE setSignedIntValue)
-
 //		Q_PROPERTY(bool MathOverflow READ mathOverflow)
 //		Q_PROPERTY(bool MathUnderflow READ mathUnderflow)
 //		Q_PROPERTY(bool MathZero READ mathZero)
@@ -100,13 +93,14 @@ namespace Sim
 		void convertWordToFloat();
 		void convertWordToSignedInt();
 
-	private:
+		// --
+		//
 		void resetMathFlags();
-		bool mathOverflow() const;
-		bool mathUnderflow() const;
-		bool mathZero() const;
-		bool mathNan() const;
-		bool mathDivByZero() const;
+		quint16 mathOverflow() const;
+		quint16 mathUnderflow() const;
+		quint16 mathZero() const;
+		quint16 mathNan() const;
+		quint16 mathDivByZero() const;
 
 	private:
 		quint16 m_paramOpIndex = 0;

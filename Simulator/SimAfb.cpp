@@ -123,8 +123,27 @@ namespace Sim
 				.addProperty("asDouble", &AfbComponentParam::doubleValue, &AfbComponentParam::setDoubleValue)
 				.addProperty("asSignedInt", &AfbComponentParam::signedIntValue, &AfbComponentParam::setSignedIntValue)
 
-//				.addFunction("isNull", &Sim::AfbComponent::isNull)
-//				.addFunction("pinCaption", &Sim::AfbComponent::pinCaption, LUA_ARGS(_opt<int>))
+				.addFunction("addSignedInteger", &AfbComponentParam::addSignedInteger, LUA_ARGS(AfbComponentParam*))
+				.addFunction("subSignedInteger", &AfbComponentParam::subSignedInteger, LUA_ARGS(AfbComponentParam*))
+				.addFunction("mulSignedInteger", &AfbComponentParam::mulSignedInteger, LUA_ARGS(AfbComponentParam*))
+				.addFunction("divSignedInteger", &AfbComponentParam::divSignedInteger, LUA_ARGS(AfbComponentParam*))
+
+				.addFunction("addSignedIntegerNumber", &AfbComponentParam::addSignedIntegerNumber, LUA_ARGS(qint32))
+				.addFunction("subSignedIntegerNumber", &AfbComponentParam::subSignedIntegerNumber, LUA_ARGS(qint32))
+				.addFunction("mulSignedIntegerNumber", &AfbComponentParam::mulSignedIntegerNumber, LUA_ARGS(qint32))
+				.addFunction("divSignedIntegerNumber", &AfbComponentParam::divSignedIntegerNumber, LUA_ARGS(qint32))
+
+				.addFunction("addFloatingPoint", &AfbComponentParam::addFloatingPoint, LUA_ARGS(AfbComponentParam*))
+				.addFunction("subFloatingPoint", &AfbComponentParam::subFloatingPoint, LUA_ARGS(AfbComponentParam*))
+				.addFunction("mulFloatingPoint", &AfbComponentParam::mulFloatingPoint, LUA_ARGS(AfbComponentParam*))
+				.addFunction("divFloatingPoint", &AfbComponentParam::divFloatingPoint, LUA_ARGS(AfbComponentParam*))
+
+				.addPropertyReadOnly("mathOverflow", &AfbComponentParam::mathOverflow)
+				.addPropertyReadOnly("mathUnderflow", &AfbComponentParam::mathUnderflow)
+				.addPropertyReadOnly("mathZero", &AfbComponentParam::mathZero)
+				.addPropertyReadOnly("mathNan", &AfbComponentParam::mathNan)
+				.addPropertyReadOnly("mathDivByZero", &AfbComponentParam::mathDivByZero)
+
 				.endClass();
 	}
 
@@ -509,29 +528,29 @@ namespace Sim
 		m_mathFlags.data = 0;
 	}
 
-	bool AfbComponentParam::mathOverflow() const
+	quint16 AfbComponentParam::mathOverflow() const
 	{
-		return m_mathFlags.overflow;
+		return m_mathFlags.overflow ? 0x0001 : 0x0000;
 	}
 
-	bool AfbComponentParam::mathUnderflow() const
+	quint16 AfbComponentParam::mathUnderflow() const
 	{
-		return m_mathFlags.underflow;
+		return m_mathFlags.underflow ? 0x0001 : 0x0000;
 	}
 
-	bool AfbComponentParam::mathZero() const
+	quint16 AfbComponentParam::mathZero() const
 	{
-		return m_mathFlags.zero;
+		return m_mathFlags.zero ? 0x0001 : 0x0000;
 	}
 
-	bool AfbComponentParam::mathNan() const
+	quint16 AfbComponentParam::mathNan() const
 	{
-		return m_mathFlags.nan;
+		return m_mathFlags.nan ? 0x0001 : 0x0000;
 	}
 
-	bool AfbComponentParam::mathDivByZero() const
+	quint16 AfbComponentParam::mathDivByZero() const
 	{
-		return m_mathFlags.divByZero;
+		return m_mathFlags.divByZero ? 0x0001 : 0x0000;
 	}
 
 	AfbComponentInstance::AfbComponentInstance(quint16 instanceNo) :

@@ -11,8 +11,9 @@ CyclePhase =
 
 simFuncTable = 
 {
-	["afb_logic"] = function(x)		afb_logic(x)	end,
-	["afb_not"] = function(x)		afb_not(x)		end,
+	["afb_logic"]	= function(x)		afb_logic(x)		end,
+	["afb_not"]		= function(x)		afb_not(x)			end,
+	["afb_math"]	= function(x)		afb_math(x)			end,
 }
 
 -- Service functions
@@ -74,6 +75,13 @@ function check_param_exist(afbInstance, opIndex, paramName)
 	if (afbInstance:paramExists(opIndex) == false)
 	then
 		error("Param " .. paramName .. " is not found.");
+	end
+end
+
+function check_param_exist(afbInstance, opIndex)
+	if (afbInstance:paramExists(opIndex) == false)
+	then
+		error("Param " .. opIndex .. " is not found.");
 	end
 end
 
@@ -300,12 +308,8 @@ end
 
 function command_rdfbb(device, command)
 	local afbInstance = device:afbComponentInstance(command.afbOpCode, command.afbInstance);
-	if (afbInstance == nil)
-	then
-		error("Cannot find afbInstance with OpCode " .. command.afbOpCode .. ", InstanceNo " .. command.afbInstance);
-	end
 
-	check_param_exist(afbInstance, command.afbPinOpCode, tostring(command.afbPinOpCode));
+	check_param_exist(afbInstance, command.afbPinOpCode);
 	
 	local param = afbInstance:param(command.afbPinOpCode);
 	device:writeRamBit(command.word0, command.bitNo0, param.asWord & 1);
@@ -322,6 +326,70 @@ end
 
 function command_appstart(device, command)
 	device.appStartAddress = command.word0;
+end
+
+-- Command: rdfb32
+-- Code: 21
+-- Description: Read 32bit data from AFB output and write it to RAM
+--
+function parse_rdfb32(device, command)
+	command.size = 3;
+	
+	command.afbOpCode = device:getWord(command.offset + 0) & 0x003F;		-- Lowest 6 bit
+	command.afbInstance = device:getWord(command.offset + 1) >> 6;			-- Highest 10 bits
+	command.afbPinOpCode = device:getWord(command.offset + 1) & 0x003F;		-- Lowest 6 bit
+
+	command.word0 = device:getWord(command.offset + 2);						-- Word0 - data address
+
+	-- Checks
+	--
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+
+	-- String representation
+	-- rdfb32 0478h, LOGIC.0[i_2_oprd]
+	--
+	local pinCaption = afb:pinCaption(command.afbPinOpCode);
+	command.asString = string.format("%-010s#%s, %s.%d[%s]", command.caption, word2hex(command.word0), afb.caption, command.afbInstance, pinCaption);	
+end
+
+function command_rdfb32(device, command)
+	local afbInstance = device:afbComponentInstance(command.afbOpCode, command.afbInstance);
+
+	check_param_exist(afbInstance, command.afbPinOpCode);
+	
+	local param = afbInstance:param(command.afbPinOpCode);
+	device:writeRamDword(command.word0, param.asDword);
+end
+
+-- Command: wrfbc32
+-- Code: 22
+-- Description: Write 32bit constant to FunctionalBlock input
+--
+function parse_wrfbc32(device, command)
+	command.size = 4;
+	
+	command.afbOpCode = device:getWord(command.offset + 0) & 0x003F;		-- Lowest 6 bit
+	command.afbInstance = device:getWord(command.offset + 1) >> 6;			-- Highest 10 bits
+	command.afbPinOpCode = device:getWord(command.offset + 1) & 0x003F;		-- Lowest 6 bit
+
+	command.dword0 = device:getDword(command.offset + 2);					-- Dword0 - data
+
+	-- Checks
+	--
+	local afb = check_afb(device, command.afbOpCode, command.afbInstance);
+
+	-- String representation
+	-- wrfbc32 MATH.0[i_oprd_1], #0423445h
+	--
+	local pinCaption = afb:pinCaption(command.afbPinOpCode);
+	command.asString = string.format("%-010s%s.%d[%s], #%s", command.caption, afb.caption, command.afbInstance, pinCaption, dword2hex(command.dword0));	
+end
+
+function command_wrfbc32(device, command)
+	local param = AfbComponentParam(command.afbPinOpCode);
+	param.asDword = command.dword0;
+
+	device:setAfbParam(command.afbOpCode, command.afbInstance, param);
 end
 
 
@@ -426,4 +494,90 @@ function afb_not(afbInstance)
 	-- Save result
 	--	
 	afbInstance:addParamWord(o_result, result);
+end
+
+--
+--	MATH, OpCode 13
+--
+function afb_math(afbInstance)
+	-- Define input opIndexes
+	--
+	local i_conf = 0;
+	local i_1_oprd = 1;
+	local i_2_oprd = 3;
+	local o_result = 6;
+	local o_mat_edi = 8;
+	local o_overflow = 9;
+	local o_underflow = 10;
+	local o_zero = 11;
+	local o_nan = 12;
+	local o_div_by_zero = 13;
+	
+	-- Get params,  check_param throws exception in case of error
+	--
+	check_param_exist(afbInstance, i_conf, "i_conf");
+	check_param_exist(afbInstance, i_1_oprd, "i_1_oprd");
+	check_param_exist(afbInstance, i_2_oprd, "i_2_oprd");
+	
+	local conf = afbInstance:param(i_conf);
+	local operand1 = afbInstance:param(i_1_oprd);
+	local operand2 = afbInstance:param(i_2_oprd);
+
+	-- Logic	conf: 1'-'+' (SI),  '2'-'-' (SI),  '3'-'*' (SI),  '4'-'/' (SI), '5'-'+' (FP),  '6'-'-' (FP),  '7'-'*' (FP),  '8'-'/' (FP)   
+	--
+
+	mathFuncTable = 
+	{
+		[1] = -- SI +
+			function(x)
+				operand1:addSignedInteger(x);
+			end,
+	};
+
+	mathFuncTable[conf.asWord](operand2);
+
+
+--[[	
+	
+	switch (conf.AsWord)
+	{
+		case 1: // SI +
+			operand1.addSignedInteger(operand2);
+			break;
+		 case 2: // SI -
+			operand1.subSignedInteger(operand2);
+			break;
+		case 3: // SI *
+			operand1.mulSignedInteger(operand2);
+			break;
+		case 4: // SI /
+			operand1.divSignedInteger(operand2);
+			break;
+		case 5: // FP +
+			operand1.addFloatingPoint(operand2);
+			break;
+		case 6: // FP -
+			operand1.subFloatingPoint(operand2);
+			break;
+		case 7: // FP *
+			operand1.mulFloatingPoint(operand2);
+		 	break;
+		case 8: // FP /
+			operand1.divFloatingPoint(operand2);
+		 	break;		
+		default:
+			throw new Error("Unknown AFB configuration: " + conf.AsSignedInt + ", or this configuration is not implemented yet.");
+	}
+	]]	
+
+	-- Save result
+	--	
+	operand1.opIndex = o_result;
+	afbInstance:addParam(operand1);
+
+	afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+	afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
+	afbInstance:addParamWord(o_zero, operand1.mathZero);
+	afbInstance:addParamWord(o_nan, operand1.mathNan);
+	afbInstance:addParamWord(o_div_by_zero, operand1.mathDivByZero);
 end

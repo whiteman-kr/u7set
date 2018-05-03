@@ -210,6 +210,15 @@ namespace Sim
 	Sim::AfbComponentInstance* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
 	{
 		Sim::AfbComponentInstance* result = m_device->m_afbComponents.componentInstance(opCode, instanceNo);
+
+		if (result == nullptr)
+		{
+			m_device->fault(QString("Attempt to get not existing AFB (opcode %1) instance (%2)")
+								.arg(opCode)
+								.arg(instanceNo),
+							"ScriptDeviceEmulator::afbComponentInstance");
+		}
+
 		return result;
 	}
 
@@ -459,7 +468,7 @@ namespace Sim
 
 		generatedScript.append("end\n");
 
-		//qDebug() << generatedScript;
+		qDebug() << generatedScript;
 
 		// Reload script
 		//
