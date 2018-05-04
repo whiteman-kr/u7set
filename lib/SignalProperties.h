@@ -53,6 +53,7 @@ public:
 	bool setValue(const SignalSpecPropValue& propValue);
 
 	bool getValue(const QString& name, QVariant* qv) const;
+	bool getValue(const QString& name, QVariant* qv, bool* isEnum) const;
 
 	bool serializeValuesToArray(QByteArray* protoData) const;
 	bool parseValuesFromArray(const QByteArray& protoData);
@@ -156,7 +157,7 @@ public:
 	explicit SignalProperties(Signal& signal);
 
 	Signal& signal() { return m_signal; }
-	void updatePropertiesInSignal();
+	void updateSpecPropValues();
 
 	const std::vector<Property*>& propertiesDependentOnPrecision() { return m_propertiesDependentOnPrecision; }
 	void addPropertyDependentOnPrecision(Property* dependentProperty);
@@ -196,7 +197,7 @@ public:
 private:
 	void initProperties();
 
-	void createSpecificProperties(const QString& specPropStruct, bool removeOld);
+	void createSpecificProperties();
 	void deleteSpecificProperties();
 
 	static std::shared_ptr<OrderedHash<int, QString>> generateOrderedHashFromStringArray(const char* const* array, size_t size);

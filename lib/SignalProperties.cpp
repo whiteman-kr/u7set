@@ -82,14 +82,23 @@ SignalProperties::SignalProperties(Signal& signal) :
 	initProperties();
 }
 
-void SignalProperties::updatePropertiesInSignal()
+void SignalProperties::updateSpecPropValues()
 {
-	for (std::shared_ptr<Property> property : properties())
+	for (const SignalSpecPropValue& value : m_specPropValues.values())
 	{
+		std::shared_ptr<Property> property = propertyByCaption(value.name());
+
+		if (property == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
 		m_specPropValues.setAnyValue(property->caption(), property->value());
 	}
 
 	QByteArray valuesData;
+
 	m_specPropValues.serializeValuesToArray(&valuesData);
 	m_signal.setProtoSpecPropValues(valuesData);
 }
@@ -109,7 +118,25 @@ void SignalProperties::addPropertyDependentOnPrecision(Property* dependentProper
 
 void SignalProperties::setSpecPropStruct(const QString & specPropStruct)
 {
-	m_specPropValues.updateFromSpecPropStruct(specPropStruct);
+	deleteSpecificProperties();
+
+	bool result = m_specPropValues.updateFromSpecPropStruct(specPropStruct);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_signal.setSpecPropStruct(specPropStruct);
+
+	QByteArray protoData;
+
+	m_specPropValues.serializeValuesToArray(&protoData);
+
+	m_signal.setProtoSpecPropValues(protoData);
+
+	createSpecificProperties();
 }
 
 void SignalProperties::initProperties()
@@ -199,7 +226,7 @@ void SignalProperties::initProperties()
 	// append signal specific properties
 	//
 
-	m_specPropValues.create(m_signal);
+	createSpecificProperties();
 
 	//
 
@@ -217,7 +244,8 @@ void SignalProperties::initProperties()
 
 void SignalProperties::createSpecificProperties()
 {
-	m_specPropValues
+	m_specPropValues.create(m_signal);
+
 	PropertyObject propObject;
 
 	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(m_signal.specPropStruct());
@@ -242,12 +270,16 @@ void SignalProperties::createSpecificProperties()
 
 		addProperty(specificProperty);
 	}
-
-
 }
 
 void SignalProperties::deleteSpecificProperties()
 {
+	const QVector<SignalSpecPropValue>& values = m_specPropValues.values();
+
+	for(const SignalSpecPropValue& value : values)
+	{
+		removeProperty(value.name());
+	}
 }
 
 
@@ -518,6 +550,9 @@ bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruc
 
 	buildPropNamesMap();
 
+	QStringList namesToDelete;
+	QHash<QString, std::shared_ptr<Property>> namesToCreate;
+
 	std::vector<std::shared_ptr<Property>> properties = pob.properties();
 
 	for(std::shared_ptr<Property> property : properties)
@@ -526,28 +561,39 @@ bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruc
 
 		if (isExists(propName) == false)
 		{
-			// create new property value, set to default
-			//
-			SignalSpecPropValue specPropValue;
-
-			specPropValue.create(property);
-
-			m_specPropValues.append(specPropValue);
+			namesToCreate.insert(propName, property);
 		}
 		else
 		{
-			// update existing value if nessesery
+			// value of property is exists
 			//
-			if (property->updateFromPreset() == true)
+			QVariant value;
+			bool isEnum = false;
+
+			getValue(propName, &value, &isEnum);
+
+			// checking that property end value types are equal
+			//
+			if (property->value().type() == value.type() && property->isEnum() == isEnum)
 			{
-				setValue(propName, property->value(), property->isEnum());
+				// equal, update existing value if nessesery
+				//
+				if (property->updateFromPreset() == true)
+				{
+					setValue(propName, property->value(), property->isEnum());
+				}
+			}
+			else
+			{
+				// property type has been changed, recreate value
+				//
+				namesToDelete.append(propName);
+				namesToCreate.insert(propName, property);
 			}
 		}
 	}
 
 	buildPropNamesMap();
-
-	QStringList namesToDelete;
 
 	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
 	{
@@ -570,6 +616,17 @@ bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruc
 		{
 			assert(false);
 		}
+	}
+
+	// create new property value, set to default
+	//
+	for(std::shared_ptr<Property> property : namesToCreate)
+	{
+		SignalSpecPropValue specPropValue;
+
+		specPropValue.create(property);
+
+		m_specPropValues.append(specPropValue);
 	}
 
 	return true;
@@ -611,6 +668,25 @@ bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv) const
 	}
 
 	*qv = m_specPropValues[index].value();
+
+	return true;
+}
+
+bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* isEnum) const
+{
+	TEST_PTR_RETURN_FALSE(qv);
+	TEST_PTR_RETURN_FALSE(isEnum);
+
+	int index = getPropertyIndex(name);
+
+	if (index == -1)
+	{
+		assert(false);
+		return false;
+	}
+
+	*qv = m_specPropValues[index].value();
+	*isEnum = m_specPropValues[index].isEnum();
 
 	return true;
 }

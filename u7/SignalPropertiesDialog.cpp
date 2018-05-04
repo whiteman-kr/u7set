@@ -361,7 +361,8 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 			assert(false);
 			continue;
 		}
-		signalProperties->updatePropertiesInSignal();
+
+		signalProperties->updateSpecPropValues();
 
 		signal = signalProperties->signal();
 
