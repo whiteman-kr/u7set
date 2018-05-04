@@ -2152,7 +2152,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 }
 
 
-bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, QVector<Hardware::DeviceSignal*> deviceSignalsToUpdate)
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
 {
 	TEST_PTR_RETURN_FALSE(dbc);
 
