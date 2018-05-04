@@ -150,7 +150,7 @@ public slots:
 	bool setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg);
 
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
-    void slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState);
+	void slot_setSignalWorkcopy(Signal *signal, ObjectState *objectState);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);

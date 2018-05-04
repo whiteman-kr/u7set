@@ -117,7 +117,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 						message += QString("Signal %1 could not be checked out\n").arg(state.id);
 						break;
 					}
-					case ERR_SIGNAL_ALREADY_CHECKED_OUT:
+					case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
 					{
 						message += QString("Signal %1 is checked out by other user\n").arg(state.id);
 						break;
@@ -543,7 +543,7 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 	}
 	foreach (const ObjectState& objectState, objectStates)
 	{
-		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER
 				&& objectState.userId != m_dbController->currentUser().userId() && !m_dbController->currentUser().isAdminstrator())
 		{
 			return false;
@@ -558,7 +558,7 @@ QString SignalPropertiesDialog::errorMessage(const ObjectState& state) const
 	{
 		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
 			return tr("Signal %1 is not checked out").arg(state.id);
-		case ERR_SIGNAL_ALREADY_CHECKED_OUT:
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
 		{
 			std::vector<DbUser> users;
 			m_dbController->getUserList(&users, m_parent);

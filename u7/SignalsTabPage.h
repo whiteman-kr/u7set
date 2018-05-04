@@ -307,6 +307,7 @@ public slots:
 	// Data
 	//
 private:
+	static SignalsTabPage* m_instance;
 	SignalsModel* m_signalsModel = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;

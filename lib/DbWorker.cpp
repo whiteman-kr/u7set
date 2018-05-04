@@ -4569,6 +4569,11 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 		return;
 	}
 
+	if (signalIDs->size() == 0)
+	{
+		return;				// nothing to checkout
+	}
+
 	objectStates->clear();
 
 	// Operation
@@ -4659,8 +4664,8 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 
 	// request
 	//
-	signal->setCreated(QDateTime::currentDateTime());
-	signal->setInstanceCreated(QDateTime::currentDateTime());
+	//signal->setCreated(QDateTime::currentDateTime());
+	//signal->setInstanceCreated(QDateTime::currentDateTime());
 
 	QString errMsg;
 
