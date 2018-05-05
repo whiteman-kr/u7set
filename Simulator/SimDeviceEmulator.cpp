@@ -492,6 +492,14 @@ namespace Sim
 			return false;
 		}
 
+		m_operateCyclefunc = LuaIntf::LuaRef(m_luaState, "operateCycle");
+
+		if (m_operateCyclefunc.isValid() == false || m_operateCyclefunc.isFunction() == false)
+		{
+			writeError("Lua: operateCycle not found or is not function.");
+			return false;
+		}
+
 		return true;
 	}
 
@@ -939,18 +947,9 @@ namespace Sim
 		//
 		std::string luaFuncName = "operateCycle";
 
-		LuaIntf::LuaRef func(m_luaState, "operateCycle");
-
-		if (func.isValid() == false || func.isFunction() == false)
-		{
-			writeError(QString("Lua: %1 not found or is not function.")
-				.arg(QString::fromStdString(luaFuncName)));
-
-			return false;
-		}
 		try
 		{
-			func(ScriptDeviceEmulator(this));
+			m_operateCyclefunc(ScriptDeviceEmulator(this));
 		}
 		catch (const LuaIntf::LuaException& e)
 		{

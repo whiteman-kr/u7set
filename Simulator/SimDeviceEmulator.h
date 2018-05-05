@@ -261,6 +261,7 @@ public:
 		// Lua
 		//
 		lua_State* m_luaState = nullptr;
+		LuaIntf::LuaRef m_operateCyclefunc;
 		int m_gcCounter = 0;
 
 		// Cached state

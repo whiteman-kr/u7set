@@ -114,7 +114,7 @@ function parse_startafb(device, command)
 
 	-- startafb   LOGIC.0
 	--
-	command.asString = string.format("%-010s %s.%d", command.caption, afb.caption, command.afbInstance);
+	command.asString = string.format("%-010s%s.%d", command.caption, afb.caption, command.afbInstance);
 end
 
 function command_startafb(device, command)
@@ -543,51 +543,86 @@ function afb_math(afbInstance)
 				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
 				afbInstance:addParamWord(o_zero, operand1.mathZero);				
 			end,
+		[2] = -- SI - SI
+			function()
+				operand1:subSignedInteger(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);				
+			end,
+		[3] = -- SI * SI
+			function()
+				operand1:mulSignedInteger(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);				
+			end,
+		[4] = -- SI / SI
+			function()
+				operand1:divSignedInteger(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_div_by_zero, operand1.mathDivByZero);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);
+			end,
+		[5] = -- FP + FP
+			function()
+				operand1:addFloatingPoint(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+				afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);	
+				afbInstance:addParamWord(o_nan, operand1.mathNan);					
+			end,
+		[6] = -- FP - FP
+			function()
+				operand1:subFloatingPoint(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+				afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);	
+				afbInstance:addParamWord(o_nan, operand1.mathNan);					
+			end,
+		[7] = -- FP * FP
+			function()
+				operand1:mulFloatingPoint(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+				afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);	
+				afbInstance:addParamWord(o_nan, operand1.mathNan);					
+			end,						
+		[8] = -- FP / FP
+			function()
+				operand1:divFloatingPoint(operand2);
+
+				operand1.opIndex = o_result;
+				afbInstance:addParam(operand1);
+
+				afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
+				afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
+				afbInstance:addParamWord(o_zero, operand1.mathZero);	
+				afbInstance:addParamWord(o_nan, operand1.mathNan);
+				afbInstance:addParamWord(o_div_by_zero, operand1.mathDivByZero);
+			end,					
 	};
 
 	mathFuncTable[conf.asWord]();
-
---[[	
-	
-	switch (conf.AsWord)
-	{
-		case 1: // SI +
-			operand1.addSignedInteger(operand2);
-			break;
-		 case 2: // SI -
-			operand1.subSignedInteger(operand2);
-			break;
-		case 3: // SI *
-			operand1.mulSignedInteger(operand2);
-			break;
-		case 4: // SI /
-			operand1.divSignedInteger(operand2);
-			break;
-		case 5: // FP +
-			operand1.addFloatingPoint(operand2);
-			break;
-		case 6: // FP -
-			operand1.subFloatingPoint(operand2);
-			break;
-		case 7: // FP *
-			operand1.mulFloatingPoint(operand2);
-		 	break;
-		case 8: // FP /
-			operand1.divFloatingPoint(operand2);
-		 	break;		
-		default:
-			throw new Error("Unknown AFB configuration: " + conf.AsSignedInt + ", or this configuration is not implemented yet.");
-	}
-	]]	
-
-	-- Save result
-	--	
-	--operand1.opIndex = o_result;
-	--afbInstance:addParam(operand1);
-
-	--afbInstance:addParamWord(o_overflow, operand1.mathOverflow);
-	--afbInstance:addParamWord(o_underflow, operand1.mathUnderflow);
-	--afbInstance:addParamWord(o_zero, operand1.mathZero);
-	--afbInstance:addParamWord(o_nan, operand1.mathNan);
-	--afbInstance:addParamWord(o_div_by_zero, operand1.mathDivByZero);
 end
