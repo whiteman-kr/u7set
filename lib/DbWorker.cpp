@@ -6296,6 +6296,9 @@ bool DbWorker::processingAfterDatabaseUpgrade0214(QSqlDatabase& db, QString* err
 	}
 
 	QString outputSpecPropStruct(
+		"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;false;false;Electric high limit of input signal;true;None\n"
+		"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;false;false;Electric low limit of input signal;true;None\n"
+		"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;false;false;;true;None\n"
 		"4;HighDAC;4 Signal processing;uint32;0;65535;65535;0;false;false;High DAC value;true;None\n"
 		"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;false;false;High engeneering units;true;None\n"
 		"4;LowDAC;4 Signal processing;uint32;0;65535;0;0;false;false;Low DAC value;true;None\n"
@@ -6467,6 +6470,11 @@ bool DbWorker::processingAfterDatabaseUpgrade0214(QSqlDatabase& db, QString* err
 
 			result &= outputSpecPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
 			result &= outputSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+
+			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
+			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+
+			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
 
 			result &= outputSpecPropValues.setEnumValue<E::OutputMode>(SignalProperties::outputModeCaption, outputMode);
 

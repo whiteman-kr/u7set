@@ -228,18 +228,12 @@ void SignalProperties::initProperties()
 
 	createSpecificProperties();
 
-	//
-
-	if (theSettings.isExpertMode() == true)
-	{
-		auto propSpecPropStruct = ADD_PROPERTY_GETTER_SETTER(QString, specificPropertiesStructCaption, true,
+	auto propSpecPropStruct = ADD_PROPERTY_GETTER_SETTER(QString, specificPropertiesStructCaption, true,
 															 SignalProperties::specPropStruct, SignalProperties::setSpecPropStruct);
+	propSpecPropStruct->setCategory(categoryExpertProperties);
+	propSpecPropStruct->setExpert(true);
 
-		propSpecPropStruct->setCategory(categoryExpertProperties);
-		propSpecPropStruct->setExpert(true);
-
-		propSpecPropStruct->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
-	}
+	propSpecPropStruct->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 }
 
 void SignalProperties::createSpecificProperties()
@@ -649,6 +643,17 @@ bool SignalSpecPropValues::setAnyValue(const QString& name, const QVariant& valu
 	return m_specPropValues[index].setAnyValue(name, value);
 }
 
+bool SignalSpecPropValues::setEnumValue(const QString& name, int enumItemValue)
+{
+	int index = getPropertyIndex(name);
+
+	if (index == -1)
+	{
+		return false;
+	}
+
+	return m_specPropValues[index].setValue(name, QVariant(enumItemValue), true);
+}
 
 bool SignalSpecPropValues::setValue(const SignalSpecPropValue& propValue)
 {
@@ -740,6 +745,11 @@ bool SignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 	buildPropNamesMap();
 
 	return true;
+}
+
+void SignalSpecPropValues::append(const SignalSpecPropValue& value)
+{
+	m_specPropValues.append(value);
 }
 
 void SignalSpecPropValues::buildPropNamesMap()

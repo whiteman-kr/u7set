@@ -5,6 +5,7 @@
 #include "Signal.h"
 #include "DataSource.h"
 #include "WUtils.h"
+#include "SignalProperties.h"
 
 #include "../Proto/serialization.pb.h"
 
@@ -252,6 +253,186 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, const QString& busType
 									 SIZE_1BIT,							// param is not checked for Bus signals
 									 E::BigEndian,						// param is not checked for Bus signals
 									 busTypeID);
+}
+
+int Signal::lowADC() const
+{
+	return getSpecPropInt(SignalProperties::lowADCCaption);
+}
+
+void Signal::setLowADC(int lowADC)
+{
+	setSpecPropInt(SignalProperties::lowADCCaption, lowADC);
+}
+
+int Signal::highADC() const
+{
+	return getSpecPropInt(SignalProperties::highADCCaption);
+}
+
+void Signal::setHighADC(int highADC)
+{
+	setSpecPropInt(SignalProperties::highADCCaption, highADC);
+}
+
+int Signal::lowDAC() const
+{
+	return getSpecPropInt(SignalProperties::lowDACCaption);
+}
+
+void Signal::setLowDAC(int lowDAC)
+{
+	setSpecPropInt(SignalProperties::lowDACCaption, lowDAC);
+}
+
+int Signal::highDAC() const
+{
+	return getSpecPropInt(SignalProperties::highDACCaption);
+}
+
+void Signal::setHighDAC(int highDAC)
+{
+	setSpecPropInt(SignalProperties::highDACCaption, highDAC);
+}
+
+double Signal::lowEngeneeringUnits() const
+{
+	return getSpecPropDouble(SignalProperties::lowEngeneeringUnitsCaption);
+}
+
+void Signal::setLowEngeneeringUnits(double lowEngeneeringUnits)
+{
+	setSpecPropDouble(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
+}
+
+double Signal::highEngeneeringUnits() const
+{
+	return getSpecPropDouble(SignalProperties::highEngeneeringUnitsCaption);
+}
+
+void Signal::setHighEngeneeringUnits(double highEngeneeringUnits)
+{
+	setSpecPropDouble(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+}
+
+double Signal::lowValidRange() const
+{
+	return getSpecPropDouble(SignalProperties::lowValidRangeCaption);
+}
+
+void Signal::setLowValidRange(double lowValidRange)
+{
+	setSpecPropDouble(SignalProperties::lowValidRangeCaption, lowValidRange);
+}
+
+double Signal::highValidRange() const
+{
+	return getSpecPropDouble(SignalProperties::highValidRangeCaption);
+}
+
+void Signal::setHighValidRange(double highValidRange)
+{
+	setSpecPropDouble(SignalProperties::highValidRangeCaption, highValidRange);
+}
+
+double Signal::filteringTime() const
+{
+	return getSpecPropDouble(SignalProperties::filteringTimeCaption);
+}
+
+void Signal::setFilteringTime(double filteringTime)
+{
+	setSpecPropDouble(SignalProperties::filteringTimeCaption, filteringTime);
+}
+
+double Signal::spreadTolerance() const
+{
+	return getSpecPropDouble(SignalProperties::spreadToleranceCaption);
+}
+
+void Signal::setSpreadTolerance(double spreadTolerance)
+{
+	setSpecPropDouble(SignalProperties::spreadToleranceCaption, spreadTolerance);
+}
+
+double Signal::electricLowLimit() const
+{
+	return getSpecPropDouble(SignalProperties::electricLowLimitCaption);
+}
+
+void Signal::setElectricLowLimit(double electricLowLimit)
+{
+	setSpecPropDouble(SignalProperties::electricLowLimitCaption, electricLowLimit);
+}
+
+double Signal::electricHighLimit() const
+{
+	return getSpecPropDouble(SignalProperties::electricHighLimitCaption);
+}
+
+void Signal::setElectricHighLimit(double electricHighLimit)
+{
+	setSpecPropDouble(SignalProperties::electricHighLimitCaption, electricHighLimit);
+}
+
+E::ElectricUnit Signal::electricUnit() const
+{
+	return static_cast<E::ElectricUnit>(getSpecPropEnum(SignalProperties::electricUnitCaption));
+}
+
+void Signal::setElectricUnit(E::ElectricUnit electricUnit)
+{
+	setSpecPropEnum(SignalProperties::electricUnitCaption, static_cast<int>(electricUnit));
+}
+
+E::SensorType Signal::sensorType() const
+{
+	return static_cast<E::SensorType>(getSpecPropEnum(SignalProperties::sensorTypeCaption));
+}
+
+void Signal::setSensorType(E::SensorType sensorType)
+{
+	setSpecPropEnum(SignalProperties::sensorTypeCaption, static_cast<int>(sensorType));
+}
+
+E::OutputMode Signal::outputMode() const
+{
+	return static_cast<E::OutputMode>(getSpecPropEnum(SignalProperties::outputModeCaption));
+}
+
+void Signal::setOutputMode(E::OutputMode outputMode)
+{
+	setSpecPropEnum(SignalProperties::outputModeCaption, static_cast<int>(outputMode));
+}
+
+bool Signal::createSpecPropValues()
+{
+	PropertyObject propObject;
+
+	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(m_specPropStruct);
+
+	if (result.first == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	std::vector<std::shared_ptr<Property>> specificProperties = propObject.properties();
+
+	SignalSpecPropValues spValues;
+
+	for(std::shared_ptr<Property> specificProperty : specificProperties)
+	{
+		SignalSpecPropValue spValue;
+
+		spValue.create(specificProperty);
+
+		spValues.append(spValue);
+	}
+
+	spValues.serializeValuesToArray(&m_protoSpecPropValues);
+
+	return true;
 }
 
 void Signal::saveProtoData(QByteArray* protoDataArray) const
@@ -667,13 +848,13 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("UnbalanceLimit", 1);
 	xml.writeDoubleAttribute("InputLowLimit", electricLowLimit());
 	xml.writeDoubleAttribute("InputHighLimit", electricHighLimit());
-	xml.writeIntAttribute("InputUnitID", electricUnitInt());
-	xml.writeIntAttribute("InputSensorID", sensorTypeInt());
+	xml.writeIntAttribute("InputUnitID", TO_INT(electricUnit()));
+	xml.writeIntAttribute("InputSensorID", TO_INT(sensorType()));
 	xml.writeDoubleAttribute("OutputLowLimit", electricLowLimit());
 	xml.writeDoubleAttribute("OutputHighLimit", electricHighLimit());
-	xml.writeIntAttribute("OutputUnitID", electricUnitInt());
-	xml.writeIntAttribute("OutputMode", outputModeInt());
-	xml.writeIntAttribute("OutputSensorID", sensorTypeInt());
+	xml.writeIntAttribute("OutputUnitID", TO_INT(electricUnit()));
+	xml.writeIntAttribute("OutputMode", TO_INT(outputMode()));
+	xml.writeIntAttribute("OutputSensorID", TO_INT(sensorType()));
 	xml.writeBoolAttribute("Acquire", acquire());
 	xml.writeBoolAttribute("Calculated", false);
 	xml.writeIntAttribute("NormalState", 0);
@@ -1285,108 +1466,125 @@ void Signal::updateTuningValuesType()
 	m_tuningLowBound.setType(tvType);
 	m_tuningHighBound.setType(tvType);
 }
-/*
-bool Signal::createSpecPropValues()
-{
-	m_specPropValues.clear();
 
-	if (m_specPropStruct.isEmpty() == true)
+
+double Signal::getSpecPropDouble(const QString& name) const
+{
+	QVariant qv;
+	bool isEnum = false;
+
+	bool result = getSpecPropValue(name, &qv, &isEnum);
+
+	if (result == false)
 	{
-		return true;
+		assert(false);
+		return 0;
 	}
 
-	PropertyObject pob;
+	assert(qv.type() == QVariant::Double && isEnum == false);
 
-	std::pair<bool, QString> result = pob.parseSpecificPropertiesStruct(m_specPropStruct);
+	return qv.toDouble();
+}
 
-	if (result.first == false)
+int Signal::getSpecPropInt(const QString& name) const
+{
+	QVariant qv;
+	bool isEnum = false;
+
+	bool result = getSpecPropValue(name, &qv, &isEnum);
+
+	if (result == false)
+	{
+		assert(false);
+		return 0;
+	}
+
+	assert(qv.type() == QVariant::Int && isEnum == false);
+
+	return qv.toInt();
+}
+
+int Signal::getSpecPropEnum(const QString& name) const
+{
+	QVariant qv;
+	bool isEnum = false;
+
+	bool result = getSpecPropValue(name, &qv, &isEnum);
+
+	if (result == false)
+	{
+		assert(false);
+		return 0;
+	}
+
+	assert(qv.type() == QVariant::Int && isEnum == true);
+
+	return qv.toInt();
+}
+
+bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const
+{
+	TEST_PTR_RETURN_FALSE(qv);
+	TEST_PTR_RETURN_FALSE(isEnum);
+
+	SignalSpecPropValues spv;
+
+	bool result = spv.parseValuesFromArray(m_protoSpecPropValues);
+
+	if (result == false)
 	{
 		assert(false);
 		return false;
 	}
 
-	std::vector<std::shared_ptr<Property>> properties = pob.properties();
+	return spv.getValue(name, qv, isEnum);
+}
 
-	Proto::TypedPropertyValues protoTypedValues;
+bool Signal::setSpecPropDouble(const QString& name, double value)
+{
+	QVariant qv(value);
 
-	for(std::shared_ptr<Property> property : properties)
+	return setSpecPropValue(name, qv, false);
+}
+
+bool Signal::setSpecPropInt(const QString& name, int value)
+{
+	QVariant qv(value);
+
+	return setSpecPropValue(name, qv, false);
+}
+
+bool Signal::setSpecPropEnum(const QString& name, int enumValue)
+{
+	QVariant qv(enumValue);
+
+	return setSpecPropValue(name, qv, true);
+}
+
+bool Signal::setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum)
+{
+	SignalSpecPropValues spv;
+
+	bool result = spv.parseValuesFromArray(m_protoSpecPropValues);
+
+	if (result == false)
 	{
-		TypedPropertyValue typedValue(property);
-
-		Proto::TypedPropertyValue* protoTypedValue = protoTypedValues.add_value();
-
-		typedValue.save(protoTypedValue);
+		assert(false);
+		return false;
 	}
 
-	int size = protoTypedValues.ByteSize();
+	if (isEnum == true)
+	{
+		return spv.setEnumValue(name, qv.toInt());
+	}
 
-	m_specPropValues.resize(size);
+	spv.setValue(name, qv);
 
-	protoTypedValues.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(m_specPropValues.data()));
+	spv.serializeValuesToArray(&m_protoSpecPropValues);
 
 	return true;
 }
 
-bool Signal::updateSpecPropValues()
-{
-	assert(false);			// should be implemented
-	return false;
-}
-
-bool Signal::parseSpecPropValues(::Proto::TypedPropertyValues* propValues)
-{
-	TEST_PTR_RETURN_FALSE(propValues);
-
-	if (m_specPropValues.isEmpty() == true)
-	{
-		return false;
-	}
-
-	return propValues->ParseFromArray(m_specPropValues.constData(), m_specPropValues.size());
-}
-
-QVariant Signal::getSpecPropertyValue(const QString& propName)
-{
-	QVariant invalidValue;
-
-	::Proto::PropertyValues propValues;
-
-	bool res = parseSpecPropValues(&propValues);
-
-	if (res == false)
-	{
-		assert(false);
-		return invalidValue;
-	}
-
-	int propCount = propValues.propertyvalue_size();
-
-	std::string stdPropName(propName.toStdString());
-
-	for(int i = 0; i < propCount; i++)
-	{
-		const ::Proto::Property& propValue = propValues.propertyvalue(i);
-
-		if (propValue.name() == stdPropName)
-		{
-			::Property prop;
-
-			res = ::Proto::loadProperty(propValue, &prop);
-
-			if (res == false)
-			{
-				return invalidValue;
-			}
-
-			return prop.value();
-		}
-	}
-
-	assert(false);
-	return invalidValue;
-}
-
-*/
 // --------------------------------------------------------------------------------------------------------
 //
 // SignalSet class implementation

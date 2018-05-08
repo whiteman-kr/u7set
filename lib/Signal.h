@@ -151,51 +151,52 @@ public:
 
 	// Analog signal properties
 
-	int lowADC() const { return m_lowADC; }
-	void setLowADC(int lowADC) { m_lowADC = lowADC; }
+	int lowADC() const;
+	void setLowADC(int lowADC);
 
-	int highADC() const { return m_highADC; }
-	void setHighADC(int highADC) { m_highADC = highADC;}
+	int highADC() const;
+	void setHighADC(int highADC);
 
-	double lowEngeneeringUnits() const { return m_lowEngeneeringUnits; }
-	void setLowEngeneeringUnits(double lowEngeneeringUnits) { m_lowEngeneeringUnits = lowEngeneeringUnits; }
+	int lowDAC() const;
+	void setLowDAC(int lowDAC);
 
-	double highEngeneeringUnits() const { return m_highEngeneeringUnits; }
-	void setHighEngeneeringUnits(double highEngeneeringUnits) { m_highEngeneeringUnits = highEngeneeringUnits; }
+	int highDAC() const;
+	void setHighDAC(int highDAC);
 
-	double lowValidRange() const { return m_lowValidRange; }
-	void setLowValidRange(double lowValidRange) { m_lowValidRange = lowValidRange; }
+	double lowEngeneeringUnits() const;
+	void setLowEngeneeringUnits(double lowEngeneeringUnits);
 
-	double highValidRange() const { return m_highValidRange; }
-	void setHighValidRange(double highValidRange) { m_highValidRange = highValidRange; }
+	double highEngeneeringUnits() const;
+	void setHighEngeneeringUnits(double highEngeneeringUnits);
 
-	double filteringTime() const { return m_filteringTime; }
-	void setFilteringTime(double filteringTime) { m_filteringTime = filteringTime; }
+	double lowValidRange() const;
+	void setLowValidRange(double lowValidRange);
 
-	double spreadTolerance() const { return m_spreadTolerance; }
-	void setSpreadTolerance(double spreadTolerance) { m_spreadTolerance = spreadTolerance; }
+	double highValidRange() const;
+	void setHighValidRange(double highValidRange);
+
+	double filteringTime() const;
+	void setFilteringTime(double filteringTime);
+
+	double spreadTolerance() const;
+	void setSpreadTolerance(double spreadTolerance);
 
 	// Analog input/output signal properties
 
-	double electricLowLimit() const { return m_electricLowLimit; }
-	void setElectricLowLimit(double electricLowLimit) { m_electricLowLimit = electricLowLimit; }
+	double electricLowLimit() const;
+	void setElectricLowLimit(double electricLowLimit);
 
-	double electricHighLimit() const { return m_electricHighLimit; }
-	void setElectricHighLimit(double electricHighLimit) { m_electricHighLimit = electricHighLimit; }
+	double electricHighLimit() const;
+	void setElectricHighLimit(double electricHighLimit);
 
-	E::ElectricUnit electricUnit() const { return m_electricUnit; }
-	int electricUnitInt() const { return TO_INT(m_electricUnit); }
-	void setElectricUnit(E::ElectricUnit electricUnit) { m_electricUnit = electricUnit; }
+	E::ElectricUnit electricUnit() const;
+	void setElectricUnit(E::ElectricUnit electricUnit);
 
-	E::SensorType sensorType() const { return m_sensorType; }
-	int sensorTypeInt() const { return TO_INT(m_sensorType); }
-	void setSensorType(E::SensorType sensorType) { m_sensorType = sensorType; }
-	void setSensorTypeInt(int sensorType) { m_sensorType = IntToEnum<E::SensorType>(sensorType); }
+	E::SensorType sensorType() const;
+	void setSensorType(E::SensorType sensorType);
 
-	E::OutputMode outputMode() const { return m_outputMode; }
-	int outputModeInt() const { return TO_INT(m_outputMode); }
-	void setOutputMode(E::OutputMode outputMode) { m_outputMode = outputMode; }
-	void setOutputModeInt(int outputMode) { m_outputMode = IntToEnum<E::OutputMode>(outputMode); }
+	E::OutputMode outputMode() const;
+	void setOutputMode(E::OutputMode outputMode);
 
 	// Tuning signal properties
 
@@ -242,16 +243,18 @@ public:
 
 	bool updateSpecProps(const QString& specPropStruct, bool* signalChanged);
 
+	bool createSpecPropValues();
+
 	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
 	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
+
+	//
 
 	void saveProtoData(QByteArray* protoDataArray) const;
 	void saveProtoData(Proto::ProtoAppSignalData* protoData) const;
 
 	void loadProtoData(const QByteArray& protoDataArray);
 	void loadProtoData(const Proto::ProtoAppSignalData& protoData);
-
-
 
 	// Signal fields from database
 
@@ -351,10 +354,16 @@ private:
 
 	//
 
-	bool createSpecPropValues();
-	bool updateSpecPropValues();
+	double getSpecPropDouble(const QString& name) const;
+	int getSpecPropInt(const QString& name) const;
+	int getSpecPropEnum(const QString& name) const;
+	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
 
-//	bool parseSpecPropValues(Proto::TypedPropertyValues* propValues);
+	bool setSpecPropDouble(const QString& name, double value);
+	bool setSpecPropInt(const QString& name, int value);
+	bool setSpecPropEnum(const QString& name, int enumValue);
+	bool setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum);
+
 //	QVariant getSpecPropertyValue(const QString& propName);
 
 private:

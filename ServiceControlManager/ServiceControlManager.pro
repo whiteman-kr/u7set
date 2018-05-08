@@ -104,7 +104,9 @@ SOURCES += MainWindow.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     AppDataSourceWidget.cpp \
     ../lib/Times.cpp \
-    ../lib/Tuning/TuningSignalState.cpp
+    ../lib/Tuning/TuningSignalState.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -153,7 +155,9 @@ HEADERS  += MainWindow.h \
     ../u7/Builder/ModulesRawData.h \
     AppDataSourceWidget.h \
     ../lib/Times.h \
-    ../lib/Tuning/TuningSignalState.h
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/PropertyObject.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 

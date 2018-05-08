@@ -49,6 +49,7 @@ public:
 
 	template<typename ENUM_TYPE>
 	bool setEnumValue(const QString& name, ENUM_TYPE enumItemValue);
+	bool setEnumValue(const QString& name, int enumItemValue);
 
 	bool setValue(const SignalSpecPropValue& propValue);
 
@@ -58,9 +59,11 @@ public:
 	bool serializeValuesToArray(QByteArray* protoData) const;
 	bool parseValuesFromArray(const QByteArray& protoData);
 
-	bool save(Proto::SignalSpecPropValues* protoValues) const;
+	//bool save(Proto::SignalSpecPropValues* protoValues) const;
 
 	const QVector<SignalSpecPropValue>& values() const { return m_specPropValues; }
+
+	void append(const SignalSpecPropValue& value);
 
 private:
 	void buildPropNamesMap();

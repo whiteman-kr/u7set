@@ -124,7 +124,10 @@ SOURCES += \
     ../lib/CircularLogger.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Signal.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/SignalProperties.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -198,7 +201,9 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../u7/Builder/CfgFiles.h
+    ../u7/Builder/CfgFiles.h \
+    ../lib/PropertyObject.h \
+    ../lib/SignalProperties.h
 #../lib/ExcelHelper.h
 
 FORMS    +=
