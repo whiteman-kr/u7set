@@ -63,10 +63,6 @@ public:
 	static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);
 	void dump() const;
 
-signals:
-
-public slots:
-
 	// Data Structures
 	//
 public:

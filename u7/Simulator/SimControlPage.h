@@ -8,7 +8,7 @@
 #include <QTreeWidget>
 #include <QLineEdit>
 #include "SimBasePage.h"
-#include "SimLmModel.h"
+#include "SimLogicModule.h"
 
 class SimControlPage : public SimBasePage
 {

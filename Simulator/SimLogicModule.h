@@ -9,6 +9,7 @@
 #include "SimEeprom.h"
 #include "SimDeviceEmulator.h"
 #include "SimTimeController.h"
+#include "SimCommandProcessor.h"
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
 
@@ -34,22 +35,6 @@ namespace Sim
 		// Running LM
 		//
 		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, bool reset);				// Start running one cycle
-
-		//bool powerOn(bool autoStart);
-		//bool powerOff();
-
-		//bool pause();
-		//bool start(int cycles = -1);
-		//bool step();
-
-		//bool isPowerOn() const;
-		//bool isFaultMode() const;
-
-		// Signals
-		//
-//	signals:
-//		void signal_pause();				// Internal class signal, command to DeviceEmulator
-//		void signal_start(int cycles);		// Internal class signal, command to DeviceEmulator
 
 	signals:
 		void faulted(QString message);		// Public signal, translated from DeviceEmulator
@@ -95,9 +80,10 @@ namespace Sim
 
 		QString m_simulationScript;
 
+		std::unique_ptr<CommandProcessor> m_commandProcessor;
+
 		// Running Emulation
 		//
-		//QThread m_workerThread;
 		DeviceEmulator m_device;
 
 		// --

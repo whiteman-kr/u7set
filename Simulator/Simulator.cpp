@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
 #include "../lib/ModuleFirmware.h"
-#include "SimLmModel.h"
+#include "SimLogicModule.h"
 
 namespace Sim
 {

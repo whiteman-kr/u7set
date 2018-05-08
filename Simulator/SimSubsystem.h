@@ -4,7 +4,7 @@
 #include <memory>
 #include "SimOutput.h"
 #include "SimEeprom.h"
-#include "SimLmModel.h"
+#include "SimLogicModule.h"
 
 namespace Hardware
 {
@@ -39,6 +39,7 @@ namespace Sim
 
 	private:
 		QString m_subsystemId;
+		LmDescription m_lmDescription;
 
 		std::map<int, std::shared_ptr<LogicModule>> m_devicesByLmNumber;			// key is LmNumber
 		std::map<QString, std::shared_ptr<LogicModule>> m_devicesByEquipmentId;		// key is EquipmentID

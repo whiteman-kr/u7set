@@ -10,7 +10,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QMutex>
 #include <SimOutput.h>
-#include <SimLmModel.h>
+#include <SimLogicModule.h>
 #include <SimTimeController.h>
 #include <SimAppSignalManager.h>
 

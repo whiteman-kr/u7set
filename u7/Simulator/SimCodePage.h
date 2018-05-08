@@ -5,7 +5,7 @@
 #include <QAbstractTableModel>
 #include <QTreeView>
 #include "SimBasePage.h"
-#include "SimLmModel.h"
+#include "SimLogicModule.h"
 
 
 enum class CodePageColumns

@@ -14,6 +14,8 @@ namespace Sim
 
 	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const QString simulationScript)
 	{
+		m_lmDescription = lmDescription;
+
 		if (firmware.uartExists(UartID::ApplicationLogic) == false)
 		{
 			writeError(QObject::tr("Application data is not found in firmware."));
@@ -78,23 +80,19 @@ namespace Sim
 	 {
 		std::shared_ptr<LogicModule> result = std::make_shared<LogicModule>();
 
+		if (auto p = m_devicesByLmNumber.try_emplace(lm.lmNumber, result);
+			p.second == false)
 		{
-			auto p = m_devicesByLmNumber.try_emplace(lm.lmNumber, result);
-			if (p.second == false)
-			{
-				writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(lm.lmNumber));
-				return std::shared_ptr<LogicModule>();
-			}
+			writeError(QObject::tr("Cannot add device, device with LmNumber %1 already exists.").arg(lm.lmNumber));
+			return std::shared_ptr<LogicModule>();
 		}
 
+		if (auto p = m_devicesByEquipmentId.try_emplace(lm.equipmentId, result);
+			p.second == false)
 		{
-			auto p = m_devicesByEquipmentId.try_emplace(lm.equipmentId, result);
-			if (p.second == false)
-			{
-				writeError(QObject::tr("Cannot add device, device with EquipmentID %1 already exists.").arg(lm.equipmentId));
-				m_devicesByLmNumber.erase(lm.lmNumber);		// Device to m_devicesByLmNumber already was added, remove it
-				return std::shared_ptr<LogicModule>();
-			}
+			writeError(QObject::tr("Cannot add device, device with EquipmentID %1 already exists.").arg(lm.equipmentId));
+			m_devicesByLmNumber.erase(lm.lmNumber);		// Device to m_devicesByLmNumber already was added, remove it
+			return std::shared_ptr<LogicModule>();
 		}
 
 		 assert(m_devicesByLmNumber.size() == m_devicesByEquipmentId.size());

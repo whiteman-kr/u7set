@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "SimBasePage.h"
-#include "SimLmModel.h"
+#include "SimLogicModule.h"
 #include "SimSchemaWidget.h"
 #include "../../VFrame30/Schema.h"
 #include "../../VFrame30/AppSignalController.h"

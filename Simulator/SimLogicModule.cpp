@@ -1,4 +1,4 @@
-#include "SimLmModel.h"
+#include "SimLogicModule.h"
 #include "../lib/ModuleFirmware.h"
 
 namespace Sim
@@ -7,20 +7,14 @@ namespace Sim
 	LogicModule::LogicModule() :
 		Output("LogicModule")
 	{
-		//m_device.moveToThread(&m_workerThread);
-
 		connect(&m_device, &DeviceEmulator::appCodeParsed, this, &LogicModule::slot_appCodeParsed);
 		connect(&m_device, &DeviceEmulator::faulted, this, &LogicModule::faulted);
-
-		//connect(this, &LogicModule::signal_pause, &m_device, &DeviceEmulator::pause, Qt::QueuedConnection);
-		//connect(this, &LogicModule::signal_start, &m_device, &DeviceEmulator::start, Qt::QueuedConnection);
 
 		return;
 	}
 
 	LogicModule::~LogicModule()
 	{
-		//powerOff();
 		return;
 	}
 
@@ -54,6 +48,8 @@ namespace Sim
 			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
 		}
 
+		m_commandProcessor = CommandProcessor::createInstance();
+
 		// Init DeviceEmulator
 		//
 		ok &= m_device.init(m_logicModuleInfo,
@@ -78,6 +74,8 @@ namespace Sim
 
 		m_simulationScript.clear();
 
+		m_commandProcessor.reset();
+
 		return;
 	}
 
@@ -91,83 +89,6 @@ namespace Sim
 		auto result = QtConcurrent::run<bool>(&m_device, &DeviceEmulator::run, 1);
 		return result;
 	}
-
-//	bool LogicModule::powerOn(bool autoStart)
-//	{
-//		writeMessage(tr("PowerOn, autoStart = %1").arg(autoStart));
-
-//		if (m_workerThread.isRunning() == true)
-//		{
-//			writeWaning(tr("PowerOn, previous device emulation is in progress, device will be stopped and new emulation will start."));
-//			powerOff();
-//			assert(m_workerThread.isFinished());
-//		}
-
-//		m_device.reset();	// Worker thread is stopped, it's safe to call reset
-
-//		m_workerThread.start();
-
-//		if (autoStart == true)
-//		{
-//			start();
-//		}
-
-//		return true;
-//	}
-
-//	bool LogicModule::powerOff()
-//	{
-//		m_workerThread.quit();
-//		m_workerThread.wait();
-
-//		return true;
-//	}
-
-//	bool LogicModule::pause()
-//	{
-//		if (m_workerThread.isRunning() == true)
-//		{
-//			return false;
-//		}
-
-//		emit signal_pause();
-//		return true;
-//	}
-
-//	bool LogicModule::start(int cycles /*= -1*/)
-//	{
-//		if (m_workerThread.isRunning() == false)
-//		{
-//			return false;
-//		}
-
-//		emit signal_start(cycles);
-//		return true;
-//	}
-
-//	bool LogicModule::step()
-//	{
-//		return start(1);
-//	}
-
-//	bool LogicModule::isPowerOn() const
-//	{
-//		return m_workerThread.isRunning();
-//	}
-
-//	bool LogicModule::isFaultMode() const
-//	{
-//		if (isPowerOn() == false)
-//		{
-//			return true;
-//		}
-
-//		// To do
-//		//
-//		int ToDo = 0;
-
-//		return false;
-//	}
 
 	bool LogicModule::loadEeprom(const Hardware::ModuleFirmware& firmware, int uartId, Eeprom* eeprom)
 	{

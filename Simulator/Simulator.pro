@@ -68,7 +68,6 @@ SOURCES += \
     ../lib/Crc.cpp \
     SimOutput.cpp \
     SimRam.cpp \
-    SimLmModel.cpp \
     SimEeprom.cpp \
     SimSubsystem.cpp \
     SimDeviceEmulator.cpp \
@@ -85,7 +84,10 @@ SOURCES += \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
-    SimAfb.cpp
+    SimAfb.cpp \
+    SimLogicModule.cpp \
+    SimCommandProcessor.cpp \
+    SimCommandProcessor_LM_SF00.cpp
 
 HEADERS += \
     Stable.h \
@@ -100,7 +102,6 @@ HEADERS += \
     ../lib/Crc.h \
     SimOutput.h \
     SimRam.h \
-    SimLmModel.h \
     SimEeprom.h \
     SimSubsystem.h \
     SimDeviceEmulator.h \
@@ -119,7 +120,10 @@ HEADERS += \
     ../lib/XmlHelper.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
-    SimAfb.h
+    SimAfb.h \
+    SimLogicModule.h \
+    SimCommandProcessor.h \
+    SimCommandProcessor_LM_SF00.h
 
 unix {
     target.path = /usr/lib
