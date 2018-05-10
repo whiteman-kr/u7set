@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0002">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" Version="1.0003">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
