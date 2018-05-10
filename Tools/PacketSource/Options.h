@@ -22,20 +22,11 @@ public:
 
 private:
 
-	QString				m_serverIP;
-	int					m_serverPort = 0;
-
 	QString				m_path;
 
 public:
 
 	void				clear();
-
-	QString				serverIP() const { return m_serverIP; }
-	void				setServerIP(const QString& serverIP) { m_serverIP = serverIP; }
-
-	int					serverPort() const { return m_serverPort; }
-	void				setServerPort(int port) { m_serverPort = port; }
 
 	QString				path() const { return m_path; }
 	void				setPath(const QString& path) { m_path = path; }

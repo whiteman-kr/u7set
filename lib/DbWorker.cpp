@@ -224,6 +224,11 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0206.sql", "Upgrade to version 206, api.get_latest_file_tree_version optimization"},
 	{":/DatabaseUpgrade/Upgrade0207.sql", "Upgrade to version 207, Added module LM1-SR02"},
 	{":/DatabaseUpgrade/Upgrade0208.sql", "Upgrade to version 208, To LM1-SR02 added: indic_latch, indic_stless, bus_indic_latch, bus_indic_stless"},
+	{":/DatabaseUpgrade/Upgrade0209.sql", "Upgrade to version 209, Services and LM scripts presets update"},
+	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
+	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, To LM1-SR02 added: pulse_gen, pulse_gen_sync"},
+	{":/DatabaseUpgrade/Upgrade0212.sql", "Upgrade to version 212, Add ETC system folder"},
+	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, To LM Description added attr Name, removed SimScriptFileName"},
 };
 
 
@@ -417,6 +422,12 @@ int DbWorker::busTypesFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_busTypesFileId;
+}
+
+int DbWorker::etcFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_etcFileId;
 }
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
@@ -962,6 +973,8 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_mcFileId = -1;
 	m_connectionsFileId = -1;
 	m_busTypesFileId = -1;
+	m_etcFileId = -1;
+
 	m_systemFiles.clear();
 	m_mutex.unlock();
 
@@ -1057,6 +1070,14 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			m_systemFiles.push_back(fi);
 			continue;
 		}
+
+		if (fi.fileName() == ::EtcFileName)
+		{
+			QMutexLocker locker(&m_mutex);
+			m_etcFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
 	}
 
 
@@ -1071,6 +1092,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result &= m_mcFileId != -1;
 	result &= m_connectionsFileId != -1;
 	result &= m_busTypesFileId != -1;
+	result &= m_etcFileId != -1;
 	m_mutex.unlock();
 
 	if (result == false)

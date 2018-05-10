@@ -31,12 +31,12 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	//
 	//
 
-	theLogFile = new Log::LogFile(qAppName());
+	theLogFile = new Log::LogFile("TuningClient");
 
 	theLogFile->writeText("---");
 	theLogFile->writeMessage(tr("Application started."));
 
-	m_tuningLog = new TuningLog::TuningLog(qAppName());
+	m_tuningLog = new TuningLog::TuningLog("TuningClientSignals");
 
 	createActions();
 	createMenu();
@@ -149,9 +149,13 @@ void MainWindow::createActions()
 	m_pTuningSourcesAction->setEnabled(true);
 	connect(m_pTuningSourcesAction, &QAction::triggered, this, &MainWindow::showTuningSources);
 
-	m_pLogAction = new QAction(tr("Log..."), this);
-	m_pLogAction->setStatusTip(tr("Show application log"));
-	connect(m_pLogAction, &QAction::triggered, this, &MainWindow::showLog);
+	m_pAppLogAction = new QAction(tr("Application Log..."), this);
+	m_pAppLogAction->setStatusTip(tr("Show application log"));
+	connect(m_pAppLogAction, &QAction::triggered, this, &MainWindow::showAppLog);
+
+	m_pSignalLogAction = new QAction(tr("Signals Log..."), this);
+	m_pSignalLogAction->setStatusTip(tr("Show signals log"));
+	connect(m_pSignalLogAction, &QAction::triggered, this, &MainWindow::showSignalsLog);
 
 	m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
@@ -182,31 +186,40 @@ void MainWindow::createMenu()
 	//
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
-	pHelpMenu->addAction(m_pLogAction);
+	pHelpMenu->addAction(m_pAppLogAction);
+	pHelpMenu->addAction(m_pSignalLogAction);
+	pHelpMenu->addSeparator();
 	pHelpMenu->addAction(m_pAboutAction);
 }
 
 void MainWindow::createStatusBar()
 {
-	m_statusBarInfo = new QLabel();
-	m_statusBarInfo->setAlignment(Qt::AlignLeft);
-	m_statusBarInfo->setIndent(3);
-	m_statusBarInfo->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
+
+	m_statusBarBuildInfo = new QLabel();
+	m_statusBarBuildInfo->setAlignment(Qt::AlignLeft);
+	m_statusBarBuildInfo->setIndent(3);
+	//m_statusBarBuildInfo->setIndent(3);
+	//m_statusBarBuildInfo->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
+
+	m_statusBarLmControlMode = new QLabel();
+	m_statusBarLmControlMode->setAlignment(Qt::AlignLeft);
+	//m_statusBarLmControlMode->setIndent(3);
+	m_statusBarLmControlMode->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
 
 	m_statusDiscreteCount = new QLabel();
 	m_statusDiscreteCount->setAlignment(Qt::AlignLeft);
-	m_statusDiscreteCount->setMinimumWidth(100);
+	m_statusDiscreteCount->setMinimumWidth(80);
 	m_statusDiscreteCount->setToolTip(tr("Alerted discretes counter"));
 
 	m_statusBarLmErrors = new QLabel();
 	m_statusBarLmErrors->setAlignment(Qt::AlignLeft);
-	m_statusBarLmErrors->setMinimumWidth(100);
+	m_statusBarLmErrors->setMinimumWidth(80);
 	m_statusBarLmErrors->installEventFilter(this);
 	m_statusBarLmErrors->setToolTip(tr("LM Errors (click for details)"));
 
 	m_statusBarSor = new QLabel();
 	m_statusBarSor->setAlignment(Qt::AlignLeft);
-	m_statusBarSor->setMinimumWidth(100);
+	m_statusBarSor->setMinimumWidth(80);
 	m_statusBarSor->installEventFilter(this);
 	m_statusBarSor->setToolTip(tr("SOR counter (click for details)"));
 
@@ -226,7 +239,8 @@ void MainWindow::createStatusBar()
 
 	// --
 	//
-	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addWidget(m_statusBarBuildInfo, 1);
+	statusBar()->addPermanentWidget(m_statusBarLmControlMode, 0);
 	statusBar()->addPermanentWidget(m_statusDiscreteCount, 0);
 	statusBar()->addPermanentWidget(m_statusBarLmErrors, 0);
 	statusBar()->addPermanentWidget(m_statusBarSor, 0);
@@ -448,7 +462,7 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 		m_statusBarLogAlerts->text().isEmpty() == false &&
 		event->type() == QEvent::MouseButtonPress)
 	{
-		showLog();
+		showAppLog();
 	}
 
 	return QWidget::eventFilter(object, event);
@@ -458,9 +472,18 @@ void MainWindow::updateStatusBar()
 {
 	// Status bar
 	//
-	assert(m_statusBarInfo);
+	assert(m_statusBarLmControlMode);
 	assert(m_statusBarConfigConnection);
 	assert(m_tcpClient);
+
+	// BuildInfo
+
+	QString text = tr("Project %1, build %2").arg(theConfigSettings.buildInfo.projectName).arg(theConfigSettings.buildInfo.buildNo);
+
+	if (m_statusBarBuildInfo->text() != text)
+	{
+		m_statusBarBuildInfo->setText(text);
+	}
 
 	// LM Control Mode
 
@@ -483,7 +506,7 @@ void MainWindow::updateStatusBar()
 			}
 		}
 
-		m_statusBarInfo->setText(str);
+		m_statusBarLmControlMode->setText(str);
 	}
 
 	Tcp::ConnectionState configConnState =  m_configController.getConnectionState();
@@ -491,7 +514,7 @@ void MainWindow::updateStatusBar()
 
 	// ConfigService
 	//
-	QString text = tr(" ConfigService: ");
+	text = tr(" ConfigService: ");
 
 	if (configConnState.isConnected == false)
 	{
@@ -551,7 +574,7 @@ void MainWindow::updateStatusBar()
 
 			if (m_discreteCounter == 0)
 			{
-				m_statusDiscreteCount->setStyleSheet(m_statusBarInfo->styleSheet());
+				m_statusDiscreteCount->setStyleSheet(m_statusBarLmControlMode->styleSheet());
 			}
 			else
 			{
@@ -587,7 +610,7 @@ void MainWindow::updateStatusBar()
 
 			if (m_lmErrorsCounter == 0)
 			{
-				m_statusBarLmErrors->setStyleSheet(m_statusBarInfo->styleSheet());
+				m_statusBarLmErrors->setStyleSheet(m_statusBarLmControlMode->styleSheet());
 			}
 			else
 			{
@@ -652,7 +675,7 @@ void MainWindow::updateStatusBar()
 				}
 				else
 				{
-					m_statusBarSor->setStyleSheet(m_statusBarInfo->styleSheet());
+					m_statusBarSor->setStyleSheet(m_statusBarLmControlMode->styleSheet());
 				}
 			}
 		}
@@ -675,7 +698,7 @@ void MainWindow::updateStatusBar()
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{
-			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
+			m_statusBarLogAlerts->setStyleSheet(m_statusBarLmControlMode->styleSheet());
 		}
 		else
 		{
@@ -772,11 +795,19 @@ void MainWindow::showTuningSources()
 	}
 }
 
-void MainWindow::showLog()
+void MainWindow::showAppLog()
 {
 	if (theLogFile != nullptr)
 	{
 		theLogFile->view(this);
+	}
+}
+
+void MainWindow::showSignalsLog()
+{
+	if (m_tuningLog != nullptr)
+	{
+		m_tuningLog->viewSignalsLog(this);
 	}
 }
 

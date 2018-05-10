@@ -18,6 +18,8 @@ public:
 	bool valid() const;
 	void invalidate();
 
+	const ::Network::TuningSourceState& previousState() const;
+
 public:
 	::Network::DataSourceInfo info;
 	::Network::TuningSourceState state;

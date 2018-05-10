@@ -16,7 +16,7 @@ quint64 TuningSource::id() const
 
 QString TuningSource::equipmentId() const
 {
-	return info.equipmentid().c_str();
+	return info.lmequipmentid().c_str();
 }
 
 void TuningSource::setNewState(const ::Network::TuningSourceState& newState)
@@ -215,4 +215,9 @@ void TuningSource::invalidate()
 {
 	m_valid = false;
 	state.set_setsor(false);
+}
+
+const ::Network::TuningSourceState& TuningSource::previousState() const
+{
+	return m_previousState;
 }

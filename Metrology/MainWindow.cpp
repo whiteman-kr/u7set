@@ -1874,7 +1874,7 @@ void MainWindow::configSocketConfigurationLoaded()
 	if (CFG_FILE_VER_METROLOGY_SIGNALS != theOptions.projectInfo().cfgFileVersion())
 	{
 		connectedState.append(tr("\n\nFailed version of %1. Current version: %2. Received version: %3 ")
-								.arg(CFG_FILE_NAME_METROLOGY_SIGNALS)
+								.arg(Builder::FILE_METROLOGY_SIGNALS_XML)
 								.arg(CFG_FILE_VER_METROLOGY_SIGNALS)
 								.arg(theOptions.projectInfo().cfgFileVersion()));
 	}

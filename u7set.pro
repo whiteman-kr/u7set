@@ -28,5 +28,9 @@ SUBDIRS += qtservice \
     mconf
 
 HEADERS += \
-    lib/IAppSignalManager.h
+    lib/IAppSignalManager.h \
+    lib/CommonTypes.h \
+    lib/Times.h
 
+SOURCES += \
+    lib/Times.cpp

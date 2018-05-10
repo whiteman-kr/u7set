@@ -208,6 +208,7 @@ SOURCES +=\
     Simulator/SimIdeSimulator.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
     ../lib/TuningValue.cpp \
+<<<<<<< HEAD
     Simulator/SimSchemaWidget.cpp \
     Simulator/SimSchemaManager.cpp \
     Simulator/SimSchemaView.cpp \
@@ -222,6 +223,9 @@ SOURCES +=\
     Simulator/SimMemoryWidget.cpp \
     Simulator/SimControlPage.cpp \
     Simulator/SimBasePage.cpp
+=======
+    ../lib/Times.cpp
+>>>>>>> develop
 
 HEADERS  += \
     CentralWidget.h \
@@ -365,6 +369,7 @@ HEADERS  += \
     Builder/MemWriteMap.h \
     SimulatorTabPage.h \
     Builder/ConfigurationServiceCfgGenerator.h \
+<<<<<<< HEAD
     Simulator/SimIdeSimulator.h \
     ../lib/TuningValue.h \
     Simulator/SimSchemaWidget.h \
@@ -381,6 +386,12 @@ HEADERS  += \
     Simulator/SimMemoryWidget.h \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h
+=======
+    ../lib/TuningValue.h \
+    Builder/CfgFiles.h \
+    ../lib/CommonTypes.h \
+    ../lib/Times.h
+>>>>>>> develop
 
 FORMS    += \
     CreateProjectDialog.ui \

@@ -154,13 +154,14 @@ public:
 	// Properties
 	//
 public:
+	QString name() const;
+
 	int descriptionNumber() const;
 
 	const QString& configurationStringFile() const;
 	Q_INVOKABLE QString jsConfigurationStringFile() const;
-	QString simualtionScriptFile() const;
 
-    const QString& version() const;
+	const QString& version() const;
 
 	const FlashMemory& flashMemory() const;
 	const Memory& memory() const;
@@ -179,12 +180,11 @@ public:
 	// Data
 	//
 private:
-
 	// !!! Copy constructor is defined, don't forget to add new memers copy to it
 	//
+	QString m_name;
 	int m_descriptionNumber = -1;
     QString m_configurationScriptFile;
-	QString m_simulationScriptFile;
     QString m_version;
 
 	FlashMemory m_flashMemory;

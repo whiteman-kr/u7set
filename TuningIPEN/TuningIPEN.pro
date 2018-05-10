@@ -32,11 +32,9 @@ SOURCES +=\
 	../lib/UdpSocket.cpp \
 	../lib/CircularLogger.cpp \
 	../lib/Queue.cpp \
-	../lib/JsonSerializable.cpp \
 	MainIPEN.cpp \
 	../lib/Signal.cpp \
 	SafetyChannelSignalsModel.cpp \
-	../AppDataService/AppSignalStateEx.cpp \
 	../lib/Crc.cpp \
 	AnalogSignalSetter.cpp \
     ../lib/WUtils.cpp \
@@ -54,7 +52,9 @@ SOURCES +=\
     ../lib/CommandLineParser.cpp \
     ../lib/AppSignal.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    AppSignalStateEx.cpp \
+    ../lib/Times.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -75,10 +75,8 @@ HEADERS  += TuningMainWindow.h \
 	../lib/UdpSocket.h \
 	../lib/CircularLogger.h \
 	../lib/Queue.h \
-	../lib/JsonSerializable.h \
 	../lib/Signal.h \
 	SafetyChannelSignalsModel.h \
-	../AppDataService/AppSignalStateEx.h \
 	../lib/Crc.h \
 	AnalogSignalSetter.h \
     ../lib/WUtils.h \
@@ -96,7 +94,9 @@ HEADERS  += TuningMainWindow.h \
     ../lib/CommandLineParser.h \
     ../lib/AppSignal.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    AppSignalStateEx.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

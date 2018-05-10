@@ -72,10 +72,12 @@ void ConfigurationServiceWidget::updateStateInfo()
 		quint32 ip = m_serviceInfo.clientrequestip();
 		quint16 port = m_serviceInfo.clientrequestport();
 		QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
+		quint32 workingIp = getWorkingClientRequestIp();
 
-		if (ip != getWorkingClientRequestIp())
+		if (ip != workingIp)
 		{
 			address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(getWorkingClientRequestIp()).toString() + QString(":%1").arg(port);
+			ip = workingIp;
 		}
 
 		m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), address);

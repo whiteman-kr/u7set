@@ -5,10 +5,9 @@
 #include <QHostAddress>
 #include <QAbstractSocket>
 
-#include "../lib/BuildInfo.h"
-#include "../lib/JsonSerializable.h"
-#include "../lib/HostAddressPort.h"
-
+#include "BuildInfo.h"
+#include "Socket.h"
+#include "HostAddressPort.h"
 
 const int MAX_DATAGRAM_SIZE = 4096;
 
@@ -16,7 +15,7 @@ const quint16   PORT_BASE_SERVICE = 13300,
 
 				PORT_CONFIGURATION_SERVICE = 13310,
 				PORT_CONFIGURATION_SERVICE_INFO = 13311,
-				PORT_CONFIGURATION_SERVICE_REQUEST = 13312,
+				PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST = 13312,
 
 				PORT_APP_DATA_SERVICE = 13320,
 				PORT_APP_DATA_SERVICE_INFO = 13321,
@@ -60,8 +59,6 @@ const quint32	RQERROR_OK = 0,
 //
 
 #pragma pack(push, 2)
-
-const int ENTIRE_UDP_SIZE = 1472;
 
 struct RpPacketFlags
 {
@@ -203,6 +200,8 @@ const quint32 TDS_TUNING_SIGNALS_WRITE = 0x1504;
 const quint32 TDS_TUNING_SIGNALS_APPLY = 0x1505;
 const quint32 TDS_CHANGE_CONTROLLED_TUNING_SOURCE = 0x1506;
 const quint32 TDS_GET_TUNING_SERVICE_SETTINGS = 0x1507;
+const quint32 TDS_GET_TUNING_SOURCE_FILLING = 0x1508;
+const quint32 TDS_GET_TUNING_SIGNAL_PARAM = 0x1509;
 
 const int TDS_TUNING_MAX_READ_STATES = 1000;
 const int TDS_TUNING_MAX_WRITE_RECORDS = 1000;

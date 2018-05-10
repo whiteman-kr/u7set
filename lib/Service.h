@@ -62,7 +62,7 @@ public:
 				  const QString& serviceName,
 				  int& argc,
 				  char** argv,
-				  std::shared_ptr<CircularLogger> logger);
+				  CircularLoggerShared logger);
 
 	virtual ~ServiceWorker();
 
@@ -102,6 +102,8 @@ public:
 
 	bool clearSettings();								// clear all service settings
 
+	CircularLoggerShared logger() const { return m_logger; }
+
 signals:
 	void work();
 	void stopped();
@@ -126,6 +128,7 @@ protected:
 	static const char* const SETTING_EQUIPMENT_ID;
 	static const char* const SETTING_CFG_SERVICE_IP1;
 	static const char* const SETTING_CFG_SERVICE_IP2;
+	static const char* const SETTING_PROCESSING_THREADS_COUNT;
 
 private:
 	QString m_equipmentID;

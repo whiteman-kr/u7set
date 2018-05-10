@@ -21,13 +21,42 @@ CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
 CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
+# Force prebuild version control info
+#
+win32 {
+contains(QMAKE_TARGET.arch, x86_64){
+QMAKE_CLEAN += $$PWD/../../bin_Win64/GetGitProjectVersion.exe
+system(IF NOT EXIST $$PWD/../../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../../GetGitProjectVersion & \
+qmake \"OBJECTS_DIR = $$OUT_PWD/../../GetGitProjectVersion/release\" & \
+nmake))
+system(chdir $$PWD & \
+$$PWD/../../bin_Win64/GetGitProjectVersion.exe $$PWD/PacketSource.pro)
+}
+else{
+QMAKE_CLEAN += $$PWD/../../bin_Win32/GetGitProjectVersion.exe
+system(IF NOT EXIST $$PWD/../../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../../GetGitProjectVersion & \
+qmake \"OBJECTS_DIR = $$OUT_PWD/../../GetGitProjectVersion/release\" & \
+nmake))
+system(chdir $$PWD & \
+$$PWD/../../bin_Win32/GetGitProjectVersion.exe $$PWD/PacketSource.pro)
+}
+}
+unix {
+QMAKE_CLEAN += $$PWD/../../bin_unix/GetGitProjectVersion
+system(cd $$PWD/../../GetGitProjectVersion; \
+qmake \"OBJECTS_DIR = $$OUT_PWD/../../GetGitProjectVersion/release\"; \
+make; \
+cd $$PWD; \
+$$PWD/../../bin_unix/GetGitProjectVersion $$PWD/PacketSource.pro)
+}
+
 SOURCES += \
-        main.cpp \
-        MainWindow.cpp \
-    Options.cpp \
-    SourceOptionDialog.cpp \
-    SourceWorker.cpp \
-    SourceBase.cpp \
+main.cpp \
+MainWindow.cpp \
+Options.cpp \
+SourceOptionDialog.cpp \
+SourceWorker.cpp \
+SourceBase.cpp \
 ../../lib/XmlHelper.cpp \
 ../../lib/SocketIO.cpp \
 ../../lib/HostAddressPort.cpp \
@@ -35,24 +64,25 @@ SOURCES += \
 ../../lib/SimpleThread.cpp \
 ../../lib/Crc.cpp \
 ../../lib/DataProtocols.cpp \
-../../lib/WUtils.cpp
+../../lib/WUtils.cpp \
 
 HEADERS += \
-        MainWindow.h \
-    Options.h \
-    SourceOptionDialog.h \
-    SourceWorker.h \
-    SourceBase.h \
+MainWindow.h \
+Options.h \
+SourceOptionDialog.h \
+SourceWorker.h \
+SourceBase.h \
 ../../lib/XmlHelper.h \
 ../../lib/SocketIO.h \
 ../../lib/HostAddressPort.h \
 ../../lib/SimpleThread.h \
 ../../lib/Crc.h \
 ../../lib/DataProtocols.h \
-../../lib/WUtils.h
+../../lib/WUtils.h \
+../../u7/Builder/CfgFiles.h \
 
 RESOURCES += \
-    resources.qrc
+resources.qrc
 
 
 #c++11 support for GCC
@@ -82,3 +112,4 @@ CONFIG(debug, debug|release): DEFINES += _DEBUG
 #INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 #INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 #}
+

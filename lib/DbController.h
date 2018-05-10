@@ -288,6 +288,7 @@ public:
 	int dvsFileId() const;			// Diaginostics Video Schemas
 	int connectionsFileId() const;	// Connections
 	int busTypesFileId() const;		// BusTypes
+	int etcFileId() const;			//
 
 	std::vector<DbFileInfo> systemFiles() const;
 

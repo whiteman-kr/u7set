@@ -559,7 +559,7 @@ public:
 
 	QList<KEY> keys() const { return m_map.keys(); }
 
-	int indexOf(const KEY& key)
+	int indexOf(const KEY& key) const
 	{
 		if (m_map.contains(key))
 		{

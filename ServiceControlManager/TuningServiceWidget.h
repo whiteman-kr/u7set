@@ -6,7 +6,7 @@
 class QStandardItemModel;
 class TcpTuningServiceClient;
 
-static const QStringList staticFieldsHeaderLabels {
+static const QStringList tuningSourceStaticFieldsHeaderLabels {
 	QStringLiteral("EquipmentId"),
 	QStringLiteral("Caption"),
 	QStringLiteral("Ip"),
@@ -18,12 +18,31 @@ static const QStringList staticFieldsHeaderLabels {
 };
 
 
-static const QStringList dynamicFieldsHeaderLabels {
+static const QStringList tuningSourceDynamicFieldsHeaderLabels {
 	QStringLiteral("IsReply"),
 	QStringLiteral("ControlIsActive"),
 	QStringLiteral("SetSOR"),
 	QStringLiteral("RequestCount"),
 	QStringLiteral("ReplyCount"),
+};
+
+static const QStringList tuningSignalsStaticFieldsHeaderLabels {
+	QStringLiteral("Custom AppSignal ID"),
+	QStringLiteral("Equipment ID"),
+	QStringLiteral("App Signal ID"),
+	QStringLiteral("Caption"),
+	QStringLiteral("Units"),
+	QStringLiteral("Type"),
+	QStringLiteral("Default"),
+};
+
+static const QStringList tuningSignalsDynamicFieldsHeaderLabels {
+	QStringLiteral("Value"),
+	QStringLiteral("LowLimit"),
+	QStringLiteral("HighLimit"),
+	QStringLiteral("Valid"),
+	QStringLiteral("Underflow"),
+	QStringLiteral("Overflow"),
 };
 
 class QStandardItemModel;
@@ -46,6 +65,8 @@ public slots:
 	void updateServiceSettings();
 	void reloadTuningSourcesList();
 	void updateTuningSourcesState();
+	void reloadTuningSignalsList();
+	void updateTuningSignalsState();
 
 	void clearServiceData();
 
@@ -60,6 +81,7 @@ protected:
 private:
 	QStandardItemModel* m_settingsTabModel = nullptr;
 	QStandardItemModel* m_tuningSourcesTabModel = nullptr;
+	QStandardItemModel* m_tuningSignalsTabModel = nullptr;
 	TcpTuningServiceClient* m_tcpClientSocket = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 	QList<TuningSourceWidget*> m_tuningSourceWidgetList;

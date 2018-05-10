@@ -107,9 +107,9 @@ LmDescription::LmDescription(const LmDescription& that)
 
 LmDescription& LmDescription::operator=(const LmDescription& src)
 {
+	m_name = src.m_name;
 	m_descriptionNumber = src.m_descriptionNumber;
 	m_configurationScriptFile = src.m_configurationScriptFile;
-	m_simulationScriptFile = src.m_simulationScriptFile;
 	m_version = src.m_version;
 
 	m_flashMemory = src.m_flashMemory;
@@ -225,6 +225,10 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 		return false;
 	}
 
+	// Attribute Name
+	//
+	m_name = logicModuleElement.attribute(QLatin1String("Name"));
+
 	// Attribute DescriptionNumber
 	//
 	QString s = logicModuleElement.attribute(QLatin1String("DescriptionNumber"));
@@ -253,16 +257,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
         errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
         return false;
     }
-
-	// Attribute SimulationScriptFile
-	//
-	m_simulationScriptFile = logicModuleElement.attribute("SimulationScriptFile");
-
-	if (m_simulationScriptFile.isEmpty() == true)
-	{
-		errorMessage->append(tr("Cant't find attribute SimulationScriptFile"));
-		return false;
-	}
 
     // Attribute Version
     //
@@ -921,6 +915,10 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 	return errorMessage->isEmpty();
 }
 
+QString LmDescription::name() const
+{
+	return m_name;
+}
 
 int LmDescription::descriptionNumber() const
 {
@@ -935,11 +933,6 @@ const QString& LmDescription::configurationStringFile() const
 QString LmDescription::jsConfigurationStringFile() const
 {
 	return m_configurationScriptFile;
-}
-
-QString LmDescription::simualtionScriptFile() const
-{
-	return m_simulationScriptFile;
 }
 
 const QString& LmDescription::version() const

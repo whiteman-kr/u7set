@@ -16,15 +16,20 @@ namespace Log
 		Warning,
 		Message,
 		Alert,
-		Text
+		Text,
+		Data,
+
+		Count
 	};
 
 	struct LogFileRecord
 	{
+		quint64 sessionHash;
 		QDateTime time;
 		MessageType type;
-		quint64 sessionHash;
+
 		QString text;
+		QStringList textArray;
 
 		QString toString(const QString& sessionHashString);
 
@@ -40,13 +45,20 @@ namespace Log
 		LogFileWorker(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash);
 		virtual ~LogFileWorker();
 
+		// Writing functions
+
 		bool write(MessageType type, const QString& text);
+		bool writeArray(const QStringList& textArray);
 
 		// Loading funtcions
 
 		void read(bool currentSessionOnly);
 
 		void getLoadedData(std::vector<LogFileRecord> *result);
+
+		// Information functions
+
+		QString logName() const;
 
 	protected:
 		virtual void onThreadStarted();
@@ -109,7 +121,7 @@ namespace Log
 		Q_OBJECT
 
 	public:
-		LogRecordModel();
+		LogRecordModel(bool showTypeColumn, std::vector<std::pair<QString, double>> headerTitles);
 		~LogRecordModel();
 
 	public:
@@ -156,6 +168,12 @@ namespace Log
 		MessageType m_filterMessageType = MessageType::All;
 		QString m_filterText;
 
+		bool m_showTypeColumn = true;
+
+		int m_columnTime = -1;
+		int m_columnType = -1;
+		int m_columnText = -1;
+
 	protected:
 	};
 
@@ -165,7 +183,7 @@ namespace Log
 
 	public:
 
-		LogFileDialog(LogFileWorker* worker, QWidget* parent);
+		LogFileDialog(LogFileWorker* worker, QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles);
 		virtual ~LogFileDialog();
 
 	private:
@@ -191,6 +209,8 @@ namespace Log
 
 		QLabel* m_counterLabel = nullptr;
 
+		QPushButton* m_export = nullptr;
+
 	private slots:
 		void onTypeComboIndexChanged(int index);
 		void onFilter();
@@ -200,6 +220,7 @@ namespace Log
 		void onReadComplete();
 		void onRecordArrived(LogFileRecord record);
 
+		void onExport();
 	};
 
 	class LogFile : public QObject
@@ -215,10 +236,11 @@ namespace Log
 		bool writeError(const QString& text);
 		bool writeWarning(const QString& text);
 		bool writeText(const QString& text);
+		bool writeArray(const QStringList& textArray);
 
 		bool write(MessageType type, const QString& text);
 
-		void view(QWidget* parent);
+		void view(QWidget* parent, bool showType = true, std::vector<std::pair<QString, double> > headerTitles = std::vector<std::pair<QString, double> >());
 
 		int alertAckCounter() const;
 		int errorAckCounter() const;

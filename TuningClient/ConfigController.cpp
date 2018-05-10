@@ -214,6 +214,18 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			result &= xmlReadSoftwareNode(softwareNodes.item(0), &readSettings);
 		}
 
+		// BuildInfo node
+		//
+		QDomNodeList buildInfoNodes = configElement.elementsByTagName("BuildInfo");
+		if (buildInfoNodes.size() != 1)
+		{
+			readSettings.errorMessage += tr("Parsing BuildInfo node error.\n");
+		}
+		else
+		{
+			result &= xmlReadBuildInfoNode(buildInfoNodes.item(0), &readSettings);
+		}
+
 		// Settings node
 		//
 		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
@@ -418,6 +430,29 @@ bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileDat
 	return result;
 }
 
+bool ConfigController::xmlReadBuildInfoNode(const QDomNode& node, ConfigSettings* outSetting)
+{
+	if (outSetting == nullptr ||
+			node.nodeName() != "BuildInfo")
+	{
+		assert(outSetting);
+		assert(node.nodeName() == "BuildInfo");
+		return false;
+	}
+
+	QDomElement element = node.toElement();
+
+	outSetting->buildInfo.projectName = element.attribute("Project");
+	outSetting->buildInfo.buildNo = element.attribute("ID").toInt();
+	outSetting->buildInfo.configuration = element.attribute("Type");
+	outSetting->buildInfo.date = element.attribute("Date");
+	outSetting->buildInfo.changeset = element.attribute("Changeset").toInt();
+	outSetting->buildInfo.user = element.attribute("User");
+	outSetting->buildInfo.workstation = element.attribute("Workstation");
+
+	return true;
+}
+
 bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
@@ -500,19 +535,31 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			QString tunsIp = dasXmlElement.attribute("ip1");
 			int tunsPort = dasXmlElement.attribute("port1").toInt();
 
+			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
+
+		}
+	}
+
+	// Get TuningService data
+	//
+	{
+		QDomNodeList dasNodes = settingsElement.elementsByTagName("Appearance");
+
+		if (dasNodes.isEmpty() == true)
+		{
+			outSetting->errorMessage += tr("Cannot find Appearance tag\n");
+			return false;
+		}
+		else
+		{
+			QDomElement dasXmlElement = dasNodes.at(0).toElement();
+
 			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
 			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
 			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
 			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
-
-			QString equipmentListString = dasXmlElement.attribute("equipmentList");
-			equipmentListString.replace(' ', ';');
-			equipmentListString.replace('\n', ';');
-			equipmentListString.remove('\r');
-			outSetting->equipmentList = equipmentListString.split(';', QString::SkipEmptyParts);
-
 			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
 			outSetting->showDiscreteCounters = dasXmlElement.attribute("showDiscreteCounters") == "true" ? true : false;
 
@@ -524,9 +571,6 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			usersAccounts.replace('\n', ';');
 			usersAccounts.remove('\r');
 			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
-
-			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
-
 		}
 	}
 

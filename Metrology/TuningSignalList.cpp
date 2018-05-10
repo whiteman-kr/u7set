@@ -187,7 +187,7 @@ QString TuningSourceTable::text(int row, int column, const TuningSource& source,
 		case TUN_SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = source.equipmentID();							break;
 		case TUN_SOURCE_LIST_COLUMN_CAPTION:		result = source.caption();								break;
 		case TUN_SOURCE_LIST_COLUMN_IP:				result = source.serverIP() + " (" + QString::number(source.serverPort()) + ")";	break;
-		case TUN_SOURCE_LIST_COLUMN_CHANNEL:		result = QString::number(source.channel() + 1);			break;
+		case TUN_SOURCE_LIST_COLUMN_CHANNEL:		result = source.channel();								break;
 		case TUN_SOURCE_LIST_COLUMN_SUBSYSTEM:		result = source.subSystem();							break;
 		case TUN_SOURCE_LIST_COLUMN_LM_NUMBER:		result = QString::number(source.lmNumber());			break;
 		case TUN_SOURCE_LIST_COLUMN_IS_REPLY:		result = state.isReply() == false ? "No" : "Yes";		break;

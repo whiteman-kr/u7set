@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="2" ConfigurationScriptFile="LM1_SR02_Conf.js"  SimulationScriptFile="LM1_SR02_SIM.js" Version="1.0017">
+<LogicModule Name="LM1_SR02" DescriptionNumber="2" ConfigurationScriptFile="LM1_SR02_Conf.js" Version="1.0018">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -522,6 +522,18 @@
 			<Pin OpName="i_sync"		OpIndex ="7"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
+		</AFBComponent>
+		<AFBComponent Caption="PULSE_GEN" OpCode="30" ImpVersion="0" VersionOpIndex="17" MaxInstCount="256" SimulationFunc="afb_pulse_gen">
+			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+			<Pin OpName="i_t_high"		OpIndex ="1"	PinType = "Param"/>
+			<Pin OpName="i_t_low"		OpIndex ="3"	PinType = "Param"/>
+			<Pin OpName="i_start_from"	OpIndex ="8"	PinType = "Input"/>
+			<Pin OpName="i_enable"		OpIndex ="9"	PinType = "Input"/>
+			<Pin OpName="i_sync"		OpIndex ="10"	PinType = "Input"/>
+			<Pin OpName="o_result"		OpIndex ="13"	PinType = "Output"/>
+			<Pin OpName="o_sync"		OpIndex ="14"	PinType = "Output"/>
+			<Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
+			<Pin OpName="o_version"		OpIndex ="17"	PinType = "Output"/>			
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
@@ -12244,6 +12256,140 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
+
+        <AFB id="#pulse_gen_v1" Caption="pulse_gen" Version="1.0001">
+		    <Properties>
+			    <Description>Pulse generator</Description>
+				<Category>Other</Category>
+				<OpCode>30</OpCode>
+				<HasRam>true</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+				<MinHeight>8</MinHeight>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_enable" Caption="enable" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+			</Outputs>
+			<Params>
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>2</HighLimit>
+					<Script>
+					    <Changed></Changed>
+					</Script>
+				</Param>
+			    <Param OpName="i_t_hight" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>250</Value>
+					<Default>250</Default>
+					<LowLimit>5</LowLimit>
+					<HighLimit>65535</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+					<Units>ms</Units>
+				</Param>
+			    <Param OpName="i_t_low" Caption="Low" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>250</Value>
+					<Default>250</Default>
+					<LowLimit>5</LowLimit>
+					<HighLimit>65535</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+					<Units>ms</Units>
+				</Param>
+			    <Param OpName="i_start_from" Caption="StartFrom" Visible="true" OpIndex="8" Size="1" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>0</LowLimit>
+					<HighLimit>1</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			    <Param OpName="i_sync" Caption="SyncInput" Visible="false" OpIndex="10" Size="1" Instantiator="false" User="false" Type="Discrete" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>0</Value>
+					<Default>0</Default>
+					<Script>
+					    <Changed></Changed>
+					</Script>
+				</Param>								
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
+        <AFB id="#pulse_gen_sync_v1" Caption="pulse_gen_sync" Version="1.0001">
+		    <Properties>
+			    <Description>Synchronized pulse generator</Description>
+				<Category>Other</Category>
+				<OpCode>30</OpCode>
+				<HasRam>true</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+				<MinHeight>8</MinHeight>
+			</Properties>
+			<Inputs>
+			    <Pin OpName="i_enable" Caption="enable" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+				<Pin OpName="i_sync" Caption="sync_in" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+			</Inputs>
+			<Outputs>
+			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_sync" Caption="sync_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
+			</Outputs>
+			<Params>
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				    <Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>2</HighLimit>
+					<Script>
+					    <Changed></Changed>
+					</Script>
+				</Param>
+			    <Param OpName="i_t_hight" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>250</Value>
+					<Default>250</Default>
+					<LowLimit>5</LowLimit>
+					<HighLimit>65535</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+					<Units>ms</Units>
+				</Param>
+			    <Param OpName="i_t_low" Caption="Low" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>250</Value>
+					<Default>250</Default>
+					<LowLimit>5</LowLimit>
+					<HighLimit>65535</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+					<Units>ms</Units>
+				</Param>
+			    <Param OpName="i_start_from" Caption="StartFrom" Visible="true" OpIndex="8" Size="1" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>0</LowLimit>
+					<HighLimit>1</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+			    <Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>				
+		
 
 	</AFBL>
 </LogicModule>

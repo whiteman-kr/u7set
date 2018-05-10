@@ -2,12 +2,12 @@
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "IssueLogger.h"
 #include "../lib/DeviceHelper.h"
+#include "../lib/ServiceSettings.h"
 #include "../VFrame30/LogicSchema.h"
 
 
 namespace Builder
 {
-
 	// ---------------------------------------------------------------------------------
 	//
 	//	SoftwareCfgGenerator class implementation
@@ -292,6 +292,31 @@ namespace Builder
 		return result;
 	}
 
+	void SoftwareCfgGenerator::initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems)
+	{
+		if (subsystemKeyMap == nullptr || subsystems == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		subsystemKeyMap->clear();
+
+		int subsystemsCount = subsystems->count();
+
+		for(int i = 0; i < subsystemsCount; i++)
+		{
+			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems->get(i);
+
+			if (subsystem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			subsystemKeyMap->insert(subsystem->subsystemId(), subsystem->key());
+		}
+	}
 
 	bool SoftwareCfgGenerator::buildLmList(Hardware::EquipmentSet* equipment, IssueLogger* log)
 	{
@@ -401,9 +426,9 @@ namespace Builder
 
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
-			for(int adapter = LM_ETHERNET_ADAPTER1; adapter <= LM_ETHERNET_ADAPTER3; adapter++)
+			for(int adapter = DataSource::LM_ETHERNET_ADAPTER1; adapter <= DataSource::LM_ETHERNET_ADAPTER3; adapter++)
 			{
-				LmEthernetAdapterNetworkProperties adapterProperties;
+				DataSource::LmEthernetAdapterProperties adapterProperties;
 				Hardware::Software* software = nullptr;
 
 				result &= adapterProperties.getLmEthernetAdapterNetworkProperties(lm, adapter, log);
@@ -413,7 +438,7 @@ namespace Builder
 					break;
 				}
 
-				if (adapter ==  LM_ETHERNET_ADAPTER1)
+				if (adapter ==  DataSource::LM_ETHERNET_ADAPTER1)
 				{
 					// tuning adapter
 					//
@@ -421,15 +446,19 @@ namespace Builder
 					{
 						if (adapterProperties.tuningServiceID.isEmpty() == true)
 						{
-							log->wrnCFG3016(adapterProperties.adapterID,
-											LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID);
+							// Property '%1.%2' is empty.
+							//
+							log->errCFG3022(adapterProperties.adapterID,
+											DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID);
 						}
 						else
 						{
 							if (m_softwareList.contains(adapterProperties.tuningServiceID) == false)
 							{
-								log->wrnCFG3015(adapterProperties.adapterID,
-												LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID,
+								// Property '%1.%2' is linked to undefined software ID '%3'.
+								//
+								log->errCFG3021(adapterProperties.adapterID,
+												DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID,
 												adapterProperties.tuningServiceID);
 							}
 							else
@@ -438,8 +467,10 @@ namespace Builder
 
 								if (software->type() != E::SoftwareType::TuningService)
 								{
+									// Property '%1.%2' is linked to not compatible software '%3'.
+									//
 									log->errCFG3017(adapterProperties.adapterID,
-													LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID,
+													DataSource::LmEthernetAdapterProperties::PROP_TUNING_SERVICE_ID,
 													adapterProperties.tuningServiceID);
 									result = false;
 								}
@@ -457,15 +488,19 @@ namespace Builder
 					{
 						if (adapterProperties.appDataServiceID.isEmpty() == true)
 						{
-							log->wrnCFG3016(adapterProperties.adapterID,
-											LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID);
+							// Property '%1.%2' is empty.
+							//
+							log->errCFG3022(adapterProperties.adapterID,
+											DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID);
 						}
 						else
 						{
 							if (m_softwareList.contains(adapterProperties.appDataServiceID) == false)
 							{
-								log->wrnCFG3015(adapterProperties.adapterID,
-												LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID,
+								// Property '%1.%2' is linked to undefined software ID '%3'.
+								//
+								log->errCFG3021(adapterProperties.adapterID,
+												DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID,
 												adapterProperties.appDataServiceID);
 							}
 							else
@@ -474,8 +509,10 @@ namespace Builder
 
 								if (software->type() != E::SoftwareType::AppDataService)
 								{
+									// Property '%1.%2' is linked to not compatible software '%3'.
+									//
 									log->errCFG3017(adapterProperties.adapterID,
-													LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID,
+													DataSource::LmEthernetAdapterProperties::PROP_APP_DATA_SERVICE_ID,
 													adapterProperties.appDataServiceID);
 									result = false;
 								}
@@ -489,15 +526,19 @@ namespace Builder
 					{
 						if (adapterProperties.diagDataServiceID.isEmpty() == true)
 						{
-							log->wrnCFG3016(adapterProperties.adapterID,
-											LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID);
+							// Property '%1.%2' is empty.
+							//
+							log->errCFG3022(adapterProperties.adapterID,
+											DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID);
 						}
 						else
 						{
 							if (m_softwareList.contains(adapterProperties.diagDataServiceID) == false)
 							{
-								log->wrnCFG3015(adapterProperties.adapterID,
-												LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID,
+								// Property '%1.%2' is linked to undefined software ID '%3'.
+								//
+								log->errCFG3021(adapterProperties.adapterID,
+												DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID,
 												adapterProperties.diagDataServiceID);
 							}
 							else
@@ -506,8 +547,10 @@ namespace Builder
 
 								if (software->type() != E::SoftwareType::DiagDataService)
 								{
+									// Property '%1.%2' is linked to not compatible software '%3'.
+									//
 									log->errCFG3017(adapterProperties.adapterID,
-													LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID,
+													DataSource::LmEthernetAdapterProperties::PROP_DIAG_DATA_SERVICE_ID,
 													adapterProperties.diagDataServiceID);
 									result = false;
 								}
@@ -553,70 +596,46 @@ namespace Builder
 		return comments;
 	}
 
-	bool SoftwareCfgGenerator::getConfigIp(QString& cfgIP1, QString& cfgIP2)
+	bool SoftwareCfgGenerator::getConfigIp(QString* cfgIP1, QString* cfgIP2)
 	{
-		TEST_PTR_RETURN_FALSE(m_equipment);
-		TEST_PTR_RETURN_FALSE(m_software);
+		TEST_PTR_RETURN_FALSE(m_log);
 
-		auto ipGetter = [=](int channel, QString& ip) -> bool
-		{
-			QString configurationServiceIdPropertyCaption = QString("ConfigurationServiceID%1").arg(channel);
-			auto configurationServiceIdProperty = m_software->propertyByCaption(configurationServiceIdPropertyCaption);
+		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP1, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP2, m_log);
 
-			QString objectName = m_software->equipmentIdTemplate();
-			QString propertyName = configurationServiceIdPropertyCaption;
+		cfgIP1->clear();
+		cfgIP2->clear();
 
-			if (configurationServiceIdProperty == nullptr)
-			{
-				QString channelIdSuffix = QString("_DATACH0%1").arg(channel);
-				auto channelObject = m_equipment->deviceObject(m_software->equipmentIdTemplate() + channelIdSuffix);
+		QString cfgServiceID1;
+		QString cfgServiceID2;
 
-				if (channelObject == nullptr)
-				{
-					TEST_PTR_RETURN_FALSE(m_log);
-
-					m_log->errCFG3020(objectName, propertyName);
-					m_log->errCFG3014(channelIdSuffix, m_software->equipmentIdTemplate());
-
-					return false;
-				}
-
-				objectName = m_software->equipmentIdTemplate() + channelIdSuffix;
-				propertyName = "ConfigurationServiceID";
-
-				configurationServiceIdProperty = channelObject->propertyByCaption(propertyName);
-				if (configurationServiceIdProperty == nullptr)
-				{
-					TEST_PTR_RETURN_FALSE(m_log);
-					m_log->errCFG3020(objectName, propertyName);
-					return false;
-				}
-			}
-
-			QString configurationID = configurationServiceIdProperty->value().toString();
-
-			auto* configurationServiceObject = m_equipment->deviceObject(configurationID);
-			if (configurationServiceObject == nullptr)
-			{
-				TEST_PTR_RETURN_FALSE(m_log);
-				m_log->errCFG3021(objectName, propertyName, configurationID);
-				return false;
-			}
-
-			if (DeviceHelper::getIPv4Property(configurationServiceObject, "ClientRequestIP", &ip, false, m_log) == false)
-			{
-				return false;
-			}
-
-			return true;
-		};
+		HostAddressPort cfgServiceIP1;
+		HostAddressPort cfgServiceIP2;
 
 		bool result = true;
 
-		result &= ipGetter(1, cfgIP1);
-		result &= ipGetter(2, cfgIP2);
+		result = ServiceSettings::getCfgServiceConnection(m_equipment, m_software,
+														   &cfgServiceID1, &cfgServiceIP1,
+														   &cfgServiceID2, &cfgServiceIP2,
+														   m_log);
+		if (result == false)
+		{
+			return false;
+		}
 
-		return result;
+		if (cfgServiceID1.isEmpty() == false)
+		{
+			*cfgIP1 = cfgServiceIP1.addressPortStr();
+		}
+
+		if (cfgServiceID2.isEmpty() == false)
+		{
+			*cfgIP2 = cfgServiceIP2.addressPortStr();
+		}
+
+		return true;
 	}
 
 	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
@@ -626,23 +645,23 @@ namespace Builder
 		QString cfgIP1;
 		QString cfgIP2;
 		
-		if (getConfigIp(cfgIP1, cfgIP2) == false)
+		if (getConfigIp(&cfgIP1, &cfgIP2) == false)
 		{
 			return false;
 		}
 
-		if (cfgIP1.isEmpty() && cfgIP2.isEmpty())
+		if (cfgIP1.isEmpty() == true && cfgIP2.isEmpty() == true)
 		{
 			m_log->errALC5140(m_software->equipmentIdTemplate());
 			return false;
 		}
 
-		if (cfgIP1.isEmpty())
+		if (cfgIP1.isEmpty() == true)
 		{
 			cfgIP1 = cfgIP2;
 		}
 
-		if (cfgIP2.isEmpty())
+		if (cfgIP2.isEmpty() == true)
 		{
 			cfgIP2 = cfgIP1;
 		}
@@ -653,102 +672,6 @@ namespace Builder
 
 		return true;
 	}
-
-	// ---------------------------------------------------------------------------------
-	//
-	//	SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties class implementation
-	//
-	// ---------------------------------------------------------------------------------
-
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_TUNING_ENABLE = "TuningEnable";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_TUNING_IP = "TuningIP";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_TUNING_PORT = "TuningPort";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_TUNING_SERVICE_ID = "TuningServiceID";
-
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_APP_DATA_ENABLE = "AppDataEnable";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_APP_DATA_IP = "AppDataIP";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_APP_DATA_PORT = "AppDataPort";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_APP_DATA_SERVICE_ID = "AppDataServiceID";
-
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_ENABLE = "DiagDataEnable";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_IP = "DiagDataIP";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_PORT = "DiagDataPort";
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::PROP_DIAG_DATA_SERVICE_ID = "DiagDataServiceID";
-
-	const char* SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR = "_ETHERNET0%1";
-
-	bool SoftwareCfgGenerator::LmEthernetAdapterNetworkProperties::getLmEthernetAdapterNetworkProperties(const Hardware::DeviceModule* lm, int adptrNo, IssueLogger* log)
-	{
-		if (log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (lm == nullptr)
-		{
-			LOG_INTERNAL_ERROR(log);
-			assert(false);
-			return false;
-		}
-
-		if (adptrNo < LM_ETHERNET_ADAPTER1 ||
-			adptrNo > LM_ETHERNET_ADAPTER3)
-		{
-			LOG_INTERNAL_ERROR(log);
-			assert(false);
-			return false;
-		}
-
-		adapterNo = adptrNo;
-
-		QString suffix = QString(LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).arg(adapterNo);
-
-		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(lm, suffix, log);
-
-		if (adapter == nullptr)
-		{
-			return false;
-		}
-
-		adapterID = adapter->equipmentIdTemplate();
-
-		bool result = true;
-
-		if (adptrNo == LM_ETHERNET_ADAPTER1)
-		{
-			// tunig adapter
-			//
-			result &= DeviceHelper::getBoolProperty(adapter, PROP_TUNING_ENABLE, &tuningEnable, log);
-			result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_IP, &tuningIP, log);
-			result &= DeviceHelper::getIntProperty(adapter, PROP_TUNING_PORT, &tuningPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, PROP_TUNING_SERVICE_ID, &tuningServiceID, log);
-			return result;
-		}
-
-		if (adptrNo == LM_ETHERNET_ADAPTER2 ||
-			adptrNo == LM_ETHERNET_ADAPTER3)
-		{
-			// application and diagnostics data adapter
-			//
-			result &= DeviceHelper::getBoolProperty(adapter, PROP_APP_DATA_ENABLE, &appDataEnable, log);
-			result &= DeviceHelper::getStrProperty(adapter, PROP_APP_DATA_IP, &appDataIP, log);
-			result &= DeviceHelper::getIntProperty(adapter, PROP_APP_DATA_PORT, &appDataPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, PROP_APP_DATA_SERVICE_ID, &appDataServiceID, log);
-
-			result &= DeviceHelper::getBoolProperty(adapter, PROP_DIAG_DATA_ENABLE, &diagDataEnable, log);
-			result &= DeviceHelper::getStrProperty(adapter, PROP_DIAG_DATA_IP, &diagDataIP, log);
-			result &= DeviceHelper::getIntProperty(adapter, PROP_DIAG_DATA_PORT, &diagDataPort, log);
-			result &= DeviceHelper::getStrProperty(adapter, PROP_DIAG_DATA_SERVICE_ID, &diagDataServiceID, log);
-
-			return result;
-		}
-
-		assert(false);
-		return false;
-	}
-
-
 
 }
 

@@ -65,7 +65,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
-    ../lib/JsonSerializable.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
@@ -76,7 +75,6 @@ SOURCES += \
     ../lib/OutputLog.cpp \
     ../lib/XmlHelper.cpp \
     DiagDataService.cpp \
-    ../lib/DataChannel.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
@@ -89,7 +87,8 @@ SOURCES += \
     ../lib/CommandLineParser.cpp \
     DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Times.cpp
 
 HEADERS += \
 	Stable.h \
@@ -106,7 +105,6 @@ HEADERS += \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../lib/JsonSerializable.h \
     ../lib/CfgServerLoader.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \
@@ -118,7 +116,6 @@ HEADERS += \
     ../lib/XmlHelper.h \
     ../lib/DataProtocols.h \
     DiagDataService.h \
-    ../lib/DataChannel.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../u7/Builder/IssueLogger.h \
@@ -129,7 +126,8 @@ HEADERS += \
     ../u7/Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

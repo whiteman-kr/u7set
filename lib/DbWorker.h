@@ -63,6 +63,7 @@ public:
     int mcFileId() const;
 	int connectionsFileId() const;
 	int busTypesFileId() const;
+	int etcFileId() const;
 
     std::vector<DbFileInfo> systemFiles() const;
 
@@ -254,6 +255,7 @@ private:
 	int m_mcFileId = -1;			// Module Configuration Template
 	int m_connectionsFileId = -1;	// Connections
 	int m_busTypesFileId = -1;		// BusTypes
+	int m_etcFileId = -1;			//
 
     std::vector<DbFileInfo> m_systemFiles;		// All system files
 

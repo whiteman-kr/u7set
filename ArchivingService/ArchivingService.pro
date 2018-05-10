@@ -78,7 +78,6 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/DeviceHelper.cpp \
-    ../lib/JsonSerializable.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/DeviceObject.cpp \
     ../u7/Builder/IssueLogger.cpp \
@@ -120,7 +119,6 @@ HEADERS += \
     ../lib/BuildInfo.h \
     ../lib/CircularLogger.h \
     ../lib/DeviceHelper.h \
-    ../lib/JsonSerializable.h \
     ../lib/TcpFileTransfer.h \
     ../lib/DeviceObject.h \
     ../u7/Builder/IssueLogger.h \

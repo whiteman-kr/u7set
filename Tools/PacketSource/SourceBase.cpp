@@ -5,12 +5,41 @@
 #include <QFile>
 
 #include "../../lib/XmlHelper.h"
+#include "../../u7/Builder/CfgFiles.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem::SourceItem() :
+PS::SourceInfo::SourceInfo()
+{
+	clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PS::SourceInfo::clear()
+{
+	index = -1;
+
+	caption.clear();
+	equipmentID.clear();
+
+	moduleType = 0;
+	subSystem.clear();
+	frameCount = 0;
+	dataID = 0;
+
+	lmAddress.clear();
+	serverAddress.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+PS::Source::Source() :
+	m_pThread(nullptr),
 	m_pWorker(nullptr)
 {
 	clear();
@@ -18,73 +47,45 @@ SourceItem::SourceItem() :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem::SourceItem(const SourceItem& from)
+PS::Source::Source(const Source& from)
 {
 	*this = from;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem::SourceItem(const SourceInfo& si)
+PS::Source::Source(const PS::SourceInfo& si)
 {
-	m_pWorker = nullptr;
 	m_si = si;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem::~SourceItem()
+PS::Source::~Source()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SourceItem::clear()
+void PS::Source::clear()
 {
-	stop();
-	m_si.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SourceItem::run()
+bool PS::Source::run()
 {
 	if (m_pWorker != nullptr)
 	{
 		return false;
 	}
 
-	SourceWorker* pWorker = new SourceWorker(this);
-	if (pWorker == nullptr)
-	{
-		return false;
-	}
-
-	QThread* pThread = new QThread;
-	if (pThread == nullptr)
-	{
-		delete pWorker;
-		return false;
-	}
-
-	pWorker->moveToThread(pThread);
-
-	connect(pThread, SIGNAL(started()), pWorker, SLOT(process()));	// on start thread run method process()
-	connect(pWorker, SIGNAL(finished()), pThread, SLOT(quit()));	// on finish() run slot quit()
-
-	connect(pWorker, SIGNAL(finished()), pWorker, SLOT(deleteLater()));
-	connect(pThread, SIGNAL(finished()), pThread, SLOT(deleteLater()));
-
-	pThread->start();												// run thread that runs process()
-
-	m_pWorker = pWorker;
-
-	return true;
+	return createWorker();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SourceItem::stop()
+bool PS::Source::stop()
 {
 	if (m_pWorker == nullptr)
 	{
@@ -92,23 +93,107 @@ bool SourceItem::stop()
 	}
 
 	m_pWorker->finish();
-	m_pWorker = nullptr;
 
 	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem& SourceItem::operator=(const SourceItem& from)
+bool PS::Source::isRunning()
+{
+	if (m_pWorker == nullptr)
+	{
+		return false;
+	}
+
+	return m_pWorker->isRunnig();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int PS::Source::sentFrames()
+{
+	if (m_pWorker == nullptr)
+	{
+		return 0;
+	}
+
+	return m_pWorker->sentFrames();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+PS::Source& PS::Source::operator=(const PS::Source& from)
 {
 	m_sourceMutex.lock();
 
+		m_pThread = from.m_pThread;
 		m_pWorker = from.m_pWorker;
+
 		m_si = from.m_si;
 
 	m_sourceMutex.unlock();
 
 	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool PS::Source::createWorker()
+{
+	if (m_pWorker != nullptr)
+	{
+		return false;
+	}
+
+	m_pWorker = new SourceWorker(this);
+	if (m_pWorker == nullptr)
+	{
+		return false;
+	}
+
+	if (m_pThread != nullptr)
+	{
+		return false;
+	}
+
+	m_pThread = new QThread;
+	if (m_pThread == nullptr)
+	{
+		delete m_pWorker;
+		return false;
+	}
+
+	m_pWorker->moveToThread(m_pThread);
+
+	connect(m_pThread, &QThread::started, m_pWorker, &SourceWorker::process);	// on start thread run method process()
+	connect(m_pWorker, &SourceWorker::finished, m_pThread, &QThread::quit);		// on finish() run slot quit()
+
+	//connect(m_pThread, SIGNAL(finished()), m_pThread, SLOT(deleteLater()));
+	//connect(pWorker, SIGNAL(finished()), pWorker, SLOT(deleteLater()));
+	connect(m_pWorker, &SourceWorker::finished, this, &Source::deleteWorker);
+
+	m_pThread->start();														// run thread that runs process()
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PS::Source::deleteWorker()
+{
+	if (m_pThread != nullptr)
+	{
+		m_pThread->wait(10000);
+		delete m_pThread;
+		m_pThread = nullptr;
+	}
+
+	if (m_pWorker != nullptr)
+	{
+		delete m_pWorker;
+		m_pWorker = nullptr;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -120,8 +205,14 @@ SourceBase theSourceBase;
 // -------------------------------------------------------------------------------------------------------------------
 
 SourceBase::SourceBase(QObject *parent) :
-	QObject(parent),
-	m_sourcesIsRunning(false)
+	QObject(parent)
+{
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SourceBase::~SourceBase()
 {
 }
 
@@ -157,49 +248,104 @@ int SourceBase::readFromXml()
 {
 	clear();
 
-	QString path = theOptions.source().path();
-	if (path.isEmpty() == true)
+	QString msgTitle = tr("Loading sources");
+
+	if (theOptions.source().path().isEmpty() == true)
 	{
-		QMessageBox::information(nullptr, "Loading sources", tr("Please, input path to sources file!"));
+		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to sources directory!"));
 		return 0;
 	}
 
-	QFile fileXml(path);
-	if (fileXml.exists() == false)
+	// read Server IP and Server Port
+	//
+
+	QString fileCfg = theOptions.source().path() + "/" + Builder::FILE_CONFIGURATION_XML;
+
+	QFile fileCfgXml(fileCfg);
+	if (fileCfgXml.exists() == false)
 	{
-		QMessageBox::information(nullptr, "Loading sources", tr("File of sources is not found!"));
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not found!").arg(Builder::FILE_CONFIGURATION_XML));
 		return 0;
 	}
 
-	if (fileXml.open(QIODevice::ReadOnly) == false)
+	if (fileCfgXml.open(QIODevice::ReadOnly) == false)
 	{
-		QMessageBox::information(nullptr, "Loading sources", tr("File of sources is not opened!"));
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not opened!").arg(Builder::FILE_CONFIGURATION_XML));
 		return 0;
 	}
 
-	QByteArray& fileData = fileXml.readAll();
+	QByteArray&& cfgData = fileCfgXml.readAll();
 
-	fileXml.close();
+	fileCfgXml.close();
 
+	XmlReadHelper xmlCfg(cfgData);
 
+	HostAddressPort serverAddress;
 
-	XmlReadHelper xml(fileData);
-
-	while(xml.findElement("DataSource") == true)
+	if (xmlCfg.readHostAddressPort("AppDataReceivingIP", "AppDataReceivingPort", &serverAddress) == false)
 	{
-		SourceInfo si;
+		QMessageBox::information(nullptr, msgTitle, tr("IP-address of AppDataSrv is not found in file %1!").arg(Builder::FILE_CONFIGURATION_XML));
+		return 0;
+	}
 
-		xml.readStringAttribute("LmDataType", &si.m_dataType);
-		xml.readStringAttribute("LmEquipmentID", &si.m_equipmentID);
-		xml.readIntAttribute("LmModuleType", &si.m_moduleType);
-		xml.readStringAttribute("LmSubsystem", &si.m_subSystem);
-		xml.readStringAttribute("LmCaption", &si.m_caption);
-		xml.readStringAttribute("LmDataIP", &si.m_ip);
-		xml.readIntAttribute("LmDataPort", &si.m_port);
+	// read Data Sources
+	//
 
-		si.m_frameCount = 1;
+	QString fileSource = theOptions.source().path() + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
 
-		append(si);
+	QFile fileSourceXml(fileSource);
+	if (fileSourceXml.exists() == false)
+	{
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not found!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
+		return 0;
+	}
+
+	if (fileSourceXml.open(QIODevice::ReadOnly) == false)
+	{
+		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not opened!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
+		return 0;
+	}
+
+	QByteArray&& sourceData = fileSourceXml.readAll();
+
+	fileSourceXml.close();
+
+	int indexSource = 0;
+	XmlReadHelper xmlSource(sourceData);
+
+	while(xmlSource.atEnd() == false)
+	{
+		if (xmlSource.readNextStartElement() == false)
+		{
+			continue;
+		}
+
+		if (xmlSource.name() == "DataSource")
+		{
+			PS::SourceInfo si;
+
+			QString ip;
+			int port = 0;
+			QString dataID;
+
+			xmlSource.readStringAttribute("LmEquipmentID", &si.equipmentID);
+			xmlSource.readIntAttribute("LmModuleType", &si.moduleType);
+			xmlSource.readStringAttribute("LmSubsystem", &si.subSystem);
+			xmlSource.readStringAttribute("LmCaption", &si.caption);
+			xmlSource.readStringAttribute("LmDataIP", &ip);
+			xmlSource.readIntAttribute("LmDataPort", &port);
+			xmlSource.readIntAttribute("LmRupFramesQuantity", &si.frameCount);
+			xmlSource.readStringAttribute("LmDataID", &dataID);
+
+			si.index = indexSource++;
+
+			si.dataID = dataID.toInt(nullptr, 16);
+
+			si.lmAddress.setAddressPort(ip, port);
+			si.serverAddress.setAddressPort(serverAddress.addressStr(), serverAddress.port());
+
+			append(si);
+		}
 	}
 
 	return count();
@@ -207,7 +353,7 @@ int SourceBase::readFromXml()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SourceBase::append(const SourceItem& source)
+int SourceBase::append(const PS::Source& source)
 {
 	int index = -1;
 
@@ -237,9 +383,9 @@ void SourceBase::remove(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem SourceBase::source(int index) const
+PS::Source SourceBase::source(int index) const
 {
-	SourceItem source;
+	PS::Source source;
 
 	m_sourceMutex.lock();
 
@@ -255,9 +401,9 @@ SourceItem SourceBase::source(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem* SourceBase::sourcePtr(int index)
+PS::Source* SourceBase::sourcePtr(int index)
 {
-	SourceItem* pSource = nullptr;
+	PS::Source* pSource = nullptr;
 
 	m_sourceMutex.lock();
 
@@ -273,7 +419,7 @@ SourceItem* SourceBase::sourcePtr(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SourceBase::setSource(int index, const SourceItem &source)
+void SourceBase::setSource(int index, const PS::Source &source)
 {
 	m_sourceMutex.lock();
 
@@ -338,8 +484,6 @@ void SourceBase::runAllSoureces()
 			m_sourceList[i].run();
 		}
 
-		m_sourcesIsRunning = true;
-
 	m_sourceMutex.unlock();
 }
 
@@ -355,10 +499,7 @@ void SourceBase::stopAllSoureces()
 			m_sourceList[i].stop();
 		}
 
-		m_sourcesIsRunning = false;
-
 	m_sourceMutex.unlock();
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -442,7 +583,7 @@ QVariant SourceTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	SourceItem* pSource = sourceAt(row);
+	PS::Source* pSource = sourceAt(row);
 	if (pSource == nullptr)
 	{
 		return QVariant();
@@ -451,6 +592,19 @@ QVariant SourceTable::data(const QModelIndex &index, int role) const
 	if (role == Qt::TextAlignmentRole)
 	{
 		return Qt::AlignCenter;
+	}
+
+	if (role == Qt::TextColorRole)
+	{
+		if (column == SOURCE_LIST_COLUMN_STATE)
+		{
+			if (pSource->isRunning() == false)
+			{
+				return QColor(0xFF, 0x00, 0x00);
+			}
+		}
+
+		return QVariant();
 	}
 
 //	if (role == Qt::BackgroundColorRole)
@@ -492,7 +646,7 @@ QVariant SourceTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SourceTable::text(int row, int column, SourceItem* pSource) const
+QString SourceTable::text(int row, int column, PS::Source* pSource) const
 {
 	if (row < 0 || row >= sourceCount())
 	{
@@ -513,13 +667,14 @@ QString SourceTable::text(int row, int column, SourceItem* pSource) const
 
 	switch (column)
 	{
-		case SOURCE_LIST_COLUMN_DATA_TYPE:		result = pSource->dataType();												break;
-		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->equipmentID();											break;
-		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->moduleType());							break;
-		case SOURCE_LIST_COLUMN_SUB_SYSTEM:		result = pSource->subSystem();												break;
-		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->caption();												break;
-		case SOURCE_LIST_COLUMN_IP:				result = pSource->ip() + " (" + QString::number(pSource->port()) + ")";		break;
-		case SOURCE_LIST_COLUMN_FRAME_COUNT:	result = QString::number(pSource->frameCount());							break;
+		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->info().caption;												break;
+		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->info().equipmentID;											break;
+		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->info().moduleType);							break;
+		case SOURCE_LIST_COLUMN_SUB_SYSTEM:		result = pSource->info().subSystem;												break;
+		case SOURCE_LIST_COLUMN_FRAME_COUNT:	result = QString::number(pSource->info().frameCount);							break;
+		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
+		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
+		case SOURCE_LIST_COLUMN_STATE:			result = pSource->isRunning() ? QString::number(pSource->sentFrames()) : tr("Stopped");										break;
 		default:								assert(0);
 	}
 
@@ -562,9 +717,9 @@ int SourceTable::sourceCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceItem* SourceTable::sourceAt(int index) const
+PS::Source* SourceTable::sourceAt(int index) const
 {
-	SourceItem* pSource = nullptr;
+	PS::Source* pSource = nullptr;
 
 	m_sourceMutex.lock();
 
@@ -580,7 +735,7 @@ SourceItem* SourceTable::sourceAt(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SourceTable::set(const QVector<SourceItem*> list_add)
+void SourceTable::set(const QVector<PS::Source*> list_add)
 {
 	int count = list_add.count();
 	if (count == 0)

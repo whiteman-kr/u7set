@@ -543,11 +543,6 @@ namespace Builder
 	//
 	// --------------------------------------------------------------------------------------
 
-	const QString BuildResultWriter::COMMON_DIR("Common");
-	const QString BuildResultWriter::REPORTS_DIR("Reports");
-	const QString BuildResultWriter::OPTO_VHD_DIR("Opto-vhd");
-	const QString BuildResultWriter::RUN_SERVICE_SCRIPTS("RunServiceScripts");
-
 	BuildResultWriter::BuildResultWriter(QObject *parent) :
 		QObject(parent)
 	{
@@ -859,7 +854,7 @@ namespace Builder
 
 			cfgFile->finalize();
 
-			BuildFile* buildFile = addFile(cfgFile->subDir(), "configuration.xml", cfgFile->getFileData());
+			BuildFile* buildFile = addFile(cfgFile->subDir(), Builder::FILE_CONFIGURATION_XML, cfgFile->getFileData());
 
 			if (buildFile == nullptr)
 			{

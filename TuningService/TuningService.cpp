@@ -75,6 +75,18 @@ namespace Tuning
 		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
 	}
 
+	const TuningSourceWorker* TuningServiceWorker::getSourceWorker(quint32 sourceIP) const
+	{
+		TuningSourceWorkerThread* thread = m_sourceWorkerThreadMap.value(sourceIP);
+		if (thread == nullptr)
+		{
+			DEBUG_LOG_MSG(m_logger, QString(tr("IP: %1, source quantity: %2").arg(QHostAddress(sourceIP).toString()).arg(m_sourceWorkerThreadMap.size())));
+			assert(false);
+			return nullptr;
+		}
+		return thread->worker();
+	}
+
 	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
 	{
 		clientContexts.clear();
@@ -320,7 +332,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_logger);
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_cfgSettings.clientRequestIP,
 															tcpTuningSever,
@@ -349,7 +361,6 @@ namespace Tuning
 		bool result = true;
 
 		result &= m_cfgSettings.readFromXml(xml);
-		result &= readTuningDataSources(xml);
 
 		if  (result == true)
 		{
@@ -402,46 +413,16 @@ namespace Tuning
 		return result;
 	}
 
-	bool TuningServiceWorker::readTuningDataSources(XmlReadHelper& xml)
+	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData)
 	{
 		bool result = true;
 
-		m_tuningSources.clear();
+		result = DataSourcesXML<TuningSource>::readFromXml(fileData, &m_tuningSources);
 
-		result = xml.findElement("TuningSources");
-
-		if (result == false)
+		if (result == true)
 		{
-			return false;
+			m_tuningSources.buildMaps();
 		}
-
-		int sourceCount = 0;
-
-		result &= xml.readIntAttribute("Count", &sourceCount);
-
-		for(int i = 0; i < sourceCount; i++)
-		{
-			result = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			TuningSource* ds = new TuningSource();
-
-			result &= ds->readFromXml(xml);
-
-			if (result == false)
-			{
-				delete ds;
-				break;
-			}
-
-			m_tuningSources.insert(ds->lmEquipmentID(), ds);
-		}
-
-		m_tuningSources.buildIP2DataSourceMap();
 
 		return result;
 	}
@@ -465,22 +446,16 @@ namespace Tuning
 
 		bool result = false;
 
-		for(TuningSource* tuningSource : m_tuningSources)
+		for(const TuningSource& tuningSource : m_tuningSources)
 		{
-			if (tuningSource == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (tuningSourceEquipmentID.isEmpty() == false && tuningSource->lmEquipmentID() != tuningSourceEquipmentID)
+			if (tuningSourceEquipmentID.isEmpty() == false && tuningSource.lmEquipmentID() != tuningSourceEquipmentID)
 			{
 				continue;
 			}
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 			//
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger, m_tuningLog);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, tuningSource, m_logger, m_tuningLog);
 
 			if (sourceWorkerThread == nullptr)
 			{
@@ -588,7 +563,7 @@ namespace Tuning
 		}
 	}
 
-	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
+	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 	{
 		if (m_cfgLoaderThread == nullptr)
 		{
@@ -609,8 +584,42 @@ namespace Tuning
 
 		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
 
-		clearConfiguration();
+		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+		{
+			QByteArray fileData;
+			QString errStr;
 
-		applyNewConfiguration();
+			m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+			if (errStr.isEmpty() == false)
+			{
+				qDebug() << errStr;
+				result = false;
+				continue;
+			}
+
+			result = true;
+
+			if (bfi.ID == CFG_FILE_ID_TUNING_SOURCES)
+			{
+				result &= readTuningDataSources(fileData);
+			}
+
+			if (result == true)
+			{
+				qDebug() << "Read file " << bfi.pathFileName << " OK";
+			}
+			else
+			{
+				qDebug() << "Read file " << bfi.pathFileName << " ERROR";
+				break;
+			}
+		}
+
+		if (result == true)
+		{
+			clearConfiguration();
+			applyNewConfiguration();
+		}
 	}
 }

@@ -3,22 +3,6 @@
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet
 
-
-QDateTime Times::systemToDateTime() const
-{
-	return system.toDateTime();
-}
-
-QDateTime Times::localToDateTime() const
-{
-	return local.toDateTime();
-}
-
-QDateTime Times::plantToDateTime() const
-{
-	return plant.toDateTime();
-}
-
 void AppSignalStateFlags::clear()
 {
 	all = 0;
@@ -28,24 +12,24 @@ void AppSignalStateFlags::clearReasonsFlags()
 {
 	validityChange = 0;
 	autoPoint = 0;
-	roughAperture = 0;
-	smoothAperture = 0;
+	coarseAperture = 0;
+	fineAperture = 0;
 }
 
 bool AppSignalStateFlags::hasArchivingReason() const
 {
 	return	validityChange == 1 ||
 			autoPoint == 1 ||
-			roughAperture == 1 ||
-			smoothAperture == 1;
+			coarseAperture == 1 ||
+			fineAperture == 1;
 }
 
 bool AppSignalStateFlags::hasShortTermArchivingReasonOnly() const
 {
 	return	validityChange == 0 &&
 			autoPoint == 0 &&
-			roughAperture == 0 &&
-			smoothAperture == 1;
+			coarseAperture == 0 &&
+			fineAperture == 1;
 }
 
 AppSignalState::AppSignalState(const Proto::AppSignalState& protoState)
@@ -173,6 +157,20 @@ Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
 
 	return hash;
 }
+
+void SimpleAppSignalState::print() const
+{
+	qDebug() << "state" << QDateTime::fromMSecsSinceEpoch(time.system.timeStamp).toString("dd.MM.yyyy HH:mm:ss.zzz") <<
+				"validity =" << flags.valid <<
+				"value =" << value <<
+				(flags.autoPoint == 1 ? " auto" : "");
+}
+
+// -------------------------------------------------------------------------------------------------
+//
+// AppSignalParam class implementation
+//
+// -------------------------------------------------------------------------------------------------
 
 AppSignalParam::AppSignalParam()
 {

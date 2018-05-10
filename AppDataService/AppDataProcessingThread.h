@@ -1,73 +1,85 @@
 #pragma once
 
-#include "AppDataServiceTypes.h"
 #include "../lib/SimpleThread.h"
-#include "../lib/DataChannel.h"
-#include "AppSignalStateEx.h"
-
+#include "AppDataReceiver.h"
 
 class AppDataProcessingWorker : public SimpleThreadWorker
 {
 public:
 	AppDataProcessingWorker(int number,
-							RupDataQueue& rupDataQueue,
-							const SourceParseInfoMap& sourceParseInfoMap,
-							AppSignalStates& signalStates,
-							AppSignalStatesQueue& signalStatesQueue);
+							const AppDataSourcesIP& appDataSourcesIP,
+							const AppDataReceiver* appDataReceiver,
+							CircularLoggerShared log);
 
-public slots:
-	void slot_rupDataQueueIsNotEmpty();
+	void connectToReceiver(AppDataReceiver& appDataReceiver);
 
 private:
 	virtual void onThreadStarted() override;
 	virtual void onThreadFinished() override;
 
-	void initAutoArchiving();
-
-	void parseRupData();
-	bool getDoubleValue(const SignalParseInfo& parseInfo, double& value);
-	bool getValidity(const SignalParseInfo& parseInfo, quint32& validity);
+public slots:
+	void onAppDataSourceReceiveRupFrame(quint32 appDataSourceIP);
 
 private:
+	const QThread* m_thisThread = nullptr;
 	int m_number = 0;
-	RupDataQueue& m_rupDataQueue;
-	const SourceParseInfoMap& m_sourceParseInfoMap;
-	AppSignalStates& m_signalStates;
-	AppSignalStatesQueue& m_signalStatesQueue;
-
-	RupData m_rupData;					// parsing buffer
+	const AppDataSourcesIP& m_appDataSourcesIP;
+	const AppDataReceiver* m_appDataReceiver;
+	CircularLoggerShared m_log;
 
 	// parsing statistics
 	//
-	quint64 m_parsedRupDataCount = 0;
-	quint64 m_notFoundIPCount = 0;
-	quint64 m_valueParsingErrorCount = 0;
-	quint64 m_validityParsingErrorCount = 0;
-	quint64 m_badSignalStateIndexCount = 0;
+	quint64 m_parsedRupPacketCount = 0;
+	quint64 m_successOwnership = 0;
+	quint64 m_failOwnership = 0;
 };
 
 
 class AppDataProcessingThread : public SimpleThread
 {
 public:
- AppDataProcessingThread(	int number,
-							RupDataQueue& rupDataQueue,
-							const SourceParseInfoMap& sourceParseInfoMap,
-							AppSignalStates& signalStates,
-							AppSignalStatesQueue& signalStatesQueue);
+	AppDataProcessingThread(int number,
+							const AppDataSourcesIP& appDataSourcesIP,
+							const AppDataReceiver* appDataReceiver,
+							CircularLoggerShared log);
+};
+
+class AppDataProcessingThread2 : public RunOverrideThread
+{
+public:
+	AppDataProcessingThread2(int number,
+							const AppDataSourcesIP& appDataSourcesIP,
+							const AppDataReceiver* appDataReceiver,
+							CircularLoggerShared log);
+
+	void run() override;
+
+private:
+	int m_number = 0;
+	const AppDataSourcesIP& m_appDataSourcesIP;
+	const AppDataReceiver* m_appDataReceiver;
+	CircularLoggerShared m_log;
+
+	// parsing statistics
+	//
+	quint64 m_parsedRupPacketCount = 0;
+	quint64 m_successOwnership = 0;
+	quint64 m_failOwnership = 0;
 };
 
 
-class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread*>
+
+class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread2*>
 {
 public:
-	void createProcessingThreads(int poolSize, RupDataQueue& rupDataQueue,
-				const SourceParseInfoMap& sourceParseInfoMap,
-				AppSignalStates& signalStates,
-				AppSignalStatesQueue& signalStatesQueue);
+	static const int IDEAL_THREADS_COUNT = -1;
 
-	void startProcessingThreads();
+public:
+	void startProcessingThreads(int poolSize,
+								const AppDataSourcesIP& appDataSourcesIP,
+								const AppDataReceiver* appDataReceiver,
+								CircularLoggerShared log);
 
-	void stopAndClearProcessingThreads();
+	void stopProcessingThreads();
 };
 

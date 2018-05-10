@@ -32,7 +32,9 @@ public:
 	bool setAddress(const QString& address);
 	void setPort(quint16 port);
 
-	bool setAddressPort(const QString& addressPortStr, quint16 defaultPort);
+	bool setAddressPort(const QString& addressStr, quint16 Port);
+
+	bool setAddressPortStr(const QString& addressPortStr, quint16 defaultPort);
 
 	quint32 address32() const;
 	QHostAddress address() const;

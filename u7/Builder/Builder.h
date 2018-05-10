@@ -2,6 +2,7 @@
 #define BUILDER_H
 
 #include "../lib/Signal.h"
+#include "../lib/CommonTypes.h"
 #include "../TuningService/TuningDataStorage.h"
 
 #include "LogicModuleSet.h"
@@ -50,8 +51,6 @@ namespace Afb
 namespace Builder
 {
     class LmDescriptionSet;
-
-	typedef QHash<QString, quint64> LmsUniqueIdMap;		// LM's equipmentID => LM's uniqueID map
 
 	// ------------------------------------------------------------------------
 	//
@@ -117,12 +116,6 @@ namespace Builder
 		//
 		bool saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
 										 BuildResultWriter* buildResultWriter);
-
-		// Save AFBs simulation scripts
-		//
-		bool saveAfbSimScripts(DbController* db,
-							   const LmDescriptionSet& lmDescriptions,
-							   BuildResultWriter* buildResultWriter);
 
 		// Compile Application Logic
 		//

@@ -46,9 +46,9 @@ namespace Builder
 
 		bool result = true;
 
-		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, m_log);
-		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, m_log);
-		result &= DeviceHelper::getPortProperty(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_PORT, &clientRequestPort, m_log);
+		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, "", m_log);
+		result &= DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", m_log);
+		result &= DeviceHelper::getPortProperty(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_PORT, &clientRequestPort, false, 0, m_log);
 
 		return result;
 	}
@@ -79,14 +79,15 @@ namespace Builder
 		content += " -b=" + appDataPath + "/" + buildDir;
 
 		QString clientRequestIP;
-		if (DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, m_log) == false)
+
+		if (DeviceHelper::getIPv4Property(m_software, CfgServiceSettings::PROP_CLIENT_REQUEST_IP, &clientRequestIP, false, "", m_log) == false)
 		{
 			return false;
 		}
 
 		content += " -ip=" + clientRequestIP + "\n";
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -120,7 +121,7 @@ namespace Builder
 
 		content += " -ip=" + m_software->propertyByCaption("ClientRequestIP")->value().toString() + "\n";
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(BuildResultWriter::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

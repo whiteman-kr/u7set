@@ -67,7 +67,6 @@ SOURCES += \
     ../lib/SimpleThread.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/Tcp.cpp \
-    ../lib/JsonSerializable.cpp \
     TuningService.cpp \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \
@@ -80,7 +79,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/Signal.cpp \
-    ../AppDataService/AppSignalStateEx.cpp \
     ../lib/Crc.cpp \
     ../lib/WUtils.cpp \
     TuningDataStorage.cpp \
@@ -100,7 +98,8 @@ SOURCES += \
     TuningServiceMain.cpp \
     ../lib/AppSignal.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Times.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -146,7 +145,8 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     ../lib/AppSignal.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/Times.h
 
 include(../qtservice/src/qtservice.pri)
 

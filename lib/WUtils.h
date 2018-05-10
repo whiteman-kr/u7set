@@ -24,7 +24,7 @@
 #define TEST_PTR_LOG_RETURN_FALSE(ptr, log)	if (ptr == nullptr) \
 											{	\
 												assert(false);	\
-												LOG_INTERNAL_ERROR(log); \
+												LOG_NULLPTR_ERROR(log); \
 												return false; \
 											}
 

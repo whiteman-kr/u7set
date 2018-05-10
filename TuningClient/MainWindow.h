@@ -77,7 +77,8 @@ public slots:
 	void runPresetEditor();
 	void showSettings();
 	void showTuningSources();
-	void showLog();
+	void showAppLog();
+	void showSignalsLog();
 	void showAbout();
 
 private:
@@ -100,10 +101,12 @@ private:
 	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
-	QAction* m_pLogAction = nullptr;
+	QAction* m_pAppLogAction = nullptr;
+	QAction* m_pSignalLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 
-	QLabel* m_statusBarInfo = nullptr;
+	QLabel* m_statusBarBuildInfo = nullptr;
+	QLabel* m_statusBarLmControlMode = nullptr;
 	QLabel* m_statusDiscreteCount = nullptr;
 	QLabel* m_statusBarLmErrors = nullptr;
 	QLabel* m_statusBarSor = nullptr;

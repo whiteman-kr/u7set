@@ -9,9 +9,9 @@ Settings theSettings;
 Settings::Settings() :
 	m_instanceStrId("SYSTEM_RACKID_WS00_MONITOR"),
 	m_configuratorIpAddress1("127.0.0.1"),
-	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_REQUEST),
+	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
 	m_configuratorIpAddress2("127.0.0.1"),
-	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST)
+	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST)
 {
 	 qRegisterMetaTypeStreamOperators<QList<int>>("QList<int>");
 }
@@ -149,10 +149,10 @@ void Settings::loadSystemScope()
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_MONITOR").toString();
 
 	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
-	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
-	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
 	m_showLogo = s.value("m_showLogo", true).toBool();
 	m_showItemsLabels = s.value("m_showItemsLabels", false).toBool();

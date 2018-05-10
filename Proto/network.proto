@@ -75,21 +75,23 @@ message GetAppSignalStateReply
 
 message DataSourceInfo
 {
-    optional uint64 id = 1;				// unique id
-    optional string equipmentID = 2;
-    optional string caption = 3;
-    optional int32 dataType = 4;
-    optional string ip = 5;
-    optional int32 port = 6;
-    optional int32 channel = 7;
-    optional int32 subsystemID = 8;
-    optional string subsystem = 9;
+    optional uint64 id = 1 [default = 0];		    // unique id
 
-    optional int32 lmNumber = 10;
-    optional int32 lmModuleType = 11;
+    optional string lmEquipmentID = 2;
+    optional string lmCaption = 3;
+    optional int32 lmDataType = 4 [default = 0];
+    optional string lmIP = 5;
+    optional int32 lmPort = 6 [default = 0];
+    optional int32 lmSubsystemID = 7 [default = 0];
+    optional string lmSubsystem = 8;
+    optional string lmSubsystemChannel = 9;
+    optional int32 lmNumber = 10 [default = 0];
+    optional int32 lmModuleType = 11 [default = 0];
     optional string lmAdapterID = 12;
-    optional bool lmDataEnable = 13;
-    optional uint64 lmDataID = 14;
+    optional bool lmDataEnable = 13 [default = false];
+    optional uint64 lmDataID = 14 [default = 0];
+    optional uint64 lmUniqueID = 15 [default = 0];
+    optional int32 lmRupFramesQuantity = 16 [default = 0];
 }
 
 
@@ -107,26 +109,34 @@ message GetDataSourcesInfoReply
 
 // Getting Application Data Sources states
 //
-
 message AppDataSourceState
 {
-    optional uint64 id = 1;			    // unique id
-    optional int64 uptime = 2;			    // time from start of data receiving
-    optional int64 receivedDataSize = 3;	    //
-    optional double dataReceivingRate = 4;	    // bytes/sec
-    optional int64 receivedFramesCount = 5;
-    optional bool processingEnabled = 6;
-    optional int64 processedPacketCount = 7;
-    optional int64 errorProtocolVersion = 8;
-    optional int64 errorFramesQuantity = 9;
-    optional int64 errorFrameNo = 10;
-    optional int64 lostedPackets = 11;
-    optional int64 errorDataID = 12;
-    optional uint64 receivedDataID = 13;
-    optional bool processingSkiped = 14;
-    optional int32 state = 15;			    // receive, noData, stopped
-    optional int64 errorBadFrameSize = 16;
-    optional bool hasErrors = 17;
+    optional uint64 id = 1 [default = 0];			    // unique id
+    optional bool dataReceives = 2 [default = false];
+    optional int64 uptime = 3 [default = 0];			    // time from start of data receiving
+    optional uint64 receivedDataID = 4 [default = 0];
+    optional int32 rupFramesQueueSize = 5 [default = 0];
+    optional int32 rupFramesQueueMaxSize = 6 [default = 0];
+    optional double dataReceivingRate = 7 [default = 0];	    // bytes/sec
+    optional int64 receivedDataSize = 8 [default = 0];	    //
+    optional int64 receivedFramesCount = 9 [default = 0];
+    optional int64 receivedPacketCount = 10 [default = 0];
+    optional int64 lostedPacketCount = 11 [default = 0];
+    optional bool dataProcessingEnabled = 12 [default = false];
+    optional int64 processedPacketCount = 13 [default = 0];
+    optional int64 lastPacketSystemTime = 14 [default = 0];
+    optional int64 rupFramePlantTime = 15 [default = 0];
+    optional int32 rupFrameNumerator = 16 [default = 0];
+    optional int32 signalStatesQueueSize = 17 [default = 0];
+    optional int32 signalStatesQueueMaxSize = 18 [default = 0];
+    optional int32 acquiredSignalsCount = 19 [default = 0];
+    optional int64 errorProtocolVersion = 20 [default = 0];
+    optional int64 errorFramesQuantity = 21 [default = 0];
+    optional int64 errorFrameNo = 22 [default = 0];
+    optional int64 errorDataID = 23 [default = 0];
+    optional int64 errorFrameSize = 24 [default = 0];
+    optional int64 errorDuplicatePlantTime = 25 [default = 0];
+    optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
 }
 
 
@@ -276,6 +286,18 @@ message GetTuningSourcesInfoReply
 //
 message GetTuningSourcesStates
 {
+}
+
+message SignalsAssociatedToTuningSource
+{
+    required uint64 sourceID = 1;
+    repeated uint64 signalHash = 2;
+}
+
+message TuningSourceFilling
+{
+    required uint64 signalCount = 1;
+    repeated SignalsAssociatedToTuningSource signalsPerSource = 2;
 }
 
 message TuningSourceState

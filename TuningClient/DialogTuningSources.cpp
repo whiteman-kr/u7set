@@ -29,11 +29,11 @@ DialogTuningSources::DialogTuningSources(TuningClientTcpClient* tcpClient, QWidg
 	headerLabels << tr("SubsystemID");
 	headerLabels << tr("LmNumber");
 
-	headerLabels << tr("IsReply");
-	headerLabels << tr("ControlIsActive");
+	headerLabels << tr("State");
+	headerLabels << tr("IsActive");
+	headerLabels << tr("HasUnapplied");
 	headerLabels << tr("RequestCount");
 	headerLabels << tr("ReplyCount");
-	headerLabels << tr("HasUnapplied");
 
 	ui->treeWidget->setColumnCount(headerLabels.size());
 	ui->treeWidget->setHeaderLabels(headerLabels);
@@ -92,15 +92,14 @@ void DialogTuningSources::update(bool refreshOnly)
 
 			TuningSource& ts = tsi[i];
 
-			connectionStrings << ts.info.equipmentid().c_str();
-			connectionStrings << ts.info.caption().c_str();
-			connectionStrings << ts.info.ip().c_str();
-			connectionStrings << QString::number(ts.info.port());
+			connectionStrings << ts.info.lmequipmentid().c_str();
+			connectionStrings << ts.info.lmcaption().c_str();
+			connectionStrings << ts.info.lmip().c_str();
+			connectionStrings << QString::number(ts.info.lmport());
 
-			QChar chChannel = 'A' + ts.info.channel();
-			connectionStrings << chChannel;
+			connectionStrings << ts.info.lmsubsystemchannel().c_str();
 
-			connectionStrings << ts.info.subsystem().c_str();
+			connectionStrings << ts.info.lmsubsystem().c_str();
 			connectionStrings << QString::number(ts.info.lmnumber());
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
@@ -116,6 +115,8 @@ void DialogTuningSources::update(bool refreshOnly)
 			ui->treeWidget->resizeColumnToContents(i);
 		}
 
+		ui->treeWidget->setColumnWidth(State, 120);
+
 		// Single control mode controls
 		if (m_singleControlMode != m_tuningTcpClient->singleLmControlMode())
 		{
@@ -127,8 +128,6 @@ void DialogTuningSources::update(bool refreshOnly)
 			ui->btnDisableControl->setEnabled(m_singleControlMode == true);
 		}
 	}
-
-	const int dynamicColumn = 7;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -146,13 +145,44 @@ void DialogTuningSources::update(bool refreshOnly)
 
 		if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == true)
 		{
-			int col = dynamicColumn;
+			if (ts.state.controlisactive() == true)
+			{
+				if (ts.state.isreply() == false)
+				{
+					item->setBackground(State, QBrush(Qt::red));
+					item->setForeground(State, QBrush(Qt::white));
 
-			item->setText(col++, ts.state.isreply() ? tr("Yes") : tr("No"));
-			item->setText(col++, ts.state.controlisactive() ? tr("Yes") : tr("No"));
-			item->setText(col++, QString::number(ts.state.requestcount()));
-			item->setText(col++, QString::number(ts.state.replycount()));
-			item->setText(col++, ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
+					item->setText(State, tr("No Reply"));
+				}
+				else
+				{
+					int errorsCount = ts.getErrorsCount();
+
+					if (errorsCount == 0)
+					{
+						item->setBackground(State, QBrush(Qt::white));
+						item->setForeground(State, QBrush(Qt::black));
+
+						item->setText(State, tr("Active"));
+					}
+					else
+					{
+						item->setBackground(State, QBrush(Qt::red));
+						item->setForeground(State, QBrush(Qt::white));
+
+						item->setText(State, tr("E: %1").arg(errorsCount));
+					}
+				}
+			}
+			else
+			{
+				item->setText(State, tr("Inactive"));
+			}
+
+			item->setText(IsActive, ts.state.controlisactive() ? tr("Yes") : tr("No"));
+			item->setText(HasUnappliedParams, ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
+			item->setText(RequestCount, QString::number(ts.state.requestcount()));
+			item->setText(ReplyCount, QString::number(ts.state.replycount()));
 		}
 	}
 }
