@@ -233,6 +233,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, HasCheckedOutSignals function creation"},
 	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, Appends specfic properties and potobuf fields to app signals"},
 	{":/DatabaseUpgrade/Upgrade0215.sql", "Upgrade to version 215, Changes in SignalData type and dependent stored procedures"},
+	{":/DatabaseUpgrade/Upgrade0216.sql", "Upgrade to version 216, Added SignalSpecificProperties in LM, AIFM, AIM, AOM, DIM, DOM, OCM presets"},
 };
 
 
