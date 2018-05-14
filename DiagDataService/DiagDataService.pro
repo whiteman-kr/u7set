@@ -92,7 +92,8 @@ SOURCES += \
     DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS += \
 	Stable.h \
@@ -131,7 +132,8 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 

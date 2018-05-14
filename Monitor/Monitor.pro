@@ -126,7 +126,8 @@ SOURCES += main.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -180,7 +181,8 @@ HEADERS  += \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 
 FORMS    += \

@@ -3,6 +3,8 @@ QT -= gui
 QT += network
 QT += qml
 QT += xml
+QT += widgets
+
 
 TARGET = TuningSrv
 CONFIG += console
@@ -100,7 +102,8 @@ SOURCES += \
     ../lib/AppSignal.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -147,7 +150,8 @@ HEADERS += \
     ../lib/AppSignal.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 

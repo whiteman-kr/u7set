@@ -154,6 +154,10 @@ public:
 	static const QString categoryTuning;
 	static const QString categoryExpertProperties;
 
+	static const QString defaultInputAnalogSpecPropStruct;
+	static const QString defaultOutputAnalogSpecPropStruct;
+	static const QString defaultInternalAnalogSpecPropStruct;
+
 	static const QString lastEditedSignalFieldValuePlace;
 
 public:

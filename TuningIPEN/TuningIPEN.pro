@@ -60,7 +60,8 @@ SOURCES +=\
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     AppSignalStateEx.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -102,7 +103,8 @@ HEADERS  += TuningMainWindow.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     AppSignalStateEx.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 
