@@ -133,19 +133,6 @@ void SignalProperties::updateSpecPropValues()
 	m_signal.setProtoSpecPropValues(valuesData);
 }
 
-void SignalProperties::addPropertyDependentOnPrecision(Property* dependentProperty)
-{
-	for (Property* currentProperty : m_propertiesDependentOnPrecision)
-	{
-		if (currentProperty == dependentProperty)
-		{
-			return;
-		}
-	}
-
-	m_propertiesDependentOnPrecision.push_back(dependentProperty);
-}
-
 void SignalProperties::setSpecPropStruct(const QString & specPropStruct)
 {
 	deleteSpecificProperties();
@@ -167,6 +154,27 @@ void SignalProperties::setSpecPropStruct(const QString & specPropStruct)
 	m_signal.setProtoSpecPropValues(protoData);
 
 	createSpecificProperties();
+}
+
+int SignalProperties::getPrecision()
+{
+	std::shared_ptr<Property> precisionProperty = propertyByCaption(SignalProperties::decimalPlacesCaption);
+
+	if (precisionProperty == nullptr)
+	{
+		return 0;
+	}
+
+	bool ok = true;
+
+	int precision = precisionProperty->value().toInt(&ok);
+
+	if (ok == false)
+	{
+		return 0;
+	}
+
+	return precision;
 }
 
 void SignalProperties::initProperties()
@@ -210,15 +218,12 @@ void SignalProperties::initProperties()
 	enableTuningProperty->setCategory(categoryTuning);
 
 	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
-	m_propertiesDependentOnPrecision.push_back(tuningDefaultValueProperty);
 	tuningDefaultValueProperty->setCategory(categoryTuning);
 
 	auto tuningLowBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningLowBoundCaption, true, Signal::tuningLowBound, Signal::setTuningLowBound, m_signal);
-	m_propertiesDependentOnPrecision.push_back(tuningLowBoundProperty);
 	tuningLowBoundProperty->setCategory(categoryTuning);
 
 	auto tuningHighBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningHighBoundCaption, true, Signal::tuningHighBound, Signal::setTuningHighBound, m_signal);
-	m_propertiesDependentOnPrecision.push_back(tuningHighBoundProperty);
 	tuningHighBoundProperty->setCategory(categoryTuning);
 
 	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,

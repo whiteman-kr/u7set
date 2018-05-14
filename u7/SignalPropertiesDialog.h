@@ -53,6 +53,13 @@ protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
+	bool checkoutSignal(Signal& s, QString& message);
+	QString errorMessage(const ObjectState& state) const;
+
+	bool isPropertyDependentOnPrecision(const QString& propName) { return m_propertiesDependentOnPrecision.value(propName, false); }
+	void addPropertyDependentOnPrecision(const QString& propName) { m_propertiesDependentOnPrecision.insert(propName, true); }
+
+private:
 	DbController* m_dbController;
 	QVector<Signal*> m_signalVector;
 	QVector<int> m_editedSignalsId;
@@ -64,8 +71,7 @@ private:
 
 	bool m_isValid = false;
 
-	bool checkoutSignal(Signal& s, QString& message);
-	QString errorMessage(const ObjectState& state) const;
+	QHash<QString, bool> m_propertiesDependentOnPrecision;
 };
 
 #endif // SIGNALPROPERTIESDIALOG_H

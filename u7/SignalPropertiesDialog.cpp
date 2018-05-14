@@ -218,9 +218,19 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
 
+	for (const QStringList& propertyDescription : fileFields)
+	{
+		if (propertyDescription[1].toLower() == "true")
+		{
+			addPropertyDependentOnPrecision(propertyDescription[0]);
+		}
+	}
+
 	for (int i = 0; i < signalVector.count(); i++)
 	{
-		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
+		Signal& appSignal = *signalVector[i];
+
+		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal);
 
 		if (readOnly == true)
 		{
@@ -230,7 +240,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 		}
 
-		auto& s = signalProperties->signal();
+		int precision = appSignal.decimalPlaces();
 
 		for (const QStringList& propertyDescription : fileFields)
 		{
@@ -241,33 +251,17 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 					continue;
 				}
 
-				if (propertyDescription[1].toLower() == "true")
+				if (isPropertyDependentOnPrecision(property->caption()) == true)
 				{
-					std::shared_ptr<Property> precisionProperty = signalProperties->propertyByCaption(SignalProperties::decimalPlacesCaption);
-
-					if (precisionProperty != nullptr)
-					{
-						bool ok = false;
-						int precision = signalVector[i]->isAnalog() ? precisionProperty->value().toInt(&ok) : 0;
-
-						if (ok == true)
-						{
-							property->setPrecision(precision);
-							signalProperties->addPropertyDependentOnPrecision(property.get());
-						}
-					}
-					else
-					{
-						assert(false);
-					}
+					property->setPrecision(precision);
 				}
 
 				bool descriptionFound = false;
 
-				for (size_t i = 0; i < signalTypeSequence.size(); i++)
+				for (int i = 0; i < signalTypeSequence.size(); i++)
 				{
-					if ((s.signalType() == signalTypeSequence[i].first &&
-						 s.inOutType() == signalTypeSequence[i].second) == false)
+					if ((appSignal.signalType() == signalTypeSequence[i].first &&
+						 appSignal.inOutType() == signalTypeSequence[i].second) == false)
 					{
 						continue;
 					}
@@ -439,29 +433,15 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 			continue;
 		}
 
-		Signal& signal = signalProperties->signal();
+		int precision = signalProperties->getPrecision();
 
-		std::shared_ptr<Property> precisionProperty = signalProperties->propertyByCaption(SignalProperties::decimalPlacesCaption);
-
-		if (precisionProperty != nullptr)
+		for (std::shared_ptr<Property> property : signalProperties->properties())
 		{
-			bool ok = false;
-			int precision = signal.isAnalog() ? precisionProperty->value().toInt(&ok) : 0;
-
-			if (ok == false)
-			{
-				continue;
-			}
-
-			for (auto property : signalProperties->propertiesDependentOnPrecision())
+			if (isPropertyDependentOnPrecision(property->caption()) == true)
 			{
 				property->setPrecision(precision);
 				m_propertyEditor->updatePropertyValues(property->caption());
 			}
-		}
-		else
-		{
-			assert(false);
 		}
 	}
 }

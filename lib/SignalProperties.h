@@ -166,11 +166,10 @@ public:
 	Signal& signal() { return m_signal; }
 	void updateSpecPropValues();
 
-	const std::vector<Property*>& propertiesDependentOnPrecision() { return m_propertiesDependentOnPrecision; }
-	void addPropertyDependentOnPrecision(Property* dependentProperty);
-
 	QString specPropStruct() const { return m_signal.specPropStruct(); }
 	void setSpecPropStruct(const QString & specPropStruct);
+
+	int getPrecision();
 
 	Q_INVOKABLE QString appSignalID() const { return m_signal.appSignalID(); }
 	Q_INVOKABLE QString customAppSignalID() const { return m_signal.customAppSignalID(); }
@@ -201,6 +200,8 @@ public:
 	Q_INVOKABLE float tuningLowBound() const { return m_signal.tuningLowBound().toFloat(); }
 	Q_INVOKABLE float tuningHighBound() const { return m_signal.tuningHighBound().toFloat(); }
 
+
+
 private:
 	void initProperties();
 
@@ -215,8 +216,6 @@ private:
 
 	static std::shared_ptr<OrderedHash<int, QString>> m_sensorTypeHash;
 	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
-
-	std::vector<Property*> m_propertiesDependentOnPrecision;
 };
 
 
