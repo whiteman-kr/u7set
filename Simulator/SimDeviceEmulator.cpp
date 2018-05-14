@@ -2,47 +2,11 @@
 #include <QQmlEngine>
 #include <QtEndian>
 
-
-namespace LuaIntf
-{
-	LUA_USING_LIST_TYPE(std::vector)
-}
-
 namespace Sim
 {
 	DeviceCommand::DeviceCommand(const LmCommand& command) :
 		m_command(command)
 	{
-	}
-
-	void DeviceCommand::registerLuaClass(lua_State* L)
-	{
-		using namespace LuaIntf;
-
-		LuaBinding(L).beginClass<DeviceCommand>("DeviceCommand")
-			.addPropertyReadOnly("caption", &DeviceCommand::caption)
-
-			.addVariableRef("offset", &DeviceCommand::m_offset)
-			.addVariableRef("size", &DeviceCommand::m_size)
-			.addProperty("asString", &DeviceCommand::asString, &DeviceCommand::setAsString)
-
-			.addVariableRef("afbOpCode", &DeviceCommand::m_afbOpCode)
-			.addVariableRef("afbInstance", &DeviceCommand::m_afbInstance)
-			.addVariableRef("afbPinOpCode", &DeviceCommand::m_afbPinOpCode)
-
-			.addVariableRef("bitNo0", &DeviceCommand::m_bitNo0)
-			.addVariableRef("bitNo1", &DeviceCommand::m_bitNo1)
-
-			.addVariableRef("word0", &DeviceCommand::m_word0)
-			.addVariableRef("word1", &DeviceCommand::m_word1)
-			.addVariableRef("word2", &DeviceCommand::m_word2)
-
-			.addVariableRef("dword0", &DeviceCommand::m_dword0)
-			.addVariableRef("dword1", &DeviceCommand::m_word1)
-
-			.endClass();
-
-		return;
 	}
 
 	void DeviceCommand::dump() const
@@ -103,21 +67,6 @@ namespace Sim
 
 	}
 
-	std::string DeviceCommand::caption() const
-	{
-		return m_command.caption.toStdString();
-	}
-
-	std::string DeviceCommand::asString() const
-	{
-		return m_string.toStdString();
-	}
-
-	void DeviceCommand::setAsString(const std::string& value)
-	{
-		m_string = QString::fromStdString(value);
-	}
-
 	//
 	// class DeviceEmulator script wrapper
 	//
@@ -125,38 +74,6 @@ namespace Sim
 		m_device(device)
 	{
 		assert(m_device);
-	}
-
-	void ScriptDeviceEmulator::registerLuaClass(lua_State* L)
-	{
-		using namespace LuaIntf;
-
-		LuaBinding(L).beginClass<ScriptDeviceEmulator>("DeviceEmulator")
-				.addFunction("command", &ScriptDeviceEmulator::command, LUA_ARGS(int))
-
-				.addProperty("appStartAddress", &ScriptDeviceEmulator::appStartAddress, &ScriptDeviceEmulator::setAppStartAddress)
-				.addProperty("phase", &ScriptDeviceEmulator::phase, &ScriptDeviceEmulator::setPhase)
-				.addProperty("programCounter", &ScriptDeviceEmulator::programCounter, &ScriptDeviceEmulator::setProgramCounter)
-
-				.addFunction("afbComponent", &ScriptDeviceEmulator::afbComponent, LUA_ARGS(int))
-				.addFunction("afbComponentInstance", &ScriptDeviceEmulator::afbComponentInstance, LUA_ARGS(int, int))
-				.addFunction("setAfbParam", &ScriptDeviceEmulator::setAfbParam, LUA_ARGS(int, int, const AfbComponentParam&))
-
-				.addFunction("movRamMem", &ScriptDeviceEmulator::movRamMem, LUA_ARGS(quint32, quint32, quint32))
-
-				.addFunction("writeRamBit", &ScriptDeviceEmulator::writeRamBit, LUA_ARGS(quint32, quint32, quint32))
-				.addFunction("readRamBit", &ScriptDeviceEmulator::readRamBit, LUA_ARGS(quint32, quint32))
-
-				.addFunction("writeRamWord", &ScriptDeviceEmulator::writeRamWord, LUA_ARGS(quint32, quint16))
-				.addFunction("readRamWord", &ScriptDeviceEmulator::readRamWord, LUA_ARGS(quint32))
-
-				.addFunction("writeRamDword", &ScriptDeviceEmulator::writeRamDword, LUA_ARGS(quint32, quint32))
-				.addFunction("readRamDword", &ScriptDeviceEmulator::readRamDword, LUA_ARGS(quint32))
-
-				.addFunction("getWord", &ScriptDeviceEmulator::getWord, LUA_ARGS(int))
-				.addFunction("getDword", &ScriptDeviceEmulator::getDword, LUA_ARGS(int))
-
-				.endClass();
 	}
 
 	DeviceCommand* ScriptDeviceEmulator::command(int index)
@@ -369,24 +286,12 @@ namespace Sim
 	DeviceEmulator::DeviceEmulator() :
 		Output("DeviceEmulator")
 	{
-		m_luaState = luaL_newstate();
-		luaL_openlibs(m_luaState);
-
-		ScriptDeviceEmulator::registerLuaClass(m_luaState);
-		DeviceCommand::registerLuaClass(m_luaState);
-		AfbComponent::registerLuaClass(m_luaState);
-		AfbComponentInstance::registerLuaClass(m_luaState);
-		AfbComponentParam::registerLuaClass(m_luaState);
-
 		return;
 	}
 
 	DeviceEmulator::~DeviceEmulator()
 	{
 		Output("~DeviceEmulator");
-
-		lua_close(m_luaState);
-
 		return;
 	}
 
@@ -394,8 +299,7 @@ namespace Sim
 							  const LmDescription& lmDescription,
 							  const Eeprom& tuningEeprom,
 							  const Eeprom& confEeprom,
-							  const Eeprom& appLogicEeprom,
-							  const QString& simulationScript)
+							  const Eeprom& appLogicEeprom)
 	{
 		setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
 		writeMessage(tr("Init device."));
@@ -403,31 +307,9 @@ namespace Sim
 		setLogicModuleInfo(logicModuleInfo);
 
 		m_lmDescription = lmDescription;
-		m_simulationScript = simulationScript;
 		m_tuningEeprom = tuningEeprom;
 		m_confEeprom = confEeprom;
 		m_appLogicEeprom = appLogicEeprom;
-
-		// Lua luaL_dostring = (luaL_loadstring(L, str) || lua_pcall(L, 0, LUA_MULTRET, 0))
-		// Made separate call to get errors from pasing and run
-		//
-		if (int luaResult = luaL_loadstring(m_luaState, m_simulationScript.toStdString().c_str());
-			luaResult != LUA_OK)
-		{
-			QString errMsg = QString("Load Lua script error, error code: %1")
-								.arg(luaResult);
-			writeError(errMsg);
-			return false;
-		}
-
-		if (int luaResult = lua_pcall(m_luaState, 0, LUA_MULTRET, 0);
-			luaResult != LUA_OK)
-		{
-			QString errMsg = QString("Load Lua script error, fucntion lua_pcall, error code: %1")
-								.arg(luaResult);
-			writeError(errMsg);
-			return false;
-		}
 
 		//--
 		//
@@ -450,53 +332,6 @@ namespace Sim
 		if (bool ok = parseAppLogicCode();
 			ok == false)
 		{
-			return false;
-		}
-
-		// Generate Lua opeartion script
-		//
-		QString generatedScript;
-		generatedScript.append("\nfunction operateCycle(device)\n");
-
-		for (int i = 0; i < m_commands.size(); i++)
-		{
-			const DeviceCommand& cmd = m_commands[i];
-			generatedScript.append(QString("%1(device, device:command(%2));\n")
-										.arg(cmd.m_command.simulationFunc)
-										.arg(i));
-		}
-
-		generatedScript.append("end\n");
-
-		qDebug() << generatedScript;
-
-		// Reload script
-		//
-		QString newScript = m_simulationScript + generatedScript;
-
-		if (int luaResult = luaL_loadstring(m_luaState, newScript.toStdString().c_str());
-			luaResult != LUA_OK)
-		{
-			QString errMsg = QString("Load Lua generated script error, error code: %1")
-								.arg(luaResult);
-			writeError(errMsg);
-			return false;
-		}
-
-		if (int luaResult = lua_pcall(m_luaState, 0, LUA_MULTRET, 0);
-			luaResult != LUA_OK)
-		{
-			QString errMsg = QString("Load Lua script error, fucntion lua_pcall, error code: %1")
-								.arg(luaResult);
-			writeError(errMsg);
-			return false;
-		}
-
-		m_operateCyclefunc = LuaIntf::LuaRef(m_luaState, "operateCycle");
-
-		if (m_operateCyclefunc.isValid() == false || m_operateCyclefunc.isFunction() == false)
-		{
-			writeError("Lua: operateCycle not found or is not function.");
 			return false;
 		}
 
@@ -857,34 +692,34 @@ namespace Sim
 
 		// --
 		//
-		LuaIntf::LuaRef func(m_luaState, command.parseFunc.toStdString().c_str());
+//		LuaIntf::LuaRef func(m_luaState, command.parseFunc.toStdString().c_str());
 
-		if (func.isValid() == false || func.isFunction() == false)
-		{
-			writeError(QString("Lua: %1 not found or is not function.")
-				.arg(command.parseFunc));
+//		if (func.isValid() == false || func.isFunction() == false)
+//		{
+//			writeError(QString("Lua: %1 not found or is not function.")
+//				.arg(command.parseFunc));
 
-			return false;
-		}
-		try
-		{
-			func(ScriptDeviceEmulator(this), &deviceCommand);
-		}
-		catch (const LuaIntf::LuaException& e)
-		{
-			writeError(QString("Call function %1 LuaException: %2.")
-				.arg(command.parseFunc)
-				.arg(e.what()));
+//			return false;
+//		}
+//		try
+//		{
+//			func(ScriptDeviceEmulator(this), &deviceCommand);
+//		}
+//		catch (const LuaIntf::LuaException& e)
+//		{
+//			writeError(QString("Call function %1 LuaException: %2.")
+//				.arg(command.parseFunc)
+//				.arg(e.what()));
 
-			return false;
-		}
-		catch (...)
-		{
-			writeError(QString("Call function %1 LuaException")
-				.arg(command.parseFunc));
+//			return false;
+//		}
+//		catch (...)
+//		{
+//			writeError(QString("Call function %1 LuaException")
+//				.arg(command.parseFunc));
 
-			return false;
-		}
+//			return false;
+//		}
 
 		// !!!!!!!!!!!!!!!!!!! debug
 		//
@@ -895,42 +730,6 @@ namespace Sim
 		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
 
 		return true;
-	}
-
-	void DeviceEmulator::dumpJsError(const QJSValue& value)
-	{
-		if (value.isError() == true)
-		{
-
-			QString str = QString("Script running uncaught exception at line %1\n"
-								  "\tStack: %2\n"
-								  "\tMessage: %3\n")
-							.arg(value.property("lineNumber").toInt())
-							.arg(value.property("stack").toString())
-							.arg(value.toString());
-			writeError(str);
-		}
-
-		return;
-	}
-
-	void DeviceEmulator::dumpLuaError(int result, QString function)
-	{
-		if (result != LUA_OK)
-		{
-			QString str = QString("Lua script runtime error\n"
-								  "\tCode: %1\n"
-								  "\tFunction: %2\n"
-								  "\tMessage: %3\n\t")
-							.arg(result)
-							.arg(function)
-							.arg(lua_tostring(m_luaState, -1));
-			lua_pop(m_luaState, 1);
-
-			writeError(str);
-		}
-
-		return;
 	}
 
 	bool DeviceEmulator::processOperate()
@@ -945,27 +744,27 @@ namespace Sim
 
 		// Run work cycle
 		//
-		std::string luaFuncName = "operateCycle";
+//		std::string luaFuncName = "operateCycle";
 
-		try
-		{
-			m_operateCyclefunc(ScriptDeviceEmulator(this));
-		}
-		catch (const LuaIntf::LuaException& e)
-		{
-			QString error = QString("Call function %1 LuaException: %2.")
-							.arg(QString::fromStdString(luaFuncName))
-							.arg(e.what());
-			FAULT(error);
-			return false;
-		}
-		catch (...)
-		{
-			QString error = QString("Call function %1 LuaException")
-								.arg(QString::fromStdString(luaFuncName));
-			FAULT(error);
-			return false;
-		}
+//		try
+//		{
+//			m_operateCyclefunc(ScriptDeviceEmulator(this));
+//		}
+//		catch (const LuaIntf::LuaException& e)
+//		{
+//			QString error = QString("Call function %1 LuaException: %2.")
+//							.arg(QString::fromStdString(luaFuncName))
+//							.arg(e.what());
+//			FAULT(error);
+//			return false;
+//		}
+//		catch (...)
+//		{
+//			QString error = QString("Call function %1 LuaException")
+//								.arg(QString::fromStdString(luaFuncName));
+//			FAULT(error);
+//			return false;
+//		}
 
 		// Run work cylce
 		//
@@ -1012,11 +811,6 @@ namespace Sim
 //				m_logicUnit.programCounter += command.m_size;
 //			}
 //		}
-
-		if (m_gcCounter++ % 100 == 0)		// It's more efficient to collect garbage not every work cycle
-		{
-			lua_gc(m_luaState, LUA_GCCOLLECT, 0);
-		}
 
 		return result;
 	}
@@ -1073,51 +867,52 @@ namespace Sim
 
 	bool DeviceEmulator::runCommand(DeviceCommand& deviceCommand)
 	{
-		//qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
+		assert(false);
+//		//qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
 
-		// SimulationFunc is checked in parsing command
-		//
-		std::string simulationFunc = deviceCommand.m_command.simulationFunc.toStdString();
+//		// SimulationFunc is checked in parsing command
+//		//
+//		std::string simulationFunc = deviceCommand.m_command.simulationFunc.toStdString();
 
-		// Run command script
-		//
-		LuaIntf::LuaRef func(m_luaState, simulationFunc.c_str());
+//		// Run command script
+//		//
+//		LuaIntf::LuaRef func(m_luaState, simulationFunc.c_str());
 
-		if (func.isValid() == false || func.isFunction() == false)
-		{
-			writeError(QString("Lua: %1 not found or is not function.")
-				.arg(QString::fromStdString(simulationFunc)));
+//		if (func.isValid() == false || func.isFunction() == false)
+//		{
+//			writeError(QString("Lua: %1 not found or is not function.")
+//				.arg(QString::fromStdString(simulationFunc)));
 
-			return false;
-		}
-		try
-		{
-//			if (simulationFunc == "command_stop")
-//			{
-//				func(ScriptDeviceEmulator(this), &deviceCommand, m_commands);
-//				qDebug() << QString::fromStdString(m_commands[0].asString());
-//				qDebug() << QString::fromStdString(m_commands[1].asString());
-//			}
-//			else
-//			{
-				func(ScriptDeviceEmulator(this), &deviceCommand);
-//			}
-		}
-		catch (const LuaIntf::LuaException& e)
-		{
-			writeError(QString("Call function %1 LuaException: %2.")
-				.arg(QString::fromStdString(simulationFunc))
-				.arg(e.what()));
+//			return false;
+//		}
+//		try
+//		{
+////			if (simulationFunc == "command_stop")
+////			{
+////				func(ScriptDeviceEmulator(this), &deviceCommand, m_commands);
+////				qDebug() << QString::fromStdString(m_commands[0].asString());
+////				qDebug() << QString::fromStdString(m_commands[1].asString());
+////			}
+////			else
+////			{
+//				func(ScriptDeviceEmulator(this), &deviceCommand);
+////			}
+//		}
+//		catch (const LuaIntf::LuaException& e)
+//		{
+//			writeError(QString("Call function %1 LuaException: %2.")
+//				.arg(QString::fromStdString(simulationFunc))
+//				.arg(e.what()));
 
-			return false;
-		}
-		catch (...)
-		{
-			writeError(QString("Call function %1 LuaException")
-				.arg(QString::fromStdString(simulationFunc)));
+//			return false;
+//		}
+//		catch (...)
+//		{
+//			writeError(QString("Call function %1 LuaException")
+//				.arg(QString::fromStdString(simulationFunc)));
 
-			return false;
-		}
+//			return false;
+//		}
 
 		return true;
 	}

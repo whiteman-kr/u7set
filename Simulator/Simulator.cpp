@@ -20,6 +20,7 @@ namespace Sim
 
 	Simulator::~Simulator()
 	{
+		m_control.stopThread();
 		return;
 	}
 
@@ -84,7 +85,6 @@ namespace Sim
 		m_buildPath.clear();
 		m_firmwares.clear();
 		m_lmDescriptions.clear();
-		m_simScript.clear();
 		m_subsystems.clear();
 		m_appSignalManager.reset();
 
@@ -123,15 +123,6 @@ namespace Sim
 		// Load LogicModules Descriptions
 		//
 		ok = loadLmDescriptions(buildPath);
-		if (ok == false)
-		{
-			clearImpl();
-			return false;
-		}
-
-		// Load AFBL simulation scripts
-		//
-		ok = loadSimulationScripts(buildPath);
 		if (ok == false)
 		{
 			clearImpl();
@@ -179,21 +170,9 @@ namespace Sim
 
 			const LmDescription& lmDescription = *(lmit->second.get());
 
-			// Get simulation script
-			//
-			auto simScriptIt = m_simScript.find(lmDescription.simualtionScriptFile());
-			if (simScriptIt == m_simScript.end())
-			{
-				writeError(QObject::tr("Cannot find AFBL simulation script file %1").arg(lmDescription.simualtionScriptFile()));
-				clearImpl();
-				return false;
-			}
-
-			const QString& simulationScript = simScriptIt->second;
-
 			// Upload data to susbystem
 			//
-			ok = ss.load(firmware, lmDescription, simulationScript);
+			ok = ss.load(firmware, lmDescription);
 			if (ok == false)
 			{
 				// Error must be reported in Subsystem::load
@@ -268,8 +247,8 @@ namespace Sim
 			return false;
 		}
 
-		bool ok = dir.cd("LmDescriptions");
-		if (ok == false)
+		if (bool ok = dir.cd("LmDescriptions");
+			ok == false)
 		{
 			writeError(QObject::tr("Path %1/LmDescriptions does not exist").arg(buildPath));
 			return false;
@@ -290,9 +269,9 @@ namespace Sim
 			writeMessage(QObject::tr("Load LogicModule description file: %1").arg(fi.fileName()));
 
 			QFile file(fileName);
-			ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
 
-			if (ok == false)
+			if (bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
+				ok == false)
 			{
 				writeError(QObject::tr("Open file error: %1")
 							.arg(file.errorString()));
@@ -304,8 +283,8 @@ namespace Sim
 			QString errorMessage;
 			std::shared_ptr<LmDescription> lmDescription = std::make_shared<LmDescription>();
 
-			ok = lmDescription->load(xmlData, &errorMessage);
-			if (ok == false)
+			if (bool ok = lmDescription->load(xmlData, &errorMessage);
+				ok == false)
 			{
 				writeError(QObject::tr("Loading file %1 error: %2")
 							.arg(fileName)
@@ -314,51 +293,6 @@ namespace Sim
 			}
 
 			m_lmDescriptions[fi.fileName()] = lmDescription;
-		}
-
-		return true;
-	}
-
-	bool Simulator::loadSimulationScripts(QString buildPath)
-	{
-		m_simScript.clear();
-
-		QDir dir(buildPath);
-		if (dir.exists() == false)
-		{
-			writeError(QObject::tr("BuildPath %1 does not exist").arg(buildPath));
-			return false;
-		}
-
-		bool ok = dir.cd("Simulation");
-		if (ok == false)
-		{
-			writeError(QObject::tr("Path %1/Simulation does not exist").arg(buildPath));
-			return false;
-		}
-
-		QStringList sjFilter = {"*.js", "*.lua"};
-		QFileInfoList jsFiles = dir.entryInfoList(sjFilter, QDir::Files);
-
-		for (QFileInfo& fi : jsFiles)
-		{
-			QString fileName = fi.canonicalFilePath();
-			writeMessage(QObject::tr("Load AFBL simulation script: %1").arg(fi.fileName()));
-
-			QFile file(fileName);
-			ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
-
-			if (ok == false)
-			{
-				writeError(QObject::tr("Open file error: %1")
-							.arg(file.errorString()));
-				return false;
-			}
-
-			QByteArray jsData = file.readAll();
-			QString js(jsData);
-
-			m_simScript[fi.fileName()] = js;
 		}
 
 		return true;

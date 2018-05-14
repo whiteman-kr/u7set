@@ -108,10 +108,11 @@ namespace Sim
 		virtual ~Control();
 
 	public:
+		void stopThread();
 		void reset();
 
 		bool addToRunList(const QString& equipmentId);
-		bool addToRunList(const QStringList& equipmentIds);
+		int addToRunList(const QStringList& equipmentIds);
 
 		void removeFromRunList(const QString& equipmentId);
 		void removeFromRunList(const QStringList& equipmentIds);

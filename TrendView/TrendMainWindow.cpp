@@ -122,9 +122,7 @@ namespace TrendLib
 		setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 		connect(this, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
 
-		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// DEBUG
 
 		//	COLORREF StdColors[] = {	RGB(0x80, 0x00, 0x00), RGB(0x00, 0x80, 0x00), RGB(0x00, 0x00, 0x80), RGB(0x00, 0x80, 0x80), RGB(0x80, 0x00, 0x80),
 		//								RGB(0xFF, 0x00, 0x00), RGB(0x00, 0x00, 0xFF), RGB(0x00, 0x00, 0x00) };
@@ -188,9 +186,7 @@ namespace TrendLib
 ////		signalSet().addSignal(s6);
 ////		signalSet().addSignal(s7);
 //		signalSet().addSignal(s11);
-		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// end of DEBUG
 
 		return;
 	}

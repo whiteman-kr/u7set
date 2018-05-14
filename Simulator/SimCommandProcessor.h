@@ -3,17 +3,18 @@
 #include <map>
 #include <functional>
 #include "QtCore"
+#include "SimOutput.h"
 
 namespace Sim
 {
-	class CommandProcessor
+	class CommandProcessor : protected Output
 	{
 	protected:
 		CommandProcessor();
 
 	public:
 		virtual ~CommandProcessor();
-		static CommandProcessor* createInstance(QString logicModuleName);
+		static CommandProcessor* createInstance(QString logicModuleName, QString equipmentId);
 
 	public:
 		virtual QString logicModuleName() const = 0;

@@ -5,7 +5,6 @@ CONFIG += ordered
 win32:SUBDIRS += Protobuf
 SUBDIRS += qtservice \
     qtpropertybrowser \
-    Lua \
     QScintilla \
     GetGitProjectVersion \
     ServiceControlManager \

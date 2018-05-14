@@ -23,7 +23,7 @@ namespace Sim
 		Subsystem& operator=(const Subsystem&) = delete;
 
 	public:
-		bool load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const QString simulationScript);
+		bool load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription);
 
 	private:
 		std::vector<Hardware::LogicModuleInfo> logicModulesInfo() const;

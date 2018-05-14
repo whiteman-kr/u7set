@@ -256,7 +256,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
     {
         errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
         return false;
-    }
+	}
 
     // Attribute Version
     //

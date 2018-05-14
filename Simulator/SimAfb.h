@@ -7,7 +7,6 @@
 #include "../lib/LmDescription.h"
 #include "../VFrame30/Afb.h"
 
-struct lua_State;
 
 namespace Sim
 {
@@ -18,8 +17,6 @@ namespace Sim
 		AfbComponent(const AfbComponent&) = default;
 		AfbComponent(std::shared_ptr<Afb::AfbComponent> afbComponent);
 		~AfbComponent() = default;
-
-		static void registerLuaClass(lua_State* L);
 
 	public:
 		bool isNull() const;
@@ -46,8 +43,6 @@ namespace Sim
 		AfbComponentParam(quint16 paramOpIndex);
 		AfbComponentParam& operator=(const AfbComponentParam& that) = default;
 		AfbComponentParam& operator=(AfbComponentParam&&) = default;
-
-		static void registerLuaClass(lua_State* L);
 
 	public:
 		int opIndex() const;
@@ -133,8 +128,6 @@ namespace Sim
 	{
 	public:
 		AfbComponentInstance(quint16 instanceNo);
-
-		static void registerLuaClass(lua_State* L);
 
 	public:
 		bool addParam(const AfbComponentParam& param);

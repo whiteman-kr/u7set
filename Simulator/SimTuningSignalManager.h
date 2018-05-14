@@ -5,11 +5,12 @@
 #include <QMutex>
 
 #include "../lib/Tuning/TuningSignalManager.h"
+#include "SimOutput.h"
 
 namespace Sim
 {
 
-	class TuningSignalManager : public ::TuningSignalManager
+	class TuningSignalManager : public ::TuningSignalManager, protected Output
 	{
 		Q_OBJECT
 

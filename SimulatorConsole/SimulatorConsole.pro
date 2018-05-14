@@ -48,21 +48,6 @@ unix {
     LIBS += -lSimulator
 }
 
-# LuaLib
-#
-DEPENDPATH += $$PWD/../Lua
-
-win32 {
-    LIBS += -L$$DESTDIR -lLua
-    INCLUDEPATH += ./../Lua
-}
-unix {
-    #LIBS += -lLua
-    LIBS += -L$$DESTDIR -lLua
-    INCLUDEPATH += ./../Lua
-}
-
-
 # VFrame30 library
 #
 win32 {

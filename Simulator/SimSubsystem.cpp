@@ -12,7 +12,7 @@ namespace Sim
 	{
 	}
 
-	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription, const QString simulationScript)
+	bool Subsystem::load(const Hardware::ModuleFirmware& firmware, const LmDescription& lmDescription)
 	{
 		m_lmDescription = lmDescription;
 
@@ -50,11 +50,14 @@ namespace Sim
 
 			writeMessage(QObject::tr("Load firmware for LogicModule %1").arg(lmInfo.equipmentId));
 
-			bool ok = logicModule->load(lmInfo, lmDescription, firmware, simulationScript);
-			if (ok == false)
+			if (bool ok = logicModule->load(lmInfo, lmDescription, firmware);
+				ok == false)
 			{
-				return false;
+				// There is no simulation for this file, or it's loading had errors
+				//
+				removeDevice(lmInfo.equipmentId);
 			}
+
 		}
 
 		return true;

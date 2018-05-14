@@ -208,7 +208,6 @@ SOURCES +=\
     Simulator/SimIdeSimulator.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
     ../lib/TuningValue.cpp \
-<<<<<<< HEAD
     Simulator/SimSchemaWidget.cpp \
     Simulator/SimSchemaManager.cpp \
     Simulator/SimSchemaView.cpp \
@@ -222,10 +221,8 @@ SOURCES +=\
     Simulator/SimOutputWidget.cpp \
     Simulator/SimMemoryWidget.cpp \
     Simulator/SimControlPage.cpp \
-    Simulator/SimBasePage.cpp
-=======
+    Simulator/SimBasePage.cpp \
     ../lib/Times.cpp
->>>>>>> develop
 
 HEADERS  += \
     CentralWidget.h \
@@ -369,7 +366,6 @@ HEADERS  += \
     Builder/MemWriteMap.h \
     SimulatorTabPage.h \
     Builder/ConfigurationServiceCfgGenerator.h \
-<<<<<<< HEAD
     Simulator/SimIdeSimulator.h \
     ../lib/TuningValue.h \
     Simulator/SimSchemaWidget.h \
@@ -385,13 +381,11 @@ HEADERS  += \
     Simulator/SimControlPage.h \
     Simulator/SimMemoryWidget.h \
     Simulator/SimOutputWidget.h \
-    Simulator/SimProjectWidget.h
-=======
+    Simulator/SimProjectWidget.h \
     ../lib/TuningValue.h \
     Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
     ../lib/Times.h
->>>>>>> develop
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -561,20 +555,6 @@ win32 {
 }
 unix {
     LIBS += -lSimulator
-}
-
-# LuaLib
-#
-DEPENDPATH += $$PWD/../Lua
-
-win32 {
-    LIBS += -L$$DESTDIR -lLua
-    INCLUDEPATH += ./../Lua
-}
-unix {
-    #LIBS += -lLua
-    LIBS += -L$$DESTDIR -lLua
-    INCLUDEPATH += ./../Lua
 }
 
 

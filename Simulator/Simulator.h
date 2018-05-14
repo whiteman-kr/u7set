@@ -38,7 +38,6 @@ namespace Sim
 		bool loadFunc(QString buildPath);
 		bool loadFirmwares(QString buildPath);
 		bool loadLmDescriptions(QString buildPath);
-		bool loadSimulationScripts(QString buildPath);
 		bool loadAppSignals(QString buildPath);
 
 	signals:
@@ -66,7 +65,6 @@ namespace Sim
 		Hardware::ModuleFirmwareStorage m_firmwares;	// Loaded bts file
 
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
-		std::map<QString, QString> m_simScript;								// Key is filename, value is afbl simulation script
 		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
 
 		// Signals Management

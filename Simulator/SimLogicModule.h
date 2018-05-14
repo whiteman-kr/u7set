@@ -27,8 +27,7 @@ namespace Sim
 	public:
 		bool load(const Hardware::LogicModuleInfo& lmInfo,
 				  const LmDescription& lmDescription,
-				  const Hardware::ModuleFirmware& firmware,
-				  const QString& simulationScript);
+				  const Hardware::ModuleFirmware& firmware);
 
 		void clear();
 
@@ -77,8 +76,6 @@ namespace Sim
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
-
-		QString m_simulationScript;
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 

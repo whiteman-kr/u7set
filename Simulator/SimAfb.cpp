@@ -3,13 +3,6 @@
 #include <cfenv>
 #include <QQmlEngine>
 
-extern "C" {
-	#include "../Lua/lua.h"
-	#include "../Lua/lauxlib.h"
-	#include "../Lua/lualib.h"
-}
-#include "../LuaIntf/LuaIntf.h"
-
 namespace Sim
 {
 
@@ -17,23 +10,6 @@ namespace Sim
 		m_afbComponent(afbComponent)
 	{
 		// assert(m_afbComponent);	Actually m_afbComponent can be nullptr, script should call isNull to detect it
-	}
-
-	void AfbComponent::registerLuaClass(lua_State* L)
-	{
-		using namespace LuaIntf;
-
-		LuaBinding(L).beginClass<Sim::AfbComponent>("AfbComponent")
-				.addFunction("isNull", &Sim::AfbComponent::isNull)
-				.addPropertyReadOnly("opCode", &Sim::AfbComponent::opCode)
-				.addPropertyReadOnly("caption", &Sim::AfbComponent::caption)
-				.addPropertyReadOnly("maxInstCount", &Sim::AfbComponent::maxInstCount)
-				.addPropertyReadOnly("simulationFunc", &Sim::AfbComponent::simulationFunc)
-				.addFunction("pinExists", &Sim::AfbComponent::pinExists, LUA_ARGS(int))
-				.addFunction("pinCaption", &Sim::AfbComponent::pinCaption, LUA_ARGS(int))
-				.endClass();
-
-		return;
 	}
 
 	bool AfbComponent::isNull() const
@@ -105,46 +81,6 @@ namespace Sim
 	AfbComponentParam::AfbComponentParam(quint16 paramOpIndex) :
 		m_paramOpIndex(paramOpIndex)
 	{
-	}
-
-	void AfbComponentParam::registerLuaClass(lua_State* L)
-	{
-		using namespace LuaIntf;
-
-		LuaBinding(L).beginClass<Sim::AfbComponentParam>("AfbComponentParam")
-				.addConstructor(LUA_ARGS())
-				.addConstructor(LUA_ARGS(quint16))
-
-				.addVariableRef("opIndex", &AfbComponentParam::m_paramOpIndex)
-
-				.addProperty("asWord", &AfbComponentParam::wordValue, &AfbComponentParam::setWordValue)
-				.addProperty("asDword", &AfbComponentParam::dwordValue, &AfbComponentParam::setDwordValue)
-				.addProperty("asFloat", &AfbComponentParam::floatValue, &AfbComponentParam::setFloatValue)
-				.addProperty("asDouble", &AfbComponentParam::doubleValue, &AfbComponentParam::setDoubleValue)
-				.addProperty("asSignedInt", &AfbComponentParam::signedIntValue, &AfbComponentParam::setSignedIntValue)
-
-				.addFunction("addSignedInteger", &AfbComponentParam::addSignedInteger, LUA_ARGS(AfbComponentParam*))
-				.addFunction("subSignedInteger", &AfbComponentParam::subSignedInteger, LUA_ARGS(AfbComponentParam*))
-				.addFunction("mulSignedInteger", &AfbComponentParam::mulSignedInteger, LUA_ARGS(AfbComponentParam*))
-				.addFunction("divSignedInteger", &AfbComponentParam::divSignedInteger, LUA_ARGS(AfbComponentParam*))
-
-				.addFunction("addSignedIntegerNumber", &AfbComponentParam::addSignedIntegerNumber, LUA_ARGS(qint32))
-				.addFunction("subSignedIntegerNumber", &AfbComponentParam::subSignedIntegerNumber, LUA_ARGS(qint32))
-				.addFunction("mulSignedIntegerNumber", &AfbComponentParam::mulSignedIntegerNumber, LUA_ARGS(qint32))
-				.addFunction("divSignedIntegerNumber", &AfbComponentParam::divSignedIntegerNumber, LUA_ARGS(qint32))
-
-				.addFunction("addFloatingPoint", &AfbComponentParam::addFloatingPoint, LUA_ARGS(AfbComponentParam*))
-				.addFunction("subFloatingPoint", &AfbComponentParam::subFloatingPoint, LUA_ARGS(AfbComponentParam*))
-				.addFunction("mulFloatingPoint", &AfbComponentParam::mulFloatingPoint, LUA_ARGS(AfbComponentParam*))
-				.addFunction("divFloatingPoint", &AfbComponentParam::divFloatingPoint, LUA_ARGS(AfbComponentParam*))
-
-				.addPropertyReadOnly("mathOverflow", &AfbComponentParam::mathOverflow)
-				.addPropertyReadOnly("mathUnderflow", &AfbComponentParam::mathUnderflow)
-				.addPropertyReadOnly("mathZero", &AfbComponentParam::mathZero)
-				.addPropertyReadOnly("mathNan", &AfbComponentParam::mathNan)
-				.addPropertyReadOnly("mathDivByZero", &AfbComponentParam::mathDivByZero)
-
-				.endClass();
 	}
 
 	int AfbComponentParam::opIndex() const
@@ -558,22 +494,6 @@ namespace Sim
 	{
 	}
 
-	void AfbComponentInstance::registerLuaClass(lua_State* L)
-	{
-		using namespace LuaIntf;
-
-		LuaBinding(L).beginClass<AfbComponentInstance>("AfbComponentInstance")
-			.addFunction("addParam", &Sim::AfbComponentInstance::addParam, LUA_ARGS(const Sim::AfbComponentParam&))
-			.addFunction("param", &Sim::AfbComponentInstance::param, LUA_ARGS(int))
-			.addFunction("paramExists", &Sim::AfbComponentInstance::paramExists, LUA_ARGS(int))
-
-			.addFunction("addParamWord", &Sim::AfbComponentInstance::addParamWord, LUA_ARGS(int, quint16))
-			.addFunction("addParamFloat", &Sim::AfbComponentInstance::addParamFloat, LUA_ARGS(int, float))
-			.addFunction("addParamSignedInt", &Sim::AfbComponentInstance::addParamSignedInt, LUA_ARGS(int, qint32))
-
-			.endClass();
-	}
-
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
 		m_params[param.opIndex()] = param;
@@ -672,18 +592,15 @@ namespace Sim
 
 		// Check if instParam.implParamOpIndex really exists in AfbComponent
 		//
-
-		// This check is moved to Lua script on parsing stage, commented for better perfomance
-		//
-//		if (m_afbComp->pinExists(instParam.opIndex()) == false)
-//		{
-//			// Can't find such pin in AfbComponent
-//			//
-//			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
-//								.arg(instParam.opIndex())
-//								.arg(m_afbComp->caption());
-//			return false;
-//		}
+		if (m_afbComp->pinExists(instParam.opIndex()) == false)
+		{
+			// Can't find such pin in AfbComponent
+			//
+			*errorMessage = QString("Can't fint pin with OpIndex %1, Component %2")
+								.arg(instParam.opIndex())
+								.arg(m_afbComp->caption());
+			return false;
+		}
 
 		// Get or add instance and set new param
 		//

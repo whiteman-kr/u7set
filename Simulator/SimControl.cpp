@@ -18,6 +18,12 @@ namespace Sim
 
 	Control::~Control()
 	{
+		stopThread();
+		return;
+	}
+
+	void Control::stopThread()
+	{
 		requestInterruption();
 
 		if (bool ok = wait(10000);
@@ -27,8 +33,6 @@ namespace Sim
 			setTerminationEnabled(true);
 			terminate();
 		}
-
-		return;
 	}
 
 	void Control::reset()
@@ -49,7 +53,7 @@ namespace Sim
 		return addToRunList(l);
 	}
 
-	bool Control::addToRunList(const QStringList& equipmentIds)
+	int Control::addToRunList(const QStringList& equipmentIds)
 	{
 		writeMessage(tr("Add to RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
@@ -58,7 +62,7 @@ namespace Sim
 			writeWaning(tr("Adding module to simulation while simulation running will not take effect till simulation is restarted."));
 		}
 
-		bool ok = true;
+		int addedModuleCount = 0;
 		std::vector<SimControlRunStruct> lms;
 		lms.reserve(equipmentIds.size());
 
@@ -67,18 +71,12 @@ namespace Sim
 			std::shared_ptr<LogicModule> lm = m_simulator->logicModule(id);
 			if (lm == nullptr)
 			{
-				writeError(QString("Module %1 not found.").arg(id));
-				assert(lm);
-				ok = false;
+				writeError(QString("Module %1 not found or it does not have simultion ability.").arg(id));
 				continue;
 			}
 
 			lms.emplace_back(lm);
-		}
-
-		if (ok == false)
-		{
-			return false;
+			addedModuleCount ++;
 		}
 
 		// Add to list
@@ -103,7 +101,7 @@ namespace Sim
 			}
 		}
 
-		return true;
+		return addedModuleCount;
 	}
 
 	void Control::removeFromRunList(const QString& equipmentId)

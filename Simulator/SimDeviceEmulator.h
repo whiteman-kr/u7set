@@ -16,14 +16,6 @@
 #include "SimRam.h"
 #include "SimAfb.h"
 
-extern "C" {
-	#include "../Lua/lua.h"
-	#include "../Lua/lauxlib.h"
-	#include "../Lua/lualib.h"
-}
-#include "../LuaIntf/LuaIntf.h"
-
-
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   //WINDOWS
 		#define __FUNCTION_NAME__   __FUNCTION__
@@ -74,17 +66,8 @@ namespace Sim
 		DeviceCommand(DeviceCommand&&) = default;
 		DeviceCommand& operator=(DeviceCommand&&) = default;
 
-		static void registerLuaClass(lua_State* L);
-
-		void dump() const;
-
-		// Properties for Lua
-		//
 	public:
-		std::string caption() const;
-
-		std::string asString() const;
-		void setAsString(const std::string& value);
+		void dump() const;
 
 	public:
 		LmCommand m_command;
@@ -117,8 +100,6 @@ namespace Sim
 	{
 	public:
 		explicit ScriptDeviceEmulator(DeviceEmulator* device);
-
-		static void registerLuaClass(lua_State* L);
 
 		// Script functins for AFB instances
 		//
@@ -177,8 +158,7 @@ public:
 				  const LmDescription& lmDescription,
 				  const Eeprom& tuningEeprom,
 				  const Eeprom& confEeprom,
-				  const Eeprom& appLogicEeprom,
-				  const QString& simulationScript);
+				  const Eeprom& appLogicEeprom);
 
 		bool reset();
 		bool run(int cycles = -1);
@@ -188,9 +168,6 @@ public:
 		bool initEeprom();
 		bool parseAppLogicCode();
 		bool parseCommand(const LmCommand& command, int programCounter);
-
-		void dumpJsError(const QJSValue& value);
-		void dumpLuaError(int result, QString function);
 
 	public slots:
 		//void pause();
@@ -237,7 +214,6 @@ public:
 
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
-		QString m_simulationScript;
 
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
@@ -257,12 +233,6 @@ public:
 		std::map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands
 
 		AfbComponentSet m_afbComponents;
-
-		// Lua
-		//
-		lua_State* m_luaState = nullptr;
-		LuaIntf::LuaRef m_operateCyclefunc;
-		int m_gcCounter = 0;
 
 		// Cached state
 		//

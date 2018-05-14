@@ -20,15 +20,13 @@ namespace Sim
 
 	bool LogicModule::load(const Hardware::LogicModuleInfo& lmInfo,
 						   const LmDescription& lmDescription,
-						   const Hardware::ModuleFirmware& firmware,
-						   const QString& simulationScript)
+						   const Hardware::ModuleFirmware& firmware)
 	{
 		setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
 
 		clear();
 
 		m_logicModuleInfo = lmInfo;
-		m_simulationScript = simulationScript;
 		m_lmDescription = lmDescription;
 
 		bool ok = true;
@@ -48,7 +46,12 @@ namespace Sim
 			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
 		}
 
-		m_commandProcessor = CommandProcessor::createInstance();
+		m_commandProcessor = std::unique_ptr<CommandProcessor>(CommandProcessor::createInstance(lmDescription.name(), lmInfo.equipmentId));
+		if (m_commandProcessor == nullptr)
+		{
+			writeWaning(QString("There is no simulation for %1, LmDescription.name = %2").arg(lmInfo.equipmentId).arg(lmDescription.name()));
+			return false;
+		}
 
 		// Init DeviceEmulator
 		//
@@ -56,8 +59,7 @@ namespace Sim
 							m_lmDescription,
 							m_tuningEeprom,
 							m_confEeprom,
-							m_appLogicEeprom,
-							m_simulationScript);
+							m_appLogicEeprom);
 
 		return ok;
 	}
@@ -71,8 +73,6 @@ namespace Sim
 		m_tuningEeprom.clear();
 		m_confEeprom.clear();
 		m_appLogicEeprom.clear();
-
-		m_simulationScript.clear();
 
 		m_commandProcessor.reset();
 

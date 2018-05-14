@@ -7,7 +7,8 @@ namespace Sim
 	//TuningSignalManager
 	//
 	TuningSignalManager::TuningSignalManager(QObject* parent) :
-		::TuningSignalManager(parent)
+		::TuningSignalManager(parent),
+		Output("TuningSignalManager")
 	{
 	}
 

@@ -9,6 +9,7 @@ namespace Sim
 	{
 	public:
 		CommandProcessor_LM_SF00();
+		virtual ~CommandProcessor_LM_SF00();
 
 	public:
 		virtual QString logicModuleName() const override;
