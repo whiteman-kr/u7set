@@ -97,7 +97,6 @@ SOURCES += MainWindow.cpp \
     TcpTuningServiceClient.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSourceWidget.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/OutputLog.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/DeviceHelper.cpp \

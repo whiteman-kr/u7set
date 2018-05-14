@@ -1089,22 +1089,6 @@ message AppSignal
 
     optional int32 analogSignalFormat = 26 [default = 1];	// E::AnalogSignalFormat::SignedInt32
     optional string unit = 27;
-    optional int32 lowADC = 28 [default = 0];
-    optional int32 highADC = 29 [default = 0];
-    optional double lowEngeneeringUnits = 30 [default = 0];
-    optional double highEngeneeringUnits = 31 [default = 0];
-    optional double lowValidRange = 32 [default = 0];
-    optional double highValidRange = 33 [default = 0];
-    optional double filteringTime = 34 [default = 0];
-    optional double spreadTolerance = 35 [default = 0];
-
-    // Analog input/output signal properties
-
-    optional double electricLowLimit = 51 [default = 0];
-    optional double electricHighLimit = 52 [default = 0];
-    optional int32 electricUnit = 53 [default = 1];
-    optional int32 sensorType = 54 [default = 0];
-    optional int32 outputMode = 55 [default = 0];		// E::OutputMode::Plus0_Plus5_V
 
     // Tuning signal properties
 
@@ -1160,9 +1144,9 @@ message ProtoAppSignalData
 	optional string unit = 7;
 	
 	optional bool enableTuning = 8 [default = false];
-    optional TuningValue tuningDefaultValue = 9;
-    optional TuningValue tuningLowBound = 10;
-    optional TuningValue tuningHighBound = 11;
+	optional TuningValue tuningDefaultValue = 9;
+	optional TuningValue tuningLowBound = 10;
+	optional TuningValue tuningHighBound = 11;
 	
 	optional bool acquire = 12 [default = true];
 	optional bool archive = 13 [default = true];

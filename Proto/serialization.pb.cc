@@ -1618,7 +1618,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalCalculatedParam));
   AppSignal_descriptor_ = file->message_type(70);
-  static const int AppSignal_offsets_[39] = {
+  static const int AppSignal_offsets_[26] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, appsignalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, customappsignalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, caption_),
@@ -1631,19 +1631,6 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, byteorder_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, analogsignalformat_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, unit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, lowadc_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, highadc_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, lowengeneeringunits_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, highengeneeringunits_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, lowvalidrange_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, highvalidrange_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, filteringtime_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, spreadtolerance_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, electriclowlimit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, electrichighlimit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, electricunit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, sensortype_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, outputmode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, enabletuning_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, tuningdefaultvalue_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, tuninglowbound_),
@@ -2527,103 +2514,94 @@ void protobuf_AddDesc_serialization_2eproto() {
     "dr\030\004 \001(\0132\020.Proto.Address16\022$\n\nregBufAddr"
     "\030\005 \001(\0132\020.Proto.Address16\022&\n\014regValueAddr"
     "\030\006 \001(\0132\020.Proto.Address16\022)\n\017regValidityA"
-    "ddr\030\007 \001(\0132\020.Proto.Address16\"\267\010\n\tAppSigna"
+    "ddr\030\007 \001(\0132\020.Proto.Address16\"\342\005\n\tAppSigna"
     "l\022\023\n\013appSignalID\030\001 \001(\t\022\031\n\021customAppSigna"
     "lID\030\002 \001(\t\022\017\n\007caption\030\003 \001(\t\022\023\n\013equipmentI"
     "D\030\004 \001(\t\022\021\n\tbusTypeID\030\005 \001(\t\022\022\n\007channel\030\006 "
     "\001(\005:\0010\022\025\n\nsignalType\030\020 \001(\005:\0011\022\024\n\tinOutTy"
     "pe\030\021 \001(\005:\0012\022\023\n\010dataSize\030\025 \001(\005:\0010\022\024\n\tbyte"
     "Order\030\026 \001(\005:\0011\022\035\n\022analogSignalFormat\030\032 \001"
-    "(\005:\0011\022\014\n\004unit\030\033 \001(\t\022\021\n\006lowADC\030\034 \001(\005:\0010\022\022"
-    "\n\007highADC\030\035 \001(\005:\0010\022\036\n\023lowEngeneeringUnit"
-    "s\030\036 \001(\001:\0010\022\037\n\024highEngeneeringUnits\030\037 \001(\001"
-    ":\0010\022\030\n\rlowValidRange\030  \001(\001:\0010\022\031\n\016highVal"
-    "idRange\030! \001(\001:\0010\022\030\n\rfilteringTime\030\" \001(\001:"
-    "\0010\022\032\n\017spreadTolerance\030# \001(\001:\0010\022\033\n\020electr"
-    "icLowLimit\0303 \001(\001:\0010\022\034\n\021electricHighLimit"
-    "\0304 \001(\001:\0010\022\027\n\014electricUnit\0305 \001(\005:\0011\022\025\n\nse"
-    "nsorType\0306 \001(\005:\0010\022\025\n\noutputMode\0307 \001(\005:\0010"
-    "\022\033\n\014enableTuning\030G \001(\010:\005false\022.\n\022tuningD"
-    "efaultValue\030H \001(\0132\022.Proto.TuningValue\022*\n"
-    "\016tuningLowBound\030I \001(\0132\022.Proto.TuningValu"
-    "e\022+\n\017tuningHighBound\030J \001(\0132\022.Proto.Tunin"
-    "gValue\022\026\n\007acquire\030Q \001(\010:\005false\022\026\n\007archiv"
-    "e\030R \001(\010:\005false\022\030\n\rdecimalPlaces\030S \001(\005:\0012"
-    "\022\031\n\016coarseAperture\030T \001(\001:\0011\022\031\n\014fineApert"
-    "ure\030U \001(\001:\0030.5\022\037\n\020adaptiveAperture\030V \001(\010"
-    ":\005false\022\026\n\016specPropStruct\030Z \001(\t\022\026\n\016specP"
-    "ropValues\030[ \001(\014\022(\n\007dbField\030x \001(\0132\027.Proto"
-    ".AppSignalDbField\0222\n\tcalcParam\030y \001(\0132\037.P"
-    "roto.AppSignalCalculatedParam\"3\n\014AppSign"
-    "alSet\022#\n\tappSignal\030\001 \003(\0132\020.Proto.AppSign"
-    "al\"\352\003\n\022ProtoAppSignalData\022\021\n\tbusTypeID\030\001"
-    " \001(\t\022\017\n\007caption\030\002 \001(\t\022\022\n\007channel\030\003 \001(\005:\001"
-    "0\022\024\n\010dataSize\030\004 \001(\005:\00232\022\024\n\tbyteOrder\030\005 \001"
-    "(\005:\0011\022\035\n\022analogSignalFormat\030\006 \001(\005:\0012\022\014\n\004"
-    "unit\030\007 \001(\t\022\033\n\014enableTuning\030\010 \001(\010:\005false\022"
-    ".\n\022tuningDefaultValue\030\t \001(\0132\022.Proto.Tuni"
-    "ngValue\022*\n\016tuningLowBound\030\n \001(\0132\022.Proto."
-    "TuningValue\022+\n\017tuningHighBound\030\013 \001(\0132\022.P"
-    "roto.TuningValue\022\025\n\007acquire\030\014 \001(\010:\004true\022"
-    "\025\n\007archive\030\r \001(\010:\004true\022\030\n\rdecimalPlaces\030"
-    "\016 \001(\005:\0012\022\031\n\016coarseAperture\030\017 \001(\001:\0011\022\031\n\014f"
-    "ineAperture\030\020 \001(\001:\0030.5\022\037\n\020adaptiveApertu"
-    "re\030\021 \001(\010:\005false\"\237\001\n\016AppSignalState\022\017\n\004ha"
-    "sh\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003"
-    " \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\020:\0010\022\024\n\tlocalT"
-    "ime\030\005 \001(\020:\0010\022\024\n\tplantTime\030\006 \001(\020:\0010\022\025\n\tar"
-    "chiveId\030\007 \001(\020:\002-1\"\224\006\n\nConnection\022\026\n\014Conn"
-    "ectionID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001"
-    "(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port"
-    "1RawDataDescription\030\005 \001(\t:\000\022!\n\027Port2RawD"
-    "ataDescription\030\006 \001(\t:\000\022\035\n\016ManualSettings"
-    "\030\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005fa"
-    "lse\022\036\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036\n\023P"
-    "ort1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWo"
-    "rdsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQu"
-    "antity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddress"
-    "\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:"
-    "\003479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:\003479\022"
-    "\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1Enabl"
-    "eSerial\030\025 \001(\010:\005false\022\032\n\017Port1SerialMode\030"
-    "\026 \001(\005:\0010\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005fal"
-    "se\022 \n\021Port2EnableSerial\030\030 \001(\010:\005false\022\032\n\017"
-    "Port2SerialMode\030\031 \001(\005:\0010\022 \n\021Port2EnableD"
-    "uplex\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014O"
-    "bsoleteMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerialMo"
-    "de\030\007 \001(\005:\0010\022#\n\024ObsoleteEnableDuplex\030\n \001("
-    "\010:\005false\"@\n\020SchemaDetailsSet\022,\n\016schemasD"
-    "etails\030\002 \003(\0132\024.Proto.SchemaDetails\"\342\001\n\rS"
-    "chemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schemaI"
-    "d\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfrom"
-    "Build\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDe"
-    "scriptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016"
-    "\n\006labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005g"
-    "uids\030\027 \003(\0132\013.Proto.Uuid\"A\n\nArchSignal\022\014\n"
-    "\004hash\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSign"
-    "alID\030\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSignals"
-    "\030\001 \003(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSignal\022"
-    "\020\n\010signalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004ty"
-    "pe\030\003 \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030"
-    "\n \001(\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseApe"
-    "rture\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030."
-    "5\022\037\n\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n\tbu"
-    "sTypeId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022in"
-    "busDiscreteBitNo\030( \001(\005\022\027\n\017inbusAnalogSiz"
-    "e\0302 \001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024in"
-    "busAnalogByteOrder\0304 \001(\005\022\031\n\021busAnalogLow"
-    "Limit\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001(\001\022"
-    "\033\n\023inbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbusAna"
-    "logHighLimit\0308 \001(\001\"\226\001\n\003Bus\022\031\n\004uuid\030\001 \001(\013"
-    "2\013.Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusS"
-    "ignals\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023autoSi"
-    "gnalPlacement\030\n \001(\010:\004true\022\030\n\rmanualBusSi"
-    "ze\030\013 \001(\005:\0010*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016"
-    "\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDi"
-    "rrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSi"
-    "gnalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFb"
-    "lDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedIn"
-    "t\020\001\022\t\n\005Float\020\002", 14734);
+    "(\005:\0011\022\014\n\004unit\030\033 \001(\t\022\033\n\014enableTuning\030G \001("
+    "\010:\005false\022.\n\022tuningDefaultValue\030H \001(\0132\022.P"
+    "roto.TuningValue\022*\n\016tuningLowBound\030I \001(\013"
+    "2\022.Proto.TuningValue\022+\n\017tuningHighBound\030"
+    "J \001(\0132\022.Proto.TuningValue\022\026\n\007acquire\030Q \001"
+    "(\010:\005false\022\026\n\007archive\030R \001(\010:\005false\022\030\n\rdec"
+    "imalPlaces\030S \001(\005:\0012\022\031\n\016coarseAperture\030T "
+    "\001(\001:\0011\022\031\n\014fineAperture\030U \001(\001:\0030.5\022\037\n\020ada"
+    "ptiveAperture\030V \001(\010:\005false\022\026\n\016specPropSt"
+    "ruct\030Z \001(\t\022\026\n\016specPropValues\030[ \001(\014\022(\n\007db"
+    "Field\030x \001(\0132\027.Proto.AppSignalDbField\0222\n\t"
+    "calcParam\030y \001(\0132\037.Proto.AppSignalCalcula"
+    "tedParam\"3\n\014AppSignalSet\022#\n\tappSignal\030\001 "
+    "\003(\0132\020.Proto.AppSignal\"\352\003\n\022ProtoAppSignal"
+    "Data\022\021\n\tbusTypeID\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t"
+    "\022\022\n\007channel\030\003 \001(\005:\0010\022\024\n\010dataSize\030\004 \001(\005:\002"
+    "32\022\024\n\tbyteOrder\030\005 \001(\005:\0011\022\035\n\022analogSignal"
+    "Format\030\006 \001(\005:\0012\022\014\n\004unit\030\007 \001(\t\022\033\n\014enableT"
+    "uning\030\010 \001(\010:\005false\022.\n\022tuningDefaultValue"
+    "\030\t \001(\0132\022.Proto.TuningValue\022*\n\016tuningLowB"
+    "ound\030\n \001(\0132\022.Proto.TuningValue\022+\n\017tuning"
+    "HighBound\030\013 \001(\0132\022.Proto.TuningValue\022\025\n\007a"
+    "cquire\030\014 \001(\010:\004true\022\025\n\007archive\030\r \001(\010:\004tru"
+    "e\022\030\n\rdecimalPlaces\030\016 \001(\005:\0012\022\031\n\016coarseApe"
+    "rture\030\017 \001(\001:\0011\022\031\n\014fineAperture\030\020 \001(\001:\0030."
+    "5\022\037\n\020adaptiveAperture\030\021 \001(\010:\005false\"\237\001\n\016A"
+    "ppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value\030"
+    "\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystemTime"
+    "\030\004 \001(\020:\0010\022\024\n\tlocalTime\030\005 \001(\020:\0010\022\024\n\tplant"
+    "Time\030\006 \001(\020:\0010\022\025\n\tarchiveId\030\007 \001(\020:\002-1\"\224\006\n"
+    "\nConnection\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020P"
+    "ort1EquipmentID\030\003 \001(\t:\000\022\032\n\020Port2Equipmen"
+    "tID\030\004 \001(\t:\000\022!\n\027Port1RawDataDescription\030\005"
+    " \001(\t:\000\022!\n\027Port2RawDataDescription\030\006 \001(\t:"
+    "\000\022\035\n\016ManualSettings\030\013 \001(\010:\005false\022\034\n\rDisa"
+    "bleDataID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFil"
+    "e\030\r \001(\010:\005false\022\036\n\023Port1TxStartAddress\030\016 "
+    "\001(\005:\0010\022!\n\024Port1TxWordsQuantity\030\017 \001(\005:\00347"
+    "9\022!\n\024Port1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023"
+    "Port2TxStartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxW"
+    "ordsQuantity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQ"
+    "uantity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto"
+    ".Uuid\022 \n\021Port1EnableSerial\030\025 \001(\010:\005false\022"
+    "\032\n\017Port1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1Enab"
+    "leDuplex\030\027 \001(\010:\005false\022 \n\021Port2EnableSeri"
+    "al\030\030 \001(\010:\005false\022\032\n\017Port2SerialMode\030\031 \001(\005"
+    ":\0010\022 \n\021Port2EnableDuplex\030\032 \001(\010:\005false\022\017\n"
+    "\004Type\030\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005:\0010\022"
+    "\035\n\022ObsoleteSerialMode\030\007 \001(\005:\0010\022#\n\024Obsole"
+    "teEnableDuplex\030\n \001(\010:\005false\"@\n\020SchemaDet"
+    "ailsSet\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto."
+    "SchemaDetails\"\342\001\n\rSchemaDetails\022\017\n\007versi"
+    "on\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007caption\030\005 "
+    "\001(\t\022\031\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013equipm"
+    "entId\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 \001(\t\022\021"
+    "\n\tsignalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013con"
+    "nections\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto.Uu"
+    "id\"A\n\nArchSignal\022\014\n\004hash\030\001 \002(\004\022\020\n\010isAnal"
+    "og\030\002 \002(\010\022\023\n\013appSignalID\030\003 \002(\t\"5\n\013ArchSig"
+    "nals\022&\n\013archSignals\030\001 \003(\0132\021.Proto.ArchSi"
+    "gnal\"\326\003\n\tBusSignal\022\020\n\010signalId\030\001 \001(\t\022\017\n\007"
+    "caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005units\030\004 \001"
+    "(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tprecision\030\013 "
+    "\001(\005:\0012\022\031\n\016coarseAperture\030\014 \001(\001:\0011\022\031\n\014fin"
+    "eAperture\030\r \001(\001:\0030.5\022\037\n\020adaptiveAperture"
+    "\030\016 \001(\010:\005false\022\021\n\tbusTypeId\030\017 \001(\t\022\023\n\013inbu"
+    "sOffset\030  \001(\005\022\032\n\022inbusDiscreteBitNo\030( \001("
+    "\005\022\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021inbusAnalo"
+    "gFormat\0303 \001(\005\022\034\n\024inbusAnalogByteOrder\0304 "
+    "\001(\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022\032\n\022busAna"
+    "logHighLimit\0306 \001(\001\022\033\n\023inbusAnalogLowLimi"
+    "t\0307 \001(\001\022\034\n\024inbusAnalogHighLimit\0308 \001(\001\"\226\001"
+    "\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tbusT"
+    "ypeId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Proto."
+    "BusSignal\022!\n\023autoSignalPlacement\030\n \001(\010:\004"
+    "true\022\030\n\rmanualBusSize\030\013 \001(\005:\0010*3\n\nSchema"
+    "Unit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inc"
+    "h\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n"
+    "\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022"
+    "\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsign"
+    "edInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 14393);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -30131,19 +30109,6 @@ const int AppSignal::kDataSizeFieldNumber;
 const int AppSignal::kByteOrderFieldNumber;
 const int AppSignal::kAnalogSignalFormatFieldNumber;
 const int AppSignal::kUnitFieldNumber;
-const int AppSignal::kLowADCFieldNumber;
-const int AppSignal::kHighADCFieldNumber;
-const int AppSignal::kLowEngeneeringUnitsFieldNumber;
-const int AppSignal::kHighEngeneeringUnitsFieldNumber;
-const int AppSignal::kLowValidRangeFieldNumber;
-const int AppSignal::kHighValidRangeFieldNumber;
-const int AppSignal::kFilteringTimeFieldNumber;
-const int AppSignal::kSpreadToleranceFieldNumber;
-const int AppSignal::kElectricLowLimitFieldNumber;
-const int AppSignal::kElectricHighLimitFieldNumber;
-const int AppSignal::kElectricUnitFieldNumber;
-const int AppSignal::kSensorTypeFieldNumber;
-const int AppSignal::kOutputModeFieldNumber;
 const int AppSignal::kEnableTuningFieldNumber;
 const int AppSignal::kTuningDefaultValueFieldNumber;
 const int AppSignal::kTuningLowBoundFieldNumber;
@@ -30193,19 +30158,6 @@ void AppSignal::SharedCtor() {
   byteorder_ = 1;
   analogsignalformat_ = 1;
   unit_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  lowadc_ = 0;
-  highadc_ = 0;
-  lowengeneeringunits_ = 0;
-  highengeneeringunits_ = 0;
-  lowvalidrange_ = 0;
-  highvalidrange_ = 0;
-  filteringtime_ = 0;
-  spreadtolerance_ = 0;
-  electriclowlimit_ = 0;
-  electrichighlimit_ = 0;
-  electricunit_ = 1;
-  sensortype_ = 0;
-  outputmode_ = 0;
   enabletuning_ = false;
   tuningdefaultvalue_ = NULL;
   tuninglowbound_ = NULL;
@@ -30322,23 +30274,6 @@ void AppSignal::Clear() {
         unit_->clear();
       }
     }
-    lowadc_ = 0;
-    highadc_ = 0;
-    lowengeneeringunits_ = 0;
-    highengeneeringunits_ = 0;
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    lowvalidrange_ = 0;
-    highvalidrange_ = 0;
-    filteringtime_ = 0;
-    spreadtolerance_ = 0;
-    electriclowlimit_ = 0;
-    electrichighlimit_ = 0;
-    electricunit_ = 1;
-    sensortype_ = 0;
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    outputmode_ = 0;
     enabletuning_ = false;
     if (has_tuningdefaultvalue()) {
       if (tuningdefaultvalue_ != NULL) tuningdefaultvalue_->::Proto::TuningValue::Clear();
@@ -30349,11 +30284,11 @@ void AppSignal::Clear() {
     if (has_tuninghighbound()) {
       if (tuninghighbound_ != NULL) tuninghighbound_->::Proto::TuningValue::Clear();
     }
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     acquire_ = false;
     archive_ = false;
     decimalplaces_ = 2;
-  }
-  if (_has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     coarseaperture_ = 1;
     fineaperture_ = 0.5;
     adaptiveaperture_ = false;
@@ -30367,6 +30302,8 @@ void AppSignal::Clear() {
         specpropvalues_->clear();
       }
     }
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (has_dbfield()) {
       if (dbfield_ != NULL) dbfield_->::Proto::AppSignalDbField::Clear();
     }
@@ -30574,214 +30511,6 @@ bool AppSignal::MergePartialFromCodedStream(
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
             this->unit().data(), this->unit().length(),
             ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(224)) goto parse_lowADC;
-        break;
-      }
-
-      // optional int32 lowADC = 28 [default = 0];
-      case 28: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_lowADC:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &lowadc_)));
-          set_has_lowadc();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(232)) goto parse_highADC;
-        break;
-      }
-
-      // optional int32 highADC = 29 [default = 0];
-      case 29: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_highADC:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &highadc_)));
-          set_has_highadc();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(241)) goto parse_lowEngeneeringUnits;
-        break;
-      }
-
-      // optional double lowEngeneeringUnits = 30 [default = 0];
-      case 30: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_lowEngeneeringUnits:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &lowengeneeringunits_)));
-          set_has_lowengeneeringunits();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(249)) goto parse_highEngeneeringUnits;
-        break;
-      }
-
-      // optional double highEngeneeringUnits = 31 [default = 0];
-      case 31: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_highEngeneeringUnits:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &highengeneeringunits_)));
-          set_has_highengeneeringunits();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(257)) goto parse_lowValidRange;
-        break;
-      }
-
-      // optional double lowValidRange = 32 [default = 0];
-      case 32: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_lowValidRange:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &lowvalidrange_)));
-          set_has_lowvalidrange();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(265)) goto parse_highValidRange;
-        break;
-      }
-
-      // optional double highValidRange = 33 [default = 0];
-      case 33: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_highValidRange:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &highvalidrange_)));
-          set_has_highvalidrange();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(273)) goto parse_filteringTime;
-        break;
-      }
-
-      // optional double filteringTime = 34 [default = 0];
-      case 34: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_filteringTime:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &filteringtime_)));
-          set_has_filteringtime();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(281)) goto parse_spreadTolerance;
-        break;
-      }
-
-      // optional double spreadTolerance = 35 [default = 0];
-      case 35: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_spreadTolerance:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &spreadtolerance_)));
-          set_has_spreadtolerance();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(409)) goto parse_electricLowLimit;
-        break;
-      }
-
-      // optional double electricLowLimit = 51 [default = 0];
-      case 51: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_electricLowLimit:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &electriclowlimit_)));
-          set_has_electriclowlimit();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(417)) goto parse_electricHighLimit;
-        break;
-      }
-
-      // optional double electricHighLimit = 52 [default = 0];
-      case 52: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_electricHighLimit:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &electrichighlimit_)));
-          set_has_electrichighlimit();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(424)) goto parse_electricUnit;
-        break;
-      }
-
-      // optional int32 electricUnit = 53 [default = 1];
-      case 53: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_electricUnit:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &electricunit_)));
-          set_has_electricunit();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(432)) goto parse_sensorType;
-        break;
-      }
-
-      // optional int32 sensorType = 54 [default = 0];
-      case 54: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_sensorType:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &sensortype_)));
-          set_has_sensortype();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(440)) goto parse_outputMode;
-        break;
-      }
-
-      // optional int32 outputMode = 55 [default = 0];
-      case 55: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_outputMode:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &outputmode_)));
-          set_has_outputmode();
         } else {
           goto handle_uninterpreted;
         }
@@ -31104,71 +30833,6 @@ void AppSignal::SerializeWithCachedSizes(
       27, this->unit(), output);
   }
 
-  // optional int32 lowADC = 28 [default = 0];
-  if (has_lowadc()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(28, this->lowadc(), output);
-  }
-
-  // optional int32 highADC = 29 [default = 0];
-  if (has_highadc()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(29, this->highadc(), output);
-  }
-
-  // optional double lowEngeneeringUnits = 30 [default = 0];
-  if (has_lowengeneeringunits()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(30, this->lowengeneeringunits(), output);
-  }
-
-  // optional double highEngeneeringUnits = 31 [default = 0];
-  if (has_highengeneeringunits()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(31, this->highengeneeringunits(), output);
-  }
-
-  // optional double lowValidRange = 32 [default = 0];
-  if (has_lowvalidrange()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(32, this->lowvalidrange(), output);
-  }
-
-  // optional double highValidRange = 33 [default = 0];
-  if (has_highvalidrange()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(33, this->highvalidrange(), output);
-  }
-
-  // optional double filteringTime = 34 [default = 0];
-  if (has_filteringtime()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(34, this->filteringtime(), output);
-  }
-
-  // optional double spreadTolerance = 35 [default = 0];
-  if (has_spreadtolerance()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(35, this->spreadtolerance(), output);
-  }
-
-  // optional double electricLowLimit = 51 [default = 0];
-  if (has_electriclowlimit()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(51, this->electriclowlimit(), output);
-  }
-
-  // optional double electricHighLimit = 52 [default = 0];
-  if (has_electrichighlimit()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(52, this->electrichighlimit(), output);
-  }
-
-  // optional int32 electricUnit = 53 [default = 1];
-  if (has_electricunit()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(53, this->electricunit(), output);
-  }
-
-  // optional int32 sensorType = 54 [default = 0];
-  if (has_sensortype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(54, this->sensortype(), output);
-  }
-
-  // optional int32 outputMode = 55 [default = 0];
-  if (has_outputmode()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(55, this->outputmode(), output);
-  }
-
   // optional bool enableTuning = 71 [default = false];
   if (has_enabletuning()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(71, this->enabletuning(), output);
@@ -31345,71 +31009,6 @@ void AppSignal::SerializeWithCachedSizes(
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         27, this->unit(), target);
-  }
-
-  // optional int32 lowADC = 28 [default = 0];
-  if (has_lowadc()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(28, this->lowadc(), target);
-  }
-
-  // optional int32 highADC = 29 [default = 0];
-  if (has_highadc()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(29, this->highadc(), target);
-  }
-
-  // optional double lowEngeneeringUnits = 30 [default = 0];
-  if (has_lowengeneeringunits()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(30, this->lowengeneeringunits(), target);
-  }
-
-  // optional double highEngeneeringUnits = 31 [default = 0];
-  if (has_highengeneeringunits()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(31, this->highengeneeringunits(), target);
-  }
-
-  // optional double lowValidRange = 32 [default = 0];
-  if (has_lowvalidrange()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(32, this->lowvalidrange(), target);
-  }
-
-  // optional double highValidRange = 33 [default = 0];
-  if (has_highvalidrange()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(33, this->highvalidrange(), target);
-  }
-
-  // optional double filteringTime = 34 [default = 0];
-  if (has_filteringtime()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(34, this->filteringtime(), target);
-  }
-
-  // optional double spreadTolerance = 35 [default = 0];
-  if (has_spreadtolerance()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(35, this->spreadtolerance(), target);
-  }
-
-  // optional double electricLowLimit = 51 [default = 0];
-  if (has_electriclowlimit()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(51, this->electriclowlimit(), target);
-  }
-
-  // optional double electricHighLimit = 52 [default = 0];
-  if (has_electrichighlimit()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(52, this->electrichighlimit(), target);
-  }
-
-  // optional int32 electricUnit = 53 [default = 1];
-  if (has_electricunit()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(53, this->electricunit(), target);
-  }
-
-  // optional int32 sensorType = 54 [default = 0];
-  if (has_sensortype()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(54, this->sensortype(), target);
-  }
-
-  // optional int32 outputMode = 55 [default = 0];
-  if (has_outputmode()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(55, this->outputmode(), target);
   }
 
   // optional bool enableTuning = 71 [default = false];
@@ -31596,85 +31195,6 @@ int AppSignal::ByteSize() const {
           this->unit());
     }
 
-    // optional int32 lowADC = 28 [default = 0];
-    if (has_lowadc()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->lowadc());
-    }
-
-    // optional int32 highADC = 29 [default = 0];
-    if (has_highadc()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->highadc());
-    }
-
-    // optional double lowEngeneeringUnits = 30 [default = 0];
-    if (has_lowengeneeringunits()) {
-      total_size += 2 + 8;
-    }
-
-    // optional double highEngeneeringUnits = 31 [default = 0];
-    if (has_highengeneeringunits()) {
-      total_size += 2 + 8;
-    }
-
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    // optional double lowValidRange = 32 [default = 0];
-    if (has_lowvalidrange()) {
-      total_size += 2 + 8;
-    }
-
-    // optional double highValidRange = 33 [default = 0];
-    if (has_highvalidrange()) {
-      total_size += 2 + 8;
-    }
-
-    // optional double filteringTime = 34 [default = 0];
-    if (has_filteringtime()) {
-      total_size += 2 + 8;
-    }
-
-    // optional double spreadTolerance = 35 [default = 0];
-    if (has_spreadtolerance()) {
-      total_size += 2 + 8;
-    }
-
-    // optional double electricLowLimit = 51 [default = 0];
-    if (has_electriclowlimit()) {
-      total_size += 2 + 8;
-    }
-
-    // optional double electricHighLimit = 52 [default = 0];
-    if (has_electrichighlimit()) {
-      total_size += 2 + 8;
-    }
-
-    // optional int32 electricUnit = 53 [default = 1];
-    if (has_electricunit()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->electricunit());
-    }
-
-    // optional int32 sensorType = 54 [default = 0];
-    if (has_sensortype()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->sensortype());
-    }
-
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    // optional int32 outputMode = 55 [default = 0];
-    if (has_outputmode()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->outputmode());
-    }
-
     // optional bool enableTuning = 71 [default = false];
     if (has_enabletuning()) {
       total_size += 2 + 1;
@@ -31701,6 +31221,8 @@ int AppSignal::ByteSize() const {
           this->tuninghighbound());
     }
 
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional bool acquire = 81 [default = false];
     if (has_acquire()) {
       total_size += 2 + 1;
@@ -31718,8 +31240,6 @@ int AppSignal::ByteSize() const {
           this->decimalplaces());
     }
 
-  }
-  if (_has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     // optional double coarseAperture = 84 [default = 1];
     if (has_coarseaperture()) {
       total_size += 2 + 8;
@@ -31749,6 +31269,8 @@ int AppSignal::ByteSize() const {
           this->specpropvalues());
     }
 
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     // optional .Proto.AppSignalDbField dbField = 120;
     if (has_dbfield()) {
       total_size += 2 +
@@ -31828,49 +31350,6 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_unit()) {
       set_unit(from.unit());
     }
-    if (from.has_lowadc()) {
-      set_lowadc(from.lowadc());
-    }
-    if (from.has_highadc()) {
-      set_highadc(from.highadc());
-    }
-    if (from.has_lowengeneeringunits()) {
-      set_lowengeneeringunits(from.lowengeneeringunits());
-    }
-    if (from.has_highengeneeringunits()) {
-      set_highengeneeringunits(from.highengeneeringunits());
-    }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    if (from.has_lowvalidrange()) {
-      set_lowvalidrange(from.lowvalidrange());
-    }
-    if (from.has_highvalidrange()) {
-      set_highvalidrange(from.highvalidrange());
-    }
-    if (from.has_filteringtime()) {
-      set_filteringtime(from.filteringtime());
-    }
-    if (from.has_spreadtolerance()) {
-      set_spreadtolerance(from.spreadtolerance());
-    }
-    if (from.has_electriclowlimit()) {
-      set_electriclowlimit(from.electriclowlimit());
-    }
-    if (from.has_electrichighlimit()) {
-      set_electrichighlimit(from.electrichighlimit());
-    }
-    if (from.has_electricunit()) {
-      set_electricunit(from.electricunit());
-    }
-    if (from.has_sensortype()) {
-      set_sensortype(from.sensortype());
-    }
-  }
-  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    if (from.has_outputmode()) {
-      set_outputmode(from.outputmode());
-    }
     if (from.has_enabletuning()) {
       set_enabletuning(from.enabletuning());
     }
@@ -31883,6 +31362,8 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_tuninghighbound()) {
       mutable_tuninghighbound()->::Proto::TuningValue::MergeFrom(from.tuninghighbound());
     }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_acquire()) {
       set_acquire(from.acquire());
     }
@@ -31892,8 +31373,6 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_decimalplaces()) {
       set_decimalplaces(from.decimalplaces());
     }
-  }
-  if (from._has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     if (from.has_coarseaperture()) {
       set_coarseaperture(from.coarseaperture());
     }
@@ -31909,6 +31388,8 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_specpropvalues()) {
       set_specpropvalues(from.specpropvalues());
     }
+  }
+  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (from.has_dbfield()) {
       mutable_dbfield()->::Proto::AppSignalDbField::MergeFrom(from.dbfield());
     }
@@ -31953,19 +31434,6 @@ void AppSignal::Swap(AppSignal* other) {
     std::swap(byteorder_, other->byteorder_);
     std::swap(analogsignalformat_, other->analogsignalformat_);
     std::swap(unit_, other->unit_);
-    std::swap(lowadc_, other->lowadc_);
-    std::swap(highadc_, other->highadc_);
-    std::swap(lowengeneeringunits_, other->lowengeneeringunits_);
-    std::swap(highengeneeringunits_, other->highengeneeringunits_);
-    std::swap(lowvalidrange_, other->lowvalidrange_);
-    std::swap(highvalidrange_, other->highvalidrange_);
-    std::swap(filteringtime_, other->filteringtime_);
-    std::swap(spreadtolerance_, other->spreadtolerance_);
-    std::swap(electriclowlimit_, other->electriclowlimit_);
-    std::swap(electrichighlimit_, other->electrichighlimit_);
-    std::swap(electricunit_, other->electricunit_);
-    std::swap(sensortype_, other->sensortype_);
-    std::swap(outputmode_, other->outputmode_);
     std::swap(enabletuning_, other->enabletuning_);
     std::swap(tuningdefaultvalue_, other->tuningdefaultvalue_);
     std::swap(tuninglowbound_, other->tuninglowbound_);
@@ -31981,7 +31449,6 @@ void AppSignal::Swap(AppSignal* other) {
     std::swap(dbfield_, other->dbfield_);
     std::swap(calcparam_, other->calcparam_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
-    std::swap(_has_bits_[1], other->_has_bits_[1]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }

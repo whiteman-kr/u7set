@@ -572,31 +572,35 @@ QString SignalPropertiesDialog::errorMessage(const ObjectState& state) const
 
 void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
+	if (m_signalVector.size() < 1)
+	{
+		return;
+	}
+
+	const Signal& signal = *m_signalVector[0];
+
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
-	Signal& signal = *m_signalVector[0];
 
 	auto saver = [&settings](const QString& name, auto value)
 	{
 		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, value);
 	};
 
-	saver(SignalProperties::lowADCCaption, signal.lowADC());
-	saver(SignalProperties::highADCCaption, signal.highADC());
-	saver(SignalProperties::lowEngeneeringUnitsCaption, signal.lowEngeneeringUnits());
-	saver(SignalProperties::highEngeneeringUnitsCaption, signal.highEngeneeringUnits());
-	saver(SignalProperties::unitCaption, signal.unit());
-	saver(SignalProperties::lowValidRangeCaption, signal.lowValidRange());
-	saver(SignalProperties::highValidRangeCaption, signal.highValidRange());
-	saver(SignalProperties::electricLowLimitCaption, signal.electricLowLimit());
-	saver(SignalProperties::electricHighLimitCaption, signal.electricHighLimit());
-	saver(SignalProperties::electricUnitCaption, signal.electricUnit());
-	saver(SignalProperties::sensorTypeCaption, signal.sensorType());
-	saver(SignalProperties::outputModeCaption, signal.outputMode());
 	saver(SignalProperties::acquireCaption, signal.acquire());
 	saver(SignalProperties::decimalPlacesCaption, signal.decimalPlaces());
+	saver(SignalProperties::unitCaption, signal.unit());
 	saver(SignalProperties::coarseApertureCaption, signal.coarseAperture());
 	saver(SignalProperties::fineApertureCaption, signal.fineAperture());
-	saver(SignalProperties::filteringTimeCaption, signal.filteringTime());
-	saver(SignalProperties::spreadToleranceCaption, signal.spreadTolerance());
 	saver(SignalProperties::byteOrderCaption, signal.byteOrder());
+
+	SignalSpecPropValues spv;
+
+	spv.create(signal);
+
+	for(const SignalSpecPropValue& sv : spv.values())
+	{
+		QVariant qv = sv.value();
+
+		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + sv.name(), qv);
+	}
 }

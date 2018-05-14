@@ -99,6 +99,14 @@ const QString SignalProperties::defaultInternalAnalogSpecPropStruct(
 	"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;false;false;Low engeneering units;true;None\n");
 
 
+const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
+								"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;false;false;High ADC value;true;None\n"
+								"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;false;false;High engeneering units;true;None\n"
+								"4;HighValidRange;4 Signal processing;double;;;100;10;false;false;High valid range of signal;true;None\n"
+								"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
+								"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;false;false;Low engeneering units;true;None\n"
+								"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
+
 
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 

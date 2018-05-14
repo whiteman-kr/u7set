@@ -14,8 +14,8 @@ LowEngeneeringUnits	; True			; Write		; Write		; Write			; Hide		; Hide			; Hide
 HighEngeneeringUnits	; True			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 FilteringTime		; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 SpreadTolerance		; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-ElectricLowLimit	; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-ElectricHighLimit	; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
+ElectricLowLimit	; False			; Write		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
+ElectricHighLimit	; False			; Write		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 Unit			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 SensorType		; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 LowADC			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide

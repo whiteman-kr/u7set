@@ -428,7 +428,8 @@ DISTFILES += \
     LogicModuleDescription/LM1_SF00.xml \
     LogicModuleDescription/LM1_SR01.xml \
     LogicModuleDescription/BVB15Module0000.xml \
-    LogicModuleDescription/LM1_SR02.xml
+    LogicModuleDescription/LM1_SR02.xml \
+    ../Etc/SignalPropertyBehavior/SignalPropertyBehavior.csv
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

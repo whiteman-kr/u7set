@@ -157,6 +157,7 @@ public:
 	static const QString defaultInputAnalogSpecPropStruct;
 	static const QString defaultOutputAnalogSpecPropStruct;
 	static const QString defaultInternalAnalogSpecPropStruct;
+	static const QString defaultBusChildAnalogSpecPropStruct;
 
 	static const QString lastEditedSignalFieldValuePlace;
 

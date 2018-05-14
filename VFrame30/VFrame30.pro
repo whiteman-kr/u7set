@@ -112,7 +112,11 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
     ../Proto/network.pb.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/Signal.h \
+    ../lib/DeviceObject.h \
+    ../lib/SignalProperties.h \
+    ../lib/XmlHelper.h
 
 SOURCES += \
     Settings.cpp \
@@ -168,7 +172,11 @@ SOURCES += \
     Bus.cpp \
     ../Proto/network.pb.cc \
     ../lib/TuningValue.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    ../lib/Signal.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/SignalProperties.cpp \
+    ../lib/XmlHelper.cpp
 
 
 DEFINES += VFRAME30LIB_LIBRARY

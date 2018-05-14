@@ -9420,97 +9420,6 @@ class AppSignal : public ::google::protobuf::Message {
   inline ::std::string* release_unit();
   inline void set_allocated_unit(::std::string* unit);
 
-  // optional int32 lowADC = 28 [default = 0];
-  inline bool has_lowadc() const;
-  inline void clear_lowadc();
-  static const int kLowADCFieldNumber = 28;
-  inline ::google::protobuf::int32 lowadc() const;
-  inline void set_lowadc(::google::protobuf::int32 value);
-
-  // optional int32 highADC = 29 [default = 0];
-  inline bool has_highadc() const;
-  inline void clear_highadc();
-  static const int kHighADCFieldNumber = 29;
-  inline ::google::protobuf::int32 highadc() const;
-  inline void set_highadc(::google::protobuf::int32 value);
-
-  // optional double lowEngeneeringUnits = 30 [default = 0];
-  inline bool has_lowengeneeringunits() const;
-  inline void clear_lowengeneeringunits();
-  static const int kLowEngeneeringUnitsFieldNumber = 30;
-  inline double lowengeneeringunits() const;
-  inline void set_lowengeneeringunits(double value);
-
-  // optional double highEngeneeringUnits = 31 [default = 0];
-  inline bool has_highengeneeringunits() const;
-  inline void clear_highengeneeringunits();
-  static const int kHighEngeneeringUnitsFieldNumber = 31;
-  inline double highengeneeringunits() const;
-  inline void set_highengeneeringunits(double value);
-
-  // optional double lowValidRange = 32 [default = 0];
-  inline bool has_lowvalidrange() const;
-  inline void clear_lowvalidrange();
-  static const int kLowValidRangeFieldNumber = 32;
-  inline double lowvalidrange() const;
-  inline void set_lowvalidrange(double value);
-
-  // optional double highValidRange = 33 [default = 0];
-  inline bool has_highvalidrange() const;
-  inline void clear_highvalidrange();
-  static const int kHighValidRangeFieldNumber = 33;
-  inline double highvalidrange() const;
-  inline void set_highvalidrange(double value);
-
-  // optional double filteringTime = 34 [default = 0];
-  inline bool has_filteringtime() const;
-  inline void clear_filteringtime();
-  static const int kFilteringTimeFieldNumber = 34;
-  inline double filteringtime() const;
-  inline void set_filteringtime(double value);
-
-  // optional double spreadTolerance = 35 [default = 0];
-  inline bool has_spreadtolerance() const;
-  inline void clear_spreadtolerance();
-  static const int kSpreadToleranceFieldNumber = 35;
-  inline double spreadtolerance() const;
-  inline void set_spreadtolerance(double value);
-
-  // optional double electricLowLimit = 51 [default = 0];
-  inline bool has_electriclowlimit() const;
-  inline void clear_electriclowlimit();
-  static const int kElectricLowLimitFieldNumber = 51;
-  inline double electriclowlimit() const;
-  inline void set_electriclowlimit(double value);
-
-  // optional double electricHighLimit = 52 [default = 0];
-  inline bool has_electrichighlimit() const;
-  inline void clear_electrichighlimit();
-  static const int kElectricHighLimitFieldNumber = 52;
-  inline double electrichighlimit() const;
-  inline void set_electrichighlimit(double value);
-
-  // optional int32 electricUnit = 53 [default = 1];
-  inline bool has_electricunit() const;
-  inline void clear_electricunit();
-  static const int kElectricUnitFieldNumber = 53;
-  inline ::google::protobuf::int32 electricunit() const;
-  inline void set_electricunit(::google::protobuf::int32 value);
-
-  // optional int32 sensorType = 54 [default = 0];
-  inline bool has_sensortype() const;
-  inline void clear_sensortype();
-  static const int kSensorTypeFieldNumber = 54;
-  inline ::google::protobuf::int32 sensortype() const;
-  inline void set_sensortype(::google::protobuf::int32 value);
-
-  // optional int32 outputMode = 55 [default = 0];
-  inline bool has_outputmode() const;
-  inline void clear_outputmode();
-  static const int kOutputModeFieldNumber = 55;
-  inline ::google::protobuf::int32 outputmode() const;
-  inline void set_outputmode(::google::protobuf::int32 value);
-
   // optional bool enableTuning = 71 [default = false];
   inline bool has_enabletuning() const;
   inline void clear_enabletuning();
@@ -9655,32 +9564,6 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_analogsignalformat();
   inline void set_has_unit();
   inline void clear_has_unit();
-  inline void set_has_lowadc();
-  inline void clear_has_lowadc();
-  inline void set_has_highadc();
-  inline void clear_has_highadc();
-  inline void set_has_lowengeneeringunits();
-  inline void clear_has_lowengeneeringunits();
-  inline void set_has_highengeneeringunits();
-  inline void clear_has_highengeneeringunits();
-  inline void set_has_lowvalidrange();
-  inline void clear_has_lowvalidrange();
-  inline void set_has_highvalidrange();
-  inline void clear_has_highvalidrange();
-  inline void set_has_filteringtime();
-  inline void clear_has_filteringtime();
-  inline void set_has_spreadtolerance();
-  inline void clear_has_spreadtolerance();
-  inline void set_has_electriclowlimit();
-  inline void clear_has_electriclowlimit();
-  inline void set_has_electrichighlimit();
-  inline void clear_has_electrichighlimit();
-  inline void set_has_electricunit();
-  inline void clear_has_electricunit();
-  inline void set_has_sensortype();
-  inline void clear_has_sensortype();
-  inline void set_has_outputmode();
-  inline void clear_has_outputmode();
   inline void set_has_enabletuning();
   inline void clear_has_enabletuning();
   inline void set_has_tuningdefaultvalue();
@@ -9724,36 +9607,23 @@ class AppSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 byteorder_;
   ::google::protobuf::int32 analogsignalformat_;
   ::std::string* unit_;
-  ::google::protobuf::int32 lowadc_;
-  ::google::protobuf::int32 highadc_;
-  double lowengeneeringunits_;
-  double highengeneeringunits_;
-  double lowvalidrange_;
-  double highvalidrange_;
-  double filteringtime_;
-  double spreadtolerance_;
-  double electriclowlimit_;
-  double electrichighlimit_;
-  ::google::protobuf::int32 electricunit_;
-  ::google::protobuf::int32 sensortype_;
   ::Proto::TuningValue* tuningdefaultvalue_;
   ::Proto::TuningValue* tuninglowbound_;
   ::Proto::TuningValue* tuninghighbound_;
-  ::google::protobuf::int32 outputmode_;
   bool enabletuning_;
   bool acquire_;
   bool archive_;
   bool adaptiveaperture_;
+  ::google::protobuf::int32 decimalplaces_;
   double coarseaperture_;
   double fineaperture_;
   ::std::string* specpropstruct_;
   ::std::string* specpropvalues_;
   ::Proto::AppSignalDbField* dbfield_;
   ::Proto::AppSignalCalculatedParam* calcparam_;
-  ::google::protobuf::int32 decimalplaces_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(39 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(26 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -24165,301 +24035,15 @@ inline void AppSignal::set_allocated_unit(::std::string* unit) {
   }
 }
 
-// optional int32 lowADC = 28 [default = 0];
-inline bool AppSignal::has_lowadc() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
-}
-inline void AppSignal::set_has_lowadc() {
-  _has_bits_[0] |= 0x00001000u;
-}
-inline void AppSignal::clear_has_lowadc() {
-  _has_bits_[0] &= ~0x00001000u;
-}
-inline void AppSignal::clear_lowadc() {
-  lowadc_ = 0;
-  clear_has_lowadc();
-}
-inline ::google::protobuf::int32 AppSignal::lowadc() const {
-  return lowadc_;
-}
-inline void AppSignal::set_lowadc(::google::protobuf::int32 value) {
-  set_has_lowadc();
-  lowadc_ = value;
-}
-
-// optional int32 highADC = 29 [default = 0];
-inline bool AppSignal::has_highadc() const {
-  return (_has_bits_[0] & 0x00002000u) != 0;
-}
-inline void AppSignal::set_has_highadc() {
-  _has_bits_[0] |= 0x00002000u;
-}
-inline void AppSignal::clear_has_highadc() {
-  _has_bits_[0] &= ~0x00002000u;
-}
-inline void AppSignal::clear_highadc() {
-  highadc_ = 0;
-  clear_has_highadc();
-}
-inline ::google::protobuf::int32 AppSignal::highadc() const {
-  return highadc_;
-}
-inline void AppSignal::set_highadc(::google::protobuf::int32 value) {
-  set_has_highadc();
-  highadc_ = value;
-}
-
-// optional double lowEngeneeringUnits = 30 [default = 0];
-inline bool AppSignal::has_lowengeneeringunits() const {
-  return (_has_bits_[0] & 0x00004000u) != 0;
-}
-inline void AppSignal::set_has_lowengeneeringunits() {
-  _has_bits_[0] |= 0x00004000u;
-}
-inline void AppSignal::clear_has_lowengeneeringunits() {
-  _has_bits_[0] &= ~0x00004000u;
-}
-inline void AppSignal::clear_lowengeneeringunits() {
-  lowengeneeringunits_ = 0;
-  clear_has_lowengeneeringunits();
-}
-inline double AppSignal::lowengeneeringunits() const {
-  return lowengeneeringunits_;
-}
-inline void AppSignal::set_lowengeneeringunits(double value) {
-  set_has_lowengeneeringunits();
-  lowengeneeringunits_ = value;
-}
-
-// optional double highEngeneeringUnits = 31 [default = 0];
-inline bool AppSignal::has_highengeneeringunits() const {
-  return (_has_bits_[0] & 0x00008000u) != 0;
-}
-inline void AppSignal::set_has_highengeneeringunits() {
-  _has_bits_[0] |= 0x00008000u;
-}
-inline void AppSignal::clear_has_highengeneeringunits() {
-  _has_bits_[0] &= ~0x00008000u;
-}
-inline void AppSignal::clear_highengeneeringunits() {
-  highengeneeringunits_ = 0;
-  clear_has_highengeneeringunits();
-}
-inline double AppSignal::highengeneeringunits() const {
-  return highengeneeringunits_;
-}
-inline void AppSignal::set_highengeneeringunits(double value) {
-  set_has_highengeneeringunits();
-  highengeneeringunits_ = value;
-}
-
-// optional double lowValidRange = 32 [default = 0];
-inline bool AppSignal::has_lowvalidrange() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
-}
-inline void AppSignal::set_has_lowvalidrange() {
-  _has_bits_[0] |= 0x00010000u;
-}
-inline void AppSignal::clear_has_lowvalidrange() {
-  _has_bits_[0] &= ~0x00010000u;
-}
-inline void AppSignal::clear_lowvalidrange() {
-  lowvalidrange_ = 0;
-  clear_has_lowvalidrange();
-}
-inline double AppSignal::lowvalidrange() const {
-  return lowvalidrange_;
-}
-inline void AppSignal::set_lowvalidrange(double value) {
-  set_has_lowvalidrange();
-  lowvalidrange_ = value;
-}
-
-// optional double highValidRange = 33 [default = 0];
-inline bool AppSignal::has_highvalidrange() const {
-  return (_has_bits_[0] & 0x00020000u) != 0;
-}
-inline void AppSignal::set_has_highvalidrange() {
-  _has_bits_[0] |= 0x00020000u;
-}
-inline void AppSignal::clear_has_highvalidrange() {
-  _has_bits_[0] &= ~0x00020000u;
-}
-inline void AppSignal::clear_highvalidrange() {
-  highvalidrange_ = 0;
-  clear_has_highvalidrange();
-}
-inline double AppSignal::highvalidrange() const {
-  return highvalidrange_;
-}
-inline void AppSignal::set_highvalidrange(double value) {
-  set_has_highvalidrange();
-  highvalidrange_ = value;
-}
-
-// optional double filteringTime = 34 [default = 0];
-inline bool AppSignal::has_filteringtime() const {
-  return (_has_bits_[0] & 0x00040000u) != 0;
-}
-inline void AppSignal::set_has_filteringtime() {
-  _has_bits_[0] |= 0x00040000u;
-}
-inline void AppSignal::clear_has_filteringtime() {
-  _has_bits_[0] &= ~0x00040000u;
-}
-inline void AppSignal::clear_filteringtime() {
-  filteringtime_ = 0;
-  clear_has_filteringtime();
-}
-inline double AppSignal::filteringtime() const {
-  return filteringtime_;
-}
-inline void AppSignal::set_filteringtime(double value) {
-  set_has_filteringtime();
-  filteringtime_ = value;
-}
-
-// optional double spreadTolerance = 35 [default = 0];
-inline bool AppSignal::has_spreadtolerance() const {
-  return (_has_bits_[0] & 0x00080000u) != 0;
-}
-inline void AppSignal::set_has_spreadtolerance() {
-  _has_bits_[0] |= 0x00080000u;
-}
-inline void AppSignal::clear_has_spreadtolerance() {
-  _has_bits_[0] &= ~0x00080000u;
-}
-inline void AppSignal::clear_spreadtolerance() {
-  spreadtolerance_ = 0;
-  clear_has_spreadtolerance();
-}
-inline double AppSignal::spreadtolerance() const {
-  return spreadtolerance_;
-}
-inline void AppSignal::set_spreadtolerance(double value) {
-  set_has_spreadtolerance();
-  spreadtolerance_ = value;
-}
-
-// optional double electricLowLimit = 51 [default = 0];
-inline bool AppSignal::has_electriclowlimit() const {
-  return (_has_bits_[0] & 0x00100000u) != 0;
-}
-inline void AppSignal::set_has_electriclowlimit() {
-  _has_bits_[0] |= 0x00100000u;
-}
-inline void AppSignal::clear_has_electriclowlimit() {
-  _has_bits_[0] &= ~0x00100000u;
-}
-inline void AppSignal::clear_electriclowlimit() {
-  electriclowlimit_ = 0;
-  clear_has_electriclowlimit();
-}
-inline double AppSignal::electriclowlimit() const {
-  return electriclowlimit_;
-}
-inline void AppSignal::set_electriclowlimit(double value) {
-  set_has_electriclowlimit();
-  electriclowlimit_ = value;
-}
-
-// optional double electricHighLimit = 52 [default = 0];
-inline bool AppSignal::has_electrichighlimit() const {
-  return (_has_bits_[0] & 0x00200000u) != 0;
-}
-inline void AppSignal::set_has_electrichighlimit() {
-  _has_bits_[0] |= 0x00200000u;
-}
-inline void AppSignal::clear_has_electrichighlimit() {
-  _has_bits_[0] &= ~0x00200000u;
-}
-inline void AppSignal::clear_electrichighlimit() {
-  electrichighlimit_ = 0;
-  clear_has_electrichighlimit();
-}
-inline double AppSignal::electrichighlimit() const {
-  return electrichighlimit_;
-}
-inline void AppSignal::set_electrichighlimit(double value) {
-  set_has_electrichighlimit();
-  electrichighlimit_ = value;
-}
-
-// optional int32 electricUnit = 53 [default = 1];
-inline bool AppSignal::has_electricunit() const {
-  return (_has_bits_[0] & 0x00400000u) != 0;
-}
-inline void AppSignal::set_has_electricunit() {
-  _has_bits_[0] |= 0x00400000u;
-}
-inline void AppSignal::clear_has_electricunit() {
-  _has_bits_[0] &= ~0x00400000u;
-}
-inline void AppSignal::clear_electricunit() {
-  electricunit_ = 1;
-  clear_has_electricunit();
-}
-inline ::google::protobuf::int32 AppSignal::electricunit() const {
-  return electricunit_;
-}
-inline void AppSignal::set_electricunit(::google::protobuf::int32 value) {
-  set_has_electricunit();
-  electricunit_ = value;
-}
-
-// optional int32 sensorType = 54 [default = 0];
-inline bool AppSignal::has_sensortype() const {
-  return (_has_bits_[0] & 0x00800000u) != 0;
-}
-inline void AppSignal::set_has_sensortype() {
-  _has_bits_[0] |= 0x00800000u;
-}
-inline void AppSignal::clear_has_sensortype() {
-  _has_bits_[0] &= ~0x00800000u;
-}
-inline void AppSignal::clear_sensortype() {
-  sensortype_ = 0;
-  clear_has_sensortype();
-}
-inline ::google::protobuf::int32 AppSignal::sensortype() const {
-  return sensortype_;
-}
-inline void AppSignal::set_sensortype(::google::protobuf::int32 value) {
-  set_has_sensortype();
-  sensortype_ = value;
-}
-
-// optional int32 outputMode = 55 [default = 0];
-inline bool AppSignal::has_outputmode() const {
-  return (_has_bits_[0] & 0x01000000u) != 0;
-}
-inline void AppSignal::set_has_outputmode() {
-  _has_bits_[0] |= 0x01000000u;
-}
-inline void AppSignal::clear_has_outputmode() {
-  _has_bits_[0] &= ~0x01000000u;
-}
-inline void AppSignal::clear_outputmode() {
-  outputmode_ = 0;
-  clear_has_outputmode();
-}
-inline ::google::protobuf::int32 AppSignal::outputmode() const {
-  return outputmode_;
-}
-inline void AppSignal::set_outputmode(::google::protobuf::int32 value) {
-  set_has_outputmode();
-  outputmode_ = value;
-}
-
 // optional bool enableTuning = 71 [default = false];
 inline bool AppSignal::has_enabletuning() const {
-  return (_has_bits_[0] & 0x02000000u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void AppSignal::set_has_enabletuning() {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void AppSignal::clear_has_enabletuning() {
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void AppSignal::clear_enabletuning() {
   enabletuning_ = false;
@@ -24475,13 +24059,13 @@ inline void AppSignal::set_enabletuning(bool value) {
 
 // optional .Proto.TuningValue tuningDefaultValue = 72;
 inline bool AppSignal::has_tuningdefaultvalue() const {
-  return (_has_bits_[0] & 0x04000000u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void AppSignal::set_has_tuningdefaultvalue() {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void AppSignal::clear_has_tuningdefaultvalue() {
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void AppSignal::clear_tuningdefaultvalue() {
   if (tuningdefaultvalue_ != NULL) tuningdefaultvalue_->::Proto::TuningValue::Clear();
@@ -24513,13 +24097,13 @@ inline void AppSignal::set_allocated_tuningdefaultvalue(::Proto::TuningValue* tu
 
 // optional .Proto.TuningValue tuningLowBound = 73;
 inline bool AppSignal::has_tuninglowbound() const {
-  return (_has_bits_[0] & 0x08000000u) != 0;
+  return (_has_bits_[0] & 0x00004000u) != 0;
 }
 inline void AppSignal::set_has_tuninglowbound() {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x00004000u;
 }
 inline void AppSignal::clear_has_tuninglowbound() {
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void AppSignal::clear_tuninglowbound() {
   if (tuninglowbound_ != NULL) tuninglowbound_->::Proto::TuningValue::Clear();
@@ -24551,13 +24135,13 @@ inline void AppSignal::set_allocated_tuninglowbound(::Proto::TuningValue* tuning
 
 // optional .Proto.TuningValue tuningHighBound = 74;
 inline bool AppSignal::has_tuninghighbound() const {
-  return (_has_bits_[0] & 0x10000000u) != 0;
+  return (_has_bits_[0] & 0x00008000u) != 0;
 }
 inline void AppSignal::set_has_tuninghighbound() {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[0] |= 0x00008000u;
 }
 inline void AppSignal::clear_has_tuninghighbound() {
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void AppSignal::clear_tuninghighbound() {
   if (tuninghighbound_ != NULL) tuninghighbound_->::Proto::TuningValue::Clear();
@@ -24589,13 +24173,13 @@ inline void AppSignal::set_allocated_tuninghighbound(::Proto::TuningValue* tunin
 
 // optional bool acquire = 81 [default = false];
 inline bool AppSignal::has_acquire() const {
-  return (_has_bits_[0] & 0x20000000u) != 0;
+  return (_has_bits_[0] & 0x00010000u) != 0;
 }
 inline void AppSignal::set_has_acquire() {
-  _has_bits_[0] |= 0x20000000u;
+  _has_bits_[0] |= 0x00010000u;
 }
 inline void AppSignal::clear_has_acquire() {
-  _has_bits_[0] &= ~0x20000000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void AppSignal::clear_acquire() {
   acquire_ = false;
@@ -24611,13 +24195,13 @@ inline void AppSignal::set_acquire(bool value) {
 
 // optional bool archive = 82 [default = false];
 inline bool AppSignal::has_archive() const {
-  return (_has_bits_[0] & 0x40000000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void AppSignal::set_has_archive() {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void AppSignal::clear_has_archive() {
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void AppSignal::clear_archive() {
   archive_ = false;
@@ -24633,13 +24217,13 @@ inline void AppSignal::set_archive(bool value) {
 
 // optional int32 decimalPlaces = 83 [default = 2];
 inline bool AppSignal::has_decimalplaces() const {
-  return (_has_bits_[0] & 0x80000000u) != 0;
+  return (_has_bits_[0] & 0x00040000u) != 0;
 }
 inline void AppSignal::set_has_decimalplaces() {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[0] |= 0x00040000u;
 }
 inline void AppSignal::clear_has_decimalplaces() {
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline void AppSignal::clear_decimalplaces() {
   decimalplaces_ = 2;
@@ -24655,13 +24239,13 @@ inline void AppSignal::set_decimalplaces(::google::protobuf::int32 value) {
 
 // optional double coarseAperture = 84 [default = 1];
 inline bool AppSignal::has_coarseaperture() const {
-  return (_has_bits_[1] & 0x00000001u) != 0;
+  return (_has_bits_[0] & 0x00080000u) != 0;
 }
 inline void AppSignal::set_has_coarseaperture() {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[0] |= 0x00080000u;
 }
 inline void AppSignal::clear_has_coarseaperture() {
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline void AppSignal::clear_coarseaperture() {
   coarseaperture_ = 1;
@@ -24677,13 +24261,13 @@ inline void AppSignal::set_coarseaperture(double value) {
 
 // optional double fineAperture = 85 [default = 0.5];
 inline bool AppSignal::has_fineaperture() const {
-  return (_has_bits_[1] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00100000u) != 0;
 }
 inline void AppSignal::set_has_fineaperture() {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[0] |= 0x00100000u;
 }
 inline void AppSignal::clear_has_fineaperture() {
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline void AppSignal::clear_fineaperture() {
   fineaperture_ = 0.5;
@@ -24699,13 +24283,13 @@ inline void AppSignal::set_fineaperture(double value) {
 
 // optional bool adaptiveAperture = 86 [default = false];
 inline bool AppSignal::has_adaptiveaperture() const {
-  return (_has_bits_[1] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00200000u) != 0;
 }
 inline void AppSignal::set_has_adaptiveaperture() {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[0] |= 0x00200000u;
 }
 inline void AppSignal::clear_has_adaptiveaperture() {
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline void AppSignal::clear_adaptiveaperture() {
   adaptiveaperture_ = false;
@@ -24721,13 +24305,13 @@ inline void AppSignal::set_adaptiveaperture(bool value) {
 
 // optional string specPropStruct = 90;
 inline bool AppSignal::has_specpropstruct() const {
-  return (_has_bits_[1] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00400000u) != 0;
 }
 inline void AppSignal::set_has_specpropstruct() {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[0] |= 0x00400000u;
 }
 inline void AppSignal::clear_has_specpropstruct() {
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline void AppSignal::clear_specpropstruct() {
   if (specpropstruct_ != &::google::protobuf::internal::kEmptyString) {
@@ -24791,13 +24375,13 @@ inline void AppSignal::set_allocated_specpropstruct(::std::string* specpropstruc
 
 // optional bytes specPropValues = 91;
 inline bool AppSignal::has_specpropvalues() const {
-  return (_has_bits_[1] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00800000u) != 0;
 }
 inline void AppSignal::set_has_specpropvalues() {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[0] |= 0x00800000u;
 }
 inline void AppSignal::clear_has_specpropvalues() {
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline void AppSignal::clear_specpropvalues() {
   if (specpropvalues_ != &::google::protobuf::internal::kEmptyString) {
@@ -24861,13 +24445,13 @@ inline void AppSignal::set_allocated_specpropvalues(::std::string* specpropvalue
 
 // optional .Proto.AppSignalDbField dbField = 120;
 inline bool AppSignal::has_dbfield() const {
-  return (_has_bits_[1] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x01000000u) != 0;
 }
 inline void AppSignal::set_has_dbfield() {
-  _has_bits_[1] |= 0x00000020u;
+  _has_bits_[0] |= 0x01000000u;
 }
 inline void AppSignal::clear_has_dbfield() {
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline void AppSignal::clear_dbfield() {
   if (dbfield_ != NULL) dbfield_->::Proto::AppSignalDbField::Clear();
@@ -24899,13 +24483,13 @@ inline void AppSignal::set_allocated_dbfield(::Proto::AppSignalDbField* dbfield)
 
 // optional .Proto.AppSignalCalculatedParam calcParam = 121;
 inline bool AppSignal::has_calcparam() const {
-  return (_has_bits_[1] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x02000000u) != 0;
 }
 inline void AppSignal::set_has_calcparam() {
-  _has_bits_[1] |= 0x00000040u;
+  _has_bits_[0] |= 0x02000000u;
 }
 inline void AppSignal::clear_has_calcparam() {
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline void AppSignal::clear_calcparam() {
   if (calcparam_ != NULL) calcparam_->::Proto::AppSignalCalculatedParam::Clear();

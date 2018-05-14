@@ -1,5 +1,6 @@
 #include "SignalSet.h"
 #include "../lib/WUtils.h"
+#include "../lib/SignalProperties.h"
 
 namespace Builder
 {
@@ -320,13 +321,6 @@ namespace Builder
 
 	Signal* SignalSet::createBusChildSignal(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal)
 	{
-		static QString specPropStruct(	"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;false;false;High ADC value;true;None\n"
-										"4;HighEngeneeringUnits;4 Signal processing;double;;;100;10;false;false;High engeneering units;true;None\n"
-										"4;HighValidRange;4 Signal processing;double;;;100;10;false;false;High valid range of signal;true;None\n"
-										"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
-										"4;LowEngeneeringUnits;4 Signal processing;double;;;0;10;false;false;Low engeneering units;true;None\n"
-										"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
-
 		Signal* newSignal = new Signal();
 
 		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
@@ -352,7 +346,7 @@ namespace Builder
 			newSignal->setDataSize(SIZE_32BIT);
 			newSignal->setAnalogSignalFormat(busSignal.analogFormat);
 
-			newSignal->setSpecPropStruct(specPropStruct);
+			newSignal->setSpecPropStruct(SignalProperties::defaultBusChildAnalogSpecPropStruct);
 			newSignal->createSpecPropValues();
 
 			newSignal->setLowADC(busSignal.inbusAnalogLowLimit);

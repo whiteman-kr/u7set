@@ -50,12 +50,6 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 		m_analogSignalFormat = deviceSignal.appSignalDataFormat();
 
 		assert(m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 || m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32);
-
-		m_lowADC = deviceSignal.appSignalLowAdc();
-		m_highADC = deviceSignal.appSignalHighAdc();
-
-		m_lowEngeneeringUnits = deviceSignal.appSignalLowEngUnits();
-		m_highEngeneeringUnits = deviceSignal.appSignalHighEngUnits();;
 	}
 
 	updateTuningValuesType();
@@ -98,11 +92,19 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	//
 	m_specPropStruct = deviceSignal.signalSpecPropsStruc();
 
-//	createSpecPropValues();
+	SignalSpecPropValues spv;
+
+	spv.createFromSpecPropStruct(m_specPropStruct);
+
+	spv.serializeValuesToArray(&m_protoSpecPropValues);
 }
 
 Signal::~Signal()
 {
+	if (m_cachedSpecPropValues != nullptr)
+	{
+		delete m_cachedSpecPropValues;
+	}
 }
 
 void Signal::setSignalType(E::SignalType type)
@@ -434,6 +436,17 @@ bool Signal::createSpecPropValues()
 
 	return true;
 }
+
+void Signal::cacheSpecPropValues()
+{
+	if (m_cachedSpecPropValues == nullptr)
+	{
+		m_cachedSpecPropValues = new SignalSpecPropValues;
+	}
+
+	m_cachedSpecPropValues->createFromSpecPropStruct(m_specPropStruct);
+}
+
 
 void Signal::saveProtoData(QByteArray* protoDataArray) const
 {
@@ -889,105 +902,105 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 
 bool Signal::readFromXml(XmlReadHelper& xml)
 {
-/*	bool result = true;
+//	bool result = true;
 
-	if (xml.name() != "Signal")
-	{
-		return false;
-	}
+//	if (xml.name() != "Signal")
+//	{
+//		return false;
+//	}
 
-	result &= xml.readIntAttribute("ID", &m_ID);
-	result &= xml.readIntAttribute("GroupID", &m_signalGroupID);
-	result &= xml.readIntAttribute("InstanceID", &m_signalInstanceID);
+//	result &= xml.readIntAttribute("ID", &m_ID);
+//	result &= xml.readIntAttribute("GroupID", &m_signalGroupID);
+//	result &= xml.readIntAttribute("InstanceID", &m_signalInstanceID);
 
-	int intValue = 0;
+//	int intValue = 0;
 
-	result &= xml.readIntAttribute("Channel", &intValue);
-	m_channel = static_cast<E::Channel>(intValue);
+//	result &= xml.readIntAttribute("Channel", &intValue);
+//	m_channel = static_cast<E::Channel>(intValue);
 
-	int type = 0;
+//	int type = 0;
 
-	result &= xml.readIntAttribute("Type", &type);
-	m_signalType = static_cast<E::SignalType>(type);
+//	result &= xml.readIntAttribute("Type", &type);
+//	m_signalType = static_cast<E::SignalType>(type);
 
-	result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
-	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
-	result &= xml.readStringAttribute("Caption", &m_caption);
-	result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
+//	result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
+//	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
+//	result &= xml.readStringAttribute("Caption", &m_caption);
+//	result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
 
-	result &= xml.readIntAttribute("DataFormat", &intValue);
-	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(intValue);
+//	result &= xml.readIntAttribute("DataFormat", &intValue);
+//	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(intValue);
 
-	result &= xml.readIntAttribute("DataSize", &m_dataSize);
-	result &= xml.readIntAttribute("LowADC", &m_lowADC);
-	result &= xml.readIntAttribute("HighADC", &m_highADC);
-	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &m_lowEngeneeringUnits);
-	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &m_highEngeneeringUnits);
-	result &= xml.readStringAttribute("Unit", &m_unit);
-	result &= xml.readDoubleAttribute("LowValidRange", &m_lowValidRange);
-	result &= xml.readDoubleAttribute("HighValidRange", &m_highValidRange);
-	result &= xml.readDoubleAttribute("ElectricLowLimit", &m_electricLowLimit);
-	result &= xml.readDoubleAttribute("ElectricHighLimit", &m_electricHighLimit);
+//	result &= xml.readIntAttribute("DataSize", &m_dataSize);
+//	result &= xml.readIntAttribute("LowADC", &m_lowADC);
+//	result &= xml.readIntAttribute("HighADC", &m_highADC);
+//	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &m_lowEngeneeringUnits);
+//	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &m_highEngeneeringUnits);
+//	result &= xml.readStringAttribute("Unit", &m_unit);
+//	result &= xml.readDoubleAttribute("LowValidRange", &m_lowValidRange);
+//	result &= xml.readDoubleAttribute("HighValidRange", &m_highValidRange);
+//	result &= xml.readDoubleAttribute("ElectricLowLimit", &m_electricLowLimit);
+//	result &= xml.readDoubleAttribute("ElectricHighLimit", &m_electricHighLimit);
 
-	result &= xml.readIntAttribute("ElectricUnit", &intValue);
-	m_electricUnit = static_cast<E::ElectricUnit>(intValue);
+//	result &= xml.readIntAttribute("ElectricUnit", &intValue);
+//	m_electricUnit = static_cast<E::ElectricUnit>(intValue);
 
-	result &= xml.readIntAttribute("SensorType", &intValue);
-	m_sensorType = static_cast<E::SensorType>(intValue);
+//	result &= xml.readIntAttribute("SensorType", &intValue);
+//	m_sensorType = static_cast<E::SensorType>(intValue);
 
-	result &= xml.readIntAttribute("OutputMode", &intValue);
-	m_outputMode = static_cast<E::OutputMode>(intValue);
+//	result &= xml.readIntAttribute("OutputMode", &intValue);
+//	m_outputMode = static_cast<E::OutputMode>(intValue);
 
-	result &= xml.readBoolAttribute("Acquire", &m_acquire);
-	result &= xml.readIntAttribute("DecimalPlaces", &m_decimalPlaces);
-	result &= xml.readDoubleAttribute("CoarseAperture", &m_coarseAperture);
-	result &= xml.readDoubleAttribute("FineAperture", &m_fineAperture);
+//	result &= xml.readBoolAttribute("Acquire", &m_acquire);
+//	result &= xml.readIntAttribute("DecimalPlaces", &m_decimalPlaces);
+//	result &= xml.readDoubleAttribute("CoarseAperture", &m_coarseAperture);
+//	result &= xml.readDoubleAttribute("FineAperture", &m_fineAperture);
 
-	result &= xml.readIntAttribute("InOutType", &intValue);
-	m_inOutType = static_cast<E::SignalInOutType>(intValue);
+//	result &= xml.readIntAttribute("InOutType", &intValue);
+//	m_inOutType = static_cast<E::SignalInOutType>(intValue);
 
-	result &= xml.readDoubleAttribute("FilteringTime", &m_filteringTime);
-	result &= xml.readDoubleAttribute("SpreadTolerance", &m_spreadTolerance);
+//	result &= xml.readDoubleAttribute("FilteringTime", &m_filteringTime);
+//	result &= xml.readDoubleAttribute("SpreadTolerance", &m_spreadTolerance);
 
-	result &= xml.readIntAttribute("ByteOrder", &intValue);
-	m_byteOrder = static_cast<E::ByteOrder>(intValue);
+//	result &= xml.readIntAttribute("ByteOrder", &intValue);
+//	m_byteOrder = static_cast<E::ByteOrder>(intValue);
 
-	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
-	result &= xml.readFloatAttribute("TuningDefaultValue", &m_tuningDefaultValue);
-	result &= xml.readFloatAttribute("TuningLowBound", &m_tuningLowBound);
-	result &= xml.readFloatAttribute("TuningHighBound", &m_tuningHighBound);
+//	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
+//	result &= xml.readFloatAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+//	result &= xml.readFloatAttribute("TuningLowBound", &m_tuningLowBound);
+//	result &= xml.readFloatAttribute("TuningHighBound", &m_tuningHighBound);
 
-	result &= xml.readStringAttribute("BusTypeID", &m_busTypeID);
-	result &= xml.readBoolAttribute("AdaptiveAperture", &m_adaptiveAperture);
+//	result &= xml.readStringAttribute("BusTypeID", &m_busTypeID);
+//	result &= xml.readBoolAttribute("AdaptiveAperture", &m_adaptiveAperture);
 
-	int offset = 0;
-	int bit = 0;
+//	int offset = 0;
+//	int bit = 0;
 
-	result &= xml.readIntAttribute("RamAddrOffset", &offset);
-	result &= xml.readIntAttribute("RamAddrBit", &bit);
+//	result &= xml.readIntAttribute("RamAddrOffset", &offset);
+//	result &= xml.readIntAttribute("RamAddrBit", &bit);
 
-	m_ualAddr.setOffset(offset);
-	m_ualAddr.setBit(bit);
+//	m_ualAddr.setOffset(offset);
+//	m_ualAddr.setBit(bit);
 
-	offset = bit = 0;
+//	offset = bit = 0;
 
-	result &= xml.readIntAttribute("ValueOffset", &offset);
-	result &= xml.readIntAttribute("ValueBit", &bit);
+//	result &= xml.readIntAttribute("ValueOffset", &offset);
+//	result &= xml.readIntAttribute("ValueBit", &bit);
 
-	m_regValueAddr.setOffset(offset);
-	m_regValueAddr.setBit(bit);
+//	m_regValueAddr.setOffset(offset);
+//	m_regValueAddr.setBit(bit);
 
-	result &= xml.readIntAttribute("ValidityOffset", &offset);
-	result &= xml.readIntAttribute("ValidityBit", &bit);
+//	result &= xml.readIntAttribute("ValidityOffset", &offset);
+//	result &= xml.readIntAttribute("ValidityBit", &bit);
 
-	m_regValidityAddr.setOffset(offset);
-	m_regValidityAddr.setBit(bit);
+//	m_regValidityAddr.setOffset(offset);
+//	m_regValidityAddr.setBit(bit);
 
-	result &= xml.readIntAttribute("TuningOffset", &offset);
-	result &= xml.readIntAttribute("TuningBit", &bit);
+//	result &= xml.readIntAttribute("TuningOffset", &offset);
+//	result &= xml.readIntAttribute("TuningBit", &bit);
 
-	m_tuningAddr.setOffset(offset);
-	m_tuningAddr.setBit(bit);*/
+//	m_tuningAddr.setOffset(offset);
+//	m_tuningAddr.setBit(bit);
 
 	bool result = true;
 
@@ -1019,21 +1032,21 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(intValue);
 
 	result &= xml.readIntAttribute("DataSize", &m_dataSize);
-	result &= xml.readIntAttribute("LowADC", &m_lowADC);
-	result &= xml.readIntAttribute("HighADC", &m_highADC);
-	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &m_lowEngeneeringUnits);
-	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &m_highEngeneeringUnits);
+	result &= xml.readIntAttribute("LowADC", &lowADC());
+	result &= xml.readIntAttribute("HighADC", &highADC());
+	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &lowEngeneeringUnits());
+	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &highEngeneeringUnits());
 
 	result &= xml.readIntAttribute("UnitID", &intValue);
 
-	result &= xml.readDoubleAttribute("LowValidRange", &m_lowValidRange);
-	result &= xml.readDoubleAttribute("HighValidRange", &m_highValidRange);
+	result &= xml.readDoubleAttribute("LowValidRange", &lowValidRange());
+	result &= xml.readDoubleAttribute("HighValidRange", &highValidRange());
 
 	double unbalanceLimit = 0;
 	result &= xml.readDoubleAttribute("UnbalanceLimit", &unbalanceLimit);
 
-	result &= xml.readDoubleAttribute("InputLowLimit", &m_electricLowLimit);
-	result &= xml.readDoubleAttribute("InputHighLimit", &m_electricHighLimit);
+	result &= xml.readDoubleAttribute("InputLowLimit", &electricLowLimit());
+	result &= xml.readDoubleAttribute("InputHighLimit", &electricHighLimit());
 
 	result &= xml.readIntAttribute("InputUnitID", &intValue);
 
@@ -1153,22 +1166,11 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 
 	s->set_analogsignalformat(TO_INT(m_analogSignalFormat));
 	s->set_unit(m_unit.toStdString());
-	s->set_lowadc(m_lowADC);
-	s->set_highadc(m_highADC);
-	s->set_lowengeneeringunits(m_lowEngeneeringUnits);
-	s->set_highengeneeringunits(m_highEngeneeringUnits);
-	s->set_lowvalidrange(m_lowValidRange);
-	s->set_highvalidrange(m_highValidRange);
-	s->set_filteringtime(m_filteringTime);
-	s->set_spreadtolerance(m_spreadTolerance);
 
-	// Analog input/output signal properties
+	// Signal specific properties
 
-	s->set_electriclowlimit(m_electricLowLimit);
-	s->set_electrichighlimit(m_electricHighLimit);
-	s->set_electricunit(m_electricUnit);
-	s->set_sensortype(m_sensorType);
-	s->set_outputmode(m_outputMode);
+	s->set_specpropstruct(m_specPropStruct.toStdString());
+	s->set_specpropvalues(m_protoSpecPropValues.constData(), m_protoSpecPropValues.size());
 
 	// Tuning signal properties
 
@@ -1339,22 +1341,11 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 
 	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s.analogsignalformat());
 	m_unit = QString::fromStdString(s.unit());
-	m_lowADC = s.lowadc();
-	m_highADC = s.highadc();
-	m_lowEngeneeringUnits = s.lowengeneeringunits();
-	m_highEngeneeringUnits = s.highengeneeringunits();
-	m_lowValidRange = s.lowvalidrange();
-	m_highValidRange = s.highvalidrange();
-	m_filteringTime = s.filteringtime();
-	m_spreadTolerance = s.spreadtolerance();
 
-	// Analog input/output signal properties
+	// Signal specific properties
 
-	m_electricLowLimit = s.electriclowlimit();
-	m_electricHighLimit = s.electrichighlimit();
-	m_electricUnit = static_cast<E::ElectricUnit>(s.electricunit());
-	m_sensorType = static_cast<E::SensorType>(s.sensortype());
-	m_outputMode = static_cast<E::OutputMode>(s.outputmode());
+	m_specPropStruct = QString::fromStdString(s.specpropstruct());
+	m_protoSpecPropValues.fromStdString(s.specpropvalues());
 
 	// Tuning signal properties
 
@@ -1499,6 +1490,7 @@ int Signal::getSpecPropInt(const QString& name) const
 		return 0;
 	}
 
+	QVariant::Type t = qv.type();
 	assert(qv.type() == QVariant::Int && isEnum == false);
 
 	return qv.toInt();
@@ -1526,6 +1518,11 @@ bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) c
 {
 	TEST_PTR_RETURN_FALSE(qv);
 	TEST_PTR_RETURN_FALSE(isEnum);
+
+	if (m_cachedSpecPropValues != nullptr)
+	{
+		return m_cachedSpecPropValues->getValue(name, qv, isEnum);
+	}
 
 	SignalSpecPropValues spv;
 

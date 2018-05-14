@@ -279,6 +279,9 @@ private:
 	TuningValue m_tuningDefaultValue;
 	TuningValue m_tuningLowBound;
 	TuningValue m_tuningHighBound;
+
+	QString m_specPropStruct;
+	QByteArray m_specPropValues;
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

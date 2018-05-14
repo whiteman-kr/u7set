@@ -101,7 +101,9 @@ SOURCES += \
     Archive.cpp \
     TimeFilter.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Signal.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS += \
     version.h \
@@ -144,7 +146,9 @@ HEADERS += \
     TimeFilter.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../lib/Signal.h
+    ../lib/Signal.h \
+    ../lib/Signal.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 

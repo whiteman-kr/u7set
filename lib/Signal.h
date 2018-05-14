@@ -12,8 +12,6 @@
 #include "ProtobufHelper.h"
 #include "Hash.h"
 #include "TuningValue.h"
-//#include "TypedPropertyValue.h"
-
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
@@ -65,6 +63,9 @@ const char* const SensorTypeStr[] =
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
+
+class SignalSpecPropValues;
+
 
 class Signal
 {
@@ -248,6 +249,8 @@ public:
 	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
 	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
 
+	void cacheSpecPropValues();
+
 	//
 
 	void saveProtoData(QByteArray* protoDataArray) const;
@@ -390,28 +393,7 @@ private:
 	//
 	E::AnalogAppSignalFormat m_analogSignalFormat =					// only for m_signalType == E::SignalType::Analog
 							E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
-
 	QString m_unit;
-
-	int m_lowADC = 0;
-	int m_highADC = 0xFFFF;
-
-	double m_lowEngeneeringUnits = 0;								// low physical value for input range
-	double m_highEngeneeringUnits = 100;							// high physical value for input range
-
-	double m_lowValidRange = 0;
-	double m_highValidRange = 100;
-
-	double m_filteringTime = 0.005;
-	double m_spreadTolerance = 2;
-
-	// Analog input/output signals properties
-	//
-	double m_electricLowLimit = 0;									// low electric value for input range
-	double m_electricHighLimit = 0;									// high electric value for input range
-	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensor;		// electric sensor type for input range (was created for m_inputUnitID)
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
 
 	// Tuning signal properties
 	//
@@ -434,6 +416,8 @@ private:
 
 	QString m_specPropStruct;
 	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
+
+	SignalSpecPropValues* m_cachedSpecPropValues = nullptr;
 
 	// Signal fields from database
 	//
