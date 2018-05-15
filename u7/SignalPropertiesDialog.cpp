@@ -433,6 +433,8 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 			continue;
 		}
 
+		//signalProperties->updateSpecPropValues();
+
 		int precision = signalProperties->getPrecision();
 
 		for (std::shared_ptr<Property> property : signalProperties->properties())

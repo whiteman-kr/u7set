@@ -310,21 +310,6 @@ public:
 
 	//
 
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputMode));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ElectricUnit));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::AnalogAppSignalFormat));
-
-	void serializeFields(const QXmlStreamAttributes& attr);
-
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
@@ -359,11 +344,13 @@ private:
 
 	double getSpecPropDouble(const QString& name) const;
 	int getSpecPropInt(const QString& name) const;
+	unsigned int getSpecPropUInt(const QString& name) const;
 	int getSpecPropEnum(const QString& name) const;
 	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
 
 	bool setSpecPropDouble(const QString& name, double value);
 	bool setSpecPropInt(const QString& name, int value);
+	bool setSpecPropUInt(const QString& name, unsigned int value);
 	bool setSpecPropEnum(const QString& name, int enumValue);
 	bool setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum);
 
@@ -488,10 +475,9 @@ public:
 
 	void resetAddresses();
 
+	bool serializeFromProtoFile(const QString& filePath);
+
 private:
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
 };
-
-
-void SerializeSignalsFromXml(const QString& filePath, SignalSet& signalSet);

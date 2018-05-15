@@ -163,7 +163,9 @@ SOURCES +=\
     DialogAlert.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    DialogSignalInfo.cpp
+    DialogSignalInfo.cpp \
+    ../lib/Signal.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -221,7 +223,9 @@ HEADERS  += MainWindow.h \
     DialogAlert.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
-    DialogSignalInfo.h
+    DialogSignalInfo.h \
+    ../lib/Signal.h \
+    ../lib/SignalProperties.h
 
 FORMS    += \
     DialogSettings.ui \

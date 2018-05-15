@@ -729,7 +729,6 @@ bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* isE
 
 	if (index == -1)
 	{
-		assert(false);
 		return false;
 	}
 
