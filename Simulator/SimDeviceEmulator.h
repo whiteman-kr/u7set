@@ -8,13 +8,13 @@
 #include <QObject>
 #include <QMutex>
 #include <QTimerEvent>
-#include <QJSEngine>
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
 #include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
 #include "SimAfb.h"
+
 
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   //WINDOWS
@@ -48,6 +48,8 @@ Q_DECLARE_METATYPE(Sim::CyclePhase)
 
 namespace Sim
 {
+	class CommandProcessor;
+
 	struct LogicUnitData
 	{
 		int programCounter = 0;					// current offeset of program memory, in words
@@ -115,7 +117,7 @@ public:
 		quint32 programCounter() const;
 		void setProgramCounter(quint32 value);
 
-		AfbComponent afbComponent(int opCode);
+		Sim::AfbComponent afbComponent(int opCode) const;
 		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
 
 		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
@@ -135,8 +137,8 @@ public:
 
 		// Getting data from m_plainAppLogic
 		//
-		quint16 getWord(int wordOffset);
-		quint32 getDword(int wordOffset);
+		quint16 getWord(int wordOffset) const;
+		quint32 getDword(int wordOffset) const;
 
 	private:
 		DeviceEmulator* m_device = nullptr;
@@ -154,6 +156,7 @@ public:
 		DeviceEmulator();
 		virtual ~DeviceEmulator();
 
+		bool clear();
 		bool init(const Hardware::LogicModuleInfo& logicModuleInfo,		// Run from UI thread
 				  const LmDescription& lmDescription,
 				  const Eeprom& tuningEeprom,
@@ -204,6 +207,8 @@ public:
 		Hardware::LogicModuleInfo logicModuleInfo() const;
 		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);
 
+		const LmDescription& lmDescription() const;
+
 		std::vector<DeviceCommand> commands() const;
 		std::map<int, size_t> offsetToCommands() const;
 
@@ -214,6 +219,8 @@ public:
 
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
+
+		std::unique_ptr<CommandProcessor> m_commandProcessor;
 
 		Eeprom m_tuningEeprom = Eeprom(UartID::Tuning);
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);

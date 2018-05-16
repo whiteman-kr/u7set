@@ -1,7 +1,6 @@
 #include "SimAfb.h"
 #include <type_traits>
 #include <cfenv>
-#include <QQmlEngine>
 
 namespace Sim
 {
@@ -27,14 +26,14 @@ namespace Sim
 		return m_afbComponent->opCode();
 	}
 
-	std::string AfbComponent::caption() const
+	QString AfbComponent::caption() const
 	{
 		if (m_afbComponent == nullptr)
 		{
-			return std::string();
+			return {};
 		}
 
-		return m_afbComponent->caption().toStdString();
+		return m_afbComponent->caption();
 	}
 
 	int AfbComponent::maxInstCount() const
@@ -47,14 +46,14 @@ namespace Sim
 		return m_afbComponent->maxInstCount();
 	}
 
-	std::string AfbComponent::simulationFunc() const
+	QString AfbComponent::simulationFunc() const
 	{
 		if (m_afbComponent == nullptr)
 		{
-			return std::string();
+			return {};
 		}
 
-		return m_afbComponent->simulationFunc().toStdString();
+		return m_afbComponent->simulationFunc();
 	}
 
 	bool AfbComponent::pinExists(int pinOpIndex) const
@@ -67,14 +66,14 @@ namespace Sim
 		return m_afbComponent->pinExists(pinOpIndex);
 	}
 
-	std::string AfbComponent::pinCaption(int pinOpIndex) const
+	QString AfbComponent::pinCaption(int pinOpIndex) const
 	{
 		if (m_afbComponent == nullptr)
 		{
-			return std::string();
+			return {};
 		}
 
-		return m_afbComponent->pinCaption(pinOpIndex).toStdString();
+		return m_afbComponent->pinCaption(pinOpIndex);
 	}
 
 
@@ -622,6 +621,11 @@ namespace Sim
 
 	AfbComponentSet::AfbComponentSet()
 	{
+	}
+
+	void AfbComponentSet::clear()
+	{
+		m_components.clear();
 	}
 
 	bool AfbComponentSet::init(const LmDescription& lmDescription)

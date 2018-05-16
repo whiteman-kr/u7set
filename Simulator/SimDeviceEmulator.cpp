@@ -1,6 +1,7 @@
 #include "SimDeviceEmulator.h"
-#include <QQmlEngine>
 #include <QtEndian>
+#include "SimException.h"
+#include "SimCommandProcessor.h"
 
 namespace Sim
 {
@@ -97,13 +98,6 @@ namespace Sim
 		m_device->m_logicUnit.appStartAddress = value;
 	}
 
-	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode)
-	{
-		auto afbc = m_device->m_lmDescription.component(opCode);
-		AfbComponent result(afbc);
-		return result;
-	}
-
 	Sim::CyclePhase ScriptDeviceEmulator::phase() const
 	{
 		return m_device->m_logicUnit.phase;
@@ -122,6 +116,13 @@ namespace Sim
 	void ScriptDeviceEmulator::setProgramCounter(quint32 value)
 	{
 		m_device->m_logicUnit.programCounter = value;
+	}
+
+	Sim::AfbComponent ScriptDeviceEmulator::afbComponent(int opCode) const
+	{
+		auto afbc = m_device->m_lmDescription.component(opCode);
+		AfbComponent result(afbc);
+		return result;
 	}
 
 	Sim::AfbComponentInstance* ScriptDeviceEmulator::afbComponentInstance(int opCode, int instanceNo)
@@ -270,12 +271,12 @@ namespace Sim
 
 	// Getting data from m_plainAppLogic
 	//
-	quint16 ScriptDeviceEmulator::getWord(int wordOffset)
+	quint16 ScriptDeviceEmulator::getWord(int wordOffset) const
 	{
 		return m_device->getWord(wordOffset);
 	}
 
-	quint32 ScriptDeviceEmulator::getDword(int wordOffset)
+	quint32 ScriptDeviceEmulator::getDword(int wordOffset) const
 	{
 		return m_device->getDword(wordOffset);
 	}
@@ -295,21 +296,64 @@ namespace Sim
 		return;
 	}
 
+	bool DeviceEmulator::clear()
+	{
+		setLogicModuleInfo(Hardware::LogicModuleInfo());
+
+		m_commandProcessor.reset();
+
+		m_lmDescription.clear();
+		m_tuningEeprom.clear();
+		m_confEeprom.clear();
+		m_appLogicEeprom.clear();
+
+		m_afbComponents.clear();
+
+		m_commands.clear();
+		m_offsetToCommand.clear();
+
+		{
+			m_cacheMutex.lock();
+			m_cachedLogicModuleInfo = Hardware::LogicModuleInfo();
+			m_cachedCommands.clear();
+			m_cachedOffsetToCommand.clear();
+			m_cacheMutex.unlock();
+		}
+
+		return true;
+	}
+
 	bool DeviceEmulator::init(const Hardware::LogicModuleInfo& logicModuleInfo,
 							  const LmDescription& lmDescription,
 							  const Eeprom& tuningEeprom,
 							  const Eeprom& confEeprom,
 							  const Eeprom& appLogicEeprom)
 	{
+		clear();
+
 		setOutputScope(QString("DeviceEmulator %1").arg(logicModuleInfo.equipmentId));
 		writeMessage(tr("Init device."));
 
+		// --
+		//
 		setLogicModuleInfo(logicModuleInfo);
 
 		m_lmDescription = lmDescription;
 		m_tuningEeprom = tuningEeprom;
 		m_confEeprom = confEeprom;
 		m_appLogicEeprom = appLogicEeprom;
+
+		// Create specific CommnadProcessor
+		//
+		m_commandProcessor = std::unique_ptr<CommandProcessor>(CommandProcessor::createInstance(this));
+
+		if (m_commandProcessor == nullptr)
+		{
+			writeWaning(QString("There is no simulation for %1, LmDescription.name = %2")
+							.arg(logicModuleInfo.equipmentId)
+							.arg(lmDescription.name()));
+			return false;
+		}
 
 		//--
 		//
@@ -617,6 +661,7 @@ namespace Sim
 					// Parse this command
 					//
 					ok = parseCommand(c, programCounter);
+
 					if (ok == false)
 					{
 						emit appCodeParsed(false);
@@ -675,6 +720,12 @@ namespace Sim
 
 	bool DeviceEmulator::parseCommand(const LmCommand& command, int programCounter)
 	{
+		if (m_commandProcessor == nullptr)
+		{
+			assert(m_commandProcessor);
+			return  false;
+		}
+
 		quint16 commandWord = getWord(programCounter);
 		quint16 commandCode = (commandWord & command.codeMask);
 		if (commandCode != command.code)
@@ -690,36 +741,23 @@ namespace Sim
 
 		deviceCommand.m_offset = programCounter;
 
-		// --
-		//
-//		LuaIntf::LuaRef func(m_luaState, command.parseFunc.toStdString().c_str());
-
-//		if (func.isValid() == false || func.isFunction() == false)
-//		{
-//			writeError(QString("Lua: %1 not found or is not function.")
-//				.arg(command.parseFunc));
-
-//			return false;
-//		}
-//		try
-//		{
-//			func(ScriptDeviceEmulator(this), &deviceCommand);
-//		}
-//		catch (const LuaIntf::LuaException& e)
-//		{
-//			writeError(QString("Call function %1 LuaException: %2.")
-//				.arg(command.parseFunc)
-//				.arg(e.what()));
-
-//			return false;
-//		}
-//		catch (...)
-//		{
-//			writeError(QString("Call function %1 LuaException")
-//				.arg(command.parseFunc));
-
-//			return false;
-//		}
+		try
+		{
+			if (bool ok = m_commandProcessor->parseFunc(deviceCommand.m_command.parseFunc, &deviceCommand);
+				ok == false)
+			{
+				 SimException::raise("m_commandProcessor->parseFunc error.", "DeviceEmulator::parseCommand");
+			}
+		}
+		catch (SimException& e)
+		{
+			writeError(QString("Command parsing error: %1, %2. ProgrammCounter = %3, ParseFunction = %4")
+						.arg(e.message())
+						.arg(e.where())
+						.arg(programCounter)
+						.arg(deviceCommand.m_command.simulationFunc));
+			return false;
+		}
 
 		// !!!!!!!!!!!!!!!!!!! debug
 		//
@@ -1663,6 +1701,11 @@ namespace Sim
 		m_cacheMutex.unlock();
 
 		return;
+	}
+
+	const LmDescription& DeviceEmulator::lmDescription() const
+	{
+		return m_lmDescription;
 	}
 
 	std::vector<DeviceCommand> DeviceEmulator::commands() const

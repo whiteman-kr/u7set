@@ -77,8 +77,6 @@ namespace Sim
 		Eeprom m_confEeprom = Eeprom(UartID::Configuration);
 		Eeprom m_appLogicEeprom = Eeprom(UartID::ApplicationLogic);
 
-		std::unique_ptr<CommandProcessor> m_commandProcessor;
-
 		// Running Emulation
 		//
 		DeviceEmulator m_device;

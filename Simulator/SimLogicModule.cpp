@@ -46,13 +46,6 @@ namespace Sim
 			ok &= loadEeprom(firmware, m_lmDescription.flashMemory().m_appLogicUartId, &m_appLogicEeprom);
 		}
 
-		m_commandProcessor = std::unique_ptr<CommandProcessor>(CommandProcessor::createInstance(lmDescription.name(), lmInfo.equipmentId));
-		if (m_commandProcessor == nullptr)
-		{
-			writeWaning(QString("There is no simulation for %1, LmDescription.name = %2").arg(lmInfo.equipmentId).arg(lmDescription.name()));
-			return false;
-		}
-
 		// Init DeviceEmulator
 		//
 		ok &= m_device.init(m_logicModuleInfo,
@@ -74,7 +67,7 @@ namespace Sim
 		m_confEeprom.clear();
 		m_appLogicEeprom.clear();
 
-		m_commandProcessor.reset();
+		m_device.clear();
 
 		return;
 	}

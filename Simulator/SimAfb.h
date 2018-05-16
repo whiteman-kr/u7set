@@ -22,12 +22,12 @@ namespace Sim
 		bool isNull() const;
 
 		int opCode() const;
-		std::string caption() const;
+		QString caption() const;
 		int maxInstCount() const;
-		std::string simulationFunc() const;
+		QString simulationFunc() const;
 
 		bool pinExists(int pinOpIndex) const;
-		std::string pinCaption(int pinOpIndex) const;
+		QString pinCaption(int pinOpIndex) const;
 
 	private:
 		std::shared_ptr<Afb::AfbComponent> m_afbComponent;
@@ -171,6 +171,7 @@ namespace Sim
 		AfbComponentSet();
 
 	public:
+		void clear();
 		bool init(const LmDescription& lmDescription);
 		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
 

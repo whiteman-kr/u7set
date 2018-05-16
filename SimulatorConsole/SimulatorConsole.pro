@@ -1,7 +1,7 @@
 QT -= gui
-QT += xml qml core concurrent
+QT += xml qml core concurrent network
 
-CONFIG += c++11 console
+CONFIG += c++14 console
 CONFIG -= app_bundle
 
 win32:QMAKE_CXXFLAGS += /std:c++17

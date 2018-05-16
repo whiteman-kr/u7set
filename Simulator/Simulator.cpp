@@ -20,7 +20,7 @@ namespace Sim
 
 	Simulator::~Simulator()
 	{
-		m_control.stopThread();
+		//m_control.stopThread();
 		return;
 	}
 

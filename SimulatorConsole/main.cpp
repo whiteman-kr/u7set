@@ -45,12 +45,17 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	Sim::Simulator simulator;
-
-	if (bool ok = simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
-		ok == false)
 	{
-		return 1;
+		Sim::Simulator simulator;
+
+		if (bool ok = true;//simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
+			ok == false)
+		{
+			qDebug() << "~~~~~~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+			return 1;
+		}
+
+		qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 	}
 
 //	//simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");

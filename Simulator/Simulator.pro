@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT		 += xml qml core concurrent
+QT		 += xml qml core concurrent network
 
 TARGET = Simulator
 TEMPLATE = lib
@@ -87,7 +87,8 @@ SOURCES += \
     SimAfb.cpp \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
-    SimCommandProcessor_LM_SF00.cpp
+    SimException.cpp \
+    SimCommandProcessor_LM1_SF00.cpp
 
 HEADERS += \
     Stable.h \
@@ -123,7 +124,8 @@ HEADERS += \
     SimAfb.h \
     SimLogicModule.h \
     SimCommandProcessor.h \
-    SimCommandProcessor_LM_SF00.h
+    SimException.h \
+    SimCommandProcessor_LM1_SF00.h
 
 unix {
     target.path = /usr/lib
