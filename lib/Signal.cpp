@@ -1150,7 +1150,6 @@ int Signal::getSpecPropEnum(const QString& name) const
 
 	if (result == false)
 	{
-		assert(false);
 		return 0;
 	}
 
@@ -1402,7 +1401,7 @@ bool SignalSet::serializeFromProtoFile(const QString& filePath)
 
 	::Proto::AppSignalSet protoAppSignalSet;
 
-	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), file.size());
+	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
 
 	if (result == false)
 	{
