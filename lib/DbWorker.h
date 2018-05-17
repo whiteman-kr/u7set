@@ -240,10 +240,10 @@ private:
 	//
 
 	bool processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage);
-	bool processingBeforeDatabaseUpgrade0214(QSqlDatabase& db,QString* errorMessage);
+	bool processingBeforeDatabaseUpgrade0215(QSqlDatabase& db,QString* errorMessage);
 
 	bool processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage);
-	bool processingAfterDatabaseUpgrade0214(QSqlDatabase& db, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage);
 //	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
 
 

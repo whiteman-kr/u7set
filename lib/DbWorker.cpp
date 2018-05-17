@@ -230,10 +230,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
 	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, To LM1-SR02 added: pulse_gen, pulse_gen_sync"},
 	{":/DatabaseUpgrade/Upgrade0212.sql", "Upgrade to version 212, Add ETC system folder"},
-	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, HasCheckedOutSignals function creation"},
-	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, Appends specfic properties and potobuf fields to app signals"},
-	{":/DatabaseUpgrade/Upgrade0215.sql", "Upgrade to version 215, Changes in SignalData type and dependent stored procedures"},
-	{":/DatabaseUpgrade/Upgrade0216.sql", "Upgrade to version 216, Added SignalSpecificProperties in LM, AIFM, AIM, AOM, DIM, DOM, OCM presets"},
+	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, HasCheckedOutSignals function creation"},
+	{":/DatabaseUpgrade/Upgrade0215.sql", "Upgrade to version 215, Appends specfic properties and potobuf fields to app signals"},
+	{":/DatabaseUpgrade/Upgrade0216.sql", "Upgrade to version 216, Changes in SignalData type and dependent stored procedures"},
+	{":/DatabaseUpgrade/Upgrade0217.sql", "Upgrade to version 217, Added SignalSpecificProperties in LM, AIFM, AIM, AOM, DIM, DOM, OCM presets"},
 };
 
 
@@ -6166,14 +6166,14 @@ bool DbWorker::processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion,
 
 	switch(newVersion)
 	{
-	case 214:
-		return processingBeforeDatabaseUpgrade0214(db, errorMessage);
+	case 215:
+		return processingBeforeDatabaseUpgrade0215(db, errorMessage);
 	}
 
 	return true;
 }
 
-bool DbWorker::processingBeforeDatabaseUpgrade0214(QSqlDatabase& db, QString* errorMessage)
+bool DbWorker::processingBeforeDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage)
 {
 	bool hasCheckedOut = true;
 
@@ -6199,18 +6199,18 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 
 	switch(currentVersion)
 	{
-	case 214:
-		return processingAfterDatabaseUpgrade0214(db, errorMessage);
+	case 215:
+		return processingAfterDatabaseUpgrade0215(db, errorMessage);
 	}
 
 	return true;
 }
 
-bool DbWorker::processingAfterDatabaseUpgrade0214(QSqlDatabase& db, QString* errorMessage)
+bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage)
 {
 	bool result = true;
 
-	// indexes of db struct SignalData fields BEFORE database upgrade 0215
+	// indexes of db struct SignalData fields BEFORE database upgrade 0216
 	//
 //	const int SD_APP_SIGNAL_ID = 0;
 //	const int SD_CUSTOM_APP_SIGNAL_ID = 1;
