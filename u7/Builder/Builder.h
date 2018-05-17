@@ -117,12 +117,6 @@ namespace Builder
 		bool saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
 										 BuildResultWriter* buildResultWriter);
 
-		// Save AFBs simulation scripts
-		//
-		bool saveAfbSimScripts(DbController* db,
-							   const LmDescriptionSet& lmDescriptions,
-							   BuildResultWriter* buildResultWriter);
-
 		// Compile Application Logic
 		//
 		bool compileApplicationLogic(	Hardware::SubsystemStorage* subsystems,
