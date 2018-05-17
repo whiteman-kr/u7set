@@ -230,6 +230,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0210.sql", "Upgrade to version 210, setDataFloat functions were added to MC script files"},
 	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, To LM1-SR02 added: pulse_gen, pulse_gen_sync"},
 	{":/DatabaseUpgrade/Upgrade0212.sql", "Upgrade to version 212, Add ETC system folder"},
+	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, To LM Description added attr Name, removed SimScriptFileName"},
 	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, HasCheckedOutSignals function creation"},
 	{":/DatabaseUpgrade/Upgrade0215.sql", "Upgrade to version 215, Appends specfic properties and potobuf fields to app signals"},
 	{":/DatabaseUpgrade/Upgrade0216.sql", "Upgrade to version 216, Changes in SignalData type and dependent stored procedures"},

@@ -45,6 +45,10 @@ void DialogAlert::onAlertArrived(QString text)
 
 	QDateTime time = QDateTime::currentDateTime();
 
+	text = text.toHtmlEscaped();
+	//text.replace('<', "&lt;");
+	//text.replace('>', "&gt;");
+
 	m_text += tr("<font size=\"4\" color=\"black\">%1</font><font size=\"4\" color=\"red\"> %2</font><br>").arg(time.toString("dd.MM.yyyy hh:mm:ss.zzz")).arg(text);
 
 	m_textEdit->setHtml(m_text);
