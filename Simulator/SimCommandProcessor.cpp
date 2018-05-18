@@ -53,11 +53,9 @@ namespace Sim
 			return false;
 		}
 
-		bool retVal = false;
 		bool ok = QMetaObject::invokeMethod(this,
 											parseFunc.toStdString().data(),
 											Qt::DirectConnection,
-											Q_RETURN_ARG(bool, retVal),
 											Q_ARG(DeviceCommand*, command));
 
 		return ok;

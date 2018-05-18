@@ -239,8 +239,7 @@ public:
 		LogicUnitData m_logicUnit;
 
 		std::vector<DeviceCommand> m_commands;
-		std::unordered_map<int, size_t> m_offsetToCommand;	// key: command offset, value: index in m_commands
-		//std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands
+		std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands
 																// empty offsets is -1
 																// Programm memory is not so big, max
 

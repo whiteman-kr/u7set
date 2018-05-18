@@ -22,8 +22,6 @@ namespace Sim
 		virtual ~CommandProcessor();
 		static CommandProcessor* createInstance(DeviceEmulator* device);
 
-
-
 	public:
 		// Parse LM command, result written to deviceCommand, can throw SimException
 		//

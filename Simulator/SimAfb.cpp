@@ -504,13 +504,13 @@ namespace Sim
 	AfbComponentParam* AfbComponentInstance::param(int opIndex)
 	{
 		auto it = m_params.find(opIndex);
-		if (it == m_params.end())
+
+		if (Q_UNLIKELY(it == m_params.end()))
 		{
 			SimException::raise(QString("Param %1 is not found, Afb.").arg(opIndex));
 		}
 
-		AfbComponentParam* componentParam = &it->second;
-		return componentParam;
+		return &it->second;
 	}
 
 	bool AfbComponentInstance::paramExists(int opIndex) const

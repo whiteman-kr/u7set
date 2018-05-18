@@ -3,37 +3,8 @@
 #include "SimException.h"
 #include "SimAfb.h"
 
-constexpr unsigned int funcNameToInt(const char* str, int h = 0)
-{
-	return !str[h] ? 5381 : (funcNameToInt(str, h + 1) * 33) ^ str[h];
-}
-
-unsigned int funcNameToInt(const QString& str)
-{
-	return funcNameToInt(str.toStdString().data());
-}
-
 namespace Sim
 {
-	const QHash<QString, CommandProcessor_LM1_SF00::SimCommandFunc> CommandProcessor_LM1_SF00::m_nameToFuncCommand
-	{
-		{"command_startafb",	[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_startafb(cmd);	}},
-		{"command_stop",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_stop(cmd);		}},
-		{"command_movmem",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_movmem(cmd);	}},
-		{"command_movc",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_movc(cmd);		}},
-		{"command_movbc",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_movbc(cmd);		}},
-		{"command_wrfbc",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_wrfbc(cmd);		}},
-		{"command_wrfbb",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_wrfbb(cmd);		}},
-		{"command_rdfbb",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_rdfbb(cmd);		}},
-		{"command_appstart",	[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_appstart(cmd);	}},
-		{"command_rdfb32",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_rdfb32(cmd);	}},
-		{"command_wrfbc32",		[](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->command_wrfbc32(cmd);	}},
-		//{"", [](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->(cmd);	}},
-		//{"", [](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->(cmd);	}},
-		//{"", [](CommandProcessor_LM1_SF00* obj, const DeviceCommand& cmd)	{	return obj->(cmd);	}},
-	};
-
-
 	CommandProcessor_LM1_SF00::CommandProcessor_LM1_SF00(DeviceEmulator* device) :
 		CommandProcessor(device)
 	{
@@ -46,22 +17,31 @@ namespace Sim
 	bool CommandProcessor_LM1_SF00::runCommand(const DeviceCommand& command)
 	{
 		auto it = m_nameToFuncCommand.find(command.m_command.simulationFunc);
-		if (it == m_nameToFuncCommand.end())
+		if (Q_UNLIKELY(it == m_nameToFuncCommand.end()))
 		{
 			SimException::raise(QString("Cannot find command %1").arg(command.m_command.simulationFunc), "CommandProcessor_LM1_SF00::runCommand");
 		}
 
 		auto& func = *it;
-		bool result = func(this, command);
 
-		return result;
+		// Call the command
+		//
+		(this->*func)(command);
+
+		return true;
+	}
+
+	void CommandProcessor_LM1_SF00::command_not_implemented(const DeviceCommand& command)
+	{
+		SimException::raise(QString("Command %1 is not implemented yet").arg(command.caption()), __FUNCTION__);
+		return;
 	}
 
 	// Command: startafb
 	// Code: 2
 	// Description: Execute AFB
 	//
-	bool CommandProcessor_LM1_SF00::parse_startafb(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_startafb(DeviceCommand* command) const
 	{
 		command->m_size = 2;
 
@@ -80,10 +60,10 @@ namespace Sim
 		command->m_string = strCommand(command->caption()) +
 							strAfbInst(command);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_startafb(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_startafb(const DeviceCommand& command)
 	{
 		AfbComponent afb = m_device.afbComponent(command.m_afbOpCode);
 		if (afb.isNull() ==  true)
@@ -103,88 +83,93 @@ namespace Sim
 		}
 
 		QString afbSimFunc = afb.simulationFunc();
-		if (afbSimFunc.isEmpty() == true)
+		assert(afbSimFunc.isEmpty() == false);
+
+		// AFB
+		//
+		auto it = m_nameToFuncAfb.find(afbSimFunc);
+		if (Q_UNLIKELY(it == m_nameToFuncAfb.end()))
 		{
-			assert(afbSimFunc.isEmpty() == false);
-			return false;
+			SimException::raise(QString("Cannot find AFB func %1").arg(afbSimFunc), "CommandProcessor_LM1_SF00::command_startafb");
 		}
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable : 4307)		// warning: C4307: '*': integral constant overflow in funcNameToInt()
-#endif
-		switch (funcNameToInt(afbSimFunc))
-		{
-		case funcNameToInt("afb_logic"):
-			afb_logic(afbInstance);
-			break;
+		auto& func = *it;
 
-		case funcNameToInt("afb_not"):
-			afb_not(afbInstance);
-			break;
+		// Call the command
+		//
+		(this->*func)(afbInstance);
 
-		case funcNameToInt("afb_math"):
-			afb_math(afbInstance);
-			break;
-
-		default:
-			SimException::raise(QString("Cannot call %1 function.").arg(afbSimFunc), "CommandProcessor_LM1_SF00::command_startafb");
-			return false;
-		}
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-
-//		bool ok = QMetaObject::invokeMethod(this,
-//											afbSimFunc.toStdString().data(),
-//											Qt::DirectConnection,
-//											Q_ARG(AfbComponentInstance*, afbInstance));
-//		if (ok == false)
-//		{
-//			SimException::raise(QString("Cannot call %1 function.").arg(afbSimFunc), "CommandProcessor_LM1_SF00::command_startafb");
-//			return false;
-//		}
-
-		return true;
+		return;
 	}
 
 	// Command: stop
 	// Code: 3
 	// Description: Stop IDR phase and start ALP, if ALP is current phase then stop work cycle
 	//
-	bool CommandProcessor_LM1_SF00::parse_stop(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_stop(DeviceCommand* command) const
 	{
 		command->m_size = 1;
 		command->m_string = command->m_command.caption;
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_stop([[maybe_unused]] const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_stop([[maybe_unused]] const DeviceCommand& command)
 	{
 		if (m_device.phase() == Sim::CyclePhase::IdrPhase)
 		{
 			m_device.setPhase(Sim::CyclePhase::AlpPhase);
 			m_device.setProgramCounter(m_device.appStartAddress());
-			return true;
+			return;
 		}
 
 		if (m_device.phase() == Sim::CyclePhase::AlpPhase)
 		{
 			m_device.setPhase(Sim::CyclePhase::ODT);
-			return true;
+			return;
 		}
 
 		SimException::raise(QString("Command stop is cannot be run in current phase: %1")
 								.arg(static_cast<int>(m_device.phase())));
-		return false;
+		return;
 
+	}
+
+	// Command: mov
+	// Code: 4
+	// Description: Move word from RAM to RAM
+	//
+	void CommandProcessor_LM1_SF00::parse_mov(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - adderess2 - destionation
+		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - adderess1 - source
+
+		// --
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAddr(command->m_word0) + ", " +
+							strAddr(command->m_word1);
+
+		return;
+	}
+
+	void CommandProcessor_LM1_SF00::command_mov(const DeviceCommand& command)
+	{
+		const auto& src = command.m_word1;
+		const auto& dst = command.m_word0;
+
+		quint16 data = m_device.readRamWord(src);
+		m_device.writeRamWord(dst, data);
+
+		return;
 	}
 
 	// Command: movmem
 	// Code: 5
 	// Description: Move N words from RAM to RAM
 	//
-	bool CommandProcessor_LM1_SF00::parse_movmem(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_movmem(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -199,10 +184,10 @@ namespace Sim
 							strAddr(command->m_word1) + ", " +
 							strAddr(command->m_word2);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_movmem(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_movmem(const DeviceCommand& command)
 	{
 		const auto& size = command.m_word2;
 		const auto& src = command.m_word1;
@@ -210,14 +195,14 @@ namespace Sim
 
 		m_device.movRamMem(src, dst, size);
 
-		return true;
+		return;
 	}
 
 	// Command: movc
 	// Code: 6
 	// Description: Write word const to RAM
 	//
-	bool CommandProcessor_LM1_SF00::parse_movc(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_movc(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -230,20 +215,20 @@ namespace Sim
 							strAddr(command->m_word0) + ", " +
 							strWordConst(command->m_word1);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_movc(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_movc(const DeviceCommand& command)
 	{
 		m_device.writeRamWord(command.m_word0, command.m_word1);
-		return true;
+		return;
 	}
 
 	// Command: movbc
 	// Code: 7
 	// Description: Write constant bit to RAM
 	//
-	bool CommandProcessor_LM1_SF00::parse_movbc(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_movbc(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -260,20 +245,56 @@ namespace Sim
 							", " +
 							strBitConst(command->m_word1);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_movbc(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_movbc(const DeviceCommand& command)
 	{
 		m_device.writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
-		return true;
+		return;
 	}
+
+	// Command: wrfb
+	// Code: 8
+	// Description: Read 16bit data from RAM and write to AFB input
+	//
+	void CommandProcessor_LM1_SF00::parse_wrfb(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+
+		// Checks
+		//
+		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
+
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAfbInstPin(command) + ", " +
+							strAddr(command->m_word0);
+		return;
+	}
+
+	void CommandProcessor_LM1_SF00::command_wrfb(const DeviceCommand& command)
+	{
+		AfbComponentParam param{command.m_afbPinOpCode};
+		param.setWordValue(m_device.readRamWord(command.m_word0));
+
+		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		return;
+	}
+
 
 	// Command: wrfbc
 	// Code: 10
 	// Description: Write constant word to AFB input
 	//
-	bool CommandProcessor_LM1_SF00::parse_wrfbc(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_wrfbc(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -293,23 +314,23 @@ namespace Sim
 							", " +
 							strWordConst(command->m_word0);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_wrfbc(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_wrfbc(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setWordValue(command.m_word0);
 
 		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
-		return true;
+		return;
 	}
 
 	// Command: wrfbb
 	// Code: 11
 	// Description: Read bit from RAM and write it to AFB
 	//
-	bool CommandProcessor_LM1_SF00::parse_wrfbb(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_wrfbb(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -333,24 +354,24 @@ namespace Sim
 							", " +
 							strBitAddr(command->m_word0, command->m_bitNo0);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_wrfbb(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_wrfbb(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setWordValue(m_device.readRamBit(command.m_word0, command.m_bitNo0));
 
 		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
 
-		return true;
+		return;
 	}
 
 	// Command: rdfbb
 	// Code: 12
 	// Description: Read bit from AFB and write it to RAM
 	//
-	bool CommandProcessor_LM1_SF00::parse_rdfbb(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_rdfbb(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -374,24 +395,55 @@ namespace Sim
 							", " +
 							strAfbInstPin(command);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_rdfbb(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_rdfbb(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		m_device.writeRamBit(command.m_word0, command.m_bitNo0, param->wordValue() & 0x01);
 
-		return true;
+		return;
+	}
+
+	// Command: movb
+	// Code: 15
+	// Description: Move bit from RAM to RAM
+	//
+	void CommandProcessor_LM1_SF00::parse_movb(DeviceCommand* command) const
+	{
+		command->m_size = 4;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// source address (ADR1)
+		command->m_bitNo0 = m_device.getWord(command->m_offset + 3) & 0b1111;			//
+
+		command->m_word1 = m_device.getWord(command->m_offset + 1);						// destionation address	(ADR2)
+		command->m_bitNo1 = (m_device.getWord(command->m_offset + 3) >> 8) & 0b1111;	//
+
+		// String representation
+		//
+		command->m_string =	strCommand(command->caption()) +
+							strBitAddr(command->m_word0, command->m_bitNo0) + ", " +
+							strBitAddr(command->m_word1, command->m_bitNo1);
+
+		return;
+	}
+
+	void CommandProcessor_LM1_SF00::command_movb(const DeviceCommand& command)
+	{
+		quint16 data = m_device.readRamBit(command.m_word0, command.m_bitNo0);
+		m_device.writeRamBit(command.m_word1, command.m_bitNo1, data);
+
+		return;
 	}
 
 	// Command: appstart
 	// Code: 17
 	// Description: Save ALP phase start address
 	//
-	bool CommandProcessor_LM1_SF00::parse_appstart(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_appstart(DeviceCommand* command) const
 	{
 		command->m_size = 2;
 		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 keeps ALP phase start address
@@ -401,20 +453,20 @@ namespace Sim
 		command->m_string = strCommand(command->m_command.caption) +
 							strWordConst(command->m_word0);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_appstart(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_appstart(const DeviceCommand& command)
 	{
 		m_device.setAppStartAddress(command.m_word0);
-		return true;
+		return;
 	}
 
 	// Command: rdfb32
 	// Code: 21
 	// Description: Read 32bit data from AFB output and write it to RAM
 	//
-	bool CommandProcessor_LM1_SF00::parse_rdfb32(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_rdfb32(DeviceCommand* command) const
 	{
 		command->m_size = 3;
 
@@ -436,24 +488,24 @@ namespace Sim
 							", " +
 							strAfbInstPin(command);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_rdfb32(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_rdfb32(const DeviceCommand& command)
 	{
 		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
 		m_device.writeRamDword(command.m_word0, param->dwordValue());
 
-		return true;
+		return;
 	}
 
 	// Command: wrfbc32
 	// Code: 22
 	// Description: Write 32bit constant to FunctionalBlock input
 	//
-	bool CommandProcessor_LM1_SF00::parse_wrfbc32(DeviceCommand* command) const
+	void CommandProcessor_LM1_SF00::parse_wrfbc32(DeviceCommand* command) const
 	{
 		command->m_size = 4;
 
@@ -475,17 +527,17 @@ namespace Sim
 							", " +
 							strDwordConst(command->m_dword0);
 
-		return true;
+		return;
 	}
 
-	bool CommandProcessor_LM1_SF00::command_wrfbc32(const DeviceCommand& command)
+	void CommandProcessor_LM1_SF00::command_wrfbc32(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setDwordValue(command.m_dword0);
 
 		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
 
-		return true;
+		return;
 	}
 
 	//
@@ -648,6 +700,114 @@ namespace Sim
 		instance->addParamWord(o_zero, operand1->mathZero());
 		instance->addParamWord(o_nan, operand1->mathNan());
 		instance->addParamWord(o_div_by_zero, operand1->mathDivByZero());
+
+		return;
+	}
+
+	void CommandProcessor_LM1_SF00::afb_scale(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_scal_k1_coef = 1;
+		const int i_scal_k2_coef = 3;
+		const int i_ui_data = 5;		// 16 bit data, unsigned integer input
+		const int i_si_fp_data = 6;		// 32 bit data, signed integer or float input
+
+		const int o_ui_result = 8;		// 16 bit data, unsigned integer output
+		const int o_si_fp_result = 9;	// 32 bit data, signed integer or float output
+		const int o_scal_edi = 11;		// error
+		const int o_overflow = 12;
+		const int o_underflow = 13;
+		const int o_zero = 14;
+		const int o_nan = 15;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		AfbComponentParam* conf = instance->param(i_conf);
+		AfbComponentParam* k1 = instance->param(i_scal_k1_coef);	// for  1, 2, 3, 4 -- k1/k2 SignedInteger
+		AfbComponentParam* k2 = instance->param(i_scal_k2_coef);	//      5, 6, 7, 8, 9 -- k1/k2 float
+		AfbComponentParam result;
+
+		// Scale, conf:  1-16(UI)/16(UI); 2-16(UI)/32(SI); 3-32(SI)/16(UI); 4-32(SI)/32(SI); 5-32(SI)/32(FP); 6-32(FP)/32(FP); 7-32(FP)/16(UI); 8-32(FP)/32(SI); 9-16(UI)/32(FP);
+		//
+		switch (conf->wordValue())
+		{
+			case 1: // 16(UI)/16(UI)
+				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
+				break;
+			 case 2: // 16(UI)/32(SI)
+				{
+					result = *instance->param(i_ui_data);
+					result.setOpIndex(o_si_fp_result);
+
+					result.convertWordToSignedInt();
+
+					result.mulSignedInteger(k1);
+					result.divSignedIntegerNumber(32768);
+					result.addSignedInteger(k2);
+
+					// Save result
+					//
+					instance->addParam(result);
+				}
+				break;
+			case 3: // 32(SI)/16(UI)
+				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
+				break;
+			case 4: // 32(SI)/32(SI)
+				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
+				break;
+			case 5: // 32(SI)/32(FP)
+				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
+				break;
+			case 6: // 32(FP)/32(FP)
+				{
+					result = *instance->param(i_si_fp_data);
+					result.setOpIndex(o_si_fp_result);
+
+					result.mulFloatingPoint(k1);
+					result.addFloatingPoint(k2);
+
+					// Save result
+					//
+					instance->addParam(result);
+				}
+				break;
+			case 7: // 32(FP)/16(UI)
+				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
+				break;
+			case 8: // 32(FP)/32(SI)
+				SimException::raise("Scale configuration: " + QString::number(conf->wordValue()) + " is not implemented yet.");
+				break;
+			case 9: // 16(UI)/32(FP)
+				{
+					result = *instance->param(i_ui_data);
+					result.setOpIndex(o_si_fp_result);
+
+					result.convertWordToFloat();
+
+					result.mulFloatingPoint(k1);
+					result.addFloatingPoint(k2);
+
+					// Save result
+					//
+					instance->addParam(result);
+				}
+				break;
+			default:
+				instance->addParamWord(o_scal_edi, 0x0001);
+				SimException::raise("Unknown AFB configuration: " + QString::number(conf->wordValue()) + " , or this configuration is not implemented yet.");
+				break;
+		}
+
+		// Save result
+		//
+		instance->addParamWord(o_scal_edi, 0x0000);
+		instance->addParamWord(o_overflow, result.mathOverflow());
+		instance->addParamWord(o_underflow, result.mathUnderflow());
+		instance->addParamWord(o_zero, result.mathZero());
+		instance->addParamWord(o_nan, result.mathNan());
 
 		return;
 	}

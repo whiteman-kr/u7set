@@ -676,7 +676,6 @@ namespace Sim
 					// Move ProgramCounter
 					//
 					assert(m_commands.empty() == false);
-					assert(m_commands.size() == m_offsetToCommand.size());
 
 					int commandSize = m_commands.back().m_size;
 					if (commandSize == 0)
@@ -714,7 +713,17 @@ namespace Sim
 		{
 			m_cacheMutex.lock();
 			m_cachedCommands = m_commands;
-			m_cachedOffsetToCommand = m_offsetToCommand;
+
+			m_cachedOffsetToCommand.clear();
+			for (size_t i = 0; i < m_offsetToCommand.size(); i++)
+			{
+				int value = m_offsetToCommand[i];
+				if (value != -1)
+				{
+					m_cachedOffsetToCommand[static_cast<int>(i)] = static_cast<size_t>(value);
+				}
+			}
+
 			m_cacheMutex.unlock();
 		}
 
@@ -770,7 +779,12 @@ namespace Sim
 
 		// Add command to offsetToCommand map
 		//
-		m_offsetToCommand[deviceCommand.m_offset] = m_commands.size() - 1;
+		while (m_offsetToCommand.size() < deviceCommand.m_offset)
+		{
+			m_offsetToCommand.push_back(-1);
+		}
+
+		m_offsetToCommand.push_back(static_cast<int>(m_commands.size() - 1));
 
 		return true;
 	}
@@ -790,15 +804,23 @@ namespace Sim
 		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
 			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
 		{
-			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
-			if (offsetIt == m_offsetToCommand.end())
+//			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
+//			if (offsetIt == m_offsetToCommand.end())
+//			{
+//				FAULT("Command not found in current ProgramCounter.");
+//				break;
+//			}
+
+			if (Q_UNLIKELY(m_logicUnit.programCounter >= m_offsetToCommand.size()))
 			{
+				assert(false);
 				FAULT("Command not found in current ProgramCounter.");
 				break;
 			}
 
-			size_t commandIndex = offsetIt->second;
-			if (commandIndex > m_commands.size())
+			int commandIndex = m_offsetToCommand[m_logicUnit.programCounter];
+
+			if (Q_UNLIKELY(commandIndex == -1 || commandIndex > m_commands.size()))
 			{
 				FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
 				break;
@@ -808,14 +830,14 @@ namespace Sim
 			assert(m_logicUnit.programCounter == command.m_offset);
 
 			if (bool ok = runCommand(command);
-				ok == false && m_currentMode != DeviceMode::Fault)
+				Q_UNLIKELY(ok == false && m_currentMode != DeviceMode::Fault))
 			{
 				FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
 				result = false;
 				break;
 			}
 
-			if (m_currentMode == DeviceMode::Fault)
+			if (Q_UNLIKELY(m_currentMode == DeviceMode::Fault))
 			{
 				result = false;
 				break;

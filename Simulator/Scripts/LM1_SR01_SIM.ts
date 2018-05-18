@@ -992,7 +992,7 @@ function afb_math(instance: ComponentInstance) : string
 }
 
 //
-//	MATH, OpCode 14
+//	SCALE, OpCode 14
 //
 function afb_scale(instance: ComponentInstance) : string
 {
