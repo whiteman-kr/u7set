@@ -60,7 +60,7 @@ namespace Sim
 
 		const std::vector<DeviceCommand>& appCommands() const;
 
-		std::map<int, size_t> offsetToCommand() const;
+		std::unordered_map<int, size_t> offsetToCommand() const;
 		const DeviceCommand& offsetToCommand(int offset) const;
 
 		// Simtime
@@ -84,7 +84,7 @@ namespace Sim
 		// --
 		//
 		std::vector<DeviceCommand> m_commands;
-		std::map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands
+		std::unordered_map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands
 	};
 
 }

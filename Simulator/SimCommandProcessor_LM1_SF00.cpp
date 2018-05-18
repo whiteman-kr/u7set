@@ -65,8 +65,8 @@ namespace Sim
 	{
 		command->m_size = 2;
 
-		command->m_afbOpCode = device().getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = device().getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
 
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
 
@@ -85,7 +85,7 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::command_startafb(const DeviceCommand& command)
 	{
-		AfbComponent afb = device().afbComponent(command.m_afbOpCode);
+		AfbComponent afb = m_device.afbComponent(command.m_afbOpCode);
 		if (afb.isNull() ==  true)
 		{
 			SimException::raise(QString("Cannot find AfbComponent with OpCode ")
@@ -93,7 +93,7 @@ namespace Sim
 								"CommandProcessor_LM1_SF00::command_startafb");
 		}
 
-		AfbComponentInstance* afbInstance = device().afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
+		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		if (afbInstance == nullptr)
 		{
 			SimException::raise(QString("Cannot find afbInstance with OpCode %1, InstanceNo %2")
@@ -161,21 +161,21 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::command_stop([[maybe_unused]] const DeviceCommand& command)
 	{
-		if (device().phase() == Sim::CyclePhase::IdrPhase)
+		if (m_device.phase() == Sim::CyclePhase::IdrPhase)
 		{
-			device().setPhase(Sim::CyclePhase::AlpPhase);
-			device().setProgramCounter(device().appStartAddress());
+			m_device.setPhase(Sim::CyclePhase::AlpPhase);
+			m_device.setProgramCounter(m_device.appStartAddress());
 			return true;
 		}
 
-		if (device().phase() == Sim::CyclePhase::AlpPhase)
+		if (m_device.phase() == Sim::CyclePhase::AlpPhase)
 		{
-			device().setPhase(Sim::CyclePhase::ODT);
+			m_device.setPhase(Sim::CyclePhase::ODT);
 			return true;
 		}
 
 		SimException::raise(QString("Command stop is cannot be run in current phase: %1")
-								.arg(static_cast<int>(device().phase())));
+								.arg(static_cast<int>(m_device.phase())));
 		return false;
 
 	}
@@ -188,9 +188,9 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = device().getWord(command->m_offset + 1);		// word0 - adderess2
-		command->m_word1 = device().getWord(command->m_offset + 2);		// word1 - adderess1
-		command->m_word2 = device().getWord(command->m_offset + 3);		// word2 - words to move
+		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - adderess2
+		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - adderess1
+		command->m_word2 = m_device.getWord(command->m_offset + 3);		// word2 - words to move
 
 		// --
 		//
@@ -208,7 +208,7 @@ namespace Sim
 		const auto& src = command.m_word1;
 		const auto& dst = command.m_word0;
 
-		device().movRamMem(src, dst, size);
+		m_device.movRamMem(src, dst, size);
 
 		return true;
 	}
@@ -221,8 +221,8 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = device().getWord(command->m_offset + 1);		// word0 - address
-		command->m_word1 = device().getWord(command->m_offset + 2);		// word1 - data
+		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - address
+		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - data
 
 		// movc     0b402h, #0
 		//
@@ -235,7 +235,7 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::command_movc(const DeviceCommand& command)
 	{
-		device().writeRamWord(command.m_word0, command.m_word1);
+		m_device.writeRamWord(command.m_word0, command.m_word1);
 		return true;
 	}
 
@@ -247,9 +247,9 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = device().getWord(command->m_offset + 1);		// word0 - data address
-		command->m_word1 = device().getWord(command->m_offset + 2);		// word1 - data
-		command->m_bitNo0 = device().getWord(command->m_offset + 3);	// bitNo0 - bitno
+		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 - data address
+		command->m_word1 = m_device.getWord(command->m_offset + 2);		// word1 - data
+		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);	// bitNo0 - bitno
 
 		checkParamRange(command->m_bitNo0, 0, 15, "BitNo");
 
@@ -265,7 +265,7 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::command_movbc(const DeviceCommand& command)
 	{
-		device().writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
+		m_device.writeRamBit(command.m_word0, command.m_bitNo0, command.m_word1);
 		return true;
 	}
 
@@ -277,11 +277,11 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = device().getWord(command->m_offset + 0) & 0x003F;	// Lowest 6 bit
-		command->m_afbInstance = device().getWord(command->m_offset + 1) >> 6;		// Highest 10 bits
-		command->m_afbPinOpCode = device().getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;	// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;		// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = device().getWord(command->m_offset + 2);					// word0 - data address
+		command->m_word0 = m_device.getWord(command->m_offset + 2);					// word0 - data address
 
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
 
@@ -301,7 +301,7 @@ namespace Sim
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setWordValue(command.m_word0);
 
-		device().setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
 		return true;
 	}
 
@@ -313,12 +313,12 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_afbOpCode = device().getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = device().getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = device().getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_word0 = device().getWord(command->m_offset + 2);						// Word0 - data address
-		command->m_bitNo0 = device().getWord(command->m_offset + 3);					// BitNo
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);					// BitNo
 
 		// Checks
 		//
@@ -339,9 +339,9 @@ namespace Sim
 	bool CommandProcessor_LM1_SF00::command_wrfbb(const DeviceCommand& command)
 	{
 		AfbComponentParam param{command.m_afbPinOpCode};
-		param.setWordValue(device().readRamBit(command.m_word0, command.m_bitNo0));
+		param.setWordValue(m_device.readRamBit(command.m_word0, command.m_bitNo0));
 
-		device().setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
 
 		return true;
 	}
@@ -354,12 +354,12 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_afbOpCode = device().getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = device().getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = device().getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_word0 = device().getWord(command->m_offset + 2);						// Word0 - data address
-		command->m_bitNo0 = device().getWord(command->m_offset + 3);					// BitNo
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_bitNo0 = m_device.getWord(command->m_offset + 3);					// BitNo
 
 		// Checks
 		//
@@ -379,12 +379,10 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::command_rdfbb(const DeviceCommand& command)
 	{
-		AfbComponentInstance* afbInstance = device().afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
-
-		checkParamExists(afbInstance, command.m_afbPinOpCode);
+		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
-		device().writeRamBit(command.m_word0, command.m_bitNo0, param->wordValue() & 0x01);
+		m_device.writeRamBit(command.m_word0, command.m_bitNo0, param->wordValue() & 0x01);
 
 		return true;
 	}
@@ -396,7 +394,7 @@ namespace Sim
 	bool CommandProcessor_LM1_SF00::parse_appstart(DeviceCommand* command) const
 	{
 		command->m_size = 2;
-		command->m_word0 = device().getWord(command->m_offset + 1);		// word0 keeps ALP phase start address
+		command->m_word0 = m_device.getWord(command->m_offset + 1);		// word0 keeps ALP phase start address
 
 		// appstart  #000Ch
 		//
@@ -408,7 +406,7 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::command_appstart(const DeviceCommand& command)
 	{
-		device().setAppStartAddress(command.m_word0);
+		m_device.setAppStartAddress(command.m_word0);
 		return true;
 	}
 
@@ -420,11 +418,11 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_afbOpCode = device().getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = device().getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = device().getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_word0 = device().getWord(command->m_offset + 2);						// Word0 - data address
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
 
 		// Checks
 		//
@@ -443,12 +441,10 @@ namespace Sim
 
 	bool CommandProcessor_LM1_SF00::command_rdfb32(const DeviceCommand& command)
 	{
-		AfbComponentInstance* afbInstance = device().afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
-
-		checkParamExists(afbInstance, command.m_afbPinOpCode);
+		AfbComponentInstance* afbInstance = m_device.afbComponentInstance(command.m_afbOpCode, command.m_afbInstance);
 		AfbComponentParam* param = afbInstance->param(command.m_afbPinOpCode);
 
-		device().writeRamDword(command.m_word0, param->dwordValue());
+		m_device.writeRamDword(command.m_word0, param->dwordValue());
 
 		return true;
 	}
@@ -461,11 +457,11 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_afbOpCode = device().getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
-		command->m_afbInstance = device().getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
-		command->m_afbPinOpCode = device().getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
 
-		command->m_dword0 = device().getDword(command->m_offset + 2);					// Dword0 - data
+		command->m_dword0 = m_device.getDword(command->m_offset + 2);					// Dword0 - data
 
 		// Checks
 		//
@@ -487,7 +483,7 @@ namespace Sim
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setDwordValue(command.m_dword0);
 
-		device().setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
 
 		return true;
 	}
@@ -514,25 +510,11 @@ namespace Sim
 		const int i_input_0 = 3;
 		const int o_result = 20;
 
-		// Get params, check_param throws exception in case of error
+		// Get params, throws exception in case of error
 		//
-		checkParamExists(instance, i_oprd_quant, "i_oprd_quant");
-		checkParamExists(instance, i_bus_width, "i_bus_width");
-		checkParamExists(instance, i_conf, "i_conf");
-
 		AfbComponentParam* oprdQuant = instance->param(i_oprd_quant);
 		AfbComponentParam* busWidth = instance->param(i_bus_width);
 		AfbComponentParam* conf = instance->param(i_conf);
-
-		if (oprdQuant == nullptr ||
-			busWidth == nullptr ||
-			conf == nullptr)
-		{
-			assert(oprdQuant);
-			assert(busWidth);
-			assert(conf);
-			return;
-		}
 
 		checkParamRange(oprdQuant->wordValue(), 1, 16, "i_oprd_quant");
 		checkParamRange(busWidth->wordValue(), 1, 16, "i_bus_width");
@@ -543,7 +525,6 @@ namespace Sim
 
 		for (quint16 i = 0; i < oprdQuant->wordValue(); i++)
 		{
-			checkParamExists(instance, i_input_0 + i, QString("i_oprd_%1").arg(i));
 			inputs[i] = *instance->param(i_input_0 + i);
 		}
 
@@ -588,10 +569,6 @@ namespace Sim
 		const int i_oprd = 0;
 		const int o_result = 2;
 
-		// Get params,  check_param throws exception in case of error
-		//
-		checkParamExists(instance, i_oprd, "i_oprd");
-
 		// Logic
 		//
 		AfbComponentParam* input = instance->param(i_oprd);
@@ -622,10 +599,6 @@ namespace Sim
 
 		// Get params,  check_param throws exception in case of error
 		//
-		checkParamExists(instance, i_conf, "i_conf");
-		checkParamExists(instance, i_1_oprd, "i_1_oprd");
-		checkParamExists(instance, i_2_oprd, "i_2_oprd");
-
 		AfbComponentParam* conf = instance->param(i_conf);
 		AfbComponentParam* operand1 = instance->param(i_1_oprd);
 		AfbComponentParam* operand2 = instance->param(i_2_oprd);

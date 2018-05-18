@@ -212,7 +212,7 @@ public:
 		const LmDescription& lmDescription() const;
 
 		std::vector<DeviceCommand> commands() const;
-		std::map<int, size_t> offsetToCommands() const;
+		std::unordered_map<int, size_t> offsetToCommands() const;
 
 		const Ram& ram() const;
 
@@ -239,7 +239,10 @@ public:
 		LogicUnitData m_logicUnit;
 
 		std::vector<DeviceCommand> m_commands;
-		std::map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands
+		std::unordered_map<int, size_t> m_offsetToCommand;	// key: command offset, value: index in m_commands
+		//std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands
+																// empty offsets is -1
+																// Programm memory is not so big, max
 
 		AfbComponentSet m_afbComponents;
 
@@ -250,7 +253,7 @@ public:
 		Hardware::LogicModuleInfo m_cachedLogicModuleInfo;
 
 		std::vector<DeviceCommand> m_cachedCommands;
-		std::map<int, size_t> m_cachedOffsetToCommand;		// key: command offset, value: index in m_commands
+		std::unordered_map<int, size_t> m_cachedOffsetToCommand;	// key: command offset, value: index in m_commands
 	};
 }
 

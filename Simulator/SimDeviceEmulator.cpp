@@ -291,6 +291,7 @@ namespace Sim
 	DeviceEmulator::DeviceEmulator() :
 		Output("DeviceEmulator")
 	{
+		m_offsetToCommand.reserve(32000);
 		return;
 	}
 
@@ -1676,7 +1677,7 @@ namespace Sim
 		return m_cachedCommands;
 	}
 
-	std::map<int, size_t> DeviceEmulator::offsetToCommands() const
+	std::unordered_map<int, size_t> DeviceEmulator::offsetToCommands() const
 	{
 		QMutexLocker ml(&m_cacheMutex);
 		assert(m_cachedOffsetToCommand.size() == m_cachedOffsetToCommand.size());

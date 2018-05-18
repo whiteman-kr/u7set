@@ -1,6 +1,8 @@
-#include "SimAfb.h"
 #include <type_traits>
 #include <cfenv>
+#include "SimAfb.h"
+#include "SimException.h"
+
 
 namespace Sim
 {
@@ -504,7 +506,7 @@ namespace Sim
 		auto it = m_params.find(opIndex);
 		if (it == m_params.end())
 		{
-			return nullptr;
+			SimException::raise(QString("Param %1 is not found, Afb.").arg(opIndex));
 		}
 
 		AfbComponentParam* componentParam = &it->second;

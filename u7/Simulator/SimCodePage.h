@@ -50,7 +50,7 @@ private:
 	QString m_lmEquipmentId;
 
 	std::vector<Sim::DeviceCommand> m_commands;
-	std::map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands, can be changed to std::vector, memory is not large
+	std::unordered_map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands, can be changed to std::vector, memory is not large
 };
 
 

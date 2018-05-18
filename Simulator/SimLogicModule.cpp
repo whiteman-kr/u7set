@@ -166,7 +166,7 @@ namespace Sim
 		return m_commands;
 	}
 
-	std::map<int, size_t> LogicModule::offsetToCommand() const
+	std::unordered_map<int, size_t> LogicModule::offsetToCommand() const
 	{
 		return m_offsetToCommand;
 	}

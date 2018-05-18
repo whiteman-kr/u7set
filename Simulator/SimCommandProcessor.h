@@ -34,16 +34,6 @@ namespace Sim
 		virtual bool runCommand(const DeviceCommand& command);
 
 	protected:
-		inline ScriptDeviceEmulator& device()
-		{
-			return m_device;
-		}
-
-		inline const ScriptDeviceEmulator& device() const
-		{
-			return m_device;
-		}
-
 		// Check that such AFB does exist and it has pin  (optional)
 		// Raise SimException if fail
 		//
@@ -75,6 +65,7 @@ namespace Sim
 	private:
 		static const std::map<QString, std::function<CommandProcessor*(DeviceEmulator*)>> m_lmToFactory;
 
+	protected:
 		ScriptDeviceEmulator m_device;
 	};
 }
