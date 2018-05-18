@@ -45,36 +45,23 @@ int main(int argc, char *argv[])
 
 	// --
 	//
+	Sim::Simulator simulator;
+
+	if (bool ok = simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
+		ok == false)
 	{
-		Sim::Simulator simulator;
-
-		if (bool ok = true;//simulator.load("D:/Develop/build/test_simulator_bts-debug/build");
-			ok == false)
-		{
-			qDebug() << "~~~~~~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-			return 1;
-		}
-
-		qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+		return 1;
 	}
 
-//	//simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");
-//	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC01_MD00");
-//	simulator.control().startSimulation(std::chrono::microseconds{-1});
+	// Add modules to simulation
+	//
+	simulator.control().addToRunList("SYSTEMID_RACKID_FSCC01_MD00");
+	//simulator.control().addToRunList("SYSTEMID_RACKID_FSCC02_MD00");
 
-////	std::shared_ptr<Sim::LogicModule> logicModule = simulator.logicModule("SYSTEMID_RACKID_FSCC01_MD00");
-////	if (logicModule == nullptr)
-////	{
-////		return 2;
-////	}
+	// Start simulation
+	//
+	simulator.control().startSimulation(std::chrono::microseconds{-1});
 
-////	ok = logicModule->powerOn(true);
-////	if (ok == false)
-////	{
-////		return 3;
-////	}
-
-//	getc(stdin);
-
+	getchar();
 	return 0;
 }

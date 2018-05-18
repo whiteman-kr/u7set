@@ -123,12 +123,14 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 
 	// AFBs
 	//
+	m_afbComponents.clear();
 	for (const std::pair<int, std::shared_ptr<Afb::AfbComponent>>& p : src.m_afbComponents)
 	{
 		std::shared_ptr<Afb::AfbComponent> afbComponentCopy = std::make_shared<Afb::AfbComponent>(*p.second.get());
 		m_afbComponents.insert({p.first, afbComponentCopy});
 	}
 
+	m_afbs.clear();
 	m_afbs.reserve(src.m_afbs.size());
 	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbs)
 	{

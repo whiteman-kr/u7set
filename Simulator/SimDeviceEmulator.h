@@ -71,6 +71,8 @@ namespace Sim
 	public:
 		void dump() const;
 
+		QString caption() const;
+
 	public:
 		LmCommand m_command;
 

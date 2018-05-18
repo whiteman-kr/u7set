@@ -65,7 +65,11 @@ namespace Sim
 		qDebug() << "\t" << str8;
 
 		return;
+	}
 
+	QString DeviceCommand::caption() const
+	{
+		return m_command.caption;
 	}
 
 	//
@@ -755,13 +759,13 @@ namespace Sim
 						.arg(e.message())
 						.arg(e.where())
 						.arg(programCounter)
-						.arg(deviceCommand.m_command.simulationFunc));
+						.arg(deviceCommand.m_command.parseFunc));
 			return false;
 		}
 
-		// !!!!!!!!!!!!!!!!!!! debug
+		// Debug
 		//
-		deviceCommand.dump();
+		//deviceCommand.dump();
 
 		// Add command to offsetToCommand map
 		//
@@ -780,75 +784,50 @@ namespace Sim
 		//
 		m_logicUnit = LogicUnitData();
 
-		// Run work cycle
-		//
-//		std::string luaFuncName = "operateCycle";
-
-//		try
-//		{
-//			m_operateCyclefunc(ScriptDeviceEmulator(this));
-//		}
-//		catch (const LuaIntf::LuaException& e)
-//		{
-//			QString error = QString("Call function %1 LuaException: %2.")
-//							.arg(QString::fromStdString(luaFuncName))
-//							.arg(e.what());
-//			FAULT(error);
-//			return false;
-//		}
-//		catch (...)
-//		{
-//			QString error = QString("Call function %1 LuaException")
-//								.arg(QString::fromStdString(luaFuncName));
-//			FAULT(error);
-//			return false;
-//		}
-
 		// Run work cylce
 		//
-//		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
-//			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
-//		{
-//			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
-//			if (offsetIt == m_offsetToCommand.end())
-//			{
-//				FAULT("Command not found in current ProgramCounter.");
-//				break;
-//			}
+		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
+			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
+		{
+			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
+			if (offsetIt == m_offsetToCommand.end())
+			{
+				FAULT("Command not found in current ProgramCounter.");
+				break;
+			}
 
-//			size_t commandIndex = offsetIt->second;
-//			if (commandIndex > m_commands.size())
-//			{
-//				FAULT("Command not found in current ProgramCounter.");
-//				break;
-//			}
+			size_t commandIndex = offsetIt->second;
+			if (commandIndex > m_commands.size())
+			{
+				FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
+				break;
+			}
 
-//			DeviceCommand& command = m_commands[commandIndex];
-//			assert(m_logicUnit.programCounter == command.m_offset);
+			DeviceCommand& command = m_commands[commandIndex];
+			assert(m_logicUnit.programCounter == command.m_offset);
 
-//			bool ok = runCommand(command);
+			if (bool ok = runCommand(command);
+				ok == false && m_currentMode != DeviceMode::Fault)
+			{
+				FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
+				result = false;
+				break;
+			}
 
-//			if (ok == false && m_currentMode != DeviceMode::Fault)
-//			{
-//				FAULT("Run command %1 unknown error.");
-//				result = false;
-//				break;
-//			}
+			if (m_currentMode == DeviceMode::Fault)
+			{
+				result = false;
+				break;
+			}
 
-//			if (m_currentMode == DeviceMode::Fault)
-//			{
-//				result = false;
-//				break;
-//			}
-
-//			// If ProgramCounter was not changed in runCommand (can be changed in APPSTART), then
-//			// incerement ProgramCounter to coommand size
-//			//
-//			if (m_logicUnit.programCounter == command.m_offset)
-//			{
-//				m_logicUnit.programCounter += command.m_size;
-//			}
-//		}
+			// If ProgramCounter was not changed in runCommand (can be changed in APPSTART), then
+			// incerement ProgramCounter to coommand size
+			//
+			if (m_logicUnit.programCounter == command.m_offset)
+			{
+				m_logicUnit.programCounter += command.m_size;
+			}
+		}
 
 		return result;
 	}
@@ -905,52 +884,34 @@ namespace Sim
 
 	bool DeviceEmulator::runCommand(DeviceCommand& deviceCommand)
 	{
-		assert(false);
-//		//qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
+		//qDebug() << "DeviceEmulator::runCommand" << "| " << deviceCommand.m_string;
 
-//		// SimulationFunc is checked in parsing command
-//		//
-//		std::string simulationFunc = deviceCommand.m_command.simulationFunc.toStdString();
+		// Run command
+		//
+		try
+		{
+			if (bool ok = m_commandProcessor->runCommand(deviceCommand);
+				ok == false)
+			{
+				SimException::raise(QString("Cannot call %1 function").arg(deviceCommand.m_command.simulationFunc), "DeviceEmulator::runCommand");
+			}
 
-//		// Run command script
-//		//
-//		LuaIntf::LuaRef func(m_luaState, simulationFunc.c_str());
-
-//		if (func.isValid() == false || func.isFunction() == false)
-//		{
-//			writeError(QString("Lua: %1 not found or is not function.")
-//				.arg(QString::fromStdString(simulationFunc)));
-
-//			return false;
-//		}
-//		try
-//		{
-////			if (simulationFunc == "command_stop")
-////			{
-////				func(ScriptDeviceEmulator(this), &deviceCommand, m_commands);
-////				qDebug() << QString::fromStdString(m_commands[0].asString());
-////				qDebug() << QString::fromStdString(m_commands[1].asString());
-////			}
-////			else
-////			{
-//				func(ScriptDeviceEmulator(this), &deviceCommand);
-////			}
-//		}
-//		catch (const LuaIntf::LuaException& e)
-//		{
-//			writeError(QString("Call function %1 LuaException: %2.")
-//				.arg(QString::fromStdString(simulationFunc))
-//				.arg(e.what()));
-
-//			return false;
-//		}
-//		catch (...)
-//		{
-//			writeError(QString("Call function %1 LuaException")
-//				.arg(QString::fromStdString(simulationFunc)));
-
-//			return false;
-//		}
+		}
+		catch (SimException& e)
+		{
+			writeError(QString("Command run error: %1, %2. Offset = %3, SimFunction = %4")
+						.arg(e.message())
+						.arg(e.where())
+						.arg(deviceCommand.m_offset)
+						.arg(deviceCommand.m_command.simulationFunc));
+			return false;
+		}
+		catch (...)
+		{
+			writeError(QString("Call function %1 unknown exception")
+					   .arg(deviceCommand.m_command.simulationFunc));
+			return false;
+		}
 
 		return true;
 	}

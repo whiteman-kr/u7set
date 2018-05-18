@@ -45,12 +45,6 @@ namespace Sim
 		}
 	}
 
-	QString CommandProcessor::logicModuleName() const
-	{
-		assert(false);	// Implement it in derived class
-		return "";
-	}
-
 	bool CommandProcessor::parseFunc(QString parseFunc, DeviceCommand* command)
 	{
 		if (command == nullptr)
@@ -69,15 +63,23 @@ namespace Sim
 		return ok;
 	}
 
-	ScriptDeviceEmulator& CommandProcessor::device()
+	bool CommandProcessor::runCommand([[maybe_unused]]const DeviceCommand& command)
 	{
-		return m_device;
+		// Must be implemented in derived class
+		//
+		assert(false);
+		return false;
 	}
 
-	const ScriptDeviceEmulator& CommandProcessor::device() const
-	{
-		return m_device;
-	}
+//	ScriptDeviceEmulator& CommandProcessor::device()
+//	{
+//		return m_device;
+//	}
+
+//	const ScriptDeviceEmulator& CommandProcessor::device() const
+//	{
+//		return m_device;
+//	}
 
 	AfbComponent CommandProcessor::checkAfb(int opCode, int instanceNo, int pinOpCode /*= -1*/) const
 	{
@@ -102,9 +104,63 @@ namespace Sim
 		return afb;
 	}
 
+	void CommandProcessor::checkParamRange(int paramValue, int minValue, int maxValue, QString param) const
+	{
+		if (paramValue < minValue || paramValue > maxValue)
+		{
+			QString message = QString("Param %1 is out of range, value = %2, range [%3, %4]")
+								.arg(param)
+								.arg(paramValue)
+								.arg(minValue)
+								.arg(maxValue);
+
+			SimException::raise(message);
+		}
+
+		return;
+	}
+
+	void CommandProcessor::checkParamExists(const AfbComponentInstance* afbInstance, int paramOpIndex, QString paramName) const
+	{
+		if (afbInstance == nullptr)
+		{
+			assert(afbInstance);
+			return;
+		}
+
+		if (afbInstance->paramExists(paramOpIndex) == false)
+		{
+			if (paramName.isEmpty() == true)
+			{
+				SimException::raise(QString("Param %1 is not found.")
+										.arg(paramOpIndex));
+			}
+			else
+			{
+				SimException::raise(QString("Param %1 is not found.")
+										.arg(paramName));
+			}
+		}
+
+		return;
+	}
+
 	QString CommandProcessor::strCommand(QString command) const
 	{
 		return command.leftJustified(10);
+	}
+
+	QString CommandProcessor::strAfbInst(const DeviceCommand* command) const
+	{
+		AfbComponent afb = device().afbComponent(command->m_afbOpCode);
+		if (afb.isNull() == true)
+		{
+			SimException::raise(QString("AFB with OpCode %1 does not exist.").arg(command->m_afbOpCode), "CommandProcessor::strAfbInst");
+		}
+
+		return QString("%1.%2")
+					.arg(afb.caption())
+					.arg(command->m_afbInstance);
 	}
 
 	QString CommandProcessor::strAfbInstPin(const DeviceCommand* command) const
@@ -123,17 +179,54 @@ namespace Sim
 
 	QString CommandProcessor::strAddr(quint16 address) const
 	{
-		return QString().arg(static_cast<ushort>(address), 4, 16, QChar('0'));
+		QString hexAddr = QString("%1").arg(static_cast<ushort>(address), 4, 16, QChar('0'));
+		if (hexAddr.at(0).isDigit() == false)
+		{
+			hexAddr.prepend('0');
+		}
+
+		return hexAddr;
 	}
+
+	QString CommandProcessor::strBitAddr(quint16 address, quint16 bitNo) const
+	{
+		QString hexAddr = QString("%1").arg(static_cast<ushort>(address), 4, 16, QChar('0'));
+		if (hexAddr.at(0).isDigit() == false)
+		{
+			hexAddr.prepend('0');
+		}
+
+		return QString("%1[%2]")
+					.arg(hexAddr)
+					.arg(bitNo);
+	}
+
+	QString CommandProcessor::strBitConst(quint16 data) const
+	{
+		return QString("#%1").arg(data);
+	}
+
 
 	QString CommandProcessor::strWordConst(quint16 data) const
 	{
-		return QString("#%1h").arg(static_cast<uint>(data), 4, 16, QChar('0'));
+		QString dataStr = QString("%1").arg(static_cast<ushort>(data), 4, 16, QChar('0'));
+		if (dataStr.at(0).isDigit() == false)
+		{
+			dataStr.prepend('0');
+		}
+
+		return "#" + dataStr;
 	}
 
 	QString CommandProcessor::strDwordConst(quint32 data) const
 	{
-		return QString("#%1h").arg(static_cast<uint>(data), 8, 16, QChar('0'));
+		QString dataStr = QString("%1").arg(static_cast<quint32>(data), 8, 16, QChar('0'));
+		if (dataStr.at(0).isDigit() == false)
+		{
+			dataStr.prepend('0');
+		}
+
+		return "#" + dataStr;
 	}
 
 }
