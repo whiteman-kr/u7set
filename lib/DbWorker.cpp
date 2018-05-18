@@ -235,6 +235,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0215.sql", "Upgrade to version 215, Appends specfic properties and potobuf fields to app signals"},
 	{":/DatabaseUpgrade/Upgrade0216.sql", "Upgrade to version 216, Changes in SignalData type and dependent stored procedures"},
 	{":/DatabaseUpgrade/Upgrade0217.sql", "Upgrade to version 217, Added SignalSpecificProperties in LM, AIFM, AIM, AOM, DIM, DOM, OCM presets"},
+	{":/DatabaseUpgrade/Upgrade0218.sql", "Upgrade to version 218, Added TIM and WAIM presets, TuningClient preset update"},
 };
 
 
