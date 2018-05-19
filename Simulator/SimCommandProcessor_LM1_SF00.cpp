@@ -812,5 +812,118 @@ namespace Sim
 		return;
 	}
 
+	void CommandProcessor_LM1_SF00::afb_lim(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_lim_max = 1;
+		const int i_lim_min = 3;
+		const int i_data = 5;
+
+		const int o_result = 8;
+		//const int o_lim_edi = 10;
+		const int o_nan = 11;
+		const int o_max = 12;
+		const int o_min = 13;
+		//const int o_version = 14;
+		const int o_param_err = 15;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		AfbComponentParam* limMax = instance->param(i_lim_max);
+		AfbComponentParam* limMin = instance->param(i_lim_min);
+		AfbComponentParam* data = instance->param(i_data);
+
+		AfbComponentParam result = *data;
+
+		// 1: SignedInt32, 2: Float32
+		//
+		bool setToMin = false;
+		bool setToMax = false;
+		bool setParamError = false;
+		bool setNan = false;
+
+		switch (conf)
+		{
+		case 1:
+			{
+				qint32 dataInt = data->signedIntValue();
+				qint32 minInt = limMin->signedIntValue();
+				qint32 maxInt = limMax->signedIntValue();
+
+				if (minInt > maxInt)
+				{
+					setParamError = true;
+					break;
+				}
+
+				if (dataInt <= minInt)
+				{
+					result.setSignedIntValue(minInt);
+					setToMin = true;
+				}
+
+				if (dataInt >= maxInt)
+				{
+					result.setSignedIntValue(maxInt);
+					setToMax = true;
+				}
+			}
+			break;
+		case 2:
+			{
+				float dataFloat = data->floatValue();
+				float minFloat = limMin->floatValue();
+				float maxFloat = limMax->floatValue();
+
+				if (dataFloat != dataFloat ||
+					minFloat != minFloat ||
+					maxFloat != maxFloat)
+				{
+					setNan = true;
+					break;
+				}
+
+				if (minFloat > maxFloat)
+				{
+					setParamError = true;
+					break;
+				}
+
+				if (dataFloat <= minFloat)
+				{
+					result = *limMin;
+					setToMin = true;
+				}
+
+				if (dataFloat >= maxFloat)
+				{
+					result = *limMax;
+					setToMax = true;
+				}
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+								.arg(conf),
+								"CommandProcessor_LM1_SF00::afb_lim");
+		}
+
+		// Save result
+		//
+		result.setOpIndex(o_result);
+		instance->addParam(result);
+
+		instance->addParamWord(o_max, setToMax);
+		instance->addParamWord(o_min, setToMin);
+		instance->addParamWord(o_param_err, setParamError);
+		instance->addParamWord(o_nan, setNan);
+
+		return;
+	}
+
 
 }

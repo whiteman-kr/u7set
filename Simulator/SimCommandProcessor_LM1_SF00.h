@@ -137,6 +137,10 @@ namespace Sim
 		//
 		void afb_scale(AfbComponentInstance* instance);
 
+		//	LIM, OpCode 23
+		//
+		void afb_lim(AfbComponentInstance* instance);
+
 	private:
 		using SimCommandFunc = void(CommandProcessor_LM1_SF00::*)(const DeviceCommand&);
 		using SimAfbFunc = void(CommandProcessor_LM1_SF00::*)(AfbComponentInstance*);
@@ -176,6 +180,7 @@ namespace Sim
 			{"afb_not",			&CommandProcessor_LM1_SF00::afb_not},			// 2
 			{"afb_math",		&CommandProcessor_LM1_SF00::afb_math},			// 13
 			{"afb_scale",		&CommandProcessor_LM1_SF00::afb_scale},			// 14
+			{"afb_lim",			&CommandProcessor_LM1_SF00::afb_lim},			// 14
 		};
 	};
 

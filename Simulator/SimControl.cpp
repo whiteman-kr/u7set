@@ -419,7 +419,7 @@ namespace Sim
 				if (auto ahead = minPossibleTime - duration_cast<microseconds>(system_clock::now().time_since_epoch());
 					ahead > 0us)
 				{
-//					QThread::usleep(ahead.count());
+					//QThread::usleep(ahead.count());
 				}
 
 				// Assign new currentTime
