@@ -331,7 +331,7 @@ namespace Sim
 		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
 													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
 													// Some compilers can optimize it!
@@ -364,7 +364,7 @@ namespace Sim
 		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
 													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
 													// Some compilers can optimize it!
@@ -397,7 +397,7 @@ namespace Sim
 		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
 													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
 													// Some compilers can optimize it!
@@ -430,7 +430,7 @@ namespace Sim
 		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f);
+		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
 													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
 													// Some compilers can optimize it!

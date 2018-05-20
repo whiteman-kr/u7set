@@ -102,7 +102,7 @@ private:
 		bool needUncompress = false;
 
 		bool isAutoRequest = false;
-		bool isTestCfgRequest = false;						// does matter only for configuration.xml file request
+		bool isTestCfgRequest = false;						// does matter only for Configuration.xml file request
 		QByteArray* fileData = nullptr;						// sets for manual requests only
 		Tcp::FileTransferResult* errorCode = nullptr;		// sets for manual requests only
 

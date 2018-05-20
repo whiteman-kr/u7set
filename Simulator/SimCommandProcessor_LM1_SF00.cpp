@@ -564,46 +564,46 @@ namespace Sim
 
 		// Get params, throws exception in case of error
 		//
-		AfbComponentParam* oprdQuant = instance->param(i_oprd_quant);
-		AfbComponentParam* busWidth = instance->param(i_bus_width);
-		AfbComponentParam* conf = instance->param(i_conf);
+		quint16 oprdQuant = instance->param(i_oprd_quant)->wordValue();
+		quint16 busWidth = instance->param(i_bus_width)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
 
-		checkParamRange(oprdQuant->wordValue(), 1, 16, "i_oprd_quant");
-		checkParamRange(busWidth->wordValue(), 1, 16, "i_bus_width");
+		checkParamRange(oprdQuant, 1, 16, "i_oprd_quant");
+		checkParamRange(busWidth, 1, 16, "i_bus_width");
 
 		// Logic
 		//
-		std::array<AfbComponentParam, 16> inputs;
+		std::array<quint16, 16> inputs;
 
-		for (quint16 i = 0; i < oprdQuant->wordValue(); i++)
+		for (quint16 i = 0; i < oprdQuant; i++)
 		{
-			inputs[i] = *instance->param(i_input_0 + i);
+			inputs[i] = instance->param(i_input_0 + i)->wordValue();
 		}
 
-		quint16 result = inputs[0].wordValue();
+		quint16 result = inputs[0];
 
-		switch (conf->wordValue())
+		switch (conf)
 		{
 			case 1:	// AND
-				for (size_t i = 1; i < oprdQuant->wordValue(); i++)
+				for (size_t i = 1; i < oprdQuant; i++)
 				{
-					result &= inputs[i].wordValue();
+					result &= inputs[i];
 				}
 				break;
 			case 2:	// OR
-				for (size_t i = 1; i < oprdQuant->wordValue(); i++)
+				for (size_t i = 1; i < oprdQuant; i++)
 				{
-					result |= inputs[i].wordValue();
+					result |= inputs[i];
 				}
 				break;
 			case 3:	// XOR
-				for (size_t i = 1; i < oprdQuant->wordValue(); i++)
+				for (size_t i = 1; i < oprdQuant; i++)
 				{
-					result ^= inputs[i].wordValue();
+					result ^= inputs[i];
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: 51").arg(conf->wordValue()), "CommandProcessor_LM1_SF00::afb_logic");
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_logic");
 		}
 
 		// Save result
@@ -629,6 +629,69 @@ namespace Sim
 		// Save result
 		//
 		instance->addParamWord(o_result, result);
+		return;
+	}
+
+	//	BCOD, OpCode 8
+	//
+	void CommandProcessor_LM1_SF00::afb_bcod(AfbComponentInstance* instance)
+	{
+		if (instance == nullptr)
+		{
+			assert(instance);
+			return;
+		}
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_oprd_quant = 1;		// Operand count
+		const int i_1_oprd = 2;			// Operand 1, 2...
+
+		const int o_result = 34;
+		const int o_active = 36;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 oprdQuant = instance->param(i_oprd_quant)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(oprdQuant, 1, 32, "i_oprd_quant");
+		checkParamRange(conf, 1, 2, "i_conf");
+
+		// Logic
+		//
+		qint32 result = 0;
+		quint16 active = 0;
+
+		switch (conf)
+		{
+		case 1:
+			for (quint16 i = 0; i < oprdQuant; i++)
+			{
+				if (instance->param(i_1_oprd + i)->wordValue() == 1)
+				{
+					result = static_cast<qint32>(i);
+					active = 1;
+					break;
+				}
+			}
+			break;
+		case 2:
+			for (quint16 i = 0; i < oprdQuant; i++)
+			{
+				qint16 inputValue = static_cast<qint32>(instance->param(i_1_oprd + i)->wordValue() & 0x0001);
+				result |= inputValue << i;
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcod");
+		}
+
+		// Save result
+		//
+		instance->addParamSignedInt(o_result, result);
+		instance->addParamWord(o_active, active);
 		return;
 	}
 
@@ -856,6 +919,7 @@ namespace Sim
 
 				if (minInt > maxInt)
 				{
+					result.setSignedIntValue(0);
 					setParamError = true;
 					break;
 				}
@@ -883,12 +947,14 @@ namespace Sim
 					minFloat != minFloat ||
 					maxFloat != maxFloat)
 				{
+					result.setFloatValue(0);
 					setNan = true;
 					break;
 				}
 
 				if (minFloat > maxFloat)
 				{
+					result.setFloatValue(0);
 					setParamError = true;
 					break;
 				}
