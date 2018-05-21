@@ -133,11 +133,19 @@ namespace Sim
 		//
 		void afb_bcod(AfbComponentInstance* instance);
 
+		//	BDEC, OpCode 9
+		//
+		void afb_bdec(AfbComponentInstance* instance);
+
+		//	BCOMP, OpCode 10
+		//
+		void afb_bcomp(AfbComponentInstance* instance);
+
 		//	MATH, OpCode 13
 		//
 		void afb_math(AfbComponentInstance* instance);
 
-		//	SCALE, OpCode 13
+		//	SCALE, OpCode 14
 		//
 		void afb_scale(AfbComponentInstance* instance);
 
@@ -183,9 +191,11 @@ namespace Sim
 			{"afb_logic",		&CommandProcessor_LM1_SF00::afb_logic},			// 1
 			{"afb_not",			&CommandProcessor_LM1_SF00::afb_not},			// 2
 			{"afb_bcod",		&CommandProcessor_LM1_SF00::afb_bcod},			// 8
+			{"afb_bdec",		&CommandProcessor_LM1_SF00::afb_bdec},			// 9
+			{"afb_bcomp",		&CommandProcessor_LM1_SF00::afb_bdec},			// 10
 			{"afb_math",		&CommandProcessor_LM1_SF00::afb_math},			// 13
 			{"afb_scale",		&CommandProcessor_LM1_SF00::afb_scale},			// 14
-			{"afb_lim",			&CommandProcessor_LM1_SF00::afb_lim},			// 14
+			{"afb_lim",			&CommandProcessor_LM1_SF00::afb_lim},			// 23
 		};
 	};
 

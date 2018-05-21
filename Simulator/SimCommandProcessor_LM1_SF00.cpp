@@ -695,6 +695,113 @@ namespace Sim
 		return;
 	}
 
+	//	BDEC, OpCode 9
+	//
+	void CommandProcessor_LM1_SF00::afb_bdec(AfbComponentInstance* instance)
+	{
+		if (instance == nullptr)
+		{
+			assert(instance);
+			return;
+		}
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_oprd_quant = 1;		// Operand count
+		const int i_number = 2;			// SignedInt
+		const int o_1_result = 4;		// Operand 1, 2...
+
+		// Get params, throws exception in case of error
+		//
+		qint32 oprdQuant = instance->param(i_oprd_quant)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
+		qint32 inputValue = instance->param(i_number)->signedIntValue();
+
+		checkParamRange(oprdQuant, 1, 32, "i_oprd_quant");
+		checkParamRange(conf, 1, 2, "i_conf");
+
+		// AFB Logic
+		//
+		switch (conf)
+		{
+		case 1:
+			for (quint16 i = 0; i < oprdQuant; i++)
+			{
+				int value = i == inputValue ? 0x0001 : 0x0000;
+				instance->addParamWord(o_1_result + i, value);
+			}
+			break;
+		case 2:
+			for (qint16 i = 0; i < oprdQuant; i++)
+			{
+				int value = inputValue & (0x01 << i) ?  1 : 0;
+				instance->addParamWord(o_1_result + i, value);
+			}
+			break;
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcod");
+		}
+
+		return;
+	}
+
+	//	BCOMP, OpCode 10
+	//
+	void CommandProcessor_LM1_SF00::afb_bcomp(AfbComponentInstance* instance)
+	{
+		if (instance == nullptr)
+		{
+			assert(instance);
+			return;
+		}
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_sp_s = 1;
+		const int i_sp_r = 3;
+		const int i_result = 5;		// Internal, prev state
+		const int i_data = 6;
+		const int o_result = 9;
+		const int o_nan = 10;
+
+		// Get params, throws exception in case of error
+		//
+//		quint16 conf = instance->param(i_conf)->wordValue();
+
+//		qint32 oprdQuant = instance->param(i_oprd_quant)->wordValue();
+
+//		qint32 inputValue = instance->param(i_number)->signedIntValue();
+
+//		checkParamRange(oprdQuant, 1, 32, "i_oprd_quant");
+//		checkParamRange(conf, 1, 2, "i_conf");
+
+//		// AFB Logic
+//		//
+//		switch (conf)
+//		{
+//		case 1:
+//			for (quint16 i = 0; i < oprdQuant; i++)
+//			{
+//				int value = i == inputValue ? 0x0001 : 0x0000;
+//				instance->addParamWord(o_1_result + i, value);
+//			}
+//			break;
+//		case 2:
+//			for (qint16 i = 0; i < oprdQuant; i++)
+//			{
+//				int value = inputValue & (0x01 << i) ?  1 : 0;
+//				instance->addParamWord(o_1_result + i, value);
+//			}
+//			break;
+//		default:
+//			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcod");
+//		}
+
+		return;
+	}
+
 	//	MATH, OpCode 13
 	//
 	void CommandProcessor_LM1_SF00::afb_math(AfbComponentInstance* instance)
@@ -767,6 +874,8 @@ namespace Sim
 		return;
 	}
 
+	//	SCALE, OpCode 14
+	//
 	void CommandProcessor_LM1_SF00::afb_scale(AfbComponentInstance* instance)
 	{
 		// Define input opIndexes
@@ -875,6 +984,8 @@ namespace Sim
 		return;
 	}
 
+	//	LIM, OpCode 23
+	//
 	void CommandProcessor_LM1_SF00::afb_lim(AfbComponentInstance* instance)
 	{
 		// Define input opIndexes
