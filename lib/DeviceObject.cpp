@@ -119,10 +119,6 @@ namespace Hardware
 	const QString PropertyNames::valueBit = "ValueBit";
 	const QString PropertyNames::validitySignalId = "ValiditySiganlID";
 
-	const QString PropertyNames::appSignalLowAdc = "LowAdc";
-	const QString PropertyNames::appSignalHighAdc = "HighAdc";
-	const QString PropertyNames::appSignalLowEngUnits = "LowEngUnits";
-	const QString PropertyNames::appSignalHighEngUnits = "HighEngUnits";
 	const QString PropertyNames::appSignalDataFormat = "DataFormat";
 
 	const QString PropertyNames::categoryAnalogAppSignal = "AnalogAppSignal";
@@ -2255,11 +2251,6 @@ R"DELIM({
 		// These properties are used in setType()
 		// So they don take part in PropertyOnDemand
 		//
-		auto appSignalLowAdcProp = addProperty<int, DeviceSignal, &DeviceSignal::appSignalLowAdc, &DeviceSignal::setAppSignalLowAdc>(PropertyNames::appSignalLowAdc, PropertyNames::categoryAnalogAppSignal, true);
-		auto appSignalHighAdcProp = addProperty<int, DeviceSignal, &DeviceSignal::appSignalHighAdc, &DeviceSignal::setAppSignalHighAdc>(PropertyNames::appSignalHighAdc, PropertyNames::categoryAnalogAppSignal, true);
-
-		auto appSignalLowEngUnitsProp = addProperty<double, DeviceSignal, &DeviceSignal::appSignalLowEngUnits, &DeviceSignal::setAppSignalLowEngUnits>(PropertyNames::appSignalLowEngUnits, PropertyNames::categoryAnalogAppSignal, true);
-		auto appSignalHighEngUnitsProp = addProperty<double, DeviceSignal, &DeviceSignal::appSignalHighEngUnits, &DeviceSignal::setAppSignalHighEngUnits>(PropertyNames::appSignalHighEngUnits, PropertyNames::categoryAnalogAppSignal, true);
 
 		auto appSignalDataFormatProp = addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, QLatin1String(), true);
 
@@ -2285,18 +2276,6 @@ R"DELIM({
 //		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
 
 //		auto signalSpecPropsStrucProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::signalSpecificProperties, true, DeviceSignal::signalSpecPropsStruc, DeviceSignal::setSignalSpecPropsStruc)
-
-		appSignalLowAdcProp->setUpdateFromPreset(true);
-		appSignalLowAdcProp->setExpert(preset);
-
-		appSignalHighAdcProp->setUpdateFromPreset(true);
-		appSignalHighAdcProp->setExpert(preset);
-
-		appSignalLowEngUnitsProp->setUpdateFromPreset(true);
-		appSignalLowEngUnitsProp->setExpert(preset);
-
-		appSignalHighEngUnitsProp->setUpdateFromPreset(true);
-		appSignalHighEngUnitsProp->setExpert(preset);
 
 		appSignalDataFormatProp->setUpdateFromPreset(true);
 		appSignalDataFormatProp->setExpert(preset);
@@ -2506,10 +2485,6 @@ R"DELIM({
 			setExpertToProperty(PropertyNames::valueOffset, true);
 			setExpertToProperty(PropertyNames::valueBit, true);
 			setExpertToProperty(PropertyNames::validitySignalId, true);
-			setExpertToProperty(PropertyNames::appSignalLowAdc, true);
-			setExpertToProperty(PropertyNames::appSignalHighAdc, true);
-			setExpertToProperty(PropertyNames::appSignalLowEngUnits, true);
-			setExpertToProperty(PropertyNames::appSignalHighEngUnits, true);
 			setExpertToProperty(PropertyNames::appSignalDataFormat, true);
 			setExpertToProperty(PropertyNames::signalSpecificProperties, true);
 		}
@@ -2619,23 +2594,11 @@ R"DELIM({
 				assert(false);
 			}
 
-			auto p1 = propertyByCaption(PropertyNames::appSignalLowAdc);
-			auto p2 = propertyByCaption(PropertyNames::appSignalHighAdc);
-			auto p3 = propertyByCaption(PropertyNames::appSignalLowEngUnits);
-			auto p4 = propertyByCaption(PropertyNames::appSignalHighEngUnits);
-			auto p5 = propertyByCaption(PropertyNames::appSignalDataFormat);
+			auto pd = propertyByCaption(PropertyNames::appSignalDataFormat);
 
-			assert(p1);
-			assert(p2);
-			assert(p3);
-			assert(p4);
-			assert(p5);
+			assert(pd);
 
-			p1->setVisible(appSignalProps);
-			p2->setVisible(appSignalProps);
-			p3->setVisible(appSignalProps);
-			p4->setVisible(appSignalProps);
-			p5->setVisible(appSignalProps);
+			pd->setVisible(appSignalProps);
 		}
 	}
 

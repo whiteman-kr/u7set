@@ -236,6 +236,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0216.sql", "Upgrade to version 216, Changes in SignalData type and dependent stored procedures"},
 	{":/DatabaseUpgrade/Upgrade0217.sql", "Upgrade to version 217, Added SignalSpecificProperties in LM, AIFM, AIM, AOM, DIM, DOM, OCM presets"},
 	{":/DatabaseUpgrade/Upgrade0218.sql", "Upgrade to version 218, Added TIM and WAIM presets, TuningClient preset update"},
+	{":/DatabaseUpgrade/Upgrade0219.sql", "Upgrade to version 219, Added RIM preset, TIM and WAIM preset were corrected"},
 };
 
 
