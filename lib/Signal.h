@@ -101,6 +101,9 @@ public:
 	QString equipmentID() const { return m_equipmentID; }
 	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
+	QString lmEquipmentID() const { return m_lmEquipmentID; }
+	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
+
 	QString busTypeID() const { return m_busTypeID; }
 	void setBusTypeID(const QString& busTypeID) { m_busTypeID = busTypeID; }
 
@@ -300,13 +303,16 @@ public:
 
 	void resetAddresses();
 
+	E::LogicModuleRamAccess lmRamAccess() const { return m_lmRamAccess; }
+	void setLmRamAccess(E::LogicModuleRamAccess access) { m_lmRamAccess = access; }
+
 	QString regValueAddrStr() const;
 
 	bool needConversion() const { return m_needConversion; }
 	void setNeedConversion(bool need) { m_needConversion = need; }
 
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
-	void setLm(std::shared_ptr<Hardware::DeviceModule> lm) { m_lm = lm; }
+	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
 
 	//
 
@@ -362,7 +368,8 @@ private:
 	QString m_appSignalID;
 	QString m_customAppSignalID;
 	QString m_caption;
-	QString m_equipmentID;
+	QString m_equipmentID;											// should be transformed to portEquipmentID
+	QString m_lmEquipmentID;										// now fills in compile time only
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
 	E::Channel m_channel = E::Channel::A;
 
@@ -437,6 +444,9 @@ private:
 
 	Address16 m_regValueAddr;				// signal Value address in FSC data packet
 	Address16 m_regValidityAddr;			// signal Validity address in FSC data packet
+
+	E::LogicModuleRamAccess m_lmRamAccess = E::LogicModuleRamAccess::Undefined;
+
 
 	//
 

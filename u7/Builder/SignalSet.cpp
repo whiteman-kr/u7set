@@ -219,8 +219,6 @@ namespace Builder
 
 			// check EquipmentID
 			//
-			s.setLm(nullptr);
-
 			if (s.equipmentID().isEmpty() == true)
 			{
 				// Application signal '%1' is not bound to any device object.

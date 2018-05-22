@@ -1062,6 +1062,7 @@ message AppSignalCalculatedParam
     optional Address16 regBufAddr = 5;
     optional Address16 regValueAddr = 6;
     optional Address16 regValidityAddr = 7;
+    optional int32 lmRamAccess = 8 [default = 0 /* E::LogicModuleRamAccess::Undefined */];	// E::LogicModuleRamAccess values
 }
 
 message AppSignal
@@ -1071,9 +1072,10 @@ message AppSignal
     optional string appSignalID = 1;
     optional string customAppSignalID = 2;
     optional string caption = 3;
-    optional string equipmentID = 4;
-    optional string busTypeID = 5;
-    optional int32 channel = 6 [default = 0];
+    optional string equipmentID = 4;				// should be transformed to portEquipmentID
+    optional string lmEquipmentID = 5;
+    optional string busTypeID = 6;
+    optional int32 channel = 7 [default = 0];
 
     // Signal type
 

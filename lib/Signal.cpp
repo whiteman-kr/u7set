@@ -554,6 +554,15 @@ QString Signal::regValueAddrStr() const
 	return QString("(reg %1:%2)").arg(regValueAddr().offset()).arg(regValueAddr().bit());
 }
 
+void Signal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
+{
+	TEST_PTR_RETURN(lm);
+
+	m_lm = lm;
+
+	setLmEquipmentID(lm->equipmentIdTemplate());
+}
+
 void Signal::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement("Signal");	// <Signal>
@@ -779,6 +788,7 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 	s->set_customappsignalid(m_customAppSignalID.toStdString());
 	s->set_caption(m_caption.toStdString());
 	s->set_equipmentid(m_equipmentID.toStdString());
+	s->set_lmequipmentid(m_lmEquipmentID.toStdString());
 	s->set_bustypeid(m_busTypeID.toStdString());
 	s->set_channel(TO_INT(m_channel));
 
@@ -939,6 +949,8 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 				assert(false);
 			}
 		}
+
+		calcParam->set_lmramaccess(TO_INT(m_lmRamAccess));
 	}
 	else
 	{
@@ -954,6 +966,7 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	m_customAppSignalID = QString::fromStdString(s.customappsignalid());
 	m_caption = QString::fromStdString(s.caption());
 	m_equipmentID = QString::fromStdString(s.equipmentid());
+	m_lmEquipmentID = QString::fromStdString(s.lmequipmentid());
 	m_busTypeID = QString::fromStdString(s.bustypeid());
 	m_channel = static_cast<E::Channel>(s.channel());
 
@@ -1031,6 +1044,8 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 
 	m_regValidityAddr.setOffset(calcParam.regvalidityaddr().offset());
 	m_regValidityAddr.setBit(calcParam.regvalidityaddr().bit());
+
+	m_lmRamAccess = static_cast<E::LogicModuleRamAccess>(calcParam.lmramaccess());
 }
 
 void Signal::initCalculatedProperties()
