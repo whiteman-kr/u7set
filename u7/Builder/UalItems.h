@@ -320,6 +320,7 @@ namespace Builder
 		bool calculate_MISMATCH_paramValues();
 		bool calculate_TCONV_paramValues();
 		bool calculate_INDICATION_paramValues();
+		bool calculate_PULSE_GENERATOR_paramValues();
 
 		//
 

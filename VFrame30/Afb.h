@@ -143,9 +143,10 @@ namespace Afb
 		MISMATCH = 27,
 		TCONV = 28,
 		INDICATION = 29,
+		PULSE_GENERATOR = 30,
 
 		First = LOGIC,
-		Last = INDICATION,				// update on adding new AFBs !!!
+		Last = PULSE_GENERATOR,				// update on adding new AFBs !!!
 	};
 
 	//

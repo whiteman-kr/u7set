@@ -5154,6 +5154,30 @@ namespace Builder
 				  QString(tr("Undefined ConfigurationService IP-address for software %1.")).arg(softwareID));
 	}
 
+	/// IssueCode: ALC5141
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of parameter %1.%2 must be in range %3 (Logic schema %4)
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 parameter caption
+	/// 	%3 range string (ex: "5..65535")
+	///
+	/// Description:
+	///		Value of AFB parameter should be in specified range. Check parameter value.
+	///
+	void IssueLogger::errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5141,
+				  QString(tr("Value of parameter %1.%2 must be in range %3 (Logic schema %4)")).
+					arg(fbCaption).arg(paramCaption).arg(rangeStr).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

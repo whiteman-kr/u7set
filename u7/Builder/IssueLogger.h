@@ -333,6 +333,7 @@ namespace Builder
 		void errALC5138(QString appSignalID, QString property);							// Signal %1 property %2 out of Float range.
 		void wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Values of parameters %1.%2 and %1.%3 are equal.
 		void errALC5140(QString softwareID);											// Undefined ConfigurationService IP-address for software %1.
+		void errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID);	// Value of parameter %1.%2 must be in range %3 (Logic schema %4).
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

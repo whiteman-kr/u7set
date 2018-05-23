@@ -146,6 +146,10 @@ namespace Builder
 			result = calculate_INDICATION_paramValues();
 			break;
 
+		case Afb::AfbType::PULSE_GENERATOR:	// opcode 30
+			result = calculate_PULSE_GENERATOR_paramValues();
+			break;
+
 		default:
 			// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 			//
@@ -1900,4 +1904,56 @@ namespace Builder
 
 		return true;
 	}
+
+	bool UalAfb::calculate_PULSE_GENERATOR_paramValues()
+	{
+		bool result = true;
+
+		m_runTime = 10 + 34;
+
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_t_high");
+		requiredParams.append("i_t_low");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+
+		// i_conf must have value 1 or 2
+		//
+		quint32 i_conf_value = i_conf.unsignedIntValue();
+
+		if (i_conf_value != 1 && i_conf_value != 2)
+		{
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf_value, i_conf.caption(), caption(), guid());
+			result = false;
+		}
+
+		AppFbParamValue& i_t_high = m_paramValuesArray["i_t_high"];
+
+		quint32 i_t_high_value = i_t_high.unsignedIntValue();
+
+		if (i_t_high_value < 5 || i_t_high_value > 65535)
+		{
+			m_log->errALC5141(caption(), i_t_high.caption(), "5..65535", guid(), schemaID());
+			result = false;
+		}
+
+		AppFbParamValue& i_t_low = m_paramValuesArray["i_t_low"];
+
+		quint32 i_t_low_value = i_t_low.unsignedIntValue();
+
+		if (i_t_low_value < 5 || i_t_low_value > 65535)
+		{
+			m_log->errALC5141(caption(), i_t_low.caption(), "5..65535", guid(), schemaID());
+			result = false;
+		}
+
+		return result;
+	}
+
 }
