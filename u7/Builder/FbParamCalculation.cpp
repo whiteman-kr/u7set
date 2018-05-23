@@ -146,7 +146,7 @@ namespace Builder
 			result = calculate_INDICATION_paramValues();
 			break;
 
-		case Afb::AfbType::PULSE_GENERATOR:	// opcode 30
+		case Afb::AfbType::PULSE_GEN:	// opcode 30
 			result = calculate_PULSE_GENERATOR_paramValues();
 			break;
 
