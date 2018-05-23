@@ -136,7 +136,6 @@ namespace Builder
 					// Coarse aperture of signal '%1' less then fine aperture.
 					//
 					m_log->wrnALC5093(s.appSignalID());
-					result = false;
 				}
 
 				result &= checkSignalPropertiesRanges(s);
