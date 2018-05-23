@@ -8214,7 +8214,7 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_highlim" Caption="HightLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+				<Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>100</Value>
 					<Default>100</Default>
 					<LowLimit>-2147483647</LowLimit>
@@ -12283,7 +12283,7 @@ function(videoItemFblElement, afbElement)
 					    <Changed></Changed>
 					</Script>
 				</Param>
-			    <Param OpName="i_t_hight" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_t_high" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>250</Value>
 					<Default>250</Default>
 					<LowLimit>5</LowLimit>
@@ -12354,7 +12354,7 @@ function(videoItemFblElement, afbElement)
 					    <Changed></Changed>
 					</Script>
 				</Param>
-			    <Param OpName="i_t_hight" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_t_high" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>250</Value>
 					<Default>250</Default>
 					<LowLimit>5</LowLimit>
