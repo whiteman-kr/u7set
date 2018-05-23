@@ -66,10 +66,10 @@ SimProjectWidget::~SimProjectWidget()
 
 void SimProjectWidget::createActions()
 {
-	m_openLmControlPageAction = new QAction(tr("Control Page..."));
+	m_openLmControlPageAction = new QAction(tr("Control Page..."), this);
 	connect(m_openLmControlPageAction, &QAction::triggered, this, &SimProjectWidget::openControlTabPage);
 
-	m_openLmCodePageAction = new QAction(tr("App Code..."));
+	m_openLmCodePageAction = new QAction(tr("App Code..."), this);
 	connect(m_openLmCodePageAction, &QAction::triggered, this, &SimProjectWidget::openCodeTabPage);
 
 	return;

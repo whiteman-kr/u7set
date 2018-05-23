@@ -10,7 +10,7 @@ class SimMemoryWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SimMemoryWidget(const Sim::Ram ram, QWidget* parent = nullptr);
+	explicit SimMemoryWidget(const Sim::Ram& ram, QWidget* parent = nullptr);
 	virtual ~SimMemoryWidget();
 
 protected:

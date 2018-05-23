@@ -442,12 +442,12 @@ namespace Sim
 
 		for (quint32 i = 0; i < memory.m_moduleCount; i++)
 		{
-			ok &= m_ram.addMemoryArea(RamAccess::Read,
+			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
 									  memory.m_moduleDataSize,
 									  QString("Input I/O Module %1").arg(i + 1));
 
-			ok &= m_ram.addMemoryArea(RamAccess::Write,
+			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 									  memory.m_moduleDataOffset + memory.m_moduleDataSize * i,
 									  memory.m_moduleDataSize,
 									  QString("Output I/O Module %1").arg(i + 1));
@@ -459,12 +459,12 @@ namespace Sim
 
 		for (quint32 i = 0; i < optoInterface.m_optoPortCount; i++)
 		{
-			ok &= m_ram.addMemoryArea(RamAccess::Read,
+			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
 									  optoInterface.m_optoPortDataSize,
 									  QString("Rx Opto Port  %1").arg(i + 1));
 
-			ok &= m_ram.addMemoryArea(RamAccess::Write,
+			ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 									  optoInterface.m_optoInterfaceDataOffset + optoInterface.m_optoPortDataSize * i,
 									  optoInterface.m_optoPortDataSize,
 									  QString("Tx Opto Port  %1").arg(i + 1));
@@ -472,31 +472,31 @@ namespace Sim
 
 		// RAM - ApplicationLogic Block, bit/word access
 		//
-		ok &= m_ram.addMemoryArea(RamAccess::ReadWrite,
+		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
 								  memory.m_appLogicBitDataOffset,
 								  memory.m_appLogicBitDataSize,
 								  QLatin1String("Appliaction Logic Block (bit access)"));
 
-		ok &= m_ram.addMemoryArea(RamAccess::ReadWrite,
+		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
 								  memory.m_appLogicWordDataOffset,
 								  memory.m_appLogicWordDataSize,
 								  QLatin1String("Appliaction Logic Block (word access)"));
 
 		// RAM - Tuninng Block
 		//
-		ok &= m_ram.addMemoryArea(RamAccess::Read,
+		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 								  memory.m_tuningDataOffset,
 								  memory.m_tuningDataSize,
 								  QLatin1String("Tuning Block"));
 
 		// RAM - Diag Data
 		//
-		ok &= m_ram.addMemoryArea(RamAccess::Read,
+		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 								  memory.m_txDiagDataOffset,
 								  memory.m_txDiagDataSize,
 								  QLatin1String("Input Diag Data"));
 
-		ok &= m_ram.addMemoryArea(RamAccess::Write,
+		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 								  memory.m_txDiagDataOffset,
 								  memory.m_txDiagDataSize,
 								  QLatin1String("Output Diag Data"));
@@ -504,12 +504,12 @@ namespace Sim
 
 		// RAM - App Data
 		//
-		ok &= m_ram.addMemoryArea(RamAccess::Read,
+		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Read,
 								  memory.m_appDataOffset,
 								  memory.m_appDataSize,
 								  QLatin1String("Input App Data"));
 
-		ok &= m_ram.addMemoryArea(RamAccess::Write,
+		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::Write,
 								  memory.m_appDataOffset,
 								  memory.m_appDataSize,
 								  QLatin1String("Output App Data"));

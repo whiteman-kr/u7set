@@ -109,6 +109,29 @@ namespace Sim
 		return;
 	}
 
+	Signal AppSignalManager::signalParamExt(const QString& appSignalId, bool* found) const
+	{
+		QReadLocker locker(&m_signalParamLock);
+
+		Hash signalHash = ::calcHash(appSignalId);
+
+		auto it = m_signalParamsExt.find(signalHash);
+
+		if (found != nullptr)
+		{
+			*found = it != m_signalParamsExt.end();
+		}
+
+		if (it == m_signalParamsExt.end())
+		{
+			return Signal{};
+		}
+		else
+		{
+			return it->second;
+		}
+	}
+
 	bool AppSignalManager::signalExists(Hash hash) const
 	{
 		QReadLocker rl(&m_signalParamLock);
@@ -308,9 +331,9 @@ static const AppSignalParam dummy;
 		return signalState(::calcHash(appSignalId), found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(const std::vector<Hash>& /*appSignalHashes*/, std::vector<AppSignalState>* /*result*/, int* /*found*/) const
 	{
-		int to_do_signalState;
+		//int to_do_signalState;
 
 		// To Do
 		//

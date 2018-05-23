@@ -151,6 +151,17 @@ public:
 	};
 	Q_ENUM(MemoryArea)
 
+	// LogicModuleRamAccess
+	//
+	enum class LogicModuleRamAccess
+	{
+		Undefined = 0x00,
+		Read  = 0x01,
+		Write = 0x02,
+		ReadWrite = 0x03
+	};
+	Q_ENUM(LogicModuleRamAccess)
+
 	// Software Module Type Identifiers
 	//
 	enum SoftwareType

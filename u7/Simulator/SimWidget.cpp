@@ -3,6 +3,7 @@
 #include "SimProjectWidget.h"
 #include "SimMemoryWidget.h"
 #include "SimOutputWidget.h"
+#include "SimOverrideWidget.h"
 #include "SimSelectBuildDialog.h"
 #include "SimControlPage.h"
 #include "SimSchemaPage.h"
@@ -155,11 +156,20 @@ void SimWidget::createDocks()
 
 	// Quick Watch dock
 	//
-	QDockWidget* watchDock = new QDockWidget("Watch", this, 0);
-	watchDock->setObjectName(watchDock->windowTitle());
-	watchDock->setWidget(new QWidget());		// Dummy for now
+//	QDockWidget* watchDock = new QDockWidget("Watch", this, 0);
+//	watchDock->setObjectName(watchDock->windowTitle());
+//	watchDock->setWidget(new QWidget());		// Dummy for now
 
-	addDockWidget(Qt::RightDockWidgetArea, watchDock);
+//	addDockWidget(Qt::RightDockWidgetArea, watchDock);
+
+	// Overriden Signals dock
+	//
+	QDockWidget* overrideDock = new QDockWidget("Override", this, 0);
+	overrideDock->setObjectName("SimOverridenSignals");
+	overrideDock->setWidget(new SimOverrideWidget(m_simulator.get(), overrideDock));
+	overrideDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+	addDockWidget(Qt::BottomDockWidgetArea, overrideDock);
 
 	// OutputLog dock
 	//
@@ -167,8 +177,8 @@ void SimWidget::createDocks()
 	if (m_slaveWindow == false)
 	{
 		outputDock = new QDockWidget("Output", this, 0);
-		outputDock->setObjectName(watchDock->windowTitle());
-		outputDock->setWidget(new SimOutputWidget());
+		outputDock->setObjectName("SimOutputWidget");
+		outputDock->setWidget(new SimOutputWidget(outputDock));
 		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
 		addDockWidget(Qt::BottomDockWidgetArea, outputDock);
@@ -176,16 +186,16 @@ void SimWidget::createDocks()
 
 	// Memory Widget - at least one defaullt memory widget
 	//
-	QDockWidget* m1 = createMemoryDock("Memory 1");
-	QDockWidget* m2 = createMemoryDock("Memory 2");
-	QDockWidget* m3 = createMemoryDock("Memory 3");
+//	QDockWidget* m1 = createMemoryDock("Memory 1");
+//	QDockWidget* m2 = createMemoryDock("Memory 2");
+//	QDockWidget* m3 = createMemoryDock("Memory 3");
 
-	if (outputDock != nullptr)
-	{
-		tabifyDockWidget(outputDock, m1);
-	}
-	tabifyDockWidget(m1, m2);
-	tabifyDockWidget(m2, m3);
+//	if (outputDock != nullptr)
+//	{
+//		tabifyDockWidget(outputDock, m1);
+//	}
+//	tabifyDockWidget(m1, m2);
+//	tabifyDockWidget(m2, m3);
 
 	// --
 	//
@@ -196,25 +206,25 @@ void SimWidget::createDocks()
 QDockWidget* SimWidget::createMemoryDock(QString caption)
 {
 	// -----------------
-static Sim::Ram ram;
-	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 0, 8192, "Input Module 1");
-	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 1, 8192, "Input Module 2");
-	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 2, 8192, "Input Module 3");
+//static Sim::Ram ram;
+//	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 0, 8192, "Input Module 1");
+//	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 1, 8192, "Input Module 2");
+//	ram.addMemoryArea(Sim::RamAccess::Read, 8192 * 2, 8192, "Input Module 3");
 
-	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 0, 8192, "Output Module 1");
-	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 1, 8192, "Output Module 2");
-	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 2, 8192, "Output Module 3");
-	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 3 + 4, 224, "Not event");
+//	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 0, 8192, "Output Module 1");
+//	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 1, 8192, "Output Module 2");
+//	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 2, 8192, "Output Module 3");
+//	ram.addMemoryArea(Sim::RamAccess::Write, 8192 * 3 + 4, 224, "Not event");
 	//-----------------
 
 	QDockWidget* dock = new QDockWidget(caption, this, 0);
-	dock->setObjectName("SimDock-" + caption);
-	dock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+//	dock->setObjectName("SimDock-" + caption);
+//	dock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-	SimMemoryWidget* memoryWidget = new SimMemoryWidget(ram);
-	dock->setWidget(memoryWidget);
+//	SimMemoryWidget* memoryWidget = new SimMemoryWidget(ram);
+//	dock->setWidget(memoryWidget);
 
-	addDockWidget(Qt::BottomDockWidgetArea, dock);
+//	addDockWidget(Qt::BottomDockWidgetArea, dock);
 
 	return dock;
 }

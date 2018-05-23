@@ -27,6 +27,8 @@ namespace Sim
 
 		void setData(QString equipmentId, const Sim::Ram& ram);
 
+		Signal signalParamExt(const QString& appSignalId, bool* found) const;
+
 		// Implementing IAppSignalManager
 		//
 	public:

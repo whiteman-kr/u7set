@@ -1,6 +1,7 @@
 #include "SimMemoryWidget.h"
 
-SimMemoryWidget::SimMemoryWidget(const Sim::Ram ram, QWidget* parent) :
+
+SimMemoryWidget::SimMemoryWidget(const Sim::Ram& ram, QWidget* parent) :
 	QWidget(parent),
 	m_ram(ram)
 {
@@ -84,9 +85,9 @@ void SimMemoryWidget::updateAreaInfo()
 	QString access;
 	switch (currentAreaInfo.access())
 	{
-	case Sim::RamAccess::Read:		access = "Read";		break;
-	case Sim::RamAccess::Write:		access = "Write";		break;
-	case Sim::RamAccess::ReadWrite:	access = "ReadWrite";	break;
+	case E::LogicModuleRamAccess::Read:			access = "Read";		break;
+	case E::LogicModuleRamAccess::Write:		access = "Write";		break;
+	case E::LogicModuleRamAccess::ReadWrite:	access = "ReadWrite";	break;
 	default:
 		assert(false);
 	}

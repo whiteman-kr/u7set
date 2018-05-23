@@ -10,6 +10,7 @@
 #include "SimControl.h"
 #include "SimAppSignalManager.h"
 #include "SimTuningSignalManager.h"
+#include "SimOverrideSignals.h"
 
 class QTextStream;
 
@@ -57,6 +58,9 @@ namespace Sim
 		Sim::TuningSignalManager& tuningSignalManager();
 		const Sim::TuningSignalManager& tuningSignalManager() const;
 
+		Sim::OverrideSignals& overrideSignals();
+		const Sim::OverrideSignals& overrideSignals() const;
+
 		Sim::Control& control();
 		const Sim::Control& control() const;
 
@@ -71,6 +75,8 @@ namespace Sim
 		//
 		Sim::AppSignalManager m_appSignalManager{this};
 		Sim::TuningSignalManager m_tuningSignalManager;
+
+		Sim::OverrideSignals m_overrideSignals{&m_appSignalManager};
 
 		// Control thread
 		//

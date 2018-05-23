@@ -222,7 +222,8 @@ SOURCES +=\
     Simulator/SimMemoryWidget.cpp \
     Simulator/SimControlPage.cpp \
     Simulator/SimBasePage.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    Simulator/SimOverrideWidget.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -385,7 +386,8 @@ HEADERS  += \
     ../lib/TuningValue.h \
     Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    Simulator/SimOverrideWidget.h
 
 FORMS    += \
     CreateProjectDialog.ui \

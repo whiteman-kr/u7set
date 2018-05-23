@@ -5,7 +5,7 @@
 namespace Sim
 {
 
-	RamAreaInfo::RamAreaInfo(RamAccess access, quint32 offset, quint32 size, QString name) :
+	RamAreaInfo::RamAreaInfo(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name) :
 		m_name(name),
 		m_access(access),
 		m_offset(offset),
@@ -13,7 +13,7 @@ namespace Sim
 	{
 	}
 
-	bool RamAreaInfo::contains(RamAccess access, quint32 offsetW) const
+	bool RamAreaInfo::contains(E::LogicModuleRamAccess access, quint32 offsetW) const
 	{
 		if ((static_cast<int>(m_access) & static_cast<int>(access)) != 0 &&
 			offsetW >= m_offset &&
@@ -25,7 +25,7 @@ namespace Sim
 		return false;
 	}
 
-	bool RamAreaInfo::overlapped(RamAccess access, quint32 offset, quint32 size) const
+	bool RamAreaInfo::overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const
 	{
 		quint32 startA = m_offset;
 		quint32 endA = m_offset + m_size;
@@ -48,7 +48,7 @@ namespace Sim
 		return m_name;
 	}
 
-	RamAccess RamAreaInfo::access() const
+	E::LogicModuleRamAccess RamAreaInfo::access() const
 	{
 		return m_access;
 	}
@@ -63,7 +63,7 @@ namespace Sim
 		return m_size;
 	}
 
-	RamArea::RamArea(RamAccess access, quint32 offset, quint32 size, QString name) :
+	RamArea::RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name) :
 		RamAreaInfo(access, offset, size, name)
 	{
 		m_data.fill(0, size * 2);
@@ -73,7 +73,7 @@ namespace Sim
 
 	bool RamArea::writeBit(quint32 offsetW, quint32 bitNo, quint16 data, E::ByteOrder byteOrder)
 	{
-		if (contains(RamAccess::Write, offsetW) == false ||
+		if (contains(E::LogicModuleRamAccess::Write, offsetW) == false ||
 			bitNo >= 16)
 		{
 			return false;
@@ -116,7 +116,7 @@ namespace Sim
 
 	bool RamArea::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
 	{
-		if (contains(RamAccess::Read, offsetW) == false ||
+		if (contains(E::LogicModuleRamAccess::Read, offsetW) == false ||
 			bitNo >= 16 ||
 			data == nullptr)
 		{
@@ -263,7 +263,7 @@ namespace Sim
 		return;
 	}
 
-	bool Ram::addMemoryArea(RamAccess access, quint32 offsetW, quint32 sizeW, QString name)
+	bool Ram::addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, QString name)
 	{
 		std::shared_ptr<RamArea> ramArea = std::make_shared<RamArea>(access, offsetW, sizeW, name);
 
@@ -322,7 +322,7 @@ namespace Sim
 
 	bool Ram::writeBit(quint32 offsetW, quint32 bitNo, quint32 data, E::ByteOrder byteOrder)
 	{
-		RamArea* area = memoryArea(RamAccess::Write, offsetW);
+		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -334,7 +334,7 @@ namespace Sim
 
 	bool Ram::readBit(quint32 offsetW, quint32 bitNo, quint16* data, E::ByteOrder byteOrder) const
 	{
-		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -346,7 +346,7 @@ namespace Sim
 
 	bool Ram::writeWord(quint32 offsetW, quint16 data, E::ByteOrder byteOrder)
 	{
-		RamArea* area = memoryArea(RamAccess::Write, offsetW);
+		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -358,7 +358,7 @@ namespace Sim
 
 	bool Ram::readWord(quint32 offsetW, quint16* data, E::ByteOrder byteOrder) const
 	{
-		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -370,7 +370,7 @@ namespace Sim
 
 	bool Ram::writeDword(quint32 offsetW, quint32 data, E::ByteOrder byteOrder)
 	{
-		RamArea* area = memoryArea(RamAccess::Write, offsetW);
+		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -382,7 +382,7 @@ namespace Sim
 
 	bool Ram::readDword(quint32 offsetW, quint32* data, E::ByteOrder byteOrder) const
 	{
-		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -404,7 +404,7 @@ namespace Sim
 
 	bool Ram::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder)
 	{
-		RamArea* area = memoryArea(RamAccess::Write, offsetW);
+		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -416,7 +416,7 @@ namespace Sim
 
 	bool Ram::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder) const
 	{
-		const RamArea* area = memoryArea(RamAccess::Read, offsetW);
+		const RamArea* area = memoryArea(E::LogicModuleRamAccess::Read, offsetW);
 		if (area == nullptr)
 		{
 			return false;
@@ -426,7 +426,7 @@ namespace Sim
 		return ok;
 	}
 
-	RamArea* Ram::memoryArea(RamAccess access, quint32 offsetW)
+	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW)
 	{
 		for (std::shared_ptr<RamArea> area : m_memoryAreas)
 		{
@@ -439,7 +439,7 @@ namespace Sim
 		return nullptr;
 	}
 
-	const RamArea* Ram::memoryArea(RamAccess access, quint32 offsetW) const
+	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const
 	{
 		for (std::shared_ptr<RamArea> area : m_memoryAreas)
 		{

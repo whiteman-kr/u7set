@@ -88,7 +88,8 @@ SOURCES += \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
     SimException.cpp \
-    SimCommandProcessor_LM1_SF00.cpp
+    SimCommandProcessor_LM1_SF00.cpp \
+    SimOverrideSignals.cpp
 
 HEADERS += \
     Stable.h \
@@ -125,7 +126,8 @@ HEADERS += \
     SimLogicModule.h \
     SimCommandProcessor.h \
     SimException.h \
-    SimCommandProcessor_LM1_SF00.h
+    SimCommandProcessor_LM1_SF00.h \
+    SimOverrideSignals.h
 
 unix {
     target.path = /usr/lib
