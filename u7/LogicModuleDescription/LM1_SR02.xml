@@ -12257,7 +12257,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#pulse_gen_v1" Caption="pulse_gen" Version="1.0001">
+        <AFB id="#pulse_gen_v1" Caption="pulse_gen" Version="1.0002">
 		    <Properties>
 			    <Description>Pulse generator</Description>
 				<Category>Other</Category>
@@ -12326,7 +12326,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#pulse_gen_sync_v1" Caption="pulse_gen_sync" Version="1.0001">
+        <AFB id="#pulse_gen_sync_v1" Caption="pulse_gen_sync" Version="1.0002">
 		    <Properties>
 			    <Description>Synchronized pulse generator</Description>
 				<Category>Other</Category>
@@ -12389,7 +12389,6 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>				
-		
 
 	</AFBL>
 </LogicModule>
