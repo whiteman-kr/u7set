@@ -792,20 +792,27 @@ namespace Builder
 
 		for(const QString& opName : requiredParams)
 		{
-			if (m_paramValuesArray.contains(opName) == false)
-			{
-				if (displayError == true)
-				{
-					// Required parameter '%1' of AFB '%2' is missing.
-					//
-					m_log->errALC5045(opName, caption(), guid());
-				}
-
-				result = false;
-			}
+			result &= checkRequiredParameter(opName, displayError);
 		}
 
 		return result;
+	}
+
+	bool UalAfb::checkRequiredParameter(const QString& requiredParam, bool displayError)
+	{
+		if (m_paramValuesArray.contains(requiredParam) == false)
+		{
+			if (displayError == true)
+			{
+				// Required parameter '%1' of AFB '%2' is missing.
+				//
+				m_log->errALC5045(requiredParam, caption(), guid());
+			}
+
+			return false;
+		}
+
+		return true;
 	}
 
 	bool UalAfb::checkUnsignedInt(const AppFbParamValue& paramValue)
