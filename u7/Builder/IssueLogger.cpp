@@ -670,7 +670,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3.
+	/// Title: Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'. Check High/LowEngineeringUints ranges, ADC range and SpreadTolerance value of signals.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
@@ -678,13 +678,13 @@ namespace Builder
 	///         %3 Module StrID
 	///
 	/// Description:
-	///			SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
+	///			Calculated SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
 	///
 	void IssueLogger::errCFG3009(QString signalID1, QString signalID2, QString module)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3'.")
+				  tr("Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'.")
 				  .arg(signalID1)
 				  .arg(signalID2)
 				  .arg(module));
