@@ -462,9 +462,29 @@ namespace VFrame30
 		m_inputPoints.clear();
 	}
 
+	void FblItem::removeInput(const QString& caption)
+	{
+		m_inputPoints.erase(std::remove_if(m_inputPoints.begin(), m_inputPoints.end(),
+								[&caption](const VFrame30::AfbPin& pin)
+								{
+									return pin.caption() == caption;
+								}),
+					m_inputPoints.end());
+	}
+
 	void FblItem::removeAllOutputs()
 	{
 		m_outputPoints.clear();
+	}
+
+	void FblItem::removeOutput(const QString& caption)
+	{
+		m_outputPoints.erase(std::remove_if(m_outputPoints.begin(), m_outputPoints.end(),
+								[&caption](const VFrame30::AfbPin& pin)
+								{
+									return pin.caption() == caption;
+								}),
+					m_outputPoints.end());
 	}
 
 	void FblItem::addOutput()
