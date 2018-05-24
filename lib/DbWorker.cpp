@@ -237,6 +237,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0217.sql", "Upgrade to version 217, Added SignalSpecificProperties in LM, AIFM, AIM, AOM, DIM, DOM, OCM presets"},
 	{":/DatabaseUpgrade/Upgrade0218.sql", "Upgrade to version 218, Added TIM and WAIM presets, TuningClient preset update"},
 	{":/DatabaseUpgrade/Upgrade0219.sql", "Upgrade to version 219, Added RIM preset, TIM and WAIM preset were corrected"},
+	{":/DatabaseUpgrade/Upgrade0220.sql", "Upgrade to version 220, Integrator: min, max, ri_const moved to inputs. AFB bus_switch, type of input sel changed to discrete. Added AFB mismatch_d_fp(si)"},
 };
 
 

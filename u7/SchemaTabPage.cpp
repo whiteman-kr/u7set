@@ -1691,12 +1691,8 @@ void SchemaControlTabPage::checkIn(std::vector<DbFileInfo> files)
 
 	// Remove deleted files
 	//
-	std::remove_if(std::begin(files), std::end(files),
-		[](const DbFileInfo& file)
-		{
-			return file.deleted();
-		});
-
+	files.erase(std::remove_if(files.begin(), files.end(), [](const auto& file) { return file.deleted();}),
+				files.end());
 
 	// Set readonly to file if it is open
 	//
