@@ -154,7 +154,10 @@ namespace VFrame30
 		void addOutput(int opIndex, E::SignalType signalType, QString caption);
 
 		void removeAllInputs();
+		void removeInput(const QString& caption);
+
 		void removeAllOutputs();
+		void removeOutput(const QString& caption);
 
 		void ClearAssociatedConnections();
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep);

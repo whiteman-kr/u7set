@@ -997,9 +997,19 @@ namespace VFrame30
 		removeAllInputs();
 	}
 
+	void SchemaItemAfb::removeInputSignal(QString caption)
+	{
+		removeInput(caption);
+	}
+
 	void SchemaItemAfb::removeOutputSignals()
 	{
 		removeAllOutputs();
+	}
+
+	void SchemaItemAfb::removeOutputSignal(QString caption)
+	{
+		removeOutput(caption);
 	}
 
 	const QString& SchemaItemAfb::afbStrID() const
