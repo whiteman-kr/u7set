@@ -12,6 +12,12 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -110,7 +116,11 @@ HEADERS += VFrame30Lib_global.h \
     ../Proto/network.pb.h \
     ../lib/TuningValue.h \
     TuningController.h \
-    AppSignalController.h
+    AppSignalController.h \
+    ../lib/Signal.h \
+    ../lib/DeviceObject.h \
+    ../lib/SignalProperties.h \
+    ../lib/XmlHelper.h
 
 SOURCES += \
     Settings.cpp \
@@ -156,7 +166,6 @@ SOURCES += \
     MacrosExpander.cpp \
     Session.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Types.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppSignal.cpp \
@@ -170,7 +179,12 @@ SOURCES += \
     ../Proto/network.pb.cc \
     ../lib/TuningValue.cpp \
     TuningController.cpp \
-    AppSignalController.cpp
+    AppSignalController.cpp \
+    ../lib/Types.cpp \
+    ../lib/Signal.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/SignalProperties.cpp \
+    ../lib/XmlHelper.cpp
 
 
 DEFINES += VFRAME30LIB_LIBRARY
@@ -178,11 +192,6 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-#c++14/17 support
-#
-CONFIG += c++14
-win32:QMAKE_CXXFLAGS += /std:c++17
 
 #Warning level
 #

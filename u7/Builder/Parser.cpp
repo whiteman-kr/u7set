@@ -2309,6 +2309,29 @@ namespace Builder
 	}
 
 
+	void ReadyParseDataContainer::add(QString equipmentId,
+									  std::shared_ptr<BushContainer> bushContainer,
+									  std::shared_ptr<VFrame30::LogicSchema> schema)
+	{
+		QMutexLocker l(&m_mutex);
+
+		m_appData.push_back({equipmentId, bushContainer, schema});
+
+		return;
+	}
+
+	void ReadyParseDataContainer::setToAppData(AppLogicData* appData, IssueLogger* log)
+	{
+		QMutexLocker l(&m_mutex);
+
+		for (auto& ad : m_appData)
+		{
+			appData->addLogicModuleData(ad.equipmentId, *ad.bushContainer.get(), ad.schema, log);
+		}
+
+		return;
+	}
+
 	// ------------------------------------------------------------------------
 	//
 	//		ApplicationLogicBuilder
@@ -2545,6 +2568,13 @@ namespace Builder
 		//
 		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
 
+		ReadyParseDataContainer readyParseDataContainer;
+
+		std::vector<QFuture<bool>> parseTasks;
+		parseTasks.reserve(schemas.size());
+
+		bool iterruptRequest = false;
+
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -2552,15 +2582,47 @@ namespace Builder
 				return false;
 			}
 
-			LOG_MESSAGE(m_log, tr("Parsing ") + schema->schemaId());
+			QFuture<bool> task =  QtConcurrent::run(std::bind(&Parser::parseAppLogicSchema, this, schema, &readyParseDataContainer, &iterruptRequest));
+			parseTasks.push_back(task);
+		}
 
-			ok = parseAppLogicSchema(schema);
-
-			if (ok == false)
+		// Wait for finish and process interrupt request
+		//
+		do
+		{
+			bool allFinished = true;
+			for (QFuture<bool>& task : parseTasks)
 			{
-				result = false;
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
+			}
+
+			if (allFinished == true)
+			{
+				break;
+			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
 			}
 		}
+		while (1);
+
+		for (QFuture<bool>& task : parseTasks)
+		{
+			result &= task.result();
+		}
+
+		// Set all parsed data to modules
+		//
+		readyParseDataContainer.setToAppData(applicationData(), m_log);
 
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
@@ -3525,13 +3587,19 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema)
+	bool Parser::parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
+									 ReadyParseDataContainer* readyParseDataContainer,
+									 bool* interruptProcess)
 	{
-		if (logicSchema.get() == nullptr)
+		if (logicSchema.get() == nullptr ||
+			interruptProcess == nullptr)
 		{
 			assert(false);
+			assert(interruptProcess);
 			return false;
 		}
+
+		LOG_MESSAGE(m_log, tr("Parsing ") + logicSchema->schemaId());
 
 		// Find layer for compilation
 		//
@@ -3543,7 +3611,7 @@ namespace Builder
 			if (l->compile() == true)
 			{
 				layerFound = true;
-				ok = parseAppLogicLayer(logicSchema, l);
+				ok = parseAppLogicLayer(logicSchema, l, readyParseDataContainer);
 
 				if (ok == false)
 				{
@@ -3569,7 +3637,8 @@ namespace Builder
 
 	bool Parser::parseAppLogicLayer(
 		std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-		std::shared_ptr<VFrame30::SchemaLayer> layer)
+		std::shared_ptr<VFrame30::SchemaLayer> layer,
+		ReadyParseDataContainer* readyParseDataContainer)
 	{
 		if (logicSchema == nullptr ||
 			layer == nullptr ||
@@ -3667,7 +3736,8 @@ namespace Builder
 			//
 			bool result = true;
 
-			BushContainer bushContainer;
+			//BushContainer bushContainer;
+			std::shared_ptr<BushContainer> bushContainer = std::make_shared<BushContainer>();
 
 			if (logicSchema->isMultichannelSchema() == true)
 			{
@@ -3683,7 +3753,7 @@ namespace Builder
 				return false;
 			}
 
-			result = findBushes(logicSchema, moduleLayer, &bushContainer);
+			result = findBushes(logicSchema, moduleLayer, bushContainer.get());
 
 			if (result == false)
 			{
@@ -3696,7 +3766,7 @@ namespace Builder
 			// Set pins' guids to bushes
 			// All log errors should be reported in setBranchConnectionToPin
 			//
-			result = setBranchConnectionToPin(logicSchema, moduleLayer, &bushContainer);
+			result = setBranchConnectionToPin(logicSchema, moduleLayer, bushContainer.get());
 			if (result == false)
 			{
 				return false;
@@ -3704,7 +3774,7 @@ namespace Builder
 
 			// Associates input/outputs
 			//
-			result = setPinConnections(logicSchema, moduleLayer, &bushContainer);
+			result = setPinConnections(logicSchema, moduleLayer, bushContainer.get());
 			if (result == false)
 			{
 				return false;
@@ -3714,12 +3784,13 @@ namespace Builder
 			//
 			if (logicSchema->isMultichannelSchema() == true)
 			{
-				filterSingleChannelBranchesInMulischema(logicSchema, equipmentId, &bushContainer);
+				filterSingleChannelBranchesInMulischema(logicSchema, equipmentId, bushContainer.get());
 			}
 
 			// Generate afb list, and set it to some container
 			//
-			applicationData()->addLogicModuleData(equipmentId, bushContainer, logicSchema, m_log);
+			readyParseDataContainer->add(equipmentId, bushContainer, logicSchema);
+			//applicationData()->addLogicModuleData(equipmentId, bushContainer, logicSchema, m_log);
 		}
 
 		return true;

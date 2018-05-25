@@ -1,5 +1,6 @@
 #include "SignalSet.h"
 #include "../lib/WUtils.h"
+#include "../lib/SignalProperties.h"
 
 namespace Builder
 {
@@ -135,7 +136,6 @@ namespace Builder
 					// Coarse aperture of signal '%1' less then fine aperture.
 					//
 					m_log->wrnALC5093(s.appSignalID());
-					result = false;
 				}
 
 				result &= checkSignalPropertiesRanges(s);
@@ -218,8 +218,6 @@ namespace Builder
 
 			// check EquipmentID
 			//
-			s.setLm(nullptr);
-
 			if (s.equipmentID().isEmpty() == true)
 			{
 				// Application signal '%1' is not bound to any device object.
@@ -318,18 +316,18 @@ namespace Builder
 		return newSignal;
 	}
 
-	Signal* SignalSet::createBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal)
+	Signal* SignalSet::createBusChildSignal(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal)
 	{
 		Signal* newSignal = new Signal();
 
-		newSignal->setAppSignalID(QString(s.appSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
-		newSignal->setCustomAppSignalID(QString(s.customAppSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + Signal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
 
-		QString caption = buildBusSignalCaption(s, bus, busSignal);
+		QString caption = buildBusSignalCaption(busParentSignal, bus, busSignal);
 
 		newSignal->setCaption(caption);
-		newSignal->setEquipmentID(s.equipmentID());
-		newSignal->setLm(s.lm());
+		newSignal->setEquipmentID(busParentSignal.equipmentID());
+		newSignal->setLm(busParentSignal.lm());
 //		newSignal->setBusTypeID(s.busTypeID());
 
 		newSignal->setSignalType(busSignal.signalType);
@@ -340,9 +338,13 @@ namespace Builder
 		switch(newSignal->signalType())
 		{
 		case E::SignalType::Analog:
+
 			newSignal->setUnit(busSignal.units);
 			newSignal->setDataSize(SIZE_32BIT);
 			newSignal->setAnalogSignalFormat(busSignal.analogFormat);
+
+			newSignal->setSpecPropStruct(SignalProperties::defaultBusChildAnalogSpecPropStruct);
+			newSignal->createSpecPropValues();
 
 			newSignal->setLowADC(busSignal.inbusAnalogLowLimit);
 			newSignal->setHighADC(busSignal.inbusAnalogHighLimit);
@@ -370,7 +372,7 @@ namespace Builder
 
 		newSignal->setEnableTuning(false);
 
-		newSignal->setAcquire(s.acquire());
+		newSignal->setAcquire(busParentSignal.acquire());
 		newSignal->setDecimalPlaces(2);				// !!!
 		newSignal->setCoarseAperture(1);
 		newSignal->setFineAperture(0.5);

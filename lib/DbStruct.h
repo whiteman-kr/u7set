@@ -9,18 +9,6 @@
 
 class Signal;
 
-// signal management error codes
-// returns in ObjectState.errCode field
-//
-
-const int	ERR_SIGNAL_OK = 0,
-			ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1,
-			ERR_SIGNAL_ALREADY_CHECKED_OUT = 2,
-			ERR_SIGNAL_DELETED = 3,
-			ERR_SIGNAL_NOT_FOUND = 4,
-
-			ERR_SIGNAL_EXISTS = 100;
-
 // System files names
 //
 extern const char* const rootFileName;			// root file name
@@ -35,6 +23,8 @@ extern const char* const McFileName;			// Modules Configurations
 extern const char* const ConnectionsFileName;	// Connections
 extern const char* const BusTypesFileName;		// Bus types
 extern const char* const EtcFileName;			// Etc file name
+
+extern const char* const SignalPropertyBehaviorFileName;			// SignalPropertyBehavior.csv file name
 
 extern const char* const AlFileExtension;		// Application Logic schema file extnesion
 extern const char* const AlTemplExtension;		// Application Logic schema template file extnesion
@@ -115,6 +105,17 @@ private:
 };
 
 
+// signal management error codes
+// returns in ObjectState.errCode field
+//
+const int	ERR_SIGNAL_OK = 0,
+			ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1,
+			ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER = 2,
+			ERR_SIGNAL_DELETED = 3,
+			ERR_SIGNAL_NOT_FOUND = 4,
+
+			ERR_SIGNAL_EXISTS = 100;
+
 struct ObjectState
 {
 	int id;
@@ -124,7 +125,6 @@ struct ObjectState
 	int userId;
 	int errCode;
 };
-
 
 //
 //

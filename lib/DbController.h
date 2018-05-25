@@ -130,6 +130,8 @@ public:
 	bool getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget);
 	bool getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out, QWidget* parentWidget);
 
+	bool hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget);
+
 	// Units management
 	//
 /*	bool getUnits(UnitList* units, QWidget* parentWidget);
@@ -226,6 +228,7 @@ signals:
 
 	void signal_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void signal_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
+	void signal_hasCheckedOutSignals(bool* hasCheckedOutSignals);
 
 	// Build management
 	//

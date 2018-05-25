@@ -11,6 +11,11 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -85,8 +90,6 @@ HEADERS += \
 
 include(../qtservice/src/qtservice.pri)
 
-CONFIG += c++14
-win32:QMAKE_CXXFLAGS += /std:c++17
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

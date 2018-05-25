@@ -844,7 +844,7 @@ namespace Tcp
 		{
 			const SoftwareInfo& si = state.connectedSoftwareInfo;
 
-			if (E::containes<E::SoftwareType>(TO_INT(si.softwareType())) == false)
+			if (E::contains<E::SoftwareType>(TO_INT(si.softwareType())) == false)
 			{
 				continue;
 			}

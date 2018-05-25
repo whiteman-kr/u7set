@@ -26,6 +26,7 @@
 #include "SignalPropertiesDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include "BusStorage.h"
+#include "../lib/WUtils.h"
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -591,7 +592,7 @@ bool SignalsModel::checkoutSignal(int index)
 	showErrors(objectStates);
 	foreach (const ObjectState& objectState, objectStates)
 	{
-		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER
 				&& objectState.userId != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			return false;
@@ -644,7 +645,7 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 	}
 	foreach (const ObjectState& objectState, objectStates)
 	{
-		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER
 				&& objectState.userId != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			return false;
@@ -705,7 +706,7 @@ QString SignalsModel::errorMessage(const ObjectState& state) const
 	switch(state.errCode)
 	{
 		case ERR_SIGNAL_IS_NOT_CHECKED_OUT: return tr("Signal %1 is not checked out").arg(state.id);
-		case ERR_SIGNAL_ALREADY_CHECKED_OUT: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_usernameMap[state.userId]);
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_usernameMap[state.userId]);
 		case ERR_SIGNAL_DELETED: return tr("Signal %1 was deleted already").arg(state.id);
 		case ERR_SIGNAL_NOT_FOUND: return tr("Signal %1 not found").arg(state.id);
 		case ERR_SIGNAL_EXISTS: return "";				// error message is displayed by PGSql driver
@@ -1236,29 +1237,29 @@ void SignalsModel::addSignal()
 
 	auto loader = [&settings](const QString& name)
 	{
-		return settings.value(lastEditedSignalFieldValuePlace + name);
+		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name);
 	};
 
-	signal.setLowADC(loader(lowADCCaption).toInt());
-	signal.setHighADC(loader(highADCCaption).toInt());
-	signal.setLowEngeneeringUnits(loader(lowEngeneeringUnitsCaption).toDouble());
-	signal.setHighEngeneeringUnits(loader(highEngeneeringUnitsCaption).toDouble());
-	signal.setUnit(loader(unitCaption).toString());
-	signal.setLowValidRange(loader(lowValidRangeCaption).toDouble());
-	signal.setHighValidRange(loader(highValidRangeCaption).toDouble());
+	signal.setLowADC(loader(SignalProperties::lowADCCaption).toInt());
+	signal.setHighADC(loader(SignalProperties::highADCCaption).toInt());
+	signal.setLowEngeneeringUnits(loader(SignalProperties::lowEngeneeringUnitsCaption).toDouble());
+	signal.setHighEngeneeringUnits(loader(SignalProperties::highEngeneeringUnitsCaption).toDouble());
+	signal.setUnit(loader(SignalProperties::unitCaption).toString());
+	signal.setLowValidRange(loader(SignalProperties::lowValidRangeCaption).toDouble());
+	signal.setHighValidRange(loader(SignalProperties::highValidRangeCaption).toDouble());
 
-	signal.setElectricLowLimit(loader(electricLowLimitCaption).toDouble());
-	signal.setElectricHighLimit(loader(electricHighLimitCaption).toDouble());
-	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(electricUnitCaption).toInt()));
-	signal.setSensorType(static_cast<E::SensorType>(loader(sensorTypeCaption).toInt()));
-	signal.setOutputMode(static_cast<E::OutputMode>(loader(outputModeCaption).toInt()));
+	signal.setElectricLowLimit(loader(SignalProperties::electricLowLimitCaption).toDouble());
+	signal.setElectricHighLimit(loader(SignalProperties::electricHighLimitCaption).toDouble());
+	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(SignalProperties::electricUnitCaption).toInt()));
+	signal.setSensorType(static_cast<E::SensorType>(loader(SignalProperties::sensorTypeCaption).toInt()));
+	signal.setOutputMode(static_cast<E::OutputMode>(loader(SignalProperties::outputModeCaption).toInt()));
 
-	signal.setAcquire(loader(acquireCaption).toBool());
-	signal.setDecimalPlaces(loader(decimalPlacesCaption).toInt());
-	signal.setCoarseAperture(loader(coarseApertureCaption).toDouble());
-	signal.setFineAperture(loader(fineApertureCaption).toDouble());
-	signal.setFilteringTime(loader(filteringTimeCaption).toDouble());
-	signal.setSpreadTolerance(loader(spreadToleranceCaption).toDouble());
+	signal.setAcquire(loader(SignalProperties::acquireCaption).toBool());
+	signal.setDecimalPlaces(loader(SignalProperties::decimalPlacesCaption).toInt());
+	signal.setCoarseAperture(loader(SignalProperties::coarseApertureCaption).toDouble());
+	signal.setFineAperture(loader(SignalProperties::fineApertureCaption).toDouble());
+	signal.setFilteringTime(loader(SignalProperties::filteringTimeCaption).toDouble());
+	signal.setSpreadTolerance(loader(SignalProperties::spreadToleranceCaption).toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder::BigEndian);
 
@@ -1363,6 +1364,11 @@ bool SignalsModel::editSignals(QVector<int> ids)
 	}
 
 	SignalPropertiesDialog dlg(dbController(), signalVector, readOnly, true, m_parentWindow);
+
+	if (dlg.isValid() == false)
+	{
+		return false;
+	}
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1554,10 +1560,17 @@ const DbController *SignalsModel::dbController() const
 // SignalsTabPage
 //
 //
+
+SignalsTabPage* SignalsTabPage::m_instance = nullptr;
+
+
 SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent)
 {
 	assert(dbcontroller != nullptr);
+	assert(m_instance == nullptr);
+
+	m_instance = this;
 
 	m_signalTypeFilterCombo = new QComboBox(this);
 	m_signalTypeFilterCombo->addItem(tr("All signals"), ST_ANY);
@@ -1861,7 +1874,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 
 	QComboBox* busTypeIdComboBox = new QComboBox(&signalCreationSettingsDialog);
 	busTypeIdComboBox->setEditable(true);
-	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(cacheValidator), busTypeIdComboBox));
+	busTypeIdComboBox->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), busTypeIdComboBox));
 	busTypeIdComboBox->setVisible(false);
 
 	BusStorage busStorage(dbc);
@@ -2143,6 +2156,166 @@ QStringList SignalsTabPage::createSignal(DbController* dbc, int counter, QString
 	model->parentWindow()->setSelection(selectIdVector);
 
 	return result;
+}
+
+
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
+{
+	TEST_PTR_RETURN_FALSE(dbc);
+
+	bool result = true;
+
+	bool res = true;
+
+	QVector<int> checkoutSignalIDs;
+	QList<Signal> newSignalWorkcopies;
+
+	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	{
+		TEST_PTR_CONTINUE(deviceSignal);
+
+		QString signalEquipmentID = deviceSignal->equipmentId();
+
+		QVector<int> signalIDs;
+
+		res = dbc->getSignalsIDsWithEquipmentID(signalEquipmentID, &signalIDs, nullptr);
+
+		if (res == false)
+		{
+			assert(false);
+			result = false;
+			continue;
+		}
+
+		if (signalIDs.isEmpty() == true)
+		{
+			continue;
+		}
+
+		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruc();
+
+		for(int signalID : signalIDs)
+		{
+			bool signalChanged = false;
+
+			Signal s;
+
+			result = dbc->getLatestSignal(signalID, &s, nullptr);
+
+			if (result == false)
+			{
+				QMessageBox::critical(m_instance,
+							  QApplication::applicationName(),
+							  QString(tr("Cannot getLatestSignal with id = %1, update from preset is aborted.")).arg(signalID));
+				return false;
+			}
+
+			if (s.specPropStruct() != deviceSignalSpecPropStruct)
+			{
+				signalChanged = true;
+			}
+
+			SignalSpecPropValues specPropValues;
+
+			res = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
+
+			if (res == false)
+			{
+				QMessageBox::critical(m_instance,
+							  QApplication::applicationName(),
+							  QString(tr("Signal %1 specific properties values parsing error, \nupdate from preset is aborted.")).arg(s.appSignalID()));
+				return false;
+			}
+
+			res = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
+
+			if (res == false)
+			{
+				QMessageBox::critical(m_instance,
+							  QApplication::applicationName(),
+							  QString(tr("Signal %1 specific properties values updating error, \nupdate from preset is aborted.")).arg(s.appSignalID()));
+				return false;
+			}
+
+			QByteArray newValues;
+
+			res = specPropValues.serializeValuesToArray(&newValues);
+
+			if (newValues != s.protoSpecPropValues())		// compare proto-data arrays
+			{
+				signalChanged = true;
+			}
+
+			if (signalChanged == false)
+			{
+				continue;
+			}
+
+			// signal should be updated
+			//
+			s.setSpecPropStruct(deviceSignalSpecPropStruct);
+			s.setProtoSpecPropValues(newValues);
+
+			checkoutSignalIDs.append(signalID);
+			newSignalWorkcopies.append(s);
+		}
+	}
+
+	QVector<ObjectState> objStates;
+
+	res = dbc->checkoutSignals(&checkoutSignalIDs, &objStates, nullptr);
+
+	if (res == false)
+	{
+		QMessageBox::critical(m_instance,
+							  QApplication::applicationName(),
+							  tr("App signals check out error, update is not possible!"));
+		return false;
+	}
+
+	if (objStates.size() != checkoutSignalIDs.size())
+	{
+		QMessageBox::critical(m_instance,
+							  QApplication::applicationName(),
+							  tr("Not all necessery app signals was checked out, update is not possible!"));
+		return false;
+	}
+
+	bool allSignalsCheckedOut = true;
+
+	for(const ObjectState& objState : objStates)
+	{
+		if (objState.checkedOut == false || objState.errCode != ERR_SIGNAL_OK)
+		{
+			allSignalsCheckedOut = false;
+			break;
+		}
+	}
+
+	if (allSignalsCheckedOut == false)
+	{
+		QMessageBox::critical(m_instance,
+					  QApplication::applicationName(),
+					  tr("Cannot check out one or more app signals, update from preset is not posible."));
+		return false;
+	}
+
+	for(Signal& s : newSignalWorkcopies)
+	{
+		ObjectState objState;
+
+		res = dbc->setSignalWorkcopy(&s, &objState, nullptr);
+
+		if (res == false)
+		{
+			QMessageBox::critical(m_instance,
+						  QApplication::applicationName(),
+						  QString(tr("Cannot set workcopy of signal %1, update from preset is aborted.")).arg(s.appSignalID()));
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)

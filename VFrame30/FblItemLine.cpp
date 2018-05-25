@@ -5,23 +5,31 @@ namespace VFrame30
 {
 	FblItemLine::FblItemLine(void)
 	{
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, FblItemLine::weight, FblItemLine::setWeight);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, FblItemLine::lineColor, FblItemLine::setLineColor);
+		return;
 	}
 
 	FblItemLine::FblItemLine(SchemaUnit unit) :
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0xC0))
 	{
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, FblItemLine::weight, FblItemLine::setWeight);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, FblItemLine::lineColor, FblItemLine::setLineColor);
-
 		setItemUnit(unit);
 		m_static = false;
+
+		return;
 	}
 
 	FblItemLine::~FblItemLine(void)
 	{
+	}
+
+	void FblItemLine::propertyDemand(const QString& prop)
+	{
+		PosConnectionImpl::propertyDemand(prop);
+
+		addProperty<double, FblItemLine, &FblItemLine::weight, &FblItemLine::setWeight>(PropertyNames::lineWeight, PropertyNames::appearanceCategory, true);
+		addProperty<QColor, FblItemLine, &FblItemLine::lineColor, &FblItemLine::setLineColor>(PropertyNames::lineColor, PropertyNames::appearanceCategory, true);
+
+		return;
 	}
 
 	// Serialization
@@ -108,7 +116,7 @@ namespace VFrame30
 		}
 	}
 
-	void FblItemLine::setWeight(double weight)
+	void FblItemLine::setWeight(const double& weight)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -128,7 +136,7 @@ namespace VFrame30
 		return m_lineColor;
 	}
 
-	void FblItemLine::setLineColor(QColor color)
+	void FblItemLine::setLineColor(const QColor& color)
 	{
 		m_lineColor = color;
 	}

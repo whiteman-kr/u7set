@@ -11,6 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = scm
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -97,7 +103,9 @@ SOURCES += MainWindow.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     AppDataSourceWidget.cpp \
     ../lib/Times.cpp \
-    ../lib/Tuning/TuningSignalState.cpp
+    ../lib/Tuning/TuningSignalState.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -146,7 +154,9 @@ HEADERS  += MainWindow.h \
     ../u7/Builder/ModulesRawData.h \
     AppDataSourceWidget.h \
     ../lib/Times.h \
-    ../lib/Tuning/TuningSignalState.h
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/PropertyObject.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -158,8 +168,6 @@ TRANSLATIONS = ./translations/ServiceControlManager_ru.ts \
 RESOURCES += \
     ServiceControlManager.qrc
 
-gcc:QMAKE_CXXFLAGS += -std=c++11
-win32:QMAKE_CXXFLAGS += /std:c++17
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

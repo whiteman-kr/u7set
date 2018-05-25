@@ -13,6 +13,11 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
@@ -223,7 +228,10 @@ SOURCES +=\
     Simulator/SimControlPage.cpp \
     Simulator/SimBasePage.cpp \
     ../lib/Times.cpp \
-    Simulator/SimOverrideWidget.cpp
+    Simulator/SimOverrideWidget.cpp \
+    SpecificPropertiesEditor.cpp \
+    ../lib/Times.cpp
+
 
 HEADERS  += \
     CentralWidget.h \
@@ -384,10 +392,12 @@ HEADERS  += \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h \
     ../lib/TuningValue.h \
+    SpecificPropertiesEditor.h \
     Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
     ../lib/Times.h \
     Simulator/SimOverrideWidget.h
+
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -455,7 +465,8 @@ DISTFILES += \
     LogicModuleDescription/LM1_SF00.xml \
     LogicModuleDescription/LM1_SR01.xml \
     LogicModuleDescription/BVB15Module0000.xml \
-    LogicModuleDescription/LM1_SR02.xml
+    LogicModuleDescription/LM1_SR02.xml \
+    ../Etc/SignalPropertyBehavior/SignalPropertyBehavior.csv
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
@@ -469,11 +480,6 @@ win32 {
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-# c++14 support
-#
-win32:QMAKE_CXXFLAGS += /std:c++17
-unix:QMAKE_CXXFLAGS += -std=c++14
 
 #Optimization flags
 #

@@ -17,21 +17,23 @@
 DbProgress::DbProgress() :
 	m_completed(false),
 	m_cancel(false),
-	m_value(0),
-	m_progressEnabled(false)
+	m_progressEnabled(false),
+	m_value(0)
 {
 }
 
 bool DbProgress::init()
 {
-	QMutexLocker l(&m_mutex);
-
 	m_completed = false;
 	m_cancel = false;
 	m_value = 0;
 
-	m_errorMessage.clear();
-	m_completeMessage.clear();
+	{
+		QMutexLocker l(&m_mutex);
+
+		m_errorMessage.clear();
+		m_completeMessage.clear();
+	}
 
 	return true;
 }
@@ -90,25 +92,21 @@ DbProgress::~DbProgress()
 
 bool DbProgress::completed() const
 {
-	QMutexLocker l(&m_mutex);
 	return m_completed;
 }
 
 void DbProgress::setCompleted(bool value)
 {
-	QMutexLocker l(&m_mutex);
 	m_completed = value;
 }
 
 bool DbProgress::wasCanceled() const
 {
-	QMutexLocker l(&m_mutex);
 	return m_cancel;
 }
 
 void DbProgress::setCancel(bool value)
 {
-	QMutexLocker l(&m_mutex);
 	m_cancel = value;
 }
 
@@ -126,13 +124,11 @@ void DbProgress::setCurrentOperation(const QString& value)
 
 int DbProgress::value() const
 {
-	QMutexLocker l(&m_mutex);
 	return m_value;
 }
 
 void DbProgress::setValue(int value)
 {
-	QMutexLocker l(&m_mutex);
 	m_value = value;
 }
 
@@ -174,19 +170,16 @@ void DbProgress::setCompleteMessage(const QString& value)
 
 void DbProgress::enableProgress()
 {
-	QMutexLocker l(&m_mutex);
 	m_progressEnabled = true;
 }
 
 void DbProgress::disableProgress()
 {
-	QMutexLocker l(&m_mutex);
 	m_progressEnabled = false;
 }
 
 bool DbProgress::isProgressEnabled()
 {
-	QMutexLocker l(&m_mutex);
 	return m_progressEnabled;
 }
 

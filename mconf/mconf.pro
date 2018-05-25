@@ -22,6 +22,12 @@ QT += core sql network xml widgets gui serialport qml
 TARGET = mconf
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -90,11 +96,6 @@ win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
 
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
-
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
-win32:QMAKE_CXXFLAGS += /std:c++17
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #

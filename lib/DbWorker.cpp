@@ -6,9 +6,11 @@
 #include <QSqlRecord>
 #include <QDebug>
 #include <QHostInfo>
+#include <QElapsedTimer>
 
 #include "../lib/DbWorker.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/SignalProperties.h"
 #include "../lib/DbProgress.h"
 
 
@@ -229,6 +231,13 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0211.sql", "Upgrade to version 211, To LM1-SR02 added: pulse_gen, pulse_gen_sync"},
 	{":/DatabaseUpgrade/Upgrade0212.sql", "Upgrade to version 212, Add ETC system folder"},
 	{":/DatabaseUpgrade/Upgrade0213.sql", "Upgrade to version 213, To LM Description added attr Name, removed SimScriptFileName"},
+	{":/DatabaseUpgrade/Upgrade0214.sql", "Upgrade to version 214, HasCheckedOutSignals function creation"},
+	{":/DatabaseUpgrade/Upgrade0215.sql", "Upgrade to version 215, Appends specfic properties and potobuf fields to app signals"},
+	{":/DatabaseUpgrade/Upgrade0216.sql", "Upgrade to version 216, Changes in SignalData type and dependent stored procedures"},
+	{":/DatabaseUpgrade/Upgrade0217.sql", "Upgrade to version 217, Added SignalSpecificProperties in LM, AIFM, AIM, AOM, DIM, DOM, OCM presets"},
+	{":/DatabaseUpgrade/Upgrade0218.sql", "Upgrade to version 218, Added TIM and WAIM presets, TuningClient preset update"},
+	{":/DatabaseUpgrade/Upgrade0219.sql", "Upgrade to version 219, Added RIM preset, TIM and WAIM preset were corrected"},
+	{":/DatabaseUpgrade/Upgrade0220.sql", "Upgrade to version 220, Integrator: min, max, ri_const moved to inputs. AFB bus_switch, type of input sel changed to discrete. Added AFB mismatch_d_fp(si)"},
 };
 
 
@@ -437,10 +446,10 @@ std::vector<DbFileInfo> DbWorker::systemFiles() const
 	return copy;
 }
 
-QString DbWorker::toSqlStr(QString str)
+QString DbWorker::toSqlStr(const QString& str)
 {
-	str = str.replace("'", "''");
-	return str;
+	QString copy(str);
+	return copy.replace("'", "''");
 }
 
 QString DbWorker::toSqlBoolean(bool value)
@@ -451,6 +460,11 @@ QString DbWorker::toSqlBoolean(bool value)
 	}
 
 	return "FALSE";
+}
+
+QString DbWorker::toSqlByteaStr(const QByteArray& binData)
+{
+	return QString("E'\\\\x%1'").arg(QString(binData.toHex().constData()));
 }
 
 void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
@@ -1678,9 +1692,30 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 				QString upgradeScript = upgradeFile.readAll();
 
+				int newVersion = i + 1;			// 'i' is index of update file, +1 to get project version
+
+				// Before update processing
+				//
+				{
+					QString errorMessage;
+
+					result = processingBeforeDatabaseUpgrade(db, newVersion, &errorMessage);
+
+					if (result == false)
+					{
+						if (errorMessage.isEmpty() == true)
+						{
+							errorMessage = QString("Processing error before database has been upgraded to version %1 !").arg(newVersion);
+						}
+
+						emitError(QSqlDatabase(), errorMessage, false);
+						break;
+					}
+				}
+
 				// Set Session key
 				//
-				if (i + 1 > 124)		// 'i' is index of update file, +1 to get project version
+				if (newVersion > 124)
 				{
 					assert(m_sessionKey.isEmpty() == false);
 
@@ -1732,6 +1767,25 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 					}
 				}
 
+				// After update processing
+				//
+				{
+					QString errorMessage;
+
+					result = processingAfterDatabaseUpgrade(db, newVersion, &errorMessage);
+
+					if (result == false)
+					{
+						if (errorMessage.isEmpty() == true)
+						{
+							errorMessage = QString("Processing error after database has been upgraded to version %1 !").arg(newVersion);
+						}
+
+						emitError(QSqlDatabase(), errorMessage, false);
+						break;
+					}
+				}
+
 				// Function log_in is created in update 124, after it we need to log in
 				//
 				if (i + 1 == 124)	// 'i' is index of update file, +1 to get project version
@@ -1751,6 +1805,11 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				}
 
 				//qDebug() << "End upgrade item";
+			}
+
+			if (result == false)
+			{
+				return;
 			}
 
 			// The table FileInstance has details field which is JSONB, details for some files
@@ -2732,28 +2791,28 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	out->clear();
 	out->reserve(q.size());
 
-//	qint64 memoryAllocationEllpased = 0;
-//	qint64 updateFileEllpased = 0;
-//	qint64 pushBackEllpased = 0;
+	//qint64 memoryAllocationEllpased = 0;
+	qint64 updateFileEllpased = 0;
+	//qint64 pushBackEllpased = 0;
 
 	while (q.next())
 	{
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		//QElapsedTimer updateFileTimer;
-		//updateFileTimer.start();
+		QElapsedTimer updateFileTimer;
+		updateFileTimer.start();
 
 		db_updateFile(q, file.get());
 
-		//updateFileEllpased += updateFileTimer.nsecsElapsed();
+		updateFileEllpased += updateFileTimer.nsecsElapsed();
 
 		out->push_back(file);
 	}
 
 	qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
-//	qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
-//	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
-//	qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
+	//qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
+	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
+	//qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
 
 	return;
 }
@@ -4247,145 +4306,48 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 }
 
 
+
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {
 	// indexes of SignalData's fields
 	//
 	const int SD_APP_SIGNAL_ID = 0;
 	const int SD_CUSTOM_APP_SIGNAL_ID = 1;
-	const int SD_CAPTION = 2;
-	const int SD_EQUIPMENT_ID = 3;
-	const int SD_BUS_TYPE_ID = 4;
-	const int SD_CHANNEL = 5;
+	const int SD_EQUIPMENT_ID = 2;
+	const int SD_SIGNAL_TYPE = 3;
+	const int SD_IN_OUT_TYPE = 4;
 
-	const int SD_SIGNAL_TYPE = 6;
-	const int SD_IN_OUT_TYPE = 7;
+	const int SD_SPEC_PROP_STRUCT = 5;
+	const int SD_SPEC_PROP_VALUES = 6;
+	const int SD_PROTO_DATA = 7;
 
-	const int SD_DATA_SIZE = 8;
-	const int SD_BYTE_ORDER = 9;
-
-	const int SD_ANALOG_SIGNAL_FORMAT = 10;
-	const int SD_UNIT = 11;
-
-	const int SD_LOW_ADC = 12;
-	const int SD_HIGH_ADC = 13;
-	const int SD_LOW_ENGENEERING_UNITS = 14;
-	const int SD_HIGH_ENGENEERING_UNITS = 15;
-	const int SD_LOW_VALID_RANGE = 16;
-	const int SD_HIGH_VALID_RANGE = 17;
-	const int SD_FILTERING_TIME = 18;
-	const int SD_SPREADTOLERANCE = 19;
-
-	const int SD_ELECTRIC_LOW_LIMIT = 20;
-	const int SD_ELECTRIC_HIGH_LIMIT = 21;
-	const int SD_ELECTRIC_UNIT = 22;
-	const int SD_SENSOR_TYPE = 23;
-	const int SD_OUTPUT_MODE = 24;
-
-	const int SD_ENABLE_TUNING = 25;
-
-	const int SD_TUNING_DEFAULT_DOUBLE = 26;
-	const int SD_TUNING_LOW_BOUND_DOUBLE = 27;
-	const int SD_TUNING_HIGH_BOUND_DOUBLE = 28;
-
-	const int SD_TUNING_DEFAULT_INT = 29;
-	const int SD_TUNING_LOW_BOUND_INT = 30;
-	const int SD_TUNING_HIGH_BOUND_INT = 31;
-
-	const int SD_ACQUIRE = 32;
-	const int SD_ARCHIVE = 33;
-
-	const int SD_DECIMAL_PLACES = 34;
-	const int SD_COARSE_APERTURE = 35;
-	const int SD_FINE_APERTURE = 36;
-	const int SD_ADAPTIVE_APERTURE = 37;
-
-	const int SD_SIGNAL_ID = 38;
-	const int SD_SIGNAL_GROUP_ID = 39;
-	const int SD_SIGNAL_INSTANCE_ID = 40;
-	const int SD_CHANGESET_ID = 41;
-	const int SD_CHECKEDOUT = 42;
-	const int SD_USER_ID = 43;
-	const int SD_CREATED = 44;
-	const int SD_DELETED = 45;
-	const int SD_INSTANCE_CREATED = 46;
-	const int SD_INSTANCE_ACTION = 47;
+	const int SD_SIGNAL_ID = 8;
+	const int SD_SIGNAL_GROUP_ID = 9;
+	const int SD_SIGNAL_INSTANCE_ID = 10;
+	const int SD_CHANGESET_ID = 11;
+	const int SD_CHECKEDOUT = 12;
+	const int SD_USER_ID = 13;
+	const int SD_CREATED = 14;
+	const int SD_DELETED = 15;
+	const int SD_INSTANCE_CREATED = 16;
+	const int SD_INSTANCE_ACTION = 17;
 
 	// read fields
 	//
 	s.setAppSignalID(q.value(SD_APP_SIGNAL_ID).toString());
 	s.setCustomAppSignalID(q.value(SD_CUSTOM_APP_SIGNAL_ID).toString());
-
-	s.setCaption(q.value(SD_CAPTION).toString());
 	s.setEquipmentID(q.value(SD_EQUIPMENT_ID).toString());
-	s.setBusTypeID(q.value(SD_BUS_TYPE_ID).toString());
-	s.setChannel(static_cast<E::Channel>(q.value(SD_CHANNEL).toInt()));
 
 	s.setSignalType(static_cast<E::SignalType>(q.value(SD_SIGNAL_TYPE).toInt()));
 	s.setInOutType(static_cast<E::SignalInOutType>(q.value(SD_IN_OUT_TYPE).toInt()));
 
-	s.setDataSize(q.value(SD_DATA_SIZE).toInt());
-	s.setByteOrder(static_cast<E::ByteOrder>(q.value(SD_BYTE_ORDER).toInt()));
+	//
 
-	int f = q.value(SD_ANALOG_SIGNAL_FORMAT).toInt();
+	s.setSpecPropStruct(q.value(SD_SPEC_PROP_STRUCT).toString());
+	s.setProtoSpecPropValues(q.value(SD_SPEC_PROP_VALUES).toByteArray());
+	s.loadProtoData(q.value(SD_PROTO_DATA).toByteArray());
 
-	if (f == TO_INT(E::DataFormat::UnsignedInt))
-	{
-		// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
-		//
-		f = TO_INT(E::AnalogAppSignalFormat::SignedInt32);
-	}
-	s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
-	s.setUnit(q.value(SD_UNIT).toString());
-
-	s.setLowADC(q.value(SD_LOW_ADC).toInt());
-	s.setHighADC(q.value(SD_HIGH_ADC).toInt());
-	s.setLowEngeneeringUnits(q.value(SD_LOW_ENGENEERING_UNITS).toDouble());
-	s.setHighEngeneeringUnits(q.value(SD_HIGH_ENGENEERING_UNITS).toDouble());
-	s.setLowValidRange(q.value(SD_LOW_VALID_RANGE).toDouble());
-	s.setHighValidRange(q.value(SD_HIGH_VALID_RANGE).toDouble());
-	s.setFilteringTime(q.value(SD_FILTERING_TIME).toDouble());
-	s.setSpreadTolerance(q.value(SD_SPREADTOLERANCE).toDouble());
-
-	s.setElectricLowLimit(q.value(SD_ELECTRIC_LOW_LIMIT).toDouble());
-	s.setElectricHighLimit(q.value(SD_ELECTRIC_HIGH_LIMIT).toDouble());
-	s.setElectricUnit(static_cast<E::ElectricUnit>(q.value(SD_ELECTRIC_UNIT).toInt()));
-	s.setSensorType(static_cast<E::SensorType>(q.value(SD_SENSOR_TYPE).toInt()));
-	s.setOutputMode(static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt()));
-
-	s.setEnableTuning(q.value(SD_ENABLE_TUNING).toBool());
-
-	TuningValue tv;
-
-	tv.setValue(s.signalType(),
-		   s.analogSignalFormat(),
-		   q.value(SD_TUNING_DEFAULT_INT).toLongLong(),
-		   q.value(SD_TUNING_DEFAULT_DOUBLE).toDouble());
-
-	s.setTuningDefaultValue(tv);
-
-	tv.setValue(s.signalType(),
-		   s.analogSignalFormat(),
-		   q.value(SD_TUNING_LOW_BOUND_INT).toLongLong(),
-		   q.value(SD_TUNING_LOW_BOUND_DOUBLE).toDouble());
-
-	s.setTuningLowBound(tv);
-
-	tv.setValue(s.signalType(),
-		   s.analogSignalFormat(),
-		   q.value(SD_TUNING_HIGH_BOUND_INT).toLongLong(),
-		   q.value(SD_TUNING_HIGH_BOUND_DOUBLE).toDouble());
-
-	s.setTuningHighBound(tv);
-
-	s.setAcquire(q.value(SD_ACQUIRE).toBool());
-	s.setArchive(q.value(SD_ARCHIVE).toBool());
-
-	s.setDecimalPlaces(q.value(SD_DECIMAL_PLACES).toInt());
-	s.setCoarseAperture(q.value(SD_COARSE_APERTURE).toDouble());
-	s.setFineAperture(q.value(SD_FINE_APERTURE).toDouble());
-	s.setAdaptiveAperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
-
+	//
 	s.setID(q.value(SD_SIGNAL_ID).toInt());
 	s.setSignalGroupID(q.value(SD_SIGNAL_GROUP_ID).toInt());
 	s.setSignalInstanceID(q.value(SD_SIGNAL_INSTANCE_ID).toInt());
@@ -4401,73 +4363,34 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 
 QString DbWorker::getSignalDataStr(const Signal& s)
 {
-	QString str = QString(
-			"('%1','%2','%3','%4','%5',%6,"
-			"%7,%8,%9,%10,%11,'%12',"
-			"%13,%14,%15,%16,%17,%18,%19,%20,"
-			"%21,%22,%23,%24,%25,"
-			"%26,%27,%28,%29,%30,%31,%32,"
-			"%33,%34,%35,%36,%37,%38,"
-			"%39,%40,%41,%42,%43,%44,'%45',%46,'%47',%48)").
+	QByteArray protoDataArray;
 
-	arg(toSqlStr(s.appSignalID())).										/* 01 */
-	arg(toSqlStr(s.customAppSignalID())).								/* 02 */
-	arg(toSqlStr(s.caption())).											/* 03 */
-	arg(toSqlStr(s.equipmentID())).										/* 04 */
-	arg(s.busTypeID()).													/* 05 */
-	arg(TO_INT(s.channel())).											/* 06 */
+	s.saveProtoData(&protoDataArray);
 
-	arg(TO_INT(s.signalType())).										/* 07 */
-	arg(TO_INT(s.inOutType())).											/* 08 */
-	arg(s.dataSize()).													/* 09 */
-	arg(TO_INT(s.byteOrder())).											/* 10 */
-	arg(TO_INT(s.analogSignalFormat())).								/* 11 */
-	arg(toSqlStr(s.unit())).											/* 12 */
+	QString str = QString("('%1','%2','%3',%4,%5,'%6',%7,%8,%9,%10,%11,%12,%13,%14,'%15',%16,'%17',%18)").
+								arg(toSqlStr(s.appSignalID())).										/* 01 */
+								arg(toSqlStr(s.customAppSignalID())).								/* 02 */
+								arg(toSqlStr(s.equipmentID())).										/* 03 */
 
-	arg(s.lowADC()).													/* 13 */
-	arg(s.highADC()).													/* 14 */
-	arg(s.lowEngeneeringUnits()).										/* 15 */
-	arg(s.highEngeneeringUnits()).										/* 16 */
-	arg(s.lowValidRange()).												/* 17 */
-	arg(s.highValidRange()).											/* 18 */
-	arg(s.filteringTime()).												/* 19 */
-	arg(s.spreadTolerance()).											/* 20 */
+								arg(TO_INT(s.signalType())).										/* 04 */
+								arg(TO_INT(s.inOutType())).											/* 05 */
 
-	arg(s.electricLowLimit()).											/* 21 */
-	arg(s.electricHighLimit()).											/* 22 */
-	arg(TO_INT(s.electricUnit())).										/* 23 */
-	arg(TO_INT(s.sensorType())).										/* 24 */
-	arg(TO_INT(s.outputMode())).										/* 25 */
+								arg(toSqlStr(s.specPropStruct())).									/* 06 */
+								arg(toSqlByteaStr(s.protoSpecPropValues())).						/* 07 */
+								arg(toSqlByteaStr(protoDataArray)).									/* 08 */
 
-	arg(toSqlBoolean(s.enableTuning())).								/* 26 */
-	arg(s.tuningDefaultValue().rawDouble()).							/* 27 */
-	arg(s.tuningLowBound().rawDouble()).								/* 28 */
-	arg(s.tuningHighBound().rawDouble()).								/* 29 */
-	arg(s.tuningDefaultValue().rawInt64()).								/* 30 */
-	arg(s.tuningLowBound().rawInt64()).									/* 31 */
-	arg(s.tuningHighBound().rawInt64()).								/* 32 */
-
-	arg(toSqlBoolean(s.acquire())).										/* 33 */
-	arg(toSqlBoolean(s.archive())).										/* 34 */
-	arg(s.decimalPlaces()).												/* 35 */
-	arg(s.coarseAperture()).											/* 36 */
-	arg(s.fineAperture()).												/* 37 */
-	arg(toSqlBoolean(s.adaptiveAperture())).							/* 38 */
-
-	arg(s.ID()).														/* 39 */
-	arg(s.signalGroupID()).												/* 40 */
-	arg(s.signalInstanceID()).											/* 41 */
-	arg(s.changesetID()).												/* 42 */
-	arg(toSqlBoolean(s.checkedOut())).									/* 43 */
-	arg(s.userID()).													/* 44 */
-	arg(s.created().toString(DATE_TIME_FORMAT_STR)).					/* 45 */
-	arg(toSqlBoolean(s.deleted())).										/* 46 */
-	arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR)).			/* 47 */
-	arg(s.instanceAction().toInt());									/* 48 */
-
+								arg(s.ID()).														/* 09 */
+								arg(s.signalGroupID()).												/* 10 */
+								arg(s.signalInstanceID()).											/* 11 */
+								arg(s.changesetID()).												/* 12 */
+								arg(toSqlBoolean(s.checkedOut())).									/* 13 */
+								arg(s.userID()).													/* 14 */
+								arg(s.created().toString(DATE_TIME_FORMAT_STR)).					/* 15 */
+								arg(toSqlBoolean(s.deleted())).										/* 16 */
+								arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR)).			/* 17 */
+								arg(s.instanceAction().toInt());									/* 18 */
 	return str;
 }
-
 
 void DbWorker::getObjectState(QSqlQuery& q, ObjectState& os)
 {
@@ -4479,15 +4402,12 @@ void DbWorker::getObjectState(QSqlQuery& q, ObjectState& os)
 	os.errCode = q.value("errCode").toInt();
 }
 
-
-
 void DbWorker::slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
 	AUTO_COMPLETE
 
 	addSignal(signalType, newSignal);
 }
-
 
 bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
@@ -4654,6 +4574,11 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 		return;
 	}
 
+	if (signalIDs->size() == 0)
+	{
+		return;				// nothing to checkout
+	}
+
 	objectStates->clear();
 
 	// Operation
@@ -4744,8 +4669,8 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 
 	// request
 	//
-	signal->setCreated(QDateTime::currentDateTime());
-	signal->setInstanceCreated(QDateTime::currentDateTime());
+	//signal->setCreated(QDateTime::currentDateTime());
+	//signal->setInstanceCreated(QDateTime::currentDateTime());
 
 	QString errMsg;
 
@@ -5353,6 +5278,64 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 	return;
 }
 
+
+void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (hasCheckedOut == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	*hasCheckedOut = true;
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	hasCheckedOutSignals(db, hasCheckedOut);
+
+	return;
+}
+
+void DbWorker::hasCheckedOutSignals(QSqlDatabase& db, bool* hasCheckedOut)
+{
+	if (hasCheckedOut == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	QSqlQuery q(db);
+
+	bool result = q.exec("SELECT hasCheckedOutSignals();");
+
+	if (result == false)
+	{
+		emitError(db, tr("Error calling hasCheckedOutSignals(): ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == false)
+	{
+		emitError(db, tr("Error hasCheckedOutSignals() result fetching"));
+		return;
+	}
+
+	*hasCheckedOut = q.value(0).toBool();
+
+	return;
+}
 
 // Build management
 //
@@ -6174,3 +6157,507 @@ void DbWorker::setSessionKey(QString value)
 {
 	m_sessionKey = value;
 }
+
+bool DbWorker::processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage)
+{
+	if (errorMessage == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	Q_UNUSED(db);
+
+	switch(newVersion)
+	{
+	case 215:
+		return processingBeforeDatabaseUpgrade0215(db, errorMessage);
+	}
+
+	return true;
+}
+
+bool DbWorker::processingBeforeDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage)
+{
+	bool hasCheckedOut = true;
+
+	hasCheckedOutSignals(db, &hasCheckedOut);
+
+	if (hasCheckedOut == true)
+	{
+		*errorMessage = "All app signals should be Checked In before database can be upgraded to new version!\n\n"
+						"Use previous version of U7 to Check In app signals and retry upgrade.";
+		return false;
+	}
+
+	return true;
+}
+
+bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage)
+{
+	if (errorMessage == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	switch(currentVersion)
+	{
+	case 215:
+		return processingAfterDatabaseUpgrade0215(db, errorMessage);
+	}
+
+	return true;
+}
+
+bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage)
+{
+	bool result = true;
+
+	// indexes of db struct SignalData fields BEFORE database upgrade 0216
+	//
+//	const int SD_APP_SIGNAL_ID = 0;
+//	const int SD_CUSTOM_APP_SIGNAL_ID = 1;
+	const int SD_CAPTION = 2;
+//	const int SD_EQUIPMENT_ID = 3;
+	const int SD_BUS_TYPE_ID = 4;
+	const int SD_CHANNEL = 5;
+
+	const int SD_SIGNAL_TYPE = 6;
+	const int SD_IN_OUT_TYPE = 7;
+
+	const int SD_DATA_SIZE = 8;
+	const int SD_BYTE_ORDER = 9;
+
+	const int SD_ANALOG_SIGNAL_FORMAT = 10;
+	const int SD_UNIT = 11;
+
+	const int SD_LOW_ADC = 12;
+	const int SD_HIGH_ADC = 13;
+	const int SD_LOW_ENGENEERING_UNITS = 14;
+	const int SD_HIGH_ENGENEERING_UNITS = 15;
+	const int SD_LOW_VALID_RANGE = 16;
+	const int SD_HIGH_VALID_RANGE = 17;
+	const int SD_FILTERING_TIME = 18;
+	const int SD_SPREADTOLERANCE = 19;
+
+	const int SD_ELECTRIC_LOW_LIMIT = 20;
+	const int SD_ELECTRIC_HIGH_LIMIT = 21;
+	const int SD_ELECTRIC_UNIT = 22;
+	const int SD_SENSOR_TYPE = 23;
+	const int SD_OUTPUT_MODE = 24;
+
+	const int SD_ENABLE_TUNING = 25;
+
+	const int SD_TUNING_DEFAULT_DOUBLE = 26;
+	const int SD_TUNING_LOW_BOUND_DOUBLE = 27;
+	const int SD_TUNING_HIGH_BOUND_DOUBLE = 28;
+
+	const int SD_TUNING_DEFAULT_INT = 29;
+	const int SD_TUNING_LOW_BOUND_INT = 30;
+	const int SD_TUNING_HIGH_BOUND_INT = 31;
+
+	const int SD_ACQUIRE = 32;
+	const int SD_ARCHIVE = 33;
+
+	const int SD_DECIMAL_PLACES = 34;
+	const int SD_COARSE_APERTURE = 35;
+	const int SD_FINE_APERTURE = 36;
+	const int SD_ADAPTIVE_APERTURE = 37;
+
+//	const int SD_SIGNAL_ID = 38;
+//	const int SD_SIGNAL_GROUP_ID = 39;
+	const int SD_SIGNAL_INSTANCE_ID = 40;
+//	const int SD_CHANGESET_ID = 41;
+//	const int SD_CHECKEDOUT = 42;
+//	const int SD_USER_ID = 43;
+//	const int SD_CREATED = 44;
+//	const int SD_DELETED = 45;
+//	const int SD_INSTANCE_CREATED = 46;
+//	const int SD_INSTANCE_ACTION = 47;
+
+	SignalSpecPropValues inputSpecPropValues;
+
+	result = inputSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultInputAnalogSpecPropStruct);
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't create SignalSpecPropValues for input signal"));
+		return false;
+	}
+
+
+	SignalSpecPropValues outputSpecPropValues;
+
+	result = outputSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultOutputAnalogSpecPropStruct);
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't create SignalSpecPropValues for output signal"));
+		return false;
+	}
+
+	SignalSpecPropValues internalSpecPropValues;
+
+	result = internalSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultInternalAnalogSpecPropStruct);
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't create SignalSpecPropValues for internal signal"));
+		return false;
+	}
+
+	//
+
+	QSqlQuery q(db);
+
+	result = q.exec(QString("SELECT * FROM get_latest_signals_all(%1)").arg(1));
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't get_latest_signals_all! Error: ")) + q.lastError().text();
+		return false;
+	}
+
+	QString sqlByteaString;
+	QSqlQuery updateQuery(db);
+	QString specPropStruct;
+	QByteArray protoDataArray;
+
+	while(q.next() != false)
+	{
+		E::SignalType signalType = static_cast<E::SignalType>(q.value(SD_SIGNAL_TYPE).toInt());
+		E::AnalogAppSignalFormat analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(q.value(SD_ANALOG_SIGNAL_FORMAT).toInt());
+
+		int latestSignalInstanceID = q.value(SD_SIGNAL_INSTANCE_ID).toInt();
+
+		// read and serialize some fields in ProtoData field of SignalInstance
+		//
+		Proto::ProtoAppSignalData protoData;
+
+		protoData.set_bustypeid(q.value(SD_BUS_TYPE_ID).toString().toStdString());
+		protoData.set_caption(q.value(SD_CAPTION).toString().toStdString());
+		protoData.set_channel(q.value(SD_CHANNEL).toInt());
+
+		protoData.set_datasize(q.value(SD_DATA_SIZE).toInt());
+		protoData.set_byteorder(q.value(SD_BYTE_ORDER).toInt());
+		protoData.set_analogsignalformat(q.value(SD_ANALOG_SIGNAL_FORMAT).toInt());
+		protoData.set_unit(q.value(SD_UNIT).toString().toStdString());
+
+		protoData.set_enabletuning(q.value(SD_ENABLE_TUNING).toBool());
+
+		TuningValue tv;
+
+		tv.setValue(signalType, analogSignalFormat,
+			   q.value(SD_TUNING_DEFAULT_INT).toLongLong(),
+			   q.value(SD_TUNING_DEFAULT_DOUBLE).toDouble());
+
+		tv.save(protoData.mutable_tuningdefaultvalue());
+
+		tv.setValue(signalType, analogSignalFormat,
+			   q.value(SD_TUNING_LOW_BOUND_INT).toLongLong(),
+			   q.value(SD_TUNING_LOW_BOUND_DOUBLE).toDouble());
+
+		tv.save(protoData.mutable_tuninglowbound());
+
+		tv.setValue(signalType, analogSignalFormat,
+			   q.value(SD_TUNING_HIGH_BOUND_INT).toLongLong(),
+			   q.value(SD_TUNING_HIGH_BOUND_DOUBLE).toDouble());
+
+		tv.save(protoData.mutable_tuninghighbound());
+
+		protoData.set_acquire(q.value(SD_ACQUIRE).toBool());
+		protoData.set_archive(q.value(SD_ARCHIVE).toBool());
+		protoData.set_decimalplaces(q.value(SD_DECIMAL_PLACES).toInt());
+		protoData.set_coarseaperture(q.value(SD_COARSE_APERTURE).toDouble());
+		protoData.set_fineaperture(q.value(SD_FINE_APERTURE).toDouble());
+		protoData.set_adaptiveaperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
+
+		int protoDataSize = protoData.ByteSize();
+
+		protoDataArray.resize(protoDataSize);
+
+		protoData.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(protoDataArray.data()));
+
+		sqlByteaString = toSqlByteaStr(protoDataArray);
+
+		result = updateQuery.exec(QString("UPDATE SignalInstance SET protodata=%1 WHERE SignalInstanceID=%2").
+										arg(sqlByteaString).arg(latestSignalInstanceID));
+
+		if (result == false)
+		{
+			*errorMessage = QString(tr("Can't set signal's protoData! Error: ")) + q.lastError().text();
+			return false;
+		}
+
+		// ----------------------- Create specific properties of analog input/output signals --------------------------
+		//
+		if (signalType != E::SignalType::Analog)
+		{
+			continue;
+		}
+
+		uint lowADC = q.value(SD_LOW_ADC).toUInt();
+		uint highADC = q.value(SD_HIGH_ADC).toUInt();
+		double lowEngeneeringUnits = q.value(SD_LOW_ENGENEERING_UNITS).toDouble();
+		double highEngeneeringUnits = q.value(SD_HIGH_ENGENEERING_UNITS).toDouble();
+		double lowValidRange = q.value(SD_LOW_VALID_RANGE).toDouble();
+		double highValidRange = q.value(SD_HIGH_VALID_RANGE).toDouble();
+		double filteringTime = q.value(SD_FILTERING_TIME).toDouble();
+		double spreadTolerance = q.value(SD_SPREADTOLERANCE).toDouble();
+		double electricLowLimit = q.value(SD_ELECTRIC_LOW_LIMIT).toDouble();
+		double electricHighLimit = q.value(SD_ELECTRIC_HIGH_LIMIT).toDouble();
+
+		E::ElectricUnit electricUnit = static_cast<E::ElectricUnit>(q.value(SD_ELECTRIC_UNIT).toInt());
+		E::SensorType sensorType = static_cast<E::SensorType>(q.value(SD_SENSOR_TYPE).toInt());
+		E::OutputMode outputMode = static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt());
+
+		E::SignalInOutType signalInOutType = static_cast<E::SignalInOutType>(q.value(SD_IN_OUT_TYPE).toInt());
+
+		switch(signalInOutType)
+		{
+		case E::SignalInOutType::Input:
+
+			result &= inputSpecPropValues.setValue(SignalProperties::lowADCCaption, lowADC);
+			result &= inputSpecPropValues.setValue(SignalProperties::highADCCaption, highADC);
+
+			result &= inputSpecPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
+			result &= inputSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+
+			result &= inputSpecPropValues.setValue(SignalProperties::lowValidRangeCaption, lowValidRange);
+			result &= inputSpecPropValues.setValue(SignalProperties::highValidRangeCaption, highValidRange);
+
+			result &= inputSpecPropValues.setValue(SignalProperties::filteringTimeCaption, filteringTime);
+			result &= inputSpecPropValues.setValue(SignalProperties::spreadToleranceCaption, spreadTolerance);
+
+			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
+			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+
+			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
+			result &= inputSpecPropValues.setEnumValue<E::SensorType>(SignalProperties::sensorTypeCaption, sensorType);
+
+			specPropStruct = SignalProperties::defaultInputAnalogSpecPropStruct;
+			inputSpecPropValues.serializeValuesToArray(&protoDataArray);
+
+			break;
+
+		case E::SignalInOutType::Output:
+
+			result &= outputSpecPropValues.setValue(SignalProperties::lowDACCaption, lowADC);
+			result &= outputSpecPropValues.setValue(SignalProperties::highDACCaption, highADC);
+
+			result &= outputSpecPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
+			result &= outputSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+
+			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
+			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+
+			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
+
+			result &= outputSpecPropValues.setEnumValue<E::OutputMode>(SignalProperties::outputModeCaption, outputMode);
+
+			specPropStruct = SignalProperties::defaultOutputAnalogSpecPropStruct;
+			outputSpecPropValues.serializeValuesToArray(&protoDataArray);
+
+			break;
+
+		case E::SignalInOutType::Internal:
+
+			result &= internalSpecPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
+			result &= internalSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+
+			specPropStruct = SignalProperties::defaultInternalAnalogSpecPropStruct;
+			internalSpecPropValues.serializeValuesToArray(&protoDataArray);
+
+			break;
+
+		default:
+			continue;
+		}
+
+		//
+
+		if (result == false)
+		{
+			*errorMessage = tr("Signal specific properties value setting error!");
+			return false;
+		}
+
+		sqlByteaString = toSqlByteaStr(protoDataArray);
+
+		result = updateQuery.exec(QString("UPDATE SignalInstance SET specpropstruct='%1', specpropvalues=%2 WHERE SignalInstanceID=%3").
+							arg(specPropStruct).arg(sqlByteaString).arg(latestSignalInstanceID));
+
+		if (result == false)
+		{
+			*errorMessage = QString(tr("Can't set signal's spec prop values! Error: ")) + q.lastError().text();
+			return false;
+		}
+	}
+
+	return result;
+}
+
+/*
+void DbWorker::getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s)
+{
+	// indexes of SignalData's fields
+	//
+	const int SD_APP_SIGNAL_ID = 0;
+	const int SD_CUSTOM_APP_SIGNAL_ID = 1;
+	const int SD_CAPTION = 2;
+	const int SD_EQUIPMENT_ID = 3;
+	const int SD_BUS_TYPE_ID = 4;
+	const int SD_CHANNEL = 5;
+
+	const int SD_SIGNAL_TYPE = 6;
+	const int SD_IN_OUT_TYPE = 7;
+
+	const int SD_DATA_SIZE = 8;
+	const int SD_BYTE_ORDER = 9;
+
+	const int SD_ANALOG_SIGNAL_FORMAT = 10;
+	const int SD_UNIT = 11;
+
+	const int SD_LOW_ADC = 12;
+	const int SD_HIGH_ADC = 13;
+	const int SD_LOW_ENGENEERING_UNITS = 14;
+	const int SD_HIGH_ENGENEERING_UNITS = 15;
+	const int SD_LOW_VALID_RANGE = 16;
+	const int SD_HIGH_VALID_RANGE = 17;
+	const int SD_FILTERING_TIME = 18;
+	const int SD_SPREADTOLERANCE = 19;
+
+	const int SD_ELECTRIC_LOW_LIMIT = 20;
+	const int SD_ELECTRIC_HIGH_LIMIT = 21;
+	const int SD_ELECTRIC_UNIT = 22;
+	const int SD_SENSOR_TYPE = 23;
+	const int SD_OUTPUT_MODE = 24;
+
+	const int SD_ENABLE_TUNING = 25;
+
+	const int SD_TUNING_DEFAULT_DOUBLE = 26;
+	const int SD_TUNING_LOW_BOUND_DOUBLE = 27;
+	const int SD_TUNING_HIGH_BOUND_DOUBLE = 28;
+
+	const int SD_TUNING_DEFAULT_INT = 29;
+	const int SD_TUNING_LOW_BOUND_INT = 30;
+	const int SD_TUNING_HIGH_BOUND_INT = 31;
+
+	const int SD_ACQUIRE = 32;
+	const int SD_ARCHIVE = 33;
+
+	const int SD_DECIMAL_PLACES = 34;
+	const int SD_COARSE_APERTURE = 35;
+	const int SD_FINE_APERTURE = 36;
+	const int SD_ADAPTIVE_APERTURE = 37;
+
+	const int SD_SIGNAL_ID = 38;
+	const int SD_SIGNAL_GROUP_ID = 39;
+	const int SD_SIGNAL_INSTANCE_ID = 40;
+	const int SD_CHANGESET_ID = 41;
+	const int SD_CHECKEDOUT = 42;
+	const int SD_USER_ID = 43;
+	const int SD_CREATED = 44;
+	const int SD_DELETED = 45;
+	const int SD_INSTANCE_CREATED = 46;
+	const int SD_INSTANCE_ACTION = 47;
+
+	// read fields
+	//
+	s.setAppSignalID(q.value(SD_APP_SIGNAL_ID).toString());
+	s.setCustomAppSignalID(q.value(SD_CUSTOM_APP_SIGNAL_ID).toString());
+
+	s.setCaption(q.value(SD_CAPTION).toString());
+	s.setEquipmentID(q.value(SD_EQUIPMENT_ID).toString());
+	s.setBusTypeID(q.value(SD_BUS_TYPE_ID).toString());
+	s.setChannel(static_cast<E::Channel>(q.value(SD_CHANNEL).toInt()));
+
+	s.setSignalType(static_cast<E::SignalType>(q.value(SD_SIGNAL_TYPE).toInt()));
+	s.setInOutType(static_cast<E::SignalInOutType>(q.value(SD_IN_OUT_TYPE).toInt()));
+
+	s.setDataSize(q.value(SD_DATA_SIZE).toInt());
+	s.setByteOrder(static_cast<E::ByteOrder>(q.value(SD_BYTE_ORDER).toInt()));
+
+	int f = q.value(SD_ANALOG_SIGNAL_FORMAT).toInt();
+
+	if (f == TO_INT(E::DataFormat::UnsignedInt))
+	{
+		// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
+		//
+		f = TO_INT(E::AnalogAppSignalFormat::SignedInt32);
+	}
+	s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
+	s.setUnit(q.value(SD_UNIT).toString());
+
+	s.setLowADC(q.value(SD_LOW_ADC).toInt());
+	s.setHighADC(q.value(SD_HIGH_ADC).toInt());
+	s.setLowEngeneeringUnits(q.value(SD_LOW_ENGENEERING_UNITS).toDouble());
+	s.setHighEngeneeringUnits(q.value(SD_HIGH_ENGENEERING_UNITS).toDouble());
+	s.setLowValidRange(q.value(SD_LOW_VALID_RANGE).toDouble());
+	s.setHighValidRange(q.value(SD_HIGH_VALID_RANGE).toDouble());
+	s.setFilteringTime(q.value(SD_FILTERING_TIME).toDouble());
+	s.setSpreadTolerance(q.value(SD_SPREADTOLERANCE).toDouble());
+
+	s.setElectricLowLimit(q.value(SD_ELECTRIC_LOW_LIMIT).toDouble());
+	s.setElectricHighLimit(q.value(SD_ELECTRIC_HIGH_LIMIT).toDouble());
+	s.setElectricUnit(static_cast<E::ElectricUnit>(q.value(SD_ELECTRIC_UNIT).toInt()));
+	s.setSensorType(static_cast<E::SensorType>(q.value(SD_SENSOR_TYPE).toInt()));
+	s.setOutputMode(static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt()));
+
+	s.setEnableTuning(q.value(SD_ENABLE_TUNING).toBool());
+
+	TuningValue tv;
+
+	tv.setValue(s.signalType(),
+		   s.analogSignalFormat(),
+		   q.value(SD_TUNING_DEFAULT_INT).toLongLong(),
+		   q.value(SD_TUNING_DEFAULT_DOUBLE).toDouble());
+
+	s.setTuningDefaultValue(tv);
+
+	tv.setValue(s.signalType(),
+		   s.analogSignalFormat(),
+		   q.value(SD_TUNING_LOW_BOUND_INT).toLongLong(),
+		   q.value(SD_TUNING_LOW_BOUND_DOUBLE).toDouble());
+
+	s.setTuningLowBound(tv);
+
+	tv.setValue(s.signalType(),
+		   s.analogSignalFormat(),
+		   q.value(SD_TUNING_HIGH_BOUND_INT).toLongLong(),
+		   q.value(SD_TUNING_HIGH_BOUND_DOUBLE).toDouble());
+
+	s.setTuningHighBound(tv);
+
+	s.setAcquire(q.value(SD_ACQUIRE).toBool());
+	s.setArchive(q.value(SD_ARCHIVE).toBool());
+
+	s.setDecimalPlaces(q.value(SD_DECIMAL_PLACES).toInt());
+	s.setCoarseAperture(q.value(SD_COARSE_APERTURE).toDouble());
+	s.setFineAperture(q.value(SD_FINE_APERTURE).toDouble());
+	s.setAdaptiveAperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
+
+	s.setID(q.value(SD_SIGNAL_ID).toInt());
+	s.setSignalGroupID(q.value(SD_SIGNAL_GROUP_ID).toInt());
+	s.setSignalInstanceID(q.value(SD_SIGNAL_INSTANCE_ID).toInt());
+	s.setChangesetID(q.value(SD_CHANGESET_ID).toInt());
+	s.setCheckedOut(q.value(SD_CHECKEDOUT).toBool());
+	s.setUserID(q.value(SD_USER_ID).toInt());
+	s.setCreated(q.value(SD_CREATED).toDateTime());
+	s.setDeleted(q.value(SD_DELETED).toBool());
+	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
+	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(SD_INSTANCE_ACTION).toInt()));
+}
+*/
+
+
+
+
+
+
+
+
+
+
+

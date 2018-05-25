@@ -445,7 +445,6 @@ namespace Proto
 		size_t m_autoCompressionLimit = 4096;
 	};
 
-
 	// Helper serialization functions
 	//
 	const QUuid& Read(const Proto::Uuid& message);

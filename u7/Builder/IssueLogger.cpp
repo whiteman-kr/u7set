@@ -670,7 +670,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.
+	/// Title: Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'. Check High/LowEngineeringUints ranges, ADC range and SpreadTolerance value of signals.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
@@ -678,13 +678,13 @@ namespace Builder
 	///         %3 Module StrID
 	///
 	/// Description:
-	///			SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
+	///			Calculated SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
 	///
 	void IssueLogger::errCFG3009(QString signalID1, QString signalID2, QString module)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3'. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.")
+				  tr("Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'.")
 				  .arg(signalID1)
 				  .arg(signalID2)
 				  .arg(module));
@@ -1132,22 +1132,27 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+	/// Title: Property '%4' must have same value in signals %1 and %2, module '%3'.
 	///
 	/// Parameters:
-	///			%1 LM equipmentID
-	///         %2 AppDataService equipmentID
+	///         %1 Signal 1 StrID
+	///         %2 Signal 2 StrID
+	///         %3 Module StrID
+	///         %4 Property Name
 	///
 	/// Description:
-	///			Two LM's etehrnet adapters can't be connected to same AppDataService. Check LM's ethernet adapters settings.
+	///			Property values should be equal in specified signals of the module.
 	///
-	void IssueLogger::errCFG3028(QString lmID, QString appDataServiceID)
+	void IssueLogger::errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3028,
-				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
-						arg(lmID).arg(appDataServiceID));
-	}
+				  tr("Property '%4' must have same value in signals %1 and %2, module '%3'.")
+				  .arg(signalID1)
+				  .arg(signalID2)
+				  .arg(module)
+				  .arg(propertyName));
+	}	
 
 	/// IssueCode: CFG3029
 	///
@@ -1168,6 +1173,26 @@ namespace Builder
 				  QString(tr("Software %1 is not linked to ConfigurationService.")).arg(softwareID));
 	}
 
+	/// IssueCode: CFG3030
+	///
+	/// IssueType: Error
+	///
+	/// Title: Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+	///
+	/// Parameters:
+	///			%1 LM equipmentID
+	///         %2 AppDataService equipmentID
+	///
+	/// Description:
+	///			Two LM's etehrnet adapters can't be connected to same AppDataService. Check LM's ethernet adapters settings.
+	///
+	void IssueLogger::errCFG3030(QString lmID, QString appDataServiceID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3030,
+				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
+						arg(lmID).arg(appDataServiceID));
+	}	
 
 	// ALP			Application Logic Parsing				4000-4999
 	//

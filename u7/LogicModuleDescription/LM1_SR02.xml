@@ -537,7 +537,7 @@
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
-        <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0001">
+	    <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0002">
 		    <Properties>
 			    <Description>Multiplexor Block selects one of two input bus signals and output result in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
@@ -547,7 +547,7 @@
 				<MinWidth>22</MinWidth>
 			</Properties>
 			<Inputs>
-			    <Pin OpName="i_sel"		Caption="sel"  Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="32" BusDataFormat="Discrete"/>
+			    <Pin OpName="i_sel" Caption="sel" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="1"/>
 				<Pin OpName="i_x1_data" Caption="in_1" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="32" BusDataFormat="Discrete"/>
 				<Pin OpName="i_x2_data" Caption="in_2" Type="Bus" ByteOrder="BigEndian" OpIndex="3" Size="32" BusDataFormat="Discrete"/>
 			</Inputs>
@@ -5502,7 +5502,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#integrator_v1"   Caption="integrator"   Version="1.0008">
+        <AFB id="#integrator_v1"   Caption="integrator"   Version="1.0009">
 			<Properties>				
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -5519,6 +5519,9 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="i_track" Caption="track" Type="Discrete" ByteOrder="BigEndian" OpIndex="18" Size="1"/>
 				<Pin OpName="i_ki" Caption="ki" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="0" Size="32"/>
 				<Pin OpName="i_ti" Caption="ti" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+				<Pin OpName="i_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
+				<Pin OpName="i_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="4" Size="32"/>
+				<Pin OpName="i_ri_const" Caption="ri_const" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="8" Size="32"/>
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="20" Size="32"/>
@@ -5531,33 +5534,6 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="28" Size="1"/>
 			</Outputs>
 			<Params>				
-				<Param OpName="i_max" Caption="Max" Visible="true" OpIndex="4" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_min" Caption="Min" Visible="true" OpIndex="6" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_ri_const" Caption="RIConst" Visible="true" OpIndex="8" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>                             
 				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
@@ -7890,6 +7866,224 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
+		<AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0001">
+			<Properties>				
+				<Description>Analog mismatch block</Description>
+				<Category>Other</Category>
+				<OpCode>27</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>28</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_x1_data" Caption="in_1" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="4" Size="32"/>
+				<Pin OpName="i_x2_data" Caption="in_2" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
+				<Pin OpName="i_x3_data" Caption="in_3" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="8" Size="32"/>
+				<Pin OpName="i_x4_data" Caption="in_4" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="10" Size="32"/>
+				<Pin OpName="i_ust" Caption="value" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_x1_mismatch" Caption="out_1" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
+				<Pin OpName="o_x2_mismatch" Caption="out_2" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_x3_mismatch" Caption="out_3" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
+				<Pin OpName="o_x4_mismatch" Caption="out_4" Type="Discrete" ByteOrder="BigEndian" OpIndex="15" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>
+				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
+				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="18" Size="1"/>
+				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
+				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>     
+			</Outputs>
+			<Params>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>3</Value>
+					<Default>2</Default>
+					<LowLimit>2</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	createInputSignals(videoItemFblElement, afbElement);
+	createOutputSignals(videoItemFblElement, afbElement);
+	return;
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>            
+				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(videoItemFblElement, afbElement)
+{
+    videoItemFblElement.removeInputSignal("in_1");
+	videoItemFblElement.removeInputSignal("in_2");
+	videoItemFblElement.removeInputSignal("in_3");
+	videoItemFblElement.removeInputSignal("in_4");
+
+	var count = videoItemFblElement.getParamIntValue("InputCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 4)
+	{
+		count = 4;
+	}
+
+	var opIndex = 4;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex+=2;
+	}	
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+
+          var count = videoItemFblElement.getParamIntValue("InputCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 4)
+	{
+		count = 4;
+	}
+
+	var opIndex = 12;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var s = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}
+		opIndex++;
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
+	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	createInputSignals(videoItemFblElement, afbElement);
+	createOutputSignals(videoItemFblElement, afbElement);
+	return;
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>		
+
 		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0006">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
@@ -8214,7 +8408,7 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_highlim" Caption="HightLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+				<Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>100</Value>
 					<Default>100</Default>
 					<LowLimit>-2147483647</LowLimit>
@@ -8624,6 +8818,168 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
+
+		<AFB id="#mismatch_d_si_v1"    Caption="mismatch_d_si"    Version="1.0001">
+			<Properties>				
+				<Description>Analog mismatch block</Description>
+				<Category>Other</Category>
+				<OpCode>27</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>28</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_x1_data" Caption="in_1" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="4" Size="32"/>
+				<Pin OpName="i_x2_data" Caption="in_2" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>
+				<Pin OpName="i_x3_data" Caption="in_3" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="8" Size="32"/>
+				<Pin OpName="i_x4_data" Caption="in_4" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="10" Size="32"/>
+				<Pin OpName="i_ust" Caption="value" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_x1_mismatch" Caption="out_1" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
+				<Pin OpName="o_x2_mismatch" Caption="out_2" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+				<Pin OpName="o_x3_mismatch" Caption="out_3" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
+				<Pin OpName="o_x4_mismatch" Caption="out_4" Type="Discrete" ByteOrder="BigEndian" OpIndex="15" Size="1"/>
+				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>                
+			</Outputs>
+			<Params>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>            
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>3</Value>
+					<Default>2</Default>
+					<LowLimit>2</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	createInputSignals(videoItemFblElement, afbElement);
+	createOutputSignals(videoItemFblElement, afbElement);
+	return;
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeInputSignal("in_1");
+	videoItemFblElement.removeInputSignal("in_2");
+	videoItemFblElement.removeInputSignal("in_3");
+	videoItemFblElement.removeInputSignal("in_4");
+
+	var count = videoItemFblElement.getParamIntValue("InputCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 4)
+	{
+		count = 4;
+	}
+
+	var opIndex = 4;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex+=2;
+	}	
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+
+          var count = videoItemFblElement.getParamIntValue("InputCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 4)
+	{
+		count = 4;
+	}
+
+	var opIndex = 12;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var s = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}
+		opIndex++;
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");	
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	createInputSignals(videoItemFblElement, afbElement);
+	createOutputSignals(videoItemFblElement, afbElement);
+	return;
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>		
 
 		<AFB id="#mul_si_v1"         Caption="mul_si"         Version="1.0005">
 			<Properties>				
@@ -12257,7 +12613,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#pulse_gen_v1" Caption="pulse_gen" Version="1.0001">
+        <AFB id="#pulse_gen_v1" Caption="pulse_gen" Version="1.0002">
 		    <Properties>
 			    <Description>Pulse generator</Description>
 				<Category>Other</Category>
@@ -12283,7 +12639,7 @@ function(videoItemFblElement, afbElement)
 					    <Changed></Changed>
 					</Script>
 				</Param>
-			    <Param OpName="i_t_hight" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_t_high" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>250</Value>
 					<Default>250</Default>
 					<LowLimit>5</LowLimit>
@@ -12326,7 +12682,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#pulse_gen_sync_v1" Caption="pulse_gen_sync" Version="1.0001">
+        <AFB id="#pulse_gen_sync_v1" Caption="pulse_gen_sync" Version="1.0002">
 		    <Properties>
 			    <Description>Synchronized pulse generator</Description>
 				<Category>Other</Category>
@@ -12354,7 +12710,7 @@ function(videoItemFblElement, afbElement)
 					    <Changed></Changed>
 					</Script>
 				</Param>
-			    <Param OpName="i_t_hight" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_t_high" Caption="High" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>250</Value>
 					<Default>250</Default>
 					<LowLimit>5</LowLimit>
@@ -12389,7 +12745,6 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>				
-		
 
 	</AFBL>
 </LogicModule>

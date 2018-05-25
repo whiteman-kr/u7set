@@ -25,11 +25,3 @@ SUBDIRS += qtservice \
     TuningClient \
     TuningIPEN \
     mconf
-
-HEADERS += \
-    lib/IAppSignalManager.h \
-    lib/CommonTypes.h \
-    lib/Times.h
-
-SOURCES += \
-    lib/Times.cpp

@@ -31,6 +31,9 @@ namespace VFrame30
 	private:
 		void Init(void);
 
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
+
 		// Serialization
 		//
 	protected:

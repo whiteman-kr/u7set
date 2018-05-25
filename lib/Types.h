@@ -8,6 +8,7 @@
 class E : public QObject
 {
 	Q_OBJECT
+
 public:
 	E() = delete;
 
@@ -214,7 +215,7 @@ public:
 	//
 	enum SensorType
 	{
-		NoSensorType = 0,
+		NoSensor = 0,
 
 		Ohm_Pt50_W1391 = 1,
 		Ohm_Pt100_W1391 = 2,
@@ -232,6 +233,20 @@ public:
 		mV_K_TXA = 11,
 		mV_L_TXK = 12,
 		mV_N_THH = 13,
+
+        //
+
+        mV_Type_B = 14,
+        mV_Type_E = 15,
+        mV_Type_J = 16,
+        mV_Type_K = 17,
+        mV_Type_N = 18,
+        mV_Type_R = 19,
+        mV_Type_S = 20,
+        mV_Type_T = 21,
+
+        mV_Raw_Mul_8 = 22,
+        mV_Raw_Mul_32 = 23,
 	};
 	Q_ENUM(SensorType)
 
@@ -290,6 +305,30 @@ public:
 	};
 	Q_ENUM(TimeType)
 
+	// Property editor type
+	//
+	enum class PropertySpecificEditor : qint16
+	{
+		None = 0,
+		Password,
+		Script,
+		TuningFilter,
+		SpecificPropertyStruct
+	};
+	Q_ENUM(PropertySpecificEditor)
+
+	enum class SpecificPropertyType
+	{
+		pt_int32,
+		pt_uint32,
+		pt_double,
+		pt_bool,
+		pt_e_channel,
+		pt_string,
+		pt_dynamicEnum,
+	};
+	Q_ENUM(SpecificPropertyType)
+
 public:
 	// Convert enum value (not index) to QString
 	//
@@ -344,7 +383,16 @@ public:
 	// Convert QString to enum value (not index)
 	//
 	template <typename ENUM_TYPE>
-	static ENUM_TYPE stringToValue(const QString& str, bool* ok = nullptr)
+	static std::pair<ENUM_TYPE, bool> stringToValue(const QString& str)
+	{
+		bool ok = false;
+		auto resultVal = stringToValue<ENUM_TYPE>(str, &ok);
+
+		return {resultVal, ok};
+	}
+
+	template <typename ENUM_TYPE>
+	static ENUM_TYPE stringToValue(const QString& str, bool* ok)
 	{
 		assert(std::is_enum<ENUM_TYPE>::value);
 
@@ -408,7 +456,6 @@ public:
 		return result;
 	}
 
-
 	// Get list of enum keys converted to QString
 	//
 	template <typename ENUM_TYPE>
@@ -436,11 +483,10 @@ public:
 		return result;
 	}
 
-
 	// Check if enum containes value
 	//
 	template <typename ENUM_TYPE>
-	static bool containes(int value)
+	static bool contains(int value)
 	{
 		assert(std::is_enum<ENUM_TYPE>::value);
 

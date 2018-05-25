@@ -32,11 +32,11 @@ namespace VFrame30
 		c1.data = E::ColumnData::State;
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemSignal::appSignalIds, SchemaItemSignal::setAppSignalIds);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::multiLine, PropertyNames::appearanceCategory, true, SchemaItemSignal::multiLine, SchemaItemSignal::setMultiLine);
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::monitorCategory, true, SchemaItemSignal::precision, SchemaItemSignal::setPrecision);
-		ADD_PROPERTY_GET_SET_CAT(E::AnalogFormat, PropertyNames::analogFormat, PropertyNames::monitorCategory, true, SchemaItemSignal::analogFormat, SchemaItemSignal::setAnalogFormat);
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::columnCount, PropertyNames::monitorCategory, true, SchemaItemSignal::columnCount, SchemaItemSignal::setColumnCount);
+		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
+		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
+		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);
+		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(PropertyNames::analogFormat, PropertyNames::monitorCategory, true);
+		addProperty<int, SchemaItemSignal, &SchemaItemSignal::columnCount, &SchemaItemSignal::setColumnCount>(PropertyNames::columnCount, PropertyNames::monitorCategory, true);
 
 		createColumnProperties();
 
@@ -898,7 +898,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_multiLine;
 	}
 
-	void SchemaItemSignal::setMultiLine(bool value)
+	void SchemaItemSignal::setMultiLine(const bool& value)
 	{
 		m_multiLine = value;
 	}
@@ -913,19 +913,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_precision;
 	}
 
-	void SchemaItemSignal::setPrecision(int value)
+	void SchemaItemSignal::setPrecision(const int& value)
 	{
-		if (value < 0)
-		{
-			value = 0;
-		}
-
-		if (value > 12)
-		{
-			value = 12;
-		}
-
-		m_precision = value;
+		m_precision = qBound(0, value, 12);
 	}
 
 	E::AnalogFormat SchemaItemSignal::analogFormat() const
@@ -933,7 +923,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_analogFormat;
 	}
 
-	void SchemaItemSignal::setAnalogFormat(E::AnalogFormat value)
+	void SchemaItemSignal::setAnalogFormat(const E::AnalogFormat& value)
 	{
 		m_analogFormat = value;
 	}
@@ -943,21 +933,13 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return static_cast<int>(m_columns.size());
 	}
 
-	void SchemaItemSignal::setColumnCount(int value)
+	void SchemaItemSignal::setColumnCount(const int& value)
 	{
-		if (value < 1)
-		{
-			value = 1;
-		}
+		int c = qBound(1, value, 8);
 
-		if (value > 8)
+		if (m_columns.size() != c)
 		{
-			value = 8;
-		}
-
-		if (m_columns.size() != value)
-		{
-			m_columns.resize(value);
+			m_columns.resize(c);
 			createColumnProperties();
 		}
 

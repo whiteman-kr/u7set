@@ -249,17 +249,26 @@ std::shared_ptr<QUdpSocket> PacketSourceModel::getSocket(const QString& address,
 
 void PacketSourceModel::loadProject(const QString& projectPath)
 {
-	QDirIterator signalsIt(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories);
-	if (signalsIt.hasNext())
+	QDirIterator signalsIt(projectPath, QStringList() << "AppSignals.asgs", QDir::Files, QDirIterator::Subdirectories);
+
+	if (signalsIt.hasNext() == true)
 	{
 		m_signalSet.clear();
-		SerializeSignalsFromXml(signalsIt.next(), m_signalSet);
+
+		bool res = m_signalSet.serializeFromProtoFile(signalsIt.next());
+
+		if (res == false)
+		{
+			QMessageBox::critical(nullptr, "Error", "Error reading AppSignals.asgs file");
+			return;
+		}
 	}
 	else
 	{
-		QMessageBox::critical(nullptr, "Error", "Could not find appSignals.xml");
+		QMessageBox::critical(nullptr, "Error", "Could not find AppSignals.asgs file");
 		return;
 	}
+
 	QDirIterator equipmentIt(projectPath, QStringList() << "*equipment.xml", QDir::Files, QDirIterator::Subdirectories);
 	if (equipmentIt.hasNext())
 	{

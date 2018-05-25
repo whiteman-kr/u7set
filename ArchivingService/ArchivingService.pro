@@ -18,6 +18,11 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 #
@@ -96,7 +101,9 @@ SOURCES += \
     Archive.cpp \
     TimeFilter.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Signal.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS += \
     version.h \
@@ -139,17 +146,15 @@ HEADERS += \
     TimeFilter.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../lib/Signal.h
+    ../lib/Signal.h \
+    ../lib/Signal.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
-win32:QMAKE_CXXFLAGS += /std:c++17
 
 #protobuf
 #

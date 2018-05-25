@@ -11,6 +11,12 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -120,7 +126,8 @@ SOURCES += main.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -174,7 +181,8 @@ HEADERS  += \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 
 FORMS    += \
@@ -210,13 +218,6 @@ CONFIG(debug, debug|release): DEFINES += _DEBUG
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
-
-
-#c++14 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++14
-
-win32:QMAKE_CXXFLAGS += /std:c++17
 
 
 # VFrame30 library

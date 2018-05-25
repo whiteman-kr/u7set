@@ -73,6 +73,9 @@ namespace VFrame30
 	public:
 		virtual ~SchemaItem();
 
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
+
 		// Serialization
 		//
 		friend Proto::ObjectSerialization<SchemaItem>;	// For call CreateObject from Proto::ObjectSerialization
@@ -228,13 +231,13 @@ namespace VFrame30
 		bool isControl() const;
 
 		bool isLocked() const;
-		void setLocked(bool locked);
+		void setLocked(const bool& locked);
 
 		bool isCommented() const;
 		bool commented() const;
-		void setCommented(bool value);
+		void setCommented(const bool& value);
 
-		const QUuid& guid() const;
+		QUuid guid() const;
 		void setGuid(const QUuid& guid);
 		virtual void setNewGuid();			// set new GUID for item, for it's pins etc, useful for copy (mousemove + ctrl)
 
@@ -244,9 +247,9 @@ namespace VFrame30
 		void setItemUnit(SchemaUnit value);
 
 		bool acceptClick() const;
-		void setAcceptClick(bool value);
+		void setAcceptClick(const bool& value);
 
-		const QString& clickScript() const;
+		QString clickScript() const;
 		void setClickScript(const QString& value);
 
 		QString preDrawScript() const;

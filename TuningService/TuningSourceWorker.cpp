@@ -966,6 +966,7 @@ namespace Tuning
 
 			m_stat.hasUnappliedParams = false;
 		}
+		else
 		{
 			result = "Fail";
 		}

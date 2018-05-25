@@ -374,7 +374,7 @@ private:
 	qint32 m_rupFramesQueueSize = 0;
 	qint32 m_rupFramesQueueMaxSize = 0;
 
-	qint32 m_rupFramePlantTime = 0;
+	qint64 m_rupFramePlantTime = 0;
 	quint16 m_rupFrameNumerator = 0;
 	bool m_dataReceives = false;
 	double m_dataReceivingRate = 0;

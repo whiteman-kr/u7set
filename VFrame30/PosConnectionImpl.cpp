@@ -16,6 +16,11 @@ namespace VFrame30
 	{
 	}
 
+	void PosConnectionImpl::propertyDemand(const QString& prop)
+	{
+		SchemaItem::propertyDemand(prop);
+	}
+
 	// Serialization
 	//
 	bool PosConnectionImpl::SaveData(Proto::Envelope* message) const

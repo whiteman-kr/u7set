@@ -262,6 +262,8 @@ public:
 
 	static QStringList createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent);
 
+	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
+
 protected:
 	void CreateActions(QToolBar* toolBar);
 
@@ -305,6 +307,7 @@ public slots:
 	// Data
 	//
 private:
+	static SignalsTabPage* m_instance;
 	SignalsModel* m_signalsModel = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;

@@ -12,7 +12,11 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
-win32:QMAKE_CXXFLAGS += /std:c++17
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
@@ -158,7 +162,9 @@ SOURCES +=\
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
-    DialogSignalInfo.cpp
+    DialogSignalInfo.cpp \
+    ../lib/Signal.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -215,7 +221,9 @@ HEADERS  += MainWindow.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
-    DialogSignalInfo.h
+    DialogSignalInfo.h \
+    ../lib/Signal.h \
+    ../lib/SignalProperties.h
 
 FORMS    += \
     DialogSettings.ui \

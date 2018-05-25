@@ -224,6 +224,8 @@ namespace Builder
 		bool createAcquiredBusSignalsList();
 		bool createNonAcquiredBusSignalsList();
 
+		bool setSignalsLmRamAccess();
+
 		bool groupTxSignals();
 
 		bool appendLinkedValiditySignal(const Signal* s);

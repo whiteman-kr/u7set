@@ -176,7 +176,7 @@ namespace Metrology
 		double					m_electricHighLimit = 0;
 		E::ElectricUnit			m_electricUnitID = E::ElectricUnit::NoUnit;
 		QString					m_electricUnit;
-		E::SensorType			m_electricSensorType = E::SensorType::NoSensorType;
+		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
 		QString					m_electricSensor;
 		int						m_electricPrecision = 3;
 

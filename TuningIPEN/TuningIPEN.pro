@@ -12,6 +12,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = TuningIPEN
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 
 SOURCES +=\
 	TuningMainWindow.cpp \
@@ -54,7 +60,8 @@ SOURCES +=\
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     AppSignalStateEx.cpp \
-    ../lib/Times.cpp
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -96,7 +103,8 @@ HEADERS  += TuningMainWindow.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     AppSignalStateEx.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 

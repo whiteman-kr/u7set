@@ -99,7 +99,7 @@ namespace Builder
 				{
 					// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
 					//
-					m_log->errCFG3028(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
+					m_log->errCFG3030(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
 					result = false;
 					break;
 				}

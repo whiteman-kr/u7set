@@ -2232,6 +2232,14 @@ namespace Builder
 			return false;
 		}
 
+		result &= setSignalsLmRamAccess();
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
 		/*result = listsUniquenessCheck();
 
 		if (result == false)
@@ -2945,6 +2953,57 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::setSignalsLmRamAccess()
+	{
+		bool result = true;
+
+		for(UalSignal* ualSignal : m_ualSignals)
+		{
+			if(ualSignal == nullptr)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			Signal* s = ualSignal->signal();
+
+			if(s == nullptr)
+			{
+				assert(false);
+				result = false;
+				continue;
+			}
+
+			switch(s->inOutType())
+			{
+			case E::SignalInOutType::Input:
+				if (s->needConversion() == true)
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				}
+				else
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::Read);
+				}
+				break;
+
+			case E::SignalInOutType::Output:
+				s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				break;
+
+			case E::SignalInOutType::Internal:
+				s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::groupTxSignals()
@@ -7714,6 +7773,7 @@ namespace Builder
 
 		result &= copyOptoPortTxDiscreteSignals(port);
 
+/*
 		// rest of manually configured buffer fills by 0
 		//
 		if (port->manualSettings() == true && port->txUsedDataSizeW() < port->txDataSizeW())
@@ -7726,7 +7786,7 @@ namespace Builder
 
 			m_code.append(cmd);
 			m_code.newLine();
-		}
+		}*/
 
 		return result;
 	}
@@ -7810,7 +7870,7 @@ namespace Builder
 
 		result &= copyOptoPortRawTxBusSignals(port, memWriteMap);
 
-		MemWriteMap::AreaList nonWrittenAreas;
+/*		MemWriteMap::AreaList nonWrittenAreas;
 
 		memWriteMap.getNonWrittenAreas(&nonWrittenAreas);
 
@@ -7832,7 +7892,7 @@ namespace Builder
 		if (first == false)
 		{
 			m_code.newLine();
-		}
+		}*/
 
 		return result;
 	}

@@ -10,6 +10,21 @@
 #include "../lib/WidgetUtils.h"
 #include "Stable.h"
 
+const std::vector<std::pair<E::SignalType, E::SignalInOutType>> signalTypeSequence =
+{
+	{E::Analog, E::SignalInOutType::Input},
+	{E::Analog, E::SignalInOutType::Output},
+	{E::Analog, E::SignalInOutType::Internal},
+
+	{E::Discrete, E::SignalInOutType::Input},
+	{E::Discrete, E::SignalInOutType::Output},
+	{E::Discrete, E::SignalInOutType::Internal},
+
+	{E::Bus, E::SignalInOutType::Input},
+	{E::Bus, E::SignalInOutType::Output},
+	{E::Bus, E::SignalInOutType::Internal},
+};
+
 // Returns vector of pairs,
 //	first: previous AppSignalID
 //  second: new AppSignalID
@@ -60,7 +75,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		}
 	}
 
-	if (signalPtrVector.isEmpty())
+	if (signalPtrVector.isEmpty() == true)
 	{
 		if (signalId.count() > 1)
 		{
@@ -76,6 +91,11 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 	result.resize(signalPtrVector.count());
 
 	SignalPropertiesDialog dlg(dbController, signalPtrVector, readOnly, true, parent);
+
+	if(dlg.isValid() == false)
+	{
+		return result;
+	}
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -97,7 +117,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 						message += QString("Signal %1 could not be checked out\n").arg(state.id);
 						break;
 					}
-					case ERR_SIGNAL_ALREADY_CHECKED_OUT:
+					case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
 					{
 						message += QString("Signal %1 is checked out by other user\n").arg(state.id);
 						break;
@@ -142,27 +162,77 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	m_parent(parent)
 {
 	QVBoxLayout* vl = new QVBoxLayout;
-	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
+
+	m_propertyEditor = new IdePropertyEditor(this);
+
+	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
+
 	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
 	{
 		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
 	}
 
+	DbFileInfo mcInfo = dbController->systemFileInfo(EtcFileName);
+
+	if (mcInfo.isNull() == true)
+	{
+		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(EtcFileName));
+		return;
+	}
+
+	DbFileInfo propertyBehaviorFile;
+	dbController->getFileInfo(mcInfo.fileId(), QString(SignalPropertyBehaviorFileName), &propertyBehaviorFile, parent);
+
+	if (propertyBehaviorFile.isNull() == true)
+	{
+		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(SignalPropertyBehaviorFileName));
+		return;
+	}
+
+	std::shared_ptr<DbFile> file;
+	bool result = dbController->getLatestVersion(propertyBehaviorFile, &file, parent);
+	QVector<QStringList> fileFields;
+	if (result == true)
+	{
+		QString fileText = file->data();
+		QStringList rows = fileText.split("\n", QString::SkipEmptyParts);
+
+		for (QString row : rows)
+		{
+			QStringList&& fields = row.split(';', QString::KeepEmptyParts);
+
+			for (QString& field : fields)
+			{
+				field = field.trimmed();
+				assert(field.length() > 0);
+			}
+
+			assert(static_cast<size_t>(fields.size()) >= signalTypeSequence.size() + 2);
+			fileFields.push_back(fields);
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
+
+	for (const QStringList& propertyDescription : fileFields)
+	{
+		if (propertyDescription[1].toLower() == "true")
+		{
+			addPropertyDependentOnPrecision(propertyDescription[0]);
+		}
+	}
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
-		//std::shared_ptr<SharedIdSignalProperties> signalProperties = std::make_shared<SharedIdSignalProperties>(signalVector, i);
-		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
+		Signal& appSignal = *signalVector[i];
 
-		int precision = signalVector[i]->isAnalog() ? signalVector[i]->decimalPlaces() : 0;
+		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal);
 
-		for (auto property : signalProperties->propertiesDependentOnPrecision())
-		{
-			property->setPrecision(precision);
-		}
-
-		if (readOnly)
+		if (readOnly == true)
 		{
 			for (auto property : signalProperties->properties())
 			{
@@ -170,67 +240,52 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 		}
 
-		signalProperties->propertyByCaption(typeCaption)->setReadOnly(true);
-		signalProperties->propertyByCaption(inOutTypeCaption)->setReadOnly(true);
-		signalProperties->propertyByCaption(dataSizeCaption)->setReadOnly(true);
-		signalProperties->propertyByCaption(byteOrderCaption)->setReadOnly(true);
+		int precision = appSignal.decimalPlaces();
 
-		auto& s = signalProperties->signal();
-		if (s.signalType() == E::SignalType::Bus)
+		for (const QStringList& propertyDescription : fileFields)
 		{
-			signalProperties->propertyByCaption(dataSizeCaption)->setVisible(false);
-			signalProperties->propertyByCaption(byteOrderCaption)->setVisible(false);
-
-			signalProperties->propertyByCaption(enableTuningCaption)->setVisible(false);
-			signalProperties->propertyByCaption(tuningDefaultValueCaption)->setVisible(false);
-			signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
-			signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
-		}
-		else
-		{
-			signalProperties->propertyByCaption(busTypeIDCaption)->setVisible(false);
-		}
-
-		if (s.isInternal() == false)
-		{
-			signalProperties->propertyByCaption(enableTuningCaption)->setVisible(false);
-			signalProperties->propertyByCaption(tuningDefaultValueCaption)->setVisible(false);
-			signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
-			signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
-		}
-
-		if (s.isAnalog())
-		{
-			if (s.isInput() == false)
+			for (auto property : signalProperties->properties())
 			{
-				signalProperties->propertyByCaption(lowValidRangeCaption)->setVisible(false);
-				signalProperties->propertyByCaption(highValidRangeCaption)->setVisible(false);
-				signalProperties->propertyByCaption(filteringTimeCaption)->setVisible(false);
-				signalProperties->propertyByCaption(spreadToleranceCaption)->setVisible(false);
+				if (property->caption() != propertyDescription[0])
+				{
+					continue;
+				}
 
-				signalProperties->propertyByCaption(electricLowLimitCaption)->setVisible(false);
-				signalProperties->propertyByCaption(electricHighLimitCaption)->setVisible(false);
-				signalProperties->propertyByCaption(electricUnitCaption)->setVisible(false);
-				signalProperties->propertyByCaption(sensorTypeCaption)->setVisible(false);
-			}
+				if (isPropertyDependentOnPrecision(property->caption()) == true)
+				{
+					property->setPrecision(precision);
+				}
 
-			if (s.isInternal())
-			{
-				signalProperties->propertyByCaption(lowADCCaption)->setVisible(false);
-				signalProperties->propertyByCaption(highADCCaption)->setVisible(false);
-			}
+				bool descriptionFound = false;
 
-			if (s.isOutput())
-			{
-				signalProperties->propertyByCaption(lowADCCaption)->setVisible(false);
-				signalProperties->propertyByCaption(highADCCaption)->setVisible(false);
-			}
-			else
-			{
-				signalProperties->propertyByCaption(lowDACCaption)->setVisible(false);
-				signalProperties->propertyByCaption(highDACCaption)->setVisible(false);
+				for (int i = 0; i < signalTypeSequence.size(); i++)
+				{
+					if ((appSignal.signalType() == signalTypeSequence[i].first &&
+						 appSignal.inOutType() == signalTypeSequence[i].second) == false)
+					{
+						continue;
+					}
 
-				signalProperties->propertyByCaption(outputModeCaption)->setVisible(false);
+					descriptionFound = true;
+
+					const QString& propertyState = propertyDescription[i + 2].toLower();
+
+					if (propertyState == "hide")
+					{
+						property->setVisible(false);
+						break;
+					}
+
+					if (propertyState == "read")
+					{
+						property->setReadOnly(true);
+						break;
+					}
+
+					assert(propertyState == "write");
+				}
+
+				assert(descriptionFound == true);
 			}
 		}
 
@@ -261,6 +316,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	setLayout(vl);
 
 	setWindowPosition(this, "SignalPropertiesDialog/geometry");
+
+	m_isValid = true;
 }
 
 
@@ -271,6 +328,11 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	for (auto object : m_objList)
 	{
 		auto signalProperties = dynamic_cast<SignalProperties*>(object.get());
+		if (signalProperties == nullptr)
+		{
+			assert(false);
+			continue;
+		}
 		Signal& signal = signalProperties->signal();
 		if (signal.appSignalID().trimmed().isEmpty())
 		{
@@ -287,7 +349,16 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	{
 		Signal& signal = *m_signalVector[i];
 
-		signal = dynamic_cast<SignalProperties*>(m_objList[i].get())->signal();
+		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(m_objList[i].get());
+		if (signalProperties == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		signalProperties->updateSpecPropValues();
+
+		signal = signalProperties->signal();
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
 		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
@@ -362,14 +433,17 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 			continue;
 		}
 
-		Signal& signal = signalProperties->signal();
+		//signalProperties->updateSpecPropValues();
 
-		int precision = signal.isAnalog() ? signal.decimalPlaces() : 0;
+		int precision = signalProperties->getPrecision();
 
-		for (auto property : signalProperties->propertiesDependentOnPrecision())
+		for (std::shared_ptr<Property> property : signalProperties->properties())
 		{
-			property->setPrecision(precision);
-			m_propertyEditor->updatePropertyValues(property->caption());
+			if (isPropertyDependentOnPrecision(property->caption()) == true)
+			{
+				property->setPrecision(precision);
+				m_propertyEditor->updatePropertyValues(property->caption());
+			}
 		}
 	}
 }
@@ -451,7 +525,7 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 	}
 	foreach (const ObjectState& objectState, objectStates)
 	{
-		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER
 				&& objectState.userId != m_dbController->currentUser().userId() && !m_dbController->currentUser().isAdminstrator())
 		{
 			return false;
@@ -466,7 +540,7 @@ QString SignalPropertiesDialog::errorMessage(const ObjectState& state) const
 	{
 		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
 			return tr("Signal %1 is not checked out").arg(state.id);
-		case ERR_SIGNAL_ALREADY_CHECKED_OUT:
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
 		{
 			std::vector<DbUser> users;
 			m_dbController->getUserList(&users, m_parent);
@@ -500,31 +574,35 @@ QString SignalPropertiesDialog::errorMessage(const ObjectState& state) const
 
 void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
+	if (m_signalVector.size() < 1)
+	{
+		return;
+	}
+
+	const Signal& signal = *m_signalVector[0];
+
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
-	Signal& signal = *m_signalVector[0];
 
 	auto saver = [&settings](const QString& name, auto value)
 	{
-		settings.setValue(lastEditedSignalFieldValuePlace + name, value);
+		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, value);
 	};
 
-	saver(lowADCCaption, signal.lowADC());
-	saver(highADCCaption, signal.highADC());
-	saver(lowEngeneeringUnitsCaption, signal.lowEngeneeringUnits());
-	saver(highEngeneeringUnitsCaption, signal.highEngeneeringUnits());
-	saver(unitCaption, signal.unit());
-	saver(lowValidRangeCaption, signal.lowValidRange());
-	saver(highValidRangeCaption, signal.highValidRange());
-	saver(electricLowLimitCaption, signal.electricLowLimit());
-	saver(electricHighLimitCaption, signal.electricHighLimit());
-	saver(electricUnitCaption, signal.electricUnit());
-	saver(sensorTypeCaption, signal.sensorType());
-	saver(outputModeCaption, signal.outputMode());
-	saver(acquireCaption, signal.acquire());
-	saver(decimalPlacesCaption, signal.decimalPlaces());
-	saver(coarseApertureCaption, signal.coarseAperture());
-	saver(fineApertureCaption, signal.fineAperture());
-	saver(filteringTimeCaption, signal.filteringTime());
-	saver(spreadToleranceCaption, signal.spreadTolerance());
-	saver(byteOrderCaption, signal.byteOrder());
+	saver(SignalProperties::acquireCaption, signal.acquire());
+	saver(SignalProperties::decimalPlacesCaption, signal.decimalPlaces());
+	saver(SignalProperties::unitCaption, signal.unit());
+	saver(SignalProperties::coarseApertureCaption, signal.coarseAperture());
+	saver(SignalProperties::fineApertureCaption, signal.fineAperture());
+	saver(SignalProperties::byteOrderCaption, signal.byteOrder());
+
+	SignalSpecPropValues spv;
+
+	spv.create(signal);
+
+	for(const SignalSpecPropValue& sv : spv.values())
+	{
+		QVariant qv = sv.value();
+
+		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + sv.name(), qv);
+	}
 }

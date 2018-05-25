@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <functional>
+#include <algorithm>
 #include <map>
 #include <unordered_map>
 #include <list>
@@ -10,7 +11,9 @@
 #include <utility>
 #include <cassert>
 #include <memory>
+#include <algorithm>
 
+#include <QtGlobal>
 #include <QObject>
 #include <QString>
 #include <QVariant>
@@ -21,59 +24,53 @@
 #include <QDebug>
 
 #include "../lib/OrderedHash.h"
+#include "../lib/Types.h"
 
 class PropertyObject;
 
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, this));
+	(std::function<TYPE(void)>)std::bind(&GETTER, this));
 
 #define ADD_PROPERTY_GETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, OWNER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
+	(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
 
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-			std::bind(&SETTER, this, std::placeholders::_1));
+	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
+	std::bind(&SETTER, this, std::placeholders::_1));
 
 #define ADD_PROPERTY_GETTER_SETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, SETTER, OWNER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-			(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER), \
-			std::bind(&SETTER, &OWNER, std::placeholders::_1));
+	(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER), \
+	std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
 // Add property which has getter, setter and category
 //
 #define ADD_PROPERTY_GET_SET_CAT(TYPE, NAME, CATEGORY, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(\
-			NAME, \
-			CATEGORY,\
-			VISIBLE,\
-			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-			std::bind(&SETTER, this, std::placeholders::_1));
+	NAME, \
+	CATEGORY,\
+	VISIBLE,\
+	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
+	std::bind(&SETTER, this, std::placeholders::_1));
 
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_DYNAMIC_ENUM(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER) \
 	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
-			(std::function<int(void)>)std::bind(&GETTER, this), \
-			std::bind(&SETTER, this, std::placeholders::_1));
+	(std::function<int(void)>)std::bind(&GETTER, this), \
+	std::bind(&SETTER, this, std::placeholders::_1));
 
 #define ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER, OWNER) \
 	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
-			(std::function<int(void)>)std::bind(&GETTER, &OWNER), \
-			std::bind(&SETTER, &OWNER, std::placeholders::_1));
+	(std::function<int(void)>)std::bind(&GETTER, &OWNER), \
+	std::bind(&SETTER, &OWNER, std::placeholders::_1));
 
 
-enum class PropertySpecificEditor : qint16
-{
-	None = 0,
-	Password,
-	Script,
-	TuningFilter
-};
 
 //
 //
@@ -83,9 +80,11 @@ enum class PropertySpecificEditor : qint16
 class Property
 {
 public:
-	Property() : m_flags(0)
-	{
-	}
+	Property() = default;
+	Property(const Property&) = default;
+	Property(Property&&) = default;
+	Property& operator=(const Property&) = default;
+	Property& operator=(Property&&) = default;
 
 	virtual ~Property()
 	{
@@ -94,6 +93,9 @@ public:
 public:
 	virtual bool isEnum() const = 0;
 	virtual std::list<std::pair<int, QString>> enumValues() const = 0;
+
+	virtual QVariant enumValue() const = 0;		// if is enum, returns QVariant with TYPE or QVariant::string if type
+												// cannot be get (dynamic enum properties)
 
 public:
 	QString caption() const
@@ -177,48 +179,42 @@ public:
 		m_expert = value;
 	}
 
-	PropertySpecificEditor specificEditor()
+	E::PropertySpecificEditor specificEditor()
 	{
 		return m_specificEditor;
 	}
 
-	void setSpecificEditor(PropertySpecificEditor value)
+	void setSpecificEditor(E::PropertySpecificEditor value)
 	{
 		m_specificEditor = value;
 	}
 
-    bool password() const
-    {
-		return m_specificEditor == PropertySpecificEditor::Password;
-    }
-    void setPassword(bool value)
-    {
-		m_specificEditor = value ? PropertySpecificEditor::Password : PropertySpecificEditor::None;
+	bool password() const
+	{
+		return m_specificEditor == E::PropertySpecificEditor::Password;
+	}
+	void setPassword(bool value)
+	{
+		m_specificEditor = value ? E::PropertySpecificEditor::Password : E::PropertySpecificEditor::None;
 	}
 
 	bool isScript() const
 	{
-		return m_specificEditor == PropertySpecificEditor::Script ||
+		return m_specificEditor == E::PropertySpecificEditor::Script ||
 				caption().contains("Script") == true;
 	}
 	void setIsScript(bool value)
 	{
-		m_specificEditor = value ? PropertySpecificEditor::Script : PropertySpecificEditor::None;
+		m_specificEditor = value ? E::PropertySpecificEditor::Script : E::PropertySpecificEditor::None;
 	}
 
-    int precision() const
+	int precision() const
 	{
 		return m_precision;
 	}
 	void setPrecision(int value)
 	{
-		if (value < 0)
-		{
-			assert(value >= 0);
-			value = 0;
-		}
-
-		m_precision = value;
+		m_precision = std::clamp<qint16>(static_cast<qint16>(value), 0, 128);
 	}
 
 	virtual QVariant value() const = 0;
@@ -275,42 +271,43 @@ private:
 			bool m_visible : 1;
 			bool m_expert : 1;
 		};
-		uint32_t m_flags;
+		uint16_t m_flags = 0;
 	};
 
-	PropertySpecificEditor m_specificEditor = PropertySpecificEditor::None;
-
-	int m_precision = 2;
+	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
+	qint16 m_precision = 2;
 };
 
 //
 //
-//			Class PropertyValue
+//			Class PropertyTypedValue
 //
 //
-template <typename TYPE>
-class PropertyValue : public Property
+template <typename TYPE,
+		  typename CLASS,
+		  TYPE(CLASS::*get)() const,
+		  void(CLASS::*set)(const TYPE&)>
+class PropertyTypedValue : public Property
 {
 public:
-	PropertyValue()
+	PropertyTypedValue() = delete;
+	PropertyTypedValue(CLASS* object) :
+		Property(),
+		m_object(object)
 	{
+		assert(object);
 	}
 
-	virtual ~PropertyValue()
-	{
-	}
+	PropertyTypedValue(const PropertyTypedValue&) = default;
+	PropertyTypedValue(PropertyTypedValue&&) = default;
+	PropertyTypedValue& operator=(const PropertyTypedValue&) = default;
+	PropertyTypedValue& operator=(PropertyTypedValue&&) = default;
 
 public:
-	virtual bool isEnum() const override
+	virtual bool isEnum() const override final
 	{
-		if (std::is_enum<TYPE>::value)
-		{
-			return true;
-		}
-
-		return false;
+		return std::is_enum<TYPE>::value;
 	}
-
 
 	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
 	// Example is in question:
@@ -336,9 +333,9 @@ private:
 	}
 
 public:
-	virtual std::list<std::pair<int, QString>> enumValues() const override
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		assert(std::is_enum<TYPE>::value);
 
 		std::list<std::pair<int, QString>> result;
 
@@ -358,8 +355,244 @@ public:
 		return result;
 	}
 
+	virtual QVariant enumValue() const override final
+	{
+		if (std::is_enum<TYPE>::value == false)
+		{
+			assert(isEnum());
+			return QVariant();
+		}
+
+		return value();
+	}
+
 public:
-	virtual QVariant value() const override
+	virtual QVariant value() const override final
+	{
+		QVariant result(QVariant::fromValue((m_object->*get)()));
+		return result;
+	}
+
+	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
+	{
+		static_assert(set != nullptr);
+
+		if (set != nullptr)
+		{
+			(m_object->*set)(value);
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
+	{
+		if (set == nullptr)
+		{
+			qDebug() << "Set property value for property without Setter: " << caption();
+		}
+		else
+		{
+			assert(value.canConvert<TYPE>());
+			(m_object->*set)(value.value<TYPE>());
+		}
+	}
+
+	virtual void setEnumValue(int value) override final			// Overriden from class Property
+	{
+		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
+	}
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Property
+	{
+		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
+	}
+
+private:
+	template <typename ENUM>
+	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Property
+	{
+		static_assert(set);
+		static_assert(std::is_enum<TYPE>::value);
+
+		(m_object->*set)(static_cast<TYPE>(value));
+	}
+	template <typename NON_ENUM>
+	void setEnumValueInternal(int value, non_enum_tag)
+	{
+		Q_UNUSED(value)
+		assert(false);
+	}
+
+	template <typename ENUM>
+	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Property
+	{
+		assert(std::is_enum<TYPE>::value == true);
+
+		QVariant v(value);
+		setValue(v);
+
+		return;
+	}
+	template <typename NON_ENUM>
+	void setEnumValueInternal(const char* value, non_enum_tag)
+	{
+		Q_UNUSED(value)
+		assert(false);
+	}
+
+public:
+	virtual const QVariant& lowLimit() const override final
+	{
+		// Limits must be checked in getter/setter
+		//
+		assert(false);
+		static QVariant staticQVariant;
+		return staticQVariant;
+	}
+	virtual void setLowLimit(const QVariant&) override final
+	{
+		// Limits must be checked in getter/setter
+		assert(false);
+	}
+
+	virtual const QVariant& highLimit() const override final
+	{
+		// Limits must be checked in getter/setter
+		//
+		assert(false);
+		static QVariant staticQVariant;
+		return staticQVariant;
+	}
+	virtual void setHighLimit(const QVariant&) override final
+	{
+		// Limits must be checked in getter/setter
+		assert(false);
+	}
+
+	virtual bool isTheSameType(Property* property) override final
+	{
+		if (dynamic_cast<decltype(this)>(property) == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	{
+		if (presetProperty == nullptr ||
+			isTheSameType(presetProperty) == false)
+		{
+			assert(presetProperty != nullptr);
+			assert(isTheSameType(presetProperty) == true);
+			return;
+		}
+
+		Property::copy(presetProperty);	// Copy data from the base class
+
+		if (auto source = dynamic_cast<decltype(this)>(presetProperty);
+			source == nullptr)
+		{
+			assert(source);
+			return;
+		}
+
+		if (updateValue == true)
+		{
+			setValue(presetProperty->value());
+		}
+
+		return;
+	}
+
+private:
+	CLASS* const m_object = nullptr;		// Cannot change m_object pointer
+};
+
+
+//
+//
+//			Class PropertyValue
+//
+//
+template <typename TYPE>
+class PropertyValue : public Property
+{
+public:
+	PropertyValue() = default;
+	PropertyValue(const PropertyValue&) = default;
+	PropertyValue(PropertyValue&&) = default;
+	PropertyValue& operator=(const PropertyValue&) = default;
+	PropertyValue& operator=(PropertyValue&&) = default;
+
+public:
+	virtual bool isEnum() const override final
+	{
+		return std::is_enum<TYPE>::value;
+	}
+
+	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
+	// Example is in question:
+	// http://stackoverflow.com/questions/6917079/tag-dispatch-versus-static-methods-on-partially-specialised-classes
+	//
+private:
+	template <bool> struct enumness {};
+	typedef enumness<true> enum_tag;
+	typedef enumness<false> non_enum_tag;
+
+	template <typename ENUM>
+	const QMetaEnum metaEnum(enum_tag) const
+	{
+		QMetaEnum me = QMetaEnum::fromType<ENUM>();		// static_assert is here, that is why tag dispatch is used
+		return me;
+	}
+
+	template <typename NOT_ENUM>
+	const QMetaEnum metaEnum(non_enum_tag) const
+	{
+		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
+		return QMetaEnum();
+	}
+
+public:
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	{
+		assert(std::is_enum<TYPE>::value);
+
+		std::list<std::pair<int, QString>> result;
+
+		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return result;
+		}
+
+		int keyCount = me.keyCount();
+		for (int i = 0; i < keyCount; i++)
+		{
+			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+		}
+
+		return result;
+	}
+
+	virtual QVariant enumValue() const override final
+	{
+		if (std::is_enum<TYPE>::value == false)
+		{
+			assert(isEnum());
+			return QVariant();
+		}
+
+		return value();
+	}
+
+public:
+	virtual QVariant value() const override final
 	{
 		if (m_getter)
 		{
@@ -383,7 +616,7 @@ public:
 		}
 	}
 
-	void setValue(const QVariant& value) override	// Overriden from class Propery
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
 	{
 		if (!m_setter)
 		{
@@ -397,11 +630,11 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) override	// Overriden from class Propery
+	virtual void setEnumValue(int value) override final			// Overriden from class Propery
 	{
 		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
-	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
 	{
 		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
@@ -446,29 +679,29 @@ private:
 	}
 
 public:
-	virtual const QVariant& lowLimit() const override
+	virtual const QVariant& lowLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
 		assert(false);
-static QVariant staticQVariant;
+		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setLowLimit(const QVariant&) override
+	virtual void setLowLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
 		assert(false);
 	}
 
-	virtual const QVariant& highLimit() const override
+	virtual const QVariant& highLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
 		assert(false);
-static QVariant staticQVariant;
+		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setHighLimit(const QVariant&) override
+	virtual void setHighLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
 		assert(false);
@@ -483,7 +716,7 @@ static QVariant staticQVariant;
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) override
+	virtual bool isTheSameType(Property* property) override final
 	{
 		if (dynamic_cast<PropertyValue<TYPE>*>(property) == nullptr)
 		{
@@ -493,7 +726,7 @@ static QVariant staticQVariant;
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -533,22 +766,24 @@ private:
 
 //
 //
-//			Class PropertyValue
+//			Class PropertyValueNoGetterSetter
 //
 //
 class PropertyValueNoGetterSetter : public Property
 {
 public:
-	PropertyValueNoGetterSetter()
-	{
-	}
+	PropertyValueNoGetterSetter() = default;
+	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) = default;
+	PropertyValueNoGetterSetter(PropertyValueNoGetterSetter&&) = default;
+	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) = default;
+	PropertyValueNoGetterSetter& operator=(PropertyValueNoGetterSetter&&) = default;
 
 	virtual ~PropertyValueNoGetterSetter()
 	{
 	}
 
 public:
-	virtual bool isEnum() const override
+	virtual bool isEnum() const override final
 	{
 		if (m_value.isValid() == false)
 		{
@@ -585,8 +820,21 @@ public:
 		}
 	}
 
+	virtual QVariant enumValue() const override final
+	{
+#ifdef _DEBUG
+		if (isEnum() == false)		// Commented for perfomance reasone
+		{
+			assert(isEnum());
+			return QVariant();
+		}
+#endif
+
+		return value();
+	}
+
 public:
-	virtual std::list<std::pair<int, QString>> enumValues() const override
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
 		std::list<std::pair<int, QString>> result;
 
@@ -640,12 +888,12 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override
+	virtual QVariant value() const override final
 	{
 		return m_value;
 	}
 
-	void setValue(const QVariant& value) override	// Overriden from class Propery
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
 	{
 		if (m_value.isValid() == false)
 		{
@@ -698,7 +946,7 @@ public:
 		}
 	};
 
-	virtual void setEnumValue(int value) override	// Overriden from class Propery
+	virtual void setEnumValue(int value) override final	// Overriden from class Propery
 	{
 		// cannot implement it now, but it's possible
 		// The problem is, I dont see the way QVariant with enum inside can be set from integer and keep that enum type
@@ -710,7 +958,7 @@ public:
 		return;
 	}
 
-	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
 	{
 		QVariant v(value);
 
@@ -761,25 +1009,25 @@ public:
 		m_highLimit = high;
 	}
 
-	const QVariant& lowLimit() const
+	virtual const QVariant& lowLimit() const override final
 	{
 		return m_lowLimit;
 	}
-	void setLowLimit(const QVariant& value)
+	virtual void setLowLimit(const QVariant& value) override final
 	{
 		m_lowLimit = value;
 	}
 
-	const QVariant& highLimit() const
+	virtual const QVariant& highLimit() const override final
 	{
 		return m_highLimit;
 	}
-	void setHighLimit(const QVariant& value)
+	virtual void setHighLimit(const QVariant& value) override final
 	{
 		m_highLimit = value;
 	}
 
-	virtual bool isTheSameType(Property* property) override
+	virtual bool isTheSameType(Property* property) override final
 	{
 		if (dynamic_cast<PropertyValueNoGetterSetter*>(property) == nullptr)
 		{
@@ -789,7 +1037,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -828,11 +1076,9 @@ private:
 };
 
 
-//
 //			Dynamic Enum Property
 //			Class PropertyValue specialization for OrderedHash<int, QString>,
 //			class behaves like enum
-//
 //
 template <>
 class PropertyValue<OrderedHash<int, QString>> : public Property
@@ -849,12 +1095,12 @@ public:
 	}
 
 public:
-	virtual bool isEnum() const override
+	virtual bool isEnum() const override final
 	{
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::list<std::pair<int, QString>> enumValues() const override
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
 		std::list<std::pair<int, QString>> result;
 
@@ -868,8 +1114,13 @@ public:
 		return result;
 	}
 
+	virtual QVariant enumValue() const override final
+	{
+		return value();
+	}
+
 public:
-	virtual QVariant value() const override
+	virtual QVariant value() const override final
 	{
 		if (m_getter)
 		{
@@ -890,7 +1141,7 @@ public:
 		return;
 	}
 
-	void setValue(const QVariant& value) override		// Overriden from class Propery
+	void setValue(const QVariant& value) override final	// Overriden from class Propery
 	{
 		if (value.type() == QVariant::Int)
 		{
@@ -908,7 +1159,7 @@ public:
 		assert(false);
 	}
 
-	virtual void setEnumValue(int value) override			// Overriden from class Propery
+	virtual void setEnumValue(int value) override final	// Overriden from class Propery
 	{
 		if (m_setter)
 		{
@@ -920,7 +1171,7 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
 	{
 		int key = m_enumValues->key(QString(value));
 		setEnumValue(key);
@@ -938,22 +1189,22 @@ public:
 		Q_UNUSED(high);
 	}
 
-	const QVariant& lowLimit() const
+	virtual const QVariant& lowLimit() const override final
 	{
-static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	void setLowLimit(const QVariant& value)
+	virtual void setLowLimit(const QVariant& value) override final
 	{
 		Q_UNUSED(value);
 	}
 
-	const QVariant& highLimit() const
+	virtual const QVariant& highLimit() const override final
 	{
-static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	void setHighLimit(const QVariant& value)
+	virtual void setHighLimit(const QVariant& value) override final
 	{
 		Q_UNUSED(value);
 	}
@@ -967,7 +1218,7 @@ static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) override
+	virtual bool isTheSameType(Property* property) override final
 	{
 		if (dynamic_cast<PropertyValue<OrderedHash<int, QString>>*>(property) == nullptr)
 		{
@@ -977,7 +1228,7 @@ static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
 	{
 		// Implementation is not requiered yet
 		// To do if requeired
@@ -997,6 +1248,211 @@ private:
 	std::function<void(int)> m_setter;
 };
 
+
+//			Dynamic Enum Property based on std::vector, it's slower then PropertyValue<OrderedHash> but consumes
+//			less memory and in plain way.
+//			class behaves like enum
+//
+template <>
+class PropertyValue<std::vector<std::pair<QString, int>>> : public Property
+{
+public:
+	PropertyValue(const std::vector<std::pair<QString, int>>& enumValues) :
+		m_enumValues(enumValues)
+	{
+		if (m_enumValues.empty() == false)
+		{
+			m_value = m_enumValues.front().second;
+		}
+		else
+		{
+			assert(m_enumValues.empty() == false);
+			m_value = 0;
+		}
+
+		return;
+	}
+
+public:
+	virtual bool isEnum() const override final
+	{
+		return true;	// This is dynamic enumeration
+	}
+
+	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	{
+		std::list<std::pair<int, QString>> result;
+
+		for (auto[str, key] : m_enumValues)
+		{
+			result.push_back({key, str});
+		}
+
+		return result;
+	}
+
+	virtual QVariant enumValue() const override final
+	{
+		for (auto[str, key] : m_enumValues)
+		{
+			if (key == m_value)
+			{
+				return QVariant(str);
+			}
+		}
+
+		assert(false);
+		return QVariant();
+	}
+
+public:
+	virtual QVariant value() const override final
+	{
+		if (m_getter)
+		{
+			QVariant result(QVariant::fromValue(m_getter()));
+			return result;
+		}
+		else
+		{
+			return QVariant(m_value);
+		}
+	}
+
+	virtual void setValue(const QVariant& value) override final		// Overriden from class Propery
+	{
+		if (value.type() == QVariant::Int)
+		{
+			setEnumValue(value.value<int>());
+			return;
+		}
+
+		if (value.type() == QVariant::String)
+		{
+			setEnumValue(value.toString().toStdString().data());
+			return;
+		}
+
+		assert(false);
+		return;
+	}
+
+	virtual void setEnumValue(int value) override final				// Overriden from class Propery
+	{
+		if (m_setter)
+		{
+			m_setter(value);
+		}
+		else
+		{
+			m_value = value;
+		}
+	}
+
+	virtual void setEnumValue(const char* value) override final		// Overriden from class Propery
+	{
+		QString strvalue(value);
+
+		for (auto[str, key] : m_enumValues)
+		{
+			if (strvalue == str)
+			{
+				setEnumValue(key);
+				return;
+			}
+		}
+
+		// Str not found
+		//
+		assert(false);
+		return;
+	}
+
+private:
+	void checkLimits()
+	{
+	}
+
+public:
+	void setLimits(const QVariant& low, const QVariant& high)
+	{
+		Q_UNUSED(low);
+		Q_UNUSED(high);
+	}
+
+	virtual const QVariant& lowLimit() const override final
+	{
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		return dummy;
+	}
+	virtual void setLowLimit(const QVariant& value) override final
+	{
+		Q_UNUSED(value);
+	}
+
+	virtual const QVariant& highLimit() const override final
+	{
+		static const QVariant dummy;			//	for return from lowLimt, hughLimt
+		return dummy;
+	}
+	virtual void setHighLimit(const QVariant& value) override final
+	{
+		Q_UNUSED(value);
+	}
+
+	void setGetter(std::function<int(void)> getter)
+	{
+		m_getter = getter;
+	}
+	void setSetter(std::function<void(int)> setter)
+	{
+		m_setter = setter;
+	}
+
+	virtual bool isTheSameType(Property* property) override final
+	{
+		return dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(property) != nullptr;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	{
+		if (presetProperty == nullptr ||
+			isTheSameType(presetProperty) == false)
+		{
+			assert(presetProperty != nullptr);
+			assert(isTheSameType(presetProperty) == true);
+			return;
+		}
+
+		Property::copy(presetProperty);	// Copy data from the base class
+		auto source = dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(presetProperty);
+
+		if (source == nullptr)
+		{
+			assert(source);
+			return;
+		}
+
+		if (updateValue == true)
+		{
+			setValue(presetProperty->value());
+		}
+
+		// Do not copy m_getter/m_setter, because they are binded to their own object instances
+		//
+		return;
+	}
+
+private:
+	// WARNING!!! If you add a field, do not forget to add it to updateFromPreset();
+	//
+	std::vector<std::pair<QString, int>> m_enumValues;
+
+	int m_value = 0;	// m_value is not index is a value from m_enumValues
+
+	std::function<int(void)> m_getter;
+	std::function<void(int)> m_setter;
+};
 
 
 //
@@ -1026,9 +1482,69 @@ public:
 	{
 	}
 
-public:
+protected:
+	// Override in child to postpone property creation
+	//
+	virtual void propertyDemand(const QString& prop)
+	{
+		Q_UNUSED(prop);
+	}
 
+	void demandAllProperties()
+	{
+		if (m_allPropsAlreadyDemanded == false)
+		{
+			propertyDemand(QString());
+			m_allPropsAlreadyDemanded = true;
+		}
+
+		return;
+	}
+
+	void demandAllProperties() const
+	{
+		if (m_allPropsAlreadyDemanded == false)
+		{
+			const_cast<PropertyObject*>(this)->propertyDemand(QString());
+			m_allPropsAlreadyDemanded = true;
+		}
+
+		return;
+	}
+
+
+public:
 	// Add new property
+	//
+	template <typename TYPE,
+			  typename CLASS,
+			  TYPE(CLASS::*get)() const,
+			  void(CLASS::*set)(const TYPE&)>
+	auto addProperty(const QString& caption, const QString& category, bool visible)
+	{
+		static_assert(get != nullptr);
+
+		auto property = std::make_shared<PropertyTypedValue<TYPE, CLASS, get, set>>(dynamic_cast<CLASS*>(this));
+
+		uint hash = qHash(caption);
+
+		property->setCaption(caption);
+		property->setCategory(category);
+		property->setVisible(visible);
+
+		if (set == nullptr)
+		{
+			property->setReadOnly(true);
+		}
+
+		m_properties[hash] = std::dynamic_pointer_cast<Property>(property);
+
+		emit propertyListChanged();
+
+		return property.get();
+	}
+
+
 	// Defines can be used:
 	//		ADD_PROPERTY_QVARIANT(int, varint);
 	//		ADD_PROPERTY_GETTER(int, varintgetter, TestProp::someProp);
@@ -1047,7 +1563,6 @@ public:
 			return nullptr;
 		}
 
-		//std::shared_ptr<PropertyValue<TYPE>> property = thePropertyObjectHeap.alloc<PropertyValue<TYPE>>();
 		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
 		uint hash = qHash(caption);
@@ -1075,7 +1590,6 @@ public:
 											 bool visible,
 											 const QVariant& value)
 	{
-		//std::shared_ptr<PropertyValueNoGetterSetter> property = thePropertyObjectHeap.alloc<PropertyValueNoGetterSetter>();
 		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
 
 		uint hash = qHash(caption);
@@ -1131,10 +1645,35 @@ public:
 		return property.get();
 	}
 
+	PropertyValue<std::vector<std::pair<QString, int>>>* addDynamicEnumProperty(
+			const QString& caption,
+			const std::vector<std::pair<QString, int>>& enumValues,
+			bool visible = false,
+			std::function<int(void)> getter = std::function<int(void)>(),
+			std::function<void(int)> setter = std::function<void(int)>())
+	{
+		uint hash = qHash(caption);
+
+		auto property = std::make_shared<PropertyValue<std::vector<std::pair<QString, int>>>>(enumValues);
+
+		property->setCaption(caption);
+		property->setVisible(visible);
+		property->setGetter(getter);
+		property->setSetter(setter);
+
+		m_properties[hash] = property;
+
+		emit propertyListChanged();
+
+		return property.get();
+	}
+
 	// Get all properties
 	//
 	std::vector<std::shared_ptr<Property>> properties() const
 	{
+		demandAllProperties();
+
 		std::vector<std::shared_ptr<Property>> result;
 		result.reserve(m_properties.size());
 
@@ -1146,16 +1685,51 @@ public:
 		return result;
 	}
 
-	Q_INVOKABLE bool propertyExists(const QString& caption) const
+	std::vector<std::shared_ptr<Property>> specificProperties() const
+	{
+		// Specific properties cannot be demanded,
+		// they are not in propertyDemand
+		//
+
+		std::vector<std::shared_ptr<Property>> result;
+		result.reserve(m_properties.size());
+
+		for (const auto[key, prop] : m_properties)
+		{
+			Q_UNUSED(key);
+
+			if (prop->specific() == true)
+			{
+				result.push_back(prop);
+			}
+		}
+
+		return result;
+	}
+
+	Q_INVOKABLE bool propertyExists(const QString& caption, bool demandIfNotExists) const
 	{
 		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-		return it != m_properties.end();
+
+		if (demandIfNotExists == false)
+		{
+			return m_properties.find(hash) != m_properties.end();
+		}
+		else
+		{
+			return propertyByCaption(caption) != nullptr;
+		}
+	}
+
+	Q_INVOKABLE bool propertyExists(const QString& caption) const
+	{
+		return propertyByCaption(caption) != nullptr;
 	}
 
 	void removeAllProperties()
 	{
 		m_properties.clear();
+		m_allPropsAlreadyDemanded = false;
 
 		emit propertyListChanged();
 	}
@@ -1242,43 +1816,61 @@ public:
 	//
 	std::shared_ptr<Property> propertyByCaption(const QString& caption)
 	{
-		std::shared_ptr<Property> result = nullptr;
-
 		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
 
-		if (it != m_properties.end())
+		if (auto it = m_properties.find(hash);
+			it == m_properties.end())
 		{
-			result = it->second;
-		}
+			propertyDemand(caption);
 
-		return result;
+			if (auto itt = m_properties.find(hash);
+				itt == m_properties.end())
+			{
+				return std::shared_ptr<Property>();
+			}
+			else
+			{
+				return itt->second;
+			}
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 
 	const std::shared_ptr<Property> propertyByCaption(const QString& caption) const
 	{
-		std::shared_ptr<Property> result = nullptr;
-
 		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
 
-		if (it != m_properties.end())
+		if (auto it = m_properties.find(hash);
+			it == m_properties.end())
 		{
-			result = it->second;
-		}
+			const_cast<PropertyObject*>(this)->propertyDemand(caption);
 
-		return result;
+			if (auto itt = m_properties.find(hash);
+				itt == m_properties.end())
+			{
+				return std::shared_ptr<Property>();
+			}
+			else
+			{
+				return itt->second;
+			}
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 
 	Q_INVOKABLE QVariant propertyValue(const QString& caption) const
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
+		auto prop = propertyByCaption(caption);
 
-		if (it != m_properties.end())
+		if (prop != nullptr)
 		{
-			QVariant result(it->second->value());
-			return result;
+			return prop->value();
 		}
 		else
 		{
@@ -1290,15 +1882,13 @@ public:
 	template <typename TYPE>
 	bool setPropertyValue(const QString& caption, const TYPE& value)
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-
-		if (it == m_properties.end())
+		auto prop = propertyByCaption(caption);
+		if (prop == nullptr)
 		{
 			return false;
 		}
 
-		Property* property = it->second.get();
+		Property* property = prop.get();
 
 		if (property->isEnum() == true)
 		{
@@ -1309,9 +1899,8 @@ public:
 		}
 		else
 		{
-			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
-
-			if (propertyValue != nullptr)
+			if (PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
+				propertyValue != nullptr)
 			{
 				propertyValue->setValueDirect(value);
 			}
@@ -1328,15 +1917,11 @@ public:
 
 	bool setPropertyValue(const QString& caption, const char* value)
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-
-		if (it == m_properties.end())
+		auto property = propertyByCaption(caption);
+		if (property == nullptr)
 		{
 			return false;
 		}
-
-		std::shared_ptr<Property> property = it->second;
 
 		if (property->isEnum() == true)
 		{
@@ -1345,17 +1930,17 @@ public:
 		}
 		else
 		{
-			PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
-
-			if (propertyValue == nullptr)
+			if (PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
+				propertyValue != nullptr)
 			{
-				assert(propertyValue);
-				return false;
+				propertyValue->setValueDirect(QString(value));
+				return true;
 			}
-
-			propertyValue->setValueDirect(QString(value));
-
-			return true;
+			else
+			{
+				property->setValue(QVariant::fromValue(QString(value)));	// Try to get luck
+				return true;
+			}
 		}
 
 		return false;
@@ -1363,32 +1948,785 @@ public:
 
 	Q_INVOKABLE bool setPropertyValue(const QString& caption, const QVariant& value)
 	{
-		uint hash = qHash(caption);
-		auto it = m_properties.find(hash);
-
-		if (it == m_properties.end())
+		auto property = propertyByCaption(caption);
+		if (property == nullptr)
 		{
 			return false;
 		}
 
-		it->second->setValue(value);
+		property->setValue(value);
 
 		return true;
 	}
 
-	std::list<std::pair<int, QString>> enumValues(const QString& property)
+	std::list<std::pair<int, QString>> enumValues(const QString& caption)
 	{
 		std::list<std::pair<int, QString>> result;
 
-		uint hash = qHash(property);
-		auto it = m_properties.find(hash);
-
-		if (it != m_properties.end())
+		auto property = propertyByCaption(caption);
+		if (property == nullptr)
 		{
-			result = it->second->enumValues();
+			return result;
+		}
+
+		result = property->enumValues();
+
+		return result;
+	}
+
+	static const int m_lastSpecificPropertiesVersion = 4;
+
+	static QString createSpecificPropertyStruct(const QString& name,
+										   const QString& category,
+										   const QString& description,
+										   const QString& strType,
+										   const QString&& strMin,
+										   const QString&& strMax,
+										   const QString&& strDefaultValue,
+										   int precision,
+										   bool updateFromPreset,
+										   bool expert,
+										   bool visible,
+										   const E::PropertySpecificEditor editor)
+	{
+		QString result = QString("%1;").arg(m_lastSpecificPropertiesVersion);
+
+		result += name + ";";
+		result += category + ";";
+		result += strType + ";";
+		result += strMin + ";";
+		result += strMax + ";";
+		result += strDefaultValue + ";";
+		result += QString("%1;").arg(precision),
+		result += updateFromPreset ? "true;" : "false;";
+		result += expert ? "true;" : "false;";
+		result += description + ";";
+		result += visible ? "true;" : "false;";
+		result += E::valueToString<E::PropertySpecificEditor>(editor);
+
+		return result;
+
+	}
+
+	// Specific properties
+	//
+	std::pair<bool, QString> parseSpecificPropertiesStruct(const QString& specificProperties)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		// Save all specific properties values
+		//
+		std::vector<std::shared_ptr<Property>> oldProperties = this->specificProperties();
+
+		// Delete all previous object's specific properties
+		//
+		removeSpecificProperties();
+
+		// Parse struct (rows, divided by semicolon) and create new properties
+		//
+
+		/*
+		Example:
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset
+		1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
+		1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description
+		2;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible
+		3;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true
+
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor
+		4;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None
+
+		version:            record version
+		name:               property name
+		category:           category name
+
+		type:               property type, can by one of:
+							qint32  (4 bytes signed integral),
+							quint32 (4 bytes unsigned integer)
+							bool (true, false),
+							double,
+							E::Channel,
+							string,
+							DynamicEnum [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
+
+		min:                property minimum value (ignored for bool, string)
+		max:                property maximim value (ignored for bool, string)
+		default:            can be any value of the specified type
+		precision:          property precision
+		updateFromPreset:   property will be updated from preset
+
+		expert:				[Added in version 2] expert property
+		description:		[Added in version 2] property description
+
+		visible:			[Added in version 3] property is visible
+
+		Editor				[Added in version 4] Property specific editor (emun E::PropertySpecificEditor )
+							can have values: None, Password, Script, TuningFilter, SpecificProperties
+		*/
+		QString m_specificPropertiesStructTrimmed = specificProperties;
+
+		QStringList rows = m_specificPropertiesStructTrimmed.split(QChar::LineFeed, QString::SkipEmptyParts);
+
+		for (QString row : rows)
+		{
+			row = row.trimmed();
+			if (row.isEmpty() == true)
+			{
+				continue;
+			}
+
+			QStringList columns = row.split(';');
+
+			for (QString& col : columns)
+			{
+				col = col.trimmed();
+			}
+
+			QString strVersion(columns[0]);
+			bool ok = false;
+			int version = strVersion.toInt(&ok);
+
+			if (ok == false)
+			{
+				result.first = false;
+				result.second += "SpecificProperties: failed to parse specific prop version filed: " + row;
+				continue;
+			}
+
+			switch (version)
+			{
+			case 1:
+				{
+					auto parseResult = parseSpecificPropertiesStructV1(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 2:
+				{
+					auto parseResult = parseSpecificPropertiesStructV2(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 3:
+				{
+					auto parseResult = parseSpecificPropertiesStructV3(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 4:
+				{
+					auto parseResult = parseSpecificPropertiesStructV4(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			default:
+				result.first = false;
+				result.second += "SpecificProperties: Unsupported version: " + version;
+
+				assert(false);
+				qDebug() << "Object has spec prop with unsuported version: " << row;
+			}
+		}
+
+		std::vector<std::shared_ptr<Property>> newProperties = this->specificProperties();
+
+		bool someValuesWereRestored = false;
+
+		// Set to parsed properties old value
+		//
+		for (const std::shared_ptr<Property>& p : oldProperties)
+		{
+			auto it = std::find_if(newProperties.begin(), newProperties.end(),
+								   [p](const std::shared_ptr<Property>& np)
+			{
+				return np->caption() == p->caption();
+			});
+
+			if (it != newProperties.end() &&
+				(*it)->value().type() == p->value().type() &&
+				p != (*it))
+			{
+				someValuesWereRestored = true;
+
+				setPropertyValue(p->caption(), p->value());
+			}
+			else
+			{
+				// Default value already was set
+				//
+				continue;
+			}
+		}
+
+		if (someValuesWereRestored == true)
+		{
+			emit propertyListChanged();
 		}
 
 		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV1(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 9)
+		{
+			result.first = false;
+			result.second += " Wrong proprty struct version 1! Expected: version;name;category;type;min;max;default;precision;updateFromPreset\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 1!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+
+		result = parseSpecificPropertiesCreate(1,
+											   name,
+											   category,
+											   QString(),
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   QLatin1String("false"),
+											   QLatin1String("true"),
+											   QLatin1String("None"));
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV2(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 11)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 2!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 2!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString strDescription(columns[10]);
+
+		result = parseSpecificPropertiesCreate(2,
+											   name,
+											   category,
+											   strDescription,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   QLatin1String("true"),
+											   QLatin1String("None"));
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV3(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 12)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 3!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString strDescription(columns[10]);
+		QString strVisible(columns[11]);
+
+		result = parseSpecificPropertiesCreate(3,
+											   name,
+											   category,
+											   strDescription,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   strVisible,
+											   QLatin1String("None"));
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV4(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 13)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 4!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString description(columns[10]);
+		QString strVisible(columns[11]);
+		QString strEditor(columns[12]);
+
+		result = parseSpecificPropertiesCreate(4,
+											   name,
+											   category,
+											   description,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   strVisible,
+											   strEditor);
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesCreate(int version,
+														   const QString& name,
+														   const QString& category,
+														   const QString& description,
+														   const QString& strType,
+														   QStringRef strMin,
+														   QStringRef strMax,
+														   QStringRef strDefaultValue,
+														   QStringRef strPrecision,
+														   const QString& strUpdateFromPreset,
+														   const QString& strExpert,
+														   const QString& strVisible,
+														   const QString& strEditor)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (version < 0 || version > m_lastSpecificPropertiesVersion)
+		{
+			assert(false);
+
+			result.first = false;
+			result.second += "SpecificProperties: Unsupported version: " + version;
+			return result;
+		}
+
+		int precision = strPrecision.toInt();
+		bool updateFromPreset = strUpdateFromPreset.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		bool expert = strExpert.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		bool visible = strVisible.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+
+		if (name.isEmpty() == true || name.size() > 1024)
+		{
+			result.first = false;
+			result.second = "SpecificProperties: filed name must have size  from 1 to 1024, name: " + name + "\n";
+
+			qDebug() << Q_FUNC_INFO << " SpecificProperties: filed name must have size  from 1 to 1024, name: " << name;
+			return result;
+		}
+
+		// Get E::PropertySpecificEditor value
+		//
+		auto[editorType, editorOk] = E::stringToValue<E::PropertySpecificEditor>(strEditor);
+
+		if (editorOk == false)
+		{
+			result.first = false;
+			result.second = "SpecificProperties: Specific propertye editor is not recognized: " + strEditor + "\n";
+
+			qDebug() << Q_FUNC_INFO << "SpecificProperties: Specific propertye editor is not recognized: " << strEditor;
+			return result;
+		}
+
+		// Type
+		//
+
+		// Check if strType is like
+		// DynamicEnum [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
+		//
+		Property* addedProperty = nullptr;
+
+		if (bool startedFromDynamicEnum = strType.trimmed().startsWith(QLatin1String("DynamicEnum"), Qt::CaseInsensitive);
+				startedFromDynamicEnum == true)
+		{
+			// Parse String - Key pairs:
+			// [EnumValue1 = 1, EnumValue2 = 2 , EnumValue7 = 12, ...]
+			//
+			bool propertyOk = false;
+
+			auto enumValues = PropertyObject::parseSpecificPropertyTypeDynamicEnum(strType, &propertyOk);
+
+			if (propertyOk == false)
+			{
+				// Error, unknown type
+				//
+				result.first = false;
+				result.second = " SpecificProperties: dynamic enum parsing error: " + strType + "\n";
+
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: dynamic enum parsing error: " << strType;
+				return result;
+			}
+
+
+			// Add property with default value
+			//
+			auto p = addDynamicEnumProperty(name, enumValues, true);
+			p->setCategory(category);
+			p->setValue(strDefaultValue.toString());
+
+			addedProperty = p;
+		}
+		else
+		{
+			auto [pt, propertyOk] = parseSpecificPropertyType(strType);
+			if (propertyOk == false)
+			{
+				// Error, unknown type
+				//
+				result.first = false;
+				result.second = " SpecificProperties: wrong type: " + strType + "\n";
+
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong type: " << strType;
+				return result;
+			}
+
+			switch (pt)
+			{
+			case E::SpecificPropertyType::pt_int32:
+				{
+					// Min
+					//
+					bool ok = false;
+					qint32 minInt = strMin.toInt(&ok);
+					if (ok == false)
+					{
+						minInt = std::numeric_limits<qint32>::lowest();
+					}
+
+					// Max
+					//
+					qint32 maxInt = strMax.toInt(&ok);
+					if (ok == false)
+					{
+						maxInt = std::numeric_limits<qint32>::max();
+					}
+
+					// Default Value
+					//
+					qint32 defaultInt = strDefaultValue.toInt();
+
+					auto p = addProperty(name, category, true, QVariant(defaultInt));
+					addedProperty = p;
+
+					p->setLimits(QVariant(minInt), QVariant(maxInt));
+				}
+				break;
+			case E::SpecificPropertyType::pt_uint32:
+				{
+					// Min
+					//
+					bool ok = false;
+					quint32 minUInt = strMin.toUInt(&ok);
+					if (ok == false)
+					{
+						minUInt = std::numeric_limits<quint32>::lowest();
+					}
+
+					// Max
+					//
+					quint32 maxUInt = strMax.toUInt(&ok);
+					if (ok == false)
+					{
+						maxUInt = std::numeric_limits<quint32>::max();
+					}
+
+					// Default Value
+					//
+					quint32 defaultUInt = strDefaultValue.toUInt();
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(defaultUInt));
+					addedProperty = p;
+
+					p->setLimits(QVariant(minUInt), QVariant(maxUInt));
+				}
+				break;
+			case E::SpecificPropertyType::pt_double:
+				{
+					// Min
+					//
+					bool ok = false;
+					double minDouble = strMin.toDouble(&ok);
+					if (ok == false)
+					{
+						minDouble = std::numeric_limits<double>::lowest();
+					}
+
+					// Max
+					//
+					double maxDouble = strMax.toDouble(&ok);
+					if (ok == false)
+					{
+						maxDouble = std::numeric_limits<double>::max();
+					}
+
+					// Default Value
+					//
+					double defaultDouble = strDefaultValue.toDouble();
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(defaultDouble));
+					addedProperty = p;
+
+					p->setLimits(QVariant(minDouble), QVariant(maxDouble));
+				}
+				break;
+			case E::SpecificPropertyType::pt_bool:
+				{
+					// Default Value
+					//
+					bool defaultBool = strDefaultValue.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(defaultBool));
+					addedProperty = p;
+				}
+				break;
+			case E::SpecificPropertyType::pt_e_channel:
+				{
+					// Default Value
+					//
+					QString defaultString = strDefaultValue.toString();
+
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant::fromValue(E::Channel::A));
+					addedProperty = p;
+
+					p->setValue(defaultString.toStdString().c_str());
+				}
+				break;
+			case E::SpecificPropertyType::pt_string:
+				{
+					// Add property with default value
+					//
+					auto p = addProperty(name, category, true, QVariant(strDefaultValue.toString()));
+					addedProperty = p;
+				}
+				break;
+
+			default:
+				assert(false);
+
+				// Error, unknown type
+				//
+				result.first = false;
+				result.second = " SpecificProperties: wrong type: " + strType + "\n";
+
+				qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong type: " << strType;
+				return result;
+			}
+		}
+
+		// Set common for all properties
+		//
+		if (addedProperty == nullptr)
+		{
+			assert(addedProperty);
+
+			result.first = false;
+			result.second = " Property was not created: " + strType + "\n";
+			return result;
+		}
+
+		// Set command properties
+		//
+		addedProperty->setSpecific(true);
+		addedProperty->setReadOnly(false);
+		addedProperty->setPrecision(precision);
+		addedProperty->setUpdateFromPreset(updateFromPreset);
+		addedProperty->setExpert(expert);
+		addedProperty->setDescription(description);
+		addedProperty->setVisible(visible);
+		addedProperty->setSpecificEditor(editorType);
+
+		return result;
+	}
+
+	static std::pair<E::SpecificPropertyType, bool> parseSpecificPropertyType(const QString& strType)
+	{
+		static std::map<uint, E::SpecificPropertyType> typeMap;
+		if (typeMap.empty() == true)	// One time init
+		{
+			typeMap[qHash(QString("qint32"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("signed int"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("int32"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("int"))] = E::SpecificPropertyType::pt_int32;
+			typeMap[qHash(QString("int32_t"))] = E::SpecificPropertyType::pt_int32;
+
+			typeMap[qHash(QString("quint32"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("unsigned int"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("uint32"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("uint"))] = E::SpecificPropertyType::pt_uint32;
+			typeMap[qHash(QString("uint32_t"))] = E::SpecificPropertyType::pt_uint32;
+
+			typeMap[qHash(QString("double"))] = E::SpecificPropertyType::pt_double;
+			typeMap[qHash(QString("Double"))] = E::SpecificPropertyType::pt_double;
+
+			typeMap[qHash(QString("bool"))] = E::SpecificPropertyType::pt_bool;
+			typeMap[qHash(QString("Bool"))] = E::SpecificPropertyType::pt_bool;
+			typeMap[qHash(QString("boolean"))] = E::SpecificPropertyType::pt_bool;
+			typeMap[qHash(QString("Boolean"))] = E::SpecificPropertyType::pt_bool;
+
+			typeMap[qHash(QString("E::Channel"))] = E::SpecificPropertyType::pt_e_channel;
+			typeMap[qHash(QString("e::channel"))] = E::SpecificPropertyType::pt_e_channel;
+			typeMap[qHash(QString("channel"))] = E::SpecificPropertyType::pt_e_channel;
+
+			typeMap[qHash(QString("string"))] = E::SpecificPropertyType::pt_string;
+			typeMap[qHash(QString("String"))] = E::SpecificPropertyType::pt_string;
+			typeMap[qHash(QString("QString"))] = E::SpecificPropertyType::pt_string;
+		}
+
+		// Check for one of standard types from typeMap
+		//
+		auto typeIt = typeMap.find(qHash(strType));
+		if (typeIt == typeMap.end())
+		{
+			return {E::SpecificPropertyType::pt_int32, false};
+		}
+
+		return {typeIt->second, true};
+	}
+
+	static std::vector<std::pair<QString, int>> parseSpecificPropertyTypeDynamicEnum(const QString& strType, bool* ok)
+	{
+		std::vector<std::pair<QString, int>> enumValues;
+
+		if (ok == nullptr)
+		{
+			assert(false);
+			return enumValues;
+		}
+
+		int openBrace = strType.indexOf('[');
+		int closeBrace = strType.lastIndexOf(']');
+
+		if (openBrace == -1 || closeBrace == -1 || openBrace >= closeBrace)
+		{
+			*ok = false;
+			return enumValues;
+		}
+
+		QString valuesString = strType.mid(openBrace + 1, closeBrace - openBrace - 1);
+		valuesString.remove(' ');
+
+		QStringList valueStringList = valuesString.split(',', QString::SkipEmptyParts);	// split value pairs
+		if (valueStringList.empty() == true)
+		{
+			*ok = false;
+			return enumValues;
+		}
+
+		enumValues.reserve(valueStringList.size());
+
+		for (QString str : valueStringList)
+		{
+			// str is like:
+			// EnumValue = 1
+			//
+			QStringList str2intList = str.split('=', QString::SkipEmptyParts);
+			if (str2intList.size() != 2)
+			{
+				*ok = false;
+				return enumValues;
+			}
+
+			QString enumStr = str2intList.at(0);
+			bool conversionOk = false;
+			int enumVal = str2intList.at(1).toInt(&conversionOk);
+
+			if (conversionOk == false)
+			{
+				*ok = false;
+				return enumValues;
+			}
+
+			// Pair is good
+			//
+			enumValues.push_back({enumStr, enumVal});
+		}
+
+		*ok = true;
+
+		return enumValues;
 	}
 
 signals:
@@ -1396,6 +2734,7 @@ signals:
 
 private:
 	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)
+	mutable bool m_allPropsAlreadyDemanded = false;
 };
 
 

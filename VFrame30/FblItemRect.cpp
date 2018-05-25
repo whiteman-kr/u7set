@@ -23,19 +23,6 @@ namespace VFrame30
 		m_fillColor(qRgb(0xF0, 0xF0, 0xF0)),
 		m_textColor(qRgb(0x00, 0x00, 0xC0))
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::appearanceCategory, true, FblItemRect::getFontName, FblItemRect::setFontName);
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::appearanceCategory, true, FblItemRect::getFontSize, FblItemRect::setFontSize);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::appearanceCategory, true, FblItemRect::getFontBold, FblItemRect::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::appearanceCategory, true, FblItemRect::getFontItalic, FblItemRect::setFontItalic);
-
-		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
-		labelProp->setCategory(PropertyNames::functionalCategory);
-
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::userText, PropertyNames::textCategory, true, FblItemRect::userText, FblItemRect::setUserText);
-		ADD_PROPERTY_GET_SET_CAT(E::UserTextPos, PropertyNames::userTextPos, PropertyNames::textCategory, true, FblItemRect::userTextPos, FblItemRect::setUserTextPos);
-
-		// --
-		//
 		setItemUnit(unit);
 		m_font.setName("Sans");
 
@@ -59,6 +46,23 @@ namespace VFrame30
 
 	FblItemRect::~FblItemRect(void)
 	{
+	}
+
+	void FblItemRect::propertyDemand(const QString& prop)
+	{
+		PosRectImpl::propertyDemand(prop);
+
+		addProperty<QString, FblItemRect, &FblItemRect::getFontName, &FblItemRect::setFontName>(PropertyNames::fontName, PropertyNames::appearanceCategory, true);
+		addProperty<double, FblItemRect, &FblItemRect::getFontSize, &FblItemRect::setFontSize>(PropertyNames::fontSize, PropertyNames::appearanceCategory, true);
+		addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold, PropertyNames::appearanceCategory, true);
+		addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic, PropertyNames::appearanceCategory, true);
+
+		addProperty<QString, FblItemRect, &FblItemRect::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
+
+		addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText, PropertyNames::textCategory, true);
+		addProperty<E::UserTextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos, PropertyNames::textCategory, true);
+
+		return;
 	}
 
 	//
@@ -1051,7 +1055,7 @@ namespace VFrame30
 		return m_userTextPos;
 	}
 
-	void FblItemRect::setUserTextPos(E::UserTextPos value)
+	void FblItemRect::setUserTextPos(const E::UserTextPos& value)
 	{
 		m_userTextPos = value;
 	}

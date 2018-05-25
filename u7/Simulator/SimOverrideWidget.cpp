@@ -106,8 +106,7 @@ void SimOverrideWidget::dropEvent(QDropEvent* event)
 
 	if (signalIds.isEmpty() == false)
 	{
-//		m_simulator->
-//				addSignals(signalIds);
+		m_simulator->overrideSignals().addSignals(signalIds);
 	}
 
 	return;

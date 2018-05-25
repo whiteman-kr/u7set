@@ -12,6 +12,12 @@ TEMPLATE = app
 
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -118,7 +124,10 @@ SOURCES += \
     ../lib/CircularLogger.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/Signal.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/SignalProperties.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -192,7 +201,9 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../u7/Builder/CfgFiles.h
+    ../u7/Builder/CfgFiles.h \
+    ../lib/PropertyObject.h \
+    ../lib/SignalProperties.h
 #../lib/ExcelHelper.h
 
 FORMS    +=
@@ -206,13 +217,6 @@ TRANSLATIONS = translations/Metrology_ru.ts \
 OTHER_FILES += \
     translations/Metrology_ru.ts \
     translations/Metrology_uk.ts
-
-
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
-win32:QMAKE_CXXFLAGS += /std:c++17
-
 
 # Q_DEBUG define
 #

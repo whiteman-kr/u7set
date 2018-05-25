@@ -429,41 +429,41 @@ namespace Log
 
 		str = str.leftJustified(m_serviceStringLength, '-').append("\r\n");
 
-		file.write(str.toUtf8());
+		file.write(str.toLocal8Bit());
 
 		str = tr("Application:\t%1").arg(qAppName());
 
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
 
-		file.write(str.toUtf8());
+		file.write(str.toLocal8Bit());
 
 		str = tr("Start Time:\t%1").arg(startTime.toString("dd.MM.yyyy hh:mm:ss"));
 
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
 
-		file.write(str.toUtf8());
+		file.write(str.toLocal8Bit());
 
 		str = tr("End Time:\t%1").arg(endTime.toString("dd.MM.yyyy hh:mm:ss"));
 
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
 
-		file.write(str.toUtf8());
+		file.write(str.toLocal8Bit());
 
 		str = tr("Records Count:\t%1").arg(recordsCount);
 
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
 
-		file.write(str.toUtf8());
+		file.write(str.toLocal8Bit());
 
 		str.clear();
 
 		str = str.leftJustified(m_serviceStringLength, '-').append("\r\n");
 
-		file.write(str.toUtf8());
+		file.write(str.toLocal8Bit());
 
 		str = "\r\n";
 
-		file.write(str.toUtf8());
+		file.write(str.toLocal8Bit());
 
 		// Seek to the end of the file
 		//
@@ -539,7 +539,7 @@ namespace Log
 
 		for (LogFileRecord& record : m_queue)
 		{
-			file.write(record.toString(m_sessionHashString).toUtf8());
+			file.write(record.toString(m_sessionHashString).toLocal8Bit());
 		}
 
 		file.close();

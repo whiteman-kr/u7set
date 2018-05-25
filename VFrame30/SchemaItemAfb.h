@@ -63,7 +63,10 @@ namespace VFrame30
 		Q_INVOKABLE void addOutputSignal(QString caption, int type, int opIndex, int size);
 
 		Q_INVOKABLE void removeInputSignals();
+		Q_INVOKABLE void removeInputSignal(QString caption);
+
 		Q_INVOKABLE void removeOutputSignals();
+		Q_INVOKABLE void removeOutputSignal(QString caption);
 
 		// Properties and Data
 		//
