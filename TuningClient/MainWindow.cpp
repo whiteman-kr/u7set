@@ -744,7 +744,7 @@ void MainWindow::slot_signalsUpdated(QByteArray data)
 
 void MainWindow::slot_schemasGlobalScriptArrived(QByteArray data)
 {
-	m_globalScript = data.toStdString().c_str();
+	m_globalScript = QString::fromLocal8Bit(data);
 }
 
 void MainWindow::exit()

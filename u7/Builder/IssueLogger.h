@@ -120,7 +120,7 @@ namespace Builder
 		void wrnCFG3007(QString signalID);											// Signal '%1' is not found in Application Signals.
 		void wrnCFG3008(QString softwareID, QString module);						// Software '%1' is not found (Logic Module '%2').
 
-		void errCFG3009(QString signalID1, QString signalID2, QString module);		//Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3.
+		void errCFG3009(QString signalID1, QString signalID2, QString module);		// Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'.
 		void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);	// Property '%1' has wrong value (%2), valid range is %3..%4 [precision %5](signal '%6').
 
 		void errCFG3011(QString addressProperty, uint address, QString controller);	// IP address in property '%1' has undefined value (%2) in controller '%3'.
