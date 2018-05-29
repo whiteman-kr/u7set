@@ -1302,7 +1302,7 @@ namespace Builder
 				return false;
 			}
 
-			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, m_lm->equipmentIdTemplate(), outPin.guid());
+			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, m_lm->equipmentIdTemplate(), false, outPin.guid());
 
 			if (ualSignal == nullptr)
 			{

@@ -1085,18 +1085,19 @@ namespace Builder
 	}
 
 	bool UalSignal::createOptoSignal(const UalItem* ualItem,
-									Signal* s,
+									Signal* templateSignal,
 									const QString& lmEquipmentID,
 									BusShared bus,
+									bool isBusChildSignal,
 									IssueLogger* log)
 	{
-		if (ualItem == nullptr || s == nullptr || log == nullptr)
+		if (ualItem == nullptr || templateSignal == nullptr || log == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		if (s->lm() == nullptr)
+		if (templateSignal->lm() == nullptr)
 		{
 			LOG_INTERNAL_ERROR(log);
 			return false;
@@ -1111,23 +1112,28 @@ namespace Builder
 
 		Signal* refSignal = nullptr;
 
-		if (lmEquipmentID == s->lm()->equipmentIdTemplate())
+		// native copy of templateSignal is created if:
+		//
+		// 1) templateSignal is not native for current LM
+		// 2) templateSignal is native but it is bus child signal
+		//
+
+		bool needToCreateNativeCopy = (lmEquipmentID != templateSignal->lm()->equipmentIdTemplate()) ||
+									  (lmEquipmentID == templateSignal->lm()->equipmentIdTemplate() && isBusChildSignal == true);
+
+		if (needToCreateNativeCopy == true)
 		{
-			// this signal is native for current LM
-			// no create new signal, use existing
-			//
-			refSignal = s;
+			refSignal = m_autoSignalPtr = createNativeCopyOfSignal(templateSignal, lmEquipmentID);
+
+			if (refSignal == nullptr)
+			{
+				assert(false);
+				return false;
+			}
 		}
 		else
 		{
-			// this signal is not native for current LM
-			// create new instance of Signal
-			//
-			refSignal = m_autoSignalPtr = new Signal(*s);
-
-			refSignal->setAcquire(false);								// reset Acquired flag
-			refSignal->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
-			refSignal->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
+			refSignal = templateSignal;
 		}
 
 		// reset signal addresses to invalid state
@@ -1298,6 +1304,23 @@ namespace Builder
 		}
 
 		return childSignal->appendRefSignal(s, false);
+	}
+
+	Signal* UalSignal::createNativeCopyOfSignal(const Signal* templateSignal, const QString &lmEquipmentID)
+	{
+		if (templateSignal == nullptr)
+		{
+			assert(false);
+			return nullptr;
+		}
+
+		Signal* nativeCopySignal = new Signal(*templateSignal);
+
+		nativeCopySignal->setAcquire(false);								// reset Acquired flag
+		nativeCopySignal->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
+		nativeCopySignal->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
+
+		return nativeCopySignal;
 	}
 
 	Address16 UalSignal::ioBufAddr()
@@ -2060,6 +2083,7 @@ namespace Builder
 	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem,
 											   Signal* s,
 											   const QString& lmEquipmentID,
+											   bool isBusChildSignal,
 											   QUuid outPinUuid)
 	{
 		// create opto signal
@@ -2090,7 +2114,7 @@ namespace Builder
 			}
 		}
 
-		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus, m_log);
+		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus, isBusChildSignal, m_log);
 
 		if (result == false)
 		{
@@ -2114,7 +2138,7 @@ namespace Builder
 			{
 				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(), bus, busSignal);
 
-				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, QUuid());
+				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, true, QUuid());
 
 				if (busChildSignal != nullptr)
 				{
