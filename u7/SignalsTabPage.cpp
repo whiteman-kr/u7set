@@ -1224,6 +1224,9 @@ void SignalsModel::addSignal()
 		case E::SignalType::Analog:
 			signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 			signal.setDataSize(FLOAT32_SIZE);
+
+			signal.setSpecPropStruct(SignalProperties::defaultInternalAnalogSpecPropStruct);
+			signal.createSpecPropValues();
 			break;
 
 		case E::SignalType::Discrete:

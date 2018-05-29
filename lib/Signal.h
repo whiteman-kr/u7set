@@ -245,8 +245,6 @@ public:
 	QString specPropStruct() const { return m_specPropStruct; }
 	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
 
-	bool updateSpecProps(const QString& specPropStruct, bool* signalChanged);
-
 	bool createSpecPropValues();
 
 	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
