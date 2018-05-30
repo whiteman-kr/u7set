@@ -282,6 +282,16 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 						break;
 					}
 
+					if (propertyState == "expert")
+					{
+						if (theSettings.isExpertMode() == false)
+						{
+							property->setVisible(false);
+						}
+
+						break;
+					}
+
 					assert(propertyState == "write");
 				}
 
