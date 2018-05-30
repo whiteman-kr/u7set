@@ -29,6 +29,20 @@ SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
 
 	setLayout(layout);
 
+	// --
+	//
+	connect(&simulator->control(), &Sim::Control::stateChanged, this, &SimSchemaPage::controlStateChanged);
+
+	SimSchemaPage::controlStateChanged(simulator->control().state());	// Slots catches only changes of state, so init the firts time
+
+	return;
+}
+
+void SimSchemaPage::controlStateChanged(Sim::SimControlState state)
+{
+	m_schemaWidget->clientSchemaView()->setPeriodicUpdate(state == Sim::SimControlState::Run);
+	m_schemaWidget->clientSchemaView()->update();	// make an update, just in case
+
 	return;
 }
 

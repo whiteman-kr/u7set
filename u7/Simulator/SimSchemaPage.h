@@ -23,6 +23,9 @@ public:
 public:
 	QString schemaId() const;
 
+protected slots:
+	void controlStateChanged(Sim::SimControlState state);
+
 private:
 	SimSchemaWidget* m_schemaWidget = nullptr;
 };

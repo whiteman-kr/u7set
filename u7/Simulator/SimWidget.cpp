@@ -60,7 +60,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	connect(db, &DbController::projectClosed, this, &SimWidget::closeBuild);
 
 	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
-	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::updateActions);
+	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
 
 	connect(m_projectWidget, &SimProjectWidget::signal_openControlTabPage, this, &SimWidget::openControlTabPage);
 	connect(m_projectWidget, &SimProjectWidget::signal_openCodeTabPage, this, &SimWidget::openCodeTabPage);
@@ -247,6 +247,11 @@ static bool firstEvent = true;
 		firstEvent = false;
 	}
 	return;
+}
+
+void SimWidget::controlStateChanged(Sim::SimControlState /*state*/)
+{
+	updateActions();
 }
 
 void SimWidget::updateActions()

@@ -131,7 +131,7 @@ namespace Sim
 		std::chrono::microseconds leftTime() const;
 
 	signals:
-		void stateChanged();
+		void stateChanged(SimControlState state);
 
 	protected:
 		virtual void run() override;

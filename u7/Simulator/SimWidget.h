@@ -40,6 +40,7 @@ signals:
 	void needUpdateActions();
 
 protected slots:
+	void controlStateChanged(Sim::SimControlState state);
 	void updateActions();
 
 	void projectOpened(DbProject project);

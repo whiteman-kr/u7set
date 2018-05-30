@@ -147,9 +147,11 @@ namespace Sim
 
 				wl.unlock();		// Unlock before emitting signal, just in case
 
-				emit stateChanged();
+				emit stateChanged(SimControlState::Stop);
 				return false;
 			}
+
+			SimControlState state;
 
 			switch (m_controlData.m_state)
 			{
@@ -182,9 +184,11 @@ namespace Sim
 				assert(false);
 			}
 
+			state = m_controlData.m_state;
+
 			wl.unlock();		// Unlock before emitting signal, just in case
 
-			emit stateChanged();
+			emit stateChanged(state);
 		}
 
 		return true;
@@ -201,7 +205,7 @@ namespace Sim
 			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 		}
 
-		emit stateChanged();
+		emit stateChanged(SimControlState::Pause);
 
 		writeMessage(tr("Pause, left time %1, us").arg(leftTime.count()));
 		return;
@@ -218,7 +222,7 @@ namespace Sim
 			leftTime = (m_controlData.m_startTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 		}
 
-		emit stateChanged();
+		emit stateChanged(SimControlState::Stop);
 
 		writeMessage(tr("Stop, left cycle %1").arg(leftTime.count()));
 		return;

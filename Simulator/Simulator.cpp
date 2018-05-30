@@ -394,6 +394,16 @@ namespace Sim
 		return m_tuningSignalManager;
 	}
 
+	Sim::OverrideSignals& Simulator::overrideSignals()
+	{
+		return m_overrideSignals;
+	}
+
+	const Sim::OverrideSignals& Simulator::overrideSignals() const
+	{
+		return m_overrideSignals;
+	}
+
 	Sim::Control& Simulator::control()
 	{
 		return m_control;

@@ -89,7 +89,8 @@ SOURCES += \
     SimCommandProcessor.cpp \
     SimException.cpp \
     SimCommandProcessor_LM1_SF00.cpp \
-    SimOverrideSignals.cpp
+    SimOverrideSignals.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS += \
     Stable.h \
@@ -127,7 +128,8 @@ HEADERS += \
     SimCommandProcessor.h \
     SimException.h \
     SimCommandProcessor_LM1_SF00.h \
-    SimOverrideSignals.h
+    SimOverrideSignals.h \
+    ../lib/SignalProperties.h
 
 unix {
     target.path = /usr/lib

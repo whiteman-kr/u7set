@@ -341,7 +341,10 @@ namespace VFrame30
 
 	void ClientSchemaView::startRepaintTimer()
 	{
-		update();
+		if (m_periodicUpdate == true)
+		{
+			update();
+		}
 
 		// Set this timer in the edge of 250ms
 		//
@@ -362,6 +365,16 @@ namespace VFrame30
 		emit signal_setSchema(schemaId);
 
 		return;
+	}
+
+	bool ClientSchemaView::periodicUpdate() const
+	{
+		return m_periodicUpdate;
+	}
+
+	void ClientSchemaView::setPeriodicUpdate(bool value)
+	{
+		m_periodicUpdate = value;
 	}
 
 	bool ClientSchemaView::infoMode() const

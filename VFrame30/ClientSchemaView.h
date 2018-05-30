@@ -78,6 +78,9 @@ namespace VFrame30
 		// Properties
 		//
 	public:
+		bool periodicUpdate() const;
+		void setPeriodicUpdate(bool value);
+
 		bool infoMode() const;
 		void setInfoMode(bool value);
 
@@ -104,6 +107,7 @@ namespace VFrame30
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;
 
+		bool m_periodicUpdate = true;		// Update widget every 250 ms
 		bool m_infoMode = false;			// Show some aditional info like labels
 
 		// --
