@@ -1225,8 +1225,6 @@ void SignalsModel::addSignal()
 			signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 			signal.setDataSize(FLOAT32_SIZE);
 
-			signal.setSpecPropStruct(SignalProperties::defaultInternalAnalogSpecPropStruct);
-			signal.createSpecPropValues();
 			break;
 
 		case E::SignalType::Discrete:
@@ -1237,6 +1235,8 @@ void SignalsModel::addSignal()
 		default:
 			break;
 	}
+
+	signal.initSpecificProperties();
 
 	auto loader = [&settings](const QString& name)
 	{

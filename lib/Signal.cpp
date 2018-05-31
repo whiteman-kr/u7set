@@ -107,6 +107,54 @@ Signal::~Signal()
 	}
 }
 
+void Signal::initSpecificProperties()
+{
+	QString specPropStruct;
+
+	switch(m_signalType)
+	{
+	case E::SignalType::Analog:
+
+		switch(m_inOutType)
+		{
+		case E::SignalInOutType::Input:
+			specPropStruct = SignalProperties::defaultInputAnalogSpecPropStruct;
+			break;
+
+		case E::SignalInOutType::Output:
+			specPropStruct = SignalProperties::defaultOutputAnalogSpecPropStruct;
+			break;
+
+		case E::SignalInOutType::Internal:
+			specPropStruct = SignalProperties::defaultInternalAnalogSpecPropStruct;
+			break;
+
+		default:
+			assert(false);
+		}
+
+		break;
+	case E::SignalType::Discrete:
+	case E::SignalType::Bus:
+		break;
+
+	default:
+		assert(false);
+	}
+
+	if (specPropStruct.isEmpty() == true)
+	{
+		setSpecPropStruct("");
+		m_protoSpecPropValues.clear();
+	}
+	else
+	{
+		setSpecPropStruct(specPropStruct);
+		createSpecPropValues();
+	}
+}
+
+
 void Signal::setSignalType(E::SignalType type)
 {
 	m_signalType = type;

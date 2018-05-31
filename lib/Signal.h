@@ -87,6 +87,8 @@ public:
 	Signal(const Hardware::DeviceSignal& deviceSignal);
 	virtual ~Signal();
 
+	void initSpecificProperties();
+
 	// Signal identificators
 
 	QString appSignalID() const { return m_appSignalID; }

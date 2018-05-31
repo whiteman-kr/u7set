@@ -4066,8 +4066,6 @@ namespace Builder
 		if (result == false)
 		{
 			delete appFb;
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("FB '%1' instantiation error")).arg(appItem.caption()));
 			return nullptr;
 		}
 
