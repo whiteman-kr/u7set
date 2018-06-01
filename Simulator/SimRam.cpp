@@ -114,7 +114,10 @@ namespace Sim
 
 		// Apply override
 		//
-		applyOverride<quint16>(offsetW);
+		if (m_overrideData.empty() == false)
+		{
+			applyOverride<quint16>(offsetW);
+		}
 
 		return true;
 	}
@@ -136,7 +139,10 @@ namespace Sim
 			// Apply override mask for read operations
 			// Probably in future it's better to apply ovvreide mask to RESULT of reading?
 			//
-			const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
+			if (m_overrideData.empty() == false)
+			{
+				const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
+			}
 		}
 
 		//--
@@ -220,7 +226,10 @@ namespace Sim
 
 		// Apply override
 		//
-		applyOverride<TYPE>(offsetW);
+		if (m_overrideData.empty() == false)
+		{
+			applyOverride<TYPE>(offsetW);
+		}
 
 		return true;
 	}
@@ -251,7 +260,10 @@ namespace Sim
 			// Apply override mask for read operations
 			// Probably in future it's better to apply ovvreide mask to RESULT of reading?
 			//
-			const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
+			if (m_overrideData.empty() == false)
+			{
+				const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
+			}
 		}
 
 		if (byteOrder == E::BigEndian)
@@ -269,6 +281,13 @@ namespace Sim
 	void RamArea::applyOverride(quint32 offsetW)
 	{
 		static_assert(sizeof(TYPE) >= 2 && sizeof(TYPE) <= 8);
+
+		if (m_overrideData.empty() == true)
+		{
+			// No data to override
+			//
+			return;
+		}
 
 		int zeroBasedOffsetW = offsetW - offset();
 

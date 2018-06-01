@@ -582,8 +582,6 @@ namespace Sim
 			return result;
 		}
 
-		result.resize(ramAreaInfo.size());
-
 		// --
 		//
 		QReadLocker locker(&m_lock);
@@ -607,6 +605,11 @@ namespace Sim
 				// dataSizeW is not taken into checks, as we suppose that signal can be in only area
 				//
 				continue;
+			}
+
+			if (result.empty() == true)
+			{
+				result.resize(ramAreaInfo.size());
 			}
 
 			offsetW -= ramAreaInfo.offset();	// Make it 0-based
