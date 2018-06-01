@@ -1,7 +1,8 @@
 #include "SimOverrideWidget.h"
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QMenu>
 #include <QActionGroup>
+#include <QLabel>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QLineEdit>
@@ -523,10 +524,45 @@ void SimOverrideWidget::setValue(QString appSignalId)
 					~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
-	QVBoxLayout* layout = new QVBoxLayout;
-	d.setLayout(layout);
+	// CustomSignalID/AppSignalID
+	//
+	QLabel* siganIdLabel = new QLabel(QString("%1 (%2)>").arg(osp->m_customSignalId).arg(osp->m_appSignalId), &d);
+	siganIdLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
+	// Caption
+	//
+	QLabel* captionLabel = new QLabel(osp->m_caption, &d);
+	captionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+	// LM ID
+	//
+	QLabel* lmIdLabel = new QLabel(osp->m_equipmentId, &d);
+	lmIdLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+	// Type/Format
+	//
+	QLabel* typeLabel = new QLabel(&d);
+
+	QString text;
+
+	if (osp->m_signalType == E::SignalType::Discrete)
+	{
+		text = E::valueToString<E::SignalType>(osp->m_signalType);
+	}
+
+	if (osp->m_signalType == E::SignalType::Analog)
+	{
+		text = QString("Type: %1 (%2)")
+				.arg(E::valueToString<E::SignalType>(osp->m_signalType))
+				.arg(E::valueToString<E::AnalogAppSignalFormat>(osp->m_dataFormat));
+	}
+
+	typeLabel->setText(text);
+
+	// Edit
+	//
 	QLineEdit* edit = new QLineEdit(&d);
+	edit->setPlaceholderText("Override Value");
 
 	QValidator* validator = nullptr;
 
@@ -568,15 +604,38 @@ void SimOverrideWidget::setValue(QString appSignalId)
 	edit->setText(osp->valueString(currentBase, m_currentFormat, m_currentPrecision));
 	edit->setAlignment(Qt::AlignRight);
 
+	// Ok/Cancel
+	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-	layout->addWidget(edit);
-	layout->addWidget(buttonBox);
 
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
-	d.resize(d.sizeHint() * 1.5);
+	// --
+	//
+	QGridLayout* layout = new QGridLayout;
+	d.setLayout(layout);
+
+	layout->addWidget(new QLabel("SignalID:"), 0, 0);
+	layout->addWidget(siganIdLabel, 0, 1);
+
+	layout->addWidget(new QLabel("Caption:"), 1, 0);
+	layout->addWidget(captionLabel, 1, 1);
+
+	layout->addWidget(new QLabel("LogicModule:"), 2, 0);
+	layout->addWidget(lmIdLabel, 2, 1);
+
+	layout->addWidget(new QLabel("Type:"), 3, 0);
+	layout->addWidget(typeLabel, 3, 1);
+
+	layout->addWidget(new QLabel("Value:"), 4, 0);
+	layout->addWidget(edit, 4, 1);
+
+	QWidget* stretch = new QWidget;
+	stretch->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	layout->addWidget(stretch, 5, 0, 1, 2);
+
+	layout->addWidget(buttonBox, 6, 0, 1, 2);
 
 	// --
 	//

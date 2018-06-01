@@ -114,7 +114,7 @@ namespace Sim
 
 		// Apply override
 		//
-		applyOverride(offsetW);
+		applyOverride<quint16>(offsetW);
 
 		return true;
 	}
@@ -128,6 +128,19 @@ namespace Sim
 			return false;
 		}
 
+		// Apply override
+		//
+		if (access() == E::LogicModuleRamAccess::Read)
+		{
+			// This is read only memory (like incoming data from i/o modules)
+			// Apply override mask for read operations
+			// Probably in future it's better to apply ovvreide mask to RESULT of reading?
+			//
+			const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
+		}
+
+		//--
+		//
 		int byteOffset = (offsetW - offset()) * 2;
 		if (byteOffset >= m_data.size())
 		{
@@ -207,26 +220,7 @@ namespace Sim
 
 		// Apply override
 		//
-		static_assert(sizeof(TYPE) >= 2 && sizeof(TYPE) <= 8);
-
-		if constexpr (sizeof(TYPE) == 2)
-		{
-			applyOverride(offsetW);
-		}
-
-		if constexpr (sizeof(TYPE)  == 4)
-		{
-			applyOverride(offsetW + 0);
-			applyOverride(offsetW + 1);
-		}
-
-		if constexpr (sizeof(TYPE) == 8)
-		{
-			applyOverride(offsetW + 0);
-			applyOverride(offsetW + 1);
-			applyOverride(offsetW + 2);
-			applyOverride(offsetW + 3);
-		}
+		applyOverride<TYPE>(offsetW);
 
 		return true;
 	}
@@ -249,6 +243,17 @@ namespace Sim
 			return false;
 		}
 
+		// Apply override
+		//
+		if (access() == E::LogicModuleRamAccess::Read)
+		{
+			// This is read only memory (like incoming data from i/o modules)
+			// Apply override mask for read operations
+			// Probably in future it's better to apply ovvreide mask to RESULT of reading?
+			//
+			const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
+		}
+
 		if (byteOrder == E::BigEndian)
 		{
 			*data = qFromBigEndian<TYPE>(m_data.constData() + byteOffset);
@@ -260,8 +265,11 @@ namespace Sim
 		return true;
 	}
 
+	template<typename TYPE>
 	void RamArea::applyOverride(quint32 offsetW)
 	{
+		static_assert(sizeof(TYPE) >= 2 && sizeof(TYPE) <= 8);
+
 		int zeroBasedOffsetW = offsetW - offset();
 
 		if (zeroBasedOffsetW < 0 ||
@@ -271,12 +279,26 @@ namespace Sim
 			return;
 		}
 
-		const OverrideRamRecord& od = m_overrideData[zeroBasedOffsetW];
-
 		quint16* ptrW = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
 
-		*ptrW &= ~od.mask;
-		*ptrW |= od.data;
+		if constexpr (sizeof(TYPE) == 2)
+		{
+			m_overrideData[zeroBasedOffsetW].applyOverlapping(ptrW);
+		}
+
+		if constexpr (sizeof(TYPE) == 4)
+		{
+			m_overrideData[zeroBasedOffsetW + 0].applyOverlapping(ptrW + 0);
+			m_overrideData[zeroBasedOffsetW + 1].applyOverlapping(ptrW + 1);
+		}
+
+		if constexpr (sizeof(TYPE) == 8)
+		{
+			m_overrideData[zeroBasedOffsetW + 0].applyOverlapping(ptrW + 0);
+			m_overrideData[zeroBasedOffsetW + 1].applyOverlapping(ptrW + 1);
+			m_overrideData[zeroBasedOffsetW + 2].applyOverlapping(ptrW + 2);
+			m_overrideData[zeroBasedOffsetW + 3].applyOverlapping(ptrW + 3);
+		}
 
 		return;
 	}

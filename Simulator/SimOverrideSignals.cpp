@@ -20,6 +20,7 @@ namespace Sim
 
 		m_signalType = signalParam.signalType();
 		m_dataFormat = signalParam.analogSignalFormat();
+		m_byteOrder = signalParam.byteOrder();
 
 		m_dataSizeW = signalParam.sizeW();
 		m_address = signalParam.ualAddr();
@@ -236,8 +237,17 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 1);
 
-		m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[0].data = qToBigEndian<quint16>(value);
+		if (m_byteOrder == E::ByteOrder::BigEndian)
+		{
+			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[0].data = qToBigEndian<quint16>(value);
+		}
+		else
+		{
+			// To do
+			//
+			assert(false);
+		}
 
 		m_value = QVariant::fromValue(value);
 
@@ -251,11 +261,20 @@ namespace Sim
 		qint32 converted = qToBigEndian<qint32>(value);
 		quint16* ptr = reinterpret_cast<quint16*>(&converted);
 
-		m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[0].data = *ptr;
+		if (m_byteOrder == E::ByteOrder::BigEndian)
+		{
+			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[0].data = *ptr;
 
-		m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[1].data = *(ptr + 1);
+			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[1].data = *(ptr + 1);
+		}
+		else
+		{
+			// To do
+			//
+			assert(false);
+		}
 
 		m_value = QVariant::fromValue(value);
 
@@ -278,11 +297,20 @@ namespace Sim
 
 		quint16* ptr = reinterpret_cast<quint16*>(&c.asDword);
 
-		m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[0].data = *ptr;
+		if (m_byteOrder == E::ByteOrder::BigEndian)
+		{
+			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[0].data = *ptr;
 
-		m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[1].data = *(ptr + 1);
+			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[1].data = *(ptr + 1);
+		}
+		else
+		{
+			// To do
+			//
+			assert(false);
+		}
 
 		m_value = QVariant::fromValue(value);
 
@@ -304,23 +332,31 @@ namespace Sim
 
 		quint16* ptr = reinterpret_cast<quint16*>(c.asDdword);
 
-		m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[0].data = *ptr;
+		if (m_byteOrder == E::ByteOrder::BigEndian)
+		{
+			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[0].data = *ptr;
 
-		m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[1].data = *(ptr + 1);
+			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[1].data = *(ptr + 1);
 
-		m_ramOverrides[2].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[2].data = *(ptr + 2);
+			m_ramOverrides[2].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[2].data = *(ptr + 2);
 
-		m_ramOverrides[3].mask = qToBigEndian<quint16>(0xFFFF);
-		m_ramOverrides[3].data = *(ptr + 3);
+			m_ramOverrides[3].mask = qToBigEndian<quint16>(0xFFFF);
+			m_ramOverrides[3].data = *(ptr + 3);
+		}
+		else
+		{
+			// To do
+			//
+			assert(false);
+		}
 
 		m_value = QVariant::fromValue(value);
 
 		return;
 	}
-
 
 
 	OverrideSignals::OverrideSignals(Sim::AppSignalManager* appSignalManager, QObject* parent /*= nullptr*/) :

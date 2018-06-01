@@ -195,7 +195,7 @@ static const AppSignalParam dummy;
 			assert(signalHash == s.hash());
 
 			appSignalId = s.appSignalID();
-			logicModuleId = s.equipmentID();	int to_do_set_logic_module_equipement_id_instead_of_just_id;
+			logicModuleId = s.lmEquipmentID();
 			ualAddress = s.ualAddr();
 			type = s.signalType();
 			byteOrder = s.byteOrder();

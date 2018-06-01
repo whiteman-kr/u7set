@@ -24,6 +24,13 @@ namespace Sim
 			mask |= r.mask;
 			data |= r.data;
 		}
+
+		void applyOverlapping(quint16* ptrW) const
+		{
+			assert(ptrW);
+			*ptrW &= ~mask;
+			*ptrW |= data;
+		}
 	};
 
 	struct OverrideSignalParam
@@ -54,6 +61,7 @@ namespace Sim
 
 		E::SignalType m_signalType = E::SignalType::Discrete;
 		E::AnalogAppSignalFormat m_dataFormat = E::AnalogAppSignalFormat::SignedInt32;
+		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
 		int m_dataSizeW = 0;								// DataSize in words, for discrete is 1 word and set OverrideRamRecord::mask
 		Address16 m_address;

@@ -6,7 +6,7 @@
 #include "../../Simulator/Simulator.h"
 
 // TO DO:
-// 3. On SetValue dialog show addtional signal info: AppSignalID, CustomSignalID, LM_ID, Channel, Type/Format, Caption...
+// 5. Indicate on SCHEMA overriden signals
 //
 
 class SimOverrideWidget : public QWidget
