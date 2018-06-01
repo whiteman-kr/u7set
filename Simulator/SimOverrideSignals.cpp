@@ -554,7 +554,8 @@ namespace Sim
 
 		for (auto[appSignalId, osp] : m_signals)
 		{
-			if (osp.m_ramAccess != ramAccess ||			// Signal is not in this RAM Area
+			if (osp.m_enabled == false ||				// Signal is not enabled to override
+				osp.m_ramAccess != ramAccess ||			// Signal is not in this RAM Area
 				osp.m_equipmentId != equipmentId)		// Signal is not in this LM
 			{
 				continue;

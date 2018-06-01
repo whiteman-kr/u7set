@@ -62,6 +62,8 @@ namespace Sim
 		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder);
 		template<typename TYPE> bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const;
 
+		void applyOverride(quint32 offsetW);
+
 	public:
 		void setOverrideData(std::vector<OverrideRamRecord> overrideData);
 

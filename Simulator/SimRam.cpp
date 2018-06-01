@@ -114,27 +114,7 @@ namespace Sim
 
 		// Apply override
 		//
-		int zeroBasedOffsetW = offsetW - offset();
-
-		if (zeroBasedOffsetW < 0 ||
-			zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
-		{
-			assert(false);
-			return false;
-		}
-
-		const OverrideRamRecord& od = m_overrideData[zeroBasedOffsetW];
-
-		quint16* ptrW = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
-
-//		if (od.mask != 0)
-//		{
-//			int i =0;
-//			i++;
-//		}
-
-		*ptrW &= ~od.mask;
-		*ptrW |= od.data;
+		applyOverride(offsetW);
 
 		return true;
 	}
@@ -225,6 +205,29 @@ namespace Sim
 			qToLittleEndian<TYPE>(data, m_data.data() + byteOffset);
 		}
 
+		// Apply override
+		//
+		static_assert(sizeof(TYPE) >= 2 && sizeof(TYPE) <= 8);
+
+		if constexpr (sizeof(TYPE) == 2)
+		{
+			applyOverride(offsetW);
+		}
+
+		if constexpr (sizeof(TYPE)  == 4)
+		{
+			applyOverride(offsetW + 0);
+			applyOverride(offsetW + 1);
+		}
+
+		if constexpr (sizeof(TYPE) == 8)
+		{
+			applyOverride(offsetW + 0);
+			applyOverride(offsetW + 1);
+			applyOverride(offsetW + 2);
+			applyOverride(offsetW + 3);
+		}
+
 		return true;
 	}
 
@@ -255,6 +258,27 @@ namespace Sim
 			*data = qFromLittleEndian<TYPE>(m_data.constData() + byteOffset);
 		}
 		return true;
+	}
+
+	void RamArea::applyOverride(quint32 offsetW)
+	{
+		int zeroBasedOffsetW = offsetW - offset();
+
+		if (zeroBasedOffsetW < 0 ||
+			zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
+		{
+			assert(false);
+			return;
+		}
+
+		const OverrideRamRecord& od = m_overrideData[zeroBasedOffsetW];
+
+		quint16* ptrW = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
+
+		*ptrW &= ~od.mask;
+		*ptrW |= od.data;
+
+		return;
 	}
 
 	void RamArea::setOverrideData(std::vector<OverrideRamRecord> overrideData)
@@ -290,6 +314,7 @@ namespace Sim
 	void Ram::reset()
 	{
 		m_memoryAreas.clear();
+		m_overrideSignalsLastCounter = -1;
 		return;
 	}
 
