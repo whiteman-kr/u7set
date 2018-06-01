@@ -190,6 +190,12 @@ namespace Sim
 			return false;
 		}
 
+		// Update overriden signals
+		//
+		overrideSignals().updateSignals();
+
+		// --
+		//
 		writeMessage("Project for simulation successfully loaded.");
 		return true;
 	}

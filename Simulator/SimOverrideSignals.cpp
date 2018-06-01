@@ -1,9 +1,17 @@
 #include "SimOverrideSignals.h"
+#include "SimAppSignalManager.h"
+#include "SimRam.h"
 
 namespace Sim
 {
 
 	OverrideSignalParam::OverrideSignalParam(const Signal& signalParam)
+	{
+		updateSignalProperties(signalParam);
+		return;
+	}
+
+	void OverrideSignalParam::updateSignalProperties(const Signal& signalParam, QVariant value /*= QVariant()*/)
 	{
 		m_appSignalId = signalParam.appSignalID();
 		m_customSignalId = signalParam.customAppSignalID();
@@ -15,6 +23,7 @@ namespace Sim
 
 		m_dataSizeW = signalParam.sizeW();
 		m_address = signalParam.ualAddr();
+		m_ramAccess = signalParam.lmRamAccess();
 
 		// Checks
 		//
@@ -28,14 +37,42 @@ namespace Sim
 		//
 		switch (m_signalType)
 		{
+		case E::SignalType::Discrete:
+			if (value.isValid() == false ||
+				value.type() != m_value.type())
+			{
+				setDiscreteValue(0);
+			}
+			else
+			{
+				setFloatValue(m_value.value<quint16>());
+			}
+			break;
+
 		case E::SignalType::Analog:
 			switch (m_dataFormat)
 			{
 			case E::AnalogAppSignalFormat::SignedInt32:
-				setSignedIntvalue(0);
+				if (value.isValid() == false ||
+					value.type() != m_value.type())
+				{
+					setSignedIntvalue(0);
+				}
+				else
+				{
+					setFloatValue(m_value.value<qint32>());
+				}
 				break;
 			case E::AnalogAppSignalFormat::Float32:
-				setFloatValue(0);
+				if (value.isValid() == false ||
+					value.type() != m_value.type())
+				{
+					setFloatValue(0);
+				}
+				else
+				{
+					setFloatValue(m_value.value<float>());
+				}
 				break;
 //			case E::AnalogAppSignalFormat::Double:???
 //				break;
@@ -44,17 +81,14 @@ namespace Sim
 			}
 			break;
 
-		case E::SignalType::Discrete:
-			setDiscreteValue(0);
-			break;
-
 		default:
 			assert(m_signalType == E::SignalType::Analog ||
 				   m_signalType == E::SignalType::Discrete);
 		}
 
-		return;
+
 	}
+
 
 	QString OverrideSignalParam::valueString(int base /*= 10*/,
 											 E::AnalogFormat analogFormat /*= E::AnalogFormat::g_9_or_9e*/,
@@ -124,6 +158,66 @@ namespace Sim
 
 		assert(false);
 		return result;
+	}
+
+	void OverrideSignalParam::setValue(const QVariant& value)
+	{
+		switch (m_signalType)
+		{
+		case E::SignalType::Discrete:
+			{
+				if (value.canConvert<quint16>() == false)
+				{
+					assert(value.canConvert<quint16>());
+					break;
+				}
+
+				quint16 discrValue = value.value<quint16>();
+				setDiscreteValue(discrValue);
+			}
+			break;
+
+		case E::SignalType::Analog:
+			{
+				switch (m_dataFormat)
+				{
+				case E::AnalogAppSignalFormat::SignedInt32:
+					{
+						if (value.canConvert<qint32>() == false)
+						{
+							assert(value.canConvert<qint32>());
+							break;
+						}
+
+						qint32 sintValue = value.value<qint32>();
+						setSignedIntvalue(sintValue);
+					}
+					break;
+
+				case E::AnalogAppSignalFormat::Float32:
+					{
+						if (value.canConvert<float>() == false)
+						{
+							assert(value.canConvert<float>());
+							break;
+						}
+
+						float floatValue = value.value<float>();
+						setFloatValue(floatValue);
+					}
+					break;
+				default:
+					assert(false);
+				}
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
+		return;
 	}
 
 	void OverrideSignalParam::setDiscreteValue(quint16 value)
@@ -228,6 +322,7 @@ namespace Sim
 	}
 
 
+
 	OverrideSignals::OverrideSignals(Sim::AppSignalManager* appSignalManager, QObject* parent /*= nullptr*/) :
 		QObject(parent),
 		Output("OverrideSignals"),
@@ -245,6 +340,8 @@ namespace Sim
 	{
 		{
 			QWriteLocker locker(&m_lock);
+			m_changesCounter ++;
+
 			m_signals.clear();
 		}
 
@@ -264,10 +361,9 @@ namespace Sim
 
 		for (const QString& id : appSignalIds)
 		{
-			bool found = false;
-			Signal sp = m_appSignalManager->signalParamExt(id, &found);
+			std::optional<Signal> sp = m_appSignalManager->signalParamExt(id);
 
-			if (found == false)
+			if (sp.has_value() == false)
 			{
 				writeWaning(QString("Cannot add signal to override list, signal %1 not found.").arg(id));
 				continue;
@@ -275,8 +371,9 @@ namespace Sim
 
 			{
 				QWriteLocker locker(&m_lock);
+				m_changesCounter ++;
 
-				auto[it, ok] = m_signals.emplace(id, sp);
+				auto[it, ok] = m_signals.emplace(id, *sp);
 				if (ok == false)
 				{
 					writeWaning(QString("Signal %1 aldready added to override list.").arg(id));
@@ -284,7 +381,7 @@ namespace Sim
 				}
 				else
 				{
-					addedSignals << sp.appSignalID();
+					addedSignals << sp->appSignalID();
 				}
 			}
 		}
@@ -301,6 +398,8 @@ namespace Sim
 	{
 		{
 			QWriteLocker locker(&m_lock);
+			m_changesCounter ++;
+
 			m_signals.erase(appSignalId);
 		}
 
@@ -314,6 +413,7 @@ namespace Sim
 
 		{
 			QWriteLocker locker(&m_lock);
+			m_changesCounter ++;
 
 			if (auto it = m_signals.find(appSignalId);
 				it != m_signals.end() && it->second.m_enabled != enable)
@@ -331,6 +431,83 @@ namespace Sim
 		return;
 	}
 
+	void OverrideSignals::setValue(QString appSignalId, const QVariant& value)
+	{
+		{
+			QWriteLocker locker(&m_lock);
+			m_changesCounter ++;
+
+			auto it = m_signals.find(appSignalId);
+
+			if (it == m_signals.end())
+			{
+				writeError(tr("Can't set new value for %1, signal not found").arg(appSignalId));
+				return;
+			}
+
+			OverrideSignalParam& osp = it->second;
+			osp.setValue(value);
+		}
+
+		emit stateChanged(appSignalId);
+		return;
+	}
+
+	void OverrideSignals::updateSignals()
+	{
+		std::vector<OverrideSignalParam> existingSignals =  overrideSignals();
+
+		std::vector<OverrideSignalParam> newSignals;
+		newSignals.reserve(existingSignals.size());
+
+		for (const OverrideSignalParam& osp : existingSignals)
+		{
+			std::optional<Signal> sp = m_appSignalManager->signalParamExt(osp.m_appSignalId);
+
+			if (sp.has_value() == false)
+			{
+				writeWaning(tr("Signal %1 removed from overriden signals.").arg(osp.m_appSignalId));
+				continue;
+			}
+
+			OverrideSignalParam& updateOsp = newSignals.emplace_back(osp);
+			updateOsp.updateSignalProperties(*sp, osp.m_value);
+		}
+
+		// Set updated signals
+		//
+		{
+			QWriteLocker locker(&m_lock);
+			m_changesCounter ++;
+
+			m_signals.clear();
+
+			for (const OverrideSignalParam& osp : newSignals)
+			{
+				m_signals.emplace(osp.m_appSignalId, osp);
+			}
+		}
+
+		emit signalsChanged({});
+
+		return;
+	}
+
+	std::optional<OverrideSignalParam> OverrideSignals::overrideSignal(QString appSignalId) const
+	{
+		std::optional<OverrideSignalParam> result;
+
+		QReadLocker rl(&m_lock);
+
+		auto it = m_signals.find(appSignalId);
+		if (it != m_signals.end())
+		{
+			result = it->second;
+		}
+
+		return result;
+	}
+
 	std::vector<OverrideSignalParam> OverrideSignals::overrideSignals() const
 	{
 		std::vector<OverrideSignalParam> result;
@@ -342,6 +519,72 @@ namespace Sim
 		for (auto[appSignalId, ovSignalParam] :  m_signals)
 		{
 			result.push_back(ovSignalParam);
+		}
+
+		return result;
+	}
+
+	int OverrideSignals::changesCounter() const
+	{
+		QReadLocker rl(&m_lock);
+		return m_changesCounter;
+	}
+
+	std::vector<OverrideRamRecord> OverrideSignals::ramOverrideData(QString equipmentId, const RamAreaInfo& ramAreaInfo) const
+	{
+		std::vector<OverrideRamRecord> result;
+		E::LogicModuleRamAccess ramAccess = ramAreaInfo.access();
+
+		// Allocate data by size of RamArea
+		//
+		if (ramAreaInfo.size() > 0x10000)
+		{
+			writeError(tr("RamArea (offset %1) in LogicModule %2 seems too big (%3)")
+						.arg(ramAreaInfo.offset())
+						.arg(equipmentId)
+						.arg(ramAreaInfo.size()));
+			return result;
+		}
+
+		result.resize(ramAreaInfo.size());
+
+		// --
+		//
+		QReadLocker locker(&m_lock);
+
+		for (auto[appSignalId, osp] : m_signals)
+		{
+			if (osp.m_ramAccess != ramAccess ||			// Signal is not in this RAM Area
+				osp.m_equipmentId != equipmentId)		// Signal is not in this LM
+			{
+				continue;
+			}
+
+			int dataSizeW = osp.m_dataSizeW;
+			int offsetW = osp.m_address.offset();
+
+			if (offsetW < static_cast<int>(ramAreaInfo.offset()) ||
+				offsetW >= static_cast<int>(ramAreaInfo.offset() + ramAreaInfo.size()))
+			{
+				// Signal is not in this RamArea
+				// dataSizeW is not taken into checks, as we suppose that signal can be in only area
+				//
+				continue;
+			}
+
+			offsetW -= ramAreaInfo.offset();	// Make it 0-based
+
+			if (offsetW < 0 || offsetW + dataSizeW > result.size())
+			{
+				assert(false);
+				return result;
+			}
+
+			for (int i = 0; i < dataSizeW; i++)
+			{
+				result[offsetW].overlapRecord(osp.m_ramOverrides[i]);
+				offsetW++;
+			}
 		}
 
 		return result;

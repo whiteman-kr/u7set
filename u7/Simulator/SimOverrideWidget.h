@@ -8,8 +8,8 @@
 // TO DO:
 // 1. Actually SET OVERRIDE VALUE
 // 2. Select signal and get its' dialog
+// 3. On SetValue dialog show addtional signal info: AppSignalID, CustomSignalID, LM_ID, Channel, Type/Format, Caption...
 //
-
 
 class SimOverrideWidget : public QWidget
 {
@@ -38,6 +38,7 @@ protected slots:
 
 	void clear();
 	void removeSignal(QString appSignalId);
+
 	void setValue(QString appSignalId);
 
 private:

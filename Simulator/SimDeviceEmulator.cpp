@@ -799,18 +799,19 @@ namespace Sim
 		//
 		m_logicUnit = LogicUnitData();
 
+
+		m_ram.setAllowOverride(true);		// Allow override ram
+
+		if (m_overrideSignals != nullptr)
+		{
+			m_ram.updateOverrideData(equpimnetId(), m_overrideSignals);
+		}
+
 		// Run work cylce
 		//
 		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
 			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
 		{
-//			auto offsetIt = m_offsetToCommand.find(m_logicUnit.programCounter);
-//			if (offsetIt == m_offsetToCommand.end())
-//			{
-//				FAULT("Command not found in current ProgramCounter.");
-//				break;
-//			}
-
 			if (Q_UNLIKELY(m_logicUnit.programCounter >= m_offsetToCommand.size()))
 			{
 				assert(false);
@@ -820,7 +821,8 @@ namespace Sim
 
 			int commandIndex = m_offsetToCommand[m_logicUnit.programCounter];
 
-			if (Q_UNLIKELY(commandIndex == -1 || commandIndex > m_commands.size()))
+			if (Q_UNLIKELY(commandIndex == -1 ||
+						   commandIndex > m_commands.size()))
 			{
 				FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
 				break;
@@ -843,7 +845,7 @@ namespace Sim
 				break;
 			}
 
-			// If ProgramCounter was not changed in runCommand (can be changed in APPSTART), then
+			// If ProgramCounter was not changed in runCommand (can be changed by APPSTART command), then
 			// incerement ProgramCounter to coommand size
 			//
 			if (m_logicUnit.programCounter == command.m_offset)
@@ -851,6 +853,8 @@ namespace Sim
 				m_logicUnit.programCounter += command.m_size;
 			}
 		}
+
+		m_ram.setAllowOverride(false);
 
 		return result;
 	}
@@ -1667,6 +1671,11 @@ namespace Sim
 		return result;
 	}
 
+	QString DeviceEmulator::equpimnetId() const
+	{
+		return logicModuleInfo().equipmentId;
+	}
+
 	Hardware::LogicModuleInfo DeviceEmulator::logicModuleInfo() const
 	{
 		m_cacheMutex.lock();
@@ -1690,6 +1699,11 @@ namespace Sim
 	const LmDescription& DeviceEmulator::lmDescription() const
 	{
 		return m_lmDescription;
+	}
+
+	void DeviceEmulator::setOverrideSignals(OverrideSignals* overrideSignals)
+	{
+		m_overrideSignals = overrideSignals;
 	}
 
 	std::vector<DeviceCommand> DeviceEmulator::commands() const

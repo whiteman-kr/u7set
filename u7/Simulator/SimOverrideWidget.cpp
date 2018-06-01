@@ -2,6 +2,11 @@
 #include <QHBoxLayout>
 #include <QMenu>
 #include <QActionGroup>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QLineEdit>
+#include <QIntValidator>
+#include <QDoubleValidator>
 #include <QSettings>
 #include <QClipboard>
 #include <QHeaderView>
@@ -502,7 +507,122 @@ void SimOverrideWidget::removeSignal(QString appSignalId)
 
 void SimOverrideWidget::setValue(QString appSignalId)
 {
-	//..
+	std::optional<Sim::OverrideSignalParam> osp = m_simulator->overrideSignals().overrideSignal(appSignalId);
+
+	if (osp.has_value() == false)
+	{
+		assert(osp.has_value());
+		return;
+	}
+
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set value for %1 (%2)").arg(osp->m_customSignalId).arg(osp->m_appSignalId));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+	d.setLayout(layout);
+
+	QLineEdit* edit = new QLineEdit(&d);
+
+	QValidator* validator = nullptr;
+
+	switch (osp->m_signalType)
+	{
+	case E::SignalType::Discrete:
+		validator = new QIntValidator(0, 1, &d);
+		break;
+	case E::SignalType::Analog:
+		switch (osp->m_dataFormat)
+		{
+		case E::AnalogAppSignalFormat::SignedInt32:
+			validator = new QIntValidator(&d);
+			break;
+		case E::AnalogAppSignalFormat::Float32:
+			validator = new QDoubleValidator(&d);
+			break;
+		default:
+			assert(false);
+			return;
+		}
+
+		break;
+	default:
+		assert(false);
+		return;
+	}
+
+	edit->setValidator(validator);
+
+	int currentBase = m_currentBase;
+
+	if (osp->m_signalType == E::SignalType::Analog &&
+		osp->m_dataFormat == E::AnalogAppSignalFormat::SignedInt32)
+	{
+		currentBase = 10;		// Only decimal base is supported for entering now
+	}
+
+	edit->setText(osp->valueString(currentBase, m_currentFormat, m_currentPrecision));
+	edit->setAlignment(Qt::AlignRight);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	layout->addWidget(edit);
+	layout->addWidget(buttonBox);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	d.resize(d.sizeHint() * 1.5);
+
+	// --
+	//
+	if (int result = d.exec();
+		result == QDialog::Accepted)
+	{
+		QVariant newValue;
+
+		switch (osp->m_signalType)
+		{
+		case E::SignalType::Discrete:
+			{
+				int value = edit->text().toInt();
+				assert(value == 0 || value == 1);
+
+				newValue = value;
+			}
+			break;
+
+		case E::SignalType::Analog:
+			switch (osp->m_dataFormat)
+			{
+			case E::AnalogAppSignalFormat::SignedInt32:			newValue = edit->text().toInt();		break;
+			case E::AnalogAppSignalFormat::Float32:				newValue = edit->text().toDouble();		break;
+			default:
+				assert(false);
+				return;
+			}
+			break;
+
+		default:
+			assert(false);
+			return;
+		}
+
+		if (newValue.isValid() == true)
+		{
+			m_simulator->overrideSignals().setValue(osp->m_appSignalId, newValue);
+		}
+		else
+		{
+			assert(newValue.isValid());
+		}
+	}
+
+	return;
 }
 
 

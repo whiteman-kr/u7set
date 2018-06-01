@@ -63,9 +63,9 @@ namespace Sim
 		std::unordered_map<int, size_t> offsetToCommand() const;
 		const DeviceCommand& offsetToCommand(int offset) const;
 
-		// Simtime
-		//
 		const Ram& ram() const;
+
+		void setOverrideSignals(OverrideSignals* overrideSignals);
 
 	private:
 		// Loaded LM data

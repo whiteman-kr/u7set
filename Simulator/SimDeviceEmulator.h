@@ -14,6 +14,7 @@
 #include "SimEeprom.h"
 #include "SimRam.h"
 #include "SimAfb.h"
+#include "SimOverrideSignals.h"
 
 
 #ifndef __FUNCTION_NAME__
@@ -206,10 +207,14 @@ public:
 		// Props
 		//
 	public:
+		QString equpimnetId() const;
+
 		Hardware::LogicModuleInfo logicModuleInfo() const;
 		void setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo);
 
 		const LmDescription& lmDescription() const;
+
+		void setOverrideSignals(OverrideSignals* overrideSignals);
 
 		std::vector<DeviceCommand> commands() const;
 		std::unordered_map<int, size_t> offsetToCommands() const;
@@ -221,6 +226,8 @@ public:
 
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
+
+		OverrideSignals* m_overrideSignals = nullptr;
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 

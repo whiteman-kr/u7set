@@ -109,7 +109,7 @@ namespace Sim
 		return;
 	}
 
-	Signal AppSignalManager::signalParamExt(const QString& appSignalId, bool* found) const
+	std::optional<Signal> AppSignalManager::signalParamExt(const QString& appSignalId) const
 	{
 		QReadLocker locker(&m_signalParamLock);
 
@@ -117,14 +117,9 @@ namespace Sim
 
 		auto it = m_signalParamsExt.find(signalHash);
 
-		if (found != nullptr)
-		{
-			*found = it != m_signalParamsExt.end();
-		}
-
 		if (it == m_signalParamsExt.end())
 		{
-			return Signal{};
+			return {};
 		}
 		else
 		{

@@ -191,4 +191,9 @@ namespace Sim
 		return m_device.ram();
 	}
 
+	void LogicModule::setOverrideSignals(OverrideSignals* overrideSignals)
+	{
+		m_device.setOverrideSignals(overrideSignals);
+	}
+
 }

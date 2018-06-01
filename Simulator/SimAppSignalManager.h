@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
+#include <optional>
 #include <QHash>
 #include <QReadWriteLock>
 #include "../lib/Signal.h"
@@ -27,7 +28,7 @@ namespace Sim
 
 		void setData(QString equipmentId, const Sim::Ram& ram);
 
-		Signal signalParamExt(const QString& appSignalId, bool* found) const;
+		std::optional<Signal> signalParamExt(const QString& appSignalId) const;
 
 		// Implementing IAppSignalManager
 		//

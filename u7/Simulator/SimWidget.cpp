@@ -144,7 +144,7 @@ void SimWidget::createDocks()
 
 	// Project dock
 	//
-	QDockWidget* projectDock = new QDockWidget("Project/Build", this, 0);
+	QDockWidget* projectDock = new QDockWidget("Project/Build", this);
 	projectDock->setObjectName(projectDock->windowTitle());
 	projectDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	projectDock->setTitleBarWidget(new QWidget());		// Hides title bar
@@ -156,7 +156,7 @@ void SimWidget::createDocks()
 
 	// Quick Watch dock
 	//
-//	QDockWidget* watchDock = new QDockWidget("Watch", this, 0);
+//	QDockWidget* watchDock = new QDockWidget("Watch", this);
 //	watchDock->setObjectName(watchDock->windowTitle());
 //	watchDock->setWidget(new QWidget());		// Dummy for now
 
@@ -164,7 +164,7 @@ void SimWidget::createDocks()
 
 	// Overriden Signals dock
 	//
-	QDockWidget* overrideDock = new QDockWidget("Override", this, 0);
+	QDockWidget* overrideDock = new QDockWidget("Override", this);
 	overrideDock->setObjectName("SimOverridenSignals");
 	overrideDock->setWidget(new SimOverrideWidget(m_simulator.get(), overrideDock));
 	overrideDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
@@ -176,7 +176,7 @@ void SimWidget::createDocks()
 	QDockWidget* outputDock = nullptr;
 	if (m_slaveWindow == false)
 	{
-		outputDock = new QDockWidget("Output", this, 0);
+		outputDock = new QDockWidget("Output", this);
 		outputDock->setObjectName("SimOutputWidget");
 		outputDock->setWidget(new SimOutputWidget(outputDock));
 		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
@@ -232,6 +232,7 @@ QDockWidget* SimWidget::createMemoryDock(QString caption)
 void SimWidget::showEvent(QShowEvent* e)
 {
 	QMainWindow::showEvent(e);
+	e->ignore();
 
 static bool firstEvent = true;
 
@@ -580,10 +581,14 @@ void SimWidget::openCodeTabPage(QString lmEquipmentId)
 
 void SimWidget::tabCloseRequest(int index)
 {
+	QByteArray state = saveState();
+
 	QWidget* w = m_tabWidget->widget(index);
 	assert(w);
 
 	delete w;
+
+	restoreState(state);
 	return;
 }
 

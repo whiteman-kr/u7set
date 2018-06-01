@@ -1,6 +1,7 @@
 #include "SimRam.h"
 #include <cassert>
 #include <QtEndian>
+#include <SimOverrideSignals.h>
 
 namespace Sim
 {
@@ -110,6 +111,30 @@ namespace Sim
 		{
 			qToLittleEndian<quint16>(word, m_data.data() + byteOffset);
 		}
+
+		// Apply override
+		//
+		int zeroBasedOffsetW = offsetW - offset();
+
+		if (zeroBasedOffsetW < 0 ||
+			zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
+		{
+			assert(false);
+			return false;
+		}
+
+		const OverrideRamRecord& od = m_overrideData[zeroBasedOffsetW];
+
+		quint16* ptrW = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
+
+//		if (od.mask != 0)
+//		{
+//			int i =0;
+//			i++;
+//		}
+
+		*ptrW &= ~od.mask;
+		*ptrW |= od.data;
 
 		return true;
 	}
@@ -230,6 +255,11 @@ namespace Sim
 			*data = qFromLittleEndian<TYPE>(m_data.constData() + byteOffset);
 		}
 		return true;
+	}
+
+	void RamArea::setOverrideData(std::vector<OverrideRamRecord> overrideData)
+	{
+		m_overrideData = std::move(overrideData);
 	}
 
 	Ram::Ram()
@@ -450,6 +480,41 @@ namespace Sim
 		}
 
 		return nullptr;
+	}
+
+	bool Ram::allowOverride() const
+	{
+		return m_allowOverride;
+	}
+
+	void Ram::setAllowOverride(bool value)
+	{
+		m_allowOverride = value;
+	}
+
+	void Ram::updateOverrideData(QString equipmentId, const OverrideSignals* overrideSignals)
+	{
+		if (overrideSignals == nullptr)
+		{
+			assert(overrideSignals);
+			return;
+		}
+
+		if (m_overrideSignalsLastCounter == overrideSignals->changesCounter())
+		{
+			// Data has not been changesd since last update
+			//
+			return;
+		}
+
+		for (std::shared_ptr<RamArea>& ramArea : m_memoryAreas)
+		{
+			std::vector<OverrideRamRecord> ovData = overrideSignals->ramOverrideData(equipmentId, *ramArea.get());
+			ramArea->setOverrideData(std::move(ovData));
+		}
+
+		m_overrideSignalsLastCounter = overrideSignals->changesCounter();
+		return;
 	}
 
 }

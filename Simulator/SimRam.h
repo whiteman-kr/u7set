@@ -1,13 +1,16 @@
 #ifndef LMRAM_H
 #define LMRAM_H
-#include <QByteArray>
 #include <map>
 #include <vector>
 #include <memory>
+#include <QByteArray>
 #include "../lib/Types.h"
+#include "SimOverrideSignals.h"
+
 
 namespace Sim
 {
+
 	class RamAreaInfo
 	{
 	public:
@@ -59,8 +62,12 @@ namespace Sim
 		template<typename TYPE> bool writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder);
 		template<typename TYPE> bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder) const;
 
+	public:
+		void setOverrideData(std::vector<OverrideRamRecord> overrideData);
+
 	private:
 		QByteArray m_data;
+		std::vector<OverrideRamRecord> m_overrideData;
 	};
 
 
@@ -98,10 +105,19 @@ namespace Sim
 		RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW);
 		const RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const;
 
+	public:
+		bool allowOverride() const;
+		void setAllowOverride(bool value);
+
+		void updateOverrideData(QString equipmentId, const Sim::OverrideSignals* overrideSignals);
+
 	private:
 		// Pay attention to copy operator
 		//
 		std::vector<std::shared_ptr<RamArea>> m_memoryAreas;
+
+		bool m_allowOverride = false;
+		int m_overrideSignalsLastCounter = -1;
 	};
 }
 

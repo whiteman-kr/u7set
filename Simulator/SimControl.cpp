@@ -75,6 +75,8 @@ namespace Sim
 				continue;
 			}
 
+			lm->setOverrideSignals(&m_simulator->overrideSignals());
+
 			lms.emplace_back(lm);
 			addedModuleCount ++;
 		}
@@ -134,62 +136,60 @@ namespace Sim
 	{
 		writeMessage(tr("Start"));
 
+		QWriteLocker wl(&m_controlDataLock);
+
+		if (m_controlData.m_lms.empty() == true)
 		{
-			QWriteLocker wl(&m_controlDataLock);
+			// Nothing to run
+			//
+			writeWaning(tr("No selected modules to simulate."));
 
-			if (m_controlData.m_lms.empty() == true)
-			{
-				// Nothing to run
-				//
-				writeWaning(tr("No selected modules to simulate."));
-
-				m_controlData.m_state = SimControlState::Stop;
-
-				wl.unlock();		// Unlock before emitting signal, just in case
-
-				emit stateChanged(SimControlState::Stop);
-				return false;
-			}
-
-			SimControlState state;
-
-			switch (m_controlData.m_state)
-			{
-			case SimControlState::Stop:
-				for (SimControlRunStruct& cs : m_controlData.m_lms)
-				{
-					cs.m_lastStartTime = 0us;	// it will make LM to reset() before running cycle
-				}
-
-				m_controlData.m_state = SimControlState::Run;
-				m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-				m_controlData.m_currentTime = m_controlData.m_startTime;
-				m_controlData.m_duration = duration;
-				break;
-
-			case SimControlState::Run:
-				assert(false);
-				break;
-
-			case SimControlState::Pause:
-				m_controlData.m_state = SimControlState::Run;
-				m_controlData.m_duration = duration;
-				if (m_controlData.m_currentTime >= m_controlData.m_startTime + m_controlData.m_duration)
-				{
-					m_controlData.m_state = SimControlState::Stop;
-				}
-				break;
-
-			default:
-				assert(false);
-			}
-
-			state = m_controlData.m_state;
+			m_controlData.m_state = SimControlState::Stop;
 
 			wl.unlock();		// Unlock before emitting signal, just in case
 
-			emit stateChanged(state);
+			emit stateChanged(SimControlState::Stop);
+			return false;
 		}
+
+		SimControlState state;
+
+		switch (m_controlData.m_state)
+		{
+		case SimControlState::Stop:
+			for (SimControlRunStruct& cs : m_controlData.m_lms)
+			{
+				cs.m_lastStartTime = 0us;	// it will make LM to reset() before running cycle
+			}
+
+			m_controlData.m_state = SimControlState::Run;
+			m_controlData.m_startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+			m_controlData.m_currentTime = m_controlData.m_startTime;
+			m_controlData.m_duration = duration;
+			break;
+
+		case SimControlState::Run:
+			assert(false);
+			break;
+
+		case SimControlState::Pause:
+			m_controlData.m_state = SimControlState::Run;
+			m_controlData.m_duration = duration;
+			if (m_controlData.m_currentTime >= m_controlData.m_startTime + m_controlData.m_duration)
+			{
+				m_controlData.m_state = SimControlState::Stop;
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		state = m_controlData.m_state;
+
+		wl.unlock();		// Unlock before emitting signal, just in case
+
+		emit stateChanged(state);
 
 		return true;
 	}
