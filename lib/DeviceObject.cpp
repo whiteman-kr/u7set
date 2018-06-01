@@ -119,7 +119,7 @@ namespace Hardware
 	const QString PropertyNames::valueBit = "ValueBit";
 	const QString PropertyNames::validitySignalId = "ValiditySiganlID";
 
-	const QString PropertyNames::appSignalDataFormat = "DataFormat";
+	const QString PropertyNames::appSignalDataFormat = "AppAnalogSignalFormat";
 
 	const QString PropertyNames::categoryAnalogAppSignal = "AnalogAppSignal";
 

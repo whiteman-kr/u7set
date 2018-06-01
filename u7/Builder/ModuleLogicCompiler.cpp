@@ -1302,7 +1302,7 @@ namespace Builder
 				return false;
 			}
 
-			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, m_lm->equipmentIdTemplate(), outPin.guid());
+			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, m_lm->equipmentIdTemplate(), false, outPin.guid());
 
 			if (ualSignal == nullptr)
 			{
@@ -4066,8 +4066,6 @@ namespace Builder
 		if (result == false)
 		{
 			delete appFb;
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("FB '%1' instantiation error")).arg(appItem.caption()));
 			return nullptr;
 		}
 

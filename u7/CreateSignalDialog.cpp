@@ -337,6 +337,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		signal.setCustomAppSignalID(customSignalId);
 		signal.setEquipmentID(equipmentId);
 		signal.setCaption(caption);
+		signal.initSpecificProperties();
 
 		newSignals.push_back(signal);
 	}

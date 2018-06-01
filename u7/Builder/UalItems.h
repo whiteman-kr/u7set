@@ -320,11 +320,13 @@ namespace Builder
 		bool calculate_MISMATCH_paramValues();
 		bool calculate_TCONV_paramValues();
 		bool calculate_INDICATION_paramValues();
+		bool calculate_PULSE_GENERATOR_paramValues();
 
 		//
 
 		bool checkRequiredParameters(const QStringList& requiredParams);
 		bool checkRequiredParameters(const QStringList& requiredParams, bool displayError);
+		bool checkRequiredParameter(const QString& requiredParam, bool displayError);
 
 		bool checkUnsignedInt(const AppFbParamValue& paramValue);
 		bool checkUnsignedInt16(const AppFbParamValue& paramValue);
@@ -391,6 +393,7 @@ namespace Builder
 								Signal* s,
 								const QString &lmEquipmentID,
 								BusShared bus,
+								bool isBusChildSignal,
 								IssueLogger* log);
 
 		bool createBusParentSignal(const UalItem* ualItem,
@@ -403,6 +406,8 @@ namespace Builder
 	public:
 		bool appendRefSignal(Signal* s, bool isOptoSignal);
 		bool appendBusChildRefSignals(const QString &busSignalID, Signal* s);
+
+		Signal* createNativeCopyOfSignal(const Signal* templateSignal, const QString& lmEquipmentID);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -569,7 +574,7 @@ namespace Builder
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
-		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
+		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, bool isBusChildSignal, QUuid outPinUuid);
 
 		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption);
 

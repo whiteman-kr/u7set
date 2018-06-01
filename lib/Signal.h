@@ -87,6 +87,8 @@ public:
 	Signal(const Hardware::DeviceSignal& deviceSignal);
 	virtual ~Signal();
 
+	void initSpecificProperties();
+
 	// Signal identificators
 
 	QString appSignalID() const { return m_appSignalID; }
@@ -244,8 +246,6 @@ public:
 
 	QString specPropStruct() const { return m_specPropStruct; }
 	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
-
-	bool updateSpecProps(const QString& specPropStruct, bool* signalChanged);
 
 	bool createSpecPropValues();
 
