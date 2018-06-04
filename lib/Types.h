@@ -247,6 +247,9 @@ public:
 
         mV_Raw_Mul_8 = 22,
         mV_Raw_Mul_32 = 23,
+
+		Ohm_Ni50_W1617 = 24,
+		Ohm_Ni100_W1617 = 25,
 	};
 	Q_ENUM(SensorType)
 
