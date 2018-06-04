@@ -462,6 +462,29 @@ namespace Sim
 		return;
 	}
 
+	// Command: movc32
+	// Code: 19
+	// Description: Move 32bit constant to RAM
+	//
+	void CommandProcessor_LM1_SF00::parse_movc32(DeviceCommand* command) const
+	{
+		command->m_size = 4;
+
+		command->m_word0 = m_device.getWord(command->m_offset + 1);					// word0 - RAM address
+		command->m_dword0 = m_device.getDword(command->m_offset + 2);				// Dword0 - data
+
+		// movc32     0b402h, #0
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAddr(command->m_word0) + ", " +
+							strDwordConst(command->m_dword0);
+	}
+
+	void CommandProcessor_LM1_SF00::command_movc32(const DeviceCommand& command)
+	{
+		m_device.writeRamDword(command.m_word0, command.m_dword0);
+	}
+
 	// Command: wrfb32
 	// Code: 20
 	// Description: Read 32bit data from RAM and write to AFB input

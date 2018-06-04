@@ -103,6 +103,13 @@ namespace Sim
 		void parse_appstart(DeviceCommand* command) const;
 		void command_appstart(const DeviceCommand& command);
 
+		// Command: movc32
+		// Code: 19
+		// Description: Move 32bit constant to RAM
+		//
+		void parse_movc32(DeviceCommand* command) const;
+		void command_movc32(const DeviceCommand& command);
+
 		// Command: wrfb32
 		// Code: 20
 		// Description: Read 32bit data from RAM and write to AFB input
@@ -184,7 +191,7 @@ namespace Sim
 			{"command_nstartafb",	&CommandProcessor_LM1_SF00::command_not_implemented},	// 16 Not supported?
 			{"command_appstart",	&CommandProcessor_LM1_SF00::command_appstart},			// 17
 			{"command_mov32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 18 Not impemented
-			{"command_movc32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 19 Not impemented
+			{"command_movc32",		&CommandProcessor_LM1_SF00::command_movc32},			// 19
 			{"command_wrfb32",		&CommandProcessor_LM1_SF00::command_wrfb32},			// 20
 			{"command_rdfb32",		&CommandProcessor_LM1_SF00::command_rdfb32},			// 21
 			{"command_wrfbc32",		&CommandProcessor_LM1_SF00::command_wrfbc32},			// 22
