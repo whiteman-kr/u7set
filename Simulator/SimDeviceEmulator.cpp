@@ -799,9 +799,6 @@ namespace Sim
 		//
 		m_logicUnit = LogicUnitData();
 
-
-		m_ram.setAllowOverride(true);		// Allow override ram
-
 		if (m_overrideSignals != nullptr)
 		{
 			m_ram.updateOverrideData(equpimnetId(), m_overrideSignals);
@@ -853,8 +850,6 @@ namespace Sim
 				m_logicUnit.programCounter += command.m_size;
 			}
 		}
-
-		m_ram.setAllowOverride(false);
 
 		return result;
 	}

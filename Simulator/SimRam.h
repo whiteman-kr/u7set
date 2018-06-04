@@ -108,9 +108,6 @@ namespace Sim
 		const RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const;
 
 	public:
-		bool allowOverride() const;
-		void setAllowOverride(bool value);
-
 		void updateOverrideData(QString equipmentId, const Sim::OverrideSignals* overrideSignals);
 
 	private:
@@ -118,7 +115,6 @@ namespace Sim
 		//
 		std::vector<std::shared_ptr<RamArea>> m_memoryAreas;
 
-		bool m_allowOverride = false;
 		int m_overrideSignalsLastCounter = -1;
 	};
 }

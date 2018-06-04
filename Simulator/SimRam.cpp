@@ -262,7 +262,7 @@ namespace Sim
 			//
 			if (m_overrideData.empty() == false)
 			{
-				const_cast<RamArea*>(this)->applyOverride<quint16>(offsetW);
+				const_cast<RamArea*>(this)->applyOverride<TYPE>(offsetW);
 			}
 		}
 
@@ -546,16 +546,6 @@ namespace Sim
 		}
 
 		return nullptr;
-	}
-
-	bool Ram::allowOverride() const
-	{
-		return m_allowOverride;
-	}
-
-	void Ram::setAllowOverride(bool value)
-	{
-		m_allowOverride = value;
 	}
 
 	void Ram::updateOverrideData(QString equipmentId, const OverrideSignals* overrideSignals)
