@@ -103,6 +103,13 @@ namespace Sim
 		void parse_appstart(DeviceCommand* command) const;
 		void command_appstart(const DeviceCommand& command);
 
+		// Command: wrfb32
+		// Code: 20
+		// Description: Read 32bit data from RAM and write to AFB input
+		//
+		void parse_wrfb32(DeviceCommand* command) const;
+		void command_wrfb32(const DeviceCommand& command);
+
 		// Command: rdfb32
 		// Code: 21
 		// Description: Read 32bit data from AFB output and write it to RAM
@@ -159,31 +166,33 @@ namespace Sim
 
 		const QHash<QString, SimCommandFunc> m_nameToFuncCommand
 		{
-			{"command_nop",			&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_startafb",	&CommandProcessor_LM1_SF00::command_startafb},
-			{"command_stop",		&CommandProcessor_LM1_SF00::command_stop},
-			{"command_mov",			&CommandProcessor_LM1_SF00::command_mov},
-			{"command_movmem",		&CommandProcessor_LM1_SF00::command_movmem},
-			{"command_movc",		&CommandProcessor_LM1_SF00::command_movc},
-			{"command_movbc",		&CommandProcessor_LM1_SF00::command_movbc},
-			{"command_wrfb",		&CommandProcessor_LM1_SF00::command_wrfb},
-			{"command_rdfb",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_wrfbc",		&CommandProcessor_LM1_SF00::command_wrfbc},
-			{"command_wrfbb",		&CommandProcessor_LM1_SF00::command_wrfbb},
-			{"command_rdfbb",		&CommandProcessor_LM1_SF00::command_rdfbb},
-			{"command_rdfbts",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_setmem",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_movb",		&CommandProcessor_LM1_SF00::command_movb},
-			{"command_appstart",	&CommandProcessor_LM1_SF00::command_appstart},
-			{"command_mov32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_movc32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_rdfb32",		&CommandProcessor_LM1_SF00::command_rdfb32},
-			{"command_wrfbc32",		&CommandProcessor_LM1_SF00::command_wrfbc32},
-			{"command_rdfbts32",	&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_movcf",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_pmov",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_pmov32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
-			{"command_fillb",		&CommandProcessor_LM1_SF00::command_not_implemented},	// !
+			{"command_nop",			&CommandProcessor_LM1_SF00::command_not_implemented},	// 1 Not impemented
+			{"command_startafb",	&CommandProcessor_LM1_SF00::command_startafb},			// 2
+			{"command_stop",		&CommandProcessor_LM1_SF00::command_stop},				// 3
+			{"command_mov",			&CommandProcessor_LM1_SF00::command_mov},				// 4
+			{"command_movmem",		&CommandProcessor_LM1_SF00::command_movmem},			// 5
+			{"command_movc",		&CommandProcessor_LM1_SF00::command_movc},				// 6
+			{"command_movbc",		&CommandProcessor_LM1_SF00::command_movbc},				// 7
+			{"command_wrfb",		&CommandProcessor_LM1_SF00::command_wrfb},				// 8
+			{"command_rdfb",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 9 Not impemented
+			{"command_wrfbc",		&CommandProcessor_LM1_SF00::command_wrfbc},				// 10
+			{"command_wrfbb",		&CommandProcessor_LM1_SF00::command_wrfbb},				// 11
+			{"command_rdfbb",		&CommandProcessor_LM1_SF00::command_rdfbb},				// 12
+			{"command_rdfbts",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 13 Not impemented
+			{"command_setmem",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 14 Not impemented
+			{"command_movb",		&CommandProcessor_LM1_SF00::command_movb},				// 15
+			{"command_nstartafb",	&CommandProcessor_LM1_SF00::command_not_implemented},	// 16 Not supported?
+			{"command_appstart",	&CommandProcessor_LM1_SF00::command_appstart},			// 17
+			{"command_mov32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 18 Not impemented
+			{"command_movc32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 19 Not impemented
+			{"command_wrfb32",		&CommandProcessor_LM1_SF00::command_wrfb32},			// 20
+			{"command_rdfb32",		&CommandProcessor_LM1_SF00::command_rdfb32},			// 21
+			{"command_wrfbc32",		&CommandProcessor_LM1_SF00::command_wrfbc32},			// 22
+			{"command_rdfbts32",	&CommandProcessor_LM1_SF00::command_not_implemented},	// 23 Not impemented
+			{"command_movcf",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 24 Not impemented
+			{"command_pmov",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 25 Not impemented
+			{"command_pmov32",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 26 Not impemented
+			{"command_fillb",		&CommandProcessor_LM1_SF00::command_not_implemented},	// 27 Not impemented
 		};
 
 		const QHash<QString, SimAfbFunc> m_nameToFuncAfb
@@ -192,7 +201,7 @@ namespace Sim
 			{"afb_not",			&CommandProcessor_LM1_SF00::afb_not},			// 2
 			{"afb_bcod",		&CommandProcessor_LM1_SF00::afb_bcod},			// 8
 			{"afb_bdec",		&CommandProcessor_LM1_SF00::afb_bdec},			// 9
-			{"afb_bcomp",		&CommandProcessor_LM1_SF00::afb_bdec},			// 10
+			{"afb_bcomp",		&CommandProcessor_LM1_SF00::afb_bcomp},			// 10
 			{"afb_math",		&CommandProcessor_LM1_SF00::afb_math},			// 13
 			{"afb_scale",		&CommandProcessor_LM1_SF00::afb_scale},			// 14
 			{"afb_lim",			&CommandProcessor_LM1_SF00::afb_lim},			// 23

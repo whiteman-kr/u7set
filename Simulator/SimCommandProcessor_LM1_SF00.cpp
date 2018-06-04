@@ -462,6 +462,41 @@ namespace Sim
 		return;
 	}
 
+	// Command: wrfb32
+	// Code: 20
+	// Description: Read 32bit data from RAM and write to AFB input
+	//
+	void CommandProcessor_LM1_SF00::parse_wrfb32(DeviceCommand* command) const
+	{
+		command->m_size = 3;
+
+		command->m_afbOpCode = m_device.getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
+		command->m_afbInstance = m_device.getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
+		command->m_afbPinOpCode = m_device.getWord(command->m_offset + 1) & 0x003F;		// Lowest 6 bit
+
+		command->m_word0 = m_device.getWord(command->m_offset + 2);						// Word0 - data address
+
+		// Checks
+		//
+		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
+
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+							strAfbInstPin(command) + ", " +
+							strAddr(command->m_word0);
+
+	}
+
+	void CommandProcessor_LM1_SF00::command_wrfb32(const DeviceCommand& command)
+	{
+		AfbComponentParam param{command.m_afbPinOpCode};
+		param.setDwordValue(m_device.readRamDword(command.m_word0));
+
+		m_device.setAfbParam(command.m_afbOpCode, command.m_afbInstance, param);
+		return;
+	}
+
 	// Command: rdfb32
 	// Code: 21
 	// Description: Read 32bit data from AFB output and write it to RAM
@@ -758,17 +793,17 @@ namespace Sim
 
 		// Define input opIndexes
 		//
-		const int i_conf = 0;
-		const int i_sp_s = 1;
-		const int i_sp_r = 3;
-		const int i_result = 5;		// Internal, prev state
-		const int i_data = 6;
-		const int o_result = 9;
+		const int i_conf = 0;		//
+		const int i_sp_s = 1;		// Setting value
+		const int i_sp_r = 3;		// Reset value
+		const int i_prev_result = 5;// Prev result
+		const int i_data = 6;		// Input data
+		const int o_result = 9;		// Result
 		const int o_nan = 10;
 
 		// Get params, throws exception in case of error
 		//
-//		quint16 conf = instance->param(i_conf)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
 
 //		qint32 oprdQuant = instance->param(i_oprd_quant)->wordValue();
 
@@ -777,17 +812,58 @@ namespace Sim
 //		checkParamRange(oprdQuant, 1, 32, "i_oprd_quant");
 //		checkParamRange(conf, 1, 2, "i_conf");
 
-//		// AFB Logic
-//		//
-//		switch (conf)
-//		{
-//		case 1:
-//			for (quint16 i = 0; i < oprdQuant; i++)
-//			{
-//				int value = i == inputValue ? 0x0001 : 0x0000;
-//				instance->addParamWord(o_1_result + i, value);
-//			}
-//			break;
+		// AFB Logic
+		//
+		switch (conf)
+		{
+		case 3:		// SignedInt32, <
+			{
+				qint32 settingValue = instance->param(i_sp_s)->signedIntValue();
+				qint32 resetValue = instance->param(i_sp_r)->signedIntValue();
+				qint32 inputValue = instance->param(i_data)->signedIntValue();
+
+				quint16 prevResult = 0;
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->signedIntValue();
+				}
+
+				if (inputValue >= settingValue)
+				{
+					if (prevResult == 0)
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						break;
+					}
+					else
+					{
+						// Prev result is 1, so setting is alerted
+						//
+						if (inputValue < resetValue)
+						{
+							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+						}
+						else
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);
+						}
+						break;
+					}
+				}
+
+				if (inputValue < settingValue)
+				{
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+					break;
+				}
+
+				assert(false);
+			}
+			break;
 //		case 2:
 //			for (qint16 i = 0; i < oprdQuant; i++)
 //			{
@@ -795,9 +871,9 @@ namespace Sim
 //				instance->addParamWord(o_1_result + i, value);
 //			}
 //			break;
-//		default:
-//			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcod");
-//		}
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+		}
 
 		return;
 	}
