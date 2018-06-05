@@ -2232,7 +2232,7 @@ namespace Builder
 			return false;
 		}
 
-		result &= setSignalsLmRamAccess();
+		result &= setSignalsCalculatedAttributes();
 
 		if (result == false)
 		{
@@ -2955,7 +2955,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::setSignalsLmRamAccess()
+	bool ModuleLogicCompiler::setSignalsCalculatedAttributes()
 	{
 		bool result = true;
 
@@ -2968,45 +2968,60 @@ namespace Builder
 				continue;
 			}
 
-			Signal* s = ualSignal->signal();
+			QVector<Signal*> refSignals = ualSignal->refSignals();
 
-			if(s == nullptr)
+			for(Signal* s : refSignals)
 			{
-				assert(false);
-				result = false;
-				continue;
-			}
-
-			switch(s->inOutType())
-			{
-			case E::SignalInOutType::Input:
-				if (s->needConversion() == true)
+				if(s == nullptr)
 				{
+					assert(false);
+					result = false;
+					continue;
+				}
+
+				// set signal's isConst flag and constValue
+				//
+				if (ualSignal->isConst() == true)
+				{
+					s->setIsConst(true);
+					s->setConstValue(ualSignal->constValue());
+					s->setLmRamAccess(E::LogicModuleRamAccess::Undefined);
+					continue;		// !
+				}
+
+				// set signal's E::LogicModuleRamAccess
+				//
+				switch(s->inOutType())
+				{
+				case E::SignalInOutType::Input:
+					if (s->needConversion() == true)
+					{
+						s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+					}
+					else
+					{
+						s->setLmRamAccess(E::LogicModuleRamAccess::Read);
+					}
+					break;
+
+				case E::SignalInOutType::Output:
 					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
-				}
-				else
-				{
-					s->setLmRamAccess(E::LogicModuleRamAccess::Read);
-				}
-				break;
+					break;
 
-			case E::SignalInOutType::Output:
-				s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
-				break;
+				case E::SignalInOutType::Internal:
+					if (ualSignal->isTuningable() == true)
+					{
+						s->setLmRamAccess(E::LogicModuleRamAccess::Read);
+					}
+					else
+					{
+						s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+					}
+					break;
 
-			case E::SignalInOutType::Internal:
-				if (ualSignal->isTuningable() == true)
-				{
-					s->setLmRamAccess(E::LogicModuleRamAccess::Read);
+				default:
+					assert(false);
 				}
-				else
-				{
-					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
-				}
-				break;
-
-			default:
-				assert(false);
 			}
 		}
 

@@ -1527,6 +1527,46 @@ namespace Builder
 		return m_constFloatValue;
 	}
 
+	double UalSignal::constValue() const
+	{
+		if (m_isConst == false)
+		{
+			assert(false);
+			return 0;
+		}
+
+		double constVal = 0;
+
+		switch(constType())
+		{
+		case E::SignalType::Discrete:
+			constVal = static_cast<double>(constDiscreteValue());
+			break;
+
+		case E::SignalType::Analog:
+
+			switch(constAnalogFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				constVal = static_cast<double>(constAnalogFloatValue());
+				break;
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				constVal = static_cast<double>(constAnalogIntValue());
+				break;
+
+			default:
+				assert(false);
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return constVal;
+	}
+
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
 		if (m_isConst == true)

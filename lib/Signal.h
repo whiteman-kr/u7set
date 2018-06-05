@@ -326,6 +326,12 @@ public:
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
 	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
 
+	bool isConst() const { return m_isConst; }
+	void setIsConst(bool isConst) { m_isConst = isConst; }
+
+	double constValue() const { return m_constValue; }
+	void setConstValue(double constValue) { m_constValue = constValue; }
+
 	//
 
 	void writeToXml(XmlWriteHelper& xml);
@@ -443,6 +449,8 @@ private:
 
 	E::LogicModuleRamAccess m_lmRamAccess = E::LogicModuleRamAccess::Undefined;
 
+	bool m_isConst = false;
+	double m_constValue = 0;
 
 	//
 

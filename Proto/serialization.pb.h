@@ -9220,6 +9220,20 @@ class AppSignalCalculatedParam : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 lmramaccess() const;
   inline void set_lmramaccess(::google::protobuf::int32 value);
 
+  // optional bool isConst = 9 [default = false];
+  inline bool has_isconst() const;
+  inline void clear_isconst();
+  static const int kIsConstFieldNumber = 9;
+  inline bool isconst() const;
+  inline void set_isconst(bool value);
+
+  // optional double constValue = 10 [default = 0];
+  inline bool has_constvalue() const;
+  inline void clear_constvalue();
+  static const int kConstValueFieldNumber = 10;
+  inline double constvalue() const;
+  inline void set_constvalue(double value);
+
   // @@protoc_insertion_point(class_scope:Proto.AppSignalCalculatedParam)
  private:
   inline void set_has_hash();
@@ -9238,6 +9252,10 @@ class AppSignalCalculatedParam : public ::google::protobuf::Message {
   inline void clear_has_regvalidityaddr();
   inline void set_has_lmramaccess();
   inline void clear_has_lmramaccess();
+  inline void set_has_isconst();
+  inline void clear_has_isconst();
+  inline void set_has_constvalue();
+  inline void clear_has_constvalue();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -9249,9 +9267,11 @@ class AppSignalCalculatedParam : public ::google::protobuf::Message {
   ::Proto::Address16* regvalueaddr_;
   ::Proto::Address16* regvalidityaddr_;
   ::google::protobuf::int32 lmramaccess_;
+  bool isconst_;
+  double constvalue_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -23524,6 +23544,50 @@ inline ::google::protobuf::int32 AppSignalCalculatedParam::lmramaccess() const {
 inline void AppSignalCalculatedParam::set_lmramaccess(::google::protobuf::int32 value) {
   set_has_lmramaccess();
   lmramaccess_ = value;
+}
+
+// optional bool isConst = 9 [default = false];
+inline bool AppSignalCalculatedParam::has_isconst() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_isconst() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void AppSignalCalculatedParam::clear_has_isconst() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void AppSignalCalculatedParam::clear_isconst() {
+  isconst_ = false;
+  clear_has_isconst();
+}
+inline bool AppSignalCalculatedParam::isconst() const {
+  return isconst_;
+}
+inline void AppSignalCalculatedParam::set_isconst(bool value) {
+  set_has_isconst();
+  isconst_ = value;
+}
+
+// optional double constValue = 10 [default = 0];
+inline bool AppSignalCalculatedParam::has_constvalue() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void AppSignalCalculatedParam::set_has_constvalue() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void AppSignalCalculatedParam::clear_has_constvalue() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void AppSignalCalculatedParam::clear_constvalue() {
+  constvalue_ = 0;
+  clear_has_constvalue();
+}
+inline double AppSignalCalculatedParam::constvalue() const {
+  return constvalue_;
+}
+inline void AppSignalCalculatedParam::set_constvalue(double value) {
+  set_has_constvalue();
+  constvalue_ = value;
 }
 
 // -------------------------------------------------------------------
