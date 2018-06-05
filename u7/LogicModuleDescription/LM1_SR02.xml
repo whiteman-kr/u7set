@@ -112,7 +112,7 @@
 			<Pin OpName="o_result"		OpIndex ="2"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="3"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="TCT"			OpCode="3"	ImpVersion="207"	VersionOpIndex="14"	MaxInstCount="256" SimulationFunc="afb_tct">
+		<AFBComponent Caption="TCT"			OpCode="3"	ImpVersion="207"	VersionOpIndex="14"	MaxInstCount="512" SimulationFunc="afb_tct">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_counter"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_counter_dff"	OpIndex ="3"	PinType = "Input"/>
