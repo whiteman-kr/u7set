@@ -254,6 +254,18 @@ public:
 
 	void cacheSpecPropValues();
 
+	double getSpecPropDouble(const QString& name) const;
+	int getSpecPropInt(const QString& name) const;
+	unsigned int getSpecPropUInt(const QString& name) const;
+	int getSpecPropEnum(const QString& name) const;
+	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
+
+	bool setSpecPropDouble(const QString& name, double value);
+	bool setSpecPropInt(const QString& name, int value);
+	bool setSpecPropUInt(const QString& name, unsigned int value);
+	bool setSpecPropEnum(const QString& name, int enumValue);
+	bool setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum);
+
 	//
 
 	void saveProtoData(QByteArray* protoDataArray) const;
@@ -345,22 +357,6 @@ private:
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
-
-	//
-
-	double getSpecPropDouble(const QString& name) const;
-	int getSpecPropInt(const QString& name) const;
-	unsigned int getSpecPropUInt(const QString& name) const;
-	int getSpecPropEnum(const QString& name) const;
-	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
-
-	bool setSpecPropDouble(const QString& name, double value);
-	bool setSpecPropInt(const QString& name, int value);
-	bool setSpecPropUInt(const QString& name, unsigned int value);
-	bool setSpecPropEnum(const QString& name, int enumValue);
-	bool setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum);
-
-//	QVariant getSpecPropertyValue(const QString& propName);
 
 private:
 	// Signal identificators

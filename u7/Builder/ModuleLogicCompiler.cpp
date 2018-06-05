@@ -2995,7 +2995,14 @@ namespace Builder
 				break;
 
 			case E::SignalInOutType::Internal:
-				s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				if (ualSignal->isTuningable() == true)
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::Read);
+				}
+				else
+				{
+					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
+				}
 				break;
 
 			default:
