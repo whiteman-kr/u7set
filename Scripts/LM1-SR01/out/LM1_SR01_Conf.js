@@ -12,6 +12,18 @@ var DeviceObjectType;
     DeviceObjectType[DeviceObjectType["Software"] = 7] = "Software";
     DeviceObjectType[DeviceObjectType["Signal"] = 8] = "Signal";
 })(DeviceObjectType || (DeviceObjectType = {}));
+var SoftwareType;
+(function (SoftwareType) {
+    SoftwareType[SoftwareType["Monitor"] = 9000] = "Monitor";
+    SoftwareType[SoftwareType["ConfigurationService"] = 9001] = "ConfigurationService";
+    SoftwareType[SoftwareType["AppDataService"] = 9002] = "AppDataService";
+    SoftwareType[SoftwareType["ArchiveService"] = 9003] = "ArchiveService";
+    SoftwareType[SoftwareType["TuningService"] = 9004] = "TuningService";
+    SoftwareType[SoftwareType["DiagDataService"] = 9005] = "DiagDataService";
+    SoftwareType[SoftwareType["TuningClient"] = 9006] = "TuningClient";
+    SoftwareType[SoftwareType["Metrology"] = 9007] = "Metrology";
+    SoftwareType[SoftwareType["ServiceControlManager"] = 9008] = "ServiceControlManager";
+})(SoftwareType || (SoftwareType = {}));
 function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) {
     //var funcStr = "(function (confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){log.writeMessage(\"Hello\"); return true; })";
     //
@@ -26,6 +38,8 @@ function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, 
 //
 "use strict";
 var FamilyLMID = 0x1100;
+var LMDescriptionNumber = 1;
+var UartID = 0;
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
 //var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
@@ -53,41 +67,48 @@ var FamilyLMID = 0x1100;
 //var configScriptVersion = 27;		// First script that supports subsystems filtering
 //var configScriptVersion : number = 28;	// Code is written using TypeScript
 //var configScriptVersion: number = 29;		// Added module place checking
-var configScriptVersion = 30; // ModuleID for LM is placed in .mct file
+//var configScriptVersion: number = 30;		// ModuleID for LM is placed in .mct file
+//var configScriptVersion: number = 31;		// Add LmDescriptionVersion to Storage Format frame
+//var configScriptVersion: number = 32;		// Removed structure ModuleFirmwareCollection
+//var configScriptVersion: number = 33;		// Changes in  ModuleFirmware functions, uartID added
+//var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
+//var configScriptVersion: number = 35;		// Add Software type checking
+//var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
+var configScriptVersion = 37; // Add setDataFloat function
 //
-function main(builder, root, logicModules, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
+function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
         var subSysID = logicModules[0].jsPropertyString("SubsystemID");
         log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
     }
+    var LMNumberCount = 0;
     for (var i = 0; i < logicModules.length; i++) {
         if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyLMID) {
             continue;
         }
-        var result = module_lm_1(builder, root, logicModules[i], confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
+        var result = module_lm_1(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
         if (result == false) {
             return false;
         }
+        LMNumberCount++;
         if (builder.jsIsInterruptRequested() == true) {
             return true;
         }
     }
-    for (var i = 0; i < logicModules.length; i++) {
-        if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyLMID) {
-            continue;
-        }
-        var result = module_lm_1_statistics(builder, logicModules[i], confCollection, log, subsystemStorage, logicModuleDescription);
-        if (result == false) {
-            return false;
-        }
-        if (builder.jsIsInterruptRequested() == true) {
-            return true;
-        }
+    // LMNumberCount
+    //
+    var frameStorageConfig = 1;
+    var ptr = 14;
+    if (setData16(confFirmware, log, -1, "", frameStorageConfig, ptr, "LMNumberCount", LMNumberCount) == false) {
+        return false;
     }
+    confFirmware.writeLog("Subsystem " + subSysID + ", frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
     return true;
 }
 function setData8(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
-    confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + data.toString(16));
+    if (channel != -1 && equpmentID.length > 0) {
+        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + data.toString(16));
+    }
     if (confFirmware.setData8(frameIndex, offset, data) == false) {
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData8");
         return false;
@@ -95,7 +116,9 @@ function setData8(confFirmware, log, channel, equpmentID, frameIndex, offset, ca
     return true;
 }
 function setData16(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
-    confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + data.toString(16));
+    if (channel != -1 && equpmentID.length > 0) {
+        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + data.toString(16));
+    }
     if (confFirmware.setData16(frameIndex, offset, data) == false) {
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData16");
         return false;
@@ -103,9 +126,21 @@ function setData16(confFirmware, log, channel, equpmentID, frameIndex, offset, c
     return true;
 }
 function setData32(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
-    confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + data.toString(16));
+    if (channel != -1 && equpmentID.length > 0) {
+        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + data.toString(16));
+    }
     if (confFirmware.setData32(frameIndex, offset, data) == false) {
         log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData32");
+        return false;
+    }
+    return true;
+}
+function setDataFloat(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
+    if (channel != -1 && equpmentID.length > 0) {
+        confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";" + data);
+    }
+    if (confFirmware.setDataFloat(frameIndex, offset, data) == false) {
+        log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setDataFloat");
         return false;
     }
     return true;
@@ -149,7 +184,7 @@ function valToADC(val, lowLimit, highLimit, lowADC, highADC) {
     var res = (highADC - lowADC) * (val - lowLimit) / (highLimit - lowLimit) + lowADC;
     return Math.round(res);
 }
-function module_lm_1(builder, root, module, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
+function module_lm_1(builder, root, module, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (module.jsDeviceType() != DeviceObjectType.Module) {
         return false;
     }
@@ -172,63 +207,14 @@ function module_lm_1(builder, root, module, confCollection, log, signalSet, subs
         }
         // Generate Configuration
         //
-        return generate_lm_1_rev3(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
-    }
-    return false;
-}
-function module_lm_1_statistics(builder, module, confCollection, log, subsystemStorage, logicModuleDescription) {
-    if (module.jsDeviceType() != DeviceObjectType.Module) {
-        return false;
-    }
-    if (module.propertyValue("EquipmentID") == undefined) {
-        log.errCFG3000("EquipmentID", "LM");
-        return false;
-    }
-    var checkProperties = ["ModuleFamily", "ModuleVersion", "SubsystemID"];
-    for (var cp = 0; cp < checkProperties.length; cp++) {
-        if (module.propertyValue(checkProperties[cp]) == undefined) {
-            log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
-            return false;
-        }
-    }
-    if (module.jsPropertyInt("ModuleFamily") == FamilyLMID) {
-        var checkProperties = ["LMNumber"];
-        for (var cp = 0; cp < checkProperties.length; cp++) {
-            if (module.propertyValue(checkProperties[cp]) == undefined) {
-                log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
-                return false;
-            }
-        }
-        // Generate Configuration
-        //
-        // Variables
-        //
-        var subSysID = module.jsPropertyString("SubsystemID");
-        var LMNumber = module.jsPropertyInt("LMNumber");
-        var frameSize = logicModuleDescription.FlashMemory_ConfigFrameSize;
-        var frameCount = logicModuleDescription.FlashMemory_ConfigFrameCount;
-        var uartId = 0x0102; // Check it !!!!
-        var ssKeyValue = subsystemStorage.ssKey(subSysID);
-        if (ssKeyValue == -1) {
-            log.errCFG3001(subSysID, module.jsPropertyString("EquipmentID"));
-            return false;
-        }
-        var configStartFrames = 2;
-        var configFrameCount = 19; // number of frames in each configuration
-        var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount);
-        var frameStorageConfig = 1;
-        var ptr = 14;
-        var LMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
-        confFirmware.writeLog("---\r\n");
-        confFirmware.writeLog(module.jsPropertyString("Caption") + " for subsystem " + subSysID + ", LMNumber " + LMNumber + ": Frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
-        return true;
+        return generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
     }
     return false;
 }
 // Generate configuration for module LM-1
 //
 //
-function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
+function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (module.propertyValue("EquipmentID") == undefined) {
         log.errCFG3000("EquipmentID", "LM");
         return false;
@@ -248,7 +234,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     var moduleId = module.jsPropertyInt("ModuleFamily") + module.jsPropertyInt("ModuleVersion");
     // Constants
     //
-    var frameSize = logicModuleDescription.FlashMemory_ConfigFrameSize;
+    var frameSize = logicModuleDescription.FlashMemory_ConfigFramePayload;
     var frameCount = logicModuleDescription.FlashMemory_ConfigFrameCount;
     if (frameSize < 1016) {
         log.errCFG3002("FlashMemory/ConfigFrameSize", frameSize, 1016, 65535, module.jsPropertyString("EquipmentID"));
@@ -274,7 +260,6 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
         return false;
     }
-    var confFirmware = confCollection.jsGet(module.jsPropertyString("Caption"), subSysID, ssKeyValue, uartId, frameSize, frameCount);
     var descriptionVersion = 1;
     confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
     confFirmware.writeLog("---\r\n");
@@ -286,6 +271,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     confFirmware.writeLog("UartID = " + uartId + "\r\n");
     confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
     confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
+    confFirmware.writeLog("LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
     // Configuration storage format
     //
     var frameStorageConfig = 1;
@@ -306,26 +292,20 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] ssKey = " + ssKey + "\r\n");
     ptr += 2;
-    var buildNo = builder.jsBuildNo();
+    var buildNo = confFirmware.buildNumber();
     if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "BuildNo", buildNo) == false) {
         return false;
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] BuildNo = " + buildNo + "\r\n");
     ptr += 2;
-    // reserved
-    ptr += 6;
-    // write LMNumberCount, if old value is less than current. If it is the same, output an error.
-    //
-    var oldLMNumberCount = confFirmware.data16(frameStorageConfig, ptr);
-    if (oldLMNumberCount == LMNumber) {
-        log.errCFG3003(LMNumber, module.jsPropertyString("EquipmentID"));
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMDescriptionNumber", LMDescriptionNumber) == false) {
         return false;
     }
-    if (oldLMNumberCount < LMNumber) {
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMNumberCount", LMNumber) == false) {
-            return false;
-        }
-    }
+    confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
+    ptr += 2;
+    // reserved
+    ptr += 4;
+    // write LMNumberCount
     ptr += 2;
     var configIndexOffset = ptr + (LMNumber - 1) * (2 /*offset*/ + 4 /*reserved*/);
     var configFrame = configStartFrames + configFrameCount * (LMNumber - 1);
@@ -448,6 +428,17 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
             log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
         }
         else {
+            // Check software type
+            if (service.propertyValue("Type") == undefined) {
+                log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+                return false;
+            }
+            var softwareType = service.jsPropertyInt("Type");
+            if (softwareType != SoftwareType.TuningService) {
+                log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
+                return false;
+            }
+            //
             var checkTuningProperties = ["TuningDataIP", "TuningDataPort"];
             for (var cp = 0; cp < checkTuningProperties.length; cp++) {
                 if (service.propertyValue(checkTuningProperties[cp]) == undefined) {
@@ -527,20 +518,26 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
                     }
                 }
                 else {
-                    var serviceDataChannel = service.jsFindChildObjectByMask(serviceID + "_DATACH0" + (i + 1));
-                    if (serviceDataChannel == null) {
-                        log.errCFG3004(serviceID + "_DATACH01", equipmentID);
+                    // Check software type
+                    if (service.propertyValue("Type") == undefined) {
+                        log.errCFG3000("Type", service.jsPropertyString("EquipmentID"));
+                        return false;
+                    }
+                    var softwareType = service.jsPropertyInt("Type");
+                    if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
+                        (s == 1 && softwareType != SoftwareType.DiagDataService)) {
+                        log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
                         return false;
                     }
                     var checkProperties = ["DataReceivingIP", "DataReceivingPort"];
                     for (var cp = 0; cp < checkProperties.length; cp++) {
-                        if (serviceDataChannel.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
-                            log.errCFG3000(servicesName[s] + checkProperties[cp], serviceDataChannel.jsPropertyString("EquipmentID"));
+                        if (service.propertyValue(servicesName[s] + checkProperties[cp]) == undefined) {
+                            log.errCFG3000(servicesName[s] + checkProperties[cp], service.jsPropertyString("EquipmentID"));
                             return false;
                         }
                     }
-                    serviceIP[s] = serviceDataChannel.jsPropertyIP(servicesName[s] + "DataReceivingIP");
-                    servicePort[s] = serviceDataChannel.jsPropertyInt(servicesName[s] + "DataReceivingPort");
+                    serviceIP[s] = service.jsPropertyIP(servicesName[s] + "DataReceivingIP");
+                    servicePort[s] = service.jsPropertyInt(servicesName[s] + "DataReceivingPort");
                 }
             }
         }

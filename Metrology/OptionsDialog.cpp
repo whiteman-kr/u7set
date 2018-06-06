@@ -313,7 +313,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 				SocketClientOption sco = m_options.socket().client(socketType);
 
-				QtProperty *serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 1 (primary)"));
+				QtProperty *serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server (primary)"));
 
 					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID1]);
 					item->setValue(sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
@@ -333,7 +333,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_PORT1);
 					serverGroup1->addSubProperty(item);
 
-				QtProperty *serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 2 (reserve)"));
+				QtProperty *serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server (reserve)"));
 
 					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID2]);
 					item->setValue(sco.equipmentID(SOCKET_SERVER_TYPE_RESERVE));
@@ -361,7 +361,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(serverGroup1);
-				editor->addProperty(serverGroup2);
+
+				if (socketType == SOCKET_TYPE_SIGNAL)
+				{
+					editor->addProperty(serverGroup2);
+				}
 
 			}
 			break;

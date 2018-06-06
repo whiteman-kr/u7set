@@ -1,6 +1,7 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 #include "Settings.h"
+#include "TuningValue.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -94,9 +95,24 @@ namespace ExtWidgets
 		return m_modified;
 	}
 
+	bool PropertyTextEditor::hasOkCancelButtons()
+	{
+		return m_hasOkCancelButtons;
+	}
+
 	void PropertyTextEditor::textChanged()
 	{
 		m_modified = true;
+	}
+
+	void PropertyTextEditor::okButtonPressed()
+	{
+		emit okPressed();
+	}
+
+	void PropertyTextEditor::cancelButtonPressed()
+	{
+		emit cancelPressed();
 	}
 
 	//
@@ -501,12 +517,16 @@ namespace ExtWidgets
 			move(theSettings.m_multiLinePropertyEditorWindowPos);
 			restoreGeometry(theSettings.m_multiLinePropertyEditorGeometry);
 		}
+		else
+		{
+			resize(1024, 768);
+		}
 
 		QVBoxLayout* vl = new QVBoxLayout();
 
 		// Create Editor
 
-        m_editor = m_propertyEditor->createCodeEditor(m_property.get(), this);
+		m_editor = m_propertyEditor->createPropertyTextEditor(m_property.get(), this);
 
 		m_editor->setText(text);
 
@@ -514,13 +534,24 @@ namespace ExtWidgets
 
 		// Buttons
 
-		QPushButton* okButton = new QPushButton(tr("OK"), this);
-		QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
+		QPushButton* okButton = nullptr;
+		QPushButton* cancelButton = nullptr;
 
-		okButton->setDefault(true);
+		if (m_editor->hasOkCancelButtons() == true)
+		{
+			okButton = new QPushButton(tr("OK"), this);
+			cancelButton = new QPushButton(tr("Cancel"), this);
 
-		connect(okButton, &QPushButton::clicked, this, &MultiLineEdit::accept);
-		connect(cancelButton, &QPushButton::clicked, this, &MultiLineEdit::reject);
+			okButton->setDefault(true);
+
+			connect(okButton, &QPushButton::clicked, this, &MultiLineEdit::accept);
+			connect(cancelButton, &QPushButton::clicked, this, &MultiLineEdit::reject);
+		}
+		else
+		{
+			connect(m_editor, &PropertyTextEditor::okPressed, this, &MultiLineEdit::accept);
+			connect(m_editor, &PropertyTextEditor::cancelPressed, this, &MultiLineEdit::reject);
+		}
 
 		connect(this, &QDialog::finished, this, &MultiLineEdit::finished);
 
@@ -588,8 +619,14 @@ namespace ExtWidgets
 		}
 
 		hl->addStretch();
-		hl->addWidget(okButton);
-		hl->addWidget(cancelButton);
+		if (okButton != nullptr)
+		{
+			hl->addWidget(okButton);
+		}
+		if (cancelButton != nullptr)
+		{
+			hl->addWidget(cancelButton);
+		}
 
 
 		vl->addWidget(m_editor);
@@ -790,8 +827,17 @@ namespace ExtWidgets
 		}
 			break;
 		default:
-			assert(false);
-			return;
+			if (m_userType == TuningValue::tuningValueTypeId())
+			{
+				TuningValue t = property->value().value<TuningValue>();
+				m_oldValue = QVariant::fromValue(t);
+				m_lineEdit->setText(t.toString(property->precision()));
+			}
+			else
+			{
+				assert(false);
+				return;
+			}
 		}
 
 		m_lineEdit->setReadOnly(readOnly);
@@ -879,8 +925,23 @@ namespace ExtWidgets
 			}
 			break;
 		default:
-			assert(false);
-			return;
+			if (m_userType == TuningValue::tuningValueTypeId())
+			{
+				bool ok = false;
+				TuningValue oldValue = m_oldValue.value<TuningValue>();
+				TuningValue value(oldValue);
+				value.fromString(m_lineEdit->text(), &ok);
+				if (ok == true && value != oldValue)
+				{
+					m_oldValue.setValue(value);
+					emit valueChanged(m_oldValue);
+				}
+			}
+			else
+			{
+				assert(false);
+				return;
+			}
 		}
 
         m_lineEdit->blockSignals(false);
@@ -1078,24 +1139,37 @@ namespace ExtWidgets
         else
         {
 
-            if (p->value().userType() == FilePathPropertyType::filePathTypeId())
-            {
-                QtMultiFilePathEdit* m_editor = new QtMultiFilePathEdit(parent);
-                editor = m_editor;
+			if (p->value().userType() == FilePathPropertyType::filePathTypeId())
+			{
+				QtMultiFilePathEdit* m_editor = new QtMultiFilePathEdit(parent);
+				editor = m_editor;
 				m_editor->setValue(p, m_property->isEnabled() == false);
 
-                connect(m_editor, &QtMultiFilePathEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-                connect(m_editor, &QtMultiFilePathEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-            }
-            else
-            {
-                switch(p->value().userType())
+				connect(m_editor, &QtMultiFilePathEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+				connect(m_editor, &QtMultiFilePathEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+			}
+			else
+			{
+				if (p->value().userType() == TuningValue::tuningValueTypeId())
 				{
-/*					case QVariant::Int:
+					QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
+
+					editor = m_editor;
+					m_editor->setValue(p, m_property->isEnabled() == false);
+
+					connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+					connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+				}
+				else
+				{
+					switch(p->value().userType())
+					{
+						/*
+						case QVariant::Int:
 						{
 							QtMultiIntSpinBox* m_editor = new QtMultiIntSpinBox(parent);
 							editor = m_editor;
-                            m_editor->setValue(p);
+							m_editor->setValue(p);
 
 							connect(m_editor, &QtMultiIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1105,7 +1179,7 @@ namespace ExtWidgets
 						{
 							QtMultiUIntSpinBox* m_editor = new QtMultiUIntSpinBox(parent);
 							editor = m_editor;
-                            m_editor->setValue(p);
+							m_editor->setValue(p);
 
 							connect(m_editor, &QtMultiUIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiUIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -1115,87 +1189,104 @@ namespace ExtWidgets
 						{
 							QtMultiDoubleSpinBox* m_editor = new QtMultiDoubleSpinBox(parent);
 							editor = m_editor;
-                            m_editor->setValue(p);
+							m_editor->setValue(p);
 
 							connect(m_editor, &QtMultiDoubleSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 							connect(m_editor, &QtMultiDoubleSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 						}
 						break;
 						*/
-					case QVariant::Bool:
-						{
-							QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
-							editor = m_editor;
-
-							connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-							connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-
-							if (m_property->isEnabled() == false)
+						case QVariant::Bool:
 							{
-								m_editor->setValue(p->value().toBool(), m_property->isEnabled() == false);
-							}
-							else
-							{
-								// change value on first click
-								//
-								bool newValue = p->value().toBool();
+								QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
 
-								if (manager->sameValue(property) == false)
+								editor = m_editor;
+
+								connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+								connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+
+								if (m_property->isEnabled() == false)
 								{
-									newValue = true;
+									m_editor->setValue(p->value().toBool(), m_property->isEnabled() == false);
 								}
 								else
 								{
-									newValue = !newValue;
+									// change value on first click
+									//
+									bool newValue = p->value().toBool();
+
+									if (manager->sameValue(property) == false)
+									{
+										newValue = true;
+									}
+									else
+									{
+										newValue = !newValue;
+									}
+
+									m_editor->setValue(newValue, m_property->isEnabled() == false);
+
+									m_valueSetOnTimer = newValue;
+									QTimer::singleShot(10, this, &QtMultiVariantFactory::slotSetValueTimer);
+								}
+							}
+							break;
+						case QVariant::String:
+						case QVariant::Int:
+						case QVariant::UInt:
+						case QMetaType::Float:
+						case QVariant::Double:
+							{
+								QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
+
+								editor = m_editor;
+
+								if (manager->sameValue(property) == true)
+								{
+									m_editor->setValue(p, m_property->isEnabled() == false);
 								}
 
-								m_editor->setValue(newValue, m_property->isEnabled() == false);
-
-								m_valueSetOnTimer = newValue;
-								QTimer::singleShot(10, this, &QtMultiVariantFactory::slotSetValueTimer);
+								connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+								connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 							}
-						}
-						break;
-					case QVariant::String:
-					case QVariant::Int:
-					case QVariant::UInt:
-					case QMetaType::Float:
-					case QVariant::Double:
-						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
+							break;
 
-							editor = m_editor;
-							m_editor->setValue(p, m_property->isEnabled() == false);
+						case QVariant::Color:
+							{
+								QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
 
-							connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-							connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-						}
-						break;
+								editor = m_editor;
 
-					case QVariant::Color:
-						{
-							QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
-							editor = m_editor;
-							m_editor->setValue(p, m_property->isEnabled() == false);
+								if (manager->sameValue(property) == true)
+								{
+									m_editor->setValue(p, m_property->isEnabled() == false);
+								}
 
-							connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-							connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-						}
-						break;
+								connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+								connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+							}
+							break;
 
-					case QVariant::Uuid:
-						{
-							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
-							editor = m_editor;
-							m_editor->setValue(p, m_property->isEnabled() == false);
+						case QVariant::Uuid:
+							{
+								QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
 
-							connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-							connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-						}
-						break;
+								editor = m_editor;
 
-					default:
-						Q_ASSERT(false);
+								if (manager->sameValue(property) == true)
+								{
+									m_editor->setValue(p, m_property->isEnabled() == false);
+								}
+
+
+								connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+								connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+							}
+							break;
+
+						default:
+							Q_ASSERT(false);
+					}
 				}
 			}
 		}
@@ -1552,6 +1643,12 @@ namespace ExtWidgets
 			{
                 FilePathPropertyType f = value.value<FilePathPropertyType>();
 				return f.filePath;
+			}
+
+			if (type == TuningValue::tuningValueTypeId())
+			{
+				TuningValue t = value.value<TuningValue>();
+				return t.toString(p->precision());
 			}
 
 			switch (type)
@@ -2170,7 +2267,7 @@ namespace ExtWidgets
 		return;
 	}
 
-    PropertyTextEditor* PropertyEditor::createCodeEditor(Property* property, QWidget* parent)
+	PropertyTextEditor* PropertyEditor::createPropertyTextEditor(Property* property, QWidget* parent)
 	{
         Q_UNUSED(property);
 		return new PropertyPlainTextEditor(parent);

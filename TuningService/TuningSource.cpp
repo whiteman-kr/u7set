@@ -12,9 +12,8 @@ namespace Tuning
 
 	TuningSource::TuningSource()
 	{
-		m_lmDataType = DataSource::DataType::Tuning;
+		setLmDataType(DataSource::DataType::Tuning);
 	}
-
 
 	TuningSource::~TuningSource()
 	{
@@ -23,7 +22,6 @@ namespace Tuning
 			delete m_tuningData;
 		}
 	}
-
 
 	void TuningSource::setTuningData(TuningData* tuningData)
 	{
@@ -36,25 +34,22 @@ namespace Tuning
 		m_tuningData = tuningData;
 	}
 
-
 	const TuningData* TuningSource::tuningData() const
 	{
 		return m_tuningData;
 	}
 
-
-	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
+	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml) const
 	{
 		if (m_tuningData == nullptr)
 		{
-			TuningData td(lmEquipmentID(), 0, 0, 0);
+			TuningData td(lmEquipmentID());
 			td.writeToXml(xml);
 			return;
 		}
 
 		m_tuningData->writeToXml(xml);
 	}
-
 
 	bool TuningSource::readAdditionalSectionsFromXml(XmlReadHelper& xml)
 	{
@@ -64,9 +59,9 @@ namespace Tuning
 
 		m_deleteTuningData = true;
 
-		m_tuningData->readFromXml(xml);
+		bool result = m_tuningData->readFromXml(xml);
 
-		return true;
+		return result;
 	}
 
 
@@ -81,93 +76,48 @@ namespace Tuning
 		clear();
 	}
 
-
 	void TuningSources::clear()
 	{
-		for(TuningSource* ds : *this)
-		{
-			delete ds;
-		}
-
-		QHash<QString, TuningSource*>::clear();
 		m_ip2Source.clear();
+		m_id2Source.clear();
+
+		QVector<TuningSource>::clear();
 	}
 
-
-	/*void TuningSources::getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info)
+	void TuningSources::buildMaps()
 	{
-		info.clear();
-
-		info.resize(count());
-
 		int index = 0;
 
-		for(TuningSource* source : (*this))
+		for(const TuningSource& source : *this)
 		{
-			if (source == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (index >= info.count())
-			{
-				assert(false);
-				break;
-			}
-
-			source->getTuningDataSourceInfo(info[index]);
+			m_ip2Source.insert(source.lmAddress32(), index);
+			m_id2Source.insert(source.lmEquipmentID(), index);
 
 			index++;
 		}
-	}*/
-
-
-	void TuningSources::buildIP2DataSourceMap()
-	{
-		for(TuningSource* source : *this)
-		{
-			m_ip2Source.insert(source->lmAddress32(), source);
-		}
 	}
-
 
 	const TuningSource* TuningSources::getSourceByIP(quint32 ip) const
 	{
-		return m_ip2Source.value(ip, nullptr);
-	}
+		int index = m_ip2Source.value(ip, -1);
 
+		if (index >= 0)
+		{
+			return &(*this)[index];
+		}
+
+		return nullptr;
+	}
 
 	const TuningSource* TuningSources::getSourceByID(const QString& sourceID) const
 	{
-		return value(sourceID, nullptr);
+		int index = m_id2Source.value(sourceID, -1);
+
+		if (index >= 0)
+		{
+			return &(*this)[index];
+		}
+
+		return nullptr;
 	}
-
-
-	/*void TuningSource::processReply(const Tuning::SocketReply& reply)
-	{
-		m_receivedRepyCount++;
-
-		m_hasConnection = true;
-
-		m_fotipFlags = reply.fotipHeader.flags;
-
-		m_lastReplyTime = QDateTime::currentMSecsSinceEpoch();
-
-		if (m_tuningData == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		m_fotipFlags = reply.fotipHeader.flags;
-
-		if (reply.fotipHeader.flags.all != 0)
-		{
-			return;
-		}
-
-		m_tuningData->setFrameData(reply.frameNo, reply.fotipData);
-	}*/
-
 }

@@ -156,7 +156,7 @@ namespace TuningIPEN
 
 		Rup::Header& rh = m_reqFrame.rupHeader;
 
-		rh.frameSize = ENTIRE_UDP_SIZE;
+		rh.frameSize = Socket::ENTIRE_UDP_SIZE;
 		rh.protocolVersion = 4;
 		rh.flags.all = 0;
 		rh.flags.tuningData = 1;

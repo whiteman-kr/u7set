@@ -18,7 +18,7 @@ class ConfigController : public QObject
 public:
 	ConfigController() = delete;
 
-	ConfigController(QWidget* parent, HostAddressPort address1, HostAddressPort address2);
+	ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, QWidget* parent);
 	virtual ~ConfigController();
 
 	// Methods
@@ -34,13 +34,11 @@ public:
 	// signals
 	//
 signals:
-	void serversArrived(HostAddressPort address1, HostAddressPort address2);
+	void tcpClientConfigurationArrived(HostAddressPort address, bool autoApply);
 
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
-	void schemasDetailsArrived(QByteArray data);
 	void globalScriptArrived(QByteArray data);
-
 
 	void configurationArrived();
 
@@ -54,11 +52,10 @@ private slots:
 
 private:
 
+	bool xmlReadBuildInfoNode(const QDomNode& node, ConfigSettings* outSetting);
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
 	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting);
-
-	void addEventMessage(const QString& text);
 
 	// Public properties
 public:
@@ -77,7 +74,7 @@ private:
 	HostAddressPort m_address1;
 	HostAddressPort m_address2;
 
-	QStringList m_eventLog;
+	QByteArray m_globalScriptData;
 };
 
 

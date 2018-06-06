@@ -2,6 +2,10 @@
 #define SETTINGS_H
 
 #include "../lib/HostAddressPort.h"
+#include "UserManager.h"
+
+// Enable the next line to access the admin functions
+//#define USE_ADMIN_REGISTRY_AREA
 
 //
 // ConfigConnection
@@ -29,6 +33,22 @@ protected:
 };
 
 //
+// BuildInfo
+//
+struct BuildInfo
+{
+	QString projectName;
+	int buildNo = -1;
+	QString configuration;
+	QString date;
+	int changeset = -1;
+	QString user;
+	QString workstation;
+
+};
+
+
+//
 // SchemaSettings
 //
 
@@ -50,10 +70,11 @@ struct SchemaSettings
 
 struct ConfigSettings
 {
-	ConfigConnection tuns1;				// Tuning Service connection params
-	ConfigConnection tuns2;				// Tuning Service connection params
+	ConfigConnection tuningServiceAddress;				// Tuning Service connection params
 
 	bool autoApply = true;
+
+	LogonMode logonMode = LogonMode::Permanent;
 
 	bool showSignals = true;
 
@@ -65,22 +86,19 @@ struct ConfigSettings
 
 	bool filterBySchema = true;
 
+	bool showSOR = true;
+
+	bool showDiscreteCounters = true;
+
+	int loginSessionLength = 120;
+
+	QStringList usersAccounts;
+
 	std::vector<SchemaSettings> schemas;
 
+	BuildInfo buildInfo;
+
 	QString errorMessage;				// Parsing error message, empty if no errors
-};
-
-//
-// TuningPageSettings
-//
-
-
-class TuningPageSettings
-{
-public:
-	int m_columnCount = 0;
-	std::vector<int> m_columnsIndexes;
-	std::vector<int> m_columnsWidth;
 };
 
 //
@@ -98,8 +116,11 @@ public:
 	void StoreSystem();
 	void RestoreSystem();
 
+	QStringList instanceHistory();
+	void setInstanceHistory(const QStringList& value);
+
 	QString instanceStrId();
-	void setInstanceId(const QString& value);
+	void setInstanceStrId(const QString& value);
 
 	void setConfiguratorAddress1(const QString& address, int port);
 	HostAddressPort configuratorAddress1();
@@ -110,11 +131,9 @@ public:
 	QString language() const;
 	void setLanguage(const QString& value);
 
+#ifdef USE_ADMIN_REGISTRY_AREA
 	bool admin() const;
-
-	TuningPageSettings* tuningPageSettings(int index);
-
-	QString globalAppDataPath();
+#endif
 
 	QString localAppDataPath();
 
@@ -122,7 +141,11 @@ public:
 
 public:
 
-	int m_requestInterval = 10;
+	int m_requestInterval = 100;
+
+#ifdef Q_DEBUG
+	bool m_simulationMode = false;
+#endif
 
 	//
 
@@ -154,12 +177,11 @@ public:
 
 private:
 
-	// Tuning pages settings
-	//
-	std::vector<TuningPageSettings> m_tuningPageSettings;
-
+#ifdef USE_ADMIN_REGISTRY_AREA
 	bool m_admin = false;
+#endif
 
+	QStringList m_instanceHistory;
 	QString m_instanceStrId;
 
 	QString m_configuratorIpAddress1;
@@ -170,7 +192,6 @@ private:
 
 	QString m_language = "en";
 
-	QString m_globalAppDataPath;
 	QString m_localAppDataPath;
 
 	QString m_userFiltersFile;

@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QSerialPort>
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "../lib/OutputLog.h"
 
 class OutputLog;
@@ -177,10 +177,10 @@ struct CONF_IDENTIFICATION_DATA_V1
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(OutputLog *log) const;
+	void dump(QStringList &out) const;
 
-	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
-	void createNextConfiguration(Hardware::ModuleFirmware* conf);
+	void createFirstConfiguration();
+	void createNextConfiguration();
 
 	static int structVersion() {	return 1;	}
 };
@@ -206,10 +206,10 @@ struct CONF_IDENTIFICATION_DATA_V2
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(OutputLog *log) const;
+	void dump(QStringList &out) const;
 
-	void createFirstConfiguration(Hardware::ModuleFirmware* conf);
-	void createNextConfiguration(Hardware::ModuleFirmware* conf);
+	void createFirstConfiguration(Hardware::ModuleFirmwareStorage* storage);
+	void createNextConfiguration(Hardware::ModuleFirmwareStorage* storage);
 
 	static int structVersion() {	return 2;	}
 };
@@ -220,6 +220,7 @@ typedef CONF_IDENTIFICATION_DATA_V2 CONF_IDENTIFICATION_DATA;	// Current version
 
 using namespace Hardware;
 
+Q_DECLARE_METATYPE(std::vector<UartPair>);
 //
 //	Configurator
 //
@@ -228,7 +229,7 @@ class Configurator : public QObject
 	Q_OBJECT
 
 public:
-        Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
+	Configurator(QString serialDevice, OutputLog* log, QObject* parent = nullptr);
 	virtual ~Configurator();
 	
 	void cancelOperation();
@@ -244,32 +245,40 @@ protected:
 
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
-	void readConfigurationWorker(int param);
-	void writeConfigurationWorker(ModuleFirmware* conf);
+	bool loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData);
+	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
-	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize);
+	void readServiceInformationWorker(int param);
+	bool readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxFrameCount);
 
-	void processConfDataFile(const QString& fileName, bool writeToFlash);
+	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize, QStringList &out);
 	// Slots
 	//
 public slots:
 	void setSettings(QString device, bool showDebugInfo, bool verify);
-	void readConfiguration(int param);
-    void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
-	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName);
+	void readServiceInformation(int param);
+	void uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
-	void writeConfData(ModuleFirmware* conf);
+	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId);
+
 	void readFirmware(const QString &fileName);
+	void detectSubsystem_v1();
 	void eraseFlashMemory(int param);
 
 	// Signals
 	//
 signals:
-	void communicationStarted();
-	void communicationFinished();
-    void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
+	void operationStarted();
+	void operationFinished();
+
+	void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
+
+	void loadBinaryFileHeaderComplete();
+	void uartOperationStart(int uartID, QString operation);
+	void uploadFirmwareComplete(int uartID);
+	void detectSubsystemComplete(int subsystemId);
 
 public:
 	// Properties
@@ -290,16 +299,19 @@ private:
 	bool m_showDebugInfo = false;
 	uint32_t m_configuratorfactoryNo = 0;
 
-        QSerialPort *m_serialPort;
+	QSerialPort *m_serialPort;
 
-        OutputLog* m_Log;
+	OutputLog* m_Log;
 
 	mutable QMutex mutex;			// m_device
 
 	volatile bool m_cancelFlag = false;
 
 	bool m_verify = true;
-};
 
+	int m_currentUartId = -1;
+
+	QString m_fileName;
+};
 
 #endif // CONFIGURATOR_H

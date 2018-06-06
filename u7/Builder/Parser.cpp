@@ -498,47 +498,25 @@ namespace Builder
 		struct HistoryItem
 		{
 			AppLogicItem ChangeItem;
-			int count;
+			int count = 0;
 		};
 
 		AppLogicItem item;
-		std::list<HistoryItem> history;
+		std::map<QUuid, HistoryItem> history;	// Key is HistoryItem.ChangeItem.m_fblItem->guid
 
+		// --
+		//
 		int getChangeCount(const AppLogicItem& forItem)
 		{
-			auto it = std::find_if(history.begin(), history.end(),
-				[&forItem](const HistoryItem& hi)
-				{
-					return hi.ChangeItem.m_fblItem == forItem.m_fblItem;
-				});
-
-			if (it == history.end())
-			{
-				return 0;
-			}
-			else
-			{
-				return it->count;
-			}
+			const HistoryItem& historyItem = history[forItem.m_fblItem->guid()];
+			return historyItem.count;
 		}
 
-		void incChangeCount(const AppLogicItem& forItem)
+		int incChangeCount(const AppLogicItem& forItem)
 		{
-			auto it = std::find_if(history.begin(), history.end(),
-				[&forItem](const HistoryItem& hi)
-				{
-					return hi.ChangeItem.m_fblItem == forItem.m_fblItem;
-				});
-
-			if (it == history.end())
-			{
-				HistoryItem hi{forItem, 1};
-				history.push_back(hi);
-			}
-			else
-			{
-				it->count++;
-			}
+			HistoryItem& historyItem = history[forItem.m_fblItem->guid()];
+			historyItem.count++;
+			return historyItem.count;
 		}
 	};
 
@@ -659,48 +637,86 @@ namespace Builder
 		//
 		std::list<AppLogicItem> orderedList;
 
-		// Add all inputs and outputs
-		// Warning:	Can be optimized by removing items from fblItems on the same
-		//			loop
+		// Add all "inputs"
 		//
-		bool hasItemsWithouInputs = false;
-
 		for (const auto& item : fblItems)
 		{
 			if (item.second.m_fblItem->inputsCount() == 0)
 			{
 				orderedList.push_front(item.second);	// items without inputs must be at the begining of the list
-				hasItemsWithouInputs = true;
 				continue;
 			}
 		}
 
-		for (const auto& item : fblItems)
+		// Get all outputs and assigned to them inputs, it's a dependand map
+		//
+		std::multimap<QUuid, AppLogicItem> outputPinToInputItem;				// Key is QUuid of output connected to input
+
+		for (const std::pair<QUuid, AppLogicItem>& currentItem : constFblItems)
 		{
-			if (item.second.m_fblItem->outputsCount() == 0)
+			const AppLogicItem& appLogicItem = currentItem.second;
+			const std::shared_ptr<VFrame30::FblItemRect>& fblItem = appLogicItem.m_fblItem;
+			// qDebug() << "FblItem " << fblItem->label();
+
+			const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
+
+			for (const VFrame30::AfbPin& input : inputs)
 			{
-				orderedList.push_back(item.second);	// items without outputs must be at the end of the list
-				continue;
+				const std::vector<QUuid>& assocOutputs = input.associatedIOs();
+//				for (const QUuid& u : assocOutputs)
+//				{
+//					qDebug() << "\t Assoc Outs" << u;
+//				}
+
+				if (assocOutputs.size() == 1)		// Only one output can be connected to input
+				{
+					outputPinToInputItem.insert({assocOutputs.front(), appLogicItem});
+				}
+				else
+				{
+					assert(assocOutputs.size() != 1);
+				}
 			}
 		}
 
+		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
+
+		for (const std::pair<QUuid, AppLogicItem>& currentItem : constFblItems)
+		{
+			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
+
+			for (const VFrame30::AfbPin& out : outputs)
+			{
+				auto range = outputPinToInputItem.equal_range(out.guid());
+
+				std::map<QUuid, AppLogicItem> rangeItemsMap;	// set removes duplicats
+				for (auto rangeIt = range.first; rangeIt != range.second; ++rangeIt)
+				{
+					const AppLogicItem& appItem = rangeIt->second;
+					rangeItemsMap[appItem.m_fblItem->guid()] = appItem;
+				}
+
+				std::vector<AppLogicItem> deps;
+				deps.reserve(8);
+
+				for (const auto& item : rangeItemsMap)
+				{
+					deps.push_back(item.second);
+				}
+
+				itemsWithInputs[out.guid()] = std::vector<AppLogicItem>();
+				std::swap(itemsWithInputs[out.guid()], deps);
+			}
+		}
+
+		// Remove already added items
+		//
 		for (const AppLogicItem& orderedItem : orderedList)
 		{
 			fblItems.erase(orderedItem.m_fblItem->guid());
 		}
 
-//		if (hasItemsWithouInputs == false)
-//		{
-//			// Imposible set exucution order for module, there is no first item,
-//			// firts item can be item without inputs
-//			//
-//			log->errALP4020(moduleEquipmentId());
-
-//			result = false;
-//			return result;
-//		}
-
-		int pass = 1;
+		int pass = 0;
 		size_t checkRemainsCount = -1;			// it's ok to give a second change for setItemsOrder to remove some items form fblItems
 		while (fblItems.empty() == false)
 		{
@@ -709,15 +725,24 @@ namespace Builder
 				break;
 			}
 
-			qDebug() << "Pass " << pass++;
+			qDebug() << "Pass " << ++pass;
 
-			setItemsOrder(log, fblItems, orderedList, constFblItems, interruptProcess);
+			// If this is not firts pass, then we need to start oreder loop form the last item (pass > 1)
+			// as all items before just added (in the end of this loop orderedList.push_back(item);) already were ordered
+			//
+			bool startLoopFromLastItem = pass > 1;
+
+			bool ok = setItemsOrder(log, fblItems, orderedList, itemsWithInputs, startLoopFromLastItem, interruptProcess);
+
+			if (ok == false)
+			{
+				return false;
+			}
 
 			if (*interruptProcess == true)
 			{
 				break;
 			}
-
 
 			if (checkRemainsCount == fblItems.size())
 			{
@@ -797,7 +822,7 @@ namespace Builder
 		for (const AppLogicItem& ali : m_items)
 		{
 			QByteArray buffer;
-			buffer.reserve(1024);
+			buffer.reserve(2048);
 
 			ali.m_fblItem->Save(buffer);
 
@@ -1233,7 +1258,8 @@ namespace Builder
 	bool AppLogicModule::setItemsOrder(IssueLogger* log,
 									   std::map<QUuid, AppLogicItem>& remainItems,
 									   std::list<AppLogicItem>& orderedItems,
-									   const std::map<QUuid, AppLogicItem>& constItems,
+									   const std::map<QUuid, std::vector<AppLogicItem>>& itemsWithInputs,
+									   bool startLoopFromLastItem,
 									   bool* interruptProcess)
 	{
 		if (log == nullptr ||
@@ -1246,81 +1272,17 @@ namespace Builder
 
 		// --
 		//
-		std::multimap<QUuid, AppLogicItem> outputPinToInputItem;				// Key is QUuid of output connected to input
-
-		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
-		{
-			const std::vector<VFrame30::AfbPin>& inputs = currentItem.second.m_fblItem->inputs();
-
-			for (const VFrame30::AfbPin& input : inputs)
-			{
-				const std::vector<QUuid>& assocOutputs = input.associatedIOs();
-
-				if (assocOutputs.size() == 1)		// Only one output can be connected to input
-				{
-					outputPinToInputItem.insert({assocOutputs.front(), currentItem.second});
-				}
-				else
-				{
-					assert(assocOutputs.size() != 1);
-				}
-			}
-		}
-
-		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
-
-		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
-		{
-			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
-
-			for (const VFrame30::AfbPin& out : outputs)
-			{
-				auto range = outputPinToInputItem.equal_range(out.guid());
-
-				std::map<QUuid, AppLogicItem> rangeItemsMap;	// set removes duplicats
-				for (auto rangeIt = range.first; rangeIt != range.second; ++rangeIt)
-				{
-					const AppLogicItem& appItem = rangeIt->second;
-					rangeItemsMap[appItem.m_fblItem->guid()] = appItem;
-				}
-
-				std::vector<AppLogicItem> deps;
-				deps.reserve(8);
-
-				for (const auto& item : rangeItemsMap)
-				{
-					deps.push_back(item.second);
-				}
-
-				itemsWithInputs[out.guid()] = std::vector<AppLogicItem>();
-				std::swap(itemsWithInputs[out.guid()], deps);
-			}
-		}
-
-		//---------------------------
-//		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
-
-
-//		auto constItemsBegin = constItems.begin();
-//		auto constItemsEnd = constItems.end();
-
-//		for (const std::pair<QUuid, AppLogicItem>& currentItem : constItems)
-//		{
-//			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
-
-//			for (const VFrame30::AfbPin& out : outputs)
-//			{
-//				std::vector<AppLogicItem> deps = getItemsWithInput(constItemsBegin, constItemsEnd, out.guid());
-//				itemsWithInputs[out.guid()] = deps;
-//			}
-//		}
-
-		// --
-		//
-		std::list<ChangeOrder> changeOrderHistory;
+		std::map<QUuid, ChangeOrder> changeOrderHistory;		// Key is ChangeOrder.item.m_fblItem->guid()
 
 		// Set other items
 		//
+		auto currentIt = orderedItems.begin();
+
+		if (startLoopFromLastItem == true && orderedItems.empty() == false)
+		{
+			currentIt = std::prev(orderedItems.end());
+		}
+
 		for (auto currentIt = orderedItems.begin(); currentIt != orderedItems.end(); ++currentIt)
 		{
 			if (*interruptProcess == true)
@@ -1378,6 +1340,18 @@ namespace Builder
 					continue;
 				}
 
+				auto remainIt = remainItems.find(dep.m_fblItem->guid());
+				if (remainIt != remainItems.end())
+				{
+					// Obviusly dependant item is not in orderedList yet, add it right after currentItem
+					//
+					assert(std::find(orderedItems.begin(), orderedItems.end(), dep) == orderedItems.end());
+
+					orderedItems.insert(std::next(currentIt), dep);
+					remainItems.erase(remainIt);
+					continue;	// Process other dependtants, do not break!
+				}
+
 				// Check if dependant item is below current, if so, thats ok, don't do anything
 				//
 				auto dependantisBelow = std::find(currentIt, orderedItems.end(), dep);
@@ -1397,38 +1371,31 @@ namespace Builder
 				{
 					// Save history
 					//
-					auto histForCurrentItem = std::find_if(
-												  changeOrderHistory.begin(),
-												  changeOrderHistory.end(),
-												  [&currentItem](const ChangeOrder& co)
-					{
-						return co.item == currentItem;
-					});
+					ChangeOrder& co = changeOrderHistory[currentItem.m_fblItem->guid()];
 
-					if (histForCurrentItem == changeOrderHistory.end())
+					if (co.item.m_fblItem == nullptr)
 					{
-						ChangeOrder co;
+						// Just created
+						//
 						co.item = currentItem;
-						co.incChangeCount(*dependantIsAbove);
-
-						changeOrderHistory.push_back(co);
 					}
-					else
-					{
-						int switchCounter = histForCurrentItem->getChangeCount(*dependantIsAbove);
 
+					int switchCounter = co.incChangeCount(*dependantIsAbove);
+
+
+<<<<<<< HEAD
 #define STRICT_LOOPBACK
 #ifdef STRICT_LOOPBACK
-						// if this is the second switch, then it's error, use LoopbackSource/Target to make it right
-						//
-						if (switchCounter >= 1)
-						{
-							log->errALP4060(currentItem.m_schema->schemaId(), currentItem.m_fblItem->buildName(), currentItem.m_fblItem->guid());
-						}
+					// if this is the second switch, then it's error, use LoopbackSource/Target to make it right
+					//
+					if (switchCounter >= 10)
+					{
+						log->errALP4060(currentItem.m_schema->schemaId(), currentItem.m_fblItem->buildName(), currentItem.m_fblItem->guid());
+					}
 #endif
 						// if this is the third switch item, then skip it
 						//
-						if (switchCounter >= 2)
+						if (switchCounter >= 10)
 						{
 							continue;
 						}
@@ -1436,6 +1403,13 @@ namespace Builder
 						{
 							histForCurrentItem->incChangeCount(*dependantIsAbove);
 						}
+=======
+					int switchCounter = co.incChangeCount(*dependantIsAbove);
+
+					if (switchCounter >= 10)
+					{
+						continue;
+>>>>>>> develop
 					}
 
 					// Dependant item is above currentItem, so let's move currentItem right before dependand one
@@ -1451,12 +1425,7 @@ namespace Builder
 					continue;	// Process other dependtants, do not break!
 				}
 
-				// Obviusly dependant item is not in orderedList yet, add it right after currentItem
-				//
-				assert(std::find(orderedItems.begin(), orderedItems.end(), dep) == orderedItems.end());
-
-				orderedItems.insert(std::next(currentIt), dep);
-				remainItems.erase(dep.m_fblItem->guid());
+				assert(false);
 
 				// Process other dependtants, do not break!
 				//
@@ -1490,7 +1459,7 @@ namespace Builder
 
 				QString signalStrId = signalElement->appSignalIds();
 
-				signalInputItems.insert(signalStrId, li);
+				signalInputItems.insertMulti(signalStrId, li);
 				continue;
 			}
 
@@ -2375,6 +2344,29 @@ namespace Builder
 	}
 
 
+	void ReadyParseDataContainer::add(QString equipmentId,
+									  std::shared_ptr<BushContainer> bushContainer,
+									  std::shared_ptr<VFrame30::LogicSchema> schema)
+	{
+		QMutexLocker l(&m_mutex);
+
+		m_appData.push_back({equipmentId, bushContainer, schema});
+
+		return;
+	}
+
+	void ReadyParseDataContainer::setToAppData(AppLogicData* appData, IssueLogger* log)
+	{
+		QMutexLocker l(&m_mutex);
+
+		for (auto& ad : m_appData)
+		{
+			appData->addLogicModuleData(ad.equipmentId, *ad.bushContainer.get(), ad.schema, log);
+		}
+
+		return;
+	}
+
 	// ------------------------------------------------------------------------
 	//
 	//		ApplicationLogicBuilder
@@ -2501,7 +2493,6 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, tr("Parsing User Functional Blocks..."));
 
-			bool result = true;
 			for (std::shared_ptr<VFrame30::UfbSchema> ufbSchema : ufbs)
 			{
 				if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -2618,6 +2609,13 @@ namespace Builder
 		//
 		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
 
+		ReadyParseDataContainer readyParseDataContainer;
+
+		std::vector<QFuture<bool>> parseTasks;
+		parseTasks.reserve(schemas.size());
+
+		bool iterruptRequest = false;
+
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -2625,15 +2623,47 @@ namespace Builder
 				return false;
 			}
 
-			LOG_MESSAGE(m_log, tr("Parsing ") + schema->schemaId());
+			QFuture<bool> task =  QtConcurrent::run(std::bind(&Parser::parseAppLogicSchema, this, schema, &readyParseDataContainer, &iterruptRequest));
+			parseTasks.push_back(task);
+		}
 
-			ok = parseAppLogicSchema(schema);
-
-			if (ok == false)
+		// Wait for finish and process interrupt request
+		//
+		do
+		{
+			bool allFinished = true;
+			for (QFuture<bool>& task : parseTasks)
 			{
-				result = false;
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
+			}
+
+			if (allFinished == true)
+			{
+				break;
+			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
 			}
 		}
+		while (1);
+
+		for (QFuture<bool>& task : parseTasks)
+		{
+			result &= task.result();
+		}
+
+		// Set all parsed data to modules
+		//
+		readyParseDataContainer.setToAppData(applicationData(), m_log);
 
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
@@ -2764,10 +2794,21 @@ namespace Builder
 			return true;		// it is not a error
 		}
 
-		out->reserve(fileList.size());
+		// Sort file list, it'll guarantee the same order of schemas from build to build
+		//
+		std::sort(fileList.begin(), fileList.end(),
+				  [](const DbFileInfo& f1, const DbFileInfo& f2)
+				  {
+						return f1.fileName() < f2.fileName();
+				  });
 
 		// Get file data and read it
 		//
+		out->reserve(fileList.size());
+
+		std::vector<QFuture<std::shared_ptr<VFrame30::Schema>>> loadSchemaTasks;
+		loadSchemaTasks.reserve(fileList.size());
+
 		bool result = true;
 		for (DbFileInfo& fi : fileList)
 		{
@@ -2797,17 +2838,113 @@ namespace Builder
 
 			// Read schema files
 			//
-			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
+			IssueLogger* scopeLog = m_log;		// cant pass m_log to lambda, so make a copy
+
+			auto task = QtConcurrent::run([file, scopeLog]() -> std::shared_ptr<VFrame30::Schema>
+				{
+					std::shared_ptr<VFrame30::Schema> result = VFrame30::Schema::Create(file.get()->data());
+
+					if (result == nullptr)
+					{
+						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+						//
+						scopeLog->errCMN0010(file->fileName());
+					}
+
+					return result;
+				});
+
+			loadSchemaTasks.push_back(task);
+
+//			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
+
+//			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
+
+//			if (ls == nullptr)
+//			{
+//				assert(ls != nullptr);
+
+//				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+//				//
+//				m_log->errCMN0010(file->fileName());
+
+//				result = false;
+//				continue;
+//			}
+
+//			if (ls->excludeFromBuild() == true)
+//			{
+//				// Schema is excluded from build (Schema '%1').
+//				//
+//				m_log->wrnALP4004(ls->schemaId());
+//				continue;
+//			}
+
+//			// Remove all commented items from the schema
+//			//
+//			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+//			{
+//				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
+
+//				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
+//				{
+//					assert(item);
+
+//					if (item->isCommented() == false)
+//					{
+//						newItemList.push_back(item);
+//					}
+//				}
+
+//				layer->Items.swap(newItemList);
+//			}
+
+//			// Add to schema list
+//			//
+//			out->push_back(ls);
+		}
+
+		// Wait for finish and process interrupt request
+		//
+		bool iterruptRequest = false;
+
+		do
+		{
+			bool allFinished = true;
+			for (auto& task : loadSchemaTasks)
+			{
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
+			}
+
+			if (allFinished == true)
+			{
+				break;
+			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
+			}
+		}
+		while (1);
+
+
+		for (auto& task : loadSchemaTasks)
+		{
+			std::shared_ptr<VFrame30::Schema> schema = task.result();
 
 			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
 
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-
-				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
-				//
-				m_log->errCMN0010(file->fileName());
 
 				result = false;
 				continue;
@@ -2874,7 +3011,7 @@ namespace Builder
 
 				uuids.insert(std::make_pair(layer->guid(), schema->schemaId()));		// Layer guid is also included in check
 
-				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+				for (const std::shared_ptr<VFrame30::SchemaItem>& item : layer->Items)
 				{
 					if (item->isFblItem() == false)
 					{
@@ -3175,7 +3312,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
 				{
 					if (dynamic_cast<VFrame30::SchemaItemAfb*>(si.get()) != nullptr)
 					{
@@ -3235,7 +3372,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
 				{
 					if (dynamic_cast<VFrame30::SchemaItemBus*>(si.get()) != nullptr)
 					{
@@ -3300,7 +3437,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
 				{
 					if (si->isType<VFrame30::SchemaItemUfb>() == true)
 					{
@@ -3592,13 +3729,19 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema)
+	bool Parser::parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
+									 ReadyParseDataContainer* readyParseDataContainer,
+									 bool* interruptProcess)
 	{
-		if (logicSchema.get() == nullptr)
+		if (logicSchema.get() == nullptr ||
+			interruptProcess == nullptr)
 		{
 			assert(false);
+			assert(interruptProcess);
 			return false;
 		}
+
+		LOG_MESSAGE(m_log, tr("Parsing ") + logicSchema->schemaId());
 
 		// Find layer for compilation
 		//
@@ -3610,7 +3753,7 @@ namespace Builder
 			if (l->compile() == true)
 			{
 				layerFound = true;
-				ok = parseAppLogicLayer(logicSchema, l);
+				ok = parseAppLogicLayer(logicSchema, l, readyParseDataContainer);
 
 				if (ok == false)
 				{
@@ -3636,7 +3779,8 @@ namespace Builder
 
 	bool Parser::parseAppLogicLayer(
 		std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-		std::shared_ptr<VFrame30::SchemaLayer> layer)
+		std::shared_ptr<VFrame30::SchemaLayer> layer,
+		ReadyParseDataContainer* readyParseDataContainer)
 	{
 		if (logicSchema == nullptr ||
 			layer == nullptr ||
@@ -3653,7 +3797,7 @@ namespace Builder
 		// Check if all signal elements are from related Logic Module
 		//
 		bool alienLmIds = false;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		for (std::shared_ptr<VFrame30::SchemaItem>& item : layer->Items)
 		{
 			if (item->isType<VFrame30::SchemaItemSignal>() == false)
 			{
@@ -3704,13 +3848,24 @@ namespace Builder
 		// Serializae layer, so it can be restored for each equipmentId
 		//
 		QByteArray layerData;
-		layer->Save(layerData);
+		if (equipmentIds.size() > 1)
+		{
+			layer->Save(layerData);		// If there is only one equipmentId, dont serialize it, just use the existing layer
+		}
 
 		// Parse layer for each LM
 		//
 		for (QString equipmentId : equipmentIds)
 		{
-			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer(VFrame30::SchemaLayer::Create(layerData));
+			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer;
+			if (equipmentIds.size() > 1)
+			{
+				moduleLayer = VFrame30::SchemaLayer::Create(layerData);
+			}
+			else
+			{
+				moduleLayer = layer;		// If there is only one equipmentId, dont serialize it, just use the existing layer
+			}
 
 			if (moduleLayer.get() == nullptr)
 			{
@@ -3723,7 +3878,8 @@ namespace Builder
 			//
 			bool result = true;
 
-			BushContainer bushContainer;
+			//BushContainer bushContainer;
+			std::shared_ptr<BushContainer> bushContainer = std::make_shared<BushContainer>();
 
 			if (logicSchema->isMultichannelSchema() == true)
 			{
@@ -3739,7 +3895,7 @@ namespace Builder
 				return false;
 			}
 
-			result = findBushes(logicSchema, moduleLayer, &bushContainer);
+			result = findBushes(logicSchema, moduleLayer, bushContainer.get());
 
 			if (result == false)
 			{
@@ -3752,7 +3908,7 @@ namespace Builder
 			// Set pins' guids to bushes
 			// All log errors should be reported in setBranchConnectionToPin
 			//
-			result = setBranchConnectionToPin(logicSchema, moduleLayer, &bushContainer);
+			result = setBranchConnectionToPin(logicSchema, moduleLayer, bushContainer.get());
 			if (result == false)
 			{
 				return false;
@@ -3760,7 +3916,7 @@ namespace Builder
 
 			// Associates input/outputs
 			//
-			result = setPinConnections(logicSchema, moduleLayer, &bushContainer);
+			result = setPinConnections(logicSchema, moduleLayer, bushContainer.get());
 			if (result == false)
 			{
 				return false;
@@ -3770,12 +3926,13 @@ namespace Builder
 			//
 			if (logicSchema->isMultichannelSchema() == true)
 			{
-				filterSingleChannelBranchesInMulischema(logicSchema, equipmentId, &bushContainer);
+				filterSingleChannelBranchesInMulischema(logicSchema, equipmentId, bushContainer.get());
 			}
 
 			// Generate afb list, and set it to some container
 			//
-			applicationData()->addLogicModuleData(equipmentId, bushContainer, logicSchema, m_log);
+			readyParseDataContainer->add(equipmentId, bushContainer, logicSchema);
+			//applicationData()->addLogicModuleData(equipmentId, bushContainer, logicSchema, m_log);
 		}
 
 		return true;
@@ -4592,7 +4749,7 @@ namespace Builder
 		const AppLogicData* appLogicData = applicationData();
 		const auto& ufbs = appLogicData->ufbs();
 
-		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : ufbs)
+		for (const std::pair<QString, std::shared_ptr<AppLogicModule>>& ufb : ufbs)
 		{
 			const std::list<AppLogicItem>& items = ufb.second->items();
 

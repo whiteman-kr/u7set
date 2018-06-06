@@ -22,9 +22,17 @@ namespace Builder
 
 	bool ArchivingServiceCfgGenerator::generateConfiguration()
 	{
-		bool result = true;
+		bool result = false;
 
-		result = writeSettings();
+		do
+		{
+			if (writeSettings() == false) break;
+			if (writeBatFile() == false) break;
+			if (writeShFile() == false) break;
+
+			result = true;
+		}
+		while(false);
 
 		return result;
 	}
@@ -85,6 +93,52 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(buildFile);
 
 		return m_cfgXml->addLinkToFile(buildFile);
+	}
+
+	bool ArchivingServiceCfgGenerator::writeBatFile()
+	{
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForBat();
+
+		content += "ArchSrv.exe";
+
+		QString parameters;
+		if (getServiceParameters(parameters) == false)
+		{
+			return false;
+		}
+		content += parameters;
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
+	}
+
+	bool ArchivingServiceCfgGenerator::writeShFile()
+	{
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForSh();
+
+		content += "./ArchSrv";
+
+		QString parameters;
+
+		if (getServiceParameters(parameters) == false)
+		{
+			return false;
+		}
+
+		content += parameters;
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
 	}
 
 }

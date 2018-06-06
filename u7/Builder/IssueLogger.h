@@ -69,8 +69,14 @@ namespace Builder
 		IssueLogger();
 		virtual ~IssueLogger();
 
-	public:
+		enum IssueCompareMode
+		{
+			Equal = 0,
+			Less = 1,
+			More = 2
+		};
 
+	public slots:
 		// CMN			Common issues							0000-0999
 		//
 		void errCMN0010(QString fileName);						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
@@ -103,37 +109,30 @@ namespace Builder
 
 		// CFG			FSC configuration						3000-3999
 		//
-		Q_INVOKABLE void errCFG3000(QString propertyName, QString object);              // general errors
-		Q_INVOKABLE void errCFG3001(QString subSysID, QString module);
-		Q_INVOKABLE void errCFG3002(QString name, int value, int min, int max, QString module);
-		Q_INVOKABLE void errCFG3003(int LMNumber, QString module);
-		Q_INVOKABLE void errCFG3004(QString controllerID, QString module);
+		void errCFG3000(QString propertyName, QString object);						// Property '%1' does not exist in object '%2'.
+		void errCFG3001(QString subSysID, QString module);							// Subsystem '%1' is not found in subsystem set (Logic Module '%2').
+		void errCFG3002(QString name, int value, int min, int max, QString module); // Property '%1' has wrong value (%2), valid range is %3..%4 (module '%5').
+		void errCFG3003(int LMNumber, QString module);								// Property System\\LMNumber (%1) is not unique in Logic Module '%2'.
+		void errCFG3004(QString controllerID, QString module);						// Controller '%1' is not found in module '%2'.
 
-		Q_INVOKABLE void wrnCFG3005(QString signalID, QString controllerID);
-		Q_INVOKABLE void wrnCFG3006(int place, QString controllerID);
-		Q_INVOKABLE void wrnCFG3007(QString signalID);
-		Q_INVOKABLE void wrnCFG3008(QString softwareID, QString module);      // software errors
+		void wrnCFG3005(QString signalID, QString controllerID);					// Signal '%1' is not found in controller '%2'.
+		void wrnCFG3006(int place, QString controllerID);							// Signal with place %1 is not found in controller '%2'.
+		void wrnCFG3007(QString signalID);											// Signal '%1' is not found in Application Signals.
+		void wrnCFG3008(QString softwareID, QString module);						// Software '%1' is not found (Logic Module '%2').
 
-		Q_INVOKABLE void errCFG3009(QString signalID1, QString signalID2, QString module);
-		Q_INVOKABLE void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);
+		void errCFG3009(QString signalID1, QString signalID2, QString module);		// Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'.
+		void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);	// Property '%1' has wrong value (%2), valid range is %3..%4 [precision %5](signal '%6').
 
-		Q_INVOKABLE void errCFG3011(QString addressProperty, uint address, QString controller);
-		Q_INVOKABLE void errCFG3012(QString portProperty, uint port, QString controller);
+		void errCFG3011(QString addressProperty, uint address, QString controller);	// IP address in property '%1' has undefined value (%2) in controller '%3'.
+		void errCFG3012(QString portProperty, uint port, QString controller);		// Port in property '%1' has undefined value (%2) in controller '%3'.
 
-		enum IssueCompareMode
-		{
-			Equal = 0,
-			Less = 1,
-			More = 2
-		};
-
-		Q_INVOKABLE void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);
+		void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);	//Property '%1' (%2) is %3 property '%4' (%5) in signal '%6'.
 
 		void errCFG3014(QString suffix, QString objectID);									// Can't find child object with suffix '%1' in object '%2'
 		void wrnCFG3015(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
 		void wrnCFG3016(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
-        void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to not compatible software ID '%3'.
-		Q_INVOKABLE void wrnCFG3018(QString propertyName, QString ip, int port, QString controller);
+		void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to not compatible software ID '%3'.
+		void wrnCFG3018(QString propertyName, QString ip, int port, QString controller);	// Default '%1' IP address %2:%3 is used in controller %4.
 		void errCFG3019(QString objectID, QString propertyName);							// Property '%1.%2' write error.
 		void errCFG3020(QString objectID, QString propertyName);							// Property '%1.%2' is not found.
         void errCFG3021(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
@@ -141,6 +140,12 @@ namespace Builder
 		void errCFG3023(QString objectID, QString propertyName);							// Property '%1.%2' conversion error.
 		void wrnCFG3024(QString appDataServiceID, QString archServiceID);					// Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
 		void errCFG3025(QString suffix, QString objectID);									// Can't find child controller with suffix '%1' in object '%2'
+		void errCFG3026(QString objectID, QString propertyName);							// Value of property %1.%2 is not valid IPv4 address.
+			
+		void errCFG3027(QString objectID, QString propertyName);							// Ethernet port number property %1.%2 should be in range 0..65535.
+		void errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName);
+		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
+		void errCFG3030(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
@@ -244,7 +249,7 @@ namespace Builder
 		void errALC5049(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.
 		void errALC5050(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Parameter '%1' of AFB '%2' must have type 32-bit Float.
 		void errALC5051(int paramValue, QString paramCaption, QString fbCaption, QUuid itemUuid);	// Value %1 of parameter '%2' of AFB '%3' is incorrect.
-		void errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+		void errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 		void wrnALC5053(QString fbCaption, QUuid itemUuid);									// Automatic sorting of XY points of FB '%1' has been performed.
 		void errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid);			// Parameters '%1' and '%2' of AFB '%3' can't be equal.
 		void wrnALC5055(QString connectionID);												// Optical connection '%1' is configured manually.
@@ -260,8 +265,8 @@ namespace Builder
 		void errALC5065(int address);								// Write address %1 of application memory is out of range 0..65535.
 		void errALC5066(int addrTo, int addrFrom, int sizeW);		// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
 		void errALC5067(int addrTo, int bit, int value);			// Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
-		void errALC5068(QString appSignalID);						// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
-		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+		void errALC5068(QString appSignalID);						// TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound.
+		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
 		void wrnALC5070(QString appSignalID);						// Signal '%1' has Little Endian byte order.
 		void errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid);					// Can't assign value to tuningable signal '%1' (Logic schema '%2').
 		void wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID);	// Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema %3).
@@ -276,7 +281,6 @@ namespace Builder
 		void wrnALC5081();											// Usage of ALP phase time exceed 90%.
 		void errALC5082();											// Usage of ALP phase time exceed 100%.
 		void errALC5083(const QString& receiverPortID, const QString& connectionID, const QString& lmID, QUuid receiverUuid);	// Receiver of connection '%1' (port '%2') is not associated with LM '%3'
-		void errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid);							// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
 		void errALC5085(const QString& portEquipmentID, const QString& connectionID);	// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
 		void errALC5086(QUuid constItemUuid, const QString& schemaID);				// Discrete constant must have value 0 or 1 (Logic schema %1).
 		void errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid);		// Can't assign value to input signal '%1' (Logic schema '%2').
@@ -293,7 +297,6 @@ namespace Builder
 		void errALC5098(QString signalID, QString busTypeID);						// Bus signal '%1' offset out of range (bus type '%2').
 		void errALC5099(QString busTypeID);											// Bus size must be multiple of 2 bytes (bus type %1).
 		void errALC5100(QString busTypeID, QUuid item, QString schemaID);			// Bus type ID '%1' is undefined (Logic schema '%2').
-		void errALC5101(QUuid composerUuid, QUuid transmitterUuid, QString schemaID);	// Bus composer cannot be directly connected to transmitter (Logic schema %1).
 		void errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID);	// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
 		void errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID);		// Different bus types of bus composer and signal '%1' (Logic schema '%2').
 		void errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID);		// Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
@@ -312,14 +315,29 @@ namespace Builder
 		void errALC5117(QUuid uuid1, QString label1, QUuid uuid2, QString label2, QString schemaID);	// Uncompatible signals connection (Logic schema '%1').
 		void errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID);			// Signal '%1' is not connected to any signal source. (Logic schema '%2').
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
-		void errALC5120(QUuid ualItemUuid, QUuid pinUuid, QString schemaID);			// UalSignal is not found for pin '%1' (Logic schema '%2').
+		void errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID);			// UalSignal is not found for pin '%1' (Logic schema '%2').
 		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
 		void errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID);		// UalSignal is not found for pin '%1' (Logic schema '%2').
 		void errALC5123(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB inputs (Logic schema %1).
 		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
 		void errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID);	// Input %1 of transmitter is connected unnamed signal (Logic schema %2).
 		void errALC5126(QUuid ualItemUuid, QString schemaID);							// Signal and bus inputs sizes are not multiples (Logic schema %1).
-		void errALC5127(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID);	// Duplicate loopback source ID %1 (Logic schema %2).
+		void errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Output bus type cannot be determined (Logic schema %1, item %2)
+		void errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
+		void errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Unknown AFB type (opCode) (Logic schema %1, item %2).
+		void errALC5130(QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+		void errALC5131(QString appSignalID, QString portID);		// Tx signal %1 is specified in raw data description of opto port %2 as discrete, but connected signal isn't discrete.
+		void errALC5132(QString unresolvedBusList);										// Can't resolve bus interdependencies: %1
+		void errALC5133(QString signalEquipmentID, QUuid ualItemUuid, QString itemLabel, QString schemaID);			// Signal with equipmentID %1 is not found (Logic schema %2, item %3).
+		void errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Integer constant value out of range (Logic schema %1, item %2)
+		void errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Float constant value out of range (Logic schema %1, item %2)
+		void errALC5136(QString appSignalID);											// The input (or output) signal %1 can be bind to Equipment Signal only.
+		void errALC5137(QString appSignalID, QString property);							// Signal %1 property %2 out of SignedInt32 range.
+		void errALC5138(QString appSignalID, QString property);							// Signal %1 property %2 out of Float range.
+		void wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Values of parameters %1.%2 and %1.%3 are equal.
+		void errALC5140(QString softwareID);											// Undefined ConfigurationService IP-address for software %1.
+		void errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID);	// Value of parameter %1.%2 must be in range %3 (Logic schema %4).
+		void errALC5142(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID);	// Duplicate loopback source ID %1 (Logic schema %2).
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
@@ -346,6 +364,8 @@ namespace Builder
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
 		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
 
+		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
+
 		// Subset of EQP -- Generation Software Configuration
 		//
 		void errEQP6100(QString softwareObjectStrId, QUuid uuid);
@@ -358,6 +378,7 @@ namespace Builder
 		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);	//Schema %1 specified in Tuning Client %2 does not exist.
 		void errEQP6107(QString property, QString softwareEquipmentId);							//Error parsing property %1 specified in software %2.
 		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
+		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);	//Tuning Source %1 specified in Tuning Client %2 does not exist.
 
 
 	public:

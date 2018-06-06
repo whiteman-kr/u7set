@@ -495,14 +495,19 @@ namespace VFrame30
 		return m_session;
 	}
 
-	const TuningController& SchemaView::tuningController() const
+	TuningController* SchemaView::tuningController()
 	{
 		return m_tuningController;
 	}
 
-	TuningController& SchemaView::tuningController()
+	const TuningController* SchemaView::tuningController() const
 	{
 		return m_tuningController;
+	}
+
+	void SchemaView::setTuningController(TuningController* value)
+	{
+		m_tuningController = value;
 	}
 
 	QJSEngine* SchemaView::jsEngine()
@@ -513,7 +518,7 @@ namespace VFrame30
 			QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
 
-			TuningController* tuningController = &m_tuningController;
+			TuningController* tuningController = m_tuningController;
 
 			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
 			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);

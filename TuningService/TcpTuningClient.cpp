@@ -4,8 +4,8 @@
 namespace Tuning
 {
 
-	TcpTuningClient::TcpTuningClient(const HostAddressPort& hostAddr, const QString equipmentID) :
-		Tcp::Client(hostAddr, E::TuningService, equipmentID, 0, 1, USED_SERVER_COMMIT_NUMBER)
+	TcpTuningClient::TcpTuningClient(const SoftwareInfo& softwareInfo, const HostAddressPort& hostAddr) :
+		Tcp::Client(softwareInfo, hostAddr)
 	{
 	}
 

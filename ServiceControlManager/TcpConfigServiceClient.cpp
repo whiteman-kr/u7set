@@ -3,14 +3,17 @@
 #include "version.h"
 
 
-TcpConfigServiceClient::TcpConfigServiceClient(const HostAddressPort& serverAddressPort) :
-	Tcp::Client(serverAddressPort, E::SoftwareType::ServiceControlManager, "", 0, 1, USED_SERVER_COMMIT_NUMBER)
+TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+											   const HostAddressPort& serverAddressPort) :
+	Tcp::Client(softwareInfo, serverAddressPort)
 {
 }
 
 
-TcpConfigServiceClient::TcpConfigServiceClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::ServiceControlManager, "", 0, 1, USED_SERVER_COMMIT_NUMBER)
+TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
+											   const HostAddressPort& serverAddressPort1,
+											   const HostAddressPort& serverAddressPort2) :
+	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2)
 {
 }
 
@@ -70,19 +73,19 @@ void TcpConfigServiceClient::processReply(quint32 requestID, const char* replyDa
 {
 	switch(requestID)
 	{
-		case RQID_GET_CONFIGURATION_SERVICE_STATE:
+		case CFGS_GET_SERVICE_STATE:
 			onGetConfigurationServiceState(replyData, replyDataSize);
 			break;
 
-		case RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST:
+		case CFGS_GET_CLIENT_LIST:
 			onGetConfigurationServiceClientList(replyData, replyDataSize);
 			break;
 
-		case RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO:
+		case CFGS_GET_LOADED_BUILD_INFO:
 			onGetConfigurationServiceLoadedBuildInfoReply(replyData, replyDataSize);
 			break;
 
-		case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
+		case CFGS_GET_SETTINGS:
 			onGetConfigurationServiceSettingsReply(replyData, replyDataSize);
 			break;
 
@@ -104,12 +107,12 @@ void TcpConfigServiceClient::onGetConfigurationServiceState(const char* replyDat
 	m_serviceStateIsReady = true;
 	emit serviceStateLoaded();
 
-	sendRequest(RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST);
+	sendRequest(CFGS_GET_CLIENT_LIST);
 }
 
 void TcpConfigServiceClient::onGetConfigurationServiceClientList(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_configurationServiceClientsMessage.ParseFromArray(replyData, replyDataSize);
+	bool result = m_serviceClientsMessage.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -120,7 +123,7 @@ void TcpConfigServiceClient::onGetConfigurationServiceClientList(const char* rep
 	m_clientsIsReady = true;
 	emit clientsLoaded();
 
-	sendRequest(RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO);
+	sendRequest(CFGS_GET_LOADED_BUILD_INFO);
 }
 
 
@@ -151,7 +154,7 @@ void TcpConfigServiceClient::onGetConfigurationServiceLoadedBuildInfoReply(const
 	m_buildInfoIsReady = true;
 	emit buildInfoLoaded();
 
-	sendRequest(RQID_GET_CONFIGURATION_SERVICE_SETTINGS);
+	sendRequest(CFGS_GET_SETTINGS);
 }
 
 
@@ -180,7 +183,7 @@ void TcpConfigServiceClient::updateState()
 {
 	if (isClearToSendRequest())
 	{
-		sendRequest(RQID_GET_CONFIGURATION_SERVICE_STATE);
+		sendRequest(CFGS_GET_SERVICE_STATE);
 	}
 }
 

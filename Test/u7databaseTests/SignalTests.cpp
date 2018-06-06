@@ -2,6 +2,7 @@
 
 #include "SignalTests.h"
 
+
 QString SignalTests::SF_APP_SIGNAL_ID("AppSignalID");
 QString SignalTests::SF_CUSTOM_APP_SIGNAL_ID("CustomAppSignalID");
 QString SignalTests::SF_CAPTION("Caption");
@@ -36,11 +37,18 @@ QString SignalTests::SF_SENSOR_TYPE("SensorType");
 QString SignalTests::SF_OUTPUT_MODE("OutputMode");
 
 QString SignalTests::SF_ENABLE_TUNING("EnableTuning");
-QString SignalTests::SF_TUNING_DEFAULT_VALUE("TuningDefaultValue");
-QString SignalTests::SF_TUNING_LOW_BOUND("TuningLowBound");
-QString SignalTests::SF_TUNING_HIGH_BOUND("TuningHighBound");
+
+QString SignalTests::SF_TUNING_DEFAULT_INT("TuningDefaultInt");
+QString SignalTests::SF_TUNING_DEFAULT_DOUBLE("TuningDefaultDouble");
+
+QString SignalTests::SF_TUNING_LOW_BOUND_INT("TuningLowBoundInt");
+QString SignalTests::SF_TUNING_LOW_BOUND_DOUBLE("TuningLowBoundDouble");
+
+QString SignalTests::SF_TUNING_HIGH_BOUND_INT("TuningHighBoundInt");
+QString SignalTests::SF_TUNING_HIGH_BOUND_DOUBLE("TuningHighBoundDouble");
 
 QString SignalTests::SF_ACQUIRE("Acquire");
+QString SignalTests::SF_ARCHIVE("Archive"); // дописал проверку для архива
 QString SignalTests::SF_DECIMAL_PLACES("DecimalPlaces");
 QString SignalTests::SF_COARSE_APERTURE("CoarseAperture");
 QString SignalTests::SF_FINE_APERTURE("FineAperture");
@@ -279,7 +287,9 @@ void SignalTests::add_signalTest()
 
 	// Call invalid userId error
 
-	ok = query.exec(QString("SELECT * FROM add_signal(%1, %2, %3)").arg(userId).arg(signalType).arg(channelCount));
+
+/*
+ * ok = query.exec(QString("SELECT * FROM add_signal(%1, %2, %3)").arg(userId).arg(signalType).arg(channelCount));
 	QVERIFY2(ok == false, qPrintable("Too big channel_count error expected"));
 
 	userId = maxValueId;
@@ -287,7 +297,7 @@ void SignalTests::add_signalTest()
 	channelCount = 1;
 
 	ok = query.exec(QString("SELECT * FROM add_signal(%1, %2, %3)").arg(userId).arg(signalType).arg(channelCount));
-	QVERIFY2(ok == false, qPrintable("Wrong user error expected"));
+	QVERIFY2(ok == false, qPrintable("Wrong user error expected")); */
 }
 
 void SignalTests::get_signal_IdsTest()
@@ -1520,9 +1530,17 @@ void SignalTests::set_signal_workcopyTest()
 	s.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
 
 	s.setEnableTuning(false);
-	s.setTuningDefaultValue(51);
-	s.setTuningLowBound(15);
-	s.setTuningHighBound(120);
+
+	TuningValue tv;
+
+	tv.setValue(s.signalType(), s.analogSignalFormat(), 51, 51.1);
+	s.setTuningDefaultValue(tv);
+
+	tv.setValue(s.signalType(), s.analogSignalFormat(), 15, 15.2);
+	s.setTuningLowBound(tv);
+
+	tv.setValue(s.signalType(), s.analogSignalFormat(), 120, 120.3);
+	s.setTuningHighBound(tv);
 
 	s.setAcquire(true);
 	s.setDecimalPlaces(3);
@@ -2567,11 +2585,20 @@ bool SignalTests::readSignalFromQuery(const QSqlQuery& q, Signal& s, quint64 exc
 	s.setOutputMode(static_cast<E::OutputMode>(q.value(SF_OUTPUT_MODE).toInt()));
 
 	s.setEnableTuning(q.value(SF_ENABLE_TUNING).toBool());
-	s.setTuningDefaultValue(q.value(SF_TUNING_DEFAULT_VALUE).toFloat());
-	s.setTuningLowBound(q.value(SF_TUNING_LOW_BOUND).toFloat());
-	s.setTuningHighBound(q.value(SF_TUNING_HIGH_BOUND).toFloat());
+
+	TuningValue tv;
+
+	tv.setValue(s.signalType(), s.analogSignalFormat(), q.value(SF_TUNING_DEFAULT_INT).toInt(), q.value(SF_TUNING_DEFAULT_DOUBLE).toDouble());
+	s.setTuningDefaultValue(tv);
+
+	tv.setValue(s.signalType(), s.analogSignalFormat(), q.value(SF_TUNING_LOW_BOUND_INT).toInt(), q.value(SF_TUNING_LOW_BOUND_DOUBLE).toDouble());
+	s.setTuningLowBound(tv);
+
+	tv.setValue(s.signalType(), s.analogSignalFormat(),q.value(SF_TUNING_HIGH_BOUND_INT).toInt(), q.value(SF_TUNING_HIGH_BOUND_DOUBLE).toDouble());
+	s.setTuningHighBound(tv);
 
 	s.setAcquire(q.value(SF_ACQUIRE).toBool());
+	s.setArchive(q.value(SF_ARCHIVE).toBool());
 	s.setDecimalPlaces(q.value(SF_DECIMAL_PLACES).toInt());
 	s.setCoarseAperture(q.value(SF_COARSE_APERTURE).toDouble());
 	s.setFineAperture(q.value(SF_FINE_APERTURE).toDouble());
@@ -2624,7 +2651,12 @@ void SignalTests::verifyQueryAndSignal(const QSqlQuery& q, Signal& s, quint64 ex
 {
 	QVERIFY2(q.value(SF_APP_SIGNAL_ID).toString() == s.appSignalID(), "Error: appSignalID is wrong");
 	QVERIFY2(q.value(SF_CUSTOM_APP_SIGNAL_ID).toString() == s.customAppSignalID(), "Error: customAppSignalID is wrong");
-	QVERIFY2(q.value(SF_CAPTION).toString() == s.caption(), "Error: caption is wrong");
+
+	if 	(q.value(SF_CAPTION).toString() != s.caption())
+	{
+		QVERIFY2(false, "Error: caption is wrong");
+	}
+
 	QVERIFY2(q.value(SF_EQUIPMENT_ID).toString() == s.equipmentID(), "Error: equipmentID is wrong");
 	QVERIFY2(q.value(SF_BUS_TYPE_ID).toString() == s.busTypeID(), "Error: busTypeID is wrong");
 
@@ -2662,11 +2694,12 @@ void SignalTests::verifyQueryAndSignal(const QSqlQuery& q, Signal& s, quint64 ex
 	QVERIFY2(q.value(SF_OUTPUT_MODE).toInt() == s.outputModeInt(), "Error: outputMode is wrong");
 
 	QVERIFY2(q.value(SF_ENABLE_TUNING).toBool() == s.enableTuning(), "Error: enableTuning is wrong");
-	QVERIFY2(q.value(SF_TUNING_DEFAULT_VALUE).toFloat() == s.tuningDefaultValue(), "Error: tuningDefaultValue is wrong");
-	QVERIFY2(q.value(SF_TUNING_LOW_BOUND).toFloat() == s.tuningLowBound(), "Error: tuningLowBound is wrong");
-	QVERIFY2(q.value(SF_TUNING_HIGH_BOUND).toFloat() == s.tuningHighBound(), "Error: tuningHighBound is wrong");
+	QVERIFY2(q.value(SF_TUNING_DEFAULT_DOUBLE).toFloat() == s.tuningDefaultValue().toFloat(), "Error: tuningDefaultValue is wrong");
+	QVERIFY2(q.value(SF_TUNING_LOW_BOUND_DOUBLE).toFloat() == s.tuningLowBound().toFloat(), "Error: tuningLowBound is wrong");
+	QVERIFY2(q.value(SF_TUNING_HIGH_BOUND_DOUBLE).toFloat() == s.tuningHighBound().toFloat(), "Error: tuningHighBound is wrong");
 
 	QVERIFY2(q.value(SF_ACQUIRE).toBool() == s.acquire(), "Error: acquire is wrong");
+	QVERIFY2(q.value(SF_ARCHIVE).toBool() == s.acquire(), "Error: archive is wrong");
 	QVERIFY2(q.value(SF_DECIMAL_PLACES).toInt() == s.decimalPlaces(), "Error: decimalPlaces is wrong");
 	QVERIFY2(q.value(SF_COARSE_APERTURE).toDouble() == s.coarseAperture(), "Error: coarseAperture is wrong");
 	QVERIFY2(q.value(SF_FINE_APERTURE).toDouble() == s.fineAperture(), "Error: fineAperture is wrong");

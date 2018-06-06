@@ -271,7 +271,7 @@ CircularLogger::~CircularLogger()
 }
 
 
-bool CircularLogger::init(int fileCount, int fileSizeInMB)
+bool CircularLogger::init(QString logName, int fileCount, int fileSizeInMB)
 {
 	if (m_loggerInitialized == true)
 	{
@@ -289,11 +289,14 @@ bool CircularLogger::init(int fileCount, int fileSizeInMB)
 
 	QFileInfo fi(appFileName);
 
-	QString logName = fi.baseName();
-
 	QString logPath = fi.absolutePath();
 
-	fi.setFile(logPath);
+	if (logName.isEmpty() == true)
+	{
+		logName = fi.baseName();	// name log as app
+	}
+
+//	fi.setFile(logPath);
 
 	if (CircularLoggerWorker::writeFileCheck(logPath, logName) == false)
 	{
@@ -397,12 +400,14 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		return;
 	}
 
+	QString msg = message.simplified();
+
+	msg.replace("&nbsp;", " ");
+
 	if (debugEcho == true)
 	{
-		qDebug() << C_STR(message);
+		qDebug() << C_STR(msg);
 	}
-
-	QString msg = message;
 
 	QString record;
 
@@ -411,7 +416,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		record = QString("%1 %2  %3  ###%4###%5:%6###").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
-							arg(msg.simplified()).
+							arg(msg).
 							arg(function).
 							arg(file).
 							arg(line);
@@ -421,7 +426,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		record = QString("%1 %2  %3").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
-							arg(msg.simplified());
+							arg(msg);
 	}
 
 
@@ -429,11 +434,11 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 }
 
 
-bool circularLoggerInit(std::shared_ptr<CircularLogger> logger, int fileCount, int fileSizeInMB)
+bool circularLoggerInit(std::shared_ptr<CircularLogger> logger, const QString& logName, int fileCount, int fileSizeInMB)
 {
 	if (logger != nullptr)
 	{
-		return logger->init(fileCount, fileSizeInMB);
+		return logger->init(logName, fileCount, fileSizeInMB);
 	}
 	else
 	{

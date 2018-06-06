@@ -9,8 +9,9 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
-								 Tuning::TuningDataStorage *tuningDataStorage, IssueLogger *log, int buildNo, int changesetId, bool debug,
-                                 QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> lmModules, const LmDescriptionSet* lmDescriptionSet):
+								 Tuning::TuningDataStorage *tuningDataStorage, const std::vector<Hardware::DeviceModule *> lmModules,
+								 const LmDescriptionSet* lmDescriptionSet, Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
+		m_firmwareWriter(firmwareWriter),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
@@ -18,20 +19,16 @@ namespace Builder
 		m_tuningDataStorage(tuningDataStorage),
 		m_log(log),
         m_lmModules(lmModules),
-		m_lmDescriptionSet(lmDescriptionSet),
-		m_buildNo(buildNo),
-		m_changesetId(changesetId),
-		m_debug(debug),
-		m_projectName(projectName),
-		m_userName(userName)
+		m_lmDescriptionSet(lmDescriptionSet)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
 		assert(m_signalSet);
 		assert(m_subsystems);
 		assert(m_tuningDataStorage);
-		assert(m_log);
         assert(m_lmDescriptionSet);
+		assert(m_firmwareWriter);
+		assert(m_log);
 
 		return;
 	}
@@ -49,8 +46,6 @@ namespace Builder
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
 			return false;
 		}
-
-		m_firmwareCollection.init(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
 		for (Hardware::DeviceModule* m : m_lmModules)
 		{
@@ -77,15 +72,18 @@ namespace Builder
                 return false;
             }
 
+			if (lmDescription->flashMemory().m_tuningWriteBitstream == false)
+			{
+				return true;
+			}
+
 			QString subsysStrID = m->propertyValue("SubsystemID").toString();
 
 			int channel = m->propertyValue("LMNumber").toInt();
-
-			int frameSize = lmDescription->flashMemory().m_tuningFrameSize;
-
+			int frameSize = lmDescription->flashMemory().m_tuningFramePayload;
 			int frameCount = lmDescription->flashMemory().m_tuningFrameCount;
-
 			int subsysID = m_subsystems->ssKey(subsysStrID);
+			int tuningUartId = lmDescription->flashMemory().m_tuningUartId;
 
 			if (subsysID == -1)
 			{
@@ -93,12 +91,14 @@ namespace Builder
 				return false;
 			}
 
-			Hardware::ModuleFirmwareWriter* firmware = m_firmwareCollection.get(m->caption(), subsysStrID, subsysID, 0x104, frameSize, frameCount);
-			if (firmware == nullptr)
-			{
-				assert(firmware);
-				return false;
-			}
+			m_firmwareWriter->createFirmware(subsysStrID,
+											 subsysID,
+											 tuningUartId,
+											 "Tuning",
+											 frameSize,
+											 frameCount,
+											 lmDescription->lmDescriptionFile(m),
+											 lmDescription->descriptionNumber());
 
 			QByteArray data;
 			quint64 uniqueID = 0;
@@ -129,11 +129,11 @@ namespace Builder
 
 				tuningData->getMetadataFields(metadataFields, &metadataFieldsVersion);
 
-				firmware->setDescriptionFields(metadataFieldsVersion, metadataFields);
+				m_firmwareWriter->setDescriptionFields(subsysStrID, tuningUartId, metadataFieldsVersion, metadataFields);
 				descriptionData = tuningData->metadata();
 			}
 
-			if (firmware->setChannelData(m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
+			if (m_firmwareWriter->setChannelData(subsysStrID, tuningUartId, m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
 			{
 				return false;
 			}
@@ -141,54 +141,6 @@ namespace Builder
 
 		return true;
 	}
-
-	bool TuningBuilder::writeBinaryFiles(BuildResultWriter &buildResultWriter)
-	{
-		std::map<QString, Hardware::ModuleFirmwareWriter>& firmwares = m_firmwareCollection.firmwares();
-		for (auto it = firmwares.begin(); it != firmwares.end(); it++)
-		{
-			Hardware::ModuleFirmwareWriter& f = it->second;
-
-			QByteArray data;
-
-			if (f.save(data, m_log) == false)
-			{
-				return false;
-			}
-
-			QString path = f.subsysId();
-			QString fileName = f.caption();
-
-			if (path.isEmpty())
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
-				return false;
-			}
-			if (fileName.isEmpty())
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
-				return false;
-			}
-
-			if (buildResultWriter.addFile(path, fileName + ".tub", data) == nullptr)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	quint64 TuningBuilder::getFirmwareUniqueId(const QString &subsystemID, int lmNumber)
-	{
-		return m_firmwareCollection.getFirmwareUniqueId(subsystemID, lmNumber);
-	}
-
-	void TuningBuilder::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
-	{
-		m_firmwareCollection.setGenericUniqueId(subsystemID, lmNumber, genericUniqueId);
-	}
-
 
 	DbController* TuningBuilder::db()
 	{
@@ -200,24 +152,5 @@ namespace Builder
 		return m_log;
 	}
 
-	int TuningBuilder::buildNo() const
-	{
-		return m_buildNo;
-	}
-
-	int TuningBuilder::changesetId() const
-	{
-		return m_changesetId;
-	}
-
-	bool TuningBuilder::debug() const
-	{
-		return m_debug;
-	}
-
-	bool TuningBuilder::release() const
-	{
-		return !debug();
-	}
 }
 

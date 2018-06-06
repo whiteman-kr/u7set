@@ -1,23 +1,8 @@
 #include "../lib/AppSignal.h"
 #include "../Proto/serialization.pb.h"
+#include "../lib/Signal.h"
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet
-
-
-QDateTime Times::systemToDateTime() const
-{
-	return system.toDateTime();
-}
-
-QDateTime Times::localToDateTime() const
-{
-	return local.toDateTime();
-}
-
-QDateTime Times::plantToDateTime() const
-{
-	return plant.toDateTime();
-}
 
 void AppSignalStateFlags::clear()
 {
@@ -28,24 +13,24 @@ void AppSignalStateFlags::clearReasonsFlags()
 {
 	validityChange = 0;
 	autoPoint = 0;
-	roughAperture = 0;
-	smoothAperture = 0;
+	coarseAperture = 0;
+	fineAperture = 0;
 }
 
 bool AppSignalStateFlags::hasArchivingReason() const
 {
 	return	validityChange == 1 ||
 			autoPoint == 1 ||
-			roughAperture == 1 ||
-			smoothAperture == 1;
+			coarseAperture == 1 ||
+			fineAperture == 1;
 }
 
 bool AppSignalStateFlags::hasShortTermArchivingReasonOnly() const
 {
 	return	validityChange == 0 &&
 			autoPoint == 0 &&
-			roughAperture == 0 &&
-			smoothAperture == 1;
+			coarseAperture == 0 &&
+			fineAperture == 1;
 }
 
 AppSignalState::AppSignalState(const Proto::AppSignalState& protoState)
@@ -174,49 +159,75 @@ Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
 	return hash;
 }
 
+void SimpleAppSignalState::print() const
+{
+	qDebug() << "state" << QDateTime::fromMSecsSinceEpoch(time.system.timeStamp).toString("dd.MM.yyyy HH:mm:ss.zzz") <<
+				"validity =" << flags.valid <<
+				"value =" << value <<
+				(flags.autoPoint == 1 ? " auto" : "");
+}
+
+// -------------------------------------------------------------------------------------------------
+//
+// AppSignalParam class implementation
+//
+// -------------------------------------------------------------------------------------------------
+
 AppSignalParam::AppSignalParam()
 {
 }
 
 bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
-	m_hash = message.hash();
-	m_appSignalId = QString::fromStdString(message.appsignalid());
-	m_customSignalId = QString::fromStdString(message.customappsignalid());
-	m_caption = QString::fromStdString(message.caption());
-	m_equipmentId = QString::fromStdString(message.equipmentid());
+	Signal s;
 
-	m_channel = static_cast<E::Channel>(message.channel());
-	m_inOutType = static_cast<E::SignalInOutType>(message.inouttype());
-	m_signalType = static_cast<E::SignalType>(message.signaltype());
-	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(message.analogsignalformat());
-	m_byteOrder = static_cast<E::ByteOrder>(message.byteorder());
+	s.serializeFrom(message);
 
-	m_unit = QString::fromStdString(message.unit());
+	s.cacheSpecPropValues();
 
-	m_lowValidRange = message.lowvalidrange();
-	m_highValidRange = message.highvalidrange();
-	m_lowEngeneeringUnits = message.lowengeneeringunits();
-	m_highEngeneeringUnits = message.highengeneeringunits();
+	m_hash = message.calcparam().hash();
+	m_appSignalId = s.appSignalID();
+	m_customSignalId = s.customAppSignalID();
+	m_caption = s.caption();
+	m_equipmentId = s.equipmentID();
 
-	m_electricLowLimit = message.electriclowlimit();
-	m_electricHighLimit = message.electrichighlimit();
-	m_electricUnit = static_cast<E::ElectricUnit>(message.electricunit());
-	m_sensorType = static_cast<E::SensorType>(message.sensortype());
-	m_outputMode = static_cast<E::OutputMode>(message.outputmode());
+	m_channel = s.channel();
+	m_inOutType = s.inOutType();
+	m_signalType = s.signalType();
+	m_analogSignalFormat = s.analogSignalFormat();
+	m_byteOrder = s.byteOrder();
 
-	m_precision = message.decimalplaces();
-	m_coarseAperture = message.coarseaperture();
-	m_fineAperture = message.fineaperture();
-	m_filteringTime = message.filteringtime();
-	m_spreadTolerance = message.spreadtolerance();
-	m_enableTuning = message.enabletuning();
-	m_tuningDefaultValue = message.tuningdefaultvalue();
+	m_unit = s.unit();
+
+	m_lowValidRange = s.lowValidRange();
+	m_highValidRange = s.highValidRange();
+	m_lowEngeneeringUnits = s.lowEngeneeringUnits();
+	m_highEngeneeringUnits = s.highEngeneeringUnits();
+
+	m_electricLowLimit = s.electricLowLimit();
+	m_electricHighLimit = s.electricHighLimit();
+	m_electricUnit = s.electricUnit();
+	m_sensorType = s.sensorType();
+	m_outputMode = s.outputMode();
+
+	m_precision = s.decimalPlaces();
+	m_coarseAperture = s.coarseAperture();
+	m_fineAperture = s.fineAperture();
+	m_filteringTime = s.filteringTime();
+	m_spreadTolerance = s.spreadTolerance();
+	m_enableTuning = s.enableTuning();
+
+	m_tuningDefaultValue = s.tuningDefaultValue();
+	m_tuningLowBound = s.tuningLowBound();
+	m_tuningHighBound = s.tuningHighBound();
+
+	m_specPropStruct = s.specPropStruct();
+	m_specPropValues = s.protoSpecPropValues();
 
 	return true;
 }
 
-void AppSignalParam::save(::Proto::AppSignal *message) const
+void AppSignalParam::save(::Proto::AppSignal* message) const
 {
 	if (message == nullptr)
 	{
@@ -224,7 +235,7 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 		return;
 	}
 
-	message->set_hash(m_hash);
+	message->mutable_calcparam()->set_hash(m_hash);
 	message->set_appsignalid(m_appSignalId.toStdString());
 	message->set_customappsignalid(m_customSignalId.toStdString());
 	message->set_caption(m_caption.toStdString());
@@ -238,24 +249,17 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 
 	message->set_unit(m_unit.toStdString());
 
-	message->set_lowvalidrange(m_lowValidRange);
-	message->set_highvalidrange(m_highValidRange);
-	message->set_lowengeneeringunits(m_lowEngeneeringUnits);
-	message->set_highengeneeringunits(m_highEngeneeringUnits);
-
-	message->set_electriclowlimit(m_electricLowLimit);
-	message->set_electrichighlimit(m_electricHighLimit);
-	message->set_electricunit(m_electricUnit);
-	message->set_sensortype(m_sensorType);
-	message->set_outputmode(m_outputMode);
-
 	message->set_decimalplaces(m_precision);
 	message->set_coarseaperture(m_coarseAperture);
 	message->set_fineaperture(m_fineAperture);
-	message->set_filteringtime(m_filteringTime);
-	message->set_spreadtolerance(m_spreadTolerance);
 	message->set_enabletuning(m_enableTuning);
-	message->set_tuningdefaultvalue(m_tuningDefaultValue);
+
+	m_tuningDefaultValue.save(message->mutable_tuningdefaultvalue());
+	m_tuningLowBound.save(message->mutable_tuninglowbound());
+	m_tuningHighBound.save(message->mutable_tuninghighbound());
+
+	message->set_specpropstruct(m_specPropStruct.toStdString());
+	message->set_specpropvalues(m_specPropValues.constData(), m_specPropValues.size());
 }
 
 Hash AppSignalParam::hash() const
@@ -362,6 +366,36 @@ E::SignalType AppSignalParam::type() const
 void AppSignalParam::setType(E::SignalType value)
 {
 	m_signalType = value;
+}
+
+TuningValueType AppSignalParam::toTuningType() const
+{
+	switch (m_signalType)
+	{
+	case E::Analog:
+		switch (m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			return TuningValueType::Float;
+		case E::AnalogAppSignalFormat::SignedInt32:
+			return TuningValueType::SignedInt32;
+		default:
+			assert(false);
+			// Unsupported tuning signal type
+			//
+		}
+		return TuningValueType::Discrete;
+
+	case E::Discrete:
+		return TuningValueType::Discrete;
+
+	default:
+		// Unsupported tuning signal type
+		//
+		assert(false);
+	}
+
+	return TuningValueType::Discrete;
 }
 
 E::AnalogAppSignalFormat AppSignalParam::analogSignalFormat() const
@@ -519,12 +553,48 @@ void AppSignalParam::setEnableTuning(bool value)
 	m_enableTuning = value;
 }
 
-double AppSignalParam::tuningDefaultValue() const
+TuningValue AppSignalParam::tuningDefaultValue() const
 {
 	return m_tuningDefaultValue;
 }
 
-void AppSignalParam::setTuningDefaultValue(double value)
+QVariant AppSignalParam::tuningDefaultValueToVariant() const
+{
+	return m_tuningDefaultValue.toVariant();
+}
+
+void AppSignalParam::setTuningDefaultValue(const TuningValue& value)
 {
 	m_tuningDefaultValue = value;
 }
+
+TuningValue AppSignalParam::tuningLowBound() const
+{
+	return m_tuningLowBound;
+}
+
+QVariant AppSignalParam::tuningLowBoundToVariant() const
+{
+	return m_tuningLowBound.toVariant();
+}
+
+void AppSignalParam::setTuningLowBound(const TuningValue& value)
+{
+	m_tuningLowBound = value;
+}
+
+TuningValue AppSignalParam::tuningHighBound() const
+{
+	return m_tuningHighBound;
+}
+
+QVariant AppSignalParam::tuningHighBoundToVariant() const
+{
+	return m_tuningHighBound.toVariant();
+}
+
+void AppSignalParam::setTuningHighBound(const TuningValue& value)
+{
+	m_tuningHighBound = value;
+}
+

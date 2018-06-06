@@ -1,6 +1,7 @@
 
-#include "IdePropertyEditor.h"
 #include "Settings.h"
+#include "IdePropertyEditor.h"
+#include "SpecificPropertiesEditor.h"
 
 #include <QMessageBox>
 #include <QHBoxLayout>
@@ -28,6 +29,10 @@ IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController
 
     setScriptHelpWindowPos(theSettings.m_scriptHelpWindowPos);
     setScriptHelpWindowGeometry(theSettings.m_scriptHelpWindowGeometry);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		setFontSizeF(fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 }
 
 IdePropertyEditor::~IdePropertyEditor()
@@ -40,11 +45,10 @@ void IdePropertyEditor::saveSettings()
     theSettings.m_scriptHelpWindowGeometry = scriptHelpWindowGeometry();
 }
 
-ExtWidgets::PropertyTextEditor* IdePropertyEditor::createCodeEditor(Property *property, QWidget* parent)
+ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Property *property, QWidget* parent)
 {
-    // THIS IS TEMPORARY SOLUTION, NO OTHER WAY TO DECIDE IF THIS IS TUNINGCLIENT FILTERS
 
-    if (property->caption() == "Filters" && property->description() == "Tuning signal filters description in XML format")
+	if (property->specificEditor() == E::PropertySpecificEditor::TuningFilter)
     {
         // This is Filters Editor for TuningClient
         //
@@ -53,7 +57,16 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createCodeEditor(Property *pr
         return editor;
     }
 
-    CodeType codeType = property->isScript() ? CodeType::Cpp : CodeType::Unknown;
+	if (property->specificEditor() == E::PropertySpecificEditor::SpecificPropertyStruct)
+	{
+		// This is Specific Properties
+		//
+
+		SpecificPropertiesEditor* editor = new SpecificPropertiesEditor(parent);
+		return editor;
+	}
+
+	CodeType codeType = property->isScript() ? CodeType::Cpp : CodeType::Unknown;
     return new IdeCodeEditor(codeType, parent);
 }
 
@@ -161,6 +174,7 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     m_textEdit->installEventFilter(this);
 
     QHBoxLayout* l = new QHBoxLayout(this);
+	l->setContentsMargins(0, 0, 0, 0);
     l->addWidget(m_textEdit);
 
     // Set up default font
@@ -380,39 +394,32 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
   m_dbController(dbController)
 {
 	SignalSet tuningSignalSet;
+	::Proto::AppSignalSet appSignalSet;
 
 	// Load tuning signals
 	//
 
 	bool ok = m_dbController->getTuningableSignals(&tuningSignalSet, parent);
-
 	if (ok == true)
 	{
 		int count = tuningSignalSet.count();
 
-		Proto::AppSignal pas;
-		AppSignalParam asp;
-
 		for (int i = 0; i < count; i++)
 		{
-			tuningSignalSet[i].serializeTo(&pas);
-
-			ok = asp.load(pas);
-
-			if (ok == false)
-			{
-				assert(false);
-				return;
-			}
-
-			m_signalStorage.addSignal(asp);
+			Proto::AppSignal* pas = appSignalSet.add_appsignal();
+			tuningSignalSet[i].serializeTo(pas);
 		}
 	}
+
+	m_signals.load(appSignalSet);
 }
 
 IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
 {
-	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+	if (m_tuningFilterEditor != nullptr)
+	{
+		m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+	}
 }
 
 void IdeTuningFiltersEditor::setText(const QString& text)
@@ -423,24 +430,29 @@ void IdeTuningFiltersEditor::setText(const QString& text)
         return;
     }
 
-
 	// Load presets
 
 	QString errorCode;
 
-	bool ok = m_filterStorage.load(text.toUtf8(), &errorCode);
+	QByteArray rawData = text.toUtf8();
+
+	bool ok = m_filters.load(rawData, &errorCode);
+
     if (ok == false)
     {
-        QLabel* errorLabel = new QLabel(errorCode);
-
-        QHBoxLayout* l = new QHBoxLayout(this);
-        l->addWidget(errorLabel);
-        return;
+		QMessageBox::critical(this, qAppName(), errorCode);
     }
 
 
 
-	m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage, false, false, TuningFilter::Source::Project,
+	m_tuningFilterEditor = new TuningFilterEditor(&m_filters,
+												  &m_signals,
+												  false,	/*readOnly*/
+												  false,	/*setCurrentEnabled*/
+												  true,		/*typeTreeEnabled*/
+												  true,		/*typeButtonEnabled*/
+												  true,		/*typeTabEnabled*/
+												  TuningFilter::Source::Project,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
 												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 
@@ -454,10 +466,14 @@ QString IdeTuningFiltersEditor::text()
 {
     QByteArray data;
 
-    bool ok = m_filterStorage.save(data);
+	bool ok = m_filters.save(data, TuningFilter::Source::Project);
+
     if (ok == true)
     {
-        return data.toStdString().c_str();
+		QString s = QString::fromUtf8(data);
+
+		return s;
+
     }
 
     return QString();

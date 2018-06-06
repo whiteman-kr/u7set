@@ -8,6 +8,8 @@
 
 namespace Builder
 {
+	class Busses;
+
 	class BusSignal
 	{
 	public:
@@ -15,6 +17,8 @@ namespace Builder
 		QString caption;
 		E::SignalType signalType = E::SignalType::Discrete;
 		Address16 inbusAddr;
+		QString busTypeID;
+		QString units;
 
 		// analog signals conversion parameters
 		//
@@ -34,7 +38,7 @@ namespace Builder
 		//
 
 		bool conversionRequired() const;
-		void init(const VFrame30::BusSignal& bs);
+		void init(const Busses& busses, const VFrame30::BusSignal& bs);
 		bool isOverlaped(const BusSignal& bs);
 
 		bool isValid() const;
@@ -46,15 +50,15 @@ namespace Builder
 		static QString INVALUD_BUS_SIGNAL_ID;
 
 	public:
-		Bus(const VFrame30::Bus bus, IssueLogger* log);
+		Bus(const Busses& busses, const VFrame30::Bus bus, IssueLogger* log);
 
 		bool init();
 
 		void writeReport(QStringList& list);
 
-		int sizeW() const { return m_sizeW; }
-		int sizeB() const { return m_sizeW * WORD_SIZE_IN_BYTES; }
-		int sizeBit() const { return m_sizeW * SIZE_16BIT; }
+		int sizeW() const;
+		int sizeB() const;
+		int sizeBit() const;
 
 		QString busTypeID() const { return m_srcBus.busTypeId(); }
 
@@ -70,6 +74,12 @@ namespace Builder
 		const VFrame30::Bus& srcBus() const { return m_srcBus; }
 		VFrame30::BusSignal& getBusSignal(const QString& signalID);
 
+		QStringList getChildBussesIDs();
+
+		bool isInitialized() const { return m_isInitialized; }
+
+		const Busses& busses() const { return m_busses; }
+
 	private:
 		bool buildInBusSignalsMap();
 		bool placeSignals();
@@ -77,8 +87,8 @@ namespace Builder
 		bool checkSignalsOffsets();
 		void buildSignalIndexesArrays();
 
-
 	private:
+		const Busses& m_busses;
 		VFrame30::Bus m_srcBus;
 		IssueLogger* m_log = nullptr;
 
@@ -87,15 +97,18 @@ namespace Builder
 		QHash<QString, int>	m_inBusSignalsMap;	// in bus signalID => signal index in m_srcBus.signals
 
 		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Mixed;
-		int m_sizeW = 0;
+		int m_sizeW = -1;
 
 		QVector<BusSignal> m_signals;
 
 		std::vector<int> m_analogSignalIndexes;
+		std::vector<int> m_busSignalIndexes;
 		std::map<int, std::vector<int>> m_discreteSignalIndexes;		// discrete signals offset => discrete signal indexes
 
 		static VFrame30::BusSignal m_invalidBusSignal;
 		static BusSignal m_invalidSignal;
+
+		bool m_isInitialized = false;
 	};
 
 	typedef std::shared_ptr<Bus> BusShared;
@@ -110,6 +123,12 @@ namespace Builder
 		bool writeReport(BuildResultWriter* resultWriter);
 
 		BusShared getBus(const QString& busTypeID) const;
+		int getBusSizeBits(const QString& busTypeID) const;
+
+		int count() const { return m_busses.count(); }
+
+	private:
+		bool getBusInitOrder(QVector<BusShared>* busInitOrder);
 
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;

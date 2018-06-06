@@ -17,42 +17,28 @@
 //
 // -------------------------------------------------------------------------------
 
-const char* const AppDataServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
-const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
-const char* const AppDataServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
-
-AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName,
+AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
+										   const QString& serviceName,
 										   int& argc,
 										   char** argv,
-										   const VersionInfo &versionInfo,
-										   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
-	m_logger(logger),
-	m_timer(this),
-	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
+										   CircularLoggerShared logger) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+	m_timer(this)
 {
-	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
-	{
-		m_appDataChannelThread[channel] = nullptr;
-		m_tcpArchiveClientThreads[channel] = nullptr;
-	}
 }
-
 
 AppDataServiceWorker::~AppDataServiceWorker()
 {
 }
 
-
 ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	AppDataServiceWorker* newInstance = new AppDataServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(), serviceName(), argc(), argv(), logger());
 
 	newInstance->init();
 
 	return newInstance;
 }
-
 
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
@@ -60,6 +46,45 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 	serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
 }
 
+bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return false;
+	}
+
+	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+
+	if (state.isConnected)
+	{
+		ip = state.peerAddr.address32();
+		port = state.peerAddr.port();
+
+		return true;
+	}
+
+	return false;
+}
+
+bool AppDataServiceWorker::isConnectedToArchiveService(quint32 &ip, quint16 &port) const
+{
+	if (m_tcpArchiveClientThread == nullptr)
+	{
+		return false;
+	}
+
+	Tcp::ConnectionState&& state = m_tcpArchiveClientThread->getConnectionState();
+
+	if (state.isConnected == true)
+	{
+		ip = state.peerAddr.address32();
+		port = state.peerAddr.port();
+
+		return true;
+	}
+
+	return false;
+}
 
 void AppDataServiceWorker::initCmdLineParser()
 {
@@ -68,66 +93,95 @@ void AppDataServiceWorker::initCmdLineParser()
 	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "IPv4");
 	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "IPv4");
+	cp.addSingleValueOption("ptc", SETTING_PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
 }
 
 void AppDataServiceWorker::loadSettings()
 {
-	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
+	m_appDataProcessingThreadCount = QString(getStrSetting(SETTING_PROCESSING_THREADS_COUNT)).toInt();
 
-	m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
-
-	m_cfgServiceIP1 = HostAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
-
-	m_cfgServiceIP2Str = getStrSetting(SETTING_CFG_SERVICE_IP2);
-
-	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
-
-	DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(m_cfgServiceIP1.addressPortStr()));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(m_cfgServiceIP2.addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_PROCESSING_THREADS_COUNT).arg(m_appDataProcessingThreadCount));
 }
 
 
-void AppDataServiceWorker::runCfgLoaderThread()
+void AppDataServiceWorker::runAppDataReceiverThread()
 {
-	CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger, E::SoftwareType::AppDataService, 0, 1, USED_SERVER_COMMIT_NUMBER);
-
-	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
-
-	m_cfgLoaderThread->start();
-
-	m_cfgLoaderThread->enableDownloadConfiguration();
-}
-
-
-void AppDataServiceWorker::stopCfgLoaderThread()
-{
-	if (m_cfgLoaderThread == nullptr)
+	if (m_appDataReceiverThread != nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	m_cfgLoaderThread->quit();
+	m_appDataReceiverThread = new AppDataReceiverThread(m_cfgSettings.appDataReceivingIP, m_appDataSourcesIP, logger());
 
-	delete m_cfgLoaderThread;
+	m_appDataReceiverThread->start();
+}
+
+void AppDataServiceWorker::stopAppDataReceiverlThread()
+{
+	if (m_appDataReceiverThread != nullptr)
+	{
+		m_appDataReceiverThread->quitAndWait();
+		delete m_appDataReceiverThread;
+		m_appDataReceiverThread = nullptr;
+	}
+}
+
+void AppDataServiceWorker::runSignalStatesProcessingThread()
+{
+	if (m_signalStatesProcessingThread != nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_signalStatesProcessingThread = new SignalStatesProcessingThread(m_appDataSources, logger());
+
+	m_signalStatesProcessingThread->start();
+}
+
+void AppDataServiceWorker::stopSignalStatesProcessingThread()
+{
+	if (m_signalStatesProcessingThread != nullptr)
+	{
+		m_signalStatesProcessingThread->quitAndWait();
+		delete m_signalStatesProcessingThread;
+		m_signalStatesProcessingThread = nullptr;
+	}
+}
+
+void AppDataServiceWorker::runAppDataProcessingThreads()
+{
+	assert(m_appDataReceiverThread != nullptr);
+
+	m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
+														  m_appDataSourcesIP,
+														  m_appDataReceiverThread->appDataReceiver(),
+														  logger());
+}
+
+void AppDataServiceWorker::stopAppDataProcessingThreads()
+{
+	m_appDataProcessingThreadsPool.stopProcessingThreads();
 }
 
 void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo());
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_cfgSettings.clientRequestIP,
 															tcpAppDataSever,
-															m_enabledAppDataSources,
+															m_appDataSourcesIP,
 															m_appSignals,
 															m_signalStates,
-															m_logger);
+															*this,
+															logger());
 	m_tcpAppDataServerThread->start();
 }
 
@@ -142,49 +196,38 @@ void AppDataServiceWorker::stopTcpAppDataServer()
 	}
 }
 
-void AppDataServiceWorker::runTcpArchiveClientThreads()
+void AppDataServiceWorker::runTcpArchiveClientThread()
 {
-	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	assert(m_tcpArchiveClientThread == nullptr);
+
+	if (m_cfgSettings.archServiceID.isEmpty() == true)
 	{
-		assert(m_tcpArchiveClientThreads[channel] == nullptr);
-
-		if (m_cfgSettings.appDataServiceChannel[channel].archServiceStrID.isEmpty() == true)
-		{
-			m_tcpArchiveClientThreads[channel] = nullptr;
-			continue;
-		}
-
-		TcpArchiveClient* client = new TcpArchiveClient(channel,
-														m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
-														E::SoftwareType::AppDataService,
-														m_equipmentID,
-														m_majorVersion,
-														m_minorVersion,
-														USED_SERVER_COMMIT_NUMBER,
-														m_logger,
-														m_signalStatesQueue);
-
-		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(client);
-
-		m_tcpArchiveClientThreads[channel]->start();
+		DEBUG_LOG_WRN(logger(), "ArchiveService is not assigned");
+		return;
 	}
+
+	TcpArchiveClient* tcpArchiveClient = new TcpArchiveClient(softwareInfo(),
+												m_cfgSettings.archServiceIP,
+												m_signalStatesProcessingThread,
+												logger());
+
+	m_tcpArchiveClientThread = new TcpArchiveClientThread(tcpArchiveClient);
+
+	m_tcpArchiveClientThread->start();
 }
 
-void AppDataServiceWorker::stopTcpArchiveClientThreads()
+void AppDataServiceWorker::stopTcpArchiveClientThread()
 {
-	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	if (m_tcpArchiveClientThread == nullptr)
 	{
-		if (m_tcpArchiveClientThreads[channel] == nullptr)
-		{
-			continue;
-		}
-
-		m_tcpArchiveClientThreads[channel]->quitAndWait();
-
-		delete m_tcpArchiveClientThreads[channel];
-
-		m_tcpArchiveClientThreads[channel] = nullptr;
+		return;
 	}
+
+	m_tcpArchiveClientThread->quitAndWait();
+
+	delete m_tcpArchiveClientThread;
+
+	m_tcpArchiveClientThread = nullptr;
 }
 
 void AppDataServiceWorker::runTimer()
@@ -195,27 +238,21 @@ void AppDataServiceWorker::runTimer()
 	m_timer.start();
 }
 
-
 void AppDataServiceWorker::stopTimer()
 {
 	m_timer.stop();
 }
 
-
 void AppDataServiceWorker::initialize()
 {
-	// Service Main Function initialization
-	//
+	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is started");
+
 	runCfgLoaderThread();
 	runTimer();
-	qDebug() << "DataServiceMainFunctionWorker initialized";
 }
-
 
 void AppDataServiceWorker::shutdown()
 {
-	// Service Main Function deinitialization
-	//
 	clearConfiguration();
 
 	stopTimer();
@@ -223,30 +260,47 @@ void AppDataServiceWorker::shutdown()
 	stopTcpAppDataServer();
 	stopCfgLoaderThread();
 
-	qDebug() << "DataServiceWorker stoped";
+	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is finished");
 }
 
-
-void AppDataServiceWorker::onTimer()
+void AppDataServiceWorker::runCfgLoaderThread()
 {
+	assert(m_cfgLoaderThread == nullptr);			// once should be runned
+
+	CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
+
+	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
+
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
+
+	m_cfgLoaderThread->start();
+
+	m_cfgLoaderThread->enableDownloadConfiguration();
 }
 
-
-void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void AppDataServiceWorker::stopCfgLoaderThread()
 {
-	qDebug() << "Configuration Ready!";
-
 	if (m_cfgLoaderThread == nullptr)
 	{
 		return;
 	}
 
-	// stop all AppDataChannelThreads and
-	// free all allocated resources
+	m_cfgLoaderThread->quitAndWait();
+
+	delete m_cfgLoaderThread;
+
+	m_cfgLoaderThread = nullptr;
+}
+
+void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+{
+	DEBUG_LOG_MSG(logger(), "Configuration is ready");
+
+	// stop all threads and free all allocated resources
 	//
 	clearConfiguration();
 
-	bool result = readConfiguration(configurationXmlData);
+	bool result = readConfigurationSettings(configurationXmlData);
 
 	if (result == false)
 	{
@@ -263,12 +317,13 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		if (errStr.isEmpty() == false)
 		{
 			qDebug() << errStr;
+			result = false;
 			continue;
 		}
 
 		result = true;
 
-		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
+		if (bfi.ID == CFG_FILE_ID_APP_DATA_SOURCES)
 		{
 			result &= readDataSources(fileData);			// fill m_appDataSources
 		}
@@ -295,8 +350,12 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	}
 }
 
+void AppDataServiceWorker::onTimer()
+{
+}
 
-bool AppDataServiceWorker::readConfiguration(const QByteArray& fileData)
+
+bool AppDataServiceWorker::readConfigurationSettings(const QByteArray& fileData)
 {
 	XmlReadHelper xml(fileData);
 
@@ -315,65 +374,48 @@ bool AppDataServiceWorker::readConfiguration(const QByteArray& fileData)
 }
 
 
-bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
+bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 {
-	XmlReadHelper xml(fileData);
-
-	bool result = true;
-
 	m_appDataSources.clear();
-	m_enabledAppDataSources.clear();
+	m_appDataSourcesIP.clear();
 
-	while (1)
+	QVector<DataSource> dataSources;
+
+	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
+
+	if (result == false)
 	{
-		bool find = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
-
-		if (find == false)
-		{
-			break;
-		}
-
-		AppDataSource* dataSource = new AppDataSource();
-
-		result &= dataSource->readFromXml(xml);
-
-		if (result == false)
-		{
-			assert(false);
-			qDebug() << "DataSource error reading from xml";
-			delete dataSource;
-			continue;
-		}
-
-		int channel = dataSource->lmChannel();
-
-		if (channel < 0 || channel >= AppDataServiceSettings::DATA_CHANNEL_COUNT)
-		{
-			assert(false);
-			qDebug() << "DataSource wrong channel";
-			delete dataSource;
-			continue;
-		}
-
-		// dataSource->lmAdapterID() is unique for all data sources
-		//
-		m_appDataSources.insert(dataSource->lmAdapterID(), dataSource);
-
-		qDebug() << "DataSource: " << dataSource->lmAdapterID();
-
-		if (dataSource->lmDataEnable() == true)
-		{
-			// dataSource->lmAddress32() is unique for enabled datasources
-			//
-			m_enabledAppDataSources.insert(dataSource->lmAddress32(), dataSource);
-		}
+		DEBUG_LOG_ERR(logger(), QString("Error reading AppDataSources from XML-file"));
+		return false;
 	}
 
-	return result;
+	for(int i = 0; i < dataSources.count(); i++)
+	{
+		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>(dataSources[i]);
+
+		if (m_appDataSources.contains(appDataSource->lmAdapterID()) == true)
+		{
+			DEBUG_LOG_ERR(logger(), QString("Duplicate AppDataSource ID %1").arg(appDataSource->lmAdapterID()));
+			continue;
+		}
+
+		if (m_appDataSourcesIP.contains(appDataSource->lmAddress32()) == true)
+		{
+			DEBUG_LOG_ERR(logger(), QString("Duplicate AppDataSource IP-address %1").arg(appDataSource->lmAddressPort().addressPortStr()));
+			continue;
+		}
+
+		m_appDataSources.insert(appDataSource->lmAdapterID(), appDataSource);
+		m_appDataSourcesIP.insert(appDataSource->lmAddress32(), appDataSource);
+	}
+
+	DEBUG_LOG_MSG(logger(), QString("AppDataSources successfully loaded"));
+
+	return true;
 }
 
 
-bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
+bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
 
@@ -444,111 +486,42 @@ void AppDataServiceWorker::createAndInitSignalStates()
 	m_signalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
 }
 
-
-void AppDataServiceWorker::clearConfiguration()
+void AppDataServiceWorker::prepareAppDataSources()
 {
-	// free all resources allocated in onConfigurationReady
-	//
-	stopTcpAppDataServer();
-	stopDataChannelThreads();
-	stopTcpArchiveClientThreads();
-
-	m_appSignals.clear();
-	m_enabledAppDataSources.clear();
-	m_signalStates.clear();
+	for(AppDataSourceShared appDataSource : m_appDataSources)
+	{
+		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount);
+	}
 }
 
 void AppDataServiceWorker::applyNewConfiguration()
 {
 	m_autoArchivingGroupsCount = m_cfgSettings.autoArchiveInterval * 60;
 
-	resizeAppSignalEventsQueue();
-
 	createAndInitSignalStates();
 
-	initDataChannelThreads();
+	prepareAppDataSources();
 
-	runTcpArchiveClientThreads();
-
-	runDataChannelThreads();
-
+	runSignalStatesProcessingThread();
+	runTcpArchiveClientThread();
 	runTcpAppDataServer();
+	runAppDataReceiverThread();
+	runAppDataProcessingThreads();
 }
 
-void AppDataServiceWorker::resizeAppSignalEventsQueue()
+void AppDataServiceWorker::clearConfiguration()
 {
-	int queueSize = m_appSignals.count() * 2;
+	// free all resources allocated in onConfigurationReady
+	//
+	stopAppDataProcessingThreads();
+	stopAppDataReceiverlThread();
+	stopTcpAppDataServer();
+	stopTcpArchiveClientThread();
+	stopSignalStatesProcessingThread();
 
-	if (queueSize == 0)
-	{
-		queueSize = 1;
-	}
-
-	if (queueSize > APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE)
-	{
-		DEBUG_LOG_WRN(m_logger,"AppSignalEvents queue is reached max size");
-
-		queueSize = APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE;
-	}
-
-	m_signalStatesQueue.resize(queueSize);
-}
-
-void AppDataServiceWorker::initDataChannelThreads()
-{
-	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
-	{
-		// create AppDataChannelThread
-		//
-		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
-						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP,
-						m_signalStatesQueue,
-						m_autoArchivingGroupsCount);
-
-		// add AppDataSources to channel
-		//
-		for(AppDataSource* appDataSource : m_enabledAppDataSources)
-		{
-			if (appDataSource->lmDataType() == DataSource::DataType::App &&
-				appDataSource->lmChannel() == channel)
-			{
-				m_appDataChannelThread[channel]->addDataSource(appDataSource);
-			}
-		}
-
-		// build required data structures inside AppDataChannel
-		//
-		m_appDataChannelThread[channel]->prepare(m_appSignals, &m_signalStates);
-	}
-}
-
-
-void AppDataServiceWorker::runDataChannelThreads()
-{
-	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
-	{
-		if (m_appDataChannelThread[channel] != nullptr)
-		{
-			m_appDataChannelThread[channel]->start();
-		}
-		else
-		{
-			assert(false);
-		}
-	}
-}
-
-
-void AppDataServiceWorker::stopDataChannelThreads()
-{
-	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
-	{
-		if (m_appDataChannelThread[channel] != nullptr)
-		{
-			m_appDataChannelThread[channel]->quitAndWait();
-			delete m_appDataChannelThread[channel];
-			m_appDataChannelThread[channel] = nullptr;
-		}
-	}
+	m_appSignals.clear();
+	m_appDataSources.clear();
+	m_appDataSourcesIP.clear();
+	m_signalStates.clear();
 }
 

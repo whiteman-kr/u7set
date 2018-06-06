@@ -78,11 +78,17 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 		m_editor->setReadOnly(true);
     }
 
-    if (theSettings.m_DialogTextEditorWindowPos.x() != -1 && theSettings.m_DialogTextEditorWindowPos.y() != -1)
-    {
-        move(theSettings.m_DialogTextEditorWindowPos);
-        restoreGeometry(theSettings.m_DialogTextEditorWindowGeometry);
-    }
+	if (theSettings.m_DialogTextEditorWindowPos.x() != -1 && theSettings.m_DialogTextEditorWindowPos.y() != -1)
+	{
+		move(theSettings.m_DialogTextEditorWindowPos);
+		restoreGeometry(theSettings.m_DialogTextEditorWindowGeometry);
+	}
+	else
+	{
+		resize(1024, 768);
+	}
+
+	connect(this, &QDialog::finished, this, &DialogFileEditor::on_DialogFileEditor_finished);
 }
 
 DialogFileEditor::~DialogFileEditor()

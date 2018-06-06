@@ -11,7 +11,7 @@
 #include "../lib/Signal.h"
 
 
-typedef Queue<RupData> RupDataQueue;
+
 
 
 class DataChannel : public SimpleThreadWorker
@@ -26,7 +26,6 @@ protected:
 	HashedVector<quint32, quint32> m_unknownDataSources;
 
 	QTimer m_timer;
-
 	QUdpSocket* m_socket = nullptr;
 	bool m_socketBound = false;
 

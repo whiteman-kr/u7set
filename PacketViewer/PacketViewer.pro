@@ -11,6 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = PacketViewer
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -21,7 +27,6 @@ unix {
         CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
         CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
-
 
 SOURCES += main.cpp\
         SourceListWidget.cpp \
@@ -42,7 +47,14 @@ SOURCES += main.cpp\
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    ../lib/TuningValue.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../lib/OutputLog.cpp \
+    ../u7/Builder/ModulesRawData.cpp \
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -64,14 +76,18 @@ HEADERS  += SourceListWidget.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/Crc.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../lib/TuningValue.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/DeviceHelper.h \
+    ../lib/OutputLog.h \
+    ../u7/Builder/ModulesRawData.h \
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #

@@ -79,9 +79,7 @@ namespace TuningIPEN
 
 	public:
 		TuningData();
-		TuningData(	QString lmID,
-					int tuningFrameSizeBytes,
-					int tuningFramesCount);
+		TuningData(QString lmID);
 
 		virtual ~TuningData();
 

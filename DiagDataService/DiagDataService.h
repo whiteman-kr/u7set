@@ -5,7 +5,6 @@
 #include "../lib/Signal.h"
 #include "../lib/CfgServerLoader.h"
 #include "../lib/ServiceSettings.h"
-#include "../lib/DataChannel.h"
 
 
 class DiagDataServiceWorker : public ServiceWorker
@@ -13,10 +12,10 @@ class DiagDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	DiagDataServiceWorker(const QString& serviceName,
+	DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
+						  const QString& serviceName,
 						  int& argc,
 						  char** argv,
-						  const VersionInfo& versionInfo,
 						  std::shared_ptr<CircularLogger> logger);
 	virtual ~DiagDataServiceWorker();
 
@@ -31,13 +30,6 @@ private:
 	virtual void shutdown() override;
 
 private:
-	QString m_equipmentID;
-	QString m_cfgServiceIP1Str;
-	QString m_cfgServiceIP2Str;
-
-	HostAddressPort m_cfgServiceIP1;
-	HostAddressPort m_cfgServiceIP2;
-
 	std::shared_ptr<CircularLogger> m_logger;
 };
 

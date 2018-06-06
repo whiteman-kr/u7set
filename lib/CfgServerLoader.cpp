@@ -1,6 +1,8 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/CircularLogger.h"
 
+#include "../u7/Builder/CfgFiles.h"
+
 #include <QXmlStreamReader>
 #include <QStandardPaths>
 
@@ -30,8 +32,8 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 //
 // -------------------------------------------------------------------------------------
 
-CfgServer::CfgServer(const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
-	Tcp::FileServer(buildFolder, logger),
+CfgServer::CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
+	Tcp::FileServer(buildFolder, softwareInfo, logger),
 	m_logger(logger)
 {
 }
@@ -39,7 +41,7 @@ CfgServer::CfgServer(const QString& buildFolder, std::shared_ptr<CircularLogger>
 
 CfgServer* CfgServer::getNewInstance()
 {
-	return new CfgServer(m_rootFolder, m_logger);
+	return new CfgServer(localSoftwareInfo(), m_rootFolder, m_logger);
 }
 
 
@@ -131,6 +133,24 @@ void CfgServer::readBuildXml()
 	qDebug() << C_STR(str);
 }
 
+bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
+{
+	if (m_buildFileInfo.contains(pathFileName) == false)
+	{
+		return false;
+	}
+
+	QString fileMd5 = m_buildFileInfo[pathFileName].md5;
+	QString calculatedMd5 = QCryptographicHash::hash(fileData, QCryptographicHash::Md5).toHex();
+
+	if (fileMd5 != calculatedMd5)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 
 // -------------------------------------------------------------------------------------
 //
@@ -138,22 +158,18 @@ void CfgServer::readBuildXml()
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoader::CfgLoader(const QString& appEquipmentID,
+CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						int appInstance,
 						const HostAddressPort& serverAddressPort1,
 						const HostAddressPort& serverAddressPort2,
 						bool enableDownloadCfg,
-						std::shared_ptr<CircularLogger> logger,
-						E::SoftwareType softwareType,
-						int majorVersion,
-						int minorVersion,
-						int commitNo) :
-	Tcp::FileClient("", serverAddressPort1, serverAddressPort2, softwareType, appEquipmentID, majorVersion, minorVersion, commitNo),
+						std::shared_ptr<CircularLogger> logger) :
+	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2),
 	m_logger(logger),
 	m_timer(this),
 	m_enableDownloadConfiguration(enableDownloadCfg)
 {
-	changeApp(appEquipmentID, appInstance);
+	changeApp(softwareInfo.equipmentID(), appInstance);
 
 	// DELETE after periodic CFG requests to be added
 	//
@@ -193,7 +209,7 @@ void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 
 	setRootFolder(m_rootFolder);
 
-	m_configurationXmlPathFileName = "/" + m_appEquipmentID + "/configuration.xml";
+	m_configurationXmlPathFileName = "/" + m_appEquipmentID + "/" + Builder::FILE_CONFIGURATION_XML;
 
 	readSavedConfiguration();
 
@@ -414,7 +430,12 @@ bool CfgLoader::startConfigurationXmlLoading()
 		return true;
 	}
 
-	if (isConnected() == false || m_transferInProgress == true)
+	if (isConnected() == false)
+	{
+		return true;
+	}
+
+	if (m_transferInProgress == true)
 	{
 		return true;
 	}
@@ -861,27 +882,19 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoaderThread::CfgLoaderThread(	const QString& appStrID,
+CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 									int appInstance,
 									const HostAddressPort& serverAddressPort1,
 									const HostAddressPort& serverAddressPort2,
 									bool enableDownloadCfg,
-									std::shared_ptr<CircularLogger> logger,
-									E::SoftwareType softwareType,
-									int majorVersion,
-									int minorVersion,
-									int commitNo)
+									std::shared_ptr<CircularLogger> logger)
 {
-	m_cfgLoader = new CfgLoader(appStrID,
+	m_cfgLoader = new CfgLoader(softwareInfo,
 								appInstance,
 								serverAddressPort1,
 								serverAddressPort2,
 								enableDownloadCfg,
-								logger,
-								softwareType,
-								majorVersion,
-								minorVersion,
-								commitNo);		// it will be deleted during SimpleThread destruction
+								logger);		// it will be deleted during SimpleThread destruction
 
 	addWorker(m_cfgLoader);
 
@@ -977,6 +990,11 @@ QString CfgLoaderThread::getLastErrorStr()
 Tcp::ConnectionState CfgLoaderThread::getConnectionState()
 {
 	return m_cfgLoader->getConnectionState();
+}
+
+HostAddressPort CfgLoaderThread::getCurrentServerAddressPort()
+{
+	return m_cfgLoader->currentServerAddressPort();
 }
 
 

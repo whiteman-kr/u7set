@@ -37,6 +37,9 @@ namespace VFrame30
 		FblItemRect(SchemaUnit itemunit);
 		virtual ~FblItemRect(void);
 
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
+
 		// Serialization
 		//
 	protected:
@@ -75,7 +78,7 @@ namespace VFrame30
 		QRectF itemRectWithPins() const;								// Get item rect with inputs and outputs
 		QRectF itemRectPinIndent(QPaintDevice* paintDevice) const;		// Get item rect without inputs and outputs
 
-		Q_INVOKABLE void adjustHeight();
+		Q_INVOKABLE void adjustHeight(double gridSize = -1, int pinGridStep = -1);
 
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
@@ -162,7 +165,7 @@ namespace VFrame30
 		void setUserText(const QString& value);
 
 		E::UserTextPos userTextPos() const;
-		void setUserTextPos(E::UserTextPos value);
+		void setUserTextPos(const E::UserTextPos& value);
 
 	protected:
 		// m_gridSize and m_pingGridStep are cached values from Schema, they set in CalcPointPos.

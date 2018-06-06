@@ -54,6 +54,9 @@ namespace VFrame30
 		bool adaptiveAperture() const;
 		void setAdaptiveAperture(bool adaptive);
 
+		QString busTypeId() const;
+		void setBusTypeId(const QString& value);
+
 		// Manual setting properties
 		//
 		int inbusOffset() const;
@@ -89,7 +92,7 @@ namespace VFrame30
 		E::SignalType m_type = E::SignalType::Discrete;
 		QString m_units;
 
-		// In use only if m_type == E::SignalType::Analog
+		// AnalogSignal settings
 		//
 		E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::Float32;
 		int m_precision = 2;
@@ -97,10 +100,13 @@ namespace VFrame30
 		double m_fineAperture = 0.5;
 		bool m_adaptiveAperture = false;
 
+		// BusSignalSettings
+		//
+		QString m_busTypeId;
+
 		// Manual signal settings
 		//
 		int m_inbusOffset = 0;
-
 		int m_inbusDiscreteBitNo = 0;
 
 		int m_inbusAnalogSize = 32;

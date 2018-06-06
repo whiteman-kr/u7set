@@ -2,15 +2,16 @@
 
 #include <QString>
 #include <QMultiHash>
-#include "../lib/Types.h"
-#include "../lib/DbStruct.h"
-#include "../lib/OrderedHash.h"
-#include "../lib/DeviceObject.h"
-#include "../lib/Address16.h"
-#include "../VFrame30/Afb.h"
-#include "../lib/ProtobufHelper.h"
-#include "../lib/Hash.h"
 
+#include "Types.h"
+#include "DbStruct.h"
+#include "OrderedHash.h"
+#include "DeviceObject.h"
+#include "Address16.h"
+#include "../VFrame30/Afb.h"
+#include "ProtobufHelper.h"
+#include "Hash.h"
+#include "TuningValue.h"
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
@@ -63,6 +64,9 @@ const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
+class SignalSpecPropValues;
+
+
 class Signal
 {
 	friend class DbWorker;
@@ -83,6 +87,8 @@ public:
 	Signal(const Hardware::DeviceSignal& deviceSignal);
 	virtual ~Signal();
 
+	void initSpecificProperties();
+
 	// Signal identificators
 
 	QString appSignalID() const { return m_appSignalID; }
@@ -97,6 +103,9 @@ public:
 	QString equipmentID() const { return m_equipmentID; }
 	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
+	QString lmEquipmentID() const { return m_lmEquipmentID; }
+	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
+
 	QString busTypeID() const { return m_busTypeID; }
 	void setBusTypeID(const QString& busTypeID) { m_busTypeID = busTypeID; }
 
@@ -107,7 +116,7 @@ public:
 
 	E::SignalType signalType() const { return m_signalType; }
 	int signalTypeInt() const { return TO_INT(m_signalType); }
-	void setSignalType(E::SignalType type) { m_signalType = type; }
+	void setSignalType(E::SignalType type);
 
 	bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 	bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
@@ -136,7 +145,7 @@ public:
 
 	E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
 	int analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
-	void setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat) { m_analogSignalFormat = dataFormat; }
+	void setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat);
 
 	E::DataFormat dataFormat() const;
 
@@ -148,65 +157,66 @@ public:
 
 	// Analog signal properties
 
-	int lowADC() const { return m_lowADC; }
-	void setLowADC(int lowADC) { m_lowADC = lowADC; }
+	int lowADC() const;
+	void setLowADC(int lowADC);
 
-	int highADC() const { return m_highADC; }
-	void setHighADC(int highADC) { m_highADC = highADC;}
+	int highADC() const;
+	void setHighADC(int highADC);
 
-	double lowEngeneeringUnits() const { return m_lowEngeneeringUnits; }
-	void setLowEngeneeringUnits(double lowEngeneeringUnits) { m_lowEngeneeringUnits = lowEngeneeringUnits; }
+	int lowDAC() const;
+	void setLowDAC(int lowDAC);
 
-	double highEngeneeringUnits() const { return m_highEngeneeringUnits; }
-	void setHighEngeneeringUnits(double highEngeneeringUnits) { m_highEngeneeringUnits = highEngeneeringUnits; }
+	int highDAC() const;
+	void setHighDAC(int highDAC);
 
-	double lowValidRange() const { return m_lowValidRange; }
-	void setLowValidRange(double lowValidRange) { m_lowValidRange = lowValidRange; }
+	double lowEngeneeringUnits() const;
+	void setLowEngeneeringUnits(double lowEngeneeringUnits);
 
-	double highValidRange() const { return m_highValidRange; }
-	void setHighValidRange(double highValidRange) { m_highValidRange = highValidRange; }
+	double highEngeneeringUnits() const;
+	void setHighEngeneeringUnits(double highEngeneeringUnits);
 
-	double filteringTime() const { return m_filteringTime; }
-	void setFilteringTime(double filteringTime) { m_filteringTime = filteringTime; }
+	double lowValidRange() const;
+	void setLowValidRange(double lowValidRange);
 
-	double spreadTolerance() const { return m_spreadTolerance; }
-	void setSpreadTolerance(double spreadTolerance) { m_spreadTolerance = spreadTolerance; }
+	double highValidRange() const;
+	void setHighValidRange(double highValidRange);
+
+	double filteringTime() const;
+	void setFilteringTime(double filteringTime);
+
+	double spreadTolerance() const;
+	void setSpreadTolerance(double spreadTolerance);
 
 	// Analog input/output signal properties
 
-	double electricLowLimit() const { return m_electricLowLimit; }
-	void setElectricLowLimit(double electricLowLimit) { m_electricLowLimit = electricLowLimit; }
+	double electricLowLimit() const;
+	void setElectricLowLimit(double electricLowLimit);
 
-	double electricHighLimit() const { return m_electricHighLimit; }
-	void setElectricHighLimit(double electricHighLimit) { m_electricHighLimit = electricHighLimit; }
+	double electricHighLimit() const;
+	void setElectricHighLimit(double electricHighLimit);
 
-	E::ElectricUnit electricUnit() const { return m_electricUnit; }
-	int electricUnitInt() const { return TO_INT(m_electricUnit); }
-	void setElectricUnit(E::ElectricUnit electricUnit) { m_electricUnit = electricUnit; }
+	E::ElectricUnit electricUnit() const;
+	void setElectricUnit(E::ElectricUnit electricUnit);
 
-	E::SensorType sensorType() const { return m_sensorType; }
-	int sensorTypeInt() const { return TO_INT(m_sensorType); }
-	void setSensorType(E::SensorType sensorType) { m_sensorType = sensorType; }
-	void setSensorTypeInt(int sensorType) { m_sensorType = IntToEnum<E::SensorType>(sensorType); }
+	E::SensorType sensorType() const;
+	void setSensorType(E::SensorType sensorType);
 
-	E::OutputMode outputMode() const { return m_outputMode; }
-	int outputModeInt() const { return TO_INT(m_outputMode); }
-	void setOutputMode(E::OutputMode outputMode) { m_outputMode = outputMode; }
-	void setOutputModeInt(int outputMode) { m_outputMode = IntToEnum<E::OutputMode>(outputMode); }
+	E::OutputMode outputMode() const;
+	void setOutputMode(E::OutputMode outputMode);
 
 	// Tuning signal properties
 
 	bool enableTuning() const { return m_enableTuning; }
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
-	float tuningDefaultValue() const { return m_tuningDefaultValue; }
-	void setTuningDefaultValue(float value) { m_tuningDefaultValue = value; }
+	TuningValue tuningDefaultValue() const { return m_tuningDefaultValue; }
+	void setTuningDefaultValue(const TuningValue& value) { m_tuningDefaultValue = value; }
 
-	float tuningLowBound() const { return m_tuningLowBound; }
-	void setTuningLowBound(float value) { m_tuningLowBound = value; }
+	TuningValue tuningLowBound() const { return m_tuningLowBound; }
+	void setTuningLowBound(const TuningValue& value) { m_tuningLowBound = value; }
 
-	float tuningHighBound() const { return m_tuningHighBound; }
-	void setTuningHighBound(float value) { m_tuningHighBound = value; }
+	TuningValue tuningHighBound() const { return m_tuningHighBound; }
+	void setTuningHighBound(const TuningValue& value) { m_tuningHighBound = value; }
 
 	// Signal properties for MATS
 
@@ -214,6 +224,11 @@ public:
 	void setAcquire(bool acquire) { m_acquire = acquire; }
 
 	bool isAcquired() const { return m_acquire; }
+
+	bool archive() const { return m_archive; }
+	void setArchive(bool archive) { m_archive = archive; }
+
+	bool isArchived() const { return m_archive; }
 
 	int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
@@ -226,6 +241,38 @@ public:
 
 	bool adaptiveAperture() const { return m_adaptiveAperture; }
 	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
+
+	// Specific properties
+
+	QString specPropStruct() const { return m_specPropStruct; }
+	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
+
+	bool createSpecPropValues();
+
+	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
+	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
+
+	void cacheSpecPropValues();
+
+	double getSpecPropDouble(const QString& name) const;
+	int getSpecPropInt(const QString& name) const;
+	unsigned int getSpecPropUInt(const QString& name) const;
+	int getSpecPropEnum(const QString& name) const;
+	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
+
+	bool setSpecPropDouble(const QString& name, double value);
+	bool setSpecPropInt(const QString& name, int value);
+	bool setSpecPropUInt(const QString& name, unsigned int value);
+	bool setSpecPropEnum(const QString& name, int enumValue);
+	bool setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum);
+
+	//
+
+	void saveProtoData(QByteArray* protoDataArray) const;
+	void saveProtoData(Proto::ProtoAppSignalData* protoData) const;
+
+	void loadProtoData(const QByteArray& protoDataArray);
+	void loadProtoData(const Proto::ProtoAppSignalData& protoData);
 
 	// Signal fields from database
 
@@ -268,30 +315,24 @@ public:
 
 	void resetAddresses();
 
+	E::LogicModuleRamAccess lmRamAccess() const { return m_lmRamAccess; }
+	void setLmRamAccess(E::LogicModuleRamAccess access) { m_lmRamAccess = access; }
+
 	QString regValueAddrStr() const;
 
 	bool needConversion() const { return m_needConversion; }
 	void setNeedConversion(bool need) { m_needConversion = need; }
 
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
-	void setLm(std::shared_ptr<Hardware::DeviceModule> lm) { m_lm = lm; }
+	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
+
+	bool isConst() const { return m_isConst; }
+	void setIsConst(bool isConst) { m_isConst = isConst; }
+
+	double constValue() const { return m_constValue; }
+	void setConstValue(double constValue) { m_constValue = constValue; }
 
 	//
-
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputMode));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ElectricUnit));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::AnalogAppSignalFormat));
-
-	void serializeFields(const QXmlStreamAttributes& attr);
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
@@ -320,7 +361,8 @@ private:
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
-	//
+
+	void updateTuningValuesType();
 
 private:
 	// Signal identificators
@@ -328,7 +370,8 @@ private:
 	QString m_appSignalID;
 	QString m_customAppSignalID;
 	QString m_caption;
-	QString m_equipmentID;
+	QString m_equipmentID;											// should be transformed to portEquipmentID
+	QString m_lmEquipmentID;										// now fills in compile time only
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
 	E::Channel m_channel = E::Channel::A;
 
@@ -346,43 +389,31 @@ private:
 	//
 	E::AnalogAppSignalFormat m_analogSignalFormat =					// only for m_signalType == E::SignalType::Analog
 							E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
-
 	QString m_unit;
-
-	int m_lowADC = 0;
-	int m_highADC = 0xFFFF;
-
-	double m_lowEngeneeringUnits = 0;								// low physical value for input range
-	double m_highEngeneeringUnits = 100;							// high physical value for input range
-
-	double m_lowValidRange = 0;
-	double m_highValidRange = 100;
-
-	double m_filteringTime = 0.005;
-	double m_spreadTolerance = 2;
-
-	// Analog input/output signals properties
-	//
-	double m_electricLowLimit = 0;									// low electric value for input range
-	double m_electricHighLimit = 0;									// high electric value for input range
-	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensorType;		// electric sensor type for input range (was created for m_inputUnitID)
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
 
 	// Tuning signal properties
 	//
 	bool m_enableTuning = false;
-	float m_tuningDefaultValue = 0;
-	float m_tuningLowBound = 0;
-	float m_tuningHighBound = 100;
+	TuningValue m_tuningDefaultValue;
+	TuningValue m_tuningLowBound;
+	TuningValue m_tuningHighBound;
 
 	// Signal properties for MATS
 	//
 	bool m_acquire = true;
+	bool m_archive = true;
 	int m_decimalPlaces = 2;
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
 	bool m_adaptiveAperture = false;
+
+	// Signal specific properties
+	//
+
+	QString m_specPropStruct;
+	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
+
+	SignalSpecPropValues* m_cachedSpecPropValues = nullptr;
 
 	// Signal fields from database
 	//
@@ -415,6 +446,11 @@ private:
 
 	Address16 m_regValueAddr;				// signal Value address in FSC data packet
 	Address16 m_regValidityAddr;			// signal Validity address in FSC data packet
+
+	E::LogicModuleRamAccess m_lmRamAccess = E::LogicModuleRamAccess::Undefined;
+
+	bool m_isConst = false;
+	double m_constValue = 0;
 
 	//
 
@@ -453,10 +489,9 @@ public:
 
 	void resetAddresses();
 
+	bool serializeFromProtoFile(const QString& filePath);
+
 private:
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
 };
-
-
-void SerializeSignalsFromXml(const QString& filePath, SignalSet& signalSet);

@@ -9,13 +9,12 @@
 //
 // -------------------------------------------------------------------------------
 
-ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceName,
+ArchivingServiceWorker::ArchivingServiceWorker(const SoftwareInfo& softwareInfo,
+											   const QString& serviceName,
 											   int& argc,
 											   char** argv,
-											   const VersionInfo& versionInfo,
 											   CircularLoggerShared logger) :
-	ServiceWorker(ServiceType::ArchivingService, serviceName, argc, argv, versionInfo, logger),
-	m_logger(logger),
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_saveStatesQueue(1024 * 1024)
 {
 }
@@ -27,7 +26,7 @@ ArchivingServiceWorker::~ArchivingServiceWorker()
 
 ServiceWorker* ArchivingServiceWorker::createInstance() const
 {
-	ArchivingServiceWorker* archServiceWorker = new ArchivingServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+	ArchivingServiceWorker* archServiceWorker = new ArchivingServiceWorker(softwareInfo(), serviceName(), argc(), argv(), logger());
 
 	archServiceWorker->init();
 
@@ -44,27 +43,17 @@ void ArchivingServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", "EquipmentID", "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", "CfgServiceIP1", "IP-addres of first Configuration Service.", "");
-	cp.addSingleValueOption("cfgip2", "CfgServiceIP2", "IP-addres of second Configuration Service.", "");
+	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
+	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
 }
 
 void ArchivingServiceWorker::loadSettings()
 {
-	m_equipmentID = getStrSetting("EquipmentID");
-
-	m_cfgServiceIP1Str = getStrSetting("CfgServiceIP1");
-
-	m_cfgServiceIP1 = HostAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
-
-	m_cfgServiceIP2Str = getStrSetting("CfgServiceIP2");
-
-	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
-
-	DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
-	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
 }
 
 void ArchivingServiceWorker::initialize()
@@ -73,7 +62,7 @@ void ArchivingServiceWorker::initialize()
 	//
 	runCfgLoaderThread();
 
-	DEBUG_LOG_MSG(m_logger, QString(tr("ArchivingServiceWorker initialized")));
+	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
 }
 
 void ArchivingServiceWorker::shutdown()
@@ -84,12 +73,12 @@ void ArchivingServiceWorker::shutdown()
 
 	stopCfgLoaderThread();
 
-	DEBUG_LOG_MSG(m_logger, QString(tr("ArchivingServiceWorker stoped")));
+	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped")));
 }
 
 void ArchivingServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1,m_cfgServiceIP1, m_cfgServiceIP2, false, nullptr, E::SoftwareType::ArchiveService, 0, 1, USED_SERVER_COMMIT_NUMBER);
+	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingServiceWorker::onConfigurationReady);
 
@@ -127,7 +116,7 @@ void ArchivingServiceWorker::createArchive()
 {
 	assert(m_archive == nullptr);
 
-	m_archive = std::make_shared<Archive>(m_projectID, m_cfgSettings.dbHost, m_logger);
+	m_archive = std::make_shared<Archive>(m_projectID, m_cfgSettings.dbHost, logger());
 }
 
 void ArchivingServiceWorker::deleteArchive()
@@ -142,7 +131,7 @@ void ArchivingServiceWorker::runArchWriteThread()
 	m_archWriteThread = new ArchWriteThread(m_cfgSettings.dbHost,
 											m_archive,
 											m_saveStatesQueue,
-											m_logger);
+											logger());
 
 	m_archWriteThread->start();
 }
@@ -161,9 +150,9 @@ void ArchivingServiceWorker::runTcpAppDataServerThread()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* server = new TcpAppDataServer(m_saveStatesQueue);
+	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_saveStatesQueue);
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, m_logger);
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, logger());
 
 	m_tcpAppDataServerThread->start();
 }
@@ -188,11 +177,11 @@ void ArchivingServiceWorker::runTcpArchRequestsServerThread()
 		return;
 	}
 
-	TcpArchRequestsServer* server = new TcpArchRequestsServer(*m_archRequestThread, m_logger);
+	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(), *m_archRequestThread, logger());
 
 	m_tcpArchiveRequestsServerThread = new TcpArchiveRequestsServerThread(m_cfgSettings.clientRequestIP,
 																		  server,
-																		  m_logger);
+																		  logger());
 	m_tcpArchiveRequestsServerThread->start();
 }
 
@@ -210,7 +199,7 @@ void ArchivingServiceWorker::runArchRequestThread()
 {
 	assert(m_archRequestThread == nullptr);
 
-	m_archRequestThread = new ArchRequestThread(m_archive, m_logger);
+	m_archRequestThread = new ArchRequestThread(m_archive, logger());
 
 	m_archRequestThread->start();
 }

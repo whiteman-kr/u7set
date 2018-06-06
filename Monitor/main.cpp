@@ -92,9 +92,12 @@ int main(int argc, char *argv[])
 	VFrame30::VFrame30Library::Init();
 	//Hardware::Init();
 
+	SoftwareInfo si;
+	si.init(E::SoftwareType::Monitor, theSettings.instanceStrId(), 0, 1);
+
 	// --
 	//
-	MonitorMainWindow w;
+	MonitorMainWindow w(si);
 	theMonitorMainWindow = &w;
 	w.show();
 

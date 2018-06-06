@@ -15,16 +15,25 @@ namespace Log
 		Error,
 		Warning,
 		Message,
-		Text
+		Alert,
+		Text,
+		Data,
+
+		Count
 	};
 
 	struct LogFileRecord
 	{
+		quint64 sessionHash;
 		QDateTime time;
 		MessageType type;
-		QString text;
 
-		QString toString();
+		QString text;
+		QStringList textArray;
+
+		QString toString(const QString& sessionHashString);
+
+		bool loadFromString(const QString& source, quint64 currentSessionHash);
 
 	};
 
@@ -33,16 +42,23 @@ namespace Log
 		Q_OBJECT
 	public:
 
-		LogFileWorker(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount);
+		LogFileWorker(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash);
 		virtual ~LogFileWorker();
 
+		// Writing functions
+
 		bool write(MessageType type, const QString& text);
+		bool writeArray(const QStringList& textArray);
 
 		// Loading funtcions
 
-		void read();
+		void read(bool currentSessionOnly);
 
 		void getLoadedData(std::vector<LogFileRecord> *result);
+
+		// Information functions
+
+		QString logName() const;
 
 	protected:
 		virtual void onThreadStarted();
@@ -60,18 +76,18 @@ namespace Log
 
 		bool switchToNextLogFile();
 
-		bool readFileRecords(const QString& fileName, std::vector<LogFileRecord>* result);
+		bool readFileRecords(const QString& fileName, bool currentSessionOnly, std::vector<LogFileRecord>* result);
 
 	private slots:
 
 		void slot_onTimer();
 
-		void slot_load();
+		void slot_load(bool currentSessionOnly);
 
 	signals:
 		void flushFailure();
 
-		void readStart();
+		void readStart(bool currentSessionOnly);
 
 		void readComplete();
 
@@ -91,6 +107,9 @@ namespace Log
 
 		int m_currentFileNumber = 0;
 
+		quint64 m_sessionHash = 0;
+		QString m_sessionHashString;
+
 		const int m_serviceStringLength = 80;
 
 		QMutex m_readMutex;
@@ -102,7 +121,7 @@ namespace Log
 		Q_OBJECT
 
 	public:
-		LogRecordModel();
+		LogRecordModel(bool showTypeColumn, std::vector<std::pair<QString, double>> headerTitles);
 		~LogRecordModel();
 
 	public:
@@ -149,6 +168,12 @@ namespace Log
 		MessageType m_filterMessageType = MessageType::All;
 		QString m_filterText;
 
+		bool m_showTypeColumn = true;
+
+		int m_columnTime = -1;
+		int m_columnType = -1;
+		int m_columnText = -1;
+
 	protected:
 	};
 
@@ -158,11 +183,13 @@ namespace Log
 
 	public:
 
-		LogFileDialog(LogFileWorker* worker, QWidget* parent);
+		LogFileDialog(LogFileWorker* worker, QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles);
 		virtual ~LogFileDialog();
 
 	private:
 		virtual void resizeEvent(QResizeEvent *event);
+
+		void enableControls(bool enable);
 
 	private:
 
@@ -172,6 +199,8 @@ namespace Log
 
 		QLineEdit* m_filterLineEdit = nullptr;
 
+		QPushButton* m_allSessions = nullptr;
+
 		QPushButton* m_autoScroll = nullptr;
 
 		LogRecordModel m_model;
@@ -180,13 +209,18 @@ namespace Log
 
 		QLabel* m_counterLabel = nullptr;
 
+		QPushButton* m_export = nullptr;
+
 	private slots:
 		void onTypeComboIndexChanged(int index);
 		void onFilter();
 
+		void onAllSessionsClicked();
+
 		void onReadComplete();
 		void onRecordArrived(LogFileRecord record);
 
+		void onExport();
 	};
 
 	class LogFile : public QObject
@@ -198,15 +232,24 @@ namespace Log
 		virtual ~LogFile();
 
 		bool writeMessage(const QString& text);
+		bool writeAlert(const QString& text);
 		bool writeError(const QString& text);
 		bool writeWarning(const QString& text);
 		bool writeText(const QString& text);
+		bool writeArray(const QStringList& textArray);
 
 		bool write(MessageType type, const QString& text);
 
-		void view(QWidget* parent);
+		void view(QWidget* parent, bool showType = true, std::vector<std::pair<QString, double> > headerTitles = std::vector<std::pair<QString, double> >());
+
+		int alertAckCounter() const;
+		int errorAckCounter() const;
+		int warningAckCounter() const;
+
 	signals:
+
 		void writeFailure();
+		void alertArrived(QString text);
 
 	private slots:
 		void onFlushFailure();
@@ -219,6 +262,12 @@ namespace Log
 		SimpleThread m_logThread;
 
 		LogFileDialog* m_logDialog = nullptr;
+
+		quint64 m_sessionHash;
+
+		int m_alertAckCounter = 0;
+		int m_errorAckCounter = 0;
+		int m_warningAckCounter = 0;
 	};
 }
 

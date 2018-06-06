@@ -249,17 +249,26 @@ std::shared_ptr<QUdpSocket> PacketSourceModel::getSocket(const QString& address,
 
 void PacketSourceModel::loadProject(const QString& projectPath)
 {
-	QDirIterator signalsIt(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories);
-	if (signalsIt.hasNext())
+	QDirIterator signalsIt(projectPath, QStringList() << "AppSignals.asgs", QDir::Files, QDirIterator::Subdirectories);
+
+	if (signalsIt.hasNext() == true)
 	{
 		m_signalSet.clear();
-		SerializeSignalsFromXml(signalsIt.next(), m_signalSet);
+
+		bool res = m_signalSet.serializeFromProtoFile(signalsIt.next());
+
+		if (res == false)
+		{
+			QMessageBox::critical(nullptr, "Error", "Error reading AppSignals.asgs file");
+			return;
+		}
 	}
 	else
 	{
-		QMessageBox::critical(nullptr, "Error", "Could not find appSignals.xml");
+		QMessageBox::critical(nullptr, "Error", "Could not find AppSignals.asgs file");
 		return;
 	}
+
 	QDirIterator equipmentIt(projectPath, QStringList() << "*equipment.xml", QDir::Files, QDirIterator::Subdirectories);
 	if (equipmentIt.hasNext())
 	{
@@ -273,7 +282,7 @@ void PacketSourceModel::loadProject(const QString& projectPath)
 	}
 	m_dataSources.clear();
 
-	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
+	initDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
 
 	for (auto listener : m_listeners)
 	{
@@ -475,8 +484,8 @@ void Listener::readPendingDatagrams()
 	{
 		QHostAddress senderAddress;
 		quint16 senderPort;
-		char* buffer = new char[ENTIRE_UDP_SIZE];
-		quint64 readBytes = m_socket->readDatagram(buffer, ENTIRE_UDP_SIZE, &senderAddress, &senderPort);
+		char* buffer = new char[Socket::ENTIRE_UDP_SIZE];
+		quint64 readBytes = m_socket->readDatagram(buffer, Socket::ENTIRE_UDP_SIZE, &senderAddress, &senderPort);
 		quint32 senderIp4 = senderAddress.toIPv4Address();
 
 		int sourceIndex = getSourceIndex(senderIp4, senderPort);
@@ -501,7 +510,8 @@ void Listener::checkListeningState()
 }
 
 
-Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Statistic* parent) :
+Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32,
+			   std::shared_ptr<DataSourceOnline>>& dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
 	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this)),
@@ -539,11 +549,11 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 	RpPacket& packet = *reinterpret_cast<RpPacket*>(buffer);
 	quint16 version = packet.Header.protocolVersion;
 	bool needSwap = false;
-	if (packet.Header.packetSize > ENTIRE_UDP_SIZE)
+	if (packet.Header.packetSize > Socket::ENTIRE_UDP_SIZE)
 	{
 		quint16 swapedPacketSize = packet.Header.packetSize;
 		swapBytes(swapedPacketSize);
-		if (swapedPacketSize == ENTIRE_UDP_SIZE)
+		if (swapedPacketSize == Socket::ENTIRE_UDP_SIZE)
 		{
 			needSwap = true;
 			swapBytes(version);
@@ -581,7 +591,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 		incrementPartialFrameCount();
 	}
 
-	if (header.partCount > Rup::MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > ENTIRE_UDP_SIZE)
+	if (header.partCount > Rup::MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > Socket::ENTIRE_UDP_SIZE)
 	{
 		incrementFormatErrorCount();
 		delete [] buffer;
@@ -662,7 +672,7 @@ void Source::removeDependentWidget(QObject* object)
 void Source::reloadProject()
 {
 	m_signalTableModel->beginReloadProject();
-	QHashIterator<quint32, std::shared_ptr<DataSource>> iterator(*m_dataSources);
+	QHashIterator<quint32, std::shared_ptr<DataSourceOnline>> iterator(*m_dataSources);
 
 	while (iterator.hasNext())
 	{
@@ -715,7 +725,7 @@ void swapHeader(Rup::Header& header)
 	swapBytes(header.timeStamp.year);
 }
 
-void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSource> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
+void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourceOnline> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
 {
 	dataSources.clear();
 
@@ -753,11 +763,11 @@ void PacketSourceModel::InitDataSources(QHash<quint32, std::shared_ptr<DataSourc
 				QHostAddress ha(ipStr);
 				quint32 ip = ha.toIPv4Address();
 
-				std::shared_ptr<DataSource> ds = std::make_shared<DataSource>();
+				std::shared_ptr<DataSourceOnline> ds = std::make_shared<DataSourceOnline>();
 				ds->setID(ip);
 				ds->setLmCaption(QString("Data Source %1").arg(key));
 				ds->setLmAddressStr(ha.toString());
-				ds->partCount(1);
+				ds->setLmRupFramesQuantity(1);
 
 				QString signalPrefix = currentModule->parent()->equipmentId();
 				int signalPrefixLength = signalPrefix.length();

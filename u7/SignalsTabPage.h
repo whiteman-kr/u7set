@@ -121,7 +121,7 @@ public:
 	bool editSignals(QVector<int> ids);
 	static void trimSignalTextFields(Signal& signal);
 	void saveSignal(Signal& signal);
-	QList<int> cloneSignals(const QSet<int>& signalIDs);
+	QVector<int> cloneSignals(const QSet<int>& signalIDs);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignals(const QSet<int>& signalIDs);
 	void deleteSignal(int signalID);
@@ -168,6 +168,8 @@ public:
 	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = 0);
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+	bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
+
 	void setSignalTypeFilter(int signalType);
 	void setSignalIdFilter(QStringList strIds);
 	void setIdFilterField(int field);
@@ -260,6 +262,8 @@ public:
 
 	static QStringList createSignal(DbController* dbc, int counter, QString schemaId, QString schemaCaption, CreatingSignalOptions* options, QWidget* parent);
 
+	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
+
 protected:
 	void CreateActions(QToolBar* toolBar);
 
@@ -287,7 +291,7 @@ public slots:
 	void editColumnsVisibilityAndOrder();
 	void changeSignalActionsVisibility();
 
-	void setSelection(const QList<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
+	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
 
@@ -303,6 +307,7 @@ public slots:
 	// Data
 	//
 private:
+	static SignalsTabPage* m_instance;
 	SignalsModel* m_signalsModel = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
@@ -315,7 +320,7 @@ private:
 	int m_lastHorizontalScrollPosition = -1;
 	bool m_changingSelectionManualy = false;
 
-	QList<int> m_selectedRowsSignalID;
+	QVector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;
 	int m_focusedCellColumn = -1;
 

@@ -18,7 +18,12 @@ int main(int argc, char *argv[])
 
     theOptions.load();
 
-    MainWindow w;
+	SoftwareInfo si;
+
+	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
+	si.init(E::SoftwareType::Metrology, equipmentID, 1, 0);
+
+	MainWindow w(si);
     w.show();
 
     int result = a.exec();

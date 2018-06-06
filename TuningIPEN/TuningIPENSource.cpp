@@ -12,7 +12,7 @@ namespace TuningIPEN
 
 	TuningSource::TuningSource()
 	{
-		m_lmDataType = DataSource::DataType::Tuning;
+		setLmDataType(DataSource::DataType::Tuning);
 
 		m_fotipFlags.all = 0;
 	}
@@ -39,11 +39,11 @@ namespace TuningIPEN
 	}
 
 
-	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml)
+	void TuningSource::writeAdditionalSectionsToXml(XmlWriteHelper& xml) const
 	{
 		if (m_tuningData == nullptr)
 		{
-			TuningData td(lmEquipmentID(), 0, 0);
+			TuningData td(lmEquipmentID());
 			td.writeToXml(xml);
 			return;
 		}
@@ -69,14 +69,14 @@ namespace TuningIPEN
 
 	void TuningSource::getTuningDataSourceInfo(TuningSourceInfo& info)
 	{
-		info.channel = m_lmChannel;
-		info.dataType = m_lmDataType;
-		info.lmEquipmentID = m_lmEquipmentID;
-		info.lmCaption = m_lmCaption;
-		info.lmAdapterID = m_lmAdapterID;
-		info.lmDataEnable = m_lmDataEnable;
-		info.lmAddressPort = m_lmAddressPort;
-		info.lmDataID = m_lmDataID;
+		info.channel = 0;	//lmChannel();
+		info.dataType = lmDataType();
+		info.lmEquipmentID = lmEquipmentID();
+		info.lmCaption = lmCaption();
+		info.lmAdapterID = lmAdapterID();
+		info.lmDataEnable = lmDataEnable();
+		info.lmAddressPort = lmAddressPort();
+		info.lmDataID = lmDataID();
 
 		info.tuningSignals.clear();
 
@@ -268,7 +268,7 @@ namespace TuningIPEN
 	}
 
 
-	quint64 TuningSource::uniqueID()
+	quint64 TuningSource::lmUniqueID()
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -284,7 +284,7 @@ namespace TuningIPEN
 	{
 		TuningSourceState state;
 
-		state.lmEquipmentID = m_lmEquipmentID;
+		state.lmEquipmentID = lmEquipmentID();
 		state.hasConnection = m_hasConnection;
 		state.receivedReplyCount = m_receivedRepyCount;
 		state.sentRequestCount = m_sentRequestCount;

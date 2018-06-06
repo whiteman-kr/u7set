@@ -6,9 +6,9 @@
 #include "Settings.h"
 
 SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn, Qt::SortOrder sortOrder):
-	m_appSignalParamVec(appSignalParamVec),
 	m_sortColumn(sortColumn),
-	m_sortOrder(sortOrder)
+	m_sortOrder(sortOrder),
+	m_appSignalParamVec(appSignalParamVec)
 {
 	if (appSignalParamVec == nullptr)
 	{
@@ -142,8 +142,8 @@ bool SignalSearchSorter::sortFunction(int index1, int index2, const SignalSearch
 
 	case Columns::TuningDefaultValue:
 		{
-			v1 = o1.tuningDefaultValue();
-			v2 = o2.tuningDefaultValue();
+			v1 = o1.tuningDefaultValue().toDouble();
+			v2 = o2.tuningDefaultValue().toDouble();
 		}
 		break;
 

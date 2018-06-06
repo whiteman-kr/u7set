@@ -24,33 +24,53 @@ namespace VFrame30
 	{	
 		m_guid = QUuid::createUuid();
 
-		auto guidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::guid, true, SchemaItem::guid);
-		guidProp->setCategory(PropertyNames::functionalCategory);
-		guidProp->setExpert(true);
+//		auto guidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::guid, true, SchemaItem::guid);
+//		guidProp->setCategory(PropertyNames::functionalCategory);
+//		guidProp->setExpert(true);
 
-		auto commentedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::commented, true, SchemaItem::commented, SchemaItem::setCommented);
-		commentedProp->setCategory(PropertyNames::functionalCategory);
+//		auto commentedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::commented, true, SchemaItem::commented, SchemaItem::setCommented);
+//		commentedProp->setCategory(PropertyNames::functionalCategory);
 
-		auto lockedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::locked, true, SchemaItem::isLocked, SchemaItem::setLocked);
-		lockedProp->setCategory(PropertyNames::appearanceCategory);
+//		auto lockedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::locked, true, SchemaItem::isLocked, SchemaItem::setLocked);
+//		lockedProp->setCategory(PropertyNames::appearanceCategory);
 
-		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::acceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
-		acceptClickProp->setCategory(PropertyNames::scriptsCategory);
+//		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::acceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
+//		acceptClickProp->setCategory(PropertyNames::scriptsCategory);
 
-		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
-		clickScriptProp->setCategory(PropertyNames::scriptsCategory);
-		clickScriptProp->setIsScript(true);
+//		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
+//		clickScriptProp->setCategory(PropertyNames::scriptsCategory);
+//		clickScriptProp->setIsScript(true);
 
-		auto objectNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::objectName, true, QObject::objectName, SchemaItem::setObjectName);
-		objectNameProp->setCategory(PropertyNames::scriptsCategory);
+//		auto objectNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::objectName, true, QObject::objectName, SchemaItem::setObjectName);
+//		objectNameProp->setCategory(PropertyNames::scriptsCategory);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true, SchemaItem::preDrawScript, SchemaItem::setPreDrawScript);
+//		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true, SchemaItem::preDrawScript, SchemaItem::setPreDrawScript);
 
 		return;
 	}
 
 	SchemaItem::~SchemaItem()
 	{
+	}
+
+	void SchemaItem::propertyDemand(const QString& /*prop*/)
+	{
+		auto guidProp = addProperty<QUuid, SchemaItem, &SchemaItem::guid, nullptr>(PropertyNames::guid, PropertyNames::functionalCategory, true);
+		guidProp->setExpert(true);
+
+		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented, PropertyNames::functionalCategory, true);
+
+		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked, PropertyNames::appearanceCategory, true);
+
+		addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick, PropertyNames::scriptsCategory, true);
+
+		auto clickScriptProp = addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript, PropertyNames::scriptsCategory, true);
+		clickScriptProp->setIsScript(true);
+
+		addProperty<QString, QObject, &SchemaItem::objectName, &SchemaItem::setObjectName>(PropertyNames::objectName, PropertyNames::scriptsCategory, true);
+		addProperty<QString, SchemaItem, &SchemaItem::preDrawScript, &SchemaItem::setPreDrawScript>(PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true);
+
+		return;
 	}
 	
 	// Serialization
@@ -727,7 +747,7 @@ namespace VFrame30
 		return m_locked;
 	}
 
-	void SchemaItem::setLocked(bool lock)
+	void SchemaItem::setLocked(const bool& lock)
 	{
 		m_locked = lock;
 		return;
@@ -743,12 +763,12 @@ namespace VFrame30
 		return m_commented;
 	}
 
-	void SchemaItem::setCommented(bool value)
+	void SchemaItem::setCommented(const bool& value)
 	{
 		m_commented = value;
 	}
 
-	const QUuid& SchemaItem::guid() const
+	QUuid SchemaItem::guid() const
 	{
 		return m_guid;
 	}
@@ -794,14 +814,14 @@ namespace VFrame30
 		return m_acceptClick;
 	}
 
-	void SchemaItem::setAcceptClick(bool value)
+	void SchemaItem::setAcceptClick(const bool& value)
 	{
 		m_acceptClick = value;
 	}
 
 	// ClickScript property
 	//
-	const QString& SchemaItem::clickScript() const
+	QString SchemaItem::clickScript() const
 	{
 		return m_clickScript;
 	}

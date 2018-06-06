@@ -3,7 +3,7 @@
 #include "../lib/DeviceObject.h"
 
 #include "../lib/OrderedHash.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 
 #include "../TuningService/TuningDataStorage.h"
 
@@ -12,6 +12,7 @@
 #include "LmMemoryMap.h"
 #include "ComparatorStorage.h"
 #include "UalItems.h"
+#include "MemWriteMap.h"
 
 #include "../u7/Connection.h"
 
@@ -34,6 +35,16 @@ namespace Builder
 		Q_OBJECT
 
 	public:
+		struct AfblUsageInfo
+		{
+			int opCode = -1;
+			QString caption;
+			int usedInstances = 0;
+			int maxInstances = 0;
+			double usagePercent = 0;
+			int version = 0;				// version of AFB implementation
+		};
+
 		struct ResourcesUsageInfo
 		{
 			QString lmEquipmentID;
@@ -44,6 +55,26 @@ namespace Builder
 
 			double idrPhaseTimeUsed = 0;			// Input Data Receive phase time
 			double alpPhaseTimeUsed = 0;			// Application Logic Processing phase time
+
+			//
+
+			CodeFragmentMetrics initAfbs;
+			CodeFragmentMetrics copyAcquiredRawDataInRegBuf;
+			CodeFragmentMetrics convertAnalogInputSignals;
+			CodeFragmentMetrics appLogicCode;
+			CodeFragmentMetrics copyAcquiredAnalogOptoSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredAnalogBusChildSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredTuningAnalogSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredConstAnalogSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteInputSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredTuningDiscreteSignalsToRegBuf;
+			CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
+			CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;
+			CodeFragmentMetrics copyOptoConnectionsTxData;
+
+			QVector<AfblUsageInfo> afblUsageInfo;
 		};
 
 	private:
@@ -100,7 +131,7 @@ namespace Builder
 		};
 
 	public:
-		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
 
 		SignalSet& signalSet() { return *m_signals; }
@@ -134,7 +165,9 @@ namespace Builder
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
-		bool createUalSignalFromReceiver(UalItem* ualItem);
+		bool createUalSignalsFromReceiver(UalItem* ualItem);
+		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
+		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
@@ -171,6 +204,7 @@ namespace Builder
 		bool createAcquiredDiscreteTuningSignalsList();
 		bool createAcquiredDiscreteConstSignalsList();
 
+		bool createNonAcquiredDiscreteInputSignalsList();
 		bool createNonAcquiredDiscreteStrictOutputSignalsList();
 		bool createNonAcquiredDiscreteInternalSignalsList();
 
@@ -190,6 +224,10 @@ namespace Builder
 
 		bool createAcquiredBusSignalsList();
 		bool createNonAcquiredBusSignalsList();
+
+		bool setSignalsCalculatedAttributes();
+
+		bool groupTxSignals();
 
 		bool appendLinkedValiditySignal(const Signal* s);
 
@@ -222,8 +260,8 @@ namespace Builder
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createAfbForAnalogInputSignalConversion(Signal& signal, UalItem& appItem);
-		bool createFbForAnalogOutputSignalConversion(Signal& signal, UalItem& appItem);
+		bool createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
+		bool createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
 
 		UalAfb* createUalAfb(const UalItem& appItem);
@@ -247,8 +285,6 @@ namespace Builder
 		bool finalizeOptoConnectionsProcessing();
 		bool setOptoUalSignalsAddresses();
 
-		bool generateAppStartCommand();
-
 		bool initAfbs();
 		bool initAppFbParams(UalAfb* appFb, bool instantiatorsOnly);
 		bool displayAfbParams(const UalAfb& appFb);
@@ -257,10 +293,6 @@ namespace Builder
 
 		bool copyAcquiredRawDataInRegBuf();
 		bool convertAnalogInputSignals();
-
-		bool copySerialRxSignals();
-		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
-		bool copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 
 		bool generateAppLogicCode();
 
@@ -285,9 +317,10 @@ namespace Builder
 		//
 
 		bool generateBusComposerCode(const UalItem* ualItem);
-		UalSignal* getBusComposerBusSignal(const UalItem* composerItem);
+		UalSignal* getBusComposerBusSignal(const UalItem* composerItem, bool* connectedToTedrminatorOnly);
 		bool generateAnalogSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal &busSignal);
+		bool generateDiscreteSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateBusSignalToBusCode(UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
 
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
@@ -309,7 +342,7 @@ namespace Builder
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
 
-		bool copyAcquiredConstAnalogSignalsToRegBuf();
+		bool copyAcquiredAnalogConstSignalsToRegBuf();
 
 		bool copyAcquiredDiscreteInputSignalsToRegBuf();
 		bool copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf();
@@ -330,14 +363,15 @@ namespace Builder
 		bool copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxBusSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
-		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module);
-		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID);
-		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset);
-		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port);
-		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port);
-		bool copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port);
+		bool isCopyOptimizationAllowed(const Commands& copyCode, int* srcAddr);
+		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID, MemWriteMap& memWriteMap);
+		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset, MemWriteMap& memWriteMap);
+		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap);
+		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap);
+		bool copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap);
 
 		bool finishAppLogicCode();
 		bool setLmAppLANDataSize();
@@ -345,11 +379,13 @@ namespace Builder
 
 		bool writeResult();
 		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
-		bool writeTuningInfoFile(const QString& subsystemID, int lmNumber);
+		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
 		void writeLMCodeTestFile();
 
-		void displayResourcesUsageInfo();
+		bool displayResourcesUsageInfo();
+		void calcOptoDiscretesStatistics();
+		bool getAfblUsageInfo();
 		void cleanup();
 
 		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
@@ -380,6 +416,8 @@ namespace Builder
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
+		Commands codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
+
 	private:
 		static const int ERR_VALUE = -1;
 
@@ -405,7 +443,9 @@ namespace Builder
 
 		// LM's and modules settings
 		//
-		int m_lmAppLogicFrameSize = 0;
+		int m_lmCodeMemorySize = 0;
+		int m_lmAppMemorySize = 0;
+		int m_lmAppLogicFramePayload = 0;
 		int m_lmAppLogicFrameCount = 0;
 
 		int m_lmCycleDuration = 0;
@@ -437,8 +477,6 @@ namespace Builder
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
 
-		QHash<UalItem*, UalSignal*> m_busComposers;
-
 		// service maps
 		//
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
@@ -460,6 +498,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredDiscreteConstSignals;
 		QVector<UalSignal*> m_acquiredDiscreteOptoAndBusChildSignals;
 
+		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteInternalSignals;		// non acquired discrete internal non tuningbale signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL

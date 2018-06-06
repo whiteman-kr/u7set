@@ -390,65 +390,6 @@ namespace Builder
 		m_xmlWriter.writeEndDocument();
 	}
 
-
-	// --------------------------------------------------------------------------------------
-	//
-	//	MultichannelFile class implementation
-	//
-	// --------------------------------------------------------------------------------------
-
-	MultichannelFile::MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmEquipmentID,
-									   QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList& descriptionFields) :
-		m_buildResultWriter(buildResultWriter),
-		m_log(buildResultWriter.log()),
-		m_subsysStrID(subsysStrID),
-		m_subsysID(subsysID),
-		m_lmEquipmentID(lmEquipmentID),
-		m_lmCaption(lmCaption)
-	{
-		BuildInfo bi = m_buildResultWriter.buildInfo();
-
-		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
-						 bi.project, bi.user, bi.id, bi.typeStr(), bi.changeset);
-
-		m_moduleFirmware.setDescriptionFields(descriptionFieldsVersion, descriptionFields);
-	}
-
-
-	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& appLogicBinCode, const std::vector<QVariantList>& descriptionData)
-	{
-		if (m_moduleFirmware.setChannelData(m_lmEquipmentID, channel, frameSize, frameCount, uniqueID, appLogicBinCode, descriptionData, m_log) == false)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-
-	bool MultichannelFile::getFileData(QByteArray& fileData)
-	{
-		QString errorMsg;
-
-		if (m_moduleFirmware.save(fileData, m_log) == false)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	quint64 MultichannelFile::getFirmwareUniqueId(int lmNumber)
-	{
-		return m_moduleFirmware.uniqueID(lmNumber);
-	}
-
-	void MultichannelFile::setGenericUniqueId(int lmNumber, quint64 genericUniqueId)
-	{
-		m_moduleFirmware.setGenericUniqueId(lmNumber, genericUniqueId);
-	}
-
-
 	// --------------------------------------------------------------------------------------
 	//
 	//	BuildResult class implementation
@@ -602,7 +543,6 @@ namespace Builder
 	//
 	// --------------------------------------------------------------------------------------
 
-
 	BuildResultWriter::BuildResultWriter(QObject *parent) :
 		QObject(parent)
 	{
@@ -623,19 +563,6 @@ namespace Builder
 		}
 
 		m_buildFiles.clear();
-
-		for(MultichannelFile* multichannelFile : m_multichannelFiles)
-		{
-			if (multichannelFile == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			delete multichannelFile;
-		}
-
-		m_multichannelFiles.clear();
 	}
 
 
@@ -927,7 +854,7 @@ namespace Builder
 
 			cfgFile->finalize();
 
-			BuildFile* buildFile = addFile(cfgFile->subDir(), "configuration.xml", cfgFile->getFileData());
+			BuildFile* buildFile = addFile(cfgFile->subDir(), Builder::FILE_CONFIGURATION_XML, cfgFile->getFileData());
 
 			if (buildFile == nullptr)
 			{
@@ -942,77 +869,25 @@ namespace Builder
 		return result;
 	}
 
-
-	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmEquipmentID, QString lmCaption, int frameSize, int frameCount, int descriptionFieldsVersion, const QStringList& descriptionFields)
+	bool BuildResultWriter::writeBinaryFiles()
 	{
-		MultichannelFile* multichannelFile = nullptr;
+		bool result = true;
 
-		if (m_multichannelFiles.contains(subsysStrID) == true)
+		QByteArray fileData;
+
+		if (m_firmwareWriter.save(fileData, m_log) == true)
 		{
-			multichannelFile = m_multichannelFiles[subsysStrID];
+			BuildFile* buildFile = addFile("", QString("%1-%2.bts").arg(m_buildInfo.project).arg(QString::number(m_buildInfo.id).rightJustified(6, '0')), fileData);
 
-			if (multichannelFile == nullptr)
+			if (buildFile == nullptr)
 			{
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				return nullptr;
-			}
-
-			if (multichannelFile->subsysID() != subsysID)
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
-						  QString(tr("Different subsysID (%1 & %2) for subsysStrID = '%3'")).
-						  arg(multichannelFile->subsysID()).arg(subsysID).arg(subsysStrID));
-
-				return nullptr;
+				result = false;
 			}
 		}
 		else
 		{
-			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmEquipmentID, lmCaption, frameSize, frameCount, descriptionFieldsVersion, descriptionFields);
-
-			m_multichannelFiles.insert(subsysStrID, multichannelFile);
-		}
-
-		return multichannelFile;
-	}
-
-
-	bool BuildResultWriter::writeMultichannelFiles()
-	{
-		bool result = true;
-
-		if (m_multichannelFiles.isEmpty() == false)
-		{
-			LOG_EMPTY_LINE(m_log);
-		}
-
-		for(MultichannelFile* multichannelFile : m_multichannelFiles)
-		{
-			if (multichannelFile == nullptr)
-			{
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			QByteArray fileData;
-
-			if (multichannelFile->getFileData(fileData) == true)
-			{
-				BuildFile* buildFile = addFile(multichannelFile->subsysStrID(), multichannelFile->lmCaption() + ".alb", fileData);
-
-				if (buildFile == nullptr)
-				{
-					result = false;
-				}
-			}
-			else
-			{
-				//assert(false);
-				result = false;
-			}
+			//assert(false);
+			result = false;
 		}
 
 		return result;
@@ -1077,41 +952,4 @@ namespace Builder
 	{
 		return m_buildInfo.release;
 	}
-
-	quint64 BuildResultWriter::getAppUniqueId(const QString &subsystemID, int lmNumber)
-	{
-		if (m_multichannelFiles.contains(subsystemID) == false)
-		{
-			assert(false);
-			return 0;
-		}
-		MultichannelFile* multiChannelFile = m_multichannelFiles[subsystemID];
-		if (multiChannelFile == nullptr)
-		{
-			assert(multiChannelFile);
-			return 0;
-		}
-
-		quint64 result = multiChannelFile->getFirmwareUniqueId(lmNumber);
-		return result;
-
-	}
-
-	void BuildResultWriter::setGenericUniqueId(const QString& subsystemID, int lmNumber, quint64 genericUniqueId)
-	{
-		if (m_multichannelFiles.contains(subsystemID) == false)
-		{
-			assert(false);
-			return;
-		}
-		MultichannelFile* firmware = m_multichannelFiles[subsystemID];
-		if (firmware == nullptr)
-		{
-			assert(firmware);
-			return;
-		}
-
-		firmware->setGenericUniqueId(lmNumber, genericUniqueId);
-	}
-
 }

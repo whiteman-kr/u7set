@@ -128,6 +128,7 @@ void Settings::writeUserScope() const
     s.setValue("TextEditorProperties/pos", m_DialogTextEditorWindowPos);
     s.setValue("TextEditorProperties/geometry", m_DialogTextEditorWindowGeometry);
 
+	s.setValue("PropertyEditor/fontScaleFactor", m_propertyEditorFontScaleFactor);
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
@@ -197,6 +198,12 @@ void Settings::loadUserScope()
 
     m_DialogTextEditorWindowPos = s.value("TextEditorProperties/pos", QPoint(-1, -1)).toPoint();
     m_DialogTextEditorWindowGeometry = s.value("TextEditorProperties/geometry").toByteArray();
+
+	m_propertyEditorFontScaleFactor = s.value("PropertyEditor/fontScaleFactor").toDouble();
+	if (m_propertyEditorFontScaleFactor < 1.0 || m_propertyEditorFontScaleFactor > 3.0)
+	{
+		m_propertyEditorFontScaleFactor = 1.0;
+	}
 
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();

@@ -5,6 +5,7 @@
 #include "TuningMemory.h"
 
 #include <cstring>
+#include "../lib/Types.h"
 
 namespace Tuning
 {
@@ -33,8 +34,8 @@ namespace Tuning
 		m_frameSizeW = frameSizeW;
 		m_framesCount = framesCount;
 
-		m_startAddrB = startAddr * sizeof(quint16);
-		m_frameSizeB = frameSizeW * sizeof(quint16);
+		m_startAddrB = startAddr * WORD_SIZE_IN_BYTES;
+		m_frameSizeB = frameSizeW * WORD_SIZE_IN_BYTES;
 
 		if (frameSizeW * framesCount > 1024 * 1024)
 		{

@@ -2,10 +2,13 @@
 
 #include <QtGlobal>
 #include <QDateTime>
-#include "../lib/Hash.h"
-#include "../lib/Queue.h"
-#include "../lib/TimeStamp.h"
-#include "Types.cpp"
+#include <memory>
+
+#include "Hash.h"
+#include "Queue.h"
+#include "TimeStamp.h"
+#include "Tuning/TuningSignalState.h"
+#include "Times.h"
 #include "Types.h"
 
 
@@ -22,19 +25,6 @@ namespace Proto
 	class AppSignalSet;
 }
 
-
-struct Times
-{
-	TimeStamp system;
-	TimeStamp local;
-	TimeStamp plant;
-
-	QDateTime systemToDateTime() const;
-	QDateTime localToDateTime() const;
-	QDateTime plantToDateTime() const;
-};
-
-
 union AppSignalStateFlags
 {
 	struct
@@ -43,8 +33,8 @@ union AppSignalStateFlags
 
 		// reasons to archiving
 		//
-		quint32 smoothAperture : 1;
-		quint32 roughAperture : 1;
+		quint32 fineAperture : 1;
+		quint32 coarseAperture : 1;
 		quint32 autoPoint : 1;
 		quint32 validityChange : 1;
 	};
@@ -60,7 +50,23 @@ union AppSignalStateFlags
 };
 
 
-struct SimpleAppSignalState;
+struct SimpleAppSignalState
+{
+	// light version of AppSignalState to use in queues and other AppDataService data structs
+	//
+	Hash hash = 0;					// == calcHash(AppSignalID)
+	Times time;
+	AppSignalStateFlags flags;
+	double value = 0;
+
+	bool isValid() const { return flags.valid == 1; }
+
+	void save(Proto::AppSignalState* protoState);
+	Hash load(const Proto::AppSignalState& protoState);
+
+	void print() const;
+};
+
 
 class AppSignalState
 {
@@ -68,6 +74,7 @@ class AppSignalState
 
 	Q_PROPERTY(Hash Hash READ hash)
 	Q_PROPERTY(double Value READ value)
+	Q_PROPERTY(bool Valid READ isValid)
 
 public:
 	AppSignalState() = default;
@@ -82,12 +89,12 @@ public:
 	static const quint32 VALID = 1;
 	static const quint32 INVALID = 0;
 
-	Q_INVOKABLE Hash hash() const;
+	Hash hash() const;
 	const Times& time() const;
 	const TimeStamp& time(E::TimeType timeType) const;
-	Q_INVOKABLE double value() const;
+	double value() const;
 
-	Q_INVOKABLE bool isValid() const;
+	bool isValid() const;
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
@@ -102,33 +109,26 @@ public:
 Q_DECLARE_METATYPE(AppSignalState)
 
 
-struct SimpleAppSignalState
-{
-	// light version of AppSignalState to use in queues and other AppDataService data structs
-	//
-	Hash hash = 0;					// == calcHash(AppSignalID)
-	Times time;
-	AppSignalStateFlags flags;
-	double value = 0;
-
-	void save(Proto::AppSignalState* protoState);
-	Hash load(const Proto::AppSignalState& protoState);
-};
-
-typedef Queue<SimpleAppSignalState> AppSignalStatesQueue;
-
-
 class AppSignalParam
 {
 	Q_GADGET
 
 	Q_PROPERTY(Hash Hash READ hash)
 	Q_PROPERTY(QString AppSignalID READ appSignalId)
-	Q_PROPERTY(QString CustimSignalID READ customSignalId)
+	Q_PROPERTY(QString CustomSignalID READ customSignalId)
 	Q_PROPERTY(QString Caption READ caption)
 	Q_PROPERTY(QString EquipmentID READ equipmentId)
 
+	Q_PROPERTY(QString Unit READ unit)
+	Q_PROPERTY(int Precision READ precision)
+
 	Q_PROPERTY(E::Channel Channel READ channel)
+
+	Q_PROPERTY(bool EnableTuning READ enableTuning)
+
+	Q_PROPERTY(QVariant TuningDefaultValue READ tuningDefaultValueToVariant)
+	Q_PROPERTY(QVariant TuningLowBound READ tuningLowBoundToVariant)
+	Q_PROPERTY(QVariant TuningHighBound READ tuningHighBoundToVariant)
 
 	Q_PROPERTY(bool IsInput READ isInput)
 	Q_PROPERTY(bool IsOutput READ isOutput)
@@ -149,16 +149,16 @@ public:
 	Hash hash() const;
 	void setHash(Hash value);
 
-	Q_INVOKABLE QString appSignalId() const;
+	QString appSignalId() const;
 	void setAppSignalId(const QString& value);
 
-	Q_INVOKABLE QString customSignalId() const;
+	QString customSignalId() const;
 	void setCustomSignalId(const QString& value);
 
-	Q_INVOKABLE QString caption() const;
+	QString caption() const;
 	void setCaption(const QString& value);
 
-	Q_INVOKABLE QString equipmentId() const;
+	QString equipmentId() const;
 	void setEquipmentId(const QString& value);
 
 	E::Channel channel() const;
@@ -170,10 +170,12 @@ public:
 	E::SignalInOutType inOutType() const;
 	void setInOutType(E::SignalInOutType value);
 
-	Q_INVOKABLE bool isAnalog() const;
-	Q_INVOKABLE bool isDiscrete() const;
+	bool isAnalog() const;
+	bool isDiscrete() const;
 	E::SignalType type() const;
 	void setType(E::SignalType value);
+
+	TuningValueType toTuningType() const;
 
 	E::AnalogAppSignalFormat analogSignalFormat() const;
 	void setAnalogSignalFormat(E::AnalogAppSignalFormat value);
@@ -184,16 +186,16 @@ public:
 	int unitId() const;
 	void setUnitId(int value);
 
-	Q_INVOKABLE QString unit() const;
+	QString unit() const;
 	void setUnit(QString value);
 
-	Q_INVOKABLE double lowValidRange() const;
-	Q_INVOKABLE double highValidRange() const;
+	double lowValidRange() const;
+	double highValidRange() const;
 
-	Q_INVOKABLE double lowEngineeringUnits() const;
+	double lowEngineeringUnits() const;
 	void setLowEngineeringUnits(double value);
 
-	Q_INVOKABLE double highEngineeringUnits() const;
+	double highEngineeringUnits() const;
 	void setHighEngineeringUnits(double value);
 
 	double inputLowLimit() const;
@@ -207,7 +209,7 @@ public:
 	E::OutputMode outputMode() const;
 	E::SensorType outputSensorType() const;
 
-	Q_INVOKABLE int precision() const;
+	int precision() const;
 	void setPrecision(int value);
 
 	double aperture();
@@ -219,11 +221,20 @@ public:
 	double spreadTolerance();
 	void setSpreadTolerance(double value);
 
-	Q_INVOKABLE bool enableTuning() const;
+	bool enableTuning() const;
 	void setEnableTuning(bool value);
 
-	Q_INVOKABLE double tuningDefaultValue() const;
-	void setTuningDefaultValue(double value);
+	TuningValue tuningDefaultValue() const;
+	QVariant tuningDefaultValueToVariant() const;
+	void setTuningDefaultValue(const TuningValue& value);
+
+	TuningValue tuningLowBound() const;
+	QVariant tuningLowBoundToVariant() const;
+	void setTuningLowBound(const TuningValue& value);
+
+	TuningValue tuningHighBound() const;
+	QVariant tuningHighBoundToVariant() const;
+	void setTuningHighBound(const TuningValue& value);
 
 public:
 	static const int NO_UNIT_ID = 1;
@@ -251,13 +262,13 @@ private:
 	double m_electricLowLimit = 0;										// low electric value for input range
 	double m_electricHighLimit = 0;									// high electric value for input range
 	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;			// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensorType;	// electric sensor type for input range (was created for m_inputUnitID)
+	E::SensorType m_sensorType = E::SensorType::NoSensor;	// electric sensor type for input range (was created for m_inputUnitID)
 
 	double m_outputLowLimit = 0;									// low physical value for output range
 	double m_outputHighLimit = 0;									// high physical value for output range
 	int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
 	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
-	E::SensorType m_outputSensorType = E::SensorType::NoSensorType;	// electric sensor type for output range (was created for m_outputMode)
+	E::SensorType m_outputSensorType = E::SensorType::NoSensor;	// electric sensor type for output range (was created for m_outputMode)
 
 	int m_precision = 2;
 	double m_coarseAperture = 1;
@@ -265,7 +276,12 @@ private:
 	double m_filteringTime = 0.005;
 	double m_spreadTolerance = 2;
 	bool m_enableTuning = false;
-	double m_tuningDefaultValue = 0;
+	TuningValue m_tuningDefaultValue;
+	TuningValue m_tuningLowBound;
+	TuningValue m_tuningHighBound;
+
+	QString m_specPropStruct;
+	QByteArray m_specPropValues;
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

@@ -1,5 +1,7 @@
 #include "MeasureBase.h"
 
+#include <QThread>
+
 #include "Database.h"
 #include "Options.h"
 #include "Conversion.h"
@@ -336,7 +338,7 @@ void LinearityMeasurement::fill_measure_aom(const MeasureMultiParam &measurePara
 		if (outParam.isOutput() == true)
 		{
 			measureParam.calibratorManager()->value();
-			while(measureParam.calibratorManager()->isReadyForManage() != true);
+			measureParam.calibratorManager()->waitReadyForManage();
 
 			elVal = pCalibrator->measureValue();
 		}

@@ -1,5 +1,5 @@
-#pragma once
-#include <QTest>
+#pragma once // препроцессорная директива, разработанная для контроля за тем, чтобы конкретный исходный файл при компиляции подключался строго один раз
+#include <QTest>//namespace contains all the functions and declarations that are related to Qt Test
 #include <memory>
 #include "../../lib/DbController.h"
 

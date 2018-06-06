@@ -17,8 +17,9 @@
 CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
 	: QDialog(parent)
 	, m_pCalibrator (pCalibrator)
-	, m_readyForManage(true)
 {
+	setReadyForManage(true);
+
 	loadSettings(pCalibrator);
 
 	createManageDialog();
@@ -33,8 +34,9 @@ CalibratorManager::~CalibratorManager()
 		delete m_pErrorDialog;
 	}
 
+	setReadyForManage(false);
+
 	m_pCalibrator = nullptr;
-	m_readyForManage = true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -97,6 +99,16 @@ void CalibratorManager::setReadyForManage(bool ready)
 		m_readyForManage = ready;
 
 	m_mutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::waitReadyForManage()
+{
+	while(isReadyForManage() != true)
+	{
+		QThread::msleep(1);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -372,7 +384,7 @@ void CalibratorManager::onCalibratorDisconnect()
 
 	enableInterface(false);
 
-	setReadyForManage(true);
+	setReadyForManage(false);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

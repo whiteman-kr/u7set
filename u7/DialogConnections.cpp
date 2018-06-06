@@ -56,6 +56,10 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	connect(m_connectionsTree, &QWidget::customContextMenuRequested, this, &DialogConnections::onCustomContextMenuRequested);
 
 	m_connectionPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		m_connectionPropertyEditor->setFontSizeF(m_connectionPropertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
 	connect(m_connectionPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogConnections::onPropertiesChanged);
 

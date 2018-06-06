@@ -67,44 +67,25 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileClient::FileClient(const QString& rootFolder,
-						   const HostAddressPort &serverAddressPort,
-						   E::SoftwareType softwareType,
-						   const QString equipmentID,
-						   int majorVersion,
-						   int minorVersion,
-						   int commitNo) :
-		Client(serverAddressPort,
-			   softwareType,
-			   equipmentID,
-			   majorVersion,
-			   minorVersion,
-			   commitNo)
+	FileClient::FileClient(const SoftwareInfo& softwareInfo, const QString& rootFolder,
+						   const HostAddressPort &serverAddressPort) :
+		Client(softwareInfo, serverAddressPort)
 	{
 		m_rootFolder = rootFolder;
+
 		m_file.setParent(this);
 
 		init();
 	}
 
-
-	FileClient::FileClient(const QString &rootFolder,
+	FileClient::FileClient(const SoftwareInfo& softwareInfo,
+						   const QString &rootFolder,
 						   const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2,
-						   E::SoftwareType softwareType,
-						   const QString equipmentID,
-						   int majorVersion,
-						   int minorVersion,
-						   int commitNo) :
-		Client(serverAddressPort1,
-			   serverAddressPort2,
-			   softwareType,
-			   equipmentID,
-			   majorVersion,
-			   minorVersion,
-			   commitNo)
+						   const HostAddressPort& serverAddressPort2) :
+		Client(softwareInfo, serverAddressPort1, serverAddressPort2)
 	{
 		m_rootFolder = rootFolder;
+
 		m_file.setParent(this);
 
 		init();
@@ -122,6 +103,10 @@ namespace Tcp
 		m_file.close();
 	}
 
+	void FileClient::onReplyTimeout()
+	{
+		endFileDownload(FileTransferResult::ServerReplyTimeout);
+	}
 
 	void FileClient::init()
 	{
@@ -131,7 +116,6 @@ namespace Tcp
 		m_reply.clear();
 		m_md5Generator.reset();
 	}
-
 
 	FileTransferResult FileClient::checkLocalFolder()
 	{
@@ -389,6 +373,10 @@ namespace Tcp
 			str = QString(tr("Local file reading error"));
 			break;
 
+		case ServerReplyTimeout:
+			str = QString(tr("Server reply timeout"));
+			break;
+
 		case ConfigurationIsNotReady:
 			str = QString(tr("Configuration is not ready"));
 			break;
@@ -408,29 +396,33 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileServer::FileServer(const QString& rootFolder, std::shared_ptr<CircularLogger> logger) :
+	FileServer::FileServer(const QString& rootFolder, const SoftwareInfo& softwareInfo, std::shared_ptr<CircularLogger> logger) :
+		Server(softwareInfo),
 		m_logger(logger),
 		m_reply(*reinterpret_cast<GetFileReply*>(m_replyData)),
+		m_replyFileData(m_replyData + sizeof(GetFileReply)),
 		m_transmitionFilesTimer(this)
 	{
 		m_rootFolder = QDir::fromNativeSeparators(rootFolder);
 		m_file.setParent(this);
 
 		m_reply.clear();
-		m_fileData = m_replyData + sizeof(GetFileReply);
 
-		connect(&m_transmitionFilesTimer, &QTimer::timeout, [this]{ m_state->isActual = true; });
+		connect(&m_transmitionFilesTimer, &QTimer::timeout, [this]{ m_state.isActual = true; });
 	}
 
 
 	Server* FileServer::getNewInstance()
 	{
-		return new FileServer(m_rootFolder, m_logger);
+		return new FileServer(m_rootFolder, localSoftwareInfo(), m_logger);
 	}
 
 
-	void FileServer::processSuccessorRequest(quint32 /*requestID*/, const char* /*requestData*/, quint32 /*requestDataSize*/)
+	void FileServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 	{
+		Q_UNUSED(requestID);
+		Q_UNUSED(requestData);
+		Q_UNUSED(requestDataSize);
 	}
 
 
@@ -449,7 +441,14 @@ namespace Tcp
 	void FileServer::init()
 	{
 		m_fileName = "";
-		m_file.close();
+
+		if (m_file.isOpen() == true)
+		{
+			m_file.close();
+		}
+
+		m_fileData.clear();
+
 		m_transferInProgress = false;
 		m_reply.clear();
 		m_md5Generator.reset();
@@ -477,21 +476,21 @@ namespace Tcp
 		}
 	}
 
+	bool FileServer::checkFile(QString& pathFileName, QByteArray& fileData)
+	{
+		Q_UNUSED(pathFileName);
+		Q_UNUSED(fileData);
+
+		return true;
+	}
 
 	void FileServer::sendFirstFilePart(const QString& fileName)
 	{
-		if (m_transferInProgress == true)
-		{
-			// cancel current transfer
-			//
-			init();
-		}
-
-		m_transferInProgress = true;
+		init();
 
 		// start upload process
 		//
-		init();
+		m_transferInProgress = true;
 
 		m_fileName = fileName;
 
@@ -517,8 +516,6 @@ namespace Tcp
 
 		m_reply.fileSize = fi.size();
 
-		assert(m_reply.fileSize >= 0);
-
 		if (m_reply.fileSize == 0)
 		{
 			m_reply.totalParts = 1;
@@ -528,47 +525,61 @@ namespace Tcp
 			m_reply.totalParts = m_reply.fileSize / FILE_PART_SIZE + (m_reply.fileSize % FILE_PART_SIZE ? 1 : 0);
 		}
 
+		// read file into memory and check file consistensy
+
+		m_fileData = m_file.readAll();
+
+		m_file.close();
+
+		if (m_reply.fileSize != 0 && m_fileData.size() == 0)
+		{
+			// file reading error!
+			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
+			sendReply(m_reply, sizeof(m_reply));
+			init();
+			return;
+		}
+
+		if (checkFile(m_fileName, m_fileData) == false)
+		{
+			// file reading error!
+			m_reply.errorCode = FileTransferResult::FileDataCorrupted;
+			sendReply(m_reply, sizeof(m_reply));
+			init();
+			return;
+		}
+
 		sendNextFilePart();
 	}
 
 
 	void FileServer::sendNextFilePart()
 	{
-		if (m_file.isOpen() == false)
-		{
-			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
-			sendReply(m_reply, sizeof(m_reply));
-			init();
+		int offset = m_reply.currentPart * FILE_PART_SIZE;
 
-			DEBUG_LOG_ERR(m_logger, QString("File '%1' is not open.").arg(m_file.fileName()));
-			return;
+		int size = m_fileData.size() - offset;
+
+		if (size > FILE_PART_SIZE)
+		{
+			size = FILE_PART_SIZE;
 		}
 
-		int readed = m_file.read(m_fileData, FILE_PART_SIZE);
+		const char* partDataPtr = m_fileData.constData() + offset;
 
-		if (readed == -1)
-		{
-			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
-			sendReply(m_reply, sizeof(m_reply));
-			init();
+		memcpy(m_replyFileData, partDataPtr, size);
+		m_md5Generator.addData(partDataPtr, size);
 
-			DEBUG_LOG_ERR(m_logger, QString("Read file '%1' error.").arg(m_file.fileName()));
-			return;
-		}
-
-		m_reply.currentPart++;
-		m_reply.currentPartSize = readed;
-
-		m_md5Generator.addData(m_fileData, readed);
 		m_reply.setMD5(m_md5Generator.result());
 
-		sendReply(m_replyData, sizeof(GetFileReply) + m_reply.currentPartSize);
+		m_reply.currentPart++;
+		m_reply.currentPartSize = size;
+
+		sendReply(m_replyData, sizeof(GetFileReply) + size);
 
 		if (m_reply.currentPart == m_reply.totalParts)
 		{
 			// all parts of file are sent
 			//
-
 			onFileSent(m_file.fileName(), peerAddr().addressStr());
 
 			init();
@@ -577,7 +588,7 @@ namespace Tcp
 
 	void FileServer::restartTransmitionFilesTimer()
 	{
-		m_state->isActual = false;
+		m_state.isActual = false;
 
 		m_transmitionFilesTimer.stop();
 

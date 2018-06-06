@@ -15,46 +15,34 @@
 #include "../lib/CircularLogger.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/CommandLineParser.h"
+#include "../lib/SoftwareInfo.h"
 #include "../Proto/network.pb.h"
 
-
-struct VersionInfo
+enum ServiceState
 {
-	int majorVersion;
-	int minorVersion;
-	int commitNo;
-	QString buildBranch;
-	QString commitSHA;
+	Stopped,
+	Starts,
+	Work,
+	Stops,
+
+	Undefined,			// this states used by 'Service Control Manager' only
+	Unavailable,
 };
-
-
-#define VERSION_INFO(majorVersion, minorVersion) {	majorVersion, \
-													minorVersion, \
-													USED_SERVER_COMMIT_NUMBER, \
-													BUILD_BRANCH, \
-													USED_SERVER_COMMIT_SHA }
-
 
 struct ServiceInfo
 {
-	ServiceType serviceType;
-	quint16 port;
-	const char* name;
-	const char* shortName;
+	ServiceInfo();
+	ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _name, QString _shortName);
+
+	E::SoftwareType softwareType = E::SoftwareType::Unknown;
+	quint16 port = 0;
+	QString name;
+	QString shortName;
 };
 
+HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo();
 
-const ServiceInfo serviceInfo[] =
-{
-	{ ServiceType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
-	{ ServiceType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
-	{ ServiceType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
-	{ ServiceType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
-	{ ServiceType::ArchivingService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
-	{ ServiceType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
-};
-
-const int SERVICE_TYPE_COUNT = sizeof(serviceInfo) / sizeof (ServiceInfo);
+static HashedVector<E::SoftwareType, ServiceInfo> serviceInfo = initServiceInfo();
 
 class Service;
 
@@ -70,12 +58,11 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ServiceWorker(ServiceType serviceType,
+	ServiceWorker(const SoftwareInfo& softwareInfo,
 				  const QString& serviceName,
 				  int& argc,
 				  char** argv,
-				  const VersionInfo& versionInfo,
-				  std::shared_ptr<CircularLogger> logger);
+				  CircularLoggerShared logger);
 
 	virtual ~ServiceWorker();
 
@@ -85,10 +72,10 @@ public:
 	QString appPath() const;
 	QString cmdLine() const;
 
-	ServiceType serviceType() const;
 	QString serviceName() const;
 
-	const VersionInfo& versionInfo() const;
+	const SoftwareInfo& softwareInfo() const;
+	E::SoftwareType softwareType() const;
 
 	void initAndProcessCmdLineSettings();
 
@@ -108,7 +95,14 @@ public:
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
 
+	QString equipmentID() const { return m_equipmentID; }
+
+	HostAddressPort cfgServiceIP1() const { return m_cfgServiceIP1; }
+	HostAddressPort cfgServiceIP2() const { return m_cfgServiceIP2; }
+
 	bool clearSettings();								// clear all service settings
+
+	CircularLoggerShared logger() const { return m_logger; }
 
 signals:
 	void work();
@@ -130,12 +124,25 @@ private:
 	void onThreadStarted() final;
 	void onThreadFinished() final;
 
+protected:
+	static const char* const SETTING_EQUIPMENT_ID;
+	static const char* const SETTING_CFG_SERVICE_IP1;
+	static const char* const SETTING_CFG_SERVICE_IP2;
+	static const char* const SETTING_PROCESSING_THREADS_COUNT;
+
 private:
-	ServiceType m_serviceType = ServiceType::BaseService;
+	QString m_equipmentID;
+
+	QString m_cfgServiceIP1Str;
+	HostAddressPort m_cfgServiceIP1;
+
+	QString m_cfgServiceIP2Str;
+	HostAddressPort m_cfgServiceIP2;
+
+	SoftwareInfo m_softwareInfo;
 	QString m_serviceName;
 	int& m_argc;
 	char** m_argv = nullptr;
-	VersionInfo m_versionInfo;
 	CircularLoggerShared m_logger;
 
 	QSettings m_settings;

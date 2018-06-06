@@ -71,7 +71,14 @@ SOURCES += main.cpp \
     DbControllerHardwareConfigurationTests.cpp \
     ../../lib/HostAddressPort.cpp \
     DbControllerBuildManagementTests.cpp \
-    DbControllerVersionControlTests.cpp
+    DbControllerVersionControlTests.cpp \
+    ../../lib/TuningValue.cpp \
+    ../../lib/Times.cpp \
+    ../../lib/OutputLog.cpp \
+    ../../u7/Builder/IssueLogger.cpp \
+    ../../lib/DeviceHelper.cpp \
+    ../../u7/Builder/ModulesRawData.cpp \
+    ../../lib/SignalProperties.cpp
 
 HEADERS += \
     UserTests.h \
@@ -109,12 +116,24 @@ HEADERS += \
     DbControllerHardwareConfigurationTests.h \
     ../../lib/HostAddressPort.h \
     DbControllerBuildManagementTests.h \
-    DbControllerVersionControlTests.h
+    DbControllerVersionControlTests.h \
+    ../../lib/TuningValue.h \
+    ../../lib/Times.h \
+    ../../lib/OutputLog.h \
+    ../../u7/Builder/IssueLogger.h \
+    ../../lib/DeviceHelper.h \
+    ../../u7/Builder/ModulesRawData.h \
+    ../../lib/SignalProperties.h
 
 #c++11 support for GCC
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+#unix:QMAKE_CXXFLAGS += -std=c++11
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #

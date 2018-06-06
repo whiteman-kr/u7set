@@ -103,7 +103,10 @@ void UdpClientSocket::onSocketReadyRead()
 {
 	AUTO_LOCK(m_mutex);
 
-	assert(m_state == State::WaitingForAck);
+	if (m_state != State::WaitingForAck)
+	{
+		return;
+	}
 
 	QHostAddress address;
 	quint16 port = 0;
@@ -431,36 +434,6 @@ bool UdpRequest::writeData(const QByteArray& data)
 	return writeData(data.constData(), data.size());
 }
 
-
-bool UdpRequest::writeStruct(Serializable* s)
-{
-	if (s == nullptr)
-	{
-		assert(s != nullptr);
-		return false;
-	}
-
-	m_writeDataIndex = s->serializeTo(writeDataPtr()) - data();
-
-	header()->dataSize += s->size();
-	m_rawDataSize += s->size();
-
-	assert(m_rawDataSize <= MAX_DATAGRAM_SIZE);
-
-	return true;
-}
-
-
-bool UdpRequest::writeStruct(const JsonSerializable& s)
-{
-	QByteArray json;
-
-	s.writeToJson(json);
-
-	return writeData(json);
-}
-
-
 quint32 UdpRequest::readDword()
 {
 	if (readDataPtr() - data() + sizeof(quint32) > header()->dataSize)
@@ -474,20 +447,6 @@ quint32 UdpRequest::readDword()
 	m_readDataIndex += sizeof(quint32);
 
 	return result;
-}
-
-
-void UdpRequest::readStruct(Serializable* s)
-{
-	m_readDataIndex = s->serializeFrom(readDataPtr()) - data();
-}
-
-
-bool UdpRequest::readStruct(JsonSerializable* s)
-{
-	QByteArray json(readDataPtr(), headerDataSize());
-
-	return s->readFromJson(json);
 }
 
 

@@ -2,7 +2,10 @@
 
 LogicModuleSet::LogicModuleSet()
 {
+}
 
+LogicModuleSet::~LogicModuleSet()
+{
 }
 
 bool LogicModuleSet::loadFile(DbController* db, QString fileName, QString* errorString)
@@ -90,15 +93,28 @@ bool LogicModuleSet::loadFile(DbController* db, QString fileName, QString* error
 	return true;
 }
 
+void LogicModuleSet::add(QString fileName, std::shared_ptr<LmDescription> lm)
+{
+	assert(lm);
+	m_lmDescriptions[fileName] = lm;
+}
+
 bool LogicModuleSet::has(QString fileName) const
 {
 	return m_lmDescriptions.count(fileName) > 0;
 }
 
-void LogicModuleSet::add(QString fileName, std::shared_ptr<LmDescription> lm)
+QStringList LogicModuleSet::fileList() const
 {
-	assert(lm);
-	m_lmDescriptions[fileName] = lm;
+	QStringList result;
+	result.reserve(static_cast<int>(m_lmDescriptions.size()));
+
+	for (auto lmp : m_lmDescriptions)
+	{
+		result.push_back(lmp.first);
+	}
+
+	return result;
 }
 
 std::shared_ptr<LmDescription> LogicModuleSet::get(QString fileName) const

@@ -18,6 +18,11 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 #
@@ -78,7 +83,6 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/DeviceHelper.cpp \
-    ../lib/JsonSerializable.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/DeviceObject.cpp \
     ../u7/Builder/IssueLogger.cpp \
@@ -95,7 +99,11 @@ SOURCES += \
     ArchRequestThread.cpp \
     TcpArchRequestsServer.cpp \
     Archive.cpp \
-    TimeFilter.cpp
+    TimeFilter.cpp \
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp \
+    ../lib/Signal.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS += \
     version.h \
@@ -118,7 +126,6 @@ HEADERS += \
     ../lib/BuildInfo.h \
     ../lib/CircularLogger.h \
     ../lib/DeviceHelper.h \
-    ../lib/JsonSerializable.h \
     ../lib/TcpFileTransfer.h \
     ../lib/DeviceObject.h \
     ../u7/Builder/IssueLogger.h \
@@ -136,16 +143,18 @@ HEADERS += \
     TcpArchRequestsServer.h \
     Archive.h \
     ../lib/TimeStamp.h \
-    TimeFilter.h
+    TimeFilter.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h \
+    ../lib/Signal.h \
+    ../lib/Signal.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 #protobuf
 #

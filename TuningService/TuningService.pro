@@ -3,14 +3,20 @@ QT -= gui
 QT += network
 QT += qml
 QT += xml
+QT += widgets
 
-CONFIG += c++11
 
 TARGET = TuningSrv
 CONFIG += console
 CONFIG -= app_bundle
 
 TEMPLATE = app
+
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 #
@@ -64,7 +70,6 @@ SOURCES += \
     ../lib/SimpleThread.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/Tcp.cpp \
-    ../lib/JsonSerializable.cpp \
     TuningService.cpp \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \
@@ -77,7 +82,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/Signal.cpp \
-    ../AppDataService/AppSignalStateEx.cpp \
     ../lib/Crc.cpp \
     ../lib/WUtils.cpp \
     TuningDataStorage.cpp \
@@ -95,7 +99,11 @@ SOURCES += \
     TuningClientContext.cpp \
     ../lib/CommandLineParser.cpp \
     TuningServiceMain.cpp \
-    ../lib/AppSignal.cpp
+    ../lib/AppSignal.cpp \
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp \
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -139,13 +147,15 @@ HEADERS += \
     TuningMemory.h \
     TuningClientContext.h \
     ../lib/CommandLineParser.h \
-    ../lib/AppSignal.h
+    ../lib/AppSignal.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h \
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

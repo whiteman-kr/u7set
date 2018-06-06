@@ -8,6 +8,7 @@
 class E : public QObject
 {
 	Q_OBJECT
+
 public:
 	E() = delete;
 
@@ -151,10 +152,23 @@ public:
 	};
 	Q_ENUM(MemoryArea)
 
+	// LogicModuleRamAccess
+	//
+	enum class LogicModuleRamAccess
+	{
+	 Undefined = 0x00,
+	 Read  = 0x01,
+	 Write = 0x02,
+	 ReadWrite = 0x03
+	};
+	Q_ENUM(LogicModuleRamAccess)
+
 	// Software Module Type Identifiers
 	//
 	enum SoftwareType
 	{
+		Unknown = 8000,
+		BaseService = 8999,
 		Monitor = 9000,
 		ConfigurationService = 9001,
 		AppDataService = 9002,
@@ -201,7 +215,7 @@ public:
 	//
 	enum SensorType
 	{
-		NoSensorType = 0,
+		NoSensor = 0,
 
 		Ohm_Pt50_W1391 = 1,
 		Ohm_Pt100_W1391 = 2,
@@ -219,6 +233,23 @@ public:
 		mV_K_TXA = 11,
 		mV_L_TXK = 12,
 		mV_N_THH = 13,
+
+        //
+
+        mV_Type_B = 14,
+        mV_Type_E = 15,
+        mV_Type_J = 16,
+        mV_Type_K = 17,
+        mV_Type_N = 18,
+        mV_Type_R = 19,
+        mV_Type_S = 20,
+        mV_Type_T = 21,
+
+        mV_Raw_Mul_8 = 22,
+        mV_Raw_Mul_32 = 23,
+
+		Ohm_Ni50_W1617 = 24,
+		Ohm_Ni100_W1617 = 25,
 	};
 	Q_ENUM(SensorType)
 
@@ -277,6 +308,30 @@ public:
 	};
 	Q_ENUM(TimeType)
 
+	// Property editor type
+	//
+	enum class PropertySpecificEditor : qint16
+	{
+		None = 0,
+		Password,
+		Script,
+		TuningFilter,
+		SpecificPropertyStruct
+	};
+	Q_ENUM(PropertySpecificEditor)
+
+	enum class SpecificPropertyType
+	{
+		pt_int32,
+		pt_uint32,
+		pt_double,
+		pt_bool,
+		pt_e_channel,
+		pt_string,
+		pt_dynamicEnum,
+	};
+	Q_ENUM(SpecificPropertyType)
+
 public:
 	// Convert enum value (not index) to QString
 	//
@@ -331,7 +386,16 @@ public:
 	// Convert QString to enum value (not index)
 	//
 	template <typename ENUM_TYPE>
-	static ENUM_TYPE stringToValue(const QString& str, bool* ok = nullptr)
+	static std::pair<ENUM_TYPE, bool> stringToValue(const QString& str)
+	{
+		bool ok = false;
+		auto resultVal = stringToValue<ENUM_TYPE>(str, &ok);
+
+		return {resultVal, ok};
+	}
+
+	template <typename ENUM_TYPE>
+	static ENUM_TYPE stringToValue(const QString& str, bool* ok)
 	{
 		assert(std::is_enum<ENUM_TYPE>::value);
 
@@ -395,7 +459,6 @@ public:
 		return result;
 	}
 
-
 	// Get list of enum keys converted to QString
 	//
 	template <typename ENUM_TYPE>
@@ -423,11 +486,10 @@ public:
 		return result;
 	}
 
-
 	// Check if enum containes value
 	//
 	template <typename ENUM_TYPE>
-	static bool containes(int value)
+	static bool contains(int value)
 	{
 		assert(std::is_enum<ENUM_TYPE>::value);
 
@@ -455,21 +517,6 @@ const char* const DataFormatStr[] =
 	"Unsigned Int",
 	"Signed Int",
 	"Float",
-};
-
-enum class UartID
-{
-	LmAppLogicUart = 0x101,
-	LmConfigUart = 0x102,
-	LmServiceUart = 0x103,
-	LmTuningUart = 0x104,
-	AimUart = 0x203,
-	AomUart = 0x303,
-	DimUart = 0x403,
-	DomUart = 0x503,
-	AifmUart = 0x603,
-	OcmUart = 0x703
-
 };
 
 

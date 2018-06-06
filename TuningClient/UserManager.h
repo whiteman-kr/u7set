@@ -1,53 +1,94 @@
 #ifndef USERMANAGER_H
 #define USERMANAGER_H
 
-#include "../lib/PropertyObject.h"
+#include <QDateTime>
 
-class User : public PropertyObject
+enum class LogonMode
 {
-public:
-	User();
-	User(const QString& name, const QString& description, const QString& password, bool admin);
-
-	User& operator=(const User& That);
-
-	QString name() const;
-	void setName(const QString& value);
-
-	QString description() const;
-	void setDescription(const QString& value);
-
-	QString password() const;
-	void setPassword(const QString& value);
-
-	bool admin() const;
-	void setAdmin(bool value);
-
-private:
-	QString m_name;
-	QString m_description;
-	QString m_password;
-
-	bool m_admin = false;
+	Permanent = 0,
+	PerOperation
 };
 
-class UserManager
+class UserManager;
+
+class LogonWorkspace : public QWidget
 {
+	Q_OBJECT
+public:
+	LogonWorkspace(UserManager* userManager, QWidget* parent);
+
+private slots:
+	void onButtonLogin();
+	void onButtonLogout();
+
+	void onUserManagerLogin();
+	void onUserManagerLogout();
+
+public slots:
+	void onTimer();
+
+private:
+	QPushButton* m_loginButton = nullptr;
+	QPushButton* m_logoutButton = nullptr;
+	QLabel* m_loginUserName = nullptr;
+	QLabel* m_logoutPendingTime = nullptr;
+
+	UserManager* m_userManager = nullptr;
+};
+
+class UserManager : public QObject
+{
+	Q_OBJECT
 public:
 	UserManager();
 
-	bool requestPassword(QWidget* parent, bool adminNeeded);
+	// Operations
 
-	void Restore();
-	void Store();
+	void setConfiguration(const QStringList& users, LogonMode logonMode, int sessionMaxLengthSeconds);
 
-	std::vector<User> m_users;
+	bool login(QWidget* parent);
+	void logout();
+
+	// State
+
+	LogonMode logonMode() const;
+
+	QStringList users() const;
+
+	bool isLoggedIn() const;
+
+	QString loggedInUser() const;
+
+	QDateTime loginTime() const;
+	QDateTime logoutPendingTime() const;
+
+signals:
+	void loggedOn();
+	void loggedOut();
 
 private:
-	QString m_emptyMd5;
+	bool requestPassword(QWidget* parent);
+
+#ifdef Q_OS_LINUX
+    static int pamConverse(int n, const struct pam_message **msg,
+        struct pam_response **resp, void *data);
+#endif
+
+private:
+	LogonMode m_logonMode = LogonMode::Permanent;
+	int m_sessionMaxLengthSeconds = 120;
+
+	QStringList m_users;
+
+	bool m_loggedIn = false;
+	QString m_loggedInUser;
+
+	QDateTime m_logonTime;
+	QDateTime m_logoutPendingTime;
+
+#ifdef Q_OS_LINUX
+    QString conversePassword;
+#endif
 };
-
-Q_DECLARE_METATYPE(User)
-
 
 #endif // USERMANAGER_H

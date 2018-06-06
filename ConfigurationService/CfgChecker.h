@@ -34,6 +34,7 @@ signals:
 public slots:
 	bool updateBuildXml();
 	void renameWorkToBackup(QString workDirectoryPathToLeave);
+	bool renameWorkToBackupCorrupted(QString corruptedWorkDirectoryPath);
 
 protected:
 	void onThreadStarted();

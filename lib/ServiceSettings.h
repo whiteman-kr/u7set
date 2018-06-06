@@ -5,11 +5,12 @@
 #include "../u7/Builder/IssueLogger.h"
 
 
-const char* const CFG_FILE_ID_DATA_SOURCES = "APP_DATA_SOURCES";
+const char* const CFG_FILE_ID_APP_DATA_SOURCES = "APP_DATA_SOURCES";
 const char* const CFG_FILE_ID_APP_SIGNALS = "APP_SIGNALS";
 const char* const CFG_FILE_ID_APP_SIGNAL_SET = "APP_SIGNAL_SET";
 const char* const CFG_FILE_ID_UNIT_SET = "UNIT_SET";
 
+const char* const CFG_FILE_ID_TUNING_SOURCES = "TUNING_SOURCES";
 const char* const CFG_FILE_ID_TUNING_SIGNALS = "TUNING_SIGNALS";
 const char* const CFG_FILE_ID_TUNING_SCHEMAS_DETAILS = "TUNING_SCHEMAS_DETAILS";
 const char* const CFG_FILE_ID_TUNING_FILTERS = "TUNING_FILTERS";
@@ -17,63 +18,98 @@ const char* const CFG_FILE_ID_TUNING_GLOBALSCRIPT = "TUNING_GLOBALSCRIPT";
 
 const char* const CFG_FILE_ID_METROLOGY_SIGNALS = "METROLOGY_SIGNALS";
 
-class AppDataServiceChannel
+class ServiceSettings
 {
-private:
-	static const char* PROP_APP_DATA_NETMASK;
+public:
+	// common properties of services
+	//
+	static const char* SETTINGS_SECTION;
+
+	static const char* PROP_APP_DATA_RECEIVING_NETMASK;
 	static const char* PROP_APP_DATA_RECEIVING_IP;
 	static const char* PROP_APP_DATA_RECEIVING_PORT;
+
+	static const char* PROP_DIAG_DATA_RECEIVING_NETMASK;
+	static const char* PROP_DIAG_DATA_RECEIVING_IP;
+	static const char* PROP_DIAG_DATA_RECEIVING_PORT;
+
+	static const char* PROP_TUNING_DATA_NETMASK;
+	static const char* PROP_TUNING_DATA_IP;
+	static const char* PROP_TUNING_DATA_PORT;
+
+	static const char* PROP_CLIENT_REQUEST_IP;
+	static const char* PROP_CLIENT_REQUEST_NETMASK;
+	static const char* PROP_CLIENT_REQUEST_PORT;
+
+	static const char* PROP_APP_DATA_SERVICE_ID;
+	static const char* PROP_APP_DATA_SERVICE_IP;
+	static const char* PROP_APP_DATA_SERVICE_PORT;
+
+	static const char* PROP_DIAG_DATA_SERVICE_ID;
+	static const char* PROP_DIAG_DATA_SERVICE_IP;
+	static const char* PROP_DIAG_DATA_SERVICE_PORT;
 
 	static const char* PROP_ARCH_SERVICE_ID;
 	static const char* PROP_ARCH_SERVICE_IP;
 	static const char* PROP_ARCH_SERVICE_PORT;
 
-	static const char* PROP_CFG_SERVICE_ID;
+	static const char* PROP_TUNING_SERVICE_ID;
+	static const char* PROP_TUNING_SERVICE_IP;
+	static const char* PROP_TUNING_SERVICE_PORT;
 
-	static const char* SECTION_FORMAT_STR;
+	static const char* PROP_CFG_SERVICE_ID1;
+	static const char* PROP_CFG_SERVICE_IP1;
+	static const char* PROP_CFG_SERVICE_PORT1;
 
-	QString sectionName(int channel);			// channel from 0
+	static const char* PROP_CFG_SERVICE_ID2;
+	static const char* PROP_CFG_SERVICE_IP2;
+	static const char* PROP_CFG_SERVICE_PORT2;
 
 public:
-	HostAddressPort appDataReceivingIP;
-	QHostAddress appDataNetmask;
+	static bool getSoftwareConnection(	const Hardware::EquipmentSet* equipment,
+										const Hardware::Software* thisSoftware,
+										const QString& propConnectedSoftwareID,
+										const QString& propConnectedSoftwareIP,
+										const QString& propConnectedSoftwarePort,
+										QString* connectedSoftwareID,
+										HostAddressPort* connectedSoftwareIP,
+										bool emptyAllowed, const QString &defaultIP, int defaultPort,
+										Builder::IssueLogger* log);
 
-	QString archServiceStrID;
-	HostAddressPort archServiceIP;
-
-	QString cfgServiceStrID;
-	HostAddressPort cfgServiceIP;
-
-	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::DeviceController* controller, Builder::IssueLogger* log);
-	bool writeToXml(XmlWriteHelper& xml, int channel);
-	bool readFromXml(XmlReadHelper& xml, int channel);
+	static bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
+										const Hardware::Software* software,
+										QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
+										QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
+										Builder::IssueLogger* log);
 };
 
-
-class AppDataServiceSettings
+class CfgServiceSettings : public ServiceSettings
 {
 public:
-	static const int DATA_CHANNEL_1 = 0;
-	static const int DATA_CHANNEL_2 = 1;
+};
 
-	static const int DATA_CHANNEL_COUNT = 2;
-
+class AppDataServiceSettings : public ServiceSettings
+{
 private:
-	static const char* DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR;
-	static const char* SECTION_NAME;
-	static const char* PROP_CLIENT_REQUEST_IP;
-	static const char* PROP_CLIENT_REQUEST_PORT;
-	static const char* PROP_CLIENT_REQUEST_NETMASK;
-
 	static const char* PROP_AUTO_ARCHIVE_INTERVAL;
 
 public:
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
 
-	AppDataServiceChannel appDataServiceChannel[DATA_CHANNEL_COUNT];
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
+	HostAddressPort appDataReceivingIP;
+	QHostAddress appDataReceivingNetmask;
 
 	int autoArchiveInterval = 5;
+
+	QString archServiceID;
+	HostAddressPort archServiceIP;
+
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
 
 	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
@@ -81,22 +117,11 @@ public:
 };
 
 
-class TuningServiceSettings
+class TuningServiceSettings : public ServiceSettings
 {
 private:
-	static const char* SECTION_NAME;
-	static const char* PROP_CLIENT_REQUEST_IP;
-	static const char* PROP_CLIENT_REQUEST_PORT;
-	static const char* PROP_CLIENT_REQUEST_NETMASK;
-	static const char* PROP_TUNING_DATA_IP;
-	static const char* PROP_TUNING_DATA_PORT;
-
-	static const char* TUNING_MEMORY_SETTINGS_ELEMENT;
-	static const char* PROP_TUNING_DATA_OFFSET;
-	static const char* PROP_TUNING_DATA_SIZE;
-	static const char* PROP_TUNING_ROM_FRAME_COUNT;
-	static const char* PROP_TUNING_ROM_FRAME_SIZE;
-	static const char* PROP_TUNING_ROM_SIZE;
+	static const char* PROP_SINGLE_LM_CONTROL;
+	static const char* PROP_DISABLE_MODULES_TYPE_CHECKING;
 
 	static const char* TUNING_CLIENTS;
 	static const char* TUNING_CLIENT;
@@ -119,13 +144,10 @@ public:
 
 	HostAddressPort tuningDataIP;
 
-	QVector<TuningClient> clients;
+	bool singleLmControl = true;
+	bool disableModulesTypeChecking = false;
 
-	int tuningDataOffsetW = 0;
-	int tuningDataSizeW = 0;
-	int tuningRomFrameCount = 0;
-	int tuningRomFrameSizeW = 0;
-	int tuningRomSizeW = 0;
+	QVector<TuningClient> clients;
 
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
@@ -133,23 +155,9 @@ public:
 };
 
 
-class ArchivingServiceSettings
+class ArchivingServiceSettings : public ServiceSettings
 {
 public:
-	static const char* SECTION_NAME;
-
-	static const char* PROP_CLIENT_REQUEST_IP;
-	static const char* PROP_CLIENT_REQUEST_PORT;
-	static const char* PROP_CLIENT_REQUEST_NETMASK;
-
-	static const char* PROP_APP_DATA_SERVICE_REQUEST_IP;
-	static const char* PROP_APP_DATA_SERVICE_REQUEST_PORT;
-	static const char* PROP_APP_DATA_SERVICE_REQUEST_NETMASK;
-
-	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_IP;
-	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_PORT;
-	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK;
-
 	static const char* PROP_ARCHIVE_DB_HOST_IP;
 	static const char* PROP_ARCHIVE_DB_HOST_PORT;
 

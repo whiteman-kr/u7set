@@ -11,6 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = scm
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -60,9 +66,7 @@ SOURCES += MainWindow.cpp \
     ../lib/SocketIO.cpp \
     ../lib/DataSource.cpp \
     main.cpp \
-    ../lib/JsonSerializable.cpp \
     BaseServiceStateWidget.cpp \
-    DataAquisitionServiceWidget.cpp \
     ConfigurationServiceWidget.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/XmlHelper.cpp \
@@ -81,9 +85,27 @@ SOURCES += MainWindow.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/AppDataSource.cpp \
+    ../AppDataService/AppDataSource.cpp \
     ../lib/CircularLogger.cpp \
-    TcpConfigServiceClient.cpp
+    TcpConfigServiceClient.cpp \
+    AppDataServiceWidget.cpp \
+    ../lib/SoftwareInfo.cpp \
+    ../lib/Service.cpp \
+    ../lib/CommandLineParser.cpp \
+    ../lib/TuningValue.cpp \
+    TuningServiceWidget.cpp \
+    TcpTuningServiceClient.cpp \
+    ../lib/Tuning/TuningSourceState.cpp \
+    TuningSourceWidget.cpp \
+    ../lib/OutputLog.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../u7/Builder/ModulesRawData.cpp \
+    AppDataSourceWidget.cpp \
+    ../lib/Times.cpp \
+    ../lib/Tuning/TuningSignalState.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -92,9 +114,7 @@ HEADERS  += MainWindow.h \
     ../lib/SocketIO.h \
     ../lib/DataSource.h \
     version.h \
-    ../lib/JsonSerializable.h \
     BaseServiceStateWidget.h \
-    DataAquisitionServiceWidget.h \
     ConfigurationServiceWidget.h \
     ../lib/SimpleThread.h \
     ../lib/XmlHelper.h \
@@ -114,10 +134,31 @@ HEADERS  += MainWindow.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \
     ../lib/HostAddressPort.h \
-    ../lib/AppDataSource.h \
+    ../AppDataService/AppDataSource.h \
     ../lib/CircularLogger.h \
     TcpConfigServiceClient.h \
-    ../lib/WidgetUtils.h
+    ../lib/WidgetUtils.h \
+    AppDataServiceWidget.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/OrderedHash.h \
+    ../lib/Service.h \
+    ../lib/CommandLineParser.h \
+    ../lib/TuningValue.h \
+    TuningServiceWidget.h \
+    TcpTuningServiceClient.h \
+    ../lib/Tuning/TuningSourceState.h \
+    TuningSourceWidget.h \
+    ../lib/OutputLog.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/DeviceHelper.h \
+    ../u7/Builder/ModulesRawData.h \
+    AppDataSourceWidget.h \
+    ../lib/Times.h \
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/PropertyObject.h \
+    ../lib/SignalProperties.h
+
+include(../qtservice/src/qtservice.pri)
 
 FORMS    +=
 
@@ -127,7 +168,6 @@ TRANSLATIONS = ./translations/ServiceControlManager_ru.ts \
 RESOURCES += \
     ServiceControlManager.qrc
 
-gcc:QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

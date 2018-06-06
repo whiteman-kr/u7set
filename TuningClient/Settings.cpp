@@ -42,9 +42,9 @@ HostAddressPort ConfigConnection::address() const
 Settings::Settings():
 	m_instanceStrId("SYSTEMID_WS00_TUN"),
 	m_configuratorIpAddress1("127.0.0.1"),
-	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_REQUEST),
+	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
 	m_configuratorIpAddress2("127.0.0.1"),
-	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST),
+	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
 	m_language("en")
 {
     qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
@@ -52,13 +52,24 @@ Settings::Settings():
 
 void Settings::StoreSystem()
 {
+#ifdef USE_ADMIN_REGISTRY_AREA
 	if (admin() == false)
 	{
 		return;
 	}
 
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+#else
+	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+#endif
 
+	QString instanceHistoryString;
+	for (const QString& s : m_instanceHistory)
+	{
+		instanceHistoryString += s + ";";
+	}
+
+	s.setValue("m_instanceHistory", instanceHistoryString);
 	s.setValue("m_instanceStrId", m_instanceStrId);
 
 	s.setValue("m_configuratorIpAddress1", m_configuratorIpAddress1);
@@ -72,6 +83,7 @@ void Settings::RestoreSystem()
 {
 	// determine if is running as administrator
 	//
+#ifdef USE_ADMIN_REGISTRY_AREA
 	QSettings adminSettings(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 	adminSettings.setValue("ApplicationName", qApp->applicationName());
 
@@ -85,42 +97,26 @@ void Settings::RestoreSystem()
 	{
 		m_admin = true;
 	}
+#endif
 
 	// read system settings
 	//
+#ifdef USE_ADMIN_REGISTRY_AREA
 	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+#else
+	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+#endif
+
+	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
+	m_instanceHistory = instanceHistoryString.split(';', QString::SkipEmptyParts);
 
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
 
 	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
-	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
-	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
-
-	// Determine the Global settings folder
-
-	QSettings qs(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-
-	QString m_globalAppDataPath = QDir::toNativeSeparators(qs.fileName());
-
-	int ptPos = m_globalAppDataPath.indexOf('.');
-	if (ptPos != -1)
-	{
-		m_globalAppDataPath = m_globalAppDataPath.left(ptPos);
-	}
-
-	qDebug() << m_globalAppDataPath;
-
-	if (m_admin == true)
-	{
-		QDir dir(m_globalAppDataPath);
-
-		if (dir.exists() == false)
-		{
-			dir.mkpath(m_globalAppDataPath);
-		}
-	}
+	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
 	// Determine the Local settings folder
 
@@ -152,17 +148,6 @@ void Settings::StoreUser()
 
 	s.setValue("TuningWorkspace/Splitter/state", m_tuningWorkspaceSplitterState);
 	s.setValue("SchemasWorkspace/Splitter/state", m_schemasWorkspaceSplitterState);
-
-	s.setValue("TuningPage/Count", static_cast<uint>(m_tuningPageSettings.size()));
-	for (int i = 0; i < m_tuningPageSettings.size(); i++)
-	{
-		s.setValue(QString("TuningPage/Settings%1/columnCount").arg(i), m_tuningPageSettings[i].m_columnCount);
-		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
-		{
-			s.setValue(QString("TuningPage/Settings%1/columnWidth/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsWidth[c]);
-			s.setValue(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsIndexes[c]);
-		}
-	}
 
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
@@ -198,21 +183,6 @@ void Settings::RestoreUser()
 	m_tuningWorkspaceSplitterState = s.value("TuningWorkspace/Splitter/state").toByteArray();
 	m_schemasWorkspaceSplitterState = s.value("SchemasWorkspace/Splitter/state").toByteArray();
 
-	int tuningPageSettingsCount = s.value("TuningPage/Count", 0).toInt();
-	m_tuningPageSettings.resize(tuningPageSettingsCount);
-
-	for (int i = 0; i < tuningPageSettingsCount; i++)
-	{
-		m_tuningPageSettings[i].m_columnCount = s.value(QString("TuningPage/Settings%1/columnCount").arg(i), 0).toInt();
-		m_tuningPageSettings[i].m_columnsWidth.resize(m_tuningPageSettings[i].m_columnCount);
-		m_tuningPageSettings[i].m_columnsIndexes.resize(m_tuningPageSettings[i].m_columnCount);
-		for (int c = 0; c < m_tuningPageSettings[i].m_columnCount; c++)
-		{
-			m_tuningPageSettings[i].m_columnsWidth[c] = s.value(QString("TuningPage/Settings%1/columnWidth/%2").arg(i).arg(c), 100).toInt();
-			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
-		}
-	}
-
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
@@ -235,13 +205,25 @@ void Settings::RestoreUser()
 	m_language = s.value("MainWindow/language", m_language).toString();
 }
 
+QStringList Settings::instanceHistory()
+{
+	QMutexLocker l(&m);
+	return m_instanceHistory;
+}
+
+void Settings::setInstanceHistory(const QStringList& value)
+{
+	QMutexLocker l(&m);
+	m_instanceHistory = value;
+}
+
 QString Settings::instanceStrId()
 {
 	QMutexLocker l(&m);
 	return m_instanceStrId;
 }
 
-void Settings::setInstanceId(const QString& value)
+void Settings::setInstanceStrId(const QString& value)
 {
 	QMutexLocker l(&m);
 	m_instanceStrId = value;
@@ -282,39 +264,12 @@ void Settings::setLanguage(const QString& value)
 	m_language = value;
 }
 
+#ifdef USE_ADMIN_REGISTRY_AREA
 bool Settings::admin() const
 {
 	return m_admin;
 }
-
-TuningPageSettings* Settings::tuningPageSettings(int index)
-{
-	// Reserve place for tuning page settings and copy existing
-	//
-	if (index >= m_tuningPageSettings.size())
-	{
-		std::vector<TuningPageSettings> m_tuningPageSettings2 = m_tuningPageSettings;
-
-		m_tuningPageSettings.resize(index + 1);
-		for (int i = 0; i < m_tuningPageSettings2.size(); i++)
-		{
-			m_tuningPageSettings[i] = m_tuningPageSettings2[i];
-		}
-	}
-
-	if (index >= m_tuningPageSettings.size())
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return& m_tuningPageSettings[index];
-}
-
-QString Settings::globalAppDataPath()
-{
-	return m_globalAppDataPath;
-}
+#endif
 
 QString Settings::localAppDataPath()
 {

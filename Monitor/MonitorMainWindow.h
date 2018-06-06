@@ -18,7 +18,7 @@ class MonitorMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MonitorMainWindow(QWidget* parent = nullptr);
+	MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
 	~MonitorMainWindow();
 
 	// Events

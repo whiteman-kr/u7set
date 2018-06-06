@@ -21,6 +21,11 @@ namespace VFrame30
 		m_heightDocPt = 0;
 	}
 
+	void PosRectImpl::propertyDemand(const QString& prop)
+	{
+		SchemaItem::propertyDemand(prop);
+	}
+
 	void PosRectImpl::dump() const
 	{
 		SchemaItem::dump();

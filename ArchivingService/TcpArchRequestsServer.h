@@ -12,7 +12,7 @@
 class TcpArchRequestsServer : public Tcp::Server
 {
 public:
-	TcpArchRequestsServer(ArchRequestThread& archRequestThread, CircularLoggerShared logger);
+	TcpArchRequestsServer(const SoftwareInfo& softwareInfo, ArchRequestThread& archRequestThread, CircularLoggerShared logger);
 
     virtual Tcp::Server* getNewInstance() override;
     virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;

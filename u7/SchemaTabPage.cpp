@@ -1691,12 +1691,8 @@ void SchemaControlTabPage::checkIn(std::vector<DbFileInfo> files)
 
 	// Remove deleted files
 	//
-	std::remove_if(std::begin(files), std::end(files),
-		[](const DbFileInfo& file)
-		{
-			return file.deleted();
-		});
-
+	files.erase(std::remove_if(files.begin(), files.end(), [](const auto& file) { return file.deleted();}),
+				files.end());
 
 	// Set readonly to file if it is open
 	//
@@ -2152,6 +2148,10 @@ void SchemaControlTabPage::editSchemasProperties(std::vector<DbFileInfo> selecte
 
 	ExtWidgets::PropertyEditor* propertyEditor = new ExtWidgets::PropertyEditor(this);
 	propertyEditor->setReadOnly(readOnly);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		propertyEditor->setFontSizeF(propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
 	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;
 	propertyObjects.reserve(schemas.size());

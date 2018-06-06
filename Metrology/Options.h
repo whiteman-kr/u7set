@@ -174,7 +174,7 @@ const char* const		SocketDefaultID[SOCKET_TYPE_COUNT] =
 
 const int				SocketDefaultPort[SOCKET_TYPE_COUNT] =
 {
-						PORT_CONFIGURATION_SERVICE_REQUEST,				// ConfigSocket
+						PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,				// ConfigSocket
 						PORT_APP_DATA_SERVICE_CLIENT_REQUEST,			// SignalSocket
 						PORT_TUNING_SERVICE_CLIENT_REQUEST,				// TuningSocket
 };
@@ -684,7 +684,7 @@ private:
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
-	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_PHYSICAL;			// type of displaing error denend on limit
+	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_ELECTRIC;			// type of displaing error denend on limit
 
 	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
 	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7

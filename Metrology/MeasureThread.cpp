@@ -518,6 +518,8 @@ void MeasureThread::run()
 
 void MeasureThread::measureLinearity()
 {
+	saveStateTunSignals();
+
 	int pointCount = theOptions.linearity().points().count();
 	for(int p = 0; p < pointCount; p++)
 	{
@@ -618,6 +620,8 @@ void MeasureThread::measureLinearity()
 
 		emit measureInfo(tr(""));
 	}
+
+	restoreStateTunSignals();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -646,6 +650,66 @@ void MeasureThread::tuningSocketDisconnected()
 	}
 
 	stopMeasure();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::saveStateTunSignals()
+{
+	if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+	{
+		return;
+	}
+
+	for(int c = 0; c < Metrology::ChannelCount; c ++)
+	{
+		if (m_activeSignalParam[c].isValid() == false)
+		{
+			continue;
+		}
+
+		Metrology::SignalParam tunParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (tunParam.isValid() == false)
+		{
+			continue;
+		}
+
+		m_tunSignalState[c] = theSignalBase.signalState(tunParam.hash()).value();
+
+//		QString val_str;
+//		val_str.sprintf("Tun save - %.3f", m_tunSignalState[c]);
+//		emit msgBox(QMessageBox::Information, val_str);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::restoreStateTunSignals()
+{
+	if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+	{
+		return;
+	}
+
+	for(int c = 0; c < Metrology::ChannelCount; c ++)
+	{
+		if (m_activeSignalParam[c].isValid() == false)
+		{
+			continue;
+		}
+
+		Metrology::SignalParam tunParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (tunParam.isValid() == false)
+		{
+			continue;
+		}
+
+//		QString val_str;
+//		val_str.sprintf("Tun restore - %.3f", m_tunSignalState[c]);
+//		emit msgBox(QMessageBox::Information, val_str);
+
+		theSignalBase.tuning().appendCmdFowWrite(tunParam.hash(), m_tunSignalState[c]);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

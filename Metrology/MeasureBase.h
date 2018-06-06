@@ -2,6 +2,7 @@
 #define MEASUREBASE_H
 
 #include "../lib/Hash.h"
+
 #include "SignalBase.h"
 
 // ==============================================================================================
@@ -201,7 +202,6 @@ public:
 
 	void			fill_measure_aim(const MeasureMultiParam& measureParam);
 	void			fill_measure_aom(const MeasureMultiParam& measureParam);
-	void			set_tun_aom(const MeasureMultiParam& measureParam);
 
 	void			setLimits(const Metrology::SignalParam& param);
 	void			calcError();

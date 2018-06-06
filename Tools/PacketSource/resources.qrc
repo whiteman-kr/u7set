@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/Options.png</file>
+        <file>icons/About.png</file>
+        <file>icons/Start.png</file>
+        <file>icons/Stop.png</file>
+        <file>icons/PacketSource.png</file>
+        <file>icons/SelectAll.png</file>
+    </qresource>
+</RCC>

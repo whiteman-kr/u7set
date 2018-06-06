@@ -1,10 +1,12 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/LmLimits.h"
+#include "../lib/WUtils.h"
+#include <QHostAddress>
 
 
 QHash<QString, ModuleRawDataDescription*> DeviceHelper::m_modulesRawDataDescription;
-QString DeviceHelper::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX = "_PI";
 
+const char* DeviceHelper::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX = "_PI";
 
 void DeviceHelper::init()
 {
@@ -44,13 +46,22 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 		return false;
 	}
 
-	*value = val.toInt();
+	bool ok = false;
+
+	*value = val.toInt(&ok);
+
+	if (ok == false)
+	{
+		// Property '%1.%2' conversion error.
+		//
+		log->errCFG3023(device->equipmentIdTemplate(), name);
+		return false;
+	}
 
 	return true;
 }
 
-
-bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger *log)
+bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger* log)
 {
 	if (device == nullptr ||
 		value == nullptr ||
@@ -72,7 +83,6 @@ bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QS
 
 	return true;
 }
-
 
 bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)
 {
@@ -97,6 +107,201 @@ bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const Q
 	return true;
 }
 
+bool DeviceHelper::getIPv4Property(const Hardware::DeviceObject* device,
+								   const QString& name,
+								   QString* value,
+								   bool emptyAllowed,
+								   const QString& defaultIp,
+								   Builder::IssueLogger *log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	QHostAddress addr;
+
+	bool res = true;
+
+	if (emptyAllowed == true)
+	{
+		// defaultIp checking
+		//
+		addr.setAddress(defaultIp);
+
+		if (res == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(log);			// defaultIp is not valid IPv4 str
+			return false;
+		}
+	}
+
+	res = getStrProperty(device, name, value, log);
+
+	if (res == false)
+	{
+		return false;
+	}
+
+	if (value->isEmpty() == true)
+	{
+		if (emptyAllowed == false)
+		{
+			// Property '%1.%2' is empty.
+			//
+			log->errCFG3022(device->equipmentIdTemplate(), name);
+			return false;
+		}
+		else
+		{
+			*value = defaultIp;
+		}
+	}
+
+	res = addr.setAddress(*value);
+
+	if (res == false)
+	{
+		// Value of property %1.%2 is not valid IPv4 address.
+		//
+		log->errCFG3026(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeviceHelper::getIPv4Property(	const Hardware::DeviceObject* device,
+									const QString& name,
+									QHostAddress* value,
+									bool emptyAllowed,
+									const QString& defaultIp,
+									Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	if (value == nullptr)
+	{
+		LOG_NULLPTR_ERROR(log);
+		return false;
+	}
+
+	QString ipStr;
+
+	bool res = getIPv4Property(device, name, &ipStr, emptyAllowed, defaultIp, log);
+
+	if (res == false)
+	{
+		return false;
+	}
+
+	return value->setAddress(ipStr);
+}
+
+bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device,
+								   const QString& name,
+								   int* value,
+								   bool emptyAllowed,
+								   int defaultPort,
+								   Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	if (emptyAllowed == true)
+	{
+		// defaultPort checking
+		//
+		if (defaultPort < Socket::PORT_LOWEST || defaultPort > Socket::PORT_HIGHEST)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
+	}
+
+	QString portStr;
+
+	if (getStrProperty(device, name, &portStr, log) == false)
+	{
+		return false;
+	}
+
+	if (portStr.isEmpty() == true)
+	{
+		if (emptyAllowed == false)
+		{
+			// Property '%1.%2' is empty.
+			//
+			log->errCFG3022(device->equipmentIdTemplate(), name);
+			return false;
+		}
+
+		*value = defaultPort;
+	}
+	else
+	{
+		bool ok = false;
+
+		*value = portStr.toInt(&ok);
+
+		if (ok == false)
+		{
+			// Property '%1.%2' conversion error.
+			//
+			log->errCFG3023(device->equipmentIdTemplate(), name);
+			return false;
+		}
+	}
+
+	if (*value < Socket::PORT_LOWEST || *value > Socket::PORT_HIGHEST)
+	{
+		// Ethernet port number property %1.%2 should be in range 0..65535.
+		//
+		log->errCFG3027(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeviceHelper:: getIpPortProperty(const Hardware::DeviceObject* device,
+									  const QString& ipProperty,
+									  const QString& portProperty,
+									  HostAddressPort* ipPort,
+									  bool emptyAllowed,
+									  const QString& defaultIP,
+									  int defaultPort,
+									  Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	if (device == nullptr || ipPort == nullptr)
+	{
+		LOG_NULLPTR_ERROR(log);
+		return false;
+	}
+
+	QString ipStr;
+
+	bool result = getIPv4Property(device, ipProperty, &ipStr, emptyAllowed, defaultIP, log);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	int port = 0;
+
+	result = getPortProperty(device, portProperty, &port, emptyAllowed, defaultPort, log);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	ipPort->setAddress(ipStr);
+	ipPort->setPort(port);
+
+	return result;
+}
 
 bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log)
 {
@@ -414,6 +619,24 @@ const Hardware::DeviceModule* DeviceHelper::getAssociatedLmOrBvb(const Hardware:
 	}
 
 	return getLmOrBvb(chassis);
+}
+
+const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID)
+{
+	if (equipment == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const Hardware::DeviceObject* device = equipment->deviceObject(softwareID);
+
+	if (device == nullptr)
+	{
+		return nullptr;
+	}
+
+	return device->toSoftware();
 }
 
 int DeviceHelper::getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)

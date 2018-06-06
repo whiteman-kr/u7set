@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SocketIO.h"
+#include "Crc.h"
 
 #pragma pack(push, 1)
 
@@ -27,7 +28,6 @@ namespace Rup
 		quint16 all;
 	};
 
-
 	struct TimeStamp
 	{
 		quint16 hour;			// 0..23
@@ -41,7 +41,6 @@ namespace Rup
 
 		void reverseBytes();
 	};
-
 
 	struct Header
 	{
@@ -61,8 +60,7 @@ namespace Rup
 		void reverseBytes();
 	};
 
-
-	const int FRAME_DATA_SIZE = ENTIRE_UDP_SIZE - sizeof(Rup::Header) - sizeof(quint64/*CRC64*/);
+	const int FRAME_DATA_SIZE = Socket::ENTIRE_UDP_SIZE - sizeof(Rup::Header) - sizeof(quint64 /*CRC64*/ );
 	const int MAX_FRAME_COUNT = 10;
 	const int BUFFER_SIZE = MAX_FRAME_COUNT * FRAME_DATA_SIZE;
 
@@ -75,6 +73,19 @@ namespace Rup
 		Rup::Data data;
 
 		quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
+
+		void calcCRC64();
+		bool checkCRC64();
+
+		void dumpData();
+	};
+
+	struct SimFrame
+	{
+		Rup::Frame rupFrame;
+
+		quint16 simVersion;
+		quint32 sourceIP;
 	};
 }
 
@@ -169,7 +180,7 @@ namespace FotipV2
 		quint16 dataType;							// enum FotipV2::DataType values
 		quint32 offsetInFrameW;
 
-		quint8 reserve[HEADER_RESERVE_SIZE];
+		quint8 reserv[HEADER_RESERVE_SIZE];
 
 		void reverseBytes();
 	};
@@ -215,6 +226,9 @@ struct RupFotipV2
 	FotipV2::Frame fotipFrame;
 
 	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
+
+	void calcCRC64();
+	bool checkCRC64();
 };
 
 

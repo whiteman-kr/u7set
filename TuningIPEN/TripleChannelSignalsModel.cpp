@@ -135,7 +135,7 @@ namespace TuningIPEN
 						break;
 						case DEFAULT_VALUE_COLUMN:
 						{
-							double value = tripleSignal[i]->tuningDefaultValue();
+							double value = tripleSignal[i]->tuningDefaultValue().toDouble();
 							if (tripleSignal[i]->isAnalog())
 							{
 								resultStr += QString::number(value);
@@ -172,7 +172,7 @@ namespace TuningIPEN
 				}
 				for (int i = 0; i < 3; i++)
 				{
-					if (qAbs(static_cast<float>(tripleState[i]->currentValue) - static_cast<float>(tripleSignal[i]->tuningDefaultValue())) > std::numeric_limits<float>::epsilon())
+					if (qAbs(static_cast<float>(tripleState[i]->currentValue) - tripleSignal[i]->tuningDefaultValue().toFloat()) > std::numeric_limits<float>::epsilon())
 						//if (data(index(currentIndex.row(), DEFAULT_VALUE_COLUMN)).toString() != data(currentIndex).toString())
 					{
 						return QColor(Qt::yellow);

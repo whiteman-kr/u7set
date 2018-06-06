@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMap>
 #include "../lib/Signal.h"
+#include "IdePropertyEditor.h"
 
 class QtProperty;
 class QtStringPropertyManager;
@@ -31,7 +32,10 @@ class SignalPropertiesDialog : public QDialog
 public:
 	explicit SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
 
-	bool isEditedSignal(int id) { return m_editedSignalsId.contains(id); }
+	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
+	bool hasEditedSignals() const { return m_editedSignalsId.isEmpty() == false; }
+
+	bool isValid() const { return m_isValid; }
 
 signals:
 	void signalChanged(int id, bool updateView);
@@ -49,6 +53,13 @@ protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
+	bool checkoutSignal(Signal& s, QString& message);
+	QString errorMessage(const ObjectState& state) const;
+
+	bool isPropertyDependentOnPrecision(const QString& propName) { return m_propertiesDependentOnPrecision.value(propName, false); }
+	void addPropertyDependentOnPrecision(const QString& propName) { m_propertiesDependentOnPrecision.insert(propName, true); }
+
+private:
 	DbController* m_dbController;
 	QVector<Signal*> m_signalVector;
 	QVector<int> m_editedSignalsId;
@@ -56,10 +67,11 @@ private:
 	QList<std::shared_ptr<PropertyObject>> m_objList;
 	bool m_tryCheckout;
 	QWidget* m_parent;
-	ExtWidgets::PropertyEditor* m_propertyEditor;
+	IdePropertyEditor* m_propertyEditor;
 
-	bool checkoutSignal(Signal& s, QString& message);
-	QString errorMessage(const ObjectState& state) const;
+	bool m_isValid = false;
+
+	QHash<QString, bool> m_propertiesDependentOnPrecision;
 };
 
 #endif // SIGNALPROPERTIESDIALOG_H

@@ -22,6 +22,8 @@ namespace Builder
 		bool writeSettings();
 		bool writeArchSignalsFile();
 
+		bool writeBatFile();
+		bool writeShFile();
 	};
 
 }

@@ -1,7 +1,10 @@
 #pragma once
 
-#include "../lib/DeviceObject.h"
-#include "../lib/OutputLog.h"
+#include "DeviceObject.h"
+#include "OutputLog.h"
+#include "HostAddressPort.h"
+#include "Socket.h"
+
 #include "../u7/Builder/IssueLogger.h"
 #include "../u7/Builder/ModulesRawData.h"
 
@@ -28,7 +31,7 @@ public:
 		StrPropertyNameVar(const char* n, QString* v) : name(n), var(v) {}
 	};
 
-	static QString LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX;
+	static const char* LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX;
 
 public:
 	static void init();
@@ -37,6 +40,36 @@ public:
 	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger* log);
 	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, Builder::IssueLogger* log);
 	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger* log);
+
+	static bool getIPv4Property(const Hardware::DeviceObject* device,
+								const QString& name,
+								QString* value,
+								bool emptyAllowed,
+								const QString& defaultIp,
+								Builder::IssueLogger *log);
+
+	static bool getIPv4Property(const Hardware::DeviceObject* device,
+								const QString& name,
+								QHostAddress* value,
+								bool emptyAllowed,
+								const QString& defaultIp,
+								Builder::IssueLogger *log);
+
+	static bool getPortProperty(const Hardware::DeviceObject* device,
+								const QString& name,
+								int* value,
+								bool emptyAllowed,
+								int defaultPort,
+								Builder::IssueLogger* log);
+
+	static bool getIpPortProperty(const Hardware::DeviceObject* device,
+								  const QString& ipProperty,
+								  const QString& portProperty,
+								  HostAddressPort* ipPort,
+								  bool emptyAllowed,
+								  const QString& defaultIP,
+								  int defaultPort,
+								  Builder::IssueLogger* log);
 
 	template<typename T>
 	static bool getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log);
@@ -57,6 +90,8 @@ public:
 
 	static const Hardware::DeviceModule* getAssociatedLm(const Hardware::DeviceObject* object);
 	static const Hardware::DeviceModule* getAssociatedLmOrBvb(const Hardware::DeviceObject* object);
+
+	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
 
 	static int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
 	static int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);

@@ -4,6 +4,130 @@
 
 namespace Afb
 {
+
+	AfbComponentPin::AfbComponentPin(const QString caption, int opIndex, AfbComponentPinType type) :
+		m_caption(caption),
+		m_opIndex(opIndex),
+		m_type(type)
+	{
+	}
+
+	bool AfbComponentPin::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
+	{
+		if (errorMessage == nullptr ||
+			xmlElement.isNull() == true ||
+			xmlElement.tagName() != QLatin1String("Pin"))
+		{
+			assert(errorMessage);
+			assert(xmlElement.isNull() == false);
+			assert(xmlElement.tagName() == QLatin1String("Pin"));
+			return false;
+		}
+
+		// xmlElement suppose to contain xml like:
+		// <Pin OpName="i_oprd_quant"	OpIndex ="0"	PinType = "Param">
+		//
+
+		// OpName -> m_caption
+		//
+		if (xmlElement.hasAttribute(QLatin1String("OpName")) == false)
+		{
+			*errorMessage = "AFBCompoment\\Pin does not have attribute OpName";
+			return false;
+		}
+
+		m_caption = xmlElement.attribute(QLatin1String("OpName"));
+
+		// OpIndex -> m_opIndex
+		//
+		if (xmlElement.hasAttribute(QLatin1String("OpIndex")) == false)
+		{
+			*errorMessage = "AFBCompoment\\Pin does not have attribute OpIndex";
+			return false;
+		}
+
+		m_opIndex = xmlElement.attribute(QLatin1String("OpIndex")).toInt();
+
+		// PinType -> m_type
+		//
+		if (xmlElement.hasAttribute(QLatin1String("PinType")) == false)
+		{
+			*errorMessage = "AFBCompoment\\Pin does not have attribute PinType";
+			return false;
+		}
+
+		QString typeStr = xmlElement.attribute(QLatin1String("PinType"));
+
+		if (typeStr.compare(QLatin1String("Param"), Qt::CaseInsensitive) == 0)
+		{
+			m_type = AfbComponentPinType::Param;
+		}
+
+		if (typeStr.compare(QLatin1String("Input"), Qt::CaseInsensitive) == 0)
+		{
+			m_type = AfbComponentPinType::Input;
+		}
+
+		if (typeStr.compare(QLatin1String("Output"), Qt::CaseInsensitive) == 0)
+		{
+			m_type = AfbComponentPinType::Output;
+		}
+
+		// --
+		//
+
+		return true;
+	}
+
+	bool AfbComponentPin::saveToXml(QDomElement* /*xmlElement*/) const
+	{
+		// To do
+		//
+		assert(false);
+		return false;
+	}
+
+	QString AfbComponentPin::caption() const
+	{
+		return m_caption;
+	}
+
+	void AfbComponentPin::setCaption(const QString& value)
+	{
+		m_caption = value;
+	}
+
+	int AfbComponentPin::opIndex() const
+	{
+		return m_opIndex;
+	}
+
+	void AfbComponentPin::setOpIndex(int value)
+	{
+		m_opIndex = value;
+	}
+
+	AfbComponentPinType AfbComponentPin::type() const
+	{
+		return m_type;
+	}
+
+	void AfbComponentPin::setType(AfbComponentPinType value)
+	{
+		m_type = value;
+	}
+
+	bool AfbComponentPin::isInputOrParam() const
+	{
+		return	m_type == AfbComponentPinType::Input ||
+				m_type == AfbComponentPinType::Param;
+	}
+
+	bool AfbComponentPin::isOutput() const
+	{
+		return	m_type == AfbComponentPinType::Output;
+	}
+
 	//
 	//				AfbComponent
 	//
@@ -11,11 +135,24 @@ namespace Afb
 	{
 	}
 
+	AfbComponent::AfbComponent(const AfbComponent& that)
+	{
+		m_opCode = that.m_opCode;
+		m_caption = that.m_caption;
+		m_impVersion = that.m_impVersion;
+		m_versionOpIndex = that.m_versionOpIndex;
+		m_maxInstCount = that.m_maxInstCount;
+
+		m_pins = that.m_pins;
+
+		return;
+	}
+
 	bool AfbComponent::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-				xmlElement.isNull() == true ||
-				xmlElement.tagName() != QLatin1String("AFBComponent"))
+			xmlElement.isNull() == true ||
+			xmlElement.tagName() != QLatin1String("AFBComponent"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -72,6 +209,32 @@ namespace Afb
 		}
 
 		m_maxInstCount = xmlElement.attribute(QLatin1String("MaxInstCount")).toInt();
+
+		// Pins
+		//
+		{
+			QDomElement p = xmlElement.firstChildElement(QLatin1String("Pin"));
+			m_pins.clear();
+
+			while (p.isNull() == false)
+			{
+				// p is Pin section
+				//
+				AfbComponentPin pin;
+
+				bool ok = pin.loadFromXml(p, errorMessage);
+				if (ok == false)
+				{
+					errorMessage->append(QString(", Component %1").arg(m_caption));
+					return false;
+				}
+
+				m_pins[pin.opIndex()] = pin;
+
+				p = p.nextSiblingElement(QLatin1String("Pin"));
+			}
+		}
+
 
 		return true;
 	}
@@ -134,6 +297,22 @@ namespace Afb
 		m_maxInstCount = value;
 	}
 
+	bool AfbComponent::pinExists(int pinOpIndex) const
+	{
+		bool result = m_pins.find(pinOpIndex) != m_pins.end();
+		return result;
+	}
+
+	QString AfbComponent::pinCaption(int pinOpIndex) const
+	{
+		auto it = m_pins.find(pinOpIndex);
+		if (it != m_pins.end())
+		{
+			return it->second.caption();
+		}
+
+		return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
+	}
 
 	//
 	//							AfbSignal
@@ -145,6 +324,10 @@ namespace Afb
 	AfbSignal::AfbSignal(const AfbSignal& that)
 	{
 		*this = that;
+	}
+
+	AfbSignal::~AfbSignal()
+	{
 	}
 
 	AfbSignal& AfbSignal::operator=(const AfbSignal& that) noexcept
@@ -1392,8 +1575,8 @@ namespace Afb
 	bool AfbElement::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-				xmlElement.isNull() == true ||
-				xmlElement.tagName() != QLatin1String("AFB"))
+			xmlElement.isNull() == true ||
+			xmlElement.tagName() != QLatin1String("AFB"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -2228,15 +2411,6 @@ namespace Afb
 	//
 
 	AfbElementCollection::AfbElementCollection(void)
-	{
-		Init();
-	}
-
-	AfbElementCollection::~AfbElementCollection(void)
-	{
-	}
-
-	void AfbElementCollection::Init(void)
 	{
 	}
 

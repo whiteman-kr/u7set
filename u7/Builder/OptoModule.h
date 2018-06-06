@@ -152,10 +152,8 @@ namespace Hardware
 		bool isPortToPortConnection() const { return m_connectionType ==  Connection::Type::PortToPort; }
 		bool isSinglePortConnection() const { return m_connectionType ==  Connection::Type::SinglePort; }
 
-//		Address16 getTxSignalAddrInBuf(const QString& appSignalID) const;
-
-		bool getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const;
-		bool getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const;
+		bool getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const;
+		bool getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const;
 
 		bool parseRawDescription();
 		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage);
@@ -177,6 +175,9 @@ namespace Hardware
 
 		Q_INVOKABLE QString linkedPortID() const { return m_linkedPortID; }
 		void setLinkedPortID(const QString& linkedPortID) { m_linkedPortID = linkedPortID; }
+
+		void setDisableDataIDControl(bool disable) { m_disableDataIDControl = disable; }
+		bool disableDataIDControl() const { return m_disableDataIDControl; }
 
 		Q_INVOKABLE bool isLinked() const { return !m_linkedPortID.isEmpty(); }
 
@@ -281,6 +282,8 @@ namespace Hardware
 		Connection::Type m_connectionType = Connection::Type::PortToPort;
 
 		bool m_enableSerial = false;
+
+		bool m_disableDataIDControl = false;
 
 		// if m_enableSerial == true settings
 		//
@@ -493,7 +496,7 @@ namespace Hardware
 								   const QString& appSignalID,
 								   const QString& receiverLM,
 								   QUuid receiverUuid,
-								   SignalAddress16& addr);
+								   SignalAddress16* addr);
 
 		static std::shared_ptr<Connection> getConnection(const QString& connectionID);
 

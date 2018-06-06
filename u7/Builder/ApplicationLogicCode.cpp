@@ -101,15 +101,7 @@ namespace Builder
 
 	void CommandCode::setFbInstance(quint16 fbInstance)
 	{
-		if (fbInstance > MAX_FB_INSTANCE)
-		{
-			assert(false);
-			setNoCommand();
-		}
-		else
-		{
-			param.fbInstance = fbInstance;
-		}
+		param.fbInstance = fbInstance;
 	}
 
 
@@ -1390,7 +1382,7 @@ namespace Builder
 	{
 		QString cmdStr;
 
-		cmdStr.sprintf("%04X\t", m_address);
+		cmdStr.sprintf("%05X\t", m_address);
 
 		for(int w = 0; w < sizeW(); w++)
 		{
@@ -1399,7 +1391,7 @@ namespace Builder
 			cmdStr += QString("%1 ").arg(codeWordStr);
 		}
 
-		int tabLen = 32 - (cmdStr.length() - 1 + 4);
+		int tabLen = 32 - (cmdStr.length() - 1 + 3);
 
 		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 
@@ -1736,6 +1728,20 @@ namespace Builder
 		return m_result;
 	}
 
+	void CodeFragmentMetrics::setEndAddr(int endAddr)
+	{
+		m_endAddr = endAddr;
+
+		m_codePercent = static_cast<double>(m_endAddr - m_startAddr) * 100.0 / 65536.0 ;
+	}
+
+
+	QString CodeFragmentMetrics::codePercentStr() const
+	{
+		QString str;
+
+		return str.sprintf("%.2f%%", static_cast<float>(m_codePercent));
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -2277,4 +2283,25 @@ namespace Builder
 		return true;
 	}
 
+	void ApplicationLogicCode::init(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setStartAddr(m_commandAddress);
+	}
+
+	void ApplicationLogicCode::calculate(CodeFragmentMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		codeFragmentMetrics->setEndAddr(m_commandAddress);
+	}
 }

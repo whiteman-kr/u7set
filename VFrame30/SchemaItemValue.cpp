@@ -322,11 +322,9 @@ namespace VFrame30
 					signalParam = drawParam->tuningController()->signalParam(signalId(), &ok);
 					tuningSignalState = drawParam->tuningController()->signalState(signalId(), nullptr);
 
-					// This is for temporary debugging
 					signalState.m_hash = signalParam.hash();
 					signalState.m_flags.valid = tuningSignalState.valid();
-					signalState.m_value = tuningSignalState.value();
-					//
+					signalState.m_value = tuningSignalState.value().toDouble();
 				}
 				break;
 

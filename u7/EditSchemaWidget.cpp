@@ -1043,8 +1043,14 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 	// Calculate points count
 	//
-	int horzGridCount = (int)(frameWidth / gridSize);
-	int vertGridCount = (int)(frameHeight / gridSize);
+	if (gridSize == 0)
+	{
+		assert(gridSize);
+		return;
+	}
+
+	int horzGridCount = qBound(0, static_cast<int>(frameWidth / gridSize), 1024);
+	int vertGridCount = qBound(0, static_cast<int>(frameHeight / gridSize), 1024);
 
 	// Drawing grid
 	//
@@ -1056,9 +1062,13 @@ void EditSchemaView::drawGrid(QPainter* p)
 	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiX();
 	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiY();
 
+	std::vector<QPointF> points;
+	points.reserve(1024);
+
 	for (int v = 0; v < vertGridCount; v++)
 	{
 		pt.setY(static_cast<double>(v + 1) * gridSize * dpiY * scale);
+		points.clear();
 
 		for (int h = 0; h < horzGridCount; h++)
 		{
@@ -1069,8 +1079,10 @@ void EditSchemaView::drawGrid(QPainter* p)
 				continue;
 			}
 
-			p->drawPoint(pt);
+			points.push_back(pt);
 		}
+
+		p->drawPoints(points.data(), static_cast<int>(points.size()));
 	}
 
 	return;
@@ -4496,7 +4508,7 @@ bool EditSchemaWidget::updateBussesForSchema()
 	//
 	std::vector<VFrame30::Bus> busses;
 
-	bool ok = loadBusses(&busses);
+	bool ok = loadBusses(db(), &busses, this);
 
 	if (ok == false)
 	{
@@ -5250,10 +5262,12 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	return true;
 }
 
-bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
+bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* out, QWidget* parentWidget)
 {
-	if (out == nullptr)
+	if (db == nullptr ||
+		out == nullptr)
 	{
+		assert(db);
 		assert(out);
 		return false;
 	}
@@ -5264,17 +5278,22 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = db()->getFileList(&fileList, db()->busTypesFileId(), ::BusFileExtension, true, this);
+	bool ok = db->getFileList(&fileList, db->busTypesFileId(), ::BusFileExtension, true, parentWidget);
 	if (ok == false)
 	{
 		return false;
+	}
+
+	if (fileList.empty() == true)
+	{
+		return true;	// It is not error, just no any busses
 	}
 
 	// Get Busses latest version from the DB
 	//
 	std::vector<std::shared_ptr<DbFile>> files;
 
-	ok = db()->getLatestVersion(fileList, &files, this);
+	ok = db->getLatestVersion(fileList, &files, parentWidget);
 	if (ok == false)
 	{
 		return false;
@@ -5298,7 +5317,7 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 
 		if (ok == false)
 		{
-			QMessageBox::critical(this, qAppName(), "Load file " + f->fileName() + " error.");
+			QMessageBox::critical(parentWidget, qAppName(), "Load file " + f->fileName() + " error.");
 			return false;
 		}
 
@@ -6473,7 +6492,7 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 	//
 	std::vector<VFrame30::Bus> busses;
 
-	bool ok = loadBusses(&busses);
+	bool ok = loadBusses(db(), &busses, this);
 
 	if (ok == false)
 	{
@@ -7576,7 +7595,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	//
 	std::vector<VFrame30::Bus> busses;
 
-	bool ok = loadBusses(&busses);
+	bool ok = loadBusses(db(), &busses, this);
 
 	if (ok == false)
 	{
@@ -9365,7 +9384,7 @@ void SchemaFindDialog::updateCompleter()
 
 void SchemaFindDialog::updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
 											  const std::list<std::pair<QString, QString>>& foundProps,
-											  QString searchText,
+											  QString /*searchText*/,
 											  Qt::CaseSensitivity /*cs*/)
 {
 

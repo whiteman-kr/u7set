@@ -59,6 +59,10 @@ namespace Builder
 
 		bool isBusProcessingAfb() const;
 
+		int maxInstances() const { return m_afb->component()->maxInstCount(); }
+		int version() const { return m_afb->component()->impVersion(); }
+		QString componentCaption() const { return m_afb->component()->caption(); }
+
 	private:
 		bool isBusProcessingAfbChecking() const;
 
@@ -80,11 +84,13 @@ namespace Builder
 	public:
 		virtual ~AfblsMap();
 
-		bool addInstance(UalAfb* ualAfb);
+		bool addInstance(UalAfb* ualAfb, IssueLogger *log);
 		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
 		void clear();
 
 		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
+
+		int getUsedInstances(int opCode) const;
 
 	private:
 
@@ -314,11 +320,14 @@ namespace Builder
 		bool calculate_DER_paramValues();
 		bool calculate_MISMATCH_paramValues();
 		bool calculate_TCONV_paramValues();
+		bool calculate_INDICATION_paramValues();
+		bool calculate_PULSE_GENERATOR_paramValues();
 
 		//
 
 		bool checkRequiredParameters(const QStringList& requiredParams);
 		bool checkRequiredParameters(const QStringList& requiredParams, bool displayError);
+		bool checkRequiredParameter(const QString& requiredParam, bool displayError);
 
 		bool checkUnsignedInt(const AppFbParamValue& paramValue);
 		bool checkUnsignedInt16(const AppFbParamValue& paramValue);
@@ -384,7 +393,9 @@ namespace Builder
 		bool createOptoSignal(const UalItem* ualItem,
 								Signal* s,
 								const QString &lmEquipmentID,
-								BusShared bus);
+								BusShared bus,
+								bool isBusChildSignal,
+								IssueLogger* log);
 
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
@@ -396,6 +407,8 @@ namespace Builder
 	public:
 		bool appendRefSignal(Signal* s, bool isOptoSignal);
 		bool appendBusChildRefSignals(const QString &busSignalID, Signal* s);
+
+		Signal* createNativeCopyOfSignal(const Signal* templateSignal, const QString& lmEquipmentID);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -419,6 +432,7 @@ namespace Builder
 		Signal* signal() const;
 
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
+		E::SignalInOutType inOutType() const { return m_refSignals[0]->inOutType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
 		int dataSize() const { return m_refSignals[0]->dataSize(); }
 		int sizeW() const { return m_refSignals[0]->sizeW(); }
@@ -475,6 +489,7 @@ namespace Builder
 		int constDiscreteValue() const;
 		int constAnalogIntValue() const;
 		float constAnalogFloatValue() const;
+		double constValue() const;
 
 		void sortRefSignals();
 
@@ -570,7 +585,7 @@ namespace Builder
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
 
-		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, QUuid outPinUuid);
+		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, bool isBusChildSignal, QUuid outPinUuid);
 
 		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption);
 
@@ -582,10 +597,6 @@ namespace Builder
 
 		UalSignal* get(QUuid pinUuid) const { return m_pinToSignalMap.value(pinUuid, nullptr); }
 		bool contains(QUuid pinUuid) const { return m_pinToSignalMap.contains(pinUuid); }
-
-		bool insertUalSignal(const UalItem* appItem);
-		bool insertNonBusAutoSignal(const UalAfb* appFb, const LogicPin& outputPin);
-		bool insertBusAutoSignal(const UalItem* appItem, const LogicPin& outputPin, BusShared bus);
 
 		void clear();
 

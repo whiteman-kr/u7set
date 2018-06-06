@@ -485,7 +485,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Subsystem '%1' is not found in subsystem set (Logic Moudle '%2').
+	/// Title: Subsystem '%1' is not found in subsystem set (Logic Module '%2').
 	///
 	///
 	/// Parameters:
@@ -499,7 +499,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3001,
-				  tr("Subsystem '%1' is not found in subsystem set (Logic Moudle '%2').")
+				  tr("Subsystem '%1' is not found in subsystem set (Logic Module '%2').")
 				  .arg(subSysID)
 				  .arg(module));
 	}
@@ -670,7 +670,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.
+	/// Title: Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'. Check High/LowEngineeringUints ranges, ADC range and SpreadTolerance value of signals.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
@@ -678,13 +678,13 @@ namespace Builder
 	///         %3 Module StrID
 	///
 	/// Description:
-	///			SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
+	///			Calculated SpreadTolerance ADC values should be equal in channel A and channel B in AIM module.
 	///
 	void IssueLogger::errCFG3009(QString signalID1, QString signalID2, QString module)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module '%3'. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.")
+				  tr("Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'.")
 				  .arg(signalID1)
 				  .arg(signalID2)
 				  .arg(module));
@@ -837,11 +837,11 @@ namespace Builder
 	///
 	void IssueLogger::errCFG3014(QString suffix, QString objectID)
 	{
+		QString msg = "Can't find child object with suffix " + suffix + " in object " + objectID + ".";
+
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3014,
-				  tr("Can't find child object with suffix '%1' in object '%2'.")
-				  .arg(suffix)
-				  .arg(objectID));
+				  msg);
 	}
 
 	/// IssueCode: CFG3015
@@ -996,7 +996,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3021,
-                  tr("Property '%1.%2' is linked to undefined software ID '%3'.")
+				  tr("Property %1.%2 is linked to undefined software ID '%3'.")
                   .arg(objectID)
                   .arg(propertyName)
                   .arg(softwareID));
@@ -1019,7 +1019,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3022,
-                  tr("Property '%1.%2' is empty.")
+				  tr("Property %1.%2 is empty.")
                   .arg(objectID)
                   .arg(propertyName));
     }
@@ -1041,7 +1041,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3023,
-				  tr("Property '%1.%2' conversion error.").arg(objectID).arg(propertyName));
+				  tr("Property %1.%2 conversion error.").arg(objectID).arg(propertyName));
 	}
 
 	/// IssueCode: CFG3024
@@ -1087,6 +1087,112 @@ namespace Builder
 				  .arg(suffix)
 				  .arg(objectID));
 	}
+
+	/// IssueCode: CFG3026
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of property %1.%2 is not valid IPv4 address.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Value of property is not valid IPv4 address. Check property value.
+	///
+	void IssueLogger::errCFG3026(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3026,
+				  tr("Value of property %1.%2 is not valid IPv4 address.").arg(objectID).arg(propertyName));
+	}
+
+	/// IssueCode: CFG3027
+	///
+	/// IssueType: Error
+	///
+	/// Title: Ethernet port number property %1.%2 should be in range 0..65535.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Ethernet port number should in range 1..65535.. Check property value.
+	///
+	void IssueLogger::errCFG3027(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3027,
+				  tr("Ethernet port number property %1.%2 should be in range 0..65535.").arg(objectID).arg(propertyName));
+	}
+
+	/// IssueCode: CFG3028
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%4' must have same value in signals %1 and %2, module '%3'.
+	///
+	/// Parameters:
+	///         %1 Signal 1 StrID
+	///         %2 Signal 2 StrID
+	///         %3 Module StrID
+	///         %4 Property Name
+	///
+	/// Description:
+	///			Property values should be equal in specified signals of the module.
+	///
+	void IssueLogger::errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3028,
+				  tr("Property '%4' must have same value in signals %1 and %2, module '%3'.")
+				  .arg(signalID1)
+				  .arg(signalID2)
+				  .arg(module)
+				  .arg(propertyName));
+	}	
+
+	/// IssueCode: CFG3029
+	///
+	/// IssueType: Error
+	///
+	/// Title: Software %1 is not linked to ConfigurationService.
+	///
+	/// Parameters:
+	///			%1 software equipmentID
+	///
+	/// Description:
+	///			Software should be linked to ConfigurationService. Check ConfigurationServiceID1 and ConfigurationServiceID2 properties.
+	///
+	void IssueLogger::errCFG3029(QString softwareID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3029,
+				  QString(tr("Software %1 is not linked to ConfigurationService.")).arg(softwareID));
+	}
+
+	/// IssueCode: CFG3030
+	///
+	/// IssueType: Error
+	///
+	/// Title: Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.
+	///
+	/// Parameters:
+	///			%1 LM equipmentID
+	///         %2 AppDataService equipmentID
+	///
+	/// Description:
+	///			Two LM's etehrnet adapters can't be connected to same AppDataService. Check LM's ethernet adapters settings.
+	///
+	void IssueLogger::errCFG3030(QString lmID, QString appDataServiceID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3030,
+				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
+						arg(lmID).arg(appDataServiceID));
+	}	
 
 	// ALP			Application Logic Parsing				4000-4999
 	//
@@ -2983,7 +3089,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5042,
-				  QString(tr("Signal '%1' is not exists in connection '%2'. (Logic schema '%3')")).
+				  QString(tr("Signal %1 is not exists in connection %2 (Logic schema %3).")).
 						arg(appSignalID).
 						arg(connectionID).
 						arg(schemaID));
@@ -3221,14 +3327,14 @@ namespace Builder
 	/// Description:
 	///		Value of first specified parameter must be greate then the value of second parameneter. Correct prameter's values.
 	///
-	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid)
+	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5052,
-				  QString(tr("Value of parameter '%1.%2' must be greate then the value of '%1.%3'.")).
-				  arg(fbCaption).arg(param1).arg(param2));
+				  QString(tr("Value of parameter %1.%2 must be greate then the value of %1.%3 (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5053
@@ -3562,20 +3668,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+	/// Title:	   TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		LowEngeneeringUnits property of tuningable signal must be greate than HighEngeneeringUnits.
-	///		Correct signal properties.
+	///		TuningHighBound property of tuningable signal must be greate than TuningLowBound. Check signal properties.
 	///
 	void IssueLogger::errALC5068(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5068,
-				  QString(tr("LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.")).
+				  QString(tr("TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound")).
 					arg(appSignalID));
 	}
 
@@ -3584,20 +3689,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
+	/// Title:	   TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningDefaultValue property of tuningable signal must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
-	///		Correct signal TuningDefaultValue property.
+	///		TuningDefaultValue property of tuningable signal must be in range from TuningLowBound to TuningHighBound.
+	///		Check signal's TuningDefaultValue property.
 	///
 	void IssueLogger::errALC5069(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5069,
-				  QString(tr("TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.")).
+				  QString(tr("TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.")).
 					arg(appSignalID));
 	}
 
@@ -3875,29 +3980,6 @@ namespace Builder
 				  5083,
 				  QString(tr("Receiver of connection '%1' (port '%2') is not associated with LM '%3'.")).
 						arg(connectionID).arg(receiverPortID).arg(lmID));
-	}
-
-	/// IssueCode: ALC5084
-	///
-	/// IssueType: Error
-	///
-	/// Title: Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
-	///
-	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Connection ID
-	///
-	/// Description:
-	///		Signal is not exists in specified serial connection. Use PortRawDataDescription to define receiving signals.
-	///
-	void IssueLogger::errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5084,
-				  QString(tr("Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.")).
-						arg(appSignalID).arg(connectionID));
 	}
 
 	/// IssueCode: ALC5085
@@ -4237,28 +4319,6 @@ namespace Builder
 		LOG_ERROR(IssueType::AlCompiler,
 				  5100,
 				  QString(tr("Bus type ID '%1' is undefined (Logic schema '%2').")).arg(busTypeID).arg(schemaID));
-	}
-
-	/// IssueCode: ALC5101
-	///
-	/// IssueType: Error
-	///
-	/// Title:	   Bus composer cannot be directly connected to transmitter (Logic schema %1).
-	///
-	/// Parameters:
-	///		%1 Logic schema ID
-	///
-	/// Description:
-	///		Bus composer can't be directly connected to transmitter. Intermediate signal should be used.
-	///
-	void IssueLogger::errALC5101(QUuid composerUuid, QUuid transmitterUuid, QString schemaID)
-	{
-		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5101,
-				  QString(tr("Bus composer cannot be directly connected to transmitter (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5102
@@ -4683,14 +4743,14 @@ namespace Builder
 	/// Description:
 	///		UalSignal is not found for pin with specified Uuid. Contact to RPCT developers.
 	///
-	void IssueLogger::errALC5120(QUuid ualItemUuid, QUuid pinUuid, QString schemaID)
+	void IssueLogger::errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5120,
-				  QString(tr("UalSignal is not found for pin '%1' (Logic schema '%2').")).
-							arg(pinUuid.toString()).arg(schemaID));
+				  QString(tr("UalSignal is not found for pin %1.%2 (Logic schema '%3').")).
+							arg(ualItemLabel).arg(pin).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5121
@@ -4776,7 +4836,7 @@ namespace Builder
 	void IssueLogger::errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, appSignalID);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5124,
@@ -4817,7 +4877,7 @@ namespace Builder
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///	Signal and bus inputs sizes are not multiples.
+	///		Signal and bus inputs sizes are not multiples.
 	///
 	void IssueLogger::errALC5126(QUuid ualItemUuid, QString schemaID)
 	{
@@ -4832,6 +4892,344 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
+	/// Title:	   Output bus type cannot be determined (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Output bus type cannot be determined.
+	///
+	void IssueLogger::errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5127,
+				  QString(tr("Output bus type cannot be determined (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5128
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		All AFB's bus inputs connected to discretes. Output bus type cannot be determined.
+	///
+	void IssueLogger::errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5128,
+				  QString(tr("All AFB's bus inputs connected to discretes (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5129
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown AFB type (opCode) (Logic schema %1, item %2).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Unknown AFB type (opCode) (Logic schema %1, item %2). Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5129,
+				  QString(tr("Unknown AFB type (opCode) (Logic schema %1, item %2).")).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5130
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+	///
+	/// Parameters:
+	///		%1 AFB component caption
+	///		%2 Logic schema ID
+	///		%3 Schema item label
+	///
+	/// Description:
+	///		 Max instances of specified AFB component is used.
+	///
+	void IssueLogger::errALC5130(QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5130,
+				  QString(tr("Max instances of AFB component '%1' is used (Logic schema %2, item %3)")).
+						arg(afbComponentCaption).arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5131
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.
+	///
+	/// Parameters:
+	///		%1 App signal ID
+	///		%2 Opto port equipmentID
+	///
+	/// Description:
+	///		 Type of signal connected to opto port isn't correspond to its type specified in raw data description.
+	///
+	void IssueLogger::errALC5131(QString appSignalID, QString portID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5131,
+				  QString(tr("Type of signal %1 connected to opto port %2 isn't correspond to its type specified in raw data description.")).
+						arg(appSignalID).arg(portID));
+	}
+
+	/// IssueCode: ALC5132
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Can't resolve busses interdependencies: %1
+	///
+	/// Parameters:
+	///		%1 Buses with interdependensies list
+	///
+	/// Description:
+	///		 Specified busses have interdependencies that cannot be resolved.
+	///
+	void IssueLogger::errALC5132(QString unresolvedBusList)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5132,
+				  QString(tr("Can't resolve busses interdependencies: %1")).
+						arg(unresolvedBusList));
+	}
+
+	/// IssueCode: ALC5133
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Application signal with equipmentID %1 is not found (Logic schema %2, item %3).
+	///
+	/// Parameters:
+	///		%1 Application signal's equipmemtID
+	///		%2 Logic schema ID
+	///		%3 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5133(QString signalEquipmentID, QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5133,
+				  QString(tr("Application signal with equipmentID %1 is not found (Logic schema %2, item %3).")).
+						arg(signalEquipmentID).arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5134
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Integer constant value out of range (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5134,
+				  QString(tr("Integer constant value out of range %1..%2 (Logic schema %3, item %4).")).
+						arg(std::numeric_limits<qint32>::min()).
+						arg(std::numeric_limits<qint32>::max()).
+						arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5135
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Float constant value out of range (Logic schema %1, item %2)
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item label
+	///
+	/// Description:
+	///		Application signal with specified equipmentID is not found.
+	///
+	void IssueLogger::errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5135,
+				  QString(tr("Float constant value out of range %1..%2 (Logic schema %3, item %4).")).
+						arg(std::numeric_limits<float>::min()).
+						arg(std::numeric_limits<float>::max()).
+						arg(schemaID).arg(itemLabel));
+	}
+
+
+	/// IssueCode: ALC5136
+	///
+	/// IssueType: Error
+	///
+	/// Title: The input (or output) signal %1 can be bind to Equipment Signal only.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		The signal bind to uncorrect equipment. Set the correct value of signal's EquipmentID property.
+	///
+	void IssueLogger::errALC5136(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5136,
+				  QString(tr("The input (or output) signal %1 can be bind to Equipment Signal only.").
+						  arg(appSignalID)));
+	}
+
+	/// IssueCode: ALC5137
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 property %2 out of SignedInt32 range.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Signal property name
+	///
+	/// Description:
+	///		Specified signal property value is out of SignedInt32 range. Check property value.
+	///
+	void IssueLogger::errALC5137(QString appSignalID, QString property)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5137,
+				  QString(tr("Signal %1 property %2 out of SignedInt32 range.")).
+						  arg(appSignalID).arg(property));
+	}
+
+	/// IssueCode: ALC5138
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 property %2 out of Float32 range.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Signal property name
+	///
+	/// Description:
+	///		Specified signal property value is out of Float32 range. Check property value.
+	///
+	void IssueLogger::errALC5138(QString appSignalID, QString property)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5138,
+				  QString(tr("Signal %1 property %2 out of Float32 range.")).
+						  arg(appSignalID).arg(property));
+	}
+
+	/// IssueCode: ALC5139
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Values of parameters %1.%2 and %1.%3 are equal.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///
+	/// Description:
+	///		Values of parameters are equal. Check params values.
+	///
+	void IssueLogger::wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
+	{
+		addItemsIssues(OutputMessageLevel::Warning0, itemUuid, schemaID);
+
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5139,
+				  QString(tr("Values of parameters %1.%2 and %1.%3 are equal (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
+	}
+
+	/// IssueCode: ALC5140
+	///
+	/// IssueType: Error
+	///
+	/// Title: Undefined ConfigurationService IP-address for software %1.
+	///
+	/// Parameters:
+	///		%1 Software EquipmentID
+	///
+	/// Description:
+	///		ConfigurationService IP-address for software is undefined. Check ConfigurationService ClientrequestIP property.
+	///
+	void IssueLogger::errALC5140(QString softwareID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5140,
+				  QString(tr("Undefined ConfigurationService IP-address for software %1.")).arg(softwareID));
+	}
+
+	/// IssueCode: ALC5141
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of parameter %1.%2 must be in range %3 (Logic schema %4)
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 parameter caption
+	/// 	%3 range string (ex: "5..65535")
+	///
+	/// Description:
+	///		Value of AFB parameter should be in specified range. Check parameter value.
+	///
+	void IssueLogger::errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5141,
+				  QString(tr("Value of parameter %1.%2 must be in range %3 (Logic schema %4)")).
+					arg(fbCaption).arg(paramCaption).arg(rangeStr).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5142
+	///
+	/// IssueType: Error
+	///
 	/// Title:	   Duplicate loopback source ID %1 (Logic schema %2).
 	///
 	/// Parameters:
@@ -4841,12 +5239,12 @@ namespace Builder
 	/// Description:
 	///		Loopback source IDs can't duplicate.
 	///
-	void IssueLogger::errALC5127(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID)
+	void IssueLogger::errALC5142(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, loopbackSourceItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
-				  5127,
+				  5142,
 				  QString(tr("Duplicate loopback source ID %1 (Logic schema %2).")).
 								arg(loopbackSourceID).arg(schemaID));
 	}
@@ -5032,7 +5430,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: // Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
+	/// Title: Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
 	///
 	/// Parameters:
 	///		%1 Opto port 1 ID
@@ -5295,6 +5693,28 @@ namespace Builder
 	}
 
 
+	/// IssueCode: EQP6020
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property LmDescriptionFile is empty, LogicModule %1.
+	///
+	/// Parameters:
+	///		%1 LogicModule EquipmentID
+	///
+	/// Description:
+	///		Property LmDescriptionFile is empty.
+	///
+	void IssueLogger::errEQP6020(QString lm, QUuid lmUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, lmUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6020,
+				  tr("Property LmDescriptionFile is empty, LogicModule %1.")
+				  .arg(lm));
+	}
+
 
 	/// IssueCode: EQP6100
 	///
@@ -5505,6 +5925,29 @@ namespace Builder
 				  tr("Signal %1 specified in filter %2 in Tuning Client %3 does not exist.")
 				  .arg(appSignalId)
 				  .arg(filter)
+				  .arg(tuningClientEquipmentId)
+				  );
+	}
+
+	/// IssueCode: EQP6109
+	///
+	/// IssueType: Error
+	///
+	/// Title: Equipment ID '%1' specified in TuningSourceEquipmentID property of Tuning Client '%2' does not exist.
+	///
+	/// Parameters:
+	///		%1 Tuning Source Equipment ID
+	///		%2 TuningClient Equipment ID
+	///
+	/// Description:
+	///		Equipment object that is specified in TuningSourceEquipmentID property of the Tuning Client does not exist.
+	///
+	void IssueLogger::errEQP6109(QString equipmentId, QString tuningClientEquipmentId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6109,
+				  tr("Equipment ID '%1' specified in TuningSourceEquipmentID property of Tuning Client '%2' does not exist.")
+				  .arg(equipmentId)
 				  .arg(tuningClientEquipmentId)
 				  );
 	}

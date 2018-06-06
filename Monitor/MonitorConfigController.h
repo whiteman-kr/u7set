@@ -62,7 +62,7 @@ class MonitorConfigController : public QObject
 public:
 	MonitorConfigController() = delete;
 
-	MonitorConfigController(HostAddressPort address1, HostAddressPort address2);
+	MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2);
 	virtual ~MonitorConfigController();
 
 	// Methods
@@ -75,6 +75,8 @@ public:
 	bool getFileById(const QString& id, QByteArray* fileData);
 
 	Tcp::ConnectionState getConnectionState() const;
+
+	const SoftwareInfo& softwareInfo() const;
 
 	// signals
 	//
@@ -106,6 +108,7 @@ public:
 	//
 private:
 	QSharedMemory m_appInstanceSharedMemory;
+	SoftwareInfo m_softwareInfo;
 	int m_appInstanceNo = -1;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;

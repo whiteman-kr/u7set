@@ -71,14 +71,26 @@ namespace ExtWidgets
 
 		bool modified();
 
+		bool hasOkCancelButtons();
+
 	signals:
 		void escapePressed();
+
+		void okPressed();
+		void cancelPressed();
 
 	public slots:
 		void textChanged();
 
 	protected:
+		void okButtonPressed();
+		void cancelButtonPressed();
+
+
+	protected:
 		bool m_modified = false;
+
+		bool m_hasOkCancelButtons = true;
 
 	};
 
@@ -199,9 +211,9 @@ namespace ExtWidgets
 	private slots:
 		void finished(int result);
 
-	private:
-		virtual void accept();
-		virtual void reject();
+	public slots:
+		virtual void accept() override;
+		virtual void reject() override;
 
 	private:
 		QString m_text;
@@ -396,7 +408,7 @@ namespace ExtWidgets
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
 
-        virtual PropertyTextEditor* createCodeEditor(Property *property, QWidget* parent);
+		virtual PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent);
 
 	protected slots:
 		void updatePropertiesList();

@@ -162,7 +162,8 @@ namespace Builder
 		bool setItemsOrder(IssueLogger* log,
 						   std::map<QUuid, AppLogicItem>& remainItems,
 						   std::list<AppLogicItem>& orderedItems,
-						   const std::map<QUuid, AppLogicItem>& constItems,
+						   const std::map<QUuid, std::vector<AppLogicItem>>& itemsWithInputs,
+						   bool startLoopFromLastItem,
 						   bool* interruptProcess);
 
 		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
@@ -235,6 +236,31 @@ namespace Builder
 	};
 
 
+	// Container to store schemas parse result, in multithreading
+	// After parsing all schemas call setToAppData to set result to modules
+	//
+	class ReadyParseDataContainer
+	{
+	public:
+		void add(QString equipmentId,
+				 std::shared_ptr<BushContainer> bushContainer,
+				 std::shared_ptr<VFrame30::LogicSchema> schema);
+
+		void setToAppData(AppLogicData* appData, IssueLogger* log);
+
+	private:
+		struct AppData
+		{
+			QString equipmentId;
+			std::shared_ptr<BushContainer> bushContainer;
+			std::shared_ptr<VFrame30::LogicSchema> schema;
+		};
+
+		mutable QMutex m_mutex;
+		std::list<AppData> m_appData;
+	};
+
+
 	// ------------------------------------------------------------------------
 	//
 	//		ApplicationLogicBuilder
@@ -287,10 +313,10 @@ namespace Builder
 		bool parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema,
 						   std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema);
+		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema, ReadyParseDataContainer* readyParseDataContainer, bool* interruptProcess);
 
 		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-								std::shared_ptr<VFrame30::SchemaLayer> layer);
+								std::shared_ptr<VFrame30::SchemaLayer> layer, ReadyParseDataContainer* readyParseDataContainer);
 
 		bool multichannelProcessing(std::shared_ptr<VFrame30::LogicSchema> schema,
 									std::shared_ptr<VFrame30::SchemaLayer> layer,

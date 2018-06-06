@@ -1,14 +1,13 @@
 #pragma once
 #include "MainTabPage.h"
 #include "../lib/OutputLog.h"
-#include "../lib/ModuleConfiguration.h"
+#include "../lib/ModuleFirmware.h"
 #include "../lib/Configurator.h"
 #include "Builder/IssueLogger.h"
 
 class DbController;
 class QCheckBox;
 class QComboBox;
-
 
 //
 //
@@ -28,13 +27,12 @@ public:
 public:
 
 	bool isUploading();
-	void findProjectBuilds();
+	void refreshProjectBuilds();
 
 protected slots:
 	void configurationTypeChanged(const QString& s);
-	void fileTypeChanged(const QString& s);
-	void findSubsystemsInBuild(int index);
-	void subsystemChanged(int index);
+	void buildChanged(int index);
+	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
@@ -42,9 +40,10 @@ signals:
 	void readConfiguration(int);
 	void readFirmware(QString fileName);
 
-	//void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
-	void showConfDataFileInfo(const QString& fileName);
-	void writeConfDataFile(const QString& fileName);
+	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem);
+	void detectSubsystem();
+
 	void eraseFlashMemory(int);
 	void cancelOperation();
 
@@ -71,24 +70,43 @@ public slots:
 
 private:
 	void writeLog(const OutputLogItem& logItem);
+	QString selectedSubsystem();
+
+	void selectBuild(const QString& id);
+	void selectSubsystem(const QString& id);
+
+	void refreshBinaryFile();
+
+private slots:
+
+	void clearSubsystemsUartData();
+	void resetUartData();
+
+	void loadBinaryFileHeaderComplete();
+	void uartOperationStart(int uartID, QString operation);
+	void uploadComplete(int uartID);
+	void detectSubsystemComplete(int selectedSubsystem);
 
 	// Data
 	//
 private:
 
+	// Interface members
+
 	QSplitter* m_vsplitter = nullptr;
-
-	QListWidget* m_pBuildList = nullptr;
-
-	QListWidget* m_pSubsystemList = nullptr;
 
 	QComboBox* m_pConfigurationCombo = nullptr;
 
-	QComboBox* m_pFileTypeCombo = nullptr;
+	QListWidget* m_pBuildList = nullptr;
+
+	QTreeWidget* m_pSubsystemsListWidget = nullptr;
+
+	QTreeWidget* m_pUartListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
-	QPushButton* m_pReadButton = nullptr;
+	QPushButton* m_pDetectSubsystemButton = nullptr;
+	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;
 
@@ -96,24 +114,34 @@ private:
 	QPushButton* m_pClearLogButton = nullptr;
 	QPushButton* m_pCancelButton = nullptr;
 
-	int m_logTimerId = -1;
-
 	Configurator* m_pConfigurator = nullptr;
 	QThread* m_pConfigurationThread = nullptr;
+
+	// Firmware and processing
+
+	Hardware::ModuleFirmwareStorage m_firmware;
+
+	int m_logTimerId = -1;
+
+	bool m_uploading = false;
 
 	Builder::IssueLogger m_outputLog;
 
 	QString m_buildSearchPath;
 
+	// Currently selected build and file info
+
+	QStringList m_currentBuilds;
 	QString m_currentBuild;
-	QString m_currentSubsystem;
-	QString m_currentFileName;
 
-	int m_currentBuildIndex = -1;
-	int m_currentSubsystemIndex = -1;
+	QString m_currentFilePath;
+	QDateTime m_currentFileModifiedTime;
 
-	bool m_uploading = false;
+	// Uart Columns indexes
 
+	const int columnSubsysId = 0;
+	const int columnUartId = 0;
+	const int columnUartType = 1;
+	const int columnUploadCount = 2;
+	const int columnUartStatus = 3;
 };
-
-

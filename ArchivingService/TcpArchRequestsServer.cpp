@@ -3,7 +3,8 @@
 QMutex TcpArchRequestsServer::m_requestNoMutex;
 quint32 TcpArchRequestsServer::m_nextRequestNo = 1;
 
-TcpArchRequestsServer::TcpArchRequestsServer(ArchRequestThread& archRequestThread, CircularLoggerShared logger) :
+TcpArchRequestsServer::TcpArchRequestsServer(const SoftwareInfo& softwareInfo, ArchRequestThread& archRequestThread, CircularLoggerShared logger) :
+	Tcp::Server(softwareInfo),
 	m_archRequestThread(archRequestThread),
     m_logger(logger)
 {
@@ -11,7 +12,7 @@ TcpArchRequestsServer::TcpArchRequestsServer(ArchRequestThread& archRequestThrea
 
 Tcp::Server* TcpArchRequestsServer::getNewInstance()
 {
-	return new TcpArchRequestsServer(m_archRequestThread, m_logger);
+	return new TcpArchRequestsServer(localSoftwareInfo(), m_archRequestThread, m_logger);
 }
 
 void TcpArchRequestsServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

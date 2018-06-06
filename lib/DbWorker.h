@@ -63,11 +63,13 @@ public:
     int mcFileId() const;
 	int connectionsFileId() const;
 	int busTypesFileId() const;
+	int etcFileId() const;
 
     std::vector<DbFileInfo> systemFiles() const;
 
-	static QString toSqlStr(QString str);
+	static QString toSqlStr(const QString& str);
 	static QString toSqlBoolean(bool value);
+	static QString toSqlByteaStr(const QByteArray& binData);
 
     //
     // Operations
@@ -148,7 +150,7 @@ public slots:
 	bool setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg);
 
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
-    void slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState);
+	void slot_setSignalWorkcopy(Signal *signal, ObjectState *objectState);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
@@ -166,6 +168,10 @@ public slots:
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
+
+	void slot_hasCheckedOutSignals(bool* hasCheckedOut);
+
+	void hasCheckedOutSignals(QSqlDatabase& db, bool* hasCheckedOut);
 
 	// Units management
 	//
@@ -231,6 +237,16 @@ private:
 	const QString& sessionKey() const;
 	void setSessionKey(QString value);
 
+	//
+
+	bool processingBeforeDatabaseUpgrade(QSqlDatabase& db, int newVersion, QString* errorMessage);
+	bool processingBeforeDatabaseUpgrade0215(QSqlDatabase& db,QString* errorMessage);
+
+	bool processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage);
+//	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
+
+
 private:
     mutable QMutex m_mutex;
 
@@ -254,6 +270,7 @@ private:
 	int m_mcFileId = -1;			// Module Configuration Template
 	int m_connectionsFileId = -1;	// Connections
 	int m_busTypesFileId = -1;		// BusTypes
+	int m_etcFileId = -1;			//
 
     std::vector<DbFileInfo> m_systemFiles;		// All system files
 

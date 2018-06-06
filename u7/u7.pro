@@ -13,6 +13,11 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
@@ -104,7 +109,7 @@ SOURCES +=\
     EditEngine/EditEngineMoveItem.cpp \
     EditEngine/EditEngineSetPoints.cpp \
     EditEngine/EditEngineSetProperty.cpp \
-    ../lib/ModuleConfiguration.cpp \
+    ../lib/ModuleFirmware.cpp \
     BuildTabPage.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbProgress.cpp \
@@ -184,7 +189,6 @@ SOURCES +=\
     ../lib/Tuning/TuningModel.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
-    ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
     ../lib/CsvFile.cpp \
     DialogBusEditor.cpp \
@@ -197,12 +201,19 @@ SOURCES +=\
     Builder/UalItems.cpp \
     EditEngine/EditEngineSetObject.cpp \
     ../lib/Address16.cpp \
-    EditEngine/EditEngineSetObject.cpp \
     EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
     CreateSignalDialog.cpp \
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../Proto/network.pb.cc \
     LogicModuleSet.cpp \
-    ../lib/LmDescription.cpp
+    ../lib/LmDescription.cpp \
+    Builder/MemWriteMap.cpp \
+    Builder/ConfigurationServiceCfgGenerator.cpp \
+    ../lib/TuningValue.cpp \
+    SpecificPropertiesEditor.cpp \
+    ../lib/Times.cpp
+
 
 HEADERS  += \
     CentralWidget.h \
@@ -238,7 +249,7 @@ HEADERS  += \
     EditEngine/EditEngineMoveItem.h \
     EditEngine/EditEngineSetPoints.h \
     EditEngine/EditEngineSetProperty.h \
-    ../lib/ModuleConfiguration.h \
+    ../lib/ModuleFirmware.h \
     BuildTabPage.h \
     ../lib/OutputLog.h \
     ../lib/DbProgress.h \
@@ -324,7 +335,6 @@ HEADERS  += \
     ../lib/Tuning/TuningModel.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
-    ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
@@ -340,8 +350,18 @@ HEADERS  += \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
     CreateSignalDialog.h \
+    ../lib/Tuning/TuningSignalManager.h \
+    ../Proto/network.pb.h \
     LogicModuleSet.h \
-    ../lib/LmDescription.h
+    ../lib/LmDescription.h \
+    Builder/MemWriteMap.h \
+    Builder/ConfigurationServiceCfgGenerator.h \
+    ../lib/TuningValue.h \
+    SpecificPropertiesEditor.h \
+    Builder/CfgFiles.h \
+    ../lib/CommonTypes.h \
+    ../lib/Times.h
+
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -404,7 +424,12 @@ DISTFILES += \
     LogicModuleDescription/LogicModule0000.xml \
     ../Proto/network.proto \
     LogicModuleDescription/LM1_SF00.xml \
-    LogicModuleDescription/LM1_SR01.xml
+    LogicModuleDescription/LM1_SR01.xml \
+    LogicModuleDescription/LM1_SF00.xml \
+    LogicModuleDescription/LM1_SR01.xml \
+    LogicModuleDescription/BVB15Module0000.xml \
+    LogicModuleDescription/LM1_SR02.xml \
+    ../Etc/SignalPropertyBehavior/SignalPropertyBehavior.csv
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
@@ -418,15 +443,6 @@ win32 {
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-# c++14 support
-#
-win32:QMAKE_CXXFLAGS += -std:c++14
-unix:QMAKE_CXXFLAGS += -std=c++14
-
-#c++14 support for Windows
-#
-unix:QMAKE_CXXFLAGS += -std=c++14
 
 #Optimization flags
 #

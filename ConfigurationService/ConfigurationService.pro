@@ -25,6 +25,10 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # Force prebuild version control info
 #
@@ -67,7 +71,6 @@ SOURCES += \
 	../lib/Service.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/JsonSerializable.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
@@ -75,7 +78,8 @@ SOURCES += \
     CfgServiceMain.cpp \
     ../lib/XmlHelper.cpp \
     CfgChecker.cpp \
-    CfgControlServer.cpp
+    CfgControlServer.cpp \
+    ../lib/SoftwareInfo.cpp
 
 HEADERS += \
     version.h \
@@ -89,7 +93,6 @@ HEADERS += \
 	../lib/Service.h \
     ../lib/UdpSocket.h \
     ../lib/CircularLogger.h \
-    ../lib/JsonSerializable.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
@@ -97,15 +100,12 @@ HEADERS += \
     ../lib/XmlHelper.h \
     CfgChecker.h \
     CfgControlServer.h \
-    ../lib/Types.h
+    ../lib/Types.h \
+    ../lib/SoftwareInfo.h
 
 include(../qtservice/src/qtservice.pri)
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 #protobuf
 #

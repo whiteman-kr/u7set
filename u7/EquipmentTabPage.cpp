@@ -3140,6 +3140,7 @@ void EquipmentView::updateFromPreset()
 	//
 	std::map<QString, std::shared_ptr<Hardware::DeviceObject>> presets;
 	QStringList presetsToUpdate;
+	bool updateAppSignals = true;
 
 	for (int i = 0; i < presetRoot->childrenCount(); i++)
 	{
@@ -3171,9 +3172,8 @@ void EquipmentView::updateFromPreset()
 	//
 	DialogUpdateFromPreset dialog(theSettings.isExpertMode(), presetsToUpdate, this);
 
-	int result = dialog.exec();
-
-	if (result != QDialog::Accepted)
+	if (int result = dialog.exec();
+		result != QDialog::Accepted)
 	{
 		return;
 	}
@@ -3186,6 +3186,7 @@ void EquipmentView::updateFromPreset()
 		//
 		forceUpdateProperties = dialog.forceUpdateProperties();
 		presetsToUpdate = dialog.selectedPresets();
+		updateAppSignals = dialog.updateAppSignlas();
 	}
 
 	// Get all equipment from the database
@@ -3209,7 +3210,7 @@ void EquipmentView::updateFromPreset()
 	std::vector<DbFileInfo> presetFiles;									// Files to check out
 	presetFiles.reserve(65536 * 2);
 
-	std::vector<std::shared_ptr<Hardware::DeviceObject>> presetRoots;		// preset root objectes to start update from preset operation
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> presetRoots;		// Preset root objectes to start update from preset operation
 	presetRoots.reserve(8192);
 
 	std::function<void(std::shared_ptr<Hardware::DeviceObject>)> getPresetFiles =
@@ -3265,9 +3266,13 @@ void EquipmentView::updateFromPreset()
 	std::vector<Hardware::DeviceObject*> deleteDeviceList;
 	std::vector<std::pair<int, int>> addDeviceList;		// first: parent fileId, second: preset file id
 
+	QVector<Hardware::DeviceSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
+																		// to updater them
+
 	updateDeviceList.reserve(65536 * 2);
 	deleteDeviceList.reserve(65536);
 	addDeviceList.reserve(65536);
+	deviceSignalsToUpdateAppSignals.reserve(65536 * 2);
 
 	for (std::shared_ptr<Hardware::DeviceObject> device : presetRoots)
 	{
@@ -3313,7 +3318,14 @@ void EquipmentView::updateFromPreset()
 		assert(preset->presetRoot() == true);
 		assert(preset->presetName() == presetName);
 
-		ok = updateDeviceFromPreset(device, preset, forceUpdateProperties, presetsToUpdate, &updateDeviceList, &deleteDeviceList, &addDeviceList);
+		ok = updateDeviceFromPreset(device,
+									preset,
+									forceUpdateProperties,
+									presetsToUpdate,
+									&updateDeviceList,
+									&deleteDeviceList,
+									&addDeviceList,
+									&deviceSignalsToUpdateAppSignals);
 	}
 
 	// save all updated data to DB
@@ -3420,6 +3432,13 @@ void EquipmentView::updateFromPreset()
 		}
 	}
 
+	// Update ApplicationSignals
+	//
+	if (updateAppSignals == true)
+	{
+		SignalsTabPage::updateSignalsSpecProps(db(), deviceSignalsToUpdateAppSignals, forceUpdateProperties);
+	}
+
 	// Reset model
 	//
 	equipmentModel()->reset();
@@ -3432,16 +3451,19 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 										   const QStringList& forceUpdateProperties,			// Update theses props even if they not meant to updayt
 										   const QStringList& presetsToUpdate,					// Update only these presets
 										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
-										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,
-										   std::vector<std::pair<int, int>>* addDeviceList)
+										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,	// Devices to delete after update
+										   std::vector<std::pair<int, int>>* addDeviceList,			// Devices to add aftre update
+										   QVector<Hardware::DeviceSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
 {
 	if (updateDeviceList == nullptr ||
 		deleteDeviceList == nullptr ||
-		addDeviceList == nullptr)
+		addDeviceList == nullptr ||
+		deviceSignalsToUpdateAppSignals == nullptr)
 	{
 		assert(updateDeviceList);
 		assert(deleteDeviceList);
 		assert(addDeviceList);
+		assert(deviceSignalsToUpdateAppSignals);
 		return false;
 	}
 
@@ -3477,6 +3499,13 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	{
 		if (presetsToUpdate.contains(device->presetName()) == true)
 		{
+			if (device->isSignal() == true)
+			{
+				// Collect all update DeviceSignals, so AppSignals can be update from them
+				//
+				deviceSignalsToUpdateAppSignals->push_back(device->toSignal());
+			}
+
 			// Update device object properties
 			//
 			std::vector<std::shared_ptr<Property>> deviceProperties = device->properties();
@@ -3605,7 +3634,14 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			if (deviceChild->preset() &&
 				deviceChild->presetName() == device->presetName())
 			{
-				updateDeviceFromPreset(deviceChild, presetChild, forceUpdateProperties, presetsToUpdate, updateDeviceList, deleteDeviceList, addDeviceList);
+				updateDeviceFromPreset(deviceChild,
+									   presetChild,
+									   forceUpdateProperties,
+									   presetsToUpdate,
+									   updateDeviceList,
+									   deleteDeviceList,
+									   addDeviceList,
+									   deviceSignalsToUpdateAppSignals);
 			}
 		}
 
@@ -3634,7 +3670,14 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 		if (deviceChild->preset() == false)
 		{
-			updateDeviceFromPreset(deviceChild, preset, forceUpdateProperties, presetsToUpdate, updateDeviceList, deleteDeviceList, addDeviceList);
+			updateDeviceFromPreset(deviceChild,
+								   preset,
+								   forceUpdateProperties,
+								   presetsToUpdate,
+								   updateDeviceList,
+								   deleteDeviceList,
+								   addDeviceList,
+								   deviceSignalsToUpdateAppSignals);
 		}
 	}
 
@@ -3813,6 +3856,10 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_propertyEditor = new IdePropertyEditor(m_splitter, dbcontroller);
     m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
 
 	m_splitter->addWidget(m_equipmentView);

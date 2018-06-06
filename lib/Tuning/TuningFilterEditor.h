@@ -7,16 +7,13 @@
 #include "TuningModel.h"
 #include "../lib/PropertyEditor.h"
 
-
-
 class DialogChooseTuningSignals : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	DialogChooseTuningSignals(const TuningSignalStorage* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent);
-
+	DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent);
 
 	enum class FilterType
 	{
@@ -34,6 +31,8 @@ public:
 		Discrete
 	};
 
+signals:
+	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok); 	// Qt::DirectConnection!
 
 private:
 
@@ -47,7 +46,7 @@ private:
 
 private:
 
-	const TuningSignalStorage* m_signalStorage = nullptr;
+	TuningSignalManager* m_signalManager = nullptr;
 
 	std::shared_ptr<TuningFilter> m_filter;
 
@@ -127,9 +126,12 @@ class TuningFilterEditor : public QWidget
 
 public:
 
-	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
+	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
 								bool readOnly,
 								bool setCurrentEnabled,
+								bool typeTreeEnabled,
+								bool typeButtonEnabled,
+								bool typeTabEnabled,
 								TuningFilter::Source source,
 								int propertyEditorSplitterPos,
 								const QByteArray& dialogChooseSignalGeometry);
@@ -141,7 +143,7 @@ public:
 
 signals:
 
-	//void getCurrentSignalValue(Hash appSignalHash, float* value, bool* ok);
+	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);	// Qt::DirectConnection!
 
 private slots:
 
@@ -160,7 +162,12 @@ private slots:
 	void presetPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	void on_m_presetsSignals_clicked();
+
+	void slot_getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);
+
 private:
+
+	void addPreset(TuningFilter::InterfaceType interfaceType);
 
 	void initUserInterface();
 
@@ -210,7 +217,7 @@ private:
 
 	TuningFilterStorage* m_filterStorage = nullptr;
 
-	const TuningSignalStorage* m_signalStorage = nullptr;
+	TuningSignalManager* m_signalManager = nullptr;
 
 private:
 
@@ -221,6 +228,11 @@ private:
     int m_propertyEditorSplitterPos = -1;
 	bool m_readOnly = false;
 	bool m_setCurrentEnabled = false;
+
+	bool m_typeButtonEnabled = false;
+	bool m_typeTabEnabled = false;
+	bool m_typeTreeEnabled = false;
+
 	TuningFilter::Source m_source = TuningFilter::Source::User;
 };
 

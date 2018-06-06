@@ -17,6 +17,9 @@ const char* const DvsFileName = "DVS";					// Diagnostics Video Schemas
 const char* const McFileName = "MC";					// Module Configuration
 const char* const ConnectionsFileName = "CONNECTIONS";	// Connections
 const char* const BusTypesFileName = "BUSTYPES";		// BustTypes
+const char* const EtcFileName = "ETC";					//
+
+const char* const SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
 
 const char* const AlFileExtension = "als";				// Application Logic schema file extension
 const char* const AlTemplExtension = "templ_als";		// Application Logic schema template file extnesion

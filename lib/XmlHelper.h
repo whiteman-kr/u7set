@@ -18,6 +18,8 @@ public:
 	XmlWriteHelper(QByteArray* data);
 	~XmlWriteHelper();
 
+	QXmlStreamWriter* xmlStreamWriter() const;
+
 	void setAutoFormatting(bool autoFormatting);
 	void writeStartDocument();
 	void writeEndDocument();
@@ -26,7 +28,7 @@ public:
 	void writeEndElement();
 
 	void writeStringAttribute(const QString& name, const QString& value);
-	void writeIntAttribute(const QString& name, int value);
+	void writeIntAttribute(const QString& name, int value, bool hex = false);
 	void writeBoolAttribute(const QString& name, bool value);
 	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);
@@ -37,6 +39,7 @@ public:
 
 	void writeStringElement(const QString& name, const QString& value);
 	void writeIntElement(const QString& name, int value);
+	void writeBoolElement(const QString& name, bool value);
 
 	void writeHostAddressPort(const QString& nameIP, const QString& namePort, HostAddressPort& hostAddressPort);
 	void writeHostAddress(const QString& nameIP, QHostAddress& hostAddress);
@@ -69,12 +72,14 @@ public:
 	bool readUInt64Attribute(const QString& name, qulonglong* value);
 	bool readUInt32Attribute(const QString& name, quint32 *value);
 
-	bool readStringElement(const QString& elementName, QString* value);
-	bool readIntElement(const QString& elementName, int* value);
+	bool readStringElement(const QString& elementName, QString* value, bool find = false);
+	bool readIntElement(const QString& elementName, int* value, bool find = false);
+	bool readBoolElement(const QString& elementName, bool* value, bool find = false);
 
 	bool readHostAddressPort(const QString& nameIP, const QString &namePort, HostAddressPort *hostAddressPort);
 	bool readHostAddress(const QString& name, QHostAddress *hostAddress);
 
 	bool findElement(const QString& elementName);
+	bool checkElement(const QString& elementName);
 };
 

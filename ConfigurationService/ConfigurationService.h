@@ -14,10 +14,10 @@ class ConfigurationServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ConfigurationServiceWorker(const QString& serviceName,
+	ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
+							   const QString& serviceName,
 							   int& argc,
 							   char** argv,
-							   const VersionInfo& versionInfo,
 							   std::shared_ptr<CircularLogger> logger);
 
 	virtual ServiceWorker* createInstance() const override;
@@ -46,7 +46,6 @@ private:
 	void stopUdpThreads();
 
 private:
-	static const char* const SETTING_EQUIPMENT_ID;
 	static const char* const SETTING_AUTOLOAD_BUILD_PATH;
 	static const char* const SETTING_CLIENT_REQUEST_IP;
 	static const char* const SETTING_WORK_DIRECTORY;
@@ -60,7 +59,6 @@ private:
 
 	// settings
 	//
-	QString m_equipmentID;
 	QString m_autoloadBuildPath;
 	QString m_clientIPStr;
 	QString m_workDirectory;

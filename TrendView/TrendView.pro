@@ -11,10 +11,14 @@ TEMPLATE = lib
 
 CONFIG += staticlib
 CONFIG += precompile_header
-CONFIG += c++14					# C++14 support is enabled.
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
 PRECOMPILED_HEADER = Stable.h
+
+#c++14/17 support
+#
+CONFIG += c++14
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings

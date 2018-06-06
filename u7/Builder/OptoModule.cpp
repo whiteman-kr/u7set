@@ -287,6 +287,7 @@ namespace Hardware
 			setEnableSerial(cn->port1EnableSerial());
 			setSerialMode(cn->port1SerialMode());
 			setEnableDuplex(cn->port1EnableDuplex());
+			setDisableDataIDControl(cn->disableDataId());
 
 			setManualSettings(cn->manualSettings());
 			setManualTxStartAddressW(cn->port1ManualTxStartAddress());
@@ -312,6 +313,7 @@ namespace Hardware
 			setEnableSerial(cn->port2EnableSerial());
 			setSerialMode(cn->port2SerialMode());
 			setEnableDuplex(cn->port2EnableDuplex());
+			setDisableDataIDControl(cn->disableDataId());
 
 			setManualSettings(cn->manualSettings());
 			setManualTxStartAddressW(cn->port2ManualTxStartAddress());
@@ -507,6 +509,11 @@ namespace Hardware
 		m_txDataID = 0;
 
 		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (disableDataIDControl() == true)
 		{
 			return true;
 		}
@@ -1057,76 +1064,86 @@ namespace Hardware
 		return m_connectionID.isEmpty() != true;
 	}
 
-/*	Address16 OptoPort::getTxSignalAddrInBuf(const QString& appSignalID) const
+	bool OptoPort::getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const
 	{
-		TxRxSignalShared s = m_txSignals.value(appSignalID, nullptr);
-
-		if (s != nullptr)
+		if (addr == nullptr)
 		{
-			return s->addrInBuf();
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
 		}
 
-		assert(false);
-
-		return Address16();
-	}*/
-
-	bool OptoPort::getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16& addr) const
-	{
 		TxRxSignalShared txSignal = m_txSignalIDs.value(appSignalID, nullptr);
 
 		if (txSignal == nullptr)
 		{
-			ASSERT_RETURN_FALSE;
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+							   QString("Tx signal %1 is not exists in opto port %2.").
+									arg(appSignalID).arg(m_equipmentID));
+			return false;
 		}
 
 		int absTxBufAddr = txBufAbsAddress();
 
 		if (absTxBufAddr == BAD_ADDRESS)
 		{
-			ASSERT_RETURN_FALSE;
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+							   QString("Undefined address of tx signal %1 in opto port's %2 buffer.").
+									arg(appSignalID).arg(m_equipmentID));
+			return false;
 		}
 
 		Address16 absAddr = txSignal->addrInBuf();
 
 		absAddr.addWord(absTxBufAddr);
 
-		addr = absAddr;
+		*addr = absAddr;
 
-		addr.setSignalType(txSignal->signalType());
-		addr.setDataFormat(txSignal->dataFormat());
-		addr.setDataSize(txSignal->dataSize());
-		addr.setByteOrder(txSignal->byteOrder());
+		addr->setSignalType(txSignal->signalType());
+		addr->setDataFormat(txSignal->dataFormat());
+		addr->setDataSize(txSignal->dataSize());
+		addr->setByteOrder(txSignal->byteOrder());
 
 		return true;
 	}
 
-	bool OptoPort::getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const
+	bool OptoPort::getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const
 	{
+		if (addr == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
 		TxRxSignalShared rxSignal = m_rxSignalIDs.value(appSignalID);
 
 		if (rxSignal == nullptr)
 		{
-			ASSERT_RETURN_FALSE;
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+							   QString("Rx signal %1 is not exists in opto port %2.").
+									arg(appSignalID).arg(m_equipmentID));
+			return false;
 		}
 
 		int rxBufAbsAddr = rxBufAbsAddress();
 
 		if (rxBufAbsAddr == BAD_ADDRESS)
 		{
-			ASSERT_RETURN_FALSE;
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
+							   QString("Undefined address of rx signal %1 in opto port's %2 buffer.").
+									arg(appSignalID).arg(m_equipmentID));
+			return false;
 		}
 
 		Address16 rxSignalAddr = rxSignal->addrInBuf();
 
 		rxSignalAddr.addWord(rxBufAbsAddr);
 
-		addr = rxSignalAddr;
+		*addr = rxSignalAddr;
 
-		addr.setSignalType(rxSignal->signalType());
-		addr.setDataFormat(rxSignal->dataFormat());
-		addr.setDataSize(rxSignal->dataSize());
-		addr.setByteOrder(rxSignal->byteOrder());
+		addr->setSignalType(rxSignal->signalType());
+		addr->setDataFormat(rxSignal->dataFormat());
+		addr->setDataSize(rxSignal->dataSize());
+		addr->setByteOrder(rxSignal->byteOrder());
 
 		return true;
 	}
@@ -2360,8 +2377,6 @@ namespace Hardware
 
 	bool OptoModule::calculateRxBufAddresses()
 	{
-		bool result = true;
-
 		if (isLmOrBvb() == true)
 		{
 			// calculate rx addresses for ports of LM module
@@ -2406,8 +2421,7 @@ namespace Hardware
 						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
 						m_log->errALC5035(linkedPort->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
-						result = false;
-						break;
+						return false;
 					}
 				}
 				else
@@ -2494,8 +2508,7 @@ namespace Hardware
 						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
 						m_log->errALC5035(rxDataSizeW, port->equipmentID(), equipmentID(), optoPortAppDataSize());
-						result = false;
-						break;
+						return false;
 					}
 				}
 				else
@@ -3136,9 +3149,15 @@ namespace Hardware
 												  const QString& appSignalID,
 												  const QString& receiverLM,
 												  QUuid receiverUuid,
-												  SignalAddress16 &addr)
+												  SignalAddress16* addr)
 	{
-		addr.reset();
+		if (addr == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		addr->reset();
 
 		std::shared_ptr<Connection> connection = getConnection(connectionID);
 
@@ -3152,7 +3171,10 @@ namespace Hardware
 
 		if (p1 == nullptr)
 		{
-			ASSERT_RETURN_FALSE;
+			// Undefined opto port '%1' in the connection '%2'.
+			//
+			m_log->errALC5021(connection->port1EquipmentID(), connectionID);
+			return false;
 		}
 
 		if (p1->lmID() == receiverLM)
@@ -3163,6 +3185,8 @@ namespace Hardware
 			}
 			else
 			{
+				// Signal %1 is not exists in connection %2 (Logic schema %3).
+				//
 				m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
 				return false;
 			}
@@ -3170,9 +3194,9 @@ namespace Hardware
 
 		if (connection->isSinglePort() == true)
 		{
-			// this is Serial connection
-			// port2 is not used
-			// signal is not found
+			// this is single port connection, port2 is not used
+			//
+			// Signal %1 is not exists in connection %2 (Logic schema %3).
 			//
 			m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
 			return false;
@@ -3182,7 +3206,10 @@ namespace Hardware
 
 		if (p2 == nullptr)
 		{
-			ASSERT_RETURN_FALSE;
+			// Undefined opto port '%1' in the connection '%2'.
+			//
+			m_log->errALC5021(connection->port1EquipmentID(), connectionID);
+			return false;
 		}
 
 		if (p2->lmID() == receiverLM)
@@ -3193,12 +3220,18 @@ namespace Hardware
 			}
 			else
 			{
+				// Signal %1 is not exists in connection %2 (Logic schema %3).
+				//
 				m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
 				return false;
 			}
 		}
 
-		ASSERT_RETURN_FALSE;			// signal is not found in both ports
+		// Signal %1 is not exists in connection %2 (Logic schema %3).
+		//
+		m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
+
+		return false;
 	}
 
 	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID)

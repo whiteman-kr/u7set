@@ -43,19 +43,17 @@ public:
 	bool isProgressEnabled();
 
 private:
-	mutable QMutex m_mutex;
+	std::atomic<bool> m_completed;			// Set true if operation is completed
+	std::atomic<bool> m_cancel;				// Cancel operation
+	std::atomic<bool> m_progressEnabled;	// QProgressDialog is enabled
 
-	bool m_completed;				// Set true if operation is completed
-	bool m_cancel;					// Cancel operation
+	std::atomic<int> m_value;				// 0 - 100%
 
+	mutable QMutex m_mutex;					// for access to m_currentOperation, m_errorMessage, m_completeMessage
 	QString m_currentOperation;
 
-	int m_value;					// 0 - 100%
-
-	QString m_errorMessage;			// In case of error, this variable will contain error description
-	QString m_completeMessage;		// If this field is not empty, show message box with the text
-
-	bool m_progressEnabled;			// QProgressDialog is enabled
+	QString m_errorMessage;					// In case of error, this variable will contain error description
+	QString m_completeMessage;				// If this field is not empty, show message box with the text
 };
 
 

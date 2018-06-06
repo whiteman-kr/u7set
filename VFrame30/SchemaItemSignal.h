@@ -74,18 +74,18 @@ namespace VFrame30
 		QStringList* mutable_appSignalIds();
 
 		bool multiLine() const;
-		void setMultiLine(bool value);
+		void setMultiLine(const bool& value);
 
 		bool multiChannel() const;
 
 		int precision() const;
-		void setPrecision(int value);
+		void setPrecision(const int& value);
 
 		E::AnalogFormat analogFormat() const;
-		void setAnalogFormat(E::AnalogFormat value);
+		void setAnalogFormat(const E::AnalogFormat& value);
 
 		int columnCount() const;
-		void setColumnCount(int value);
+		void setColumnCount(const int& value);
 
 		double columnWidth(int columnIndex) const;
 		void setColumnWidth(double value, int columnIndex);

@@ -10,17 +10,16 @@
 //
 // ------------------------------------------------------------------------------------
 
-const char* const ConfigurationServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
 const char* const ConfigurationServiceWorker::SETTING_AUTOLOAD_BUILD_PATH = "AutoloadBuildPath";
 const char* const ConfigurationServiceWorker::SETTING_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* const ConfigurationServiceWorker::SETTING_WORK_DIRECTORY = "WorkDirectory";
 
 
-ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceName,
+ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
+													   const QString& serviceName,
 													   int& argc, char** argv,
-													   const VersionInfo& versionInfo,
 													   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::ConfigurationService, serviceName, argc, argv, versionInfo, logger),
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_logger(logger)
 {
 }
@@ -28,7 +27,7 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceNam
 
 ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
-	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
 
 	newInstance->init();
 
@@ -52,8 +51,6 @@ void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
 	startCfgServerThread(newBuildPath);
 }
 
-
-
 void ConfigurationServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
@@ -66,15 +63,14 @@ void ConfigurationServiceWorker::initCmdLineParser()
 
 void ConfigurationServiceWorker::loadSettings()
 {
-	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
 	m_autoloadBuildPath = getStrSetting(SETTING_AUTOLOAD_BUILD_PATH);
 	m_clientIPStr = getStrSetting(SETTING_CLIENT_REQUEST_IP);
 	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
 
-	m_clientIP = HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
+	m_clientIP.setAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
 	DEBUG_LOG_MSG(m_logger, QString("Load settings:"));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_WORK_DIRECTORY).arg(m_workDirectory));
@@ -101,11 +97,14 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-	CfgControlServer* cfgControlServer = new CfgControlServer(m_equipmentID, m_autoloadBuildPath, m_workDirectory, buildPath, *m_cfgCheckerWorker, m_logger);
+	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
+															  m_autoloadBuildPath,
+															  m_workDirectory,
+															  buildPath,
+															  *m_cfgCheckerWorker,
+															  m_logger);
 
 	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
-
-	connect(listener, &Tcp::Listener::connectedClientsListChanged, cfgControlServer, &CfgControlServer::updateClientsInfo);
 
 	m_cfgServerThread = new Tcp::ServerThread(listener);
 

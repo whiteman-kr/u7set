@@ -22,6 +22,7 @@
 #include "ArchivingServiceCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
 #include "MetrologyCfgGenerator.h"
+#include "ConfigurationServiceCfgGenerator.h"
 #include "IssueLogger.h"
 
 #include <functional>
@@ -44,8 +45,10 @@ namespace Builder
 	{
 		QThread::currentThread()->setTerminationEnabled(true);
 
+		QTime buildTime;
+		buildTime.start();
+
 		bool ok = false;
-		QString str;
 
 		// Start logging to output string, this string will be written as file to build output
 		//
@@ -58,6 +61,7 @@ namespace Builder
 		// Log softaware version
 		//
 		LOG_MESSAGE(m_log, qApp->applicationName() + " v" + qApp->applicationVersion());
+		LOG_MESSAGE(m_log, tr("Started at: ") + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss"));
 
 		// Create database controller and open project
 		//
@@ -114,6 +118,9 @@ namespace Builder
 						  tr("There are some checked out objects (%1). Please check in all objects before building release version.").arg(checkedOutCount));
 				break;
 			}
+
+			const BuildInfo& bi = buildWriter.buildInfo();
+			buildWriter.firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.release == false, bi.changeset);
 
 			//
 			// Get Equipment from the database
@@ -214,7 +221,7 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Loading LogicModule descriptions..."));
 
 			std::vector<Hardware::DeviceModule*> lmModules;
-			findLmModules(equipmentSet.root(), &lmModules);
+			findModulesByFamily(equipmentSet.root(), &lmModules, Hardware::DeviceModule::FamilyType::LM);
 
 			std::vector<Hardware::DeviceModule*> lmAndBvbModules;
 
@@ -263,7 +270,7 @@ namespace Builder
 
 			Hardware::SubsystemStorage subsystems;
 
-			ok = loadSubsystems(db, lmModules, &subsystems);
+			ok = loadSubsystems(db, lmAndBvbModules, &subsystems);
 
 			if (ok == false)
 			{
@@ -309,12 +316,23 @@ namespace Builder
 			}
 
 			//
+			// Save LogicModule Descriptions
+			//
+			ok = saveLogicModuleDescriptions(lmDescriptions, &buildWriter);
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Compile application logic
 			//
 			Tuning::TuningDataStorage tuningDataStorage;
 			ComparatorStorage comparatorStorage;
 
-			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage,
+			ok = compileApplicationLogic(&subsystems, lmAndBvbModules, &equipmentSet, &opticModuleStorage,
 										 &connections, &signalSet, &lmDescriptions, &appLogicData,
 										 &tuningDataStorage, &comparatorStorage, &busSet, &buildWriter);
 
@@ -330,8 +348,8 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
-			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, m_log,
-                                        buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules, &lmDescriptions);
+			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage,
+										lmModules, &lmDescriptions, buildWriter.firmwareWriter(), m_log);
 
 			ok = tuningBuilder.build();
 
@@ -347,11 +365,9 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, m_log,
-                                               buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName());
+			ConfigurationBuilder cfgBuilder(this, &m_jsEngine, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, buildWriter.firmwareWriter(), m_log);
 
 			ok = cfgBuilder.build(buildWriter);
-
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -359,9 +375,11 @@ namespace Builder
 				break;
 			}
 
+			generateModulesInformation(buildWriter, lmAndBvbModules);
+
 			LmsUniqueIdMap lmsUniqueIdMap;
 
-			generateLmsUniqueID(buildWriter, tuningBuilder, cfgBuilder, lmModules, lmsUniqueIdMap);
+			generateLmsUniqueID(buildWriter, lmModules, lmsUniqueIdMap);
 
 			//
 			// Generate MATS software configurations
@@ -378,6 +396,7 @@ namespace Builder
 			// Write logic, configuration and tuning binary files
 			//
 
+
 			ok = writeBinaryFiles(buildWriter);
 
 			if (ok == false ||
@@ -386,15 +405,7 @@ namespace Builder
 				break;
 			}
 
-			ok = tuningBuilder.writeBinaryFiles(buildWriter);
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			ok = cfgBuilder.writeBinaryFiles(buildWriter);
+			ok = cfgBuilder.writeDataFiles(buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -418,6 +429,13 @@ namespace Builder
 		}
 
 		db.closeProject(nullptr);
+
+		// Display build time
+		//
+		int buildEllapsed = buildTime.elapsed() / 1000;
+		int durationSecs = buildEllapsed % 60;
+		int durationMins = buildEllapsed / 60;
+		LOG_MESSAGE(m_log, QString("Build time: %1 minute(s) %2 second(s)").arg(durationMins).arg(durationSecs));
 
 		// Set Shceme Items Issues to GlobalMessanger
 		//
@@ -495,39 +513,6 @@ namespace Builder
 		return true;
 	}
 
-	void BuildWorkerThread::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
-	{
-		if (object == nullptr ||
-			out == nullptr)
-		{
-			assert(object);
-			assert(out);
-			return;
-		}
-
-		for (int i = 0; i < object->childrenCount(); i++)
-		{
-			Hardware::DeviceObject* child = object->child(i);
-
-			if (child->deviceType() == Hardware::DeviceType::Module)
-			{
-				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-
-				if (module->isLogicModule() == true)
-				{
-					out->push_back(module);
-				}
-			}
-
-			if (child->deviceType() < Hardware::DeviceType::Module)
-			{
-				findLmModules(child, out);
-			}
-		}
-
-		return;
-	}
-
 	void BuildWorkerThread::findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
 	{
 		if (object == nullptr ||
@@ -585,7 +570,7 @@ namespace Builder
 				}
 			}
 
-			if (child->deviceType() < Hardware::DeviceType::Module)
+			if (static_cast<int>(child->deviceType()) < static_cast<int>(Hardware::DeviceType::Module))
 			{
 				findModulesByFamily(child, out, family);
 			}
@@ -608,7 +593,7 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicMoudles, Hardware::SubsystemStorage* subsystems)
+	bool BuildWorkerThread::loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicModules, Hardware::SubsystemStorage* subsystems)
 	{
 		if (subsystems == nullptr)
 		{
@@ -676,7 +661,7 @@ namespace Builder
 			int moduleVersion = -1;
 			QString LmDescriptionFile;
 
-			for (const Hardware::DeviceModule* lm : logicMoudles)
+			for (const Hardware::DeviceModule* lm : logicModules)
 			{
 				assert(lm);
 				assert(lm->isFSCConfigurationModule() == true);
@@ -705,6 +690,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 
@@ -720,6 +706,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 
@@ -742,6 +729,7 @@ namespace Builder
 					{
 						result = false;
 						m_log->errEQP6007(subsystem->subsystemId());
+						continue;
 					}
 				}
 			}
@@ -938,15 +926,6 @@ namespace Builder
 
 		signalSet->buildID2IndexMap();
 
-		result = signalSet->expandBusSignals();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		signalSet->buildID2IndexMap();				// rebuild map after expand
-
 		result = signalSet->bindSignalsToLMs(equipment);
 
 		if (result == false)
@@ -1051,7 +1030,7 @@ namespace Builder
 
 		if (lmDescriptionFile.isEmpty() == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QObject::tr("Property LmDescriptionFile is empty. LogicModule %1").arg(logicModule->equipmentIdTemplate()));
+			m_log->errEQP6020(logicModule->equipmentIdTemplate(), logicModule->uuid());
 			return false;
 		}
 
@@ -1112,8 +1091,35 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
+														BuildResultWriter* buildResultWriter)
+	{
+		assert(buildResultWriter);
+
+		LOG_MESSAGE(m_log, "Saving LogicModule's descriptions");
+
+		QStringList lmFiles = lmDescriptions.fileList();
+		for (QString fileName : lmFiles)
+		{
+			auto file = lmDescriptions.rowFile(fileName);
+
+			if (file.second == false)
+			{
+				m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. ") + Q_FUNC_INFO);
+				return false;
+			}
+
+			BuildFile* buildFile = buildResultWriter->addFile(QLatin1String("LmDescriptions"), fileName, file.first, false);
+			assert(buildFile);
+			Q_UNUSED(buildFile);
+		}
+
+		return true;
+	}
+
 
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
+													const std::vector<Hardware::DeviceModule*>& lmModules,
 													Hardware::EquipmentSet* equipmentSet,
 													Hardware::OptoModuleStorage* optoModuleStorage,
 													Hardware::ConnectionStorage* connections,
@@ -1129,6 +1135,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
 		ApplicationLogicCompiler appLogicCompiler(subsystems,
+												  lmModules,
 												  equipmentSet,
 												  optoModuleStorage,
 												  connections,
@@ -1169,7 +1176,7 @@ namespace Builder
 		bool result = true;
 
 		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("OMS and Tuning software configuration generation...")))
+		LOG_MESSAGE(m_log, QString(tr("MATS configuration generation...")))
 		LOG_EMPTY_LINE(m_log);
 
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(db, signalSet, equipment, buildResultWriter);
@@ -1195,7 +1202,7 @@ namespace Builder
 				switch(software->type())
 				{
 				case E::SoftwareType::AppDataService:
-					softwareCfgGenerator = new AppDataServiceCfgGenerator(db, subsystems, software, signalSet, equipment, buildResultWriter);
+					softwareCfgGenerator = new AppDataServiceCfgGenerator(db, subsystems, software, signalSet, equipment, lmsUniqueIdMap, buildResultWriter);
 					break;
 
 				case E::SoftwareType::DiagDataService:
@@ -1215,15 +1222,16 @@ namespace Builder
 					break;
 
 				case E::SoftwareType::ConfigurationService:
+					softwareCfgGenerator = new ConfigurationServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 
 				case E::SoftwareType::ArchiveService:
 					softwareCfgGenerator = new ArchivingServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 
-                case E::SoftwareType::Metrology:
-                    softwareCfgGenerator = new MetrologyCfgGenerator(db, subsystems, software, signalSet, equipment, buildResultWriter);
-                    break;
+				case E::SoftwareType::Metrology:
+					softwareCfgGenerator = new MetrologyCfgGenerator(db, subsystems, software, signalSet, equipment, buildResultWriter);
+					break;
 
 				default:
 					m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());
@@ -1260,15 +1268,61 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= buildResultWriter.writeMultichannelFiles();
+		result &= buildResultWriter.writeBinaryFiles();
 
 		return result;
 	}
 
 
+	void BuildWorkerThread::generateModulesInformation(BuildResultWriter& buildWriter,
+							   const std::vector<Hardware::DeviceModule *>& lmModules)
+	{
+		for (auto it = lmModules.begin(); it != lmModules.end(); it++)
+		{
+			Hardware::DeviceModule* lm = *it;
+
+			if (lm == nullptr)
+			{
+				assert(lm);
+				continue;
+			}
+
+			QString subsysID = lm->propertyValue("SubsystemID").toString();
+			if (subsysID.isEmpty())
+			{
+				assert(false);
+				continue;
+			}
+
+			bool ok = false;
+			int lmNumber = lm->propertyValue("LMNumber").toInt(&ok);
+			if (ok == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			int subsystemChannel = lm->propertyValue("SubsystemChannel").toInt(&ok);
+			if (ok == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			Hardware::ModuleFirmwareWriter* firmwareWriter = buildWriter.firmwareWriter();
+
+			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->firmware(subsysID, &ok);
+			if (ok == false)
+			{
+				// No module firmware exists for this module, maybe it
+				continue;
+			}
+
+			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), subsysID, lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
+		}
+	}
+
 	void BuildWorkerThread::generateLmsUniqueID(BuildResultWriter& buildWriter,
-												TuningBuilder& tuningBuilder,
-												ConfigurationBuilder& cfgBuilder,
 												const std::vector<Hardware::DeviceModule *>& lmModules,
 												LmsUniqueIdMap &lmsUniqueIdMap)
 	{
@@ -1303,21 +1357,40 @@ namespace Builder
 				continue;
 			}
 
-			quint64 appUniqueId = buildWriter.getAppUniqueId(subsysID, lmNumber);
-			quint64 tunUniqueId = tuningBuilder.getFirmwareUniqueId(subsysID, lmNumber);
-			quint64 cfgUniqueId = cfgBuilder.getFirmwareUniqueId(subsysID, lmNumber);
+			Hardware::ModuleFirmwareWriter* firmwareWriter = buildWriter.firmwareWriter();
 
-			quint64 genericUniqueId = appUniqueId ^ tunUniqueId ^ cfgUniqueId;
+			quint64 genericUniqueId = 0;
+			bool first = true;
 
-			buildWriter.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-			tuningBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
-			cfgBuilder.setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			Hardware::ModuleFirmware& moduleFirmware = firmwareWriter->firmware(subsysID, &ok);
+			if (ok == false)
+			{
+				assert(ok);
+				continue;
+			}
+
+			std::vector<UartPair> uarts = moduleFirmware.uartList();
+
+			for (auto fi : uarts)
+			{
+				int uartId = fi.first;
+
+				if (first == true)
+				{
+					first = false;
+					genericUniqueId = firmwareWriter->uniqueID(subsysID, uartId, lmNumber);
+				}
+				else
+				{
+					genericUniqueId ^= firmwareWriter->uniqueID(subsysID, uartId, lmNumber);
+				}
+			}
+
+			firmwareWriter->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
 
 			lmsUniqueIdMap.insert(lm->equipmentIdTemplate(), genericUniqueId);
 		}
 	}
-
-
 
 	QString BuildWorkerThread::projectName() const
 	{
@@ -1482,7 +1555,20 @@ namespace Builder
 
 		add(fileName, lmd);
 
+		m_rawLmDescriptions[fileName] = file->data();
+
 		return true;
+	}
+
+	std::pair<QString, bool> LmDescriptionSet::rowFile(QString fileName) const
+	{
+		auto it = m_rawLmDescriptions.find(fileName);
+		if (it == m_rawLmDescriptions.end())
+		{
+			return {QString(), false};
+		}
+
+		return {it->second, true};
 	}
 
 

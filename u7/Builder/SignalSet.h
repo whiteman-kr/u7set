@@ -20,7 +20,6 @@ namespace Builder
 
 		bool prepareBusses();
 		bool checkSignals();
-		bool expandBusSignals();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();
 
@@ -32,11 +31,15 @@ namespace Builder
 												 const QString& busChildSignalID,
 												 const QString& busChildSignalCaption);
 
-		Signal* appendBusChildSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
-		Signal* createBusChildSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
+		Signal* appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
+		Signal* createBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
 
 	private:
-		QString buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
+		QString buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal);
+
+		bool checkSignalPropertiesRanges(const Signal& s);
+		bool checkSignalPropertyRanges(const Signal& s, double properyValue, const QString& propertyName);
+		bool checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName);
 
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;

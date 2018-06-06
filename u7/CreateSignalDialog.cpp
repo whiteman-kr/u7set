@@ -337,6 +337,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		signal.setCustomAppSignalID(customSignalId);
 		signal.setEquipmentID(equipmentId);
 		signal.setCaption(caption);
+		signal.initSpecificProperties();
 
 		newSignals.push_back(signal);
 	}
@@ -377,13 +378,14 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 	SignalsModel* model = SignalsModel::instance();
 	model->loadSignals();
 
-	QList<int> selectIdList;
+	QVector<int> selectIdList(newSignals.size());
+	int currentIdIndex = 0;
 	QStringList resultAppSignalIds;
 
 	for (Signal& signal : newSignals)
 	{
 		resultAppSignalIds << signal.appSignalID();
-		selectIdList << signal.ID();
+		selectIdList[currentIdIndex++] = signal.ID();
 	}
 
 	model->parentWindow()->setSelection(selectIdList);

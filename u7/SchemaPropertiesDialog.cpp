@@ -1,6 +1,7 @@
 #include "SchemaPropertiesDialog.h"
 #include "ui_SchemaPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
+#include "Settings.h"
 
 
 SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :
@@ -11,6 +12,10 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngin
 
 	m_propertyEditor = new SchemaPropertyEditor(editEngine, this);
     m_propertyEditor->setResizeMode(ExtWidgets::PropertyEditor::ResizeToContents);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 	return;

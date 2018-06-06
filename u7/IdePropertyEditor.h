@@ -7,6 +7,7 @@
 
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
+#include "../lib/Types.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
 
 //
@@ -21,7 +22,7 @@ public:
 
     virtual void saveSettings();
 
-    virtual ExtWidgets::PropertyTextEditor* createCodeEditor(Property *property, QWidget* parent) override;
+	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent) override;
 
 private:
 
@@ -124,8 +125,8 @@ public:
 private:
     TuningFilterEditor* m_tuningFilterEditor = nullptr;
 
-    TuningSignalStorage m_signalStorage;
-    TuningFilterStorage m_filterStorage;
+	TuningSignalManager m_signals;
+	TuningFilterStorage m_filters;
 
 	DbController* m_dbController = nullptr;
 

@@ -316,20 +316,12 @@ bool SocketClientOption::readOptionsFromXml(const QByteArray& fileData)
 				break;
 			}
 
-			result &= xml.readBoolAttribute("PropertyIsValid1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
+			result &= xml.readBoolAttribute("PropertyIsValid", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv);
 			if (m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].readFromCfgSrv == true)
 			{
-				result &= xml.readStringAttribute("SoftwareMetrologyID1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
-				result &= xml.readStringAttribute("ip1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
-				result &= xml.readIntAttribute("port1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
-			}
-
-			result &= xml.readBoolAttribute("PropertyIsValid2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv);
-			if (m_connectOption[SOCKET_SERVER_TYPE_RESERVE].readFromCfgSrv == true)
-			{
-				result &= xml.readStringAttribute("SoftwareMetrologyID2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].equipmentID);
-				result &= xml.readStringAttribute("ip2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverIP);
-				result &= xml.readIntAttribute("port2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverPort);
+				result &= xml.readStringAttribute("SoftwareMetrologyID", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
+				result &= xml.readStringAttribute("ip", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
+				result &= xml.readIntAttribute("port", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
 			}
 
 			if (result == false)
@@ -977,7 +969,7 @@ void LinearityOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-	m_showErrorFromLimit = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MEASURE_LIMIT_TYPE_PHYSICAL).toInt();
+	m_showErrorFromLimit = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
 	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();

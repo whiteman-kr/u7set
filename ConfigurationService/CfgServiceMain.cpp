@@ -17,9 +17,11 @@ int main(int argc, char *argv[])
 
 	logger->setLogCodeInfo(false);
 
-	VersionInfo vi = VERSION_INFO(1, 0);
+	SoftwareInfo si;
 
-	ConfigurationServiceWorker cfgServiceWorker("RPCT Configuration Service", argc, argv, vi, logger);
+	si.init(E::SoftwareType::ConfigurationService, "", 1, 0);
+
+	ConfigurationServiceWorker cfgServiceWorker(si, "RPCT Configuration Service", argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, cfgServiceWorker, logger);
 

@@ -3,18 +3,25 @@
 #include "SoftwareCfgGenerator.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
-
-class DataSource;
+#include "../lib/DataSource.h"
 
 namespace Builder
 {
 	class AppDataServiceCfgGenerator : public SoftwareCfgGenerator
 	{
-	private:
-		QStringList m_associatedLMs;
-		QHash<QString, bool> m_associatedAppSignals;
-		Hardware::SubsystemStorage* m_subsystems = nullptr;
+	public:
+		AppDataServiceCfgGenerator(	DbController* db,
+									const Hardware::SubsystemStorage* subsystems,
+									Hardware::Software* software,
+									SignalSet* signalSet,
+									Hardware::EquipmentSet* equipment,
+									const QHash<QString, quint64>& lmUniqueIdMap,
+									BuildResultWriter* buildResultWriter);
+		~AppDataServiceCfgGenerator();
 
+		virtual bool generateConfiguration() override;
+
+	private:
 		bool getAssociatedLMs();
 
 		bool writeSettings();
@@ -22,18 +29,18 @@ namespace Builder
 		bool writeAppSignalsXml();
 		bool addLinkToAppSignalsFile();
 
+		bool writeBatFile();
+		bool writeShFile();
 
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
-	public:
-		AppDataServiceCfgGenerator(	DbController* db,
-									Hardware::SubsystemStorage* subsystems,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									BuildResultWriter* buildResultWriter);
-		~AppDataServiceCfgGenerator();
+	private:
+		const QHash<QString, quint64>& m_lmUniqueIdMap;
+		SubsystemKeyMap m_subsystemKeyMap;
 
-		virtual bool generateConfiguration() override;
+		//
+
+		QStringList m_associatedLMs;
+		QHash<QString, bool> m_associatedAppSignals;
 	};
 }

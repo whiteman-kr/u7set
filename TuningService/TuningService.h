@@ -3,7 +3,6 @@
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/CfgServerLoader.h"
-#include "../AppDataService/AppSignalStateEx.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceWorker.h"
@@ -19,11 +18,12 @@ namespace Tuning
 		Q_OBJECT
 
 	public:
-		TuningServiceWorker(const QString &serviceName,
+		TuningServiceWorker(const SoftwareInfo& softwareInfo,
+							const QString &serviceName,
 							int &argc,
 							char **argv,
-							const VersionInfo &versionInfo,
-							std::shared_ptr<CircularLogger> logger);
+							CircularLoggerShared logger,
+							CircularLoggerShared tuningLog);
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
@@ -32,17 +32,31 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
+		const TuningSourceWorker* getSourceWorker(quint32 sourceIP) const;
+
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
+
+		bool singleLmControl() const;
+
+		// called from TcpTuningServer thread!!!
+		//
+		NetworkError changeControlledTuningSource(const QString& tuningSourceEquipmentID,
+													bool activateControl,
+													QString* controlledTuningSource,
+													bool* controlIsActive);
+
+		bool clientIsConnected(const SoftwareInfo& softwareInfo, const QString& clientIP);
+		bool clientIsDisconnected(const SoftwareInfo& softwareInfo, const QString& clientIP);
+		bool setActiveClient(const SoftwareInfo& softwareInfo, const QString& clientIP);
+
+		QString activeClientID() const;
+		QString activeClientIP() const;
 
 	signals:
 
 	public slots:
 
 	private:
-		static const char* const SETTING_EQUIPMENT_ID;
-		static const char* const SETTING_CFG_SERVICE_IP1;
-		static const char* const SETTING_CFG_SERVICE_IP2;
-
 		virtual void initCmdLineParser() override;
 		virtual void loadSettings() override;
 
@@ -53,6 +67,7 @@ namespace Tuning
 
 		void runCfgLoaderThread();
 		void stopCfgLoaderThread();
+
 		void clearConfiguration();
 		void applyNewConfiguration();
 
@@ -61,32 +76,27 @@ namespace Tuning
 
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
-		bool readTuningDataSources(XmlReadHelper& xml);
-
-		void allocateSignalsAndStates();
+		bool readTuningDataSources(const QByteArray& fileData);
 
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();
 
 		void runTuningSourceWorkers();
+		bool runTuningSourceWorker(const QString& tuningSourceEquipmentID);		// if tuningSourceEquipmentID empty - run all sources workers
 		void stopTuningSourceWorkers();
 
-		void setWorkerInTuningClientContext(const QString& sourceID, TuningSourceWorker* worker);
+		void runSourcesListenerThread();
+		void stopSourcesListenerThread();
+
+		void setWorkerInTuningClientContext(TuningSourceWorker* worker);
+		void removeWorkerFromTuningClientContext(TuningSourceWorker* worker);
 
 	private slots:
-		void onTimer();
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	private:
-		QString m_equipmentID;
-		QString m_buildPath;
-		QString m_cfgServiceIP1Str;
-		QString m_cfgServiceIP2Str;
-
-		HostAddressPort m_cfgServiceIP1;
-		HostAddressPort m_cfgServiceIP2;
-
-		std::shared_ptr<CircularLogger> m_logger;
+		CircularLoggerShared m_logger;
+		CircularLoggerShared m_tuningLog;
 
 		TuningServiceSettings m_cfgSettings;
 
@@ -96,12 +106,15 @@ namespace Tuning
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
+		mutable QMutex m_mainMutex;
+
 		TuningSourceWorkerThreadMap m_sourceWorkerThreadMap;
 
 		TuningSocketListenerThread* m_socketListenerThread = nullptr;
 
-		QTimer m_timer;
-
 		TuningClientContextMap m_clientContextMap;
+
+		SoftwareInfo m_activeClientInfo;
+		QString m_activeClientIP;
 	};
 }

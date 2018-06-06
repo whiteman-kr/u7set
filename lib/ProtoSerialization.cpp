@@ -1,6 +1,7 @@
 #include "QUuid"
 
 #include "../lib/ProtoSerialization.h"
+#include "WUtils.h"
 #include "PropertyObject.h"
 
 #ifdef Q_OS_WIN
@@ -164,7 +165,7 @@ namespace Proto
 
 		if (property->isEnum() == true)
 		{
-			valueStr = value.toString();
+			valueStr = property->enumValue().toString();
 		}
 		else
 		{

@@ -3,6 +3,8 @@
 
 #include <QThread>
 #include <QEventLoop>
+#include <memory>
+#include <atomic>
 
 
 class SimpleThreadWorker : public QObject
@@ -54,6 +56,22 @@ public:
 
 	virtual void beforeStart();
 	virtual void beforeQuit();
+};
+
+
+class RunOverrideThread : public QThread
+{
+public:
+	bool isQuitRequested() const { return m_quitRequested.load(); }
+
+	bool quitAndWait(unsigned long time = ULONG_MAX)
+	{
+		m_quitRequested.store(true);
+		return wait(time);
+	}
+
+private:
+	std::atomic<bool> m_quitRequested = { false };
 };
 
 

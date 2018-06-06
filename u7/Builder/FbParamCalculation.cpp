@@ -4,6 +4,17 @@ namespace Builder
 {
 
 #define CHECK_REQUIRED_PARAMETERS(paramList)	if (checkRequiredParameters(paramList) == false) { return false; }
+#define CHECK_REQUIRED_PARAMETER(paramName)		if (checkRequiredParameter(paramName) == false) { return false; }
+
+#define CHECK_AND_GET_REQUIRED_PARAMETER(paramName, paramPtr)		if (checkRequiredParameter(paramName, true) == false) \
+																	{ \
+																		return false; \
+																	} \
+																	else \
+																	{ \
+																		paramPtr = &m_paramValuesArray[paramName]; \
+																	}
+
 #define CHECK_UNSIGNED_INT(param)				if (checkUnsignedInt(param) == false) { return false; }
 #define CHECK_UNSIGNED_INT16(param)				if (checkUnsignedInt16(param) == false) { return false; }
 #define CHECK_UNSIGNED_INT32(param)				if (checkUnsignedInt32(param) == false) { return false; }
@@ -142,6 +153,14 @@ namespace Builder
 			result = calculate_TCONV_paramValues();
 			break;
 
+		case Afb::AfbType::INDICATION:		// opcode 29
+			result = calculate_INDICATION_paramValues();
+			break;
+
+		case Afb::AfbType::PULSE_GEN:	// opcode 30
+			result = calculate_PULSE_GENERATOR_paramValues();
+			break;
+
 		default:
 			// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 			//
@@ -151,7 +170,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool UalAfb::calculate_LOGIC_paramValues()
 	{
@@ -184,13 +202,11 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_NOT_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
-
 
 	bool UalAfb::calculate_TCT_paramValues()
 	{
@@ -224,7 +240,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_FLIP_FLOP_paramValues()
 	{
@@ -260,7 +275,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_CTUD_paramValues()
 	{
 		QStringList requiredParams;
@@ -291,7 +305,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_MAJ_paramValues()
 	{
 		QStringList requiredParams;
@@ -314,13 +327,11 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_SRSST_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
-
 
 	bool UalAfb::calculate_BCOD_paramValues()
 	{
@@ -328,13 +339,11 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_BDEC_paramValues()
 	{
 		m_runTime = 3 + 4;
 		return true;
 	}
-
 
 	bool UalAfb::calculate_BCOMP_paramValues()
 	{
@@ -473,15 +482,15 @@ namespace Builder
 		return false;
 	}
 
-
 	bool UalAfb::calculate_DAMPER_paramValues()
 	{
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
 
-		if (caption() == "dampc_si" ||
-			caption() == "dampc_fp")
+		bool isConstDamper = caption() == "dampc_si" ||	caption() == "dampc_fp";
+
+		if (isConstDamper == true)
 		{
 			requiredParams.append("i_del");
 		}
@@ -492,8 +501,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		if (caption() == "dampc_si" ||
-			caption() == "dampc_fp")
+		if (isConstDamper == true)
 		{
 			AppFbParamValue& i_del = m_paramValuesArray["i_del"];
 			CHECK_SIGNED_INT32(i_del)
@@ -521,7 +529,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_MEM_paramValues()
 	{
@@ -556,7 +563,14 @@ namespace Builder
 			{
 				int siTiming[] = { 4, 17, 23, 30, 38, 47 };		// exec time for signed int inputs
 
-				m_runTime = siTiming[index] + 4;
+				if (index < 0 || index >= sizeof(siTiming) / sizeof(int) )
+				{
+					assert(false);
+				}
+				else
+				{
+					m_runTime = siTiming[index] + 4;
+				}
 			}
 			break;
 
@@ -564,7 +578,14 @@ namespace Builder
 			{
 				int fpTiming[] = { 21, 36, 44, 49, 57, 66 };	// exec time for float inputs
 
-				m_runTime = fpTiming[index] + 4;
+				if (index < 0 || index >= sizeof(fpTiming) / sizeof(int) )
+				{
+					assert(false);
+				}
+				else
+				{
+					m_runTime = fpTiming[index] + 4;
+				}
 			}
 			break;
 
@@ -577,7 +598,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_MATH_paramValues()
 	{
@@ -618,7 +638,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_SCALE_paramValues()
 	{
@@ -877,7 +896,6 @@ namespace Builder
 
 		return false;
 	}
-
 
 	bool UalAfb::calculate_SCALE_P_paramValues()
 	{
@@ -1155,7 +1173,6 @@ namespace Builder
 		return false;
 	}
 
-
 	bool UalAfb::calculate_FUNC_paramValues()
 	{
 		QStringList requiredParams;
@@ -1214,65 +1231,51 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_INT_paramValues()
 	{
-		QStringList requiredParams;
+		bool isConstIntegrator = caption() == "integratorc";
 
-		requiredParams.append("i_max");
-		requiredParams.append("i_min");
-
-		if (caption() == "integratorc")
+		if (isConstIntegrator == true)
 		{
-			requiredParams.append("i_ti");
-			requiredParams.append("i_ki");
-		}
+			AppFbParamValue* i_ti = nullptr;
+			AppFbParamValue* i_ki = nullptr;
+			AppFbParamValue* i_max = nullptr;
+			AppFbParamValue* i_min = nullptr;
 
-		CHECK_REQUIRED_PARAMETERS(requiredParams);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_ti", i_ti);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_ki", i_ki);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_max", i_max);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_min", i_min);
 
-		if (caption() == "integratorc")
-		{
-			AppFbParamValue& i_ti = m_paramValuesArray["i_ti"];
-			AppFbParamValue& i_ki = m_paramValuesArray["i_ki"];
+			CHECK_SIGNED_INT32(*i_ti);
+			CHECK_FLOAT32(*i_ki);
+			CHECK_FLOAT32(*i_max);
+			CHECK_FLOAT32(*i_min);
 
-			CHECK_SIGNED_INT32(i_ti);
-			CHECK_FLOAT32(i_ki);
-
-			int i_ti_value = i_ti.signedIntValue();
-
-			if (i_ti_value < 0)
+			if (i_ti->signedIntValue() < 0)
 			{
 				// Value of parameter '%1.%2' must be greater or equal to 0.
 				//
-				m_log->errALC5043(caption(), i_ti.caption(), guid());
+				m_log->errALC5043(caption(), i_ti->caption(), guid());
 
 				return false;
 			}
-		}
 
-		AppFbParamValue& i_max = m_paramValuesArray["i_max"];
-		AppFbParamValue& i_min = m_paramValuesArray["i_min"];
+			if (i_max->floatValue() <= i_min->floatValue())
+			{
+				// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+				//
+				m_log->errALC5052(caption(), i_max->caption(), i_min->caption(), guid(), schemaID(), label());
 
-		CHECK_FLOAT32(i_max);
-		CHECK_FLOAT32(i_min);
+				return false;
+			}
 
-		float i_max_value = i_max.floatValue();
-		float i_min_value = i_min.floatValue();
-
-		if (i_max_value <= i_min_value)
-		{
-			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
-			//
-			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid());
-
-			return false;
 		}
 
 		m_runTime = 27 + 24;
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_DPCOMP_paramValues()
 	{
@@ -1381,14 +1384,12 @@ namespace Builder
 		return false;
 	}
 
-
 	bool UalAfb::calculate_MUX_paramValues()
 	{
 		m_runTime = 3 + 4;
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_LATCH_paramValues()
 	{
@@ -1422,7 +1423,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_LIM_paramValues()
 	{
 		QStringList requiredParams;
@@ -1441,17 +1441,6 @@ namespace Builder
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		AppFbParamValue dummy;
-
-		AppFbParamValue& i_lim_max = dummy;
-		AppFbParamValue& i_lim_min = dummy;
-
-		if (caption() == "limc_fp" || caption() == "limc_si")
-		{
-			i_lim_max = m_paramValuesArray["i_lim_max"];
-			i_lim_min = m_paramValuesArray["i_lim_min"];
-		}
-
 		CHECK_UNSIGNED_INT(i_conf);
 
 		m_runTime = 0;
@@ -1463,6 +1452,9 @@ namespace Builder
 
 			if (isConstLimiter == true)
 			{
+				AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+				AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+
 				CHECK_SIGNED_INT32(i_lim_max);
 				CHECK_SIGNED_INT32(i_lim_min);
 
@@ -1470,9 +1462,16 @@ namespace Builder
 				{
 					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 					//
-					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 
 					return false;
+				}
+
+				if (i_lim_min.signedIntValue() == i_lim_max.signedIntValue())
+				{
+					// Values of parameters %1.%2 and %1.%3 are equal.
+					//
+					m_log->wrnALC5139(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 				}
 			}
 
@@ -1483,6 +1482,9 @@ namespace Builder
 
 			if (isConstLimiter == true)
 			{
+				AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+				AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+
 				CHECK_FLOAT32(i_lim_max);
 				CHECK_FLOAT32(i_lim_min);
 
@@ -1490,9 +1492,16 @@ namespace Builder
 				{
 					// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 					//
-					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid());
+					m_log->errALC5052(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 
 					return false;
+				}
+
+				if (static_cast<float>(i_lim_min.floatValue()) == static_cast<float>(i_lim_max.floatValue()))
+				{
+					// Values of parameters %1.%2 and %1.%3 are equal.
+					//
+					m_log->wrnALC5139(caption(), i_lim_max.caption(), i_lim_min.caption(), guid(), schemaID(), label());
 				}
 			}
 
@@ -1508,7 +1517,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool UalAfb::calculate_DEAD_ZONE_paramValues()
 	{
@@ -1569,7 +1577,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_POL_paramValues()
 	{
 		m_runTime = 24 + 4;
@@ -1618,7 +1625,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_DER_paramValues()
 	{
 		m_runTime = 35 + 44;
@@ -1628,7 +1634,9 @@ namespace Builder
 		requiredParams.append("i_max");
 		requiredParams.append("i_min");
 
-		if (caption() == "derivc")
+		bool isConstDerivative = caption() == "derivc";
+
+		if (isConstDerivative == true)
 		{
 			requiredParams.append("i_kd");
 			requiredParams.append("i_td");
@@ -1636,7 +1644,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		if (caption() == "derivc")
+		if (isConstDerivative == true)
 		{
 			AppFbParamValue& i_kd = m_paramValuesArray["i_kd"];
 			AppFbParamValue& i_td = m_paramValuesArray["i_td"];
@@ -1669,7 +1677,7 @@ namespace Builder
 		{
 			// Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
 			//
-			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid());
+			m_log->errALC5052(caption(), i_max.caption(), i_min.caption(), guid(), schemaID(), label());
 
 			return false;
 		}
@@ -1677,61 +1685,72 @@ namespace Builder
 		return true;
 	}
 
-
 	bool UalAfb::calculate_MISMATCH_paramValues()
 	{
-		QStringList requiredParams;
+		AppFbParamValue* i_conf = nullptr;
+		AppFbParamValue* i_conf_n = nullptr;
 
-		requiredParams.append("i_conf");
-		requiredParams.append("i_conf_n");
-		requiredParams.append("i_ust");
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf", i_conf);
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf_n", i_conf_n);
 
-		CHECK_REQUIRED_PARAMETERS(requiredParams);
+		CHECK_UNSIGNED_INT(*i_conf);
+		CHECK_UNSIGNED_INT(*i_conf_n);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		AppFbParamValue& i_conf_n = m_paramValuesArray["i_conf_n"];
-		AppFbParamValue& i_ust = m_paramValuesArray["i_ust"];
-
-		CHECK_UNSIGNED_INT(i_conf);
-		CHECK_UNSIGNED_INT(i_conf_n);
+		//
 
 		bool mismatchWithRange = false;
 
+		if (caption().startsWith("mismatch_r", Qt::CaseInsensitive) == true)
+		{
+			mismatchWithRange = true;
+		}
+
+		// optional parameters for mismatchWithRange == true
+		//
 		AppFbParamValue* i_lowlim = nullptr;
 		AppFbParamValue* i_highlim = nullptr;
 		AppFbParamValue* i_relvalue = nullptr;
 
-		QStringList optionalParams;
-
-		optionalParams.append("i_lowlim");
-		optionalParams.append("i_highlim");
-		optionalParams.append("i_relvalue");
-
-		if (checkRequiredParameters(optionalParams, false) == true)
+		if (mismatchWithRange == true)
 		{
-			i_lowlim = &m_paramValuesArray["i_lowlim"];
-			i_highlim = &m_paramValuesArray["i_highlim"];
-			i_relvalue = &m_paramValuesArray["i_relvalue"];
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_lowlim", i_lowlim);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_highlim", i_highlim);
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_relvalue", i_relvalue);
+		}
 
-			mismatchWithRange = true;
+		//
+
+		bool mismatchDynamic = false;
+
+		if (caption().startsWith("mismatch_d", Qt::CaseInsensitive) == true)
+		{
+			mismatchDynamic = true;
+		}
+
+		// optional parameter for mismatchDynamic == false
+		//
+		AppFbParamValue* i_ust = nullptr;
+
+		if (mismatchDynamic == false)
+		{
+			CHECK_AND_GET_REQUIRED_PARAMETER("i_ust", i_ust);
 		}
 
 		m_runTime = 0;
 
 		// i_conf must have value 1 (SI) or 2 (FP)
 		//
-		switch(i_conf.unsignedIntValue())
+		switch(i_conf->unsignedIntValue())
 		{
 		case 1:				// SI
 			m_runTime = 5 + 4;
-
-			CHECK_SIGNED_INT32(i_ust);
 
 			if (mismatchWithRange == true)
 			{
 				CHECK_SIGNED_INT32(*i_lowlim);
 				CHECK_SIGNED_INT32(*i_highlim);
 				CHECK_FLOAT32(*i_relvalue);
+				CHECK_SIGNED_INT32(*i_ust);
 
 				if (i_lowlim->signedIntValue() == i_highlim->signedIntValue())
 				{
@@ -1747,20 +1766,25 @@ namespace Builder
 				{
 					// Parameter '%1' of AFB '%2' can't be 0.
 					//
-					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					m_log->errALC5058(i_ust->caption(), caption(), guid());
 					return false;
 				}
 
-				i_ust.setSignedIntValue(static_cast<qint32>(value));
+				i_ust->setSignedIntValue(static_cast<qint32>(value));
 			}
 			else
 			{
-				if (i_ust.signedIntValue() <= 0)
+				if (mismatchDynamic == false)
 				{
-					// Value of parameter '%1.%2' must be greater then 0.
-					//
-					m_log->errALC5088(i_ust.caption(), caption(), guid());
-					return false;
+					CHECK_SIGNED_INT32(*i_ust);
+
+					if (i_ust->signedIntValue() <= 0)
+					{
+						// Value of parameter '%1.%2' must be greater then 0.
+						//
+						m_log->errALC5088(i_ust->caption(), caption(), guid());
+						return false;
+					}
 				}
 			}
 			break;
@@ -1768,13 +1792,12 @@ namespace Builder
 		case 2:				// FP
 			m_runTime = 14 + 4;
 
-			CHECK_FLOAT32(i_ust);
-
 			if (mismatchWithRange == true)
 			{
 				CHECK_FLOAT32(*i_lowlim);
 				CHECK_FLOAT32(*i_highlim);
 				CHECK_FLOAT32(*i_relvalue);
+				CHECK_FLOAT32(*i_ust);
 
 				if (i_lowlim->floatValue() == i_highlim->floatValue())
 				{
@@ -1790,20 +1813,25 @@ namespace Builder
 				{
 					// Parameter '%1' of AFB '%2' can't be 0.
 					//
-					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					m_log->errALC5058(i_ust->caption(), caption(), guid());
 					return false;
 				}
 
-				i_ust.setFloatValue(value);
+				i_ust->setFloatValue(value);
 			}
 			else
 			{
-				if (i_ust.floatValue() <= 0)
+				if (mismatchDynamic == false)
 				{
-					// Value of parameter '%1.%2' must be greater then 0.
-					//
-					m_log->errALC5088(i_ust.caption(), caption(), guid());
-					return false;
+					CHECK_FLOAT32(*i_ust);
+
+					if (i_ust->floatValue() <= 0)
+					{
+						// Value of parameter '%1.%2' must be greater then 0.
+						//
+						m_log->errALC5088(i_ust->caption(), caption(), guid());
+						return false;
+					}
 				}
 			}
 
@@ -1812,17 +1840,17 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf->unsignedIntValue(), i_conf->caption(), caption(), guid());
 			return false;
 		}
 
 		// i_conf_n must have value from 2 to 4
 		//
-		if (i_conf_n.unsignedIntValue() < 2 || i_conf_n.unsignedIntValue() > 4)
+		if (i_conf_n->unsignedIntValue() < 2 || i_conf_n->unsignedIntValue() > 4)
 		{
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf_n.unsignedIntValue(), i_conf_n.caption(), caption(), guid());
+			m_log->errALC5051(i_conf_n->unsignedIntValue(), i_conf_n->caption(), caption(), guid());
 			return false;
 		}
 
@@ -1844,7 +1872,7 @@ namespace Builder
 		// i_conf must have value from 1 to 4
 		//
 
-		quint32  i_conf_value = i_conf.unsignedIntValue();
+		quint32 i_conf_value = i_conf.unsignedIntValue();
 
 		switch(i_conf_value)
 		{
@@ -1861,11 +1889,85 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(i_conf_value, i_conf.caption(), caption(), guid());
 			return false;
 		}
 
 		return true;
+	}
+
+	bool UalAfb::calculate_INDICATION_paramValues()
+	{
+		m_runTime = 3 + 34;
+
+		AppFbParamValue* i_conf = nullptr;
+
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf", i_conf);
+
+		CHECK_UNSIGNED_INT(*i_conf);
+
+		// i_conf must have value 1 or 2
+		//
+		quint32 i_conf_value = i_conf->unsignedIntValue();
+
+		if (i_conf_value != 1 && i_conf_value != 2)
+		{
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf_value, i_conf->caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
+
+	bool UalAfb::calculate_PULSE_GENERATOR_paramValues()
+	{
+		bool result = true;
+
+		m_runTime = 10 + 34;
+
+		AppFbParamValue* i_conf = nullptr;
+		AppFbParamValue* i_t_high = nullptr;
+		AppFbParamValue* i_t_low = nullptr;
+
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf", i_conf);
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_t_high", i_t_high);
+		CHECK_AND_GET_REQUIRED_PARAMETER("i_t_low", i_t_low);
+
+		CHECK_UNSIGNED_INT(*i_conf);
+		CHECK_UNSIGNED_INT(*i_t_high);
+		CHECK_UNSIGNED_INT(*i_t_low);
+
+		// i_conf must have value 1 or 2
+		//
+		quint32 i_conf_value = i_conf->unsignedIntValue();
+
+		if (i_conf_value != 1 && i_conf_value != 2)
+		{
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf_value, i_conf->caption(), caption(), guid());
+			result = false;
+		}
+
+		quint32 i_t_high_value = i_t_high->unsignedIntValue();
+
+		if (i_t_high_value < 5 || i_t_high_value > 65535)
+		{
+			m_log->errALC5141(caption(), i_t_high->caption(), "5..65535", guid(), schemaID());
+			result = false;
+		}
+
+		quint32 i_t_low_value = i_t_low->unsignedIntValue();
+
+		if (i_t_low_value < 5 || i_t_low_value > 65535)
+		{
+			m_log->errALC5141(caption(), i_t_low->caption(), "5..65535", guid(), schemaID());
+			result = false;
+		}
+
+		return result;
 	}
 
 }

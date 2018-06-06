@@ -2,7 +2,7 @@
 
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
-#include "../AppDataService/AppSignalStateEx.h"
+#include "AppSignalStateEx.h"
 #include "TuningIPENSource.h"
 #include "TuningIPENSocket.h"
 
@@ -69,10 +69,10 @@ namespace TuningIPEN
 		void onSetSignalState(QString appSignalID, double value);
 
 	public:
-		TuningIPENServiceWorker(const QString& serviceName,
+		TuningIPENServiceWorker(const SoftwareInfo& softwareInfo,
+								const QString& serviceName,
 								int& argc,
 								char** argv,
-								const VersionInfo& versionInfo,
 								std::shared_ptr<CircularLogger> logger);
 		virtual ~TuningIPENServiceWorker();
 

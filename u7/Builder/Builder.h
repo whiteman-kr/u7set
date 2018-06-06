@@ -2,6 +2,7 @@
 #define BUILDER_H
 
 #include "../lib/Signal.h"
+#include "../lib/CommonTypes.h"
 #include "../TuningService/TuningDataStorage.h"
 
 #include "LogicModuleSet.h"
@@ -51,8 +52,6 @@ namespace Builder
 {
     class LmDescriptionSet;
 
-	typedef QHash<QString, quint64> LmsUniqueIdMap;		// LM's equipmentID => LM's uniqueID map
-
 	// ------------------------------------------------------------------------
 	//
 	//		BuildWorkerThread
@@ -70,7 +69,6 @@ namespace Builder
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
-		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const;
 
@@ -80,7 +78,7 @@ namespace Builder
 
 		// Load subsystems
 		//
-		bool loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicMoudles, Hardware::SubsystemStorage* subsystems);
+		bool loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicModules, Hardware::SubsystemStorage* subsystems);
 
 		// Check same Uuids and same StrIds
 		//
@@ -114,9 +112,15 @@ namespace Builder
 								   VFrame30::BusSet* busSet,
 								   int changesetId);
 
+		// Save Logic Modules Descriptions
+		//
+		bool saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
+										 BuildResultWriter* buildResultWriter);
+
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
+		bool compileApplicationLogic(	Hardware::SubsystemStorage* subsystems,
+										const std::vector<Hardware::DeviceModule*>& lmModules,
 										Hardware::EquipmentSet*equipmentSet,
 										Hardware::OptoModuleStorage* optoModuleStorage,
 										Hardware::ConnectionStorage* connections,
@@ -139,9 +143,10 @@ namespace Builder
 
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
 
+		void generateModulesInformation(BuildResultWriter& buildWriter,
+								   const std::vector<Hardware::DeviceModule *>& lmModules);
+
 		void generateLmsUniqueID(BuildResultWriter& buildWriter,
-								 TuningBuilder& tuningBuilder,
-								 ConfigurationBuilder& cfgBuilder,
 								 const std::vector<Hardware::DeviceModule *>& lmModules,
 								 LmsUniqueIdMap& lmsUniqueIdMap);
 
@@ -202,6 +207,9 @@ namespace Builder
 		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
 
 		IssueLogger* m_log = nullptr;					// Probably it's better to make it as shared_ptr
+
+		QJSEngine m_jsEngine;
+
 	};
 
 	// LogicModule Description Set
@@ -212,6 +220,10 @@ namespace Builder
 
     public:
 		bool loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName);
+		std::pair<QString, bool> rowFile(QString fileName) const;
+
+	private:
+		std::map<QString, QString> m_rawLmDescriptions;		// Raw data (xml), not parsed file. Required to save to build result
 	};
 
 	// ------------------------------------------------------------------------

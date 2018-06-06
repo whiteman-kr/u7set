@@ -12,6 +12,12 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -100,10 +106,18 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/TuningController.h \
     ../lib/AppSignal.h \
     ../lib/DbStruct.h \
-    ../lib/Tuning/TuningSignalState.h \
     SchemaItemBus.h \
     Bus.h \
-    SchemaItemLoopback.h
+    SchemaItemLoopback.h \
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/Tuning/ITuningSignalManager.h \
+    ../lib/Tuning/ITuningTcpClient.h \
+    ../Proto/network.pb.h \
+    ../lib/TuningValue.h \
+    ../lib/Signal.h \
+    ../lib/DeviceObject.h \
+    ../lib/SignalProperties.h \
+    ../lib/XmlHelper.h
 
 SOURCES += \
     Settings.cpp \
@@ -149,7 +163,6 @@ SOURCES += \
     MacrosExpander.cpp \
     Session.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Types.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/Tuning/TuningController.cpp \
@@ -158,18 +171,20 @@ SOURCES += \
     ../lib/Tuning/TuningSignalState.cpp \
     SchemaItemBus.cpp \
     Bus.cpp \
-    SchemaItemLoopback.cpp
-
+    SchemaItemLoopback.cpp \
+    ../Proto/network.pb.cc \
+    ../lib/TuningValue.cpp \
+    ../lib/Types.cpp \
+    ../lib/Signal.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/SignalProperties.cpp \
+    ../lib/XmlHelper.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-#c++14 support
-#
-CONFIG += c++14
 
 #Warning level
 #

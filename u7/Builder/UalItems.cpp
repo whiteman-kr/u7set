@@ -112,90 +112,76 @@ namespace Builder
 		clear();
 	}
 
-	bool AfblsMap::addInstance(UalAfb* ualAfb)
+	bool AfblsMap::addInstance(UalAfb* ualAfb, IssueLogger* log)
 	{
+		TEST_PTR_RETURN_FALSE(log);
+
 		if (ualAfb == nullptr)
 		{
-			assert(false);
+			LOG_NULLPTR_ERROR(log);
 			return false;
 		}
 
 		QString afbStrID = ualAfb->strID();
 
-		if (contains(afbStrID) == false)
-		{
-			assert(false);			// unknown FBL strID
-			return false;
-		}
-
-		Afbl* afbl = (*this)[afbStrID];
+		Afbl* afbl = (*this).value(afbStrID, nullptr);
 
 		if (afbl == nullptr)
 		{
-			assert(false);
-			return 0;
-		}
-
-		int instance = 0;
-
-		QString instantiatorID = ualAfb->instantiatorID();
-
-		if (afbl->hasRam() == true)
-		{
-			int opCode = afbl->opCode();
-
-			if (m_fblInstance.contains(opCode))
-			{
-				instance = m_fblInstance[opCode];
-
-				instance++;
-
-				m_fblInstance[opCode] = instance;
-
-				m_nonRamFblInstance.insert(instantiatorID, instance);
-			}
-			else
-			{
-				assert(false);		// unknown opcode
-			}
-		}
-		else
-		{
-			// Calculate non-RAM Fbl instance
-			//
-			if (m_nonRamFblInstance.contains(instantiatorID))
-			{
-				instance = m_nonRamFblInstance.value(instantiatorID);
-			}
-			else
-			{
-				int opCode = afbl->opCode();
-				if (m_fblInstance.contains(opCode))
-				{
-					instance = m_fblInstance[opCode];
-
-					instance++;
-
-					m_fblInstance[opCode] = instance;
-
-					m_nonRamFblInstance.insert(instantiatorID, instance);
-				}
-				else
-				{
-					assert(false);		// unknown opcode
-				}
-			}
-		}
-
-		if (instance == 0)
-		{
-			assert(false);				// invalid instance number
+			LOG_INTERNAL_ERROR(log);			// unknown FBL strID
 			return false;
 		}
 
-		if (instance > MAX_FB_INSTANCE)
+		int opCode = afbl->opCode();
+
+		if (m_fblInstance.contains(opCode) == false)
 		{
-			assert(false);				// reached the max instance number
+			// Unknown AFB type (opCode) (Logic schema %1, item %2).
+			//
+			log->errALC5129(ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
+			return false;
+		}
+
+		int instance = -1;
+		int maxInstances = afbl->maxInstances();
+
+		QString instantiatorID = ualAfb->instantiatorID();
+
+		if (afbl->hasRam() == false && m_nonRamFblInstance.contains(instantiatorID) == true)
+		{
+			// ualAfb has no RAM and its instantiatorID already exists - existing instance would be used
+			//
+			instance = m_nonRamFblInstance.value(instantiatorID);
+		}
+		else
+		{
+			// ualAfb has RAM or ualAfb has no RAM and its instantiatorID is not exist - new instance would be created
+
+			instance = m_fblInstance[opCode];
+
+			instance++;
+
+			if (instance >= maxInstances)
+			{
+				// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+				//
+				log->errALC5130(afbl->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+				return false;
+			}
+
+			m_fblInstance[opCode] = instance;
+
+			if (afbl->hasRam() == false)
+			{
+				// append new instantiatorID for non-RAM afb
+				//
+				m_nonRamFblInstance.insert(instantiatorID, instance);
+			}
+		}
+
+		if (instance < 0)
+		{
+			assert(false);				// invalid instance number
 			return false;
 		}
 
@@ -224,9 +210,9 @@ namespace Builder
 
 		// initialize map Fbl opCode -> current instance
 		//
-		if (!m_fblInstance.contains(logicAfb->opCode()))
+		if (m_fblInstance.contains(logicAfb->opCode()) == false)
 		{
-			m_fblInstance.insert(logicAfb->opCode(), 0);
+			m_fblInstance.insert(logicAfb->opCode(), -1);			// init by -1, but used instances values is beginning from 0
 		}
 
 		// add AfbElement in/out signals to m_fblsSignals map
@@ -323,6 +309,11 @@ namespace Builder
 		assert(false);
 
 		return LogicAfbSignal();
+	}
+
+	int AfblsMap::getUsedInstances(int opCode) const
+	{
+		return m_fblInstance.value(opCode, -1) + 1;
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -696,7 +687,9 @@ namespace Builder
 			return m_instantiatorID;
 		}
 
-		m_instantiatorID = afb().strID();
+		m_instantiatorID = QString("opCode:%1").arg(afb().opCode());
+
+		bool firstParam = true;
 
 		// append instantiator param's values to instantiatorID
 		//
@@ -705,6 +698,12 @@ namespace Builder
 			if (paramValue.instantiator() == false)
 			{
 				continue;
+			}
+
+			if (firstParam == true)
+			{
+				m_instantiatorID += ":params";
+				firstParam = false;
 			}
 
 			switch(paramValue.dataFormat())
@@ -818,20 +817,27 @@ namespace Builder
 
 		for(const QString& opName : requiredParams)
 		{
-			if (m_paramValuesArray.contains(opName) == false)
-			{
-				if (displayError == true)
-				{
-					// Required parameter '%1' of AFB '%2' is missing.
-					//
-					m_log->errALC5045(opName, caption(), guid());
-				}
-
-				result = false;
-			}
+			result &= checkRequiredParameter(opName, displayError);
 		}
 
 		return result;
+	}
+
+	bool UalAfb::checkRequiredParameter(const QString& requiredParam, bool displayError)
+	{
+		if (m_paramValuesArray.contains(requiredParam) == false)
+		{
+			if (displayError == true)
+			{
+				// Required parameter '%1' of AFB '%2' is missing.
+				//
+				m_log->errALC5045(requiredParam, caption(), guid());
+			}
+
+			return false;
+		}
+
+		return true;
 	}
 
 	bool UalAfb::checkUnsignedInt(const AppFbParamValue& paramValue)
@@ -1104,42 +1110,63 @@ namespace Builder
 	}
 
 	bool UalSignal::createOptoSignal(const UalItem* ualItem,
-									Signal* s,
+									Signal* templateSignal,
 									const QString& lmEquipmentID,
-									 BusShared bus)
+									BusShared bus,
+									bool isBusChildSignal,
+									IssueLogger* log)
 	{
-		if (ualItem == nullptr)
+		if (ualItem == nullptr || templateSignal == nullptr || log == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
+		if (templateSignal->lm() == nullptr)
+		{
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
+
+		// Opto UalSignal creation from receiver
+		//
 		m_ualItem = ualItem;
 		m_bus = bus;
 
-		// Opto UalSignal creation from receiver
-
-		if (s == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
 		m_isOptoSignal = true;
 
-		// create new instance of Signal
-		m_autoSignalPtr = new Signal(*s);
+		Signal* refSignal = nullptr;
+
+		// native copy of templateSignal is created if:
+		//
+		// 1) templateSignal is not native for current LM
+		// 2) templateSignal is native but it is bus child signal
+		//
+
+		bool needToCreateNativeCopy = (lmEquipmentID != templateSignal->lm()->equipmentIdTemplate()) ||
+									  (lmEquipmentID == templateSignal->lm()->equipmentIdTemplate() && isBusChildSignal == true);
+
+		if (needToCreateNativeCopy == true)
+		{
+			refSignal = m_autoSignalPtr = createNativeCopyOfSignal(templateSignal, lmEquipmentID);
+
+			if (refSignal == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+		}
+		else
+		{
+			refSignal = templateSignal;
+		}
 
 		// reset signal addresses to invalid state
 		// ualAddr of opto signal should be set later in setOptoUalSignalsAddresses()
 		//
-		m_autoSignalPtr->resetAddresses();
+		refSignal->resetAddresses();
 
-		m_autoSignalPtr->setEquipmentID(lmEquipmentID);						// associate new signal with current lm
-		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
-		m_autoSignalPtr->setAcquire(false);
-
-		appendRefSignal(m_autoSignalPtr, true);
+		appendRefSignal(refSignal, true);
 
 		setComputed();
 
@@ -1304,6 +1331,23 @@ namespace Builder
 		return childSignal->appendRefSignal(s, false);
 	}
 
+	Signal* UalSignal::createNativeCopyOfSignal(const Signal* templateSignal, const QString &lmEquipmentID)
+	{
+		if (templateSignal == nullptr)
+		{
+			assert(false);
+			return nullptr;
+		}
+
+		Signal* nativeCopySignal = new Signal(*templateSignal);
+
+		nativeCopySignal->setAcquire(false);								// reset Acquired flag
+		nativeCopySignal->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
+		nativeCopySignal->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
+
+		return nativeCopySignal;
+	}
+
 	Address16 UalSignal::ioBufAddr()
 	{
 		if (m_isInput == true)
@@ -1334,7 +1378,20 @@ namespace Builder
 
 		if (m_isOptoSignal == true)
 		{
-			return m_autoSignalPtr->ioBufAddr();
+			Signal* s = m_autoSignalPtr;
+
+			if (s == nullptr)
+			{
+				s = signal();
+			}
+
+			if (s == nullptr)
+			{
+				assert(false);
+				return Address16();
+			}
+
+			return s->ioBufAddr();
 		}
 
 		return Address16();
@@ -1435,7 +1492,20 @@ namespace Builder
 			return false;
 		}
 
-		return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
+		switch(busSignal.signalType)
+		{
+		case E::SignalType::Analog:
+		case E::SignalType::Discrete:
+			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
+
+		case E::SignalType::Bus:
+			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.busTypeID);
+
+		default:
+			assert(false);
+		}
+
+		return false;
 	}
 
 	bool UalSignal::isCompatible(const UalSignal* ualSignal) const
@@ -1503,6 +1573,46 @@ namespace Builder
 		return m_constFloatValue;
 	}
 
+	double UalSignal::constValue() const
+	{
+		if (m_isConst == false)
+		{
+			assert(false);
+			return 0;
+		}
+
+		double constVal = 0;
+
+		switch(constType())
+		{
+		case E::SignalType::Discrete:
+			constVal = static_cast<double>(constDiscreteValue());
+			break;
+
+		case E::SignalType::Analog:
+
+			switch(constAnalogFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				constVal = static_cast<double>(constAnalogFloatValue());
+				break;
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				constVal = static_cast<double>(constAnalogIntValue());
+				break;
+
+			default:
+				assert(false);
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return constVal;
+	}
+
 	bool UalSignal::setUalAddr(Address16 ualAddr)
 	{
 		if (m_isConst == true)
@@ -1513,10 +1623,14 @@ namespace Builder
 
 		assert(ualAddr.isValid() == true);
 
-		if (m_ualAddr.isValid() == true)
+		if (m_ualAddr.isValid() == true && m_isBusChild == true)
 		{
-			Signal* s = signal();
-			assert(false);				// m_ualAddr is already set
+			return true;			// ualAddress of bus child signal is allredy set, its ok
+		}
+
+		if (m_ualAddr.isValid() == true && m_isBusChild == false)
+		{
+			assert(false);				// why and where m_ualAddr is already set???
 			return false;
 		}
 
@@ -2052,8 +2166,10 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem, Signal* s,
+	UalSignal* UalSignalsMap::createOptoSignal(const UalItem* ualItem,
+											   Signal* s,
 											   const QString& lmEquipmentID,
+											   bool isBusChildSignal,
 											   QUuid outPinUuid)
 	{
 		// create opto signal
@@ -2084,7 +2200,7 @@ namespace Builder
 			}
 		}
 
-		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus);
+		bool result = ualSignal->createOptoSignal(ualItem, s, lmEquipmentID, bus, isBusChildSignal, m_log);
 
 		if (result == false)
 		{
@@ -2106,13 +2222,9 @@ namespace Builder
 
 			for(const BusSignal& busSignal : busSignals)
 			{
-				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(),
-																   bus->srcBus(),
-																   bus->getBusSignal(busSignal.signalID));
+				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(), bus, busSignal);
 
-				templateSignal->setEquipmentID(s->equipmentID());
-
-				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, QUuid());
+				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, true, QUuid());
 
 				if (busChildSignal != nullptr)
 				{
@@ -2127,7 +2239,8 @@ namespace Builder
 	}
 
 	UalSignal* UalSignalsMap::createBusParentSignal(const UalItem* ualItem,
-													Signal* s, BusShared bus,
+													Signal* s,
+													BusShared bus,
 													QUuid outPinUuid,
 													const QString& outPinCaption)
 	{
@@ -2155,16 +2268,45 @@ namespace Builder
 
 		for(const BusSignal& busSignal : busSignals)
 		{
-			Signal* s = m_compiler.signalSet().appendBusChildSignal(*busParentSignal->signal(),
-															   bus->srcBus(),
-															   bus->getBusSignal(busSignal.signalID));
+			Signal* sChild = m_compiler.signalSet().appendBusChildSignal(*busParentSignal->signal(), bus, busSignal);
 
-			UalSignal* busChildSignal = createSignal(s);
+			UalSignal* busChildSignal = nullptr;
+
+			switch(busSignal.signalType)
+			{
+			case E::SignalType::Analog:
+			case E::SignalType::Discrete:
+				busChildSignal = createSignal(sChild);
+				break;
+
+			case E::SignalType::Bus:
+				{
+					BusShared childBus = bus->busses().getBus(busSignal.busTypeID);
+
+					if (childBus == nullptr)
+					{
+						result = false;
+						continue;
+					}
+
+					busChildSignal = createBusParentSignal(ualItem, sChild, childBus, QUuid(), busSignal.caption);
+				}
+				break;
+
+			default:
+				assert(false);
+			}
 
 			if (busChildSignal != nullptr)
 			{
-				busParentSignal->appendBusChildSignal(busSignal.signalID, busChildSignal);
+				result &= busParentSignal->appendBusChildSignal(busSignal.signalID, busChildSignal);
 			}
+		}
+
+		if (result == false)
+		{
+			delete busParentSignal;
+			return nullptr;
 		}
 
 		return busParentSignal;
@@ -2275,180 +2417,12 @@ namespace Builder
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
-			Signal* newSignal = m_compiler.signalSet().appendBusChildSignal(*s, bus->srcBus(), bus->getBusSignal(busSignal.signalID));
+			Signal* newSignal = m_compiler.signalSet().appendBusChildSignal(*s, bus, busSignal);
 
 			result &= ualSignal->appendBusChildRefSignals(busSignal.signalID, newSignal);
 		}
 
 		return result;
-	}
-
-	bool UalSignalsMap::insertUalSignal(const UalItem* ualSignal)
-	{
-/*		if (ualSignal == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		if (ualSignal->isSignal() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		QString appSignalID = ualSignal->strID();
-
-		if (appSignalID[0] != '#')
-		{
-			appSignalID = "#" + appSignalID;
-		}
-
-		Signal* s = m_compiler.getSignal(appSignalID);
-
-		if (s == nullptr)
-		{
-			// Signal identifier '%1' is not found.
-			//
-			m_compiler.log()->errALC5000(appSignalID, ualSignal->guid());
-			return false;
-		}
-
-		UalSignal* appSignal = nullptr;
-
-		if (m_signalStrIdMap.contains(appSignalID) == true)
-		{
-			appSignal = m_signalStrIdMap[appSignalID];
-		}
-		else
-		{
-			appSignal = new UalSignal(s, ualSignal);
-
-			m_signalStrIdMap.insert(appSignalID, appSignal);
-		}
-
-		assert(appSignal != nullptr);
-
-		HashedVector<QUuid, UalSignal*>::insert(ualSignal->guid(), appSignal);
-
-		// qDebug() << "Insert signal" << ualSignal->guid().toString() << appSignalID;
-*/
-		return true;
-	}
-
-	bool UalSignalsMap::insertNonBusAutoSignal(const UalAfb* appFb, const LogicPin& outputPin)
-	{
-/*		if (appFb == nullptr )
-		{
-			LOG_NULLPTR_ERROR(m_log);
-		}
-
-		// insert "auto" signal bound to AFB output pin
-		//
-		const LogicAfbSignal afbSignal = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
-
-		QUuid outPinGuid = outputPin.guid();
-
-		QString autoSignalID = getAutoSignalID(appFb, outputPin);
-
-		E::AnalogAppSignalFormat analogSignalFormat;
-		int dataSize = 1;
-
-		switch(afbSignal.type())
-		{
-		case E::SignalType::Analog:
-			{
-				switch(afbSignal.dataFormat())		// Afb::AfbDataFormat
-				{
-				case E::DataFormat::Float:
-					analogSignalFormat = E::AnalogAppSignalFormat::Float32;
-					dataSize = FLOAT32_SIZE;
-					break;
-
-				case E::DataFormat::SignedInt:
-					analogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
-					dataSize = SIGNED_INT32_SIZE;
-					break;
-
-				case E::DataFormat::UnsignedInt:
-					// Uncompatible data format of analog AFB Signal '%1.%2'
-					//
-					m_log->errALC5057(appFb->afb().caption(), afbSignal.caption(), appFb->guid());
-					return false;
-
-				default:
-					assert(false);
-					return false;
-				}
-			}
-			break;
-
-		case E::SignalType::Discrete:
-			dataSize = 1;
-			break;
-
-		case E::SignalType::Bus:
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-
-		default:
-			assert(false);
-		}
-
-		UalSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
-
-		if (appSignal != nullptr)
-		{
-			assert(false);							// duplicate StrID
-		}
-		else
-		{
-			appSignal = new UalSignal(outPinGuid, afbSignal.type(), analogSignalFormat, dataSize, appFb, autoSignalID);
-
-			// auto-signals always connected to output pin, therefore considered computed
-			//
-			appSignal->setComputed();
-
-			m_signalStrIdMap.insert(autoSignalID, appSignal);
-		}
-
-		HashedVector<QUuid, UalSignal*>::insert(outPinGuid, appSignal);
-*/
-		return true;
-	}
-
-	bool UalSignalsMap::insertBusAutoSignal(const UalItem* appItem, const LogicPin& outputPin, BusShared bus)
-	{
-/*		if (appItem == nullptr || bus == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		QUuid outPinGuid = outputPin.guid();
-
-		QString autoSignalID = getAutoSignalID(appItem, outputPin);
-
-		UalSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
-
-		if (appSignal == nullptr)
-		{
-			appSignal = new UalSignal(outPinGuid, autoSignalID, bus->busTypeID(), bus->sizeW());
-
-			// auto-signals always connected to output pin, therefore considered computed
-			//
-			appSignal->setComputed();
-
-			m_signalStrIdMap.insert(autoSignalID, appSignal);
-		}
-		else
-		{
-			assert(false);							// duplicate StrID??
-		}
-
-		HashedVector<QUuid, UalSignal*>::insert(outPinGuid, appSignal);
-*/
-		return true;
 	}
 
 	void UalSignalsMap::clear()
@@ -2510,6 +2484,9 @@ namespace Builder
 			str.append(E::valueToString<E::SignalType>(ualSignal->signalType()));
 			str += ";";
 
+			str.append(E::valueToString<E::SignalInOutType>(ualSignal->inOutType()));
+			str += ";";
+
 			str.append(E::valueToString<E::AnalogAppSignalFormat>(ualSignal->analogSignalFormat()));
 			str += ";";
 
@@ -2517,6 +2494,15 @@ namespace Builder
 			str += ";";
 
 			str.append(ualSignal->isAcquired() == true ? "true" : "false");
+			str += ";";
+
+			str.append(ualSignal->isBusChild() == true ? "true" : "false");
+			str += ";";
+
+			str.append(ualSignal->isTuningable() == true ? "true" : "false");
+			str += ";";
+
+			str.append(ualSignal->isOptoSignal() == true ? "true" : "false");
 			str += ";";
 
 			str.append(QString::number(ualSignal->ualAddr().offset()));

@@ -12,6 +12,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = TuningIPEN
 TEMPLATE = app
 
+#c++14/17 support
+#
+CONFIG += c++14
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
 
 SOURCES +=\
 	TuningMainWindow.cpp \
@@ -32,11 +38,9 @@ SOURCES +=\
 	../lib/UdpSocket.cpp \
 	../lib/CircularLogger.cpp \
 	../lib/Queue.cpp \
-	../lib/JsonSerializable.cpp \
 	MainIPEN.cpp \
 	../lib/Signal.cpp \
 	SafetyChannelSignalsModel.cpp \
-	../AppDataService/AppSignalStateEx.cpp \
 	../lib/Crc.cpp \
 	AnalogSignalSetter.cpp \
     ../lib/WUtils.cpp \
@@ -52,7 +56,12 @@ SOURCES +=\
     TuningIPENDataStorage.cpp \
     ../TuningService/TuningDataStorage.cpp \
     ../lib/CommandLineParser.cpp \
-    ../lib/AppSignal.cpp
+    ../lib/AppSignal.cpp \
+    ../lib/SoftwareInfo.cpp \
+    ../lib/TuningValue.cpp \
+    AppSignalStateEx.cpp \
+    ../lib/Times.cpp \
+    ../lib/SignalProperties.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -73,10 +82,8 @@ HEADERS  += TuningMainWindow.h \
 	../lib/UdpSocket.h \
 	../lib/CircularLogger.h \
 	../lib/Queue.h \
-	../lib/JsonSerializable.h \
 	../lib/Signal.h \
 	SafetyChannelSignalsModel.h \
-	../AppDataService/AppSignalStateEx.h \
 	../lib/Crc.h \
 	AnalogSignalSetter.h \
     ../lib/WUtils.h \
@@ -92,7 +99,12 @@ HEADERS  += TuningMainWindow.h \
     TuningIPENDataStorage.h \
     ../TuningService/TuningDataStorage.h \
     ../lib/CommandLineParser.h \
-    ../lib/AppSignal.h
+    ../lib/AppSignal.h \
+    ../lib/SoftwareInfo.h \
+    ../lib/TuningValue.h \
+    AppSignalStateEx.h \
+    ../lib/Times.h \
+    ../lib/SignalProperties.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -121,6 +133,36 @@ CONFIG(release, debug|release) {
 	RCC_DIR = release/rcc
 	UI_DIR = release/ui
 }
+
+# Force prebuild version control info
+#
+win32 {
+        contains(QMAKE_TARGET.arch, x86_64){
+                QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
+                system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
+                        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+                        nmake))
+                system(chdir $$PWD & \
+                        $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/TuningIPEN.pro)
+        }
+        else{
+                QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
+                system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
+                        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+                        nmake))
+                system(chdir $$PWD & \
+                        $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/TuningIPEN.pro)
+        }
+}
+unix {
+        QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
+        system(cd $$PWD/../GetGitProjectVersion; \
+                qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+                make;)
+        system(cd $$PWD; \
+                $$PWD/../bin_unix/GetGitProjectVersion $$PWD/TuningIPEN.pro)
+}
+
 
 #c++11 support for GCC
 #

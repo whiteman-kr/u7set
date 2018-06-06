@@ -63,7 +63,7 @@ protected slots:
 	void runSubsystemListEditor();
     void runConnectionsEditor();
 	void runBusEditor();
-	void updateUfbsAfbs();
+	void updateUfbsAfbsBusses();
     void showAbout();
 	void debug();
 	void startBuild();

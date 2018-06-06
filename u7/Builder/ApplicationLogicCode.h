@@ -96,9 +96,6 @@ namespace Builder
 	const quint16	MIN_FB_TYPE = 1,
 					MAX_FB_TYPE = 64 - 1,
 
-					MIN_FB_INSTANCE = 1,
-					MAX_FB_INSTANCE = 1024 - 1,
-
 					MIN_FB_PARAM_NO = 0,
 					MAX_FB_PARAM_NO = 64 - 1,
 
@@ -325,6 +322,8 @@ namespace Builder
 
 		// --
 
+		LmCommandCode getOpcode() const { return m_code.getOpCode(); }
+
 		void setAddress(int address) { m_address = address; }
 
 		QString toString() override;
@@ -340,6 +339,10 @@ namespace Builder
 		bool isOpCode(LmCommandCode code) const { return m_code.getOpCode() == code; }
 
 		quint16 getWord2() const { return m_code.getWord2(); }
+		quint16 getWord3() const { return m_code.getWord3(); }
+
+		quint16 getBitNo1() const { return m_code.getBitNo1(); }
+		quint16 getBitNo2() const { return m_code.getBitNo2(); }
 
 		bool isValidCommand() { return m_code.getOpCode() != LmCommandCode::NoCommand; }
 
@@ -402,6 +405,23 @@ namespace Builder
 
 	typedef QVector<Command> Commands;
 
+	struct CodeFragmentMetrics
+	{
+		void setStartAddr(int startAddr) { m_startAddr = startAddr; }
+		void setEndAddr(int endAddr);
+
+		double codePercent() const { return m_codePercent; }
+		QString codePercentStr() const;
+
+	private:
+		int m_startAddr = 0;
+		int m_endAddr = 0;
+		int m_runTime = 0;
+
+		double m_codePercent = 0;
+
+	};
+
 	class ApplicationLogicCode : public QObject
 	{
 		Q_OBJECT
@@ -443,6 +463,9 @@ namespace Builder
 		void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 		int commandAddress() const { return m_commandAddress; }
+
+		void init(CodeFragmentMetrics* codeFragmentMetrics);
+		void calculate(CodeFragmentMetrics* codeFragmentMetrics);
 	};
 
 }

@@ -73,7 +73,7 @@ namespace TuningIPEN
 		void automaticModeChanged(bool newValue);
 
 	public:
-		explicit TuningMainWindow(int& argc, char** argv, std::shared_ptr<CircularLogger> logger, QWidget *parent = 0);
+		explicit TuningMainWindow(const SoftwareInfo& softwareInfo, int& argc, char** argv, std::shared_ptr<CircularLogger> logger, QWidget *parent = 0);
 		~TuningMainWindow();
 
 		void onTuningServiceReady();

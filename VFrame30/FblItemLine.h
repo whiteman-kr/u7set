@@ -14,7 +14,8 @@ namespace VFrame30
 		FblItemLine(SchemaUnit itemunit);
 		virtual ~FblItemLine(void);
 		
-	public:
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
 		
 		// Serialization
 		//
@@ -26,10 +27,10 @@ namespace VFrame30
 		// Properties and Data
 	public:
 		double weight() const;
-		void setWeight(double weight);
+		void setWeight(const double& weight);
 
 		QColor lineColor() const;
-		void setLineColor(QColor color);
+		void setLineColor(const QColor& color);
 
 	protected:
 		double m_weight;					// Line weight, pixels/inchces depends on UnitDocPt
