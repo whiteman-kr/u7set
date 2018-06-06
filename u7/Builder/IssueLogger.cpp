@@ -4913,24 +4913,25 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+	/// Title:	   Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
 	///
 	/// Parameters:
-	///		%1 AFB component caption
-	///		%2 Logic schema ID
-	///		%3 Schema item label
+	///		%1 Max instances count
+	///		%2 AFB component caption
+	///		%3 Logic schema ID
+	///		%4 Schema item label
 	///
 	/// Description:
 	///		 Max instances of specified AFB component is used.
 	///
-	void IssueLogger::errALC5130(QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	void IssueLogger::errALC5130(int maxInstances, QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5130,
-				  QString(tr("Max instances of AFB component '%1' is used (Logic schema %2, item %3)")).
-						arg(afbComponentCaption).arg(schemaID).arg(itemLabel));
+				  QString(tr("Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)")).
+						arg(maxInstances).arg(afbComponentCaption).arg(schemaID).arg(itemLabel));
 	}
 
 	/// IssueCode: ALC5131
