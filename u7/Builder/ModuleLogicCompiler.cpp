@@ -717,8 +717,8 @@ namespace Builder
 			//
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::Terminator:
-			case UalItem::Type::LoopbackOutput:
-			case UalItem::Type::LoopbackInput:
+			case UalItem::Type::LoopbackSource:
+			case UalItem::Type::LoopbackTarget:
 				break;
 
 			// unknown item's type
@@ -1480,8 +1480,11 @@ namespace Builder
 			// link pins to signal only, any checks is not required
 			//
 			case UalItem::Type::Transmitter:
-			case UalItem::Type::LoopbackOutput:
 				m_ualSignals.appendRefPin(destUalItem, inPinUuid, ualSignal);
+				break;
+
+			case UalItem::Type::LoopbackSource:
+				result &= linkLoopbackSource(destUalItem, inPinUuid, ualSignal);
 				break;
 
 			case UalItem::Type::Terminator:
@@ -1491,7 +1494,7 @@ namespace Builder
 			//
 			case UalItem::Type::Const:
 			case UalItem::Type::Receiver:
-			case UalItem::Type::LoopbackInput:
+			case UalItem::Type::LoopbackTarget:
 				m_log->errALC5116(srcUalItem->guid(), destUalItem->guid(), destUalItem->schemaID());
 				result = false;
 				break;
@@ -1735,6 +1738,35 @@ namespace Builder
 
 		return result;
 	}
+
+	bool ModuleLogicCompiler::linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(loopbackSourceItem, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(ualSignal, m_log);
+
+		const UalLoopbackSource* ualLbSource = loopbackSourceItem->ualLoopbackSource();
+
+		if  (ualLbSource == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString loopbackID = ualLbSource->loopbackId();
+
+		if (m_loopbacks.contains(loopbackID) == true)
+		{
+			// err
+			return false;
+		}
+
+		m_loopbacks.insert(loopbackID, ualSignal);
+
+		ualSignal->setLoopbackID(loopbackID);			// mark signal as loopbackSource
+
+		m_ualSignals.appendRefPin(loopbackSourceItem, inPinUuid, ualSignal);
+	}
+
 
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID)
 	{
@@ -5029,8 +5061,8 @@ namespace Builder
 			case UalItem::Type::Receiver:
 			case UalItem::Type::Terminator:
 			case UalItem::Type::BusExtractor:
-			case UalItem::Type::LoopbackOutput:
-			case UalItem::Type::LoopbackInput:
+			case UalItem::Type::LoopbackSource:
+			case UalItem::Type::LoopbackTarget:
 				break;
 
 			case UalItem::Type::Unknown:

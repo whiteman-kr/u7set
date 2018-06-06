@@ -1513,25 +1513,25 @@ namespace Builder
 		return isCompatible(ualSignal->signal());
 	}
 
-	void UalSignal::setLoopbackSourceID(const QString& loopbackSourceID)
+	void UalSignal::setLoopbackID(const QString& loopbackID)
 	{
-		if (m_loopbackSourceID.isEmpty() == false)
+		if (m_loopbackID.isEmpty() == false)
 		{
 			assert(false);				// reassigning of m_loopbackSourceID, why?
 		}
 
-		m_loopbackSourceID = loopbackSourceID;
+		m_loopbackID = loopbackID;
 	}
 
-	QString UalSignal::loopbackSourceID() const
+	QString UalSignal::loopbackID() const
 	{
-		if (m_loopbackSourceID.isEmpty() == true)
+		if (m_loopbackID.isEmpty() == true)
 		{
 			assert(false);
 			return QString();
 		}
 
-		return m_loopbackSourceID;
+		return m_loopbackID;
 	}
 
 	E::SignalType UalSignal::constType() const

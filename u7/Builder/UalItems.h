@@ -36,6 +36,9 @@ namespace Builder
 	typedef VFrame30::SchemaItemBusComposer UalBusComposer;
 	typedef VFrame30::SchemaItemBusExtractor UalBusExtractor;
 
+	typedef VFrame30::SchemaItemLoopbackSource UalLoopbackSource;
+	typedef VFrame30::SchemaItemLoopbackTarget UalLoopbackTarget;
+
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
 
@@ -166,6 +169,8 @@ namespace Builder
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const UalReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const UalReceiver* ualReceiver() const { return m_appLogicItem.m_fblItem->toReceiverElement(); }
+		const UalLoopbackSource* ualLoopbackSource() const { return m_appLogicItem.m_fblItem->toLoopbackSourceElement(); }
+		const UalLoopbackTarget* ualLoopbackTarget() const { return m_appLogicItem.m_fblItem->toLoopbackTargetElement(); }
 
 		const UalBusComposer* ualBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
 		const UalBusExtractor* ualBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
@@ -476,10 +481,10 @@ namespace Builder
 		bool isBusChild() const { return m_isBusChild; }
 		void setBusChild(bool busChild) { m_isBusChild = busChild; }
 
-		bool isLoopbackSource() const { return m_loopbackSourceID.isEmpty() == false; }
+		bool isLoopbackSource() const { return m_loopbackID.isEmpty() == false; }
 
-		void setLoopbackSourceID(const QString& loopbackSourceID);
-		QString loopbackSourceID() const;
+		void setLoopbackID(const QString& loopbackID);
+		QString loopbackID() const;
 
 		//
 
@@ -539,7 +544,7 @@ namespace Builder
 
 		//
 
-		QString m_loopbackSourceID;
+		QString m_loopbackID;
 
 		//
 

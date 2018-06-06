@@ -1382,34 +1382,10 @@ namespace Builder
 
 					int switchCounter = co.incChangeCount(*dependantIsAbove);
 
-
-<<<<<<< HEAD
-#define STRICT_LOOPBACK
-#ifdef STRICT_LOOPBACK
-					// if this is the second switch, then it's error, use LoopbackSource/Target to make it right
-					//
 					if (switchCounter >= 10)
 					{
 						log->errALP4060(currentItem.m_schema->schemaId(), currentItem.m_fblItem->buildName(), currentItem.m_fblItem->guid());
-					}
-#endif
-						// if this is the third switch item, then skip it
-						//
-						if (switchCounter >= 10)
-						{
-							continue;
-						}
-						else
-						{
-							histForCurrentItem->incChangeCount(*dependantIsAbove);
-						}
-=======
-					int switchCounter = co.incChangeCount(*dependantIsAbove);
-
-					if (switchCounter >= 10)
-					{
 						continue;
->>>>>>> develop
 					}
 
 					// Dependant item is above currentItem, so let's move currentItem right before dependand one
