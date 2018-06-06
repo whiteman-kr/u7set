@@ -163,9 +163,9 @@ namespace Builder
 
 			if (instance >= maxInstances)
 			{
-				// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+				// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
 				//
-				log->errALC5130(afbl->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+				log->errALC5130(maxInstances, afbl->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
 				return false;
 			}
 
