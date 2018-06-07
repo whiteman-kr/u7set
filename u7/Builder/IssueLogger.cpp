@@ -5246,8 +5246,31 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5142,
-				  QString(tr("Duplicate loopback source ID %1 (Logic schema %2).")).
+				  QString(tr("Duplicate loopback source ID %1 (Logic schema %2)")).
 								arg(loopbackSourceID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5143
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Loopback ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		LoopbackSource with specified ID is not exists. Check loopback identifier or create LoopbackSource.
+	///
+	void IssueLogger::errALC5143(QString loopbackID, QUuid loopbackTargetItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, loopbackTargetItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  51423,
+				  QString(tr("LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2)")).
+								arg(loopbackID).arg(schemaID));
 	}
 
 	//

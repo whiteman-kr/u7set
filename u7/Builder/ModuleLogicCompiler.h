@@ -58,21 +58,21 @@ namespace Builder
 
 			//
 
-			CodeFragmentMetrics initAfbs;
-			CodeFragmentMetrics copyAcquiredRawDataInRegBuf;
-			CodeFragmentMetrics convertAnalogInputSignals;
-			CodeFragmentMetrics appLogicCode;
-			CodeFragmentMetrics copyAcquiredAnalogOptoSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredAnalogBusChildSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredTuningAnalogSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredConstAnalogSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredDiscreteInputSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredTuningDiscreteSignalsToRegBuf;
-			CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
-			CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;
-			CodeFragmentMetrics copyOptoConnectionsTxData;
+			CodeSnippetMetrics initAfbs;
+			CodeSnippetMetrics copyAcquiredRawDataInRegBuf;
+			CodeSnippetMetrics convertAnalogInputSignals;
+			CodeSnippetMetrics appLogicCode;
+			CodeSnippetMetrics copyAcquiredAnalogOptoSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredAnalogBusChildSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredTuningAnalogSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredConstAnalogSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredDiscreteInputSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredTuningDiscreteSignalsToRegBuf;
+			CodeSnippetMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
+			CodeSnippetMetrics copyOutputSignalsInOutputModulesMemory;
+			CodeSnippetMetrics copyOptoConnectionsTxData;
 
 			QVector<AfblUsageInfo> afblUsageInfo;
 		};
@@ -176,6 +176,7 @@ namespace Builder
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
@@ -285,9 +286,12 @@ namespace Builder
 		bool finalizeOptoConnectionsProcessing();
 		bool setOptoUalSignalsAddresses();
 
-		bool initAfbs();
-		bool initAppFbParams(UalAfb* appFb, bool instantiatorsOnly);
+		bool startIdrPhaseCode();
+		bool generateInitAfbsCode();
+		bool generateInitAppFbParamsCode(UalAfb* appFb, bool instantiatorsOnly);
 		bool displayAfbParams(const UalAfb& appFb);
+		bool generateLoopbacksRefreshingCode();
+		bool finalizeIdrPhaseCode();
 
 		bool startAppLogicCode();
 
@@ -363,7 +367,7 @@ namespace Builder
 		bool copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxBusSignals(Hardware::OptoPortShared port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
-		bool isCopyOptimizationAllowed(const Commands& copyCode, int* srcAddr);
+		bool isCopyOptimizationAllowed(const CodeSnippet& copyCode, int* srcAddr);
 		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset, MemWriteMap& memWriteMap);
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace, MemWriteMap& memWriteMap);
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module, MemWriteMap& memWriteMap);
@@ -416,7 +420,7 @@ namespace Builder
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
-		Commands codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
+		CodeSnippet codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
 
 	private:
 		static const int ERR_VALUE = -1;
@@ -468,6 +472,9 @@ namespace Builder
 		//
 
 		ApplicationLogicCode m_code;
+
+		CodeSnippet m_idrCode;
+		CodeSnippet m_alpCode;
 
 		int m_idrPhaseClockCount = 0;		// input data receive phase clock count
 		int m_alpPhaseClockCount = 0;		// application logic processing clock count
