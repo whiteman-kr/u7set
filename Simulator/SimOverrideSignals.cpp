@@ -46,7 +46,7 @@ namespace Sim
 			}
 			else
 			{
-				setFloatValue(m_value.value<quint16>());
+				setDiscreteValue(m_value.value<quint16>());
 			}
 			break;
 
@@ -61,7 +61,7 @@ namespace Sim
 				}
 				else
 				{
-					setFloatValue(m_value.value<qint32>());
+					setSignedIntvalue(m_value.value<qint32>());
 				}
 				break;
 			case E::AnalogAppSignalFormat::Float32:

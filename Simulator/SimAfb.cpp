@@ -162,7 +162,18 @@ namespace Sim
 		qint32 op1 = this->signedIntValue();
 		qint32 op2 = operand->signedIntValue();
 		qint32 result = op1 + op2;
+
 		qint64 wideResult = static_cast<qint64>(op1) + static_cast<qint64>(op2);
+
+		if (wideResult > std::numeric_limits<qint32>::max())
+		{
+			result = std::numeric_limits<qint32>::max();
+		}
+
+		if (wideResult < std::numeric_limits<qint32>::min())
+		{
+			result = std::numeric_limits<qint32>::min();
+		}
 
 		setSignedIntValue(result);
 
@@ -202,6 +213,16 @@ namespace Sim
 		qint32 op2 = operand->signedIntValue();
 		qint32 result = op1 * op2;
 		qint64 wideResult = static_cast<qint64>(op1) * static_cast<qint64>(op2);
+
+		if (wideResult > std::numeric_limits<qint32>::max())
+		{
+			result = std::numeric_limits<qint32>::max();
+		}
+
+		if (wideResult < std::numeric_limits<qint32>::min())
+		{
+			result = std::numeric_limits<qint32>::min();
+		}
 
 		setSignedIntValue(result);
 

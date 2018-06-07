@@ -563,6 +563,7 @@ void SimOverrideWidget::setValue(QString appSignalId)
 	//
 	QLineEdit* edit = new QLineEdit(&d);
 	edit->setPlaceholderText("Override Value");
+	edit->setAlignment(Qt::AlignRight);
 
 	QValidator* validator = nullptr;
 
@@ -602,7 +603,7 @@ void SimOverrideWidget::setValue(QString appSignalId)
 	}
 
 	edit->setText(osp->valueString(currentBase, m_currentFormat, m_currentPrecision));
-	edit->setAlignment(Qt::AlignRight);
+	edit->selectAll();
 
 	// Ok/Cancel
 	//

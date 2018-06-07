@@ -816,39 +816,87 @@ namespace Sim
 
 		// Define input opIndexes
 		//
-		const int i_conf = 0;		//
+		const int i_conf = 0;
 		const int i_sp_s = 1;		// Setting value
 		const int i_sp_r = 3;		// Reset value
 		const int i_prev_result = 5;// Prev result
 		const int i_data = 6;		// Input data
 		const int o_result = 9;		// Result
-		const int o_nan = 10;
+		const int o_nan = 10;		// Any input FP param NaN
 
 		// Get params, throws exception in case of error
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
 
-//		qint32 oprdQuant = instance->param(i_oprd_quant)->wordValue();
-
-//		qint32 inputValue = instance->param(i_number)->signedIntValue();
-
-//		checkParamRange(oprdQuant, 1, 32, "i_oprd_quant");
-//		checkParamRange(conf, 1, 2, "i_conf");
-
 		// AFB Logic
 		//
-		switch (conf)
+		if (conf >=1 && conf <= 4)
 		{
-		case 3:		// SignedInt32, <
-			{
-				qint32 settingValue = instance->param(i_sp_s)->signedIntValue();
-				qint32 resetValue = instance->param(i_sp_r)->signedIntValue();
-				qint32 inputValue = instance->param(i_data)->signedIntValue();
+			qint32 settingValue = instance->param(i_sp_s)->signedIntValue();
+			qint32 resetValue = instance->param(i_sp_r)->signedIntValue();
+			qint32 inputValue = instance->param(i_data)->signedIntValue();
+			quint16 prevResult = 0;
 
-				quint16 prevResult = 0;
+			switch (conf)
+			{
+			case 1:		// SignedInt32, ==
+				if (inputValue >= resetValue && inputValue <= settingValue)
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				break;
+
+			case 2:		// SignedInt32, >
 				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
 				{
-					prevResult = instance->param(i_prev_result)->signedIntValue();
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if (inputValue <= settingValue)
+				{
+					if (prevResult == 0)
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						break;
+					}
+					else
+					{
+						// Prev result is 1, so setting is alerted
+						//
+						if (inputValue > resetValue)
+						{
+							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+						}
+						else
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);
+						}
+						break;
+					}
+				}
+				else
+				{
+					// if (inputValue > settingValue)
+					//
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+					break;
+				}
+
+				assert(false);
+				break;
+
+			case 3:		// SignedInt32, <
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
 				}
 
 				if (inputValue >= settingValue)
@@ -876,28 +924,185 @@ namespace Sim
 						break;
 					}
 				}
-
-				if (inputValue < settingValue)
+				else
 				{
+					// if (inputValue < settingValue)
+					//
 					instance->addParamWord(o_result, 1);
 					instance->addParamWord(i_prev_result, 1);
 					break;
 				}
 
 				assert(false);
+				break;
+
+			case 4:		// SignedInt32, <>
+				if (inputValue >= resetValue && inputValue <= settingValue)
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				break;
+
+			default:
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
 			}
-			break;
-//		case 2:
-//			for (qint16 i = 0; i < oprdQuant; i++)
-//			{
-//				int value = inputValue & (0x01 << i) ?  1 : 0;
-//				instance->addParamWord(o_1_result + i, value);
-//			}
-//			break;
-		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+
+			return;
 		}
 
+		if (conf >=5 && conf <= 8)
+		{
+			float settingValue = instance->param(i_sp_s)->floatValue();
+			float resetValue = instance->param(i_sp_r)->floatValue();
+			float inputValue = instance->param(i_data)->floatValue();
+			quint16 prevResult = 0;
+			quint16 nan = (settingValue != settingValue || resetValue != resetValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+
+			switch (conf)
+			{
+			case 5:		// FloatingPoint32, ==
+				instance->addParamWord(o_nan, nan);
+				if (nan != 0)
+				{
+					break;
+				}
+
+				if (inputValue >= resetValue && inputValue <= settingValue)
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				break;
+
+			case 6:		// FloatingPoint32, >
+				{
+					instance->addParamWord(o_nan, nan);
+					if (nan != 0)
+					{
+						break;
+					}
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if (inputValue <= settingValue)
+					{
+						if (prevResult == 0)
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+							break;
+						}
+						else
+						{
+							// Prev result is 1, so setting is alerted
+							//
+							if (inputValue > resetValue)
+							{
+								instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+								instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							}
+							else
+							{
+								instance->addParamWord(o_result, 0);
+								instance->addParamWord(i_prev_result, 0);
+							}
+							break;
+						}
+					}
+					else
+					{
+						// if (inputValue > settingValue)
+						//
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+						break;
+					}
+
+					assert(false);
+				}
+				break;
+			case 7:		// FloatingPoint32, <
+				instance->addParamWord(o_nan, nan);
+				if (nan != 0)
+				{
+					break;
+				}
+
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if (inputValue >= settingValue)
+				{
+					if (prevResult == 0)
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						break;
+					}
+					else
+					{
+						// Prev result is 1, so setting is alerted
+						//
+						if (inputValue < resetValue)
+						{
+							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+						}
+						else
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);
+						}
+						break;
+					}
+				}
+				else
+				{
+					// if (inputValue < settingValue)
+					//
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+					break;
+				}
+
+				assert(false);
+				break;
+			case 8:		// FloatingPoint32, <>
+				instance->addParamWord(o_nan, nan);
+				if (nan != 0)
+				{
+					break;
+				}
+
+				if (inputValue >= resetValue && inputValue <= settingValue)
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				break;
+			default:
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+			}
+
+			return;
+		}
+
+		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
 		return;
 	}
 
