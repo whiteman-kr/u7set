@@ -246,6 +246,20 @@ namespace Builder
 					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 					return false;
 				}
+
+				if (cfgs->type() != E::SoftwareType::ConfigurationService)
+				{
+					m_log->errCFG3017(m_software->equipmentIdTemplate(), cfgsProperty, configurationServiceId);
+
+					QString errorStr = tr("Property '%1.%2' is linked to not compatible software '%3'.")
+						.arg(m_software->equipmentIdTemplate())
+						.arg(cfgsProperty)
+						.arg(configurationServiceId);
+
+
+					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+					return false;
+				}
 			}
 
 			//
@@ -278,6 +292,20 @@ namespace Builder
 				m_log->errCFG3021(m_software->equipmentIdTemplate(), tunsProperty, tuningServiceId);
 
 				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId);
+
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+				return false;
+			}
+
+			if (tunsObject->type() != E::SoftwareType::TuningService)
+			{
+				m_log->errCFG3017(m_software->equipmentIdTemplate(), tunsProperty, tuningServiceId);
+
+				QString errorStr = tr("Property '%1.%2' is linked to not compatible software '%3'.")
+					.arg(m_software->equipmentIdTemplate())
+					.arg(tunsProperty)
+					.arg(tuningServiceId);
+
 
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 				return false;
