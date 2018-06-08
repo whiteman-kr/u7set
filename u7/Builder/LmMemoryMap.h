@@ -290,6 +290,9 @@ namespace Builder
 
 		Address16 constBit0Addr() const;
 		Address16 constBit1Addr() const;
+
+		bool addressInBitMemory(int address) const;
+		bool addressInWordMemory(int address) const;
 	};
 
 }

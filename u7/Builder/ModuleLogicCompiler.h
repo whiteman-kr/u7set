@@ -378,6 +378,8 @@ namespace Builder
 		bool copyOptoPortRawTxBusSignals(Hardware::OptoPortShared port, MemWriteMap& memWriteMap);
 
 		bool finishAppLogicCode();
+		bool makeAppLogicCode();
+
 		bool setLmAppLANDataSize();
 		bool calculateCodeRunTime();
 
@@ -420,7 +422,7 @@ namespace Builder
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
-		CodeSnippet codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
+		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
 
 	private:
 		static const int ERR_VALUE = -1;

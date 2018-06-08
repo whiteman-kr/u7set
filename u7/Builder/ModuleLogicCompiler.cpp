@@ -145,7 +145,7 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, msg);
 
-		m_alpCode.setMemoryMap(&m_memoryMap, m_log);
+		m_code.setMemoryMap(&m_memoryMap, m_log);
 
 		ProcsToCallArray procs =
 		{
@@ -176,6 +176,8 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
 			PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
 			PROC_TO_CALL(ModuleLogicCompiler::finishAppLogicCode),
+
+			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
 
 			//
 
@@ -4742,7 +4744,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::startIdrPhaseCode()
 	{
-		Command cmd;
+		CodeItem cmd;
 
 		// first command in program!
 		//
@@ -4751,13 +4753,15 @@ namespace Builder
 
 		m_alpCode.append(cmd);
 		m_alpCode.newLine();
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::generateInitAfbsCode()
 	{
 		m_alpCode.init(&m_resourcesUsageInfo.initAfbs);
 
-		Command cmd;
+		CodeItem cmd;
 
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
@@ -4809,10 +4813,12 @@ namespace Builder
 
 		// set APPSTART command to current address
 		//
-		cmd.appStart(m_alpCode.commandAddress());
-		cmd.clearComment();
 
-		m_alpCode.replaceAt(0, cmd);
+		assert(false);			// needs refactoring, function replaceAt is obsolete !!!!
+
+		//cmd.appStart(m_alpCode.commandAddress());
+		//cmd.clearComment();
+		//m_alpCode.replaceAt(0, cmd);
 
 		m_alpCode.calculate(&m_resourcesUsageInfo.initAfbs);
 
@@ -4865,7 +4871,7 @@ namespace Builder
 
 			QString opName = paramValue.opName();
 
-			Command cmd;
+			CodeItem cmd;
 
 			if (paramValue.type() == E::SignalType::Discrete)
 			{
@@ -4954,7 +4960,7 @@ namespace Builder
 	{
 		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
-		Comment cmt;
+		CodeItem cmt;
 
 		for(const AppFbParamValue& paramValue : appFbParamValues)
 		{
@@ -4993,7 +4999,7 @@ namespace Builder
 		m_alpCode.comment(tr("Start of application logic code"));
 		m_alpCode.newLine();
 
-		Command cmd;
+		CodeItem cmd;
 
 		cmd.movBitConst(m_memoryMap.constBit0Addr(), 0);
 		cmd.setComment("init const bit 0");
@@ -5035,7 +5041,7 @@ namespace Builder
 		m_alpCode.comment("Convertion of analog input signals");
 		m_alpCode.newLine();
 
-		Command cmd;
+		CodeItem cmd;
 
 		for(UalSignal* ualSignal : analogInputSignals)
 		{
@@ -5286,7 +5292,7 @@ namespace Builder
 		QString afbCaption = ualAfb->caption();
 		QString signalCaption = inAfbSignal.caption();
 
-		Command cmd;
+		CodeItem cmd;
 
 		switch(inAfbSignal.type())
 		{
@@ -5425,7 +5431,7 @@ namespace Builder
 			return false;
 		}
 
-		Command cmd;
+		CodeItem cmd;
 
 		int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
 
@@ -5508,7 +5514,7 @@ namespace Builder
 
 		int addrFrom = inUalSignal->ualAddr().offset();
 
-		Command cmd;
+		CodeItem cmd;
 
 		int inputSize = inAfbSignal.size();
 
@@ -5543,7 +5549,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::startAfb(const UalAfb* ualAfb, int processingStep, int processingStepsNumber)
 	{
-		Command cmd;
+		CodeItem cmd;
 
 		cmd.start(ualAfb->opcode(), ualAfb->instance(), ualAfb->caption(), ualAfb->runTime());
 
@@ -5651,7 +5657,7 @@ namespace Builder
 		QString afbCaption = ualAfb->caption();
 		QString signalCaption = outAfbSignal.caption();
 
-		Command cmd;
+		CodeItem cmd;
 
 		switch(outAfbSignal.type())
 		{
@@ -5720,7 +5726,7 @@ namespace Builder
 
 		int addrTo = outUalSignal->ualAddr().offset();
 
-		Command cmd;
+		CodeItem cmd;
 
 		int outputSize = outAfbSignal.size();
 
@@ -6152,7 +6158,7 @@ namespace Builder
 		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
 		QString busChildSignalIDs = busChildSignal->refSignalIDsJoined();
 
-		Command cmd;
+		CodeItem cmd;
 
 		if (inputSignal->isConst() == true)
 		{
@@ -6206,7 +6212,7 @@ namespace Builder
 		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
 		QString busChildSignalIDs = busChildSignal->refSignalIDsJoined();
 
-		Command cmd;
+		CodeItem cmd;
 
 		if (inputSignal->isConst() == true)
 		{
@@ -6269,7 +6275,7 @@ namespace Builder
 		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
 		QString busChildSignalIDs = busChildSignal->refSignalIDsJoined();
 
-		Command cmd;
+		CodeItem cmd;
 
 		int busSizeW = busChildSignal->sizeW();
 
@@ -6795,7 +6801,7 @@ namespace Builder
 				return false;
 			}
 
-			Command cmd;
+			CodeItem cmd;
 
 			cmd.mov32(ualSignal->regBufAddr(), ualSignal->ualAddr());
 			cmd.setComment(QString("copy %1").arg(ualSignal->acquiredRefSignalsIDs().join(", ")));
@@ -6852,7 +6858,7 @@ namespace Builder
 				continue;
 			}
 
-			Command cmd;
+			CodeItem cmd;
 
 			cmd.mov32(ualSignal->regBufAddr(), ualSignal->ualAddr());
 			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
@@ -6874,7 +6880,7 @@ namespace Builder
 
 		m_alpCode.init(&m_resourcesUsageInfo.copyAcquiredTuningAnalogSignalsToRegBuf);
 
-		Comment cmnt;
+		CodeItem cmnt;
 
 		cmnt.setComment(QString(tr("Copy acquired tuningable analog signals to regBuf")));
 
@@ -6888,7 +6894,7 @@ namespace Builder
 		int prevRegBufAddr = -1;
 		int prevSignalSizeW = -1;
 
-		Command cmd;
+		CodeItem cmd;
 
 		QString commentStr;
 
@@ -7000,7 +7006,7 @@ namespace Builder
 
 		m_alpCode.init(&m_resourcesUsageInfo.copyAcquiredTuningDiscreteSignalsToRegBuf);
 
-		Comment cmnt;
+		CodeItem cmnt;
 
 		cmnt.setComment(QString(tr("Copy acquired tuningable discrete signals to regBuf")));
 
@@ -7013,7 +7019,7 @@ namespace Builder
 		int prevUalAddr = -1;
 		int prevRegBufAddr = -1;
 
-		Command cmd;
+		CodeItem cmd;
 
 		QString commentStr;
 
@@ -7183,7 +7189,7 @@ namespace Builder
 					constIntSignalsIDs.append(constIntSignal->acquiredRefSignalsIDs());
 				}
 
-				Command cmd;
+				CodeItem cmd;
 
 				cmd.movConstInt32(regBufAddr.offset(), intConst);
 				cmd.setComment(QString("int const %1: %2").arg(intConst).arg(constIntSignalsIDs.join(", ")));
@@ -7228,7 +7234,7 @@ namespace Builder
 					constFloatSignalsIDs.append(constFloatSignal->acquiredRefSignalsIDs());
 				}
 
-				Command cmd;
+				CodeItem cmd;
 
 				cmd.movConstFloat(regBufAddr.offset(), floatConst);
 				cmd.setComment(QString("float const %1: %2").arg(floatConst).arg(constFloatSignalsIDs.join(", ")));
@@ -7276,7 +7282,7 @@ namespace Builder
 			m_alpCode.comment("Copy acquired discrete output signals from bit-addressed memory to regBuf");
 			m_alpCode.newLine();
 
-			Command cmd;
+			CodeItem cmd;
 
 			cmd.movMem(m_memoryMap.acquiredDiscreteOutputSignalsAddressInRegBuf(),
 					   m_memoryMap.acquiredDiscreteOutputSignalsAddress(),
@@ -7294,7 +7300,7 @@ namespace Builder
 			m_alpCode.comment("Copy acquired discrete internal signals from bit-addressed memory to regBuf");
 			m_alpCode.newLine();
 
-			Command cmd;
+			CodeItem cmd;
 
 			cmd.movMem(m_memoryMap.acquiredDiscreteInternalSignalsAddressInRegBuf(),
 					   m_memoryMap.acquiredDiscreteInternalSignalsAddress(),
@@ -7341,14 +7347,14 @@ namespace Builder
 
 		assert(const0Signals.size() != 0 || const1Signals.size() != 0);		// why m_memoryMap.acquiredDiscreteConstSignalsInRegBufSizeW() !=0, but const signals is not found ???
 
-		m_alpCode.append(Comment("Copy acquired discrete const signals values:"));
+		m_alpCode.comment("Copy acquired discrete const signals values:");
 
-		m_alpCode.append(Comment(QString("const 0: %1").arg(const0Signals.join(", "))));
-		m_alpCode.append(Comment(QString("const 1: %1").arg(const1Signals.join(", "))));
+		m_alpCode.comment(QString("const 0: %1").arg(const0Signals.join(", ")));
+		m_alpCode.comment(QString("const 1: %1").arg(const1Signals.join(", ")));
 
 		m_alpCode.newLine();
 
-		Command cmd;
+		CodeItem cmd;
 		cmd.movConst(m_memoryMap.acquiredDiscreteConstSignalsAddressInRegBuf(), 2);
 		cmd.setComment("bit 0 == 0, bit 1 == 1");
 
@@ -7365,10 +7371,7 @@ namespace Builder
 			return true;
 		}
 
-		Comment comment;
-
-		comment.setComment(QString("Copy %1 in regBuf").arg(description));
-		m_alpCode.append(comment);
+		m_alpCode.comment(QString("Copy %1 in regBuf").arg(description));
 		m_alpCode.newLine();
 
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
@@ -7377,7 +7380,7 @@ namespace Builder
 
 		int count = 0;
 
-		Command cmd;
+		CodeItem cmd;
 
 		int countReminder16 = 0;
 
@@ -7486,7 +7489,7 @@ namespace Builder
 		m_alpCode.comment("Init LM's output signals memory");
 		m_alpCode.newLine();
 
-		Command cmd;
+		CodeItem cmd;
 
 		cmd.movConst(lmOutsMemoryOffset, 0);
 		m_alpCode.append(cmd);
@@ -7535,7 +7538,7 @@ namespace Builder
 		m_alpCode.comment("Convertion of output analog signals");
 		m_alpCode.newLine();
 
-		Command cmd;
+		CodeItem cmd;
 
 		for(Signal* s : m_analogOutputSignalsToConversion)
 		{
@@ -7731,7 +7734,7 @@ namespace Builder
 				sortedWriteSignals.insert(std::make_pair(s->ioBufAddr().bitAddress(), s));
 			}
 
-			Command cmd;
+			CodeItem cmd;
 
 			cmd.movConst(wordAccAddr, 0);
 			m_alpCode.append(cmd);
@@ -7795,7 +7798,7 @@ namespace Builder
 
 		if (lmOutputsIsWritten == false)
 		{
-			Command cmd;
+			CodeItem cmd;
 
 			cmd.movConst(lmOutputsAddress, 0);
 			cmd.setComment("write #0 to LM's outputs area");
@@ -7855,10 +7858,7 @@ namespace Builder
 
 				if (initialCommentPrinted == false)
 				{
-					Comment comment;
-
-					comment.setComment(QString(tr("Copying txData of opto-module %1")).arg(module->equipmentID()));
-					m_alpCode.append(comment);
+					m_alpCode.comment(QString(tr("Copying txData of opto-module %1")).arg(module->equipmentID()));
 					m_alpCode.newLine();
 
 					initialCommentPrinted = true;
@@ -7882,24 +7882,20 @@ namespace Builder
 			return false;
 		}
 
-		Comment comment;
-
 		if (port->txDataSizeW() == 0)
 		{
-			comment.setComment(QString(tr("No txData of opto-port %1")).arg(port->equipmentID()));
-			m_alpCode.append(comment);
+			m_alpCode.comment(QString(tr("No txData of opto-port %1")).arg(port->equipmentID()));
 			m_alpCode.newLine();
 			return true;
 		}
 
 		bool result = true;
 
-		Command cmd;
-
-		comment.setComment(QString(tr("Copying txData of opto-port %1 (%2 words)")).
-						   arg(port->equipmentID()).arg(port->txDataSizeW()));
-		m_alpCode.append(comment);
+		m_alpCode.comment(QString(tr("Copying txData of opto-port %1 (%2 words)")).
+						  arg(port->equipmentID()).arg(port->txDataSizeW()));
 		m_alpCode.newLine();
+
+		CodeItem cmd;
 
 		// write data port txData identifier
 		//
@@ -7951,15 +7947,10 @@ namespace Builder
 
 		bool result = true;
 
-		Comment comment;
-
-		comment.setComment(QString(tr("Copying raw data (%1 words) of opto-port %2")).arg(port->txRawDataSizeW()).arg(port->equipmentID()));
-		m_alpCode.append(comment);
+		m_alpCode.comment(QString(tr("Copying raw data (%1 words) of opto-port %2")).arg(port->txRawDataSizeW()).arg(port->equipmentID()));
 		m_alpCode.newLine();
 
 		int offset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
-
-		Command cmd;
 
 		int txRawDataStartAddr = port->txBufAbsAddress() + offset;
 		int txRawDataSizeW = port->txRawDataSizeW();
@@ -8093,17 +8084,13 @@ namespace Builder
 
 			if (first == true)
 			{
-				Comment comment;
-
-				comment.setComment(QString("Copying regular tx analog signals of opto-port %1").arg(port->equipmentID()));
-
-				m_alpCode.append(comment);
+				m_alpCode.comment(QString("Copying regular tx analog signals of opto-port %1").arg(port->equipmentID()));
 				m_alpCode.newLine();
 
 				first = false;
 			}
 
-			Command cmd;
+			CodeItem cmd;
 
 			SignalAddress16 txSignalAddress;
 
@@ -8206,17 +8193,13 @@ namespace Builder
 
 			if (first == true)
 			{
-				Comment comment;
-
-				comment.setComment(QString("Copying tx bus signals of opto-port %1").arg(port->equipmentID()));
-
-				m_alpCode.append(comment);
+				m_alpCode.comment(QString("Copying tx bus signals of opto-port %1").arg(port->equipmentID()));
 				m_alpCode.newLine();
 
 				first = false;
 			}
 
-			Command cmd;
+			CodeItem cmd;
 
 			SignalAddress16 txSignalAddress;
 
@@ -8276,7 +8259,7 @@ namespace Builder
 
 		bool result = true;
 
-		Command cmd;
+		CodeItem cmd;
 
 		int bitCount = 0;
 
@@ -8323,11 +8306,7 @@ namespace Builder
 
 			if (first == true)
 			{
-				Comment comment;
-
-				comment.setComment(QString("Copying regular tx discrete signals of opto-port %1").arg(port->equipmentID()));
-
-				m_alpCode.append(comment);
+				m_alpCode.comment(QString("Copying regular tx discrete signals of opto-port %1").arg(port->equipmentID()));
 				m_alpCode.newLine();
 
 				first = false;
@@ -8447,9 +8426,9 @@ namespace Builder
 
 		for(int i = 0; i < 16; i++)
 		{
-			const Command& cmd = copyCode[i];
+			const CodeItem& cmd = copyCode[i];
 
-			if (cmd.getOpcode() != LmCommandCode::MOVB)
+			if (cmd.getOpcode() != LmCommand::Code::MOVB)
 			{
 				return false;
 			}
@@ -8583,7 +8562,7 @@ namespace Builder
 
 		for(const ModuleRawDataDescription::Item& item : items)
 		{
-			Command cmd;
+			CodeItem cmd;
 
 			toAddr = port->txBufAbsAddress() + offset + localOffset;
 
@@ -8729,7 +8708,7 @@ namespace Builder
 			return true;
 		}
 
-		Command cmd;
+		CodeItem cmd;
 
 		int writeAddr = port->txBufAbsAddress() + offset;
 		int writeSizeW = portTxRawDataSizeW;
@@ -8757,7 +8736,7 @@ namespace Builder
 			return false;
 		}
 
-		Command cmd;
+		CodeItem cmd;
 
 		int writeAddr = port->txBufAbsAddress() + offset;
 		int writeSizeW = 1;
@@ -8790,7 +8769,7 @@ namespace Builder
 
 		bool result = true;
 
-		Command cmd;
+		CodeItem cmd;
 
 		int count = 0;
 
@@ -8915,7 +8894,7 @@ namespace Builder
 
 		bool result = true;
 
-		Command cmd;
+		CodeItem cmd;
 
 		for(int offset : offsets)
 		{
@@ -9012,7 +8991,7 @@ namespace Builder
 
 		bool result = true;
 
-		Command cmd;
+		CodeItem cmd;
 
 		int count = 0;
 
@@ -9125,11 +9104,20 @@ namespace Builder
 		m_alpCode.comment("End of application logic code");
 		m_alpCode.newLine();
 
-		Command cmd;
+		CodeItem cmd;
 
 		cmd.stop();
 
 		m_alpCode.append(cmd);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::makeAppLogicCode()
+	{
+		assert(false); // set start addr needed
+		m_code.append(m_idrCode);
+		m_code.append(m_alpCode);
 
 		return true;
 	}
@@ -9151,7 +9139,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateCodeRunTime()
 	{
-		bool result = m_alpCode.getRunTimes(m_idrPhaseClockCount, m_alpPhaseClockCount);
+		bool result = m_code.getRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
 
 		if (result == false)
 		{
@@ -9165,11 +9153,9 @@ namespace Builder
 	{
 		bool result = true;
 
-		m_alpCode.generateBinCode();
-
 		QByteArray binCode;
 
-		m_alpCode.getBinCode(binCode);
+		m_code.getBinCode(&binCode);
 
 		quint64 uniqueID = 0;
 
@@ -9192,7 +9178,7 @@ namespace Builder
 														   uniqueID,
 														   m_lmDescription->lmDescriptionFile(m_lm),
 														   m_lmDescription->descriptionNumber(),
-														   m_alpCode);
+														   m_code);
 			if (result == false)
 			{
 				return false;
@@ -9212,7 +9198,7 @@ namespace Builder
 
 		QStringList asmCode;
 
-		m_alpCode.getAsmCode(asmCode);
+		m_code.getAsmCode(&asmCode);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.asm").
 													   arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
@@ -9662,7 +9648,7 @@ namespace Builder
 	{
 		QString str;
 
-		double percentOfUsedCodeMemory = (m_alpCode.commandAddress() * 100.0) / m_lmCodeMemorySize;
+		double percentOfUsedCodeMemory = (m_code.commandAddress() * 100.0) / m_lmCodeMemorySize;
 
 		bool result = true;
 
@@ -10269,12 +10255,12 @@ namespace Builder
 		return Address16();
 	}
 
-	CodeSnippet ModuleLogicCompiler::codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment)
+	CodeItem ModuleLogicCompiler::codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment)
 	{
 		assert(addrFrom >=0 && addrFrom < static_cast<int>(m_lmDescription->memory().m_appMemorySize));
 		assert(addrFrom + sizeW < static_cast<int>(m_lmDescription->memory().m_appMemorySize));
 
-		Command cmd;
+		CodeItem cmd;
 
 		switch(sizeW)
 		{
@@ -10302,11 +10288,7 @@ namespace Builder
 			cmd.setComment(comment);
 		}
 
-		CodeSnippet code;
-
-		code.append(cmd);
-
-		return code;
+		return cmd;
 	}
 
 	// ---------------------------------------------------------------------------------------
