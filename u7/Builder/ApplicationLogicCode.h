@@ -386,7 +386,7 @@ namespace Builder
 
 		bool generateBinCode(QByteArray* binCode) const;
 
-		QString toString() const;
+		QString getAsmCode(bool printCmdCode) const;
 		QString mnemoCode() const;
 		QString getConstValueString() const;
 
@@ -429,7 +429,7 @@ namespace Builder
 
 		bool m_result = true;
 
-		static QHash<int, const LmCommand*> m_lmCommands;
+//		static QHash<int, const LmCommand*> m_lmCommands;
 		static QHash<quint16, int> m_executedFb;				// fbType => remaining FB exec time
 
 		static qint32 m_codeItemsNumerator;
@@ -458,9 +458,12 @@ namespace Builder
 
 		void comment(const QString& cmt);
 		void newLine();
+		void comment_nl(const QString& cmt);
 
 		void init(CodeSnippetMetrics* codeFragmentMetrics);
 		void calculate(CodeSnippetMetrics* codeFragmentMetrics);
+
+		int sizeW() const;
 	};
 
 	class ApplicationLogicCode : public QObject
@@ -475,6 +478,9 @@ namespace Builder
 
 		void append(const CodeItem& codeItem);
 		void append(const CodeSnippet& codeShippet);
+		void comment(const QString& str);
+		void newLine();
+
 		void clear();
 
 //		void generateBinCode();

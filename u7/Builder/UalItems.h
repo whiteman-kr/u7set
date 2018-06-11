@@ -277,7 +277,7 @@ namespace Builder
 		bool isComparator() const;
 		bool isBusPocessingElement() const;
 
-		QString instantiatorID();
+		QString instantiatorID() const;
 
 		void setInstance(quint16 instance) { m_instance = instance; }
 		void setNumber(int number) { m_number = number; }
@@ -343,7 +343,7 @@ namespace Builder
 	private:
 		quint16 m_instance = -1;
 		int m_number = -1;
-		QString m_instantiatorID;
+		mutable QString m_instantiatorID;
 
 		AppFbParamValuesArray m_paramValuesArray;
 

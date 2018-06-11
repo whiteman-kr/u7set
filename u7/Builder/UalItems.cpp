@@ -680,7 +680,7 @@ namespace Builder
 		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
 	}
 
-	QString UalAfb::instantiatorID()
+	QString UalAfb::instantiatorID() const
 	{
 		if (m_instantiatorID.isEmpty() == false)
 		{

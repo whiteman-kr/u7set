@@ -385,7 +385,7 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	QHash<int, const LmCommand*> CodeItem::m_lmCommands;
+//	QHash<int, const LmCommand*> CodeItem::m_lmCommands;
 	QHash<quint16, int> CodeItem::m_executedFb;
 
 	qint32 CodeItem::m_codeItemsNumerator = 0;
@@ -1183,30 +1183,50 @@ namespace Builder
 		return true;
 	}
 
-	QString CodeItem::toString() const
+	QString CodeItem::getAsmCode(bool printCmdCode) const
 	{
+		if (m_isCommand == false)
+		{
+			// this is a comment
+			//
+			if (m_comment.isEmpty() == true)
+			{
+				return QString();
+			}
+			else
+			{
+				return QString("\t-- %1").arg(m_comment);
+			}
+		}
+
 		QString cmdStr;
 
+		// print address of command
+		//
 		cmdStr.sprintf("%05X\t", m_address);
 
-		for(int w = 0; w < sizeW(); w++)
+		if (printCmdCode == true)
 		{
-			QString codeWordStr = getCodeWordStr(w);
+			// print command code
 
-			cmdStr += QString("%1 ").arg(codeWordStr);
+			for(int w = 0; w < sizeW(); w++)
+			{
+				QString codeWordStr = getCodeWordStr(w);
+
+				cmdStr += QString("%1 ").arg(codeWordStr);
+			}
+
+			int tabLen = 32 - (cmdStr.length() - 1 + 3);
+
+			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+
+			for(int i = 0; i < tabCount; i++)
+			{
+				cmdStr += "\t";
+			}
 		}
 
-		int tabLen = 32 - (cmdStr.length() - 1 + 3);
-
-		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
-
-		for(int i = 0; i < tabCount; i++)
-		{
-			cmdStr += "\t";
-		}
-
-		QString str;
-
+//		QString str;
 //		Execution times printing
 //		Commented while refactoring!!!
 //
@@ -1221,14 +1241,14 @@ namespace Builder
 
 		if (m_comment.isEmpty() == false)
 		{
-			tabLen = 80 - 32 - mnemo.length();
+			int tabLen = 72 - 32 - mnemo.length();
 
 			if (tabLen <= 0)
 			{
 				tabLen += 16;
 			}
 
-			tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 
 			for(int i = 0; i < tabCount; i++)
 			{
@@ -1437,21 +1457,15 @@ namespace Builder
 		*waitTime = 0;
 		*execTime = 0;
 
-		if (m_lmCommands.contains(m_code.getOpCodeInt()) == false)
+		if (lmCommands.contains(m_code.getOpCodeInt()) == false)
 		{
 			assert(false);			// unknown command code!
 			return false;
 		}
 
-		const LmCommand* lmCommand = m_lmCommands[m_code.getOpCodeInt()];
+		const LmCommand& lmCommand = lmCommands[m_code.getOpCodeInt()];
 
-		if (lmCommand == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		int cmdReadTime = lmCommand->readTime;
+		int cmdReadTime = lmCommand.readTime;
 
 		if (prevCmdExecTime > cmdReadTime)
 		{
@@ -1468,7 +1482,7 @@ namespace Builder
 
 		assert(*waitTime >= 0);
 
-		if (lmCommand->waitFbExecution == true)
+		if (lmCommand.waitFbExecution == true)
 		{
 			int fbType = m_code.getFbType();
 
@@ -1502,17 +1516,17 @@ namespace Builder
 		case LmCommand::Code::MOVCF:
 		case LmCommand::Code::PMOV32:
 		case LmCommand::Code::FILL:
-			assert(lmCommand->runTime != LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmCommand->runTime;
+			assert(lmCommand.runTime != LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmCommand.runTime;
 			break;
 
 			// specific commands START, NSTART
 			//
 		case LmCommand::Code::START:
 			{
-				assert(lmCommand->runTime != LmCommand::CALC_RUNTIME);
+				assert(lmCommand.runTime != LmCommand::CALC_RUNTIME);
 
-				cmdExecTime = lmCommand->runTime;
+				cmdExecTime = lmCommand.runTime;
 
 				startFbExec(m_code.getFbType(), m_fbExecTime);
 			}
@@ -1520,7 +1534,7 @@ namespace Builder
 
 		case LmCommand::Code::NSTART:
 			{
-				assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 
 				quint16 n = m_code.getWord3();
 
@@ -1533,13 +1547,13 @@ namespace Builder
 			// commands with calculated runtime
 			//
 		case LmCommand::Code::MOV:
-			assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
 			break;
 
 		case LmCommand::Code::MOVMEM:
 			{
-				assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 
 				quint16 n = m_code.getWord4();
 
@@ -1550,23 +1564,23 @@ namespace Builder
 			break;
 
 		case LmCommand::Code::MOVC:
-			assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
 			break;
 
 		case LmCommand::Code::MOVBC:
-			assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
 			break;
 
 		case LmCommand::Code::RDFBB:
-			assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
 			break;
 
 		case LmCommand::Code::SETMEM:
 			{
-				assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 
 				quint16 n = m_code.getWord4();
 
@@ -1577,12 +1591,12 @@ namespace Builder
 			break;
 
 		case LmCommand::Code::MOVB:
-			assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
 			break;
 
 		case LmCommand::Code::PMOV:
-			assert(lmCommand->runTime == LmCommand::CALC_RUNTIME);
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 8 : 53;
 			break;
 
@@ -1808,6 +1822,12 @@ namespace Builder
 		comment(QString());
 	}
 
+	void CodeSnippet::comment_nl(const QString& cmt)
+	{
+		comment(cmt);
+		newLine();
+	}
+
 	void CodeSnippet::init(CodeSnippetMetrics* codeFragmentMetrics)
 	{
 		if (codeFragmentMetrics == nullptr)
@@ -1828,6 +1848,18 @@ namespace Builder
 		}
 
 		//codeFragmentMetrics->setEndAddr(m_commandAddress);
+	}
+
+	int CodeSnippet::sizeW() const
+	{
+		int sizeW = 0;
+
+		for(const CodeItem& codeItem : *this)
+		{
+			sizeW += codeItem.sizeW();
+		}
+
+		return sizeW;
 	}
 
 	// -----------------------------------------------------------------------------------------------
@@ -1867,12 +1899,10 @@ namespace Builder
 
 	void ApplicationLogicCode::setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log)
 	{
-		if (lmMemory == nullptr ||
-			log == nullptr)
-		{
-			assert(false);
-			return;
-		}
+		TEST_PTR_RETURN(lmMemory);
+		TEST_PTR_RETURN(log);
+
+		m_lmMemoryMap = lmMemory;
 	}
 
 	void ApplicationLogicCode::clear()
@@ -1885,14 +1915,11 @@ namespace Builder
 	{
 		m_codeItems.append(codeItem);
 
-		if (codeItem.isCommand() == true)
-		{
-			int lastIndex = m_codeItems.size() - 1;
+		int lastIndex = m_codeItems.size() - 1;
 
-			m_codeItems[lastIndex].setAddress(m_commandAddress);
+		m_codeItems[lastIndex].setAddress(m_commandAddress);
 
-			m_commandAddress += m_codeItems[lastIndex].sizeW();
-		}
+		m_commandAddress += m_codeItems[lastIndex].sizeW();
 	}
 
 	void ApplicationLogicCode::append(const CodeSnippet& codeSnippet)
@@ -1901,6 +1928,22 @@ namespace Builder
 		{
 			append(codeItem);
 		}
+	}
+
+	void ApplicationLogicCode::comment(const QString& str)
+	{
+		CodeItem comment;
+
+		comment.setComment(str);
+
+		append(comment);
+	}
+
+	void ApplicationLogicCode::newLine()
+	{
+		CodeItem emptyComment;
+
+		append(emptyComment);
 	}
 
 /*	void ApplicationLogicCode::replaceAt(int commandIndex, const Command &cmd)
@@ -1996,7 +2039,7 @@ namespace Builder
 
 		for(const CodeItem& codeItem : m_codeItems)
 		{
-			QString str = codeItem.toString();
+			QString str = codeItem.getAsmCode(true);
 
 			asmCode->append(str);
 		}
