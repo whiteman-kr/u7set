@@ -4732,7 +4732,6 @@ namespace Builder
 		{
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::constBitsInitialization),
 		};
 
 		bool result = runCodeGenProcs(procs, &m_idrCode);
@@ -4746,6 +4745,7 @@ namespace Builder
 
 		CodeGenProcsToCallArray procs =
 		{
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::constBitsInitialization),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
