@@ -9075,6 +9075,16 @@ namespace Builder
 			}
 		}
 
+		if (theSettings.isExpertMode() == true)
+		{
+			BuildFile* binFile = m_resultWriter->addFile(DIR_BIN, QString("%1.bin").arg(m_lm->equipmentIdTemplate()), "", "", binCode);
+
+			if (binFile == nullptr)
+			{
+				return false;
+			}
+		}
+
 /*		QStringList mifCode;
 
 		m_code.getMifCode(mifCode);
