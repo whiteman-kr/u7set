@@ -168,12 +168,14 @@ message GetUnitsReply
 message AppDataServiceState
 {
     required bool CfgServiceIsConnected = 1 [default = false];
-    optional uint32 CfgServiceIp = 2;
-	optional int32 CfgServicePort = 3;
+    optional uint32 CfgServiceIp = 2 [default = 0];
+    optional int32 CfgServicePort = 3 [default = 0];
 
     required bool ArchiveServiceIsConnected = 4 [default = false];
-    optional uint32 ArchiveServiceIp = 5;
-	optional int32 ArchiveServicePort = 6;
+    optional uint32 ArchiveServiceIp = 5 [default = 0];
+    optional int32 ArchiveServicePort = 6 [default = 0];
+
+
 }
 
 

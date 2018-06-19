@@ -4233,7 +4233,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5096,
-				  QString(tr("Offset of in bus analog signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
+				  QString(tr("Offset of in-bus analog signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
 							arg(inBusSignalID).arg(busTypeID));
 	}
 
@@ -5268,9 +5268,36 @@ namespace Builder
 		addItemsIssues(OutputMessageLevel::Error, loopbackTargetItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
-				  51423,
+				  5143,
 				  QString(tr("LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2)")).
 								arg(loopbackID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5144
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)
+	///
+	/// Parameters:
+	///		%1 Signal 1 ID
+	///		%2 Signal 2 ID
+	///		%3 Loopback ID
+	///		%4 Logic schema ID
+	///
+	/// Description:
+	///		Non compatible signals are connected to same LoopbackTarget.
+	///
+	void IssueLogger::errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, s1Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, s2Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, lbGuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5144,
+				  QString(tr("Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)")).
+								arg(s1ID).arg(s2ID).arg(lbId).arg(schemaID));
 	}
 
 	//

@@ -1176,7 +1176,8 @@ namespace Builder
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
 											Signal* busSignal,
 											Builder::BusShared bus,
-											const QString& outPinCaption)
+											const QString& outPinCaption,
+											std::shared_ptr<Hardware::DeviceModule> lm)
 	{
 		// create parent Bus signal
 		//
@@ -1207,6 +1208,8 @@ namespace Builder
 			m_autoSignalPtr->setDataSizeW(bus->sizeW());
 
 			m_autoSignalPtr->setAcquire(false);
+
+			m_autoSignalPtr->setLm(lm);
 
 			busSignal = m_autoSignalPtr;
 		}
@@ -2242,13 +2245,14 @@ namespace Builder
 													Signal* s,
 													BusShared bus,
 													QUuid outPinUuid,
-													const QString& outPinCaption)
+													const QString& outPinCaption,
+													std::shared_ptr<Hardware::DeviceModule> lm)
 	{
 		// s can bee nullptr!!!
 		//
 		UalSignal* busParentSignal = new UalSignal;
 
-		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption);
+		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption, lm);
 
 		if (result == false)
 		{
@@ -2289,7 +2293,7 @@ namespace Builder
 						continue;
 					}
 
-					busChildSignal = createBusParentSignal(ualItem, sChild, childBus, QUuid(), busSignal.caption);
+					busChildSignal = createBusParentSignal(ualItem, sChild, childBus, QUuid(), busSignal.caption, lm);
 				}
 				break;
 

@@ -175,6 +175,7 @@ namespace Builder
 		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
 		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
+		bool createUalSignalsFromLoopbackTarget(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
@@ -184,11 +185,15 @@ namespace Builder
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 
+		bool getLinkedSignalItems(const LogicPin& outPin, QList<UalItem*>* connectedSignals);
+		bool checkSignalsCompatibility(const QList<UalItem*>& signalItems, bool* typesIsEqual);
+
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
 		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
+		bool isConnectedToLoopbackTarget(const LogicPin& inPin);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
@@ -300,6 +305,7 @@ namespace Builder
 		bool generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb);
 		bool displayAfbParams(CodeSnippet* code, const UalAfb& appFb);
 		bool generateLoopbacksRefreshingCode(CodeSnippet* code);
+		bool getRefreshingCode(CodeSnippet* code, const QString& loopbackID, const UalSignal* lbSignal);
 		bool constBitsInitialization(CodeSnippet*code);
 
 		bool copyAcquiredRawDataInRegBuf(CodeSnippet* code);
@@ -409,6 +415,10 @@ namespace Builder
 		bool getLMStrProperty(const QString& name, QString *value);
 
 		QString getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType);
+
+		std::shared_ptr<Hardware::DeviceObject> getDeviceSharedPtr(const Hardware::DeviceObject* device);
+		std::shared_ptr<Hardware::DeviceObject> getDeviceSharedPtr(const QString& deviceEquipmentID);
+		std::shared_ptr<Hardware::DeviceModule> getLmSharedPtr();
 
 		void dumpApplicationLogicItems();
 

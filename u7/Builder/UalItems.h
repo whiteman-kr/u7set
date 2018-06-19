@@ -405,7 +405,8 @@ namespace Builder
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
 									Builder::BusShared bus,
-									const QString& outPinCaption);
+									const QString& outPinCaption,
+									std::shared_ptr<Hardware::DeviceModule> lm);
 
 		friend class UalSignalsMap;
 
@@ -592,7 +593,7 @@ namespace Builder
 
 		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, bool isBusChildSignal, QUuid outPinUuid);
 
-		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption);
+		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption, std::shared_ptr<Hardware::DeviceModule> lm);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);

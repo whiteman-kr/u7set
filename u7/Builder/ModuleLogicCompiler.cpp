@@ -700,9 +700,13 @@ namespace Builder
 				res = linkUalSignalsFromBusExtractor(ualItem);
 				break;
 
+			case UalItem::Type::LoopbackTarget:
+				res = createUalSignalsFromLoopbackTarget(ualItem);
+				break;
+
 			case UalItem::Type::BusComposer:
 			case UalItem::Type::Receiver:
-				// already processed in previous loop
+				// already processed in previous loops
 				break;
 
 			// UAL items that doesn't generate signals
@@ -710,8 +714,6 @@ namespace Builder
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::Terminator:
 			case UalItem::Type::LoopbackSource:
-			case UalItem::Type::LoopbackTarget:
-				break;
 
 			// unknown item's type
 			//
@@ -783,11 +785,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalsFromBusComposer(UalItem* ualItem)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		const UalBusComposer* busComposer = ualItem->ualBusComposer();
 
@@ -827,7 +825,15 @@ namespace Builder
 
 		Signal* connectedBusSignal = getCompatibleConnectedBusSignal(outPin, busTypeID);
 
-		UalSignal* parentBusSignal = m_ualSignals.createBusParentSignal(ualItem, connectedBusSignal, bus, outPin.guid(), outPin.caption());
+		std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
+
+		if (lm == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		UalSignal* parentBusSignal = m_ualSignals.createBusParentSignal(ualItem, connectedBusSignal, bus, outPin.guid(), outPin.caption(), lm);
 
 		if (parentBusSignal == nullptr)
 		{
@@ -841,11 +847,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalFromSignal(UalItem* ualItem, int passNo)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		if (ualItem->isSignal() == false)
 		{
@@ -953,11 +955,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalFromConst(UalItem* ualItem)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		const UalConst* ualConst = ualItem->ualConst();
 
@@ -1052,11 +1050,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalsFromAfbOuts(UalItem* ualItem)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
 
@@ -1141,15 +1135,24 @@ namespace Builder
 				break;
 
 			case E::SignalType::Bus:
-
-				if ((s != nullptr && s->isBus() == false) || (bus == nullptr))
 				{
-					assert(false);
-					LOG_INTERNAL_ERROR(m_log);
-					return false;
-				}
+					if ((s != nullptr && s->isBus() == false) || (bus == nullptr))
+					{
+						assert(false);
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
 
-				ualSignal = m_ualSignals.createBusParentSignal(ualItem, s, bus, outPin.guid(), outAfbSignal.caption());
+					std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
+
+					if (lm == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					ualSignal = m_ualSignals.createBusParentSignal(ualItem, s, bus, outPin.guid(), outAfbSignal.caption(), lm);
+				}
 				break;
 
 			default:
@@ -1171,11 +1174,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalsFromReceiver(UalItem* ualItem)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		const UalReceiver* ualReceiver = ualItem->ualReceiver();
 
@@ -1295,11 +1294,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		UalSignal* ualSignal = m_ualSignals.get(appSignalID);
 
@@ -1338,11 +1333,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		Signal* s = m_equipmentSignals.value(validitySignalEquipmentID);
 
@@ -1382,11 +1373,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::linkUalSignalsFromBusExtractor(UalItem* ualItem)
 	{
-		if (ualItem == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		const UalBusExtractor* extractor = ualItem->ualBusExtractor();
 
@@ -1448,6 +1435,61 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::createUalSignalsFromLoopbackTarget(UalItem* ualItem)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		assert(ualItem->isLoopbackTarget() == true);
+
+		const UalLoopbackTarget* lbTarget = ualItem->ualLoopbackTarget();
+
+		TEST_PTR_LOG_RETURN_FALSE(lbTarget, m_log);
+
+		const std::vector<LogicPin>& outputs = lbTarget->outputs();
+
+		if (outputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);				// LoopbackTarget must have only one output pin
+			return false;
+		}
+
+		const LogicPin& outPin = outputs[0];
+
+		QList<UalItem*> connectedSignals;
+
+		bool result = getLinkedSignalItems(outPin, &connectedSignals);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		bool typesIsEqual = false;
+
+		result = checkSignalsCompatibility(connectedSignals, &typesIsEqual);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		UalSignal* ualSignal = m_ualSignals.createConstSignal(ualItem,
+															  constSignalType,
+															  constAnalogFormat,
+															  outPin.guid());
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		// link connected signals to newly created UalSignal
+		//
+		bool result = linkConnectedItems(ualItem, outPin, ualSignal);
+
+
 	}
 
 	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
@@ -1831,6 +1873,92 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::getLinkedSignalItems(const LogicPin& outPin, QList<UalItem*>* connectedSignals)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(connectedSignals, m_log);
+
+		const std::vector<QUuid>& associatedInPins = outPin.associatedIOs();
+
+		bool result = true;
+
+		for(QUuid inPin : associatedInPins)
+		{
+			UalItem* ualItem = m_pinParent.value(inPin, nullptr);
+
+			if (ualItem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				continue;
+			}
+
+			if (ualItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			connectedSignals->append(ualItem);
+
+			const std::vector<LogicPin>& outPins = ualItem->outputs();
+
+			for(const LogicPin& out : outPins)
+			{
+				result &= getLinkedSignalItems(out, connectedSignals);
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::checkSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(typesIsEqual, m_log);
+
+		*typesIsEqual = false;
+
+		Signal* firstSignal = nullptr;
+		UalItem* firstSignalItem = nullptr;
+		bool isFirstSignal = true;
+
+		for(const UalItem* item : signalItems)
+		{
+			TEST_PTR_LOG_RETURN_FALSE(item, m_log);
+
+			if (item->isSignal() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			Signal* s = m_signals->getSignal(item->strID());
+
+			if (s == nullptr)
+			{
+				// Signal identifier '%1' is not found (Logic schema '%2').
+				//
+				m_log->errALC5000(item->strID(), item->guid(), item->schemaID());
+				return false;
+			}
+
+			if (isFirstSignal == true)
+			{
+				firstSignal = s;
+				firstSignalItem = iteam;
+				isFirstSignal = false;
+			}
+			else
+			{
+				if (firstSignal->isCompatibleFormat(*s) == false)
+				{
+					// Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)
+					//
+				}
+			}
+
+		}
+
+		return true;
+	}
+
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
@@ -1928,6 +2056,29 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::isConnectedToLoopbackTarget(const LogicPin& inPin)
+	{
+		const std::vector<QUuid>& connectedPinsUuids = inPin.associatedIOs();
+
+		for(QUuid outPinUuid : connectedPinsUuids)
+		{
+			UalItem* connectedItem = m_pinParent.value(outPinUuid, nullptr);
+
+			if (connectedItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (connectedItem->isLoopbackTarget() == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	bool ModuleLogicCompiler::determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID)
 	{
 		if (ualAfb == nullptr || outBusTypeID == nullptr)
@@ -1959,6 +2110,11 @@ namespace Builder
 			}
 
 			busInputsCount++;
+
+			if (isConnectedToLoopbackTarget(inPin) == true)
+			{
+				continue;			// can't determine loopbackTarget type now, skip input checking
+			}
 
 			// inPin is bus
 
@@ -5029,7 +5185,134 @@ namespace Builder
 			return true;
 		}
 
+		bool result = true;
+
 		code->comment_nl("Loopback signals refreshing code");
+
+		// refresh analog signals
+		//
+
+		QStringList loopbackIDs = m_usedLoopbacks.keys();
+
+		loopbackIDs.sort();
+
+		CodeSnippet analogsRefreshCode;
+		CodeSnippet bussesRefreshCode;
+
+		for(const QString& loopbackID : loopbackIDs)
+		{
+			UalSignal* lbSignal = m_loopbacks.value(loopbackID, nullptr);
+
+			if (lbSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (lbSignal->ualAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			switch(lbSignal->signalType())
+			{
+			case E::Analog:
+				getRefreshingCode(&analogsRefreshCode, loopbackID, lbSignal);
+				break;
+
+			case E::Discrete:
+				if (m_memoryMap.addressInBitMemory(lbSignal->ualAddr().offset()) == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;					// why discrete in not bit-addressed memory
+				}
+				break;
+
+			case E::Bus:
+				getRefreshingCode(&bussesRefreshCode, loopbackID, lbSignal);
+				break;
+			default:
+				assert(false);
+			}
+		}
+
+		if (analogsRefreshCode.isEmpty() == false)
+		{
+			code->append(analogsRefreshCode);
+			code->newLine();
+		}
+
+		if (bussesRefreshCode.isEmpty() == false)
+		{
+			code->append(bussesRefreshCode);
+			code->newLine();
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::getRefreshingCode(CodeSnippet* code, const QString& loopbackID, const UalSignal* lbSignal)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(lbSignal, m_log);
+
+		int offset = lbSignal->ualAddr().offset();
+		int sizeW = 0;
+
+		switch(lbSignal->signalType())
+		{
+		case E::Analog:
+			assert((lbSignal->dataSize() % WORD_SIZE) == 0);
+
+			sizeW = lbSignal->dataSize() / WORD_SIZE;
+			break;
+
+		case E::Bus:
+			sizeW = lbSignal->bus()->sizeW();
+			break;
+
+		case E::Discrete:
+		default:
+			assert(false);
+			return false;
+		}
+
+		bool firstCommand = true;
+
+		for(int w = 0; w < sizeW / 2; w++ )
+		{
+			CodeItem cmd;
+
+			cmd.prevMov32(offset, offset);
+
+			if (firstCommand == true)
+			{
+				cmd.setComment(QString("loopback %1 (signal %2)").arg(loopbackID).arg(lbSignal->signal()->appSignalID()));
+				firstCommand = false;
+			}
+
+			code->append(cmd);
+
+			offset += 2;
+		}
+
+		if ((sizeW % 2) != 0)
+		{
+			CodeItem cmd;
+
+			cmd.prevMov(offset, offset);
+
+			if (firstCommand == true)
+			{
+				cmd.setComment(QString("loopback %1 (signal %2)").arg(loopbackID).arg(lbSignal->signal()->appSignalID()));
+				firstCommand = false;
+			}
+
+			code->append(cmd);
+		}
 
 		return true;
 	}
@@ -10037,6 +10320,25 @@ namespace Builder
 		assert(typeStr != "???");
 
 		return typeStr;
+	}
+
+	std::shared_ptr<Hardware::DeviceObject> ModuleLogicCompiler::getDeviceSharedPtr(const Hardware::DeviceObject* device)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(device, m_log);
+
+		return getDeviceSharedPtr(device->equipmentIdTemplate());
+	}
+
+	std::shared_ptr<Hardware::DeviceObject> ModuleLogicCompiler::getDeviceSharedPtr(const QString& deviceEquipmentID)
+	{
+		return m_equipmentSet->deviceObjectSharedPointer(deviceEquipmentID);
+	}
+
+	std::shared_ptr<Hardware::DeviceModule> ModuleLogicCompiler::getLmSharedPtr()
+	{
+		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
+
+		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(m_lm->equipmentIdTemplate()));
 	}
 
 	void ModuleLogicCompiler::dumpApplicationLogicItems()

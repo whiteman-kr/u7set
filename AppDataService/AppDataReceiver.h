@@ -49,6 +49,7 @@ private:
 	bool m_socketBound = false;
 
 	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
+	qint64 m_unknownAppDataSourcesCount = 0;
 
 	int m_receivedFramesCount = 0;
 

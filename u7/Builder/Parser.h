@@ -186,6 +186,9 @@ namespace Builder
 		QString m_lmDescriptionFile;					// LogicModule description filename
 		std::list<AppLogicItem> m_items;				// Ordered items
 		std::map<QUuid, AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
+
+		//
+		QHash<QString, bool> m_signaledItems;
 	};
 
 

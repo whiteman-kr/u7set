@@ -1384,7 +1384,11 @@ namespace Builder
 
 					if (switchCounter >= 10)
 					{
-						log->errALP4060(currentItem.m_schema->schemaId(), currentItem.m_fblItem->buildName(), currentItem.m_fblItem->guid());
+						if (m_signaledItems.contains(currentItem.m_fblItem->label()) == false)
+						{
+							m_signaledItems.insert(currentItem.m_fblItem->label(), true);
+							log->errALP4060(currentItem.m_schema->schemaId(), currentItem.m_fblItem->buildName(), currentItem.m_fblItem->guid());
+						}
 						continue;
 					}
 
