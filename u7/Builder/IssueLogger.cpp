@@ -5300,6 +5300,50 @@ namespace Builder
 								arg(s1ID).arg(s2ID).arg(lbId).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5145
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Input signal %1 is connected to LoopbackTarget (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Input signal cannot be connected to loopback target.
+	///
+	void IssueLogger::errALC5145(QString signalID, QUuid signalGuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5145,
+				  QString(tr("Input signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5146
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Input signal cannot be connected to loopback target.
+	///
+	void IssueLogger::errALC5146(QString signalID, QUuid signalGuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5146,
+				  QString(tr("Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

@@ -186,7 +186,7 @@ namespace Builder
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 
 		bool getLinkedSignalItems(const LogicPin& outPin, QList<UalItem*>* connectedSignals);
-		bool checkSignalsCompatibility(const QList<UalItem*>& signalItems, bool* typesIsEqual);
+		bool checkLoopbackTargetSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems);
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
@@ -403,8 +403,8 @@ namespace Builder
 		bool getAfblUsageInfo();
 		void cleanup();
 
-		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
-		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal);
+		bool checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
+		bool checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal);
 
 		bool isUsedInUal(const Signal* s) const;
 		bool isUsedInUal(const QString& appSignalID) const;

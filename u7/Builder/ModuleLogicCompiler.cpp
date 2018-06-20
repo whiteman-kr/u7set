@@ -714,6 +714,7 @@ namespace Builder
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::Terminator:
 			case UalItem::Type::LoopbackSource:
+				break;
 
 			// unknown item's type
 			//
@@ -1439,6 +1440,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalSignalsFromLoopbackTarget(UalItem* ualItem)
 	{
+		// Signal from loopback target is create only if SignalItem is connectet to LoopbackTarget item
+		// Otherwise loopback signals are created from LoopbackSources
+		//
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
 		assert(ualItem->isLoopbackTarget() == true);
@@ -1466,30 +1470,44 @@ namespace Builder
 			return false;
 		}
 
-		bool typesIsEqual = false;
+		if (connectedSignals.isEmpty() == true)
+		{
+			// it is Ok, has no SignalItems connected to LoopbackTarget item, nothing to create
+			// loopback signal will be create later from LoopbackSource item
+			//
+			return true;
+		}
 
-		result = checkSignalsCompatibility(connectedSignals, &typesIsEqual);
+		result = checkLoopbackTargetSignalsCompatibility(lbTarget, connectedSignals);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		UalSignal* ualSignal = m_ualSignals.createConstSignal(ualItem,
-															  constSignalType,
-															  constAnalogFormat,
-															  outPin.guid());
-		if (ualSignal == nullptr)
+		// loopback signal creation
+		//
+		UalItem* connectedSignalItem = connectedSignals.first();
+
+		TEST_PTR_LOG_RETURN_FALSE(connectedSignalItem, m_log);
+
+		Signal* connectedSignal = m_signals->getSignal(connectedSignalItem->strID());
+
+		TEST_PTR_LOG_RETURN_FALSE(connectedSignal, m_log);
+
+		UalSignal* loopbackSignal = m_ualSignals.createSignal(ualItem, connectedSignal, outPin.guid());
+
+		if (loopbackSignal == nullptr)
 		{
-			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		// link connected signals to newly created UalSignal
+		// link connected signals to newly created loopback signal
 		//
-		bool result = linkConnectedItems(ualItem, outPin, ualSignal);
+		result = linkConnectedItems(ualItem, outPin, loopbackSignal);
 
-
+		return result;
 	}
 
 	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
@@ -1909,14 +1927,10 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::checkSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems)
+	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems)
 	{
-		TEST_PTR_LOG_RETURN_FALSE(typesIsEqual, m_log);
-
-		*typesIsEqual = false;
-
 		Signal* firstSignal = nullptr;
-		UalItem* firstSignalItem = nullptr;
+		const UalItem* firstSignalItem = nullptr;
 		bool isFirstSignal = true;
 
 		for(const UalItem* item : signalItems)
@@ -1939,10 +1953,26 @@ namespace Builder
 				return false;
 			}
 
+			if (s->isInput() == true)
+			{
+				// Input signal %1 is connected to LoopbackTarget (Logic schema %2).
+				//
+				m_log->errALC5145(s->appSignalID(), item->guid(), item->schemaID());
+				return false;
+			}
+
+			if (s->enableTuning() == true)
+			{
+				// Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
+				//
+				m_log->errALC5146(s->appSignalID(), item->guid(), item->schemaID());
+				return false;
+			}
+
 			if (isFirstSignal == true)
 			{
 				firstSignal = s;
-				firstSignalItem = iteam;
+				firstSignalItem = item;
 				isFirstSignal = false;
 			}
 			else
@@ -1951,6 +1981,11 @@ namespace Builder
 				{
 					// Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)
 					//
+					m_log->errALC5144(firstSignal->appSignalID(), firstSignalItem->guid(),
+									  s->appSignalID(), item->guid(),
+									  lbTarget->loopbackId(), lbTarget->guid(),
+									  firstSignalItem->schemaID());
+					return false;
 				}
 			}
 
@@ -10184,7 +10219,7 @@ namespace Builder
 		m_scalAppItems.clear();
 	}
 
-	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid)
+	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid)
 	{
 		if (srcSignal.isDiscrete())
 		{
@@ -10237,7 +10272,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal)
+	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal)
 	{
 		if (srcSignal.isDiscrete())
 		{
