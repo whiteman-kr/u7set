@@ -1,4 +1,5 @@
 #include "FblItemRect.h"
+#include <QPainter>
 #include "SchemaLayer.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
@@ -317,6 +318,8 @@ namespace VFrame30
 
 		FontParam smallFont = m_font;
 		smallFont.setDrawSize(m_font.drawSize() * 0.75);
+		smallFont.setBold(false);
+		smallFont.setItalic(false);
 
 		if (inputsCount() > 0)
 		{

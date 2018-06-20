@@ -859,7 +859,8 @@ namespace Builder
 
 			// Set new guids to in/outs
 			//
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())
+			auto& aliInputs = ali.m_fblItem->inputs();
+			for (VFrame30::AfbPin& pin : aliInputs)
 			{
 				QUuid newPinGuid = QUuid::createUuid();
 				oldToNewPins[pin.guid()] = newPinGuid;
@@ -867,7 +868,8 @@ namespace Builder
 				pin.setGuid(newPinGuid);
 			}
 
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())
+			auto& aliOutputs = ali.m_fblItem->outputs();
+			for (VFrame30::AfbPin& pin : aliOutputs)
 			{
 				QUuid newPinGuid = QUuid::createUuid();
 				oldToNewPins[pin.guid()] = newPinGuid;
@@ -882,9 +884,11 @@ namespace Builder
 		{
 			assert(ali.m_fblItem);
 
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())
+			auto& aliInputs = ali.m_fblItem->inputs();
+			for (VFrame30::AfbPin& pin : aliInputs)
 			{
-				for (QUuid& assocIO : pin.associatedIOs())
+				std::vector<QUuid>& pinAssocIOs = pin.associatedIOs();
+				for (QUuid& assocIO : pinAssocIOs)
 				{
 					auto newGuidIt = oldToNewPins.find(assocIO);
 
@@ -898,9 +902,11 @@ namespace Builder
 				}
 			}
 
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())
+			auto& aliOutputs = ali.m_fblItem->outputs();
+			for (VFrame30::AfbPin& pin : aliOutputs)
 			{
-				for (QUuid& assocIO : pin.associatedIOs())
+				std::vector<QUuid>& pinAssocIOs = pin.associatedIOs();
+				for (QUuid& assocIO : pinAssocIOs)
 				{
 					auto newGuidIt = oldToNewPins.find(assocIO);
 
@@ -3511,7 +3517,8 @@ namespace Builder
 				item->isType<VFrame30::SchemaItemOutput>() == true ||
 				item->isType<VFrame30::SchemaItemConst>() == true ||
 				item->isType<VFrame30::SchemaItemTerminator>() == true ||
-				item->isType<VFrame30::SchemaItemAfb>() == true)
+				item->isType<VFrame30::SchemaItemAfb>() == true ||
+				item->isType<VFrame30::SchemaItemBus>() == true)
 			{
 				// All theses items are allowed to be used on UFB schema
 				//
