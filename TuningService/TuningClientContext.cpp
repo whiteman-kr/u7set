@@ -22,16 +22,14 @@ namespace Tuning
 		source->getInfo(&m_sourceInfo);
 	}
 
-
 	void TuningSourceContext::getSourceInfo(Network::DataSourceInfo& si) const
 	{
 		si = m_sourceInfo;
 	}
 
-
 	void TuningSourceContext::getSourceState(Network::TuningSourceState& tss) const
 	{
-		if (m_sourceWorker == nullptr)
+		if (m_sourceHandler == nullptr)
 		{
 			tss.set_sourceid(m_sourceInfo.id());
 			tss.set_isreply(false);
@@ -40,57 +38,56 @@ namespace Tuning
 		}
 		else
 		{
-			m_sourceWorker->getState(tss);
+			m_sourceHandler->getState(tss);
 		}
 	}
 
-
-	void TuningSourceContext::setSourceWorker(TuningSourceWorker* worker)
+	void TuningSourceContext::setSourceHandler(TuningSourceHandler* handler)
 	{
-		TEST_PTR_RETURN(worker);
+		TEST_PTR_RETURN(handler);
 
-		if (worker->sourceEquipmentID() != m_sourceID)
+		if (handler->sourceEquipmentID() != m_sourceID)
 		{
 			assert(false);
 			return;
 		}
 
-		assert(m_sourceWorker == nullptr);
+		assert(m_sourceHandler == nullptr);
 
-		m_sourceWorker = worker;
+		m_sourceHandler = handler;
 	}
 
-	void TuningSourceContext::removeSourceWorker(TuningSourceWorker* worker)
+	void TuningSourceContext::removeSourceHandler(TuningSourceHandler* handler)
 	{
-		TEST_PTR_RETURN(worker);
+		TEST_PTR_RETURN(handler);
 
-		if (worker->sourceEquipmentID() != m_sourceID)
+		if (handler->sourceEquipmentID() != m_sourceID)
 		{
 			assert(false);
 			return;
 		}
 
-		if (m_sourceWorker != worker)
+		if (m_sourceHandler != handler)
 		{
 			assert(false);
 			return;
 		}
 
-		m_sourceWorker = nullptr;
+		m_sourceHandler = nullptr;
 	}
 
 	void TuningSourceContext::readSignalState(Network::TuningSignalState* tss)
 	{
 		TEST_PTR_RETURN(tss);
 
-		if (m_sourceWorker == nullptr)
+		if (m_sourceHandler == nullptr)
 		{
 			tss->set_valid(false);
 			tss->set_error(TO_INT(NetworkError::LmControlIsNotActive));
 			return;
 		}
 
-		m_sourceWorker->readSignalState(tss);
+		m_sourceHandler->readSignalState(tss);
 	}
 
 
@@ -99,24 +96,24 @@ namespace Tuning
 														Hash signalHash,
 														const TuningValue& newValue)
 	{
-		if (m_sourceWorker == nullptr)
+		if (m_sourceHandler == nullptr)
 		{
 			return NetworkError::LmControlIsNotActive;
 		}
 
-		return m_sourceWorker->writeSignalState(clientEquipmentID, user, signalHash, newValue);
+		return m_sourceHandler->writeSignalState(clientEquipmentID, user, signalHash, newValue);
 	}
 
 
 	NetworkError TuningSourceContext::applySignalStates(const QString& clientEquipmentID,
 														const QString& user)
 	{
-		if (m_sourceWorker == nullptr)
+		if (m_sourceHandler == nullptr)
 		{
 			return NetworkError::LmControlIsNotActive;
 		}
 
-		return m_sourceWorker->applySignalStates(clientEquipmentID, user);
+		return m_sourceHandler->applySignalStates(clientEquipmentID, user);
 	}
 
 
@@ -360,32 +357,32 @@ namespace Tuning
 	}
 
 
-	void TuningClientContext::setSourceWorker(TuningSourceWorker* worker)
+	void TuningClientContext::setSourceHandler(TuningSourceHandler* handler)
 	{
-		TEST_PTR_RETURN(worker);
+		TEST_PTR_RETURN(handler);
 
-		TuningSourceContext* sourceContext = getSourceContext(worker->sourceEquipmentID());
+		TuningSourceContext* sourceContext = getSourceContext(handler->sourceEquipmentID());
 
 		if (sourceContext == nullptr)
 		{
 			return;			// its OK
 		}
 
-		sourceContext->setSourceWorker(worker);
+		sourceContext->setSourceHandler(handler);
 	}
 
-	void TuningClientContext::removeSourceWorker(TuningSourceWorker* worker)
+	void TuningClientContext::removeSourceHandler(TuningSourceHandler* handler)
 	{
-		TEST_PTR_RETURN(worker);
+		TEST_PTR_RETURN(handler);
 
-		TuningSourceContext* sourceContext = getSourceContext(worker->sourceEquipmentID());
+		TuningSourceContext* sourceContext = getSourceContext(handler->sourceEquipmentID());
 
 		if (sourceContext == nullptr)
 		{
 			return;			// its OK
 		}
 
-		sourceContext->removeSourceWorker(worker);
+		sourceContext->removeSourceHandler(handler);
 	}
 
 	TuningSourceContext* TuningClientContext::getSourceContext(const QString& sourceID) const

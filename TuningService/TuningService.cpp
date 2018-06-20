@@ -75,16 +75,18 @@ namespace Tuning
 		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
 	}
 
-	const TuningSourceWorker* TuningServiceWorker::getSourceWorker(quint32 sourceIP) const
+	const TuningSourceHandler* TuningServiceWorker::getSourceHandler(quint32 sourceIP) const
 	{
-		TuningSourceWorkerThread* thread = m_sourceWorkerThreadMap.value(sourceIP);
+		TuningSourceThread* thread = m_sourceThreadMap.value(sourceIP, nullptr);
+
 		if (thread == nullptr)
 		{
-			DEBUG_LOG_MSG(m_logger, QString(tr("IP: %1, source quantity: %2").arg(QHostAddress(sourceIP).toString()).arg(m_sourceWorkerThreadMap.size())));
+			DEBUG_LOG_MSG(m_logger, QString(tr("IP: %1, source quantity: %2").arg(QHostAddress(sourceIP).toString()).arg(m_sourceThreadMap.size())));
 			assert(false);
 			return nullptr;
 		}
-		return thread->worker();
+
+		return thread->handler();
 	}
 
 	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
@@ -125,7 +127,7 @@ namespace Tuning
 
 		stopSourcesListenerThread();
 
-		stopTuningSourceWorkers();
+		stopTuningSourceThreads();
 
 		if (activateControl == false)
 		{
@@ -134,7 +136,7 @@ namespace Tuning
 			return NetworkError::Success;
 		}
 
-		bool result = runTuningSourceWorker(tuningSourceEquipmentID);
+		bool result = runTuningSourceThread(tuningSourceEquipmentID);
 
 		if (result == false)
 		{
@@ -297,7 +299,7 @@ namespace Tuning
 		m_mainMutex.lock();
 
 		stopSourcesListenerThread();
-		stopTuningSourceWorkers();
+		stopTuningSourceThreads();
 		clearServiceMaps();
 
 		m_mainMutex.unlock();
@@ -433,16 +435,16 @@ namespace Tuning
 		{
 			// running all TuningSourceWorkers at once if SingleLmControl is disabled
 			//
-			runTuningSourceWorker("");
+			runTuningSourceThread("");
 		}
 	}
 
-	bool TuningServiceWorker::runTuningSourceWorker(const QString& tuningSourceEquipmentID)
+	bool TuningServiceWorker::runTuningSourceThread(const QString& tuningSourceEquipmentID)
 	{
 		// if tuningSourceEquipmentID empty - run all sources workers
 		// else - run specific source worker
 		//
-		assert(m_sourceWorkerThreadMap.size() == 0);
+		assert(m_sourceThreadMap.size() == 0);
 
 		bool result = false;
 
@@ -455,57 +457,57 @@ namespace Tuning
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 			//
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, tuningSource, m_logger, m_tuningLog);
+			TuningSourceThread* sourceThread = new TuningSourceThread(m_cfgSettings, tuningSource, m_logger, m_tuningLog);
 
-			if (sourceWorkerThread == nullptr)
+			if (sourceThread == nullptr)
 			{
 				assert(false);
 				continue;
 			}
 
-			quint32 addr = sourceWorkerThread->sourceIP();
+			quint32 addr = sourceThread->sourceIP();
 
-			m_sourceWorkerThreadMap.insert(addr, sourceWorkerThread);
+			m_sourceThreadMap.insert(addr, sourceThread);
 
-			setWorkerInTuningClientContext(sourceWorkerThread->worker());
+			setHandlerInTuningClientContext(sourceThread->handler());
 
 			result = true;
 		}
 
-		// run TuningSourceWorkerThreads
+		// run event-based TuningSourceWorkerThreads
 		//
-		for(TuningSourceWorkerThread* sourceWorkerThread : m_sourceWorkerThreadMap)
+		for(TuningSourceThread* sourceThread : m_sourceThreadMap)
 		{
-			sourceWorkerThread->start();
+			sourceThread->start();
 		}
 
 		return result;
 	}
 
-	void TuningServiceWorker::stopTuningSourceWorkers()
+	void TuningServiceWorker::stopTuningSourceThreads()
 	{
-		// stop and delete TuningSourceWorkerThreads
+		// stop and delete TuningSourcThreads
 		//
-		for(TuningSourceWorkerThread* sourceWorkerThread : m_sourceWorkerThreadMap)
+		for(TuningSourceThread* sourceThread : m_sourceThreadMap)
 		{
-			if (sourceWorkerThread == nullptr)
+			if (sourceThread == nullptr)
 			{
 				assert(false);
 				continue;
 			}
 
-			removeWorkerFromTuningClientContext(sourceWorkerThread->worker());
+			removeHandlerFromTuningClientContext(sourceThread->handler());
 
-			sourceWorkerThread->quitAndWait();
-			delete sourceWorkerThread;
+			sourceThread->quitAndWait();
+			delete sourceThread;
 		}
 
-		m_sourceWorkerThreadMap.clear();
+		m_sourceThreadMap.clear();
 	}
 
 	void TuningServiceWorker::runSourcesListenerThread()
 	{
-		if (m_sourceWorkerThreadMap.size() == 0)
+		if (m_sourceThreadMap.size() == 0)
 		{
 			DEBUG_LOG_MSG(m_logger, QString("Tuning sources workers is not running. Listener thread is not run also."));
 			return;
@@ -515,7 +517,7 @@ namespace Tuning
 		//
 		assert(m_socketListenerThread == nullptr);
 
-		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP, m_sourceWorkerThreadMap, m_logger);
+		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP, m_sourceThreadMap, m_logger);
 		m_socketListenerThread->start();
 	}
 
@@ -531,9 +533,9 @@ namespace Tuning
 		}
 	}
 
-	void TuningServiceWorker::setWorkerInTuningClientContext(TuningSourceWorker* worker)
+	void TuningServiceWorker::setHandlerInTuningClientContext(TuningSourceHandler* handler)
 	{
-		TEST_PTR_RETURN(worker);
+		TEST_PTR_RETURN(handler);
 
 		for(TuningClientContext* clientContext : m_clientContextMap)
 		{
@@ -543,13 +545,13 @@ namespace Tuning
 				continue;
 			}
 
-			clientContext->setSourceWorker(worker);
+			clientContext->setSourceHandler(handler);
 		}
 	}
 
-	void TuningServiceWorker::removeWorkerFromTuningClientContext(TuningSourceWorker* worker)
+	void TuningServiceWorker::removeHandlerFromTuningClientContext(TuningSourceHandler* handler)
 	{
-		TEST_PTR_RETURN(worker);
+		TEST_PTR_RETURN(handler);
 
 		for(TuningClientContext* clientContext : m_clientContextMap)
 		{
@@ -559,7 +561,7 @@ namespace Tuning
 				continue;
 			}
 
-			clientContext->removeSourceWorker(worker);
+			clientContext->removeSourceHandler(handler);
 		}
 	}
 

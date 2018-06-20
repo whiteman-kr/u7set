@@ -80,14 +80,12 @@ namespace Tuning
 
 	// ----------------------------------------------------------------------------------
 	//
-	// TuningSourceWorker class declaration
+	// TuningSourceHandler class declaration
 	//
 	// ----------------------------------------------------------------------------------
 
-	class TuningSourceWorker : public SimpleThreadWorker
+	class TuningSourceHandler
 	{
-		Q_OBJECT
-
 	private:
 
 		struct TuningCommand
@@ -207,14 +205,17 @@ namespace Tuning
 		};
 
 	public:
-		TuningSourceWorker(const TuningServiceSettings& settings,
+		TuningSourceHandler(const TuningServiceSettings& settings,
 						   const TuningSource& source,
 						   CircularLoggerShared logger,
-						   CircularLoggerShared tuningLog);
-		~TuningSourceWorker();
+						   CircularLoggerShared tuningLog,
+							QObject* parent);
+		~TuningSourceHandler();
 
 		quint32 sourceIP() const;
 		QString sourceEquipmentID() const;
+
+		TuningSourceHandler* handler() { return this; }
 
 		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
@@ -230,14 +231,18 @@ namespace Tuning
 
 		NetworkError applySignalStates(	const QString& clientEquipmentID,
 										const QString& user);
+	protected:
+		void initHandler();
+		void shutdownHandler();
 
-	signals:
-		void replyReady();
+		Queue<Rup::Frame>& replyQueue() { return m_replyQueue; }
+
+		virtual void restartTimer() {}
+
+		void periodicProcessing();
+		bool processReplyQueue();
 
 	private:
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
-
 		void initTuningSignals(const TuningData* td);
 
 		bool processWaitReply();
@@ -263,16 +268,10 @@ namespace Tuning
 		bool checkRupHeader(const Rup::Header& rupHeader);
 		bool checkFotipHeader(const FotipV2::Header& fotipHeader);
 
-		void restartTimer();
-
 		void invalidateAllSignals();
 
 		void logTuningRequest(const TuningCommand& cmd);
 		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply);
-
-	private slots:
-		void onTimer();
-		void onReplyReady();
 
 	private:
 		CircularLoggerShared m_logger;
@@ -314,9 +313,6 @@ namespace Tuning
 
 		int m_nextFrameToAutoRead = 0;
 
-		int m_timerInterval = 10;
-		QTimer m_timer;
-
 		QUdpSocket m_socket;
 
 		RupFotipV2 m_request;
@@ -350,6 +346,54 @@ namespace Tuning
 
 	// ----------------------------------------------------------------------------------
 	//
+	// TuningSourceThread class declaration (QThread::run override)
+	//
+	// ----------------------------------------------------------------------------------
+
+	class TuningSourceRunOverrideThread : public RunOverrideThread, public TuningSourceHandler
+	{
+	public:
+		TuningSourceRunOverrideThread(	const TuningServiceSettings& settings,
+										const TuningSource& source,
+										CircularLoggerShared logger,
+										CircularLoggerShared tuningLog);
+	private:
+		void run() override;
+	};
+
+	// ----------------------------------------------------------------------------------
+	//
+	// TuningSourceWorker class declaration (signal-slot, event driven)
+	//
+	// ----------------------------------------------------------------------------------
+
+	class TuningSourceWorker : public SimpleThreadWorker, public TuningSourceHandler
+	{
+		Q_OBJECT
+
+	public:
+		TuningSourceWorker(const TuningServiceSettings& settings,
+						   const TuningSource& source,
+						   CircularLoggerShared logger,
+						   CircularLoggerShared tuningLog);
+	private:
+		virtual void onThreadStarted() override;
+		virtual void onThreadFinished() override;
+
+		virtual void restartTimer() override;
+
+	private slots:
+		void onTimer();
+		void onReplyReady();
+
+	private:
+		int m_timerInterval = 10;
+		QTimer m_timer;
+	};
+
+
+	// ----------------------------------------------------------------------------------
+	//
 	// TuningSourceWorkerThread class declaration
 	//
 	// ----------------------------------------------------------------------------------
@@ -371,13 +415,23 @@ namespace Tuning
 		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
 
+		TuningSourceHandler* handler();
+
 	private:
 		TuningSourceWorker* m_sourceWorker = nullptr;
 	};
 
+	//
+	// Different implementations of TuningSourceThread
+	//
 
-	typedef QHash<quint32, TuningSourceWorkerThread*> TuningSourceWorkerThreadMap;
+	//	typedef TuningSourceWorkerThread TuningSourceThread;
 
+	typedef TuningSourceRunOverrideThread TuningSourceThread;
+
+	//
+
+	typedef QHash<quint32, TuningSourceThread*> TuningSourceThreadMap;
 
 	// ----------------------------------------------------------------------------------
 	//
@@ -391,7 +445,7 @@ namespace Tuning
 
 	public:
 		TuningSocketListener(const HostAddressPort& listenIP,
-							 TuningSourceWorkerThreadMap& sourceWorkerMap,
+							 TuningSourceThreadMap& sourceWorkerMap,
 							 std::shared_ptr<CircularLogger> logger);
 		~TuningSocketListener();
 
@@ -416,7 +470,7 @@ namespace Tuning
 
 	private:
 		HostAddressPort m_listenIP;
-		TuningSourceWorkerThreadMap& m_sourceWorkerMap;
+		TuningSourceThreadMap& m_sourceThreadMap;
 
 		std::shared_ptr<CircularLogger> m_logger;
 
@@ -442,7 +496,7 @@ namespace Tuning
 	{
 	public:
 		TuningSocketListenerThread(const HostAddressPort& listenIP,
-								   TuningSourceWorkerThreadMap& sourceWorkerMap,
+								   TuningSourceThreadMap& sourceWorkerMap,
 								   std::shared_ptr<CircularLogger> logger);
 		~TuningSocketListenerThread();
 
