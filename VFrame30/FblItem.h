@@ -1,7 +1,8 @@
 #pragma once
-
+#include <QUuid>
 #include "SchemaPoint.h"
 #include "../lib/Types.h"
+#include "VFrame30Lib_global.h"
 
 class QPainter;
 
@@ -9,6 +10,12 @@ namespace Afb
 {
 	class AfbPin;
 	class AfbSignal;
+}
+
+namespace Proto
+{
+	class FblConnectionPoint;
+	class Envelope;
 }
 
 namespace VFrame30
@@ -145,13 +152,13 @@ namespace VFrame30
 		int inputsCount() const;
 		int outputsCount() const;
 
-		void addInput();
-		void addInput(const Afb::AfbSignal& s);
-		void addInput(int opIndex, E::SignalType signalType, QString caption);
+		AfbPin& addInput();
+		AfbPin& addInput(const Afb::AfbSignal& s);
+		AfbPin& addInput(int opIndex, E::SignalType signalType, QString caption);
 
-		void addOutput();
-		void addOutput(const Afb::AfbSignal& s);
-		void addOutput(int opIndex, E::SignalType signalType, QString caption);
+		AfbPin& addOutput();
+		AfbPin& addOutput(const Afb::AfbSignal& s);
+		AfbPin& addOutput(int opIndex, E::SignalType signalType, QString caption);
 
 		void removeAllInputs();
 		void removeInput(const QString& caption);

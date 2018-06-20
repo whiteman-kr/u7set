@@ -90,6 +90,9 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 				return tv1 < tv2;
 			else
 				return tv1 > tv2;
+
+			v1 = tv1;
+			v2 = tv2;
 		}
 		else
 		{
@@ -103,7 +106,7 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
 			double tv1 = tss1.value().toDouble();
-			double tv2 = tss1.value().toDouble();
+			double tv2 = tss2.value().toDouble();
 
 			if (tv1 == tv2)
 			{
@@ -114,6 +117,9 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 				return tv1 < tv2;
 			else
 				return tv1 > tv2;
+
+			v1 = tv1;
+			v2 = tv2;
 		}
 		else
 		{
@@ -138,6 +144,9 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 				return tv1 < tv2;
 			else
 				return tv1 > tv2;
+
+			v1 = tv1;
+			v2 = tv2;
 		}
 		else
 		{
@@ -162,6 +171,9 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 				return tv1 < tv2;
 			else
 				return tv1 > tv2;
+
+			v1 = tv1;
+			v2 = tv2;
 		}
 		else
 		{
