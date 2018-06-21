@@ -402,6 +402,7 @@ bool MonitorConfigController::xmlReadBuildInfoNode(const QDomNode& buildInfoNode
 
 	QDomElement element = buildInfoNode.toElement();
 
+	outSetting->buildNo = element.attribute(QLatin1String("ID")).toInt();
 	outSetting->project = element.attribute(QLatin1String("Project"));
 
 	return true;

@@ -34,6 +34,7 @@ protected:
 
 struct ConfigSettings
 {
+	int buildNo = -1;
 	QString softwareEquipmentId;
 	QString project;
 	QString startSchemaId;
