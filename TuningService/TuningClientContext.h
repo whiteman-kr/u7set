@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/ServiceSettings.h"
-#include "TuningSourceWorker.h"
+#include "TuningSourceThread.h"
 
 namespace Tuning
 {
@@ -20,8 +20,8 @@ namespace Tuning
 		void getSourceInfo(Network::DataSourceInfo& si) const;
 		void getSourceState(Network::TuningSourceState& tss) const;
 
-		void setSourceWorker(TuningSourceWorker* worker);
-		void removeSourceWorker(TuningSourceWorker* worker);
+		void setSourceHandler(TuningSourceHandler* handler);
+		void removeSourceHandler(TuningSourceHandler* handler);
 
 		void readSignalState(Network::TuningSignalState* tss);
 
@@ -35,7 +35,7 @@ namespace Tuning
 
 	private:
 		QString m_sourceID;			// Tuning source (LM) equipmentID
-		TuningSourceWorker* m_sourceWorker = nullptr;
+		TuningSourceHandler* m_sourceHandler = nullptr;
 
 		Network::DataSourceInfo m_sourceInfo;
 		Network::TuningSourceState m_sourceState;
@@ -67,8 +67,8 @@ namespace Tuning
 		void applySignalStates(const QString& clientEquipmentID,
 							   const QString &user) const;
 
-		void setSourceWorker(TuningSourceWorker* worker);
-		void removeSourceWorker(TuningSourceWorker* worker);
+		void setSourceHandler(TuningSourceHandler* handler);
+		void removeSourceHandler(TuningSourceHandler* handler);
 
 	private:
 		TuningSourceContext* getSourceContext(const QString& sourceID) const;

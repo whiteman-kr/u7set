@@ -137,7 +137,7 @@ namespace FotipV2
 
 				if (reverseValue == true)
 				{
-					unsignedIntValue = reverseUint32(unsignedIntValue);
+					unsignedIntValue = (reverseUint32(unsignedIntValue) == 0 ? 0 : 1);
 				}
 
 				return QString("%1").arg(unsignedIntValue);

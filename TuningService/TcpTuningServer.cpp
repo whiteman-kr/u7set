@@ -311,12 +311,12 @@ namespace Tuning
 
 				Hash signalHash = m_tuningSignalsReadRequest.signalhash(i);
 				quint32 ip = m_signalHash2SourceIP.value(signalHash);
-				const TuningSourceWorker* worker = m_service.getSourceWorker(ip);
+				const TuningSourceHandler* handler = m_service.getSourceHandler(ip);
 
-				TEST_PTR_CONTINUE(worker);
+				TEST_PTR_CONTINUE(handler);
 
 				tss->set_signalhash(signalHash);
-				worker->readSignalState(tss);
+				handler->readSignalState(tss);
 			}
 
 			m_tuningSignalsReadReply.set_error(TO_INT(NetworkError::Success));
