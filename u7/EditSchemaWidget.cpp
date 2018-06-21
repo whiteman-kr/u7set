@@ -6723,6 +6723,8 @@ void EditSchemaWidget::editPaste()
 		bool schemaItemAfbIsPresent = false;
 		bool schemaItemUfbIsPresent = false;
 		bool schemaItemBusIsPresent = false;
+		bool schemaItemConnectionIsPresent = false;
+		bool schemaItemInOutIsPresent = false;
 
 		for (int i = 0; i < message.items_size(); i++)
 		{
@@ -6751,6 +6753,16 @@ void EditSchemaWidget::editPaste()
 				schemaItemBusIsPresent = true;
 			}
 
+			if (schemaItem->isType<VFrame30::SchemaItemConnection>() == true)
+			{
+				schemaItemConnectionIsPresent = true;
+			}
+
+			if (schemaItem->isType<VFrame30::SchemaItemInOut>() == true)
+			{
+				schemaItemInOutIsPresent = true;
+			}
+
 			if (schemaItem->isFblItemRect() == true)
 			{
 				// If items is FblItemRect set label to it
@@ -6771,6 +6783,15 @@ void EditSchemaWidget::editPaste()
 
 		if (itemList.empty() == false)
 		{
+			if (schema()->isUfbSchema() == true &&
+				(schemaItemUfbIsPresent == true ||
+				 schemaItemConnectionIsPresent == true ||
+				 schemaItemInOutIsPresent == true))
+			{
+				QMessageBox::critical(this, qAppName(), tr("Adding In/Outs, Transmiters/Receivers, User Functional Blocks to UFB Schema is impossible."));
+				return;
+			}
+
 			m_editEngine->runAddItem(itemList, editSchemaView()->activeLayer());
 		}
 
