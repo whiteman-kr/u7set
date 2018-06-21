@@ -3,7 +3,7 @@
 
 #include "TrendSignal.h"
 #include "TrendDrawParam.h"
-#include "TrendRuller.h"
+#include "TrendRuler.h"
 
 namespace Proto
 {
@@ -66,8 +66,8 @@ namespace TrendLib
 		void drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 		void drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 
-		void drawRullers(QPainter* painter, const TrendDrawParam& drawParam) const;
-		TrendStateItem rullerSignalState(const TrendRuller& ruller, QString appSignalId, E::TimeType timeType) const;
+		void drawRulers(QPainter* painter, const TrendDrawParam& drawParam) const;
+		TrendStateItem rulerSignalState(const TrendRuler& ruler, QString appSignalId, E::TimeType timeType) const;
 
 		static void adjustPainter(QPainter* painter, int dpiX, int dpiY);
 
@@ -99,10 +99,10 @@ namespace TrendLib
 			OutsideTrendArea,	// Outside lane but in the rect
 			InsideTrendArea,	// Inside lane rectangle
 			OnSignalDescription,// Over Signal Description (id +  caption)
-			OnRuller,			// Over ruller
+			OnRuler,			// Over ruler
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex, TrendSignalParam* outSignal) const;
+		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const;
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
@@ -116,12 +116,12 @@ namespace TrendLib
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
 
-		TrendLib::TrendRullerSet& rullerSet();
-		const TrendLib::TrendRullerSet& rullerSet() const;
+		TrendLib::TrendRulerSet& rulerSet();
+		const TrendLib::TrendRulerSet& rulerSet() const;
 
 	private:
 		TrendLib::TrendSignalSet m_signalSet;
-		TrendLib::TrendRullerSet m_rullerSet;
+		TrendLib::TrendRulerSet m_rulerSet;
 
 		const static double discreteSignalHeight;// = 5.0 / 8.0;		// if inches
 	};

@@ -63,9 +63,9 @@ namespace TrendLib
 		void actionRefreshTriggered();
 		void actionAutoSclaeTriggered();
 
-		void actionAddRuller(QPoint mousePos);
-		void actionDeleteRuller(int rullerIndex);
-		void actionRullerProperties(int rullerIndex);
+		void actionAddRuler(QPoint mousePos);
+		void actionDeleteRuler(int rulerIndex);
+		void actionRulerProperties(int rulerIndex);
 
 		void timeComboCurrentIndexChanged(int index);
 		void viewComboCurrentIndexChanged(int index);

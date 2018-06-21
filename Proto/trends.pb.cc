@@ -46,12 +46,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* TrendSignalSet_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   TrendSignalSet_reflection_ = NULL;
-const ::google::protobuf::Descriptor* TrendRuller_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* TrendRuler_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  TrendRuller_reflection_ = NULL;
-const ::google::protobuf::Descriptor* TrendRullerSet_descriptor_ = NULL;
+  TrendRuler_reflection_ = NULL;
+const ::google::protobuf::Descriptor* TrendRulerSet_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  TrendRullerSet_reflection_ = NULL;
+  TrendRulerSet_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Trend_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Trend_reflection_ = NULL;
@@ -162,42 +162,42 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendSignalSet));
-  TrendRuller_descriptor_ = file->message_type(5);
-  static const int TrendRuller_offsets_[3] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuller, time_stamp_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuller, show_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuller, show_signal_values_),
+  TrendRuler_descriptor_ = file->message_type(5);
+  static const int TrendRuler_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuler, time_stamp_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuler, show_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuler, show_signal_values_),
   };
-  TrendRuller_reflection_ =
+  TrendRuler_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      TrendRuller_descriptor_,
-      TrendRuller::default_instance_,
-      TrendRuller_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuller, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuller, _unknown_fields_),
+      TrendRuler_descriptor_,
+      TrendRuler::default_instance_,
+      TrendRuler_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuler, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuler, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(TrendRuller));
-  TrendRullerSet_descriptor_ = file->message_type(6);
-  static const int TrendRullerSet_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRullerSet, rullers_),
+      sizeof(TrendRuler));
+  TrendRulerSet_descriptor_ = file->message_type(6);
+  static const int TrendRulerSet_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRulerSet, rulers_),
   };
-  TrendRullerSet_reflection_ =
+  TrendRulerSet_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      TrendRullerSet_descriptor_,
-      TrendRullerSet::default_instance_,
-      TrendRullerSet_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRullerSet, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRullerSet, _unknown_fields_),
+      TrendRulerSet_descriptor_,
+      TrendRulerSet::default_instance_,
+      TrendRulerSet_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRulerSet, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRulerSet, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(TrendRullerSet));
+      sizeof(TrendRulerSet));
   Trend_descriptor_ = file->message_type(7);
   static const int Trend_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Trend, signal_set_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Trend, ruller_set_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Trend, ruler_set_),
   };
   Trend_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -270,9 +270,9 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     TrendSignalSet_descriptor_, &TrendSignalSet::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    TrendRuller_descriptor_, &TrendRuller::default_instance());
+    TrendRuler_descriptor_, &TrendRuler::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    TrendRullerSet_descriptor_, &TrendRullerSet::default_instance());
+    TrendRulerSet_descriptor_, &TrendRulerSet::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Trend_descriptor_, &Trend::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -294,10 +294,10 @@ void protobuf_ShutdownFile_trends_2eproto() {
   delete TrendSignalParam_reflection_;
   delete TrendSignalSet::default_instance_;
   delete TrendSignalSet_reflection_;
-  delete TrendRuller::default_instance_;
-  delete TrendRuller_reflection_;
-  delete TrendRullerSet::default_instance_;
-  delete TrendRullerSet_reflection_;
+  delete TrendRuler::default_instance_;
+  delete TrendRuler_reflection_;
+  delete TrendRulerSet::default_instance_;
+  delete TrendRulerSet_reflection_;
   delete Trend::default_instance_;
   delete Trend_reflection_;
   delete TrendParam::default_instance_;
@@ -330,19 +330,19 @@ void protobuf_AddDesc_trends_2eproto() {
     "ocal_time\030\n \003(\0132\023.Proto.TrendArchive\0220\n\023"
     "archive_system_time\030\013 \003(\0132\023.Proto.TrendA"
     "rchive\022/\n\022archive_plant_time\030\014 \003(\0132\023.Pro"
-    "to.TrendArchive\"W\n\013TrendRuller\022\022\n\ntime_s"
-    "tamp\030\002 \001(\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show_s"
-    "ignal_values\030\004 \001(\010:\004true\"5\n\016TrendRullerS"
-    "et\022#\n\007rullers\030\002 \003(\0132\022.Proto.TrendRuller\""
-    "]\n\005Trend\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.Tre"
-    "ndSignalSet\022)\n\nruller_set\030\003 \001(\0132\025.Proto."
-    "TrendRullerSet\"\245\001\n\nTrendParam\022\024\n\tview_mo"
-    "de\030\002 \001(\005:\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlan"
-    "e_count\030\004 \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010"
-    "duration\0303 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026"
-    "\n\016back_color_2nd\030G \001(\r\"R\n\013TrendWidget\022\033\n"
-    "\005trend\030\002 \001(\0132\014.Proto.Trend\022&\n\013trend_para"
-    "m\030\003 \001(\0132\021.Proto.TrendParam", 1186);
+    "to.TrendArchive\"V\n\nTrendRuler\022\022\n\ntime_st"
+    "amp\030\002 \001(\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show_si"
+    "gnal_values\030\004 \001(\010:\004true\"2\n\rTrendRulerSet"
+    "\022!\n\006rulers\030\002 \003(\0132\021.Proto.TrendRuler\"[\n\005T"
+    "rend\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.TrendSi"
+    "gnalSet\022\'\n\truler_set\030\003 \001(\0132\024.Proto.Trend"
+    "RulerSet\"\245\001\n\nTrendParam\022\024\n\tview_mode\030\002 \001"
+    "(\005:\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlane_coun"
+    "t\030\004 \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010durati"
+    "on\0303 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026\n\016back"
+    "_color_2nd\030G \001(\r\"R\n\013TrendWidget\022\033\n\005trend"
+    "\030\002 \001(\0132\014.Proto.Trend\022&\n\013trend_param\030\003 \001("
+    "\0132\021.Proto.TrendParam", 1180);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "trends.proto", &protobuf_RegisterTypes);
   TrendStateRecord::default_instance_ = new TrendStateRecord();
@@ -350,8 +350,8 @@ void protobuf_AddDesc_trends_2eproto() {
   TrendArchive::default_instance_ = new TrendArchive();
   TrendSignalParam::default_instance_ = new TrendSignalParam();
   TrendSignalSet::default_instance_ = new TrendSignalSet();
-  TrendRuller::default_instance_ = new TrendRuller();
-  TrendRullerSet::default_instance_ = new TrendRullerSet();
+  TrendRuler::default_instance_ = new TrendRuler();
+  TrendRulerSet::default_instance_ = new TrendRulerSet();
   Trend::default_instance_ = new Trend();
   TrendParam::default_instance_ = new TrendParam();
   TrendWidget::default_instance_ = new TrendWidget();
@@ -360,8 +360,8 @@ void protobuf_AddDesc_trends_2eproto() {
   TrendArchive::default_instance_->InitAsDefaultInstance();
   TrendSignalParam::default_instance_->InitAsDefaultInstance();
   TrendSignalSet::default_instance_->InitAsDefaultInstance();
-  TrendRuller::default_instance_->InitAsDefaultInstance();
-  TrendRullerSet::default_instance_->InitAsDefaultInstance();
+  TrendRuler::default_instance_->InitAsDefaultInstance();
+  TrendRulerSet::default_instance_->InitAsDefaultInstance();
   Trend::default_instance_->InitAsDefaultInstance();
   TrendParam::default_instance_->InitAsDefaultInstance();
   TrendWidget::default_instance_->InitAsDefaultInstance();
@@ -2159,26 +2159,26 @@ void TrendSignalSet::Swap(TrendSignalSet* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TrendRuller::kTimeStampFieldNumber;
-const int TrendRuller::kShowFieldNumber;
-const int TrendRuller::kShowSignalValuesFieldNumber;
+const int TrendRuler::kTimeStampFieldNumber;
+const int TrendRuler::kShowFieldNumber;
+const int TrendRuler::kShowSignalValuesFieldNumber;
 #endif  // !_MSC_VER
 
-TrendRuller::TrendRuller()
+TrendRuler::TrendRuler()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void TrendRuller::InitAsDefaultInstance() {
+void TrendRuler::InitAsDefaultInstance() {
 }
 
-TrendRuller::TrendRuller(const TrendRuller& from)
+TrendRuler::TrendRuler(const TrendRuler& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void TrendRuller::SharedCtor() {
+void TrendRuler::SharedCtor() {
   _cached_size_ = 0;
   time_stamp_ = GOOGLE_ULONGLONG(0);
   show_ = true;
@@ -2186,37 +2186,37 @@ void TrendRuller::SharedCtor() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-TrendRuller::~TrendRuller() {
+TrendRuler::~TrendRuler() {
   SharedDtor();
 }
 
-void TrendRuller::SharedDtor() {
+void TrendRuler::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void TrendRuller::SetCachedSize(int size) const {
+void TrendRuler::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* TrendRuller::descriptor() {
+const ::google::protobuf::Descriptor* TrendRuler::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return TrendRuller_descriptor_;
+  return TrendRuler_descriptor_;
 }
 
-const TrendRuller& TrendRuller::default_instance() {
+const TrendRuler& TrendRuler::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_trends_2eproto();
   return *default_instance_;
 }
 
-TrendRuller* TrendRuller::default_instance_ = NULL;
+TrendRuler* TrendRuler::default_instance_ = NULL;
 
-TrendRuller* TrendRuller::New() const {
-  return new TrendRuller;
+TrendRuler* TrendRuler::New() const {
+  return new TrendRuler;
 }
 
-void TrendRuller::Clear() {
+void TrendRuler::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     time_stamp_ = GOOGLE_ULONGLONG(0);
     show_ = true;
@@ -2226,7 +2226,7 @@ void TrendRuller::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool TrendRuller::MergePartialFromCodedStream(
+bool TrendRuler::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -2295,7 +2295,7 @@ bool TrendRuller::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void TrendRuller::SerializeWithCachedSizes(
+void TrendRuler::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // optional fixed64 time_stamp = 2;
   if (has_time_stamp()) {
@@ -2318,7 +2318,7 @@ void TrendRuller::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* TrendRuller::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* TrendRuler::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // optional fixed64 time_stamp = 2;
   if (has_time_stamp()) {
@@ -2342,7 +2342,7 @@ void TrendRuller::SerializeWithCachedSizes(
   return target;
 }
 
-int TrendRuller::ByteSize() const {
+int TrendRuler::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -2373,10 +2373,10 @@ int TrendRuller::ByteSize() const {
   return total_size;
 }
 
-void TrendRuller::MergeFrom(const ::google::protobuf::Message& from) {
+void TrendRuler::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const TrendRuller* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const TrendRuller*>(
+  const TrendRuler* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TrendRuler*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -2385,7 +2385,7 @@ void TrendRuller::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void TrendRuller::MergeFrom(const TrendRuller& from) {
+void TrendRuler::MergeFrom(const TrendRuler& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_time_stamp()) {
@@ -2401,24 +2401,24 @@ void TrendRuller::MergeFrom(const TrendRuller& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void TrendRuller::CopyFrom(const ::google::protobuf::Message& from) {
+void TrendRuler::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void TrendRuller::CopyFrom(const TrendRuller& from) {
+void TrendRuler::CopyFrom(const TrendRuler& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool TrendRuller::IsInitialized() const {
+bool TrendRuler::IsInitialized() const {
 
   return true;
 }
 
-void TrendRuller::Swap(TrendRuller* other) {
+void TrendRuler::Swap(TrendRuler* other) {
   if (other != this) {
     std::swap(time_stamp_, other->time_stamp_);
     std::swap(show_, other->show_);
@@ -2429,11 +2429,11 @@ void TrendRuller::Swap(TrendRuller* other) {
   }
 }
 
-::google::protobuf::Metadata TrendRuller::GetMetadata() const {
+::google::protobuf::Metadata TrendRuler::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = TrendRuller_descriptor_;
-  metadata.reflection = TrendRuller_reflection_;
+  metadata.descriptor = TrendRuler_descriptor_;
+  metadata.reflection = TrendRuler_reflection_;
   return metadata;
 }
 
@@ -2441,81 +2441,81 @@ void TrendRuller::Swap(TrendRuller* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TrendRullerSet::kRullersFieldNumber;
+const int TrendRulerSet::kRulersFieldNumber;
 #endif  // !_MSC_VER
 
-TrendRullerSet::TrendRullerSet()
+TrendRulerSet::TrendRulerSet()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void TrendRullerSet::InitAsDefaultInstance() {
+void TrendRulerSet::InitAsDefaultInstance() {
 }
 
-TrendRullerSet::TrendRullerSet(const TrendRullerSet& from)
+TrendRulerSet::TrendRulerSet(const TrendRulerSet& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void TrendRullerSet::SharedCtor() {
+void TrendRulerSet::SharedCtor() {
   _cached_size_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-TrendRullerSet::~TrendRullerSet() {
+TrendRulerSet::~TrendRulerSet() {
   SharedDtor();
 }
 
-void TrendRullerSet::SharedDtor() {
+void TrendRulerSet::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void TrendRullerSet::SetCachedSize(int size) const {
+void TrendRulerSet::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* TrendRullerSet::descriptor() {
+const ::google::protobuf::Descriptor* TrendRulerSet::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return TrendRullerSet_descriptor_;
+  return TrendRulerSet_descriptor_;
 }
 
-const TrendRullerSet& TrendRullerSet::default_instance() {
+const TrendRulerSet& TrendRulerSet::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_trends_2eproto();
   return *default_instance_;
 }
 
-TrendRullerSet* TrendRullerSet::default_instance_ = NULL;
+TrendRulerSet* TrendRulerSet::default_instance_ = NULL;
 
-TrendRullerSet* TrendRullerSet::New() const {
-  return new TrendRullerSet;
+TrendRulerSet* TrendRulerSet::New() const {
+  return new TrendRulerSet;
 }
 
-void TrendRullerSet::Clear() {
-  rullers_.Clear();
+void TrendRulerSet::Clear() {
+  rulers_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
-bool TrendRullerSet::MergePartialFromCodedStream(
+bool TrendRulerSet::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.TrendRuller rullers = 2;
+      // repeated .Proto.TrendRuler rulers = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_rullers:
+         parse_rulers:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_rullers()));
+                input, add_rulers()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_rullers;
+        if (input->ExpectTag(18)) goto parse_rulers;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -2536,12 +2536,12 @@ bool TrendRullerSet::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void TrendRullerSet::SerializeWithCachedSizes(
+void TrendRulerSet::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.TrendRuller rullers = 2;
-  for (int i = 0; i < this->rullers_size(); i++) {
+  // repeated .Proto.TrendRuler rulers = 2;
+  for (int i = 0; i < this->rulers_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->rullers(i), output);
+      2, this->rulers(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -2550,13 +2550,13 @@ void TrendRullerSet::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* TrendRullerSet::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* TrendRulerSet::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.TrendRuller rullers = 2;
-  for (int i = 0; i < this->rullers_size(); i++) {
+  // repeated .Proto.TrendRuler rulers = 2;
+  for (int i = 0; i < this->rulers_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->rullers(i), target);
+        2, this->rulers(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -2566,15 +2566,15 @@ void TrendRullerSet::SerializeWithCachedSizes(
   return target;
 }
 
-int TrendRullerSet::ByteSize() const {
+int TrendRulerSet::ByteSize() const {
   int total_size = 0;
 
-  // repeated .Proto.TrendRuller rullers = 2;
-  total_size += 1 * this->rullers_size();
-  for (int i = 0; i < this->rullers_size(); i++) {
+  // repeated .Proto.TrendRuler rulers = 2;
+  total_size += 1 * this->rulers_size();
+  for (int i = 0; i < this->rulers_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->rullers(i));
+        this->rulers(i));
   }
 
   if (!unknown_fields().empty()) {
@@ -2588,10 +2588,10 @@ int TrendRullerSet::ByteSize() const {
   return total_size;
 }
 
-void TrendRullerSet::MergeFrom(const ::google::protobuf::Message& from) {
+void TrendRulerSet::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const TrendRullerSet* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const TrendRullerSet*>(
+  const TrendRulerSet* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const TrendRulerSet*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -2600,43 +2600,43 @@ void TrendRullerSet::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void TrendRullerSet::MergeFrom(const TrendRullerSet& from) {
+void TrendRulerSet::MergeFrom(const TrendRulerSet& from) {
   GOOGLE_CHECK_NE(&from, this);
-  rullers_.MergeFrom(from.rullers_);
+  rulers_.MergeFrom(from.rulers_);
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void TrendRullerSet::CopyFrom(const ::google::protobuf::Message& from) {
+void TrendRulerSet::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void TrendRullerSet::CopyFrom(const TrendRullerSet& from) {
+void TrendRulerSet::CopyFrom(const TrendRulerSet& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool TrendRullerSet::IsInitialized() const {
+bool TrendRulerSet::IsInitialized() const {
 
   return true;
 }
 
-void TrendRullerSet::Swap(TrendRullerSet* other) {
+void TrendRulerSet::Swap(TrendRulerSet* other) {
   if (other != this) {
-    rullers_.Swap(&other->rullers_);
+    rulers_.Swap(&other->rulers_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
 }
 
-::google::protobuf::Metadata TrendRullerSet::GetMetadata() const {
+::google::protobuf::Metadata TrendRulerSet::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = TrendRullerSet_descriptor_;
-  metadata.reflection = TrendRullerSet_reflection_;
+  metadata.descriptor = TrendRulerSet_descriptor_;
+  metadata.reflection = TrendRulerSet_reflection_;
   return metadata;
 }
 
@@ -2645,7 +2645,7 @@ void TrendRullerSet::Swap(TrendRullerSet* other) {
 
 #ifndef _MSC_VER
 const int Trend::kSignalSetFieldNumber;
-const int Trend::kRullerSetFieldNumber;
+const int Trend::kRulerSetFieldNumber;
 #endif  // !_MSC_VER
 
 Trend::Trend()
@@ -2655,7 +2655,7 @@ Trend::Trend()
 
 void Trend::InitAsDefaultInstance() {
   signal_set_ = const_cast< ::Proto::TrendSignalSet*>(&::Proto::TrendSignalSet::default_instance());
-  ruller_set_ = const_cast< ::Proto::TrendRullerSet*>(&::Proto::TrendRullerSet::default_instance());
+  ruler_set_ = const_cast< ::Proto::TrendRulerSet*>(&::Proto::TrendRulerSet::default_instance());
 }
 
 Trend::Trend(const Trend& from)
@@ -2667,7 +2667,7 @@ Trend::Trend(const Trend& from)
 void Trend::SharedCtor() {
   _cached_size_ = 0;
   signal_set_ = NULL;
-  ruller_set_ = NULL;
+  ruler_set_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2678,7 +2678,7 @@ Trend::~Trend() {
 void Trend::SharedDtor() {
   if (this != default_instance_) {
     delete signal_set_;
-    delete ruller_set_;
+    delete ruler_set_;
   }
 }
 
@@ -2708,8 +2708,8 @@ void Trend::Clear() {
     if (has_signal_set()) {
       if (signal_set_ != NULL) signal_set_->::Proto::TrendSignalSet::Clear();
     }
-    if (has_ruller_set()) {
-      if (ruller_set_ != NULL) ruller_set_->::Proto::TrendRullerSet::Clear();
+    if (has_ruler_set()) {
+      if (ruler_set_ != NULL) ruler_set_->::Proto::TrendRulerSet::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -2731,17 +2731,17 @@ bool Trend::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_ruller_set;
+        if (input->ExpectTag(26)) goto parse_ruler_set;
         break;
       }
 
-      // optional .Proto.TrendRullerSet ruller_set = 3;
+      // optional .Proto.TrendRulerSet ruler_set = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_ruller_set:
+         parse_ruler_set:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_ruller_set()));
+               input, mutable_ruler_set()));
         } else {
           goto handle_uninterpreted;
         }
@@ -2773,10 +2773,10 @@ void Trend::SerializeWithCachedSizes(
       2, this->signal_set(), output);
   }
 
-  // optional .Proto.TrendRullerSet ruller_set = 3;
-  if (has_ruller_set()) {
+  // optional .Proto.TrendRulerSet ruler_set = 3;
+  if (has_ruler_set()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->ruller_set(), output);
+      3, this->ruler_set(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -2794,11 +2794,11 @@ void Trend::SerializeWithCachedSizes(
         2, this->signal_set(), target);
   }
 
-  // optional .Proto.TrendRullerSet ruller_set = 3;
-  if (has_ruller_set()) {
+  // optional .Proto.TrendRulerSet ruler_set = 3;
+  if (has_ruler_set()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        3, this->ruller_set(), target);
+        3, this->ruler_set(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -2819,11 +2819,11 @@ int Trend::ByteSize() const {
           this->signal_set());
     }
 
-    // optional .Proto.TrendRullerSet ruller_set = 3;
-    if (has_ruller_set()) {
+    // optional .Proto.TrendRulerSet ruler_set = 3;
+    if (has_ruler_set()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->ruller_set());
+          this->ruler_set());
     }
 
   }
@@ -2856,8 +2856,8 @@ void Trend::MergeFrom(const Trend& from) {
     if (from.has_signal_set()) {
       mutable_signal_set()->::Proto::TrendSignalSet::MergeFrom(from.signal_set());
     }
-    if (from.has_ruller_set()) {
-      mutable_ruller_set()->::Proto::TrendRullerSet::MergeFrom(from.ruller_set());
+    if (from.has_ruler_set()) {
+      mutable_ruler_set()->::Proto::TrendRulerSet::MergeFrom(from.ruler_set());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -2883,7 +2883,7 @@ bool Trend::IsInitialized() const {
 void Trend::Swap(Trend* other) {
   if (other != this) {
     std::swap(signal_set_, other->signal_set_);
-    std::swap(ruller_set_, other->ruller_set_);
+    std::swap(ruler_set_, other->ruler_set_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

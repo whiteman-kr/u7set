@@ -5,15 +5,15 @@
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
 
-TrendSlider::TrendSlider(TrendLib::TrendRullerSet* rullerSet) :
-	m_rullerSet(rullerSet)
+TrendSlider::TrendSlider(TrendLib::TrendRulerSet* rulerSet) :
+	m_rulerSet(rulerSet)
 {
-	assert(m_rullerSet);
+	assert(m_rulerSet);
 
 	m_setTimeButton = new QPushButton(QChar(0x25B2), this);
 	m_lineLeftButton = new QPushButton(QChar(0x25C4), this);
 	m_lineRightButton = new QPushButton(QChar(0x25BA), this);
-	m_railSubcontrol = new TrendSliderRailSubcontrol(this, m_rullerSet);
+	m_railSubcontrol = new TrendSliderRailSubcontrol(this, m_rulerSet);
 
 	m_lineLeftButton->setAutoRepeat(true);
 	m_lineLeftButton->setAutoRepeatInterval(50);
@@ -237,12 +237,12 @@ void TrendSlider::setLaneDuration(qint64 ms)
 	update();
 }
 
-TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* threndSlider, TrendLib::TrendRullerSet* rullerSet) :
+TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* threndSlider, TrendLib::TrendRulerSet* rulerSet) :
 	m_trendSlider(threndSlider),
-	m_rullerSet(rullerSet)
+	m_rulerSet(rulerSet)
 {
 	assert(m_trendSlider);
-	assert(m_rullerSet);
+	assert(m_rulerSet);
 
 	connect(m_trendSlider, &TrendSlider::paramsChanged, this, &TrendSliderRailSubcontrol::paramsChanged);
 
@@ -413,21 +413,21 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 		update();
 	}
 
-	// Draw rullers
+	// Draw rulers
 	//
-//	QPen rullerPen(QBrush(QColor(0x00, 0x00, 0xC0, 0x60)), 0, Qt::PenStyle::DashLine);
-//	p.setPen(rullerPen);
+//	QPen rulerPen(QBrush(QColor(0x00, 0x00, 0xC0, 0x60)), 0, Qt::PenStyle::DashLine);
+//	p.setPen(rulerPen);
 
 //	TimeStamp minTimeStamp(m_min);
 //	TimeStamp maxTimeStamp(m_max + m_trendSlider->laneDuartion());
 //	qint64 duration = maxTimeStamp.timeStamp - minTimeStamp.timeStamp;
 //	double k = static_cast<double>(this->rect().width()) / static_cast<double>(duration);
 
-//	std::vector<TrendLib::TrendRuller> rullers = m_rullerSet->getRullers(minTimeStamp, maxTimeStamp);
+//	std::vector<TrendLib::TrendRuler> rulers = m_rulerSet->getRulers(minTimeStamp, maxTimeStamp);
 
-//	for (const TrendLib::TrendRuller& ruller : rullers)
+//	for (const TrendLib::TrendRuler& ruler : rulers)
 //	{
-//		double x = rect().left() + k * (ruller.timeStamp().timeStamp - m_min);
+//		double x = rect().left() + k * (ruler.timeStamp().timeStamp - m_min);
 
 //		p.drawLine(QPointF(x, rect().top()),
 //				   QPointF(x, rect().bottom()));

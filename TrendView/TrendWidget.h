@@ -2,7 +2,7 @@
 #define TRENDVIEW_H
 
 #include "Trend.h"
-#include "TrendRuller.h"
+#include "TrendRuler.h"
 
 class QPrinter;
 
@@ -81,9 +81,9 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, TrendSignalParam* outSignalId);
+		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rulerIndex, TrendSignalParam* outSignalId);
 
-		void resetRullerHighlight();
+		void resetRulerHighlight();
 
 	protected:
 		void initSelectViewArea(QPoint pos, int laneIndex);
@@ -109,8 +109,8 @@ namespace TrendLib
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
 
-		TrendLib::TrendRullerSet& rullerSet();
-		const TrendLib::TrendRullerSet& rullerSet() const;
+		TrendLib::TrendRulerSet& rulerSet();
+		const TrendLib::TrendRulerSet& rulerSet() const;
 
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
@@ -142,23 +142,23 @@ namespace TrendLib
 		{
 			None,
 			Scroll,
-			MoveRuller,
+			MoveRuler,
 			SelectViewStart,
 			SelectViewSelectSecondPoint
 		};
 
 		MouseAction m_mouseAction = MouseAction::None;
 
-		// MouseScroll/RullerMove/... vaiables
+		// MouseScroll/RulerMove/... vaiables
 		//
 		TimeStamp m_mouseScrollInitialTime;
 		QPoint m_mouseScrollInitialMousePos;
 		TrendSignalParam m_mouseScrollSignal;
 		std::vector<TrendSignalParam> m_mouseScrollAnalogSignals;
 
-		int m_rullerMoveRullerIndex = -1;
-		QPoint m_rullerMoveInitialMousePos;
-		TimeStamp m_rullerMoveInitialTimeStamp;
+		int m_rulerMoveRulerIndex = -1;
+		QPoint m_rulerMoveInitialMousePos;
+		TimeStamp m_rulerMoveInitialTimeStamp;
 
 		QPointF m_startSelectViewPoint;
 		QPointF m_finishSelectViewPoint;

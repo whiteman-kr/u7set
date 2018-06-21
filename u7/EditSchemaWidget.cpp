@@ -122,7 +122,7 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 		draw(drawParam);
 	}
 
-	// Draw other -- selection, grid, outlines, rullers, etc
+	// Draw other -- selection, grid, outlines, rulers, etc
 	//
 	QPainter p;
 	p.begin(this);
@@ -413,10 +413,10 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 	VFrame30::SchemaItem::DrawOutline(drawParam, outlines);
 
-	// Draw ruller for newItem
+	// Draw ruler for newItem
 	//
-	bool drawRullers = false;
-	VFrame30::SchemaPoint rullerPoint;
+	bool drawRulers = false;
+	VFrame30::SchemaPoint rulerPoint;
 
 	bool posInterfaceFound = false;
 
@@ -431,9 +431,9 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 		VFrame30::IPosLine* pos = dynamic_cast<VFrame30::IPosLine*>(m_newItem.get());
 
-		drawRullers = true;
-		rullerPoint.X = pos->endXDocPt();
-		rullerPoint.Y = pos->endYDocPt();
+		drawRulers = true;
+		rulerPoint.X = pos->endXDocPt();
+		rulerPoint.Y = pos->endYDocPt();
 	}
 
 	if (dynamic_cast<VFrame30::IPosRect*>(m_newItem.get()) != nullptr)
@@ -446,10 +446,10 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		posInterfaceFound = true;
 		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(m_newItem.get());
 
-		drawRullers = true;
+		drawRulers = true;
 
-		rullerPoint.X = itemPos->leftDocPt() + itemPos->widthDocPt();
-		rullerPoint.Y = itemPos->topDocPt() + itemPos->heightDocPt();
+		rulerPoint.X = itemPos->leftDocPt() + itemPos->widthDocPt();
+		rulerPoint.Y = itemPos->topDocPt() + itemPos->heightDocPt();
 	}
 
 	if (dynamic_cast<VFrame30::IPosConnection*>(m_newItem.get()) != nullptr)
@@ -470,8 +470,8 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 		if (ecl.extensionPoints().empty() == false)
 		{
-			drawRullers = true;
-			rullerPoint = VFrame30::SchemaPoint(ecl.lastExtensionPoint());
+			drawRulers = true;
+			rulerPoint = VFrame30::SchemaPoint(ecl.lastExtensionPoint());
 		}
 	}
 
@@ -483,7 +483,7 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		return;
 	}
 
-	if (drawRullers == true)
+	if (drawRulers == true)
 	{
 		QColor outlineColor(Qt::blue);
 		outlineColor.setAlphaF(0.5);
@@ -497,8 +497,8 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 		p->setPen(outlinePen);
 
-		p->drawLine(QPointF(rullerPoint.X, 0.0), QPointF(rullerPoint.X, schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerPoint.Y), QPointF(schema()->docWidth(), rullerPoint.Y));
+		p->drawLine(QPointF(rulerPoint.X, 0.0), QPointF(rulerPoint.X, schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rulerPoint.Y), QPointF(schema()->docWidth(), rulerPoint.Y));
 
 		p->setRenderHints(oldrenderhints);
 	}
@@ -608,7 +608,7 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 			}
 		});
 
-	// Draw rullers by bounding rect
+	// Draw rulers by bounding rect
 	//
 	QPainter* p = drawParam->painter();
 
@@ -689,16 +689,16 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	itemPos->setWidthDocPt(newItemRect.width());
 	itemPos->setHeightDocPt(newItemRect.height());
 
-	// Save result for drawing rullers
+	// Save result for drawing rulers
 	//
 	m_addRectStartPoint = VFrame30::SchemaPoint(newItemRect.topLeft());
 	m_addRectEndPoint = VFrame30::SchemaPoint(newItemRect.bottomRight());
 
-	// Draw rullers by bounding rect
+	// Draw rulers by bounding rect
 	//
 	QPainter* p = drawParam->painter();
 
-	QRectF rullerRect(m_addRectStartPoint, m_addRectEndPoint);
+	QRectF rulerRect(m_addRectStartPoint, m_addRectEndPoint);
 
 	QPen outlinePen(Qt::blue);
 	outlinePen.setStyle(Qt::PenStyle::DashLine);
@@ -712,32 +712,32 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	switch (mouseState())
 	{
 	case MouseState::SizingTopLeft:
-		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(schema()->docWidth(), rullerRect.top()));
+		p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
 		break;
 	case MouseState::SizingTop:
-		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(schema()->docWidth(), rullerRect.top()));
+		p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
 		break;
 	case MouseState::SizingTopRight:
-		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(schema()->docWidth(), rullerRect.top()));
+		p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
 		break;
 	case MouseState::SizingRight:
-		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), schema()->docHeight()));
+		p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
 		break;
 	case MouseState::SizingBottomRight:
-		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(schema()->docWidth(), rullerRect.bottom()));
+		p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
 		break;
 	case MouseState::SizingBottom:
-		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(schema()->docWidth(), rullerRect.bottom()));
+		p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
 		break;
 	case MouseState::SizingBottomLeft:
-		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(schema()->docWidth(), rullerRect.bottom()));
+		p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
+		p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
 		break;
 	case MouseState::SizingLeft:
-		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), schema()->docHeight()));
+		p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
 		break;
 	default:
 		assert(false);
@@ -808,7 +808,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 		itemPos->setEndYDocPt(itemPos->endYDocPt() + ydif);
 	}
 
-	// Draw rullers
+	// Draw rulers
 	//
 	QPainter* p = drawParam->painter();
 
@@ -865,7 +865,7 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 
 	const EditConnectionLine& ecl = m_editConnectionLines.front();
 
-	// Draw rullers
+	// Draw rulers
 	//
 	QPainter* p = drawParam->painter();
 
@@ -885,34 +885,34 @@ void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	{
 	case MouseState::MovingHorizontalEdge:
 		{
-			double rullerPoint = ecl.editEdgetCurrState();
-			p->drawLine(QPointF(0.0, rullerPoint), QPointF(schema()->docWidth(), rullerPoint));
+			double rulerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(0.0, rulerPoint), QPointF(schema()->docWidth(), rulerPoint));
 		}
 		break;
 	case MouseState::MovingVerticalEdge:
 		{
-			double rullerPoint = ecl.editEdgetCurrState();
-			p->drawLine(QPointF(rullerPoint, 0.0), QPointF(rullerPoint, schema()->docHeight()));
+			double rulerPoint = ecl.editEdgetCurrState();
+			p->drawLine(QPointF(rulerPoint, 0.0), QPointF(rulerPoint, schema()->docHeight()));
 		}
 		break;
 	case MouseState::MovingConnectionLinePoint:
 		{
-			QPointF rullerPoint;
+			QPointF rulerPoint;
 			switch (ecl.mode())
 			{
 			case EditConnectionLine::EditMode::AddToBegin:
 			case EditConnectionLine::EditMode::AddToEnd:
-				rullerPoint = ecl.lastExtensionPoint();
+				rulerPoint = ecl.lastExtensionPoint();
 				break;
 			case EditConnectionLine::EditMode::EditPoint:
-				rullerPoint = ecl.editPointCurrState();
+				rulerPoint = ecl.editPointCurrState();
 				break;
 			default:
 				assert(false);
 			}
 
-			p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), schema()->docHeight()));
-			p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(schema()->docWidth(), rullerPoint.y()));
+			p->drawLine(QPointF(rulerPoint.x(), 0.0), QPointF(rulerPoint.x(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rulerPoint.y()), QPointF(schema()->docWidth(), rulerPoint.y()));
 		}
 		break;
 	default:

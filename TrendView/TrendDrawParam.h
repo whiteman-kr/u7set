@@ -64,9 +64,9 @@ namespace TrendLib
 		quint64 duration() const;
 		void setLaneDuration(qint64 value);
 
-		int hightlightRullerIndex() const;
-		void setHightlightRullerIndex(int value);
-		void resetHightlightRullerIndex();
+		int hightlightRulerIndex() const;
+		void setHightlightRulerIndex(int value);
+		void resetHightlightRulerIndex();
 
 		double cosmeticPenWidth() const;
 
@@ -88,7 +88,7 @@ namespace TrendLib
 		TimeStamp m_startTimeStamp = TimeStamp{QDateTime::currentDateTime().toMSecsSinceEpoch() - 1_hour};
 		qint64 m_duration = 1_hour;
 
-		int m_highlightRullerIndex = -1;
+		int m_highlightRulerIndex = -1;
 		double m_cosmeticPenWidth = 0;
 
 		mutable std::vector<std::pair<QString, QRectF>> m_signalDescriptionRect;		// Keeps signal description Rect, which is filled while draw trend, in inches.
