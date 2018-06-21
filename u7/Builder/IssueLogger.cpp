@@ -1877,6 +1877,31 @@ namespace Builder
 				  .arg(schema));
 	}
 
+
+	/// IssueCode: ALP4070
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Schema '%1' has %2 commented functional item(s).
+	///
+	/// Parameters:
+	///		%1 Schema StrID
+	///		%2 Commennted item(s) count
+	///
+	/// Description:
+	///			Schema has one or more commented functional items.
+	///
+	void IssueLogger::wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Warning2, itemsUuids, schema);
+
+		LOG_WARNING2(IssueType::AlParsing,
+					4070,
+					tr("Schema '%1' has %2 commented functional item(s).")
+						.arg(schema)
+						.arg(itemsUuids.size()));
+	}
+
 	/// IssueCode: ALP4130
 	///
 	/// IssueType: Error

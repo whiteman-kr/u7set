@@ -2918,11 +2918,13 @@ namespace Builder
 
 			// Remove all commented items from the schema
 			//
+			std::vector<QUuid> commentedItems;
+
 			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
 			{
 				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
 
-				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
 				{
 					assert(item);
 
@@ -2930,9 +2932,21 @@ namespace Builder
 					{
 						newItemList.push_back(item);
 					}
+
+					if (item->isCommented() == true && item->isFblItem() == true)
+					{
+						commentedItems.push_back(item->guid());
+					}
 				}
 
 				layer->Items.swap(newItemList);
+			}
+
+			if (commentedItems.empty() == false)
+			{
+				// Schema has commented functional items
+				//
+				m_log->wrnALP4070(ls->schemaId(), commentedItems);
 			}
 
 			// Add to schema list

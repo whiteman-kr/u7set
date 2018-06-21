@@ -181,6 +181,8 @@ namespace Builder
 		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);
 
+		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);	// Schema '%1' has %2 commented functional item(s).
+
 		// Multichannel pasing errors
 		//
 		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);
