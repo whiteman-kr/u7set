@@ -29,11 +29,7 @@ bool TuningModelClient::hasPendingChanges()
 	{
 		Hash hash = m_hashes[row];
 
-		bool ok = false;
-
-		const TuningSignalState tss = m_tuningSignalManager->state(hash, &ok);
-
-		if (tss.userModified() == true)
+		if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 		{
 			return true;
 		}
@@ -76,7 +72,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (m_blink == true && state.userModified() == true)
+		if (m_blink == true && m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 		{
 			QColor color = QColor(Qt::yellow);
 			return QBrush(color);
@@ -189,7 +185,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (m_blink == true && state.userModified() == true)
+		if (m_blink == true && m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 		{
 			QColor color = QColor(Qt::black);
 			return QBrush(color);
@@ -294,7 +290,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && asp.isDiscrete() == true && state.valid() == true)
 	{
-		return (state.modifiedValue().discreteValue() == 0 ? Qt::Unchecked : Qt::Checked);
+		return (m_tuningSignalManager->newValue(hash).discreteValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
 
 	return TuningModel::data(index, role);
@@ -808,12 +804,12 @@ bool TuningPage::write()
 
 	for (Hash hash : hashes)
 	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.userModified() == false)
+		if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
 		{
 			continue;
 		}
+
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 		if (state.controlIsEnabled() == false)
 		{
@@ -837,7 +833,7 @@ bool TuningPage::write()
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (state.userModified() == false)
+		if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
 		{
 			continue;
 		}
@@ -855,11 +851,11 @@ bool TuningPage::write()
 
 		if (asp.isAnalog() == true)
 		{
-			strValue = state.modifiedValue().toString(asp.precision());
+			strValue = m_tuningSignalManager->newValue(hash).toString(asp.precision());
 		}
 		else
 		{
-			strValue = state.modifiedValue().toString();
+			strValue = m_tuningSignalManager->newValue(hash).toString();
 		}
 
 		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
@@ -881,19 +877,19 @@ bool TuningPage::write()
 
 	for (Hash hash : hashes)
 	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.userModified() == false)
+		if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
 		{
 			continue;
 		}
+
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 		if (state.controlIsEnabled() == false)
 		{
 			continue;
 		}
 
-		TuningWriteCommand cmd(hash, state.modifiedValue());
+		TuningWriteCommand cmd(hash, m_tuningSignalManager->newValue(hash));
 
 		commands.push_back(cmd);
 	}
@@ -1237,7 +1233,7 @@ void TuningPage::invertValue()
 
 			tv.setDiscreteValue(0);
 
-			if (state.modifiedValue().discreteValue() == 0)
+			if (m_tuningSignalManager->newValue(hash).discreteValue() == 0)
 			{
 				tv.setDiscreteValue(1);
 			}

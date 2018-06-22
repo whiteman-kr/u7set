@@ -558,7 +558,6 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (displayIndex == static_cast<int>(Columns::Value))
 		{
-
 			if (tss.controlIsEnabled() == false)
 			{
 				return tr("-");
@@ -567,19 +566,21 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 			{
 				if (tss.valid() == true)
 				{
+					TuningValue newValue = m_tuningSignalManager->newValue(hash);
+
 					if (asp.isAnalog() == false)
 					{
 						QString valueString = tss.value().toString();
 
-						if (tss.userModified() == true)
+						if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 						{
-							QString editValueString = tss.modifiedValue().toString();
+							QString editValueString = newValue.toString();
 							return tr("%1 => %2").arg(valueString).arg(editValueString);
 						}
 
 						if (tss.writeInProgress() == true)
 						{
-							QString editValueString = tss.modifiedValue().toString();
+							QString editValueString = newValue.toString();
 							return tr("Writing %1").arg(editValueString);
 						}
 
@@ -589,15 +590,15 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					{
 						QString valueString = tss.value().toString(asp.precision());
 
-						if (tss.userModified() == true)
+						if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 						{
-							QString editValueString = tss.modifiedValue().toString(asp.precision());
+							QString editValueString = newValue.toString(asp.precision());
 							return QString("%1 => %2").arg(valueString).arg(editValueString);
 						}
 
 						if (tss.writeInProgress() == true)
 						{
-							QString editValueString = tss.modifiedValue().toString(asp.precision());
+							QString editValueString = newValue.toString(asp.precision());
 							return tr("Writing %1").arg(editValueString);
 						}
 

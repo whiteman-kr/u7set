@@ -30,25 +30,6 @@ double TuningSignalState::toDouble() const
 	return m_value.toDouble();
 }
 
-TuningValue TuningSignalState::modifiedValue() const
-{
-	return m_newValue;
-}
-
-void TuningSignalState::setModifiedValue(const TuningValue& value)
-{
-	m_newValue = value;
-
-	if (m_value == m_newValue)
-	{
-		m_flags.userModified = false;
-	}
-	else
-	{
-		m_flags.userModified = true;
-	}
-}
-
 TuningValue TuningSignalState::lowBound() const
 {
 	return m_lowBound;
@@ -117,11 +98,6 @@ QDateTime TuningSignalState::successfulWriteTime() const
 QDateTime TuningSignalState::unsuccessfulWriteTime() const
 {
 	return QDateTime::fromMSecsSinceEpoch(m_unsuccessfulWriteTime);
-}
-
-bool TuningSignalState::userModified() const
-{
-	return m_flags.userModified;
 }
 
 bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
