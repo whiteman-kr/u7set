@@ -15,7 +15,6 @@ union TuningSignalStateFlags
 		quint32	writeInProgress : 1;
 		quint32 controlIsEnabled: 1;
 
-		quint32 userModified : 1;	// This flag is used by TuningClient's model
 	};
 
 	quint32 all = 0;
@@ -46,9 +45,6 @@ public:
 	QVariant toVariant() const;
 	double toDouble() const;
 
-	TuningValue modifiedValue() const;
-	void setModifiedValue(const TuningValue& value);
-
 	TuningValue lowBound() const;
 	QVariant lowBoundToVariant() const;
 
@@ -68,8 +64,6 @@ public:
 	QDateTime successfulWriteTime() const;
 	QDateTime unsuccessfulWriteTime() const;
 
-	bool userModified() const;
-
 	bool setState(const ::Network::TuningSignalState& message);
 
 	void invalidate();
@@ -82,7 +76,6 @@ public:
 	TuningSignalStateFlags m_flags;
 
 	TuningValue m_value;
-	TuningValue m_newValue;
 
 	TuningValue m_lowBound;
 	TuningValue m_highBound;
