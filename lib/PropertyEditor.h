@@ -45,6 +45,8 @@ namespace ExtWidgets
 {
 	class PropertyEditor;
 
+	const int PropertyEditorTextMaxLength = 32767;
+
 	class PropertyEditorHelp : public QDialog
 	{
 	public:
