@@ -514,6 +514,14 @@ namespace VFrame30
 		Q_UNUSED(propertyName)
 		Q_UNUSED(value)
 
+		std::map<QString, AfbPin> oldOuputs;	// We need to keep pin's GUIDs. If an item is met in UFB, then it will be copied
+												// and old outputs GUID's are conected to associated IOs
+												// Key is PinCaption
+		for (const AfbPin& pin : outputs())
+		{
+			oldOuputs[pin.caption()] = pin;
+		}
+
 		outputs().clear();
 
 		std::vector<std::shared_ptr<Property>> props = properties();
@@ -531,7 +539,15 @@ namespace VFrame30
 			if (it == props.end())
 			{
 				assert(false);
-				addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
+				AfbPin& newPin = addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
+
+				// Restore old pin guid, associatedIOs, etc
+				//
+				if (auto foundOldPinIt = oldOuputs.find(newPin.caption());
+					foundOldPinIt != oldOuputs.end())
+				{
+					newPin = foundOldPinIt->second;
+				}
 			}
 			else
 			{
@@ -542,7 +558,15 @@ namespace VFrame30
 				}
 				else
 				{
-					addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
+					AfbPin& newPin = addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
+
+					// Restore old pin guid, associatedIOs, etc
+					//
+					if (auto foundOldPinIt = oldOuputs.find(newPin.caption());
+						foundOldPinIt != oldOuputs.end())
+					{
+						newPin = foundOldPinIt->second;
+					}
 				}
 			}
 		}

@@ -177,19 +177,19 @@ namespace TrendLib
 		}
 	}
 
-	int TrendDrawParam::hightlightRullerIndex() const
+	int TrendDrawParam::hightlightRulerIndex() const
 	{
-		return m_highlightRullerIndex;
+		return m_highlightRulerIndex;
 	}
 
-	void TrendDrawParam::setHightlightRullerIndex(int value)
+	void TrendDrawParam::setHightlightRulerIndex(int value)
 	{
-		m_highlightRullerIndex = value;
+		m_highlightRulerIndex = value;
 	}
 
-	void TrendDrawParam::resetHightlightRullerIndex()
+	void TrendDrawParam::resetHightlightRulerIndex()
 	{
-		m_highlightRullerIndex = -1;
+		m_highlightRulerIndex = -1;
 	}
 
 	double TrendDrawParam::cosmeticPenWidth() const

@@ -36,7 +36,7 @@ public:
 
 	// UserTextPos
 	//
-	enum class UserTextPos
+	enum class TextPos
 	{
 		LeftTop,
 		Top,
@@ -47,7 +47,7 @@ public:
 		LeftBottom,
 		Left
 	};
-	Q_ENUM(UserTextPos)
+	Q_ENUM(TextPos)
 
 	// Format analog
 	//

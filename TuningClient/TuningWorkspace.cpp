@@ -755,8 +755,13 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 			}
 		}
 
+		static QString equipmentString = tr("Equipment");
+		static QString schemasString = tr("Schemas");
+		Q_UNUSED(equipmentString);
+		Q_UNUSED(schemasString);
+
 		QStringList l;
-		l << caption;
+		l << tr(caption.toUtf8().data());	// Try to translate filter name!
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));

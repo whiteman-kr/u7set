@@ -447,12 +447,14 @@ namespace Builder
 			if (schemas.isEmpty() == false)
 			{
 				schemas.replace('\n', ';');
-				schemasList = schemas.split(';');
+				schemasList = schemas.split(';', QString::SkipEmptyParts);
 			}
 
 
-			for (auto s : schemasList)
+			for (QString s : schemasList)
 			{
+				s = s.trimmed();
+
 				// Check if schema with specified ID exists
 				//
 
@@ -683,12 +685,14 @@ namespace Builder
 		if (schemas.isEmpty() == false)
 		{
 			schemas.replace('\n', ';');
-			schemasList = schemas.split(';');
+			schemasList = schemas.split(';', QString::SkipEmptyParts);
 		}
 
 
-		for (const QString& s : schemasList)
+		for (QString s : schemasList)
 		{
+			s = s.trimmed();
+
 			bool found = false;
 
 			// Check if schema with specified ID exists

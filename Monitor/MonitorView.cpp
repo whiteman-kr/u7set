@@ -42,6 +42,7 @@ void MonitorView::paintEvent(QPaintEvent* /*pe*/)
 	drawParam.setEditMode(false);
 	drawParam.setAppSignalManager(&theSignals);
 	drawParam.setInfoMode(theSettings.showItemsLabels());
+	drawParam.setDrawNotesLayer(false);
 
 	// Draw schema
 	//

@@ -270,7 +270,7 @@ namespace TrendLib
 
 		{
 			QPainter p(&pixmap);
-			m_trend.drawRullers(&p, drawParam);
+			m_trend.drawRulers(&p, drawParam);
 		}
 
 		bool ok = pixmap.save(fileName, nullptr, -1);
@@ -305,7 +305,7 @@ namespace TrendLib
 		QPainter p(&pdfWriter);
 
 		m_trend.draw(&p, drawParam, true);
-		m_trend.drawRullers(&p, drawParam);
+		m_trend.drawRulers(&p, drawParam);
 
 		return true;
 	}
@@ -346,7 +346,7 @@ namespace TrendLib
 		// Draw to printer
 		//
 		m_trend.draw(&painter, drawParam, true);
-		m_trend.drawRullers(&painter, drawParam);
+		m_trend.drawRulers(&painter, drawParam);
 
 		// Finish printing
 		//
@@ -383,9 +383,9 @@ namespace TrendLib
 
 		painter.drawPixmap(0, 0, m_pixmap);
 
-		// Draw rullers
+		// Draw rulers
 		//
-		trend().drawRullers(&painter, m_pixmapDrawParam);
+		trend().drawRulers(&painter, m_pixmapDrawParam);
 
 		// Draw select view area
 		//
@@ -430,16 +430,16 @@ namespace TrendLib
 		}
 
 		int laneIndex = -1;
-		int rullerIndex = -1;
+		int rulerIndex = -1;
 		TimeStamp timeStamp;
 		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex, &outSignal);
+		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rulerIndex, &outSignal);
 
 		if (m_mouseAction == MouseAction::SelectViewStart &&
 			(mouseOn == Trend::MouseOn::InsideTrendArea ||
 			 mouseOn == Trend::MouseOn::OnSignalDescription ||
-			 mouseOn == Trend::MouseOn::OnRuller))
+			 mouseOn == Trend::MouseOn::OnRuler))
 		{
 			if (event->buttons().testFlag(Qt::LeftButton) == false &&
 				event->buttons().testFlag(Qt::MiddleButton) == false)
@@ -473,20 +473,20 @@ namespace TrendLib
 
 		if (event->buttons().testFlag(Qt::LeftButton) == true)
 		{
-			if (mouseOn == Trend::MouseOn::OnRuller)
+			if (mouseOn == Trend::MouseOn::OnRuler)
 			{
-				if (rullerIndex == -1)
+				if (rulerIndex == -1)
 				{
-					assert(rullerIndex != -1);
+					assert(rulerIndex != -1);
 					return;
 				}
 
-				m_rullerMoveRullerIndex = rullerIndex;
-				m_rullerMoveInitialMousePos = event->pos();
+				m_rulerMoveRulerIndex = rulerIndex;
+				m_rulerMoveInitialMousePos = event->pos();
 
-				m_rullerMoveInitialTimeStamp = rullerSet().rullers().at(rullerIndex).timeStamp();
+				m_rulerMoveInitialTimeStamp = rulerSet().rulers().at(rulerIndex).timeStamp();
 
-				m_mouseAction = MouseAction::MoveRuller;
+				m_mouseAction = MouseAction::MoveRuler;
 				this->grabMouse();
 			}
 
@@ -544,12 +544,12 @@ namespace TrendLib
 			return;
 		}
 
-		if (m_mouseAction == MouseAction::MoveRuller)
+		if (m_mouseAction == MouseAction::MoveRuler)
 		{
 
 		}
 
-		if (m_mouseAction == MouseAction::MoveRuller)
+		if (m_mouseAction == MouseAction::MoveRuler)
 		{
 			// This will call slider update
 			//
@@ -581,11 +581,11 @@ namespace TrendLib
 		if (m_mouseAction == MouseAction::None)
 		{
 			int laneIndex = -1;
-			int rullerIndex = -1;
+			int rulerIndex = -1;
 			TimeStamp timeStamp;
 			TrendSignalParam onSignal;
 
-			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_pixmapDrawParam, &laneIndex, &timeStamp, &rullerIndex, &onSignal);
+			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_pixmapDrawParam, &laneIndex, &timeStamp, &rulerIndex, &onSignal);
 
 			Qt::CursorShape newCursorShape = Qt::ArrowCursor;
 
@@ -595,12 +595,12 @@ namespace TrendLib
 			case Trend::MouseOn::OutsideTrendArea:		newCursorShape = Qt::ArrowCursor;			break;
 			case Trend::MouseOn::InsideTrendArea:		newCursorShape = Qt::ArrowCursor;			break;
 			case Trend::MouseOn::OnSignalDescription:	newCursorShape = Qt::PointingHandCursor;	break;
-			case Trend::MouseOn::OnRuller:				newCursorShape = Qt::SplitHCursor;			break;
+			case Trend::MouseOn::OnRuler:				newCursorShape = Qt::SplitHCursor;			break;
 			default:
 				assert(false);
 			}
 
-			m_pixmapDrawParam.setHightlightRullerIndex(rullerIndex);
+			m_pixmapDrawParam.setHightlightRulerIndex(rulerIndex);
 
 			if (newCursorShape == Qt::ArrowCursor)
 			{
@@ -690,10 +690,10 @@ namespace TrendLib
 					emit startTimeChanged(ts);
 				}
 				break;
-			case MouseAction::MoveRuller:
+			case MouseAction::MoveRuler:
 				{
-					assert(m_rullerMoveRullerIndex != -1);
-					assert(m_rullerMoveRullerIndex >= 0 && m_rullerMoveRullerIndex < static_cast<int>(rullerSet().rullers().size()));
+					assert(m_rulerMoveRulerIndex != -1);
+					assert(m_rulerMoveRulerIndex >= 0 && m_rulerMoveRulerIndex < static_cast<int>(rulerSet().rulers().size()));
 
 					int laneHeight = rect().height() / laneCount();
 					int laneIndex = qBound<int>(0, event->pos().y() / laneHeight, laneCount() - 1);
@@ -711,8 +711,8 @@ namespace TrendLib
 
 					TimeStamp ts(laneStartTime + static_cast<qint64>(mouseOffset * coefx));
 
-					TrendRuller& mutableRuller = rullerSet().rullers().at(m_rullerMoveRullerIndex);
-					mutableRuller.setTimeStamp(ts);
+					TrendRuler& mutableRuler = rulerSet().rulers().at(m_rulerMoveRulerIndex);
+					mutableRuler.setTimeStamp(ts);
 
 					update();
 				}
@@ -807,11 +807,11 @@ namespace TrendLib
 				// Scale analog signal where is mouse now
 				//
 				int laneIndex = -1;
-				int rullerIndex = -1;
+				int rulerIndex = -1;
 				TimeStamp timeStamp;
 				TrendSignalParam trendSignal;
 
-				Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex, &trendSignal);
+				Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rulerIndex, &trendSignal);
 
 				if (mouseOn != Trend::MouseOn::OutsideTrendArea &&
 					mouseOn != Trend::MouseOn::Outside &&
@@ -864,14 +864,14 @@ namespace TrendLib
 		return;
 	}
 
-	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, TrendSignalParam* onSignal)
+	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rulerIndex, TrendSignalParam* onSignal)
 	{
-		return m_trend.mouseIsOver(mousePos, m_pixmapDrawParam, outLaneIndex, timeStamp, rullerIndex, onSignal);
+		return m_trend.mouseIsOver(mousePos, m_pixmapDrawParam, outLaneIndex, timeStamp, rulerIndex, onSignal);
 	}
 
-	void TrendWidget::resetRullerHighlight()
+	void TrendWidget::resetRulerHighlight()
 	{
-		m_pixmapDrawParam.resetHightlightRullerIndex();
+		m_pixmapDrawParam.resetHightlightRulerIndex();
 	}
 
 	void TrendWidget::initSelectViewArea(QPoint pos, int laneIndex)
@@ -1048,14 +1048,14 @@ namespace TrendLib
 		return m_trend.signalSet();
 	}
 
-	TrendLib::TrendRullerSet& TrendWidget::rullerSet()
+	TrendLib::TrendRulerSet& TrendWidget::rulerSet()
 	{
-		return m_trend.rullerSet();
+		return m_trend.rulerSet();
 	}
 
-	const TrendLib::TrendRullerSet& TrendWidget::rullerSet() const
+	const TrendLib::TrendRulerSet& TrendWidget::rulerSet() const
 	{
-		return m_trend.rullerSet();
+		return m_trend.rulerSet();
 	}
 
 	TrendLib::Trend& TrendWidget::trend()

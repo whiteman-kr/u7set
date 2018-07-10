@@ -4141,6 +4141,13 @@ class FblItemRect : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 usertextpos() const;
   inline void set_usertextpos(::google::protobuf::int32 value);
 
+  // optional int32 labelPos = 9 [default = 2];
+  inline bool has_labelpos() const;
+  inline void clear_labelpos();
+  static const int kLabelPosFieldNumber = 9;
+  inline ::google::protobuf::int32 labelpos() const;
+  inline void set_labelpos(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.FblItemRect)
  private:
   inline void set_has_weight();
@@ -4159,6 +4166,8 @@ class FblItemRect : public ::google::protobuf::Message {
   inline void clear_has_usertext();
   inline void set_has_usertextpos();
   inline void clear_has_usertextpos();
+  inline void set_has_labelpos();
+  inline void clear_has_labelpos();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4170,9 +4179,10 @@ class FblItemRect : public ::google::protobuf::Message {
   ::google::protobuf::uint32 textcolor_;
   ::google::protobuf::int32 usertextpos_;
   ::std::string* usertext_;
+  ::google::protobuf::int32 labelpos_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -17441,6 +17451,28 @@ inline ::google::protobuf::int32 FblItemRect::usertextpos() const {
 inline void FblItemRect::set_usertextpos(::google::protobuf::int32 value) {
   set_has_usertextpos();
   usertextpos_ = value;
+}
+
+// optional int32 labelPos = 9 [default = 2];
+inline bool FblItemRect::has_labelpos() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void FblItemRect::set_has_labelpos() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void FblItemRect::clear_has_labelpos() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void FblItemRect::clear_labelpos() {
+  labelpos_ = 2;
+  clear_has_labelpos();
+}
+inline ::google::protobuf::int32 FblItemRect::labelpos() const {
+  return labelpos_;
+}
+inline void FblItemRect::set_labelpos(::google::protobuf::int32 value) {
+  set_has_labelpos();
+  labelpos_ = value;
 }
 
 // -------------------------------------------------------------------

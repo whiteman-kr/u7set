@@ -1,7 +1,7 @@
 #ifndef TRENDSLIDER_H
 #define TRENDSLIDER_H
 #include <QWidget>
-#include "TrendRuller.h"
+#include "TrendRuler.h"
 #include "../lib/TimeStamp.h"
 
 class QPushButton;
@@ -14,7 +14,7 @@ class TrendSlider : public QWidget
 	Q_OBJECT
 
 public:
-	TrendSlider(TrendLib::TrendRullerSet* rullerSet);
+	TrendSlider(TrendLib::TrendRulerSet* rulerSet);
 
 	// Method
 	//
@@ -68,7 +68,7 @@ private:
 	QPushButton* m_lineRightButton = nullptr;
 	TrendSliderRailSubcontrol* m_railSubcontrol = nullptr;
 
-	TrendLib::TrendRullerSet* m_rullerSet = nullptr;
+	TrendLib::TrendRulerSet* m_rulerSet = nullptr;
 };
 
 class TrendSliderRailSubcontrol : public QWidget
@@ -76,7 +76,7 @@ class TrendSliderRailSubcontrol : public QWidget
 	Q_OBJECT
 
 public:
-	TrendSliderRailSubcontrol(TrendSlider* threndSlider, TrendLib::TrendRullerSet* rullerSet);
+	TrendSliderRailSubcontrol(TrendSlider* threndSlider, TrendLib::TrendRulerSet* rulerSet);
 
 signals:
 	void valueChanged(qint64 value);
@@ -95,7 +95,7 @@ protected slots:
 
 private:
 	TrendSlider* m_trendSlider = nullptr;
-	TrendLib::TrendRullerSet* m_rullerSet = nullptr;
+	TrendLib::TrendRulerSet* m_rulerSet = nullptr;
 	qint64 m_value = 0;
 	qint64 m_max = 0;
 	qint64 m_min = 0;

@@ -161,11 +161,14 @@ namespace VFrame30
 		QString label() const;
 		void setLabel(const QString& value);
 
+		E::TextPos labelPos() const;
+		void setLabelPos(const E::TextPos& value);
+
 		QString userText() const;
 		void setUserText(const QString& value);
 
-		E::UserTextPos userTextPos() const;
-		void setUserTextPos(const E::UserTextPos& value);
+		E::TextPos userTextPos() const;
+		void setUserTextPos(const E::TextPos& value);
 
 	protected:
 		// m_gridSize and m_pingGridStep are cached values from Schema, they set in CalcPointPos.
@@ -182,9 +185,10 @@ namespace VFrame30
 		FontParam m_font;
 
 		QString m_label;
+		E::TextPos m_labelPos = E::TextPos::RightTop;
 
 		QString m_userText;
-		E::UserTextPos m_userTextPos = E::UserTextPos::Top;
+		E::TextPos m_userTextPos = E::TextPos::Top;
 	};
 }
 

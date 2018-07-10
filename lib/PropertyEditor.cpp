@@ -768,18 +768,42 @@ namespace ExtWidgets
 
 	void QtMultiTextEdit::onButtonPressed()
 	{
-		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_propertyEditor, m_lineEdit->text(), m_property);
+		QString editText;
+		if (m_userType == QVariant::String)
+		{
+			editText = m_oldValue.toString();	// Take string from m_oldValue, because m_lineEdit has length limit
+		}
+		else
+		{
+			editText = editText = m_lineEdit->text();
+		}
+
+		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_propertyEditor, editText, m_property);
 		if (multlLineEdit->exec() == QDialog::Accepted)
 		{
-            m_lineEdit->blockSignals(true);
+			editText = multlLineEdit->text();
 
-            m_lineEdit->setText(multlLineEdit->text());
-            if (m_lineEdit->text() != m_oldValue)
+			m_lineEdit->blockSignals(true);
+
+			bool longText = editText.length() > PropertyEditorTextMaxLength;
+
+			m_lineEdit->setReadOnly(longText == true);
+
+			if (longText == true)
+			{
+				m_lineEdit->setText(tr("<%1 bytes>").arg(editText.length()));
+			}
+			else
+			{
+				m_lineEdit->setText(editText);
+			}
+
+			if (editText != m_oldValue)
             {
-                 emit valueChanged(m_lineEdit->text());
+				 emit valueChanged(editText);
             }
 
-            m_oldValue = m_lineEdit->text();
+			m_oldValue = editText;
 
             m_lineEdit->blockSignals(false);
         }
@@ -794,12 +818,28 @@ namespace ExtWidgets
 			return;
 		}
 
+		m_lineEdit->setReadOnly(readOnly);
+
 		switch (m_userType)
 		{
 		case QVariant::String:
 			{
 				m_oldValue = property->value().toString();
-				m_lineEdit->setText(m_oldValue.toString());
+
+				QString editText = property->value().toString();
+
+				bool longText = editText.length() > PropertyEditorTextMaxLength;
+
+				m_lineEdit->setReadOnly(readOnly || longText == true);
+
+				if (longText == true)
+				{
+					m_lineEdit->setText(tr("<%1 bytes>").arg(editText.length()));
+				}
+				else
+				{
+					m_lineEdit->setText(editText);
+				}
 			}
 			break;
 		case QVariant::Int:
@@ -839,8 +879,6 @@ namespace ExtWidgets
 				return;
 			}
 		}
-
-		m_lineEdit->setReadOnly(readOnly);
 
 		if (m_button != nullptr)
 		{
@@ -1687,6 +1725,11 @@ namespace ExtWidgets
 				case QVariant::String:
 					{
                         QString val = value.toString();
+
+						if (val.length() > PropertyEditorTextMaxLength)
+						{
+							val = tr("<%1 bytes>").arg(val.length());
+						}
 
 						val.replace("\n", " ");
 

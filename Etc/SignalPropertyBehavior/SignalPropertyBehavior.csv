@@ -20,6 +20,8 @@ Unit				; False			; Write		; Hide		; Write			; Hide		; Hide			; Hide			; Hide		;
 SensorType			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 LowADC				; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 HighADC				; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
+LowPhysicalUnits		; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
+HighPhysicalUnits		; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 LowDAC				; False			; Hide		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 HighDAC				; False			; Hide		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 OutputMode			; False			; Hide		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide

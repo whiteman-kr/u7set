@@ -439,22 +439,22 @@ namespace VFrame30
 		return static_cast<int>(m_outputPoints.size());
 	}
 
-	void FblItem::addInput()
+	AfbPin& FblItem::addInput()
 	{
-		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), -1, E::SignalType::Discrete, "");
-		m_inputPoints.push_back(cp);
+		AfbPin& cp = m_inputPoints.emplace_back(ConnectionDirrection::Input, QUuid::createUuid(), -1, E::SignalType::Discrete, "");
+		return cp;
 	}
 
-	void FblItem::addInput(const Afb::AfbSignal& s)
+	AfbPin& FblItem::addInput(const Afb::AfbSignal& s)
 	{
-		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), s);
-		m_inputPoints.push_back(cp);
+		AfbPin& cp = m_inputPoints.emplace_back(ConnectionDirrection::Input, QUuid::createUuid(), s);
+		return cp;
 	}
 
-	void FblItem::addInput(int opIndex, E::SignalType signalType, QString caption)
+	AfbPin& FblItem::addInput(int opIndex, E::SignalType signalType, QString caption)
 	{
-		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), opIndex, signalType, caption);
-		m_inputPoints.push_back(cp);
+		AfbPin& cp = m_inputPoints.emplace_back(ConnectionDirrection::Input, QUuid::createUuid(), opIndex, signalType, caption);
+		return cp;
 	}
 
 	void FblItem::removeAllInputs()
@@ -487,22 +487,22 @@ namespace VFrame30
 					m_outputPoints.end());
 	}
 
-	void FblItem::addOutput()
+	AfbPin& FblItem::addOutput()
 	{
-		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), -1, E::SignalType::Discrete, "");
-		m_outputPoints.push_back(cp);
+		AfbPin& cp = m_outputPoints.emplace_back(ConnectionDirrection::Output, QUuid::createUuid(), -1, E::SignalType::Discrete, "");
+		return cp;
 	}
 
-	void FblItem::addOutput(const Afb::AfbSignal& s)
+	AfbPin& FblItem::addOutput(const Afb::AfbSignal& s)
 	{
-		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), s);
-		m_outputPoints.push_back(cp);
+		AfbPin& cp = m_outputPoints.emplace_back(ConnectionDirrection::Output, QUuid::createUuid(), s);
+		return cp;
 	}
 
-	void FblItem::addOutput(int opIndex, E::SignalType signalType, QString caption)
+	AfbPin& FblItem::addOutput(int opIndex, E::SignalType signalType, QString caption)
 	{
-		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), opIndex, signalType, caption);
-		m_outputPoints.push_back(cp);
+		AfbPin& cp = m_outputPoints.emplace_back(ConnectionDirrection::Output, QUuid::createUuid(), opIndex, signalType, caption);
+		return cp;
 	}
 
 	void FblItem::ClearAssociatedConnections()

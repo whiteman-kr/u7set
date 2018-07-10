@@ -184,6 +184,8 @@ namespace Builder
 		void errALP4060(QString schema, QString schemaItem, QUuid itemUuid);						// Loopback detected
 		void errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids);	// Duplicate source of LoopbackID
 
+		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);	// Schema '%1' has %2 commented functional item(s).
+
 		// Multichannel pasing errors
 		//
 		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);

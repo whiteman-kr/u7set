@@ -57,7 +57,7 @@ namespace TrendLib
 
 		// Slider Widged
 		//
-		m_trendSlider = new TrendSlider(&m_trendWidget->rullerSet());
+		m_trendSlider = new TrendSlider(&m_trendWidget->rulerSet());
 
 		layout->setRowStretch(0, 1);
 		layout->addWidget(m_trendSlider, 1, 0);
@@ -931,63 +931,63 @@ static int lastCopyCount = false;
 		return;
 	}
 
-	void TrendMainWindow::actionAddRuller(QPoint mousePos)
+	void TrendMainWindow::actionAddRuler(QPoint mousePos)
 	{
 		int laneIndex = -1;
-		int rullerIndex = -1;
+		int rulerIndex = -1;
 		TimeStamp timeStamp;
 		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex, &outSignal);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rulerIndex, &outSignal);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea)
 		{
 			return;
 		}
 
-		qDebug() << "Add trend ruller on pos " << timeStamp.toDateTime();
+		qDebug() << "Add trend ruler on pos " << timeStamp.toDateTime();
 
-		TrendRuller ruller(timeStamp);
-		trend().rullerSet().addRuller(ruller);
+		TrendRuler ruler(timeStamp);
+		trend().rulerSet().addRuler(ruler);
 
 		update();
 
 		return;
 	}
 
-	void TrendMainWindow::actionDeleteRuller(int rullerIndex)
+	void TrendMainWindow::actionDeleteRuler(int rulerIndex)
 	{
-		if (rullerIndex == -1)
+		if (rulerIndex == -1)
 		{
-			assert(rullerIndex);
+			assert(rulerIndex);
 			return;
 		}
 
-		if (rullerIndex < 0 ||
-			rullerIndex >= static_cast<int>(trend().rullerSet().rullers().size()))
+		if (rulerIndex < 0 ||
+			rulerIndex >= static_cast<int>(trend().rulerSet().rulers().size()))
 		{
 			assert(false);
 			return;
 		}
 
-		trend().rullerSet().deleteRuller(trend().rullerSet().at(rullerIndex).timeStamp());
-		m_trendWidget->resetRullerHighlight();
+		trend().rulerSet().deleteRuler(trend().rulerSet().at(rulerIndex).timeStamp());
+		m_trendWidget->resetRulerHighlight();
 
 		update();
 
 		return;
 	}
 
-	void TrendMainWindow::actionRullerProperties(int rullerIndex)
+	void TrendMainWindow::actionRulerProperties(int rulerIndex)
 	{
-		if (rullerIndex == -1)
+		if (rulerIndex == -1)
 		{
-			assert(rullerIndex);
+			assert(rulerIndex);
 			return;
 		}
 
-		if (rullerIndex < 0 ||
-			rullerIndex >= static_cast<int>(trend().rullerSet().rullers().size()))
+		if (rulerIndex < 0 ||
+			rulerIndex >= static_cast<int>(trend().rulerSet().rulers().size()))
 		{
 			assert(false);
 			return;
@@ -995,10 +995,10 @@ static int lastCopyCount = false;
 
 		// --
 		//
-		TrendRuller& mutableRuller = trend().rullerSet().at(rullerIndex);
+		TrendRuler& mutableRuler = trend().rulerSet().at(rulerIndex);
 
 		QDialog d(this);
-		d.setWindowTitle(tr("Ruller Properties"));
+		d.setWindowTitle(tr("Ruler Properties"));
 		d.setWindowFlags((d.windowFlags() &
 						~Qt::WindowMinimizeButtonHint &
 						~Qt::WindowMaximizeButtonHint &
@@ -1009,10 +1009,10 @@ static int lastCopyCount = false;
 		QLabel* dateLabel = new QLabel(tr("Date:"));
 		QLabel* timeLabel = new QLabel(tr("Time:"));
 
-		QDateEdit* dateEdit = new QDateEdit(mutableRuller.timeStamp().toDate());
+		QDateEdit* dateEdit = new QDateEdit(mutableRuler.timeStamp().toDate());
 		dateEdit->setCalendarPopup(true);
 
-		QTimeEdit* timeEdit = new QTimeEdit(mutableRuller.timeStamp().toTime());
+		QTimeEdit* timeEdit = new QTimeEdit(mutableRuler.timeStamp().toTime());
 		timeEdit->setDisplayFormat("hh:mm:ss.zzz");
 
 		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -1041,7 +1041,7 @@ static int lastCopyCount = false;
 			newDateTime.setTime(timeEdit->time());
 
 			TimeStamp ts(newDateTime);
-			mutableRuller.setTimeStamp(ts);
+			mutableRuler.setTimeStamp(ts);
 
 			update();
 		}
@@ -1143,42 +1143,42 @@ static int lastCopyCount = false;
 		int discretesCount = signalSet().discretesSignalsCount();
 
 		int outLaneIndex = -1;
-		int rullerIndex = -1;
+		int rulerIndex = -1;
 		TimeStamp timeStamp;
 		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
 		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex, &outSignal);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rulerIndex, &outSignal);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
-			mouseOn != Trend::MouseOn::OnRuller)
+			mouseOn != Trend::MouseOn::OnRuler)
 		{
 			return;
 		}
 
 		QMenu menu(this);
 
-		QAction* addRullerAction = menu.addAction(tr("Add Ruller"));
-		connect(addRullerAction, &QAction::triggered, this,
+		QAction* addRulerAction = menu.addAction(tr("Add Ruler"));
+		connect(addRulerAction, &QAction::triggered, this,
 				[&pos, this]()
 				{
-					this->TrendMainWindow::actionAddRuller(pos);
+					this->TrendMainWindow::actionAddRuler(pos);
 				});
 
-		QAction* deleteRullerAction = menu.addAction(tr("Delete Ruller"));
-		deleteRullerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuller);
-		connect(deleteRullerAction, &QAction::triggered, this,
-				[rullerIndex, this]()
+		QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
+		deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+		connect(deleteRulerAction, &QAction::triggered, this,
+				[rulerIndex, this]()
 				{
-					this->TrendMainWindow::actionDeleteRuller(rullerIndex);
+					this->TrendMainWindow::actionDeleteRuler(rulerIndex);
 				});
 
-		QAction* rullerPropertiesAction = menu.addAction(tr("Ruller Properties..."));
-		rullerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuller);
-		connect(rullerPropertiesAction, &QAction::triggered, this,
-				[rullerIndex, this]()
+		QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
+		rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+		connect(rulerPropertiesAction, &QAction::triggered, this,
+				[rulerIndex, this]()
 				{
-					this->TrendMainWindow::actionRullerProperties(rullerIndex);
+					this->TrendMainWindow::actionRulerProperties(rulerIndex);
 				});
 
 		menu.addSeparator();

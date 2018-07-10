@@ -524,6 +524,7 @@ message FblItemRect
 	optional string label = 6;
 	optional string userText = 7;
 	optional int32 userTextPos = 8 [default = 1];			// enum E::UserTextPos, 1 - Top
+	optional int32 labelPos = 9 [default = 2];				// enum E::UserTextPos, 2 - RightTop
 }
 
 

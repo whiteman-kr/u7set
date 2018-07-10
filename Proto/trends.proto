@@ -45,22 +45,22 @@ message TrendSignalSet
 	repeated TrendArchive archive_plant_time= 12;
 }
 
-message TrendRuller
+message TrendRuler
 {
     optional fixed64 time_stamp = 2;
 	optional bool show = 3 [default = true];
 	optional bool show_signal_values = 4 [default = true];
 }
 
-message TrendRullerSet
+message TrendRulerSet
 {
-    repeated TrendRuller rullers = 2;
+    repeated TrendRuler rulers = 2;
 }
 
 message Trend
 {
     optional TrendSignalSet signal_set = 2;
-	optional TrendRullerSet ruller_set = 3;
+	optional TrendRulerSet ruler_set = 3;
 }
 
 message TrendParam

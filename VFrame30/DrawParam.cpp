@@ -285,6 +285,16 @@ namespace VFrame30
 		m_blinkPhase = value;
 	}
 
+	bool CDrawParam::drawNotesLayer() const
+	{
+		return m_drawNotesLayer;
+	}
+
+	void CDrawParam::setDrawNotesLayer(bool value)
+	{
+		m_drawNotesLayer = value;
+	}
+
 	AppSignalManager* CDrawParam::appSignalManager()
 	{
 		return m_appSignalmanager;
