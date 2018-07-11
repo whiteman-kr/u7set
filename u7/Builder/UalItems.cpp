@@ -1748,7 +1748,7 @@ namespace Builder
 
 	void UalSignal::sortRefSignals()
 	{
-		// sorting m_refSignals by m_refSignals[i]->appSignalID ascending
+		// sorting m_refSignals by appSignalID ascending
 		//
 
 		int count = m_refSignals.count();

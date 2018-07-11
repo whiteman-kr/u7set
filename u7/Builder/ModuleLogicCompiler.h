@@ -166,16 +166,32 @@ namespace Builder
 
 		bool createUalAfbsMap();
 
+		//
+
 		bool createUalSignals();
+
+		bool loopbacksPreprocessing();
+		bool getLinkedSignalItems(const LogicPin& outPin, QVector<UalItem *>* connectedSignals);
+
+		bool createUalSignalsFromInputAndTuningAcquiredSignals();
+
+/*		bool createUalSignalsFromLoopbackTargets();
+		bool createUalSignalsFromLoopbackTarget(UalItem* ualItem);
+		bool linkSignalsConnectedToLoopbackTarget(UalItem* ualItem);*/
+
+		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
-		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
-		bool createUalSignalFromConst(UalItem* ualItem);
-		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
+		UalSignal* createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, Signal* s, const QString& busTypeID);
+
+		bool createUalSignalsFromReceivers();
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
 		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
 		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
+
+		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
+		bool createUalSignalFromConst(UalItem* ualItem);
+		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
-		bool createUalSignalsFromLoopbackTarget(UalItem* ualItem);
 
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
@@ -185,12 +201,14 @@ namespace Builder
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 
-		bool getLinkedSignalItems(const LogicPin& outPin, QList<UalItem*>* connectedSignals);
-		bool checkLoopbackTargetSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems);
+		//
 
-		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString busTypeID);
+		//bool checkLoopbackTargetSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems);
+
+		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
 		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
+		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
 		bool isConnectedToLoopbackTarget(const LogicPin& inPin);
@@ -512,8 +530,9 @@ namespace Builder
 		QHash<QString, QString> m_linkedValidtySignalsID;		// device signals with linked validity signals
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
 
-		QHash<QString, UalSignal*> m_loopbacks;					// loopbackSourceID => loopback source ualSignal
-		QHash<QString, bool> m_usedLoopbacks;
+		QHash<QString, UalItem*> m_loopbackSources;
+		QHash<QString, QVector<UalItem*>> m_loopbackConnectedSignals;
+		QHash<QString, UalSignal*> m_loopbackSignals;					// loopbackID => loopback ualSignal
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL
