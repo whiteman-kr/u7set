@@ -4804,23 +4804,21 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
+	/// Title:	   Different busTypes on AFB output (Logic schema %1).
 	///
 	/// Parameters:
-	///		%1 Schema item pin caption
-	///		%2 Logic schema ID
+	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		UalSignal is not found for pin with specified caption. Contact to RPCT developers.
+	///		Different busTypes on AFB output.
 	///
-	void IssueLogger::errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID)
+	void IssueLogger::errALC5122(QUuid ualItemUuid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5122,
-				  QString(tr("UalSignal is not found for pin '%1' (Logic schema '%2').")).
-							arg(pinCaption).arg(schemaID));
+				  QString(tr("Different busTypes on AFB output (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5123
@@ -5366,6 +5364,32 @@ namespace Builder
 		LOG_ERROR(IssueType::AlCompiler,
 				  5146,
 				  QString(tr("Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
+	}
+
+
+	/// IssueCode: ALC5147
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 Loopback target ID1
+	///		%3 Loopback target ID3
+	///		%4 Logic schema ID
+	///
+	/// Description:
+	///		Signal is connected to different LoopbackTargets. Check signals connections.
+	///
+	void IssueLogger::errALC5147(QString signalID, QUuid signalGuid, QString lbID1, QString lbID2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5147,
+				  QString(tr("Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4).")).
+					arg(signalID).arg(lbID1).arg(lbID2).arg(schemaID));
 	}
 
 	//

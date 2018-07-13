@@ -172,6 +172,7 @@ namespace Builder
 
 		bool loopbacksPreprocessing();
 		bool getLinkedSignalItems(const LogicPin& outPin, QVector<UalItem *>* connectedSignals);
+		bool isLoopbackSignal(const QString& appSignalID);
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
@@ -203,6 +204,8 @@ namespace Builder
 		bool linkLoopbackTargets();
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 
+		bool checkBusProcessingItemsConnections();
+
 		//
 
 		//bool checkLoopbackTargetSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems);
@@ -213,8 +216,11 @@ namespace Builder
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
-		bool isConnectedToLoopbackTarget(const LogicPin& inPin);
+		bool isConnectedToLoopbackTarget(const LogicPin& inPin, UalItem** loopbackTarget);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
+		bool determineOutBusTypeByInputs(UalAfb* ualAfb, QString* outBusTypeID);
+		bool determineOutBusTypeByOutput(UalAfb* ualAfb, QString* outBusTypeID);
+		bool isBusTypesAreEqual(const QStringList& busTypes);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
 		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
@@ -347,7 +353,9 @@ namespace Builder
 		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb, const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal, int busProcessingStep);
 
 		bool calcBusProcessingStepsNumber(const UalAfb* ualAfb, int* busProcessingStepsNumber);
-		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins, int* pinsSize, int* signalsSize, bool isInputs);
+		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
+									   int* pinsSize, int* signalsSize, bool isInputs,
+									   bool* allBusInputsConnectedToDiscretes);
 		bool isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing);
 
 		//
@@ -535,6 +543,7 @@ namespace Builder
 		QHash<QString, UalItem*> m_loopbackSources;
 		QHash<QString, QVector<UalItem*>> m_loopbackConnectedSignals;
 		QHash<QString, UalSignal*> m_loopbackSignals;					// loopbackID => loopback ualSignal
+		QHash<QString, QString> m_signalsToLoopbacks;					// appSignalID => loopbackID
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL

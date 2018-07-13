@@ -689,6 +689,13 @@ namespace Builder
 			return false;
 		}
 
+		result &= checkBusProcessingItemsConnections();
+
+		if (result == false)
+		{
+			return false;
+		}
+
 		/* Not required if loopbackSource and loopbackTargets is processed
 
 		for(UalItem* ualItem : m_ualItems)
@@ -830,6 +837,32 @@ namespace Builder
 			}
 
 			m_loopbackConnectedSignals[loopbackID].append(connectedSignals);
+
+			for(const UalItem* item : connectedSignals)
+			{
+				QString appSignalID = item->strID();
+
+				QString lbID = m_signalsToLoopbacks.value(appSignalID, QString());
+
+				if (lbID.isEmpty() == true)
+				{
+					m_signalsToLoopbacks.insert(appSignalID, loopbackID);
+				}
+				else
+				{
+					if (lbID != loopbackID)
+					{
+						// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
+						//
+						m_log->errALC5147(appSignalID, item->guid(), lbID, loopbackID, item->schemaID());
+						result = false;
+						continue;
+					}
+
+					// else:
+					//			signal is twice connected to same LoopbackTarget, it is not a error
+				}
+			}
 		}
 
 		return result;
@@ -869,6 +902,11 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::isLoopbackSignal(const QString& appSignalID)
+	{
+		return m_signalsToLoopbacks.contains(appSignalID);
 	}
 
 	bool ModuleLogicCompiler::createUalSignalsFromInputAndTuningAcquiredSignals()
@@ -2156,6 +2194,12 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::checkBusProcessingItemsConnections()
+	{
+//		assert(false);		// TO DO
+		return true;
+	}
+
 	bool ModuleLogicCompiler::linkLoopbackTarget(UalItem* loopbackTargetItem)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(loopbackTargetItem, m_log);
@@ -2420,8 +2464,10 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::isConnectedToLoopbackTarget(const LogicPin& inPin)
+	bool ModuleLogicCompiler::isConnectedToLoopbackTarget(const LogicPin& inPin, UalItem** loopbackTarget)
 	{
+		TEST_PTR_RETURN_FALSE(loopbackTarget);
+
 		const std::vector<QUuid>& connectedPinsUuids = inPin.associatedIOs();
 
 		for(QUuid outPinUuid : connectedPinsUuids)
@@ -2436,7 +2482,38 @@ namespace Builder
 
 			if (connectedItem->isLoopbackTarget() == true)
 			{
+				*loopbackTarget = connectedItem;
 				return true;
+			}
+
+			if (connectedItem->isSignal() == true)
+			{
+				const LogicSignal& signalItem = connectedItem->signal();
+
+				if (signalItem.isInOutSignalElement() == false)
+				{
+					continue;
+				}
+
+				const std::vector<LogicPin>& inputs = connectedItem->inputs();
+
+				if (inputs.size() == 0)
+				{
+					continue;
+				}
+
+				if(inputs.size() != 1)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				bool res = isConnectedToLoopbackTarget(inputs[0], loopbackTarget);
+
+				if (res == true)
+				{
+					return true;
+				}
 			}
 		}
 
@@ -2445,16 +2522,33 @@ namespace Builder
 
 	bool ModuleLogicCompiler::determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID)
 	{
-		if (ualAfb == nullptr || outBusTypeID == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(outBusTypeID, m_log);
 
 		outBusTypeID->clear();
 
-		int busInputsCount = 0;
-		int discretesToBusConnectedCount = 0;
+		// AFB's out bus type determination rules:
+		//
+		// 1) try determinte BusType by input UalSignals
+		// 2) try determine BusType by bus signal connected to output
+
+		determineOutBusTypeByInputs(ualAfb, outBusTypeID);
+
+		if (outBusTypeID->isEmpty() == false)
+		{
+			return true;
+		}
+
+		determineOutBusTypeByOutput(ualAfb, outBusTypeID);
+
+		return outBusTypeID->isEmpty() == false;
+	}
+
+	bool ModuleLogicCompiler::determineOutBusTypeByInputs(UalAfb* ualAfb, QString* outBusTypeID)
+	{
+		QStringList busTypes;
+
+		bool result = true;
 
 		for(const LogicPin& inPin : ualAfb->inputs())
 		{
@@ -2473,70 +2567,207 @@ namespace Builder
 				continue;
 			}
 
-			busInputsCount++;
-
-			if (isConnectedToLoopbackTarget(inPin) == true)
-			{
-				assert(false);		// TO DO: find signal in m_loopbackConnectedSignals!
-
-				continue;			// can't determine loopbackTarget type now, skip input checking
-			}
-
 			// inPin is bus
 
 			UalSignal* ualSignal = m_ualSignals.get(inPin.guid());
 
-			if (ualSignal == nullptr)
+			if (ualSignal != nullptr)
+			{
+				if (ualSignal->isBus() == true)
+				{
+					busTypes.append(ualSignal->busTypeID());
+
+					continue;			// check remaining inputs
+				}
+
+				if (ualSignal->isDiscrete() && afbSignal.isBus() == true && afbSignal.busDataFormat() == E::BusDataFormat::Discrete)
+				{
+					// discrete signal to "discrete" bus - is allowed connection, but bus type is still unknown
+					continue;
+				}
+
+				// Uncompatible signals connection (Logic schema '%1').
+				//
+				assert(false);				// this error must be detected earlier
+
+				m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->ualItemLabel(),
+								  ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
+				return false;
+			}
+
+			// ualSignal is not connected to bus input now
+			// check, may be input is connected to LoopbackTarget via SignalItem(s),
+			// and try get busType from this signal(s)
+
+			UalItem* loopbackTarget = nullptr;
+
+			if (isConnectedToLoopbackTarget(inPin, &loopbackTarget) == false)
 			{
 				// UalSignal is not found for pin '%1' (Logic schema '%2').
 				//
 				m_log->errALC5120(ualAfb->guid(), ualAfb->label(), inPin.caption(), ualAfb->schemaID());
-				return false;
-			}
-
-			if (ualSignal->isBus() == true)
-			{
-				if (outBusTypeID->isEmpty() == true)
-				{
-					*outBusTypeID = ualSignal->busTypeID();
-					continue;
-				}
-
-				if (*outBusTypeID != ualSignal->busTypeID())
-				{
-					// Different busTypes on AFB inputs (Logic schema %1).
-					m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID());
-					return false;
-				}
-
-				continue;			// check remaining inputs
-			}
-
-			if (ualSignal->isDiscrete() && afbSignal.isBus() == true && afbSignal.busDataFormat() == E::BusDataFormat::Discrete)
-			{
-				// discrete to "discrete" bus - is allowed connection
-				discretesToBusConnectedCount++;
+				result = false;
 				continue;
 			}
 
-			// Uncompatible signals connection (Logic schema '%1').
-			//
-			assert(false);				// this error must be detected earlier
+			TEST_PTR_LOG_RETURN_FALSE(loopbackTarget, m_log);
 
-			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->ualItemLabel(),
-							  ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
-			return false;
+			// input is connected to LoopbackTarget
+			//
+			const UalLoopbackTarget* target = loopbackTarget->ualLoopbackTarget();
+
+			TEST_PTR_LOG_RETURN_FALSE(target, m_log);
+
+			if (m_loopbackConnectedSignals.contains(target->loopbackId()) == false)
+			{
+				// this error should be detected early in loppbacksPreprocessing
+				//
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			for(const UalItem* ualItem : m_loopbackConnectedSignals.value(target->loopbackId()))
+			{
+				TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+				QString signalID = ualItem->strID();
+
+				Signal* s = m_signals->getSignal(signalID);
+
+				if (s == nullptr)
+				{
+					continue;
+				}
+
+				if (s->isBus() == true)
+				{
+					busTypes.append(s->busTypeID());
+				}
+			}
 		}
 
-		if (outBusTypeID->isEmpty() == true && busInputsCount == discretesToBusConnectedCount)
+		if (result == false)
 		{
-			// All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
-			//
-			m_log->errALC5128(ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
 			return false;
 		}
 
-		return outBusTypeID->isEmpty() == false;
+		if (busTypes.isEmpty() == true)
+		{
+			return false;			// no busses on inputs
+		}
+
+		if (isBusTypesAreEqual(busTypes) == false)
+		{
+			// Different busTypes on AFB inputs (Logic schema %1).
+			//
+			m_log->errALC5123(ualAfb->guid(), ualAfb->schemaID());
+
+			return false;			// bus type is not determined :(
+		}
+
+		*outBusTypeID = busTypes.first();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::determineOutBusTypeByOutput(UalAfb* ualAfb, QString* outBusTypeID)
+	{
+		QStringList busTypes;
+
+		const std::vector<LogicPin> outputs = ualAfb->outputs();
+
+		for(const LogicPin& outPin : outputs)
+		{
+			LogicAfbSignal afbSignal;
+
+			bool res = ualAfb->getAfbSignalByPin(outPin, &afbSignal);
+
+			if (res == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			if (afbSignal.isBus() == false)
+			{
+				continue;
+			}
+
+			QVector<UalItem*> connectedSignals;
+
+			res = getLinkedSignalItems(outPin, &connectedSignals);
+
+			if (res == false)
+			{
+				return false;
+			}
+
+			for(const UalItem* ualItem : connectedSignals)
+			{
+				TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+				QString signalID = ualItem->strID();
+
+				Signal* s = m_signals->getSignal(signalID);
+
+				if (s == nullptr)
+				{
+					continue;
+				}
+
+				if (s->isBus() == true)
+				{
+					busTypes.append(s->busTypeID());
+				}
+			}
+		}
+
+		if (busTypes.isEmpty() == true)
+		{
+			return false;			// no bus signals connected to output(s)
+		}
+
+		if (isBusTypesAreEqual(busTypes) == false)
+		{
+			// Different busTypes on AFB output (Logic schema %1).
+			//
+			m_log->errALC5122(ualAfb->guid(), ualAfb->schemaID());
+
+			return false;			// bus type is not determined :(
+		}
+
+		*outBusTypeID = busTypes.first();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::isBusTypesAreEqual(const QStringList& busTypes)
+	{
+		if (busTypes.isEmpty() == true)
+		{
+			return false;
+		}
+
+		QString firstBusType;
+
+		for(const QString& busType : busTypes)
+		{
+			assert(busType.isEmpty() == false);
+
+			if (firstBusType.isEmpty() == true)
+			{
+				firstBusType = busType;
+			}
+			else
+			{
+				if (firstBusType != busType)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal)
@@ -6494,8 +6725,9 @@ namespace Builder
 
 		int inputsBusSize = -1;
 		int inputSignalSize = -1;
+		bool allBusInputsConnectedToDiscretes = false;
 
-		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->inputs(), &inputsBusSize, &inputSignalSize, true);
+		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->inputs(), &inputsBusSize, &inputSignalSize, true, &allBusInputsConnectedToDiscretes);
 
 		if (result == false)
 		{
@@ -6504,12 +6736,19 @@ namespace Builder
 
 		int outputsBusSize = -1;
 		int outputSignalSize = -1;
+		bool dummyBool = false;
 
-		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->outputs(), &outputsBusSize, &outputSignalSize, false);
+		result = getPinsAndSignalsBusSizes(ualAfb, ualAfb->outputs(), &outputsBusSize, &outputSignalSize, false, &dummyBool);
 
 		if (result == false)
 		{
 			return false;
+		}
+
+		if (allBusInputsConnectedToDiscretes == true)
+		{
+			inputsBusSize = outputsBusSize;
+			inputSignalSize = outputSignalSize;
 		}
 
 		if (outputSignalSize == -1)
@@ -6562,16 +6801,18 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins, int* pinsSize, int* signalsSize, bool isInputs)
+	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
+														int* pinsSize, int* signalsSize, bool isInputs,
+														bool* allBusInputsConnectedToDiscretes)
 	{
-		if (ualAfb == nullptr || pinsSize == nullptr || signalsSize == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(pinsSize, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(signalsSize, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(allBusInputsConnectedToDiscretes, m_log);
 
 		*pinsSize = -1;
 		*signalsSize = -1;
+		*allBusInputsConnectedToDiscretes = true;
 
 		for(const LogicPin& pin : pins)
 		{
@@ -6621,6 +6862,8 @@ namespace Builder
 			{
 				continue;
 			}
+
+			*allBusInputsConnectedToDiscretes = false;
 
 			if (ualSignal->isBus() == false)
 			{
@@ -7369,7 +7612,7 @@ namespace Builder
 			{
 				// UalSignal is not found for pin '%1' (Logic schema '%2').
 				//
-				m_log->errALC5122(ualItem->guid(), pinCaption, ualItem->schemaID());
+				m_log->errALC5120(ualItem->guid(), ualItem->label(), pinCaption, ualItem->schemaID());
 				return nullptr;
 			}
 
