@@ -147,7 +147,7 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 
 "use strict";
 
-var FamilyBVB15ID: number = 0x5600;
+var FamilyBVB15ID: number = 0x5200;
 
 //var configScriptVersion: number = 1;
 //var configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
