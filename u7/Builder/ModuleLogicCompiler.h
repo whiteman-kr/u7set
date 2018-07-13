@@ -199,6 +199,8 @@ namespace Builder
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
+
+		bool linkLoopbackTargets();
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 
 		//

@@ -611,9 +611,13 @@ namespace Builder
 		// primarily created signals
 		//
 		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
-//		result &= createUalSignalsFromLoopbackTargets();
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromReceivers();
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		// secondary created signals
 		//
@@ -648,9 +652,8 @@ namespace Builder
 				res = linkUalSignalsFromBusExtractor(ualItem);
 				break;
 
-			// UAL items already processed in previous loops
+			// UAL items already processed
 			//
-			case UalItem::Type::LoopbackTarget:
 			case UalItem::Type::BusComposer:
 			case UalItem::Type::Receiver:
 				break;
@@ -660,6 +663,7 @@ namespace Builder
 			case UalItem::Type::Transmitter:
 			case UalItem::Type::Terminator:
 			case UalItem::Type::LoopbackSource:
+			case UalItem::Type::LoopbackTarget:
 				break;
 
 			// unknown item's type
@@ -678,30 +682,12 @@ namespace Builder
 			return false;
 		}
 
-		// link loopbackTargets
-		//
-		for(UalItem* ualItem : m_ualItems)
-		{
-			if (ualItem == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			if (ualItem->type() != UalItem::Type::LoopbackTarget)
-			{
-				continue;
-			}
-
-			result &= linkLoopbackTarget(ualItem);
-		}
+		result &= linkLoopbackTargets();
 
 		if (result == false)
 		{
 			return false;
 		}
-
 
 		/* Not required if loopbackSource and loopbackTargets is processed
 
@@ -2124,6 +2110,13 @@ namespace Builder
 
 		if (loopbackSignal != nullptr)
 		{
+			 if (loopbackSignal == ualSignal)
+			 {
+				 // it is Ok, LoopbackSource already linked to this ualSignal
+				 //
+				 return true;
+			 }
+
 			// this error should be detected early, during loopbacks preprocessing
 			//
 			assert(false);
@@ -2137,6 +2130,30 @@ namespace Builder
 		m_ualSignals.appendRefPin(loopbackSourceItem, inPinUuid, ualSignal);
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::linkLoopbackTargets()
+	{
+		bool result = true;
+
+		for(UalItem* ualItem : m_ualItems)
+		{
+			if (ualItem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (ualItem->type() != UalItem::Type::LoopbackTarget)
+			{
+				continue;
+			}
+
+			result &= linkLoopbackTarget(ualItem);
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::linkLoopbackTarget(UalItem* loopbackTargetItem)
@@ -5536,10 +5553,6 @@ namespace Builder
 
 		bool result = true;
 
-		code->comment_nl("Loopback signals refreshing code");
-
-		// refresh analog signals
-		//
 		QStringList loopbackIDs = m_loopbackSignals.keys();
 
 		loopbackIDs.sort();
@@ -5588,16 +5601,24 @@ namespace Builder
 			}
 		}
 
+		CodeSnippet refreshingCode;
+
 		if (analogsRefreshCode.isEmpty() == false)
 		{
-			code->append(analogsRefreshCode);
-			code->newLine();
+			refreshingCode.append(analogsRefreshCode);
+			refreshingCode.newLine();
 		}
 
 		if (bussesRefreshCode.isEmpty() == false)
 		{
-			code->append(bussesRefreshCode);
-			code->newLine();
+			refreshingCode.append(bussesRefreshCode);
+			refreshingCode.newLine();
+		}
+
+		if (refreshingCode.isEmpty() == false)
+		{
+			code->comment_nl("Loopback signals refreshing code");
+			code->append(refreshingCode);
 		}
 
 		return result;
@@ -5639,7 +5660,7 @@ namespace Builder
 
 			if (firstCommand == true)
 			{
-				cmd.setComment(QString("loopback %1 (signal %2)").arg(loopbackID).arg(lbSignal->signal()->appSignalID()));
+				cmd.setComment(QString("loopback %1 (signal %2)").arg(loopbackID).arg(lbSignal->refSignalIDsJoined()));
 				firstCommand = false;
 			}
 
