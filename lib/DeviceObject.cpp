@@ -2042,10 +2042,15 @@ R"DELIM({
 
 	int DeviceModule::jsModuleFamily() const
 	{
-		if (moduleFamily() == FamilyType::OTHER)
+		if (customModuleFamily() != 0)
 		{
 			return customModuleFamily();
 		}
+
+		//if (moduleFamily() == FamilyType::OTHER)
+		//{
+			//return customModuleFamily();
+		//}
 
 		return static_cast<int>(m_type & 0xFF00);
 	}
@@ -2135,7 +2140,7 @@ R"DELIM({
 				family == FamilyType::TIM ||
 				family == FamilyType::RIM ||
 				family == FamilyType::AIFM ||
-				family == FamilyType::MPS17;
+				family == FamilyType::MPS;
 	}
 
 	bool DeviceModule::isOutputModule() const
