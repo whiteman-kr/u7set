@@ -50,6 +50,7 @@
 		<OptoPortAppDataSize>2560</OptoPortAppDataSize>		
 		<OptoInterfaceDataOffset>35840</OptoInterfaceDataOffset>
 		<OptoPortDataSize>2560</OptoPortDataSize>
+		<SharedBuffer>false</SharedBuffer>
 	</OptoInterface>
 
         <LogicUnitCommnads/>
