@@ -332,6 +332,24 @@ public:
 	};
 	Q_ENUM(SpecificPropertyType)
 
+	//
+
+	enum class UalItemType
+	{
+		Unknown,
+		Signal,
+		Afb,
+		Const,
+		Transmitter,
+		Receiver,
+		Terminator,
+		BusComposer,
+		BusExtractor,
+		LoopbackSource,
+		LoopbackTarget
+	};
+	Q_ENUM(UalItemType)
+
 public:
 	// Convert enum value (not index) to QString
 	//

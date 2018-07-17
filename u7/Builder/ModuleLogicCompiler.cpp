@@ -606,6 +606,8 @@ namespace Builder
 
 		bool result = true;
 
+		result &= writeUalItemsFile();
+
 		result &= loopbacksPreprocessing();
 
 		// primarily created signals
@@ -636,39 +638,39 @@ namespace Builder
 			{
 			// UAL items that can generate signals
 			//
-			case UalItem::Type::Signal:
+			case E::UalItemType::Signal:
 				res = createUalSignalFromSignal(ualItem, 1);
 				break;
 
-			case UalItem::Type::Const:
+			case E::UalItemType::Const:
 				res = createUalSignalFromConst(ualItem);
 				break;
 
-			case UalItem::Type::Afb:
+			case E::UalItemType::Afb:
 				res = createUalSignalsFromAfbOuts(ualItem);
 				break;
 
-			case UalItem::Type::BusExtractor:
+			case E::UalItemType::BusExtractor:
 				res = linkUalSignalsFromBusExtractor(ualItem);
 				break;
 
 			// UAL items already processed
 			//
-			case UalItem::Type::BusComposer:
-			case UalItem::Type::Receiver:
+			case E::UalItemType::BusComposer:
+			case E::UalItemType::Receiver:
 				break;
 
 			// UAL items that doesn't generate signals
 			//
-			case UalItem::Type::Transmitter:
-			case UalItem::Type::Terminator:
-			case UalItem::Type::LoopbackSource:
-			case UalItem::Type::LoopbackTarget:
+			case E::UalItemType::Transmitter:
+			case E::UalItemType::Terminator:
+			case E::UalItemType::LoopbackSource:
+			case E::UalItemType::LoopbackTarget:
 				break;
 
 			// unknown item's type
 			//
-			case UalItem::Type::Unknown:
+			case E::UalItemType::Unknown:
 			default:
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -689,15 +691,8 @@ namespace Builder
 			return false;
 		}
 
-		result &= checkBusProcessingItemsConnections();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		/* Not required if loopbackSource and loopbackTargets is processed
-
+		// link signals connected to loopback targets
+		//
 		for(UalItem* ualItem : m_ualItems)
 		{
 			if (ualItem == nullptr)
@@ -713,7 +708,14 @@ namespace Builder
 			}
 
 			result &= createUalSignalFromSignal(ualItem, 2);
-		} */
+		}
+
+		result &= checkBusProcessingItemsConnections();
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		for(UalSignal* ualSignal : m_ualSignals)
 		{
@@ -723,20 +725,48 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::writeUalItemsFile()
+	{
+		QStringList items;
+
+		for(const UalItem* ualItem : m_ualItems)
+		{
+			QString itemStr;
+
+			E::UalItemType itemType = ualItem->type();
+
+			itemStr = QString("%1, %2").arg(E::valueToString(itemType)).arg(ualItem->label());
+
+			if (itemType == E::UalItemType::Signal)
+			{
+				itemStr += QString(", %1").arg(ualItem->strID());
+			}
+
+			items.append(itemStr);
+		}
+
+		return m_resultWriter->addFile(m_lmSubsystemID, m_lm->equipmentIdTemplate() + ".uil", "", "", items, false);
+	}
+
+
 	bool ModuleLogicCompiler::loopbacksPreprocessing()
 	{
 		bool result = true;
 
-		// 1. Find all LoopbackSources
-		//
+		result &= findLoopbackSources();
+		result &= findLoopbackTargets();
+		result &= findSignalsAndPinsLinkedToLoopbackTargets();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::findLoopbackSources()
+	{
+		bool result = true;
+
 		for(UalItem* ualItem : m_ualItems)
 		{
-			if (ualItem == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
+			TEST_PTR_CONTINUE(ualItem);
 
 			if (ualItem->isLoopbackSource() == false)
 			{
@@ -754,9 +784,9 @@ namespace Builder
 
 			QString loopbackID = source->loopbackId();
 
-			UalItem* prevSource = m_loopbackSources.value(loopbackID, nullptr);
+			Loopback* loopback = m_loopbacks.value(loopbackID, nullptr);
 
-			if (prevSource != nullptr)
+			if (loopback != nullptr)
 			{
 				// Duplicate loopback source ID %1 (Logic schema %2).
 				//
@@ -765,19 +795,24 @@ namespace Builder
 				continue;
 			}
 
-			m_loopbackSources.insert(loopbackID, ualItem);
+			loopback = new Loopback;					// would be deleted in ModuleLogicCompiler::cleanup()
+
+			loopback->ID = loopbackID;
+			loopback->source = ualItem;
+
+			m_loopbacks.insert(loopbackID, loopback);
 		}
 
-		// 2. Find LoopbackTargets and all SignalItems connected to them
-		//
-		for(UalItem* ualItem : m_ualItems)
+		return result;
+	}
+
+	bool ModuleLogicCompiler::findLoopbackTargets()
+	{
+		bool result = true;
+
+		for(const UalItem* ualItem : m_ualItems)
 		{
-			if (ualItem == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
+			TEST_PTR_CONTINUE(ualItem);
 
 			if (ualItem->isLoopbackTarget() == false)
 			{
@@ -795,7 +830,9 @@ namespace Builder
 
 			QString loopbackID = target->loopbackId();
 
-			if (m_loopbackSources.contains(loopbackID) == false)
+			Loopback* loopback = m_loopbacks.value(loopbackID, nullptr);
+
+			if (loopback == nullptr)
 			{
 				// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
 				//
@@ -803,69 +840,102 @@ namespace Builder
 				result = false;
 				continue;
 			}
-
-			// find all signals connected to this LoopbackTarget
-			//
-			const std::vector<LogicPin>& outputs = target->outputs();
-
-			if (outputs.size() != 1)
+			else
 			{
-				LOG_INTERNAL_ERROR(m_log);				// LoopbackTarget must have only one output pin
-				return false;
-			}
-
-			const LogicPin& outPin = outputs[0];
-
-			QVector<UalItem*> connectedSignals;
-
-			bool res = getLinkedSignalItems(outPin, &connectedSignals);
-
-			if (res == false)
-			{
-				result = false;
-				continue;
-			}
-
-			if (connectedSignals.isEmpty() == true)
-			{
-				continue;			// it is Ok!
-			}
-
-			if (m_loopbackConnectedSignals.contains(loopbackID) == false)
-			{
-				m_loopbackConnectedSignals.insert(loopbackID, QVector<UalItem*>());
-			}
-
-			m_loopbackConnectedSignals[loopbackID].append(connectedSignals);
-
-			for(const UalItem* item : connectedSignals)
-			{
-				QString appSignalID = item->strID();
-
-				QString lbID = m_signalsToLoopbacks.value(appSignalID, QString());
-
-				if (lbID.isEmpty() == true)
-				{
-					m_signalsToLoopbacks.insert(appSignalID, loopbackID);
-				}
-				else
-				{
-					if (lbID != loopbackID)
-					{
-						// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
-						//
-						m_log->errALC5147(appSignalID, item->guid(), lbID, loopbackID, item->schemaID());
-						result = false;
-						continue;
-					}
-
-					// else:
-					//			signal is twice connected to same LoopbackTarget, it is not a error
-				}
+				loopback->targets.append(ualItem);
 			}
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::findSignalsAndPinsLinkedToLoopbackTargets()
+	{
+		bool result = true;
+
+		for(Loopback* loopback : m_loopbacks)
+		{
+			TEST_PTR_CONTINUE(loopback);
+
+			for(UalItem* target : loopback->targets)
+			{
+				TEST_PTR_CONTINUE(target);
+
+				result &= findSignalsAndPinsLinkedToLoopbackTarget(target);
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::findSignalsAndPinsLinkedToLoopbackTarget(const UalItem* targetItem)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(targetItem, m_log);
+
+		// find all signals connected to this LoopbackTarget
+		//
+		const std::vector<LogicPin>& outputs = targetItem->outputs();
+
+		if (outputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);				// LoopbackTarget must have only one output pin
+			return false;
+		}
+
+		const LogicPin& outPin = outputs[0];
+
+		QVector<UalItem*> connectedSignals;
+
+		РАБОТАТЬ ЗДЕСЬ!!!!!
+		ЛИНКОВАТь СИГНАЛЫ И ПИНЫ К LoopbackTarget!
+
+								'
+		bool res = getLinkedSignalItems(outPin, &connectedSignals);
+
+		if (res == false)
+		{
+			result = false;
+			continue;
+		}
+
+		if (connectedSignals.isEmpty() == true)
+		{
+			continue;			// it is Ok!
+		}
+
+		if (m_loopbackConnectedSignals.contains(loopbackID) == false)
+		{
+			m_loopbackConnectedSignals.insert(loopbackID, QVector<UalItem*>());
+		}
+
+		m_loopbackConnectedSignals[loopbackID].append(connectedSignals);
+
+		for(const UalItem* item : connectedSignals)
+		{
+			QString appSignalID = item->strID();
+
+			QString lbID = m_signalsToLoopbacks.value(appSignalID, QString());
+
+			if (lbID.isEmpty() == true)
+			{
+				m_signalsToLoopbacks.insert(appSignalID, loopbackID);
+			}
+			else
+			{
+				if (lbID != loopbackID)
+				{
+					// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
+					//
+					m_log->errALC5147(appSignalID, item->guid(), lbID, loopbackID, item->schemaID());
+					result = false;
+					continue;
+				}
+
+				// else:
+				//			signal is twice connected to same LoopbackTarget, it is not a error
+			}
+		}
+
 	}
 
 	bool ModuleLogicCompiler::getLinkedSignalItems(const LogicPin& outPin, QVector<UalItem*>* connectedSignals)
@@ -1461,6 +1531,9 @@ namespace Builder
 
 		if (ualSignal != nullptr)
 		{
+			// UalSignal already created for this signalID
+			// add ref pin and link connected items
+			//
 			result = appendRefPinToSignal(ualItem, ualSignal);
 
 			if (result == false)
@@ -1484,8 +1557,11 @@ namespace Builder
 			return result;
 		}
 
-		// Only Input and Tuningable signals really can generate UalSignal
+		// UalSignal is not yet created
+		//
 
+		// Only Input and Tuningable signals really can generate UalSignal
+		//
 		if (s->isInput() == false && s->enableTuning() == false)
 		{
 			result = checkInOutsConnectedToSignal(ualItem, true);
@@ -1644,19 +1720,10 @@ namespace Builder
 
 		bool result = true;
 
-		bool isBusProcessing = false;
-
-		result = isBusProcessingAfb(ualAfb, &isBusProcessing);
-
-		if (result == false)
-		{
-			return false;
-		}
-
 		QString outBusTypeID;
 		BusShared bus;
 
-		if (isBusProcessing == true)
+		if (ualAfb->isBusProcessing() == true)
 		{
 			result = determineOutBusTypeID(ualAfb, &outBusTypeID);
 
@@ -1851,47 +1918,47 @@ namespace Builder
 
 			switch(destUalItem->type())
 			{
-			case UalItem::Type::Signal:
+			case E::UalItemType::Signal:
 				result &= linkSignal(srcUalItem, destUalItem, inPinUuid, ualSignal);
 				break;
 
-			case UalItem::Type::Afb:
+			case E::UalItemType::Afb:
 				result &= linkAfbInput(srcUalItem, destUalItem, inPinUuid, ualSignal);
 				break;
 
-			case UalItem::Type::BusComposer:
+			case E::UalItemType::BusComposer:
 				result &= linkBusComposerInput(srcUalItem, destUalItem, inPinUuid, ualSignal);
 				break;
 
-			case UalItem::Type::BusExtractor:
+			case E::UalItemType::BusExtractor:
 				result &= linkBusExtractorInput(srcUalItem, destUalItem, inPinUuid, ualSignal);
 				break;
 
 			// link pins to signal only, any checks is not required
 			//
-			case UalItem::Type::Transmitter:
+			case E::UalItemType::Transmitter:
 				m_ualSignals.appendRefPin(destUalItem, inPinUuid, ualSignal);
 				break;
 
-			case UalItem::Type::LoopbackSource:
+			case E::UalItemType::LoopbackSource:
 				result &= linkLoopbackSource(destUalItem, inPinUuid, ualSignal);
 				break;
 
-			case UalItem::Type::Terminator:
+			case E::UalItemType::Terminator:
 				break;
 
 			// output can't connect to:
 			//
-			case UalItem::Type::Const:
-			case UalItem::Type::Receiver:
-			case UalItem::Type::LoopbackTarget:
+			case E::UalItemType::Const:
+			case E::UalItemType::Receiver:
+			case E::UalItemType::LoopbackTarget:
 				m_log->errALC5116(srcUalItem->guid(), destUalItem->guid(), destUalItem->schemaID());
 				result = false;
 				break;
 
 			// unknown UalItem type
 			//
-			case UalItem::Type::Unknown:
+			case E::UalItemType::Unknown:
 			default:
 				assert(false);
 				result = false;
@@ -2183,7 +2250,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->type() != UalItem::Type::LoopbackTarget)
+			if (ualItem->type() != E::UalItemType::LoopbackTarget)
 			{
 				continue;
 			}
@@ -2196,8 +2263,43 @@ namespace Builder
 
 	bool ModuleLogicCompiler::checkBusProcessingItemsConnections()
 	{
-//		assert(false);		// TO DO
-		return true;
+		bool result = true;
+
+		for(const UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+			if (ualItem->isAfb() == false)
+			{
+				continue;
+			}
+
+			const UalAfb* afb = m_ualAfbs.value(ualItem->guid(), nullptr);
+
+			TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
+
+			if (afb->isBusProcessing() == false)
+			{
+				continue;
+			}
+
+			QString inBusType;
+			QString outBusType;
+
+			determineBusTypeByInputs(afb, &inBusType);
+			determineBusTypeByOutput(afb, &outBusType);
+
+			if ((inBusType.isEmpty() == true && outBusType.isEmpty() == true) ||
+				(inBusType.isEmpty() == false && inBusType != outBusType))
+			{
+				// Output bus type cannot be determined (Logic schema %1, item %2)
+				//
+				m_log->errALC5127(afb->guid(), afb->label(), afb->schemaID());
+				result = false;
+			}
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::linkLoopbackTarget(UalItem* loopbackTargetItem)
@@ -2532,19 +2634,19 @@ namespace Builder
 		// 1) try determinte BusType by input UalSignals
 		// 2) try determine BusType by bus signal connected to output
 
-		determineOutBusTypeByInputs(ualAfb, outBusTypeID);
+		determineBusTypeByInputs(ualAfb, outBusTypeID);
 
 		if (outBusTypeID->isEmpty() == false)
 		{
 			return true;
 		}
 
-		determineOutBusTypeByOutput(ualAfb, outBusTypeID);
+		determineBusTypeByOutput(ualAfb, outBusTypeID);
 
 		return outBusTypeID->isEmpty() == false;
 	}
 
-	bool ModuleLogicCompiler::determineOutBusTypeByInputs(UalAfb* ualAfb, QString* outBusTypeID)
+	bool ModuleLogicCompiler::determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID)
 	{
 		QStringList busTypes;
 
@@ -2670,7 +2772,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::determineOutBusTypeByOutput(UalAfb* ualAfb, QString* outBusTypeID)
+	bool ModuleLogicCompiler::determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID)
 	{
 		QStringList busTypes;
 
@@ -2690,6 +2792,18 @@ namespace Builder
 
 			if (afbSignal.isBus() == false)
 			{
+				continue;
+			}
+
+			UalSignal* ualSignal = m_ualSignals.get(outPin.guid());
+
+			if (ualSignal != nullptr)
+			{
+				if (ualSignal->isBus() == true)
+				{
+					busTypes.append(ualSignal->busTypeID());
+				}
+
 				continue;
 			}
 
@@ -4921,7 +5035,15 @@ namespace Builder
 			return nullptr;
 		}
 
-		UalAfb* appFb = new UalAfb(appItem);
+		Afbl* afbl = m_afbls.value(appItem.strID(), nullptr);
+
+		if (afbl == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		UalAfb* appFb = new UalAfb(appItem, afbl->isBusProcessingAfb());
 
 		if (appFb->calculateFbParamValues(this) == false)
 		{
@@ -5863,6 +5985,8 @@ namespace Builder
 		int offset = lbSignal->ualAddr().offset();
 		int sizeW = 0;
 
+		QString busStr;
+
 		switch(lbSignal->signalType())
 		{
 		case E::Analog:
@@ -5873,6 +5997,7 @@ namespace Builder
 
 		case E::Bus:
 			sizeW = lbSignal->bus()->sizeW();
+			busStr = "bus ";
 			break;
 
 		case E::Discrete:
@@ -5891,7 +6016,7 @@ namespace Builder
 
 			if (firstCommand == true)
 			{
-				cmd.setComment(QString("loopback %1 (signal %2)").arg(loopbackID).arg(lbSignal->refSignalIDsJoined()));
+				cmd.setComment(QString("loopback %1 (%2signal %3)").arg(loopbackID).arg(busStr).arg(lbSignal->refSignalIDsJoined()));
 				firstCommand = false;
 			}
 
@@ -5908,7 +6033,7 @@ namespace Builder
 
 			if (firstCommand == true)
 			{
-				cmd.setComment(QString("loopback %1 (signal %2)").arg(loopbackID).arg(lbSignal->signal()->appSignalID()));
+				cmd.setComment(QString("loopback %1 (%2signal %3)").arg(loopbackID).arg(busStr).arg(lbSignal->signal()->appSignalID()));
 				firstCommand = false;
 			}
 
@@ -6093,27 +6218,27 @@ namespace Builder
 
 			switch(ualItem->type())
 			{
-			case UalItem::Type::Afb:
+			case E::UalItemType::Afb:
 				result &= generateAfbCode(code, ualItem);
 				break;
 
-			case UalItem::Type::BusComposer:
+			case E::UalItemType::BusComposer:
 				result &= generateBusComposerCode(code, ualItem);
 				break;
 
 			// UalItems that is not required code generation
 			//
-			case UalItem::Type::Signal:
-			case UalItem::Type::Const:
-			case UalItem::Type::Transmitter:
-			case UalItem::Type::Receiver:
-			case UalItem::Type::Terminator:
-			case UalItem::Type::BusExtractor:
-			case UalItem::Type::LoopbackSource:
-			case UalItem::Type::LoopbackTarget:
+			case E::UalItemType::Signal:
+			case E::UalItemType::Const:
+			case E::UalItemType::Transmitter:
+			case E::UalItemType::Receiver:
+			case E::UalItemType::Terminator:
+			case E::UalItemType::BusExtractor:
+			case E::UalItemType::LoopbackSource:
+			case E::UalItemType::LoopbackTarget:
 				break;
 
-			case UalItem::Type::Unknown:
+			case E::UalItemType::Unknown:
 			default:
 				assert(false);
 				LOG_INTERNAL_ERROR(m_log);
@@ -6906,7 +7031,7 @@ namespace Builder
 			return false;
 		}
 
-		Afbl* afbl = m_afbls.value(ualAfb->strID());
+		Afbl* afbl = m_afbls.value(ualAfb->strID(), nullptr);
 
 		if (afbl == nullptr)
 		{
@@ -7380,14 +7505,14 @@ namespace Builder
 		{
 		// allowed connections
 		//
-		case UalItem::Signal:
+		case E::UalItemType::Signal:
 			// extractor connected to signal
 			//
 			srcSignalUuid = extractorSourceItem->guid();
 			break;
 
-		case UalItem::Afb:
-		case UalItem::BusComposer:
+		case E::UalItemType::Afb:
+		case E::UalItemType::BusComposer:
 			// extractor directly connected to 	Fb, BusComposer
 			//
 			srcSignalUuid = connectedOutPinUuid;
@@ -10795,6 +10920,13 @@ namespace Builder
 		}
 
 		m_scalAppItems.clear();
+
+		for(Loopback* loopback : m_loopbacks)
+		{
+			delete loopback;
+		}
+
+		m_loopbacks.clear();
 	}
 
 	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid)

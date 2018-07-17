@@ -117,21 +117,6 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		enum Type
-		{
-			Unknown,
-			Signal,
-			Afb,
-			Const,
-			Transmitter,
-			Receiver,
-			Terminator,
-			BusComposer,
-			BusExtractor,
-			LoopbackSource,
-			LoopbackTarget
-		};
-
 		UalItem();
 		UalItem(const UalItem& ualItem);
 		UalItem(const AppLogicItem& appLogicItem);
@@ -145,18 +130,18 @@ namespace Builder
 
 		QString strID() const;
 
-		bool isSignal() const { return type() == UalItem::Type::Signal; }
-		bool isAfb() const { return type() == UalItem::Type::Afb; }
-		bool isConst() const { return type() == UalItem::Type::Const; }
-		bool isTransmitter() const { return type() == UalItem::Type::Transmitter; }
-		bool isReceiver() const { return type() == UalItem::Type::Receiver; }
-		bool isTerminator() const { return type() == UalItem::Type::Terminator; }
-		bool isBusComposer() const { return type() == UalItem::Type::BusComposer; }
-		bool isBusExtractor() const { return type() == UalItem::Type::BusExtractor; }
-		bool isLoopbackSource() const { return type() == UalItem::Type::LoopbackSource; }
-		bool isLoopbackTarget() const { return type() == UalItem::Type::LoopbackTarget; }
+		bool isSignal() const { return type() == E::UalItemType::Signal; }
+		bool isAfb() const { return type() == E::UalItemType::Afb; }
+		bool isConst() const { return type() == E::UalItemType::Const; }
+		bool isTransmitter() const { return type() == E::UalItemType::Transmitter; }
+		bool isReceiver() const { return type() == E::UalItemType::Receiver; }
+		bool isTerminator() const { return type() == E::UalItemType::Terminator; }
+		bool isBusComposer() const { return type() == E::UalItemType::BusComposer; }
+		bool isBusExtractor() const { return type() == E::UalItemType::BusExtractor; }
+		bool isLoopbackSource() const { return type() == E::UalItemType::LoopbackSource; }
+		bool isLoopbackTarget() const { return type() == E::UalItemType::LoopbackTarget; }
 
-		Type type() const;
+		E::UalItemType type() const;
 
 		bool hasRam() const { return afb().hasRam(); }
 
@@ -191,7 +176,7 @@ namespace Builder
 		AppLogicItem m_appLogicItem;							// structure from parser
 
 	private:
-		mutable UalItem::Type m_type = UalItem::Type::Unknown;
+		mutable E::UalItemType m_type = E::UalItemType::Unknown;
 
 		QHash<QString, int> m_opNameToIndexMap;
 	};
@@ -264,7 +249,7 @@ namespace Builder
 		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of FB's parameters used by user only
 
 	public:
-		UalAfb(const UalItem &appItem);
+		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().opCode(); }		// return FB type
@@ -275,7 +260,7 @@ namespace Builder
 		bool isConstComaparator() const;
 		bool isDynamicComaparator() const;
 		bool isComparator() const;
-		bool isBusPocessingElement() const;
+		bool isBusProcessing() const;
 
 		QString instantiatorID() const;
 
@@ -294,8 +279,6 @@ namespace Builder
 		int runTime() const { return m_runTime; }
 
 	private:
-		bool isBusProcessingAfbChecking() const;
-
 		// FB's parameters values and runtime calculations
 		// implemented in file FbParamCalculation.cpp
 		//
@@ -343,6 +326,7 @@ namespace Builder
 	private:
 		quint16 m_instance = -1;
 		int m_number = -1;
+		bool m_isBusProcessing = false;
 		mutable QString m_instantiatorID;
 
 		AppFbParamValuesArray m_paramValuesArray;

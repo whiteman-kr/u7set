@@ -418,76 +418,76 @@ namespace Builder
 		return "";
 	}
 
-	UalItem::Type UalItem::type() const
+	E::UalItemType UalItem::type() const
 	{
-		if (m_type != UalItem::Type::Unknown)
+		if (m_type != E::UalItemType::Unknown)
 		{
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isSignalElement() == true)
 		{
-			m_type = Type::Signal;
+			m_type = E::UalItemType::Signal;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isAfbElement() == true)
 		{
-			m_type = Type::Afb;
+			m_type = E::UalItemType::Afb;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isConstElement() == true)
 		{
-			m_type = Type::Const;
+			m_type = E::UalItemType::Const;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isTransmitterElement() == true)
 		{
-			m_type = Type::Transmitter;
+			m_type = E::UalItemType::Transmitter;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isReceiverElement() == true)
 		{
-			m_type = Type::Receiver;
+			m_type = E::UalItemType::Receiver;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isTerminatorElement() == true)
 		{
-			m_type = Type::Terminator;
+			m_type = E::UalItemType::Terminator;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isBusComposerElement() == true)
 		{
-			m_type = Type::BusComposer;
+			m_type = E::UalItemType::BusComposer;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isBusExtractorElement() == true)
 		{
-			m_type = Type::BusExtractor;
+			m_type = E::UalItemType::BusExtractor;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isLoopbackSourceElement() == true)
 		{
-			m_type = Type::LoopbackSource;
+			m_type = E::UalItemType::LoopbackSource;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isLoopbackTargetElement() == true)
 		{
-			m_type = Type::LoopbackTarget;
+			m_type = E::UalItemType::LoopbackTarget;
 			return m_type;
 		}
 
 		assert(false);
 
-		m_type = Type::Unknown;
+		m_type = E::UalItemType::Unknown;
 
 		return m_type;
 	}
@@ -650,8 +650,9 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	UalAfb::UalAfb(const UalItem& appItem) :
-		UalItem(appItem)
+	UalAfb::UalAfb(const UalItem& appItem, bool isBusProcessingAfb) :
+		UalItem(appItem),
+		m_isBusProcessing(isBusProcessingAfb)
 	{
 		// initialize m_paramValuesArray
 		//
@@ -678,6 +679,11 @@ namespace Builder
 		quint16 oc = opcode();
 
 		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
+	}
+
+	bool UalAfb::isBusProcessing() const
+	{
+		return m_isBusProcessing;
 	}
 
 	QString UalAfb::instantiatorID() const

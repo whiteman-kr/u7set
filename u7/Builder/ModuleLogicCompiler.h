@@ -136,6 +136,25 @@ namespace Builder
 			int busContentAddress = BAD_ADDRESS;
 		};
 
+		struct Loopback
+		{
+			// initial loopback params
+			//
+			QString ID;
+			const UalItem* source = nullptr;
+
+			// params will be filled during loopbackPreprocessing
+			//
+			QVector<const UalItem*> targets;
+			QHash<QString, bool> linkedSignals;
+			QHash<UalItem*, bool> linkedSignalItems;
+			QHash<QUuid, bool> linkedPins;
+
+			//
+
+			UalSignal* ualSignal = nullptr;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
@@ -169,8 +188,14 @@ namespace Builder
 		//
 
 		bool createUalSignals();
+		bool writeUalItemsFile();
 
 		bool loopbacksPreprocessing();
+		bool findLoopbackSources();
+		bool findLoopbackTargets();
+		bool findSignalsAndPinsLinkedToLoopbackTargets();
+		bool findSignalsAndPinsLinkedToLoopbackTarget(const UalItem* targetItem);
+
 		bool getLinkedSignalItems(const LogicPin& outPin, QVector<UalItem *>* connectedSignals);
 		bool isLoopbackSignal(const QString& appSignalID);
 
@@ -218,8 +243,8 @@ namespace Builder
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
 		bool isConnectedToLoopbackTarget(const LogicPin& inPin, UalItem** loopbackTarget);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
-		bool determineOutBusTypeByInputs(UalAfb* ualAfb, QString* outBusTypeID);
-		bool determineOutBusTypeByOutput(UalAfb* ualAfb, QString* outBusTypeID);
+		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
+		bool determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool isBusTypesAreEqual(const QStringList& busTypes);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
@@ -540,7 +565,10 @@ namespace Builder
 		QHash<QString, QString> m_linkedValidtySignalsID;		// device signals with linked validity signals
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
 
-		QHash<QString, UalItem*> m_loopbackSources;
+		QHash<QString, Loopback*> m_loopbacks;
+
+		//
+//		QHash<QString, UalItem*> m_loopbackSources;
 		QHash<QString, QVector<UalItem*>> m_loopbackConnectedSignals;
 		QHash<QString, UalSignal*> m_loopbackSignals;					// loopbackID => loopback ualSignal
 		QHash<QString, QString> m_signalsToLoopbacks;					// appSignalID => loopbackID
