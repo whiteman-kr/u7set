@@ -344,7 +344,7 @@ namespace Builder
 		void errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID);	// Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)
 		void errALC5145(QString signalID, QUuid signalGuid, QString schemaID);			// Input signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
-		void errALC5147(QString signalID, QUuid signalGuid, QString lbID1, QString lbID2, QString schemaID);			// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
+		void errALC5147(QString signalID, QString lbID1, QString lbID2);			// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

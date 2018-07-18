@@ -146,9 +146,9 @@ namespace Builder
 			// params will be filled during loopbackPreprocessing
 			//
 			QVector<const UalItem*> targets;
-			QHash<QString, bool> linkedSignals;
-			QHash<UalItem*, bool> linkedSignalItems;
-			QHash<QUuid, bool> linkedPins;
+			QHash<QString, const UalItem*> linkedSignals;
+			QHash<const UalItem*, bool> linkedItems;
+			QHash<QUuid, const UalItem*> linkedPins;
 
 			//
 
@@ -194,9 +194,12 @@ namespace Builder
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
-		bool findSignalsAndPinsLinkedToLoopbackTarget(const UalItem* targetItem);
+		bool findSignalsAndPinsLinkedToLoopbackTarget(Loopback* loopback, const UalItem* targetItem);
+		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
+										   QHash<QString, const UalItem *>* linkedSignals,
+										   QHash<const UalItem*, bool>* linkedItems,
+										   QHash<QUuid, const UalItem *>* linkedPins);
 
-		bool getLinkedSignalItems(const LogicPin& outPin, QVector<UalItem *>* connectedSignals);
 		bool isLoopbackSignal(const QString& appSignalID);
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
@@ -566,12 +569,14 @@ namespace Builder
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
 
 		QHash<QString, Loopback*> m_loopbacks;
+		QHash<QString, Loopback*> m_signalsToLoopbacks;
+		QHash<QUuid, Loopback*> m_pinsToLoopbacks;
 
 		//
 //		QHash<QString, UalItem*> m_loopbackSources;
-		QHash<QString, QVector<UalItem*>> m_loopbackConnectedSignals;
-		QHash<QString, UalSignal*> m_loopbackSignals;					// loopbackID => loopback ualSignal
-		QHash<QString, QString> m_signalsToLoopbacks;					// appSignalID => loopbackID
+//		QHash<QString, QVector<UalItem*>> m_loopbackConnectedSignals;
+//		QHash<QString, UalSignal*> m_loopbackSignals;					// loopbackID => loopback ualSignal
+//		QHash<QString, QString> m_signalsToLoopbacks;					// appSignalID => loopbackID
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL

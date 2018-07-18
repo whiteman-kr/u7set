@@ -5371,18 +5371,17 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
+	/// Title:	   Signal %1 is connected to different Loopbacks %2 and %3
 	///
 	/// Parameters:
 	///		%1 Signal ID
-	///		%2 Loopback target ID1
-	///		%3 Loopback target ID3
-	///		%4 Logic schema ID
+	///		%2 Loopback1 ID
+	///		%3 Loopback2 ID
 	///
 	/// Description:
-	///		Signal is connected to different LoopbackTargets. Check signals connections.
+	///		Signal is connected to different Loopbacks. Check signals connections.
 	///
-	void IssueLogger::errALC5147(QString signalID, QUuid signalGuid, QString lbID1, QString lbID2, QString schemaID)
+	void IssueLogger::errALC5147(QString signalID, QString lbID1, QString lbID2)
 	{
 		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
 

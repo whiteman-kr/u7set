@@ -753,9 +753,15 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= findLoopbackSources();
-		result &= findLoopbackTargets();
-		result &= findSignalsAndPinsLinkedToLoopbackTargets();
+		result = findLoopbackSources();
+
+		RETURN_IF_FALSE(result);
+
+		result = findLoopbackTargets();
+
+		RETURN_IF_FALSE(result);
+
+		result = findSignalsAndPinsLinkedToLoopbackTargets();
 
 		return result;
 	}
@@ -857,40 +863,66 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(loopback);
 
-			for(UalItem* target : loopback->targets)
+			for(const UalItem* target : loopback->targets)
 			{
 				TEST_PTR_CONTINUE(target);
 
-				result &= findSignalsAndPinsLinkedToLoopbackTarget(target);
+				result &= getSignalsAndPinsLinkedToItem(target,
+														&loopback->linkedSignals,
+														&loopback->linkedItems,
+														&loopback->linkedPins);
 			}
+
+			QStringList linkedSignals = loopback->linkedSignals.keys();
+
+			for(const QString& linkedSignal : linkedSignals)
+			{
+				Loopback* presentLoopback = m_signalsToLoopbacks.value(linkedSignal, nullptr);
+
+				if (presentLoopback == nullptr)
+				{
+					m_signalsToLoopbacks.insert(linkedSignal, loopback);
+					continue;
+				}
+
+				// Signal %1 is connected to different Loopbacks %2 and %3.
+				//
+				m_log->errALC5147(linkedSignal, presentLoopback->ID, loopback->ID);
+				result = false;
+			}
+
+			QList<QUuid> linkedPins = loopback->linkedPins.keys();
+
+			for(const QString& linkedSignal : linkedSignals)
+			{
+				Loopback* presentLoopback = m_signalsToLoopbacks.value(linkedSignal, nullptr);
+
+				if (presentLoopback == nullptr)
+				{
+					m_signalsToLoopbacks.insert(linkedSignal, loopback);
+					continue;
+				}
+
+				// Signal %1 is connected to different Loopbacks %2 and %3.
+				//
+				m_log->errALC5147(linkedSignal, presentLoopback->ID, loopback->ID);
+				result = false;
+			}
+
 		}
+
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::findSignalsAndPinsLinkedToLoopbackTarget(const UalItem* targetItem)
+	bool ModuleLogicCompiler::findSignalsAndPinsLinkedToLoopbackTarget(Loopback* loopback, const UalItem* targetItem)
 	{
+/*		TEST_PTR_LOG_RETURN_FALSE(loopback, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(targetItem, m_log);
 
 		// find all signals connected to this LoopbackTarget
 		//
-		const std::vector<LogicPin>& outputs = targetItem->outputs();
 
-		if (outputs.size() != 1)
-		{
-			LOG_INTERNAL_ERROR(m_log);				// LoopbackTarget must have only one output pin
-			return false;
-		}
-
-		const LogicPin& outPin = outputs[0];
-
-		QVector<UalItem*> connectedSignals;
-
-		РАБОТАТЬ ЗДЕСЬ!!!!!
-		ЛИНКОВАТь СИГНАЛЫ И ПИНЫ К LoopbackTarget!
-
-								'
-		bool res = getLinkedSignalItems(outPin, &connectedSignals);
 
 		if (res == false)
 		{
@@ -924,50 +956,110 @@ namespace Builder
 			{
 				if (lbID != loopbackID)
 				{
-					// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
-					//
-					m_log->errALC5147(appSignalID, item->guid(), lbID, loopbackID, item->schemaID());
-					result = false;
 					continue;
 				}
 
 				// else:
 				//			signal is twice connected to same LoopbackTarget, it is not a error
 			}
-		}
+		}*/
+
+		return true;
 
 	}
 
-	bool ModuleLogicCompiler::getLinkedSignalItems(const LogicPin& outPin, QVector<UalItem*>* connectedSignals)
+	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToItem(const UalItem* item,
+															QHash<QString, const UalItem*>* linkedSignals,
+															QHash<const UalItem*, bool>* linkedItems,
+															QHash<QUuid, const UalItem*>* linkedPins)
 	{
-		TEST_PTR_LOG_RETURN_FALSE(connectedSignals, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(item, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(linkedSignals, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(linkedItems, m_log);
 
-		const std::vector<QUuid>& associatedInPins = outPin.associatedIOs();
+		// linkedPins can be null if not required
 
 		bool result = true;
 
-		for(QUuid inPin : associatedInPins)
+		const std::vector<LogicPin>& outputs = item->outputs();
+
+		for(const LogicPin& outPin : outputs)
 		{
-			UalItem* ualItem = m_pinParent.value(inPin, nullptr);
+			const std::vector<QUuid>& associatedInPins = outPin.associatedIOs();
 
-			if (ualItem == nullptr)
+			if (linkedPins != nullptr)
 			{
-				LOG_INTERNAL_ERROR(m_log);
-				continue;
+				linkedPins->insert(outPin.guid(), item);
 			}
 
-			if (ualItem->isSignal() == false)
+			for(QUuid inPin : associatedInPins)
 			{
-				continue;
-			}
+				const UalItem* linkedItem = m_pinParent.value(inPin, nullptr);
 
-			connectedSignals->append(ualItem);
+				if (linkedItem == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					continue;
+				}
 
-			const std::vector<LogicPin>& outPins = ualItem->outputs();
+				linkedItems->insert(linkedItem, true);
 
-			for(const LogicPin& out : outPins)
-			{
-				result &= getLinkedSignalItems(out, connectedSignals);
+				if (linkedPins != nullptr)
+				{
+					linkedPins->insert(inPin, linkedItem);
+				}
+
+				if (linkedItem->isSignal() == false)
+				{
+					// linkedItem is not a Signal - add linked item and pin only
+					//
+					continue;
+				}
+
+				// linkedItem is a Signal
+				//
+				QString signalID = linkedItem->strID();
+
+				bool signalAlreadyLinked = linkedSignals->contains(signalID);
+
+				linkedSignals->insert(signalID, linkedItem);
+
+				if (linkedItem->outputs().size() > 0)
+				{
+					// Signal has output - link next items
+					//
+					result &= getSignalsAndPinsLinkedToItem(linkedItem, linkedSignals, linkedItems, linkedPins);
+				}
+
+				if (signalAlreadyLinked == false)
+				{
+					// scan all ualItems and find SignalItems with signalID that is not in linkedItems
+					// (heavy operation)
+
+					for(const UalItem* item : m_ualItems)
+					{
+						TEST_PTR_CONTINUE(item);
+
+						if (item->isSignal() == false)
+						{
+							continue;
+						}
+
+						if (item->strID() != signalID)
+						{
+							continue;
+						}
+
+						if (linkedItems->contains(item) == true)
+						{
+							continue;
+						}
+
+						linkedItems->insert(item, true);
+
+						result &= getSignalsAndPinsLinkedToItem(item, linkedSignals, linkedItems, linkedPins);
+					}
+				}
 			}
 		}
 
@@ -2211,11 +2303,20 @@ namespace Builder
 
 		QString loopbackID = source->loopbackId();
 
-		const UalSignal* loopbackSignal = m_loopbackSignals.value(loopbackID, nullptr);
+		Loopback* loopback = m_loopbacks.value(loopbackID, nullptr);
 
-		if (loopbackSignal != nullptr)
+		if (loopback == nullptr)
 		{
-			 if (loopbackSignal == ualSignal)
+			// unknown loopbackSource - why?
+			// this error should be detected early, during loopbacks preprocessing
+			//
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (loopback->ualSignal != nullptr)
+		{
+			 if (loopback->ualSignal == ualSignal)
 			 {
 				 // it is Ok, LoopbackSource already linked to this ualSignal
 				 //
@@ -2225,12 +2326,13 @@ namespace Builder
 			// this error should be detected early, during loopbacks preprocessing
 			//
 			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		ualSignal->setLoopbackID(loopbackID);			// mark signal as loopbackSource
+		loopback->ualSignal = ualSignal;
 
-		m_loopbackSignals.insert(loopbackID, ualSignal);
+		ualSignal->setLoopbackID(loopbackID);			// mark signal as loopbackSource
 
 		m_ualSignals.appendRefPin(loopbackSourceItem, inPinUuid, ualSignal);
 
@@ -2316,13 +2418,27 @@ namespace Builder
 
 		QString loopbackID = target->loopbackId();
 
-		UalSignal* loopbackSignal = m_loopbackSignals.value(loopbackID, nullptr);
+		Loopback* loopback = m_loopbacks.value(loopbackID, nullptr);
 
-		if (loopbackSignal == nullptr)
+		if (loopback == nullptr)
+		{
+			// this error should be detected early, during loopbacks preprocessing
+			//
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		UalSignal* loopbackUalSignal = loopback->ualSignal;
+
+		if (loopbackUalSignal == nullptr)
 		{
 			// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
 			//
-			m_log->errALC5143(loopbackID, loopbackTargetItem->guid(), loopbackTargetItem->schemaID());
+			// this error should be detected early, during loopbacks preprocessing
+			//
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
@@ -2336,7 +2452,7 @@ namespace Builder
 
 		// link connected items to loopback source signal
 		//
-		bool result = linkConnectedItems(loopbackTargetItem, outputs[0], loopbackSignal);
+		bool result = linkConnectedItems(loopbackTargetItem, outputs[0], loopbackUalSignal);
 
 		return result;
 	}
@@ -2809,7 +2925,7 @@ namespace Builder
 
 			QVector<UalItem*> connectedSignals;
 
-			res = getLinkedSignalItems(outPin, &connectedSignals);
+			res = getSignalsAndPinsLinkedToItem()(outPin, &connectedSignals);
 
 			if (res == false)
 			{
