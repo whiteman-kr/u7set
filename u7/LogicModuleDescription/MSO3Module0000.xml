@@ -29,14 +29,14 @@
 		<AppLogicWordDataSize>3570</AppLogicWordDataSize>;
 		<ModuleDataOffset>0</ModuleDataOffset>
 		<ModuleDataSize>2560</ModuleDataSize>
-		<ModuleCount>14</ModuleCount>
+		<ModuleCount>72</ModuleCount>
 		<TuningDataOffset>46336</TuningDataOffset>
 		<TuningDataSize>7620</TuningDataSize>				<!--TuningDataFrameCount * TuningDataFramePayload-->
 		<TuningDataFrameCount>15</TuningDataFrameCount>
 		<TuningDataFramePayload>508</TuningDataFramePayload>
 		<TuningDataFrameSize>512</TuningDataFrameSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
-		<TxDiagDataSize>92</TxDiagDataSize>
+		<TxDiagDataSize>84</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
 		<ALPPhaseTime>2500</ALPPhaseTime>

@@ -147,7 +147,7 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 
 "use strict";
 
-var FamilyBVB15ID: number = 0x5200;
+var FamilyMSO3ID: number = 0x5200;
 
 //var configScriptVersion: number = 1;
 //var configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
@@ -169,11 +169,11 @@ function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[]
 
 	for (var i: number = 0; i < logicModules.length; i++) {
 
-		if (logicModules[i].jsModuleFamily() != FamilyBVB15ID) {
+		if (logicModules[i].jsModuleFamily() != FamilyMSO3ID) {
 			continue;
 		}
 
-		var result: boolean = module_bvb15(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
+		var result: boolean = module_mso3(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
 		if (result == false) {
 			return false;
 		}
@@ -285,14 +285,14 @@ function valToADC(val: number, lowLimit: number, highLimit: number, lowADC: numb
 	return Math.round(res);
 }
 
-function module_bvb15(builder: Builder, root: DeviceObject, module: DeviceObject, confFirmware: ModuleFirmware, log: IssueLogger,
+function module_mso3(builder: Builder, root: DeviceObject, module: DeviceObject, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule): boolean {
 	if (module.jsDeviceType() != DeviceObjectType.Module) {
 		return false;
 	}
 
 	if (module.propertyValue("EquipmentID") == undefined) {
-		log.errCFG3000("EquipmentID", "BVB-15");
+		log.errCFG3000("EquipmentID", "MSO-3");
 		return false;
 	}
 
@@ -304,7 +304,7 @@ function module_bvb15(builder: Builder, root: DeviceObject, module: DeviceObject
 		}
 	}
 
-	if (module.jsModuleFamily() == FamilyBVB15ID) {
+	if (module.jsModuleFamily() == FamilyMSO3ID) {
 		var place: number = module.jsPropertyInt("Place");
 
 		if (place != 0) {
@@ -314,24 +314,23 @@ function module_bvb15(builder: Builder, root: DeviceObject, module: DeviceObject
 
 		// Generate Configuration
 		//
-		return generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
+		return generate_mso3_rev1(builder, module, root, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
 	}
 
 	return false;
 }
 
-// Generate configuration for module BVB-15
+// Generate configuration for module MSO-3
 //
 //
-function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: DeviceObject, confFirmware: ModuleFirmware, log: IssueLogger,
+function generate_mso3_rev1(builder: Builder, module: DeviceObject, root: DeviceObject, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule) {
 	if (module.propertyValue("EquipmentID") == undefined) {
-		log.errCFG3000("EquipmentID", "BVB-15");
+		log.errCFG3000("EquipmentID", "MSO-3");
 		return false;
 	}
 
-	var checkProperties: string[] = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID",
-		"Bit0_TemperatureSensor1", "Bit1_TemperatureSensor2", "Bit2_TemperatureSensor3", "Bit3_E14", "Bit4_E15", "Bit5_E16", "Bit6_SimulationInputMode"];
+	var checkProperties: string[] = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
 	for (var cp: number = 0; cp < checkProperties.length; cp++) {
 		if (module.propertyValue(checkProperties[cp]) == undefined) {
 			log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
@@ -375,7 +374,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	var maxLMNumber: number = 62;               // Can be changed!
 	var configStartFrames: number = 2;
 	var configFrameCount: number = 4;          // number of frames in each configuration
-	var ioModulesMaxCount: number = 14;
+	var ioModulesMaxCount: number = 72;
 
 	if (LMNumber < 1 || LMNumber > maxLMNumber) {
 		log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
@@ -387,7 +386,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
 
 	confFirmware.writeLog("---\r\n");
-	confFirmware.writeLog("Module: BVB-15\r\n");
+	confFirmware.writeLog("Module: MSO-3\r\n");
 	confFirmware.writeLog("EquipmentID = " + equipmentID + "\r\n");
 	confFirmware.writeLog("Subsystem ID = " + subSysID + "\r\n");
 	confFirmware.writeLog("Key value = " + ssKeyValue + "\r\n");
@@ -501,7 +500,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 			continue;
 		}
 
-		if (ioModule.jsModuleFamily() == FamilyBVB15ID) {
+		if (ioModule.jsModuleFamily() == FamilyMSO3ID) {
 			continue;
 		}
 
@@ -987,10 +986,11 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	var equipmentID = module.propertyValue("EquipmentID");
 
-	var FamilyBUMD1: number = 0x5700;
-	var FamilyBUMZ1: number = 0x5800;
+	var FamilyMYM: number = 0x5D00;
+	var FamilyMVD: number = 0x5E00;
+	var FamilyMSU: number = 0x5F00;
 
-	var ioModulesMaxCount: number = 16;
+	var ioModulesMaxCount: number = 72;
 
 	var chassis: DeviceObject = module.jsParent();
 
@@ -1056,6 +1056,17 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	ptr += 2;
 
+	// Checks
+
+	var Checks = 0;
+
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Checks", Checks) == false) {
+		return false;
+	}
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: Checks = " + Checks + "\r\n");
+
+	ptr += 2;
+
 	// Blocks[]
 
 	var blocksPtr : number = ptr + 2 + 2;	// bptr is a pointer to Blocks [] array
@@ -1082,7 +1093,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		var customModuleFamily : number = ioModule.jsModuleFamily();
 
-		if (customModuleFamily != FamilyBUMD1 && customModuleFamily != FamilyBUMZ1) {
+	if (customModuleFamily != FamilyMYM && customModuleFamily != FamilyMVD && customModuleFamily != FamilyMSU) {
 			continue;
 		}
 
@@ -1134,27 +1145,9 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		blockPtr += 2;
 
-		// TxDiagDataSize
+		blockPtr += 2;	// Reserved
 
-		var diagWordsIoCount: number = ioModule.jsPropertyInt("TxDiagDataSize");
-
-		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "DiagDataSize", diagWordsIoCount) == false) {
-			return false;
-		}
-		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: DiagDataSize = " + diagWordsIoCount + "\r\n");
-
-		blockPtr += 2;
-
-		// TxAppDataSize
-
-		var appWordsIoCount: number = ioModule.jsPropertyInt("TxAppDataSize");
-
-		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "AppDataSize", appWordsIoCount) == false) {
-			return false;
-		}
-		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: AppDataSize = " + appWordsIoCount + "\r\n");
-
-		blockPtr += 2;
+		blockPtr += 2;	// Reserved
 	}
 
 	for (var i: number = 0; i < ioModulesMaxCount; i++) {
@@ -1175,62 +1168,23 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 		blockPtr += 2;
 	}
 
-	// ModulesCount
+	// QBlocks
 
-	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "ModulesCount", blocksCount) == false) {
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "QBlocks", blocksCount) == false) {
 		return false;
 	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: ModulesCount = " + blocksCount + "\r\n");
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: QBlocks = " + blocksCount + "\r\n");
 
 	ptr += 2;
 
-	// ModulesMask
+	// StructSize
 
-	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "ModulesMask", blocksMask) == false) {
+	var structSize = 8;
+
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "StructSize", structSize) == false) {
 		return false;
 	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: ModulesMask = " + blocksMask + "\r\n");
-
-	ptr = 144;
-
-	// Checks
-
-	var Checks = 0;
-
-	if (module.jsPropertyBool("Bit0_TemperatureSensor1") == true) {
-		Checks |= (1 << 0);
-	}
-
-	if (module.jsPropertyBool("Bit1_TemperatureSensor2") == true) {
-		Checks |= (1 << 1);
-	}
-
-	if (module.jsPropertyBool("Bit2_TemperatureSensor3") == true) {
-		Checks |= (1 << 2);
-	}
-
-	if (module.jsPropertyBool("Bit3_E14") == true) {
-		Checks |= (1 << 3);
-	}
-
-	if (module.jsPropertyBool("Bit4_E15") == true) {
-		Checks |= (1 << 4);
-	}
-
-	if (module.jsPropertyBool("Bit5_E16") == true) {
-		Checks |= (1 << 5);
-	}
-
-	if (module.jsPropertyBool("Bit6_SimulationInputMode") == true) {
-		Checks |= (1 << 6);
-	}
-
-	if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Checks", Checks) == false) {
-		return false;
-	}
-	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: Checks = " + Checks + "\r\n");
-
-	ptr += 2;
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "]: StructSize = " + structSize + "\r\n");
 
 	return true;
 }
