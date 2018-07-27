@@ -863,109 +863,114 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(loopback);
 
+			QHash<QString, const UalItem*> linkedSignals;
+			QHash<const UalItem*, bool> linkedItems;
+			QHash<QUuid, const UalItem*> linkedPins;
+
+			bool res = true;
+
 			for(const UalItem* target : loopback->targets)
 			{
 				TEST_PTR_CONTINUE(target);
 
-				result &= getSignalsAndPinsLinkedToItem(target,
-														&loopback->linkedSignals,
-														&loopback->linkedItems,
-														&loopback->linkedPins);
+				res &= getSignalsAndPinsLinkedToItem(target,
+														&linkedSignals,
+														&linkedItems,
+														&linkedPins);
 			}
 
-			QStringList linkedSignals = loopback->linkedSignals.keys();
-
-			for(const QString& linkedSignal : linkedSignals)
+			if (res == false)
 			{
-				Loopback* presentLoopback = m_signalsToLoopbacks.value(linkedSignal, nullptr);
+				result = false;
+				continue;
+			}
+
+			Signal* firstSignal = nullptr;
+			const UalItem* firstSignalItem = nullptr;
+
+			QStringList linkedSignalIDs = linkedSignals.keys();
+
+			for(const QString& linkedSignalID : linkedSignalIDs)
+			{
+				Signal* s = m_signals->getSignal(linkedSignalID);
+
+				if (s == nullptr)
+				{
+					// this error should be detected early
+					//
+					LOG_INTERNAL_ERROR(m_log);
+					res = false;
+					continue;
+				}
+
+				if (firstSignal == nullptr)
+				{
+					firstSignal = s;
+					firstSignalItem = linkedSignals.value(linkedSignalID, nullptr);
+
+					assert(firstSignalItem != nullptr);
+				}
+				else
+				{
+					// check signals compatibility
+					if (firstSignal->isCompatibleFormat(*s) == false)
+					{
+						// error
+						fl,asf;asld,f;s,ldf
+					}
+				}
+
+				Loopback* presentLoopback = m_signalsToLoopbacks.value(linkedSignalID, nullptr);
 
 				if (presentLoopback == nullptr)
 				{
-					m_signalsToLoopbacks.insert(linkedSignal, loopback);
+					m_signalsToLoopbacks.insert(linkedSignalID, loopback);
 					continue;
 				}
 
 				// Signal %1 is connected to different Loopbacks %2 and %3.
 				//
-				m_log->errALC5147(linkedSignal, presentLoopback->ID, loopback->ID);
+				m_log->errALC5147(linkedSignalID, presentLoopback->ID, loopback->ID);
+				res = false;
+			}
+
+			if (res == false)
+			{
 				result = false;
+				continue;
 			}
 
 			QList<QUuid> linkedPins = loopback->linkedPins.keys();
 
-			for(const QString& linkedSignal : linkedSignals)
+			for(const QUuid linkedPin : linkedPins)
 			{
-				Loopback* presentLoopback = m_signalsToLoopbacks.value(linkedSignal, nullptr);
+				Loopback* presentLoopback = m_pinsToLoopbacks.value(linkedPin, nullptr);
 
 				if (presentLoopback == nullptr)
 				{
-					m_signalsToLoopbacks.insert(linkedSignal, loopback);
+					m_pinsToLoopbacks.insert(linkedPin, loopback);
 					continue;
 				}
 
-				// Signal %1 is connected to different Loopbacks %2 and %3.
+				// Pin is connected to different Loopbacks (different sources == assembly OR)
+				// This error should be detected early, during parsing
 				//
-				m_log->errALC5147(linkedSignal, presentLoopback->ID, loopback->ID);
-				result = false;
+				LOG_INTERNAL_ERROR(m_log);
+				res = false;
 			}
 
-		}
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
 
+			loopback->linkedSignals = linkedSignals;
+			loopback->linkedItems = linkedItems;
+			loopback->linkedPins = linkedPins;
+		}
 
 		return result;
-	}
-
-	bool ModuleLogicCompiler::findSignalsAndPinsLinkedToLoopbackTarget(Loopback* loopback, const UalItem* targetItem)
-	{
-/*		TEST_PTR_LOG_RETURN_FALSE(loopback, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(targetItem, m_log);
-
-		// find all signals connected to this LoopbackTarget
-		//
-
-
-		if (res == false)
-		{
-			result = false;
-			continue;
-		}
-
-		if (connectedSignals.isEmpty() == true)
-		{
-			continue;			// it is Ok!
-		}
-
-		if (m_loopbackConnectedSignals.contains(loopbackID) == false)
-		{
-			m_loopbackConnectedSignals.insert(loopbackID, QVector<UalItem*>());
-		}
-
-		m_loopbackConnectedSignals[loopbackID].append(connectedSignals);
-
-		for(const UalItem* item : connectedSignals)
-		{
-			QString appSignalID = item->strID();
-
-			QString lbID = m_signalsToLoopbacks.value(appSignalID, QString());
-
-			if (lbID.isEmpty() == true)
-			{
-				m_signalsToLoopbacks.insert(appSignalID, loopbackID);
-			}
-			else
-			{
-				if (lbID != loopbackID)
-				{
-					continue;
-				}
-
-				// else:
-				//			signal is twice connected to same LoopbackTarget, it is not a error
-			}
-		}*/
-
-		return true;
-
 	}
 
 	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToItem(const UalItem* item,
@@ -1022,7 +1027,10 @@ namespace Builder
 
 				bool signalAlreadyLinked = linkedSignals->contains(signalID);
 
-				linkedSignals->insert(signalID, linkedItem);
+				if (signalAlreadyLinked == false)
+				{
+					linkedSignals->insert(signalID, linkedItem);
+				}
 
 				if (linkedItem->outputs().size() > 0)
 				{
@@ -2577,32 +2585,23 @@ namespace Builder
 
 		// find connected signals in loopbacks
 		//
-
 		for(const QString& loopbackID : connectedLoopbacks)
 		{
-			if (m_loopbackConnectedSignals.contains(loopbackID) == false)
+			Loopback* loopback = m_loopbacks.value(loopbackID, nullptr);
+
+			if (loopback == nullptr)
 			{
+				// this error should be detected early
+				//
+				LOG_INTERNAL_ERROR(m_log);
+				assert(false);
 				continue;
 			}
 
-			const QVector<UalItem*> loopbackConnectedSignals = m_loopbackConnectedSignals.value(loopbackID);
+			QStringList signalIDs = loopback->linkedSignals.keys();
 
-			for(const UalItem* ualItem : loopbackConnectedSignals)
+			for(const QString& signalID : signalIDs)
 			{
-				if (ualItem == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				if (ualItem->isSignal() == false)
-				{
-					assert(false);
-					continue;
-				}
-
-				QString signalID = ualItem->strID();
-
 				Signal* s = m_signals->getSignal(signalID);
 
 				if (s == nullptr)
@@ -2816,6 +2815,7 @@ namespace Builder
 			// ualSignal is not connected to bus input now
 			// check, may be input is connected to LoopbackTarget via SignalItem(s),
 			// and try get busType from this signal(s)
+
 
 			UalItem* loopbackTarget = nullptr;
 

@@ -194,7 +194,6 @@ namespace Builder
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
-		bool findSignalsAndPinsLinkedToLoopbackTarget(Loopback* loopback, const UalItem* targetItem);
 		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
 										   QHash<QString, const UalItem *>* linkedSignals,
 										   QHash<const UalItem*, bool>* linkedItems,
