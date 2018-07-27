@@ -556,6 +556,8 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	//
 	memcpy(m_rupFramesData + frameNumber, &rupFrameTime.rupFrame.data, sizeof(rupFrameTime.rupFrame.data));
 
+	m_receivedFramesCount++;
+
 	// check packet parts
 	//
 	bool dataReady = true;
@@ -571,6 +573,8 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	{
 		return false;
 	}
+
+	m_receivedPacketCount++;
 
 	const Rup::TimeStamp& timeStamp = m_rupFramesHeaders[0].timeStamp;
 
