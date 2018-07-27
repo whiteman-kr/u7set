@@ -56,7 +56,7 @@ namespace Tcp
 	{
 		Q_OBJECT
 
-	protected:
+	public:
 		#pragma pack(push, 1)
 
 		struct Header
@@ -90,6 +90,7 @@ namespace Tcp
 
 		#pragma pack(pop)
 
+	protected:
 		enum ReadState
 		{
 			WaitingForHeader,
