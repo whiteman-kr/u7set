@@ -147,6 +147,7 @@ public:
 		quint32 m_optoPortAppDataSize = 0xFFFFFFFF;
 		quint32 m_optoInterfaceDataOffset = 0xFFFFFFFF;
 		quint32 m_optoPortDataSize = 0xFFFFFFFF;
+		bool m_sharedBuffer = false;
 
 		quint32 optoPortCount() const { return m_optoPortCount; }
 
