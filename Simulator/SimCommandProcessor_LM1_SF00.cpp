@@ -1288,6 +1288,255 @@ namespace Sim
 		return;
 	}
 
+	//	DPCOMP, OpCode 20
+	//
+	void CommandProcessor_LM1_SF00::afb_dpcomp(AfbComponentInstance* instance)
+	{
+		if (instance == nullptr)
+		{
+			assert(instance);
+			return;
+		}
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_hyst = 1;			// Hysteresis value
+		const int i_prev_result = 3;	// Prev result
+
+		const int i_data = 4;			// Input data
+		const int i_setting = 6;		// Setting value
+
+		const int o_result = 9;			// Result
+		const int o_overflow = 10;		// Result
+		const int o_underflow = 11;		// Result
+		const int o_nan = 13;			// Any input FP param NaN
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		// AFB Logic
+		//
+		if (conf >=1 && conf <= 4)
+		{
+			qint32 hystValue = instance->param(i_hyst)->signedIntValue();
+			qint32 settingValue = instance->param(i_setting)->signedIntValue();
+			qint32 inputValue = instance->param(i_data)->signedIntValue();
+			quint16 prevResult = 0;
+
+			switch (conf)
+			{
+			case 1:		// SignedInt32, ==
+				if (inputValue >= (settingValue - hystValue / 2) &&
+					inputValue <= (settingValue + hystValue / 2))
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				break;
+
+			case 2:		// SignedInt32, >
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if (inputValue > settingValue ||
+					(prevResult == 1 && inputValue > settingValue - hystValue))
+				{
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+					instance->addParamWord(i_prev_result, 0);
+				}
+				break;
+
+			case 3:		// SignedInt32, <
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if ((inputValue < settingValue) ||
+					(prevResult == 1 && inputValue < settingValue + hystValue))
+				{
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 0);
+					instance->addParamWord(i_prev_result, 0);
+				}
+				break;
+
+			case 4:		// SignedInt32, <>
+				if (inputValue >= (settingValue - hystValue / 2) &&
+					inputValue <= (settingValue + hystValue / 2))
+				{
+					instance->addParamWord(o_result, 0);
+				}
+				else
+				{
+					instance->addParamWord(o_result, 1);
+				}
+				break;
+
+			default:
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+			}
+
+			return;
+		}
+
+		if (conf >=5 && conf <= 8)
+		{
+			float hystValue = instance->param(i_hyst)->floatValue();
+			float settingValue = instance->param(i_setting)->floatValue();
+			float inputValue = instance->param(i_data)->floatValue();
+			quint16 prevResult = 0;
+
+			// NaN
+			//
+			quint16 nan = (settingValue != settingValue || hystValue != hystValue || inputValue != inputValue) ? 0x0001 : 0x0000;
+
+			instance->addParamWord(o_nan, nan);
+
+			if (nan != 0)
+			{
+				instance->addParamWord(o_result, 0);
+				instance->addParamWord(i_prev_result, 0);
+				instance->addParamWord(o_overflow, 0);
+				instance->addParamWord(o_underflow, 0);
+				return;
+			}
+
+			// --
+			//
+			switch (conf)
+			{
+			case 5:		// FloatingPoint32, ==
+				{
+					AfbComponentParam setValLow;
+					AfbComponentParam setValHigh;
+
+					setValLow.setFloatValue(settingValue - hystValue / 2.0f);
+					setValHigh.setFloatValue(settingValue + hystValue / 2.0f);
+
+					if (inputValue >= setValLow.floatValue() &&
+						inputValue <= setValHigh.floatValue())
+					{
+						instance->addParamWord(o_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
+					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+				}
+				break;
+
+			case 6:		// FloatingPoint32, >
+				{
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					AfbComponentParam t;
+
+					t.setFloatValue(settingValue);
+					t.subFloatingPoint(hystValue);
+
+					if ((inputValue > settingValue) ||
+						(prevResult == 1 && inputValue > t.floatValue()))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, t.mathOverflow());
+					instance->addParamWord(o_underflow, t.mathUnderflow());
+				}
+				break;
+
+			case 7:		// FloatingPoint32, <
+				{
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					AfbComponentParam t;
+
+					t.setFloatValue(settingValue);
+					t.addFloatingPoint(hystValue);
+
+					if ((inputValue < settingValue) ||
+						(prevResult == 1 && inputValue < t.floatValue()))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, t.mathOverflow());
+					instance->addParamWord(o_underflow, t.mathUnderflow());
+				}
+				break;
+
+			case 8:		// FloatingPoint32, <>
+				{
+					AfbComponentParam setValLow;
+					AfbComponentParam setValHigh;
+
+					setValLow.setFloatValue(settingValue - hystValue / 2.0f);
+					setValHigh.setFloatValue(settingValue + hystValue / 2.0f);
+
+					if (inputValue >= setValLow.floatValue() &&
+						inputValue <= setValHigh.floatValue())
+					{
+						instance->addParamWord(o_result, 0);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 1);
+					}
+
+					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
+					instance->addParamWord(o_underflow, setValHigh.mathUnderflow() || setValHigh.mathUnderflow());
+				}
+				break;
+
+			default:
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+			}
+
+			return;
+		}
+
+		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+		return;
+	}
+
 	//	LIM, OpCode 23
 	//
 	void CommandProcessor_LM1_SF00::afb_lim(AfbComponentInstance* instance)

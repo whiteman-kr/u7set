@@ -80,6 +80,11 @@ namespace Sim
 		void mulFloatingPoint(AfbComponentParam* operand);
 		void divFloatingPoint(AfbComponentParam* operand);
 
+		void addFloatingPoint(float operand);
+		void subFloatingPoint(float operand);
+		void mulFloatingPoint(float operand);
+		void divFloatingPoint(float operand);
+
 		void convertWordToFloat();
 		void convertWordToSignedInt();
 

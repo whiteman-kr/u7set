@@ -461,6 +461,34 @@ namespace Sim
 		return;
 	}
 
+	void AfbComponentParam::addFloatingPoint(float operand)
+	{
+		AfbComponentParam cp(*this);
+		cp.setFloatValue(operand);
+		return addFloatingPoint(&cp);
+	}
+
+	void AfbComponentParam::subFloatingPoint(float operand)
+	{
+		AfbComponentParam cp(*this);
+		cp.setFloatValue(operand);
+		return subFloatingPoint(&cp);
+	}
+
+	void AfbComponentParam::mulFloatingPoint(float operand)
+	{
+		AfbComponentParam cp(*this);
+		cp.setFloatValue(operand);
+		return mulFloatingPoint(&cp);
+	}
+
+	void AfbComponentParam::divFloatingPoint(float operand)
+	{
+		AfbComponentParam cp(*this);
+		cp.setFloatValue(operand);
+		return divFloatingPoint(&cp);
+	}
+
 	void AfbComponentParam::convertWordToFloat()
 	{
 		resetMathFlags();
