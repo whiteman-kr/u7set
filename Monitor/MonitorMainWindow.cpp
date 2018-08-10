@@ -156,6 +156,14 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 
 		m_statusBarConnectionStatistics->setText(text);
 
+		// BuildNo
+		//
+		text = QString(" Project: %1   Build: %2  ")
+				   .arg(m_configController.configuration().project)
+				   .arg(m_configController.configuration().buildNo);
+
+		m_statusBarProjectInfo->setText(text);
+
 		return;
 	}
 
@@ -473,11 +481,16 @@ void MonitorMainWindow::createStatusBar()
 	m_statusBarConnectionState->setAlignment(Qt::AlignHCenter);
 	m_statusBarConnectionState->setMinimumWidth(100);
 
+	m_statusBarProjectInfo = new QLabel;
+	m_statusBarProjectInfo->setAlignment(Qt::AlignHCenter);
+	m_statusBarProjectInfo->setMinimumWidth(100);
+
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
 	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
 	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
+	statusBar()->addPermanentWidget(m_statusBarProjectInfo, 0);
 
 	return;
 }

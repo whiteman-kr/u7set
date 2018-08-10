@@ -483,6 +483,7 @@ namespace Builder
 		int constDiscreteValue() const;
 		int constAnalogIntValue() const;
 		float constAnalogFloatValue() const;
+		double constValue() const;
 
 		void sortRefSignals();
 

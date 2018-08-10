@@ -538,6 +538,7 @@ message FblItemRect
 	optional string label = 6;
 	optional string userText = 7;
 	optional int32 userTextPos = 8 [default = 1];			// enum E::UserTextPos, 1 - Top
+	optional int32 labelPos = 9 [default = 2];				// enum E::UserTextPos, 2 - RightTop
 }
 
 
@@ -1063,6 +1064,8 @@ message AppSignalCalculatedParam
     optional Address16 regValueAddr = 6;
     optional Address16 regValidityAddr = 7;
     optional int32 lmRamAccess = 8 [default = 0 /* E::LogicModuleRamAccess::Undefined */];	// E::LogicModuleRamAccess values
+    optional bool isConst = 9 [default = false];
+    optional double constValue = 10 [default = 0];
 }
 
 message AppSignal

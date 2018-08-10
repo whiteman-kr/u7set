@@ -6,6 +6,12 @@
 
 #include "../lib/Tuning/ITuningSignalManager.h"
 
+struct TuningNewValue
+{
+	TuningValue value;
+	bool isUnapplied = false;
+};
+
 class TuningSignalManager : public QObject, public ITuningSignalManager
 {
 	Q_OBJECT
@@ -53,8 +59,13 @@ public:
 	void setState(Hash signalHash, const TuningSignalState& state);
 	void setState(const std::vector<TuningSignalState>& states);
 
+	// Working with new values
+
+	TuningValue newValue(Hash signalHash) const;
 	void setNewValue(Hash signalHash, const TuningValue& value);
 
+	bool newValueIsUnapplied(Hash signalHash) const;
+	void setNewValueAsApplied(Hash signalHash);
 
 	// Signals
 	//
@@ -74,6 +85,11 @@ private:
 	//
 	mutable QMutex m_statesMutex;						// For access to m_states
 	std::unordered_map<Hash, TuningSignalState> m_states;
+
+	// New values storage
+	//
+	mutable QMutex m_newValuesMutex;						// For access to m_newValues
+	std::unordered_map<Hash, TuningNewValue> m_newValues;
 };
 
 

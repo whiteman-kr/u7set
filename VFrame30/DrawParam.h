@@ -78,6 +78,9 @@ namespace VFrame30
 		bool blinkPhase() const;
 		void setBlinkPhase(bool value);
 
+		bool drawNotesLayer() const;
+		void setDrawNotesLayer(bool value);
+
 		AppSignalController* appSignalController();
 		void setAppSignalController(AppSignalController* value);
 
@@ -103,6 +106,7 @@ namespace VFrame30
 		bool m_isEditMode = true;
 		bool m_infoMode = false;
 		bool m_blinkPhase = false;
+		bool m_drawNotesLayer = true;
 
 		int m_dpiX = -1;
 		int m_dpiY = -1;

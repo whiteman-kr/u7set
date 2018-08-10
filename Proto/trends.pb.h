@@ -38,8 +38,8 @@ class TrendArchiveHour;
 class TrendArchive;
 class TrendSignalParam;
 class TrendSignalSet;
-class TrendRuller;
-class TrendRullerSet;
+class TrendRuler;
+class TrendRulerSet;
 class Trend;
 class TrendParam;
 class TrendWidget;
@@ -669,14 +669,14 @@ class TrendSignalSet : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TrendRuller : public ::google::protobuf::Message {
+class TrendRuler : public ::google::protobuf::Message {
  public:
-  TrendRuller();
-  virtual ~TrendRuller();
+  TrendRuler();
+  virtual ~TrendRuler();
 
-  TrendRuller(const TrendRuller& from);
+  TrendRuler(const TrendRuler& from);
 
-  inline TrendRuller& operator=(const TrendRuller& from) {
+  inline TrendRuler& operator=(const TrendRuler& from) {
     CopyFrom(from);
     return *this;
   }
@@ -690,17 +690,17 @@ class TrendRuller : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TrendRuller& default_instance();
+  static const TrendRuler& default_instance();
 
-  void Swap(TrendRuller* other);
+  void Swap(TrendRuler* other);
 
   // implements Message ----------------------------------------------
 
-  TrendRuller* New() const;
+  TrendRuler* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TrendRuller& from);
-  void MergeFrom(const TrendRuller& from);
+  void CopyFrom(const TrendRuler& from);
+  void MergeFrom(const TrendRuler& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -744,7 +744,7 @@ class TrendRuller : public ::google::protobuf::Message {
   inline bool show_signal_values() const;
   inline void set_show_signal_values(bool value);
 
-  // @@protoc_insertion_point(class_scope:Proto.TrendRuller)
+  // @@protoc_insertion_point(class_scope:Proto.TrendRuler)
  private:
   inline void set_has_time_stamp();
   inline void clear_has_time_stamp();
@@ -767,18 +767,18 @@ class TrendRuller : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_trends_2eproto();
 
   void InitAsDefaultInstance();
-  static TrendRuller* default_instance_;
+  static TrendRuler* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class TrendRullerSet : public ::google::protobuf::Message {
+class TrendRulerSet : public ::google::protobuf::Message {
  public:
-  TrendRullerSet();
-  virtual ~TrendRullerSet();
+  TrendRulerSet();
+  virtual ~TrendRulerSet();
 
-  TrendRullerSet(const TrendRullerSet& from);
+  TrendRulerSet(const TrendRulerSet& from);
 
-  inline TrendRullerSet& operator=(const TrendRullerSet& from) {
+  inline TrendRulerSet& operator=(const TrendRulerSet& from) {
     CopyFrom(from);
     return *this;
   }
@@ -792,17 +792,17 @@ class TrendRullerSet : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TrendRullerSet& default_instance();
+  static const TrendRulerSet& default_instance();
 
-  void Swap(TrendRullerSet* other);
+  void Swap(TrendRulerSet* other);
 
   // implements Message ----------------------------------------------
 
-  TrendRullerSet* New() const;
+  TrendRulerSet* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TrendRullerSet& from);
-  void MergeFrom(const TrendRullerSet& from);
+  void CopyFrom(const TrendRulerSet& from);
+  void MergeFrom(const TrendRulerSet& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -825,24 +825,24 @@ class TrendRullerSet : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.TrendRuller rullers = 2;
-  inline int rullers_size() const;
-  inline void clear_rullers();
-  static const int kRullersFieldNumber = 2;
-  inline const ::Proto::TrendRuller& rullers(int index) const;
-  inline ::Proto::TrendRuller* mutable_rullers(int index);
-  inline ::Proto::TrendRuller* add_rullers();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuller >&
-      rullers() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuller >*
-      mutable_rullers();
+  // repeated .Proto.TrendRuler rulers = 2;
+  inline int rulers_size() const;
+  inline void clear_rulers();
+  static const int kRulersFieldNumber = 2;
+  inline const ::Proto::TrendRuler& rulers(int index) const;
+  inline ::Proto::TrendRuler* mutable_rulers(int index);
+  inline ::Proto::TrendRuler* add_rulers();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuler >&
+      rulers() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuler >*
+      mutable_rulers();
 
-  // @@protoc_insertion_point(class_scope:Proto.TrendRullerSet)
+  // @@protoc_insertion_point(class_scope:Proto.TrendRulerSet)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuller > rullers_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuler > rulers_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -852,7 +852,7 @@ class TrendRullerSet : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_trends_2eproto();
 
   void InitAsDefaultInstance();
-  static TrendRullerSet* default_instance_;
+  static TrendRulerSet* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -919,26 +919,26 @@ class Trend : public ::google::protobuf::Message {
   inline ::Proto::TrendSignalSet* release_signal_set();
   inline void set_allocated_signal_set(::Proto::TrendSignalSet* signal_set);
 
-  // optional .Proto.TrendRullerSet ruller_set = 3;
-  inline bool has_ruller_set() const;
-  inline void clear_ruller_set();
-  static const int kRullerSetFieldNumber = 3;
-  inline const ::Proto::TrendRullerSet& ruller_set() const;
-  inline ::Proto::TrendRullerSet* mutable_ruller_set();
-  inline ::Proto::TrendRullerSet* release_ruller_set();
-  inline void set_allocated_ruller_set(::Proto::TrendRullerSet* ruller_set);
+  // optional .Proto.TrendRulerSet ruler_set = 3;
+  inline bool has_ruler_set() const;
+  inline void clear_ruler_set();
+  static const int kRulerSetFieldNumber = 3;
+  inline const ::Proto::TrendRulerSet& ruler_set() const;
+  inline ::Proto::TrendRulerSet* mutable_ruler_set();
+  inline ::Proto::TrendRulerSet* release_ruler_set();
+  inline void set_allocated_ruler_set(::Proto::TrendRulerSet* ruler_set);
 
   // @@protoc_insertion_point(class_scope:Proto.Trend)
  private:
   inline void set_has_signal_set();
   inline void clear_has_signal_set();
-  inline void set_has_ruller_set();
-  inline void clear_has_ruller_set();
+  inline void set_has_ruler_set();
+  inline void clear_has_ruler_set();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::TrendSignalSet* signal_set_;
-  ::Proto::TrendRullerSet* ruller_set_;
+  ::Proto::TrendRulerSet* ruler_set_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
@@ -2029,101 +2029,101 @@ TrendSignalSet::mutable_archive_plant_time() {
 
 // -------------------------------------------------------------------
 
-// TrendRuller
+// TrendRuler
 
 // optional fixed64 time_stamp = 2;
-inline bool TrendRuller::has_time_stamp() const {
+inline bool TrendRuler::has_time_stamp() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TrendRuller::set_has_time_stamp() {
+inline void TrendRuler::set_has_time_stamp() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TrendRuller::clear_has_time_stamp() {
+inline void TrendRuler::clear_has_time_stamp() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TrendRuller::clear_time_stamp() {
+inline void TrendRuler::clear_time_stamp() {
   time_stamp_ = GOOGLE_ULONGLONG(0);
   clear_has_time_stamp();
 }
-inline ::google::protobuf::uint64 TrendRuller::time_stamp() const {
+inline ::google::protobuf::uint64 TrendRuler::time_stamp() const {
   return time_stamp_;
 }
-inline void TrendRuller::set_time_stamp(::google::protobuf::uint64 value) {
+inline void TrendRuler::set_time_stamp(::google::protobuf::uint64 value) {
   set_has_time_stamp();
   time_stamp_ = value;
 }
 
 // optional bool show = 3 [default = true];
-inline bool TrendRuller::has_show() const {
+inline bool TrendRuler::has_show() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TrendRuller::set_has_show() {
+inline void TrendRuler::set_has_show() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TrendRuller::clear_has_show() {
+inline void TrendRuler::clear_has_show() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TrendRuller::clear_show() {
+inline void TrendRuler::clear_show() {
   show_ = true;
   clear_has_show();
 }
-inline bool TrendRuller::show() const {
+inline bool TrendRuler::show() const {
   return show_;
 }
-inline void TrendRuller::set_show(bool value) {
+inline void TrendRuler::set_show(bool value) {
   set_has_show();
   show_ = value;
 }
 
 // optional bool show_signal_values = 4 [default = true];
-inline bool TrendRuller::has_show_signal_values() const {
+inline bool TrendRuler::has_show_signal_values() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void TrendRuller::set_has_show_signal_values() {
+inline void TrendRuler::set_has_show_signal_values() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void TrendRuller::clear_has_show_signal_values() {
+inline void TrendRuler::clear_has_show_signal_values() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void TrendRuller::clear_show_signal_values() {
+inline void TrendRuler::clear_show_signal_values() {
   show_signal_values_ = true;
   clear_has_show_signal_values();
 }
-inline bool TrendRuller::show_signal_values() const {
+inline bool TrendRuler::show_signal_values() const {
   return show_signal_values_;
 }
-inline void TrendRuller::set_show_signal_values(bool value) {
+inline void TrendRuler::set_show_signal_values(bool value) {
   set_has_show_signal_values();
   show_signal_values_ = value;
 }
 
 // -------------------------------------------------------------------
 
-// TrendRullerSet
+// TrendRulerSet
 
-// repeated .Proto.TrendRuller rullers = 2;
-inline int TrendRullerSet::rullers_size() const {
-  return rullers_.size();
+// repeated .Proto.TrendRuler rulers = 2;
+inline int TrendRulerSet::rulers_size() const {
+  return rulers_.size();
 }
-inline void TrendRullerSet::clear_rullers() {
-  rullers_.Clear();
+inline void TrendRulerSet::clear_rulers() {
+  rulers_.Clear();
 }
-inline const ::Proto::TrendRuller& TrendRullerSet::rullers(int index) const {
-  return rullers_.Get(index);
+inline const ::Proto::TrendRuler& TrendRulerSet::rulers(int index) const {
+  return rulers_.Get(index);
 }
-inline ::Proto::TrendRuller* TrendRullerSet::mutable_rullers(int index) {
-  return rullers_.Mutable(index);
+inline ::Proto::TrendRuler* TrendRulerSet::mutable_rulers(int index) {
+  return rulers_.Mutable(index);
 }
-inline ::Proto::TrendRuller* TrendRullerSet::add_rullers() {
-  return rullers_.Add();
+inline ::Proto::TrendRuler* TrendRulerSet::add_rulers() {
+  return rulers_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuller >&
-TrendRullerSet::rullers() const {
-  return rullers_;
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuler >&
+TrendRulerSet::rulers() const {
+  return rulers_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuller >*
-TrendRullerSet::mutable_rullers() {
-  return &rullers_;
+inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendRuler >*
+TrendRulerSet::mutable_rulers() {
+  return &rulers_;
 }
 
 // -------------------------------------------------------------------
@@ -2168,41 +2168,41 @@ inline void Trend::set_allocated_signal_set(::Proto::TrendSignalSet* signal_set)
   }
 }
 
-// optional .Proto.TrendRullerSet ruller_set = 3;
-inline bool Trend::has_ruller_set() const {
+// optional .Proto.TrendRulerSet ruler_set = 3;
+inline bool Trend::has_ruler_set() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Trend::set_has_ruller_set() {
+inline void Trend::set_has_ruler_set() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Trend::clear_has_ruller_set() {
+inline void Trend::clear_has_ruler_set() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Trend::clear_ruller_set() {
-  if (ruller_set_ != NULL) ruller_set_->::Proto::TrendRullerSet::Clear();
-  clear_has_ruller_set();
+inline void Trend::clear_ruler_set() {
+  if (ruler_set_ != NULL) ruler_set_->::Proto::TrendRulerSet::Clear();
+  clear_has_ruler_set();
 }
-inline const ::Proto::TrendRullerSet& Trend::ruller_set() const {
-  return ruller_set_ != NULL ? *ruller_set_ : *default_instance_->ruller_set_;
+inline const ::Proto::TrendRulerSet& Trend::ruler_set() const {
+  return ruler_set_ != NULL ? *ruler_set_ : *default_instance_->ruler_set_;
 }
-inline ::Proto::TrendRullerSet* Trend::mutable_ruller_set() {
-  set_has_ruller_set();
-  if (ruller_set_ == NULL) ruller_set_ = new ::Proto::TrendRullerSet;
-  return ruller_set_;
+inline ::Proto::TrendRulerSet* Trend::mutable_ruler_set() {
+  set_has_ruler_set();
+  if (ruler_set_ == NULL) ruler_set_ = new ::Proto::TrendRulerSet;
+  return ruler_set_;
 }
-inline ::Proto::TrendRullerSet* Trend::release_ruller_set() {
-  clear_has_ruller_set();
-  ::Proto::TrendRullerSet* temp = ruller_set_;
-  ruller_set_ = NULL;
+inline ::Proto::TrendRulerSet* Trend::release_ruler_set() {
+  clear_has_ruler_set();
+  ::Proto::TrendRulerSet* temp = ruler_set_;
+  ruler_set_ = NULL;
   return temp;
 }
-inline void Trend::set_allocated_ruller_set(::Proto::TrendRullerSet* ruller_set) {
-  delete ruller_set_;
-  ruller_set_ = ruller_set;
-  if (ruller_set) {
-    set_has_ruller_set();
+inline void Trend::set_allocated_ruler_set(::Proto::TrendRulerSet* ruler_set) {
+  delete ruler_set_;
+  ruler_set_ = ruler_set;
+  if (ruler_set) {
+    set_has_ruler_set();
   } else {
-    clear_has_ruller_set();
+    clear_has_ruler_set();
   }
 }
 

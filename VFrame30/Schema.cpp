@@ -218,6 +218,12 @@ namespace VFrame30
 				continue;
 			}
 
+			if (drawParam->drawNotesLayer() == false &&
+				pLayer->name().compare(QLatin1String("Notes"), Qt::CaseInsensitive) == 0)
+			{
+				continue;
+			}
+
 			for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 			{
 				const std::shared_ptr<SchemaItem>& item = *vi;

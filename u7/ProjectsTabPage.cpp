@@ -181,7 +181,7 @@ void ProjectsTabPage::createProject()
 			bool result = dbController()->createProject(projectName, administratorPassword, this);
 			if (result == true)
 			{
-				bool upgradeOk = dbController()->upgradeProject(projectName, administratorPassword, false, this);
+				bool upgradeOk = dbController()->upgradeProject(projectName, administratorPassword, true, this);
 
 				if (upgradeOk == true)
 				{
@@ -278,7 +278,6 @@ void ProjectsTabPage::openProject()
 		{
 			return;
 		}
-
 
 		dbController()->upgradeProject(projectName, password, false, this);
 		refreshProjectList();

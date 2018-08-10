@@ -999,6 +999,9 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 		}
 
 		calcParam->set_lmramaccess(TO_INT(m_lmRamAccess));
+
+		calcParam->set_isconst(m_isConst);
+		calcParam->set_constvalue(m_constValue);
 	}
 	else
 	{
@@ -1094,6 +1097,9 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	m_regValidityAddr.setBit(calcParam.regvalidityaddr().bit());
 
 	m_lmRamAccess = static_cast<E::LogicModuleRamAccess>(calcParam.lmramaccess());
+
+	m_isConst = calcParam.isconst();
+	m_constValue = calcParam.constvalue();
 }
 
 void Signal::initCalculatedProperties()

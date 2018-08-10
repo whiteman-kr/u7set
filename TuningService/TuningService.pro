@@ -95,7 +95,6 @@ SOURCES += \
     TcpTuningClient.cpp \
     TuningSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
-    TuningSourceWorker.cpp \
     TuningMemory.cpp \
     TuningClientContext.cpp \
     ../lib/CommandLineParser.cpp \
@@ -104,7 +103,8 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    TuningSourceThread.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -131,7 +131,6 @@ HEADERS += \
     ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/Signal.h \
-    ../AppDataService/AppSignalStateEx.h \
     ../lib/Crc.h \
     TuningDataStorage.h \
     ../lib/Hash.h \
@@ -143,7 +142,6 @@ HEADERS += \
     TcpTuningClient.h \
     TuningSource.h \
     ../u7/Builder/ModulesRawData.h \
-    TuningSourceWorker.h \
     ../lib/DataProtocols.h \
     TuningMemory.h \
     TuningClientContext.h \
@@ -152,7 +150,8 @@ HEADERS += \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Times.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    TuningSourceThread.h
 
 include(../qtservice/src/qtservice.pri)
 

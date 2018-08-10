@@ -181,6 +181,8 @@ namespace Builder
 		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);
 
+		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);	// Schema '%1' has %2 commented functional item(s).
+
 		// Multichannel pasing errors
 		//
 		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);
@@ -322,7 +324,7 @@ namespace Builder
 		void errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Output bus type cannot be determined (Logic schema %1, item %2)
 		void errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
 		void errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Unknown AFB type (opCode) (Logic schema %1, item %2).
-		void errALC5130(QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+		void errALC5130(int maxInstances, QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
 		void errALC5131(QString appSignalID, QString portID);		// Tx signal %1 is specified in raw data description of opto port %2 as discrete, but connected signal isn't discrete.
 		void errALC5132(QString unresolvedBusList);										// Can't resolve bus interdependencies: %1
 		void errALC5133(QString signalEquipmentID, QUuid ualItemUuid, QString itemLabel, QString schemaID);			// Signal with equipmentID %1 is not found (Logic schema %2, item %3).

@@ -163,9 +163,9 @@ namespace Builder
 
 			if (instance >= maxInstances)
 			{
-				// Max instances of AFB component '%1' is used (Logic schema %2, item %3)
+				// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
 				//
-				log->errALC5130(afbl->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+				log->errALC5130(maxInstances, afbl->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
 				return false;
 			}
 
@@ -1525,6 +1525,46 @@ namespace Builder
 		assert(constAnalogFormat() == E::AnalogAppSignalFormat::Float32);
 
 		return m_constFloatValue;
+	}
+
+	double UalSignal::constValue() const
+	{
+		if (m_isConst == false)
+		{
+			assert(false);
+			return 0;
+		}
+
+		double constVal = 0;
+
+		switch(constType())
+		{
+		case E::SignalType::Discrete:
+			constVal = static_cast<double>(constDiscreteValue());
+			break;
+
+		case E::SignalType::Analog:
+
+			switch(constAnalogFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				constVal = static_cast<double>(constAnalogFloatValue());
+				break;
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				constVal = static_cast<double>(constAnalogIntValue());
+				break;
+
+			default:
+				assert(false);
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return constVal;
 	}
 
 	bool UalSignal::setUalAddr(Address16 ualAddr)

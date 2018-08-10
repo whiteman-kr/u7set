@@ -164,6 +164,7 @@ private:
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;
 	QLabel* m_statusBarConnectionState = nullptr;
+	QLabel* m_statusBarProjectInfo = nullptr;
 
 	int m_updateStatusBarTimerId = -1;
 };

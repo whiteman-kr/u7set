@@ -224,7 +224,7 @@ namespace Builder
 		bool createAcquiredBusSignalsList();
 		bool createNonAcquiredBusSignalsList();
 
-		bool setSignalsLmRamAccess();
+		bool setSignalsCalculatedAttributes();
 
 		bool groupTxSignals();
 

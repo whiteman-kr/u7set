@@ -768,14 +768,14 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 				{
 					if (arrivedState.successfulWriteTime() > previousState.successfulWriteTime())
 					{
-						previousState.m_flags.userModified = false;
+						m_signals->setNewValueAsApplied(arrivedState.hash());
 					}
 				}
 				else
 				{
 					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
 					{
-						previousState.m_flags.userModified = false;
+						m_signals->setNewValueAsApplied(arrivedState.hash());
 
 						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
 						if (found == false)
@@ -785,7 +785,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 						}
 
 						writeLogAlert(tr("Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-									  .arg(previousState.modifiedValue().toString(param.precision()))
+									  .arg(m_signals->newValue(arrivedState.hash()).toString(param.precision()))
 									  .arg(param.customSignalId())
 									  .arg(param.caption())
 									  .arg(param.equipmentId())
@@ -798,18 +798,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		// When updating states, we have to set some properties locally
 
-		arrivedState.m_flags.userModified = previousState.userModified();
-
 		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
-
-		if (previousState.userModified() == false)
-		{
-			arrivedState.m_newValue = arrivedState.value();
-		}
-		else
-		{
-			arrivedState.m_newValue = previousState.modifiedValue();
-		}
 
 		//
 

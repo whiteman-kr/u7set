@@ -5,7 +5,7 @@
 #include "../lib/CfgServerLoader.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
-#include "TuningSourceWorker.h"
+#include "TuningSourceThread.h"
 #include "TuningClientContext.h"
 
 namespace Tuning
@@ -32,7 +32,7 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
-		const TuningSourceWorker* getSourceWorker(quint32 sourceIP) const;
+		const TuningSourceHandler* getSourceHandler(quint32 sourceIP) const;
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
@@ -82,14 +82,14 @@ namespace Tuning
 		void stopTcpTuningServerThread();
 
 		void runTuningSourceWorkers();
-		bool runTuningSourceWorker(const QString& tuningSourceEquipmentID);		// if tuningSourceEquipmentID empty - run all sources workers
-		void stopTuningSourceWorkers();
+		bool runTuningSourceThread(const QString& tuningSourceEquipmentID);		// if tuningSourceEquipmentID empty - run all sources workers
+		void stopTuningSourceThreads();
 
 		void runSourcesListenerThread();
 		void stopSourcesListenerThread();
 
-		void setWorkerInTuningClientContext(TuningSourceWorker* worker);
-		void removeWorkerFromTuningClientContext(TuningSourceWorker* worker);
+		void setHandlerInTuningClientContext(TuningSourceHandler* handler);
+		void removeHandlerFromTuningClientContext(TuningSourceHandler* handler);
 
 	private slots:
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
@@ -108,7 +108,7 @@ namespace Tuning
 
 		mutable QMutex m_mainMutex;
 
-		TuningSourceWorkerThreadMap m_sourceWorkerThreadMap;
+		TuningSourceThreadMap m_sourceThreadMap;
 
 		TuningSocketListenerThread* m_socketListenerThread = nullptr;
 

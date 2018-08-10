@@ -42,9 +42,9 @@ SOURCES += \
     TrendSettings.cpp \
     TrendMainWindow.cpp \
     Trend.cpp \
-    TrendRuller.cpp \
     DialogTrendSignalProperties.cpp \
-    ../Proto/trends.pb.cc
+    ../Proto/trends.pb.cc \
+    TrendRuler.cpp
 
 HEADERS += \
     Stable.h \
@@ -56,9 +56,9 @@ HEADERS += \
     TrendSettings.h \
     TrendMainWindow.h \
     Trend.h \
-    TrendRuller.h \
     DialogTrendSignalProperties.h \
-    ../Proto/trends.pb.h
+    ../Proto/trends.pb.h \
+    TrendRuler.h
 
 unix {
     target.path = /usr/lib

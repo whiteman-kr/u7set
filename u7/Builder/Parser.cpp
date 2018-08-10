@@ -859,7 +859,8 @@ namespace Builder
 
 			// Set new guids to in/outs
 			//
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())
+			auto& aliInputs = ali.m_fblItem->inputs();
+			for (VFrame30::AfbPin& pin : aliInputs)
 			{
 				QUuid newPinGuid = QUuid::createUuid();
 				oldToNewPins[pin.guid()] = newPinGuid;
@@ -867,7 +868,8 @@ namespace Builder
 				pin.setGuid(newPinGuid);
 			}
 
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())
+			auto& aliOutputs = ali.m_fblItem->outputs();
+			for (VFrame30::AfbPin& pin : aliOutputs)
 			{
 				QUuid newPinGuid = QUuid::createUuid();
 				oldToNewPins[pin.guid()] = newPinGuid;
@@ -882,9 +884,11 @@ namespace Builder
 		{
 			assert(ali.m_fblItem);
 
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->inputs())
+			auto& aliInputs = ali.m_fblItem->inputs();
+			for (VFrame30::AfbPin& pin : aliInputs)
 			{
-				for (QUuid& assocIO : pin.associatedIOs())
+				std::vector<QUuid>& pinAssocIOs = pin.associatedIOs();
+				for (QUuid& assocIO : pinAssocIOs)
 				{
 					auto newGuidIt = oldToNewPins.find(assocIO);
 
@@ -898,9 +902,11 @@ namespace Builder
 				}
 			}
 
-			for (VFrame30::AfbPin& pin : ali.m_fblItem->outputs())
+			auto& aliOutputs = ali.m_fblItem->outputs();
+			for (VFrame30::AfbPin& pin : aliOutputs)
 			{
-				for (QUuid& assocIO : pin.associatedIOs())
+				std::vector<QUuid>& pinAssocIOs = pin.associatedIOs();
+				for (QUuid& assocIO : pinAssocIOs)
 				{
 					auto newGuidIt = oldToNewPins.find(assocIO);
 
@@ -2912,11 +2918,13 @@ namespace Builder
 
 			// Remove all commented items from the schema
 			//
+			std::vector<QUuid> commentedItems;
+
 			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
 			{
 				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
 
-				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
+				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
 				{
 					assert(item);
 
@@ -2924,9 +2932,21 @@ namespace Builder
 					{
 						newItemList.push_back(item);
 					}
+
+					if (item->isCommented() == true && item->isFblItem() == true)
+					{
+						commentedItems.push_back(item->guid());
+					}
 				}
 
 				layer->Items.swap(newItemList);
+			}
+
+			if (commentedItems.empty() == false)
+			{
+				// Schema has commented functional items
+				//
+				m_log->wrnALP4070(ls->schemaId(), commentedItems);
 			}
 
 			// Add to schema list
@@ -3511,7 +3531,8 @@ namespace Builder
 				item->isType<VFrame30::SchemaItemOutput>() == true ||
 				item->isType<VFrame30::SchemaItemConst>() == true ||
 				item->isType<VFrame30::SchemaItemTerminator>() == true ||
-				item->isType<VFrame30::SchemaItemAfb>() == true)
+				item->isType<VFrame30::SchemaItemAfb>() == true ||
+				item->isType<VFrame30::SchemaItemBus>() == true)
 			{
 				// All theses items are allowed to be used on UFB schema
 				//

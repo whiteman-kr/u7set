@@ -97,18 +97,25 @@ void DialogSignalInfo::updateInfo()
 
 	if (state.controlIsEnabled() == false)
 	{
-		text += tr("ModifiedValue:\t\tDisabled\r\n");
+		text += tr("NewValue:\t\tDisabled\r\n");
 	}
 	else
 	{
-		int precision = 0;
-
-		if (asp.isAnalog() == true)
+		if (m_signalManager->newValueIsUnapplied(m_appSignalHash) == true)
 		{
-			precision = asp.precision();
-		}
+			int precision = 0;
 
-		text += tr("ModifiedValue:\t\t%1\r\n").arg(state.modifiedValue().toString(precision));
+			if (asp.isAnalog() == true)
+			{
+				precision = asp.precision();
+			}
+
+			text += tr("NewValue:\t\t%1\r\n").arg(m_signalManager->newValue(m_appSignalHash).toString(precision));
+		}
+		else
+		{
+			text += tr("NewValue:\t\t-\r\n");
+		}
 	}
 
 	text += "\r\n";
@@ -117,7 +124,6 @@ void DialogSignalInfo::updateInfo()
 	text += tr("OutOfRange:\t\t%1\r\n").arg(state.outOfRange() == true ? tr("Yes") : tr("No"));
 	text += tr("WriteInProgress:\t%1\r\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
 	text += tr("ControlIsEnabled:\t%1\r\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
-	text += tr("UserModified:\t\t%1\r\n").arg(state.userModified() == true ? tr("Yes") : tr("No"));
 
 	text += "\r\n";
 

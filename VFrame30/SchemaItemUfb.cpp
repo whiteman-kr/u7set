@@ -107,18 +107,6 @@ namespace VFrame30
 		p->setPen(textColor());
 		DrawHelper::drawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
 
-		// Draw Label
-		//
-		if (drawParam->infoMode() == true)
-		{
-			QString labelText = label();
-
-			labelRect.moveBottomLeft(labelRect.topRight());
-
-			p->setPen(Qt::darkGray);
-			DrawHelper::drawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
-		}
-
 		return;
 	}
 

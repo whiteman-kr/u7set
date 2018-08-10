@@ -290,6 +290,19 @@ void TuningSignalManager::setState(const std::vector<TuningSignalState>& states)
 	return;
 }
 
+TuningValue TuningSignalManager::newValue(Hash signalHash) const
+{
+	QMutexLocker l(&m_newValuesMutex);
+
+	auto it = m_newValues.find(signalHash);
+	if (it == m_newValues.end())
+	{
+		return TuningValue();
+	}
+
+	return it->second.value;
+}
+
 void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
 {
 	if (signalHash == 0)
@@ -298,17 +311,61 @@ void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
 		return;
 	}
 
-	QMutexLocker l(&m_statesMutex);
+	// Get the old value
 
-	auto it = m_states.find(signalHash);
-	if (it == m_states.end())
+	QMutexLocker ls(&m_statesMutex);
+
+	auto foundState = m_states.find(signalHash);
+
+	if (foundState == m_states.end())
 	{
 		assert(false);
 		return;
 	}
 
-	it->second.setModifiedValue(value);
+	TuningSignalState& state = foundState->second;
+
+	ls.unlock();
+
+	// Compare new value to old value and set unapplied flag
+
+	QMutexLocker ln(&m_newValuesMutex);
+
+	TuningNewValue tnv;
+	tnv.value = value;
+
+	if (state.valid() == true)
+	{
+		if (state.value() == value)
+		{
+			tnv.isUnapplied = false;
+		}
+		else
+		{
+			tnv.isUnapplied = true;
+		}
+	}
+
+	m_newValues[signalHash] = tnv;
 
 	return;
+}
 
+bool TuningSignalManager::newValueIsUnapplied(Hash signalHash) const
+{
+	QMutexLocker l(&m_newValuesMutex);
+
+	auto it = m_newValues.find(signalHash);
+	if (it == m_newValues.end())
+	{
+		return false;
+	}
+
+	return it->second.isUnapplied;
+}
+
+void TuningSignalManager::setNewValueAsApplied(Hash signalHash)
+{
+	QMutexLocker l(&m_newValuesMutex);
+	m_newValues[signalHash].isUnapplied = false;
 }
