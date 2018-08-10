@@ -167,6 +167,10 @@ namespace Sim
 		//
 		void afb_dpcomp(AfbComponentInstance* instance);
 
+		//	MUX, OpCode 21
+		//
+		void afb_mux(AfbComponentInstance* instance);
+
 		//	LIM, OpCode 23
 		//
 		void afb_lim(AfbComponentInstance* instance);
@@ -216,6 +220,7 @@ namespace Sim
 			{"afb_math",		&CommandProcessor_LM1_SF00::afb_math},			// 13
 			{"afb_scale",		&CommandProcessor_LM1_SF00::afb_scale},			// 14
 			{"afb_dpcomp",		&CommandProcessor_LM1_SF00::afb_dpcomp},		// 20
+			{"afb_mux",			&CommandProcessor_LM1_SF00::afb_mux},			// 21
 			{"afb_lim",			&CommandProcessor_LM1_SF00::afb_lim},			// 23
 		};
 	};

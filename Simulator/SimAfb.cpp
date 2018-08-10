@@ -556,7 +556,7 @@ namespace Sim
 
 		if (Q_UNLIKELY(it == m_params.end()))
 		{
-			SimException::raise(QString("Param %1 is not found, Afb.").arg(opIndex));
+			SimException::raise(QString("Param %1 is not found in AFB.").arg(opIndex));
 		}
 
 		return &it->second;

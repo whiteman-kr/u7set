@@ -606,11 +606,7 @@ namespace Sim
 	//
 	void CommandProcessor_LM1_SF00::afb_logic(AfbComponentInstance* instance)
 	{
-		if (instance == nullptr)
-		{
-			assert(instance);
-			return;
-		}
+		assert(instance);
 
 		// Define input opIndexes
 		//
@@ -694,11 +690,7 @@ namespace Sim
 	//
 	void CommandProcessor_LM1_SF00::afb_bcod(AfbComponentInstance* instance)
 	{
-		if (instance == nullptr)
-		{
-			assert(instance);
-			return;
-		}
+		assert(instance);
 
 		// Define input opIndexes
 		//
@@ -757,11 +749,7 @@ namespace Sim
 	//
 	void CommandProcessor_LM1_SF00::afb_bdec(AfbComponentInstance* instance)
 	{
-		if (instance == nullptr)
-		{
-			assert(instance);
-			return;
-		}
+		assert(instance);
 
 		// Define input opIndexes
 		//
@@ -808,11 +796,7 @@ namespace Sim
 	//
 	void CommandProcessor_LM1_SF00::afb_bcomp(AfbComponentInstance* instance)
 	{
-		if (instance == nullptr)
-		{
-			assert(instance);
-			return;
-		}
+		assert(instance);
 
 		// Define input opIndexes
 		//
@@ -1292,11 +1276,7 @@ namespace Sim
 	//
 	void CommandProcessor_LM1_SF00::afb_dpcomp(AfbComponentInstance* instance)
 	{
-		if (instance == nullptr)
-		{
-			assert(instance);
-			return;
-		}
+		assert(instance);
 
 		// Define input opIndexes
 		//
@@ -1534,6 +1514,33 @@ namespace Sim
 		}
 
 		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
+		return;
+	}
+
+	//	MUX, OpCode 21
+	//
+	void CommandProcessor_LM1_SF00::afb_mux(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_sel = 0;
+		const int i_input_1 = 1;
+		const int i_input_2 = 3;
+
+		const int o_result = 6;
+		//const int o_version = 8;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 selector = instance->param(i_sel)->wordValue();
+		AfbComponentParam* input1 = instance->param(i_input_1);
+		AfbComponentParam* input2 = instance->param(i_input_2);
+
+		AfbComponentParam result = {selector == 0 ? *input1 : *input2};
+		result.setOpIndex(o_result);
+
+		instance->addParam(result);
+
 		return;
 	}
 
