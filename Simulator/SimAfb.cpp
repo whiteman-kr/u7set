@@ -149,6 +149,17 @@ namespace Sim
 		m_data.asSignedInt = value;
 	}
 
+	qint64 AfbComponentParam::signedInt64Value() const
+	{
+		return m_data.asSignedInt64;
+	}
+
+	void AfbComponentParam::setSignedInt64Value(qint64 value)
+	{
+		m_data.data = 0;
+		m_data.asSignedInt64 = value;
+	}
+
 	void AfbComponentParam::addSignedInteger(AfbComponentParam* operand)
 	{
 		if (operand == nullptr)
@@ -542,6 +553,7 @@ namespace Sim
 	AfbComponentInstance::AfbComponentInstance(quint16 instanceNo) :
 		m_instanceNo(instanceNo)
 	{
+		m_params.reserve(16);
 	}
 
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
@@ -585,10 +597,28 @@ namespace Sim
 		return true;
 	}
 
+	bool AfbComponentInstance::addParamDouble(int opIndex, double value)
+	{
+		AfbComponentParam param(opIndex);
+		param.setDoubleValue(value);
+
+		m_params[opIndex] = std::move(param);
+		return true;
+	}
+
 	bool AfbComponentInstance::addParamSignedInt(int opIndex, qint32 value)
 	{
 		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
+
+		m_params[opIndex] = std::move(param);
+		return true;
+	}
+
+	bool AfbComponentInstance::addParamSignedInt64(int opIndex, qint64 value)
+	{
+		AfbComponentParam param(opIndex);
+		param.setSignedInt64Value(value);
 
 		m_params[opIndex] = std::move(param);
 		return true;

@@ -155,6 +155,10 @@ namespace Sim
 		//
 		void afb_bcomp(AfbComponentInstance* instance);
 
+		//	DAMPER, OpCode 11
+		//
+		void afb_damper(AfbComponentInstance* instance);
+
 		//	MATH, OpCode 13
 		//
 		void afb_math(AfbComponentInstance* instance);
@@ -217,6 +221,7 @@ namespace Sim
 			{"afb_bcod",		&CommandProcessor_LM1_SF00::afb_bcod},			// 8
 			{"afb_bdec",		&CommandProcessor_LM1_SF00::afb_bdec},			// 9
 			{"afb_bcomp",		&CommandProcessor_LM1_SF00::afb_bcomp},			// 10
+			{"afb_damper",		&CommandProcessor_LM1_SF00::afb_damper},		// 11
 			{"afb_math",		&CommandProcessor_LM1_SF00::afb_math},			// 13
 			{"afb_scale",		&CommandProcessor_LM1_SF00::afb_scale},			// 14
 			{"afb_dpcomp",		&CommandProcessor_LM1_SF00::afb_dpcomp},		// 20

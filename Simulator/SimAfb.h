@@ -63,6 +63,9 @@ namespace Sim
 		qint32 signedIntValue() const;
 		void setSignedIntValue(qint32 value);
 
+		qint64 signedInt64Value() const;
+		void setSignedInt64Value(qint64 value);
+
 		// --
 		//
 		void addSignedInteger(AfbComponentParam* operand);
@@ -105,6 +108,7 @@ namespace Sim
 			quint16 asWord;
 			quint32 asDword;
 			qint32 asSignedInt;
+			quint64 asSignedInt64;
 			float asFloat;
 			double asDouble;
 			quint64 data = 0;
@@ -142,7 +146,9 @@ namespace Sim
 
 		bool addParamWord(int opIndex, quint16 value);
 		bool addParamFloat(int opIndex, float value);
+		bool addParamDouble(int opIndex, double value);
 		bool addParamSignedInt(int opIndex, qint32 value);
+		bool addParamSignedInt64(int opIndex, qint64 value);
 
 	private:
 		quint16 m_instanceNo = 0;

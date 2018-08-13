@@ -1,4 +1,5 @@
 #include <array>
+#include <cfenv>
 #include "SimCommandProcessor_LM1_SF00.h"
 #include "SimException.h"
 #include "SimAfb.h"
@@ -1089,6 +1090,159 @@ namespace Sim
 		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_bcomp");
 		return;
 	}
+
+	//	DAMPER, OpCode 11
+	//
+	void CommandProcessor_LM1_SF00::afb_damper(AfbComponentInstance* instance)
+	{
+		assert(instance);
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_time = 1;		// 32 bit SI
+		const int i_prev = 3;		// 48-bit prev data after filer (inputs 3, 4, 5)
+		const int i_data = 6;		// Input data
+		const int i_track = 8;		//
+
+		const int o_current = 10;	// 48-bit current data after filer (inputs 10, 11, 12)
+		const int o_result = 13;	// 32-bit current result value (SI/FP)
+		const int o_overflow = 15;
+		const int o_underflow = 16;
+		const int o_zero = 17;
+		const int o_nan = 18;		// Any input FP param NaN
+		const int o_param_err = 19;
+		//const int o_version = 21;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+		qint64 time = instance->param(i_time)->dwordValue();
+
+		AfbComponentParam* prevValueParam = instance->paramExists(i_prev) ? instance->param(i_prev) : nullptr;
+		AfbComponentParam* dataParam = instance->param(i_data);
+
+		quint16 track = instance->param(i_track)->wordValue();
+
+		if (time == 0 || (conf != 1 && conf != 2))
+		{
+			// ?????
+			//
+			instance->addParamSignedInt(o_result, 0);
+			instance->addParamSignedInt64(o_current, 0);
+			instance->addParamSignedInt64(i_prev, 0);
+
+			instance->addParamWord(o_overflow, 0);
+			instance->addParamWord(o_underflow, 0);
+			instance->addParamWord(o_zero, 0);
+			instance->addParamWord(o_nan, 0);
+
+			instance->addParamWord(o_param_err, 1);
+			return;
+		}
+		else
+		{
+			instance->addParamWord(o_param_err, 0);
+		}
+
+		// --
+		//
+		quint16 isOverflow = false;
+		quint16 isUnderflow = false;
+		quint16 isZero = false;
+		quint16 isNan = false;
+
+		if (track == 0)
+		{
+			// Damping
+			//
+			if (conf == 1)
+			{
+				// SignedInt
+				//
+				qint64 inputValue = dataParam->signedIntValue();
+				inputValue <<= 16;
+
+				qint64 prevValue = prevValueParam ? prevValueParam->signedInt64Value() : 0;	// First cycle prevValue is 0
+				qint64 n = time / 5;
+				qint64 resultExt = prevValue + inputValue / n - prevValue / n;
+
+				instance->addParamSignedInt(o_result, static_cast<qint32>(resultExt >> 16));
+				instance->addParamSignedInt64(o_current, resultExt);						// Save exdended value
+				instance->addParamSignedInt64(i_prev, resultExt);							// Save exdended value
+
+				isOverflow = (resultExt >> 16) > std::numeric_limits<qint32>::max() ||
+							 (resultExt >> 16) < std::numeric_limits<qint32>::min();
+				isUnderflow = false;
+				isZero = (resultExt >> 16) == 0;
+				isNan = false;
+			}
+			else
+			{
+				// Float
+				//
+				float inputValue = dataParam->floatValue();
+
+				float prevValue = prevValueParam ? prevValueParam->floatValue() : 0.0f;	// First cycle prevValue is 0
+				float n = time / 5;
+
+				std::feclearexcept(FE_ALL_EXCEPT);
+				float result = prevValue + inputValue / n - prevValue / n;
+
+				isOverflow = std::fetestexcept(FE_OVERFLOW);
+				isUnderflow = std::fetestexcept(FE_UNDERFLOW);
+				isZero = (result == .0f) || isUnderflow;
+				isNan = (result != result);
+
+				instance->addParamFloat(o_result, result);
+				instance->addParamFloat(o_current, result);
+				instance->addParamFloat(i_prev, result);
+			}
+		}
+		else
+		{
+			// track == 1, Output is input
+			//
+			if (conf == 1)
+			{
+				// SignedInt
+				//
+				qint32 inputValue = dataParam->signedIntValue();
+
+				instance->addParamSignedInt(o_result, inputValue);
+				instance->addParamSignedInt64(o_current, inputValue << 16);		// This input is extended for SI
+				instance->addParamSignedInt64(i_prev, inputValue << 16);		// This output is extended for SI
+
+				isOverflow = false;
+				isUnderflow = false;
+				isZero = (inputValue == 0);
+				isNan = false;
+			}
+			else
+			{
+				// Float
+				//
+				float inputValue = dataParam->floatValue();
+
+				instance->addParamFloat(o_result, inputValue);
+				instance->addParamFloat(o_current, inputValue);
+				instance->addParamFloat(i_prev, inputValue);
+
+				isOverflow = false;
+				isUnderflow = false;
+				isZero = (inputValue == .0f);
+				isNan = (inputValue != inputValue);
+			}
+		}
+
+		instance->addParamWord(o_overflow, isOverflow);
+		instance->addParamWord(o_underflow, isUnderflow);
+		instance->addParamWord(o_zero, isZero);
+		instance->addParamWord(o_nan, isNan);
+
+		return;
+	}
+
 
 	//	MATH, OpCode 13
 	//
