@@ -671,6 +671,8 @@ namespace Sim
 	//
 	void CommandProcessor_LM1_SF00::afb_not(AfbComponentInstance* instance)
 	{
+		assert(instance);
+
 		// Define input opIndexes
 		//
 		const int i_oprd = 0;
@@ -684,6 +686,206 @@ namespace Sim
 		// Save result
 		//
 		instance->addParamWord(o_result, result);
+		return;
+	}
+
+
+	//	TCT, OpCode 3
+	//
+	void CommandProcessor_LM1_SF00::afb_tct(AfbComponentInstance* instance)
+	{
+		assert(instance);
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;			// 1..5
+		const int i_counter = 1;		// Time, SI
+		const int i_prev_counter = 3;	// Previous counter value, SI
+		const int i_saved_data = 5;		// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int i_input = 6;			// 1/0
+
+		const int o_result = 8;			// 1/0
+		const int o_counter = 9;		// Counter value -> i_prev_counter
+		const int o_saved_data = 11;	// keeps 2 signals, 0bit - prev_input, 1bit - prev_result
+		const int o_parem_err = 12;
+		//const int o_tct_edi = 13;
+		//const int o_version = 14;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+		quint32 time = instance->param(i_counter)->dwordValue();
+		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
+
+		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
+									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
+
+		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
+									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+
+		quint16 currentInputValue = instance->param(i_input)->wordValue();
+
+		checkParamRange(conf, 1, 6, "i_conf");
+
+		// Logic
+		//
+		quint16 result = 0;
+		quint16 paramError = 0;
+
+		switch (conf)
+		{
+		case 1:
+			{
+				// On
+				//
+				if (currentInputValue == 0)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 1
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > time)
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 2:
+			{
+				// Off
+				//
+				if (currentInputValue == 1)
+				{
+					result = 0;
+					counter = 0;
+				}
+				else
+				{
+					// InputValue == 0
+					//
+					counter += m_cycleDurationMs;
+
+					if (counter > time)
+					{
+						result = 1;
+						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+				}
+			}
+			break;
+		case 3:
+			{
+				// Univibrator (TCTC_VIBR)
+				//
+				if (counter == 0 &&
+					prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+		case 4:
+			{
+				// Filter (TCTC_FILTER)
+				//
+				if (prevInputValue != currentInputValue)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+
+				if (counter != 0 )
+				{
+					counter --;
+
+					if (counter == 0)
+					{
+						result = currentInputValue;
+					}
+					else
+					{
+						result = prevResultValue;
+					}
+				}
+				else
+				{
+					result = prevResultValue;
+				}
+			}
+			break;
+
+		case 5:
+			{
+				// Univibrator R (TCTC_RSV)
+				//
+				if (prevInputValue == 0 &&
+					currentInputValue == 1)
+				{
+					// Start timer
+					//
+					counter = time / m_cycleDurationMs;
+				}
+				else
+				{
+					if (counter != 0)
+					{
+						counter --;
+					}
+				}
+
+				result = (counter == 0) ? 0 : 1;
+			}
+			break;
+
+		case 6:
+			{
+				// RC FILTER (TCTC_...)
+				// Not implemented in LM yet
+				//
+				SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+										.arg(conf), "afb_tct");
+			}
+			break;
+
+
+
+		default:
+			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), "afb_tct");
+		}
+
+		// Save result
+		//
+		instance->addParamWord(o_result, result);
+
+		instance->addParamDword(o_counter, counter);
+		instance->addParamDword(i_prev_counter, counter);
+
+		instance->addParamWord(o_saved_data, currentInputValue | (result << 1));
+		instance->addParamWord(i_saved_data, currentInputValue | (result << 1));
+
+		instance->addParamWord(o_parem_err, paramError);
+
 		return;
 	}
 
@@ -1164,7 +1366,7 @@ namespace Sim
 				inputValue <<= 16;
 
 				qint64 prevValue = prevValueParam ? prevValueParam->signedInt64Value() : 0;	// First cycle prevValue is 0
-				qint64 n = time / 5;
+				qint64 n = time / m_cycleDurationMs;
 				qint64 resultExt = prevValue + inputValue / n - prevValue / n;
 
 				instance->addParamSignedInt(o_result, static_cast<qint32>(resultExt >> 16));
@@ -1184,7 +1386,7 @@ namespace Sim
 				float inputValue = dataParam->floatValue();
 
 				float prevValue = prevValueParam ? prevValueParam->floatValue() : 0.0f;	// First cycle prevValue is 0
-				float n = time / 5;
+				float n = time / m_cycleDurationMs;
 
 				std::feclearexcept(FE_ALL_EXCEPT);
 				float result = prevValue + inputValue / n - prevValue / n;

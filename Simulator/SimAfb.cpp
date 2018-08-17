@@ -588,6 +588,15 @@ namespace Sim
 		return true;
 	}
 
+	bool AfbComponentInstance::addParamDword(int opIndex, quint32 value)
+	{
+		AfbComponentParam param(opIndex);
+		param.setDwordValue(value);
+
+		m_params[opIndex] = std::move(param);
+		return true;
+	}
+
 	bool AfbComponentInstance::addParamFloat(int opIndex, float value)
 	{
 		AfbComponentParam param(opIndex);

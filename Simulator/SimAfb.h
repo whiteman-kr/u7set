@@ -145,6 +145,7 @@ namespace Sim
 		bool paramExists(int opIndex) const;
 
 		bool addParamWord(int opIndex, quint16 value);
+		bool addParamDword(int opIndex, quint32 value);
 		bool addParamFloat(int opIndex, float value);
 		bool addParamDouble(int opIndex, double value);
 		bool addParamSignedInt(int opIndex, qint32 value);

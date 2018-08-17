@@ -143,6 +143,10 @@ namespace Sim
 		//
 		void afb_not(AfbComponentInstance* instance);
 
+		//	TCT, OpCode 3
+		//
+		void afb_tct(AfbComponentInstance* instance);
+
 		//	BCOD, OpCode 8
 		//
 		void afb_bcod(AfbComponentInstance* instance);
@@ -218,6 +222,7 @@ namespace Sim
 		{
 			{"afb_logic",		&CommandProcessor_LM1_SF00::afb_logic},			// 1
 			{"afb_not",			&CommandProcessor_LM1_SF00::afb_not},			// 2
+			{"afb_tct",			&CommandProcessor_LM1_SF00::afb_tct},			// 3
 			{"afb_bcod",		&CommandProcessor_LM1_SF00::afb_bcod},			// 8
 			{"afb_bdec",		&CommandProcessor_LM1_SF00::afb_bdec},			// 9
 			{"afb_bcomp",		&CommandProcessor_LM1_SF00::afb_bcomp},			// 10
@@ -228,6 +233,8 @@ namespace Sim
 			{"afb_mux",			&CommandProcessor_LM1_SF00::afb_mux},			// 21
 			{"afb_lim",			&CommandProcessor_LM1_SF00::afb_lim},			// 23
 		};
+
+		static const int m_cycleDurationMs = 5;
 	};
 
 }
