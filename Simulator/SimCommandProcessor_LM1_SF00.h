@@ -147,6 +147,11 @@ namespace Sim
 		//
 		void afb_tct(AfbComponentInstance* instance);
 
+		//	CTUD, OpCode 5
+		//  Counter Up/Down
+		//
+		void afb_ctud(AfbComponentInstance* instance);
+
 		//	BCOD, OpCode 8
 		//
 		void afb_bcod(AfbComponentInstance* instance);
@@ -223,6 +228,7 @@ namespace Sim
 			{"afb_logic",		&CommandProcessor_LM1_SF00::afb_logic},			// 1
 			{"afb_not",			&CommandProcessor_LM1_SF00::afb_not},			// 2
 			{"afb_tct",			&CommandProcessor_LM1_SF00::afb_tct},			// 3
+			{"afb_ctud",		&CommandProcessor_LM1_SF00::afb_ctud},			// 5
 			{"afb_bcod",		&CommandProcessor_LM1_SF00::afb_bcod},			// 8
 			{"afb_bdec",		&CommandProcessor_LM1_SF00::afb_bdec},			// 9
 			{"afb_bcomp",		&CommandProcessor_LM1_SF00::afb_bcomp},			// 10

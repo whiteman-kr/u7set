@@ -889,6 +889,77 @@ namespace Sim
 		return;
 	}
 
+	//	CTUD, OpCode 5
+	//  Counter Up/Down
+	//
+	void CommandProcessor_LM1_SF00::afb_ctud(AfbComponentInstance* instance)
+	{
+		assert(instance);
+
+		// Define input opIndexes
+		//
+		const int i_conf = 0;			// 1, 2
+		const int i_counter = 1;		// Time, SI, can be negative
+		const int i_prev_input = 3;		// Previous counter value, 0/1
+		const int i_input = 4;			// 0/1
+		const int i_reset = 5;			// 0/1
+
+		const int o_result = 7;			// Counter value -> i_counter
+		const int o_prev_input = 9;		// o_prev_input -> i_prev_input
+		//const int o_edi = 10;
+		//const int o_version = 11;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+		qint32 counter = instance->paramExists(i_counter) ? instance->param(i_counter)->signedIntValue() : 0;
+
+		quint16 prevInputValue = instance->paramExists(i_prev_input) ? instance->param(i_prev_input)->wordValue() : 0;
+		quint16 input = instance->param(i_input)->wordValue();
+		quint16 reset = instance->param(i_reset)->wordValue();
+
+		// Logic
+		//
+		if (reset == 1)
+		{
+			counter = 0;
+		}
+		else
+		{
+			switch (conf)
+			{
+			case 1:
+				// Up - rising edges
+				//
+				if (prevInputValue == 0 &&
+					input == 1)
+				{
+					counter ++;
+				}
+				break;
+			case 2:
+				// Up - falling edges
+				//
+				if (prevInputValue == 1 &&
+					input == 0)
+				{
+					counter --;
+				}
+				break;
+			default:
+				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM1_SF00::afb_ctud");
+			}
+		}
+
+		instance->addParamSignedInt(o_result, counter);
+		instance->addParamSignedInt(i_counter, counter);
+
+		instance->addParamWord(o_prev_input, input);
+		instance->addParamWord(i_prev_input, input);
+
+		return;
+	}
+
 	//	BCOD, OpCode 8
 	//
 	void CommandProcessor_LM1_SF00::afb_bcod(AfbComponentInstance* instance)

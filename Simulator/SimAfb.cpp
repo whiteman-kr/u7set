@@ -553,7 +553,7 @@ namespace Sim
 	AfbComponentInstance::AfbComponentInstance(quint16 instanceNo) :
 		m_instanceNo(instanceNo)
 	{
-		m_params.reserve(16);
+		m_params.reserve(32);
 	}
 
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)

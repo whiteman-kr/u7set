@@ -136,7 +136,7 @@
 			<Pin OpName="o_ff_edi"		OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="9"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_stud">
+		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"	MaxInstCount="256" SimulationFunc="afb_ctud">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_counter_dff"	OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_wave_dff"	OpIndex ="3"	PinType = "Input"/>
