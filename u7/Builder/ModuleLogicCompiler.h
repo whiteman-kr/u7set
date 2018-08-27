@@ -146,13 +146,16 @@ namespace Builder
 			// params will be filled during loopbackPreprocessing
 			//
 			QVector<const UalItem*> targets;
-			QHash<QString, const UalItem*> linkedSignals;
+			QHash<QString, bool> linkedSignals;
 			QHash<const UalItem*, bool> linkedItems;
 			QHash<QUuid, const UalItem*> linkedPins;
 
 			//
 
 			UalSignal* ualSignal = nullptr;
+
+			bool isConnected(const LogicPin& pin) const;
+			bool isConnected(const QString& signalID) const;
 		};
 
 	public:
@@ -195,9 +198,14 @@ namespace Builder
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
 		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
-										   QHash<QString, const UalItem *>* linkedSignals,
+										   QHash<QString, bool>* linkedSignals,
 										   QHash<const UalItem*, bool>* linkedItems,
 										   QHash<QUuid, const UalItem *>* linkedPins);
+		bool getSignalsAndPinsLinkedToOutPin(const UalItem* item,
+											 const LogicPin& outPin,
+											QHash<QString, bool>* linkedSignals,
+											QHash<const UalItem*, bool>* linkedItems,
+											QHash<QUuid, const UalItem*>* linkedPins);
 
 		bool isLoopbackSignal(const QString& appSignalID);
 
@@ -243,7 +251,7 @@ namespace Builder
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
-		bool isConnectedToLoopbackTarget(const LogicPin& inPin, UalItem** loopbackTarget);
+		bool isConnectedToLoopback(const LogicPin& inPin, Loopback** loopback);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID);

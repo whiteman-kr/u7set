@@ -5299,7 +5299,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)
+	/// Title:	   Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
 	///
 	/// Parameters:
 	///		%1 Signal 1 ID
@@ -5318,7 +5318,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5144,
-				  QString(tr("Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)")).
+				  QString(tr("Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)")).
 								arg(s1ID).arg(s2ID).arg(lbId).arg(schemaID));
 	}
 
@@ -5383,12 +5383,10 @@ namespace Builder
 	///
 	void IssueLogger::errALC5147(QString signalID, QString lbID1, QString lbID2)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
-
 		LOG_ERROR(IssueType::AlCompiler,
 				  5147,
-				  QString(tr("Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4).")).
-					arg(signalID).arg(lbID1).arg(lbID2).arg(schemaID));
+				  QString(tr("Signal %1 is connected to different LoopbackTargets %2 and %3.")).
+					arg(signalID).arg(lbID1).arg(lbID2));
 	}
 
 	//
