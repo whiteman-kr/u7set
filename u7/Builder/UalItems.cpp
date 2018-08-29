@@ -362,7 +362,7 @@ namespace Builder
 
 	QString UalItem::strID() const
 	{
-		if (m_appLogicItem.m_fblItem->isSignalElement())
+		if (m_appLogicItem.m_fblItem->isSignalElement() == true)
 		{
 			VFrame30::SchemaItemSignal* itemSignal= m_appLogicItem.m_fblItem->toSignalElement();
 
@@ -375,7 +375,7 @@ namespace Builder
 			return itemSignal->appSignalIds();
 		}
 
-		if (m_appLogicItem.m_fblItem->isAfbElement())
+		if (m_appLogicItem.m_fblItem->isAfbElement() == true)
 		{
 			VFrame30::SchemaItemAfb* itemFb= m_appLogicItem.m_fblItem->toAfbElement();
 
@@ -388,7 +388,7 @@ namespace Builder
 			return itemFb->afbStrID();
 		}
 
-		if (m_appLogicItem.m_fblItem->isConstElement())
+		if (m_appLogicItem.m_fblItem->isConstElement() == true)
 		{
 			VFrame30::SchemaItemConst* itemConst= m_appLogicItem.m_fblItem->toSchemaItemConst();
 
@@ -401,68 +401,93 @@ namespace Builder
 			return QString("Const(%1)").arg(itemConst->valueToString());
 		}
 
+		if (m_appLogicItem.m_fblItem->isLoopbackSourceElement() == true)
+		{
+			const VFrame30::SchemaItemLoopbackSource* loopbackSource= m_appLogicItem.m_fblItem->toLoopbackSourceElement();
+
+			if (loopbackSource == nullptr)
+			{
+				assert(false);
+				return "";
+			}
+
+			return loopbackSource->loopbackId();
+		}
+
 		assert(false);		// unknown type of item
 		return "";
 	}
 
-	UalItem::Type UalItem::type() const
+	E::UalItemType UalItem::type() const
 	{
-		if (m_type != UalItem::Type::Unknown)
+		if (m_type != E::UalItemType::Unknown)
 		{
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isSignalElement() == true)
 		{
-			m_type = Type::Signal;
+			m_type = E::UalItemType::Signal;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isAfbElement() == true)
 		{
-			m_type = Type::Afb;
+			m_type = E::UalItemType::Afb;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isConstElement() == true)
 		{
-			m_type = Type::Const;
+			m_type = E::UalItemType::Const;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isTransmitterElement() == true)
 		{
-			m_type = Type::Transmitter;
+			m_type = E::UalItemType::Transmitter;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isReceiverElement() == true)
 		{
-			m_type = Type::Receiver;
+			m_type = E::UalItemType::Receiver;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isTerminatorElement() == true)
 		{
-			m_type = Type::Terminator;
+			m_type = E::UalItemType::Terminator;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isBusComposerElement() == true)
 		{
-			m_type = Type::BusComposer;
+			m_type = E::UalItemType::BusComposer;
 			return m_type;
 		}
 
 		if (m_appLogicItem.m_fblItem->isBusExtractorElement() == true)
 		{
-			m_type = Type::BusExtractor;
+			m_type = E::UalItemType::BusExtractor;
+			return m_type;
+		}
+
+		if (m_appLogicItem.m_fblItem->isLoopbackSourceElement() == true)
+		{
+			m_type = E::UalItemType::LoopbackSource;
+			return m_type;
+		}
+
+		if (m_appLogicItem.m_fblItem->isLoopbackTargetElement() == true)
+		{
+			m_type = E::UalItemType::LoopbackTarget;
 			return m_type;
 		}
 
 		assert(false);
 
-		m_type = Type::Unknown;
+		m_type = E::UalItemType::Unknown;
 
 		return m_type;
 	}
@@ -625,8 +650,9 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	UalAfb::UalAfb(const UalItem& appItem) :
-		UalItem(appItem)
+	UalAfb::UalAfb(const UalItem& appItem, bool isBusProcessingAfb) :
+		UalItem(appItem),
+		m_isBusProcessing(isBusProcessingAfb)
 	{
 		// initialize m_paramValuesArray
 		//
@@ -655,7 +681,12 @@ namespace Builder
 		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
 	}
 
-	QString UalAfb::instantiatorID()
+	bool UalAfb::isBusProcessing() const
+	{
+		return m_isBusProcessing;
+	}
+
+	QString UalAfb::instantiatorID() const
 	{
 		if (m_instantiatorID.isEmpty() == false)
 		{
@@ -1151,7 +1182,8 @@ namespace Builder
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
 											Signal* busSignal,
 											Builder::BusShared bus,
-											const QString& outPinCaption)
+											const QString& outPinCaption,
+											std::shared_ptr<Hardware::DeviceModule> lm)
 	{
 		// create parent Bus signal
 		//
@@ -1182,6 +1214,8 @@ namespace Builder
 			m_autoSignalPtr->setDataSizeW(bus->sizeW());
 
 			m_autoSignalPtr->setAcquire(false);
+
+			m_autoSignalPtr->setLm(lm);
 
 			busSignal = m_autoSignalPtr;
 		}
@@ -1488,6 +1522,27 @@ namespace Builder
 		return isCompatible(ualSignal->signal());
 	}
 
+	void UalSignal::setLoopbackID(const QString& loopbackID)
+	{
+		if (m_loopbackID.isEmpty() == false)
+		{
+			assert(false);				// reassigning of m_loopbackSourceID, why?
+		}
+
+		m_loopbackID = loopbackID;
+	}
+
+	QString UalSignal::loopbackID() const
+	{
+		if (m_loopbackID.isEmpty() == true)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_loopbackID;
+	}
+
 	E::SignalType UalSignal::constType() const
 	{
 		assert(m_isConst == true);
@@ -1699,7 +1754,7 @@ namespace Builder
 
 	void UalSignal::sortRefSignals()
 	{
-		// sorting m_refSignals by m_refSignals[i]->appSignalID ascending
+		// sorting m_refSignals by appSignalID ascending
 		//
 
 		int count = m_refSignals.count();
@@ -2196,13 +2251,14 @@ namespace Builder
 													Signal* s,
 													BusShared bus,
 													QUuid outPinUuid,
-													const QString& outPinCaption)
+													const QString& outPinCaption,
+													std::shared_ptr<Hardware::DeviceModule> lm)
 	{
 		// s can bee nullptr!!!
 		//
 		UalSignal* busParentSignal = new UalSignal;
 
-		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption);
+		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption, lm);
 
 		if (result == false)
 		{
@@ -2243,7 +2299,7 @@ namespace Builder
 						continue;
 					}
 
-					busChildSignal = createBusParentSignal(ualItem, sChild, childBus, QUuid(), busSignal.caption);
+					busChildSignal = createBusParentSignal(ualItem, sChild, childBus, QUuid(), busSignal.caption, lm);
 				}
 				break;
 
@@ -2406,6 +2462,11 @@ namespace Builder
 			if (ualSignal == nullptr)
 			{
 				assert(false);
+				continue;
+			}
+
+			if (ualSignal->isBusChild() == true)
+			{
 				continue;
 			}
 

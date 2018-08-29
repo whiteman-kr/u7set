@@ -1,5 +1,6 @@
 #include "ApplicationLogicCode.h"
 #include "../VFrame30/Afb.h"
+#include "../lib/WUtils.h"
 
 namespace Builder
 {
@@ -9,33 +10,67 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	bool LmCommand::isValidCode(int commandCode)
+	LmCommands lmCommands;		// static map of LM's commands
+
+	LmCommands::LmCommands()
 	{
-		return commandCode >= 0 && commandCode < LM_COMMAND_COUNT;
+		for(const LmCommand& lmCommand : lmCommandSet)
+		{
+			if (contains(TO_INT(lmCommand.code)) == true)
+			{
+				assert(false);			// duplicate command code
+				continue;
+			}
+
+			insert(TO_INT(lmCommand.code), lmCommand);
+		}
 	}
 
-
-	int LmCommand::getSizeW(int commandCode)
+	bool LmCommands::isValidCode(LmCommand::Code commandCode)
 	{
-		if (!isValidCode(commandCode))
+		return isValidCode(TO_INT(commandCode));
+	}
+
+	bool LmCommands::isValidCode(int commandCode)
+	{
+		bool codeExists = contains(commandCode);
+
+		if (codeExists == false)
 		{
 			assert(false);
+		}
+
+		return codeExists;
+	}
+
+	int LmCommands::getSizeW(LmCommand::Code commandCode)
+	{
+		return getSizeW(TO_INT(commandCode));
+	}
+
+	int LmCommands::getSizeW(int commandCode)
+	{
+		if (isValidCode(commandCode) == false)
+		{
 			return 0;
 		}
 
-		return LmCommands[commandCode].sizeW;
+		return value(commandCode).sizeW;
 	}
 
-
-	const char* LmCommand::getStr(int commandCode)
+	QString LmCommands::getMnemo(LmCommand::Code commandCode)
 	{
-		if (!isValidCode(commandCode))
+		return getMnemo(TO_INT(commandCode));
+	}
+
+	QString LmCommands::getMnemo(int commandCode)
+	{
+		if (isValidCode(commandCode) == false)
 		{
-			assert(false);
 			return "";
 		}
 
-		return LmCommands[commandCode].str;
+		return QString(value(commandCode).mnemo);
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -49,12 +84,10 @@ namespace Builder
 		setNoCommand();
 	}
 
-
 	CommandCode::CommandCode(const CommandCode& cCode)
 	{
 		*this = cCode;
 	}
-
 
 	CommandCode& CommandCode::operator = (const CommandCode& cCode)
 	{
@@ -71,9 +104,9 @@ namespace Builder
 		return *this;
 	}
 
-	void CommandCode::setOpCode(LmCommandCode code)
+	void CommandCode::setOpCode(LmCommand::Code code)
 	{
-		if (!LmCommand::isValidCode(static_cast<int>(code)))
+		if (lmCommands.isValidCode(code) == false)
 		{
 			assert(false);
 			setNoCommand();
@@ -84,10 +117,9 @@ namespace Builder
 		}
 	}
 
-
 	void CommandCode::setFbType(quint16 fbType)
 	{
-		if (fbType > MAX_FB_TYPE)
+		if (fbType > LmCommand::MAX_FB_TYPE)
 		{
 			assert(false);
 			setNoCommand();
@@ -98,16 +130,14 @@ namespace Builder
 		}
 	}
 
-
 	void CommandCode::setFbInstance(quint16 fbInstance)
 	{
 		param.fbInstance = fbInstance;
 	}
 
-
 	void CommandCode::setFbParamNo(quint16 fbParamNo)
 	{
-		if (fbParamNo > MAX_FB_PARAM_NO)
+		if (fbParamNo > LmCommand::MAX_FB_PARAM_NO)
 		{
 			assert(false);
 			setNoCommand();
@@ -118,10 +148,9 @@ namespace Builder
 		}
 	}
 
-
 	void CommandCode::setBitNo(quint16 bitNo)
 	{
-		if (bitNo > MAX_BIT_NO_16)
+		if (bitNo > LmCommand::MAX_BIT_NO_16)
 		{
 			assert(false);
 			setNoCommand();
@@ -132,10 +161,9 @@ namespace Builder
 		}
 	}
 
-
 	void CommandCode::setBitNo1(quint16 bitNo)
 	{
-		if (bitNo > MAX_BIT_NO_16)
+		if (bitNo > LmCommand::MAX_BIT_NO_16)
 		{
 			assert(false);
 			setNoCommand();
@@ -146,10 +174,9 @@ namespace Builder
 		}
 	}
 
-
 	void CommandCode::setBitNo2(quint16 bitNo)
 	{
-		if (bitNo > MAX_BIT_NO_16)
+		if (bitNo > LmCommand::MAX_BIT_NO_16)
 		{
 			assert(false);
 			setNoCommand();
@@ -159,7 +186,6 @@ namespace Builder
 			this->bitNo.b2 = bitNo;
 		}
 	}
-
 
 	quint16 CommandCode::getWord(int index) const
 	{
@@ -184,18 +210,63 @@ namespace Builder
 		return 0;
 	}
 
+	void CommandCode::setConstFloat(float floatValue)
+	{
+		m_const.floatValue = floatValue;
+		m_constDataFormat = E::DataFormat::Float;
+	}
+
+	float CommandCode::getConstFloat() const
+	{
+		if (m_constDataFormat == E::DataFormat::Float)
+		{
+			return m_const.floatValue;
+		}
+
+		assert(false);
+
+		return 0;
+	}
+
+	void CommandCode::setConstInt32(qint32 int32Value)
+	{
+		m_const.int32Value = int32Value;
+		m_constDataFormat = E::DataFormat::SignedInt;
+	}
+
+	qint32 CommandCode::getConstInt32() const
+	{
+		if (m_constDataFormat == E::DataFormat::SignedInt)
+		{
+			return m_const.int32Value;
+		}
+
+		assert(false);
+
+		return 0;
+	}
+
+	void CommandCode::setConstUInt32(quint32 uint32Value)
+	{
+		m_const.uint32Value = uint32Value;
+		m_constDataFormat = E::DataFormat::UnsignedInt;
+	}
+
+	quint32 CommandCode::getConstUInt32() const
+	{
+		if (m_constDataFormat == E::DataFormat::UnsignedInt)
+		{
+			return m_const.uint32Value;
+		}
+
+		assert(false);
+
+		return 0;
+	}
 
 	int CommandCode::sizeW() const
 	{
-		int cmdCode = static_cast<int>(opCode.code);
-
-		if (cmdCode > LM_COMMAND_COUNT)
-		{
-			assert(false);
-			return 0;
-		}
-
-		return LmCommand::getSizeW(cmdCode);
+		return lmCommands.getSizeW(opCode.code);
 	}
 
 	void CommandCode::calcCrc5()
@@ -254,78 +325,13 @@ namespace Builder
 		word4 = 0;
 	}
 
-	QString CommandCode::getFbTypeStr() const
-	{
-		assert(false);
-		return QString();
-	}
-
-	void CommandCode::setConstFloat(float floatValue)
-	{
-		m_const.floatValue = floatValue;
-		m_constDataFormat = E::DataFormat::Float;
-	}
-
-
-	float CommandCode::getConstFloat() const
-	{
-		if (m_constDataFormat == E::DataFormat::Float)
-		{
-			return m_const.floatValue;
-		}
-
-		assert(false);
-
-		return 0;
-	}
-
-
-	void CommandCode::setConstInt32(qint32 int32Value)
-	{
-		m_const.int32Value = int32Value;
-		m_constDataFormat = E::DataFormat::SignedInt;
-	}
-
-	qint32 CommandCode::getConstInt32() const
-	{
-		if (m_constDataFormat == E::DataFormat::SignedInt)
-		{
-			return m_const.int32Value;
-		}
-
-		assert(false);
-
-		return 0;
-	}
-
-
-	void CommandCode::setConstUInt32(quint32 uint32Value)
-	{
-		m_const.uint32Value = uint32Value;
-		m_constDataFormat = E::DataFormat::UnsignedInt;
-	}
-
-
-	quint32 CommandCode::getConstUInt32() const
-	{
-		if (m_constDataFormat == E::DataFormat::UnsignedInt)
-		{
-			return m_const.uint32Value;
-		}
-
-		assert(false);
-
-		return 0;
-	}
-
-
 	// ---------------------------------------------------------------------------------------
 	//
 	// CodeItem class implementation
 	//
 	// ---------------------------------------------------------------------------------------
 
-	CodeItem::CodeItem()
+/*	CodeItem::CodeItem()
 	{
 	}
 
@@ -334,7 +340,7 @@ namespace Builder
 	{
 		m_comment = codeItem.m_comment;
 		m_binCode = codeItem.m_binCode;
-	}
+	}*
 
 
 	// ---------------------------------------------------------------------------------------
@@ -343,7 +349,7 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	Comment::Comment()
+/*	Comment::Comment()
 	{
 	}
 
@@ -370,42 +376,1271 @@ namespace Builder
 		}
 
 		return QString("\t-- %1").arg(getComment());
-	}
+	}*/
 
 
 	// ---------------------------------------------------------------------------------------
 	//
-	// Command class implementation
+	// CodeItem class implementation
 	//
 	// ---------------------------------------------------------------------------------------
 
-	QHash<int, const LmCommand*> Command::m_lmCommands;
-	QHash<quint16, int> Command::m_executedFb;
+//	QHash<int, const LmCommand*> CodeItem::m_lmCommands;
+	QHash<quint16, int> CodeItem::m_executedFb;
 
-	LmMemoryMap* Command::m_memoryMap = nullptr;
-	IssueLogger* Command::m_log = nullptr;
+	qint32 CodeItem::m_codeItemsNumerator = 0;
 
-    Command::Command()
-    {
-		initStaticMembers();
-    }
-
-
-	Command::Command(const Command& cmd) :
-		CodeItem(cmd)
+	CodeItem::CodeItem()
 	{
-		initStaticMembers();
+		m_numerator = m_codeItemsNumerator;
+		m_codeItemsNumerator++;
+	}
 
-		m_address = cmd.m_address;
-		m_fbExecTime = cmd.m_fbExecTime;
-		m_waitTime = cmd.m_waitTime;
-		m_execTime = cmd.m_execTime;
-		m_result = cmd.m_result;
-		m_code = cmd.m_code;
+	void CodeItem::nop()
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::NOP);
+	}
+
+	void CodeItem::start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_fbExecTime = fbRunTime;
+
+		m_code.setOpCode(LmCommand::Code::START);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbCaption(fbCaption);
+
+		if (fbRunTime == 0)
+		{
+			assert(false);		// fbRunTime can't be 0
+		}
+	}
+
+	void CodeItem::stop()
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::STOP);
 	}
 
 
-	int Command::startFbExec(quint16 fbType, int fbRuntime)
+	void CodeItem::mov(quint16 addrTo, quint16 addrFrom)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOV);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+	}
+
+	void CodeItem::mov(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov(addrTo.offset(), addrFrom.offset());
+	}
+
+	void CodeItem::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
+	{
+		initCommand();
+
+		m_result = true;
+
+		assert(sizeW > 0);
+
+		m_code.setOpCode(LmCommand::Code::MOVMEM);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+		m_code.setWord4(sizeW);
+	}
+
+	void CodeItem::movMem(Address16 addrTo, Address16 addrFrom, quint16 sizeW)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		movMem(addrTo.offset(), addrFrom.offset(), sizeW);
+	}
+
+	void CodeItem::movConst(quint16 addrTo, quint16 constVal)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOVC);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(constVal);
+	}
+
+	void CodeItem::movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOVBC);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(constBit);
+		m_code.setBitNo(bitNo);
+	}
+
+	void CodeItem::movBitConst(Address16 addr16, quint16 constBit)
+	{
+		assert(addr16.isValid() == true);
+
+		movBitConst(addr16.offset(), addr16.bit(), constBit);
+	}
+
+	void CodeItem::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::WRFB);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrFrom);
+		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::RDFB);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrTo);
+		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::WRFBC);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(constVal);
+		m_code.setFbCaption(fbCaption);
+	}
+
+
+	void CodeItem::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::WRFBB);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrFrom);
+		m_code.setBitNo(bitNo);
+		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(), fbCaption);
+	}
+
+	void CodeItem::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::RDFBB);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrTo);
+		m_code.setBitNo(bitNo);
+		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::readFuncBlockBit(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo, fbCaption);
+	}
+
+	void CodeItem::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::RDFBTS);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(testValue);
+		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::setMem(quint16 addr, quint16 constValue, quint16 sizeW)
+	{
+		initCommand();
+
+		m_result = true;
+
+		assert(sizeW > 0);
+
+		m_code.setOpCode(LmCommand::Code::SETMEM);
+		m_code.setWord2(addr);
+		m_code.setWord3(constValue);
+		m_code.setWord4(sizeW);
+	}
+
+
+	void CodeItem::movBit(quint16 addrTo, quint16 bitTo, quint16 addrFrom, quint16 bitFrom)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOVB);
+		m_code.setWord2(addrTo);
+		m_code.setBitNo2(bitTo);
+		m_code.setWord3(addrFrom);
+		m_code.setBitNo1(bitFrom);
+	}
+
+	void CodeItem::movBit(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+
+		movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit());
+	}
+
+	void CodeItem::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_fbExecTime = fbRunTime;
+
+		m_code.setOpCode(LmCommand::Code::NSTART);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setWord3(startCount);
+		m_code.setFbCaption(fbCaption);
+
+		//
+
+		if (fbRunTime == 0)
+		{
+			assert(false);		// fbRunTime can't be 0
+		}
+	}
+
+	void CodeItem::appStart(quint16 appStartAddr)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::APPSTART);
+		m_code.setWord2(appStartAddr);
+	}
+
+
+	void CodeItem::mov32(quint16 addrTo, quint16 addrFrom)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOV32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+	}
+
+	void CodeItem::mov32(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.bit() == 0);
+		assert(addrFrom.bit() == 0);
+
+		mov32(addrTo.offset(), addrFrom.offset());
+	}
+
+	void CodeItem::movConstInt32(quint16 addrTo, qint32 constInt32)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOVC32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setConstInt32(constInt32);
+	}
+
+	void CodeItem::movConstUInt32(quint16 addrTo, quint32 constUInt32)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOVC32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3((constUInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constUInt32 & 0xFFFF);
+		m_code.setConstUInt32(constUInt32);
+	}
+
+	void CodeItem::movConstFloat(quint16 addrTo, float constFloat)
+	{
+		initCommand();
+
+		m_result = true;
+
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
+
+		m_code.setOpCode(LmCommand::Code::MOVC32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setConstFloat(constFloat);
+	}
+
+	void CodeItem::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::WRFB32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrFrom);
+		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	{
+		assert(addrFrom.bit() == 0);
+
+		writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
+	}
+
+	void CodeItem::readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::RDFB32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrTo);
+		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::readFuncBlock32(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		assert(addrTo.bit() == 0);
+
+		readFuncBlock32(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
+	}
+
+	void CodeItem::writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::WRFBC32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstInt32(constInt32);
+	}
+
+	void CodeItem::writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float constFloat, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
+
+		m_code.setOpCode(LmCommand::Code::WRFBC32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstFloat(constFloat);
+	}
+
+	void CodeItem::readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::RDFBTS32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((testInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(testInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstInt32(testInt32);
+	}
+
+	void CodeItem::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption)
+	{
+		initCommand();
+
+		m_result = true;
+
+		qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
+
+		m_code.setOpCode(LmCommand::Code::RDFBTS32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((testInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(testInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstFloat(testFloat);
+	}
+
+	void CodeItem::movConstIfFlag(quint16 addrTo, quint16 constVal)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::MOVCF);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(constVal);
+	}
+
+	void CodeItem::prevMov(quint16 addrTo, quint16 addrFrom)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::PMOV);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+	}
+
+	void CodeItem::prevMov32(quint16 addrTo, quint16 addrFrom)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::PMOV32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+	}
+
+	void CodeItem::fill(quint16 addrTo, quint16 addrFrom, quint16 addrBit)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_code.setOpCode(LmCommand::Code::FILL);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+		m_code.setWord4(addrBit);
+	}
+
+	void CodeItem::fill(Address16 addrTo, Address16 addrFrom)
+	{
+		assert(addrTo.isValid() == true);
+		assert(addrFrom.isValid() == true);
+		assert(addrTo.bit() == 0);
+
+		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
+	}
+
+	bool CodeItem::checkNop()
+	{
+		return true;
+	}
+
+	bool CodeItem::checkStart()
+	{
+		// need check fbType and fbInstance
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkStop()
+	{
+		// need check fbType and fbInstance
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMov()
+	{
+		// chek addresses
+
+		//read16(addrFrom);
+		//write16(addrTo);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMovMem()
+	{
+		/*if (addressInBitMemory(addrTo) ||
+			addressInBitMemory(addrTo + sizeW - 1))
+		{
+			// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
+			//
+			m_log->errALC5066(addrTo, addrFrom, sizeW);
+			m_result = false;
+		}
+
+		readArea(addrFrom, sizeW);
+		writeArea(addrTo, sizeW);*/
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMovConst()
+	{
+		//write16(addrTo);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMovBitConst()
+	{
+		/*
+		if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+
+			//	Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
+			//
+			m_log->errALC5067(addrTo, bitNo, constBit);
+
+			m_result = false;
+		}
+
+		write16(addrTo);*/
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkWriteFuncBlock()
+	{
+		//	read16(addrFrom);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkReadFuncBlock()
+	{
+		// write16(addrTo);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkWriteFuncBlockConst()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkWriteFuncBlockBit()
+	{
+		// read16(addrFrom);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkReadFuncBlockBit()
+	{
+		/*
+		if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+			assert(false);			// RDFBB command can write only in bit- or word-addressed memory
+			m_result = false;
+			return;
+		}
+
+		m_memoryMap->write16(addrTo);*/
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkReadFuncBlockTest()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkSetMem()
+	{
+		/*
+		if (addressInBitMemory(addr) ||
+			addressInBitMemory(addr + sizeW - 1))
+		{
+			assert(false);			// SETMEM command can't write to bit-addressed memory
+			m_result = false;
+		}
+
+		writeArea(addr, sizeW);*/
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMovBit()
+	{
+		/*if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+
+			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
+			//
+			m_log->errALC5089(addrTo, bitTo, addrFrom, bitFrom);
+
+			m_result = false;
+		}
+
+		//
+
+		read16(addrFrom);
+		write16(addrTo);*/
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkNstart()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkAppStart()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMov32()
+	{
+		/*read32(addrFrom);
+		write32(addrTo);*/
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMovConst32()
+	{
+		// write32(addrTo);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkWriteFuncBlock32()
+	{
+		// read32(addrFrom);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkReadFuncBlock32()
+	{
+		// write32(addrTo);
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkWriteFuncBlockConst32()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkReadFuncBlockTest32()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkMovConstIfFlag()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkPrevMov()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkPrevMov32()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::checkFill()
+	{
+		// ??
+		assert(false);
+		return false;
+	}
+
+	bool CodeItem::generateBinCode(QByteArray* binCode) const
+	{
+		TEST_PTR_RETURN_FALSE(binCode);
+
+		binCode->clear();
+
+		if (isComment() == true)
+		{
+			return true;
+		}
+
+		E::ByteOrder byteOrder = E::ByteOrder::BigEndian;
+
+		int cmdSizeW = sizeW();
+
+		binCode->resize(cmdSizeW * WORD_SIZE_IN_BYTES);
+
+		CommandCode cmdCode = m_code;
+
+		cmdCode.calcCrc5();
+
+		for(int i = 0; i < cmdSizeW; i++)
+		{
+			quint16 cmdWord = cmdCode.getWord(i);
+
+			if (byteOrder == E::ByteOrder::LittleEndian)
+			{
+				// Little Endian byte order
+				//
+				(*binCode)[i * WORD_SIZE_IN_BYTES] = cmdWord & 0x00FF;
+				(*binCode)[i * WORD_SIZE_IN_BYTES + 1] = (cmdWord & 0xFF00) >> 8;
+			}
+			else
+			{
+				// Big Endian byte order
+				//
+				(*binCode)[i * WORD_SIZE_IN_BYTES] = (cmdWord & 0xFF00) >> 8;
+				(*binCode)[i * WORD_SIZE_IN_BYTES + 1] = cmdWord & 0x00FF;
+			}
+		}
+
+		return true;
+	}
+
+	QString CodeItem::getAsmCode(bool printCmdCode) const
+	{
+		if (m_isCommand == false)
+		{
+			// this is a comment
+			//
+			if (m_comment.isEmpty() == true)
+			{
+				return QString();
+			}
+			else
+			{
+				return QString("\t-- %1").arg(m_comment);
+			}
+		}
+
+		QString cmdStr;
+
+		// print address of command
+		//
+		cmdStr.sprintf("%05X\t", m_address);
+
+		if (printCmdCode == true)
+		{
+			// print command code
+
+			for(int w = 0; w < sizeW(); w++)
+			{
+				QString codeWordStr = getCodeWordStr(w);
+
+				cmdStr += QString("%1 ").arg(codeWordStr);
+			}
+
+			int tabLen = 32 - (cmdStr.length() - 1 + 3);
+
+			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+
+			for(int i = 0; i < tabCount; i++)
+			{
+				cmdStr += "\t";
+			}
+		}
+
+//		QString str;
+//		Execution times printing
+//		Commented while refactoring!!!
+//
+//		assert(m_execTime != 0);			// check that times already calculated
+//		str.sprintf("[%02d:%02d]", m_waitTime, m_execTime);
+//		str = str.leftJustified(12, ' ');
+//		cmdStr += str;
+
+		QString mnemo = mnemoCode();
+
+		cmdStr += mnemo;
+
+		if (m_comment.isEmpty() == false)
+		{
+			int tabLen = 72 - 32 - mnemo.length();
+
+			if (tabLen <= 0)
+			{
+				tabLen += 16;
+			}
+
+			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+
+			for(int i = 0; i < tabCount; i++)
+			{
+				cmdStr += "\t";
+			}
+
+			cmdStr += QString("-- %1").arg(m_comment);
+		}
+
+		return cmdStr;
+	}
+
+	QString CodeItem::mnemoCode() const
+	{
+		int opCodeInt = m_code.getOpCodeInt();
+
+		QString mnemoCode = lmCommands.getMnemo(opCodeInt).leftJustified(10, ' ', false);
+
+		QString params;
+
+		switch(m_code.getOpCode())
+		{
+		case LmCommand::Code::NoCommand:
+		case LmCommand::Code::NOP:
+		case LmCommand::Code::STOP:
+			break;
+
+		case LmCommand::Code::START:
+			params = QString("%1.%2").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt());
+			break;
+
+		case LmCommand::Code::MOV:
+		case LmCommand::Code::PMOV:
+		case LmCommand::Code::MOV32:
+		case LmCommand::Code::PMOV32:
+			params = QString("%1, %2").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3());
+			break;
+
+		case LmCommand::Code::MOVMEM:
+			params = QString("%1, %2, %3").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
+			break;
+
+		case LmCommand::Code::MOVC:
+		case LmCommand::Code::MOVCF:
+			params = QString("%1, #%2").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3());
+			break;
+
+		case LmCommand::Code::MOVBC:
+			params = QString("%1[%2], #%3").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord4()).
+						arg(m_code.getWord3());
+			break;
+
+		case LmCommand::Code::WRFB:
+		case LmCommand::Code::WRFB32:
+			params = QString("%1.%2[%3], %4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3());
+			break;
+
+		case LmCommand::Code::RDFB:
+		case LmCommand::Code::RDFB32:
+			params = QString("%1, %2.%3[%4]").
+						arg(m_code.getWord3()).
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt());
+			break;
+
+		case LmCommand::Code::WRFBC:
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3());
+			break;
+
+		case LmCommand::Code::WRFBB:
+			params = QString("%1.%2[%3], %4[%5]").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
+			break;
+
+		case LmCommand::Code::RDFBB:
+			params = QString("%1[%2], %3.%4[%5]").
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4()).
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt());
+			break;
+
+		case LmCommand::Code::RDFBTS:
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3());
+			break;
+
+		case LmCommand::Code::SETMEM:
+			params = QString("%1, #%2, %3").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
+			break;
+
+		case LmCommand::Code::MOVB:
+			params = QString("%1[%2], %3[%4]").
+						arg(m_code.getWord2()).
+						arg(m_code.getBitNo2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getBitNo1());
+			break;
+
+		case LmCommand::Code::NSTART:
+			params = QString("%1.%2, %3").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getWord3());
+			break;
+
+		case LmCommand::Code::APPSTART:
+			params = QString("%1").
+						arg(m_code.getWord2());
+			break;
+
+		case LmCommand::Code::MOVC32:
+			params = QString("%1, #%2").
+						arg(m_code.getWord2()).
+						arg(getConstValueString());
+			break;
+
+		case LmCommand::Code::WRFBC32:
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(getConstValueString());
+			break;
+
+		case LmCommand::Code::RDFBTS32:
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(getConstValueString());
+			break;
+
+		case LmCommand::Code::FILL:
+			params = QString("%1, %2[%3]").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
+			break;
+
+
+		default:
+			assert(false);
+		}
+
+		return mnemoCode + params;
+	}
+
+	QString CodeItem::getConstValueString() const
+	{
+		switch(m_code.constDataFormat())
+		{
+		case E::DataFormat::Float:
+			return QString("%1").arg(m_code.getConstFloat());
+
+		case E::DataFormat::SignedInt:
+			return QString("%1").arg(m_code.getConstInt32());
+
+		case E::DataFormat::UnsignedInt:
+			return QString("%1").arg(m_code.getConstUInt32());
+
+		default:
+			assert(false);
+		}
+
+		return QString();
+	}
+
+	bool CodeItem::getTimes(const LmMemoryMap* lmMemMap, int prevCmdExecTime, int* waitTime, int* execTime) const
+	{
+		TEST_PTR_RETURN_FALSE(lmMemMap);
+		TEST_PTR_RETURN_FALSE(waitTime);
+		TEST_PTR_RETURN_FALSE(execTime);
+
+		*waitTime = 0;
+		*execTime = 0;
+
+		if (lmCommands.contains(m_code.getOpCodeInt()) == false)
+		{
+			assert(false);			// unknown command code!
+			return false;
+		}
+
+		const LmCommand& lmCommand = lmCommands[m_code.getOpCodeInt()];
+
+		int cmdReadTime = lmCommand.readTime;
+
+		if (prevCmdExecTime > cmdReadTime)
+		{
+			*waitTime = prevCmdExecTime - cmdReadTime;
+
+			decFbExecTime(prevCmdExecTime);
+		}
+		else
+		{
+			*waitTime = cmdReadTime - prevCmdExecTime;
+
+			decFbExecTime(cmdReadTime);
+		}
+
+		assert(*waitTime >= 0);
+
+		if (lmCommand.waitFbExecution == true)
+		{
+			int fbType = m_code.getFbType();
+
+			*waitTime += getFbRemainingExecTime(fbType);
+		}
+
+		int cmdExecTime = 0;
+
+		switch(m_code.getOpCode())
+		{
+		case LmCommand::Code::NoCommand:
+			assert(false);
+			break;
+
+			// commands with const runtime
+			//
+		case LmCommand::Code::NOP:
+		case LmCommand::Code::STOP:
+		case LmCommand::Code::WRFB:
+		case LmCommand::Code::RDFB:
+		case LmCommand::Code::WRFBC:
+		case LmCommand::Code::WRFBB:
+		case LmCommand::Code::RDFBTS:
+		case LmCommand::Code::APPSTART:
+		case LmCommand::Code::MOV32:
+		case LmCommand::Code::MOVC32:
+		case LmCommand::Code::WRFB32:
+		case LmCommand::Code::RDFB32:
+		case LmCommand::Code::WRFBC32:
+		case LmCommand::Code::RDFBTS32:
+		case LmCommand::Code::MOVCF:
+		case LmCommand::Code::PMOV32:
+		case LmCommand::Code::FILL:
+			assert(lmCommand.runTime != LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmCommand.runTime;
+			break;
+
+			// specific commands START, NSTART
+			//
+		case LmCommand::Code::START:
+			{
+				assert(lmCommand.runTime != LmCommand::CALC_RUNTIME);
+
+				cmdExecTime = lmCommand.runTime;
+
+				startFbExec(m_code.getFbType(), m_fbExecTime);
+			}
+			break;
+
+		case LmCommand::Code::NSTART:
+			{
+				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+
+				quint16 n = m_code.getWord3();
+
+				cmdExecTime = 3 + n * 2;
+
+				startFbExec(m_code.getFbType(), m_fbExecTime * n);
+			}
+			break;
+
+			// commands with calculated runtime
+			//
+		case LmCommand::Code::MOV:
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
+			break;
+
+		case LmCommand::Code::MOVMEM:
+			{
+				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+
+				quint16 n = m_code.getWord4();
+
+				assert(n > 0);
+
+				cmdExecTime = 7 + (n - 1) * 6 + 1;
+			}
+			break;
+
+		case LmCommand::Code::MOVC:
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
+			break;
+
+		case LmCommand::Code::MOVBC:
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
+			break;
+
+		case LmCommand::Code::RDFBB:
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
+			break;
+
+		case LmCommand::Code::SETMEM:
+			{
+				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+
+				quint16 n = m_code.getWord4();
+
+				assert(n > 0);
+
+				cmdExecTime = 4 + (n - 1) * 3 + 1;
+			}
+			break;
+
+		case LmCommand::Code::MOVB:
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
+			break;
+
+		case LmCommand::Code::PMOV:
+			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 8 : 53;
+			break;
+
+		default:
+			assert(false);								// unknown command code
+		}
+
+		*execTime = cmdExecTime;
+
+		return true;
+	}
+
+	void CodeItem::initCommand()
+	{
+		m_isCommand = true;
+		m_code.clear();
+	}
+
+	QString CodeItem::getCodeWordStr(int wordNo) const
+	{
+		QString str;
+
+		QByteArray binCode;
+
+		generateBinCode(&binCode);
+
+		if (binCode.count() < (wordNo + 1) * WORD_SIZE_IN_BYTES)
+		{
+			assert(false);
+			return str;
+		}
+
+		unsigned int lowByte = binCode[wordNo * 2];
+		unsigned int highByte = binCode[wordNo * 2 + 1];
+
+		lowByte &= 0x00FF;
+		highByte &= 0x00FF;
+
+		str.sprintf("%02X%02X", lowByte, highByte);
+
+		return str;
+	}
+
+	int CodeItem::startFbExec(quint16 fbType, int fbRuntime)
 	{
 		int waitTime = 0;
 
@@ -431,8 +1666,7 @@ namespace Builder
 		return waitTime;
 	}
 
-
-	void Command::decFbExecTime(int time)
+	void CodeItem::decFbExecTime(int time)
 	{
 		QHash<quint16, int>::iterator i = m_executedFb.begin();
 
@@ -457,1185 +1691,14 @@ namespace Builder
 		}
 	}
 
-
-	int Command::getFbRemainingExecTime(quint16 fbType)
+	int CodeItem::getFbRemainingExecTime(quint16 fbType)
 	{
 		return m_executedFb.value(fbType, 0);
 	}
 
-
-	void Command::initStaticMembers()
+	bool CodeItem::read16(int addrFrom)
 	{
-		if (m_memoryMap == nullptr)
-		{
-			assert(false);			// call ApplicationLogicCode::initMemoryMap() first
-			return;
-		}
-
-		if (m_lmCommands.isEmpty())
-		{
-			for(const LmCommand& lmCommand : LmCommands)
-			{
-				m_lmCommands.insert(static_cast<int>(lmCommand.code), &lmCommand);
-			}
-		}
-	}
-
-
-	void Command::setMemoryMap(LmMemoryMap* memoryMap, IssueLogger* log)
-	{
-		if (memoryMap == nullptr ||
-			log == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		m_memoryMap = memoryMap;
-		m_log = log;
-	}
-
-
-	void Command::resetMemoryMap()
-	{
-		m_memoryMap = nullptr;
-		m_log = nullptr;
-	}
-
-
-	void Command::nop()
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::NOP);
-	}
-
-
-	void Command::start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_fbExecTime = fbRunTime;
-
-		m_code.setOpCode(LmCommandCode::START);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		// check: fbType, fbInstance
-
-		if (fbRunTime == 0)
-		{
-			assert(false);		// fbRunTime can't be 0
-		}
-	}
-
-
-	void Command::stop()
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::STOP);
-	}
-
-
-	void Command::mov(quint16 addrTo, quint16 addrFrom)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOV);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(addrFrom);
-
-		//
-
-		read16(addrFrom);
-		write16(addrTo);
-	}
-
-	void Command::mov(Address16 addrTo, Address16 addrFrom)
-	{
-		assert(addrTo.bit() == 0);
-		assert(addrFrom.bit() == 0);
-
-		mov(addrTo.offset(), addrFrom.offset());
-	}
-
-	void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		assert(sizeW > 0);
-
-		m_code.setOpCode(LmCommandCode::MOVMEM);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(addrFrom);
-		m_code.setWord4(sizeW);
-
-		//
-
-		if (addressInBitMemory(addrTo) ||
-			addressInBitMemory(addrTo + sizeW - 1))
-		{
-			// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
-			//
-			m_log->errALC5066(addrTo, addrFrom, sizeW);
-			m_result = false;
-		}
-
-		readArea(addrFrom, sizeW);
-		writeArea(addrTo, sizeW);
-	}
-
-	void Command::movMem(Address16 addrTo, Address16 addrFrom, quint16 sizeW)
-	{
-		assert(addrTo.bit() == 0);
-		assert(addrFrom.bit() == 0);
-
-		movMem(addrTo.offset(), addrFrom.offset(), sizeW);
-	}
-
-	void Command::movConst(quint16 addrTo, quint16 constVal)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOVC);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(constVal);
-
-		//
-
-		write16(addrTo);
-	}
-
-
-	void Command::movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOVBC);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(constBit);
-		m_code.setBitNo(bitNo);
-
-		//
-
-		if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-
-			//	Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
-			//
-			m_log->errALC5067(addrTo, bitNo, constBit);
-
-			m_result = false;
-		}
-
-		write16(addrTo);
-	}
-
-	void Command::movBitConst(Address16 addr16, quint16 constBit)
-	{
-		assert(addr16.isValid() == true);
-
-		movBitConst(addr16.offset(), addr16.bit(), constBit);
-	}
-
-	void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::WRFB);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(addrFrom);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		read16(addrFrom);
-	}
-
-
-	void Command::readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::RDFB);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(addrTo);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		write16(addrTo);
-	}
-
-
-	void Command::writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::WRFBC);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(constVal);
-		m_code.setFbCaption(fbCaption);
-	}
-
-
-	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::WRFBB);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(addrFrom);
-		m_code.setBitNo(bitNo);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		read16(addrFrom);
-	}
-
-	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
-	{
-		writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(), fbCaption);
-	}
-
-	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::RDFBB);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(addrTo);
-		m_code.setBitNo(bitNo);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-			assert(false);			// RDFBB command can write only in bit- or word-addressed memory
-			m_result = false;
-			return;
-		}
-
-		m_memoryMap->write16(addrTo);
-	}
-
-	void Command::readFuncBlockBit(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
-	{
-		readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo, fbCaption);
-	}
-
-	void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::RDFBTS);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(testValue);
-		m_code.setFbCaption(fbCaption);
-	}
-
-
-	void Command::setMem(quint16 addr, quint16 constValue, quint16 sizeW)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		assert(sizeW > 0);
-
-		m_code.setOpCode(LmCommandCode::SETMEM);
-		m_code.setWord2(addr);
-		m_code.setWord3(constValue);
-		m_code.setWord4(sizeW);
-
-		//
-
-		if (addressInBitMemory(addr) ||
-			addressInBitMemory(addr + sizeW - 1))
-		{
-			assert(false);			// SETMEM command can't write to bit-addressed memory
-			m_result = false;
-		}
-
-		writeArea(addr, sizeW);
-	}
-
-
-	void Command::movBit(quint16 addrTo, quint16 bitTo, quint16 addrFrom, quint16 bitFrom)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOVB);
-		m_code.setWord2(addrTo);
-		m_code.setBitNo2(bitTo);
-		m_code.setWord3(addrFrom);
-		m_code.setBitNo1(bitFrom);
-
-		if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-
-			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
-			//
-			m_log->errALC5089(addrTo, bitTo, addrFrom, bitFrom);
-
-			m_result = false;
-		}
-
-		//
-
-		read16(addrFrom);
-		write16(addrTo);
-	}
-
-	void Command::movBit(Address16 addrTo, Address16 addrFrom)
-	{
-		assert(addrTo.isValid() == true);
-		assert(addrFrom.isValid() == true);
-
-		movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit());
-	}
-
-	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_fbExecTime = fbRunTime;
-
-		m_code.setOpCode(LmCommandCode::NSTART);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setWord3(startCount);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		if (fbRunTime == 0)
-		{
-			assert(false);		// fbRunTime can't be 0
-		}
-	}
-
-
-	void Command::appStart(quint16 appStartAddr)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::APPSTART);
-		m_code.setWord2(appStartAddr);
-	}
-
-
-	void Command::mov32(quint16 addrTo, quint16 addrFrom)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOV32);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(addrFrom);
-
-		//
-
-		read32(addrFrom);
-		write32(addrTo);
-	}
-
-	void Command::mov32(Address16 addrTo, Address16 addrFrom)
-	{
-		assert(addrTo.bit() == 0);
-		assert(addrFrom.bit() == 0);
-
-		mov32(addrTo.offset(), addrFrom.offset());
-	}
-
-	void Command::movConstInt32(quint16 addrTo, qint32 constInt32)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOVC32);
-		m_code.setWord2(addrTo);
-		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
-		m_code.setWord4(constInt32 & 0xFFFF);
-		m_code.setConstInt32(constInt32);
-
-		//
-
-		write32(addrTo);
-	}
-
-
-	void Command::movConstUInt32(quint16 addrTo, quint32 constUInt32)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOVC32);
-		m_code.setWord2(addrTo);
-		m_code.setWord3((constUInt32 >> 16) & 0xFFFF);
-		m_code.setWord4(constUInt32 & 0xFFFF);
-		m_code.setConstUInt32(constUInt32);
-
-		//
-
-		write32(addrTo);
-	}
-
-
-	void Command::movConstFloat(quint16 addrTo, float constFloat)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
-
-		m_code.setOpCode(LmCommandCode::MOVC32);
-		m_code.setWord2(addrTo);
-		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
-		m_code.setWord4(constInt32 & 0xFFFF);
-		m_code.setConstFloat(constFloat);
-
-		//
-
-		write32(addrTo);
-	}
-
-
-	void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::WRFB32);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(addrFrom);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		read32(addrFrom);
-	}
-
-	void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption)
-	{
-		assert(addrFrom.bit() == 0);
-
-		writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
-	}
-
-	void Command::readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::RDFB32);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(addrTo);
-		m_code.setFbCaption(fbCaption);
-
-		//
-
-		write32(addrTo);
-	}
-
-	void Command::readFuncBlock32(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
-	{
-		assert(addrTo.bit() == 0);
-
-		readFuncBlock32(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
-	}
-
-	void Command::writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::WRFBC32);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
-		m_code.setWord4(constInt32 & 0xFFFF);
-		m_code.setFbCaption(fbCaption);
-		m_code.setConstInt32(constInt32);
-	}
-
-
-	void Command::writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float constFloat, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
-
-		m_code.setOpCode(LmCommandCode::WRFBC32);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
-		m_code.setWord4(constInt32 & 0xFFFF);
-		m_code.setFbCaption(fbCaption);
-		m_code.setConstFloat(constFloat);
-	}
-
-
-	void Command::readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::RDFBTS32);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3((testInt32 >> 16) & 0xFFFF);
-		m_code.setWord4(testInt32 & 0xFFFF);
-		m_code.setFbCaption(fbCaption);
-		m_code.setConstInt32(testInt32);
-	}
-
-
-	void Command::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
-
-		m_code.setOpCode(LmCommandCode::RDFBTS32);
-		m_code.setFbType(fbType);
-		m_code.setFbInstance(fbInstance);
-		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3((testInt32 >> 16) & 0xFFFF);
-		m_code.setWord4(testInt32 & 0xFFFF);
-		m_code.setFbCaption(fbCaption);
-		m_code.setConstFloat(testFloat);
-	}
-
-
-	void Command::movConstIfFlag(quint16 addrTo, quint16 constVal)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::MOVCF);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(constVal);
-	}
-
-
-	void Command::prevMov(quint16 addrTo, quint16 addrFrom)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::PMOV);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(addrFrom);
-	}
-
-	void Command::prevMov32(quint16 addrTo, quint16 addrFrom)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::PMOV32);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(addrFrom);
-	}
-
-	void Command::fill(quint16 addrTo, quint16 addrFrom, quint16 addrBit)
-	{
-		m_code.clear();
-
-		m_result = true;
-
-		m_code.setOpCode(LmCommandCode::FILL);
-		m_code.setWord2(addrTo);
-		m_code.setWord3(addrFrom);
-		m_code.setWord4(addrBit);
-	}
-
-	void Command::fill(Address16 addrTo, Address16 addrFrom)
-	{
-		assert(addrTo.isValid() == true);
-		assert(addrFrom.isValid() == true);
-		assert(addrTo.bit() == 0);
-
-		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
-	}
-
-	void Command::generateBinCode(E::ByteOrder byteOrder)
-	{
-		m_binCode.clear();
-
-		int cmdSizeW = sizeW();
-
-		m_binCode.resize(cmdSizeW * sizeof(quint16));
-
-		m_code.calcCrc5();
-
-		for(int i = 0; i < cmdSizeW; i++)
-		{
-			quint16 cmdWord = m_code.getWord(i);
-
-			if (byteOrder == E::ByteOrder::LittleEndian)
-			{
-				// Little Endian byte order
-				//
-				m_binCode[i * 2] = cmdWord & 0x00FF;
-				m_binCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
-			}
-			else
-			{
-				// Big Endian byte order
-				//
-				m_binCode[i * 2] = (cmdWord & 0xFF00) >> 8;
-				m_binCode[i * 2 + 1] = cmdWord & 0x00FF;
-			}
-		}
-	}
-
-
-	QString Command::getCodeWordStr(int wordNo)
-	{
-		QString str;
-
-		if (m_binCode.count() < (wordNo + 1) * 2)
-		{
-			assert(false);
-			return str;
-		}
-
-		unsigned int lowByte = m_binCode[wordNo * 2];
-		unsigned int highByte = m_binCode[wordNo * 2 + 1];
-
-		lowByte &= 0x00FF;
-		highByte &= 0x00FF;
-
-		str.sprintf("%02X%02X", lowByte, highByte);
-
-		return str;
-	}
-
-
-	QString Command::getMnemoCode()
-	{
-		int opCodeInt = m_code.getOpCodeInt();
-
-		QString mnemoCode = QString(LmCommand::getStr(opCodeInt)).leftJustified(10, ' ', false);
-
-		QString params;
-
-		switch(m_code.getOpCode())
-		{
-		case LmCommandCode::NoCommand:
-		case LmCommandCode::NOP:
-		case LmCommandCode::STOP:
-			break;
-
-		case LmCommandCode::START:
-			params = QString("%1.%2").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt());
-			break;
-
-		case LmCommandCode::MOV:
-		case LmCommandCode::PMOV:
-		case LmCommandCode::MOV32:
-		case LmCommandCode::PMOV32:
-			params = QString("%1, %2").
-						arg(m_code.getWord2()).
-						arg(m_code.getWord3());
-			break;
-
-		case LmCommandCode::MOVMEM:
-			params = QString("%1, %2, %3").
-						arg(m_code.getWord2()).
-						arg(m_code.getWord3()).
-						arg(m_code.getWord4());
-			break;
-
-		case LmCommandCode::MOVC:
-		case LmCommandCode::MOVCF:
-			params = QString("%1, #%2").
-						arg(m_code.getWord2()).
-						arg(m_code.getWord3());
-			break;
-
-		case LmCommandCode::MOVBC:
-			params = QString("%1[%2], #%3").
-						arg(m_code.getWord2()).
-						arg(m_code.getWord4()).
-						arg(m_code.getWord3());
-			break;
-
-		case LmCommandCode::WRFB:
-		case LmCommandCode::WRFB32:
-			params = QString("%1.%2[%3], %4").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt()).
-						arg(m_code.getWord3());
-			break;
-
-		case LmCommandCode::RDFB:
-		case LmCommandCode::RDFB32:
-			params = QString("%1, %2.%3[%4]").
-						arg(m_code.getWord3()).
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt());
-			break;
-
-		case LmCommandCode::WRFBC:
-			params = QString("%1.%2[%3], #%4").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt()).
-						arg(m_code.getWord3());
-			break;
-
-		case LmCommandCode::WRFBB:
-			params = QString("%1.%2[%3], %4[%5]").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt()).
-						arg(m_code.getWord3()).
-						arg(m_code.getWord4());
-			break;
-
-		case LmCommandCode::RDFBB:
-			params = QString("%1[%2], %3.%4[%5]").
-						arg(m_code.getWord3()).
-						arg(m_code.getWord4()).
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt());
-			break;
-
-		case LmCommandCode::RDFBTS:
-			params = QString("%1.%2[%3], #%4").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt()).
-						arg(m_code.getWord3());
-			break;
-
-		case LmCommandCode::SETMEM:
-			params = QString("%1, #%2, %3").
-						arg(m_code.getWord2()).
-						arg(m_code.getWord3()).
-						arg(m_code.getWord4());
-			break;
-
-		case LmCommandCode::MOVB:
-			params = QString("%1[%2], %3[%4]").
-						arg(m_code.getWord2()).
-						arg(m_code.getBitNo2()).
-						arg(m_code.getWord3()).
-						arg(m_code.getBitNo1());
-			break;
-
-		case LmCommandCode::NSTART:
-			params = QString("%1.%2, %3").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getWord3());
-			break;
-
-		case LmCommandCode::APPSTART:
-			params = QString("%1").
-						arg(m_code.getWord2());
-			break;
-
-		case LmCommandCode::MOVC32:
-			params = QString("%1, #%2").
-						arg(m_code.getWord2()).
-						arg(getConstValueString());
-			break;
-
-		case LmCommandCode::WRFBC32:
-			params = QString("%1.%2[%3], #%4").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt()).
-						arg(getConstValueString());
-			break;
-
-		case LmCommandCode::RDFBTS32:
-			params = QString("%1.%2[%3], #%4").
-						arg(m_code.getFbCaption()).
-						arg(m_code.getFbInstanceInt()).
-						arg(m_code.getFbParamNoInt()).
-						arg(getConstValueString());
-			break;
-
-		case LmCommandCode::FILL:
-			params = QString("%1, %2[%3]").
-						arg(m_code.getWord2()).
-						arg(m_code.getWord3()).
-						arg(m_code.getWord4());
-			break;
-
-
-		default:
-			assert(false);
-		}
-
-		return mnemoCode + params;
-	}
-
-
-	QString Command::getConstValueString()
-	{
-		switch(m_code.constDataFormat())
-		{
-		case E::DataFormat::Float:
-			return QString("%1").arg(m_code.getConstFloat());
-
-		case E::DataFormat::SignedInt:
-			return QString("%1").arg(m_code.getConstInt32());
-
-		case E::DataFormat::UnsignedInt:
-			return QString("%1").arg(m_code.getConstUInt32());
-
-		default:
-			assert(false);
-		}
-
-		return QString();
-	}
-
-
-	QString Command::toString()
-	{
-		QString cmdStr;
-
-		cmdStr.sprintf("%05X\t", m_address);
-
-		for(int w = 0; w < sizeW(); w++)
-		{
-			QString codeWordStr = getCodeWordStr(w);
-
-			cmdStr += QString("%1 ").arg(codeWordStr);
-		}
-
-		int tabLen = 32 - (cmdStr.length() - 1 + 3);
-
-		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
-
-		for(int i = 0; i < tabCount; i++)
-		{
-			cmdStr += "\t";
-		}
-
-		assert(m_execTime != 0);			// check that times already calculated
-
-		QString str;
-
-		str.sprintf("[%02d:%02d]", m_waitTime, m_execTime);
-		str = str.leftJustified(12, ' ');
-
-		cmdStr += str;
-
-		QString mnemoCode = getMnemoCode();
-
-		cmdStr += mnemoCode;
-
-		if (!commentIsEmpty())
-		{
-			tabLen = 80 - 32 - mnemoCode.length();
-
-			if (tabLen <= 0)
-			{
-				tabLen += 16;
-			}
-
-			tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
-
-			for(int i = 0; i < tabCount; i++)
-			{
-				cmdStr += "\t";
-			}
-
-			cmdStr += QString("-- %1").arg(getComment());
-		}
-
-		return cmdStr;
-	}
-
-
-	bool Command::getTimes(int prevCmdExecTime)
-	{
-		if (m_lmCommands.contains(m_code.getOpCodeInt()) == false)
-		{
-			assert(false);			// unknown command code!
-			return false;
-		}
-
-		const LmCommand* lmCommand = m_lmCommands[m_code.getOpCodeInt()];
-
-		if (lmCommand == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		int cmdReadTime = lmCommand->readTime;
-
-		if (prevCmdExecTime > cmdReadTime)
-		{
-			m_waitTime = prevCmdExecTime - cmdReadTime;
-
-			decFbExecTime(prevCmdExecTime);
-		}
-		else
-		{
-			m_waitTime = cmdReadTime - prevCmdExecTime;
-
-			decFbExecTime(cmdReadTime);
-		}
-
-		assert(m_waitTime >= 0);
-
-		if (lmCommand->waitFbExecution == true)
-		{
-			int fbType = m_code.getFbType();
-
-			m_waitTime += getFbRemainingExecTime(fbType);
-		}
-
-		int cmdExecTime = 0;
-
-		switch(m_code.getOpCode())
-		{
-		case LmCommandCode::NoCommand:
-			assert(false);
-			break;
-
-			// commands with const runtime
-			//
-		case LmCommandCode::NOP:
-		case LmCommandCode::STOP:
-		case LmCommandCode::WRFB:
-		case LmCommandCode::RDFB:
-		case LmCommandCode::WRFBC:
-		case LmCommandCode::WRFBB:
-		case LmCommandCode::RDFBTS:
-		case LmCommandCode::APPSTART:
-		case LmCommandCode::MOV32:
-		case LmCommandCode::MOVC32:
-		case LmCommandCode::WRFB32:
-		case LmCommandCode::RDFB32:
-		case LmCommandCode::WRFBC32:
-		case LmCommandCode::RDFBTS32:
-		case LmCommandCode::MOVCF:
-		case LmCommandCode::PMOV32:
-		case LmCommandCode::FILL:
-			assert(lmCommand->runTime != CALC_RUNTIME);
-			cmdExecTime = lmCommand->runTime;
-			break;
-
-			// specific commands START, NSTART
-			//
-		case LmCommandCode::START:
-			{
-				assert(lmCommand->runTime != CALC_RUNTIME);
-
-				cmdExecTime = lmCommand->runTime;
-
-				startFbExec(m_code.getFbType(), m_fbExecTime);
-			}
-			break;
-
-		case LmCommandCode::NSTART:
-			{
-				assert(lmCommand->runTime == CALC_RUNTIME);
-
-				quint16 n = m_code.getWord3();
-
-				cmdExecTime = 3 + n * 2;
-
-				startFbExec(m_code.getFbType(), m_fbExecTime * n);
-			}
-			break;
-
-			// commands with calculated runtime
-			//
-		case LmCommandCode::MOV:
-			assert(lmCommand->runTime == CALC_RUNTIME);
-			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
-			break;
-
-		case LmCommandCode::MOVMEM:
-			{
-				assert(lmCommand->runTime == CALC_RUNTIME);
-
-				quint16 n = m_code.getWord4();
-
-				assert(n > 0);
-
-				cmdExecTime = 7 + (n - 1) * 6 + 1;
-			}
-			break;
-
-		case LmCommandCode::MOVC:
-			assert(lmCommand->runTime == CALC_RUNTIME);
-			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
-			break;
-
-		case LmCommandCode::MOVBC:
-			assert(lmCommand->runTime == CALC_RUNTIME);
-			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
-			break;
-
-		case LmCommandCode::RDFBB:
-			assert(lmCommand->runTime == CALC_RUNTIME);
-			cmdExecTime = addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
-			break;
-
-		case LmCommandCode::SETMEM:
-			{
-				assert(lmCommand->runTime == CALC_RUNTIME);
-
-				quint16 n = m_code.getWord4();
-
-				assert(n > 0);
-
-				cmdExecTime = 4 + (n - 1) * 3 + 1;
-			}
-			break;
-
-		case LmCommandCode::MOVB:
-			assert(lmCommand->runTime == CALC_RUNTIME);
-			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
-			break;
-
-		case LmCommandCode::PMOV:
-			assert(lmCommand->runTime == CALC_RUNTIME);
-			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 8 : 53;
-			break;
-
-		default:
-			assert(false);								// unknown command code
-		}
-
-		m_execTime = cmdExecTime;
-
-		return true;
-	}
-
-
-	bool Command::addressInBitMemory(int address)
-	{
-		if (m_memoryMap == nullptr)
-		{
-			assert(false);		// call setMemoryMap first
-			return false;
-		}
-
-		if (address >= m_memoryMap->appBitMemoryStart() &&
-			address < m_memoryMap->appBitMemoryStart() + m_memoryMap->appBitMemorySizeW())
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-
-	bool Command::addressInWordMemory(int address)
-	{
-		if (m_memoryMap == nullptr)
-		{
-			assert(false);		// call setMemoryMap first
-			return false;
-		}
-
-		if (address >= m_memoryMap->appWordMemoryStart() &&
-			address < m_memoryMap->appWordMemoryStart() + m_memoryMap->appWordMemorySizeW())
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-
-	bool Command::read16(int addrFrom)
-	{
-		if (m_memoryMap == nullptr)
+/*		if (m_memoryMap == nullptr)
 		{
 			assert(false);
 			m_result = false;
@@ -1645,13 +1708,14 @@ namespace Builder
 			m_result &= m_memoryMap->read16(addrFrom);
 		}
 
-		return m_result;
+		return m_result;*/
+
+		return false;
 	}
 
-
-	bool Command::read32(int addrFrom)
+	bool CodeItem::read32(int addrFrom)
 	{
-		if (m_memoryMap == nullptr)
+/*		if (m_memoryMap == nullptr)
 		{
 			assert(false);
 			m_result = false;
@@ -1661,13 +1725,14 @@ namespace Builder
 			m_result &= m_memoryMap->read32(addrFrom);
 		}
 
-		return m_result;
+		return m_result;*/
+
+		return false;
 	}
 
-
-	bool Command::readArea(int addrFrom, int sizeW)
+	bool CodeItem::readArea(int addrFrom, int sizeW)
 	{
-		if (m_memoryMap == nullptr)
+/*		if (m_memoryMap == nullptr)
 		{
 			assert(false);
 			m_result = false;
@@ -1677,13 +1742,14 @@ namespace Builder
 			m_result &= m_memoryMap->readArea(addrFrom, sizeW);
 		}
 
-		return m_result;
+		return m_result;*/
+
+		return false;
 	}
 
-
-	bool Command::write16(int addrTo)
+	bool CodeItem::write16(int addrTo)
 	{
-		if (m_memoryMap == nullptr)
+/*		if (m_memoryMap == nullptr)
 		{
 			assert(false);
 			m_result = false;
@@ -1693,13 +1759,14 @@ namespace Builder
 			m_result &= m_memoryMap->write16(addrTo);
 		}
 
-		return m_result;
+		return m_result;*/
+
+		return false;
 	}
 
-
-	bool Command::write32(int addrTo)
+	bool CodeItem::write32(int addrTo)
 	{
-		if (m_memoryMap == nullptr)
+/*		if (m_memoryMap == nullptr)
 		{
 			assert(false);
 			m_result = false;
@@ -1709,13 +1776,14 @@ namespace Builder
 			m_result &= m_memoryMap->write32(addrTo);
 		}
 
-		return m_result;
+		return m_result;*/
+
+		return false;
 	}
 
-
-	bool Command::writeArea(int addrTo, int sizeW)
+	bool CodeItem::writeArea(int addrTo, int sizeW)
 	{
-		if (m_memoryMap == nullptr)
+/*		if (m_memoryMap == nullptr)
 		{
 			assert(false);
 			m_result = false;
@@ -1725,10 +1793,82 @@ namespace Builder
 			m_result &= m_memoryMap->writeArea(addrTo, sizeW);
 		}
 
-		return m_result;
+		return m_result;*/
+
+		return false;
 	}
 
-	void CodeFragmentMetrics::setEndAddr(int endAddr)
+	// -----------------------------------------------------------------------------------------------
+	//
+	// CodeSnippet class implementation
+	//
+	// -----------------------------------------------------------------------------------------------
+
+	CodeSnippet::CodeSnippet()
+	{
+	}
+
+	void CodeSnippet::comment(const QString& cmt)
+	{
+		CodeItem commentItem;
+
+		commentItem.setComment(cmt);
+
+		append(commentItem);
+	}
+
+	void CodeSnippet::newLine()
+	{
+		comment(QString());
+	}
+
+	void CodeSnippet::comment_nl(const QString& cmt)
+	{
+		comment(cmt);
+		newLine();
+	}
+
+	void CodeSnippet::init(CodeSnippetMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		//codeFragmentMetrics->setStartAddr(m_commandAddress);
+	}
+
+	void CodeSnippet::calculate(CodeSnippetMetrics* codeFragmentMetrics)
+	{
+		if (codeFragmentMetrics == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		//codeFragmentMetrics->setEndAddr(m_commandAddress);
+	}
+
+	int CodeSnippet::sizeW() const
+	{
+		int sizeW = 0;
+
+		for(const CodeItem& codeItem : *this)
+		{
+			sizeW += codeItem.sizeW();
+		}
+
+		return sizeW;
+	}
+
+	// -----------------------------------------------------------------------------------------------
+	//
+	// CodeSnippetMetrics struct implementation
+	//
+	// -----------------------------------------------------------------------------------------------
+
+	void CodeSnippetMetrics::setEndAddr(int endAddr)
 	{
 		m_endAddr = endAddr;
 
@@ -1736,7 +1876,7 @@ namespace Builder
 	}
 
 
-	QString CodeFragmentMetrics::codePercentStr() const
+	QString CodeSnippetMetrics::codePercentStr() const
 	{
 		QString str;
 
@@ -1753,32 +1893,17 @@ namespace Builder
 	{
 	}
 
-
 	ApplicationLogicCode::~ApplicationLogicCode()
 	{
-		Command::resetMemoryMap();
-
-		for(auto codeItem : m_codeItems)
-		{
-			delete codeItem;
-		}
-
-		m_codeItems.clear();
 	}
-
 
 	void ApplicationLogicCode::setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log)
 	{
-		if (lmMemory == nullptr ||
-			log == nullptr)
-		{
-			assert(false);
-			return;
-		}
+		TEST_PTR_RETURN(lmMemory);
+		TEST_PTR_RETURN(log);
 
-		Command::setMemoryMap(lmMemory, log);
+		m_lmMemoryMap = lmMemory;
 	}
-
 
 	void ApplicationLogicCode::clear()
 	{
@@ -1786,41 +1911,42 @@ namespace Builder
 		m_commandAddress = 0;
 	}
 
-
-	void ApplicationLogicCode::append(const Command& cmd)
+	void ApplicationLogicCode::append(const CodeItem& codeItem)
 	{
-		Command* newCommand = new Command(cmd);
+		m_codeItems.append(codeItem);
 
-		newCommand->setAddress(m_commandAddress);
+		int lastIndex = m_codeItems.size() - 1;
 
-		m_commandAddress += newCommand->sizeW();
+		m_codeItems[lastIndex].setAddress(m_commandAddress);
 
-		m_codeItems.append(newCommand);
+		m_commandAddress += m_codeItems[lastIndex].sizeW();
 	}
 
-	void ApplicationLogicCode::append(const Commands& commands)
+	void ApplicationLogicCode::append(const CodeSnippet& codeSnippet)
 	{
-		for(const Command& cmd : commands)
+		for(const CodeItem& codeItem : codeSnippet)
 		{
-			Command* newCommand = new Command(cmd);
-
-			newCommand->setAddress(m_commandAddress);
-
-			m_commandAddress += newCommand->sizeW();
-
-			m_codeItems.append(newCommand);
+			append(codeItem);
 		}
 	}
 
-	void ApplicationLogicCode::append(const Comment& cmt)
+	void ApplicationLogicCode::comment(const QString& str)
 	{
-		Comment* newComment = new Comment(cmt);
+		CodeItem comment;
 
-		m_codeItems.append(newComment);
+		comment.setComment(str);
+
+		append(comment);
 	}
 
+	void ApplicationLogicCode::newLine()
+	{
+		CodeItem emptyComment;
 
-	void ApplicationLogicCode::replaceAt(int commandIndex, const Command &cmd)
+		append(emptyComment);
+	}
+
+/*	void ApplicationLogicCode::replaceAt(int commandIndex, const Command &cmd)
 	{
 		if (commandIndex < 0 && commandIndex >= m_codeItems.count())
 		{
@@ -1879,93 +2005,67 @@ namespace Builder
 	}
 
 
-	void ApplicationLogicCode::comment(QString commentStr)
+	void ApplicationLogicCode::comment(const QString& commentStr)
 	{
-		Comment* newComment = new Comment();
+		CodeItem comment;
 
-		newComment->setComment(commentStr);
+		comment.setComment(commentStr);
 
-		m_codeItems.append(newComment);
+		m_codeItems.append(comment);
 	}
 
 
 	void ApplicationLogicCode::newLine()
 	{
-		Comment* newComment = new Comment();
+		CodeItem emptyComment;
 
-		m_codeItems.append(newComment);
-	}
+		m_codeItems.append(emptyComment);
+	} */
 
 
-	void ApplicationLogicCode::generateBinCode()
+	/*void ApplicationLogicCode::generateBinCode()
 	{
-		for(CodeItem* codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_codeItems)
 		{
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			codeItem.generateBinCode(m_byteOrder);
+		}
+	}*/
 
-			codeItem->generateBinCode(m_byteOrder);
+	void ApplicationLogicCode::getAsmCode(QStringList* asmCode) const
+	{
+		TEST_PTR_RETURN(asmCode);
+
+		asmCode->clear();
+
+		for(const CodeItem& codeItem : m_codeItems)
+		{
+			QString str = codeItem.getAsmCode(true);
+
+			asmCode->append(str);
 		}
 	}
 
-
-	void ApplicationLogicCode::getAsmCode(QStringList& asmCode)
+	void ApplicationLogicCode::getBinCode(QByteArray* binCode) const
 	{
-		asmCode.clear();
+		TEST_PTR_RETURN(binCode);
 
-		for(auto codeItem : m_codeItems)
+		binCode->clear();
+
+		for(const CodeItem& codeItem : m_codeItems)
 		{
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			QByteArray cmdBinCode;
 
-			QString str = codeItem->toString();
+			codeItem.generateBinCode(&cmdBinCode);
 
-			asmCode.append(str);
+			binCode->append(cmdBinCode);
 		}
 	}
 
-
-	void ApplicationLogicCode::getBinCode(QByteArray& byteArray)
+	void ApplicationLogicCode::getMifCode(QStringList* mifCode) const
 	{
-		byteArray.clear();
+		TEST_PTR_RETURN(mifCode);
 
-		int codeSizeW = 0;
-
-		for(CodeItem* codeItem : m_codeItems)
-		{
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			codeSizeW += codeItem->sizeW();
-		}
-
-		byteArray.reserve(codeSizeW * sizeof(quint16));
-
-		for(CodeItem* codeItem : m_codeItems)
-		{
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			byteArray.append(codeItem->getBinCode());
-		}
-	}
-
-
-	void ApplicationLogicCode::getMifCode(QStringList& mifCode)
-	{
-		mifCode.clear();
+		mifCode->clear();
 
 		if (m_codeItems.count() < 1)
 		{
@@ -1977,77 +2077,56 @@ namespace Builder
 
 		// find last command for compute address depth
 		//
-		for(int i = m_codeItems.count() - 1; i >= 0; i--)
+		int codeItemsCount = m_codeItems.count();
+
+		for(int i = codeItemsCount - 1; i >= 0; i--)
 		{
-			CodeItem* codeItem = m_codeItems[i];
-
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (codeItem->isComment())
+			if (m_codeItems[i].isComment() == true)
 			{
 				continue;
 			}
 
-			Command* command = dynamic_cast<Command*>(codeItem);
-
-			if (command == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			depth = command->address() + command->sizeW() - 1;
-
+			depth = m_codeItems[i].address() + m_codeItems[i].sizeW() - 1;
 			break;
 		}
 
-		mifCode.append(QString("WIDTH = %1;").arg(width));
-		mifCode.append(QString("DEPTH = %1;").arg(depth + 1));
+		mifCode->append(QString("WIDTH = %1;").arg(width));
+		mifCode->append(QString("DEPTH = %1;").arg(depth + 1));
 
-		mifCode.append("");
+		mifCode->append("");
 
-		mifCode.append("ADDRESS_RADIX = HEX;");
-		mifCode.append("DATA_RADIX = HEX;");
+		mifCode->append("ADDRESS_RADIX = HEX;");
+		mifCode->append("DATA_RADIX = HEX;");
 
-		mifCode.append("");
+		mifCode->append("");
 
-		mifCode.append("CONTENT");
-		mifCode.append("BEGIN");
+		mifCode->append("CONTENT");
+		mifCode->append("BEGIN");
 
 		QString codeStr;
 		QString str;
 
-		for(CodeItem* codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_codeItems)
 		{
-			if (codeItem == nullptr)
+			if (codeItem.isComment() == true)
 			{
-				assert(false);
-				continue;
-			}
-
-			if (codeItem->isComment())
-			{
-				if (codeItem->getComment().isEmpty())
+				if (codeItem.comment().isEmpty() == true)
 				{
 					str.clear();
 				}
 				else
 				{
-					str = QString("\t-- %1").arg(codeItem->getComment());
+					str = QString("\t-- %1").arg(codeItem.comment());
 				}
 
-				mifCode.append(str);
+				mifCode->append(str);
 
 				continue;
 			}
 
-			Command* command = dynamic_cast<Command*>(codeItem);
+			QByteArray binCode;
 
-			const QByteArray& binCode = command->getBinCode();
+			codeItem.generateBinCode(&binCode);
 
 			assert((binCode.count() % 2) == 0);
 
@@ -2057,7 +2136,7 @@ namespace Builder
 			{
 				if (i == 0)
 				{
-					str.sprintf("\t%04X : ", command->address());
+					str.sprintf("\t%04X : ", codeItem.address());
 					codeStr = str;
 				}
 
@@ -2092,45 +2171,41 @@ namespace Builder
 				codeStr += "\t";
 			}
 
-			str = QString("-- %1").arg(command->getMnemoCode());
+			str = QString("-- %1").arg(codeItem.mnemoCode());
 
 			codeStr += str;
 
-			mifCode.append(codeStr);
+			mifCode->append(codeStr);
 		}
 
-		mifCode.append("END;");
+		mifCode->append("END;");
 	}
 
-	void ApplicationLogicCode::getAsmMetadataFields(QStringList& metadataFields, int* metadataVersion)
+	void ApplicationLogicCode::getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const
 	{
-		if (metadataVersion)
-		{
-			const int ASM_METADATA_VERSION = 1;
-			*metadataVersion = ASM_METADATA_VERSION;
-		}
+		TEST_PTR_RETURN(metadataFields);
+		TEST_PTR_RETURN(metadataVersion);
 
-		metadataFields.clear();
+		const int ASM_METADATA_VERSION = 1;
+		*metadataVersion = ASM_METADATA_VERSION;
 
-		metadataFields.append("IsCommand");
-		metadataFields.append("Address");
-		metadataFields.append("BinCode");
-		metadataFields.append("MnemoCode");
-		metadataFields.append("Comment");
+		metadataFields->clear();
+
+		metadataFields->append("IsCommand");
+		metadataFields->append("Address");
+		metadataFields->append("BinCode");
+		metadataFields->append("MnemoCode");
+		metadataFields->append("Comment");
 	}
 
-	void ApplicationLogicCode::getAsmMetadata(std::vector<QVariantList>& metadata)
+	void ApplicationLogicCode::getAsmMetadata(std::vector<QVariantList>* metadata) const
 	{
-		metadata.clear();
+		TEST_PTR_RETURN(metadata);
 
-		for(CodeItem* codeItem : m_codeItems)
+		metadata->clear();
+
+		for(const CodeItem& codeItem : m_codeItems)
 		{
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
 			QVariantList data;
 
 			bool isCommand = false;
@@ -2139,30 +2214,27 @@ namespace Builder
 			QString mnemoCode;
 			QString comment;
 
-			if (codeItem->isCommand())
+			if (codeItem.isCommand() == true)
 			{
 				isCommand = true;
 
-				Command* cmd = dynamic_cast<Command*>(codeItem);
+				address = QString().sprintf("%04X", codeItem.address());
 
-				if (cmd == nullptr)
-				{
-					assert(false);
-					continue;
-				}
+				QByteArray cmdBinCode;
 
-				address = QString().sprintf("%04X", cmd->address());
-				binCode = QString(cmd->getBinCode().toHex()).toUpper();
-				mnemoCode = cmd->getMnemoCode();
-				comment = cmd->getComment();
+				codeItem.generateBinCode(&cmdBinCode);
+
+				binCode = QString(cmdBinCode.toHex()).toUpper();
+				mnemoCode = codeItem.mnemoCode();
+				comment = codeItem.comment();
 			}
 			else
 			{
 				isCommand = false;
 
-				comment = codeItem->getComment();
+				comment = codeItem.comment();
 
-				if (comment.isEmpty())
+				if (comment.isEmpty() == true)
 				{
 					continue;			// skip empty strings
 				}
@@ -2174,50 +2246,37 @@ namespace Builder
 			data.append(QVariant(mnemoCode));
 			data.append(QVariant(comment));
 
-			metadata.push_back(data);
+			metadata->push_back(data);
 		}
 	}
 
-
-	bool ApplicationLogicCode::getRunTimes(int& idrPhaseClockCount, int& alpPhaseClockCount)
+	bool ApplicationLogicCode::getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const
 	{
-		idrPhaseClockCount = 0;
-		alpPhaseClockCount = 0;
+		TEST_PTR_RETURN_FALSE(idrPhaseClockCount);
+		TEST_PTR_RETURN_FALSE(alpPhaseClockCount);
 
-		if (m_codeItems.isEmpty())
+		*idrPhaseClockCount = 0;
+		*alpPhaseClockCount = 0;
+
+		if (m_codeItems.isEmpty() == true)
 		{
 			return true;
 		}
 
 		// find appStart command and read application logic processing code start address
 		//
-
 		int appLogicProcessingCodeStartAddress = -1;
 
-		for(CodeItem* codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_codeItems)
 		{
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				return false;
-			}
-
-			if (codeItem->isCommand() == false)
+			if (codeItem.isCommand() == false)
 			{
 				continue;
 			}
 
-			Command* command = dynamic_cast<Command*>(codeItem);
-
-			if (command == nullptr)
+			if (codeItem.isOpCode(LmCommand::Code::APPSTART))
 			{
-				assert(false);
-				return false;
-			}
-
-			if (command->isOpCode(LmCommandCode::APPSTART))
-			{
-				appLogicProcessingCodeStartAddress = command->getWord2();
+				appLogicProcessingCodeStartAddress = codeItem.getWord2();
 				break;
 			}
 		}
@@ -2234,74 +2293,41 @@ namespace Builder
 
 		int prevCmdExecTime = 0;
 
-		for(CodeItem* codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_codeItems)
 		{
-			if (codeItem == nullptr)
-			{
-				assert(false);
-				return false;
-			}
-
-			if (codeItem->isCommand() == false)
+			if (codeItem.isCommand() == false)
 			{
 				continue;
 			}
 
-			Command* command = dynamic_cast<Command*>(codeItem);
-
-			if (command == nullptr)
+			if (codeItem.address() == appLogicProcessingCodeStartAddress)
 			{
-				assert(false);
-				return false;
-			}
-
-			if (command->address() == appLogicProcessingCodeStartAddress)
-			{
-				idrPhaseClockCount += prevCmdExecTime;
+				*idrPhaseClockCount += prevCmdExecTime;
 
 				prevCmdExecTime = 0;
 
 				idrPhaseCode = false;
 			}
 
-			command->getTimes(prevCmdExecTime);
+			int waitTime = 0;
+			int execTime = 0;
+
+			codeItem.getTimes(m_lmMemoryMap, prevCmdExecTime, &waitTime, &execTime);
 
 			if (idrPhaseCode == true)
 			{
-				idrPhaseClockCount += command->waitAndExecTime();
+				*idrPhaseClockCount += (waitTime + execTime);
 			}
 			else
 			{
-				alpPhaseClockCount += command->waitAndExecTime();
+				*alpPhaseClockCount +=  (waitTime + execTime);
 			}
 
-			prevCmdExecTime = command->execTime();
+			prevCmdExecTime = execTime;
 		}
 
 		alpPhaseClockCount += prevCmdExecTime;
 
 		return true;
-	}
-
-	void ApplicationLogicCode::init(CodeFragmentMetrics* codeFragmentMetrics)
-	{
-		if (codeFragmentMetrics == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		codeFragmentMetrics->setStartAddr(m_commandAddress);
-	}
-
-	void ApplicationLogicCode::calculate(CodeFragmentMetrics* codeFragmentMetrics)
-	{
-		if (codeFragmentMetrics == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		codeFragmentMetrics->setEndAddr(m_commandAddress);
 	}
 }

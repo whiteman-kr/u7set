@@ -1877,6 +1877,53 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4060
+	///
+	/// IssueType: Error
+	///
+	/// Title: Loopback detected in LogicSchema %1, SchemaItem '%2'. To resolve issue use Loopback Source/Target items.
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///		%2 Schema item description
+	///
+	/// Description:
+	///		On schema loopback made via links or signals, to resolve issue use Loopback Source/Target items.
+	///
+	void IssueLogger::errALP4060(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4060,
+				  tr("Loopback detected in LogicSchema %1, SchemaItem '%2'. To resolve issue use Loopback Source/Target items.")
+				  .arg(schema)
+				  .arg(schemaItem));
+	}
+
+	/// IssueCode: ALP4061
+	///
+	/// IssueType: Error
+	///
+	/// Title: Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.
+	///
+	/// Parameters:
+	///		%1 LoopbackID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Two or more LoopbackSource have the same LoopbackID.
+	///
+	void IssueLogger::errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuids, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4061,
+				  tr("Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.")
+				  .arg(loopbackId)
+				  .arg(schema));
+	}
 
 	/// IssueCode: ALP4070
 	///
@@ -4210,7 +4257,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5096,
-				  QString(tr("Offset of in bus analog signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
+				  QString(tr("Offset of in-bus analog signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
 							arg(inBusSignalID).arg(busTypeID));
 	}
 
@@ -4757,23 +4804,21 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
+	/// Title:	   Different busTypes on AFB output (Logic schema %1).
 	///
 	/// Parameters:
-	///		%1 Schema item pin caption
-	///		%2 Logic schema ID
+	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		UalSignal is not found for pin with specified caption. Contact to RPCT developers.
+	///		Different busTypes on AFB output.
 	///
-	void IssueLogger::errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID)
+	void IssueLogger::errALC5122(QUuid ualItemUuid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5122,
-				  QString(tr("UalSignal is not found for pin '%1' (Logic schema '%2').")).
-							arg(pinCaption).arg(schemaID));
+				  QString(tr("Different busTypes on AFB output (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5123
@@ -5202,6 +5247,146 @@ namespace Builder
 				  5141,
 				  QString(tr("Value of parameter %1.%2 must be in range %3 (Logic schema %4)")).
 					arg(fbCaption).arg(paramCaption).arg(rangeStr).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5142
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Duplicate loopback source ID %1 (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Loopback sourceID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Loopback source IDs can't duplicate.
+	///
+	void IssueLogger::errALC5142(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, loopbackSourceItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5142,
+				  QString(tr("Duplicate loopback source ID %1 (Logic schema %2)")).
+								arg(loopbackSourceID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5143
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Loopback ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		LoopbackSource with specified ID is not exists. Check loopback identifier or create LoopbackSource.
+	///
+	void IssueLogger::errALC5143(QString loopbackID, QUuid loopbackTargetItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, loopbackTargetItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5143,
+				  QString(tr("LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2)")).
+								arg(loopbackID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5144
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
+	///
+	/// Parameters:
+	///		%1 Signal 1 ID
+	///		%2 Signal 2 ID
+	///		%3 Loopback ID
+	///		%4 Logic schema ID
+	///
+	/// Description:
+	///		Non compatible signals are connected to same LoopbackTarget.
+	///
+	void IssueLogger::errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, s1Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, s2Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, lbGuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5144,
+				  QString(tr("Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)")).
+								arg(s1ID).arg(s2ID).arg(lbId).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5145
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Input signal %1 is connected to LoopbackTarget (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Input signal cannot be connected to loopback target.
+	///
+	void IssueLogger::errALC5145(QString signalID, QUuid signalGuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5145,
+				  QString(tr("Input signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5146
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Input signal cannot be connected to loopback target.
+	///
+	void IssueLogger::errALC5146(QString signalID, QUuid signalGuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5146,
+				  QString(tr("Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
+	}
+
+
+	/// IssueCode: ALC5147
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal %1 is connected to different Loopbacks %2 and %3
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///		%2 Loopback1 ID
+	///		%3 Loopback2 ID
+	///
+	/// Description:
+	///		Signal is connected to different Loopbacks. Check signals connections.
+	///
+	void IssueLogger::errALC5147(QString signalID, QString lbID1, QString lbID2)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5147,
+				  QString(tr("Signal %1 is connected to different LoopbackTargets %2 and %3.")).
+					arg(signalID).arg(lbID1).arg(lbID2));
 	}
 
 	//

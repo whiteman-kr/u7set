@@ -186,6 +186,9 @@ namespace Builder
 		QString m_lmDescriptionFile;					// LogicModule description filename
 		std::list<AppLogicItem> m_items;				// Ordered items
 		std::map<QUuid, AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
+
+		//
+		QHash<QString, bool> m_signaledItems;
 	};
 
 
@@ -306,6 +309,8 @@ namespace Builder
 		bool checkBusItemsVersion(VFrame30::Schema* schema, const VFrame30::BusSet& busSet);
 		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
 								  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
+		bool checkForUniqueLoopbackId(VFrame30::Schema* schema);
+		bool checkForUniqueLoopbackId(std::shared_ptr<AppLogicModule> module);
 
 		bool parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema);
 		bool parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema,

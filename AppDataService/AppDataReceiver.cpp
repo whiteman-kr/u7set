@@ -112,7 +112,7 @@ void AppDataReceiver::onSocketReadyRead()
 		if (size == -1 || size > sizeof(simFrame))
 		{
 			break;				// exit from loop if no pending datagram exists
-								// or datagram size is exceede sizeof(simFrame)
+								// or datagram size is exceeded sizeof(simFrame)
 		}
 
 		size = m_socket->readDatagram(reinterpret_cast<char*>(&simFrame), size, &from);
@@ -174,6 +174,7 @@ void AppDataReceiver::onSocketReadyRead()
 			if (m_unknownAppDataSourcesIP.contains(ip) == false && m_unknownAppDataSourcesIP.count() < 500)
 			{
 				m_unknownAppDataSourcesIP.insert(ip, ip);
+				m_unknownAppDataSourcesCount++;
 			}
 
 			continue;

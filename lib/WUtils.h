@@ -42,6 +42,11 @@
 
 #define DEBUG_STOP					{ int a = 0; a++; }
 
+#define RETURN_IF_FALSE(result)		if (result == false) \
+									{ \
+										return false; \
+									}
+
 
 #define AUTO_LOCK(mutex) QMutexLocker m(&mutex);
 
