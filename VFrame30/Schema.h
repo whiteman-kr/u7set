@@ -180,6 +180,9 @@ namespace VFrame30
 		SchemaDetails();
 		SchemaDetails(const QString& details);
 
+	public:
+		bool operator< (const SchemaDetails& b) const;
+
 		static QString getDetailsString(const Schema* schema);
 		bool parseDetails(const QString& details);
 
@@ -187,6 +190,8 @@ namespace VFrame30
 		bool loadData(const Proto::SchemaDetails& message);
 
 		bool searchForString(const QString& searchText) const;
+
+		bool hasEquipmentId(const QString& equipmentId) const;
 
 	public:
 		int m_version = 0;
@@ -224,6 +229,8 @@ namespace VFrame30
 		void add(std::shared_ptr<SchemaDetails> details);
 
 		std::vector<SchemaDetails> schemasDetails() const;
+		std::vector<SchemaDetails> schemasDetails(QString equipmentId) const;
+
 		std::shared_ptr<SchemaDetails> schemaDetails(QString schemaId) const;
 
 	private:

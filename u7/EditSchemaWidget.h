@@ -685,6 +685,8 @@ private:
 	// --
 	// End of ConextMenu
 private:
+
+	bool m_lastSelectedAddSignal = false;
 };
 
 

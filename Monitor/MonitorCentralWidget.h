@@ -3,15 +3,19 @@
 
 #include "QTabWidget"
 #include "MonitorSchemaWidget.h"
+#include "MonitorSchemaManager.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/TuningController.h"
 
-class SchemaManager;
 
 class MonitorCentralWidget : public QTabWidget
 {
 	Q_OBJECT
 
 public:
-	MonitorCentralWidget(SchemaManager* schemaManager);
+	MonitorCentralWidget(MonitorSchemaManager* schemaManager,
+						 VFrame30::AppSignalController* appSignalController,
+						 VFrame30::TuningController* tuningController);
 	~MonitorCentralWidget();
 
 public:
@@ -43,19 +47,22 @@ public slots:
 
 protected slots:
 	void slot_tabCloseRequested(int index);
-	void slot_resetSchema(QString startSchemaId);
+	void slot_resetSchema();
 
 	void slot_newSameTab(MonitorSchemaWidget* tabWidget);
 	void slot_closeTab(MonitorSchemaWidget* tabWidget);
 
-	void slot_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema);
+	void slot_schemaChanged(VFrame30::ClientSchemaWidget* tabWidget, VFrame30::Schema* schema);
 
 	void slot_tabPageChanged(int index);
 
 	// Data
 	//
 private:
-	SchemaManager* m_schemaManager = nullptr;
+	MonitorSchemaManager* m_schemaManager = nullptr;
+
+	VFrame30::AppSignalController* m_appSignalController = nullptr;
+	VFrame30::TuningController* m_tuningController = nullptr;
 };
 
 #endif // MONITORCENTRALWIDGET_H

@@ -123,12 +123,14 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 
 	// AFBs
 	//
+	m_afbComponents.clear();
 	for (const std::pair<int, std::shared_ptr<Afb::AfbComponent>>& p : src.m_afbComponents)
 	{
 		std::shared_ptr<Afb::AfbComponent> afbComponentCopy = std::make_shared<Afb::AfbComponent>(*p.second.get());
 		m_afbComponents.insert({p.first, afbComponentCopy});
 	}
 
+	m_afbs.clear();
 	m_afbs.reserve(src.m_afbs.size());
 	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbs)
 	{
@@ -256,7 +258,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
     {
         errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
         return false;
-    }
+	}
 
     // Attribute Version
     //
@@ -373,6 +375,11 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	//
 
 	return true;
+}
+
+void LmDescription::clear()
+{
+	*this = LmDescription();
 }
 
 bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessage)
@@ -1006,4 +1013,17 @@ LmCommand LmDescription::command(int commandCode) const
 const std::map<int, LmCommand>& LmDescription::commands() const
 {
 	return m_commands;
+}
+
+std::vector<LmCommand> LmDescription::commandsAsVector() const
+{
+	std::vector<LmCommand> result;
+	result.reserve(m_commands.size());
+
+	for (auto p : m_commands)
+	{
+		result.push_back(p.second);
+	}
+
+	return result;
 }

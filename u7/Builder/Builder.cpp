@@ -1302,12 +1302,13 @@ namespace Builder
 				continue;
 			}
 
-			int subsystemChannel = lm->propertyValue("SubsystemChannel").toInt(&ok);
-			if (ok == false)
+			QVariant channelVariant = lm->propertyValue("SubsystemChannel");
+			if (channelVariant.canConvert<E::Channel>() == false)
 			{
 				assert(false);
 				continue;
 			}
+			E::Channel subsystemChannel = channelVariant.value<E::Channel>();
 
 			Hardware::ModuleFirmwareWriter* firmwareWriter = buildWriter.firmwareWriter();
 

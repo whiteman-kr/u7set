@@ -10,8 +10,6 @@
 // UploadTabPage
 //
 //
-
-
 UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent)//,
 {
@@ -184,9 +182,6 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	this->setEnabled(false);
 
-
-
-
 	// Logic
 	//
 	qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
@@ -226,7 +221,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	m_logTimerId = startTimer(100);
 
-
+	return;
 }
 
 UploadTabPage::~UploadTabPage()

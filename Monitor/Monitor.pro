@@ -90,7 +90,6 @@ SOURCES += main.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
-    SchemaManager.cpp \
     ../Proto/network.pb.cc \
     TcpSignalClient.cpp \
     ../Proto/serialization.pb.cc \
@@ -119,9 +118,10 @@ SOURCES += main.cpp \
     ArchiveModelView.cpp \
     ArchiveData.cpp \
     TcpSignalRecents.cpp \
+    MonitorSchemaManager.cpp \
+    SelectSchemaWidget.cpp \    
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
-    SelectSchemaWidget.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
@@ -144,7 +144,6 @@ HEADERS  += \
     MonitorSchemaWidget.h \
     ../lib/Types.h \
     MonitorConfigController.h \
-    SchemaManager.h \
     ../Proto/network.pb.h \
     TcpSignalClient.h \
     ../lib/Hash.h \
@@ -175,9 +174,10 @@ HEADERS  += \
     ArchiveModelView.h \
     ArchiveData.h \
     TcpSignalRecents.h \
+    SelectSchemaWidget.h \
+    MonitorSchemaManager.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
-    SelectSchemaWidget.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \

@@ -209,8 +209,26 @@ SOURCES +=\
     LogicModuleSet.cpp \
     ../lib/LmDescription.cpp \
     Builder/MemWriteMap.cpp \
+    SimulatorTabPage.cpp \
+    Simulator/SimIdeSimulator.cpp \
     Builder/ConfigurationServiceCfgGenerator.cpp \
     ../lib/TuningValue.cpp \
+    Simulator/SimSchemaWidget.cpp \
+    Simulator/SimSchemaManager.cpp \
+    Simulator/SimSchemaView.cpp \
+    Simulator/SimTuningTcpClient.cpp \
+    ../lib/AppSignalManager.cpp \
+    Simulator/SimCodePage.cpp \
+    Simulator/SimWidget.cpp \
+    Simulator/SimSelectBuildDialog.cpp \
+    Simulator/SimSchemaPage.cpp \
+    Simulator/SimProjectWidget.cpp \
+    Simulator/SimOutputWidget.cpp \
+    Simulator/SimMemoryWidget.cpp \
+    Simulator/SimControlPage.cpp \
+    Simulator/SimBasePage.cpp \
+    ../lib/Times.cpp \
+    Simulator/SimOverrideWidget.cpp \
     SpecificPropertiesEditor.cpp \
     ../lib/Times.cpp
 
@@ -355,12 +373,30 @@ HEADERS  += \
     LogicModuleSet.h \
     ../lib/LmDescription.h \
     Builder/MemWriteMap.h \
+    SimulatorTabPage.h \
     Builder/ConfigurationServiceCfgGenerator.h \
+    Simulator/SimIdeSimulator.h \
+    ../lib/TuningValue.h \
+    Simulator/SimSchemaWidget.h \
+    Simulator/SimSchemaManager.h \
+    Simulator/SimSchemaView.h \
+    Simulator/SimTuningTcpClient.h \
+    ../lib/AppSignalManager.h \
+    Simulator/SimCodePage.h \
+    Simulator/SimWidget.h \
+    Simulator/SimSelectBuildDialog.h \
+    Simulator/SimSchemaPage.h \
+    Simulator/SimBasePage.h \
+    Simulator/SimControlPage.h \
+    Simulator/SimMemoryWidget.h \
+    Simulator/SimOutputWidget.h \
+    Simulator/SimProjectWidget.h \
     ../lib/TuningValue.h \
     SpecificPropertiesEditor.h \
     Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
-    ../lib/Times.h
+    ../lib/Times.h \
+    Simulator/SimOverrideWidget.h
 
 
 FORMS    += \
@@ -385,7 +421,8 @@ FORMS    += \
     Forms/ChangesetDetailsDialog.ui \
     Forms/CompareDialog.ui \
     Forms/ComparePropertyObjectDialog.ui \
-    DialogTuningClients.ui
+    DialogTuningClients.ui \
+    Simulator/SimulatorSelectBuildDialog.ui
 
 RESOURCES += \
     Resources.qrc \
@@ -513,4 +550,20 @@ DEFINES += USE_CREDENTIAL_STORE
 INCLUDEPATH += ./qtkeychain-0.8
 
 include(../Tools/qtkeychain-0.8/qt5keychain.pri)
+
+# Simulator Lib
+#
+INCLUDEPATH += $$PWD/../Simulator
+DEPENDPATH += $$PWD/../Simulator
+
+win32 {
+    LIBS += -L$$DESTDIR -lSimulator
+
+    CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Simulator.lib
+    CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
+}
+unix {
+    LIBS += -lSimulator
+}
+
 

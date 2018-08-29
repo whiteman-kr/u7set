@@ -1,5 +1,3 @@
-#include <QMessageBox>
-
 #include "SignalProperties.h"
 #include "WUtils.h"
 #include "../u7/Settings.h"

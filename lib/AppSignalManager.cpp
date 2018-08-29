@@ -1,72 +1,24 @@
 #include "../lib/AppSignalManager.h"
 
-ScriptSignalManager::ScriptSignalManager(const AppSignalManager* signalManager)	:
-	m_signalManager(signalManager)
-{
-	assert(m_signalManager);
-}
 
-QVariant ScriptSignalManager::signalParam(QString signalId) const
+AppSignalManager::AppSignalManager(QObject* parent) :
+	QObject(parent)
 {
-	bool ok = false;
-	AppSignalParam s = m_signalManager->signalParam(signalId, &ok);
-
-	if (ok == false)
 	{
-		return QVariant();
+		QMutexLocker l(&m_paramsMutex);
+		m_signalParams.reserve(128000);
 	}
 
-	return QVariant::fromValue(s);
-}
-
-QVariant ScriptSignalManager::signalParam(Hash signalHash) const
-{
-	bool ok = false;
-	AppSignalParam s = m_signalManager->signalParam(signalHash, &ok);
-
-	if (ok == false)
 	{
-		return QVariant();
+		QMutexLocker l(&m_statesMutex);
+		m_signalStates.reserve(128000);
 	}
 
-	return QVariant::fromValue(s);
-}
-
-QVariant ScriptSignalManager::signalState(QString signalId) const
-{
-	bool ok = false;
-	AppSignalState s = m_signalManager->signalState(signalId, &ok);
-
-	if (ok == false)
-	{
-		return QVariant();
-	}
-
-	return QVariant::fromValue(s);
-}
-
-QVariant ScriptSignalManager::signalState(Hash signalHash) const
-{
-	bool ok = false;
-	AppSignalState s = m_signalManager->signalState(signalHash, &ok);
-
-	if (ok == false)
-	{
-		return QVariant();
-	}
-
-	return QVariant::fromValue(s);
-}
-
-
-AppSignalManager::AppSignalManager()
-{
-
+	return;
 }
 
 AppSignalManager::~AppSignalManager()
 {
-
 }
 
 void AppSignalManager::reset()
@@ -89,10 +41,22 @@ void AppSignalManager::reset()
 	return;
 }
 
-void AppSignalManager::addSignal(const AppSignalParam& signal)
+void AppSignalManager::addSignal(const AppSignalParam& appSignal)
 {
 	QMutexLocker l(&m_paramsMutex);
-	m_signalParams[signal.hash()] = signal;
+	m_signalParams[appSignal.hash()] = appSignal;
+	return;
+}
+
+void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
+{
+	QMutexLocker l(&m_paramsMutex);
+
+	for (const AppSignalParam& s : appSignals)
+	{
+		m_signalParams[s.hash()] = s;
+	}
+
 	return;
 }
 
@@ -126,38 +90,7 @@ std::vector<Hash> AppSignalManager::signalHashes() const
 	return result;
 }
 
-AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
-{
-	Hash signalHash = ::calcHash(appSignalId);
-
-	return signalParam(signalHash, found);
-}
-
-AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
-{
-	QMutexLocker l(&m_paramsMutex);
-
-	auto result = m_signalParams.find(signalHash);
-
-	if (result == m_signalParams.end())
-	{
-		if (found != nullptr)
-		{
-			*found = false;
-		}
-
-		return AppSignalParam();
-	}
-
-	if (found != nullptr)
-	{
-		*found = true;
-	}
-
-	return result->second;
-}
-
-void AppSignalManager::invalidateAllSignalStates()
+void AppSignalManager::invalidateSignalStates()
 {
 	QMutexLocker l(&m_statesMutex);
 
@@ -242,6 +175,50 @@ void AppSignalManager::setState(const std::vector<AppSignalState>& states)
 	}
 
 	return;
+}
+
+bool AppSignalManager::signalExists(Hash hash) const
+{
+	QMutexLocker l(&m_paramsMutex);
+
+	auto result = m_signalParams.find(hash);
+	return result != m_signalParams.end();
+}
+
+bool AppSignalManager::signalExists(const QString& appSignalId) const
+{
+	Hash signalHash = ::calcHash(appSignalId);
+	return signalExists(signalHash);
+}
+
+AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
+{
+	QMutexLocker l(&m_paramsMutex);
+
+	auto result = m_signalParams.find(signalHash);
+
+	if (result == m_signalParams.end())
+	{
+		if (found != nullptr)
+		{
+			*found = false;
+		}
+
+		return AppSignalParam();
+	}
+
+	if (found != nullptr)
+	{
+		*found = true;
+	}
+
+	return result->second;
+}
+
+AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
+{
+	Hash signalHash = ::calcHash(appSignalId);
+	return signalParam(signalHash, found);
 }
 
 AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
@@ -342,6 +319,3 @@ void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std
 	signalState(appSignalHashes, result, found);
 	return;
 }
-
-
-

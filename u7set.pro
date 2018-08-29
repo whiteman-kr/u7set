@@ -5,16 +5,18 @@ CONFIG += ordered
 win32:SUBDIRS += Protobuf
 SUBDIRS += qtservice \
     qtpropertybrowser \
+    QScintilla \
     GetGitProjectVersion \
-    BaseService \
     ServiceControlManager \
     Metrology \
-    ConfigurationService \
-    ArchivingService \
-	QScintilla \	
     TrendView \
 	VFrame30 \
+    Simulator \
+    SimulatorConsole \
 	u7 \
+    BaseService \
+    ConfigurationService \
+    ArchivingService \
     Monitor \
     PacketViewer \
     TuningService \

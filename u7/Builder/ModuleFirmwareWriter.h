@@ -103,7 +103,6 @@ namespace Hardware
 		void setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId);
 
 	private:
-
 		bool storeChannelData(Builder::IssueLogger* log);
 
 	private:

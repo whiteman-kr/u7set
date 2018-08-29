@@ -1,43 +1,18 @@
-#ifndef SIGNALSET_H
-#define SIGNALSET_H
+#ifndef APPSIGNALMANAGER_H
+#define APPSIGNALMANAGER_H
 
+#include <map>
 #include <unordered_map>
 #include <QMutex>
-#include "../lib/Hash.h"
-#include "../lib/AppSignal.h"
-
-typedef quint64 SignalHash;
-
-class AppSignalManager;
+#include "../lib/IAppSignalManager.h"
 
 
-class ScriptSignalManager : public QObject
+class AppSignalManager : public QObject, public IAppSignalManager
 {
 	Q_OBJECT
 
 public:
-	 explicit ScriptSignalManager(const AppSignalManager* signalManager);
-
-	// Script Interface
-	//
-public slots:
-	QVariant signalParam(QString signalId) const;		// Returns AppSignalParam
-	QVariant signalParam(Hash signalHash) const;		// Returns AppSignalParam
-
-	QVariant signalState(QString signalId) const;		// Returns AppSignalState
-	QVariant signalState(Hash signalHash) const;		// Returns AppSignalState
-
-private:
-	 const AppSignalManager* m_signalManager = nullptr;
-};
-
-
-class AppSignalManager : public QObject
-{
-	Q_OBJECT
-
-public:
-	AppSignalManager();
+	explicit AppSignalManager(QObject* parent = nullptr);
 	virtual ~AppSignalManager();
 
 public:
@@ -45,27 +20,33 @@ public:
 
 	// Signal Params
 	//
-	void addSignal(const AppSignalParam& signal);
+	void addSignal(const AppSignalParam& appSignal);
+	void addSignals(const std::vector<AppSignalParam>& appSignals);
 
 	std::vector<AppSignalParam> signalList() const;
 	std::vector<Hash> signalHashes() const;
 
-	AppSignalParam signalParam(const QString& appSignalId, bool* found) const;
-	AppSignalParam signalParam(Hash signalHash, bool* found) const;
-
 	// Signal States
 	//
-	void invalidateAllSignalStates();
+	void invalidateSignalStates();
 
 	void setState(const QString& appSignalId, const AppSignalState& state);
 	void setState(Hash signalHash, const AppSignalState& state);
 	void setState(const std::vector<AppSignalState>& states);
 
-	AppSignalState signalState(Hash signalHash, bool* found) const;
-	AppSignalState signalState(const QString& appSignalId, bool* found) const;
+	// IAppSignalManager implememntation
+	//
+	virtual bool signalExists(Hash hash) const override;
+	virtual bool signalExists(const QString& appSignalId) const override;
 
-	void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
-	void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
+	virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override;
+	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
+
+	virtual AppSignalState signalState(Hash signalHash, bool* found) const override;
+	virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override;
+
+	virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
+	virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
 
 signals:
 	void addSignalToPriorityList(Hash signalHash) const;
@@ -84,4 +65,4 @@ private:
 
 
 
-#endif // SIGNALSET_H
+#endif // APPSIGNALMANAGER_H

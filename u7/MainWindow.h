@@ -10,6 +10,7 @@ class SignalsTabPage;
 class FilesTabPage;
 class BuildTabPage;
 class UploadTabPage;
+class SimulatorTabPage;
 
 namespace Ui {
 class MainWindow;
@@ -111,6 +112,7 @@ private:
 	SchemasTabPage* m_monitorSchema = nullptr;
 	BuildTabPage* m_buildTabPage = nullptr;
 	UploadTabPage* m_uploadTabPage = nullptr;
+	SimulatorTabPage* m_simulatorTabPage = nullptr;
 	//SchemasTabPage* m_diagSchema = nullptr;
 
 	DbController* m_dbController = nullptr;

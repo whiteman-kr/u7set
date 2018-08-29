@@ -50,6 +50,8 @@ public:
 	bool load(const QString& xml, QString* errorMessage);
 	bool load(QDomDocument doc, QString* errorMessage);
 
+	void clear();
+
 protected:
 	bool loadCommands(const QDomElement& element, QString* errorMessage);
 	bool loadAfbComponents(const QDomElement& element, QString* errorMessage);
@@ -60,10 +62,6 @@ protected:
 public:
 	static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);
 	void dump() const;
-
-signals:
-
-public slots:
 
 	// Data Structures
 	//
@@ -178,6 +176,7 @@ public:
 
 	LmCommand command(int commandCode) const;
 	const std::map<int, LmCommand>& commands() const;
+	std::vector<LmCommand> commandsAsVector() const;
 
 	// Data
 	//

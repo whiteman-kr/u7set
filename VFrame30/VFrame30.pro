@@ -103,17 +103,21 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/AppSignalManager.h \
     ../lib/HostAddressPort.h \
     ../lib/Factory.h \
-    ../lib/Tuning/TuningController.h \
     ../lib/AppSignal.h \
     ../lib/DbStruct.h \
     SchemaItemBus.h \
     Bus.h \
+    ClientSchemaWidget.h \
+    SchemaManager.h \
+    ClientSchemaView.h \
     SchemaItemLoopback.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
     ../Proto/network.pb.h \
     ../lib/TuningValue.h \
+    TuningController.h \
+    AppSignalController.h \
     ../lib/Signal.h \
     ../lib/DeviceObject.h \
     ../lib/SignalProperties.h \
@@ -165,15 +169,19 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/Tuning/TuningController.cpp \
     ../lib/AppSignal.cpp \
     ../lib/DbStruct.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     SchemaItemBus.cpp \
     Bus.cpp \
+    ClientSchemaWidget.cpp \
+    SchemaManager.cpp \
+    ClientSchemaView.cpp \
     SchemaItemLoopback.cpp \
     ../Proto/network.pb.cc \
     ../lib/TuningValue.cpp \
+    TuningController.cpp \
+    AppSignalController.cpp \
     ../lib/Types.cpp \
     ../lib/Signal.cpp \
     ../lib/DeviceObject.cpp \

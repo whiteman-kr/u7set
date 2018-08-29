@@ -14,6 +14,21 @@
 namespace Hardware
 {
 
+	QByteArray ModuleFirmwareData::toByteArray() const
+	{
+		QByteArray ba;
+		ba.reserve(eepromFrameSize * static_cast<int>(frames.size()));
+
+		for (const std::vector<quint8>& frame : frames)
+		{
+			QByteArray rawData = QByteArray::fromRawData(reinterpret_cast<const char*>(frame.data()),
+														 static_cast<int>(frame.size()));
+			ba.push_back(rawData);
+		}
+
+		return ba;
+	}
+
 	void ModuleFirmware::addFirmwareData(int uartId,
 							  const QString& uartType,
 							  int eepromFramePayloadSize,
@@ -191,12 +206,11 @@ static const std::vector<quint8> err;
 	void ModuleFirmware::addLogicModuleInfo(const QString& equipmentId,
 							const QString& subsystemId,
 							int lmNumber,
-							int channel,
+							E::Channel channel,
 							int moduleFamily,
 							int customModuleFamily,
 							int moduleVersion,
-							int moduleType
-							)
+							int moduleType)
 	{
 		LogicModuleInfo info;
 
@@ -307,6 +321,20 @@ static const std::vector<quint8> err;
 	bool ModuleFirmwareStorage::hasBinaryData() const
 	{
 		return m_hasBinaryData;
+	}
+
+	void ModuleFirmwareStorage::clear()
+	{
+		m_fileVersion = 0;
+		m_hasBinaryData = false;
+		m_buildSoftware.clear();
+		m_projectName.clear();
+		m_userName.clear();
+		m_changesetId = 0;
+		m_buildNumber = 0;
+		m_firmwares.clear();
+
+		return;
 	}
 
 	void ModuleFirmwareStorage::createFirmware(const QString& subsysId,
@@ -567,7 +595,14 @@ static ModuleFirmware err;
 					*errorCode = "Parse firmware error: cant find field channel";
 					return false;
 				}
-				lmi.channel = jModuleInfo.value(QLatin1String("channel")).toInt();
+
+				bool ok = true;
+				lmi.channel = E::stringToValue<E::Channel>(jModuleInfo.value(QLatin1String("channel")).toString(), &ok);
+				if (ok == false)
+				{
+					*errorCode = "Parse firmware error: Unknown channel %1" + jModuleInfo.value(QLatin1String("channel")).toString();
+					return false;
+				}
 
 				if (jModuleInfo.value(QLatin1String("moduleFamily")).isUndefined() == true)
 				{

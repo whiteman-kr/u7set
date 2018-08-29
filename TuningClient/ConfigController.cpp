@@ -383,14 +383,12 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply);
 	}
 
-	emit globalScriptArrived(m_globalScriptData);	// for develop
-
 	if (someFilesUpdated == true || apperanceUpdated == true)
 	{
 		emit configurationArrived();
 	}
 
-	//emit globalScriptArrived(m_globalScriptData);	for rpct-1867
+	emit globalScriptArrived(m_globalScriptData);
 
 	return;
 }

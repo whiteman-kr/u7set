@@ -249,7 +249,7 @@ namespace Proto
 			}
 		}
 
-		bool Load(const QString& fileName)
+		[[nodiscard]] bool Load(const QString& fileName)
 		{
 			std::wstring wfnstr(fileName.toStdWString());
 			std::string fnstr(wfnstr.begin(), wfnstr.end());
@@ -257,7 +257,6 @@ namespace Proto
 			std::fstream input(fnstr, std::ios::in | std::ios::binary);
 			if (input.is_open() == false || input.bad() == true)
 			{
-				assert(false);
 				return false;
 			}
 
@@ -338,6 +337,11 @@ namespace Proto
 				assert(false);
 				return false;
 			}
+		}
+
+		static std::shared_ptr<VFrameType> Create(QString fileName)
+		{
+			return Create(fileName.toStdWString().data());
 		}
 
 		static std::shared_ptr<VFrameType> Create(const wchar_t* fileName)
