@@ -453,6 +453,7 @@ namespace Builder
 		bool copyOptoPortRawTxBusSignals(CodeSnippet* code, Hardware::OptoPortShared port);
 
 		bool setLmAppLANDataSize();
+		bool detectUnusedSignals();
 		bool calculateCodeRunTime();
 
 		bool writeResult();
