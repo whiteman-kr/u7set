@@ -1404,7 +1404,7 @@ namespace Builder
 			// Bus type ID '%1' is undefined (Logic schema '%2').
 			//
 			m_log->errALC5100(busTypeID, ualItem->guid(), ualItem->schemaID());
-			return false;
+			return nullptr;
 		}
 
 		std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
@@ -5150,7 +5150,7 @@ namespace Builder
 		if (afbl == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			return nullptr;
 		}
 
 		UalAfb* appFb = new UalAfb(appItem, afbl->isBusProcessingAfb());
@@ -11183,7 +11183,7 @@ namespace Builder
 
 	std::shared_ptr<Hardware::DeviceObject> ModuleLogicCompiler::getDeviceSharedPtr(const Hardware::DeviceObject* device)
 	{
-		TEST_PTR_LOG_RETURN_FALSE(device, m_log);
+		TEST_PTR_LOG_RETURN_NULLPTR(device, m_log);
 
 		return getDeviceSharedPtr(device->equipmentIdTemplate());
 	}
@@ -11195,7 +11195,7 @@ namespace Builder
 
 	std::shared_ptr<Hardware::DeviceModule> ModuleLogicCompiler::getLmSharedPtr()
 	{
-		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
+		TEST_PTR_LOG_RETURN_NULLPTR(m_lm, m_log);
 
 		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(m_lm->equipmentIdTemplate()));
 	}
