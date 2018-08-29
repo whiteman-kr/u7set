@@ -178,6 +178,7 @@ namespace Builder
 			//
 
 			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
+			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::calculateCodeRunTime),
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
 		};
@@ -10224,6 +10225,32 @@ namespace Builder
 											m_log);
 	}
 
+	bool ModuleLogicCompiler::detectUnusedSignals()
+	{
+		QStringList unusedSignals;
+
+		for(const Signal* s : m_chassisSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isInternal() == true && m_ualSignals.contains(s->appSignalID()) == false)
+			{
+				unusedSignals.append(s->appSignalID());
+			}
+		}
+
+		unusedSignals.sort();
+
+		for(const QString& unusedSignal : unusedSignals)
+		{
+			// Internal signal %1 is unused.
+			//
+			m_log->wrnALC5148(unusedSignal);
+		}
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::calculateCodeRunTime()
 	{
 		bool result = m_code.getRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
@@ -10749,8 +10776,12 @@ namespace Builder
 
 		bool result = true;
 
+		LOG_EMPTY_LINE(m_log);
+
+		LOG_MESSAGE(m_log, QString(tr("Used resources of %1:")).arg(m_lm->equipmentIdTemplate()));
+
 		str.sprintf("%.2f", percentOfUsedCodeMemory);
-		LOG_MESSAGE(m_log, QString(tr("Code memory used - %1%")).arg(str));
+		LOG_MESSAGE(m_log, QString(tr("Code memory - %1%")).arg(str));
 
 		if (percentOfUsedCodeMemory > 95)
 		{
@@ -10774,7 +10805,7 @@ namespace Builder
 		double percentOfUsedBitMemory = m_memoryMap.bitAddressedMemoryUsed();
 
 		str.sprintf("%.2f", percentOfUsedBitMemory);
-		LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory used - %1%")).arg(str));
+		LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory - %1%")).arg(str));
 
 		if (percentOfUsedBitMemory > 95)
 		{
@@ -10798,7 +10829,7 @@ namespace Builder
 		double percentOfUsedWordMemory = m_memoryMap.wordAddressedMemoryUsed();
 
 		str.sprintf("%.2f", percentOfUsedWordMemory);
-		LOG_MESSAGE(m_log, QString(tr("Word-addressed memory used - %1%")).arg(str));
+		LOG_MESSAGE(m_log, QString(tr("Word-addressed memory - %1%")).arg(str));
 
 		if (percentOfUsedWordMemory > 95)
 		{
@@ -10836,7 +10867,7 @@ namespace Builder
 		str_percent.sprintf("%.2f", static_cast<float>(idrPhaseTimeUsed));
 		str.sprintf("%.2f", static_cast<float>(idrPhaseTime * 1000000));
 
-		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
+		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 					arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 
 		if (idrPhaseTimeUsed > 90)
@@ -10871,7 +10902,7 @@ namespace Builder
 		str_percent.sprintf("%.2f", static_cast<float>(alpPhaseTimeUsed));
 		str.sprintf("%.2f", static_cast<float>(alpPhaseTime * 1000000));
 
-		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
+		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 					arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 
 		if (alpPhaseTimeUsed > 90)
@@ -10921,6 +10952,8 @@ namespace Builder
 		CodeFragmentMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
 		CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
 		CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;*/
+
+		LOG_EMPTY_LINE(m_log);
 
 		return result;
 	}

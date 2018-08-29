@@ -5389,6 +5389,26 @@ namespace Builder
 					arg(signalID).arg(lbID1).arg(lbID2));
 	}
 
+
+	/// IssueCode: ALC5148
+	///
+	/// IssueType: Warning
+	///
+	/// Title:	   Internal signal %1 is unused.
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///
+	/// Description:
+	///		Internal signal has been created but not used in UAL.
+	///
+	void IssueLogger::wrnALC5148(QString signalID)
+	{
+		LOG_WARNING2(IssueType::AlCompiler,
+				  5148,
+				  QString(tr("Internal signal %1 is unused.")).arg(signalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
