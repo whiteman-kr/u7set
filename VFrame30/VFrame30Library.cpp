@@ -22,6 +22,7 @@
 #include "SchemaItemLineEdit.h"
 #include "SchemaItemValue.h"
 #include "SchemaItemBus.h"
+#include "SchemaItemLoopback.h"
 #include "../lib/Types.h"
 
 namespace VFrame30
@@ -70,6 +71,9 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemBus>();
 		SchemaItemFactory.Register<SchemaItemBusComposer>();
 		SchemaItemFactory.Register<SchemaItemBusExtractor>();
+		SchemaItemFactory.Register<SchemaItemLoopback>();
+		SchemaItemFactory.Register<SchemaItemLoopbackSource>();
+		SchemaItemFactory.Register<SchemaItemLoopbackTarget>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

@@ -2188,14 +2188,14 @@ class AppDataServiceState : public ::google::protobuf::Message {
   inline bool cfgserviceisconnected() const;
   inline void set_cfgserviceisconnected(bool value);
 
-  // optional uint32 CfgServiceIp = 2;
+  // optional uint32 CfgServiceIp = 2 [default = 0];
   inline bool has_cfgserviceip() const;
   inline void clear_cfgserviceip();
   static const int kCfgServiceIpFieldNumber = 2;
   inline ::google::protobuf::uint32 cfgserviceip() const;
   inline void set_cfgserviceip(::google::protobuf::uint32 value);
 
-  // optional int32 CfgServicePort = 3;
+  // optional int32 CfgServicePort = 3 [default = 0];
   inline bool has_cfgserviceport() const;
   inline void clear_cfgserviceport();
   static const int kCfgServicePortFieldNumber = 3;
@@ -2209,14 +2209,14 @@ class AppDataServiceState : public ::google::protobuf::Message {
   inline bool archiveserviceisconnected() const;
   inline void set_archiveserviceisconnected(bool value);
 
-  // optional uint32 ArchiveServiceIp = 5;
+  // optional uint32 ArchiveServiceIp = 5 [default = 0];
   inline bool has_archiveserviceip() const;
   inline void clear_archiveserviceip();
   static const int kArchiveServiceIpFieldNumber = 5;
   inline ::google::protobuf::uint32 archiveserviceip() const;
   inline void set_archiveserviceip(::google::protobuf::uint32 value);
 
-  // optional int32 ArchiveServicePort = 6;
+  // optional int32 ArchiveServicePort = 6 [default = 0];
   inline bool has_archiveserviceport() const;
   inline void clear_archiveserviceport();
   static const int kArchiveServicePortFieldNumber = 6;
@@ -8564,7 +8564,7 @@ inline void AppDataServiceState::set_cfgserviceisconnected(bool value) {
   cfgserviceisconnected_ = value;
 }
 
-// optional uint32 CfgServiceIp = 2;
+// optional uint32 CfgServiceIp = 2 [default = 0];
 inline bool AppDataServiceState::has_cfgserviceip() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -8586,7 +8586,7 @@ inline void AppDataServiceState::set_cfgserviceip(::google::protobuf::uint32 val
   cfgserviceip_ = value;
 }
 
-// optional int32 CfgServicePort = 3;
+// optional int32 CfgServicePort = 3 [default = 0];
 inline bool AppDataServiceState::has_cfgserviceport() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -8630,7 +8630,7 @@ inline void AppDataServiceState::set_archiveserviceisconnected(bool value) {
   archiveserviceisconnected_ = value;
 }
 
-// optional uint32 ArchiveServiceIp = 5;
+// optional uint32 ArchiveServiceIp = 5 [default = 0];
 inline bool AppDataServiceState::has_archiveserviceip() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -8652,7 +8652,7 @@ inline void AppDataServiceState::set_archiveserviceip(::google::protobuf::uint32
   archiveserviceip_ = value;
 }
 
-// optional int32 ArchiveServicePort = 6;
+// optional int32 ArchiveServicePort = 6 [default = 0];
 inline bool AppDataServiceState::has_archiveserviceport() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }

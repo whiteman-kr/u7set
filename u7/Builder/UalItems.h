@@ -11,6 +11,7 @@
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemBus.h"
+#include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/LogicSchema.h"
 
@@ -34,6 +35,9 @@ namespace Builder
 
 	typedef VFrame30::SchemaItemBusComposer UalBusComposer;
 	typedef VFrame30::SchemaItemBusExtractor UalBusExtractor;
+
+	typedef VFrame30::SchemaItemLoopbackSource UalLoopbackSource;
+	typedef VFrame30::SchemaItemLoopbackTarget UalLoopbackTarget;
 
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
@@ -113,21 +117,6 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		enum Type
-		{
-			Unknown,
-			Signal,
-			Afb,
-			Const,
-			Transmitter,
-			Receiver,
-			Terminator,
-			BusComposer,
-			BusExtractor,
-			LoopbackOutput,
-			LoopbackInput
-		};
-
 		UalItem();
 		UalItem(const UalItem& ualItem);
 		UalItem(const AppLogicItem& appLogicItem);
@@ -141,18 +130,18 @@ namespace Builder
 
 		QString strID() const;
 
-		bool isSignal() const { return type() == UalItem::Type::Signal; }
-		bool isAfb() const { return type() == UalItem::Type::Afb; }
-		bool isConst() const { return type() == UalItem::Type::Const; }
-		bool isTransmitter() const { return type() == UalItem::Type::Transmitter; }
-		bool isReceiver() const { return type() == UalItem::Type::Receiver; }
-		bool isTerminator() const { return type() == UalItem::Type::Terminator; }
-		bool isBusComposer() const { return type() == UalItem::Type::BusComposer; }
-		bool isBusExtractor() const { return type() == UalItem::Type::BusExtractor; }
-		bool isLoopbackOutput() const { return type() == UalItem::Type::LoopbackOutput; }
-		bool isLoopbackInput() const { return type() == UalItem::Type::LoopbackInput; }
+		bool isSignal() const { return type() == E::UalItemType::Signal; }
+		bool isAfb() const { return type() == E::UalItemType::Afb; }
+		bool isConst() const { return type() == E::UalItemType::Const; }
+		bool isTransmitter() const { return type() == E::UalItemType::Transmitter; }
+		bool isReceiver() const { return type() == E::UalItemType::Receiver; }
+		bool isTerminator() const { return type() == E::UalItemType::Terminator; }
+		bool isBusComposer() const { return type() == E::UalItemType::BusComposer; }
+		bool isBusExtractor() const { return type() == E::UalItemType::BusExtractor; }
+		bool isLoopbackSource() const { return type() == E::UalItemType::LoopbackSource; }
+		bool isLoopbackTarget() const { return type() == E::UalItemType::LoopbackTarget; }
 
-		Type type() const;
+		E::UalItemType type() const;
 
 		bool hasRam() const { return afb().hasRam(); }
 
@@ -165,6 +154,8 @@ namespace Builder
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const UalReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const UalReceiver* ualReceiver() const { return m_appLogicItem.m_fblItem->toReceiverElement(); }
+		const UalLoopbackSource* ualLoopbackSource() const { return m_appLogicItem.m_fblItem->toLoopbackSourceElement(); }
+		const UalLoopbackTarget* ualLoopbackTarget() const { return m_appLogicItem.m_fblItem->toLoopbackTargetElement(); }
 
 		const UalBusComposer* ualBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
 		const UalBusExtractor* ualBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
@@ -185,7 +176,7 @@ namespace Builder
 		AppLogicItem m_appLogicItem;							// structure from parser
 
 	private:
-		mutable UalItem::Type m_type = UalItem::Type::Unknown;
+		mutable E::UalItemType m_type = E::UalItemType::Unknown;
 
 		QHash<QString, int> m_opNameToIndexMap;
 	};
@@ -258,7 +249,7 @@ namespace Builder
 		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of FB's parameters used by user only
 
 	public:
-		UalAfb(const UalItem &appItem);
+		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().opCode(); }		// return FB type
@@ -269,9 +260,9 @@ namespace Builder
 		bool isConstComaparator() const;
 		bool isDynamicComaparator() const;
 		bool isComparator() const;
-		bool isBusPocessingElement() const;
+		bool isBusProcessing() const;
 
-		QString instantiatorID();
+		QString instantiatorID() const;
 
 		void setInstance(quint16 instance) { m_instance = instance; }
 		void setNumber(int number) { m_number = number; }
@@ -288,8 +279,6 @@ namespace Builder
 		int runTime() const { return m_runTime; }
 
 	private:
-		bool isBusProcessingAfbChecking() const;
-
 		// FB's parameters values and runtime calculations
 		// implemented in file FbParamCalculation.cpp
 		//
@@ -337,7 +326,8 @@ namespace Builder
 	private:
 		quint16 m_instance = -1;
 		int m_number = -1;
-		QString m_instantiatorID;
+		bool m_isBusProcessing = false;
+		mutable QString m_instantiatorID;
 
 		AppFbParamValuesArray m_paramValuesArray;
 
@@ -399,7 +389,8 @@ namespace Builder
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
 									Builder::BusShared bus,
-									const QString& outPinCaption);
+									const QString& outPinCaption,
+									std::shared_ptr<Hardware::DeviceModule> lm);
 
 		friend class UalSignalsMap;
 
@@ -475,6 +466,11 @@ namespace Builder
 		bool isBusChild() const { return m_isBusChild; }
 		void setBusChild(bool busChild) { m_isBusChild = busChild; }
 
+		bool isLoopbackSource() const { return m_loopbackID.isEmpty() == false; }
+
+		void setLoopbackID(const QString& loopbackID);
+		QString loopbackID() const;
+
 		//
 
 		bool isConst() const { return m_isConst; }
@@ -533,6 +529,10 @@ namespace Builder
 
 		//
 
+		QString m_loopbackID;
+
+		//
+
 		BusShared m_bus;
 
 		bool m_isInput = false;							// signal sources
@@ -577,7 +577,7 @@ namespace Builder
 
 		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, bool isBusChildSignal, QUuid outPinUuid);
 
-		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption);
+		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption, std::shared_ptr<Hardware::DeviceModule> lm);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(Signal* s, UalSignal* ualSignal);

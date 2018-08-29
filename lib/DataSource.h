@@ -15,6 +15,8 @@
 
 #include "../u7/Builder/IssueLogger.h"
 
+#include "WUtils.h"
+
 
 class DataSource
 {

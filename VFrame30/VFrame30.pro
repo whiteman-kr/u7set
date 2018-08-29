@@ -110,6 +110,7 @@ HEADERS += VFrame30Lib_global.h \
     ClientSchemaWidget.h \
     SchemaManager.h \
     ClientSchemaView.h \
+    SchemaItemLoopback.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
@@ -176,6 +177,7 @@ SOURCES += \
     ClientSchemaWidget.cpp \
     SchemaManager.cpp \
     ClientSchemaView.cpp \
+    SchemaItemLoopback.cpp \
     ../Proto/network.pb.cc \
     ../lib/TuningValue.cpp \
     TuningController.cpp \
@@ -185,7 +187,6 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/XmlHelper.cpp
-
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

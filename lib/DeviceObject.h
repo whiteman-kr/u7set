@@ -470,9 +470,9 @@ namespace Hardware
 			WAIM = 0x1800,
 			TIM = 0x1900,
 			RIM = 0x1A00,
-			MPS17 = 0x5100,
-			BVK4 = 0x5300,
-			BP336 = 0x5500,
+			MPS = 0x5100,
+			BVK4 = 0x5300,	// obsolete, for compatibility
+			BP336 = 0x5500,	// obsolete, for compatibility
 			BVB = 0x5600
 		};
 		Q_ENUM(FamilyType)

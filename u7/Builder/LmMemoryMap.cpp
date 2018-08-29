@@ -986,5 +986,26 @@ namespace Builder
 		return Address16(m_appBitAdressed.constBits.startAddress(), 1);
 	}
 
+	bool LmMemoryMap::addressInBitMemory(int address) const
+	{
+		if (address >= appBitMemoryStart() &&
+			address < appBitMemoryStart() + appBitMemorySizeW())
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool LmMemoryMap::addressInWordMemory(int address) const
+	{
+		if (address >= appWordMemoryStart() &&
+			address < appWordMemoryStart() + appWordMemorySizeW())
+		{
+			return true;
+		}
+
+		return false;
+	}
 }
 

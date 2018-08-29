@@ -600,7 +600,7 @@ namespace Builder
 
 		QStringList metadataFields;
 
-		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
+		appLogicCode.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
 
 		Hardware::ModuleFirmwareWriter* firmwareWriter = m_resultWriter->firmwareWriter();
 
@@ -623,11 +623,11 @@ namespace Builder
 
 		QByteArray binCode;
 
-		appLogicCode.getBinCode(binCode);
+		appLogicCode.getBinCode(&binCode);
 
 		std::vector<QVariantList> metadata;
 
-		appLogicCode.getAsmMetadata(metadata);
+		appLogicCode.getAsmMetadata(&metadata);
 
 		result &= firmwareWriter->setChannelData(subsystemID, appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
 

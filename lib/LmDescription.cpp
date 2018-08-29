@@ -903,6 +903,18 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 			QString nodeText = nl.at(0).toElement().text();
 			return nodeText.toUInt();
 		};
+	auto getSectionBoolDefaultValue =
+		[&element](QLatin1String section, bool defaultValue) -> bool
+		{
+			QDomNodeList nl = element.elementsByTagName(section);
+			if (nl.size() != 1)
+			{
+				return defaultValue;
+			}
+
+			QString nodeText = nl.at(0).toElement().text();
+			return nodeText.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		};
 
 	// Getting data
 	//
@@ -913,6 +925,7 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 	m_optoPortAppDataSize = getSectionUintValue(QLatin1String("OptoPortAppDataSize"), errorMessage);
 	m_optoInterfaceDataOffset = getSectionUintValue(QLatin1String("OptoInterfaceDataOffset"), errorMessage);
 	m_optoPortDataSize = getSectionUintValue(QLatin1String("OptoPortDataSize"), errorMessage);
+	m_sharedBuffer = getSectionBoolDefaultValue(QLatin1String("SharedBuffer"), false);
 
 	return errorMessage->isEmpty();
 }

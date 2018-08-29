@@ -6,7 +6,7 @@
 #include <QMutex>
 #include <QUuid>
 
-#include "../lib/OutputLog.h"
+#include "../../lib/OutputLog.h"
 
 #define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
@@ -178,8 +178,11 @@ namespace Builder
 		void errALP4022(QString schema);
 		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
 
-		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);
-		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);
+		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);		// Bus Related
+		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);						// Bus Related
+
+		void errALP4060(QString schema, QString schemaItem, QUuid itemUuid);						// Loopback detected
+		void errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids);	// Duplicate source of LoopbackID
 
 		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);	// Schema '%1' has %2 commented functional item(s).
 
@@ -316,7 +319,7 @@ namespace Builder
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
 		void errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID);			// UalSignal is not found for pin '%1' (Logic schema '%2').
 		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
-		void errALC5122(QUuid ualItemUuid, QString pinCaption, QString schemaID);		// UalSignal is not found for pin '%1' (Logic schema '%2').
+		void errALC5122(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB output (Logic schema %1).
 		void errALC5123(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB inputs (Logic schema %1).
 		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
 		void errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID);	// Input %1 of transmitter is connected unnamed signal (Logic schema %2).
@@ -336,6 +339,12 @@ namespace Builder
 		void wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Values of parameters %1.%2 and %1.%3 are equal.
 		void errALC5140(QString softwareID);											// Undefined ConfigurationService IP-address for software %1.
 		void errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID);	// Value of parameter %1.%2 must be in range %3 (Logic schema %4).
+		void errALC5142(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID);	// Duplicate loopback source ID %1 (Logic schema %2).
+		void errALC5143(QString loopbackID, QUuid loopbackTargetItemUuid, QString schemaID);		// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
+		void errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID);	// Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
+		void errALC5145(QString signalID, QUuid signalGuid, QString schemaID);			// Input signal %1 is connected to LoopbackTarget (Logic schema %2).
+		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
+		void errALC5147(QString signalID, QString lbID1, QString lbID2);			// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

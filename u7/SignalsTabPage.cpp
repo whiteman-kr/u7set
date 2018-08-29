@@ -1216,37 +1216,57 @@ void SignalsModel::addSignal()
 	Signal signal;
 
 	QSettings settings;
+	auto loader = [&settings](const QString& name, QVariant defaultValue = QVariant())
+	{
+		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, defaultValue);
+	};
 
 	signal.setSignalType(static_cast<E::SignalType>(signalTypeCombo->currentIndex()));
 
 	switch (signal.signalType())
 	{
-		case E::SignalType::Analog:
-			signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-			signal.setDataSize(FLOAT32_SIZE);
+	case E::SignalType::Analog:
+	{
+		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+		signal.setDataSize(FLOAT32_SIZE);
 
-			break;
+		auto value = signal.tuningLowBound();
+		value.setFloatValue(loader(SignalProperties::lowEngeneeringUnitsCaption, 0).toFloat());
+		signal.setTuningLowBound(value);
 
-		case E::SignalType::Discrete:
-			signal.setDataSize(DISCRETE_SIZE);
-			break;
+		value = signal.tuningHighBound();
+		value.setFloatValue(loader(SignalProperties::highEngeneeringUnitsCaption, 100).toFloat());
+		signal.setTuningHighBound(value);
 
-		case E::SignalType::Bus:
-		default:
-			break;
+		break;
+	}
+
+	case E::SignalType::Discrete:
+	{
+		signal.setDataSize(DISCRETE_SIZE);
+
+		auto value = signal.tuningLowBound();
+		value.setDiscreteValue(0);
+		signal.setTuningLowBound(value);
+
+		value = signal.tuningHighBound();
+		value.setDiscreteValue(1);
+		signal.setTuningHighBound(value);
+
+		break;
+	}
+
+	case E::SignalType::Bus:
+	default:
+		break;
 	}
 
 	signal.initSpecificProperties();
 
-	auto loader = [&settings](const QString& name)
-	{
-		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name);
-	};
-
 	signal.setLowADC(loader(SignalProperties::lowADCCaption).toInt());
 	signal.setHighADC(loader(SignalProperties::highADCCaption).toInt());
-	signal.setLowEngeneeringUnits(loader(SignalProperties::lowEngeneeringUnitsCaption).toDouble());
-	signal.setHighEngeneeringUnits(loader(SignalProperties::highEngeneeringUnitsCaption).toDouble());
+	signal.setLowEngeneeringUnits(loader(SignalProperties::lowEngeneeringUnitsCaption, 0).toDouble());
+	signal.setHighEngeneeringUnits(loader(SignalProperties::highEngeneeringUnitsCaption, 100).toDouble());
 	signal.setUnit(loader(SignalProperties::unitCaption).toString());
 	signal.setLowValidRange(loader(SignalProperties::lowValidRangeCaption).toDouble());
 	signal.setHighValidRange(loader(SignalProperties::highValidRangeCaption).toDouble());
@@ -1307,7 +1327,7 @@ void SignalsModel::addSignal()
 				}
 
 				signalVector[i].setAppSignalID((signalVector[i].appSignalID() + suffix).toUpper());
-				signalVector[i].setCustomAppSignalID((signalVector[i].customAppSignalID() + suffix).toUpper());
+				signalVector[i].setCustomAppSignalID((signalVector[i].customAppSignalID() + suffix));
 			}
 
 			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))

@@ -37,6 +37,7 @@ interface DeviceObject {
 	jsPropertyBool(name: string): boolean;
 	jsPropertyString(name: string): string;
 	jsPropertyIP(name: string): number;
+	jsModuleFamily(): number;
 
 	jsParent(): DeviceObject;
 	jsChild(index: number): DeviceObject;
@@ -168,7 +169,7 @@ function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[]
 
 	for (var i: number = 0; i < logicModules.length; i++) {
 
-		if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyBVB15ID) {
+		if (logicModules[i].jsModuleFamily() != FamilyBVB15ID) {
 			continue;
 		}
 
@@ -303,7 +304,7 @@ function module_bvb15(builder: Builder, root: DeviceObject, module: DeviceObject
 		}
 	}
 
-	if (module.jsPropertyInt("ModuleFamily") == FamilyBVB15ID) {
+	if (module.jsModuleFamily() == FamilyBVB15ID) {
 		var place: number = module.jsPropertyInt("Place");
 
 		if (place != 0) {
@@ -360,7 +361,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 		return false;
 	}
 
-	var uartId: number = 0x1604;
+	var uartId: number = logicModuleDescription.FlashMemory_ConfigUartId;
 
 	var appWordsCount: number = module.jsPropertyInt("AppLANDataSize");
 	var diagWordsCount: number = logicModuleDescription.Memory_TxDiagDataSize;
@@ -500,7 +501,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 			continue;
 		}
 
-		if (ioModule.jsPropertyInt("ModuleFamily") == FamilyBVB15ID) {
+		if (ioModule.jsModuleFamily() == FamilyBVB15ID) {
 			continue;
 		}
 
@@ -1079,7 +1080,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 			return false;
 		}
 
-		var customModuleFamily : number = ioModule.jsPropertyInt("CustomModuleFamily");
+		var customModuleFamily : number = ioModule.jsModuleFamily();
 
 		if (customModuleFamily != FamilyBUMD1 && customModuleFamily != FamilyBUMZ1) {
 			continue;

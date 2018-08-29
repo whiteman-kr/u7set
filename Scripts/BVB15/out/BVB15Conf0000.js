@@ -50,7 +50,7 @@ function main(builder, root, logicModules, confFirmware, log, signalSet, subsyst
     }
     var LMNumberCount = 0;
     for (var i = 0; i < logicModules.length; i++) {
-        if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyBVB15ID) {
+        if (logicModules[i].jsModuleFamily() != FamilyBVB15ID) {
             continue;
         }
         var result = module_bvb15(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
@@ -156,7 +156,7 @@ function module_bvb15(builder, root, module, confFirmware, log, signalSet, subsy
             return false;
         }
     }
-    if (module.jsPropertyInt("ModuleFamily") == FamilyBVB15ID) {
+    if (module.jsModuleFamily() == FamilyBVB15ID) {
         var place = module.jsPropertyInt("Place");
         if (place != 0) {
             log.errCFG3002("Place", place, 0, 0, module.jsPropertyString("EquipmentID"));
@@ -201,7 +201,7 @@ function generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet
         log.errCFG3002("FlashMemory/ConfigFrameCount", frameCount, 78, 65535, module.jsPropertyString("EquipmentID"));
         return false;
     }
-    var uartId = 0x1604;
+    var uartId = logicModuleDescription.FlashMemory_ConfigUartId;
     var appWordsCount = module.jsPropertyInt("AppLANDataSize");
     var diagWordsCount = logicModuleDescription.Memory_TxDiagDataSize;
     var ssKeyValue = subsystemStorage.ssKey(subSysID);
@@ -308,7 +308,7 @@ function generate_bvb15_rev1(builder, module, root, confFirmware, log, signalSet
         if (ioModule.jsDeviceType() != DeviceObjectType.Module) {
             continue;
         }
-        if (ioModule.jsPropertyInt("ModuleFamily") == FamilyBVB15ID) {
+        if (ioModule.jsModuleFamily() == FamilyBVB15ID) {
             continue;
         }
         var ioPlace = ioModule.jsPropertyInt("Place");
@@ -734,7 +734,7 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
             log.errCFG3000("EquipmentID", "I/O_module");
             return false;
         }
-        var customModuleFamily = ioModule.jsPropertyInt("CustomModuleFamily");
+        var customModuleFamily = ioModule.jsModuleFamily();
         if (customModuleFamily != FamilyBUMD1 && customModuleFamily != FamilyBUMZ1) {
             continue;
         }
