@@ -1307,7 +1307,7 @@ void SignalsModel::addSignal()
 				}
 
 				signalVector[i].setAppSignalID((signalVector[i].appSignalID() + suffix).toUpper());
-				signalVector[i].setCustomAppSignalID((signalVector[i].customAppSignalID() + suffix).toUpper());
+				signalVector[i].setCustomAppSignalID((signalVector[i].customAppSignalID() + suffix));
 			}
 
 			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))

@@ -243,6 +243,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0223.sql", "Upgrade to version 223, Set MaxInstanceCounter to 512 for AFB TCT. LM1-SR02. Project version 223"},
 	{":/DatabaseUpgrade/Upgrade0224.sql", "Upgrade to version 224, Set MaxInstanceCounter to 1024 for AFB TCT. LM1-SR02. Project version 224"},
 	{":/DatabaseUpgrade/Upgrade0225.sql", "Upgrade to version 225, OCM and OCMN signals PresetName fix"},
+	{":/DatabaseUpgrade/Upgrade0226.sql", "Upgrade to version 226, OCM and OCMN have new property SharedBuffer"},
 };
 
 

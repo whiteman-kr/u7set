@@ -533,7 +533,7 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 		}
 		else
 		{
-			sendRequest(RQID_GET_CLIENT_LIST);
+			sendRequest(ADS_GET_SETTINGS);
 		}
 		break;
 

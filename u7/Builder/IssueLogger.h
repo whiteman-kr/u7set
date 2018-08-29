@@ -6,7 +6,7 @@
 #include <QMutex>
 #include <QUuid>
 
-#include "../lib/OutputLog.h"
+#include "../../lib/OutputLog.h"
 
 #define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
