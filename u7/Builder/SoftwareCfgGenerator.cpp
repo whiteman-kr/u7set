@@ -67,7 +67,7 @@ namespace Builder
 		if (m_cfgXml == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
-					  QString(tr("Can't create 'configuration.xml' file for software %1")).
+					  QString(tr("Can't create 'Configuration.xml' file for software %1")).
 					  arg(m_software->equipmentIdTemplate()));
 			return false;
 		}

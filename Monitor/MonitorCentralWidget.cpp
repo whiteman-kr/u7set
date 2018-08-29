@@ -1,10 +1,14 @@
 #include "MonitorCentralWidget.h"
-#include "SchemaManager.h"
+#include "MonitorSchemaManager.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/LogicSchema.h"
 
-MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
-	m_schemaManager(schemaManager)
+MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
+										   VFrame30::AppSignalController* appSignalController,
+										   VFrame30::TuningController* tuningController) :
+	m_schemaManager(schemaManager),
+	m_appSignalController(appSignalController),
+	m_tuningController(tuningController)
 {
 	assert(m_schemaManager);
 
@@ -26,7 +30,7 @@ MonitorCentralWidget::MonitorCentralWidget(SchemaManager* schemaManager) :
 	connect(this->tabBar(), &QTabBar::tabCloseRequested, this, &MonitorCentralWidget::slot_tabCloseRequested);
 	connect(this, &MonitorCentralWidget::currentChanged, this, &MonitorCentralWidget::slot_tabPageChanged);
 
-	connect(m_schemaManager, &SchemaManager::resetSchema, this, &MonitorCentralWidget::slot_resetSchema);
+	connect(m_schemaManager, &VFrame30::SchemaManager::schemasWereReseted, this, &MonitorCentralWidget::slot_resetSchema);
 
 	return;
 }
@@ -52,7 +56,10 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 		tabSchema->setCaption("Empty Schema");
 	}
 
-	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema, m_schemaManager);
+	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema,
+																m_schemaManager,
+																m_appSignalController,
+																m_tuningController);
 
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
 	connect(schemaWidget, &MonitorSchemaWidget::signal_historyChanged, this, &MonitorCentralWidget::signal_historyChanged);
@@ -186,7 +193,7 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 		return;
 	}
 
-	tab->slot_setSchema(schemaId);
+	tab->setSchema(schemaId);
 
 	tab->emitHistoryChanged();
 
@@ -225,7 +232,7 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 	return;
 }
 
-void MonitorCentralWidget::slot_resetSchema(QString /*startSchemaId*/)
+void MonitorCentralWidget::slot_resetSchema()
 {
 	// All schemas must be refreshed, apparently the new configuration has arrived
 	// if there is no schema with prev SchemaID, load startSchemaId
@@ -240,7 +247,7 @@ void MonitorCentralWidget::slot_resetSchema(QString /*startSchemaId*/)
 			continue;
 		}
 
-		tabPage->slot_setSchema(tabPage->schemaId());
+		tabPage->setSchema(tabPage->schemaId());
 		tabPage->resetHistory();
 
 		if (i == currentIndex())
@@ -301,7 +308,7 @@ void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
 	return;
 }
 
-void MonitorCentralWidget::slot_schemaChanged(MonitorSchemaWidget* tabWidget, VFrame30::Schema* schema)
+void MonitorCentralWidget::slot_schemaChanged(VFrame30::ClientSchemaWidget* tabWidget, VFrame30::Schema* schema)
 {
 	if (tabWidget == nullptr ||
 		schema == nullptr)

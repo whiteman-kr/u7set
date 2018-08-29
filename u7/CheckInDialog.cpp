@@ -84,7 +84,7 @@ void CheckInDialog::on_checkInButton_clicked()
 	{
 		QMessageBox mb(this);
 
-		mb.setText(tr("Check In comment connot be empty!"));
+		mb.setText(tr("Check In comment cannot be empty!"));
 		mb.exec();
 
 		ui->commentEdit->setFocus();

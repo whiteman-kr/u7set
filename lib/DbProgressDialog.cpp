@@ -24,8 +24,8 @@ ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbPr
     setWindowTitle(tr("u7"));
     setMinimumWidth(400);
 
-    // create all widgets and layouts
-
+	// Create all widgets and layouts
+	//
     QVBoxLayout* vLayout = new QVBoxLayout;
 
     m_label = new QLabel();

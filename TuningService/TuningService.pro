@@ -10,6 +10,7 @@ TARGET = TuningSrv
 CONFIG += console
 CONFIG -= app_bundle
 
+
 TEMPLATE = app
 
 #c++14/17 support

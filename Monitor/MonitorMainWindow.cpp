@@ -43,9 +43,21 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	connect(&theSignals, &AppSignalManager::addSignalToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignal, Qt::QueuedConnection);
 	connect(&theSignals, &AppSignalManager::addSignalsToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignals, Qt::QueuedConnection);
 
+	// TuningTcpClient
+	//
+bool monitor_tuning_tcp_client_under_construction;
+	m_tuningTcpClient = new TuningTcpClient(softwareInfo, &theTuningSignals);
+
+	// Creating signals controllers for VFrame30
+	//
+	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&theSignals);
+	m_tuningController = std::make_unique<VFrame30::TuningController>(&theTuningSignals, m_tuningTcpClient);
+
 	// --
 	//
-	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager);
+	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
+																		  m_appSignalController.get(),
+																		  m_tuningController.get());
 	setCentralWidget(monitorCentralWidget);
 
 	// Create Menus, ToolBars, StatusBar

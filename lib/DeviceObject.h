@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <functional>
 #include <array>
-#include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
 #include "../lib/DebugInstCounter.h"

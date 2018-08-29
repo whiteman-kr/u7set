@@ -31,7 +31,7 @@ namespace PS
 	{
 	public:
 
-		SourceInfo::SourceInfo();
+		SourceInfo();
 
 		void				clear();
 

@@ -817,7 +817,6 @@ void MonitorArchiveWidget::dropEvent(QDropEvent* event)
 	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
 
 	return;
-
 }
 
 void MonitorArchiveWidget::saveWindowState()

@@ -100,7 +100,6 @@ private:
 	QListWidget* m_pBuildList = nullptr;
 
 	QTreeWidget* m_pSubsystemsListWidget = nullptr;
-
 	QTreeWidget* m_pUartListWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;

@@ -2,6 +2,7 @@
 #include <QDomElement>
 #include <QXmlStreamReader>
 
+
 namespace Afb
 {
 
@@ -142,11 +143,13 @@ namespace Afb
 		m_impVersion = that.m_impVersion;
 		m_versionOpIndex = that.m_versionOpIndex;
 		m_maxInstCount = that.m_maxInstCount;
+		m_simulationFunc = that.m_simulationFunc;
 
 		m_pins = that.m_pins;
 
 		return;
 	}
+
 
 	bool AfbComponent::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
@@ -209,6 +212,10 @@ namespace Afb
 		}
 
 		m_maxInstCount = xmlElement.attribute(QLatin1String("MaxInstCount")).toInt();
+
+		// SimulationFunc
+		//
+		m_simulationFunc = xmlElement.attribute(QLatin1String("SimulationFunc"));
 
 		// Pins
 		//
@@ -295,6 +302,21 @@ namespace Afb
 	void AfbComponent::setMaxInstCount(int value)
 	{
 		m_maxInstCount = value;
+	}
+
+	QString AfbComponent::simulationFunc() const
+	{
+		return m_simulationFunc;
+	}
+
+	void AfbComponent::setSimulationFunc(const QString& value)
+	{
+		m_simulationFunc = value;
+	}
+
+	const std::map<int, AfbComponentPin>& AfbComponent::pins() const
+	{
+		return m_pins;
 	}
 
 	bool AfbComponent::pinExists(int pinOpIndex) const

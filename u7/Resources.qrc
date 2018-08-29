@@ -32,6 +32,13 @@
         <file>Images/SchemaBusExtractor.svg</file>
         <file>Images/SchemaLoopbackSource.svg</file>
         <file>Images/SchemaLoopbackTarget.svg</file>
+        <file>Images/SimOpen.svg</file>
+        <file>Images/SimClose.svg</file>
+        <file>Images/SimRefresh.svg</file>
+        <file>Images/SimAddWindow.svg</file>
+        <file>Images/SimPause.svg</file>
+        <file>Images/SimRun.svg</file>
+        <file>Images/SimStop.svg</file>        
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

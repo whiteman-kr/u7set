@@ -5518,10 +5518,21 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 			{
 				QAction* addSignal = new QAction(tr("Add New App Signal..."), &menu);
 
+				// Highlight this menu item if it was selected last time
+				//
+				QFont f = addSignal->font();
+				f.setBold(m_lastSelectedAddSignal);
+				m_lastSelectedAddSignal = false;
+
+				addSignal->setFont(f);
+
+				// --
+				//
 				connect(addSignal, &QAction::triggered,
 					[this, selected](bool)
 					{
 						this->addNewAppSignal(selected);
+						m_lastSelectedAddSignal = true;
 					});
 
 				actions << addSignal;

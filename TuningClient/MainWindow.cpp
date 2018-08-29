@@ -73,9 +73,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	connect(&m_configController, &ConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 
-	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
-			Qt::QueuedConnection);
-
 	// DialogAlert
 
 	m_dialogAlert = new DialogAlert(this);
@@ -354,6 +351,7 @@ void MainWindow::createWorkspace()
 	}
 
 	// Create workspaces
+
 	if (m_mainLayout == nullptr)
 	{
 		QWidget* w = new QWidget(this);
@@ -388,7 +386,7 @@ void MainWindow::createWorkspace()
 
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
-		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, m_globalScript, this);
+		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, this);
 	}
 
 	if (theConfigSettings.showSignals == true)
@@ -740,11 +738,6 @@ void MainWindow::slot_signalsUpdated(QByteArray data)
 		QString completeErrorMessage = QObject::tr("Tuning signals file loading error.");
 		theLogFile->writeError(completeErrorMessage);
 	}
-}
-
-void MainWindow::slot_schemasGlobalScriptArrived(QByteArray data)
-{
-	m_globalScript = QString::fromLocal8Bit(data);
 }
 
 void MainWindow::exit()

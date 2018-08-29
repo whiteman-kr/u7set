@@ -2,6 +2,7 @@
 #include "SchemaItemSignal.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include "AppSignalController.h"
 #include "../lib/AppSignalManager.h"
 
 namespace VFrame30
@@ -449,8 +450,8 @@ namespace VFrame30
 
 		if (drawParam->isMonitorMode() == true)
 		{
-			signal = drawParam->appSignalManager()->signalParam(appSignalId, &signalFound);
-			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
+			signal = drawParam->appSignalController()->signalParam(appSignalId, &signalFound);
+			signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
 		}
 
 		QString dataText = SchemaItemSignal::getCoulumnText(drawParam, m_dataType, signal, signalState, m_analogFormat, m_precision);

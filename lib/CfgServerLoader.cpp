@@ -537,7 +537,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 	if (m_currentDownloadRequest.etalonMD5.isEmpty() == true)
 	{
-		// can be empty for configuration.xml file only!!!
+		// can be empty for Configuration.xml file only!!!
 		//
 		assert(m_currentDownloadRequest.pathFileName == m_configurationXmlPathFileName);
 	}
@@ -555,7 +555,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 	if (fileName == m_configurationXmlPathFileName)
 	{
-		// configuration.xml is loaded
+		// Configuration.xml is loaded
 		//
 		if (m_currentDownloadRequest.isTestCfgRequest)
 		{
@@ -566,7 +566,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		}
 		else
 		{
-			qDebug() << "Downloaded configuration.xml";
+			qDebug() << "Downloaded Configuration.xml";
 
 			if (readConfigurationXml() == true)
 			{
@@ -581,7 +581,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 					bfiArray.append(bfi);
 				}
 
-				qDebug() << "Read configuration.xml";
+				qDebug() << "Read Configuration.xml";
 
 				emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML].fileData, bfiArray);
 			}
@@ -698,7 +698,7 @@ void CfgLoader::resetStatuses()
 	m_configurationXmlMd5 = "";
 
 	m_configurationXmlReady = false;
-	m_autoDownloadIndex = 1;		// index 0 - configuration.xml
+	m_autoDownloadIndex = 1;		// index 0 - Configuration.xml
 	m_allFilesLoaded = false;
 }
 
@@ -755,7 +755,7 @@ bool CfgLoader::readConfigurationXml()
 	cfi.md5 = Md5Hash::hashStr(fileData);
 	cfi.fileData.swap(fileData);
 
-	// configuration.xml info always first item in m_cfgFileInfo
+	// Configuration.xml info always first item in m_cfgFileInfo
 	//
 	m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
 

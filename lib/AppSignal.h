@@ -39,7 +39,7 @@ union AppSignalStateFlags
 		quint32 validityChange : 1;
 	};
 
-	quint32 all;
+	quint32 all = 0;
 
 	void clear();
 
@@ -140,7 +140,7 @@ class AppSignalParam
 public:
 	AppSignalParam();
 
-	bool load(const Proto::AppSignal &message);
+	bool load(const Proto::AppSignal& message);
 	void save(::Proto::AppSignal* message) const;
 
 	// Properties
@@ -259,7 +259,7 @@ private:
 	double m_lowEngeneeringUnits = 0;
 	double m_highEngeneeringUnits = 100;
 
-	double m_electricLowLimit = 0;										// low electric value for input range
+	double m_electricLowLimit = 0;									// low electric value for input range
 	double m_electricHighLimit = 0;									// high electric value for input range
 	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;			// electric unit for input range (mA, mV, Ohm, V ....)
 	E::SensorType m_sensorType = E::SensorType::NoSensor;	// electric sensor type for input range (was created for m_inputUnitID)

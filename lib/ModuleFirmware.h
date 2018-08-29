@@ -26,19 +26,21 @@ namespace Hardware
 		// binary data
 		//
 		std::vector<std::vector<quint8>> frames;
+
+		QByteArray toByteArray() const;
 	};
 
 	struct LogicModuleInfo
 	{
 		QString equipmentId;
 		QString subsystemId;
-		int lmNumber;
-		int channel;
+		int lmNumber = 0;
+		E::Channel channel = E::Channel::A;
 
-		int moduleFamily;
-		int customModuleFamily;
-		int moduleVersion;
-		int moduleType;
+		int moduleFamily = 0;
+		int customModuleFamily = 0;
+		int moduleVersion = 0;
+		int moduleType = 0;
 	};
 
 	class ModuleFirmware
@@ -75,7 +77,7 @@ namespace Hardware
 		void addLogicModuleInfo(const QString& equipmentId,
 								const QString& subsystemId,
 								int lmNumber,
-								int channel,
+								E::Channel channel,
 								int moduleFamily,
 								int customModuleFamily,
 								int moduleVersion,
@@ -115,10 +117,11 @@ namespace Hardware
 
 		bool load(QString fileName, QString* errorCode);
 		bool load(const QByteArray& data, QString* errorCode);
-
 		bool loadHeader(QString fileName, QString* errorCode);
 
 		bool hasBinaryData() const;
+
+		void clear();
 
 		// Firmware operations
 		//
@@ -149,7 +152,7 @@ namespace Hardware
 		//
 	protected:
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 2;	//Latest version
+		static const int m_maxFileVersion = 2;	// Latest version
 
 		bool m_hasBinaryData = false;
 
@@ -161,7 +164,6 @@ namespace Hardware
 		bool m_debug = false;
 
 		std::map<QString, ModuleFirmware> m_firmwares;
-
 	};
 }
 

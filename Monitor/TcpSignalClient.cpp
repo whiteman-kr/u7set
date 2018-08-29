@@ -57,7 +57,7 @@ void TcpSignalClient::onDisconnection()
 {
 	qDebug() << "TcpSignalClient::onDisconnection";
 
-	theSignals.invalidateAllSignalStates();
+	theSignals.invalidateSignalStates();
 
 	emit connectionReset();
 }
@@ -307,6 +307,9 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		return;
 	}
 
+	std::vector<AppSignalParam> appSignals;
+	appSignals.reserve(m_getSignalParamReply.appsignals_size());
+
 	for (int i = 0; i < m_getSignalParamReply.appsignals_size(); i++)
 	{
 		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignals(i);
@@ -314,14 +317,22 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		AppSignalParam s;
 		s.load(protoSignal);
 
+		if (s.hash() == 0)
+		{
+			qDebug() << s.appSignalId();
+			qDebug() << s.caption();
+		}
+
 		assert(s.hash() != 0);
 		assert(s.appSignalId().isEmpty() == false);
 
 		if (s.hash() != 0 && s.appSignalId().isEmpty() == false)
 		{
-			theSignals.addSignal(s);
+			appSignals.push_back(s);
 		}
 	}
+
+	theSignals.addSignals(appSignals);
 
 	requestSignalParam(m_lastSignalParamStartIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
 

@@ -531,7 +531,9 @@ public:
 		const char* ptr = clearClassName.c_str();
 
 		while (*ptr)
-			nHash += (nHash<<5) + *ptr++;
+		{
+			nHash += (nHash << 5) + *ptr++;
+		}
 
 		return nHash;
 	}

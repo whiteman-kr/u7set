@@ -597,4 +597,3 @@ void AppSignalParam::setTuningHighBound(const TuningValue& value)
 {
 	m_tuningHighBound = value;
 }
-
