@@ -102,3 +102,6 @@ unix {
 }
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
+
+DISTFILES += \
+    ../../Proto/network.proto

@@ -24,14 +24,15 @@ private:
 	bool initTcpClient(QString& error);
 	void removeSenders();
 	void removeTcpClient();
-	bool sendBuffers(QString& error);
+	bool sendBuffers(QString& error, bool checkHeaderErrors = true);
 
 	const Network::AppDataSourceState *getSourceMessageById(Network::GetAppDataSourcesStatesReply& reply, quint64 id);
 
 private Q_SLOTS:
 	void initTestCase();
 
-	void TADS_001_001();
+	void TADS_001_001();	// Send correct data
+	void TADS_002_001();	// TADS_002_* Initiate frame header errors
 
 	void cleanupTestCase();
 
@@ -42,7 +43,6 @@ private:
 
 	AppDataServiceClient* m_tcpClientSocket = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
-	QMetaObject::Connection tcpClientSendRequestConnection;
 
 	QVector<QUdpSocket*> m_udpSockets;
 
