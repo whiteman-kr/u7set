@@ -93,8 +93,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_uploadTabPage, tr("&Upload"));
 
-	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
+	//m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
+	//getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
 
 	// --
 	//
