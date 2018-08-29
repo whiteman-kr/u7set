@@ -8,7 +8,7 @@
 #include "SelectSchemaWidget.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
-#include "../Lib/Tuning/TuningTcpClient.h"
+#include "../lib/Tuning/TuningTcpClient.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;

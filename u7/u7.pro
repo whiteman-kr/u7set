@@ -229,8 +229,7 @@ SOURCES +=\
     Simulator/SimBasePage.cpp \
     ../lib/Times.cpp \
     Simulator/SimOverrideWidget.cpp \
-    SpecificPropertiesEditor.cpp \
-    ../lib/Times.cpp
+    SpecificPropertiesEditor.cpp
 
 
 HEADERS  += \

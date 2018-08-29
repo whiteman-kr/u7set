@@ -37,7 +37,7 @@ QVariant SimCodeModel::headerData(int section, Qt::Orientation /*orientation*/, 
 {
 	if (role == Qt::DisplayRole)
 	{
-		switch (section)
+		switch (static_cast<CodePageColumns>(section))
 		{
 		case CodePageColumns::Row:		return tr("Row");
 		case CodePageColumns::Address:	return tr("Address");
@@ -68,7 +68,7 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 	//
 	if (role == Qt::BackgroundRole)
 	{
-		switch (column)
+		switch (static_cast<CodePageColumns>(column))
 		{
 		case CodePageColumns::Row:
 				if (row == 20)
@@ -85,7 +85,7 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 
 	if (role == Qt::ForegroundRole)
 	{
-		switch (column)
+		switch (static_cast<CodePageColumns>(column))
 		{
 		//case CodePageColumns::Row:			return QBrush(Qt::darkGray);
 		case CodePageColumns::Row:
@@ -106,7 +106,7 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 	//
 	if (role == Qt::DisplayRole)
 	{
-		switch (column)
+		switch (static_cast<CodePageColumns>(column))
 		{
 		case CodePageColumns::Row:		return QString(" %1 ").arg(row);
 		case CodePageColumns::Address:	return QString(" 0x%1 ").arg(command.m_offset, 4, 16, QChar('0'));
@@ -121,7 +121,7 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 	//
 	if (role == Qt::TextAlignmentRole)
 	{
-		switch (column)
+		switch (static_cast<CodePageColumns>(column))
 		{
 		case CodePageColumns::Row:		return  QVariant(Qt::AlignRight);
 		case CodePageColumns::Address:	return  QVariant(Qt::AlignRight);
