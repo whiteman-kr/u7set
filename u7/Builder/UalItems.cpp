@@ -2465,6 +2465,11 @@ namespace Builder
 				continue;
 			}
 
+			if (ualSignal->isBusChild() == true)
+			{
+				continue;
+			}
+
 			signalIDs.append(ualSignal->appSignalID());
 		}
 

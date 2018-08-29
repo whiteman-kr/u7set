@@ -6111,7 +6111,7 @@ namespace Builder
 
 		case E::Bus:
 			sizeW = lbSignal->bus()->sizeW();
-			busStr = "bus ";
+			busStr = QString("bustype %1 ").arg(lbSignal->busTypeID());
 			break;
 
 		case E::Discrete:
