@@ -8,12 +8,12 @@ Remote:	       	????
 
 	Clone u7set git repository
 
-	$ git clone ssh://git@192.168.75.11:radiy/u7set.git
+	$ git clone git@192.168.75.11:radiy/u7set.git
 
 
 	Clone u7set install git repository
 
-	$ git clone ssh://git@192.168.75.3:/opt/git/u7setinstall.git
+	$ git clone git@192.168.75.11:radiy/u7setinstall.git
 
 
 3. Branch, a simple branch tutorial https://backlogtool.com/git-guide/en/stepup/stepup2_2.html
