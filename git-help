@@ -8,7 +8,7 @@ Remote:	       	????
 
 	Clone u7set git repository
 
-	$ git clone ssh://git@192.168.75.3:/opt/git/u7set.git
+	$ git clone ssh://git@192.168.75.11:radiy/u7set.git
 
 
 	Clone u7set install git repository
