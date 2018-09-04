@@ -4,6 +4,7 @@ QT  += network
 QT  += widgets
 QT  += qml
 QT  += xml
+QT  += sql
 
 TARGET = AppDataSrv
 CONFIG += console
@@ -101,7 +102,8 @@ SOURCES += \
     AppDataReceiver.cpp \
     SignalStatesProcessingThread.cpp \
     ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    RtTrendsWriteThread.cpp
 
 HEADERS += \
 	Stable.h \
@@ -153,7 +155,8 @@ HEADERS += \
     ../lib/Socket.h \
     SignalStatesProcessingThread.h \
     ../lib/Times.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    RtTrendsWriteThread.h
 
 include(../qtservice/src/qtservice.pri)
 
