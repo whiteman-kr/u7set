@@ -20,15 +20,21 @@ windows build job:
     - "echo ------------------------------------"
     - "echo -   JOB STARTED: windows build     -"
     - "echo ------------------------------------"
-    - "echo --- debug ---"
-    - mkdir bin
-    - cd bin
-    - "@echo i'm a result >> aaa.zip"
-    - cd ..
-    - "echo --- end of debug ---"
-#    - ToDo Pack bin to zip
   after_script:
 #    - "echo ToDo: Clean up build stuff and evering else"
   artifacts:
     paths:
-      - bin/*.zip
+      - bin/release/*.exe
+      - bin/release/*.dll
+      - bin/release/*.lib
+      - bin/release/*.exp
+
+deploy job:
+  stage: deploy
+  only:
+    - master
+  script:
+    - "echo ------------------------------------"
+    - "echo -   JOB STARTED: deploy            -"
+    - "echo ------------------------------------"
+#    - TO DO Upload zopped exe to drive.goodle...
