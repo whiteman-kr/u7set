@@ -196,6 +196,18 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetAppSignalStatesFromArchiveCancelReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetAppSignalStatesFromArchiveCancelReply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* RtTrendsManagementRequest_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  RtTrendsManagementRequest_reflection_ = NULL;
+const ::google::protobuf::Descriptor* RtTrendsManagementReply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  RtTrendsManagementReply_reflection_ = NULL;
+const ::google::protobuf::Descriptor* RtTrendsGetStateChangesRequest_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  RtTrendsGetStateChangesRequest_reflection_ = NULL;
+const ::google::protobuf::Descriptor* RtTrendsGetStateChangesReply_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  RtTrendsGetStateChangesReply_reflection_ = NULL;
 
 }  // namespace
 
@@ -1207,6 +1219,71 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveCancelReply));
+  RtTrendsManagementRequest_descriptor_ = file->message_type(55);
+  static const int RtTrendsManagementRequest_offsets_[4] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, clientequipmentid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, sampleperiod_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, appendsignalhashes_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, deletesignalhashes_),
+  };
+  RtTrendsManagementRequest_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      RtTrendsManagementRequest_descriptor_,
+      RtTrendsManagementRequest::default_instance_,
+      RtTrendsManagementRequest_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(RtTrendsManagementRequest));
+  RtTrendsManagementReply_descriptor_ = file->message_type(56);
+  static const int RtTrendsManagementReply_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, errorstring_),
+  };
+  RtTrendsManagementReply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      RtTrendsManagementReply_descriptor_,
+      RtTrendsManagementReply::default_instance_,
+      RtTrendsManagementReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(RtTrendsManagementReply));
+  RtTrendsGetStateChangesRequest_descriptor_ = file->message_type(57);
+  static const int RtTrendsGetStateChangesRequest_offsets_[1] = {
+  };
+  RtTrendsGetStateChangesRequest_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      RtTrendsGetStateChangesRequest_descriptor_,
+      RtTrendsGetStateChangesRequest::default_instance_,
+      RtTrendsGetStateChangesRequest_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesRequest, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesRequest, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(RtTrendsGetStateChangesRequest));
+  RtTrendsGetStateChangesReply_descriptor_ = file->message_type(58);
+  static const int RtTrendsGetStateChangesReply_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, errorstring_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, signalstates_),
+  };
+  RtTrendsGetStateChangesReply_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      RtTrendsGetStateChangesReply_descriptor_,
+      RtTrendsGetStateChangesReply::default_instance_,
+      RtTrendsGetStateChangesReply_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(RtTrendsGetStateChangesReply));
 }
 
 namespace {
@@ -1329,6 +1406,14 @@ void protobuf_RegisterTypes(const ::std::string&) {
     GetAppSignalStatesFromArchiveCancelRequest_descriptor_, &GetAppSignalStatesFromArchiveCancelRequest::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetAppSignalStatesFromArchiveCancelReply_descriptor_, &GetAppSignalStatesFromArchiveCancelReply::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    RtTrendsManagementRequest_descriptor_, &RtTrendsManagementRequest::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    RtTrendsManagementReply_descriptor_, &RtTrendsManagementReply::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    RtTrendsGetStateChangesRequest_descriptor_, &RtTrendsGetStateChangesRequest::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    RtTrendsGetStateChangesReply_descriptor_, &RtTrendsGetStateChangesReply::default_instance());
 }
 
 }  // namespace
@@ -1444,6 +1529,14 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete GetAppSignalStatesFromArchiveCancelRequest_reflection_;
   delete GetAppSignalStatesFromArchiveCancelReply::default_instance_;
   delete GetAppSignalStatesFromArchiveCancelReply_reflection_;
+  delete RtTrendsManagementRequest::default_instance_;
+  delete RtTrendsManagementRequest_reflection_;
+  delete RtTrendsManagementReply::default_instance_;
+  delete RtTrendsManagementReply_reflection_;
+  delete RtTrendsGetStateChangesRequest::default_instance_;
+  delete RtTrendsGetStateChangesRequest_reflection_;
+  delete RtTrendsGetStateChangesReply::default_instance_;
+  delete RtTrendsGetStateChangesReply_reflection_;
 }
 
 void protobuf_AddDesc_network_2eproto() {
@@ -1651,7 +1744,16 @@ void protobuf_AddDesc_network_2eproto() {
     "quest\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAppSig"
     "nalStatesFromArchiveCancelReply\022\020\n\005error"
     "\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013err"
-    "orString\030\003 \001(\t", 7894);
+    "orString\030\003 \001(\t\"\204\001\n\031RtTrendsManagementReq"
+    "uest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\024\n\014sampl"
+    "ePeriod\030\002 \001(\005\022\032\n\022appendSignalHashes\030\003 \003("
+    "\004\022\032\n\022deleteSignalHashes\030\004 \003(\004\"@\n\027RtTrend"
+    "sManagementReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013er"
+    "rorString\030\002 \001(\t\" \n\036RtTrendsGetStateChang"
+    "esRequest\"r\n\034RtTrendsGetStateChangesRepl"
+    "y\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001(\t"
+    "\022+\n\014signalStates\030\003 \003(\0132\025.Proto.AppSignal"
+    "State", 8245);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -1709,6 +1811,10 @@ void protobuf_AddDesc_network_2eproto() {
   GetAppSignalStatesFromArchiveNextReply::default_instance_ = new GetAppSignalStatesFromArchiveNextReply();
   GetAppSignalStatesFromArchiveCancelRequest::default_instance_ = new GetAppSignalStatesFromArchiveCancelRequest();
   GetAppSignalStatesFromArchiveCancelReply::default_instance_ = new GetAppSignalStatesFromArchiveCancelReply();
+  RtTrendsManagementRequest::default_instance_ = new RtTrendsManagementRequest();
+  RtTrendsManagementReply::default_instance_ = new RtTrendsManagementReply();
+  RtTrendsGetStateChangesRequest::default_instance_ = new RtTrendsGetStateChangesRequest();
+  RtTrendsGetStateChangesReply::default_instance_ = new RtTrendsGetStateChangesReply();
   GetSignalListStartRequest::default_instance_->InitAsDefaultInstance();
   GetSignalListStartReply::default_instance_->InitAsDefaultInstance();
   GetSignalListNextRequest::default_instance_->InitAsDefaultInstance();
@@ -1764,6 +1870,10 @@ void protobuf_AddDesc_network_2eproto() {
   GetAppSignalStatesFromArchiveNextReply::default_instance_->InitAsDefaultInstance();
   GetAppSignalStatesFromArchiveCancelRequest::default_instance_->InitAsDefaultInstance();
   GetAppSignalStatesFromArchiveCancelReply::default_instance_->InitAsDefaultInstance();
+  RtTrendsManagementRequest::default_instance_->InitAsDefaultInstance();
+  RtTrendsManagementReply::default_instance_->InitAsDefaultInstance();
+  RtTrendsGetStateChangesRequest::default_instance_->InitAsDefaultInstance();
+  RtTrendsGetStateChangesReply::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_network_2eproto);
 }
 
@@ -20819,6 +20929,1093 @@ void GetAppSignalStatesFromArchiveCancelReply::Swap(GetAppSignalStatesFromArchiv
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = GetAppSignalStatesFromArchiveCancelReply_descriptor_;
   metadata.reflection = GetAppSignalStatesFromArchiveCancelReply_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int RtTrendsManagementRequest::kClientEquipmentIDFieldNumber;
+const int RtTrendsManagementRequest::kSamplePeriodFieldNumber;
+const int RtTrendsManagementRequest::kAppendSignalHashesFieldNumber;
+const int RtTrendsManagementRequest::kDeleteSignalHashesFieldNumber;
+#endif  // !_MSC_VER
+
+RtTrendsManagementRequest::RtTrendsManagementRequest()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void RtTrendsManagementRequest::InitAsDefaultInstance() {
+}
+
+RtTrendsManagementRequest::RtTrendsManagementRequest(const RtTrendsManagementRequest& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void RtTrendsManagementRequest::SharedCtor() {
+  _cached_size_ = 0;
+  clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  sampleperiod_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+RtTrendsManagementRequest::~RtTrendsManagementRequest() {
+  SharedDtor();
+}
+
+void RtTrendsManagementRequest::SharedDtor() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void RtTrendsManagementRequest::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* RtTrendsManagementRequest::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return RtTrendsManagementRequest_descriptor_;
+}
+
+const RtTrendsManagementRequest& RtTrendsManagementRequest::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+RtTrendsManagementRequest* RtTrendsManagementRequest::default_instance_ = NULL;
+
+RtTrendsManagementRequest* RtTrendsManagementRequest::New() const {
+  return new RtTrendsManagementRequest;
+}
+
+void RtTrendsManagementRequest::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_clientequipmentid()) {
+      if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+        clientequipmentid_->clear();
+      }
+    }
+    sampleperiod_ = 0;
+  }
+  appendsignalhashes_.Clear();
+  deletesignalhashes_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool RtTrendsManagementRequest::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string clientEquipmentID = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_clientequipmentid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->clientequipmentid().data(), this->clientequipmentid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_samplePeriod;
+        break;
+      }
+
+      // optional int32 samplePeriod = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_samplePeriod:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &sampleperiod_)));
+          set_has_sampleperiod();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_appendSignalHashes;
+        break;
+      }
+
+      // repeated uint64 appendSignalHashes = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_appendSignalHashes:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 1, 24, input, this->mutable_appendsignalhashes())));
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, this->mutable_appendsignalhashes())));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_appendSignalHashes;
+        if (input->ExpectTag(32)) goto parse_deleteSignalHashes;
+        break;
+      }
+
+      // repeated uint64 deleteSignalHashes = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_deleteSignalHashes:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 1, 32, input, this->mutable_deletesignalhashes())));
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, this->mutable_deletesignalhashes())));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(32)) goto parse_deleteSignalHashes;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void RtTrendsManagementRequest::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional string clientEquipmentID = 1;
+  if (has_clientequipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->clientequipmentid().data(), this->clientequipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->clientequipmentid(), output);
+  }
+
+  // optional int32 samplePeriod = 2;
+  if (has_sampleperiod()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->sampleperiod(), output);
+  }
+
+  // repeated uint64 appendSignalHashes = 3;
+  for (int i = 0; i < this->appendsignalhashes_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(
+      3, this->appendsignalhashes(i), output);
+  }
+
+  // repeated uint64 deleteSignalHashes = 4;
+  for (int i = 0; i < this->deletesignalhashes_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(
+      4, this->deletesignalhashes(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* RtTrendsManagementRequest::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional string clientEquipmentID = 1;
+  if (has_clientequipmentid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->clientequipmentid().data(), this->clientequipmentid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->clientequipmentid(), target);
+  }
+
+  // optional int32 samplePeriod = 2;
+  if (has_sampleperiod()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->sampleperiod(), target);
+  }
+
+  // repeated uint64 appendSignalHashes = 3;
+  for (int i = 0; i < this->appendsignalhashes_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteUInt64ToArray(3, this->appendsignalhashes(i), target);
+  }
+
+  // repeated uint64 deleteSignalHashes = 4;
+  for (int i = 0; i < this->deletesignalhashes_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteUInt64ToArray(4, this->deletesignalhashes(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int RtTrendsManagementRequest::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string clientEquipmentID = 1;
+    if (has_clientequipmentid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->clientequipmentid());
+    }
+
+    // optional int32 samplePeriod = 2;
+    if (has_sampleperiod()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->sampleperiod());
+    }
+
+  }
+  // repeated uint64 appendSignalHashes = 3;
+  {
+    int data_size = 0;
+    for (int i = 0; i < this->appendsignalhashes_size(); i++) {
+      data_size += ::google::protobuf::internal::WireFormatLite::
+        UInt64Size(this->appendsignalhashes(i));
+    }
+    total_size += 1 * this->appendsignalhashes_size() + data_size;
+  }
+
+  // repeated uint64 deleteSignalHashes = 4;
+  {
+    int data_size = 0;
+    for (int i = 0; i < this->deletesignalhashes_size(); i++) {
+      data_size += ::google::protobuf::internal::WireFormatLite::
+        UInt64Size(this->deletesignalhashes(i));
+    }
+    total_size += 1 * this->deletesignalhashes_size() + data_size;
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void RtTrendsManagementRequest::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const RtTrendsManagementRequest* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const RtTrendsManagementRequest*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void RtTrendsManagementRequest::MergeFrom(const RtTrendsManagementRequest& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  appendsignalhashes_.MergeFrom(from.appendsignalhashes_);
+  deletesignalhashes_.MergeFrom(from.deletesignalhashes_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_clientequipmentid()) {
+      set_clientequipmentid(from.clientequipmentid());
+    }
+    if (from.has_sampleperiod()) {
+      set_sampleperiod(from.sampleperiod());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void RtTrendsManagementRequest::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void RtTrendsManagementRequest::CopyFrom(const RtTrendsManagementRequest& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RtTrendsManagementRequest::IsInitialized() const {
+
+  return true;
+}
+
+void RtTrendsManagementRequest::Swap(RtTrendsManagementRequest* other) {
+  if (other != this) {
+    std::swap(clientequipmentid_, other->clientequipmentid_);
+    std::swap(sampleperiod_, other->sampleperiod_);
+    appendsignalhashes_.Swap(&other->appendsignalhashes_);
+    deletesignalhashes_.Swap(&other->deletesignalhashes_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata RtTrendsManagementRequest::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = RtTrendsManagementRequest_descriptor_;
+  metadata.reflection = RtTrendsManagementRequest_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int RtTrendsManagementReply::kErrorFieldNumber;
+const int RtTrendsManagementReply::kErrorStringFieldNumber;
+#endif  // !_MSC_VER
+
+RtTrendsManagementReply::RtTrendsManagementReply()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void RtTrendsManagementReply::InitAsDefaultInstance() {
+}
+
+RtTrendsManagementReply::RtTrendsManagementReply(const RtTrendsManagementReply& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void RtTrendsManagementReply::SharedCtor() {
+  _cached_size_ = 0;
+  error_ = 0;
+  errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+RtTrendsManagementReply::~RtTrendsManagementReply() {
+  SharedDtor();
+}
+
+void RtTrendsManagementReply::SharedDtor() {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    delete errorstring_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void RtTrendsManagementReply::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* RtTrendsManagementReply::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return RtTrendsManagementReply_descriptor_;
+}
+
+const RtTrendsManagementReply& RtTrendsManagementReply::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+RtTrendsManagementReply* RtTrendsManagementReply::default_instance_ = NULL;
+
+RtTrendsManagementReply* RtTrendsManagementReply::New() const {
+  return new RtTrendsManagementReply;
+}
+
+void RtTrendsManagementReply::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    error_ = 0;
+    if (has_errorstring()) {
+      if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+        errorstring_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool RtTrendsManagementReply::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 error = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_)));
+          set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_errorString;
+        break;
+      }
+
+      // optional string errorString = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_errorString:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_errorstring()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->errorstring().data(), this->errorstring().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void RtTrendsManagementReply::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
+  }
+
+  // optional string errorString = 2;
+  if (has_errorstring()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->errorstring().data(), this->errorstring().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->errorstring(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* RtTrendsManagementReply::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  // optional string errorString = 2;
+  if (has_errorstring()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->errorstring().data(), this->errorstring().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->errorstring(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int RtTrendsManagementReply::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 error = 1 [default = 0];
+    if (has_error()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->error());
+    }
+
+    // optional string errorString = 2;
+    if (has_errorstring()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->errorstring());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void RtTrendsManagementReply::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const RtTrendsManagementReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const RtTrendsManagementReply*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void RtTrendsManagementReply::MergeFrom(const RtTrendsManagementReply& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_error()) {
+      set_error(from.error());
+    }
+    if (from.has_errorstring()) {
+      set_errorstring(from.errorstring());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void RtTrendsManagementReply::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void RtTrendsManagementReply::CopyFrom(const RtTrendsManagementReply& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RtTrendsManagementReply::IsInitialized() const {
+
+  return true;
+}
+
+void RtTrendsManagementReply::Swap(RtTrendsManagementReply* other) {
+  if (other != this) {
+    std::swap(error_, other->error_);
+    std::swap(errorstring_, other->errorstring_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata RtTrendsManagementReply::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = RtTrendsManagementReply_descriptor_;
+  metadata.reflection = RtTrendsManagementReply_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+#endif  // !_MSC_VER
+
+RtTrendsGetStateChangesRequest::RtTrendsGetStateChangesRequest()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void RtTrendsGetStateChangesRequest::InitAsDefaultInstance() {
+}
+
+RtTrendsGetStateChangesRequest::RtTrendsGetStateChangesRequest(const RtTrendsGetStateChangesRequest& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void RtTrendsGetStateChangesRequest::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+RtTrendsGetStateChangesRequest::~RtTrendsGetStateChangesRequest() {
+  SharedDtor();
+}
+
+void RtTrendsGetStateChangesRequest::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void RtTrendsGetStateChangesRequest::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* RtTrendsGetStateChangesRequest::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return RtTrendsGetStateChangesRequest_descriptor_;
+}
+
+const RtTrendsGetStateChangesRequest& RtTrendsGetStateChangesRequest::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+RtTrendsGetStateChangesRequest* RtTrendsGetStateChangesRequest::default_instance_ = NULL;
+
+RtTrendsGetStateChangesRequest* RtTrendsGetStateChangesRequest::New() const {
+  return new RtTrendsGetStateChangesRequest;
+}
+
+void RtTrendsGetStateChangesRequest::Clear() {
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool RtTrendsGetStateChangesRequest::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+      return true;
+    }
+    DO_(::google::protobuf::internal::WireFormat::SkipField(
+          input, tag, mutable_unknown_fields()));
+  }
+  return true;
+#undef DO_
+}
+
+void RtTrendsGetStateChangesRequest::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* RtTrendsGetStateChangesRequest::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int RtTrendsGetStateChangesRequest::ByteSize() const {
+  int total_size = 0;
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void RtTrendsGetStateChangesRequest::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const RtTrendsGetStateChangesRequest* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const RtTrendsGetStateChangesRequest*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void RtTrendsGetStateChangesRequest::MergeFrom(const RtTrendsGetStateChangesRequest& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void RtTrendsGetStateChangesRequest::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void RtTrendsGetStateChangesRequest::CopyFrom(const RtTrendsGetStateChangesRequest& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RtTrendsGetStateChangesRequest::IsInitialized() const {
+
+  return true;
+}
+
+void RtTrendsGetStateChangesRequest::Swap(RtTrendsGetStateChangesRequest* other) {
+  if (other != this) {
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata RtTrendsGetStateChangesRequest::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = RtTrendsGetStateChangesRequest_descriptor_;
+  metadata.reflection = RtTrendsGetStateChangesRequest_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int RtTrendsGetStateChangesReply::kErrorFieldNumber;
+const int RtTrendsGetStateChangesReply::kErrorStringFieldNumber;
+const int RtTrendsGetStateChangesReply::kSignalStatesFieldNumber;
+#endif  // !_MSC_VER
+
+RtTrendsGetStateChangesReply::RtTrendsGetStateChangesReply()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void RtTrendsGetStateChangesReply::InitAsDefaultInstance() {
+}
+
+RtTrendsGetStateChangesReply::RtTrendsGetStateChangesReply(const RtTrendsGetStateChangesReply& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void RtTrendsGetStateChangesReply::SharedCtor() {
+  _cached_size_ = 0;
+  error_ = 0;
+  errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+RtTrendsGetStateChangesReply::~RtTrendsGetStateChangesReply() {
+  SharedDtor();
+}
+
+void RtTrendsGetStateChangesReply::SharedDtor() {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    delete errorstring_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void RtTrendsGetStateChangesReply::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* RtTrendsGetStateChangesReply::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return RtTrendsGetStateChangesReply_descriptor_;
+}
+
+const RtTrendsGetStateChangesReply& RtTrendsGetStateChangesReply::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+RtTrendsGetStateChangesReply* RtTrendsGetStateChangesReply::default_instance_ = NULL;
+
+RtTrendsGetStateChangesReply* RtTrendsGetStateChangesReply::New() const {
+  return new RtTrendsGetStateChangesReply;
+}
+
+void RtTrendsGetStateChangesReply::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    error_ = 0;
+    if (has_errorstring()) {
+      if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+        errorstring_->clear();
+      }
+    }
+  }
+  signalstates_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool RtTrendsGetStateChangesReply::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 error = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_)));
+          set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_errorString;
+        break;
+      }
+
+      // optional string errorString = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_errorString:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_errorstring()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->errorstring().data(), this->errorstring().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_signalStates;
+        break;
+      }
+
+      // repeated .Proto.AppSignalState signalStates = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_signalStates:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_signalstates()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_signalStates;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void RtTrendsGetStateChangesReply::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
+  }
+
+  // optional string errorString = 2;
+  if (has_errorstring()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->errorstring().data(), this->errorstring().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->errorstring(), output);
+  }
+
+  // repeated .Proto.AppSignalState signalStates = 3;
+  for (int i = 0; i < this->signalstates_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      3, this->signalstates(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* RtTrendsGetStateChangesReply::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 error = 1 [default = 0];
+  if (has_error()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  // optional string errorString = 2;
+  if (has_errorstring()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->errorstring().data(), this->errorstring().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->errorstring(), target);
+  }
+
+  // repeated .Proto.AppSignalState signalStates = 3;
+  for (int i = 0; i < this->signalstates_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        3, this->signalstates(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int RtTrendsGetStateChangesReply::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 error = 1 [default = 0];
+    if (has_error()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->error());
+    }
+
+    // optional string errorString = 2;
+    if (has_errorstring()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->errorstring());
+    }
+
+  }
+  // repeated .Proto.AppSignalState signalStates = 3;
+  total_size += 1 * this->signalstates_size();
+  for (int i = 0; i < this->signalstates_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->signalstates(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void RtTrendsGetStateChangesReply::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const RtTrendsGetStateChangesReply* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const RtTrendsGetStateChangesReply*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void RtTrendsGetStateChangesReply::MergeFrom(const RtTrendsGetStateChangesReply& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  signalstates_.MergeFrom(from.signalstates_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_error()) {
+      set_error(from.error());
+    }
+    if (from.has_errorstring()) {
+      set_errorstring(from.errorstring());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void RtTrendsGetStateChangesReply::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void RtTrendsGetStateChangesReply::CopyFrom(const RtTrendsGetStateChangesReply& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RtTrendsGetStateChangesReply::IsInitialized() const {
+
+  return true;
+}
+
+void RtTrendsGetStateChangesReply::Swap(RtTrendsGetStateChangesReply* other) {
+  if (other != this) {
+    std::swap(error_, other->error_);
+    std::swap(errorstring_, other->errorstring_);
+    signalstates_.Swap(&other->signalstates_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata RtTrendsGetStateChangesReply::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = RtTrendsGetStateChangesReply_descriptor_;
+  metadata.reflection = RtTrendsGetStateChangesReply_reflection_;
   return metadata;
 }
 

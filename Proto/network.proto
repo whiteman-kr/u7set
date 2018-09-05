@@ -551,7 +551,57 @@ message GetAppSignalStatesFromArchiveCancelReply
 	optional string errorString = 3;
 }
 
+// Real-time trends requests and replies
+//
 
+message RtTrendsManagementRequest
+{
+    optional string clientEquipmentID = 1;
+    optional int32 samplePeriod = 2;			    // enum E::RtTrandSamplePeriod
+    repeated uint64 appendSignalHashes = 3;
+    repeated uint64 deleteSignalHashes = 4;
+}
+
+message RtTrendsManagementReply
+{
+    optional int32 error = 1 [default = 0];
+    optional string errorString = 2;
+}
+
+//
+
+message RtTrendsGetStateChangesRequest
+{
+}
+
+message RtTrendsGetStateChangesReply
+{
+    optional int32 error = 1 [default = 0];
+    optional string errorString = 2;
+
+    repeated Proto.AppSignalState signalStates = 3;
+}
+
+//
+/*
+message RtTrendsGetArchiveStatesRequest
+{
+    optional int32 timeType = 1 [default = 1];		// enum TimeType values:
+							// 0 - plant time
+							// 1 - system time
+							// 2 - local time
+							// 3 - archive id
+    optional sfixed64 startTime = 2 [default = 0];
+    optional sfixed64 endTime = 3 [default = 0];
+}
+
+message RtTrendsGetArchiveStatesReply
+{
+    optional int32 error = 1 [default = 0];
+    optional string errorString = 2;
+
+    repeated Proto.AppSignalState signalStates = 3;
+}*/
 
 
 
