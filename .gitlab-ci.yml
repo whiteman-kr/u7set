@@ -1,11 +1,11 @@
 before_script:
-  - echo job: before_script
+  - echo job before_script
   - cd
   - dir /S
 
 build:
   script:
-    - echo job: build
+    - echo job build
     - cd
     - dir
     - echo I like to build it, build it)))
