@@ -1,11 +1,29 @@
-before_script:
-  - echo job before_script
-  - cd
-  - dir /S
+stages:
+  - build
+  - test
+  - deploy
 
-build:
+before_script:
+  - echo before_script
+  - cd
+  - dir
+  - set
+  
+after_script:
+  - echo after_script
+
+windows build job:
+  stage: build
+  tags:
+    - VS2017
   script:
-    - echo job build
-    - cd
-    - dir
-    - echo I like to build it, build it)))
+    - "echo ------------------------------------"
+    - "echo -   JOB STARTED: windows build     -"
+    - "echo ------------------------------------"
+    - "@echo i'm a result >> aaa.zip"
+#    - ToDo Pack bin to zip
+  after_script:
+#    - "echo ToDo: Clean up build stuff and evering else"
+  artifacts:
+    paths:
+      - bin/*.zip
