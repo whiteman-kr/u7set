@@ -230,6 +230,30 @@ void AppDataServiceWorker::stopTcpArchiveClientThread()
 	m_tcpArchiveClientThread = nullptr;
 }
 
+void AppDataServiceWorker::runRtTrendsServerThread()
+{
+	assert(m_rtTrendsServerThread == nullptr);
+
+	m_rtTrendsServerThread = new RtTrendsServerThread(softwareInfo(),
+													  HostAddressPort(m_cfgSettings.clientRequestIP.addressStr(),
+																	  PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST),
+													  m_appDataSourcesIP,
+													  logger());
+
+	m_rtTrendsServerThread->start();
+}
+
+void AppDataServiceWorker::stopRtTrendsServerThread()
+{
+	if (m_rtTrendsServerThread != nullptr)
+	{
+		m_rtTrendsServerThread->quitAndWait(10000);
+		delete m_rtTrendsServerThread;
+
+		m_rtTrendsServerThread = nullptr;
+	}
+}
+
 void AppDataServiceWorker::runTimer()
 {
 	connect(&m_timer, &QTimer::timeout, this, &AppDataServiceWorker::onTimer);
@@ -507,12 +531,14 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpAppDataServer();
 	runAppDataReceiverThread();
 	runAppDataProcessingThreads();
+	runRtTrendsServerThread();
 }
 
 void AppDataServiceWorker::clearConfiguration()
 {
 	// free all resources allocated in onConfigurationReady
 	//
+	stopRtTrendsServerThread();
 	stopAppDataProcessingThreads();
 	stopAppDataReceiverlThread();
 	stopTcpAppDataServer();

@@ -380,7 +380,6 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-
 	class Client : public SocketWorker
 	{
 		Q_OBJECT

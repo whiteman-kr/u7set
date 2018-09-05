@@ -222,6 +222,11 @@ const quint32 ARCHS_GET_APP_SIGNALS_STATES_CANCEL = 0x1703;
 const int ARCH_REQUEST_MAX_SIGNALS = 32;
 const int ARCH_REQUEST_MAX_STATES = 20000; //65000;
 
+// Real time trends requests
+//
+const int RT_TRENDS_MANAGEMENT = 0x1801;
+const int RT_TRENDS_GET_STATE_CHANGES = 1802;
+
 // Getting application signals Units
 //
 const quint32 ADS_GET_UNITS = 0x1500;

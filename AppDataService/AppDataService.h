@@ -12,6 +12,7 @@
 #include "TcpArchiveClient.h"
 #include "AppDataProcessingThread.h"
 #include "SignalStatesProcessingThread.h"
+#include "RtTrendsServer.h"
 
 
 class TcpArchiveClient;
@@ -78,6 +79,9 @@ private:
 	void runTcpArchiveClientThread();
 	void stopTcpArchiveClientThread();
 
+	void runRtTrendsServerThread();
+	void stopRtTrendsServerThread();
+
 	void runTimer();
 	void stopTimer();
 
@@ -111,6 +115,8 @@ private:
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
+
+	RtTrendsServerThread* m_rtTrendsServerThread = nullptr;
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 

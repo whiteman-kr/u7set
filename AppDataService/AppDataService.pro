@@ -103,7 +103,8 @@ SOURCES += \
     SignalStatesProcessingThread.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    RtTrendsDatabase.cpp
+    RtTrendsDatabase.cpp \
+    RtTrendsServer.cpp
 
 HEADERS += \
 	Stable.h \
@@ -156,7 +157,8 @@ HEADERS += \
     SignalStatesProcessingThread.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    RtTrendsDatabase.h
+    RtTrendsDatabase.h \
+    RtTrendsServer.h
 
 include(../qtservice/src/qtservice.pri)
 
