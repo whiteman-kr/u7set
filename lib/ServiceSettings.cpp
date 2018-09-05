@@ -27,6 +27,9 @@ const char* ServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* ServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
 const char* ServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
 
+const char* ServiceSettings::PROP_RT_TRENDS_REQUEST_IP = "RtTrendsRequestIP";
+const char* ServiceSettings::PROP_RT_TRENDS_REQUEST_PORT = "RtTrendsRequestPort";
+
 const char* ServiceSettings::PROP_APP_DATA_SERVICE_ID = "AppDataServiceID";
 const char* ServiceSettings::PROP_APP_DATA_SERVICE_IP = "AppDataServiceIP";
 const char* ServiceSettings::PROP_APP_DATA_SERVICE_PORT = "AppDataServicePort";
@@ -217,6 +220,12 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 											  &clientRequestIP,
 											  false, "", 0, log);
 
+	int rtTrendsRequestPort = 0;
+
+	result &= DeviceHelper::getPortProperty(software, PROP_RT_TRENDS_REQUEST_PORT, &rtTrendsRequestPort, true, PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST, log);
+
+	rtTrendsRequestIP.setAddressPort(clientRequestIP.addressStr(), rtTrendsRequestPort);
+
 	result &= DeviceHelper::getIPv4Property(software, PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
 
 	result &= getSoftwareConnection(equipment, software,
@@ -257,6 +266,8 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
+	xml.writeHostAddressPort(PROP_RT_TRENDS_REQUEST_IP, PROP_RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
+
 	xml.writeEndElement();	// </Settings>
 
 	return result;
@@ -289,6 +300,8 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+
+	result &= xml.readHostAddressPort(PROP_RT_TRENDS_REQUEST_IP, PROP_RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
 
 	return result;
 }

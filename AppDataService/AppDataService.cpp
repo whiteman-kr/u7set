@@ -235,8 +235,7 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 	assert(m_rtTrendsServerThread == nullptr);
 
 	m_rtTrendsServerThread = new RtTrendsServerThread(softwareInfo(),
-													  HostAddressPort(m_cfgSettings.clientRequestIP.addressStr(),
-																	  PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST),
+													  m_cfgSettings.rtTrendsRequestIP,
 													  m_appDataSourcesIP,
 													  logger());
 
