@@ -15,6 +15,35 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+# Force prebuild version control info
+#
+win32 {
+    contains(QMAKE_TARGET.arch, x86_64){
+        QMAKE_CLEAN += $$PWD/../../bin_Win64/GetGitProjectVersion.exe
+        system(IF NOT EXIST $$PWD/../../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake))
+        system(chdir $$PWD & \
+            $$PWD/../../bin_Win64/GetGitProjectVersion.exe $$PWD/TestAppDataService.pro)
+    }
+    else{
+        QMAKE_CLEAN += $$PWD/../../bin_Win32/GetGitProjectVersion.exe
+        system(IF NOT EXIST $$PWD/../../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake))
+        system(chdir $$PWD & \
+            $$PWD/../../bin_Win32/GetGitProjectVersion.exe $$PWD/TestAppDataService.pro)
+    }
+}
+unix {
+    QMAKE_CLEAN += $$PWD/../../bin_unix/GetGitProjectVersion
+    system(cd $$PWD/../../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make; \
+        cd $$PWD; \
+        $$PWD/../../bin_unix/GetGitProjectVersion $$PWD/TestAppDataService.pro)
+}
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -52,7 +81,9 @@ HEADERS += tst_testappdataservice.h \
     ../../lib/Tcp.h \
     ../../Proto/network.pb.h \
     ../../lib/SocketIO.h \
-    ../../lib/CircularLogger.h
+    ../../lib/CircularLogger.h \
+    version.h
+
 
 SOURCES += \
         tst_testappdataservice.cpp \ 
