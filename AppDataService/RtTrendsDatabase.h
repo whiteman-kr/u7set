@@ -7,6 +7,22 @@
 #include "../lib/CircularLogger.h"
 #include "../lib/HostAddressPort.h"
 
+class RtTrendsDatabase
+{
+public:
+	RtTrendsDatabase(const QString& equipmentID,
+					 const QString& accessStr1,
+					 const QString& accessStr2);
+
+	QString user() const;
+	QString password() const;
+
+private:
+	QString m_equipmentID;
+	QString m_accessStr1;
+	QString m_accessStr2;
+};
+
 class RtTrendsWriteThread : public RunOverrideThread
 {
 public:
@@ -67,15 +83,5 @@ private:
 	int m_prevMinute = -1;
 
 	friend class ArchRequestThreadWorker;
-};
-
-
-class ArchWriteThread : public SimpleThread
-{
-public:
-	ArchWriteThread(const HostAddressPort& dbHost,
-					ArchiveShared archive,
-					Queue<SimpleAppSignalState>& saveStatesQueue,
-					CircularLoggerShared logger);
 };
 

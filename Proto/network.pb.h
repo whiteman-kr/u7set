@@ -89,6 +89,10 @@ class GetAppSignalStatesFromArchiveNextRequest;
 class GetAppSignalStatesFromArchiveNextReply;
 class GetAppSignalStatesFromArchiveCancelRequest;
 class GetAppSignalStatesFromArchiveCancelReply;
+class RtTrendsManagementRequest;
+class RtTrendsManagementReply;
+class RtTrendsGetStateChangesRequest;
+class RtTrendsGetStateChangesReply;
 
 // ===================================================================
 
@@ -6603,6 +6607,408 @@ class GetAppSignalStatesFromArchiveCancelReply : public ::google::protobuf::Mess
 
   void InitAsDefaultInstance();
   static GetAppSignalStatesFromArchiveCancelReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RtTrendsManagementRequest : public ::google::protobuf::Message {
+ public:
+  RtTrendsManagementRequest();
+  virtual ~RtTrendsManagementRequest();
+
+  RtTrendsManagementRequest(const RtTrendsManagementRequest& from);
+
+  inline RtTrendsManagementRequest& operator=(const RtTrendsManagementRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RtTrendsManagementRequest& default_instance();
+
+  void Swap(RtTrendsManagementRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  RtTrendsManagementRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RtTrendsManagementRequest& from);
+  void MergeFrom(const RtTrendsManagementRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string clientEquipmentID = 1;
+  inline bool has_clientequipmentid() const;
+  inline void clear_clientequipmentid();
+  static const int kClientEquipmentIDFieldNumber = 1;
+  inline const ::std::string& clientequipmentid() const;
+  inline void set_clientequipmentid(const ::std::string& value);
+  inline void set_clientequipmentid(const char* value);
+  inline void set_clientequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_clientequipmentid();
+  inline ::std::string* release_clientequipmentid();
+  inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
+
+  // optional int32 samplePeriod = 2;
+  inline bool has_sampleperiod() const;
+  inline void clear_sampleperiod();
+  static const int kSamplePeriodFieldNumber = 2;
+  inline ::google::protobuf::int32 sampleperiod() const;
+  inline void set_sampleperiod(::google::protobuf::int32 value);
+
+  // repeated uint64 appendSignalHashes = 3;
+  inline int appendsignalhashes_size() const;
+  inline void clear_appendsignalhashes();
+  static const int kAppendSignalHashesFieldNumber = 3;
+  inline ::google::protobuf::uint64 appendsignalhashes(int index) const;
+  inline void set_appendsignalhashes(int index, ::google::protobuf::uint64 value);
+  inline void add_appendsignalhashes(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      appendsignalhashes() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_appendsignalhashes();
+
+  // repeated uint64 deleteSignalHashes = 4;
+  inline int deletesignalhashes_size() const;
+  inline void clear_deletesignalhashes();
+  static const int kDeleteSignalHashesFieldNumber = 4;
+  inline ::google::protobuf::uint64 deletesignalhashes(int index) const;
+  inline void set_deletesignalhashes(int index, ::google::protobuf::uint64 value);
+  inline void add_deletesignalhashes(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      deletesignalhashes() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_deletesignalhashes();
+
+  // @@protoc_insertion_point(class_scope:Network.RtTrendsManagementRequest)
+ private:
+  inline void set_has_clientequipmentid();
+  inline void clear_has_clientequipmentid();
+  inline void set_has_sampleperiod();
+  inline void clear_has_sampleperiod();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* clientequipmentid_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > appendsignalhashes_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > deletesignalhashes_;
+  ::google::protobuf::int32 sampleperiod_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static RtTrendsManagementRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RtTrendsManagementReply : public ::google::protobuf::Message {
+ public:
+  RtTrendsManagementReply();
+  virtual ~RtTrendsManagementReply();
+
+  RtTrendsManagementReply(const RtTrendsManagementReply& from);
+
+  inline RtTrendsManagementReply& operator=(const RtTrendsManagementReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RtTrendsManagementReply& default_instance();
+
+  void Swap(RtTrendsManagementReply* other);
+
+  // implements Message ----------------------------------------------
+
+  RtTrendsManagementReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RtTrendsManagementReply& from);
+  void MergeFrom(const RtTrendsManagementReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // optional string errorString = 2;
+  inline bool has_errorstring() const;
+  inline void clear_errorstring();
+  static const int kErrorStringFieldNumber = 2;
+  inline const ::std::string& errorstring() const;
+  inline void set_errorstring(const ::std::string& value);
+  inline void set_errorstring(const char* value);
+  inline void set_errorstring(const char* value, size_t size);
+  inline ::std::string* mutable_errorstring();
+  inline ::std::string* release_errorstring();
+  inline void set_allocated_errorstring(::std::string* errorstring);
+
+  // @@protoc_insertion_point(class_scope:Network.RtTrendsManagementReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+  inline void set_has_errorstring();
+  inline void clear_has_errorstring();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* errorstring_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static RtTrendsManagementReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RtTrendsGetStateChangesRequest : public ::google::protobuf::Message {
+ public:
+  RtTrendsGetStateChangesRequest();
+  virtual ~RtTrendsGetStateChangesRequest();
+
+  RtTrendsGetStateChangesRequest(const RtTrendsGetStateChangesRequest& from);
+
+  inline RtTrendsGetStateChangesRequest& operator=(const RtTrendsGetStateChangesRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RtTrendsGetStateChangesRequest& default_instance();
+
+  void Swap(RtTrendsGetStateChangesRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  RtTrendsGetStateChangesRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RtTrendsGetStateChangesRequest& from);
+  void MergeFrom(const RtTrendsGetStateChangesRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Network.RtTrendsGetStateChangesRequest)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static RtTrendsGetStateChangesRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RtTrendsGetStateChangesReply : public ::google::protobuf::Message {
+ public:
+  RtTrendsGetStateChangesReply();
+  virtual ~RtTrendsGetStateChangesReply();
+
+  RtTrendsGetStateChangesReply(const RtTrendsGetStateChangesReply& from);
+
+  inline RtTrendsGetStateChangesReply& operator=(const RtTrendsGetStateChangesReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RtTrendsGetStateChangesReply& default_instance();
+
+  void Swap(RtTrendsGetStateChangesReply* other);
+
+  // implements Message ----------------------------------------------
+
+  RtTrendsGetStateChangesReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RtTrendsGetStateChangesReply& from);
+  void MergeFrom(const RtTrendsGetStateChangesReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // optional string errorString = 2;
+  inline bool has_errorstring() const;
+  inline void clear_errorstring();
+  static const int kErrorStringFieldNumber = 2;
+  inline const ::std::string& errorstring() const;
+  inline void set_errorstring(const ::std::string& value);
+  inline void set_errorstring(const char* value);
+  inline void set_errorstring(const char* value, size_t size);
+  inline ::std::string* mutable_errorstring();
+  inline ::std::string* release_errorstring();
+  inline void set_allocated_errorstring(::std::string* errorstring);
+
+  // repeated .Proto.AppSignalState signalStates = 3;
+  inline int signalstates_size() const;
+  inline void clear_signalstates();
+  static const int kSignalStatesFieldNumber = 3;
+  inline const ::Proto::AppSignalState& signalstates(int index) const;
+  inline ::Proto::AppSignalState* mutable_signalstates(int index);
+  inline ::Proto::AppSignalState* add_signalstates();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >&
+      signalstates() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
+      mutable_signalstates();
+
+  // @@protoc_insertion_point(class_scope:Network.RtTrendsGetStateChangesReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+  inline void set_has_errorstring();
+  inline void clear_has_errorstring();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* errorstring_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState > signalstates_;
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static RtTrendsGetStateChangesReply* default_instance_;
 };
 // ===================================================================
 
@@ -13640,6 +14046,373 @@ inline void GetAppSignalStatesFromArchiveCancelReply::set_allocated_errorstring(
     clear_has_errorstring();
     errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// -------------------------------------------------------------------
+
+// RtTrendsManagementRequest
+
+// optional string clientEquipmentID = 1;
+inline bool RtTrendsManagementRequest::has_clientequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void RtTrendsManagementRequest::set_has_clientequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void RtTrendsManagementRequest::clear_has_clientequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void RtTrendsManagementRequest::clear_clientequipmentid() {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_->clear();
+  }
+  clear_has_clientequipmentid();
+}
+inline const ::std::string& RtTrendsManagementRequest::clientequipmentid() const {
+  return *clientequipmentid_;
+}
+inline void RtTrendsManagementRequest::set_clientequipmentid(const ::std::string& value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void RtTrendsManagementRequest::set_clientequipmentid(const char* value) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(value);
+}
+inline void RtTrendsManagementRequest::set_clientequipmentid(const char* value, size_t size) {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* RtTrendsManagementRequest::mutable_clientequipmentid() {
+  set_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    clientequipmentid_ = new ::std::string;
+  }
+  return clientequipmentid_;
+}
+inline ::std::string* RtTrendsManagementRequest::release_clientequipmentid() {
+  clear_has_clientequipmentid();
+  if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientequipmentid_;
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void RtTrendsManagementRequest::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+  if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientequipmentid_;
+  }
+  if (clientequipmentid) {
+    set_has_clientequipmentid();
+    clientequipmentid_ = clientequipmentid;
+  } else {
+    clear_has_clientequipmentid();
+    clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 samplePeriod = 2;
+inline bool RtTrendsManagementRequest::has_sampleperiod() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void RtTrendsManagementRequest::set_has_sampleperiod() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void RtTrendsManagementRequest::clear_has_sampleperiod() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void RtTrendsManagementRequest::clear_sampleperiod() {
+  sampleperiod_ = 0;
+  clear_has_sampleperiod();
+}
+inline ::google::protobuf::int32 RtTrendsManagementRequest::sampleperiod() const {
+  return sampleperiod_;
+}
+inline void RtTrendsManagementRequest::set_sampleperiod(::google::protobuf::int32 value) {
+  set_has_sampleperiod();
+  sampleperiod_ = value;
+}
+
+// repeated uint64 appendSignalHashes = 3;
+inline int RtTrendsManagementRequest::appendsignalhashes_size() const {
+  return appendsignalhashes_.size();
+}
+inline void RtTrendsManagementRequest::clear_appendsignalhashes() {
+  appendsignalhashes_.Clear();
+}
+inline ::google::protobuf::uint64 RtTrendsManagementRequest::appendsignalhashes(int index) const {
+  return appendsignalhashes_.Get(index);
+}
+inline void RtTrendsManagementRequest::set_appendsignalhashes(int index, ::google::protobuf::uint64 value) {
+  appendsignalhashes_.Set(index, value);
+}
+inline void RtTrendsManagementRequest::add_appendsignalhashes(::google::protobuf::uint64 value) {
+  appendsignalhashes_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+RtTrendsManagementRequest::appendsignalhashes() const {
+  return appendsignalhashes_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+RtTrendsManagementRequest::mutable_appendsignalhashes() {
+  return &appendsignalhashes_;
+}
+
+// repeated uint64 deleteSignalHashes = 4;
+inline int RtTrendsManagementRequest::deletesignalhashes_size() const {
+  return deletesignalhashes_.size();
+}
+inline void RtTrendsManagementRequest::clear_deletesignalhashes() {
+  deletesignalhashes_.Clear();
+}
+inline ::google::protobuf::uint64 RtTrendsManagementRequest::deletesignalhashes(int index) const {
+  return deletesignalhashes_.Get(index);
+}
+inline void RtTrendsManagementRequest::set_deletesignalhashes(int index, ::google::protobuf::uint64 value) {
+  deletesignalhashes_.Set(index, value);
+}
+inline void RtTrendsManagementRequest::add_deletesignalhashes(::google::protobuf::uint64 value) {
+  deletesignalhashes_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+RtTrendsManagementRequest::deletesignalhashes() const {
+  return deletesignalhashes_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+RtTrendsManagementRequest::mutable_deletesignalhashes() {
+  return &deletesignalhashes_;
+}
+
+// -------------------------------------------------------------------
+
+// RtTrendsManagementReply
+
+// optional int32 error = 1 [default = 0];
+inline bool RtTrendsManagementReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void RtTrendsManagementReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void RtTrendsManagementReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void RtTrendsManagementReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 RtTrendsManagementReply::error() const {
+  return error_;
+}
+inline void RtTrendsManagementReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// optional string errorString = 2;
+inline bool RtTrendsManagementReply::has_errorstring() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void RtTrendsManagementReply::set_has_errorstring() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void RtTrendsManagementReply::clear_has_errorstring() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void RtTrendsManagementReply::clear_errorstring() {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    errorstring_->clear();
+  }
+  clear_has_errorstring();
+}
+inline const ::std::string& RtTrendsManagementReply::errorstring() const {
+  return *errorstring_;
+}
+inline void RtTrendsManagementReply::set_errorstring(const ::std::string& value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void RtTrendsManagementReply::set_errorstring(const char* value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void RtTrendsManagementReply::set_errorstring(const char* value, size_t size) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* RtTrendsManagementReply::mutable_errorstring() {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  return errorstring_;
+}
+inline ::std::string* RtTrendsManagementReply::release_errorstring() {
+  clear_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = errorstring_;
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void RtTrendsManagementReply::set_allocated_errorstring(::std::string* errorstring) {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    delete errorstring_;
+  }
+  if (errorstring) {
+    set_has_errorstring();
+    errorstring_ = errorstring;
+  } else {
+    clear_has_errorstring();
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// RtTrendsGetStateChangesRequest
+
+// -------------------------------------------------------------------
+
+// RtTrendsGetStateChangesReply
+
+// optional int32 error = 1 [default = 0];
+inline bool RtTrendsGetStateChangesReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void RtTrendsGetStateChangesReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void RtTrendsGetStateChangesReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void RtTrendsGetStateChangesReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 RtTrendsGetStateChangesReply::error() const {
+  return error_;
+}
+inline void RtTrendsGetStateChangesReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// optional string errorString = 2;
+inline bool RtTrendsGetStateChangesReply::has_errorstring() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void RtTrendsGetStateChangesReply::set_has_errorstring() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void RtTrendsGetStateChangesReply::clear_has_errorstring() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void RtTrendsGetStateChangesReply::clear_errorstring() {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    errorstring_->clear();
+  }
+  clear_has_errorstring();
+}
+inline const ::std::string& RtTrendsGetStateChangesReply::errorstring() const {
+  return *errorstring_;
+}
+inline void RtTrendsGetStateChangesReply::set_errorstring(const ::std::string& value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void RtTrendsGetStateChangesReply::set_errorstring(const char* value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void RtTrendsGetStateChangesReply::set_errorstring(const char* value, size_t size) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* RtTrendsGetStateChangesReply::mutable_errorstring() {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  return errorstring_;
+}
+inline ::std::string* RtTrendsGetStateChangesReply::release_errorstring() {
+  clear_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = errorstring_;
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void RtTrendsGetStateChangesReply::set_allocated_errorstring(::std::string* errorstring) {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    delete errorstring_;
+  }
+  if (errorstring) {
+    set_has_errorstring();
+    errorstring_ = errorstring;
+  } else {
+    clear_has_errorstring();
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated .Proto.AppSignalState signalStates = 3;
+inline int RtTrendsGetStateChangesReply::signalstates_size() const {
+  return signalstates_.size();
+}
+inline void RtTrendsGetStateChangesReply::clear_signalstates() {
+  signalstates_.Clear();
+}
+inline const ::Proto::AppSignalState& RtTrendsGetStateChangesReply::signalstates(int index) const {
+  return signalstates_.Get(index);
+}
+inline ::Proto::AppSignalState* RtTrendsGetStateChangesReply::mutable_signalstates(int index) {
+  return signalstates_.Mutable(index);
+}
+inline ::Proto::AppSignalState* RtTrendsGetStateChangesReply::add_signalstates() {
+  return signalstates_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >&
+RtTrendsGetStateChangesReply::signalstates() const {
+  return signalstates_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
+RtTrendsGetStateChangesReply::mutable_signalstates() {
+  return &signalstates_;
 }
 
 

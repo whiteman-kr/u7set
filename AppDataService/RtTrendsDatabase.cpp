@@ -1,6 +1,25 @@
-#include "RtTrendsWriteThread.h"
+#include "RtTrendsDatabase.h"
 
 #include <chrono>
+
+RtTrendsDatabase::RtTrendsDatabase(const QString& equipmentID,
+				 const QString& accessStr1,
+				 const QString& accessStr2) :
+	m_equipmentID(equipmentID),
+	m_accessStr1(accessStr1),
+	m_accessStr2(accessStr2)
+{
+}
+
+QString RtTrendsDatabase::user() const
+{
+	return m_accessStr1;
+}
+
+QString RtTrendsDatabase::password() const
+{
+	return m_accessStr2;
+}
 
 const StringPair RtTrendsWriteThread::m_upgradeFiles[] =
 {
@@ -19,6 +38,11 @@ RtTrendsWriteThread::RtTrendsWriteThread(const HostAddressPort& dbHost,
 {
 }
 
+void RtTrendsWriteThread::run()
+{
+}
+
+/*
 void RtTrendsWriteThread::run()
 {
 	DEBUG_LOG_MSG(m_logger, "RtTrendsWriteThread is started");
@@ -476,6 +500,7 @@ void ArchWriteThreadWorker::disconnectFromDb()
 	}
 }
 
+
 void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 {
 	if (m_db.isOpen() == false)
@@ -518,18 +543,6 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 		{
 			break;
 		}
-
-		// DEBUG
-		/*if (state.hash == testHash)
-		{
-			if (prevSystemTime > state.time.system.timeStamp)
-			{
-				assert(false);
-			}
-
-			prevSystemTime = state.time.system.timeStamp;
-		}*/
-		// DEBUG
 
 		ArchSignal archSignal = m_archive->getArchSignal(state.hash);
 
@@ -784,3 +797,5 @@ ArchWriteThread::ArchWriteThread(const HostAddressPort& dbHost,
 
 	addWorker(worker);
 }
+
+*/
