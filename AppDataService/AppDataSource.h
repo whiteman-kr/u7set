@@ -126,6 +126,8 @@ public:
 };
 
 
+struct RtTrendsSession;
+
 class AppDataSource : public DataSourceOnline
 {
 private:
@@ -160,6 +162,12 @@ public:
 	void setState(const Network::AppDataSourceState& proto);
 
 	bool getSignalState(SimpleAppSignalState* state);
+
+	// Real time trends support
+	//
+	bool setRtTrendsSamplePeriod(int sessionID, E::RtTrendsSamplePeriod samplePeriod);
+	bool appendRtTrendsSignal(int sessionID, Hash appendSignalHash, E::RtTrendsSamplePeriod samplePeriod);
+	bool deleteRtTrendsSignal(int sessionID, Hash deleteSignalHash, E::RtTrendsSamplePeriod samplePeriod);
 
 private:
 	int getAutoArchivingGroup(qint64 currentSysTime);
@@ -201,6 +209,9 @@ private:
 	int m_autoArchivingGroupsCount = 0;
 	qint64 m_lastAutoArchivingTime = 0;
 	int m_lastAutoArchivingGroup = AppSignalStateEx::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
+
+	// Real time trends support
+	QHash<int, RtTrendsSession*> m_rtTrendsSessions;
 };
 
 typedef std::shared_ptr<AppDataSource> AppDataSourceShared;

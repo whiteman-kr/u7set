@@ -1,8 +1,18 @@
 #pragma once
 
 #include "../lib/Tcp.h"
+#include "../lib/Hash.h"
+
 #include "../Proto/network.pb.h"
+
 #include "AppDataSource.h"
+
+struct RtTrendsSession
+{
+	int ID = 0;
+	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_60s;
+	QHash<Hash, bool> trackedSignals;
+};
 
 class RtTrendsServer : public Tcp::Server
 {
@@ -20,14 +30,23 @@ public:
 
 private:
 	void onRtTrendsManagementRequest(const char* requestData, quint32 requestDataSize);
+	void setSamplePeriod(E::RtTrendsSamplePeriod newSamplePeriod);
+	void appendTrackedSignals(const Network::RtTrendsManagementRequest& request);
+	void deleteTrackedSignals(const Network::RtTrendsManagementRequest& request);
+
 	void onRtTrendsGetStateChangesRequest(const char* requestData, quint32 requestDataSize);
+
 
 private:
 	AppDataSourcesIP& m_appDataSourcesIP;
 	std::shared_ptr<CircularLogger> m_log;
-	int m_sessionID = 0;
 
 	static std::atomic<int> m_globalSessionID;
+
+	//
+
+	RtTrendsSession m_session;
+	AppDataSourcesIP m_trackedSources;
 
 	//
 

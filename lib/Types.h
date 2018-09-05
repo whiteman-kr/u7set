@@ -308,6 +308,24 @@ public:
 	};
 	Q_ENUM(TimeType)
 
+	// RtTrendsSamplePeriod
+	//
+	enum class RtTrendsSamplePeriod
+	{
+		sp_5ms,
+		sp_10ms,
+		sp_20ms,
+		sp_50ms,
+		sp_100ms,
+		sp_250ms,
+		sp_500ms,
+		sp_1s,
+		sp_5s,
+		sp_15s,
+		sp_30s,
+		sp_60s,
+	};
+
 	// Property editor type
 	//
 	enum class PropertySpecificEditor : qint16

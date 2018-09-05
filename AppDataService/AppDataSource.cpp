@@ -1,6 +1,7 @@
 #include "../lib/WUtils.h"
 
 #include "AppDataSource.h"
+#include "RtTrendsServer.h"
 
 // -------------------------------------------------------------------------------------------------
 //
@@ -694,6 +695,78 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state)
 
 	return result;
 }
+
+bool AppDataSource::setRtTrendsSamplePeriod(int sessionID, E::RtTrendsSamplePeriod samplePeriod)
+{
+	return true;
+}
+
+bool AppDataSource::appendRtTrendsSignal(int sessionID, Hash appendSignalHash, E::RtTrendsSamplePeriod samplePeriod)
+{
+	// function return TRUE if appendSignalHash is present in this Source and Source required tracking
+	// if appendSignalHash is not in this Source, function return FALSE
+	//
+
+	const Signal* s = m_appSignals->getSignal(appendSignalHash);
+
+	if (s == nullptr)
+	{
+		return false;			// it is ok, appendSignalHash is not in current AppDataSource
+	}
+
+	RtTrendsSession* session = m_rtTrendsSessions.value(sessionID, nullptr);
+
+	if (session == nullptr)
+	{
+		session = new RtTrendsSession;
+
+		session->ID = sessionID;
+		session->samplePeriod = samplePeriod;
+
+		m_rtTrendsSessions.insert(sessionID, session);
+	}
+	else
+	{
+		assert(session->samplePeriod == samplePeriod);		// changes of samplePeriod required processing here!!!
+	}
+
+	assert(session->trackedSignals.contains(appendSignalHash) == false);
+
+	session->trackedSignals.insert(appendSignalHash, true);
+
+	return true;
+}
+
+bool AppDataSource::deleteRtTrendsSignal(int sessionID, Hash deleteSignalHash, E::RtTrendsSamplePeriod samplePeriod)
+{
+	// function return TRUE if this Source is not longer needs traking
+	// otherwise function return FALSE
+	//
+
+	RtTrendsSession* session = m_rtTrendsSessions.value(sessionID, nullptr);
+
+	if (session == nullptr)
+	{
+		assert(false);
+		return true;
+	}
+
+	int removedItems = session->trackedSignals.remove(deleteSignalHash);
+
+	assert(removedItems == 1);
+
+	if (session->trackedSignals.size() == 0)
+	{
+		m_rtTrendsSessions.remove(sessionID);
+		delete session;
+		return true;
+	}
+
+	assert(session->samplePeriod == samplePeriod);	// changes of samplePeriod required processing here!!
+
+	return false;
+}
+
 
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 {
