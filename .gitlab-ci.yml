@@ -20,7 +20,12 @@ windows build job:
     - "echo ------------------------------------"
     - "echo -   JOB STARTED: windows build     -"
     - "echo ------------------------------------"
+    - "echo --- debug ---"
+    - mkdir bin
+    - cd bin
     - "@echo i'm a result >> aaa.zip"
+    - cd ..
+    - "echo --- end of debug ---"
 #    - ToDo Pack bin to zip
   after_script:
 #    - "echo ToDo: Clean up build stuff and evering else"
