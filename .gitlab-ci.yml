@@ -1,11 +1,40 @@
-before_script:
-  - echo job before_script
-  - cd
-  - dir /S
+stages:
+  - build
+  - test
+  - deploy
 
-build:
+before_script:
+  - echo before_script
+  - cd
+  - dir
+  - set
+  
+after_script:
+  - echo after_script
+
+windows build job:
+  stage: build
+  tags:
+    - vs2017
   script:
-    - echo job build
-    - cd
-    - dir
-    - echo I like to build it, build it)))
+    - "echo ------------------------------------"
+    - "echo -   JOB STARTED: windows build     -"
+    - "echo ------------------------------------"
+  after_script:
+#    - "echo ToDo: Clean up build stuff and evering else"
+  artifacts:
+    paths:
+      - bin/release/*.exe
+      - bin/release/*.dll
+      - bin/release/*.lib
+      - bin/release/*.exp
+
+deploy job:
+  stage: deploy
+  only:
+    - master
+  script:
+    - "echo ------------------------------------"
+    - "echo -   JOB STARTED: deploy            -"
+    - "echo ------------------------------------"
+#    - TO DO Upload zopped exe to drive.goodle...
