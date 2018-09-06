@@ -241,6 +241,58 @@ void AppSignalStateEx::setAutoArchivingGroup(int archivingGroup)
 	m_autoArchivingGroup = archivingGroup;
 }
 
+void AppSignalStateEx::addRtSession(const QThread* rtProcessingOwner, std::shared_ptr<RtTrends::Session> newSession, Hash signalHash)
+{
+	TEST_PTR_RETURN(newSession);
+
+	if (signalHash != calcHash(m_signal->appSignalID()))
+	{
+		assert(false);
+		return;
+	}
+
+	takeRtProcessingOwnership(rtProcessingOwner);
+
+	int newSessionID = newSession->id();
+
+	if (m_rtSessions.contains(newSessionID) == false)
+	{
+		RtSession rtSession;
+
+		rtSession.session = newSession;
+		rtSession.samplePeriod = newSession->samplePeriod();
+
+		m_rtSessions.insert(newSessionID, rtSession);
+	}
+	else
+	{
+		assert(false);
+	}
+
+	releaseRtProcessingOwnership(rtProcessingOwner);
+}
+
+void AppSignalStateEx::takeRtProcessingOwnership(const QThread* newProcessingOwner)
+{
+	bool result = false;
+
+	do
+	{
+		const QThread* expectedOwner = nullptr;
+		result = m_rtProcessingOwner.compare_exchange_strong(expectedOwner, newProcessingOwner);
+	}
+	while(result == false);
+}
+
+void AppSignalStateEx::releaseRtProcessingOwnership(const QThread* currentProcessingOwner)
+{
+	bool result = m_rtProcessingOwner.compare_exchange_strong(currentProcessingOwner, nullptr);
+
+	assert(result == true);
+
+	Q_UNUSED(result);
+}
+
 void AppSignalStateEx::setNewCurState(const SimpleAppSignalState& newCurState)
 {
 	int writeStateIndex = m_curStateIndex.load() == 0 ? 1 : 0;
@@ -696,6 +748,7 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state)
 	return result;
 }
 
+/*
 bool AppDataSource::setRtTrendsSamplePeriod(int sessionID, E::RtTrendsSamplePeriod samplePeriod)
 {
 	return true;
@@ -714,11 +767,11 @@ bool AppDataSource::appendRtTrendsSignal(int sessionID, Hash appendSignalHash, E
 		return false;			// it is ok, appendSignalHash is not in current AppDataSource
 	}
 
-	RtTrendsSession* session = m_rtTrendsSessions.value(sessionID, nullptr);
+	RtTrends::Session* session = m_rtTrendsSessions.value(sessionID, nullptr);
 
 	if (session == nullptr)
 	{
-		session = new RtTrendsSession;
+		session = new RtTrends::Session;
 
 		session->ID = sessionID;
 		session->samplePeriod = samplePeriod;
@@ -743,7 +796,7 @@ bool AppDataSource::deleteRtTrendsSignal(int sessionID, Hash deleteSignalHash, E
 	// otherwise function return FALSE
 	//
 
-	RtTrendsSession* session = m_rtTrendsSessions.value(sessionID, nullptr);
+	RtTrends::Session* session = m_rtTrendsSessions.value(sessionID, nullptr);
 
 	if (session == nullptr)
 	{
@@ -766,8 +819,7 @@ bool AppDataSource::deleteRtTrendsSignal(int sessionID, Hash deleteSignalHash, E
 
 	return false;
 }
-
-
+*/
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 {
 	if (m_lastAutoArchivingTime == 0)

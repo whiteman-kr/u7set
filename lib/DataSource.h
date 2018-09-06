@@ -345,7 +345,7 @@ public:
 
 	// Functions used by data processing thread
 	//
-	bool seizeProcessingOwnership(const QThread* processingThread);
+	bool takeProcessingOwnership(const QThread* processingThread);
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	bool processRupFrameTimeQueue();

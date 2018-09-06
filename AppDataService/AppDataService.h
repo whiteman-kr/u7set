@@ -104,6 +104,8 @@ private:
 	AppDataSources m_appDataSources;				// all data sources
 	AppDataSourcesIP m_appDataSourcesIP;
 
+	SignalsToSources m_signalsToSources;
+
 	AppSignalStates m_signalStates;
 
 	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
@@ -116,7 +118,7 @@ private:
 
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
-	RtTrendsServerThread* m_rtTrendsServerThread = nullptr;
+	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 

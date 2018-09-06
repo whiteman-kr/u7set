@@ -7,63 +7,96 @@
 
 #include "AppDataSource.h"
 
-struct RtTrendsSession
+namespace RtTrends
 {
-	int ID = 0;
-	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_60s;
-	QHash<Hash, bool> trackedSignals;
-};
 
-class RtTrendsServer : public Tcp::Server
-{
-public:
-	RtTrendsServer(const SoftwareInfo& sotwareInfo,
-				   AppDataSourcesIP& appDataSourcesIP,
-				   std::shared_ptr<CircularLogger> logger);
+	struct SignalState
+	{
+		SimpleAppSignalState state;
 
-	Tcp::Server* getNewInstance() override;
+		qint64 archiveID = 0;
+		quint32 samplePeriodFlags = 0;
+	};
 
-	void onServerThreadStarted() override;
-	void onServerThreadFinished() override;
+	class SignalStatesQueue
+	{
+	private:
+		LockFreeQueue<SignalState> m_clientQueue;
+		LockFreeQueue<SignalState> m_dbQueue;
+	};
 
-	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
+	class Session
+	{
+	public:
+		Session(int id);
 
-private:
-	void onRtTrendsManagementRequest(const char* requestData, quint32 requestDataSize);
-	void setSamplePeriod(E::RtTrendsSamplePeriod newSamplePeriod);
-	void appendTrackedSignals(const Network::RtTrendsManagementRequest& request);
-	void deleteTrackedSignals(const Network::RtTrendsManagementRequest& request);
+		int id() const { return m_id; }
 
-	void onRtTrendsGetStateChangesRequest(const char* requestData, quint32 requestDataSize);
+		E::RtTrendsSamplePeriod samplePeriod() const { return m_samplePeriod; }
+		void setSamplePeriod(E::RtTrendsSamplePeriod sp) { m_samplePeriod = sp; }
+
+	private:
+		int m_id = 0;
+		E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_60s;
+		QHash<Hash, SignalStatesQueue*> m_trackedSignals;
+
+		std::atomic<qint64> m_archiveID = 0;
+	};
+
+	typedef std::shared_ptr<Session> SessionShared;
+
+	class Server : public Tcp::Server
+	{
+	public:
+		Server(const SoftwareInfo& sotwareInfo,
+			   const SignalsToSources& signalsToSources,
+			   std::shared_ptr<CircularLogger> logger);
+
+		Tcp::Server* getNewInstance() override;
+
+		void onServerThreadStarted() override;
+		void onServerThreadFinished() override;
+
+		void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
+
+	private:
+		void onRtTrendsManagementRequest(const char* requestData, quint32 requestDataSize);
+		void setSamplePeriod(E::RtTrendsSamplePeriod newSamplePeriod);
+		void appendTrackedSignals(const Network::RtTrendsManagementRequest& request);
+		void deleteTrackedSignals(const Network::RtTrendsManagementRequest& request);
+
+		void onRtTrendsGetStateChangesRequest(const char* requestData, quint32 requestDataSize);
 
 
-private:
-	AppDataSourcesIP& m_appDataSourcesIP;
-	std::shared_ptr<CircularLogger> m_log;
+	private:
+		const SignalsToSources& m_signalsToSources;
+		std::shared_ptr<CircularLogger> m_log;
 
-	static std::atomic<int> m_globalSessionID;
+		static std::atomic<int> m_globalSessionID;
+
+		//
+
+		Session m_session;
+		AppDataSourcesIP m_trackedSources;
+
+		//
+
+		Network::RtTrendsManagementRequest m_rtTrendsManagementRequest;
+		Network::RtTrendsManagementReply m_rtTrendsManagementReply;
+
+		Network::RtTrendsGetStateChangesRequest m_rtTrendsGetStateChangesRequest;
+		Network::RtTrendsGetStateChangesReply m_rtTrendsGetStateChangesReply;
+	};
 
 	//
 
-	RtTrendsSession m_session;
-	AppDataSourcesIP m_trackedSources;
+	class ServerThread : public Tcp::ServerThread
+	{
+	public:
+		ServerThread(const SoftwareInfo& sotwareInfo,
+					 const HostAddressPort& listenAddressPort,
+					 const SignalsToSources& signalsToSources,
+					 std::shared_ptr<CircularLogger> logger);
+	};
 
-	//
-
-	Network::RtTrendsManagementRequest m_rtTrendsManagementRequest;
-	Network::RtTrendsManagementReply m_rtTrendsManagementReply;
-
-	Network::RtTrendsGetStateChangesRequest m_rtTrendsGetStateChangesRequest;
-	Network::RtTrendsGetStateChangesReply m_rtTrendsGetStateChangesReply;
-};
-
-//
-
-class RtTrendsServerThread : public Tcp::ServerThread
-{
-public:
-	RtTrendsServerThread(const SoftwareInfo& sotwareInfo,
-						 const HostAddressPort& listenAddressPort,
-						 AppDataSourcesIP &appDataSourcesIP,
-						 std::shared_ptr<CircularLogger> logger);
-};
+}
