@@ -7,6 +7,7 @@
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
+#include "RtTrendsServer.h"
 
 #include "version.h"
 
@@ -234,10 +235,7 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 {
 	assert(m_rtTrendsServerThread == nullptr);
 
-	m_rtTrendsServerThread = new RtTrendsServerThread(softwareInfo(),
-													  m_cfgSettings.rtTrendsRequestIP,
-													  m_signalsToSources,
-													  logger());
+	m_rtTrendsServerThread = new RtTrends::ServerThread(m_cfgSettings.rtTrendsRequestIP, *this);
 
 	m_rtTrendsServerThread->start();
 }
@@ -519,7 +517,7 @@ void AppDataServiceWorker::prepareAppDataSources()
 	{
 		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount);
 
-		const QStringList& sourceSignals = m_appDataSources->associatedsignals();
+		const QStringList& sourceSignals = appDataSource->associatedSignals();
 
 		for(const QString& signalID : sourceSignals)
 		{

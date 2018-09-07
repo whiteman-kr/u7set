@@ -310,6 +310,8 @@ public:
 
 	// RtTrendsSamplePeriod
 	//
+	// ATTENTION: After changes in this enum function getSamplePeriodCounter() MUST BE CHECKED !!!
+	//
 	enum class RtTrendsSamplePeriod
 	{
 		sp_5ms,
@@ -545,8 +547,10 @@ public:
 };
 
 
-typedef QPair<QString, QString> StringPair;
+int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
 
+
+typedef QPair<QString, QString> StringPair;
 
 const char* const DataFormatStr[] =
 {
@@ -598,4 +602,3 @@ const int	SIZE_32BIT = 32;
 
 const int	SIZE_1WORD = 1;
 const int	SIZE_2WORD = 2;
-

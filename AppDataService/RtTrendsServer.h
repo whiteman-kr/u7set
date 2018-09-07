@@ -5,6 +5,7 @@
 
 #include "../Proto/network.pb.h"
 
+#include "AppDataService.h"
 #include "AppDataSource.h"
 
 namespace RtTrends
@@ -15,32 +16,56 @@ namespace RtTrends
 		SimpleAppSignalState state;
 
 		qint64 archiveID = 0;
-		quint32 samplePeriodFlags = 0;
+		//quint32 samplePeriodFlags = 0;
 	};
 
 	class SignalStatesQueue
 	{
+	public:
+		SignalStatesQueue(int queueSize);
+
+		void push(qint64 archiveID, const SimpleAppSignalState& state);
+
 	private:
 		LockFreeQueue<SignalState> m_clientQueue;
-		LockFreeQueue<SignalState> m_dbQueue;
+		//LockFreeQueue<SignalState> m_dbQueue;
 	};
 
 	class Session
 	{
 	public:
-		Session(int id);
+		Session(AppDataServiceWorker& service);
+		~Session();
 
 		int id() const { return m_id; }
 
 		E::RtTrendsSamplePeriod samplePeriod() const { return m_samplePeriod; }
 		void setSamplePeriod(E::RtTrendsSamplePeriod sp) { m_samplePeriod = sp; }
 
+		bool containsSignal(Hash signalHash);
+		bool appendSignal(Hash signalHash);
+		bool deleteSignal(Hash signalHash);
+
+		void pushSignalState(Hash signalHash, const SimpleAppSignalState& state);
+
 	private:
+		static std::atomic<int> m_globalID;
+
+		//
+
 		int m_id = 0;
+
+		AppSignalStates& m_signalStates;
+		const SignalsToSources& m_signalToSources;
+
+		//
+
 		E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_60s;
+		int m_samplePeriodCounter = 0;
+
 		QHash<Hash, SignalStatesQueue*> m_trackedSignals;
 
-		std::atomic<qint64> m_archiveID = 0;
+		std::atomic<qint64> m_archiveID = 1;
 	};
 
 	typedef std::shared_ptr<Session> SessionShared;
@@ -48,9 +73,7 @@ namespace RtTrends
 	class Server : public Tcp::Server
 	{
 	public:
-		Server(const SoftwareInfo& sotwareInfo,
-			   const SignalsToSources& signalsToSources,
-			   std::shared_ptr<CircularLogger> logger);
+		Server(AppDataServiceWorker& appDataService);
 
 		Tcp::Server* getNewInstance() override;
 
@@ -61,23 +84,26 @@ namespace RtTrends
 
 	private:
 		void onRtTrendsManagementRequest(const char* requestData, quint32 requestDataSize);
+
 		void setSamplePeriod(E::RtTrendsSamplePeriod newSamplePeriod);
+
 		void appendTrackedSignals(const Network::RtTrendsManagementRequest& request);
-		void deleteTrackedSignals(const Network::RtTrendsManagementRequest& request);
+		bool appendTrackedSignal(Hash signalHash, E::RtTrendsSamplePeriod samplePeriod);
+
+		void removeTrackedSignals(const Network::RtTrendsManagementRequest& request);
+		bool removeTrackedSignal(Hash signalHash);
 
 		void onRtTrendsGetStateChangesRequest(const char* requestData, quint32 requestDataSize);
 
-
 	private:
+		AppDataServiceWorker& m_appDataService;
 		const SignalsToSources& m_signalsToSources;
+		AppSignalStates& m_signalStates;
 		std::shared_ptr<CircularLogger> m_log;
-
-		static std::atomic<int> m_globalSessionID;
 
 		//
 
-		Session m_session;
-		AppDataSourcesIP m_trackedSources;
+		std::shared_ptr<Session> m_session;
 
 		//
 
@@ -93,10 +119,8 @@ namespace RtTrends
 	class ServerThread : public Tcp::ServerThread
 	{
 	public:
-		ServerThread(const SoftwareInfo& sotwareInfo,
-					 const HostAddressPort& listenAddressPort,
-					 const SignalsToSources& signalsToSources,
-					 std::shared_ptr<CircularLogger> logger);
+		ServerThread(const HostAddressPort& listenAddressPort,
+					 AppDataServiceWorker& appDataService);
 	};
 
 }

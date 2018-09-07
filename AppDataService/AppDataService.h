@@ -17,6 +17,11 @@
 
 class TcpArchiveClient;
 
+namespace RtTrends
+{
+	class ServerThread;
+}
+
 class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
@@ -38,6 +43,12 @@ public:
 
 	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port) const;
 	bool isConnectedToArchiveService(quint32 &ip, quint16 &port) const;
+
+	const AppDataSources& appDataSources() const { return m_appDataSources; }
+	const AppDataSourcesIP& appDataSourcesIP() const { return m_appDataSourcesIP; }
+	const SignalsToSources& signalsToSources() const { return m_signalsToSources; }
+
+	AppSignalStates& signalStates() { return m_signalStates; }
 
 private:
 	virtual void initCmdLineParser() override;

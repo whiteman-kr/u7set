@@ -1,3 +1,5 @@
+#include "AppDataService.h"
+
 #include "RtTrendsServer.h"
 
 namespace RtTrends
@@ -5,14 +7,100 @@ namespace RtTrends
 
 	// -----------------------------------------------------------------------------------------------
 	//
+	// Struct RtTrends::SignalStatesQueue implementation
+	//
+	// -----------------------------------------------------------------------------------------------
+
+	SignalStatesQueue::SignalStatesQueue(int queueSize) :
+		m_clientQueue(queueSize)
+		//m_dbQueue(queueSize)
+	{
+	}
+
+	void SignalStatesQueue::push(qint64 archiveID, const SimpleAppSignalState& state)
+	{
+		SignalState ss;
+
+		ss.state = state;
+		ss.archiveID = archiveID;
+
+		m_clientQueue.push(ss);
+		//m_dbQueue.push(&ss);
+	}
+
+	// -----------------------------------------------------------------------------------------------
+	//
 	// Class RtTrends::Session implementation
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	Session::Session(int id) :
-		m_id(id)
-	{
+	std::atomic<int> Session::m_globalID = 1;
 
+	Session::Session(AppDataServiceWorker& service) :
+		m_id(m_globalID.fetch_add(1)),
+		m_signalStates(service.signalStates()),
+		m_signalToSources(service.signalsToSources())
+	{
+	}
+
+	Session::~Session()
+	{
+		for(SignalStatesQueue* queue : m_trackedSignals)
+		{
+			delete queue;
+		}
+	}
+
+	bool Session::containsSignal(Hash signalHash)
+	{
+		return m_trackedSignals.contains(signalHash);
+	}
+
+	bool Session::appendSignal(Hash signalHash)
+	{
+		if (m_trackedSignals.contains(signalHash) == true)
+		{
+			assert(false);
+			return false;
+		}
+
+		SignalStatesQueue* statesQueue = new SignalStatesQueue(1000);		// 5 sec queue for min samplePeriod
+
+		m_trackedSignals.insert(signalHash, statesQueue);
+
+		return true;
+	}
+
+	bool Session::deleteSignal(Hash signalHash)
+	{
+		SignalStatesQueue* queue = m_trackedSignals.value(signalHash, nullptr);
+
+		if (queue == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_trackedSignals.remove(signalHash);
+
+		delete queue;
+
+		return true;
+	}
+
+	void Session::pushSignalState(Hash signalHash, const SimpleAppSignalState& state)
+	{
+		SignalStatesQueue* queue = m_trackedSignals.value(signalHash, nullptr);
+
+		if (queue == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		qint64 archiveID = m_archiveID.fetch_add(1);
+
+		queue->push(archiveID, state);
 	}
 
 	// -----------------------------------------------------------------------------------------------
@@ -21,33 +109,31 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	std::atomic<int> Server::m_globalSessionID = 1;
 
-
-	Server::Server(	const SoftwareInfo& sotwareInfo,
-					const SignalsToSources& signalsToSources,
-					std::shared_ptr<CircularLogger> logger) :
-		Tcp::Server(sotwareInfo),
-		m_signalsToSources(signalsToSources),
-		m_log(logger)
+	Server::Server(AppDataServiceWorker& appDataService) :
+		Tcp::Server(appDataService.softwareInfo()),
+		m_appDataService(appDataService),
+		m_signalsToSources(appDataService.signalsToSources()),
+		m_signalStates(appDataService.signalStates()),
+		m_log(appDataService.logger()),
+		m_session(std::make_shared<Session>(appDataService))
 	{
-		m_session.ID = std::atomic_fetch_add(&m_globalSessionID, 1);
 	}
 
 	Tcp::Server* Server::getNewInstance()
 	{
-		return new Server(localSoftwareInfo(), m_appDataSourcesIP, m_log);
+		return new Server(m_appDataService);
 	}
 
 
 	void Server::onServerThreadStarted()
 	{
-		LOG_MSG(m_log, QString("RtTrendsServer(%1) started, сlientID = %2").arg(m_session.ID).arg(connectedSoftwareInfo().equipmentID()));
+		LOG_MSG(m_log, QString("RtTrendsServer(%1) started, сlientID = %2").arg(m_session->id()).arg(connectedSoftwareInfo().equipmentID()));
 	}
 
 	void Server::onServerThreadFinished()
 	{
-		LOG_MSG(m_log, QString("RtTrendsServer(%1) finished").arg(m_session.ID).arg(connectedSoftwareInfo().equipmentID()));
+		LOG_MSG(m_log, QString("RtTrendsServer(%1) finished").arg(m_session->id()).arg(connectedSoftwareInfo().equipmentID()));
 	}
 
 	void Server::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -86,90 +172,98 @@ namespace RtTrends
 
 		appendTrackedSignals(m_rtTrendsManagementRequest);
 
-		deleteTrackedSignals(m_rtTrendsManagementRequest);
+		removeTrackedSignals(m_rtTrendsManagementRequest);
 
 		sendReply(m_rtTrendsManagementReply);
 	}
 
 	void Server::setSamplePeriod(E::RtTrendsSamplePeriod newSamplePeriod)
 	{
-		if (newSamplePeriod == m_session.samplePeriod)
+		if (newSamplePeriod == m_session->samplePeriod())
 		{
 			return;
 		}
 
-		m_session.samplePeriod = newSamplePeriod;
-
-		for(AppDataSourceShared source : m_trackedSources)
-		{
-			source->setRtTrendsSamplePeriod(m_session.ID, m_session.samplePeriod);
-		}
+		m_session->setSamplePeriod(newSamplePeriod);
 	}
 
 	void Server::appendTrackedSignals(const Network::RtTrendsManagementRequest& request)
 	{
 		int size = request.appendsignalhashes_size();
 
+		E::RtTrendsSamplePeriod samplePeriod = static_cast<E::RtTrendsSamplePeriod>(m_rtTrendsManagementRequest.sampleperiod());
+
 		for(int i = 0; i < size; i++)
 		{
 			Hash hashToAppend = request.appendsignalhashes(i);
 
-			if (m_session.trackedSignals.contains(hashToAppend) == true)
-			{
-				continue;
-			}
-
-			AppDataSourceShared source = m_signalsToSources.value(hashToAppend, nullptr);
-
-			if (source == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			bool res = source->appendRtTrendsSignal(m_session.ID, hashToAppend, m_session.samplePeriod);
-
-			if (res == false)
-			{
-				assert(false);
-				continue;
-			}
-
-			m_trackedSources.insert(source->lmAddress32(), source);
-			m_session.trackedSignals.insert(hashToAppend, true);
+			appendTrackedSignal(hashToAppend, samplePeriod);
 		}
 	}
 
-	void Server::deleteTrackedSignals(const Network::RtTrendsManagementRequest& request)
+	bool Server::appendTrackedSignal(Hash signalHash, E::RtTrendsSamplePeriod samplePeriod)
+	{
+		if (m_session->containsSignal(signalHash) == true)
+		{
+			return true;
+		}
+
+		AppDataSourceShared source = m_signalsToSources.value(signalHash, nullptr);
+
+		if (source == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		int lmWorkcycle_ms = source->lmWorkcycle_ms();
+
+		int samplePeriodCounter = getSamplePeriodCounter(samplePeriod, lmWorkcycle_ms);
+
+		AppSignalStateEx* state = m_signalStates.getStateByHash(signalHash);
+
+		if (state == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		m_session->appendSignal(signalHash);
+
+		state->appendRtSession(signalHash, QThread::currentThread(), m_session, samplePeriodCounter);
+
+		return true;
+	}
+
+	void Server::removeTrackedSignals(const Network::RtTrendsManagementRequest& request)
 	{
 		int size = request.deletesignalhashes_size();
 
 		for(int i = 0; i < size; i++)
 		{
-			Hash hashToDelete = request.appendsignalhashes(i);
+			Hash hashToDelete = request.deletesignalhashes(i);
 
-			if (m_session.trackedSignals.contains(hashToDelete) == false)
-			{
-				continue;
-			}
-
-			AppDataSourceShared source = m_signalsToSources.value(hashToDelete, nullptr);
-
-			if (source == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			m_session.trackedSignals.remove(hashToDelete);
-
-			bool removeSourceFromTracked = source->deleteRtTrendsSignal(m_session.ID, hashToDelete, m_session.samplePeriod);
-
-			if (removeSourceFromTracked == true)
-			{
-				m_trackedSources.remove(source->lmAddress32());
-			}
+			removeTrackedSignal(hashToDelete);
 		}
+	}
+
+	bool Server::removeTrackedSignal(Hash signalHash)
+	{
+		if (m_session->containsSignal(signalHash) == false)
+		{
+			return false;
+		}
+
+		AppSignalStateEx* state = m_signalStates.getStateByHash(signalHash);
+
+		if (state == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		state->removeRtSession(signalHash, QThread::currentThread(), m_session);
+
+		m_session->deleteSignal(signalHash);
+
+		return true;
 	}
 
 	void Server::onRtTrendsGetStateChangesRequest(const char* requestData, quint32 requestDataSize)
@@ -198,14 +292,11 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	ServerThread::ServerThread(	const SoftwareInfo& sotwareInfo,
-								const HostAddressPort& listenAddressPort,
-								const SignalsToSources& signalsToSources,
-								std::shared_ptr<CircularLogger> logger) :
+	ServerThread::ServerThread(	const HostAddressPort& listenAddressPort,
+								AppDataServiceWorker& appDataService) :
 		Tcp::ServerThread(listenAddressPort,
-						  new Server(sotwareInfo, signalsToSources, logger),
-						  logger)
+						  new Server(appDataService),
+						  appDataService.logger())
 	{
 	}
-
 }

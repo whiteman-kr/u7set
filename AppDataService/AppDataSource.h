@@ -51,15 +51,24 @@ public:
 
 	// Real time trends support
 	//
-	void addRtSession(const QThread* rtProcessingOwner, std::shared_ptr<RtTrends::Session> session);
+	void appendRtSession(Hash signalHash,
+						const QThread* rtProcessingOwner,
+						std::shared_ptr<RtTrends::Session> newSession,
+						int samplePeriodCounter);
+
+	void removeRtSession(Hash signalHash,
+						const QThread* rtProcessingOwner,
+						std::shared_ptr<RtTrends::Session> sessionToRemove);
+
+	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
 
 private:
 
 	struct RtSession
 	{
 		std::shared_ptr<RtTrends::Session> session;
-
-		int samplePeriod = 0;
+		int sessionID = 0;
+		int samplePeriodCounter = 0;
 		int sampleCounter = 0;
 	};
 
@@ -71,6 +80,8 @@ private:
 	//
 	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
 	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
+
+	int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
 
 private:
 	SimpleAppSignalState m_current[2];
@@ -101,6 +112,8 @@ private:
 	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
 	Signal* m_signal = nullptr;
+	Hash m_signalHash;
+
 	int m_index = 0;
 
 	// Real time trends support
@@ -127,6 +140,8 @@ public:
 
 	AppSignalStateEx* operator [] (int index);
 
+	AppSignalStateEx* getStateByHash(Hash signalHash);
+
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
@@ -140,7 +155,7 @@ private:
 	AppSignalStateEx* m_appSignalState = nullptr;
 	int m_size = 0;
 
-	QHash<Hash, const AppSignalStateEx*> m_hash2State;
+	QHash<Hash, AppSignalStateEx*> m_hash2State;
 };
 
 
@@ -193,12 +208,6 @@ public:
 
 	bool getSignalState(SimpleAppSignalState* state);
 
-	// Real time trends support
-	//
-//	bool setRtTrendsSamplePeriod(int sessionID, E::RtTrendsSamplePeriod samplePeriod);
-	//bool appendRtTrendsSignal(int sessionID, Hash appendSignalHash, E::RtTrendsSamplePeriod samplePeriod);
-//	bool deleteRtTrendsSignal(int sessionID, Hash deleteSignalHash, E::RtTrendsSamplePeriod samplePeriod);
-
 private:
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
@@ -239,9 +248,6 @@ private:
 	int m_autoArchivingGroupsCount = 0;
 	qint64 m_lastAutoArchivingTime = 0;
 	int m_lastAutoArchivingGroup = AppSignalStateEx::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
-
-	// Real time trends support
-//	QHash<int, RtTrends::Session*> m_rtTrendsSessions;
 };
 
 typedef std::shared_ptr<AppDataSource> AppDataSourceShared;
