@@ -370,27 +370,6 @@ void AppSignalStateEx::releaseRtProcessingOwnership(const QThread* currentProces
 	Q_UNUSED(result);
 }
 
-int AppSignalStateEx::getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms)
-{
-	if (lmWorkcycle_ms <= 0)
-	{
-		assert(false);
-		lmWorkcycle_ms = 5;
-	}
-
-	const int periods_ms[] = { 5, 10, 20, 50, 100, 250, 500, 1000, 5000, 15000, 30000, 60000 };
-
-	int periodIndex = static_cast<int>(period);
-
-	if (periodIndex < 0 || periodIndex >= (sizeof(periods_ms) / sizeof(const int)))
-	{
-		assert(false);
-		return 1000 / lmWorkcycle_ms;
-	}
-
-	return periods_ms[periodIndex] / lmWorkcycle_ms;
-}
-
 void AppSignalStateEx::setNewCurState(const SimpleAppSignalState& newCurState)
 {
 	int writeStateIndex = m_curStateIndex.load() == 0 ? 1 : 0;

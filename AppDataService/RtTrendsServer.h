@@ -22,11 +22,15 @@ namespace RtTrends
 	class SignalStatesQueue
 	{
 	public:
-		SignalStatesQueue(int queueSize);
+		SignalStatesQueue(Hash signalHash, int queueSize);
 
+		Hash signalHash() const { return m_signalHash; }
 		void push(qint64 archiveID, const SimpleAppSignalState& state);
 
+		LockFreeQueue<SignalState>& clientQueue() { return m_clientQueue; }
+
 	private:
+		Hash m_signalHash = 0;
 		LockFreeQueue<SignalState> m_clientQueue;
 		//LockFreeQueue<SignalState> m_dbQueue;
 	};
@@ -47,6 +51,10 @@ namespace RtTrends
 		bool deleteSignal(Hash signalHash);
 
 		void pushSignalState(Hash signalHash, const SimpleAppSignalState& state);
+
+		void getTrackedSignalHashes(QVector<Hash>* hashes);
+
+		const QHash<Hash, SignalStatesQueue*>& trackedSignals() const { return m_trackedSignals; }
 
 	private:
 		static std::atomic<int> m_globalID;
@@ -79,6 +87,8 @@ namespace RtTrends
 
 		void onServerThreadStarted() override;
 		void onServerThreadFinished() override;
+
+		void onConnectedSoftwareInfoChanged() override;
 
 		void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 

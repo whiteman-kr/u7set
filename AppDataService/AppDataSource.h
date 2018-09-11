@@ -62,6 +62,8 @@ public:
 
 	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
 
+	const Signal* signal() const { return m_signal; }
+
 private:
 
 	struct RtSession
@@ -80,8 +82,6 @@ private:
 	//
 	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
 	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
-
-	int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
 
 private:
 	SimpleAppSignalState m_current[2];

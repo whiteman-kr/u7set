@@ -11,7 +11,8 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	SignalStatesQueue::SignalStatesQueue(int queueSize) :
+	SignalStatesQueue::SignalStatesQueue(Hash signalHash, int queueSize) :
+		m_signalHash(signalHash),
 		m_clientQueue(queueSize)
 		//m_dbQueue(queueSize)
 	{
@@ -34,7 +35,7 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	std::atomic<int> Session::m_globalID = 1;
+	std::atomic<int> Session::m_globalID = 0;
 
 	Session::Session(AppDataServiceWorker& service) :
 		m_id(m_globalID.fetch_add(1)),
@@ -64,7 +65,7 @@ namespace RtTrends
 			return false;
 		}
 
-		SignalStatesQueue* statesQueue = new SignalStatesQueue(1000);		// 5 sec queue for min samplePeriod
+		SignalStatesQueue* statesQueue = new SignalStatesQueue(signalHash, 1000);		// 5 sec queue for min samplePeriod
 
 		m_trackedSignals.insert(signalHash, statesQueue);
 
@@ -103,6 +104,15 @@ namespace RtTrends
 		queue->push(archiveID, state);
 	}
 
+	void Session::getTrackedSignalHashes(QVector<Hash>* hashes)
+	{
+		TEST_PTR_RETURN(hashes);
+
+		hashes->clear();
+
+		*hashes = QVector<Hash>::fromList(m_trackedSignals.uniqueKeys());
+	}
+
 	// -----------------------------------------------------------------------------------------------
 	//
 	// Class RtTrends::Server implementation
@@ -125,15 +135,19 @@ namespace RtTrends
 		return new Server(m_appDataService);
 	}
 
-
 	void Server::onServerThreadStarted()
 	{
-		LOG_MSG(m_log, QString("RtTrendsServer(%1) started, сlientID = %2").arg(m_session->id()).arg(connectedSoftwareInfo().equipmentID()));
+		DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) started").arg(m_session->id()));
 	}
 
 	void Server::onServerThreadFinished()
 	{
-		LOG_MSG(m_log, QString("RtTrendsServer(%1) finished").arg(m_session->id()).arg(connectedSoftwareInfo().equipmentID()));
+		DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) finished").arg(m_session->id()));
+	}
+
+	void Server::onConnectedSoftwareInfoChanged()
+	{
+		DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) clientID = %2").arg(m_session->id()).arg(connectedSoftwareInfo().equipmentID()));
 	}
 
 	void Server::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -173,6 +187,17 @@ namespace RtTrends
 		appendTrackedSignals(m_rtTrendsManagementRequest);
 
 		removeTrackedSignals(m_rtTrendsManagementRequest);
+
+		m_rtTrendsManagementReply.set_sampleperiod(static_cast<int>(m_session->samplePeriod()));
+
+		QVector<Hash> trakedSignals;
+
+		m_session->getTrackedSignalHashes(&trakedSignals);
+
+		for(Hash hash : trakedSignals)
+		{
+			m_rtTrendsManagementReply.add_trackedsignalhashes(hash);
+		}
 
 		sendReply(m_rtTrendsManagementReply);
 	}
@@ -226,6 +251,11 @@ namespace RtTrends
 			ASSERT_RETURN_FALSE;
 		}
 
+		if (state->signal() != nullptr)
+		{
+			DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) append signal %2").arg(m_session->id()).arg(state->signal()->appSignalID()));
+		}
+
 		m_session->appendSignal(signalHash);
 
 		state->appendRtSession(signalHash, QThread::currentThread(), m_session, samplePeriodCounter);
@@ -259,6 +289,11 @@ namespace RtTrends
 			ASSERT_RETURN_FALSE;
 		}
 
+		if (state->signal() != nullptr)
+		{
+			DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) remove signal %2").arg(m_session->id()).arg(state->signal()->appSignalID()));
+		}
+
 		state->removeRtSession(signalHash, QThread::currentThread(), m_session);
 
 		m_session->deleteSignal(signalHash);
@@ -280,7 +315,44 @@ namespace RtTrends
 			return;
 		}
 
-		assert(false);	// do real work!
+		const QHash<Hash, SignalStatesQueue*>& trackedSignals = m_session->trackedSignals();
+
+		for(SignalStatesQueue* queue : trackedSignals)
+		{
+			TEST_PTR_CONTINUE(queue);
+
+			Hash signalHash = queue->signalHash();
+
+			LockFreeQueue<SignalState>& clientQueue = queue->clientQueue();
+
+			int count = 0;
+
+			SignalState ss;
+
+			while(clientQueue.isNotEmpty() == true && count < 1000)
+			{
+				clientQueue.pop(&ss);
+
+				Proto::AppSignalState* appSignalState = m_rtTrendsGetStateChangesReply.add_signalstates();
+
+				if (appSignalState == nullptr)
+				{
+					assert(false);
+					break;
+				}
+
+				appSignalState->set_hash(signalHash);
+				appSignalState->set_value(ss.state.value);
+				appSignalState->set_flags(ss.state.flags.all);
+
+				appSignalState->set_systemtime(ss.state.time.system.timeStamp);
+				appSignalState->set_localtime(ss.state.time.local.timeStamp);
+				appSignalState->set_planttime(ss.state.time.plant.timeStamp);
+				appSignalState->set_archiveid(ss.archiveID);
+
+				count++;
+			}
+		}
 
 		sendReply(m_rtTrendsGetStateChangesReply);
 	}
