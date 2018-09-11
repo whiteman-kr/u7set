@@ -108,6 +108,8 @@ namespace TrendLib
 		void durationChanged(qint64 duration);
 		void showSignalProperties(QString appSignalId);
 
+		void trendModeChanged();
+
 		// Properties
 		//
 	public:

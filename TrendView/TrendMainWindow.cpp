@@ -1187,4 +1187,14 @@ static int lastCopyCount = false;
 		return m_trendWidget->trend();
 	}
 
+	E::TrendMode TrendMainWindow::trendMode() const
+	{
+		return m_trendWidget->trendMode();
+	}
+
+	void TrendMainWindow::setTrendMode(E::TrendMode value)
+	{
+		m_trendWidget->setTrendMode(value);
+	}
+
 }

@@ -91,6 +91,9 @@ namespace TrendLib
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
 
+		E::TrendMode trendMode() const;
+		void setTrendMode(E::TrendMode value);
+
 	private:
 		Ui::TrendsMainWindow *ui;
 

@@ -1131,6 +1131,8 @@ namespace TrendLib
 		{
 			m_trendParam.setTrendMode(value);
 			updateWidget();
+
+			emit trendModeChanged();
 		}
 
 		return;

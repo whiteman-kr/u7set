@@ -70,6 +70,7 @@ void MonitorTrends::unregisterTrendWindow(QString name)
 
 MonitorTrendsWidget::MonitorTrendsWidget(MonitorConfigController* configController, QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
+	m_configController(configController),
 	m_archiveService1(configController->configuration().archiveService1),
 	m_archiveService2(configController->configuration().archiveService2)
 {
@@ -98,18 +99,11 @@ static int no = 1;
 
 	// Communication thread
 	//
-	m_archiveTcpClient =  new ArchiveTrendTcpClient(configController);
+	createArchiveConnection();
 
-	m_archiveTcpClientThread = new SimpleThread(m_archiveTcpClient);
-	m_archiveTcpClientThread->start();
-
-	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
-
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
-
-	//connect(m_tcpClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
+	// --
+	//
+	connect(m_trendWidget, &TrendLib::TrendWidget::trendModeChanged, this, &MonitorTrendsWidget::slot_trendModeChanged);
 	//connect(m_tcpClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
 	// --
 	//
@@ -227,6 +221,46 @@ void MonitorTrendsWidget::signalsButton()
 	return;
 }
 
+void MonitorTrendsWidget::createArchiveConnection()
+{
+	assert(m_configController);
+	assert(m_archiveTcpClient == nullptr);
+	assert(m_archiveTcpClientThread == nullptr);
+
+	m_archiveTcpClient = new ArchiveTrendTcpClient(m_configController);
+
+	m_archiveTcpClientThread = new SimpleThread(m_archiveTcpClient);	// Archive mode is default one
+	m_archiveTcpClientThread->start();
+
+	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
+
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+
+	return;
+}
+
+void MonitorTrendsWidget::createRealtimeConnection()
+{
+	assert(m_configController);
+	assert(m_rtTcpClient == nullptr);
+	assert(m_rtTcpClientThread == nullptr);
+
+	m_rtTcpClient = new RtTrendTcpClient(m_configController);
+
+	m_rtTcpClientThread = new SimpleThread(m_rtTcpClient);	// Archive mode is default one
+	m_rtTcpClientThread->start();
+
+	//connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
+	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
+	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
+
+	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+
+	return;
+}
+
 void MonitorTrendsWidget::slot_dataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
 {
 	assert(m_trendWidget);
@@ -244,5 +278,37 @@ void MonitorTrendsWidget::slot_dataReceived(QString /*appSignalId*/, TimeStamp r
 	}
 
 	m_trendWidget->updateWidget();
+	return;
+}
+
+void MonitorTrendsWidget::slot_trendModeChanged()
+{
+	qDebug() << __FUNCTION__ << ", TrendMode = " << trendMode();
+
+	if (m_archiveTcpClientThread != nullptr)
+	{
+		m_archiveTcpClientThread->quitAndWait(10000);
+		delete m_archiveTcpClientThread;
+
+		m_archiveTcpClient = nullptr;
+	}
+
+	if (m_rtTcpClientThread != nullptr)
+	{
+		m_rtTcpClientThread->quitAndWait(10000);
+		delete m_rtTcpClientThread;
+
+		m_rtTcpClient = nullptr;
+	}
+
+	if (trendMode() == E::TrendMode::Archive)
+	{
+		createArchiveConnection();
+	}
+	else
+	{
+		createRealtimeConnection();
+	}
+
 	return;
 }
