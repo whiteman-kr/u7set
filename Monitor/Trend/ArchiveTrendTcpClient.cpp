@@ -1,13 +1,14 @@
-#include "TrendTcpClient.h"
+#include "Stable.h"
+#include "AcrhiveTrendTcpClient.h"
 #include "Settings.h"
 
-TrendTcpClient::TrendTcpClient(MonitorConfigController* configController) :
+ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController) :
 	Tcp::Client(configController->softwareInfo(),
 				configController->configuration().archiveService1.address(),
 				configController->configuration().archiveService2.address()),
 	m_cfgController(configController)
 {
-	qDebug() << "TrendTcpClient::TrendTcpClient(...)";
+	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...)";
 
 	enableWatchdogTimer(false);
 
@@ -16,22 +17,24 @@ TrendTcpClient::TrendTcpClient(MonitorConfigController* configController) :
 	return;
 }
 
-TrendTcpClient::~TrendTcpClient()
+ArchiveTrendTcpClient::~ArchiveTrendTcpClient()
 {
-	qDebug() << "TrendTcpClient::~TrendTcpClient()";
+	qDebug() << "ArchiveTrendTcpClient::~ArchiveTrendTcpClient()";
 }
 
-void TrendTcpClient::timerEvent(QTimerEvent* event)
+void ArchiveTrendTcpClient::timerEvent(QTimerEvent* event)
 {
 	if (requestInProgress == true)
 	{
-		m_statRequestDescription = QString("%1 - %2").arg(m_currentRequest.appSignalId).arg(m_currentRequest.hourToRequest.toDateTime().toString("dd.MM.yyyy hh:mm"));
+		QString stat = QString("%1 - %2").arg(m_currentRequest.appSignalId).arg(m_currentRequest.hourToRequest.toDateTime().toString("dd.MM.yyyy hh:mm"));
+		setStatText(stat);
 	}
 	else
 	{
-		m_statRequestDescription.clear();
+		setStatText(QString());
 	}
-	m_statRequestQueueSize = static_cast<int>(m_queue.size());
+
+	setStatRequestQueueSize(static_cast<int>(m_queue.size()));
 
 	if (event->timerId() == m_periodicTimerId &&
 		requestInProgress == false &&
@@ -44,12 +47,12 @@ void TrendTcpClient::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void TrendTcpClient::onClientThreadStarted()
+void ArchiveTrendTcpClient::onClientThreadStarted()
 {
-	qDebug() << "TcpSignalClient::TrendTcpClient()";
+	qDebug() << "ArchiveTrendTcpClient::onClientThreadStarted()";
 
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &TrendTcpClient::slot_configurationArrived,
+			this, &ArchiveTrendTcpClient::slot_configurationArrived,
 			Qt::QueuedConnection);
 
 	m_periodicTimerId = startTimer(theSettings.requestTimeInterval());	// Start it here, as this function is running in the right thread
@@ -57,34 +60,34 @@ void TrendTcpClient::onClientThreadStarted()
 	return;
 }
 
-void TrendTcpClient::onClientThreadFinished()
+void ArchiveTrendTcpClient::onClientThreadFinished()
 {
-	qDebug() << "TrendTcpClient::onClientThreadFinished()";
+	qDebug() << "ArchiveTrendTcpClient::onClientThreadFinished()";
 }
 
-void TrendTcpClient::onConnection()
+void ArchiveTrendTcpClient::onConnection()
 {
-	qDebug() << "TrendTcpClient::onConnection()";
+	qDebug() << "ArchiveTrendTcpClient::onConnection()";
 	assert(isClearToSendRequest() == true);
 
 	return;
 }
 
-void TrendTcpClient::onDisconnection()
+void ArchiveTrendTcpClient::onDisconnection()
 {
-	qDebug() << "TrendTcpClient::onDisconnection";
+	qDebug() << "ArchiveTrendTcpClient::onDisconnection";
 	requestInProgress = false;
 }
 
-void TrendTcpClient::onReplyTimeout()
+void ArchiveTrendTcpClient::onReplyTimeout()
 {
-	qDebug() << "TrendTcpClient::onReplyTimeout()";
+	qDebug() << "ArchiveTrendTcpClient::onReplyTimeout()";
 	requestInProgress = false;
 }
 
-void TrendTcpClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+void ArchiveTrendTcpClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
-	m_statTcpReplyCount ++;
+	incStatReplyCount();
 
 	if (replyData == nullptr)
 	{
@@ -114,7 +117,7 @@ void TrendTcpClient::processReply(quint32 requestID, const char* replyData, quin
 	return;
 }
 
-void TrendTcpClient::resetRequestCycle()
+void ArchiveTrendTcpClient::resetRequestCycle()
 {
 	QThread::msleep(0);
 
@@ -131,7 +134,7 @@ void TrendTcpClient::resetRequestCycle()
 	return;
 }
 
-void TrendTcpClient::requestStart()
+void ArchiveTrendTcpClient::requestStart()
 {
 	assert(isClearToSendRequest());
 
@@ -144,7 +147,7 @@ void TrendTcpClient::requestStart()
 	m_currentRequest = m_queue.back();	// THESE TWO LINES MUST BE IN CONSISTENCY!!!!
 	m_queue.pop_back();					// Take the last one, let's assume it is shown now and more important
 
-	m_statTcpRequestCount ++;
+	incStatRequestCount();
 	requestInProgress = true;
 
 	m_currentSignalHash = ::calcHash(m_currentRequest.appSignalId);
@@ -166,7 +169,7 @@ void TrendTcpClient::requestStart()
 	return;
 }
 
-void TrendTcpClient::processStart(const QByteArray& data)
+void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 {
 	qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: " << m_startRequestTime.elapsed();
 
@@ -203,7 +206,7 @@ void TrendTcpClient::processStart(const QByteArray& data)
 	return;
 }
 
-void TrendTcpClient::requestNext()
+void ArchiveTrendTcpClient::requestNext()
 {
 	assert(isClearToSendRequest());
 	assert(m_currentRequestId != 0);
@@ -213,12 +216,12 @@ void TrendTcpClient::requestNext()
 
 	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_NEXT, m_nextRequest);
 
-	m_statTcpRequestCount ++;
+	incStatRequestCount();
 
 	return;
 }
 
-void TrendTcpClient::processNext(const QByteArray& data)
+void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 {
 	bool ok = m_nextReply.ParseFromArray(data.constData(), data.size());
 
@@ -349,9 +352,9 @@ void TrendTcpClient::processNext(const QByteArray& data)
 	return;
 }
 
-void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType)
+void ArchiveTrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType)
 {
-	//qDebug() << "TrendTcpClient::slot_requestData, AppSignalID = " << appSignalId << ", Time = " << hourToRequest.toDateTime();
+	//qDebug() << "ArchiveTrendTcpClient::slot_requestData, AppSignalID = " << appSignalId << ", Time = " << hourToRequest.toDateTime();
 
 	RequestQueue request;
 
@@ -376,7 +379,7 @@ void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToReque
 	return;
 }
 
-void TrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
+void ArchiveTrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
 {
 	HostAddressPort s1 = configuration.archiveService1.address();
 	HostAddressPort s2 = configuration.archiveService2.address();
@@ -386,6 +389,62 @@ void TrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
 	{
 		setServers(s1, s2, true);
 	}
+
+	return;
+}
+
+ArchiveTrendTcpClient::Stat ArchiveTrendTcpClient::stat() const
+{
+	ArchiveTrendTcpClient::Stat result;
+
+	m_statMutex.lock();
+	result = m_stat;
+	m_statMutex.unlock();
+
+	return result;
+}
+
+void ArchiveTrendTcpClient::setStat(const Stat& stat)
+{
+	m_statMutex.lock();
+	m_stat = stat;
+	m_statMutex.unlock();
+
+	return;
+}
+
+void ArchiveTrendTcpClient::setStatText(const QString& text)
+{
+	m_statMutex.lock();
+	m_stat.text = text;
+	m_statMutex.unlock();
+
+	return;
+}
+
+void ArchiveTrendTcpClient::setStatRequestQueueSize(int value)
+{
+	m_statMutex.lock();
+	m_stat.requestQueueSize = value;
+	m_statMutex.unlock();
+
+	return;
+}
+
+void ArchiveTrendTcpClient::incStatRequestCount()
+{
+	m_statMutex.lock();
+	m_stat.requestCount ++;
+	m_statMutex.unlock();
+
+	return;
+}
+
+void ArchiveTrendTcpClient::incStatReplyCount()
+{
+	m_statMutex.lock();
+	m_stat.replyCount ++;
+	m_statMutex.unlock();
 
 	return;
 }

@@ -1,7 +1,5 @@
+#include "Stable.h"
 #include "Settings.h"
-#include <QStandardPaths>
-#include <QDir>
-#include <QSettings>
 #include "../lib/SocketIO.h"
 
 Settings theSettings;

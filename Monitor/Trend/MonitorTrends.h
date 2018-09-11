@@ -2,9 +2,11 @@
 #define MONITORTRENDS_H
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
-#include "TrendTcpClient.h"
+#include "AcrhiveTrendTcpClient.h"
+#include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
+class QLabel;
 
 class MonitorTrends
 {
@@ -24,12 +26,16 @@ private:
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
 public:
-	explicit MonitorTrendsWidget(MonitorConfigController* configController, QWidget* parent);
+	MonitorTrendsWidget(MonitorConfigController* configController, QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void signalsButton() override;
+
+private:
+	void createArchiveConnection();
+	void createRealtimeConnection();
 
 public:
 
@@ -37,15 +43,22 @@ public:
 	//
 protected slots:
 	void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void slot_trendModeChanged();
+
 
 	// Data
 	//
 private:
+	MonitorConfigController* m_configController = nullptr;
+
 	ConfigConnection m_archiveService1;
 	ConfigConnection m_archiveService2;
 
-	TrendTcpClient* m_tcpClient = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;
+	ArchiveTrendTcpClient* m_archiveTcpClient = nullptr;
+	SimpleThread* m_archiveTcpClientThread = nullptr;
+
+	RtTrendTcpClient* m_rtTcpClient = nullptr;
+	SimpleThread* m_rtTcpClientThread = nullptr;
 
 	enum  StatusBarColumns
 	{

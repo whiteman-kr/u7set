@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "TcpSignalClient.h"
 #include "Settings.h"
 #include "version.h"

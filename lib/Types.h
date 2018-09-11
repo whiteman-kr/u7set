@@ -328,6 +328,13 @@ public:
 		sp_60s,
 	};
 
+	enum class TrendMode
+	{
+		Archive,
+		Realtime
+	};
+	Q_ENUM(TrendMode)
+
 	// Property editor type
 	//
 	enum class PropertySpecificEditor : qint16

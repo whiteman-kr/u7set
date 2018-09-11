@@ -1,6 +1,7 @@
-#ifndef ARCHIVETRENDTCPCLIENT_H
-#define ARCHIVETRENDTCPCLIENT_H
+#ifndef RTTRENDTCPCLIENT_H
+#define RTTRENDTCPCLIENT_H
 
+#include <atomic>
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../lib/TimeStamp.h"
@@ -8,13 +9,13 @@
 #include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"
 
-class ArchiveTrendTcpClient : public Tcp::Client
+class RtTrendTcpClient : public Tcp::Client
 {
 	Q_OBJECT
 
 public:
-	ArchiveTrendTcpClient(MonitorConfigController* configController);
-	virtual ~ArchiveTrendTcpClient();
+	RtTrendTcpClient(MonitorConfigController* configController);
+	virtual ~RtTrendTcpClient();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -39,7 +40,7 @@ protected:
 	void processNext(const QByteArray& data);
 
 public slots:
-	void slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType);
+	//void slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType);
 
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
@@ -48,50 +49,69 @@ signals:
 	void dataReady(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 	void requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
 
+	// Staticstic
+	//
+public:
+	struct Stat
+	{
+		QString text;
+		int requestQueueSize = 0;
+		int requestCount = 0;
+		int replyCount = 0;
+	};
+
+	Stat stat() const;
+	void setStat(const Stat& stat);
+
+	void setStatText(const QString& text);
+	void setStatRequestQueueSize(int value);
+
+	void incStatRequestCount();
+	void incStatReplyCount();
+
+	// Data
+	//
 private:
 	int m_periodicTimerId = 0;
 
 	MonitorConfigController* m_cfgController = nullptr;
 
-	struct RequestQueue
-	{
-		QString appSignalId;
-		TimeStamp hourToRequest;
-		E::TimeType timeType;
+//	struct RequestQueue
+//	{
+//		QString appSignalId;
+//		TimeStamp hourToRequest;
+//		E::TimeType timeType;
 
-		bool operator== (const RequestQueue& r) const
-		{
-			return	this->appSignalId == r.appSignalId &&
-					this->hourToRequest == r.hourToRequest &&
-					this->timeType == r.timeType;
-		}
-	};
+//		bool operator== (const RequestQueue& r) const
+//		{
+//			return	this->appSignalId == r.appSignalId &&
+//					this->hourToRequest == r.hourToRequest &&
+//					this->timeType == r.timeType;
+//		}
+//	};
 
-	std::list<RequestQueue> m_queue;
+//	std::list<RequestQueue> m_queue;
 
 private:
 	bool requestInProgress = false;
-	RequestQueue m_currentRequest;
-	Hash m_currentSignalHash = 0;
-	int m_currentRequestId = 0;
+//	RequestQueue m_currentRequest;
+//	Hash m_currentSignalHash = 0;
+//	int m_currentRequestId = 0;
 
-	std::shared_ptr<TrendLib::OneHourData> m_receivedData;
+//	std::shared_ptr<TrendLib::OneHourData> m_receivedData;
 
-	Network::GetAppSignalStatesFromArchiveStartRequest m_startRequest;
-	Network::GetAppSignalStatesFromArchiveStartReply m_startReply;
+//	Network::GetAppSignalStatesFromArchiveStartRequest m_startRequest;
+//	Network::GetAppSignalStatesFromArchiveStartReply m_startReply;
 
-	Network::GetAppSignalStatesFromArchiveNextRequest m_nextRequest;
-	Network::GetAppSignalStatesFromArchiveNextReply m_nextReply;
+//	Network::GetAppSignalStatesFromArchiveNextRequest m_nextRequest;
+//	Network::GetAppSignalStatesFromArchiveNextReply m_nextReply;
 
-	QTime m_startRequestTime;
+//	QTime m_startRequestTime;
 
 	// Statisctics and state variables
 	//
-public:
-	QString m_statRequestDescription = 0;
-	volatile int m_statRequestQueueSize = 0;
-	volatile int m_statTcpRequestCount = 0;
-	volatile int m_statTcpReplyCount = 0;
+	mutable QMutex m_statMutex;
+	Stat m_stat;
 };
 
-#endif // ARCHIVETRENDTCPCLIENT_H
+#endif // RTTRENDTCPCLIENT_H

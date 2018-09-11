@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "DialogSignalSearch.h"
 #include "ui_DialogSignalSearch.h"
 #include "MonitorMainWindow.h"

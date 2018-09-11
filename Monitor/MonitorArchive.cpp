@@ -1,16 +1,6 @@
-#include <memory>
+#include "Stable.h"
 #include "MonitorArchive.h"
 #include "Settings.h"
-#include <QMessageBox>
-#include <QTextDocument>
-#include <QTextCursor>
-#include <QTextDocumentWriter>
-#include <QTextBlock>
-#include <QPrinter>
-#include <QPageSetupDialog>
-#include <QProgressDialog>
-#include <QPrintPreviewDialog>
-#include <QPrintDialog>
 #include "DialogSignalInfo.h"
 
 std::map<QString, MonitorArchiveWidget*> MonitorArchive::m_archiveList;

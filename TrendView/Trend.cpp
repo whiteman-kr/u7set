@@ -45,7 +45,7 @@ namespace TrendLib
 		return true;
 	}
 
-	void Trend::draw(QImage* image, const TrendDrawParam& drawParam) const
+	void Trend::draw(QImage* image, const TrendParam& drawParam) const
 	{
 		if (image == nullptr)
 		{
@@ -68,7 +68,7 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::draw(QPainter* painter, const TrendDrawParam& drawParam, bool needAdjustPainter) const
+	void Trend::draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter) const
 	{
 		assert(painter);
 
@@ -88,7 +88,7 @@ namespace TrendLib
 				break;
 			}
 
-			TrendDrawParam laneDrawParam = drawParam;
+			TrendParam laneDrawParam = drawParam;
 			laneDrawParam.setStartTime(startTime);
 
 			QRectF laneRect = calcLaneRect(laneIndex, drawParam);
@@ -109,7 +109,7 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawLane(QPainter* painter, const QRectF& laneRect, const TrendDrawParam& drawParam) const
+	void Trend::drawLane(QPainter* painter, const QRectF& laneRect, const TrendParam& drawParam) const
 	{
 		painter->setBrush(drawParam.backColor1st());
 		painter->setPen(Qt::PenStyle::NoPen);
@@ -160,7 +160,7 @@ namespace TrendLib
 
 	void Trend::drawBackground(QPainter* painter,
 							   const QRectF& insideRect,
-							   const TrendDrawParam& drawParam,
+							   const TrendParam& drawParam,
 							   const std::vector<TrendSignalParam>& discretes,
 							   const std::vector<TrendSignalParam>& analogs) const
 	{
@@ -196,7 +196,6 @@ namespace TrendLib
 		{
 			// Draw backgorund in switched color, it is just nice to separate discretes from empty area
 			//
-
 			QRectF blankArea(lastDiscreteRect.bottomLeft(),
 							 insideRect.bottomRight());
 
@@ -243,7 +242,7 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawTimeGrid(QPainter* painter, const QRectF& laneRect, const QRectF& insideRect, const TrendDrawParam& drawParam) const
+	void Trend::drawTimeGrid(QPainter* painter, const QRectF& laneRect, const QRectF& insideRect, const TrendParam& drawParam) const
 	{
 		double dpiX = drawParam.dpiX();
 
@@ -394,7 +393,7 @@ namespace TrendLib
 
 	void Trend::drawSignalsDecor(QPainter* painter,
 								 const QRectF& laneRect,
-								 const TrendDrawParam& drawParam,
+								 const TrendParam& drawParam,
 								 const std::vector<TrendSignalParam>& discretes,
 								 const std::vector<TrendSignalParam>& analogs) const
 	{
@@ -515,7 +514,7 @@ namespace TrendLib
 
 	void Trend::drawAnalogSignalsGridSeparateMode(QPainter* painter,
 												  const QRectF& laneRect,
-												  const TrendDrawParam& drawParam,
+												  const TrendParam& drawParam,
 												  const TrendSignalParam& signal) const
 	{
 		assert(painter);
@@ -647,7 +646,7 @@ namespace TrendLib
 
 	void Trend::drawAnalogSignalsGridOverlappedMode(QPainter* painter,
 													const QRectF& laneRect,
-													const TrendDrawParam& drawParam,
+													const TrendParam& drawParam,
 													const std::vector<TrendSignalParam>& analogs) const
 	{
 		assert(painter);
@@ -868,7 +867,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		return;
 	}
 
-	void Trend::drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam) const
+	void Trend::drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam) const
 	{
 		assert(painter);
 
@@ -911,7 +910,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		return;
 	}
 
-	void Trend::drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
+	void Trend::drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
 	{
 		assert(painter);
 		assert(signal.isDiscrete() == true);
@@ -1045,7 +1044,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		return;
 	}
 
-	void Trend::drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
+	void Trend::drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);
@@ -1198,7 +1197,7 @@ static const int recomendedSize = 8192;
 		return;
 	}
 
-	void Trend::drawRulers(QPainter* painter, const TrendDrawParam& drawParam) const
+	void Trend::drawRulers(QPainter* painter, const TrendParam& drawParam) const
 	{
 		if (painter == nullptr)
 		{
@@ -1240,7 +1239,7 @@ static const int recomendedSize = 8192;
 			TimeStamp startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
 			TimeStamp finishLaneTime = startLaneTime.timeStamp + drawParam.duration();
 
-			TrendDrawParam laneDrawParam = drawParam;
+			TrendParam laneDrawParam = drawParam;
 			laneDrawParam.setStartTimeStamp(startLaneTime);
 
 			QRectF laneRect = calcLaneRect(laneIndex, laneDrawParam);
@@ -1703,7 +1702,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 	}
 
 	void Trend::calcSignalRects(const QRectF& insideRect,
-								const TrendDrawParam& drawParam,
+								const TrendParam& drawParam,
 								std::vector<TrendSignalParam>* discretes,
 								std::vector<TrendSignalParam>* analogs)
 	{
@@ -1788,7 +1787,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 		return;
 	}
 
-	QRectF Trend::calcLaneRect(int laneIndex, const TrendDrawParam& drawParam)
+	QRectF Trend::calcLaneRect(int laneIndex, const TrendParam& drawParam)
 	{
 		QSizeF inchSize(static_cast<double>(drawParam.rect().size().width()) / static_cast<double>(drawParam.dpiX()),
 						static_cast<double>(drawParam.rect().size().height()) / static_cast<double>(drawParam.dpiY()));
@@ -1807,13 +1806,13 @@ static const TrendStateItem fakeState = TrendStateItem();
 		return laneRect;
 	}
 
-	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam) const
+	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam) const
 	{
 		int analogsCount = static_cast<int>(signalSet().analogSignalsCount());
 		return Trend::calcTrendArea(laneRect, drawParam, analogsCount);
 	}
 
-	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, size_t analogSignalCount)
+	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam, size_t analogSignalCount)
 	{
 		double dpiX = drawParam.dpiX();
 		double dpiY = drawParam.dpiY();
@@ -1884,7 +1883,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 		return result;
 	}
 
-	QRect Trend::inchRectToPixelRect(const QRectF& rect, const TrendDrawParam& drawParam)
+	QRect Trend::inchRectToPixelRect(const QRectF& rect, const TrendParam& drawParam)
 	{
 		QRect result(static_cast<int>(rect.left() * drawParam.dpiX()),
 					 static_cast<int>(rect.top() * drawParam.dpiY()),
@@ -1894,7 +1893,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 		return result;
 	}
 
-	QRectF Trend::pixelRectToInchRect(const QRect& rect, const TrendDrawParam& drawParam)
+	QRectF Trend::pixelRectToInchRect(const QRect& rect, const TrendParam& drawParam)
 	{
 		QRectF result(static_cast<double>(rect.left()) / static_cast<double>(drawParam.dpiX()),
 					  static_cast<double>(rect.top()) / static_cast<double>(drawParam.dpiY()),
@@ -1904,21 +1903,21 @@ static const TrendStateItem fakeState = TrendStateItem();
 		return result;
 	}
 
-	QPoint Trend::inchPointToPixelPoint(const QPointF& point, const TrendDrawParam& drawParam)
+	QPoint Trend::inchPointToPixelPoint(const QPointF& point, const TrendParam& drawParam)
 	{
 		QPoint result(static_cast<int>(point.x() * drawParam.dpiX()),
 					  static_cast<int>(point.y() * drawParam.dpiY()));
 		return result;
 	}
 
-	QPointF Trend::pixelPointToInchPoint(const QPoint& point, const TrendDrawParam& drawParam)
+	QPointF Trend::pixelPointToInchPoint(const QPoint& point, const TrendParam& drawParam)
 	{
 		QPointF result(static_cast<double>(point.x()) / static_cast<double>(drawParam.dpiX()),
 					   static_cast<double>(point.y()) / static_cast<double>(drawParam.dpiY()));
 		return result;
 	}
 
-	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const
+	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const
 	{
 		if (outLaneIndex == nullptr ||
 			outTime == nullptr ||
@@ -2083,7 +2082,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 	}
 
 
-	void Trend::drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect/* = nullptr*/)
+	void Trend::drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect/* = nullptr*/)
 	{
 		if (painter == nullptr)
 		{

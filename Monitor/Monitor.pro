@@ -109,9 +109,8 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/CircularLogger.cpp \
     MonitorView.cpp \
-    MonitorTrends.cpp \
-    DialogChooseTrendSignals.cpp \
-    TrendTcpClient.cpp \
+    Trend/MonitorTrends.cpp \
+    Trend/DialogChooseTrendSignals.cpp \
     MonitorArchive.cpp \
     DialogChooseArchiveSignals.cpp \
     ArchiveTcpClient.cpp \
@@ -127,7 +126,9 @@ SOURCES += main.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    Trend/ArchiveTrendTcpClient.cpp \
+    Trend/RtTrendTcpClient.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -165,9 +166,8 @@ HEADERS  += \
     ../lib/HostAddressPort.h \
     ../lib/CircularLogger.h \
     MonitorView.h \
-    MonitorTrends.h \
-    DialogChooseTrendSignals.h \
-    TrendTcpClient.h \
+    Trend/MonitorTrends.h \
+    Trend/DialogChooseTrendSignals.h \
     MonitorArchive.h \
     DialogChooseArchiveSignals.h \
     ArchiveTcpClient.h \
@@ -182,7 +182,9 @@ HEADERS  += \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Times.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    Trend/AcrhiveTrendTcpClient.h \
+    Trend/RtTrendTcpClient.h
 
 
 FORMS    += \
@@ -191,7 +193,7 @@ FORMS    += \
     DialogSignalSearch.ui \
     DialogSignalSnapshot.ui \
     DialogColumns.ui \
-    DialogChooseTrendSignals.ui \
+    Trend/DialogChooseTrendSignals.ui \
     DialogChooseArchiveSignals.ui
 
 

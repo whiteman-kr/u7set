@@ -1,6 +1,6 @@
+#include "Stable.h"
 #include "DialogColumns.h"
 #include "ui_DialogColumns.h"
-#include <QMessageBox>
 
 
 DialogColumns::DialogColumns(QWidget *parent, const QStringList& columnsNames, const std::vector<int>& columnsIndexes) :
