@@ -16,7 +16,7 @@ namespace TrendLib
 		: QThread(parent),
 		m_trend(trend)
 	{
-		qRegisterMetaType<TrendLib::TrendDrawParam>("TrendDrawParam");
+		qRegisterMetaType<TrendLib::TrendParam>("TrendDrawParam");
 
 		assert(m_trend);
 	}
@@ -35,7 +35,7 @@ namespace TrendLib
 		return;
 	}
 
-	void RenderThread::render(const TrendDrawParam& drawParam)
+	void RenderThread::render(const TrendParam& drawParam)
 	{
 		QMutexLocker locker(&m_mutex);
 
@@ -64,7 +64,7 @@ namespace TrendLib
 			// Start new job
 			//
 			m_mutex.lock();
-			TrendDrawParam drawParam = m_drawParam;
+			TrendParam drawParam = m_drawParam;
 			drawParam.signalDescriptionRect().clear();
 			m_mutex.unlock();
 
@@ -230,7 +230,7 @@ namespace TrendLib
 		ok &= m_trend.save(trendMessage);
 
 		::Proto::TrendParam* trendParamMessage = message->mutable_trend_param();
-		ok &= m_drawParam.save(trendParamMessage);
+		ok &= m_trendParam.save(trendParamMessage);
 
 		return ok;
 	}
@@ -250,23 +250,23 @@ namespace TrendLib
 		bool ok = true;
 
 		ok &= m_trend.load(message.trend());
-		ok &= m_drawParam.load(message.trend_param());
+		ok &= m_trendParam.load(message.trend_param());
 
 		return ok;
 	}
 
 	void TrendWidget::updateWidget()
 	{
-		m_drawParam.setRect(rect());
-		m_drawParam.setDpi(physicalDpiX(), physicalDpiY());
+		m_trendParam.setRect(rect());
+		m_trendParam.setDpi(physicalDpiX(), physicalDpiY());
 
-		m_thread.render(m_drawParam);
+		m_thread.render(m_trendParam);
 	}
 
 	bool TrendWidget::saveImageToFile(QString fileName) const
 	{
 		QPixmap pixmap = m_pixmap;
-		TrendDrawParam drawParam = m_pixmapDrawParam;
+		TrendParam drawParam = m_pixmapDrawParam;
 
 		{
 			QPainter p(&pixmap);
@@ -287,7 +287,7 @@ namespace TrendLib
 		pdfWriter.setPageOrientation(pageOrientation);
 		pdfWriter.pageLayout().setUnits(QPageLayout::Inch);
 
-		TrendDrawParam drawParam = m_drawParam;
+		TrendParam drawParam = m_trendParam;
 
 		QRectF rc(pdfWriter.pageLayout().paintRect(QPageLayout::Inch));
 		double resolution = pdfWriter.resolution();
@@ -330,7 +330,7 @@ namespace TrendLib
 
 		// Prepare DrawParam
 		//
-		TrendDrawParam drawParam = m_drawParam;
+		TrendParam drawParam = m_trendParam;
 
 		QRectF rc(printer->pageLayout().paintRect(QPageLayout::Inch));
 		double resolution = printer->resolution();
@@ -366,7 +366,7 @@ namespace TrendLib
 
 		if (m_pixmap.isNull() == true)
 		{
-			painter.fillRect(rect(), m_drawParam.backColor1st());
+			painter.fillRect(rect(), m_trendParam.backColor1st());
 			painter.setPen(Qt::black);
 			painter.drawText(rect(), Qt::AlignCenter, tr("Rendering initial image, please wait..."));
 			return;
@@ -376,7 +376,7 @@ namespace TrendLib
 		{
 			// New pixmap is not ready yet, scale the current one
 			//
-			painter.fillRect(rect(), m_drawParam.backColor1st());
+			painter.fillRect(rect(), m_trendParam.backColor1st());
 			painter.drawPixmap(m_pixmap.rect(), m_pixmap, m_pixmap.rect());
 			return;
 		}
@@ -507,7 +507,7 @@ namespace TrendLib
 		{
 			if (mouseOn == Trend::MouseOn::InsideTrendArea)
 			{
-				m_mouseScrollInitialTime = m_drawParam.startTimeStamp();
+				m_mouseScrollInitialTime = m_trendParam.startTimeStamp();
 				m_mouseScrollInitialMousePos = event->pos();
 				m_mouseScrollSignal = outSignal;								// tempDrawRect already calculated
 
@@ -630,16 +630,16 @@ namespace TrendLib
 				{
 					// Scroll time with a mouse mode
 					//
-					QRectF laneRect = m_trend.calcLaneRect(0, m_drawParam);
-					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_drawParam);	// TrendArea in inches
-					QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_drawParam);
+					QRectF laneRect = m_trend.calcLaneRect(0, m_trendParam);
+					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_trendParam);	// TrendArea in inches
+					QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_trendParam);
 
-					double coefx = m_drawParam.duration() / trendAreaRectPixels.width();
+					double coefx = m_trendParam.duration() / trendAreaRectPixels.width();
 
 					QPointF mouseOffset = m_mouseScrollInitialMousePos - event->pos();
 
 					TimeStamp ts(m_mouseScrollInitialTime.timeStamp + static_cast<qint64>(mouseOffset.x() * coefx));
-					m_drawParam.setStartTimeStamp(ts);
+					m_trendParam.setStartTimeStamp(ts);
 
 					// Scroll vertical area
 					//
@@ -647,7 +647,7 @@ namespace TrendLib
 					{
 						std::vector<TrendSignalParam> analogsToShift;
 
-						if (m_drawParam.viewMode() == TrendViewMode::Separated)
+						if (m_trendParam.viewMode() == TrendViewMode::Separated)
 						{
 							analogsToShift.push_back(m_mouseScrollSignal);		// signalRect is calculated
 						}
@@ -656,7 +656,7 @@ namespace TrendLib
 							analogsToShift = m_mouseScrollAnalogSignals;		// signalRect is not calculated yet
 							auto discretes = signalSet().discreteSignals();
 
-							Trend::calcSignalRects(trenAreaRect, m_drawParam, &discretes, &analogsToShift);
+							Trend::calcSignalRects(trenAreaRect, m_trendParam, &discretes, &analogsToShift);
 						}
 
 						for (const TrendSignalParam& trendSignal : analogsToShift)
@@ -669,7 +669,7 @@ namespace TrendLib
 							if (fabs(highLimit - lowLimit) > DBL_MIN &&
 								signalRect.height() > DBL_MIN)
 							{
-								double dy = mouseOffset.y() / m_drawParam.dpiY();
+								double dy = mouseOffset.y() / m_trendParam.dpiY();
 								double k = (highLimit - lowLimit) / signalRect.height();
 
 								highLimit -= dy * k;
@@ -698,13 +698,13 @@ namespace TrendLib
 					int laneHeight = rect().height() / laneCount();
 					int laneIndex = qBound<int>(0, event->pos().y() / laneHeight, laneCount() - 1);
 
-					QRectF laneRect = m_trend.calcLaneRect(laneIndex, m_drawParam);
-					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_drawParam);	// TrendArea in inches
-					QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_drawParam);
+					QRectF laneRect = m_trend.calcLaneRect(laneIndex, m_trendParam);
+					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_trendParam);	// TrendArea in inches
+					QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_trendParam);
 
-					qint64 laneStartTime = m_drawParam.startTimeStamp().timeStamp + m_drawParam.duration() * laneIndex;
+					qint64 laneStartTime = m_trendParam.startTimeStamp().timeStamp + m_trendParam.duration() * laneIndex;
 
-					double coefx = m_drawParam.duration() / trendAreaRectPixels.width();
+					double coefx = m_trendParam.duration() / trendAreaRectPixels.width();
 
 					int mouseOffset = event->pos().x() - trendAreaRectPixels.left();
 					mouseOffset = qBound<int>(1, mouseOffset, trendAreaRectPixels.width());
@@ -719,7 +719,7 @@ namespace TrendLib
 				break;
 			case MouseAction::SelectViewSelectSecondPoint:
 				{
-					m_finishSelectViewPoint = Trend::pixelPointToInchPoint(event->pos(), m_drawParam);
+					m_finishSelectViewPoint = Trend::pixelPointToInchPoint(event->pos(), m_trendParam);
 					update();
 				}
 				break;
@@ -758,9 +758,9 @@ namespace TrendLib
 		//
 		if (event->modifiers().testFlag(Qt::AltModifier) == false)
 		{
-			qint64 startTime = m_drawParam.startTimeStamp().timeStamp;
+			qint64 startTime = m_trendParam.startTimeStamp().timeStamp;
 
-			qint64 oldDuration = m_drawParam.duration();
+			qint64 oldDuration = m_trendParam.duration();
 			qint64 newLaneDuration = oldDuration;
 
 			if (numSteps < 0)
@@ -776,11 +776,11 @@ namespace TrendLib
 
 			// Set new values to controls and draw param
 			//
-			m_drawParam.setLaneDuration(newLaneDuration);		// This func can limit value
+			m_trendParam.setLaneDuration(newLaneDuration);		// This func can limit value
 
-			if (m_drawParam.duration() != oldDuration)
+			if (m_trendParam.duration() != oldDuration)
 			{
-				m_drawParam.setStartTimeStamp(startTime);
+				m_trendParam.setStartTimeStamp(startTime);
 
 				emit startTimeChanged(startTime);
 				emit durationChanged(newLaneDuration);
@@ -795,14 +795,14 @@ namespace TrendLib
 			//
 			std::vector<TrendSignalParam> signalsToScale;
 
-			if (m_drawParam.viewMode() == TrendViewMode::Overlapped)
+			if (m_trendParam.viewMode() == TrendViewMode::Overlapped)
 			{
 				// Scale all analog signals
 				//
 				signalsToScale = signalSet().analogSignals();
 			}
 
-			if (m_drawParam.viewMode() == TrendViewMode::Separated)
+			if (m_trendParam.viewMode() == TrendViewMode::Separated)
 			{
 				// Scale analog signal where is mouse now
 				//
@@ -880,18 +880,18 @@ namespace TrendLib
 
 		m_selectViewLaneIndex = laneIndex;
 
-		QRectF laneRect = Trend::calcLaneRect(laneIndex, m_drawParam);
+		QRectF laneRect = Trend::calcLaneRect(laneIndex, m_trendParam);
 
 		int analogsCount = static_cast<int>(signalSet().analogSignalsCount());
-		QRectF trendArea = Trend::calcTrendArea(laneRect, m_drawParam, analogsCount);
+		QRectF trendArea = Trend::calcTrendArea(laneRect, m_trendParam, analogsCount);
 
-		m_startSelectViewPoint = Trend::pixelPointToInchPoint(pos, m_drawParam);
+		m_startSelectViewPoint = Trend::pixelPointToInchPoint(pos, m_trendParam);
 		m_finishSelectViewPoint = m_startSelectViewPoint;
 
 		std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
 		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
 
-		Trend::calcSignalRects(trendArea, m_drawParam, &discretes, &analogs);
+		Trend::calcSignalRects(trendArea, m_trendParam, &discretes, &analogs);
 
 		for (const TrendSignalParam& tsp : discretes)
 		{
@@ -921,12 +921,12 @@ namespace TrendLib
 	{
 		// Scale time
 		//
-		m_finishSelectViewPoint = Trend::pixelPointToInchPoint(pos, m_drawParam);
+		m_finishSelectViewPoint = Trend::pixelPointToInchPoint(pos, m_trendParam);
 
 		double left = qMin(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 		double right = qMax(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 
-		if (fabs(right - left) * m_drawParam.dpiX() <= 1)
+		if (fabs(right - left) * m_trendParam.dpiX() <= 1)
 		{
 			// Value is way too small
 			//
@@ -937,16 +937,16 @@ namespace TrendLib
 		//
 		QRectF signalRect = m_selectViewAreaSignal.tempDrawRect();
 
-		qint64 startLaneTime = m_drawParam.startTimeStamp().timeStamp + m_selectViewLaneIndex * m_drawParam.duration();
-		double coef = m_drawParam.duration() / signalRect.width();
+		qint64 startLaneTime = m_trendParam.startTimeStamp().timeStamp + m_selectViewLaneIndex * m_trendParam.duration();
+		double coef = m_trendParam.duration() / signalRect.width();
 
 		qint64 leftTime = startLaneTime + static_cast<qint64>((left - signalRect.left()) * coef);
 		qint64 rightTime = startLaneTime + static_cast<qint64>((right - signalRect.left()) * coef);
 
 		// Set new values to controls and draw param
 		//
-		m_drawParam.setStartTimeStamp(leftTime);
-		m_drawParam.setLaneDuration(rightTime - leftTime);
+		m_trendParam.setStartTimeStamp(leftTime);
+		m_trendParam.setLaneDuration(rightTime - leftTime);
 
 		emit startTimeChanged(leftTime);
 		emit durationChanged(rightTime - leftTime);
@@ -965,12 +965,12 @@ namespace TrendLib
 
 				// Analogs does not have calculated trend rect
 				//
-				QRectF laneRect = Trend::calcLaneRect(m_selectViewLaneIndex, m_drawParam);
+				QRectF laneRect = Trend::calcLaneRect(m_selectViewLaneIndex, m_trendParam);
 
 				int analogsCount = static_cast<int>(analogs.size());
-				QRectF trendArea = Trend::calcTrendArea(laneRect, m_drawParam, analogsCount);
+				QRectF trendArea = Trend::calcTrendArea(laneRect, m_trendParam, analogsCount);
 
-				Trend::calcSignalRects(trendArea, m_drawParam, &discretes, &analogs);  // calc rects
+				Trend::calcSignalRects(trendArea, m_trendParam, &discretes, &analogs);  // calc rects
 			}
 			else
 			{
@@ -981,7 +981,7 @@ namespace TrendLib
 			double top = qMin(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 			double bottom = qMax(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 
-			if (fabs(bottom - top) * m_drawParam.dpiY() <= 1)
+			if (fabs(bottom - top) * m_trendParam.dpiY() <= 1)
 			{
 				// Value is way too small
 				//
@@ -1029,7 +1029,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendWidget::updatePixmap(const QImage& image, TrendDrawParam drawParam)
+	void TrendWidget::updatePixmap(const QImage& image, TrendParam drawParam)
 	{
 		m_pixmap = QPixmap::fromImage(image);
 		m_pixmapDrawParam = drawParam;
@@ -1070,54 +1070,70 @@ namespace TrendLib
 
 	TrendViewMode TrendWidget::viewMode() const
 	{
-		return m_drawParam.viewMode();
+		return m_trendParam.viewMode();
 	}
 
 	void TrendWidget::setViewMode(TrendViewMode value)
 	{
-		m_drawParam.setViewMode(value);
+		m_trendParam.setViewMode(value);
 		return;
 	}
 
 	int TrendWidget::laneCount() const
 	{
-		return m_drawParam.laneCount();
+		return m_trendParam.laneCount();
 	}
 
 	void TrendWidget::setLaneCount(int value)
 	{
-		m_drawParam.setLaneCount(value);
+		m_trendParam.setLaneCount(value);
 	}
 
 	E::TimeType TrendWidget::timeType() const
 	{
-		return m_drawParam.timeType();
+		return m_trendParam.timeType();
 	}
 
 	void TrendWidget::setTimeType(E::TimeType value)
 	{
-		m_drawParam.setTimeType(value);
+		m_trendParam.setTimeType(value);
 	}
 
 	TimeStamp TrendWidget::startTime() const
 	{
-		TimeStamp ts(m_drawParam.startTime());
+		TimeStamp ts(m_trendParam.startTime());
 		return ts;
 	}
 
 	void TrendWidget::setStartTime(const TimeStamp& startTime)
 	{
-		m_drawParam.setStartTimeStamp(startTime);
+		m_trendParam.setStartTimeStamp(startTime);
 	}
 
 	qint64 TrendWidget::duration() const
 	{
-		return m_drawParam.duration();
+		return m_trendParam.duration();
 	}
 
 	void TrendWidget::setLaneDuration(qint64 interval)
 	{
-		m_drawParam.setLaneDuration(interval);
+		m_trendParam.setLaneDuration(interval);
+	}
+
+	E::TrendMode TrendWidget::trendMode() const
+	{
+		return m_trendParam.trendMode();
+	}
+
+	void TrendWidget::setTrendMode(E::TrendMode value)
+	{
+		if (m_trendParam.trendMode() != value)
+		{
+			m_trendParam.setTrendMode(value);
+			updateWidget();
+		}
+
+		return;
 	}
 
 }

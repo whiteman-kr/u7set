@@ -2,7 +2,8 @@
 #define DRAWPARAM_H
 #include "../lib/TimeStamp.h"
 #include "../lib/Types.h"
-
+#include <QColor>
+#include <QRectF>
 
 namespace Proto
 {
@@ -23,10 +24,10 @@ Q_DECLARE_METATYPE(TrendLib::TrendViewMode)
 
 namespace TrendLib
 {
-	class TrendDrawParam
+	class TrendParam
 	{
 	public:
-		TrendDrawParam();
+		TrendParam();
 
 	public:
 		bool save(::Proto::TrendParam* message) const;
@@ -48,6 +49,9 @@ namespace TrendLib
 
 		int laneCount() const;
 		void setLaneCount(int value);
+
+		E::TrendMode trendMode() const;
+		void setTrendMode(E::TrendMode value);
 
 		QColor backColor1st() const;
 		void setBackColor1st(const QColor& value);
@@ -82,6 +86,8 @@ namespace TrendLib
 		E::TimeType m_timeType = E::TimeType::Local;
 		int m_laneCount = 1;
 
+		E::TrendMode m_trendMode = E::TrendMode::Archive;
+
 		QColor m_backColor1st = {qRgb(0xE0, 0xE0, 0xE0)};
 		QColor m_backColor2nd = {qRgb(0xEA, 0xEA, 0xEA)};
 
@@ -95,6 +101,6 @@ namespace TrendLib
 	};
 }
 
-Q_DECLARE_METATYPE(TrendLib::TrendDrawParam)
+Q_DECLARE_METATYPE(TrendLib::TrendParam)
 
 #endif // DRAWPARAM_H

@@ -5,6 +5,8 @@
 #include "TrendSlider.h"
 #include "../TrendView/Trend.h"
 
+class QComboBox;
+
 namespace Ui
 {
 	class TrendsMainWindow;
@@ -71,6 +73,7 @@ namespace TrendLib
 		void viewComboCurrentIndexChanged(int index);
 		void laneCountComboCurrentIndexChanged(int index);
 		void timeTypeComboCurrentIndexChanged(int index);
+		void realtimeModeToggled(bool state);
 
 		void sliderValueChanged(TimeStamp value);
 
@@ -96,6 +99,7 @@ namespace TrendLib
 		QComboBox* m_viewCombo = nullptr;
 		QComboBox* m_lanesCombo = nullptr;
 		QComboBox* m_timeTypeCombo = nullptr;
+		QPushButton* m_realtimeModeButton = nullptr;
 		QPushButton* m_refreshButton = nullptr;
 		QPushButton* m_signalsButton = nullptr;
 

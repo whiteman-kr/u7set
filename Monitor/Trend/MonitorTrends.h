@@ -2,9 +2,11 @@
 #define MONITORTRENDS_H
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
-#include "TrendTcpClient.h"
+#include "AcrhiveTrendTcpClient.h"
+#include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
+class QLabel;
 
 class MonitorTrends
 {
@@ -44,8 +46,11 @@ private:
 	ConfigConnection m_archiveService1;
 	ConfigConnection m_archiveService2;
 
-	TrendTcpClient* m_tcpClient = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;
+	ArchiveTrendTcpClient* m_archiveTcpClient = nullptr;
+	SimpleThread* m_archiveTcpClientThread = nullptr;
+
+	RtTrendTcpClient* m_rtTcpClient = nullptr;
+	SimpleThread* m_rtTcpClientThread = nullptr;
 
 	enum  StatusBarColumns
 	{

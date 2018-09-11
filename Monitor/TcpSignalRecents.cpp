@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "TcpSignalRecents.h"
 #include "Settings.h"
 #include "version.h"

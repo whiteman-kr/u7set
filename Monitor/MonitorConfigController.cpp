@@ -1,7 +1,6 @@
+#include "Stable.h"
 #include "MonitorConfigController.h"
 #include "Settings.h"
-#include <QDomElement>
-#include <QDomNodeList>
 #include "version.h"
 
 ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :

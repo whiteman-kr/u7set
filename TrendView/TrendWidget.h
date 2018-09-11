@@ -3,6 +3,11 @@
 
 #include "Trend.h"
 #include "TrendRuler.h"
+#include <QPixmap>
+#include <QImage>
+#include <QWidget>
+#include <QPageSize>
+#include <QPageLayout>
 
 class QPrinter;
 
@@ -23,10 +28,10 @@ namespace TrendLib
 		virtual ~RenderThread();
 
 	public:
-		void render(const TrendDrawParam& drawParam);
+		void render(const TrendParam& drawParam);
 
 	signals:
-		void renderedImage(const QImage& image, TrendDrawParam drawParam);
+		void renderedImage(const QImage& image, TrendParam drawParam);
 
 	protected:
 		virtual void run() override;
@@ -35,7 +40,7 @@ namespace TrendLib
 		Trend* m_trend = nullptr;
 
 		QMutex m_mutex;
-		TrendDrawParam m_drawParam;
+		TrendParam m_drawParam;
 
 		bool m_newJob = false;
 
@@ -95,7 +100,7 @@ namespace TrendLib
 		void startSelectionViewArea();
 
 	protected slots:
-		void updatePixmap(const QImage& image, TrendDrawParam drawParam);
+		void updatePixmap(const QImage& image, TrendParam drawParam);
 
 		// Signals
 	signals:
@@ -130,13 +135,16 @@ namespace TrendLib
 		qint64 duration() const;
 		void setLaneDuration(qint64 interval);
 
+		E::TrendMode trendMode() const;
+		void setTrendMode(E::TrendMode value);
+
 	private:
 		RenderThread m_thread;
 		QPixmap m_pixmap;
-		TrendDrawParam m_pixmapDrawParam;			// DrawParmas whcih was used to generate m_pixmap;
+		TrendParam m_pixmapDrawParam;			// DrawParmas whcih was used to generate m_pixmap;
 
 		Trend m_trend;
-		TrendDrawParam m_drawParam;
+		TrendParam m_trendParam;
 
 		enum class MouseAction
 		{
