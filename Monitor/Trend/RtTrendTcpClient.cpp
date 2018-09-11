@@ -4,8 +4,8 @@
 
 RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController) :
 	Tcp::Client(configController->softwareInfo(),
-				configController->configuration().archiveService1.address(),
-				configController->configuration().archiveService2.address()),
+				configController->configuration().appDataServiceRealtimeTrend1.address(),
+				configController->configuration().appDataServiceRealtimeTrend2.address()),
 	m_cfgController(configController)
 {
 	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...)";

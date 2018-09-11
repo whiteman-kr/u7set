@@ -36,6 +36,7 @@ protected:
 private:
 	void createArchiveConnection();
 	void createRealtimeConnection();
+	//void setRealtimeParams();
 
 public:
 

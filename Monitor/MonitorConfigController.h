@@ -42,6 +42,9 @@ struct ConfigSettings
 	ConfigConnection appDataService1;
 	ConfigConnection appDataService2;
 
+	ConfigConnection appDataServiceRealtimeTrend1;
+	ConfigConnection appDataServiceRealtimeTrend2;
+
 	ConfigConnection archiveService1;
 	ConfigConnection archiveService2;
 

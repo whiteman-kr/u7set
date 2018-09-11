@@ -177,16 +177,16 @@ namespace Builder
 
 		// AppDataServiceStrID1->ClientRequestIP, ClientRequestPort
 		//
-		Hardware::Software* dasObject1 = nullptr;
-		Hardware::Software* dasObject2 = nullptr;
+		Hardware::Software* appDataService1 = nullptr;
+		Hardware::Software* appDataService2 = nullptr;
 		ok1 = true;
 		ok2 = true;
 
 		if (appDataServiceId1.isEmpty() == false)
 		{
-			dasObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
+			appDataService1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
 
-			if (dasObject1 == nullptr)
+			if (appDataService1 == nullptr)
 			{
 				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
 
@@ -199,9 +199,9 @@ namespace Builder
 
 		if (appDataServiceId2.isEmpty() == false)
 		{
-			dasObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
+			appDataService2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
 
-			if (dasObject2 == nullptr)
+			if (appDataService2 == nullptr)
 			{
 				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
 
@@ -219,19 +219,19 @@ namespace Builder
 
 		// Reading AppDataService Settings
 		//
-		AppDataServiceSettings dasSettings1;
-		AppDataServiceSettings dasSettings2;
+		AppDataServiceSettings adsSettings1;
+		AppDataServiceSettings adsSettings2;
 		ok1 = true;
 		ok2 = true;
 
-		if (dasObject1 != nullptr)
+		if (appDataService1 != nullptr)
 		{
-			ok1 = dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
+			ok1 = adsSettings1.readFromDevice(m_equipment, appDataService1, m_log);
 		}
 
-		if (dasObject2 != nullptr)
+		if (appDataService2 != nullptr)
 		{
-			ok2 = dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
+			ok2 = adsSettings2.readFromDevice(m_equipment, appDataService2, m_log);
 		}
 
 		if (ok1 == false || ok2 == false)
@@ -253,10 +253,15 @@ namespace Builder
 			xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
 			xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
 
-			xmlWriter.writeAttribute("ip1", dasSettings1.clientRequestIP.address().toString());
-			xmlWriter.writeAttribute("port1", QString::number(dasSettings1.clientRequestIP.port()));
-			xmlWriter.writeAttribute("ip2", dasSettings2.clientRequestIP.address().toString());
-			xmlWriter.writeAttribute("port2", QString::number(dasSettings2.clientRequestIP.port()));
+			xmlWriter.writeAttribute("ip1", adsSettings1.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port1", QString::number(adsSettings1.clientRequestIP.port()));
+			xmlWriter.writeAttribute("rtip1", adsSettings1.rtTrendsRequestIP.address().toString());
+			xmlWriter.writeAttribute("rtport1", QString::number(adsSettings1.rtTrendsRequestIP.port()));
+
+			xmlWriter.writeAttribute("ip2", adsSettings2.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port2", QString::number(adsSettings2.clientRequestIP.port()));
+			xmlWriter.writeAttribute("rtip2", adsSettings2.rtTrendsRequestIP.address().toString());
+			xmlWriter.writeAttribute("rtport2", QString::number(adsSettings2.rtTrendsRequestIP.port()));
 		}	// AppDataService
 
 		return true;

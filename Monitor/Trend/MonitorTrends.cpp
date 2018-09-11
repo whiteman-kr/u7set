@@ -136,23 +136,49 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 	QStatusBar* sb = statusBar();
 	assert(sb);
 
-	ArchiveTrendTcpClient::Stat stat = m_archiveTcpClient->stat();
-
-	m_statusBarTextLabel->setText(stat.text);
-	m_statusBarQueueSizeLabel->setText(QString(" Queue size: %1 ").arg(stat.requestQueueSize));
-	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ")
-											 .arg(stat.requestCount)
-											 .arg(stat.replyCount));
-	HostAddressPort server = m_archiveTcpClient->currentServerAddressPort();
-	m_statusBarServerLabel->setText(QString(" ArchiveServer: %1 ").arg(server.addressPortStr()));
-
-	if (m_archiveTcpClient->isConnected() == true)
+	if (trendMode() == E::TrendMode::Archive)
 	{
-		m_statusBarConnectionStateLabel->setText(" Connected ");
+		ArchiveTrendTcpClient::Stat stat = m_archiveTcpClient->stat();
+
+		m_statusBarTextLabel->setText(stat.text);
+		m_statusBarQueueSizeLabel->setText(QString(" Queue size: %1 ").arg(stat.requestQueueSize));
+		m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ")
+												 .arg(stat.requestCount)
+												 .arg(stat.replyCount));
+
+		HostAddressPort server = m_archiveTcpClient->currentServerAddressPort();
+		m_statusBarServerLabel->setText(QString(" ArchiveServer: %1 ").arg(server.addressPortStr()));
+
+		if (m_archiveTcpClient->isConnected() == true)
+		{
+			m_statusBarConnectionStateLabel->setText(" Connected ");
+		}
+		else
+		{
+			m_statusBarConnectionStateLabel->setText(" NoConnection ");
+		}
 	}
 	else
 	{
-		m_statusBarConnectionStateLabel->setText(" NoConnection ");
+		RtTrendTcpClient::Stat stat = m_rtTcpClient->stat();
+
+		m_statusBarTextLabel->setText(stat.text);
+		m_statusBarQueueSizeLabel->setText("");
+		m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ")
+												 .arg(stat.requestCount)
+												 .arg(stat.replyCount));
+
+		HostAddressPort server = m_rtTcpClient->currentServerAddressPort();
+		m_statusBarServerLabel->setText(QString(" RtSource: %1 ").arg(server.addressPortStr()));
+
+		if (m_rtTcpClient->isConnected() == true)
+		{
+			m_statusBarConnectionStateLabel->setText(" Connected ");
+		}
+		else
+		{
+			m_statusBarConnectionStateLabel->setText(" NoConnection ");
+		}
 	}
 
 	return;
@@ -291,6 +317,7 @@ void MonitorTrendsWidget::slot_trendModeChanged()
 		delete m_archiveTcpClientThread;
 
 		m_archiveTcpClient = nullptr;
+		m_archiveTcpClientThread = nullptr;
 	}
 
 	if (m_rtTcpClientThread != nullptr)
@@ -299,6 +326,7 @@ void MonitorTrendsWidget::slot_trendModeChanged()
 		delete m_rtTcpClientThread;
 
 		m_rtTcpClient = nullptr;
+		m_rtTcpClientThread = nullptr;
 	}
 
 	if (trendMode() == E::TrendMode::Archive)

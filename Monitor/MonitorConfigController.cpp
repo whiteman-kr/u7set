@@ -373,9 +373,12 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	//
 	qDebug() << "New configuration arrived";
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
+
 	qDebug() << "ADS1 (id, ip, port): " << readSettings.appDataService1.equipmentId() << ", " << readSettings.appDataService1.ip() << ", " << readSettings.appDataService1.port();
 	qDebug() << "ADS2 (id, ip, port): " << readSettings.appDataService2.equipmentId() << ", " << readSettings.appDataService2.ip() << ", " << readSettings.appDataService2.port();
 
+	qDebug() << "ADS RT Trends 1 (id, ip, port): " << readSettings.appDataServiceRealtimeTrend1.equipmentId() << ", " << readSettings.appDataServiceRealtimeTrend1.ip() << ", " << readSettings.appDataServiceRealtimeTrend1.port();
+	qDebug() << "ADS RT Trends 2 (id, ip, port): " << readSettings.appDataServiceRealtimeTrend2.equipmentId() << ", " << readSettings.appDataServiceRealtimeTrend2.ip() << ", " << readSettings.appDataServiceRealtimeTrend2.port();
 
 	// Emit signal to inform everybody about new configuration
 	//
@@ -504,15 +507,23 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 			QDomElement dasXmlElement = dasNodes.at(0).toElement();
 
 			QString id1 = dasXmlElement.attribute("AppDataServiceID1");
+
 			QString ip1 = dasXmlElement.attribute("ip1");
 			int port1 = dasXmlElement.attribute("port1").toInt();
+			QString rtip1 = dasXmlElement.attribute("rtip1");
+			int rtport1 = dasXmlElement.attribute("rtport1").toInt();
 
 			QString id2 = dasXmlElement.attribute("AppDataServiceID2");
 			QString ip2 = dasXmlElement.attribute("ip2");
 			int port2 = dasXmlElement.attribute("port2").toInt();
+			QString rtip2 = dasXmlElement.attribute("rtip2");
+			int rtport2 = dasXmlElement.attribute("rtport2").toInt();
 
 			outSetting->appDataService1 = ConfigConnection(id1, ip1, port1);
 			outSetting->appDataService2 = ConfigConnection(id2, ip2, port2);
+
+			outSetting->appDataServiceRealtimeTrend1 = ConfigConnection(id1, rtip1, rtport1);
+			outSetting->appDataServiceRealtimeTrend2 = ConfigConnection(id2, rtip2, rtport2);
 		}
 	}
 
