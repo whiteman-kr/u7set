@@ -6806,20 +6806,43 @@ class RtTrendsManagementReply : public ::google::protobuf::Message {
   inline ::std::string* release_errorstring();
   inline void set_allocated_errorstring(::std::string* errorstring);
 
+  // optional int32 samplePeriod = 3;
+  inline bool has_sampleperiod() const;
+  inline void clear_sampleperiod();
+  static const int kSamplePeriodFieldNumber = 3;
+  inline ::google::protobuf::int32 sampleperiod() const;
+  inline void set_sampleperiod(::google::protobuf::int32 value);
+
+  // repeated uint64 trackedSignalHashes = 4;
+  inline int trackedsignalhashes_size() const;
+  inline void clear_trackedsignalhashes();
+  static const int kTrackedSignalHashesFieldNumber = 4;
+  inline ::google::protobuf::uint64 trackedsignalhashes(int index) const;
+  inline void set_trackedsignalhashes(int index, ::google::protobuf::uint64 value);
+  inline void add_trackedsignalhashes(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      trackedsignalhashes() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_trackedsignalhashes();
+
   // @@protoc_insertion_point(class_scope:Network.RtTrendsManagementReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
   inline void set_has_errorstring();
   inline void clear_has_errorstring();
+  inline void set_has_sampleperiod();
+  inline void clear_has_sampleperiod();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* errorstring_;
   ::google::protobuf::int32 error_;
+  ::google::protobuf::int32 sampleperiod_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > trackedsignalhashes_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -14288,6 +14311,53 @@ inline void RtTrendsManagementReply::set_allocated_errorstring(::std::string* er
     clear_has_errorstring();
     errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional int32 samplePeriod = 3;
+inline bool RtTrendsManagementReply::has_sampleperiod() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void RtTrendsManagementReply::set_has_sampleperiod() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void RtTrendsManagementReply::clear_has_sampleperiod() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void RtTrendsManagementReply::clear_sampleperiod() {
+  sampleperiod_ = 0;
+  clear_has_sampleperiod();
+}
+inline ::google::protobuf::int32 RtTrendsManagementReply::sampleperiod() const {
+  return sampleperiod_;
+}
+inline void RtTrendsManagementReply::set_sampleperiod(::google::protobuf::int32 value) {
+  set_has_sampleperiod();
+  sampleperiod_ = value;
+}
+
+// repeated uint64 trackedSignalHashes = 4;
+inline int RtTrendsManagementReply::trackedsignalhashes_size() const {
+  return trackedsignalhashes_.size();
+}
+inline void RtTrendsManagementReply::clear_trackedsignalhashes() {
+  trackedsignalhashes_.Clear();
+}
+inline ::google::protobuf::uint64 RtTrendsManagementReply::trackedsignalhashes(int index) const {
+  return trackedsignalhashes_.Get(index);
+}
+inline void RtTrendsManagementReply::set_trackedsignalhashes(int index, ::google::protobuf::uint64 value) {
+  trackedsignalhashes_.Set(index, value);
+}
+inline void RtTrendsManagementReply::add_trackedsignalhashes(::google::protobuf::uint64 value) {
+  trackedsignalhashes_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+RtTrendsManagementReply::trackedsignalhashes() const {
+  return trackedsignalhashes_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+RtTrendsManagementReply::mutable_trackedsignalhashes() {
+  return &trackedsignalhashes_;
 }
 
 // -------------------------------------------------------------------
