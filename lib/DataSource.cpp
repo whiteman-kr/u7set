@@ -693,7 +693,7 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 	m_rupFramesQueueMaxSize = m_rupFrameTimeQueue.maxSize();
 }
 
-bool DataSourceOnline::seizeProcessingOwnership(const QThread* processingThread)
+bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
 {
 	const QThread* expected = nullptr;
 

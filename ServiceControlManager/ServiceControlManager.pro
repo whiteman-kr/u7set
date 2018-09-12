@@ -105,7 +105,8 @@ SOURCES += MainWindow.cpp \
     ../lib/Times.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/PropertyObject.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../AppDataService/RtTrendsServer.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -156,7 +157,8 @@ HEADERS  += MainWindow.h \
     ../lib/Times.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/PropertyObject.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../AppDataService/RtTrendsServer.h
 
 include(../qtservice/src/qtservice.pri)
 
