@@ -10,9 +10,7 @@ RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController) :
 {
 	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...)";
 
-	enableWatchdogTimer(false);
-
-	//qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("share_ptr<TrendLib::OneHourData>>");
+	enableWatchdogTimer(true);
 
 	return;
 }
@@ -22,29 +20,29 @@ RtTrendTcpClient::~RtTrendTcpClient()
 	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient()";
 }
 
-void RtTrendTcpClient::timerEvent(QTimerEvent* event)
+bool RtTrendTcpClient::setData(E::RtTrendsSamplePeriod samplePeriod, const std::vector<TrendLib::TrendSignalParam> trendSignals)
 {
-	if (requestInProgress == true)
-	{
-		//m_statRequestDescription = QString("%1 - %2").arg(m_currentRequest.appSignalId).arg(m_currentRequest.hourToRequest.toDateTime().toString("dd.MM.yyyy hh:mm"));
-		setStatText(tr("Request In Progress"));
-	}
-	else
-	{
-		setStatText(QString());
-	}
+	QMutexLocker ml(&m_dataMutex);
 
-	//m_statRequestQueueSize = static_cast<int>(m_queue.size());
+	m_samplePeriod = samplePeriod;
 
-	if (event->timerId() == m_periodicTimerId &&
-		requestInProgress == false &&
-		isClearToSendRequest() == true)
+	m_signalSet.clear();
+	for (const TrendLib::TrendSignalParam& sp : trendSignals)
 	{
-		resetRequestCycle();
-		return;
+		m_signalSet.insert(sp.appSignalHash());
 	}
 
-	return;
+	return true;
+}
+
+bool RtTrendTcpClient::clearData()
+{
+	QMutexLocker ml(&m_dataMutex);
+
+	m_samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
+	m_signalSet.clear();
+
+	return true;
 }
 
 void RtTrendTcpClient::onClientThreadStarted()
@@ -54,8 +52,6 @@ void RtTrendTcpClient::onClientThreadStarted()
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
 			this, &RtTrendTcpClient::slot_configurationArrived,
 			Qt::QueuedConnection);
-
-	m_periodicTimerId = startTimer(theSettings.requestTimeInterval());		// Start it here, as this function is running in the right thread
 
 	return;
 }
@@ -70,19 +66,22 @@ void RtTrendTcpClient::onConnection()
 	qDebug() << "RtTrendTcpClient::onConnection()";
 	assert(isClearToSendRequest() == true);
 
+	startRequestCycle();
+
 	return;
 }
 
 void RtTrendTcpClient::onDisconnection()
 {
 	qDebug() << "TrendTcpClient::onDisconnection";
-	requestInProgress = false;
+	clearData();
+	return;
 }
 
 void RtTrendTcpClient::onReplyTimeout()
 {
 	qDebug() << "RtTrendTcpClient::onReplyTimeout()";
-	requestInProgress = false;
+	return;
 }
 
 void RtTrendTcpClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -99,296 +98,177 @@ void RtTrendTcpClient::processReply(quint32 requestID, const char* replyData, qu
 
 	switch (requestID)
 	{
-//	case ARCHS_GET_APP_SIGNALS_STATES_START:
-//		processStart(data);
-//		break;
+	case RT_TRENDS_MANAGEMENT:
+		processTrendManagement(data);
+		break;
 
-//	case ARCHS_GET_APP_SIGNALS_STATES_NEXT:
-//		processNext(data);
-//		break;
+	case RT_TRENDS_GET_STATE_CHANGES:
+		processTrendStateChanges(data);
+		break;
 
 	default:
 		assert(false);
 		qDebug() << "Wrong requestID in RtTrendTcpClient::processReply() " << requestID;
 
-		resetRequestCycle();
+		closeConnection();
 	}
 
 	return;
 }
 
-void RtTrendTcpClient::resetRequestCycle()
+void RtTrendTcpClient::startRequestCycle()
 {
-	QThread::msleep(0);
+	QThread::msleep(50);
 
-	if (//m_queue.empty() == false &&
-		requestInProgress == false &&
-		isClearToSendRequest() == true)
+	if (isClearToSendRequest() == false)
 	{
-		requestStart();
+		assert(isClearToSendRequest() == true);
+		closeConnection();
+		return;
 	}
-	else
-	{
-	}
+
+	requestTrendManagement();
 
 	return;
 }
 
-void RtTrendTcpClient::requestStart()
+void RtTrendTcpClient::requestTrendManagement()
 {
 	assert(isClearToSendRequest());
-
-//	if (m_queue.empty() == true)
-//	{
-//		requestInProgress = false;
-//		return;
-//	}
-
-//	m_currentRequest = m_queue.back();	// THESE TWO LINES MUST BE IN CONSISTENCY!!!!
-//	m_queue.pop_back();					// Take the last one, let's assume it is shown now and more important
-
 	incStatRequestCount();
-	requestInProgress = true;
 
-//	m_currentSignalHash = ::calcHash(m_currentRequest.appSignalId);
+	m_managementRequest.Clear();
 
-//	m_startRequest.Clear();
-//	m_startRequest.set_clientequipmentid(theSettings.instanceStrId().toStdString());
+	m_dataMutex.lock();
+	E::RtTrendsSamplePeriod samplePeriod = m_samplePeriod;
+	std::set<Hash> signalSet = m_signalSet;
+	m_dataMutex.unlock();
 
-//	m_startRequest.set_timetype(static_cast<int>(m_currentRequest.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
-//	m_startRequest.set_starttime(m_currentRequest.hourToRequest.timeStamp);
-//	m_startRequest.set_endtime(m_currentRequest.hourToRequest.timeStamp + 1_hour);
-//	m_startRequest.add_signalhashes(m_currentSignalHash);
+	m_managementRequest.set_clientequipmentid(theSettings.instanceStrId().toStdString());
+	m_managementRequest.set_sampleperiod(static_cast<int>(samplePeriod));
 
-//	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START, m_startRequest);
+	// Add signals for tracking
+	//
+	for (Hash signalHash : signalSet)
+	{
+		if (m_trackedSignals.find(signalHash) == m_trackedSignals.end())
+		{
+			m_managementRequest.add_appendsignalhashes(signalHash);
+		}
+	}
 
-//	m_startRequestTime.start();
+	// Remove tracking signals
+	//
+	for (Hash trackedSignalHash : m_trackedSignals)
+	{
+		if (signalSet.find(trackedSignalHash) == signalSet.end())
+		{
+			m_managementRequest.add_deletesignalhashes(trackedSignalHash);
+		}
+	}
 
-//	m_receivedData = std::make_shared<TrendLib::OneHourData>();
-
-	return;
-}
-
-void RtTrendTcpClient::processStart(const QByteArray& data)
-{
-//	qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: " << m_startRequestTime.elapsed();
-
-//	bool ok = m_startReply.ParseFromArray(data.constData(), data.size());
-
-//	if (ok == false)
-//	{
-//		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
-
-//		requestInProgress = false;
-//		assert(ok);
-//		resetRequestCycle();
-//		return;
-//	}
-
-//	int error = m_startReply.error();
-//	int archError = m_startReply.archerror();
-//	m_currentRequestId = m_startReply.requestid();
-
-//	if (error != 0)
-//	{
-//		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
-//		requestInProgress = false;
-
-//		qDebug() << "RECEIVED ERROR:   TrendTcpClient::processStart, error = " << error
-//				 << ", archError = " << archError
-//				 << ", RequestID = " << m_currentRequestId;
-
-//		resetRequestCycle();
-//		return;
-//	}
-
-//	requestNext();
-	return;
-}
-
-void RtTrendTcpClient::requestNext()
-{
-//	assert(isClearToSendRequest());
-//	assert(m_currentRequestId != 0);
-
-//	m_nextRequest.Clear();
-//	m_nextRequest.set_requestid(m_currentRequestId);
-
-//	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_NEXT, m_nextRequest);
-
-//	m_statTcpRequestCount ++;
+	// --
+	//
+	sendRequest(RT_TRENDS_MANAGEMENT, m_managementRequest);
 
 	return;
 }
 
-void RtTrendTcpClient::processNext(const QByteArray& data)
+void RtTrendTcpClient::processTrendManagement(const QByteArray& data)
 {
-//	bool ok = m_nextReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_managementReply.ParseFromArray(data.constData(), data.size());
 
-//	if (ok == false)
-//	{
-//		assert(ok);
+	if (ok == false)
+	{
+		emit requestError(tr("Cannot parse reply to RT_TRENDS_MANAGEMENT"));
 
-//		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
-//		requestInProgress = false;
+		assert(ok);
+		closeConnection();
+		return;
+	}
 
-//		resetRequestCycle();
-//		return;
-//	}
+	int error = m_managementReply.error();
+	if (error != 0)
+	{
+		emit requestError(QString::fromStdString(m_managementReply.errorstring()));
+		closeConnection();
+		return;
+	}
 
-//	int error = m_nextReply.error();
-//	int archError = m_nextReply.archerror();
+	m_trackedSignals.clear();
+	int trackedSignalCount = m_managementReply.trackedsignalhashes_size();
+	for (int i = 0; i < trackedSignalCount; i++)
+	{
+		Hash h = m_managementReply.trackedsignalhashes(i);
+		m_trackedSignals.insert(h);
+	}
 
-//	if (m_currentRequestId != m_nextReply.requestid())
-//	{
-//		assert(m_currentRequestId == m_nextReply.requestid());
+	// --
+	//
+	requestTrendStateChanges();
 
-//		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
-//		requestInProgress = false;
-
-//		qDebug() << "TrendTcpClient::processNext, wrong RequestID, expected " << m_currentRequestId
-//				 << ", received " << m_nextReply.requestid();
-
-//		resetRequestCycle();
-//		return;
-//	}
-
-//	if (error != 0)
-//	{
-//		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
-//		requestInProgress = false;
-
-//		qDebug() << "ERROR: TrendTcpClient::processNext, AppSignalID = " << m_currentRequest.appSignalId
-//				 << ", error = " << error
-//				 << ", archError = " << archError
-//				 << ", RequestID = " << m_currentRequestId
-//				 << ", requestedTime = " << m_currentRequest.hourToRequest.toDateTime();
-
-//		resetRequestCycle();
-//		return;
-//	}
-
-//	if (m_nextReply.dataready() == false)
-//	{
-//		// Data not ready yet, request next part one more time
-//		//
-//		QThread::msleep(5);
-//		requestNext();
-//		return;
-//	}
-
-//	// Parse data
-//	//
-//	assert(m_receivedData);
-
-//	int stateCount = m_nextReply.appsignalstates_size();
-
-//	// --
-//	//
-//	TrendLib::TrendStateRecord* record = nullptr;
-
-//	if (m_receivedData->data.empty() == true)
-//	{
-//		m_receivedData->data.emplace_back();
-//		m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::recomendedSize);
-//	}
-
-//	record = &m_receivedData->data.back();
-
-//	// --
-//	//
-//	qDebug() << "TrendTcpClient::processNext, stateCount " << stateCount;
-//	for (int i = 0; i < stateCount; i++)
-//	{
-//		const ::Proto::AppSignalState& stateMessage = m_nextReply.appsignalstates(i);
-
-//		AppSignalState s;
-//		Hash hash = s.load(stateMessage);
-
-//		if (hash != m_currentSignalHash)
-//		{
-//			assert(hash == m_currentSignalHash);
-//		}
-//		else
-//		{
-//			assert(record);
-
-//			if (record->states.size() >= record->states.max_size())
-//			{
-//				m_receivedData->data.emplace_back();
-//				m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::recomendedSize);
-
-//				record = &m_receivedData->data.back();
-//				assert(record);
-//			}
-
-//			record->states.emplace_back(s);
-//		}
-//	}
-
-//	// Request next or stop communication
-//	//
-//	if (m_nextReply.islastpart() == true)
-//	{
-//		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Reqest->Reply time: " << m_startRequestTime.elapsed();
-//		assert(m_receivedData);
-
-//		m_receivedData->state = TrendLib::OneHourData::State::Received;
-
-//		emit dataReady(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType, m_receivedData);
-
-//		requestInProgress = false;			// END OF REQUEST COMMUNICATION!
-//		m_receivedData.reset();
-
-//		resetRequestCycle();				// start new cycle
-//	}
-//	else
-//	{
-//		// Request next part
-//		//
-//		requestNext();
-//	}
-
-//	return;
+	return;
 }
 
-//void RtTrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType)
-//{
-	//qDebug() << "TrendTcpClient::slot_requestData, AppSignalID = " << appSignalId << ", Time = " << hourToRequest.toDateTime();
+void RtTrendTcpClient::requestTrendStateChanges()
+{
+	assert(isClearToSendRequest());
+	incStatRequestCount();
 
-//	RequestQueue request;
+	m_stateChangesRequest.Clear();
 
-//	request.appSignalId = appSignalId;
-//	request.hourToRequest = hourToRequest;
-//	request.timeType = timeType;
+	// --
+	//
+	sendRequest(RT_TRENDS_GET_STATE_CHANGES, m_managementRequest);
 
-//	// Check if such request already in the queue
-//	//
-//	for (const RequestQueue& rq : m_queue)
-//	{
-//		if (rq == request)
-//		{
-//			return;
-//		}
-//	}
+	return;
+}
 
-//	// Add request to the queue
-//	//
-//	m_queue.push_back(request);
+void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
+{
+	bool ok = m_stateChangesReply.ParseFromArray(data.constData(), data.size());
 
-//	return;
-//}
+	if (ok == false)
+	{
+		assert(ok);
+
+		emit requestError(tr("Cannot parse reply to RT_TRENDS_GET_STATE_CHANGES"));
+		closeConnection();
+		return;
+	}
+
+	int error = m_stateChangesReply.error();
+	if (error != 0)
+	{
+		emit requestError(QString::fromStdString(m_stateChangesReply.errorstring()));
+		closeConnection();
+		return;
+	}
+
+	// --
+	//
+	int stateCount = m_stateChangesReply.signalstates_size();
+
+	for (int i = 0; i < stateCount; i++)
+	{
+		const ::Proto::AppSignalState& protoState = m_stateChangesReply.signalstates(i);
+
+		Hash signalHash = protoState.hash();
+
+		AppSignalState state;
+	}
+
+	// New network data exchange cycle
+	//
+	startRequestCycle();
+
+	return;
+}
 
 void RtTrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort s1 = configuration.appDataService1.address();
-	HostAddressPort s2 = configuration.appDataService2.address();
-
-	quint16 set_port_here_for_realtime1;
-	quint16 set_port_here_for_realtime2;
-
-	s1.setPort(0);
-	s2.setPort(0);
+	HostAddressPort s1 = configuration.appDataServiceRealtimeTrend1.address();
+	HostAddressPort s2 = configuration.appDataServiceRealtimeTrend2.address();
 
 	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)

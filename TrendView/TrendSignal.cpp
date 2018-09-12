@@ -224,6 +224,11 @@ namespace TrendLib
 		m_appSignalId = value;
 	}
 
+	Hash TrendSignalParam::appSignalHash() const
+	{
+		return ::calcHash(m_appSignalId);
+	}
+
 	QString TrendSignalParam::caption() const
 	{
 		return m_caption;

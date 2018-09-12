@@ -17,8 +17,11 @@ public:
 	RtTrendTcpClient(MonitorConfigController* configController);
 	virtual ~RtTrendTcpClient();
 
-protected:
-	virtual void timerEvent(QTimerEvent* event) override;
+	// Methods
+	//
+public:
+	bool setData(E::RtTrendsSamplePeriod samplePeriod, const std::vector<TrendLib::TrendSignalParam> trendSignals);
+	bool clearData();
 
 public:
 	virtual void onClientThreadStarted() override;
@@ -31,23 +34,20 @@ public:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 protected:
-	void resetRequestCycle();
+	void startRequestCycle();
 
-	void requestStart();
-	void processStart(const QByteArray& data);
+	void requestTrendManagement();
+	void processTrendManagement(const QByteArray& data);
 
-	void requestNext();
-	void processNext(const QByteArray& data);
-
-public slots:
-	//void slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType);
+	void requestTrendStateChanges();
+	void processTrendStateChanges(const QByteArray& data);
 
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
 signals:
-	void dataReady(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
-	void requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
+	void dataReady(Hash appSignalHash, std::shared_ptr<TrendLib::OneHourData> data);
+	void requestError(QString text);
 
 	// Staticstic
 	//
@@ -72,41 +72,21 @@ public:
 	// Data
 	//
 private:
-	int m_periodicTimerId = 0;
-
 	MonitorConfigController* m_cfgController = nullptr;
 
-//	struct RequestQueue
-//	{
-//		QString appSignalId;
-//		TimeStamp hourToRequest;
-//		E::TimeType timeType;
+	mutable QMutex m_dataMutex;
 
-//		bool operator== (const RequestQueue& r) const
-//		{
-//			return	this->appSignalId == r.appSignalId &&
-//					this->hourToRequest == r.hourToRequest &&
-//					this->timeType == r.timeType;
-//		}
-//	};
-
-//	std::list<RequestQueue> m_queue;
+	E::RtTrendsSamplePeriod m_samplePeriod;
+	std::set<Hash> m_signalSet;
 
 private:
-	bool requestInProgress = false;
-//	RequestQueue m_currentRequest;
-//	Hash m_currentSignalHash = 0;
-//	int m_currentRequestId = 0;
+	Network::RtTrendsManagementRequest m_managementRequest;
+	Network::RtTrendsManagementReply m_managementReply;
 
-//	std::shared_ptr<TrendLib::OneHourData> m_receivedData;
+	Network::RtTrendsGetStateChangesRequest m_stateChangesRequest;
+	Network::RtTrendsGetStateChangesReply m_stateChangesReply;
 
-//	Network::GetAppSignalStatesFromArchiveStartRequest m_startRequest;
-//	Network::GetAppSignalStatesFromArchiveStartReply m_startReply;
-
-//	Network::GetAppSignalStatesFromArchiveNextRequest m_nextRequest;
-//	Network::GetAppSignalStatesFromArchiveNextReply m_nextReply;
-
-//	QTime m_startRequestTime;
+	std::set<Hash> m_trackedSignals;		// Currently tracked signals by AppDataService
 
 	// Statisctics and state variables
 	//

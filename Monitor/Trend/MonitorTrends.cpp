@@ -138,6 +138,8 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 	if (trendMode() == E::TrendMode::Archive)
 	{
+		assert(m_archiveTcpClient);
+
 		ArchiveTrendTcpClient::Stat stat = m_archiveTcpClient->stat();
 
 		m_statusBarTextLabel->setText(stat.text);
@@ -160,6 +162,14 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 	}
 	else
 	{
+		assert(m_rtTcpClient);
+
+		// --
+		//
+		setRealtimeParams();
+
+		// --
+		//
 		RtTrendTcpClient::Stat stat = m_rtTcpClient->stat();
 
 		m_statusBarTextLabel->setText(stat.text);
@@ -283,6 +293,28 @@ void MonitorTrendsWidget::createRealtimeConnection()
 	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
 
 	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+
+	setRealtimeParams();
+
+	return;
+}
+
+void MonitorTrendsWidget::setRealtimeParams()
+{
+	if (m_rtTcpClient == nullptr ||
+		m_rtTcpClientThread == nullptr)
+	{
+		assert(m_rtTcpClient);
+		assert(m_rtTcpClientThread);
+		return;
+	}
+
+	int to_do_calc_sample_period;
+
+	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
+	std::vector<TrendLib::TrendSignalParam> signalSetVector = trend().signalSet().trendSignals();
+
+	m_rtTcpClient->setData(samplePeriod, signalSetVector);
 
 	return;
 }

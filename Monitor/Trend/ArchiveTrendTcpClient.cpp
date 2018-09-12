@@ -298,6 +298,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 	// --
 	//
 	qDebug() << "TrendTcpClient::processNext, stateCount " << stateCount;
+
 	for (int i = 0; i < stateCount; i++)
 	{
 		const ::Proto::AppSignalState& stateMessage = m_nextReply.appsignalstates(i);

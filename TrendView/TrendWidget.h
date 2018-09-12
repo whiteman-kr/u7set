@@ -76,6 +76,7 @@ namespace TrendLib
 		//
 	protected:
 		virtual void paintEvent(QPaintEvent* event) override;
+
 		virtual void resizeEvent(QResizeEvent*) override;
 
 		virtual void mousePressEvent(QMouseEvent* event) override;

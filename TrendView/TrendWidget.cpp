@@ -16,7 +16,7 @@ namespace TrendLib
 		: QThread(parent),
 		m_trend(trend)
 	{
-		qRegisterMetaType<TrendLib::TrendParam>("TrendDrawParam");
+		qRegisterMetaType<TrendLib::TrendParam>("TrendParam");
 
 		assert(m_trend);
 	}
@@ -83,6 +83,7 @@ namespace TrendLib
 			m_trend->draw(&m_image, drawParam);
 
 			emit renderedImage(m_image, drawParam);
+
 		}
 		while (isInterruptionRequested() == false);
 

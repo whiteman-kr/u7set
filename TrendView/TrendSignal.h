@@ -4,6 +4,7 @@
 #include <array>
 #include <bitset>
 #include <memory>
+#include <QColor>
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 
@@ -132,6 +133,8 @@ namespace TrendLib
 
 		QString appSignalId() const;
 		void setAppSignalId(const QString& value);
+
+		Hash appSignalHash() const;
 
 		QString caption() const;
 		void setCaption(const QString& value);
