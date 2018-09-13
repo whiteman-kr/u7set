@@ -580,14 +580,23 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 
 	QDateTime plantTime;
 
-	plantTime.setTimeSpec(Qt::UTC);	// don't delete this to prevent plantTime conversion from Local to UTC time!!!
+	// don't delete this to prevent plantTime conversion from Local to UTC time during call plantTime.toMSecsSinceEpoch()!!!
+	//
+	plantTime.setTimeSpec(Qt::UTC);
 
 	plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 	plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
 
 	m_rupDataTimes.plant.timeStamp = plantTime.toMSecsSinceEpoch();
 	m_rupDataTimes.system.timeStamp = m_firstFrameServerTime;
-	m_rupDataTimes.local.timeStamp = QDateTime::fromMSecsSinceEpoch(m_firstFrameServerTime).toMSecsSinceEpoch();
+
+	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(m_firstFrameServerTime);
+
+	// don't delete this to prevent localTime conversion from Local to UTC time during call localTime.toMSecsSinceEpoch()!!!
+	//
+	localTime.setTimeSpec(Qt::UTC);
+
+	m_rupDataTimes.local.timeStamp = localTime.toMSecsSinceEpoch();
 
 	m_rupDataSize = framesQuantity * sizeof(Rup::Data);
 
