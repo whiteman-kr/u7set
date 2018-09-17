@@ -9,7 +9,10 @@ TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, cons
 {
 	assert(m_cfgController);
 
+	setObjectName("TcpSignalClient");
+
 	qDebug() << "TcpSignalClient::TcpSignalClient(...)";
+
 
 	m_startStateTimerId = startTimer(theSettings.requestTimeInterval());
 }

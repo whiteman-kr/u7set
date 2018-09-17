@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "AcrhiveTrendTcpClient.h"
+#include "ArchiveTrendTcpClient.h"
 #include "Settings.h"
 
 ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController) :
@@ -10,9 +10,12 @@ ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configCont
 {
 	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...)";
 
+	setObjectName("ArchiveTrendTcpClient");
 	enableWatchdogTimer(false);
 
-	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("share_ptr<TrendLib::OneHourData>>");
+	qRegisterMetaType<TrendLib::TrendStateItem>("TrendLib::TrendStateItem");
+	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("shared_ptr<TrendLib::OneHourData>>");
+	qRegisterMetaType<std::shared_ptr<TrendLib::RealtimeData>>("shared_ptr<TrendLib::RealtimeData>>");
 
 	return;
 }
@@ -290,7 +293,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 	if (m_receivedData->data.empty() == true)
 	{
 		m_receivedData->data.emplace_back();
-		m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::recomendedSize);
+		m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 	}
 
 	record = &m_receivedData->data.back();
@@ -317,7 +320,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 			if (record->states.size() >= record->states.max_size())
 			{
 				m_receivedData->data.emplace_back();
-				m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::recomendedSize);
+				m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 
 				record = &m_receivedData->data.back();
 				assert(record);

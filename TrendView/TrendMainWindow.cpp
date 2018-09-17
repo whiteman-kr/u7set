@@ -1044,6 +1044,8 @@ static int lastCopyCount = false;
 		E::TrendMode tm = state ? E::TrendMode::Realtime : E::TrendMode::Archive;
 		m_trendWidget->setTrendMode(tm);
 
+		signalSet().addNonValidPoint();
+
 		return;
 	}
 

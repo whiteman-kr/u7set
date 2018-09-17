@@ -269,10 +269,11 @@ void MonitorTrendsWidget::createArchiveConnection()
 	m_archiveTcpClientThread->start();
 
 	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
 
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveRequestError);
+
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived);	// Fpr updating widget
 
 	return;
 }
@@ -288,11 +289,10 @@ void MonitorTrendsWidget::createRealtimeConnection()
 	m_rtTcpClientThread = new SimpleThread(m_rtTcpClient);	// Archive mode is default one
 	m_rtTcpClientThread->start();
 
-	//connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
-	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
-	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
+	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
+	connect(m_rtTcpClient, &RtTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
 
-	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
 
 	setRealtimeParams();
 
@@ -319,7 +319,7 @@ void MonitorTrendsWidget::setRealtimeParams()
 	return;
 }
 
-void MonitorTrendsWidget::slot_dataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
+void MonitorTrendsWidget::slot_archiveDataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
 {
 	assert(m_trendWidget);
 	assert(m_trendSlider);
@@ -336,6 +336,41 @@ void MonitorTrendsWidget::slot_dataReceived(QString /*appSignalId*/, TimeStamp r
 	}
 
 	m_trendWidget->updateWidget();
+	return;
+}
+
+void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
+{
+	assert(m_trendWidget);
+	assert(m_trendSlider);
+	assert(data);
+
+	if (data->signalData.empty() == true)
+	{
+		return;
+	}
+
+	const TrendLib::RealtimeDataChunk& chunk = data->signalData.front();
+	if (chunk.states.empty() == true)
+	{
+		return;
+	}
+
+	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
+	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
+
+	TimeStamp minus1hour(minTime.timeStamp - 1_hour);
+	TimeStamp plus1hour(maxTime.timeStamp + 1_hour);
+
+	if (m_trendSlider->isTimeInRange(minTime) == true ||
+		m_trendSlider->isTimeInRange(maxTime) == true ||
+		m_trendSlider->isTimeInRange(plus1hour) == true ||
+		m_trendSlider->isTimeInRange(minus1hour) == true ||
+		(m_trendSlider->min() < minTime && m_trendSlider->max() > maxTime))
+	{
+		m_trendWidget->updateWidget();
+	}
+
 	return;
 }
 
