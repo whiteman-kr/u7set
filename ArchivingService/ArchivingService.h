@@ -10,6 +10,7 @@
 #include "ArchWriteThread.h"
 #include "TcpArchRequestsServer.h"
 #include "ArchRequestThread.h"
+#include "FileArchWriter.h"
 
 class ArchivingServiceWorker : public ServiceWorker
 {
@@ -77,6 +78,8 @@ private:
 
 	ArchWriteThread* m_archWriteThread = nullptr;
 	ArchRequestThread* m_archRequestThread = nullptr;
+
+	FileArchWriter* m_fileArchWriter = nullptr;
 
 	Queue<SimpleAppSignalState> m_saveStatesQueue;
 

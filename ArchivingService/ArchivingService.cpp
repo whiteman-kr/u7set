@@ -134,6 +134,14 @@ void ArchivingServiceWorker::runArchWriteThread()
 											logger());
 
 	m_archWriteThread->start();
+
+	//
+
+	assert(m_fileArchWriter == nullptr);
+
+	m_fileArchWriter = new FileArchWriter(m_archive, m_saveStatesQueue, logger());
+
+	m_fileArchWriter->start();
 }
 
 void ArchivingServiceWorker::stopArchWriteThread()
@@ -143,6 +151,15 @@ void ArchivingServiceWorker::stopArchWriteThread()
 		m_archWriteThread->quitAndWait();
 		delete m_archWriteThread;
 		m_archWriteThread = nullptr;
+	}
+
+	//
+
+	if (m_fileArchWriter != nullptr)
+	{
+		m_fileArchWriter->quitAndWait();
+		delete m_fileArchWriter;
+		m_fileArchWriter = nullptr;
 	}
 }
 

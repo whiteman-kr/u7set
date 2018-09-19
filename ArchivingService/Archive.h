@@ -73,6 +73,14 @@ public:
 
 	void setSignalInitialized(Hash signalHash, bool initilaized);
 
+	void setArchDir(const QString& archDir, const QString& project, const QString& equipmentID);
+	QString archDir() const { return m_archDir; }
+	QString project() const { return m_project; }
+	QString equipment() const { return m_equipmentID; }
+
+	QString archFullPath() const { return m_archFullPath; }
+
+
 private:
 	void clear();
 
@@ -87,6 +95,12 @@ private:
 private:
 	HostAddressPort m_dbHost;
 	CircularLoggerShared m_logger;
+
+	QString m_archDir;
+	QString m_project;
+	QString m_equipmentID;
+
+	QString m_archFullPath;
 
 	QString m_dbUser;
 	QString m_dbPassword;

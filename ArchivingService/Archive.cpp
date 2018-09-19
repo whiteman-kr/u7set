@@ -252,6 +252,15 @@ void Archive::setSignalInitialized(Hash signalHash, bool initilaized)
 	m_archSignals[signalHash].isInitialized = initilaized;
 }
 
+void Archive::setArchDir(const QString& archDir, const QString& project, const QString& equipmentID)
+{
+	m_archDir = archDir;
+	m_project = project;
+	m_equipmentID = equipmentID;
+
+	m_archFullPath = QString("%1/%1/%1").arg(m_archDir).arg(m_project).arg(m_equipmentID);
+}
+
 void Archive::clear()
 {
 	m_projectID.clear();
