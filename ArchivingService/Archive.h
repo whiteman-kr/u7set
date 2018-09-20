@@ -80,7 +80,6 @@ public:
 
 	QString archFullPath() const { return m_archFullPath; }
 
-
 private:
 	void clear();
 

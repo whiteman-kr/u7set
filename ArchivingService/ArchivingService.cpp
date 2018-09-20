@@ -139,6 +139,8 @@ void ArchivingServiceWorker::runArchWriteThread()
 
 	assert(m_fileArchWriter == nullptr);
 
+	m_archive->setArchDir("d:/temp", m_projectID, softwareInfo().equipmentID());
+
 	m_fileArchWriter = new FileArchWriter(m_archive, m_saveStatesQueue, logger());
 
 	m_fileArchWriter->start();

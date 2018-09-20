@@ -1,5 +1,30 @@
 #include "FileArchWriter.h"
 
+
+ArchFile::ArchFile()
+{
+}
+
+bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash hash, int initialQueueSize)
+{
+	TEST_PTR_RETURN_FALSE(writer);
+
+	m_archWriter = writer;
+	m_signalID = signalID;
+	m_hash = hash;
+
+	m_queue = new LockFreeQueue<SignalState>(initialQueueSize);
+
+	return true;
+
+}
+
+bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
+{
+	return true;
+}
+
+
 FileArchWriter::FileArchWriter(ArchiveShared archive,
 								Queue<SimpleAppSignalState>& saveStatesQueue,
 								CircularLoggerShared logger) :
@@ -27,9 +52,17 @@ void FileArchWriter::run()
 
 	if (result == false)
 	{
-		DEBUG_LOG_ERR(m_log, "FileArchWriter terminated (initialization error). ");
+		DEBUG_LOG_ERR(m_log, "FileArchWriter terminated (files initialization error). ");
 		return;
 	}
+
+	do
+	{
+
+	}
+	while(isQuitRequested() == false);
+
+	shutdown();
 }
 
 
@@ -42,30 +75,22 @@ bool FileArchWriter::initFiles()
 		return false;
 	}
 
-/*	cresult = createSignalsDirs();
+	result = createGroupDirs();
 
-	m_archFiles = new ArchFile[m_signalIDs.size()];
-
-	int index = 0;
-
-	for(const QString& signalID : m_signalIDs)
+	if (result == false)
 	{
-		Hash hash = calcHash(signalID);
+		return false;
+	}
 
-		if (m_hashArchFiles.contains(hash) == true)
-		{
-			assert(false);
-			continue;
-		}
+	result = createArchFiles();
 
-		ArchFile* archFile = m_archFiles + index;
+	if (result == false)
+	{
+		return false;
+	}
 
-		archFile->init(&m_archInfo, signalID);
 
-		m_hashArchFiles.insert(hash, archFile);
-
-		index++;
-	}*/
+		//writeArchInfoFile();
 }
 
 bool FileArchWriter::archDirIsWritableChecking()
@@ -138,7 +163,7 @@ bool FileArchWriter::archDirIsWritableChecking()
 
 		DEBUG_LOG_MSG(m_log, QString("Test directory %1 is created successfully").arg(testDir));
 
-		d.rmpath(testDir);
+		d.rmdir(testDir);
 
 		QString testFile = QString("%1/test_file_%2.dat").arg(m_archFullPath).arg(time);
 
@@ -165,3 +190,87 @@ bool FileArchWriter::archDirIsWritableChecking()
 
 	return result;
 }
+
+bool FileArchWriter::createGroupDirs()
+{
+	bool result = true;
+
+	for(int i = 0; i < 256; i++)
+	{
+		QString dir = QString("%1/%2").arg(m_archFullPath).arg(QString().sprintf("%02X", i));
+
+		QDir d;
+
+		bool res = d.mkpath(dir);
+
+		if (res == false)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Directory %1 creation error!").arg(dir));
+
+			result = false;
+		}
+	}
+
+	return result;
+}
+
+bool FileArchWriter::createArchFiles()
+{
+	bool result = true;
+
+	const QHash<Hash, ArchSignal>& archSignals = m_archive->archSignals();
+
+	m_archFiles = new ArchFile[archSignals.size()];
+
+	TEST_PTR_RETURN_FALSE(m_archFiles);
+
+	int index = 0;
+
+	for(const ArchSignal& archSignal : archSignals)
+	{
+		Hash hash = archSignal.hash;
+
+		if (m_hashArchFiles.contains(hash) == true)
+		{
+			assert(false);
+			continue;
+		}
+
+		QString signalID = m_archive->getSignalID(hash);
+
+		if (signalID.isEmpty() == true)
+		{
+			assert(false);
+			continue;
+		}
+
+		int initialQueueSize = DISCRETES_INITIAL_QUEUE_SIZE;
+
+		if (archSignal.isAnalog == true)
+		{
+			initialQueueSize = ANALOGS_INITIAL_QUEUE_SIZE;
+		}
+
+		ArchFile* archFile = m_archFiles + index;
+
+		result &= archFile->init(this, signalID, hash, initialQueueSize);
+
+		m_hashArchFiles.insert(hash, archFile);
+
+		index++;
+	}
+
+	return result;
+}
+
+
+void FileArchWriter::shutdown()
+{
+	if (m_archFiles != nullptr)
+	{
+		delete [] m_archFiles;
+		m_archFiles = nullptr;
+	}
+}
+
+

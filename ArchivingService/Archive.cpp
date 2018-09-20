@@ -258,7 +258,7 @@ void Archive::setArchDir(const QString& archDir, const QString& project, const Q
 	m_project = project;
 	m_equipmentID = equipmentID;
 
-	m_archFullPath = QString("%1/%1/%1").arg(m_archDir).arg(m_project).arg(m_equipmentID);
+	m_archFullPath = QString("%1/%2-archive/%3").arg(m_archDir).arg(m_project).arg(m_equipmentID);
 }
 
 void Archive::clear()
