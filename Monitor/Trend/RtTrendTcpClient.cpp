@@ -256,7 +256,7 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 
 	int stateCount = m_stateChangesReply.signalstates_size();
 
-	qDebug() << "RtTrendTcpClient::processTrendStateChanges: Received states  " << stateCount;
+	//qDebug() << "RtTrendTcpClient::processTrendStateChanges: Received states  " << stateCount;
 
 	for (int i = 0; i < stateCount; i++)
 	{

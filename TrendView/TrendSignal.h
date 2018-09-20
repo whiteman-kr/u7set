@@ -53,7 +53,7 @@ namespace TrendLib
 			return (flags & 0x00000001);
 		}
 
-		bool isRealtimePOint() const
+		bool isRealtimePoint() const
 		{
 			return (flags & 0x80000000) ? true : false;
 		}

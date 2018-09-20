@@ -459,16 +459,12 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::Re
 	if (isRealtimeAutoShift() == true)
 	{
 		setRealtimeAutoShift(maxTime);
-		return;	// If autoshift is on, update will be called there
 	}
 
 	// Update widget if received data somewhere in view
 	//
-	TimeStamp startLimit(minTime.timeStamp - m_trendWidget->duration() / 10);
-	TimeStamp finishLimin(maxTime.timeStamp + m_trendWidget->duration() / 10);
-
-	if (startLimit >= m_trendWidget->startTime() &&
-		finishLimin <= m_trendWidget->finishTime())
+	if (minTime >= m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10 &&
+		maxTime <= m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10)
 	{
 		m_trendWidget->updateWidget();
 	}
