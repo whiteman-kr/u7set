@@ -309,6 +309,8 @@ public:
 	}
 
 	virtual bool push(const TYPE* ptr) { return LockFreeQueueBase::push(reinterpret_cast<const char*>(ptr)); }
+	virtual bool push(const TYPE& ref) { return LockFreeQueueBase::push(reinterpret_cast<const char*>(&ref)); }
+
 	virtual bool pop(TYPE* ptr) { return LockFreeQueueBase::pop(reinterpret_cast<char*>(ptr)); }
 
 	TYPE* beginPush() { return reinterpret_cast<TYPE*>(LockFreeQueueBase::beginPush()); }

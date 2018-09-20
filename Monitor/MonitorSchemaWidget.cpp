@@ -1,4 +1,4 @@
-#include <QMessageBox>
+#include "Stable.h"
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaWidget.h"
 #include "MonitorView.h"

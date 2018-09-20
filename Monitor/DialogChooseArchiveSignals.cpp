@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "DialogChooseArchiveSignals.h"
 #include "ui_DialogChooseArchiveSignals.h"
 #include "Settings.h"

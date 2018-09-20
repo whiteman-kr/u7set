@@ -308,6 +308,33 @@ public:
 	};
 	Q_ENUM(TimeType)
 
+	// RtTrendsSamplePeriod
+	//
+	// ATTENTION: After changes in this enum function getSamplePeriodCounter() MUST BE CHECKED !!!
+	//
+	enum class RtTrendsSamplePeriod
+	{
+		sp_5ms,
+		sp_10ms,
+		sp_20ms,
+		sp_50ms,
+		sp_100ms,
+		sp_250ms,
+		sp_500ms,
+		sp_1s,
+		sp_5s,
+		sp_15s,
+		sp_30s,
+		sp_60s,
+	};
+
+	enum class TrendMode
+	{
+		Archive,
+		Realtime
+	};
+	Q_ENUM(TrendMode)
+
 	// Property editor type
 	//
 	enum class PropertySpecificEditor : qint16
@@ -527,8 +554,10 @@ public:
 };
 
 
-typedef QPair<QString, QString> StringPair;
+int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
 
+
+typedef QPair<QString, QString> StringPair;
 
 const char* const DataFormatStr[] =
 {
@@ -580,4 +609,3 @@ const int	SIZE_32BIT = 32;
 
 const int	SIZE_1WORD = 1;
 const int	SIZE_2WORD = 2;
-

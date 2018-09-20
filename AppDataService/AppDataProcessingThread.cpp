@@ -38,7 +38,7 @@ void AppDataProcessingWorker::onAppDataSourceReceiveRupFrame(quint32 appDataSour
 {
 	AppDataSourceShared appDataSource = m_appDataSourcesIP.value(appDataSourceIP, nullptr);
 
-	bool result = appDataSource->seizeProcessingOwnership(m_thisThread);
+	bool result = appDataSource->takeProcessingOwnership(m_thisThread);
 
 	if (result == false)
 	{
@@ -122,7 +122,7 @@ void AppDataProcessingThread2::run()
 				continue;
 			}
 
-			bool result = appDataSource->seizeProcessingOwnership(thisThread);
+			bool result = appDataSource->takeProcessingOwnership(thisThread);
 
 			if (result == false)
 			{

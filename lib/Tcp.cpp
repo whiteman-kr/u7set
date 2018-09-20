@@ -1208,7 +1208,16 @@ namespace Tcp
 
 	void Client::onInitConnection()
 	{
-		qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
+		if (objectName().isEmpty() == true)
+		{
+			qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
+		}
+		else
+		{
+			qDebug() << qPrintable(QString("%1: Socket connected to server %2")
+										.arg(objectName())
+										.arg(m_selectedServer.addressPortStr()));
+		}
 
 		SoftwareInfo locSoftwareInfo = localSoftwareInfo();
 
@@ -1222,13 +1231,31 @@ namespace Tcp
 
 	void Client::onDisconnection()
 	{
-		qDebug() << qPrintable(QString("Socket disconnected from server %1").arg(m_selectedServer.addressPortStr()));
+		if (objectName().isEmpty() == true)
+		{
+			qDebug() << qPrintable(QString("Socket disconnected from server %1").arg(m_selectedServer.addressPortStr()));
+		}
+		else
+		{
+			qDebug() << qPrintable(QString("%1: Socket disconnected from server %2")
+										.arg(objectName())
+										.arg(m_selectedServer.addressPortStr()));
+		}
 	}
 
 
 	void Client::onTryConnectToServer(const HostAddressPort& serverAddr)
 	{
-		qDebug() << qPrintable(QString("Try connect to server %1").arg(serverAddr.addressPortStr()));
+		if (objectName().isEmpty() == true)
+		{
+			qDebug() << qPrintable(QString("Try connect to server %1").arg(serverAddr.addressPortStr()));
+		}
+		else
+		{
+			qDebug() << qPrintable(QString("%1: Try connect to server %2")
+										.arg(objectName())
+										.arg(serverAddr.addressPortStr()));
+		}
 	}
 
 

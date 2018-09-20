@@ -37,20 +37,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     TrendWidget.cpp \
     TrendSignal.cpp \
-    TrendDrawParam.cpp \
     TrendSlider.cpp \
     TrendSettings.cpp \
     TrendMainWindow.cpp \
     Trend.cpp \
     DialogTrendSignalProperties.cpp \
     ../Proto/trends.pb.cc \
-    TrendRuler.cpp
+    TrendRuler.cpp \
+    TrendParam.cpp
 
 HEADERS += \
     Stable.h \
     TrendWidget.h \
     TrendSignal.h \
-    TrendDrawParam.h \
     ../lib/TimeStamp.h \
     TrendSlider.h \
     TrendSettings.h \
@@ -58,7 +57,8 @@ HEADERS += \
     Trend.h \
     DialogTrendSignalProperties.h \
     ../Proto/trends.pb.h \
-    TrendRuler.h
+    TrendRuler.h \
+    TrendParam.h
 
 unix {
     target.path = /usr/lib

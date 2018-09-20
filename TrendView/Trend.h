@@ -2,8 +2,10 @@
 #define TREND_H
 
 #include "TrendSignal.h"
-#include "TrendDrawParam.h"
+#include "TrendParam.h"
 #include "TrendRuler.h"
+
+class QPainter;
 
 namespace Proto
 {
@@ -30,43 +32,43 @@ namespace TrendLib
 	public:
 		// Draw methods
 		//
-		void draw(QImage* image, const TrendDrawParam& drawParam) const;
-		void draw(QPainter* painter, const TrendDrawParam& drawParam, bool needAdjustPainter) const;
+		void draw(QImage* image, const TrendParam& drawParam) const;
+		void draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter) const;
 
-		void drawLane(QPainter* painter, const QRectF& laneRect, const TrendDrawParam& drawParam) const;
+		void drawLane(QPainter* painter, const QRectF& laneRect, const TrendParam& drawParam) const;
 
 		void drawBackground(QPainter* painter,
 							const QRectF& insideRect,
-							const TrendDrawParam& drawParam,
+							const TrendParam& drawParam,
 							const std::vector<TrendSignalParam>& discretes,
 							const std::vector<TrendSignalParam>& analogs) const;
 
 		void drawTimeGrid(QPainter* painter,
 						  const QRectF& laneRect,
 						  const QRectF& insideRect,
-						  const TrendDrawParam& drawParam) const;
+						  const TrendParam& drawParam) const;
 
 		void drawSignalsDecor(QPainter* painter,
 							  const QRectF& laneRect,
-							  const TrendDrawParam& drawParam,
+							  const TrendParam& drawParam,
 							  const std::vector<TrendSignalParam>& discretes,
 							  const std::vector<TrendSignalParam>& analogs) const;
 
 		void drawAnalogSignalsGridSeparateMode(QPainter* painter,
 											   const QRectF& laneRect,
-											   const TrendDrawParam& drawParam,
+											   const TrendParam& drawParam,
 											   const TrendSignalParam& signal) const;
 
 		void drawAnalogSignalsGridOverlappedMode(QPainter* painter,
 												 const QRectF& laneRect,
-												 const TrendDrawParam& drawParam,
+												 const TrendParam& drawParam,
 												 const std::vector<TrendSignalParam>& analogs) const;
 
-		void drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam) const;
-		void drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
-		void drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
+		void drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam) const;
+		void drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
+		void drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 
-		void drawRulers(QPainter* painter, const TrendDrawParam& drawParam) const;
+		void drawRulers(QPainter* painter, const TrendParam& drawParam) const;
 		TrendStateItem rulerSignalState(const TrendRuler& ruler, QString appSignalId, E::TimeType timeType) const;
 
 		static void adjustPainter(QPainter* painter, int dpiX, int dpiY);
@@ -75,20 +77,20 @@ namespace TrendLib
 
 	public:
 		static void calcSignalRects(const QRectF& insideRect,
-							 const TrendDrawParam& drawParam,
+							 const TrendParam& drawParam,
 							 std::vector<TrendSignalParam>* discretes,
 							 std::vector<TrendSignalParam>* analogs);
 
-		static QRectF calcLaneRect(int laneIndex, const TrendDrawParam& drawParam);
-		QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam) const;
-		static QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, size_t analogSignalCount);
+		static QRectF calcLaneRect(int laneIndex, const TrendParam& drawParam);
+		QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam) const;
+		static QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam, size_t analogSignalCount);
 		static QRectF calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect);
 
-		static QRect inchRectToPixelRect(const QRectF& rect, const TrendDrawParam& drawParam);
-		static QRectF pixelRectToInchRect(const QRect& rect, const TrendDrawParam& drawParam);
+		static QRect inchRectToPixelRect(const QRectF& rect, const TrendParam& drawParam);
+		static QRectF pixelRectToInchRect(const QRect& rect, const TrendParam& drawParam);
 
-		static QPoint inchPointToPixelPoint(const QPointF& point, const TrendDrawParam& drawParam);
-		static QPointF pixelPointToInchPoint(const QPoint& point, const TrendDrawParam& drawParam);
+		static QPoint inchPointToPixelPoint(const QPointF& point, const TrendParam& drawParam);
+		static QPointF pixelPointToInchPoint(const QPoint& point, const TrendParam& drawParam);
 
 		// Service methods
 		//
@@ -102,13 +104,13 @@ namespace TrendLib
 			OnRuler,			// Over ruler
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const;
+		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const;
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
 		static double valueToScaledPixel(double value, const QRectF& rect, double lowLimit, double highLimit);
 
-		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);
+		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 
 		// Properties
 		//

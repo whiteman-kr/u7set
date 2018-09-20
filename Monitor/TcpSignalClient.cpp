@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "TcpSignalClient.h"
 #include "Settings.h"
 #include "version.h"
@@ -8,7 +9,10 @@ TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, cons
 {
 	assert(m_cfgController);
 
+	setObjectName("TcpSignalClient");
+
 	qDebug() << "TcpSignalClient::TcpSignalClient(...)";
+
 
 	m_startStateTimerId = startTimer(theSettings.requestTimeInterval());
 }

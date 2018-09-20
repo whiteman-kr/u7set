@@ -1,6 +1,5 @@
+#include "Stable.h"
 #include "DialogSignalInfo.h"
-#include <QPainter>
-#include <QClipboard>
 #include "ui_DialogSignalInfo.h"
 #include "../lib/Types.h"
 #include "../Proto/serialization.pb.h"

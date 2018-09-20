@@ -9,6 +9,7 @@ TcpArchiveClient::TcpArchiveClient(const SoftwareInfo& softwareInfo,
 	m_logger(logger),
 	m_timer(this)
 {
+	setObjectName("TcpArchiveClient");
 }
 
 void TcpArchiveClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)

@@ -1,8 +1,5 @@
+#include "Stable.h"
 #include "MonitorMainWindow.h"
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QComboBox>
-#include <QToolButton>
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
@@ -10,7 +7,7 @@
 #include "DialogSignalSearch.h"
 #include "DialogSignalSnapshot.h"
 #include "MonitorArchive.h"
-#include "MonitorTrends.h"
+#include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
 
 const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";

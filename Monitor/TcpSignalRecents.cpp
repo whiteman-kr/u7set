@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "TcpSignalRecents.h"
 #include "Settings.h"
 #include "version.h"
@@ -134,6 +135,8 @@ TcpSignalRecents::TcpSignalRecents(MonitorConfigController* configController, co
 {
 	assert(m_cfgController);
 	qDebug() << "TcpSignalRecents::TcpSignalRecents(...)";
+
+	setObjectName("TcpSignalRecents");
 }
 
 TcpSignalRecents::~TcpSignalRecents()
