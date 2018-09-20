@@ -346,6 +346,7 @@ namespace Builder
 		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5147(QString signalID, QString lbID1, QString lbID2);				// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
 		void wrnALC5148(QString signalID);												// Internal signal %1 is unused.
+		void errALC5149(QString chassisEquipmentID);									// LM- or BVB-family module is not found in chassis %1
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
