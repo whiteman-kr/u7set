@@ -10,6 +10,7 @@ RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController) :
 {
 	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...)";
 
+	setObjectName("RtTrendTcpClient");
 	enableWatchdogTimer(true);
 
 	return;
@@ -140,6 +141,7 @@ void RtTrendTcpClient::requestTrendManagement()
 	m_managementRequest.Clear();
 
 	m_dataMutex.lock();
+
 	E::RtTrendsSamplePeriod samplePeriod = m_samplePeriod;
 	std::set<Hash> signalSet = m_signalSet;
 	m_dataMutex.unlock();
@@ -247,15 +249,67 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 
 	// --
 	//
+	std::shared_ptr<TrendLib::RealtimeData> realtimeData = std::make_shared<TrendLib::RealtimeData>();
+	std::map<Hash, TrendLib::RealtimeDataChunk> realtimeDataBySignals;
+
+	TrendLib::TrendStateItem minState;
+	TrendLib::TrendStateItem maxState;
+
 	int stateCount = m_stateChangesReply.signalstates_size();
+
+	//qDebug() << "RtTrendTcpClient::processTrendStateChanges: Received states  " << stateCount;
 
 	for (int i = 0; i < stateCount; i++)
 	{
-		const ::Proto::AppSignalState& protoState = m_stateChangesReply.signalstates(i);
+		const ::Proto::AppSignalState& stateMessage = m_stateChangesReply.signalstates(i);
 
-		Hash signalHash = protoState.hash();
+		TrendLib::RealtimeDataChunk& chunk = realtimeDataBySignals[stateMessage.hash()];
 
-		AppSignalState state;
+		if (chunk.appSignalHash == UNDEFINED_HASH)
+		{
+			// Chunk just created
+			//
+			chunk.appSignalHash = stateMessage.hash();
+			chunk.states.reserve(32);
+		}
+
+		TrendLib::TrendStateItem& trendItemState = chunk.states.emplace_back(AppSignalState{stateMessage});
+		trendItemState.setRealtimePointFlag();
+
+		if (i == 0)
+		{
+			minState = chunk.states.back();
+			maxState = chunk.states.back();
+		}
+		else
+		{
+			// Min/Max is defined by system time, it assume to be sequential,
+			// Later UI will decide itself, which time to use
+			//
+			if (trendItemState.system < minState.system)
+			{
+				minState = trendItemState;
+			}
+
+			if (trendItemState.system > maxState.system)
+			{
+				maxState = trendItemState;
+			}
+		}
+	}
+
+	for (auto& [hash, chunk] : realtimeDataBySignals)
+	{
+		Q_UNUSED(hash);
+		realtimeData->signalData.push_back(std::move(chunk));
+	}
+
+	// signal dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	//
+
+	if (realtimeData->signalData.empty() == false)
+	{
+		emit dataReady(realtimeData, minState, maxState);
 	}
 
 	// New network data exchange cycle

@@ -127,8 +127,8 @@ SOURCES += main.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    Trend/ArchiveTrendTcpClient.cpp \
-    Trend/RtTrendTcpClient.cpp
+    Trend/RtTrendTcpClient.cpp \
+    Trend/ArchiveTrendTcpClient.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -183,8 +183,8 @@ HEADERS  += \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    Trend/AcrhiveTrendTcpClient.h \
-    Trend/RtTrendTcpClient.h
+    Trend/RtTrendTcpClient.h \
+    Trend/ArchiveTrendTcpClient.h
 
 
 FORMS    += \

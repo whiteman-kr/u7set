@@ -46,7 +46,7 @@ protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
 signals:
-	void dataReady(Hash appSignalHash, std::shared_ptr<TrendLib::OneHourData> data);
+	void dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
 
 	// Staticstic

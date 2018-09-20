@@ -1111,6 +1111,11 @@ namespace TrendLib
 		m_trendParam.setStartTimeStamp(startTime);
 	}
 
+	TimeStamp TrendWidget::finishTime() const
+	{
+		return TimeStamp{m_trendParam.startTime()}.timeStamp + m_trendParam.duration() * m_trendParam.laneCount();
+	}
+
 	qint64 TrendWidget::duration() const
 	{
 		return m_trendParam.duration();

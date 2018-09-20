@@ -19,12 +19,10 @@ int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms)
 //		sp_500ms,
 //		sp_1s,
 //		sp_5s,
-//		sp_15s,
-//		sp_30s,
-//		sp_60s,
+//		sp_10s,
 //	};
 
-	const int periods_ms[] = { 5, 10, 20, 50, 100, 250, 500, 1000, 5000, 15000, 30000, 60000 };
+	const int periods_ms[] = { 5, 10, 20, 50, 100, 250, 500, 1000, 5000, 10000 };
 
 	const int periodsCount = sizeof(periods_ms) / sizeof(const int);
 

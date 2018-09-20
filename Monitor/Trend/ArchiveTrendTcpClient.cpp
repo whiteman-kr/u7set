@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "AcrhiveTrendTcpClient.h"
+#include "ArchiveTrendTcpClient.h"
 #include "Settings.h"
 
 ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController) :
@@ -10,9 +10,12 @@ ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configCont
 {
 	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...)";
 
+	setObjectName("ArchiveTrendTcpClient");
 	enableWatchdogTimer(false);
 
-	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("share_ptr<TrendLib::OneHourData>>");
+	qRegisterMetaType<TrendLib::TrendStateItem>("TrendLib::TrendStateItem");
+	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("shared_ptr<TrendLib::OneHourData>>");
+	qRegisterMetaType<std::shared_ptr<TrendLib::RealtimeData>>("shared_ptr<TrendLib::RealtimeData>>");
 
 	return;
 }
@@ -283,47 +286,50 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	int stateCount = m_nextReply.appsignalstates_size();
 
+	//qDebug() << "TrendTcpClient::processNext, stateCount " << stateCount;
+
 	// --
 	//
 	TrendLib::TrendStateRecord* record = nullptr;
 
-	if (m_receivedData->data.empty() == true)
+	if (stateCount != 0)
 	{
-		m_receivedData->data.emplace_back();
-		m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::recomendedSize);
-	}
-
-	record = &m_receivedData->data.back();
-
-	// --
-	//
-	qDebug() << "TrendTcpClient::processNext, stateCount " << stateCount;
-
-	for (int i = 0; i < stateCount; i++)
-	{
-		const ::Proto::AppSignalState& stateMessage = m_nextReply.appsignalstates(i);
-
-		AppSignalState s;
-		Hash hash = s.load(stateMessage);
-
-		if (hash != m_currentSignalHash)
+		if (m_receivedData->data.empty() == true)
 		{
-			assert(hash == m_currentSignalHash);
+			m_receivedData->data.emplace_back();
+			m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 		}
-		else
+
+		record = &m_receivedData->data.back();
+
+		// --
+		//
+		for (int i = 0; i < stateCount; i++)
 		{
-			assert(record);
+			const ::Proto::AppSignalState& stateMessage = m_nextReply.appsignalstates(i);
 
-			if (record->states.size() >= record->states.max_size())
+			AppSignalState s;
+			Hash hash = s.load(stateMessage);
+
+			if (hash != m_currentSignalHash)
 			{
-				m_receivedData->data.emplace_back();
-				m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::recomendedSize);
-
-				record = &m_receivedData->data.back();
-				assert(record);
+				assert(hash == m_currentSignalHash);
 			}
+			else
+			{
+				assert(record);
 
-			record->states.emplace_back(s);
+				if (record->states.size() >= record->states.max_size())
+				{
+					m_receivedData->data.emplace_back();
+					m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
+
+					record = &m_receivedData->data.back();
+					assert(record);
+				}
+
+				record->states.emplace_back(s);
+			}
 		}
 	}
 

@@ -269,10 +269,11 @@ void MonitorTrendsWidget::createArchiveConnection()
 	m_archiveTcpClientThread->start();
 
 	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
 
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveRequestError);
+
+	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived);	// Fpr updating widget
 
 	return;
 }
@@ -288,11 +289,10 @@ void MonitorTrendsWidget::createRealtimeConnection()
 	m_rtTcpClientThread = new SimpleThread(m_rtTcpClient);	// Archive mode is default one
 	m_rtTcpClientThread->start();
 
-	//connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
-	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
-	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
+	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
+	connect(m_rtTcpClient, &RtTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
 
-	//connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
 
 	setRealtimeParams();
 
@@ -309,9 +309,90 @@ void MonitorTrendsWidget::setRealtimeParams()
 		return;
 	}
 
-	int to_do_calc_sample_period;
+	//	enum class RtTrendsSamplePeriod
+	//	{
+	//		sp_5ms,
+	//		sp_10ms,
+	//		sp_20ms,
+	//		sp_50ms,
+	//		sp_100ms,
+	//		sp_250ms,
+	//		sp_500ms,
+	//		sp_1s,
+	//		sp_5s,
+	//		sp_15s,
+	//		sp_30s,
+	//		sp_60s,
+	//	};
 
 	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
+	qint64 duration = m_trendWidget->duration();
+
+	if (duration <= 2_sec)
+	{
+		samplePeriod = E::RtTrendsSamplePeriod::sp_5ms;
+	}
+	else
+	{
+		if (duration <= 5_sec)
+		{
+			samplePeriod = E::RtTrendsSamplePeriod::sp_10ms;
+		}
+		else
+		{
+			if (duration <= 10_sec)
+			{
+				samplePeriod = E::RtTrendsSamplePeriod::sp_20ms;
+			}
+			else
+			{
+				if (duration <= 20_sec)
+				{
+					samplePeriod = E::RtTrendsSamplePeriod::sp_50ms;
+				}
+				else
+				{
+					if (duration <= 1_min)
+					{
+						samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
+					}
+					else
+					{
+						if (duration <= 1_min + 30_sec)
+						{
+							samplePeriod = E::RtTrendsSamplePeriod::sp_250ms;
+						}
+						else
+						{
+							if (duration <= 3_min)
+							{
+								samplePeriod = E::RtTrendsSamplePeriod::sp_500ms;
+							}
+							else
+							{
+								if (duration <= 15_min)
+								{
+									samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
+								}
+								else
+								{
+									if (duration <= 60_min)
+									{
+										samplePeriod = E::RtTrendsSamplePeriod::sp_5s;
+									}
+									else
+									{
+										samplePeriod = E::RtTrendsSamplePeriod::sp_10s;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	std::vector<TrendLib::TrendSignalParam> signalSetVector = trend().signalSet().trendSignals();
 
 	m_rtTcpClient->setData(samplePeriod, signalSetVector);
@@ -319,7 +400,7 @@ void MonitorTrendsWidget::setRealtimeParams()
 	return;
 }
 
-void MonitorTrendsWidget::slot_dataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
+void MonitorTrendsWidget::slot_archiveDataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
 {
 	assert(m_trendWidget);
 	assert(m_trendSlider);
@@ -336,6 +417,44 @@ void MonitorTrendsWidget::slot_dataReceived(QString /*appSignalId*/, TimeStamp r
 	}
 
 	m_trendWidget->updateWidget();
+	return;
+}
+
+void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
+{
+	assert(m_trendWidget);
+	assert(m_trendSlider);
+	assert(data);
+
+	if (data->signalData.empty() == true)
+	{
+		return;
+	}
+
+	const TrendLib::RealtimeDataChunk& chunk = data->signalData.front();
+	if (chunk.states.empty() == true)
+	{
+		return;
+	}
+
+	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
+	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
+
+	// Shift view area if autoshift mode is turned on
+	//
+	if (isRealtimeAutoShift() == true)
+	{
+		setRealtimeAutoShift(maxTime);
+	}
+
+	// Update widget if received data somewhere in view
+	//
+	if (minTime >= m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10 &&
+		maxTime <= m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10)
+	{
+		m_trendWidget->updateWidget();
+	}
+
 	return;
 }
 

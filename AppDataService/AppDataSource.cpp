@@ -276,7 +276,7 @@ void AppSignalStateEx::appendRtSession(Hash signalHash,
 		rtSession.session = newSession;
 		rtSession.sessionID = newSession->id();
 		rtSession.samplePeriodCounter = samplePeriodCounter;
-		rtSession.sampleCounter = 1000000;					// big value for first point immediatly sending
+		rtSession.sampleCounter = 1000000;					// big value for first point immediately sending
 
 		m_rtSessions.insert(newSessionID, rtSession);
 
@@ -340,8 +340,6 @@ void AppSignalStateEx::setRtSessionSamplePeriodCounter(Hash signalHash,
 	}
 
 	releaseRtProcessingOwnership(rtProcessingOwner);
-
-
 }
 
 void AppSignalStateEx::rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway)

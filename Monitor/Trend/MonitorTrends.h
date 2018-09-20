@@ -2,7 +2,7 @@
 #define MONITORTRENDS_H
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
-#include "AcrhiveTrendTcpClient.h"
+#include "ArchiveTrendTcpClient.h"
 #include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
@@ -43,7 +43,9 @@ public:
 	// Slots
 	//
 protected slots:
-	void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+
 	void slot_trendModeChanged();
 
 

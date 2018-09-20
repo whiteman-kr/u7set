@@ -135,6 +135,8 @@ TcpSignalRecents::TcpSignalRecents(MonitorConfigController* configController, co
 {
 	assert(m_cfgController);
 	qDebug() << "TcpSignalRecents::TcpSignalRecents(...)";
+
+	setObjectName("TcpSignalRecents");
 }
 
 TcpSignalRecents::~TcpSignalRecents()

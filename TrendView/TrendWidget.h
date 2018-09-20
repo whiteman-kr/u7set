@@ -135,6 +135,8 @@ namespace TrendLib
 		TimeStamp startTime() const;
 		void setStartTime(const TimeStamp& startTime);
 
+		TimeStamp finishTime() const;
+
 		qint64 duration() const;
 		void setLaneDuration(qint64 interval);
 
