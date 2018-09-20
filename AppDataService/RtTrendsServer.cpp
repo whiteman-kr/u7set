@@ -315,7 +315,12 @@ namespace RtTrends
 			return;
 		}
 
+/*		sendReply(m_rtTrendsGetStateChangesReply);
+		return;*/
+
 		const QHash<Hash, SignalStatesQueue*>& trackedSignals = m_session->trackedSignals();
+
+		int states = 0;
 
 		for(SignalStatesQueue* queue : trackedSignals)
 		{
@@ -329,9 +334,14 @@ namespace RtTrends
 
 			SignalState ss;
 
-			while(clientQueue.isNotEmpty() == true && count < 1000)
+			do
 			{
-				clientQueue.pop(&ss);
+				bool result = clientQueue.pop(&ss);
+
+				if (result == false)
+				{
+					break;
+				}
 
 				Proto::AppSignalState* appSignalState = m_rtTrendsGetStateChangesReply.add_signalstates();
 
@@ -351,8 +361,13 @@ namespace RtTrends
 				appSignalState->set_archiveid(ss.archiveID);
 
 				count++;
-			}
+
+				states++;
+
+			} while(count < 1000);
 		}
+
+		qDebug() << C_STR(QString("RtTrendsServer(%1) rt states = %2").arg(m_session->id()).arg(states));
 
 		sendReply(m_rtTrendsGetStateChangesReply);
 	}
