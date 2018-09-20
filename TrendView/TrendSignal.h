@@ -50,7 +50,22 @@ namespace TrendLib
 
 		bool isValid() const
 		{
-			return (flags & 0x000001);
+			return (flags & 0x00000001);
+		}
+
+		bool isRealtimePOint() const
+		{
+			return (flags & 0x80000000) ? true : false;
+		}
+
+		void setRealtimePointFlag()
+		{
+			flags |= 0x80000000;
+		}
+
+		void resetRealtimePointFlag()
+		{
+			flags &= ~0x80000000;
 		}
 
 		TimeStamp getTime(const E::TimeType& timeType) const

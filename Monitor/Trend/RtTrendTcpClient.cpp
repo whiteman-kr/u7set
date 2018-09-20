@@ -273,6 +273,7 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 		}
 
 		TrendLib::TrendStateItem& trendItemState = chunk.states.emplace_back(AppSignalState{stateMessage});
+		trendItemState.setRealtimePointFlag();
 
 		if (i == 0)
 		{

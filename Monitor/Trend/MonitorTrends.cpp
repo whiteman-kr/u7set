@@ -309,9 +309,104 @@ void MonitorTrendsWidget::setRealtimeParams()
 		return;
 	}
 
-	int to_do_calc_sample_period;
+	//	enum class RtTrendsSamplePeriod
+	//	{
+	//		sp_5ms,
+	//		sp_10ms,
+	//		sp_20ms,
+	//		sp_50ms,
+	//		sp_100ms,
+	//		sp_250ms,
+	//		sp_500ms,
+	//		sp_1s,
+	//		sp_5s,
+	//		sp_15s,
+	//		sp_30s,
+	//		sp_60s,
+	//	};
 
 	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
+	qint64 duration = m_trendWidget->duration();
+
+	if (duration <= 2_sec)
+	{
+		samplePeriod = E::RtTrendsSamplePeriod::sp_5ms;
+	}
+	else
+	{
+		if (duration <= 5_sec)
+		{
+			samplePeriod = E::RtTrendsSamplePeriod::sp_10ms;
+		}
+		else
+		{
+			if (duration <= 10_sec)
+			{
+				samplePeriod = E::RtTrendsSamplePeriod::sp_20ms;
+			}
+			else
+			{
+				if (duration <= 20_sec)
+				{
+					samplePeriod = E::RtTrendsSamplePeriod::sp_50ms;
+				}
+				else
+				{
+					if (duration <= 1_min)
+					{
+						samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
+					}
+					else
+					{
+						if (duration <= 1_min + 30_sec)
+						{
+							samplePeriod = E::RtTrendsSamplePeriod::sp_250ms;
+						}
+						else
+						{
+							if (duration <= 3_min)
+							{
+								samplePeriod = E::RtTrendsSamplePeriod::sp_500ms;
+							}
+							else
+							{
+								if (duration <= 5_min)
+								{
+									samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
+								}
+								else
+								{
+									if (duration <= 30_min)
+									{
+										samplePeriod = E::RtTrendsSamplePeriod::sp_5s;
+									}
+									else
+									{
+										if (duration <= 90_min)
+										{
+											samplePeriod = E::RtTrendsSamplePeriod::sp_15s;
+										}
+										else
+										{
+											if (duration <= 3_hour)
+											{
+												samplePeriod = E::RtTrendsSamplePeriod::sp_30s;
+											}
+											else
+											{
+												samplePeriod = E::RtTrendsSamplePeriod::sp_60s;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	std::vector<TrendLib::TrendSignalParam> signalSetVector = trend().signalSet().trendSignals();
 
 	m_rtTcpClient->setData(samplePeriod, signalSetVector);
@@ -359,14 +454,21 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::Re
 	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
 	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
 
-	TimeStamp minus1hour(minTime.timeStamp - 1_hour);
-	TimeStamp plus1hour(maxTime.timeStamp + 1_hour);
+	// Shift view area if autoshift mode is turned on
+	//
+	if (isRealtimeAutoShift() == true)
+	{
+		setRealtimeAutoShift(maxTime);
+		return;	// If autoshift is on, update will be called there
+	}
 
-	if (m_trendSlider->isTimeInRange(minTime) == true ||
-		m_trendSlider->isTimeInRange(maxTime) == true ||
-		m_trendSlider->isTimeInRange(plus1hour) == true ||
-		m_trendSlider->isTimeInRange(minus1hour) == true ||
-		(m_trendSlider->min() < minTime && m_trendSlider->max() > maxTime))
+	// Update widget if received data somewhere in view
+	//
+	TimeStamp startLimit(minTime.timeStamp - m_trendWidget->duration() / 10);
+	TimeStamp finishLimin(maxTime.timeStamp + m_trendWidget->duration() / 10);
+
+	if (startLimit >= m_trendWidget->startTime() &&
+		finishLimin <= m_trendWidget->finishTime())
 	{
 		m_trendWidget->updateWidget();
 	}

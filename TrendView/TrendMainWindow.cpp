@@ -75,6 +75,8 @@ namespace TrendLib
 		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
 		connect(m_timeTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
 		connect(m_realtimeModeButton, &QPushButton::toggled, this, &TrendMainWindow::realtimeModeToggled);
+		connect(m_realtimeAutoShiftButton, &QPushButton::toggled, this, &TrendMainWindow::realtimeAutoShiftClicked);
+
 		connect(m_refreshButton, &QPushButton::clicked, m_refreshAction, &QAction::triggered);
 		connect(m_signalsButton, &QPushButton::clicked, this, &TrendMainWindow::signalsButton);
 
@@ -311,17 +313,17 @@ static int stdColorIndex = 0;
 
 		// TrendMode
 		//
-//		QLabel* modeLabel = new QLabel("  Mode: ");
-//		modeLabel->setAlignment(Qt::AlignCenter);
-//		m_toolBar->addWidget(modeLabel);
-
-//		m_realtimeModeButton = new QComboBox(m_toolBar);
-//		m_realtimeModeButton->addItem(tr("Archive"), QVariant::fromValue(E::TrendMode::Archive));
-//		m_realtimeModeButton->addItem(tr("Realtime"), QVariant::fromValue(E::TrendMode::Realtime));
-//		m_toolBar->addWidget(m_realtimeModeButton);
 		m_realtimeModeButton = new QPushButton(tr("Realtime"));
 		m_realtimeModeButton->setCheckable(true);
 		m_toolBar->addWidget(m_realtimeModeButton);
+
+		m_realtimeAutoShiftButton = new QPushButton(tr(">>>"));
+		m_realtimeAutoShiftButton->setEnabled(false);
+		m_realtimeAutoShiftButton->setCheckable(true);
+		//m_realtimeAutoShiftButton->(QSizePolicy::Fixed, QSizePolicy::Minimum);
+		m_toolBar->addWidget(m_realtimeAutoShiftButton);
+
+		m_toolBar->addSeparator();
 
 		// Add stretecher
 		//
@@ -379,6 +381,28 @@ static int stdColorIndex = 0;
 		// Ensure widget is visible
 		//
 		ensureVisible();
+
+		return;
+	}
+
+	void TrendMainWindow::setRealtimeAutoShift(const TimeStamp& ts)
+	{
+		assert(trendMode() == E::TrendMode::Realtime);
+		assert(isRealtimeAutoShift() == true);
+
+		m_lastRealtimeMaxValue = ts;
+
+		if (ts < m_trendWidget->startTime())
+		{
+			m_trendWidget->setStartTime(ts);
+			return;
+		}
+
+		if (ts > m_trendWidget->finishTime())
+		{
+			m_trendWidget->setStartTime(ts.timeStamp - m_trendWidget->duration() * m_trendWidget->laneCount());
+			return;
+		}
 
 		return;
 	}
@@ -791,7 +815,7 @@ static int lastCopyCount = false;
 		QDateTime finishTime = TimeStamp(m_trendWidget->startTime().timeStamp + m_trendWidget->duration()).toDateTime();
 
 		qint64 startTimeValue = m_trendWidget->startTime().timeStamp;
-		qint64 finishTimeValue = m_trendWidget->startTime().timeStamp + m_trendWidget->duration();
+		qint64 finishTimeValue = m_trendWidget->finishTime().timeStamp;
 
 		E::TimeType timeType = m_trendWidget->timeType();
 
@@ -1046,6 +1070,15 @@ static int lastCopyCount = false;
 
 		signalSet().addNonValidPoint();
 
+		m_realtimeAutoShiftButton->setEnabled(tm == E::TrendMode::Realtime);
+		m_realtimeAutoShiftButton->setChecked(true);
+
+		return;
+	}
+
+	void TrendMainWindow::realtimeAutoShiftClicked(bool /*state*/)
+	{
+		//E::TrendMode tm = m_trendWidget->trendMode();
 		return;
 	}
 
@@ -1059,6 +1092,20 @@ static int lastCopyCount = false;
 	void TrendMainWindow::startTimeChanged(TimeStamp value)
 	{
 		m_trendSlider->setValueShiftMinMax(value);
+
+		if (trendMode() == E::TrendMode::Realtime &&
+			isRealtimeAutoShift() == true)
+		{
+			if (m_lastRealtimeMaxValue > m_trendWidget->finishTime() ||
+				m_lastRealtimeMaxValue < m_trendWidget->startTime())
+			{
+				// Exit realtime autoshift
+				//
+				m_realtimeAutoShiftButton->setChecked(false);
+			}
+		}
+
+		return;
 	}
 
 	void TrendMainWindow::durationChanged(qint64 value)
@@ -1197,6 +1244,14 @@ static int lastCopyCount = false;
 	void TrendMainWindow::setTrendMode(E::TrendMode value)
 	{
 		m_trendWidget->setTrendMode(value);
+	}
+
+	bool TrendMainWindow::isRealtimeAutoShift() const
+	{
+		assert(trendMode() == E::TrendMode::Realtime);
+		assert(m_realtimeAutoShiftButton);
+
+		return m_realtimeAutoShiftButton->isChecked();
 	}
 
 }

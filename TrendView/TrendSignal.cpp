@@ -892,39 +892,40 @@ namespace TrendLib
 			}
 			else
 			{
-				qint64 hourTimeStamp = trendArchive.m_hours.rbegin()->first.timeStamp;
-				std::shared_ptr<OneHourData> hour = trendArchive.m_hours.rbegin()->second;
-
-				if (hour->data.empty() == false)
+				// Find the last hour with points and add non valid state to it
+				//
+				for (auto rhit = trendArchive.m_hours.rbegin(); rhit != trendArchive.m_hours.rend(); ++rhit)
 				{
-					hour->state = OneHourData::State::Received;
+					std::shared_ptr<OneHourData> hour = rhit->second;
 
-					TrendStateRecord& record = hour->data.emplace_back();
-					record.states.reserve(TrendStateRecord::RecomendedSize);
-
-					TrendStateItem tsi;
-					tsi.clear();
-
-					tsi.local = hourTimeStamp;
-					tsi.plant = hourTimeStamp;
-					tsi.system = hourTimeStamp;
-					tsi.flags = 0;	// Signal is not valid
-					tsi.value = 0;
-
-					record.states.push_back(tsi);
-				}
-				else
-				{
-					TrendStateRecord& record = hour->data.back();
-
-					if (record.states.empty() == false)
+					if (hour->data.empty() == true)
 					{
-						// Just duplicate last state with invalid flag
+						// It can be just request for ah hour
+						// Process the next hour
 						//
-						TrendStateItem tsi = record.states.back();
-						tsi.flags = 0;
+						continue;
+					}
+					else
+					{
+						// Assume that record has some states
+						//
+						TrendStateRecord& record = hour->data.back();
 
-						record.states.push_back(tsi);
+						if (record.states.empty() == false)
+						{
+							// Just duplicate last state with invalid flag
+							//
+							TrendStateItem tsi = record.states.back();
+							tsi.flags = 0;
+
+							record.states.push_back(tsi);
+						}
+						else
+						{
+							assert(record.states.empty() == false);
+						}
+
+						break;
 					}
 				}
 			}

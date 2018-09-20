@@ -40,6 +40,8 @@ namespace TrendLib
 		void saveWindowState();
 		void restoreWindowState();
 
+		void setRealtimeAutoShift(const TimeStamp& ts);
+
 		// Events
 		//
 	protected:
@@ -74,6 +76,7 @@ namespace TrendLib
 		void laneCountComboCurrentIndexChanged(int index);
 		void timeTypeComboCurrentIndexChanged(int index);
 		void realtimeModeToggled(bool state);
+		void realtimeAutoShiftClicked(bool state);
 
 		void sliderValueChanged(TimeStamp value);
 
@@ -94,6 +97,8 @@ namespace TrendLib
 		E::TrendMode trendMode() const;
 		void setTrendMode(E::TrendMode value);
 
+		bool isRealtimeAutoShift() const;
+
 	private:
 		Ui::TrendsMainWindow *ui;
 
@@ -103,10 +108,14 @@ namespace TrendLib
 		QComboBox* m_lanesCombo = nullptr;
 		QComboBox* m_timeTypeCombo = nullptr;
 		QPushButton* m_realtimeModeButton = nullptr;
+		QPushButton* m_realtimeAutoShiftButton = nullptr;
+
 		QPushButton* m_refreshButton = nullptr;
 		QPushButton* m_signalsButton = nullptr;
 
 		QAction* m_refreshAction = nullptr;
+
+		TimeStamp m_lastRealtimeMaxValue;
 
 	protected:
 		TrendLib::TrendWidget* m_trendWidget = nullptr;

@@ -964,11 +964,14 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 
 					// Break line if it is not valid point
 					//
-					if (state.isValid() == false &&
-						lines.isEmpty() == false)
+					if (state.isValid() == false)
 					{
-						drawPolyline(painter, lines, signalRect);
-						lines.clear();
+						if (lines.isEmpty() == false)
+						{
+							drawPolyline(painter, lines, signalRect);
+							lines.clear();
+						}
+
 						continue;
 					}
 
@@ -1101,11 +1104,14 @@ static const int recomendedSize = 8192;
 
 					// Break line if it is not valid point
 					//
-					if (state.isValid() == false &&
-						lines.isEmpty() == false)
+					if (state.isValid() == false)
 					{
-						drawPolyline(painter, lines, signalRect);
-						lines.clear();
+						if (lines.isEmpty() == false)
+						{
+							drawPolyline(painter, lines, signalRect);
+							lines.clear();
+						}
+
 						continue;
 					}
 
