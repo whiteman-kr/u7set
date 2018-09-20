@@ -323,10 +323,9 @@ public:
 		sp_500ms,
 		sp_1s,
 		sp_5s,
-		sp_15s,
-		sp_30s,
-		sp_60s,
+		sp_10s,
 	};
+	Q_ENUM(RtTrendsSamplePeriod)
 
 	enum class TrendMode
 	{

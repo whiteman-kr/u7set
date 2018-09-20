@@ -370,33 +370,19 @@ void MonitorTrendsWidget::setRealtimeParams()
 							}
 							else
 							{
-								if (duration <= 5_min)
+								if (duration <= 15_min)
 								{
 									samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
 								}
 								else
 								{
-									if (duration <= 30_min)
+									if (duration <= 60_min)
 									{
 										samplePeriod = E::RtTrendsSamplePeriod::sp_5s;
 									}
 									else
 									{
-										if (duration <= 90_min)
-										{
-											samplePeriod = E::RtTrendsSamplePeriod::sp_15s;
-										}
-										else
-										{
-											if (duration <= 3_hour)
-											{
-												samplePeriod = E::RtTrendsSamplePeriod::sp_30s;
-											}
-											else
-											{
-												samplePeriod = E::RtTrendsSamplePeriod::sp_60s;
-											}
-										}
+										samplePeriod = E::RtTrendsSamplePeriod::sp_10s;
 									}
 								}
 							}

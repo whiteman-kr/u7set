@@ -141,6 +141,7 @@ void RtTrendTcpClient::requestTrendManagement()
 	m_managementRequest.Clear();
 
 	m_dataMutex.lock();
+
 	E::RtTrendsSamplePeriod samplePeriod = m_samplePeriod;
 	std::set<Hash> signalSet = m_signalSet;
 	m_dataMutex.unlock();
