@@ -69,7 +69,6 @@ namespace RtTrends
 		//
 
 		E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_60s;
-		int m_samplePeriodCounter = 0;
 
 		QHash<Hash, SignalStatesQueue*> m_trackedSignals;
 

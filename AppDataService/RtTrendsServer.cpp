@@ -76,15 +76,16 @@ namespace RtTrends
 	{
 		SignalStatesQueue* queue = m_trackedSignals.value(signalHash, nullptr);
 
-		if (queue == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
 		m_trackedSignals.remove(signalHash);
 
-		delete queue;
+		if (queue != nullptr)
+		{
+			delete queue;
+		}
+		else
+		{
+			assert(false);
+		}
 
 		return true;
 	}
@@ -93,11 +94,7 @@ namespace RtTrends
 	{
 		SignalStatesQueue* queue = m_trackedSignals.value(signalHash, nullptr);
 
-		if (queue == nullptr)
-		{
-			assert(false);
-			return;
-		}
+		TEST_PTR_RETURN(queue);
 
 		qint64 archiveID = m_archiveID.fetch_add(1);
 
@@ -209,7 +206,30 @@ namespace RtTrends
 			return;
 		}
 
+		qDebug() << C_STR(QString("Session %1 NEW sample period %2").arg(m_session->id()).arg(static_cast<int>(newSamplePeriod)));
+
 		m_session->setSamplePeriod(newSamplePeriod);
+
+		QThread* thisThread = QThread::currentThread();
+
+		QVector<Hash> trackedSignalHashes;
+
+		m_session->getTrackedSignalHashes(&trackedSignalHashes);
+
+		for(Hash signalHash : trackedSignalHashes)
+		{
+			AppDataSourceShared source = m_signalsToSources.value(signalHash, nullptr);
+
+			TEST_PTR_CONTINUE(source);
+
+			int samplePeriodCounter = getSamplePeriodCounter(newSamplePeriod, source->lmWorkcycle_ms());
+
+			AppSignalStateEx* state = m_signalStates.getStateByHash(signalHash);
+
+			TEST_PTR_CONTINUE(state);
+
+			state->setRtSessionSamplePeriodCounter(signalHash, thisThread, m_session->id(), samplePeriodCounter);
+		}
 	}
 
 	void Server::appendTrackedSignals(const Network::RtTrendsManagementRequest& request)
@@ -367,7 +387,7 @@ namespace RtTrends
 			} while(count < 1000);
 		}
 
-		qDebug() << C_STR(QString("RtTrendsServer(%1) rt states = %2").arg(m_session->id()).arg(states));
+//		qDebug() << C_STR(QString("RtTrendsServer(%1) rt states = %2").arg(m_session->id()).arg(states));
 
 		sendReply(m_rtTrendsGetStateChangesReply);
 	}
