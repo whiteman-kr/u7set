@@ -4,6 +4,7 @@
 #include <array>
 #include <bitset>
 #include <memory>
+#include <QColor>
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 
@@ -49,7 +50,22 @@ namespace TrendLib
 
 		bool isValid() const
 		{
-			return (flags & 0x000001);
+			return (flags & 0x00000001);
+		}
+
+		bool isRealtimePoint() const
+		{
+			return (flags & 0x80000000) ? true : false;
+		}
+
+		void setRealtimePointFlag()
+		{
+			flags |= 0x80000000;
+		}
+
+		void resetRealtimePointFlag()
+		{
+			flags &= ~0x80000000;
 		}
 
 		TimeStamp getTime(const E::TimeType& timeType) const
@@ -72,12 +88,23 @@ namespace TrendLib
 	struct TrendStateRecord
 	{
 		std::vector<TrendStateItem> states;
-		static const size_t recomendedSize = 1024;
+		static const size_t RecomendedSize = 1024;
 
 		// Serialization
 		//
 		bool save(Proto::TrendStateRecord* message) const;
 		bool load(const Proto::TrendStateRecord& message);
+	};
+
+	struct RealtimeDataChunk
+	{
+		Hash appSignalHash = UNDEFINED_HASH;
+		std::vector<TrendStateItem> states;
+	};
+
+	struct RealtimeData
+	{
+		std::list<RealtimeDataChunk> signalData;	// Each item is a signal with vecro of states
 	};
 
 	struct OneHourData
@@ -101,7 +128,8 @@ namespace TrendLib
 	struct TrendArchive
 	{
 		QString appSignalId;		// This fiels is not filled in. Don't use it now
-		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;			// Key is rounded to hour (like 9:00, 14:00, ...)
+		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;		// Key is rounded to hour (like 9:00, 14:00, ...)
+																		// DO NOT CHANGE type to unordered_map, as it is soppise to be ordered
 
 		// Serialization
 		//
@@ -132,6 +160,8 @@ namespace TrendLib
 
 		QString appSignalId() const;
 		void setAppSignalId(const QString& value);
+
+		Hash appSignalHash() const;
 
 		QString caption() const;
 		void setCaption(const QString& value);
@@ -222,13 +252,24 @@ namespace TrendLib
 		int analogSignalsCount() const;
 
 		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
-		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;
+		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 
 		void clear(E::TimeType timeType);
 
+		void addNonValidPoint();	// Add non valid points to all signals, useful in switching mode Archive/RealTime
+
+	private:
+		void addNonValidPoint(E::TimeType timeType);
+
 	public slots:
-		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
-		void slot_requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
+		void slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+		void slot_archiveRequestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
+
+		void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		void slot_realtimeRequestError(QString errorText);
+
+	private:
+		void appendRealtimeDataToArchive(E::TimeType timeType, Hash signalhash, const std::vector<TrendStateItem>& states);
 
 	signals:
 		void requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType) const;
@@ -238,12 +279,14 @@ namespace TrendLib
 		std::list<TrendSignalParam> m_signalParams;
 
 		mutable QMutex m_archiveMutex;
-		mutable std::map<QString, TrendArchive> m_archiveLocalTime;
-		mutable std::map<QString, TrendArchive> m_archiveSystemTime;
-		mutable std::map<QString, TrendArchive> m_archivePlantTime;
+		mutable std::map<Hash, TrendArchive> m_archiveLocalTime;
+		mutable std::map<Hash, TrendArchive> m_archiveSystemTime;
+		mutable std::map<Hash, TrendArchive> m_archivePlantTime;
 	};
 }
 
+Q_DECLARE_METATYPE(TrendLib::TrendStateItem)
 Q_DECLARE_METATYPE(std::shared_ptr<TrendLib::OneHourData>)
+Q_DECLARE_METATYPE(std::shared_ptr<TrendLib::RealtimeData>)
 
 #endif // TRENDSIGNAL_H

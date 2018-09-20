@@ -1,6 +1,7 @@
 #include "../lib/WUtils.h"
 
 #include "AppDataSource.h"
+#include "RtTrendsServer.h"
 
 // -------------------------------------------------------------------------------------------------
 //
@@ -46,6 +47,7 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 
 	m_index = index;
 	m_signal = signal;
+	m_signalHash = calcHash(signal->appSignalID());
 
 	m_isDiscreteSignal = signal->isDiscrete();
 
@@ -96,6 +98,8 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 			{
 				statesQueue.pushAutoPoint(prevState);
 
+				rtSessionsProcessing(prevState, true);
+
 				m_prevStateIsStored = true;
 			}
 
@@ -124,6 +128,8 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 			tmpState.value = 0;
 
 			statesQueue.pushAutoPoint(tmpState);
+
+			rtSessionsProcessing(tmpState, true);
 
 //			logState(autoPointState);
 
@@ -209,6 +215,11 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 	//
 	setNewCurState(curState);
 
+	if (m_hasRtSessions == true)
+	{
+		rtSessionsProcessing(curState, hasArchivingReason);
+	}
+
 	return hasArchivingReason;
 }
 
@@ -238,6 +249,150 @@ QString AppSignalStateEx::appSignalID() const
 void AppSignalStateEx::setAutoArchivingGroup(int archivingGroup)
 {
 	m_autoArchivingGroup = archivingGroup;
+}
+
+void AppSignalStateEx::appendRtSession(Hash signalHash,
+									const QThread* rtProcessingOwner,
+									std::shared_ptr<RtTrends::Session> newSession,
+									int samplePeriodCounter)
+{
+	TEST_PTR_RETURN(rtProcessingOwner);
+	TEST_PTR_RETURN(newSession);
+
+	if (signalHash != m_signalHash)
+	{
+		assert(false);
+		return;
+	}
+
+	int newSessionID = newSession->id();
+
+	takeRtProcessingOwnership(rtProcessingOwner);
+
+	if (m_rtSessions.contains(newSessionID) == false)
+	{
+		RtSession rtSession;
+
+		rtSession.session = newSession;
+		rtSession.sessionID = newSession->id();
+		rtSession.samplePeriodCounter = samplePeriodCounter;
+		rtSession.sampleCounter = 1000000;					// big value for first point immediately sending
+
+		m_rtSessions.insert(newSessionID, rtSession);
+
+		m_hasRtSessions = true;
+	}
+	else
+	{
+		assert(false);
+	}
+
+	releaseRtProcessingOwnership(rtProcessingOwner);
+}
+
+void AppSignalStateEx::removeRtSession(Hash signalHash,
+									const QThread* rtProcessingOwner,
+									std::shared_ptr<RtTrends::Session> sessionToRemove)
+{
+	TEST_PTR_RETURN(rtProcessingOwner);
+	TEST_PTR_RETURN(sessionToRemove);
+
+	if (signalHash != m_signalHash)
+	{
+		assert(false);
+		return;
+	}
+
+	int sessionToRemoveID = sessionToRemove->id();
+
+	takeRtProcessingOwnership(rtProcessingOwner);
+
+	assert(m_rtSessions.contains(sessionToRemoveID) == true);
+
+	m_rtSessions.remove(sessionToRemoveID);
+
+	if (m_rtSessions.size() == 0)
+	{
+		m_hasRtSessions = false;
+	}
+
+	releaseRtProcessingOwnership(rtProcessingOwner);
+}
+
+void AppSignalStateEx::setRtSessionSamplePeriodCounter(Hash signalHash,
+					const QThread* rtProcessingOwner,
+					int sessionID,
+					int newSamplePeriodCounter)
+{
+	TEST_PTR_RETURN(rtProcessingOwner);
+
+	if (signalHash != m_signalHash)
+	{
+		assert(false);
+		return;
+	}
+
+	takeRtProcessingOwnership(rtProcessingOwner);
+
+	if (m_rtSessions.contains(sessionID) == true)
+	{
+		m_rtSessions[sessionID].samplePeriodCounter = newSamplePeriodCounter;
+	}
+
+	releaseRtProcessingOwnership(rtProcessingOwner);
+}
+
+void AppSignalStateEx::rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway)
+{
+	if (m_hasRtSessions == false)
+	{
+		return;
+	}
+
+	QThread* thread = QThread::currentThread();
+
+	takeRtProcessingOwnership(thread);
+
+	for(RtSession& session : m_rtSessions)
+	{
+		if (pushAnyway == true)
+		{
+			session.session->pushSignalState(m_signalHash, state);
+			session.sampleCounter = 0;
+			continue;
+		}
+
+		session.sampleCounter++;
+
+		if (session.sampleCounter >= session.samplePeriodCounter)
+		{
+			session.session->pushSignalState(m_signalHash, state);
+			session.sampleCounter = 0;
+		}
+	}
+
+	releaseRtProcessingOwnership(thread);
+}
+
+void AppSignalStateEx::takeRtProcessingOwnership(const QThread* newProcessingOwner)
+{
+	bool result = false;
+
+	do
+	{
+		const QThread* expectedOwner = nullptr;
+		result = m_rtProcessingOwner.compare_exchange_strong(expectedOwner, newProcessingOwner);
+	}
+	while(result == false);
+}
+
+void AppSignalStateEx::releaseRtProcessingOwnership(const QThread* currentProcessingOwner)
+{
+	bool result = m_rtProcessingOwner.compare_exchange_strong(currentProcessingOwner, nullptr);
+
+	assert(result == true);
+
+	Q_UNUSED(result);
 }
 
 void AppSignalStateEx::setNewCurState(const SimpleAppSignalState& newCurState)
@@ -305,6 +460,10 @@ AppSignalStateEx* AppSignalStates::operator [] (int index)
 	return m_appSignalState + index;
 }
 
+AppSignalStateEx* AppSignalStates::getStateByHash(Hash signalHash)
+{
+	return m_hash2State.value(signalHash, nullptr);
+}
 
 void AppSignalStates::buidlHash2State()
 {

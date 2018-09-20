@@ -1,24 +1,14 @@
 #include "TrendMainWindow.h"
 #include "ui_TrendsMainWindow.h"
-#include <QDialog>
-#include <QLabel>
-#include <QGridLayout>
-#include <QDialogButtonBox>
-#include <QMessageBox>
-#include <QDateEdit>
-#include <QTimeEdit>
-#include <QFileDialog>
-#include <QPrintDialog>
-#include <QPrinter>
-#include <QPageSize>
-#include <QPageLayout>
-#include <QComboBox>
+#include <cfloat>
+#include <QtWidgets>
+#include <QtPrintSupport>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 #include "TrendSignal.h"
 #include "DialogTrendSignalProperties.h"
 #include "../Proto/serialization.pb.h"
-#include <cfloat>
+#include "../lib/Types.h"
 
 namespace TrendLib
 {
@@ -84,6 +74,9 @@ namespace TrendLib
 		connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
 		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
 		connect(m_timeTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
+		connect(m_realtimeModeButton, &QPushButton::toggled, this, &TrendMainWindow::realtimeModeToggled);
+		connect(m_realtimeAutoShiftButton, &QPushButton::toggled, this, &TrendMainWindow::realtimeAutoShiftClicked);
+
 		connect(m_refreshButton, &QPushButton::clicked, m_refreshAction, &QAction::triggered);
 		connect(m_signalsButton, &QPushButton::clicked, this, &TrendMainWindow::signalsButton);
 
@@ -121,72 +114,6 @@ namespace TrendLib
 		//
 		setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 		connect(this, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
-
-		// DEBUG
-
-		//	COLORREF StdColors[] = {	RGB(0x80, 0x00, 0x00), RGB(0x00, 0x80, 0x00), RGB(0x00, 0x00, 0x80), RGB(0x00, 0x80, 0x80), RGB(0x80, 0x00, 0x80),
-		//								RGB(0xFF, 0x00, 0x00), RGB(0x00, 0x00, 0xFF), RGB(0x00, 0x00, 0x00) };
-
-
-//		TrendLib::TrendSignalParam s1;
-//		s1.setSignalId("ASIGNAL001");
-//		s1.setAppSignalId("#ASIGNAL001");
-//		s1.setCaption("ATrend Signal 001");
-//		s1.setType(E::SignalType::Analog);
-//		s1.setLowLimit(10.0);
-//		s1.setHighLimit(105.0);
-//		s1.setColor(qRgb(0x80, 0x00, 0x00));
-
-//		TrendLib::TrendSignalParam s11;
-//		s11.setSignalId("ASIGNAL011");
-//		s11.setAppSignalId("#ASIGNAL011");
-//		s11.setCaption("ATren Signal 011");
-//		s11.setType(E::SignalType::Analog);
-//		s11.setLowLimit(400.0);
-//		s11.setHighLimit(25000.0);
-//		s11.setColor(qRgb(0x80, 0x00, 0x80));
-
-//		TrendLib::TrendSignalParam s2;
-//		s2.setSignalId("SIGNAL002");
-//		s2.setAppSignalId("#SIGNAL002");
-//		s2.setCaption("Tren Signal 002");
-//		s2.setType(E::SignalType::Discrete);
-//		s2.setColor(qRgb(0x00, 0x80, 0x00));
-
-//		TrendLib::TrendSignalParam s3;
-//		s3.setSignalId("SIGNAL003");
-//		s3.setAppSignalId("#SIGNAL003");
-//		s3.setCaption("Tren Signal 003");
-//		s3.setType(E::SignalType::Discrete);
-//		s3.setColor(qRgb(0x00, 0x00, 0x80));
-
-//		TrendLib::TrendSignalParam s4;
-//		s4.setSignalId("SIGNAL004");
-//		s4.setAppSignalId("#SIGNAL004");
-//		s4.setCaption("Tren Signal 004");
-//		s4.setType(E::SignalType::Discrete);
-//		s4.setColor(qRgb(0x00, 0x80, 0x80));
-
-//		TrendLib::TrendSignalParam s6;
-//		s6.setSignalId("SIGNAL006");
-//		s6.setCaption("Tren Signal 006");
-//		s6.setType(E::SignalType::Discrete);
-//		s6.setColor(qRgb(0x00, 0x80, 0x80));
-
-//		TrendLib::TrendSignalParam s7;
-//		s7.setSignalId("SIGNAL007");
-//		s7.setCaption("Tren Signal 007");
-//		s7.setType(E::SignalType::Discrete);
-//		s7.setColor(qRgb(0x00, 0x80, 0x80));
-
-//		signalSet().addSignal(s1);
-//		signalSet().addSignal(s2);
-//		signalSet().addSignal(s3);
-//		signalSet().addSignal(s4);
-////		signalSet().addSignal(s6);
-////		signalSet().addSignal(s7);
-//		signalSet().addSignal(s11);
-		// end of DEBUG
 
 		return;
 	}
@@ -384,6 +311,20 @@ static int stdColorIndex = 0;
 
 		m_toolBar->addSeparator();
 
+		// TrendMode
+		//
+		m_realtimeModeButton = new QPushButton(tr("Realtime"));
+		m_realtimeModeButton->setCheckable(true);
+		m_toolBar->addWidget(m_realtimeModeButton);
+
+		m_realtimeAutoShiftButton = new QPushButton(tr(">>>"));
+		m_realtimeAutoShiftButton->setEnabled(false);
+		m_realtimeAutoShiftButton->setCheckable(true);
+		//m_realtimeAutoShiftButton->(QSizePolicy::Fixed, QSizePolicy::Minimum);
+		m_toolBar->addWidget(m_realtimeAutoShiftButton);
+
+		m_toolBar->addSeparator();
+
 		// Add stretecher
 		//
 		QWidget* empty = new QWidget();
@@ -440,6 +381,28 @@ static int stdColorIndex = 0;
 		// Ensure widget is visible
 		//
 		ensureVisible();
+
+		return;
+	}
+
+	void TrendMainWindow::setRealtimeAutoShift(const TimeStamp& ts)
+	{
+		assert(trendMode() == E::TrendMode::Realtime);
+		assert(isRealtimeAutoShift() == true);
+
+		m_lastRealtimeMaxValue = ts;
+
+		if (ts < m_trendWidget->startTime())
+		{
+			m_trendWidget->setStartTime(ts);
+			return;
+		}
+
+		if (ts > m_trendWidget->finishTime())
+		{
+			m_trendWidget->setStartTime(ts.timeStamp - m_trendWidget->duration() * m_trendWidget->laneCount());
+			return;
+		}
 
 		return;
 	}
@@ -852,7 +815,7 @@ static int lastCopyCount = false;
 		QDateTime finishTime = TimeStamp(m_trendWidget->startTime().timeStamp + m_trendWidget->duration()).toDateTime();
 
 		qint64 startTimeValue = m_trendWidget->startTime().timeStamp;
-		qint64 finishTimeValue = m_trendWidget->startTime().timeStamp + m_trendWidget->duration();
+		qint64 finishTimeValue = m_trendWidget->finishTime().timeStamp;
 
 		E::TimeType timeType = m_trendWidget->timeType();
 
@@ -1100,6 +1063,25 @@ static int lastCopyCount = false;
 		return;
 	}
 
+	void TrendMainWindow::realtimeModeToggled(bool state)
+	{
+		E::TrendMode tm = state ? E::TrendMode::Realtime : E::TrendMode::Archive;
+		m_trendWidget->setTrendMode(tm);
+
+		signalSet().addNonValidPoint();
+
+		m_realtimeAutoShiftButton->setEnabled(tm == E::TrendMode::Realtime);
+		m_realtimeAutoShiftButton->setChecked(true);
+
+		return;
+	}
+
+	void TrendMainWindow::realtimeAutoShiftClicked(bool /*state*/)
+	{
+		//E::TrendMode tm = m_trendWidget->trendMode();
+		return;
+	}
+
 	void TrendMainWindow::sliderValueChanged(TimeStamp value)
 	{
 		m_trendWidget->setStartTime(value);
@@ -1110,6 +1092,20 @@ static int lastCopyCount = false;
 	void TrendMainWindow::startTimeChanged(TimeStamp value)
 	{
 		m_trendSlider->setValueShiftMinMax(value);
+
+		if (trendMode() == E::TrendMode::Realtime &&
+			isRealtimeAutoShift() == true)
+		{
+			if (m_lastRealtimeMaxValue > m_trendWidget->finishTime() ||
+				m_lastRealtimeMaxValue < m_trendWidget->startTime())
+			{
+				// Exit realtime autoshift
+				//
+				m_realtimeAutoShiftButton->setChecked(false);
+			}
+		}
+
+		return;
 	}
 
 	void TrendMainWindow::durationChanged(qint64 value)
@@ -1238,6 +1234,24 @@ static int lastCopyCount = false;
 	const TrendLib::Trend& TrendMainWindow::trend() const
 	{
 		return m_trendWidget->trend();
+	}
+
+	E::TrendMode TrendMainWindow::trendMode() const
+	{
+		return m_trendWidget->trendMode();
+	}
+
+	void TrendMainWindow::setTrendMode(E::TrendMode value)
+	{
+		m_trendWidget->setTrendMode(value);
+	}
+
+	bool TrendMainWindow::isRealtimeAutoShift() const
+	{
+		assert(trendMode() == E::TrendMode::Realtime);
+		assert(m_realtimeAutoShiftButton);
+
+		return m_realtimeAutoShiftButton->isChecked();
 	}
 
 }

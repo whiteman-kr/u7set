@@ -1,14 +1,14 @@
-#include "TrendDrawParam.h"
+#include "TrendParam.h"
 #include "../Proto/trends.pb.h"
 
 namespace TrendLib
 {
 
-	TrendDrawParam::TrendDrawParam()
+	TrendParam::TrendParam()
 	{
 	}
 
-	bool TrendDrawParam::save(::Proto::TrendParam* message) const
+	bool TrendParam::save(::Proto::TrendParam* message) const
 	{
 		if (message == nullptr)
 		{
@@ -28,7 +28,7 @@ namespace TrendLib
 		return true;
 	}
 
-	bool TrendDrawParam::load(const ::Proto::TrendParam& message)
+	bool TrendParam::load(const ::Proto::TrendParam& message)
 	{
 		if (message.IsInitialized() == false)
 		{
@@ -49,28 +49,28 @@ namespace TrendLib
 		return true;
 	}
 
-	QRectF TrendDrawParam::rect() const
+	QRectF TrendParam::rect() const
 	{
 		return m_rect;
 	}
 
-	void TrendDrawParam::setRect(const QRectF& value)
+	void TrendParam::setRect(const QRectF& value)
 	{
 		m_rect = value;
 		return;
 	}
 
-	int TrendDrawParam::dpiX() const
+	int TrendParam::dpiX() const
 	{
 		return m_dpiX;
 	}
 
-	int TrendDrawParam::dpiY() const
+	int TrendParam::dpiY() const
 	{
 		return m_dpiY;
 	}
 
-	void TrendDrawParam::setDpi(int dpiX, int dpiY)
+	void TrendParam::setDpi(int dpiX, int dpiY)
 	{
 		m_dpiX = dpiX;
 		m_dpiY = dpiY;
@@ -87,82 +87,93 @@ namespace TrendLib
 		return;
 	}
 
-	TrendViewMode TrendDrawParam::viewMode() const
+	TrendViewMode TrendParam::viewMode() const
 	{
 		return m_viewMode;
 	}
 
-	void TrendDrawParam::setViewMode(TrendViewMode value)
+	void TrendParam::setViewMode(TrendViewMode value)
 	{
 		m_viewMode = value;
 	}
 
-	E::TimeType TrendDrawParam::timeType() const
+	E::TimeType TrendParam::timeType() const
 	{
 		return m_timeType;
 	}
 
-	void TrendDrawParam::setTimeType(E::TimeType value)
+	void TrendParam::setTimeType(E::TimeType value)
 	{
 		m_timeType = value;
 	}
 
-	int TrendDrawParam::laneCount() const
+	int TrendParam::laneCount() const
 	{
 		return m_laneCount;
 	}
 
-	void TrendDrawParam::setLaneCount(int value)
+	void TrendParam::setLaneCount(int value)
 	{
 		m_laneCount = value;
 	}
 
-	QColor TrendDrawParam::backColor1st() const
+	E::TrendMode TrendParam::trendMode() const
+	{
+		return m_trendMode;
+	}
+
+	void TrendParam::setTrendMode(E::TrendMode value)
+	{
+		m_trendMode = value;
+		return;
+	}
+
+	QColor TrendParam::backColor1st() const
 	{
 		return m_backColor1st;
 	}
 
-	void TrendDrawParam::setBackColor1st(const QColor& value)
+	void TrendParam::setBackColor1st(const QColor& value)
 	{
 		m_backColor1st = value;
 	}
 
-	QColor TrendDrawParam::backColor2nd() const
+	QColor TrendParam::backColor2nd() const
 	{
 		return m_backColor2nd;
 	}
 
-	void TrendDrawParam::setBackColor2nd(const QColor& value)
+	void TrendParam::setBackColor2nd(const QColor& value)
 	{
 		m_backColor2nd = value;
 	}
 
-	QDateTime TrendDrawParam::startTime() const
+	QDateTime TrendParam::startTime() const
 	{
 		return m_startTimeStamp.toDateTime();
 	}
 
-	void TrendDrawParam::setStartTime(const QDateTime& value)
+	void TrendParam::setStartTime(const QDateTime& value)
 	{
 		m_startTimeStamp.timeStamp = value.toMSecsSinceEpoch();
 	}
 
-	TimeStamp TrendDrawParam::startTimeStamp() const
+	TimeStamp TrendParam::startTimeStamp() const
 	{
 		return m_startTimeStamp;
 	}
 
-	void TrendDrawParam::setStartTimeStamp(const TimeStamp& value)
+	void TrendParam::setStartTimeStamp(const TimeStamp& value)
 	{
 		m_startTimeStamp = value;
 	}
 
-	quint64 TrendDrawParam::duration() const
+	quint64 TrendParam::duration() const
 	{
 		return m_duration;
 	}
 
-	void TrendDrawParam::setLaneDuration(qint64 value)
+	void TrendParam::setLaneDuration(qint64 value)
 	{
 		m_duration = value;
 
@@ -177,32 +188,32 @@ namespace TrendLib
 		}
 	}
 
-	int TrendDrawParam::hightlightRulerIndex() const
+	int TrendParam::hightlightRulerIndex() const
 	{
 		return m_highlightRulerIndex;
 	}
 
-	void TrendDrawParam::setHightlightRulerIndex(int value)
+	void TrendParam::setHightlightRulerIndex(int value)
 	{
 		m_highlightRulerIndex = value;
 	}
 
-	void TrendDrawParam::resetHightlightRulerIndex()
+	void TrendParam::resetHightlightRulerIndex()
 	{
 		m_highlightRulerIndex = -1;
 	}
 
-	double TrendDrawParam::cosmeticPenWidth() const
+	double TrendParam::cosmeticPenWidth() const
 	{
 		return m_cosmeticPenWidth;
 	}
 
-	std::vector<std::pair<QString, QRectF>>& TrendDrawParam::signalDescriptionRect()
+	std::vector<std::pair<QString, QRectF>>& TrendParam::signalDescriptionRect()
 	{
 		return m_signalDescriptionRect;
 	}
 
-	std::vector<std::pair<QString, QRectF>>& TrendDrawParam::signalDescriptionRect() const
+	std::vector<std::pair<QString, QRectF>>& TrendParam::signalDescriptionRect() const
 	{
 		return m_signalDescriptionRect;
 	}

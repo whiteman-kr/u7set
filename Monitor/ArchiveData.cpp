@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "ArchiveData.h"
 
 ArchiveData::ArchiveData()

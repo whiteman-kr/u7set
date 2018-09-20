@@ -15,6 +15,11 @@ public:
 typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
 
 
+namespace RtTrends
+{
+	class Session;
+}
+
 struct AppSignalStateEx
 {
 public:
@@ -44,9 +49,44 @@ public:
 	int autoArchiningGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
 
+	// Real time trends support
+	//
+	void appendRtSession(Hash signalHash,
+						const QThread* rtProcessingOwner,
+						std::shared_ptr<RtTrends::Session> newSession,
+						int samplePeriodCounter);
+
+	void removeRtSession(Hash signalHash,
+						const QThread* rtProcessingOwner,
+						std::shared_ptr<RtTrends::Session> sessionToRemove);
+
+	void setRtSessionSamplePeriodCounter(Hash signalHash,
+						const QThread* rtProcessingOwner,
+						int sessionID,
+						int newSamplePeriodCounter);
+
+	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
+
+	const Signal* signal() const { return m_signal; }
+
+private:
+
+	struct RtSession
+	{
+		std::shared_ptr<RtTrends::Session> session;
+		int sessionID = 0;
+		int samplePeriodCounter = 0;
+		int sampleCounter = 0;
+	};
+
 private:
 	void setNewCurState(const SimpleAppSignalState& newCurState);
 	void logState(const SimpleAppSignalState& state);
+
+	// Real time trends support
+	//
+	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
+	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
 
 private:
 	SimpleAppSignalState m_current[2];
@@ -77,20 +117,23 @@ private:
 	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
 	Signal* m_signal = nullptr;
+	Hash m_signalHash;
+
 	int m_index = 0;
+
+	// Real time trends support
+
+	bool m_hasRtSessions = false;		// this is not thread-safe but fast-checked flag
+										// if m_hasRtQueues == true, then slow thread-safe checking will run
+
+	std::atomic<const QThread*> m_rtProcessingOwner = { nullptr };
+
+	QHash<int, RtSession> m_rtSessions;
 };
 
 
 class AppSignalStates
 {
-private:
-	QMutex m_allMutex;
-
-	AppSignalStateEx* m_appSignalState = nullptr;
-	int m_size = 0;
-
-	QHash<Hash, const AppSignalStateEx*> m_hash2State;
-
 public:
 	~AppSignalStates();
 
@@ -102,12 +145,22 @@ public:
 
 	AppSignalStateEx* operator [] (int index);
 
+	AppSignalStateEx* getStateByHash(Hash signalHash);
+
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
 	bool getStoredState(Hash hash, AppSignalState& state) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
+
+private:
+	QMutex m_allMutex;
+
+	AppSignalStateEx* m_appSignalState = nullptr;
+	int m_size = 0;
+
+	QHash<Hash, AppSignalStateEx*> m_hash2State;
 };
 
 
@@ -124,7 +177,6 @@ public:
 
 	const Signal* getSignal(Hash hash) const;
 };
-
 
 class AppDataSource : public DataSourceOnline
 {
@@ -208,3 +260,5 @@ typedef std::shared_ptr<AppDataSource> AppDataSourceShared;
 typedef QHash<QString, AppDataSourceShared> AppDataSources;		// app data source EquipmentID => AppDataSourceShared
 
 typedef QHash<quint32, AppDataSourceShared> AppDataSourcesIP;	// app data source IP => AppDataSourceShared
+
+typedef QHash<Hash, AppDataSourceShared> SignalsToSources;		// signal Hash => AppDataSourceShared

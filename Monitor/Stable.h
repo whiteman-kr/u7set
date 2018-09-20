@@ -18,15 +18,14 @@
 #include <functional>
 #include <type_traits>
 #include <limits>
+#include <atomic>
 
 // Qt includes
 //
 #include <QtCore>
 #include <QtWidgets>
 #include <QtXml>
-
-#include <QTimeEdit>
-#include <QDateEdit>
+#include <QtPrintSupport>
 
 // Other stable includes
 //

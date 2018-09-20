@@ -1,7 +1,6 @@
+#include "Stable.h"
 #include "DialogSettings.h"
 #include "ui_DialogSettings.h"
-
-#include <QFileDialog>
 
 DialogSettings::DialogSettings(QWidget *parent) :
 	QDialog(parent),

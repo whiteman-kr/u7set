@@ -12,9 +12,15 @@
 #include "TcpArchiveClient.h"
 #include "AppDataProcessingThread.h"
 #include "SignalStatesProcessingThread.h"
+#include "RtTrendsServer.h"
 
 
 class TcpArchiveClient;
+
+namespace RtTrends
+{
+	class ServerThread;
+}
 
 class AppDataServiceWorker : public ServiceWorker
 {
@@ -37,6 +43,12 @@ public:
 
 	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port) const;
 	bool isConnectedToArchiveService(quint32 &ip, quint16 &port) const;
+
+	const AppDataSources& appDataSources() const { return m_appDataSources; }
+	const AppDataSourcesIP& appDataSourcesIP() const { return m_appDataSourcesIP; }
+	const SignalsToSources& signalsToSources() const { return m_signalsToSources; }
+
+	AppSignalStates& signalStates() { return m_signalStates; }
 
 private:
 	virtual void initCmdLineParser() override;
@@ -78,6 +90,9 @@ private:
 	void runTcpArchiveClientThread();
 	void stopTcpArchiveClientThread();
 
+	void runRtTrendsServerThread();
+	void stopRtTrendsServerThread();
+
 	void runTimer();
 	void stopTimer();
 
@@ -100,6 +115,8 @@ private:
 	AppDataSources m_appDataSources;				// all data sources
 	AppDataSourcesIP m_appDataSourcesIP;
 
+	SignalsToSources m_signalsToSources;
+
 	AppSignalStates m_signalStates;
 
 	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
@@ -111,6 +128,8 @@ private:
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
+
+	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 

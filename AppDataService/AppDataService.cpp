@@ -7,6 +7,7 @@
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
+#include "RtTrendsServer.h"
 
 #include "version.h"
 
@@ -228,6 +229,26 @@ void AppDataServiceWorker::stopTcpArchiveClientThread()
 	delete m_tcpArchiveClientThread;
 
 	m_tcpArchiveClientThread = nullptr;
+}
+
+void AppDataServiceWorker::runRtTrendsServerThread()
+{
+	assert(m_rtTrendsServerThread == nullptr);
+
+	m_rtTrendsServerThread = new RtTrends::ServerThread(m_cfgSettings.rtTrendsRequestIP, *this);
+
+	m_rtTrendsServerThread->start();
+}
+
+void AppDataServiceWorker::stopRtTrendsServerThread()
+{
+	if (m_rtTrendsServerThread != nullptr)
+	{
+		m_rtTrendsServerThread->quitAndWait(10000);
+		delete m_rtTrendsServerThread;
+
+		m_rtTrendsServerThread = nullptr;
+	}
 }
 
 void AppDataServiceWorker::runTimer()
@@ -488,9 +509,24 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 void AppDataServiceWorker::prepareAppDataSources()
 {
+	m_signalsToSources.clear();
+
+	m_signalsToSources.reserve(static_cast<int>(m_appSignals.size() * 1.3));
+
 	for(AppDataSourceShared appDataSource : m_appDataSources)
 	{
 		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount);
+
+		const QStringList& sourceSignals = appDataSource->associatedSignals();
+
+		for(const QString& signalID : sourceSignals)
+		{
+			Hash signalHash = calcHash(signalID);
+
+			assert(m_signalsToSources.contains(signalHash) == false);
+
+			m_signalsToSources.insert(signalHash, appDataSource);
+		}
 	}
 }
 
@@ -499,7 +535,6 @@ void AppDataServiceWorker::applyNewConfiguration()
 	m_autoArchivingGroupsCount = m_cfgSettings.autoArchiveInterval * 60;
 
 	createAndInitSignalStates();
-
 	prepareAppDataSources();
 
 	runSignalStatesProcessingThread();
@@ -507,12 +542,14 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpAppDataServer();
 	runAppDataReceiverThread();
 	runAppDataProcessingThreads();
+	runRtTrendsServerThread();
 }
 
 void AppDataServiceWorker::clearConfiguration()
 {
 	// free all resources allocated in onConfigurationReady
 	//
+	stopRtTrendsServerThread();
 	stopAppDataProcessingThreads();
 	stopAppDataReceiverlThread();
 	stopTcpAppDataServer();
@@ -523,5 +560,6 @@ void AppDataServiceWorker::clearConfiguration()
 	m_appDataSources.clear();
 	m_appDataSourcesIP.clear();
 	m_signalStates.clear();
+	m_signalsToSources.clear();
 }
 

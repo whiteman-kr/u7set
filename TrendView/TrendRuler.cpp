@@ -44,7 +44,7 @@ namespace TrendLib
 
 	void TrendRuler::setTimeStamp(const TimeStamp& value)
 	{
-		m_timeStamp = (value.timeStamp / 5) * 5;
+		m_timeStamp = value.timeStamp;
 	}
 
 	bool TrendRuler::isShowRuler() const
