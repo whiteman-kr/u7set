@@ -68,7 +68,13 @@ private:
 	bool createGroupDirs();
 	bool createArchFiles();
 
+	bool writeEmergencySignals();
+	bool writeRegularSignals();
+
 	void shutdown();
+
+	void takeEmergencySignalsOwnership(QThread* newOwner);
+	void releaseEmergencySignalsOwnership(QThread* currentOwner);
 
 private:
 	ArchiveShared m_archive;
@@ -78,6 +84,9 @@ private:
 	QString m_archFullPath;
 	ArchFile* m_archFiles = nullptr;
 	QHash<Hash, ArchFile*> m_hashArchFiles;
+
+	std::atomic<const QThread*> m_emergencySignalsOwner = { nullptr };
+	QList<Hash> m_emergencySignals;
 
 	const int DISCRETES_INITIAL_QUEUE_SIZE = 20;
 	const int ANALOGS_INITIAL_QUEUE_SIZE = 200;

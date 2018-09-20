@@ -58,7 +58,14 @@ void FileArchWriter::run()
 
 	do
 	{
+		writeEmergencySignals();
 
+		if (isQuitRequested() == true)
+		{
+			break;
+		}
+
+		writeRegularSignals();
 	}
 	while(isQuitRequested() == false);
 
@@ -263,6 +270,15 @@ bool FileArchWriter::createArchFiles()
 	return result;
 }
 
+bool FileArchWriter::writeEmergencySignals()
+{
+	while(m_emergencySignals.size
+}
+
+bool FileArchWriter::writeRegularSignals()
+{
+
+}
 
 void FileArchWriter::shutdown()
 {
@@ -271,6 +287,16 @@ void FileArchWriter::shutdown()
 		delete [] m_archFiles;
 		m_archFiles = nullptr;
 	}
+}
+
+void FileArchWriter::takeEmergencySignalsOwnership(QThread* newOwner)
+{
+
+}
+
+void FileArchWriter::releaseEmergencySignalsOwnership(QThread* currentOwner)
+{
+
 }
 
 
