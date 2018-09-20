@@ -34,6 +34,8 @@ const char* const OutputModeStr[] =
 	"4 .. 20 mA",
 	"-10 .. 10 V",
 	"0 .. 5 mA",
+	"0 .. 20 mA",
+	"0 .. 24 mA",
 };
 
 const int OUTPUT_MODE_COUNT = sizeof(OutputModeStr) / sizeof(OutputModeStr[0]);
