@@ -566,6 +566,8 @@ message RtTrendsManagementReply
 {
     optional int32 error = 1 [default = 0];
     optional string errorString = 2;
+	optional int32 samplePeriod = 3;			    // enum E::RtTrandSamplePeriod
+	repeated uint64 trackedSignalHashes = 4;
 }
 
 //

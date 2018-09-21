@@ -1,3 +1,4 @@
+#include "Stable.h"
 #include "ArchiveModelView.h"
 #include "Settings.h"
 

@@ -1,7 +1,6 @@
+#include "Stable.h"
 #include "DialogSignalSnapshot.h"
 #include "ui_DialogSignalSnapshot.h"
-#include <QFileSystemModel>
-#include <QCompleter>
 #include "Stable.h"
 #include "Settings.h"
 #include "MonitorMainWindow.h"

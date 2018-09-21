@@ -6,6 +6,39 @@
 #include <QDateTime>
 
 
+// Time literals converts to ms
+//
+constexpr int64_t operator "" _ms(unsigned long long int value)
+{
+	return value;
+}
+
+constexpr int64_t operator "" _sec(unsigned long long int value)
+{
+	return value * 1000;
+}
+
+constexpr int64_t operator "" _min(unsigned long long int value)
+{
+	return value * 60 * 1000;
+}
+
+constexpr int64_t operator "" _hour(unsigned long long int value)
+{
+	return value * 3600 * 1000;
+}
+
+constexpr int64_t operator "" _hours(unsigned long long int value)
+{
+	return value * 3600 * 1000;
+}
+
+constexpr int64_t operator "" _day(unsigned long long int value)
+{
+	return value * 24 * 3600 * 1000;
+}
+
+
 // TimeStamp
 //
 struct TimeStamp
@@ -38,6 +71,11 @@ struct TimeStamp
 	QTime toTime() const
 	{
 		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).time();
+	}
+
+	TimeStamp roundedToHour() const
+	{
+		return (timeStamp / 1_hour) * 1_hour;
 	}
 
 	bool operator> (const TimeStamp& value) const
@@ -89,37 +127,5 @@ struct TimeSpan
 
 Q_DECLARE_METATYPE(TimeSpan)
 
-
-// Time literals converts to ms
-//
-constexpr int64_t operator "" _ms(unsigned long long int value)
-{
-	return value;
-}
-
-constexpr int64_t operator "" _sec(unsigned long long int value)
-{
-	return value * 1000;
-}
-
-constexpr int64_t operator "" _min(unsigned long long int value)
-{
-	return value * 60 * 1000;
-}
-
-constexpr int64_t operator "" _hour(unsigned long long int value)
-{
-	return value * 3600 * 1000;
-}
-
-constexpr int64_t operator "" _hours(unsigned long long int value)
-{
-	return value * 3600 * 1000;
-}
-
-constexpr int64_t operator "" _day(unsigned long long int value)
-{
-	return value * 24 * 3600 * 1000;
-}
 
 #endif //TIMESTAMP_H

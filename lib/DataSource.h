@@ -212,6 +212,9 @@ public:
 	bool getInfo(Network::DataSourceInfo* protoInfo) const;
 	bool setInfo(const Network::DataSourceInfo& proto);
 
+	int lmWorkcycle_mcs() const { return m_lmWorkcycle_mcs; }
+	int lmWorkcycle_ms() const { return m_lmWorkcycle_mcs / 1000; }
+
 private:
 	quint64 generateID() const;
 
@@ -233,6 +236,7 @@ private:
 	quint64 m_lmUniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
 	int m_lmDataSize = 0;
 	int m_lmRupFramesQuantity = 0;
+	int m_lmWorkcycle_mcs = 5000;
 
 	QString m_serviceID;
 
@@ -345,7 +349,7 @@ public:
 
 	// Functions used by data processing thread
 	//
-	bool seizeProcessingOwnership(const QThread* processingThread);
+	bool takeProcessingOwnership(const QThread* processingThread);
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	bool processRupFrameTimeQueue();

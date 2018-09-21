@@ -41,6 +41,9 @@ public:
 	static const char* PROP_CLIENT_REQUEST_NETMASK;
 	static const char* PROP_CLIENT_REQUEST_PORT;
 
+	static const char* PROP_RT_TRENDS_REQUEST_IP;
+	static const char* PROP_RT_TRENDS_REQUEST_PORT;
+
 	static const char* PROP_APP_DATA_SERVICE_ID;
 	static const char* PROP_APP_DATA_SERVICE_IP;
 	static const char* PROP_APP_DATA_SERVICE_PORT;
@@ -110,6 +113,8 @@ public:
 
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
+
+	HostAddressPort rtTrendsRequestIP;
 
 	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);

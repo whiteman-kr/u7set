@@ -1,8 +1,5 @@
+#include "Stable.h"
 #include "SelectSchemaWidget.h"
-#include <QHBoxLayout>
-#include <QDialog>
-#include <QHeaderView>
-#include <QPropertyAnimation>
 
 SelectSchemaWidget::SelectSchemaWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
 	m_configController(configController),

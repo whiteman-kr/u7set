@@ -1,5 +1,5 @@
-#ifndef TRENDTCPCLIENT_H
-#define TRENDTCPCLIENT_H
+#ifndef ARCHIVETRENDTCPCLIENT_H
+#define ARCHIVETRENDTCPCLIENT_H
 
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
@@ -8,13 +8,13 @@
 #include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"
 
-class TrendTcpClient : public Tcp::Client
+class ArchiveTrendTcpClient : public Tcp::Client
 {
 	Q_OBJECT
 
 public:
-	TrendTcpClient(MonitorConfigController* configController);
-	virtual ~TrendTcpClient();
+	ArchiveTrendTcpClient(MonitorConfigController* configController);
+	virtual ~ArchiveTrendTcpClient();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -47,6 +47,27 @@ protected slots:
 signals:
 	void dataReady(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 	void requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
+
+	// Staticstic
+	//
+public:
+	struct Stat
+	{
+		QString text;
+		int requestQueueSize = 0;
+		int requestCount = 0;
+		int replyCount = 0;
+	};
+
+	Stat stat() const;
+	void setStat(const Stat& stat);
+
+	void setStatText(const QString& text);
+	void setStatRequestQueueSize(int value);
+
+	void incStatRequestCount();
+	void incStatReplyCount();
+
 
 private:
 	int m_periodicTimerId = 0;
@@ -87,11 +108,8 @@ private:
 
 	// Statisctics and state variables
 	//
-public:
-	QString m_statRequestDescription = 0;
-	volatile int m_statRequestQueueSize = 0;
-	volatile int m_statTcpRequestCount = 0;
-	volatile int m_statTcpReplyCount = 0;
+	mutable QMutex m_statMutex;
+	Stat m_stat;
 };
 
-#endif // TRENDTCPCLIENT_H
+#endif // ARCHIVETRENDTCPCLIENT_H
