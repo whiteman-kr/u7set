@@ -189,6 +189,8 @@ public:
 		Plus4_Plus20_mA = 1,
 		Minus10_Plus10_V = 2,
 		Plus0_Plus5_mA = 3,
+		Plus0_Plus20_mA = 4,
+		Plus0_Plus24_mA = 5,
 	};
 	Q_ENUM(OutputMode)
 
