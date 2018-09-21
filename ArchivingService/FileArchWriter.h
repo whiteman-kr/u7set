@@ -38,6 +38,8 @@ public:
 
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
 
+	void flush();
+
 private:
 	const FileArchWriter* m_archWriter = nullptr;
 	QString m_signalID;
@@ -60,6 +62,9 @@ public:
 				   Queue<SimpleAppSignalState>& saveStatesQueue,
 				   CircularLoggerShared logger);
 
+	bool pushState(const SimpleAppSignalState& state, const QThread* thread);
+
+
 private:
 	void run() override;
 
@@ -68,25 +73,35 @@ private:
 	bool createGroupDirs();
 	bool createArchFiles();
 
-	bool writeEmergencySignals();
-	bool writeRegularSignals();
+	bool writeEmergencyFiles();
+	bool writeRegularFiles();
 
 	void shutdown();
 
-	void takeEmergencySignalsOwnership(QThread* newOwner);
-	void releaseEmergencySignalsOwnership(QThread* currentOwner);
+	void addEmergencyFile(ArchFile* file, const QThread* thread);
+	ArchFile* getNextEmergencyFile(const QThread* thread);
+
+	void takeEmergencyFilesOwnership(const QThread* newOwner);
+	void releaseEmergencyFilesOwnership(const QThread* currentOwner);
+
 
 private:
 	ArchiveShared m_archive;
 	Queue<SimpleAppSignalState>& m_saveStatesQueue;
 	CircularLoggerShared m_log;
+	QThread* m_thisThread = nullptr;
 
 	QString m_archFullPath;
 	ArchFile* m_archFiles = nullptr;
+	int m_archFilesCount = 0;
+	int m_regularArchFileIndex = 0;
 	QHash<Hash, ArchFile*> m_hashArchFiles;
 
-	std::atomic<const QThread*> m_emergencySignalsOwner = { nullptr };
-	QList<Hash> m_emergencySignals;
+	qint64 m_archID = 0;
+
+	std::atomic<const QThread*> m_emergencyFilesOwner = { nullptr };
+	QList<ArchFile*> m_emergencyFilesQueue;
+	QHash<ArchFile*, bool> m_emergencyFilesInQueue;
 
 	const int DISCRETES_INITIAL_QUEUE_SIZE = 20;
 	const int ANALOGS_INITIAL_QUEUE_SIZE = 200;

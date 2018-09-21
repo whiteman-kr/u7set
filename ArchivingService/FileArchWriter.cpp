@@ -24,6 +24,10 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	return true;
 }
 
+void ArchFile::flush()
+{
+
+}
 
 FileArchWriter::FileArchWriter(ArchiveShared archive,
 								Queue<SimpleAppSignalState>& saveStatesQueue,
@@ -33,6 +37,23 @@ FileArchWriter::FileArchWriter(ArchiveShared archive,
 	m_log(logger)
 {
 }
+
+bool FileArchWriter::pushState(const SimpleAppSignalState& state, const QThread* thread)
+{
+	ArchFile* archFile = m_hashArchFiles.value(state.hash, nullptr);
+
+	TEST_PTR_RETURN_FALSE(archFile);
+
+	archFile->pushState(m_archID, state);
+
+	m_archID++;
+
+	if (archFile->isEmergency() == true)
+	{
+		addEmergencyFile(archFile, thread);
+	}
+}
+
 
 void FileArchWriter::run()
 {
@@ -48,6 +69,8 @@ void FileArchWriter::run()
 		return;
 	}
 
+	m_thisThread = QThread::currentThread();
+
 	bool result = initFiles();
 
 	if (result == false)
@@ -58,14 +81,14 @@ void FileArchWriter::run()
 
 	do
 	{
-		writeEmergencySignals();
+		writeEmergencyFiles();
 
 		if (isQuitRequested() == true)
 		{
 			break;
 		}
 
-		writeRegularSignals();
+		writeRegularFiles();
 	}
 	while(isQuitRequested() == false);
 
@@ -96,8 +119,7 @@ bool FileArchWriter::initFiles()
 		return false;
 	}
 
-
-		//writeArchInfoFile();
+	return true;
 }
 
 bool FileArchWriter::archDirIsWritableChecking()
@@ -267,17 +289,61 @@ bool FileArchWriter::createArchFiles()
 		index++;
 	}
 
+	m_archFilesCount = index;
+
 	return result;
 }
 
-bool FileArchWriter::writeEmergencySignals()
+bool FileArchWriter::writeEmergencyFiles()
 {
-	while(m_emergencySignals.size
+	int count = 0;
+
+	do
+	{
+		ArchFile* emergencyFile = getNextEmergencyFile(m_thisThread);
+
+		if (emergencyFile != nullptr)
+		{
+			emergencyFile->flush();
+		}
+
+		count++;
+	}
+	while(count < 200);
+
+	return true;
 }
 
-bool FileArchWriter::writeRegularSignals()
+bool FileArchWriter::writeRegularFiles()
 {
+	if (m_regularArchFileIndex >= m_archFilesCount)
+	{
+		return false;
+	}
 
+	int count = 0;
+
+	do
+	{
+		ArchFile* archFile = m_archFiles[m_regularArchFileIndex];
+
+		m_regularArchFileIndex++;
+
+		if (m_regularArchFileIndex >= m_archFilesCount)
+		{
+			m_regularArchFileIndex = 0;
+		}
+
+		if (archFile != nullptr)
+		{
+			archFile->flush();
+		}
+
+		count++;
+	}
+	while(count < 100);
+
+	return true;
 }
 
 void FileArchWriter::shutdown()
@@ -289,14 +355,57 @@ void FileArchWriter::shutdown()
 	}
 }
 
-void FileArchWriter::takeEmergencySignalsOwnership(QThread* newOwner)
+void FileArchWriter::addEmergencyFile(ArchFile* file, const QThread* thread)
 {
+	takeEmergencyFilesOwnership(thread);
 
+	if (m_emergencyFilesInQueue.contains(file) == false)
+	{
+		m_emergencyFilesQueue.append(file);
+		m_emergencyFilesInQueue.insert(file, true);
+	}
+
+	releaseEmergencyFilesOwnership(thread);
 }
 
-void FileArchWriter::releaseEmergencySignalsOwnership(QThread* currentOwner)
+ArchFile* FileArchWriter::getNextEmergencyFile(const QThread* thread)
 {
+	ArchFile* emergencyFile = nullptr;
 
+	takeEmergencyFilesOwnership(thread);
+
+	if (m_emergencyFilesQueue.isEmpty() == false)
+	{
+		emergencyFile = m_emergencyFilesQueue.first();
+		m_emergencyFilesQueue.removeFirst();
+		m_emergencyFilesInQueue.remove(fileemergencyFile);
+	}
+
+	releaseEmergencyFilesOwnership(thread);
+
+	return emergencyFile;
+}
+
+
+void FileArchWriter::takeEmergencyFilesOwnership(const QThread* newOwner)
+{
+	bool result = false;
+
+	do
+	{
+		const QThread* expectedOwner = nullptr;
+		result = m_emergencyFilesOwner.compare_exchange_strong(expectedOwner, newOwner);
+	}
+	while(result == false);
+}
+
+void FileArchWriter::releaseEmergencyFilesOwnership(const QThread* currentOwner)
+{
+	bool result = m_emergencyFilesOwner.compare_exchange_strong(currentOwner, nullptr);
+
+	assert(result == true);
+
+	Q_UNUSED(result);
 }
 
 
