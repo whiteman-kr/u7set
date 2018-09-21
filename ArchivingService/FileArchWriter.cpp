@@ -5,7 +5,7 @@ ArchFile::ArchFile()
 {
 }
 
-bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash hash, int initialQueueSize)
+bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal)
 {
 	TEST_PTR_RETURN_FALSE(writer);
 
@@ -13,7 +13,14 @@ bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash 
 	m_signalID = signalID;
 	m_hash = hash;
 
-	m_queue = new LockFreeQueue<SignalState>(initialQueueSize);
+	int queueSize = QUEUE_MIN_SIZE;
+
+	if (isAnalogSignal == true)
+	{
+		queueSize = QUEUE_MIN_SIZE * 16;
+	}
+
+	m_queue = new LockFreeQueue<SignalState>(queueSize);
 
 	return true;
 
@@ -21,6 +28,28 @@ bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash 
 
 bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 {
+	if (state.hash != m_hash)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_queue == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	SignalState s;
+
+	s.state.archID = archID;
+	s.state.plant = state.time.plant.timeStamp;
+	s.state.system = state.time.system.timeStamp;
+	s.state.flags = state.flags;
+	s.state.value = state.value;
+
+	m_queue->push(&s);
+
 	return true;
 }
 
@@ -28,6 +57,14 @@ void ArchFile::flush()
 {
 
 }
+
+bool ArchFile::isEmergency() const
+{
+	TEST_PTR_RETURN_FALSE(m_queue);
+
+	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
+}
+
 
 FileArchWriter::FileArchWriter(ArchiveShared archive,
 								Queue<SimpleAppSignalState>& saveStatesQueue,
@@ -44,14 +81,6 @@ bool FileArchWriter::pushState(const SimpleAppSignalState& state, const QThread*
 
 	TEST_PTR_RETURN_FALSE(archFile);
 
-	archFile->pushState(m_archID, state);
-
-	m_archID++;
-
-	if (archFile->isEmergency() == true)
-	{
-		addEmergencyFile(archFile, thread);
-	}
 }
 
 
@@ -81,6 +110,13 @@ void FileArchWriter::run()
 
 	do
 	{
+		processSaveStatesQueue();
+
+		if (isQuitRequested() == true)
+		{
+			break;
+		}
+
 		writeEmergencyFiles();
 
 		if (isQuitRequested() == true)
@@ -273,16 +309,9 @@ bool FileArchWriter::createArchFiles()
 			continue;
 		}
 
-		int initialQueueSize = DISCRETES_INITIAL_QUEUE_SIZE;
-
-		if (archSignal.isAnalog == true)
-		{
-			initialQueueSize = ANALOGS_INITIAL_QUEUE_SIZE;
-		}
-
 		ArchFile* archFile = m_archFiles + index;
 
-		result &= archFile->init(this, signalID, hash, initialQueueSize);
+		result &= archFile->init(this, signalID, hash, archSignal.isAnalog);
 
 		m_hashArchFiles.insert(hash, archFile);
 
@@ -292,6 +321,45 @@ bool FileArchWriter::createArchFiles()
 	m_archFilesCount = index;
 
 	return result;
+}
+
+bool FileArchWriter::processSaveStatesQueue()
+{
+	SimpleAppSignalState state;
+
+	int count = 0;
+
+	do
+	{
+		bool result = m_saveStatesQueue.pop(&state);
+
+		if (result == false)
+		{
+			break;
+		}
+
+		ArchFile* archFile = m_hashArchFiles.value(state.hash, nullptr);
+
+		if (archFile == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		archFile->pushState(m_archID, state);
+
+		m_archID++;
+
+		if (archFile->isEmergency() == true)
+		{
+			addEmergencyFile(archFile, thread);
+		}
+
+		count++;
+	}
+	while(count < 10000);
+
+	return true;
 }
 
 bool FileArchWriter::writeEmergencyFiles()
@@ -325,7 +393,7 @@ bool FileArchWriter::writeRegularFiles()
 
 	do
 	{
-		ArchFile* archFile = m_archFiles[m_regularArchFileIndex];
+		ArchFile* archFile = m_archFiles + m_regularArchFileIndex;
 
 		m_regularArchFileIndex++;
 
@@ -378,7 +446,7 @@ ArchFile* FileArchWriter::getNextEmergencyFile(const QThread* thread)
 	{
 		emergencyFile = m_emergencyFilesQueue.first();
 		m_emergencyFilesQueue.removeFirst();
-		m_emergencyFilesInQueue.remove(fileemergencyFile);
+		m_emergencyFilesInQueue.remove(emergencyFile);
 	}
 
 	releaseEmergencyFilesOwnership(thread);

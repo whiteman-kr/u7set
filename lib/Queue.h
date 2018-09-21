@@ -116,6 +116,7 @@ public:
 	bool isEmpty() const { return m_size.load() == 0; }
 	bool isNotEmpty() const { return m_size.load() > 0; }
 	bool isFull() const { return m_size.load() == m_queueSize; }
+	int queueSize() const { return m_queueSize; }
 
 	int size() const { return m_size.load(); }
 	int maxSize() const { return m_maxSize.load(); }
