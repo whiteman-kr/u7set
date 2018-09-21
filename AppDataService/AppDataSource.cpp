@@ -256,6 +256,7 @@ void AppSignalStateEx::appendRtSession(Hash signalHash,
 									std::shared_ptr<RtTrends::Session> newSession,
 									int samplePeriodCounter)
 {
+	TEST_PTR_RETURN(rtProcessingOwner);
 	TEST_PTR_RETURN(newSession);
 
 	if (signalHash != m_signalHash)
@@ -275,6 +276,7 @@ void AppSignalStateEx::appendRtSession(Hash signalHash,
 		rtSession.session = newSession;
 		rtSession.sessionID = newSession->id();
 		rtSession.samplePeriodCounter = samplePeriodCounter;
+		rtSession.sampleCounter = 1000000;					// big value for first point immediately sending
 
 		m_rtSessions.insert(newSessionID, rtSession);
 
@@ -292,6 +294,7 @@ void AppSignalStateEx::removeRtSession(Hash signalHash,
 									const QThread* rtProcessingOwner,
 									std::shared_ptr<RtTrends::Session> sessionToRemove)
 {
+	TEST_PTR_RETURN(rtProcessingOwner);
 	TEST_PTR_RETURN(sessionToRemove);
 
 	if (signalHash != m_signalHash)
@@ -311,6 +314,29 @@ void AppSignalStateEx::removeRtSession(Hash signalHash,
 	if (m_rtSessions.size() == 0)
 	{
 		m_hasRtSessions = false;
+	}
+
+	releaseRtProcessingOwnership(rtProcessingOwner);
+}
+
+void AppSignalStateEx::setRtSessionSamplePeriodCounter(Hash signalHash,
+					const QThread* rtProcessingOwner,
+					int sessionID,
+					int newSamplePeriodCounter)
+{
+	TEST_PTR_RETURN(rtProcessingOwner);
+
+	if (signalHash != m_signalHash)
+	{
+		assert(false);
+		return;
+	}
+
+	takeRtProcessingOwnership(rtProcessingOwner);
+
+	if (m_rtSessions.contains(sessionID) == true)
+	{
+		m_rtSessions[sessionID].samplePeriodCounter = newSamplePeriodCounter;
 	}
 
 	releaseRtProcessingOwnership(rtProcessingOwner);
@@ -347,7 +373,6 @@ void AppSignalStateEx::rtSessionsProcessing(const SimpleAppSignalState& state, b
 
 	releaseRtProcessingOwnership(thread);
 }
-
 
 void AppSignalStateEx::takeRtProcessingOwnership(const QThread* newProcessingOwner)
 {

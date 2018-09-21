@@ -1,3 +1,6 @@
+variables:
+  GIT_DEPTH: "3"
+  
 stages:
   - build
   - test
@@ -32,7 +35,7 @@ windows build job:
 deploy job:
   stage: deploy
   only:
-    - master
+    - /^release.*$/
   script:
     - "echo ------------------------------------"
     - "echo -   JOB STARTED: deploy            -"

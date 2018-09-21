@@ -560,13 +560,15 @@ const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceCha
 
 		if (module->isLogicModule() == true || module->isBvb() == true)
 		{
-			if (module->place() == LM1_PLACE)
+			return 	module;
+
+/*			if (module->place() == LM1_PLACE)
 			{
 				return 	module;
 			}
 
 			assert(false);
-			break;
+			break;*/
 		}
 	}
 

@@ -60,6 +60,11 @@ public:
 						const QThread* rtProcessingOwner,
 						std::shared_ptr<RtTrends::Session> sessionToRemove);
 
+	void setRtSessionSamplePeriodCounter(Hash signalHash,
+						const QThread* rtProcessingOwner,
+						int sessionID,
+						int newSamplePeriodCounter);
+
 	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
 
 	const Signal* signal() const { return m_signal; }

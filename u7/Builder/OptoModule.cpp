@@ -3484,7 +3484,17 @@ namespace Hardware
 
 		if (chassisLm == nullptr)
 		{
-			assert(chassisLm);
+			if (module->parent() != nullptr && module->parent()->isChassis() == true)
+			{
+				// LM- or BVB-family module is not found is chassis %1
+				//
+				m_log->errALC5149(module->parent()->equipmentIdTemplate());
+			}
+			else
+			{
+				LOG_INTERNAL_ERROR(m_log);
+			}
+
 			return false;
 		}
 

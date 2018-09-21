@@ -5366,7 +5366,6 @@ namespace Builder
 				  QString(tr("Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
 	}
 
-
 	/// IssueCode: ALC5147
 	///
 	/// IssueType: Error
@@ -5389,7 +5388,6 @@ namespace Builder
 					arg(signalID).arg(lbID1).arg(lbID2));
 	}
 
-
 	/// IssueCode: ALC5148
 	///
 	/// IssueType: Warning
@@ -5407,6 +5405,25 @@ namespace Builder
 		LOG_WARNING2(IssueType::AlCompiler,
 				  5148,
 				  QString(tr("Internal signal %1 is unused.")).arg(signalID));
+	}
+
+	/// IssueCode: ALC5149
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   LM- or BVB-family module is not found in chassis %1.
+	///
+	/// Parameters:
+	///		%1 chassis equipmentID
+	///
+	/// Description:
+	///		LM- or BVB-family module is not found in chassis. Check equipment configuration.
+	///
+	void IssueLogger::errALC5149(QString chassisEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5149,
+				  QString(tr("LM- or BVB-family module is not found in chassis %1.")).arg(chassisEquipmentID));
 	}
 
 	//
