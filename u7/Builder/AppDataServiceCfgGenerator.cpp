@@ -171,7 +171,7 @@ namespace Builder
 
 			bool hasWrongField = false;
 
-			if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
+			if (E::contains<E::OutputMode>(signal.outputMode()) == false)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;

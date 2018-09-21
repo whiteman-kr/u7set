@@ -28,16 +28,6 @@ const char* const ElectricUnitStr[] =
 
 const int ELECTRIC_UNIT_COUNT = sizeof(ElectricUnitStr) / sizeof(ElectricUnitStr[0]);
 
-const char* const OutputModeStr[] =
-{
-	"0 .. 5 V",
-	"4 .. 20 mA",
-	"-10 .. 10 V",
-	"0 .. 5 mA",
-};
-
-const int OUTPUT_MODE_COUNT = sizeof(OutputModeStr) / sizeof(OutputModeStr[0]);
-
 const char* const SensorTypeStr[] =
 {
 	"Not used",
