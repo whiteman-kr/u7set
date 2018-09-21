@@ -148,11 +148,11 @@ namespace Builder
 
 			// TuningService
 			//
-//			ok = writeTuningServiceSection(xmlWriter);
-//			if (ok == false)
-//			{
-//				return false;
-//			}
+			ok = writeTuningServiceSection(xmlWriter);
+			if (ok == false)
+			{
+				return false;
+			}
 
 		} // Settings
 
@@ -372,8 +372,6 @@ namespace Builder
 	bool MonitorCfgGenerator::writeTuningServiceSection(QXmlStreamWriter& xmlWriter)
 	{
 		bool ok = true;
-		bool ok1 = true;
-		bool ok2 = true;
 
 		// TuningEnable
 		//
@@ -383,101 +381,100 @@ namespace Builder
 			return false;
 		}
 
-		// TuningSourceEquipmentID, semicolon or return EquipmentID separated list
-		//
-		QString tuningSources = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
-		if (ok == false)
+		QString tuningSources;
+		Hardware::Software* tuningServiceObject = nullptr;
+		TuningServiceSettings tuningServiceSettings;
+		QStringList tuningSourceList;
+		QString tuningServiceId;
+
+		if (tuningEnable == true)
 		{
-			return false;
-		}
-
-		tuningSources = tuningSources.replace(QChar(QChar::LineFeed), QChar(';'));
-		tuningSources = tuningSources.replace(QChar(QChar::CarriageReturn), QChar(';'));
-		tuningSources = tuningSources.replace(QChar(QChar::Tabulation), QChar(';'));
-
-		QStringList tuningSourceList = tuningSources.split(QChar(';'), QString::SkipEmptyParts);
-
-		if (tuningEnable == true &&
-			tuningSourceList.isEmpty() == true)
-		{
-			// Warning, tuning is enabled but no equipment to tune set
+			// TuningSourceEquipmentID, semicolon or return EquipmentID separated list
 			//
-			m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
-		}
-
-		// TuningServiceID
-		//
-		QString tuningServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID1", &ok1).trimmed();
-		QString tuningServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID2", &ok2).trimmed();
-
-		if (ok1 == false || ok2 == false)
-		{
-			return false;
-		}
-
-		// TuningServiceID1(2)->ClientRequestIP, ClientRequestPort
-		//
-		Hardware::Software* tuningServiceObject1 = nullptr;
-		Hardware::Software* tuningServiceObject2 = nullptr;
-		ok1 = true;
-		ok2 = true;
-
-		if (tuningServiceId1.isEmpty() == false)
-		{
-			tuningServiceObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId1));
-
-			if (tuningServiceObject1 == nullptr)
+			tuningSources = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
+			if (ok == false)
 			{
-				m_log->errCFG3021(m_software->equipmentId(), "TuningServiceID1", tuningServiceId1);
+				return false;
+			}
 
-				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId1);
+			tuningSources = tuningSources.replace(QChar(QChar::LineFeed), QChar(';'));
+			tuningSources = tuningSources.replace(QChar(QChar::CarriageReturn), QChar(';'));
+			tuningSources = tuningSources.replace(QChar(QChar::Tabulation), QChar(';'));
+
+			tuningSourceList = tuningSources.split(QChar(';'), QString::SkipEmptyParts);
+
+			if (tuningSourceList.isEmpty() == true)
+			{
+				// Warning, tuning is enabled but no equipment to tune set
+				//
+				m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
+			}
+
+			// TuningServiceID
+			//
+			tuningServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningServiceID", &ok).trimmed();
+
+			if (ok == false)
+			{
+				// getObjectProperty reposrts to log abourt error
+				//
+				return false;
+			}
+
+			// TuningServiceID->ClientRequestIP, ClientRequestPort
+			//
+			if (tuningServiceId.isEmpty() == true)
+			{
+				// Property '%1.%2' is empty.
+				//
+				m_log->errCFG3022(m_software->equipmentIdTemplate(), "TuningServiceID");
+				return false;
+			}
+
+			tuningServiceObject = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId));
+
+			if (tuningServiceObject == nullptr)
+			{
+				// Property '%1.%2' is linked to undefined software ID '%3'.
+				//
+				m_log->errCFG3021(m_software->equipmentId(), "TuningServiceID", tuningServiceId);
+
+				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId);
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
-				ok1 = false;
+				return false;
 			}
-		}
 
-
-		if (tuningServiceId2.isEmpty() == false)
-		{
-			tuningServiceObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId2));
-
-			if (tuningServiceObject2 == nullptr)
+			if (tuningServiceObject->type() != E::SoftwareType::TuningService)
 			{
-				m_log->errCFG3021(m_software->equipmentId(), "TuningServiceID2", tuningServiceId2);
-
-				QString errorStr = tr("Object %1 is not found").arg(tuningServiceId2);
-				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-
-				ok2 = false;
+				// Property '%1.%2' is linked to not compatible software '%3'.
+				//
+				m_log->errCFG3017(m_software->equipmentId(), "TuningServiceID", tuningServiceId);
+				return false;
 			}
-		}
 
-		if (ok1 == false || ok2 == false)
-		{
-			return false;
-		}
+			auto [singleLmControl, hasSingleLmControl] = getObjectProperty<bool>(tuningServiceId, "SingleLmControl");
+			if (hasSingleLmControl == false)
+			{
+				return false;
+			}
 
-		// Reading TuningService Settings
-		//
-		TuningServiceSettings tuningServiceSettings1;
-		TuningServiceSettings tuningServiceSettings2;
-		ok1 = true;
-		ok2 = true;
+			if (singleLmControl == true)
+			{
+				// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
+				//
+				m_log->errCFG3040(m_software->equipmentId(), tuningServiceId);
+				return false;
+			}
 
-		if (tuningServiceObject1 != nullptr)
-		{
-			ok1 = tuningServiceSettings1.readFromDevice(tuningServiceObject1, m_log);
-		}
+			// Reading TuningService Settings
+			//
+			ok = tuningServiceSettings.readFromDevice(tuningServiceObject, m_log);	// readFromDevice reports to log about errors
 
-		if (tuningServiceObject2 != nullptr)
-		{
-			ok2 = tuningServiceSettings2.readFromDevice(tuningServiceObject2, m_log);
-		}
-
-		if (ok1 == false || ok2 == false)
-		{
-			return false;
+			if (ok == false)
+			{
+				return false;
+			}
 		}
 
 		// TuningService -- Get ip addresses and ports, write them to configurations
@@ -493,17 +490,18 @@ namespace Builder
 			//
 			xmlWriter.writeAttribute("Enable", tuningEnable ? "true" : "false");
 
-			xmlWriter.writeAttribute("TuningServiceID1", tuningServiceId1);
-			xmlWriter.writeAttribute("TuningServiceID2", tuningServiceId2);
+			if (tuningEnable == true)
+			{
+				xmlWriter.writeAttribute("TuningServiceID", tuningServiceId);
 
-			xmlWriter.writeAttribute("ip1", tuningServiceSettings1.clientRequestIP.address().toString());
-			xmlWriter.writeAttribute("port1", QString::number(tuningServiceSettings1.clientRequestIP.port()));
-			xmlWriter.writeAttribute("ip2", tuningServiceSettings2.clientRequestIP.address().toString());
-			xmlWriter.writeAttribute("port2", QString::number(tuningServiceSettings2.clientRequestIP.port()));
+				xmlWriter.writeAttribute("ip", tuningServiceSettings.clientRequestIP.address().toString());
+				xmlWriter.writeAttribute("port", QString::number(tuningServiceSettings.clientRequestIP.port()));
+			}
 		}	// TuningService
 
 		// TuningSources -- EqupmentIDs for LM's to tune
 		//
+		if (tuningEnable == true)
 		{
 			xmlWriter.writeTextElement(QLatin1String("TuningSources"), tuningSourceList.join(QLatin1String("; ")));
 		}

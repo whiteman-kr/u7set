@@ -147,6 +147,8 @@ namespace Builder
 		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
 
+		void errCFG3040(QString monitorId, QString tuningServiceId);				// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
+
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);

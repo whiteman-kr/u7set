@@ -75,7 +75,6 @@ signals:
 	// Data
 	//
 private:
-
 	// Objects storage
 	//
 	mutable QMutex m_signalsMutex;						// For access to m_signals

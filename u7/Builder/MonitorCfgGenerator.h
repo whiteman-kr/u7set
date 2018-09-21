@@ -25,6 +25,9 @@ namespace Builder
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
+
+		template <typename TYPE>
+		std::pair<TYPE, bool> getObjectProperty(QString strId, QString property);
 	};
 
 
@@ -91,6 +94,15 @@ namespace Builder
 		TYPE t = v.value<TYPE>();
 
 		return t;
+	}
+
+	template <typename TYPE>
+	std::pair<TYPE, bool> MonitorCfgGenerator::getObjectProperty(QString strId, QString property)
+	{
+		bool ok = false;
+		TYPE result = getObjectProperty<TYPE>(strId, property, &ok);
+
+		return {result, ok};
 	}
 
 }
