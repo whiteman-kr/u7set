@@ -318,6 +318,8 @@ namespace Metrology
 					case E::OutputMode::Plus4_Plus20_mA:	m_electricLowLimit = 4;		m_electricHighLimit = 20;	m_electricUnitID = E::ElectricUnit::mA;	break;
 					case E::OutputMode::Minus10_Plus10_V:	m_electricLowLimit = -10;	m_electricHighLimit = 10;	m_electricUnitID = E::ElectricUnit::V;	break;
 					case E::OutputMode::Plus0_Plus5_mA:		m_electricLowLimit = 0;		m_electricHighLimit = 5;	m_electricUnitID = E::ElectricUnit::mA;	break;
+					case E::OutputMode::Plus0_Plus20_mA:	m_electricLowLimit = 0;		m_electricHighLimit = 20;	m_electricUnitID = E::ElectricUnit::mA;	break;
+					case E::OutputMode::Plus0_Plus24_mA:	m_electricLowLimit = 0;		m_electricHighLimit = 24;	m_electricUnitID = E::ElectricUnit::mA;	break;
 					default:								assert(0);
 				}
 
