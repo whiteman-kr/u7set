@@ -362,7 +362,8 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 			}
 
 			if (tuningClient->type() != E::SoftwareType::TuningClient &&
-				tuningClient->type() != E::SoftwareType::Metrology)
+				tuningClient->type() != E::SoftwareType::Metrology &&
+				tuningClient->type() != E::SoftwareType::Monitor)
 			{
 				return;
 			}
@@ -381,6 +382,23 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 			if (tuningServiceID != software->equipmentIdTemplate())
 			{
 				return;
+			}
+
+			bool tuningEnable = true;			// by default tuning is enabled for known clients without property "TuningEnable"
+
+			if (DeviceHelper::isPropertyExists(tuningClient, "TuningEnable") == true)
+			{
+				result &= DeviceHelper::getBoolProperty(tuningClient, "TuningEnable", &tuningEnable, log);
+
+				if (result == false)
+				{
+					return;
+				}
+
+				if (tuningEnable == false)
+				{
+					return;
+				}
 			}
 
 			// TuningClient is linked to this TuningService
