@@ -71,6 +71,8 @@ public:
 								  int defaultPort,
 								  Builder::IssueLogger* log);
 
+	static bool isPropertyExists(const Hardware::DeviceObject* device, const QString& name);
+
 	template<typename T>
 	static bool getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log);
 

@@ -314,7 +314,7 @@ namespace Builder
 						hasWrongField = true;
 					}
 
-					if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
+					if (E::contains<E::OutputMode>(signal.outputMode()) == false)
 					{
 						// Signal %1 has wrong type of output range mode: %2.
 						//
