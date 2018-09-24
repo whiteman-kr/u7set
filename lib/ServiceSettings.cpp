@@ -324,7 +324,7 @@ const char* TuningServiceSettings::ATTR_EQUIIPMENT_ID = "EquipmentID";
 const char* TuningServiceSettings::ATTR_COUNT = "Count";
 
 
-bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, Builder::IssueLogger* log)
+bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, bool singleLmControlEnabled, Builder::IssueLogger* log)
 {
 	clients.clear();
 
@@ -345,7 +345,7 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 	}
 
 	Hardware::equipmentWalker(root,
-		[this, &software, &result, &log](Hardware::DeviceObject* currentDevice)
+		[this, &software, &result, &singleLmControlEnabled, &log](Hardware::DeviceObject* currentDevice)
 		{
 			if (currentDevice->isSoftware() == false)
 			{
@@ -399,6 +399,14 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 				{
 					return;
 				}
+
+				if (tuningClient->type() == E::SoftwareType::Monitor && singleLmControlEnabled == true)
+				{
+					// Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.
+					//
+					log->errALC5150(tuningClient->equipmentIdTemplate(), software->equipmentIdTemplate());
+					result = false;
+				}
 			}
 
 			// TuningClient is linked to this TuningService
@@ -425,7 +433,6 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 			this->clients.append(tc);
 		}
 	);
-
 
 	return result;
 }
@@ -454,7 +461,7 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 
 	tuningDataIP = HostAddressPort(tuningDataIPStr, tuningDataPort);
 
-	result &= fillTuningClientsInfo(software, log);
+	result &= fillTuningClientsInfo(software, singleLmControl, log);
 
 	return result;
 }
