@@ -351,3 +351,185 @@ void LockFreeQueueBase::resize(int newQueueSize)		// not thread-safe operation!!
 }
 
 
+FastQueueBase::FastQueueBase(int itemSize, int queueSize) :
+	m_itemSize(itemSize),
+	m_queueSize(queueSize),
+	m_writeIndex(queueSize),
+	m_readIndex(queueSize)
+{
+	if (m_queueSize <= 0)
+	{
+		assert(false);
+		m_queueSize = 1;
+	}
+
+	if (m_itemSize <= 0)
+	{
+		assert(false);
+	}
+
+	m_buffer = allocateBuffer(m_queueSize * m_itemSize);
+}
+
+FastQueueBase::~FastQueueBase()
+{
+	delete [] m_buffer;
+}
+
+bool FastQueueBase::push(const char* item)
+{
+	TEST_PTR_RETURN_FALSE(item);
+
+	if (m_size == m_queueSize)
+	{
+		m_readIndex++;				// lost last item in queue
+	}
+
+	memcpy(m_buffer + m_writeIndex() * m_itemSize, &item, m_itemSize);
+
+	m_writeIndex++;
+
+	// m_size - is not changed
+
+	return true;
+}
+
+bool FastQueueBase::pop(char* item)
+{
+	TEST_PTR_RETURN_FALSE(item);
+
+	if (m_size == 0)
+	{
+		return false;
+	}
+
+	memcpy(item, m_buffer + m_readIndex() * m_itemSize, m_itemSize);
+
+	m_readIndex++;
+	m_size--;
+
+	return true;
+}
+
+void FastQueueBase::resizeAndCopy(int newQueueSize)
+{
+	if (newQueueSize <= 0)
+	{
+		assert(false);
+		newQueueSize = 1;
+	}
+
+	if (newQueueSize == m_queueSize)
+	{
+		return;
+	}
+
+	if (m_size > 0)
+	{
+		// data copying required
+		//
+
+		if (newQueueSize < m_size)
+		{
+			// queue compression
+			// if newQueueSize < m_size, remove items from beginng of queue
+			//
+			m_readIndex += m_size - newQueueSize;
+			m_size = newQueueSize;
+		}
+
+		char* newBuffer = allocateBuffer(newQueueSize * m_itemSize);
+
+		if (m_readIndex() < m_writeIndex())
+		{
+			memcpy(newBuffer, m_buffer + m_readIndex() * m_itemSize, m_size * m_itemSize);
+		}
+		else
+		{
+			int firstPartSize = m_queueSize - m_readIndex();
+			int secondPartSize = m_size - firstPartSize;
+
+			memcpy(newBuffer, m_buffer + m_readIndex() * m_itemSize, firstPartSize * m_itemSize);
+			memcpy(newBuffer + firstPartSize * m_itemSize, m_buffer, secondPartSize * m_itemSize);
+		}
+
+		delete [] m_buffer;
+		m_buffer = newBuffer;
+
+		m_readIndex.reset();
+		m_readIndex.setMaxValue(newQueueSize);
+
+		m_writeIndex.setValue(m_size);
+		m_writeIndex.setMaxValue(newQueueSize);
+
+		m_queueSize = newQueueSize;
+	}
+	else
+	{
+		// no data copying required
+		//
+		delete [] m_buffer;
+		m_buffer = allocateBuffer(newQueueSize * m_itemSize);
+
+		m_readIndex.reset();
+		m_readIndex.setMaxValue(newQueueSize);
+
+		m_writeIndex.reset();
+		m_writeIndex.setMaxValue(newQueueSize);
+
+		m_queueSize = newQueueSize;
+	}
+
+}
+
+bool FastQueueBase::copyToBuffer(char* buffer, int bufferSize, int* copiedDataSize)
+{
+	TEST_PTR_RETURN_FALSE(buffer);
+	TEST_PTR_RETURN_FALSE(copiedDataSize);
+
+	int itemsToCopy = bufferSize / m_itemSize;
+
+	assert(itemsToCopy != 0);
+
+	if (itemsToCopy == 0 || m_size == 0)
+	{
+		*copiedDataSize = 0;
+		return false;
+	}
+
+	if (m_size < itemsToCopy)
+	{
+		itemsToCopy = m_size;
+	}
+
+	if (m_readIndex() < m_writeIndex())
+	{
+		memcpy(buffer, m_buffer + m_readIndex() * m_itemSize, itemsToCopy * m_itemSize);
+	}
+	else
+	{
+		int firstPartSize = m_queueSize - m_readIndex();
+		int secondPartSize = m_size - firstPartSize;
+
+		memcpy(buffer, m_buffer + m_readIndex() * m_itemSize, firstPartSize * m_itemSize);
+		memcpy(buffer + firstPartSize * m_itemSize, m_buffer, secondPartSize * m_itemSize);
+	}
+
+	m_readIndex += itemsToCopy;
+	m_size -= itemsToCopy;
+
+	*copiedDataSize = itemsToCopy * m_itemSize;
+
+	return true;
+}
+
+char* FastQueueBase::allocateBuffer(int sizeBytes)
+{
+	if (sizeBytes <= 0)
+	{
+		assert(false);
+	}
+
+	return new char [sizeBytes];
+}
+

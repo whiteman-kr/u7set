@@ -75,15 +75,6 @@ FileArchWriter::FileArchWriter(ArchiveShared archive,
 {
 }
 
-bool FileArchWriter::pushState(const SimpleAppSignalState& state, const QThread* thread)
-{
-	ArchFile* archFile = m_hashArchFiles.value(state.hash, nullptr);
-
-	TEST_PTR_RETURN_FALSE(archFile);
-
-}
-
-
 void FileArchWriter::run()
 {
 	if (m_log == nullptr)

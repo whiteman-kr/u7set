@@ -26,11 +26,23 @@ public:
 		return m_index;
 	}
 
+	int operator += (int value)
+	{
+		m_index += value;
+
+		if (m_index >= m_maxValue)
+		{
+			m_index %= m_maxValue;
+		}
+
+		return m_index;
+	}
+
 	int operator () () const { return m_index; }
 
 	void reset() { m_index = 0; }
-
 	void setMaxValue(int maxValue) { m_maxValue = maxValue; }
+	void setValue(int value) { m_index = value; }
 };
 
 class QueueBase : public QObject
@@ -319,5 +331,63 @@ public:
 };
 
 
+// ----------------------------------------------------------------------------------------------------
+//
+//	FastQueueBase - fast, non thread-safe queue!
+//
+// ----------------------------------------------------------------------------------------------------
 
+class FastQueueBase
+{
+public:
+	FastQueueBase(int itemSize, int queueSize);
+	virtual ~FastQueueBase();
+
+	int size() const { return m_size; }
+
+	bool isEmpty() const { return m_size == 0; }
+	bool isNotEmpty() const { return m_size > 0; }
+	bool isFull() const { return m_size == m_queueSize; }
+
+	bool push(const char* item);
+	bool pop(char* item);
+
+	void resizeAndCopy(int newQueueSize);
+
+	bool copyToBuffer(char* buffer, int bufferSize, int* copiedDataSize);
+
+private:
+	char* allocateBuffer(int sizeBytes);
+
+protected:
+	char* m_buffer = nullptr;
+
+	int m_itemSize = 0;
+	int m_queueSize = 0;
+
+	int m_size = 0;								// current queue size
+
+	QueueIndex m_writeIndex;
+	QueueIndex m_readIndex;
+
+private:
+	static const int MAX_QUEUE_MEMORY_SIZE = 50 * 1024 * 1024;			// 50 MBytes
+};
+
+
+template <typename TYPE>
+class FastQueue : public FastQueueBase
+{
+public:
+	FastQueue(int queueSize) :
+		FastQueue(sizeof(TYPE), queueSize)
+	{
+		// checking, that memcpy can be used to copy queue items of type TYPE
+		//
+		assert(std::is_trivially_copyable<TYPE>::value == true);
+	}
+
+	bool push(const TYPE& ref) { return FastQueue::push(reinterpret_cast<const char*>(&ref)); }
+	bool pop(TYPE* ptr) { return FastQueue::pop(reinterpret_cast<char*>(ptr)); }
+};
 
