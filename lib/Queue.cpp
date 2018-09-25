@@ -510,10 +510,22 @@ bool FastQueueBase::copyToBuffer(char* buffer, int bufferSize, int* copiedDataSi
 	else
 	{
 		int firstPartSize = m_queueSize - m_readIndex();
-		int secondPartSize = m_size - firstPartSize;
 
-		memcpy(buffer, m_buffer + m_readIndex() * m_itemSize, firstPartSize * m_itemSize);
-		memcpy(buffer + firstPartSize * m_itemSize, m_buffer, secondPartSize * m_itemSize);
+		if(itemsToCopy <= firstPartSize)
+		{
+			memcpy(buffer, m_buffer + m_readIndex() * m_itemSize, itemsToCopy * m_itemSize);
+		}
+		else
+		{
+			memcpy(buffer, m_buffer + m_readIndex() * m_itemSize, firstPartSize * m_itemSize);
+
+			int secondPartSize = itemsToCopy - firstPartSize;
+
+			if (secondPartSize > 0)
+			{
+				memcpy(buffer + firstPartSize * m_itemSize, m_buffer, secondPartSize * m_itemSize);
+			}
+		}
 	}
 
 	m_readIndex += itemsToCopy;
