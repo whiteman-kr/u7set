@@ -1,4 +1,5 @@
 #include "MonitorCfgGenerator.h"
+#include "TuningClientCfgGenerator.h"
 #include "../../lib/ServiceSettings.h"
 #include "../../VFrame30/Schema.h"
 
@@ -88,6 +89,13 @@ namespace Builder
 		{
 			BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", schemaSetFileData);
 			m_cfgXml->addLinkToFile(schemaDetailsBuildFile);
+		}
+
+		// Generate tuning signals file
+		//
+		if (m_tuningEnabled == true)
+		{
+			result &= writeTuningSignals();
 		}
 
 		return result;
@@ -375,7 +383,7 @@ namespace Builder
 
 		// TuningEnable
 		//
-		bool tuningEnable = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "TuningEnable", &ok);
+		m_tuningEnabled = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "TuningEnable", &ok);
 		if (ok == false)
 		{
 			return false;
@@ -384,10 +392,11 @@ namespace Builder
 		QString tuningSources;
 		Hardware::Software* tuningServiceObject = nullptr;
 		TuningServiceSettings tuningServiceSettings;
-		QStringList tuningSourceList;
 		QString tuningServiceId;
 
-		if (tuningEnable == true)
+		m_tuningSources.clear();
+
+		if (m_tuningEnabled == true)
 		{
 			// TuningSourceEquipmentID, semicolon or return EquipmentID separated list
 			//
@@ -401,13 +410,23 @@ namespace Builder
 			tuningSources = tuningSources.replace(QChar(QChar::CarriageReturn), QChar(';'));
 			tuningSources = tuningSources.replace(QChar(QChar::Tabulation), QChar(';'));
 
-			tuningSourceList = tuningSources.split(QChar(';'), QString::SkipEmptyParts);
+			m_tuningSources = tuningSources.split(QChar(';'), QString::SkipEmptyParts);
 
-			if (tuningSourceList.isEmpty() == true)
+			if (m_tuningSources.isEmpty() == true)
 			{
-				// Warning, tuning is enabled but no equipment to tune set
-				//
-				m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
+				m_log->errCFG3022(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
+				return false;
+			}
+
+			// Check for valid EquipmentIds
+			//
+			for (const QString& tuningEquipmentID : m_tuningSources)
+			{
+				if (m_equipment->deviceObject(tuningEquipmentID) == nullptr)
+				{
+					m_log->errEQP6109(tuningEquipmentID, m_software->equipmentIdTemplate());
+					return false;
+				}
 			}
 
 			// TuningServiceID
@@ -488,9 +507,9 @@ namespace Builder
 
 			// --
 			//
-			xmlWriter.writeAttribute("Enable", tuningEnable ? "true" : "false");
+			xmlWriter.writeAttribute("Enable", m_tuningEnabled ? "true" : "false");
 
-			if (tuningEnable == true)
+			if (m_tuningEnabled == true)
 			{
 				xmlWriter.writeAttribute("TuningServiceID", tuningServiceId);
 
@@ -501,9 +520,9 @@ namespace Builder
 
 		// TuningSources -- EqupmentIDs for LM's to tune
 		//
-		if (tuningEnable == true)
+		if (m_tuningEnabled == true)
 		{
-			xmlWriter.writeTextElement(QLatin1String("TuningSources"), tuningSourceList.join(QLatin1String("; ")));
+			xmlWriter.writeTextElement(QLatin1String("TuningSources"), m_tuningSources.join(QLatin1String("; ")));
 		}
 
 		return true;
@@ -512,5 +531,43 @@ namespace Builder
 	void MonitorCfgGenerator::writeErrorSection(QXmlStreamWriter& xmlWriter, QString error)
 	{
 		xmlWriter.writeTextElement("Error", error);
+	}
+
+	bool MonitorCfgGenerator::writeTuningSignals()
+	{
+		if (m_tuningSources.empty() == true)
+		{
+			assert(m_tuningSources.empty() == false);
+			return false;
+		}
+
+		::Proto::AppSignalSet tuningSet;
+
+		bool ok = TuningClientCfgGenerator::createTuningSignals(m_tuningSources, m_signalSet, &tuningSet);
+		if (ok == false)
+		{
+			m_log->errINT1000("Generate tuning signal set error: MonitorCfgGenerator::writeTuningSignals, call for TuningClientCfgGenerator::createTuningSignals");
+			return false;
+		}
+
+		// Write number of signals
+		//
+		QByteArray data;
+		data.resize(tuningSet.ByteSize());
+
+		tuningSet.SerializeToArray(data.data(), tuningSet.ByteSize());
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
+
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012("TuningSignals.dat");
+			return false;
+		}
+
+		ok = m_cfgXml->addLinkToFile(buildFile);
+		return ok;
 	}
 }

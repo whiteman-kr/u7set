@@ -163,10 +163,11 @@ signals:
 private:
 	QString networkErrorStr(NetworkError error);
 
-public:
+	void initSignalHashesAndSources();
+
 	// Properties
 	//
-
+public:
 	QString instanceId() const;
 	void setInstanceId(const QString& instanceId);
 
@@ -202,6 +203,7 @@ private:
 	TuningSignalManager* m_signals = nullptr;
 
 protected:
+
 	// Tuning sources
 	//
 	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources, m_equipmentToSignalMap

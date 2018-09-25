@@ -217,7 +217,8 @@ namespace VFrame30
 
 		// Evaluate script
 		//
-		if (m_jsClickScript.isUndefined() == true)
+		int warning_thikk_efefefef;
+//		if (m_jsClickScript.isUndefined() == true)
 		{
 			m_jsClickScript = evaluateScript(m_clickScript, globalScript, engine, parentWidget);
 		}
@@ -248,7 +249,8 @@ namespace VFrame30
 
 		// Evaluate script
 		//
-		if (m_jsPreDrawScript.isUndefined() == true)
+		int warning_thikk_efefefef;
+		//if (m_jsPreDrawScript.isUndefined() == true)
 		{
 			m_jsPreDrawScript = evaluateScript(m_preDrawScript, globalScript, engine, nullptr);
 		}
@@ -306,7 +308,6 @@ namespace VFrame30
 			assert(parentWidget);
 			return QJSValue();
 		}
-
 
 		QJSValue result = engine->evaluate(script + globalScript);
 

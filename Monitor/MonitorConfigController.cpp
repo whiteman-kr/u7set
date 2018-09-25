@@ -1,4 +1,5 @@
 #include "Stable.h"
+#include "../lib/ServiceSettings.h"
 #include "MonitorConfigController.h"
 #include "Settings.h"
 #include "version.h"
@@ -342,6 +343,24 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		}
 	}
 
+	// Get tuning signal files
+	//
+	{
+		QByteArray data;
+		QString errorString;
+
+		bool result = getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorString);
+
+		if (result == false)
+		{
+			readSettings.errorMessage += errorString + "\n";
+		}
+		else
+		{
+			theTuningSignals.load(data);
+		}
+	}
+
 	// Get all schema details
 	//
 	{
@@ -577,7 +596,7 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 		{
 			QDomElement tuningServiceElement = tuningServiceNodes.at(0).toElement();
 
-			bool enableTuning = tuningServiceElement.attribute("port1").compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+			bool enableTuning = tuningServiceElement.attribute("Enable").compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 			QString id = tuningServiceElement.attribute("TuningServiceID");
 			QString ip = tuningServiceElement.attribute("ip");

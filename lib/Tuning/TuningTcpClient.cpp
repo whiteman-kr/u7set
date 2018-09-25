@@ -21,12 +21,15 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 // TuningTcpClient
 //
-TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo,
-								 TuningSignalManager* signalManager) :
+TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager) :
 	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0)),
 	m_signals(signalManager)
 {
 	assert(m_signals);
+
+	initSignalHashesAndSources();
+
+	return;
 }
 
 TuningTcpClient::~TuningTcpClient()
@@ -257,7 +260,6 @@ void TuningTcpClient::onConnection()
 
 	{
 		QMutexLocker l(&m_tuningSourcesMutex);
-
 		m_tuningSources.clear();
 	}
 
@@ -991,9 +993,36 @@ void TuningTcpClient::slot_signalsUpdated()
 		}
 	}
 
+	initSignalHashesAndSources();
+
+	// --
+	//
+	if (isConnected() == true)
+	{
+		resetToGetTuningSources();
+	}
+
+#ifdef Q_DEBUG
+	if (m_simulationMode == true)
+	{
+		m_signals->validateStates();
+	}
+#endif
+
+	return;
+}
+
+QString TuningTcpClient::networkErrorStr(NetworkError error)
+{
+	return getNetworkErrorStr(error);
+}
+
+void TuningTcpClient::initSignalHashesAndSources()
+{
 	m_signalHashes = m_signals->signalHashes();
 
 	// Build m_equipmentToSignalMap
+	//
 	{
 		QMutexLocker sl(&m_tuningSourcesMutex);
 
@@ -1015,46 +1044,27 @@ void TuningTcpClient::slot_signalsUpdated()
 		}
 	}
 
-	//
-
-	if (isConnected() == true)
-	{
-		resetToGetTuningSources();
-	}
-
-#ifdef Q_DEBUG
-	if (m_simulationMode == true)
-	{
-		m_signals->validateStates();
-	}
-#endif
-
 	return;
-}
-
-QString TuningTcpClient::networkErrorStr(NetworkError error)
-{
-	return getNetworkErrorStr(error);
 }
 
 void TuningTcpClient::writeLogAlert(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogError(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogWarning(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogMessage(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
@@ -1066,7 +1076,7 @@ void TuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const Tu
 
 void TuningTcpClient::writeLogSignalChange(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 QString TuningTcpClient::instanceId() const

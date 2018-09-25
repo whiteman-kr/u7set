@@ -19,6 +19,8 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 {
 	qDebug() << Q_FUNC_INFO;
 
+	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
+
 	// TcpSignalClient
 	//
 	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
@@ -40,15 +42,10 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	connect(&theSignals, &AppSignalManager::addSignalToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignal, Qt::QueuedConnection);
 	connect(&theSignals, &AppSignalManager::addSignalsToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignals, Qt::QueuedConnection);
 
-	// TuningTcpClient
-	//
-bool monitor_tuning_tcp_client_under_construction;
-	m_tuningTcpClient = new TuningTcpClient(softwareInfo, &theTuningSignals);
-
 	// Creating signals controllers for VFrame30
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&theSignals);
-	m_tuningController = std::make_unique<VFrame30::TuningController>(&theTuningSignals, m_tuningTcpClient);
+	m_tuningController = std::make_unique<VFrame30::TuningController>(&theTuningSignals, nullptr);
 
 	// --
 	//
@@ -111,6 +108,12 @@ MonitorMainWindow::~MonitorMainWindow()
 	m_tcpClientThread->quitAndWait(10000);
 	delete m_tcpClientThread;
 
+	if (m_tuningTcpClientThread != nullptr)
+	{
+		m_tuningTcpClientThread->quitAndWait(10000);
+		delete m_tuningTcpClientThread;
+	}
+
 	return;
 }
 
@@ -125,6 +128,25 @@ void MonitorMainWindow::closeEvent(QCloseEvent* e)
 void MonitorMainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
+
+	QString tuningServiceState;
+	int tuningServiceReplyCount = 0;
+
+	if (m_configController.configuration().tuningEnabled == true)
+	{
+		if (m_tuningTcpClientThread == nullptr ||
+			m_tuningTcpClient == nullptr)
+		{
+			tuningServiceState = tr("TCP Thread Error");
+		}
+		else
+		{
+			auto connState = m_tuningTcpClient->getConnectionState();
+			tuningServiceReplyCount = connState.replyCount;
+
+			tuningServiceState = connState.isConnected ? connState.peerAddr.addressStr() : "NoConnection";
+		}
+	}
 
 	// Update status bar
 	//
@@ -141,7 +163,12 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 		//
 		QString text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
 					   .arg(confiConnState.isConnected ? confiConnState.peerAddr.addressStr() : "NoConnection")
-						.arg(signalClientState.isConnected ? signalClientState.peerAddr.addressStr() : "NoConnection");
+					   .arg(signalClientState.isConnected ? signalClientState.peerAddr.addressStr() : "NoConnection");
+
+		if (m_configController.configuration().tuningEnabled == true)
+		{
+			text.append(QString("  TuningSrv: %1 ").arg(tuningServiceState));
+		}
 
 		m_statusBarConnectionState->setText(text);
 
@@ -150,6 +177,11 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 		text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
 			   .arg(QString::number(confiConnState.replyCount))
 			   .arg(QString::number(signalClientState.replyCount));
+
+		if (m_configController.configuration().tuningEnabled == true)
+		{
+			text.append(QString("  TuningSrv: %1 ").arg(tuningServiceReplyCount));
+		}
 
 		m_statusBarConnectionStatistics->setText(text);
 
@@ -812,6 +844,38 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 
 	m_historyBack->setEnabled(enableBack);
 	m_historyForward->setEnabled(enableForward);
+
+	return;
+}
+
+void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
+{
+	if (m_tuningTcpClientThread != nullptr)
+	{
+		m_tuningController->resetTcpClient();
+
+		m_tuningTcpClientThread->quitAndWait(10000);
+		delete m_tuningTcpClientThread;
+
+		m_tuningTcpClientThread = nullptr;
+		m_tuningTcpClient = nullptr;
+	}
+
+	// TuningTcpClient
+	//
+	if (configuration.tuningEnabled == true)
+	{
+		m_tuningTcpClient = new MonitorTuningTcpClient(m_configController.softwareInfo(), &theTuningSignals);
+
+		m_tuningTcpClient->setServers(configuration.tuningService.address(),
+									  configuration.tuningService.address(),
+									  false);
+
+		m_tuningTcpClientThread = new SimpleThread(m_tuningTcpClient);
+		m_tuningTcpClientThread->start();
+
+		m_tuningController->setTcpClient(m_tuningTcpClient);
+	}
 
 	return;
 }
