@@ -126,14 +126,14 @@ void ArchivingServiceWorker::deleteArchive()
 
 void ArchivingServiceWorker::runArchWriteThread()
 {
-	assert(m_archWriteThread == nullptr);
+/*	assert(m_archWriteThread == nullptr);
 
 	m_archWriteThread = new ArchWriteThread(m_cfgSettings.dbHost,
 											m_archive,
 											m_saveStatesQueue,
 											logger());
 
-	m_archWriteThread->start();
+	m_archWriteThread->start(); */
 
 	//
 
@@ -148,12 +148,12 @@ void ArchivingServiceWorker::runArchWriteThread()
 
 void ArchivingServiceWorker::stopArchWriteThread()
 {
-	if (m_archWriteThread != nullptr)
+/*	if (m_archWriteThread != nullptr)
 	{
 		m_archWriteThread->quitAndWait();
 		delete m_archWriteThread;
 		m_archWriteThread = nullptr;
-	}
+	}*/
 
 	//
 

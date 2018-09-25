@@ -383,13 +383,14 @@ bool FastQueueBase::push(const char* item)
 	if (m_size == m_queueSize)
 	{
 		m_readIndex++;				// lost last item in queue
+		m_size--;
 	}
 
-	memcpy(m_buffer + m_writeIndex() * m_itemSize, &item, m_itemSize);
+	memcpy(m_buffer + m_writeIndex() * m_itemSize, item, m_itemSize);
 
 	m_writeIndex++;
 
-	// m_size - is not changed
+	m_size++;
 
 	return true;
 }

@@ -1,6 +1,9 @@
 #include "FileArchWriter.h"
 
 
+ArchFile::SignalState ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
+
+
 ArchFile::ArchFile()
 {
 }
@@ -20,10 +23,14 @@ bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash 
 		queueSize = QUEUE_MIN_SIZE * 16;
 	}
 
-	m_queue = new LockFreeQueue<SignalState>(queueSize);
+	m_queue = new FastQueue<SignalState>(queueSize);
+
+	m_path = QString("%1/%2/%3").
+					arg(writer->archFullPath()).
+					arg(QString().sprintf("%02X", static_cast<int>(m_hash & 0xFF))).
+					arg(m_signalID.remove("#"));
 
 	return true;
-
 }
 
 bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
@@ -34,11 +41,7 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 		return false;
 	}
 
-	if (m_queue == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(m_queue);
 
 	SignalState s;
 
@@ -48,14 +51,66 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	s.state.flags = state.flags;
 	s.state.value = state.value;
 
-	m_queue->push(&s);
+	m_queue->push(s);
 
 	return true;
 }
 
 void ArchFile::flush()
 {
+	TEST_PTR_RETURN(m_queue);
 
+	int copiedItemsCount = 0;
+
+	bool result = m_queue->copyToBuffer(m_buffer, QUEUE_MAX_SIZE, &copiedItemsCount);
+
+	if (result == false || copiedItemsCount == 0)
+	{
+		return;
+	}
+
+	int startIndex = 0;
+	int index = startIndex;
+	int itemsCount = 0;
+	qint64 partition = -1;
+
+	const int PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;
+
+	do
+	{
+		qint64 statePartition = m_buffer[index].state.system / PARTITTION_DIVIDER;
+
+		if (partition == -1)
+		{
+			partition = statePartition;
+			itemsCount++;
+			index++;
+		}
+		else
+		{
+			if (statePartition == partition)
+			{
+				itemsCount++;
+				index++;
+			}
+			else
+			{
+				writeFile(statePartition * PARTITTION_DIVIDER, m_buffer + startIndex, itemsCount);
+
+				startIndex = itemsCount;
+				itemsCount = 0;
+				partition = statePartition;
+				continue;
+			}
+
+		}
+	}
+	while(index < copiedItemsCount);
+
+	if (itemsCount > 0)
+	{
+		writeFile(partition * PARTITTION_DIVIDER, m_buffer + startIndex, itemsCount);
+	}
 }
 
 bool ArchFile::isEmergency() const
@@ -64,6 +119,52 @@ bool ArchFile::isEmergency() const
 
 	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
 }
+
+bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount)
+{
+	TEST_PTR_RETURN_FALSE(buffer);
+
+	if (m_pathIsExists == false)
+	{
+		QDir d;
+
+		m_pathIsExists = d.mkpath(m_path);
+	}
+
+	QDateTime date = QDateTime::fromMSecsSinceEpoch(partition, Qt::UTC);
+
+	QString fileName = QString("%1/%2_%3_%4.dat").
+							arg(m_path).
+							arg(date.date().year()).
+							arg(QString().sprintf("%02d", date.date().month())).
+							arg(QString().sprintf("%02d", date.date().day()));
+
+	QFile f(fileName);
+
+	if (f.open(QIODevice::Append) == false)
+	{
+		return false;
+	}
+
+	qint64 sizeToWrite = statesCount * sizeof(SignalState);
+
+	qint64 written = f.write(reinterpret_cast<const char*>(buffer), sizeToWrite);
+
+	if (written == -1)
+	{
+		return false;
+	}
+
+	if (sizeToWrite != written)
+	{
+		// no aligned
+	}
+
+	f.close();
+
+	return true;
+}
+
 
 
 FileArchWriter::FileArchWriter(ArchiveShared archive,
@@ -101,21 +202,33 @@ void FileArchWriter::run()
 
 	do
 	{
-		processSaveStatesQueue();
+		bool doWork = false;
+
+		doWork |= processSaveStatesQueue();
 
 		if (isQuitRequested() == true)
 		{
 			break;
 		}
 
-		writeEmergencyFiles();
+		doWork |= writeEmergencyFiles();
 
 		if (isQuitRequested() == true)
 		{
 			break;
 		}
 
-		writeRegularFiles();
+		doWork |= writeRegularFiles();
+
+		if (isQuitRequested() == true)
+		{
+			break;
+		}
+
+		if (doWork == false)
+		{
+			msleep(5);
+		}
 	}
 	while(isQuitRequested() == false);
 
@@ -343,14 +456,19 @@ bool FileArchWriter::processSaveStatesQueue()
 
 		if (archFile->isEmergency() == true)
 		{
-			addEmergencyFile(archFile, thread);
+			addEmergencyFile(archFile);
 		}
 
 		count++;
 	}
-	while(count < 10000);
+	while(count < 100000);
 
-	return true;
+	if (count > 0)
+	{
+		qDebug() << C_STR(QString("%1 states processed").arg(count));
+	}
+
+	return count > 0;
 }
 
 bool FileArchWriter::writeEmergencyFiles()
@@ -359,25 +477,27 @@ bool FileArchWriter::writeEmergencyFiles()
 
 	do
 	{
-		ArchFile* emergencyFile = getNextEmergencyFile(m_thisThread);
+		ArchFile* emergencyFile = getNextEmergencyFile();
 
-		if (emergencyFile != nullptr)
+		if (emergencyFile == nullptr)
 		{
-			emergencyFile->flush();
+			break;
 		}
+
+		emergencyFile->flush();
 
 		count++;
 	}
 	while(count < 200);
 
-	return true;
+	return count > 0;
 }
 
 bool FileArchWriter::writeRegularFiles()
 {
 	if (m_regularArchFileIndex >= m_archFilesCount)
 	{
-		return false;
+		m_regularArchFileIndex = 0;
 	}
 
 	int count = 0;
@@ -414,9 +534,9 @@ void FileArchWriter::shutdown()
 	}
 }
 
-void FileArchWriter::addEmergencyFile(ArchFile* file, const QThread* thread)
+void FileArchWriter::addEmergencyFile(ArchFile* file)
 {
-	takeEmergencyFilesOwnership(thread);
+//	takeEmergencyFilesOwnership(thread);
 
 	if (m_emergencyFilesInQueue.contains(file) == false)
 	{
@@ -424,14 +544,14 @@ void FileArchWriter::addEmergencyFile(ArchFile* file, const QThread* thread)
 		m_emergencyFilesInQueue.insert(file, true);
 	}
 
-	releaseEmergencyFilesOwnership(thread);
+//	releaseEmergencyFilesOwnership(thread);
 }
 
-ArchFile* FileArchWriter::getNextEmergencyFile(const QThread* thread)
+ArchFile* FileArchWriter::getNextEmergencyFile()
 {
 	ArchFile* emergencyFile = nullptr;
 
-	takeEmergencyFilesOwnership(thread);
+//	takeEmergencyFilesOwnership(thread);
 
 	if (m_emergencyFilesQueue.isEmpty() == false)
 	{
@@ -440,12 +560,12 @@ ArchFile* FileArchWriter::getNextEmergencyFile(const QThread* thread)
 		m_emergencyFilesInQueue.remove(emergencyFile);
 	}
 
-	releaseEmergencyFilesOwnership(thread);
+//	releaseEmergencyFilesOwnership(thread);
 
 	return emergencyFile;
 }
 
-
+/*
 void FileArchWriter::takeEmergencyFilesOwnership(const QThread* newOwner)
 {
 	bool result = false;
@@ -466,5 +586,5 @@ void FileArchWriter::releaseEmergencyFilesOwnership(const QThread* currentOwner)
 
 	Q_UNUSED(result);
 }
-
+*/
 

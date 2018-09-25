@@ -348,6 +348,7 @@ public:
 	bool isEmpty() const { return m_size == 0; }
 	bool isNotEmpty() const { return m_size > 0; }
 	bool isFull() const { return m_size == m_queueSize; }
+	int queueSize() const { return m_queueSize; }
 
 	bool push(const char* item);
 	bool pop(char* item);
@@ -380,14 +381,23 @@ class FastQueue : public FastQueueBase
 {
 public:
 	FastQueue(int queueSize) :
-		FastQueue(sizeof(TYPE), queueSize)
+		FastQueueBase(sizeof(TYPE), queueSize)
 	{
 		// checking, that memcpy can be used to copy queue items of type TYPE
 		//
 		assert(std::is_trivially_copyable<TYPE>::value == true);
 	}
 
-	bool push(const TYPE& ref) { return FastQueue::push(reinterpret_cast<const char*>(&ref)); }
-	bool pop(TYPE* ptr) { return FastQueue::pop(reinterpret_cast<char*>(ptr)); }
+	bool push(const TYPE& ref) { return FastQueueBase::push(reinterpret_cast<const char*>(&ref)); }
+	bool pop(TYPE* ptr) { return FastQueueBase::pop(reinterpret_cast<char*>(ptr)); }
+
+	bool copyToBuffer(TYPE* buffer, int bufferSizeInItems, int* copiedItemsCount)
+	{
+		bool result = FastQueueBase::copyToBuffer(reinterpret_cast<char*>(buffer), bufferSizeInItems * sizeof(TYPE), copiedItemsCount);
+
+		*copiedItemsCount /= sizeof(TYPE);
+
+		return result;
+	}
 };
 

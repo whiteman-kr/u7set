@@ -23,7 +23,7 @@ class ArchFile
 			qint64 plant;
 
 			AppSignalStateFlags flags;
-			double value = 0;
+			double value;
 		} state;
 
 		quint32 CRC32;
@@ -43,9 +43,14 @@ public:
 	bool isEmergency() const;
 
 private:
+	bool writeFile(qint64 partition, SignalState* buffer, int statesCount);
+
+private:
 	const FileArchWriter* m_archWriter = nullptr;
 	QString m_signalID;
 	Hash m_hash = 0;
+
+	QString m_path;
 
 	//
 
@@ -53,13 +58,15 @@ private:
 	bool m_fileIsOpened = false;
 	int m_currentPartition = -1;
 
-	LockFreeQueue<SignalState>* m_queue = nullptr;
+	FastQueue<SignalState>* m_queue = nullptr;
 
 	const double QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
 	const double QUEUE_EXPAND_LIMIT = 0.9;			// 90%
 
-	const int QUEUE_MIN_SIZE = 20;
-	const int QUEUE_MAX_SIZE = 1280;		// 20 * 2^6
+	static const int QUEUE_MIN_SIZE = 20;
+	static const int QUEUE_MAX_SIZE = 1280;		// 20 * 2^6
+
+	static SignalState m_buffer[QUEUE_MAX_SIZE];
 };
 
 
@@ -69,6 +76,8 @@ public:
 	FileArchWriter(ArchiveShared archive,
 				   Queue<SimpleAppSignalState>& saveStatesQueue,
 				   CircularLoggerShared logger);
+
+	QString archFullPath() const { return m_archFullPath; }
 
 private:
 	void run() override;
@@ -84,11 +93,12 @@ private:
 
 	void shutdown();
 
-	void addEmergencyFile(ArchFile* file, const QThread* thread);
-	ArchFile* getNextEmergencyFile(const QThread* thread);
+	void addEmergencyFile(ArchFile* file);
+	ArchFile* getNextEmergencyFile();
 
-	void takeEmergencyFilesOwnership(const QThread* newOwner);
-	void releaseEmergencyFilesOwnership(const QThread* currentOwner);
+
+//	void takeEmergencyFilesOwnership(const QThread* newOwner);
+//	void releaseEmergencyFilesOwnership(const QThread* currentOwner);
 
 private:
 	ArchiveShared m_archive;
