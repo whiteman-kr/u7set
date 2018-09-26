@@ -1720,7 +1720,6 @@ namespace Tuning
 	{
 		if (m_socket == nullptr)
 		{
-			assert(false);
 			return;
 		}
 

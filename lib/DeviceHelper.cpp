@@ -303,6 +303,13 @@ bool DeviceHelper:: getIpPortProperty(const Hardware::DeviceObject* device,
 	return result;
 }
 
+bool DeviceHelper::isPropertyExists(const Hardware::DeviceObject* device, const QString& name)
+{
+	TEST_PTR_RETURN_FALSE(device);
+
+	return device->propertyExists(name);
+}
+
 bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log)
 {
 	if (device == nullptr ||

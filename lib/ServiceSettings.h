@@ -135,7 +135,7 @@ private:
 	static const char* ATTR_EQUIIPMENT_ID;
 	static const char* ATTR_COUNT;
 
-	bool fillTuningClientsInfo(Hardware::Software *software, Builder::IssueLogger* log);
+	bool fillTuningClientsInfo(Hardware::Software *software, bool singleLmControlEnabled, Builder::IssueLogger* log);
 
 public:
 	struct TuningClient

@@ -10,9 +10,8 @@ TARGET = TrendView
 TEMPLATE = lib
 
 CONFIG += staticlib
-CONFIG += precompile_header
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
-
+CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 #c++17 support

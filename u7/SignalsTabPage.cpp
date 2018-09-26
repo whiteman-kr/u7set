@@ -225,9 +225,10 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_OUTPUT_MODE:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			for (int i = 0; i < OUTPUT_MODE_COUNT; i++)
+			auto values = E::enumValues<E::OutputMode>();
+			for (auto& valuePair : values)
 			{
-				cb->addItem(OutputModeStr[i]);
+				cb->addItem(valuePair.second, valuePair.first);
 			}
 			return cb;
 		}
@@ -310,7 +311,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		//
 		case SC_ANALOG_SIGNAL_FORMAT: assert(false);/* WhiteMan if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt()));*/ break;
 		case SC_UNIT: if (le) le->setText(s.unit()); break;
-		case SC_OUTPUT_MODE: if (cb) cb->setCurrentIndex(s.outputMode()); break;
+		case SC_OUTPUT_MODE: if (cb) cb->setCurrentIndex(cb->findData(s.outputMode())); break;
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
 		case SC_ENABLE_TUNING: if (cb) cb->setCurrentIndex(s.enableTuning()); break;
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(TO_INT(s.inOutType())); break;
@@ -439,7 +440,14 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		//
 		case SC_ANALOG_SIGNAL_FORMAT: assert(false); /* WhiteMan if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex())));*/ break;
 		case SC_UNIT: if (le) s.setUnit(le->text().trimmed()); break;
-		case SC_OUTPUT_MODE: if (cb) s.setOutputMode(static_cast<E::OutputMode>(cb->currentIndex())); break;
+		case SC_OUTPUT_MODE:
+		{
+			if (cb && cb->currentData().isValid())
+			{
+				s.setOutputMode(static_cast<E::OutputMode>(cb->currentData().toInt()));
+			}
+			break;
+		}
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_ENABLE_TUNING: if (cb) s.setEnableTuning(cb->currentIndex() == 0 ? false : true); break;
 		case SC_BYTE_ORDER: if (cb) s.setByteOrder(E::ByteOrder(cb->currentIndex())); break;
@@ -523,14 +531,12 @@ QString SignalsModel::getSensorStr(int sensorType) const
 
 QString SignalsModel::getOutputModeStr(int outputMode) const
 {
-	if (outputMode >= 0 && outputMode < OUTPUT_MODE_COUNT)
-	{
-		return OutputModeStr[outputMode];
-	}
-	else
+	QString result = E::valueToString<E::OutputMode>(outputMode);
+	if (result.isEmpty())
 	{
 		return tr("Unknown output mode");
 	}
+	return result;
 }
 
 QString SignalsModel::getUserStr(int userID) const

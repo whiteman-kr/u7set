@@ -5449,6 +5449,27 @@ namespace Builder
 				  QString(tr("LM- or BVB-family module is not found in chassis %1.")).arg(chassisEquipmentID));
 	}
 
+	/// IssueCode: ALC5150
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.
+	///
+	/// Parameters:
+	///		%1 Monitor equipmentID
+	///		%2 Tuning service equipmentID
+	///
+	/// Description:
+	///		Monitor cannot be connected to TuningService with enabled SingleLmControl mode. Check TuningService settings.
+	///
+	void IssueLogger::errALC5150(QString monitorID, QString tuningServiceID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5150,
+				  QString(tr("Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.")).
+						arg(monitorID).arg(tuningServiceID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
