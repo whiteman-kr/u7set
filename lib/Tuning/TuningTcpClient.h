@@ -22,7 +22,7 @@ struct TuningWriteCommand
 
 	Hash m_hash = 0;
 
-	QString m_equipmentId = 0;
+	QString m_equipmentId;
 
 	TuningValue m_value;
 

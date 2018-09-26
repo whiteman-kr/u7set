@@ -129,6 +129,8 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
+	// Update status bar
+	//
 	QString tuningServiceState;
 	int tuningServiceReplyCount = 0;
 
@@ -144,12 +146,10 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 			auto connState = m_tuningTcpClient->getConnectionState();
 			tuningServiceReplyCount = connState.replyCount;
 
-			tuningServiceState = connState.isConnected ? connState.peerAddr.addressStr() : "NoConnection";
+			tuningServiceState = connState.isConnected ? connState.peerAddr.addressPortStr() : "NoConnection";
 		}
 	}
 
-	// Update status bar
-	//
 	if  (event->timerId() == m_updateStatusBarTimerId &&
 		 m_tcpSignalClient != nullptr)
 	{
@@ -162,8 +162,8 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 		// State
 		//
 		QString text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
-					   .arg(confiConnState.isConnected ? confiConnState.peerAddr.addressStr() : "NoConnection")
-					   .arg(signalClientState.isConnected ? signalClientState.peerAddr.addressStr() : "NoConnection");
+					   .arg(confiConnState.isConnected ? confiConnState.peerAddr.addressPortStr() : "NoConnection")
+					   .arg(signalClientState.isConnected ? signalClientState.peerAddr.addressPortStr() : "NoConnection");
 
 		if (m_configController.configuration().tuningEnabled == true)
 		{
