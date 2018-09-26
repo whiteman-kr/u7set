@@ -9,6 +9,8 @@
 #include "MonitorTuningTcpClient.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
+#include "../lib/LogFile.h"
+#include "DialogAlert.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -30,6 +32,8 @@ protected:
 	virtual void closeEvent(QCloseEvent*) override;
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void showEvent(QShowEvent*) override;
+
+	virtual bool eventFilter(QObject *object, QEvent *event) override;
 
 	// Public methods
 	//
@@ -78,14 +82,7 @@ protected:
 
 	void slot_configurationArrived(ConfigSettings configuration);
 
-	void tcpSignalClient_signalParamAndUnitsArrived();
-	void tcpSignalClient_connectionReset();
-
 	void checkMonitorSingleInstance();
-
-signals:
-	void signalParamAndUnitsArrived();
-	void connectionReset();
 
 	// Properties
 	//
@@ -122,6 +119,10 @@ private:
 
 	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
 	SimpleThread* m_tuningTcpClientThread = nullptr;
+
+	Log::LogFile m_LogFile;
+
+	DialogAlert m_dialogAlert;
 
 	// File menu
 	//
@@ -168,8 +169,12 @@ private:
 	QLabel* m_statusBarConnectionStatistics = nullptr;
 	QLabel* m_statusBarConnectionState = nullptr;
 	QLabel* m_statusBarProjectInfo = nullptr;
+	QLabel* m_statusBarLogAlerts = nullptr;
 
 	int m_updateStatusBarTimerId = -1;
+
+	int m_logErrorsCounter = -1;
+	int m_logWarningsCounter = -1;
 };
 
 

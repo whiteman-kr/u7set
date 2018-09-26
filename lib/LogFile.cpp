@@ -1332,7 +1332,6 @@ namespace Log
 		return m_logFileWorker->write(type, text);
 	}
 
-
 	void LogFile::view(QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles)
 	{
 		m_alertAckCounter = 0;
@@ -1341,19 +1340,21 @@ namespace Log
 
 		if (m_logDialog != nullptr)
 		{
-			m_logDialog->activateWindow();
+			if (m_logDialog->isActiveWindow() == false)
+			{
+				m_logDialog->activateWindow();
+			}
+		}
+		else
+		{
+			m_logDialog = new LogFileDialog(m_logFileWorker, parent, showType, headerTitles);
 
-			return;
+			connect(m_logDialog, &QDialog::finished, this, &LogFile::onDialogFinished);
+
+			m_logDialog->show();
 		}
 
-		m_logDialog = new LogFileDialog(m_logFileWorker, parent, showType, headerTitles);
-
-		connect(m_logDialog, &QDialog::finished, this, &LogFile::onDialogFinished);
-
-		m_logDialog->show();
-
 		return;
-
 	}
 
 	int LogFile::alertAckCounter() const

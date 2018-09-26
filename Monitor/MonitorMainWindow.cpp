@@ -15,7 +15,9 @@ const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCh
 MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
-	m_schemaManager(&m_configController)
+	m_schemaManager(&m_configController),
+	m_dialogAlert(this),
+	m_LogFile(qAppName())
 {
 	qDebug() << Q_FUNC_INFO;
 
@@ -29,9 +31,6 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	m_tcpClientThread = new SimpleThread(m_tcpSignalClient);
 	m_tcpClientThread->start();
 
-	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
-	connect(m_tcpSignalClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
-
 	// TcpSignalClient
 	//
 	m_tcpSignalRecents = new TcpSignalRecents(&m_configController, fakeAddress, fakeAddress);
@@ -41,6 +40,16 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 	connect(&theSignals, &AppSignalManager::addSignalToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignal, Qt::QueuedConnection);
 	connect(&theSignals, &AppSignalManager::addSignalsToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignals, Qt::QueuedConnection);
+
+	// Log file
+	//
+
+	m_LogFile.writeText("---");
+	m_LogFile.writeMessage(tr("Application started."));
+
+	// DialogAlert
+
+	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
 
 	// Creating signals controllers for VFrame30
 	//
@@ -129,6 +138,11 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
+/*	if ((rand() % 10) == 5)
+	{
+		m_LogFile.writeError("Error");
+	}*/
+
 	// Update status bar
 	//
 	QString tuningServiceState;
@@ -193,8 +207,28 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 
 		m_statusBarProjectInfo->setText(text);
 
-		return;
 	}
+
+	if (event->timerId() == m_updateStatusBarTimerId &&
+			(m_logErrorsCounter != m_LogFile.errorAckCounter() || m_logWarningsCounter != m_LogFile.warningAckCounter()))
+	{
+		m_logErrorsCounter = m_LogFile.errorAckCounter();
+		m_logWarningsCounter = m_LogFile.warningAckCounter();
+
+		assert(m_statusBarLogAlerts);
+
+		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+
+		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
+		{
+			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
+		}
+	}
+
 
 	return;
 }
@@ -203,6 +237,19 @@ void MonitorMainWindow::showEvent(QShowEvent*)
 {
 	showLogo();
 	return;
+}
+
+bool MonitorMainWindow::eventFilter(QObject *object, QEvent *event)
+{
+	if (object == m_statusBarLogAlerts &&
+			event->type() == QEvent::MouseButtonPress &&
+			m_statusBarLogAlerts->text().isEmpty() == false
+			)
+	{
+		showLog();
+	}
+
+	return QWidget::eventFilter(object, event);
 }
 
 void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
@@ -514,12 +561,19 @@ void MonitorMainWindow::createStatusBar()
 	m_statusBarProjectInfo->setAlignment(Qt::AlignHCenter);
 	m_statusBarProjectInfo->setMinimumWidth(100);
 
+	m_statusBarLogAlerts = new QLabel;
+	m_statusBarLogAlerts->setAlignment(Qt::AlignHCenter);
+	m_statusBarLogAlerts->setMinimumWidth(100);
+	m_statusBarLogAlerts->setToolTip(tr("Error and warning counters in the log (click to view log)"));
+	m_statusBarLogAlerts->installEventFilter(this);
+
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
 	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
 	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
 	statusBar()->addPermanentWidget(m_statusBarProjectInfo, 0);
+	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 
 	return;
 }
@@ -539,7 +593,7 @@ void MonitorMainWindow::exit()
 
 void MonitorMainWindow::showLog()
 {
-
+	m_LogFile.view(this);
 }
 
 void MonitorMainWindow::showSettings()
@@ -818,7 +872,7 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalSnapshot()
 {
-	DialogSignalSnapshot* dss = new DialogSignalSnapshot(&m_configController, this);
+	DialogSignalSnapshot* dss = new DialogSignalSnapshot(&m_configController, m_tcpSignalClient, this);
 	dss->show();
 
 	return;
@@ -865,7 +919,7 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	//
 	if (configuration.tuningEnabled == true)
 	{
-		m_tuningTcpClient = new MonitorTuningTcpClient(m_configController.softwareInfo(), &theTuningSignals);
+		m_tuningTcpClient = new MonitorTuningTcpClient(m_configController.softwareInfo(), &theTuningSignals, &m_LogFile);
 
 		m_tuningTcpClient->setServers(configuration.tuningService.address(),
 									  configuration.tuningService.address(),
@@ -879,17 +933,6 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 
 	return;
 }
-
-void MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived()
-{
-	emit signalParamAndUnitsArrived();
-}
-
-void MonitorMainWindow::tcpSignalClient_connectionReset()
-{
-	emit connectionReset();
-}
-
 
 MonitorConfigController* MonitorMainWindow::configController()
 {
