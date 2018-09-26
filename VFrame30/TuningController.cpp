@@ -12,9 +12,20 @@ namespace VFrame30
 		m_tcpClient(tcpClient)
 	{
 		assert(m_signalManager);
-		assert(m_tcpClient);
+		return;
+	}
+
+	void TuningController::setTcpClient(ITuningTcpClient* tcpClient)
+	{
+		assert(tcpClient);
+		m_tcpClient = tcpClient;
 
 		return;
+	}
+
+	void TuningController::resetTcpClient()
+	{
+		m_tcpClient = nullptr;
 	}
 
 	AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok)
@@ -42,7 +53,6 @@ namespace VFrame30
 	QVariant TuningController::signalParam(const QString& appSignalId)
 	{
 		bool ok = true;
-
 		QVariant result = QVariant::fromValue(signalParam(appSignalId, &ok));
 
 		if (ok == false)
@@ -56,7 +66,6 @@ namespace VFrame30
 	QVariant TuningController::signalState(const QString& appSignalId)
 	{
 		bool ok = true;
-
 		QVariant result = QVariant::fromValue(signalState(appSignalId, &ok));
 
 		if (ok == false)
@@ -71,7 +80,7 @@ namespace VFrame30
 	{
 		if (m_tcpClient == nullptr)
 		{
-			assert(m_tcpClient);
+			qDebug() << "Warning: Attempt to write tuning value while m_tcpClient is not set.";
 			return false;
 		}
 
@@ -88,38 +97,29 @@ namespace VFrame30
 		switch (value.type())
 		{
 		case QVariant::Bool:
-		{
 			if (appSignal.toTuningType() != TuningValueType::Discrete)
 			{
 				assert(false);	// Bool is allowed only for discrete signals
 				return false;
 			}
 			break;
-		}
 
 		case QVariant::Int:
-		{
 			if (appSignal.toTuningType() == TuningValueType::Discrete)
 			{
 				value = value.toInt() == 0 ? false : true;	// Discrete signals can be set by 0 or 1
 			}
 			break;
-		}
 
 		case QVariant::LongLong:
-		{
 			assert(false);	// Must not arrive from script
 			return false;
-		}
 
 		case QMetaType::Float:
-		{
 			assert(false);	// Must not arrive from script
 			return false;
-		}
 
 		case QVariant::Double:
-		{
 			if (appSignal.toTuningType() == TuningValueType::Discrete)
 			{
 				value = value.toBool();	// Discrete signals can be set by 0.0 or 1.0
@@ -135,13 +135,10 @@ namespace VFrame30
 				value = value.toFloat();
 			}
 			break;
-		}
 
 		default:
-		{
 			assert(false);	// Some unknown type arrived from script
 			return false;
-		}
 		}
 
 		TuningValue tuningValue(value);

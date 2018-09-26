@@ -1,4 +1,5 @@
 #include "Stable.h"
+#include "../lib/ServiceSettings.h"
 #include "MonitorConfigController.h"
 #include "Settings.h"
 #include "version.h"
@@ -342,6 +343,24 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		}
 	}
 
+	// Get tuning signal files
+	//
+	{
+		QByteArray data;
+		QString errorString;
+
+		bool result = getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorString);
+
+		if (result == false)
+		{
+			readSettings.errorMessage += errorString + "\n";
+		}
+		else
+		{
+			theTuningSignals.load(data);
+		}
+	}
+
 	// Get all schema details
 	//
 	{
@@ -560,56 +579,57 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 	// Get Tuning data
 	//
 	{
-//		// TuningService data
-//		//
-//		QDomNodeList tuningServiceNodes = settingsElement.elementsByTagName("TuningService");
+		outSetting->tuningEnabled = false;
+		outSetting->tuningSources.clear();
+		outSetting->tuningService = ConfigConnection();
 
-//		if (tuningServiceNodes.isEmpty() == true)
-//		{
-//			outSetting->errorMessage += tr("Cannot find TuningService tag %1\n");
-//			return false;
-//		}
-//		else
-//		{
-//			QDomElement tuningServiceElement = tuningServiceNodes.at(0).toElement();
+		// TuningService data
+		//
+		QDomNodeList tuningServiceNodes = settingsElement.elementsByTagName("TuningService");
 
-//			bool enableTuning = tuningServiceElement.attribute("port1").compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		if (tuningServiceNodes.isEmpty() == true)
+		{
+			// Tuning is disabled
+			//
+		}
+		else
+		{
+			QDomElement tuningServiceElement = tuningServiceNodes.at(0).toElement();
 
-//			QString id1 = tuningServiceElement.attribute("TuningServiceID1");
-//			QString ip1 = tuningServiceElement.attribute("ip1");
-//			int port1 = tuningServiceElement.attribute("port1").toInt();
+			bool enableTuning = tuningServiceElement.attribute("Enable").compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
-//			QString id2 = tuningServiceElement.attribute("TuningServiceID2");
-//			QString ip2 = tuningServiceElement.attribute("ip2");
-//			int port2 = tuningServiceElement.attribute("port2").toInt();
+			QString id = tuningServiceElement.attribute("TuningServiceID");
+			QString ip = tuningServiceElement.attribute("ip");
+			int port = tuningServiceElement.attribute("port").toInt();
 
-//			outSetting->tuningEnabled = enableTuning;
-//			outSetting->tuningService1 = ConfigConnection(id1, ip1, port1);
-//			outSetting->tuningService2 = ConfigConnection(id2, ip2, port2);
-//		}
+			outSetting->tuningEnabled = enableTuning;
+			outSetting->tuningService = ConfigConnection(id, ip, port);
+		}
 
-//		// TuningSources
-//		//
-//		QDomNodeList tuningSourceNodes = settingsElement.elementsByTagName("TuningSources");
+		// TuningSources
+		//
+		QDomNodeList tuningSourceNodes = settingsElement.elementsByTagName("TuningSources");
 
-//		if (tuningSourceNodes.isEmpty() == true)
-//		{
-//			outSetting->errorMessage += tr("Cannot find tuningSourceNodes tag %1\n").arg("TuningSources");
-//			return false;
-//		}
-//		else
-//		{
-//			QDomElement tuningSourceElement = tuningSourceNodes.at(0).toElement();
+		if (outSetting->tuningEnabled == true &&
+			tuningSourceNodes.isEmpty() == true)
+		{
+			outSetting->errorMessage += tr("Cannot find tuningSourceNodes tag %1\n").arg("TuningSources");
+			return false;
+		}
 
-//			QString str = tuningSourceElement.text().trimmed();
-//			str = str.replace(QChar(QChar::LineFeed), QChar(';'));
-//			str = str.replace(QChar(QChar::CarriageReturn), QChar(';'));
-//			str = str.replace(QChar(QChar::Tabulation), QChar(';'));
 
-//			QStringList tuningSourceList = str.split(QChar(';'), QString::SkipEmptyParts);
+		{
+			QDomElement tuningSourceElement = tuningSourceNodes.at(0).toElement();
 
-//			outSetting->tuningSources = tuningSourceList;
-//		}
+			QString str = tuningSourceElement.text().trimmed();
+			str = str.replace(QChar(QChar::LineFeed), QChar(';'));
+			str = str.replace(QChar(QChar::CarriageReturn), QChar(';'));
+			str = str.replace(QChar(QChar::Tabulation), QChar(';'));
+
+			QStringList tuningSourceList = str.split(QChar(';'), QString::SkipEmptyParts);
+
+			outSetting->tuningSources = tuningSourceList;
+		}
 	}
 
 	return outSetting->errorMessage.isEmpty();

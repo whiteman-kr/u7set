@@ -21,12 +21,17 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 // TuningTcpClient
 //
-TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo,
-								 TuningSignalManager* signalManager) :
+TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager) :
 	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0)),
+	m_instanceId(softwareInfo.equipmentID()),
+	m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
 	m_signals(signalManager)
 {
 	assert(m_signals);
+
+	initSignalHashesAndSources();
+
+	return;
 }
 
 TuningTcpClient::~TuningTcpClient()
@@ -257,7 +262,6 @@ void TuningTcpClient::onConnection()
 
 	{
 		QMutexLocker l(&m_tuningSourcesMutex);
-
 		m_tuningSources.clear();
 	}
 
@@ -759,7 +763,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		if (found == true)
 		{
 			// Process write error only if writing was performed by current client
-
+			//
 			Hash writeClientHash = stateMessage.writeclient();
 
 			if (m_instanceIdHash == writeClientHash)
@@ -775,6 +779,10 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 				{
 					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
 					{
+//						qDebug() << "arrivedState.unsuccessfulWriteTime() " << arrivedState.unsuccessfulWriteTime().toMSecsSinceEpoch();
+//						qDebug() << "previousState.unsuccessfulWriteTime() " << previousState.unsuccessfulWriteTime().toMSecsSinceEpoch();
+//						qDebug() << "stateMessage.writeerrorcode() " << stateMessage.writeerrorcode();
+
 						m_signals->setNewValueAsApplied(arrivedState.hash());
 
 						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
@@ -797,11 +805,11 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		}
 
 		// When updating states, we have to set some properties locally
-
+		//
 		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
 
+		// --
 		//
-
 		arrivedStates.push_back(arrivedState);
 	}
 
@@ -991,9 +999,36 @@ void TuningTcpClient::slot_signalsUpdated()
 		}
 	}
 
+	initSignalHashesAndSources();
+
+	// --
+	//
+	if (isConnected() == true)
+	{
+		resetToGetTuningSources();
+	}
+
+#ifdef Q_DEBUG
+	if (m_simulationMode == true)
+	{
+		m_signals->validateStates();
+	}
+#endif
+
+	return;
+}
+
+QString TuningTcpClient::networkErrorStr(NetworkError error)
+{
+	return getNetworkErrorStr(error);
+}
+
+void TuningTcpClient::initSignalHashesAndSources()
+{
 	m_signalHashes = m_signals->signalHashes();
 
 	// Build m_equipmentToSignalMap
+	//
 	{
 		QMutexLocker sl(&m_tuningSourcesMutex);
 
@@ -1015,46 +1050,27 @@ void TuningTcpClient::slot_signalsUpdated()
 		}
 	}
 
-	//
-
-	if (isConnected() == true)
-	{
-		resetToGetTuningSources();
-	}
-
-#ifdef Q_DEBUG
-	if (m_simulationMode == true)
-	{
-		m_signals->validateStates();
-	}
-#endif
-
 	return;
-}
-
-QString TuningTcpClient::networkErrorStr(NetworkError error)
-{
-	return getNetworkErrorStr(error);
 }
 
 void TuningTcpClient::writeLogAlert(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogError(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogWarning(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogMessage(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 void TuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
@@ -1066,7 +1082,7 @@ void TuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const Tu
 
 void TuningTcpClient::writeLogSignalChange(const QString& message)
 {
-	Q_UNUSED(message);
+	qDebug() << message;
 }
 
 QString TuningTcpClient::instanceId() const

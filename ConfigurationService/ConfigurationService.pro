@@ -25,9 +25,9 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-#c++14/17 support
+#c++17 support
 #
-CONFIG += c++14
+gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # Force prebuild version control info

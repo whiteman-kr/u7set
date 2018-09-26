@@ -62,13 +62,22 @@ namespace Builder
 			return result;
 		}
 
+		// Generate tuning signals
+		//
+		if (equipmentList.empty() == true)
+		{
+			log->errCFG3022(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
+			return false;
+		}
 
-		result &= createTuningSignals(equipmentList);
+		result &= createTuningSignals(equipmentList, m_signalSet, &m_tuningSet);
 		if (result == false)
 		{
 			return result;
 		}
 
+		// --
+		//
 		result &= createObjectFilters(equipmentList, filterByEquipment, filterBySchema, showDiscreteCounters);
 		if (result == false)
 		{
@@ -104,6 +113,67 @@ namespace Builder
 		return result;
 	}
 
+	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
+	{
+		if (tuningSet == nullptr ||
+			signalSet == nullptr ||
+			equipmentList.empty() == true)
+		{
+			assert(tuningSet);
+			assert(signalSet);
+			assert(equipmentList.empty() == false);
+			return false;
+		}
+
+		// Create signals
+		//
+		tuningSet->Clear();
+
+		int signalsCount = signalSet->count();
+
+		for (int i = 0; i < signalsCount; i++)
+		{
+			const Signal& s = (*signalSet)[i];
+
+			if (s.enableTuning() == false)
+			{
+				continue;
+			}
+
+			// Check EquipmentIdMasks
+			//
+			bool result = false;
+
+			for (QString m : equipmentList)
+			{
+				m = m.trimmed();
+
+				if (m.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QRegExp rx(m);
+				rx.setPatternSyntax(QRegExp::Wildcard);
+				if (rx.exactMatch(s.equipmentID()))
+				{
+					result = true;
+					break;
+				}
+			}
+
+			if (result == false)
+			{
+				continue;
+			}
+
+			::Proto::AppSignal* aspMessage = tuningSet->add_appsignal();
+			s.serializeTo(aspMessage);
+		}
+
+		return true;
+	}
+
 	bool TuningClientCfgGenerator::createEquipmentList(QStringList* equipmentList)
 	{
 		QString equipmentString;
@@ -137,7 +207,6 @@ namespace Builder
 
 		// Check for valid EquipmentIds
 		//
-
 		for (const QString& tuningEquipmentID : *equipmentList)
 		{
 			if (m_equipment->deviceObject(tuningEquipmentID) == nullptr)
@@ -494,73 +563,12 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList)
-	{
-		// Create signals
-
-		m_tuningSignalManager.reset();
-
-		m_tuningSet.Clear();
-
-		if (equipmentList.empty() == true)
-		{
-			m_log->errCFG3022(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
-			return false;
-		}
-
-		int signalsCount = m_signalSet->count();
-
-		for (int i = 0; i < signalsCount; i++)
-		{
-			const Signal& s = (*m_signalSet)[i];
-
-			if (s.enableTuning() == false)
-			{
-				continue;
-			}
-
-			// Check EquipmentIdMasks
-			//
-
-			bool result = false;
-
-			for (QString m : equipmentList)
-			{
-				m = m.trimmed();
-
-				if (m.isEmpty() == true)
-				{
-					continue;
-				}
-
-				QRegExp rx(m);
-				rx.setPatternSyntax(QRegExp::Wildcard);
-				if (rx.exactMatch(s.equipmentID()))
-				{
-					result = true;
-					break;
-				}
-			}
-
-			if (result == false)
-			{
-				continue;
-			}
-
-			::Proto::AppSignal* aspMessage = m_tuningSet.add_appsignal();
-			s.serializeTo(aspMessage);
-		}
-
-		// Write signals to tuningSignalManager
-
-		m_tuningSignalManager.load(m_tuningSet);
-
-		return true;
-	}
-
 	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters)
 	{
 		bool ok = true;
+
+		TuningSignalManager tuningSignalManager;
+		tuningSignalManager.load(m_tuningSet);
 
 		//
 		// Filters
@@ -592,7 +600,7 @@ namespace Builder
 
 		std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
 
-		m_tuningFilterStorage.checkFilterSignals(m_tuningSignalManager.signalHashes(), notFoundSignalsAndFilters);
+		m_tuningFilterStorage.checkFilterSignals(tuningSignalManager.signalHashes(), notFoundSignalsAndFilters);
 
 		if (notFoundSignalsAndFilters.empty() == false)
 		{
@@ -606,7 +614,7 @@ namespace Builder
 
 		// Create schemas and equipment filters
 
-		ok = createAutomaticFilters(equipmentList, filterByEquipment, filterBySchema, showDiscreteCounters);
+		ok = createAutomaticFilters(equipmentList, tuningSignalManager, filterByEquipment, filterBySchema, showDiscreteCounters);
 		if (ok == false)
 		{
 			assert(false);
@@ -620,14 +628,14 @@ namespace Builder
 	bool TuningClientCfgGenerator::writeTuningSignals()
 	{
 		// Write number of signals
-
+		//
 		QByteArray data;
 		data.resize(m_tuningSet.ByteSize());
 
 		m_tuningSet.SerializeToArray(data.data(), m_tuningSet.ByteSize());
 
 		// Write file
-
+		//
 		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
 
 		if (buildFile == nullptr)
@@ -745,7 +753,11 @@ namespace Builder
 		xmlWriter.writeTextElement("Error", error);
 	}
 
-	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters)
+	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
+														  const TuningSignalManager& tuningSignalManager,
+														  bool filterByEquipment,
+														  bool filterBySchema,
+														  bool showDiscreteCounters)
 	{
 		if (filterBySchema == true)
 		{
@@ -767,7 +779,7 @@ namespace Builder
 					//
 					Hash hash = ::calcHash(appSignalID);
 
-					if (m_tuningSignalManager.signalExists(hash) == false)
+					if (tuningSignalManager.signalExists(hash) == false)
 					{
 						continue;
 					}

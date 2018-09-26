@@ -6,9 +6,9 @@
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
 #include "SelectSchemaWidget.h"
+#include "MonitorTuningTcpClient.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
-#include "../lib/Tuning/TuningTcpClient.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -76,6 +76,8 @@ protected:
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
 
+	void slot_configurationArrived(ConfigSettings configuration);
+
 	void tcpSignalClient_signalParamAndUnitsArrived();
 	void tcpSignalClient_connectionReset();
 
@@ -118,7 +120,8 @@ private:
 	TcpSignalRecents* m_tcpSignalRecents = nullptr;
 	SimpleThread* m_tcpRecentsThread = nullptr;
 
-	TuningTcpClient* m_tuningTcpClient = nullptr;
+	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
+	SimpleThread* m_tuningTcpClientThread = nullptr;
 
 	// File menu
 	//
@@ -168,6 +171,7 @@ private:
 
 	int m_updateStatusBarTimerId = -1;
 };
+
 
 class MonitorToolBar : public QToolBar
 {

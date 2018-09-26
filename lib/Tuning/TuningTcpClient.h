@@ -21,9 +21,7 @@ struct TuningWriteCommand
 	// Data
 
 	Hash m_hash = 0;
-
-	QString m_equipmentId = 0;
-
+	QString m_equipmentId;		// Used only for activation/deactivation LM
 	TuningValue m_value;
 
 	TuningWriteCommandType m_type = TuningWriteCommandType::WriteValue;
@@ -32,7 +30,7 @@ struct TuningWriteCommand
 	bool m_forceTakeControl = false;
 
 	// Write constructor
-
+	//
 	TuningWriteCommand(const QString& appSignalId, const TuningValue& value) :
 		TuningWriteCommand(::calcHash(appSignalId), value)
 	{
@@ -47,7 +45,7 @@ struct TuningWriteCommand
 	}
 
 	// Apply constructor
-
+	//
 	TuningWriteCommand(bool apply)
 	{
 		Q_UNUSED(apply);
@@ -55,7 +53,7 @@ struct TuningWriteCommand
 	}
 
 	// Activate LM constructor
-
+	//
 	TuningWriteCommand(const QString& equipmentId, bool enableControl, bool forceTakeControl)
 	{
 		m_type = TuningWriteCommandType::ActivateLm;
@@ -163,10 +161,11 @@ signals:
 private:
 	QString networkErrorStr(NetworkError error);
 
-public:
+	void initSignalHashesAndSources();
+
 	// Properties
 	//
-
+public:
 	QString instanceId() const;
 	void setInstanceId(const QString& instanceId);
 
@@ -202,6 +201,7 @@ private:
 	TuningSignalManager* m_signals = nullptr;
 
 protected:
+
 	// Tuning sources
 	//
 	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources, m_equipmentToSignalMap

@@ -575,14 +575,14 @@ namespace Tuning
 
 			qDebug() << "NoReply " << C_STR(m_sourceIP.addressStr());
 
-			onNoReply();
-
 			m_retryCount++;
 
 			if (m_retryCount >= MAX_RETRY_COUNT)
 			{
 				// fix - source is not reply
 				//
+				onNoReply();
+
 				m_stat.isReply = false;
 
 				invalidateAllSignals();
