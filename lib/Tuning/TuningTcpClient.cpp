@@ -23,6 +23,8 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager) :
 	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0)),
+	m_instanceId(softwareInfo.equipmentID()),
+	m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
 	m_signals(signalManager)
 {
 	assert(m_signals);
@@ -761,7 +763,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		if (found == true)
 		{
 			// Process write error only if writing was performed by current client
-
+			//
 			Hash writeClientHash = stateMessage.writeclient();
 
 			if (m_instanceIdHash == writeClientHash)
@@ -777,6 +779,10 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 				{
 					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
 					{
+//						qDebug() << "arrivedState.unsuccessfulWriteTime() " << arrivedState.unsuccessfulWriteTime().toMSecsSinceEpoch();
+//						qDebug() << "previousState.unsuccessfulWriteTime() " << previousState.unsuccessfulWriteTime().toMSecsSinceEpoch();
+//						qDebug() << "stateMessage.writeerrorcode() " << stateMessage.writeerrorcode();
+
 						m_signals->setNewValueAsApplied(arrivedState.hash());
 
 						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
@@ -799,11 +805,11 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		}
 
 		// When updating states, we have to set some properties locally
-
+		//
 		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
 
+		// --
 		//
-
 		arrivedStates.push_back(arrivedState);
 	}
 

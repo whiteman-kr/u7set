@@ -12,6 +12,13 @@ class MonitorTuningTcpClient : public TuningTcpClient
 public:
 	MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager);
 	virtual ~MonitorTuningTcpClient();
+
+protected:
+	virtual void writeLogAlert(const QString& message) override;
+	virtual void writeLogError(const QString& message) override;
+	virtual void writeLogWarning(const QString& message) override;
+	virtual void writeLogMessage(const QString& message) override;
+
 };
 
 #endif // MONITORTUNINGTCPCLIENT_H
