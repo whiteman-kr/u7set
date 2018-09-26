@@ -217,8 +217,7 @@ namespace VFrame30
 
 		// Evaluate script
 		//
-		int warning_thikk_efefefef;
-//		if (m_jsClickScript.isUndefined() == true)
+		if (m_jsClickScript.isUndefined() == true)
 		{
 			m_jsClickScript = evaluateScript(m_clickScript, globalScript, engine, parentWidget);
 		}
@@ -249,8 +248,7 @@ namespace VFrame30
 
 		// Evaluate script
 		//
-		int warning_thikk_efefefef;
-		//if (m_jsPreDrawScript.isUndefined() == true)
+		if (m_jsPreDrawScript.isUndefined() == true)
 		{
 			m_jsPreDrawScript = evaluateScript(m_preDrawScript, globalScript, engine, nullptr);
 		}

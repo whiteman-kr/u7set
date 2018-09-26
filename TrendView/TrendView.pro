@@ -13,14 +13,11 @@ CONFIG += staticlib
 CONFIG += precompile_header
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
-CONFIG += c++17					# C++14 support is enabled.
-win32:QMAKE_CXXFLAGS += /std:c++17
-
 PRECOMPILED_HEADER = Stable.h
 
-#c++14/17 support
+#c++17 support
 #
-CONFIG += c++14
+gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # The following define makes your compiler emit warnings if you use

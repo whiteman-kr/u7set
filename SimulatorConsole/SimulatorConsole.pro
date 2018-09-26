@@ -1,11 +1,13 @@
 QT -= gui
 QT += xml qml core concurrent network
 
-CONFIG += c++14 console
+CONFIG += console
 CONFIG -= app_bundle
 
+#c++17 support
+#
 gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings

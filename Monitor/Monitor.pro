@@ -11,9 +11,8 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
-#c++14/17 support
+#c++17 support
 #
-CONFIG += c++14
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
@@ -128,7 +127,12 @@ SOURCES += main.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
     Trend/RtTrendTcpClient.cpp \
-    Trend/ArchiveTrendTcpClient.cpp
+    Trend/ArchiveTrendTcpClient.cpp \
+    MonitorTuningTcpClient.cpp \
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../lib/Tuning/TuningSignalState.cpp \
+    ../lib/Tuning/TuningSourceState.cpp \
+    ../lib/Tuning/TuningTcpClient.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -184,7 +188,12 @@ HEADERS  += \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
     Trend/RtTrendTcpClient.h \
-    Trend/ArchiveTrendTcpClient.h
+    Trend/ArchiveTrendTcpClient.h \
+    MonitorTuningTcpClient.h \
+    ../lib/Tuning/TuningSignalManager.h \
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/Tuning/TuningSourceState.h \
+    ../lib/Tuning/TuningTcpClient.h
 
 
 FORMS    += \
