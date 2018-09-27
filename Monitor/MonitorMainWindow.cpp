@@ -138,11 +138,6 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
-/*	if ((rand() % 10) == 5)
-	{
-		m_LogFile.writeError("Error");
-	}*/
-
 	// Update status bar
 	//
 	QString tuningServiceState;

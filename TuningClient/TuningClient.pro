@@ -157,13 +157,14 @@ SOURCES +=\
     TuningClientTcpClient.cpp \ 
     ../lib/SoftwareInfo.cpp \
     ../lib/Tuning/TuningLog.cpp \
-    DialogAlert.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
     DialogSignalInfo.cpp \
     ../lib/Signal.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../lib/Ui/DialogAlert.cpp \
+    ../lib/Ui/UiTools.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -216,13 +217,14 @@ HEADERS  += MainWindow.h \
     TuningClientTcpClient.h \ 
     ../lib/SoftwareInfo.h \
     ../lib/Tuning/TuningLog.h \
-    DialogAlert.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
     DialogSignalInfo.h \
     ../lib/Signal.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../lib/Ui/DialogAlert.h \
+    ../lib/Ui/UiTools.h
 
 FORMS    += \
     DialogSettings.ui \

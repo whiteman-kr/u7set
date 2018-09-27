@@ -13,7 +13,7 @@
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningSchemaManager.h"
-#include "DialogAlert.h"
+#include "../lib/Ui/DialogAlert.h"
 
 namespace Ui {
 	class MainWindow;

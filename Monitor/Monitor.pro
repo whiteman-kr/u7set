@@ -130,7 +130,8 @@ SOURCES += main.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
     MonitorTuningTcpClient.cpp \
     ../lib/LogFile.cpp \
-    DialogAlert.cpp
+    ../lib/Ui/DialogAlert.cpp \
+    ../lib/Ui/UiTools.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -193,7 +194,8 @@ HEADERS  += \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/LogFile.h \
-    DialogAlert.h
+    ../lib/Ui/DialogAlert.h \
+    ../lib/Ui/UiTools.h
 
 
 FORMS    += \

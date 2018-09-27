@@ -10,7 +10,7 @@
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 #include "../lib/LogFile.h"
-#include "DialogAlert.h"
+#include "../lib/Ui/DialogAlert.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
