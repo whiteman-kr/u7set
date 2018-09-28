@@ -7174,17 +7174,17 @@ namespace Builder
 
 		UalSignal* ualBusSignal = getBusComposerBusSignal(ualItem, &connectedToTerminatorOnly);
 
-		if (ualBusSignal == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
 		if (connectedToTerminatorOnly == true)
 		{
 			// no busComposer code generation required
 			//
 			return true;
+		}
+
+		if (ualBusSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
 		}
 
 		BusShared bus = ualBusSignal->bus();
