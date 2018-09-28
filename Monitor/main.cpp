@@ -6,6 +6,7 @@
 #include "MonitorMainWindow.h"
 #include "MonitorConfigController.h"
 #include "TcpSignalClient.h"
+#include "version.h"
 
 AppSignalManager theSignals;
 TuningSignalManager theTuningSignals;
@@ -26,6 +27,9 @@ int main(int argc, char *argv[])
 	a.setApplicationName("Monitor 3.0");
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
+
+	a.setApplicationVersion(QString("3.0.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
+
 
 	// --
 	//

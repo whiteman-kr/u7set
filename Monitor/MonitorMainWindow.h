@@ -10,13 +10,14 @@
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 #include "../lib/LogFile.h"
-#include "DialogAlert.h"
+#include "../lib/Ui/DialogAlert.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
 class SchemaListWidget;
 class QLabel;
 class QComboBox;
+class DialogTuningSources;
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -66,6 +67,7 @@ protected slots:
 	void exit();
 
 	void showLog();
+	void showTuningSources();
 	void showSettings();
 
 	void showAbout();
@@ -130,6 +132,8 @@ private:
 
 	// Tools menu
 	//
+
+	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu
@@ -175,6 +179,8 @@ private:
 
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
+
+	DialogTuningSources* m_dialogTuningSources = nullptr;
 };
 
 

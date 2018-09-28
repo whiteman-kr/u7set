@@ -1,19 +1,19 @@
 #include "DialogTuningSourceInfo.h"
-#include "ui_DialogTuningSourceInfo.h"
-#include "MainWindow.h"
 #include "../lib/Tuning/TuningSignalManager.h"
+#include "../lib/Tuning/TuningTcpClient.h"
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient, QWidget* parent, Hash tuningSourceEquipmentId) :
+DialogTuningSourceInfo::DialogTuningSourceInfo(TuningTcpClient* tcpClient, QWidget* parent, Hash tuningSourceEquipmentId) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_tuningSourceEquipmentId(tuningSourceEquipmentId),
-	ui(new Ui::DialogTuningSourceInfo),
 	m_tcpClient(tcpClient)
 {
-	assert(tcpClient);
-
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	ui->setupUi(this);
+	if (m_tcpClient == nullptr)
+	{
+		assert(m_tcpClient);
+		return;
+	}
 
 	TuningSource ts;
 
@@ -26,13 +26,25 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 		setWindowTitle("???");
 	}
 
+	//
+
+	QHBoxLayout* l = new QHBoxLayout();
+
+	m_treeWidget = new QTreeWidget();
+
+	l->addWidget(m_treeWidget);
+
+	setLayout(l);
+
+	setFixedSize(640, 600);
+
 	QStringList headerLabels;
 	headerLabels << tr("Parameter");
 	headerLabels << tr("Value");
 	headerLabels << QString();
 
-	ui->treeWidget->setColumnCount(headerLabels.size());
-	ui->treeWidget->setHeaderLabels(headerLabels);
+	m_treeWidget->setColumnCount(headerLabels.size());
+	m_treeWidget->setHeaderLabels(headerLabels);
 
 	QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << tr("Source info"));
 
@@ -52,7 +64,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	infoItem->addChild(new QTreeWidgetItem(QStringList() << "lmDataEnable"));
 	infoItem->addChild(new QTreeWidgetItem(QStringList() << "lmDataID"));
 
-	ui->treeWidget->addTopLevelItem(infoItem);
+	m_treeWidget->addTopLevelItem(infoItem);
 
 	infoItem->setExpanded(true);
 
@@ -73,7 +85,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errAnalogLowBoundCheck"));
 	stateItem->addChild(new QTreeWidgetItem(QStringList() << "errAnalogHighBoundCheck"));
 
-	ui->treeWidget->addTopLevelItem(stateItem);
+	m_treeWidget->addTopLevelItem(stateItem);
 
 	stateItem->setExpanded(true);
 
@@ -87,7 +99,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupFrameNumber"));
 	errorsRUPItem->addChild(new QTreeWidgetItem(QStringList() << "errRupCRC"));
 
-	ui->treeWidget->addTopLevelItem(errorsRUPItem);
+	m_treeWidget->addTopLevelItem(errorsRUPItem);
 
 	QTreeWidgetItem* errorsFotipItem = new QTreeWidgetItem(QStringList() << tr("errors in reply FotipHeader"));
 
@@ -101,7 +113,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	errorsFotipItem->addChild(new QTreeWidgetItem(QStringList() << "errFotipRomSize"));
 	errorsFotipItem->addChild(new QTreeWidgetItem(QStringList() << "errFotipRomFrameSize"));
 
-	ui->treeWidget->addTopLevelItem(errorsFotipItem);
+	m_treeWidget->addTopLevelItem(errorsFotipItem);
 
 	QTreeWidgetItem* errorsFotipFlagItem = new QTreeWidgetItem(QStringList() << tr("errors reported by LM in reply FotipHeader.flags"));
 
@@ -123,13 +135,13 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 	errorsFotipFlagItem->addChild(new QTreeWidgetItem(QStringList() << "fotipFlagApplySuccess"));
 	errorsFotipFlagItem->addChild(new QTreeWidgetItem(QStringList() << "fotipFlagSetSOR"));
 
-	ui->treeWidget->addTopLevelItem(errorsFotipFlagItem);
+	m_treeWidget->addTopLevelItem(errorsFotipFlagItem);
 
 	updateData();
 
-	for (int i = 0; i < ui->treeWidget->columnCount(); i++)
+	for (int i = 0; i < m_treeWidget->columnCount(); i++)
 	{
-		ui->treeWidget->resizeColumnToContents(i);
+		m_treeWidget->resizeColumnToContents(i);
 	}
 
 	m_updateStateTimerId = startTimer(250);
@@ -138,7 +150,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningClientTcpClient* tcpClient,
 
 DialogTuningSourceInfo::~DialogTuningSourceInfo()
 {
-	delete ui;
+
 }
 
 void DialogTuningSourceInfo::timerEvent(QTimerEvent* event)
@@ -154,6 +166,12 @@ void DialogTuningSourceInfo::timerEvent(QTimerEvent* event)
 
 void DialogTuningSourceInfo::updateData()
 {
+	if (m_tcpClient == nullptr)
+	{
+		assert(m_tcpClient);
+		return;
+	}
+
 	TuningSource ts;
 
 	if (m_tcpClient->tuningSourceInfo(m_tuningSourceEquipmentId, &ts) == false)
@@ -163,7 +181,7 @@ void DialogTuningSourceInfo::updateData()
 
 	// info
 
-	QTreeWidgetItem* item = ui->treeWidget->topLevelItem(0);
+	QTreeWidgetItem* item = m_treeWidget->topLevelItem(0);
 	if (item == nullptr)
 	{
 		assert(item);
@@ -174,25 +192,25 @@ void DialogTuningSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
-	setChildText(item, c++, ts.info.id());
+	setChildNumber(item, c++, ts.info.id());
 	setChildText(item, c++, ts.info.lmequipmentid().c_str());
 	setChildText(item, c++, ts.info.lmcaption().c_str());
-	setChildText(item, c++, ts.info.lmdatatype());
+	setChildNumber(item, c++, ts.info.lmdatatype());
 	setChildText(item, c++, ts.info.lmip().c_str());
-	setChildText(item, c++, ts.info.lmport());
+	setChildNumber(item, c++, ts.info.lmport());
 	setChildText(item, c++, ts.info.lmsubsystemchannel().c_str());
-	setChildText(item, c++, ts.info.lmsubsystemid());
+	setChildNumber(item, c++, ts.info.lmsubsystemid());
 	setChildText(item, c++, ts.info.lmsubsystem().c_str());
 
-	setChildText(item, c++, ts.info.lmnumber());
-	setChildText(item, c++, ts.info.lmmoduletype());
+	setChildNumber(item, c++, ts.info.lmnumber());
+	setChildNumber(item, c++, ts.info.lmmoduletype());
 	setChildText(item, c++, ts.info.lmadapterid().c_str());
-	setChildText(item, c++, ts.info.lmdataenable());
-	setChildText(item, c++, ts.info.lmdataid());
+	setChildNumber(item, c++, ts.info.lmdataenable());
+	setChildNumber(item, c++, ts.info.lmdataid());
 
 	// state
 
-	item = ui->treeWidget->topLevelItem(1);
+	item = m_treeWidget->topLevelItem(1);
 	if (item == nullptr)
 	{
 		assert(item);
@@ -204,25 +222,25 @@ void DialogTuningSourceInfo::updateData()
 	item->setData(0, Qt::UserRole, 0);
 
 	setChildText(item, c++, ts.state.isreply() ? "Yes" : "No");
-	setChildText(item, c++, ts.state.requestcount());
-	setChildText(item, c++, ts.state.replycount());
-	setChildText(item, c++, ts.state.commandqueuesize());
+	setChildNumber(item, c++, ts.state.requestcount());
+	setChildNumber(item, c++, ts.state.replycount());
+	setChildNumber(item, c++, ts.state.commandqueuesize());
 	setChildText(item, c++, ts.state.controlisactive() ? "Yes" : "No");
 	setChildText(item, c++, ts.state.setsor() ? "Yes" : "No");
 
-	setChildText(item, c++, ts.state.erruntimelyreplay());
-	setChildText(item, c++, ts.state.errsent());
-	setChildText(item, c++, ts.state.errpartialsent());
-	setChildText(item, c++, ts.state.errreplysize());
-	setChildText(item, c++, ts.state.errnoreply());
-	setChildText(item, c++, ts.state.erranaloglowboundcheck());
-	setChildText(item, c++, ts.state.erranaloghighboundcheck());
+	setChildNumber(item, c++, ts.state.erruntimelyreplay());
+	setChildNumber(item, c++, ts.state.errsent());
+	setChildNumber(item, c++, ts.state.errpartialsent());
+	setChildNumber(item, c++, ts.state.errreplysize());
+	setChildNumberDelta(item, c++, ts.state.errnoreply(), ts.previousState().errnoreply());
+	setChildNumber(item, c++, ts.state.erranaloglowboundcheck());
+	setChildNumber(item, c++, ts.state.erranaloghighboundcheck());
 
 	updateParentItemState(item);
 
 	// RupFrameHeader
 
-	item = ui->treeWidget->topLevelItem(2);
+	item = m_treeWidget->topLevelItem(2);
 	if (item == nullptr)
 	{
 		assert(item);
@@ -233,21 +251,21 @@ void DialogTuningSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
-	setChildText(item, c++, ts.state.errrupprotocolversion(), ts.previousState().errrupprotocolversion());
-	setChildText(item, c++, ts.state.errrupframesize(), ts.previousState().errrupframesize());
-	setChildText(item, c++, ts.state.errrupnontuningdata(), ts.previousState().errrupnontuningdata());
-	setChildText(item, c++, ts.state.errrupmoduletype(), ts.previousState().errrupmoduletype());
+	setChildNumberDelta(item, c++, ts.state.errrupprotocolversion(), ts.previousState().errrupprotocolversion());
+	setChildNumberDelta(item, c++, ts.state.errrupframesize(), ts.previousState().errrupframesize());
+	setChildNumberDelta(item, c++, ts.state.errrupnontuningdata(), ts.previousState().errrupnontuningdata());
+	setChildNumberDelta(item, c++, ts.state.errrupmoduletype(), ts.previousState().errrupmoduletype());
 
-	setChildText(item, c++, ts.state.errrupframesquantity(), ts.previousState().errrupframesquantity());
-	setChildText(item, c++, ts.state.errrupframenumber(), ts.previousState().errrupframenumber());
+	setChildNumberDelta(item, c++, ts.state.errrupframesquantity(), ts.previousState().errrupframesquantity());
+	setChildNumberDelta(item, c++, ts.state.errrupframenumber(), ts.previousState().errrupframenumber());
 
-	setChildText(item, c++, ts.state.errrupcrc(), ts.previousState().errrupcrc());
+	setChildNumberDelta(item, c++, ts.state.errrupcrc(), ts.previousState().errrupcrc());
 
 	updateParentItemState(item);
 
 	// FotipHeader
 
-	item = ui->treeWidget->topLevelItem(3);
+	item = m_treeWidget->topLevelItem(3);
 	if (item == nullptr)
 	{
 		assert(item);
@@ -258,21 +276,21 @@ void DialogTuningSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
-	setChildText(item, c++, ts.state.errfotipprotocolversion(), ts.previousState().errfotipprotocolversion());
-	setChildText(item, c++, ts.state.errfotipuniqueid(), ts.previousState().errfotipuniqueid());
-	setChildText(item, c++, ts.state.errfotiplmnumber(), ts.previousState().errfotiplmnumber());
-	setChildText(item, c++, ts.state.errfotipsubsystemcode(), ts.previousState().errfotipsubsystemcode());
+	setChildNumberDelta(item, c++, ts.state.errfotipprotocolversion(), ts.previousState().errfotipprotocolversion());
+	setChildNumberDelta(item, c++, ts.state.errfotipuniqueid(), ts.previousState().errfotipuniqueid());
+	setChildNumberDelta(item, c++, ts.state.errfotiplmnumber(), ts.previousState().errfotiplmnumber());
+	setChildNumberDelta(item, c++, ts.state.errfotipsubsystemcode(), ts.previousState().errfotipsubsystemcode());
 
-	setChildText(item, c++, ts.state.errfotipoperationcode(), ts.previousState().errfotipoperationcode());
-	setChildText(item, c++, ts.state.errfotipframesize(), ts.previousState().errfotipframesize());
-	setChildText(item, c++, ts.state.errfotipromsize(), ts.previousState().errfotipromsize());
-	setChildText(item, c++, ts.state.errfotipromframesize(), ts.previousState().errfotipromframesize());
+	setChildNumberDelta(item, c++, ts.state.errfotipoperationcode(), ts.previousState().errfotipoperationcode());
+	setChildNumberDelta(item, c++, ts.state.errfotipframesize(), ts.previousState().errfotipframesize());
+	setChildNumberDelta(item, c++, ts.state.errfotipromsize(), ts.previousState().errfotipromsize());
+	setChildNumberDelta(item, c++, ts.state.errfotipromframesize(), ts.previousState().errfotipromframesize());
 
 	updateParentItemState(item);
 
 	// FotipFlags
 
-	item = ui->treeWidget->topLevelItem(4);
+	item = m_treeWidget->topLevelItem(4);
 	if (item == nullptr)
 	{
 		assert(item);
@@ -283,28 +301,28 @@ void DialogTuningSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
-	setChildText(item, c++, ts.state.fotipflagboundschecksuccess());
-	setChildText(item, c++, ts.state.fotipflagwritesuccess());
-	setChildText(item, c++, ts.state.fotipflagdatatypeerr(), ts.previousState().fotipflagdatatypeerr());
-	setChildText(item, c++, ts.state.fotipflagopcodeerr(), ts.previousState().fotipflagopcodeerr());
+	setChildNumber(item, c++, ts.state.fotipflagboundschecksuccess());
+	setChildNumber(item, c++, ts.state.fotipflagwritesuccess());
+	setChildNumberDelta(item, c++, ts.state.fotipflagdatatypeerr(), ts.previousState().fotipflagdatatypeerr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagopcodeerr(), ts.previousState().fotipflagopcodeerr());
 
-	setChildText(item, c++, ts.state.fotipflagstartaddrerr(), ts.previousState().fotipflagstartaddrerr());
-	setChildText(item, c++, ts.state.fotipflagromsizeerr(), ts.previousState().fotipflagromsizeerr());
-	setChildText(item, c++, ts.state.fotipflagromframesizeerr(), ts.previousState().fotipflagromframesizeerr());
-	setChildText(item, c++, ts.state.fotipflagframesizeerr(), ts.previousState().fotipflagframesizeerr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagstartaddrerr(), ts.previousState().fotipflagstartaddrerr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagromsizeerr(), ts.previousState().fotipflagromsizeerr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagromframesizeerr(), ts.previousState().fotipflagromframesizeerr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagframesizeerr(), ts.previousState().fotipflagframesizeerr());
 
-	setChildText(item, c++, ts.state.fotipflagprotocolversionerr(), ts.previousState().fotipflagprotocolversionerr());
-	setChildText(item, c++, ts.state.fotipflagsubsystemkeyerr(), ts.previousState().fotipflagsubsystemkeyerr());
-	setChildText(item, c++, ts.state.fotipflaguniueiderr(), ts.previousState().fotipflaguniueiderr());
-	setChildText(item, c++, ts.state.fotipflagoffseterr(), ts.previousState().fotipflagoffseterr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagprotocolversionerr(), ts.previousState().fotipflagprotocolversionerr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagsubsystemkeyerr(), ts.previousState().fotipflagsubsystemkeyerr());
+	setChildNumberDelta(item, c++, ts.state.fotipflaguniueiderr(), ts.previousState().fotipflaguniueiderr());
+	setChildNumberDelta(item, c++, ts.state.fotipflagoffseterr(), ts.previousState().fotipflagoffseterr());
 
-	setChildText(item, c++, ts.state.fotipflagapplysuccess());
-	setChildText(item, c++, ts.state.fotipflagsetsor());
+	setChildNumber(item, c++, ts.state.fotipflagapplysuccess());
+	setChildNumber(item, c++, ts.state.fotipflagsetsor());
 
 	updateParentItemState(item);
 }
 
-void DialogTuningSourceInfo::setChildText(QTreeWidgetItem* item, int childIndex, quint64 number, quint64 previousNumber)
+void DialogTuningSourceInfo::setChildNumberDelta(QTreeWidgetItem* item, int childIndex, quint64 number, quint64 previousNumber)
 {
 	setChildText(item, childIndex, QString::number(number));
 
@@ -344,17 +362,19 @@ void DialogTuningSourceInfo::setChildText(QTreeWidgetItem* item, int childIndex,
 			assert(ok);
 		}
 
-		childItem->setBackground(1, QBrush(Qt::red));
-		childItem->setForeground(1, QBrush(Qt::white));
+		//childItem->setBackground(1, QBrush(Qt::red));
+		//childItem->setForeground(1, QBrush(Qt::white));
+		childItem->setForeground(1, QBrush(Qt::red));
 	}
 	else
 	{
-		childItem->setBackground(1, QBrush(Qt::white));
+		//childItem->setBackground(1, QBrush(Qt::white));
+		//childItem->setForeground(1, QBrush(Qt::black));
 		childItem->setForeground(1, QBrush(Qt::black));
 	}
 }
 
-void DialogTuningSourceInfo::setChildText(QTreeWidgetItem* item, int childIndex, quint64 number)
+void DialogTuningSourceInfo::setChildNumber(QTreeWidgetItem* item, int childIndex, quint64 number)
 {
 	setChildText(item, childIndex, QString::number(number));
 }
@@ -395,13 +415,14 @@ void DialogTuningSourceInfo::updateParentItemState(QTreeWidgetItem* item)
 
 	if (errorCount > 0)
 	{
-		item->setBackground(1, QBrush(Qt::red));
-		item->setForeground(1, QBrush(Qt::white));
+		//item->setBackground(1, QBrush(Qt::red));
+		//item->setForeground(1, QBrush(Qt::white));
+		item->setForeground(1, QBrush(Qt::red));
 		item->setText(1, tr("E: %1").arg(errorCount));
 	}
 	else
 	{
-		item->setBackground(1, QBrush(Qt::white));
+		//item->setBackground(1, QBrush(Qt::white));
 		item->setForeground(1, QBrush(Qt::black));
 		item->setText(1, QString());
 

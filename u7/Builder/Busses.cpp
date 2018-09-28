@@ -562,6 +562,38 @@ namespace Builder
 
 				break;
 
+			case E::SignalType::Bus:
+				{
+					BusShared childBus = m_busses.getBus(busSignal.busTypeId());
+
+					if (childBus == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+					}
+					else
+					{
+						if ((childBus->sizeBit() % SIZE_16BIT) != 0)
+						{
+							// The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').
+							//
+							m_log->errALC5095(childBus->busTypeID());
+							return false;
+						}
+
+						if ((busSignal.inbusOffset() % WORD_SIZE_IN_BYTES) != 0)
+						{
+							// Offset of in bus analog (or bus) signal '%' is not multiple of 2 bytes (1 word) (bus type '%2')
+							//
+							m_log->errALC5096(busSignal.signalId(), m_srcBus.busTypeId());
+							return false;
+						}
+					}
+
+					inBusAddr.setOffset(busSignal.inbusOffset() / WORD_SIZE_IN_BYTES);
+					inBusAddr.setBit(0);
+				}
+				break;
+
 			case E::SignalType::Discrete:
 				inBusAddr.addBit(busSignal.inbusOffset() * SIZE_8BIT + busSignal.inbusDiscreteBitNo());
 				break;
@@ -607,6 +639,7 @@ namespace Builder
 			switch(srcBusSignal.type())
 			{
 			case E::SignalType::Analog:
+			case E::SignalType::Bus:
 				inBusAddr.addBit(srcBusSignal.inbusOffset() * SIZE_8BIT);
 				break;
 
