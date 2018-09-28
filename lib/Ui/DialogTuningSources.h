@@ -3,22 +3,23 @@
 
 #include <QDialog>
 
-#include "TuningClientTcpClient.h"
-
-namespace Ui {
-	class DialogTuningSources;
-}
+class TuningTcpClient;
 
 class DialogTuningSources : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSources(TuningClientTcpClient* tcpClient, QWidget* parent = 0);
+	explicit DialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent);
 	~DialogTuningSources();
+
+signals:
+	void dialogClosed();
 
 protected:
 	void timerEvent(QTimerEvent* event);
+
+	virtual bool passwordOk();
 
 private slots:
 	void slot_tuningSourcesArrived();
@@ -43,7 +44,6 @@ private:
 	enum Columns
 	{
 		EquipmentId,
-		Caption,
 		Ip,
 		Port,
 		Channel,
@@ -60,13 +60,20 @@ private:
 	};
 
 private:
-	Ui::DialogTuningSources* ui;
+
+	QTreeWidget* m_treeWidget = nullptr;
+	QPushButton* m_btnDetails = nullptr;
+	QPushButton* m_btnEnableControl = nullptr;
+	QPushButton* m_btnDisableControl = nullptr;
+	QLabel* m_labelSingleControlMode = nullptr;
 
 	int m_updateStateTimerId = -1;
 
+	bool m_hasActivationControls = false;
+
 	bool m_singleControlMode = true;
 
-	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+	TuningTcpClient* m_tuningTcpClient = nullptr;
 
 	QWidget* m_parent = nullptr;
 
@@ -76,7 +83,5 @@ private:
 	static const int columnIndex_Hash = 0;
 	static const int columnIndex_EquipmentId = 1;
 };
-
-extern DialogTuningSources* theDialogTuningSources;
 
 #endif // DIALOGTUNINGSOURCES_H

@@ -9,6 +9,9 @@
 #include "MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
+#include "../lib/Ui/DialogTuningSources.h"
+#include "../lib/Ui/UiTools.h"
+#include "version.h"
 
 const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
 
@@ -333,6 +336,13 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
 
+	m_pTuningSourcesAction = new QAction(tr("Tuning Sources..."), this);
+	m_pTuningSourcesAction->setStatusTip(tr("View Tuning Sources"));
+	m_pTuningSourcesAction->setIcon(QIcon(":/Images/Images/TuningSources.svg"));
+	m_pTuningSourcesAction->setEnabled(true);
+	m_pTuningSourcesAction->setVisible(false);
+	connect(m_pTuningSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showTuningSources);
+
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
 	m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
@@ -346,7 +356,7 @@ void MonitorMainWindow::createActions()
 
 	m_pLogAction = new QAction(tr("Log..."), this);
 	m_pLogAction->setStatusTip(tr("Show application log"));
-	//m_pLogAction->setEnabled(false);
+	m_pLogAction->setIcon(QIcon(":/Images/Images/Log.svg"));
 	connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
 
 	m_pAboutAction = new QAction(tr("About..."), this);
@@ -475,6 +485,7 @@ void MonitorMainWindow::createMenus()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
+	pToolsMenu->addAction(m_pTuningSourcesAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -591,6 +602,34 @@ void MonitorMainWindow::showLog()
 	m_LogFile.view(this);
 }
 
+void MonitorMainWindow::showTuningSources()
+{
+	if (m_dialogTuningSources == nullptr)
+	{
+		if (m_tuningTcpClient == nullptr)
+		{
+			assert(m_tuningTcpClient);
+			return;
+		}
+
+		m_dialogTuningSources = new DialogTuningSources(m_tuningTcpClient, false, this);
+		m_dialogTuningSources->show();
+
+		auto f = [this]() -> void
+		{
+				m_dialogTuningSources = nullptr;
+		};
+
+		connect(m_dialogTuningSources, &DialogTuningSources::dialogClosed, this, f);
+	}
+	else
+	{
+		m_dialogTuningSources->activateWindow();
+	}
+
+	UiTools::adjustDialogPlacement(m_dialogTuningSources);
+}
+
 void MonitorMainWindow::showSettings()
 {
 	DialogSettings d(this);
@@ -614,7 +653,55 @@ void MonitorMainWindow::showSettings()
 
 void MonitorMainWindow::showAbout()
 {
-	QMessageBox::about(this, tr("About Monitor"), tr("Monitor software. Version not assigned."));
+	//QMessageBox::about(this, tr("About Monitor"), tr("Monitor software. Version not assigned."));
+	QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+	QHBoxLayout* hl = new QHBoxLayout;
+
+	/*QLabel* logo = new QLabel(&aboutDialog);
+	logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
+
+	hl->addWidget(logo);*/
+
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
+
+	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
+#ifndef Q_DEBUG
+	text += "Build: Release";
+#else
+	text += "Build: Debug";
+#endif
+	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+
+	QLabel* label = new QLabel(text, &aboutDialog);
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	vl->addWidget(label);
+
+	label = new QLabel(&aboutDialog);
+	label->setText(qApp->applicationName() + " allows user to view schemas and trends.");
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	label->setWordWrap(true);
+	vl->addWidget(label);
+
+	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
+		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+	});
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+	buttonBox->addButton(QDialogButtonBox::Ok);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+	mainLayout->addLayout(hl);
+	mainLayout->addWidget(buttonBox);
+	aboutDialog.setLayout(mainLayout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
+
+	aboutDialog.exec();
+
 }
 
 void MonitorMainWindow::debug()
@@ -910,6 +997,12 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 		m_tuningTcpClient = nullptr;
 	}
 
+	if (m_dialogTuningSources != nullptr)
+	{
+		delete m_dialogTuningSources;
+		m_dialogTuningSources = nullptr;
+	}
+
 	// TuningTcpClient
 	//
 	if (configuration.tuningEnabled == true)
@@ -925,6 +1018,8 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 
 		m_tuningController->setTcpClient(m_tuningTcpClient);
 	}
+
+	m_pTuningSourcesAction->setVisible(configuration.tuningEnabled);
 
 	return;
 }

@@ -469,7 +469,6 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 
 	if (m_tuningSourcesInfoReply.error() != static_cast<int>(NetworkError::Success))
 	{
-		assert(false);
 		writeLogError(tr("TuningTcpClient::m_tuningDataSourcesInfoReply, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_tuningSourcesInfoReply.error()))));
 
@@ -533,7 +532,6 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 	if (m_tuningSourcesStatesReply.error() != static_cast<int>(NetworkError::Success))
 	{
-		assert(false);
 		writeLogError(tr("TuningTcpClient::processTuningSourcesState, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_tuningSourcesStatesReply.error()))));
 
@@ -647,8 +645,6 @@ void TuningTcpClient::processActivateTuningSource(const QByteArray& data)
 
 	if (m_activateTuningSourceReply.error() != static_cast<int>(NetworkError::Success))
 	{
-		assert(false);
-
 		writeLogError(tr("TuningTcpClient::processActivateTuningSource, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_activateTuningSourceReply.error()))));
 
@@ -726,7 +722,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 	if (m_readTuningSignalsReply.error() != static_cast<int>(NetworkError::Success))
 	{
-		assert(false);
 		writeLogError(tr("TuningTcpClient::processReadTuningSignals, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_readTuningSignalsReply.error()))));
 
@@ -902,7 +897,6 @@ void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 
 	if (m_writeTuningSignalsReply.error() != static_cast<int>(NetworkError::Success))
 	{
-		assert(false);
 		writeLogError(tr("TuningTcpClient::processWriteTuningSignals, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_writeTuningSignalsReply.error()))));
 
@@ -918,7 +912,6 @@ void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 
 		if (twr.error() != static_cast<int>(NetworkError::Success))
 		{
-			assert(false);
 			writeLogError(tr("TuningTcpClient::processWriteTuningSignals, TuningSignalWriteResult error received: %1, hash = %2")
 						  .arg(networkErrorStr(static_cast<NetworkError>(twr.error())))
 						  .arg(twr.signalhash()));
@@ -959,7 +952,6 @@ void TuningTcpClient::processApplyTuningSignals(const QByteArray& data)
 
 	if (m_applyTuningSignalsReply.error() != static_cast<int>(NetworkError::Success))
 	{
-		assert(false);
 		writeLogError(tr("TuningTcpClient::processApplyTuningSignals, error received: %1")
 					  .arg(networkErrorStr(static_cast<NetworkError>(m_applyTuningSignalsReply.error()))));
 
