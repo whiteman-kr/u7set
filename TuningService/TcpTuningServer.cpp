@@ -292,8 +292,6 @@ namespace Tuning
 
 		NetworkError errCode = NetworkError::Success;
 
-		QVector<const TuningClientContext*> clientContexts;
-
 		if (clientEquipmentID == SCM_CLIENT_ID)
 		{
 			int signalQuantity = m_tuningSignalsReadRequest.signalhash_size();
@@ -311,12 +309,14 @@ namespace Tuning
 
 				Hash signalHash = m_tuningSignalsReadRequest.signalhash(i);
 				quint32 ip = m_signalHash2SourceIP.value(signalHash);
-				const TuningSourceHandler* handler = m_service.getSourceHandler(ip);
 
-				TEST_PTR_CONTINUE(handler);
+				const TuningSourceThread* thread = m_service.getSourceThread(ip);
+
+				TEST_PTR_CONTINUE(thread);
 
 				tss->set_signalhash(signalHash);
-				handler->readSignalState(tss);
+
+				thread->readSignalState(tss);
 			}
 
 			m_tuningSignalsReadReply.set_error(TO_INT(NetworkError::Success));
@@ -711,7 +711,6 @@ namespace Tuning
 			}
 		}
 	}
-
 
 	// -------------------------------------------------------------------------------
 	//

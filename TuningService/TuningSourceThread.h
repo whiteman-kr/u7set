@@ -75,7 +75,7 @@ namespace Tuning
 		bool setSOR = false;
 		bool hasUnappliedParams = false;
 
-		void get(Network::TuningSourceState& tss);
+		void get(Network::TuningSourceState* tss);
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -215,12 +215,16 @@ namespace Tuning
 		quint32 sourceIP() const;
 		QString sourceEquipmentID() const;
 
-		TuningSourceHandler* handler() { return this; }
+		void startHandler();
+		void stopHandler();
+
+		void periodicProcessing();
+		bool processReplyQueue();
 
 		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
 
-		void getState(Network::TuningSourceState& tuningSourceState);
+		void getState(Network::TuningSourceState* tuningSourceState);
 
 		void readSignalState(Network::TuningSignalState* tss) const;
 
@@ -232,15 +236,7 @@ namespace Tuning
 		NetworkError applySignalStates(	const QString& clientEquipmentID,
 										const QString& user);
 	protected:
-		void initHandler();
-		void shutdownHandler();
-
-		Queue<Rup::Frame>& replyQueue() { return m_replyQueue; }
-
-		virtual void restartTimer() {}
-
-		void periodicProcessing();
-		bool processReplyQueue();
+//		Queue<Rup::Frame>& replyQueue() { return m_replyQueue; }
 
 	private:
 		void initTuningSignals(const TuningData* td);
@@ -346,88 +342,56 @@ namespace Tuning
 
 	// ----------------------------------------------------------------------------------
 	//
-	// TuningSourceThread class declaration (QThread::run override)
+	// TuningSourceThread class declaration
 	//
 	// ----------------------------------------------------------------------------------
 
-	class TuningSourceRunOverrideThread : public RunOverrideThread, public TuningSourceHandler
+	class TuningSourceThread : public RunOverrideThread
 	{
 	public:
-		TuningSourceRunOverrideThread(	const TuningServiceSettings& settings,
+		TuningSourceThread(	const TuningServiceSettings& settings,
 										const TuningSource& source,
 										CircularLoggerShared logger,
 										CircularLoggerShared tuningLog);
-	private:
-		void run() override;
-	};
-
-	// ----------------------------------------------------------------------------------
-	//
-	// TuningSourceWorker class declaration (signal-slot, event driven)
-	//
-	// ----------------------------------------------------------------------------------
-
-	class TuningSourceWorker : public SimpleThreadWorker, public TuningSourceHandler
-	{
-		Q_OBJECT
-
-	public:
-		TuningSourceWorker(const TuningServiceSettings& settings,
-						   const TuningSource& source,
-						   CircularLoggerShared logger,
-						   CircularLoggerShared tuningLog);
-	private:
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
-
-		virtual void restartTimer() override;
-
-	private slots:
-		void onTimer();
-		void onReplyReady();
-
-	private:
-		int m_timerInterval = 10;
-		QTimer m_timer;
-	};
-
-
-	// ----------------------------------------------------------------------------------
-	//
-	// TuningSourceWorkerThread class declaration
-	//
-	// ----------------------------------------------------------------------------------
-
-	class TuningSourceWorkerThread : public SimpleThread
-	{
-	public:
-		TuningSourceWorkerThread(const TuningServiceSettings& settings,
-								 const TuningSource& source,
-								 CircularLoggerShared logger,
-								 CircularLoggerShared tuningLog);
-
-		~TuningSourceWorkerThread();
-
-		quint32 sourceIP();
-
-		TuningSourceWorker* worker();
 
 		void pushReply(const Rup::Frame& reply);
 		void incErrReplySize();
 
-		TuningSourceHandler* handler();
+		void getState(Network::TuningSourceState* tuningSourceState);
+
+		void readSignalState(Network::TuningSignalState* tss) const;
+
+		NetworkError writeSignalState(	const QString& clientEquipmentID,
+										const QString& user,
+										Hash signalHash,
+										const TuningValue& newValue);
+
+		NetworkError applySignalStates(	const QString& clientEquipmentID,
+										const QString& user);
+
+		QString sourceEquipmentID() const;
+
+		void waitWhileHandlerInitialized() const;
 
 	private:
-		TuningSourceWorker* m_sourceWorker = nullptr;
+		void run() override;
+
+		void initHandler();
+		void shutdownHandler();
+
+	private:
+		const TuningServiceSettings& m_settings;
+		const TuningSource& m_source;
+		CircularLoggerShared m_logger;
+		CircularLoggerShared m_tuningLog;
+
+		//
+
+		mutable QMutex m_handlerMutex;
+		TuningSourceHandler* m_handler = nullptr;
+
+		std::atomic<bool> m_handlerIsInitialized = { false };
 	};
-
-	//
-	// Different implementations of TuningSourceThread
-	//
-
-	//	typedef TuningSourceWorkerThread TuningSourceThread;
-
-	typedef TuningSourceRunOverrideThread TuningSourceThread;
 
 	//
 
