@@ -7,17 +7,24 @@
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
-#include "../lib/LogFile.h"
-#include "../lib/Tuning/TuningLog.h"
 #include "UserManager.h"
-#include "TuningClientTcpClient.h"
-#include "TuningClientFilterStorage.h"
-#include "TuningSchemaManager.h"
-#include "../lib/Ui/DialogAlert.h"
+#include "../lib/Ui/DialogTuningSources.h"
+
+class TuningTcpClient;
+class DialogAlert;
 
 namespace Ui {
 	class MainWindow;
 }
+
+class ClientDialogTuningSources : public DialogTuningSources
+{
+public:
+	explicit ClientDialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent);
+
+protected:
+	virtual bool passwordOk() override;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -127,6 +134,8 @@ private:
 
 	QString m_singleLmControlModeText;
 	QString m_multipleLmControlModeText;
+
+	ClientDialogTuningSources* m_dialogTuningSources = nullptr;
 };
 
 // Global definitions

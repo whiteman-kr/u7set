@@ -121,7 +121,7 @@ SOURCES +=\
     ../lib/Crc.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    DialogTuningSources.cpp \
+    ../lib/Ui/DialogTuningSources.cpp \
     ../Proto/network.pb.cc \
     ../lib/AppSignal.cpp \
     ../Proto/serialization.pb.cc \
@@ -133,7 +133,7 @@ SOURCES +=\
     ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
-    DialogTuningSourceInfo.cpp \
+    ../lib/Ui/DialogTuningSourceInfo.cpp \
     DialogPassword.cpp \
     Main.cpp \
     ../lib/Tuning/TuningFilter.cpp \
@@ -181,7 +181,7 @@ HEADERS  += MainWindow.h \
     ../lib/Crc.h \
     ../lib/SocketIO.h \
     DialogSettings.h \
-    DialogTuningSources.h \
+    ../lib/Ui/DialogTuningSources.h \
     ../Proto/network.pb.h \
     ../lib/AppSignal.h \
     ../Proto/serialization.pb.h \
@@ -193,7 +193,7 @@ HEADERS  += MainWindow.h \
     ../lib/OutputLog.h \
     UserManager.h \
     DialogProperties.h \
-    DialogTuningSourceInfo.h \
+    ../lib/Ui/DialogTuningSourceInfo.h \
     DialogPassword.h \
     Main.h \
     ../lib/Tuning/TuningFilter.h \
@@ -228,8 +228,6 @@ HEADERS  += MainWindow.h \
 
 FORMS    += \
     DialogSettings.ui \
-    DialogTuningSources.ui \
-    DialogTuningSourceInfo.ui \
     DialogPassword.ui \
     DialogSignalInfo.ui
 
