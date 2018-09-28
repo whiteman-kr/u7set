@@ -7,11 +7,15 @@
 #include "DialogColumns.h"
 #include "MonitorConfigController.h"
 
+
 namespace Ui {
 class DialogSignalSnapshot;
 }
 
+class MonitorConfigController;
+class TcpSignalClient;
 class SignalSnapshotModel;
+struct ConfigSettings;
 
 class SignalSnapshotSorter
 {
@@ -145,7 +149,7 @@ class DialogSignalSnapshot : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogSignalSnapshot(MonitorConfigController* configController, QWidget *parent = 0);
+	explicit DialogSignalSnapshot(MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, QWidget *parent = 0);
 	~DialogSignalSnapshot();
 
 private slots:
@@ -195,6 +199,8 @@ private:
 	SignalSnapshotModel *m_model = nullptr;
 
 	MonitorConfigController* m_configController = nullptr;
+
+	TcpSignalClient* m_tcpSignalClient = nullptr;
 
 	int m_updateStateTimerId = -1;
 };

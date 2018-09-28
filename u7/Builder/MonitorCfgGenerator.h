@@ -19,12 +19,21 @@ namespace Builder
 		bool writeAppDataServiceSection(QXmlStreamWriter& xmlWriter);
 		bool writeArchiveServiceSection(QXmlStreamWriter& xmlWriter);
 		bool writeTuningServiceSection(QXmlStreamWriter& xmlWriter);
-
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
-
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
+
+		template <typename TYPE>
+		std::pair<TYPE, bool> getObjectProperty(QString strId, QString property);
+
+		// Generate tuning signals file
+		//
+		bool writeTuningSignals();
+
+	private:
+		bool m_tuningEnabled = false;
+		QStringList m_tuningSources;
 	};
 
 
@@ -91,6 +100,15 @@ namespace Builder
 		TYPE t = v.value<TYPE>();
 
 		return t;
+	}
+
+	template <typename TYPE>
+	std::pair<TYPE, bool> MonitorCfgGenerator::getObjectProperty(QString strId, QString property)
+	{
+		bool ok = false;
+		TYPE result = getObjectProperty<TYPE>(strId, property, &ok);
+
+		return {result, ok};
 	}
 
 }

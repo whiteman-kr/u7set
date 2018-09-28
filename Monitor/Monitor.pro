@@ -11,9 +11,8 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
-#c++14/17 support
+#c++17 support
 #
-CONFIG += c++14
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
@@ -128,7 +127,13 @@ SOURCES += main.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
     Trend/RtTrendTcpClient.cpp \
-    Trend/ArchiveTrendTcpClient.cpp
+    Trend/ArchiveTrendTcpClient.cpp \
+    MonitorTuningTcpClient.cpp \
+    ../lib/LogFile.cpp \
+    ../lib/Ui/DialogAlert.cpp \
+    ../lib/Ui/UiTools.cpp \
+    ../lib/Ui/DialogTuningSourceInfo.cpp \
+    ../lib/Ui/DialogTuningSources.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -184,7 +189,17 @@ HEADERS  += \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
     Trend/RtTrendTcpClient.h \
-    Trend/ArchiveTrendTcpClient.h
+    Trend/ArchiveTrendTcpClient.h \
+    MonitorTuningTcpClient.h \
+    ../lib/Tuning/TuningSignalManager.h \
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/Tuning/TuningSourceState.h \
+    ../lib/Tuning/TuningTcpClient.h \
+    ../lib/LogFile.h \
+    ../lib/Ui/DialogAlert.h \
+    ../lib/Ui/UiTools.h \
+    ../lib/Ui/DialogTuningSourceInfo.h \
+    ../lib/Ui/DialogTuningSources.h
 
 
 FORMS    += \
@@ -267,7 +282,9 @@ DISTFILES += \
     Images/readme.txt \
     ../Proto/network.proto \
     ../Proto/serialization.proto \
-    Images/Trends.svg
+    Images/Trends.svg \
+    Images/Log.svg \
+    Images/TuningSources.svg
 
 # TrendView library
 #

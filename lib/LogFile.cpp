@@ -10,7 +10,9 @@
 #include <QTableView>
 #include <QFileDialog>
 #include <QHeaderView>
+#include <QDesktopWidget>
 #include "Hash.h"
+#include "Ui/UiTools.h"
 
 
 //#define LOGFILE_USE_HEADER	// Uncomment this to use header
@@ -1048,7 +1050,6 @@ namespace Log
 
 		m_autoScroll = new QPushButton(tr("Auto Scroll"));
 		m_autoScroll->setCheckable(true);
-		m_autoScroll->setChecked(true);
 		topLayout->addWidget(m_autoScroll);
 
 		//
@@ -1079,7 +1080,9 @@ namespace Log
 
 		mainLayout->addLayout(bottomLayout);
 
-		setMinimumSize(1024, 600);
+		QSize defaultSize = QSize(1024, 600);
+
+		setMinimumSize(defaultSize);
 
 		//
 
@@ -1090,12 +1093,54 @@ namespace Log
 		m_worker->read(true);
 		enableControls(false);
 
+		// Restore settings
+
+		QSettings s;
+
+		QPoint windowPos = s.value("LogFileDialog/windowPos", QPoint(-1, -1)).toPoint();
+		QSize windowSize = s.value("LogFileDialog/windowSize", QSize(-1, -1)).toSize();
+
+		if (windowPos.x() != -1 && windowPos.y() != -1)
+		{
+			move(windowPos);
+		}
+		else
+		{
+			QRect desktopRect = QApplication::desktop()->availableGeometry(this);
+			int x = (desktopRect.width() - width()) / 2;
+			int y = (desktopRect.height() - height()) / 2;
+			move(QPoint(x, y));
+		}
+
+		if (windowSize.width() != -1 && windowSize.height() != -1)
+		{
+			resize(windowSize);
+		}
+		else
+		{
+			resize(defaultSize);
+		}
+
+		bool autoScroll = s.value("LogFileDialog/autoScroll", true).toBool();
+		m_autoScroll->setChecked(autoScroll);
 
 	}
 
 	LogFileDialog::~LogFileDialog()
 	{
+		QSettings s;
 
+		QPoint windowPos = pos();
+		QSize windowSize = size();
+
+		s.setValue("LogFileDialog/windowPos", windowPos);
+		s.setValue("LogFileDialog/windowSize", windowSize);
+
+		if (m_autoScroll != nullptr)
+		{
+			bool autoScroll = m_autoScroll->isChecked();
+			s.setValue("LogFileDialog/autoScroll", autoScroll);
+		}
 	}
 
 	void LogFileDialog::resizeEvent(QResizeEvent *event)
@@ -1332,7 +1377,6 @@ namespace Log
 		return m_logFileWorker->write(type, text);
 	}
 
-
 	void LogFile::view(QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles)
 	{
 		m_alertAckCounter = 0;
@@ -1341,19 +1385,23 @@ namespace Log
 
 		if (m_logDialog != nullptr)
 		{
-			m_logDialog->activateWindow();
+			if (m_logDialog->isActiveWindow() == false)
+			{
+				m_logDialog->activateWindow();
+			}
+		}
+		else
+		{
+			m_logDialog = new LogFileDialog(m_logFileWorker, parent, showType, headerTitles);
 
-			return;
+			connect(m_logDialog, &QDialog::finished, this, &LogFile::onDialogFinished);
+
+			m_logDialog->show();
 		}
 
-		m_logDialog = new LogFileDialog(m_logFileWorker, parent, showType, headerTitles);
-
-		connect(m_logDialog, &QDialog::finished, this, &LogFile::onDialogFinished);
-
-		m_logDialog->show();
+		UiTools::adjustDialogPlacement(m_logDialog);
 
 		return;
-
 	}
 
 	int LogFile::alertAckCounter() const

@@ -6,15 +6,18 @@
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
 #include "SelectSchemaWidget.h"
+#include "MonitorTuningTcpClient.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
-#include "../lib/Tuning/TuningTcpClient.h"
+#include "../lib/LogFile.h"
+#include "../lib/Ui/DialogAlert.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
 class SchemaListWidget;
 class QLabel;
 class QComboBox;
+class DialogTuningSources;
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -30,6 +33,8 @@ protected:
 	virtual void closeEvent(QCloseEvent*) override;
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void showEvent(QShowEvent*) override;
+
+	virtual bool eventFilter(QObject *object, QEvent *event) override;
 
 	// Public methods
 	//
@@ -62,6 +67,7 @@ protected slots:
 	void exit();
 
 	void showLog();
+	void showTuningSources();
 	void showSettings();
 
 	void showAbout();
@@ -76,14 +82,9 @@ protected:
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
 
-	void tcpSignalClient_signalParamAndUnitsArrived();
-	void tcpSignalClient_connectionReset();
+	void slot_configurationArrived(ConfigSettings configuration);
 
 	void checkMonitorSingleInstance();
-
-signals:
-	void signalParamAndUnitsArrived();
-	void connectionReset();
 
 	// Properties
 	//
@@ -118,7 +119,12 @@ private:
 	TcpSignalRecents* m_tcpSignalRecents = nullptr;
 	SimpleThread* m_tcpRecentsThread = nullptr;
 
-	TuningTcpClient* m_tuningTcpClient = nullptr;
+	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
+	SimpleThread* m_tuningTcpClientThread = nullptr;
+
+	Log::LogFile m_LogFile;
+
+	DialogAlert m_dialogAlert;
 
 	// File menu
 	//
@@ -126,6 +132,8 @@ private:
 
 	// Tools menu
 	//
+
+	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu
@@ -165,9 +173,16 @@ private:
 	QLabel* m_statusBarConnectionStatistics = nullptr;
 	QLabel* m_statusBarConnectionState = nullptr;
 	QLabel* m_statusBarProjectInfo = nullptr;
+	QLabel* m_statusBarLogAlerts = nullptr;
 
 	int m_updateStatusBarTimerId = -1;
+
+	int m_logErrorsCounter = -1;
+	int m_logWarningsCounter = -1;
+
+	DialogTuningSources* m_dialogTuningSources = nullptr;
 };
+
 
 class MonitorToolBar : public QToolBar
 {

@@ -12,9 +12,8 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
-#c++14/17 support
+#c++17 support
 #
-CONFIG += c++14
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
@@ -122,7 +121,7 @@ SOURCES +=\
     ../lib/Crc.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    DialogTuningSources.cpp \
+    ../lib/Ui/DialogTuningSources.cpp \
     ../Proto/network.pb.cc \
     ../lib/AppSignal.cpp \
     ../Proto/serialization.pb.cc \
@@ -134,7 +133,7 @@ SOURCES +=\
     ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
-    DialogTuningSourceInfo.cpp \
+    ../lib/Ui/DialogTuningSourceInfo.cpp \
     DialogPassword.cpp \
     Main.cpp \
     ../lib/Tuning/TuningFilter.cpp \
@@ -158,13 +157,14 @@ SOURCES +=\
     TuningClientTcpClient.cpp \ 
     ../lib/SoftwareInfo.cpp \
     ../lib/Tuning/TuningLog.cpp \
-    DialogAlert.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
     DialogSignalInfo.cpp \
     ../lib/Signal.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../lib/Ui/DialogAlert.cpp \
+    ../lib/Ui/UiTools.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -181,7 +181,7 @@ HEADERS  += MainWindow.h \
     ../lib/Crc.h \
     ../lib/SocketIO.h \
     DialogSettings.h \
-    DialogTuningSources.h \
+    ../lib/Ui/DialogTuningSources.h \
     ../Proto/network.pb.h \
     ../lib/AppSignal.h \
     ../Proto/serialization.pb.h \
@@ -193,7 +193,7 @@ HEADERS  += MainWindow.h \
     ../lib/OutputLog.h \
     UserManager.h \
     DialogProperties.h \
-    DialogTuningSourceInfo.h \
+    ../lib/Ui/DialogTuningSourceInfo.h \
     DialogPassword.h \
     Main.h \
     ../lib/Tuning/TuningFilter.h \
@@ -217,18 +217,17 @@ HEADERS  += MainWindow.h \
     TuningClientTcpClient.h \ 
     ../lib/SoftwareInfo.h \
     ../lib/Tuning/TuningLog.h \
-    DialogAlert.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
     DialogSignalInfo.h \
     ../lib/Signal.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../lib/Ui/DialogAlert.h \
+    ../lib/Ui/UiTools.h
 
 FORMS    += \
     DialogSettings.ui \
-    DialogTuningSources.ui \
-    DialogTuningSourceInfo.ui \
     DialogPassword.ui \
     DialogSignalInfo.ui
 

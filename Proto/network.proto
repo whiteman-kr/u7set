@@ -422,12 +422,12 @@ message TuningSignalState
 
     optional bool writeInProgress = 7 [default = false];
     optional int32 writeErrorCode = 8 [default = 0];			// NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
-    optional fixed64 writeClient = 9 [default = 0];			// Hash code of Client's EquipmentID
+	optional fixed64 writeClient = 9 [default = 0];				// Hash code of Client's EquipmentID
 
-    optional sfixed64 successfulReadTime = 10 [default = 0];		// time of last succesfull signal reading (UTC)
+    optional sfixed64 successfulReadTime = 10 [default = 0];	// time of last succesfull signal reading (UTC)
     optional sfixed64 writeRequestTime = 11 [default = 0];		// time of last write request (UTC)
-    optional sfixed64 successfulWriteTime = 12 [default = 0];		// time of last succesfull signal writing (UTC)
-    optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];		// time of last unsuccesfull signal writing (UTC)
+	optional sfixed64 successfulWriteTime = 12 [default = 0];	// time of last succesfull signal writing (UTC)
+	optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];	// time of last unsuccesfull signal writing (UTC)
 }
 
 message TuningSignalsReadReply

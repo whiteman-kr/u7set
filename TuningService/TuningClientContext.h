@@ -17,11 +17,11 @@ namespace Tuning
 	public:
 		TuningSourceContext(const QString& sourceID, const TuningSource* source);
 
-		void getSourceInfo(Network::DataSourceInfo& si) const;
-		void getSourceState(Network::TuningSourceState& tss) const;
+		void getSourceInfo(Network::DataSourceInfo* si) const;
+		void getSourceState(Network::TuningSourceState* tss) const;
 
-		void setSourceHandler(TuningSourceHandler* handler);
-		void removeSourceHandler(TuningSourceHandler* handler);
+		void setSourceThread(TuningSourceThread* thread);
+		void removeSourceThread(TuningSourceThread* thread);
 
 		void readSignalState(Network::TuningSignalState* tss);
 
@@ -35,7 +35,7 @@ namespace Tuning
 
 	private:
 		QString m_sourceID;			// Tuning source (LM) equipmentID
-		TuningSourceHandler* m_sourceHandler = nullptr;
+		TuningSourceThread* m_sourceThread = nullptr;
 
 		Network::DataSourceInfo m_sourceInfo;
 		Network::TuningSourceState m_sourceState;
@@ -67,8 +67,8 @@ namespace Tuning
 		void applySignalStates(const QString& clientEquipmentID,
 							   const QString &user) const;
 
-		void setSourceHandler(TuningSourceHandler* handler);
-		void removeSourceHandler(TuningSourceHandler* handler);
+		void setSourceThread(TuningSourceThread* thread);
+		void removeSourceThread(TuningSourceThread* thread);
 
 	private:
 		TuningSourceContext* getSourceContext(const QString& sourceID) const;

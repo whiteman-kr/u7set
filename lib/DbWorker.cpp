@@ -245,6 +245,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0225.sql", "Upgrade to version 225, OCM and OCMN signals PresetName fix"},
 	{":/DatabaseUpgrade/Upgrade0226.sql", "Upgrade to version 226, OCM and OCMN have new property SharedBuffer"},
 	{":/DatabaseUpgrade/Upgrade0227.sql", "Upgrade to version 227, Add RtTrendsRequestPort property to AppDataService"},
+	{":/DatabaseUpgrade/Upgrade0228.sql", "Upgrade to version 228, Add Tuning confiruation properties to Monitor preset"},
+	{":/DatabaseUpgrade/Upgrade0229.sql", "Upgrade to version 229, Changed file ETC/SignalPropertiesBehavior.csv"},
 };
 
 

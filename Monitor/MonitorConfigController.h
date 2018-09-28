@@ -50,8 +50,7 @@ struct ConfigSettings
 
 	bool tuningEnabled = false;
 	QStringList tuningSources;
-	ConfigConnection tuningService1;
-	ConfigConnection tuningService2;
+	ConfigConnection tuningService;
 
 	QString globalScript;
 

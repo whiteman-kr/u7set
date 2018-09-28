@@ -35,7 +35,7 @@ private:
 
 	Log::LogFile* m_log = nullptr;
 
-	TuningLog::TuningLog *m_tuningLog = nullptr;
+	TuningLog::TuningLog* m_tuningLog = nullptr;
 
 	UserManager* m_userManager = nullptr;
 

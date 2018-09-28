@@ -1,11 +1,10 @@
 #include "Stable.h"
 #include "DialogSignalSnapshot.h"
 #include "ui_DialogSignalSnapshot.h"
-#include "Stable.h"
 #include "Settings.h"
 #include "MonitorMainWindow.h"
 #include "MonitorCentralWidget.h"
-#include "Stable.h"
+#include "TcpSignalClient.h"
 
 SignalSnapshotSorter::SignalSnapshotSorter(int column, SignalSnapshotModel *model):
 	m_column(column),
@@ -747,13 +746,22 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 //DialogSignalSnapshot
 //
 
-DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configController, QWidget *parent) :
+DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configController, TcpSignalClient* tcpSignalClient, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalSnapshot),
-	m_configController(configController)
+	m_configController(configController),
+	m_tcpSignalClient(tcpSignalClient)
 {
 	ui->setupUi(this);
-	 setAttribute(Qt::WA_DeleteOnClose);
+
+	if (m_configController == nullptr || m_tcpSignalClient == nullptr)
+	{
+		assert(m_configController);
+		assert(m_tcpSignalClient);
+		return;
+	}
+
+	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Restore window pos
 	//
@@ -848,8 +856,8 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 
 	//
 
-	connect(theMonitorMainWindow, &MonitorMainWindow::signalParamAndUnitsArrived, this, &DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived);
-	connect(theMonitorMainWindow, &MonitorMainWindow::connectionReset, this, &DialogSignalSnapshot::tcpSignalClient_connectionReset);
+	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived);
+	connect(m_tcpSignalClient, &TcpSignalClient::connectionReset, this, &DialogSignalSnapshot::tcpSignalClient_connectionReset);
 	connect(m_configController, &MonitorConfigController::configurationArrived, this, &DialogSignalSnapshot::configController_configurationArrived);
 
 	// Fill the data

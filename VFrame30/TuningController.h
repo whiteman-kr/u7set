@@ -19,6 +19,9 @@ namespace VFrame30
 		TuningController() = delete;
 		TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QObject* parent = nullptr);
 
+		void setTcpClient(ITuningTcpClient* tcpClient);
+		void resetTcpClient();
+
 	public:
 		AppSignalParam signalParam(const QString& appSignalId, bool* ok);
 		TuningSignalState signalState(const QString& appSignalId, bool* ok);

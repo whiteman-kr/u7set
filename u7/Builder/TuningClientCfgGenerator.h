@@ -21,12 +21,13 @@ namespace Builder
 
 		virtual bool generateConfiguration() override;
 
+		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
+
 	private:
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 
 		bool createEquipmentList(QStringList* equipmentList);
 		bool createSettings(bool* filterByEquipment, bool* filterBySchema, bool* showDiscreteCounters);
-		bool createTuningSignals(const QStringList& equipmentList);
 		bool createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters);
 
 		bool writeSettings(bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters);
@@ -37,19 +38,19 @@ namespace Builder
 
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
-		bool createAutomaticFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters);
+		bool createAutomaticFilters(const QStringList& equipmentList,
+									const TuningSignalManager& tuningSignalManager,
+									bool filterByEquipment,
+									bool filterBySchema,
+									bool showDiscreteCounters);
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
 	private:
-
 		::Proto::AppSignalSet m_tuningSet;
-		TuningSignalManager m_tuningSignalManager;
 
 		TuningFilterStorage m_tuningFilterStorage;
-
-
 	};
 
 	template <typename TYPE>

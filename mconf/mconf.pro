@@ -22,9 +22,8 @@ QT += core sql network xml widgets gui serialport qml
 TARGET = mconf
 TEMPLATE = app
 
-#c++14/17 support
+#c++17 support
 #
-CONFIG += c++14
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 

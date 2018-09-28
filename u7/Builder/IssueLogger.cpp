@@ -1192,8 +1192,31 @@ namespace Builder
 				  3030,
 				  tr("Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.").
 						arg(lmID).arg(appDataServiceID));
-	}	
+	}
 
+	/// IssueCode: CFG3040
+	///
+	/// IssueType: Error
+	///
+	/// Title: Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
+	///
+	/// Parameters:
+	///			%1 Monitor EquipmentID
+	///         %2 TuningService EquipmentID
+	///
+	/// Description:
+	///			Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false.
+	///
+	void IssueLogger::errCFG3040(QString monitorId, QString tuningServiceId)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3040,
+				  tr("Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.")
+						.arg(monitorId)
+						.arg(tuningServiceId));
+	}
+
+	//
 	// ALP			Application Logic Parsing				4000-4999
 	//
 
@@ -4244,7 +4267,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
+	/// Title:	   Offset of in bus analog (or bus) signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
 	///
 	/// Parameters:
 	///		%1 In bus signal ID
@@ -4257,7 +4280,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5096,
-				  QString(tr("Offset of in-bus analog signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
+				  QString(tr("Offset of in-bus analog (or bus) signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
 							arg(inBusSignalID).arg(busTypeID));
 	}
 

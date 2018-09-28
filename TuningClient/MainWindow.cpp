@@ -1,14 +1,38 @@
 #include "Main.h"
 #include "MainWindow.h"
+#include "version.h"
+
+#include "DialogFilterEditor.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
+
+#include "../lib/Tuning/TuningFilter.h"
+#include "../lib/LogFile.h"
+#include "../lib/Tuning/TuningLog.h"
+#include "../lib/Ui/DialogAlert.h"
+
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "../lib/Tuning/TuningFilter.h"
-#include "DialogTuningSources.h"
-#include "DialogFilterEditor.h"
-#include "version.h"
+#include "TuningClientTcpClient.h"
+#include "TuningClientFilterStorage.h"
+#include "TuningSchemaManager.h"
+
+ClientDialogTuningSources::ClientDialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent):
+	DialogTuningSources(tcpClient, hasActivationControls, parent)
+{
+
+}
+
+bool ClientDialogTuningSources::passwordOk()
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return false;
+	}
+
+	return true;
+}
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
@@ -784,14 +808,22 @@ void MainWindow::showSettings()
 
 void MainWindow::showTuningSources()
 {
-	if (theDialogTuningSources == nullptr)
+	if (m_dialogTuningSources == nullptr)
 	{
-		theDialogTuningSources = new DialogTuningSources(m_tcpClient, this);
-		theDialogTuningSources->show();
+		m_dialogTuningSources = new ClientDialogTuningSources(m_tcpClient, true, this);
+		m_dialogTuningSources->show();
+
+		auto f = [this]() -> void
+		{
+				m_dialogTuningSources = nullptr;
+		};
+
+		connect(m_dialogTuningSources, &DialogTuningSources::dialogClosed, this, f);
+
 	}
 	else
 	{
-		theDialogTuningSources->activateWindow();
+		m_dialogTuningSources->activateWindow();
 	}
 }
 
