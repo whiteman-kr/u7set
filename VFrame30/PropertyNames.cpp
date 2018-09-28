@@ -199,11 +199,7 @@ QPushButton:default {
 }
 )_");
 
-	const QString PropertyNames::pushButtonDefaultEventScript(
-R"_(function(schemaItem, pushButtonWidget, checked)
-{
-}
-)_");
+	const QString PropertyNames::pushButtonDefaultEventScript("(function(schemaItem, pushButtonWidget, checked)\n{\n})");
 
 	const QString PropertyNames::pushButtonPropText("Property holds the text shown on the button.");
 	const QString PropertyNames::pushButtonPropCheckable("Property holds whether the button is checkable.");
@@ -235,7 +231,7 @@ QLineEdit:hover {
 	border-width: 2px
 })_"};
 
-	const QString PropertyNames::lineEditDefaultEventScript = {"function(schemaItem, lineEditWidget, text)\n{\n}"};
+	const QString PropertyNames::lineEditDefaultEventScript = {"(function(schemaItem, lineEditWidget, text)\n{\n})"};
 	const QString PropertyNames::lineEditPropText("Property holds the line edit's text.");
 	const QString PropertyNames::lineEditPropPlaceholderText("Property holds the line edit's placeholder text.\n"
 															 "Setting this property makes the line edit display a grayed-out placeholder text as long as the line edit is empty.\n"
