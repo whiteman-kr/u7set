@@ -32,7 +32,7 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
-		const TuningSourceHandler* getSourceHandler(quint32 sourceIP) const;
+		const TuningSourceThread* getSourceThread(quint32 sourceIP) const;
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
@@ -81,15 +81,15 @@ namespace Tuning
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();
 
-		void runTuningSourceWorkers();
+		void runTuningSourceThreads();
 		bool runTuningSourceThread(const QString& tuningSourceEquipmentID);		// if tuningSourceEquipmentID empty - run all sources workers
 		void stopTuningSourceThreads();
 
 		void runSourcesListenerThread();
 		void stopSourcesListenerThread();
 
-		void setHandlerInTuningClientContext(TuningSourceHandler* handler);
-		void removeHandlerFromTuningClientContext(TuningSourceHandler* handler);
+		void setSourceThreadInTuningClientContexts(TuningSourceThread* thread);
+		void removeSourceThreadFromTuningClientContexts(TuningSourceThread* thread);
 
 	private slots:
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
