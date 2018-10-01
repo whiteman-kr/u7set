@@ -56,7 +56,7 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	return true;
 }
 
-void ArchFile::flush()
+void ArchFile::flush(qint64 curPartition)
 {
 	TEST_PTR_RETURN(m_queue);
 
@@ -69,48 +69,7 @@ void ArchFile::flush()
 		return;
 	}
 
-	int startIndex = 0;
-	int index = startIndex;
-	int itemsCount = 0;
-	qint64 partition = -1;
-
-	const int PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;
-
-	do
-	{
-		qint64 statePartition = m_buffer[index].state.system / PARTITTION_DIVIDER;
-
-		if (partition == -1)
-		{
-			partition = statePartition;
-			itemsCount++;
-			index++;
-		}
-		else
-		{
-			if (statePartition == partition)
-			{
-				itemsCount++;
-				index++;
-			}
-			else
-			{
-				writeFile(statePartition * PARTITTION_DIVIDER, m_buffer + startIndex, itemsCount);
-
-				startIndex = itemsCount;
-				itemsCount = 0;
-				partition = statePartition;
-				continue;
-			}
-
-		}
-	}
-	while(index < copiedItemsCount);
-
-	if (itemsCount > 0)
-	{
-		writeFile(partition * PARTITTION_DIVIDER, m_buffer + startIndex, itemsCount);
-	}
+	writeFile(curPartition, m_buffer, copiedItemsCount);
 }
 
 bool ArchFile::isEmergency() const
@@ -124,31 +83,52 @@ bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount)
 {
 	TEST_PTR_RETURN_FALSE(buffer);
 
-	if (m_pathIsExists == false)
+	if (m_fileIsOpened == false)
 	{
-		QDir d;
+		if (m_pathIsExists == false)
+		{
+			QDir d;
 
-		m_pathIsExists = d.mkpath(m_path);
-	}
+			m_pathIsExists = d.mkpath(m_path);
+		}
 
-	QDateTime date = QDateTime::fromMSecsSinceEpoch(partition, Qt::UTC);
+		QDateTime date = QDateTime::fromMSecsSinceEpoch(partition, Qt::UTC);
 
-	QString fileName = QString("%1/%2_%3_%4.dat").
-							arg(m_path).
-							arg(date.date().year()).
-							arg(QString().sprintf("%02d", date.date().month())).
-							arg(QString().sprintf("%02d", date.date().day()));
+		QString fileName = QString("%1/%2_%3_%4_%5_%6.dat").
+								arg(m_path).
+								arg(date.date().year()).
+								arg(QString().sprintf("%02d", date.date().month())).
+								arg(QString().sprintf("%02d", date.date().day())).
+								arg(QString().sprintf("%02d", date.time().hour())).
+								arg(QString().sprintf("%02d", date.time().minute()));
 
-	QFile f(fileName);
+		m_file.setFileName(fileName);
 
-	if (f.open(QIODevice::Append) == false)
-	{
-		return false;
+		if (m_file.open(QIODevice::Append) == false)
+		{
+			return false;
+		}
+
+		m_fileIsOpened = true;
+
+		if (m_fileIsAligned == false)
+		{
+			QFileInfo fi(m_file);
+
+			qint64 fileSize = fi.size();
+
+			if ((fileSize % sizeof(SignalState)) != 0)
+			{
+				m_file.seek((fileSize / sizeof(SignalState)) * sizeof(SignalState));
+			}
+
+			m_fileIsAligned = true;
+		}
 	}
 
 	qint64 sizeToWrite = statesCount * sizeof(SignalState);
 
-	qint64 written = f.write(reinterpret_cast<const char*>(buffer), sizeToWrite);
+	qint64 written = m_file.write(reinterpret_cast<const char*>(buffer), sizeToWrite);
 
 	if (written == -1)
 	{
@@ -157,15 +137,20 @@ bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount)
 
 	if (sizeToWrite != written)
 	{
-		// no aligned
+		m_fileIsAligned = false;
 	}
-
-	f.close();
 
 	return true;
 }
 
+void ArchFile::close()
+{
+	assert(m_fileIsOpened == true);
 
+	m_file.close();
+
+	m_fileIsOpened = false;
+}
 
 FileArchWriter::FileArchWriter(ArchiveShared archive,
 								Queue<SimpleAppSignalState>& saveStatesQueue,
@@ -211,6 +196,8 @@ void FileArchWriter::run()
 			break;
 		}
 
+		updateCurrentPartition();
+
 		doWork |= writeEmergencyFiles();
 
 		if (isQuitRequested() == true)
@@ -219,6 +206,13 @@ void FileArchWriter::run()
 		}
 
 		doWork |= writeRegularFiles();
+
+		if (isQuitRequested() == true)
+		{
+			break;
+		}
+
+		doWork |= archiveMaintenance();
 
 		if (isQuitRequested() == true)
 		{
@@ -471,6 +465,34 @@ bool FileArchWriter::processSaveStatesQueue()
 	return count > 0;
 }
 
+void FileArchWriter::updateCurrentPartition()
+{
+	const int PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;			// each day
+
+	qint64 curPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITTION_DIVIDER) * PARTITTION_DIVIDER;
+
+	if (m_curPartition == curPartition)
+	{
+		return;
+	}
+
+	if (m_curPartition == -1)
+	{
+		m_curPartition = curPartition;
+	}
+	else
+	{
+		m_curPartition = curPartition;
+
+		runArchiveMaintenance();
+	}
+}
+
+void FileArchWriter::runArchiveMaintenance()
+{
+	m_archMaintenanceIsRunning = true;
+}
+
 bool FileArchWriter::writeEmergencyFiles()
 {
 	int count = 0;
@@ -484,7 +506,7 @@ bool FileArchWriter::writeEmergencyFiles()
 			break;
 		}
 
-		emergencyFile->flush();
+		emergencyFile->flush(m_curPartition);
 
 		count++;
 	}
@@ -515,12 +537,24 @@ bool FileArchWriter::writeRegularFiles()
 
 		if (archFile != nullptr)
 		{
-			archFile->flush();
+			archFile->flush(m_curPartition);
 		}
 
 		count++;
 	}
 	while(count < 100);
+
+	return true;
+}
+
+bool FileArchWriter::archiveMaintenance()
+{
+	if (m_archMaintenanceIsRunning == false)
+	{
+		return false;
+	}
+
+	// do real work here !
 
 	return true;
 }

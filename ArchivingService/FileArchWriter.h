@@ -38,12 +38,13 @@ public:
 
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
 
-	void flush();
+	void flush(qint64 curPartition);
 
 	bool isEmergency() const;
 
 private:
 	bool writeFile(qint64 partition, SignalState* buffer, int statesCount);
+	void close();
 
 private:
 	const FileArchWriter* m_archWriter = nullptr;
@@ -54,9 +55,10 @@ private:
 
 	//
 
+	QFile m_file;
 	bool m_pathIsExists = false;
 	bool m_fileIsOpened = false;
-	int m_currentPartition = -1;
+	bool m_fileIsAligned = false;
 
 	FastQueue<SignalState>* m_queue = nullptr;
 
@@ -88,8 +90,11 @@ private:
 	bool createArchFiles();
 
 	bool processSaveStatesQueue();
+	void updateCurrentPartition();
+	void runArchiveMaintenance();
 	bool writeEmergencyFiles();
 	bool writeRegularFiles();
+	bool archiveMaintenance();
 
 	void shutdown();
 
@@ -112,7 +117,10 @@ private:
 	int m_regularArchFileIndex = 0;
 	QHash<Hash, ArchFile*> m_hashArchFiles;
 
+	qint64 m_curPartition = -1;
 	qint64 m_archID = 0;
+
+	bool m_archMaintenanceIsRunning = false;
 
 	std::atomic<const QThread*> m_emergencyFilesOwner = { nullptr };
 	QList<ArchFile*> m_emergencyFilesQueue;
