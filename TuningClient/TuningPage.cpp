@@ -290,7 +290,18 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && asp.isDiscrete() == true && state.valid() == true)
 	{
-		return (m_tuningSignalManager->newValue(hash).discreteValue() == 0 ? Qt::Unchecked : Qt::Checked);
+		quint32 discreteValue = 0;
+
+		if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+		{
+			discreteValue = m_tuningSignalManager->newValue(hash).discreteValue();
+		}
+		else
+		{
+			discreteValue = state.value().discreteValue();
+		}
+
+		return (discreteValue == 0 ? Qt::Unchecked : Qt::Checked);
 	}
 
 	return TuningModel::data(index, role);
