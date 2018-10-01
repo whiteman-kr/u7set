@@ -7,6 +7,7 @@
 class SpecificPropertyDescription : public PropertyObject
 {
 	Q_OBJECT
+
 public:
 	SpecificPropertyDescription();
 	explicit SpecificPropertyDescription(const SpecificPropertyDescription& source);
@@ -53,11 +54,8 @@ public:
 	void validateDynamicEnumType(QWidget* parent);
 
 private:
-
-	//
 	// Warning! Be sure to add new fields to the copy constructor!
 	//
-
 	QString m_caption;
 	QString m_category;
 	QString m_description;
@@ -71,8 +69,6 @@ private:
 	bool m_expert = false;
 	bool m_visible = true;
 	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
-
-
 };
 
 class SpecificPropertiesEditor : public ExtWidgets::PropertyTextEditor
@@ -83,7 +79,6 @@ public:
 	virtual ~SpecificPropertiesEditor();
 
 	void setText(const QString& text) override;
-
 	QString text() override;
 
 	void setReadOnly(bool value) override;
@@ -91,7 +86,6 @@ public:
 private slots:
 	void onTreeSelectionChanged();
 	void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
-
 
 	void onAddProperty();
 	void onCloneProperty();
@@ -116,7 +110,6 @@ private:
 	const int m_columnCaption = 0;
 	const int m_columnType = 1;
 	const int m_columnCategory = 2;
-
 };
 
 #endif // SPECIFICPROPERTIESEDITOR_H
