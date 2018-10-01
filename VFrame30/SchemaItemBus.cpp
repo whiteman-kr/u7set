@@ -304,7 +304,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			AfbPin& newPin = addInput(-1, E::SignalType::Discrete, busSignal.signalId());
+			AfbPin& newPin = addInput(-1, busSignal.type(), busSignal.signalId());
 
 			// Restore old pin guid, etc
 			//
@@ -554,7 +554,7 @@ namespace VFrame30
 			if (it == props.end())
 			{
 				assert(false);
-				AfbPin& newPin = addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
+				AfbPin& newPin = addOutput(-1, busSignal.type(), busSignal.signalId());
 
 				// Restore old pin guid, associatedIOs, etc
 				//
@@ -573,7 +573,7 @@ namespace VFrame30
 				}
 				else
 				{
-					AfbPin& newPin = addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
+					AfbPin& newPin = addOutput(-1, busSignal.type(), busSignal.signalId());
 
 					// Restore old pin guid, associatedIOs, etc
 					//
