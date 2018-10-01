@@ -1093,6 +1093,13 @@ class EnvelopeSetShortDescription : public ::google::protobuf::Message {
   inline bool preseteditor() const;
   inline void set_preseteditor(bool value);
 
+  // optional bool presetRoot = 5;
+  inline bool has_presetroot() const;
+  inline void clear_presetroot();
+  static const int kPresetRootFieldNumber = 5;
+  inline bool presetroot() const;
+  inline void set_presetroot(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.EnvelopeSetShortDescription)
  private:
   inline void set_has_projectdbversion();
@@ -1101,6 +1108,8 @@ class EnvelopeSetShortDescription : public ::google::protobuf::Message {
   inline void clear_has_equipmenteditor();
   inline void set_has_preseteditor();
   inline void clear_has_preseteditor();
+  inline void set_has_presetroot();
+  inline void clear_has_presetroot();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1108,9 +1117,10 @@ class EnvelopeSetShortDescription : public ::google::protobuf::Message {
   ::google::protobuf::uint32 projectdbversion_;
   bool equipmenteditor_;
   bool preseteditor_;
+  bool presetroot_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -12754,6 +12764,28 @@ inline bool EnvelopeSetShortDescription::preseteditor() const {
 inline void EnvelopeSetShortDescription::set_preseteditor(bool value) {
   set_has_preseteditor();
   preseteditor_ = value;
+}
+
+// optional bool presetRoot = 5;
+inline bool EnvelopeSetShortDescription::has_presetroot() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void EnvelopeSetShortDescription::set_has_presetroot() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void EnvelopeSetShortDescription::clear_has_presetroot() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void EnvelopeSetShortDescription::clear_presetroot() {
+  presetroot_ = false;
+  clear_has_presetroot();
+}
+inline bool EnvelopeSetShortDescription::presetroot() const {
+  return presetroot_;
+}
+inline void EnvelopeSetShortDescription::set_presetroot(bool value) {
+  set_has_presetroot();
+  presetroot_ = value;
 }
 
 // -------------------------------------------------------------------
