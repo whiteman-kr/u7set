@@ -307,7 +307,7 @@ namespace VFrame30
 			return QJSValue();
 		}
 
-		QJSValue result = engine->evaluate(script + globalScript);
+		QJSValue result = engine->evaluate(globalScript + script);
 
 		if (result.isError() == true)
 		{

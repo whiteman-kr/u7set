@@ -139,6 +139,7 @@ message EnvelopeSetShortDescription
 	repeated uint32 classnamehash = 2;				// Hash from classname, the way of getting the hash is always the same
 	optional bool equipmentEditor = 3;				// Copy from Equipmnet editor
 	optional bool presetEditor = 4;					// Copy from Equipment preset editor
+	optional bool presetRoot = 5;					// All objects are preset root
 }
 
 //------------------------------------------------------------------------------------------

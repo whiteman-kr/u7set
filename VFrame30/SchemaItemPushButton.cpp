@@ -284,12 +284,6 @@ namespace VFrame30
 		//
 		if (m_jsClicked.isUndefined() == true)
 		{
-			//m_scriptClicked = "(" + m_scriptClicked + ")";
-
-			qDebug() << "-------------";
-			qDebug() << m_scriptClicked;
-			qDebug() << "-------------";
-
 			m_jsClicked = evaluateScript(senderWidget, m_scriptClicked);
 
 			if (m_jsClicked.isError() == true ||

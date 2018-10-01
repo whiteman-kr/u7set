@@ -2448,6 +2448,8 @@ void EditSchemaWidget::createActions()
 
 		if (isMonitorSchema() == true)
 		{
+			m_addMenu->addAction(m_addValueAction);
+			m_addMenu->addAction(m_addPushButtonAction);
 			m_addMenu->addAction(m_addLineEditAction);
 		}
 

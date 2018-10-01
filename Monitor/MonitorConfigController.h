@@ -71,6 +71,8 @@ public:
 	// Methods
 	//
 public:
+	void setConnectionParams(QString equipmentId, HostAddressPort address1, HostAddressPort address2);
+
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFile(const QString& pathFileName, QByteArray* fileData);
 

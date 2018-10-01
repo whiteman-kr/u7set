@@ -2611,6 +2611,7 @@ void EquipmentView::copySelectedDevices()
 	assert(firstDevice);
 
 	Hardware::DeviceType type = firstDevice->deviceType();
+	bool allObjectsArePresetRoots = true;
 
 	std::vector<const Hardware::DeviceObject*> devices;
 	devices.reserve(selected.size());
@@ -2625,6 +2626,8 @@ void EquipmentView::copySelectedDevices()
 			assert(false);
 			return;
 		}
+
+		allObjectsArePresetRoots &= device->presetRoot() & device->preset();
 
 		devices.push_back(device);
 	}
@@ -2661,6 +2664,7 @@ void EquipmentView::copySelectedDevices()
 	descriptionMessage.set_projectdbversion(DbController::databaseVersion());
 	descriptionMessage.set_equipmenteditor(isConfigurationMode());
 	descriptionMessage.set_preseteditor(isPresetMode());
+	descriptionMessage.set_presetroot(allObjectsArePresetRoots);
 
 	for (std::shared_ptr<Hardware::DeviceObject> device : latestDevices)
 	{
@@ -2923,6 +2927,13 @@ bool EquipmentView::canPaste() const
 
 	if (selectedIndexList.size() != 1)
 	{
+		if (isPresetMode() == true && message.presetroot() == true)
+		{
+			// Allow insert new whole preset(s)
+			//
+			return true;
+		}
+
 		return false;
 	}
 

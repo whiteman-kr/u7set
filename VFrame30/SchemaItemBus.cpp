@@ -293,11 +293,26 @@ namespace VFrame30
 
 	void SchemaItemBusComposer::setBusPins(const VFrame30::Bus& bus)
 	{
+		std::map<QString, AfbPin> oldInputs;	// We need to keep pin's GUIDs. If an item is met in UFB, then it will be copied
+												// and old outputs GUID's
+		for (const AfbPin& pin : inputs())
+		{
+			oldInputs[pin.caption()] = pin;
+		}
+
 		inputs().clear();
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			addInput(-1, E::SignalType::Discrete, busSignal.signalId());
+			AfbPin& newPin = addInput(-1, E::SignalType::Discrete, busSignal.signalId());
+
+			// Restore old pin guid, etc
+			//
+			if (auto foundOldPinIt = oldInputs.find(newPin.caption());
+				foundOldPinIt != oldInputs.end())
+			{
+				newPin = foundOldPinIt->second;
+			}
 		}
 
 		adjustHeight();
