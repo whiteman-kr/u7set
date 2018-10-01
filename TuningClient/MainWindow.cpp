@@ -11,6 +11,7 @@
 #include "../lib/LogFile.h"
 #include "../lib/Tuning/TuningLog.h"
 #include "../lib/Ui/DialogAlert.h"
+#include "../lib/Ui/UiTools.h"
 
 #include "Settings.h"
 #include "DialogSettings.h"
@@ -279,7 +280,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	{
 		int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Are you sure you want to exit?"), tr("Yes"), tr("No"));
 
-		if (result == 1)
+		if (result == QDialog::Accepted)
 		{
 			event->ignore();
 		}
@@ -825,6 +826,8 @@ void MainWindow::showTuningSources()
 	{
 		m_dialogTuningSources->activateWindow();
 	}
+
+	UiTools::adjustDialogPlacement(m_dialogTuningSources);
 }
 
 void MainWindow::showAppLog()
