@@ -53,7 +53,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	connect(m_timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
 	m_timer->start(500);
 
-	setWindowPosition(this, QString("Service_%1_%2/geometry").arg(QHostAddress(udpIp).toString()).arg(udpPort));
+	setWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(udpIp).toString()).arg(udpPort));
 
 	addStateTab();
 
@@ -71,9 +71,7 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 		m_socketThread = nullptr;
 	}
 
-	QSettings settings;
-	QString settingName = QString("Service_%1_%2/geometry").arg(QHostAddress(m_udpIp).toString()).arg(m_udpPort);
-	settings.setValue(settingName, geometry());
+	saveWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(m_udpIp).toString()).arg(m_udpPort));
 }
 
 void BaseServiceStateWidget::updateServiceState()
