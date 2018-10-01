@@ -154,6 +154,21 @@ MonitorConfigController::~MonitorConfigController()
 	delete m_cfgLoaderThread;
 }
 
+void MonitorConfigController::setConnectionParams(QString equipmentId, HostAddressPort address1, HostAddressPort address2)
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread);
+		return;
+	}
+
+	m_softwareInfo.setEquipmentID(equipmentId);
+
+	m_cfgLoaderThread->setConnectionParams(m_softwareInfo, address1, address2);
+
+	return;
+}
+
 bool MonitorConfigController::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
 {
 	if (m_cfgLoaderThread == nullptr)
